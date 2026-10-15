@@ -4995,6 +4995,16 @@
      "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
      "linea": 131,
      "fragmento": "? resolveCredentialDisplay(asset.description)"
+    },
+    {
+     "ruta": "src/lib/integrations/cal-com.ts",
+     "linea": 49,
+     "fragmento": "const res = await fetch(`${API_BASE}/bookings?apiKey=${apiKey}`, {"
+    },
+    {
+     "ruta": "src/lib/notifications/telegram.ts",
+     "linea": 45,
+     "fragmento": "const configToken = settings?.osTelegramBotToken?.trim()"
     }
    ],
    "impacto": "Bloqueante para el primer cliente real: quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio y hosting cargadas en la Bóveda, mientras el portal le asegura al cliente, en el encabezado y en cada tarjeta de la Bóveda, que están cifradas con AES-256. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear: encryptCredential no tiene llamadores fuera de los tests.",
@@ -5089,6 +5099,13 @@
       "titulo": "El formulario de la Bóveda invita a escribir contraseñas en la descripción, que se guarda en claro",
       "severidad": "BAJA",
       "nota_padre": "Misma causa que SEC-036 (la descripción de la bóveda se guarda en claro); suma el rótulo del formulario que invita a escribir contraseñas."
+     },
+     {
+      "ciclo": "D7-c1",
+      "tmp": "D7-c1/D7-L1/H13",
+      "titulo": "Credenciales de terceros en claro en la base (instancias del lote): tokens OAuth de GBP y Tiendanube, API key de Cal.com en la query y token de Telegram; encryptCredential sin llamadores",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa (tokens de terceros guardados tal cual; encryptCredential sin llamadores). Suma los callbacks OAuth del lote (google-business/callback/route.ts:49-56, tiendanube/callback/route.ts:63-69) y la API key de Cal.com en la query (cal-com.ts:49)."
      }
     ],
     "cambios": [

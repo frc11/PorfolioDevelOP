@@ -7,11 +7,11 @@
 | Área | Herramientas medidas | Funcionalidades | En L3 o más | Faltantes de L3 más comunes | FAL |
 |---|---:|---:|---:|---|---:|
 | h1 · Acceso | 5 / 5 | 15 | 0 | Sentry (11), autonomía (9), errores (8) | 3 |
-| h2 · Portal del cliente | 16 / 16 | 103 | 12 | Sentry (66), sin mocks ni TODO (55), errores (48) | 11 |
-| h3 · Chatbot centralizado | 8 / 8 | 109 | 3 | Sentry (64), errores (61), autonomía (50) | 6 |
-| h4 · Panel de admin | 13 / 13 | 102 | 3 | Sentry (70), errores (58), validación en servidor (38) | 8 |
+| h2 · Portal del cliente | 16 / 16 | 109 | 12 | Sentry (72), sin mocks ni TODO (54), errores (53) | 11 |
+| h3 · Chatbot centralizado | 8 / 8 | 111 | 3 | Sentry (66), errores (63), autonomía (51) | 6 |
+| h4 · Panel de admin | 13 / 13 | 105 | 3 | Sentry (74), errores (62), validación en servidor (39) | 8 |
 | h5 · Setter y LeadOS | 0 / 7 | 0 | 0 | — | 0 |
-| h6 · Entradas públicas que alimentan lo interno | 1 / 2 | 6 | 0 | Sentry (4), errores (3), mobile (2) | 0 |
+| h6 · Entradas públicas que alimentan lo interno | 2 / 2 | 8 | 0 | Sentry (6), errores (5), autonomía (4) | 0 |
 
 ## h1 · Acceso
 
@@ -108,12 +108,13 @@
 
 ### h2.cli-inicio — Inicio
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 16 funcionalidades: 8×L2, 5×L3, 3×L1).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 17 funcionalidades: 8×L2, 5×L3, 4×L1).
 - Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, sin mocks ni TODO, permisos y tenant, autonomía, carga, vacíos.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h2.cli-inicio.atencion-hoy` Atención hoy | L2 | errores, carga, Sentry, sin mocks ni TODO | page.tsx:177-180 → attention.ts:25-127 (org-scoped) → AttentionStack.tsx:76-160 con Links a rutas existentes; el ítem de conexiones es falso perpetuo. |
+| `h2.cli-inicio.brief-ia-programado` Regeneración semanal del resumen ejecutivo IA | L1 | permisos y tenant, errores, Sentry, autonomía | route.ts:18-56 existe; solo vercel.json:8 la agenda. |
 | `h2.cli-inicio.campanas-utm` Campañas | L3 | — | home-metrics.ts:134 → home-metrics-logic.ts:206-234 → LeadCampaigns.tsx:18-69. |
 | `h2.cli-inicio.checklist-de-onboarding` Checklist 'Estamos configurando tu negocio' | L1 | vacíos, errores, carga, Sentry, autonomía | La card lee tareas (OnboardingStatusCard.tsx:17-28) pero ninguna alta viva las crea: seedOnboardingTasksForOrg (seed-tasks-for-org.ts:4-16) solo lo llaman lib/actions/clients.ts:139 e invitations.ts:93, sin importadores; solo un script de QA siembra tareas. |
 | `h2.cli-inicio.embudo-leads` Qué pasó con tus leads | L3 | — | home-metrics.ts:123-125 → home-metrics-logic.ts:117-127 → LeadFunnel.tsx:27-85 (link ?status=NEW soportado por leads/page.tsx:32-40). |
@@ -144,8 +145,8 @@
 
 ### h2.cli-resultados — Resultados
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 13 funcionalidades: 1×L1, 12×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: vacíos, errores, Sentry, sin mocks ni TODO, autonomía, permisos y tenant, carga, validación en servidor.
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 13 funcionalidades: 12×L2, 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: vacíos, errores, Sentry, autonomía, permisos y tenant, carga, validación en servidor, sin mocks ni TODO.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
@@ -155,13 +156,13 @@
 | `h2.cli-resultados.insights-ia` Insights de tráfico y SEO con IA | L2 | errores, Sentry | resultados/trafico/page.tsx:168 → getTrafficInsights (results-insights.ts:34-42) → generateTrafficInsights (:54-106) → parseInsights (:176-182) |
 | `h2.cli-resultados.oportunidades-seo` Oportunidades SEO con pedido al equipo | L2 | permisos y tenant, errores, Sentry, sin mocks ni TODO | seo/page.tsx:319-321 -> OportunidadesSEO.tsx:10-56 -> OportunidadSEO.tsx:83-97 -> messages.ts:114-140. |
 | `h2.cli-resultados.pagespeed` Velocidad del sitio (PageSpeed) | L2 | vacíos, errores, Sentry, autonomía | siteUrl lo carga el admin (updateClient.ts:95; createClientOnly.ts:84) → trafico/page.tsx:99-101 → PageSpeedSection (:125-136) → getPageSpeedReport (pagespeed.ts:26-35, caché 6 h) → PageSpeedCard. Requiere GOOGLE_PAGESPEED_API_KEY (pagespeed.ts:41-45). |
-| `h2.cli-resultados.reputacion-gbp` Reputación en Google | L2 | errores, Sentry, sin mocks ni TODO | reputacion/page.tsx:15-34 → getGBPMetrics(org) → GBPMetricsCard.tsx:37-178. |
+| `h2.cli-resultados.reputacion-gbp` Reputación: rating y últimas reseñas de Google Business | L1 | vacíos, errores, Sentry, sin mocks ni TODO, autonomía | reputacion/page.tsx:20 -> google-business-profile.ts:165-182 -> :185-236 pinta en el primer render, pero en el acierto de caché createdAt llega como string y GBPMetricsCard.tsx:124 lanza; performance fijo en 0 (:218-224). |
 | `h2.cli-resultados.seo` Metricas SEO (Search Console) | L2 | Sentry, sin mocks ni TODO | seo/page.tsx:100 resolveOrgId -> :179 getSearchConsoleData -> :230-270 cards con TrendBadge -> SeoAlertas.tsx:9-44. |
-| `h2.cli-resultados.seo-search-console` SEO & Posicionamiento (Search Console) | L2 | errores, Sentry, sin mocks ni TODO, autonomía | siteUrl (admin) → seo/page.tsx:103-108, :150-152 → getSearchConsoleData (searchconsole.ts:99-210, datos reales si la service account tiene acceso) → métricas y tablas (:223-342). Sin credenciales o con error → mock con PreviewBanner (:226). |
+| `h2.cli-resultados.seo-search-console` SEO (Search Console) | L2 | vacíos, errores, Sentry, sin mocks ni TODO, autonomía | seo/page.tsx:179 -> searchconsole.ts:99-210 tres consultas en paralelo. |
 | `h2.cli-resultados.seo-solicitar-activacion` Pedir SEO avanzado (ACTIVAR AHORA) | L2 | permisos y tenant, errores, carga, validación en servidor, Sentry, autonomía | form (seo/page.tsx:137-141) → activarSeo (:110-113) → requestUpsellAction (upsell.ts:10-156) → contactSubmission.create (:88-97), webhook (:99-104), notificaciones (:112-135). |
 | `h2.cli-resultados.trafico` Metricas de trafico (GA4) | L2 | vacíos, errores, Sentry, sin mocks ni TODO, autonomía | trafico/page.tsx:48 -> :147 getAnalyticsData -> :186-241 AnalyticsMetricCard -> TrendBadge; Suspense con AnalyticsSkeleton (:89-94). Datos de mentira (trends fijos) impiden L3. |
-| `h2.cli-resultados.trafico-ga4` Tráfico & Analytics (GA4) | L1 | vacíos, errores, Sentry, sin mocks ni TODO, autonomía | Ningún flujo vivo escribe Organization.analyticsPropertyId (git grep: solo complete-onboarding.ts:38, inalcanzable, y lib/actions/clients.ts:161-197, sin importadores). Un cliente real ve siempre AnalyticsEmptyState (trafico/page.tsx:82-86) con CTA muerto (:11 |
-| `h2.cli-resultados.velocidad-sitio` Velocidad del sitio (PageSpeed) | L2 | vacíos, errores, Sentry | trafico/page.tsx:125-136 → pagespeed.ts:26-35 (cache 6 h) → PageSpeedCard.tsx:176-250. |
+| `h2.cli-resultados.trafico-ga4` Tráfico del sitio (GA4) | L2 | permisos y tenant, vacíos, errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | trafico/page.tsx:46 -> analytics.ts:85-195 cuatro runReport en paralelo -> datos con isMockData false. |
+| `h2.cli-resultados.velocidad-sitio` Velocidad del sitio (PageSpeed) | L2 | vacíos, errores, validación en servidor, Sentry | trafico/page.tsx:125 -> pagespeed.ts:26-35 (caché 6 h) -> :37-74 -> :76-149. |
 
 ### [FAL-010] Tráfico (GA4) sin camino de activación: nadie escribe analyticsPropertyId y el CTA no hace nada
 - Dominio: D2  ·  Severidad: ALTA  ·  Tipo: faltante
@@ -176,12 +177,12 @@
 ### [FAL-011] Reputación: la conexión con Google Business Profile no tiene entrada en ninguna UI
 - Dominio: D2  ·  Severidad: MEDIA  ·  Tipo: faltante
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/app/api/auth/google-business/start/route.ts:7` — «if (!session?.user || session.user.role !== 'SUPER_ADMIN') {»; `src/app/api/auth/google-business/start/route.ts:12` — «const orgId = searchParams.get('orgId')»; `src/app/(protected)/dashboard/resultados/reputacion/page.tsx:52` — «Setup manual por ahora»
+- Evidencia: `src/app/api/auth/google-business/start/route.ts:7` — «if (!session?.user || session.user.role !== 'SUPER_ADMIN') {»; `src/app/api/auth/google-business/start/route.ts:12` — «const orgId = searchParams.get('orgId')»; `src/app/(protected)/dashboard/resultados/reputacion/page.tsx:52` — «Setup manual por ahora»; `src/app/api/auth/google-business/callback/route.ts:82` — «return NextResponse.redirect(new URL('/admin/clients?gbp=${gbp}', request.url))»; `src/app/api/auth/google-business/callback/route.ts:33` — «new URL('/admin/clients?error=oauth_state_${stateCheck.reason}', request.url),»; `src/lib/integrations/gbp-connection-logic.ts:143` — «status: 'CONNECTED_NO_LOCATION', reason: locations.length === 0 ? 'none' : 'multiple',»; `src/lib/actions/gbp-connection.ts:17` — «export async function listAvailableLocations(): Promise<ActionResult<AvailableLocation[]>> {»
 - Impacto: La pestaña queda vacía para todo cliente salvo que alguien de develOP arme a mano /api/auth/google-business/start?orgId=<cuid> (git grep 'google-business/start' → 0 enlaces; tiendanube/start sí está enlazado en ConnectStoreCard.tsx:39). El Motor de reseñas depende de los mismos tokens.
 - Propuesta: Botón «Conectar Google Business» en la ficha del cliente del admin (el state firmado ya existe en getAuthUrl).
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [UX-015]
-- Nodo(s): h2.cli-resultados.reputacion-gbp, h4.adm-clientes, int.google-business-profile, h2.cli-resenas
+- Nodo(s): h2.cli-resultados.reputacion-gbp, h4.adm-clientes, int.google-business-profile, h2.cli-resenas, h4.adm-clientes.conectar-google-business, h2.cli-resenas.selector-sucursal, int.gbp
 
 ### h2.cli-servicios — Mis servicios y módulos
 
@@ -344,11 +345,13 @@
 
 ### h2.cli-reportes-email — Reportes por email
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 4 funcionalidades: 2×L2, 2×L1).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 6 funcionalidades: 3×L2, 3×L1).
 - Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, vacíos, carga, sin mocks ni TODO, autonomía, permisos y tenant, mobile.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
+| `h2.cli-reportes-email.baja-un-clic` Baja de un clic del reporte ejecutivo | L2 | Sentry, autonomía | executive-weekly.ts:289 -> unsubscribe-token.ts:57-66 -> unsubscribe-executive/route.ts:39-101. |
+| `h2.cli-reportes-email.envio-automatico-semanal` Envío automático del reporte ejecutivo semanal | L1 | errores, Sentry, autonomía | la ruta (:17-37) y la plantilla (executive-weekly.ts:182-322) existen, pero solo vercel.json:12 la agenda y el hosting es Netlify: no sale sola. |
 | `h2.cli-reportes-email.pdf-reporte-ejecutivo` Descarga de reporte ejecutivo en PDF | L1 | vacíos, errores, carga, Sentry, sin mocks ni TODO, autonomía | Maqueta no cableada: DownloadReportButtons (DownloadReportButton.tsx:129) sin importadores y alimentado con mockData (:82-89, :122). |
 | `h2.cli-reportes-email.preferencias-del-reporte` Preferencias del reporte semanal | L2 | errores, carga, mobile, Sentry, sin mocks ni TODO | perfil/page.tsx:193-203,297-306 → ExecutiveReportPrefsForm → executive-report-prefs.actions.ts:20-46 → Organization → send.ts:83,114 y build.ts:99,161. |
 | `h2.cli-reportes-email.preferencias-reporte` Frecuencia y leads destacados del reporte semanal | L2 | errores, Sentry | perfil/page.tsx:196, :304-309 -> ExecutiveReportPrefsForm.tsx:45-56 -> executive-report-prefs.actions.ts:20-47. |
@@ -356,7 +359,7 @@
 
 ### h2.cli-resenas — Motor de reseñas (módulo)
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 7 funcionalidades: 6×L2, 1×L3).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 8 funcionalidades: 6×L2, 1×L3, 1×L1).
 - Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry, sin mocks ni TODO, vacíos, errores, validación en servidor, autonomía, mobile.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
@@ -366,6 +369,7 @@
 | `h2.cli-resenas.pedir-resenas-qr` Pedir resenas con QR y link | L2 | errores, autonomía | AskReviewSection.tsx:42-137 con placeId de la org (page.tsx:161). |
 | `h2.cli-resenas.publicar-respuesta` Publicar respuesta en Google | L2 | permisos y tenant, errores, validación en servidor, mobile, Sentry | ReviewItem.tsx:64-79 → _actions.ts:48-73 → google-business-profile.ts:275-305. |
 | `h2.cli-resenas.responder-resenas-con-ia` Listar y responder resenas con borrador IA | L2 | vacíos, errores, validación en servidor, Sentry | page.tsx:19-80 -> listReviews; ReviewItem.tsx:46-79 -> motor-resenas/_actions.ts:11-73. |
+| `h2.cli-resenas.selector-sucursal` Elegir la sucursal de Google Business | L1 | permisos y tenant, errores, Sentry, autonomía | server actions (gbp-connection.ts:17,36) sin ninguna pantalla que las importe. |
 | `h2.cli-resenas.vista-de-venta` Vista de venta del Motor de resenas | L2 | permisos y tenant, Sentry, sin mocks ni TODO | motor-resenas/page.tsx:120-148 -> LockedView.tsx:63-82 -> upsell.ts:10-140. |
 | `h2.cli-resenas.vista-segun-estado` Motor de Reseñas: vista bloqueada, conectando u operativa | L2 | validación en servidor, mobile, sin mocks ni TODO, autonomía | motor-resenas/page.tsx:106-127 (resolveOrgId, isModuleActive, deriveConnectionStatus) → motor-resenas-view.ts:38-42 → LockedView/ConnectingState/ReviewsList (:144-153); acciones con resolveScopedOrgId + isModuleActive (_actions.ts:20-24,55-59). |
 
@@ -395,23 +399,25 @@
 
 ### h2.cli-tienda — Tienda online (módulo)
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 2 funcionalidades: 1×L1, 1×L2).
-- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, Sentry, sin mocks ni TODO, autonomía.
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 3 funcionalidades: 2×L2, 1×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, sin mocks ni TODO, autonomía, validación en servidor, vacíos.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
-| `h2.cli-tienda.conectar-tienda` Conectar Tiendanube | L1 | permisos y tenant, errores, Sentry, sin mocks ni TODO, autonomía | ConnectStoreCard.tsx:38-54 -> start/route.ts:9-19 rechaza al ORG_MEMBER con 401. |
+| `h2.cli-tienda.conectar-tienda` Conectar la tienda Tiendanube | L1 | errores, validación en servidor, Sentry, autonomía | el botón del cliente (ConnectStoreCard.tsx:39) choca con SUPER_ADMIN en start (:10-13); solo anda impersonando: start -> tiendanube.ts:17-22 -> callback :28-85 -> tienda-conectada/page.tsx:306. |
 | `h2.cli-tienda.resumen-de-ventas` Resumen de ventas de Tiendanube | L2 | errores, Sentry, sin mocks ni TODO, autonomía | page.tsx:86-255 -> tiendanube.ts:82-162 (conexion hecha por develOP). |
+| `h2.cli-tienda.resumen-tienda` Resumen de la tienda (ventas, ticket, stock bajo, carritos) | L2 | vacíos, errores, Sentry, autonomía | tienda-conectada/page.tsx:87 -> tiendanube.ts:74-80 (caché 30 min) -> :82-164 cuatro GET y agregados. |
 
 ### h2.cli-agenda — Agenda inteligente (módulo)
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 2 funcionalidades: 2×L1).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 3 funcionalidades: 3×L1).
 - Criterios de L3 que faltan en alguna funcionalidad: validación en servidor, mobile, autonomía, errores, Sentry.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h2.cli-agenda.conectar-agenda` Conectar y ver la agenda (Cal.com) | L1 | validación en servidor, mobile, autonomía | La vista conectada existe (agenda-inteligente/page.tsx:344-349) pero ningún código de la app escribe calComApiKey, calComUsername ni calComEmbedUrl (git grep en src, scripts y prisma: solo lecturas). Sin edición manual de la base, el cliente ve siempre 'Tu age |
 | `h2.cli-agenda.panel-de-agenda` Panel de agenda (Cal.com) | L1 | errores, mobile, Sentry, autonomía | page.tsx:316-353 -> cal-com.ts:40-111 contra api.cal.com/v1 (apagada segun cal-com-v2.ts:4-5). |
+| `h2.cli-agenda.resumen-agenda` Agenda inteligente: próximas reuniones y totales de Cal.com | L1 | errores, Sentry, autonomía | agenda-inteligente/page.tsx -> cal-com.ts:32-111 contra api.cal.com/v1 (:4), que cal-com-v2.ts:4-6 da por apagada (PROBABLE). |
 
 ### [FAL-004] Agenda y QR de reseñas sin camino de configuración: calCom* y googleMapsPlaceId no tienen escritor en la app
 - Dominio: D6  ·  Severidad: MEDIA  ·  Tipo: faltante
@@ -458,7 +464,7 @@
 | `h3.cli-chatbot.personalizacion` Personalizacion del bot | L2 | permisos y tenant, errores, Sentry, autonomía | settings/page.tsx:13-60 -> BotPersonalization.tsx:149-169 -> updateBotAppearance.ts:55-138. Varios campos no llegan al widget instalado. |
 | `h3.cli-chatbot.personalizar-apariencia` Personalizar apariencia del bot (cliente) | L2 | permisos y tenant, errores, Sentry | BotPersonalization.tsx:151 -> updateBotAppearance.ts:56-66 -> :77 -> :95-107 -> :109 -> :135-136. |
 | `h3.cli-chatbot.pestanas` Pestanas de Mi Chatbot | L3 | — | layout.tsx:57 -> ClientDashboardTabs.tsx:21-98 con Link y fades de overflow. |
-| `h3.cli-chatbot.reporte-semanal-email` Reporte semanal del chatbot por email | L2 | vacíos, errores, Sentry, sin mocks ni TODO, autonomía | netlify.toml:28-29 -> route.ts:7-14 -> sendWeeklyReports.ts:14-93 -> buildWeeklyReport.ts:26-139 -> Brevo :63-67. |
+| `h3.cli-chatbot.reporte-semanal-email` Reporte semanal del chatbot por email | L2 | permisos y tenant, vacíos, errores, Sentry, autonomía | netlify.toml:28-29 -> send-weekly-reports-cron.ts:63-108 -> route.ts:7-21 -> sendWeeklyReports.ts:58-66 (fuera) -> weekly-report.ts:25-175. |
 | `h3.cli-chatbot.resumen` Resumen del chatbot del cliente | L2 | permisos y tenant, errores, Sentry, sin mocks ni TODO, autonomía | page.tsx:15-31 -> getUsageByOrgSlug/listLeadsByOrgSlug/listRecentHandoffsByOrgSlug (multiTenantQueries.ts:27-54, :208-258) -> ChatbotOverview.tsx:40-111 |
 | `h3.cli-chatbot.scoring-leads` Scoring, decay y explicacion del score | L2 | sin mocks ni TODO, autonomía | captureLead.ts:343-361 -> calculateLeadScore.ts:259-329 -> persistido :406-412; lectura getEffectiveScore :461-485. |
 | `h3.cli-chatbot.sync-crm` Enviar leads al CRM del cliente (n8n) | L2 | errores, validación en servidor, Sentry, autonomía | captureLead.ts:500 -> syncLeadToCrm.ts:41-133 -> postToN8n.ts:152-199 (fetch :87-92). |
@@ -474,19 +480,19 @@
 - Relacionado: —
 - Nodo(s): h3.cli-chatbot, lib.chatbot.quota, int.brevo, modelo.QuotaUsage
 
-### [FAL-020] Reporte semanal del chatbot sin opt-out, destinatario no deterministico y link con fallback a localhost
-- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: faltante
+### [FAL-020] Reporte semanal del chatbot sin forma de darse de baja (el link de preferencias lleva a una ruta que no existe, sin List-Unsubscribe ni opt-out), con destinatario no determinístico y link con fallback a localhost
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: faltante
 - Confianza: PROBABLE
-- Evidencia: `src/modules/chatbot/server/reports/sendWeeklyReports.ts:27` — «take: 1, (members where role ADMIN, sin orderBy)»; `src/modules/chatbot/server/reports/sendWeeklyReports.ts:57` — «const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'»; `src/lib/email/templates/executive-weekly.ts:289` — «Dejar de recibir este reporte (control: el executive report si tiene unsubscribe)»
+- Evidencia: `src/modules/chatbot/server/reports/sendWeeklyReports.ts:27` — «take: 1, (members where role ADMIN, sin orderBy)»; `src/modules/chatbot/server/reports/sendWeeklyReports.ts:57` — «const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'»; `src/lib/email/templates/executive-weekly.ts:289` — «Dejar de recibir este reporte (control: el executive report si tiene unsubscribe)»; `src/lib/email/templates/weekly-report.ts:164` — «<a href="${data.dashboardUrl}/preferences" style="color:#06b6d4; text-decoration:none;">cambiá tus preferencias</a>.»; `src/modules/chatbot/server/reports/sendWeeklyReports.ts:60` — «dashboardUrl: '${appUrl}/dashboard/chatbot',»; `prisma/schema.prisma:387` — «executiveReportOptOut Boolean @default(false)»
 - Impacto: El cliente recibe dos mails semanales (este y el executive report); este no tiene baja ni registro de envio (un reintento del cron duplica), va al primer ADMIN que devuelva la base y el boton puede apuntar a localhost si falta la variable.
 - Propuesta: Unificar con el executive report o sumarle opt-out y WeeklyReportLog; orderBy determinista y leadNotificationEmail como destinatario; fallar si falta la URL.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.cli-chatbot, lib.chatbot.reports, int.brevo, int.cron.send-weekly-reports
+- Nodo(s): h3.cli-chatbot, lib.chatbot.reports, int.brevo, int.cron.send-weekly-reports, h3.cli-chatbot.reporte-semanal-email
 
 ### h3.adm-chatbots — Chatbots (admin)
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 29 funcionalidades: 1×L3, 26×L2, 1×L1, 1×L?).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 30 funcionalidades: 1×L3, 27×L2, 1×L1, 1×L?).
 - Criterios de L3 que faltan en alguna funcionalidad: errores, validación en servidor, mobile, Sentry, autonomía, sin mocks ni TODO, vacíos, permisos y tenant, carga.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
@@ -509,6 +515,7 @@
 | `h3.adm-chatbots.email-prueba-notificacion` Email de prueba de notificacion de leads | L2 | Sentry, sin mocks ni TODO | sendTestNotification.ts:16-58 -> sendLeadNotification.ts:18-39 -> Brevo. |
 | `h3.adm-chatbots.generar-insights` Generar insights con IA | L2 | errores, validación en servidor | insights/generate/route.ts:24 y cron route.ts:43 -> generateInsights.ts:30-130. Hoy falla por Vertex vencido. |
 | `h3.adm-chatbots.historial-sync-crm` Historial de syncs y reintento | L2 | Sentry | CrmIntegrationAdminCard.tsx:72 getOrgSyncHistory -> CrmSyncHistoryList.tsx:39-79 -> RetrySyncButton.tsx:17-25 -> retryCrmSync.ts:24-79. |
+| `h3.adm-chatbots.insights-automaticos` Generación diaria de insights del chatbot | L2 | permisos y tenant, errores, Sentry, autonomía | netlify.toml:25-26 -> generate-insights-cron.ts:44-104 -> route.ts:10-96 -> generateInsightsForBot (fuera). |
 | `h3.adm-chatbots.instalacion` Instalación del widget (admin) | L2 | sin mocks ni TODO | InstallTab.tsx:24-131 buildEmbedSnippet + instrucciones |
 | `h3.adm-chatbots.integracion-crm` Integracion CRM por webhook (n8n) | L2 | Sentry, autonomía | CrmConfigForm.tsx:48 -> saveCrmIntegration.ts:29-182; :70 -> testCrmConnection.ts:21-118; RetrySyncButton.tsx:19 -> retryCrmSync.ts:23-79; CrmIntegrationAdminCard.tsx:72 -> getCrmSyncHistory.ts:85-127 |
 | `h3.adm-chatbots.integraciones-crm` Integración CRM (n8n) por org | L? | sin mocks ni TODO | IntegrationsTab.tsx:36-39 → CrmIntegrationAdminCard → saveCrmIntegration.ts:30 (requireSuperAdmin); el envío a n8n es de D7 y no se trazó |
@@ -533,7 +540,7 @@
 
 ### h3.adm-actividad — Actividad global de chatbots
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 5 funcionalidades: 5×L2).
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 6 funcionalidades: 6×L2).
 - Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, vacíos, mobile, autonomía, errores, validación en servidor, Sentry, sin mocks ni TODO.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
@@ -541,6 +548,7 @@
 | `h3.adm-actividad.grafico-7-dias` Grafico de actividad de 7 dias | L2 | permisos y tenant, vacíos, errores, Sentry | activity/page.tsx:12 -> getActivityChartData.ts:3-38 |
 | `h3.adm-actividad.grafico-semanal` Gráfico de eventos por día | L2 | permisos y tenant, vacíos, sin mocks ni TODO | activity/page.tsx:12 -> getActivityChartData.ts:12-37 -> ActivityChart.tsx:18-79. |
 | `h3.adm-actividad.log-bot-develop` Activity log del bot de develOP | L2 | permisos y tenant, vacíos, mobile, autonomía | activity/page.tsx:10-19 → ActivityChart + ActivityLog (polling events/route.ts) |
+| `h3.adm-actividad.purga-eventos` Purga diaria de eventos del chatbot (30 días) | L2 | errores, Sentry | netlify.toml:31-32 -> cleanup-old-events-cron.ts:6-41 -> route.ts:16-30 -> cleanupOldEvents (fuera). |
 | `h3.adm-actividad.registro-eventos` Registro de eventos del chatbot | L2 | errores, Sentry, autonomía | logChatbotEvent persistentLogger.ts:87-148 (forOrg create :129); purga :154-163 via cron netlify.toml:31-32. |
 | `h3.adm-actividad.stream-eventos` Activity Log del bot develOP | L2 | permisos y tenant, errores, validación en servidor, Sentry | activity/page.tsx:10-19 -> ActivityLog.tsx:33-45 -> polling :101-125 -> events/route.ts. |
 
@@ -684,7 +692,7 @@
 
 ### h4.adm-clientes — Clientes
 
-- Madurez de la herramienta: **L0** (la de su funcionalidad más floja; 36 funcionalidades: 33×L2, 1×L3, 1×L0, 1×L1).
+- Madurez de la herramienta: **L0** (la de su funcionalidad más floja; 37 funcionalidades: 33×L2, 1×L3, 1×L0, 2×L1).
 - Criterios de L3 que faltan en alguna funcionalidad: Sentry, autonomía, sin mocks ni TODO, errores, validación en servidor, permisos y tenant, mobile, carga.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
@@ -702,6 +710,7 @@
 | `h4.adm-clientes.borrador-del-alta` Borrador persistente del alta de cliente | L2 | errores, Sentry | admin/clients/new/page.tsx:14 -> OnboardingWizard.tsx:98 -> useOnboardingDraft.ts:26-56 restore, :59-78 autosave, OnboardingWizard.tsx:140 clearDraft al crear. |
 | `h4.adm-clientes.boveda-alta-activo` Alta de activo en la bóveda del cliente | L2 | permisos y tenant, errores, validación en servidor, Sentry | VaultManager.tsx:25 (fuera del lote) -> agency-actions.ts:98-101 rol -> :103-111 clientAsset.create -> flujo D2 'Bóveda del cliente' (boveda/page.tsx:129). La credencial queda en claro. |
 | `h4.adm-clientes.boveda-carga` Subir un recurso a la Bóveda del cliente | L2 | errores, validación en servidor, mobile, Sentry, sin mocks ni TODO, autonomía | VaultTab.tsx:6 → VaultManager.tsx:19-34 → agency-actions.ts:94-113 (flujo D2 «Bóveda del cliente»). |
+| `h4.adm-clientes.conectar-google-business` Conectar Google Business de un cliente (OAuth) | L1 | errores, validación en servidor, Sentry, autonomía | callback trazado (callback/route.ts:14-82; oauth-state.ts:72-120; gbp-connection-logic.ts:219-230) pero sin entrada en la UI y con el resultado ?gbp= sin lector. |
 | `h4.adm-clientes.crear-entregable` Crear entregable y notificar al cliente | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | ProjectsTab.tsx:7 → ProjectManager.tsx:12-26 → agency-actions.ts:14-91 (assertProjectBelongsToOrg :29). |
 | `h4.adm-clientes.detalle` Ficha del cliente | L3 | — | page.tsx:28-31 -> :39-69 -> :75-83 -> :85-93; cumple los criterios aplicables. Deuda: router.push en switcher, cuid en URL, archivados sin marca. |
 | `h4.adm-clientes.editar-datos` Editar datos del cliente | L2 | errores, carga, Sentry | EditClientForm.tsx:79 → updateClient.ts:29 (guard) → :33-37 (Zod) → :42-65 (lee org+admin) → :71-81 (unicidad email) → :83-119 (tx) → :121 (audit) → :148-149 (revalidate) |
@@ -882,7 +891,7 @@
 |---|---|---|---|
 | `h4.adm-alertas.alerta-upsell-cuota` Alerta de upsell al agotar cuota | L2 | sin mocks ni TODO, autonomía | handleChatRequest.ts:374 -> upsellAlert.ts:52-58 (markDegradedIfFirst) -> :68-88. |
 | `h4.adm-alertas.churn-y-vencimientos` Alertas periódicas de clientes inactivos y suscripciones por vencer | L1 | errores, Sentry, sin mocks ni TODO, autonomía | Código en alerts.ts:195-296 y ruta api/cron/alerts/route.ts:2, sin disparador (netlify.toml:25-32, vercel.json:4-12); renewalDate sin escritor (FAL-006). |
-| `h4.adm-alertas.deteccion-automatica` Detección automática de incidencias | L1 | sin mocks ni TODO, autonomía | El detector existe (api/cron/detect-bot-issues/route.ts:13 -> detectBotIssues.ts:285) pero ningún scheduler lo llama: netlify.toml:25-32 y vercel.json:2-15 no lo incluyen; solo corre a mano (api/admin/alerts/trigger-detector/route.ts:12). |
+| `h4.adm-alertas.deteccion-automatica` Detección automática de incidencias de bots | L1 | errores, Sentry, autonomía | route.ts:7-21 existe y anda a mano (flujo D3 'Detector de alertas de bots disparado a mano'), pero no tiene disparador. |
 | `h4.adm-alertas.detector-incidencias` Detector de incidencias de bots disparado a mano | L2 | vacíos, errores, mobile, Sentry, sin mocks ni TODO, autonomía | alerts/page.tsx:7-22 → AlertSettingsClient.tsx:85-97 → trigger-detector/route.ts:5-13 → runAlertDetector (flujo D5). Sin cron (FAL-016) y sin link. |
 | `h4.adm-alertas.filtros-y-vista-completa` Filtros de alertas y vista completa por columna | L2 | mobile | AlertsClient.tsx:48-49 estado -> :75-79 passesFilters -> alerts-filters.ts:50-70 -> AlertsClient.tsx:207-275 cap -> alert-column-overview.tsx:95-158 overlay con Escape/trap (:43-89). Opera sobre el recorte de 100 filas. |
 | `h4.adm-alertas.listado` Listado de alertas del sistema | L2 | errores, validación en servidor, autonomía | alerts/page.tsx:5 → manageAlerts.ts:9-27 → AlertsClient (columnas con VISIBLE_CAP AlertsClient.tsx:206-208) |
@@ -893,12 +902,12 @@
 ### [FAL-016] El detector de alertas de los bots (/api/cron/detect-bot-issues) no tiene ningún disparador programado
 - Dominio: D5  ·  Severidad: ALTA  ·  Tipo: faltante
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `netlify.toml:25` — «[functions."generate-insights-cron"] schedule = "0 9 * * *"»; `netlify.toml:31` — «[functions."cleanup-old-events-cron"]»; `vercel.json:4` — «"path": "/api/cron/os-follow-up",»; `src/app/api/cron/detect-bot-issues/route.ts:7` — «export async function GET(req: Request) { if (!isAuthorizedCronRequest(req)) {»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:89` — «const res = await fetch('/api/admin/alerts/trigger-detector', { method: 'POST' })»; `src/app/api/cron/detect-bot-issues/route.ts:13` — «const result = await runAlertDetector()»; `src/app/(protected)/admin/alerts/page.tsx:17` — «Issues detectados automaticamente cada 15 minutos»; `src/app/api/admin/alerts/trigger-detector/route.ts:12` — «const result = await runAlertDetector()»
+- Evidencia: `netlify.toml:25` — «[functions."generate-insights-cron"] schedule = "0 9 * * *"»; `netlify.toml:31` — «[functions."cleanup-old-events-cron"]»; `vercel.json:4` — «"path": "/api/cron/os-follow-up",»; `src/app/api/cron/detect-bot-issues/route.ts:7` — «export async function GET(req: Request) { if (!isAuthorizedCronRequest(req)) {»; `src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx:89` — «const res = await fetch('/api/admin/alerts/trigger-detector', { method: 'POST' })»; `src/app/api/cron/detect-bot-issues/route.ts:13` — «const result = await runAlertDetector()»; `src/app/(protected)/admin/alerts/page.tsx:17` — «Issues detectados automaticamente cada 15 minutos»; `src/app/api/admin/alerts/trigger-detector/route.ts:12` — «const result = await runAlertDetector()»; `src/app/api/cron/alerts/route.ts:6` — «const providedSecret = request.headers.get('X-Cron-Secret')?.trim()»; `raíz:.github/workflows/db-backup.yml:41` — «- cron: '0 6 * * *'»
 - Impacto: Bloqueante para el primer cliente real: las alertas de bot (LLM_PROVIDER_ERROR, QUOTA_EXHAUSTED, LATENCY_DEGRADED, LEAD_CAPTURE_FAILURE, CLIENT_NO_ACTIVITY) solo se generan si un SUPER_ADMIN aprieta el botón manual de Configuración → Alertas. Un bot caído o con el cupo agotado pasa días sin aviso. netlify.toml agenda solo generate-insights, weekly-reports y cleanup; vercel.json agenda otros tres crons que en Netlify no corren.
 - Propuesta: Agendar el detector con una función programada de Netlify (mismo patrón que cleanup-old-events-cron, p. ej. cada 15 min) o documentar el scheduler externo si existe; alinear netlify.toml y vercel.json.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [BUG-047]
-- Nodo(s): int.cron.detect-bot-issues, h4.adm-alertas, h3.adm-health, lib.chatbot.admin, modelo.BotAlert, h4.adm-alertas.detector-incidencias, h4.adm-alertas.deteccion-automatica, int.cron.alerts
+- Nodo(s): int.cron.detect-bot-issues, h4.adm-alertas, h3.adm-health, lib.chatbot.admin, modelo.BotAlert, h4.adm-alertas.detector-incidencias, h4.adm-alertas.deteccion-automatica, int.cron.alerts, h4.adm-config, int.vertex
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-067
 
 ### [FAL-026] Las alertas periódicas de churn y vencimientos (/api/cron/alerts) no tienen disparador: los toggles 'Alertar churn' y 'Alertar vencimientos' no producen nada
@@ -914,11 +923,13 @@
 
 ### h4.adm-config — Configuración
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 7 funcionalidades: 7×L2).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 9 funcionalidades: 8×L2, 1×L1).
 - Criterios de L3 que faltan en alguna funcionalidad: errores, autonomía, Sentry, sin mocks ni TODO, vacíos, validación en servidor.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
+| `h4.adm-config.alertas-periodicas-agencia` Alertas periódicas de la agencia (clientes inactivos, suscripciones por vencer) | L1 | errores, Sentry, autonomía | alerts/route.ts:4-19 -> runPeriodicAgencyAlerts (lib/alerts.ts:195) sin disparador y solo con X-Cron-Secret. |
+| `h4.adm-config.avisos-telegram` Avisos por Telegram al equipo | L2 | errores, Sentry | llamadores -> telegram.ts:67-99 -> :39-61 -> POST api.telegram.org. |
 | `h4.adm-config.datos-y-alertas` Datos de la agencia, webhook y toggles de alertas | L2 | errores, Sentry, sin mocks ni TODO, autonomía | Camino feliz: settings/page.tsx:6-9 → settings.actions.ts:87-121 → settings-console.tsx:100-115 → settings.actions.ts:141-169 → consumido por alerts.ts:111-129. Pero email/WhatsApp/sitio no los lee nadie y los toggles de churn/vencimientos no tienen cron. |
 | `h4.adm-config.meta-demos` Objetivo semanal de demos | L2 | vacíos, errores, Sentry, sin mocks ni TODO | settings-console.tsx:451-467 → settings.actions.ts:160 (coerceWeeklyDemoTarget :23-36) → sale a admin/page.tsx:182-184. |
 | `h4.adm-config.miembros-listado` Lista de miembros del equipo en Configuración | L2 | Sentry, autonomía | settings/page.tsx:8 → settings.actions.ts:207-239 → settings-console.tsx:529-554. Solo lectura. |
@@ -954,7 +965,7 @@
 
 ### h6.vis-contacto — Formulario de contacto público
 
-- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 6 funcionalidades: 6×L2).
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 7 funcionalidades: 7×L2).
 - Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry, errores, mobile, sin mocks ni TODO, autonomía, validación en servidor.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
@@ -965,6 +976,16 @@
 | `h6.vis-contacto.captura-referido` Captura del código de referido en /contact?ref= | L2 | mobile, autonomía | contact/page.tsx:71-75 → :149 → contact.ts:42, :68-69. Solo en desktop. |
 | `h6.vis-contacto.enviar-formulario` Enviar formulario de contacto | L2 | errores, validación en servidor, Sentry | contact/page.tsx:66 → contact.ts:100-105 → :23-33 → :35-47 → :62-64 → :72-85 → contact/page.tsx:212-213 |
 | `h6.vis-contacto.formulario` Formulario de contacto público | L2 | errores, mobile, Sentry, sin mocks ni TODO, autonomía | En desktop: contact/page.tsx:66, :148-224 → submitContactForm (src/lib/actions/contact.ts:100). En mobile no existe (:119). |
+| `h6.vis-contacto.formulario-pie-home` Formulario de contacto del pie del home | L2 | errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | page.tsx:42 -> Footer.tsx:446 -> :589 -> :78-89 POST al webhook de n8n y pantalla de éxito. |
+
+### h6.vis-optout — Baja de emails de marketing
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 1 funcionalidades: 1×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, Sentry, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h6.vis-optout.baja-campania` Darse de baja de una campaña de email marketing | L2 | errores, Sentry, autonomía | email-marketing/_actions.ts:155 (fuera) -> optout/route.ts:69-104 -> unsubscribe-token.ts:97-109. |
 
 ## ZONA-FRANCO
 
@@ -990,3 +1011,27 @@
 - Esfuerzo: M  ·  Zona: FROZEN + ZONA-FRANCO
 - Relacionado: —
 - Nodo(s): h1.auth-login, lib.auth, h4.adm-audit, modelo.AdminAuditLog
+
+## Faltantes transversales
+
+### [FAL-029] Ninguna integración ni cron reporta a Sentry: las fallas atrapadas terminan en console.error, null o datos demo y develOP no se entera cuando vence una credencial (E10)
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/analytics.ts:196` — «} catch { // Fall back to mock data on any API error return { ok: true, data: getMockAnalyticsData() }»; `src/lib/integrations/google-business-profile.ts:94` — «console.error('[GBP] Refresh failed:', err) return null»; `src/lib/email/brevo-service.ts:41` — «console.error('[Brevo] Error sending email:', error)»; `src/lib/notifications/telegram.ts:91` — «console.error('[telegram] envío falló:', await response.text())»; `src/app/api/cron/detect-bot-issues/route.ts:16` — «return NextResponse.json( { ok: false, error: String(error) },»; `src/instrumentation.ts:49` — «export const onRequestError = Sentry.captureRequestError»
+- Impacto: Con el primer cliente real: si se revoca el refresh token de Google Business, vence la key de Brevo, se revoca la service account de GA4, se desinstala la app de Tiendanube o muere el token de Telegram, el cliente ve vacíos, ceros o datos demo, o simplemente no recibe emails, y develOP solo lo sabe si el cliente reclama. onRequestError solo ve excepciones no atrapadas, y todas estas se atrapan. git grep de Sentry/captureException en crons, callbacks OAuth, lib/integrations, lib/email, notifications, n8n, analytics, searchconsole y netlify/ da cero; Vertex (handleChatRequest.ts) es la única con captura y su detector automático no corre.
+- Propuesta: Un helper único reportIntegrationFailure(servicio, error, contexto) con Sentry.captureException y tag de servicio (más flush en handlers serverless), usado en cada catch de integraciones y crons; persistir el estado de la conexión por org cuando falle el refresh (p. ej. última falla y fecha) y mostrar 'reconectar'; un cron diario de salud de credenciales (Brevo, GA4, GBP, Telegram, PageSpeed) que avise por Telegram/email; agendar detect-bot-issues.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [FAL-015], [BUG-041], [BUG-063], [BUG-066]
+- Nodo(s): int.sentry, int.brevo, int.gbp, int.ga4, int.searchconsole, int.telegram, int.tiendanube, int.calcom, int.pagespeed, int.cron.detect-bot-issues, lib.integrations
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-134
+
+### [FAL-030] Sentry depende de NEXT_PUBLIC_SENTRY_DSN incrustada en el build: sin ella queda inerte sin aviso, y la config raíz con SENTRY_DSN es código muerto
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/instrumentation.ts:7` — «dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,»; `src/instrumentation-client.ts:5` — «dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,»; `instrumentation.ts:3` — «await import('./sentry.server.config')»; `sentry.server.config.ts:9` — «dsn: process.env.SENTRY_DSN,»; librería next@16.2.9, dist/build/index.js línea 616 — «const rootDir = _path.default.join(pagesDir || appDir, '..');»; `src/instrumentation-client.ts:10` — «replaysOnErrorSampleRate: 1.0,»
+- Impacto: Si la variable no estaba en el entorno de build de Netlify (la bitácora lo daba inactivo a 2026-08), todo Sentry (server, edge, navegador, onRequestError, error boundaries y la captura del chatbot) es no-op silencioso, y cargarla después sin recompilar no alcanza porque Next incrusta NEXT_PUBLIC_* en el bundle. Los documentos que piden SENTRY_DSN configuran una variable que solo leen archivos que nunca se ejecutan (Next solo carga src/instrumentation.ts; @sentry/nextjs 10.62 no autocarga sentry.*.config). Los replays 'on error' no se graban: no hay replayIntegration. El criterio L3 'errores en Sentry' no se cumple en ninguna herramienta hasta confirmar esto.
+- Propuesta: Confirmar NEXT_PUBLIC_SENTRY_DSN en Netlify con scope de builds y recompilar; leer en el server una DSN de runtime (SENTRY_DSN) y dejar NEXT_PUBLIC solo para el navegador; borrar instrumentation.ts raíz y sentry.server/edge.config.ts; un chequeo en el build que falle o avise si falta la DSN en producción; decidir si se quiere Replay (agregar la integración) o quitar la opción.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [FAL-003], [FAL-015]
+- Nodo(s): int.sentry, lib.sentry
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-135

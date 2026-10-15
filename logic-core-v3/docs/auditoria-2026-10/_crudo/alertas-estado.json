@@ -1158,6 +1158,51 @@
    "resultado": "parcial",
    "evidencia": "updateSettings (admin/settings/_actions/settings.actions.ts:127-173) parsea dentro del try (:143) y devuelve fail(toErrorMessage(...)) (:171): el ZodError se mapea al primer issue (action-utils.ts:28-29), así que esa fuga está resuelta. Pero cualquier otro Error (Prisma, conexión) devuelve su message crudo (action-utils.ts:31-32).",
    "hallazgo_titulo": "D3-A4 parcial: updateSettings ya no filtra el ZodError, pero sigue devolviendo al cliente el message crudo de cualquier otro Error (Prisma)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "alerta": "[D7-A1] Opt-out sin firma: /api/email/optout/[contactId] pendiente de HMAC según B11.3 y dado por cerrado en B-SEC.3c citando unsubscribe-token.ts",
+   "resultado": "descartada",
+   "evidencia": "src/app/api/email/optout/[contactId]/route.ts:77 verifica verifyEmailContactOptOutToken (src/lib/email/unsubscribe-token.ts:97-109, scope propio email-contact:optout:v1) antes de tocar la DB; el link de las campañas lleva el token (email-marketing/_actions.ts:114-115,155). La cita de B-SEC.3c hoy es correcta (cerrado por SEC vía 1). Quedan abiertos otros defectos de la baja: GET que escribe (BUG-061) y atributo en el contacto global (SEC-039)."
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "alerta": "[D7-A2] OAuth de Google Business: state-swap cerrado tarde y probado con un script fuera del repo; verificar state firmado y atado a la sesión en GBP y Tiendanube",
+   "resultado": "parcial",
+   "hallazgo_titulo": "oauth-state.ts no tiene test versionado y el state no está atado a la sesión ni es de un solo uso",
+   "evidencia": "Firmado sí: oauth-state.ts:38-59 HMAC-SHA256 con scope, nonce y expiración de 10 min; ambos callbacks verifican antes de la DB (google-business/callback/route.ts:30-35, tiendanube/callback/route.ts:42-47) y exigen SUPER_ADMIN (:14-17, :28-31). Atado a la sesión no: el state solo lleva org, nonce y expiración, y no se persisten nonces (oauth-state.ts:20-21). Sin test en el repo (git grep de verifyOAuthState/signOAuthState fuera de docs: solo 5 archivos de código)."
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "alerta": "[D7-A3] Hosting ambiguo: Netlify aplica migrate deploy pero el cron del reporte semanal (ejecutivo) se registra en vercel.json: cron posiblemente sin disparador",
+   "resultado": "confirmada",
+   "hallazgo_titulo": "Detector de incidencias de bots y alertas periódicas de la agencia sin disparador en ningún registrador: la credencial de Vertex vencida nunca se convierte en alerta automática",
+   "evidencia": "vercel.json:8,12 registra regenerate-briefs y send-executive-reports; netlify.toml:25-32 solo agenda generate-insights, send-weekly-reports (chatbot) y cleanup-old-events; .github/workflows solo tiene db-backup.yml:41. El caso del reporte ejecutivo ya es BUG-047; además detect-bot-issues y alerts no están en ningún registrador."
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "alerta": "[D7-A4] Sentry inactivo en prod a 2026-08 y nombre del DSN inconsistente (SENTRY_DSN vs NEXT_PUBLIC_SENTRY_DSN): ver qué variable lee el código y qué pasa si falta",
+   "resultado": "parcial",
+   "hallazgo_titulo": "Sentry depende de NEXT_PUBLIC_SENTRY_DSN incrustada en el build: sin ella queda inerte sin aviso, y la config raíz con SENTRY_DSN es código muerto",
+   "evidencia": "El código vivo lee NEXT_PUBLIC_SENTRY_DSN (src/instrumentation.ts:7,34; src/instrumentation-client.ts:5; .env.example:293). SENTRY_DSN solo la leen sentry.server.config.ts:9 y sentry.edge.config.ts:6, que importa instrumentation.ts de la raíz, archivo que Next 16 no carga con src/app (next/dist/build/index.js:616). Si falta, Sentry.init sin DSN queda inerte en silencio. Si prod la tiene hoy no es verificable desde el repo (caso manual)."
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "alerta": "[D7-A5] Credenciales por worktree: copiar .env.local y vertex-credentials.json a cada worktree (insumo para E10)",
+   "resultado": "parcial",
+   "evidencia": "Coherente con el código: GOOGLE_APPLICATION_CREDENTIALS apunta a un archivo local (google.ts:54) y vertex-credentials.json está en .gitignore:55; ningún archivo de credenciales está versionado (git ls-tree con patrones vertex-credentials/credentials.json/.env -> vacío; control: .env.example sí aparece). En Netlify se usa GOOGLE_VERTEX_CREDENTIALS_JSON (google.ts:55,73). Es insumo operativo, no defecto: incorporado a la fila E10 de Vertex."
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "alerta": "[D7-A6] Token de Vercel Blob quitado del .env: confirmar que no quedan lecturas de BLOB_READ_WRITE_TOKEN",
+   "resultado": "confirmada",
+   "evidencia": "git grep -n -E 'BLOB_READ_WRITE_TOKEN|@vercel/blob' origin/main -- logic-core-v3 ':!logic-core-v3/docs' -> exit 1 (control positivo: TELEGRAM_BOT_TOKEN aparece en telegram.ts). Sin defecto: no requiere hallazgo."
   }
  ]
 }

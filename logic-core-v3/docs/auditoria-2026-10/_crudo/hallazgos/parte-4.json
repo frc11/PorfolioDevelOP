@@ -3,6 +3,103 @@
  "partes": 5,
  "hallazgos": [
   {
+   "id": "DEU-050",
+   "prefijo": "DEU",
+   "titulo": "Contratos muertos o desfasados: messagesAdded ignorado, checkQuota con MAX_SAFE_INTEGER y tipos publicos que no coinciden con Prisma",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/quota/checker.ts",
+     "linea": 56,
+     "fragmento": "messagesAdded: number  (no se usa en upsertPeriod :76-92)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 226,
+     "fragmento": "const r = await checkQuota(orgId, bot.id, Number.MAX_SAFE_INTEGER)"
+    },
+    {
+     "ruta": "src/modules/chatbot/shared/types.ts",
+     "linea": 50,
+     "fragmento": "export type ChatbotLeadStatus = 'new' | 'contacted' | 'qualified' | 'lost' | 'converted'"
+    },
+    {
+     "ruta": "src/modules/chatbot/shared/types.ts",
+     "linea": 40,
+     "fragmento": "export type AvatarStyle = 'neuro' | 'legacy_neuro' | 'simple' | 'custom_image' | 'emoji' | 'none'"
+    }
+   ],
+   "impacto": "El barrel publico exporta tipos que contradicen el enum real (Prisma usa NEW/CONTACTED/IN_NEGOTIATION/WON/LOST; el avatar real usa monograma/onda/geometrico/image): quien los use compila contra valores que no existen. withinQuota de checkQuota siempre es true y confunde.",
+   "propuesta": "Borrar los tipos sin consumidores, quitar messagesAdded y dejar checkQuota como lectura de uso con nombre propio.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.chatbot.shared",
+    "lib.chatbot.quota"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H21",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-101",
+   "prefijo": "BUG",
+   "titulo": "excludeDqWhere excluye tambien los leads con classification NULL",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/scoring/dqFilter.ts",
+     "linea": 23,
+     "fragmento": "NOT: { classification: 'dq' },"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1493,
+     "fragmento": "classification LeadClassification?"
+    }
+   ],
+   "impacto": "Con la semantica de NULL de SQL que usa Prisma, los leads sin clasificar (legacy o creados por scripts) desaparecen de metricas y del reporte semanal. Hoy el camino de produccion siempre clasifica, por eso BAJA.",
+   "propuesta": "OR: [{ classification: null }, { classification: { not: 'dq' } }].",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.chatbot.scoring",
+    "h3.cli-chatbot",
+    "modelo.ChatbotLead"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "memoria: gotcha excludeDqWhere/null",
+   "vh": "VH-104",
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H22",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: dqFilter.ts:21-24 (NOT classification = dq) con el campo opcional de schema.prisma:1493: en SQL el NOT sobre NULL también excluye (eslabón de Prisma/Postgres → PROBABLE).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "FAL-021",
    "prefijo": "FAL",
    "titulo": "El bot de WhatsApp no responde ni se puede dar de alta: nada consume los mensajes entrantes, sendMotorMessage no tiene llamadores y no hay alta de canal",

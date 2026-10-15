@@ -1,276 +1,7 @@
 {
  "parte": 2,
- "partes": 2,
+ "partes": 3,
  "items": [
-  {
-   "ciclo": "D5-c1",
-   "lote": "D5-L4",
-   "herramienta": "h3.vis-widget-develop",
-   "id": "h3.vis-widget-develop.reintento-de-config",
-   "nombre": "Reintento manual cuando /config no carga",
-   "descripcion": "Si la config del bot no carga tras los reintentos automaticos, el widget muestra 'No pudimos conectar' con boton Reintentar.",
-   "archivos": [
-    "src/modules/chatbot/components/chat/ConfigLoadError.tsx"
-   ],
-   "entradas": [
-    "GET /api/chatbot/[slug]/config (fuera de lote)"
-   ],
-   "madurez": "L2",
-   "madurez_evidencia": "LogicCompanion.tsx:103-120 -> ConfigLoadError.tsx:17-73 onRetry=chatbot.retryLoadConfig; mismo componente en ChatbotEmbed.tsx:189.",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "n/a",
-     "evidencia": "Sin datos."
-    },
-    "vacios": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "errores": {
-     "cumple": "si",
-     "evidencia": "Mensaje util y accion (ConfigLoadError.tsx:52,54-70), role=status."
-    },
-    "carga": {
-     "cumple": "parcial",
-     "evidencia": "Mientras carga, el launcher no se muestra (LogicCompanion.tsx:95 return null), decision PLAN-519."
-    },
-    "validacion_servidor": {
-     "cumple": "n/a",
-     "evidencia": "No envia datos."
-    },
-    "mobile": {
-     "cumple": "si",
-     "evidencia": "Boton minHeight 36px, maxWidth 240px (LogicCompanion.tsx:111)."
-    },
-    "sentry": {
-     "cumple": "no",
-     "evidencia": "El agotamiento de reintentos no se reporta (fuera de lote: configCache)."
-    },
-    "sin_mocks_todos": {
-     "cumple": "si",
-     "evidencia": "Sin placeholders."
-    },
-    "autonomia": {
-     "cumple": "si",
-     "evidencia": "El visitante reintenta solo."
-    }
-   }
-  },
-  {
-   "ciclo": "D5-c1",
-   "lote": "D5-L4",
-   "herramienta": "h3.vis-widget-develop",
-   "id": "h3.vis-widget-develop.respuestas-rapidas",
-   "nombre": "Chips de respuestas rapidas",
-   "descripcion": "Con el chat vacio se ofrecen chips configurados que envian un prompt.",
-   "archivos": [
-    "src/modules/chatbot/components/chat/ChatWindow.tsx"
-   ],
-   "entradas": [],
-   "madurez": "L2",
-   "madurez_evidencia": "ChatWindow.tsx:467-489 onClick -> onQuickReply(qr.promptToSend) = chatbot.sendMessage (LogicCompanion.tsx:154). QuickReplyChips.tsx es codigo muerto.",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "n/a",
-     "evidencia": "Config publica del bot."
-    },
-    "vacios": {
-     "cumple": "si",
-     "evidencia": "Sin quickReplies no renderiza (:467)."
-    },
-    "errores": {
-     "cumple": "n/a",
-     "evidencia": "Delegado al envio."
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "Sin carga propia."
-    },
-    "validacion_servidor": {
-     "cumple": "n/a",
-     "evidencia": "Server valida el mensaje."
-    },
-    "mobile": {
-     "cumple": "si",
-     "evidencia": "flex-wrap (:468)."
-    },
-    "sentry": {
-     "cumple": "n/a",
-     "evidencia": "Sin errores propios."
-    },
-    "sin_mocks_todos": {
-     "cumple": "si",
-     "evidencia": "Datos del config."
-    },
-    "autonomia": {
-     "cumple": "si",
-     "evidencia": "Un click."
-    }
-   }
-  },
-  {
-   "ciclo": "D5-c1",
-   "lote": "D5-L4",
-   "herramienta": "h3.vis-widget-cliente",
-   "id": "h3.vis-widget-cliente.estados-degradados",
-   "nombre": "Banners de degradado en el widget embebido del cliente",
-   "descripcion": "El embed reutiliza DegradedBanner para cuota, pausa, rate limit, cortes y fallas de conexion.",
-   "archivos": [
-    "src/modules/chatbot/components/chat/DegradedBanner.tsx"
-   ],
-   "entradas": [],
-   "madurez": "L2",
-   "madurez_evidencia": "ChatbotEmbed.tsx:419 <DegradedBanner info={chatbot.degradedInfo}> con el mismo hook (useChatbot); ramas en DegradedBanner.tsx:41-215.",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "n/a",
-     "evidencia": "Solo renderiza."
-    },
-    "vacios": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "errores": {
-     "cumple": "parcial",
-     "evidencia": "Proveedor caido se muestra como transitorio sin WhatsApp (DegradedBanner.tsx:41-98)."
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "validacion_servidor": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "mobile": {
-     "cumple": "si",
-     "evidencia": "CTA 44px."
-    },
-    "sentry": {
-     "cumple": "no",
-     "evidencia": "Sin reporte cliente."
-    },
-    "sin_mocks_todos": {
-     "cumple": "si",
-     "evidencia": "Copys reales."
-    },
-    "autonomia": {
-     "cumple": "parcial",
-     "evidencia": "Sin numero de WhatsApp no hay salida."
-    }
-   }
-  },
-  {
-   "ciclo": "D5-c1",
-   "lote": "D5-L4",
-   "herramienta": "h3.vis-widget-cliente",
-   "id": "h3.vis-widget-cliente.apariencia-de-marca",
-   "nombre": "Colores de marca del cliente en el widget embebido",
-   "descripcion": "accentColor, accentSecondary y chatSurfaceTint configurados por el cliente deberian pintar el widget de su sitio.",
-   "archivos": [
-    "src/modules/chatbot/components/chat/ChatHeader.tsx"
-   ],
-   "entradas": [],
-   "madurez": "L1",
-   "madurez_evidencia": "Solo ChatHeader (ChatHeader.tsx:67,83) y el avatar usan accentColor; el resto del embed es cyan fijo (ChatbotEmbed.tsx:269, :537; git grep accentColor|accentSecondary|chatSurfaceTint en ChatbotEmbed = 0).",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "n/a",
-     "evidencia": "Config publica por slug."
-    },
-    "vacios": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "errores": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "validacion_servidor": {
-     "cumple": "si",
-     "evidencia": "Hex de 6 digitos en updateBotAppearance.ts:29-30 (fuera de lote)."
-    },
-    "mobile": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "sentry": {
-     "cumple": "n/a",
-     "evidencia": "No aplica."
-    },
-    "sin_mocks_todos": {
-     "cumple": "no",
-     "evidencia": "Color hardcodeado en lugar del configurado."
-    },
-    "autonomia": {
-     "cumple": "no",
-     "evidencia": "El cliente configura y no ve el cambio en su sitio."
-    }
-   }
-  },
-  {
-   "ciclo": "D5-c1",
-   "lote": "D5-L4",
-   "herramienta": "h3.vis-widget-cliente",
-   "id": "h3.vis-widget-cliente.avatar-del-bot",
-   "nombre": "Avatar animado del bot en cabecera y launcher",
-   "descripcion": "Renderiza el avatar elegido (3D, SVG, imagen o emoji) con estados idle/thinking/speaking.",
-   "archivos": [
-    "src/modules/chatbot/components/avatar/AvatarRenderer.tsx",
-    "src/modules/chatbot/components/avatar/registry.ts",
-    "src/modules/chatbot/components/avatar/HeavyAvatarsLazy.tsx",
-    "src/modules/chatbot/components/avatar/NeuroAvatar.tsx",
-    "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
-    "src/modules/chatbot/components/avatar/MonogramAvatar.tsx",
-    "src/modules/chatbot/components/avatar/PulseAvatar.tsx",
-    "src/modules/chatbot/components/avatar/GeometricAvatar.tsx"
-   ],
-   "entradas": [],
-   "madurez": "L2",
-   "madurez_evidencia": "ChatHeader.tsx:61-72 -> AvatarRenderer.tsx:51-101 -> registry.ts:96-104 -> HeavyAvatarsLazy.tsx:27-35 -> NeuroAvatar.tsx:45-64 / LegacyNeuroAvatarAdapter.tsx:31.",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "n/a",
-     "evidencia": "Config publica."
-    },
-    "vacios": {
-     "cumple": "parcial",
-     "evidencia": "Escotilla sin valor cae al 3D pesado (AvatarRenderer.tsx:51,87)."
-    },
-    "errores": {
-     "cumple": "no",
-     "evidencia": "Sin error boundary para WebGL/chunk (git grep ErrorBoundary = 0)."
-    },
-    "carga": {
-     "cumple": "si",
-     "evidencia": "Placeholder del tamano final (HeavyAvatarsLazy.tsx:62-89)."
-    },
-    "validacion_servidor": {
-     "cumple": "si",
-     "evidencia": "AVATAR_STYLE_SCHEMA/CLIENT_AVATAR_STYLE_SCHEMA en las actions."
-    },
-    "mobile": {
-     "cumple": "parcial",
-     "evidencia": "dpr hasta 2 y frameloop always (LegacyNeuroAvatar.tsx:940, NeuroAvatar.tsx:33)."
-    },
-    "sentry": {
-     "cumple": "no",
-     "evidencia": "Estilo desconocido solo console.warn (AvatarRenderer.tsx:122-129)."
-    },
-    "sin_mocks_todos": {
-     "cumple": "si",
-     "evidencia": "Sin TODO."
-    },
-    "autonomia": {
-     "cumple": "si",
-     "evidencia": "Automatico."
-    }
-   }
-  },
   {
    "ciclo": "D5-c1",
    "lote": "D5-L4",
@@ -3264,58 +2995,6 @@
    "ciclo": "D5-c1",
    "lote": "D5-L8",
    "herramienta": "h3.cli-chatbot",
-   "id": "h3.cli-chatbot.reporte-semanal-email",
-   "nombre": "Reporte semanal del chatbot por email",
-   "descripcion": "Conversaciones, leads, consultas frecuentes y tiempo de respuesta de la semana.",
-   "archivos": [
-    "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
-    "src/modules/chatbot/server/reports/sendWeeklyReports.ts"
-   ],
-   "madurez": "L2",
-   "madurez_evidencia": "netlify.toml:28-29 -> route.ts:7-14 -> sendWeeklyReports.ts:14-93 -> buildWeeklyReport.ts:26-139 -> Brevo :63-67.",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "si",
-     "evidencia": "forOrg por bot (buildWeeklyReport.ts:27); barrido global con razon (sendWeeklyReports.ts:16)"
-    },
-    "vacios": {
-     "cumple": "parcial",
-     "evidencia": "mensaje para 0 conversaciones culpa al cliente (:181)"
-    },
-    "errores": {
-     "cumple": "parcial",
-     "evidencia": "errores acumulados en la respuesta del cron (:84-88); sin Sentry"
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "email"
-    },
-    "validacion_servidor": {
-     "cumple": "si",
-     "evidencia": "isAuthorizedCronRequest route.ts:8"
-    },
-    "mobile": {
-     "cumple": "n/a",
-     "evidencia": "email"
-    },
-    "sentry": {
-     "cumple": "no",
-     "evidencia": "catch sin captureException (sendWeeklyReports.ts:84-89)"
-    },
-    "sin_mocks_todos": {
-     "cumple": "no",
-     "evidencia": "total de leads con tope 10 (:67,:120)"
-    },
-    "autonomia": {
-     "cumple": "parcial",
-     "evidencia": "sin opt-out"
-    }
-   }
-  },
-  {
-   "ciclo": "D5-c1",
-   "lote": "D5-L8",
-   "herramienta": "h3.cli-chatbot",
    "id": "h3.cli-chatbot.email-insights",
    "nombre": "Email de insights nuevos",
    "descripcion": "Aviso al cliente cuando el cron genera insights del bot.",
@@ -4401,59 +4080,6 @@
     "autonomia": {
      "cumple": "n/a",
      "evidencia": "Herramienta interna"
-    }
-   }
-  },
-  {
-   "ciclo": "D3-c1",
-   "lote": "D3-L1",
-   "herramienta": "h4.adm-alertas",
-   "id": "h4.adm-alertas.deteccion-automatica",
-   "nombre": "Detección automática de incidencias",
-   "descripcion": "Corrida periódica del detector que crea BotAlert; la página afirma que corre cada 15 minutos.",
-   "archivos": [
-    "src/app/(protected)/admin/alerts/page.tsx",
-    "src/app/(protected)/admin/layout.tsx"
-   ],
-   "entradas": [],
-   "madurez": "L1",
-   "madurez_evidencia": "El detector existe (api/cron/detect-bot-issues/route.ts:13 -> detectBotIssues.ts:285) pero ningún scheduler lo llama: netlify.toml:25-32 y vercel.json:2-15 no lo incluyen; solo corre a mano (api/admin/alerts/trigger-detector/route.ts:12).",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "n/a",
-     "evidencia": "Cron con secreto, fuera del lote"
-    },
-    "vacios": {
-     "cumple": "n/a",
-     "evidencia": "Sin UI propia"
-    },
-    "errores": {
-     "cumple": "n/a",
-     "evidencia": "Fuera del lote"
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "Proceso de fondo"
-    },
-    "validacion_servidor": {
-     "cumple": "n/a",
-     "evidencia": "Sin entrada"
-    },
-    "mobile": {
-     "cumple": "n/a",
-     "evidencia": "Sin UI"
-    },
-    "sentry": {
-     "cumple": "n/a",
-     "evidencia": "No verificado (fuera del lote)"
-    },
-    "sin_mocks_todos": {
-     "cumple": "no",
-     "evidencia": "La copy afirma 'cada 15 minutos' (alerts/page.tsx:17) sin disparador"
-    },
-    "autonomia": {
-     "cumple": "no",
-     "evidencia": "Depende de que un admin dispare el detector a mano"
     }
    }
   },
@@ -9087,6 +8713,451 @@
     "autonomia": {
      "cumple": "si",
      "evidencia": "automático"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.reputacion-gbp",
+   "nombre": "Reputación: rating y últimas reseñas de Google Business",
+   "descripcion": "Muestra rating, cantidad y reseñas recientes de la ficha de Google del cliente.",
+   "archivos": [
+    "src/lib/integrations/google-business-profile.ts",
+    "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+    "src/components/dashboard/results/GBPMetricsCard.tsx"
+   ],
+   "entradas": [
+    "/dashboard/resultados/reputacion"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "reputacion/page.tsx:20 -> google-business-profile.ts:165-182 -> :185-236 pinta en el primer render, pero en el acierto de caché createdAt llega como string y GBPMetricsCard.tsx:124 lanza; performance fijo en 0 (:218-224).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "reputacion/page.tsx:15 resolveOrgId; google-business-profile.ts:166-167 filtra por organizationId"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "ReputationEmptyState si metrics es null (reputacion/page.tsx:34), pero null también es error o sin sucursal"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "error de API -> null igual que vacío (:202-205); el acierto de caché rompe el render"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "layout fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:203, :233) sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "performance stub en 0 (:218-224) y FIXME(data-truth) en GBPMetricsCard.tsx:38"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "la conexión la hace un SUPER_ADMIN tipeando la URL de start"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h4.adm-clientes",
+   "id": "h4.adm-clientes.conectar-google-business",
+   "nombre": "Conectar Google Business de un cliente (OAuth)",
+   "descripcion": "El admin autoriza la ficha de Google del cliente y el sistema descubre cuenta y sucursal.",
+   "archivos": [
+    "src/app/api/auth/google-business/start/route.ts",
+    "src/app/api/auth/google-business/callback/route.ts",
+    "src/lib/security/oauth-state.ts",
+    "src/lib/integrations/gbp-connection.ts",
+    "src/lib/integrations/gbp-connection-logic.ts",
+    "src/lib/integrations/gbp-discovery.ts"
+   ],
+   "entradas": [
+    "GET /api/auth/google-business/start",
+    "GET /api/auth/google-business/callback"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "callback trazado (callback/route.ts:14-82; oauth-state.ts:72-120; gbp-connection-logic.ts:219-230) pero sin entrada en la UI y con el resultado ?gbp= sin lector.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "SUPER_ADMIN en start (:6-9) y callback (:14-17); state HMAC por org"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no lista datos"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "JSON crudo (:43, :85) y ?error= sin lector"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "redirecciones"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "presencia + firma (:23-35); orgId de start sin validar hasta el callback"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "sin pantalla"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:67, :84)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos de mentira"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "hay que tipear la URL; varias sucursales quedan sin selector"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-resenas",
+   "id": "h2.cli-resenas.selector-sucursal",
+   "nombre": "Elegir la sucursal de Google Business",
+   "descripcion": "Listar las sucursales de la cuenta conectada y fijar la activa.",
+   "archivos": [
+    "src/lib/actions/gbp-connection.ts",
+    "src/lib/integrations/gbp-connection-logic.ts"
+   ],
+   "entradas": [
+    "listAvailableLocations",
+    "setActiveLocation"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "server actions (gbp-connection.ts:17,36) sin ninguna pantalla que las importe.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "org de la sesión (:19, :40) sin rol; SEC-053"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin pantalla"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "mensajes genéricos (:27, :56)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "sin pantalla"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "SetActiveLocationSchema (:43)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "sin pantalla"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:26, :55)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos de mentira"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "no hay UI"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-tienda",
+   "id": "h2.cli-tienda.conectar-tienda",
+   "nombre": "Conectar la tienda Tiendanube",
+   "descripcion": "OAuth de Tiendanube para leer pedidos y productos.",
+   "archivos": [
+    "src/app/api/auth/tiendanube/start/route.ts",
+    "src/app/api/auth/tiendanube/callback/route.ts",
+    "src/lib/integrations/tiendanube.ts"
+   ],
+   "entradas": [
+    "GET /api/auth/tiendanube/start",
+    "GET /api/auth/tiendanube/callback"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "el botón del cliente (ConnectStoreCard.tsx:39) choca con SUPER_ADMIN en start (:10-13); solo anda impersonando: start -> tiendanube.ts:17-22 -> callback :28-85 -> tienda-conectada/page.tsx:306.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "SUPER_ADMIN + state HMAC (callback :28-48)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "sin listado"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "sin try/catch (:58-81); errores a /dashboard?error= sin lector"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "redirecciones"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "firma del state; respuesta del token sin validar (tiendanube.ts:43)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "sin pantalla propia"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (tiendanube.ts:40, :45)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos de mentira"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "el cliente recibe 401 (BUG-032)"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-tienda",
+   "id": "h2.cli-tienda.resumen-tienda",
+   "nombre": "Resumen de la tienda (ventas, ticket, stock bajo, carritos)",
+   "descripcion": "Métricas del mes de la tienda conectada.",
+   "archivos": [
+    "src/lib/integrations/tiendanube.ts"
+   ],
+   "entradas": [
+    "/dashboard/modules/tienda-conectada"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "tienda-conectada/page.tsx:87 -> tiendanube.ts:74-80 (caché 30 min) -> :82-164 cuatro GET y agregados.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getAuth filtra por organizationId (tiendanube.ts:53-55)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "null muestra el mismo mensaje de error (page.tsx:88-103)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "errores de API como ceros (:96-118); null cacheado 30 min"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:161)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales de la API"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "depende de que develOP conecte la tienda"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-agenda",
+   "id": "h2.cli-agenda.resumen-agenda",
+   "nombre": "Agenda inteligente: próximas reuniones y totales de Cal.com",
+   "descripcion": "Lee las reservas del Cal.com del cliente.",
+   "archivos": [
+    "src/lib/integrations/cal-com.ts"
+   ],
+   "entradas": [
+    "/dashboard/modules/agenda-inteligente"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "agenda-inteligente/page.tsx -> cal-com.ts:32-111 contra api.cal.com/v1 (:4), que cal-com-v2.ts:4-6 da por apagada (PROBABLE).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getApiKey por organizationId (:24-30)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "null cacheado 10 min, console.error del status (:52-54)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:53, :108)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "API v1 apagada; key en la query (:49)"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.trafico-ga4",
+   "nombre": "Tráfico del sitio (GA4)",
+   "descripcion": "Sesiones, usuarios, rebote, páginas y fuentes de 30 días.",
+   "archivos": [
+    "src/lib/analytics.ts"
+   ],
+   "entradas": [
+    "/dashboard/resultados/trafico"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "trafico/page.tsx:46 -> analytics.ts:85-195 cuatro runReport en paralelo -> datos con isMockData false.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "el propertyId lo puede fijar el cliente y se lee con la service account única (SEC-045)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "sin filas devuelve ceros (:154-160)"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "cualquier error -> demo con banner, sin log (:196-198)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "normalizePropertyId (:60-72)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "mock de concesionaria en el camino del cliente (:24-56)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "requiere que develOP tenga acceso a la propiedad"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.seo-search-console",
+   "nombre": "SEO (Search Console)",
+   "descripcion": "Clics, impresiones, CTR, posición, consultas y páginas de 28 días.",
+   "archivos": [
+    "src/lib/searchconsole.ts"
+   ],
+   "entradas": [
+    "/dashboard/resultados/seo"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "seo/page.tsx:179 -> searchconsole.ts:99-210 tres consultas en paralelo.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "siteUrl de la org (fuera del lote)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "sin filas da ceros (:167-182)"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "error -> demo sin log (:211-213)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "mock de sanmiguel.com.ar (:29-64)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "la service account tiene que estar agregada al sitio"
     }
    }
   }

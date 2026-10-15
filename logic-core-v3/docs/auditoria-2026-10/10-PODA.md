@@ -2557,6 +2557,55 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - Propuesta: borrar junto con lib/actions/leads.ts
 - Zona: libre
 
+### [POD-360] instrumentation.ts (D7-c1)
+- Hallado en F2 (D7-L1) · `instrumentation.ts` · Nodo(s): lib.plataforma.instrumentation · Alcance: el archivo entero — la instrumentation de la raíz: Next 16 solo ejecuta src/instrumentation.ts porque la app vive en src/; sin importadores; solo importa los sentry.*.config legacy · Señales: Next 16.2.9 busca instrumentation en join(appDir, '..') = src (node_modules/next/dist/build/index.js:615-616) y existe src/instrumentation.ts; sin importadores; solo importa los sentry.*.config legacy
+- Qué rompe si se borra: nada en runtime; corregir docs que piden SENTRY_DSN
+- Confianza de poda: MEDIA
+- Propuesta: borrar junto con sentry.server.config.ts y sentry.edge.config.ts, y corregir los docs que piden SENTRY_DSN (FAL-030)
+- Zona: libre
+
+### [POD-361] sentry.server.config.ts (D7-c1)
+- Hallado en F2 (D7-L1) · `sentry.server.config.ts` · Nodo(s): lib.plataforma.sentry-server-config · Alcance: el archivo entero — solo lo importa la instrumentation de la raíz, que no corre; lee SENTRY_DSN · Señales: solo lo importa instrumentation.ts de la raíz (muerto); @sentry/nextjs 10.62 no lo autocarga: solo advierte (build/cjs/config/webpack.js:318-329); lee SENTRY_DSN, que nadie más usa
+- Qué rompe si se borra: nada
+- Confianza de poda: MEDIA
+- Propuesta: borrar con instrumentation.ts de la raíz
+- Zona: libre
+
+### [POD-362] sentry.edge.config.ts (D7-c1)
+- Hallado en F2 (D7-L1) · `sentry.edge.config.ts` · Nodo(s): lib.plataforma.sentry-edge-config · Alcance: el archivo entero — igual que sentry.server.config.ts · Señales: idem sentry.server.config.ts
+- Qué rompe si se borra: nada
+- Confianza de poda: MEDIA
+- Propuesta: borrar con instrumentation.ts de la raíz
+- Zona: libre
+
+### [POD-363] src/app/api/test-sentry/route.ts (D7-c1)
+- Hallado en F2 (D7-L1) · `src/app/api/test-sentry/route.ts` · Nodo(s): int.sentry · Alcance: el archivo entero — ruta de prueba pública, sin referencias (SEC-093) · Señales: sin referencias (git grep test-sentry vacío); 500 público permanente
+- Qué rompe si se borra: la prueba manual de Sentry (reemplazable por una acción solo SUPER_ADMIN)
+- Confianza de poda: MEDIA
+- Propuesta: borrar, o reemplazarla por una acción solo SUPER_ADMIN
+- Zona: libre
+
+### [POD-364] src/lib/integrations/brevo.ts (D7-c1)
+- Hallado en F2 (D7-L1) · `src/lib/integrations/brevo.ts` · Nodo(s): int.brevo · Alcance: exports sueltos (el archivo sigue vivo) — getCampaignStats (:143-166) sin llamadores; cuenta las listas como destinatarios y solo los softBounces · Señales: sin llamadores (git grep -l solo brevo.ts); cuenta listas como destinatarios (:157) y solo softBounces (:160)
+- Qué rompe si se borra: nada
+- Confianza de poda: MEDIA
+- Propuesta: borrarla, o corregirla cuando haya métricas de campañas (BUG-025)
+- Zona: libre
+
+### [POD-365] src/lib/n8n.ts (D7-c1)
+- Hallado en F2 (D7-L1) · `src/lib/n8n.ts` · Nodo(s): int.n8n · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — getN8nMetrics (:259) con sus tipos y constantes de métricas, sin llamadores; N8N_API_URL y N8N_API_KEY solo los lee ese bloque · Señales: sin llamadores; N8N_API_URL/KEY solo los usa esto y settings.ts (módulo sin importadores según D1)
+- Qué rompe si se borra: nada; mantener sendLeadToN8n (:18-35)
+- Confianza de poda: MEDIA
+- Propuesta: borrar el bloque de métricas; sendLeadToN8n (:18-35) se queda
+- Zona: libre
+
+### [POD-366] src/app/api/track/route.ts (D7-c1)
+- Hallado en F2 (D7-L1) · `src/app/api/track/route.ts` · Nodo(s): int.tracking · Alcance: el archivo entero — ruta sin consumidores (SEC-042) · Señales: sin consumidores (git grep api/track fuera de la ruta -> vacío; control: api/chatbot en useChatbot.ts); SEC-042
+- Qué rompe si se borra: nada
+- Confianza de poda: MEDIA
+- Propuesta: borrar
+- Zona: libre
+
 ### Refuerzos de F2 sobre fichas de F1
 
 - [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)
@@ -2582,6 +2631,8 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - [POD-060] `src/lib/actions/leads.ts` (D3-c1): 0 importadores (git grep updateLeadStatusAction|updateLeadNotesAction); la versión viva está en admin/leads/_actions (ZONA-FRANCO); guard reimplementado ensureAdmin (:14-17). Qué rompe: Nada.
 - [POD-079] `src/lib/actions/projects.ts` (D3-c1): 5 de 7 exports sin importadores (createProjectAction, updateProjectAction, createTaskAction, updateTaskStatusAction, deleteTaskAction); duplica admin/projects/_actions/project.actions.ts (bitacora:6491 ya lo marcaba). Qué rompe: delete-project-button.tsx:6 (deleteProjectAction) y task-list.tsx:22 (sendTaskForApprovalAction): hay que migrarlos antes de borrar.
 - [POD-076] `src/lib/actions/contact.ts` (D3-c1): markLeadAsRead (:110) sin importadores; contactFormAction exportada solo para el wrapper submitContactForm (:100-105). Qué rompe: Nada si se quita markLeadAsRead; contact/page.tsx:6 usa submitContactForm.
+- [POD-059] `src/lib/actions/gbp-connection.ts` (D7-c1): 'use server' sin importadores (acciones públicas latentes, SEC-053). Qué rompe: el futuro selector de sucursal P3-A.2
+- [POD-084] `vercel.json` (D7-c1): el hosting es Netlify (netlify.toml:1-10, AGENTS.md:21); sus 3 crons no corren. Qué rompe: nada, si los crons se migran a functions de Netlify
 
 ## §docs
 

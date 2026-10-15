@@ -2804,6 +2804,301 @@
     "demand.ts:137-153 serializa Dates a ISO",
     "src/app/(protected)/admin/leads/_components/module-demand-table.tsx:3 consume SerializedModuleDemand"
    ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Conexión OAuth de Google Business (SUPER_ADMIN, sin botón en la UI)",
+   "pasos": [
+    "entrada manual: el admin tipea /api/auth/google-business/start?orgId=<id> (git grep de auth/google-business/start sin links en src)",
+    "src/app/api/auth/google-business/start/route.ts:6-9 auth() + SUPER_ADMIN; :12 orgId del query",
+    "src/lib/integrations/google-business-profile.ts:37-47 generateAuthUrl con state = signOAuthState (src/lib/security/oauth-state.ts:50-59, HMAC con scope google-business:v1, TTL 10 min)",
+    "consentimiento en Google -> src/app/api/auth/google-business/callback/route.ts:14-17 SUPER_ADMIN; :30-35 verifyOAuthState (oauth-state.ts:72-120) antes de la DB",
+    "callback/route.ts:38-44 la org existe; :47 exchangeCodeForTokens (google-business-profile.ts:49-53); :49-57 guarda gbpAccessToken y gbpRefreshToken en claro",
+    "callback/route.ts:65 connectGbpForOrg -> src/lib/integrations/gbp-connection.ts:39 -> gbp-connection-logic.ts:219-230 -> gbp-discovery.ts:39-73 y :76-119 -> gbp-connection.ts:21-23 prisma.organization.update",
+    "una sucursal: OPERATIONAL + rating one-shot (gbp-connection-logic.ts:228, :205-212); varias: CONNECTED_NO_LOCATION (:138-147) y el selector (src/lib/actions/gbp-connection.ts:17,36) no tiene pantalla",
+    "sale del lote: callback/route.ts:71 -> src/lib/audit-log.ts (logAdminAction); :82 redirect /admin/clients?gbp=<estado>, parámetro que ninguna pantalla lee"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Conexión OAuth de Tiendanube",
+   "pasos": [
+    "sale del lote al inicio: ConnectStoreCard.tsx:39 (flujo D2 'Tienda conectada: conectar y ver resumen')",
+    "src/app/api/auth/tiendanube/start/route.ts:10-13 exige SUPER_ADMIN: el cliente recibe 401 JSON; solo anda con un SUPER_ADMIN impersonando",
+    "src/lib/integrations/tiendanube.ts:17-22 URL de autorización con state firmado (scope tiendanube:v1)",
+    "src/app/api/auth/tiendanube/callback/route.ts:28-31 SUPER_ADMIN; :42-48 verifyOAuthState; :50-56 la org existe",
+    "tiendanube.ts:24-48 exchangeCodeForToken (res.json() sin validar forma)",
+    "callback/route.ts:63-70 guarda tiendanubeStoreId y tiendanubeAccessToken en claro, sin try/catch y sin revalidateTag de tiendanube:<org>",
+    "sale del lote: callback/route.ts:72 logAdminAction; :83-85 redirect /dashboard/modules/tienda-conectada?connected=true (tienda-conectada/page.tsx:306 lo lee)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Lectura de Reputación GBP con caché (y su caída en el acierto)",
+   "pasos": [
+    "sale del lote al inicio: reputacion/page.tsx:15-20 (flujo D2 'Resultados › Reputación (Google Business Profile)')",
+    "src/lib/integrations/google-business-profile.ts:165-176 lee tokens y gbpLocationId",
+    "google-business-profile.ts:178-182 unstable_cache 3600 s con clave org + location + connectedAt",
+    "google-business-profile.ts:185-187 getAuthedClient (:55-100): refresh si vence en menos de 60 s; si el refresh falla -> console.error y null",
+    "google-business-profile.ts:196-216 GET v4 reviews sin timeout; createdAt como Date (:214); :218-224 performance en 0",
+    "acierto de caché: node_modules/next/dist/server/web/spec-extension/unstable-cache.js:168 JSON.parse -> createdAt llega como string",
+    "sale del lote: GBPMetricsCard.tsx:124 review.createdAt.toISOString() lanza TypeError y la página cae al error boundary"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Cron agendado en Netlify -> ruta Next",
+   "pasos": [
+    "netlify.toml:25-32 agenda generate-insights-cron (09:00), send-weekly-reports-cron (lunes 12:00) y cleanup-old-events-cron (06:00)",
+    "netlify/functions/cleanup-old-events-cron.ts:7-18, generate-insights-cron.ts:45-57, send-weekly-reports-cron.ts:64-76 leen URL y CRON_SECRET y abortan con 500 si faltan",
+    "fetch con Authorization Bearer: cleanup :21-23 (sin timeout), generate-insights :62-66 (POST, 20 s), send-weekly :81-84 (20 s)",
+    "ruta: src/lib/cron/cron-secret.ts:40-44 isAuthorizedCronRequest (falla cerrado)",
+    "sale del lote: cleanup-old-events/route.ts:22 -> cleanupOldEvents (flujo D5 'Purga de eventos del chatbot')",
+    "sale del lote: generate-insights/route.ts:36-43,61 -> generateInsightsForBot y sendInsightsNotificationEmail (flujo D5 'Insights del chatbot')",
+    "sale del lote: send-weekly-reports/route.ts:13 -> sendWeeklyReports (flujo D5 'Reporte semanal del chatbot por email') -> src/lib/email/templates/weekly-report.ts:25-175",
+    "fallas: la ruta responde 500 con el mensaje y la function lo loguea en Netlify; ningún paso llama a Sentry"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Crons sin disparador",
+   "pasos": [
+    "vercel.json:4-13 registra os-follow-up, regenerate-briefs y send-executive-reports; el hosting es Netlify (netlify.toml:1-10)",
+    "sale del lote: regenerate-briefs/route.ts:40 -> refreshExecutiveBriefCache (flujo D2 'Home: Resumen ejecutivo IA')",
+    "sale del lote: send-executive-reports/route.ts:26 -> sendExecutiveWeeklyReports (flujo D2 'Reporte ejecutivo semanal (cron)')",
+    "sale del lote: detect-bot-issues/route.ts:13 -> runAlertDetector (flujo D3 'Deteccion automatica de alertas (prometida, sin disparador)')",
+    "sale del lote: alerts/route.ts:13 -> runPeriodicAgencyAlerts (src/lib/alerts.ts:195; flujo D3 'Alertas de la agencia por webhook'), que solo acepta X-Cron-Secret (:6)",
+    ".github/workflows/db-backup.yml:39-41 es el único cron de GitHub Actions"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Email transaccional por Brevo",
+   "pasos": [
+    "llamadores fuera del lote (magic link, reset, bienvenida, reporte semanal, reporte ejecutivo, insights) -> src/lib/email/brevo-service.ts:17",
+    "brevo-service.ts:20-23 sin BREVO_API_KEY devuelve EMAIL_NOT_CONFIGURED + console.error",
+    "brevo-service.ts:26-37 SDK BrevoClient sin timeout propio; remitente BREVO_FROM_NAME/EMAIL o fallback literal a un Gmail personal (:33)",
+    "brevo-service.ts:40-45 error -> console.error y mensaje crudo al llamador; sin Sentry"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Email marketing por Brevo REST y baja por contacto",
+   "pasos": [
+    "sale del lote al inicio: email-marketing/_actions.ts (flujo D2 'Email marketing: importar, crear, enviar y darse de baja')",
+    "src/lib/integrations/brevo.ts:9-29 ensureBrevoList (folderId 1 fijo); :31-58 syncContact con atributos CONTACT_ID y OPTOUT_TOKEN",
+    "brevo.ts:60-90 createCampaign (devuelve el cuerpo crudo del error :82); :92-103 sendCampaign",
+    "link de baja {{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}} -> src/app/api/email/optout/[contactId]/route.ts:69-87 verifyEmailContactOptOutToken (src/lib/email/unsubscribe-token.ts:97-109)",
+    "optout/route.ts:91-94 updateMany optedOut=true (no avisa a Brevo, BUG-021)",
+    "brevo.ts:143-166 getCampaignStats sin llamadores: las métricas de campaña nunca se leen"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Baja de un clic del reporte ejecutivo",
+   "pasos": [
+    "src/lib/email/unsubscribe-token.ts:57-66 buildUnsubscribeUrl (HMAC por org, sin vencimiento, NEXT_PUBLIC_APP_URL con fallback localhost)",
+    "src/lib/email/templates/executive-weekly.ts:289 link en el pie del email",
+    "GET o POST /api/email/unsubscribe-executive -> route.ts:39-60 -> :62-72 verifyUnsubscribeToken (timingSafeEqual) -> :74-90 executiveReportOptOut = true -> :92-100 acuse"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Formulario del pie del home -> n8n desde el navegador",
+   "pasos": [
+    "sale del lote al inicio: src/app/page.tsx:42 renderiza Footer",
+    "src/components/sections/home/Footer.tsx:442-446 tarjeta 'Completar formulario' (motion.div con onClick) -> :584-603 formulario",
+    "Footer.tsx:78-89 onSubmit: fetch POST directo a NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL sin mirar res.ok y setSubmitted(true)",
+    "Footer.tsx:90-97 si el fetch lanza abre WhatsApp; :98-106 sin webhook abre WhatsApp (número de fallback propio :8) y marca enviado",
+    "no pasa por src/lib/actions/contact.ts:100 (Zod, rate limit, ContactSubmission, alerta de agencia y n8n desde el servidor en :82; flujo D3 'Formulario público de contacto')"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Inicialización de Sentry",
+   "pasos": [
+    "Next 16.2.9 busca el archivo de instrumentation en join(appDir, '..') = src (node_modules/next/dist/build/index.js:615-616)",
+    "src/instrumentation.ts:4-43 Sentry.init node y edge con NEXT_PUBLIC_SENTRY_DSN y beforeSend -> src/lib/sentry/scrub-pii.ts:116-177; :49 onRequestError",
+    "src/instrumentation-client.ts:4-19 init del navegador con la misma DSN; replaysOnErrorSampleRate sin replayIntegration",
+    "instrumentation.ts (raíz) -> sentry.server.config.ts / sentry.edge.config.ts con SENTRY_DSN: nunca se ejecutan (@sentry/nextjs 10.62 solo advierte, build/cjs/config/webpack.js:318-329)",
+    "sale del lote: next.config.ts:254-260 withSentryConfig (source maps con SENTRY_AUTH_TOKEN, tunnel /monitoring)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "Aviso por Telegram",
+   "pasos": [
+    "llamadores fuera del lote (LeadOS, detectBotIssues, upsellAlert, captureLead, showWhatsappHandoff) -> src/lib/notifications/telegram.ts:67 sendTelegram o :116 notifyTelegramOptional",
+    "telegram.ts:39-61 credenciales: AgencySettings.osTelegramBotToken/ChatId (en claro) y si no, TELEGRAM_BOT_TOKEN/CHAT_ID",
+    "telegram.ts:77-98 POST a api.telegram.org sin timeout; error -> console.error y false",
+    "telegram.ts:108-110 isTelegramConfigured solo mira presencia (lo usa admin/leados/page.tsx)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "GA4 y Search Console con la service account de develOP",
+   "pasos": [
+    "sale del lote al inicio: trafico/page.tsx:46 y seo/page.tsx:179 (flujo D2 'Metricas de Trafico y SEO')",
+    "src/lib/analytics.ts:85-100 normaliza propertyId; sin GOOGLE_SERVICE_ACCOUNT_KEY -> demo",
+    "analytics.ts:111-195 cuatro runReport en paralelo; :196-198 cualquier error -> demo con isMockData y sin log",
+    "src/lib/searchconsole.ts:99-215 mismo patrón (tres consultas; :211-213 demo)",
+    "la UI muestra PreviewBanner si isMockData (trafico/page.tsx:188, seo/page.tsx:226)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Vertex AI (control positivo)",
+   "pasos": [
+    "se lee: src/modules/chatbot/server/llm/providers/google.ts:54-56,73-77 (GOOGLE_APPLICATION_CREDENTIALS = archivo vertex-credentials.json por worktree, ignorado en .gitignore:55; GOOGLE_VERTEX_CREDENTIALS_JSON en Netlify; CHATBOT_GCP_PROJECT_ID, CHATBOT_GCP_LOCATION)",
+    "si vence: flujos D5 'Credencial de Vertex vencida (E10): que pasa en cada capa' y 'Falla del LLM (control positivo E10)'",
+    "se entera: es la única integración con Sentry.captureException (handleChatRequest.ts:1057,1389 + flush) y health (checkHealth.ts:47); el detector que la volvería alerta (detectBotIssues.ts:85) no tiene disparador; src/instrumentation.ts:15-16 descarta RESOURCE_EXHAUSTED y quota exceeded",
+    "se renueva: nueva key de la service account en GCP -> GOOGLE_VERTEX_CREDENTIALS_JSON en Netlify + redeploy; en local copiar vertex-credentials.json a cada worktree"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Brevo (BREVO_API_KEY, BREVO_FROM_EMAIL, BREVO_FROM_NAME)",
+   "pasos": [
+    "se lee: src/lib/email/brevo-service.ts:4,20,32-33; src/lib/integrations/brevo.ts:4,112-124",
+    "si vence o se revoca: transaccionales (magic link, reset, bienvenida, reportes, insights) -> brevo-service.ts:40-45 console.error + {ok:false}; email marketing -> createCampaign devuelve 'Brevo error: 401 ...' crudo (brevo.ts:81-83), syncContact false sin log (:53), sendCampaign false (:98)",
+    "se entera: no (sin Sentry; el magic link muestra éxito igual, BUG-003)",
+    "se renueva: API key nueva en Brevo -> Netlify -> redeploy; remitente verificado en Brevo (si falta BREVO_FROM_EMAIL sale desde un Gmail personal)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Resend (RESEND_API_KEY, restos)",
+   "pasos": [
+    "se lee: src/lib/email.ts:4 y src/lib/email/notify-message.ts:13-18; RESEND_FROM_EMAIL documentada pero sin lectura (email.ts:21 fija develop-agency.com)",
+    "si falta: email.ts:15-17 devuelve success:true sin enviar; notify-message.ts:14 console.log y sale. Si se revoca: el resultado de resend.emails.send no se mira (email.ts:20-26, notify-message.ts:50-60; PROBABLE que el SDK v6 devuelva {error} sin lanzar)",
+    "afecta: 'Acción requerida' (agency-actions), respuesta de ticket (lib/tickets/actions), aviso de mensaje del admin (admin-message-notification.ts:42)",
+    "se entera: no. Se renueva: key nueva en Resend y dominio verificado; recomendado migrar estos 3 envíos a Brevo"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · GA4 y Search Console (GOOGLE_SERVICE_ACCOUNT_KEY)",
+   "pasos": [
+    "se lee: src/lib/analytics.ts:95; src/lib/searchconsole.ts:102 (y settings.ts:279, módulo sin importadores)",
+    "si vence, se revoca o el JSON es inválido: catch sin log -> datos demo con isMockData (analytics.ts:104-107,196-198; searchconsole.ts:108-112,211-213) y PreviewBanner en la UI",
+    "se entera: no (ni console.error)",
+    "se renueva: key nueva de la service account en GCP, mantener su acceso a cada propiedad/sitio del cliente, env en Netlify + redeploy"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Google Business Profile (client OAuth + tokens por org)",
+   "pasos": [
+    "se lee: src/lib/integrations/google-business-profile.ts:29-35 (CLIENT_ID, CLIENT_SECRET, REDIRECT_URI) y :55-72 (gbpAccessToken, gbpRefreshToken en claro)",
+    "si el refresh token se revoca o el secret rota: :76 lanza -> :93-96 console.error y null -> Reputación cae al estado vacío, Motor de reseñas 'Sin reseñas' (listReviews :329-331) y responder 'GBP no conectado' (:281); gbpConnectedAt queda seteado y deriveConnectionStatus sigue diciendo OPERATIONAL (gbp-connection-logic.ts:163-169)",
+    "se entera: no",
+    "se renueva: un SUPER_ADMIN reabre /api/auth/google-business/start?orgId= a mano (no hay botón). Si la app OAuth está en modo Testing en Google Cloud, los refresh tokens vencen solos (HIPÓTESIS, verificar el Publishing status)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Tiendanube (client + token por org)",
+   "pasos": [
+    "se lee: src/lib/integrations/tiendanube.ts:21,33-34 (CLIENT_ID/SECRET al conectar) y :52-58 (tiendanubeAccessToken en claro)",
+    "si el token deja de valer (app desinstalada o revocada): cada fetch !ok se toma como lista vacía (:96,102,112,118) -> resumen en ceros cacheado 30 min",
+    "se entera: no",
+    "se renueva: SUPER_ADMIN impersonando -> 'Conectar mi tienda' (el cliente solo ve 401, BUG-032)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Cal.com (calComApiKey por org)",
+   "pasos": [
+    "se lee: src/lib/integrations/cal-com.ts:24-30 (en claro) y :49 (en la query string)",
+    "hoy: la API v1 (:4) está apagada según cal-com-v2.ts:4-6 -> !ok -> console.error(status) y null cacheado 10 min",
+    "se entera: no",
+    "se renueva: no aplica hasta migrar a v2 (TEC-002); LeadOS usa cal-com-v2.ts sin credencial (:9-12)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · PageSpeed (GOOGLE_PAGESPEED_API_KEY)",
+   "pasos": [
+    "se lee: src/lib/integrations/pagespeed.ts:41",
+    "si falta: console.warn y null cacheado 6 h (:42-45, :33); si se revoca o se agota la cuota: console.error y null 6 h (:63-65)",
+    "se entera: no",
+    "se renueva: key nueva en GCP -> env -> redeploy; esperar hasta 6 h o invalidar el tag pagespeed:<url>"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Telegram (AgencySettings -> TELEGRAM_BOT_TOKEN/CHAT_ID)",
+   "pasos": [
+    "se lee: src/lib/notifications/telegram.ts:41-48 (config) y :54-55 (env)",
+    "si el token se revoca: 401 -> console.error y false (:90-93); isTelegramConfigured (:108-110) sigue diciendo que está configurado",
+    "se entera: no",
+    "se renueva: desde /admin/settings sin redeploy (config-first): el único servicio rotable desde la UI"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · n8n (webhooks de contacto y API)",
+   "pasos": [
+    "se lee: src/lib/n8n.ts:19 (N8N_CONTACT_WEBHOOK_URL, servidor), src/components/sections/home/Footer.tsx:81 (NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL, navegador), n8n.ts:183-184 y :264-265 (N8N_API_URL/KEY, solo getN8nMetrics sin llamadores)",
+    "si el webhook cambia o se cae: sendLeadToN8n lanza (n8n.ts:21-34) y decide contact.ts; el pie del home muestra éxito igual (Footer.tsx:84-89)",
+    "se entera: no",
+    "se renueva: URL nueva -> env; la variable NEXT_PUBLIC se incrusta en el build y exige recompilar"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Sentry (NEXT_PUBLIC_SENTRY_DSN; SENTRY_DSN sin lector vivo)",
+   "pasos": [
+    "se lee: src/instrumentation.ts:7,34; src/instrumentation-client.ts:5; sentry.server.config.ts:9 y sentry.edge.config.ts:6 (muertos)",
+    "si falta: Sentry.init sin DSN deja el SDK inerte en silencio (debug false)",
+    "se entera: no, por definición",
+    "se renueva: DSN en Netlify con scope de build + recompilar (NEXT_PUBLIC se incrusta); SENTRY_AUTH_TOKEN/ORG/PROJECT para source maps (next.config.ts:254-260)"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · CRON_SECRET",
+   "pasos": [
+    "se lee: netlify/functions/*-cron.ts (:8, :46, :65), src/lib/cron/cron-secret.ts:41 y copias inline (regenerate-briefs/route.ts:19, send-executive-reports/route.ts:18, alerts/route.ts:5, os-follow-up/route.ts:154)",
+    "si falta en las functions: 500 'Missing URL or CRON_SECRET' logueado en Netlify; si difiere entre function y sitio: 401 y log route_error",
+    "se entera: solo en los logs de Netlify Functions",
+    "se renueva: mismo valor en sitio y functions + redeploy"
+   ]
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "nombre": "E10 · Secretos propios (HMAC y cifrado)",
+   "pasos": [
+    "se leen: EMAIL_UNSUBSCRIBE_SECRET con fallback a AUTH_SECRET (unsubscribe-token.ts:7-9); OAUTH_STATE_SECRET con fallback a AUTH_SECRET (oauth-state.ts:27-29); IMPERSONATION_SECRET -> AUTH_SECRET -> NEXTAUTH_SECRET (impersonation.ts:16-18); CRM_SECRET_KEY (encryptSecret.ts:26); MOTOR_CHANNEL_SECRET_KEY (secret-box vía sendMessage.ts:210); ONBOARDING_SECRET_KEY (credential-cipher.ts:35, sin escritores)",
+    "no vencen; al rotar: AUTH_SECRET cierra todas las sesiones y, sin EMAIL_UNSUBSCRIBE_SECRET propio, deja en 403 todos los links de baja ya enviados y los OAuth en curso; CRM/MOTOR: los secretos guardados dejan de descifrar (GCM lanza) hasta recargarlos",
+    "corrección al inventario: AUTH_SECRET sí se lee en src (unsubscribe-token.ts:9, oauth-state.ts:29, impersonation.ts:17, api/qa/login/route.ts:102), no 'solo scripts'",
+    "otras: ANTHROPIC_API_KEY fuera del lote (BUG-066: fallo cacheado 24 h sin Sentry); BLOB_READ_WRITE_TOKEN sin lecturas; AUTH_GOOGLE_ID/SECRET en auth.ts (FROZEN, UX-002)"
+   ]
   }
  ]
 }

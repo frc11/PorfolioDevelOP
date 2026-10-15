@@ -1189,3 +1189,84 @@
 - Resultado esperado: El botón apunta al mismo ADMIN que muestra Editar datos
 - Señal de falla: El botón apunta al miembro más antiguo (no ADMIN) y le resetea la contraseña a él
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-133] Reputación GBP: segunda visita dentro de la hora
+- Verifica: [BUG-141] · Prioridad: alta
+- Entorno: build de producción local (npm run start sin QA) o deploy preview, con una org de prueba
+- Precondiciones: Cuenta de Google de prueba con una ficha de Business que tenga al menos una reseña; GOOGLE_BUSINESS_PROFILE_* configuradas
+- Pasos: 1) Como SUPER_ADMIN, abrir /api/auth/google-business/start?orgId=<org de prueba> y completar el consentimiento 2) Impersonar la org y abrir /dashboard/resultados/reputacion 3) Recargar la página antes de que pase una hora
+- Resultado esperado: Las dos cargas muestran el rating y las reseñas con su fecha
+- Señal de falla: La segunda carga muestra la pantalla de error (TypeError en toISOString/toLocaleDateString)
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-134] Credenciales externas: cuándo vencen, quién se entera y cómo se renuevan (E10)
+- Verifica: [FAL-029] · Prioridad: media
+- Entorno: Consolas de cada proveedor y Netlify; para el paso de GBP, una org de prueba con Google Business conectado
+- Precondiciones: La tabla de credenciales de 01-INVENTARIO.md §6.1 a mano. No copiar ningún valor de credencial en notas ni capturas
+- Pasos: 1) Por cada fila de la tabla (Vertex y GA4/Search Console en las service accounts de Google Cloud; los clientes OAuth de login y de Google Business, con su Publishing status; Brevo; Resend; la app de Tiendanube; el bot de Telegram; 360dialog; n8n; Neon; Netlify; Sentry; Anthropic; PageSpeed): anotar si la credencial vence, cuándo, a qué email llega el aviso del proveedor y quién puede renovarla 2) Confirmar en Netlify que NEXT_PUBLIC_SENTRY_DSN existe con scope de build (sin ella Sentry queda inerte) y que CRON_SECRET es el mismo para el sitio y las functions 3) En la org de prueba: revocar el acceso de la app en la cuenta de Google y abrir Resultados → Reputación como cliente y /admin como SUPER_ADMIN
+- Resultado esperado: Cada credencial tiene fecha de vencimiento o renovación conocida y un responsable; al revocar GBP aparece algún aviso (Sentry, alerta o mensaje útil)
+- Señal de falla: Credenciales sin dueño ni fecha; con GBP revocado la pantalla queda vacía o dice «pendiente de conexión» y nadie recibe un aviso
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-135] Sentry recibe eventos en producción
+- Verifica: [FAL-030] · Prioridad: media
+- Entorno: panel de Netlify + panel de Sentry; deploy preview
+- Precondiciones: Acceso a Netlify y Sentry
+- Pasos: 1) En Netlify > Site configuration > Environment variables, verificar NEXT_PUBLIC_SENTRY_DSN con scope Builds y Functions 2) En un deploy preview, pedir GET /api/test-sentry 3) Buscar el evento en Sentry dentro de un minuto
+- Resultado esperado: Aparece el evento 'Test Sentry'
+- Señal de falla: No aparece: Sentry está inerte en ese build
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-136] Duración del cron generate-insights con todos los bots
+- Verifica: [PERF-012] · Prioridad: media
+- Entorno: Netlify → Functions → generate-insights-cron (producción)
+- Precondiciones: Con la credencial de Vertex renovada
+- Pasos: 1) Abrir los logs de las últimas ejecuciones de generate-insights-cron 2) Anotar la duración, cuántos bots procesó y si alguna ejecución terminó por timeout
+- Resultado esperado: Procesa todos los bots activos dentro del tiempo de la function
+- Señal de falla: Timeouts o ejecuciones que procesan solo los primeros bots
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-137] Tienda conectada: error cacheado tras una falla
+- Verifica: [BUG-143] · Prioridad: media
+- Entorno: build de producción local con una tienda Tiendanube de prueba conectada
+- Precondiciones: Org de prueba con Tiendanube conectada
+- Pasos: 1) Desinstalar la app de develOP en la tienda de prueba 2) Abrir /dashboard/modules/tienda-conectada (impersonando) 3) Reconectar la tienda y recargar varias veces durante 10 minutos
+- Resultado esperado: Tras reconectar se ven los datos
+- Señal de falla: Sigue el error o los ceros hasta 30 minutos
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-138] /api/test-sentry en producción
+- Verifica: [SEC-093] · Prioridad: media
+- Entorno: Producción, sin sesión
+- Precondiciones: Acceso a Sentry para mirar el evento
+- Pasos: 1) Abrir https://develop.com.ar/api/test-sentry en una ventana privada 2) Mirar en Sentry si entró un evento nuevo
+- Resultado esperado: 404 o 401, sin evento en Sentry
+- Señal de falla: 500 y un evento nuevo en Sentry por cada visita
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-139] Pie del home con n8n caído y con teclado
+- Verifica: [SEC-094] · Prioridad: media
+- Entorno: local con NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL apuntando a un webhook de prueba desactivado (responde 404/500)
+- Precondiciones: Build local
+- Pasos: 1) Abrir / y bajar hasta el pie 2) Con Tab, intentar llegar a 'Completar formulario' y abrirlo con Enter 3) Con el mouse, abrir el formulario, completarlo y enviar
+- Resultado esperado: La tarjeta se enfoca y abre con teclado; ante el error de n8n se muestra un mensaje de error
+- Señal de falla: La tarjeta no recibe foco; aparece '¡Consulta enviada!' aunque el webhook falló
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-140] Scheduled functions de Netlify invocables por URL
+- Verifica: [SEC-099] · Prioridad: media
+- Entorno: branch deploy SIN CRON_SECRET (para que no tengan efecto)
+- Precondiciones: Branch deploy con netlify/functions publicado
+- Pasos: 1) curl -i https://<branch-deploy>/.netlify/functions/cleanup-old-events-cron 2) Repetir con generate-insights-cron y send-weekly-reports-cron
+- Resultado esperado: 404 o rechazo: solo corren por schedule
+- Señal de falla: 500 con 'Missing URL or CRON_SECRET': la function corre por URL (en producción dispararía la ruta real)
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-141] Renovar la credencial de Vertex y confirmar que el chatbot vuelve a responder
+- Verifica: [BUG-145] · Prioridad: alta
+- Entorno: Consola de Google Cloud (proyecto del chatbot), Netlify (variables del sitio) y el sitio en producción; en local, cada worktree
+- Precondiciones: Acceso de owner a la service account del chatbot en Google Cloud y al sitio en Netlify. No imprimir la credencial: scripts/check-env.js la vuelca entera por stdout (SEC-071)
+- Pasos: 1) Google Cloud → IAM → Service accounts → la cuenta que usa el chatbot → Keys: ver la fecha de la key actual y si la organización tiene una política de vencimiento de keys 2) Crear una key nueva (JSON) y cargarla en Netlify como GOOGLE_VERTEX_CREDENTIALS_JSON; redeploy 3) Abrir el widget en develop.com.ar y mandar un mensaje; repetir en el bot de un cliente de prueba 4) Con el chatbot respondiendo, borrar la key vieja en Google Cloud 5) En local: reemplazar vertex-credentials.json en cada worktree que lo use (GOOGLE_APPLICATION_CREDENTIALS)
+- Resultado esperado: El bot responde en el sitio y en el bot de prueba; /api/chatbot/[slug]/health sigue en verde
+- Señal de falla: «Se cortó la respuesta / Escribí de nuevo y seguimos» (UX-025) o un error de permisos de Vertex en Sentry
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción

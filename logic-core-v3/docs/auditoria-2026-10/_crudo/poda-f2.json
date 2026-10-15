@@ -1089,6 +1089,95 @@
     "contactFormAction exportada solo para el wrapper submitContactForm (:100-105)"
    ],
    "que_rompe": "Nada si se quita markLeadAsRead; contact/page.tsx:6 usa submitContactForm."
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "instrumentation.ts",
+   "senales": [
+    "Next 16.2.9 busca instrumentation en join(appDir, '..') = src (node_modules/next/dist/build/index.js:615-616) y existe src/instrumentation.ts",
+    "sin importadores; solo importa los sentry.*.config legacy"
+   ],
+   "que_rompe": "nada en runtime; corregir docs que piden SENTRY_DSN"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "sentry.server.config.ts",
+   "senales": [
+    "solo lo importa instrumentation.ts de la raíz (muerto)",
+    "@sentry/nextjs 10.62 no lo autocarga: solo advierte (build/cjs/config/webpack.js:318-329)",
+    "lee SENTRY_DSN, que nadie más usa"
+   ],
+   "que_rompe": "nada"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "sentry.edge.config.ts",
+   "senales": [
+    "idem sentry.server.config.ts"
+   ],
+   "que_rompe": "nada"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "src/app/api/test-sentry/route.ts",
+   "senales": [
+    "sin referencias (git grep test-sentry vacío)",
+    "500 público permanente"
+   ],
+   "que_rompe": "la prueba manual de Sentry (reemplazable por una acción solo SUPER_ADMIN)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "src/lib/integrations/brevo.ts (getCampaignStats :143-166)",
+   "senales": [
+    "sin llamadores (git grep -l solo brevo.ts)",
+    "cuenta listas como destinatarios (:157) y solo softBounces (:160)"
+   ],
+   "que_rompe": "nada"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "src/lib/n8n.ts (getN8nMetrics y mock :37-355)",
+   "senales": [
+    "sin llamadores",
+    "N8N_API_URL/KEY solo los usa esto y settings.ts (módulo sin importadores según D1)"
+   ],
+   "que_rompe": "nada; mantener sendLeadToN8n (:18-35)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "src/lib/actions/gbp-connection.ts",
+   "senales": [
+    "'use server' sin importadores (acciones públicas latentes, SEC-053)"
+   ],
+   "que_rompe": "el futuro selector de sucursal P3-A.2"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "vercel.json",
+   "senales": [
+    "el hosting es Netlify (netlify.toml:1-10, AGENTS.md:21)",
+    "sus 3 crons no corren"
+   ],
+   "que_rompe": "nada, si los crons se migran a functions de Netlify"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "archivo": "src/app/api/track/route.ts",
+   "senales": [
+    "sin consumidores (git grep api/track fuera de la ruta -> vacío; control: api/chatbot en useChatbot.ts)",
+    "SEC-042"
+   ],
+   "que_rompe": "nada"
   }
  ]
 }

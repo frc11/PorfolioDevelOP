@@ -1,0 +1,207 @@
+{
+ "D7-c1/D7-L1/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: google-business-profile.ts:165-183 (getGBPMetrics envuelve fetchGBPMetrics en unstable_cache, 1 h) y :208-216 (createdAt es Date), GBPMetricsCard.tsx:124 (createdAt.toISOString() en el render del servidor) y reputacion/page.tsx:15-35 (el try solo envuelve getGBPMetrics, no el render). En next@16.2.9, unstable-cache.js:23 guarda con JSON.stringify y :168 devuelve JSON.parse: en el acierto de caché createdAt es texto y el render lanza. Hoy ninguna org tiene GBP conectado por la UI (FAL-011), así que el defecto espera al primer cliente que lo conecte.",
+  "caso_indice": 0,
+  "relacionados_ids": [
+   "FAL-011",
+   "UX-015"
+  ]
+ },
+ "D7-c1/D7-L1/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído junto con el verificador: git grep de captureException/Sentry en api/cron, api/auth, lib/integrations, lib/email, lib/notifications, analytics, searchconsole, n8n y netlify/ da cero (control: handleChatRequest.ts sí). analytics.ts:196 vuelve a datos demo, google-business-profile.ts:94 console.error y null, brevo-service.ts:41 console.error, telegram.ts:91 console.error. Es el hallazgo que pide DEC-43 cuando el código no tiene cómo enterarse de que venció una credencial. El verificador la bajó a MEDIA (las fallas se atrapan y la app no se cae) y se le sigue; el caso de VH es la revisión de vencimientos de la tabla de E10, escrito por el padre.",
+  "severidad": "MEDIA",
+  "requiere_verificacion_humana": true,
+  "caso": {
+   "titulo": "Credenciales externas: cuándo vencen, quién se entera y cómo se renuevan (E10)",
+   "entorno": "Consolas de cada proveedor y Netlify; para el paso de GBP, una org de prueba con Google Business conectado",
+   "precondiciones": "La tabla de credenciales de 01-INVENTARIO.md §6.1 a mano. No copiar ningún valor de credencial en notas ni capturas",
+   "pasos": [
+    "Por cada fila de la tabla (Vertex y GA4/Search Console en las service accounts de Google Cloud; los clientes OAuth de login y de Google Business, con su Publishing status; Brevo; Resend; la app de Tiendanube; el bot de Telegram; 360dialog; n8n; Neon; Netlify; Sentry; Anthropic; PageSpeed): anotar si la credencial vence, cuándo, a qué email llega el aviso del proveedor y quién puede renovarla",
+    "Confirmar en Netlify que NEXT_PUBLIC_SENTRY_DSN existe con scope de build (sin ella Sentry queda inerte) y que CRON_SECRET es el mismo para el sitio y las functions",
+    "En la org de prueba: revocar el acceso de la app en la cuenta de Google y abrir Resultados → Reputación como cliente y /admin como SUPER_ADMIN"
+   ],
+   "esperado": "Cada credencial tiene fecha de vencimiento o renovación conocida y un responsable; al revocar GBP aparece algún aviso (Sentry, alerta o mensaje útil)",
+   "senal_falla": "Credenciales sin dueño ni fecha; con GBP revocado la pantalla queda vacía o dice «pendiente de conexión» y nadie recibe un aviso",
+   "escribe_db_o_email": false,
+   "hallazgos": "Ninguna integración ni cron reporta a Sentry (E10)"
+  },
+  "relacionados_ids": [
+   "FAL-015",
+   "BUG-041",
+   "BUG-063",
+   "BUG-066"
+  ]
+ },
+ "D7-c1/D7-L1/H03": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: src/instrumentation.ts:7 y :34 e instrumentation-client.ts:5 leen solo NEXT_PUBLIC_SENTRY_DSN; la raíz instrumentation.ts (con sentry.server.config.ts, que lee SENTRY_DSN) no la ejecuta Next porque la app vive en src/. El verificador la bajó a MEDIA (con la variable cargada, Sentry funciona) y se le sigue: que la variable esté en Netlify es runtime → PROBABLE con su VH.",
+  "severidad": "MEDIA",
+  "confianza_padre": "PROBABLE",
+  "caso_indice": 1,
+  "relacionados_ids": [
+   "FAL-003",
+   "FAL-015"
+  ]
+ },
+ "D7-c1/D7-L1/H04": {
+  "decision": "fusionar",
+  "con": "FAL-016",
+  "nota_padre": "Mismo faltante (detect-bot-issues sin disparador en netlify.toml, vercel.json ni GitHub Actions; el verificador lo sostiene ALTA). La parte de /api/cron/alerts ya es FAL-026 (D3). Suma que la credencial de Vertex vencida nunca llega a ser una alerta."
+ },
+ "D7-c1/D7-L1/H13": {
+  "decision": "fusionar",
+  "con": "SEC-036",
+  "nota_padre": "Misma causa (tokens de terceros guardados tal cual; encryptCredential sin llamadores). Suma los callbacks OAuth del lote (google-business/callback/route.ts:49-56, tiendanube/callback/route.ts:63-69) y la API key de Cal.com en la query (cal-com.ts:49)."
+ },
+ "D7-c1/D7-L1/H11": {
+  "decision": "fusionar",
+  "con": "FAL-020",
+  "nota_padre": "Misma falta de baja del reporte semanal del chatbot; suma que el link «cambiá tus preferencias» lleva a una ruta inexistente y que no hay List-Unsubscribe. Sube a MEDIA: es un email periódico sin ninguna forma de cortarlo. El campo de opt-out en el schema queda como decisión para Valentino.",
+  "destino": {
+   "severidad": "MEDIA",
+   "titulo": "Reporte semanal del chatbot sin forma de darse de baja (el link de preferencias lleva a una ruta que no existe, sin List-Unsubscribe ni opt-out), con destinatario no determinístico y link con fallback a localhost"
+  }
+ },
+ "D7-c1/D7-L1/H14": {
+  "decision": "fusionar",
+  "con": "FAL-011",
+  "nota_padre": "Mismo faltante (sin entrada en la UI para conectar Google Business); suma que el callback no muestra el resultado y que una cuenta con varias sucursales queda sin selector (relacionado con SEC-053)."
+ },
+ "D7-c1/D7-L1/H05": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: generate-insights/route.ts:18-20 (bots isActive sin mirar la org) y regenerate-briefs/route.ts:26-29 (orgs con suscripción ACTIVE): git grep de deletedAt en api/cron y sendWeeklyReports sin resultados; archiveClient.ts:35 solo marca deletedAt.",
+  "relacionados_ids": [
+   "SEC-014",
+   "BUG-110"
+  ]
+ },
+ "D7-c1/D7-L1/H10": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: Footer.tsx:442-450 (motion.div con onClick, sin role, tabIndex ni onKeyDown) y :612-624 (label sin htmlFor junto a un input sin id).",
+  "caso_indice": 5
+ },
+ "D7-c1/D7-L1/H16": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: pagespeed.ts:77 (data: any) y :129-132 ([string, any])."
+ },
+ "D7-c1/D7-L1/H21": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: los tres handlers de netlify/functions (generate-insights-cron.ts:44, send-weekly-reports-cron.ts:63, cleanup-old-events-cron.ts:6) no reciben ni validan nada del pedido y agregan CRON_SECRET para llamar a la ruta real. Que Netlify no las exponga por URL es runtime → PROBABLE con su VH.",
+  "confianza_padre": "PROBABLE",
+  "caso_indice": 2
+ },
+ "D7-c1/D7-L1/H06": {
+  "decision": "aceptar",
+  "requiere_verificacion_humana": true,
+  "caso": {
+   "titulo": "Duración del cron generate-insights con todos los bots",
+   "entorno": "Netlify → Functions → generate-insights-cron (producción)",
+   "precondiciones": "Con la credencial de Vertex renovada",
+   "pasos": [
+    "Abrir los logs de las últimas ejecuciones de generate-insights-cron",
+    "Anotar la duración, cuántos bots procesó y si alguna ejecución terminó por timeout"
+   ],
+   "esperado": "Procesa todos los bots activos dentro del tiempo de la function",
+   "senal_falla": "Timeouts o ejecuciones que procesan solo los primeros bots",
+   "escribe_db_o_email": false,
+   "hallazgos": "generate-insights recorre todos los bots en serie"
+  },
+  "relacionados_ids": [
+   "BUG-110",
+   "DEU-048"
+  ]
+ },
+ "D7-c1/D7-L1/H07": {
+  "decision": "aceptar",
+  "caso_indice": 6,
+  "relacionados_ids": [
+   "BUG-033",
+   "UX-015"
+  ]
+ },
+ "D7-c1/D7-L1/H08": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-060"
+  ],
+  "caso": {
+   "titulo": "/api/test-sentry en producción",
+   "entorno": "Producción, sin sesión",
+   "precondiciones": "Acceso a Sentry para mirar el evento",
+   "pasos": [
+    "Abrir https://develop.com.ar/api/test-sentry en una ventana privada",
+    "Mirar en Sentry si entró un evento nuevo"
+   ],
+   "esperado": "404 o 401, sin evento en Sentry",
+   "senal_falla": "500 y un evento nuevo en Sentry por cada visita",
+   "escribe_db_o_email": false,
+   "hallazgos": "/api/test-sentry es público"
+  }
+ },
+ "D7-c1/D7-L1/H09": {
+  "decision": "aceptar",
+  "caso_indice": 5,
+  "relacionados_ids": [
+   "SEC-090",
+   "BUG-099"
+  ]
+ },
+ "D7-c1/D7-L1/H12": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-037"
+  ]
+ },
+ "D7-c1/D7-L1/H15": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "DEU-049"
+  ]
+ },
+ "D7-c1/D7-L1/H17": {
+  "decision": "aceptar"
+ },
+ "D7-c1/D7-L1/H18": {
+  "decision": "aceptar"
+ },
+ "D7-c1/D7-L1/H19": {
+  "decision": "aceptar"
+ },
+ "D7-c1/D7-L1/H20": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-053"
+  ]
+ },
+ "D7-c1/D7-L1/H22": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "UX-031"
+  ]
+ },
+ "D7-c1/D7-L1/H23": {
+  "decision": "aceptar",
+  "requiere_verificacion_humana": false,
+  "nota_padre": "Sin VH: es la lección de CLAUDE.md (pathLength en SVG complejos) aplicada al pie, verificable por lectura (Footer.tsx)."
+ },
+ "D7-c1/D7-L1/H24": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-032"
+  ]
+ },
+ "D7-c1/PADRE/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "confianza_padre": "PROBABLE"
+ }
+}

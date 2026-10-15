@@ -170,6 +170,10 @@
    "variable": "AUTH_SECRET",
    "servicio": "Auth.js (secretos propios)",
    "lecturas": [
+    "src/app/api/qa/login/route.ts:102",
+    "src/lib/email/unsubscribe-token.ts:9",
+    "src/lib/impersonation.ts:17",
+    "src/lib/security/oauth-state.ts:29",
     "scripts/qa-corridas/_p21-corrida.ts:39",
     "scripts/qa-corridas/_p23/capturas.ts:39",
     "scripts/qa-corridas/_p23/censo-ubicaciones.ts:120",
@@ -177,11 +181,7 @@
     "scripts/qa-corridas/_verify-home-aviso.ts:32",
     "scripts/qa-corridas/_verify-scroll-gap.ts:37",
     "scripts/qa-corridas/capturar-franja.ts:127",
-    "scripts/qa-corridas/corrida-1-import-csv.ts:74",
-    "scripts/qa-corridas/medir-cartera.ts:466",
-    "scripts/qa-corridas/medir-panel-setter.ts:231",
-    "scripts/qa-corridas/medir-pliegue-manual.ts:578",
-    "scripts/qa-corridas/p19-capturas.ts:28"
+    "scripts/qa-corridas/corrida-1-import-csv.ts:74"
    ],
    "lecturas_total": 17,
    "lecturas_en_tests": 2,
@@ -217,11 +217,11 @@
    "variable": "BREVO_API_KEY",
    "servicio": "Brevo",
    "lecturas": [
-    "scripts/check-env.js:119",
     "src/lib/email/brevo-service.ts:4",
     "src/lib/email/brevo-service.ts:20",
     "src/lib/integrations/brevo.ts:4",
-    "src/lib/integrations/brevo.ts:112"
+    "src/lib/integrations/brevo.ts:112",
+    "scripts/check-env.js:119"
    ],
    "lecturas_total": 5,
    "lecturas_en_tests": 2,
@@ -258,13 +258,13 @@
     "netlify/functions/cleanup-old-events-cron.ts:8",
     "netlify/functions/generate-insights-cron.ts:46",
     "netlify/functions/send-weekly-reports-cron.ts:65",
-    "scripts/check-env.js:145",
     "src/app/api/cron/alerts/route.ts:5",
     "src/app/api/cron/os-follow-up/route.ts:154",
     "src/app/api/cron/regenerate-briefs/route.ts:19",
     "src/app/api/cron/send-executive-reports/route.ts:18",
     "src/lib/cron/cron-secret.ts:11",
-    "src/lib/cron/cron-secret.ts:41"
+    "src/lib/cron/cron-secret.ts:41",
+    "scripts/check-env.js:145"
    ],
    "lecturas_total": 10,
    "lecturas_en_tests": 7,
@@ -463,6 +463,8 @@
    "servicio": "Neon / Postgres",
    "lecturas": [
     "prisma/seed-guard.ts:51",
+    "src/modules/chatbot/evals/shared.ts:52",
+    "prisma/schema.prisma:7",
     "scripts/_b14-2-cleanup-bench-prod.ts:41",
     "scripts/_b14-2-seed-bench-prod.ts:65",
     "scripts/_db-cleanup-execute.mjs:28",
@@ -471,9 +473,7 @@
     "scripts/b1-verify-setter-ownership.ts:22",
     "scripts/b2-verify-dossier.ts:33",
     "scripts/b3-qa-assign-leads.ts:22",
-    "scripts/b4-qa-construccion.ts:26",
-    "scripts/b5-qa-review-queue.ts:33",
-    "scripts/b6-qa-outreach.ts:28"
+    "scripts/b4-qa-construccion.ts:26"
    ],
    "lecturas_total": 35,
    "lecturas_en_tests": 0,
@@ -745,8 +745,8 @@
    "variable": "CHATBOT_LLM_PROVIDER",
    "servicio": "Otros (configuración)",
    "lecturas": [
-    "scripts/check-env.js:126",
-    "src/modules/chatbot/server/llm/factory.ts:22"
+    "src/modules/chatbot/server/llm/factory.ts:22",
+    "scripts/check-env.js:126"
    ],
    "lecturas_total": 2,
    "lecturas_en_tests": 0,
@@ -1093,7 +1093,6 @@
    "servicio": "Otros (configuración)",
    "lecturas": [
     "prisma/seed-guard.ts:61",
-    "scripts/check-env.js:137",
     "sentry.edge.config.ts:9",
     "sentry.server.config.ts:12",
     "src/app/api/chatbot/[slug]/config/same-origin.ts:26",
@@ -1103,7 +1102,8 @@
     "src/instrumentation-client.ts:12",
     "src/instrumentation.ts:8",
     "src/instrumentation.ts:10",
-    "src/instrumentation.ts:35"
+    "src/instrumentation.ts:35",
+    "src/instrumentation.ts:37"
    ],
    "lecturas_total": 26,
    "lecturas_en_tests": 1,
@@ -1242,11 +1242,11 @@
    "variable": "RESEND_API_KEY",
    "servicio": "Resend",
    "lecturas": [
-    "scripts/check-env.js:118",
     "src/lib/email.ts:4",
     "src/lib/email.ts:4",
     "src/lib/email/notify-message.ts:13",
-    "src/lib/email/notify-message.ts:18"
+    "src/lib/email/notify-message.ts:18",
+    "scripts/check-env.js:118"
    ],
    "lecturas_total": 5,
    "lecturas_en_tests": 1,
@@ -1257,8 +1257,8 @@
    "variable": "CHATBOT_IP_HASH_SALT",
    "servicio": "Secretos propios (firma y cifrado)",
    "lecturas": [
-    "scripts/check-env.js:140",
-    "src/modules/chatbot/server/safety/ipHash.ts:21"
+    "src/modules/chatbot/server/safety/ipHash.ts:21",
+    "scripts/check-env.js:140"
    ],
    "lecturas_total": 2,
    "lecturas_en_tests": 0,
@@ -1269,13 +1269,13 @@
    "variable": "CRM_SECRET_KEY",
    "servicio": "Secretos propios (firma y cifrado)",
    "lecturas": [
+    "src/modules/chatbot/server/crm/encryptSecret.ts:26",
     "scripts/b58-smoke.ts:131",
     "scripts/b58-smoke.ts:159",
     "scripts/b58-smoke.ts:160",
     "scripts/b58-smoke.ts:169",
     "scripts/b58-smoke.ts:172",
-    "scripts/b58-smoke.ts:180",
-    "src/modules/chatbot/server/crm/encryptSecret.ts:26"
+    "scripts/b58-smoke.ts:180"
    ],
    "lecturas_total": 7,
    "lecturas_en_tests": 0,
@@ -1423,8 +1423,8 @@
    "variable": "GOOGLE_APPLICATION_CREDENTIALS",
    "servicio": "Vertex AI (Google Cloud)",
    "lecturas": [
-    "scripts/check-env.js:128",
-    "src/modules/chatbot/server/llm/providers/google.ts:54"
+    "src/modules/chatbot/server/llm/providers/google.ts:54",
+    "scripts/check-env.js:128"
    ],
    "lecturas_total": 2,
    "lecturas_en_tests": 1,
@@ -1435,9 +1435,9 @@
    "variable": "GOOGLE_VERTEX_CREDENTIALS_JSON",
    "servicio": "Vertex AI (Google Cloud)",
    "lecturas": [
-    "scripts/check-env.js:129",
     "src/modules/chatbot/server/llm/providers/google.ts:55",
-    "src/modules/chatbot/server/llm/providers/google.ts:73"
+    "src/modules/chatbot/server/llm/providers/google.ts:73",
+    "scripts/check-env.js:129"
    ],
    "lecturas_total": 3,
    "lecturas_en_tests": 0,

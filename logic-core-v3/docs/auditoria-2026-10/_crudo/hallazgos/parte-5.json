@@ -945,6 +945,1252 @@
     "verificador": null
    },
    "estado": "vigente"
+  },
+  {
+   "id": "BUG-141",
+   "prefijo": "BUG",
+   "titulo": "Reputación se cae desde la segunda visita: unstable_cache devuelve las fechas de las reseñas como texto y GBPMetricsCard llama a toISOString()",
+   "dominio": "D7",
+   "severidad": "ALTA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/integrations/google-business-profile.ts",
+     "linea": 178,
+     "fragmento": "return unstable_cache("
+    },
+    {
+     "ruta": "src/lib/integrations/google-business-profile.ts",
+     "linea": 214,
+     "fragmento": "createdAt: parseReviewDate(review.createTime),"
+    },
+    {
+     "ruta": "src/components/dashboard/results/GBPMetricsCard.tsx",
+     "linea": 124,
+     "fragmento": "key={`${review.reviewerName}-${review.createdAt.toISOString()}-${index}`}"
+    },
+    {
+     "ruta": "node_modules/next/dist/server/web/spec-extension/unstable-cache.js",
+     "linea": 168,
+     "fragmento": "const cachedResponse = cacheEntry.value.data.body !== undefined ? JSON.parse(cacheEntry.value.data.body) : undefined;"
+    },
+    {
+     "ruta": "src/lib/integrations/pagespeed.ts",
+     "linea": 145,
+     "fragmento": "fetchedAt: new Date(),"
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente con Google Business conectado y al menos una reseña: la primera visita a Resultados › Reputación pinta bien, pero durante la hora siguiente (revalidate 3600) cada visita lee la caché, createdAt llega como string y el render lanza TypeError (también formatDate en GBPMetricsCard.tsx:135): el cliente ve la pantalla de error. En Tráfico, la fecha de PageSpeed sale como ISO crudo en el acierto (PageSpeedCard.tsx:60 llama toLocaleString sobre un string).",
+   "propuesta": "Que las funciones envueltas en unstable_cache devuelvan solo tipos JSON (fechas como ISO string) y que el componente convierta con new Date(), o rehidratar los Date al salir de la caché. Agregar un test que pase el resultado por JSON.parse(JSON.stringify()) antes de renderizar. Revisar los demás unstable_cache del repo con el mismo patrón.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-resultados.reputacion-gbp",
+    "h2.cli-resultados.velocidad-sitio",
+    "int.gbp",
+    "lib.integrations"
+   ],
+   "relacionados_ids": [
+    "FAL-011",
+    "UX-015"
+   ],
+   "previas": [],
+   "relacionados_texto": "UX-015, BUG-036, TEC-005",
+   "vh": "VH-133",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: google-business-profile.ts:165-183 (getGBPMetrics envuelve fetchGBPMetrics en unstable_cache, 1 h) y :208-216 (createdAt es Date), GBPMetricsCard.tsx:124 (createdAt.toISOString() en el render del servidor) y reputacion/page.tsx:15-35 (el try solo envuelve getGBPMetrics, no el render). En next@16.2.9, unstable-cache.js:23 guarda con JSON.stringify y :168 devuelve JSON.parse: en el acierto de caché createdAt es texto y el render lanza. Hoy ninguna org tiene GBP conectado por la UI (FAL-011), así que el defecto espera al primer cliente que lo conecte.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "ALTA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-029",
+   "prefijo": "FAL",
+   "titulo": "Ninguna integración ni cron reporta a Sentry: las fallas atrapadas terminan en console.error, null o datos demo y develOP no se entera cuando vence una credencial (E10)",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/analytics.ts",
+     "linea": 196,
+     "fragmento": "} catch { // Fall back to mock data on any API error return { ok: true, data: getMockAnalyticsData() }"
+    },
+    {
+     "ruta": "src/lib/integrations/google-business-profile.ts",
+     "linea": 94,
+     "fragmento": "console.error('[GBP] Refresh failed:', err) return null"
+    },
+    {
+     "ruta": "src/lib/email/brevo-service.ts",
+     "linea": 41,
+     "fragmento": "console.error('[Brevo] Error sending email:', error)"
+    },
+    {
+     "ruta": "src/lib/notifications/telegram.ts",
+     "linea": 91,
+     "fragmento": "console.error('[telegram] envío falló:', await response.text())"
+    },
+    {
+     "ruta": "src/app/api/cron/detect-bot-issues/route.ts",
+     "linea": 16,
+     "fragmento": "return NextResponse.json( { ok: false, error: String(error) },"
+    },
+    {
+     "ruta": "src/instrumentation.ts",
+     "linea": 49,
+     "fragmento": "export const onRequestError = Sentry.captureRequestError"
+    }
+   ],
+   "impacto": "Con el primer cliente real: si se revoca el refresh token de Google Business, vence la key de Brevo, se revoca la service account de GA4, se desinstala la app de Tiendanube o muere el token de Telegram, el cliente ve vacíos, ceros o datos demo, o simplemente no recibe emails, y develOP solo lo sabe si el cliente reclama. onRequestError solo ve excepciones no atrapadas, y todas estas se atrapan. git grep de Sentry/captureException en crons, callbacks OAuth, lib/integrations, lib/email, notifications, n8n, analytics, searchconsole y netlify/ da cero; Vertex (handleChatRequest.ts) es la única con captura y su detector automático no corre.",
+   "propuesta": "Un helper único reportIntegrationFailure(servicio, error, contexto) con Sentry.captureException y tag de servicio (más flush en handlers serverless), usado en cada catch de integraciones y crons; persistir el estado de la conexión por org cuando falle el refresh (p. ej. última falla y fecha) y mostrar 'reconectar'; un cron diario de salud de credenciales (Brevo, GA4, GBP, Telegram, PageSpeed) que avise por Telegram/email; agendar detect-bot-issues.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "int.sentry",
+    "int.brevo",
+    "int.gbp",
+    "int.ga4",
+    "int.searchconsole",
+    "int.telegram",
+    "int.tiendanube",
+    "int.calcom",
+    "int.pagespeed",
+    "int.cron.detect-bot-issues",
+    "lib.integrations"
+   ],
+   "relacionados_ids": [
+    "FAL-015",
+    "BUG-041",
+    "BUG-063",
+    "BUG-066"
+   ],
+   "previas": [],
+   "relacionados_texto": "OBS-01, BUG-041, BUG-137, BUG-066, DEU-051",
+   "vh": "VH-134",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H02",
+    "verificado_padre": true,
+    "nota_padre": "Leído junto con el verificador: git grep de captureException/Sentry en api/cron, api/auth, lib/integrations, lib/email, lib/notifications, analytics, searchconsole, n8n y netlify/ da cero (control: handleChatRequest.ts sí). analytics.ts:196 vuelve a datos demo, google-business-profile.ts:94 console.error y null, brevo-service.ts:41 console.error, telegram.ts:91 console.error. Es el hallazgo que pide DEC-43 cuando el código no tiene cómo enterarse de que venció una credencial. El verificador la bajó a MEDIA (las fallas se atrapan y la app no se cae) y se le sigue; el caso de VH es la revisión de vencimientos de la tabla de E10, escrito por el padre.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "MEDIA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-030",
+   "prefijo": "FAL",
+   "titulo": "Sentry depende de NEXT_PUBLIC_SENTRY_DSN incrustada en el build: sin ella queda inerte sin aviso, y la config raíz con SENTRY_DSN es código muerto",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/instrumentation.ts",
+     "linea": 7,
+     "fragmento": "dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,"
+    },
+    {
+     "ruta": "src/instrumentation-client.ts",
+     "linea": 5,
+     "fragmento": "dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,"
+    },
+    {
+     "ruta": "instrumentation.ts",
+     "linea": 3,
+     "fragmento": "await import('./sentry.server.config')"
+    },
+    {
+     "ruta": "sentry.server.config.ts",
+     "linea": 9,
+     "fragmento": "dsn: process.env.SENTRY_DSN,"
+    },
+    {
+     "ruta": "node_modules/next/dist/build/index.js",
+     "linea": 616,
+     "fragmento": "const rootDir = _path.default.join(pagesDir || appDir, '..');"
+    },
+    {
+     "ruta": "src/instrumentation-client.ts",
+     "linea": 10,
+     "fragmento": "replaysOnErrorSampleRate: 1.0,"
+    }
+   ],
+   "impacto": "Si la variable no estaba en el entorno de build de Netlify (la bitácora lo daba inactivo a 2026-08), todo Sentry (server, edge, navegador, onRequestError, error boundaries y la captura del chatbot) es no-op silencioso, y cargarla después sin recompilar no alcanza porque Next incrusta NEXT_PUBLIC_* en el bundle. Los documentos que piden SENTRY_DSN configuran una variable que solo leen archivos que nunca se ejecutan (Next solo carga src/instrumentation.ts; @sentry/nextjs 10.62 no autocarga sentry.*.config). Los replays 'on error' no se graban: no hay replayIntegration. El criterio L3 'errores en Sentry' no se cumple en ninguna herramienta hasta confirmar esto.",
+   "propuesta": "Confirmar NEXT_PUBLIC_SENTRY_DSN en Netlify con scope de builds y recompilar; leer en el server una DSN de runtime (SENTRY_DSN) y dejar NEXT_PUBLIC solo para el navegador; borrar instrumentation.ts raíz y sentry.server/edge.config.ts; un chequeo en el build que falle o avise si falta la DSN en producción; decidir si se quiere Replay (agregar la integración) o quitar la opción.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.sentry",
+    "lib.sentry"
+   ],
+   "relacionados_ids": [
+    "FAL-003",
+    "FAL-015"
+   ],
+   "previas": [],
+   "relacionados_texto": "OBS-01, PERF-05, PLAN-1122, PLAN-1123, PLAN-1162",
+   "vh": "VH-135",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H03",
+    "verificado_padre": true,
+    "nota_padre": "Leído: src/instrumentation.ts:7 y :34 e instrumentation-client.ts:5 leen solo NEXT_PUBLIC_SENTRY_DSN; la raíz instrumentation.ts (con sentry.server.config.ts, que lee SENTRY_DSN) no la ejecuta Next porque la app vive en src/. El verificador la bajó a MEDIA (con la variable cargada, Sentry funciona) y se le sigue: que la variable esté en Netlify es runtime → PROBABLE con su VH.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "MEDIA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-142",
+   "prefijo": "BUG",
+   "titulo": "Los crons siguen procesando clientes archivados: insights con Vertex, reporte semanal y brief para orgs con deletedAt",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/cron/generate-insights/route.ts",
+     "linea": 18,
+     "fragmento": "const bots = await prisma.botConfig.findMany({ where: { isActive: true },"
+    },
+    {
+     "ruta": "src/app/api/cron/regenerate-briefs/route.ts",
+     "linea": 27,
+     "fragmento": "where: { onboardingCompleted: true, subscription: { is: { status: 'ACTIVE' } },"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+     "linea": 35,
+     "fragmento": "(c) => c.organization.update({ where: { id: org.id }, data: { deletedAt: new Date() } }),"
+    }
+   ],
+   "impacto": "Un cliente que se va y se archiva sigue recibiendo el email de 'N insights nuevos', el reporte semanal del chatbot y, si su suscripción quedó ACTIVE, el brief y el reporte ejecutivo; develOP sigue pagando Vertex por sus bots. git grep de deletedAt en las rutas de cron, sendWeeklyReports, executive-weekly/send y detectBotIssues da cero.",
+   "propuesta": "Filtrar organization.deletedAt: null en todos los barridos de cron con un helper compartido de 'orgs activas', o pausar los bots y cancelar los envíos al archivar.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.cron.generate-insights",
+    "int.cron.regenerate-briefs",
+    "int.cron.send-weekly-reports",
+    "h4.adm-clientes",
+    "int.vertex",
+    "int.brevo"
+   ],
+   "relacionados_ids": [
+    "SEC-014",
+    "BUG-110"
+   ],
+   "previas": [],
+   "relacionados_texto": "SEC-014, BUG-121, BUG-110",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H05",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: generate-insights/route.ts:18-20 (bots isActive sin mirar la org) y regenerate-briefs/route.ts:26-29 (orgs con suscripción ACTIVE): git grep de deletedAt en api/cron y sendWeeklyReports sin resultados; archiveClient.ts:35 solo marca deletedAt.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-012",
+   "prefijo": "PERF",
+   "titulo": "generate-insights recorre todos los bots en serie con una llamada al LLM cada uno, sin orden ni reanudación, dentro de un techo de ~20-26 s",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/cron/generate-insights/route.ts",
+     "linea": 33,
+     "fragmento": "for (const bot of bots) {"
+    },
+    {
+     "ruta": "src/app/api/cron/generate-insights/route.ts",
+     "linea": 43,
+     "fragmento": "const result = await generateInsightsForBot(bot.organization.id, bot.id)"
+    },
+    {
+     "ruta": "netlify/functions/generate-insights-cron.ts",
+     "linea": 33,
+     "fragmento": "const FETCH_TIMEOUT_MS = 20_000"
+    },
+    {
+     "ruta": "netlify/functions/generate-insights-cron.ts",
+     "linea": 22,
+     "fragmento": "// TIMEOUT — aritmética. Una Netlify Function sincrona estandar no puede pasar de ~26s"
+    }
+   ],
+   "impacto": "Con más de unos pocos bots activos la corrida diaria se corta por el límite de la plataforma; como findMany no tiene orderBy ni cursor guardado, los mismos primeros bots se procesan cada día y los últimos clientes nunca reciben insights. La function informa timeout, pero nada lo reporta.",
+   "propuesta": "Procesar en lotes con cursor persistido o un fan-out de una invocación por bot (background function), orderBy estable y maxDuration explícito; medir la duración por bot.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "int.cron.generate-insights",
+    "h3.adm-chatbots",
+    "int.vertex"
+   ],
+   "relacionados_ids": [
+    "BUG-110",
+    "DEU-048"
+   ],
+   "previas": [],
+   "relacionados_texto": "RESIL-04, PERF-010, BUG-110, BUG-023",
+   "vh": "VH-136",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-143",
+   "prefijo": "BUG",
+   "titulo": "Las integraciones cachean null ante una falla transitoria: Tiendanube 30 min (y la pantalla pide 'reintentar en unos minutos'), PageSpeed 6 h, GBP 1 h, Cal.com 10 min",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/integrations/tiendanube.ts",
+     "linea": 75,
+     "fragmento": "return unstable_cache( async () => fetchStoreSummary(organizationId), ['tiendanube-summary', organizationId], { revalidate: 1800,"
+    },
+    {
+     "ruta": "src/lib/integrations/tiendanube.ts",
+     "linea": 161,
+     "fragmento": "console.error('[Tiendanube] fetchSummary error:', err) return null"
+    },
+    {
+     "ruta": "src/lib/integrations/pagespeed.ts",
+     "linea": 33,
+     "fragmento": "{ revalidate: 6 * 3600, tags: [`pagespeed:${url}`] },"
+    },
+    {
+     "ruta": "src/lib/integrations/cal-com.ts",
+     "linea": 36,
+     "fragmento": "{ revalidate: 600, tags: [`cal:${organizationId}`] },"
+    },
+    {
+     "ruta": "node_modules/next/dist/server/web/spec-extension/unstable-cache.js",
+     "linea": 23,
+     "fragmento": "body: JSON.stringify(result),"
+    }
+   ],
+   "impacto": "Un corte de segundos en la API del proveedor deja al cliente sin datos durante la ventana entera: Tienda conectada muestra 'Intentá de nuevo en unos minutos' (tienda-conectada/page.tsx:101) pero reintentar no sirve por 30 min; PageSpeed desaparece 6 h. Ninguna conexión invalida su tag (git grep de revalidateTag con tiendanube/gbp/cal/pagespeed vacío), así que tras reconectar se siguen viendo los datos viejos o el error.",
+   "propuesta": "No cachear errores: que el callback lance (o devuelva un resultado discriminado y solo se cachee el ok) y que la página atrape; revalidateTag del tag de la integración al conectar/desconectar.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-tienda.resumen-tienda",
+    "h2.cli-resultados.velocidad-sitio",
+    "h2.cli-resultados.reputacion-gbp",
+    "h2.cli-agenda",
+    "lib.integrations"
+   ],
+   "relacionados_ids": [
+    "BUG-033",
+    "UX-015"
+   ],
+   "previas": [],
+   "relacionados_texto": "BUG-033, BUG-066, UX-015",
+   "vh": "VH-137",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H07",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-093",
+   "prefijo": "SEC",
+   "titulo": "/api/test-sentry es público: cada pedido anónimo produce un 500 y un evento de Sentry",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/test-sentry/route.ts",
+     "linea": 3,
+     "fragmento": "export async function GET() { throw new Error('Test Sentry — esto debería aparecer en el dashboard de Sentry')"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 172,
+     "fragmento": "matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],"
+    },
+    {
+     "ruta": "src/instrumentation.ts",
+     "linea": 49,
+     "fragmento": "export const onRequestError = Sentry.captureRequestError"
+    }
+   ],
+   "impacto": "Con Sentry activo, un loop de curl anónimo llena la cuota de eventos y tapa los errores reales de los clientes; además es una ruta 500 permanente en producción.",
+   "propuesta": "Borrar la ruta o exigir SUPER_ADMIN y NODE_ENV distinto de production.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.sentry",
+    "h6"
+   ],
+   "relacionados_ids": [
+    "SEC-060"
+   ],
+   "previas": [],
+   "relacionados_texto": "SEC-060, PLAN-1015",
+   "vh": "VH-138",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-094",
+   "prefijo": "SEC",
+   "titulo": "El formulario del pie del home manda el lead desde el navegador al webhook público de n8n: sin servidor, sin validación, sin rate limit, sin registro en la base, y muestra éxito aunque n8n falle",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 81,
+     "fragmento": "const webhookUrl = process.env.NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL;"
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 84,
+     "fragmento": "await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form), }); setSubmitted(true);"
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 105,
+     "fragmento": "setSubmitted(true);"
+    },
+    {
+     "ruta": "src/app/page.tsx",
+     "linea": 42,
+     "fragmento": "<Footer />"
+    }
+   ],
+   "impacto": "La URL del webhook queda en el bundle público: cualquiera le manda cargas sin tope ni validación (y dispara lo que haga el workflow). Los leads del pie del home no entran a ContactSubmission, a la alerta de agencia ni a la atribución de referidos, que sí hace la action de /contact (contact.ts:100); si n8n responde 4xx/5xx la pantalla dice '¡Consulta enviada! Te contactamos en menos de 2hs' y el lead se pierde; sin webhook abre WhatsApp y también marca enviado.",
+   "propuesta": "Que el pie use la server action de contacto existente (Zod, rate limit, persistencia y n8n desde el servidor) y muestre el error real; retirar NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto.formulario-pie-home",
+    "int.n8n",
+    "modelo.ContactSubmission"
+   ],
+   "relacionados_ids": [
+    "SEC-090",
+    "BUG-099"
+   ],
+   "previas": [],
+   "relacionados_texto": "SEC-090, SEC-025",
+   "vh": "VH-139",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H09",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-025",
+   "prefijo": "A11Y",
+   "titulo": "Pie del home: 'Completar formulario' es un div con onClick (no se abre con teclado) y los labels no están asociados a sus campos",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 442,
+     "fragmento": "<motion.div whileHover={{ scale: 1.015, y: -2 }} ... onClick={() => setContactMode('form')}"
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 612,
+     "fragmento": "<label style={{"
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 624,
+     "fragmento": "<input type={field.type} placeholder={field.placeholder}"
+    }
+   ],
+   "impacto": "Un visitante con teclado o lector de pantalla no puede abrir el formulario de contacto principal del home (sin role, tabIndex ni onKeyDown) y los campos se anuncian sin nombre; el 'Enviar' no da error accesible.",
+   "propuesta": "Usar un button real para la tarjeta; label con htmlFor/id; mensajes de estado con role=status/alert.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto.formulario-pie-home"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "A11Y-022",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H10",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: Footer.tsx:442-450 (motion.div con onClick, sin role, tabIndex ni onKeyDown) y :612-624 (label sin htmlFor junto a un input sin id).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-070",
+   "prefijo": "DEU",
+   "titulo": "Identidad de envío fragmentada: dos proveedores (Brevo y Resend), cuatro remitentes en dos dominios, uno legacy, y fallback a un Gmail personal",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/email/brevo-service.ts",
+     "linea": 33,
+     "fragmento": "email: process.env.BREVO_FROM_EMAIL ?? '[Gmail personal, redactado]',"
+    },
+    {
+     "ruta": "src/lib/email.ts",
+     "linea": 21,
+     "fragmento": "from: 'develOP Agency <hello@develop-agency.com>',"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 124,
+     "fragmento": "email: params.senderEmail ?? process.env.BREVO_FROM_EMAIL ?? 'alerts@develop-agency.com',"
+    },
+    {
+     "ruta": "src/lib/email/notify-message.ts",
+     "linea": 51,
+     "fragmento": "from: 'develOP <hola@develop.com.ar>',  // ⚠️ Franco, ajustar al dominio real verificado en Resend"
+    }
+   ],
+   "impacto": "Dos keys y dos dominios que mantener vivos, con dos modos de falla distintos; si falta BREVO_FROM_EMAIL, magic link, reset, bienvenida y reportes salen desde una casilla personal de Gmail (entregabilidad y PII del desarrollador en el código); los avisos por Resend salen del dominio legacy develop-agency.com, marcado como pendiente de verificar.",
+   "propuesta": "Un solo proveedor (Brevo) y un módulo de remitentes con dominio verificado; sin fallbacks literales: si falta el remitente en producción, fallar y avisar.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "int.brevo",
+    "int.resend",
+    "lib.email"
+   ],
+   "relacionados_ids": [
+    "BUG-037"
+   ],
+   "previas": [],
+   "relacionados_texto": "CLEAN-H3, BUG-037, BUG-112",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H12",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-095",
+   "prefijo": "SEC",
+   "titulo": "Plantillas HTML de email interpolan nombres y contenido sin escapar (bienvenida, bot activado, aviso de mensaje, reset)",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/email/templates/welcome-client.ts",
+     "linea": 46,
+     "fragmento": "Hola ${input.clientName}, tu cuenta está lista"
+    },
+    {
+     "ruta": "src/lib/email/templates/bot-activated.ts",
+     "linea": 35,
+     "fragmento": "${input.botName} está listo"
+    },
+    {
+     "ruta": "src/lib/email/notify-message.ts",
+     "linea": 110,
+     "fragmento": "white-space: pre-wrap;\">${params.preview}</p>"
+    },
+    {
+     "ruta": "src/lib/email/templates/password-reset.ts",
+     "linea": 12,
+     "fragmento": "const safeName = input.clientName?.trim() || 'Hola'"
+    }
+   ],
+   "impacto": "Un nombre de empresa, de bot o un mensaje del admin con < o comillas rompe el HTML del email o inyecta marcado (enlaces engañosos); el riesgo es bajo porque los valores los carga develOP o el propio destinatario, pero weekly-report.ts:3 y executive-weekly.ts:55 ya escapan y estas no.",
+   "propuesta": "Extraer el escapeHtml existente a lib/email y aplicarlo a toda interpolación en plantillas HTML.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.email",
+    "int.brevo",
+    "int.resend"
+   ],
+   "relacionados_ids": [
+    "DEU-049"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c2, DEU-049",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H15",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-071",
+   "prefijo": "DEU",
+   "titulo": "`any` en pagespeed.ts (regla dura 'Cero any')",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/integrations/pagespeed.ts",
+     "linea": 77,
+     "fragmento": "data: any,"
+    },
+    {
+     "ruta": "src/lib/integrations/pagespeed.ts",
+     "linea": 129,
+     "fragmento": ".filter(([_, audit]: [string, any]) =>"
+    },
+    {
+     "ruta": "src/lib/integrations/pagespeed.ts",
+     "linea": 132,
+     "fragmento": ".map(([id, audit]: [string, any]) => ({"
+    }
+   ],
+   "impacto": "La respuesta de Lighthouse se parsea sin tipos: un cambio de forma rompe en runtime (atrapado y cacheado como null 6 h) en vez de en compilación.",
+   "propuesta": "Tipar con unknown y guards como hace google-business-profile.ts (parseReviewsResponse).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-resultados.velocidad-sitio",
+    "int.pagespeed"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H16",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: pagespeed.ts:77 (data: any) y :129-132 ([string, any]).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-096",
+   "prefijo": "SEC",
+   "titulo": "secret-box descifra sin fijar authTagLength ni validar iv/tag, y su validación de hex es inerte",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/crypto/secret-box.ts",
+     "linea": 63,
+     "fragmento": "key = Buffer.from(raw, 'hex')"
+    },
+    {
+     "ruta": "src/lib/crypto/secret-box.ts",
+     "linea": 97,
+     "fragmento": "const decipher = createDecipheriv(ALGORITHM, key, iv) decipher.setAuthTag(tag)"
+    },
+    {
+     "ruta": "src/lib/crypto/credential-cipher.ts",
+     "linea": 119,
+     "fragmento": "const decipher = createDecipheriv(ALGORITHM, key, iv, { authTagLength: TAG_LENGTH_BYTES,"
+    }
+   ],
+   "impacto": "Protege la API key de 360dialog por canal (sendMessage.ts:22): quien pueda escribir la base puede guardar un tag truncado y bajar la autenticación GCM; Buffer.from no lanza con hex inválido, así que una key mal formada da un error de largo confuso. credential-cipher.ts ya tiene el endurecimiento.",
+   "propuesta": "Copiar a secret-box la validación de hex, el largo de iv/tag y authTagLength de credential-cipher.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.crypto",
+    "h3.vis-whatsapp"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H17",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-097",
+   "prefijo": "SEC",
+   "titulo": "Los HMAC de bajas y del state OAuth caen a AUTH_SECRET: rotarla deja inválidos todos los links de baja ya enviados",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/email/unsubscribe-token.ts",
+     "linea": 8,
+     "fragmento": "process.env.EMAIL_UNSUBSCRIBE_SECRET?.trim() || process.env.AUTH_SECRET?.trim()"
+    },
+    {
+     "ruta": "src/lib/security/oauth-state.ts",
+     "linea": 28,
+     "fragmento": "process.env.OAUTH_STATE_SECRET?.trim() || process.env.AUTH_SECRET?.trim()"
+    }
+   ],
+   "impacto": "La misma clave firma sesiones, bajas y state OAuth. Si hay que rotar AUTH_SECRET (p. ej. por una filtración) y no se configuró EMAIL_UNSUBSCRIBE_SECRET, todos los links de 'Dejar de recibir' y 'Darme de baja' de emails ya enviados responden 403, y la baja deja de funcionar para esos destinatarios. El inventario de credenciales lo da como 'solo scripts', pero se lee en 4 archivos de src.",
+   "propuesta": "Exigir secretos dedicados en producción sin fallback y documentar la rotación con período de gracia (aceptar también la firma con la clave anterior).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.email",
+    "lib.security",
+    "h6.vis-optout",
+    "h2.cli-reportes-email"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-030",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H18",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-098",
+   "prefijo": "SEC",
+   "titulo": "CRON_SECRET se compara con === y el chequeo tiene cuatro copias; alerts solo acepta X-Cron-Secret",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/cron/cron-secret.ts",
+     "linea": 43,
+     "fragmento": "return Boolean(expectedSecret) && providedSecret === expectedSecret"
+    },
+    {
+     "ruta": "src/app/api/cron/alerts/route.ts",
+     "linea": 8,
+     "fragmento": "if (!expectedSecret || providedSecret !== expectedSecret) {"
+    },
+    {
+     "ruta": "src/app/api/cron/regenerate-briefs/route.ts",
+     "linea": 7,
+     "fragmento": "function getProvidedCronSecret(request: Request): string | null {"
+    },
+    {
+     "ruta": "src/app/api/cron/send-executive-reports/route.ts",
+     "linea": 7,
+     "fragmento": "function getProvidedCronSecret(request: Request): string | null {"
+    }
+   ],
+   "impacto": "Todas fallan cerrado (bien), pero la comparación no es de tiempo constante y las copias ya divergieron: alerts no acepta Bearer, contra lo que documenta .env.example:219.",
+   "propuesta": "timingSafeEqual en isAuthorizedCronRequest y usarlo en regenerate-briefs, send-executive-reports, alerts y os-follow-up.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.cron",
+    "int.cron.alerts",
+    "int.cron.regenerate-briefs",
+    "int.cron.send-executive-reports"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-1151, PLAN-1013",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H19",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-072",
+   "prefijo": "DEU",
+   "titulo": "oauth-state.ts no tiene test versionado y el state no está atado a la sesión ni es de un solo uso",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/security/oauth-state.ts",
+     "linea": 20,
+     "fragmento": "No persistimos nonces consumidos: el flow es SUPER_ADMIN-only, el TTL es corto (10 min), y el modelo de amenaza es anti state-swap, no anti-replay."
+    },
+    {
+     "ruta": "src/lib/security/oauth-state.ts",
+     "linea": 72,
+     "fragmento": "export function verifyOAuthState(scope: string, state: unknown): VerifyResult {"
+    }
+   ],
+   "impacto": "El cierre del state-swap (SEC-AUTH-01/02) se probó con un script fuera del repo (C:/tmp/probe-oauth-state.mjs): un cambio futuro en oauth-state o en los callbacks puede reabrirlo sin que nada falle. El state vale para cualquier sesión SUPER_ADMIN durante 10 min.",
+   "propuesta": "Test de unidad versionado (firma, expiración, scope cruzado, payload manipulado) en el estilo de idor-tokens.invariant.ts; opcional, atar el state a una cookie httpOnly del admin.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.security",
+    "int.gbp",
+    "int.tiendanube"
+   ],
+   "relacionados_ids": [
+    "SEC-053"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-1309, PLAN-1310, SEC-AUTH-01, SEC-AUTH-02",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H20",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-099",
+   "prefijo": "SEC",
+   "titulo": "Las tres scheduled functions de Netlify no validan quién las invoca: si Netlify las expusiera por URL, un anónimo dispararía insights (Vertex) y reportes por email",
+   "dominio": "D7",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "netlify/functions/generate-insights-cron.ts",
+     "linea": 44,
+     "fragmento": "export const handler = async () => {"
+    },
+    {
+     "ruta": "netlify/functions/send-weekly-reports-cron.ts",
+     "linea": 63,
+     "fragmento": "export const handler = async () => {"
+    },
+    {
+     "ruta": "netlify/functions/cleanup-old-events-cron.ts",
+     "linea": 6,
+     "fragmento": "export const handler = async () => {"
+    }
+   ],
+   "impacto": "Cada handler agrega el CRON_SECRET y llama a la ruta real. Según la documentación de Netlify las scheduled functions no se invocan por URL en producción, pero no se pudo verificar: si lo fueran, cualquiera repetiría a voluntad la generación de insights (costo de Vertex por bot) y el reporte semanal a todos los clientes.",
+   "propuesta": "Verificar con el caso manual; si responden por URL, chequear en el handler el header de invocación programada de Netlify o mover la lógica a la ruta con su propio secreto.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.cron.generate-insights",
+    "int.cron.send-weekly-reports",
+    "int.cron.cleanup-old-events"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-140",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H21",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: los tres handlers de netlify/functions (generate-insights-cron.ts:44, send-weekly-reports-cron.ts:63, cleanup-old-events-cron.ts:6) no reciben ni validan nada del pedido y agregan CRON_SECRET para llamar a la ruta real. Que Netlify no las exponga por URL es runtime → PROBABLE con su VH.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-144",
+   "prefijo": "BUG",
+   "titulo": "El pie del home conserva su número de WhatsApp de fallback ficticio, fuera de lib/whatsapp.ts que dice haberlo migrado",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 8,
+     "fragmento": "const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';"
+    },
+    {
+     "ruta": "src/lib/whatsapp.ts",
+     "linea": 11,
+     "fragmento": "`543812223344` (×2), `5493815000000` (`Footer`), `543813165293` (`/contact`)"
+    }
+   ],
+   "impacto": "Si NEXT_PUBLIC_WHATSAPP_NUMBER falta al compilar, el CTA 'WhatsApp directo' del pie lleva a un número ficticio mientras el resto del sitio usa el fallback real; el comentario de whatsapp.ts afirma una migración que en main no está.",
+   "propuesta": "Usar getWhatsappUrl/getWhatsappDigits de lib/whatsapp.ts en el pie.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto.formulario-pie-home"
+   ],
+   "relacionados_ids": [
+    "UX-031"
+   ],
+   "previas": [],
+   "relacionados_texto": "UX-031",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H22",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-013",
+   "prefijo": "PERF",
+   "titulo": "El pie del home anima pathLength sobre el path complejo del logo y blur en whileInView (lección de CLAUDE.md)",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 183,
+     "fragmento": "initial={{ pathLength: 0, opacity: 0 }} whileInView={{ pathLength: 1, opacity: 1 }}"
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 166,
+     "fragmento": "filter: ['blur(0px)', 'blur(0px)', 'blur(1.6px)'],"
+    }
+   ],
+   "impacto": "CLAUDE.md registra que pathLength en paths complejos es caro; el logo tiene cientos de puntos y se combina con filtros blur animados en cada bloque del pie (jank en móviles de gama baja).",
+   "propuesta": "strokeDashoffset con getTotalLength() como indica la lección, y animar opacidad en lugar de filter blur.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H23",
+    "verificado_padre": false,
+    "nota_padre": "Sin VH: es la lección de CLAUDE.md (pathLength en SVG complejos) aplicada al pie, verificable por lectura (Footer.tsx).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-052",
+   "prefijo": "UX",
+   "titulo": "Callback de Tiendanube sin manejo de errores y con redirecciones de error que ninguna pantalla lee",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
+     "linea": 45,
+     "fragmento": "new URL(`/dashboard?error=oauth_state_${stateCheck.reason}`, request.url),"
+    },
+    {
+     "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
+     "linea": 63,
+     "fragmento": "await prisma.organization.update({"
+    }
+   ],
+   "impacto": "Si la base falla después de canjear el code, el admin ve un 500 genérico y el token queda sin guardar; si el state vence o la conexión falla, termina en el inicio del panel sin ningún mensaje (git grep de oauth_failed/oauth_state sin lectores).",
+   "propuesta": "try/catch con mensaje, y que tienda-conectada lea ?error= como ya lee ?connected.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-tienda.conectar-tienda",
+    "int.tiendanube"
+   ],
+   "relacionados_ids": [
+    "BUG-032"
+   ],
+   "previas": [],
+   "relacionados_texto": "BUG-032",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "D7-L1",
+    "tmp": "D7-c1/D7-L1/H24",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-073",
+   "prefijo": "DEU",
+   "titulo": "Higiene de UI — D7: 15 detalles cosméticos (contraste 7, copy 5, otro 2, inline 1)",
+   "dominio": "D7",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 111,
+     "fragmento": "[inline] El componente entero usa style={{}} (decenas de bloques y handlers que mutan style) donde hay clases Tailwind equivalentes."
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 762,
+     "fragmento": "[contraste] 'Te respondemos en menos de 2hs' a rgba(255,255,255,0.18) sobre #050505, muy por debajo de 4,5:1."
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 885,
+     "fragmento": "[contraste] Links sociales a 0.2 de opacidad y 10px."
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 907,
+     "fragmento": "[contraste] Copyright a 0.1 de opacidad."
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 510,
+     "fragmento": "[contraste] Subtítulo de la tarjeta de formulario a 0.28."
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 616,
+     "fragmento": "[contraste] Labels del formulario a 0.35 y 10px."
+    },
+    {
+     "ruta": "src/components/sections/home/Footer.tsx",
+     "linea": 51,
+     "fragmento": "[copy] 'Respuesta Inmediata' contradice 'menos de 2hs' del mismo pie (:427, :580)."
+    },
+    {
+     "ruta": "src/emails/ActionRequiredEmail.tsx",
+     "linea": 57,
+     "fragmento": "[copy] 'aviso cifrado ... C-Level. No responda a este bot' promete cifrado inexistente; tuteo/usted (:51) frente al voseo del resto."
+    },
+    {
+     "ruta": "src/emails/TicketReplyEmail.tsx",
+     "linea": 56,
+     "fragmento": "[copy] Jerga ('Soporte B2B', 'ecosistema', 'equipo de ingeniería') y tuteo."
+    },
+    {
+     "ruta": "src/emails/ActionRequiredEmail.tsx",
+     "linea": 23,
+     "fragmento": "[otro] URL por defecto del dominio legacy develop-agency.com (también TicketReplyEmail.tsx:26 con un ticket de ejemplo)."
+    },
+    {
+     "ruta": "src/emails/ActionRequiredEmail.tsx",
+     "linea": 74,
+     "fragmento": "[otro] Container con width fijo de 580px (sin max-width) en un email que se lee en móvil; idem TicketReplyEmail.tsx:79."
+    },
+    {
+     "ruta": "src/lib/email/templates/welcome-client.ts",
+     "linea": 81,
+     "fragmento": "[copy] 'escribime por WhatsApp' sin número ni link; firma personal 'Franco — develOP' en plantillas de sistema (:84; bot-activated.ts:66; password-reset.ts:63)."
+    },
+    {
+     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+     "linea": 50,
+     "fragmento": "[contraste] Texto #71717a sobre #09090b (cerca de 4:1)."
+    },
+    {
+     "ruta": "src/lib/email/templates/weekly-report.ts",
+     "linea": 162,
+     "fragmento": "[contraste] Pie #71717a sobre #09090b; idem executive-weekly.ts:285."
+    },
+    {
+     "ruta": "src/lib/email/templates/weekly-report.ts",
+     "linea": 114,
+     "fragmento": "[copy] 'Charlas' en el reporte del chatbot frente a 'Conversaciones' en el ejecutivo (executive-weekly.ts:254)."
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.",
+   "propuesta": "Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto",
+    "int.email",
+    "h6.vis-optout"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "todos",
+    "tmp": "D7-c1/HIGIENE",
+    "verificado_padre": false,
+    "nota_padre": "DEC-55: higiene de UI agrupada, sin verificación individual",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-145",
+   "prefijo": "BUG",
+   "titulo": "La credencial de Vertex (service account de Google Cloud) está vencida: el chatbot de develOP y el de todos los clientes no responde",
+   "dominio": "D7",
+   "severidad": "ALTA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/llm/providers/google.ts",
+     "linea": 54,
+     "linea_fin": 56,
+     "fragmento": "la credencial se toma de GOOGLE_APPLICATION_CREDENTIALS (archivo local) o de GOOGLE_VERTEX_CREDENTIALS_JSON (Netlify)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/llm/providers/google.ts",
+     "linea": 72,
+     "linea_fin": 77,
+     "fragmento": "el cliente de Vertex se arma con el JSON inline de la service account"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+     "linea": 47,
+     "linea_fin": 54,
+     "fragmento": "el health del LLM instancia el provider y lista modelos, sin una llamada real: con la credencial vencida da ok"
+    }
+   ],
+   "impacto": "Hecho conocido (ENMIENDA-01): el chatbot funcionaba y hoy no responde en ningún entorno que use esa credencial. Es el producto central: el widget del sitio y el de cada cliente fallan en cada mensaje (UX-025), los insights, el brief y el resumen ejecutivo por Vertex también caen, y nada lo avisa (BUG-063: el health da ok; FAL-016: el detector no corre; D7-L1/H02: las integraciones no reportan a Sentry). Bloqueante para el primer cliente real y para cualquier demo.",
+   "propuesta": "Renovar la key de la service account y cargarla en Netlify (VH). Para que no vuelva a pasar en silencio: un health que haga una llamada mínima real al modelo, el detector con disparador (FAL-016) y una alerta cuando el chat acumula errores del proveedor; anotar la fecha de vencimiento de la key en la tabla de E10.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.vertex",
+    "h3.vis-widget-develop",
+    "lib.chatbot.llm"
+   ],
+   "relacionados_ids": [
+    "BUG-063",
+    "UX-025",
+    "FAL-016",
+    "SEC-064",
+    "SEC-071"
+   ],
+   "previas": [],
+   "relacionados_texto": [],
+   "vh": "VH-141",
+   "origen": {
+    "ciclo": "D7-c1",
+    "lote": "PADRE",
+    "tmp": "D7-c1/PADRE/H01",
+    "verificado_padre": true,
+    "nota_padre": "Hallazgo del padre por DEC-43: el vencimiento es un hecho conocido que declara ENMIENDA-01 (:14 y E10); no se puede verificar leyendo y la credencial no se renueva durante la corrida. Leído: google.ts:54-56 y :73-77 (la credencial sale de GOOGLE_VERTEX_CREDENTIALS_JSON en Netlify o del archivo de GOOGLE_APPLICATION_CREDENTIALS en local), checkHealth.ts:39-58 (el health solo instancia el provider: no prueba la credencial) y detectBotIssues.ts (el detector que lo volvería alerta no tiene disparador, FAL-016).",
+    "verificador": null
+   },
+   "estado": "vigente"
   }
  ]
 }

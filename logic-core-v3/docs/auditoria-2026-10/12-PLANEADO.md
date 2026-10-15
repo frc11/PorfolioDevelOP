@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 304 · parcial 128 · no empezado 258 · abandonado 10 · contradicho 14 · por cruzar 637.
+- Estado en código: hecho 332 · parcial 143 · no empezado 267 · abandonado 10 · contradicho 15 · por cruzar 584.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -7782,24 +7782,24 @@
 - Nodo(s): h6.vis-optout
 - Qué es: Cualquiera con el link puede dar de baja al contacto; replicar el HMAC de unsubscribe-executive. B11.3 lo deja para un sprint dedicado y el checklist de B-SEC.3c lo da por cerrado citando unsubscribe-token.ts (contradicción, ver notas).
 - Referencias: src/app/api/email/optout/[contactId]/route.ts:4-14 · tambien en docs/bitacora-roadmap.md:6543 · tambien en docs/bitacora-roadmap.md:6556 · tambien en docs/bitacora-roadmap.md:6822 · tambien en docs/bitacora-roadmap.md:7241 · tambien en docs/bitacora-roadmap.md:8401
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/api/email/optout/[contactId]/route.ts:77 verifyEmailContactOptOutToken antes de la DB (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-964] SEC vía 1: opt-out de email con token HMAC
 - Fuente: `docs/bitacora-roadmap.md:10995` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): h6.vis-optout
 - Qué es: La ruta de opt-out exige token por contacto; cierra IDOR/enumeración y el bug de {{contact.id}} de Brevo.
 - Referencias: src/app/api/email/optout/[contactId]/route.ts · src/lib/email/unsubscribe-token.ts · tests/e2e/20-idor-optout.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — optout/[contactId]/route.ts:77; unsubscribe-token.ts:77-109; tests/e2e/20-idor-optout.spec.ts referencia signEmailContactOptOutToken (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-965] Atributos Brevo CONTACT_ID/OPTOUT_TOKEN + e2e de opt-out
 - Fuente: `docs/bitacora-roadmap.md:11031` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): h6.vis-optout
 - Qué es: Crear atributos en Brevo para que el footer interpole el token; correr 20-idor-optout.spec.ts.
 - Referencias: también en fuente:11029
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — email-marketing/_actions.ts:114-115 manda los atributos y :155 arma el link; tests/e2e/20-idor-optout.spec.ts existe; la creación de atributos en Brevo no es verificable y SEC-039 muestra que el atributo vive en el contacto global (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 ## Transversal, plataforma y otros
 
@@ -7928,8 +7928,8 @@
 - Nodo(s): lib.otro
 - Qué es: Código muerto o futuro; si un módulo lo consume debe usar isMockData + PreviewBanner.
 - Referencias: src/lib/n8n.ts · tambien en docs/bitacora-roadmap.md:6199
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -l '\bgetN8nMetrics\b' origin/main -- logic-core-v3/src -> solo src/lib/n8n.ts:259 (control: sendLeadToN8n aparece en src/lib/actions/contact.ts:5,82) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-982] Beta de LeadOS sigue en bitacora-beta.md
 - Fuente: `docs/bitacora-roadmap.md:10803` · tipo: decision · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
@@ -7944,8 +7944,8 @@
 - Nodo(s): lib.otro
 - Qué es: No urgente: el workflow v1 sigue funcionando.
 - Referencias: también en fuente:11590
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — el payload ya trae signalsV2 (git grep -c signalsV2 en crm/buildLeadPayload.ts = 3); el workflow de n8n vive fuera del repo (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-984] Regla de gates: uno por vez y sin pipes
 - Fuente: `docs/bitacora-roadmap.md:16414` · tipo: decision · estado declarado: hecho
@@ -7985,16 +7985,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Ruta de cron copiada de las dos existentes.
 - Referencias: cleanupOldEvents · A2.4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — cleanup-old-events/route.ts:16-30 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-989] T0.3: higiene de los crons
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:15` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-06
 - Nodo(s): lib.plataforma
 - Qué es: Tipar el any del cron. Si falta CRON_SECRET al inicio de cada cron, abortar.
 - Referencias: A5.3 · A1.9a
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — cron-secret.ts:40-44 falla cerrado; las functions abortan sin CRON_SECRET (cleanup-old-events-cron.ts:10-18); git grep de ': any' en src/app/api/cron sin resultados (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-990] Invalidación de cache con varias instancias
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:51` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-06
@@ -8120,8 +8120,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: src/lib/searchconsole.ts:119 (google-auth-library duplicada) y ignoreBuildErrors; el error desaparece en L2452 e ignoreBuildErrors se retira en C1.
 - Referencias: src/lib/searchconsole.ts:119 · también en fuente:555,2132,2452,5006,5234
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — next.config.ts:31 sin ignoreBuildErrors; baseline tsc 0 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1006] CI nunca corrió y no tiene secrets
 - Fuente: `docs/bitacora-beta-3.md:505` · tipo: pendiente · estado declarado: parcial · fecha: 2026-06-30
@@ -8176,16 +8176,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: getProvidedCronSecret movido de route.ts a cron-secret.ts para que route.ts solo exporte GET+dynamic (TS2344).
 - Referencias: commit d0e8ef4 · src/app/api/cron/cleanup-old-events/cron-secret.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/cron/cron-secret.ts:24; la carpeta cleanup-old-events solo tiene route.ts y __tests__ (git ls-tree) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1013] Crons: dedupe de getProvidedCronSecret y build autoritativo
 - Fuente: `docs/bitacora-beta-3.md:1273` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-17
 - Nodo(s): lib.plataforma
 - Qué es: Otros 3 route.ts de cron con la misma duplicación; falta el next build de Franco sobre main d0e8ef4.
 - Referencias: también en fuente:1283
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — 4 rutas usan cron-secret.ts; regenerate-briefs:7, send-executive-reports:7 y os-follow-up:142 conservan copias (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1014] QA_ALLOW_LOCALHOST abriría /api/qa/login en prod
 - Fuente: `docs/bitacora-beta-3.md:2049` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-31
@@ -8200,8 +8200,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: src/app/api/test-sentry/route.ts viaja al bundle y genera un 500 no autenticado.
 - Referencias: src/app/api/test-sentry/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/app/api/test-sentry/route.ts:3-5 sin guard; proxy.ts:172 no cubre /api (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1016] Invariantes con tsx corren sin chequeo de tipos
 - Fuente: `docs/bitacora-beta-3.md:2065` · tipo: pendiente · estado declarado: pendiente (C1b) · fecha: 2026-07-31 · **ZONA-FRANCO**
@@ -8687,8 +8687,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Deuda de instrumentación: hook onRequestError faltante y global-error.js recomendado; el sentry.client.config deprecado se migró en B1.2. Siguen reportados en B12.6.
 - Referencias: sentry.server.config.ts · sentry.edge.config.ts · tambien en docs/bitacora-roadmap.md:83 · tambien en docs/bitacora-roadmap.md:311 · tambien en docs/bitacora-roadmap.md:7667
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/instrumentation.ts:49 exporta onRequestError; src/app/global-error.tsx:24 captureException (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1077] B1.1 — Diagnóstico de performance build/dev (solo medición)
 - Fuente: `docs/bitacora-roadmap.md:59` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-21
@@ -8703,8 +8703,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: IMPERSONATION_SECRET, DEVELOP_ALERTS_EMAIL y NEXT_PUBLIC_APP_URL faltan; no bloquean el build pero sí impersonation, alertas técnicas y CTAs públicos.
 - Referencias: scripts/check-env.js · tambien en docs/bitacora-roadmap.md:222
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/check-env.js:26 exige NEXT_PUBLIC_APP_URL; el código sigue con fallback localhost (unsubscribe-token.ts:58) o 'undefined' (notify-message.ts:45). El .env no se lee (secret) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1079] Pasar next build a Turbopack cuando sea estable
 - Fuente: `docs/bitacora-roadmap.md:202` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-21
@@ -8726,8 +8726,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Build con NODE_OPTIONS 8GB vía cross-env, lucide con imports nominados (-695KB), googleapis en serverExternalPackages, VaultManager con import type, sentry.client.config migrado a instrumentation-client.ts y script dev a --turbopack (build sigue webpack).
 - Referencias: package.json · next.config.ts · src/instrumentation-client.ts · src/components/admin/managers/VaultManager.tsx · src/components/sections/todo-incluido/TodoIncluidoFeatureCard.tsx · src/components/sections/modulos-opcionales/ModuloActiveCard.tsx +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — src/instrumentation-client.ts existe (migración hecha); pero package.json:7 'next dev --webpack' (no turbopack) y package.json:9 'next build --webpack' sin cross-env; NODE_OPTIONS 4096 en netlify.toml:7 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1082] @google-analytics/data a serverExternalPackages
 - Fuente: `docs/bitacora-roadmap.md:329` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-22
@@ -8798,8 +8798,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Sin la key el header de autenticación del webhook queda deshabilitado en la UI.
 - Referencias: .env.example
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — lectura en encryptSecret.ts:26 (fuera del lote); el valor del entorno no es verificable por lectura (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1091] MS-6 — Bypass del preloader en automatización (?e2e=1)
 - Fuente: `docs/bitacora-roadmap.md:4793` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-24
@@ -8862,16 +8862,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Lockeado; B12.1 deja TODO(B14) en los error boundaries.
 - Referencias: tambien en docs/bitacora-roadmap.md:7427
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — superado por B14.5: src/instrumentation.ts y captureException en error boundaries (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1099] Cablear Sentry.captureException en los error boundaries (TODO B14)
 - Fuente: `docs/bitacora-roadmap.md:7392` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
 - Nodo(s): lib.plataforma
 - Qué es: SectionErrorBoundary y src/app/error.tsx tienen el snippet comentado listo para descomentar.
 - Referencias: src/components/ui/SectionErrorBoundary.tsx · src/app/error.tsx · tambien en docs/bitacora-roadmap.md:7427 · tambien en docs/bitacora-roadmap.md:7433
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/components/ui/SectionErrorBoundary.tsx:64 y src/app/error.tsx:27 captureException (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1100] Rate-limit distribuido (Upstash Redis) — SEC-RATELIMIT-01
 - Fuente: `docs/bitacora-roadmap.md:7523` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
@@ -8934,8 +8934,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: google-auth-library + @googleapis/webmasters; −190 MB en node_modules.
 - Referencias: src/lib/integrations/google-business-profile.ts · src/lib/searchconsole.ts · src/lib/actions/settings.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — package.json:131 @googleapis/webmasters y :147 google-auth-library; git grep '"googleapis"' en package.json -> sin resultados (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1108] BP.2 Prisma fuera del bundle del browser
 - Fuente: `docs/bitacora-roadmap.md:9017` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
@@ -9043,24 +9043,24 @@
 - Nodo(s): lib.plataforma
 - Qué es: scrub-pii en todos los inits, global-error.tsx, onRequestError y captura de errores del bot.
 - Referencias: src/lib/sentry/scrub-pii.ts · src/app/global-error.tsx · src/instrumentation.ts · scripts/_b14-5-scrub-smoke.mjs
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — scrubPii en src/instrumentation.ts:21,39 e instrumentation-client.ts:17; global-error.tsx:24; onRequestError :49 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1122] Activar Sentry en prod (DSN + source maps)
 - Fuente: `docs/bitacora-roadmap.md:9630` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: Crear proyecto y setear NEXT_PUBLIC_SENTRY_DSN (y token para source maps) en Netlify; al 2026-08 seguía inactivo.
 - Referencias: también en fuente:9637 · también en fuente:13073 · también en fuente:16738
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — next.config.ts:254-260 withSentryConfig listo; .env.example:293 y :312-314 documentan las variables; el entorno no es verificable (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1123] Consolidar inits de Sentry duplicados
 - Fuente: `docs/bitacora-roadmap.md:9636` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: instrumentation.ts vs sentry.server/edge.config.ts legacy; además IPv6 y breadcrumbs de consola sin cubrir.
 - Referencias: sentry.server.config.ts · sentry.edge.config.ts · también en fuente:9717 · también en fuente:16873
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — siguen instrumentation.ts (raíz), sentry.server.config.ts:8 y sentry.edge.config.ts:5 junto a src/instrumentation.ts:6,33; las claves de IP se agregaron en scrub-pii.ts:34-38 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1124] B14.4 checklist de deploy y smoke de prod
 - Fuente: `docs/bitacora-roadmap.md:9641` · tipo: hecho-declarado · estado declarado: hecho (ejecución pendiente de Franco)
@@ -9098,8 +9098,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: searchconsole.ts TS2307 citado como baseline en muchos sprints; dejó de aparecer en COST-2b/CRON-2.
 - Referencias: src/lib/searchconsole.ts · también en fuente:10485 · también en fuente:13821
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — package.json:131 @googleapis/webmasters instalado (node_modules/@googleapis/webmasters presente); baseline tsc 0 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1129] C.0 seeds blindados contra prod
 - Fuente: `docs/bitacora-roadmap.md:10530` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17
@@ -9193,32 +9193,32 @@
 - Nodo(s): lib.plataforma
 - Qué es: Ruta /api/cron/cleanup-old-events con retención de 30 días.
 - Referencias: src/app/api/cron/cleanup-old-events/route.ts · netlify.toml
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/api/cron/cleanup-old-events/route.ts:14-29 (30 días) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1141] vercel.json y netlify.toml con crons distintos
 - Fuente: `docs/bitacora-roadmap.md:13529` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-11
 - Nodo(s): lib.plataforma
 - Qué es: vercel.json registra os-follow-up, regenerate-briefs y send-executive-reports; desincronizado.
 - Referencias: vercel.json · netlify.toml · también en fuente:13595 · también en fuente:16887
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — vercel.json:4-13 (os-follow-up, regenerate-briefs, send-executive-reports) vs netlify.toml:25-32 (generate-insights, send-weekly-reports, cleanup-old-events) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1142] CRON-2 scheduled function real de cleanup
 - Fuente: `docs/bitacora-roadmap.md:13839` · tipo: hecho-declarado · estado declarado: hecho (no verificado en prod) · fecha: 2026-07-11
 - Nodo(s): lib.plataforma
 - Qué es: netlify/functions/cleanup-old-events-cron.ts llama a la ruta Next.
 - Referencias: netlify/functions/cleanup-old-events-cron.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — netlify/functions/cleanup-old-events-cron.ts:6-41; netlify.toml:31-32 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1143] Crons sin scheduler real en Netlify
 - Fuente: `docs/bitacora-roadmap.md:13906` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-11
 - Nodo(s): lib.plataforma
 - Qué es: regenerate-briefs, send-executive-reports, detect-bot-issues, alerts y os-follow-up (este último de LeadOS) quedan sin function agendada.
 - Referencias: también en fuente:13910
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — netlify.toml:25-32 solo 3; git grep de regenerate-briefs|send-executive-reports|detect-bot-issues|cron/alerts en netlify.toml, netlify/ y .github/workflows -> sin resultados (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1144] Riesgo de envenenamiento del pool de Prisma
 - Fuente: `docs/bitacora-roadmap.md:14302` · tipo: pendiente · estado declarado: pendiente
@@ -9241,8 +9241,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Las notificaciones de lead no se envían.
 - Referencias: también en fuente:15787 · también en fuente:16507 · también en fuente:17143
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — brevo-service.ts:20-23 y telegram.ts:72-75 degradan sin credencial; isTelegramConfigured (:108) avisa en admin/leados; el valor en prod no es verificable (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1147] Rotar la key de Vertex expuesta en logs
 - Fuente: `docs/bitacora-roadmap.md:15604` · tipo: pendiente · estado declarado: pendiente
@@ -9257,31 +9257,31 @@
 - Nodo(s): lib.plataforma
 - Qué es: Function de Netlify POST con timeout 20s; cierra el bloque DESPERTAR.
 - Referencias: netlify/functions/generate-insights-cron.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — netlify/functions/generate-insights-cron.ts:33,62-66 (POST, 20 s); netlify.toml:25-26 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1149] H.1 cron real de send-weekly-reports
 - Fuente: `docs/bitacora-roadmap.md:15800` · tipo: hecho-declarado · estado declarado: hecho (verificación en prod pendiente)
 - Nodo(s): lib.plataforma
 - Qué es: Function de Netlify gemela de D.3.
 - Referencias: netlify/functions/send-weekly-reports-cron.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — netlify/functions/send-weekly-reports-cron.ts:63-108; netlify.toml:28-29 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1150] H.2 auth de crons que falla cerrado
 - Fuente: `docs/bitacora-roadmap.md:15846` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): lib.plataforma
 - Qué es: Helper compartido cron-secret.ts aplicado a generate-insights, send-weekly-reports y detect-bot-issues; se quitó el any.
 - Referencias: src/lib/cron/cron-secret.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/cron/cron-secret.ts:40-44; usado en generate-insights/route.ts:11, send-weekly-reports/route.ts:8, detect-bot-issues/route.ts:8, cleanup-old-events/route.ts:17 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1151] Consolidar auth inline de 4 crons al helper
 - Fuente: `docs/bitacora-roadmap.md:15933` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.plataforma
 - Qué es: os-follow-up (LeadOS), regenerate-briefs, send-executive-reports y alerts siguen con chequeo propio; limpieza, no vulnerabilidad.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — copias en regenerate-briefs/route.ts:7-22, send-executive-reports/route.ts:7-21, alerts/route.ts:5-8, os-follow-up/route.ts:142-155 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1152] H.4 misceláneos
 - Fuente: `docs/bitacora-roadmap.md:15940` · tipo: hecho-declarado · estado declarado: hecho
@@ -9312,8 +9312,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: IMPERSONATION_SECRET y DEVELOP_ALERTS_EMAIL faltan; check-env sale 1 en dev.
 - Referencias: también en fuente:16900
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — entorno local, no verificable por lectura del repo (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1156] Verificar la retención de logs de Netlify
 - Fuente: `docs/bitacora-roadmap.md:16895` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11
@@ -9335,8 +9335,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Sin hacer; chatbotEvent crece y COST-1 le suma un evento.
 - Referencias: T0.2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — cleanup-old-events/route.ts y netlify/functions/cleanup-old-events-cron.ts; el pendiente quedó viejo (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1159] Verificación visual automática bloqueada
 - Fuente: `docs/roadmap-pendientes.md:165` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-10
@@ -9367,8 +9367,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Sin DSN el canal Sentry es no-op; setearlo en Netlify.
 - Referencias: docs/sprints/alpha-pre-cierre-RESUMEN.md:62 · docs/sprints/infra-1-observabilidad.md:69
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — el código lee NEXT_PUBLIC_SENTRY_DSN (src/instrumentation.ts:7, instrumentation-client.ts:5); el valor en Netlify no es verificable desde el repo (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1163] STATUS.md y smoke final
 - Fuente: `docs/sprints/alpha-0-9-status-verificacion.md:5` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-17
@@ -9381,8 +9381,8 @@
 - Fuente: `docs/sprints/alpha-pre-cierre-RESUMEN.md:61` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-17
 - Nodo(s): lib.plataforma
 - Qué es: AUTH_SECRET, NEXTAUTH_URL, GOOGLE_APPLICATION_CREDENTIALS, CHATBOT_GCP_PROJECT_ID, BREVO_API_KEY, DEVELOP_ALERTS_EMAIL (solo nombres).
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — no verificable sin leer el .env; check-env.js:41-68 las lista pero no corre en el build (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1165] Backups de Neon sin verificar
 - Fuente: `docs/sprints/alpha-pre-cierre-RESUMEN.md:63` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-17
@@ -9404,8 +9404,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: npm run build falla (@googleapis/webmasters faltante, set-state-in-effect en PreloaderContext) y hace OOM; tsc baseline searchconsole.ts:119.
 - Referencias: raiz:lane-resultados-redesign-log.md:191 · docs/sprints/p3-a-1-gbp-connection.md:23 · docs/sprints/infra-1-observabilidad.md:50 · docs/sprints/utm-1-captura.md:223
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — @googleapis/webmasters resuelto (package.json:131, tsc 0); el OOM del build sigue (no se corre build en esta auditoría) y eslint tiene 102 errores (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1168] Borrar org seed san-miguel
 - Fuente: `STATUS.md:151` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-21
@@ -9987,8 +9987,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Chevron propio, color-scheme dark y listbox con un select nativo oculto sincronizado. Cero cambios en los 42 call sites, con portal y teclado completo.
 - Referencias: src/components/ui/Select.tsx · src/lib/use-is-client.ts · tambien en Olme/Chatbot_ registro de cambios.md:24
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -c listbox src/components/ui/Select.tsx = 12 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1241] Merge de Inteligencia y Configuración
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:29` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-20
@@ -10114,8 +10114,8 @@
 - Nodo(s): lib.transversal
 - Qué es: La lógica del módulo chatbot se copió a src/lib/csv en lugar de importarla cruzando la frontera de módulo. Si cambia el escape, hay que sincronizar las dos copias.
 - Referencias: src/lib/csv/csv-escape.ts · src/modules/chatbot/server/ · tambien en Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:89
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — git ls-tree de logic-core-v3/src/lib/csv -> vacío; la única copia es src/modules/chatbot/server/leads/csv/csvEscape.ts (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1257] Rama b0-isolation-motor-chatbot sin mergear a main
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:81` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-13
@@ -10138,8 +10138,8 @@
 - Nodo(s): lib.transversal
 - Qué es: No se migró el boundary del setter porque su 'Volver al inicio' apunta a /dashboard; se replicó a mano el par logger + Sentry.
 - Referencias: SectionErrorBoundary · src/app/(protected)/setter/error.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/app/(protected)/setter/error.tsx:32 captureException propio (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1260] B1.A TextArea promovida al kit UI
 - Fuente: `docs/bitacora-beta-3.md:538` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-01
@@ -10226,8 +10226,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Las 3 copias (telegram.ts del chatbot, leados/notify.ts y el cron os-follow-up) pasan por un único sender; notifyTelegramOptional queda como wrapper.
 - Referencias: src/lib/notifications/telegram.ts · src/lib/leados/notify.ts · src/app/api/cron/os-follow-up/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep api.telegram.org origin/main -- logic-core-v3/src -> solo src/lib/notifications/telegram.ts:79 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1271] Línea base e2e pre-rediseño: 32 passed / 10 failed / 8 skipped
 - Fuente: `docs/bitacora-beta.md:1639` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-25
@@ -10449,8 +10449,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Inventario de 70 server actions y 33 API routes; C1 (tiendanube/callback pre-auth) y C2 (replyTicketAction post-auth) confirmados en runtime; fragilidades F1-F8 mapeadas y scope de B11.1-B11.3 definido.
 - Referencias: src/app/api/auth/tiendanube/callback/route.ts · src/actions/ticket-actions.ts · src/app/api/auth/google-business/callback/route.ts · src/lib/actions/projects.ts · src/actions/agency-actions.ts · src/lib/actions/contact.ts +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — C1 cerrado: tiendanube/callback/route.ts:28-31 exige sesión SUPER_ADMIN (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1299] Notification.organizationId sigue nullable
 - Fuente: `docs/bitacora-roadmap.md:6719` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
@@ -10465,8 +10465,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Helpers assertTicketBelongsToOrg/assertProjectBelongsToOrg; tiendanube callback con auth + SUPER_ADMIN + audit y start solo SUPER_ADMIN; requireSuperAdmin en markLeadAsRead y en las 7 actions de projects.ts; rename a getGlobalBotsOverviewStats.
 - Referencias: src/lib/auth/assert-ownership.ts · src/modules/chatbot/server/admin/getGlobalBotsOverviewStats.ts · src/app/api/auth/tiendanube/callback/route.ts · src/app/api/auth/tiendanube/start/route.ts · src/actions/ticket-actions.ts · src/actions/agency-actions.ts +6
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — tiendanube/callback/route.ts:28-31 y :72-81 (auth + audit); tiendanube/start/route.ts:10-13 SUPER_ADMIN; src/lib/auth/assert-ownership.ts existe (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1301] B11.6 — BusinessMetric y PageView con organizationId
 - Fuente: `docs/bitacora-roadmap.md:7070` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
@@ -10481,8 +10481,8 @@
 - Nodo(s): lib.transversal
 - Qué es: C1 y C2 cerrados con evidencia runtime; F5, F6 y F8 cerrados; controles de regresión OK; F2, F3, F4 y F7 diferidos. Cuenta F1 como cerrado aunque solo re-probó el curl anónimo (ver notas).
 - Referencias: src/app/api/auth/tiendanube/callback/route.ts · src/actions/ticket-actions.ts · src/actions/agency-actions.ts · src/app/api/track/route.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — C1 cerrado (callback :28-31); F1 cerrado luego por B-SEC.3b (callback :42-47); F7 cerrado por SEC vía 1 (optout/route.ts:77) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1303] B12.1 — Error boundaries + loading skeletons
 - Fuente: `docs/bitacora-roadmap.md:7351` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-25
@@ -10529,32 +10529,32 @@
 - Nodo(s): lib.transversal
 - Qué es: Helper oauth-state.ts (orgId + nonce + expiración de 10 min, HMAC con scope); getAuthUrl firma y los callbacks verifican antes de tocar la DB; cierra SEC-AUTH-01/02 y el state-swap (F1 de B11.0).
 - Referencias: src/lib/security/oauth-state.ts · src/lib/integrations/tiendanube.ts · src/app/api/auth/tiendanube/callback/route.ts · src/lib/integrations/google-business-profile.ts · src/app/api/auth/google-business/callback/route.ts · pendiente originado en docs/bitacora-roadmap.md:6490 +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — oauth-state.ts:50-59 y :72-120; tiendanube.ts:20; google-business-profile.ts:44; verificación antes de la DB en google-business/callback/route.ts:30-35 y tiendanube/callback/route.ts:42-47 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1309] Sin anti-replay duro en el state OAuth
 - Fuente: `docs/bitacora-roadmap.md:8180` · tipo: decision · estado declarado: hecho
 - Nodo(s): lib.transversal
 - Qué es: No se persisten nonces consumidos; el TTL de 10 min y el flujo SUPER_ADMIN-only acotan el riesgo.
 - Referencias: src/lib/security/oauth-state.ts · tambien en docs/bitacora-roadmap.md:8253
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/security/oauth-state.ts:20-21 decisión documentada; TTL 10 min en :24 (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1310] Probar el state firmado en un flujo OAuth real (sandbox)
 - Fuente: `docs/bitacora-roadmap.md:8284` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: Confirmar que Tiendanube y Google no truncan ni modifican el state y cubrir refresh o doble click durante el consent.
 - Referencias: src/lib/security/oauth-state.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -l -E 'verifyOAuthState|signOAuthState' origin/main -- logic-core-v3 -> solo docs y 5 archivos de código, ningún test; git grep probe-oauth-state fuera de docs -> sin resultados (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1311] B-SEC.3c — Verificación del cierre del state-swap de Google Business
 - Fuente: `docs/bitacora-roadmap.md:8325` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): lib.transversal
 - Qué es: Report-only sin cambios de código; re-corre el probe 9/9, aclara que en B11.0 el hallazgo era F1 (no F3) y actualiza el checklist heredado de B-SEC.1.
 - Referencias: src/app/api/auth/google-business/callback/route.ts:27-33 · C:/tmp/probe-oauth-state.mjs (fuera del repo)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — google-business/callback/route.ts:27-35; el probe vive fuera del repo (sin test versionado) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1312] B13.1 — Tokens, BrandMark y sidebar/tabs/breadcrumb unificados
 - Fuente: `docs/bitacora-roadmap.md:8409` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
@@ -10622,8 +10622,8 @@
 - Fuente: `docs/bitacora-roadmap.md:9002` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-26
 - Nodo(s): lib.transversal
 - Qué es: No se probó en runtime contra Google; confirmar callback OAuth de GBP y query de Search Console.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — sin test ni registro de prueba en el repo; requiere runtime (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1321] B14.1 rate limiter persistente en Neon
 - Fuente: `docs/bitacora-roadmap.md:9326` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-05-26
@@ -10638,15 +10638,15 @@
 - Nodo(s): lib.transversal
 - Qué es: Onboarding real (KB, admin, allowedDomains), embed + CORS real, activar plan/billing en BotConfig, notificaciones Sentry→Slack/email.
 - Referencias: también en fuente:15621 (Matsu pinchó, cero tráfico)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — lo de Sentry -> Slack/email es configuración del panel de Sentry, no del repo, y la DSN no está verificada; el resto es de otros dominios (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1323] CC.1 auditoría de lo que configura el cliente
 - Fuente: `docs/bitacora-roadmap.md:9756` · tipo: hecho-declarado · estado declarado: hecho
 - Nodo(s): lib.transversal
 - Qué es: Único tecnicismo en el dashboard: CRM (webhook n8n); KB y fromEmail dudosos.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — report-only sin cambios de código; la config CRM vive en el admin (flujo D5 'Configurar y probar la integración CRM (n8n)': IntegrationsTab.tsx:36) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1324] Hydration mismatch en TransitionContext/preloader
 - Fuente: `docs/bitacora-roadmap.md:10021` · tipo: pendiente · estado declarado: pendiente
@@ -10707,8 +10707,8 @@
 - Fuente: `docs/bitacora-roadmap.md:12527` · tipo: pendiente · estado declarado: pendiente
 - Nodo(s): lib.transversal
 - Qué es: GBP, Tiendanube y Cal.com guardan tokens sin cifrar; sprint SEC dedicado.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — mismas líneas que PLAN-1340; cal-com.ts:28 lee calComApiKey en claro (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1332] Badge 'Generado por IA'
 - Fuente: `docs/roadmap-pendientes.md:72` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
@@ -10762,8 +10762,8 @@
 - Nodo(s): lib.transversal
 - Qué es: agency-dashboard -> /admin/clients/[id] con tabs, alertas por cron, personalización limitada del cliente, E2E como estrategia principal sin unit tests.
 - Referencias: tambien en :48-:50
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — las alertas por cron existen como ruta (detect-bot-issues/route.ts:7) pero sin disparador (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1339] Próximos pasos mayo-agosto
 - Fuente: `docs/sprints/alpha-RESUMEN-FINAL.md:66` · tipo: promesa · estado declarado: pendiente · fecha: 2026-05
@@ -10778,8 +10778,8 @@
 - Nodo(s): lib.transversal
 - Qué es: GBP, Tiendanube, Cal.com y credenciales de onboarding sin cifrar; sprint SEC dedicado (AES-GCM como CRM).
 - Referencias: docs/roadmap-pendientes.md:175 (CO-7 + PD-1)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — google-business/callback/route.ts:52-53, tiendanube/callback/route.ts:67 escriben en claro; encryptCredential sin llamadores en src (git grep de credential-cipher fuera de src/lib/crypto -> vacío) (D7-c1, lector D7-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1341] Commits delegados al humano
 - Fuente: `docs/sprints/p3-a-1-gbp-connection.md:148` · tipo: pendiente · estado declarado: pendiente

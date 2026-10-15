@@ -1,0 +1,3966 @@
+{
+ "dominio": "D7",
+ "ciclo": "D7-c1",
+ "lote": "D7-L1",
+ "run": "wf_8b880417-ca5",
+ "fecha": "2026-10-15T18:18:18.375Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "instrumentation.ts",
+    "lineas_total": 8,
+    "leido_completo": true
+   },
+   {
+    "ruta": "netlify/functions/cleanup-old-events-cron.ts",
+    "lineas_total": 41,
+    "leido_completo": true
+   },
+   {
+    "ruta": "netlify/functions/generate-insights-cron.ts",
+    "lineas_total": 104,
+    "leido_completo": true
+   },
+   {
+    "ruta": "netlify/functions/send-weekly-reports-cron.ts",
+    "lineas_total": 108,
+    "leido_completo": true
+   },
+   {
+    "ruta": "sentry.edge.config.ts",
+    "lineas_total": 13,
+    "leido_completo": true
+   },
+   {
+    "ruta": "sentry.server.config.ts",
+    "lineas_total": 16,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/auth/google-business/callback/route.ts",
+    "lineas_total": 87,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/auth/google-business/start/route.ts",
+    "lineas_total": 16,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
+    "lineas_total": 86,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/auth/tiendanube/start/route.ts",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/alerts/route.ts",
+    "lineas_total": 19,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/cleanup-old-events/route.ts",
+    "lineas_total": 30,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/detect-bot-issues/route.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/generate-insights/route.ts",
+    "lineas_total": 96,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/regenerate-briefs/route.ts",
+    "lineas_total": 56,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/send-executive-reports/route.ts",
+    "lineas_total": 37,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/send-weekly-reports/route.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/dev/email-preview/executive-weekly/route.ts",
+    "lineas_total": 124,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+    "lineas_total": 105,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
+    "lineas_total": 112,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/test-sentry/route.ts",
+    "lineas_total": 5,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/track/route.ts",
+    "lineas_total": 46,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/components/sections/home/Footer.tsx",
+    "lineas_total": 924,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/emails/ActionRequiredEmail.tsx",
+    "lineas_total": 143,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/emails/TicketReplyEmail.tsx",
+    "lineas_total": 153,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/instrumentation-client.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/instrumentation.ts",
+    "lineas_total": 49,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/actions/gbp-connection.ts",
+    "lineas_total": 58,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/analytics.ts",
+    "lineas_total": 200,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/cron/cron-secret.ts",
+    "lineas_total": 44,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/crypto/credential-cipher.ts",
+    "lineas_total": 127,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/crypto/resolve-credential.ts",
+    "lineas_total": 25,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/crypto/secret-box.ts",
+    "lineas_total": 112,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email.ts",
+    "lineas_total": 31,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/admin-message-notification.ts",
+    "lineas_total": 52,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/brevo-service.ts",
+    "lineas_total": 47,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/notify-message.ts",
+    "lineas_total": 127,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/templates/bot-activated.ts",
+    "lineas_total": 102,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/templates/executive-weekly.ts",
+    "lineas_total": 322,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/templates/password-reset.ts",
+    "lineas_total": 90,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/templates/weekly-report.ts",
+    "lineas_total": 175,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/templates/welcome-client.ts",
+    "lineas_total": 119,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/email/unsubscribe-token.ts",
+    "lineas_total": 124,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/brevo.ts",
+    "lineas_total": 166,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/cal-com-v2.ts",
+    "lineas_total": 214,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/cal-com.ts",
+    "lineas_total": 111,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/gbp-connection-logic.ts",
+    "lineas_total": 273,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/gbp-connection.ts",
+    "lineas_total": 54,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/gbp-discovery.ts",
+    "lineas_total": 119,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/google-business-profile.ts",
+    "lineas_total": 367,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/pagespeed.ts",
+    "lineas_total": 149,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/integrations/tiendanube.ts",
+    "lineas_total": 164,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/mask-secret.ts",
+    "lineas_total": 7,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/n8n.ts",
+    "lineas_total": 355,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/notifications/telegram.ts",
+    "lineas_total": 118,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/searchconsole.ts",
+    "lineas_total": 215,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/security/oauth-state.ts",
+    "lineas_total": 120,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/sentry/scrub-pii.ts",
+    "lineas_total": 185,
+    "leido_completo": true
+   },
+   {
+    "ruta": "vercel.json",
+    "lineas_total": 16,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [
+   {
+    "archivo": "src/app/api/auth/google-business/start/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/auth/google-business/start?orgId=",
+    "auth": "si",
+    "evidencia_auth": "start/route.ts:6-9 auth() y 401 si no es SUPER_ADMIN",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "start/route.ts:7 session.user.role !== 'SUPER_ADMIN'",
+    "org_de": "parametro",
+    "evidencia_org": "start/route.ts:12 searchParams.get('orgId') (herramienta de admin sobre cualquier org; no valida que la org exista hasta el callback)",
+    "validacion": "manual",
+    "evidencia_validacion": "start/route.ts:13 solo presencia de orgId",
+    "rate_limit": "no",
+    "notas": "Ninguna pantalla enlaza esta ruta (git grep de auth/google-business/start sin resultados fuera de la ruta): hay que tipear la URL."
+   },
+   {
+    "archivo": "src/app/api/auth/google-business/callback/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/auth/google-business/callback",
+    "auth": "si",
+    "evidencia_auth": "callback/route.ts:14-17 auth() + SUPER_ADMIN + user.id",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "callback/route.ts:15",
+    "org_de": "parametro",
+    "evidencia_org": "callback/route.ts:30-36 orgId sale del state firmado con HMAC (oauth-state.ts:72-120), verificado antes de tocar la DB; no está atado a la sesión del admin",
+    "validacion": "manual",
+    "evidencia_validacion": "callback/route.ts:23-25 presencia de code/state; :30-35 firma, scope y expiración",
+    "rate_limit": "no",
+    "notas": "Tokens guardados en claro (:52-53). Resultado ?gbp= y ?error= sin lector en la UI."
+   },
+   {
+    "archivo": "src/app/api/auth/tiendanube/start/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/auth/tiendanube/start?orgId=",
+    "auth": "si",
+    "evidencia_auth": "start/route.ts:10-13 auth() + 401",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "start/route.ts:11",
+    "org_de": "parametro",
+    "evidencia_org": "start/route.ts:16 searchParams.get('orgId')",
+    "validacion": "manual",
+    "evidencia_validacion": "start/route.ts:17 solo presencia",
+    "rate_limit": "no",
+    "notas": "El único link es ConnectStoreCard.tsx:39 del panel del cliente: el cliente recibe 401 JSON (BUG-032); solo funciona con un SUPER_ADMIN impersonando."
+   },
+   {
+    "archivo": "src/app/api/auth/tiendanube/callback/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/auth/tiendanube/callback",
+    "auth": "si",
+    "evidencia_auth": "callback/route.ts:28-31 auth() + SUPER_ADMIN + user.id",
+    "rol": "SUPER_ADMIN",
+    "evidencia_rol": "callback/route.ts:29",
+    "org_de": "parametro",
+    "evidencia_org": "callback/route.ts:42-48 orgId del state firmado (HMAC, scope tiendanube:v1, TTL 10 min)",
+    "validacion": "manual",
+    "evidencia_validacion": "callback/route.ts:37-39 presencia; :42-47 firma; tiendanube.ts:43 respuesta del token sin validar",
+    "rate_limit": "no",
+    "notas": "Sin try/catch en :58-81; errores redirigen a /dashboard?error= que nadie lee."
+   },
+   {
+    "archivo": "src/app/api/cron/alerts/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/cron/alerts",
+    "auth": "si",
+    "evidencia_auth": "alerts/route.ts:5-10 CRON_SECRET por header X-Cron-Secret, falla cerrado",
+    "rol": "maquina (CRON_SECRET)",
+    "evidencia_rol": "alerts/route.ts:8 comparación con ===",
+    "org_de": "no-aplica",
+    "evidencia_org": "barrido global de orgs (lib/alerts.ts:195, fuera del lote)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "No figura en netlify.toml, vercel.json ni GitHub Actions: nunca corre. Solo acepta X-Cron-Secret (no Bearer)."
+   },
+   {
+    "archivo": "src/app/api/cron/cleanup-old-events/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/cron/cleanup-old-events",
+    "auth": "si",
+    "evidencia_auth": "route.ts:17 isAuthorizedCronRequest (cron-secret.ts:40-44)",
+    "rol": "maquina (CRON_SECRET)",
+    "evidencia_rol": "cron-secret.ts:43",
+    "org_de": "no-aplica",
+    "evidencia_org": "purga global por antigüedad (cleanupOldEvents, fuera del lote)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "Agendada en netlify.toml:31-32. Devuelve error.message en el 500 (:25-28)."
+   },
+   {
+    "archivo": "src/app/api/cron/detect-bot-issues/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/cron/detect-bot-issues",
+    "auth": "si",
+    "evidencia_auth": "route.ts:8 isAuthorizedCronRequest",
+    "rol": "maquina (CRON_SECRET)",
+    "evidencia_rol": "cron-secret.ts:43",
+    "org_de": "no-aplica",
+    "evidencia_org": "barrido global (runAlertDetector, fuera del lote)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "Sin disparador en ningún registrador. 500 con String(error) (:16-19)."
+   },
+   {
+    "archivo": "src/app/api/cron/generate-insights/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/cron/generate-insights",
+    "auth": "si",
+    "evidencia_auth": "route.ts:11 isAuthorizedCronRequest",
+    "rol": "maquina (CRON_SECRET)",
+    "evidencia_rol": "cron-secret.ts:43",
+    "org_de": "no-aplica",
+    "evidencia_org": "route.ts:18-21 todos los bots activos (sin filtro de org archivada ni de plan); cada llamada pasa bot.organization.id",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "Agendada vía netlify.toml:25-26. findMany sin try/catch; loop secuencial con LLM."
+   },
+   {
+    "archivo": "src/app/api/cron/regenerate-briefs/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/cron/regenerate-briefs",
+    "auth": "si",
+    "evidencia_auth": "route.ts:18-24 copia inline del chequeo (falla cerrado)",
+    "rol": "maquina (CRON_SECRET)",
+    "evidencia_rol": "route.ts:22",
+    "org_de": "no-aplica",
+    "evidencia_org": "route.ts:26-32 orgs con onboarding completo y suscripción ACTIVE (sin filtro deletedAt)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "Solo registrada en vercel.json:8; maxDuration 300 (:5) no aplica en Netlify."
+   },
+   {
+    "archivo": "src/app/api/cron/send-executive-reports/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/cron/send-executive-reports",
+    "auth": "si",
+    "evidencia_auth": "route.ts:17-23 copia inline (falla cerrado)",
+    "rol": "maquina (CRON_SECRET)",
+    "evidencia_rol": "route.ts:21",
+    "org_de": "no-aplica",
+    "evidencia_org": "barrido en sendExecutiveWeeklyReports (fuera del lote)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "Solo en vercel.json:12 (BUG-047)."
+   },
+   {
+    "archivo": "src/app/api/cron/send-weekly-reports/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/cron/send-weekly-reports",
+    "auth": "si",
+    "evidencia_auth": "route.ts:8 isAuthorizedCronRequest",
+    "rol": "maquina (CRON_SECRET)",
+    "evidencia_rol": "cron-secret.ts:43",
+    "org_de": "no-aplica",
+    "evidencia_org": "barrido global en sendWeeklyReports (fuera del lote)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no-aplica",
+    "notas": "Agendada en netlify.toml:28-29."
+   },
+   {
+    "archivo": "src/app/api/dev/email-preview/executive-weekly/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/dev/email-preview/executive-weekly?variant=",
+    "auth": "no",
+    "evidencia_auth": "route.ts:107-109 devuelve 404 si NODE_ENV === 'production'; en dev no pide sesión",
+    "rol": "ninguno (solo dev)",
+    "evidencia_rol": "route.ts:107",
+    "org_de": "no-aplica",
+    "evidencia_org": "datos mock fijos (:14-104)",
+    "validacion": "manual",
+    "evidencia_validacion": "route.ts:112-113 variante buscada en un mapa cerrado",
+    "rate_limit": "no",
+    "notas": "Herramienta de visual-qa; sin datos reales."
+   },
+   {
+    "archivo": "src/app/api/email/optout/[contactId]/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/email/optout/[contactId]?token=",
+    "auth": "no",
+    "evidencia_auth": "route.ts:77 token HMAC por contacto (verifyEmailContactOptOutToken, unsubscribe-token.ts:97-109) antes de la DB",
+    "rol": "anónimo con token",
+    "evidencia_rol": "route.ts:77-87 403 sin token válido",
+    "org_de": "no-aplica",
+    "evidencia_org": "route.ts:91-94 updateMany por id de contacto; el token ata el contactId",
+    "validacion": "manual",
+    "evidencia_validacion": "route.ts:71,77 HMAC timingSafeEqual",
+    "rate_limit": "no",
+    "notas": "La baja se ejecuta en el GET (BUG-061); sin try/catch en :91."
+   },
+   {
+    "archivo": "src/app/api/email/unsubscribe-executive/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/email/unsubscribe-executive?org=&token=",
+    "auth": "no",
+    "evidencia_auth": "route.ts:62 verifyUnsubscribeToken (HMAC por org, unsubscribe-token.ts:39-51)",
+    "rol": "anónimo con token",
+    "evidencia_rol": "route.ts:62-72 403",
+    "org_de": "parametro",
+    "evidencia_org": "route.ts:41 org del query, protegida por la firma (:62)",
+    "validacion": "manual",
+    "evidencia_validacion": "route.ts:50-72",
+    "rate_limit": "no",
+    "notas": "GET escribe la baja (BUG-061)."
+   },
+   {
+    "archivo": "src/app/api/email/unsubscribe-executive/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/email/unsubscribe-executive?org=&token=",
+    "auth": "no",
+    "evidencia_auth": "route.ts:110-112 mismo handle con HMAC",
+    "rol": "anónimo con token",
+    "evidencia_rol": "route.ts:62",
+    "org_de": "parametro",
+    "evidencia_org": "route.ts:41 (firmada)",
+    "validacion": "manual",
+    "evidencia_validacion": "route.ts:50-72",
+    "rate_limit": "no",
+    "notas": "RFC 8058 one-click."
+   },
+   {
+    "archivo": "src/app/api/test-sentry/route.ts",
+    "simbolo": "GET",
+    "tipo": "route-handler",
+    "url": "/api/test-sentry",
+    "auth": "no",
+    "evidencia_auth": "route.ts:3-5 sin chequeo; el proxy no cubre /api (proxy.ts:172)",
+    "rol": "ninguno",
+    "evidencia_rol": "sin guard",
+    "org_de": "no-aplica",
+    "evidencia_org": "no toca datos",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no",
+    "notas": "Lanza siempre: 500 + evento de Sentry por pedido anónimo."
+   },
+   {
+    "archivo": "src/app/api/track/route.ts",
+    "simbolo": "OPTIONS",
+    "tipo": "route-handler",
+    "url": "/api/track",
+    "auth": "no",
+    "evidencia_auth": "route.ts:5-7 devuelve 204",
+    "rol": "ninguno",
+    "evidencia_rol": "sin guard",
+    "org_de": "no-aplica",
+    "evidencia_org": "no toca datos",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "src/app/api/track/route.ts",
+    "simbolo": "POST",
+    "tipo": "route-handler",
+    "url": "/api/track",
+    "auth": "si",
+    "evidencia_auth": "route.ts:11-14 auth() y 401",
+    "rol": "cualquier usuario logueado",
+    "evidencia_rol": "sin chequeo de rol salvo la rama SUPER_ADMIN (:25)",
+    "org_de": "mixto",
+    "evidencia_org": "route.ts:24-27 sesión para no-admin; SUPER_ADMIN elige la org por body",
+    "validacion": "parcial",
+    "evidencia_validacion": "route.ts:20-22 String()/typeof, sin largo máximo",
+    "rate_limit": "no",
+    "notas": "Sin consumidores (SEC-042)."
+   },
+   {
+    "archivo": "src/lib/actions/gbp-connection.ts",
+    "simbolo": "listAvailableLocations",
+    "tipo": "server-action",
+    "url": "(server action sin importadores)",
+    "auth": "parcial",
+    "evidencia_auth": "gbp-connection.ts:18-20 solo exige session.user.organizationId",
+    "rol": "cualquiera con organizationId (sin rol ni OrgRole)",
+    "evidencia_rol": "sin chequeo de rol",
+    "org_de": "sesion",
+    "evidencia_org": "gbp-connection.ts:19 session.user.organizationId (no honra impersonación, patrón D1-c1)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no",
+    "notas": "Cada llamada re-descubre en Google; SEC-053."
+   },
+   {
+    "archivo": "src/lib/actions/gbp-connection.ts",
+    "simbolo": "setActiveLocation",
+    "tipo": "server-action",
+    "url": "(server action sin importadores)",
+    "auth": "parcial",
+    "evidencia_auth": "gbp-connection.ts:39-41 solo organizationId de la sesión",
+    "rol": "cualquiera con organizationId (un VIEWER podría cambiar la sucursal)",
+    "evidencia_rol": "sin chequeo de rol",
+    "org_de": "sesion",
+    "evidencia_org": "gbp-connection.ts:40",
+    "validacion": "zod",
+    "evidencia_validacion": "gbp-connection.ts:43 SetActiveLocationSchema.safeParse",
+    "rate_limit": "no",
+    "notas": "Pertenencia validada contra lo que ve el token (gbp-connection-logic.ts:263-265)."
+   },
+   {
+    "archivo": "netlify/functions/cleanup-old-events-cron.ts",
+    "simbolo": "handler",
+    "tipo": "route-handler",
+    "url": "/.netlify/functions/cleanup-old-events-cron (scheduled)",
+    "auth": "no",
+    "evidencia_auth": "cleanup-old-events-cron.ts:6 handler sin mirar el request; se apoya en que Netlify solo lo invoque por schedule (HIPÓTESIS, verificar)",
+    "rol": "scheduler de Netlify",
+    "evidencia_rol": "netlify.toml:31-32",
+    "org_de": "no-aplica",
+    "evidencia_org": "reenvía a la ruta con CRON_SECRET (:21-23)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "netlify/functions/generate-insights-cron.ts",
+    "simbolo": "handler",
+    "tipo": "route-handler",
+    "url": "/.netlify/functions/generate-insights-cron (scheduled)",
+    "auth": "no",
+    "evidencia_auth": "generate-insights-cron.ts:44 sin chequeo propio (HIPÓTESIS: Netlify no expone scheduled functions por URL)",
+    "rol": "scheduler de Netlify",
+    "evidencia_rol": "netlify.toml:25-26",
+    "org_de": "no-aplica",
+    "evidencia_org": "reenvía con CRON_SECRET (:62-66)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no"
+   },
+   {
+    "archivo": "netlify/functions/send-weekly-reports-cron.ts",
+    "simbolo": "handler",
+    "tipo": "route-handler",
+    "url": "/.netlify/functions/send-weekly-reports-cron (scheduled)",
+    "auth": "no",
+    "evidencia_auth": "send-weekly-reports-cron.ts:63 sin chequeo propio (HIPÓTESIS)",
+    "rol": "scheduler de Netlify",
+    "evidencia_rol": "netlify.toml:28-29",
+    "org_de": "no-aplica",
+    "evidencia_org": "reenvía con CRON_SECRET (:81-84)",
+    "validacion": "no-aplica",
+    "evidencia_validacion": "sin input",
+    "rate_limit": "no"
+   }
+  ],
+  "flujos": [
+   {
+    "nombre": "Conexión OAuth de Google Business (SUPER_ADMIN, sin botón en la UI)",
+    "pasos": [
+     "entrada manual: el admin tipea /api/auth/google-business/start?orgId=<id> (git grep de auth/google-business/start sin links en src)",
+     "src/app/api/auth/google-business/start/route.ts:6-9 auth() + SUPER_ADMIN; :12 orgId del query",
+     "src/lib/integrations/google-business-profile.ts:37-47 generateAuthUrl con state = signOAuthState (src/lib/security/oauth-state.ts:50-59, HMAC con scope google-business:v1, TTL 10 min)",
+     "consentimiento en Google -> src/app/api/auth/google-business/callback/route.ts:14-17 SUPER_ADMIN; :30-35 verifyOAuthState (oauth-state.ts:72-120) antes de la DB",
+     "callback/route.ts:38-44 la org existe; :47 exchangeCodeForTokens (google-business-profile.ts:49-53); :49-57 guarda gbpAccessToken y gbpRefreshToken en claro",
+     "callback/route.ts:65 connectGbpForOrg -> src/lib/integrations/gbp-connection.ts:39 -> gbp-connection-logic.ts:219-230 -> gbp-discovery.ts:39-73 y :76-119 -> gbp-connection.ts:21-23 prisma.organization.update",
+     "una sucursal: OPERATIONAL + rating one-shot (gbp-connection-logic.ts:228, :205-212); varias: CONNECTED_NO_LOCATION (:138-147) y el selector (src/lib/actions/gbp-connection.ts:17,36) no tiene pantalla",
+     "sale del lote: callback/route.ts:71 -> src/lib/audit-log.ts (logAdminAction); :82 redirect /admin/clients?gbp=<estado>, parámetro que ninguna pantalla lee"
+    ]
+   },
+   {
+    "nombre": "Conexión OAuth de Tiendanube",
+    "pasos": [
+     "sale del lote al inicio: ConnectStoreCard.tsx:39 (flujo D2 'Tienda conectada: conectar y ver resumen')",
+     "src/app/api/auth/tiendanube/start/route.ts:10-13 exige SUPER_ADMIN: el cliente recibe 401 JSON; solo anda con un SUPER_ADMIN impersonando",
+     "src/lib/integrations/tiendanube.ts:17-22 URL de autorización con state firmado (scope tiendanube:v1)",
+     "src/app/api/auth/tiendanube/callback/route.ts:28-31 SUPER_ADMIN; :42-48 verifyOAuthState; :50-56 la org existe",
+     "tiendanube.ts:24-48 exchangeCodeForToken (res.json() sin validar forma)",
+     "callback/route.ts:63-70 guarda tiendanubeStoreId y tiendanubeAccessToken en claro, sin try/catch y sin revalidateTag de tiendanube:<org>",
+     "sale del lote: callback/route.ts:72 logAdminAction; :83-85 redirect /dashboard/modules/tienda-conectada?connected=true (tienda-conectada/page.tsx:306 lo lee)"
+    ]
+   },
+   {
+    "nombre": "Lectura de Reputación GBP con caché (y su caída en el acierto)",
+    "pasos": [
+     "sale del lote al inicio: reputacion/page.tsx:15-20 (flujo D2 'Resultados › Reputación (Google Business Profile)')",
+     "src/lib/integrations/google-business-profile.ts:165-176 lee tokens y gbpLocationId",
+     "google-business-profile.ts:178-182 unstable_cache 3600 s con clave org + location + connectedAt",
+     "google-business-profile.ts:185-187 getAuthedClient (:55-100): refresh si vence en menos de 60 s; si el refresh falla -> console.error y null",
+     "google-business-profile.ts:196-216 GET v4 reviews sin timeout; createdAt como Date (:214); :218-224 performance en 0",
+     "acierto de caché: node_modules/next/dist/server/web/spec-extension/unstable-cache.js:168 JSON.parse -> createdAt llega como string",
+     "sale del lote: GBPMetricsCard.tsx:124 review.createdAt.toISOString() lanza TypeError y la página cae al error boundary"
+    ]
+   },
+   {
+    "nombre": "Cron agendado en Netlify -> ruta Next",
+    "pasos": [
+     "netlify.toml:25-32 agenda generate-insights-cron (09:00), send-weekly-reports-cron (lunes 12:00) y cleanup-old-events-cron (06:00)",
+     "netlify/functions/cleanup-old-events-cron.ts:7-18, generate-insights-cron.ts:45-57, send-weekly-reports-cron.ts:64-76 leen URL y CRON_SECRET y abortan con 500 si faltan",
+     "fetch con Authorization Bearer: cleanup :21-23 (sin timeout), generate-insights :62-66 (POST, 20 s), send-weekly :81-84 (20 s)",
+     "ruta: src/lib/cron/cron-secret.ts:40-44 isAuthorizedCronRequest (falla cerrado)",
+     "sale del lote: cleanup-old-events/route.ts:22 -> cleanupOldEvents (flujo D5 'Purga de eventos del chatbot')",
+     "sale del lote: generate-insights/route.ts:36-43,61 -> generateInsightsForBot y sendInsightsNotificationEmail (flujo D5 'Insights del chatbot')",
+     "sale del lote: send-weekly-reports/route.ts:13 -> sendWeeklyReports (flujo D5 'Reporte semanal del chatbot por email') -> src/lib/email/templates/weekly-report.ts:25-175",
+     "fallas: la ruta responde 500 con el mensaje y la function lo loguea en Netlify; ningún paso llama a Sentry"
+    ]
+   },
+   {
+    "nombre": "Crons sin disparador",
+    "pasos": [
+     "vercel.json:4-13 registra os-follow-up, regenerate-briefs y send-executive-reports; el hosting es Netlify (netlify.toml:1-10)",
+     "sale del lote: regenerate-briefs/route.ts:40 -> refreshExecutiveBriefCache (flujo D2 'Home: Resumen ejecutivo IA')",
+     "sale del lote: send-executive-reports/route.ts:26 -> sendExecutiveWeeklyReports (flujo D2 'Reporte ejecutivo semanal (cron)')",
+     "sale del lote: detect-bot-issues/route.ts:13 -> runAlertDetector (flujo D3 'Deteccion automatica de alertas (prometida, sin disparador)')",
+     "sale del lote: alerts/route.ts:13 -> runPeriodicAgencyAlerts (src/lib/alerts.ts:195; flujo D3 'Alertas de la agencia por webhook'), que solo acepta X-Cron-Secret (:6)",
+     ".github/workflows/db-backup.yml:39-41 es el único cron de GitHub Actions"
+    ]
+   },
+   {
+    "nombre": "Email transaccional por Brevo",
+    "pasos": [
+     "llamadores fuera del lote (magic link, reset, bienvenida, reporte semanal, reporte ejecutivo, insights) -> src/lib/email/brevo-service.ts:17",
+     "brevo-service.ts:20-23 sin BREVO_API_KEY devuelve EMAIL_NOT_CONFIGURED + console.error",
+     "brevo-service.ts:26-37 SDK BrevoClient sin timeout propio; remitente BREVO_FROM_NAME/EMAIL o fallback literal a un Gmail personal (:33)",
+     "brevo-service.ts:40-45 error -> console.error y mensaje crudo al llamador; sin Sentry"
+    ]
+   },
+   {
+    "nombre": "Email marketing por Brevo REST y baja por contacto",
+    "pasos": [
+     "sale del lote al inicio: email-marketing/_actions.ts (flujo D2 'Email marketing: importar, crear, enviar y darse de baja')",
+     "src/lib/integrations/brevo.ts:9-29 ensureBrevoList (folderId 1 fijo); :31-58 syncContact con atributos CONTACT_ID y OPTOUT_TOKEN",
+     "brevo.ts:60-90 createCampaign (devuelve el cuerpo crudo del error :82); :92-103 sendCampaign",
+     "link de baja {{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}} -> src/app/api/email/optout/[contactId]/route.ts:69-87 verifyEmailContactOptOutToken (src/lib/email/unsubscribe-token.ts:97-109)",
+     "optout/route.ts:91-94 updateMany optedOut=true (no avisa a Brevo, BUG-021)",
+     "brevo.ts:143-166 getCampaignStats sin llamadores: las métricas de campaña nunca se leen"
+    ]
+   },
+   {
+    "nombre": "Baja de un clic del reporte ejecutivo",
+    "pasos": [
+     "src/lib/email/unsubscribe-token.ts:57-66 buildUnsubscribeUrl (HMAC por org, sin vencimiento, NEXT_PUBLIC_APP_URL con fallback localhost)",
+     "src/lib/email/templates/executive-weekly.ts:289 link en el pie del email",
+     "GET o POST /api/email/unsubscribe-executive -> route.ts:39-60 -> :62-72 verifyUnsubscribeToken (timingSafeEqual) -> :74-90 executiveReportOptOut = true -> :92-100 acuse"
+    ]
+   },
+   {
+    "nombre": "Formulario del pie del home -> n8n desde el navegador",
+    "pasos": [
+     "sale del lote al inicio: src/app/page.tsx:42 renderiza Footer",
+     "src/components/sections/home/Footer.tsx:442-446 tarjeta 'Completar formulario' (motion.div con onClick) -> :584-603 formulario",
+     "Footer.tsx:78-89 onSubmit: fetch POST directo a NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL sin mirar res.ok y setSubmitted(true)",
+     "Footer.tsx:90-97 si el fetch lanza abre WhatsApp; :98-106 sin webhook abre WhatsApp (número de fallback propio :8) y marca enviado",
+     "no pasa por src/lib/actions/contact.ts:100 (Zod, rate limit, ContactSubmission, alerta de agencia y n8n desde el servidor en :82; flujo D3 'Formulario público de contacto')"
+    ]
+   },
+   {
+    "nombre": "Inicialización de Sentry",
+    "pasos": [
+     "Next 16.2.9 busca el archivo de instrumentation en join(appDir, '..') = src (node_modules/next/dist/build/index.js:615-616)",
+     "src/instrumentation.ts:4-43 Sentry.init node y edge con NEXT_PUBLIC_SENTRY_DSN y beforeSend -> src/lib/sentry/scrub-pii.ts:116-177; :49 onRequestError",
+     "src/instrumentation-client.ts:4-19 init del navegador con la misma DSN; replaysOnErrorSampleRate sin replayIntegration",
+     "instrumentation.ts (raíz) -> sentry.server.config.ts / sentry.edge.config.ts con SENTRY_DSN: nunca se ejecutan (@sentry/nextjs 10.62 solo advierte, build/cjs/config/webpack.js:318-329)",
+     "sale del lote: next.config.ts:254-260 withSentryConfig (source maps con SENTRY_AUTH_TOKEN, tunnel /monitoring)"
+    ]
+   },
+   {
+    "nombre": "Aviso por Telegram",
+    "pasos": [
+     "llamadores fuera del lote (LeadOS, detectBotIssues, upsellAlert, captureLead, showWhatsappHandoff) -> src/lib/notifications/telegram.ts:67 sendTelegram o :116 notifyTelegramOptional",
+     "telegram.ts:39-61 credenciales: AgencySettings.osTelegramBotToken/ChatId (en claro) y si no, TELEGRAM_BOT_TOKEN/CHAT_ID",
+     "telegram.ts:77-98 POST a api.telegram.org sin timeout; error -> console.error y false",
+     "telegram.ts:108-110 isTelegramConfigured solo mira presencia (lo usa admin/leados/page.tsx)"
+    ]
+   },
+   {
+    "nombre": "GA4 y Search Console con la service account de develOP",
+    "pasos": [
+     "sale del lote al inicio: trafico/page.tsx:46 y seo/page.tsx:179 (flujo D2 'Metricas de Trafico y SEO')",
+     "src/lib/analytics.ts:85-100 normaliza propertyId; sin GOOGLE_SERVICE_ACCOUNT_KEY -> demo",
+     "analytics.ts:111-195 cuatro runReport en paralelo; :196-198 cualquier error -> demo con isMockData y sin log",
+     "src/lib/searchconsole.ts:99-215 mismo patrón (tres consultas; :211-213 demo)",
+     "la UI muestra PreviewBanner si isMockData (trafico/page.tsx:188, seo/page.tsx:226)"
+    ]
+   },
+   {
+    "nombre": "E10 · Vertex AI (control positivo)",
+    "pasos": [
+     "se lee: src/modules/chatbot/server/llm/providers/google.ts:54-56,73-77 (GOOGLE_APPLICATION_CREDENTIALS = archivo vertex-credentials.json por worktree, ignorado en .gitignore:55; GOOGLE_VERTEX_CREDENTIALS_JSON en Netlify; CHATBOT_GCP_PROJECT_ID, CHATBOT_GCP_LOCATION)",
+     "si vence: flujos D5 'Credencial de Vertex vencida (E10): que pasa en cada capa' y 'Falla del LLM (control positivo E10)'",
+     "se entera: es la única integración con Sentry.captureException (handleChatRequest.ts:1057,1389 + flush) y health (checkHealth.ts:47); el detector que la volvería alerta (detectBotIssues.ts:85) no tiene disparador; src/instrumentation.ts:15-16 descarta RESOURCE_EXHAUSTED y quota exceeded",
+     "se renueva: nueva key de la service account en GCP -> GOOGLE_VERTEX_CREDENTIALS_JSON en Netlify + redeploy; en local copiar vertex-credentials.json a cada worktree"
+    ]
+   },
+   {
+    "nombre": "E10 · Brevo (BREVO_API_KEY, BREVO_FROM_EMAIL, BREVO_FROM_NAME)",
+    "pasos": [
+     "se lee: src/lib/email/brevo-service.ts:4,20,32-33; src/lib/integrations/brevo.ts:4,112-124",
+     "si vence o se revoca: transaccionales (magic link, reset, bienvenida, reportes, insights) -> brevo-service.ts:40-45 console.error + {ok:false}; email marketing -> createCampaign devuelve 'Brevo error: 401 ...' crudo (brevo.ts:81-83), syncContact false sin log (:53), sendCampaign false (:98)",
+     "se entera: no (sin Sentry; el magic link muestra éxito igual, BUG-003)",
+     "se renueva: API key nueva en Brevo -> Netlify -> redeploy; remitente verificado en Brevo (si falta BREVO_FROM_EMAIL sale desde un Gmail personal)"
+    ]
+   },
+   {
+    "nombre": "E10 · Resend (RESEND_API_KEY, restos)",
+    "pasos": [
+     "se lee: src/lib/email.ts:4 y src/lib/email/notify-message.ts:13-18; RESEND_FROM_EMAIL documentada pero sin lectura (email.ts:21 fija develop-agency.com)",
+     "si falta: email.ts:15-17 devuelve success:true sin enviar; notify-message.ts:14 console.log y sale. Si se revoca: el resultado de resend.emails.send no se mira (email.ts:20-26, notify-message.ts:50-60; PROBABLE que el SDK v6 devuelva {error} sin lanzar)",
+     "afecta: 'Acción requerida' (agency-actions), respuesta de ticket (lib/tickets/actions), aviso de mensaje del admin (admin-message-notification.ts:42)",
+     "se entera: no. Se renueva: key nueva en Resend y dominio verificado; recomendado migrar estos 3 envíos a Brevo"
+    ]
+   },
+   {
+    "nombre": "E10 · GA4 y Search Console (GOOGLE_SERVICE_ACCOUNT_KEY)",
+    "pasos": [
+     "se lee: src/lib/analytics.ts:95; src/lib/searchconsole.ts:102 (y settings.ts:279, módulo sin importadores)",
+     "si vence, se revoca o el JSON es inválido: catch sin log -> datos demo con isMockData (analytics.ts:104-107,196-198; searchconsole.ts:108-112,211-213) y PreviewBanner en la UI",
+     "se entera: no (ni console.error)",
+     "se renueva: key nueva de la service account en GCP, mantener su acceso a cada propiedad/sitio del cliente, env en Netlify + redeploy"
+    ]
+   },
+   {
+    "nombre": "E10 · Google Business Profile (client OAuth + tokens por org)",
+    "pasos": [
+     "se lee: src/lib/integrations/google-business-profile.ts:29-35 (CLIENT_ID, CLIENT_SECRET, REDIRECT_URI) y :55-72 (gbpAccessToken, gbpRefreshToken en claro)",
+     "si el refresh token se revoca o el secret rota: :76 lanza -> :93-96 console.error y null -> Reputación cae al estado vacío, Motor de reseñas 'Sin reseñas' (listReviews :329-331) y responder 'GBP no conectado' (:281); gbpConnectedAt queda seteado y deriveConnectionStatus sigue diciendo OPERATIONAL (gbp-connection-logic.ts:163-169)",
+     "se entera: no",
+     "se renueva: un SUPER_ADMIN reabre /api/auth/google-business/start?orgId= a mano (no hay botón). Si la app OAuth está en modo Testing en Google Cloud, los refresh tokens vencen solos (HIPÓTESIS, verificar el Publishing status)"
+    ]
+   },
+   {
+    "nombre": "E10 · Tiendanube (client + token por org)",
+    "pasos": [
+     "se lee: src/lib/integrations/tiendanube.ts:21,33-34 (CLIENT_ID/SECRET al conectar) y :52-58 (tiendanubeAccessToken en claro)",
+     "si el token deja de valer (app desinstalada o revocada): cada fetch !ok se toma como lista vacía (:96,102,112,118) -> resumen en ceros cacheado 30 min",
+     "se entera: no",
+     "se renueva: SUPER_ADMIN impersonando -> 'Conectar mi tienda' (el cliente solo ve 401, BUG-032)"
+    ]
+   },
+   {
+    "nombre": "E10 · Cal.com (calComApiKey por org)",
+    "pasos": [
+     "se lee: src/lib/integrations/cal-com.ts:24-30 (en claro) y :49 (en la query string)",
+     "hoy: la API v1 (:4) está apagada según cal-com-v2.ts:4-6 -> !ok -> console.error(status) y null cacheado 10 min",
+     "se entera: no",
+     "se renueva: no aplica hasta migrar a v2 (TEC-002); LeadOS usa cal-com-v2.ts sin credencial (:9-12)"
+    ]
+   },
+   {
+    "nombre": "E10 · PageSpeed (GOOGLE_PAGESPEED_API_KEY)",
+    "pasos": [
+     "se lee: src/lib/integrations/pagespeed.ts:41",
+     "si falta: console.warn y null cacheado 6 h (:42-45, :33); si se revoca o se agota la cuota: console.error y null 6 h (:63-65)",
+     "se entera: no",
+     "se renueva: key nueva en GCP -> env -> redeploy; esperar hasta 6 h o invalidar el tag pagespeed:<url>"
+    ]
+   },
+   {
+    "nombre": "E10 · Telegram (AgencySettings -> TELEGRAM_BOT_TOKEN/CHAT_ID)",
+    "pasos": [
+     "se lee: src/lib/notifications/telegram.ts:41-48 (config) y :54-55 (env)",
+     "si el token se revoca: 401 -> console.error y false (:90-93); isTelegramConfigured (:108-110) sigue diciendo que está configurado",
+     "se entera: no",
+     "se renueva: desde /admin/settings sin redeploy (config-first): el único servicio rotable desde la UI"
+    ]
+   },
+   {
+    "nombre": "E10 · n8n (webhooks de contacto y API)",
+    "pasos": [
+     "se lee: src/lib/n8n.ts:19 (N8N_CONTACT_WEBHOOK_URL, servidor), src/components/sections/home/Footer.tsx:81 (NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL, navegador), n8n.ts:183-184 y :264-265 (N8N_API_URL/KEY, solo getN8nMetrics sin llamadores)",
+     "si el webhook cambia o se cae: sendLeadToN8n lanza (n8n.ts:21-34) y decide contact.ts; el pie del home muestra éxito igual (Footer.tsx:84-89)",
+     "se entera: no",
+     "se renueva: URL nueva -> env; la variable NEXT_PUBLIC se incrusta en el build y exige recompilar"
+    ]
+   },
+   {
+    "nombre": "E10 · Sentry (NEXT_PUBLIC_SENTRY_DSN; SENTRY_DSN sin lector vivo)",
+    "pasos": [
+     "se lee: src/instrumentation.ts:7,34; src/instrumentation-client.ts:5; sentry.server.config.ts:9 y sentry.edge.config.ts:6 (muertos)",
+     "si falta: Sentry.init sin DSN deja el SDK inerte en silencio (debug false)",
+     "se entera: no, por definición",
+     "se renueva: DSN en Netlify con scope de build + recompilar (NEXT_PUBLIC se incrusta); SENTRY_AUTH_TOKEN/ORG/PROJECT para source maps (next.config.ts:254-260)"
+    ]
+   },
+   {
+    "nombre": "E10 · CRON_SECRET",
+    "pasos": [
+     "se lee: netlify/functions/*-cron.ts (:8, :46, :65), src/lib/cron/cron-secret.ts:41 y copias inline (regenerate-briefs/route.ts:19, send-executive-reports/route.ts:18, alerts/route.ts:5, os-follow-up/route.ts:154)",
+     "si falta en las functions: 500 'Missing URL or CRON_SECRET' logueado en Netlify; si difiere entre function y sitio: 401 y log route_error",
+     "se entera: solo en los logs de Netlify Functions",
+     "se renueva: mismo valor en sitio y functions + redeploy"
+    ]
+   },
+   {
+    "nombre": "E10 · Secretos propios (HMAC y cifrado)",
+    "pasos": [
+     "se leen: EMAIL_UNSUBSCRIBE_SECRET con fallback a AUTH_SECRET (unsubscribe-token.ts:7-9); OAUTH_STATE_SECRET con fallback a AUTH_SECRET (oauth-state.ts:27-29); IMPERSONATION_SECRET -> AUTH_SECRET -> NEXTAUTH_SECRET (impersonation.ts:16-18); CRM_SECRET_KEY (encryptSecret.ts:26); MOTOR_CHANNEL_SECRET_KEY (secret-box vía sendMessage.ts:210); ONBOARDING_SECRET_KEY (credential-cipher.ts:35, sin escritores)",
+     "no vencen; al rotar: AUTH_SECRET cierra todas las sesiones y, sin EMAIL_UNSUBSCRIBE_SECRET propio, deja en 403 todos los links de baja ya enviados y los OAuth en curso; CRM/MOTOR: los secretos guardados dejan de descifrar (GCM lanza) hasta recargarlos",
+     "corrección al inventario: AUTH_SECRET sí se lee en src (unsubscribe-token.ts:9, oauth-state.ts:29, impersonation.ts:17, api/qa/login/route.ts:102), no 'solo scripts'",
+     "otras: ANTHROPIC_API_KEY fuera del lote (BUG-066: fallo cacheado 24 h sin Sentry); BLOB_READ_WRITE_TOKEN sin lecturas; AUTH_GOOGLE_ID/SECRET en auth.ts (FROZEN, UX-002)"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Reputación se cae desde la segunda visita: unstable_cache devuelve las fechas de las reseñas como texto y GBPMetricsCard llama a toISOString()",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/integrations/google-business-profile.ts",
+      "linea": 178,
+      "fragmento": "return unstable_cache("
+     },
+     {
+      "ruta": "src/lib/integrations/google-business-profile.ts",
+      "linea": 214,
+      "fragmento": "createdAt: parseReviewDate(review.createTime),"
+     },
+     {
+      "ruta": "src/components/dashboard/results/GBPMetricsCard.tsx",
+      "linea": 124,
+      "fragmento": "key={`${review.reviewerName}-${review.createdAt.toISOString()}-${index}`}"
+     },
+     {
+      "ruta": "node_modules/next/dist/server/web/spec-extension/unstable-cache.js",
+      "linea": 168,
+      "fragmento": "const cachedResponse = cacheEntry.value.data.body !== undefined ? JSON.parse(cacheEntry.value.data.body) : undefined;"
+     },
+     {
+      "ruta": "src/lib/integrations/pagespeed.ts",
+      "linea": 145,
+      "fragmento": "fetchedAt: new Date(),"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente con Google Business conectado y al menos una reseña: la primera visita a Resultados › Reputación pinta bien, pero durante la hora siguiente (revalidate 3600) cada visita lee la caché, createdAt llega como string y el render lanza TypeError (también formatDate en GBPMetricsCard.tsx:135): el cliente ve la pantalla de error. En Tráfico, la fecha de PageSpeed sale como ISO crudo en el acierto (PageSpeedCard.tsx:60 llama toLocaleString sobre un string).",
+    "propuesta": "Que las funciones envueltas en unstable_cache devuelvan solo tipos JSON (fechas como ISO string) y que el componente convierta con new Date(), o rehidratar los Date al salir de la caché. Agregar un test que pase el resultado por JSON.parse(JSON.stringify()) antes de renderizar. Revisar los demás unstable_cache del repo con el mismo patrón.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.reputacion-gbp",
+     "h2.cli-resultados.velocidad-sitio",
+     "int.gbp",
+     "lib.integrations"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "UX-015, BUG-036, TEC-005"
+   },
+   {
+    "titulo": "Ninguna integración ni cron reporta a Sentry: las fallas atrapadas terminan en console.error, null o datos demo y develOP no se entera cuando vence una credencial (E10)",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/analytics.ts",
+      "linea": 196,
+      "fragmento": "} catch { // Fall back to mock data on any API error return { ok: true, data: getMockAnalyticsData() }"
+     },
+     {
+      "ruta": "src/lib/integrations/google-business-profile.ts",
+      "linea": 94,
+      "fragmento": "console.error('[GBP] Refresh failed:', err) return null"
+     },
+     {
+      "ruta": "src/lib/email/brevo-service.ts",
+      "linea": 41,
+      "fragmento": "console.error('[Brevo] Error sending email:', error)"
+     },
+     {
+      "ruta": "src/lib/notifications/telegram.ts",
+      "linea": 91,
+      "fragmento": "console.error('[telegram] envío falló:', await response.text())"
+     },
+     {
+      "ruta": "src/app/api/cron/detect-bot-issues/route.ts",
+      "linea": 16,
+      "fragmento": "return NextResponse.json( { ok: false, error: String(error) },"
+     },
+     {
+      "ruta": "src/instrumentation.ts",
+      "linea": 49,
+      "fragmento": "export const onRequestError = Sentry.captureRequestError"
+     }
+    ],
+    "impacto": "Con el primer cliente real: si se revoca el refresh token de Google Business, vence la key de Brevo, se revoca la service account de GA4, se desinstala la app de Tiendanube o muere el token de Telegram, el cliente ve vacíos, ceros o datos demo, o simplemente no recibe emails, y develOP solo lo sabe si el cliente reclama. onRequestError solo ve excepciones no atrapadas, y todas estas se atrapan. git grep de Sentry/captureException en crons, callbacks OAuth, lib/integrations, lib/email, notifications, n8n, analytics, searchconsole y netlify/ da cero; Vertex (handleChatRequest.ts) es la única con captura y su detector automático no corre.",
+    "propuesta": "Un helper único reportIntegrationFailure(servicio, error, contexto) con Sentry.captureException y tag de servicio (más flush en handlers serverless), usado en cada catch de integraciones y crons; persistir el estado de la conexión por org cuando falle el refresh (p. ej. última falla y fecha) y mostrar 'reconectar'; un cron diario de salud de credenciales (Brevo, GA4, GBP, Telegram, PageSpeed) que avise por Telegram/email; agendar detect-bot-issues.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "int.sentry",
+     "int.brevo",
+     "int.gbp",
+     "int.ga4",
+     "int.searchconsole",
+     "int.telegram",
+     "int.tiendanube",
+     "int.calcom",
+     "int.pagespeed",
+     "int.cron.detect-bot-issues",
+     "lib.integrations"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "OBS-01, BUG-041, BUG-137, BUG-066, DEU-051"
+   },
+   {
+    "titulo": "Sentry depende de NEXT_PUBLIC_SENTRY_DSN incrustada en el build: sin ella queda inerte sin aviso, y la config raíz con SENTRY_DSN es código muerto",
+    "prefijo": "FAL",
+    "severidad": "ALTA",
+    "tipo": "faltante",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/instrumentation.ts",
+      "linea": 7,
+      "fragmento": "dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,"
+     },
+     {
+      "ruta": "src/instrumentation-client.ts",
+      "linea": 5,
+      "fragmento": "dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,"
+     },
+     {
+      "ruta": "instrumentation.ts",
+      "linea": 3,
+      "fragmento": "await import('./sentry.server.config')"
+     },
+     {
+      "ruta": "sentry.server.config.ts",
+      "linea": 9,
+      "fragmento": "dsn: process.env.SENTRY_DSN,"
+     },
+     {
+      "ruta": "node_modules/next/dist/build/index.js",
+      "linea": 616,
+      "fragmento": "const rootDir = _path.default.join(pagesDir || appDir, '..');"
+     },
+     {
+      "ruta": "src/instrumentation-client.ts",
+      "linea": 10,
+      "fragmento": "replaysOnErrorSampleRate: 1.0,"
+     }
+    ],
+    "impacto": "Si la variable no estaba en el entorno de build de Netlify (la bitácora lo daba inactivo a 2026-08), todo Sentry (server, edge, navegador, onRequestError, error boundaries y la captura del chatbot) es no-op silencioso, y cargarla después sin recompilar no alcanza porque Next incrusta NEXT_PUBLIC_* en el bundle. Los documentos que piden SENTRY_DSN configuran una variable que solo leen archivos que nunca se ejecutan (Next solo carga src/instrumentation.ts; @sentry/nextjs 10.62 no autocarga sentry.*.config). Los replays 'on error' no se graban: no hay replayIntegration. El criterio L3 'errores en Sentry' no se cumple en ninguna herramienta hasta confirmar esto.",
+    "propuesta": "Confirmar NEXT_PUBLIC_SENTRY_DSN en Netlify con scope de builds y recompilar; leer en el server una DSN de runtime (SENTRY_DSN) y dejar NEXT_PUBLIC solo para el navegador; borrar instrumentation.ts raíz y sentry.server/edge.config.ts; un chequeo en el build que falle o avise si falta la DSN en producción; decidir si se quiere Replay (agregar la integración) o quitar la opción.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.sentry",
+     "lib.sentry"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "OBS-01, PERF-05, PLAN-1122, PLAN-1123, PLAN-1162"
+   },
+   {
+    "titulo": "Detector de incidencias de bots y alertas periódicas de la agencia sin disparador en ningún registrador: la credencial de Vertex vencida nunca se convierte en alerta automática",
+    "prefijo": "BUG",
+    "severidad": "ALTA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "netlify.toml",
+      "linea": 25,
+      "fragmento": "[functions.\"generate-insights-cron\"] (solo 3 schedules en :25-32)"
+     },
+     {
+      "ruta": "vercel.json",
+      "linea": 4,
+      "fragmento": "\"path\": \"/api/cron/os-follow-up\", (solo os-follow-up, regenerate-briefs y send-executive-reports)"
+     },
+     {
+      "ruta": "src/app/api/cron/detect-bot-issues/route.ts",
+      "linea": 7,
+      "fragmento": "export async function GET(req: Request) {"
+     },
+     {
+      "ruta": "src/app/api/cron/alerts/route.ts",
+      "linea": 6,
+      "fragmento": "const providedSecret = request.headers.get('X-Cron-Secret')?.trim()"
+     },
+     {
+      "ruta": ".github/workflows/db-backup.yml",
+      "linea": 41,
+      "fragmento": "- cron: '0 6 * * *'"
+     }
+    ],
+    "impacto": "De las 8 rutas de cron, Netlify agenda 3, vercel.json declara otras 3 que en Netlify no corren (BUG-047) y detect-bot-issues y alerts no figuran en ningún lado. Con el primer cliente: si su bot deja de responder (Vertex vencido, cuota), nadie recibe el email/Telegram automático que promete /admin/settings/alerts; develOP tampoco recibe el aviso de clientes inactivos 30 días ni de suscripciones que vencen en 7 días (lib/alerts.ts:195-202). Además alerts solo acepta X-Cron-Secret, así que agendado con el molde de las functions (Bearer) respondería 401.",
+    "propuesta": "Agregar netlify/functions/detect-bot-issues-cron.ts y agency-alerts-cron.ts con el molde de send-weekly-reports-cron.ts y su schedule en netlify.toml; pasar alerts a isAuthorizedCronRequest; migrar o borrar vercel.json (el hosting es Netlify).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.cron.detect-bot-issues",
+     "int.cron.alerts",
+     "h4.adm-alertas",
+     "h4.adm-config",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "BUG-047, UX-049, PERF-010, PLAN-1143"
+   },
+   {
+    "titulo": "Los crons siguen procesando clientes archivados: insights con Vertex, reporte semanal y brief para orgs con deletedAt",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/cron/generate-insights/route.ts",
+      "linea": 18,
+      "fragmento": "const bots = await prisma.botConfig.findMany({ where: { isActive: true },"
+     },
+     {
+      "ruta": "src/app/api/cron/regenerate-briefs/route.ts",
+      "linea": 27,
+      "fragmento": "where: { onboardingCompleted: true, subscription: { is: { status: 'ACTIVE' } },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+      "linea": 35,
+      "fragmento": "(c) => c.organization.update({ where: { id: org.id }, data: { deletedAt: new Date() } }),"
+     }
+    ],
+    "impacto": "Un cliente que se va y se archiva sigue recibiendo el email de 'N insights nuevos', el reporte semanal del chatbot y, si su suscripción quedó ACTIVE, el brief y el reporte ejecutivo; develOP sigue pagando Vertex por sus bots. git grep de deletedAt en las rutas de cron, sendWeeklyReports, executive-weekly/send y detectBotIssues da cero.",
+    "propuesta": "Filtrar organization.deletedAt: null en todos los barridos de cron con un helper compartido de 'orgs activas', o pausar los bots y cancelar los envíos al archivar.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.cron.generate-insights",
+     "int.cron.regenerate-briefs",
+     "int.cron.send-weekly-reports",
+     "h4.adm-clientes",
+     "int.vertex",
+     "int.brevo"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-014, BUG-121, BUG-110"
+   },
+   {
+    "titulo": "generate-insights recorre todos los bots en serie con una llamada al LLM cada uno, sin orden ni reanudación, dentro de un techo de ~20-26 s",
+    "prefijo": "PERF",
+    "severidad": "MEDIA",
+    "tipo": "perf",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/cron/generate-insights/route.ts",
+      "linea": 33,
+      "fragmento": "for (const bot of bots) {"
+     },
+     {
+      "ruta": "src/app/api/cron/generate-insights/route.ts",
+      "linea": 43,
+      "fragmento": "const result = await generateInsightsForBot(bot.organization.id, bot.id)"
+     },
+     {
+      "ruta": "netlify/functions/generate-insights-cron.ts",
+      "linea": 33,
+      "fragmento": "const FETCH_TIMEOUT_MS = 20_000"
+     },
+     {
+      "ruta": "netlify/functions/generate-insights-cron.ts",
+      "linea": 22,
+      "fragmento": "// TIMEOUT — aritmética. Una Netlify Function sincrona estandar no puede pasar de ~26s"
+     }
+    ],
+    "impacto": "Con más de unos pocos bots activos la corrida diaria se corta por el límite de la plataforma; como findMany no tiene orderBy ni cursor guardado, los mismos primeros bots se procesan cada día y los últimos clientes nunca reciben insights. La function informa timeout, pero nada lo reporta.",
+    "propuesta": "Procesar en lotes con cursor persistido o un fan-out de una invocación por bot (background function), orderBy estable y maxDuration explícito; medir la duración por bot.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "int.cron.generate-insights",
+     "h3.adm-chatbots",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "RESIL-04, PERF-010, BUG-110, BUG-023"
+   },
+   {
+    "titulo": "Las integraciones cachean null ante una falla transitoria: Tiendanube 30 min (y la pantalla pide 'reintentar en unos minutos'), PageSpeed 6 h, GBP 1 h, Cal.com 10 min",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/integrations/tiendanube.ts",
+      "linea": 75,
+      "fragmento": "return unstable_cache( async () => fetchStoreSummary(organizationId), ['tiendanube-summary', organizationId], { revalidate: 1800,"
+     },
+     {
+      "ruta": "src/lib/integrations/tiendanube.ts",
+      "linea": 161,
+      "fragmento": "console.error('[Tiendanube] fetchSummary error:', err) return null"
+     },
+     {
+      "ruta": "src/lib/integrations/pagespeed.ts",
+      "linea": 33,
+      "fragmento": "{ revalidate: 6 * 3600, tags: [`pagespeed:${url}`] },"
+     },
+     {
+      "ruta": "src/lib/integrations/cal-com.ts",
+      "linea": 36,
+      "fragmento": "{ revalidate: 600, tags: [`cal:${organizationId}`] },"
+     },
+     {
+      "ruta": "node_modules/next/dist/server/web/spec-extension/unstable-cache.js",
+      "linea": 23,
+      "fragmento": "body: JSON.stringify(result),"
+     }
+    ],
+    "impacto": "Un corte de segundos en la API del proveedor deja al cliente sin datos durante la ventana entera: Tienda conectada muestra 'Intentá de nuevo en unos minutos' (tienda-conectada/page.tsx:101) pero reintentar no sirve por 30 min; PageSpeed desaparece 6 h. Ninguna conexión invalida su tag (git grep de revalidateTag con tiendanube/gbp/cal/pagespeed vacío), así que tras reconectar se siguen viendo los datos viejos o el error.",
+    "propuesta": "No cachear errores: que el callback lance (o devuelva un resultado discriminado y solo se cachee el ok) y que la página atrape; revalidateTag del tag de la integración al conectar/desconectar.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-tienda.resumen-tienda",
+     "h2.cli-resultados.velocidad-sitio",
+     "h2.cli-resultados.reputacion-gbp",
+     "h2.cli-agenda",
+     "lib.integrations"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "BUG-033, BUG-066, UX-015"
+   },
+   {
+    "titulo": "/api/test-sentry es público: cada pedido anónimo produce un 500 y un evento de Sentry",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/test-sentry/route.ts",
+      "linea": 3,
+      "fragmento": "export async function GET() { throw new Error('Test Sentry — esto debería aparecer en el dashboard de Sentry')"
+     },
+     {
+      "ruta": "src/proxy.ts",
+      "linea": 172,
+      "fragmento": "matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],"
+     },
+     {
+      "ruta": "src/instrumentation.ts",
+      "linea": 49,
+      "fragmento": "export const onRequestError = Sentry.captureRequestError"
+     }
+    ],
+    "impacto": "Con Sentry activo, un loop de curl anónimo llena la cuota de eventos y tapa los errores reales de los clientes; además es una ruta 500 permanente en producción.",
+    "propuesta": "Borrar la ruta o exigir SUPER_ADMIN y NODE_ENV distinto de production.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.sentry",
+     "h6"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-060, PLAN-1015"
+   },
+   {
+    "titulo": "El formulario del pie del home manda el lead desde el navegador al webhook público de n8n: sin servidor, sin validación, sin rate limit, sin registro en la base, y muestra éxito aunque n8n falle",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 81,
+      "fragmento": "const webhookUrl = process.env.NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL;"
+     },
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 84,
+      "fragmento": "await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form), }); setSubmitted(true);"
+     },
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 105,
+      "fragmento": "setSubmitted(true);"
+     },
+     {
+      "ruta": "src/app/page.tsx",
+      "linea": 42,
+      "fragmento": "<Footer />"
+     }
+    ],
+    "impacto": "La URL del webhook queda en el bundle público: cualquiera le manda cargas sin tope ni validación (y dispara lo que haga el workflow). Los leads del pie del home no entran a ContactSubmission, a la alerta de agencia ni a la atribución de referidos, que sí hace la action de /contact (contact.ts:100); si n8n responde 4xx/5xx la pantalla dice '¡Consulta enviada! Te contactamos en menos de 2hs' y el lead se pierde; sin webhook abre WhatsApp y también marca enviado.",
+    "propuesta": "Que el pie use la server action de contacto existente (Zod, rate limit, persistencia y n8n desde el servidor) y muestre el error real; retirar NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto.formulario-pie-home",
+     "int.n8n",
+     "modelo.ContactSubmission"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-090, SEC-025"
+   },
+   {
+    "titulo": "Pie del home: 'Completar formulario' es un div con onClick (no se abre con teclado) y los labels no están asociados a sus campos",
+    "prefijo": "A11Y",
+    "severidad": "MEDIA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 442,
+      "fragmento": "<motion.div whileHover={{ scale: 1.015, y: -2 }} ... onClick={() => setContactMode('form')}"
+     },
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 612,
+      "fragmento": "<label style={{"
+     },
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 624,
+      "fragmento": "<input type={field.type} placeholder={field.placeholder}"
+     }
+    ],
+    "impacto": "Un visitante con teclado o lector de pantalla no puede abrir el formulario de contacto principal del home (sin role, tabIndex ni onKeyDown) y los campos se anuncian sin nombre; el 'Enviar' no da error accesible.",
+    "propuesta": "Usar un button real para la tarjeta; label con htmlFor/id; mensajes de estado con role=status/alert.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto.formulario-pie-home"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "A11Y-022"
+   },
+   {
+    "titulo": "Reporte semanal del chatbot sin forma de darse de baja: el link 'cambiá tus preferencias' lleva a una ruta que no existe y no hay List-Unsubscribe ni campo de opt-out",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/email/templates/weekly-report.ts",
+      "linea": 164,
+      "fragmento": "<a href=\"${data.dashboardUrl}/preferences\" style=\"color:#06b6d4; text-decoration:none;\">cambiá tus preferencias</a>."
+     },
+     {
+      "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
+      "linea": 60,
+      "fragmento": "dashboardUrl: `${appUrl}/dashboard/chatbot`,"
+     },
+     {
+      "ruta": "prisma/schema.prisma",
+      "linea": 387,
+      "fragmento": "executiveReportOptOut Boolean @default(false)"
+     }
+    ],
+    "impacto": "El dueño de cada org con bot activo recibe el email todos los lunes; el único camino de baja termina en 404 (/dashboard/chatbot/preferences no existe en src/app) y el envío no lleva List-Unsubscribe. Si lo marca como spam, castiga la reputación del remitente compartido de Brevo, el mismo del magic link y del reset.",
+    "propuesta": "Link de baja firmado con HMAC (scope propio, como unsubscribe-executive) y headers List-Unsubscribe/List-Unsubscribe-Post; persistir la preferencia. Agregar la columna toca prisma/schema.prisma: decisión para Valentino (o reutilizar una preferencia existente).",
+    "esfuerzo": "S",
+    "zona": "FROZEN",
+    "nodos": [
+     "h3.cli-chatbot.reporte-semanal-email",
+     "int.brevo",
+     "int.cron.send-weekly-reports"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-061, BUG-028"
+   },
+   {
+    "titulo": "Identidad de envío fragmentada: dos proveedores (Brevo y Resend), cuatro remitentes en dos dominios, uno legacy, y fallback a un Gmail personal",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/email/brevo-service.ts",
+      "linea": 33,
+      "fragmento": "email: process.env.BREVO_FROM_EMAIL ?? '[Gmail personal, redactado]',"
+     },
+     {
+      "ruta": "src/lib/email.ts",
+      "linea": 21,
+      "fragmento": "from: 'develOP Agency <hello@develop-agency.com>',"
+     },
+     {
+      "ruta": "src/lib/integrations/brevo.ts",
+      "linea": 124,
+      "fragmento": "email: params.senderEmail ?? process.env.BREVO_FROM_EMAIL ?? 'alerts@develop-agency.com',"
+     },
+     {
+      "ruta": "src/lib/email/notify-message.ts",
+      "linea": 51,
+      "fragmento": "from: 'develOP <hola@develop.com.ar>',  // ⚠️ Franco, ajustar al dominio real verificado en Resend"
+     }
+    ],
+    "impacto": "Dos keys y dos dominios que mantener vivos, con dos modos de falla distintos; si falta BREVO_FROM_EMAIL, magic link, reset, bienvenida y reportes salen desde una casilla personal de Gmail (entregabilidad y PII del desarrollador en el código); los avisos por Resend salen del dominio legacy develop-agency.com, marcado como pendiente de verificar.",
+    "propuesta": "Un solo proveedor (Brevo) y un módulo de remitentes con dominio verificado; sin fallbacks literales: si falta el remitente en producción, fallar y avisar.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "int.brevo",
+     "int.resend",
+     "lib.email"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "CLEAN-H3, BUG-037, BUG-112"
+   },
+   {
+    "titulo": "Credenciales de terceros en claro en la base (instancias del lote): tokens OAuth de GBP y Tiendanube, API key de Cal.com en la query y token de Telegram; encryptCredential sin llamadores",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/auth/google-business/callback/route.ts",
+      "linea": 52,
+      "fragmento": "gbpAccessToken: tokens.access_token, gbpRefreshToken: tokens.refresh_token,"
+     },
+     {
+      "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
+      "linea": 67,
+      "fragmento": "tiendanubeAccessToken: tokens.access_token,"
+     },
+     {
+      "ruta": "src/lib/integrations/cal-com.ts",
+      "linea": 49,
+      "fragmento": "const res = await fetch(`${API_BASE}/bookings?apiKey=${apiKey}`, {"
+     },
+     {
+      "ruta": "src/lib/notifications/telegram.ts",
+      "linea": 45,
+      "fragmento": "const configToken = settings?.osTelegramBotToken?.trim()"
+     },
+     {
+      "ruta": "src/lib/crypto/credential-cipher.ts",
+      "linea": 73,
+      "fragmento": "export function encryptCredential(plaintext: string): string {"
+     }
+    ],
+    "impacto": "Misma causa raíz que SEC-036: quien lea la base o un dump (Neon compartida) obtiene el refresh token de Google Business del cliente, el acceso a su tienda, su key de Cal.com y el bot de Telegram de develOP; la key de Cal.com además viaja en la URL (logs de proxies y del proveedor).",
+    "propuesta": "Cifrar en reposo con el formato de una sola cadena de credential-cipher (enc:v1:..., sin cambio de schema) o secret-box con una key por dominio; backfill; conectar encryptCredential a los escritores de la Bóveda; la key de Cal.com por header.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "int.gbp",
+     "int.tiendanube",
+     "int.calcom",
+     "int.telegram",
+     "lib.crypto",
+     "modelo.Organization",
+     "modelo.AgencySettings"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-036, SEC-037, PLAN-1331, PLAN-1340"
+   },
+   {
+    "titulo": "Conectar Google Business no tiene entrada en la UI ni muestra el resultado, y una cuenta con varias sucursales queda sin selector",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/auth/google-business/callback/route.ts",
+      "linea": 82,
+      "fragmento": "return NextResponse.redirect(new URL(`/admin/clients?gbp=${gbp}`, request.url))"
+     },
+     {
+      "ruta": "src/app/api/auth/google-business/callback/route.ts",
+      "linea": 33,
+      "fragmento": "new URL(`/admin/clients?error=oauth_state_${stateCheck.reason}`, request.url),"
+     },
+     {
+      "ruta": "src/lib/integrations/gbp-connection-logic.ts",
+      "linea": 143,
+      "fragmento": "status: 'CONNECTED_NO_LOCATION', reason: locations.length === 0 ? 'none' : 'multiple',"
+     },
+     {
+      "ruta": "src/lib/actions/gbp-connection.ts",
+      "linea": 17,
+      "fragmento": "export async function listAvailableLocations(): Promise<ActionResult<AvailableLocation[]>> {"
+     }
+    ],
+    "impacto": "Para conectar la reputación del primer cliente, el admin tiene que tipear /api/auth/google-business/start?orgId=<id>; al volver, nada le dice si quedó OPERATIONAL, sin sucursal o con discovery_failed (ninguna pantalla lee ?gbp= ni ?error=). Si la cuenta de Google tiene más de una sucursal, el módulo queda sin location para siempre: el selector existe como server actions sin pantalla.",
+    "propuesta": "Botón 'Conectar Google Business' en la ficha del cliente (admin) que llame a start; leer ?gbp/?error y mostrar el estado; construir el selector de sucursal (cerrando antes SEC-053).",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h4.adm-clientes.conectar-google-business",
+     "h2.cli-resenas.selector-sucursal",
+     "int.gbp"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-053"
+   },
+   {
+    "titulo": "Plantillas HTML de email interpolan nombres y contenido sin escapar (bienvenida, bot activado, aviso de mensaje, reset)",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/email/templates/welcome-client.ts",
+      "linea": 46,
+      "fragmento": "Hola ${input.clientName}, tu cuenta está lista"
+     },
+     {
+      "ruta": "src/lib/email/templates/bot-activated.ts",
+      "linea": 35,
+      "fragmento": "${input.botName} está listo"
+     },
+     {
+      "ruta": "src/lib/email/notify-message.ts",
+      "linea": 110,
+      "fragmento": "white-space: pre-wrap;\">${params.preview}</p>"
+     },
+     {
+      "ruta": "src/lib/email/templates/password-reset.ts",
+      "linea": 12,
+      "fragmento": "const safeName = input.clientName?.trim() || 'Hola'"
+     }
+    ],
+    "impacto": "Un nombre de empresa, de bot o un mensaje del admin con < o comillas rompe el HTML del email o inyecta marcado (enlaces engañosos); el riesgo es bajo porque los valores los carga develOP o el propio destinatario, pero weekly-report.ts:3 y executive-weekly.ts:55 ya escapan y estas no.",
+    "propuesta": "Extraer el escapeHtml existente a lib/email y aplicarlo a toda interpolación en plantillas HTML.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.email",
+     "int.brevo",
+     "int.resend"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c2, DEU-049"
+   },
+   {
+    "titulo": "`any` en pagespeed.ts (regla dura 'Cero any')",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/integrations/pagespeed.ts",
+      "linea": 77,
+      "fragmento": "data: any,"
+     },
+     {
+      "ruta": "src/lib/integrations/pagespeed.ts",
+      "linea": 129,
+      "fragmento": ".filter(([_, audit]: [string, any]) =>"
+     },
+     {
+      "ruta": "src/lib/integrations/pagespeed.ts",
+      "linea": 132,
+      "fragmento": ".map(([id, audit]: [string, any]) => ({"
+     }
+    ],
+    "impacto": "La respuesta de Lighthouse se parsea sin tipos: un cambio de forma rompe en runtime (atrapado y cacheado como null 6 h) en vez de en compilación.",
+    "propuesta": "Tipar con unknown y guards como hace google-business-profile.ts (parseReviewsResponse).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-resultados.velocidad-sitio",
+     "int.pagespeed"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "secret-box descifra sin fijar authTagLength ni validar iv/tag, y su validación de hex es inerte",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/crypto/secret-box.ts",
+      "linea": 63,
+      "fragmento": "key = Buffer.from(raw, 'hex')"
+     },
+     {
+      "ruta": "src/lib/crypto/secret-box.ts",
+      "linea": 97,
+      "fragmento": "const decipher = createDecipheriv(ALGORITHM, key, iv) decipher.setAuthTag(tag)"
+     },
+     {
+      "ruta": "src/lib/crypto/credential-cipher.ts",
+      "linea": 119,
+      "fragmento": "const decipher = createDecipheriv(ALGORITHM, key, iv, { authTagLength: TAG_LENGTH_BYTES,"
+     }
+    ],
+    "impacto": "Protege la API key de 360dialog por canal (sendMessage.ts:22): quien pueda escribir la base puede guardar un tag truncado y bajar la autenticación GCM; Buffer.from no lanza con hex inválido, así que una key mal formada da un error de largo confuso. credential-cipher.ts ya tiene el endurecimiento.",
+    "propuesta": "Copiar a secret-box la validación de hex, el largo de iv/tag y authTagLength de credential-cipher.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.crypto",
+     "h3.vis-whatsapp"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Los HMAC de bajas y del state OAuth caen a AUTH_SECRET: rotarla deja inválidos todos los links de baja ya enviados",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/email/unsubscribe-token.ts",
+      "linea": 8,
+      "fragmento": "process.env.EMAIL_UNSUBSCRIBE_SECRET?.trim() || process.env.AUTH_SECRET?.trim()"
+     },
+     {
+      "ruta": "src/lib/security/oauth-state.ts",
+      "linea": 28,
+      "fragmento": "process.env.OAUTH_STATE_SECRET?.trim() || process.env.AUTH_SECRET?.trim()"
+     }
+    ],
+    "impacto": "La misma clave firma sesiones, bajas y state OAuth. Si hay que rotar AUTH_SECRET (p. ej. por una filtración) y no se configuró EMAIL_UNSUBSCRIBE_SECRET, todos los links de 'Dejar de recibir' y 'Darme de baja' de emails ya enviados responden 403, y la baja deja de funcionar para esos destinatarios. El inventario de credenciales lo da como 'solo scripts', pero se lee en 4 archivos de src.",
+    "propuesta": "Exigir secretos dedicados en producción sin fallback y documentar la rotación con período de gracia (aceptar también la firma con la clave anterior).",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.email",
+     "lib.security",
+     "h6.vis-optout",
+     "h2.cli-reportes-email"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-030"
+   },
+   {
+    "titulo": "CRON_SECRET se compara con === y el chequeo tiene cuatro copias; alerts solo acepta X-Cron-Secret",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/cron/cron-secret.ts",
+      "linea": 43,
+      "fragmento": "return Boolean(expectedSecret) && providedSecret === expectedSecret"
+     },
+     {
+      "ruta": "src/app/api/cron/alerts/route.ts",
+      "linea": 8,
+      "fragmento": "if (!expectedSecret || providedSecret !== expectedSecret) {"
+     },
+     {
+      "ruta": "src/app/api/cron/regenerate-briefs/route.ts",
+      "linea": 7,
+      "fragmento": "function getProvidedCronSecret(request: Request): string | null {"
+     },
+     {
+      "ruta": "src/app/api/cron/send-executive-reports/route.ts",
+      "linea": 7,
+      "fragmento": "function getProvidedCronSecret(request: Request): string | null {"
+     }
+    ],
+    "impacto": "Todas fallan cerrado (bien), pero la comparación no es de tiempo constante y las copias ya divergieron: alerts no acepta Bearer, contra lo que documenta .env.example:219.",
+    "propuesta": "timingSafeEqual en isAuthorizedCronRequest y usarlo en regenerate-briefs, send-executive-reports, alerts y os-follow-up.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.cron",
+     "int.cron.alerts",
+     "int.cron.regenerate-briefs",
+     "int.cron.send-executive-reports"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1151, PLAN-1013"
+   },
+   {
+    "titulo": "oauth-state.ts no tiene test versionado y el state no está atado a la sesión ni es de un solo uso",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/security/oauth-state.ts",
+      "linea": 20,
+      "fragmento": "No persistimos nonces consumidos: el flow es SUPER_ADMIN-only, el TTL es corto (10 min), y el modelo de amenaza es anti state-swap, no anti-replay."
+     },
+     {
+      "ruta": "src/lib/security/oauth-state.ts",
+      "linea": 72,
+      "fragmento": "export function verifyOAuthState(scope: string, state: unknown): VerifyResult {"
+     }
+    ],
+    "impacto": "El cierre del state-swap (SEC-AUTH-01/02) se probó con un script fuera del repo (C:/tmp/probe-oauth-state.mjs): un cambio futuro en oauth-state o en los callbacks puede reabrirlo sin que nada falle. El state vale para cualquier sesión SUPER_ADMIN durante 10 min.",
+    "propuesta": "Test de unidad versionado (firma, expiración, scope cruzado, payload manipulado) en el estilo de idor-tokens.invariant.ts; opcional, atar el state a una cookie httpOnly del admin.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.security",
+     "int.gbp",
+     "int.tiendanube"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-1309, PLAN-1310, SEC-AUTH-01, SEC-AUTH-02"
+   },
+   {
+    "titulo": "Las tres scheduled functions de Netlify no validan quién las invoca: si Netlify las expusiera por URL, un anónimo dispararía insights (Vertex) y reportes por email",
+    "prefijo": "SEC",
+    "severidad": "MEDIA",
+    "tipo": "seguridad",
+    "confianza": "HIPÓTESIS",
+    "evidencia": [
+     {
+      "ruta": "netlify/functions/generate-insights-cron.ts",
+      "linea": 44,
+      "fragmento": "export const handler = async () => {"
+     },
+     {
+      "ruta": "netlify/functions/send-weekly-reports-cron.ts",
+      "linea": 63,
+      "fragmento": "export const handler = async () => {"
+     },
+     {
+      "ruta": "netlify/functions/cleanup-old-events-cron.ts",
+      "linea": 6,
+      "fragmento": "export const handler = async () => {"
+     }
+    ],
+    "impacto": "Cada handler agrega el CRON_SECRET y llama a la ruta real. Según la documentación de Netlify las scheduled functions no se invocan por URL en producción, pero no se pudo verificar: si lo fueran, cualquiera repetiría a voluntad la generación de insights (costo de Vertex por bot) y el reporte semanal a todos los clientes.",
+    "propuesta": "Verificar con el caso manual; si responden por URL, chequear en el handler el header de invocación programada de Netlify o mover la lógica a la ruta con su propio secreto.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.cron.generate-insights",
+     "int.cron.send-weekly-reports",
+     "int.cron.cleanup-old-events"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "El pie del home conserva su número de WhatsApp de fallback ficticio, fuera de lib/whatsapp.ts que dice haberlo migrado",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 8,
+      "fragmento": "const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';"
+     },
+     {
+      "ruta": "src/lib/whatsapp.ts",
+      "linea": 11,
+      "fragmento": "`543812223344` (×2), `5493815000000` (`Footer`), `543813165293` (`/contact`)"
+     }
+    ],
+    "impacto": "Si NEXT_PUBLIC_WHATSAPP_NUMBER falta al compilar, el CTA 'WhatsApp directo' del pie lleva a un número ficticio mientras el resto del sitio usa el fallback real; el comentario de whatsapp.ts afirma una migración que en main no está.",
+    "propuesta": "Usar getWhatsappUrl/getWhatsappDigits de lib/whatsapp.ts en el pie.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto.formulario-pie-home"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "UX-031"
+   },
+   {
+    "titulo": "El pie del home anima pathLength sobre el path complejo del logo y blur en whileInView (lección de CLAUDE.md)",
+    "prefijo": "PERF",
+    "severidad": "BAJA",
+    "tipo": "perf",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 183,
+      "fragmento": "initial={{ pathLength: 0, opacity: 0 }} whileInView={{ pathLength: 1, opacity: 1 }}"
+     },
+     {
+      "ruta": "src/components/sections/home/Footer.tsx",
+      "linea": 166,
+      "fragmento": "filter: ['blur(0px)', 'blur(0px)', 'blur(1.6px)'],"
+     }
+    ],
+    "impacto": "CLAUDE.md registra que pathLength en paths complejos es caro; el logo tiene cientos de puntos y se combina con filtros blur animados en cada bloque del pie (jank en móviles de gama baja).",
+    "propuesta": "strokeDashoffset con getTotalLength() como indica la lección, y animar opacidad en lugar de filter blur.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h6.vis-contacto"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": ""
+   },
+   {
+    "titulo": "Callback de Tiendanube sin manejo de errores y con redirecciones de error que ninguna pantalla lee",
+    "prefijo": "UX",
+    "severidad": "BAJA",
+    "tipo": "ux",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
+      "linea": 45,
+      "fragmento": "new URL(`/dashboard?error=oauth_state_${stateCheck.reason}`, request.url),"
+     },
+     {
+      "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
+      "linea": 63,
+      "fragmento": "await prisma.organization.update({"
+     }
+    ],
+    "impacto": "Si la base falla después de canjear el code, el admin ve un 500 genérico y el token queda sin guardar; si el state vence o la conexión falla, termina en el inicio del panel sin ningún mensaje (git grep de oauth_failed/oauth_state sin lectores).",
+    "propuesta": "try/catch con mensaje, y que tienda-conectada lea ?error= como ya lee ?connected.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h2.cli-tienda.conectar-tienda",
+     "int.tiendanube"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-032"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.reputacion-gbp",
+    "nombre": "Reputación: rating y últimas reseñas de Google Business",
+    "descripcion": "Muestra rating, cantidad y reseñas recientes de la ficha de Google del cliente.",
+    "archivos": [
+     "src/lib/integrations/google-business-profile.ts",
+     "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
+     "src/components/dashboard/results/GBPMetricsCard.tsx"
+    ],
+    "entradas": [
+     "/dashboard/resultados/reputacion"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "reputacion/page.tsx:20 -> google-business-profile.ts:165-182 -> :185-236 pinta en el primer render, pero en el acierto de caché createdAt llega como string y GBPMetricsCard.tsx:124 lanza; performance fijo en 0 (:218-224).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "reputacion/page.tsx:15 resolveOrgId; google-business-profile.ts:166-167 filtra por organizationId"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "ReputationEmptyState si metrics es null (reputacion/page.tsx:34), pero null también es error o sin sucursal"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "error de API -> null igual que vacío (:202-205); el acierto de caché rompe el render"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura sin input"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "layout fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:203, :233) sin captureException"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "performance stub en 0 (:218-224) y FIXME(data-truth) en GBPMetricsCard.tsx:38"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "la conexión la hace un SUPER_ADMIN tipeando la URL de start"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-clientes",
+    "id": "h4.adm-clientes.conectar-google-business",
+    "nombre": "Conectar Google Business de un cliente (OAuth)",
+    "descripcion": "El admin autoriza la ficha de Google del cliente y el sistema descubre cuenta y sucursal.",
+    "archivos": [
+     "src/app/api/auth/google-business/start/route.ts",
+     "src/app/api/auth/google-business/callback/route.ts",
+     "src/lib/security/oauth-state.ts",
+     "src/lib/integrations/gbp-connection.ts",
+     "src/lib/integrations/gbp-connection-logic.ts",
+     "src/lib/integrations/gbp-discovery.ts"
+    ],
+    "entradas": [
+     "GET /api/auth/google-business/start",
+     "GET /api/auth/google-business/callback"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "callback trazado (callback/route.ts:14-82; oauth-state.ts:72-120; gbp-connection-logic.ts:219-230) pero sin entrada en la UI y con el resultado ?gbp= sin lector.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "SUPER_ADMIN en start (:6-9) y callback (:14-17); state HMAC por org"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "no lista datos"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "JSON crudo (:43, :85) y ?error= sin lector"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "redirecciones"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "presencia + firma (:23-35); orgId de start sin validar hasta el callback"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "sin pantalla"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:67, :84)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos de mentira"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "hay que tipear la URL; varias sucursales quedan sin selector"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resenas",
+    "id": "h2.cli-resenas.selector-sucursal",
+    "nombre": "Elegir la sucursal de Google Business",
+    "descripcion": "Listar las sucursales de la cuenta conectada y fijar la activa.",
+    "archivos": [
+     "src/lib/actions/gbp-connection.ts",
+     "src/lib/integrations/gbp-connection-logic.ts"
+    ],
+    "entradas": [
+     "listAvailableLocations",
+     "setActiveLocation"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "server actions (gbp-connection.ts:17,36) sin ninguna pantalla que las importe.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "org de la sesión (:19, :40) sin rol; SEC-053"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "sin pantalla"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "mensajes genéricos (:27, :56)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "sin pantalla"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "SetActiveLocationSchema (:43)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "sin pantalla"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:26, :55)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos de mentira"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "no hay UI"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-tienda",
+    "id": "h2.cli-tienda.conectar-tienda",
+    "nombre": "Conectar la tienda Tiendanube",
+    "descripcion": "OAuth de Tiendanube para leer pedidos y productos.",
+    "archivos": [
+     "src/app/api/auth/tiendanube/start/route.ts",
+     "src/app/api/auth/tiendanube/callback/route.ts",
+     "src/lib/integrations/tiendanube.ts"
+    ],
+    "entradas": [
+     "GET /api/auth/tiendanube/start",
+     "GET /api/auth/tiendanube/callback"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "el botón del cliente (ConnectStoreCard.tsx:39) choca con SUPER_ADMIN en start (:10-13); solo anda impersonando: start -> tiendanube.ts:17-22 -> callback :28-85 -> tienda-conectada/page.tsx:306.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "SUPER_ADMIN + state HMAC (callback :28-48)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "sin listado"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "sin try/catch (:58-81); errores a /dashboard?error= sin lector"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "redirecciones"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "firma del state; respuesta del token sin validar (tiendanube.ts:43)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "sin pantalla propia"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (tiendanube.ts:40, :45)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin datos de mentira"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "el cliente recibe 401 (BUG-032)"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-tienda",
+    "id": "h2.cli-tienda.resumen-tienda",
+    "nombre": "Resumen de la tienda (ventas, ticket, stock bajo, carritos)",
+    "descripcion": "Métricas del mes de la tienda conectada.",
+    "archivos": [
+     "src/lib/integrations/tiendanube.ts"
+    ],
+    "entradas": [
+     "/dashboard/modules/tienda-conectada"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "tienda-conectada/page.tsx:87 -> tiendanube.ts:74-80 (caché 30 min) -> :82-164 cuatro GET y agregados.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "getAuth filtra por organizationId (tiendanube.ts:53-55)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "null muestra el mismo mensaje de error (page.tsx:88-103)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "errores de API como ceros (:96-118); null cacheado 30 min"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:161)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales de la API"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "depende de que develOP conecte la tienda"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-agenda",
+    "id": "h2.cli-agenda.resumen-agenda",
+    "nombre": "Agenda inteligente: próximas reuniones y totales de Cal.com",
+    "descripcion": "Lee las reservas del Cal.com del cliente.",
+    "archivos": [
+     "src/lib/integrations/cal-com.ts"
+    ],
+    "entradas": [
+     "/dashboard/modules/agenda-inteligente"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "agenda-inteligente/page.tsx -> cal-com.ts:32-111 contra api.cal.com/v1 (:4), que cal-com-v2.ts:4-6 da por apagada (PROBABLE).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "getApiKey por organizationId (:24-30)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "null cacheado 10 min, console.error del status (:52-54)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:53, :108)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "API v1 apagada; key en la query (:49)"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.trafico-ga4",
+    "nombre": "Tráfico del sitio (GA4)",
+    "descripcion": "Sesiones, usuarios, rebote, páginas y fuentes de 30 días.",
+    "archivos": [
+     "src/lib/analytics.ts"
+    ],
+    "entradas": [
+     "/dashboard/resultados/trafico"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "trafico/page.tsx:46 -> analytics.ts:85-195 cuatro runReport en paralelo -> datos con isMockData false.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "el propertyId lo puede fijar el cliente y se lee con la service account única (SEC-045)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "sin filas devuelve ceros (:154-160)"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "cualquier error -> demo con banner, sin log (:196-198)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "normalizePropertyId (:60-72)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "mock de concesionaria en el camino del cliente (:24-56)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "requiere que develOP tenga acceso a la propiedad"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.seo-search-console",
+    "nombre": "SEO (Search Console)",
+    "descripcion": "Clics, impresiones, CTR, posición, consultas y páginas de 28 días.",
+    "archivos": [
+     "src/lib/searchconsole.ts"
+    ],
+    "entradas": [
+     "/dashboard/resultados/seo"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "seo/page.tsx:179 -> searchconsole.ts:99-210 tres consultas en paralelo.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "siteUrl de la org (fuera del lote)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "sin filas da ceros (:167-182)"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "error -> demo sin log (:211-213)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "lectura"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "mock de sanmiguel.com.ar (:29-64)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "la service account tiene que estar agregada al sitio"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-resultados",
+    "id": "h2.cli-resultados.velocidad-sitio",
+    "nombre": "Velocidad del sitio (PageSpeed)",
+    "descripcion": "Score y Core Web Vitals del sitio del cliente.",
+    "archivos": [
+     "src/lib/integrations/pagespeed.ts"
+    ],
+    "entradas": [
+     "/dashboard/resultados/trafico"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "trafico/page.tsx:125 -> pagespeed.ts:26-35 (caché 6 h) -> :37-74 -> :76-149.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "URL del sitio de la org (fuera del lote)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "null sin distinguir falta de key, URL inválida o error"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "null cacheado 6 h (:63-65); fecha cruda en el acierto (PageSpeedCard.tsx:60)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "url.startsWith('http') (:47)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "página fuera del lote"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:64, :71)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "lectura automática"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-reportes-email",
+    "id": "h2.cli-reportes-email.envio-automatico-semanal",
+    "nombre": "Envío automático del reporte ejecutivo semanal",
+    "descripcion": "Cron de los lunes que manda el resumen ejecutivo a Pro/Business.",
+    "archivos": [
+     "src/app/api/cron/send-executive-reports/route.ts",
+     "src/lib/email/templates/executive-weekly.ts",
+     "vercel.json"
+    ],
+    "entradas": [
+     "GET /api/cron/send-executive-reports"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "la ruta (:17-37) y la plantilla (executive-weekly.ts:182-322) existen, pero solo vercel.json:12 la agenda y el hosting es Netlify: no sale sola.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "CRON_SECRET (:17-23)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "envío"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "500 con message (:28-35), sin Sentry"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "envío"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-width 540 (executive-weekly.ts:204)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales (build.ts fuera del lote)"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "sin disparador"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-reportes-email",
+    "id": "h2.cli-reportes-email.baja-un-clic",
+    "nombre": "Baja de un clic del reporte ejecutivo",
+    "descripcion": "Link firmado que desactiva el reporte de la org.",
+    "archivos": [
+     "src/app/api/email/unsubscribe-executive/route.ts",
+     "src/lib/email/unsubscribe-token.ts"
+    ],
+    "entradas": [
+     "GET/POST /api/email/unsubscribe-executive"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "executive-weekly.ts:289 -> unsubscribe-token.ts:57-66 -> unsubscribe-executive/route.ts:39-101.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "HMAC por org (:62)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acuse"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "mensajes útiles (:50-90)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "página estática"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "timingSafeEqual (unsubscribe-token.ts:39-51)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "viewport y card max-width (:19, :23)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:80)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "la baja corre en el GET (BUG-061)"
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-optout",
+    "id": "h6.vis-optout.baja-campania",
+    "nombre": "Darse de baja de una campaña de email marketing",
+    "descripcion": "Link por contacto que marca optedOut.",
+    "archivos": [
+     "src/app/api/email/optout/[contactId]/route.ts",
+     "src/lib/email/unsubscribe-token.ts"
+    ],
+    "entradas": [
+     "GET /api/email/optout/[contactId]"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "email-marketing/_actions.ts:155 (fuera) -> optout/route.ts:69-104 -> unsubscribe-token.ts:97-109.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "HMAC por contacto antes de la DB (:77)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acuse"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "403 claro; sin try/catch en :91"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "página estática"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "HMAC timingSafeEqual"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "viewport (:13), max-width 380 (:32)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "solo onRequestError si lanza"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "la baja no llega a Brevo (BUG-021) y el token vive en el contacto global (SEC-039)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.cli-chatbot",
+    "id": "h3.cli-chatbot.reporte-semanal-email",
+    "nombre": "Reporte semanal del chatbot por email",
+    "descripcion": "Cada lunes, resumen de charlas y leads al admin de la org.",
+    "archivos": [
+     "netlify/functions/send-weekly-reports-cron.ts",
+     "src/app/api/cron/send-weekly-reports/route.ts",
+     "src/lib/email/templates/weekly-report.ts"
+    ],
+    "entradas": [
+     "GET /api/cron/send-weekly-reports"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "netlify.toml:28-29 -> send-weekly-reports-cron.ts:63-108 -> route.ts:7-21 -> sendWeeklyReports.ts:58-66 (fuera) -> weekly-report.ts:25-175.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "barre todas las orgs con bot activo, incluidas archivadas"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "secciones condicionales (:29-68)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "500 con String(error) (:16-19); cuenta fallas sin Sentry"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "envío"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "max-width 540 (:84)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "datos reales"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "no hay forma de darse de baja (:164 a ruta inexistente)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-chatbots",
+    "id": "h3.adm-chatbots.insights-automaticos",
+    "nombre": "Generación diaria de insights del chatbot",
+    "descripcion": "Cron que genera insights por bot activo y avisa por email.",
+    "archivos": [
+     "netlify/functions/generate-insights-cron.ts",
+     "src/app/api/cron/generate-insights/route.ts"
+    ],
+    "entradas": [
+     "POST /api/cron/generate-insights"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "netlify.toml:25-26 -> generate-insights-cron.ts:44-104 -> route.ts:10-96 -> generateInsightsForBot (fuera).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "incluye orgs archivadas (:18-21) y no mira el plan (BUG-110)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "skipped_insufficient (:46-49)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "logChatbotEvent por bot (:76-86); findMany sin try"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:70, :75)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "se corta con muchos bots (PERF)"
+     }
+    }
+   },
+   {
+    "herramienta": "h3.adm-actividad",
+    "id": "h3.adm-actividad.purga-eventos",
+    "nombre": "Purga diaria de eventos del chatbot (30 días)",
+    "descripcion": "Cron de retención de chatbot_events.",
+    "archivos": [
+     "netlify/functions/cleanup-old-events-cron.ts",
+     "src/app/api/cron/cleanup-old-events/route.ts"
+    ],
+    "entradas": [
+     "GET /api/cron/cleanup-old-events"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "netlify.toml:31-32 -> cleanup-old-events-cron.ts:6-41 -> route.ts:16-30 -> cleanupOldEvents (fuera).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "CRON_SECRET (:17)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "500 con message (:24-28)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "automático"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-alertas",
+    "id": "h4.adm-alertas.deteccion-automatica",
+    "nombre": "Detección automática de incidencias de bots",
+    "descripcion": "Cron que crea alertas y avisa al dueño y a develOP.",
+    "archivos": [
+     "src/app/api/cron/detect-bot-issues/route.ts"
+    ],
+    "entradas": [
+     "GET /api/cron/detect-bot-issues"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "route.ts:7-21 existe y anda a mano (flujo D3 'Detector de alertas de bots disparado a mano'), pero no tiene disparador.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "CRON_SECRET (:8)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "500 con String(error) (:16-19)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "nunca corre sola"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-config",
+    "id": "h4.adm-config.alertas-periodicas-agencia",
+    "nombre": "Alertas periódicas de la agencia (clientes inactivos, suscripciones por vencer)",
+    "descripcion": "Cron que avisa por webhook de clientes sin actividad 30 días y renovaciones en 7 días.",
+    "archivos": [
+     "src/app/api/cron/alerts/route.ts"
+    ],
+    "entradas": [
+     "GET /api/cron/alerts"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "alerts/route.ts:4-19 -> runPeriodicAgencyAlerts (lib/alerts.ts:195) sin disparador y solo con X-Cron-Secret.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "CRON_SECRET (:5-10)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "500 genérico (:15-18)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "console.error (:16)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "nunca corre"
+     }
+    }
+   },
+   {
+    "herramienta": "h2.cli-inicio",
+    "id": "h2.cli-inicio.brief-ia-programado",
+    "nombre": "Regeneración semanal del resumen ejecutivo IA",
+    "descripcion": "Cron de los lunes que refresca el brief de cada org activa.",
+    "archivos": [
+     "src/app/api/cron/regenerate-briefs/route.ts",
+     "vercel.json"
+    ],
+    "entradas": [
+     "GET /api/cron/regenerate-briefs"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "route.ts:18-56 existe; solo vercel.json:8 la agenda.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "CRON_SECRET; incluye orgs archivadas con suscripción ACTIVE (:26-32)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "errorLog por org (:42-45), ok:true igual"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "batch"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "sin disparador en Netlify"
+     }
+    }
+   },
+   {
+    "herramienta": "h6.vis-contacto",
+    "id": "h6.vis-contacto.formulario-pie-home",
+    "nombre": "Formulario de contacto del pie del home",
+    "descripcion": "Nombre, WhatsApp, rubro y mensaje enviados a n8n, o salida a WhatsApp.",
+    "archivos": [
+     "src/components/sections/home/Footer.tsx"
+    ],
+    "entradas": [
+     "/ (pie del home)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:42 -> Footer.tsx:446 -> :589 -> :78-89 POST al webhook de n8n y pantalla de éxito.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "público"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "formulario"
+     },
+     "errores": {
+      "cumple": "no",
+      "evidencia": "no mira res.ok (:84-89); éxito falso"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "ENVIANDO... y disabled (:735, :755)"
+     },
+     "validacion_servidor": {
+      "cumple": "no",
+      "evidencia": "sin servidor; solo required (:629)"
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "grid auto-fit minmax(min(100%, 140px)) (:600)"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch vacío (:90)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "parcial",
+      "evidencia": "número ficticio de fallback (:8)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "el visitante cree que envió aunque n8n falle"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-config",
+    "id": "h4.adm-config.avisos-telegram",
+    "nombre": "Avisos por Telegram al equipo",
+    "descripcion": "Sender único con credenciales config-first y fallback a env.",
+    "archivos": [
+     "src/lib/notifications/telegram.ts"
+    ],
+    "entradas": [
+     "sendTelegram",
+     "notifyTelegramOptional",
+     "isTelegramConfigured"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "llamadores -> telegram.ts:67-99 -> :39-61 -> POST api.telegram.org.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "credenciales de agencia (AgencySettings), no por cliente"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "envío"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "false + console.error (:90-97); la UI solo detecta ausencia (:108-110)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "envío"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "mensajes armados por el servidor"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "sin pantalla"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "sin captura"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin mock"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "rotable desde /admin/settings sin redeploy"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-1076",
+    "clave": "Warnings de Sentry en el build (onRequestError, global-error.js)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/instrumentation.ts:49 exporta onRequestError; src/app/global-error.tsx:24 captureException",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-981",
+    "clave": "getN8nMetrics mock sin call sites",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -l '\\bgetN8nMetrics\\b' origin/main -- logic-core-v3/src -> solo src/lib/n8n.ts:259 (control: sendLeadToN8n aparece en src/lib/actions/contact.ts:5,82)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Candidato a poda junto con su mock (n8n.ts:37-355)."
+   },
+   {
+    "id": "PLAN-963",
+    "clave": "F7: /api/email/optout/[contactId] sin firma",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/app/api/email/optout/[contactId]/route.ts:77 verifyEmailContactOptOutToken antes de la DB",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1310",
+    "clave": "Probar el state firmado en un flujo OAuth real (sandbox)",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -l -E 'verifyOAuthState|signOAuthState' origin/main -- logic-core-v3 -> solo docs y 5 archivos de código, ningún test; git grep probe-oauth-state fuera de docs -> sin resultados",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1123",
+    "clave": "Consolidar inits de Sentry duplicados",
+    "estado_en_codigo": "parcial",
+    "evidencia": "siguen instrumentation.ts (raíz), sentry.server.config.ts:8 y sentry.edge.config.ts:5 junto a src/instrumentation.ts:6,33; las claves de IP se agregaron en scrub-pii.ts:34-38",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Los legacy no se ejecutan: es borrar, no consolidar."
+   },
+   {
+    "id": "PLAN-1128",
+    "clave": "Baseline tsc rojo por @googleapis/webmasters",
+    "estado_en_codigo": "hecho",
+    "evidencia": "package.json:131 @googleapis/webmasters instalado (node_modules/@googleapis/webmasters presente); baseline tsc 0",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1141",
+    "clave": "vercel.json y netlify.toml con crons distintos",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "vercel.json:4-13 (os-follow-up, regenerate-briefs, send-executive-reports) vs netlify.toml:25-32 (generate-insights, send-weekly-reports, cleanup-old-events)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1005",
+    "clave": "Error de tipos en searchconsole.ts y build sin tipos",
+    "estado_en_codigo": "hecho",
+    "evidencia": "next.config.ts:31 sin ignoreBuildErrors; baseline tsc 0",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1015",
+    "clave": "Endpoint test-sentry sin guard en producción",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "src/app/api/test-sentry/route.ts:3-5 sin guard; proxy.ts:172 no cubre /api",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1309",
+    "clave": "Sin anti-replay duro en el state OAuth",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/security/oauth-state.ts:20-21 decisión documentada; TTL 10 min en :24",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1081",
+    "clave": "B1.2 optimizaciones de build/dev",
+    "estado_en_codigo": "parcial",
+    "evidencia": "src/instrumentation-client.ts existe (migración hecha); pero package.json:7 'next dev --webpack' (no turbopack) y package.json:9 'next build --webpack' sin cross-env; NODE_OPTIONS 4096 en netlify.toml:7",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1298",
+    "clave": "B11.0 probe multi-tenant: mapa de fugas",
+    "estado_en_codigo": "hecho",
+    "evidencia": "C1 cerrado: tiendanube/callback/route.ts:28-31 exige sesión SUPER_ADMIN",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1300",
+    "clave": "B11.2 assertResourceBelongsToOrg + fixes C1, C2, F2, F5, F6",
+    "estado_en_codigo": "hecho",
+    "evidencia": "tiendanube/callback/route.ts:28-31 y :72-81 (auth + audit); tiendanube/start/route.ts:10-13 SUPER_ADMIN; src/lib/auth/assert-ownership.ts existe",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1302",
+    "clave": "B11.3 re-probe (cierre de B11)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "C1 cerrado (callback :28-31); F1 cerrado luego por B-SEC.3b (callback :42-47); F7 cerrado por SEC vía 1 (optout/route.ts:77)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1308",
+    "clave": "B-SEC.3b state OAuth firmado con HMAC",
+    "estado_en_codigo": "hecho",
+    "evidencia": "oauth-state.ts:50-59 y :72-120; tiendanube.ts:20; google-business-profile.ts:44; verificación antes de la DB en google-business/callback/route.ts:30-35 y tiendanube/callback/route.ts:42-47",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1311",
+    "clave": "B-SEC.3c verificación del cierre del state-swap de Google Business",
+    "estado_en_codigo": "hecho",
+    "evidencia": "google-business/callback/route.ts:27-35; el probe vive fuera del repo (sin test versionado)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1107",
+    "clave": "BP.1 googleapis reemplazado por paquetes granulares",
+    "estado_en_codigo": "hecho",
+    "evidencia": "package.json:131 @googleapis/webmasters y :147 google-auth-library; git grep '\"googleapis\"' en package.json -> sin resultados",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1121",
+    "clave": "B14.5 Sentry cableado con scrubbing de PII",
+    "estado_en_codigo": "hecho",
+    "evidencia": "scrubPii en src/instrumentation.ts:21,39 e instrumentation-client.ts:17; global-error.tsx:24; onRequestError :49",
+    "sigue_teniendo_sentido": "no",
+    "nota": "La DSN sigue sin verificar (hallazgo Sentry)."
+   },
+   {
+    "id": "PLAN-964",
+    "clave": "SEC vía 1: opt-out de email con token HMAC",
+    "estado_en_codigo": "hecho",
+    "evidencia": "optout/[contactId]/route.ts:77; unsubscribe-token.ts:77-109; tests/e2e/20-idor-optout.spec.ts referencia signEmailContactOptOutToken",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1140",
+    "clave": "T0.2 cron de cleanupOldEvents",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/app/api/cron/cleanup-old-events/route.ts:14-29 (30 días)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1142",
+    "clave": "CRON-2 scheduled function real de cleanup",
+    "estado_en_codigo": "hecho",
+    "evidencia": "netlify/functions/cleanup-old-events-cron.ts:6-41; netlify.toml:31-32",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1148",
+    "clave": "D.3 cron real de generate-insights",
+    "estado_en_codigo": "hecho",
+    "evidencia": "netlify/functions/generate-insights-cron.ts:33,62-66 (POST, 20 s); netlify.toml:25-26",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1149",
+    "clave": "H.1 cron real de send-weekly-reports",
+    "estado_en_codigo": "hecho",
+    "evidencia": "netlify/functions/send-weekly-reports-cron.ts:63-108; netlify.toml:28-29",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1150",
+    "clave": "H.2 auth de crons que falla cerrado",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/cron/cron-secret.ts:40-44; usado en generate-insights/route.ts:11, send-weekly-reports/route.ts:8, detect-bot-issues/route.ts:8, cleanup-old-events/route.ts:17",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1012",
+    "clave": "Sprint T: getProvidedCronSecret fuera de route.ts",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/lib/cron/cron-secret.ts:24; la carpeta cleanup-old-events solo tiene route.ts y __tests__ (git ls-tree)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1270",
+    "clave": "Sender único de Telegram",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git grep api.telegram.org origin/main -- logic-core-v3/src -> solo src/lib/notifications/telegram.ts:79",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1078",
+    "clave": "Variables críticas faltantes en .env.local (check-env)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "scripts/check-env.js:26 exige NEXT_PUBLIC_APP_URL; el código sigue con fallback localhost (unsubscribe-token.ts:58) o 'undefined' (notify-message.ts:45). El .env no se lee (secret)",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Requiere verificación del entorno."
+   },
+   {
+    "id": "PLAN-1090",
+    "clave": "Generar CRM_SECRET_KEY en .env.local",
+    "estado_en_codigo": "parcial",
+    "evidencia": "lectura en encryptSecret.ts:26 (fuera del lote); el valor del entorno no es verificable por lectura",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1099",
+    "clave": "Cablear Sentry.captureException en los error boundaries",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/components/ui/SectionErrorBoundary.tsx:64 y src/app/error.tsx:27 captureException",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1158",
+    "clave": "T0.2 cron cleanupOldEvents (roadmap-pendientes)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "cleanup-old-events/route.ts y netlify/functions/cleanup-old-events-cron.ts; el pendiente quedó viejo",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1167",
+    "clave": "Build rojo por baseline ajeno",
+    "estado_en_codigo": "parcial",
+    "evidencia": "@googleapis/webmasters resuelto (package.json:131, tsc 0); el OOM del build sigue (no se corre build en esta auditoría) y eslint tiene 102 errores",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1162",
+    "clave": "DSN de Sentry sin configurar",
+    "estado_en_codigo": "parcial",
+    "evidencia": "el código lee NEXT_PUBLIC_SENTRY_DSN (src/instrumentation.ts:7, instrumentation-client.ts:5); el valor en Netlify no es verificable desde el repo",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1164",
+    "clave": "Env vars críticas faltantes en .env local",
+    "estado_en_codigo": "parcial",
+    "evidencia": "no verificable sin leer el .env; check-env.js:41-68 las lista pero no corre en el build",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1340",
+    "clave": "Tokens OAuth y credenciales en claro",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "google-business/callback/route.ts:52-53, tiendanube/callback/route.ts:67 escriben en claro; encryptCredential sin llamadores en src (git grep de credential-cipher fuera de src/lib/crypto -> vacío)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1320",
+    "clave": "Verificar GBP OAuth y Search Console con credenciales reales",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "sin test ni registro de prueba en el repo; requiere runtime",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1122",
+    "clave": "Activar Sentry en prod (DSN + source maps)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "next.config.ts:254-260 withSentryConfig listo; .env.example:293 y :312-314 documentan las variables; el entorno no es verificable",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-965",
+    "clave": "Atributos Brevo CONTACT_ID/OPTOUT_TOKEN + e2e de opt-out",
+    "estado_en_codigo": "parcial",
+    "evidencia": "email-marketing/_actions.ts:114-115 manda los atributos y :155 arma el link; tests/e2e/20-idor-optout.spec.ts existe; la creación de atributos en Brevo no es verificable y SEC-039 muestra que el atributo vive en el contacto global",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-983",
+    "clave": "Actualizar workflow n8n para leer signalsV2",
+    "estado_en_codigo": "parcial",
+    "evidencia": "el payload ya trae signalsV2 (git grep -c signalsV2 en crm/buildLeadPayload.ts = 3); el workflow de n8n vive fuera del repo",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1331",
+    "clave": "Tokens OAuth guardados en claro",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "mismas líneas que PLAN-1340; cal-com.ts:28 lee calComApiKey en claro",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1143",
+    "clave": "Crons sin scheduler real en Netlify",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "netlify.toml:25-32 solo 3; git grep de regenerate-briefs|send-executive-reports|detect-bot-issues|cron/alerts en netlify.toml, netlify/ y .github/workflows -> sin resultados",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1146",
+    "clave": "BREVO_API_KEY y Telegram sin configurar en prod",
+    "estado_en_codigo": "parcial",
+    "evidencia": "brevo-service.ts:20-23 y telegram.ts:72-75 degradan sin credencial; isTelegramConfigured (:108) avisa en admin/leados; el valor en prod no es verificable",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1151",
+    "clave": "Consolidar auth inline de 4 crons al helper",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "copias en regenerate-briefs/route.ts:7-22, send-executive-reports/route.ts:7-21, alerts/route.ts:5-8, os-follow-up/route.ts:142-155",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1155",
+    "clave": "Env vars faltantes en el worktree de dev",
+    "estado_en_codigo": "parcial",
+    "evidencia": "entorno local, no verificable por lectura del repo",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1013",
+    "clave": "Crons: dedupe de getProvidedCronSecret y build autoritativo",
+    "estado_en_codigo": "parcial",
+    "evidencia": "4 rutas usan cron-secret.ts; regenerate-briefs:7, send-executive-reports:7 y os-follow-up:142 conservan copias",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-988",
+    "clave": "T0.2 cron de cleanupOldEvents (bloque)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "cleanup-old-events/route.ts:16-30",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-989",
+    "clave": "T0.3 higiene de los crons (any y CRON_SECRET)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "cron-secret.ts:40-44 falla cerrado; las functions abortan sin CRON_SECRET (cleanup-old-events-cron.ts:10-18); git grep de ': any' en src/app/api/cron sin resultados",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1322",
+    "clave": "B2 Matsu vivo (onboarding, embed, plan, Sentry -> Slack/email)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "lo de Sentry -> Slack/email es configuración del panel de Sentry, no del repo, y la DSN no está verificada; el resto es de otros dominios",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1098",
+    "clave": "Sentry diferido a B14",
+    "estado_en_codigo": "hecho",
+    "evidencia": "superado por B14.5: src/instrumentation.ts y captureException en error boundaries",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1256",
+    "clave": "csv-escape duplicado a propósito",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "git ls-tree de logic-core-v3/src/lib/csv -> vacío; la única copia es src/modules/chatbot/server/leads/csv/csvEscape.ts",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "La copia en src/lib/csv no está en main (quizás quedó en otra rama)."
+   },
+   {
+    "id": "PLAN-1338",
+    "clave": "Decisiones clave de Alpha (tabs, alertas por cron, E2E)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "las alertas por cron existen como ruta (detect-bot-issues/route.ts:7) pero sin disparador",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1259",
+    "clave": "SectionErrorBoundary no sirve fuera del portal cliente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "src/app/(protected)/setter/error.tsx:32 captureException propio",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1240",
+    "clave": "Select compartido con listbox propio",
+    "estado_en_codigo": "hecho",
+    "evidencia": "git grep -c listbox src/components/ui/Select.tsx = 12",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1323",
+    "clave": "CC.1 auditoría de lo que configura el cliente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "report-only sin cambios de código; la config CRM vive en el admin (flujo D5 'Configurar y probar la integración CRM (n8n)': IntegrationsTab.tsx:36)",
+    "sigue_teniendo_sentido": "no"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D7-A1] Opt-out sin firma: /api/email/optout/[contactId] pendiente de HMAC según B11.3 y dado por cerrado en B-SEC.3c citando unsubscribe-token.ts",
+    "resultado": "descartada",
+    "evidencia": "src/app/api/email/optout/[contactId]/route.ts:77 verifica verifyEmailContactOptOutToken (src/lib/email/unsubscribe-token.ts:97-109, scope propio email-contact:optout:v1) antes de tocar la DB; el link de las campañas lleva el token (email-marketing/_actions.ts:114-115,155). La cita de B-SEC.3c hoy es correcta (cerrado por SEC vía 1). Quedan abiertos otros defectos de la baja: GET que escribe (BUG-061) y atributo en el contacto global (SEC-039)."
+   },
+   {
+    "alerta": "[D7-A2] OAuth de Google Business: state-swap cerrado tarde y probado con un script fuera del repo; verificar state firmado y atado a la sesión en GBP y Tiendanube",
+    "resultado": "parcial",
+    "hallazgo_titulo": "oauth-state.ts no tiene test versionado y el state no está atado a la sesión ni es de un solo uso",
+    "evidencia": "Firmado sí: oauth-state.ts:38-59 HMAC-SHA256 con scope, nonce y expiración de 10 min; ambos callbacks verifican antes de la DB (google-business/callback/route.ts:30-35, tiendanube/callback/route.ts:42-47) y exigen SUPER_ADMIN (:14-17, :28-31). Atado a la sesión no: el state solo lleva org, nonce y expiración, y no se persisten nonces (oauth-state.ts:20-21). Sin test en el repo (git grep de verifyOAuthState/signOAuthState fuera de docs: solo 5 archivos de código)."
+   },
+   {
+    "alerta": "[D7-A3] Hosting ambiguo: Netlify aplica migrate deploy pero el cron del reporte semanal (ejecutivo) se registra en vercel.json: cron posiblemente sin disparador",
+    "resultado": "confirmada",
+    "hallazgo_titulo": "Detector de incidencias de bots y alertas periódicas de la agencia sin disparador en ningún registrador: la credencial de Vertex vencida nunca se convierte en alerta automática",
+    "evidencia": "vercel.json:8,12 registra regenerate-briefs y send-executive-reports; netlify.toml:25-32 solo agenda generate-insights, send-weekly-reports (chatbot) y cleanup-old-events; .github/workflows solo tiene db-backup.yml:41. El caso del reporte ejecutivo ya es BUG-047; además detect-bot-issues y alerts no están en ningún registrador."
+   },
+   {
+    "alerta": "[D7-A4] Sentry inactivo en prod a 2026-08 y nombre del DSN inconsistente (SENTRY_DSN vs NEXT_PUBLIC_SENTRY_DSN): ver qué variable lee el código y qué pasa si falta",
+    "resultado": "parcial",
+    "hallazgo_titulo": "Sentry depende de NEXT_PUBLIC_SENTRY_DSN incrustada en el build: sin ella queda inerte sin aviso, y la config raíz con SENTRY_DSN es código muerto",
+    "evidencia": "El código vivo lee NEXT_PUBLIC_SENTRY_DSN (src/instrumentation.ts:7,34; src/instrumentation-client.ts:5; .env.example:293). SENTRY_DSN solo la leen sentry.server.config.ts:9 y sentry.edge.config.ts:6, que importa instrumentation.ts de la raíz, archivo que Next 16 no carga con src/app (next/dist/build/index.js:616). Si falta, Sentry.init sin DSN queda inerte en silencio. Si prod la tiene hoy no es verificable desde el repo (caso manual)."
+   },
+   {
+    "alerta": "[D7-A5] Credenciales por worktree: copiar .env.local y vertex-credentials.json a cada worktree (insumo para E10)",
+    "resultado": "parcial",
+    "evidencia": "Coherente con el código: GOOGLE_APPLICATION_CREDENTIALS apunta a un archivo local (google.ts:54) y vertex-credentials.json está en .gitignore:55; ningún archivo de credenciales está versionado (git ls-tree con patrones vertex-credentials/credentials.json/.env -> vacío; control: .env.example sí aparece). En Netlify se usa GOOGLE_VERTEX_CREDENTIALS_JSON (google.ts:55,73). Es insumo operativo, no defecto: incorporado a la fila E10 de Vertex."
+   },
+   {
+    "alerta": "[D7-A6] Token de Vercel Blob quitado del .env: confirmar que no quedan lecturas de BLOB_READ_WRITE_TOKEN",
+    "resultado": "confirmada",
+    "evidencia": "git grep -n -E 'BLOB_READ_WRITE_TOKEN|@vercel/blob' origin/main -- logic-core-v3 ':!logic-core-v3/docs' -> exit 1 (control positivo: TELEGRAM_BOT_TOKEN aparece en telegram.ts). Sin defecto: no requiere hallazgo."
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "instrumentation.ts",
+    "senales": [
+     "Next 16.2.9 busca instrumentation en join(appDir, '..') = src (node_modules/next/dist/build/index.js:615-616) y existe src/instrumentation.ts",
+     "sin importadores; solo importa los sentry.*.config legacy"
+    ],
+    "que_rompe": "nada en runtime; corregir docs que piden SENTRY_DSN"
+   },
+   {
+    "archivo": "sentry.server.config.ts",
+    "senales": [
+     "solo lo importa instrumentation.ts de la raíz (muerto)",
+     "@sentry/nextjs 10.62 no lo autocarga: solo advierte (build/cjs/config/webpack.js:318-329)",
+     "lee SENTRY_DSN, que nadie más usa"
+    ],
+    "que_rompe": "nada"
+   },
+   {
+    "archivo": "sentry.edge.config.ts",
+    "senales": [
+     "idem sentry.server.config.ts"
+    ],
+    "que_rompe": "nada"
+   },
+   {
+    "archivo": "src/app/api/test-sentry/route.ts",
+    "senales": [
+     "sin referencias (git grep test-sentry vacío)",
+     "500 público permanente"
+    ],
+    "que_rompe": "la prueba manual de Sentry (reemplazable por una acción solo SUPER_ADMIN)"
+   },
+   {
+    "archivo": "src/lib/integrations/brevo.ts (getCampaignStats :143-166)",
+    "senales": [
+     "sin llamadores (git grep -l solo brevo.ts)",
+     "cuenta listas como destinatarios (:157) y solo softBounces (:160)"
+    ],
+    "que_rompe": "nada"
+   },
+   {
+    "archivo": "src/lib/n8n.ts (getN8nMetrics y mock :37-355)",
+    "senales": [
+     "sin llamadores",
+     "N8N_API_URL/KEY solo los usa esto y settings.ts (módulo sin importadores según D1)"
+    ],
+    "que_rompe": "nada; mantener sendLeadToN8n (:18-35)"
+   },
+   {
+    "archivo": "src/lib/actions/gbp-connection.ts",
+    "senales": [
+     "'use server' sin importadores (acciones públicas latentes, SEC-053)"
+    ],
+    "que_rompe": "el futuro selector de sucursal P3-A.2"
+   },
+   {
+    "archivo": "vercel.json",
+    "senales": [
+     "el hosting es Netlify (netlify.toml:1-10, AGENTS.md:21)",
+     "sus 3 crons no corren"
+    ],
+    "que_rompe": "nada, si los crons se migran a functions de Netlify"
+   },
+   {
+    "archivo": "src/app/api/track/route.ts",
+    "senales": [
+     "sin consumidores (git grep api/track fuera de la ruta -> vacío; control: api/chatbot en useChatbot.ts)",
+     "SEC-042"
+    ],
+    "que_rompe": "nada"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Reputación GBP: segunda visita dentro de la hora",
+    "entorno": "build de producción local (npm run start sin QA) o deploy preview, con una org de prueba",
+    "precondiciones": "Cuenta de Google de prueba con una ficha de Business que tenga al menos una reseña; GOOGLE_BUSINESS_PROFILE_* configuradas",
+    "pasos": [
+     "Como SUPER_ADMIN, abrir /api/auth/google-business/start?orgId=<org de prueba> y completar el consentimiento",
+     "Impersonar la org y abrir /dashboard/resultados/reputacion",
+     "Recargar la página antes de que pase una hora"
+    ],
+    "esperado": "Las dos cargas muestran el rating y las reseñas con su fecha",
+    "senal_falla": "La segunda carga muestra la pantalla de error (TypeError en toISOString/toLocaleDateString)",
+    "escribe_db_o_email": true,
+    "hallazgos": "Reputación se cae desde la segunda visita"
+   },
+   {
+    "titulo": "Sentry recibe eventos en producción",
+    "entorno": "panel de Netlify + panel de Sentry; deploy preview",
+    "precondiciones": "Acceso a Netlify y Sentry",
+    "pasos": [
+     "En Netlify > Site configuration > Environment variables, verificar NEXT_PUBLIC_SENTRY_DSN con scope Builds y Functions",
+     "En un deploy preview, pedir GET /api/test-sentry",
+     "Buscar el evento en Sentry dentro de un minuto"
+    ],
+    "esperado": "Aparece el evento 'Test Sentry'",
+    "senal_falla": "No aparece: Sentry está inerte en ese build",
+    "escribe_db_o_email": false,
+    "hallazgos": "Sentry depende de NEXT_PUBLIC_SENTRY_DSN incrustada en el build"
+   },
+   {
+    "titulo": "Scheduled functions de Netlify invocables por URL",
+    "entorno": "branch deploy SIN CRON_SECRET (para que no tengan efecto)",
+    "precondiciones": "Branch deploy con netlify/functions publicado",
+    "pasos": [
+     "curl -i https://<branch-deploy>/.netlify/functions/cleanup-old-events-cron",
+     "Repetir con generate-insights-cron y send-weekly-reports-cron"
+    ],
+    "esperado": "404 o rechazo: solo corren por schedule",
+    "senal_falla": "500 con 'Missing URL or CRON_SECRET': la function corre por URL (en producción dispararía la ruta real)",
+    "escribe_db_o_email": false,
+    "hallazgos": "Las tres scheduled functions de Netlify no validan quién las invoca"
+   },
+   {
+    "titulo": "Crons realmente agendados en producción",
+    "entorno": "panel de Netlify (Functions)",
+    "precondiciones": "Acceso a Netlify",
+    "pasos": [
+     "Abrir Functions y filtrar las Scheduled",
+     "Ver último run de cada una",
+     "Confirmar si existe un proyecto Vercel activo con vercel.json"
+    ],
+    "esperado": "Agendados también regenerate-briefs, send-executive-reports, detect-bot-issues y alerts",
+    "senal_falla": "Solo figuran generate-insights-cron, send-weekly-reports-cron y cleanup-old-events-cron",
+    "escribe_db_o_email": false,
+    "hallazgos": "Detector de incidencias de bots y alertas periódicas sin disparador; BUG-047"
+   },
+   {
+    "titulo": "Baja del reporte semanal del chatbot",
+    "entorno": "casilla de una org de prueba con bot activo",
+    "precondiciones": "Haber recibido un reporte semanal del chatbot",
+    "pasos": [
+     "Abrir el email del lunes",
+     "Clic en 'cambiá tus preferencias'"
+    ],
+    "esperado": "Pantalla para dejar de recibir el reporte",
+    "senal_falla": "404 en /dashboard/chatbot/preferences",
+    "escribe_db_o_email": false,
+    "hallazgos": "Reporte semanal del chatbot sin forma de darse de baja"
+   },
+   {
+    "titulo": "Pie del home con n8n caído y con teclado",
+    "entorno": "local con NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL apuntando a un webhook de prueba desactivado (responde 404/500)",
+    "precondiciones": "Build local",
+    "pasos": [
+     "Abrir / y bajar hasta el pie",
+     "Con Tab, intentar llegar a 'Completar formulario' y abrirlo con Enter",
+     "Con el mouse, abrir el formulario, completarlo y enviar"
+    ],
+    "esperado": "La tarjeta se enfoca y abre con teclado; ante el error de n8n se muestra un mensaje de error",
+    "senal_falla": "La tarjeta no recibe foco; aparece '¡Consulta enviada!' aunque el webhook falló",
+    "escribe_db_o_email": false,
+    "hallazgos": "Formulario del pie del home -> n8n; A11Y del pie"
+   },
+   {
+    "titulo": "Tienda conectada: error cacheado tras una falla",
+    "entorno": "build de producción local con una tienda Tiendanube de prueba conectada",
+    "precondiciones": "Org de prueba con Tiendanube conectada",
+    "pasos": [
+     "Desinstalar la app de develOP en la tienda de prueba",
+     "Abrir /dashboard/modules/tienda-conectada (impersonando)",
+     "Reconectar la tienda y recargar varias veces durante 10 minutos"
+    ],
+    "esperado": "Tras reconectar se ven los datos",
+    "senal_falla": "Sigue el error o los ceros hasta 30 minutos",
+    "escribe_db_o_email": true,
+    "hallazgos": "Las integraciones cachean null ante una falla transitoria"
+   },
+   {
+    "titulo": "Credencial de Google Business revocada: qué ve cada uno",
+    "entorno": "producción o preview con una org de prueba conectada",
+    "precondiciones": "GBP de prueba conectado",
+    "pasos": [
+     "En la cuenta de Google de prueba, quitar el acceso de la app (Seguridad > Apps de terceros)",
+     "Abrir Reputación y Motor de reseñas del cliente",
+     "Revisar Sentry, Telegram y email de develOP",
+     "En Google Cloud Console, revisar el Publishing status de la pantalla de consentimiento (Testing hace vencer refresh tokens)"
+    ],
+    "esperado": "develOP recibe un aviso y el cliente ve 'reconectar'",
+    "senal_falla": "El cliente ve vacío o 'Sin reseñas' y nadie en develOP recibe nada",
+    "escribe_db_o_email": false,
+    "hallazgos": "Ninguna integración ni cron reporta a Sentry (E10)"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "Ningún archivo de crons, callbacks OAuth, integraciones, emails, notificaciones, n8n, analytics, searchconsole ni netlify/ llama a Sentry",
+    "comando": "git grep -n -E 'Sentry|captureException' origin/main -- logic-core-v3/src/app/api/cron logic-core-v3/src/app/api/auth/google-business logic-core-v3/src/app/api/auth/tiendanube logic-core-v3/src/lib/integrations logic-core-v3/src/lib/email logic-core-v3/src/lib/email.ts logic-core-v3/src/lib/notifications logic-core-v3/src/lib/n8n.ts logic-core-v3/src/lib/analytics.ts logic-core-v3/src/lib/searchconsole.ts logic-core-v3/netlify  (exit 1)",
+    "control_positivo": "git grep -c captureException origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> 3"
+   },
+   {
+    "afirmacion": "No quedan lecturas de BLOB_READ_WRITE_TOKEN ni de @vercel/blob",
+    "comando": "git grep -n -E 'BLOB_READ_WRITE_TOKEN|@vercel/blob' origin/main -- logic-core-v3 ':!logic-core-v3/docs'  (exit 1)",
+    "control_positivo": "git grep -c TELEGRAM_BOT_TOKEN origin/main -- logic-core-v3/src -> src/lib/notifications/telegram.ts:2"
+   },
+   {
+    "afirmacion": "detect-bot-issues, alerts, regenerate-briefs y send-executive-reports no tienen disparador en Netlify ni en GitHub Actions",
+    "comando": "git grep -n -E 'os-follow-up|regenerate-briefs|send-executive-reports|detect-bot-issues|cron/alerts' origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json logic-core-v3/netlify/ .github/workflows/  -> solo vercel.json:4,8,12",
+    "control_positivo": "git show origin/main:logic-core-v3/netlify.toml muestra [functions.\"generate-insights-cron\"], send-weekly-reports-cron y cleanup-old-events-cron (:25-32)"
+   },
+   {
+    "afirmacion": "GitHub Actions no dispara ninguna ruta de la app",
+    "comando": "git grep -n -E 'schedule|cron|/api/' origin/main -- .github/workflows/  -> solo db-backup.yml:39,41",
+    "control_positivo": "el mismo comando encuentra el cron de db-backup.yml:41"
+   },
+   {
+    "afirmacion": "Ninguna pantalla enlaza /api/auth/google-business/start",
+    "comando": "git grep -n -E 'auth/(tiendanube|google-business)/start' origin/main -- logic-core-v3/src  -> solo ConnectStoreCard.tsx:39 (tiendanube)",
+    "control_positivo": "el hit de tiendanube/start en ConnectStoreCard.tsx:39"
+   },
+   {
+    "afirmacion": "Nadie lee ?gbp=, ?error=oauth_state_* ni ?error=oauth_failed tras los callbacks",
+    "comando": "git grep -n -E 'oauth_state|oauth_failed|gbp=|connected=true|searchParams\\.(gbp|connected|error)|params\\.(gbp|connected)' origin/main -- logic-core-v3/src/app logic-core-v3/src/components | grep -v src/app/api/auth/",
+    "control_positivo": "el mismo comando encuentra tienda-conectada/page.tsx:306 params.connected"
+   },
+   {
+    "afirmacion": "listAvailableLocations y setActiveLocation no tienen pantalla que las importe",
+    "comando": "git grep -l -E '\\blistAvailableLocations\\b' origin/main -- logic-core-v3/src  -> solo src/lib/actions/gbp-connection.ts (setActiveLocation: además schemas.ts y un invariant)",
+    "control_positivo": "git grep -l '\\bgetGBPMetrics\\b' -> reputacion/page.tsx y GBPMetricsCard.tsx"
+   },
+   {
+    "afirmacion": "getCampaignStats y getN8nMetrics no tienen llamadores",
+    "comando": "git grep -l -E '\\bgetCampaignStats\\b' origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma logic-core-v3/tests -> solo brevo.ts; idem getN8nMetrics -> solo n8n.ts",
+    "control_positivo": "ensureBrevoList -> email-marketing/_actions.ts; sendLeadToN8n -> lib/actions/contact.ts"
+   },
+   {
+    "afirmacion": "No existe la ruta /dashboard/chatbot/preferences que enlaza el reporte semanal",
+    "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -i preferences  -> vacío",
+    "control_positivo": "el mismo listado contiene logic-core-v3/src/app/(protected)/dashboard/chatbot/settings/page.tsx"
+   },
+   {
+    "afirmacion": "El schema no tiene opt-out para el reporte semanal del chatbot",
+    "comando": "git grep -n -iE 'weekly|OptOut' origin/main -- logic-core-v3/prisma/schema.prisma  -> solo executiveReportOptOut (:387) y WeeklyReportLog/estados del reporte ejecutivo",
+    "control_positivo": "executiveReportOptOut aparece en schema.prisma:387"
+   },
+   {
+    "afirmacion": "Ningún barrido de cron filtra organizaciones archivadas (deletedAt)",
+    "comando": "git grep -n deletedAt origin/main -- logic-core-v3/src/app/api/cron logic-core-v3/src/modules/chatbot/server/reports/sendWeeklyReports.ts logic-core-v3/src/lib/reports/ logic-core-v3/src/modules/chatbot/server/admin/detectBotIssues.ts logic-core-v3/src/lib/alerts.ts  (exit 1)",
+    "control_positivo": "git grep -c deletedAt 'logic-core-v3/src/app/(protected)/admin/clients/page.tsx' -> 4"
+   },
+   {
+    "afirmacion": "Ninguna conexión o desconexión invalida los tags de caché de Tiendanube, GBP, Cal.com o PageSpeed",
+    "comando": "git grep -n 'revalidateTag(' origin/main -- logic-core-v3/src | grep -E 'tiendanube|gbp|cal:|pagespeed'  -> vacío",
+    "control_positivo": "git grep -c 'revalidateTag(' -> admin/leads/_actions/lead.actions.ts:6 entre otros"
+   },
+   {
+    "afirmacion": "oauth-state.ts no tiene test ni invariant en el repo",
+    "comando": "git grep -l -E 'verifyOAuthState|signOAuthState' origin/main -- logic-core-v3  -> 5 docs y 5 archivos de código, ningún test",
+    "control_positivo": "git grep -l buildEmailContactOptOutUrl -> src/lib/security/idor-tokens.invariant.ts (los tokens de baja sí tienen invariant)"
+   },
+   {
+    "afirmacion": "No hay replayIntegration ni captureConsoleIntegration configuradas",
+    "comando": "git grep -n -E 'replayIntegration|captureConsoleIntegration|integrations:' origin/main -- logic-core-v3/src logic-core-v3/sentry.server.config.ts logic-core-v3/sentry.edge.config.ts logic-core-v3/next.config.ts  (exit 1)",
+    "control_positivo": "git grep -c Sentry.init origin/main -- logic-core-v3/src/instrumentation-client.ts -> 1"
+   },
+   {
+    "afirmacion": "/api/track no tiene consumidores",
+    "comando": "git grep -n -E 'api/track' origin/main -- logic-core-v3/src logic-core-v3/public | grep -v src/app/api/track/route.ts  (exit 1)",
+    "control_positivo": "git grep -c api/chatbot origin/main -- logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts -> 1"
+   },
+   {
+    "afirmacion": "onLeadCaptured ya no existe (P1-13)",
+    "comando": "git grep -n onLeadCaptured origin/main -- logic-core-v3/src  (exit 1)",
+    "control_positivo": "git grep -n sendLeadToN8n origin/main -- logic-core-v3/src/lib/actions/contact.ts -> :5 y :82"
+   },
+   {
+    "afirmacion": "No hay archivos de credenciales versionados",
+    "comando": "git ls-tree -r --name-only origin/main | grep -iE 'vertex-credentials|credentials\\.json|service-account.*\\.json|\\.env(\\.local)?$'  (exit 1)",
+    "control_positivo": "git ls-tree -r --name-only origin/main | grep -E '\\.env\\.example$' -> logic-core-v3/.env.example"
+   },
+   {
+    "afirmacion": "encryptCredential no tiene llamadores en src (solo secret-box se usa, en el motor)",
+    "comando": "git grep -n -E 'credential-cipher|isEncrypted|encryptCredential|secret-box' origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma | grep -v src/lib/crypto/  -> solo src/modules/motor/services/sendMessage.ts:22",
+    "control_positivo": "el mismo comando encuentra el import de secret-box en sendMessage.ts:22"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "unstable_cache que devuelve objetos con Date: en el acierto vuelven como string y los métodos de Date lanzan",
+    "como_buscarlo": "git grep -n unstable_cache origin/main -- logic-core-v3/src y, por cada uno, revisar si el tipo de retorno tiene Date y si el consumidor llama .toISOString/.getTime/.toLocale* sin new Date()",
+    "donde_aparecio": "google-business-profile.ts:178 -> GBPMetricsCard.tsx:124; pagespeed.ts:30 -> PageSpeedCard.tsx:60; candidato admin/clients/page.tsx:20"
+   },
+   {
+    "patron": "unstable_cache que guarda null o [] devueltos por un catch: el error queda cacheado toda la ventana",
+    "como_buscarlo": "mismos sitios de unstable_cache: ver si el callback atrapa y devuelve null/[]",
+    "donde_aparecio": "tiendanube.ts:75, pagespeed.ts:30, cal-com.ts:33, google-business-profile.ts:178; results-insights.ts:37 (BUG-066)"
+   },
+   {
+    "patron": "Barridos de cron sin filtrar organization.deletedAt",
+    "como_buscarlo": "git grep -n 'findMany(' en src/app/api/cron, src/lib/reports, src/modules/chatbot/server/reports y detectBotIssues, y comprobar el filtro deletedAt: null",
+    "donde_aparecio": "generate-insights/route.ts:18, regenerate-briefs/route.ts:26"
+   },
+   {
+    "patron": "HMAC o claves con fallback a AUTH_SECRET (reuso de clave; rotar rompe links ya enviados)",
+    "como_buscarlo": "git grep -n AUTH_SECRET origin/main -- logic-core-v3/src",
+    "donde_aparecio": "unsubscribe-token.ts:9, oauth-state.ts:29, impersonation.ts:17"
+   },
+   {
+    "patron": "NEXT_PUBLIC_* leída en código de servidor: se incrusta en el build y no se rota en caliente",
+    "como_buscarlo": "git grep -n 'process.env.NEXT_PUBLIC_' origin/main -- logic-core-v3/src/lib logic-core-v3/src/app/api logic-core-v3/src/modules logic-core-v3/src/instrumentation.ts",
+    "donde_aparecio": "src/instrumentation.ts:7, generate-insights/route.ts:66, notify-message.ts:45, unsubscribe-token.ts:58"
+   },
+   {
+    "patron": "catch en route handlers que devuelve 500 sin Sentry: onRequestError nunca ve errores atrapados",
+    "como_buscarlo": "git grep -n -A3 'catch' en src/app/api/**/route.ts y filtrar los que no llaman captureException",
+    "donde_aparecio": "cron/*/route.ts, google-business/callback/route.ts:83-85, track/route.ts:42-44"
+   },
+   {
+    "patron": "Secretos comparados con === o !== en lugar de timingSafeEqual",
+    "como_buscarlo": "git grep -n -E 'providedSecret (!==|===) expectedSecret|provided !== expected' origin/main -- logic-core-v3/src",
+    "donde_aparecio": "cron-secret.ts:43, alerts/route.ts:8, regenerate-briefs/route.ts:22, send-executive-reports/route.ts:21, os-follow-up/route.ts:154-155"
+   },
+   {
+    "patron": "Envíos desde el navegador a webhooks de terceros con URL NEXT_PUBLIC (sin servidor ni rate limit)",
+    "como_buscarlo": "git grep -n -E 'NEXT_PUBLIC_[A-Z_]*(WEBHOOK|HOOK)' origin/main -- logic-core-v3/src",
+    "donde_aparecio": "Footer.tsx:81"
+   },
+   {
+    "patron": "Elementos clickeables que no son botones (div/motion.div con onClick)",
+    "como_buscarlo": "git grep -n -E '<(motion\\.)?div[^>]*onClick' origin/main -- logic-core-v3/src/components logic-core-v3/src/app",
+    "donde_aparecio": "Footer.tsx:442-446"
+   },
+   {
+    "patron": "Fallbacks literales de remitente, número o dominio legacy en lugar del módulo canónico",
+    "como_buscarlo": "git grep -n -E 'develop-agency\\.com|@gmail\\.com|wa\\.me/' origin/main -- logic-core-v3/src",
+    "donde_aparecio": "brevo-service.ts:33, email.ts:21, brevo.ts:124, Footer.tsx:8, ActionRequiredEmail.tsx:23"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/baselines/2026-07-auditoria-seguridad.md:1268",
+    "id_previo": "S2b-01",
+    "estado": "abierto",
+    "evidencia": "git grep -E 'isModuleActive|check-activation' en email-marketing/_actions.ts -> exit 1; el gate sigue solo en layout.tsx:6 (registrado como SEC-044)"
+   },
+   {
+    "doc": "docs/audit-repo-20260707.md:180",
+    "id_previo": "CO-1",
+    "estado": "cerrado",
+    "evidencia": "next.config.ts:31 sin typescript.ignoreBuildErrors; baseline tsc 0. Next 16 no corre lint en el build (eslint queda en CI)"
+   },
+   {
+    "doc": "docs/auditoria-seguridad-2026-05.md:101",
+    "id_previo": "SEC-AUTH-01",
+    "estado": "cerrado",
+    "evidencia": "google-business-profile.ts:44 signOAuthState; callback/route.ts:30-35 verifyOAuthState antes de la DB"
+   },
+   {
+    "doc": "docs/auditoria-seguridad-2026-05.md:111",
+    "id_previo": "SEC-AUTH-02",
+    "estado": "cerrado",
+    "evidencia": "tiendanube.ts:20 signOAuthState; tiendanube/callback/route.ts:28-31 sesión SUPER_ADMIN y :42-47 firma"
+   },
+   {
+    "doc": "docs/auditoria-seguridad-2026-05.md:250",
+    "id_previo": "SEC-PII-01",
+    "estado": "cerrado",
+    "evidencia": "notify-message.ts:62 loguea obfuscateEmail(...) (:70-77)"
+   },
+   {
+    "doc": "docs/auditoria-total-pre-deploy.md:36",
+    "id_previo": "O-2",
+    "estado": "cerrado",
+    "evidencia": "package.json:131 @googleapis/webmasters y node_modules/@googleapis/webmasters presente; tsc 0"
+   },
+   {
+    "doc": "docs/audits/2026-05-auditoria-profunda.md:56",
+    "id_previo": "P1-13",
+    "estado": "no-reproducible",
+    "evidencia": "onLeadCaptured ya no existe (git grep exit 1); n8n.ts solo tiene sendLeadToN8n para el formulario de contacto (contact.ts:82); los leads del chatbot van por el CRM por cliente (flujo D5 'Sync de lead al CRM del cliente (n8n)')"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:61",
+    "id_previo": "NUEVO-P0-2",
+    "estado": "cerrado",
+    "evidencia": "dependencia instalada (package.json:131) y tsc 0"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:82",
+    "id_previo": "P1-8",
+    "estado": "parcial",
+    "evidencia": "analytics.ts:98-99,104-107,196-198 y searchconsole.ts:103-104,108-112,211-213 siguen cayendo a demo sin log, pero la UI muestra PreviewBanner (trafico/page.tsx:188, seo/page.tsx:226); el mock de n8n (n8n.ts:259-268) no tiene llamadores"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:199",
+    "id_previo": "SEC-PII-01",
+    "estado": "cerrado",
+    "evidencia": "notify-message.ts:62 obfuscateEmail"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:55",
+    "id_previo": "N-2",
+    "estado": "cerrado",
+    "evidencia": "@googleapis/webmasters instalado; next instalado 16.2.9 (node_modules/next/package.json)"
+   },
+   {
+    "doc": "docs/audits/2026-06-revalidacion.md:91",
+    "id_previo": "SEC-PII-01",
+    "estado": "cerrado",
+    "evidencia": "notify-message.ts:62 obfuscateEmail"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:65",
+    "id_previo": "SEC-AUTH-01",
+    "estado": "cerrado",
+    "evidencia": "oauth-state.ts:50-59,72-120; google-business/callback/route.ts:30-35"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:66",
+    "id_previo": "SEC-AUTH-02",
+    "estado": "cerrado",
+    "evidencia": "tiendanube.ts:20; tiendanube/callback/route.ts:42-47"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:76",
+    "id_previo": "SEC-PII-01",
+    "estado": "cerrado",
+    "evidencia": "notify-message.ts:62,69-77 ofuscado"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:284",
+    "id_previo": "SEC-03",
+    "estado": "cerrado",
+    "evidencia": "cron-secret.ts:40-44 falla cerrado y lo usan detect-bot-issues:8, generate-insights:11, send-weekly-reports:8; las copias inline también fallan cerrado (regenerate-briefs:22, send-executive-reports:21, alerts:8)"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:590",
+    "id_previo": "PERF-05",
+    "estado": "parcial",
+    "evidencia": "instrumentation-client.ts:4-19 no declara integraciones y @sentry/nextjs 10.62 no incluye Replay por defecto (build/cjs/client/index.js:86-104): replaysOnErrorSampleRate es inerte; el peso real del bundle no se midió en esta corrida"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1315",
+    "id_previo": "RESIL-04",
+    "estado": "abierto",
+    "evidencia": "regenerate-briefs/route.ts:5 y send-executive-reports/route.ts:5 maxDuration 300 (y además sin disparador en Netlify); generate-insights/route.ts:33-89 sigue secuencial"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1318",
+    "id_previo": "RESIL-05",
+    "estado": "abierto",
+    "evidencia": "brevo-service.ts:3-5 BrevoClient sin opción de timeout; brevo.ts:11,39,69,94,118,151 fetch sin signal"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1327",
+    "id_previo": "RESIL-08",
+    "estado": "abierto",
+    "evidencia": "telegram.ts:78-89 fetch sin signal"
+   },
+   {
+    "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1622",
+    "id_previo": "OBS-01",
+    "estado": "abierto",
+    "evidencia": "el código lee NEXT_PUBLIC_SENTRY_DSN (src/instrumentation.ts:7); ninguna integración reporta (ausencia verificada); el valor en producción sigue sin evidencia"
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:23",
+    "id_previo": "CLEAN-H2b",
+    "estado": "abierto",
+    "evidencia": "generate-insights/route.ts:66 sin fallback, notify-message.ts:45 sin fallback, unsubscribe-token.ts:58 y :118 con 'http://localhost:3000'"
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:26",
+    "id_previo": "CLEAN-H3",
+    "estado": "abierto",
+    "evidencia": "email.ts:21 develop-agency.com, brevo-service.ts:33 Gmail personal, brevo.ts:124 alerts@develop-agency.com, notify-message.ts:51 hola@develop.com.ar"
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:74",
+    "id_previo": "CLEAN-R2",
+    "estado": "parcial",
+    "evidencia": "weekly-report.ts:12 toLocaleDateString sin timeZone (en el lote); los demás sitios citados están fuera del lote"
+   },
+   {
+    "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:77",
+    "id_previo": "CLEAN-R3",
+    "estado": "parcial",
+    "evidencia": "n8n.ts:29 sendLeadToN8n con AbortSignal.timeout(8000) y las functions de Netlify con 20 s; siguen sin timeout brevo.ts, google-business-profile.ts (:131,197,284,340), gbp-discovery.ts (:50,89), tiendanube.ts (:29,92-117), cal-com.ts:49, cal-com-v2.ts:168, pagespeed.ts:59, telegram.ts:78, n8n.ts:190"
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/components/sections/home/Footer.tsx",
+    "linea": 111,
+    "tipo": "inline",
+    "detalle": "El componente entero usa style={{}} (decenas de bloques y handlers que mutan style) donde hay clases Tailwind equivalentes."
+   },
+   {
+    "ruta": "src/components/sections/home/Footer.tsx",
+    "linea": 762,
+    "tipo": "contraste",
+    "detalle": "'Te respondemos en menos de 2hs' a rgba(255,255,255,0.18) sobre #050505, muy por debajo de 4,5:1."
+   },
+   {
+    "ruta": "src/components/sections/home/Footer.tsx",
+    "linea": 885,
+    "tipo": "contraste",
+    "detalle": "Links sociales a 0.2 de opacidad y 10px."
+   },
+   {
+    "ruta": "src/components/sections/home/Footer.tsx",
+    "linea": 907,
+    "tipo": "contraste",
+    "detalle": "Copyright a 0.1 de opacidad."
+   },
+   {
+    "ruta": "src/components/sections/home/Footer.tsx",
+    "linea": 510,
+    "tipo": "contraste",
+    "detalle": "Subtítulo de la tarjeta de formulario a 0.28."
+   },
+   {
+    "ruta": "src/components/sections/home/Footer.tsx",
+    "linea": 616,
+    "tipo": "contraste",
+    "detalle": "Labels del formulario a 0.35 y 10px."
+   },
+   {
+    "ruta": "src/components/sections/home/Footer.tsx",
+    "linea": 51,
+    "tipo": "copy",
+    "detalle": "'Respuesta Inmediata' contradice 'menos de 2hs' del mismo pie (:427, :580)."
+   },
+   {
+    "ruta": "src/emails/ActionRequiredEmail.tsx",
+    "linea": 57,
+    "tipo": "copy",
+    "detalle": "'aviso cifrado ... C-Level. No responda a este bot' promete cifrado inexistente; tuteo/usted (:51) frente al voseo del resto."
+   },
+   {
+    "ruta": "src/emails/TicketReplyEmail.tsx",
+    "linea": 56,
+    "tipo": "copy",
+    "detalle": "Jerga ('Soporte B2B', 'ecosistema', 'equipo de ingeniería') y tuteo."
+   },
+   {
+    "ruta": "src/emails/ActionRequiredEmail.tsx",
+    "linea": 23,
+    "tipo": "otro",
+    "detalle": "URL por defecto del dominio legacy develop-agency.com (también TicketReplyEmail.tsx:26 con un ticket de ejemplo)."
+   },
+   {
+    "ruta": "src/emails/ActionRequiredEmail.tsx",
+    "linea": 74,
+    "tipo": "otro",
+    "detalle": "Container con width fijo de 580px (sin max-width) en un email que se lee en móvil; idem TicketReplyEmail.tsx:79."
+   },
+   {
+    "ruta": "src/lib/email/templates/welcome-client.ts",
+    "linea": 81,
+    "tipo": "copy",
+    "detalle": "'escribime por WhatsApp' sin número ni link; firma personal 'Franco — develOP' en plantillas de sistema (:84; bot-activated.ts:66; password-reset.ts:63)."
+   },
+   {
+    "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+    "linea": 50,
+    "tipo": "contraste",
+    "detalle": "Texto #71717a sobre #09090b (cerca de 4:1)."
+   },
+   {
+    "ruta": "src/lib/email/templates/weekly-report.ts",
+    "linea": 162,
+    "tipo": "contraste",
+    "detalle": "Pie #71717a sobre #09090b; idem executive-weekly.ts:285."
+   },
+   {
+    "ruta": "src/lib/email/templates/weekly-report.ts",
+    "linea": 114,
+    "tipo": "copy",
+    "detalle": "'Charlas' en el reporte del chatbot frente a 'Conversaciones' en el ejecutivo (executive-weekly.ts:254)."
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "Reputación se cae desde la segunda visita: unstable_cache devuelve las fechas de las reseñas como texto y GBPMetricsCard llama a toISOString()",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "El flujo cierra leyendo el código. google-business-profile.ts:178-182 envuelve fetchGBPMetrics en unstable_cache (revalidate 3600, clave con orgId, locationId y gbpConnectedAt), y :214 arma createdAt como Date. En next 16.2.9, que es la versión del package-lock de origin/main, unstable-cache.js:23 guarda el resultado con JSON.stringify(result); en un acierto, :168 (fresco) o la rama stale lo devuelve con JSON.parse, así que createdAt llega como string. GBPMetricsCard.tsx no tiene 'use client' y lo renderiza en el servidor reputacion/page.tsx:34. El try/catch de page.tsx:19-23 solo envuelve getGBPMetrics, no el render. Por eso review.createdAt.toISOString() en :124 (y date.toLocaleDateString en formatDate, :13/:135) lanza TypeError y cae en resultados/error.tsx. dashboard/layout.tsx:16 tiene force-dynamic, pero no evita la caché: create-component-tree.js:151 solo setea forceDynamic, y el bypass de unstable_cache exige fetchCache === 'force-no-store', que nadie exporta. Hay un camino real de conexión (gbp-connection-logic.ts:153/:269 persiste gbpLocationId). El impacto es peor que el reportado: no es solo 'la hora siguiente'. Al vencer, la entrada stale se sigue devolviendo con revalidación en segundo plano, así que solo pinta bien el primer render después de cada cambio de clave (reconexión). Contraste que confirma el patrón: agenda-inteligente/page.tsx:96-97 rehidrata con new Date(booking.startTime) la salida de otro unstable_cache (cal-com.ts). PageSpeed: fetchedAt (pagespeed.ts:145) llega como string y PageSpeedCard.tsx:60/:221 llama a toLocaleString. No lanza (Object.prototype.toLocaleString devuelve el string): muestra el ISO crudo, un defecto menor dentro del mismo hallazgo.",
+    "evidencia_contra": [
+     "Precondición: Google Business conectado con gbpLocationId y al menos una reseña; si recentReviews está vacío, se ve 'No hay reseñas recientes' y no hay crash.",
+     "La rama de PageSpeed no rompe: solo formatea mal la fecha (BAJA aislada).",
+     "El caché efectivo en Netlify depende del cache handler del runtime (Blobs). Aun sin persistencia, el LRU en memoria de cada instancia caliente produce aciertos."
+    ]
+   },
+   {
+    "titulo": "Ninguna integración ni cron reporta a Sentry: las fallas atrapadas terminan en console.error, null o datos demo y develOP no se entera cuando vence una credencial (E10)",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Barrido: git grep 'captureException|@sentry|Sentry.' origin/main sobre src/app/api/cron, src/app/api/auth, src/lib/integrations, src/lib/email, src/lib/notifications, src/lib/analytics.ts y netlify/ da cero. Control positivo del mismo patrón: aparece en src/instrumentation.ts, instrumentation-client.ts, app/error.tsx, global-error.tsx, SectionErrorBoundary, handleChatRequest.ts, persistTurn.ts y modules/chatbot/server/logging/logger.ts. Líneas citadas confirmadas: analytics.ts:196 vuelve a getMockAnalyticsData() con ok:true; google-business-profile.ts:94 hace console.error y devuelve null; brevo-service.ts:41 hace console.error y devuelve ok:false; telegram.ts:91 hace console.error y devuelve false; detect-bot-issues/route.ts:15-19 devuelve 500 sin captura. Sentry.init (instrumentation.ts:6-29) no agrega captureConsoleIntegration, y la integración Console por defecto solo deja breadcrumbs. onRequestError (:49) solo ve excepciones no atrapadas. Baja a MEDIA: es un hueco de observabilidad sin explotación, sin pérdida de datos y sin flujo del cliente roto. El workaround parcial es que console.error queda en los logs de funciones de Netlify. Además, con Sentry inactivo en prod (hallazgo 3), agregar captureException hoy no cambiaría nada: el arreglo de fondo es compartido. El fallback a datos mock con ok:true de analytics.ts:194-197 es un problema de datos de mentira aparte, que conviene registrar por separado.",
+    "evidencia_contra": [
+     "Los errores atrapados sí quedan en stderr, en los logs de funciones de Netlify: el aviso no es nulo, es pasivo.",
+     "Con NEXT_PUBLIC_SENTRY_DSN ausente en prod (bitácora-roadmap.md:16736-16739), la falta de captureException hoy no cambia el resultado: se solapa con el hallazgo 3.",
+     "No rompe ningún flujo ni expone datos: no encaja en los criterios de ALTA de la rúbrica."
+    ]
+   },
+   {
+    "titulo": "Sentry depende de NEXT_PUBLIC_SENTRY_DSN incrustada en el build: sin ella queda inerte sin aviso, y la config raíz con SENTRY_DSN es código muerto",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "Confirmado por lectura. src/instrumentation.ts:7/:34 e instrumentation-client.ts:5 leen solo NEXT_PUBLIC_SENTRY_DSN, sin fallback. En next/dist/build/index.js:615-616, rootDir = path.join(appDir,'..') = src/, así que Next solo detecta src/instrumentation.ts. La raíz logic-core-v3/instrumentation.ts:3 (que importa sentry.server.config.ts, con dsn SENTRY_DSN en :9) nunca se ejecuta. @sentry/nextjs 10.62 tampoco autocarga sentry.server/edge.config: webpack.js:323-327 solo advierte que se muevan al register(). sentry-setup.md:26 pide SENTRY_DSN, una variable que solo lee código muerto. No hay replayIntegration: client/index.js:86-104 (getDefaultIntegrations) agrega solo tracing y normalización, así que replaysOnErrorSampleRate:1.0 (instrumentation-client.ts:10) no graba. Que hoy esté inactivo lo documenta bitacora-roadmap.md:16736-16739, verificado por nombres de env en Netlify: no existen SENTRY_DSN ni NEXT_PUBLIC_SENTRY_DSN en ningún contexto, y lo repiten infra-1-observabilidad.md:18/:69 y b14-deploy-checklist.md:112. Baja a MEDIA: se arregla con configuración (setear la var y recompilar), ya figura como 'A SETEAR' en el checklist de deploy, no rompe ningún flujo del cliente ni expone nada. El código muerto y el doc que pide SENTRY_DSN son BAJA. Matiz técnico: define-env.js:53/:61 incrusta NEXT_PUBLIC_* solo si existe al compilar. Si falta en el build, el servidor la leería en runtime, así que lo de 'cargarla sin recompilar no alcanza' vale para el navegador y no del todo para el servidor.",
+    "evidencia_contra": [
+     "El estado 'inactivo en prod' sale de la bitácora (2026-08), no del código; puede haber cambiado desde entonces.",
+     "La corrección es de configuración (una env var más un redeploy), ya listada en b14-deploy-checklist.md:112-138: no es un defecto de código que bloquee un flujo.",
+     "Si NEXT_PUBLIC_SENTRY_DSN no existía al compilar, Next no la incrusta en el bundle del servidor, que la leería en runtime: la parte de 'cargarla sin recompilar no alcanza' solo vale para el cliente.",
+     "El DSN es público por diseño (auditoria-seguridad.md:3528): usar NEXT_PUBLIC_ en el servidor es un patrón aceptado por Sentry."
+    ]
+   },
+   {
+    "titulo": "Detector de incidencias de bots y alertas periódicas de la agencia sin disparador en ningún registrador: la credencial de Vertex vencida nunca se convierte en alerta automática",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "netlify.toml:25-32 agenda solo generate-insights-cron, send-weekly-reports-cron y cleanup-old-events-cron, y existen las tres funciones en netlify/functions/. vercel.json:2-15 declara os-follow-up, regenerate-briefs y send-executive-reports, pero el deploy es Netlify y eso no corre ahí. git grep 'detect-bot-issues' origin/main solo da docs, tests (tests/e2e/19-security.spec.ts, tests/integration/alerts-detector.spec.ts), .env.example y comentarios. Ningún scheduler. git grep 'cron/alerts' da cero referencias de contenido. Control positivo: 'api/cron/generate-insights' sí aparece. .github/workflows tiene solo ci.yml (on: push, pull_request) y db-backup.yml (cron '0 6 * * *' de pg_dump, :41). La bitácora (bitacora-roadmap.md:13908-13910) deja detect-bot-issues 'para replicar este mismo patrón en un sprint posterior'. La UI promete otra cosa: AlertSettingsClient.tsx:165 dice 'El detector corre automáticamente cada 15 minutos'. Auth confirmada: alerts/route.ts:5-6 lee solo el header X-Cron-Secret, mientras las funciones de netlify mandan 'Authorization: Bearer' (cleanup-old-events-cron.ts:22, generate-insights-cron.ts:64, send-weekly-reports-cron.ts:82), así que con ese molde recibiría 401. detect-bot-issues sí acepta los dos vía isAuthorizedCronRequest (cron-secret.ts:24-44). La rúbrica pone 'un cron sin disparador' como ejemplo literal de ALTA. Confianza PROBABLE porque un cron externo (cron-job.org/EasyCron, sugerido en cron-jobs.md:11/:27 y alerts-types.md:41) no se puede descartar leyendo el repo.",
+    "evidencia_contra": [
+     "Un scheduler externo fuera del repo (cron-job.org, EasyCron), que la propia documentación sugiere, haría falso el 'no corre'; no es verificable por lectura.",
+     "Hay disparo manual del detector desde admin: /api/admin/alerts/trigger-detector/route.ts:12 llama a runAlertDetector(). Mitiga, pero no es automático.",
+     "Las alertas periódicas (clientes inactivos 30 días, suscripciones por vencer) son internas de develOP, no del cliente."
+    ]
+   },
+   {
+    "titulo": "Credenciales de terceros en claro en la base (instancias del lote): tokens OAuth de GBP y Tiendanube, API key de Cal.com en la query y token de Telegram; encryptCredential sin llamadores",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "VERIFICADO-POR-LECTURA",
+    "motivo": "google-business/callback/route.ts:49-56 persiste tokens.access_token y tokens.refresh_token tal cual. tiendanube/callback/route.ts:63-69 persiste tokens.access_token tal cual. Los campos del schema son String? @db.Text sin transformación (schema.prisma:359-360, :367, :375, :835). google-business-profile.ts:56-72 y tiendanube.ts:55-58 los leen y usan en claro. git grep '$extends|$use(' en src da cero: no hay extensión de Prisma que cifre de forma transparente. git grep encryptCredential/decryptCredential da solo src/lib/crypto/__tests__/credential-cipher.test.ts: el cifrador (credential-cipher.ts:73) no tiene llamadores en producción. osTelegramBotToken se escribe en claro desde admin/settings/_actions/settings.actions.ts:161 (se enmascara solo al mostrarlo, :109). Exponerlo exige leer la base o un dump, una precondición fuerte; según la rúbrica, un secret de proveedor expuesto con precondición fuerte es ALTA. El impacto para el primer cliente real es el refresh token de su Google Business y el acceso a su tienda Tiendanube.",
+    "evidencia_contra": [
+     "Precondición fuerte: hay que tener acceso de lectura a Neon o a un dump. Los backups de db-backup.yml van cifrados con GPG (:20-24).",
+     "Cal.com: calComApiKey no tiene ningún escritor en src (solo lectores en cal-com.ts:27 y agenda-inteligente/page.tsx:325); hoy solo se cargaría a mano en la base. Además, la API key en la query (?apiKey=) es el método de autenticación documentado de Cal.com v1, no una decisión propia del repo: esa sub-afirmación es débil.",
+     "El token de Telegram es de develOP (AgencySettings), no de un cliente, y va en la URL por diseño de la API de Telegram.",
+     "No hay clientes reales: hoy no hay tokens reales de clientes guardados."
+    ]
+   }
+  ]
+ }
+}

@@ -3380,6 +3380,26 @@
      "ruta": "src/app/(protected)/dashboard/resultados/reputacion/page.tsx",
      "linea": 52,
      "fragmento": "Setup manual por ahora"
+    },
+    {
+     "ruta": "src/app/api/auth/google-business/callback/route.ts",
+     "linea": 82,
+     "fragmento": "return NextResponse.redirect(new URL(`/admin/clients?gbp=${gbp}`, request.url))"
+    },
+    {
+     "ruta": "src/app/api/auth/google-business/callback/route.ts",
+     "linea": 33,
+     "fragmento": "new URL(`/admin/clients?error=oauth_state_${stateCheck.reason}`, request.url),"
+    },
+    {
+     "ruta": "src/lib/integrations/gbp-connection-logic.ts",
+     "linea": 143,
+     "fragmento": "status: 'CONNECTED_NO_LOCATION', reason: locations.length === 0 ? 'none' : 'multiple',"
+    },
+    {
+     "ruta": "src/lib/actions/gbp-connection.ts",
+     "linea": 17,
+     "fragmento": "export async function listAvailableLocations(): Promise<ActionResult<AvailableLocation[]>> {"
     }
    ],
    "impacto": "La pestaña queda vacía para todo cliente salvo que alguien de develOP arme a mano /api/auth/google-business/start?orgId=<cuid> (git grep 'google-business/start' → 0 enlaces; tiendanube/start sí está enlazado en ConnectStoreCard.tsx:39). El Motor de reseñas depende de los mismos tokens.",
@@ -3390,7 +3410,10 @@
     "h2.cli-resultados.reputacion-gbp",
     "h4.adm-clientes",
     "int.google-business-profile",
-    "h2.cli-resenas"
+    "h2.cli-resenas",
+    "h4.adm-clientes.conectar-google-business",
+    "h2.cli-resenas.selector-sucursal",
+    "int.gbp"
    ],
    "relacionados_ids": [
     "UX-015"
@@ -3404,7 +3427,16 @@
     "tmp": "D2-c1/D2-L2/H16",
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene (google-business/start/route.ts:7-9 solo SUPER_ADMIN; git grep 'google-business/start' en src = 0 enlaces, control 'tiendanube/start' = 1 en ConnectStoreCard.tsx:39; reputacion/page.tsx:52 'Setup manual por ahora').",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D7-c1",
+      "tmp": "D7-c1/D7-L1/H14",
+      "titulo": "Conectar Google Business no tiene entrada en la UI ni muestra el resultado, y una cuenta con varias sucursales queda sin selector",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo faltante (sin entrada en la UI para conectar Google Business); suma que el callback no muestra el resultado y que una cuenta con varias sucursales queda sin selector (relacionado con SEC-053)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -7355,70 +7387,6 @@
     "tmp": "D2-c2/D2-T1/H05",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-055",
-   "prefijo": "SEC",
-   "titulo": "La deduplicacion del pedido de upsell consulta ContactSubmission, que tambien escribe el formulario publico anonimo: un visitante puede silenciar 24 h el aviso del pedido de un cliente",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/lib/actions/upsell.ts",
-     "linea": 82,
-     "fragmento": "where: { email: user.email, service: parsed.data.featureKey },"
-    },
-    {
-     "ruta": "src/lib/actions/upsell.ts",
-     "linea": 79,
-     "fragmento": "// así que la consulta queda auto-scopeada al propio cliente (no puede leer submissions"
-    },
-    {
-     "ruta": "src/lib/actions/upsell.ts",
-     "linea": 87,
-     "fragmento": "if (shouldCreateUpsellSubmission(lastSubmission?.createdAt ?? null, new Date())) {"
-    },
-    {
-     "ruta": "src/lib/actions/contact.ts",
-     "linea": 62,
-     "fragmento": "await prisma.contactSubmission.create({  // formulario publico, email y service libres"
-    },
-    {
-     "ruta": "src/lib/actions/schemas.ts",
-     "linea": 61,
-     "fragmento": "service: z.string().trim().optional().nullable(),"
-    }
-   ],
-   "impacto": "Quien conozca el email de acceso de un cliente puede mandar el formulario publico con ese email y service igual al slug del modulo (por ejemplo 'motor-resenas'); durante 24 h los pedidos de ese cliente no crean el lead en /admin/leads, ni la alerta, ni las notificaciones (solo sube el contador de OrganizationModule). Impacto acotado, pero el comentario afirma un aislamiento que una tabla global escrita por anonimos no da.",
-   "propuesta": "Deduplicar contra la propia fila OrganizationModule (leer upsellLastRequestedAt antes del upsert) o marcar los ContactSubmission de upsell con un discriminador que solo escriba esta action (servicio con prefijo y organizacion), nunca por email libre.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-servicios.solicitar-modulo",
-    "h6.vis-contacto",
-    "modelo.ContactSubmission",
-    "modelo.OrganizationModule",
-    "lib.actions"
-   ],
-   "relacionados_ids": [
-    "SEC-048",
-    "SEC-047"
-   ],
-   "previas": [],
-   "relacionados_texto": "SEC-048 (la misma tabla global contada como leads), BUG-002",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c2",
-    "lote": "D2-T1",
-    "tmp": "D2-c2/D2-T1/H06",
-    "verificado_padre": true,
-    "nota_padre": "Muestreo DEC-37: se sostiene (upsell.ts:81-87 deduplica por email y service contra ContactSubmission; contact.ts:62 crea ContactSubmission desde el formulario público con email y service libres, schemas.ts:61).",
     "verificador": null
    },
    "estado": "vigente"

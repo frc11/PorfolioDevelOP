@@ -4476,5 +4476,328 @@
   "evidencia": "src/lib/mask-secret.ts existe (git ls-tree); lo importan admin/settings/_actions/settings.actions.ts y settings-console.tsx; invariante src/lib/mask-secret.invariant.ts",
   "sentido": "no",
   "ciclo": "D3-c1, lector D3-L6"
+ },
+ "docs/bitacora-roadmap.md:52": {
+  "estado": "hecho",
+  "evidencia": "src/instrumentation.ts:49 exporta onRequestError; src/app/global-error.tsx:24 captureException",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:6166": {
+  "estado": "no empezado",
+  "evidencia": "git grep -l '\\bgetN8nMetrics\\b' origin/main -- logic-core-v3/src -> solo src/lib/n8n.ts:259 (control: sendLeadToN8n aparece en src/lib/actions/contact.ts:5,82)",
+  "sentido": "decidir",
+  "nota": "Candidato a poda junto con su mock (n8n.ts:37-355).",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:6496": {
+  "estado": "hecho",
+  "evidencia": "src/app/api/email/optout/[contactId]/route.ts:77 verifyEmailContactOptOutToken antes de la DB",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:8284": {
+  "estado": "no empezado",
+  "evidencia": "git grep -l -E 'verifyOAuthState|signOAuthState' origin/main -- logic-core-v3 -> solo docs y 5 archivos de código, ningún test; git grep probe-oauth-state fuera de docs -> sin resultados",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:9636": {
+  "estado": "parcial",
+  "evidencia": "siguen instrumentation.ts (raíz), sentry.server.config.ts:8 y sentry.edge.config.ts:5 junto a src/instrumentation.ts:6,33; las claves de IP se agregaron en scrub-pii.ts:34-38",
+  "sentido": "si",
+  "nota": "Los legacy no se ejecutan: es borrar, no consolidar.",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:10451": {
+  "estado": "hecho",
+  "evidencia": "package.json:131 @googleapis/webmasters instalado (node_modules/@googleapis/webmasters presente); baseline tsc 0",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:13529": {
+  "estado": "no empezado",
+  "evidencia": "vercel.json:4-13 (os-follow-up, regenerate-briefs, send-executive-reports) vs netlify.toml:25-32 (generate-insights, send-weekly-reports, cleanup-old-events)",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-beta-3.md:335": {
+  "estado": "hecho",
+  "evidencia": "next.config.ts:31 sin ignoreBuildErrors; baseline tsc 0",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-beta-3.md:2062": {
+  "estado": "no empezado",
+  "evidencia": "src/app/api/test-sentry/route.ts:3-5 sin guard; proxy.ts:172 no cubre /api",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:8180": {
+  "estado": "hecho",
+  "evidencia": "src/lib/security/oauth-state.ts:20-21 decisión documentada; TTL 10 min en :24",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:256": {
+  "estado": "parcial",
+  "evidencia": "src/instrumentation-client.ts existe (migración hecha); pero package.json:7 'next dev --webpack' (no turbopack) y package.json:9 'next build --webpack' sin cross-env; NODE_OPTIONS 4096 en netlify.toml:7",
+  "sentido": "decidir",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:6453": {
+  "estado": "hecho",
+  "evidencia": "C1 cerrado: tiendanube/callback/route.ts:28-31 exige sesión SUPER_ADMIN",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:6727": {
+  "estado": "hecho",
+  "evidencia": "tiendanube/callback/route.ts:28-31 y :72-81 (auth + audit); tiendanube/start/route.ts:10-13 SUPER_ADMIN; src/lib/auth/assert-ownership.ts existe",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:7187": {
+  "estado": "hecho",
+  "evidencia": "C1 cerrado (callback :28-31); F1 cerrado luego por B-SEC.3b (callback :42-47); F7 cerrado por SEC vía 1 (optout/route.ts:77)",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:8145": {
+  "estado": "hecho",
+  "evidencia": "oauth-state.ts:50-59 y :72-120; tiendanube.ts:20; google-business-profile.ts:44; verificación antes de la DB en google-business/callback/route.ts:30-35 y tiendanube/callback/route.ts:42-47",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:8325": {
+  "estado": "hecho",
+  "evidencia": "google-business/callback/route.ts:27-35; el probe vive fuera del repo (sin test versionado)",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:8939": {
+  "estado": "hecho",
+  "evidencia": "package.json:131 @googleapis/webmasters y :147 google-auth-library; git grep '\"googleapis\"' en package.json -> sin resultados",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:9547": {
+  "estado": "hecho",
+  "evidencia": "scrubPii en src/instrumentation.ts:21,39 e instrumentation-client.ts:17; global-error.tsx:24; onRequestError :49",
+  "sentido": "no",
+  "nota": "La DSN sigue sin verificar (hallazgo Sentry).",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:10995": {
+  "estado": "hecho",
+  "evidencia": "optout/[contactId]/route.ts:77; unsubscribe-token.ts:77-109; tests/e2e/20-idor-optout.spec.ts referencia signEmailContactOptOutToken",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:13516": {
+  "estado": "hecho",
+  "evidencia": "src/app/api/cron/cleanup-old-events/route.ts:14-29 (30 días)",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:13839": {
+  "estado": "hecho",
+  "evidencia": "netlify/functions/cleanup-old-events-cron.ts:6-41; netlify.toml:31-32",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:15685": {
+  "estado": "hecho",
+  "evidencia": "netlify/functions/generate-insights-cron.ts:33,62-66 (POST, 20 s); netlify.toml:25-26",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:15800": {
+  "estado": "hecho",
+  "evidencia": "netlify/functions/send-weekly-reports-cron.ts:63-108; netlify.toml:28-29",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:15846": {
+  "estado": "hecho",
+  "evidencia": "src/lib/cron/cron-secret.ts:40-44; usado en generate-insights/route.ts:11, send-weekly-reports/route.ts:8, detect-bot-issues/route.ts:8, cleanup-old-events/route.ts:17",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-beta-3.md:1269": {
+  "estado": "hecho",
+  "evidencia": "src/lib/cron/cron-secret.ts:24; la carpeta cleanup-old-events solo tiene route.ts y __tests__ (git ls-tree)",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-beta.md:418": {
+  "estado": "hecho",
+  "evidencia": "git grep api.telegram.org origin/main -- logic-core-v3/src -> solo src/lib/notifications/telegram.ts:79",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:66": {
+  "estado": "parcial",
+  "evidencia": "scripts/check-env.js:26 exige NEXT_PUBLIC_APP_URL; el código sigue con fallback localhost (unsubscribe-token.ts:58) o 'undefined' (notify-message.ts:45). El .env no se lee (secret)",
+  "sentido": "si",
+  "nota": "Requiere verificación del entorno.",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:4602": {
+  "estado": "parcial",
+  "evidencia": "lectura en encryptSecret.ts:26 (fuera del lote); el valor del entorno no es verificable por lectura",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:7392": {
+  "estado": "hecho",
+  "evidencia": "src/components/ui/SectionErrorBoundary.tsx:64 y src/app/error.tsx:27 captureException",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/roadmap-pendientes.md:151": {
+  "estado": "hecho",
+  "evidencia": "cleanup-old-events/route.ts y netlify/functions/cleanup-old-events-cron.ts; el pendiente quedó viejo",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "raiz:lane-plan-log.md:33": {
+  "estado": "parcial",
+  "evidencia": "@googleapis/webmasters resuelto (package.json:131, tsc 0); el OOM del build sigue (no se corre build en esta auditoría) y eslint tiene 102 errores",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/sprints/alpha-0-7-baseline-observability.md:16": {
+  "estado": "parcial",
+  "evidencia": "el código lee NEXT_PUBLIC_SENTRY_DSN (src/instrumentation.ts:7, instrumentation-client.ts:5); el valor en Netlify no es verificable desde el repo",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/sprints/alpha-pre-cierre-RESUMEN.md:61": {
+  "estado": "parcial",
+  "evidencia": "no verificable sin leer el .env; check-env.js:41-68 las lista pero no corre en el build",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/sprints/p3-a-1-gbp-connection.md:92": {
+  "estado": "no empezado",
+  "evidencia": "google-business/callback/route.ts:52-53, tiendanube/callback/route.ts:67 escriben en claro; encryptCredential sin llamadores en src (git grep de credential-cipher fuera de src/lib/crypto -> vacío)",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:9002": {
+  "estado": "no empezado",
+  "evidencia": "sin test ni registro de prueba en el repo; requiere runtime",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:9630": {
+  "estado": "parcial",
+  "evidencia": "next.config.ts:254-260 withSentryConfig listo; .env.example:293 y :312-314 documentan las variables; el entorno no es verificable",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:11031": {
+  "estado": "parcial",
+  "evidencia": "email-marketing/_actions.ts:114-115 manda los atributos y :155 arma el link; tests/e2e/20-idor-optout.spec.ts existe; la creación de atributos en Brevo no es verificable y SEC-039 muestra que el atributo vive en el contacto global",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:11543": {
+  "estado": "parcial",
+  "evidencia": "el payload ya trae signalsV2 (git grep -c signalsV2 en crm/buildLeadPayload.ts = 3); el workflow de n8n vive fuera del repo",
+  "sentido": "decidir",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:12527": {
+  "estado": "no empezado",
+  "evidencia": "mismas líneas que PLAN-1340; cal-com.ts:28 lee calComApiKey en claro",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:13906": {
+  "estado": "no empezado",
+  "evidencia": "netlify.toml:25-32 solo 3; git grep de regenerate-briefs|send-executive-reports|detect-bot-issues|cron/alerts en netlify.toml, netlify/ y .github/workflows -> sin resultados",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:15600": {
+  "estado": "parcial",
+  "evidencia": "brevo-service.ts:20-23 y telegram.ts:72-75 degradan sin credencial; isTelegramConfigured (:108) avisa en admin/leados; el valor en prod no es verificable",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:15933": {
+  "estado": "no empezado",
+  "evidencia": "copias en regenerate-briefs/route.ts:7-22, send-executive-reports/route.ts:7-21, alerts/route.ts:5-8, os-follow-up/route.ts:142-155",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:16884": {
+  "estado": "parcial",
+  "evidencia": "entorno local, no verificable por lectura del repo",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-beta-3.md:1273": {
+  "estado": "parcial",
+  "evidencia": "4 rutas usan cron-secret.ts; regenerate-briefs:7, send-executive-reports:7 y os-follow-up:142 conservan copias",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:14": {
+  "estado": "hecho",
+  "evidencia": "cleanup-old-events/route.ts:16-30",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md:15": {
+  "estado": "hecho",
+  "evidencia": "cron-secret.ts:40-44 falla cerrado; las functions abortan sin CRON_SECRET (cleanup-old-events-cron.ts:10-18); git grep de ': any' en src/app/api/cron sin resultados",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:9705": {
+  "estado": "parcial",
+  "evidencia": "lo de Sentry -> Slack/email es configuración del panel de Sentry, no del repo, y la DSN no está verificada; el resto es de otros dominios",
+  "sentido": "decidir",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:7347": {
+  "estado": "hecho",
+  "evidencia": "superado por B14.5: src/instrumentation.ts y captureException en error boundaries",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:34": {
+  "estado": "contradicho",
+  "evidencia": "git ls-tree de logic-core-v3/src/lib/csv -> vacío; la única copia es src/modules/chatbot/server/leads/csv/csvEscape.ts",
+  "sentido": "decidir",
+  "nota": "La copia en src/lib/csv no está en main (quizás quedó en otra rama).",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/sprints/alpha-RESUMEN-FINAL.md:45": {
+  "estado": "parcial",
+  "evidencia": "las alertas por cron existen como ruta (detect-bot-issues/route.ts:7) pero sin disparador",
+  "sentido": "decidir",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-beta-2.md:489": {
+  "estado": "hecho",
+  "evidencia": "src/app/(protected)/setter/error.tsx:32 captureException propio",
+  "sentido": "si",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md:52": {
+  "estado": "hecho",
+  "evidencia": "git grep -c listbox src/components/ui/Select.tsx = 12",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
+ },
+ "docs/bitacora-roadmap.md:9756": {
+  "estado": "hecho",
+  "evidencia": "report-only sin cambios de código; la config CRM vive en el admin (flujo D5 'Configurar y probar la integración CRM (n8n)': IntegrationsTab.tsx:36)",
+  "sentido": "no",
+  "ciclo": "D7-c1, lector D7-L1"
  }
 }

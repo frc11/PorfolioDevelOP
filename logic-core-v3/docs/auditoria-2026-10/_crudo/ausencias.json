@@ -2988,6 +2988,132 @@
    "afirmacion": "La lista de Clientes no excluye la org 'develop'",
    "comando": "git grep -n -E \"AGENCY_ORG_SLUG|'develop'\" origin/main -- logic-core-v3/src → no aparece admin/clients/page.tsx",
    "control_positivo": "El mismo grep encuentra admin/projects/page.tsx:11 `where: { slug: { not: 'develop' } }`"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "Ningún archivo de crons, callbacks OAuth, integraciones, emails, notificaciones, n8n, analytics, searchconsole ni netlify/ llama a Sentry",
+   "comando": "git grep -n -E 'Sentry|captureException' origin/main -- logic-core-v3/src/app/api/cron logic-core-v3/src/app/api/auth/google-business logic-core-v3/src/app/api/auth/tiendanube logic-core-v3/src/lib/integrations logic-core-v3/src/lib/email logic-core-v3/src/lib/email.ts logic-core-v3/src/lib/notifications logic-core-v3/src/lib/n8n.ts logic-core-v3/src/lib/analytics.ts logic-core-v3/src/lib/searchconsole.ts logic-core-v3/netlify  (exit 1)",
+   "control_positivo": "git grep -c captureException origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> 3"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "No quedan lecturas de BLOB_READ_WRITE_TOKEN ni de @vercel/blob",
+   "comando": "git grep -n -E 'BLOB_READ_WRITE_TOKEN|@vercel/blob' origin/main -- logic-core-v3 ':!logic-core-v3/docs'  (exit 1)",
+   "control_positivo": "git grep -c TELEGRAM_BOT_TOKEN origin/main -- logic-core-v3/src -> src/lib/notifications/telegram.ts:2"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "detect-bot-issues, alerts, regenerate-briefs y send-executive-reports no tienen disparador en Netlify ni en GitHub Actions",
+   "comando": "git grep -n -E 'os-follow-up|regenerate-briefs|send-executive-reports|detect-bot-issues|cron/alerts' origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json logic-core-v3/netlify/ .github/workflows/  -> solo vercel.json:4,8,12",
+   "control_positivo": "git show origin/main:logic-core-v3/netlify.toml muestra [functions.\"generate-insights-cron\"], send-weekly-reports-cron y cleanup-old-events-cron (:25-32)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "GitHub Actions no dispara ninguna ruta de la app",
+   "comando": "git grep -n -E 'schedule|cron|/api/' origin/main -- .github/workflows/  -> solo db-backup.yml:39,41",
+   "control_positivo": "el mismo comando encuentra el cron de db-backup.yml:41"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "Ninguna pantalla enlaza /api/auth/google-business/start",
+   "comando": "git grep -n -E 'auth/(tiendanube|google-business)/start' origin/main -- logic-core-v3/src  -> solo ConnectStoreCard.tsx:39 (tiendanube)",
+   "control_positivo": "el hit de tiendanube/start en ConnectStoreCard.tsx:39"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "Nadie lee ?gbp=, ?error=oauth_state_* ni ?error=oauth_failed tras los callbacks",
+   "comando": "git grep -n -E 'oauth_state|oauth_failed|gbp=|connected=true|searchParams\\.(gbp|connected|error)|params\\.(gbp|connected)' origin/main -- logic-core-v3/src/app logic-core-v3/src/components | grep -v src/app/api/auth/",
+   "control_positivo": "el mismo comando encuentra tienda-conectada/page.tsx:306 params.connected"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "listAvailableLocations y setActiveLocation no tienen pantalla que las importe",
+   "comando": "git grep -l -E '\\blistAvailableLocations\\b' origin/main -- logic-core-v3/src  -> solo src/lib/actions/gbp-connection.ts (setActiveLocation: además schemas.ts y un invariant)",
+   "control_positivo": "git grep -l '\\bgetGBPMetrics\\b' -> reputacion/page.tsx y GBPMetricsCard.tsx"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "getCampaignStats y getN8nMetrics no tienen llamadores",
+   "comando": "git grep -l -E '\\bgetCampaignStats\\b' origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma logic-core-v3/tests -> solo brevo.ts; idem getN8nMetrics -> solo n8n.ts",
+   "control_positivo": "ensureBrevoList -> email-marketing/_actions.ts; sendLeadToN8n -> lib/actions/contact.ts"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "No existe la ruta /dashboard/chatbot/preferences que enlaza el reporte semanal",
+   "comando": "git ls-tree -r --name-only origin/main -- logic-core-v3/src/app | grep -i preferences  -> vacío",
+   "control_positivo": "el mismo listado contiene logic-core-v3/src/app/(protected)/dashboard/chatbot/settings/page.tsx"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "El schema no tiene opt-out para el reporte semanal del chatbot",
+   "comando": "git grep -n -iE 'weekly|OptOut' origin/main -- logic-core-v3/prisma/schema.prisma  -> solo executiveReportOptOut (:387) y WeeklyReportLog/estados del reporte ejecutivo",
+   "control_positivo": "executiveReportOptOut aparece en schema.prisma:387"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "Ningún barrido de cron filtra organizaciones archivadas (deletedAt)",
+   "comando": "git grep -n deletedAt origin/main -- logic-core-v3/src/app/api/cron logic-core-v3/src/modules/chatbot/server/reports/sendWeeklyReports.ts logic-core-v3/src/lib/reports/ logic-core-v3/src/modules/chatbot/server/admin/detectBotIssues.ts logic-core-v3/src/lib/alerts.ts  (exit 1)",
+   "control_positivo": "git grep -c deletedAt 'logic-core-v3/src/app/(protected)/admin/clients/page.tsx' -> 4"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "Ninguna conexión o desconexión invalida los tags de caché de Tiendanube, GBP, Cal.com o PageSpeed",
+   "comando": "git grep -n 'revalidateTag(' origin/main -- logic-core-v3/src | grep -E 'tiendanube|gbp|cal:|pagespeed'  -> vacío",
+   "control_positivo": "git grep -c 'revalidateTag(' -> admin/leads/_actions/lead.actions.ts:6 entre otros"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "oauth-state.ts no tiene test ni invariant en el repo",
+   "comando": "git grep -l -E 'verifyOAuthState|signOAuthState' origin/main -- logic-core-v3  -> 5 docs y 5 archivos de código, ningún test",
+   "control_positivo": "git grep -l buildEmailContactOptOutUrl -> src/lib/security/idor-tokens.invariant.ts (los tokens de baja sí tienen invariant)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "No hay replayIntegration ni captureConsoleIntegration configuradas",
+   "comando": "git grep -n -E 'replayIntegration|captureConsoleIntegration|integrations:' origin/main -- logic-core-v3/src logic-core-v3/sentry.server.config.ts logic-core-v3/sentry.edge.config.ts logic-core-v3/next.config.ts  (exit 1)",
+   "control_positivo": "git grep -c Sentry.init origin/main -- logic-core-v3/src/instrumentation-client.ts -> 1"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "/api/track no tiene consumidores",
+   "comando": "git grep -n -E 'api/track' origin/main -- logic-core-v3/src logic-core-v3/public | grep -v src/app/api/track/route.ts  (exit 1)",
+   "control_positivo": "git grep -c api/chatbot origin/main -- logic-core-v3/src/modules/chatbot/hooks/useChatbot.ts -> 1"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "onLeadCaptured ya no existe (P1-13)",
+   "comando": "git grep -n onLeadCaptured origin/main -- logic-core-v3/src  (exit 1)",
+   "control_positivo": "git grep -n sendLeadToN8n origin/main -- logic-core-v3/src/lib/actions/contact.ts -> :5 y :82"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "No hay archivos de credenciales versionados",
+   "comando": "git ls-tree -r --name-only origin/main | grep -iE 'vertex-credentials|credentials\\.json|service-account.*\\.json|\\.env(\\.local)?$'  (exit 1)",
+   "control_positivo": "git ls-tree -r --name-only origin/main | grep -E '\\.env\\.example$' -> logic-core-v3/.env.example"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "afirmacion": "encryptCredential no tiene llamadores en src (solo secret-box se usa, en el motor)",
+   "comando": "git grep -n -E 'credential-cipher|isEncrypted|encryptCredential|secret-box' origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma | grep -v src/lib/crypto/  -> solo src/modules/motor/services/sendMessage.ts:22",
+   "control_positivo": "el mismo comando encuentra el import de secret-box en sendMessage.ts:22"
   }
  ]
 }

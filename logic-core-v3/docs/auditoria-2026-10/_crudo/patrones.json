@@ -2379,6 +2379,76 @@
    "patron": "Bloque de error del form público sin role=alert",
    "como_buscarlo": "git grep -n \"state?.error\" origin/main -- src/app y verificar role=alert/aria-live",
    "donde_aparecio": "src/app/contact/page.tsx:212-213 (instancia del patrón D1-c1)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "unstable_cache que devuelve objetos con Date: en el acierto vuelven como string y los métodos de Date lanzan",
+   "como_buscarlo": "git grep -n unstable_cache origin/main -- logic-core-v3/src y, por cada uno, revisar si el tipo de retorno tiene Date y si el consumidor llama .toISOString/.getTime/.toLocale* sin new Date()",
+   "donde_aparecio": "google-business-profile.ts:178 -> GBPMetricsCard.tsx:124; pagespeed.ts:30 -> PageSpeedCard.tsx:60; candidato admin/clients/page.tsx:20"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "unstable_cache que guarda null o [] devueltos por un catch: el error queda cacheado toda la ventana",
+   "como_buscarlo": "mismos sitios de unstable_cache: ver si el callback atrapa y devuelve null/[]",
+   "donde_aparecio": "tiendanube.ts:75, pagespeed.ts:30, cal-com.ts:33, google-business-profile.ts:178; results-insights.ts:37 (BUG-066)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "Barridos de cron sin filtrar organization.deletedAt",
+   "como_buscarlo": "git grep -n 'findMany(' en src/app/api/cron, src/lib/reports, src/modules/chatbot/server/reports y detectBotIssues, y comprobar el filtro deletedAt: null",
+   "donde_aparecio": "generate-insights/route.ts:18, regenerate-briefs/route.ts:26"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "HMAC o claves con fallback a AUTH_SECRET (reuso de clave; rotar rompe links ya enviados)",
+   "como_buscarlo": "git grep -n AUTH_SECRET origin/main -- logic-core-v3/src",
+   "donde_aparecio": "unsubscribe-token.ts:9, oauth-state.ts:29, impersonation.ts:17"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "NEXT_PUBLIC_* leída en código de servidor: se incrusta en el build y no se rota en caliente",
+   "como_buscarlo": "git grep -n 'process.env.NEXT_PUBLIC_' origin/main -- logic-core-v3/src/lib logic-core-v3/src/app/api logic-core-v3/src/modules logic-core-v3/src/instrumentation.ts",
+   "donde_aparecio": "src/instrumentation.ts:7, generate-insights/route.ts:66, notify-message.ts:45, unsubscribe-token.ts:58"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "catch en route handlers que devuelve 500 sin Sentry: onRequestError nunca ve errores atrapados",
+   "como_buscarlo": "git grep -n -A3 'catch' en src/app/api/**/route.ts y filtrar los que no llaman captureException",
+   "donde_aparecio": "cron/*/route.ts, google-business/callback/route.ts:83-85, track/route.ts:42-44"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "Secretos comparados con === o !== en lugar de timingSafeEqual",
+   "como_buscarlo": "git grep -n -E 'providedSecret (!==|===) expectedSecret|provided !== expected' origin/main -- logic-core-v3/src",
+   "donde_aparecio": "cron-secret.ts:43, alerts/route.ts:8, regenerate-briefs/route.ts:22, send-executive-reports/route.ts:21, os-follow-up/route.ts:154-155"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "Envíos desde el navegador a webhooks de terceros con URL NEXT_PUBLIC (sin servidor ni rate limit)",
+   "como_buscarlo": "git grep -n -E 'NEXT_PUBLIC_[A-Z_]*(WEBHOOK|HOOK)' origin/main -- logic-core-v3/src",
+   "donde_aparecio": "Footer.tsx:81"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "Elementos clickeables que no son botones (div/motion.div con onClick)",
+   "como_buscarlo": "git grep -n -E '<(motion\\.)?div[^>]*onClick' origin/main -- logic-core-v3/src/components logic-core-v3/src/app",
+   "donde_aparecio": "Footer.tsx:442-446"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "patron": "Fallbacks literales de remitente, número o dominio legacy en lugar del módulo canónico",
+   "como_buscarlo": "git grep -n -E 'develop-agency\\.com|@gmail\\.com|wa\\.me/' origin/main -- logic-core-v3/src",
+   "donde_aparecio": "brevo-service.ts:33, email.ts:21, brevo.ts:124, Footer.tsx:8, ActionRequiredEmail.tsx:23"
   }
  ]
 }

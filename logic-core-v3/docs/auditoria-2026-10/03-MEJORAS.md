@@ -61,7 +61,7 @@ Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de
 ### [SEC-036] Credenciales de terceros en claro en la base: tokens OAuth de Google Business, token de Tiendanube, API key de Cal.com, token de Telegram y las credenciales de la Bóveda (el cifrado de escritura quedó sin mergear)
 - Dominio: D6  ·  Severidad: ALTA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `prisma/migrations/20260503150000_add_gbp_fields/migration.sql:5` — «ADD COLUMN "gbpAccessToken" TEXT, ADD COLUMN "gbpRefreshToken" TEXT,»; `prisma/migrations/20260504235814_add_tiendanube_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "tiendanubeAccessToken" TEXT,»; `prisma/migrations/20260505000536_add_cal_com_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "calComApiKey" TEXT,»; `src/app/api/auth/google-business/callback/route.ts:52` — «gbpAccessToken: tokens.access_token, gbpRefreshToken: tokens.refresh_token,»; `src/actions/agency-actions.ts:103` — «await prisma.clientAsset.create({ data: { organizationId,»; `prisma/schema.prisma:1704` — «// Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM // con env CRM_SECRET_KEY.»; `prisma/schema.prisma:360` — «gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:375` — «calComApiKey String? @db.Text»; `prisma/schema.prisma:835` — «osTelegramBotToken String?»; `src/app/api/auth/google-business/callback/route.ts:53` — «gbpRefreshToken: tokens.refresh_token,»; `src/app/api/auth/tiendanube/callback/route.ts:67` — «tiendanubeAccessToken: tokens.access_token,»; `src/lib/crypto/credential-cipher.ts:73` — «export function encryptCredential(plaintext: string): string { // sin llamadores en origin/main»; `src/lib/crypto/resolve-credential.ts:24` — «return { value: description, error: false } // texto plano pasa tal cual»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:85` — «AES-256 // badge del header (tambien :148 en cada tarjeta)»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:185` — «<VaultRevealButton value={credential.value} /> // el valor viaja en el payload RSC»; `src/actions/agency-actions.ts:109` — «description: data.description»; `src/components/admin/managers/VaultManager.tsx:5` — «import { createClientAssetAction } from '@/actions/agency-actions'»; `src/actions/onboarding-actions.ts:115` — «url: 'ENCRIPTADO_EN_TEXTO',»; `src/components/admin/managers/VaultManager.tsx:85` — «placeholder="Contraseña o instrucciones..."»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:148` — «AES-256»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:51` — «// ─── Demo activity log (PLACEHOLDER — data fake; modelo real = schema, parada aparte) ──»; `src/components/dashboard/VaultRevealButton.tsx:61` — «Información sensible — Solo visible para vos»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:131` — «? resolveCredentialDisplay(asset.description)»
+- Evidencia: `prisma/migrations/20260503150000_add_gbp_fields/migration.sql:5` — «ADD COLUMN "gbpAccessToken" TEXT, ADD COLUMN "gbpRefreshToken" TEXT,»; `prisma/migrations/20260504235814_add_tiendanube_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "tiendanubeAccessToken" TEXT,»; `prisma/migrations/20260505000536_add_cal_com_fields/migration.sql:2` — «ALTER TABLE "Organization" ADD COLUMN "calComApiKey" TEXT,»; `src/app/api/auth/google-business/callback/route.ts:52` — «gbpAccessToken: tokens.access_token, gbpRefreshToken: tokens.refresh_token,»; `src/actions/agency-actions.ts:103` — «await prisma.clientAsset.create({ data: { organizationId,»; `prisma/schema.prisma:1704` — «// Auth opcional vía header (ej. "X-Webhook-Secret"). Secret cifrado AES-256-GCM // con env CRM_SECRET_KEY.»; `prisma/schema.prisma:360` — «gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:375` — «calComApiKey String? @db.Text»; `prisma/schema.prisma:835` — «osTelegramBotToken String?»; `src/app/api/auth/google-business/callback/route.ts:53` — «gbpRefreshToken: tokens.refresh_token,»; `src/app/api/auth/tiendanube/callback/route.ts:67` — «tiendanubeAccessToken: tokens.access_token,»; `src/lib/crypto/credential-cipher.ts:73` — «export function encryptCredential(plaintext: string): string { // sin llamadores en origin/main»; `src/lib/crypto/resolve-credential.ts:24` — «return { value: description, error: false } // texto plano pasa tal cual»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:85` — «AES-256 // badge del header (tambien :148 en cada tarjeta)»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:185` — «<VaultRevealButton value={credential.value} /> // el valor viaja en el payload RSC»; `src/actions/agency-actions.ts:109` — «description: data.description»; `src/components/admin/managers/VaultManager.tsx:5` — «import { createClientAssetAction } from '@/actions/agency-actions'»; `src/actions/onboarding-actions.ts:115` — «url: 'ENCRIPTADO_EN_TEXTO',»; `src/components/admin/managers/VaultManager.tsx:85` — «placeholder="Contraseña o instrucciones..."»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:148` — «AES-256»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:51` — «// ─── Demo activity log (PLACEHOLDER — data fake; modelo real = schema, parada aparte) ──»; `src/components/dashboard/VaultRevealButton.tsx:61` — «Información sensible — Solo visible para vos»; `src/app/(protected)/dashboard/cuenta/boveda/page.tsx:131` — «? resolveCredentialDisplay(asset.description)»; `src/lib/integrations/cal-com.ts:49` — «const res = await fetch('${API_BASE}/bookings?apiKey=${apiKey}', {»; `src/lib/notifications/telegram.ts:45` — «const configToken = settings?.osTelegramBotToken?.trim()»
 - Impacto: Bloqueante para el primer cliente real: quien tenga lectura de la base o de un dump (la Neon dev es compartida con otro desarrollador) obtiene el refresh token de Google Business del cliente (permite responder reseñas en su nombre), acceso a su tienda, su API key de Cal.com, el token del bot de Telegram (AgencySettings, 20260406033000:3, escrito en claro en settings.actions.ts:161) y las credenciales de dominio y hosting cargadas en la Bóveda, mientras el portal le asegura al cliente, en el encabezado y en cada tarjeta de la Bóveda, que están cifradas con AES-256. El repo ya cifra en reposo el secret del CRM y la API key del motor, y tiene credential-cipher para la Bóveda, pero el cifrado de los write-paths (PD-1.2, commit 9fc616c4) quedó en la rama b0-isolation-motor-chatbot sin mergear: encryptCredential no tiene llamadores fuera de los tests.
 - Propuesta: Cifrar en los write-paths con secret-box/credential-cipher (callbacks OAuth de GBP y Tiendanube, settings de Telegram, carga de Cal.com y assets de la Bóveda), backfill idempotente y lectura tolerante (resolve-credential ya soporta ambos formatos); mergear o portar 9fc616c4.
 - Esfuerzo: M  ·  Zona: libre
@@ -531,6 +531,39 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [SEC-054], [SEC-055]
 - Nodo(s): h6.vis-contacto.enviar-formulario, modelo.ContactSubmission, lib.actions, int.n8n, h2.cli-servicios
 
+### [SEC-093] /api/test-sentry es público: cada pedido anónimo produce un 500 y un evento de Sentry
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/test-sentry/route.ts:3` — «export async function GET() { throw new Error('Test Sentry — esto debería aparecer en el dashboard de Sentry')»; `src/proxy.ts:172` — «matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password'],»; `src/instrumentation.ts:49` — «export const onRequestError = Sentry.captureRequestError»
+- Impacto: Con Sentry activo, un loop de curl anónimo llena la cuota de eventos y tapa los errores reales de los clientes; además es una ruta 500 permanente en producción.
+- Propuesta: Borrar la ruta o exigir SUPER_ADMIN y NODE_ENV distinto de production.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-060]
+- Nodo(s): int.sentry, h6
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-138
+
+### [SEC-094] El formulario del pie del home manda el lead desde el navegador al webhook público de n8n: sin servidor, sin validación, sin rate limit, sin registro en la base, y muestra éxito aunque n8n falle
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/components/sections/home/Footer.tsx:81` — «const webhookUrl = process.env.NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL;»; `src/components/sections/home/Footer.tsx:84` — «await fetch(webhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form), }); setSubmitted(true);»; `src/components/sections/home/Footer.tsx:105` — «setSubmitted(true);»; `src/app/page.tsx:42` — «<Footer />»
+- Impacto: La URL del webhook queda en el bundle público: cualquiera le manda cargas sin tope ni validación (y dispara lo que haga el workflow). Los leads del pie del home no entran a ContactSubmission, a la alerta de agencia ni a la atribución de referidos, que sí hace la action de /contact (contact.ts:100); si n8n responde 4xx/5xx la pantalla dice '¡Consulta enviada! Te contactamos en menos de 2hs' y el lead se pierde; sin webhook abre WhatsApp y también marca enviado.
+- Propuesta: Que el pie use la server action de contacto existente (Zod, rate limit, persistencia y n8n desde el servidor) y muestre el error real; retirar NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-090], [BUG-099]
+- Nodo(s): h6.vis-contacto.formulario-pie-home, int.n8n, modelo.ContactSubmission
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-139
+
+### [SEC-099] Las tres scheduled functions de Netlify no validan quién las invoca: si Netlify las expusiera por URL, un anónimo dispararía insights (Vertex) y reportes por email
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `netlify/functions/generate-insights-cron.ts:44` — «export const handler = async () => {»; `netlify/functions/send-weekly-reports-cron.ts:63` — «export const handler = async () => {»; `netlify/functions/cleanup-old-events-cron.ts:6` — «export const handler = async () => {»
+- Impacto: Cada handler agrega el CRON_SECRET y llama a la ruta real. Según la documentación de Netlify las scheduled functions no se invocan por URL en producción, pero no se pudo verificar: si lo fueran, cualquiera repetiría a voluntad la generación de insights (costo de Vertex por bot) y el reporte semanal a todos los clientes.
+- Propuesta: Verificar con el caso manual; si responden por URL, chequear en el handler el header de invocación programada de Netlify o mover la lógica a la ruta con su propio secreto.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): int.cron.generate-insights, int.cron.send-weekly-reports, int.cron.cleanup-old-events
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-140
+
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -954,6 +987,46 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [SEC-062]
 - Nodo(s): h4.adm-config, lib.action-utils, h4.adm-novedades.publicar, lib.actions, int.sentry, h4.adm-alertas, h4.adm-proyectos.tareas, h4.adm-tickets
 
+### [SEC-095] Plantillas HTML de email interpolan nombres y contenido sin escapar (bienvenida, bot activado, aviso de mensaje, reset)
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/email/templates/welcome-client.ts:46` — «Hola ${input.clientName}, tu cuenta está lista»; `src/lib/email/templates/bot-activated.ts:35` — «${input.botName} está listo»; `src/lib/email/notify-message.ts:110` — «white-space: pre-wrap;">${params.preview}</p>»; `src/lib/email/templates/password-reset.ts:12` — «const safeName = input.clientName?.trim() || 'Hola'»
+- Impacto: Un nombre de empresa, de bot o un mensaje del admin con < o comillas rompe el HTML del email o inyecta marcado (enlaces engañosos); el riesgo es bajo porque los valores los carga develOP o el propio destinatario, pero weekly-report.ts:3 y executive-weekly.ts:55 ya escapan y estas no.
+- Propuesta: Extraer el escapeHtml existente a lib/email y aplicarlo a toda interpolación en plantillas HTML.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [DEU-049]
+- Nodo(s): lib.email, int.brevo, int.resend
+
+### [SEC-096] secret-box descifra sin fijar authTagLength ni validar iv/tag, y su validación de hex es inerte
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/crypto/secret-box.ts:63` — «key = Buffer.from(raw, 'hex')»; `src/lib/crypto/secret-box.ts:97` — «const decipher = createDecipheriv(ALGORITHM, key, iv) decipher.setAuthTag(tag)»; `src/lib/crypto/credential-cipher.ts:119` — «const decipher = createDecipheriv(ALGORITHM, key, iv, { authTagLength: TAG_LENGTH_BYTES,»
+- Impacto: Protege la API key de 360dialog por canal (sendMessage.ts:22): quien pueda escribir la base puede guardar un tag truncado y bajar la autenticación GCM; Buffer.from no lanza con hex inválido, así que una key mal formada da un error de largo confuso. credential-cipher.ts ya tiene el endurecimiento.
+- Propuesta: Copiar a secret-box la validación de hex, el largo de iv/tag y authTagLength de credential-cipher.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.crypto, h3.vis-whatsapp
+
+### [SEC-097] Los HMAC de bajas y del state OAuth caen a AUTH_SECRET: rotarla deja inválidos todos los links de baja ya enviados
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/email/unsubscribe-token.ts:8` — «process.env.EMAIL_UNSUBSCRIBE_SECRET?.trim() || process.env.AUTH_SECRET?.trim()»; `src/lib/security/oauth-state.ts:28` — «process.env.OAUTH_STATE_SECRET?.trim() || process.env.AUTH_SECRET?.trim()»
+- Impacto: La misma clave firma sesiones, bajas y state OAuth. Si hay que rotar AUTH_SECRET (p. ej. por una filtración) y no se configuró EMAIL_UNSUBSCRIBE_SECRET, todos los links de 'Dejar de recibir' y 'Darme de baja' de emails ya enviados responden 403, y la baja deja de funcionar para esos destinatarios. El inventario de credenciales lo da como 'solo scripts', pero se lee en 4 archivos de src.
+- Propuesta: Exigir secretos dedicados en producción sin fallback y documentar la rotación con período de gracia (aceptar también la firma con la clave anterior).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.email, lib.security, h6.vis-optout, h2.cli-reportes-email
+
+### [SEC-098] CRON_SECRET se compara con === y el chequeo tiene cuatro copias; alerts solo acepta X-Cron-Secret
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/cron/cron-secret.ts:43` — «return Boolean(expectedSecret) && providedSecret === expectedSecret»; `src/app/api/cron/alerts/route.ts:8` — «if (!expectedSecret || providedSecret !== expectedSecret) {»; `src/app/api/cron/regenerate-briefs/route.ts:7` — «function getProvidedCronSecret(request: Request): string | null {»; `src/app/api/cron/send-executive-reports/route.ts:7` — «function getProvidedCronSecret(request: Request): string | null {»
+- Impacto: Todas fallan cerrado (bien), pero la comparación no es de tiempo constante y las copias ya divergieron: alerts no acepta Bearer, contra lo que documenta .env.example:219.
+- Propuesta: timingSafeEqual en isAuthorizedCronRequest y usarlo en regenerate-briefs, send-executive-reports, alerts y os-follow-up.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.cron, int.cron.alerts, int.cron.regenerate-briefs, int.cron.send-executive-reports
+
 ## Bugs latentes
 
 ### [BUG-002] El alta de cliente guarda el email tal cual se tipeo: con una mayuscula el cliente no puede entrar por ningun metodo
@@ -1051,6 +1124,28 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): h3.cli-chatbot.resumen, modelo.ChatbotLead, modelo.QuotaUsage, h3.cli-chatbot, lib.chatbot.lib
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-087
+
+### [BUG-141] Reputación se cae desde la segunda visita: unstable_cache devuelve las fechas de las reseñas como texto y GBPMetricsCard llama a toISOString()
+- Dominio: D7  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/integrations/google-business-profile.ts:178` — «return unstable_cache(»; `src/lib/integrations/google-business-profile.ts:214` — «createdAt: parseReviewDate(review.createTime),»; `src/components/dashboard/results/GBPMetricsCard.tsx:124` — «key={'${review.reviewerName}-${review.createdAt.toISOString()}-${index}'}»; librería next@16.2.9, dist/server/web/spec-extension/unstable-cache.js línea 168 — «const cachedResponse = cacheEntry.value.data.body !== undefined ? JSON.parse(cacheEntry.value.data.body) : undefined;»; `src/lib/integrations/pagespeed.ts:145` — «fetchedAt: new Date(),»
+- Impacto: Bloqueante para el primer cliente con Google Business conectado y al menos una reseña: la primera visita a Resultados › Reputación pinta bien, pero durante la hora siguiente (revalidate 3600) cada visita lee la caché, createdAt llega como string y el render lanza TypeError (también formatDate en GBPMetricsCard.tsx:135): el cliente ve la pantalla de error. En Tráfico, la fecha de PageSpeed sale como ISO crudo en el acierto (PageSpeedCard.tsx:60 llama toLocaleString sobre un string).
+- Propuesta: Que las funciones envueltas en unstable_cache devuelvan solo tipos JSON (fechas como ISO string) y que el componente convierta con new Date(), o rehidratar los Date al salir de la caché. Agregar un test que pase el resultado por JSON.parse(JSON.stringify()) antes de renderizar. Revisar los demás unstable_cache del repo con el mismo patrón.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [FAL-011], [UX-015]
+- Nodo(s): h2.cli-resultados.reputacion-gbp, h2.cli-resultados.velocidad-sitio, int.gbp, lib.integrations
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-133
+
+### [BUG-145] La credencial de Vertex (service account de Google Cloud) está vencida: el chatbot de develOP y el de todos los clientes no responde
+- Dominio: D7  ·  Severidad: ALTA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/llm/providers/google.ts:54-56` — «la credencial se toma de GOOGLE_APPLICATION_CREDENTIALS (archivo local) o de GOOGLE_VERTEX_CREDENTIALS_JSON (Netlify)»; `src/modules/chatbot/server/llm/providers/google.ts:72-77` — «el cliente de Vertex se arma con el JSON inline de la service account»; `src/modules/chatbot/server/health/checkHealth.ts:47-54` — «el health del LLM instancia el provider y lista modelos, sin una llamada real: con la credencial vencida da ok»
+- Impacto: Hecho conocido (ENMIENDA-01): el chatbot funcionaba y hoy no responde en ningún entorno que use esa credencial. Es el producto central: el widget del sitio y el de cada cliente fallan en cada mensaje (UX-025), los insights, el brief y el resumen ejecutivo por Vertex también caen, y nada lo avisa (BUG-063: el health da ok; FAL-016: el detector no corre; D7-L1/H02: las integraciones no reportan a Sentry). Bloqueante para el primer cliente real y para cualquier demo.
+- Propuesta: Renovar la key de la service account y cargarla en Netlify (VH). Para que no vuelva a pasar en silencio: un health que haga una llamada mínima real al modelo, el detector con disparador (FAL-016) y una alerta cuando el chat acumula errores del proveedor; anotar la fecha de vencimiento de la key en la tabla de E10.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-063], [UX-025], [FAL-016], [SEC-064], [SEC-071]
+- Nodo(s): int.vertex, h3.vis-widget-develop, lib.chatbot.llm
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-141
 
 ### [BUG-001] Sesion invalidada en Node pero viva en el proxy: bucle /login <-> portal (ERR_TOO_MANY_REDIRECTS)
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: bug
@@ -1871,6 +1966,27 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h6.vis-contacto.enviar-formulario, lib.rate-limit, lib.prisma
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-131
 
+### [BUG-142] Los crons siguen procesando clientes archivados: insights con Vertex, reporte semanal y brief para orgs con deletedAt
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/app/api/cron/generate-insights/route.ts:18` — «const bots = await prisma.botConfig.findMany({ where: { isActive: true },»; `src/app/api/cron/regenerate-briefs/route.ts:27` — «where: { onboardingCompleted: true, subscription: { is: { status: 'ACTIVE' } },»; `src/modules/chatbot/server/admin/archiveClient.ts:35` — «(c) => c.organization.update({ where: { id: org.id }, data: { deletedAt: new Date() } }),»
+- Impacto: Un cliente que se va y se archiva sigue recibiendo el email de 'N insights nuevos', el reporte semanal del chatbot y, si su suscripción quedó ACTIVE, el brief y el reporte ejecutivo; develOP sigue pagando Vertex por sus bots. git grep de deletedAt en las rutas de cron, sendWeeklyReports, executive-weekly/send y detectBotIssues da cero.
+- Propuesta: Filtrar organization.deletedAt: null en todos los barridos de cron con un helper compartido de 'orgs activas', o pausar los bots y cancelar los envíos al archivar.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-014], [BUG-110]
+- Nodo(s): int.cron.generate-insights, int.cron.regenerate-briefs, int.cron.send-weekly-reports, h4.adm-clientes, int.vertex, int.brevo
+
+### [BUG-143] Las integraciones cachean null ante una falla transitoria: Tiendanube 30 min (y la pantalla pide 'reintentar en unos minutos'), PageSpeed 6 h, GBP 1 h, Cal.com 10 min
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/lib/integrations/tiendanube.ts:75` — «return unstable_cache( async () => fetchStoreSummary(organizationId), ['tiendanube-summary', organizationId], { revalidate: 1800,»; `src/lib/integrations/tiendanube.ts:161` — «console.error('[Tiendanube] fetchSummary error:', err) return null»; `src/lib/integrations/pagespeed.ts:33` — «{ revalidate: 6 * 3600, tags: ['pagespeed:${url}'] },»; `src/lib/integrations/cal-com.ts:36` — «{ revalidate: 600, tags: ['cal:${organizationId}'] },»; librería next@16.2.9, dist/server/web/spec-extension/unstable-cache.js línea 23 — «body: JSON.stringify(result),»
+- Impacto: Un corte de segundos en la API del proveedor deja al cliente sin datos durante la ventana entera: Tienda conectada muestra 'Intentá de nuevo en unos minutos' (tienda-conectada/page.tsx:101) pero reintentar no sirve por 30 min; PageSpeed desaparece 6 h. Ninguna conexión invalida su tag (git grep de revalidateTag con tiendanube/gbp/cal/pagespeed vacío), así que tras reconectar se siguen viendo los datos viejos o el error.
+- Propuesta: No cachear errores: que el callback lance (o devuelva un resultado discriminado y solo se cachee el ok) y que la página atrape; revalidateTag del tag de la integración al conectar/desconectar.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-033], [UX-015]
+- Nodo(s): h2.cli-tienda.resumen-tienda, h2.cli-resultados.velocidad-sitio, h2.cli-resultados.reputacion-gbp, h2.cli-agenda, lib.integrations
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-137
+
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
 - Confianza: VERIFICADO-POR-LECTURA
@@ -2363,6 +2479,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [BUG-062]
 - Nodo(s): h4.adm-alertas.marcar-vista-resolver, modelo.BotAlert
 
+### [BUG-144] El pie del home conserva su número de WhatsApp de fallback ficticio, fuera de lib/whatsapp.ts que dice haberlo migrado
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/components/sections/home/Footer.tsx:8` — «const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';»; `src/lib/whatsapp.ts:11` — «'543812223344' (×2), '5493815000000' ('Footer'), '543813165293' ('/contact')»
+- Impacto: Si NEXT_PUBLIC_WHATSAPP_NUMBER falta al compilar, el CTA 'WhatsApp directo' del pie lleva a un número ficticio mientras el resto del sitio usa el fallback real; el comentario de whatsapp.ts afirma una migración que en main no está.
+- Propuesta: Usar getWhatsappUrl/getWhatsappDigits de lib/whatsapp.ts en el pie.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [UX-031]
+- Nodo(s): h6.vis-contacto.formulario-pie-home
+
 ## Tecnología vieja
 
 ### [TEC-002] Agenda inteligente usa la API v1 de Cal.com, apagada segun el propio repo, con la API key en la query string
@@ -2473,6 +2599,17 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Nodo(s): h3.adm-chatbots, h3.cli-chatbot, h3.vis-widget-cliente, lib.chatbot.components, h3.adm-chatbots.editar-config-bot, h4.adm-clientes.alta-cliente-con-bot, lib.chatbot.avatar
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-083
 
+### [PERF-012] generate-insights recorre todos los bots en serie con una llamada al LLM cada uno, sin orden ni reanudación, dentro de un techo de ~20-26 s
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/cron/generate-insights/route.ts:33` — «for (const bot of bots) {»; `src/app/api/cron/generate-insights/route.ts:43` — «const result = await generateInsightsForBot(bot.organization.id, bot.id)»; `netlify/functions/generate-insights-cron.ts:33` — «const FETCH_TIMEOUT_MS = 20_000»; `netlify/functions/generate-insights-cron.ts:22` — «// TIMEOUT — aritmética. Una Netlify Function sincrona estandar no puede pasar de ~26s»
+- Impacto: Con más de unos pocos bots activos la corrida diaria se corta por el límite de la plataforma; como findMany no tiene orderBy ni cursor guardado, los mismos primeros bots se procesan cada día y los últimos clientes nunca reciben insights. La function informa timeout, pero nada lo reporta.
+- Propuesta: Procesar en lotes con cursor persistido o un fan-out de una invocación por bot (background function), orderBy estable y maxDuration explícito; medir la duración por bot.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [BUG-110], [DEU-048]
+- Nodo(s): int.cron.generate-insights, h3.adm-chatbots, int.vertex
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-136
+
 ### [PERF-001] FKs sin índice (Task.projectId, Notification.userId/taskId, ChatbotEvent.conversationId) e índices redundantes
 - Dominio: D6  ·  Severidad: BAJA  ·  Tipo: perf
 - Confianza: PROBABLE
@@ -2532,6 +2669,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h4.adm-tickets.bandeja, h4.adm-equipo.workload, h4.adm-clientes.acciones-masivas, h4.adm-leads.pipeline-kanban, h4.adm-mensajes.hilo-y-leido, modelo.OsLead, modelo.Message, h4.adm-proyectos.tablero-kanban, modelo.OsTimeEntry
+
+### [PERF-013] El pie del home anima pathLength sobre el path complejo del logo y blur en whileInView (lección de CLAUDE.md)
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: perf
+- Confianza: PROBABLE
+- Evidencia: `src/components/sections/home/Footer.tsx:183` — «initial={{ pathLength: 0, opacity: 0 }} whileInView={{ pathLength: 1, opacity: 1 }}»; `src/components/sections/home/Footer.tsx:166` — «filter: ['blur(0px)', 'blur(0px)', 'blur(1.6px)'],»
+- Impacto: CLAUDE.md registra que pathLength en paths complejos es caro; el logo tiene cientos de puntos y se combina con filtros blur animados en cada bloque del pie (jank en móviles de gama baja).
+- Propuesta: strokeDashoffset con getTotalLength() como indica la lección, y animar opacidad en lugar de filter blur.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h6.vis-contacto
 
 ## Deuda
 
@@ -2705,6 +2852,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [DEU-001], [DEU-018], [DEU-063]
 - Nodo(s): lib.actions, h4.adm-config, h4.adm-equipo, h4.adm-leads, h4.adm-proyectos, h4.adm-clientes
+
+### [DEU-070] Identidad de envío fragmentada: dos proveedores (Brevo y Resend), cuatro remitentes en dos dominios, uno legacy, y fallback a un Gmail personal
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/email/brevo-service.ts:33` — «email: process.env.BREVO_FROM_EMAIL ?? '[Gmail personal, redactado]',»; `src/lib/email.ts:21` — «from: 'develOP Agency <hello@develop-agency.com>',»; `src/lib/integrations/brevo.ts:124` — «email: params.senderEmail ?? process.env.BREVO_FROM_EMAIL ?? 'alerts@develop-agency.com',»; `src/lib/email/notify-message.ts:51` — «from: 'develOP <hola@develop.com.ar>', // ⚠️ Franco, ajustar al dominio real verificado en Resend»
+- Impacto: Dos keys y dos dominios que mantener vivos, con dos modos de falla distintos; si falta BREVO_FROM_EMAIL, magic link, reset, bienvenida y reportes salen desde una casilla personal de Gmail (entregabilidad y PII del desarrollador en el código); los avisos por Resend salen del dominio legacy develop-agency.com, marcado como pendiente de verificar.
+- Propuesta: Un solo proveedor (Brevo) y un módulo de remitentes con dominio verificado; sin fallbacks literales: si falta el remitente en producción, fallar y avisar.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [BUG-037]
+- Nodo(s): int.brevo, int.resend, lib.email
 
 ### [DEU-001] Flujo de invitacion huerfano: ninguna action viva emite links a /accept-invite (y la de clientes nunca los enviaba)
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: deuda
@@ -3205,6 +3362,36 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h4.adm-shell, h4.adm-alertas, h4.adm-audit, h4.adm-dashboard, h4.adm-novedades, h4.adm-clientes, h4.adm-leads, h4.adm-mensajes, h4.adm-proyectos, h4.adm-config, h4.adm-tickets, h6.vis-contacto, h4.adm-equipo
+
+### [DEU-071] `any` en pagespeed.ts (regla dura 'Cero any')
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/integrations/pagespeed.ts:77` — «data: any,»; `src/lib/integrations/pagespeed.ts:129` — «.filter(([_, audit]: [string, any]) =>»; `src/lib/integrations/pagespeed.ts:132` — «.map(([id, audit]: [string, any]) => ({»
+- Impacto: La respuesta de Lighthouse se parsea sin tipos: un cambio de forma rompe en runtime (atrapado y cacheado como null 6 h) en vez de en compilación.
+- Propuesta: Tipar con unknown y guards como hace google-business-profile.ts (parseReviewsResponse).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h2.cli-resultados.velocidad-sitio, int.pagespeed
+
+### [DEU-072] oauth-state.ts no tiene test versionado y el state no está atado a la sesión ni es de un solo uso
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/lib/security/oauth-state.ts:20` — «No persistimos nonces consumidos: el flow es SUPER_ADMIN-only, el TTL es corto (10 min), y el modelo de amenaza es anti state-swap, no anti-replay.»; `src/lib/security/oauth-state.ts:72` — «export function verifyOAuthState(scope: string, state: unknown): VerifyResult {»
+- Impacto: El cierre del state-swap (SEC-AUTH-01/02) se probó con un script fuera del repo (C:/tmp/probe-oauth-state.mjs): un cambio futuro en oauth-state o en los callbacks puede reabrirlo sin que nada falle. El state vale para cualquier sesión SUPER_ADMIN durante 10 min.
+- Propuesta: Test de unidad versionado (firma, expiración, scope cruzado, payload manipulado) en el estilo de idor-tokens.invariant.ts; opcional, atar el state a una cookie httpOnly del admin.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-053]
+- Nodo(s): lib.security, int.gbp, int.tiendanube
+
+### [DEU-073] Higiene de UI — D7: 15 detalles cosméticos (contraste 7, copy 5, otro 2, inline 1)
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/components/sections/home/Footer.tsx:111` — «[inline] El componente entero usa style={{}} (decenas de bloques y handlers que mutan style) donde hay clases Tailwind equivalentes.»; `src/components/sections/home/Footer.tsx:762` — «[contraste] 'Te respondemos en menos de 2hs' a rgba(255,255,255,0.18) sobre #050505, muy por debajo de 4,5:1.»; `src/components/sections/home/Footer.tsx:885` — «[contraste] Links sociales a 0.2 de opacidad y 10px.»; `src/components/sections/home/Footer.tsx:907` — «[contraste] Copyright a 0.1 de opacidad.»; `src/components/sections/home/Footer.tsx:510` — «[contraste] Subtítulo de la tarjeta de formulario a 0.28.»; `src/components/sections/home/Footer.tsx:616` — «[contraste] Labels del formulario a 0.35 y 10px.»; `src/components/sections/home/Footer.tsx:51` — «[copy] 'Respuesta Inmediata' contradice 'menos de 2hs' del mismo pie (:427, :580).»; `src/emails/ActionRequiredEmail.tsx:57` — «[copy] 'aviso cifrado ... C-Level. No responda a este bot' promete cifrado inexistente; tuteo/usted (:51) frente al voseo del resto.»; `src/emails/TicketReplyEmail.tsx:56` — «[copy] Jerga ('Soporte B2B', 'ecosistema', 'equipo de ingeniería') y tuteo.»; `src/emails/ActionRequiredEmail.tsx:23` — «[otro] URL por defecto del dominio legacy develop-agency.com (también TicketReplyEmail.tsx:26 con un ticket de ejemplo).»; `src/emails/ActionRequiredEmail.tsx:74` — «[otro] Container con width fijo de 580px (sin max-width) en un email que se lee en móvil; idem TicketReplyEmail.tsx:79.»; `src/lib/email/templates/welcome-client.ts:81` — «[copy] 'escribime por WhatsApp' sin número ni link; firma personal 'Franco — develOP' en plantillas de sistema (:84; bot-activated.ts:66; password-reset.ts:63).»; `src/app/api/email/optout/[contactId]/route.ts:50` — «[contraste] Texto #71717a sobre #09090b (cerca de 4:1).»; `src/lib/email/templates/weekly-report.ts:162` — «[contraste] Pie #71717a sobre #09090b; idem executive-weekly.ts:285.»; `src/lib/email/templates/weekly-report.ts:114` — «[copy] 'Charlas' en el reporte del chatbot frente a 'Conversaciones' en el ejecutivo (executive-weekly.ts:254).»
+- Impacto: Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.
+- Propuesta: Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h6.vis-contacto, int.email, h6.vis-optout
 
 ## Calidad
 
@@ -3731,6 +3918,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: [BUG-112]
 - Nodo(s): h4.adm-proyectos.enviar-a-aprobacion, h2.cli-proyecto, modelo.Message, modelo.Notification
 
+### [UX-052] Callback de Tiendanube sin manejo de errores y con redirecciones de error que ninguna pantalla lee
+- Dominio: D7  ·  Severidad: BAJA  ·  Tipo: ux
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/auth/tiendanube/callback/route.ts:45` — «new URL('/dashboard?error=oauth_state_${stateCheck.reason}', request.url),»; `src/app/api/auth/tiendanube/callback/route.ts:63` — «await prisma.organization.update({»
+- Impacto: Si la base falla después de canjear el code, el admin ve un 500 genérico y el token queda sin guardar; si el state vence o la conexión falla, termina en el inicio del panel sin ningún mensaje (git grep de oauth_failed/oauth_state sin lectores).
+- Propuesta: try/catch con mensaje, y que tienda-conectada lea ?error= como ya lee ?connected.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-032]
+- Nodo(s): h2.cli-tienda.conectar-tienda, int.tiendanube
+
 ## Observabilidad
 
 ## Accesibilidad
@@ -3828,6 +4025,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: [A11Y-005]
 - Nodo(s): h6.vis-contacto.formulario
+
+### [A11Y-025] Pie del home: 'Completar formulario' es un div con onClick (no se abre con teclado) y los labels no están asociados a sus campos
+- Dominio: D7  ·  Severidad: MEDIA  ·  Tipo: a11y
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/components/sections/home/Footer.tsx:442` — «<motion.div whileHover={{ scale: 1.015, y: -2 }} ... onClick={() => setContactMode('form')}»; `src/components/sections/home/Footer.tsx:612` — «<label style={{»; `src/components/sections/home/Footer.tsx:624` — «<input type={field.type} placeholder={field.placeholder}»
+- Impacto: Un visitante con teclado o lector de pantalla no puede abrir el formulario de contacto principal del home (sin role, tabIndex ni onKeyDown) y los campos se anuncian sin nombre; el 'Enviar' no da error accesible.
+- Propuesta: Usar un button real para la tarjeta; label con htmlFor/id; mensajes de estado con role=status/alert.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h6.vis-contacto.formulario-pie-home
 
 ### [A11Y-004] Filas del dropdown de notificaciones no operables con teclado
 - Dominio: D2  ·  Severidad: BAJA  ·  Tipo: a11y

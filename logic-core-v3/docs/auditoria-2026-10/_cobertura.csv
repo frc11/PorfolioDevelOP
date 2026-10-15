@@ -424,12 +424,12 @@ logic-core-v3/docs/v1.0-smoke-test-checklist.md,DOC,superficial,superficial,F1,d
 logic-core-v3/docs/verificacion-arranque-oslead-vii.md,DOC,superficial,superficial,F1,doc
 logic-core-v3/eslint.config.mjs,D8,profundo,pendiente,,config
 logic-core-v3/find_unused.js,D9,superficial,pendiente,,script-suelto-raiz-app
-logic-core-v3/instrumentation.ts,D7,profundo,pendiente,,sentry
+logic-core-v3/instrumentation.ts,D7,profundo,leído,D7-c1,sentry
 logic-core-v3/knip.ts,D8,profundo,pendiente,,config
 logic-core-v3/netlify.toml,D8,profundo,pendiente,,config; crons
-logic-core-v3/netlify/functions/cleanup-old-events-cron.ts,D7,profundo,pendiente,,cron; guard-indirecto
-logic-core-v3/netlify/functions/generate-insights-cron.ts,D7,profundo,pendiente,,cron; guard-indirecto
-logic-core-v3/netlify/functions/send-weekly-reports-cron.ts,D7,profundo,pendiente,,cron; guard-indirecto
+logic-core-v3/netlify/functions/cleanup-old-events-cron.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto
+logic-core-v3/netlify/functions/generate-insights-cron.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto
+logic-core-v3/netlify/functions/send-weekly-reports-cron.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto
 logic-core-v3/next.config.ts,D8,profundo,pendiente,,config
 logic-core-v3/package-lock.json,D8,fuera,excluido-generado,,lockfile (se analiza con npm ls / npm audit)
 logic-core-v3/package.json,D8,profundo,pendiente,,dependencias
@@ -681,8 +681,8 @@ logic-core-v3/scripts/set-matsu-password.ts,D9,profundo,superficial,F1.11,script
 logic-core-v3/scripts/utm1-smoke.mjs,D9,profundo,superficial,F1.11,script-operativo; toca-db; escribe-db; promovido: escribe en la base | PODA-ALTA
 logic-core-v3/scripts/utm1-verify-attribution.ts,D9,superficial,pendiente,,script-operativo
 logic-core-v3/scripts/v1-qa-wizard-states.ts,D9,superficial,pendiente,,script-operativo
-logic-core-v3/sentry.edge.config.ts,D7,profundo,pendiente,,sentry
-logic-core-v3/sentry.server.config.ts,D7,profundo,pendiente,,sentry
+logic-core-v3/sentry.edge.config.ts,D7,profundo,leído,D7-c1,sentry
+logic-core-v3/sentry.server.config.ts,D7,profundo,leído,D7-c1,sentry
 logic-core-v3/src/actions/admin/onboarding-tasks.ts,D3,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/actions/agency-actions.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/actions/auth-actions.ts,D1,profundo,leído,D1-c1,server-actions; server-action; usa-auth
@@ -1140,35 +1140,35 @@ logic-core-v3/src/app/api/admin/clients/[organizationId]/send-executive-report/r
 logic-core-v3/src/app/api/admin/reports/send-now/route.ts,D3,profundo,leído,D3-c1,api-admin; usa-auth; route-handler
 logic-core-v3/src/app/api/admin/users/[userId]/resend-credentials/route.ts,D3,profundo,leído,D3-c1,api-admin; toca-db; usa-auth; route-handler; escribe-db
 logic-core-v3/src/app/api/auth/[...nextauth]/route.ts,D1,profundo,leído,D1-c1,nextauth; usa-auth; route-handler
-logic-core-v3/src/app/api/auth/google-business/callback/route.ts,D7,profundo,pendiente,,oauth; toca-db; usa-auth; route-handler; escribe-db
-logic-core-v3/src/app/api/auth/google-business/start/route.ts,D7,profundo,pendiente,,oauth; usa-auth; route-handler
-logic-core-v3/src/app/api/auth/tiendanube/callback/route.ts,D7,profundo,pendiente,,oauth; toca-db; usa-auth; route-handler; escribe-db
-logic-core-v3/src/app/api/auth/tiendanube/start/route.ts,D7,profundo,pendiente,,oauth; usa-auth; route-handler
+logic-core-v3/src/app/api/auth/google-business/callback/route.ts,D7,profundo,leído,D7-c1,oauth; toca-db; usa-auth; route-handler; escribe-db
+logic-core-v3/src/app/api/auth/google-business/start/route.ts,D7,profundo,leído,D7-c1,oauth; usa-auth; route-handler
+logic-core-v3/src/app/api/auth/tiendanube/callback/route.ts,D7,profundo,leído,D7-c1,oauth; toca-db; usa-auth; route-handler; escribe-db
+logic-core-v3/src/app/api/auth/tiendanube/start/route.ts,D7,profundo,leído,D7-c1,oauth; usa-auth; route-handler
 logic-core-v3/src/app/api/chatbot/[slug]/chat/route.ts,D5,profundo,leído,D5-c1,api-chatbot-publica; toca-db; route-handler; escribe-db
 logic-core-v3/src/app/api/chatbot/[slug]/config/__tests__/fix-origin-same-origin.invariant.ts,D5,superficial,superficial,D5-c1,"api-chatbot-publica; test | test sin DB: decision same-origin del GET de config sin header Origin (isSameOriginBypassApplicable, isTrustedSameOrigin); no cubre el escape de develop.com.ar para todos los bots"
 logic-core-v3/src/app/api/chatbot/[slug]/config/route.ts,D5,profundo,leído,D5-c1,api-chatbot-publica; route-handler
 logic-core-v3/src/app/api/chatbot/[slug]/config/same-origin.ts,D5,profundo,leído,D5-c1,api-chatbot-publica; toca-db
 logic-core-v3/src/app/api/chatbot/[slug]/health/route.ts,D5,profundo,leído,D5-c1,api-chatbot-publica; route-handler
-logic-core-v3/src/app/api/cron/alerts/route.ts,D7,profundo,pendiente,,cron; guard-indirecto; route-handler
-logic-core-v3/src/app/api/cron/cleanup-old-events/__tests__/cleanup-old-events-auth.invariant.ts,D7,superficial,pendiente,,cron; test; guard-indirecto
-logic-core-v3/src/app/api/cron/cleanup-old-events/route.ts,D7,profundo,pendiente,,cron; route-handler
-logic-core-v3/src/app/api/cron/detect-bot-issues/route.ts,D7,profundo,pendiente,,cron; route-handler
-logic-core-v3/src/app/api/cron/generate-insights/route.ts,D7,profundo,pendiente,,cron; toca-db; route-handler
+logic-core-v3/src/app/api/cron/alerts/route.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto; route-handler
+logic-core-v3/src/app/api/cron/cleanup-old-events/__tests__/cleanup-old-events-auth.invariant.ts,D7,superficial,superficial,D7-c1,cron; test; guard-indirecto | test sin DB: el GET del cron responde 401 sin CRON_SECRET valido antes de tocar Prisma; no cubre que la scheduled function de Netlify valide quien la invoca (SEC-099)
+logic-core-v3/src/app/api/cron/cleanup-old-events/route.ts,D7,profundo,leído,D7-c1,cron; route-handler
+logic-core-v3/src/app/api/cron/detect-bot-issues/route.ts,D7,profundo,leído,D7-c1,cron; route-handler
+logic-core-v3/src/app/api/cron/generate-insights/route.ts,D7,profundo,leído,D7-c1,cron; toca-db; route-handler
 logic-core-v3/src/app/api/cron/os-follow-up/route.ts,D4,profundo,pendiente,,cron-leados; toca-db; guard-indirecto; route-handler; escribe-db
-logic-core-v3/src/app/api/cron/regenerate-briefs/route.ts,D7,profundo,pendiente,,cron; toca-db; guard-indirecto; route-handler
-logic-core-v3/src/app/api/cron/send-executive-reports/route.ts,D7,profundo,pendiente,,cron; guard-indirecto; route-handler
-logic-core-v3/src/app/api/cron/send-weekly-reports/route.ts,D7,profundo,pendiente,,cron; route-handler
+logic-core-v3/src/app/api/cron/regenerate-briefs/route.ts,D7,profundo,leído,D7-c1,cron; toca-db; guard-indirecto; route-handler
+logic-core-v3/src/app/api/cron/send-executive-reports/route.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto; route-handler
+logic-core-v3/src/app/api/cron/send-weekly-reports/route.ts,D7,profundo,leído,D7-c1,cron; route-handler
 logic-core-v3/src/app/api/dashboard/chatbot/leads/export/route.ts,D5,profundo,leído,D5-c1,api-dashboard-chatbot; toca-db; route-handler
 logic-core-v3/src/app/api/dashboard/leads/recent/route.ts,D2,profundo,leído,D2-c1,api-dashboard; toca-db; usa-auth; guard-indirecto; route-handler
-logic-core-v3/src/app/api/dev/email-preview/executive-weekly/route.ts,D7,profundo,pendiente,,api-integracion; route-handler
-logic-core-v3/src/app/api/email/optout/[contactId]/route.ts,D7,profundo,pendiente,,api-integracion; toca-db; route-handler; escribe-db
-logic-core-v3/src/app/api/email/unsubscribe-executive/route.ts,D7,profundo,pendiente,,api-integracion; toca-db; route-handler; escribe-db
+logic-core-v3/src/app/api/dev/email-preview/executive-weekly/route.ts,D7,profundo,leído,D7-c1,api-integracion; route-handler
+logic-core-v3/src/app/api/email/optout/[contactId]/route.ts,D7,profundo,leído,D7-c1,api-integracion; toca-db; route-handler; escribe-db
+logic-core-v3/src/app/api/email/unsubscribe-executive/route.ts,D7,profundo,leído,D7-c1,api-integracion; toca-db; route-handler; escribe-db
 logic-core-v3/src/app/api/motor/webhook/[channelToken]/route.ts,D5,profundo,leído,D5-c1,motor; webhook; route-handler
 logic-core-v3/src/app/api/qa/login/route.ts,D1,profundo,leído,D1-c1,qa-login; toca-db; route-handler; escribe-db; ZONA-FRANCO
 logic-core-v3/src/app/api/reports/client-monthly/route.ts,D2,profundo,leído,D2-c1,api-dashboard; guard-indirecto; route-handler
 logic-core-v3/src/app/api/reports/monthly/route.ts,D2,profundo,leído,D2-c1,api-dashboard; toca-db; usa-auth; route-handler
-logic-core-v3/src/app/api/test-sentry/route.ts,D7,profundo,pendiente,,api-integracion; route-handler
-logic-core-v3/src/app/api/track/route.ts,D7,profundo,pendiente,,endpoint-publico; toca-db; usa-auth; route-handler; escribe-db
+logic-core-v3/src/app/api/test-sentry/route.ts,D7,profundo,leído,D7-c1,api-integracion; route-handler
+logic-core-v3/src/app/api/track/route.ts,D7,profundo,leído,D7-c1,endpoint-publico; toca-db; usa-auth; route-handler; escribe-db
 logic-core-v3/src/app/api/version/route.ts,D8,profundo,pendiente,,api; route-handler
 logic-core-v3/src/app/bienvenida/_actions/complete-onboarding.ts,D2,profundo,leído,D2-c1,onboarding-cliente; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
 logic-core-v3/src/app/bienvenida/_components/BienvenidaWizard.tsx,D2,profundo,leído,D2-c1,onboarding-cliente; client-component
@@ -1387,7 +1387,7 @@ logic-core-v3/src/components/sections/TemplateWarehouse.tsx,PUB,superficial,supe
 logic-core-v3/src/components/sections/cierre/Cierre.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico
 logic-core-v3/src/components/sections/cierre/ContactoCta.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/sections/home/About.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
-logic-core-v3/src/components/sections/home/Footer.tsx,D7,profundo,pendiente,,webhook n8n desde el navegador; client-component
+logic-core-v3/src/components/sections/home/Footer.tsx,D7,profundo,leído,D7-c1,webhook n8n desde el navegador; client-component
 logic-core-v3/src/components/sections/home/InfiniteReviews.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/sections/home/OurServices.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
 logic-core-v3/src/components/sections/home/Portfolio.tsx,PUB,superficial,superficial,F1,componentes-sitio-publico; client-component
@@ -1483,16 +1483,16 @@ logic-core-v3/src/components/ui/skeletons/TableSkeleton.tsx,D9,profundo,pendient
 logic-core-v3/src/components/ui/skeletons/index.ts,D9,profundo,pendiente,,ui-base; FROZEN
 logic-core-v3/src/context/PreloaderContext.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/layout.tsx, src/components/layout/useChromeRevealed.ts +2); contexto-sitio-publico; client-component; FROZEN"
 logic-core-v3/src/context/TransitionContext.tsx,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx, src/app/(protected)/setter/_components/setter-nav.tsx +2); contexto-sitio-publico; client-component; FROZEN"
-logic-core-v3/src/emails/ActionRequiredEmail.tsx,D7,profundo,pendiente,,emails
-logic-core-v3/src/emails/TicketReplyEmail.tsx,D7,profundo,pendiente,,emails
+logic-core-v3/src/emails/ActionRequiredEmail.tsx,D7,profundo,leído,D7-c1,emails
+logic-core-v3/src/emails/TicketReplyEmail.tsx,D7,profundo,leído,D7-c1,emails
 logic-core-v3/src/hooks/useThemeObserver.tsx,PUB,superficial,superficial,F1,hook del home publico; client-component
-logic-core-v3/src/instrumentation-client.ts,D7,profundo,pendiente,,sentry
-logic-core-v3/src/instrumentation.ts,D7,profundo,pendiente,,sentry
+logic-core-v3/src/instrumentation-client.ts,D7,profundo,leído,D7-c1,sentry
+logic-core-v3/src/instrumentation.ts,D7,profundo,leído,D7-c1,sentry
 logic-core-v3/src/lib/action-utils.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/actions/announcements.ts,D2,profundo,leído,D2-c1,server-actions del cliente; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/clients.ts,D3,profundo,leído,D3-c1,server-actions; toca-db; server-action; guard-indirecto; escribe-db
 logic-core-v3/src/lib/actions/contact.ts,D3,profundo,leído,D3-c1,server-actions; endpoint-publico; toca-db; server-action; guard-indirecto; escribe-db
-logic-core-v3/src/lib/actions/gbp-connection.ts,D7,profundo,pendiente,,server-actions; server-action; usa-auth
+logic-core-v3/src/lib/actions/gbp-connection.ts,D7,profundo,leído,D7-c1,server-actions; server-action; usa-auth
 logic-core-v3/src/lib/actions/impersonation.ts,D1,profundo,leído,D1-c1,server-actions; toca-db; server-action; usa-auth; escribe-db
 logic-core-v3/src/lib/actions/invitations.ts,D1,profundo,superficial,F1.11,server-actions; toca-db; server-action; usa-auth; escribe-db | PODA-ALTA
 logic-core-v3/src/lib/actions/leads-constants.ts,D3,profundo,leído,D3-c1,server-actions
@@ -1514,7 +1514,7 @@ logic-core-v3/src/lib/ai/executive-brief.ts,D2,profundo,leído,D2-c1,ia-llm; toc
 logic-core-v3/src/lib/ai/results-insights.ts,D5,profundo,leído,D5-c1,proveedor-ia: Anthropic directo fuera del modulo chatbot
 logic-core-v3/src/lib/ai/review-reply-draft.ts,D5,profundo,leído,D5-c1,proveedor-ia: Anthropic directo fuera del modulo chatbot
 logic-core-v3/src/lib/alerts.ts,D3,profundo,leído,D3-c1,logica-admin; toca-db; FROZEN-inferido
-logic-core-v3/src/lib/analytics.ts,D7,profundo,pendiente,,integracion
+logic-core-v3/src/lib/analytics.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/announcements/announcements.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: visibilidad de novedades (ALL a todas las orgs, ORG solo a la suya, caducidad, no leidas)"
 logic-core-v3/src/lib/announcements/get-announcements-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/announcements/visibility.ts,D2,profundo,leído,D2-c1,logica-dashboard
@@ -1533,12 +1533,12 @@ logic-core-v3/src/lib/client-notifications/index.ts,D5,profundo,leído,D5-c1,avi
 logic-core-v3/src/lib/client-notifications/notify.ts,D5,profundo,leído,D5-c1,aviso de lead al cliente (lo dispara captureLead); toca-db; escribe-db
 logic-core-v3/src/lib/client-notifications/templates.ts,D5,profundo,leído,D5-c1,aviso de lead al cliente (lo dispara captureLead)
 logic-core-v3/src/lib/cn.ts,D9,profundo,superficial,F1.11,lib-transversal | PODA-ALTA
-logic-core-v3/src/lib/cron/cron-secret.invariant.ts,D7,superficial,pendiente,,integracion; test; guard-indirecto
-logic-core-v3/src/lib/cron/cron-secret.ts,D7,profundo,pendiente,,integracion; guard-indirecto
-logic-core-v3/src/lib/crypto/__tests__/credential-cipher.test.ts,D7,superficial,pendiente,,integracion; test
-logic-core-v3/src/lib/crypto/credential-cipher.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/crypto/resolve-credential.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/crypto/secret-box.ts,D7,profundo,pendiente,,integracion
+logic-core-v3/src/lib/cron/cron-secret.invariant.ts,D7,superficial,superficial,D7-c1,integracion; test; guard-indirecto | test sin DB: isAuthorizedCronRequest rechaza sin CRON_SECRET (incluido Bearer undefined); no cubre las 4 copias inline del chequeo ni la comparacion con === (SEC-098)
+logic-core-v3/src/lib/cron/cron-secret.ts,D7,profundo,leído,D7-c1,integracion; guard-indirecto
+logic-core-v3/src/lib/crypto/__tests__/credential-cipher.test.ts,D7,superficial,superficial,D7-c1,integracion; test | test sin DB del cifrador de credenciales (round-trip, tamper, key ausente); verde por arnes respecto del uso: encryptCredential no tiene llamadores de produccion (SEC-036)
+logic-core-v3/src/lib/crypto/credential-cipher.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/crypto/resolve-credential.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/crypto/secret-box.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/dashboard/attention.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/dashboard/home-metrics-logic.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: logica pura del home de resultados (periodo AR, plata, gate por plan, embudo, vacios); la anti-fuga entre orgs la declara solo en runtime"
 logic-core-v3/src/lib/dashboard/home-metrics-logic.ts,D2,profundo,leído,D2-c1,logica-dashboard
@@ -1552,32 +1552,32 @@ logic-core-v3/src/lib/dates-ar.invariant.ts,D9,superficial,pendiente,,lib-transv
 logic-core-v3/src/lib/dates-ar.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/design-patterns.ts,D9,profundo,superficial,F1.11,lib-transversal | PODA-ALTA
 logic-core-v3/src/lib/design-tokens.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
-logic-core-v3/src/lib/email.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/email/admin-message-notification.ts,D7,profundo,pendiente,,integracion; toca-db
-logic-core-v3/src/lib/email/brevo-service.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/email/notify-message.ts,D7,profundo,pendiente,,integracion; toca-db
-logic-core-v3/src/lib/email/templates/bot-activated.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/email/templates/executive-weekly.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/email/templates/password-reset.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/email/templates/weekly-report.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/email/templates/welcome-client.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/email/unsubscribe-token.ts,D7,profundo,pendiente,,integracion
+logic-core-v3/src/lib/email.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/email/admin-message-notification.ts,D7,profundo,leído,D7-c1,integracion; toca-db
+logic-core-v3/src/lib/email/brevo-service.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/email/notify-message.ts,D7,profundo,leído,D7-c1,integracion; toca-db
+logic-core-v3/src/lib/email/templates/bot-activated.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/email/templates/executive-weekly.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/email/templates/password-reset.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/email/templates/weekly-report.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/email/templates/welcome-client.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/email/unsubscribe-token.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/follow-up.ts,D4,profundo,pendiente,,leados-libre
 logic-core-v3/src/lib/health-score.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/home-routes.ts,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/Preloader.tsx); lib-sitio-publico
 logic-core-v3/src/lib/hover.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/alerts/AlertsClient.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +39); lib-sitio-publico; FROZEN-inferido"
 logic-core-v3/src/lib/impersonation-constants.ts,D1,profundo,leído,D1-c1,auth
 logic-core-v3/src/lib/impersonation.ts,D1,profundo,leído,D1-c1,auth; usa-auth
-logic-core-v3/src/lib/integrations/brevo.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/integrations/cal-com-v2.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/integrations/cal-com.ts,D7,profundo,pendiente,,integracion; toca-db
-logic-core-v3/src/lib/integrations/gbp-connection-logic.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/integrations/gbp-connection.invariant.ts,D7,superficial,pendiente,,integracion; test
-logic-core-v3/src/lib/integrations/gbp-connection.ts,D7,profundo,pendiente,,integracion; toca-db; escribe-db
-logic-core-v3/src/lib/integrations/gbp-discovery.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/integrations/google-business-profile.ts,D7,profundo,pendiente,,integracion; toca-db; escribe-db
-logic-core-v3/src/lib/integrations/pagespeed.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/integrations/tiendanube.ts,D7,profundo,pendiente,,integracion; toca-db
+logic-core-v3/src/lib/integrations/brevo.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/integrations/cal-com-v2.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/integrations/cal-com.ts,D7,profundo,leído,D7-c1,integracion; toca-db
+logic-core-v3/src/lib/integrations/gbp-connection-logic.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/integrations/gbp-connection.invariant.ts,D7,superficial,superficial,D7-c1,integracion; test | test sin DB ni red de la conexion GBP (cardinalidad, aislamiento por org, reemplazo, puente v1-v4); no cubre la falta de entrada en la UI (FAL-011) ni el crash del acierto de cache de Reputacion (BUG-141)
+logic-core-v3/src/lib/integrations/gbp-connection.ts,D7,profundo,leído,D7-c1,integracion; toca-db; escribe-db
+logic-core-v3/src/lib/integrations/gbp-discovery.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/integrations/google-business-profile.ts,D7,profundo,leído,D7-c1,integracion; toca-db; escribe-db
+logic-core-v3/src/lib/integrations/pagespeed.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/integrations/tiendanube.ts,D7,profundo,leído,D7-c1,integracion; toca-db
 logic-core-v3/src/lib/isolation/index.ts,D6,profundo,leído,D6-c1,aislamiento; toca-db
 logic-core-v3/src/lib/isolation/registry.ts,D6,profundo,leído,D6-c1,aislamiento; toca-db; escribe-db
 logic-core-v3/src/lib/isolation/scoped-model.ts,D6,profundo,leído,D6-c1,aislamiento; toca-db; escribe-db
@@ -1660,7 +1660,7 @@ logic-core-v3/src/lib/logger.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-i
 logic-core-v3/src/lib/logo-footprint.ts,D9,profundo,pendiente,,"compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx, src/components/ui/IntroLockupText.tsx +1); lib-sitio-publico"
 logic-core-v3/src/lib/marketing-routes.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/components/layout/useChromeRevealed.ts, src/components/ui/MarketingIntro.tsx +1); lib-sitio-publico"
 logic-core-v3/src/lib/mask-secret.invariant.ts,D9,superficial,pendiente,,lib-transversal; test
-logic-core-v3/src/lib/mask-secret.ts,D7,profundo,pendiente,,integracion
+logic-core-v3/src/lib/mask-secret.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/modules/check-activation.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/modules/demand.ts,D3,profundo,leído,D3-c1,logica-admin (cruza orgs a proposito); guard-indirecto
 logic-core-v3/src/lib/modules/modules.invariant.ts,D2,superficial,superficial,D2-c1,"logica-dashboard; test | test sin DB: vitrina de modulos (owned/available/coming_soon, INACTIVE no es tenencia, buildShowroom por org, ranking de demanda); no cubre el slug email-marketing vs email-marketing-pro"
@@ -1668,8 +1668,8 @@ logic-core-v3/src/lib/modules/motor-resenas-view.invariant.ts,D2,superficial,sup
 logic-core-v3/src/lib/modules/motor-resenas-view.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/modules/showroom.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/motion-variants.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/_components/PageTransition.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +12); lib-sitio-publico; FROZEN-inferido"
-logic-core-v3/src/lib/n8n.ts,D7,profundo,pendiente,,integracion
-logic-core-v3/src/lib/notifications/telegram.ts,D7,profundo,pendiente,,integracion; toca-db
+logic-core-v3/src/lib/n8n.ts,D7,profundo,leído,D7-c1,integracion
+logic-core-v3/src/lib/notifications/telegram.ts,D7,profundo,leído,D7-c1,integracion; toca-db
 logic-core-v3/src/lib/onboarding/core.ts,D5,profundo,leído,D5-c1,alta de cliente (unico llamador: admin/chatbots/new); toca-db; escribe-db
 logic-core-v3/src/lib/onboarding/seed-tasks-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
 logic-core-v3/src/lib/os-commercial.ts,D4,profundo,pendiente,,leados-libre; toca-db; guard-indirecto; escribe-db
@@ -1707,15 +1707,15 @@ logic-core-v3/src/lib/reports/executive-weekly/report-eligible-plan.ts,D2,profun
 logic-core-v3/src/lib/reports/executive-weekly/send-manual.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
 logic-core-v3/src/lib/reports/executive-weekly/send.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
 logic-core-v3/src/lib/reports/executive-weekly/top-hot-leads.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
-logic-core-v3/src/lib/searchconsole.ts,D7,profundo,pendiente,,integracion
+logic-core-v3/src/lib/searchconsole.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/security/auth-rate-limit.ts,D1,profundo,leído,D1-c1,seguridad
 logic-core-v3/src/lib/security/generate-temp-password.ts,D1,profundo,leído,D1-c1,seguridad
 logic-core-v3/src/lib/security/idor-tokens.invariant.ts,D1,superficial,superficial,D1-c1,"seguridad; test | test: cubre el token firmado del opt-out por contacto (/api/email/optout, D7) y resolveScopedOrgId (org-scope.ts); sin DB"
-logic-core-v3/src/lib/security/oauth-state.ts,D7,profundo,pendiente,,oauth
+logic-core-v3/src/lib/security/oauth-state.ts,D7,profundo,leído,D7-c1,oauth
 logic-core-v3/src/lib/security/org-scope.ts,D2,profundo,leído,D2-c1,tenant-scope; guard-indirecto
 logic-core-v3/src/lib/security/origin-matcher.ts,D5,profundo,leído,D5-c1,origen-widget
 logic-core-v3/src/lib/security/validate-origin.ts,D5,profundo,leído,D5-c1,origen-widget; toca-db
-logic-core-v3/src/lib/sentry/scrub-pii.ts,D7,profundo,pendiente,,integracion
+logic-core-v3/src/lib/sentry/scrub-pii.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/slugify.ts,D9,profundo,pendiente,,lib-transversal
 logic-core-v3/src/lib/subscription.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/tickets/actions.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; server-action; usa-auth; guard-indirecto; escribe-db
@@ -2204,7 +2204,7 @@ logic-core-v3/ts_prune_output.txt,D9,fuera,excluido-generado,,salida-generada-co
 logic-core-v3/tsconfig.json,D8,profundo,pendiente,,config
 logic-core-v3/unused_report.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
 logic-core-v3/unused_report_utf8.txt,D9,fuera,excluido-generado,,salida-generada-commiteada
-logic-core-v3/vercel.json,D7,profundo,pendiente,,crons
+logic-core-v3/vercel.json,D7,profundo,leído,D7-c1,crons
 logodevelOP.png,-,fuera,excluido-generado,,asset-binario
 logodevelOP.svg,-,fuera,excluido-generado,,asset-binario
 videos/Male_business_owner_opens_laptop_delpmaspu_.mp4,-,fuera,excluido-generado,,asset-binario

@@ -1,0 +1,665 @@
+{
+ "parte": 3,
+ "partes": 3,
+ "items": [
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.velocidad-sitio",
+   "nombre": "Velocidad del sitio (PageSpeed)",
+   "descripcion": "Score y Core Web Vitals del sitio del cliente.",
+   "archivos": [
+    "src/lib/integrations/pagespeed.ts"
+   ],
+   "entradas": [
+    "/dashboard/resultados/trafico"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "trafico/page.tsx:125 -> pagespeed.ts:26-35 (caché 6 h) -> :37-74 -> :76-149.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "URL del sitio de la org (fuera del lote)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "null sin distinguir falta de key, URL inválida o error"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "null cacheado 6 h (:63-65); fecha cruda en el acierto (PageSpeedCard.tsx:60)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "url.startsWith('http') (:47)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:64, :71)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura automática"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-reportes-email",
+   "id": "h2.cli-reportes-email.envio-automatico-semanal",
+   "nombre": "Envío automático del reporte ejecutivo semanal",
+   "descripcion": "Cron de los lunes que manda el resumen ejecutivo a Pro/Business.",
+   "archivos": [
+    "src/app/api/cron/send-executive-reports/route.ts",
+    "src/lib/email/templates/executive-weekly.ts",
+    "vercel.json"
+   ],
+   "entradas": [
+    "GET /api/cron/send-executive-reports"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "la ruta (:17-37) y la plantilla (executive-weekly.ts:182-322) existen, pero solo vercel.json:12 la agenda y el hosting es Netlify: no sale sola.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "CRON_SECRET (:17-23)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "envío"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "500 con message (:28-35), sin Sentry"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "envío"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "max-width 540 (executive-weekly.ts:204)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales (build.ts fuera del lote)"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "sin disparador"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-reportes-email",
+   "id": "h2.cli-reportes-email.baja-un-clic",
+   "nombre": "Baja de un clic del reporte ejecutivo",
+   "descripcion": "Link firmado que desactiva el reporte de la org.",
+   "archivos": [
+    "src/app/api/email/unsubscribe-executive/route.ts",
+    "src/lib/email/unsubscribe-token.ts"
+   ],
+   "entradas": [
+    "GET/POST /api/email/unsubscribe-executive"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "executive-weekly.ts:289 -> unsubscribe-token.ts:57-66 -> unsubscribe-executive/route.ts:39-101.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "HMAC por org (:62)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acuse"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "mensajes útiles (:50-90)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página estática"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "timingSafeEqual (unsubscribe-token.ts:39-51)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "viewport y card max-width (:19, :23)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:80)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "la baja corre en el GET (BUG-061)"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h6.vis-optout",
+   "id": "h6.vis-optout.baja-campania",
+   "nombre": "Darse de baja de una campaña de email marketing",
+   "descripcion": "Link por contacto que marca optedOut.",
+   "archivos": [
+    "src/app/api/email/optout/[contactId]/route.ts",
+    "src/lib/email/unsubscribe-token.ts"
+   ],
+   "entradas": [
+    "GET /api/email/optout/[contactId]"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "email-marketing/_actions.ts:155 (fuera) -> optout/route.ts:69-104 -> unsubscribe-token.ts:97-109.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "HMAC por contacto antes de la DB (:77)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acuse"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "403 claro; sin try/catch en :91"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página estática"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "HMAC timingSafeEqual"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "viewport (:13), max-width 380 (:32)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "solo onRequestError si lanza"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "la baja no llega a Brevo (BUG-021) y el token vive en el contacto global (SEC-039)"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h3.cli-chatbot",
+   "id": "h3.cli-chatbot.reporte-semanal-email",
+   "nombre": "Reporte semanal del chatbot por email",
+   "descripcion": "Cada lunes, resumen de charlas y leads al admin de la org.",
+   "archivos": [
+    "netlify/functions/send-weekly-reports-cron.ts",
+    "src/app/api/cron/send-weekly-reports/route.ts",
+    "src/lib/email/templates/weekly-report.ts"
+   ],
+   "entradas": [
+    "GET /api/cron/send-weekly-reports"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "netlify.toml:28-29 -> send-weekly-reports-cron.ts:63-108 -> route.ts:7-21 -> sendWeeklyReports.ts:58-66 (fuera) -> weekly-report.ts:25-175.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "barre todas las orgs con bot activo, incluidas archivadas"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "secciones condicionales (:29-68)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "500 con String(error) (:16-19); cuenta fallas sin Sentry"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "envío"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "max-width 540 (:84)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "datos reales"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "no hay forma de darse de baja (:164 a ruta inexistente)"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h3.adm-chatbots",
+   "id": "h3.adm-chatbots.insights-automaticos",
+   "nombre": "Generación diaria de insights del chatbot",
+   "descripcion": "Cron que genera insights por bot activo y avisa por email.",
+   "archivos": [
+    "netlify/functions/generate-insights-cron.ts",
+    "src/app/api/cron/generate-insights/route.ts"
+   ],
+   "entradas": [
+    "POST /api/cron/generate-insights"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "netlify.toml:25-26 -> generate-insights-cron.ts:44-104 -> route.ts:10-96 -> generateInsightsForBot (fuera).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "incluye orgs archivadas (:18-21) y no mira el plan (BUG-110)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "skipped_insufficient (:46-49)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "logChatbotEvent por bot (:76-86); findMany sin try"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:70, :75)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "se corta con muchos bots (PERF)"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h3.adm-actividad",
+   "id": "h3.adm-actividad.purga-eventos",
+   "nombre": "Purga diaria de eventos del chatbot (30 días)",
+   "descripcion": "Cron de retención de chatbot_events.",
+   "archivos": [
+    "netlify/functions/cleanup-old-events-cron.ts",
+    "src/app/api/cron/cleanup-old-events/route.ts"
+   ],
+   "entradas": [
+    "GET /api/cron/cleanup-old-events"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "netlify.toml:31-32 -> cleanup-old-events-cron.ts:6-41 -> route.ts:16-30 -> cleanupOldEvents (fuera).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "CRON_SECRET (:17)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "500 con message (:24-28)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "automático"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h4.adm-alertas",
+   "id": "h4.adm-alertas.deteccion-automatica",
+   "nombre": "Detección automática de incidencias de bots",
+   "descripcion": "Cron que crea alertas y avisa al dueño y a develOP.",
+   "archivos": [
+    "src/app/api/cron/detect-bot-issues/route.ts"
+   ],
+   "entradas": [
+    "GET /api/cron/detect-bot-issues"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "route.ts:7-21 existe y anda a mano (flujo D3 'Detector de alertas de bots disparado a mano'), pero no tiene disparador.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "CRON_SECRET (:8)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "500 con String(error) (:16-19)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "nunca corre sola"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.alertas-periodicas-agencia",
+   "nombre": "Alertas periódicas de la agencia (clientes inactivos, suscripciones por vencer)",
+   "descripcion": "Cron que avisa por webhook de clientes sin actividad 30 días y renovaciones en 7 días.",
+   "archivos": [
+    "src/app/api/cron/alerts/route.ts"
+   ],
+   "entradas": [
+    "GET /api/cron/alerts"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "alerts/route.ts:4-19 -> runPeriodicAgencyAlerts (lib/alerts.ts:195) sin disparador y solo con X-Cron-Secret.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "CRON_SECRET (:5-10)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "500 genérico (:15-18)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:16)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "nunca corre"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-inicio",
+   "id": "h2.cli-inicio.brief-ia-programado",
+   "nombre": "Regeneración semanal del resumen ejecutivo IA",
+   "descripcion": "Cron de los lunes que refresca el brief de cada org activa.",
+   "archivos": [
+    "src/app/api/cron/regenerate-briefs/route.ts",
+    "vercel.json"
+   ],
+   "entradas": [
+    "GET /api/cron/regenerate-briefs"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "route.ts:18-56 existe; solo vercel.json:8 la agenda.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "CRON_SECRET; incluye orgs archivadas con suscripción ACTIVE (:26-32)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "errorLog por org (:42-45), ok:true igual"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "batch"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "sin disparador en Netlify"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h6.vis-contacto",
+   "id": "h6.vis-contacto.formulario-pie-home",
+   "nombre": "Formulario de contacto del pie del home",
+   "descripcion": "Nombre, WhatsApp, rubro y mensaje enviados a n8n, o salida a WhatsApp.",
+   "archivos": [
+    "src/components/sections/home/Footer.tsx"
+   ],
+   "entradas": [
+    "/ (pie del home)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:42 -> Footer.tsx:446 -> :589 -> :78-89 POST al webhook de n8n y pantalla de éxito.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "público"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "no mira res.ok (:84-89); éxito falso"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "ENVIANDO... y disabled (:735, :755)"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "sin servidor; solo required (:629)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid auto-fit minmax(min(100%, 140px)) (:600)"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch vacío (:90)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "número ficticio de fallback (:8)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "el visitante cree que envió aunque n8n falle"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h4.adm-config",
+   "id": "h4.adm-config.avisos-telegram",
+   "nombre": "Avisos por Telegram al equipo",
+   "descripcion": "Sender único con credenciales config-first y fallback a env.",
+   "archivos": [
+    "src/lib/notifications/telegram.ts"
+   ],
+   "entradas": [
+    "sendTelegram",
+    "notifyTelegramOptional",
+    "isTelegramConfigured"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "llamadores -> telegram.ts:67-99 -> :39-61 -> POST api.telegram.org.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "credenciales de agencia (AgencySettings), no por cliente"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "envío"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "false + console.error (:90-97); la UI solo detecta ausencia (:108-110)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "envío"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "mensajes armados por el servidor"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "sin pantalla"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captura"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "rotable desde /admin/settings sin redeploy"
+    }
+   }
+  }
+ ]
+}

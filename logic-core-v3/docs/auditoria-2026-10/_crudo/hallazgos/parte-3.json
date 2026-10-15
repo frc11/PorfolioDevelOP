@@ -3,6 +3,70 @@
  "partes": 5,
  "hallazgos": [
   {
+   "id": "SEC-055",
+   "prefijo": "SEC",
+   "titulo": "La deduplicacion del pedido de upsell consulta ContactSubmission, que tambien escribe el formulario publico anonimo: un visitante puede silenciar 24 h el aviso del pedido de un cliente",
+   "dominio": "D2",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 82,
+     "fragmento": "where: { email: user.email, service: parsed.data.featureKey },"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 79,
+     "fragmento": "// así que la consulta queda auto-scopeada al propio cliente (no puede leer submissions"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 87,
+     "fragmento": "if (shouldCreateUpsellSubmission(lastSubmission?.createdAt ?? null, new Date())) {"
+    },
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 62,
+     "fragmento": "await prisma.contactSubmission.create({  // formulario publico, email y service libres"
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 61,
+     "fragmento": "service: z.string().trim().optional().nullable(),"
+    }
+   ],
+   "impacto": "Quien conozca el email de acceso de un cliente puede mandar el formulario publico con ese email y service igual al slug del modulo (por ejemplo 'motor-resenas'); durante 24 h los pedidos de ese cliente no crean el lead en /admin/leads, ni la alerta, ni las notificaciones (solo sube el contador de OrganizationModule). Impacto acotado, pero el comentario afirma un aislamiento que una tabla global escrita por anonimos no da.",
+   "propuesta": "Deduplicar contra la propia fila OrganizationModule (leer upsellLastRequestedAt antes del upsert) o marcar los ContactSubmission de upsell con un discriminador que solo escriba esta action (servicio con prefijo y organizacion), nunca por email libre.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-servicios.solicitar-modulo",
+    "h6.vis-contacto",
+    "modelo.ContactSubmission",
+    "modelo.OrganizationModule",
+    "lib.actions"
+   ],
+   "relacionados_ids": [
+    "SEC-048",
+    "SEC-047"
+   ],
+   "previas": [],
+   "relacionados_texto": "SEC-048 (la misma tabla global contada como leads), BUG-002",
+   "vh": null,
+   "origen": {
+    "ciclo": "D2-c2",
+    "lote": "D2-T1",
+    "tmp": "D2-c2/D2-T1/H06",
+    "verificado_padre": true,
+    "nota_padre": "Muestreo DEC-37: se sostiene (upsell.ts:81-87 deduplica por email y service contra ContactSubmission; contact.ts:62 crea ContactSubmission desde el formulario público con email y service libres, schemas.ts:61).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "PERF-006",
    "prefijo": "PERF",
    "titulo": "El layout del portal escribe User.lastDashboardVisit en cada render, sin esperar el resultado, y ningun codigo lo lee",
@@ -599,6 +663,16 @@
      "ruta": "src/app/api/admin/alerts/trigger-detector/route.ts",
      "linea": 12,
      "fragmento": "const result = await runAlertDetector()"
+    },
+    {
+     "ruta": "src/app/api/cron/alerts/route.ts",
+     "linea": 6,
+     "fragmento": "const providedSecret = request.headers.get('X-Cron-Secret')?.trim()"
+    },
+    {
+     "ruta": "raíz:.github/workflows/db-backup.yml",
+     "linea": 41,
+     "fragmento": "- cron: '0 6 * * *'"
     }
    ],
    "impacto": "Bloqueante para el primer cliente real: las alertas de bot (LLM_PROVIDER_ERROR, QUOTA_EXHAUSTED, LATENCY_DEGRADED, LEAD_CAPTURE_FAILURE, CLIENT_NO_ACTIVITY) solo se generan si un SUPER_ADMIN aprieta el botón manual de Configuración → Alertas. Un bot caído o con el cupo agotado pasa días sin aviso. netlify.toml agenda solo generate-insights, weekly-reports y cleanup; vercel.json agenda otros tres crons que en Netlify no corren.",
@@ -613,7 +687,9 @@
     "modelo.BotAlert",
     "h4.adm-alertas.detector-incidencias",
     "h4.adm-alertas.deteccion-automatica",
-    "int.cron.alerts"
+    "int.cron.alerts",
+    "h4.adm-config",
+    "int.vertex"
    ],
    "relacionados_ids": [
     "BUG-047"
@@ -645,6 +721,13 @@
       "titulo": "Detector automático de alertas de bots sin disparador programado (la página promete 'cada 15 minutos')",
       "severidad": "ALTA",
       "nota_padre": "Mismo faltante (detect-bot-issues sin cron en netlify.toml ni en netlify/functions/). Suma la promesa de la UI: admin/alerts/page.tsx:17 dice «cada 15 minutos». El verificador la sostiene ALTA."
+     },
+     {
+      "ciclo": "D7-c1",
+      "tmp": "D7-c1/D7-L1/H04",
+      "titulo": "Detector de incidencias de bots y alertas periódicas de la agencia sin disparador en ningún registrador: la credencial de Vertex vencida nunca se convierte en alerta automática",
+      "severidad": "ALTA",
+      "nota_padre": "Mismo faltante (detect-bot-issues sin disparador en netlify.toml, vercel.json ni GitHub Actions; el verificador lo sostiene ALTA). La parte de /api/cron/alerts ya es FAL-026 (D3). Suma que la credencial de Vertex vencida nunca llega a ser una alerta."
      }
     ]
    },
@@ -7152,9 +7235,9 @@
   {
    "id": "FAL-020",
    "prefijo": "FAL",
-   "titulo": "Reporte semanal del chatbot sin opt-out, destinatario no deterministico y link con fallback a localhost",
+   "titulo": "Reporte semanal del chatbot sin forma de darse de baja (el link de preferencias lleva a una ruta que no existe, sin List-Unsubscribe ni opt-out), con destinatario no determinístico y link con fallback a localhost",
    "dominio": "D5",
-   "severidad": "BAJA",
+   "severidad": "MEDIA",
    "tipo": "faltante",
    "tipo_detalle": "faltante",
    "confianza": "PROBABLE",
@@ -7173,6 +7256,21 @@
      "ruta": "src/lib/email/templates/executive-weekly.ts",
      "linea": 289,
      "fragmento": "Dejar de recibir este reporte  (control: el executive report si tiene unsubscribe)"
+    },
+    {
+     "ruta": "src/lib/email/templates/weekly-report.ts",
+     "linea": 164,
+     "fragmento": "<a href=\"${data.dashboardUrl}/preferences\" style=\"color:#06b6d4; text-decoration:none;\">cambiá tus preferencias</a>."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
+     "linea": 60,
+     "fragmento": "dashboardUrl: `${appUrl}/dashboard/chatbot`,"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 387,
+     "fragmento": "executiveReportOptOut Boolean @default(false)"
     }
    ],
    "impacto": "El cliente recibe dos mails semanales (este y el executive report); este no tiene baja ni registro de envio (un reintento del cron duplica), va al primer ADMIN que devuelva la base y el boton puede apuntar a localhost si falta la variable.",
@@ -7183,7 +7281,8 @@
     "h3.cli-chatbot",
     "lib.chatbot.reports",
     "int.brevo",
-    "int.cron.send-weekly-reports"
+    "int.cron.send-weekly-reports",
+    "h3.cli-chatbot.reporte-semanal-email"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -7195,7 +7294,27 @@
     "tmp": "D5-c1/D5-L8/H18",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D7-c1",
+      "tmp": "D7-c1/D7-L1/H11",
+      "titulo": "Reporte semanal del chatbot sin forma de darse de baja: el link 'cambiá tus preferencias' lleva a una ruta que no existe y no hay List-Unsubscribe ni campo de opt-out",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma falta de baja del reporte semanal del chatbot; suma que el link «cambiá tus preferencias» lleva a una ruta inexistente y que no hay List-Unsubscribe. Sube a MEDIA: es un email periódico sin ninguna forma de cortarlo. El campo de opt-out en el schema queda como decisión para Valentino."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "D7-c1",
+      "tmp": "D7-c1/D7-L1/H11",
+      "antes": {
+       "severidad": "BAJA",
+       "titulo": "Reporte semanal del chatbot sin opt-out, destinatario no deterministico y link con fallback a localhost"
+      },
+      "nota_padre": "Misma falta de baja del reporte semanal del chatbot; suma que el link «cambiá tus preferencias» lleva a una ruta inexistente y que no hay List-Unsubscribe. Sube a MEDIA: es un email periódico sin ninguna forma de cortarlo. El campo de opt-out en el schema queda como decisión para Valentino."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -7294,103 +7413,6 @@
     "tmp": "D5-c1/D5-L8/H20",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-050",
-   "prefijo": "DEU",
-   "titulo": "Contratos muertos o desfasados: messagesAdded ignorado, checkQuota con MAX_SAFE_INTEGER y tipos publicos que no coinciden con Prisma",
-   "dominio": "D5",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/quota/checker.ts",
-     "linea": 56,
-     "fragmento": "messagesAdded: number  (no se usa en upsertPeriod :76-92)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-     "linea": 226,
-     "fragmento": "const r = await checkQuota(orgId, bot.id, Number.MAX_SAFE_INTEGER)"
-    },
-    {
-     "ruta": "src/modules/chatbot/shared/types.ts",
-     "linea": 50,
-     "fragmento": "export type ChatbotLeadStatus = 'new' | 'contacted' | 'qualified' | 'lost' | 'converted'"
-    },
-    {
-     "ruta": "src/modules/chatbot/shared/types.ts",
-     "linea": 40,
-     "fragmento": "export type AvatarStyle = 'neuro' | 'legacy_neuro' | 'simple' | 'custom_image' | 'emoji' | 'none'"
-    }
-   ],
-   "impacto": "El barrel publico exporta tipos que contradicen el enum real (Prisma usa NEW/CONTACTED/IN_NEGOTIATION/WON/LOST; el avatar real usa monograma/onda/geometrico/image): quien los use compila contra valores que no existen. withinQuota de checkQuota siempre es true y confunde.",
-   "propuesta": "Borrar los tipos sin consumidores, quitar messagesAdded y dejar checkQuota como lectura de uso con nombre propio.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.chatbot.shared",
-    "lib.chatbot.quota"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H21",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-101",
-   "prefijo": "BUG",
-   "titulo": "excludeDqWhere excluye tambien los leads con classification NULL",
-   "dominio": "D5",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/scoring/dqFilter.ts",
-     "linea": 23,
-     "fragmento": "NOT: { classification: 'dq' },"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 1493,
-     "fragmento": "classification LeadClassification?"
-    }
-   ],
-   "impacto": "Con la semantica de NULL de SQL que usa Prisma, los leads sin clasificar (legacy o creados por scripts) desaparecen de metricas y del reporte semanal. Hoy el camino de produccion siempre clasifica, por eso BAJA.",
-   "propuesta": "OR: [{ classification: null }, { classification: { not: 'dq' } }].",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.chatbot.scoring",
-    "h3.cli-chatbot",
-    "modelo.ChatbotLead"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "memoria: gotcha excludeDqWhere/null",
-   "vh": "VH-104",
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H22",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: dqFilter.ts:21-24 (NOT classification = dq) con el campo opcional de schema.prisma:1493: en SQL el NOT sobre NULL también excluye (eslabón de Prisma/Postgres → PROBABLE).",
     "verificador": null
    },
    "estado": "vigente"

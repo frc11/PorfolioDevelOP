@@ -99,7 +99,8 @@ const SERVICIOS = [
 const servicioDe = (v) => (SERVICIOS.find(([, re]) => re.test(v)) ?? ['Otros (configuración)'])[0]
 
 const variables = [...lecturas.entries()].map(([v, ls]) => {
-  const prod = ls.filter((x) => !x.test)
+  // las lecturas de la app van primero: con el tope de 12, las de scripts/ tapaban las de src/ (D7-c1)
+  const prod = ls.filter((x) => !x.test).sort((a, b) => /^(logic-core-v3\/)?scripts\//.test(a.ruta) - /^(logic-core-v3\/)?scripts\//.test(b.ruta))
   return {
     variable: v, servicio: servicioDe(v),
     lecturas: prod.slice(0, 12).map((x) => `${x.ruta.replace(/^logic-core-v3\//, '')}:${x.linea}`),

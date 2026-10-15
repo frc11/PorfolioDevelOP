@@ -1287,6 +1287,206 @@
    "id_previo": "RESIL-07",
    "estado": "abierto",
    "evidencia": "src/lib/prisma.ts:5-6 sin retry ni opciones de conexión (connect_timeout de la URL no verificable). En contact.ts, el rate limit (:24 → limiter.ts:44, $queryRawUnsafe sin catch) corre antes del try (:61): un cold-start o un fallo de Neon lanza la excepción al visitante. auth.ts:205-231 no se revisó (fuera del lote)."
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/baselines/2026-07-auditoria-seguridad.md:1268",
+   "id_previo": "S2b-01",
+   "estado": "abierto",
+   "evidencia": "git grep -E 'isModuleActive|check-activation' en email-marketing/_actions.ts -> exit 1; el gate sigue solo en layout.tsx:6 (registrado como SEC-044)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/audit-repo-20260707.md:180",
+   "id_previo": "CO-1",
+   "estado": "cerrado",
+   "evidencia": "next.config.ts:31 sin typescript.ignoreBuildErrors; baseline tsc 0. Next 16 no corre lint en el build (eslint queda en CI)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:101",
+   "id_previo": "SEC-AUTH-01",
+   "estado": "cerrado",
+   "evidencia": "google-business-profile.ts:44 signOAuthState; callback/route.ts:30-35 verifyOAuthState antes de la DB"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:111",
+   "id_previo": "SEC-AUTH-02",
+   "estado": "cerrado",
+   "evidencia": "tiendanube.ts:20 signOAuthState; tiendanube/callback/route.ts:28-31 sesión SUPER_ADMIN y :42-47 firma"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/auditoria-seguridad-2026-05.md:250",
+   "id_previo": "SEC-PII-01",
+   "estado": "cerrado",
+   "evidencia": "notify-message.ts:62 loguea obfuscateEmail(...) (:70-77)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/auditoria-total-pre-deploy.md:36",
+   "id_previo": "O-2",
+   "estado": "cerrado",
+   "evidencia": "package.json:131 @googleapis/webmasters y node_modules/@googleapis/webmasters presente; tsc 0"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/audits/2026-05-auditoria-profunda.md:56",
+   "id_previo": "P1-13",
+   "estado": "no-reproducible",
+   "evidencia": "onLeadCaptured ya no existe (git grep exit 1); n8n.ts solo tiene sendLeadToN8n para el formulario de contacto (contact.ts:82); los leads del chatbot van por el CRM por cliente (flujo D5 'Sync de lead al CRM del cliente (n8n)')"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:61",
+   "id_previo": "NUEVO-P0-2",
+   "estado": "cerrado",
+   "evidencia": "dependencia instalada (package.json:131) y tsc 0"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:82",
+   "id_previo": "P1-8",
+   "estado": "parcial",
+   "evidencia": "analytics.ts:98-99,104-107,196-198 y searchconsole.ts:103-104,108-112,211-213 siguen cayendo a demo sin log, pero la UI muestra PreviewBanner (trafico/page.tsx:188, seo/page.tsx:226); el mock de n8n (n8n.ts:259-268) no tiene llamadores"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:199",
+   "id_previo": "SEC-PII-01",
+   "estado": "cerrado",
+   "evidencia": "notify-message.ts:62 obfuscateEmail"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/audits/2026-06-revalidacion.md:55",
+   "id_previo": "N-2",
+   "estado": "cerrado",
+   "evidencia": "@googleapis/webmasters instalado; next instalado 16.2.9 (node_modules/next/package.json)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "docs/audits/2026-06-revalidacion.md:91",
+   "id_previo": "SEC-PII-01",
+   "estado": "cerrado",
+   "evidencia": "notify-message.ts:62 obfuscateEmail"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:65",
+   "id_previo": "SEC-AUTH-01",
+   "estado": "cerrado",
+   "evidencia": "oauth-state.ts:50-59,72-120; google-business/callback/route.ts:30-35"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:66",
+   "id_previo": "SEC-AUTH-02",
+   "estado": "cerrado",
+   "evidencia": "tiendanube.ts:20; tiendanube/callback/route.ts:42-47"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:76",
+   "id_previo": "SEC-PII-01",
+   "estado": "cerrado",
+   "evidencia": "notify-message.ts:62,69-77 ofuscado"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:284",
+   "id_previo": "SEC-03",
+   "estado": "cerrado",
+   "evidencia": "cron-secret.ts:40-44 falla cerrado y lo usan detect-bot-issues:8, generate-insights:11, send-weekly-reports:8; las copias inline también fallan cerrado (regenerate-briefs:22, send-executive-reports:21, alerts:8)"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:590",
+   "id_previo": "PERF-05",
+   "estado": "parcial",
+   "evidencia": "instrumentation-client.ts:4-19 no declara integraciones y @sentry/nextjs 10.62 no incluye Replay por defecto (build/cjs/client/index.js:86-104): replaysOnErrorSampleRate es inerte; el peso real del bundle no se midió en esta corrida"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1315",
+   "id_previo": "RESIL-04",
+   "estado": "abierto",
+   "evidencia": "regenerate-briefs/route.ts:5 y send-executive-reports/route.ts:5 maxDuration 300 (y además sin disparador en Netlify); generate-insights/route.ts:33-89 sigue secuencial"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1318",
+   "id_previo": "RESIL-05",
+   "estado": "abierto",
+   "evidencia": "brevo-service.ts:3-5 BrevoClient sin opción de timeout; brevo.ts:11,39,69,94,118,151 fetch sin signal"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1327",
+   "id_previo": "RESIL-08",
+   "estado": "abierto",
+   "evidencia": "telegram.ts:78-89 fetch sin signal"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:origin/chore/auditoria-maestra:docs/baselines/2026-07-auditoria-maestra.md:1622",
+   "id_previo": "OBS-01",
+   "estado": "abierto",
+   "evidencia": "el código lee NEXT_PUBLIC_SENTRY_DSN (src/instrumentation.ts:7); ninguna integración reporta (ausencia verificada); el valor en producción sigue sin evidencia"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:23",
+   "id_previo": "CLEAN-H2b",
+   "estado": "abierto",
+   "evidencia": "generate-insights/route.ts:66 sin fallback, notify-message.ts:45 sin fallback, unsubscribe-token.ts:58 y :118 con 'http://localhost:3000'"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:26",
+   "id_previo": "CLEAN-H3",
+   "estado": "abierto",
+   "evidencia": "email.ts:21 develop-agency.com, brevo-service.ts:33 Gmail personal, brevo.ts:124 alerts@develop-agency.com, notify-message.ts:51 hola@develop.com.ar"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:74",
+   "id_previo": "CLEAN-R2",
+   "estado": "parcial",
+   "evidencia": "weekly-report.ts:12 toLocaleDateString sin timeZone (en el lote); los demás sitios citados están fuera del lote"
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "doc": "rama:chore/auditoria-clean:docs/baselines/2026-07-auditoria-clean.md:77",
+   "id_previo": "CLEAN-R3",
+   "estado": "parcial",
+   "evidencia": "n8n.ts:29 sendLeadToN8n con AbortSignal.timeout(8000) y las functions de Netlify con 20 s; siguen sin timeout brevo.ts, google-business-profile.ts (:131,197,284,340), gbp-discovery.ts (:50,89), tiendanube.ts (:29,92-117), cal-com.ts:49, cal-com-v2.ts:168, pagespeed.ts:59, telegram.ts:78, n8n.ts:190"
   }
  ]
 }
