@@ -285,7 +285,8 @@ titulo('C3 · El mouse del pie: más rango, sobre todo vertical')
 // abajo tampoco entra: simétrico; la velocidad, con el amortiguado subido).
 const finalDelPieC3 = sinComentarios(leer('_lib/escena/final/FinalDelPie.tsx'))
 type Vertical = (y: number, aspecto: number) => number
-const rangoBien = (O: typeof ORBITA_DEL_MOUSE, vertical: Vertical, dom: string): boolean => {
+type Orbita = { readonly horizontal: number; readonly vertical: number; readonly amortiguaS: number }
+const rangoBien = (O: Orbita, vertical: Vertical, dom: string): boolean => {
   const ganancias = [900 / 1440, 768 / 1024, 1080 / 1920].map((aspecto) => {
     const dy = 0.02
     const porPixelV = vertical(dy, aspecto) / (dy * aspecto)
@@ -294,11 +295,13 @@ const rangoBien = (O: typeof ORBITA_DEL_MOUSE, vertical: Vertical, dom: string):
   })
   const o = { ...nuevaOrbita(), deja: 1 }
   for (let t = 0; t < 10 * O.amortiguaS; t += 1 / 60) pasoDeLaOrbita(o, { x: 1, y: 0.75, aspecto: 900 / 1440 }, true, 1 / 60)
-  return O.horizontal >= 21 && O.horizontal <= 23 && O.vertical >= 11 && O.vertical <= 12 && ganancias.every((g) => g >= 1.4) && Math.abs(vertical(1, 0.625)) === O.vertical &&
-    Math.abs(o.h - O.horizontal) < 0.01 && Math.abs(o.v - O.vertical) < 0.01 && O.amortiguaS > 0.3 && dom.includes('ORBITA_EN_VIVO.aspecto = window.innerHeight / Math.max(1, window.innerWidth)')
+  // [CIERRE A] A2 · el 40 % del rango (±8,8° y ±4,8°; eran ±22° y ±12°) y más amortiguada que la de C3 (0,45 s).
+  return O.horizontal >= 8 && O.horizontal <= 9.5 && O.vertical >= 4.4 && O.vertical <= 5.2 && ganancias.every((g) => g >= 1.4) && Math.abs(vertical(1, 0.625)) === O.vertical &&
+    Math.abs(o.h - O.horizontal) < 0.01 && Math.abs(o.v - O.vertical) < 0.01 && O.amortiguaS > 0.45 && dom.includes('ORBITA_EN_VIVO.aspecto = window.innerHeight / Math.max(1, window.innerWidth)')
 }
 const porPixel = (aspecto: number): string => (gradosVerticales(0.02, aspecto) / (0.02 * aspecto) / ORBITA_DEL_MOUSE.horizontal).toFixed(2)
-afirmar(rangoBien(ORBITA_DEL_MOUSE, gradosVerticales, finalDelPieC3), 'el mouse del pie: ±22° y hasta ±12°; la ganancia por píxel vertical, mayor que la horizontal (y el tope antes del borde); más amortiguada', `vertical/horizontal por píxel: ${porPixel(900 / 1440)} (16:10) · ${porPixel(768 / 1024)} (4:3) · amortiguada ${String(ORBITA_DEL_MOUSE.amortiguaS)} s`)
+afirmar(rangoBien(ORBITA_DEL_MOUSE, gradosVerticales, finalDelPieC3), 'el mouse del pie: [CIERRE A] A2 ±8,8° y hasta ±4,8°; la ganancia por píxel vertical, mayor que la horizontal (y el tope antes del borde); más amortiguada', `vertical/horizontal por píxel: ${porPixel(900 / 1440)} (16:10) · ${porPixel(768 / 1024)} (4:3) · amortiguada ${String(ORBITA_DEL_MOUSE.amortiguaS)} s`)
+controlPositivo('el detector VE la órbita de antes de CIERRE A (±22° y ±12°, 0,45 s)', { horizontal: 22, vertical: 12, amortiguaS: 0.45 }, (O: Orbita) => rangoBien(O, gradosVerticales, finalDelPieC3))
 controlPositivo('el detector VE la ganancia de la proporción (la misma por píxel, ±11° en toda la altura)', [ORBITA_DEL_MOUSE, ((y: number, aspecto: number) => Math.max(-1, Math.min(1, y)) * aspecto * ORBITA_DEL_MOUSE.horizontal) as Vertical, finalDelPieC3] as const, ([a, b, c]: readonly [typeof ORBITA_DEL_MOUSE, Vertical, string]) => rangoBien(a, b, c))
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -16,8 +16,11 @@ import * as THREE from 'three'
  *
  * [PULIDO 13] K4 · mientras cae, el logo mira la cámara de frente: en la cinemática la órbita se apaga del todo (`enLaCinematica`
  * 0, era 0,2: torcía la mirada hasta 4,4°), amortiguada igual; vuelve entera en el quieto, después de la caída.
+ *
+ * [CIERRE A] A2 · EL PIE, ESTABLE: el 40 % del rango (era ±22° y ±12°) y el doble de amortiguada (era 0,45 s). De pie, el paralaje del
+ * recorrido, igual (`punteroDeLaOrbita.ts`, `ORBITA_EN_EL_PIE`).
  */
-export const ORBITA_DEL_MOUSE = { horizontal: 22, vertical: 12, gananciaVertical: 1.6, amortiguaS: 0.45, enLaCinematica: 0 } as const
+export const ORBITA_DEL_MOUSE = { horizontal: 8.8, vertical: 4.8, gananciaVertical: 1.6, amortiguaS: 0.9, enLaCinematica: 0 } as const
 
 /** [PULIDO 4] C3 · el alto sobre el ancho de la ventana si el DOM todavía no lo escribió (el de 1440 × 900). */
 const ASPECTO_DE_SIEMPRE = 900 / 1440

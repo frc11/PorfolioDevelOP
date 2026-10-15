@@ -99,9 +99,10 @@ export function perseguirAlPuntero(
   objetivoX: number,
   objetivoY: number,
   delta: number,
+  tau = MOUSE_TAU,
 ): void {
-  estado.x = dampTowards(estado.x, objetivoX, MOUSE_TAU, MOUSE_EPSILON, delta)
-  estado.y = dampTowards(estado.y, objetivoY, MOUSE_TAU, MOUSE_EPSILON, delta)
+  estado.x = dampTowards(estado.x, objetivoX, tau, MOUSE_EPSILON, delta)
+  estado.y = dampTowards(estado.y, objetivoY, tau, MOUSE_EPSILON, delta)
 }
 
 /** Devuelve el puntero a cero. Es lo que corresponde con la física apagada. */
