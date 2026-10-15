@@ -22,10 +22,12 @@ export const TRAZO = {
   uArcoDia: [0.08, 0.04, 0.95, 1],
   /** De noche: la luz del halo, la del resplandor y la del núcleo. */
   uArcoNoche: [0.16, 0.18, 1.7, 0],
+  /** [PULIDO 27] Z3 · de día: el ancho (parte del de noche) y el gris del núcleo (lineal); los pone la variante del día (`dia.ts`). */
+  uDiaDelArco: [0.55, 0.21, 0, 0],
 } as const
 
 /** [PULIDO 24] V2 · de día los arcos, finos (parte del ancho) y en gris medio (lineal: el gris del núcleo): no compiten con el texto. */
-export const ARCO_DE_DIA = { fino: 0.55, gris: 0.21 } as const
+export const ARCO_DE_DIA = { fino: TRAZO.uDiaDelArco[0], gris: TRAZO.uDiaDelArco[1] } as const
 
 /** [PULIDO 18] P1.a · en cuánto se desvanece el canal contra lo opaco (u): corto (donde toca el logo, casi hasta el borde). */
 export const ARCO_BLANDO = 0.15
@@ -34,13 +36,14 @@ export type NombreDelTrazo = keyof typeof TRAZO
 
 export function uniformesDelTrazo(): Record<NombreDelTrazo, { value: THREE.Vector4 }> {
   const v = (n: NombreDelTrazo): { value: THREE.Vector4 } => ({ value: new THREE.Vector4(TRAZO[n][0], TRAZO[n][1], TRAZO[n][2], TRAZO[n][3]) })
-  return { uArcoForma: v('uArcoForma'), uArcoDia: v('uArcoDia'), uArcoNoche: v('uArcoNoche') }
+  return { uArcoForma: v('uArcoForma'), uArcoDia: v('uArcoDia'), uArcoNoche: v('uArcoNoche'), uDiaDelArco: v('uDiaDelArco') }
 }
 
 export const TRAZO_GLSL = /* glsl */ `
 uniform vec4 uArcoForma;
 uniform vec4 uArcoDia;
 uniform vec4 uArcoNoche;
+uniform vec4 uDiaDelArco;
 uniform float uCapa;
 `
 
@@ -95,7 +98,7 @@ void canalDelArco( vec3 aPunto, vec3 aAntes, vec3 aDespues, vec4 aForma, vec4 aE
 	// Las puntas se afinan (el canal hacia sus dos puntas; cada rama hacia la suya).
 	float afina = vRama > 0.5 ? mix( 1.0, 0.15, vLargo ) : 0.12 + 0.88 * smoothstep( 0.0, 0.16, vLargo ) * smoothstep( 1.0, 0.84, vLargo );
 	afina = mix( 1.0, afina, uArcoForma.w );
-	float medio = ( uCapa < 0.5 ? uArcoForma.x * aForma.y : uArcoForma.y * 3.0 * max( 0.6, aForma.y ) ) * uPixel * afina * mix( ${f(ARCO_DE_DIA.fino)}, 1.0, uNoche );
+	float medio = ( uCapa < 0.5 ? uArcoForma.x * aForma.y : uArcoForma.y * 3.0 * max( 0.6, aForma.y ) ) * uPixel * afina * mix( uDiaDelArco.x, 1.0, uNoche );
 	vAncho = medio;
 	vTexto = adentroDelTexto( c.xy / c.w );
 	gl_Position = vec4( ( s + normal * vLado * medio * inglete ) / ( uResolucion * 0.5 ) * c.w, c.z, c.w );
@@ -147,7 +150,7 @@ void main() {
 	// La luz que corre por el canal: una ondulación a lo largo que se mueve rápido (no un brillo parejo de trazo).
 	float corre = 1.0 - uArcoForma.z + uArcoForma.z * ( 0.5 + 0.5 * sin( vLargo * 23.0 - uTiempo * 41.0 + vSemilla ) * sin( vLargo * 9.0 + uTiempo * 17.0 + vSemilla * 1.3 ) );
 	float rama = vRama > 0.5 ? 0.6 : 1.0;
-	float nucleo = exp( - pow( x / ( uArcoForma.y * uPixel * mix( ${f(ARCO_DE_DIA.fino)}, 1.0, uNoche ) ), 2.0 ) ) * vGolpe * corre * rama;
+	float nucleo = exp( - pow( x / ( uArcoForma.y * uPixel * mix( uDiaDelArco.x, 1.0, uNoche ) ), 2.0 ) ) * vGolpe * corre * rama;
 	// [PULIDO 18] P1.d · la luz que corre, sólo en el núcleo: en el halo ancho dibujaba rayas de través (una espina de pescado).
 	float halo = exp( - pow( x / ( vAncho * 0.45 ), 2.0 ) ) * vGolpe * rama;
 	float resplandor = exp( - pow( x / ( vAncho * 0.85 ), 2.0 ) ) * vResidual * rama;
@@ -155,7 +158,7 @@ void main() {
 	float oscuro = min( 1.0, halo * uArcoDia.x + resplandor * uArcoDia.y );
 	float blanco = min( 1.0, nucleo * uArcoDia.z );
 	float aDia = uCapa < 0.5 ? oscuro : blanco;
-	vec3 colorDia = uCapa < 0.5 ? uTintaDia : mix( mix( uClaroDia, uTintaDia, uArcoDia.w ), vec3( ${f(ARCO_DE_DIA.gris)} ), uArcoDia.w );
+	vec3 colorDia = uCapa < 0.5 ? uTintaDia : mix( mix( uClaroDia, uTintaDia, uArcoDia.w ), vec3( uDiaDelArco.y ), uArcoDia.w );
 	vec3 luzNoche = uCapa < 0.5 ? uLuzNoche * ( halo * uArcoNoche.x + resplandor * uArcoNoche.y ) : uLuzNoche * nucleo * uArcoNoche.z;
 	// [PULIDO 18] P1.a · blando contra lo opaco en una distancia corta (ningún brillo corta una superficie).
 	float blando = smoothstep( 0.0, ${f(ARCO_BLANDO)}, distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia );

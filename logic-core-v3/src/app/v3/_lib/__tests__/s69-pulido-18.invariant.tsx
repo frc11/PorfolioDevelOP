@@ -24,6 +24,7 @@ import { DE_AFUERA, deAfuera } from '../escena/energia/afuera'
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas } from '../escena/energia/brasas'
 import { TRAZO } from '../escena/energia/dibujo/arcos'
 import { ORDEN_DE_LA_ENERGIA } from '../escena/energia/dibujo/armado'
+import { DE_DIA, aplicarElDia, type UniformesDelDia } from '../escena/energia/dibujo/dia'
 import { ASPECTO } from '../escena/energia/dibujo/particulas'
 import { DIRECCIONES, DIRECCION_RECOMENDADA } from '../escena/energia/direcciones'
 import { largo3 } from '../escena/energia/largo'
@@ -233,6 +234,27 @@ afirmar(presenciaBien(A_ASPECTO, PARTICULA, TRAZO.uArcoDia), `  la presencia: de
 controlPositivo('  el detector VE los puntitos tenues de la noche (el núcleo en 1,3, el reposo en 0,18)', { ...A_ASPECTO, uLuz: [1.3, 0.18, 0.14, 2] as const }, (a: Aspecto) => presenciaBien(a, PARTICULA, TRAZO.uArcoDia))
 controlPositivo('  y el día colgado del reposo de la noche', PARTICULA.replace(VIVO, 'float vivo = uLuz.y + ( 1.0 - uLuz.y ) * e;'), (p: string) => presenciaBien(A_ASPECTO, p, TRAZO.uArcoDia))
 controlPositivo('  y el arco de día con el núcleo blanco (la banda de humo)', [0.22, 0.1, 1, 0] as const, (t: readonly number[]) => presenciaBien(A_ASPECTO, PARTICULA, t))
+
+// [PULIDO 27] Z3 · DE DÍA POR DEFECTO (`dibujo/dia.ts`, `?dia=`): el rayo de noche en el día (entero o más, el núcleo de tinta casi negra,
+// con un halo suave: se lee sobre el papel) y las cargas secundarias (el grafito, con su tope) y quietas de brillo (sin titileo ni
+// destellos sueltos). De noche nada cambia: lo del día entra sólo por `1 - uNoche` (el ancho del arco, la calma de las cargas).
+const DIA_POR_DEFECTO = ((): { readonly v: string; readonly u: UniformesDelDia } => {
+  const u = { arco: new THREE.Vector4(), tapa: new THREE.Vector4(), carga: new THREE.Vector4() }
+  return { v: aplicarElDia(null, u), u }
+})()
+const ARCOS_DIBUJO_Z3 = leer('_lib/escena/energia/dibujo/arcos.ts')
+const diaZ3Bien = (d: { readonly v: string; readonly u: UniformesDelDia }, particula: string, arcos: string): boolean =>
+  d.v === DE_DIA.porDefecto && d.u.arco.x >= 1 && d.u.arco.y <= 0.05 && d.u.tapa.w === 1 && d.u.tapa.z >= 0.8 && d.u.tapa.x <= 0.25 && d.u.carga.y === 1 && d.u.carga.x <= 0.4 &&
+  particula.includes('float calma = uDiaDeLaCarga.y * ( 1.0 - uNoche );') && particula.includes('titila = mix( titila, 1.0, calma );') && particula.includes('destello *= 1.0 - calma;') &&
+  arcos.includes('mix( uDiaDelArco.x, 1.0, uNoche )') && !arcos.includes('ARCO_DE_DIA.fino)}')
+afirmar(diaZ3Bien(DIA_POR_DEFECTO, PARTICULA, ARCOS_DIBUJO_Z3), `  de día por defecto (${DIA_POR_DEFECTO.v}): el rayo de noche en el día (${String(DIA_POR_DEFECTO.u.arco.x)} veces el ancho, núcleo de tinta, halo ${String(DIA_POR_DEFECTO.u.tapa.x)}) y las cargas de grafito (tope ${DIA_POR_DEFECTO.u.carga.x.toFixed(2)}) sin titileo; de noche, igual`)
+const conVariante = (valor: string): { readonly v: string; readonly u: UniformesDelDia } => {
+  const u = { arco: new THREE.Vector4(), tapa: new THREE.Vector4(), carga: new THREE.Vector4() }
+  return { v: aplicarElDia(valor, u), u: u }
+}
+controlPositivo('  el detector VE el día de antes (el rayo al 55 % y gris medio, las cargas titilando)', { ...conVariante('antes'), v: DE_DIA.porDefecto }, (d: { readonly v: string; readonly u: UniformesDelDia }) => diaZ3Bien(d, PARTICULA, ARCOS_DIBUJO_Z3))
+controlPositivo('  y las cargas negras de PULIDO 23', { ...conVariante('carga'), v: DE_DIA.porDefecto }, (d: { readonly v: string; readonly u: UniformesDelDia }) => diaZ3Bien(d, PARTICULA, ARCOS_DIBUJO_Z3))
+controlPositivo('  y las cargas que siguen titilando de día', PARTICULA.replace('titila = mix( titila, 1.0, calma );', ''), (p: string) => diaZ3Bien(DIA_POR_DEFECTO, p, ARCOS_DIBUJO_Z3))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('P1.e · La física nueva: convección, el pinch de los arcos, la estela del puntero, el viento del scroll; estable y contenida')

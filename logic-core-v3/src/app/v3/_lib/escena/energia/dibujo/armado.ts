@@ -14,6 +14,7 @@ import { crearPoblacion, type Poblacion } from '../poblacion'
 import { largo3 } from '../largo'
 import { FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DEL_HALO_DEL_ARCO, VERTICES_DE_LOS_ARCOS, uniformesDelTrazo } from './arcos'
 import { DIBUJO, materialDeEnergia, uniformesComunes, type UniformesComunes } from './comun'
+import { aplicarElDia, type UniformesDelDia } from './dia'
 import { EFECTOS, FRAGMENTOS_DE_LOS_EFECTOS, VERTICES_DE_LOS_EFECTOS } from './efectos'
 import { sombreadoresDeParticulas, uniformesDelAspecto, type NombreDelAspecto } from './particulas'
 import { armarLaRed, type DibujoDeLaRed } from './red'
@@ -72,6 +73,8 @@ export interface Armado {
   /** El halo de la carga del puntero (sigue a la carga y al soltar se funde) y las ondas de los pulsos (dónde, desde cuándo: ms). */
   halo: number
   readonly ondas: Float32Array
+  /** [PULIDO 27] Z3 · las uniformes del día (`dia.ts`: la variante de `?dia=`). */
+  readonly dia: UniformesDelDia
   /** Las uniformes que el banco ajusta en vivo, por grupo (`banco.ts`, `ajustar`). */
   readonly ajustables: Readonly<Record<'brasas' | 'arcos' | 'comun' | 'reflejo' | 'red', Readonly<Record<string, THREE.IUniform>>>>
 }
@@ -210,6 +213,9 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
     seVe,
     bordeDelLogo,
   }
+  // [PULIDO 27] Z3 · el día, con la variante por defecto (el componente pone la de la consulta).
+  const dia = { arco: trazo.uDiaDelArco.value, tapa: trazo.uArcoDia.value, carga: deLasBrasas.uDiaDeLaCarga.value }
+  aplicarElDia(null, dia)
   const poblacion = crearPoblacion(compacto)
   const entrada = crearEntradaDeLasBrasas()
   entrada.poblacion = poblacion
@@ -217,7 +223,7 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
     azar, brasas, entrada, temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, dominio: crearDominio(), poblado: false, poblacion, ocupadas: new Uint8Array(brasas.n), red: crearRed(brasas.n), gesto: crearMemoriaDelGesto(), dibujoDeLaRed, uniformes,
     atributosDeLasBrasas, atributosDeLaCinta, geometriaDeLaCinta: gt, efectos: { lugar: lugarDeLosEfectos, efecto, geometria: ge }, mallas, centro, v, luces: new Float32Array(DIBUJO.luces * 4),
     puntoDelPuntero: new Float32Array(3), camaraAntes: new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN), puntoAntes: new Float32Array(3).fill(Number.NaN), rayo, entorno, texto: { leidoEn: Number.NEGATIVE_INFINITY, scroll: Number.NaN }, halo: 0, ondas: new Float32Array(8).fill(Number.NEGATIVE_INFINITY),
-    ajustables: { brasas: deLasBrasas, arcos: trazo, comun: uniformes, reflejo: delReflejo, red: dibujoDeLaRed.uniformes },
+    dia, ajustables: { brasas: deLasBrasas, arcos: trazo, comun: uniformes, reflejo: delReflejo, red: dibujoDeLaRed.uniformes },
   }
 }
 

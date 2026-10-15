@@ -15,6 +15,7 @@ import { FLOOR_Y } from '../probeScene'
 import { energiaDelBanco, type EnergiaDelBanco } from './banco'
 import { crearAfuera, cuadro, cuadroQuieto, type Afuera } from './cuadro'
 import { armar, soltar, type Armado, type Vista } from './dibujo/armado'
+import { aplicarElDia } from './dibujo/dia'
 import { escucharElPuntero } from './interaccion/puntero'
 import { juntarLasLucesVivas } from './lucesVivas'
 import { TEXTO_EN_PANTALLA, cajaDelLogo, cajasDelTexto } from './textoEnPantalla'
@@ -55,8 +56,10 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
     const g = grupo.current
     if (g === null) return undefined
     const a = armar(compacto, vista, () => logoGroupRef.current)
-    // [PULIDO 27] Z2 · `?red=toda`: la red en reposo, un árbol que une todas las que se ven (`arbol.ts`).
-    a.red.modo = new URLSearchParams(window.location.search).get('red') === 'toda' ? 'toda' : 'cadenas'
+    // [PULIDO 27] Z2 · `?red=toda`: la red en reposo, un árbol que une todas las que se ven (`arbol.ts`); Z3 · `?dia=`: el día (`dia.ts`).
+    const consulta = new URLSearchParams(window.location.search)
+    a.red.modo = consulta.get('red') === 'toda' ? 'toda' : 'cadenas'
+    aplicarElDia(consulta.get('dia'), a.dia)
     g.add(...a.mallas)
     armado.current = a
     quietas.current.listo = false

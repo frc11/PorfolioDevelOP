@@ -53,10 +53,10 @@ export const ASPECTO: Readonly<Record<Estilo, Readonly<Record<NombreDelAspecto, 
 }
 
 /** Las uniformes del aspecto de un estilo (objetos propios de su malla: el banco las ajusta). */
-export function uniformesDelAspecto(estilo: Estilo): Record<NombreDelAspecto, { value: THREE.Vector4 }> & { uClaroEnReposo: { value: number } } {
+export function uniformesDelAspecto(estilo: Estilo): Record<NombreDelAspecto, { value: THREE.Vector4 }> & { uClaroEnReposo: { value: number }; uDiaDeLaCarga: { value: THREE.Vector4 } } {
   const a = ASPECTO[estilo]
   const v = (n: NombreDelAspecto): { value: THREE.Vector4 } => ({ value: new THREE.Vector4(a[n][0], a[n][1], a[n][2], a[n][3]) })
-  return { uTamano: v('uTamano'), uLuz: v('uLuz'), uDia: v('uDia'), uDiaForma: v('uDiaForma'), uMovida: v('uMovida'), uFuente: v('uFuente'), uDestello: v('uDestello'), uDelante: v('uDelante'), uChispa: v('uChispa'), uCalorDia: v('uCalorDia'), uNucleo: v('uNucleo'), uClaroEnReposo: { value: CLARO_EN_REPOSO[estilo] } }
+  return { uTamano: v('uTamano'), uLuz: v('uLuz'), uDia: v('uDia'), uDiaForma: v('uDiaForma'), uMovida: v('uMovida'), uFuente: v('uFuente'), uDestello: v('uDestello'), uDelante: v('uDelante'), uChispa: v('uChispa'), uCalorDia: v('uCalorDia'), uNucleo: v('uNucleo'), uClaroEnReposo: { value: CLARO_EN_REPOSO[estilo] }, uDiaDeLaCarga: { value: new THREE.Vector4(DIA_SECUNDARIO.tope, 0, 0, 0) } }
 }
 
 /** De día, el destello blanco en reposo: ninguna (con el punto claro en reposo, la energía oscura se leía como ojos; sobre el logo, como rayones). Sólo calientes. */
@@ -87,6 +87,7 @@ uniform vec4 uDestello;
 uniform vec4 uDelante;
 uniform float uIntensidad;
 uniform float uClaroEnReposo;
+uniform vec4 uDiaDeLaCarga;
 `
 
 /**
@@ -164,6 +165,10 @@ void main() {
 	vec2 suyo = brillar( id, e, signo );
 	float titila = suyo.x;
 	float destello = suyo.y;
+	// [PULIDO 27] Z3 · de día, según la variante (\`dia.ts\`), quietas de brillo: sin titileo ni destellos sueltos.
+	float calma = uDiaDeLaCarga.y * ( 1.0 - uNoche );
+	titila = mix( titila, 1.0, calma );
+	destello *= 1.0 - calma;
 	// Respira con su región (un ruido lento: zonas que se encienden) y se apaga lejos de la fuente.
 	float region = ruidoConGradiente( p * uFuente.w + vec3( 0.0, uTiempo * 0.09, uTiempo * 0.05 ), 5u ).x;
 	float respira = max( 0.0, 1.0 + uFuente.z * region * 1.6 );
@@ -299,7 +304,7 @@ void main() {
 	float aDia = min( 0.85, cuerpo * uDia.x * vBrillo * 2.0 + min( 0.25, humo * uDiaForma.z * vBrillo * 2.0 ) + especular );
 	vec3 colorDia = mix( uTintaDia, uClaroDia, especular / max( 1e-4, aDia ) );
 	// [PULIDO 24] V2 · de día, secundaria: grafito con tope, las lejanas se funden con el papel, algunas casi nada, sobre un texto menos.
-	aDia = min( aDia, ${g(D.tope)} ) * vDia.y * ( 1.0 - ${g(D.aerea)} * smoothstep( uFoco * ${g(D.desde)}, uFoco * ${g(D.hasta)}, vDistancia ) ) * ( 1.0 - ${g(D.textos)} * vTexto );
+	aDia = min( aDia, uDiaDeLaCarga.x ) * vDia.y * ( 1.0 - ${g(D.aerea)} * smoothstep( uFoco * ${g(D.desde)}, uFoco * ${g(D.hasta)}, vDistancia ) ) * ( 1.0 - ${g(D.textos)} * vTexto );
 	// El calor (de día, las calientes): lo de atrás (la copia del cuadro), corrido como en el aire que tiembla y con más contraste.
 	float radioDelCalor = uCalorDia.z * uPixel;
 	float qc = dot( vLocal, vLocal ) / ( radioDelCalor * radioDelCalor );
