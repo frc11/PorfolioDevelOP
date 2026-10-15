@@ -28,7 +28,6 @@ import {
   crearDesplazamiento,
   crearPuntero,
   desplazamientoDelMouse,
-  perseguirAlPuntero,
   sinDesplazamiento,
   soltarElPuntero,
   type DesplazamientoDePose,
@@ -53,6 +52,7 @@ import { elevacionDe } from './lightArc'
 import { escribirEmisionDelLogo } from './logoEmision'
 import { publicarLaMirada } from './miradaDeLaCamara'
 import { INCLINACION_DEL_TELEFONO } from './giroscopio'
+import { perseguirElPunteroDeLaOrbita } from './punteroDeLaOrbita'
 import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, viajeEnCurso } from './viaje'
 
 /** [PULIDO 2] 2 · un cuadro que llega después de esto (s) viene de la escena suspendida (no de un tirón: esos duran décimas). */
@@ -467,7 +467,7 @@ export function OrbitRig({
     if (physics) {
       // [PULIDO 11] F · con el giroscopio prendido (`?giroscopio=si`), la inclinación del teléfono es el puntero (mismos topes).
       const inclinado = INCLINACION_DEL_TELEFONO.activa
-      perseguirAlPuntero(mouse, inclinado ? INCLINACION_DEL_TELEFONO.x : state.pointer.x, inclinado ? INCLINACION_DEL_TELEFONO.y : state.pointer.y, delta)
+      perseguirElPunteroDeLaOrbita(mouse, inclinado, state.pointer, delta)
       desplazamientoDelMouse(desplazamiento, mouse, distance, rigValues.mouseScale, rigValues.progress)
     } else {
       soltarElPuntero(mouse)

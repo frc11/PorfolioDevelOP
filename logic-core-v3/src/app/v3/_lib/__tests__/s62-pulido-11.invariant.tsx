@@ -736,8 +736,10 @@ controlPositivo('F1 · el detector VE una inclinación sin tope (pasaría el bor
 const RIG_F = leer('_lib/escena/OrbitRig.tsx')
 const SONIDO_F = leer('_chrome/sonido/ControlDelSonido.tsx')
 const GIRO_F = leer('_lib/escena/giroscopio.ts')
+// [CIERRE A] A1 · el caño del mouse pasa por la persecución de la órbita (el puntero sin los controles fijos); el giroscopio, igual.
+const MODULACION_F = leer('_lib/escena/punteroDeLaOrbita.ts')
 const cableadoBien = (rig: string, son: string, g: string): boolean =>
-  rig.includes('perseguirAlPuntero(mouse, inclinado ? INCLINACION_DEL_TELEFONO.x : state.pointer.x, inclinado ? INCLINACION_DEL_TELEFONO.y : state.pointer.y, delta)') &&
+  rig.includes('perseguirElPunteroDeLaOrbita(mouse, inclinado, state.pointer, delta)') && MODULACION_F.includes('const p = inclinado ? INCLINACION_DEL_TELEFONO : punteroDeLaOrbita(puntero.x, puntero.y)') &&
   son.includes('if (!giroscopioPedido(window.location.search)) return undefined') && son.includes('if (leerPrendido()) prenderElGiroscopio()') && son.includes("document.addEventListener('click', alTocar)") &&
   g.includes("window.matchMedia('(prefers-reduced-motion: reduce)').matches") && g.includes("document.addEventListener('visibilitychange', alCambiarLaVisibilidad)") && g.includes('conPermiso.requestPermission()') &&
   !giroscopioPedido('') && giroscopioPedido('?giroscopio=si') && !giroscopioPedido('?giroscopio=1')

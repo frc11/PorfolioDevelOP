@@ -22,8 +22,11 @@ import type { ClaseDelViaje } from '../viaje'
 export const ANTICIPACION = {
   /** Cuánto del camino hacia la luz del destino (adentro de la clase) se recorre. */
   luz: 0.75,
-  /** El giro de la cámara hacia el destino (grados): el mouse ya la corre hasta 22, esto es «apenas». */
-  giroDeg: 7,
+  /**
+   * El giro de la cámara hacia el destino (grados; era 7). [CIERRE A] A1 · cero: el hover de la barra no mueve la cámara (la órbita del
+   * mouse se congela sobre ella: `punteroDeLaOrbita.ts`); la anticipación queda en la luz.
+   */
+  giroDeg: 0,
   /** Entra (s) y vuelve (s). */
   subeTauS: 0.18,
   bajaTauS: 0.45,

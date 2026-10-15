@@ -174,7 +174,13 @@ function anticipar(plan: PlanDeAnticipacion | null, hz: number, segundos: number
 const plan = planDeLaAnticipacion('trabajos', 'dia-a-noche', 1, null, 0, 5000, 0)
 const en = (serie: number[], s: number): number => serie[Math.round(s * 60) - 1]
 const quieto = anticipar(plan, 60, 3)
-afirmar(Math.abs(en(quieto.luz, 0.55) - plan.luz) < 0.05 * Math.abs(plan.luz) && Math.abs(en(quieto.giro, 0.55) - ANTICIPACION.giroDeg) < 0.05 * ANTICIPACION.giroDeg && Math.abs(en(quieto.luz, 2.9)) < 0.03 * Math.abs(plan.luz), `entra en medio segundo, gira ${String(ANTICIPACION.giroDeg)}° y vuelve sola después de ${String(ANTICIPACION.sostenS)} s`)
+// [CIERRE A] A1 · la anticipación queda en la luz: el hover de la barra no gira la cámara (era 7°).
+const sinGiro = (r: { readonly giro: readonly number[] }): boolean => r.giro.every((g) => g === 0)
+afirmar(Math.abs(en(quieto.luz, 0.55) - plan.luz) < 0.05 * Math.abs(plan.luz) && sinGiro(quieto) && Math.abs(en(quieto.luz, 2.9)) < 0.03 * Math.abs(plan.luz), `la luz entra en medio segundo y vuelve sola después de ${String(ANTICIPACION.sostenS)} s; la cámara no gira (${String(ANTICIPACION.giroDeg)}°)`)
+controlPositivo('  el chequeo ve la anticipación de antes, que giraba la cámara', anticipar(plan, 60, 3, undefined, (e, p, v, y, ahora, dt) => {
+  avanzarLaAnticipacion(e, p, v, y, ahora, dt)
+  if (p !== null && ahora - p.desde < ANTICIPACION.sostenS * 1000) e.giro += (p.sentido * 7 - e.giro) * (1 - Math.exp(-dt / ANTICIPACION.subeTauS))
+}), sinGiro)
 const conClic = anticipar(plan, 60, 4, { desde: 0.6, destino: 'trabajos', y0: 0, y1: 5000 })
 const iClic = Math.round(0.6 * 60)
 afirmar(Math.abs(conClic.luz[iClic] - conClic.luz[iClic - 1]) < 0.01 && Math.abs(en(conClic.luz, 3.8)) < 1e-9 && Math.abs(en(conClic.giro, 3.8)) < 1e-9, 'con el clic, el viaje arranca DESDE la anticipación (sin salto) y la descuenta con su avance: en la llegada es cero')

@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from 'rea
 import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
+import { sobreUnControlFijo } from '../punteroDeLaOrbita'
 import { retenerLosGestos } from '../../gestosDelScroll'
 import type { NivelDeCalidad } from '../calidad'
 import { hayBanco } from '../entorno'
@@ -143,7 +144,8 @@ export function FinalDelPie({ logoGroupRef, stats, calidad, estatico }: Props) {
   useEffect(() => {
     if (angosto || estatico) return undefined
     const mover = (e: PointerEvent): void => {
-      if (e.pointerType !== 'mouse') return
+      // [CIERRE A] A1 · sobre la barra o un control fijo, la órbita se queda con el último valor (`punteroDeLaOrbita.ts`).
+      if (e.pointerType !== 'mouse' || sobreUnControlFijo(e.target)) return
       ORBITA_EN_VIVO.x = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1
       ORBITA_EN_VIVO.y = 1 - (e.clientY / Math.max(1, window.innerHeight)) * 2
       ORBITA_EN_VIVO.aspecto = window.innerHeight / Math.max(1, window.innerWidth)
