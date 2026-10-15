@@ -1,0 +1,2048 @@
+{
+ "dominio": "D4",
+ "ciclo": "D4-c1",
+ "lote": "D4-L2",
+ "run": "wf_560f9507-743",
+ "fecha": "2026-10-15T19:19:57.407Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/app/(protected)/setter/_components/autosave-status.tsx",
+    "lineas_total": 80,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+    "lineas_total": 230,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/campo-mejora.tsx",
+    "lineas_total": 29,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/canal-seguridad.tsx",
+    "lineas_total": 57,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/cartera-toolbar.tsx",
+    "lineas_total": 110,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/cartera-view.tsx",
+    "lineas_total": 213,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/cola-del-dia.tsx",
+    "lineas_total": 131,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/copy-block.tsx",
+    "lineas_total": 100,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/ejemplo-ideal.tsx",
+    "lineas_total": 131,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+    "lineas_total": 330,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/guardrail-rol.tsx",
+    "lineas_total": 42,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/home-empty.tsx",
+    "lineas_total": 30,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/home-en-espera.tsx",
+    "lineas_total": 116,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/home-sections.tsx",
+    "lineas_total": 191,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+    "lineas_total": 298,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
+    "lineas_total": 92,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/novedades-abrir-foco.tsx",
+    "lineas_total": 65,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/novedades-marcar-visto.tsx",
+    "lineas_total": 45,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+    "lineas_total": 205,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/progreso-semana.tsx",
+    "lineas_total": 62,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+    "lineas_total": 134,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+    "lineas_total": 85,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/shortcuts-help.tsx",
+    "lineas_total": 88,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/teach-panel.tsx",
+    "lineas_total": 149,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/tool-guide.tsx",
+    "lineas_total": 116,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+    "lineas_total": 75,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/trabajar-lead-button.tsx",
+    "lineas_total": 47,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/use-keyboard-shortcuts.ts",
+    "lineas_total": 56,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [],
+  "flujos": [
+   {
+    "nombre": "Ir a trabajar el lead del foco (o una fila de la cola): ancla y abre el detalle",
+    "pasos": [
+     "src/app/(protected)/setter/_components/cola-del-dia.tsx:109 monta FocoSurface con cola.items[0] (la page lo monta en page.tsx:118, fuera del lote)",
+     "foco-surface.tsx:231 onClick={irATrabajar} (atajo 't': foco-surface.tsx:151 -> use-keyboard-shortcuts.ts:46-50)",
+     "foco-surface.tsx:85 await anclarFoco(foco.id)",
+     "sale del lote: foco-surface.tsx:20 -> src/app/(protected)/setter/_actions/foco.actions.ts (anclarFoco; cookie de foco en src/lib/leados/foco-cookie.ts)",
+     "foco-surface.tsx:86-88 error -> toast.error(result.error)",
+     "foco-surface.tsx:90 router.push(`/setter/leads/${foco.id}`) -> detalle del lead (otro lote)",
+     "variante fila de la cola: cola-del-dia.tsx:83 -> trabajar-lead-button.tsx:38 -> :26 anclarFoco -> :31 router.push"
+    ]
+   },
+   {
+    "nombre": "Saltar y Soltar el foco",
+    "pasos": [
+     "foco-surface.tsx:258 Saltar (deshabilitado sin próximo :259)",
+     "foco-surface.tsx:97 await anclarFoco(proximo.id) -> sale del lote: foco.actions.ts",
+     "foco-surface.tsx:107 toast.success('Saltado — ...') -> :109 router.refresh()",
+     "foco-surface.tsx:269-272 Soltar (solo con stickyActivo)",
+     "foco-surface.tsx:129 await soltarFoco() -> sale del lote: foco.actions.ts",
+     "foco-surface.tsx:137 toast -> :139 router.refresh()"
+    ]
+   },
+   {
+    "nombre": "Pausar un lead (desde el foco o desde la card de la cartera)",
+    "pasos": [
+     "foco-surface.tsx:241 toggleSnooze -> :144 setMinDate(fechaEnDias(1))",
+     "foco-surface.tsx:291 pausar(fechaEnDias(atajo.dias)) o :309 pausar(fechaCustom)",
+     "foco-surface.tsx:68-71 fechaEnDias: setDate local + toISOString().slice(0,10) (UTC)",
+     "foco-surface.tsx:115 await pausarLead(foco.id, hasta) -> sale del lote: src/app/(protected)/setter/_actions/cartera.actions.ts:78",
+     "foco-surface.tsx:120 toast con formatFechaCorta(result.data.snoozedUntil) -> :123 router.refresh()",
+     "variante card: lead-card-actions.tsx:155 abrirSnooze -> :190 pausar(fechaEnDias(...)) -> :92 pausarLead -> :100 router.refresh()"
+    ]
+   },
+   {
+    "nombre": "Palancas privadas de la card: fijar, nota, reanudar",
+    "pasos": [
+     "home-sections.tsx:176 LeadCardActions fuera del Link de la card",
+     "lead-card-actions.tsx:147 togglePin -> :80 fijarLead(leadId, !pinned) -> sale del lote: cartera.actions.ts",
+     "lead-card-actions.tsx:159-165 abrirNota -> :227-233 TextArea maxLength={NOTA_MAX} (NOTA_MAX de cartera.schemas.ts, :16) -> :235 guardar -> :119 guardarNota(leadId, notaTexto) -> sale del lote: cartera.actions.ts",
+     "lead-card-actions.tsx:167-170 Reanudar (solo con pausa vigente, :76) -> :106 reanudarLead -> sale del lote",
+     "cada acción: toast.error(result.error) o toast.success + router.refresh() (:81-86, :120-126, :107-113)"
+    ]
+   },
+   {
+    "nombre": "Cartera agrupada: abrir, buscar, filtrar, ordenar y entrar a un lead",
+    "pasos": [
+     "cartera-view.tsx:81 toggle «Ver toda la cartera» (cerrada por defecto :42)",
+     "cartera-view.tsx:106 CarteraToolbar -> cartera-toolbar.tsx:69 (query), :81 (estado de VISTAS_CARTERA :27-30), :88 (orden :32-37)",
+     "cartera-view.tsx:58 filtrarYOrdenarCartera(leads, query, estado, orden) -> sale del lote: src/lib/leados/flow.ts",
+     "cartera-view.tsx:64 agruparCartera(lista) (sin grupos si busca) -> sale del lote: flow.ts",
+     "cartera-view.tsx:118-123 vacío por filtro / :127 lista plana / :131-145 GrupoPlegable (VISTA_ABIERTA abierto :142)",
+     "cartera-view.tsx:208 ListaTarjetas -> home-sections.tsx:68-70 <Link href=`/setter/leads/${lead.id}`>"
+    ]
+   },
+   {
+    "nombre": "Novedades: abrir un aviso y marcar vistas",
+    "pasos": [
+     "novedades-panel.tsx:134 no renderiza sin filas ni revisión (datos de getNovedadesSetter, fuera del lote)",
+     "novedades-panel.tsx:122 AbrirFocoButton(leadId, anclar=fila.vigente)",
+     "novedades-abrir-foco.tsx:40-45 si anclar: anclarFoco(leadId) -> sale del lote: foco.actions.ts",
+     "novedades-abrir-foco.tsx:47 router.push(`/setter/leads/${leadId}`)",
+     "novedades-panel.tsx:155 MarcarVistoButton -> novedades-marcar-visto.tsx:21 marcarNovedadesVistasAction() -> sale del lote: src/app/(protected)/setter/_actions/novedades.actions.ts",
+     "novedades-marcar-visto.tsx:26-27 toast + router.refresh()"
+    ]
+   },
+   {
+    "nombre": "Rail del setter: navegación interna y herramientas externas",
+    "pasos": [
+     "setter/layout.tsx:90 (fuera del lote, guard SETTER en :32) -> setter-shell.tsx:23",
+     "setter-shell.tsx:70 SetterNav con onNavigate que cierra el drawer",
+     "setter-nav.tsx:65 «Cargar prospecto» / :97 «Tu día» -> :48-51 handleNavigate",
+     "setter-nav.tsx:49 triggerTransition(href) -> sale del lote: src/context/TransitionContext.tsx:108-120 (FROZEN; cortina global app/layout.tsx:114, 300 ms y router.push)",
+     "setter-nav.tsx:129 ToolsRail -> tools-rail.tsx:26 HERRAMIENTAS_ORDEN -> :29-44 fila 'pendiente' si url null / :50-55 <a target=_blank>"
+    ]
+   },
+   {
+    "nombre": "Ficha por bloques con avance por completitud",
+    "pasos": [
+     "consumidor fuera del lote: src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx:412 monta BloquesSecuenciales",
+     "bloques-secuenciales.tsx:179 click en cabecera -> onAbrir(bloque.id)",
+     "bloques-secuenciales.tsx:158 onBlur del bloque -> :136 manejarSalida",
+     "bloques-secuenciales.tsx:140 foco sigue adentro -> no avanza; :141-143 puntero apretado -> avance pendiente aplicado en :118-124 tras pointerup",
+     "bloques-secuenciales.tsx:145 onSalirDelBloque(id) -> sale del lote: el padre (ficha-form.tsx / ficha-bloques.ts) decide si avanza",
+     "bloques-secuenciales.tsx:215-223 solo el bloque abierto se monta"
+    ]
+   },
+   {
+    "nombre": "Copiar un bloque para un Gem externo",
+    "pasos": [
+     "guardrail-rol.tsx:35 (y otras pantallas fuera del lote) montan CopyBlock",
+     "copy-block.tsx:64 onClick={copiar}",
+     "copy-block.tsx:37 navigator.clipboard.writeText(texto)",
+     "copy-block.tsx:38-48 fallback textarea + document.execCommand('copy') sin mirar el resultado",
+     "copy-block.tsx:50 setCopiado(true) siempre -> :73 «Copiado»"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "router.push sin justificación inline en tres controles del panel del setter",
+    "prefijo": "DEU",
+    "severidad": "MEDIA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+      "linea": 90,
+      "fragmento": "router.push(`/setter/leads/${foco.id}`)"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/novedades-abrir-foco.tsx",
+      "linea": 47,
+      "fragmento": "router.push(`/setter/leads/${leadId}`)"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/trabajar-lead-button.tsx",
+      "linea": 31,
+      "fragmento": "router.push(`/setter/leads/${leadId}`)"
+     }
+    ],
+    "impacto": "Viola la regla dura del PROMPT (§2 «Nunca router.push directo») y la de CLAUDE.md para portales (Link, o redirect() en server action; router.push solo con comentario inline). Para el primer setter real no rompe el flujo, pero las tres puertas al detalle del lead (Ir a trabajarlo, Trabajar de la cola, Abrir de una novedad) no se pueden abrir en pestaña nueva ni prefetchean, y en novedades-abrir-foco.tsx:40 con anclar=false es navegación pura que un <Link> resolvería. El patrón ya se copió fuera del lote (setter/nuevo/nuevo-prospecto-form.tsx:98).",
+    "propuesta": "Que la navegación salga de la server action (anclarFoco con redirect() al detalle) o envolver el control en un form con action; cuando no hay que anclar, usar <Link>. Si Franco decide mantener router.push, agregar el comentario inline que lo justifique (con eso baja a BAJA por rúbrica).",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-dia",
+     "h5.set-dia.foco-ahora",
+     "h5.set-dia.cola-de-hoy",
+     "h5.set-dia.novedades"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D4-A3, PLAN-700"
+   },
+   {
+    "titulo": "El rail del setter navega con triggerTransition y botones, contra la regla de portales de CLAUDE.md",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+      "linea": 45,
+      "fragmento": "// Navegación SOLO por triggerTransition (decisión cerrada · CLAUDE.md). El"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+      "linea": 97,
+      "fragmento": "onClick={() => handleNavigate(item.href)}"
+     },
+     {
+      "ruta": "src/context/TransitionContext.tsx",
+      "linea": 116,
+      "fragmento": "setTimeout(() => {\n    startTransition(() => {\n        router.push(target);"
+     },
+     {
+      "ruta": "src/app/layout.tsx",
+      "linea": 114,
+      "fragmento": "<Shutter />"
+     }
+    ],
+    "impacto": "Cada navegación del rail («Tu día», «Cargar prospecto») pasa por la cortina negra global (Shutter montado en el layout raíz, fixed z-[9985]) y 300 ms de espera; los destinos son <button>, así que no se pueden abrir en pestaña nueva ni prefetchean, y un clic durante la animación se descarta (TransitionContext.tsx:72 if (isAnimating) return). El comentario se apoya en CLAUDE.md, que hoy dice lo contrario para portales y no clasifica /setter; además CLAUDE.md afirma que el Shutter no existe en portales, y sí existe (layout raíz).",
+    "propuesta": "Decisión para Valentino y Franco: (a) declarar /setter como portal en CLAUDE.md y migrar el rail a <Link> con aria-current, o (b) registrar en CLAUDE.md la excepción del setter. En ambos casos corregir la premisa «el Shutter no existe ahí». TransitionContext.tsx es FROZEN: no se toca.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-dia.rail-navegacion",
+     "h5"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D4-A3, PLAN-700, PLAN-726, PLAN-757"
+   },
+   {
+    "titulo": "4 de 5 herramientas externas sin link y el rail ofrece un «Chat de evaluación» que ningún paso usa",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/herramientas.ts",
+      "linea": 63,
+      "fragmento": "url: null, // TODO: URL — chat de evaluación en Sonnet (pedir a Franco)"
+     },
+     {
+      "ruta": "src/lib/leados/herramientas.ts",
+      "linea": 123,
+      "fragmento": "'evaluador',"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+      "linea": 41,
+      "fragmento": "<span className=\"shrink-0 text-[10px] uppercase tracking-wide text-amber-300/50\">\n  pendiente"
+     }
+    ],
+    "impacto": "Bloqueante de autonomía para el primer setter real: Gem de diseño (herramientas.ts:78), Claude Design (:90) y Gem de outreach (:117) también tienen url null con TODO. El rail, que es el panel persistente, las muestra como «pendiente» sin decir qué hacer (la salida SalidaLinkPendiente de tool-guide.tsx:61-67 existe pero el rail no la usa) y anuncia una herramienta del paso Evaluación que tras la fusión no tiene pantalla: ningún ToolGuide ni HerramientaLauncher con id evaluador en src (solo el test tests/setter/16-municiones-salida.spec.ts:132).",
+    "propuesta": "Franco carga las URLs (mejor en configuración editable que en código) y decide sacar 'evaluador' de HERRAMIENTAS_ORDEN, ajustando tests/setter/16-municiones-salida.spec.ts:132. Mientras falten, el rail debería mostrar la misma salida que ToolGuide.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-manual.herramientas-externas",
+     "lib.leados"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D4-A2, PLAN-708, PLAN-717, PLAN-782"
+   },
+   {
+    "titulo": "Las pausas del setter calculan la fecha en UTC: de 21 a 24 h quedan un día más largas",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+      "linea": 70,
+      "fragmento": "fecha.setDate(fecha.getDate() + dias)\n  return fecha.toISOString().slice(0, 10)"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+      "linea": 36,
+      "fragmento": "fecha.setDate(fecha.getDate() + dias)\n  return fecha.toISOString().slice(0, 10)"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+      "linea": 144,
+      "fragmento": "setMinDate(fechaEnDias(1))"
+     }
+    ],
+    "impacto": "Argentina es UTC−3: entre las 21:00 y las 23:59 toISOString ya está en el día siguiente, así que «3 días / 1 semana / 2 semanas» mandan hoy+4/+8/+15 y el mínimo del selector de fecha salta a pasado mañana (no se puede pausar «hasta mañana»). El cálculo del cliente está verificado por lectura; cómo guarda pausarLead la fecha está fuera del lote (cartera.actions.ts:78). El helper y el panel de pausa están duplicados en los dos archivos (foco-surface.tsx:61-72 y :283-318; lead-card-actions.tsx:34-44 y :180-217).",
+    "propuesta": "Un único helper de «fecha calendario en hora AR» compartido por FocoSurface y LeadCardActions (si va en dates-ar.ts/tz-ar.ts, que son FROZEN-inferido, es decisión para Valentino), y extraer el panel de pausa a un componente.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-dia.foco-ahora",
+     "h5.set-dia.palancas-de-card",
+     "modelo.OsLeadSetterMeta"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-735"
+   },
+   {
+    "titulo": "La ficha por bloques puede avanzar sola cuando el setter cambia de pestaña o de ventana",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+      "linea": 138,
+      "fragmento": "const destino = evento.relatedTarget\n    // El foco sigue adentro del bloque (tabular entre sus campos) → no es salir.\n    if (destino instanceof Node && evento.currentTarget.contains(destino)) return"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+      "linea": 145,
+      "fragmento": "onSalirDelBloque(id)"
+     }
+    ],
+    "impacto": "Cuando la ventana pierde el foco el navegador emite focusout con relatedTarget null; el componente lo trata como salida del bloque (no hay puntero apretado en esta ventana) y el padre puede plegarlo y abrir el siguiente. El uso típico de la ficha por fuentes es ir a Instagram o Google a mirar: el setter vuelve y el bloque donde escribía ya no está montado (no pierde datos, pierde el lugar). Depende de la regla de completitud del padre (ficha-form.tsx:412, fuera del lote).",
+    "propuesta": "Ignorar la salida cuando document.hasFocus() es false, o diferirla al próximo focusin fuera del bloque; sumar el caso a la spec 21.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-manual.ficha-por-bloques"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-934"
+   },
+   {
+    "titulo": "Atajos globales de una sola letra (t, p, s, ?) sin forma de apagarlos (WCAG 2.1.4)",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_components/use-keyboard-shortcuts.ts",
+      "linea": 53,
+      "fragmento": "window.addEventListener('keydown', onKeyDown)"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+      "linea": 151,
+      "fragmento": "t: () => trabajarRef.current?.click(),\n    s: () => saltarRef.current?.click(),\n    p: toggleSnooze,"
+     }
+    ],
+    "impacto": "Con el foco fuera de un campo (por ejemplo en un botón), una tecla suelta navega al lead (t) o re-ancla el foco al próximo (s). Quien usa dictado por voz o un teclado alternativo dispara acciones sin querer, y no hay ajuste para desactivar ni remapear los atajos, que es el requisito de nivel A.",
+    "propuesta": "Preferencia para apagar los atajos, o activarlos solo con el foco dentro de la tarjeta del foco; mantener «?» como ayuda.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-dia.foco-ahora"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-737"
+   },
+   {
+    "titulo": "El drawer mobile del setter cerrado sigue en el orden de tabulación y no se cierra con Escape",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+      "linea": 53,
+      "fragmento": "className={`fixed left-0 top-0 h-screen w-[240px] transition-transform lg:translate-x-0 ${\n          mobileOpen ? 'translate-x-0' : '-translate-x-full'"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+      "linea": 36,
+      "fragmento": "aria-label=\"Abrir menú\""
+     }
+    ],
+    "impacto": "Por debajo de 1024 px el rail cerrado queda fuera de pantalla pero focusable: Tab recorre «Cargar prospecto», «Tu día» y los links de herramientas invisibles. Abierto, no se cierra con Escape ni recibe el foco, y el disparador no expone aria-expanded. El mismo patrón está en AdminLayoutClient.tsx:63 y DashboardLayoutClient.tsx:81.",
+    "propuesta": "inert (o aria-hidden más sacar del tab order) en el aside cerrado bajo lg; Escape y foco al abrir; aria-expanded y aria-controls en el botón de menú.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-dia.rail-navegacion"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-756"
+   },
+   {
+    "titulo": "Las palancas de la card tienen un nombre accesible que no contiene su rótulo visible (WCAG 2.5.3)",
+    "prefijo": "A11Y",
+    "severidad": "BAJA",
+    "tipo": "a11y",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+      "linea": 152,
+      "fragmento": "label={estaPausado ? 'Cambiar la pausa' : 'Pausar en tu cartera'}\n          texto=\"Pausar\""
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+      "linea": 283,
+      "fragmento": "aria-label={label}\n      title={label}"
+     }
+    ],
+    "impacto": "Quien maneja el navegador por voz dice «Pausar» o «Fijado» y no activa el botón cuando el nombre accesible es «Cambiar la pausa» o «Quitar de fijados» (:144-145). El comentario de :272-275 lo declara intencional.",
+    "propuesta": "Que el aria-label empiece con el texto visible («Pausar: cambiar la pausa») o pasar el estado a aria-pressed/aria-describedby.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-dia.palancas-de-card"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-722"
+   },
+   {
+    "titulo": "«Copiar bloque» confirma «Copiado» aunque el copiado falle",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_components/copy-block.tsx",
+      "linea": 47,
+      "fragmento": "document.execCommand('copy')\n      document.body.removeChild(area)\n    }"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/copy-block.tsx",
+      "linea": 50,
+      "fragmento": "setCopiado(true)"
+     }
+    ],
+    "impacto": "Si la Clipboard API no está (http por IP, como dev:qa) y execCommand devuelve false, el botón igual dice «Copiado» y el setter pega en el Gem lo que tenía antes en el portapapeles, que puede ser el bloque de otro negocio. execCommand además está deprecado.",
+    "propuesta": "Mirar el booleano de execCommand y, si falla, mostrar un error con el texto seleccionable para copiar a mano.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-manual.ayudas-de-paso"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": ""
+   },
+   {
+    "titulo": "La bitácora declara pendiente el ascenso a main que ya ocurrió (EL TRONCO está en origin/main)",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "docs/bitacora-beta-3.md",
+      "linea": 10975,
+      "fragmento": "- **No se pusheó a `main`.** Ni una vez. El push es de Franco."
+     }
+    ],
+    "impacto": "El doc de cierre y PLAN-1042 dejan el push a main como pendiente, pero origin/main = 57c421bc «docs(tronco): EL TRONCO» (autor y committer Franco, 2026-09-06 03:13 -0300). Es un fast-forward de 50 commits sobre 17727117 y el reflog local lo recibió por fetch el 2026-09-06 20:14 -0300. Git no registra quién hizo el push. Quien lea la bitácora cree que main sigue atrás.",
+    "propuesta": "Anotar en 09-PARA-FRANCO quién y cuándo pusheó main y si corrió ci.yml (on: [push, pull_request]); actualizar «Lo que queda para el humano».",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "D4-A6, PLAN-1042"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.foco-ahora",
+    "nombre": "Tu foco ahora (Ir a trabajarlo, Pausar, Saltar, Soltar y atajos)",
+    "descripcion": "Tarjeta protagonista con el lead a trabajar, su próxima acción y su porqué; ancla el sticky, pausa, salta al próximo o suelta el anclaje.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/foco-surface.tsx",
+     "src/app/(protected)/setter/_components/shortcuts-help.tsx",
+     "src/app/(protected)/setter/_components/use-keyboard-shortcuts.ts"
+    ],
+    "entradas": [
+     "foco.actions.ts#anclarFoco (fuera del lote)",
+     "foco.actions.ts#soltarFoco (fuera del lote)",
+     "cartera.actions.ts#pausarLead (fuera del lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "Camino feliz en el lote: foco-surface.tsx:231 -> :85 anclarFoco -> :90 router.push; Saltar :258 -> :97 -> :107-109; Soltar :272 -> :129 -> :137-139; Pausar :291 -> :115 -> :120-123. Le faltan para L3 la fecha en hora AR y las acciones fuera del lote verificadas.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Guard de rol SETTER en setter/layout.tsx:32 (contexto fijo). El leadId sale del cliente (foco-surface.tsx:85,97,115) y la propiedad del lead la tiene que validar la action, fuera del lote y no verificada."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin ítems la cola no se monta (cola-del-dia.tsx:91) y la page muestra HomeEnEspera o HomeEmpty; Saltar se deshabilita sin próximo (foco-surface.tsx:259-260)."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast.error(result.error) en las cuatro acciones (foco-surface.tsx:87,99,117,131); la calidad del mensaje depende de la action."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "disabled={isPending} en todos los controles (foco-surface.tsx:232,242,259,273,292,310); existe src/app/(protected)/setter/loading.tsx."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Solo min de fecha en cliente (foco-surface.tsx:303); la validación de 'hasta' y del leadId está en cartera.actions/foco.actions, fuera del lote."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "CTAs con flex-wrap (foco-surface.tsx:227) y padding responsive (:164); la pastilla de atajos queda fija abajo a la derecha en touch (shortcuts-help.tsx:32)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "setter/error.tsx llama a captureException (git); los fallos devueltos como {success:false} solo van a un toast."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO, FIXME ni datos fijos en los tres archivos."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Funciona sin ayuda, salvo las pausas entre 21 y 24 h, que quedan un día más largas (foco-surface.tsx:68-71)."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.cola-de-hoy",
+    "nombre": "Tu cola de hoy",
+    "descripcion": "Lista del día con el foco como primer ítem, filas compactas con «Trabajar» y el pie de cuántos quedan en la cartera.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/cola-del-dia.tsx",
+     "src/app/(protected)/setter/_components/trabajar-lead-button.tsx"
+    ],
+    "entradas": [
+     "foco.actions.ts#anclarFoco (fuera del lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "cola-del-dia.tsx:109 FocoSurface + :113-115 FilaCola -> :83 TrabajarLeadButton -> trabajar-lead-button.tsx:26 anclarFoco -> :31 router.push.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Los ítems los arma la page con la cola del setter (fuera del lote); el leadId de trabajar-lead-button.tsx:26 lo valida la action, no verificada."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "return null sin ítems (cola-del-dia.tsx:91); el pie nombra los ocultos (:122-127)."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast.error(result.error) en trabajar-lead-button.tsx:28."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "disabled={isPending} (trabajar-lead-button.tsx:39)."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "No hay entrada libre en el lote; solo leadId hacia anclarFoco."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap y min-w-0 en la fila (cola-del-dia.tsx:48-49), nombre con truncate (:51)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "error.tsx del setter con captureException; los fallos de la action solo van a toast."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO ni datos fijos."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "El setter llega a cada lead desde la fila (cola-del-dia.tsx:83)."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.cartera-agrupada",
+    "nombre": "Cartera completa agrupada con búsqueda, filtro y orden",
+    "descripcion": "Plegable con todos los leads del setter agrupados por vista; buscar la vuelve plana; cada tarjeta lleva al detalle.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/cartera-view.tsx",
+     "src/app/(protected)/setter/_components/cartera-toolbar.tsx",
+     "src/app/(protected)/setter/_components/home-sections.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "cartera-view.tsx:81 -> :106 toolbar -> :58 filtrarYOrdenarCartera -> :64 agruparCartera -> :131 GrupoPlegable -> :208 ListaTarjetas -> home-sections.tsx:68 Link al detalle.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "La lista llega como prop desde la page (page.tsx:129, fuera del lote); el lote no consulta datos."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Vacío por filtro con salida (cartera-view.tsx:118-123); cartera vacía total en HomeEmpty (home-empty.tsx:14-20)."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Filtro y orden en memoria del cliente; no hay llamadas."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Datos ya cargados por el server; setter/loading.tsx cubre la carga de la page."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin escritura."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Toolbar flex-col sm:flex-row (cartera-toolbar.tsx:58) y grilla sm:grid-cols-2 (cartera-view.tsx:157); la fila de dos selects con min-w 9,5rem + 10rem sin wrap (cartera-toolbar.tsx:75-89) desborda a 320 px."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones que fallen fuera del render (error.tsx del setter cubre el render)."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Rótulos de VISTAS_CARTERA (cartera-toolbar.tsx:27-30); sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Busca, filtra y entra al lead sin ayuda."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.palancas-de-card",
+    "nombre": "Palancas privadas de la card: fijar, pausar, nota y reanudar",
+    "descripcion": "Organización propia del setter sobre cada lead de la cartera, con editores inline.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/lead-card-actions.tsx"
+    ],
+    "entradas": [
+     "cartera.actions.ts#fijarLead (fuera del lote)",
+     "cartera.actions.ts#pausarLead (fuera del lote)",
+     "cartera.actions.ts#reanudarLead (fuera del lote)",
+     "cartera.actions.ts#guardarNota (fuera del lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "lead-card-actions.tsx:147 -> :80 fijarLead -> :85-86; :190 -> :92 pausarLead -> :97-100; :235 -> :119 guardarNota -> :124-126; :170 -> :106 reanudarLead.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "leadId del cliente hacia las actions (lead-card-actions.tsx:80,92,106,119); la privacidad por setter (OsLeadSetterMeta) está fuera del lote y requiere el caso manual con dos setters."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Controles sobre un lead existente."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast.error(result.error) en las cuatro acciones (:82,94,108,121)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "disabled={isPending} y Button loading (:148,156,164,171,235)."
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "Cliente: maxLength={NOTA_MAX} y contador (:223-231), NOTA_MAX importado de cartera.schemas.ts (:16); la validación server está fuera del lote."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Editores inline dentro de la card (:180-249), fecha con flex gap-2 (:199)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Fallos devueltos solo a toast."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Pausas desplazadas un día entre 21 y 24 h (lead-card-actions.tsx:34-37)."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.novedades",
+    "nombre": "Novedades y demos esperando a Franco",
+    "descripcion": "Avisos dirigidos sin leer, agrupados, con «Abrir» que ancla el foco si la orden sigue vigente, y resumen de la cola de revisión.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/novedades-panel.tsx",
+     "src/app/(protected)/setter/_components/novedades-abrir-foco.tsx",
+     "src/app/(protected)/setter/_components/novedades-marcar-visto.tsx"
+    ],
+    "entradas": [
+     "foco.actions.ts#anclarFoco (fuera del lote)",
+     "novedades.actions.ts#marcarNovedadesVistasAction (fuera del lote)"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "novedades-panel.tsx:160-162 AvisoItem -> :122 AbrirFocoButton -> novedades-abrir-foco.tsx:41 -> :47; novedades-panel.tsx:155 -> novedades-marcar-visto.tsx:21 -> :27.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "Datos de getNovedadesSetter y la action de marcar, ambas fuera del lote."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Sin filas ni revisión no renderiza (novedades-panel.tsx:134); los ocultos se nombran (:166-171)."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "toast.error en novedades-marcar-visto.tsx:23 y novedades-abrir-foco.tsx:43."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "disabled={isPending} (novedades-marcar-visto.tsx:35, novedades-abrir-foco.tsx:55)."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin entrada libre."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap en el encabezado (:141); el subtítulo se oculta en mobile (:149)."
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "Fallos devueltos solo a toast."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Abre el lead del aviso y limpia los avisos sin ayuda."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.panel-en-espera-y-vacio",
+    "nombre": "Estados «todo en espera» y «cartera vacía»",
+    "descripcion": "Pantallas para cuando no hay nada accionable (con conteos por turno, fijados y pausados) o cuando el setter no tiene leads.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/home-en-espera.tsx",
+     "src/app/(protected)/setter/_components/home-empty.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "La page monta HomeEmpty (page.tsx:116) y HomeEnEspera (page.tsx:120, git); home-en-espera.tsx:45-115 arma el texto por turno y los chips; home-empty.tsx:14-27 ofrece cargar o importar.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Presentación de conteos ya calculados por la page."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Son los estados vacíos, con salida (home-en-espera.tsx:107-112; home-empty.tsx:19,21-27)."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin escritura."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Columna centrada con flex-wrap en los chips (home-en-espera.tsx:53,73)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Textos de TEXTO_TURNO; sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Indica a quién le toca y ofrece adelantar trabajo."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.mis-numeros-y-semana",
+    "nombre": "Tu semana y Mis números",
+    "descripcion": "Señal sobria de avance de 7 días y criterio descarte vs avance, sin rankings.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/progreso-semana.tsx",
+     "src/app/(protected)/setter/_components/mis-numeros.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "page.tsx:141 y :144 (git) montan MisNumeros y ProgresoSemana; progreso-semana.tsx:17-40 filtra métricas con valor; mis-numeros.tsx:25-88 pinta el criterio.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Los datos los calculan progreso.ts y mis-numeros.ts (fuera del lote)."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "Se ocultan en cero (progreso-semana.tsx:15; mis-numeros.tsx:25)."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin escritura."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap (progreso-semana.tsx:47); grilla de una columna (mis-numeros.tsx:35)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Solo lectura."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.rail-navegacion",
+    "nombre": "Shell y rail de navegación del setter",
+    "descripcion": "Grilla rail + contenido con drawer mobile, destino «Tu día» y acción «Cargar prospecto».",
+    "archivos": [
+     "src/app/(protected)/setter/_components/setter-shell.tsx",
+     "src/app/(protected)/setter/_components/setter-nav.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "setter-shell.tsx:70 -> setter-nav.tsx:97 -> :49 triggerTransition -> TransitionContext.tsx:116-118 router.push.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "Heredado: el guard SETTER vive en setter/layout.tsx:32 (contexto fijo); el shell no lee datos."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "Navegación fija."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "carga": {
+      "cumple": "parcial",
+      "evidencia": "La cortina global cubre 300 ms (TransitionContext.tsx:111-120); no hay indicador propio."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin escritura."
+     },
+     "mobile": {
+      "cumple": "parcial",
+      "evidencia": "Drawer y botón de menú bajo lg (setter-shell.tsx:31-56), pero el drawer cerrado sigue focusable y sin Escape."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Solo rutas reales (setter-nav.tsx:36-38)."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Dos destinos claros."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-manual",
+    "id": "h5.set-manual.herramientas-externas",
+    "nombre": "Herramientas externas (rail «Tus herramientas» y lanzadores por paso)",
+    "descripcion": "Accesos a Gems, Claude Design y Netlify Drop en el rail y en cada paso, con explicación plegable.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/tools-rail.tsx",
+     "src/app/(protected)/setter/_components/tool-guide.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L1",
+    "madurez_evidencia": "4 de 5 herramientas con url null y TODO (herramientas.ts:63,78,90,117): el rail las pinta como «pendiente» sin destino (tools-rail.tsx:29-44). Solo Netlify Drop abre (herramientas.ts:105 -> tools-rail.tsx:50-55).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Links estáticos."
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "ToolGuide muestra la salida «pedíselo a Franco» (tool-guide.tsx:61-67,95); el rail no (tools-rail.tsx:41-43)."
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin escritura."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap en ToolGuide (tool-guide.tsx:88); el rail cierra el drawer al abrir (tools-rail.tsx:54)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones."
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "TODO en herramientas.ts:63,78,90,117 y fila inerte 'evaluador' (:123)."
+     },
+     "autonomia": {
+      "cumple": "no",
+      "evidencia": "Sin links el setter depende de Franco (tool-guide.tsx:65)."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-manual",
+    "id": "h5.set-manual.ayudas-de-paso",
+    "nombre": "Ayudas de paso: TeachPanel, ejemplos ideales, bloques copiables, guardrail de rol y cartel del canal",
+    "descripcion": "Piezas de enseñanza y munición que comparten las pantallas del manual.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/teach-panel.tsx",
+     "src/app/(protected)/setter/_components/ejemplo-ideal.tsx",
+     "src/app/(protected)/setter/_components/copy-block.tsx",
+     "src/app/(protected)/setter/_components/guardrail-rol.tsx",
+     "src/app/(protected)/setter/_components/canal-seguridad.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L2",
+    "madurez_evidencia": "copy-block.tsx:64 -> :37 -> :50; teach-panel.tsx:100-148 desde GUIA_PASOS; ejemplo-ideal.tsx:79-131; guardrail-rol.tsx:35-39 monta CopyBlock; canal-seguridad.tsx:11-56 lee CANAL_INSTAGRAM (flow-content.ts:317).",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Presentación de contenido estático."
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "TeachPanel no renderiza sin contenido (teach-panel.tsx:102-104)."
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "CopyBlock anuncia «Copiado» aunque el copiado falle (copy-block.tsx:47-50)."
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones asíncronas salvo el portapapeles."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Sin escritura."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "flex-wrap (copy-block.tsx:56; canal-seguridad.tsx:31); pre con break-words y scroll (copy-block.tsx:89)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Sin operaciones de servidor."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Contenido de guidance-content/flow; sin TODO en el lote."
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "Enseña el porqué y deja copiar los guiones."
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-manual",
+    "id": "h5.set-manual.ficha-por-bloques",
+    "nombre": "Ficha por bloques con avance por completitud y nudges de calidad",
+    "descripcion": "Acordeón de una sección abierta que avanza al salir del bloque; nudge de calidad al salir de un campo flojo; indicador de autoguardado.",
+    "archivos": [
+     "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+     "src/app/(protected)/setter/_components/campo-mejora.tsx",
+     "src/app/(protected)/setter/_components/autosave-status.tsx"
+    ],
+    "entradas": [],
+    "madurez": "L?",
+    "madurez_evidencia": "El lote tiene solo la mecánica (bloques-secuenciales.tsx:136-146, :179, :215-223; autosave-status.tsx:26-53); el guardado y la regla de avance viven en ficha-form.tsx:412 y ficha-bloques.ts (otro lote), así que el camino feliz no se cierra dentro del lote.",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "Presentación."
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "El padre arma los bloques."
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "AutosaveStatus pinta el error con mensaje accionable (autosave-status.tsx:35-41,64) y role=status (:73)."
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "«Guardando…» con Spinner (autosave-status.tsx:32-34)."
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "Fuera del lote."
+     },
+     "mobile": {
+      "cumple": "si",
+      "evidencia": "Título y estado en dos renglones en todos los anchos (bloques-secuenciales.tsx:167-180)."
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "Fuera del lote."
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "Sin TODO."
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "Todas las cabeceras abren con un clic (bloques-secuenciales.tsx:34-37,179), pero el avance puede dispararse al cambiar de ventana (:138-145)."
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-708",
+    "clave": "rail-herramientas-pendiente-sin-salida",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tools-rail.tsx:29-44 sigue mostrando solo «pendiente»; SalidaLinkPendiente (tool-guide.tsx:61) solo se usa en tool-guide.tsx:95 y m5-seguimiento.tsx:231 (git grep).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-717",
+    "clave": "rail-chat-de-evaluacion-inerte",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "herramientas.ts:53-63 (url null + TODO) y :123 en HERRAMIENTAS_ORDEN; git grep de id evaluador en src sin usos (solo tests/setter/16-municiones-salida.spec.ts:132); control positivo: m-construccion.tsx:135, m13-borrador.tsx:65 y m4-opener.tsx:63 usan otros ids.",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Lo decide Franco; ver hallazgo de herramientas sin link."
+   },
+   {
+    "id": "PLAN-941",
+    "clave": "contraste-copy-block-copiado",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "copy-block.tsx:91 sigue con text-zinc-300 sobre bg-emerald-500/[0.06].",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Por aritmética, zinc-300 (#d4d4d8) sobre un tinte esmeralda del 6 % sobre #080a0c da ≈13:1 y pasa AA: falso positivo del hook."
+   },
+   {
+    "id": "PLAN-879",
+    "clave": "limites-instagram-10-8-3",
+    "estado_en_codigo": "parcial",
+    "evidencia": "flow-content.ts:318-320 (topeDiarioDms 10, avisoDesdeDms 8, ritmoPorHora 3), leídos por canal-seguridad.tsx:12-27.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Validarlos contra el historial real de la cuenta es tarea de Franco y no se verifica en código."
+   },
+   {
+    "id": "PLAN-707",
+    "clave": "orden-colas-inalcanzable",
+    "estado_en_codigo": "hecho",
+    "evidencia": "OrdenCartera sin 'colas' (flow.ts:894); ORDEN_OPCIONES con 4 valores (cartera-toolbar.tsx:32-37); default 'urgencia' (cartera-view.tsx:45). git grep \"'colas'\" solo encuentra comentarios en flow.ts:884 y :887.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-803",
+    "clave": "calidad-en-brief-y-construccion",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "CampoMejora solo se importa en ficha-form.tsx:34 y :303 (git grep -w CampoMejora: 3 archivos, incluidos su definición y un test/medición).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-700",
+    "clave": "navegacion-setter-vs-claude-md",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "setter-nav.tsx:45 cita una «decisión cerrada · CLAUDE.md», pero CLAUDE.md solo clasifica /admin y /dashboard y dice que triggerTransition no aplica en portales; el Shutter existe en todas las rutas (app/layout.tsx:114).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-726",
+    "clave": "rail-solo-triggertransition",
+    "estado_en_codigo": "hecho",
+    "evidencia": "setter-nav.tsx:48-51, :65 y :97: el rail no usa Link ni router.",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Choca con el CLAUDE.md vigente (ver hallazgo del rail)."
+   },
+   {
+    "id": "PLAN-1237",
+    "clave": "oslead-frentes-f1-f4",
+    "estado_en_codigo": "parcial",
+    "evidencia": "F1: Modal.tsx no tiene role=dialog ni aria-modal (git show | grep: solo aria-label=\"Cerrar\" en :91). F2: hay conteo total y por grupo (cartera-view.tsx:87-89, :201-203) en lugar de una franja. F3: draft-preview.tsx no existe en origin/main (git ls-tree). F4 no verificado.",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Declarado hecho pero F1 y F3 no están en main; puede vivir en una rama no integrada."
+   },
+   {
+    "id": "PLAN-915",
+    "clave": "p4-municiones-salida-link",
+    "estado_en_codigo": "hecho",
+    "evidencia": "SalidaLinkPendiente fuera del plegable (tool-guide.tsx:95; el details empieza en :98); título del plegable (:100); prop titulo de TeachPanel (teach-panel.tsx:87-98); tests/setter/16-municiones-salida.spec.ts existe; fa4af2a0 es ancestro de origin/main.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-934",
+    "clave": "p16-ficha-por-fuentes",
+    "estado_en_codigo": "hecho",
+    "evidencia": "bloques-secuenciales.tsx (230 líneas) usado en ficha-form.tsx:412; ficha-bloques.ts y ficha-bloques.invariant.ts existen; tests/setter/21-ficha-por-fuentes.spec.ts existe; 8b8ecf23 es ancestro.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Ver hallazgo del avance al cambiar de ventana."
+   },
+   {
+    "id": "PLAN-719",
+    "clave": "p21-cola-de-trabajo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "cola-del-dia.tsx:89-131 (foco como primer ítem :109, filas :113-115, ocultos :122-127); Soltar conectado (foco-surface.tsx:127-141, :269-280); «Leads activos» retirado (mis-numeros.tsx:11-21); cola.ts, novedades-agrupar.ts y tests/setter/26-cola-de-trabajo.spec.ts existen.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-722",
+    "clave": "p22-cartera-agrupada",
+    "estado_en_codigo": "hecho",
+    "evidencia": "agruparCartera y VISTA_ABIERTA (cartera-view.tsx:7-9, :64, :142); VISTAS_CARTERA como fuente del filtro (cartera-toolbar.tsx:27-30; flow.ts:944-956); sin badge de etapa (home-sections.tsx:80-88); rótulos visibles (lead-card-actions.tsx:145,153,161); home-empty.tsx:18; tests/setter/27-cartera-agrupada.spec.ts existe.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-756",
+    "clave": "b0.1-shell-setter",
+    "estado_en_codigo": "hecho",
+    "evidencia": "setter-shell.tsx:23-85: rail de 240 px (:53, :69), drawer mobile (:41-56), main scrolleable (:78).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-757",
+    "clave": "b0.2-navegacion-setter",
+    "estado_en_codigo": "hecho",
+    "evidencia": "setter-nav.tsx:36-38 tiene un único destino /setter, hoy rotulado «Tu día»; triggerTransition en :49.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-697",
+    "clave": "sprint-2.3-archivo-categorizado",
+    "estado_en_codigo": "hecho",
+    "evidencia": "archivoMotivo en home-sections.tsx:42 y :99-106; archivados en Tu semana (progreso-semana.tsx:33-39); vistas archivo-descartado y archivo-perdido (flow.ts:954-955); 6dd4946 es ancestro.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-878",
+    "clave": "p1-poda-copy",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Límites 10/8/3 en flow-content.ts:318-320; label de Perdidos en flow.ts:955; aria-label del checkbox en agenda-form.tsx:194; git grep 'hace hace' en src sin coincidencias (control: 'hace ' aparece 4 veces en flow-content.ts).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-706",
+    "clave": "f3-acuse-de-saltar",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Toast en Saltar (foco-surface.tsx:107); acuse-recibo.invariant.ts existe; fc9ea865 es ancestro de origin/main.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-724",
+    "clave": "b0.1-shell-bitacora-beta",
+    "estado_en_codigo": "hecho",
+    "evidencia": "setter-shell.tsx con rail de 240 px y drawer; el layout sigue siendo server y monta el shell (setter/layout.tsx:8, :90, git).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-725",
+    "clave": "b0.2-barra-setter-pill",
+    "estado_en_codigo": "hecho",
+    "evidencia": "layoutId namespaced 'setter-sidebar-active-pill' (setter-nav.tsx:108) y aria-current (:98); el label pasó de «Cartera» a «Tu día» (:29-38).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-729",
+    "clave": "fg0-zindex-tokens",
+    "estado_en_codigo": "hecho",
+    "evidencia": "setter-shell.tsx:29, 34, 45, 52 y 60 usan zIndex.appShell/appNavTrigger/appDrawerBackdrop/appDrawer/appDrawerClose.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Solo se verificó la parte del lote."
+   },
+   {
+    "id": "PLAN-782",
+    "clave": "toolguide-herramientas-rail",
+    "estado_en_codigo": "parcial",
+    "evidencia": "ToolGuide (tool-guide.tsx:82-116), rail (tools-rail.tsx:16-75) y registro existen, pero 4 de 5 URLs siguen null con TODO (herramientas.ts:63,78,90,117) y el ToolGuide de 'evaluador' ya no se monta en ningún paso.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-733",
+    "clave": "chip-motivo-orden",
+    "estado_en_codigo": "hecho",
+    "evidencia": "home-sections.tsx:40 y :124-136; foco-surface.tsx:157 y :213-218; cola-del-dia.tsx:65-75.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-735",
+    "clave": "palancas-cartera-setter-meta",
+    "estado_en_codigo": "hecho",
+    "evidencia": "cartera-toolbar.tsx:45-110; filtro y orden en cartera-view.tsx:57-66; acciones en lead-card-actions.tsx:78-128; setter-meta.ts existe.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "La privacidad con dos setters reales sigue sin verificar: ver caso manual."
+   },
+   {
+    "id": "PLAN-737",
+    "clave": "atajos-de-teclado",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Quedan t/p/s/? (foco-surface.tsx:54-59 y :150-155; shortcuts-help.tsx:22-29); guard de campos de escritura en use-keyboard-shortcuts.ts:14-20; los atajos j/k/Enter/r ya no existen.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Ver hallazgo WCAG 2.1.4."
+   },
+   {
+    "id": "PLAN-739",
+    "clave": "novedades-del-setter",
+    "estado_en_codigo": "hecho",
+    "evidencia": "novedades-panel.tsx:130-205; novedades-marcar-visto.tsx:19-29; novedades.ts y novedades.invariant.ts existen.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-742",
+    "clave": "carril-continua-donde-dejaste",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "continuar-cta.tsx no está en origin/main (git ls-tree -r | grep continuar-cta: 0); lo reemplazó FocoSurface.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-743",
+    "clave": "tu-semana",
+    "estado_en_codigo": "hecho",
+    "evidencia": "progreso-semana.tsx:14-62 se oculta en cero (:15) y muestra solo valores mayores que cero (:40); onboarding-hint ya no existe (git grep sin coincidencias).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-796",
+    "clave": "teachpanel",
+    "estado_en_codigo": "hecho",
+    "evidencia": "teach-panel.tsx:84-149; git grep -l -w TeachPanel devuelve 8 archivos.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-685",
+    "clave": "2.1a-modo-direccion-foco",
+    "estado_en_codigo": "hecho",
+    "evidencia": "foco-surface.tsx:83-125 (Ir, Pausar y Saltar); foco.ts, foco.invariant.ts y foco-cookie.ts existen; cartera colapsada (cartera-view.tsx:42, :104).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-687",
+    "clave": "2.1b-postergados-y-en-espera",
+    "estado_en_codigo": "hecho",
+    "evidencia": "El postergado vencido vuelve a trabajar (flow.ts:420-424); home-en-espera.tsx:28-116 muestra cuentas disjuntas por turno, fijados y pausados.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-691",
+    "clave": "2.2-novedades-integradas-al-foco",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Abrir ancla el foco (novedades-abrir-foco.tsx:38-49) y un aviso caducado no ancla (novedades-panel.tsx:122); la exclusión del lead-foco vive en novedades.ts, fuera del lote.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-692",
+    "clave": "2.3-cabina-subordinada",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Hover y foco del toggle (cartera-view.tsx:83); riel neutro (:105).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1097",
+    "clave": "drop-indices-oslead",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "El model OsLead conserva @@index([status]) y @@index([nextFollowUpAt]) junto al compuesto (schema.prisma:896-898).",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Depende de medir en PROD; schema.prisma es FROZEN."
+   },
+   {
+    "id": "PLAN-611",
+    "clave": "confirmacion-borrado-overview-leads",
+    "estado_en_codigo": "hecho",
+    "evidencia": "lead-card.tsx:15 y :185 usan InlineConfirm (popup local), la misma pieza que draggable-project-card.tsx (git grep -l InlineConfirm).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-829",
+    "clave": "h06-m13-rechazada-sin-cambiar-link",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "m13-borrador.tsx:122 sigue mostrando «Borrador congelado por el rechazo».",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-584",
+    "clave": "ui-admin-calcom-develop",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -l calComEmbedUrl en src/app/(protected)/admin: 0; control positivo: aparece en dashboard/modules/agenda-inteligente/page.tsx y src/lib/leados/agenda.ts.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "agenda.ts:59 y :70 abortan si más de una org tiene calComUsername (H-09 del doc OSLEAD)."
+   },
+   {
+    "id": "PLAN-837",
+    "clave": "m5-jerarquia-y-numeracion-de-toques",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Conviven «Toques: N de M» (estado-manual.tsx:86; m5-seguimiento.tsx:88) y «Mensaje base del toque N de M» (m5-seguimiento.tsx:195).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-234",
+    "clave": "ya-convertido-persistente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ChatbotLead.convertedToOsLeadId (schema.prisma:1510, re-agregada en la migración 20260622120000:21) y lectura persistente en ConvertChatbotLeadButton.tsx:20.",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1042",
+    "clave": "push-a-main-y-primera-corrida-ci",
+    "estado_en_codigo": "hecho",
+    "evidencia": "origin/main = 57c421bc (Franco, 2026-09-06 03:13 -0300), fast-forward de 50 commits sobre 17727117; ci.yml dispara en push (on: [push, pull_request]).",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Falta verificar a mano la primera corrida de CI sobre main."
+   },
+   {
+    "id": "PLAN-1049",
+    "clave": "fieldcontrol-firstvisible",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tests/helpers/setter-ui.ts tiene 5 firstVisible( y 31 archivos de tests lo usan (git grep).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-716",
+    "clave": "leads-corrida-en-base-dev",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "Es estado de la base dev, no verificable leyendo código; el script de origen existe (scripts/qa-corridas/_p21-corrida.ts).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1004",
+    "clave": "dev-qa-no-hidrata-leados",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep allowedDevOrigins en next.config.ts: 0 (control: frame-ancestors en next.config.ts:80); dev:qa en package.json:8.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-847",
+    "clave": "curado-prompts-de-diseno",
+    "estado_en_codigo": "parcial",
+    "evidencia": "prompts-disenio.ts:20 y :25 se declaran SEMILLA.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-861",
+    "clave": "triage-39-hallazgos-smoke-test",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md existe; NavConstruccion se sigue montando en pantalla-manual.tsx:241.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1016",
+    "clave": "invariantes-tsx-sin-chequeo-de-tipos",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "35 de los 57 scripts check:invariant de package.json corren con tsx.",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Si tsconfig incluye esos archivos, el tsc --noEmit del baseline los tipa; no se verificó."
+   },
+   {
+    "id": "PLAN-1019",
+    "clave": "qa-persona-recorre-wizard-retirado",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "corrida-1-novato-frio.spec.ts:80 y :143 buscan [data-step]; git grep -l data-step en src: 0.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-705",
+    "clave": "contraste-aa-en-setter",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "28 usos de text-zinc-600/700 en el lote (git grep -c), por ejemplo mis-numeros.tsx:83 (≈1,9:1) y tools-rail.tsx:37 (≈1,9:1).",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1026",
+    "clave": "verificar-headers-anticlickjacking-en-prod",
+    "estado_en_codigo": "parcial",
+    "evidencia": "En código: next.config.ts:94-96 (X-Frame-Options DENY para /(admin|dashboard|setter)) y :99 (frame-ancestors para /setter).",
+    "sigue_teniendo_sentido": "si",
+    "nota": "La verificación en prod es manual: ver caso."
+   },
+   {
+    "id": "PLAN-669",
+    "clave": "me-trabe-sin-historial",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "ESCALADO_RESET = { escaladoAt: null, escaladoNota: null } (escalamiento.ts:53).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-852",
+    "clave": "e2-ui-de-fases-con-progresojson",
+    "estado_en_codigo": "parcial",
+    "evidencia": "FaseAutoReporte usa guardarProgreso (fase-auto-reporte.tsx:9).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-612",
+    "clave": "cerrar-lead-y-convertirlo-en-cliente",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep closedToOrgId en schema y src: 0; el único vínculo es ChatbotLead→OsLead (schema.prisma:1510).",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1045",
+    "clave": "techo-declarado-de-la-red-sin-base",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Límite aceptado: contarDmsHoy (outreach.ts:67) y pausarLead (cartera.actions.ts:78) existen; no hay trabajo de código pendiente.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1052",
+    "clave": "qa-walkthrough-fuera-de-gate",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "package.json no menciona qa-walkthrough (0 coincidencias); playwright.qa-walkthrough.config.ts existe en el árbol.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-982",
+    "clave": "beta-leados-en-bitacora-beta",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Existen docs/bitacora-beta.md, bitacora-beta-2.md y bitacora-beta-3.md.",
+    "sigue_teniendo_sentido": "no",
+    "nota": "La beta siguió en bitacora-beta-3.md."
+   },
+   {
+    "id": "PLAN-821",
+    "clave": "m1-calidad-de-ficha-y-corte-de-10-min",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "git grep de registrarCorteFicha, direccionFisica, horariosReales, contactoExacto y comoSeVeWeb en src: 0; git log --all -S solo los encuentra en commits de docs de esta auditoría. Control positivo: fichaJson en dossier.ts. El doc OSLEAD (:879) los da por existentes.",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-1039",
+    "clave": "c1b-invariantes-con-falso-verde",
+    "estado_en_codigo": "hecho",
+    "evidencia": "Los 4 invariantes existen; self-check-gate.invariant.ts:78 (HARD_CHECKS.slice(0, -1)) es coherente con selfCheckAprobado, que exige todos los HARD_CHECKS (flow.ts:204-208).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1046",
+    "clave": "el-ascenso-p3-a-p8",
+    "estado_en_codigo": "hecho",
+    "evidencia": "0c92dd08, 17727117, a2004edb, fa4af2a0, 6ef28432 y b87bc821 son ancestros de origin/main (git merge-base --is-ancestor).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-1261",
+    "clave": "aud-1-setter-vs-brief",
+    "estado_en_codigo": "hecho",
+    "evidencia": "AUDITORIA-VS-BRIEF-2026-07.md está versionado en la raíz del repo; A-05, A-06 y A-09 quedaron cerrados (ver previas).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-870",
+    "clave": "m5-ultima-charla-y-m15-consultable",
+    "estado_en_codigo": "hecho",
+    "evidencia": "manual.invariant.ts:120-133 (m15 habilitada en APROBADA con gate cerrado); ultimoToque/openerTexto usados en m5-seguimiento.tsx y m4-opener.tsx (git grep -l).",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-973",
+    "clave": "manual-de-usuario-del-setter",
+    "estado_en_codigo": "hecho",
+    "evidencia": "docs/manual-usuario/00-INDICE.md y HALLAZGOS-MANUAL.md están versionados.",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-1024",
+    "clave": "setter-no-embebible",
+    "estado_en_codigo": "hecho",
+    "evidencia": "next.config.ts:94-96 y :99.",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Falta verificar en prod (PLAN-1026)."
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D4-A1] APROBADA con gate cerrado y toque vencido: ¿'trabajar' (QUINTA) o 'seguimiento' (P23)?",
+    "resultado": "parcial",
+    "evidencia": "Las dos tienen razón en parte. En flow.ts:430-443, una APROBADA sin link permanente y sin demo enviada (finalUrl === null) va a 'seguimiento' aunque el toque esté vencido (:438), como dice P23. Con el link cargado, o con finalUrl undefined en superficies que no proyectan el campo (:437), y gate cerrado, el toque vencido la manda a 'trabajar' (:441), como dice QUINTA. La línea :433 que cita QUINTA hoy es un comentario."
+   },
+   {
+    "alerta": "[D4-A2] Herramientas sin URL: el evaluador sigue en herramientas.ts y en el rail sin pantalla",
+    "resultado": "confirmada",
+    "evidencia": "herramientas.ts:53-63 (evaluador con url null y TODO) y :123 en HERRAMIENTAS_ORDEN; tools-rail.tsx:26-44 lo lista como «pendiente». No hay ToolGuide ni HerramientaLauncher con id evaluador en src (git grep; control positivo con otros ids en m-construccion.tsx:135, m13-borrador.tsx:65, m4-opener.tsx:63). Gem de diseño, Claude Design y Gem de outreach también están en null (:78, :90, :117).",
+    "hallazgo_titulo": "4 de 5 herramientas externas sin link y el rail ofrece un «Chat de evaluación» que ningún paso usa"
+   },
+   {
+    "alerta": "[D4-A3] Navegación del setter fijada por triggerTransition como «decisión cerrada» mientras CLAUDE.md pide <Link> en portales",
+    "resultado": "confirmada",
+    "evidencia": "setter-nav.tsx:45 (antes :38) dice «decisión cerrada · CLAUDE.md» y navega por triggerTransition (:49, :65, :97). CLAUDE.md solo clasifica /admin y /dashboard como portales y dice que triggerTransition no aplica ahí. Su premisa «el Shutter no existe ahí» es falsa: Shutter está montado en app/layout.tsx:114 y triggerTransition pone 300 ms de cortina antes de router.push (TransitionContext.tsx:111-120).",
+    "hallazgo_titulo": "El rail del setter navega con triggerTransition y botones, contra la regla de portales de CLAUDE.md"
+   },
+   {
+    "alerta": "[D4-A4] Drift de convertedToOsLeadId: drop dado por cerrado, re-listado, y migración 20260619140100 registrada con resolve --applied",
+    "resultado": "parcial",
+    "evidencia": "El drop no quedó cerrado. La columna se dropea en 20260619140100/migration.sql:9 y otra vez en 20260621120000:29, y se re-agrega en 20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql:21 (ADD COLUMN IF NOT EXISTS). Hoy vive en schema.prisma:1510 y se escribe en convert-chatbot-lead.actions.ts:71. Si 20260619140100 se registró con migrate resolve --applied sin ejecutar el SQL solo se ve en _prisma_migrations (cruce con D6); por el IF NOT EXISTS el estado final converge en los dos casos."
+   },
+   {
+    "alerta": "[D4-A5] Doc OSLEAD: 11 contradicciones doc↔código y H-04 falso verde del gate de self-check",
+    "resultado": "parcial",
+    "evidencia": "H-04 no se reproduce hoy: selfCheckAprobado exige los 10 HARD_CHECKS (flow.ts:204-208; flow-content.ts:171) y HARD_CHECKS_BASE, tresColores y botonInvita no existen (git grep: 0; control positivo: HARD_CHECKS en flow.ts, 8 coincidencias). Lo que sigue pendiente es la decisión m14 de 4 criterios de diseño bloqueantes, que no está construida. De la tabla :887-899 siguen en pie: título obligatorio (dossier.schemas.ts:82), CTA opcional (:88), m13 congelado (m13-borrador.tsx:122), G3 ausente (git grep 0; control: confirmoCarga en borrador-form.tsx), m16 sin decisor (agenda.actions.ts:125-131 recibe solo leadIdRaw; decisorConfirmado solo en agenda.schemas.ts:11), numeración de toques (estado-manual.tsx:86 vs m5-seguimiento.tsx:195) y «Contexto del lead» (pantalla-manual.tsx:205). La fila de mc2 no se verificó: mc2-refinar.tsx ya no existe. Además, el «falso positivo» 3 del doc (:878-879) afirma que registrarCorteFicha existe y no está en origin/main (PLAN-821). H-09 (agenda.ts:59 y :70, Cal.com con más de una org) sigue en el código, fuera del lote: va como patrón."
+   },
+   {
+    "alerta": "[D4-A6] EL TRONCO le deja el push a main a Franco, pero origin/main @ 57c421bc ya es EL TRONCO",
+    "resultado": "confirmada",
+    "evidencia": "git log: 57c421bc «docs(tronco): EL TRONCO» tiene autor y committer Franco (2026-09-06 03:13 -0300). Es un fast-forward de 50 commits sobre 17727117 (merge-base --is-ancestor). El reflog local registra «fetch origin: fast-forward» el 2026-09-06 20:14 -0300. Git no guarda quién pusheó. La bitácora sigue diciendo que el push está pendiente (docs/bitacora-beta-3.md:10975).",
+    "hallazgo_titulo": "La bitácora declara pendiente el ascenso a main que ya ocurrió (EL TRONCO está en origin/main)"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/lib/leados/herramientas.ts (entrada 'evaluador'; fuera del lote, la muestra tools-rail.tsx)",
+    "senales": [
+     "url null con TODO (herramientas.ts:63)",
+     "ningún ToolGuide ni HerramientaLauncher con id evaluador en src (git grep)",
+     "el paso Evaluación se fusionó con la ficha (bitácora D15-bis), así que la fila anuncia una fase retirada"
+    ],
+    "que_rompe": "tests/setter/16-municiones-salida.spec.ts:132, que espera ['evaluador','gemDiseno','claudeDesign','gemOutreach'] como herramientas sin URL; y el tipo HerramientaId si algo lo referencia."
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Pausa de un lead entre las 21:00 y las 23:59 (hora de Argentina)",
+    "entorno": "Local o preview con un setter de prueba y al menos un lead accionable",
+    "pasos": [
+     "Con el reloj del equipo en hora de Argentina, esperar a las 21:30 (o poner esa hora en el sistema operativo).",
+     "Entrar como setter a /setter.",
+     "En «Tu foco ahora», tocar «Pausar» y elegir «3 días».",
+     "Leer la fecha del toast «Pausado — vuelve a tu cartera el …».",
+     "Abrir la cartera, desplegar «Pausar» en otra card y mirar la fecha mínima que permite el selector."
+    ],
+    "esperado": "La fecha del toast es hoy + 3 días calendario y el mínimo del selector es mañana.",
+    "senal_falla": "El toast dice hoy + 4 y el selector no deja elegir mañana.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Las pausas del setter calculan la fecha en UTC: de 21 a 24 h quedan un día más largas",
+    "precondiciones": "Setter de prueba con un lead en la cola."
+   },
+   {
+    "titulo": "La ficha por bloques no debería avanzar sola al cambiar de pestaña",
+    "entorno": "Local con setter de prueba y un lead en etapa ficha",
+    "pasos": [
+     "Abrir el lead y entrar a la ficha (m1).",
+     "Completar los campos obligatorios del bloque Instagram hasta que su cabecera diga completo, dejando el cursor dentro de un campo de ese bloque.",
+     "Cambiar a otra pestaña con Ctrl+Tab (o a otra ventana con Alt+Tab), esperar dos segundos y volver."
+    ],
+    "esperado": "El bloque Instagram sigue abierto con el cursor donde estaba.",
+    "senal_falla": "El bloque Instagram aparece plegado y quedó abierto el siguiente bloque.",
+    "escribe_db_o_email": true,
+    "hallazgos": "La ficha por bloques puede avanzar sola cuando el setter cambia de pestaña o de ventana",
+    "precondiciones": "Lead en FICHA; la ficha se autoguarda."
+   },
+   {
+    "titulo": "Aislamiento entre setters en las palancas, el foco y las notas",
+    "entorno": "Local o preview con dos setters de prueba (A y B) y leads asignados a cada uno",
+    "pasos": [
+     "Como setter A, fijar el lead X y escribirle una nota privada.",
+     "En otro navegador, como setter B, entrar a /setter y abrir «Ver toda la cartera»: B no tiene que ver el lead X ni la nota de A.",
+     "Como B, con las DevTools abiertas, tocar «Fijar» en un lead propio y copiar la request de la server action.",
+     "Reenviar esa request cambiando el leadId por el id del lead X (repetir con guardarNota, pausarLead y anclarFoco)."
+    ],
+    "esperado": "Las cuatro acciones rechazan el leadId ajeno con un error y no escriben nada; la nota y el pin de A no cambian.",
+    "senal_falla": "Alguna acción devuelve success, o A ve cambios hechos por B en su lead.",
+    "escribe_db_o_email": true,
+    "hallazgos": "PLAN-735 (privacidad con 2 setters sin verificar); las validaciones están en cartera.actions.ts y foco.actions.ts, fuera del lote",
+    "precondiciones": "Dos cuentas con rol SETTER."
+   },
+   {
+    "titulo": "Headers anti-clickjacking de /setter en producción",
+    "entorno": "Producción (dominio real en Netlify)",
+    "pasos": [
+     "Correr curl -I https://<dominio-de-produccion>/setter (sin sesión vale: mirar los headers aunque redirija).",
+     "Repetir con /setter/leads/<cualquier-id>."
+    ],
+    "esperado": "Aparecen X-Frame-Options: DENY y una Content-Security-Policy con frame-ancestors 'none'.",
+    "senal_falla": "Falta alguno de los dos headers.",
+    "escribe_db_o_email": false,
+    "hallazgos": "PLAN-1026 / PLAN-1024",
+    "precondiciones": "Deploy de origin/main publicado."
+   },
+   {
+    "titulo": "Primera corrida de ci.yml sobre main",
+    "entorno": "GitHub Actions del repo",
+    "pasos": [
+     "Abrir la pestaña Actions y filtrar por la rama main.",
+     "Buscar la corrida del commit 57c421bc («docs(tronco): EL TRONCO»).",
+     "Anotar el resultado y quién disparó el push."
+    ],
+    "esperado": "Existe una corrida de ci.yml sobre 57c421bc y está en verde.",
+    "senal_falla": "No hay corrida o está en rojo.",
+    "escribe_db_o_email": false,
+    "hallazgos": "La bitácora declara pendiente el ascenso a main que ya ocurrió (EL TRONCO está en origin/main)",
+    "precondiciones": "Acceso al repo en GitHub."
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "El lote no tiene páginas, layouts, route handlers ni módulos 'use server' (por eso entradas queda vacío).",
+    "comando": "git grep -n \"use server\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/_components/\"  →  0 coincidencias",
+    "control_positivo": "El mismo patrón sobre logic-core-v3/src/app/(protected)/setter/_actions/ encuentra agenda.actions.ts:1, cartera.actions.ts:1 y dossier.actions.ts:1."
+   },
+   {
+    "afirmacion": "Ninguna pantalla monta la herramienta 'evaluador'.",
+    "comando": "git grep -n -E \"id=\\\"evaluador\\\"|'evaluador'|\\\"evaluador\\\"\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v herramientas.ts  →  solo tests/setter/16-municiones-salida.spec.ts:132",
+    "control_positivo": "git grep -n -E 'id=\"(gemDiseno|gemOutreach|netlifyDrop|claudeDesign)\"' encuentra m-construccion.tsx:135, m13-borrador.tsx:65 y m4-opener.tsx:63."
+   },
+   {
+    "afirmacion": "Ningún drawer del repo usa inert; el del setter se oculta solo con transform.",
+    "comando": "git grep -n -E \"\\binert\\b\" origin/main -- logic-core-v3/src  →  0",
+    "control_positivo": "git grep -n -- \"-translate-x-full\" encuentra setter-shell.tsx:54, AdminLayoutClient.tsx:63 y DashboardLayoutClient.tsx:81."
+   },
+   {
+    "afirmacion": "El orden 'colas' de la cartera ya no existe como valor.",
+    "comando": "git grep -n \"'colas'\" origin/main -- logic-core-v3/src/lib/leados/  →  solo comentarios en flow.ts:884 y :887",
+    "control_positivo": "git grep -n \"export type OrdenCartera\" encuentra flow.ts:894."
+   },
+   {
+    "afirmacion": "No queda numeración «Paso N» del wizard en copy visible del setter (C-04).",
+    "comando": "git grep -n -E \"Paso [0-9]+|paso [0-9]+ de|\\(Paso|«Paso\" origin/main -- \"src/app/(protected)/setter/\" src/lib/leados/flow.ts src/lib/leados/flow-content.ts src/lib/leados/herramientas.ts src/lib/leados/guidance-content.ts (sin comentarios ni invariantes)  →  0",
+    "control_positivo": "git grep -n -E \"Paso [0-9]+\" origin/main -- src encuentra admin/chatbots/[botId]/tabs/InstallTab.tsx:61."
+   },
+   {
+    "afirmacion": "No existe el chequeo G3 «¿Exportaste después del último refinamiento?».",
+    "comando": "git grep -n -i -E \"export(aste|ó).*refin|último refinamiento|ultimo refinamiento\" origin/main -- src  →  0",
+    "control_positivo": "git grep -c confirmoCarga en manual/_components/borrador-form.tsx da 14."
+   },
+   {
+    "afirmacion": "No existen HARD_CHECKS_BASE ni los criterios de diseño tresColores y botonInvita (H-04 del doc OSLEAD).",
+    "comando": "git grep -q -E 'tresColores|botonInvita|HARD_CHECKS_BASE' origin/main -- src; echo $?  →  1 (sin coincidencias)",
+    "control_positivo": "git grep -c HARD_CHECKS origin/main -- src/lib/leados/flow.ts da 8."
+   },
+   {
+    "afirmacion": "El sprint M1 de calidad de ficha (registrarCorteFicha, direccionFisica…) no está en origin/main ni en el historial de ninguna rama.",
+    "comando": "git grep -n -i -E \"registrarCorte|direccionFisica\" origin/main -- src  →  0; git log --all --oneline -S registrarCorteFicha  →  solo f70dcae0 y 04ecc0db (docs de esta auditoría)",
+    "control_positivo": "git grep -c fichaJson origin/main -- src/lib/leados/dossier.ts da 1."
+   },
+   {
+    "afirmacion": "Modal.tsx no declara role=dialog ni aria-modal (PLAN-1237 F1).",
+    "comando": "git show origin/main:./src/components/ui/Modal.tsx | grep -n -i -E \"role|aria-|dialog\"  →  solo aria-label=\"Cerrar\" (línea 91)",
+    "control_positivo": "El mismo grep encuentra aria-label=\"Cerrar\", así que el patrón funciona sobre el archivo."
+   },
+   {
+    "afirmacion": "draft-preview.tsx (PLAN-1237 F3) no existe en origin/main.",
+    "comando": "git ls-tree -r --name-only origin/main | grep -i -E \"draft-preview|draftPreview\"  →  0",
+    "control_positivo": "El mismo listado filtrado encuentra src/lib/leados/cola.ts y novedades-agrupar.ts."
+   },
+   {
+    "afirmacion": "No existe closedToOrgId (vínculo lead → cliente de PLAN-612).",
+    "comando": "git grep -n closedToOrgId origin/main -- prisma/schema.prisma src  →  0",
+    "control_positivo": "git grep -n convertedToOsLeadId encuentra schema.prisma:1510."
+   },
+   {
+    "afirmacion": "No hay UI en /admin para el Cal.com de develOP (calComEmbedUrl).",
+    "comando": "git grep -l calComEmbedUrl origin/main -- \"src/app/(protected)/admin\"  →  0",
+    "control_positivo": "git grep -l calComEmbedUrl origin/main -- src encuentra dashboard/modules/agenda-inteligente/page.tsx y src/lib/leados/agenda.ts."
+   },
+   {
+    "afirmacion": "next.config.ts no define allowedDevOrigins (PLAN-1004).",
+    "comando": "git grep -n allowedDevOrigins origin/main -- logic-core-v3/next.config.ts  →  0",
+    "control_positivo": "git grep -n frame-ancestors en el mismo archivo encuentra :80."
+   },
+   {
+    "afirmacion": "Ningún script de package.json invoca la suite qa-walkthrough.",
+    "comando": "git show origin/main:./package.json | grep -c qa-walkthrough  →  0",
+    "control_positivo": "git ls-tree --name-only origin/main muestra playwright.qa-walkthrough.config.ts, y el mismo grep sobre package.json encuentra \"dev:qa\" (:8)."
+   },
+   {
+    "afirmacion": "src no tiene atributos data-step (la suite qa-persona apunta al wizard retirado).",
+    "comando": "git grep -l data-step origin/main -- src  →  0",
+    "control_positivo": "git grep -n data-step origin/main -- tests/qa-persona/corrida-1-novato-frio.spec.ts encuentra :80 y :143."
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Fecha calendario local armada en el cliente con toISOString().slice(0, 10) (UTC): entre las 21 y las 24 h de Argentina da el día siguiente",
+    "como_buscarlo": "git grep -n \"toISOString().slice(0, 10)\" origin/main -- src y revisar cuáles representan «hoy» o «hoy + N» local",
+    "donde_aparecio": "foco-surface.tsx:71 y lead-card-actions.tsx:37 (fuera del lote también: admin/projects/_components/time-entry-panel.tsx:72, setter/.../seguimiento-form.tsx:95, admin/projects/_components/project-form.tsx:72, admin/clients/[clientId]/_components/BillingOverrideForm.tsx:23)"
+   },
+   {
+    "patron": "router.push en un portal después de una server action, sin comentario inline que lo justifique",
+    "como_buscarlo": "git grep -n \"router.push\" origin/main -- \"src/app/(protected)\" y mirar si la línea anterior lo justifica",
+    "donde_aparecio": "foco-surface.tsx:90, novedades-abrir-foco.tsx:47, trabajar-lead-button.tsx:31 (fuera del lote: setter/nuevo/nuevo-prospecto-form.tsx:98)"
+   },
+   {
+    "patron": "triggerTransition (cortina global de 300 ms) usado en portales protegidos",
+    "como_buscarlo": "git grep -n \"triggerTransition(\" origin/main -- \"src/app/(protected)\"",
+    "donde_aparecio": "setter-nav.tsx:49 (fuera del lote: admin/clients/[clientId]/edit/EditClientForm.tsx:92 y :232)"
+   },
+   {
+    "patron": "Drawer mobile oculto solo con -translate-x-full: sigue focusable, sin inert, sin Escape y sin aria-expanded en el disparador",
+    "como_buscarlo": "git grep -n -- \"-translate-x-full\" origin/main -- src (shells)",
+    "donde_aparecio": "setter-shell.tsx:54 (también AdminLayoutClient.tsx:63 y DashboardLayoutClient.tsx:81)"
+   },
+   {
+    "patron": "Atajos globales de una letra en window keydown sin forma de desactivarlos (WCAG 2.1.4)",
+    "como_buscarlo": "git grep -l \"addEventListener('keydown'\" origin/main -- src y revisar cuáles mapean letras sueltas fuera de un componente con foco",
+    "donde_aparecio": "use-keyboard-shortcuts.ts:53 con bindings en foco-surface.tsx:150-155"
+   },
+   {
+    "patron": "Feedback de éxito que no mira el resultado de la operación (portapapeles)",
+    "como_buscarlo": "git grep -n -E \"execCommand|clipboard.writeText\" origin/main -- src",
+    "donde_aparecio": "copy-block.tsx:47-50"
+   },
+   {
+    "patron": "aria-label que reemplaza al texto visible y no lo contiene (WCAG 2.5.3)",
+    "como_buscarlo": "git grep -n -B3 \"aria-label={\" origin/main -- src y comparar con el texto hijo del mismo control",
+    "donde_aparecio": "lead-card-actions.tsx:144-153 y :283"
+   },
+   {
+    "patron": "URLs operativas en código como null con TODO, visibles en la UI",
+    "como_buscarlo": "git grep -n \"url: null, // TODO\" origin/main -- src",
+    "donde_aparecio": "herramientas.ts:63, :78, :90, :117 (las muestra tools-rail.tsx:29-44)"
+   },
+   {
+    "patron": "Agenda de LeadOS que busca «la única org con calComUsername» y aborta si hay más de una (H-09 del doc OSLEAD, marcado Crítica allí)",
+    "como_buscarlo": "git grep -n -A12 \"calComUsername: { not: null }\" origin/main -- src/lib/leados/agenda.ts; cruzar con dónde escriben calComUsername los clientes",
+    "donde_aparecio": "src/lib/leados/agenda.ts:59 y :70 (fuera del lote, dominio D4; verificado solo por git grep)"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:69",
+    "id_previo": "C-04",
+    "estado": "cerrado",
+    "evidencia": "foco-surface.tsx:171 hoy es un comentario (P21, :172-174) y no hay «Paso N» visible. git grep -E \"Paso [0-9]+|paso [0-9]+ de|\\(Paso|«Paso\" sobre setter/, flow.ts, flow-content.ts, herramientas.ts y guidance-content.ts no encuentra nada fuera de comentarios e invariantes (control positivo: InstallTab.tsx:61)."
+   },
+   {
+    "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:80",
+    "id_previo": "C-15",
+    "estado": "cerrado",
+    "evidencia": "En el lote, ejemplo-ideal.tsx:106 es un comentario y los textos visibles (:83 «Ver ejemplo de una ficha bien hecha», :112 «Ver ejemplo de un chequeo final bien hecho») no tienen jerga. En los otros archivos citados, un barrido heurístico de literales con gate/server-side/hard-block/dossier/draft/follow-up no encontró coincidencias; esos archivos no se leyeron completos."
+   },
+   {
+    "doc": "docs/auditoria-consistencia-setter.md:102",
+    "id_previo": "sin-id (canal-seguridad tono→clases)",
+    "estado": "abierto",
+    "evidencia": "canal-seguridad.tsx:17-21 sigue armando a mano las clases rose/amber/neutral; Callout existe (src/components/ui/Callout.tsx) y se usa en home-sections.tsx:152."
+   },
+   {
+    "doc": "docs/auditoria-consistencia-setter.md:115",
+    "id_previo": "sin-id (mis-numeros re-implementa StatCard)",
+    "estado": "parcial",
+    "evidencia": "cartera-view.tsx:147-165 ya no tiene stat cards (hoy son ListaTarjetas y GrupoPlegable). mis-numeros.tsx:37-88 sigue siendo una tarjeta a mano aunque StatCard existe (src/components/ui/StatCard.tsx:40); la barra de proporción (:57-71) no la cubre StatCard."
+   },
+   {
+    "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:113",
+    "id_previo": "A-05",
+    "estado": "cerrado",
+    "evidencia": "flow.ts:826-829: el fijado accionable y vigente entra en grupos.trabajar (y al foco) en vez de excluirse; home-en-espera.tsx:19-24 lo documenta; lead-card-actions.tsx:76 usa la pausa vigente."
+   },
+   {
+    "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:119",
+    "id_previo": "A-06",
+    "estado": "cerrado",
+    "evidencia": "novedades-panel.tsx:173-201: la revisión es un resumen sin lista navegable; «Abrir» usa anclarFoco, el mismo mecanismo del foco (novedades-abrir-foco.tsx:40-47), y no ancla si el aviso caducó (novedades-panel.tsx:122)."
+   },
+   {
+    "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:141",
+    "id_previo": "A-09",
+    "estado": "cerrado",
+    "evidencia": "La causa del archivo se ve en la card (home-sections.tsx:42 y :99-106); los archivados suman en Tu semana (progreso-semana.tsx:33-39); las vistas archivo-descartado y archivo-perdido existen (flow.ts:954-955)."
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
+    "linea": 83,
+    "tipo": "contraste",
+    "detalle": "text-zinc-700 en la nota «sin fecha» da ≈1,9:1 sobre el fondo oscuro."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
+    "linea": 77,
+    "tipo": "contraste",
+    "detalle": "text-zinc-600 en «Últimos 30 días» da ≈2,6:1."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
+    "linea": 31,
+    "tipo": "contraste",
+    "detalle": "El rótulo «Mis números» en text-zinc-600 a 11 px da ≈2,6:1."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+    "linea": 33,
+    "tipo": "contraste",
+    "detalle": "El nombre de la herramienta pendiente en text-zinc-600 da ≈2,6:1."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+    "linea": 37,
+    "tipo": "contraste",
+    "detalle": "dondeSeUsa en text-zinc-700 a 10 px da ≈1,9:1."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+    "linea": 41,
+    "tipo": "contraste",
+    "detalle": "«pendiente» en text-amber-300/50 a 10 px no llega a AA."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+    "linea": 59,
+    "tipo": "contraste",
+    "detalle": "dondeSeUsa de las herramientas con link en text-zinc-600 a 10 px."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+    "linea": 95,
+    "tipo": "contraste",
+    "detalle": "El cuerpo caducado en text-zinc-600 y tachado da ≈2,6:1 y se lee mal."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+    "linea": 113,
+    "tipo": "contraste",
+    "detalle": "El «hace …» del aviso en text-zinc-600 a 11 px."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+    "linea": 179,
+    "tipo": "contraste",
+    "detalle": "El encabezado «Tus demos esperando a Franco» en text-zinc-600."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+    "linea": 196,
+    "tipo": "contraste",
+    "detalle": "La instrucción «Las ves en tu cartera → filtro…» en text-zinc-600."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/cola-del-dia.tsx",
+    "linea": 123,
+    "tipo": "contraste",
+    "detalle": "El pie «Quedan N más para trabajar» en text-zinc-600."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/cola-del-dia.tsx",
+    "linea": 76,
+    "tipo": "contraste",
+    "detalle": "Rubro y zona de la fila en text-zinc-600 a 11 px."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/home-sections.tsx",
+    "linea": 97,
+    "tipo": "contraste",
+    "detalle": "La meta de la card (rubro · zona · antigüedad) en text-zinc-600."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/home-en-espera.tsx",
+    "linea": 102,
+    "tipo": "contraste",
+    "detalle": "«Tu cartera completa sigue disponible.» en text-zinc-600."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/cartera-view.tsx",
+    "linea": 122,
+    "tipo": "contraste",
+    "detalle": "La ayuda del vacío por filtro en text-zinc-600."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/progreso-semana.tsx",
+    "linea": 58,
+    "tipo": "contraste",
+    "detalle": "«últimos N días» en text-zinc-600 a 11 px."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+    "linea": 223,
+    "tipo": "contraste",
+    "detalle": "El contador de caracteres de la nota en text-zinc-600 a 10 px."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/canal-seguridad.tsx",
+    "linea": 46,
+    "tipo": "contraste",
+    "detalle": "La lista de disciplina en text-zinc-500 a 11 px da ≈4,1:1, por debajo de 4,5:1."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+    "linea": 149,
+    "tipo": "otro",
+    "detalle": "aria-label en un div genérico sin role: los lectores de pantalla lo ignoran (usar role=\"group\" o una región)."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/novedades-abrir-foco.tsx",
+    "linea": 61,
+    "tipo": "otro",
+    "detalle": "Varios botones «Abrir» con el mismo nombre accesible y sin el negocio; TrabajarLeadButton sí lo incluye (trabajar-lead-button.tsx:40)."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/home-sections.tsx",
+    "linea": 27,
+    "tipo": "copy",
+    "detalle": "diasDesde cuenta bloques de 24 h, no días calendario: un lead de ayer a las 23 h aparece como «hoy» a la mañana."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+    "linea": 89,
+    "tipo": "otro",
+    "detalle": "«Tu día» queda marcado como activo también en /setter/nuevo por el startsWith."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/shortcuts-help.tsx",
+    "linea": 32,
+    "tipo": "otro",
+    "detalle": "La pastilla de atajos queda fija abajo a la derecha también en touch, donde no sirve y tapa contenido."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/cartera-toolbar.tsx",
+    "linea": 75,
+    "tipo": "otro",
+    "detalle": "Los dos selects (min-w 9,5rem + 10rem) no hacen wrap: desbordan ≈41 px a 320 px y 1 px a 360 px."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+    "linea": 52,
+    "tipo": "otro",
+    "detalle": "Los links externos con target=_blank no avisan al lector de pantalla que abren una pestaña nueva."
+   },
+   {
+    "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+    "linea": 29,
+    "tipo": "inline",
+    "detalle": "El z-index va por style inline con tokens (:29, :34, :45, :52, :60) en lugar de clases."
+   }
+  ]
+ },
+ "verificacion": null
+}

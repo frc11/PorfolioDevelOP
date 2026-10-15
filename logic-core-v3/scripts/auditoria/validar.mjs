@@ -149,6 +149,8 @@ for (const f of todos) {
   const bytes = statSync(f).size
   if (bytes <= 300 * 1024) continue
   if (/^_crudo\/ciclos\/[^/]+\.workflow\.js$/.test(rel) && !enIndice.has(rel)) aviso(rel, `pesa ${Math.round(bytes / 1024)} KB: queda local (se regenera con f2-construir.mjs desde ${rel.replace(/\.workflow\.js$/, '.args.json').replace(/^_crudo\/ciclos\//, '')})`)
+  // los args de un ciclo que pasan el tope quedan locales si su copia partida (<ciclo>-args/) está al lado (C14)
+  else if (/^_crudo\/ciclos\/[^/]+\.args\.json$/.test(rel) && !enIndice.has(rel) && existsSync(path.join(DIR, rel.replace(/\.args\.json$/, '-args')))) aviso(rel, `pesa ${Math.round(bytes / 1024)} KB: queda local; el registro commiteado es ${rel.replace(/\.args\.json$/, '-args/')}`)
   else err(rel, `pesa ${Math.round(bytes / 1024)} KB: el tope de lo crudo es 300 KB (partirlo con crudo-partes.mjs o dejarlo local)`)
 }
 

@@ -1,0 +1,2962 @@
+{
+ "parte": 2,
+ "partes": 2,
+ "items": [
+  {
+   "clave": "docs/bitacora-beta-3.md:54",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "no verificable por código; existen docs/manual-usuario/galeria/ y tests/setter/22-cromo-primer-pliegue.spec.ts",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1103",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git cat-file: docs/brief-vision-flujo-setter.md y docs/correccion-decisiones-vs-A3.md no existen (control: docs/verificacion-arranque-oslead-vii.md sí)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1994",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep de calComUsername/calComEmbedUrl/calComApiKey en src: sin escrituras (control positivo: lecturas en agenda.ts:59 y agenda-inteligente/page.tsx:325)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3279",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "cartera.actions.ts:12-17 pausa vs postergar documentado; outreach.actions.ts:185 'reunión'; dossier.schemas.ts:97 'Gem'",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3514",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "docs/manual-usuario/01-tu-dia.md..13-cierres.md existen; la curaduría comercial no es verificable",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4904",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "existen pantallas-construccion, progreso-isolation, self-check-gate, contador-dms y particion .invariant.ts; particion.invariant.ts:35 importa particionarCartera (que usa grupoPara vía flow.ts:641); sabotajes no re-verificados",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7088",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "dossier.schemas.ts:97 'Gem de diseño', :116 'Netlify Drop'; herramientas.ts:53-117",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4325",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "contracts.ts:169-177 sin checkId, coherente con 'descartado por ahora' (y contradice PLAN-663)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10447",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "novedades.ts:77 y :82 kinds distintos; setter/page.tsx:95-98 dedup solo contra la cola (excludeLeadIds)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1265",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git merge-base --is-ancestor origin/b1-s2-bsp-outbound origin/main: sí",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4739",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "origin/leados/v1-integracion es ancestro de origin/main",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:226",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "leados-ui.ts:18-27 STAGE_TONE sin cyan; [leadId]/page.tsx:153 y pipeline-board.tsx:264 lo usan; veredicto sin cyan (dossier-panels.tsx:55-59)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "raiz:lane-LOG.md:124",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "admin/chatbots/_actions/convert-chatbot-lead.actions.ts:33 solo slug develop; :39 idempotencia por convertedToOsLeadId",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7864",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "tests/helpers/setter-ui.ts:88 [data-sonner-toast]; package.json:113 test:helpers; playwright.helpers-probe.config.ts existe",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8080",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "tests/setter/01-flow.spec.ts y tests/qa-walkthrough existen",
+    "sentido": "no",
+    "nota": "la corrida en verde no es verificable por lectura",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9197",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "tests/setter/22-cromo-primer-pliegue.spec.ts y scripts/qa-corridas/medir-pliegue-manual.ts existen",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10869",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "origin/main = 57c421bc 'docs(tronco): EL TRONCO' = origin/leados/v2-a-main; ea94dbf8 es ancestro",
+    "sentido": "no",
+    "nota": "el push a main ya ocurrió (commit de Franco, 2026-09-06)",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1200",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md existe",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1845",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "playwright.galeria.config.ts, scripts/dev/m0-galeria-indice.ts, package.json:120 'galeria', docs/manual-usuario/galeria/",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3943",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/manual-usuario/BACHES-RE-VERIFICADOS.md, BACHES-CORRIDA-EXPERIENCIA.md, docs/diagnostico-visual-2026-08/ y -admin-2026-08/",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4046",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "7e18f9a7, 05ae1a87 y 17727117 son ancestros de origin/main",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4454",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/verificacion-arranque-oslead-vii.md existe en origin/main",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7025",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "tools-rail.tsx:29-44 sigue mostrando solo «pendiente»; SalidaLinkPendiente (tool-guide.tsx:61) solo se usa en tool-guide.tsx:95 y m5-seguimiento.tsx:231 (git grep).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8779",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "herramientas.ts:53-63 (url null + TODO) y :123 en HERRAMIENTAS_ORDEN; git grep de id evaluador en src sin usos (solo tests/setter/16-municiones-salida.spec.ts:132); control positivo: m-construccion.tsx:135, m13-borrador.tsx:65 y m4-opener.tsx:63 usan otros ids.",
+    "sentido": "decidir",
+    "nota": "Lo decide Franco; ver hallazgo de herramientas sin link.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9460",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "copy-block.tsx:91 sigue con text-zinc-300 sobre bg-emerald-500/[0.06].",
+    "sentido": "no",
+    "nota": "Por aritmética, zinc-300 (#d4d4d8) sobre un tinte esmeralda del 6 % sobre #080a0c da ≈13:1 y pasa AA: falso positivo del hook.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2114",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "flow-content.ts:318-320 (topeDiarioDms 10, avisoDesdeDms 8, ritmoPorHora 3), leídos por canal-seguridad.tsx:12-27.",
+    "sentido": "si",
+    "nota": "Validarlos contra el historial real de la cuenta es tarea de Franco y no se verifica en código.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5038",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "OrdenCartera sin 'colas' (flow.ts:894); ORDEN_OPCIONES con 4 valores (cartera-toolbar.tsx:32-37); default 'urgencia' (cartera-view.tsx:45). git grep \"'colas'\" solo encuentra comentarios en flow.ts:884 y :887.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1509",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "CampoMejora solo se importa en ficha-form.tsx:34 y :303 (git grep -w CampoMejora: 3 archivos, incluidos su definición y un test/medición).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1806",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "setter-nav.tsx:45 cita una «decisión cerrada · CLAUDE.md», pero CLAUDE.md solo clasifica /admin y /dashboard y dice que triggerTransition no aplica en portales; el Shutter existe en todas las rutas (app/layout.tsx:114).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:92",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "setter-nav.tsx:48-51, :65 y :97: el rail no usa Link ni router.",
+    "sentido": "decidir",
+    "nota": "Choca con el CLAUDE.md vigente (ver hallazgo del rail).",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:645",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "F1: Modal.tsx no tiene role=dialog ni aria-modal (git show | grep: solo aria-label=\"Cerrar\" en :91). F2: hay conteo total y por grupo (cartera-view.tsx:87-89, :201-203) en lugar de una franja. F3: draft-preview.tsx no existe en origin/main (git ls-tree). F4 no verificado.",
+    "sentido": "decidir",
+    "nota": "Declarado hecho pero F1 y F3 no están en main; puede vivir en una rama no integrada.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6745",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "SalidaLinkPendiente fuera del plegable (tool-guide.tsx:95; el details empieza en :98); título del plegable (:100); prop titulo de TeachPanel (teach-panel.tsx:87-98); tests/setter/16-municiones-salida.spec.ts existe; fa4af2a0 es ancestro de origin/main.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8795",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "bloques-secuenciales.tsx (230 líneas) usado en ficha-form.tsx:412; ficha-bloques.ts y ficha-bloques.invariant.ts existen; tests/setter/21-ficha-por-fuentes.spec.ts existe; 8b8ecf23 es ancestro.",
+    "sentido": "si",
+    "nota": "Ver hallazgo del avance al cambiar de ventana.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10240",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "cola-del-dia.tsx:89-131 (foco como primer ítem :109, filas :113-115, ocultos :122-127); Soltar conectado (foco-surface.tsx:127-141, :269-280); «Leads activos» retirado (mis-numeros.tsx:11-21); cola.ts, novedades-agrupar.ts y tests/setter/26-cola-de-trabajo.spec.ts existen.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10456",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "agruparCartera y VISTA_ABIERTA (cartera-view.tsx:7-9, :64, :142); VISTAS_CARTERA como fuente del filtro (cartera-toolbar.tsx:27-30; flow.ts:944-956); sin badge de etapa (home-sections.tsx:80-88); rótulos visibles (lead-card-actions.tsx:145,153,161); home-empty.tsx:18; tests/setter/27-cartera-agrupada.spec.ts existe.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10565",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "setter-shell.tsx:23-85: rail de 240 px (:53, :69), drawer mobile (:41-56), main scrolleable (:78).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10601",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "setter-nav.tsx:36-38 tiene un único destino /setter, hoy rotulado «Tu día»; triggerTransition en :49.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:683",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "archivoMotivo en home-sections.tsx:42 y :99-106; archivados en Tu semana (progreso-semana.tsx:33-39); vistas archivo-descartado y archivo-perdido (flow.ts:954-955); 6dd4946 es ancestro.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2072",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Límites 10/8/3 en flow-content.ts:318-320; label de Perdidos en flow.ts:955; aria-label del checkbox en agenda-form.tsx:194; git grep 'hace hace' en src sin coincidencias (control: 'hace ' aparece 4 veces en flow-content.ts).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4561",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Toast en Saltar (foco-surface.tsx:107); acuse-recibo.invariant.ts existe; fc9ea865 es ancestro de origin/main.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:46",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "setter-shell.tsx con rail de 240 px y drawer; el layout sigue siendo server y monta el shell (setter/layout.tsx:8, :90, git).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:82",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "layoutId namespaced 'setter-sidebar-active-pill' (setter-nav.tsx:108) y aria-current (:98); el label pasó de «Cartera» a «Tu día» (:29-38).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:212",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "setter-shell.tsx:29, 34, 45, 52 y 60 usan zIndex.appShell/appNavTrigger/appDrawerBackdrop/appDrawer/appDrawerClose.",
+    "sentido": "si",
+    "nota": "Solo se verificó la parte del lote.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:284",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "ToolGuide (tool-guide.tsx:82-116), rail (tools-rail.tsx:16-75) y registro existen, pero 4 de 5 URLs siguen null con TODO (herramientas.ts:63,78,90,117) y el ToolGuide de 'evaluador' ya no se monta en ningún paso.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:578",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "home-sections.tsx:40 y :124-136; foco-surface.tsx:157 y :213-218; cola-del-dia.tsx:65-75.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:668",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "cartera-toolbar.tsx:45-110; filtro y orden en cartera-view.tsx:57-66; acciones en lead-card-actions.tsx:78-128; setter-meta.ts existe.",
+    "sentido": "si",
+    "nota": "La privacidad con dos setters reales sigue sin verificar: ver caso manual.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:762",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Quedan t/p/s/? (foco-surface.tsx:54-59 y :150-155; shortcuts-help.tsx:22-29); guard de campos de escritura en use-keyboard-shortcuts.ts:14-20; los atajos j/k/Enter/r ya no existen.",
+    "sentido": "si",
+    "nota": "Ver hallazgo WCAG 2.1.4.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:974",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "novedades-panel.tsx:130-205; novedades-marcar-visto.tsx:19-29; novedades.ts y novedades.invariant.ts existen.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1031",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "continuar-cta.tsx no está en origin/main (git ls-tree -r | grep continuar-cta: 0); lo reemplazó FocoSurface.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1069",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "progreso-semana.tsx:14-62 se oculta en cero (:15) y muestra solo valores mayores que cero (:40); onboarding-hint ya no existe (git grep sin coincidencias).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1368",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "teach-panel.tsx:84-149; git grep -l -w TeachPanel devuelve 8 archivos.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:306",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "foco-surface.tsx:83-125 (Ir, Pausar y Saltar); foco.ts, foco.invariant.ts y foco-cookie.ts existen; cartera colapsada (cartera-view.tsx:42, :104).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:343",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "El postergado vencido vuelve a trabajar (flow.ts:420-424); home-en-espera.tsx:28-116 muestra cuentas disjuntas por turno, fijados y pausados.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:402",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Abrir ancla el foco (novedades-abrir-foco.tsx:38-49) y un aviso caducado no ancla (novedades-panel.tsx:122); la exclusión del lead-foco vive en novedades.ts, fuera del lote.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:440",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Hover y foco del toggle (cartera-view.tsx:83); riel neutro (:105).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7051",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "El model OsLead conserva @@index([status]) y @@index([nextFollowUpAt]) junto al compuesto (schema.prisma:896-898).",
+    "sentido": "decidir",
+    "nota": "Depende de medir en PROD; schema.prisma es FROZEN.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Leads_ registro de cambios.md:48",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "lead-card.tsx:15 y :185 usan InlineConfirm (popup local), la misma pieza que draggable-project-card.tsx (git grep -l InlineConfirm).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:756",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "m13-borrador.tsx:122 sigue mostrando «Borrador congelado por el rechazo».",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:808",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -l calComEmbedUrl en src/app/(protected)/admin: 0; control positivo: aparece en dashboard/modules/agenda-inteligente/page.tsx y src/lib/leados/agenda.ts.",
+    "sentido": "si",
+    "nota": "agenda.ts:59 y :70 abortan si más de una org tiene calComUsername (H-09 del doc OSLEAD).",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:834",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Conviven «Toques: N de M» (estado-manual.tsx:86; m5-seguimiento.tsx:88) y «Mensaje base del toque N de M» (m5-seguimiento.tsx:195).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "raiz:lane-LOG.md:141",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "ChatbotLead.convertedToOsLeadId (schema.prisma:1510, re-agregada en la migración 20260622120000:21) y lectura persistente en ConvertChatbotLeadButton.tsx:20.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6517",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "origin/main = 57c421bc (Franco, 2026-09-06 03:13 -0300), fast-forward de 50 commits sobre 17727117; ci.yml dispara en push (on: [push, pull_request]).",
+    "sentido": "no",
+    "nota": "Falta verificar a mano la primera corrida de CI sobre main.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8041",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "tests/helpers/setter-ui.ts tiene 5 firstVisible( y 31 archivos de tests lo usan (git grep).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8297",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Es estado de la base dev, no verificable leyendo código; el script de origen existe (scripts/qa-corridas/_p21-corrida.ts).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:95",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep allowedDevOrigins en next.config.ts: 0 (control: frame-ancestors en next.config.ts:80); dev:qa en package.json:8.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:330",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "prompts-disenio.ts:20 y :25 se declaran SEMILLA.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1105",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md existe; NavConstruccion se sigue montando en pantalla-manual.tsx:241.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2065",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "35 de los 57 scripts check:invariant de package.json corren con tsx.",
+    "sentido": "decidir",
+    "nota": "Si tsconfig incluye esos archivos, el tsc --noEmit del baseline los tipa; no se verificó.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3291",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "corrida-1-novato-frio.spec.ts:80 y :143 buscan [data-step]; git grep -l data-step en src: 0.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4130",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "28 usos de text-zinc-600/700 en el lote (git grep -c), por ejemplo mis-numeros.tsx:83 (≈1,9:1) y tools-rail.tsx:37 (≈1,9:1).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4447",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "En código: next.config.ts:94-96 (X-Frame-Options DENY para /(admin|dashboard|setter)) y :99 (frame-ancestors para /setter).",
+    "sentido": "si",
+    "nota": "La verificación en prod es manual: ver caso.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4840",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "ESCALADO_RESET = { escaladoAt: null, escaladoNota: null } (escalamiento.ts:53).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:534",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "FaseAutoReporte usa guardarProgreso (fase-auto-reporte.tsx:9).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Ideas de nuevas features.md:11",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep closedToOrgId en schema y src: 0; el único vínculo es ChatbotLead→OsLead (schema.prisma:1510).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7543",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Límite aceptado: contarDmsHoy (outreach.ts:67) y pausarLead (cartera.actions.ts:78) existen; no hay trabajo de código pendiente.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8205",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "package.json no menciona qa-walkthrough (0 coincidencias); playwright.qa-walkthrough.config.ts existe en el árbol.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10803",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Existen docs/bitacora-beta.md, bitacora-beta-2.md y bitacora-beta-3.md.",
+    "sentido": "no",
+    "nota": "La beta siguió en bitacora-beta-3.md.",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:457",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "git grep de registrarCorteFicha, direccionFisica, horariosReales, contactoExacto y comoSeVeWeb en src: 0; git log --all -S solo los encuentra en commits de docs de esta auditoría. Control positivo: fichaJson en dossier.ts. El doc OSLEAD (:879) los da por existentes.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5799",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Los 4 invariantes existen; self-check-gate.invariant.ts:78 (HARD_CHECKS.slice(0, -1)) es coherente con selfCheckAprobado, que exige todos los HARD_CHECKS (flow.ts:204-208).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7566",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "0c92dd08, 17727117, a2004edb, fa4af2a0, 6ef28432 y b87bc821 son ancestros de origin/main (git merge-base --is-ancestor).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:669",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "AUDITORIA-VS-BRIEF-2026-07.md está versionado en la raíz del repo; A-05, A-06 y A-09 quedaron cerrados (ver previas).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1564",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "manual.invariant.ts:120-133 (m15 habilitada en APROBADA con gate cerrado); ultimoToque/openerTexto usados en m5-seguimiento.tsx y m4-opener.tsx (git grep -l).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1939",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/manual-usuario/00-INDICE.md y HALLAZGOS-MANUAL.md están versionados.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4382",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "next.config.ts:94-96 y :99.",
+    "sentido": "si",
+    "nota": "Falta verificar en prod (PLAN-1026).",
+    "ciclo": "D4-c1, lector D4-L2"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7851",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "m5-seguimiento.tsx:63 sigue con Date.now(). El baseline de eslint (_crudo/eslint.json) lo marca como error react-hooks/purity en la línea 63.",
+    "sentido": "si",
+    "nota": "Mismo dato en hallazgos (DEU BAJA).",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8075",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "m-construccion.tsx:180-188 (comentario sobre expectToast) y :201, :209 (subjuntivo). tests/helpers/setter-ui.ts:103 ya acota expectToast a [data-sonner-toast].",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8238",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "fase-auto-reporte.tsx:69-74 arma el array desde la prop. 'git merge-base --is-ancestor d0b37c71 origin/main' da negativo; 130492e8 está en origin/p25/rafaga-tildes sin integrar.",
+    "sentido": "si",
+    "nota": "Va como hallazgo BUG MEDIA.",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9685",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "tests/setter/23-accion-a-la-vista.spec.ts:243 excluye m16 de forma explícita. git grep 'data-accion' en las specs 12 y 13 de m16 no encuentra nada.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9687",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "barra-accion.tsx:47-49 (costo aceptado) y :131-143 (la acción se declara en un useEffect).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2645",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Resuelto: el motivo del tilde según el stage (m-construccion.tsx:198-221). Pendiente: faseActual sigue en ProgresoSchema (contracts.ts:163) sin lectores fuera de progreso-isolation.invariant.ts, y el ítem 'assets' sigue (flow-content.ts:72-73).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3990",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "dossier.schemas.ts:129-133 errorMap en confirmoCarga; borrador-form.tsx:55-72 separa los errores por control.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9690",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "ficha-form.tsx no llama a useAccionPrincipal (git grep -c da 0; en evaluacion-form da 2). El veredicto se monta solo con su bloque abierto (bloques-secuenciales.tsx:215). El botón 'Guardar ficha' queda en línea (ficha-form.tsx:446-452).",
+    "sentido": "decidir",
+    "nota": "El mismo desmontaje es la causa del hallazgo del veredicto que se pierde al plegar.",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6376",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "b3ea27db y 17727117 son ancestros de origin/main. Están guia-retrabajo.tsx (lote) y src/lib/leados/acuse-recibo.invariant.ts.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6529",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "a2004edb y d167df16 están en main. borrador-form.tsx:55-72; m13-borrador.tsx:118-131 ofrece 'Reabrir construcción'; enlace-chequeo.tsx:63-66 lleva a m14.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7052",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "6ef28432 y fa4af2a0 están en main. flow.ts:914 vistaDeLead; m-construccion.tsx:198-221 motivo según el stage.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7139",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "b87bc821 está en main. manual-nav.tsx:117-131 (chip de reactivateAt), estado-manual.tsx:83-92 ('Toques: N de 3') y :134-144 (draftUrl en la espera).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8495",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "f4332226 y 52ac5c62 están en main. m1-ficha.tsx:162-231; archivo-manual.tsx:76-78; manual.ts:564-572 manda DESCARTADA al archivo.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9479",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "66d7fe64 y c9b1db7a están en main. barra-accion.tsx:156-194 (sticky, aria-describedby en :187); pantalla-manual.tsx:253.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9938",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "795d8f31 y 62c6273a están en main. franja-recorrido.tsx:69-214; pantalla-manual.tsx:155. git grep NavAtras|indicadorDeFase solo aparece en un comentario (manual.ts:319).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10135",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "29d0635f está en main. franja-recorrido.tsx:92-95 (iSiguiente vale -1 sin paso actual).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:992",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "[leadId]/page.tsx:23 redirect(`/setter/leads/${leadId}/manual`). Los step files del wizard ya no están (git ls-tree de _components). construccion-ctas.tsx e historial-lead.tsx están.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1325",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "m5-seguimiento.tsx:280-284 (cadenciaAgotada); manual.ts:520-521 (PERDIDO al archivo); outreach.actions.ts:169 (leadActivo); pantalla-manual.tsx:132 (C-17). Los specs 08 y 09 existen.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1380",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "opener-form.tsx:44 useUnsavedGuard; fase-auto-reporte.tsx:87 y m-construccion.tsx:268 (tilde apagado fuera de CONSTRUCCION); m1-ficha.tsx:137-141 sin «Caliente». La cabecera (manual-nav.tsx:100-104) muestra el caliente que marca Franco.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1886",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "m5-seguimiento.tsx:61-65 y :105-109 (toque vencido); contracts.ts:22-27 (tope de 5000); manual-nav.tsx:96 y :158 (line-clamp).",
+    "sentido": "si",
+    "nota": "El tope de 5000 no se maneja en ficha-form (.parse en :148) y deja la pantalla rota: hallazgo ALTA.",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2933",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "brief-form.tsx:32-41 y :76: notasMarca viaja en el payload sin campo visible.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3038",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "chequeo-form.tsx:146-157 (delayMs 0, sin botón de guardar) y :206 (GRUPOS_CHEQUEO).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:515",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "ficha-form.tsx:193-198; brief-form.tsx:113-125. El autoguardado del brief solo corre en el re-pegado (brief-sanity.tsx:30-40), y guardarBrief transiciona solo desde EVALUADA (dossier.actions.ts:208-209).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1190",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "lead-timeline.tsx:62-163; lead-timeline.helpers.ts; historial-lead.tsx:14-28.",
+    "sentido": "no",
+    "nota": "Las horas se formatean sin huso (hallazgo BAJA).",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1328",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "ficha-form.tsx:290 y :350 leen GUIA_FICHA; guidance-content.ts:307.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1405",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "m1-ficha.tsx:91 FichaEjemplo; m14-chequeo.tsx:87 SelfCheckEjemplo.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md:52",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "scripts/demos-seed-review-queue.ts está versionado (git ls-files). Si se ejecutó o no, no se puede verificar desde el código.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:184",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Quedó commiteado como WIP 506e0059 (Franco, 2026-09-18) en origin/p25/rafaga-tildes. 'git log origin/main..origin/p25/rafaga-tildes' da 5 commits sin integrar (51 archivos, +4544/−320).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:701",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "En main hay un solo formulario de brief (brief-form.tsx:158-238), y pegadoGem es opcional mientras gemDiseno no tenga URL (dossier.schemas.ts:91-92, herramientas.ts:78). El doble formulario (vueltas-gem.tsx) existe solo en origin/p25/rafaga-tildes.",
+    "sentido": "si",
+    "nota": "Aplica al integrar la rama p25.",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:734",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "selfCheckAprobado recorre todos los HARD_CHECKS (flow.ts:206-207), igual en origin/p25/rafaga-tildes. El invariante 4b prueba que un hard faltante no aprueba (self-check-gate.invariant.ts:73-86).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:778",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "agenda-form.tsx:237-245 ('Buscar de nuevo' sin disabled); agenda-form.tsx:113 ofrecerHorarios(leadId). git grep -c -i decisor en agenda.actions.ts da 0.",
+    "sentido": "si",
+    "nota": "Va como hallazgo BUG BAJA.",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:819",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Sigue sin autoguardado (evaluacion-form.tsx:94-98). La promesa se corrigió (evaluacion-form.tsx:182-185, ficha-form.tsx:460-462) y hay guardia interna (:102). Pero plegar el bloque pierde el veredicto (bloques-secuenciales.tsx:215).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:852",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "herramientas.ts:63, 78, 90 y 117: url null con TODO.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5777",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep 'Object.keys(ActivityChannel)' no encuentra nada en timeline.invariant.ts. Control: contador-dms.invariant.ts:217-218 sí tiene el censo.",
+    "sentido": "decidir",
+    "nota": "canalEtiqueta ya es exhaustivo por tipo (lead-timeline.helpers.ts:21-38).",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7681",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "No se puede verificar desde el repo: el upstream es configuración local de Franco. Las ramas origin/p25/* existen (git branch -a).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:193",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "seguimiento-step.tsx ya no existe (git ls-files da 0). seguimiento-form.tsx:95 usa Date.now dentro de un inicializador y el baseline de eslint no lo marca.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:474",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "No se puede verificar sin correr la suite, que esta auditoría tiene prohibido. tests/setter tiene 30 specs.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:709",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "contracts.ts:230 'nota: textoLibre' sigue opcional en resultado.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1975",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "agenda.ts:46-48 AGENDA_NO_CONECTADA, mensaje humano; copy-sin-jerga.invariant.ts:195-200 prohíbe las frases viejas.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3977",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Los obligatorios del chequeo siguen tildándose solo desde el Toggle (chequeo-form.tsx:109), mientras los delatores son filas tappeables (:254-258). 'El dato no viaja' quedó cubierto en parte por P6 (estado-manual.tsx:83-92).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4843",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "admin/team/page.tsx:21 filtra role SUPER_ADMIN. Existe el detalle por setter admin/leados/setter/[setterId]/page.tsx (git ls-files).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:124",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "setter-nav.tsx:43-49 navega con triggerTransition. Validarlo requiere runtime.",
+    "sentido": "decidir",
+    "nota": "CLAUDE.md pide <Link> en portales: ver el hallazgo de D4-A3.",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1543",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "docs/experimentos/fg2-brief-experimento.md y fg2-prompts-listos.md están versionados. Correr el experimento es trabajo humano y no deja rastro en el código.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2478",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "PANTALLA_DE_FASE (manual.ts:129) y mc1/mc2 (m-construccion.tsx:15-39) siguen en main. origin/p25/rafaga-tildes trae mc1-construir.tsx y registro-fases.tsx sin integrar.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Ideas de nuevas features.md:39",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep pipelineOrder en prisma/schema.prisma y src no encuentra nada. Control: model OsLead en schema.prisma:862.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7838",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "auth.ts:129: profile() de Google con role 'ORG_MEMBER'. docs/leados-alta-setter.md está versionado.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9471",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "copy-block.tsx usa <details> (git grep -c da 3). Falta que Franco lo valide.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1138",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "pantalla-manual.tsx:205-209 mantiene el orden contexto, munición, registro. P18 resolvió la acción con la barra sticky (barra-accion.tsx:156-194).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:767",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "use-keyboard-shortcuts.ts:46-54 no se dispara con modificadores ni en campos editables. No verifiqué en cada consumidor que el handler haga .click() de un Link.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:982",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "escalar-modal.tsx:57-65: el Telegram va a Franco y al setter le llegan toasts dentro de la app.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:457",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "tests/setter/06-claim-atomico.spec.ts, 07-admin-assign-caliente.spec.ts y playwright.leados.config.ts están versionados.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1170",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "manual-nav.tsx:89 y :96 (space-y-2 sm:space-y-3, text-2xl sm:text-3xl). c82ff48 está en main y docs/auditorias/REGRESION-FINAL-2026-07.md está versionado.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:178",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "Los step files ya no existen (git ls-tree de leads/[leadId]/_components) y el manual no usa 'Paso N' (git grep sin coincidencias fuera de comentarios).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:263",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "setter-shell.tsx y setter-nav.tsx siguen vigentes (git grep).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1151",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "step-anchor, lead-wizard y dossier-stepper ya no existen (git ls-files da 0). Ahora el aterrizaje lo hace el redirect al manual ([leadId]/page.tsx:23).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1729",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "tests/setter con 30 specs y playwright.setter.config.ts versionados. La ejecución no se puede verificar.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:177",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "schema.prisma:880 'caliente Boolean @default(false)'. La migración 20260627000000_admin_1a_add_oslead_caliente está presente.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:514",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "onboarding-hint.tsx se borró en 7074ba6b (2026-07-04, 'guía estructural en lugar del onboarding en prosa'). git grep 'un lead por vez' no encuentra nada.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L3"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7535",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/app/api/cron/os-follow-up/route.ts:112-118 (isReactivationLead) y :187-191 (where status POSTERGADO) siguen inline; el mismo predicado vive en _data.ts:167-170",
+    "sentido": "si",
+    "nota": "Las líneas del doc (:168, :176) se corrieron; hoy son :114 y :188.",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7537",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "route.ts:7 y :20-59 copia propia con -03:00; outreach.ts:15-33 copia privada; dates-ar.ts:65/:70 startOfDayAR/endOfDayAR sin usar. git grep -n \"dates-ar\" origin/main -- os-follow-up/route.ts outreach.ts -> 0 (control: dates-ar.ts:65 exporta startOfDayAR)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1301",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "os-commercial.ts:19-22 y :79-82 limpian reactivateAt sin tocar status; flow.ts:420-423 manda el POSTERGADO sin fecha a seguimiento aunque el toque venza",
+    "sentido": "si",
+    "nota": "Registrado como hallazgo BUG MEDIA.",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2192",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "[paso]/page.tsx:213-438: diez ternarios anidados y fallback {} en :438; archivo de 453 líneas",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7060",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "postergarLead os-commercial.ts:181-191 (status + reactivateAt); el cron lo lee y avisa sin cambiar status (route.ts:112-118, :187-191); _data.ts:93-97 lo documenta",
+    "sentido": "si",
+    "nota": "'La levanta el cron' quiere decir que la lista y avisa, no que reactive: coincide con el código.",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:222",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "follow-up.ts:3-13; os-commercial.ts:78-82 escribe null al agotar; seguimiento-form.tsx:87-89 oculta SIN_RESPUESTA; :56 'el cierre del lead lo decide Franco'",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:640",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "route.ts:204 where SOLO_CONTACTOS_COMERCIALES; outreach.ts:50; admin/leads/page.tsx:29; activity.schemas.ts:26 rechaza SISTEMA",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6220",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "outreach.schemas.ts:60 parseCalendarDayAR; isolation.ts:142 SOLO_MENSAJES_ENVIADOS; commits 34e15156 y cbfaa27f son ancestros de origin/main",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1290",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "os-commercial.ts:78-82 (null), :91 y :113 (reactivateAt null), :107-115 rama RECHAZADO; home.ts:51 sinProximoToque; tests/leados/foco-no-miente.spec.ts existe",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Ideas de nuevas features.md:73",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "schema.prisma:909 model OsLeadSetterMeta, :1090 enum ActivityChannel; migraciones 20260619150000_add_activity_channel_sistema y 20260619160000_add_os_lead_setter_meta en el repo; índices schema.prisma:900 y :969",
+    "sentido": "no",
+    "nota": "Que se hayan registrado con migrate resolve --applied no se verifica por código (DB): cruza con D6.",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:712",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "brief-form.tsx:85 autosaveEnabled = false por defecto y :115 enabled: autosaveEnabled && briefValido; m6-brief.tsx no lo pasa (git grep autosaveEnabled en m6-brief.tsx -> 0; control: brief-form.tsx:85). Mitigación: useUnsavedGuard(autosave.isDirty) brief-form.tsx:125",
+    "sentido": "si",
+    "nota": "Las '4 vueltas' (vueltas-gem.tsx) no están en main: viven en origin/p25/rafaga-tildes (506e0059).",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:745",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -l \"tildeUnico\" en todas las refs -> solo origin/p25/rafaga-tildes (m-construccion.tsx, mc1-construir.tsx, registro-fases.tsx); en main no hay cinco tildes ni tildeUnico",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:789",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/lib/leados/agenda.ts:58-84: organization.findMany({ calComUsername: not null }) y orgs.length > 1 -> agenda bloqueada",
+    "sentido": "si",
+    "nota": "Fuera del lote. Con el primer cliente que cargue Cal.com se cae la agenda del setter: conviene un hallazgo en el lote de agenda.",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:824",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "pantalla-manual.tsx:205 <Zona etiqueta=\"Contexto del lead\">",
+    "sentido": "decidir",
+    "nota": "La decisión §S7 viene de docs/decisiones-oslead-vii/, que no está en main.",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:861",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "useUnsavedGuard en seguimiento-form.tsx:101-102 y brief-form.tsx:125; sin control de concurrencia ni redirect por sesión vencida (auth-guards.ts:16-17 lanza Unauthorized); foco.ts:12 sticky único",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7531",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "dossier.ts:266, 291, 319, 345, 377, 404, 422 siguen con updateMany; git grep -c \"stage: '\" dossier.ts = 7",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9173",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "único consumidor m1-ficha.tsx:212 con editable={false}; la rama editable sigue en ficha-step.tsx:29-33",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10647",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "setter-nav.tsx:43-49 navega por triggerTransition con varios destinos; la verificación en runtime no es trazable por código",
+    "sentido": "decidir",
+    "nota": "Depende de clasificar /setter como portal (D4-A3).",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:740",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "7 componentes usan useStepAction (incluido seguimiento-form.tsx:86); 12 siguen con startTransition a mano, entre ellos nuevo-prospecto-form.tsx:87 e importar-prospectos-form.tsx:84",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4126",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "docs/manual-usuario/BACHES-RE-VERIFICADOS.md existe en main; cada ID no es verificable desde este lote",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4352",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "revision.actions.ts:94 rechazarRevision -> transitionDossier + avisarDecisionAlSetter; dossier.actions.ts:252 reabrirConstruccion -> transitionDossier. git grep osLeadActivity.create en src/lib/leados y src/app -> solo assignment-trail.ts:45 (control: os-commercial.ts:57)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4858",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Es una medición de layout (px visibles), no verificable por lectura de código ni en este lote",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:174",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "seguimiento-step.tsx ya no existe; su sucesor seguimiento-form.tsx:94-96 usa lazy init. El baseline de eslint tiene react-hooks/purity en m5-seguimiento.tsx:63 (Date.now en render)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:902",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "admin/leados/page.tsx:26, src/lib/leados/setter-carga.ts:46, admin/leados/setter/[setterId]/page.tsx:59",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1173",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "lead-wizard.tsx ya no existe (git ls-tree ... | grep lead-wizard -> 0); el aterrizaje lo decide derivarPantalla (manual.ts) desde el corte 5.6, y anchorActivo quedó en paso.ts:223",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1387",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "construccion-step.tsx no existe; Construcción se partió en mc1/mc2 con tres fases cada una ([paso]/page.tsx:91-95, :277-300; m-construccion.tsx:43 usa SHELL_CONSTRUCCION)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1510",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "scripts/v1-qa-wizard-states.ts (seed por estado) y la suite tests/setter/ existen; la QA visual no es verificable por código",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:292",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "schema.prisma:876-879 'Hoy NADIE lo setea ni lo lee'; _data.ts:217 y :255 leen lead.caliente",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1206",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "C-02 cerrado (os-commercial.ts:75-82), A-14 cerrado (_data.ts:267, [paso]/page.tsx:105); A-08 sigue parcial",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3157",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -n -E \"fetch\\([^)]*draftUrl|draftUrl[^;]*fetch\" origin/main -- src -> 0 (control: draftUrl aparece 4 veces en dossier.ts)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1027",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "solo AgencySettings.osTelegramChatId global (schema.prisma:836); ningún chatId por User",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7842",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git grep requireSetterOrAdmin -> 0; auth-guards.ts:3 requireSuperAdmin y :13 requireSetter (control)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:386",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "contracts.ts:124 SelfCheckSchema; selfCheckAprobado correlaciona por nombre (flow.ts:204-209)",
+    "sentido": "si",
+    "nota": "HARD_CHECKS.find por nombre no está en main ni en ninguna ref.",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5841",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "dossier-stage.ts:39 FICHA: ['EVALUADA']; dossier-stage.invariant.ts y tests/setter/20-veredicto-abre-construir.spec.ts existen",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6848",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "en el lote, la acción vive en la barra fija siempre visible: seguimiento-form.tsx:130-137 useAccionPrincipal con motivo del disabled",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8810",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "piloto en bloques-secuenciales.tsx, ficha-form.tsx y m1-ficha.tsx (git grep -l completitud)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9704",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "barra-accion.tsx:112 useAccionPrincipal, consumida por seguimiento-form.tsx:130",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9804",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "manual.ts:648 return { actual: 'm16', habilitadas: [] }; paso-admitido.invariant.ts existe",
+    "sentido": "si",
+    "nota": "Con m5 completada y navegable, el formulario de toques sigue activo sobre la reunión agendada (hallazgo ALTA).",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10130",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "franja-recorrido.tsx:69 FranjaRecorrido",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:12",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "git grep -n -E \"['\\\">]Paso [0-9]\" en setter, manual.ts y flow-content.ts -> 0 (control: 'Paso' aparece 4 veces en comentarios de manual.ts)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:521",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "dossier.ts:141-142 RELOOP_RESET solo toca selfCheckJson; :358-361 checklist, no gate; _data.ts:60-62",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:184",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "dossier-stepper.tsx no existe en main; la navegación es la franja de nueve etapas (manual.ts:305-315, franja-recorrido.tsx:69)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1253",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "módulos puros con invariantes ejecutables en src/lib/leados/*.invariant.ts (p. ej. postergacion.invariant.ts, paso-admitido.invariant.ts)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1539",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "marcado EXPERIMENTAL/DESCARTABLE en admin/fg2-lab/page.tsx:2 y _experimental/fg2-brief-lab.ts:2; sigue en main junto con scripts/_experimental/fg2-gen-prompts.ts",
+    "sentido": "decidir",
+    "nota": "Candidato de poda cuando Franco cierre el experimento.",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:9",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "D4 caliente como campo (_data.ts:217); D6 postergado vencido accionable (flow.ts:420-423); D7 sticky (foco.ts:12)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:2",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git log --all --oneline -- \"*mc2-refinar.tsx\" \"*prompts-refinamiento.ts\" -> 0 en las 170 refs (control: git log --all --grep=P43 -> 506e0059)",
+    "sentido": "decidir",
+    "nota": "Se declara hecho en un insumo de Drive, pero el código no está en ninguna ref del repo (probablemente quedó solo local de Franco).",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8211",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "commit 2da5de41 es ancestro de origin/main",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10647",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "ea94dbf8 en main; manual.ts:719 ofreceSalida; src/lib/use-unsaved-guard.ts; tests/setter/28-veredicto-y-ciclo.spec.ts",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10697",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "lead-wizard.tsx ya no existe (reemplazado por el manual 5.6) y no hay 'Paso N' visible (ver PLAN-841)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:297",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "scripts/v1-qa-wizard-states.ts existe en main",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:756",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "ruta manual/[paso]/page.tsx en el lote; m1 fusiona m1+m2 (D15-bis, [paso]/page.tsx:214-235); scripts/dev/qa-manual-m5-m16.ts existe",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1024",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:813 particionarCartera; particion.invariant.ts existe; onboarding-hint.tsx ya no está",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1216",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "commit 612c4ee es ancestro de origin/main",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3177",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "commit f06df31e es ancestro de origin/main",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4277",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "[paso]/page.tsx:52 PANTALLAS_DEL_RETRABAJO = ['mr','mc1','mc2','m13','m14'] y :185-190 GuiaRetrabajo con previos; commit 2d456390 en main; tests/setter/14-motivo-rechazo.spec.ts",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4885",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md y A3-VIABILIDAD-BIS-2026-08.md existen",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:359",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "migración 20260619132830_add_operator_cabin_indexes; schema.prisma:900 y :969",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:545",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "foco/particion en main (flow.ts:813, foco.ts); hoy hay suite e2e del setter en tests/setter/",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L4"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6162",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Grafo congelado y exportado en src/lib/leados/dossier-stage.ts:38-47 con invariante (src/lib/leados/dossier-stage.invariant.ts); la validación de producto no deja rastro en código",
+    "sentido": "decidir",
+    "nota": "Hoy APROBADA y DESCARTADA no tienen salidas: un lead aprobado no puede volver a construcción",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7034",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "herramientas.ts:63, :78, :90, :117 url null; tests/setter/16-municiones-salida.spec.ts:128-132 afirma las cuatro; git grep 'ToolGuide id=\"evaluador\"' origin/main -- src vacío (control: ToolGuide id=\"claudeDesign\" en m-construccion.tsx:135)",
+    "sentido": "decidir",
+    "nota": "Cargar gemDiseno, claudeDesign y gemOutreach; el evaluador conviene retirarlo",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7400",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "flow.ts:438 corrigió el caso sin link; persiste con link cargado y gate cerrado: flow.ts:440-441 (trabajar) y flow.ts:539-545 (espera, accionable false)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7532",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "assignment-trail.ts:76 'channel: ActivityChannel.SISTEMA' inline; la fuente está en isolation.ts:116-126",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7854",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "guidance-content.ts:643 GUIA_CONSTRUCCION, :887 GUIA_TRASPASO, :958 GUIA_REVISION.aprobada sin lectores; TeachPanel solo con id objeciones (m5-seguimiento.tsx:214) y selfCheck (m14-chequeo.tsx:83)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:677",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "herramientas.ts:63, :78, :90, :117; solo netlifyDrop tiene url (herramientas.ts:105)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:925",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "contracts.ts:118 sigue; brief-form.tsx:38 confirma que no tiene lector y se borra en cada re-guardado",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1925",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "GUIA_CONSTRUCCION/GUIA_TRASPASO/GUIA_REVISION.aprobada sin consumidores (git grep -l -w); describirFoco sigue en src/lib/leados/paso.ts:86",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4832",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "agenda.ts:58-61 findMany sin filtro de org; agenda.ts:70-84 ambigüedad",
+    "sentido": "si",
+    "nota": "Escalado a hallazgo SEC ALTA: si develOP no tiene el campo, se reserva en el calendario del cliente",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2034",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "flow.ts:133-136 safeParse de todo el blob -> { completadas: [] }",
+    "sentido": "decidir",
+    "nota": "Convive con la regla PLAN-907",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2376",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "currentWebUrl ya entra en el alta propia (isolation.ts:52, :92); googleMapsUrl no está en OwnedLeadFields (isolation.ts:44-54) y solo se lee (m1-ficha.tsx:44)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2921",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "soltarFoco ya tiene llamador (foco-surface.tsx:20); agruparParaHome (flow.ts:653) sin consumidores: git grep -w agruparParaHome origin/main -- src tests scripts solo da flow.ts",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3212",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "flow.ts:188-191 y :206-207 unen por nombre; contracts.ts:124-132 sin id",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3921",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:438 y :534-545 miran finalUrl; revision.schemas.ts:22-25 exige finalUrl https para aprobar",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5134",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "dossier-stage.ts:38 exportado sin imports de valor; src/lib/leados/dossier-stage.invariant.ts existe",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:314",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "herramientas.ts:63, :78, :90, :117 url null con TODO",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:354",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "herramientas.ts:16-17 'Hoy queda localizado acá a propósito'; guidance-content.ts no importa herramientas (imports guidance-content.ts:35-46)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1570",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "flow-content.ts:42 'PROVISORIO: refinar tras el test de Claude Design'",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:349",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "flow.ts:653; sin consumidores en src, tests y scripts (git grep -l -w)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7854",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "server actions en dossier.actions.ts:100, :145, :205, :238, :326, :356, :398 sobre dossier.ts",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7854#2",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "revision.actions.ts:78 (APROBADA) y :106 (RECHAZADA) -> dossier.ts:191-221",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1358",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "tipo SelfCheckRazon (guidance-content.ts:167-170) y campo selfCheckRazones (:276) sin contenido ni consumidores (git grep -w: 0 fuera del archivo)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1389",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "GUIA_SELF_CHECK.ejemplos (guidance-content.ts:709-722) solo tiene 'Probar de verdad' y 'Honestidad en los flags'; ninguno de datosReales/fielAlBrief",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7863",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "en src solo dossier.ts y agenda.ts escriben osLeadDossier (git grep 'osLeadDossier.(update|create|upsert)'); ownership dossier.ts:69-94",
+    "sentido": "si",
+    "nota": "Scripts de QA y seed escriben stage directo (scripts/b5-qa-review-queue.ts:77, prisma/seed-agency-os.ts:2039). La rama DESCARTADA no re-parsea el blob (dossier.ts:185-188)",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7876",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "el gate usa el campo caliente, no el score: flow.ts:81-83 y dossier.ts:167",
+    "sentido": "no",
+    "nota": "Reemplazado por admin-1d (PLAN-767)",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5564",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "sin fallback (flow.ts:207); la red es el censo congelado y el blob guardado (self-check-gate.invariant.ts:103-132 y :134-178)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5743",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:133-136; contracts.ts:142-149; existe src/lib/leados/progreso-isolation.invariant.ts",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8985",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "criterio puro en ficha-calidad.ts:30-33, consumido en ficha-form.tsx:225; bloqueCompleto no lo mira (ficha-bloques.ts:193-195); el freno del plegado vive en el componente (fuera del lote, no verificado)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10665",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "evaluacionJson solo lo escribe transitionDossier (dossier.ts:150-158, :185-188)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2046",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "regla vigente en flow.ts:218-223, aplicada en el server (outreach.schemas.ts:41)",
+    "sentido": "decidir",
+    "nota": "La regla da falsos positivos (hallazgo BUG BAJA)",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:591",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:611-627 switch exhaustivo sobre trabajoTier (flow.ts:734)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:928",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "dossier.ts:143-147 mergea ESCALADO_RESET (escalamiento.ts:53)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1446",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "ficha-calidad.ts:5-10 y :30-33; flow.ts no importa ficha-calidad (imports flow.ts:17-43)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:260",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:81-83 y :633-634; dossier.ts:167",
+    "sentido": "si",
+    "nota": "Copy no renderizado lo contradice (guidance-content.ts:526-528)",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:246",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "contracts.ts:102-107",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7852",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "prisma/migrations/20260612121536_add_os_lead_dossier; contracts.ts; dossier.ts:116; scripts/b2-verify-dossier.ts (git ls-files)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:187",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "primeraMirada, tresColores y HARD_CHECKS_BASE no existen en ninguno de los 117 refs (git grep por ref); flow-content.ts:171-261 tiene 10 hard-checks; SelfCheckSchema sin estado (contracts.ts:124-132)",
+    "sentido": "decidir",
+    "nota": "El doc OSLEAD describe código que no está en el repo",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:494",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "obtenerAnguloWow y AnguloWowCard ausentes en los 117 refs (git grep); copy-blocks.ts no la define; git log --all -S solo la encuentra en docs de auditoría",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5829",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "dossier-stage.ts:38; dossier.ts:41 lo importa; c219d830 y 7eeacdef son ancestros de origin/main",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7406",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "isolation.ts:174-209 SOLO_DMS_MANDADOS/dmsMandadosHoyWhere; escalamiento.ts:78-80 lee LEGAL_TRANSITIONS; finDePausaAR en cartera.schemas.ts:49; 0c92dd08 ancestro",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8302",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "herramientas.ts:145-162; copy-blocks.ts:251-257; agenda.ts:46-48; existe copy-sin-jerga.invariant.ts; fa36389a y 52ac5c62 ancestros",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:283",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "paso-actual-banner.tsx, step-anchor.tsx y step-nav.tsx no existen (git ls-files); quedan los GUIA_* y error.tsx/loading.tsx de [leadId]",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:509",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "prisma/migrations/20260630000000_add_dossier_progreso; contracts.ts:142-165; dossier.ts:366-385",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:564",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "RELOOP_RESET solo selfCheckJson (escalamiento.ts:102; dossier.ts:146); 'Cargar prospecto' en setter-nav.tsx:61; existe reloop-selfcheck-reset.invariant.ts",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1514",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "error-copy.ts:34-79 (16 literales más el prefijo de transición ilegal = 17), cubre todos los throw de dossier.ts; action-codes.ts:18 SLOT_OCUPADO; b6b2132 ancestro",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1613",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "contracts.ts:201, :210-212; agenda.ts:194-289 (OFRECIDOS reclamable, compensación restaura); 8b3ce80 y 6a88cbe ancestros",
+    "sentido": "no",
+    "nota": "revertirAgendaConfirmadaOwned borra la oferta (agenda.ts:315) y su comentario quedó viejo (agenda.ts:296)",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2119",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "m3-veredicto.tsx no existe (git ls-files); herramienta renombrada en herramientas.ts:55",
+    "sentido": "no",
+    "nota": "D15-bis retiró después el chat de evaluación (guidance-content.ts:473-476)",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2267",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "contracts.ts:73-81; copy-blocks.ts:185-229",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2795",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:719-756 trabajoTier; existe particion.invariant.ts",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4138",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "isolation.ts:142-209 (contador solo SIN_RESPUESTA); src/lib/dates-ar.ts:107 parseCalendarDayAR; 34e15156 ancestro",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:719",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "recorrido-strip.tsx no existe (git ls-files); recorrido.ts reusado por manual/_components/franja-recorrido.tsx; buildHomeLeads en home.ts:24",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:917",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "prisma/migrations/20260620180000_add_dossier_escalado; escalamiento.ts:42-117; dossier.ts:309-327",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1237",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "isolation.ts:1-17 como fuente única de aislamiento",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1442",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "ficha-calidad.ts:23, :30-33; ficha-form.tsx:225; textos de mejora en guidance-content.ts:339-369",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1564",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow-content.ts; re-export en flow.ts:49-60",
+    "sentido": "no",
+    "nota": "flow.ts volvió a crecer a 1070 líneas",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:262",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "dossier.ts:160-172 usa gateBriefAbierto(status, caliente)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:381",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:18-43 con imports relativos .ts; package.json:30 'check:invariant:flow'",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:844",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "ConstruccionMunicion ya se renderiza ([paso]/page.tsx:286) con BadgeProvisorio adentro (m-construccion.tsx:127); referenciasFicha sigue sin lectores (contracts.ts:118); notasMarca lo lee el admin (dossier-panels.tsx:114)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/sprints/alpha-1-reaudit.md:227",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -l toast origin/main -- 'src/app/(protected)/admin/leads' vacío (control: admin/alerts/AlertsClient.tsx sí lo usa)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10451",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "cola.ts:38 TOPE_COLA = 5 sin medición registrada",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10693",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Los tres citados ya no figuran: seguimiento-step.tsx y onboarding-hint.tsx no existen. El baseline actual (docs/auditoria-2026-10/_crudo/eslint.json) tiene react-hooks/purity en m5-seguimiento.tsx:63 y no-unused-vars en lead-card-actions.tsx:56. Los archivos del lote no tienen errores",
+    "sentido": "si",
+    "nota": "Baseline leído con grep. Un intento previo con node -e (fuera de las reglas de la tarea) falló sin leer nada",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:620",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "los componentes del wizard que cubría no existen más (paso-actual-banner.tsx, step-anchor.tsx, step-nav.tsx: git ls-files vacío)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9910",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "RechazoSchema sin campo de aplicado (contracts.ts:169-177)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:361",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "prompts-disenio.ts:139-141 HARD_CHECK_PROMPT solo mapea 'mobile' (1 de 10)",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10782",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "setter-nav.tsx y setter/layout.tsx presentes (layout.tsx:32 guard SETTER del contexto fijo)",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L5"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7301",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/lib/leados/paso.ts:169-192 la rama sigue sin mirar finalUrl, anotada; único consumidor manual.ts:552, que lee foco solo en EVALUADA (:574-578).",
+    "sentido": "no",
+    "nota": "Se resuelve borrando la rama sin consumidor (hallazgo paso.ts).",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7853",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/lib/leados/paso.ts:184 'mandá el link y seguí el contacto en «Seguimiento»'; rama APROBADA sin render.",
+    "sentido": "no",
+    "nota": "Copy muerto; desaparece al podar paso.ts.",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10633",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "tests/setter/02-isolation.spec.ts:52 y :87 (dos setters A/B, cartera y 404); tests/leados/alta-import.spec.ts:95 getOwnedLead(created.id, setterB) es null.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1014",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -i -c wizard origin/main -- setter + src/lib/leados: 99 menciones en 37 archivos; 20 'Paso N' en setter/_actions; StepAnchorId en paso.ts:34; manual.ts:327 'ruta paralela al wizard'.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4240",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/lib/leados/outreach.ts:21-33 duplica dates-ar.ts:75; admin/leads/_actions/lead.schemas.ts:32-40 sigue con z.coerce.date() (fecha sola = medianoche UTC, como explica dates-ar.ts:86-90).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:114",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "Igual que PLAN-811: tests/setter/02-isolation.spec.ts:52-123, tests/leados/alta-import.spec.ts:95.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7401",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "pipeline.ts:31-37 excluye APROBADA y :58 le da SLA Infinity; git grep finalUrl origin/main -- admin/leados/page.tsx admin/leados/_components: vacío (control: admin/leados/[leadId]/_components/decision-bar.tsx, 8 apariciones).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9907",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/lib/leados/turno.ts:33 sigue con tres turnos; postergacion mapea a 'negocio' (turno.ts:122).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:431",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "src/lib/leados/prospecto-import.ts:27-30 'Mapeo flexible de columnas = futuro'; COLUMNAS_IMPORT fijo :38-48.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:890",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "src/lib/leados/pipeline.ts:13-19 (updatedAt como proxy) y :51-60 (48/48/48/72/24/48, terminales Infinity).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1122",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "mis-numeros.ts:22-28 no importa alarmaNuncaDescarta; git grep alarmaNuncaDescarta origin/main -- setter: vacío (control: admin/leados/page.tsx:274).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9711",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "paso-admitido.ts:67-144 (oráculo) y :232-282 (9x9x2x2x2x2x6x2x2x3x2x2 = 373.248 estados); paso-admitido.invariant.ts y tests/setter/24-paso-que-corresponde.spec.ts existen.",
+    "sentido": "si",
+    "nota": "El oráculo admite m5 con toque vencido en APROBADA sin link, que el home trata como espera (hallazgo).",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:320",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "prompts-disenio.ts:59-108 y :139-154; chequeo-form.tsx:84 promptParaHardCheck(check.id).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:715",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "src/lib/use-step-action.ts existe (9 archivos lo referencian); paso.ts:251 existe, pero sus consumidores (stepper, banner, anchor) ya no están: único uso manual.ts:552.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2474",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "manual.ts:106 PANTALLAS_CONSTRUCCION ['mc1','mc2'], :129-138 PANTALLA_DE_FASE; pantallas-construccion.invariant.ts existe.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:3789",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "turno.ts:33, :111-124, :131-157, :199-218; turno.invariant.ts existe.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1111",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "mis-numeros.ts:89-122; revision.ts:27 ESTADOS_TERMINALES; mis-numeros.invariant.ts y _components/mis-numeros.tsx existen.",
+    "sentido": "si",
+    "nota": "Cuenta descartados como activos (hallazgo).",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:7888",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "El código que se verifica existe (ownership.ts:24-31; specs 02-isolation). Una verificación manual no deja rastro en el código.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:655",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "copy-sin-jerga.invariant.ts:56 y copy-sin-ubicacion.invariant.ts:45 siguen con AMBITO fijo; docs/barrera-rutas-ast.md no está en origin/main (ls-tree).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:723",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "evaluacion-form.tsx:153 setErrors(erroresPorCampo(...)) sin referencia a BloquesSecuenciales ni apertura del bloque (git grep). Confirmarlo exige navegador.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:767",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -i exportaste origin/main -- src: solo herramientas.ts:98 (descripción de Netlify Drop); no hay check G3.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:812",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Sin generador wa.me en setter (git grep -F wa.me: vacío; control flow.ts:219); sin cronómetro (solo '~10 min' en guidance-content.ts:322); el Export se menciona en herramientas.ts:98.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:848",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -i setter origin/main -- admin/team/page.tsx: vacío (control: admin/leados/page.tsx, 21 apariciones).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6338",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep -l reactivateAt origin/main -- prisma/migrations: solo 20260403173000_agency_os_init; sin backfill en scripts (solo QA). lead.schemas.ts:32-40 sigue con z.coerce.date().",
+    "sentido": "si",
+    "nota": "Contarlas en producción es tarea humana.",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:6738",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Verificación humana sin rastro en el código.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:8243",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Sin detalle cruzable en el código (el reporte de la corrida está fuera del lote).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10862",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "La bitácora no detalla el defecto; no se puede cruzar con el código.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:673",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Lecturas cruzadas cubiertas (02-isolation.spec.ts:52-123). git grep -E 'Owned[A-Za-z]*\\(.*setterB' origin/main -- tests: solo la lectura de alta-import.spec.ts:95. Las escrituras testeadas (envio-demo-rechazo.spec.ts:64, 06-claim-atomico.spec.ts:89) usan al setter dueño.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1877",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "Techo de filas (novedades-agrupar.ts:19; novedades.ts:58), pliegue (:98-148) y vigencia YA_NO_ES_TUYO (novedades-vigencia.ts:93). Sin purga: osSetterNotice.delete* solo en scripts (m0-galeria-seed.ts:139); leadId onDelete SetNull (schema.prisma:950).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2389",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Decisiones de producto pendientes de Franco; sin marca en el código.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1979",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "docs/manual-usuario/galeria/INDICE.md:15 y :176 siguen declarando 0 huecos.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4234",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Sin migración ni backfill de reactivateAt (igual que PLAN-912).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:197",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "lead-wizard.tsx ya no está en origin/main (ls-tree de setter/leads/[leadId]/_components).",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:414",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "prisma/schema.prisma:899 @@index([assignedToId]) junto a :900 @@index([assignedToId, nextFollowUpAt]).",
+    "sentido": "si",
+    "nota": "Opcional; schema FROZEN: decisión para Valentino y Franco.",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:375",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:826-829 (A-05): un fijado accionable y vigente entra a 'trabajar' y al foco.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5599",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "HARD_CHECKS tiene 10 ítems (flow-content.ts:171+; :168 cita los nuevos ctaClaro/noPareceIa/tonoDelNegocio); el gate compara por nombre (flow.ts:206-208): renombrar un check desaprueba los self-checks guardados.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9159",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "FichaSchema (contracts.ts:52+) sin dirección, horarios, contacto exacto ni 'cómo se ve la web'.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:4896",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "docs/decisiones-oslead-vii no está en origin/main (ls-tree; solo docs/verificacion-arranque-oslead-vii.md).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1518",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "admin/fg2-lab sigue como laboratorio (page.tsx, fg2-lab-client.tsx, medicion-panel.tsx). No verifiqué más allá.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-2.md:136",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Ítem de bitácora sin marca cruzable en el código.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7253",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "git grep enRevisionAt origin/main -- schema.prisma src: vacío (control: aprobadaAt en schema.prisma:1005); el proxy sigue siendo updatedAt (pipeline.ts:13-19; novedades.ts:184-188).",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10635",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "flow.ts:959 VISTA_ABIERTA = 'trabajar'; cartera-view.tsx:142 abre solo ese grupo.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:60",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "prisma/schema.prisma:1505-1510 String? sin @relation; re-agregado en 20260622120000_readd_client_columns_dropped_by_reconcile.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:26",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "manual.ts:135-137 cta/calidad/mobile mapean a mc2 sin tocar FASE_IDS (:125-127).",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:9358",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "Decisión pendiente de Franco; sin cambio cruzable en el lote.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-roadmap.md:10799",
+   "valor": {
+    "estado": "contradicho",
+    "evidencia": "recorrido.ts:4-6 y :54-64: la franja de P20 usa nueve fases y reemplazó al indicador (manual.ts:318-325); el índice del rail de 5 pasos (paso.ts:37-38) no tiene consumidor.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:177",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:92-103 gateEnvioDemo = APROBADA y finalUrl y (respondió o caliente); manual.ts:656-664; novedades-vigencia.ts:118-129; tests/setter/06-claim-atomico.spec.ts.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2913",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "flow.ts:81-83 respondió o caliente; consumido en manual.ts:550 y paso-admitido.ts:103.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:715",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "setter-meta.ts:17-21 snoozedUntil (personal); POSTERGADO/reactivateAt en manual.ts:542-549 y turno.ts:95.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:7685",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "enlaces-manual.invariant.ts existe (citado en manual.ts:716-717); tests/setter/17-destinos-alcanzables.spec.ts existe.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1099",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md está en origin/main.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:1752",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/metodo/LECCIONES-LEADOS.md, PROPUESTA-CIMIENTO.md y MAPA-LEADOS.md en origin/main.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:2006",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "docs/probe-poda-terreno.md en origin/main.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:5380",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "El commit 3f636437 existe (git cat-file); .github/workflows/ci.yml:87, :152, :202 con node-version '24'.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1291",
+   "valor": {
+    "estado": "abandonado",
+    "evidencia": "onboarding-hint.tsx no está en origin/main; lo retiró 7074ba6b (2026-07-04) 'guía estructural en lugar del onboarding en prosa (A-01)'.",
+    "sentido": "no",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1486",
+   "valor": {
+    "estado": "parcial",
+    "evidencia": "FG-1.1 (onboarding-hint.tsx) reemplazado en 7074ba6b; el resto de las piezas no lo verifiqué en este lote.",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta.md:1673",
+   "valor": {
+    "estado": "hecho",
+    "evidencia": "prisma/seed-agency-os.ts:751 qaLeadSeeds y :2047 bucle de alta.",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L6"
+   }
+  }
+ ]
+}

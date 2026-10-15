@@ -3,6 +3,167 @@
  "partes": 5,
  "hallazgos": [
   {
+   "id": "BUG-061",
+   "prefijo": "BUG",
+   "titulo": "Las bajas de un clic se ejecutan en el GET: un escáner de enlaces del correo da de baja al dueño del reporte semanal y a los contactos de las campañas sin que nadie haga clic",
+   "dominio": "D2",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
+     "linea": 103,
+     "fragmento": "export async function GET(request: Request) {\n  return handle(request)"
+    },
+    {
+     "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
+     "linea": 77,
+     "fragmento": "data: { executiveReportOptOut: true },"
+    },
+    {
+     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+     "linea": 93,
+     "fragmento": "data: { optedOut: true, optedOutAt: new Date() },  // dentro del GET de :69"
+    },
+    {
+     "ruta": "src/lib/email/templates/executive-weekly.ts",
+     "linea": 289,
+     "fragmento": "<a href=\"${escapeHtml(input.unsubscribeUrl)}\" ...>Dejar de recibir este reporte</a>"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 155,
+     "fragmento": "<a href=\"${appUrl}/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}\""
+    },
+    {
+     "ruta": "src/lib/reports/executive-weekly/build.ts",
+     "linea": 99,
+     "fragmento": "if (org.executiveReportOptOut || org.executiveReportFrequency === 'DISABLED') {"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts",
+     "linea": 41,
+     "fragmento": "...(parsed.data.frequency !== 'DISABLED' ? { executiveReportOptOut: false } : {}),"
+    },
+    {
+     "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
+     "linea": 75,
+     "fragmento": "await prisma.organization.update({\n      where: { id: orgId },\n      data: { executiveReportOptOut: true },"
+    },
+    {
+     "ruta": "src/lib/reports/executive-weekly/build.ts",
+     "linea": 191,
+     "fragmento": "unsubscribeUrl: buildUnsubscribeUrl(organizationId),"
+    },
+    {
+     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+     "linea": 91,
+     "fragmento": "await prisma.emailContact.updateMany({\n    where: { id: contactId },\n    data: { optedOut: true, optedOutAt: new Date() },   (dentro de GET, :69)"
+    },
+    {
+     "ruta": "src/lib/email/unsubscribe-token.ts",
+     "linea": 63,
+     "fragmento": "return `${base}/api/email/unsubscribe-executive?org=${encodeURIComponent(\n    organizationId,\n  )}&token=${token}`"
+    }
+   ],
+   "impacto": "Los filtros de correo corporativos (Microsoft Defender Safe Links, Mimecast, Proofpoint) abren cada enlace del mail al recibirlo. Con el primer cliente PRO/BUSINESS que use un correo asi, el primer reporte semanal lo da de baja solo: el lunes siguiente build.ts lo saltea por OPTOUT y Perfil muestra 'No recibir' sin que lo haya pedido; si lo reactiva, el proximo mail lo vuelve a dar de baja. En email marketing, los destinatarios detras de esos filtros quedan como 'Bajas' tras la primera campana (hoy ensucia el conteo porque la baja no llega a Brevo, BUG-021; al arreglar BUG-021 dejarian de recibir sin haberlo pedido). El comentario de route.ts:107 cita RFC 8058, que recomienda confirmar en la pagina justamente porque el antispam hace GET automatico.",
+   "propuesta": "Separar los verbos en ambas rutas: el GET muestra una pagina con un boton 'Confirmar baja' (form POST) y no escribe; el POST (el que usan Gmail/Outlook con List-Unsubscribe-Post) hace la baja. Opcional: guardar fecha y origen de la baja para auditarla.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-reportes-email.reporte-semanal",
+    "h2.cli-reportes-email.preferencias-reporte",
+    "h2.cli-email-mkt.baja-de-contactos",
+    "h6.vis-optout",
+    "int.brevo",
+    "modelo.Organization",
+    "modelo.EmailContact",
+    "h2.cli-reportes-email",
+    "h2.cli-email-mkt"
+   ],
+   "relacionados_ids": [
+    "BUG-007",
+    "BUG-021"
+   ],
+   "previas": [],
+   "relacionados_texto": "BUG-007 (mismo patron en el magic link), BUG-021, SEC-039",
+   "vh": "VH-063",
+   "origen": {
+    "ciclo": "D2-c2",
+    "lote": "D2-T1",
+    "tmp": "D2-c2/D2-T1/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c2",
+      "tmp": "D2-c2/D2-T2/H02",
+      "titulo": "Las bajas del reporte semanal y de email marketing se ejecutan con un GET: el escáner de enlaces del correo da de baja sin que nadie haga clic",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo hallazgo (unsubscribe-executive y optout escriben en el GET)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-062",
+   "prefijo": "BUG",
+   "titulo": "Aprobar y pedir cambios en una entrega es check-then-act: el estado se lee fuera de la transaccion y el update no exige PENDING_APPROVAL",
+   "dominio": "D2",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 26,
+     "fragmento": "const task = await prisma.task.findUnique({ where: { id: parsed.data.taskId }, include: { project: true } })"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 39,
+     "fragmento": "if (task.approvalStatus !== 'PENDING_APPROVAL') {"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 44,
+     "fragmento": "await tx.task.update({\n        where: { id: parsed.data.taskId },\n        data: { approvalStatus: 'APPROVED' },"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 132,
+     "fragmento": "await tx.task.update({\n        where: { id: parsed.data.taskId },  // REJECTED, mismo patron"
+    }
+   ],
+   "impacto": "Dos pedidos casi simultaneos (aprobar en una pestana y pedir cambios en otra, o llamadas directas a la action) pasan los dos el control: quedan en Mensajes 'Aprobé la entrega' y 'Solicité cambios', dos tandas de notificaciones a todos los SUPER_ADMIN y un estado final que depende de cual escribio ultimo. Frente al primer cliente, el equipo no sabe si la entrega quedo aprobada.",
+   "propuesta": "Decision para Valentino (dashboard-actions.ts es congelado): dentro de la transaccion usar updateMany con where { id, approvalStatus: 'PENDING_APPROVAL', project: { organizationId } } y abortar si count === 0 antes de crear mensajes y notificaciones.",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "h2.cli-proyecto.aprobar-o-pedir-cambios",
+    "modelo.Task",
+    "lib.actions"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-043 (mismo patron en el brief), BUG-045",
+   "vh": null,
+   "origen": {
+    "ciclo": "D2-c2",
+    "lote": "D2-T1",
+    "tmp": "D2-c2/D2-T1/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "SEC-055",
    "prefijo": "SEC",
    "titulo": "La deduplicacion del pedido de upsell consulta ContactSubmission, que tambien escribe el formulario publico anonimo: un visitante puede silenciar 24 h el aviso del pedido de un cliente",
@@ -7228,191 +7389,6 @@
     "tmp": "D5-c1/D5-L8/H17",
     "verificado_padre": true,
     "nota_padre": "Muestreado: package.json:141 («ai»: «^6.0.177») y providerStreamClose.ts:186 (cita internals de @ai-sdk/google por número de línea).",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "FAL-020",
-   "prefijo": "FAL",
-   "titulo": "Reporte semanal del chatbot sin forma de darse de baja (el link de preferencias lleva a una ruta que no existe, sin List-Unsubscribe ni opt-out), con destinatario no determinístico y link con fallback a localhost",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "faltante",
-   "tipo_detalle": "faltante",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
-     "linea": 27,
-     "fragmento": "take: 1,  (members where role ADMIN, sin orderBy)"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
-     "linea": 57,
-     "fragmento": "const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'"
-    },
-    {
-     "ruta": "src/lib/email/templates/executive-weekly.ts",
-     "linea": 289,
-     "fragmento": "Dejar de recibir este reporte  (control: el executive report si tiene unsubscribe)"
-    },
-    {
-     "ruta": "src/lib/email/templates/weekly-report.ts",
-     "linea": 164,
-     "fragmento": "<a href=\"${data.dashboardUrl}/preferences\" style=\"color:#06b6d4; text-decoration:none;\">cambiá tus preferencias</a>."
-    },
-    {
-     "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
-     "linea": 60,
-     "fragmento": "dashboardUrl: `${appUrl}/dashboard/chatbot`,"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 387,
-     "fragmento": "executiveReportOptOut Boolean @default(false)"
-    }
-   ],
-   "impacto": "El cliente recibe dos mails semanales (este y el executive report); este no tiene baja ni registro de envio (un reintento del cron duplica), va al primer ADMIN que devuelva la base y el boton puede apuntar a localhost si falta la variable.",
-   "propuesta": "Unificar con el executive report o sumarle opt-out y WeeklyReportLog; orderBy determinista y leadNotificationEmail como destinatario; fallar si falta la URL.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.cli-chatbot",
-    "lib.chatbot.reports",
-    "int.brevo",
-    "int.cron.send-weekly-reports",
-    "h3.cli-chatbot.reporte-semanal-email"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "patrones D1-c1 take:1 sin orderBy y D1-c3 fallback localhost",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H18",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D7-c1",
-      "tmp": "D7-c1/D7-L1/H11",
-      "titulo": "Reporte semanal del chatbot sin forma de darse de baja: el link 'cambiá tus preferencias' lleva a una ruta que no existe y no hay List-Unsubscribe ni campo de opt-out",
-      "severidad": "MEDIA",
-      "nota_padre": "Misma falta de baja del reporte semanal del chatbot; suma que el link «cambiá tus preferencias» lleva a una ruta inexistente y que no hay List-Unsubscribe. Sube a MEDIA: es un email periódico sin ninguna forma de cortarlo. El campo de opt-out en el schema queda como decisión para Valentino."
-     }
-    ],
-    "cambios": [
-     {
-      "ciclo": "D7-c1",
-      "tmp": "D7-c1/D7-L1/H11",
-      "antes": {
-       "severidad": "BAJA",
-       "titulo": "Reporte semanal del chatbot sin opt-out, destinatario no deterministico y link con fallback a localhost"
-      },
-      "nota_padre": "Misma falta de baja del reporte semanal del chatbot; suma que el link «cambiá tus preferencias» lleva a una ruta inexistente y que no hay List-Unsubscribe. Sube a MEDIA: es un email periódico sin ninguna forma de cortarlo. El campo de opt-out en el schema queda como decisión para Valentino."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "UX-033",
-   "prefijo": "UX",
-   "titulo": "Con cero conversaciones el reporte semanal culpa al cliente ('verifica el script'), aunque la causa sea el LLM caido",
-   "dominio": "D5",
-   "severidad": "BAJA",
-   "tipo": "ux",
-   "tipo_detalle": "ux",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
-     "linea": 181,
-     "fragmento": "return 'Esta semana no hubo actividad en tu chatbot. Verificá que el script esté instalado.'"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/quota/checker.ts",
-     "linea": 197,
-     "fragmento": "const discarded = await tx.conversation.deleteMany({"
-    }
-   ],
-   "impacto": "Cuando Vertex falla antes del primer token, la compensacion borra la Conversation nueva; la semana queda con 0 conversaciones y el mail le pide al cliente revisar su instalacion mientras el problema es de develOP.",
-   "propuesta": "Antes de ese mensaje, mirar eventos de error del bot en la semana y usar un texto neutro o avisar a develOP.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.cli-chatbot",
-    "lib.chatbot.reports",
-    "lib.chatbot.quota"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "D5-A4",
-   "vh": "VH-103",
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H19",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-049",
-   "prefijo": "DEU",
-   "titulo": "Email de insights sin escapar botName/companyName y con URL que puede quedar 'undefined'; el email de prueba de leads usa otra plantilla que la real",
-   "dominio": "D5",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/notifications/sendInsightsNotification.ts",
-     "linea": 36,
-     "fragmento": "para ${botName} en ${organizationName}</p>"
-    },
-    {
-     "ruta": "src/app/api/cron/generate-insights/route.ts",
-     "linea": 66,
-     "fragmento": "dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/chatbot`,"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/sendTestNotification.ts",
-     "linea": 46,
-     "fragmento": "const result = await sendLeadNotificationEmail({"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/notifications/sendLeadNotification.ts",
-     "linea": 74,
-     "fragmento": "${escapeHtml(lead.createdAt.toLocaleString('es-AR'))}"
-    }
-   ],
-   "impacto": "Un nombre de bot con HTML se inyecta en el mail del propio cliente (riesgo bajo, mismo tenant). El boton 'probar notificacion' del admin manda una plantilla que produccion no usa (produccion usa lib/client-notifications/templates.ts) y con la hora en UTC: la prueba no representa lo que recibe el cliente.",
-   "propuesta": "Escapar con el helper de sendLeadNotification; fallback explicito de URL; que sendTestNotification use renderLeadEmail de client-notifications y borrar sendLeadNotification.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.adm-chatbots",
-    "h3.cli-chatbot",
-    "lib.chatbot.notifications",
-    "int.brevo"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "patron D1-c2 interpolacion sin escapar; CLEAN-R2",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L8",
-    "tmp": "D5-c1/D5-L8/H20",
-    "verificado_padre": false,
-    "nota_padre": "",
     "verificador": null
    },
    "estado": "vigente"

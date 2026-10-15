@@ -790,35 +790,35 @@ logic-core-v3/src/app/(protected)/admin/clients/loading.tsx,D3,profundo,leído,D
 logic-core-v3/src/app/(protected)/admin/clients/new/page.tsx,D3,profundo,leído,D3-c1,admin
 logic-core-v3/src/app/(protected)/admin/clients/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
 logic-core-v3/src/app/(protected)/admin/error.tsx,D3,profundo,leído,D3-c1,admin; client-component
-logic-core-v3/src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx,D4,profundo,pendiente,,experimento LeadOS (ZONA-FRANCO-inferida); client-component
-logic-core-v3/src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx,D4,profundo,pendiente,,experimento LeadOS (ZONA-FRANCO-inferida); client-component
-logic-core-v3/src/app/(protected)/admin/fg2-lab/page.tsx,D4,profundo,pendiente,,experimento LeadOS (ZONA-FRANCO-inferida); toca-db
+logic-core-v3/src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx,D4,profundo,leído,D4-c1,experimento LeadOS (ZONA-FRANCO-inferida); client-component
+logic-core-v3/src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx,D4,profundo,leído,D4-c1,experimento LeadOS (ZONA-FRANCO-inferida); client-component
+logic-core-v3/src/app/(protected)/admin/fg2-lab/page.tsx,D4,profundo,leído,D4-c1,experimento LeadOS (ZONA-FRANCO-inferida); toca-db
 logic-core-v3/src/app/(protected)/admin/layout.tsx,D3,profundo,leído,D3-c1,admin; toca-db; usa-auth
-logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx,D4,profundo,pendiente,,admin-leados; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx,D4,profundo,pendiente,,admin-leados; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx,D4,profundo,pendiente,,admin-leados; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/[leadId]/loading.tsx,D4,profundo,pendiente,,admin-leados; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/[leadId]/page.tsx,D4,profundo,pendiente,,admin-leados; toca-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/_actions/revision.actions.ts,D4,profundo,pendiente,,admin-leados; toca-db; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/_actions/revision.schemas.ts,D4,profundo,pendiente,,admin-leados; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/_components/pipeline-board.tsx,D4,profundo,pendiente,,admin-leados; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/error.tsx,D4,profundo,pendiente,,admin-leados; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/loading.tsx,D4,profundo,pendiente,,admin-leados; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/page.tsx,D4,profundo,pendiente,,admin-leados; toca-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx,D4,profundo,pendiente,,admin-leados; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leados/setter/[setterId]/page.tsx,D4,profundo,pendiente,,admin-leados; toca-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx,D4,profundo,leído,D4-c1,admin-leados; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx,D4,profundo,leído,D4-c1,admin-leados; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx,D4,profundo,leído,D4-c1,admin-leados; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/[leadId]/loading.tsx,D4,profundo,leído,D4-c1,admin-leados; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/[leadId]/page.tsx,D4,profundo,leído,D4-c1,admin-leados; toca-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/_actions/revision.actions.ts,D4,profundo,leído,D4-c1,admin-leados; toca-db; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/_actions/revision.schemas.ts,D4,profundo,leído,D4-c1,admin-leados; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/_components/pipeline-board.tsx,D4,profundo,leído,D4-c1,admin-leados; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/error.tsx,D4,profundo,leído,D4-c1,admin-leados; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/loading.tsx,D4,profundo,leído,D4-c1,admin-leados; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/page.tsx,D4,profundo,leído,D4-c1,admin-leados; toca-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx,D4,profundo,leído,D4-c1,admin-leados; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leados/setter/[setterId]/page.tsx,D4,profundo,leído,D4-c1,admin-leados; toca-db; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leads/[leadId]/page.tsx,D3,profundo,leído,D3-c1,admin; toca-db
-logic-core-v3/src/app/(protected)/admin/leads/_actions/activity.actions.ts,D4,profundo,pendiente,,admin-leads-actions; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/activity.schemas.ts,D4,profundo,pendiente,,admin-leads-actions; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/demo.actions.ts,D4,profundo,pendiente,,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/demo.schemas.ts,D4,profundo,pendiente,,admin-leads-actions; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/inbound.actions.ts,D4,profundo,pendiente,,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/inbound.schemas.ts,D4,profundo,pendiente,,admin-leads-actions; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/lead.actions.ts,D4,profundo,pendiente,,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/lead.schemas.ts,D4,profundo,pendiente,,admin-leads-actions; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/module-demand.actions.ts,D4,profundo,pendiente,,admin-leads-actions; toca-db; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/reunion.actions.ts,D4,profundo,pendiente,,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/admin/leads/_actions/reunion.schemas.ts,D4,profundo,pendiente,,admin-leads-actions; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/activity.actions.ts,D4,profundo,leído,D4-c1,admin-leads-actions; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/activity.schemas.ts,D4,profundo,leído,D4-c1,admin-leads-actions; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/demo.actions.ts,D4,profundo,leído,D4-c1,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/demo.schemas.ts,D4,profundo,leído,D4-c1,admin-leads-actions; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/inbound.actions.ts,D4,profundo,leído,D4-c1,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/inbound.schemas.ts,D4,profundo,leído,D4-c1,admin-leads-actions; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/lead.actions.ts,D4,profundo,leído,D4-c1,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/lead.schemas.ts,D4,profundo,leído,D4-c1,admin-leads-actions; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/module-demand.actions.ts,D4,profundo,leído,D4-c1,admin-leads-actions; toca-db; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/reunion.actions.ts,D4,profundo,leído,D4-c1,admin-leads-actions; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/admin/leads/_actions/reunion.schemas.ts,D4,profundo,leído,D4-c1,admin-leads-actions; ZONA-FRANCO
 logic-core-v3/src/app/(protected)/admin/leads/_components/assign-setter-control.tsx,D3,profundo,leído,D3-c1,admin; client-component
 logic-core-v3/src/app/(protected)/admin/leads/_components/change-status-select.tsx,D3,profundo,leído,D3-c1,admin; client-component
 logic-core-v3/src/app/(protected)/admin/leads/_components/column-overview.tsx,D3,profundo,leído,D3-c1,admin; client-component
@@ -1024,106 +1024,106 @@ logic-core-v3/src/app/(protected)/dashboard/soporte/[ticketId]/loading.tsx,D2,pr
 logic-core-v3/src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; usa-auth; guard-indirecto
 logic-core-v3/src/app/(protected)/dashboard/soporte/loading.tsx,D2,profundo,leído,D2-c1,dashboard
 logic-core-v3/src/app/(protected)/dashboard/soporte/page.tsx,D2,profundo,leído,D2-c1,dashboard; toca-db; usa-auth; guard-indirecto
-logic-core-v3/src/app/(protected)/setter/_actions/agenda.actions.ts,D4,profundo,pendiente,,setter; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/agenda.schemas.ts,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/cartera.actions.ts,D4,profundo,pendiente,,setter; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/cartera.schemas.ts,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/dossier.actions.ts,D4,profundo,pendiente,,setter; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/dossier.schemas.ts,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/draft-url-mensaje.invariant.ts,D4,superficial,pendiente,,setter; test; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/foco.actions.ts,D4,profundo,pendiente,,setter; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/novedades.actions.ts,D4,profundo,pendiente,,setter; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/outreach.actions.ts,D4,profundo,pendiente,,setter; server-action; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/outreach.schemas.ts,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/pausa-dia-ar.invariant.ts,D4,superficial,pendiente,,setter; test; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts,D4,profundo,pendiente,,setter; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/prospecto.actions.ts,D4,profundo,pendiente,,setter; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_actions/prospecto.schemas.ts,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/autosave-status.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/bloques-secuenciales.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/campo-mejora.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/canal-seguridad.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/cartera-toolbar.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/cartera-view.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/cola-del-dia.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/copy-block.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/ejemplo-ideal.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/foco-surface.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/guardrail-rol.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/home-empty.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/home-en-espera.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/home-sections.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/lead-card-actions.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/mis-numeros.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/novedades-abrir-foco.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/novedades-marcar-visto.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/novedades-panel.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/progreso-semana.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/setter-nav.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/setter-shell.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/shortcuts-help.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/teach-panel.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/tool-guide.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/tools-rail.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/trabajar-lead-button.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/_components/use-keyboard-shortcuts.ts,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/error.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/layout.tsx,D4,profundo,pendiente,,setter; usa-auth; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/badge-provisorio.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/escalar-modal.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/guia-retrabajo.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.helpers.ts,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/opener-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/urgencia-banner.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/use-hidratado.ts,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/error.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/loading.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/archivo-manual.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/borrador-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/brief-sanity.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/construccion-ctas.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/enlace-chequeo.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/enlace-pantalla.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/envio-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/escalamiento-construccion.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/estado-manual.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/fase-auto-reporte.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/franja-recorrido.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/historial-lead.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m1-ficha.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m13-borrador.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m14-chequeo.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m15-envio.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m16-agenda.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m4-opener.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m6-brief.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/manual-nav.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/salida-manual.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_data.ts,D4,profundo,pendiente,,setter; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/error.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/loading.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/page.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/leads/[leadId]/page.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/loading.tsx,D4,profundo,pendiente,,setter; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/not-found.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/nuevo/importar/page.tsx,D4,profundo,pendiente,,setter; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx,D4,profundo,pendiente,,setter; client-component; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/nuevo/page.tsx,D4,profundo,pendiente,,setter; toca-db; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/app/(protected)/setter/page.tsx,D4,profundo,pendiente,,setter; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/agenda.actions.ts,D4,profundo,leído,D4-c1,setter; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/agenda.schemas.ts,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/cartera.actions.ts,D4,profundo,leído,D4-c1,setter; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/cartera.schemas.ts,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/dossier.actions.ts,D4,profundo,leído,D4-c1,setter; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/dossier.schemas.ts,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/draft-url-mensaje.invariant.ts,D4,superficial,superficial,D4-c1,setter; test; ZONA-FRANCO | test sin DB: el error del borrador llega en castellano y colgado del control (zod 4)
+logic-core-v3/src/app/(protected)/setter/_actions/foco.actions.ts,D4,profundo,leído,D4-c1,setter; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/novedades.actions.ts,D4,profundo,leído,D4-c1,setter; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/outreach.actions.ts,D4,profundo,leído,D4-c1,setter; server-action; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/outreach.schemas.ts,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/pausa-dia-ar.invariant.ts,D4,superficial,superficial,D4-c1,setter; test; ZONA-FRANCO | test sin DB con TZ=UTC: fin de la pausa personal en el borde del dia AR; no cubre el dia de hoy calculado en UTC de las otras fechas del setter (BUG-152)
+logic-core-v3/src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts,D4,profundo,leído,D4-c1,setter; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/prospecto.actions.ts,D4,profundo,leído,D4-c1,setter; toca-db; server-action; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_actions/prospecto.schemas.ts,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/autosave-status.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/bloques-secuenciales.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/campo-mejora.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/canal-seguridad.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/cartera-toolbar.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/cartera-view.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/cola-del-dia.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/copy-block.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/ejemplo-ideal.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/foco-surface.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/guardrail-rol.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/home-empty.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/home-en-espera.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/home-sections.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/lead-card-actions.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/mis-numeros.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/novedades-abrir-foco.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/novedades-marcar-visto.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/novedades-panel.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/progreso-semana.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/setter-nav.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/setter-shell.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/shortcuts-help.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/teach-panel.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/tool-guide.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/tools-rail.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/trabajar-lead-button.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/_components/use-keyboard-shortcuts.ts,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/error.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/layout.tsx,D4,profundo,leído,D4-c1,setter; usa-auth; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/badge-provisorio.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/escalar-modal.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/guia-retrabajo.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.helpers.ts,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/opener-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/urgencia-banner.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/use-hidratado.ts,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/error.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/loading.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/archivo-manual.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/borrador-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/brief-sanity.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/construccion-ctas.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/enlace-chequeo.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/enlace-pantalla.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/envio-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/escalamiento-construccion.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/estado-manual.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/fase-auto-reporte.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/franja-recorrido.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/historial-lead.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m1-ficha.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m13-borrador.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m14-chequeo.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m15-envio.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m16-agenda.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m4-opener.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/m6-brief.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/manual-nav.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/salida-manual.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_data.ts,D4,profundo,leído,D4-c1,setter; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/error.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/loading.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/page.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/leads/[leadId]/page.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/loading.tsx,D4,profundo,leído,D4-c1,setter; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/not-found.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/nuevo/importar/page.tsx,D4,profundo,leído,D4-c1,setter; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx,D4,profundo,leído,D4-c1,setter; client-component; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/nuevo/page.tsx,D4,profundo,leído,D4-c1,setter; toca-db; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/app/(protected)/setter/page.tsx,D4,profundo,leído,D4-c1,setter; guard-indirecto; ZONA-FRANCO
 logic-core-v3/src/app/accept-invite/AcceptInviteForm.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
 logic-core-v3/src/app/accept-invite/InviteBackground.tsx,D1,profundo,leído,D1-c1,auth-ui; client-component
 logic-core-v3/src/app/accept-invite/actions.ts,D1,profundo,leído,D1-c1,auth-ui; toca-db; server-action; escribe-db
@@ -1154,7 +1154,7 @@ logic-core-v3/src/app/api/cron/cleanup-old-events/__tests__/cleanup-old-events-a
 logic-core-v3/src/app/api/cron/cleanup-old-events/route.ts,D7,profundo,leído,D7-c1,cron; route-handler
 logic-core-v3/src/app/api/cron/detect-bot-issues/route.ts,D7,profundo,leído,D7-c1,cron; route-handler
 logic-core-v3/src/app/api/cron/generate-insights/route.ts,D7,profundo,leído,D7-c1,cron; toca-db; route-handler
-logic-core-v3/src/app/api/cron/os-follow-up/route.ts,D4,profundo,pendiente,,cron-leados; toca-db; guard-indirecto; route-handler; escribe-db
+logic-core-v3/src/app/api/cron/os-follow-up/route.ts,D4,profundo,leído,D4-c1,cron-leados; toca-db; guard-indirecto; route-handler; escribe-db
 logic-core-v3/src/app/api/cron/regenerate-briefs/route.ts,D7,profundo,leído,D7-c1,cron; toca-db; guard-indirecto; route-handler
 logic-core-v3/src/app/api/cron/send-executive-reports/route.ts,D7,profundo,leído,D7-c1,cron; guard-indirecto; route-handler
 logic-core-v3/src/app/api/cron/send-weekly-reports/route.ts,D7,profundo,leído,D7-c1,cron; route-handler
@@ -1562,7 +1562,7 @@ logic-core-v3/src/lib/email/templates/password-reset.ts,D7,profundo,leído,D7-c1
 logic-core-v3/src/lib/email/templates/weekly-report.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/email/templates/welcome-client.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/email/unsubscribe-token.ts,D7,profundo,leído,D7-c1,integracion
-logic-core-v3/src/lib/follow-up.ts,D4,profundo,pendiente,,leados-libre
+logic-core-v3/src/lib/follow-up.ts,D4,profundo,leído,D4-c1,leados-libre
 logic-core-v3/src/lib/health-score.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/home-routes.ts,D9,profundo,pendiente,,compartido: lo importa components/ui (FROZEN) (src/components/ui/Preloader.tsx); lib-sitio-publico
 logic-core-v3/src/lib/hover.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/app/(protected)/admin/alerts/AlertsClient.tsx, src/app/(protected)/admin/audit-log/_components/AuditLogClient.tsx +39); lib-sitio-publico; FROZEN-inferido"
@@ -1581,81 +1581,81 @@ logic-core-v3/src/lib/integrations/tiendanube.ts,D7,profundo,leído,D7-c1,integr
 logic-core-v3/src/lib/isolation/index.ts,D6,profundo,leído,D6-c1,aislamiento; toca-db
 logic-core-v3/src/lib/isolation/registry.ts,D6,profundo,leído,D6-c1,aislamiento; toca-db; escribe-db
 logic-core-v3/src/lib/isolation/scoped-model.ts,D6,profundo,leído,D6-c1,aislamiento; toca-db; escribe-db
-logic-core-v3/src/lib/leados-ui.ts,D4,profundo,pendiente,,leados-libre
-logic-core-v3/src/lib/leados/_experimental/fg2-brief-lab.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/_experimental/fg2-casos-gastro.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/action-codes.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/acuse-recibo.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/agenda.ts,D4,profundo,pendiente,,leados; toca-db; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/alta-propia.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/aprobada-sin-link.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/assignment-trail.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/assignment-trail.ts,D4,profundo,pendiente,,leados; toca-db; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/cola.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/cola.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/contador-dms.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/contracts.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/copy-blocks.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/copy-sin-jerga.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/copy-sin-ubicacion.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/dossier-stage.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/dossier-stage.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/dossier.ts,D4,profundo,pendiente,,leados; toca-db; guard-indirecto; escribe-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/enlaces-manual.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/error-copy.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/escalamiento.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/escalamiento.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/ficha-bloques.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/ficha-bloques.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/ficha-calidad.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/flow-content.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/flow.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/flow.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/foco-cookie.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/foco.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/foco.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/gate-envio-demo.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/guidance-content.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/herramientas.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/home.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/isolation.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/manual.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/manual.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/mis-numeros.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/mis-numeros.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/notify.ts,D4,profundo,pendiente,,leados; toca-db; escribe-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/novedades-agrupar.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/novedades-vigencia.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/novedades-vigencia.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/novedades.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/novedades.ts,D4,profundo,pendiente,,leados; toca-db; escribe-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/outreach.ts,D4,profundo,pendiente,,leados; toca-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/ownership.ts,D4,profundo,pendiente,,leados; toca-db; guard-indirecto; ZONA-FRANCO
-logic-core-v3/src/lib/leados/pantallas-construccion.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/particion.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/paso-admitido.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/paso-admitido.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/paso.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/pipeline.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/postergacion.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/progreso-isolation.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/progreso.ts,D4,profundo,pendiente,,leados; toca-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/prompts-disenio.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/prospecto-import.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/prospecto-import.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/recorrido.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/recorrido.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/reloop-selfcheck-reset.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/revision.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/self-check-gate.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/setter-carga.ts,D4,profundo,pendiente,,leados; toca-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/setter-meta.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/setter-meta.ts,D4,profundo,pendiente,,leados; toca-db; escribe-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/timeline.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/timeline.ts,D4,profundo,pendiente,,leados; toca-db; ZONA-FRANCO
-logic-core-v3/src/lib/leados/turno.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
-logic-core-v3/src/lib/leados/turno.ts,D4,profundo,pendiente,,leados; ZONA-FRANCO
-logic-core-v3/src/lib/leados/vista-cartera.invariant.ts,D4,superficial,pendiente,,leados; test; ZONA-FRANCO
+logic-core-v3/src/lib/leados-ui.ts,D4,profundo,leído,D4-c1,leados-libre
+logic-core-v3/src/lib/leados/_experimental/fg2-brief-lab.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/_experimental/fg2-casos-gastro.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/action-codes.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/acuse-recibo.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: toda accion que escribe da respuesta inmediata y acuse
+logic-core-v3/src/lib/leados/agenda.ts,D4,profundo,leído,D4-c1,leados; toca-db; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/alta-propia.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el duenio del alta propia sale de la sesion (anti-IDOR) y entra frio; no cubre la deduplicacion contra el sistema (BUG-161)
+logic-core-v3/src/lib/leados/aprobada-sin-link.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: una APROBADA sin finalUrl no deriva igual que una con link; no cubre la contradiccion con toque vencido y gate cerrado (BUG-164)
+logic-core-v3/src/lib/leados/assignment-trail.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: mostrar el rastro de reasignacion no cambia el ownership y excluye el evento SISTEMA de lo comercial
+logic-core-v3/src/lib/leados/assignment-trail.ts,D4,profundo,leído,D4-c1,leados; toca-db; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/cola.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: la cola de trabajo no duplica leads y el foco es su primer item; no cubre que un CERRADO vuelva a la cola (BUG-147)
+logic-core-v3/src/lib/leados/cola.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/contador-dms.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el contador de DMs del dia cuenta mensajes mandados, no filas
+logic-core-v3/src/lib/leados/contracts.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/copy-blocks.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/copy-sin-jerga.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: ninguna copy del setter nombra codigos de sprint ni columnas
+logic-core-v3/src/lib/leados/copy-sin-ubicacion.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: ninguna copy del setter dice donde esta una cosa
+logic-core-v3/src/lib/leados/dossier-stage.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el grafo LEGAL_TRANSITIONS del stage del dossier
+logic-core-v3/src/lib/leados/dossier-stage.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/dossier.ts,D4,profundo,leído,D4-c1,leados; toca-db; guard-indirecto; escribe-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/enlaces-manual.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: los destinos que nombra el manual se alcanzan y no se gatean de mas
+logic-core-v3/src/lib/leados/error-copy.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/escalamiento.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: persistir el escalamiento no mueve el stage
+logic-core-v3/src/lib/leados/escalamiento.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/ficha-bloques.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el mapa de bloques de la ficha contra el gate; no cubre el avance solo al cambiar de pestania
+logic-core-v3/src/lib/leados/ficha-bloques.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/ficha-calidad.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/flow-content.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/flow.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: clasificacion del home (postergado vencido accionable); no cubre CERRADO, que no va al archivo (BUG-147)
+logic-core-v3/src/lib/leados/flow.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/foco-cookie.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/foco.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el foco sticky y la cima de la cola
+logic-core-v3/src/lib/leados/foco.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/gate-envio-demo.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: gateEnvioDemo es exactamente la composicion de sus tres factores
+logic-core-v3/src/lib/leados/guidance-content.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/herramientas.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/home.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/isolation.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/manual.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: un lead terminal deriva a archivo; no cubre CERRADO, que el manual sigue trabajando (BUG-147)
+logic-core-v3/src/lib/leados/manual.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/mis-numeros.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el setter ve solo sus numeros; no cubre que los descartados cuenten como activos (BUG-168)
+logic-core-v3/src/lib/leados/mis-numeros.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/notify.ts,D4,profundo,leído,D4-c1,leados; toca-db; escribe-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/novedades-agrupar.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/novedades-vigencia.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: un aviso no manda lo contrario que la cola
+logic-core-v3/src/lib/leados/novedades-vigencia.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/novedades.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: las novedades se filtran por destinatario; no cubre la purga de avisos de leads borrados
+logic-core-v3/src/lib/leados/novedades.ts,D4,profundo,leído,D4-c1,leados; toca-db; escribe-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/outreach.ts,D4,profundo,leído,D4-c1,leados; toca-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/ownership.ts,D4,profundo,leído,D4-c1,leados; toca-db; guard-indirecto; ZONA-FRANCO
+logic-core-v3/src/lib/leados/pantallas-construccion.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: pantallas de construccion contra FASE_IDS
+logic-core-v3/src/lib/leados/particion.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: fijar un lead nunca deja el foco falsamente vacio
+logic-core-v3/src/lib/leados/paso-admitido.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: ningun estado senala como paso actual una pantalla que no admite; usa fixtures con la ficha de forma vieja (POD-374)
+logic-core-v3/src/lib/leados/paso-admitido.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/paso.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/pipeline.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/postergacion.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el dia elegido es el que se guarda, se muestra y reactiva; no cubre la fecha minima del picker en UTC (BUG-152)
+logic-core-v3/src/lib/leados/progreso-isolation.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: las piezas puras del write de progresoJson (aislamiento por duenio); no cubre la carrera de varios tildes seguidos
+logic-core-v3/src/lib/leados/progreso.ts,D4,profundo,leído,D4-c1,leados; toca-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/prompts-disenio.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/prospecto-import.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: la importacion deriva el duenio de la sesion y valida fila por fila; no cubre comillas en medio de un campo (BUG-169) ni CSV con punto y coma o Latin-1 (UX-055)
+logic-core-v3/src/lib/leados/prospecto-import.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/recorrido.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: la franja del recorrido lista los pasos del manual sin repetir y con destinos validos
+logic-core-v3/src/lib/leados/recorrido.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/reloop-selfcheck-reset.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el re-loop RECHAZADA a CONSTRUCCION resetea el self-check y preserva el progreso
+logic-core-v3/src/lib/leados/revision.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/self-check-gate.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: selfCheckAprobado valida contra HARD_CHECKS vigentes; el emparejamiento sigue siendo por texto visible (DEU-086)
+logic-core-v3/src/lib/leados/setter-carga.ts,D4,profundo,leído,D4-c1,leados; toca-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/setter-meta.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: pin, snooze y nota del setter se filtran por setterId
+logic-core-v3/src/lib/leados/setter-meta.ts,D4,profundo,leído,D4-c1,leados; toca-db; escribe-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/timeline.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: el timeline del lead solo lo ve su setter (despues del gate de ownership)
+logic-core-v3/src/lib/leados/timeline.ts,D4,profundo,leído,D4-c1,leados; toca-db; ZONA-FRANCO
+logic-core-v3/src/lib/leados/turno.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: las pantallas no muestran la misma frase para dos turnos distintos
+logic-core-v3/src/lib/leados/turno.ts,D4,profundo,leído,D4-c1,leados; ZONA-FRANCO
+logic-core-v3/src/lib/leados/vista-cartera.invariant.ts,D4,superficial,superficial,D4-c1,leados; test; ZONA-FRANCO | test sin DB: pausa personal y postergacion comercial son conceptos y escrituras distintos
 logic-core-v3/src/lib/logger.ts,D9,profundo,pendiente,,lib-transversal; FROZEN-inferido
 logic-core-v3/src/lib/logo-footprint.ts,D9,profundo,pendiente,,"compartido: lo importa components/ui (FROZEN) (src/components/ui/BrandedIntroCanvas.tsx, src/components/ui/IntroLockupText.tsx +1); lib-sitio-publico"
 logic-core-v3/src/lib/marketing-routes.ts,D9,profundo,pendiente,,"compartido: lo importa codigo interno (src/components/layout/useChromeRevealed.ts, src/components/ui/MarketingIntro.tsx +1); lib-sitio-publico"
@@ -1672,7 +1672,7 @@ logic-core-v3/src/lib/n8n.ts,D7,profundo,leído,D7-c1,integracion
 logic-core-v3/src/lib/notifications/telegram.ts,D7,profundo,leído,D7-c1,integracion; toca-db
 logic-core-v3/src/lib/onboarding/core.ts,D5,profundo,leído,D5-c1,alta de cliente (unico llamador: admin/chatbots/new); toca-db; escribe-db
 logic-core-v3/src/lib/onboarding/seed-tasks-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db
-logic-core-v3/src/lib/os-commercial.ts,D4,profundo,pendiente,,leados-libre; toca-db; guard-indirecto; escribe-db
+logic-core-v3/src/lib/os-commercial.ts,D4,profundo,leído,D4-c1,leados-libre; toca-db; guard-indirecto; escribe-db
 logic-core-v3/src/lib/plan/fallback.ts,D2,profundo,leído,D2-c1,logica-dashboard
 logic-core-v3/src/lib/plan/get-org-usage.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db
 logic-core-v3/src/lib/plan/get-plan-for-org.ts,D2,profundo,leído,D2-c1,logica-dashboard; toca-db; escribe-db

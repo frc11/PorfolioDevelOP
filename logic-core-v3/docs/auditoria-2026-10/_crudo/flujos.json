@@ -3099,6 +3099,788 @@
     "corrección al inventario: AUTH_SECRET sí se lee en src (unsubscribe-token.ts:9, oauth-state.ts:29, impersonation.ts:17, api/qa/login/route.ts:102), no 'solo scripts'",
     "otras: ANTHROPIC_API_KEY fuera del lote (BUG-066: fallo cacheado 24 h sin Sentry); BLOB_READ_WRITE_TOKEN sin lecturas; AUTH_GOOGLE_ID/SECRET en auth.ts (FROZEN, UX-002)"
    ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Setter: Tu dia (cola, foco y espera)",
+   "pasos": [
+    "proxy.ts:117 rama SETTER",
+    "src/app/(protected)/setter/layout.tsx:26-34 auth + rol SETTER",
+    "layout.tsx:39-41 contarNovedadesSinLeer(session.user.id)",
+    "src/app/(protected)/setter/page.tsx:29 requireSetter()",
+    "page.tsx:30 listOwnedLeads(userId) -> sale del lote: src/lib/leados/ownership.ts (where isolation.ts:34-35 assignedToId)",
+    "page.tsx:44 particionarCartera -> sale del lote: src/lib/leados/flow.ts:813 (grupoPara flow.ts:416)",
+    "page.tsx:45-47 leerFocoLeadId + seleccionarFoco + armarCola",
+    "page.tsx:115-125 HomeEmpty | ColaDelDia | HomeEnEspera",
+    "page.tsx:95-98 getNovedadesSetter con dedup excludeLeadIds(cola)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Setter: alta manual de prospecto",
+   "pasos": [
+    "sale del lote: src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx (UI)",
+    "src/app/(protected)/setter/_actions/prospecto.actions.ts:25 requireSetter()",
+    "prospecto.actions.ts:26 NuevoProspectoSchema.parse",
+    "prospecto.actions.ts:28-31 prisma.osLead.create(ownedLeadCreateData(parsed, userId)) -> sale del lote: src/lib/leados/isolation.ts:96-97 (caliente false, source Setter)",
+    "prospecto.actions.ts:36-37 revalidatePath /setter y /admin/leados"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Setter: importacion CSV de prospectos",
+   "pasos": [
+    "src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts:40 requireSetter()",
+    "prospecto-bulk.actions.ts:42-48 csv de FormData -> parseCsv/mapearFilas (sale del lote: src/lib/leados/prospecto-import.ts)",
+    "prospecto-bulk.actions.ts:53 tope MAX_FILAS_IMPORT",
+    "prospecto-bulk.actions.ts:63 NuevoProspectoSchema.safeParse por fila",
+    "prospecto-bulk.actions.ts:83-88 dedup contra cartera propia y nombresEnSistema() (:143-146, lee todo OsLead)",
+    "prospecto-bulk.actions.ts:104-110 construirAltasLote(..., userId) + prisma.$transaction(create)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Setter: dossier de la demo (ficha -> evaluacion -> brief -> construccion -> borrador -> chequeo -> revision)",
+   "pasos": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts:100 saveOwnedFicha (stage FICHA)",
+    "dossier.actions.ts:139-148 fichaFaltantes + transitionDossier EVALUADA (sale del lote: src/lib/leados/dossier.ts)",
+    "dossier.actions.ts:151-156 score<=2 -> DESCARTADA (sin transaccion con el paso anterior)",
+    "dossier.actions.ts:164-166 notificarEvaluacionScoreAlto (Telegram informativo)",
+    "dossier.actions.ts:205-210 saveOwnedBrief + transitionDossier BRIEF (gate caliente/respondio en dossier.ts)",
+    "dossier.actions.ts:238 transitionDossier CONSTRUCCION",
+    "dossier.actions.ts:326 saveOwnedDraftUrl (https)",
+    "dossier.actions.ts:355-356 buildSelfCheck + saveOwnedSelfCheck",
+    "dossier.actions.ts:382-398 gate draft + selfCheckAprobado (flow.ts:204-208, match por nombre) + transitionDossier EN_REVISION",
+    "dossier.actions.ts:401 revalidarRevisionAdmin"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Admin: revision de demos (aprobar / rechazar) y loop de retrabajo",
+   "pasos": [
+    "src/app/(protected)/admin/leados/page.tsx:34-49 cola EN_REVISION (sin guard propio, heredado admin/layout.tsx:47)",
+    "page.tsx:105-120 ordenarCola por campo caliente",
+    "src/app/(protected)/admin/leados/[leadId]/page.tsx:53 dossier + :237 iframe del draftUrl",
+    "[leadId]/_components/decision-bar.tsx:129-136 AprobarRevisionSchema -> aprobarRevision",
+    "src/app/(protected)/admin/leados/_actions/revision.actions.ts:78-81 transitionDossier APROBADA con finalUrl",
+    "revision.actions.ts:85 -> :41-50 emitirNovedadSetter DEMO_APROBADA (sale del lote: src/lib/leados/novedades.ts)",
+    "decision-bar.tsx:120-123 resetAndClose + router.refresh",
+    "rechazo: decision-bar.tsx:149-163 -> revision.actions.ts:106-113 transitionDossier RECHAZADA + aviso",
+    "retrabajo: src/app/(protected)/setter/_actions/dossier.actions.ts:252-267 reabrirConstruccion"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Setter: outreach (opener, toques y envio de la demo)",
+   "pasos": [
+    "src/app/(protected)/setter/_actions/outreach.actions.ts:103-123 ownership + guards (no respondio, evaluado, sin contactos)",
+    "outreach.actions.ts:125-131 registrarContactoComercial INSTAGRAM_DM + SIN_RESPUESTA (sale del lote: src/lib/os-commercial.ts)",
+    "outreach.actions.ts:164-171 registrarResultado: lead propio y activo (leadActivo)",
+    "outreach.actions.ts:184-186 CALL_AGENDADA rebota a Agenda",
+    "outreach.actions.ts:188-198 registrarContactoComercial + postergarLead si POSTERGADO",
+    "outreach.actions.ts:235-242 gateEnvioDemo (respondio o caliente + APROBADA + finalUrl)",
+    "outreach.actions.ts:244-260 claim marcarDemoEnviadaOwned + crearDemoComercial con compensacion"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Setter: agenda de la reunion (Cal.com) y cierre admin",
+   "pasos": [
+    "src/app/(protected)/setter/_actions/agenda.actions.ts:84-113 gateAgenda (propio, RESPONDIO, sin reunion agendada)",
+    "agenda.actions.ts:134 getCalConfigLeadOS -> sale del lote: src/lib/leados/agenda.ts:57-95 (toma CUALQUIER org con calComUsername)",
+    "agenda.actions.ts:138-154 getSlots (cal-com-v2.ts, sin auth) + guardarHorariosOfrecidosOwned",
+    "agenda.actions.ts:190-201 revalidacion del slot",
+    "agenda.actions.ts:204-209 claim AGENDANDO",
+    "agenda.actions.ts:213-220 createBooking",
+    "agenda.actions.ts:236-245 guardarAgendaOwned + registrarContactoComercial CALL_AGENDADA",
+    "agenda.actions.ts:246-259 compensacion (cancelBooking .catch silenciado)",
+    "agenda.actions.ts:263 notificarReunionAgendada",
+    "admin: src/app/(protected)/admin/leads/_actions/reunion.actions.ts:50 marcarReunionRealizadaAdmin",
+    "reunion.actions.ts:71-84 guardarResultadoReunionAdmin + status (RE_SEGUIMIENTO -> RESPONDIO; agendaJson sigue AGENDADA -> agenda.actions.ts:108 bloquea re-agendar)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Setter: palancas de la cartera y foco",
+   "pasos": [
+    "src/app/(protected)/setter/_actions/cartera.actions.ts:40-51 resolverLeadPropio (requireSetter + getOwnedLead)",
+    "cartera.actions.ts:65/:101/:117/:140 upsertSetterMeta(leadId, userId, ...) (sale del lote: src/lib/leados/setter-meta.ts)",
+    "cartera.actions.ts:93 finDePausaAR (borde en hora AR)",
+    "src/app/(protected)/setter/_actions/foco.actions.ts:41-45 getOwnedLead + cookie httpOnly leados-foco-v1",
+    "setter/page.tsx:45-46 leerFocoLeadId + seleccionarFoco"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Admin: asignacion de lead a setter y aviso de handoff",
+   "pasos": [
+    "sale del lote: src/app/(protected)/admin/leads/_components/assign-setter-control.tsx",
+    "src/app/(protected)/admin/leads/_actions/lead.actions.ts:137-157 dueño previo + destino debe ser SETTER",
+    "lead.actions.ts:161-167 update assignedToId + caliente",
+    "lead.actions.ts:171-185 registrarReasignacion (canal SISTEMA, sale del lote: src/lib/leados/assignment-trail.ts:42-48)",
+    "lead.actions.ts:194-203 emitirNovedadSetter entrante/saliente",
+    "lead.actions.ts:211-223 revalidate /setter y tags admin",
+    "setter/layout.tsx:39-41 badge de novedades"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Admin: metrica descarte/avance y drill-down por setter",
+   "pasos": [
+    "src/app/(protected)/admin/leados/page.tsx:52-60 dossiers con lead.assignedToId (dueño ACTUAL)",
+    "page.tsx:122-134 filasMetrica + calcularRatioSetters (sale del lote: src/lib/leados/revision.ts)",
+    "page.tsx:276-278 link a /admin/leados/setter/[setterId]",
+    "src/app/(protected)/admin/leados/setter/[setterId]/page.tsx:36-51 user + dossiers del dueño actual",
+    "setter/[setterId]/page.tsx:77-95 orden y ratio",
+    "_components/setter-evaluaciones.tsx:36-99 lista"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Admin: panorama de produccion (pipeline y atascos)",
+   "pasos": [
+    "src/app/(protected)/admin/leados/page.tsx:64-84 dossiers FICHA..EN_REVISION + RECHAZADA",
+    "page.tsx:92-103 resumirPipeline/detectarAtascos/detectarEscaladas (sale del lote: src/lib/leados/pipeline.ts)",
+    "_components/pipeline-board.tsx:42-131 PipelineCockpit",
+    "pipeline-board.tsx:139-196 escaladas, :215-247 carriles, :293-370 atascos"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Cron os-follow-up (avisos de toque y postergados vencidos)",
+   "pasos": [
+    "vercel.json:4 path /api/cron/os-follow-up (unico disparador; netlify.toml:26-32 solo agenda otros 3 crons)",
+    "src/app/api/cron/os-follow-up/route.ts:180-189 where nextFollowUpAt vencido y status notIn CERRADO/PERDIDO, o POSTERGADO vencido",
+    "desemboca en [D7] Crons sin disparador"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Admin: FG-2 lab (prototipo de prompt estructurado)",
+   "pasos": [
+    "src/app/(protected)/admin/fg2-lab/page.tsx:29-46 fichas (take 200) de todos los setters",
+    "page.tsx:48-66 LabLead con señal",
+    "_components/fg2-lab-client.tsx:76-114 precarga desde lead o caso",
+    "fg2-lab-client.tsx:136-137 assembleGastroPrompt/estimarCostoPrompt (sale del lote: src/lib/leados/_experimental/fg2-brief-lab.ts)",
+    "fg2-lab-client.tsx:49-56 copiar al portapapeles",
+    "_components/medicion-panel.tsx:77-90 fila TSV del experimento"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "nombre": "Admin leads: inbound a OsLead",
+   "pasos": [
+    "src/app/(protected)/admin/leads/_actions/inbound.actions.ts:55-69 ContactSubmission por rango",
+    "inbound.actions.ts:126-171 $transaction: dedup por email insensible + create source Inbound",
+    "desemboca en [D3] Inbound: listar por periodo y convertir a Lead OS"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Ir a trabajar el lead del foco (o una fila de la cola): ancla y abre el detalle",
+   "pasos": [
+    "src/app/(protected)/setter/_components/cola-del-dia.tsx:109 monta FocoSurface con cola.items[0] (la page lo monta en page.tsx:118, fuera del lote)",
+    "foco-surface.tsx:231 onClick={irATrabajar} (atajo 't': foco-surface.tsx:151 -> use-keyboard-shortcuts.ts:46-50)",
+    "foco-surface.tsx:85 await anclarFoco(foco.id)",
+    "sale del lote: foco-surface.tsx:20 -> src/app/(protected)/setter/_actions/foco.actions.ts (anclarFoco; cookie de foco en src/lib/leados/foco-cookie.ts)",
+    "foco-surface.tsx:86-88 error -> toast.error(result.error)",
+    "foco-surface.tsx:90 router.push(`/setter/leads/${foco.id}`) -> detalle del lead (otro lote)",
+    "variante fila de la cola: cola-del-dia.tsx:83 -> trabajar-lead-button.tsx:38 -> :26 anclarFoco -> :31 router.push"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Saltar y Soltar el foco",
+   "pasos": [
+    "foco-surface.tsx:258 Saltar (deshabilitado sin próximo :259)",
+    "foco-surface.tsx:97 await anclarFoco(proximo.id) -> sale del lote: foco.actions.ts",
+    "foco-surface.tsx:107 toast.success('Saltado — ...') -> :109 router.refresh()",
+    "foco-surface.tsx:269-272 Soltar (solo con stickyActivo)",
+    "foco-surface.tsx:129 await soltarFoco() -> sale del lote: foco.actions.ts",
+    "foco-surface.tsx:137 toast -> :139 router.refresh()"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Pausar un lead (desde el foco o desde la card de la cartera)",
+   "pasos": [
+    "foco-surface.tsx:241 toggleSnooze -> :144 setMinDate(fechaEnDias(1))",
+    "foco-surface.tsx:291 pausar(fechaEnDias(atajo.dias)) o :309 pausar(fechaCustom)",
+    "foco-surface.tsx:68-71 fechaEnDias: setDate local + toISOString().slice(0,10) (UTC)",
+    "foco-surface.tsx:115 await pausarLead(foco.id, hasta) -> sale del lote: src/app/(protected)/setter/_actions/cartera.actions.ts:78",
+    "foco-surface.tsx:120 toast con formatFechaCorta(result.data.snoozedUntil) -> :123 router.refresh()",
+    "variante card: lead-card-actions.tsx:155 abrirSnooze -> :190 pausar(fechaEnDias(...)) -> :92 pausarLead -> :100 router.refresh()"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Palancas privadas de la card: fijar, nota, reanudar",
+   "pasos": [
+    "home-sections.tsx:176 LeadCardActions fuera del Link de la card",
+    "lead-card-actions.tsx:147 togglePin -> :80 fijarLead(leadId, !pinned) -> sale del lote: cartera.actions.ts",
+    "lead-card-actions.tsx:159-165 abrirNota -> :227-233 TextArea maxLength={NOTA_MAX} (NOTA_MAX de cartera.schemas.ts, :16) -> :235 guardar -> :119 guardarNota(leadId, notaTexto) -> sale del lote: cartera.actions.ts",
+    "lead-card-actions.tsx:167-170 Reanudar (solo con pausa vigente, :76) -> :106 reanudarLead -> sale del lote",
+    "cada acción: toast.error(result.error) o toast.success + router.refresh() (:81-86, :120-126, :107-113)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Cartera agrupada: abrir, buscar, filtrar, ordenar y entrar a un lead",
+   "pasos": [
+    "cartera-view.tsx:81 toggle «Ver toda la cartera» (cerrada por defecto :42)",
+    "cartera-view.tsx:106 CarteraToolbar -> cartera-toolbar.tsx:69 (query), :81 (estado de VISTAS_CARTERA :27-30), :88 (orden :32-37)",
+    "cartera-view.tsx:58 filtrarYOrdenarCartera(leads, query, estado, orden) -> sale del lote: src/lib/leados/flow.ts",
+    "cartera-view.tsx:64 agruparCartera(lista) (sin grupos si busca) -> sale del lote: flow.ts",
+    "cartera-view.tsx:118-123 vacío por filtro / :127 lista plana / :131-145 GrupoPlegable (VISTA_ABIERTA abierto :142)",
+    "cartera-view.tsx:208 ListaTarjetas -> home-sections.tsx:68-70 <Link href=`/setter/leads/${lead.id}`>"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Novedades: abrir un aviso y marcar vistas",
+   "pasos": [
+    "novedades-panel.tsx:134 no renderiza sin filas ni revisión (datos de getNovedadesSetter, fuera del lote)",
+    "novedades-panel.tsx:122 AbrirFocoButton(leadId, anclar=fila.vigente)",
+    "novedades-abrir-foco.tsx:40-45 si anclar: anclarFoco(leadId) -> sale del lote: foco.actions.ts",
+    "novedades-abrir-foco.tsx:47 router.push(`/setter/leads/${leadId}`)",
+    "novedades-panel.tsx:155 MarcarVistoButton -> novedades-marcar-visto.tsx:21 marcarNovedadesVistasAction() -> sale del lote: src/app/(protected)/setter/_actions/novedades.actions.ts",
+    "novedades-marcar-visto.tsx:26-27 toast + router.refresh()"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Rail del setter: navegación interna y herramientas externas",
+   "pasos": [
+    "setter/layout.tsx:90 (fuera del lote, guard SETTER en :32) -> setter-shell.tsx:23",
+    "setter-shell.tsx:70 SetterNav con onNavigate que cierra el drawer",
+    "setter-nav.tsx:65 «Cargar prospecto» / :97 «Tu día» -> :48-51 handleNavigate",
+    "setter-nav.tsx:49 triggerTransition(href) -> sale del lote: src/context/TransitionContext.tsx:108-120 (FROZEN; cortina global app/layout.tsx:114, 300 ms y router.push)",
+    "setter-nav.tsx:129 ToolsRail -> tools-rail.tsx:26 HERRAMIENTAS_ORDEN -> :29-44 fila 'pendiente' si url null / :50-55 <a target=_blank>"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Ficha por bloques con avance por completitud",
+   "pasos": [
+    "consumidor fuera del lote: src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx:412 monta BloquesSecuenciales",
+    "bloques-secuenciales.tsx:179 click en cabecera -> onAbrir(bloque.id)",
+    "bloques-secuenciales.tsx:158 onBlur del bloque -> :136 manejarSalida",
+    "bloques-secuenciales.tsx:140 foco sigue adentro -> no avanza; :141-143 puntero apretado -> avance pendiente aplicado en :118-124 tras pointerup",
+    "bloques-secuenciales.tsx:145 onSalirDelBloque(id) -> sale del lote: el padre (ficha-form.tsx / ficha-bloques.ts) decide si avanza",
+    "bloques-secuenciales.tsx:215-223 solo el bloque abierto se monta"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "nombre": "Copiar un bloque para un Gem externo",
+   "pasos": [
+    "guardrail-rol.tsx:35 (y otras pantallas fuera del lote) montan CopyBlock",
+    "copy-block.tsx:64 onClick={copiar}",
+    "copy-block.tsx:37 navigator.clipboard.writeText(texto)",
+    "copy-block.tsx:38-48 fallback textarea + document.execCommand('copy') sin mirar el resultado",
+    "copy-block.tsx:50 setCopiado(true) siempre -> :73 «Copiado»"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "m1 · ficha por fuentes con autoguardado y veredicto que cierra el paso",
+   "pasos": [
+    "m1-ficha.tsx:224-229 M1Registro monta FichaForm con el veredicto como slot 'cierre'",
+    "ficha-form.tsx:193-197 useAutosave guarda aPayload(estado) en cada pausa",
+    "sale del lote: ficha-form.tsx:196 -> setter/_actions/dossier.actions.ts guardarFicha (FichaSchema.safeParse en :97)",
+    "ficha-form.tsx:388-401 el veredicto es el último bloque del acordeón; bloques-secuenciales.tsx:215 solo monta el contenido del bloque abierto",
+    "evaluacion-form.tsx:142-161 intentarEnviar (score 1-2 abre modal de descarte :143-158)",
+    "evaluacion-form.tsx:169-173 declara la acción en la barra -> barra-accion.tsx:182 click",
+    "sale del lote: evaluacion-form.tsx:125 -> dossier.actions.ts registrarEvaluacion (gate de señal mínima y FICHA->EVALUADA server-side)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "m4 · opener armado, copiado y registrado",
+   "pasos": [
+    "m4-opener.tsx:30-55 contexto: bloque para el Gem de outreach (buildOpenerInputBlock)",
+    "m4-opener.tsx:60-66 munición: ToolGuide gemOutreach (url null, herramientas.ts:117) + CanalSeguridad",
+    "opener-form.tsx:36-39 hard-block de link en vivo (contieneLink)",
+    "opener-form.tsx:72-79 acción en la barra, disabled si hay link con motivo",
+    "sale del lote: opener-form.tsx:54 -> setter/_actions/outreach.actions.ts registrarOpener",
+    "opener-form.tsx:60-65 toast con próximo toque + router.refresh -> la posición se re-deriva a espera"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "m5 · registrar lo que pasó (cadencia)",
+   "pasos": [
+    "m5-seguimiento.tsx:41-136 contexto: toques N de 3, toque vencido (Date.now en render :63), cadencia agotada :118-123",
+    "m5-seguimiento.tsx:144-237 munición: mensaje base del próximo toque o cierre; objeciones con HerramientaLauncher",
+    "m5-seguimiento.tsx:271-286 UltimaCharla + SeguimientoForm con cadenciaAgotada",
+    "sale del lote: m5-seguimiento.tsx:284 -> manual/_components/seguimiento-form.tsx (registrarResultado, otro lote)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "m6 · brief del Gem de diseño (captura EVALUADA -> BRIEF y re-pegado con autoguardado)",
+   "pasos": [
+    "m6-brief.tsx:67-90 M6Registro: captura (BriefForm) / sanity-check en BRIEF (BriefSanity) / resumen",
+    "brief-form.tsx:104-121 safeParse con BriefInputSchema; autosave solo si autosaveEnabled (brief-sanity.tsx:30-40)",
+    "brief-form.tsx:131-147 guardar -> useStepAction",
+    "sale del lote: brief-form.tsx:139 -> dossier.actions.ts:186-216 guardarBrief (requireSetter :191, getOwnedDossier :201, saveOwnedBrief :205, EVALUADA->BRIEF :208-209)",
+    "fuera del lote: dossier.ts:444 BriefSchema.parse (tope 5000 de textoLibre, contracts.ts:119)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "mc1/mc2 · arrancar construcción, tildar fases y escalar a Franco",
+   "pasos": [
+    "m-construccion.tsx:271-278 en BRIEF monta ArrancarConstruccion",
+    "construccion-ctas.tsx:28-38 declara 'Arrancar construcción' en la barra -> sale del lote: dossier.actions.ts iniciarConstruccion (BRIEF->CONSTRUCCION)",
+    "m-construccion.tsx:302-313 un FaseAutoReporte por fase con la MISMA prop completadas",
+    "fase-auto-reporte.tsx:67-81 arma el array desde la prop + useOptimistic -> sale del lote: dossier.actions.ts guardarProgreso -> router.refresh",
+    "m-construccion.tsx:316-322 -> escalamiento-construccion.tsx:59-64 -> escalar-modal.tsx:36-66 -> sale del lote: dossier.actions.ts escalarConstruccion (dossier + Telegram a Franco) -> router.refresh :56"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "m13 -> m14 · borrador publicado, chequeo final y envío a revisión",
+   "pasos": [
+    "m13-borrador.tsx:97-147 M13Registro: RECHAZADA congelada (ReabrirConstruccion) / post-construcción lectura / BorradorForm",
+    "borrador-form.tsx:54-72 DraftUrlInputSchema.safeParse con errores por control",
+    "sale del lote: borrador-form.tsx:75 -> dossier.actions.ts guardarDraftUrl (errorMap en dossier.schemas.ts:129-133) -> router.refresh :90",
+    "borrador-form.tsx:129-133 EnlaceChequeoFinal -> enlace-chequeo.tsx:63-66 Link a m14",
+    "m14-chequeo.tsx:94-147 -> chequeo-form.tsx:146-157 autosave delayMs 0 de guardarSelfCheck",
+    "chequeo-form.tsx:160-181 enviar: guardarSelfCheck + sale del lote: dossier.actions.ts enviarARevision (re-valida selfCheckAprobado, flow.ts:204-209)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "m15 · mandar la demo aprobada",
+   "pasos": [
+    "m15-envio.tsx:97-98 gateEnvioDemo decide el render",
+    "m15-envio.tsx:101-103 gate abierto -> envio-form.tsx:52-57 acción en la barra",
+    "sale del lote: envio-form.tsx:39 -> outreach.actions.ts enviarDemoAprobada (re-valida el gate)",
+    "m15-envio.tsx:110-134 gate cerrado: turno + motivo + Link crudo a m5"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "m16 · ofrecer horarios y confirmar la reunión en Cal.com",
+   "pasos": [
+    "m16-agenda.tsx:39-43 estadoDeAgenda (hecho/espera/agendar)",
+    "m16-agenda.tsx:236-244 AgendaForm con ofertaPrevia (memoria OFRECIDOS :160-167)",
+    "agenda-form.tsx:107-119 buscarHorarios -> sale del lote: agenda.actions.ts:125 ofrecerHorarios -> :134 getCalConfigLeadOS -> lib/leados/agenda.ts:57-97 (org = la única con calComUsername)",
+    "agenda-form.tsx:122-137 valida ConfirmarReunionSchema (decisor, nombre, email, notas 30-2000)",
+    "agenda-form.tsx:139-155 confirmar -> sale del lote: agenda.actions.ts:168 confirmarReunion -> createBooking (metadata {leadId}, :218)",
+    "agenda-form.tsx:142-151 SLOT_OCUPADO limpia la oferta"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "Layout del manual: franja, barra de acción y salida",
+   "pasos": [
+    "pantalla-manual.tsx:142-143 ProveedorAccion envuelve la pantalla",
+    "pantalla-manual.tsx:144 ManualHeader -> manual-nav.tsx:93 SalidaDelManual",
+    "salida-manual.tsx:51-57 Link que intercepta solo si useHayTrabajoSinRegistrar -> modal -> router.push('/setter') :46",
+    "pantalla-manual.tsx:155 -> franja-recorrido.tsx:79-211 (Link solo a destinos alcanzables)",
+    "pantalla-manual.tsx:205-211 zonas contexto/munición/registro + accion",
+    "pantalla-manual.tsx:253 -> barra-accion.tsx:156-194 sticky bottom-0, motivo con aria-describedby",
+    "error.tsx:29-39 boundary del lead con logger + Sentry.captureException; loading.tsx:9-28 skeleton"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "Pantallas de estado y archivo",
+   "pasos": [
+    "estado-manual.tsx:63-96 turno desde TURNO_DE_CAUSA, toques clampados, ofreceSalida",
+    "estado-manual.tsx:146-154 Link a m5 solo si puedeRegistrar",
+    "archivo-manual.tsx:39-121 causa perdido/descartado, motivo, EnlacePantalla a m1 :102-106, Link a /setter :111-117"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "nombre": "Historial del lead",
+   "pasos": [
+    "sale del lote (origen de datos): manual/_data.ts arma LeadTimelineEvent[]",
+    "historial-lead.tsx:14-28 details colapsable con conteo",
+    "lead-timeline.tsx:62-93 estado vacío :75-79 o lista",
+    "lead-timeline.tsx:95-163 SISTEMA vs comercial (esContactoComercial) y lead-timeline.helpers.ts:71-79 formatearMomento sin timeZone"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "nombre": "Abrir un lead del setter: puerta unica -> manual -> pantalla actual",
+   "pasos": [
+    "src/app/(protected)/setter/leads/[leadId]/page.tsx:23 redirect(`/setter/leads/${leadId}/manual`)",
+    "src/app/(protected)/setter/leads/[leadId]/manual/page.tsx:18 cargarManualDelLead(leadId)",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts:145 requireSetter() (auth-guards.ts:16)",
+    "_data.ts:147 getOwnedLead(leadId, userId) -> null -> notFound() manual/page.tsx:20",
+    "_data.ts:150-159 Promise.all: sale del lote -> src/lib/leados/dossier.ts (getOwnedDossier), outreach.ts:40 (listOwnedLeadActivities con SOLO_CONTACTOS_COMERCIALES :50), assignment-trail.ts, timeline.ts",
+    "_data.ts:213 derivarPantalla(...) sale del lote -> src/lib/leados/manual.ts",
+    "manual/page.tsx:21 redirect(rutaManual(leadId, manual.posicion.actual))",
+    "[paso]/page.tsx:64 cargarManualDelLead (segunda carga completa)",
+    "[paso]/page.tsx:69-73 guardia: paso desconocido o futuro -> redirect a la actual",
+    "[paso]/page.tsx:213-438 despacho de slots por pantalla",
+    "[paso]/page.tsx:442 sale del lote: PantallaManual (manual/_components/pantalla-manual.tsx)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "nombre": "Registrar el resultado de un toque (m5)",
+   "pasos": [
+    "sale del lote (origen): manual/_components/m5-seguimiento.tsx:284 monta SeguimientoForm sin condicion de status",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx:87-89 oculta SIN_RESPUESTA con la cadencia agotada",
+    "seguimiento-form.tsx:104-115 validacion cliente con ResultadoInputSchema",
+    "seguimiento-form.tsx:116 registro.run(() => registrarResultado(leadId, parsed.data)) — sale del lote: setter/_actions/outreach.actions.ts (requireSetter, getOwnedLead, rechaza solo CERRADO/PERDIDO :169)",
+    "outreach.actions.ts:188 -> src/lib/os-commercial.ts:57-66 crea OsLeadActivity",
+    "os-commercial.ts:68-83 SIN_RESPUESTA: cuenta y llama calculateNextFollowUp (src/lib/follow-up.ts:3-13), escribe nextFollowUpAt y limpia reactivateAt",
+    "os-commercial.ts:85-94 RESPONDIO: status RESPONDIO incondicional; :107-115 RECHAZADO: limpia toque y reactivateAt",
+    "outreach.actions.ts:197 -> os-commercial.ts:181-191 postergarLead: status POSTERGADO + reactivateAt"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "nombre": "Cargar un prospecto a mano",
+   "pasos": [
+    "src/app/(protected)/setter/nuevo/page.tsx:18 requireSetter()",
+    "nuevo/page.tsx:22-26 nombres de la cartera propia (ownedListWhere) para el aviso no bloqueante",
+    "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx:69-74 aviso de posible duplicado solo contra la cartera propia",
+    "nuevo-prospecto-form.tsx:79 NuevoProspectoSchema.safeParse(form)",
+    "nuevo-prospecto-form.tsx:88 sale del lote: cargarProspecto (setter/_actions/prospecto.actions.ts:21-41: requireSetter, parse, osLead.create sin dedupe global)",
+    "nuevo-prospecto-form.tsx:98 router.push(`/setter/leads/${result.data.id}`) -> desemboca en 'Abrir un lead del setter'"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "nombre": "Importar una lista CSV de prospectos",
+   "pasos": [
+    "src/app/(protected)/setter/nuevo/importar/page.tsx:16 requireSetter()",
+    "src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx:64-76 FileReader.readAsText (UTF-8 por defecto)",
+    "importar-prospectos-form.tsx:32-46 previsualizar: sale del lote -> src/lib/leados/prospecto-import.ts:89 parseCsv (solo coma, :131) y mapearFilas; tope MAX_FILAS_IMPORT=500 (prospecto-import.ts:24)",
+    "importar-prospectos-form.tsx:84-85 sale del lote: importarProspectos (prospecto-bulk.actions.ts: dedupe en-archivo/en-cartera/en-sistema :80-98)",
+    "importar-prospectos-form.tsx:91-94 toast + router.refresh()",
+    "importar-prospectos-form.tsx:191-249 reporte de creados, invalidas y duplicadas"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "nombre": "Digest diario de follow-ups por Telegram (cron os-follow-up)",
+   "pasos": [
+    "vercel.json:4 agenda /api/cron/os-follow-up a las 12:00 UTC; netlify.toml:25-32 no lo agenda (sin funcion en netlify/functions/)",
+    "src/app/api/cron/os-follow-up/route.ts:153-159 verificacion de CRON_SECRET",
+    "route.ts:162-165 dia argentino con copia privada (:20-59)",
+    "route.ts:167-226 marcador del dia (Notification por titulo) + leads con toque vencido o POSTERGADO a reactivar, ultimo contacto comercial (SOLO_CONTACTOS_COMERCIALES :204)",
+    "route.ts:228-234 corta si no hay pendientes o ya se envio",
+    "route.ts:236-262 usuario para el marcador (SUPER_ADMIN mas viejo, o cualquier usuario)",
+    "route.ts:264 buildTelegramMessage (:120-140, sin tope de largo)",
+    "route.ts:265 sale del lote: sendTelegram (src/lib/notifications/telegram.ts:67) -> flujo D7 'Aviso por Telegram'",
+    "route.ts:276-289 crea el marcador de idempotencia"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "nombre": "Maquinaria comercial compartida admin/setter (consumidores de os-commercial)",
+   "pasos": [
+    "sale del lote (origen admin): admin/leads/_actions/activity.actions.ts:6 y demo.actions.ts:8 -> flujo D3 'Ficha del lead: estado, setter, demos, actividad y reunión'",
+    "sale del lote (origen setter): setter/_actions/outreach.actions.ts:35 y agenda.actions.ts:45",
+    "src/lib/os-commercial.ts:54-118 registrarContactoComercial (sin auth: cada caller pone su guard, :8-10)",
+    "os-commercial.ts:134-172 crearDemoComercial: OsDemo + DEMO_ENVIADA si PROSPECTO + nextFollowUpAt +2 dias (:150)",
+    "os-commercial.ts:181-191 postergarLead"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Mi día del setter: foco, cola y cartera",
+   "pasos": [
+    "src/app/(protected)/setter/page.tsx:31 buildHomeLeads(leads) (entrada, fuera del lote; la lista sale de ownership.ts:54 con ownedListWhere)",
+    "src/lib/leados/home.ts:24-75 arma HomeLeadInput: vencimientos con Date.now (home.ts:46-57), meta privada por setterId (home.ts:27), finalUrl del dossier (home.ts:65)",
+    "src/lib/leados/flow.ts:629 clasificarLead -> flow.ts:416 grupoPara y flow.ts:482 proximaAccionPara",
+    "setter/page.tsx:44 -> flow.ts:813 particionarCartera (pin/snooze; orden flow.ts:770 ordenFoco con trabajoTier flow.ts:734)",
+    "setter/page.tsx:45 -> src/lib/leados/foco-cookie.ts:36 leerFocoLeadId",
+    "setter/page.tsx:46 -> src/lib/leados/foco.ts:49 seleccionarFoco (sticky solo si el id está en la cola propia, foco.ts:61-62)",
+    "setter/page.tsx:47 -> src/lib/leados/cola.ts:64 armarCola (TOPE_COLA cola.ts:38) -> cola.ts:95 idsEnCola",
+    "setter/page.tsx:72 -> flow.ts:867 contarEnVueloPorTurno -> sale del lote: flow.ts:870 -> src/lib/leados/turno.ts",
+    "cartera-view.tsx:58/64 -> flow.ts:1054 filtrarYOrdenarCartera / flow.ts:983 agruparCartera (vistaDeLead flow.ts:914); home-sections.tsx:42 -> flow.ts:1012 archivoMotivo"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Máquina de stage del dossier (transitionDossier)",
+   "pasos": [
+    "Entradas fuera del lote: setter/_actions/dossier.actions.ts:145, :152, :209, :238, :267, :398 y admin/leados/_actions/revision.actions.ts:78, :106",
+    "src/lib/leados/dossier.ts:120-123 lee el dossier con lead.status y lead.caliente",
+    "dossier.ts:129 valida contra src/lib/leados/dossier-stage.ts:38-47 LEGAL_TRANSITIONS",
+    "dossier.ts:143-147 mergea ESCALADO_RESET (escalamiento.ts:53) y RELOOP_RESET solo si esReloopRechazo (escalamiento.ts:78, :102)",
+    "dossier.ts:149-224 exigencias por destino: EVALUADA parsea EvaluacionSchema (:151), BRIEF gate gateBriefAbierto (flow.ts:81-83), DESCARTADA motivo (:175), APROBADA finalUrl (:196), RECHAZADA historial (:207-219)",
+    "dossier.ts:228-236 updateMany con guard optimista where {leadId, stage: from}",
+    "error -> dossier.actions.ts:73 copyOperativo -> src/lib/leados/error-copy.ts:92"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Ficha de observación -> veredicto -> descarte",
+   "pasos": [
+    "setter/_actions/dossier.actions.ts:100 -> src/lib/leados/dossier.ts:253 saveOwnedFicha (ensureOwnedDossier dossier.ts:83 -> getOwnedLead; FichaSchema contracts.ts:52; guard stage FICHA dossier.ts:266)",
+    "dossier.actions.ts:139 -> src/lib/leados/flow.ts:295 fichaFaltantes (señal mínima; ficha-bloques.ts:136 REQUISITOS la mapea para la UI)",
+    "dossier.actions.ts:145 -> dossier.ts:150-158 EVALUADA (EvaluacionSchema.parse + fecha)",
+    "dossier.actions.ts:151-155 -> dossier.ts:174-189 DESCARTADA (motivo trim, sin re-parse del objeto final)",
+    "lectura: home.ts:39 -> flow.ts:112 parseEvaluacion -> flow.ts:1012 archivoMotivo (home-sections.tsx:42)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Brief, construcción, chequeo final y envío a revisión",
+   "pasos": [
+    "dossier.actions.ts:205 -> src/lib/leados/dossier.ts:434 saveOwnedBrief (BriefSchema) -> dossier.actions.ts:209 transition BRIEF (gate flow.ts:81)",
+    "m6-brief.tsx:53 -> src/lib/leados/copy-blocks.ts:90 buildBriefInputBlock; m-construccion.tsx:70 -> copy-blocks.ts:177 buildConstruccionBlock (herramientas.ts:157 faltaPorHerramientaSinLink)",
+    "dossier.actions.ts:238 -> CONSTRUCCION; :297 -> dossier.ts:366 saveOwnedProgreso; :326 -> dossier.ts:281 saveOwnedDraftUrl",
+    "dossier.actions.ts:355 -> flow.ts:183 buildSelfCheck -> dossier.ts:334 saveOwnedSelfCheck -> dossier.actions.ts:360 -> flow.ts:204 selfCheckAprobado",
+    "dossier.actions.ts:398 -> dossier.ts:116 transitionDossier EN_REVISION",
+    "escalar: dossier.actions.ts:433 -> dossier.ts:309 marcarEscaladoOwned -> escalamiento.ts:42 buildEscaladoPatch"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Revisión del admin y re-loop del rechazo",
+   "pasos": [
+    "admin/leados/_actions/revision.actions.ts:78 -> src/lib/leados/dossier.ts:191-200 APROBADA (finalUrl obligatoria por revision.schemas.ts:22-25)",
+    "revision.actions.ts:106 -> dossier.ts:202-220 RECHAZADA (historial RechazosSchema contracts.ts:179; topes 280/280/2000 en revision.schemas.ts:35-49)",
+    "re-loop: dossier.actions.ts:267 -> dossier.ts:146 RELOOP_RESET (limpia selfCheckJson, escalamiento.ts:102)",
+    "setter: flow.ts:149 partirRechazos; flow.ts:562-566 sugerencia de retrabajo"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Envío del link de la demo",
+   "pasos": [
+    "manual/_components/m15-envio.tsx:98 -> src/lib/leados/flow.ts:92 gateEnvioDemo",
+    "setter/_actions/outreach.actions.ts:237 re-valida gateEnvioDemo -> :244 -> src/lib/leados/dossier.ts:394 marcarDemoEnviadaOwned (claim por enviadaAt null, dossier.ts:405)",
+    "si falla la creación -> outreach.actions.ts:258 -> dossier.ts:416 revertirDemoEnviadaOwned",
+    "envio-form.tsx:73 -> src/lib/leados/copy-blocks.ts:139 buildDemoMensajeBlock"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Agenda de la reunión (Cal.com)",
+   "pasos": [
+    "setter/_actions/agenda.actions.ts:84-109 gateAgenda (lead propio, status RESPONDIO, sin reunión agendada; cualquier stage)",
+    "agenda.actions.ts:134 -> src/lib/leados/agenda.ts:57 getCalConfigLeadOS (findMany global agenda.ts:58-61)",
+    "ofrecer: agenda.ts:110 rangoOferta -> sale del lote: src/lib/integrations/cal-com-v2.ts:50 getSlots -> agenda.ts:122 elegirTresSlots -> agenda.actions.ts:154 -> agenda.ts:270 guardarHorariosOfrecidosOwned",
+    "confirmar: agenda.actions.ts:190 getSlots -> agenda.ts:155 slotSigueLibre -> agenda.actions.ts:204 -> agenda.ts:194 marcarAgendandoOwned (claim)",
+    "sale del lote: agenda.actions.ts:213 -> src/lib/integrations/cal-com-v2.ts:108 createBooking (sin auth, por username)",
+    "agenda.actions.ts:236 -> agenda.ts:324 guardarAgendaOwned -> registrarContactoComercial (os-commercial, fuera del lote)",
+    "compensaciones: agenda.actions.ts:223 -> agenda.ts:235 revertirAgendandoOwned; agenda.actions.ts:257 -> agenda.ts:300 revertirAgendaConfirmadaOwned"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Cierre post-reunión (admin) y su efecto en el panel del setter",
+   "pasos": [
+    "admin/leads/_actions/reunion.actions.ts:50 -> src/lib/leados/agenda.ts:348 marcarReunionRealizadaAdmin",
+    "reunion.actions.ts:71 -> agenda.ts:365 guardarResultadoReunionAdmin (mantiene estado AGENDADA) -> reunion.actions.ts:81-84 status (GANADO->CERRADO, PERDIDO, RE_SEGUIMIENTO->RESPONDIO)",
+    "setter: flow.ts:416-445 grupoPara (CERRADO no se archiva); agenda.actions.ts:108 bloquea re-agendar tras RE_SEGUIMIENTO"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Reasignación de lead y rastro",
+   "pasos": [
+    "admin/leads/_actions/lead.actions.ts:180 -> src/lib/leados/assignment-trail.ts:42 registrarReasignacion (canal SISTEMA, result null)",
+    "manual/_data.ts:154 -> assignment-trail.ts:68 getUltimaAsignacion (getOwnedLead assignment-trail.ts:72)",
+    "las lecturas comerciales excluyen SISTEMA: isolation.ts:116-118"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Alta propia de prospecto",
+   "pasos": [
+    "setter/_actions/prospecto.actions.ts:29 -> src/lib/leados/isolation.ts:80 ownedLeadCreateData (assignedToId del userId isolation.ts:95, caliente false :96, source Setter :97)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "nombre": "Laboratorio FG-2 (admin, experimental)",
+   "pasos": [
+    "admin/fg2-lab/page.tsx:17 (guard heredado de admin/layout.tsx:47) -> fg2-lab-client.tsx:136 -> src/lib/leados/_experimental/fg2-brief-lab.ts:231 assembleGastroPrompt",
+    "fg2-brief-lab.ts:318 estimarCostoPrompt -> fg2-brief-lab.ts:362 buildLogRowTsv; casos precargados fg2-casos-gastro.ts:46"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Home del setter: Mis números, progreso de la semana, novedades y resumen de revisión",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/setter/page.tsx:30 listOwnedLeads(userId) (userId de requireSetter en la página)",
+    "src/lib/leados/ownership.ts:52-64 findMany con ownedListWhere(userId), include dossier completo + _count de contactos comerciales + setterMetas propios",
+    "sale del lote: src/lib/leados/ownership.ts:54 -> src/lib/leados/isolation.ts (ownedListWhere)",
+    "setter/page.tsx:78 -> src/lib/leados/mis-numeros.ts:117 derivarMisNumeros -> :89 calcularMisNumeros (activos por leadActivo(status) :94) -> :69 filasCriterioPropio (setterId = userId de sesión :79) -> src/lib/leados/revision.ts:96 calcularRatioSetters -> :137 pctDescarte",
+    "setter/page.tsx:95 -> src/lib/leados/novedades.ts:229 getNovedadesSetter -> :246 derivarColaRevision (:190-207, proxy dossier.updatedAt) -> :256-271 findMany/count con ownSetterNoticeWhere(userId), take 50 -> :295 src/lib/leados/novedades-vigencia.ts:88 vigenciaDeAviso -> :300 src/lib/leados/novedades-agrupar.ts:98 agruparAvisos (tope 6 filas)",
+    "setter/page.tsx:99 -> src/lib/leados/progreso.ts:105 getProgresoSemana -> :114-120 count por performedById en ventana de 7 días -> :56 derivarProgresoSemana (demos por enviadaAt, reuniones por agendaJson, archivados por DESCARTADA/PERDIDO)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Novedad dirigida al setter (handoff del admin -> panel y badge del setter)",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/admin/leads/_actions/lead.actions.ts:194 y :199 / admin/leados/_actions/revision.actions.ts:46 llaman emitirNovedadSetter",
+    "src/lib/leados/novedades.ts:108-117 destinatario por regla única; sale del lote: novedades.ts:115 -> src/lib/leados/isolation.ts (destinatarioNovedad)",
+    "novedades.ts:118 copyNovedad (:67-99, snapshot de título y cuerpo) -> :120-129 prisma.osSetterNotice.create; fallo -> :131 console.error (sin Sentry)",
+    "badge: src/app/(protected)/setter/layout.tsx:40 -> novedades.ts:312-321 contarNovedadesSinLeer",
+    "panel: ver flujo 'Home del setter' (novedades.ts:229-306)",
+    "marcar vistas: setter/_actions/novedades.actions.ts:20 -> novedades.ts:327-333 updateMany read=true filtrado por setterId"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Derivación de la pantalla del manual paso a paso",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/setter/leads/[leadId]/manual/_data.ts:213 derivarPantalla({...})",
+    "src/lib/leados/manual.ts:687 derivarPantalla -> :446 completadasDe (marcas desde stage, blobs y checklist) -> :509 posicionDe",
+    "manual.ts:520-522 PERDIDO -> archivo; :542-549 POSTERGADO no vencido (salvo DESCARTADA/EN_REVISION) -> espera",
+    "manual.ts:550-552 gateBriefAbierto + src/lib/leados/paso.ts:251 derivarPasoDelLead (solo se usa en la rama EVALUADA :573-589)",
+    "manual.ts:590-631 BRIEF/CONSTRUCCION (re-loop clavado en mc1 :622-629); :632-636 RECHAZADA -> mr; :637-638 EN_REVISION -> revision; :639-673 APROBADA (gateEnvioDemo :656; toque vencido -> m5 :670-671)",
+    "sale del lote: manual.ts:656 -> src/lib/leados/flow.ts:92 gateEnvioDemo",
+    "manual.ts:691-697 la actual siempre accesible -> guard en manual/[paso]/page.tsx:69-73 (redirect a la actual)",
+    "franja: manual/_components/franja-recorrido.tsx:79 -> src/lib/leados/recorrido.ts:132 derivarRecorrido -> :111 destinoDeFase (mismo alcance que el guard)",
+    "pantallas de estado: manual/[paso]/page.tsx:118,154 -> src/lib/leados/turno.ts:131 causaDeEspera -> estado-manual.tsx:74 TEXTO_TURNO[TURNO_DE_CAUSA[causa]]"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Escalamiento 'me trabé' en Construcción (Telegram a Franco)",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/setter/_actions/dossier.actions.ts:438 notificarEscalamientoConstruccion (la persistencia escaladoAt la hace la action antes)",
+    "src/lib/leados/notify.ts:36-53 findUnique del dossier por leadId (sin ownership propio: lo valida la action)",
+    "notify.ts:56-65 mensaje HTML escapado (descripción recortada a 800)",
+    "sale del lote: notify.ts:67 -> src/lib/notifications/telegram.ts (flujo D7 'Aviso por Telegram'); fallo -> notify.ts:69 console.error y false"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Aviso informativo de evaluación con score alto",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/setter/_actions/dossier.actions.ts:164-166 (await, score >= SCORE_CALIENTE)",
+    "src/lib/leados/notify.ts:128-147 lee evaluacionJson, corta si score < 4 o ya notificado (calienteNotificadaAt)",
+    "notify.ts:160 sendTelegram (sale del lote -> telegram.ts, flujo D7 'Aviso por Telegram')",
+    "notify.ts:165-173 reescribe evaluacionJson con la marca de idempotencia solo si el envío salió"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Aviso de reunión agendada (traspaso a Franco)",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/setter/_actions/agenda.actions.ts:263 notificarReunionAgendada",
+    "src/lib/leados/notify.ts:79-96 lee agendaJson y exige estado AGENDADA",
+    "notify.ts:98-112 mensaje con horario, invitado y notas de traspaso escapados",
+    "sale del lote: notify.ts:114 -> telegram.ts (flujo D7 'Aviso por Telegram')"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Importación masiva de prospectos por CSV",
+   "pasos": [
+    "preview en cliente: src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx importa prospecto-import.ts",
+    "entrada fuera del lote: src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts:40 requireSetter -> :48 mapearFilas(parseCsv(csv)) -> :53 tope MAX_FILAS_IMPORT",
+    "src/lib/leados/prospecto-import.ts:89-163 parseCsv (comillas, CRLF, BOM) -> :182-233 mapearFilas por encabezado o alias -> :254-271 dedupEnLote",
+    "prospecto-import.ts:280-285 construirAltasLote; sale del lote: prospecto-import.ts:284 -> src/lib/leados/isolation.ts (ownedLeadCreateData, dueño forzado a la sesión)"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Lecturas del lead: timeline, contactos y DMs del día",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/setter/leads/[leadId]/manual/_data.ts:152-158",
+    "src/lib/leados/outreach.ts:40-53 listOwnedLeadActivities -> src/lib/leados/ownership.ts:24-31 getOwnedLead -> findMany con SOLO_CONTACTOS_COMERCIALES",
+    "src/lib/leados/outreach.ts:67-72 contarDmsHoy -> :21-33 limitesDelDiaArgentino; sale del lote: outreach.ts:70 -> src/lib/leados/isolation.ts (dmsMandadosHoyWhere, performedById)",
+    "src/lib/leados/timeline.ts:45-63 getOwnedLead y findMany por timelineActivityWhere(lead.id) con performedBy.name"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Meta privada del setter (pin, snooze, nota)",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/setter/_actions/cartera.actions.ts:65/:101/:117/:140 (ownership previa en la action)",
+    "src/lib/leados/setter-meta.ts:53-63 upsert por la unique (leadId, setterId)",
+    "lectura: src/lib/leados/ownership.ts:61 setterMetas filtrado por ownSetterMetaWhere(userId) -> src/lib/leados/setter-meta.ts:34-44 toSetterMetaView"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Panorama de producción y ratio de setters (admin)",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/admin/leados/page.tsx:101-103 (guard SUPER_ADMIN en admin/layout.tsx:47)",
+    "src/lib/leados/pipeline.ts:109-125 resumirPipeline (5 carriles, SLA :51-60) -> :135-143 detectarAtascos -> :167-184 detectarEscaladas",
+    "sale del lote: pipeline.ts:173 -> src/lib/leados/escalamiento.ts (estaEscalado)",
+    "admin/leados/page.tsx:274 -> src/lib/leados/revision.ts:143 alarmaNuncaDescarta; revision.ts:96 calcularRatioSetters"
+   ]
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "nombre": "Carga por setter en la asignación del lead (admin)",
+   "pasos": [
+    "entrada fuera del lote: src/app/(protected)/admin/leads/[leadId]/page.tsx:225 cargarCargaSetters",
+    "src/lib/leados/setter-carga.ts:61-82 groupBy de leads con status notIn CERRADO/PERDIDO + dossiers de esos setters",
+    "sale del lote: setter-carga.ts:91 -> src/lib/leados/flow.ts (parseEvaluacion)",
+    "setter-carga.ts:102-121 -> src/lib/leados/revision.ts:96 calcularRatioSetters, :137 pctDescarte, :143 alarmaNuncaDescarta"
+   ]
   }
  ]
 }

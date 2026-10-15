@@ -9,8 +9,8 @@
 | h1 · Acceso | 5 / 5 | 15 | 0 | Sentry (11), autonomía (9), errores (8) | 3 |
 | h2 · Portal del cliente | 16 / 16 | 109 | 12 | Sentry (72), sin mocks ni TODO (54), errores (53) | 11 |
 | h3 · Chatbot centralizado | 8 / 8 | 111 | 3 | Sentry (66), errores (63), autonomía (51) | 6 |
-| h4 · Panel de admin | 13 / 13 | 105 | 3 | Sentry (74), errores (62), validación en servidor (39) | 8 |
-| h5 · Setter y LeadOS | 0 / 7 | 0 | 0 | — | 0 |
+| h4 · Panel de admin | 13 / 13 | 114 | 3 | Sentry (82), errores (69), autonomía (41) | 8 |
+| h5 · Setter y LeadOS | 7 / 7 | 76 | 0 | autonomía (38), Sentry (37), permisos y tenant (26) | 3 |
 | h6 · Entradas públicas que alimentan lo interno | 2 / 2 | 8 | 0 | Sentry (6), errores (5), autonomía (4) | 0 |
 
 ## h1 · Acceso
@@ -798,22 +798,31 @@
 
 ### h4.adm-leads — Leads
 
-- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 12 funcionalidades: 11×L2, 1×L1).
-- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, validación en servidor, mobile, Sentry, errores, carga, sin mocks ni TODO, vacíos.
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 21 funcionalidades: 18×L2, 3×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, validación en servidor, mobile, Sentry, errores, carga, sin mocks ni TODO, vacíos, autonomía.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h4.adm-leads.actividad-comercial` Registrar actividad comercial y timeline | L2 | permisos y tenant, validación en servidor, Sentry | lead-activity-feed.tsx:131 -> :75 createActivity (sale a activity.actions.ts, revalida admin-leads :28 por git grep) -> :87-90 limpia + refresh. |
+| `h4.adm-leads.actividad-y-demos` Actividad comercial y demos desde el admin | L2 | errores, validación en servidor, Sentry | activity.actions.ts:13-29 -> os-commercial; demo.actions.ts:15-25, :35-62 |
 | `h4.adm-leads.alta-edicion` Alta y edición de lead | L2 | permisos y tenant, validación en servidor, Sentry | page.tsx:159 -> lead-form.tsx:129 safeParse -> :140-141 createLead/updateLead (sale a lead.actions.ts) -> :148-149 cierra + refresh. |
+| `h4.adm-leads.asignacion-setter` Asignar lead a setter y marcar caliente | L2 | errores, Sentry | lead.actions.ts:137-224 (rol destino, update, rastro, novedades, revalidate) |
 | `h4.adm-leads.asignar-setter` Asignar setter y marcar caliente | L2 | permisos y tenant, validación en servidor, Sentry | [leadId]/page.tsx:212-216 + :225 cargarCargaSetters (sale a lib/leados) -> :412 -> assign-setter-control.tsx:224 -> :63 assignLeadSetter (sale a lead.actions.ts) -> :72-73. |
+| `h4.adm-leads.carga-por-setter` Carga y ratio en la asignación | L2 | autonomía | admin/leads/[leadId]/page.tsx:225 -> setter-carga.ts:55-122 -> revision.ts:96. |
+| `h4.adm-leads.cierre-post-reunion` Marcar reunión realizada y registrar el resultado | L2 | errores, Sentry, autonomía | reunion.actions.ts:50 -> agenda.ts:348-358; reunion.actions.ts:71 -> agenda.ts:365-382 -> reunion.actions.ts:81-84 |
+| `h4.adm-leads.cierre-reunion` Cierre de loop post-reunión | L1 | errores, Sentry, autonomía | Requiere una agenda AGENDADA que solo crea confirmarReunion, inoperante sin Cal.com; RE_SEGUIMIENTO deja estado sin salida |
 | `h4.adm-leads.convertir-a-proyecto` Convertir lead cerrado en proyecto | L1 | errores, sin mocks ni TODO | [leadId]/page.tsx:227 canConvertToProject + :281-289 botón disabled sin handler; convertLeadToProject (project.actions.ts:833) y ConvertLeadDialog (convert-lead-dialog.tsx:72) existen sin importadores. |
-| `h4.adm-leads.demanda-modulos` Demanda medida de módulos | L2 | errores | module-demand.actions.ts:25-50 (ZONA-FRANCO) → demand.ts:87-134 → demand.ts:137-153 → module-demand-table.tsx:3; invariantes modules.invariant.ts:91-120 |
+| `h4.adm-leads.crud-y-estado` Alta, edición, cambio de estado y borrado de leads outbound | L2 | errores, validación en servidor, Sentry, autonomía | lead.actions.ts:52-121, :230-247; UI trazada en [D3] Kanban outbound y Alta y edición de lead outbound |
+| `h4.adm-leads.demanda-modulos` Demanda medida de módulos premium | L2 | errores, Sentry | module-demand.actions.ts:25-50; UI en [D3] Demanda de módulos |
 | `h4.adm-leads.demos` Demos y Looms del lead | L2 | permisos y tenant, errores, validación en servidor, Sentry | demo-form.tsx:153 -> :113 createDemo (sale a demo.actions.ts) -> :126-128 refresh; :246 markDemoViewed (sale). |
+| `h4.adm-leads.digest-follow-ups-telegram` Digest diario de follow-ups por Telegram | L1 | errores, Sentry, autonomía | El código del camino feliz está completo (route.ts:153-295), pero solo está agendado en vercel.json:4 y el deploy es Netlify (netlify.toml:25-32 no lo agenda): en producción no corre. |
 | `h4.adm-leads.eliminar-lead` Eliminar lead con confirmación | L2 | permisos y tenant, validación en servidor, Sentry | lead-card.tsx:120-123 -> :184-195 InlineConfirm -> lead-pipeline.tsx:143-161 deleteLead (sale a lead.actions.ts) -> :153 rollback / :160 refresh. |
 | `h4.adm-leads.ficha-y-estado` Ficha del lead y cambio de estado | L2 | permisos y tenant, errores, carga, validación en servidor, Sentry, sin mocks ni TODO | lead-card.tsx:69 -> [leadId]/page.tsx:183-217 -> :279 -> change-status-select.tsx:37 updateLeadStatus (sale) -> :49 refresh. |
 | `h4.adm-leads.filtros-outbound` Filtros del board (servicio, período, setter, ubicación) | L2 | — | outbound-leads-view.tsx:27-30 -> lead-filters.ts:43 deriveFilterOptions / :154 applyLeadFilters -> lead-filters-bar.tsx:59-129 -> location-typeahead.tsx:118-133. |
 | `h4.adm-leads.inbound` Inbound por período y conversión a Lead OS | L2 | permisos y tenant, validación en servidor, Sentry | page.tsx:117-119 listInboundLeads (sale) -> :212 -> inbound-leads-table.tsx:143 -> :52 convertInboundToLead (sale) -> :61-67. |
+| `h4.adm-leads.inbound-a-oslead` Inbound por período y conversión a OsLead | L2 | errores, Sentry, autonomía | inbound.actions.ts:55-113, :123-174; UI en [D3] Inbound |
 | `h4.adm-leads.pipeline-kanban` Kanban outbound con drag & drop y vista de columna | L2 | permisos y tenant, validación en servidor, mobile, Sentry | page.tsx:21-54 getLeads -> :202 -> outbound-leads-view.tsx:29 groupLeads -> lead-pipeline.tsx:192-207 handleDragEnd -> :122 updateLeadStatus (sale a lead.actions.ts, que revalida 'admin-leads' según git grep) -> :139 refresh / :132 rollback. |
+| `h4.adm-leads.rastro-reasignacion` Rastro de la reasignación de un lead | L2 | — | lead.actions.ts:180 -> assignment-trail.ts:42-55; manual/_data.ts:154 -> assignment-trail.ts:68-80 |
 | `h4.adm-leads.reunion-resultado` Reunión agendada: realizada y resultado | L2 | permisos y tenant, vacíos, carga, validación en servidor, Sentry, sin mocks ni TODO | [leadId]/page.tsx:229-230 parseAgenda (sale a lib/leados/flow) -> :296 -> reunion-panel.tsx:130 -> :61 marcarReunionRealizada; :165 -> :189 -> :73 registrarResultadoReunion (sale a reunion.actions.ts). |
 
 ### [FAL-024] «Convertir a proyecto» en la ficha del lead está siempre deshabilitado; la action y el diálogo existen sin conectar
@@ -961,6 +970,138 @@
 
 ## h5 · Setter y LeadOS (ZONA-FRANCO)
 
+### h5.set-dia — Tu día (setter)
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 18 funcionalidades: 18×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: mobile, autonomía, Sentry, permisos y tenant, validación en servidor, carga, vacíos, errores.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h5.set-dia.cartera-agrupada` Cartera completa agrupada con búsqueda, filtro y orden | L2 | permisos y tenant, mobile | cartera-view.tsx:81 -> :106 toolbar -> :58 filtrarYOrdenarCartera -> :64 agruparCartera -> :131 GrupoPlegable -> :208 ListaTarjetas -> home-sections.tsx:68 Link al detalle. |
+| `h5.set-dia.cartera-palancas` Fijar, pausar, reanudar y nota propia | L2 | Sentry | cartera.actions.ts:40-51 ownership -> :65/:101/:117/:140 upsertSetterMeta(leadId,userId); foco.actions.ts:41-45. UI fuera del lote. |
+| `h5.set-dia.cartera-vistas-y-filtros` Cartera agrupada, búsqueda, filtros y archivo por causa | L2 | vacíos, autonomía | cartera-view.tsx:58 -> flow.ts:1054; cartera-view.tsx:64 -> flow.ts:983 -> flow.ts:914; home-sections.tsx:42 -> flow.ts:1012 |
+| `h5.set-dia.cola-de-hoy` Tu cola de hoy | L2 | permisos y tenant, Sentry | cola-del-dia.tsx:109 FocoSurface + :113-115 FilaCola -> :83 TrabajarLeadButton -> trabajar-lead-button.tsx:26 anclarFoco -> :31 router.push. |
+| `h5.set-dia.cola-del-dia` Cola del día, foco y espera | L2 | mobile, autonomía | Camino feliz: page.tsx:29-30 requireSetter+listOwnedLeads -> :44-47 partición/foco/cola -> :115-125 render. No L3: Sentry solo en render; CERRADO no se archiva (hallazgo). |
+| `h5.set-dia.foco-ahora` Tu foco ahora (Ir a trabajarlo, Pausar, Saltar, Soltar y atajos) | L2 | permisos y tenant, validación en servidor, mobile, Sentry, autonomía | Camino feliz en el lote: foco-surface.tsx:231 -> :85 anclarFoco -> :90 router.push; Saltar :258 -> :97 -> :107-109; Soltar :272 -> :129 -> :137-139; Pausar :291 -> :115 -> :120-123. Le faltan para L3 la fecha en hora AR y las acciones fuera del lote verificada |
+| `h5.set-dia.foco-y-cola` Foco del día y cola visible | L2 | vacíos, autonomía | setter/page.tsx:31 -> home.ts:24 -> flow.ts:629 -> setter/page.tsx:44 -> flow.ts:813 -> foco.ts:49 -> cola.ts:64; no llega a L3 por los leads CERRADO en la cola (flow.ts:417) y la APROBADA no accionable (flow.ts:441) |
+| `h5.set-dia.meta-privada-cartera` Pin, snooze y nota privada | L2 | errores, Sentry | cartera.actions.ts:65/:101/:117/:140 -> setter-meta.ts:53-63 upsert -> lectura ownership.ts:61 -> setter-meta.ts:34-44. |
+| `h5.set-dia.mis-numeros` Mis números | L2 | vacíos, autonomía | Camino feliz: setter/page.tsx:30 listOwnedLeads -> ownership.ts:52-64 -> setter/page.tsx:78 derivarMisNumeros -> mis-numeros.ts:117 -> :89 -> :69 -> revision.ts:96-134. No llega a L3: 'activos' incluye descartados (hallazgo) y la UI (mis-numeros.tsx) está fuer |
+| `h5.set-dia.mis-numeros-y-semana` Tu semana y Mis números | L2 | — | page.tsx:141 y :144 (git) montan MisNumeros y ProgresoSemana; progreso-semana.tsx:17-40 filtra métricas con valor; mis-numeros.tsx:25-88 pinta el criterio. |
+| `h5.set-dia.novedades` Novedades y demos esperando a Franco | L2 | permisos y tenant, Sentry | novedades-panel.tsx:160-162 AvisoItem -> :122 AbrirFocoButton -> novedades-abrir-foco.tsx:41 -> :47; novedades-panel.tsx:155 -> novedades-marcar-visto.tsx:21 -> :27. |
+| `h5.set-dia.novedades-dirigidas` Novedades dirigidas al setter | L2 | vacíos, errores, Sentry | admin lead.actions.ts:194 -> novedades.ts:108-133 (create) -> setter/layout.tsx:40 contarNovedadesSinLeer (novedades.ts:312) -> setter/page.tsx:95 getNovedadesSetter (novedades.ts:229-306) -> novedades-vigencia.ts:88 -> novedades-agrupar.ts:98 -> novedades.act |
+| `h5.set-dia.palancas-de-card` Palancas privadas de la card: fijar, pausar, nota y reanudar | L2 | permisos y tenant, validación en servidor, Sentry, autonomía | lead-card-actions.tsx:147 -> :80 fijarLead -> :85-86; :190 -> :92 pausarLead -> :97-100; :235 -> :119 guardarNota -> :124-126; :170 -> :106 reanudarLead. |
+| `h5.set-dia.panel-en-espera-y-vacio` Estados «todo en espera» y «cartera vacía» | L2 | — | La page monta HomeEmpty (page.tsx:116) y HomeEnEspera (page.tsx:120, git); home-en-espera.tsx:45-115 arma el texto por turno y los chips; home-empty.tsx:14-27 ofrece cargar o importar. |
+| `h5.set-dia.progreso-semana` Progreso de los últimos 7 días | L2 | errores, Sentry | setter/page.tsx:99 -> progreso.ts:105-126 -> count por performedById :114-120 -> derivarProgresoSemana :56-97. |
+| `h5.set-dia.rail-navegacion` Shell y rail de navegación del setter | L2 | carga, mobile | setter-shell.tsx:70 -> setter-nav.tsx:97 -> :49 triggerTransition -> TransitionContext.tsx:116-118 router.push. |
+| `h5.set-dia.resumen-cola-revision` Resumen de demos en revisión | L2 | — | setter/page.tsx:95 -> novedades.ts:246 derivarColaRevision (:190-207) -> revision.ts:61 formatEspera. |
+| `h5.set-dia.turno-de-espera` A quién le toca | L2 | — | flow.ts:473-479 esperaDe -> turno.ts:164 turnoDelLead -> :131 causaDeEspera -> :199 TEXTO_TURNO -> home-en-espera.tsx:82. |
+
+### h5.set-nuevo — Cargar un prospecto
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 4 funcionalidades: 4×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: errores, validación en servidor, Sentry, permisos y tenant, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h5.set-nuevo.alta-manual` Cargar un prospecto a mano | L2 | permisos y tenant, errores, validación en servidor, Sentry | nuevo/page.tsx:18 -> nuevo-prospecto-form.tsx:76-99 -> prospecto.actions.ts:21-41 (fuera) -> router.push :98 |
+| `h5.set-nuevo.alta-propia` Alta de prospecto propio | L2 | autonomía | prospecto.actions.ts:29 -> isolation.ts:80-99 |
+| `h5.set-nuevo.alta-prospecto` Alta manual de prospecto propio | L2 | errores, validación en servidor, Sentry | prospecto.actions.ts:25-39 requireSetter -> zod -> create(ownedLeadCreateData) -> revalidate |
+| `h5.set-nuevo.aviso-duplicado` Aviso no bloqueante de posible duplicado | L2 | autonomía | nuevo/page.tsx:22-26 -> nuevo-prospecto-form.tsx:59-74 -> :119-124 |
+
+### h5.set-importar — Importar prospectos
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 3 funcionalidades: 3×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: validación en servidor, Sentry, autonomía, carga.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h5.set-importar.csv` Importación CSV de prospectos | L2 | carga, Sentry, autonomía | prospecto-bulk.actions.ts:40 requireSetter -> :48 parseCsv (prospecto-import.ts:89) / mapearFilas (:182) -> :53 MAX_FILAS_IMPORT -> dedupEnLote :254 -> construirAltasLote :280 -> ownedLeadCreateData. |
+| `h5.set-importar.importar-csv` Importar una lista CSV | L2 | validación en servidor, Sentry, autonomía | importar/page.tsx:16 -> importar-prospectos-form.tsx:64-76 -> :32-46 -> :84-100 importarProspectos (fuera) -> :191-249 reporte |
+| `h5.set-importar.plantilla-csv` Descargar plantilla y referencia de columnas | L2 | autonomía | importar-prospectos-form.tsx:103-111 Blob + descarga; :251-280 ColumnasReferencia desde COLUMNAS_IMPORT |
+
+### h5.set-lead — Ficha del lead
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 16 funcionalidades: 16×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: validación en servidor, Sentry, sin mocks ni TODO, autonomía, permisos y tenant, vacíos, errores.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h5.set-lead.agenda-reunion` Agendar la reunión con Cal.com | L2 | permisos y tenant, vacíos, Sentry, autonomía | agenda.actions.ts:134 -> agenda.ts:57; :154 -> agenda.ts:270; :204 -> agenda.ts:194; :213 -> cal-com-v2.ts:108; :236 -> agenda.ts:324; compensaciones :223 -> agenda.ts:235 y :257 -> agenda.ts:300 |
+| `h5.set-lead.aviso-reunion-agendada` Traspaso de reunión agendada | L2 | errores, Sentry | agenda.actions.ts:263 -> notify.ts:79-118 -> sendTelegram. |
+| `h5.set-lead.aviso-score-alto` Aviso de evaluación con score alto | L2 | errores, Sentry | dossier.actions.ts:164-166 -> notify.ts:128-177 (idempotencia :147, marca tras envío :165-173). |
+| `h5.set-lead.brief-construccion-revision` Brief, construcción, borrador, chequeo final y envío a revisión | L2 | validación en servidor, Sentry, sin mocks ni TODO, autonomía | dossier.actions.ts:205-210 -> :238 -> :326 -> :355-356 -> :382-398; escalamiento :433-443 |
+| `h5.set-lead.brief-y-construccion` Brief de diseño y construcción guiada | L2 | sin mocks ni TODO, autonomía | dossier.actions.ts:205 -> dossier.ts:434; :209 -> dossier.ts:160-172; m-construccion.tsx:70 -> copy-blocks.ts:177; :297 -> dossier.ts:366; :326 -> dossier.ts:281 |
+| `h5.set-lead.chequeo-final-y-revision` Chequeo final y envío a revisión | L2 | — | dossier.actions.ts:355 -> flow.ts:183 -> dossier.ts:334 -> flow.ts:204 -> dossier.actions.ts:398 -> dossier.ts:116 |
+| `h5.set-lead.contador-dms-hoy` DMs mandados hoy | L2 | — | manual/_data.ts:153 / outreach.actions.ts:73 -> outreach.ts:67-72 -> :21-33 -> dmsMandadosHoyWhere (isolation.ts, gte/lte). |
+| `h5.set-lead.envio-demo` Envío del link de la demo aprobada | L2 | — | m15-envio.tsx:98 -> flow.ts:92; outreach.actions.ts:237 -> :244 -> dossier.ts:394-409 -> (falla) outreach.actions.ts:258 -> dossier.ts:416 |
+| `h5.set-lead.escalamiento-construccion` Me trabé (escalamiento) | L2 | validación en servidor, Sentry | dossier.actions.ts:438 -> notify.ts:36-72 -> sendTelegram (flujo D7 'Aviso por Telegram'). |
+| `h5.set-lead.escalar-me-trabe` Pedir ayuda durante la construcción | L2 | — | dossier.actions.ts:433 -> dossier.ts:309-327 -> escalamiento.ts:42-45; reset dossier.ts:145 |
+| `h5.set-lead.ficha-y-evaluacion` Ficha de observación y veredicto | L2 | validación en servidor, Sentry, sin mocks ni TODO, autonomía | dossier.actions.ts:100 saveOwnedFicha -> :139-156 transiciones EVALUADA/DESCARTADA |
+| `h5.set-lead.ficha-y-veredicto` Ficha de observación y veredicto del setter | L2 | validación en servidor | dossier.actions.ts:100 -> dossier.ts:253-274; dossier.actions.ts:139 -> flow.ts:295; :145 -> dossier.ts:150-158; :152 -> dossier.ts:174-189 |
+| `h5.set-lead.opener-sin-link` Opener sin link y seguimiento por cadencia | L2 | validación en servidor, sin mocks ni TODO, autonomía | opener-form.tsx:38 -> flow.ts:221; outreach.schemas.ts:41 -> flow.ts:221; m4-opener.tsx:52 -> copy-blocks.ts:110; estado-manual.tsx:83 -> flow.ts:243 |
+| `h5.set-lead.outreach-y-envio-demo` Opener, toques de seguimiento y envío de la demo aprobada | L2 | Sentry, sin mocks ni TODO, autonomía | outreach.actions.ts:103-135, :164-203, :226-264 |
+| `h5.set-lead.puerta-unica` Puerta única al lead | L2 | — | leads/[leadId]/page.tsx:23 -> manual/page.tsx:18-21 -> _data.ts:145-148 -> [paso]/page.tsx:64-73. Camino feliz trazado; dos redirects y doble carga (PERF). |
+| `h5.set-lead.timeline` Timeline del lead | L2 | vacíos | manual/_data.ts:158 -> timeline.ts:45-63 -> ownership.ts:24 getOwnedLead -> findMany timelineActivityWhere(lead.id). |
+
+### h5.set-manual — Manual del lead
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 27 funcionalidades: 2×L1, 23×L2, 2×L?).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, Sentry, autonomía, vacíos, sin mocks ni TODO, validación en servidor, carga, mobile.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h5.set-manual.agenda` Agendar la reunión en Cal.com (m16) | L2 | permisos y tenant, validación en servidor, Sentry, autonomía | m16-agenda.tsx:236-244 -> agenda-form.tsx:107-119 ofrecerHorarios -> :122-137 ConfirmarReunionSchema -> :139-155 confirmarReunion -> agenda.actions.ts:185 getCalConfigLeadOS -> agenda.ts:57-97. Necesita Cal.com configurado; si no, devuelve AGENDA_NO_CONECTADA  |
+| `h5.set-manual.agenda-reunion` Ofrecer horarios y agendar la reunión (Cal.com) | L1 | permisos y tenant, errores, Sentry, autonomía | Código completo (agenda.actions.ts:125-271) pero inoperante: ninguna org tiene Cal.com y no hay camino de escritura de la config (agenda.ts:63-69, git grep sin writes); nunca se ejecutó (PLAN-931) |
+| `h5.set-manual.aterrizaje-y-guardia` Pantalla del manual con guardia de servidor | L2 | mobile, autonomía | [paso]/page.tsx:64 -> _data.ts:145-234 -> [paso]/page.tsx:69-73 guardia -> :213-438 slots -> :442 PantallaManual. Falla L3 por autonomía (herramientas sin URL) y por mobile no verificable dentro del lote. |
+| `h5.set-manual.ayudas-de-paso` Ayudas de paso: TeachPanel, ejemplos ideales, bloques copiables, guardrail de rol y cartel del canal | L2 | errores | copy-block.tsx:64 -> :37 -> :50; teach-panel.tsx:100-148 desde GUIA_PASOS; ejemplo-ideal.tsx:79-131; guardrail-rol.tsx:35-39 monta CopyBlock; canal-seguridad.tsx:11-56 lee CANAL_INSTAGRAM (flow-content.ts:317). |
+| `h5.set-manual.borrador` Publicar y registrar el borrador (m13) | L2 | permisos y tenant, Sentry | m13-borrador.tsx:147 -> borrador-form.tsx:54-92 guardarDraftUrl -> router.refresh en :90 -> estado publicado en :112-150 con el enlace al chequeo (enlace-chequeo.tsx:63-66). |
+| `h5.set-manual.brief` Decidir cómo va a ser la demo (m6) | L2 | errores, Sentry, sin mocks ni TODO, autonomía | m6-brief.tsx:90 -> brief-form.tsx:131-147 -> dossier.actions.ts:186-216 (requireSetter :191, BriefInputSchema :196, getOwnedDossier :201, transición :208-209). |
+| `h5.set-manual.cabecera-e-historial` Cabecera del lead e historial al pie | L2 | vacíos, mobile, autonomía | _data.ts:236-293 serializa -> [paso]/page.tsx:99-116 cabecera e historial -> :139/:170/:450 |
+| `h5.set-manual.cadencia-follow-up` Cadencia +2/+2/+3 y corte | L2 | errores, Sentry, autonomía | follow-up.ts:3-13 -> os-commercial.ts:68-82 (null limpia el toque) -> _data.ts:182 -> seguimiento-form.tsx:87-89 |
+| `h5.set-manual.chequeo-final` Chequeo final y envío a revisión (m14) | L2 | permisos y tenant, mobile, Sentry | m14-chequeo.tsx:147 -> chequeo-form.tsx:146-157 autoguardado -> :160-181 guardarSelfCheck + enviarARevision; el server re-valida con selfCheckAprobado (flow.ts:204-209). |
+| `h5.set-manual.construccion` Construcción de la demo (mc1/mc2) | L2 | permisos y tenant, errores, validación en servidor, Sentry, sin mocks ni TODO, autonomía | m-construccion.tsx:271-278 -> construccion-ctas.tsx:28-38 iniciarConstruccion; tildes en m-construccion.tsx:302-313 -> fase-auto-reporte.tsx:67-81 guardarProgreso. Hay una carrera conocida cuando se tilda en ráfaga. |
+| `h5.set-manual.derivacion-de-pantalla` Pantalla actual del manual | L2 | autonomía | manual/_data.ts:213 -> manual.ts:687 -> :446 completadasDe -> :509 posicionDe (:520, :542, :552 -> paso.ts:251, :656 -> flow.ts:92) -> :691-697 -> [paso]/page.tsx:69-73 guard. No llega a L3: APROBADA con toque vencido y CERRADO dan órdenes contradictorias (hal |
+| `h5.set-manual.envio-demo` Mandar el link aprobado (m15) | L2 | permisos y tenant, Sentry, autonomía | m15-envio.tsx:97-102 gateEnvioDemo -> envio-form.tsx:52-57 barra -> :37-46 enviarDemoAprobada (idempotente según el toast de :42-44). |
+| `h5.set-manual.escalar-a-franco` Me trabé: avisar a Franco | L2 | permisos y tenant, validación en servidor, Sentry | escalamiento-construccion.tsx:62 -> escalar-modal.tsx:36-66 -> escalarConstruccion -> router.refresh en :56 -> banner en escalamiento-construccion.tsx:31-56. |
+| `h5.set-manual.ficha-por-bloques` Ficha por bloques con avance por completitud y nudges de calidad | L? | autonomía | El lote tiene solo la mecánica (bloques-secuenciales.tsx:136-146, :179, :215-223; autosave-status.tsx:26-53); el guardado y la regla de avance viven en ficha-form.tsx:412 y ficha-bloques.ts (otro lote), así que el camino feliz no se cierra dentro del lote. |
+| `h5.set-manual.ficha-y-veredicto` Ficha por fuentes y veredicto (m1) | L2 | permisos y tenant, errores, validación en servidor, Sentry, autonomía | Camino feliz: m1-ficha.tsx:224-229 -> ficha-form.tsx:193-197 autoguarda con guardarFicha (FichaSchema.safeParse en dossier.actions.ts:97) -> evaluacion-form.tsx:142-160 -> :125 registrarEvaluacion. No llega a L3 por dos cosas: un texto de más de 5000 caractere |
+| `h5.set-manual.franja-recorrido` Franja del recorrido | L2 | — | franja-recorrido.tsx:79 -> recorrido.ts:132-160 -> :111-122 destinoDeFase (mismo alcance que el guard) -> manual.ts:303-316 FASES_MANUAL. |
+| `h5.set-manual.guia-y-herramientas` Guía por paso y rail de herramientas externas | L2 | sin mocks ni TODO, autonomía | teach-panel.tsx:100 -> guidance-content.ts:1197; tools-rail.tsx:26 -> herramientas.ts:122; m-construccion.tsx:135 ToolGuide claudeDesign |
+| `h5.set-manual.herramientas-externas` Herramientas externas (rail «Tus herramientas» y lanzadores por paso) | L1 | vacíos, sin mocks ni TODO, autonomía | 4 de 5 herramientas con url null y TODO (herramientas.ts:63,78,90,117): el rail las pinta como «pendiente» sin destino (tools-rail.tsx:29-44). Solo Netlify Drop abre (herramientas.ts:105 -> tools-rail.tsx:50-55). |
+| `h5.set-manual.historial-del-lead` Historial del lead | L2 | permisos y tenant, errores, Sentry, autonomía | historial-lead.tsx:14-28 -> lead-timeline.tsx:62-93 -> lead-timeline.helpers.ts:21-79. |
+| `h5.set-manual.opener` Mandar el opener (m4) | L2 | permisos y tenant, validación en servidor, Sentry, sin mocks ni TODO, autonomía | m4-opener.tsx:101 -> opener-form.tsx:72-79 (barra) -> :46-66 registrarOpener -> router.refresh en :65. |
+| `h5.set-manual.pantalla-de-espera-con-causa` Pantalla de espera con causa | L2 | — | manual.ts:548/:588/:672 actual 'espera' -> [paso]/page.tsx:118, :154 causaDeEspera (turno.ts:131) -> estado-manual.tsx:74; salida ofreceSalida manual.ts:719-725. |
+| `h5.set-manual.postergar-y-retomar` Postergar un lead y retomarlo | L2 | Sentry, autonomía | seguimiento-form.tsx:175-183 -> outreach.actions.ts:197 (fuera) -> os-commercial.ts:181-191 -> _data.ts:167-170 -> flow.ts:420-423. Retomar no reanuda la cadencia (PLAN-866). |
+| `h5.set-manual.prompts-de-diseno` Prompts de diseño | L2 | — | m-construccion.tsx:79 -> prompts-disenio.ts:191-197; chequeo-form.tsx:84 -> :150-154. |
+| `h5.set-manual.recorrido-y-barra` Layout del manual: franja, barra de acción, cabecera, estados y archivo | L2 | permisos y tenant, autonomía | pantalla-manual.tsx:142-255 -> franja-recorrido.tsx:79-211 -> barra-accion.tsx:156-194; estado-manual.tsx:63-157; archivo-manual.tsx:39-121; error.tsx:29-39. |
+| `h5.set-manual.registrar-resultado-toque` Registrar el resultado de un toque (m5) | L2 | permisos y tenant, Sentry, autonomía | seguimiento-form.tsx:104-124 -> outreach.actions.ts:188 (fuera) -> os-commercial.ts:57-115. Falla L3: pisa CALL_AGENDADA (hallazgo ALTA). |
+| `h5.set-manual.retrabajo` Retrabajo tras el rechazo | L2 | permisos y tenant, errores, validación en servidor, Sentry | m13-borrador.tsx:118-131 -> construccion-ctas.tsx:42-53 reabrirConstruccion; guia-retrabajo.tsx:46-80 muestra el último rechazo y los anteriores. |
+| `h5.set-manual.seguimiento` Registrar lo que pasó (m5) | L? | permisos y tenant, carga, validación en servidor, Sentry, sin mocks ni TODO | La presentación está trazada (m5-seguimiento.tsx:41-286), pero el registro sale del lote en m5-seguimiento.tsx:284 hacia seguimiento-form.tsx, así que el camino feliz no se pudo trazar entero. |
+
+### h5.adm-revision-demos — Revisión de demos (LeadOS)
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 6 funcionalidades: 6×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, Sentry, autonomía, carga, validación en servidor.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h5.adm-revision-demos.aprobar-rechazar` Aprobar o rechazar la demo | L2 | permisos y tenant, Sentry | revision.actions.ts:78 -> dossier.ts:191-200; revision.actions.ts:106 -> dossier.ts:202-221; re-loop dossier.ts:146 -> escalamiento.ts:102 |
+| `h5.adm-revision-demos.cola-y-veredicto` Cola de revisión y veredicto aprobar/rechazar | L2 | permisos y tenant, Sentry, autonomía | page.tsx:34-49 -> [leadId]/page.tsx:53 -> decision-bar.tsx:129-141 -> revision.actions.ts:78-87 -> decision-bar.tsx:120-123 |
+| `h5.adm-revision-demos.metrica-descarte` Métrica descarte/avance por setter y drill-down | L2 | permisos y tenant, carga, validación en servidor, autonomía | page.tsx:52-60, :122-134 -> setter/[setterId]/page.tsx:36-95 -> setter-evaluaciones.tsx:36-99 |
+| `h5.adm-revision-demos.panorama-produccion` Panorama de producción | L2 | autonomía | admin/leados/page.tsx:101-103 -> pipeline.ts:109-125, :135-143, :167-184. |
+| `h5.adm-revision-demos.pipeline-produccion` Panorama de producción, atascos y escaladas | L2 | permisos y tenant | page.tsx:64-103 -> pipeline-board.tsx:42-131 |
+| `h5.adm-revision-demos.ratio-descarte` Ratio descarte/avance por setter | L2 | — | admin/leados/page.tsx:274 -> revision.ts:143 alarmaNuncaDescarta; revision.ts:96-134 calcularRatioSetters. |
+
+### h5.adm-fg2lab — FG-2 Lab (experimento)
+
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 2 funcionalidades: 2×L1).
+- Criterios de L3 que faltan en alguna funcionalidad: permisos y tenant, errores, sin mocks ni TODO.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h5.adm-fg2lab.prompt-estructurado` Lab FG-2 de prompt estructurado (gastronomía) | L1 | permisos y tenant, errores, sin mocks ni TODO | Declarado 'EXPERIMENTAL / DESCARTABLE' (page.tsx:2-8); experimento no corrido (docs/experimentos/fg2-brief-experimento.md:3-4) |
+| `h5.adm-fg2lab.prompt-estructurado-gastro` Laboratorio FG-2: prompt estructurado de gastronomía | L1 | sin mocks ni TODO | prototipo declarado descartable y no conectado al flujo (fg2-brief-lab.ts:2-8); camino: page.tsx:17 -> fg2-lab-client.tsx:136 -> fg2-brief-lab.ts:231 |
+
 ## h6 · Entradas públicas que alimentan lo interno
 
 ### h6.vis-contacto — Formulario de contacto público
@@ -1001,6 +1142,36 @@
 - Relacionado: —
 - Nodo(s): h1.auth-login, h1.auth-login.password, h1.auth-login.magic-link, lib.auth, int.sentry
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-023
+
+### [FAL-031] Los fallos de LeadOS no llegan a Sentry: las server actions tragan las excepciones y los avisos, el escalamiento y el cron os-follow-up solo hacen console.error
+- Dominio: D4  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/setter/_actions/dossier.actions.ts:71` — «function mapError(error: unknown, fallback: string) { ... return fail(fallback) }»; `src/app/(protected)/setter/_actions/outreach.actions.ts:52` — «function mapError(error: unknown, fallback: string): ActionResult<never> {»; `src/app/(protected)/admin/leados/_actions/revision.actions.ts:52` — «console.error('[revision] aviso al setter no fatal:', error)»; `src/app/api/cron/os-follow-up/route.ts:297` — «console.error('[cron os-follow-up] execution error:', error)»; `src/app/api/cron/os-follow-up/route.ts:270` — «return NextResponse.json( { ok: false, error: 'Telegram send failed' },»; `src/lib/leados/novedades.ts:131` — «console.error('[novedades] fallo no fatal al emitir novedad:', error)»; `src/lib/leados/novedades.ts:303` — «console.error('[novedades] fallo no fatal al leer avisos:', error) return { filas: [], ocultos: 0, revision, totalSinLeer: 0 }»; `src/lib/leados/notify.ts:69` — «console.error('[leados notify] fallo no fatal:', error)»; `src/lib/leados/notify.ts:175` — «console.error('[leados notify] fallo no fatal:', error)»; `src/lib/leados/progreso.ts:122` — «console.error('[progreso] fallo no fatal al contar contactos:', error)»
+- Impacto: Ninguna de las ~40 acciones del lote llama a captureException (git grep: 0); la mayoría ni siquiera loguea. Un fallo de Neon o de Cal.com en el flujo del setter queda como un toast genérico, invisible para Franco y para Sentry. Bloquea el criterio Sentry de L3 en todo LeadOS.
+- Propuesta: En cada mapError, antes del fallback, capturar con Sentry (tag section: leados, acción y leadId) los errores no esperados; mantener el copy al usuario.
+- Esfuerzo: S  ·  Zona: ZONA-FRANCO
+- Relacionado: [FAL-029], [FAL-015]
+- Nodo(s): h5.set-lead, h5.set-manual, h5.adm-revision-demos, int.sentry, lib.leados, int.cron.os-follow-up, h5.set-dia.novedades-dirigidas, h5.set-lead.escalamiento-construccion, int.telegram, modelo.OsSetterNotice
+
+### [FAL-032] La revisión de Franco no muestra los materiales de la ficha
+- Dominio: D4  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx:236` — «const FICHA_BLOQUES: Array<{ key: keyof Ficha; label: string }> = [»; `src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx:256` — «return typeof valor === 'string' && valor.trim() !== '' ? valor : null»; `src/lib/leados/contracts.ts:73` — «materiales: z.object({ resenasUrl, imagenesUrl, otraRedUrl, queVende, comoSePresenta })»
+- Impacto: El setter carga en la ficha los links de reseñas e imágenes reales, qué vende y cómo se presenta (P5-A), pero el panel de revisión solo lista los seis bloques viejos y descarta todo lo que no es string: Franco aprueba o rechaza la demo sin ver el material que debía usar (PLAN-667 sigue abierto).
+- Propuesta: Agregar un bloque 'Material del negocio' que renderice materiales (links como enlaces externos) en FichaPanel.
+- Esfuerzo: S  ·  Zona: ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): h5.adm-revision-demos.cola-y-veredicto, modelo.OsLeadDossier
+
+### [FAL-033] Cuatro de las cinco herramientas externas del recorrido del setter siguen sin link (TODO) y el rail ofrece el «Chat de evaluación» que el recorrido ya no usa
+- Dominio: D4  ·  Severidad: MEDIA  ·  Tipo: faltante
+- Confianza: PROBABLE
+- Evidencia: `src/lib/leados/herramientas.ts:63` — «url: null, // TODO: URL — chat de evaluación en Sonnet (pedir a Franco)»; `src/lib/leados/herramientas.ts:123` — «'evaluador',»; `src/app/(protected)/setter/_components/tools-rail.tsx:41` — «<span className="shrink-0 text-[10px] uppercase tracking-wide text-amber-300/50"> pendiente»; `src/app/(protected)/setter/_components/tools-rail.tsx:26` — «{HERRAMIENTAS_ORDEN.map((id) => {»; `src/app/(protected)/setter/_actions/dossier.schemas.ts:14` — «El veredicto del setter (D15-bis: antes era la transcripción de un chat de evaluación externo)»; `src/lib/leados/herramientas.ts:78` — «url: null, // TODO: URL — Gem privado de diseño/brief (pedir a Franco)»; `src/lib/leados/herramientas.ts:90` — «url: null, // TODO: URL — acceso a Claude Design que usa el equipo (pedir a Franco)»; `src/lib/leados/herramientas.ts:117` — «url: null, // TODO: URL — Gem privado de outreach (pedir a Franco)»; `src/app/(protected)/setter/leads/[leadId]/manual/_components/m4-opener.tsx:63` — «<ToolGuide id="gemOutreach" />»; `src/app/(protected)/setter/leads/[leadId]/manual/_components/m6-brief.tsx:60` — «return <ToolGuide id="gemDiseno" />»; `src/lib/leados/herramientas.ts:55` — «nombre: 'Chat de evaluación (Sonnet)',»; `src/app/(protected)/setter/leads/[leadId]/manual/_components/m1-ficha.tsx:85` — «Lo que se fue con la fusión es el 'ToolGuide' del chat de evaluación: sin»; `src/lib/leados/herramientas.ts:62` — «dondeSeUsa: 'Evaluación', url: null, // TODO: URL — chat de evaluación en Sonnet (pedir a Franco)»; `src/lib/leados/manual.ts:307` — «ficha: { titulo: 'Ficha', pantallas: ['m1'] }, // ninguna etapa se llama 'Evaluación' (:307-315)»; `src/lib/leados/guidance-content.ts:474` — «SETTER. Hasta acá el veredicto salía de un chat de evaluación externo y el setter transcribía la respuesta; el chat quedó afuera»; `src/lib/leados/herramientas.ts:53` — «evaluador: { id: 'evaluador', nombre: 'Chat de evaluación (Sonnet)',»; `src/lib/leados/manual.ts:160` — «// no tiene link cargado, así que los tres campos —obligatorios, porque // sostienen el gate— no se podían llenar sin inventarlos. Ahora el juicio es // del setter»
+- Impacto: Bloqueante de autonomía para el primer setter real: Gem de diseño (herramientas.ts:78), Claude Design (:90) y Gem de outreach (:117) también tienen url null con TODO. El rail, que es el panel persistente, las muestra como «pendiente» sin decir qué hacer (la salida SalidaLinkPendiente de tool-guide.tsx:61-67 existe pero el rail no la usa) y anuncia una herramienta del paso Evaluación que tras la fusión no tiene pantalla: ningún ToolGuide ni HerramientaLauncher con id evaluador en src (solo el test tests/setter/16-municiones-salida.spec.ts:132).
+- Propuesta: Franco carga las URLs (mejor en configuración editable que en código) y decide sacar 'evaluador' de HERRAMIENTAS_ORDEN, ajustando tests/setter/16-municiones-salida.spec.ts:132. Mientras falten, el rail debería mostrar la misma salida que ToolGuide.
+- Esfuerzo: S  ·  Zona: ZONA-FRANCO
+- Relacionado: —
+- Nodo(s): h5.set-manual.herramientas-externas, lib.leados, h5.set-lead, h5.set-manual.opener, h5.set-manual.brief, h5.set-manual.construccion, h5.set-dia, h5.set-manual.ficha-y-veredicto, h5.set-manual, h5.set-manual.guia-y-herramientas, h5.set-lead.brief-y-construccion
 
 ### [FAL-001] Los inicios de sesión no dejan rastro: no hay events en auth.ts ni tipo LOGIN en AuditActionType
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: faltante

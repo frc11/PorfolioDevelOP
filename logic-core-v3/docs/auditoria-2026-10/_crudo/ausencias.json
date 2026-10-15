@@ -3114,6 +3114,587 @@
    "afirmacion": "encryptCredential no tiene llamadores en src (solo secret-box se usa, en el motor)",
    "comando": "git grep -n -E 'credential-cipher|isEncrypted|encryptCredential|secret-box' origin/main -- logic-core-v3/src logic-core-v3/scripts logic-core-v3/prisma | grep -v src/lib/crypto/  -> solo src/modules/motor/services/sendMessage.ts:22",
    "control_positivo": "el mismo comando encuentra el import de secret-box en sendMessage.ts:22"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "Ninguna server action del lote captura en Sentry",
+   "comando": "git grep -n \"captureException\\|Sentry\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/_actions\" \"logic-core-v3/src/app/(protected)/admin/leads/_actions\" \"logic-core-v3/src/app/(protected)/admin/leados/_actions\"  -> 0 resultados",
+   "control_positivo": "El mismo patrón encuentra setter/error.tsx:32 y components/ui/SectionErrorBoundary.tsx:64"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "listLeads y getLeadById no tienen importadores",
+   "comando": "git grep -n -w \"listLeads\\|getLeadById\" origin/main -- logic-core-v3/src logic-core-v3/tests  -> solo lead.actions.ts:249 y :275",
+   "control_positivo": "git grep -l -w assignLeadSetter devuelve assign-setter-control.tsx y assignment-trail.ts"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "HARD_CHECKS_BASE (código citado por el insumo OSLEAD H-04) no existe en main ni en ramas remotas",
+   "comando": "git grep -n HARD_CHECKS_BASE origin/main -- logic-core-v3/src  -> 0; bucle sobre refs/remotes/origin con git grep -l en flow.ts -> 0",
+   "control_positivo": "git grep 'export const HARD_CHECKS' origin/main encuentra flow-content.ts:171"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "RechazoSchema no tiene checkId",
+   "comando": "git grep -n checkId origin/main -- logic-core-v3/src  -> solo guidance-content.ts:164 y :168 (otro concepto)",
+   "control_positivo": "git grep 'RechazoSchema = ' encuentra contracts.ts:169"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "Ningún código escribe la configuración de Cal.com de una organización",
+   "comando": "git grep -n \"calComUsername\\|calComEmbedUrl\\|calComApiKey\" origin/main -- logic-core-v3/src logic-core-v3/prisma  -> solo lecturas/selects, migración y schema",
+   "control_positivo": "El mismo grep encuentra la lectura en lib/leados/agenda.ts:59 y agenda-inteligente/page.tsx:325"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "El cron os-follow-up no tiene disparador en Netlify",
+   "comando": "git grep -n -i follow origin/main -- logic-core-v3/netlify.toml logic-core-v3/vercel.json  -> solo vercel.json:4; git ls-tree netlify/functions -> 3 funciones, ninguna de follow-up",
+   "control_positivo": "git grep 'schedule' netlify.toml encuentra :26, :29 y :32"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "No existe base de test dedicada (.env.test / DATABASE_URL_TEST en configs)",
+   "comando": "git cat-file -e origin/main:logic-core-v3/.env.test -> no existe; git grep DATABASE_URL_TEST origin/main -- logic-core-v3 -> solo docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md",
+   "control_positivo": "git grep env.local encuentra playwright.leados.config.ts:25 y playwright.setter.config.ts:31"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "No queda numeración 'Paso N' visible en el copy del setter (C-04)",
+   "comando": "git grep -n -E 'Paso [0-9]+' origin/main -- flow.ts flow-content.ts herramientas.ts guidance-content.ts (protected)/setter | grep -v líneas de comentario -> 0",
+   "control_positivo": "git grep -c 'Paso [0-9]' outreach.actions.ts -> 5 (en comentarios)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "/admin/fg2-lab no está enlazado desde ninguna pantalla",
+   "comando": "git grep -n fg2-lab origin/main -- logic-core-v3/src | grep -v admin/fg2-lab/ -> 0",
+   "control_positivo": "git grep -l \"/admin/leados'\" encuentra admin/_components/admin-sidebar.tsx"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "Los documentos de referencia docs/brief-vision-flujo-setter.md y docs/correccion-decisiones-vs-A3.md no existen",
+   "comando": "git cat-file -e origin/main:logic-core-v3/docs/brief-vision-flujo-setter.md (y correccion-decisiones-vs-A3.md) -> no existe",
+   "control_positivo": "git cat-file -e origin/main:logic-core-v3/docs/verificacion-arranque-oslead-vii.md -> existe"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "onboarding-hint.tsx (PLAN-759/728) ya no existe",
+   "comando": "git cat-file -e \"origin/main:logic-core-v3/src/app/(protected)/setter/_components/onboarding-hint.tsx\" -> no existe; git grep 'onboarding-hint\\|OnboardingHint' -> 0",
+   "control_positivo": "git cat-file -e \"origin/main:logic-core-v3/src/app/(protected)/setter/nuevo/page.tsx\" -> existe"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "afirmacion": "La derivación del manual no lee input.ficha (PLAN-950)",
+   "comando": "git show origin/main:logic-core-v3/src/lib/leados/manual.ts | grep -n 'input\\.ficha' -> 0",
+   "control_positivo": "en el mismo archivo input.status aparece en :488 y :520"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "El lote no tiene páginas, layouts, route handlers ni módulos 'use server' (por eso entradas queda vacío).",
+   "comando": "git grep -n \"use server\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/_components/\"  →  0 coincidencias",
+   "control_positivo": "El mismo patrón sobre logic-core-v3/src/app/(protected)/setter/_actions/ encuentra agenda.actions.ts:1, cartera.actions.ts:1 y dossier.actions.ts:1."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "Ninguna pantalla monta la herramienta 'evaluador'.",
+   "comando": "git grep -n -E \"id=\\\"evaluador\\\"|'evaluador'|\\\"evaluador\\\"\" origin/main -- logic-core-v3/src logic-core-v3/tests | grep -v herramientas.ts  →  solo tests/setter/16-municiones-salida.spec.ts:132",
+   "control_positivo": "git grep -n -E 'id=\"(gemDiseno|gemOutreach|netlifyDrop|claudeDesign)\"' encuentra m-construccion.tsx:135, m13-borrador.tsx:65 y m4-opener.tsx:63."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "Ningún drawer del repo usa inert; el del setter se oculta solo con transform.",
+   "comando": "git grep -n -E \"\\binert\\b\" origin/main -- logic-core-v3/src  →  0",
+   "control_positivo": "git grep -n -- \"-translate-x-full\" encuentra setter-shell.tsx:54, AdminLayoutClient.tsx:63 y DashboardLayoutClient.tsx:81."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "El orden 'colas' de la cartera ya no existe como valor.",
+   "comando": "git grep -n \"'colas'\" origin/main -- logic-core-v3/src/lib/leados/  →  solo comentarios en flow.ts:884 y :887",
+   "control_positivo": "git grep -n \"export type OrdenCartera\" encuentra flow.ts:894."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "No queda numeración «Paso N» del wizard en copy visible del setter (C-04).",
+   "comando": "git grep -n -E \"Paso [0-9]+|paso [0-9]+ de|\\(Paso|«Paso\" origin/main -- \"src/app/(protected)/setter/\" src/lib/leados/flow.ts src/lib/leados/flow-content.ts src/lib/leados/herramientas.ts src/lib/leados/guidance-content.ts (sin comentarios ni invariantes)  →  0",
+   "control_positivo": "git grep -n -E \"Paso [0-9]+\" origin/main -- src encuentra admin/chatbots/[botId]/tabs/InstallTab.tsx:61."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "No existe el chequeo G3 «¿Exportaste después del último refinamiento?».",
+   "comando": "git grep -n -i -E \"export(aste|ó).*refin|último refinamiento|ultimo refinamiento\" origin/main -- src  →  0",
+   "control_positivo": "git grep -c confirmoCarga en manual/_components/borrador-form.tsx da 14."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "No existen HARD_CHECKS_BASE ni los criterios de diseño tresColores y botonInvita (H-04 del doc OSLEAD).",
+   "comando": "git grep -q -E 'tresColores|botonInvita|HARD_CHECKS_BASE' origin/main -- src; echo $?  →  1 (sin coincidencias)",
+   "control_positivo": "git grep -c HARD_CHECKS origin/main -- src/lib/leados/flow.ts da 8."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "El sprint M1 de calidad de ficha (registrarCorteFicha, direccionFisica…) no está en origin/main ni en el historial de ninguna rama.",
+   "comando": "git grep -n -i -E \"registrarCorte|direccionFisica\" origin/main -- src  →  0; git log --all --oneline -S registrarCorteFicha  →  solo f70dcae0 y 04ecc0db (docs de esta auditoría)",
+   "control_positivo": "git grep -c fichaJson origin/main -- src/lib/leados/dossier.ts da 1."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "Modal.tsx no declara role=dialog ni aria-modal (PLAN-1237 F1).",
+   "comando": "git show origin/main:./src/components/ui/Modal.tsx | grep -n -i -E \"role|aria-|dialog\"  →  solo aria-label=\"Cerrar\" (línea 91)",
+   "control_positivo": "El mismo grep encuentra aria-label=\"Cerrar\", así que el patrón funciona sobre el archivo."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "draft-preview.tsx (PLAN-1237 F3) no existe en origin/main.",
+   "comando": "git ls-tree -r --name-only origin/main | grep -i -E \"draft-preview|draftPreview\"  →  0",
+   "control_positivo": "El mismo listado filtrado encuentra src/lib/leados/cola.ts y novedades-agrupar.ts."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "No existe closedToOrgId (vínculo lead → cliente de PLAN-612).",
+   "comando": "git grep -n closedToOrgId origin/main -- prisma/schema.prisma src  →  0",
+   "control_positivo": "git grep -n convertedToOsLeadId encuentra schema.prisma:1510."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "No hay UI en /admin para el Cal.com de develOP (calComEmbedUrl).",
+   "comando": "git grep -l calComEmbedUrl origin/main -- \"src/app/(protected)/admin\"  →  0",
+   "control_positivo": "git grep -l calComEmbedUrl origin/main -- src encuentra dashboard/modules/agenda-inteligente/page.tsx y src/lib/leados/agenda.ts."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "next.config.ts no define allowedDevOrigins (PLAN-1004).",
+   "comando": "git grep -n allowedDevOrigins origin/main -- logic-core-v3/next.config.ts  →  0",
+   "control_positivo": "git grep -n frame-ancestors en el mismo archivo encuentra :80."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "Ningún script de package.json invoca la suite qa-walkthrough.",
+   "comando": "git show origin/main:./package.json | grep -c qa-walkthrough  →  0",
+   "control_positivo": "git ls-tree --name-only origin/main muestra playwright.qa-walkthrough.config.ts, y el mismo grep sobre package.json encuentra \"dev:qa\" (:8)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "afirmacion": "src no tiene atributos data-step (la suite qa-persona apunta al wizard retirado).",
+   "comando": "git grep -l data-step origin/main -- src  →  0",
+   "control_positivo": "git grep -n data-step origin/main -- tests/qa-persona/corrida-1-novato-frio.spec.ts encuentra :80 y :143."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "El lote no tiene page.tsx, layout.tsx, route handlers ni módulos 'use server', así que entradas queda vacío",
+   "comando": "git grep -l \"'use server'\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/\" \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/manual/_components/\" \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/error.tsx\" \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/loading.tsx\"  (sin resultados)",
+   "control_positivo": "El mismo comando sobre setter/_actions/dossier.actions.ts lo lista."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "No hay dangerouslySetInnerHTML en el lote",
+   "comando": "git grep -n dangerouslySetInnerHTML origin/main -- \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/\"  (sin resultados)",
+   "control_positivo": "git grep -l dangerouslySetInnerHTML origin/main -- logic-core-v3/src devuelve src/components/layout/EarlyScrollLock.tsx"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "No hay any en el lote",
+   "comando": "git grep -n -E \":\\s*any\\b|as any|<any>\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/\"  (sin resultados)",
+   "control_positivo": "git grep -c -E \"as any\" origin/main -- logic-core-v3/src devuelve LegacyNeuroAvatar.tsx:1 y ClientSettingsForm.tsx:3"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "No hay console.* en el lote",
+   "comando": "git grep -n \"console\\.\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/\"  (sin resultados)",
+   "control_positivo": "El mismo patrón encuentra console.warn en src/lib/leados/agenda.ts:64"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "No hay marcadores TODO/FIXME en el lote: las coincidencias son la palabra 'TODO' en la prosa de los comentarios",
+   "comando": "git grep -n -E \"TODO|FIXME\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/\"  (solo prosa: guia-retrabajo.tsx:37, lead-timeline.tsx:56, chequeo-form.tsx:27, pantalla-manual.tsx:137)",
+   "control_positivo": "git grep -n \"TODO: URL\" origin/main -- logic-core-v3/src/lib/leados/herramientas.ts encuentra :63, :78, :90 y :117"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "FichaForm no declara una acción en la barra (m1 depende de EvaluacionForm montado)",
+   "comando": "git grep -c useAccionPrincipal origin/main -- \"logic-core-v3/src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx\"  (sin resultados)",
+   "control_positivo": "El mismo comando sobre evaluacion-form.tsx devuelve 2"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "ofrecerHorarios no recibe ni valida el decisor",
+   "comando": "git grep -c -i decisor origin/main -- \"logic-core-v3/src/app/(protected)/setter/_actions/agenda.actions.ts\"  (sin resultados)",
+   "control_positivo": "git grep -n decisor origin/main -- \"logic-core-v3/src/app/(protected)/setter/_actions/agenda.schemas.ts\" encuentra :10-11"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "En src ningún código escribe Organization.calComUsername: solo se lee (LeadOS y agenda-inteligente)",
+   "comando": "git grep -n calComUsername origin/main -- logic-core-v3/src | grep -v lib/leados/  (solo lecturas en dashboard/modules/agenda-inteligente/page.tsx:325,347,348)",
+   "control_positivo": "El mismo grep sin el filtro encuentra src/lib/leados/agenda.ts:59 (findMany where calComUsername not null)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "El arreglo P25 de la carrera de tildes no está en main",
+   "comando": "git merge-base --is-ancestor d0b37c71 origin/main  (falso); git log --oneline origin/main..origin/p25/rafaga-tildes  (5 commits, incluido 130492e8)",
+   "control_positivo": "git merge-base --is-ancestor b3ea27db origin/main da verdadero (y lo mismo con otros 19 commits declarados hechos)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "timeline.invariant.ts no tiene censo exhaustivo de ActivityChannel",
+   "comando": "git grep -n -E \"Object\\.(values|keys)\\(ActivityChannel\" origin/main -- logic-core-v3/src/lib/leados/timeline.invariant.ts  (sin resultados)",
+   "control_positivo": "El patrón Object.keys(ActivityChannel) aparece en contador-dms.invariant.ts:218"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "No queda copy visible con 'Paso N' (numeración del wizard) en el setter",
+   "comando": "git grep -n -i -E \"paso [0-9]\" origin/main -- logic-core-v3/src/lib/leados/flow.ts \"logic-core-v3/src/app/(protected)/setter/\" logic-core-v3/src/lib/leados/flow-content.ts logic-core-v3/src/lib/leados/herramientas.ts logic-core-v3/src/lib/leados/guidance-content.ts | grep -v líneas de comentario  (sin resultados)",
+   "control_positivo": "Sin filtrar comentarios, git grep -c -E \"Paso [0-9]\" sobre dossier.actions.ts devuelve 8"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "La spec 23 de la barra de acción no cubre m16",
+   "comando": "git grep -n m16 origin/main -- logic-core-v3/tests/setter/23-accion-a-la-vista.spec.ts  (solo :243, la exclusión)",
+   "control_positivo": "git grep -c m14 sobre el mismo archivo devuelve 9"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "pipelineOrder no existe en el schema ni en src",
+   "comando": "git grep -n pipelineOrder origin/main -- logic-core-v3/prisma/schema.prisma logic-core-v3/src  (sin resultados)",
+   "control_positivo": "git grep -n \"^model OsLead \" encuentra schema.prisma:862"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "onboarding-hint.tsx ya no existe en main",
+   "comando": "git ls-files \"logic-core-v3/src/app/(protected)/setter/_components/\" | grep -i onboarding  (sin resultados); git log --diff-filter=D -- .../onboarding-hint.tsx devuelve 7074ba6b",
+   "control_positivo": "git grep -n keydown en la misma carpeta encuentra use-keyboard-shortcuts.ts:53"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "afirmacion": "Solo el veredicto declara avisaEnSalidaInterna",
+   "comando": "git grep -n avisaEnSalidaInterna origin/main -- logic-core-v3/src/app/  (código solo en evaluacion-form.tsx:102; salida-manual.tsx:20 es un comentario)",
+   "control_positivo": "El mismo grep encuentra la declaración en evaluacion-form.tsx:102"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "cargarProspecto (alta manual) no deduplica contra la cartera de otros setters ni contra el sistema",
+   "comando": "git grep -n -i \"duplic\\|findFirst\\|en-sistema\\|normaliz\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/_actions/prospecto.actions.ts\"  -> 0 resultados",
+   "control_positivo": "git grep -n -i \"en-sistema\\|en-cartera\" origin/main -- \"logic-core-v3/src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts\" -> :93 y :95; y git grep -n \"osLead.create\" sobre prospecto.actions.ts -> :28"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "Netlify no agenda /api/cron/os-follow-up",
+   "comando": "git grep -n \"os-follow-up\" origin/main -- logic-core-v3/netlify.toml logic-core-v3/netlify  -> 0 resultados; git ls-tree origin/main logic-core-v3/netlify/functions/ -> solo cleanup-old-events-cron, generate-insights-cron, send-weekly-reports-cron",
+   "control_positivo": "git grep -n \"os-follow-up\" origin/main -- logic-core-v3/vercel.json -> :4; git grep -n schedule origin/main -- logic-core-v3/netlify.toml -> :26, :29, :32"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "sendTelegram no parte ni recorta mensajes largos",
+   "comando": "git grep -n -e \"4096\" -e \"chunk\" -e \"\\.length\" origin/main -- logic-core-v3/src/lib/notifications/telegram.ts  -> 0 resultados",
+   "control_positivo": "git grep -n -A 8 \"export async function sendTelegram\" origin/main -- logic-core-v3/src/lib/notifications/telegram.ts -> :67-75"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "El cron os-follow-up no usa los helpers canónicos de día AR ni de secreto de cron",
+   "comando": "git grep -n \"dates-ar\\|cron-secret\\|isAuthorizedCronRequest\" origin/main -- logic-core-v3/src/app/api/cron/os-follow-up/route.ts  -> solo :144 (header x-cron-secret propio)",
+   "control_positivo": "git grep -n \"isAuthorizedCronRequest\" origin/main -- logic-core-v3/src/app/api/cron/detect-bot-issues/route.ts -> :2 y :8"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "La herramienta 'evaluador' no se usa fuera del registro herramientas.ts (solo en el rail por HERRAMIENTAS_ORDEN)",
+   "comando": "git grep -n \"'evaluador'\\|\\\"evaluador\\\"\" origin/main -- logic-core-v3/src | grep -v herramientas.ts  -> 0 resultados",
+   "control_positivo": "git grep -n \"herramientaSinLink('gemDiseno')\" origin/main -- logic-core-v3/src -> dossier.schemas.ts:103 y brief-form.tsx:107"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "rechazarRevision y reabrirConstruccion no escriben OsLeadActivity",
+   "comando": "git grep -n \"osLeadActivity.create\" origin/main -- logic-core-v3/src/lib/leados logic-core-v3/src/app  -> solo src/lib/leados/assignment-trail.ts:45",
+   "control_positivo": "git grep -n \"osLeadActivity.create\" origin/main -- logic-core-v3/src/lib/os-commercial.ts -> :57"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "HARD_CHECKS_BASE / baseAprobada (H-04 del documento OSLEAD) no existen en main",
+   "comando": "git grep -n \"HARD_CHECKS_BASE\\|baseAprobada\" origin/main -- logic-core-v3/src  -> 0 resultados",
+   "control_positivo": "git grep -c \"HARD_CHECKS\" origin/main -- logic-core-v3/src/lib/leados/flow.ts -> 8"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "mc2-refinar.tsx y prompts-refinamiento.ts (P43) no están en ninguna ref del repo",
+   "comando": "git log --all --oneline -- \"*mc2-refinar.tsx\" \"*prompts-refinamiento.ts\"  -> 0 resultados",
+   "control_positivo": "git log --all --oneline --grep=\"P43\" -> 506e0059 (WIP P36-P43, solo en origin/p25/rafaga-tildes)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "tildeUnico no existe en main (solo en origin/p25/rafaga-tildes)",
+   "comando": "git grep -l \"HARD_CHECKS.find\\|tildeUnico\" $(git for-each-ref --format='%(refname)' refs/remotes refs/heads) -- logic-core-v3/src",
+   "control_positivo": "El mismo comando devuelve 3 archivos en refs/remotes/origin/p25/rafaga-tildes (m-construccion.tsx, mc1-construir.tsx, registro-fases.tsx)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "No hay ningún fetch o chequeo automático contra draftUrl",
+   "comando": "git grep -n -E \"fetch\\([^)]*draftUrl|draftUrl[^;]*fetch\" origin/main -- logic-core-v3/src  -> 0 resultados",
+   "control_positivo": "git grep -c \"draftUrl\" origin/main -- logic-core-v3/src/lib/leados/dossier.ts -> 4"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "No existe requireSetterOrAdmin",
+   "comando": "git grep -n \"requireSetterOrAdmin\" origin/main -- logic-core-v3/src  -> 0 resultados",
+   "control_positivo": "git grep -n \"export async function require\" origin/main -- logic-core-v3/src/lib/auth-guards.ts -> :3 requireSuperAdmin, :13 requireSetter"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "No hay chatId de Telegram por usuario (solo el global de AgencySettings)",
+   "comando": "git grep -n -i \"telegramChatId\\|chatId\" origin/main -- logic-core-v3/prisma/schema.prisma  -> solo :836 osTelegramChatId (AgencySettings)",
+   "control_positivo": "git grep -n -i \"chatid\" origin/main -- logic-core-v3/src/lib/notifications/telegram.ts -> :5 y :7"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "No queda 'Paso N' visible en las superficies del setter",
+   "comando": "git grep -n -E \"['\\\">]Paso [0-9]\" origin/main -- \"logic-core-v3/src/app/(protected)/setter\" logic-core-v3/src/lib/leados/manual.ts logic-core-v3/src/lib/leados/flow-content.ts  -> 0 resultados",
+   "control_positivo": "git grep -c \"Paso\" origin/main -- logic-core-v3/src/lib/leados/manual.ts -> 4 (en comentarios)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "lead-wizard.tsx, dossier-stepper.tsx y seguimiento-step.tsx ya no existen en main",
+   "comando": "git ls-tree -r --name-only origin/main logic-core-v3/src | grep -E \"lead-wizard|dossier-stepper|seguimiento-step\"  -> 0 resultados",
+   "control_positivo": "El mismo comando con \"fg2-lab|_experimental\" devuelve 5 archivos"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "afirmacion": "Las listas de errores de los archivos del lote no tienen TODO/FIXME ni mocks",
+   "comando": "git grep -n -E \"TODO|FIXME|XXX|HACK|mock|lorem\" origin/main -- <los 15 archivos del lote>  -> solo falsos positivos ('TODO el retrabajo' _data.ts:36, 'TODOS los status' os-commercial.ts:178)",
+   "control_positivo": "git grep -c \"TODO\" origin/main -- logic-core-v3/src/lib/leados/herramientas.ts -> 5"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "flow.ts no trata CERRADO como terminal: solo aparece en RESPONDED_STATUSES",
+   "comando": "git grep -n \"CERRADO\" origin/main -- src/lib/leados/flow.ts  (única línea: flow.ts:73)",
+   "control_positivo": "git grep -n \"'PERDIDO'\" origin/main -- src/lib/leados/flow.ts devuelve flow.ts:417 y :486"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "La lista de leads del setter no filtra por status",
+   "comando": "git grep -n \"status\" origin/main -- src/lib/leados/ownership.ts  (vacío)",
+   "control_positivo": "git grep -n \"ownedListWhere\" origin/main -- src/lib/leados/ownership.ts devuelve :19 y :54"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "No hay código que escriba Organization.calComUsername (se carga a mano)",
+   "comando": "git grep -n \"calComUsername\" origin/main -- src prisma/seed*.ts prisma/seeds  (solo lecturas: agenda.ts, agenda-inteligente/page.tsx:325/347/348 e invariante copy-sin-jerga)",
+   "control_positivo": "La misma búsqueda encuentra la lectura en dashboard/modules/agenda-inteligente/page.tsx:325"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "reunion.actions.ts no limpia agendaJson al registrar RE_SEGUIMIENTO",
+   "comando": "git grep -n \"agendaJson\\|DbNull\" origin/main -- \"src/app/(protected)/admin/leads/_actions/reunion.actions.ts\"  (vacío)",
+   "control_positivo": "git grep -n \"RE_SEGUIMIENTO\" en el mismo archivo devuelve :11 y :31"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "GUIA_CONSTRUCCION, GUIA_TRASPASO, GUIA_REVISION, agruparParaHome y SelfCheckRazon no tienen consumidores fuera de su archivo",
+   "comando": "git grep -l -w <símbolo> origin/main -- src tests scripts  (solo el archivo que lo define)",
+   "control_positivo": "El mismo comando con particionarCartera devuelve setter/page.tsx; GUIA_OBJECIONES se consume por TeachPanel id=\"objeciones\" (m5-seguimiento.tsx:214)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "TeachPanel solo se invoca con los ids 'objeciones' y 'selfCheck'",
+   "comando": "git grep -n -A3 \"<TeachPanel\" origin/main -- src | grep -o 'id=\"[a-zA-Z]*\"' | sort | uniq -c",
+   "control_positivo": "El mismo comando sí lista id=\"objeciones\" e id=\"selfCheck\""
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "Ninguna pantalla usa la herramienta 'evaluador'",
+   "comando": "git grep -n 'ToolGuide id=\"evaluador\"\\|evaluador' origin/main -- src/app  (vacío)",
+   "control_positivo": "git grep -n 'ToolGuide id=' origin/main -- src devuelve claudeDesign (m-construccion.tsx:135), netlifyDrop, gemOutreach y gemDiseno"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "HARD_CHECKS_BASE, obtenerAnguloWow, AnguloWowCard, primeraMirada y tresColores no existen en ningún ref del repo",
+   "comando": "for b in $(git for-each-ref --format='%(refname:short)' refs/remotes refs/heads); do git grep -l \"obtenerAnguloWow\\|primeraMirada\\|tresColores\\|HARD_CHECKS_BASE\" $b -- src; done  (vacío en los 117 refs)",
+   "control_positivo": "git grep -c \"HARD_CHECKS\" origin/main -- src/lib/leados/flow.ts devuelve 8"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "No queda numeración 'Paso N' en el copy de los archivos del lote",
+   "comando": "git grep -n \"Paso [0-9]\" origin/main -- src/lib/leados/flow.ts src/lib/leados/flow-content.ts src/lib/leados/herramientas.ts src/lib/leados/guidance-content.ts  (vacío)",
+   "control_positivo": "El mismo patrón sobre src/app/(protected)/setter devuelve comentarios en agenda.actions.ts:4 y dossier.actions.ts:83"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "No hay toast en /admin/leads",
+   "comando": "git grep -l \"toast\" origin/main -- \"src/app/(protected)/admin/leads\"  (vacío)",
+   "control_positivo": "git grep -l \"toast\" origin/main -- \"src/app/(protected)/admin\" devuelve admin/alerts/AlertsClient.tsx"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "afirmacion": "Ningún archivo de src/lib/leados lleva la directiva 'use server' (el lote no tiene entradas)",
+   "comando": "git grep -l -E \"^['\\\"]use server['\\\"]\" origin/main -- src/lib/leados/  (vacío)",
+   "control_positivo": "git grep -l \"^'use server'\" origin/main -- \"src/app/(protected)/setter/_actions\" devuelve agenda.actions.ts, cartera.actions.ts y dossier.actions.ts"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "Ningún archivo del lote es page, layout, route handler ni módulo 'use server' (entradas vacías).",
+   "comando": "git grep -n -E \"^['\\\"]use (server|client)['\\\"]\" origin/main -- <los 20 archivos de src/lib/leados del lote>",
+   "control_positivo": "git grep -n -E \"^['\\\"]use server['\\\"]\" origin/main -- \"src/app/(protected)/setter/_actions/cartera.actions.ts\" -> :1 'use server'"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "src/lib/leados no usa Sentry: los catch del lote solo hacen console.error.",
+   "comando": "git grep -n -i sentry origin/main -- src/lib/leados",
+   "control_positivo": "git grep -n captureException origin/main -- \"src/app/(protected)/setter/error.tsx\" -> :32"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "DossierStepper, PasoActualBanner y StepAnchor ya no existen; derivarPasoDelLead solo se consume en manual.ts.",
+   "comando": "git grep -n -l \"DossierStepper\\|PasoActualBanner\\|StepAnchor\\b\\|step-anchor\" origin/main -- src ; git grep -n derivarPasoDelLead origin/main -- src",
+   "control_positivo": "La misma búsqueda encuentra src/lib/leados/paso.ts (las menciones de la cabecera) y manual.ts:552."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "El descarte (EVALUADA->DESCARTADA) no cambia OsLead.status.",
+   "comando": "git grep -n -E \"osLead\\.update\" origin/main -- src/lib/leados/dossier.ts \"src/app/(protected)/setter/_actions/dossier.actions.ts\"",
+   "control_positivo": "git grep -n -E \"osLead\\.(update|updateMany)\\(\" origin/main -- src -> admin/leads/_actions/lead.actions.ts:80 y src/lib/os-commercial.ts:79"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "No hay purga de OsSetterNotice en código de producción.",
+   "comando": "git grep -n \"osSetterNotice.delete\" origin/main -- src",
+   "control_positivo": "git grep -n \"osSetterNotice.delete\" origin/main -- scripts -> scripts/dev/m0-galeria-seed.ts:139"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "No existe un campo enRevisionAt.",
+   "comando": "git grep -n enRevisionAt origin/main -- prisma/schema.prisma src",
+   "control_positivo": "git grep -n \"aprobadaAt\\|enviadaAt\" origin/main -- prisma/schema.prisma -> :1005, :1006"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "Los criterios de diseño de §m14 (tresColores, botonInvita, jerarquia) no existen en src.",
+   "comando": "git grep -n -i \"tresColores\\|botonInvita\\|jerarquia'\" origin/main -- src",
+   "control_positivo": "git grep -n noPareceIa origin/main -- src/lib/leados/flow-content.ts -> :168"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "No hay check G3 '¿Exportaste después del último refinamiento?'.",
+   "comando": "git grep -n -i exportaste origin/main -- src",
+   "control_positivo": "El mismo grep devuelve src/lib/leados/herramientas.ts:98 (otro contexto): el patrón matchea cuando la palabra existe."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "No hay generador de wa.me en el área del setter.",
+   "comando": "git grep -n -F 'wa.me' origin/main -- \"src/app/(protected)/setter\"",
+   "control_positivo": "git grep -n -F 'wa\\.me' origin/main -- src/lib/leados/flow.ts -> :219"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "El panorama admin (/admin/leados) no mira finalUrl: no avisa de aprobadas sin link.",
+   "comando": "git grep -n finalUrl origin/main -- \"src/app/(protected)/admin/leados/page.tsx\" \"src/app/(protected)/admin/leados/_components\"",
+   "control_positivo": "git grep -c finalUrl origin/main -- \"src/app/(protected)/admin/leados/[leadId]\" -> decision-bar.tsx: 8"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "Ningún test prueba una mutación de un setter B sobre un lead de A.",
+   "comando": "git grep -n -E \"Owned[A-Za-z]*\\(.*setterB\" origin/main -- tests",
+   "control_positivo": "El mismo patrón devuelve tests/leados/alta-import.spec.ts:95 (la lectura getOwnedLead con setterB)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "La alarma 'nunca descarta' no se muestra al setter.",
+   "comando": "git grep -n alarmaNuncaDescarta origin/main -- \"src/app/(protected)/setter\"",
+   "control_positivo": "git grep -n alarmaNuncaDescarta origin/main -- \"src/app/(protected)/admin\" -> admin/leados/page.tsx:274"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "listOwnedLeads no pagina ni acota la cartera.",
+   "comando": "git grep -n -E \"take:|skip:|cursor:\" origin/main -- src/lib/leados/ownership.ts",
+   "control_positivo": "git grep -n \"take:\" origin/main -- src/lib/leados/novedades.ts -> :259"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "Sin TODO/FIXME reales ni 'any' en el lote (los matches de TODO son la palabra 'todo/todos' en castellano).",
+   "comando": "git grep -n -E \"TODO|FIXME\" origin/main -- <20 archivos del lote> ; git grep -n -E \":\\s*any\\b|as any\\b|<any>\" origin/main -- <20 archivos>",
+   "control_positivo": "git grep -n \"TODO: URL\" origin/main -- src/lib/leados/herramientas.ts -> :48 ; git grep -n -E \"as any\\b\" origin/main -- src -> LegacyNeuroAvatar.tsx:601"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "afirmacion": "El panel de horas del equipo no incluye a los setters.",
+   "comando": "git grep -n -i setter origin/main -- \"src/app/(protected)/admin/team/page.tsx\"",
+   "control_positivo": "git grep -c -i setter origin/main -- \"src/app/(protected)/admin/leados/page.tsx\" -> 21"
   }
  ]
 }

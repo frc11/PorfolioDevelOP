@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 332 · parcial 143 · no empezado 267 · abandonado 10 · contradicho 15 · por cruzar 584.
+- Estado en código: hecho 515 · parcial 188 · no empezado 376 · abandonado 24 · contradicho 25 · por cruzar 223.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -1945,8 +1945,8 @@
 - Nodo(s): h3.adm-chatbots
 - Qué es: convertChatbotLeadToOsLead solo para slug develop, idempotente por email; botón por fila en LeadsTab.
 - Referencias: d6d4d7b
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — admin/chatbots/_actions/convert-chatbot-lead.actions.ts:33 solo slug develop; :39 idempotencia por convertedToOsLeadId (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-233] Transcript expandible de conversaciones
 - Fuente: `raiz:lane-LOG.md:129` · tipo: hecho-declarado · estado declarado: hecho
@@ -1960,8 +1960,8 @@
 - Fuente: `raiz:lane-LOG.md:141` · tipo: pendiente · estado declarado: pendiente de coordinación · **ZONA-FRANCO**
 - Nodo(s): h3.adm-chatbots
 - Qué es: Badge solo in-session; requiere ChatbotLead.convertedToOsLeadId o left-join por email.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ChatbotLead.convertedToOsLeadId (schema.prisma:1510, re-agregada en la migración 20260622120000:21) y lectura persistente en ConvertChatbotLeadButton.tsx:20. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-235] Lote 2.1
 - Fuente: `raiz:lane-LOG.md:168` · tipo: hecho-declarado · estado declarado: hecho
@@ -4728,8 +4728,8 @@
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:808` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h4.adm-config
 - Qué es: calComUsername/calComEmbedUrl de la org develOP solo se cargan directo en base.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -l calComEmbedUrl en src/app/(protected)/admin: 0; control positivo: aparece en dashboard/modules/agenda-inteligente/page.tsx y src/lib/leados/agenda.ts. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-585] Lane config-settings
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md:21` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-19
@@ -4875,8 +4875,8 @@
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:848` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h4.adm-equipo
 - Qué es: Tableros de horas de /admin/team sin registro de actividad de setters.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -i setter origin/main -- admin/team/page.tsx: vacío (control: admin/leados/page.tsx, 21 apariciones). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-603] Bug de horas cargadas a otro usuario
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md:9` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17
@@ -4915,8 +4915,8 @@
 - Nodo(s): h4.adm-equipo
 - Qué es: /admin/team lista solo SUPER_ADMIN; los setters se gestionan solo desde la asignación en el lead.
 - Referencias: /admin/team
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — admin/team/page.tsx:21 filtra role SUPER_ADMIN. Existe el detalle por setter admin/leados/setter/[setterId]/page.tsx (git ls-files). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-608] Time entries con z.coerce.date() sobre fecha sin hora
 - Fuente: `docs/bitacora-beta-3.md:6352` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-25/26 (inferida)
@@ -4933,72 +4933,72 @@
 - Nodo(s): h4.adm-leads
 - Qué es: El vínculo cliente↔lead es indirecto, vía Project.osLeadId. convertedToOsLeadId es un string suelto a propósito, para no acoplar el chatbot con una relación dura.
 - Referencias: OsLead · Project.osLeadId · ChatbotLead.convertedToOsLeadId · tambien en Olme/Ideas de nuevas features.md:18
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/schema.prisma:1505-1510 String? sin @relation; re-agregado en 20260622120000_readd_client_columns_dropped_by_reconcile. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-610] Leads admin: kanban, inbound y filtros
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Leads_ registro de cambios.md:9` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-16 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: 32 commits. Kanban con @dnd-kit y drag desde el overview. Overview y form portaleados. Filtros, typeahead de ubicación y schemas fuera de 'use server'. Mergeado a main.
 - Referencias: fe1fa2b · @dnd-kit/core@6.3.1 · @dnd-kit/utilities@3.2.2 · activity.schemas.ts · demo.schemas.ts · lead-zone.helpers.ts +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — package.json:127-128 @dnd-kit; activity.schemas.ts y demo.schemas.ts fuera de 'use server'; admin/leads/_components/lead-zone.helpers.ts existe (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-611] Confirmación de borrado dentro del overview
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Leads_ registro de cambios.md:48` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-16 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: El z-index se resolvió con un hotfix. El refactor al popup local anclado (paridad con Proyectos) quedó agendado como sprint dedicado.
 - Referencias: ConfirmDialog
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — lead-card.tsx:15 y :185 usan InlineConfirm (popup local), la misma pieza que draggable-project-card.tsx (git grep -l InlineConfirm). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-612] Cerrar lead y convertirlo en cliente con vínculo de ID duro
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:11` · tipo: idea · estado declarado: pendiente · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: Botón en el lead del pipeline que crea la Organization y lo pasa a cerrado/ganado guardando el vínculo lead→cliente. Requiere relevamiento, schema (rompe la regla de no-acople) y state machine. Complejidad alta.
 - Referencias: OsLead · Organization · ChatbotLead.convertedToOsLeadId · closedToOrgId · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:71 · tambien en Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:69 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep closedToOrgId en schema y src: 0; el único vínculo es ChatbotLead→OsLead (schema.prisma:1510). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-613] pipelineOrder del kanban de Leads
 - Fuente: `_insumos/drive/Olme/Ideas de nuevas features.md:39` · tipo: idea · estado declarado: pendiente · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: Orden manual persistido dentro de cada columna del kanban. Requiere un campo en OsLead (schema) y lógica de drag-and-drop con persistencia. Hoy reordenar en la misma columna no hace nada.
 - Referencias: OsLead.pipelineOrder · prisma/schema.prisma · tambien en Olme/Admin - Registro de cambios/Operaciones/Leads_ registro de cambios.md:47 · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:68 · tambien en Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md:89
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep pipelineOrder en prisma/schema.prisma y src no encuentra nada. Control: model OsLead en schema.prisma:862. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-614] admin-1a Campo persistido OsLead.caliente + backfill
 - Fuente: `docs/bitacora-beta-2.md:177` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: Columna boolean default false (migración solo aditiva) y backfill idempotente que replica esCaliente (12 de 37 leads).
 - Referencias: prisma/migrations/20260627000000_admin_1a_add_oslead_caliente/migration.sql · scripts/admin-1a-backfill-caliente.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:880 'caliente Boolean @default(false)'. La migración 20260627000000_admin_1a_add_oslead_caliente está presente. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-615] admin-1b El caliente operativo pasa al campo (toggle en la asignación)
 - Fuente: `docs/bitacora-beta-2.md:204` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: esCaliente(caliente, stage?) lee el campo; gates, badges, orden de cola y sidebar lo siguen; toggle role=switch persistido por assignLeadSetter sin tocar assignedToId.
 - Referencias: src/lib/leados/revision.ts · src/lib/leados/flow.ts · src/lib/leados/home.ts · src/app/(protected)/admin/leads/_components/assign-setter-control.tsx · src/app/(protected)/admin/leads/_actions/lead.actions.ts · src/app/(protected)/admin/leads/[leadId]/page.tsx +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — revision.ts:47; lead.actions.ts:165; admin/leados/page.tsx:44 y [leadId]/page.tsx:84 leen el campo (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-616] Única fuente del caliente operativo: OsLead.caliente marcado por Franco
 - Fuente: `docs/bitacora-beta-2.md:260` · tipo: decision · estado declarado: vigente · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: El score y el veredicto CALIENTE del setter son informativos y no disparan nada operativo; UI, action y server usan la misma gateBriefAbierto.
 - Referencias: src/lib/leados/revision.ts · src/lib/leados/flow.ts · también en docs/bitacora-beta-2.md:235 · también en docs/bitacora-beta-2.md:294
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:81-83 y :633-634; dossier.ts:167 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-617] Residuos de fechas en admin y outreach
 - Fuente: `docs/bitacora-beta-3.md:4240` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-12 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: optionalReactivateAtSchema del admin usa z.coerce.date(); limitesDelDiaArgentino duplica dayRangeAR; dates-ar no estaba encadenado.
 - Referencias: outreach.ts · src/lib/dates-ar.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/leados/outreach.ts:21-33 duplica dates-ar.ts:75; admin/leads/_actions/lead.schemas.ts:32-40 sigue con z.coerce.date() (fecha sola = medianoche UTC, como explica dates-ar.ts:86-90). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-618] optionalReactivateAtSchema de admin/leads: trampa latente
 - Fuente: `docs/bitacora-beta-3.md:6354` · tipo: pendiente · estado declarado: latente, sin tocar · fecha: 2026-08-25/26 (inferida)
@@ -5013,8 +5013,8 @@
 - Nodo(s): h4.adm-leads
 - Qué es: Panel 'Carga del equipo' y label con leads activos y % descarte reusando calcularRatioSetters; assignLeadSetter sin cambios.
 - Referencias: src/lib/leados/setter-carga.ts · src/app/(protected)/admin/leads/_components/assign-setter-control.tsx · src/app/(protected)/admin/leads/[leadId]/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-carga.ts:24 reusa calcularRatioSetters; admin/leads/[leadId]/page.tsx:11; assign-setter-control.tsx:10 (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-620] Distinguir 'módulo' vs 'plan upgrade' en /admin/leads
 - Fuente: `docs/bitacora-roadmap.md:3192` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-23
@@ -5029,16 +5029,16 @@
 - Nodo(s): h4.adm-leads
 - Qué es: Investigar si conviene unificar en un sprint propio; LeadStatus es la máquina comercial de OsLead.
 - Referencias: prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — prisma/schema.prisma:697 leadStatus String? @default('NUEVO'); :1072 enum LeadStatus (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-622] P1 toast en CRUD de leads OS
 - Fuente: `docs/sprints/alpha-1-reaudit.md:227` · tipo: pendiente · estado declarado: pendiente (Alpha.4) · fecha: 2026-05-17 · **ZONA-FRANCO**
 - Nodo(s): h4.adm-leads
 - Qué es: Pipeline /admin/leads sin toast de éxito/error ni paginación.
 - Referencias: tambien en :154, :155, :258
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -l toast origin/main -- 'src/app/(protected)/admin/leads' vacío (control: admin/alerts/AlertsClient.tsx sí lo usa) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h4.adm-mensajes — Mensajes (admin)
 
@@ -5346,32 +5346,32 @@
 - Nodo(s): h5.adm-fg2lab
 - Qué es: Formulario estructurado de gastronomía que arma un prompt prescriptivo, cronómetro y fila de log TSV; lab no linkeado en el sidebar.
 - Referencias: src/lib/leados/_experimental/fg2-brief-lab.ts · src/app/(protected)/admin/fg2-lab/page.tsx · src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx · src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx · docs/experimentos/fg2-brief-experimento.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — fg2-lab/page.tsx, fg2-lab-client.tsx, medicion-panel.tsx y lib/leados/_experimental/fg2-brief-lab.ts existen; sin links fuera de su carpeta (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-660] El código de FG-2 es experimental y descartable
 - Fuente: `docs/bitacora-beta.md:1539` · tipo: decision · estado declarado: vigente · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-fg2lab
 - Qué es: Marcado EXPERIMENTAL/DESCARTABLE en cada archivo, a borrar tras la decisión del experimento; solo lee fichas, no toca gates.
 - Referencias: src/lib/leados/_experimental/ · src/app/(protected)/admin/fg2-lab/ · scripts/_experimental/fg2-gen-prompts.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — marcado EXPERIMENTAL/DESCARTABLE en admin/fg2-lab/page.tsx:2 y _experimental/fg2-brief-lab.ts:2; sigue en main junto con scripts/_experimental/fg2-gen-prompts.ts (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-661] Correr el experimento FG-2 (5 con formulario vs 5 a mano)
 - Fuente: `docs/bitacora-beta.md:1543` · tipo: pendiente · estado declarado: pendiente (preparado, no corrido) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-fg2lab
 - Qué es: Franco pega los 10 prompts en Claude Design, juzga calidad 1–5 y registra tiempo y cuota por demo.
 - Referencias: docs/experimentos/fg2-brief-experimento.md · docs/experimentos/fg2-prompts-listos.md · también en docs/bitacora-beta.md:1558 · también en docs/bitacora-beta.md:1634
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — docs/experimentos/fg2-brief-experimento.md y fg2-prompts-listos.md están versionados. Correr el experimento es trabajo humano y no deja rastro en el código. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-662] FG-2.0 Experimento preparado (5 casos + 10 prompts + checklist)
 - Fuente: `docs/bitacora-beta.md:1596` · tipo: hecho-declarado · estado declarado: hecho (preparación); experimento no corrido · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-fg2lab
 - Qué es: Casos precargados (2 arquetipos marcados como no reales), selector en el lab, generador de prompts y rúbrica; el experimento no se corrió.
 - Referencias: src/lib/leados/_experimental/fg2-casos-gastro.ts · fg2-lab-client.tsx · scripts/_experimental/fg2-gen-prompts.ts · docs/experimentos/fg2-prompts-listos.md · docs/experimentos/fg2-brief-experimento.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — fg2-casos-gastro.ts, scripts/_experimental/fg2-gen-prompts.ts y docs/experimentos/fg2-prompts-listos.md existen; docs/experimentos/fg2-brief-experimento.md:3-4 'GATE ABIERTO' (no corrido) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h5.adm-revision-demos — Revisión de demos (LeadOS)
 
@@ -5380,159 +5380,159 @@
 - Nodo(s): h5.adm-revision-demos
 - Qué es: checkId opcional en RechazoSchema, modal de rechazo con panel del self-check, guía de retrabajo y métrica de checks falsamente verdes en /admin/leados.
 - Referencias: decision-bar.tsx · src/lib/leados/revision.ts · src/app/(protected)/admin/leados/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — contracts.ts:169-177 RechazoSchema sin checkId; revision.schemas.ts:33-50 sin checkId; decision-bar.tsx:256-334 modal sin panel de self-check; admin/leados/page.tsx sin métrica de checks falsamente verdes. git grep checkId solo guidance-content.ts:164-168 (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-664] lane/demos: cola de Revisión de Demos
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md:17` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Seed con URLs reales, ficha en acordeón, preview sticky y fix definitivo de Aprobar/Rechazar (overlay portaleado). Usa OsLeadDossier en EN_REVISION, no OsDemo. Ya no salta solo a la demo siguiente.
 - Referencias: ec561ff · 58458f8 · 45bf684 (superseded) · 9265791 · c2a6c66 · 284f897 +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — decision-bar.tsx:60-89 overlay portaleado; :120-123 router.refresh sin saltar a la siguiente; [leadId]/page.tsx:128-135 'Siguiente en la cola' (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-665] decision-bar.tsx reconciliado después del merge
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md:44` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-17 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: El JSX quedó roto por un merge con código de Franco. Se reconcilió con la estructura de la lane.
 - Referencias: decision-bar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — decision-bar.tsx:177-336 estructura coherente; baseline tsc 0 errores (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-666] Correr el seed de la cola de demos
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md:52` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-17 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: El worktree no tenía .env.local; el script idempotente quedó sin correr. Componentes oversize a monitorear.
 - Referencias: scripts/demos-seed-review-queue.ts · tambien en Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md:73 · tambien en Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md:74
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/demos-seed-review-queue.ts está versionado (git ls-files). Si se ejecutó o no, no se puede verificar desde el código. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-667] Admin no muestra el material nuevo de la ficha
 - Fuente: `docs/bitacora-beta-3.md:2382` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-03 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: FICHA_BLOQUES lista solo los seis campos viejos; Franco no ve materiales.
 - Referencias: admin/leados/[leadId]/_components/dossier-panels.tsx:227
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — dossier-panels.tsx:236-243 seis bloques; :255-256 descarta objetos; contracts.ts:73-81 materiales (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-668] Rechazo estructurado (sección o checkId)
 - Fuente: `docs/bitacora-beta-3.md:4325` · tipo: idea · estado declarado: descartado por ahora · fecha: 2026-08-12 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: «donde» es texto libre y RechazoSchema no tiene checkId; estructurarlo habilita saltar al lugar y señalar un check.
 - Referencias: RechazoSchema · también en fuente:4834,4937,5141
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — contracts.ts:169-177 sin checkId, coherente con 'descartado por ahora' (y contradice PLAN-663) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-669] «Me trabé» es un slot único sin historial
 - Fuente: `docs/bitacora-beta-3.md:4840` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-22 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: escaladoAt/escaladoNota se borran en cualquier cambio de stage; solo se ven en «Setters trabados».
 - Referencias: OsLeadDossier.escaladoAt
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ESCALADO_RESET = { escaladoAt: null, escaladoNota: null } (escalamiento.ts:53). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-670] Cola de revisión del admin casi invisible
 - Fuente: `docs/bitacora-beta-3.md:4858` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-22 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: 8.662 px de contenido y se ve el 9%; las evaluaciones de un setter, el 7%.
 - Referencias: /admin/leados
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Es una medición de layout (px visibles), no verificable por lectura de código ni en este lote (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-671] Listas de stages adyacentes no atadas al grafo
 - Fuente: `docs/bitacora-beta-3.md:5874` · tipo: pendiente · estado declarado: anotado, no tocado · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: admin/leados/page.tsx:67 (stages del filtro «en vuelo») y manual.ts:420 (STAGES_POST_CHEQUEO) repiten conjuntos de stages por fuera de LEGAL_TRANSITIONS. Anotadas, no tocadas.
 - Referencias: src/app/(protected)/admin/leados/page.tsx:67 · manual.ts:420
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin/leados/page.tsx:67 lista inline; src/lib/leados/manual.ts:439 STAGES_POST_CHEQUEO inline (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-672] Avisarle al admin de las demos aprobadas sin link permanente
 - Fuente: `docs/bitacora-beta-3.md:7401` · tipo: idea · estado declarado: no tocado · fecha: 2026-08-27 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: pipeline.ts saca APROBADA de las etapas de producción con SLA infinito, así que Franco no ve como atasco una demo aprobada sin finalUrl. Ese caso solo nace por seeds o tooling, porque la UI exige el link.
 - Referencias: pipeline.ts · AprobarRevisionSchema · scripts/b2-verify-dossier.ts:266 · tambien en docs/bitacora-beta-3.md:7402
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — pipeline.ts:31-37 excluye APROBADA y :58 le da SLA Infinity; git grep finalUrl origin/main -- admin/leados/page.tsx admin/leados/_components: vacío (control: admin/leados/[leadId]/_components/decision-bar.tsx, 8 apariciones). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-673] assignment-trail.ts repite inline el discriminador SISTEMA
 - Fuente: `docs/bitacora-beta-3.md:7532` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Escribe la negación exacta de SOLO_CONTACTOS_COMERCIALES en vez de usar el fragmento: el discriminador está dos veces.
 - Referencias: assignment-trail.ts:75 · isolation.ts (SOLO_CONTACTOS_COMERCIALES)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — assignment-trail.ts:76 'channel: ActivityChannel.SISTEMA' inline; la fuente está en isolation.ts:116-126 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-674] Stage EN_REVISION inline en tres lugares del admin
 - Fuente: `docs/bitacora-beta-3.md:7533` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: La cola de revisión del admin repite el discriminador del stage en tres archivos, sin una fuente única.
 - Referencias: admin/layout.tsx:23 · admin/leados/[leadId]/page.tsx:89 · admin/leados/page.tsx:34
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin/layout.tsx:24, admin/leados/page.tsx:35, admin/leados/[leadId]/page.tsx:85 y :90 (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-675] Flag a Franco: import corregido en setter-evaluaciones.tsx (WIP untracked)
 - Fuente: `docs/bitacora-beta.md:822` · tipo: pendiente · estado declarado: sin estado (flag) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Se cambió el import de formatFechaHora de revision a flow para destrabar el build; confirmar si el dueño del WIP esperaba otra cosa.
 - Referencias: src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-evaluaciones.tsx:12 import { formatFechaHora, STAGE_LABELS } from '@/lib/leados/flow' (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-676] Drill-down de la métrica descarte/avance (/admin/leados/setter/[setterId])
 - Fuente: `docs/bitacora-beta.md:840` · tipo: hecho-declarado · estado declarado: hecho (sign-off visual de Franco) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: La fila del setter linkea a sus últimas evaluaciones (score, veredicto, stage, razonamiento) con el mismo cálculo de la cola.
 - Referencias: src/app/(protected)/admin/leados/setter/[setterId]/page.tsx · setter-evaluaciones.tsx · src/app/(protected)/admin/leados/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — admin/leados/setter/[setterId]/page.tsx:29-133; admin/leados/page.tsx:276-278 link (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-677] VEREDICTO_TONES duplicado localmente a propósito
 - Fuente: `docs/bitacora-beta.md:853` · tipo: decision · estado declarado: vigente · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Copia local del mapa canónico de dossier-panels.tsx para no tocar un archivo fuera de scope; el Record tipado rompe si cambia el enum.
 - Referencias: setter-evaluaciones.tsx · dossier-panels.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-evaluaciones.tsx:30-34 copia de dossier-panels.tsx:55-59 (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-678] Panorama de producción del admin (conteo por etapa + atascos)
 - Fuente: `docs/bitacora-beta.md:880` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Tablero FICHA→EN_REVISION con antigüedad y badge de atasco por SLA; RECHAZADA entra a la lista de atascos sin carril propio.
 - Referencias: src/lib/leados/pipeline.ts · src/app/(protected)/admin/leados/_components/pipeline-board.tsx · src/app/(protected)/admin/leados/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — admin/leados/page.tsx:64-103; pipeline-board.tsx:42-131; :309-314 RECHAZADA en atascos (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-679] Antigüedad por etapa derivada de updatedAt + SLA editable
 - Fuente: `docs/bitacora-beta.md:890` · tipo: decision · estado declarado: vigente · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Sin migración: 'sin movimiento desde' = updatedAt; STAGE_SLA_HORAS (FICHA/EVALUADA/BRIEF 48h, CONSTRUCCION 72h, EN_REVISION 24h, RECHAZADA 48h).
 - Referencias: src/lib/leados/pipeline.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/lib/leados/pipeline.ts:13-19 (updatedAt como proxy) y :51-60 (48/48/48/72/24/48, terminales Infinity). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-680] DRY de setterLabel (deuda sistémica pre-existente)
 - Fuente: `docs/bitacora-beta.md:902` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Anotado en la review adversarial del panorama de producción, fuera de alcance.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin/leados/page.tsx:26, src/lib/leados/setter-carga.ts:46, admin/leados/setter/[setterId]/page.tsx:59 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-681] Señal in-app de alarmas + 'me trabé' persistido + aviso de Telegram sin configurar
 - Fuente: `docs/bitacora-beta.md:917` · tipo: hecho-declarado · estado declarado: hecho (verificación funcional de Franco) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Badge 'Revisión demos' en el sidebar (calientes en ámbar), columnas escaladoAt/escaladoNota con panel 'Setters trabados' y banner si Telegram no está configurado.
 - Referencias: prisma/migrations/20260620180000_add_dossier_escalado · src/lib/leados/escalamiento.ts · src/lib/leados/escalamiento.invariant.ts · src/lib/leados/dossier.ts · src/lib/notifications/telegram.ts · src/app/(protected)/admin/layout.tsx +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/migrations/20260620180000_add_dossier_escalado; escalamiento.ts:42-117; dossier.ts:309-327 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-682] Cola de revisión del admin (B5 de LeadOS)
 - Fuente: `docs/bitacora-roadmap.md:7854#2` · tipo: bloque · estado declarado: pendiente · fecha: 2026-06-12 · **ZONA-FRANCO**
 - Nodo(s): h5.adm-revision-demos
 - Qué es: Revisión del activo demo por el admin (EN_REVISION a APROBADA o RECHAZADA con motivo).
 - Referencias: src/lib/leados/dossier.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — revision.actions.ts:78 (APROBADA) y :106 (RECHAZADA) -> dossier.ts:191-221 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 ### h5.set-dia — Tu día (setter)
 
@@ -5541,616 +5541,616 @@
 - Nodo(s): h5.set-dia
 - Qué es: La bitácora solo detalla D4 (caliente = campo de Franco), D6 (postergados vencidos accionables) y D7 (sticky liviano); D1–D3 y D5 no se describen.
 - Referencias: también en docs/bitacora-beta-2.md:204 · también en docs/bitacora-beta-2.md:306 · también en docs/bitacora-beta-2.md:343
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — D4 caliente como campo (_data.ts:217); D6 postergado vencido accionable (flow.ts:420-423); D7 sticky (foco.ts:12) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-684] Bloques 1 y 3–6 del rediseño del flujo del setter sin entrada
 - Fuente: `docs/bitacora-beta-2.md:136` · tipo: bloque · estado declarado: sin estado · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: La bitácora prevé agregar 'franja admin, 1-6' uno por bloque; solo registra pre-bloque 0, franja admin y Bloque 2.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Ítem de bitácora sin marca cruzable en el código. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-685] 2.1a Home del setter en modo dirección (foco secuenciado + sticky)
 - Fuente: `docs/bitacora-beta-2.md:306` · tipo: hecho-declarado · estado declarado: hecho (eyeball visual final de Franco) · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: FocoSurface entrega un lead accionable con su porqué y CTAs Ir/Parquear/Saltar; cartera secundaria colapsada; lanes, recorrido y continuar-cta borrados.
 - Referencias: src/lib/leados/foco.ts · src/lib/leados/foco.invariant.ts · src/lib/leados/foco-cookie.ts · src/app/(protected)/setter/_actions/foco.actions.ts · foco-surface.tsx · cartera-view.tsx +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — foco-surface.tsx:83-125 (Ir, Pausar y Saltar); foco.ts, foco.invariant.ts y foco-cookie.ts existen; cartera colapsada (cartera-view.tsx:42, :104). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-686] Sticky del foco por cookie httpOnly leados-foco-v1
 - Fuente: `docs/bitacora-beta-2.md:317` · tipo: decision · estado declarado: vigente · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Sin DB ni migración; un stickyId fuera de 'trabajar' se ignora por construcción; el foco presenta y calcula, nunca transiciona.
 - Referencias: src/lib/leados/foco-cookie.ts · foco.actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — foco-cookie.ts:22 y :27 httpOnly; foco.actions.ts:41-45 ownership antes de escribir (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-687] 2.1b Postergados vencidos accionables (D6) + estado 'todo en espera'
 - Fuente: `docs/bitacora-beta-2.md:343` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: POSTERGADO con reactivateAt vencido vuelve a 'trabajar'; HomeEnEspera con cuentas disjuntas en espera/fijados/pausados.
 - Referencias: src/lib/leados/flow.ts · src/lib/leados/home.ts · home-en-espera.tsx · foco-surface.tsx · src/app/(protected)/setter/page.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — El postergado vencido vuelve a trabajar (flow.ts:420-424); home-en-espera.tsx:28-116 muestra cuentas disjuntas por turno, fijados y pausados. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-688] agruparParaHome quedó sin callers desde 2.1a
 - Fuente: `docs/bitacora-beta-2.md:349` · tipo: pendiente · estado declarado: sin estado · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Función de flow.ts muerta, no se tocó.
 - Referencias: src/lib/leados/flow.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — flow.ts:653; sin consumidores en src, tests y scripts (git grep -l -w) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-689] Decidir si un lead fijado (pin) accionable puede ser foco
 - Fuente: `docs/bitacora-beta-2.md:375` · tipo: pendiente · estado declarado: pendiente (decisión de Franco) · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: particionarCartera lo excluye de 'trabajar', así que fijar tu única accionable hace desaparecer el foco; decisión de Franco documentada en el código.
 - Referencias: src/lib/leados/flow.ts (particionarCartera) · también en docs/bitacora-beta-2.md:447 · también en docs/bitacora-beta-2.md:466 · también en docs/bitacora-beta-2.md:559
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:826-829 (A-05): un fijado accionable y vigente entra a 'trabajar' y al foco. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-690] Invariante ejecutable de D6 (flow.invariant.ts)
 - Fuente: `docs/bitacora-beta-2.md:381` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: flow.ts pasa a imports relativos .ts para que ts-node lo cargue; check:invariant:flow asevera vencido vs futuro.
 - Referencias: src/lib/leados/flow.ts · src/lib/leados/flow.invariant.ts · package.json (check:invariant:flow)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:18-43 con imports relativos .ts; package.json:30 'check:invariant:flow' (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-691] 2.2 Novedades integradas al foco
 - Fuente: `docs/bitacora-beta-2.md:402` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-28 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: getNovedadesSetter excluye el aviso del lead-foco, el panel va debajo del foco y cada aviso aterriza en su paso por el ancla de stage (sin ?step=).
 - Referencias: src/lib/leados/novedades.ts · src/app/(protected)/setter/page.tsx · novedades-panel.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Abrir ancla el foco (novedades-abrir-foco.tsx:38-49) y un aviso caducado no ancla (novedades-panel.tsx:122); la exclusión del lead-foco vive en novedades.ts, fuera del lote. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-692] 2.3 Cabina subordinada (atajos viejos no-op + cartera secundaria pulida)
 - Fuente: `docs/bitacora-beta-2.md:440` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-28 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: No quedaban atajos del modelo viejo; hover diseñado y riel neutro en la cartera; el pin se deja como está.
 - Referencias: cartera-view.tsx · src/lib/leados/flow.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Hover y foco del toggle (cartera-view.tsx:83); riel neutro (:105). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-693] 2.4 Estados de carga y error del foco
 - Fuente: `docs/bitacora-beta-2.md:472` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: loading.tsx redibujado al modo dirección y error.tsx con logger.error + Sentry.captureException; lógica pura sin tocar.
 - Referencias: src/app/(protected)/setter/loading.tsx · src/app/(protected)/setter/error.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter/loading.tsx:11-31; setter/error.tsx:26-36 logger.error + Sentry.captureException (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-694] 2.5 Onboarding del setter explica el modo dirección
 - Fuente: `docs/bitacora-beta-2.md:514` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: La misma card descartable suma el bloque 'Trabajás un lead por vez'; STORAGE_KEY pasa de v1 a v2 para re-mostrarse una vez.
 - Referencias: src/app/(protected)/setter/_components/onboarding-hint.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — onboarding-hint.tsx se borró en 7074ba6b (2026-07-04, 'guía estructural en lugar del onboarding en prosa'). git grep 'un lead por vez' no encuentra nada. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-695] Cierre del Bloque 2 'Foco / Modo dirección' (2.1→2.5)
 - Fuente: `docs/bitacora-beta-2.md:545` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Base e2e estable en 32/10/8 (sin spec de /setter); pendientes a Franco: pin-como-foco y e2e de onboarding del cliente.
 - Referencias: también en docs/bitacora-beta-2.md:559 · también en docs/bitacora-beta-2.md:560
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — foco/particion en main (flow.ts:813, foco.ts); hoy hay suite e2e del setter en tests/setter/ (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-696] B6.6 pasada perceptual del wizard y del home
 - Fuente: `docs/bitacora-beta-3.md:620` · tipo: bloque · estado declarado: pendiente · fecha: 2026-07-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Sprint nombrado para cerrar lo visual de B6.2-B6.5; no aparece como sección en el documento.
 - Referencias: también en fuente:641,665
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — los componentes del wizard que cubría no existen más (paso-actual-banner.tsx, step-anchor.tsx, step-nav.tsx: git ls-files vacío) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-697] Sprint 2.3 remediación A-14/A-24/A-09
 - Fuente: `docs/bitacora-beta-3.md:683` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Teléfono re-servido, guardia de salida en Evaluación, archivo categorizado (archivoMotivo, VistaCartera) y archivados suman a Tu semana; proof-screenshots gitignorado.
 - Referencias: commit 6dd4946 · flow.ts · progreso.ts · cartera-toolbar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — archivoMotivo en home-sections.tsx:42 y :99-106; archivados en Tu semana (progreso-semana.tsx:33-39); vistas archivo-descartado y archivo-perdido (flow.ts:954-955); 6dd4946 es ancestro. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-698] Bloque 6: pin ordena el foco, novedades informan, guía en estructura
 - Fuente: `docs/bitacora-beta-3.md:1024` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: particionarCartera/ordenFoco (invariante particion), AbrirFocoButton + resumen de cola en revisión, onboarding-hint.tsx borrado.
 - Referencias: también en fuente:1046,1074 · commits 7b3e491,811362c,7074ba6 · particion.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:813 particionarCartera; particion.invariant.ts existe; onboarding-hint.tsx ya no está (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-699] 2.1 el foco no miente (cadencia, postergado, rechazado)
 - Fuente: `docs/bitacora-beta-3.md:1290` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-17 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: os-commercial.ts: SIN_RESPUESTA escribe nextFollowUpAt null, contactos limpian reactivateAt, rama RECHAZADO; señal sinProximoToque; spec foco-no-miente.
 - Referencias: os-commercial.ts · home.ts · tests/leados/foco-no-miente.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — os-commercial.ts:78-82 (null), :91 y :113 (reactivateAt null), :107-115 rama RECHAZADO; home.ts:51 sinProximoToque; tests/leados/foco-no-miente.spec.ts existe (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-700] Navegación del setter: triggerTransition vs CLAUDE.md
 - Fuente: `docs/bitacora-beta-3.md:1806` · tipo: decision · estado declarado: abierta · fecha: 2026-07-23 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: setter-nav.tsx:38 dice «decisión cerrada · CLAUDE.md», pero CLAUDE.md no clasifica /setter; falta que CLAUDE.md lo diga (C-26).
 - Referencias: setter-nav.tsx:38 · también en fuente:633
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — setter-nav.tsx:45 cita una «decisión cerrada · CLAUDE.md», pero CLAUDE.md solo clasifica /admin y /dashboard y dice que triggerTransition no aplica en portales; el Shutter existe en todas las rutas (app/layout.tsx:114). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-701] Novedades sin techo y huérfanas
 - Fuente: `docs/bitacora-beta-3.md:1877` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: El home acumula novedades (campana 9+); 77 de 80 avisos eran huérfanos de leads borrados.
 - Referencias: también en fuente:4545,4792
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Techo de filas (novedades-agrupar.ts:19; novedades.ts:58), pliegue (:98-148) y vigencia YA_NO_ES_TUYO (novedades-vigencia.ts:93). Sin purga: osSetterNotice.delete* solo en scripts (m0-galeria-seed.ts:139); leadId onDelete SetNull (schema.prisma:950). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-702] P8 el foco prioriza construir
 - Fuente: `docs/bitacora-beta-3.md:2795` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: trabajoTier en flow.ts (CONSTRUIR, ESPERA_TU_ACCION, CONTACTAR_CON_DEMO, EVALUAR, CONTACTO_SIN_DEMO); nunca sugiere construir sin veredicto.
 - Referencias: flow.ts · particion.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:719-756 trabajoTier; existe particion.invariant.ts (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-703] Exports sin consumidor en el foco
 - Fuente: `docs/bitacora-beta-3.md:2921` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: agruparParaHome (flow.ts:532) y soltarFoco no los llama nadie.
 - Referencias: flow.ts:532 · también en fuente:4909
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — soltarFoco ya tiene llamador (foco-surface.tsx:20); agruparParaHome (flow.ts:653) sin consumidores: git grep -w agruparParaHome origin/main -- src tests scripts solo da flow.ts (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-704] Panel pide mandar link de demo aprobada sin finalUrl
 - Fuente: `docs/bitacora-beta-3.md:3921` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-10 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: grupoPara/proximaAccionPara no miran finalUrl; el admin no puede aprobar sin link y el setter ve «Seguí la cadencia».
 - Referencias: flow.ts · también en fuente:4848
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:438 y :534-545 miran finalUrl; revision.schemas.ts:22-25 exige finalUrl https para aprobar (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-705] Contraste AA incumplido en /setter
 - Fuente: `docs/bitacora-beta-3.md:4130` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: 46 de 103 textos visibles no llegan a AA; el peor da 1,97:1 a 10 px.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — 28 usos de text-zinc-600/700 en el lote (git grep -c), por ejemplo mis-numeros.tsx:83 (≈1,9:1) y tools-rail.tsx:37 (≈1,9:1). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-706] F3 acuse de recibo en el lugar del clic
 - Fuente: `docs/bitacora-beta-3.md:4561` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: «Saltar» del foco suma toast; invariante acuse-recibo por call-site (22 invariantes).
 - Referencias: commit fc9ea865 · foco-surface.tsx · acuse-recibo.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Toast en Saltar (foco-surface.tsx:107); acuse-recibo.invariant.ts existe; fc9ea865 es ancestro de origin/main. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-707] Orden «colas» de la cartera inalcanzable
 - Fuente: `docs/bitacora-beta-3.md:5038` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-24 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: cartera-view.tsx:36 degrada 'colas' a 'urgencia' y el valor no está en ORDEN_OPCIONES.
 - Referencias: cartera-view.tsx:36
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — OrdenCartera sin 'colas' (flow.ts:894); ORDEN_OPCIONES con 4 valores (cartera-toolbar.tsx:32-37); default 'urgencia' (cartera-view.tsx:45). git grep "'colas'" solo encuentra comentarios en flow.ts:884 y :887. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-708] El rail «Tus herramientas» muestra «pendiente» sin salida
 - Fuente: `docs/bitacora-beta-3.md:7025` · tipo: pendiente · estado declarado: anotado, no tocado · fecha: 2026-08-26 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: tools-rail.tsx dice «pendiente» y nada más. Es el panel persistente del shell, no un bloque de munición; se declaró y se dejó sin tocar en tres sprints.
 - Referencias: tools-rail.tsx:41-43 · tambien en docs/bitacora-beta-3.md:7732 · tambien en docs/bitacora-beta-3.md:7852 · tambien en docs/bitacora-beta-3.md:8076
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tools-rail.tsx:29-44 sigue mostrando solo «pendiente»; SalidaLinkPendiente (tool-guide.tsx:61) solo se usa en tool-guide.tsx:95 y m5-seguimiento.tsx:231 (git grep). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-709] P5 VOCABULARIO: un concepto, un nombre
 - Fuente: `docs/bitacora-beta-3.md:7052` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-26/27 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Pausar (personal) y Postergar (comercial) quedan separados, con la vista y el filtro «Postergados por el negocio». El motivo del tilde cambia según el stage, el rail apunta a «Tu día», se dice «construir» y no «producir la demo», y se fue «(Evaluación)». Invariante vista-cartera.
 - Referencias: fix/vocabulario · 6ef28432 · fa4af2a0 · flow.ts (vistaDeLead) · src/lib/leados/vista-cartera.invariant.ts · m-construccion.tsx +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 6ef28432 y fa4af2a0 están en main. flow.ts:914 vistaDeLead; m-construccion.tsx:198-221 motivo según el stage. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-710] Pausar y postergar son dos conceptos; manda la pausa personal
 - Fuente: `docs/bitacora-beta-3.md:7060` · tipo: decision · estado declarado: decidido · fecha: 2026-08-26/27 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: La pausa es snoozedUntil, privada por (lead, setter) y sin cron. La postergación es status POSTERGADO más reactivateAt: global, y la levanta el cron. Si coexisten gana la pausa, y cada filtro contiene lo que dice su nombre.
 - Referencias: cartera.actions.ts:74 · os-commercial.ts:181 · flow.ts:766 · api/cron/os-follow-up/route.ts:112-119 · tambien en docs/bitacora-beta-3.md:7071
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — postergarLead os-commercial.ts:181-191 (status + reactivateAt); el cron lo lee y avisa sin cambiar status (route.ts:112-118, :187-191); _data.ts:93-97 lo documenta (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-711] P7 LA QUINTA SUPERFICIE: una demo aprobada sin link permanente ya no se ofrece para mandar
 - Fuente: `docs/bitacora-beta-3.md:7258` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-27 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: finalUrl llega a HomeLeadInput. proximaAccionPara, grupoPara y esperaDe distinguen con o sin link, el contador del panel pasa a contarEnVueloPorTurno y FALTA_LINK_PERMANENTE es la fuente única del texto. Invariante aprobada-sin-link con censo y guard de descubrimiento; spec 18.
 - Referencias: fix/quinta-superficie · 035f90a1 · src/lib/leados/aprobada-sin-link.invariant.ts · flow.ts · turno.ts · setter/page.tsx +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:438 APROBADA sin finalUrl -> seguimiento; setter/page.tsx:72 contarEnVueloPorTurno; aprobada-sin-link.invariant.ts:61 FALTA_LINK_PERMANENTE (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-712] Trampa latente en describirFoco (paso.ts) para APROBADA
 - Fuente: `docs/bitacora-beta-3.md:7301` · tipo: pendiente · estado declarado: latente, anotado en el archivo · fecha: 2026-08-27 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: En APROBADA diría «Enviá el link de la demo» mirando solo el gate del brief. Hoy no se renderiza; la trampa quedó anotada en el propio archivo.
 - Referencias: paso.ts:165 · tambien en docs/bitacora-beta-3.md:8076
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/leados/paso.ts:169-192 la rama sigue sin mirar finalUrl, anotada; único consumidor manual.ts:552, que lee foco solo en EVALUADA (:574-578). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-713] APROBADA con toque vencido cae en «trabajar» con una sugerencia no accionable
 - Fuente: `docs/bitacora-beta-3.md:7400` · tipo: pendiente · estado declarado: preexistente, anotado, no arreglado · fecha: 2026-08-27 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Con la demo sin mandar, el gate cerrado y el toque vencido, el lead entra a la cola de trabajo y hasta puede ser el foco, pero la tarjeta dice «esperá». Grupo y accionabilidad salen de dos escaleras independientes.
 - Referencias: flow.ts:433
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — flow.ts:438 corrigió el caso sin link; persiste con link cargado y gate cerrado: flow.ts:440-441 (trabajar) y flow.ts:539-545 (espera, accionable false) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-714] P8 UNA SOLA FUENTE: cuatro duplicaciones cerradas
 - Fuente: `docs/bitacora-beta-3.md:7406` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: SOLO_DMS_MANDADOS y dmsMandadosHoyWhere pasan a ser el único where del contador; esReloopRechazo lee LEGAL_TRANSITIONS con guard de aridad; finDePausaAR ancla la pausa al día AR (invariante pausa-dia bajo TZ=UTC); y la cuenta de invariantes queda exacta en 48.
 - Referencias: fix/una-sola-fuente · 0c92dd08 · isolation.ts · escalamiento.ts:56 · reloop-selfcheck-reset.invariant.ts · cartera.schemas.ts +6
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — isolation.ts:174-209 SOLO_DMS_MANDADOS/dmsMandadosHoyWhere; escalamiento.ts:78-80 lee LEGAL_TRANSITIONS; finDePausaAR en cartera.schemas.ts:49; 0c92dd08 ancestro (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-715] El cartel del home nombra la fase «Seguimiento»
 - Fuente: `docs/bitacora-beta-3.md:7853` · tipo: pendiente · estado declarado: anotado, sin hacer · fecha: 2026-08-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: paso.ts manda a seguir el contacto en «Seguimiento», que es una fase y no una pantalla; además el envío tiene pantalla propia (m15). Queda fuera del invariante de enlaces.
 - Referencias: paso.ts:184 · tambien en docs/bitacora-beta-3.md:8076
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/leados/paso.ts:184 'mandá el link y seguí el contacto en «Seguimiento»'; rama APROBADA sin render. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-716] Tres leads «CORRIDA» quedaron en la base dev
 - Fuente: `docs/bitacora-beta-3.md:8297` · tipo: pendiente · estado declarado: anotado; no se borraron a propósito · fecha: 2026-08-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Un postergado, un descartado y un evaluado: se dejaron a propósito como evidencia del recorrido.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Es estado de la base dev, no verificable leyendo código; el script de origen existe (scripts/qa-corridas/_p21-corrida.ts). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-717] El rail sigue ofreciendo el «Chat de evaluación» de un paso que ya no existe
 - Fuente: `docs/bitacora-beta-3.md:8779` · tipo: pendiente · estado declarado: no tocado a propósito (decisión de Franco) · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Es una fila inerte (url: null) que anuncia una herramienta y una fase que la fusión retiró. Borrar la entrada de herramientas.ts lo decide Franco.
 - Referencias: herramientas.ts · tools-rail.tsx · tambien en docs/bitacora-beta-3.md:9177
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — herramientas.ts:53-63 (url null + TODO) y :123 en HERRAMIENTAS_ORDEN; git grep de id evaluador en src sin usos (solo tests/setter/16-municiones-salida.spec.ts:132); control positivo: m-construccion.tsx:135, m13-borrador.tsx:65 y m4-opener.tsx:63 usan otros ids. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-718] Padding del scroller del shell del setter (main py-8)
 - Fuente: `docs/bitacora-beta-3.md:9451` · tipo: pendiente · estado declarado: anotado, fuera de alcance · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Son 32 px de cromo en las catorce pantallas, pero pertenecen al shell que comparten el home y la cartera: tocarlo mueve pantallas de fuera del manual.
 - Referencias: shell del setter (main py-8)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — setter/_components/setter-shell.tsx:78 main ... py-8 (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-719] P21 LA COLA DE TRABAJO: el panel muestra la cola del día y no un lead por vez
 - Fuente: `docs/bitacora-beta-3.md:10240` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: cola.ts y cola-del-dia.tsx, con el foco como primer ítem y un tope de 5. Las novedades se deduplican por lead visible, se agrupan y bajan (1.346 → 582 px a 1440). «Soltar» quedó conectado a soltarFoco y se fue «Leads activos». Invariante cola; spec 26.
 - Referencias: fix/cola-de-trabajo · c8e0da7a · 29d0635f · cola.ts · cola-del-dia.tsx · novedades-agrupar.ts +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — cola-del-dia.tsx:89-131 (foco como primer ítem :109, filas :113-115, ocultos :122-127); Soltar conectado (foco-surface.tsx:127-141, :269-280); «Leads activos» retirado (mis-numeros.tsx:11-21); cola.ts, novedades-agrupar.ts y tests/setter/26-cola-de-trabajo.spec.ts existen. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-720] Dos avisos con acción del mismo negocio se muestran los dos
 - Fuente: `docs/bitacora-beta-3.md:10447` · tipo: decision · estado declarado: decidido · fecha: 2026-09-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: «Franco aprobó» y «Franco pidió cambios» de vueltas distintas son dos hechos, y plegarlos escondería un «Abrir». Queda como está.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — novedades.ts:77 y :82 kinds distintos; setter/page.tsx:95-98 dedup solo contra la cola (excludeLeadIds) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-721] TOPE_COLA = 5 se eligió, no se midió
 - Fuente: `docs/bitacora-beta-3.md:10451` · tipo: pendiente · estado declarado: a revisar con uso real · fecha: 2026-09-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: El tope no se contrastó con el ritmo real de un setter: si queda corto o largo se cambia en una línea. Un aviso vigente puede apuntar a un lead que quedó fuera de las cinco filas.
 - Referencias: TOPE_COLA · tambien en docs/bitacora-beta-3.md:10863
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — cola.ts:38 TOPE_COLA = 5 sin medición registrada (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-722] P22 PARA QUÉ SIRVE LA CARTERA: la cartera agrupada por lo que toca hacer
 - Fuente: `docs/bitacora-beta-3.md:10456` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-03/06 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: agruparCartera y VISTAS_CARTERA son la fuente única de encabezados y filtro. «Para trabajar» queda abierto y los otros siete grupos plegados con su conteo. Se fueron el orden muerto «colas» y el badge de etapa en jerga, y Fijar/Pausar/Nota tienen rótulo visible. Spec 27.
 - Referencias: fix/cartera-para-que · c8e0da7a · flow.ts (agruparCartera, VISTAS_CARTERA) · home-empty.tsx:18 · tests/helpers/setter-ui.ts (expandirGruposCartera) · scripts/qa-corridas/medir-cartera.ts +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — agruparCartera y VISTA_ABIERTA (cartera-view.tsx:7-9, :64, :142); VISTAS_CARTERA como fuente del filtro (cartera-toolbar.tsx:27-30; flow.ts:944-956); sin badge de etapa (home-sections.tsx:80-88); rótulos visibles (lead-card-actions.tsx:145,153,161); home-empty.tsx:18; tests/setter/27-cartera-agrupada.spec.ts existe. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-723] El mapa de la cartera queda al fondo de todo
 - Fuente: `docs/bitacora-beta-3.md:10635` · tipo: idea · estado declarado: anotado, no hecho · fecha: 2026-09-03/06 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Con «Para trabajar» abierto, los otros siete encabezados quedan detrás de 49 tarjetas. Una salida posible es una franja de conteos en la cabecera de la cartera. El grupo abierto, además, está fijo en VISTA_ABIERTA y la cartera sigue colapsada por defecto.
 - Referencias: VISTA_ABIERTA · tambien en docs/bitacora-beta-3.md:10641 · tambien en docs/bitacora-beta-3.md:10643
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — flow.ts:959 VISTA_ABIERTA = 'trabajar'; cartera-view.tsx:142 abre solo ese grupo. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-724] B0.1 Shell del setter (rail + contenido)
 - Fuente: `docs/bitacora-beta.md:46` · tipo: hecho-declarado · estado declarado: hecho (verificación perceptual de Franco declarada) · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: setter-shell.tsx espeja la geometría del admin (rail 240px, drawer mobile, main scrolleable); layout.tsx sigue Server Component con auth intacta.
 - Referencias: src/app/(protected)/setter/_components/setter-shell.tsx · src/app/(protected)/setter/layout.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-shell.tsx con rail de 240 px y drawer; el layout sigue siendo server y monta el shell (setter/layout.tsx:8, :90, git). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-725] B0.2 Barra de navegación del setter (setter-nav)
 - Fuente: `docs/bitacora-beta.md:82` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Rail con destinos reales (único hub /setter 'Cartera'), pill activa con layoutId namespaced y aria-current; sin rutas inventadas.
 - Referencias: src/app/(protected)/setter/_components/setter-nav.tsx · src/app/(protected)/setter/_components/setter-shell.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — layoutId namespaced 'setter-sidebar-active-pill' (setter-nav.tsx:108) y aria-current (:98); el label pasó de «Cartera» a «Tu día» (:29-38). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-726] Navegación del rail del setter solo por triggerTransition()
 - Fuente: `docs/bitacora-beta.md:92` · tipo: decision · estado declarado: vigente en su momento · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Decisión cerrada en B0.2: sin <Link>, router.push ni useRouter en la barra. Después prev/next y atajos usan <Link>/.click() para no pasar por el shutter.
 - Referencias: src/app/(protected)/setter/_components/setter-nav.tsx · src/context/TransitionContext.tsx · también en docs/bitacora-beta.md:269 · también en docs/bitacora-beta.md:779
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-nav.tsx:48-51, :65 y :97: el rail no usa Link ni router. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-727] Validar salto entre rutas por triggerTransition con 2+ destinos en el rail
 - Fuente: `docs/bitacora-beta.md:124` · tipo: pendiente · estado declarado: pendiente (condicional) · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Cuando el rail tenga 2 o más destinos, validar el click-nav entre rutas y el caveat de hydration mismatch de TransitionContext en dev (prod OK).
 - Referencias: src/context/TransitionContext.tsx · también en docs/bitacora-beta.md:128 · también en docs/bitacora-beta.md:278
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — setter-nav.tsx:43-49 navega con triggerTransition. Validarlo requiere runtime. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-728] B0.3 Scoreboard de solo lectura + numeración única + hint de-numerado
 - Fuente: `docs/bitacora-beta.md:132` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: StatCards envueltos en una sección de solo lectura ('De un vistazo') y onboarding-hint sin numerar; el stepper de 5 etapas queda como única fuente numerada.
 - Referencias: src/app/(protected)/setter/page.tsx · src/app/(protected)/setter/_components/onboarding-hint.tsx · marcador de 5 StatCards retirado en 2.1a según docs/bitacora-beta-2.md:478
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — idem PLAN-759: onboarding-hint.tsx no existe; setter/page.tsx sin StatCards (modo dirección 2.1a) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-729] FG-0 cierre: z-index del chrome a tokens + 5 regresiones B9
 - Fuente: `docs/bitacora-beta.md:212` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Shell y drawer del setter consumen el tier app* de design-tokens.ts; banner de rechazo, lane prioritario, paso activo y DecisionBar elevados; pill de stage del admin cableada a STAGE_TONE.
 - Referencias: src/lib/design-tokens.ts · setter-shell.tsx · lead-wizard.tsx · home-sections.tsx · dossier-stepper.tsx · src/app/(protected)/admin/leados/[leadId]/page.tsx +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-shell.tsx:29, 34, 45, 52 y 60 usan zIndex.appShell/appNavTrigger/appDrawerBackdrop/appDrawer/appDrawerClose. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-730] Disciplina de color B9: cyan = accionable, el resto informativo
 - Fuente: `docs/bitacora-beta.md:226` · tipo: decision · estado declarado: vigente · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: El 'plano' se ataca con elevación y jerarquía, nunca re-saturando; stage y rótulos informativos en tonos semánticos, nunca cyan.
 - Referencias: también en docs/bitacora-beta.md:280 · también en docs/bitacora-beta.md:1249 · también en docs/bitacora-beta.md:1502
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — leados-ui.ts:18-27 STAGE_TONE sin cyan; [leadId]/page.tsx:153 y pipeline-board.tsx:264 lo usan; veredicto sin cyan (dossier-panels.tsx:55-59) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-731] Cierre del bloque FG-0 (chrome del setter + reconciliación visual)
 - Fuente: `docs/bitacora-beta.md:263` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: B0.1–B0.4 más la pasada de cierre; todo presentación, tsc 0, build verde, 61 migraciones.
 - Referencias: también en docs/bitacora-beta.md:46 · también en docs/bitacora-beta.md:82 · también en docs/bitacora-beta.md:132 · también en docs/bitacora-beta.md:178 · también en docs/bitacora-beta.md:212
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-shell.tsx y setter-nav.tsx siguen vigentes (git grep). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-732] FG-0.5 Índices compuestos para la cabina del operador
 - Fuente: `docs/bitacora-beta.md:359` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: OsLead[assignedToId,nextFollowUpAt] y OsLeadActivity[performedById,createdAt]; migración solo aditiva aplicada con migrate deploy.
 - Referencias: prisma/migrations/20260619132830_add_operator_cabin_indexes/migration.sql · prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — migración 20260619132830_add_operator_cabin_indexes; schema.prisma:900 y :969 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-733] Rótulo del criterio de orden por card (motivoOrden)
 - Fuente: `docs/bitacora-beta.md:578` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Chip neutro por card en 'Para trabajar ahora' con el tier real (respondió, caliente, orden de llegada).
 - Referencias: src/lib/leados/flow.ts · home-sections.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — home-sections.tsx:40 y :124-136; foco-surface.tsx:157 y :213-218; cola-del-dia.tsx:65-75. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-734] motivoOrden debe mantenerse en sincronía con el sort de urgencia
 - Fuente: `docs/bitacora-beta.md:591` · tipo: decision · estado declarado: vigente · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Criterio y rótulo son dos lecturas de la misma regla; si otro lane pasa a ordenarse por urgencia hay que extender motivoOrden.
 - Referencias: src/lib/leados/flow.ts · también en docs/bitacora-beta.md:620 · también en docs/bitacora-beta-2.md:353
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:611-627 switch exhaustivo sobre trabajoTier (flow.ts:734) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-735] Palancas de la cartera: buscar/filtrar/ordenar + fijar/pausar/nota privada
 - Fuente: `docs/bitacora-beta.md:668` · tipo: hecho-declarado · estado declarado: hecho (falta confirmar privacidad con 2 setters reales) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Toolbar client-side y tabla nueva OsLeadSetterMeta (privada por setterId) con server actions ownership-gated; invariante check:invariant:setter-meta.
 - Referencias: cartera-toolbar.tsx · cartera-view.tsx · src/app/(protected)/setter/_actions/cartera.actions.ts · cartera.schemas.ts · lead-card-actions.tsx · src/lib/leados/setter-meta.ts +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — cartera-toolbar.tsx:45-110; filtro y orden en cartera-view.tsx:57-66; acciones en lead-card-actions.tsx:78-128; setter-meta.ts existe. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-736] Snooze de cartera (personal) y 'Postergar' del Paso 9 (comercial) conviven
 - Fuente: `docs/bitacora-beta.md:715` · tipo: decision · estado declarado: vigente · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Son cosas distintas a propósito; si se confunden en uso, revisar etiquetas.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-meta.ts:17-21 snoozedUntil (personal); POSTERGADO/reactivateAt en manual.ts:542-549 y turno.ts:95. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-737] Atajos de teclado del operador + ayuda mínima
 - Fuente: `docs/bitacora-beta.md:762` · tipo: hecho-declarado · estado declarado: hecho; los atajos del modelo viejo desaparecen con 2.1a (quedan t/p/s/?) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: useKeyboardShortcuts con guard de campos de escritura; j/k/Enter/r en la cartera y j/k/b en el recorrido; pastilla de ayuda.
 - Referencias: src/app/(protected)/setter/_components/use-keyboard-shortcuts.ts · shortcuts-help.tsx · también en docs/bitacora-beta-2.md:445
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Quedan t/p/s/? (foco-surface.tsx:54-59 y :150-155; shortcuts-help.tsx:22-29); guard de campos de escritura en use-keyboard-shortcuts.ts:14-20; los atajos j/k/Enter/r ya no existen. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-738] Atajos = el mismo click; acciones sensibles sin atajo
 - Fuente: `docs/bitacora-beta.md:767` · tipo: decision · estado declarado: vigente · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Enviar opener/demo, transiciones y fijar/pausar siguen siendo click con su gate; los atajos activan el <Link> existente (.click()), no router.push ni triggerTransition.
 - Referencias: también en docs/bitacora-beta.md:779
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — use-keyboard-shortcuts.ts:46-54 no se dispara con modificadores ni en campos editables. No verifiqué en cada consumidor que el handler haga .click() de un Link. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-739] 0.5.8 Novedades dirigidas al setter (OsSetterNotice)
 - Fuente: `docs/bitacora-beta.md:974` · tipo: hecho-declarado · estado declarado: hecho (verificación funcional de Franco) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Avisos in-app de lead asignado, demo aprobada/rechazada y reasignación saliente; badge en el topbar y 'demos esperando a Franco'; invariante check:invariant:novedades.
 - Referencias: src/lib/leados/novedades.ts · src/lib/leados/novedades.invariant.ts · src/app/(protected)/setter/_actions/novedades.actions.ts · novedades-panel.tsx · novedades-marcar-visto.tsx · prisma/migrations/20260620190000_add_setter_novedades +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — novedades-panel.tsx:130-205; novedades-marcar-visto.tsx:19-29; novedades.ts y novedades.invariant.ts existen. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-740] Avisos al setter in-app, no por Telegram
 - Fuente: `docs/bitacora-beta.md:982` · tipo: decision · estado declarado: vigente · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: sendTelegram resuelve a un único chat (Franco) y no hay chatId por setter.
 - Referencias: src/lib/notifications/telegram.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — escalar-modal.tsx:57-65: el Telegram va a Franco y al setter le llegan toasts dentro de la app. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-741] Telegram al setter con chatId por usuario
 - Fuente: `docs/bitacora-beta.md:1027` · tipo: idea · estado declarado: sin estado (propuesta) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Desbloqueo futuro fuera de scope para que las novedades también lleguen por Telegram al setter.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — solo AgencySettings.osTelegramChatId global (schema.prisma:836); ningún chatId por User (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-742] 0.5.9 Carril 'Continuá donde dejaste'
 - Fuente: `docs/bitacora-beta.md:1031` · tipo: hecho-declarado · estado declarado: hecho; reemplazado por el foco de 2.1a · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: CTA arriba del home al tope de 'trabajar' (próxima acción más urgente, no último lead tocado).
 - Referencias: continuar-cta.tsx · cartera-view.tsx · borrado en docs/bitacora-beta-2.md:323
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — continuar-cta.tsx no está en origin/main (git ls-tree -r | grep continuar-cta: 0); lo reemplazó FocoSurface. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-743] 0.5.10 'Tu semana' (señal de avance del setter)
 - Fuente: `docs/bitacora-beta.md:1069` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Contactos, demos enviadas y reuniones en ventana móvil de 7 días; se oculta en cero, sin metas ni ranking; fix ESLint de onboarding-hint.
 - Referencias: src/lib/leados/progreso.ts · src/app/(protected)/setter/_components/progreso-semana.tsx · src/app/(protected)/setter/page.tsx · onboarding-hint.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — progreso-semana.tsx:14-62 se oculta en cero (:15) y muestra solo valores mayores que cero (:40); onboarding-hint ya no existe (git grep sin coincidencias). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-744] 0.5.11 'Mis números' del setter
 - Fuente: `docs/bitacora-beta.md:1111` · tipo: hecho-declarado · estado declarado: hecho (verificación con 2 setters pendiente) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Leads activos y ratio descarte/avance propios reusando calcularRatioSetters; invariante check:invariant:mis-numeros; ESTADOS_TERMINALES movido a revision.ts.
 - Referencias: src/lib/leados/mis-numeros.ts · src/lib/leados/mis-numeros.invariant.ts · src/app/(protected)/setter/_components/mis-numeros.tsx · src/lib/leados/revision.ts · src/lib/leados/setter-carga.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — mis-numeros.ts:89-122; revision.ts:27 ESTADOS_TERMINALES; mis-numeros.invariant.ts y _components/mis-numeros.tsx existen. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-745] Al setter no se le muestra la alarma 'nunca descarta'
 - Fuente: `docs/bitacora-beta.md:1122` · tipo: decision · estado declarado: vigente · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: alarmaNuncaDescarta es lectura de gestión del admin; al setter se le muestra su número, no un juicio.
 - Referencias: src/lib/leados/revision.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — mis-numeros.ts:22-28 no importa alarmaNuncaDescarta; git grep alarmaNuncaDescarta origin/main -- setter: vacío (control: admin/leados/page.tsx:274). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-746] Cierre del bloque FG-0.5 (cabina del operador + handoffs)
 - Fuente: `docs/bitacora-beta.md:1237` · tipo: hecho-declarado · estado declarado: hecho (verificación perceptual de cada superficie en cola de Franco) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: 11 piezas (índices, 3 admin, 7 del setter), isolation.ts como fuente única de aislamiento y 6 invariantes sin DB verdes.
 - Referencias: commit feat(fg-0.5 admin) · src/lib/leados/isolation.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — isolation.ts:1-17 como fuente única de aislamiento (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-747] Patrón de trabajo heredado por FG-1
 - Fuente: `docs/bitacora-beta.md:1253` · tipo: decision · estado declarado: vigente · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Descubrimiento con Explore → módulo puro + invariante ejecutable por regla de aislamiento → smoke HTTP autenticado (dev:qa) en pantallas auth-gated.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — módulos puros con invariantes ejecutables en src/lib/leados/*.invariant.ts (p. ej. postergacion.invariant.ts, paso-admitido.invariant.ts) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-748] FG-1.1 Onboarding del setter enseña el flujo invertido
 - Fuente: `docs/bitacora-beta.md:1291` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: 4 tarjetas (el score marca el camino, opener antes que demo, la espera, caliente adelanta la demo) y banda 'Ojo'.
 - Referencias: src/app/(protected)/setter/_components/onboarding-hint.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — onboarding-hint.tsx no está en origin/main; lo retiró 7074ba6b (2026-07-04) 'guía estructural en lugar del onboarding en prosa (A-01)'. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-749] Seed de estados del setter (7 leads QA)
 - Fuente: `docs/bitacora-beta.md:1673` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: qaLeadSeeds con ensureLeadDossier idempotente en seed-agency-os.ts: ficha a medias, caliente, en revisión, aprobado, rechazado, descartado y postergado vencido.
 - Referencias: prisma/seed-agency-os.ts · también en docs/bitacora-beta-2.md:83
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/seed-agency-os.ts:751 qaLeadSeeds y :2047 bucle de alta. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-750] Smoke test e2e del setter (tests/setter/, 35 tests) + diagnóstico de drift
 - Fuente: `docs/bitacora-beta.md:1729` · tipo: hecho-declarado · estado declarado: suite escrita y type-clean; ejecución en browser pendiente; reconciliación pendiente del OK de Franco · fecha: 2026-06-22 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Suite aislada con playwright.setter.config.ts y npm run test:setter contra build de producción; se borró el BOT_DELETED duplicado del schema que rompía el build.
 - Referencias: docs/smoke-report.md · tests/setter/ · playwright.setter.config.ts · prisma/schema.prisma · también en docs/bitacora-beta.md:1631 · también en docs/bitacora-beta.md:1748 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — tests/setter con 30 specs y playwright.setter.config.ts versionados. La ejecución no se puede verificar. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-751] B1 (LeadOS) — Capa de acceso del setter
 - Fuente: `docs/bitacora-roadmap.md:7819` · tipo: hecho-declarado · estado declarado: en curso · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Rol SETTER (migración aditiva), requireSetter(), rama SETTER en src/proxy.ts, zona /setter con guard propio, signIn que exime a SETTER, getOwnedLead por assignedToId, seed de setter QA y procedimiento de alta; el bloque no se cierra hasta la verificación manual.
 - Referencias: prisma/schema.prisma · prisma/migrations/20260611210802_add_setter_role/ · src/lib/auth-guards.ts · src/proxy.ts · src/auth.ts · src/auth.config.ts +10
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — auth-guards.ts:13 requireSetter; proxy.ts:117 rama SETTER; migración 20260611210802_add_setter_role; setter/layout.tsx:32 (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-752] Alta de setters solo por credenciales (Google prohibido)
 - Fuente: `docs/bitacora-roadmap.md:7838` · tipo: decision · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: El profile() de Google fuerza ORG_MEMBER; el login por magic link de un setter ya creado sí se permite.
 - Referencias: docs/leados-alta-setter.md · tambien en docs/bitacora-roadmap.md:7899
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — auth.ts:129: profile() de Google con role 'ORG_MEMBER'. docs/leados-alta-setter.md está versionado. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-753] No crear requireSetterOrAdmin() hasta que haya consumidor
 - Fuente: `docs/bitacora-roadmap.md:7842` · tipo: decision · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Una superficie compartida va a necesitar acceso a datos distinto por rol (admin ve todo, setter lo suyo); se diseña cuando exista.
 - Referencias: src/lib/auth-guards.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep requireSetterOrAdmin -> 0; auth-guards.ts:3 requireSuperAdmin y :13 requireSetter (control) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-754] Verificación manual de Franco de B1 y B2 LeadOS
 - Fuente: `docs/bitacora-roadmap.md:7888` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: B2: Prisma Studio con tablas intactas y /admin/leads igual que antes. B1: alta, login, cambio de password, redirects de las 3 identidades, getOwnedLead con lead real y sesión del setter.
 - Referencias: tambien en docs/bitacora-roadmap.md:7892 · tambien en docs/bitacora-roadmap.md:7902 · tambien en docs/bitacora-roadmap.md:7904
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — El código que se verifica existe (ownership.ts:24-31; specs 02-isolation). Una verificación manual no deja rastro en el código. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-755] /setter muestra el navbar público y el widget de chat marketing
 - Fuente: `docs/bitacora-roadmap.md:7897` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Vienen del root layout; el shell propio del panel setter llega con el wizard.
 - Referencias: src/app/(protected)/setter/layout.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — src/components/layout/publicRoute.ts:16 PORTAL_PREFIXES incluye '/setter'; setter/layout.tsx:90 SetterShell propio (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-756] B0.1 shell del setter (rail + contenido)
 - Fuente: `docs/bitacora-roadmap.md:10565` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: setter-shell espeja la geometría del admin con drawer mobile.
 - Referencias: src/app/(protected)/setter/_components/setter-shell.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-shell.tsx:23-85: rail de 240 px (:53, :69), drawer mobile (:41-56), main scrolleable (:78). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-757] B0.2 navegación del setter
 - Fuente: `docs/bitacora-roadmap.md:10601` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: setter-nav con un único destino /setter, navegación solo por triggerTransition().
 - Referencias: src/app/(protected)/setter/_components/setter-nav.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-nav.tsx:36-38 tiene un único destino /setter, hoy rotulado «Tu día»; triggerTransition en :49. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-758] Validar salto entre rutas del setter
 - Fuente: `docs/bitacora-roadmap.md:10647` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Cuando haya ≥2 destinos, verificar en runtime triggerTransition y el caveat de hydration.
 - Referencias: también en fuente:10797
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — setter-nav.tsx:43-49 navega por triggerTransition con varios destinos; la verificación en runtime no es trazable por código (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-759] B0.3 scoreboard de solo lectura + numeración única
 - Fuente: `docs/bitacora-roadmap.md:10651` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Scoreboard no clickeable y hint de-numerado; el stepper de 5 etapas manda.
 - Referencias: src/app/(protected)/setter/page.tsx · src/app/(protected)/setter/_components/onboarding-hint.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — onboarding-hint.tsx no existe (git cat-file); setter/page.tsx:102-145 sin StatCards; loading.tsx:7-8 'el marcador de 5 StatCards ... que 2.1a/2.3 borraron' (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-760] Cierre del bloque FG-0
 - Fuente: `docs/bitacora-roadmap.md:10782` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-dia
 - Qué es: Chrome del setter y reconciliación visual de LeadOS completos (B0.1-B0.4 + cierre).
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — setter-nav.tsx y setter/layout.tsx presentes (layout.tsx:32 guard SETTER del contexto fijo) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 ### h5.set-importar — Importar prospectos
 
@@ -6159,24 +6159,24 @@
 - Nodo(s): h5.set-importar
 - Qué es: prospecto-import.ts (parser RFC-4180), importarProspectos con $transaction, tope MAX_FILAS_IMPORT=500, ruta /setter/nuevo/importar, invariante prospecto-import.
 - Referencias: lib/leados/prospecto-import.ts · prospecto-bulk.actions.ts · prospecto-import.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prospecto-import.ts:24 MAX_FILAS_IMPORT = 500; prospecto-bulk.actions.ts:108-110 $transaction; setter/nuevo/importar/page.tsx existe (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-762] Mapeo flexible de columnas en la importación CSV
 - Fuente: `docs/bitacora-beta-3.md:431` · tipo: idea · estado declarado: sin estado · **ZONA-FRANCO**
 - Nodo(s): h5.set-importar
 - Qué es: Formato fijo v1 (COLUMNAS_IMPORT); mapeo flexible queda a futuro.
 - Referencias: prospecto-import.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/leados/prospecto-import.ts:27-30 'Mapeo flexible de columnas = futuro'; COLUMNAS_IMPORT fijo :38-48. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-763] Dedup cross-setter por existencia global
 - Fuente: `docs/bitacora-beta-3.md:436` · tipo: decision · estado declarado: vigente · **ZONA-FRANCO**
 - Nodo(s): h5.set-importar
 - Qué es: nombresEnSistema en la action devuelve solo un bit; excepción deliberada al aislamiento de lectura; CSV nativo sin dependencia.
 - Referencias: prospecto-bulk.actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prospecto-bulk.actions.ts:143-146 nombresEnSistema; :94-95 motivo en-sistema (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h5.set-lead — Ficha del lead
 
@@ -6185,414 +6185,414 @@
 - Nodo(s): h5.set-lead
 - Qué es: 5 copias inline desincronizadas reemplazadas por esCaliente(score, stage?) en revision.ts; comportamiento neutro probado por equivalencia.
 - Referencias: src/lib/leados/revision.ts · src/lib/leados/flow.ts · src/app/(protected)/setter/page.tsx · opener-step.tsx · dossier.actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — revision.ts:47 esCaliente(caliente, stage?) (superada por admin-1b) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-765] admin-1c La opinión del setter sobre temperatura pasa a informativa
 - Fuente: `docs/bitacora-beta-2.md:237` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: notificarEvaluacionCaliente renombrada notificarEvaluacionScoreAlto con texto informativo; el veredicto CALIENTE queda documentado como lectura del setter.
 - Referencias: src/lib/leados/notify.ts · dossier.actions.ts · src/lib/leados/contracts.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — notify.ts:128 notificarEvaluacionScoreAlto; dossier.actions.ts:164-166 (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-766] calienteNotificadaAt conserva su nombre legacy
 - Fuente: `docs/bitacora-beta-2.md:246` · tipo: decision · estado declarado: vigente · fecha: 2026-06-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Es flag de idempotencia de la notificación; renombrarlo exigiría migrar blobs y podría re-notificar.
 - Referencias: src/lib/leados/contracts.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — contracts.ts:102-107 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-767] admin-1d Gate server-side de demo preventiva lee el campo caliente
 - Fuente: `docs/bitacora-beta-2.md:262` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: transitionDossier case BRIEF reusa gateBriefAbierto(status, caliente); el score del setter deja de abrir el brief; harness b2-verify-dossier actualizado (18/18).
 - Referencias: src/lib/leados/dossier.ts · scripts/b2-verify-dossier.ts · cierra docs/bitacora-beta-2.md:258 y :561
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dossier.ts:160-172 usa gateBriefAbierto(status, caliente) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-768] Lint react-hooks/purity en seguimiento-step.tsx
 - Fuente: `docs/bitacora-beta-3.md:193` · tipo: pendiente · estado declarado: pendiente (archivo retirado L1003) · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: new Date(Date.now()) del date-picker; candidato a sprint propio. El archivo figura retirado en 5.6 y el form nuevo usa useState lazy.
 - Referencias: también en fuente:209,231,277,387,972
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — seguimiento-step.tsx ya no existe (git ls-files da 0). seguimiento-form.tsx:95 usa Date.now dentro de un inicializador y el baseline de eslint no lo marca. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-769] Bloque 3 wizard del lead cerrado (3.1-3.7 + 4·C)
 - Fuente: `docs/bitacora-beta-3.md:283` · tipo: hecho-declarado · estado declarado: hecho (luego retirado en 5.6) · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Wizard de página larga guiado: PasoActualBanner/StepAnchor, GUIA_* en guidance-content.ts, error.tsx/loading.tsx de [leadId], StepLink. El propio doc lo declara retirado en 5.6 (L1003).
 - Referencias: también en fuente:12,16,67,103,137,173,213,247,365 · guidance-content.ts · paso-actual-banner.tsx · step-anchor.tsx · step-nav.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — paso-actual-banner.tsx, step-anchor.tsx y step-nav.tsx no existen (git ls-files); quedan los GUIA_* y error.tsx/loading.tsx de [leadId] (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-770] V-1 seed QA: un lead por estado del wizard
 - Fuente: `docs/bitacora-beta-3.md:297` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: scripts/v1-qa-wizard-states.ts siembra 13 leads «QA-W» owned por setter-qa, idempotente, solo branch Neon dev; stage directo permitido en seed, no en app.
 - Referencias: scripts/v1-qa-wizard-states.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — scripts/v1-qa-wizard-states.ts existe en main (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-771] 5.2/5.3 tests de claim atómico, assign admin y suite test:leados
 - Fuente: `docs/bitacora-beta-3.md:457` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Specs 06-claim-atomico, 07-admin-assign-caliente; playwright.leados.config.ts con dossier-gates, envio-demo-rechazo, selfcheck-anti-bypass, alta-import; invariantes gate-envio y self-check.
 - Referencias: también en fuente:482 · tests/setter/06-claim-atomico.spec.ts · tests/leados/ · playwright.leados.config.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — tests/setter/06-claim-atomico.spec.ts, 07-admin-assign-caliente.spec.ts y playwright.leados.config.ts están versionados. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-772] B6.1/B6.2/B6.3/B6.5 fixes del wizard y del rail
 - Fuente: `docs/bitacora-beta-3.md:564` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: openerPendiente, GuiaRetrabajo en RECHAZADA, RELOOP_RESET limpia solo selfCheckJson (invariante reloop-selfcheck), botón «Cargar prospecto» en setter-nav.tsx, router.refresh en escalar-modal.
 - Referencias: también en fuente:596,624,645 · escalamiento.ts · dossier.ts · setter-nav.tsx · reloop-selfcheck-reset.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — RELOOP_RESET solo selfCheckJson (escalamiento.ts:102; dossier.ts:146); 'Cargar prospecto' en setter-nav.tsx:61; existe reloop-selfcheck-reset.invariant.ts (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-773] Remediación 3.1/3.2: useStepAction, auxiliares y derivarPasoDelLead
 - Fuente: `docs/bitacora-beta-3.md:715` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Hook src/lib/use-step-action.ts (9 call-sites), auxiliares extraídos de construccion-step y derivación única src/lib/leados/paso.ts.
 - Referencias: también en fuente:792 · src/lib/use-step-action.ts · src/lib/leados/paso.ts · commit 2d8a3bc
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — src/lib/use-step-action.ts existe (9 archivos lo referencian); paso.ts:251 existe, pero sus consumidores (stepper, banner, anchor) ya no están: único uso manual.ts:552. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-774] Adopción de useStepAction en ~10 componentes
 - Fuente: `docs/bitacora-beta-3.md:740` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: ficha-step, nuevo-prospecto-form, importar, foco-surface, lead-card-actions, novedades-marcar-visto, etc. repiten el ciclo submit a mano.
 - Referencias: también en fuente:754,4606
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — 7 componentes usan useStepAction (incluido seguimiento-form.tsx:86); 12 siguen con startTransition a mano, entre ellos nuevo-prospecto-form.tsx:87 e importar-prospectos-form.tsx:84 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-775] El setter no puede cargar googleMapsUrl ni currentWebUrl
 - Fuente: `docs/bitacora-beta-3.md:2376` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: No están en el alta ni en el CSV y no hay action de edición de columnas del lead; exige tocar isolation.ts.
 - Referencias: schema.prisma:873 · isolation.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — currentWebUrl ya entra en el alta propia (isolation.ts:52, :92); googleMapsUrl no está en OwnedLeadFields (isolation.ts:44-54) y solo se lee (m1-ficha.tsx:44) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-776] timeline sin guard exhaustivo de canal
 - Fuente: `docs/bitacora-beta-3.md:5777` · tipo: pendiente · estado declarado: anotado, no hecho · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: El eje de canal del invariante timeline («SISTEMA se muestra pero NO cuenta») se sigue probando con casos puntuales. Le falta el censo de ActivityChannel que se le agregó a contador-dms.
 - Referencias: check:invariant:timeline · src/lib/leados/contador-dms.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep 'Object.keys(ActivityChannel)' no encuentra nada en timeline.invariant.ts. Control: contador-dms.invariant.ts:217-218 sí tiene el censo. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-777] Test de aislamiento DB-bound de ownership.ts
 - Fuente: `docs/bitacora-beta.md:114` · tipo: pendiente · estado declarado: pendiente (fuera de scope) · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: No hay runner unitario; un invariante DB-bound exige sembrar 2 setters con leads cruzados. Quedó fuera de scope (se usaron invariantes puros sin DB).
 - Referencias: src/lib/leados/ownership.ts · también en docs/bitacora-beta.md:542
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Igual que PLAN-811: tests/setter/02-isolation.spec.ts:52-123, tests/leados/alta-import.spec.ts:95. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-778] Errores ESLint react-hooks pre-existentes en el setter
 - Fuente: `docs/bitacora-beta.md:174` · tipo: pendiente · estado declarado: parcial: page.tsx:34 (:687), construccion-step.tsx:53 (:941) y onboarding-hint.tsx:39 (:1085) declarados resueltos; seguimiento-step.tsx sigue vivo (:1508) · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: purity en setter/page.tsx:34 y en seguimiento-step.tsx (Date.now() en minReactivacion); set-state-in-effect en onboarding-hint.tsx:39 y construccion-step.tsx:53.
 - Referencias: src/app/(protected)/setter/leads/[leadId]/_components/seguimiento-step.tsx · también en docs/bitacora-beta.md:208 · también en docs/bitacora-beta.md:277 · también en docs/bitacora-beta.md:331 · también en docs/bitacora-beta.md:355 · también en docs/bitacora-beta.md:1398 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — seguimiento-step.tsx ya no existe; su sucesor seguimiento-form.tsx:94-96 usa lazy init. El baseline de eslint tiene react-hooks/purity en m5-seguimiento.tsx:63 (Date.now en render) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-779] B0.4 Headers 'Paso N' reconciliados con el stepper de 5 etapas
 - Fuente: `docs/bitacora-beta.md:178` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Paso 1–4 solo en ficha, evaluación, brief y construcción; opener, seguimiento, agenda, draft y self-check sin número; cross-refs de copy realineadas.
 - Referencias: opener-step.tsx · seguimiento-step.tsx · agenda-step.tsx · draft-step.tsx · self-check-step.tsx · brief-step.tsx +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — Los step files ya no existen (git ls-tree de leads/[leadId]/_components) y el manual no usa 'Paso N' (git grep sin coincidencias fuera de comentarios). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-780] El stepper de 5 etapas es la única numeración del flujo del setter
 - Fuente: `docs/bitacora-beta.md:184` · tipo: decision · estado declarado: vigente · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Ficha·Evaluación·Brief·Construcción·Revisión (1:1 con DossierStage); toda superficie nueva del setter debe deferir a él y no numerar el flujo.
 - Referencias: src/app/(protected)/setter/leads/[leadId]/_components/dossier-stepper.tsx · también en docs/bitacora-beta.md:280 · también en docs/bitacora-beta.md:1302
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — dossier-stepper.tsx no existe en main; la navegación es la franja de nueve etapas (manual.ts:305-315, franja-recorrido.tsx:69) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-781] Wizard del lead duplicado en el DOM por variantes responsive
 - Fuente: `docs/bitacora-beta.md:197` · tipo: pendiente · estado declarado: sin estado (pre-existente) · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Una copia vive bajo un ancestro display:none (pre-existente, no tocado); StepAnchor tuvo que esquivarla con offsetParent.
 - Referencias: src/app/(protected)/setter/leads/[leadId]/_components/lead-wizard.tsx · también en docs/bitacora-beta.md:1166
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — lead-wizard.tsx ya no está en origin/main (ls-tree de setter/leads/[leadId]/_components). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-782] Orientación de herramientas externas (ToolGuide + herramientas.ts + 'Tus herramientas')
 - Fuente: `docs/bitacora-beta.md:284` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Registro editable de 5 herramientas (Evaluador, Gem de diseño, Claude Design, Netlify Drop, Gem de outreach) con explicación colapsable y lanzador en cada paso y en el rail.
 - Referencias: src/lib/leados/herramientas.ts · src/app/(protected)/setter/_components/tool-guide.tsx · src/app/(protected)/setter/_components/tools-rail.tsx · setter-nav.tsx · evaluacion-step.tsx · brief-step.tsx +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — ToolGuide (tool-guide.tsx:82-116), rail (tools-rail.tsx:16-75) y registro existen, pero 4 de 5 URLs siguen null con TODO (herramientas.ts:63,78,90,117) y el ToolGuide de 'evaluador' ya no se monta en ningún paso. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-783] Cargar las 4 URLs reales de herramientas (TODO: URL)
 - Fuente: `docs/bitacora-beta.md:314` · tipo: pendiente · estado declarado: pendiente (Franco) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Franco debe reemplazar los null de herramientas.ts para Evaluador, Gem de diseño, Claude Design y Gem de outreach; hoy la UI muestra 'Link pendiente'.
 - Referencias: src/lib/leados/herramientas.ts · también en docs/bitacora-beta.md:353
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — herramientas.ts:63, :78, :90, :117 url null con TODO (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-784] Migrar herramientas.ts y onboarding-hint a la fuente única de guía (FG-1.0)
 - Fuente: `docs/bitacora-beta.md:354` · tipo: pendiente · estado declarado: pendiente (diferido) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: FG-1.0 se creó (guidance-content.ts) pero el registro de herramientas y la guía del onboarding siguen localizados a propósito.
 - Referencias: src/lib/leados/herramientas.ts · src/lib/leados/guidance-content.ts · onboarding-hint.tsx · también en docs/bitacora-beta.md:297 · también en docs/bitacora-beta.md:1252 · también en docs/bitacora-beta.md:1287 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — herramientas.ts:16-17 'Hoy queda localizado acá a propósito'; guidance-content.ts no importa herramientas (imports guidance-content.ts:35-46) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-785] Autosave + guardia de salida de ficha y brief
 - Fuente: `docs/bitacora-beta.md:515` · tipo: hecho-declarado · estado declarado: hecho (verificación funcional de Franco pendiente) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: useAutosave (debounce 1200ms, maxWait 8s), useUnsavedGuard (beforeunload) e indicador de estado; el autosave del brief solo en stage BRIEF y nunca transiciona.
 - Referencias: src/lib/use-autosave.ts · src/lib/use-unsaved-guard.ts · src/app/(protected)/setter/_components/autosave-status.tsx · ficha-step.tsx · brief-step.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ficha-form.tsx:193-198; brief-form.tsx:113-125. El autoguardado del brief solo corre en el re-pegado (brief-sanity.tsx:30-40), y guardarBrief transiciona solo desde EVALUADA (dossier.actions.ts:208-209). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-786] Autoguardar la captura inicial del brief en EVALUADA
 - Fuente: `docs/bitacora-beta.md:573` · tipo: idea · estado declarado: sin estado (posible follow-up) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Exigiría un path que persista briefJson parcial sin transicionar (schema laxo + flag en la action); hoy lo cubre la guardia de salida.
 - Referencias: src/lib/leados/dossier.ts · dossier.actions.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — dossier.ts:441 saveOwnedBrief acepta EVALUADA y dossier.actions.ts:205-210 guarda antes de transicionar: un brief completo queda persistido aunque el gate rechace; no hay autoguardado parcial (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-787] Rastro visible de reasignación (canal SISTEMA + banner 'Te asignaron')
 - Fuente: `docs/bitacora-beta.md:624` · tipo: hecho-declarado · estado declarado: hecho (verificación funcional de Franco) · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: assignLeadSetter registra una OsLeadActivity SISTEMA solo si cambia el dueño; banner en el detalle del setter; el feed admin muestra 'Reasignación'; invariante check:invariant.
 - Referencias: src/lib/leados/assignment-trail.ts · src/lib/leados/assignment-trail.invariant.ts · src/lib/leados/isolation.ts · prisma/migrations/20260619150000_add_activity_channel_sistema · src/app/(protected)/admin/leads/_actions/lead.actions.ts · src/app/(protected)/setter/leads/[leadId]/page.tsx +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — assignment-trail.ts:42-48 SISTEMA; lead.actions.ts:171-185; manual-nav.tsx:172 'Te asignaron este lead'; lead-activity-feed.tsx:234; migración 20260619150000_add_activity_channel_sistema (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-788] El evento SISTEMA nunca cuenta como contacto comercial
 - Fuente: `docs/bitacora-beta.md:640` · tipo: decision · estado declarado: vigente · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: SOLO_CONTACTOS_COMERCIALES (isolation.ts) lo excluye de _count.activities, último contacto del cron, gate de Seguimiento y listas admin; CreateActivitySchema rechaza SISTEMA.
 - Referencias: src/lib/leados/isolation.ts · activity.schemas.ts · src/app/api/cron/os-follow-up/route.ts · src/app/(protected)/admin/leads/page.tsx · también en docs/bitacora-beta.md:998 · también en docs/bitacora-beta.md:1248
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — route.ts:204 where SOLO_CONTACTOS_COMERCIALES; outreach.ts:50; admin/leads/page.tsx:29; activity.schemas.ts:26 rechaza SISTEMA (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-789] Recorrido de cola prev/next (?cola=)
 - Fuente: `docs/bitacora-beta.md:719` · tipo: hecho-declarado · estado declarado: hecho; luego borrado en 2.1a · fecha: 2026-06-19 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Strip sticky con Anterior/Siguiente sobre la cola ya clasificada (recorrido.ts puro; buildHomeLeads extraído a home.ts).
 - Referencias: src/lib/leados/recorrido.ts · src/lib/leados/home.ts · recorrido-strip.tsx · borrado en docs/bitacora-beta-2.md:323
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — recorrido-strip.tsx no existe (git ls-files); recorrido.ts reusado por manual/_components/franja-recorrido.tsx; buildHomeLeads en home.ts:24 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-790] El escalamiento pertenece al dossier y se resetea en toda transición
 - Fuente: `docs/bitacora-beta.md:928` · tipo: decision · estado declarado: vigente · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: No va en el meta privado del setter (sobrevive a la reasignación); transitionDossier mergea ESCALADO_RESET; persistir nunca transiciona.
 - Referencias: src/lib/leados/escalamiento.ts · src/lib/leados/dossier.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dossier.ts:143-147 mergea ESCALADO_RESET (escalamiento.ts:53) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-791] 0.5.12 Al abrir el lead, caer en el paso activo
 - Fuente: `docs/bitacora-beta.md:1151` · tipo: hecho-declarado · estado declarado: hecho (verificación funcional de Franco) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: StepAnchor hace scroll a la sección según pasoActual(stage), exportado del stepper, saltando la copia responsive oculta.
 - Referencias: src/app/(protected)/setter/leads/[leadId]/_components/step-anchor.tsx · lead-wizard.tsx · dossier-stepper.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — step-anchor, lead-wizard y dossier-stepper ya no existen (git ls-files da 0). Ahora el aterrizaje lo hace el redirect al manual ([leadId]/page.tsx:23). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-792] Decidir dónde aterriza un lead en EVALUADA (brief vs opener)
 - Fuente: `docs/bitacora-beta.md:1173` · tipo: pendiente · estado declarado: pendiente (decisión de Franco) · fecha: 2026-06-20 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Hoy cae en «brief» por deferir al stepper; si se prefiere el opener es 1 línea en anchorActivo, decisión de interpretación del flujo que es de Franco.
 - Referencias: lead-wizard.tsx (anchorActivo)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **abandonado** — lead-wizard.tsx ya no existe (git ls-tree ... | grep lead-wizard -> 0); el aterrizaje lo decide derivarPantalla (manual.ts) desde el corte 5.6, y anchorActivo quedó en paso.ts:223 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-793] 0.5.13 Timeline del lead en el detalle del setter
 - Fuente: `docs/bitacora-beta.md:1190` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Lectura separada listOwnedLeadTimeline que incluye SISTEMA (se muestra sin contar); invariante check:invariant:timeline.
 - Referencias: src/lib/leados/timeline.ts · src/lib/leados/timeline.invariant.ts · lead-timeline.tsx · lead-timeline.helpers.ts · src/lib/leados/isolation.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — lead-timeline.tsx:62-163; lead-timeline.helpers.ts; historial-lead.tsx:14-28. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-794] FG-1.0 Fuente única tipada de contenido de guía (guidance-content.ts)
 - Fuente: `docs/bitacora-beta.md:1328` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Tipos CampoGuia/PasoGuia/EjemploContrastado y registro GUIA_PASOS; la ficha del Paso 1 migrada como prueba.
 - Referencias: src/lib/leados/guidance-content.ts · ficha-step.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ficha-form.tsx:290 y :350 leen GUIA_FICHA; guidance-content.ts:307. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-795] FG-4 razones del self-check
 - Fuente: `docs/bitacora-beta.md:1358` · tipo: bloque · estado declarado: sin estado (planeado) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Consumidor planeado de SelfCheckRazon en guidance-content.ts (checkId string desacoplado de HARD_CHECKS/SOFT_CHECKS).
 - Referencias: src/lib/leados/guidance-content.ts · también en docs/bitacora-beta.md:1335 · también en docs/bitacora-beta.md:1341
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tipo SelfCheckRazon (guidance-content.ts:167-170) y campo selfCheckRazones (:276) sin contenido ni consumidores (git grep -w: 0 fuera del archivo) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-796] FG-1.2 TeachPanel ('¿por qué importa?' + esto-sí/esto-no) en 5 pasos
 - Fuente: `docs/bitacora-beta.md:1368` · tipo: hecho-declarado · estado declarado: hecho (QA visual en runtime pendiente de Franco) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Componente reutilizable aplicado a construcción, self-check, opener, objeciones y traspaso, con el contenido en guidance-content.ts.
 - Referencias: src/app/(protected)/setter/_components/teach-panel.tsx · src/lib/leados/guidance-content.ts · construccion-step.tsx · self-check-step.tsx · opener-step.tsx · seguimiento-step.tsx +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — teach-panel.tsx:84-149; git grep -l -w TeachPanel devuelve 8 archivos. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-797] Rediseñar la pantalla de Construcción (sobre-guiada)
 - Fuente: `docs/bitacora-beta.md:1387` · tipo: pendiente · estado declarado: pendiente (sprint aparte) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Apila 10+ bloques; propuesta: shell de 6 fases como stepper/acordeón y MaterialesNegocio plegado en su fase. Sprint aparte.
 - Referencias: construccion-step.tsx · SHELL_CONSTRUCCION · también en docs/bitacora-beta.md:1507
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — construccion-step.tsx no existe; Construcción se partió en mc1/mc2 con tres fases cada una ([paso]/page.tsx:91-95, :277-300; m-construccion.tsx:43 usa SHELL_CONSTRUCCION) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-798] Segundo par esto-sí/no en el self-check
 - Fuente: `docs/bitacora-beta.md:1389` · tipo: idea · estado declarado: sin estado · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Sumar datosReales/fielAlBrief si Franco lo quiere (la asimetría actual es deliberada).
 - Referencias: src/lib/leados/guidance-content.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — GUIA_SELF_CHECK.ejemplos (guidance-content.ts:709-722) solo tiene 'Probar de verdad' y 'Honestidad en los flags'; ninguno de datosReales/fielAlBrief (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-799] FG-1.4 'Ver ejemplo' del estado ideal (ficha y self-check)
 - Fuente: `docs/bitacora-beta.md:1405` · tipo: hecho-declarado · estado declarado: hecho (sign-off perceptual de Franco, sin capturas) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Ejemplares completos en guidance-content.ts y componente colapsable ejemplo-ideal.tsx en ficha y self-check.
 - Referencias: src/app/(protected)/setter/_components/ejemplo-ideal.tsx · src/lib/leados/guidance-content.ts · ficha-step.tsx · self-check-step.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — m1-ficha.tsx:91 FichaEjemplo; m14-chequeo.tsx:87 SelfCheckEjemplo. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-800] FG-1.3 Validación de calidad de la ficha al salir del campo
 - Fuente: `docs/bitacora-beta.md:1442` · tipo: hecho-declarado · estado declarado: hecho (verificación funcional de Franco) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Nudge neutro onBlur en 5 campos (campoFichaFlojo, umbral 40) que orienta sin bloquear ni tocar autosave ni gates.
 - Referencias: src/lib/leados/ficha-calidad.ts · src/app/(protected)/setter/_components/campo-mejora.tsx · src/lib/leados/guidance-content.ts · ficha-step.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ficha-calidad.ts:23, :30-33; ficha-form.tsx:225; textos de mejora en guidance-content.ts:339-369 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-801] Calidad advisory ≠ gate; frontera palabras/criterio/estructura
 - Fuente: `docs/bitacora-beta.md:1446` · tipo: decision · estado declarado: vigente · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: ficha-calidad.ts vive fuera de flow.ts; las palabras en guidance-content.ts, el criterio en lógica pura y la estructura en componentes; la guía nunca toca gates ni autosave.
 - Referencias: src/lib/leados/ficha-calidad.ts · src/lib/leados/flow.ts · también en docs/bitacora-beta.md:1343 · también en docs/bitacora-beta.md:1501 · también en docs/bitacora-beta.md:1504
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ficha-calidad.ts:5-10 y :30-33; flow.ts no importa ficha-calidad (imports flow.ts:17-43) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-802] Cierre del bloque FG-1 (capa de mentoría del setter)
 - Fuente: `docs/bitacora-beta.md:1486` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: FG-1.pre, 1.0, 1.1, 1.2, 1.4 y 1.3 completos; gates y autosave intactos; verificación perceptual en manos de Franco.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — FG-1.1 (onboarding-hint.tsx) reemplazado en 7074ba6b; el resto de las piezas no lo verifiqué en este lote. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-803] Extender la validación de calidad a los forms de brief y construcción
 - Fuente: `docs/bitacora-beta.md:1509` · tipo: idea · estado declarado: sin estado (fuera de alcance de FG-1) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: La infraestructura (campo mejora en 1.0 + heurística análoga + CampoMejora) es reusable.
 - Referencias: src/lib/leados/ficha-calidad.ts · campo-mejora.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — CampoMejora solo se importa en ficha-form.tsx:34 y :303 (git grep -w CampoMejora: 3 archivos, incluidos su definición y un test/medición). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-804] QA visual en runtime del bloque FG-1 + harness de seed por stage
 - Fuente: `docs/bitacora-beta.md:1510` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Las pantallas del setter exigen auth y leads sembrados por stage; FG-2 podría montar el harness para automatizarlo.
 - Referencias: relacionado docs/bitacora-beta.md:1673 (seed de estados) · relacionado docs/bitacora-beta.md:1735 (suite tests/setter)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — scripts/v1-qa-wizard-states.ts (seed por estado) y la suite tests/setter/ existen; la QA visual no es verificable por código (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-805] FG-2.1→2.3 formulario estructurado para los 4 rubros
 - Fuente: `docs/bitacora-beta.md:1518` · tipo: bloque · estado declarado: bloqueado (gate abierto) · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: No se deriva hasta que corra el experimento 5 vs 5; FG-2 también recibe la capa 'cómo dirigir la IA' / ejemplos de prompt.
 - Referencias: también en docs/bitacora-beta.md:286 · también en docs/bitacora-beta.md:340 · también en docs/bitacora-beta.md:1558 · también en docs/bitacora-beta.md:1636
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — admin/fg2-lab sigue como laboratorio (page.tsx, fg2-lab-client.tsx, medicion-panel.tsx). No verifiqué más allá. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-806] Refactor preparatorio FG-2: contenido de flow.ts a flow-content.ts
 - Fuente: `docs/bitacora-beta.md:1564` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: 8 grupos de copy (SHELL_CONSTRUCCION, HARD/SOFT_CHECKS, CANAL_INSTAGRAM, etc.) movidos con re-export; flow.ts 824→614 líneas, gates sin mover.
 - Referencias: src/lib/leados/flow-content.ts · src/lib/leados/flow.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow-content.ts; re-export en flow.ts:49-60 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-807] Refinar SHELL_CONSTRUCCION tras el test de Claude Design
 - Fuente: `docs/bitacora-beta.md:1570` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-21 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Sigue marcado PROVISORIO; es el ancla editable del constructor de FG-2.
 - Referencias: src/lib/leados/flow-content.ts · también en docs/bitacora-beta.md:1588
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — flow-content.ts:42 'PROVISORIO: refinar tras el test de Claude Design' (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-808] B2 (LeadOS) — Modelo de producción del dossier
 - Fuente: `docs/bitacora-roadmap.md:7852` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Enum DossierStage y modelo OsLeadDossier 1:1 con OsLead (migración aditiva), contratos zod de los blobs (ficha, evaluación, brief, self-check, rechazos) y transitionDossier con transiciones legales y guard optimista; verificación 17/17; sin UI ni server actions.
 - Referencias: prisma/schema.prisma · prisma/migrations/20260612121536_add_os_lead_dossier/ · src/lib/leados/contracts.ts · src/lib/leados/dossier.ts · scripts/b2-verify-dossier.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/migrations/20260612121536_add_os_lead_dossier; contracts.ts; dossier.ts:116; scripts/b2-verify-dossier.ts (git ls-files) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-809] transitionDossier es la única puerta del stage del dossier
 - Fuente: `docs/bitacora-roadmap.md:7863` · tipo: decision · estado declarado: hecho · fecha: 2026-06-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Setear stage con Prisma fuera de dossier.ts está prohibido; el setter accede siempre vía ownership (getOwnedDossier), nunca por el id del dossier; todo blob se parsea con zod antes de escribir.
 - Referencias: src/lib/leados/dossier.ts · src/lib/leados/contracts.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — en src solo dossier.ts y agenda.ts escriben osLeadDossier (git grep 'osLeadDossier.(update|create|upsert)'); ownership dossier.ts:69-94 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-810] Gate EVALUADA a BRIEF del flujo invertido
 - Fuente: `docs/bitacora-roadmap.md:7876` · tipo: decision · estado declarado: hecho · fecha: 2026-06-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Pasa si el lead respondió (RESPONDIO, CALL_AGENDADA o CERRADO) o si el score de evaluación es >=4; DESCARTADA exige motivo y no valida score.
 - Referencias: src/lib/leados/dossier.ts · tambien en docs/bitacora-roadmap.md:7883 · tambien en docs/bitacora-roadmap.md:7884
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — el gate usa el campo caliente, no el score: flow.ts:81-83 y dossier.ts:167 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-811] Test de aislamiento DB-bound de ownership.ts
 - Fuente: `docs/bitacora-roadmap.md:10633` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Sembrar 2 setters con leads cruzados para probar listOwnedLeads/getOwnedLead; fuera de scope de 0.2.
 - Referencias: src/lib/leados/ownership.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — tests/setter/02-isolation.spec.ts:52 y :87 (dos setters A/B, cartera y 404); tests/leados/alta-import.spec.ts:95 getOwnedLead(created.id, setterB) es null. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-812] Errores ESLint preexistentes del setter
 - Fuente: `docs/bitacora-roadmap.md:10693` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: react-hooks/purity (setter/page.tsx:34, seguimiento-step.tsx:198) y set-state-in-effect (onboarding-hint.tsx:39).
 - Referencias: también en fuente:10727 · también en fuente:10796
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Los tres citados ya no figuran: seguimiento-step.tsx y onboarding-hint.tsx no existen. El baseline actual (docs/auditoria-2026-10/_crudo/eslint.json) tiene react-hooks/purity en m5-seguimiento.tsx:63 y no-unused-vars en lead-card-actions.tsx:56. Los archivos del lote no tienen errores (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-813] B0.4 headers Paso N reconciliados
 - Fuente: `docs/bitacora-roadmap.md:10697` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Outreach/agenda/draft/self-check de-numerados; hueco 'Paso 8' eliminado.
 - Referencias: src/app/(protected)/setter/leads/[leadId]/_components/lead-wizard.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — lead-wizard.tsx ya no existe (reemplazado por el manual 5.6) y no hay 'Paso N' visible (ver PLAN-841) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-814] FG-0 cierre: z-index a tokens + regresiones B9
 - Fuente: `docs/bitacora-roadmap.md:10731` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Tier app* en zIndex bajo modal; elevación en banner, lane, stepper y DecisionBar; STAGE_TONE en pill admin.
 - Referencias: src/lib/design-tokens.ts · src/app/(protected)/admin/leados/[leadId]/page.tsx · src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — design-tokens.ts:227-244 tier app*; decision-bar.tsx:181 elevación; [leadId]/page.tsx:153 STAGE_PILL[stageTone]; pero decision-bar.tsx:65 sigue con z-[130] literal (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-815] Regla para superficies nuevas del setter
 - Fuente: `docs/bitacora-roadmap.md:10799` · tipo: decision · estado declarado: hecho · fecha: 2026-06-18 · **ZONA-FRANCO**
 - Nodo(s): h5.set-lead
 - Qué es: Deben deferir al stepper canónico de 5 etapas y a 'cyan = accionable, resto informativo'.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — recorrido.ts:4-6 y :54-64: la franja de P20 usa nueve fases y reemplazó al indicador (manual.ts:318-325); el índice del rail de 5 pasos (paso.ts:37-38) no tiene consumidor. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h5.set-manual — Manual del lead
 
@@ -6601,1149 +6601,1149 @@
 - Nodo(s): h5.set-manual
 - Qué es: 5 prompts de refinamiento tipados en prompts-refinamiento.ts y pantalla mc2-refinar.tsx (contexto plegado, acordeón de munición, un tilde).
 - Referencias: prompts-refinamiento.ts · mc2-refinar.tsx · docs/p43-refinar/REPORTE.md · tambien en :33, :130
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git log --all --oneline -- "*mc2-refinar.tsx" "*prompts-refinamiento.ts" -> 0 en las 170 refs (control: git log --all --grep=P43 -> 506e0059) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-817] mc2 con tilde único, no cinco
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:26` · tipo: decision · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Un solo tilde persiste en bloque ['cta','calidad','mobile'] para no romper progresoJson/FASE_IDS; la spec pedía 5 (ver H-05).
 - Referencias: src/lib/leados/contracts.ts (FASE_IDS) · tambien en :143, :745
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — manual.ts:135-137 cta/calidad/mobile mapean a mc2 sin tocar FASE_IDS (:125-127). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-818] Trabajo LeadOS sin commitear
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:184` · tipo: pendiente · estado declarado: pendiente (sin commit) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: P43 quedó en working tree sin git add ni commit; la auditoría ve un diff de 48 archivos como baseline de la rama p25/rafaga-tildes.
 - Referencias: rama p25/rafaga-tildes · tambien en :906, :956
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Quedó commiteado como WIP 506e0059 (Franco, 2026-09-18) en origin/p25/rafaga-tildes. 'git log origin/main..origin/p25/rafaga-tildes' da 5 commits sin integrar (51 archivos, +4544/−320). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-819] M14 self-check tripartito, 15 checks y gate
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:187` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Contrato aditivo (estado opcional, primeraMirada), 5 criterios de diseño bloqueantes, selector sin_revisar/bien/mal en chequeo-form.tsx y gate selfCheckAprobado.
 - Referencias: src/lib/leados/contracts.ts · chequeo-form.tsx · src/lib/leados/flow.ts · tambien en :227, :278, :298
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — primeraMirada, tresColores y HARD_CHECKS_BASE no existen en ninguno de los 117 refs (git grep por ref); flow-content.ts:171-261 tiene 10 hard-checks; SelfCheckSchema sin estado (contracts.ts:124-132) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-820] No tocar selfCheckJson ni SelfCheckSchema
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:386` · tipo: decision · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: La correlación checkId-check se hace por nombre en memoria (HARD_CHECKS.find) para no romper blobs históricos.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — contracts.ts:124 SelfCheckSchema; selfCheckAprobado correlaciona por nombre (flow.ts:204-209) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-821] M1 calidad de ficha + corte de 10 min
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:457` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: 4 campos aditivos (direccionFisica, horariosReales, contactoExacto, comoSeVeWeb), umbrales alcanzaParaDecidir/Disenar y corte en fichaJson.corte que relega en ordenFoco.
 - Referencias: registrarCorteFicha · tests/leados/m1-sprint-calidad.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — git grep de registrarCorteFicha, direccionFisica, horariosReales, contactoExacto y comoSeVeWeb en src: 0; git log --all -S solo los encuentra en commits de docs de esta auditoría. Control positivo: fichaJson en dossier.ts. El doc OSLEAD (:879) los da por existentes. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-822] G2 ángulo wow en m4/m15/m5
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:494` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: obtenerAnguloWow en copy-blocks.ts y AnguloWowCard en opener, envío y seguimiento; sin ángulo degrada al copy previo. Regla: se ofrece, no se inyecta.
 - Referencias: src/lib/leados/copy-blocks.ts · tests/leados/angulo-wow-mensajes.spec.ts · tambien en :553
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — obtenerAnguloWow y AnguloWowCard ausentes en los 117 refs (git grep); copy-blocks.ts no la define; git log --all -S solo la encuentra en docs de auditoría (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-823] Barrera AST para invariantes de copy y enlaces
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:655` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: copy-sin-jerga/copy-sin-ubicacion usan AMBITO fijo y enlaces-manual una lista estática; barrera AST estimada en 400-600 LOC, sprint separado.
 - Referencias: docs/barrera-rutas-ast.md · tambien en :839, :840
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — copy-sin-jerga.invariant.ts:56 y copy-sin-ubicacion.invariant.ts:45 siguen con AMBITO fijo; docs/barrera-rutas-ast.md no está en origin/main (ls-tree). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-824] H-01 doble formulario en m6
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:701` · tipo: pendiente · estado declarado: pendiente (Bloqueante) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Tras las 4 vueltas, Zod exige pegadoGem legacy si el Gem tiene URL; bloquea al setter.
 - Referencias: brief-form.tsx#L288-L362 · dossier.schemas.ts#L148-L157 · docs/decisiones-oslead-vii/ · tambien en :807, :820, :892
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — En main hay un solo formulario de brief (brief-form.tsx:158-238), y pegadoGem es opcional mientras gemDiseno no tenga URL (dossier.schemas.ts:91-92, herramientas.ts:78). El doble formulario (vueltas-gem.tsx) existe solo en origin/p25/rafaga-tildes. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-825] H-02 pérdida de las 4 vueltas ante F5 en m6
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:712` · tipo: pendiente · estado declarado: pendiente (Crítica) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: M6Registro no pasa autosaveEnabled; no hay persistencia local del brief en curso.
 - Referencias: m6-brief.tsx#L116 · brief-form.tsx#L186-L194 · tambien en :859
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — brief-form.tsx:85 autosaveEnabled = false por defecto y :115 enabled: autosaveEnabled && briefValido; m6-brief.tsx no lo pasa (git grep autosaveEnabled en m6-brief.tsx -> 0; control: brief-form.tsx:85). Mitigación: useUnsavedGuard(autosave.isDirty) brief-form.tsx:125 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-826] H-03 botón principal mudo en m1
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:723` · tipo: pendiente · estado declarado: pendiente (Alta) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Registrar evaluación falla sin mostrar errores si el bloque 5 de FichaForm está colapsado.
 - Referencias: m1-ficha.tsx#L225-L231 · evaluacion-form.tsx#L169-L173 · tambien en :806
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — evaluacion-form.tsx:153 setErrors(erroresPorCampo(...)) sin referencia a BloquesSecuenciales ni apertura del bloque (git grep). Confirmarlo exige navegador. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-827] H-04 falso verde del gate de self-check
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:734` · tipo: pendiente · estado declarado: pendiente (Alta) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: selfCheckAprobado no exige los criterios de diseño nuevos si se omiten del payload; el invariante tiene un aserto vacuo.
 - Referencias: src/lib/leados/flow.ts#L221-L231 · self-check-gate.invariant.ts#L76-L86 · tambien en :833, :838, :896
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **contradicho** — selfCheckAprobado recorre todos los HARD_CHECKS (flow.ts:206-207), igual en origin/p25/rafaga-tildes. El invariante 4b prueba que un hard faltante no aprueba (self-check-gate.invariant.ts:73-86). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-828] H-05 mc2: un tilde vs cinco
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:745` · tipo: pendiente · estado declarado: pendiente (Media) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: decisiones-por-pantalla y mc2-prompts-refinamiento piden 5 tildes por prompt; el código tiene tildeUnico.
 - Referencias: mc2-refinar.tsx#L273-L313 · tambien en :821, :831, :893
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -l "tildeUnico" en todas las refs -> solo origin/p25/rafaga-tildes (m-construccion.tsx, mc1-construir.tsx, registro-fases.tsx); en main no hay cinco tildes ni tildeUnico (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-829] H-06 m13 en RECHAZADA sin cambiar link
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:756` · tipo: pendiente · estado declarado: pendiente (Media) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Se congela el borrador y exige Reabrir construcción; guardarDraftUrl solo acepta stage CONSTRUCCION.
 - Referencias: m13-borrador.tsx#L109-L132 · dossier.actions.ts#L330-L335 · tambien en :832, :894
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — m13-borrador.tsx:122 sigue mostrando «Borrador congelado por el rechazo». (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-830] H-07 control G3 no implementado
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:767` · tipo: pendiente · estado declarado: pendiente (Media) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Falta el chequeo '¿Exportaste después del último refinamiento?' antes de guardar el borrador.
 - Referencias: borrador-form.tsx#L170-L206 · tambien en :822, :895
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -i exportaste origin/main -- src: solo herramientas.ts:98 (descripción de Netlify Drop); no hay check G3. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-831] H-08 sin gate de decisor en búsqueda de agenda (m16)
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:778` · tipo: pendiente · estado declarado: pendiente (Media) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: ofrecerHorarios no valida decisorConfirmado; 'Buscar de nuevo' queda habilitado.
 - Referencias: agenda.actions.ts#L125-L160 · agenda-form.tsx#L238-L246 · tambien en :823, :897
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — agenda-form.tsx:237-245 ('Buscar de nuevo' sin disabled); agenda-form.tsx:113 ofrecerHorarios(leadId). git grep -c -i decisor en agenda.actions.ts da 0. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-832] H-09 Cal.com de LeadOS frágil multi-tenant
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:789` · tipo: pendiente · estado declarado: pendiente (Crítica) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: getCalConfigLeadOS aborta si más de una Organization tiene calComUsername; un cliente con Cal.com rompe la agenda del setter.
 - Referencias: src/lib/leados/agenda.ts#L57-L85 · tambien en :855
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/leados/agenda.ts:58-84: organization.findMany({ calComUsername: not null }) y orgs.length > 1 -> agenda bloqueada (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-833] Guías faltantes para el setter
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:812` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Generador de wa.me (m1), modelo/opciones de Claude Design (mc1), dónde está Export (m13) y cronómetro del corte de 10 min.
 - Referencias: tambien en :813, :814, :815
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Sin generador wa.me en setter (git grep -F wa.me: vacío; control flow.ts:219); sin cronómetro (solo '~10 min' en guidance-content.ts:322); el Export se menciona en herramientas.ts:98. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-834] Evaluación de m1 sin autosave
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:819` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Promete 'se guarda sola' pero la evaluación se pierde al salir o recargar.
 - Referencias: tambien en :860
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Sigue sin autoguardado (evaluacion-form.tsx:94-98). La promesa se corrigió (evaluacion-form.tsx:182-185, ficha-form.tsx:460-462) y hay guardia interna (:102). Pero plegar el bloque pierde el veredicto (bloques-secuenciales.tsx:215). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-835] Rótulo CONTEXTO DEL LEAD sigue
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:824` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Debía eliminarse (decisiones §S7); sigue en pantalla-manual.tsx.
 - Referencias: pantalla-manual.tsx#L205 · tambien en :899
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — pantalla-manual.tsx:205 <Zona etiqueta="Contexto del lead"> (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-836] m6: decisiones de brief no construidas
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:828` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Título del brief debía eliminarse (sigue obligatorio), CTA debía ser obligatorio (es opcional) y 'concepto' debía llamarse 'Ángulo wow'.
 - Referencias: dossier.schemas.ts#L131 · dossier.schemas.ts#L137 · tambien en :829, :830, :889-:891
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — dossier.schemas.ts:82 titulo obligatorio; :88 cta opcional; :83 concepto (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-837] m5: jerarquía de resultados y numeración de toques
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:834` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Jerarquizar Rechazó/Respondió (hoy 4 tarjetas iguales) y unificar 'Toques 1 de 3' vs 'toque 2 de 3'.
 - Referencias: tambien en :898
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Conviven «Toques: N de M» (estado-manual.tsx:86; m5-seguimiento.tsx:88) y «Mensaje base del toque N de M» (m5-seguimiento.tsx:195). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-838] Código LeadOS construido sin uso
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:844` · tipo: pendiente · estado declarado: pendiente (poda) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: ConstruccionMunicion/BadgeProvisorio importados sin render; referenciasFicha y notasMarca sin consumidores; campos de vueltas sin gate.
 - Referencias: m-construccion.tsx#L129 · contracts.ts (BriefSchema)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — ConstruccionMunicion ya se renderiza ([paso]/page.tsx:286) con BadgeProvisorio adentro (m-construccion.tsx:127); referenciasFicha sigue sin lectores (contracts.ts:118); notasMarca lo lee el admin (dossier-panels.tsx:114) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-839] Supuestos sobre herramientas externas sin medir
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:852` · tipo: pendiente · estado declarado: pendiente (riesgo) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Export de Claude Design, Netlify Drop sin cuenta y URLs que caducan, 4 Gems con 3-5 imágenes, webhooks de Cal.com.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — herramientas.ts:63, 78, 90 y 117: url null con TODO. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-840] Robustez del manual ante acciones del setter
 - Fuente: `_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:861` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Atrás muestra BriefSanity bloqueado, sesión expirada sin redirect ni guardado local, sin concurrencia optimista, stickyId único por usuario.
 - Referencias: tambien en :862, :863, :864
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — useUnsavedGuard en seguimiento-form.tsx:101-102 y brief-form.tsx:125; sin control de concurrencia ni redirect por sesión vencida (auth-guards.ts:16-17 lanza Unauthorized); foco.ts:12 sticky único (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-841] Numeración «Paso N» flow-wide
 - Fuente: `docs/bitacora-beta-3.md:12` · tipo: decision · estado declarado: hecho (1.1 y P9) · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Decisión de producto: referir pasos por nombre y no por número; el copy visible se barrió en 1.1 y P9.
 - Referencias: también en fuente:255,276,293,1106,1186,3219
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git grep -n -E "['\">]Paso [0-9]" en setter, manual.ts y flow-content.ts -> 0 (control: 'Paso' aparece 4 veces en comentarios de manual.ts) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-842] Pasadas perceptuales a ojo de Franco (wizard, manual, home)
 - Fuente: `docs/bitacora-beta-3.md:54` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Verificación visual desktop/mobile pedida en casi todos los sprints; screenshots fallaban por visibilityState hidden; parte cubierta por 7.1.
 - Referencias: también en fuente:131,207,389,421,1012,1038,1376,1746 · sección 7.1 en fuente:1122
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — no verificable por código; existen docs/manual-usuario/galeria/ y tests/setter/22-cromo-primer-pliegue.spec.ts (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-843] Caliente es campo exclusivo de Franco
 - Fuente: `docs/bitacora-beta-3.md:110` · tipo: decision · estado declarado: vigente · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Score ≥4 solo avisa; el setter no marca caliente (alta forzada a false); el copy del setter dice «avanzar con prioridad».
 - Referencias: dossier.actions.ts:152-166 · también en fuente:408,883,893,1393,1488
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — isolation.ts:96 caliente: false en el alta; dossier.actions.ts:159-166 score alto solo notifica; lead.actions.ts:165 caliente lo persiste el admin (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-844] Línea roja del flujo invertido del envío
 - Fuente: `docs/bitacora-beta-3.md:177` · tipo: decision · estado declarado: vigente · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El link de la demo solo sale con APROBADA ∧ finalUrl ∧ (respondió ∨ caliente); claim atómico y re-validación server.
 - Referencias: flow.ts gateEnvioDemo · dossier.ts marcarDemoEnviadaOwned · outreach.actions.ts enviarDemoAprobada · también en fuente:1175
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:92-103 gateEnvioDemo = APROBADA y finalUrl y (respondió o caliente); manual.ts:656-664; novedades-vigencia.ts:118-129; tests/setter/06-claim-atomico.spec.ts. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-845] Cadencia +2/+2/+3 y corte; cierre a PERDIDO lo decide Franco
 - Fuente: `docs/bitacora-beta-3.md:222` · tipo: decision · estado declarado: vigente · fecha: 2026-06-29 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: calculateNextFollowUp en follow-up.ts; agotada no ofrece más toques; el setter no cierra a PERDIDO.
 - Referencias: follow-up.ts · también en fuente:973,988,1307
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — follow-up.ts:3-13; os-commercial.ts:78-82 escribe null al agotar; seguimiento-form.tsx:87-89 oculta SIN_RESPUESTA; :56 'el cierre del lead lo decide Franco' (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-846] 4·A librería de prompts de diseño + 4·B puente self-check
 - Fuente: `docs/bitacora-beta-3.md:320` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: src/lib/leados/prompts-disenio.ts (estetica/mobile/motion) y HARD_CHECK_PROMPT/promptParaHardCheck, hoy solo mobile→mobile.
 - Referencias: también en fuente:341 · src/lib/leados/prompts-disenio.ts · self-check-step.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prompts-disenio.ts:59-108 y :139-154; chequeo-form.tsx:84 promptParaHardCheck(check.id). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-847] Curado fino de los prompts de diseño
 - Fuente: `docs/bitacora-beta-3.md:330` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Los prompts de prompts-disenio.ts son semilla; el contenido fino lo cura Franco.
 - Referencias: también en fuente:337
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — prompts-disenio.ts:20 y :25 se declaran SEMILLA. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-848] Más prompts para hard-checks y soft-checks
 - Fuente: `docs/bitacora-beta-3.md:361` · tipo: idea · estado declarado: sin estado · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Prompts lead-agnósticos para linksWhatsapp/sinRelleno y enganchar estetica/motion a los SOFT-checks; HARD_CHECK_PROMPT sigue 1 de 10.
 - Referencias: también en fuente:665,3161
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — prompts-disenio.ts:139-141 HARD_CHECK_PROMPT solo mapea 'mobile' (1 de 10) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-849] Tests rojos y flaky de la suite setter
 - Fuente: `docs/bitacora-beta-3.md:474` · tipo: pendiente · estado declarado: parcial · fecha: 2026-06-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: B3 copy-drift, B10 y G1 flaky, 01-flow:229 copy vieja; F4 arreglado en 3.4 y la copy reconciliada en b468ec6.
 - Referencias: también en fuente:478,935,1064,1316,1384,1496
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — No se puede verificar sin correr la suite, que esta auditoría tiene prohibido. tests/setter tiene 30 specs. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-850] E.1 progresoJson del dossier
 - Fuente: `docs/bitacora-beta-3.md:509` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-06-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Columna progresoJson (migración 20260630000000_add_dossier_progreso), FASE_IDS, saveOwnedProgreso e invariante progreso; checklist, no gate.
 - Referencias: prisma/migrations/20260630000000_add_dossier_progreso · contracts.ts · dossier.ts · progreso-isolation.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — prisma/migrations/20260630000000_add_dossier_progreso; contracts.ts:142-165; dossier.ts:366-385 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-851] El progreso es checklist, nunca gate; el re-loop lo preserva
 - Fuente: `docs/bitacora-beta-3.md:521` · tipo: decision · estado declarado: vigente · fecha: 2026-06-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: progresoJson jamás se cablea a EN_REVISION; RECHAZADA→CONSTRUCCION preserva fases y draft y resetea solo el self-check.
 - Referencias: también en fuente:522,609
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dossier.ts:141-142 RELOOP_RESET solo toca selfCheckJson; :358-361 checklist, no gate; _data.ts:60-62 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-852] E.2 UI de fases que consume progresoJson
 - Fuente: `docs/bitacora-beta-3.md:534` · tipo: bloque · estado declarado: pendiente · fecha: 2026-06-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Próximo paso declarado tras E.1; no hay sección E.2 propia, aunque FaseAutoReporte usa guardarProgreso desde 5.3.
 - Referencias: también en fuente:928
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — FaseAutoReporte usa guardarProgreso (fase-auto-reporte.tsx:9). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-853] Mutación cruzada testeada en 2 de ~19 writes
 - Fuente: `docs/bitacora-beta-3.md:673` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Ownership 100% en capa de aplicación sin RLS; falta prueba dinámica de setter B contra leads de A en dossier/outreach/agenda/cartera/foco.
 - Referencias: también en fuente:677
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Lecturas cruzadas cubiertas (02-isolation.spec.ts:52-123). git grep -E 'Owned[A-Za-z]*\(.*setterB' origin/main -- tests: solo la lectura de alta-import.spec.ts:95. Las escrituras testeadas (envio-demo-rechazo.spec.ts:64, 06-claim-atomico.spec.ts:89) usan al setter dueño. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-854] Cuatro de cinco herramientas externas sin URL
 - Fuente: `docs/bitacora-beta-3.md:677` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: herramientas.ts: Chat de evaluación, Gem de diseño, Claude Design y Gem de outreach en null; no hay modelo ni pantalla, solo editar el .ts; frena el recorrido en m2.
 - Referencias: herramientas.ts:87 · también en fuente:1186,1210,1865,1964,2657,3516,4014,4542,4827
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — herramientas.ts:63, :78, :90, :117; solo netlifyDrop tiene url (herramientas.ts:105) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-855] Motivo de PERDIDO no garantizado
 - Fuente: `docs/bitacora-beta-3.md:709` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Volver obligatorio agenda.resultado.nota en AgendaSchema es una decisión de contrato.
 - Referencias: contracts.ts AgendaSchema
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — contracts.ts:230 'nota: textoLibre' sigue opcional en resultado. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-856] Bloques 4-5: manual paso-por-pantalla M1-M16
 - Fuente: `docs/bitacora-beta-3.md:756` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: manual.ts derivarPantalla, ruta /setter/leads/[leadId]/manual/[paso], pantallas M1-M16 + espera/revisión/M-R; costura posicionDe→derivarPasoDelLead.
 - Referencias: también en fuente:816,846,875,897,918,944,968 · commits 8781724,a8e7747,2e75007,8fa48f6,5654716,3a7addd,914862a,6ad4066 · scripts/dev/qa-manual-m5-m16.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ruta manual/[paso]/page.tsx en el lote; m1 fusiona m1+m2 (D15-bis, [paso]/page.tsx:214-235); scripts/dev/qa-manual-m5-m16.ts existe (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-857] referenciasFicha fantasma en BriefSchema
 - Fuente: `docs/bitacora-beta-3.md:925` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Sin lectores ni campo de formulario; se pierde en cada re-guardado de guardarBrief; sacarlo es tocar el contrato.
 - Referencias: contracts.ts:118 · también en fuente:2385,2955,3018
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — contracts.ts:118 sigue; brief-form.tsx:38 confirma que no tiene lector y se borra en cada re-guardado (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-858] 5.6 EL CORTE: manual reemplaza al wizard
 - Fuente: `docs/bitacora-beta-3.md:992` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: /setter/leads/[leadId] redirige al manual; wizard retirado (16 archivos); construccion-ctas, escalamiento-construccion, historial-lead, CabeceraLead; e2e migrada 39/39.
 - Referencias: commit 75b9d7f · manual/_components/construccion-ctas.tsx · historial-lead.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — [leadId]/page.tsx:23 redirect(`/setter/leads/${leadId}/manual`). Los step files del wizard ya no están (git ls-tree de _components). construccion-ctas.tsx e historial-lead.tsx están. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-859] Naming histórico del wizard en código
 - Fuente: `docs/bitacora-beta-3.md:1014` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: StepAnchorId y comentarios de paso.ts, ~110 menciones a «wizard» y 13 «Paso N» en comentarios de server actions.
 - Referencias: paso.ts · también en fuente:1186,3286,3289
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -i -c wizard origin/main -- setter + src/lib/leados: 99 menciones en 37 archivos; 20 'Paso N' en setter/_actions; StepAnchorId en paso.ts:34; manual.ts:327 'ruta paralela al wizard'. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-860] 7.0 smoke-test del manual
 - Fuente: `docs/bitacora-beta-3.md:1099` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: 41 hallazgos, 2 arreglados (role=alert), 39 (b) volcados a docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md.
 - Referencias: commit 036d70b · docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md está en origin/main. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-861] 39 hallazgos (b) del smoke-test para triage
 - Fuente: `docs/bitacora-beta-3.md:1105` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md; incluye NavConstruccion renderizado en mr (decisión de producto).
 - Referencias: también en fuente:1116,1186,1195
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md existe; NavConstruccion se sigue montando en pantalla-manual.tsx:241. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-862] Construcción bajo el fold en mobile: no reestructurar
 - Fuente: `docs/bitacora-beta-3.md:1138` · tipo: decision · estado declarado: descartado por ahora · fecha: 2026-07-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El Registro de mc1/mc2 queda bajo el fold; Franco descartó por ahora bajar contexto/munición debajo de la acción.
 - Referencias: también en fuente:1186
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — pantalla-manual.tsx:205-209 mantiene el orden contexto, munición, registro. P18 resolvió la acción con la barra sticky (barra-accion.tsx:156-194). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-863] 7.1/7.3 header compacto mobile y regresión final del rediseño
 - Fuente: `docs/bitacora-beta-3.md:1170` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: manual-nav.tsx compacto en mobile; regresión multi-lente sin regresiones (docs/auditorias/REGRESION-FINAL-2026-07.md); proyecto de rediseño cerrado.
 - Referencias: también en fuente:1122 · commit c82ff48 · docs/auditorias/REGRESION-FINAL-2026-07.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — manual-nav.tsx:89 y :96 (space-y-2 sm:space-y-3, text-2xl sm:text-3xl). c82ff48 está en main y docs/auditorias/REGRESION-FINAL-2026-07.md está versionado. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-864] Backlog AUD-2 y diseño de la fase PRE
 - Fuente: `docs/bitacora-beta-3.md:1206` · tipo: bloque · estado declarado: en curso (P3.1 y B-05 atacados) · fecha: 2026-07-07 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: 40 ítems (3 P1, 10 P2, 17 P3, 10 decisiones de Franco), 10 PR-x y fase PRE de 4 pantallas como insumo del Bloque 8.
 - Referencias: docs/auditorias/AUDITORIA-CIERRE-2026-07.md · también en fuente:1888,1644
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — C-02 cerrado (os-commercial.ts:75-82), A-14 cerrado (_data.ts:267, [paso]/page.tsx:105); A-08 sigue parcial (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-865] 1.1 barrido de vocabulario del wizard muerto
 - Fuente: `docs/bitacora-beta-3.md:1216` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-09 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: 72 strings en 18 archivos (sin «Paso N» ni jerga visible); quedó absorbido en commit huérfano 44e25be y se recuperó como 612c4ee (Sprint R).
 - Referencias: commit 612c4ee · commit 44e25be (huérfano) · también en fuente:1244
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — commit 612c4ee es ancestro de origin/main (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-866] POSTERGADO no reanuda la cadencia
 - Fuente: `docs/bitacora-beta-3.md:1301` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-17 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Solo se limpia reactivateAt; un resume real exige transición POSTERGADO→working que decida Franco; copy de flow.ts:404 imprecisa.
 - Referencias: os-commercial.ts · flow.ts:404
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — os-commercial.ts:19-22 y :79-82 limpian reactivateAt sin tocar status; flow.ts:420-423 manda el POSTERGADO sin fecha a seguimiento aunque el toque venza (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-867] 2.2/2.3 M5 agotada y terminales a archivo
 - Fuente: `docs/bitacora-beta-3.md:1325` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-17 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: cadenciaAgotada oculta «No respondió»; pantalla 'archivo' para PERDIDO, guard leadActivo en registrarResultado, C-17 sin cyan en terminales; manual.invariant.
 - Referencias: también en fuente:1345 · archivo-manual.tsx · manual.invariant.ts · tests/setter/08-m5-cadencia-agotada.spec.ts · 09-archivo-terminal.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — m5-seguimiento.tsx:280-284 (cadenciaAgotada); manual.ts:520-521 (PERDIDO al archivo); outreach.actions.ts:169 (leadActivo); pantalla-manual.tsx:132 (C-17). Los specs 08 y 09 existen. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-868] 3.1-3.4 (jul-22): caliente solo de Franco, guardias, tilde y residuos
 - Fuente: `docs/bitacora-beta-3.md:1380` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-22 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Copy sin «caliente» para el setter, useUnsavedGuard en opener/seguimiento, tilde deshabilitado fuera de CONSTRUCCION, start:qa encadena build, fix flaky F4.
 - Referencias: también en fuente:1413,1448,1484 · commits b468ec6,909ad8d,79d3787,db557e8 · fase-auto-reporte.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — opener-form.tsx:44 useUnsavedGuard; fase-auto-reporte.tsx:87 y m-construccion.tsx:268 (tilde apagado fuera de CONSTRUCCION); m1-ficha.tsx:137-141 sin «Caliente». La cabecera (manual-nav.tsx:100-104) muestra el caliente que marca Franco. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-869] 4.1 errores persistentes y en criollo
 - Fuente: `docs/bitacora-beta-3.md:1514` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-23 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: src/lib/leados/error-copy.ts traduce 17 mensajes del motor; action-codes.ts SLOT_OCUPADO; error inline en chequeo-form y envio-form.
 - Referencias: commit b6b2132 · error-copy.ts · action-codes.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — error-copy.ts:34-79 (16 literales más el prefijo de transición ilegal = 17), cubre todos los throw de dossier.ts; action-codes.ts:18 SLOT_OCUPADO; b6b2132 ancestro (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-870] 5.1/5.3 (jul-23): última charla en m5 y m15 consultable
 - Fuente: `docs/bitacora-beta-3.md:1564` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-23 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: ultimoToque/openerTexto re-servidos; m15 habilitada en APROBADA con gate cerrado (invariante manual caso 6).
 - Referencias: también en fuente:1589 · commits 88b1f13,65058fc
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — manual.invariant.ts:120-133 (m15 habilitada en APROBADA con gate cerrado); ultimoToque/openerTexto usados en m5-seguimiento.tsx y m4-opener.tsx (git grep -l). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-871] 6.0-6.2 (jul-23): agenda con memoria (B-05)
 - Fuente: `docs/bitacora-beta-3.md:1613` · tipo: hecho-declarado · estado declarado: hecho (pase visual pendiente de Franco) · fecha: 2026-07-23 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Spec 12-claim-agenda; estado OFRECIDOS reclamable, compensación restaura, guardarHorariosOfrecidosOwned; m16 re-entra con memoria, guardia y confirmación inline.
 - Referencias: también en fuente:1644,1712 · commits 8b3ce80,6a88cbe · src/lib/leados/agenda.ts · tests/setter/13-m16-memoria.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — contracts.ts:201, :210-212; agenda.ts:194-289 (OFRECIDOS reclamable, compensación restaura); 8b3ce80 y 6a88cbe ancestros (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-872] P3.1 la interfaz deja de decir cosas que no son
 - Fuente: `docs/bitacora-beta-3.md:1886` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Toque vencido visible, textoLibre .max(5000), line-clamp/break-words, Parquear→Pausar, pluralización de horarios, placeholder de Zona eliminado.
 - Referencias: m5-seguimiento.tsx · contracts.ts · pantalla-manual.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — m5-seguimiento.tsx:61-65 y :105-109 (toque vencido); contracts.ts:22-27 (tope de 5000); manual-nav.tsx:96 y :158 (line-clamp). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-873] Copy muerto en guidance-content.ts y paso.ts
 - Fuente: `docs/bitacora-beta-3.md:1925` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: GUIA_CONSTRUCCION, GUIA_REVISION, GUIA_TRASPASO, casi todo GUIA_BRIEF, describirFoco y títulos de espera/revisión en PANTALLAS: sin consumidores, retirarlos es poda.
 - Referencias: guidance-content.ts:525-563 · también en fuente:2650,3020,3283,3826,4507
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — GUIA_CONSTRUCCION/GUIA_TRASPASO/GUIA_REVISION.aprobada sin consumidores (git grep -l -w); describirFoco sigue en src/lib/leados/paso.ts:86 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-874] Buscar horarios devuelve jerga de setup de Cal.com
 - Fuente: `docs/bitacora-beta-3.md:1975` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: «Setup B7.0 pendiente… calComUsername» llega crudo al setter y esquiva error-copy.ts.
 - Referencias: también en fuente:3979
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — agenda.ts:46-48 AGENDA_NO_CONECTADA, mensaje humano; copy-sin-jerga.invariant.ts:195-200 prohíbe las frases viejas. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-875] Cal.com sin configurar y sin camino de escritura
 - Fuente: `docs/bitacora-beta-3.md:1994` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: calComUsername/calComEmbedUrl en NULL en las 16 orgs y ningún write en el código; m16 falla al hacer clic.
 - Referencias: también en fuente:3519,4544,4830
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep de calComUsername/calComEmbedUrl/calComApiKey en src: sin escrituras (control positivo: lecturas en agenda.ts:59 y agenda-inteligente/page.tsx:325) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-876] parseProgreso vacía el progreso en silencio
 - Fuente: `docs/bitacora-beta-3.md:2034` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: safeParse contra FASE_IDS: una llave muerta borra todo el blob sin error ni log; renombrar fases es destructivo.
 - Referencias: flow.ts:131-134 · también en fuente:4899,5128
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — flow.ts:133-136 safeParse de todo el blob -> { completadas: [] } (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-877] Links en el opener: decisión de Franco
 - Fuente: `docs/bitacora-beta-3.md:2046` · tipo: decision · estado declarado: pendiente de decisión · fecha: 2026-07-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: La regla vive en flow.ts:205; cambiarla toca ~3 archivos de lógica, 8 de copy (incluido el prompt del Gem) y 4+ tests.
 - Referencias: flow.ts:205
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — regla vigente en flow.ts:218-223, aplicada en el server (outreach.schemas.ts:41) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-878] P1 poda: seis correcciones de copy
 - Fuente: `docs/bitacora-beta-3.md:2072` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: «hace hace», label de Perdidos, aria-label del checkbox de agenda, límites de Instagram 30/24/6→10/8/3, comentario de contarDmsHoy.
 - Referencias: flow-content.ts · canal-seguridad.tsx · cartera-toolbar.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Límites 10/8/3 en flow-content.ts:318-320; label de Perdidos en flow.ts:955; aria-label del checkbox en agenda-form.tsx:194; git grep 'hace hace' en src sin coincidencias (control: 'hace ' aparece 4 veces en flow-content.ts). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-879] Límites de Instagram 10/8/3 a validar por Franco
 - Fuente: `docs/bitacora-beta-3.md:2114` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Textos del cartel de canal-seguridad y números de perfil conservador según historial real de la cuenta.
 - Referencias: canal-seguridad.tsx · flow-content.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — flow-content.ts:318-320 (topeDiarioDms 10, avisoDesdeDms 8, ritmoPorHora 3), leídos por canal-seguridad.tsx:12-27. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-880] P4 poda: m3 fusionada en m2
 - Fuente: `docs/bitacora-beta-3.md:2119` · tipo: hecho-declarado · estado declarado: hecho (test:setter contaminado, sin autocierre) · fecha: 2026-07-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: m3-veredicto.tsx borrado; m2 «Llevá la ficha a evaluar y registrá el veredicto»; herramienta renombrada «Chat de evaluación (Sonnet)».
 - Referencias: manual.ts · m2-evaluador.tsx · herramientas.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — m3-veredicto.tsx no existe (git ls-files); herramienta renombrada en herramientas.ts:55 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-881] Monolito de manual/[paso]/page.tsx
 - Fuente: `docs/bitacora-beta-3.md:2192` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-07-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Escalera de 11-12 ternarios anidados; desarmarla es sprint propio.
 - Referencias: manual/[paso]/page.tsx · también en fuente:2643
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — [paso]/page.tsx:213-438: diez ternarios anidados y fallback {} en :438; archivo de 453 líneas (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-882] P5-A la ficha recibe el material de la demo
 - Fuente: `docs/bitacora-beta-3.md:2267` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Grupo materiales (resenasUrl, imagenesUrl, otraRedUrl, queVende, comoSePresenta) en FichaSchema sin migración; viaja a buildConstruccionBlock.
 - Referencias: contracts.ts · ficha-form.tsx · copy-blocks.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — contracts.ts:73-81; copy-blocks.ts:185-229 (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-883] Decisiones de producto de la poda a aprobar en preview
 - Fuente: `docs/bitacora-beta-3.md:2389` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Campos de material, títulos de m2/mc1/mc2/m6/m14, ¿10 obligatorios?, rótulos del foco y textos de turno.
 - Referencias: también en fuente:2235,2663,2927,3030,3166,3300,3937
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Decisiones de producto pendientes de Franco; sin marca en el código. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-884] P6-B Construcción: seis pantallas pasan a dos (mc1/mc2)
 - Fuente: `docs/bitacora-beta-3.md:2474` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: PANTALLA_DE_FASE explícita, invariante pantallas-construccion, seis tildes conservados 3+3, direcciones viejas redirigen.
 - Referencias: commit 742f756 · manual.ts · pantallas-construccion.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — manual.ts:106 PANTALLAS_CONSTRUCCION ['mc1','mc2'], :129-138 PANTALLA_DE_FASE; pantallas-construccion.invariant.ts existe. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-885] Construcción hacia cero pantallas
 - Fuente: `docs/bitacora-beta-3.md:2478` · tipo: bloque · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Brief v3: fases reabsorbidas por el chequeo final y la librería de prompts; mc1/mc2 es paso intermedio.
 - Referencias: PANTALLA_DE_FASE
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — PANTALLA_DE_FASE (manual.ts:129) y mc1/mc2 (m-construccion.tsx:15-39) siguen en main. origin/p25/rafaga-tildes trae mc1-construir.tsx y registro-fases.tsx sin integrar. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-886] Residuos de construcción tras el colapso
 - Fuente: `docs/bitacora-beta-3.md:2645` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El motivo del tilde miente en RECHAZADA, el item de assets duplica materiales.imagenesUrl y faseActual es campo fantasma de ProgresoSchema.
 - Referencias: fase-auto-reporte.tsx · contracts.ts ProgresoSchema
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Resuelto: el motivo del tilde según el stage (m-construccion.tsx:198-221). Pendiente: faseActual sigue en ProgresoSchema (contracts.ts:163) sin lectores fuera de progreso-isolation.invariant.ts, y el ítem 'assets' sigue (flow-content.ts:72-73). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-887] gateBriefAbierto del recorrido viejo frena construir en frío
 - Fuente: `docs/bitacora-beta-3.md:2913` · tipo: decision · estado declarado: pendiente de decisión · fecha: 2026-08-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Exige respondió ∨ caliente, así un lead evaluado y frío no puede construir; decisión de producto de Franco.
 - Referencias: flow.ts gateBriefAbierto · también en fuente:3025
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:81-83 respondió o caliente; consumido en manual.ts:550 y paso-admitido.ts:103. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-888] P5-B m6 reconvertida «Decidí cómo va a ser la demo»
 - Fuente: `docs/bitacora-beta-3.md:2933` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-04 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Se retira la pregunta de Notas de marca (sigue en el payload para no borrar datos viejos).
 - Referencias: brief-form.tsx · guidance-content.ts · manual.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — brief-form.tsx:32-41 y :76: notasMarca viaja en el payload sin campo visible. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-889] P7 chequeo final con autosave y 10 obligatorios en dos grupos
 - Fuente: `docs/bitacora-beta-3.md:3038` · tipo: hecho-declarado · estado declarado: hecho (sin commit al cierre) · fecha: 2026-08-05 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Autosave delay 0 sobre guardarSelfCheck, sin botón Guardar; HardCheck.grupo setter/franco, 3 criterios nuevos.
 - Referencias: chequeo-form.tsx · flow-content.ts · tests/helpers/setter-db.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — chequeo-form.tsx:146-157 (delayMs 0, sin botón de guardar) y :206 (GRUPOS_CHEQUEO). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-890] Verificación automática de la demo
 - Fuente: `docs/bitacora-beta-3.md:3157` · tipo: idea · estado declarado: sin estado · fecha: 2026-08-05 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: No existe ningún fetch/HEAD/Lighthouse contra draftUrl; hoy el chequeo es checklist humano.
 - Referencias: draftUrl
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -n -E "fetch\([^)]*draftUrl|draftUrl[^;]*fetch" origin/main -- src -> 0 (control: draftUrl aparece 4 veces en dossier.ts) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-891] P9 barrido final de vocabulario de la poda
 - Fuente: `docs/bitacora-beta-3.md:3177` · tipo: hecho-declarado · estado declarado: hecho (commiteado luego como f06df31e) · fecha: 2026-08-07 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Título de m14, contador de fase solo si m>1, proximaAccionPara sin paréntesis, «Instagram», «delator de diseño»; llaves persistidas intactas.
 - Referencias: commit f06df31e · también en fuente:3795
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — commit f06df31e es ancestro de origin/main (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-892] HardCheck.nombre es etiqueta y llave persistida
 - Fuente: `docs/bitacora-beta-3.md:3212` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-07 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El gate une el blob por nombre visible; renombrar desaprueba self-checks guardados; pasar a id (D26-ter) es destructivo y no hay precedente de matcher con fallback.
 - Referencias: contracts.ts:125 · flow-content.ts:128 · también en fuente:3275,4995,5121,5287
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — flow.ts:188-191 y :206-207 unen por nombre; contracts.ts:124-132 sin id (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-893] Ambigüedades de vocabulario a decidir por Franco
 - Fuente: `docs/bitacora-beta-3.md:3279` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-07 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: «assets», «Toque» vs «Seguimiento», «call» vs «reunión», «brief» en el form de m6 y Pausar/Posponer/Postergar.
 - Referencias: también en fuente:3303,3409,3933,3981
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — cartera.actions.ts:12-17 pausa vs postergar documentado; outreach.actions.ts:185 'reunión'; dossier.schemas.ts:97 'Gem' (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-894] P11 a quién le toca (turno)
 - Fuente: `docs/bitacora-beta-3.md:3789` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-10 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: src/lib/leados/turno.ts (turnoDelLead, TEXTO_TURNO) e invariante turno; cuarto «todavía no» del envío (aprobada sin finalUrl = Franco).
 - Referencias: commit 513f38b4 · turno.ts · turno.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — turno.ts:33, :111-124, :131-157, :199-218; turno.invariant.ts existe. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-895] Patrones de la corrida de experiencia
 - Fuente: `docs/bitacora-beta-3.md:3977` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: «El dato no viaja» (7 casos), checks bloqueantes de 26 px sin fila tappeable y baches de celular diferidos.
 - Referencias: docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md · también en fuente:3983,4118
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Los obligatorios del chequeo siguen tildándose solo desde el Toggle (chequeo-form.tsx:109), mientras los delatores son filas tappeables (:254-258). 'El dato no viaja' quedó cubierto en parte por P6 (estado-manual.tsx:83-92). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-896] m13 muestra error Zod crudo en inglés
 - Fuente: `docs/bitacora-beta-3.md:3990` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-11 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Guardar sin el interruptor devuelve «Invalid literal value, expected true» con aria-invalid sobre la URL válida.
 - Referencias: borrador-form.tsx · también en fuente:4774
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dossier.schemas.ts:129-133 errorMap en confirmoCarga; borrador-form.tsx:55-72 separa los errores por control. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-897] 22 baches no-celular pendientes y 10 de celular diferidos
 - Fuente: `docs/bitacora-beta-3.md:4126` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Listados por ID en BACHES-RE-VERIFICADOS.md; el celular quedó diferido por Franco.
 - Referencias: docs/manual-usuario/BACHES-RE-VERIFICADOS.md · también en fuente:4520
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — docs/manual-usuario/BACHES-RE-VERIFICADOS.md existe en main; cada ID no es verificable desde este lote (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-898] F1 postergación un día antes y contador de DMs
 - Fuente: `docs/bitacora-beta-3.md:4138` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: parseCalendarDayAR en dates-ar.ts aplicado al schema; contarDmsHoy cuenta solo SIN_RESPUESTA (SOLO_MENSAJES_ENVIADOS); invariantes postergacion y contador-dms.
 - Referencias: commit 34e15156 · src/lib/dates-ar.ts · isolation.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — isolation.ts:142-209 (contador solo SIN_RESPUESTA); src/lib/dates-ar.ts:107 parseCalendarDayAR; 34e15156 ancestro (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-899] Postergaciones guardadas con el bug UTC
 - Fuente: `docs/bitacora-beta-3.md:4234` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: No se migraron; en producción hay que volver a contarlas.
 - Referencias: reactivateAt
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sin migración ni backfill de reactivateAt (igual que PLAN-912). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-900] F2 el pedido de Franco acompaña la corrección
 - Fuente: `docs/bitacora-beta-3.md:4277` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: GuiaRetrabajo en mr, mc1, mc2, m13 y m14 con vueltas anteriores plegadas; cierra C-19/B-11 (historial de rechazos visible).
 - Referencias: commit 2d456390 · tests/setter/14-motivo-rechazo.spec.ts · también en fuente:1895,4110
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — [paso]/page.tsx:52 PANTALLAS_DEL_RETRABAJO = ['mr','mc1','mc2','m13','m14'] y :185-190 GuiaRetrabajo con previos; commit 2d456390 en main; tests/setter/14-motivo-rechazo.spec.ts (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-901] Rechazo y reapertura no quedan en el historial
 - Fuente: `docs/bitacora-beta-3.md:4352` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: rechazarRevision y reabrirConstruccion no escriben OsLeadActivity («sin movimientos»); el rechazo tampoco aparece en el panel de inicio.
 - Referencias: HistorialDelLead
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — revision.actions.ts:94 rechazarRevision -> transitionDossier + avisarDecisionAlSetter; dossier.actions.ts:252 reabrirConstruccion -> transitionDossier. git grep osLeadActivity.create en src/lib/leados y src/app -> solo assignment-trail.ts:45 (control: os-commercial.ts:57) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-902] agenda.ts busca la org de Cal.com globalmente
 - Fuente: `docs/bitacora-beta-3.md:4832` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-22 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: agenda.ts:44 sin filtro de tenant: cargar el campo en una org cliente rompe LeadOS con «Config Cal.com ambigua».
 - Referencias: src/lib/leados/agenda.ts:44 · cli-agenda
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — agenda.ts:58-61 findMany sin filtro de org; agenda.ts:70-84 ambigüedad (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-903] Decisiones OSLead VII no construibles como están
 - Fuente: `docs/bitacora-beta-3.md:4896` · tipo: bloque · estado declarado: pendiente de decisión · fecha: 2026-08-24 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: 17 decisiones no construibles (10+7), 7 cambios de schema destructivos y «sacar el Evaluador» (pantalla reversible, enum no); el paso 2 de A3 no se corrió.
 - Referencias: docs/decisiones-oslead-vii/ · plan-de-accion-v4.md · también en fuente:4955,4959,4992,5049
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — docs/decisiones-oslead-vii no está en origin/main (ls-tree; solo docs/verificacion-arranque-oslead-vii.md). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-904] LEGAL_TRANSITIONS sin invariante
 - Fuente: `docs/bitacora-beta-3.md:5134` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Es const sin export en dossier.ts (importa @/lib/prisma); solo la cubre test:leados.
 - Referencias: dossier.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dossier-stage.ts:38 exportado sin imports de valor; src/lib/leados/dossier-stage.invariant.ts existe (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-905] Self-check atado por nombre: no se hace el fallback id→nombre
 - Fuente: `docs/bitacora-beta-3.md:5564` · tipo: decision · estado declarado: decidido: sin implementar, el invariante lo declara en rojo · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: selfCheckJson guarda {nombre, ok} sin id: renombrar o agregar un hard-check desaprueba en silencio los self-checks guardados. El fallback (SelfCheckSchema, write path, gate y formulario) quedó fuera; la aserción 7 de self-check-gate.invariant.ts lo marca en rojo.
 - Referencias: src/lib/leados/self-check-gate.invariant.ts · flow-content.ts:128 · contracts.ts:125 · flow.ts:188 · flow.ts:207 · chequeo-form.tsx:51 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — sin fallback (flow.ts:207); la red es el censo congelado y el blob guardado (self-check-gate.invariant.ts:103-132 y :134-178) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-906] Rediseño de m14 (chequeo final)
 - Fuente: `docs/bitacora-beta-3.md:5599` · tipo: bloque · estado declarado: pendiente (planeado) · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Trabajo futuro: el rediseño de m14 va a renombrar hard-checks y actualizar el censo. Como el vínculo es por nombre, eso desaprueba los self-checks ya guardados (ver la decisión de la línea 5564).
 - Referencias: flow-content.ts (HARD_CHECKS) · src/lib/leados/self-check-gate.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — HARD_CHECKS tiene 10 ítems (flow-content.ts:171+; :168 cita los nuevos ctaClaro/noPareceIa/tonoDelNegocio); el gate compara por nombre (flow.ts:206-208): renombrar un check desaprueba los self-checks guardados. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-907] progresoJson todo-o-nada: cambiar FASE_IDS exige migrar los blobs
 - Fuente: `docs/bitacora-beta-3.md:5743` · tipo: decision · estado declarado: regla vigente (invariante progreso) · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: parseProgreso descarta el blob entero si un id no valida, y un renombre coordinado de FASE_IDS borra los tildes de todos los setters. Regla: si el cambio es a propósito, migrar los blobs guardados y actualizar el fixture en el mismo commit.
 - Referencias: src/lib/leados/progreso-isolation.invariant.ts · flow.ts:133 · contracts.ts · flow-content.ts · manual.ts · tambien en docs/bitacora-beta-3.md:5766
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — flow.ts:133-136; contracts.ts:142-149; existe src/lib/leados/progreso-isolation.invariant.ts (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-908] C2: LEGAL_TRANSITIONS pasa a dossier-stage.ts y estrena invariante
 - Fuente: `docs/bitacora-beta-3.md:5829` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El grafo de stage se movió tal cual a src/lib/leados/dossier-stage.ts, sin imports de valor. Invariante dossier-stage: grafo censado, FICHA→BRIEF ilegal, enum vs grafo, alcanzabilidad y guards por case. Un microsprint corrige el comentario de ci.yml. Commits locales, sin push.
 - Referencias: src/lib/leados/dossier-stage.ts · src/lib/leados/dossier-stage.invariant.ts · src/lib/leados/dossier.ts · .github/workflows/ci.yml · c219d830 · 7eeacdef +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dossier-stage.ts:38; dossier.ts:41 lo importa; c219d830 y 7eeacdef son ancestros de origin/main (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-909] Garantía estructural: sin veredicto no se construye (FICHA→BRIEF ilegal)
 - Fuente: `docs/bitacora-beta-3.md:5841` · tipo: decision · estado declarado: vigente · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: FICHA tiene una sola salida, EVALUADA. La aserción 2 del invariante no se borra: al fusionar m1 y m2 hay que decidir de forma explícita qué reemplaza la garantía. D15-bis dejó la transición intacta y sumó un test e2e.
 - Referencias: src/lib/leados/dossier-stage.invariant.ts · tests/setter/20-veredicto-abre-construir.spec.ts · tambien en docs/bitacora-beta-3.md:5987 · tambien en docs/bitacora-beta-3.md:6167 · tambien en docs/bitacora-beta-3.md:8715
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — dossier-stage.ts:39 FICHA: ['EVALUADA']; dossier-stage.invariant.ts y tests/setter/20-veredicto-abre-construir.spec.ts existen (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-910] Validar con Franco el grafo de stage congelado
 - Fuente: `docs/bitacora-beta-3.md:6162` · tipo: pendiente · estado declarado: pendiente (verificación humana de Franco) · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: C2 congela el grafo tal como está, no como debería estar. Si sobra o falta una transición, es una decisión de producto para otro sprint, con premortem.
 - Referencias: src/lib/leados/dossier-stage.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — Grafo congelado y exportado en src/lib/leados/dossier-stage.ts:38-47 con invariante (src/lib/leados/dossier-stage.invariant.ts); la validación de producto no deja rastro en código (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-911] F1-VERIF: verificados de punta a punta los dos bugs de datos que arregló F1
 - Fuente: `docs/bitacora-beta-3.md:6220` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-25/26 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: La postergación se guarda como día de calendario AR (parseCalendarDayAR) y el contador de DMs cuenta mensajes (SOLO_MENSAJES_ENVIADOS). Medido contra Neon dev: arreglado en leados/v1-integracion y todavía vivo en main a esa fecha. Sin código nuevo.
 - Referencias: 34e15156 · cbfaa27f · dates-ar.ts:107-130 · outreach.schemas.ts · outreach.ts · isolation.ts:142-144 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — outreach.schemas.ts:60 parseCalendarDayAR; isolation.ts:142 SOLO_MENSAJES_ENVIADOS; commits 34e15156 y cbfaa27f son ancestros de origin/main (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-912] Postergaciones con desvío de medianoche UTC en producción: sin contar
 - Fuente: `docs/bitacora-beta-3.md:6338` · tipo: pendiente · estado declarado: sin medir en producción; no migrado · fecha: 2026-08-25/26 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: En dev hay 0 filas con el desvío. En producción el número es desconocido porque no se conectó a esa base, y no se migró nada.
 - Referencias: OsLead.reactivateAt
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep -l reactivateAt origin/main -- prisma/migrations: solo 20260403173000_agency_os_init; sin backfill en scripts (solo QA). lead.schemas.ts:32-40 sigue con z.coerce.date(). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-913] P3 CALLEJONES: tres pantallas que nombraban una salida y no la ofrecían
 - Fuente: `docs/bitacora-beta-3.md:6529` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-26 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El error del borrador sale en castellano y en el control correcto (errorMap, props aditivas en Toggle, errores por control). m13 en RECHAZADA ofrece «Reabrir construcción» y enlace-chequeo lleva al chequeo final (m14). Invariante draft-url-mensaje y spec 15.
 - Referencias: fix/callejones · a2004edb · d167df16 · setter/_actions/dossier.schemas.ts:75 · Toggle.tsx · borrador-form.tsx +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — a2004edb y d167df16 están en main. borrador-form.tsx:55-72; m13-borrador.tsx:118-131 ofrece 'Reabrir construcción'; enlace-chequeo.tsx:63-66 lleva a m14. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-914] Pasada perceptual de Franco (copy y estética) de P3 a P20
 - Fuente: `docs/bitacora-beta-3.md:6738` · tipo: pendiente · estado declarado: pendiente (verificación humana) · fecha: 2026-08-26 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Cada sprint le deja a Franco validar que la copy nueva suene al producto, que tarjetas y pantallas no queden cargadas ni pobres, y el juicio estético en general. Ningún test lo valida.
 - Referencias: tambien en docs/bitacora-beta-3.md:7043 · tambien en docs/bitacora-beta-3.md:7129 · tambien en docs/bitacora-beta-3.md:7246 · tambien en docs/bitacora-beta-3.md:7395 · tambien en docs/bitacora-beta-3.md:7859 · tambien en docs/bitacora-beta-3.md:8789 +5
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Verificación humana sin rastro en el código. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-915] P4 MUNICIONES: la salida del link pendiente queda a la vista y los títulos dicen qué hay
 - Fuente: `docs/bitacora-beta-3.md:6745` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-26 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: SalidaLinkPendiente va fuera de todo plegable en m2, m4, m5, m6, mc1, mc2 y mr (mr estrena munición). Los títulos de ToolGuide y TeachPanel nombran su contenido. Se cerraron los dos pendientes de P3: el paso 4 de m13 congelado y el toast que nombraba el chequeo. Spec 16.
 - Referencias: fix/municiones · fa4af2a0 · tool-guide.tsx · teach-panel.tsx · herramientas.ts · tests/setter/16-municiones-salida.spec.ts +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — SalidaLinkPendiente fuera del plegable (tool-guide.tsx:95; el details empieza en :98); título del plegable (:100); prop titulo de TeachPanel (teach-panel.tsx:87-98); tests/setter/16-municiones-salida.spec.ts existe; fa4af2a0 es ancestro de origin/main. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-916] Regla: una salida nunca se pliega y un plegable dice lo que contiene
 - Fuente: `docs/bitacora-beta-3.md:6848` · tipo: decision · estado declarado: regla vigente · fecha: 2026-08-26 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Lo que destraba al setter queda siempre visible, y cada plegable lleva un título que nombra su contenido. P17 la extiende: se pliega lo que el novato necesita y el experto no, pero nunca el botón ni el título.
 - Referencias: tambien en docs/bitacora-beta-3.md:6878 · tambien en docs/bitacora-beta-3.md:9310
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — en el lote, la acción vive en la barra fija siempre visible: seguimiento-form.tsx:130-137 useAccionPrincipal con motivo del disabled (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-917] Cuatro herramientas sin URL en herramientas.ts (las carga Franco)
 - Fuente: `docs/bitacora-beta-3.md:7034` · tipo: pendiente · estado declarado: pendiente (Franco) · fecha: 2026-08-26 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: evaluador, gemDiseno, claudeDesign y gemOutreach tienen url: null. Cargar el link desactiva solo el modo «sin herramienta», y el spec 16 falla a propósito el día que se carguen. Desde D15-bis el evaluador ya no tiene pantalla que lo use.
 - Referencias: herramientas.ts · tests/setter/16-municiones-salida.spec.ts · tambien en docs/bitacora-beta-3.md:6983 · tambien en docs/bitacora-beta-3.md:8231 · tambien en docs/bitacora-beta-3.md:8479 · tambien en docs/bitacora-beta-3.md:8692
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — herramientas.ts:63, :78, :90, :117 url null; tests/setter/16-municiones-salida.spec.ts:128-132 afirma las cuatro; git grep 'ToolGuide id="evaluador"' origin/main -- src vacío (control: ToolGuide id="claudeDesign" en m-construccion.tsx:135) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-918] Rediseño de m6 (brief): vocabulario de brief, Gem y herramientas
 - Fuente: `docs/bitacora-beta-3.md:7088` · tipo: bloque · estado declarado: pendiente (diferido al rediseño de m6) · fecha: 2026-08-26/27 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El vocabulario de «brief», «Gem» y los nombres de herramientas (Chat de evaluación, Claude Design, Netlify Drop) quedó afuera a propósito porque «el rediseño de m6 los cambia igual».
 - Referencias: tambien en docs/bitacora-beta-3.md:7135
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — dossier.schemas.ts:97 'Gem de diseño', :116 'Netlify Drop'; herramientas.ts:53-117 (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-919] P6 DATOS QUE VIAJAN: fecha de postergación, causa de espera y contador de toques
 - Fuente: `docs/bitacora-beta-3.md:7139` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: reactivateAt llega a la tarjeta («Postergado — vuelve el 5/9») y al chip de ManualHeader. CausaEspera y causaDeEspera en turno.ts más GUIA_ESPERA; las esperas muestran el draftUrl y dicen «Toques: N de 3». Spec 17.
 - Referencias: fix/datos-viajan · b87bc821 · turno.ts · flow.ts · guidance-content.ts (GUIA_ESPERA) · estado-manual.tsx +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — b87bc821 está en main. manual-nav.tsx:117-131 (chip de reactivateAt), estado-manual.tsx:83-92 ('Toques: N de 3') y :134-144 (draftUrl en la espera). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-920] Referencia de plazo en las esperas (enRevisionAt / SLA)
 - Fuente: `docs/bitacora-beta-3.md:7253` · tipo: idea · estado declarado: no hecho (requiere campo nuevo) · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Las esperas no pueden decir hace cuánto que esperan: no hay marca de entrada a revisión ni SLA persistido. Cerrarlo pide un campo nuevo.
 - Referencias: OsLeadDossier (aprobadaAt, enviadaAt)
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep enRevisionAt origin/main -- schema.prisma src: vacío (control: aprobadaAt en schema.prisma:1005); el proxy sigue siendo updatedAt (pipeline.ts:13-19; novedades.ts:184-188). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-921] Guards de stage inline en siete updateMany de dossier.ts
 - Fuente: `docs/bitacora-beta-3.md:7531` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Siete consultas vuelven a escribir en su where la máquina de stage que le pertenece a LEGAL_TRANSITIONS: el caso 2 de P8, pero aplicado a consultas.
 - Referencias: dossier.ts:266,291,319,345,377,404,422
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — dossier.ts:266, 291, 319, 345, 377, 404, 422 siguen con updateMany; git grep -c "stage: '" dossier.ts = 7 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-922] Escrituras de canal y resultado sin fragmento propio
 - Fuente: `docs/bitacora-beta-3.md:7534` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El lado de escritura de lo que cuenta el contador escribe el par canal + resultado inline. SOLO_DMS_MANDADOS solo lo nombra para las lecturas.
 - Referencias: outreach.actions.ts:127-128 · outreach.actions.ts:190 · agenda.actions.ts:241-242
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — outreach.actions.ts:127-128 y :190; agenda.actions.ts:241-242 escriben el par inline; SOLO_DMS_MANDADOS solo en lecturas (isolation.ts:174) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-923] El borde del día argentino tiene copias privadas en LeadOS
 - Fuente: `docs/bitacora-beta-3.md:7537` · tipo: pendiente · estado declarado: listado, sin tocar · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Además de la versión canónica de dates-ar.ts hay una copia privada en outreach.ts y otra propia en el cron os-follow-up. Ninguna se tocó.
 - Referencias: dates-ar.ts · outreach.ts:15-33 · api/cron/os-follow-up/route.ts:7
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — route.ts:7 y :20-59 copia propia con -03:00; outreach.ts:15-33 copia privada; dates-ar.ts:65/:70 startOfDayAR/endOfDayAR sin usar. git grep -n "dates-ar" origin/main -- os-follow-up/route.ts outreach.ts -> 0 (control: dates-ar.ts:65 exporta startOfDayAR) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-924] P10 DESTINOS ALCANZABLES: censo de los destinos que nombran las quince pantallas
 - Fuente: `docs/bitacora-beta-3.md:7685` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Se encontraron 19 menciones con defecto en cinco clases. Se arreglaron las clases 1 a 3 y el enlace que rebotaba: EnlacePantalla, el enlace a «Correcciones» desde mc1/mc2 y M16Municion con estadoDeAgenda. Invariante enlaces-manual (6.912 estados); spec 17-destinos.
 - Referencias: fix/destinos-alcanzables · 1596b1cb · EnlacePantalla · src/lib/leados/enlaces-manual.invariant.ts · tests/setter/17-destinos-alcanzables.spec.ts · cierra pendiente de docs/bitacora-beta-3.md:7134 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — enlaces-manual.invariant.ts existe (citado en manual.ts:716-717); tests/setter/17-destinos-alcanzables.spec.ts existe. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-925] Date.now() en el render de m5-seguimiento.tsx (error de lint)
 - Fuente: `docs/bitacora-beta-3.md:7851` · tipo: pendiente · estado declarado: anotado, sin hacer · fecha: 2026-08-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Error react-hooks/purity que ya estaba antes de P10.
 - Referencias: m5-seguimiento.tsx:63 · tambien en docs/bitacora-beta-3.md:8076
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — m5-seguimiento.tsx:63 sigue con Date.now(). El baseline de eslint (_crudo/eslint.json) lo marca como error react-hooks/purity en la línea 63. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-926] Contenido muerto de la guía que nombra destinos
 - Fuente: `docs/bitacora-beta-3.md:7854` · tipo: pendiente · estado declarado: anotado, sin hacer · fecha: 2026-08-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: GUIA_CONSTRUCCION, partes de GUIA_BRIEF, GUIA_OPENER y GUIA_SEGUIMIENTO, GUIA_TRASPASO y GUIA_REVISION.aprobada no tienen consumidores. Borrarlos es otro sprint.
 - Referencias: guidance-content.ts · tambien en docs/bitacora-beta-3.md:8076
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — guidance-content.ts:643 GUIA_CONSTRUCCION, :887 GUIA_TRASPASO, :958 GUIA_REVISION.aprobada sin lectores; TeachPanel solo con id objeciones (m5-seguimiento.tsx:214) y selfCheck (m14-chequeo.tsx:83) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-927] La copy en subjuntivo de m-construccion.tsx ya no hace falta
 - Fuente: `docs/bitacora-beta-3.md:8075` · tipo: pendiente · estado declarado: anotado, no tocado · fecha: 2026-08-30 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Está redactada así para esquivar el expectToast viejo, que ya se arregló. Es código de producto y no se tocó.
 - Referencias: m-construccion.tsx · tambien en docs/bitacora-beta-3.md:8207
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — m-construccion.tsx:180-188 (comentario sobre expectToast) y :201, :209 (subjuntivo). tests/helpers/setter-ui.ts:103 ya acota expectToast a [data-sonner-toast]. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-928] CORRIDA DE RECORRIDO: el camino entero de un lead por la UI real
 - Fuente: `docs/bitacora-beta-3.md:8211` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: De la carga del lead a la agenda, pasando por rechazo, retrabajo, aprobación, envío y postergación, más un descarte completo. Encontró 9 baches (B1 a B9) y declaró 6 falsos positivos, sin tocar código.
 - Referencias: corrida/recorrido-completo · 2da5de41 · docs/corrida-recorrido-2026-08-31/ · cumple docs/bitacora-beta-3.md:6740 · cumple docs/bitacora-beta-3.md:7860
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — commit 2da5de41 es ancestro de origin/main (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-929] Carrera de tildes del auto-reporte (B3 / N2): el arreglo de P25 hay que rehacerlo sobre el tronco
 - Fuente: `docs/bitacora-beta-3.md:8238` · tipo: pendiente · estado declarado: pendiente (arreglo de P25 sin integrar) · fecha: 2026-08-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Tildar tres fases en 400 ms guarda una y la pantalla muestra tres (progresoJson; selfCheckJson está a salvo). P25 (d0b37c71) lo arregló fuera del tronco y quedó en p25/carrera-tildes. Se rehace en su propio sprint: dueño único del blob y autoguardado serializado.
 - Referencias: p25/carrera-tildes · d0b37c71 · fase-auto-reporte.tsx · tambien en docs/bitacora-beta-3.md:8489 · tambien en docs/bitacora-beta-3.md:9915 · tambien en docs/bitacora-beta-3.md:10857 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — fase-auto-reporte.tsx:69-74 arma el array desde la prop. 'git merge-base --is-ancestor d0b37c71 origin/main' da negativo; 130492e8 está en origin/p25/rafaga-tildes sin integrar. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-930] B5: la pantalla no acompaña al dato
 - Fuente: `docs/bitacora-beta-3.md:8243` · tipo: pendiente · estado declarado: pendiente (sin tocar en el rango) · fecha: 2026-08-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Bache de la corrida del novato clasificado como «molesta» y vivo desde agosto. El detalle está en el reporte de la corrida, no en la bitácora.
 - Referencias: docs/corrida-recorrido-2026-08-31/ · tambien en docs/bitacora-beta-3.md:8260 · tambien en docs/bitacora-beta-3.md:8489 · tambien en docs/bitacora-beta-3.md:9915
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Sin detalle cruzable en el código (el reporte de la corrida está fuera del lote). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-931] Cal.com y Telegram sin configurar ni verificados de punta a punta
 - Fuente: `docs/bitacora-beta-3.md:8282` · tipo: pendiente · estado declarado: pendiente (configuración de Franco) · fecha: 2026-08-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: calComUsername y calComEmbedUrl están en null en todas las orgs (setup B7.0), así que confirmarReunion → POST /v2/bookings nunca se ejecutó. Telegram no tiene credenciales y el escalamiento «Me trabé» no sale. La configuración la hace Franco en la org develOP.
 - Referencias: agenda.actions.ts · cal-com-v2.ts · AgencySettings · B7.0 · tambien en docs/bitacora-beta-3.md:8234 · tambien en docs/bitacora-beta-3.md:8321 +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep calComUsername|calComEmbedUrl en src: solo lecturas (agenda.ts:59); agenda.ts:63-69 devuelve 'agenda no conectada'; admin/leados/page.tsx:139 banner Telegram sin configurar (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-932] LA CONFIGURACIÓN QUE FALTA: el brief no exige lo que no se puede traer y Cal.com deja la jerga
 - Fuente: `docs/bitacora-beta-3.md:8302` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-31 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: herramientaSinLink y faltaPorHerramientaSinLink en herramientas.ts. El brief exige el pegado del Gem solo si el Gem tiene link, y el faltante se nombra en vez de omitirse. Los mensajes de Cal.com se reescribieron sin jerga. Invariante copy-sin-jerga; specs 19 y campo-sin-herramienta.
 - Referencias: fix/config-faltante · fa36389a · 52ac5c62 · herramientas.ts · agenda.ts · cal-com-v2.ts:200 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — herramientas.ts:145-162; copy-blocks.ts:251-257; agenda.ts:46-48; existe copy-sin-jerga.invariant.ts; fa36389a y 52ac5c62 ancestros (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-933] D15-bis LA FUSIÓN: ficha y veredicto en una sola pantalla (m1)
 - Fuente: `docs/bitacora-beta-3.md:8495` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: m2 sale del registro: el setter carga la ficha y decide el veredicto en m1, sin el chat externo. DESCARTADA aterriza en archivo, m1 se completa con el veredicto y quedan 9 fases y 14 pantallas. LEGAL_TRANSITIONS, EvaluacionSchema y transitionDossier no se tocaron; spec 20.
 - Referencias: fix/fusion-m1-m2 · f4332226 · 52ac5c62 · m1-ficha.tsx · src/lib/leados/manual.invariant.ts:88 · tests/setter/20-veredicto-abre-construir.spec.ts +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — f4332226 y 52ac5c62 están en main. m1-ficha.tsx:162-231; archivo-manual.tsx:76-78; manual.ts:564-572 manda DESCARTADA al archivo. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-934] P16 LA FICHA POR FUENTES: cinco bloques y avance por completitud (piloto)
 - Fuente: `docs/bitacora-beta-3.md:8795` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: La ficha se recorre por fuente: Instagram, Google, web, balance y «Tu decisión», cada bloque con su material. El siguiente se abre solo al completar el anterior, sin persistir estado. ficha-bloques.ts, bloques-secuenciales.tsx e invariante ficha-bloques; spec 21. Contratos y gate intactos.
 - Referencias: fix/ficha-por-fuentes · 8b8ecf23 · f4332226 · src/lib/leados/ficha-bloques.ts · src/lib/leados/ficha-bloques.invariant.ts · src/app/(protected)/setter/_components/bloques-secuenciales.tsx +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — bloques-secuenciales.tsx (230 líneas) usado en ficha-form.tsx:412; ficha-bloques.ts y ficha-bloques.invariant.ts existen; tests/setter/21-ficha-por-fuentes.spec.ts existe; 8b8ecf23 es ancestro. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-935] ¿El avance por completitud se extiende a las catorce pantallas?
 - Fuente: `docs/bitacora-beta-3.md:8810` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Lo decide Franco con el piloto de P16 andando. Lecciones: «completo» necesita las dos mitades, el avance espera al pointerup, las cabeceras de lo que viene van visibles y el nombre del bloque no puede competir con los controles.
 - Referencias: S2 (A3-bis) · tambien en docs/bitacora-beta-3.md:9188
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — piloto en bloques-secuenciales.tsx, ficha-form.tsx y m1-ficha.tsx (git grep -l completitud) (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-936] La sugerencia de calidad frena el avance automático (a criterio de Franco)
 - Fuente: `docs/bitacora-beta-3.md:8985` · tipo: decision · estado declarado: la tomó el sprint; a validar por Franco · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El bloque no se pliega mientras haya un nudge recién disparado, pero no funciona como gate: no bloquea submit ni transición. Es la única decisión de P16 que roza un límite escrito.
 - Referencias: ficha-calidad.ts · tambien en docs/bitacora-beta-3.md:9186
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — criterio puro en ficha-calidad.ts:30-33, consumido en ficha-form.tsx:225; bloqueCompleto no lo mira (ficha-bloques.ts:193-195); el freno del plegado vive en el componente (fuera del lote, no verificado) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-937] Rediseño de la ficha: cuatro campos nuevos, dos umbrales y el corte de diez minutos
 - Fuente: `docs/bitacora-beta-3.md:9159` · tipo: bloque · estado declarado: fuera de alcance; pendiente (decisión de Franco) · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Dirección, horarios, contacto exacto y «cómo se ve la web» (llenaría el bloque de la web, que hoy tiene un solo campo), más dos umbrales de suficiencia y el corte de diez minutos. Cambian el contrato del blob o requieren decisiones de Franco.
 - Referencias: FichaSchema (contracts.ts) · tambien en docs/bitacora-beta-3.md:8785 · tambien en docs/bitacora-beta-3.md:8885
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — FichaSchema (contracts.ts:52+) sin dirección, horarios, contacto exacto ni 'cómo se ve la web'. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-938] FichaStep con editable={true} es código muerto
 - Fuente: `docs/bitacora-beta-3.md:9173` · tipo: pendiente · estado declarado: anotado, no tocado · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Su único consumidor lo monta con editable={false}. La rama viva arrastra GUIA_FICHA.intro, duracion y el CopyBlock de la ficha, que no se renderizan en ningún lado. La limpieza no se hizo.
 - Referencias: FichaStep · GUIA_FICHA
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — único consumidor m1-ficha.tsx:212 con editable={false}; la rama editable sigue en ficha-step.tsx:29-33 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-939] P17 EL CROMO DEL PRIMER PLIEGUE: el layout-tipo de PantallaManual achicado
 - Fuente: `docs/bitacora-beta-3.md:9197` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Las zonas pasan a banda y solo el bloque de trabajo es tarjeta; se fue el eyebrow, el cyan quedó reservado a la acción y se plegaron el preview de CopyBlock y la tabla de criterios de m1. A 1440 las 11 pantallas de trabajo muestran algo accionable en el pliegue. Spec 22.
 - Referencias: fix/cromo-primer-pliegue · c9b1db7a · 8b8ecf23 · scripts/qa-corridas/medir-pliegue-manual.ts · scripts/v1-qa-wizard-states.ts · tests/setter/22-cromo-primer-pliegue.spec.ts +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — tests/setter/22-cromo-primer-pliegue.spec.ts y scripts/qa-corridas/medir-pliegue-manual.ts existen (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-940] Plegar las guías numeradas de m13, m16 y m5 lo decide Franco
 - Fuente: `docs/bitacora-beta-3.md:9358` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: A 390 lo que queda arriba del trabajo ya no es cromo sino contenido. Plegarlo mejoraría el número, pero sería sacarle al manual lo que es.
 - Referencias: tambien en docs/bitacora-beta-3.md:9453
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — Decisión pendiente de Franco; sin cambio cruzable en el lote. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-941] Contraste de copy-block.tsx en el estado «Copiado»
 - Fuente: `docs/bitacora-beta-3.md:9460` · tipo: pendiente · estado declarado: anotado, no tocado · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Usa text-zinc-300 sobre el tinte esmeralda y el hook de diseño lo marca. Ya estaba antes del sprint y no se tocó.
 - Referencias: copy-block.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — copy-block.tsx:91 sigue con text-zinc-300 sobre bg-emerald-500/[0.06]. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-942] P17: validar el plegado del preview copiable y el filo neutro de la instrucción
 - Fuente: `docs/bitacora-beta-3.md:9471` · tipo: decision · estado declarado: tomada; a validar por Franco · fecha: 2026-09-01 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Plegar el texto crudo del bloque copiable fue el único movimiento que cambió veredictos; botón y título quedaron arriba. El cyan pasó al bloque de trabajo y la instrucción quedó con filo neutro. Las dos cosas quedan para que las mire Franco.
 - Referencias: tambien en docs/bitacora-beta-3.md:9474
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — copy-block.tsx usa <details> (git grep -c da 3). Falta que Franco lo valide. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-943] P18 LA ACCIÓN A LA VISTA: barra de acción principal en las pantallas del manual
 - Fuente: `docs/bitacora-beta-3.md:9479` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: barra-accion.tsx queda sticky al pie de PantallaManual. Cada formulario declara su acción con useAccionPrincipal, con el mismo estado y el mismo disabled, y el motivo del bloqueo va con aria-describedby. Acción visible 9/9 a los dos anchos; spec 23.
 - Referencias: fix/accion-a-la-vista · 66d7fe64 · c9b1db7a · manual/_components/barra-accion.tsx · tests/setter/23-accion-a-la-vista.spec.ts · docs/baselines/p18-pliegue-antes.json +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 66d7fe64 y c9b1db7a están en main. barra-accion.tsx:156-194 (sticky, aria-describedby en :187); pantalla-manual.tsx:253. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-944] La suite no cubre m16 para la barra de acción
 - Fuente: `docs/bitacora-beta-3.md:9685` · tipo: pendiente · estado declarado: anotado · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Su acción solo aparece después de elegir un horario, y para eso hace falta una búsqueda real de disponibilidad. Se verificó a mano.
 - Referencias: agenda-form.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/setter/23-accion-a-la-vista.spec.ts:243 excluye m16 de forma explícita. git grep 'data-accion' en las specs 12 y 13 de m16 no encuentra nada. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-945] La barra de acción aparece recién en la hidratación
 - Fuente: `docs/bitacora-beta-3.md:9687` · tipo: pendiente · estado declarado: anotado · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El botón ya no viene en el HTML del server, así que en una carga fría hay un instante sin barra. Se podría cerrar pasando un descriptor desde el server; queda para otro sprint.
 - Referencias: barra-accion.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — barra-accion.tsx:47-49 (costo aceptado) y :131-143 (la acción se declara en un useEffect). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-946] m1 con la ficha vacía no ofrece ninguna acción
 - Fuente: `docs/bitacora-beta-3.md:9690` · tipo: decision · estado declarado: pendiente (decisión de producto) · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El acordeón de P16 no monta el veredicto hasta que se abre el último bloque. Si el veredicto tendría que estar disponible antes, es una decisión de producto.
 - Referencias: m1-ficha.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — ficha-form.tsx no llama a useAccionPrincipal (git grep -c da 0; en evaluacion-form da 2). El veredicto se monta solo con su bloque abierto (bloques-secuenciales.tsx:215). El botón 'Guardar ficha' queda en línea (ficha-form.tsx:446-452). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-947] ¿Sigue el patrón de la barra fija? (el costo en m4 a 1440)
 - Fuente: `docs/bitacora-beta-3.md:9704` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: La barra cuesta 57 px de pliegue y cambió un solo veredicto: m4 a 1440, que tenía 8 px de margen. La pregunta de fondo es si hace que el producto se lea como una aplicación.
 - Referencias: tambien en docs/bitacora-beta-3.md:9706
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — barra-accion.tsx:112 useAccionPrincipal, consumida por seguimiento-form.tsx:130 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-948] P19 EL PASO QUE CORRESPONDE: barrido de la derivación del paso actual
 - Fuente: `docs/bitacora-beta-3.md:9711` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: 373.248 combinaciones contra un oráculo independiente. La postergación entra a la derivación, el re-loop aterriza en mc1, «aparece en tu foco» pasa a «entra a tu cola» y se disuelve la zona vacía de mr. Pantallas no admitidas como paso de ahora: de 29.856 a 0. Invariante paso-admitido; spec 24.
 - Referencias: fix/paso-que-corresponde · 62c6273a · 66d7fe64 · scripts/qa-corridas/barrido-derivacion.ts · src/lib/leados/paso-admitido.ts · paso-admitido.invariant.ts +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — paso-admitido.ts:67-144 (oráculo) y :232-282 (9x9x2x2x2x2x6x2x2x3x2x2 = 373.248 estados); paso-admitido.invariant.ts y tests/setter/24-paso-que-corresponde.spec.ts existen. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-949] Con la reunión ya agendada se aterriza en m16 «Agendá la reunión»: excepción declarada
 - Fuente: `docs/bitacora-beta-3.md:9804` · tipo: decision · estado declarado: declarado, no arreglado (a propósito) · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Es un aterrizaje terminal, sin acción y con badge «Completada». Mandarlo a espera haría decir «Le toca al negocio» sobre una reunión ya reservada. El invariante declara cada caso y exige que la excepción siga ocurriendo.
 - Referencias: paso-admitido.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — manual.ts:648 return { actual: 'm16', habilitadas: [] }; paso-admitido.invariant.ts existe (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-950] `ficha` es un campo muerto en DerivacionManualInput
 - Fuente: `docs/bitacora-beta-3.md:9813` · tipo: pendiente · estado declarado: anotado, no tocado · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Ninguna rama de la derivación de posición lo lee; lo consumen las pantallas. Anotado, no tocado.
 - Referencias: DerivacionManualInput (manual.ts) · tambien en docs/bitacora-beta-3.md:9914
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — manual.ts:344 ficha: Ficha | null; git grep 'input\.ficha' en manual.ts: 0 (control: input.status en :488) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-951] Un cuarto turno para la espera de un lead que pausó el setter
 - Fuente: `docs/bitacora-beta-3.md:9907` · tipo: idea · estado declarado: anotado · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: La espera de un postergado dice «Le toca al negocio» y la causa lo aclara abajo, pero el titular no nombra a quien decidió la pausa. Un cuarto turno queda para otro sprint.
 - Referencias: turno.ts · tambien en docs/bitacora-beta-3.md:9922
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/lib/leados/turno.ts:33 sigue con tres turnos; postergacion mapea a 'negocio' (turno.ts:122). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-952] Registrar qué correcciones del rechazo se aplicaron
 - Fuente: `docs/bitacora-beta-3.md:9910` · tipo: idea · estado declarado: no hecho (el dato no existe) · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Sin ese dato, mientras el re-loop siga abierto el paso señalado es la construcción (mc1), aunque el setter ya esté más adelante. No se inventó el dato.
 - Referencias: tambien en docs/bitacora-beta-3.md:9923
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — RechazoSchema sin campo de aplicado (contracts.ts:169-177) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-953] P20 LA FRANJA DEL RECORRIDO: los nueve pasos a la vista en las catorce pantallas
 - Fuente: `docs/bitacora-beta-3.md:9938` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: FranjaRecorrido va entre la cabecera y el título. Sus pasos salen de FASES_EN_ORDEN, el paso de ahora de posicion.actual, y solo enlaza lo alcanzable. Reemplaza a NavAtras y a indicadorDeFase, que se borró. Invariante recorrido; spec 25 con 37 casos.
 - Referencias: fix/franja-recorrido · 795d8f31 · 62c6273a · franja-recorrido.tsx · recorrido.ts · scripts/qa-corridas/capturar-franja.ts +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 795d8f31 y 62c6273a están en main. franja-recorrido.tsx:69-214; pantalla-manual.tsx:155. git grep NavAtras|indicadorDeFase solo aparece en un comentario (manual.ts:319). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-954] Mantener o sacar la franja según el saldo vertical
 - Fuente: `docs/bitacora-beta-3.md:10130` · tipo: decision · estado declarado: pendiente (decisión de Franco) · fecha: 2026-09-02 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Cuesta 33 px de pliegue y devuelve entre 59 y 128 px de scroll en 12 de las 14 pantallas; m1 a 390 conserva 25 px de margen. El sprint deja el número; la conclusión es de Franco.
 - Referencias: tambien en docs/bitacora-beta-3.md:10127
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — franja-recorrido.tsx:69 FranjaRecorrido (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-955] P20 ADENDA: re-verificación completa y arreglo del «Opener» prometido en pantallas de estado
 - Fuente: `docs/bitacora-beta-3.md:10135` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-03 · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: Todo lo que reportó P20 se reprodujo sin diferencias, y no se perdió ningún destino. iSiguiente ya no nombra el primer paso cuando no hay paso de ahora (espera, revisión y archivo a 390). También corrige las citas archivo:línea de P20.
 - Referencias: 795d8f31 · 29d0635f · franja-recorrido.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 29d0635f está en main. franja-recorrido.tsx:92-95 (iSiguiente vale -1 sin paso actual). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-956] P23 EL VEREDICTO QUE SE PIERDE Y EL CICLO: cinco baches de la segunda corrida del novato
 - Fuente: `docs/bitacora-beta-3.md:10647` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-03/06 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: El veredicto no se autoguarda y la copy deja de prometerlo; salir con datos cargados pregunta (useUnsavedGuard opt-in). Se suprime la vuelta del ciclo espera⇄m5 con ofreceSalida. Se reescribieron las referencias de ubicación, y los avisos caducos envejecen en vez de borrarse. Spec 28.
 - Referencias: fix/veredicto-y-ciclo · ea94dbf8 · manual.ts (ofreceSalida) · useUnsavedGuard · check:invariant:copy-sin-ubicacion · check:invariant:novedades-vigencia +4
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — ea94dbf8 en main; manual.ts:719 ofreceSalida; src/lib/use-unsaved-guard.ts; tests/setter/28-veredicto-y-ciclo.spec.ts (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-957] Autoguardar el veredicto exige una columna nueva (frenado; decide Franco)
 - Fuente: `docs/bitacora-beta-3.md:10665` · tipo: decision · estado declarado: frenado (decisión de Franco) · fecha: 2026-09-03/06 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: evaluacionJson solo lo escribe transitionDossier, y el seed usa evaluacionJson != null como proxy, así que un borrador ahí sería un veredicto a medias. Se eligió no autoguardar: hacerlo bien requiere un cambio de schema.
 - Referencias: dossier.ts:154 · dossier.ts:185 · prisma/seed-agency-os.ts:2034
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — evaluacionJson solo lo escribe transitionDossier (dossier.ts:150-158, :185-188) (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-958] N8 de la segunda corrida del novato, fuera de scope
 - Fuente: `docs/bitacora-beta-3.md:10857` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-09-03/06 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: P23 cerró cinco de los ocho baches; N2 (la carrera de tildes) y N8 quedaron afuera por la regla de un solo objetivo. Este rango no describe qué es N8.
 - Referencias: tambien en docs/bitacora-beta-3.md:10649
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — el rango del doc no describe N8; no es verificable contra código (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-959] «La revisión que sale a internet sola»
 - Fuente: `docs/bitacora-beta-3.md:10862` · tipo: pendiente · estado declarado: anotado, sprint propio · fecha: 2026-09-03/06 (inferida) · **ZONA-FRANCO**
 - Nodo(s): h5.set-manual
 - Qué es: La anotó la segunda corrida del novato para un sprint propio. Este rango no detalla el defecto.
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — La bitácora no detalla el defecto; no se puede cruzar con el código. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 ### h5.set-nuevo — Cargar un prospecto
 
@@ -7752,16 +7752,16 @@
 - Nodo(s): h5.set-nuevo
 - Qué es: ownedLeadCreateData en isolation.ts (dueño=sesión, caliente=false, source Setter), NuevoProspectoSchema, cargarProspecto, ruta /setter/nuevo, invariante alta-propia.
 - Referencias: isolation.ts · prospecto.schemas.ts · prospecto.actions.ts · alta-propia.invariant.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — isolation.ts:96-97; prospecto.schemas.ts:39-53; prospecto.actions.ts:25-31; setter/nuevo/page.tsx y alta-propia.invariant.ts existen (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-961] Wizard del setter (B3/B4 de LeadOS)
 - Fuente: `docs/bitacora-roadmap.md:7854` · tipo: bloque · estado declarado: pendiente · fecha: 2026-06-12 · **ZONA-FRANCO**
 - Nodo(s): h5.set-nuevo
 - Qué es: Siguiente trabajo sobre el dossier: las server actions y la UI del setter para ficha, evaluación y brief.
 - Referencias: src/lib/leados/dossier.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — server actions en dossier.actions.ts:100, :145, :205, :238, :326, :356, :398 sobre dossier.ts (D4-c1, lector D4-L5)
+- ¿Sigue teniendo sentido?: no
 
 ## h6 · Entradas públicas que alimentan lo interno
 
@@ -7841,80 +7841,80 @@
 - Nodo(s): lib.otro
 - Qué es: docs/brief-vision-flujo-setter.md, Cimiento de Chat, Manual de Flujo, inventario de 16 pantallas (brief v3 §9) y correccion-decisiones-vs-A3.md.
 - Referencias: también en fuente:1208,1787,2041,4975
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git cat-file: docs/brief-vision-flujo-setter.md y docs/correccion-decisiones-vs-A3.md no existen (control: docs/verificacion-arranque-oslead-vii.md sí) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-971] Corrida D1: método LeadOS destilado
 - Fuente: `docs/bitacora-beta-3.md:1752` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-23 · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: docs/metodo/LECCIONES-LEADOS.md, PROPUESTA-CIMIENTO.md (21 cambios de método) y MAPA-LEADOS.md.
 - Referencias: commits 23a19c3,f01a178,69d0fb4 · docs/metodo/
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/metodo/LECCIONES-LEADOS.md, PROPUESTA-CIMIENTO.md y MAPA-LEADOS.md en origin/main. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-972] Galería de estados M0 y regeneración (Corrida G)
 - Fuente: `docs/bitacora-beta-3.md:1845` · tipo: hecho-declarado · estado declarado: hecho · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: Galería docs/manual-usuario/galeria/ (npm run galeria); luego aislada en .next-galeria :3004 con índice generado por scripts/dev/m0-galeria-indice.ts.
 - Referencias: también en fuente:3308 · commit c138ae4c · playwright.galeria.config.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — playwright.galeria.config.ts, scripts/dev/m0-galeria-indice.ts, package.json:120 'galeria', docs/manual-usuario/galeria/ (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-973] Manual de usuario del Panel del Setter (M1 y M1 v3)
 - Fuente: `docs/bitacora-beta-3.md:1939` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-10 · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: docs/manual-usuario/ índice + capítulos y HALLAZGOS-MANUAL.md; v3 reescrito sobre el producto podado (13 capítulos).
 - Referencias: también en fuente:3423 · docs/manual-usuario/00-INDICE.md · HALLAZGOS-MANUAL.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/manual-usuario/00-INDICE.md y HALLAZGOS-MANUAL.md están versionados. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-974] Galería y manual de usuario desfasados y con huecos
 - Fuente: `docs/bitacora-beta-3.md:1979` · tipo: pendiente · estado declarado: pendiente · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: Cartera nunca fotografiada (35 y 36 idénticos), estados sin captura y capítulos desfasados por P11; el índice declara 0 huecos.
 - Referencias: docs/manual-usuario/galeria/INDICE.md · también en fuente:3397,4513
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — docs/manual-usuario/galeria/INDICE.md:15 y :176 siguen declarando 0 huecos. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-975] PROBE terreno para la poda
 - Fuente: `docs/bitacora-beta-3.md:2006` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-31 · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: docs/probe-poda-terreno.md: 10 ítems relevados y 55 hallazgos laterales (rama redesign/home).
 - Referencias: docs/probe-poda-terreno.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/probe-poda-terreno.md en origin/main. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-976] Contenido comercial del manual que solo Franco puede escribir
 - Fuente: `docs/bitacora-beta-3.md:3514` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-10 · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: Rubros y zonas que funcionan, tono real, openers y respuestas a objeciones curadas.
 - Referencias: docs/manual-usuario/
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — docs/manual-usuario/01-tu-dia.md..13-cierres.md existen; la curaduría comercial no es verificable (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-977] Corridas de experiencia y re-verificación de baches
 - Fuente: `docs/bitacora-beta-3.md:3943` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-11 · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: BACHES-CORRIDA-EXPERIENCIA.md (48 baches, medida sobre 4dadd274 sin poda) y BACHES-RE-VERIFICADOS.md; capturas setter y admin en docs/diagnostico-visual-*.
 - Referencias: también en fuente:4086,4745,4813 · docs/manual-usuario/BACHES-RE-VERIFICADOS.md · docs/diagnostico-visual-2026-08/ · docs/diagnostico-visual-admin-2026-08/
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/manual-usuario/BACHES-RE-VERIFICADOS.md, BACHES-CORRIDA-EXPERIENCIA.md, docs/diagnostico-visual-2026-08/ y -admin-2026-08/ (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-978] Verificación de arranque OSLead VII
 - Fuente: `docs/bitacora-beta-3.md:4454` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-18 · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: docs/verificacion-arranque-oslead-vii.md: F1/F2 sin pushear, F3 sin commit, F4 inexistente, 15 pasos sobre 6 rutas.
 - Referencias: docs/verificacion-arranque-oslead-vii.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/verificacion-arranque-oslead-vii.md existe en origin/main (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-979] A3 y A3-BIS viabilidad de decisiones OSLead VII
 - Fuente: `docs/bitacora-beta-3.md:4885` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-24 · **ZONA-FRANCO**
 - Nodo(s): lib.otro
 - Qué es: docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md y A3-VIABILIDAD-BIS-2026-08.md.
 - Referencias: también en fuente:4963 · docs/decisiones-oslead-vii/
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md y A3-VIABILIDAD-BIS-2026-08.md existen (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-980] El slug del bot demo es 'develop', no 'aki'
 - Fuente: `docs/bitacora-roadmap.md:5936` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-05-25
@@ -7936,8 +7936,8 @@
 - Nodo(s): lib.otro
 - Qué es: Este archivo queda como histórico; las entradas de la beta de LeadOS van a bitacora-beta.md.
 - Referencias: docs/bitacora-beta.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Existen docs/bitacora-beta.md, bitacora-beta-2.md y bitacora-beta-3.md. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-983] Actualizar workflow n8n para leer signalsV2
 - Fuente: `docs/bitacora-roadmap.md:11543` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-30
@@ -8049,8 +8049,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: OsLeadSetterMeta, 2 índices y la recreación del enum ActivityChannel ya existen en Neon pero no en schema ni migrations. La migración de Franco debe marcarlos como aplicados (migrate resolve --applied), no recrearlos, porque migrate dev dispararía un reset.
 - Referencias: OsLeadSetterMeta · OsLead_assignedToId_nextFollowUpAt_idx · OsLeadActivity_performedById_createdAt_idx · enum ActivityChannel · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:39 · tambien en Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:66 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — schema.prisma:909 model OsLeadSetterMeta, :1090 enum ActivityChannel; migraciones 20260619150000_add_activity_channel_sistema y 20260619160000_add_os_lead_setter_meta en el repo; índices schema.prisma:900 y :969 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-997] CO-5/CO-6: índices del portal en producción
 - Fuente: `_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:52` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-07-13
@@ -8096,8 +8096,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Dice que nadie lo setea ni lo lee; fix trivial de comentario si Franco quiere (schema es frozen).
 - Referencias: prisma/schema.prisma:824-827
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — schema.prisma:876-879 'Hoy NADIE lo setea ni lo lee'; _data.ts:217 y :255 leen lead.caliente (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1003] E2E global roja en lanes dashboard/cliente/admin
 - Fuente: `docs/bitacora-beta-3.md:55` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-06-29
@@ -8112,8 +8112,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Con 127.0.0.1 Next 16 dev bloquea dev-resources; navegar por localhost; allowedDevOrigins no tocado.
 - Referencias: también en fuente:836
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git grep allowedDevOrigins en next.config.ts: 0 (control: frame-ancestors en next.config.ts:80); dev:qa en package.json:8. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1005] Error de tipos en searchconsole.ts y build sin tipos
 - Fuente: `docs/bitacora-beta-3.md:335` · tipo: pendiente · estado declarado: resuelto según L2452 y L5234
@@ -8168,8 +8168,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Declarada tras Sprint R; separar lanes por rama queda a decisión de Franco. Más adelante el trabajo sigue en main, redesign/home y leados/v1-integracion.
 - Referencias: rama b1-s2-bsp-outbound · también en fuente:2010,4657
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — git merge-base --is-ancestor origin/b1-s2-bsp-outbound origin/main: sí (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1012] Sprint T: main typechea (cron cleanup-old-events)
 - Fuente: `docs/bitacora-beta-3.md:1269` · tipo: hecho-declarado · estado declarado: hecho (falta next build de Franco) · fecha: 2026-07-17
@@ -8208,8 +8208,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: 24 de 43 scripts usan tsx (postergacion, contador-dms, acuse…); su Record exhaustivo es inerte. Se atiende en C1b.
 - Referencias: también en fuente:5103,5282,5328
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — 35 de los 57 scripts check:invariant de package.json corren con tsx. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1017] Microsprint INFRA: suite del setter con distDir propio
 - Fuente: `docs/bitacora-beta-3.md:2398` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-03
@@ -8232,8 +8232,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: tests/qa-persona/corrida-1-novato-frio.spec.ts usa [data-step] del wizard; fuera de los gates.
 - Referencias: tests/qa-persona/corrida-1-novato-frio.spec.ts
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — corrida-1-novato-frio.spec.ts:80 y :143 buscan [data-step]; git grep -l data-step en src: 0. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1020] @next/bundle-analyzer instalado sin cablear
 - Fuente: `docs/bitacora-beta-3.md:3667` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-10
@@ -8264,16 +8264,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Push a main 8b60c176..05ae1a87; P11 rescatado del stash; luego F1+F2+F3 mergeados sobre origin/main 17727117 en rama leados/v1-integracion (no main).
 - Referencias: también en fuente:4655 · merge 7e18f9a7 · rama leados/v1-integracion
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 7e18f9a7, 05ae1a87 y 17727117 son ancestros de origin/main (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1024] A2-S1 /setter deja de ser embebible
 - Fuente: `docs/bitacora-beta-3.md:4382` · tipo: hecho-declarado · estado declarado: hecho (verificación en prod pendiente) · fecha: 2026-08-15 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: next.config.ts: X-Frame-Options DENY para /(admin|dashboard|setter) y CSP frame-ancestors 'none' en /setter; /embed sigue embebible.
 - Referencias: next.config.ts · commit 17727117
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — next.config.ts:94-96 y :99. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1025] CSP global sigue en Report-Only
 - Fuente: `docs/bitacora-beta-3.md:4408` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-15
@@ -8288,8 +8288,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: curl -I contra el dominio real en Netlify; Franco no revisó aún el cambio.
 - Referencias: también en fuente:4739
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — En código: next.config.ts:94-96 (X-Frame-Options DENY para /(admin|dashboard|setter)) y :99 (frame-ancestors para /setter). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1027] tsx no es dependencia declarada
 - Fuente: `docs/bitacora-beta-3.md:4495` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-18
@@ -8304,8 +8304,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Decisión de Franco sobre si la rama integrada pasa a ser main, y cuándo.
 - Referencias: rama leados/v1-integracion
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — origin/leados/v1-integracion es ancestro de origin/main (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1029] Rotar credencial de la branch Neon dev
 - Fuente: `docs/bitacora-beta-3.md:4808` · tipo: pendiente · estado declarado: pendiente · fecha: 2026-08-20
@@ -8319,8 +8319,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: pantallas-construccion tautológica, progreso-isolation ciega al blob, self-check-gate y contador-dms pasan sabotajes, particion no llama a grupoPara. Se atiende en C1b.
 - Referencias: también en fuente:5019,5119,5276,5374
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — existen pantallas-construccion, progreso-isolation, self-check-gate, contador-dms y particion .invariant.ts; particion.invariant.ts:35 importa particionarCartera (que usa grupoPara vía flow.ts:641); sabotajes no re-verificados (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1031] C0 red de verificación sometida a sabotaje
 - Fuente: `docs/bitacora-beta-3.md:5053` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-25
@@ -8359,8 +8359,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Declara cuatro invariantes reforzados solo en *.invariant.ts; en el rango solo la Fase 1 (Node 24 en ci.yml, tabla de runners 19 ts-node / 24 tsx). El resto sigue después de L5500.
 - Referencias: commit 3f636437
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — El commit 3f636437 existe (git cat-file); .github/workflows/ci.yml:87, :152, :202 con node-version '24'. (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1036] check:invariant:client-monthly-report-pdf sigue excluido
 - Fuente: `docs/bitacora-beta-3.md:5783` · tipo: promesa · estado declarado: pendiente (excluido con motivo) · fecha: 2026-08-25
@@ -8383,16 +8383,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: test:leados y test:setter cargan .env.local y escriben en la Neon dev compartida. No existe .env.test ni DATABASE_URL_TEST, y los jobs test-leados/e2e del CI se saltean con warning.
 - Referencias: playwright.setter.config.ts:31 · playwright.leados.config.ts:25 · tests/helpers/setter-db.ts · tambien en docs/bitacora-beta-3.md:6500 · tambien en docs/bitacora-beta-3.md:7625 · tambien en docs/bitacora-beta-3.md:7676 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — git cat-file .env.test: no existe; git grep DATABASE_URL_TEST solo en docs; playwright.setter.config.ts:31 y playwright.leados.config.ts:25 cargan .env.local (control positivo) (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1039] C1b: cuatro invariantes con falso verde arreglados
 - Fuente: `docs/bitacora-beta-3.md:5799` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-25 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: self-check-gate (censo congelado y self-check guardado ayer), contador-dms (censo de enums en runtime), pantallas-construccion (fixture independiente) y progreso (blob guardado ayer). Sin cambios de producción. El encabezado de C1b está en la línea 5380, fuera del rango.
 - Referencias: src/lib/leados/self-check-gate.invariant.ts · src/lib/leados/contador-dms.invariant.ts · src/lib/leados/pantallas-construccion.invariant.ts · src/lib/leados/progreso-isolation.invariant.ts · leados/v1-integracion
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Los 4 invariantes existen; self-check-gate.invariant.ts:78 (HARD_CHECKS.slice(0, -1)) es coherente con selfCheckAprobado, que exige todos los HARD_CHECKS (flow.ts:204-208). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1040] Un invariante nuevo se prueba viendo que imprime, no que sale 0
 - Fuente: `docs/bitacora-beta-3.md:6115` · tipo: decision · estado declarado: regla anotada; nada roto · fecha: 2026-08-25
@@ -8407,16 +8407,16 @@
 - Nodo(s): lib.plataforma
 - Qué es: Se pusheó leados/v1-integracion (3f636437..b3ea27db). leados/v1-a-main se creó desde origin/main y avanzó por fast-forward a b3ea27db sin conflictos. F1, F2 (guia-retrabajo) y F3 (acuse-recibo) se verificaron por contenido. No se pusheó a main.
 - Referencias: leados/v1-integracion · leados/v1-a-main · b3ea27db · 17727117 · src/lib/leados/acuse-recibo.invariant.ts · guia-retrabajo.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — b3ea27db y 17727117 son ancestros de origin/main. Están guia-retrabajo.tsx (lote) y src/lib/leados/acuse-recibo.invariant.ts. (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1042] Push a main (lo hace Franco) y primera corrida del gate de CI sobre main
 - Fuente: `docs/bitacora-beta-3.md:6517` · tipo: pendiente · estado declarado: pendiente (Franco); ningún sprint del rango pusheó a main · fecha: 2026-08-25/26 (inferida) · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: Cada sprint del rango le deja a Franco el ascenso a main con refspec explícito: primero leados/v1-a-main, después fix/una-sola-fuente y al final la punta del tronco. La primera corrida de ci.yml sobre main queda para verificación humana.
 - Referencias: git push origin refs/heads/leados/v1-a-main:refs/heads/main · git push origin refs/heads/fix/una-sola-fuente:refs/heads/main · .github/workflows/ci.yml · tambien en docs/bitacora-beta-3.md:6205 · tambien en docs/bitacora-beta-3.md:7664 · tambien en docs/bitacora-beta-3.md:7675 +3
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — origin/main = 57c421bc (Franco, 2026-09-06 03:13 -0300), fast-forward de 50 commits sobre 17727117; ci.yml dispara en push (on: [push, pull_request]). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1043] Cuenta exacta de invariantes, con fallo en las dos direcciones
 - Fuente: `docs/bitacora-beta-3.md:7510` · tipo: decision · estado declarado: regla vigente · fecha: 2026-08-27
@@ -8431,48 +8431,48 @@
 - Nodo(s): lib.plataforma
 - Qué es: El status aparece dos veces en el cron sin una fuente única.
 - Referencias: api/cron/os-follow-up/route.ts:168 · api/cron/os-follow-up/route.ts:176
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — src/app/api/cron/os-follow-up/route.ts:112-118 (isReactivationLead) y :187-191 (where status POSTERGADO) siguen inline; el mismo predicado vive en _data.ts:167-170 (D4-c1, lector D4-L4)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1045] Techo declarado de la red sin base
 - Fuente: `docs/bitacora-beta-3.md:7543` · tipo: decision · estado declarado: aceptado (límite declarado) · fecha: 2026-08-27 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: Los invariantes no pueden afirmar que contarDmsHoy y pausarLead sigan llamando a la fuente única, ni detectar que un script se va y entra otro (la cuenta no cambia). Se acepta como límite.
 - Referencias: tambien en docs/bitacora-beta-3.md:7544
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — Límite aceptado: contarDmsHoy (outreach.ts:67) y pausarLead (cartera.actions.ts:78) existen; no hay trabajo de código pendiente. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1046] EL ASCENSO: las seis ramas de P3 a P8 pusheadas y verificadas
 - Fuente: `docs/bitacora-beta-3.md:7566` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-29 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: Seis ramas pusheadas con refspec explícito, verificadas 0/0 contra origin. La punta 0c92dd08 es fast-forward sobre origin/main 17727117 y los gates dan verde con 47 invariantes. No se pusheó a main.
 - Referencias: 0c92dd08 · 17727117 · a2004edb · fa4af2a0 · 6ef28432 · b87bc821 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — 0c92dd08, 17727117, a2004edb, fa4af2a0, 6ef28432 y b87bc821 son ancestros de origin/main (git merge-base --is-ancestor). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1047] Ramas pusheadas sin upstream configurado
 - Fuente: `docs/bitacora-beta-3.md:7681` · tipo: pendiente · estado declarado: deliberado, anotado · fecha: 2026-08-29 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: Se pushearon con refspec explícito y sin -u, a propósito. Un git push sin argumentos parado en ellas sigue siendo ambiguo.
 - Referencias: tambien en docs/bitacora-beta-3.md:6733
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — No se puede verificar desde el repo: el upstream es configuración local de Franco. Las ramas origin/p25/* existen (git branch -a). (D4-c1, lector D4-L3)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1048] P11 LOS HELPERS QUE PRUEBAN: cuatro helpers de test con falso verde arreglados
 - Fuente: `docs/bitacora-beta-3.md:7864` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-08-30 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: expectToast queda acotado a [data-sonner-toast]; pickSelect, typeControlledInput y setControlledSelect afirman su post-condición. Banco propio tests/helpers-probe (npm run test:helpers, sin server ni DB). Cero código de producto.
 - Referencias: fix/helpers-que-prueban · 728b943e · tests/helpers/setter-ui.ts · tests/helpers/form.ts · playwright.helpers-probe.config.ts · tests/helpers-probe/ +1
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — tests/helpers/setter-ui.ts:88 [data-sonner-toast]; package.json:113 test:helpers; playwright.helpers-probe.config.ts existe (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1049] fieldControl + firstVisible eligen en silencio cuando dos etiquetas coinciden
 - Fuente: `docs/bitacora-beta-3.md:8041` · tipo: pendiente · estado declarado: latente, anotado · fecha: 2026-08-30 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: El contains() del xpath es portante y los 21 call sites lo envuelven en firstVisible(). El sabotaje queda en test.fail() a propósito, y los 15 call sites dentro de las 118 pruebas no están medidos. Cerrarlo obliga a tocar los 21.
 - Referencias: tests/helpers/setter-ui.ts:42 · tambien en docs/bitacora-beta-3.md:8072 · tambien en docs/bitacora-beta-3.md:8195 · tambien en docs/bitacora-beta-3.md:8206
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — tests/helpers/setter-ui.ts tiene 5 firstVisible( y 31 archivos de tests lo usan (git grep). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1050] Tres helpers de test muertos
 - Fuente: `docs/bitacora-beta-3.md:8074` · tipo: pendiente · estado declarado: anotado, sin hacer · fecha: 2026-08-30
@@ -8487,24 +8487,24 @@
 - Nodo(s): lib.plataforma
 - Qué es: La línea base y los arreglos dan 118/118, y dos controles prueban que las aserciones corren de verdad. Se arreglaron las dos aserciones sin filo (/Demo enviada registrada/i sin .catch) y los selectores rotos de corrida-1. El banco pasa de 22 a 26 casos.
 - Referencias: 2da5de41 · 728b943e · tests/setter/01-flow.spec.ts:298 · tests/qa-walkthrough/corrida-1.spec.ts:233 · tests/qa-walkthrough/corrida-1.spec.ts:313 · cierra pendiente de docs/bitacora-beta-3.md:7980 +2
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — tests/setter/01-flow.spec.ts y tests/qa-walkthrough existen (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1052] tests/qa-walkthrough está fuera de todo gate: darle script o borrarla
 - Fuente: `docs/bitacora-beta-3.md:8205` · tipo: decision · estado declarado: pendiente de decidir · fecha: 2026-08-31 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: Tiene config propia pero ningún script de package.json la invoca, y por eso acumuló líneas rotas de un renombre. La bitácora lo plantea como decisión, no como arreglo.
 - Referencias: playwright.qa-walkthrough.config.ts · tests/qa-walkthrough/ · tambien en docs/bitacora-beta-3.md:8167
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — package.json no menciona qa-walkthrough (0 coincidencias); playwright.qa-walkthrough.config.ts existe en el árbol. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1053] EL TRONCO: veinticinco sprints vuelven a una sola línea (sin push a main)
 - Fuente: `docs/bitacora-beta-3.md:10869` · tipo: hecho-declarado · estado declarado: hecho · fecha: 2026-09-06 · **ZONA-FRANCO**
 - Nodo(s): lib.plataforma
 - Qué es: Se pushearon trece ramas con commits solo locales (P16–P23, y P25 en p25/carrera-tildes). La punta real es ea94dbf8, sobre una cadena lineal de 49 commits con un solo merge (7e18f9a7). Se verificaron 27 ramas sin pérdidas y el gate quedó en la raíz. El push a main es de Franco.
 - Referencias: ea94dbf8 · 7e18f9a7 · d0b37c71 · p25/carrera-tildes · 17727117 · .github/workflows/ci.yml
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — origin/main = 57c421bc 'docs(tronco): EL TRONCO' = origin/leados/v2-a-main; ea94dbf8 es ancestro (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1054] El build se envenena solo por una clase Tailwind citada en esta bitácora
 - Fuente: `docs/bitacora-beta-3.md:10924` · tipo: pendiente · estado declarado: mitigado; causa raíz sin arreglar · fecha: 2026-09-06
@@ -8535,8 +8535,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Quedó como prefijo redundante del índice compuesto nuevo; un DROP INDEX lo limpiaría pero no es aditivo.
 - Referencias: prisma/schema.prisma
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — prisma/schema.prisma:899 @@index([assignedToId]) junto a :900 @@index([assignedToId, nextFollowUpAt]). (D4-c1, lector D4-L6)
+- ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1058] Drift DB↔schema: BOT_DELETED adoptado y convertedToOsLeadId dropeada
 - Fuente: `docs/bitacora-beta.md:470` · tipo: hecho-declarado · estado declarado: hecho (FG-1.pre declara luego que 20260619140100 quedó --applied sin ejecutar el SQL) · fecha: 2026-06-19
@@ -8854,8 +8854,8 @@
 - Nodo(s): lib.plataforma
 - Qué es: Subsumidos por el índice compuesto; misma condición de medición en PROD post-B14.
 - Referencias: docs/roadmap-pendientes.md · docs/audits/2026-05-auditoria-db.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **no empezado** — El model OsLead conserva @@index([status]) y @@index([nextFollowUpAt]) junto al compuesto (schema.prisma:896-898). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1098] Sentry diferido a B14
 - Fuente: `docs/bitacora-roadmap.md:7347` · tipo: decision · estado declarado: hecho · fecha: 2026-05-25
@@ -9963,8 +9963,8 @@
 - Nodo(s): lib.transversal
 - Qué es: F1 Modal.tsx con role=dialog/aria-modal; F2 franja de conteos en cartera-view.tsx; F3 borrador on-demand (draft-preview.tsx) en /admin/leados/[leadId]; F4 invariantes endurecidos.
 - Referencias: src/components/ui/Modal.tsx · cartera-view.tsx · draft-preview.tsx
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **parcial** — F1: Modal.tsx no tiene role=dialog ni aria-modal (git show | grep: solo aria-label="Cerrar" en :91). F2: hay conteo total y por grupo (cartera-view.tsx:87-89, :201-203) en lugar de una franja. F3: draft-preview.tsx no existe en origin/main (git ls-tree). F4 no verificado. (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-1238] Patrones establecidos del admin
 - Fuente: `_insumos/drive/Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md:54` · tipo: decision · estado declarado: hecho · fecha: 2026-06-20
@@ -10154,8 +10154,8 @@
 - Nodo(s): lib.transversal
 - Qué es: Informe AUDITORIA-VS-BRIEF-2026-07.md en raíz: 29 divergencias (2 sev 4); gating de aislamiento con perímetro acotado.
 - Referencias: AUDITORIA-VS-BRIEF-2026-07.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — AUDITORIA-VS-BRIEF-2026-07.md está versionado en la raíz del repo; A-05, A-06 y A-09 quedaron cerrados (ver previas). (D4-c1, lector D4-L2)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1262] 7.2 accesibilidad sistémica de Field.tsx
 - Fuente: `docs/bitacora-beta-3.md:1146` · tipo: hecho-declarado · estado declarado: hecho (commit registrado como «<pendiente>») · fecha: 2026-07-04
@@ -10170,8 +10170,8 @@
 - Nodo(s): lib.transversal
 - Qué es: docs/auditorias/AUDITORIA-CIERRE-2026-07.md: 26 hallazgos C-xx, 10 PR-x, diseño fase PRE y backlog de 40 ítems.
 - Referencias: docs/auditorias/AUDITORIA-CIERRE-2026-07.md
-- Estado en código: por cruzar
-- ¿Sigue teniendo sentido?: por decidir en su dominio
+- Estado en código: **hecho** — docs/auditorias/AUDITORIA-CIERRE-2026-07.md existe (D4-c1, lector D4-L1)
+- ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1264] 21 cambios de método (PROPUESTA-CIMIENTO)
 - Fuente: `docs/bitacora-beta-3.md:1778` · tipo: idea · estado declarado: propuesto · fecha: 2026-07-23

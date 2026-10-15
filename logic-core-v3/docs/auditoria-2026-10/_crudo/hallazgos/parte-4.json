@@ -3,6 +3,191 @@
  "partes": 5,
  "hallazgos": [
   {
+   "id": "FAL-020",
+   "prefijo": "FAL",
+   "titulo": "Reporte semanal del chatbot sin forma de darse de baja (el link de preferencias lleva a una ruta que no existe, sin List-Unsubscribe ni opt-out), con destinatario no determinístico y link con fallback a localhost",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
+     "linea": 27,
+     "fragmento": "take: 1,  (members where role ADMIN, sin orderBy)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
+     "linea": 57,
+     "fragmento": "const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'"
+    },
+    {
+     "ruta": "src/lib/email/templates/executive-weekly.ts",
+     "linea": 289,
+     "fragmento": "Dejar de recibir este reporte  (control: el executive report si tiene unsubscribe)"
+    },
+    {
+     "ruta": "src/lib/email/templates/weekly-report.ts",
+     "linea": 164,
+     "fragmento": "<a href=\"${data.dashboardUrl}/preferences\" style=\"color:#06b6d4; text-decoration:none;\">cambiá tus preferencias</a>."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
+     "linea": 60,
+     "fragmento": "dashboardUrl: `${appUrl}/dashboard/chatbot`,"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 387,
+     "fragmento": "executiveReportOptOut Boolean @default(false)"
+    }
+   ],
+   "impacto": "El cliente recibe dos mails semanales (este y el executive report); este no tiene baja ni registro de envio (un reintento del cron duplica), va al primer ADMIN que devuelva la base y el boton puede apuntar a localhost si falta la variable.",
+   "propuesta": "Unificar con el executive report o sumarle opt-out y WeeklyReportLog; orderBy determinista y leadNotificationEmail como destinatario; fallar si falta la URL.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "lib.chatbot.reports",
+    "int.brevo",
+    "int.cron.send-weekly-reports",
+    "h3.cli-chatbot.reporte-semanal-email"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patrones D1-c1 take:1 sin orderBy y D1-c3 fallback localhost",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H18",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D7-c1",
+      "tmp": "D7-c1/D7-L1/H11",
+      "titulo": "Reporte semanal del chatbot sin forma de darse de baja: el link 'cambiá tus preferencias' lleva a una ruta que no existe y no hay List-Unsubscribe ni campo de opt-out",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma falta de baja del reporte semanal del chatbot; suma que el link «cambiá tus preferencias» lleva a una ruta inexistente y que no hay List-Unsubscribe. Sube a MEDIA: es un email periódico sin ninguna forma de cortarlo. El campo de opt-out en el schema queda como decisión para Valentino."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "D7-c1",
+      "tmp": "D7-c1/D7-L1/H11",
+      "antes": {
+       "severidad": "BAJA",
+       "titulo": "Reporte semanal del chatbot sin opt-out, destinatario no deterministico y link con fallback a localhost"
+      },
+      "nota_padre": "Misma falta de baja del reporte semanal del chatbot; suma que el link «cambiá tus preferencias» lleva a una ruta inexistente y que no hay List-Unsubscribe. Sube a MEDIA: es un email periódico sin ninguna forma de cortarlo. El campo de opt-out en el schema queda como decisión para Valentino."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-033",
+   "prefijo": "UX",
+   "titulo": "Con cero conversaciones el reporte semanal culpa al cliente ('verifica el script'), aunque la causa sea el LLM caido",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
+     "linea": 181,
+     "fragmento": "return 'Esta semana no hubo actividad en tu chatbot. Verificá que el script esté instalado.'"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/quota/checker.ts",
+     "linea": 197,
+     "fragmento": "const discarded = await tx.conversation.deleteMany({"
+    }
+   ],
+   "impacto": "Cuando Vertex falla antes del primer token, la compensacion borra la Conversation nueva; la semana queda con 0 conversaciones y el mail le pide al cliente revisar su instalacion mientras el problema es de develOP.",
+   "propuesta": "Antes de ese mensaje, mirar eventos de error del bot en la semana y usar un texto neutro o avisar a develOP.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "lib.chatbot.reports",
+    "lib.chatbot.quota"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "D5-A4",
+   "vh": "VH-103",
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H19",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-049",
+   "prefijo": "DEU",
+   "titulo": "Email de insights sin escapar botName/companyName y con URL que puede quedar 'undefined'; el email de prueba de leads usa otra plantilla que la real",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/notifications/sendInsightsNotification.ts",
+     "linea": 36,
+     "fragmento": "para ${botName} en ${organizationName}</p>"
+    },
+    {
+     "ruta": "src/app/api/cron/generate-insights/route.ts",
+     "linea": 66,
+     "fragmento": "dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/chatbot`,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/sendTestNotification.ts",
+     "linea": 46,
+     "fragmento": "const result = await sendLeadNotificationEmail({"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/notifications/sendLeadNotification.ts",
+     "linea": 74,
+     "fragmento": "${escapeHtml(lead.createdAt.toLocaleString('es-AR'))}"
+    }
+   ],
+   "impacto": "Un nombre de bot con HTML se inyecta en el mail del propio cliente (riesgo bajo, mismo tenant). El boton 'probar notificacion' del admin manda una plantilla que produccion no usa (produccion usa lib/client-notifications/templates.ts) y con la hora en UTC: la prueba no representa lo que recibe el cliente.",
+   "propuesta": "Escapar con el helper de sendLeadNotification; fallback explicito de URL; que sendTestNotification use renderLeadEmail de client-notifications y borrar sendLeadNotification.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.adm-chatbots",
+    "h3.cli-chatbot",
+    "lib.chatbot.notifications",
+    "int.brevo"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patron D1-c2 interpolacion sin escapar; CLEAN-R2",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H20",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "DEU-050",
    "prefijo": "DEU",
    "titulo": "Contratos muertos o desfasados: messagesAdded ignorado, checkQuota con MAX_SAFE_INTEGER y tipos publicos que no coinciden con Prisma",

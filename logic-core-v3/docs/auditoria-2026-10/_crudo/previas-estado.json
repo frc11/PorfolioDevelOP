@@ -1487,6 +1487,430 @@
    "id_previo": "CLEAN-R3",
    "estado": "parcial",
    "evidencia": "n8n.ts:29 sendLeadToN8n con AbortSignal.timeout(8000) y las functions de Netlify con 20 s; siguen sin timeout brevo.ts, google-business-profile.ts (:131,197,284,340), gbp-discovery.ts (:50,89), tiendanube.ts (:29,92-117), cal-com.ts:49, cal-com-v2.ts:168, pagespeed.ts:59, telegram.ts:78, n8n.ts:190"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:68",
+   "id_previo": "C-03",
+   "estado": "cerrado",
+   "evidencia": "src/lib/leados/manual.ts:513-520 rama PERDIDO terminal; setter/_actions/outreach.actions.ts:169-171 registrarResultado rechaza leads terminales (leadActivo)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:69",
+   "id_previo": "C-04",
+   "estado": "cerrado",
+   "evidencia": "git grep de 'Paso N' fuera de comentarios en flow.ts, flow-content.ts, herramientas.ts, guidance-content.ts y (protected)/setter: 0; outreach.actions.ts:176 y dossier.actions.ts:388 sacaron el paréntesis (P11)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:80",
+   "id_previo": "C-15",
+   "estado": "parcial",
+   "evidencia": "Sin 'gate server-side/hard-block/follow-up' visibles en los archivos citados; queda guidance-content.ts:650 'el dossier pasa a «Construcción»' y los nombres de herramienta 'Gem de diseño' y 'Netlify Drop' (dossier.schemas.ts:97, :116), diferidos a PLAN-918"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:70",
+   "id_previo": "C-05",
+   "estado": "cerrado",
+   "evidencia": "agenda.actions.ts:150-154 persiste la oferta (OFRECIDOS); agenda-form.tsx:105 useUnsavedGuard; agenda-form.tsx:47 y :91-92 paso de confirmación antes del booking"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:153",
+   "id_previo": "B3",
+   "estado": "abierto",
+   "evidencia": "contracts.ts:124-131 itemsDuros solo con nombre y ok; flow.ts:188-190 buildSelfCheck escribe nombre; flow.ts:207 match por nombre; dossier-panels.tsx:174 key={item.nombre}"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "docs/b8a-auditoria.md:26",
+   "id_previo": "H1",
+   "estado": "parcial",
+   "evidencia": "agenda.actions.ts:249-257 ahora revierte el claim y la agenda confirmada con este uid; sigue silenciando la falla de cancelBooking (:253-255) y afirmando la cancelación (:259), solo console.error (:258)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "docs/b8a-auditoria.md:37",
+   "id_previo": "H2",
+   "estado": "abierto",
+   "evidencia": "reunion.actions.ts:31 RE_SEGUIMIENTO -> RESPONDIO; agenda.ts:373-380 solo agrega resultado; flow.ts:171 reunionAgendada sigue true; agenda.actions.ts:108-110 bloquea"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:113",
+   "id_previo": "A-05",
+   "estado": "cerrado",
+   "evidencia": "flow.ts:826-829 el fijado accionable entra a la cola 'trabajar' y ordenFoco lo pone primero; setter/page.tsx:53-55 documenta"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:135",
+   "id_previo": "A-08",
+   "estado": "abierto",
+   "evidencia": "follow-up.ts:3-13 devuelve null tras el 3er toque sin cerrar; os-commercial.ts:25 'el cierre (PERDIDO) lo decide Franco'; outreach.actions.ts:149-198 sin tope de toques"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:193",
+   "id_previo": "A-13",
+   "estado": "parcial",
+   "evidencia": "tests/setter/02-isolation.spec.ts:52-83 cubre lectura (404 sin leak); hay menciones de ajeno en alta-import, dossier-gates y progreso-construccion; no hay batería sistemática de denegación por cada una de las ~25 escrituras del setter"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:199",
+   "id_previo": "A-14",
+   "estado": "cerrado",
+   "evidencia": "setter/leads/[leadId]/manual/_data.ts:267 leadPhone; manual-nav.tsx:78 muestra el teléfono en la cabecera del manual"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:69",
+   "id_previo": "C-04",
+   "estado": "cerrado",
+   "evidencia": "foco-surface.tsx:171 hoy es un comentario (P21, :172-174) y no hay «Paso N» visible. git grep -E \"Paso [0-9]+|paso [0-9]+ de|\\(Paso|«Paso\" sobre setter/, flow.ts, flow-content.ts, herramientas.ts y guidance-content.ts no encuentra nada fuera de comentarios e invariantes (control positivo: InstallTab.tsx:61)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:80",
+   "id_previo": "C-15",
+   "estado": "cerrado",
+   "evidencia": "En el lote, ejemplo-ideal.tsx:106 es un comentario y los textos visibles (:83 «Ver ejemplo de una ficha bien hecha», :112 «Ver ejemplo de un chequeo final bien hecho») no tienen jerga. En los otros archivos citados, un barrido heurístico de literales con gate/server-side/hard-block/dossier/draft/follow-up no encontró coincidencias; esos archivos no se leyeron completos."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "doc": "docs/auditoria-consistencia-setter.md:102",
+   "id_previo": "sin-id (canal-seguridad tono→clases)",
+   "estado": "abierto",
+   "evidencia": "canal-seguridad.tsx:17-21 sigue armando a mano las clases rose/amber/neutral; Callout existe (src/components/ui/Callout.tsx) y se usa en home-sections.tsx:152."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "doc": "docs/auditoria-consistencia-setter.md:115",
+   "id_previo": "sin-id (mis-numeros re-implementa StatCard)",
+   "estado": "parcial",
+   "evidencia": "cartera-view.tsx:147-165 ya no tiene stat cards (hoy son ListaTarjetas y GrupoPlegable). mis-numeros.tsx:37-88 sigue siendo una tarjeta a mano aunque StatCard existe (src/components/ui/StatCard.tsx:40); la barra de proporción (:57-71) no la cubre StatCard."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:113",
+   "id_previo": "A-05",
+   "estado": "cerrado",
+   "evidencia": "flow.ts:826-829: el fijado accionable y vigente entra en grupos.trabajar (y al foco) en vez de excluirse; home-en-espera.tsx:19-24 lo documenta; lead-card-actions.tsx:76 usa la pausa vigente."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:119",
+   "id_previo": "A-06",
+   "estado": "cerrado",
+   "evidencia": "novedades-panel.tsx:173-201: la revisión es un resumen sin lista navegable; «Abrir» usa anclarFoco, el mismo mecanismo del foco (novedades-abrir-foco.tsx:40-47), y no ancla si el aviso caducó (novedades-panel.tsx:122)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md:141",
+   "id_previo": "A-09",
+   "estado": "cerrado",
+   "evidencia": "La causa del archivo se ve en la card (home-sections.tsx:42 y :99-106); los archivados suman en Tu semana (progreso-semana.tsx:33-39); las vistas archivo-descartado y archivo-perdido existen (flow.ts:954-955)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:67",
+   "id_previo": "C-02",
+   "estado": "cerrado",
+   "evidencia": "os-commercial.ts:78-81 recalcula nextFollowUpAt con calculateNextFollowUp(followUpCount), que da null al agotarse, y el comentario :15 dice que eso limpia el toque viejo. home.ts:51 sinProximoToque; m5-seguimiento.tsx:186 trata la cadencia agotada sin ofrecer otro toque."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:68",
+   "id_previo": "C-03",
+   "estado": "cerrado",
+   "evidencia": "manual.ts:520-521 manda PERDIDO al archivo con habilitadas vacías; outreach.actions.ts:169 tiene el guard leadActivo; archivo-manual.tsx:39-121 no ofrece acciones de toque."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:82",
+   "id_previo": "C-17",
+   "estado": "cerrado",
+   "evidencia": "pantalla-manual.tsx:132: esPasoActivo exige habilitadas.length > 0 (sin cyan en terminales). DESCARTADA ahora aterriza en el archivo (manual.ts:564-572; archivo-manual.tsx:76-78)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:69",
+   "id_previo": "C-04",
+   "estado": "cerrado",
+   "evidencia": "git grep -i 'paso [0-9]' no encuentra nada fuera de comentarios en flow.ts, setter/, flow-content.ts, herramientas.ts ni guidance-content.ts. Control: 8 apariciones en comentarios de dossier.actions.ts. chequeo-form.tsx ya no contiene 'Paso'."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:80",
+   "id_previo": "C-15",
+   "estado": "parcial",
+   "evidencia": "guidance-content.ts:650 sigue mostrando «el dossier pasa a «Construcción»». m16-agenda.tsx:159-166 ahora es comentario y m5 no tiene jerga visible. En el lote quedan «auto-reporte» (m-construccion.tsx:291, manual-nav.tsx:208) y «CTA» (brief-form.tsx:260, chequeo-form.tsx:99)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "doc": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:153",
+   "id_previo": "B3",
+   "estado": "abierto",
+   "evidencia": "El cambio destructivo no se hizo: el match sigue por nombre (chequeo-form.tsx:52; flow.ts:207) y el blob guarda {nombre, ok} sin id (self-check-gate.invariant.ts:62). La fragilidad sigue: si se renombra el nombre de un HardCheck, se apagan sus tildes guardados y el gate."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "doc": "docs/auditoria-consistencia-setter.md:96",
+   "id_previo": "sin-id (Callout re-implementado en ficha-step)",
+   "estado": "abierto",
+   "evidencia": "El patrón se mudó: las cajas warning y success inline están ahora en ficha-form.tsx:420-437 (no usa Callout). Se repite en evaluacion-form.tsx:182-185 y brief-sanity.tsx:49-73."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "doc": "docs/auditoria-consistencia-setter.md:125",
+   "id_previo": "sin-id (header de step copiado en 9 steps)",
+   "estado": "cerrado",
+   "evidencia": "Los step files del wizard ya no existen (git ls-tree de leads/[leadId]/_components). PantallaManual es la cabecera común (pantalla-manual.tsx:162-199). Solo queda el header de ficha-step.tsx:55-74, en una rama sin consumidores."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:67",
+   "id_previo": "C-02",
+   "estado": "cerrado",
+   "evidencia": "os-commercial.ts:75-82: con la cadencia agotada calculateNextFollowUp devuelve null (follow-up.ts:12) y se escribe nextFollowUpAt:null. home.ts:51 expone sinProximoToque y seguimiento-form.tsx:87-89 deja de ofrecer 'No respondió'. El lead ya no queda en 'trabajar' por un toque vencido eterno."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "doc": "docs/b8a-ii-auditoria.md:25",
+   "id_previo": "NII-1",
+   "estado": "cerrado",
+   "evidencia": "El bloque de construcción ahora recibe la ficha: m-construccion.tsx:70 buildConstruccionBlock(lead, brief, ficha), alimentado por [paso]/page.tsx:280-284 (ConstruccionContexto con ficha=manual.ficha)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:135",
+   "id_previo": "A-08",
+   "estado": "parcial",
+   "evidencia": "La cadencia corta: follow-up.ts:12 null al 4º SIN_RESPUESTA, os-commercial.ts:78-82 limpia el toque y seguimiento-form.tsx:87-89 oculta la opción. No hay cierre duro a PERDIDO, por decisión (PLAN-845; seguimiento-form.tsx:56 'el cierre del lead lo decide Franco'). El lead queda en seguimiento sin plazo, y la copy :143 promete 'se enfría solo' sin una transición que lo haga."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:199",
+   "id_previo": "A-14",
+   "estado": "cerrado",
+   "evidencia": "El teléfono se vuelve a mostrar: _data.ts:98-100 y :267 leadPhone = lead.phone; [paso]/page.tsx:105 (cabecera, todas las pantallas), :394 (M5Contexto), :420 y :434 (M16)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:67",
+   "id_previo": "C-02",
+   "estado": "cerrado",
+   "evidencia": "os-commercial.ts:78-81 recalcula nextFollowUpAt = calculateNextFollowUp(count), que es null al agotarse (follow-up.ts:3-13); home.ts:47 y :51 derivan vencido o sin próximo toque; flow.ts:581-583 muestra 'Se enfría' en seguimiento, no en trabajar"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:69",
+   "id_previo": "C-04",
+   "estado": "cerrado",
+   "evidencia": "git grep 'Paso [0-9]' sobre flow.ts, flow-content.ts, herramientas.ts y guidance-content.ts no da resultados; quedan solo comentarios de doc en las actions (agenda.actions.ts:4, dossier.actions.ts:83, outreach.actions.ts:82)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md:41",
+   "id_previo": "sin-id (hint del score 'caliente')",
+   "estado": "cerrado",
+   "evidencia": "El hint visible dice '1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad' (guidance-content.ts:500, usado en evaluacion-form.tsx:56). El 'porque' que promete construir sin respuesta (:526-528) no se renderiza (TeachPanel sin id 'evaluacion')"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/auditorias/REGRESION-FINAL-2026-07.md:116",
+   "id_previo": "sin-id (hint del score 'caliente', heredado)",
+   "estado": "cerrado",
+   "evidencia": "Igual que el anterior: guidance-content.ts:500 ya no dice 'caliente'; el resto vive en contenido no renderizado"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md:38",
+   "id_previo": "Sabotaje 3",
+   "estado": "cerrado",
+   "evidencia": "Ya no es un falso verde: self-check-gate.invariant.ts:103-132 (censo congelado id+nombre) y :134-178 (blob guardado que debe seguir aprobando) atrapan renombres y altas. El join por nombre sigue por decisión (flow.ts:207)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md:635",
+   "id_previo": "§4.1",
+   "estado": "cerrado",
+   "evidencia": "LEGAL_TRANSITIONS exportado y sin imports de valor en dossier-stage.ts:38-47; existe src/lib/leados/dossier-stage.invariant.ts; dossier.ts:41 lo importa"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:153",
+   "id_previo": "B3",
+   "estado": "abierto",
+   "evidencia": "La advertencia sigue vigente: SelfCheckSchema guarda {nombre, ok} sin id (contracts.ts:124-132) y buildSelfCheck escribe solo el nombre (flow.ts:188-191); pasar a id sin fallback desaprobaría todo lo guardado"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/b8a-auditoria.md:26",
+   "id_previo": "H1",
+   "estado": "cerrado",
+   "evidencia": "revertirAgendaConfirmadaOwned (agenda.ts:300-317) limpia la AGENDADA con ese uid y se llama en la compensación (agenda.actions.ts:257). Nota: borra también la oferta y su comentario quedó viejo (agenda.ts:296)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/b8a-auditoria.md:37",
+   "id_previo": "H2",
+   "estado": "abierto",
+   "evidencia": "RE_SEGUIMIENTO -> RESPONDIO (reunion.actions.ts:31) pero la agenda queda AGENDADA (agenda.ts:373-380); gateAgenda la rechaza por reunionAgendada (agenda.actions.ts:108; flow.ts:170-172); PARTIDA_RECLAMABLE solo acepta NULL u OFRECIDOS (agenda.ts:174-177)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/b8a-auditoria.md:43",
+   "id_previo": "H3",
+   "estado": "cerrado",
+   "evidencia": "flow.ts:518-524: CALL_AGENDADA devuelve la espera de la reunión antes del switch por stage"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "docs/b8a-ii-auditoria.md:25",
+   "id_previo": "NII-1",
+   "estado": "parcial",
+   "evidencia": "buildConstruccionBlock (copy-blocks.ts:177-261) ya suma reseñas, contenido, qué vende, cómo se presenta, señales operativas y assets. Todavía omite identidad, presenciaDigital, otros y la evaluación, que sí viajan al opener vía buildBriefInputBlock (copy-blocks.ts:110-119)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:129",
+   "id_previo": "A-07",
+   "estado": "parcial",
+   "evidencia": "El valor 'CALIENTE' sigue en VEREDICTO_VALUES (contracts.ts:91), pero el copy visible habla de 'avanzar con prioridad' (guidance-content.ts:500, :504) y el gate usa el campo de Franco (flow.ts:81-83). El 'porque' no renderizado (:526-528) todavía enseña que 4–5 deja construir sin respuesta"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:113",
+   "id_previo": "A-05",
+   "estado": "cerrado",
+   "evidencia": "El fijado accionable entra a la cola trabajar y sube a la cima (flow.ts:826-829 y ordenFoco flow.ts:770-776)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:135",
+   "id_previo": "A-08",
+   "estado": "parcial",
+   "evidencia": "Con la cadencia agotada el lead se ve pasivo ('Se enfría — el cierre lo decide Franco', flow.ts:578-583); el cierre duro no existe por decisión"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:141",
+   "id_previo": "A-09",
+   "estado": "cerrado",
+   "evidencia": "Archivo por causa: vistas archivo-descartado y archivo-perdido con motivo (flow.ts:906-956, :1006-1024)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:159",
+   "id_previo": "A-10",
+   "estado": "cerrado",
+   "evidencia": "checklist-construccion.tsx y construccion-step.tsx ya no existen (git ls-files); m-construccion.tsx:5 importa promptsParaFase de prompts-disenio.ts, el paso y los prompts están conectados"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:193",
+   "id_previo": "A-13",
+   "estado": "parcial",
+   "evidencia": "git grep -l -i 'ajeno|otro setter|cross|cruzad' en tests/leados y tests/setter: 9 de 37 specs. No se re-contó la cobertura función por función"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:205",
+   "id_previo": "A-15",
+   "estado": "no-reproducible",
+   "evidencia": "brief-step.tsx no existe (git ls-files); la edición del brief vive en brief-form.tsx con otro modelo (brief-form.tsx:92, :109)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:68",
+   "id_previo": "C-03",
+   "estado": "cerrado",
+   "evidencia": "manual.ts:513-522 corta PERDIDO a 'archivo' con habilitadas [] antes de derivar por stage; paso-admitido.ts:46-48 lo trata como cerrado; m5 deja de estar habilitada y el guard redirige (manual/[paso]/page.tsx:73). No verifiqué si outreach.actions.ts bloquea un toque enviado directo sobre un PERDIDO (fuera del lote)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:82",
+   "id_previo": "C-17",
+   "estado": "cerrado",
+   "evidencia": "DESCARTADA aterriza en 'archivo' (manual.ts:564-572), que renderiza ArchivoManual (manual/[paso]/page.tsx:118-131) y no PantallaManual. El cyan de PantallaManual exige habilitadas no vacía (pantalla-manual.tsx:132). Queda un comentario viejo en pantalla-manual.tsx:129 ('DESCARTADA en m2')."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:119",
+   "id_previo": "A-06",
+   "estado": "cerrado",
+   "evidencia": "derivarColaRevision devuelve solo un agregado (novedades.ts:150-207); el aviso lleva leadId para anclar el foco (novedades-agrupar.ts:29-34); el panel usa AbrirFocoButton con anclar={fila.vigente} (novedades-panel.tsx:114-122), no links directos."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:141",
+   "id_previo": "A-09",
+   "estado": "parcial",
+   "evidencia": "Los archivados ya suman al progreso (progreso.ts:35-40, :79-92) y el archivo nombra el motivo (flow.ts:1012 archivoMotivo). Pero «Mis números» sigue sin reflejar el descarte: cuenta como activos a los descartados (mis-numeros.ts:94, revision.ts:27)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md:159",
+   "id_previo": "A-10",
+   "estado": "cerrado",
+   "evidencia": "FASE_PROMPTS/promptsParaFase (prompts-disenio.ts:179-197) se renderizan dentro de la fase (m-construccion.tsx:79); checklist-construccion.tsx y construccion-step.tsx ya no están en origin/main (ls-tree)."
   }
  ]
 }

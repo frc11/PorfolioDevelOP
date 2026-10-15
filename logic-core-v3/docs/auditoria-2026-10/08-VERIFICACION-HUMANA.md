@@ -1270,3 +1270,147 @@
 - Resultado esperado: El bot responde en el sitio y en el bot de prueba; /api/chatbot/[slug]/health sigue en verde
 - Señal de falla: «Se cortó la respuesta / Escribí de nuevo y seguimos» (UX-025) o un error de permisos de Vertex en Sentry
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-142] Un lead cerrado (ganado) sigue en la cola del setter
+- Verifica: [BUG-147] · Prioridad: media
+- Entorno: Local con DB de desarrollo
+- Precondiciones: Setter QA con un lead propio con dossier en CONSTRUCCION
+- Pasos: 1) Como SUPER_ADMIN, en el kanban de /admin/leads arrastrar ese lead a 'Cerrado' 2) Entrar como el setter y abrir /setter 3) Buscar el lead en la cola 'Tu día' y en la cartera
+- Resultado esperado: El lead aparece archivado o como ganado, fuera de la cola de trabajo
+- Señal de falla: El lead aparece en la cola (o como foco) con una acción de construcción pendiente; al registrar un toque responde 'Este negocio ya está cerrado'
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-143] Iframe del borrador sin sandbox en la revisión
+- Verifica: [SEC-100] · Prioridad: media
+- Entorno: Local con DB de desarrollo
+- Precondiciones: Un lead en CONSTRUCCION del setter QA y una página https propia de prueba que intente abrir un popup y mostrar un formulario de login
+- Pasos: 1) Como setter, guardar como borrador la URL de la página de prueba, completar el chequeo y enviar a revisión 2) Como SUPER_ADMIN, abrir /admin/leados/[leadId] 3) Interactuar con la demo embebida (clic) y observar popups, descargas o navegación de la pestaña
+- Resultado esperado: El iframe está aislado (sandbox): no abre popups ni navega la pestaña del admin
+- Señal de falla: La página embebida abre ventanas, dispara descargas o navega la pestaña tras un clic
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-144] Pausa de un lead entre las 21:00 y las 23:59 (hora de Argentina)
+- Verifica: [BUG-152] · Prioridad: media
+- Entorno: Local o preview con un setter de prueba y al menos un lead accionable
+- Precondiciones: Setter de prueba con un lead en la cola.
+- Pasos: 1) Con el reloj del equipo en hora de Argentina, esperar a las 21:30 (o poner esa hora en el sistema operativo). 2) Entrar como setter a /setter. 3) En «Tu foco ahora», tocar «Pausar» y elegir «3 días». 4) Leer la fecha del toast «Pausado — vuelve a tu cartera el …». 5) Abrir la cartera, desplegar «Pausar» en otra card y mirar la fecha mínima que permite el selector.
+- Resultado esperado: La fecha del toast es hoy + 3 días calendario y el mínimo del selector es mañana.
+- Señal de falla: El toast dice hoy + 4 y el selector no deja elegir mañana.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-145] La ficha por bloques no debería avanzar sola al cambiar de pestaña
+- Verifica: [BUG-153] · Prioridad: media
+- Entorno: Local con setter de prueba y un lead en etapa ficha
+- Precondiciones: Lead en FICHA; la ficha se autoguarda.
+- Pasos: 1) Abrir el lead y entrar a la ficha (m1). 2) Completar los campos obligatorios del bloque Instagram hasta que su cabecera diga completo, dejando el cursor dentro de un campo de ese bloque. 3) Cambiar a otra pestaña con Ctrl+Tab (o a otra ventana con Alt+Tab), esperar dos segundos y volver.
+- Resultado esperado: El bloque Instagram sigue abierto con el cursor donde estaba.
+- Señal de falla: El bloque Instagram aparece plegado y quedó abierto el siguiente bloque.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-146] Ficha: pegar más de 5000 caracteres en «Reseñas crudas»
+- Verifica: [BUG-155] · Prioridad: media
+- Entorno: local (npm run dev) con una base de desarrollo propia, nunca la Neon compartida; usuario SETTER de prueba con un lead asignado en stage FICHA
+- Precondiciones: Un lead del setter de prueba sin veredicto registrado.
+- Pasos: 1) Entrar como setter y abrir el lead (aterriza en m1). 2) Abrir el bloque que contiene «Reseñas crudas». 3) Pegar un texto de 5.200 caracteres (por ejemplo, reseñas repetidas).
+- Resultado esperado: El campo avisa que pasó el tope y el texto sigue en pantalla; nada se rompe.
+- Señal de falla: Aparece la pantalla de error («No se pudo abrir este lead» o la del manual) y al reintentar el texto pegado ya no está.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-147] m1: plegar el veredicto descarta lo cargado
+- Verifica: [BUG-156] · Prioridad: media
+- Entorno: local con base propia; usuario SETTER de prueba
+- Precondiciones: Lead en FICHA con señal mínima cargada.
+- Pasos: 1) En m1, con la ficha completa, abrir el bloque «Tu decisión». 2) Elegir score 4, veredicto 'Avanzar' y escribir dos líneas de razonamiento. 3) Hacer clic en la cabecera del bloque 1 de la ficha. 4) Volver a abrir «Tu decisión».
+- Resultado esperado: Score, veredicto y razonamiento siguen cargados, o antes de plegar aparece un aviso.
+- Señal de falla: Los tres campos están vacíos y no hubo aviso.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-148] Construcción: tres tildes seguidos
+- Verifica: [BUG-157] · Prioridad: media
+- Entorno: local con base propia; usuario SETTER de prueba
+- Precondiciones: Dossier en CONSTRUCCION sin fases marcadas.
+- Pasos: 1) Abrir un lead en CONSTRUCCION en la pantalla mc1 (manual/mc1). 2) Tocar los tres tildes de fase en menos de un segundo. 3) Esperar a que terminen los spinners y recargar la página con F5.
+- Resultado esperado: Después de recargar, las tres fases siguen marcadas.
+- Señal de falla: Después de recargar queda marcada una sola fase (la última).
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-149] Opener y notas de traspaso al navegar dentro del manual
+- Verifica: [UX-053] · Prioridad: baja
+- Entorno: local con base propia; usuario SETTER de prueba
+- Precondiciones: Un lead en m4 y otro en RESPONDIO con un horario elegido en m16.
+- Pasos: 1) En m4, escribir un opener sin registrarlo. 2) Tocar un chip de la franja (por ejemplo, el paso de la ficha) o «Volver a tu día». 3) Repetir en m16 con las notas de traspaso escritas.
+- Resultado esperado: Un aviso de que hay trabajo sin registrar, como pasa con el veredicto.
+- Señal de falla: Navega sin preguntar y al volver el texto ya no está.
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-150] Historial del lead: hora en el entorno desplegado
+- Verifica: [BUG-159] · Prioridad: baja
+- Entorno: deploy de preview en Netlify contra base de prueba; usuario SETTER de prueba
+- Precondiciones: Lead en seguimiento.
+- Pasos: 1) Registrar un toque en m5 y anotar la hora local (Argentina). 2) Abrir «Ver historial del lead» al pie de la pantalla. 3) Comparar la hora del evento con la hora anotada.
+- Resultado esperado: La misma hora de Argentina.
+- Señal de falla: La hora aparece 3 h adelantada (UTC).
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-151] Toque en m5 sobre un lead con reunión agendada
+- Verifica: [BUG-160] · Prioridad: media
+- Entorno: dev:qa contra la rama dev de Neon, con el setter QA
+- Precondiciones: Lead QA en stage APROBADA, demo enviada (enviadaAt), status CALL_AGENDADA y agendaJson con reunión (seed scripts/v1-qa-wizard-states.ts o un lead que pasó por m16)
+- Pasos: 1) Entrar como setter QA y abrir /setter/leads/<id>: tiene que aterrizar en m16 'Agendá la reunión' completada 2) Ir a /setter/leads/<id>/manual/m5 (por la franja o escribiendo la URL) 3) Elegir 'Respondió', escribir una nota y tocar 'Registrar resultado' en la barra fija 4) Mirar la cartera del setter (grupo Agendadas) y el kanban de /admin/leads como SUPER_ADMIN 5) Repetir con otro lead igual eligiendo 'Postergar' con fecha
+- Resultado esperado: La acción se rechaza con un mensaje, o el status CALL_AGENDADA no cambia
+- Señal de falla: El lead pasa a 'Respondió' (o 'Postergado'), sale de 'Agendadas' y cambia de columna en el kanban admin
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-152] Alta manual de un negocio que ya está en la cartera de otro setter
+- Verifica: [BUG-161] · Prioridad: media
+- Entorno: dev:qa con dos setters QA
+- Precondiciones: Setter A tiene el lead 'Café QA Duplicado'
+- Pasos: 1) Entrar como setter B y abrir /setter/nuevo 2) Cargar 'Café QA Duplicado' y tocar 'Cargar prospecto' 3) Como setter B, importar en /setter/nuevo/importar un CSV con una fila 'Café QA Duplicado' 4) Como SUPER_ADMIN, buscar el nombre en /admin/leados
+- Resultado esperado: El alta manual avisa o bloquea igual que la importación ('ya en el sistema')
+- Señal de falla: El alta manual crea un segundo lead sin aviso, mientras la importación lo reporta como 'ya en el sistema'
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-153] Retomar un postergado y esperar el próximo toque
+- Verifica: [BUG-162] · Prioridad: media
+- Entorno: dev:qa contra la rama dev de Neon
+- Precondiciones: Lead QA POSTERGADO con reactivateAt vencido, con opener y menos de 3 toques
+- Pasos: 1) Abrir el lead: tiene que estar en 'Para trabajar' con 'Se venció … — retomá el contacto' 2) En m5 registrar 'No respondió — mandé un toque' 3) En la DB dev, mover nextFollowUpAt de ese lead a ayer (o esperar 2 días) 4) Recargar /setter y mirar en qué grupo está el lead y qué dice su card
+- Resultado esperado: El lead vuelve a 'Para trabajar' con 'te toca un toque'
+- Señal de falla: El lead queda en 'seguimiento' con status Postergado y sin fecha, aunque el toque venció
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-154] Digest de Telegram con muchos pendientes
+- Verifica: [BUG-163] · Prioridad: media
+- Entorno: dev con CRON_SECRET y un bot o chat de Telegram de prueba en AgencySettings
+- Precondiciones: Más de 70 leads QA con nextFollowUpAt vencido (rama dev de Neon)
+- Pasos: 1) Llamar GET /api/cron/os-follow-up con Authorization: Bearer <CRON_SECRET de dev> 2) Mirar la respuesta y el log del servidor
+- Resultado esperado: Llega un digest (recortado o en partes) y la respuesta es ok:true
+- Señal de falla: 500 'Telegram send failed' y error de Telegram por mensaje demasiado largo; al día siguiente vuelve a fallar
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-155] APROBADA con link, gate cerrado y toque vencido
+- Verifica: [BUG-164] · Prioridad: media
+- Entorno: dev:qa contra la rama dev de Neon
+- Precondiciones: Lead QA en APROBADA con finalUrl, sin enviadaAt, caliente=false, status DEMO_ENVIADA o VIO_VIDEO y nextFollowUpAt vencido
+- Pasos: 1) Entrar como el setter dueño y abrir /setter 2) Mirar en qué grupo aparece el lead y si es el foco 3) Leer la sugerencia de su card
+- Resultado esperado: Grupo y sugerencia coinciden: o es trabajo accionable, o está en seguimiento
+- Señal de falla: Aparece en 'Para trabajar' (o como foco) con una card que dice que le toca esperar
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
+
+### [VH-156] Importar un CSV exportado de Excel en español
+- Verifica: [UX-055] · Prioridad: media
+- Entorno: dev:qa, Windows con configuración regional Español (Argentina)
+- Precondiciones: —
+- Pasos: 1) Descargar la plantilla en /setter/nuevo/importar 2) Abrirla en Excel, cargar dos negocios con acentos (p. ej. 'Café Ñandú') y guardar como 'CSV (delimitado por comas)' 3) Subir el archivo y leer la vista previa (sin importar)
+- Resultado esperado: Vista previa con 2 negocios y acentos correctos
+- Señal de falla: 'No se puede importar todavía' por encabezados, o nombres con caracteres rotos
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-157] Tiempo de carga del home con carteras grandes
+- Verifica: [PERF-015] · Prioridad: media
+- Entorno: Local (next start o dev:qa) contra una base de desarrollo descartable, nunca la compartida sin coordinar.
+- Precondiciones: Un setter con 50 leads y otro con 1.500 (tres tandas de import de 500).
+- Pasos: 1) Loguearse con cada setter. 2) Cargar /setter tres veces y anotar el TTFB en la pestaña Network de DevTools. 3) Anotar el uso de memoria del proceso de Node durante la carga.
+- Resultado esperado: TTFB por debajo de 1-2 s y memoria estable con las dos carteras.
+- Señal de falla: El TTFB crece de forma lineal con la cartera (más de 3 s con 1.500 leads) o la memoria sube por varios cientos de MB por request.
+- ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción

@@ -1,0 +1,2433 @@
+{
+ "dominio": "D4",
+ "ciclo": "D4-c1",
+ "lote": "D4-L5",
+ "run": "wf_560f9507-743",
+ "fecha": "2026-10-15T19:19:57.407Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/lib/leados/_experimental/fg2-brief-lab.ts",
+    "lineas_total": 375,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/_experimental/fg2-casos-gastro.ts",
+    "lineas_total": 210,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/action-codes.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/agenda.ts",
+    "lineas_total": 392,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/assignment-trail.ts",
+    "lineas_total": 80,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/cola.ts",
+    "lineas_total": 97,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/contracts.ts",
+    "lineas_total": 242,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/copy-blocks.ts",
+    "lineas_total": 261,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/dossier-stage.ts",
+    "lineas_total": 47,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/dossier.ts",
+    "lineas_total": 453,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/error-copy.ts",
+    "lineas_total": 94,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/escalamiento.ts",
+    "lineas_total": 117,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/ficha-bloques.ts",
+    "lineas_total": 259,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/ficha-calidad.ts",
+    "lineas_total": 33,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/flow-content.ts",
+    "lineas_total": 385,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/flow.ts",
+    "lineas_total": 1070,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/foco-cookie.ts",
+    "lineas_total": 39,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/foco.ts",
+    "lineas_total": 75,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/guidance-content.ts",
+    "lineas_total": 1209,
+    "leido_completo": true,
+    "rangos": "1-620, 620-1209"
+   },
+   {
+    "ruta": "src/lib/leados/herramientas.ts",
+    "lineas_total": 162,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/home.ts",
+    "lineas_total": 75,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/leados/isolation.ts",
+    "lineas_total": 272,
+    "leido_completo": true
+   }
+  ],
+  "entradas": [],
+  "flujos": [
+   {
+    "nombre": "Mi día del setter: foco, cola y cartera",
+    "pasos": [
+     "src/app/(protected)/setter/page.tsx:31 buildHomeLeads(leads) (entrada, fuera del lote; la lista sale de ownership.ts:54 con ownedListWhere)",
+     "src/lib/leados/home.ts:24-75 arma HomeLeadInput: vencimientos con Date.now (home.ts:46-57), meta privada por setterId (home.ts:27), finalUrl del dossier (home.ts:65)",
+     "src/lib/leados/flow.ts:629 clasificarLead -> flow.ts:416 grupoPara y flow.ts:482 proximaAccionPara",
+     "setter/page.tsx:44 -> flow.ts:813 particionarCartera (pin/snooze; orden flow.ts:770 ordenFoco con trabajoTier flow.ts:734)",
+     "setter/page.tsx:45 -> src/lib/leados/foco-cookie.ts:36 leerFocoLeadId",
+     "setter/page.tsx:46 -> src/lib/leados/foco.ts:49 seleccionarFoco (sticky solo si el id está en la cola propia, foco.ts:61-62)",
+     "setter/page.tsx:47 -> src/lib/leados/cola.ts:64 armarCola (TOPE_COLA cola.ts:38) -> cola.ts:95 idsEnCola",
+     "setter/page.tsx:72 -> flow.ts:867 contarEnVueloPorTurno -> sale del lote: flow.ts:870 -> src/lib/leados/turno.ts",
+     "cartera-view.tsx:58/64 -> flow.ts:1054 filtrarYOrdenarCartera / flow.ts:983 agruparCartera (vistaDeLead flow.ts:914); home-sections.tsx:42 -> flow.ts:1012 archivoMotivo"
+    ]
+   },
+   {
+    "nombre": "Máquina de stage del dossier (transitionDossier)",
+    "pasos": [
+     "Entradas fuera del lote: setter/_actions/dossier.actions.ts:145, :152, :209, :238, :267, :398 y admin/leados/_actions/revision.actions.ts:78, :106",
+     "src/lib/leados/dossier.ts:120-123 lee el dossier con lead.status y lead.caliente",
+     "dossier.ts:129 valida contra src/lib/leados/dossier-stage.ts:38-47 LEGAL_TRANSITIONS",
+     "dossier.ts:143-147 mergea ESCALADO_RESET (escalamiento.ts:53) y RELOOP_RESET solo si esReloopRechazo (escalamiento.ts:78, :102)",
+     "dossier.ts:149-224 exigencias por destino: EVALUADA parsea EvaluacionSchema (:151), BRIEF gate gateBriefAbierto (flow.ts:81-83), DESCARTADA motivo (:175), APROBADA finalUrl (:196), RECHAZADA historial (:207-219)",
+     "dossier.ts:228-236 updateMany con guard optimista where {leadId, stage: from}",
+     "error -> dossier.actions.ts:73 copyOperativo -> src/lib/leados/error-copy.ts:92"
+    ]
+   },
+   {
+    "nombre": "Ficha de observación -> veredicto -> descarte",
+    "pasos": [
+     "setter/_actions/dossier.actions.ts:100 -> src/lib/leados/dossier.ts:253 saveOwnedFicha (ensureOwnedDossier dossier.ts:83 -> getOwnedLead; FichaSchema contracts.ts:52; guard stage FICHA dossier.ts:266)",
+     "dossier.actions.ts:139 -> src/lib/leados/flow.ts:295 fichaFaltantes (señal mínima; ficha-bloques.ts:136 REQUISITOS la mapea para la UI)",
+     "dossier.actions.ts:145 -> dossier.ts:150-158 EVALUADA (EvaluacionSchema.parse + fecha)",
+     "dossier.actions.ts:151-155 -> dossier.ts:174-189 DESCARTADA (motivo trim, sin re-parse del objeto final)",
+     "lectura: home.ts:39 -> flow.ts:112 parseEvaluacion -> flow.ts:1012 archivoMotivo (home-sections.tsx:42)"
+    ]
+   },
+   {
+    "nombre": "Brief, construcción, chequeo final y envío a revisión",
+    "pasos": [
+     "dossier.actions.ts:205 -> src/lib/leados/dossier.ts:434 saveOwnedBrief (BriefSchema) -> dossier.actions.ts:209 transition BRIEF (gate flow.ts:81)",
+     "m6-brief.tsx:53 -> src/lib/leados/copy-blocks.ts:90 buildBriefInputBlock; m-construccion.tsx:70 -> copy-blocks.ts:177 buildConstruccionBlock (herramientas.ts:157 faltaPorHerramientaSinLink)",
+     "dossier.actions.ts:238 -> CONSTRUCCION; :297 -> dossier.ts:366 saveOwnedProgreso; :326 -> dossier.ts:281 saveOwnedDraftUrl",
+     "dossier.actions.ts:355 -> flow.ts:183 buildSelfCheck -> dossier.ts:334 saveOwnedSelfCheck -> dossier.actions.ts:360 -> flow.ts:204 selfCheckAprobado",
+     "dossier.actions.ts:398 -> dossier.ts:116 transitionDossier EN_REVISION",
+     "escalar: dossier.actions.ts:433 -> dossier.ts:309 marcarEscaladoOwned -> escalamiento.ts:42 buildEscaladoPatch"
+    ]
+   },
+   {
+    "nombre": "Revisión del admin y re-loop del rechazo",
+    "pasos": [
+     "admin/leados/_actions/revision.actions.ts:78 -> src/lib/leados/dossier.ts:191-200 APROBADA (finalUrl obligatoria por revision.schemas.ts:22-25)",
+     "revision.actions.ts:106 -> dossier.ts:202-220 RECHAZADA (historial RechazosSchema contracts.ts:179; topes 280/280/2000 en revision.schemas.ts:35-49)",
+     "re-loop: dossier.actions.ts:267 -> dossier.ts:146 RELOOP_RESET (limpia selfCheckJson, escalamiento.ts:102)",
+     "setter: flow.ts:149 partirRechazos; flow.ts:562-566 sugerencia de retrabajo"
+    ]
+   },
+   {
+    "nombre": "Envío del link de la demo",
+    "pasos": [
+     "manual/_components/m15-envio.tsx:98 -> src/lib/leados/flow.ts:92 gateEnvioDemo",
+     "setter/_actions/outreach.actions.ts:237 re-valida gateEnvioDemo -> :244 -> src/lib/leados/dossier.ts:394 marcarDemoEnviadaOwned (claim por enviadaAt null, dossier.ts:405)",
+     "si falla la creación -> outreach.actions.ts:258 -> dossier.ts:416 revertirDemoEnviadaOwned",
+     "envio-form.tsx:73 -> src/lib/leados/copy-blocks.ts:139 buildDemoMensajeBlock"
+    ]
+   },
+   {
+    "nombre": "Agenda de la reunión (Cal.com)",
+    "pasos": [
+     "setter/_actions/agenda.actions.ts:84-109 gateAgenda (lead propio, status RESPONDIO, sin reunión agendada; cualquier stage)",
+     "agenda.actions.ts:134 -> src/lib/leados/agenda.ts:57 getCalConfigLeadOS (findMany global agenda.ts:58-61)",
+     "ofrecer: agenda.ts:110 rangoOferta -> sale del lote: src/lib/integrations/cal-com-v2.ts:50 getSlots -> agenda.ts:122 elegirTresSlots -> agenda.actions.ts:154 -> agenda.ts:270 guardarHorariosOfrecidosOwned",
+     "confirmar: agenda.actions.ts:190 getSlots -> agenda.ts:155 slotSigueLibre -> agenda.actions.ts:204 -> agenda.ts:194 marcarAgendandoOwned (claim)",
+     "sale del lote: agenda.actions.ts:213 -> src/lib/integrations/cal-com-v2.ts:108 createBooking (sin auth, por username)",
+     "agenda.actions.ts:236 -> agenda.ts:324 guardarAgendaOwned -> registrarContactoComercial (os-commercial, fuera del lote)",
+     "compensaciones: agenda.actions.ts:223 -> agenda.ts:235 revertirAgendandoOwned; agenda.actions.ts:257 -> agenda.ts:300 revertirAgendaConfirmadaOwned"
+    ]
+   },
+   {
+    "nombre": "Cierre post-reunión (admin) y su efecto en el panel del setter",
+    "pasos": [
+     "admin/leads/_actions/reunion.actions.ts:50 -> src/lib/leados/agenda.ts:348 marcarReunionRealizadaAdmin",
+     "reunion.actions.ts:71 -> agenda.ts:365 guardarResultadoReunionAdmin (mantiene estado AGENDADA) -> reunion.actions.ts:81-84 status (GANADO->CERRADO, PERDIDO, RE_SEGUIMIENTO->RESPONDIO)",
+     "setter: flow.ts:416-445 grupoPara (CERRADO no se archiva); agenda.actions.ts:108 bloquea re-agendar tras RE_SEGUIMIENTO"
+    ]
+   },
+   {
+    "nombre": "Reasignación de lead y rastro",
+    "pasos": [
+     "admin/leads/_actions/lead.actions.ts:180 -> src/lib/leados/assignment-trail.ts:42 registrarReasignacion (canal SISTEMA, result null)",
+     "manual/_data.ts:154 -> assignment-trail.ts:68 getUltimaAsignacion (getOwnedLead assignment-trail.ts:72)",
+     "las lecturas comerciales excluyen SISTEMA: isolation.ts:116-118"
+    ]
+   },
+   {
+    "nombre": "Alta propia de prospecto",
+    "pasos": [
+     "setter/_actions/prospecto.actions.ts:29 -> src/lib/leados/isolation.ts:80 ownedLeadCreateData (assignedToId del userId isolation.ts:95, caliente false :96, source Setter :97)"
+    ]
+   },
+   {
+    "nombre": "Laboratorio FG-2 (admin, experimental)",
+    "pasos": [
+     "admin/fg2-lab/page.tsx:17 (guard heredado de admin/layout.tsx:47) -> fg2-lab-client.tsx:136 -> src/lib/leados/_experimental/fg2-brief-lab.ts:231 assembleGastroPrompt",
+     "fg2-brief-lab.ts:318 estimarCostoPrompt -> fg2-brief-lab.ts:362 buildLogRowTsv; casos precargados fg2-casos-gastro.ts:46"
+    ]
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "La agenda de LeadOS toma la cuenta de Cal.com de cualquier organización con el campo cargado, incluidas las de clientes",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 58,
+      "fragmento": "const orgs = await prisma.organization.findMany({\n  where: { calComUsername: { not: null } },"
+     },
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 86,
+      "fragmento": "const [org] = orgs\nconst username = org.calComUsername?.trim()"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+      "linea": 213,
+      "fragmento": "const booking = await createBooking({\n  username: config.username,\n  eventTypeSlug: config.eventTypeSlug,"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+      "linea": 217,
+      "fragmento": "attendee: { name: nombre, email },\nmetadata: { leadId },"
+     },
+     {
+      "ruta": "src/lib/integrations/cal-com-v2.ts",
+      "linea": 10,
+      "fragmento": "POST /v2/bookings         → SIN auth"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+      "linea": 325,
+      "fragmento": "select: { calComApiKey: true, calComUsername: true, calComEmbedUrl: true },"
+     },
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 64,
+      "fragmento": "console.warn(\n  '[leados agenda] Cal.com sin configurar: ninguna Organization tiene calComUsername. ' +"
+     }
+    ],
+    "impacto": "Las mismas columnas las usa la Agenda inteligente de los clientes. Bloqueante para el primer cliente con ese módulo: si la org de develOP también tiene el campo, la agenda del setter queda bloqueada por 'ambigüedad'; si develOP no lo tiene, las reuniones de prospectos de develOP se reservan en el calendario público del cliente con nombre, email del prospecto y el id interno del lead (fuga de datos a otro tenant y reuniones perdidas). La configuración faltante o ambigua solo se avisa con console.warn, sin Sentry.",
+    "propuesta": "Resolver la cuenta de Cal.com de develOP de forma explícita (AgencySettings, variable de entorno con el slug de la org de develOP o un campo propio de LeadOS), nunca como 'la única org que tenga el campo'. Avisar la config faltante por Sentry o alerta. Coordinar con Franco: es su zona.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-lead",
+     "h5.set-lead.agenda-reunion",
+     "lib.leados",
+     "int.calcom",
+     "modelo.Organization",
+     "h2.cli-agenda"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "PLAN-902; patrón D1-c1 (fallos que solo hacen console.*)"
+   },
+   {
+    "titulo": "Un lead ganado (CERRADO) vuelve a la cola de trabajo del setter, a veces como foco",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 417,
+      "fragmento": "if (input.status === 'PERDIDO' || input.stage === 'DESCARTADA') return 'archivo'"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 73,
+      "fragmento": "'CERRADO',"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 740,
+      "fragmento": "if (lead.stage === 'EVALUADA' && lead.gateAbierto) return TRABAJO_TIER.CONSTRUIR"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_actions/reunion.actions.ts",
+      "linea": 29,
+      "fragmento": "GANADO: LeadStatus.CERRADO,"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+      "linea": 99,
+      "fragmento": "if (lead.status !== LeadStatus.RESPONDIO) {"
+     },
+     {
+      "ruta": "src/lib/leados/revision.ts",
+      "linea": 27,
+      "fragmento": "export const ESTADOS_TERMINALES: LeadStatus[] = ['CERRADO', 'PERDIDO']"
+     },
+     {
+      "ruta": "src/lib/leados/ownership.ts",
+      "linea": 54,
+      "fragmento": "where: ownedListWhere(userId),"
+     }
+    ],
+    "impacto": "La agenda solo exige RESPONDIO, así que un lead puede tener la reunión antes de que exista la demo. Si Franco marca GANADO, el lead pasa a CERRADO y no se archiva: con stage EVALUADA queda primero en la cola ('Decidí cómo va a ser la demo', tier CONSTRUIR); con la demo aprobada y sin mandar dice 'mandá el link al negocio'; con la demo enviada queda para siempre en 'En seguimiento'. Antes del primer cliente real, el setter puede construir o mandar una demo a un cliente que ya compró.",
+    "propuesta": "Tratar CERRADO como terminal en grupoPara y proximaAccionPara, usando ESTADOS_TERMINALES, con una vista propia ('Ganados') en VISTAS_CARTERA. Sumar el caso a los invariantes de partición y de vista-cartera.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-dia",
+     "h5.set-dia.foco-y-cola",
+     "h5.set-dia.cartera-vistas-y-filtros",
+     "h4.adm-leads.cierre-post-reunion",
+     "lib.leados",
+     "modelo.OsLead"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "A-09 (archivo categorizado)"
+   },
+   {
+    "titulo": "Tras un resultado RE_SEGUIMIENTO la reunión vieja sigue 'agendada' y el setter no puede volver a agendar",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/admin/leads/_actions/reunion.actions.ts",
+      "linea": 31,
+      "fragmento": "RE_SEGUIMIENTO: LeadStatus.RESPONDIO,"
+     },
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 373,
+      "fragmento": "const parsed = AgendaSchema.parse({\n  ...agenda,\n  resultado: { tipo, fecha: new Date().toISOString(), nota },"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 171,
+      "fragmento": "return agenda?.estado === 'AGENDADA' && Boolean(agenda.calBookingUid)"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+      "linea": 108,
+      "fragmento": "if (reunionAgendada(parseAgenda(dossier.agendaJson))) {\n  return { ok: false, resultado: fail('Este lead ya tiene la reunión agendada') }"
+     },
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 174,
+      "fragmento": "const PARTIDA_RECLAMABLE: Prisma.OsLeadDossierWhereInput[] = [\n  { agendaJson: { equals: Prisma.AnyNull } },\n  { agendaJson: { path: ['estado'], equals: 'OFRECIDOS' } },"
+     }
+    ],
+    "impacto": "El resultado 'volver a seguimiento' devuelve el lead a RESPONDIO, pero el blob de agenda sigue en AGENDADA. Ofrecer horarios y confirmar quedan bloqueados con 'Este lead ya tiene la reunión agendada', así que una segunda reunión solo se coordina por fuera del panel.",
+    "propuesta": "Al registrar RE_SEGUIMIENTO, mover la reunión vieja a un historial y dejar la agenda reclamable, o aceptar 'AGENDADA con resultado RE_SEGUIMIENTO' como estado de partida en PARTIDA_RECLAMABLE y en gateAgenda. Decisión con Franco.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-lead.agenda-reunion",
+     "h4.adm-leads.cierre-post-reunion",
+     "lib.leados",
+     "modelo.OsLeadDossier"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "docs/b8a-auditoria.md:37 [H2]"
+   },
+   {
+    "titulo": "Tres herramientas del recorrido siguen sin link y el evaluador retirado sigue en el rail",
+    "prefijo": "FAL",
+    "severidad": "MEDIA",
+    "tipo": "faltante",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/herramientas.ts",
+      "linea": 78,
+      "fragmento": "url: null, // TODO: URL — Gem privado de diseño/brief (pedir a Franco)"
+     },
+     {
+      "ruta": "src/lib/leados/herramientas.ts",
+      "linea": 90,
+      "fragmento": "url: null, // TODO: URL — acceso a Claude Design que usa el equipo (pedir a Franco)"
+     },
+     {
+      "ruta": "src/lib/leados/herramientas.ts",
+      "linea": 117,
+      "fragmento": "url: null, // TODO: URL — Gem privado de outreach (pedir a Franco)"
+     },
+     {
+      "ruta": "src/lib/leados/herramientas.ts",
+      "linea": 123,
+      "fragmento": "'evaluador',"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+      "linea": 26,
+      "fragmento": "{HERRAMIENTAS_ORDEN.map((id) => {"
+     },
+     {
+      "ruta": "src/lib/leados/guidance-content.ts",
+      "linea": 474,
+      "fragmento": "SETTER. Hasta acá el veredicto salía de un chat de evaluación externo y el\nsetter transcribía la respuesta; el chat quedó afuera"
+     }
+    ],
+    "impacto": "El setter no puede abrir el Gem de diseño, Claude Design ni el Gem de outreach desde el panel: ve 'Link pendiente' y el brief viaja sin la respuesta del Gem (copy-blocks.ts:251-257). El rail ofrece el 'Chat de evaluación', que desde D15-bis no usa ninguna pantalla. Ningún ToolGuide usa id='evaluador'.",
+    "propuesta": "Franco carga las tres URLs reales en herramientas.ts. Sacar 'evaluador' del registro y de HERRAMIENTAS_ORDEN, ajustando tests/setter/16-municiones-salida.spec.ts:128-132, que falla a propósito.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-manual",
+     "h5.set-manual.guia-y-herramientas",
+     "h5.set-lead.brief-y-construccion",
+     "lib.leados"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-917, PLAN-854, PLAN-783; alerta D4-A2"
+   },
+   {
+    "titulo": "Una demo APROBADA con link, gate cerrado y toque vencido entra a 'Para trabajar' con una sugerencia de espera",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 438,
+      "fragmento": "if (input.finalUrl === null && !input.demoEnviada) return 'seguimiento'"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 441,
+      "fragmento": "if (input.followUpVencido) return 'trabajar'"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 539,
+      "fragmento": "if (!input.demoEnviada) {\n  return esperaDe(\n    input,"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 745,
+      "fragmento": "if (lead.followUpVencido || lead.postergadoVencido) return TRABAJO_TIER.ESPERA_TU_ACCION"
+     }
+    ],
+    "impacto": "P23 corrigió solo el caso sin link. Con el link cargado, si Franco desmarca 'caliente' a un lead que no respondió y tiene un toque vencido, el lead entra a la cola en el tier 1 (puede ser el foco) con accionable=false y una sugerencia de espera. Es la misma incoherencia que el comentario de flow.ts:434-436 dice evitar. Es un caso raro.",
+    "propuesta": "Aplicar a esta rama la misma regla que al caso sin link, o hacer que proximaAccionPara ofrezca el toque (sin link) como acción.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-dia.foco-y-cola",
+     "lib.leados"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-713; alerta D4-A1"
+   },
+   {
+    "titulo": "El bloqueo de links del opener rechaza mensajes sin link ('...me encantó', 'cuenta.Me')",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 218,
+      "fragmento": "const LINK_PATTERN =\n  /(https?:\\/\\/|www\\.|wa\\.me\\/|bit\\.ly\\/|linktr\\.ee\\/|\\S+\\.(com|com\\.ar|ar|net|org|io|app|dev|shop|online|site|me)\\b)/i"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/_actions/outreach.schemas.ts",
+      "linea": 41,
+      "fragmento": "(texto) => !contieneLink(texto),"
+     }
+    ],
+    "impacto": "El patrón '\\S+\\.me\\b' (sin distinguir mayúsculas) matchea puntos suspensivos o un punto sin espacio seguidos de 'me', algo muy común en DMs: 'Hola!...me encantó tu local' o 'Vi tu cuenta.Me gustó'. Se probó con grep -P sobre esas frases. El server rechaza el opener con 'El link NO va en el opener' y el setter no encuentra ningún link. La salida es agregar un espacio.",
+    "propuesta": "Exigir forma de dominio: sin puntos consecutivos antes del TLD y TLD seguido de fin, espacio o barra. Sumar los casos negativos ('...me', 'palabra.Me') al invariante o spec del opener.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-lead.opener-sin-link",
+     "lib.leados"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-877"
+   },
+   {
+    "titulo": "Descartar: el motivo no tiene tope y se guarda sin re-validar; si pasa los 5000 caracteres la evaluación entera deja de leerse",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/(protected)/setter/_actions/dossier.schemas.ts",
+      "linea": 29,
+      "fragmento": "razonamiento: z.string().trim().min(1, 'Escribí por qué le pusiste ese score'),\nmotivoDescarte: z\n  .string()"
+     },
+     {
+      "ruta": "src/lib/leados/dossier.ts",
+      "linea": 185,
+      "fragmento": "data.evaluacionJson = {\n  ...evaluacion.data,\n  motivoDescarte: motivo,"
+     },
+     {
+      "ruta": "src/lib/leados/contracts.ts",
+      "linea": 97,
+      "fragmento": "motivoDescarte: textoLibre,"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 112,
+      "fragmento": "export function parseEvaluacion(json: unknown): Evaluacion | null {\n  const parsed = EvaluacionSchema.safeParse(json)"
+     },
+     {
+      "ruta": "src/lib/leados/contracts.ts",
+      "linea": 4,
+      "fragmento": "Regla: todo write a `fichaJson` / `evaluacionJson` / `briefJson` /\n`selfCheckJson` / `rechazos` se parsea con estos schemas ANTES de tocar"
+     }
+    ],
+    "impacto": "Un pegado largo en el motivo (el caso para el que existe el tope de 5000, contracts.ts:20-22) se guarda igual. Después parseEvaluacion devuelve null y el lead descartado pierde en el panel el score, el veredicto, el razonamiento y el motivo del archivo (archivoMotivo devuelve null). Los datos quedan en la base pero invisibles. 'razonamiento' no tiene tope ni en el input ni en el contrato. El par EVALUADA->DESCARTADA son dos transiciones separadas (dossier.actions.ts:145, :152): si falla la segunda, el lead queda en EVALUADA con score 1-2.",
+    "propuesta": "Poner un max en motivoDescarte y razonamiento, en el input y en EvaluacionSchema. En la rama DESCARTADA, re-parsear el objeto final con EvaluacionSchema antes del update, como pide la regla del contrato.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-lead.ficha-y-veredicto",
+     "lib.leados",
+     "modelo.OsLeadDossier"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c3 (texto libre sin .max())"
+   },
+   {
+    "titulo": "Cierre post-reunión: el blob de agenda se reescribe entero y el status va aparte, sin atomicidad",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 352,
+      "fragmento": "const parsed = AgendaSchema.parse({ ...agenda, realizadaAt: new Date().toISOString() })\nconst updated = await prisma.osLeadDossier.updateMany({\n  where: { leadId, agendaJson: { path: ['estado'], equals: 'AGENDADA' } },"
+     },
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 371,
+      "fragmento": "if (!agenda || agenda.resultado) return false"
+     },
+     {
+      "ruta": "src/app/(protected)/admin/leads/_actions/reunion.actions.ts",
+      "linea": 81,
+      "fragmento": "await prisma.osLead.update({\n  where: { id: parsed.leadId },\n  data: { status, reactivateAt: null },"
+     }
+    ],
+    "impacto": "Si el update del status falla después de guardar el resultado, el lead queda con resultado pero sigue en CALL_AGENDADA. El reintento se rechaza con 'ya tiene resultado', porque la regla 'una sola vez' vive en agenda.ts:371. Además, marcar 'realizada' y registrar el resultado al mismo tiempo (dos pestañas) se pisan: cada uno reescribe el blob leído antes. La action devuelve error.message crudo (reunion.actions.ts:90-92).",
+    "propuesta": "Guardar el resultado y el status en una transacción. Condicionar el where a realizadaAt/resultado nulos (por path) o mergear el campo en vez de reescribir el blob.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h4.adm-leads.cierre-post-reunion",
+     "lib.leados",
+     "modelo.OsLeadDossier"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "patrón D1-c1 (mensajes internos al cliente)"
+   },
+   {
+    "titulo": "La oferta de horarios calcula el rango con el día UTC: de noche no ofrece los horarios de mañana",
+    "prefijo": "BUG",
+    "severidad": "BAJA",
+    "tipo": "bug",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 110,
+      "fragmento": "export function rangoOferta(desde: Date = new Date()): { start: string; end: string } {\n  const start = new Date(desde.getTime() + 24 * 60 * 60 * 1000)"
+     },
+     {
+      "ruta": "src/lib/leados/agenda.ts",
+      "linea": 113,
+      "fragmento": "return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) }"
+     }
+    ],
+    "impacto": "Entre las 21:00 y las 23:59 hora AR (00:00 a 02:59 UTC del día siguiente), now+24h cae en el día UTC de pasado mañana, así que el primer día ofrecido saltea mañana. Depende de cómo interpreta Cal.com el 'start' (cal-com-v2.ts, fuera del lote).",
+    "propuesta": "Calcular start y end con el día calendario AR, usando el helper de src/lib/dates-ar.ts.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-lead.agenda-reunion",
+     "lib.leados",
+     "int.calcom"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "memoria: helper de fechas AR (dates-ar.ts)"
+   },
+   {
+    "titulo": "Guía y exports sin consumidores, uno de ellos con una regla de gate que ya no existe",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/guidance-content.ts",
+      "linea": 526,
+      "fragmento": "'El score marca el camino: ',\n{ enfasis: '1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad' },\n' (y deja construir la demo sin esperar respuesta). La mayoría son 3 —fríos— y eso está bien: es el caso normal.',"
+     },
+     {
+      "ruta": "src/lib/leados/guidance-content.ts",
+      "linea": 643,
+      "fragmento": "export const GUIA_CONSTRUCCION = {"
+     },
+     {
+      "ruta": "src/lib/leados/guidance-content.ts",
+      "linea": 887,
+      "fragmento": "const GUIA_TRASPASO = {"
+     },
+     {
+      "ruta": "src/lib/leados/guidance-content.ts",
+      "linea": 958,
+      "fragmento": "aprobada: ["
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 653,
+      "fragmento": "export function agruparParaHome(inputs: HomeLeadInput[]): Record<HomeGroupKey, HomeLead[]> {"
+     },
+     {
+      "ruta": "src/lib/leados/contracts.ts",
+      "linea": 118,
+      "fragmento": "referenciasFicha: textoLibre,"
+     },
+     {
+      "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx",
+      "linea": 214,
+      "fragmento": "<TeachPanel id=\"objeciones\" collapsible={false} />"
+     }
+    ],
+    "impacto": "TeachPanel solo se invoca con 'objeciones' y 'selfCheck'. GUIA_CONSTRUCCION, GUIA_TRASPASO, GUIA_REVISION.aprobada, GUIA_EVALUACION.porque/ejemplos, SelfCheckRazon y agruparParaHome no tienen lectores. El 'porque' de la evaluación enseña que un score 4–5 abre la construcción sin respuesta, lo que contradice gateBriefAbierto (flow.ts:81-83, que mira solo el campo caliente): si se conecta un TeachPanel 'evaluacion', enseña una regla falsa. referenciasFicha no tiene lector y se borra en cada re-guardado del brief (brief-form.tsx:38).",
+    "propuesta": "Borrar el contenido y los exports muertos, o corregir el 'porque' de la evaluación si se piensa usar. Sacar referenciasFicha del contrato.",
+    "esfuerzo": "S",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-manual.guia-y-herramientas",
+     "lib.leados"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-926, PLAN-873, PLAN-703, PLAN-688, PLAN-857, PLAN-795; A-07"
+   },
+   {
+    "titulo": "Blobs del dossier acoplados a texto visible o a enums: un renombre los invalida sin error",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 188,
+      "fragmento": "itemsDuros: HARD_CHECKS.map((check) => ({\n  nombre: check.nombre,\n  ok: duros[check.id] === true,"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 207,
+      "fragmento": "selfCheck.itemsDuros.some((item) => item.nombre === check.nombre && item.ok),"
+     },
+     {
+      "ruta": "src/lib/leados/contracts.ts",
+      "linea": 126,
+      "fragmento": "z.object({\n  nombre: z.string().trim().min(1),\n  ok: z.boolean(),"
+     },
+     {
+      "ruta": "src/lib/leados/flow.ts",
+      "linea": 133,
+      "fragmento": "export function parseProgreso(json: unknown): Progreso {\n  const parsed = ProgresoSchema.safeParse(json)\n  return parsed.success ? parsed.data : { completadas: [] }"
+     }
+    ],
+    "impacto": "El self-check se une a la lista por el texto visible: corregir una coma desaprueba todos los chequeos guardados. Un id de fase muerto vacía el checklist entero de cada setter, sin log. Hoy un invariante lo frena (self-check-gate.invariant.ts:134-178), pero la causa sigue y pasar a id es destructivo.",
+    "propuesta": "Guardar el id junto al nombre con lectura tolerante (por id y, si falta, por nombre) y parsear el progreso ítem por ítem. Decisión de Franco.",
+    "esfuerzo": "M",
+    "zona": "ZONA-FRANCO",
+    "nodos": [
+     "h5.set-lead.chequeo-final-y-revision",
+     "h5.set-lead.brief-y-construccion",
+     "lib.leados",
+     "modelo.OsLeadDossier"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "PLAN-892, PLAN-905, PLAN-876, PLAN-907; A3 B3"
+   }
+  ],
+  "funcionalidades": [
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.foco-y-cola",
+    "nombre": "Foco del día y cola visible",
+    "descripcion": "Elige un lead accionable (con sticky por cookie) y arma la cola de hasta 5 con el motivo de cada posición.",
+    "archivos": [
+     "src/lib/leados/flow.ts",
+     "src/lib/leados/foco.ts",
+     "src/lib/leados/cola.ts",
+     "src/lib/leados/foco-cookie.ts",
+     "src/lib/leados/home.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/page.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "setter/page.tsx:31 -> home.ts:24 -> flow.ts:629 -> setter/page.tsx:44 -> flow.ts:813 -> foco.ts:49 -> cola.ts:64; no llega a L3 por los leads CERRADO en la cola (flow.ts:417) y la APROBADA no accionable (flow.ts:441)",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "lista por ownedListWhere (isolation.ts:34, ownership.ts:54); meta por setterId (isolation.ts:108); sticky solo si el lead está en la cola propia (foco.ts:61-62)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "foco null -> cola vacía (foco.ts:54-56, cola.ts:69); el mensaje 'todo en espera' se pinta fuera del lote (no verificado)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "setter/error.tsx:32 con Sentry.captureException"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "src/app/(protected)/setter/loading.tsx existe (git ls-files)"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "solo lectura; la cookie se valida por pertenencia (foco.ts:61)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura sin layout; la UI está fuera del lote"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "setter/error.tsx:32"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO/FIXME en flow.ts, foco.ts, cola.ts, home.ts (git grep)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "un lead ganado vuelve a 'trabajar' (flow.ts:416-445) y una APROBADA no accionable puede ser el foco (flow.ts:441)"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-dia",
+    "id": "h5.set-dia.cartera-vistas-y-filtros",
+    "nombre": "Cartera agrupada, búsqueda, filtros y archivo por causa",
+    "descripcion": "Agrupa la cartera por vista (trabajar, seguimiento, revisión, agendadas, pausados, postergados, descartados, perdidos), con búsqueda sin tildes y cuatro órdenes.",
+    "archivos": [
+     "src/lib/leados/flow.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_components/cartera-view.tsx",
+     "src/app/(protected)/setter/_components/home-sections.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "cartera-view.tsx:58 -> flow.ts:1054; cartera-view.tsx:64 -> flow.ts:983 -> flow.ts:914; home-sections.tsx:42 -> flow.ts:1012",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "misma lista propia (ownership.ts:54); la nota es privada por setterId (isolation.ts:108)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "agruparCartera devuelve solo grupos con leads (flow.ts:980-996); el vacío total se pinta fuera del lote"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "setter/error.tsx:32"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "setter/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "filtro en memoria sobre datos ya aislados"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "setter/error.tsx:32"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO en flow.ts"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "no hay vista para ganados: CERRADO cae en trabajar o seguimiento (VISTAS_CARTERA flow.ts:943-956)"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-lead",
+    "id": "h5.set-lead.ficha-y-veredicto",
+    "nombre": "Ficha de observación y veredicto del setter",
+    "descripcion": "Guarda la ficha con autosave, exige la señal mínima y registra score/veredicto; score 1-2 descarta con motivo.",
+    "archivos": [
+     "src/lib/leados/dossier.ts",
+     "src/lib/leados/contracts.ts",
+     "src/lib/leados/flow.ts",
+     "src/lib/leados/ficha-bloques.ts",
+     "src/lib/leados/ficha-calidad.ts",
+     "src/lib/leados/error-copy.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_actions/dossier.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "dossier.actions.ts:100 -> dossier.ts:253-274; dossier.actions.ts:139 -> flow.ts:295; :145 -> dossier.ts:150-158; :152 -> dossier.ts:174-189",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "ensureOwnedDossier/getOwnedDossier derivan de getOwnedLead (dossier.ts:73, :87)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "fichaFaltantes devuelve qué falta en lenguaje del setter (flow.ts:295-310)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "error-copy.ts:92 copyOperativo (dossier.actions.ts:73); [leadId]/error.tsx:35"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "setter/leads/[leadId]/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "FichaSchema.parse (dossier.ts:263) y EvaluacionSchema.parse (dossier.ts:151); motivoDescarte y razonamiento sin tope, y DESCARTADA no re-parsea (dossier.ts:185-188)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "[leadId]/error.tsx:35"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO en dossier.ts, contracts.ts y ficha-*.ts"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "recorrido por fuentes sin bloqueo (ficha-bloques.ts:216-235) y gate explicado"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-lead",
+    "id": "h5.set-lead.brief-y-construccion",
+    "nombre": "Brief de diseño y construcción guiada",
+    "descripcion": "Captura el brief (gate respondió o caliente), arma los bloques para el Gem y Claude Design, registra el progreso por fase y el borrador.",
+    "archivos": [
+     "src/lib/leados/dossier.ts",
+     "src/lib/leados/copy-blocks.ts",
+     "src/lib/leados/flow-content.ts",
+     "src/lib/leados/herramientas.ts",
+     "src/lib/leados/contracts.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_actions/dossier.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "dossier.actions.ts:205 -> dossier.ts:434; :209 -> dossier.ts:160-172; m-construccion.tsx:70 -> copy-blocks.ts:177; :297 -> dossier.ts:366; :326 -> dossier.ts:281",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "getOwnedDossier en cada write (dossier.ts:286, :371, :439)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "los bloques omiten lo vacío y nombran el faltante por herramienta sin link (copy-blocks.ts:27-31, :251-257)"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "mensajes del motor traducidos (error-copy.ts:34-79)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "[leadId]/loading.tsx y manual/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "BriefSchema.parse (dossier.ts:444), ProgresoSchema.parse (dossier.ts:376); draftUrl validada en la action (dossier.actions.ts:326, fuera del lote)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "[leadId]/manual/error.tsx:30"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "herramientas.ts:78 y :90 con TODO url null; SHELL_CONSTRUCCION marcado PROVISORIO (flow-content.ts:42)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "sin link al Gem de diseño ni a Claude Design el setter depende de Franco (herramientas.ts:78, :90)"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-lead",
+    "id": "h5.set-lead.chequeo-final-y-revision",
+    "nombre": "Chequeo final y envío a revisión",
+    "descripcion": "Self-check de 10 obligatorios y 4 delatores; el server arma los nombres y valida el gate antes de EN_REVISION.",
+    "archivos": [
+     "src/lib/leados/flow.ts",
+     "src/lib/leados/flow-content.ts",
+     "src/lib/leados/dossier.ts",
+     "src/lib/leados/escalamiento.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_actions/dossier.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "dossier.actions.ts:355 -> flow.ts:183 -> dossier.ts:334 -> flow.ts:204 -> dossier.actions.ts:398 -> dossier.ts:116",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "getOwnedDossier (dossier.ts:339)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "no es una colección"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "error-copy.ts:68-69"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "manual/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "los nombres los arma el server desde HARD_CHECKS (flow.ts:188); SelfCheckSchema.parse (dossier.ts:344); gate contra la lista vigente (flow.ts:206)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "manual/error.tsx:30"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO en el gate"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "cada obligatorio trae cómo verificar y el arreglo (flow-content.ts:171-261)"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-lead",
+    "id": "h5.set-lead.escalar-me-trabe",
+    "nombre": "Pedir ayuda durante la construcción",
+    "descripcion": "Marca el dossier como escalado con nota; se resetea en toda transición.",
+    "archivos": [
+     "src/lib/leados/dossier.ts",
+     "src/lib/leados/escalamiento.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_actions/dossier.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "dossier.actions.ts:433 -> dossier.ts:309-327 -> escalamiento.ts:42-45; reset dossier.ts:145",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "getOwnedDossier (dossier.ts:314)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "error-copy.ts:63-66"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "manual/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "trim y tope de 1000 (escalamiento.ts:26, :43); stage CONSTRUCCION (dossier.ts:316)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "manual/error.tsx:30"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "persistido aunque falle Telegram (dossier.ts:301-308)"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-lead",
+    "id": "h5.set-lead.envio-demo",
+    "nombre": "Envío del link de la demo aprobada",
+    "descripcion": "Gate de envío (APROBADA + finalUrl + respondió o caliente), claim idempotente y mensaje base con el link.",
+    "archivos": [
+     "src/lib/leados/flow.ts",
+     "src/lib/leados/dossier.ts",
+     "src/lib/leados/copy-blocks.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_actions/outreach.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "m15-envio.tsx:98 -> flow.ts:92; outreach.actions.ts:237 -> :244 -> dossier.ts:394-409 -> (falla) outreach.actions.ts:258 -> dossier.ts:416",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "getOwnedDossier (dossier.ts:398, :420)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "error-copy.ts:74-75; outreach.actions.ts:54 copyOperativo"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "manual/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "gate re-validado en el server (outreach.actions.ts:237); claim atómico (dossier.ts:404-407)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "manual/error.tsx:30"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "las cuatro esperas explicadas (guidance-content.ts:994-1050)"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-lead",
+    "id": "h5.set-lead.opener-sin-link",
+    "nombre": "Opener sin link y seguimiento por cadencia",
+    "descripcion": "Bloquea links en el primer mensaje, arma los bloques para el Gem de outreach y muestra el estado de la cadencia +2/+2/+3.",
+    "archivos": [
+     "src/lib/leados/flow.ts",
+     "src/lib/leados/flow-content.ts",
+     "src/lib/leados/copy-blocks.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_actions/outreach.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "opener-form.tsx:38 -> flow.ts:221; outreach.schemas.ts:41 -> flow.ts:221; m4-opener.tsx:52 -> copy-blocks.ts:110; estado-manual.tsx:83 -> flow.ts:243",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "reglas puras; la escritura vive en outreach.actions (fuera del lote)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "no es una colección"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "gate explicado (guidance-content.ts:779-788)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "manual/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "parcial",
+      "evidencia": "contieneLink en el schema del server (outreach.schemas.ts:41), con falsos positivos (flow.ts:218-219)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "si",
+      "evidencia": "manual/error.tsx:30"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "Gem de outreach sin url (herramientas.ts:117)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "un falso positivo bloquea el registro del opener sin decir dónde está el 'link'"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-lead",
+    "id": "h5.set-lead.agenda-reunion",
+    "nombre": "Agendar la reunión con Cal.com",
+    "descripcion": "Ofrece 3 horarios reales con memoria, claim anti doble click, booking y compensaciones.",
+    "archivos": [
+     "src/lib/leados/agenda.ts",
+     "src/lib/leados/contracts.ts",
+     "src/lib/leados/action-codes.ts",
+     "src/lib/leados/copy-blocks.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_actions/agenda.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "agenda.actions.ts:134 -> agenda.ts:57; :154 -> agenda.ts:270; :204 -> agenda.ts:194; :213 -> cal-com-v2.ts:108; :236 -> agenda.ts:324; compensaciones :223 -> agenda.ts:235 y :257 -> agenda.ts:300",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "no",
+      "evidencia": "los writes van por getOwnedDossier, pero la cuenta de Cal.com sale de un findMany global de organizaciones (agenda.ts:58-61)"
+     },
+     "vacios": {
+      "cumple": "parcial",
+      "evidencia": "elegirTresSlots devuelve lo que haya (agenda.ts:122-148); el 'sin horarios' se pinta fuera del lote"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "AGENDA_NO_CONECTADA en lenguaje del setter (agenda.ts:46-48); SLOT_OCUPADO (action-codes.ts:18)"
+     },
+     "carga": {
+      "cumple": "si",
+      "evidencia": "manual/loading.tsx"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "AgendaSchema.parse en cada write (agenda.ts:283, :332); slot re-validado (agenda.ts:155)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "config faltante o ambigua solo por console.warn (agenda.ts:64, :74, :90)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO en agenda.ts"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "tras RE_SEGUIMIENTO no se puede re-agendar (agenda.actions.ts:108); la config la carga Franco a mano (agenda.ts:24)"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-manual",
+    "id": "h5.set-manual.guia-y-herramientas",
+    "nombre": "Guía por paso y rail de herramientas externas",
+    "descripcion": "Copy de enseñanza (porqué, ejemplos, gates explicados) y accesos a las herramientas externas con 'Link pendiente'.",
+    "archivos": [
+     "src/lib/leados/guidance-content.ts",
+     "src/lib/leados/herramientas.ts",
+     "src/lib/leados/flow-content.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_components/teach-panel.tsx",
+     "src/app/(protected)/setter/_components/tools-rail.tsx"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "teach-panel.tsx:100 -> guidance-content.ts:1197; tools-rail.tsx:26 -> herramientas.ts:122; m-construccion.tsx:135 ToolGuide claudeDesign",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "n/a",
+      "evidencia": "contenido estático"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "contenido estático"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "contenido estático"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "contenido estático"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin entrada de usuario"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "sin I/O"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "4 TODO url null (herramientas.ts:63, :78, :90, :117); contenido muerto con una regla vieja (guidance-content.ts:526-528)"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "tres herramientas no se pueden abrir desde el panel"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.adm-revision-demos",
+    "id": "h5.adm-revision-demos.aprobar-rechazar",
+    "nombre": "Aprobar o rechazar la demo",
+    "descripcion": "El admin aprueba con la URL permanente o rechaza con qué, dónde y arreglo; el rechazo reabre la construcción y limpia el self-check.",
+    "archivos": [
+     "src/lib/leados/dossier.ts",
+     "src/lib/leados/dossier-stage.ts",
+     "src/lib/leados/escalamiento.ts",
+     "src/lib/leados/contracts.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/leados/_actions/revision.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "revision.actions.ts:78 -> dossier.ts:191-200; revision.actions.ts:106 -> dossier.ts:202-221; re-loop dossier.ts:146 -> escalamiento.ts:102",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "parcial",
+      "evidencia": "el guard de rol vive en la action (dossier.ts:111-113 lo delega a requireSuperAdmin); no se leyó revision.actions.ts"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "acción puntual"
+     },
+     "errores": {
+      "cumple": "si",
+      "evidencia": "DossierTransitionError con mensajes (dossier.ts:205, :233)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "FinalUrlSchema https obligatorio y topes de rechazo (revision.schemas.ts:14-49)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "parcial",
+      "evidencia": "admin/error.tsx (flujo D3); no verificado en la action"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "rechazo estructurado llega al setter (flow.ts:149-161)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.cierre-post-reunion",
+    "nombre": "Marcar reunión realizada y registrar el resultado",
+    "descripcion": "El admin marca la reunión como realizada y registra GANADO/PERDIDO/RE_SEGUIMIENTO, que mueve el status del lead.",
+    "archivos": [
+     "src/lib/leados/agenda.ts",
+     "src/lib/leados/contracts.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/leads/_actions/reunion.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "reunion.actions.ts:50 -> agenda.ts:348-358; reunion.actions.ts:71 -> agenda.ts:365-382 -> reunion.actions.ts:81-84",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "requireSuperAdmin en la action (reunion.actions.ts:68)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "sin reunión agendada devuelve false y la action lo explica (agenda.ts:350, :371; reunion.actions.ts:77)"
+     },
+     "errores": {
+      "cumple": "parcial",
+      "evidencia": "la action devuelve error.message crudo (reunion.actions.ts:90-92)"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "ResultadoReunionInputSchema (reunion.actions.ts:69); AgendaSchema.parse (agenda.ts:352, :373)"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "no",
+      "evidencia": "catch que solo devuelve fail sin captureException (reunion.actions.ts:89-92)"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "RE_SEGUIMIENTO deja la agenda bloqueada; resultado y status no atómicos (agenda.ts:371, reunion.actions.ts:81)"
+     }
+    }
+   },
+   {
+    "herramienta": "h4.adm-leads",
+    "id": "h4.adm-leads.rastro-reasignacion",
+    "nombre": "Rastro de la reasignación de un lead",
+    "descripcion": "Registra la reasignación como evento SISTEMA y el setter nuevo ve cuándo se lo asignaron.",
+    "archivos": [
+     "src/lib/leados/assignment-trail.ts",
+     "src/lib/leados/isolation.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "lead.actions.ts:180 -> assignment-trail.ts:42-55; manual/_data.ts:154 -> assignment-trail.ts:68-80",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "lectura del setter por getOwnedLead (assignment-trail.ts:72); SISTEMA excluido de lo comercial (isolation.ts:116)"
+     },
+     "vacios": {
+      "cumple": "si",
+      "evidencia": "null para leads sin rastro (assignment-trail.ts:62-66)"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "lib"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "lib"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "sin input de usuario"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "lib"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "si",
+      "evidencia": "el aviso 'te asignaron' sale del rastro"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.set-nuevo",
+    "id": "h5.set-nuevo.alta-propia",
+    "nombre": "Alta de prospecto propio",
+    "descripcion": "El setter carga un lead y el sistema fuerza dueño, frío y fuente.",
+    "archivos": [
+     "src/lib/leados/isolation.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/setter/_actions/prospecto.actions.ts"
+    ],
+    "madurez": "L2",
+    "madurez_evidencia": "prospecto.actions.ts:29 -> isolation.ts:80-99",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "assignedToId sale del userId de la sesión, nunca del input (isolation.ts:95)"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "alta"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "fuera del lote"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "fuera del lote"
+     },
+     "validacion_servidor": {
+      "cumple": "si",
+      "evidencia": "recibe el input ya parseado (prospecto.actions.ts:29 'parsed')"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lib pura"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "fuera del lote"
+     },
+     "sin_mocks_todos": {
+      "cumple": "si",
+      "evidencia": "sin TODO"
+     },
+     "autonomia": {
+      "cumple": "parcial",
+      "evidencia": "googleMapsUrl no se puede cargar en el alta (isolation.ts:44-54)"
+     }
+    }
+   },
+   {
+    "herramienta": "h5.adm-fg2lab",
+    "id": "h5.adm-fg2lab.prompt-estructurado-gastro",
+    "nombre": "Laboratorio FG-2: prompt estructurado de gastronomía",
+    "descripcion": "Arma un prompt prescriptivo para Claude Design desde un formulario, estima tokens y genera filas TSV del experimento.",
+    "archivos": [
+     "src/lib/leados/_experimental/fg2-brief-lab.ts",
+     "src/lib/leados/_experimental/fg2-casos-gastro.ts"
+    ],
+    "entradas": [
+     "src/app/(protected)/admin/fg2-lab/page.tsx"
+    ],
+    "madurez": "L1",
+    "madurez_evidencia": "prototipo declarado descartable y no conectado al flujo (fg2-brief-lab.ts:2-8); camino: page.tsx:17 -> fg2-lab-client.tsx:136 -> fg2-brief-lab.ts:231",
+    "criterios_l3": {
+     "permisos_tenant": {
+      "cumple": "si",
+      "evidencia": "guard SUPER_ADMIN heredado de admin/layout.tsx:47"
+     },
+     "vacios": {
+      "cumple": "n/a",
+      "evidencia": "lab"
+     },
+     "errores": {
+      "cumple": "n/a",
+      "evidencia": "lab"
+     },
+     "carga": {
+      "cumple": "n/a",
+      "evidencia": "lab"
+     },
+     "validacion_servidor": {
+      "cumple": "n/a",
+      "evidencia": "solo string-building en cliente"
+     },
+     "mobile": {
+      "cumple": "n/a",
+      "evidencia": "lab"
+     },
+     "sentry": {
+      "cumple": "n/a",
+      "evidencia": "lab"
+     },
+     "sin_mocks_todos": {
+      "cumple": "no",
+      "evidencia": "casos representativos y WhatsApp de ejemplo (fg2-casos-gastro.ts:43-44, :155-158)"
+     },
+     "autonomia": {
+      "cumple": "n/a",
+      "evidencia": "herramienta interna de experimento"
+     }
+    }
+   }
+  ],
+  "planeado_cruzado": [
+   {
+    "id": "PLAN-910",
+    "clave": "Validar con Franco el grafo de stage congelado",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Grafo congelado y exportado en src/lib/leados/dossier-stage.ts:38-47 con invariante (src/lib/leados/dossier-stage.invariant.ts); la validación de producto no deja rastro en código",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Hoy APROBADA y DESCARTADA no tienen salidas: un lead aprobado no puede volver a construcción"
+   },
+   {
+    "id": "PLAN-917",
+    "clave": "Cuatro herramientas sin URL en herramientas.ts",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "herramientas.ts:63, :78, :90, :117 url null; tests/setter/16-municiones-salida.spec.ts:128-132 afirma las cuatro; git grep 'ToolGuide id=\"evaluador\"' origin/main -- src vacío (control: ToolGuide id=\"claudeDesign\" en m-construccion.tsx:135)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Cargar gemDiseno, claudeDesign y gemOutreach; el evaluador conviene retirarlo"
+   },
+   {
+    "id": "PLAN-713",
+    "clave": "APROBADA con toque vencido cae en «trabajar» con sugerencia no accionable",
+    "estado_en_codigo": "parcial",
+    "evidencia": "flow.ts:438 corrigió el caso sin link; persiste con link cargado y gate cerrado: flow.ts:440-441 (trabajar) y flow.ts:539-545 (espera, accionable false)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-673",
+    "clave": "assignment-trail.ts repite inline el discriminador SISTEMA",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "assignment-trail.ts:76 'channel: ActivityChannel.SISTEMA' inline; la fuente está en isolation.ts:116-126",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-926",
+    "clave": "Contenido muerto de la guía que nombra destinos",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "guidance-content.ts:643 GUIA_CONSTRUCCION, :887 GUIA_TRASPASO, :958 GUIA_REVISION.aprobada sin lectores; TeachPanel solo con id objeciones (m5-seguimiento.tsx:214) y selfCheck (m14-chequeo.tsx:83)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-854",
+    "clave": "Cuatro de cinco herramientas externas sin URL",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "herramientas.ts:63, :78, :90, :117; solo netlifyDrop tiene url (herramientas.ts:105)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-857",
+    "clave": "referenciasFicha fantasma en BriefSchema",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "contracts.ts:118 sigue; brief-form.tsx:38 confirma que no tiene lector y se borra en cada re-guardado",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-873",
+    "clave": "Copy muerto en guidance-content.ts y paso.ts",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "GUIA_CONSTRUCCION/GUIA_TRASPASO/GUIA_REVISION.aprobada sin consumidores (git grep -l -w); describirFoco sigue en src/lib/leados/paso.ts:86",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-902",
+    "clave": "agenda.ts busca la org de Cal.com globalmente",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "agenda.ts:58-61 findMany sin filtro de org; agenda.ts:70-84 ambigüedad",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Escalado a hallazgo SEC ALTA: si develOP no tiene el campo, se reserva en el calendario del cliente"
+   },
+   {
+    "id": "PLAN-876",
+    "clave": "parseProgreso vacía el progreso en silencio",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "flow.ts:133-136 safeParse de todo el blob -> { completadas: [] }",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "Convive con la regla PLAN-907"
+   },
+   {
+    "id": "PLAN-775",
+    "clave": "El setter no puede cargar googleMapsUrl ni currentWebUrl",
+    "estado_en_codigo": "parcial",
+    "evidencia": "currentWebUrl ya entra en el alta propia (isolation.ts:52, :92); googleMapsUrl no está en OwnedLeadFields (isolation.ts:44-54) y solo se lee (m1-ficha.tsx:44)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-703",
+    "clave": "Exports sin consumidor en el foco (agruparParaHome, soltarFoco)",
+    "estado_en_codigo": "parcial",
+    "evidencia": "soltarFoco ya tiene llamador (foco-surface.tsx:20); agruparParaHome (flow.ts:653) sin consumidores: git grep -w agruparParaHome origin/main -- src tests scripts solo da flow.ts",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-892",
+    "clave": "HardCheck.nombre es etiqueta y llave persistida",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "flow.ts:188-191 y :206-207 unen por nombre; contracts.ts:124-132 sin id",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-704",
+    "clave": "Panel pide mandar link de demo aprobada sin finalUrl",
+    "estado_en_codigo": "hecho",
+    "evidencia": "flow.ts:438 y :534-545 miran finalUrl; revision.schemas.ts:22-25 exige finalUrl https para aprobar",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-904",
+    "clave": "LEGAL_TRANSITIONS sin invariante",
+    "estado_en_codigo": "hecho",
+    "evidencia": "dossier-stage.ts:38 exportado sin imports de valor; src/lib/leados/dossier-stage.invariant.ts existe",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-783",
+    "clave": "Cargar las 4 URLs reales de herramientas",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "herramientas.ts:63, :78, :90, :117 url null con TODO",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-784",
+    "clave": "Migrar herramientas.ts y onboarding-hint a la fuente única de guía",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "herramientas.ts:16-17 'Hoy queda localizado acá a propósito'; guidance-content.ts no importa herramientas (imports guidance-content.ts:35-46)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-807",
+    "clave": "Refinar SHELL_CONSTRUCCION tras el test de Claude Design",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "flow-content.ts:42 'PROVISORIO: refinar tras el test de Claude Design'",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-688",
+    "clave": "agruparParaHome quedó sin callers",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "flow.ts:653; sin consumidores en src, tests y scripts (git grep -l -w)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-961",
+    "clave": "Wizard del setter (B3/B4 de LeadOS)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "server actions en dossier.actions.ts:100, :145, :205, :238, :326, :356, :398 sobre dossier.ts",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-682",
+    "clave": "Cola de revisión del admin (B5 de LeadOS)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "revision.actions.ts:78 (APROBADA) y :106 (RECHAZADA) -> dossier.ts:191-221",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-795",
+    "clave": "FG-4 razones del self-check",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "tipo SelfCheckRazon (guidance-content.ts:167-170) y campo selfCheckRazones (:276) sin contenido ni consumidores (git grep -w: 0 fuera del archivo)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-798",
+    "clave": "Segundo par esto-sí/no en el self-check",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "GUIA_SELF_CHECK.ejemplos (guidance-content.ts:709-722) solo tiene 'Probar de verdad' y 'Honestidad en los flags'; ninguno de datosReales/fielAlBrief",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-809",
+    "clave": "transitionDossier es la única puerta del stage del dossier",
+    "estado_en_codigo": "hecho",
+    "evidencia": "en src solo dossier.ts y agenda.ts escriben osLeadDossier (git grep 'osLeadDossier.(update|create|upsert)'); ownership dossier.ts:69-94",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Scripts de QA y seed escriben stage directo (scripts/b5-qa-review-queue.ts:77, prisma/seed-agency-os.ts:2039). La rama DESCARTADA no re-parsea el blob (dossier.ts:185-188)"
+   },
+   {
+    "id": "PLAN-810",
+    "clave": "Gate EVALUADA a BRIEF del flujo invertido (score >= 4)",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "el gate usa el campo caliente, no el score: flow.ts:81-83 y dossier.ts:167",
+    "sigue_teniendo_sentido": "no",
+    "nota": "Reemplazado por admin-1d (PLAN-767)"
+   },
+   {
+    "id": "PLAN-905",
+    "clave": "Self-check atado por nombre: no se hace el fallback id->nombre",
+    "estado_en_codigo": "hecho",
+    "evidencia": "sin fallback (flow.ts:207); la red es el censo congelado y el blob guardado (self-check-gate.invariant.ts:103-132 y :134-178)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-907",
+    "clave": "progresoJson todo-o-nada: cambiar FASE_IDS exige migrar los blobs",
+    "estado_en_codigo": "hecho",
+    "evidencia": "flow.ts:133-136; contracts.ts:142-149; existe src/lib/leados/progreso-isolation.invariant.ts",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-936",
+    "clave": "La sugerencia de calidad frena el avance automático",
+    "estado_en_codigo": "parcial",
+    "evidencia": "criterio puro en ficha-calidad.ts:30-33, consumido en ficha-form.tsx:225; bloqueCompleto no lo mira (ficha-bloques.ts:193-195); el freno del plegado vive en el componente (fuera del lote, no verificado)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-957",
+    "clave": "Autoguardar el veredicto exige una columna nueva",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "evaluacionJson solo lo escribe transitionDossier (dossier.ts:150-158, :185-188)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-877",
+    "clave": "Links en el opener: decisión de Franco",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "regla vigente en flow.ts:218-223, aplicada en el server (outreach.schemas.ts:41)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "La regla da falsos positivos (hallazgo BUG BAJA)"
+   },
+   {
+    "id": "PLAN-734",
+    "clave": "motivoOrden en sincronía con el sort de urgencia",
+    "estado_en_codigo": "hecho",
+    "evidencia": "flow.ts:611-627 switch exhaustivo sobre trabajoTier (flow.ts:734)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-790",
+    "clave": "El escalamiento pertenece al dossier y se resetea en toda transición",
+    "estado_en_codigo": "hecho",
+    "evidencia": "dossier.ts:143-147 mergea ESCALADO_RESET (escalamiento.ts:53)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-801",
+    "clave": "Calidad advisory distinta del gate",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ficha-calidad.ts:5-10 y :30-33; flow.ts no importa ficha-calidad (imports flow.ts:17-43)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-616",
+    "clave": "Única fuente del caliente operativo: OsLead.caliente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "flow.ts:81-83 y :633-634; dossier.ts:167",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Copy no renderizado lo contradice (guidance-content.ts:526-528)"
+   },
+   {
+    "id": "PLAN-766",
+    "clave": "calienteNotificadaAt conserva su nombre legacy",
+    "estado_en_codigo": "hecho",
+    "evidencia": "contracts.ts:102-107",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-808",
+    "clave": "B2 Modelo de producción del dossier",
+    "estado_en_codigo": "hecho",
+    "evidencia": "prisma/migrations/20260612121536_add_os_lead_dossier; contracts.ts; dossier.ts:116; scripts/b2-verify-dossier.ts (git ls-files)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-819",
+    "clave": "M14 self-check tripartito, 15 checks y gate",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "primeraMirada, tresColores y HARD_CHECKS_BASE no existen en ninguno de los 117 refs (git grep por ref); flow-content.ts:171-261 tiene 10 hard-checks; SelfCheckSchema sin estado (contracts.ts:124-132)",
+    "sigue_teniendo_sentido": "decidir",
+    "nota": "El doc OSLEAD describe código que no está en el repo"
+   },
+   {
+    "id": "PLAN-822",
+    "clave": "G2 ángulo wow en m4/m15/m5",
+    "estado_en_codigo": "contradicho",
+    "evidencia": "obtenerAnguloWow y AnguloWowCard ausentes en los 117 refs (git grep); copy-blocks.ts no la define; git log --all -S solo la encuentra en docs de auditoría",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-908",
+    "clave": "C2: LEGAL_TRANSITIONS pasa a dossier-stage.ts y estrena invariante",
+    "estado_en_codigo": "hecho",
+    "evidencia": "dossier-stage.ts:38; dossier.ts:41 lo importa; c219d830 y 7eeacdef son ancestros de origin/main",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-714",
+    "clave": "P8 UNA SOLA FUENTE: cuatro duplicaciones cerradas",
+    "estado_en_codigo": "hecho",
+    "evidencia": "isolation.ts:174-209 SOLO_DMS_MANDADOS/dmsMandadosHoyWhere; escalamiento.ts:78-80 lee LEGAL_TRANSITIONS; finDePausaAR en cartera.schemas.ts:49; 0c92dd08 ancestro",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-932",
+    "clave": "LA CONFIGURACIÓN QUE FALTA: brief sin exigir lo que no se puede traer, Cal.com sin jerga",
+    "estado_en_codigo": "hecho",
+    "evidencia": "herramientas.ts:145-162; copy-blocks.ts:251-257; agenda.ts:46-48; existe copy-sin-jerga.invariant.ts; fa36389a y 52ac5c62 ancestros",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-769",
+    "clave": "Bloque 3 wizard del lead cerrado",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "paso-actual-banner.tsx, step-anchor.tsx y step-nav.tsx no existen (git ls-files); quedan los GUIA_* y error.tsx/loading.tsx de [leadId]",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-850",
+    "clave": "E.1 progresoJson del dossier",
+    "estado_en_codigo": "hecho",
+    "evidencia": "prisma/migrations/20260630000000_add_dossier_progreso; contracts.ts:142-165; dossier.ts:366-385",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-772",
+    "clave": "B6.1/B6.2/B6.3/B6.5 fixes del wizard y del rail",
+    "estado_en_codigo": "hecho",
+    "evidencia": "RELOOP_RESET solo selfCheckJson (escalamiento.ts:102; dossier.ts:146); 'Cargar prospecto' en setter-nav.tsx:61; existe reloop-selfcheck-reset.invariant.ts",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-869",
+    "clave": "4.1 errores persistentes y en criollo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "error-copy.ts:34-79 (16 literales más el prefijo de transición ilegal = 17), cubre todos los throw de dossier.ts; action-codes.ts:18 SLOT_OCUPADO; b6b2132 ancestro",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-871",
+    "clave": "Agenda con memoria (B-05)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "contracts.ts:201, :210-212; agenda.ts:194-289 (OFRECIDOS reclamable, compensación restaura); 8b3ce80 y 6a88cbe ancestros",
+    "sigue_teniendo_sentido": "no",
+    "nota": "revertirAgendaConfirmadaOwned borra la oferta (agenda.ts:315) y su comentario quedó viejo (agenda.ts:296)"
+   },
+   {
+    "id": "PLAN-880",
+    "clave": "P4 poda: m3 fusionada en m2",
+    "estado_en_codigo": "hecho",
+    "evidencia": "m3-veredicto.tsx no existe (git ls-files); herramienta renombrada en herramientas.ts:55",
+    "sigue_teniendo_sentido": "no",
+    "nota": "D15-bis retiró después el chat de evaluación (guidance-content.ts:473-476)"
+   },
+   {
+    "id": "PLAN-882",
+    "clave": "P5-A la ficha recibe el material de la demo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "contracts.ts:73-81; copy-blocks.ts:185-229",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-702",
+    "clave": "P8 el foco prioriza construir",
+    "estado_en_codigo": "hecho",
+    "evidencia": "flow.ts:719-756 trabajoTier; existe particion.invariant.ts",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-898",
+    "clave": "F1 postergación un día antes y contador de DMs",
+    "estado_en_codigo": "hecho",
+    "evidencia": "isolation.ts:142-209 (contador solo SIN_RESPUESTA); src/lib/dates-ar.ts:107 parseCalendarDayAR; 34e15156 ancestro",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-789",
+    "clave": "Recorrido de cola prev/next (?cola=)",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "recorrido-strip.tsx no existe (git ls-files); recorrido.ts reusado por manual/_components/franja-recorrido.tsx; buildHomeLeads en home.ts:24",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-681",
+    "clave": "Señal in-app de alarmas, 'me trabé' persistido y aviso de Telegram sin configurar",
+    "estado_en_codigo": "hecho",
+    "evidencia": "prisma/migrations/20260620180000_add_dossier_escalado; escalamiento.ts:42-117; dossier.ts:309-327",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-746",
+    "clave": "Cierre del bloque FG-0.5",
+    "estado_en_codigo": "hecho",
+    "evidencia": "isolation.ts:1-17 como fuente única de aislamiento",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-800",
+    "clave": "FG-1.3 validación de calidad de la ficha al salir del campo",
+    "estado_en_codigo": "hecho",
+    "evidencia": "ficha-calidad.ts:23, :30-33; ficha-form.tsx:225; textos de mejora en guidance-content.ts:339-369",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-806",
+    "clave": "Refactor preparatorio FG-2: contenido de flow.ts a flow-content.ts",
+    "estado_en_codigo": "hecho",
+    "evidencia": "flow-content.ts; re-export en flow.ts:49-60",
+    "sigue_teniendo_sentido": "no",
+    "nota": "flow.ts volvió a crecer a 1070 líneas"
+   },
+   {
+    "id": "PLAN-767",
+    "clave": "admin-1d gate server-side de demo preventiva lee el campo caliente",
+    "estado_en_codigo": "hecho",
+    "evidencia": "dossier.ts:160-172 usa gateBriefAbierto(status, caliente)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-690",
+    "clave": "Invariante ejecutable de D6 (flow.invariant.ts)",
+    "estado_en_codigo": "hecho",
+    "evidencia": "flow.ts:18-43 con imports relativos .ts; package.json:30 'check:invariant:flow'",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-838",
+    "clave": "Código LeadOS construido sin uso",
+    "estado_en_codigo": "parcial",
+    "evidencia": "ConstruccionMunicion ya se renderiza ([paso]/page.tsx:286) con BadgeProvisorio adentro (m-construccion.tsx:127); referenciasFicha sigue sin lectores (contracts.ts:118); notasMarca lo lee el admin (dossier-panels.tsx:114)",
+    "sigue_teniendo_sentido": "si"
+   },
+   {
+    "id": "PLAN-622",
+    "clave": "Toast en CRUD de leads OS",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "git grep -l toast origin/main -- 'src/app/(protected)/admin/leads' vacío (control: admin/alerts/AlertsClient.tsx sí lo usa)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-721",
+    "clave": "TOPE_COLA = 5 se eligió, no se midió",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "cola.ts:38 TOPE_COLA = 5 sin medición registrada",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-812",
+    "clave": "Errores ESLint preexistentes del setter",
+    "estado_en_codigo": "parcial",
+    "evidencia": "Los tres citados ya no figuran: seguimiento-step.tsx y onboarding-hint.tsx no existen. El baseline actual (docs/auditoria-2026-10/_crudo/eslint.json) tiene react-hooks/purity en m5-seguimiento.tsx:63 y no-unused-vars en lead-card-actions.tsx:56. Los archivos del lote no tienen errores",
+    "sigue_teniendo_sentido": "si",
+    "nota": "Baseline leído con grep. Un intento previo con node -e (fuera de las reglas de la tarea) falló sin leer nada"
+   },
+   {
+    "id": "PLAN-696",
+    "clave": "B6.6 pasada perceptual del wizard y del home",
+    "estado_en_codigo": "abandonado",
+    "evidencia": "los componentes del wizard que cubría no existen más (paso-actual-banner.tsx, step-anchor.tsx, step-nav.tsx: git ls-files vacío)",
+    "sigue_teniendo_sentido": "no"
+   },
+   {
+    "id": "PLAN-952",
+    "clave": "Registrar qué correcciones del rechazo se aplicaron",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "RechazoSchema sin campo de aplicado (contracts.ts:169-177)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-848",
+    "clave": "Más prompts para hard-checks y soft-checks",
+    "estado_en_codigo": "no empezado",
+    "evidencia": "prompts-disenio.ts:139-141 HARD_CHECK_PROMPT solo mapea 'mobile' (1 de 10)",
+    "sigue_teniendo_sentido": "decidir"
+   },
+   {
+    "id": "PLAN-760",
+    "clave": "Cierre del bloque FG-0",
+    "estado_en_codigo": "hecho",
+    "evidencia": "setter-nav.tsx y setter/layout.tsx presentes (layout.tsx:32 guard SETTER del contexto fijo)",
+    "sigue_teniendo_sentido": "no"
+   }
+  ],
+  "alertas_verificadas": [
+   {
+    "alerta": "[D4-A1] APROBADA con gate cerrado y toque vencido cae en 'trabajar' (QUINTA) vs grupoPara la manda a seguimiento (P23)",
+    "resultado": "parcial",
+    "evidencia": "P23 tiene razón para el caso sin link: flow.ts:438 manda a 'seguimiento' cuando finalUrl === null. QUINTA sigue valiendo con el link cargado: flow.ts:440-441 devuelve 'trabajar' por followUpVencido, mientras flow.ts:539-545 devuelve una espera con accionable false y flow.ts:745 la pone en el tier ESPERA_TU_ACCION",
+    "hallazgo_titulo": "Una demo APROBADA con link, gate cerrado y toque vencido entra a 'Para trabajar' con una sugerencia de espera"
+   },
+   {
+    "alerta": "[D4-A2] Herramientas sin URL: tras D15-bis el evaluador no tiene pantalla pero sigue en herramientas.ts y en el rail",
+    "resultado": "confirmada",
+    "evidencia": "herramientas.ts:53-64 (evaluador, url null) y :123 en HERRAMIENTAS_ORDEN; tools-rail.tsx:26 recorre el orden completo; ningún ToolGuide usa id='evaluador' (control: m-construccion.tsx:135 usa claudeDesign); guidance-content.ts:473-476 confirma que el chat quedó afuera",
+    "hallazgo_titulo": "Tres herramientas del recorrido siguen sin link y el evaluador retirado sigue en el rail"
+   },
+   {
+    "alerta": "[D4-A3] Navegación del setter por triggerTransition() como 'decisión cerrada' vs CLAUDE.md que pide <Link> en portales",
+    "resultado": "parcial",
+    "evidencia": "setter-nav.tsx:43-49 usa triggerTransition con el comentario 'decisión cerrada · CLAUDE.md'; no hay router.push en setter-nav.tsx (git grep). CLAUDE.md solo define como portales /admin y /dashboard y dice que triggerTransition no aplica en portales; /setter (bajo (protected)) queda sin clasificar. Es una decisión documental para Valentino y Franco, no un defecto de código"
+   },
+   {
+    "alerta": "[D4-A4] Drift de convertedToOsLeadId: drop dado por cerrado vs migración 20260619140100 registrada con resolve --applied",
+    "resultado": "parcial",
+    "evidencia": "La columna sigue en schema.prisma:1510 y la usan BotDetailClient.tsx:72 y LeadsTab.tsx:22. La cadena de migraciones la agrega (20260617184913/migration.sql:5), la dropea (20260619140100/migration.sql:9 y 20260621120000/migration.sql:29) y la vuelve a agregar con IF NOT EXISTS (20260622120000/migration.sql:21). El estado final coincide con el schema y el 'drop cerrado' de la bitácora quedó revertido. Si la 0619 se ejecutó o solo se marcó como aplicada es historia de la DB (D6)"
+   },
+   {
+    "alerta": "[D4-A5] OSLEAD: 11 contradicciones docs vs código; H-04 marca falso verde del gate del self-check",
+    "resultado": "parcial",
+    "evidencia": "H-04 no se reproduce en origin/main: selfCheckAprobado exige todos los HARD_CHECKS (flow.ts:204-208), y HARD_CHECKS_BASE, jerarquia y tresColores no existen en ninguno de los 117 refs (git grep por ref; control: 8 apariciones de HARD_CHECKS en flow.ts). El invariante tiene censo congelado y blob guardado (self-check-gate.invariant.ts:103-178). Del cuadro, §m6 sí se reproduce: titulo obligatorio (contracts.ts:113), cta opcional (contracts.ts:117), concepto (contracts.ts:114). El documento describe un estado de código que no está en el repo"
+   },
+   {
+    "alerta": "[D4-A6] EL TRONCO le deja el push a main a Franco, pero origin/main @ 57c421bc ya es 'docs(tronco): EL TRONCO'",
+    "resultado": "descartada",
+    "evidencia": "Como dato para 09: 57c421bc tiene autor y committer Franco, 2026-09-06 03:13 -0300, mensaje 'docs(tronco): EL TRONCO - veinticinco sprints vuelven a una sola linea' (git log -1 origin/main). Es coherente con que el push lo hiciera Franco, así que no hay contradicción. Git no registra quién empujó"
+   }
+  ],
+  "candidatos_poda": [
+   {
+    "archivo": "src/lib/leados/_experimental/fg2-brief-lab.ts",
+    "senales": [
+     "Encabezado 'EXPERIMENTAL / DESCARTABLE … BORRAR tras la decisión del experimento' (fg2-brief-lab.ts:2-8)",
+     "No está conectado al flujo del setter; consumidores: solo admin/fg2-lab (page.tsx:17, fg2-lab-client.tsx:28, medicion-panel.tsx:19) y scripts/_experimental/fg2-gen-prompts.ts:12"
+    ],
+    "que_rompe": "La ruta /admin/fg2-lab y el script de generación de prompts: hay que borrarlos juntos"
+   },
+   {
+    "archivo": "src/lib/leados/_experimental/fg2-casos-gastro.ts",
+    "senales": [
+     "'BORRAR junto con el resto del prototipo tras la decisión' (fg2-casos-gastro.ts:9)",
+     "Datos representativos y WhatsApp de ejemplo (fg2-casos-gastro.ts:43-44)"
+    ],
+    "que_rompe": "fg2-lab-client.tsx:29 y scripts/_experimental/fg2-gen-prompts.ts:13"
+   },
+   {
+    "archivo": "src/lib/leados/guidance-content.ts",
+    "senales": [
+     "GUIA_CONSTRUCCION (:643), GUIA_TRASPASO (:887) y GUIA_REVISION.aprobada (:958) sin lectores; TeachPanel solo usa 'objeciones' y 'selfCheck'",
+     "GUIA_EVALUACION.porque/ejemplos (:519-538) no se renderizan y contradicen el gate",
+     "Tipo SelfCheckRazon y campo selfCheckRazones sin uso (:167-170, :276)"
+    ],
+    "que_rompe": "Nada si solo se quitan esas claves y sus entradas en GUIA_PASOS (:1201, :1208); el resto del archivo está vivo"
+   },
+   {
+    "archivo": "src/lib/leados/flow.ts",
+    "senales": [
+     "agruparParaHome (flow.ts:653-667) sin consumidores en src, tests ni scripts (git grep -w)"
+    ],
+    "que_rompe": "Nada (verificar invariantes que la importen: git grep no encontró ninguno)"
+   },
+   {
+    "archivo": "src/lib/leados/herramientas.ts",
+    "senales": [
+     "Entrada 'evaluador' (herramientas.ts:53-64) sin pantalla desde D15-bis; solo la usa el rail genérico"
+    ],
+    "que_rompe": "tests/setter/16-municiones-salida.spec.ts:132, que afirma la lista de herramientas sin URL"
+   }
+  ],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Qué organizaciones tienen Cal.com cargado (cuenta que usa la agenda de LeadOS)",
+    "entorno": "Consola SQL de Neon de la base que usa producción, solo lectura",
+    "precondiciones": "Acceso de lectura a Neon; no correr ninguna escritura (es compartida con Franco)",
+    "pasos": [
+     "Abrir la consola SQL de Neon de la base de producción",
+     "Buscar en schema.prisma el nombre de la tabla de Organization (@@map) y correr: SELECT slug, \"calComUsername\" IS NOT NULL AS tiene_usuario, \"calComEmbedUrl\" IS NOT NULL AS tiene_evento FROM <tabla_organization> WHERE \"calComUsername\" IS NOT NULL;",
+     "Anotar cuántas filas hay y a qué organizaciones corresponden"
+    ],
+    "esperado": "Exactamente una fila, y es la organización de develOP",
+    "senal_falla": "0 filas: la agenda del setter no funciona. 2 o más: la agenda queda bloqueada por ambigüedad. 1 fila de una org cliente: las reuniones de prospectos de develOP se reservan en el calendario de ese cliente",
+    "escribe_db_o_email": false,
+    "hallazgos": "SEC: La agenda de LeadOS toma la cuenta de Cal.com de cualquier organización con el campo cargado"
+   },
+   {
+    "titulo": "Un lead ganado no debería volver a 'Para trabajar'",
+    "entorno": "Dev local o QA con una base de prueba propia (no la Neon compartida)",
+    "precondiciones": "Un setter de QA con un lead asignado cuyo dossier esté en EVALUADA y su status en RESPONDIO",
+    "pasos": [
+     "Opción solo lectura primero: en la base de prueba buscar leads con status CERRADO y assignedToId no nulo; si hay, entrar como ese setter a /setter y saltar al paso 4",
+     "Si no hay: en la base de prueba poner status = 'CERRADO' a ese lead (o, si tiene reunión AGENDADA, registrar resultado GANADO desde /admin/leads/[id])",
+     "Entrar como el setter a /setter",
+     "Mirar el foco, la cola del día y la cartera"
+    ],
+    "esperado": "El lead no aparece como trabajo (queda en un archivo o vista de ganados)",
+    "senal_falla": "Aparece en 'Para trabajar' con 'Decidí cómo va a ser la demo' (o 'Mandá el link al negocio'), o es el foco",
+    "escribe_db_o_email": true,
+    "hallazgos": "BUG: Un lead ganado (CERRADO) vuelve a la cola de trabajo del setter"
+   },
+   {
+    "titulo": "Re-agendar después de un resultado 'volver a seguimiento'",
+    "entorno": "Dev local o QA con base de prueba y un Cal.com de prueba",
+    "precondiciones": "Un lead de QA con reunión AGENDADA por el flujo de agenda",
+    "pasos": [
+     "Como SUPER_ADMIN, en /admin/leads/[id] registrar el resultado de la reunión como RE_SEGUIMIENTO",
+     "Como el setter dueño, abrir el lead en el manual y entrar al paso de agenda",
+     "Tocar 'Buscar horarios libres de Franco'"
+    ],
+    "esperado": "El panel ofrece horarios nuevos para una segunda reunión",
+    "senal_falla": "Aparece 'Este lead ya tiene la reunión agendada' y no se puede ofrecer ni confirmar",
+    "escribe_db_o_email": true,
+    "hallazgos": "BUG: Tras un resultado RE_SEGUIMIENTO la reunión vieja sigue 'agendada'"
+   },
+   {
+    "titulo": "Falso positivo del bloqueo de links en el opener",
+    "entorno": "Dev local o QA con un lead de prueba en el paso del opener",
+    "precondiciones": "Un lead de QA en EVALUADA con el gate cerrado y el opener pendiente",
+    "pasos": [
+     "Abrir el paso del opener del lead",
+     "Escribir: Hola!...me encantó tu local, vi que en los comentarios preguntan el horario",
+     "Intentar registrar el opener",
+     "Repetir con: Vi tu cuenta.Me gustó cómo muestran los platos"
+    ],
+    "esperado": "El mensaje se acepta: no tiene ningún link",
+    "senal_falla": "Aparece 'El link NO va en el opener — sacalo' y el registro se rechaza",
+    "escribe_db_o_email": true,
+    "hallazgos": "BUG: El bloqueo de links del opener rechaza mensajes sin link"
+   },
+   {
+    "titulo": "La oferta de horarios a la noche incluye mañana",
+    "entorno": "Dev local con la cuenta de Cal.com de prueba conectada",
+    "precondiciones": "Un lead de QA en RESPONDIO; disponibilidad en Cal.com para mañana",
+    "pasos": [
+     "Entre las 21:00 y las 23:59 hora Argentina tocar 'Buscar horarios libres de Franco'",
+     "Anotar el primer día ofrecido",
+     "Repetir antes de las 21:00 y comparar"
+    ],
+    "esperado": "En ambos casos el primer día ofrecido es mañana (si hay disponibilidad)",
+    "senal_falla": "A la noche el primer día ofrecido es pasado mañana",
+    "escribe_db_o_email": true,
+    "hallazgos": "BUG: La oferta de horarios calcula el rango con el día UTC"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "flow.ts no trata CERRADO como terminal: solo aparece en RESPONDED_STATUSES",
+    "comando": "git grep -n \"CERRADO\" origin/main -- src/lib/leados/flow.ts  (única línea: flow.ts:73)",
+    "control_positivo": "git grep -n \"'PERDIDO'\" origin/main -- src/lib/leados/flow.ts devuelve flow.ts:417 y :486"
+   },
+   {
+    "afirmacion": "La lista de leads del setter no filtra por status",
+    "comando": "git grep -n \"status\" origin/main -- src/lib/leados/ownership.ts  (vacío)",
+    "control_positivo": "git grep -n \"ownedListWhere\" origin/main -- src/lib/leados/ownership.ts devuelve :19 y :54"
+   },
+   {
+    "afirmacion": "No hay código que escriba Organization.calComUsername (se carga a mano)",
+    "comando": "git grep -n \"calComUsername\" origin/main -- src prisma/seed*.ts prisma/seeds  (solo lecturas: agenda.ts, agenda-inteligente/page.tsx:325/347/348 e invariante copy-sin-jerga)",
+    "control_positivo": "La misma búsqueda encuentra la lectura en dashboard/modules/agenda-inteligente/page.tsx:325"
+   },
+   {
+    "afirmacion": "reunion.actions.ts no limpia agendaJson al registrar RE_SEGUIMIENTO",
+    "comando": "git grep -n \"agendaJson\\|DbNull\" origin/main -- \"src/app/(protected)/admin/leads/_actions/reunion.actions.ts\"  (vacío)",
+    "control_positivo": "git grep -n \"RE_SEGUIMIENTO\" en el mismo archivo devuelve :11 y :31"
+   },
+   {
+    "afirmacion": "GUIA_CONSTRUCCION, GUIA_TRASPASO, GUIA_REVISION, agruparParaHome y SelfCheckRazon no tienen consumidores fuera de su archivo",
+    "comando": "git grep -l -w <símbolo> origin/main -- src tests scripts  (solo el archivo que lo define)",
+    "control_positivo": "El mismo comando con particionarCartera devuelve setter/page.tsx; GUIA_OBJECIONES se consume por TeachPanel id=\"objeciones\" (m5-seguimiento.tsx:214)"
+   },
+   {
+    "afirmacion": "TeachPanel solo se invoca con los ids 'objeciones' y 'selfCheck'",
+    "comando": "git grep -n -A3 \"<TeachPanel\" origin/main -- src | grep -o 'id=\"[a-zA-Z]*\"' | sort | uniq -c",
+    "control_positivo": "El mismo comando sí lista id=\"objeciones\" e id=\"selfCheck\""
+   },
+   {
+    "afirmacion": "Ninguna pantalla usa la herramienta 'evaluador'",
+    "comando": "git grep -n 'ToolGuide id=\"evaluador\"\\|evaluador' origin/main -- src/app  (vacío)",
+    "control_positivo": "git grep -n 'ToolGuide id=' origin/main -- src devuelve claudeDesign (m-construccion.tsx:135), netlifyDrop, gemOutreach y gemDiseno"
+   },
+   {
+    "afirmacion": "HARD_CHECKS_BASE, obtenerAnguloWow, AnguloWowCard, primeraMirada y tresColores no existen en ningún ref del repo",
+    "comando": "for b in $(git for-each-ref --format='%(refname:short)' refs/remotes refs/heads); do git grep -l \"obtenerAnguloWow\\|primeraMirada\\|tresColores\\|HARD_CHECKS_BASE\" $b -- src; done  (vacío en los 117 refs)",
+    "control_positivo": "git grep -c \"HARD_CHECKS\" origin/main -- src/lib/leados/flow.ts devuelve 8"
+   },
+   {
+    "afirmacion": "No queda numeración 'Paso N' en el copy de los archivos del lote",
+    "comando": "git grep -n \"Paso [0-9]\" origin/main -- src/lib/leados/flow.ts src/lib/leados/flow-content.ts src/lib/leados/herramientas.ts src/lib/leados/guidance-content.ts  (vacío)",
+    "control_positivo": "El mismo patrón sobre src/app/(protected)/setter devuelve comentarios en agenda.actions.ts:4 y dossier.actions.ts:83"
+   },
+   {
+    "afirmacion": "No hay toast en /admin/leads",
+    "comando": "git grep -l \"toast\" origin/main -- \"src/app/(protected)/admin/leads\"  (vacío)",
+    "control_positivo": "git grep -l \"toast\" origin/main -- \"src/app/(protected)/admin\" devuelve admin/alerts/AlertsClient.tsx"
+   },
+   {
+    "afirmacion": "Ningún archivo de src/lib/leados lleva la directiva 'use server' (el lote no tiene entradas)",
+    "comando": "git grep -l -E \"^['\\\"]use server['\\\"]\" origin/main -- src/lib/leados/  (vacío)",
+    "control_positivo": "git grep -l \"^'use server'\" origin/main -- \"src/app/(protected)/setter/_actions\" devuelve agenda.actions.ts, cartera.actions.ts y dossier.actions.ts"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Configuración de un tenant resuelta por un findMany global ('la única org que tenga el campo cargado') en vez de por la org de la sesión o una org explícita",
+    "como_buscarlo": "git grep -n -A2 \"organization.findMany\\|organization.findFirst\" origin/main -- src/lib src/modules | grep -v organizationId",
+    "donde_aparecio": "src/lib/leados/agenda.ts:58-61"
+   },
+   {
+    "patron": "Clasificación por status que solo archiva PERDIDO y olvida otros terminales (CERRADO) definidos en ESTADOS_TERMINALES",
+    "como_buscarlo": "git grep -n \"status === 'PERDIDO'\" origin/main -- src; comparar contra los usos de ESTADOS_TERMINALES (src/lib/leados/revision.ts:27)",
+    "donde_aparecio": "src/lib/leados/flow.ts:417 frente a src/lib/leados/revision.ts:27"
+   },
+   {
+    "patron": "Blob Json armado a mano (spread + campo nuevo) y escrito sin re-parsear con su contrato zod",
+    "como_buscarlo": "git grep -n -B4 \"as Prisma.InputJsonValue\" origin/main -- src | grep -v \"Schema.parse\"",
+    "donde_aparecio": "src/lib/leados/dossier.ts:185-188 (DESCARTADA); dossier.ts:219 (rechazos, hoy protegido por los topes del admin)"
+   },
+   {
+    "patron": "Read-modify-write del blob Json entero con where solo por estado (lost update) y efecto de 'una sola vez' separado de la escritura que lo acompaña",
+    "como_buscarlo": "git grep -n \"path: \\['estado'\\]\" origin/main -- src; revisar si el data reescribe el blob leído antes",
+    "donde_aparecio": "src/lib/leados/agenda.ts:349-356 y :370-380; status aparte en reunion.actions.ts:81"
+   },
+   {
+    "patron": "Rango de fechas con toISOString().slice(0, 10) (día UTC) en código que razona en día argentino",
+    "como_buscarlo": "git grep -n \"toISOString().slice(0, 10)\" origin/main -- src",
+    "donde_aparecio": "src/lib/leados/agenda.ts:113"
+   },
+   {
+    "patron": "Regex de detección de links/dominios con '\\S+\\.(tld)\\b' sin exigir forma de dominio (falsos positivos con '...me', 'palabra.Me')",
+    "como_buscarlo": "git grep -n \"\\\\\\\\S+\\\\\\\\.(\" origin/main -- src",
+    "donde_aparecio": "src/lib/leados/flow.ts:218-219 (aplicado en el server, outreach.schemas.ts:41)"
+   },
+   {
+    "patron": "Funciones de lib que reciben leadId y no verifican dueño ni rol (lo delegan al caller): cada caller debe pasar por getOwnedLead o requireSuperAdmin",
+    "como_buscarlo": "git grep -n \"transitionDossier(\\|marcarReunionRealizadaAdmin(\\|guardarResultadoReunionAdmin(\" origin/main -- src/app y verificar el guard previo en cada action",
+    "donde_aparecio": "src/lib/leados/dossier.ts:116; src/lib/leados/agenda.ts:348, :365, :384"
+   },
+   {
+    "patron": "Contenido de guía registrado pero nunca renderizado que conserva reglas de gate desactualizadas",
+    "como_buscarlo": "Para cada export GUIA_* de guidance-content.ts: git grep -w <export> origin/main -- src; y los ids de <TeachPanel>",
+    "donde_aparecio": "src/lib/leados/guidance-content.ts:526-528 (score 4–5 'deja construir sin esperar respuesta')"
+   },
+   {
+    "patron": "Configuración faltante o ambigua avisada solo por console.warn/console.error (no llega a Sentry)",
+    "como_buscarlo": "git grep -n \"console.warn(\" origin/main -- src/lib src/app | grep -iv test",
+    "donde_aparecio": "src/lib/leados/agenda.ts:64, :74, :90 (se suma al patrón D1-c1)"
+   }
+  ],
+  "previas_reverificadas": [
+   {
+    "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:67",
+    "id_previo": "C-02",
+    "estado": "cerrado",
+    "evidencia": "os-commercial.ts:78-81 recalcula nextFollowUpAt = calculateNextFollowUp(count), que es null al agotarse (follow-up.ts:3-13); home.ts:47 y :51 derivan vencido o sin próximo toque; flow.ts:581-583 muestra 'Se enfría' en seguimiento, no en trabajar"
+   },
+   {
+    "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:69",
+    "id_previo": "C-04",
+    "estado": "cerrado",
+    "evidencia": "git grep 'Paso [0-9]' sobre flow.ts, flow-content.ts, herramientas.ts y guidance-content.ts no da resultados; quedan solo comentarios de doc en las actions (agenda.actions.ts:4, dossier.actions.ts:83, outreach.actions.ts:82)"
+   },
+   {
+    "doc": "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md:41",
+    "id_previo": "sin-id (hint del score 'caliente')",
+    "estado": "cerrado",
+    "evidencia": "El hint visible dice '1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad' (guidance-content.ts:500, usado en evaluacion-form.tsx:56). El 'porque' que promete construir sin respuesta (:526-528) no se renderiza (TeachPanel sin id 'evaluacion')"
+   },
+   {
+    "doc": "docs/auditorias/REGRESION-FINAL-2026-07.md:116",
+    "id_previo": "sin-id (hint del score 'caliente', heredado)",
+    "estado": "cerrado",
+    "evidencia": "Igual que el anterior: guidance-content.ts:500 ya no dice 'caliente'; el resto vive en contenido no renderizado"
+   },
+   {
+    "doc": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md:38",
+    "id_previo": "Sabotaje 3",
+    "estado": "cerrado",
+    "evidencia": "Ya no es un falso verde: self-check-gate.invariant.ts:103-132 (censo congelado id+nombre) y :134-178 (blob guardado que debe seguir aprobando) atrapan renombres y altas. El join por nombre sigue por decisión (flow.ts:207)"
+   },
+   {
+    "doc": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md:635",
+    "id_previo": "§4.1",
+    "estado": "cerrado",
+    "evidencia": "LEGAL_TRANSITIONS exportado y sin imports de valor en dossier-stage.ts:38-47; existe src/lib/leados/dossier-stage.invariant.ts; dossier.ts:41 lo importa"
+   },
+   {
+    "doc": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:153",
+    "id_previo": "B3",
+    "estado": "abierto",
+    "evidencia": "La advertencia sigue vigente: SelfCheckSchema guarda {nombre, ok} sin id (contracts.ts:124-132) y buildSelfCheck escribe solo el nombre (flow.ts:188-191); pasar a id sin fallback desaprobaría todo lo guardado"
+   },
+   {
+    "doc": "docs/b8a-auditoria.md:26",
+    "id_previo": "H1",
+    "estado": "cerrado",
+    "evidencia": "revertirAgendaConfirmadaOwned (agenda.ts:300-317) limpia la AGENDADA con ese uid y se llama en la compensación (agenda.actions.ts:257). Nota: borra también la oferta y su comentario quedó viejo (agenda.ts:296)"
+   },
+   {
+    "doc": "docs/b8a-auditoria.md:37",
+    "id_previo": "H2",
+    "estado": "abierto",
+    "evidencia": "RE_SEGUIMIENTO -> RESPONDIO (reunion.actions.ts:31) pero la agenda queda AGENDADA (agenda.ts:373-380); gateAgenda la rechaza por reunionAgendada (agenda.actions.ts:108; flow.ts:170-172); PARTIDA_RECLAMABLE solo acepta NULL u OFRECIDOS (agenda.ts:174-177)"
+   },
+   {
+    "doc": "docs/b8a-auditoria.md:43",
+    "id_previo": "H3",
+    "estado": "cerrado",
+    "evidencia": "flow.ts:518-524: CALL_AGENDADA devuelve la espera de la reunión antes del switch por stage"
+   },
+   {
+    "doc": "docs/b8a-ii-auditoria.md:25",
+    "id_previo": "NII-1",
+    "estado": "parcial",
+    "evidencia": "buildConstruccionBlock (copy-blocks.ts:177-261) ya suma reseñas, contenido, qué vende, cómo se presenta, señales operativas y assets. Todavía omite identidad, presenciaDigital, otros y la evaluación, que sí viajan al opener vía buildBriefInputBlock (copy-blocks.ts:110-119)"
+   },
+   {
+    "doc": "AUDITORIA-VS-BRIEF-2026-07.md:129",
+    "id_previo": "A-07",
+    "estado": "parcial",
+    "evidencia": "El valor 'CALIENTE' sigue en VEREDICTO_VALUES (contracts.ts:91), pero el copy visible habla de 'avanzar con prioridad' (guidance-content.ts:500, :504) y el gate usa el campo de Franco (flow.ts:81-83). El 'porque' no renderizado (:526-528) todavía enseña que 4–5 deja construir sin respuesta"
+   },
+   {
+    "doc": "AUDITORIA-VS-BRIEF-2026-07.md:113",
+    "id_previo": "A-05",
+    "estado": "cerrado",
+    "evidencia": "El fijado accionable entra a la cola trabajar y sube a la cima (flow.ts:826-829 y ordenFoco flow.ts:770-776)"
+   },
+   {
+    "doc": "AUDITORIA-VS-BRIEF-2026-07.md:135",
+    "id_previo": "A-08",
+    "estado": "parcial",
+    "evidencia": "Con la cadencia agotada el lead se ve pasivo ('Se enfría — el cierre lo decide Franco', flow.ts:578-583); el cierre duro no existe por decisión"
+   },
+   {
+    "doc": "AUDITORIA-VS-BRIEF-2026-07.md:141",
+    "id_previo": "A-09",
+    "estado": "cerrado",
+    "evidencia": "Archivo por causa: vistas archivo-descartado y archivo-perdido con motivo (flow.ts:906-956, :1006-1024)"
+   },
+   {
+    "doc": "AUDITORIA-VS-BRIEF-2026-07.md:159",
+    "id_previo": "A-10",
+    "estado": "cerrado",
+    "evidencia": "checklist-construccion.tsx y construccion-step.tsx ya no existen (git ls-files); m-construccion.tsx:5 importa promptsParaFase de prompts-disenio.ts, el paso y los prompts están conectados"
+   },
+   {
+    "doc": "AUDITORIA-VS-BRIEF-2026-07.md:193",
+    "id_previo": "A-13",
+    "estado": "parcial",
+    "evidencia": "git grep -l -i 'ajeno|otro setter|cross|cruzad' en tests/leados y tests/setter: 9 de 37 specs. No se re-contó la cobertura función por función"
+   },
+   {
+    "doc": "AUDITORIA-VS-BRIEF-2026-07.md:205",
+    "id_previo": "A-15",
+    "estado": "no-reproducible",
+    "evidencia": "brief-step.tsx no existe (git ls-files); la edición del brief vive en brief-form.tsx con otro modelo (brief-form.tsx:92, :109)"
+   }
+  ],
+  "higiene_ui": [
+   {
+    "ruta": "src/lib/leados/guidance-content.ts",
+    "linea": 1186,
+    "tipo": "copy",
+    "detalle": "El ejemplo del chequeo final dice 'Los 6 obligatorios en verde' y hoy son 10 hard-checks (flow-content.ts:171-261)"
+   },
+   {
+    "ruta": "src/lib/leados/escalamiento.ts",
+    "linea": 87,
+    "tipo": "otro",
+    "detalle": "El comentario habla de 'los 6 hard-checks' y hoy son 10"
+   },
+   {
+    "ruta": "src/lib/leados/agenda.ts",
+    "linea": 296,
+    "tipo": "otro",
+    "detalle": "El comentario dice que el claim exigió agendaJson NULL; desde 6.1 también acepta OFRECIDOS"
+   },
+   {
+    "ruta": "src/lib/leados/flow.ts",
+    "linea": 650,
+    "tipo": "otro",
+    "detalle": "El comentario de agruparParaHome dice 'calientes (score >= 4)'; el caliente hoy es el campo de Franco"
+   },
+   {
+    "ruta": "src/lib/leados/flow.ts",
+    "linea": 412,
+    "tipo": "otro",
+    "detalle": "El doc de grupoPara dice 'APROBADA → en seguimiento (el envío llega en bloques posteriores)'; el código (:430-443) ya manda a trabajar"
+   },
+   {
+    "ruta": "src/lib/leados/guidance-content.ts",
+    "linea": 24,
+    "tipo": "otro",
+    "detalle": "El encabezado dice 'hoy el registro solo tiene la ficha (m1)'; el registro tiene once pasos"
+   },
+   {
+    "ruta": "src/lib/leados/herramientas.ts",
+    "linea": 8,
+    "tipo": "otro",
+    "detalle": "Dice que SHELL_CONSTRUCCION y CANAL_INSTAGRAM están en flow.ts; viven en flow-content.ts"
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "[ZONA-FRANCO] La agenda de LeadOS toma la cuenta de Cal.com de cualquier organización con calComUsername cargado, incluidas las de clientes",
+    "se_sostiene": true,
+    "severidad_ajustada": "MEDIA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "El defecto de código está verificado por lectura. src/lib/leados/agenda.ts:58-61 hace prisma.organization.findMany({ where: { calComUsername: { not: null } } }) sobre todas las orgs, sin filtrar por la org de develOP (ni por slug ni por id). Si hay una sola org con el campo, :86-96 devuelve su username y su eventTypeSlug. ofrecerHorarios (setter/_actions/agenda.actions.ts:134-143) y confirmarReunion (:185-195 y :213-219) piden los slots y crean el booking con esa config, con attendee {nombre, email} y metadata {leadId}. Que el campo sea compartido también es real: docs/onboarding-modulo-agenda.md:76-81 manda cargar calComUsername, calComApiKey y calComEmbedUrl en la fila Organization del CLIENTE, y ningún código escribe esos campos (solo Prisma Studio, a mano). Los avisos de configuración faltante o ambigua son solo console.warn (agenda.ts:64, :74 y :90); sentry.server.config.ts e instrumentation.ts tienen Sentry.init pero no capturan la consola (control positivo hecho). Bajo la severidad de ALTA a MEDIA por varias razones. (1) Con las dos orgs configuradas, el código falla cerrado: hay rama explícita de ambigüedad (:70-84), no reserva y le da al setter un mensaje con salida ('coordiná con Franco directo'). Eso es un flujo interno de develOP bloqueado, con workaround, y no un flujo del cliente. (2) La fuga necesita que se den a la vez varias condiciones operativas: un cliente onboardeado con el módulo, la org de develOP sin el campo (es el estado documentado hoy) y además la variante NO por defecto del onboarding. Con el embed URL por defecto del doc (https://cal.com/{username}, onboarding-modulo-agenda.md:42-46 y :81), parseEventTypeSlug (:100-105) devuelve el propio username como slug del event type, así que lo más probable es que Cal.com responda 404 y caiga en CalComV2Error 'no_encontrado' (cal-com-v2.ts:197-208) sin crear ningún booking. Este eslabón depende del runtime de Cal.com, de ahí PROBABLE. (3) Nadie lo puede explotar: el actor es el SETTER, un rol interno que actúa de buena fe. Lo que viajaría son datos de prospectos de develOP (nombre, email y el cuid del lead en metadata), no datos de otro cliente. Además, el onboarding dice que la cuenta de Cal.com del cliente la administra develOP ('El cliente NO tiene acceso directo', :98), así que es inferido que el cliente llegue a ver esos datos. (4) La agenda del cliente no se ve afectada: page.tsx:323-325 lee la org por id con findUnique, aislado por tenant, así que el impacto no cae en el camino del cliente. (5) El riesgo ya está documentado como conocido en docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:847-866 y en docs/verificacion-arranque-oslead-vii.md:550. Así se sostiene como deuda de diseño: una consulta global sin filtro de dominio que acopla LeadOS con el módulo del cliente y que hay que arreglar antes de onboardear al primer cliente con Agenda inteligente. Encaja como MEDIA (impacto acotado o con workaround), no como ALTA.",
+    "evidencia_contra": [
+     "src/lib/leados/agenda.ts:70-84: con más de una org con calComUsername falla cerrado: no reserva y devuelve un mensaje con salida (coordinar con Franco), así que el caso más probable (develOP y el cliente configurados) no fuga nada",
+     "src/lib/leados/agenda.ts:100-105 junto con docs/onboarding-modulo-agenda.md:42-46 y :81: el embed URL por defecto del onboarding del cliente es https://cal.com/{username}, entonces el slug del event type sale igual al username y Cal.com probablemente devuelve 404 (cal-com-v2.ts:197-208) sin crear booking; la fuga necesita la variante por event type",
+     "src/app/(protected)/setter/_actions/agenda.actions.ts:129 y :173: solo un SETTER (rol interno) dispara el flujo, de buena fe; no hay actor anónimo ni cliente que lo explote",
+     "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:323-325: el módulo del cliente lee su propia org por id (findUnique), así que su flujo no se rompe",
+     "docs/onboarding-modulo-agenda.md:98: la cuenta de Cal.com del cliente la opera develOP ('El cliente NO tiene acceso directo'), lo que hace inferido que el cliente vea los datos del prospecto",
+     "docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:847-866 y docs/verificacion-arranque-oslead-vii.md:550: el acoplamiento ya está registrado como riesgo conocido",
+     "git grep calComUsername en origin/main: ningún código escribe el campo, solo se carga a mano (Prisma Studio), así que la fuga necesita una acción manual de develOP en el orden equivocado"
+    ]
+   }
+  ]
+ }
+}

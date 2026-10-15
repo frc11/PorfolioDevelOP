@@ -1,0 +1,872 @@
+{
+ "dominio": "D4",
+ "nombre": "Setter (ZONA-FRANCO)",
+ "ciclo": "D4-c1",
+ "lente": "",
+ "foco": "Setter y LeadOS (ZONA-FRANCO, solo lectura): flujo completo, maquina de estados del lead y del dossier, integracion con admin/leads y con los crons (os-follow-up), consistencia de datos y aislamiento entre setters. Todo hallazgo lleva Zona ZONA-FRANCO y va a 09-PARA-FRANCO.",
+ "acotado": true,
+ "flujos_cerrados": "[D1] Login con contrasena (Credentials): src/app/login/page.tsx:347 -> src/app/login/actions.ts:65 -> actions.ts:111 -> src/auth.ts:142 -> src/lib/auth-cookies.ts:21 -> auth.ts:89 -> src/proxy.ts:70 -> admin/layout.tsx:41\n[D1] Magic link (provider Resend que envia por Brevo): src/app/login/page.tsx:204 -> src/app/login/actions.ts:140 -> send-token.js:74 -> src/auth.ts:175 -> src/lib/email/brevo-service.ts:17 -> src/app/api/auth/[...nextauth]/route.ts:3 -> auth.ts:192 -> actions.ts:148\n[D1] Recupero de contrasena: src/app/login/page.tsx:365 -> src/app/forgot-password/page.tsx:120 -> actions.ts:29 -> limiter.ts:37 -> src/app/reset-password/page.tsx:10 -> ResetPasswordForm.tsx:186\n[D1] Cambio forzado de contrasena (temporal): createClientOnly.ts:96 -> onboarding/core.ts:96 -> route.ts:64 -> src/auth.ts:168 -> src/proxy.ts:84 -> src/app/cambiar-password/page.tsx:6 -> CambiarPasswordForm.tsx:116 -> src/app/cambiar-password/actions.ts:25\n[D1] Impersonacion de soporte (SUPER_ADMIN): ImpersonateButton.tsx:24 -> projects/[projectId]/layout.tsx:219 -> client.actions.ts:8 -> src/lib/actions/impersonation.ts:12 -> src/lib/impersonation.ts:24 -> src/proxy.ts:77 -> dashboard/layout.tsx:72 -> src/lib/preview.ts:14\n[D1] Invalidacion de sesion por sessionVersion (y sus huecos): cambiar-password/actions.ts:59 -> profile.ts:230 -> reset-password/actions.ts:76 -> resend-credentials/route.ts:71 -> src/auth.ts:215 -> dashboard/layout.tsx:90 -> proxy.ts:134 -> auth.ts:215\n[D1] QA login (ZONA-FRANCO): src/app/api/qa/login/route.ts:49 -> auth-cookies.ts:21 -> auth.ts:209\n[D1] Logout: admin-topbar.tsx:85 -> setter/layout.tsx:76 -> DashboardLayoutClient.tsx:150 -> src/actions/auth-actions.ts:5 -> impersonation.ts:82\n[D6] Seed principal: prisma db seed → prisma/seed.ts: prisma.config.ts:23 -> seed.ts:73 -> seed-guard.ts:42 -> src/lib/agency-settings.ts:1\n[D6] Seed Agency OS: npm run seed:agency-os → prisma/seed-agency-os.ts: package.json:17 -> seed-agency-os.ts:2386\n[D6] Migraciones hacia prod: netlify.toml:2 -> prisma.config.ts:26 -> prisma/schema.prisma:5\n[D6] Cambio de plan → precio que ve el cliente: src/app/(protected)/admin/clients/_actions/plan.actions.ts:179 -> plan.actions.ts:186 -> src/lib/plan/get-plan-for-org.ts:50 -> src/app/(protected)/dashboard/cuenta/perfil/page.tsx:80 -> perfil/page.tsx:208 -> src/components/dashboard/ProfileForms.tsx:660\n[D6] Archivar cliente (soft-delete de Organization): src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:161 -> src/modules/chatbot/server/admin/archiveClient.ts:17 -> archiveClient.ts:37 -> src/app/(protected)/admin/clients/page.tsx:23\n[D6] OAuth de GBP y Tiendanube → tokens en Organization: src/app/api/auth/google-business/callback/route.ts:49 -> src/app/api/auth/tiendanube/callback/route.ts:63 -> src/lib/integrations/google-business-profile.ts:59 -> prisma/schema.prisma:359 -> schema.prisma:1704\n[D6] Hard-delete de cliente y cascadas: ClientsListClient.tsx:187 -> src/modules/chatbot/server/admin/hardDeleteClient.ts:60 -> hardDeleteClient.ts:141 -> prisma/schema.prisma:528\n[D6] Revisión manual de las 14 sentencias DML de migraciones (veredicto por sentencia): (sin rutas)\n[D6] Mensaje del widget público: tenant resuelto por slug y escrituras aisladas del chatbot: src/app/api/chatbot/[slug]/chat/route.ts:97 -> src/modules/chatbot/server/chat/handleChatRequest.ts:155 -> src/modules/chatbot/server/conversation/resolver.ts:24 -> resolver.ts:38 -> handleChatRequest.ts:163 -> src/lib/isolation/index.ts:71 -> registry.ts:833 -> scoped-model.ts:157\n[D6] Webhook entrante de WhatsApp (motor): tenant por channelToken y FKs compuestas: src/app/api/motor/webhook/[channelToken]/route.ts:27 -> src/modules/motor/adapters/whatsapp/inbound/handle-request.ts:22 -> resolve-channel.ts:22 -> handle-request.ts:53 -> registry.ts:467 -> scoped-model.ts:343\n[D6] Archivar cliente (admin): soft-delete que solo oculta del listado: src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:161 -> src/modules/chatbot/server/admin/archiveClient.ts:16 -> src/app/(protected)/admin/clients/page.tsx:23 -> resolver.ts:24\n[D6] Eliminar cliente (hard-delete) y su cascada: ClientsListClient.tsx:192 -> src/modules/chatbot/server/admin/hardDeleteClient.ts:107 -> hardDeleteClient.ts:125\n[D6] Catálogo de módulos premium: código -> sitio público / DB -> portal y gates: src/lib/data/premium-modules.ts:21 -> src/app/page.tsx:39 -> src/components/sections/modulos-opcionales/ModulosOpcionales.tsx:426 -> ModuloActiveCard.tsx:248 -> prisma/seeds/sync-premium-modules.ts:64 -> src/app/(protected)/dashboard/services/page.tsx:177 -> src/app/(protected)/admin/settings/_actions/settings.actions.ts:175 -> src/app/(protected)/dashboard/layout.tsx:53\n[D6] Plan del bot: catálogo de planes -> plan efectivo -> tools habilitadas: prisma/seeds/sync-plans.ts:66 -> prisma/seeds/add-contact-tool.ts:47 -> handleChatRequest.ts:218 -> src/lib/plan/get-plan-for-org.ts:40 -> src/lib/plan/fallback.ts:44 -> src/modules/chatbot/server/tools/getTools.ts:121\n[D6] Migraciones hacia producción: netlify.toml:2 -> package.json:9 -> prisma/seeds/sync-plans.ts:9 -> add-contact-tool.ts:24 -> backfill-vertical-pack.ts:58\n[D6] Mensaje precargado en Mensajes del portal: src/components/dashboard/MessageThread.tsx:72 -> src/lib/data/message-context.ts:54 -> MessageThread.tsx:173\n[D2] Entrada al portal y gate de onboarding: src/proxy.ts:154 -> src/app/(protected)/dashboard/layout.tsx:72 -> src/lib/preview.ts:6 -> layout.tsx:79 -> src/components/dashboard/SidebarNav.tsx:76\n[D2] Inicio: metricas del negocio, Health Score, semana y resumen IA: src/app/(protected)/dashboard/page.tsx:51 -> page.tsx:110 -> src/lib/dashboard/home-metrics.ts:96 -> src/lib/health-score.ts:284 -> src/lib/dashboard/week-results.ts:43 -> AIExecutiveBriefV2.tsx:33 -> regenerate-brief.ts:9 -> executive-brief.ts:137\n[D2] Aprobar o pedir cambios en una entrega: src/app/(protected)/dashboard/project/page.tsx:134 -> src/components/dashboard/TaskApprovalButtons.tsx:14 -> src/actions/dashboard-actions.ts:12 -> dashboard-actions.ts:43 -> dashboard/layout.tsx:101\n[D2] Mensajes con develOP: src/app/(protected)/dashboard/messages/page.tsx:12 -> messages/_components/MarkReadOnMount.tsx:13 -> messages/_actions/mark-read.ts:11 -> src/components/dashboard/MessageThread.tsx:51 -> src/lib/actions/messages.ts:114 -> src/lib/email/notify-message.ts:50\n[D2] Email marketing: importar, crear, enviar y darse de baja: src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:17 -> premium-modules.ts:38 -> contactos/_components/ImportCSVButton.tsx:14 -> email-marketing/_actions.ts:71 -> brevo.ts:31 -> campaigns/new/page.tsx:47 -> _actions.ts:128 -> src/lib/integrations/brevo.ts:60\n[D2] Motor de resenas: vista, borrador IA y respuesta: src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:105 -> motor-resenas-view.ts:38 -> page.tsx:19 -> src/lib/integrations/google-business-profile.ts:329 -> _components/ReviewItem.tsx:46 -> src/components/dashboard/modules/motor-resenas/_actions.ts:11 -> src/lib/ai/review-reply-draft.ts:25 -> ReviewItem.tsx:64\n[D2] Tienda conectada: conectar y ver resumen: src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx:292 -> _components/ConnectStoreCard.tsx:39 -> src/app/api/auth/tiendanube/start/route.ts:9 -> src/app/api/auth/tiendanube/callback/route.ts:27 -> page.tsx:86 -> src/lib/integrations/tiendanube.ts:82\n[D2] Agenda inteligente: src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:316 -> page.tsx:203 -> src/lib/integrations/cal-com.ts:32\n[D2] Mi cuenta: perfil, reporte, facturacion y boveda: src/app/(protected)/dashboard/cuenta/perfil/page.tsx:73 -> src/components/dashboard/ExecutiveReportPrefsForm.tsx:45 -> _actions/executive-report-prefs.actions.ts:20 -> schemas.ts:8 -> cuenta/facturacion/page.tsx:61 -> cuenta/boveda/page.tsx:63 -> src/lib/crypto/resolve-credential.ts:16 -> src/actions/agency-actions.ts:94\n[D2] Plan: consumo y pedido de upgrade: src/app/(protected)/dashboard/plan/page.tsx:12 -> src/lib/plan/get-org-usage.ts:50 -> src/components/dashboard/plan/PlansShowcase.tsx:89 -> src/components/dashboard/plan/UpgradeCtaButton.tsx:88 -> src/lib/actions/upsell.ts:10\n[D2] Referidos: src/app/(protected)/dashboard/referidos/page.tsx:26 -> src/lib/referrals/referrals.service.ts:16 -> src/components/dashboard/ReferralPanel.tsx:43 -> src/lib/actions/referrals.ts:12\n[D2] Onboarding (bienvenida), fuera del lote, trazado por el foco: src/app/bienvenida/_components/BienvenidaWizard.tsx:33 -> src/app/bienvenida/_actions/complete-onboarding.ts:17 -> src/app/bienvenida/_components/Step2Conexiones.tsx:38 -> complete-onboarding.ts:38 -> src/lib/analytics.ts:60\n[D2] Resultados › Análisis mensual (Pro+): proxy.ts:154 -> analisis/page.tsx:32 -> preview.ts:6 -> plan-allows.ts:21 -> getMonthlyAnalysisForOrg.ts:53 -> netlify.toml:25 -> generateInsights.ts:99\n[D2] Descarga del informe mensual en PDF: DownloadMonthlyReportButton.tsx:21 -> client-monthly/route.ts:25 -> route.ts:38 -> get-client-monthly-report-data.ts:24\n[D2] Resultados › SEO y pedido de activación: seo/page.tsx:98 -> updateClient.ts:95 -> upsell.ts:10 -> searchconsole.ts:99 -> results-insights.ts:44\n[D2] Resultados › Tráfico + PageSpeed: trafico/page.tsx:46 -> analytics.ts:85 -> results-insights.ts:34 -> pagespeed.ts:26\n[D2] Resultados › Reputación (Google Business Profile): start/route.ts:5 -> callback/route.ts:49 -> reputacion/page.tsx:15 -> google-business-profile.ts:165\n[D2] Servicios › vitrina y solicitud de módulo: services/page.tsx:169 -> showroom.ts:58 -> PremiumModuleCard.tsx:201 -> upsell.ts:10\n[D2] Soporte › abrir ticket: soporte/page.tsx:15 -> NewTicketModal.tsx:29 -> lib/tickets/actions.ts:38 -> tickets/actions.ts:49\n[D2] Soporte › conversación y cierre del ticket: soporte/[ticketId]/page.tsx:54 -> page.tsx:106 -> TicketReplyForm.tsx:13 -> tickets/actions.ts:110 -> assert-ownership.ts:32 -> ResolveTicketButton.tsx:12\n[D2] Bienvenida (onboarding del cliente): proxy.ts:130 -> login/actions.ts:101 -> protected)/dashboard/layout.tsx:127 -> core.ts:85 -> createClientOnly.ts:85 -> createClientWithBot.ts:135 -> bienvenida/layout.tsx:9 -> page.tsx:10\n[D2] Crear ticket de soporte: soporte/page.tsx:73 -> NewTicketModal.tsx:113 -> tickets/actions.ts:49 -> lib/alerts.ts:109 -> soporte/[ticketId]/page.tsx:54\n[D2] Responder y resolver un ticket: soporte/[ticketId]/page.tsx:56 -> ClientChatThread.tsx:32 -> TicketReplyForm.tsx:14 -> ClientChatComposer.tsx:92 -> tickets/actions.ts:121 -> ResolveTicketButton.tsx:12\n[D2] Mensaje al equipo develOP: messages/page.tsx:12 -> MessageThread.tsx:50 -> ClientChatComposer.tsx:92 -> messages.ts:118\n[D2] Aprobar o pedir cambios en una entrega: project/page.tsx:131 -> ProjectTaskTabs.tsx:160 -> TaskApprovalButtons.tsx:14 -> dashboard-actions.ts:12 -> layout.tsx:101 -> notifications.ts:82\n[D2] Campana de notificaciones e historial: dashboard/layout.tsx:74 -> DashboardLayoutClient.tsx:148 -> NotificationCenter.tsx:41 -> dashboard-actions.ts:188 -> notifications.ts:46 -> NotificationHistoryModal.tsx:30\n[D2] Solicitar un modulo premium (upsell): services/page.tsx:169 -> PremiumModuleCard.tsx:201 -> upsell.ts:14 -> MessageThread.tsx:72\n[D2] Perfil de empresa, contacto y contrasena: perfil/page.tsx:74 -> ProfileForms.tsx:216 -> profile.ts:28\n[D2] Solicitar eliminacion de cuenta: ProfileForms.tsx:689 -> profile.ts:150 -> admin/tickets/_components/ticket-chat.tsx:119\n[D2] Metricas de Trafico y SEO: resultados/trafico/page.tsx:46 -> analytics.ts:36 -> trafico/page.tsx:194 -> AnalyticsMetricCard.tsx:63 -> AnalyticsAlertas.tsx:9 -> AlertaMetrica.tsx:63 -> seo/page.tsx:179 -> searchconsole.ts:104\n[D2] Referidos: referidos/page.tsx:27 -> ReferralPanel.tsx:40 -> referrals.ts:13\n[D2] Preferencias del reporte ejecutivo semanal: perfil/page.tsx:196 -> ExecutiveReportPrefsForm.tsx:45 -> executive-report-prefs.actions.ts:23\n[D2] Card de onboarding en Inicio: dashboard/page.tsx:51 -> OnboardingStatusCard.tsx:17 -> MessageThread.tsx:73\n[D2] Home: 'Tu semana en números' (leads, semáforo, velocidad, origen, embudo, campañas): src/app/(protected)/dashboard/page.tsx:51 -> src/lib/preview.ts:6 -> impersonation.ts:54 -> page.tsx:111 -> src/lib/dashboard/home-metrics.ts:85 -> home-metrics-logic.ts:22 -> home-metrics.ts:96 -> BusinessHero.tsx:46\n[D2] Home: ticket promedio y estimación de plata: MoneyEstimate.tsx:36 -> src/app/(protected)/dashboard/_actions/business-profile.actions.ts:25 -> business-profile.actions.ts:33 -> home-metrics-logic.ts:93\n[D2] Home: Resumen ejecutivo IA (lectura on-demand y regeneración manual): page.tsx:187 -> src/lib/ai/executive-brief.ts:52 -> executive-brief-input.ts:204 -> executive-brief.ts:95 -> factory.ts:20 -> providers/google.ts:1 -> AIExecutiveBriefV2.tsx:33 -> src/app/(protected)/dashboard/_actions/regenerate-brief.ts:9\n[D2] Home: bloque 'Tu cuenta' (Health Score, Atención hoy, Resultados de la semana): page.tsx:172 -> health-score.ts:59 -> HealthScore.tsx:30 -> attention.ts:25 -> AttentionStack.tsx:76 -> week-results.ts:18 -> WeekResultsGrid.tsx:21\n[D2] Email ejecutivo semanal (consume las libs del lote): vercel.json:12 -> netlify.toml:25 -> src/lib/reports/executive-weekly/build.ts:113 -> build.ts:122 -> src/lib/email/templates/executive-weekly.ts:243\n[D2] Pedido de upsell (planes, recomendaciones, módulos, SEO): UpgradeCtaButton.tsx:80 -> Recommendations.tsx:82 -> PremiumModuleCard.tsx:206 -> LockedView.tsx:68 -> resultados/seo/page.tsx:112 -> src/lib/actions/upsell.ts:14 -> schemas.ts:45 -> upsell.ts:45\n[D2] Mensaje del cliente a develOP: MessageThread.tsx:51 -> src/lib/actions/messages.ts:118 -> messages.ts:134\n[D2] Notificaciones del cliente: src/app/(protected)/dashboard/layout.tsx:72 -> NotificationCenter.tsx:114 -> notifications.ts:46 -> NotificationHistoryModal.tsx:34\n[D2] Novedades del panel: layout.tsx:110 -> get-announcements-for-org.ts:37 -> visibility.ts:59 -> AnnouncementsFeed.tsx:57 -> announcements.ts:29\n[D2] Código de referido: src/app/(protected)/dashboard/referidos/page.tsx:27 -> ReferralPanel.tsx:40 -> src/lib/actions/referrals.ts:12\n[D2] Motor de reseñas: borrador IA y publicación en Google: src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:110 -> src/lib/modules/check-activation.ts:3 -> ReviewItem.tsx:46 -> _actions.ts:20 -> src/lib/ai/review-reply-draft.ts:32 -> src/lib/integrations/google-business-profile.ts:275\n[D2] Mi plan: src/app/(protected)/dashboard/plan/page.tsx:12 -> plan/page.tsx:36 -> src/lib/plan/get-org-usage.ts:49 -> UsageMeter.tsx:75 -> PlansShowcase.tsx:45 -> plan-presentation.ts:149\n[D2] Bóveda del cliente: src/app/(protected)/dashboard/cuenta/boveda/page.tsx:63 -> boveda/page.tsx:129 -> src/lib/crypto/resolve-credential.ts:16 -> VaultRevealButton.tsx:7 -> src/components/admin/managers/VaultManager.tsx:25 -> src/actions/agency-actions.ts:94\n[D2] Facturación: plan actual: src/app/(protected)/dashboard/cuenta/facturacion/page.tsx:60 -> src/lib/billing/get-current-plan.ts:38 -> get-current-plan.ts:70 -> src/components/dashboard/CurrentPlanCard.tsx:173 -> facturacion/page.tsx:81\n[D2] Resultados: reputación, velocidad, insights, análisis mensual e informe PDF: resultados/reputacion/page.tsx:15 -> google-business-profile.ts:165 -> GBPMetricsCard.tsx:37 -> resultados/trafico/page.tsx:125 -> pagespeed.ts:26 -> PageSpeedCard.tsx:176 -> trafico/page.tsx:47 -> results-insights.ts:34\n[D2] Crear ticket de soporte (cliente): src/app/(protected)/dashboard/soporte/page.tsx:73 -> src/components/dashboard/NewTicketModal.tsx:38 -> src/lib/tickets/actions.ts:49 -> src/lib/preview.ts:6 -> src/lib/alerts.ts:109 -> src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:60\n[D2] Responder ticket (cliente y admin): src/components/dashboard/TicketReplyForm.tsx:16 -> src/lib/tickets/actions.ts:117 -> src/lib/auth/assert-ownership.ts:32 -> src/lib/email.ts:15 -> src/components/dashboard/ClientChatComposer.tsx:84\n[D2] Marcar ticket como resuelto (cliente): src/app/(protected)/dashboard/soporte/[ticketId]/page.tsx:150 -> src/components/dashboard/ResolveTicketButton.tsx:12 -> src/lib/tickets/actions.ts:205\n[D2] Reporte ejecutivo semanal (cron): vercel.json:11 -> netlify.toml:25 -> src/app/api/cron/send-executive-reports/route.ts:17 -> src/lib/reports/executive-weekly/send.ts:78 -> src/lib/reports/executive-weekly/build.ts:68 -> src/lib/ai/executive-brief.ts:52 -> src/lib/ai/brief-history.ts:24 -> top-hot-leads.ts:56\n[D2] Envío manual del reporte (admin): src/app/(protected)/admin/clients/[clientId]/_components/SendExecutiveReportButton.tsx:37 -> src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:13 -> src/lib/reports/executive-weekly/send-manual.ts:46\n[D2] Preferencias del reporte (cliente): src/app/(protected)/dashboard/cuenta/perfil/page.tsx:193 -> src/lib/reports/executive-weekly/report-eligible-plan.ts:9 -> src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts:20 -> src/lib/reports/executive-weekly/send.ts:83 -> build.ts:99\n[D2] Informe mensual en PDF (cliente): src/app/(protected)/dashboard/resultados/analisis/page.tsx:45 -> src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx:18 -> src/app/api/reports/client-monthly/route.ts:24 -> src/lib/reports/client-monthly/get-client-monthly-report-data.ts:24 -> src/lib/reports/client-monthly/monthly-report-data.ts:73 -> src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx:287\n[D2] Ideas para crecer (recomendaciones en Inicio): src/app/(protected)/dashboard/page.tsx:78 -> src/lib/recommendations/get-recommendations-for-org.ts:32 -> src/lib/recommendations/rules.ts:175 -> src/components/dashboard/home/Recommendations.tsx:78 -> src/lib/actions/upsell.ts:43 -> src/lib/upsell/dedup.ts:33\n[D2] Mi plan: consumo y vitrina: src/app/(protected)/dashboard/plan/page.tsx:12 -> src/lib/plan/get-org-usage.ts:49 -> src/lib/plan/get-plan-for-org.ts:68 -> src/lib/plan/fallback.ts:44 -> src/lib/plan/plan-presentation.ts:144 -> src/components/dashboard/plan/UpgradeCtaButton.tsx:80\n[D2] Vitrina de servicios y 'avisame cuando esté': src/app/(protected)/dashboard/services/page.tsx:169 -> src/lib/modules/showroom.ts:58 -> src/components/dashboard/PremiumModuleCard.tsx:200 -> src/lib/actions/upsell.ts:81\n[D2] Referidos: código, link y atribución pública: src/app/(protected)/dashboard/referidos/page.tsx:26 -> src/lib/referrals/referrals.service.ts:15 -> src/components/dashboard/ReferralPanel.tsx:32 -> src/lib/actions/referrals.ts:12 -> referrals.service.ts:28 -> code.ts:23 -> src/lib/referrals/code.ts:29 -> src/lib/actions/contact.ts:16\n[D2] Gating de módulos premium: src/app/(protected)/dashboard/layout.tsx:115 -> SidebarNav.tsx:76 -> src/app/(protected)/dashboard/modules/email-marketing/layout.tsx:17 -> src/lib/modules/check-activation.ts:3 -> src/lib/data/premium-modules.ts:38 -> src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17 -> src/app/(protected)/dashboard/modules/motor-resenas/page.tsx:106 -> motor-resenas-view.ts:38\n[D2] Leads y Health Score de Inicio alimentados por ContactSubmission global: src/app/(protected)/dashboard/page.tsx:172 -> src/lib/dashboard/week-results.ts:43 -> src/lib/health-score.ts:283 -> src/lib/actions/upsell.ts:88 -> src/lib/reports/executive-weekly/build.ts:130 -> src/lib/ai/executive-brief.ts:278\n[D5] Visitante en el sitio del cliente → widget embebido → respuesta del LLM: public/widget.js:113 -> next.config.ts:126 -> src/app/embed/[slug]/page.tsx:29 -> ChatbotEmbed.tsx:66 -> useChatbot.ts:272 -> chat/route.ts:42 -> validate-origin.ts:69 -> handleChatRequest.ts:133\n[D5] Lead capturado → avisos (dueño, develOP, sitio padre): captureLead.ts:58 -> notify.ts:87 -> decide.ts:40 -> presets.ts:65 -> ChatbotEmbed.tsx:93 -> widget.js:177\n[D5] Cliente revisa y exporta sus leads: proxy.ts:154 -> dashboard/chatbot/layout.tsx:25 -> getClientSession.ts:5 -> leads/page.tsx:36 -> multiTenantQueries.ts:75 -> ClientLeadsTable.tsx:311 -> export/route.ts:83\n[D5] Cliente abre el transcript de una conversación: conversations/page.tsx:9 -> multiTenantQueries.ts:174 -> transcript-action.ts:31\n[D5] Admin crea org + bot de cero: CreateBotForm.tsx:70 -> new/actions.ts:39 -> core.ts:58\n[D5] Admin activa, pausa o elimina un bot: BotDetailClient.tsx:134 -> preflightChecks.ts:1 -> actions.ts:25 -> resolver.ts:47\n[D5] Admin exporta leads de varios bots: BotsListClient.tsx:62 -> BulkActionBar.tsx:91 -> bulk-actions.ts:110\n[D5] Admin prueba un prompt en el sandbox de KB: KnowledgeTab.tsx:21 -> TestPromptSandbox.tsx:42 -> test-prompt/route.ts:27\n[D5] Health del chatbot (admin y público): admin/chatbot/health/page.tsx:11 -> checkHealth.ts:21 -> envValidator.ts:83 -> buildHealthVerdict.ts:24 -> api/chatbot/[slug]/health/route.ts:6\n[D5] Fallo del proveedor (control E10: credencial de Vertex vencida): handleChatRequest.ts:937 -> google.ts:71 -> logger.ts:172 -> checker.ts:189 -> persistTurn.ts:353 -> reconcile.ts:407 -> detectBotIssues.ts:85\n[D5] Webhook entrante de WhatsApp (motor): route.ts:27 -> handle-request.ts:22 -> resolve-channel.ts:24 -> auth.ts:134\n[D5] Widget de develOP: de la carga del sitio a la respuesta del bot: app/layout.tsx:137 -> ChatWidgetMount.tsx:37 -> configCache.ts:33 -> LogicCompanion.tsx:53 -> useChatbot.ts:239 -> ChatWindow.tsx:186 -> chat/route.ts:42 -> handleChatRequest.ts:136\n[D5] Credencial de Vertex vencida (E10): que pasa en cada capa: handleChatRequest.ts:937 -> reconcile.ts:366 -> useChatbot.ts:470 -> checkHealth.ts:46 -> dashboard/chatbot/layout.tsx:50\n[D5] Accion rapida sobre un lead y Deshacer: dashboard/chatbot/leads/page.tsx:36 -> BusinessLeadCard.tsx:240 -> LeadDetail.tsx:318 -> LeadStatusActions.tsx:120 -> lead-status-rules.ts:23 -> updateLeadStatus.ts:18 -> getClientSession.ts:6 -> home-metrics.ts:120\n[D5] Detalle del lead en lenguaje de dueno: dashboard/chatbot/leads/[id]/page.tsx:29 -> page.tsx:43 -> LeadDetail.tsx:161 -> lead-detail-presentation.ts:28 -> lead-intent-labels.ts:44\n[D5] Exportar contactos a CSV: api/dashboard/chatbot/leads/export/route.ts:143 -> buildLeadsCsv.ts:82\n[D5] Abuso anonimo del endpoint de chat (cuota): validate-origin.ts:69 -> origin-matcher.ts:39 -> chat/route.ts:80 -> handleChatRequest.ts:185\n[D5] Guardar la configuración del bot (admin): BotConfigEditor.tsx:220 -> BotConfigDiffModal.tsx:64 -> saveBotConfigByOrgSlug.ts:71\n[D5] Guardar la KB (admin): KnowledgeBaseEditor.tsx:184 -> SaveConfirmModal.tsx:26 -> DiffViewer.tsx:19 -> saveKnowledgeBaseByOrgSlug.ts:24\n[D5] Probar prompt con la KB en borrador: KnowledgeBaseEditor.tsx:176 -> TestPromptSandbox.tsx:33 -> test-prompt/route.ts:28\n[D5] Activar un bot pausado con preflight: BotDetailClient.tsx:227 -> preflightChecks.ts:18 -> ActivationModal.tsx:28 -> botId]/actions.ts:29\n[D5] Alta de cliente con bot (asistente): clients/new/page.tsx:14 -> OnboardingWizard.tsx:87 -> useOnboardingDraft.ts:26 -> Step1Company.tsx:23 -> Step2BotIdentity.tsx:9 -> Step3KnowledgeBase.tsx:9 -> kb-templates/index.ts:38 -> Step4Appearance.tsx:24\n[D5] Configurar y probar la integración CRM (n8n): IntegrationsTab.tsx:36 -> CrmIntegrationAdminCard.tsx:29 -> getCrmSyncHistory.ts:89 -> CrmConfigForm.tsx:39 -> saveCrmIntegration.ts:30 -> testCrmConnection.ts:22\n[D5] Reintentar un sync CRM fallido: CrmSyncHistoryList.tsx:75 -> RetrySyncButton.tsx:17 -> retryCrmSync.ts:24\n[D5] Stream de actividad en vivo: admin/chatbot/activity/page.tsx:10 -> queries.ts:36 -> ActivityLog.tsx:101 -> events/route.ts:8 -> activityFilters.ts:91\n[D5] Health del chatbot y latencia: admin/chatbot/health/page.tsx:11 -> checkHealth.ts:25 -> getLatencyHistory.ts:73 -> buildHealthVerdict.ts:24 -> LatencyChart.tsx:28\n[D5] Visitante del sitio develOP conversa con el bot (widget on-site): src/app/layout.tsx:137 -> src/components/layout/ChatWidgetMount.tsx:10 -> LogicCompanion.tsx:95 -> ChatWindow.tsx:161 -> useChatbot.ts:537 -> ThinkingAvatar.tsx:30 -> StreamingMarkdown.tsx:75 -> revealSafeMarkdown.ts:65\n[D5] Degradado y errores visibles al visitante (develOP y embed del cliente): useChatbot.ts:318 -> ChatWindow.tsx:280 -> DegradedBanner.tsx:41 -> public/widget.js:125 -> src/app/embed/[slug]/page.tsx:40 -> ChatbotEmbed.tsx:419\n[D5] Cabecera y avatar del widget (develOP y embed): ChatWindow.tsx:251 -> ChatbotEmbed.tsx:211 -> ChatHeader.tsx:61 -> AvatarRenderer.tsx:51 -> registry.ts:96 -> HeavyAvatarsLazy.tsx:27 -> NeuroAvatar.tsx:45 -> LegacyNeuroAvatarAdapter.tsx:31\n[D5] Cliente y admin eligen avatar del bot: src/app/(protected)/dashboard/chatbot/settings/page.tsx:63 -> BotPersonalization.tsx:271 -> admin/chatbots/[botId]/tabs/ConfigTab.tsx:54 -> BotConfigEditor.tsx:174 -> AppearanceTab.tsx:40 -> admin/clients/new/page.tsx:14 -> Step4Appearance.tsx:58 -> AvatarPicker.tsx:84\n[D5] Borrador del alta de cliente (admin): src/app/(protected)/admin/clients/new/page.tsx:14 -> OnboardingWizard.tsx:98 -> useOnboardingDraft.ts:26 -> onboarding/types.ts:30\n[D5] Resumen del chatbot del cliente (Overview): src/app/(protected)/dashboard/chatbot/page.tsx:15 -> clientHasChatbot.ts:5 -> page.tsx:20 -> multiTenantQueries.ts:33 -> ChatbotOverview.tsx:40 -> business-metrics.ts:19\n[D5] Cambio de estado de un tap sobre un contacto: BusinessLeadCard.tsx:240 -> LeadDetail.tsx:318 -> LeadStatusActions.tsx:133 -> updateLeadStatus.ts:18\n[D5] Guardar estado y notas desde el detalle del contacto: leads/[id]/page.tsx:29 -> LeadDetail.tsx:497 -> updateLeadStatus.ts:17\n[D5] Transcript de la conversacion origen en el detalle del contacto: leads/[id]/page.tsx:75 -> multiTenantQueries.ts:166 -> schema.prisma:152 -> LeadDetail.tsx:480\n[D5] Personalizacion del bot por el cliente: settings/page.tsx:14 -> BotPersonalization.tsx:134 -> updateBotAppearance.ts:56 -> public/widget.js:28 -> ChatbotEmbed.tsx:298\n[D5] Chat del visitante en el sitio del cliente (widget + embed): public/widget.js:21 -> src/app/embed/[slug]/page.tsx:29 -> ChatbotEmbed.tsx:27 -> useChatbot.ts:537 -> src/app/api/chatbot/[slug]/chat/route.ts:40 -> validate-origin.ts:70 -> handleChatRequest.ts:309 -> degradedResponse.ts:97\n[D5] Lista de contactos con filtros, pipeline y polling: leads/page.tsx:35 -> ClientLeadsTable.tsx:166 -> LeadPipeline.tsx:31 -> classes.ts:31\n[D5] Exportar contactos a CSV: ClientLeadsTable.tsx:311 -> ExportLeadsButton.tsx:44\n[D5] Conversaciones del cliente con transcript expandible: conversations/page.tsx:9 -> multiTenantQueries.ts:180 -> ConversationsTable.tsx:59\n[D5] Instalacion del snippet: platforms.ts:26 -> SnippetCopyBlock.tsx:28 -> PlatformInstructions.tsx:11\n[D5] Visitante conversa con el bot de un cliente (widget): useChatbot.ts:537 -> route.ts:8 -> chatRetryPolicy.ts:24\n[D5] Carga de config del widget y bot pausado: useChatbot.ts:230\n[D5] E10: credencial de Vertex vencida (que ve el visitante, que ve el cliente, como se entera el sistema): useChatbot.ts:537 -> route.ts:8 -> google.ts:53 -> handleChatRequest.ts:1046 -> logger.ts:172 -> multiTenantQueries.ts:174 -> ChatbotOverview.tsx:63 -> detectBotIssues.ts:85\n[D5] Alta de cliente con bot desde el wizard admin: Step5Review.tsx:71 -> createClientWithBot.ts:96\n[D5] Crear bot para una org existente: admin/chatbots/new/actions.ts:41 -> createBot.ts:41\n[D5] Activar un bot (preflight): BotDetailClient.tsx:136 -> preflightChecks.ts:18 -> ActivationModal.tsx:30 -> admin/chatbots/[botId]/actions.ts:42\n[D5] Editar configuracion del bot (admin): BotConfigEditor.tsx:80 -> saveBotConfig.ts:78 -> resolver.ts:11 -> handleChatRequest.ts:713 -> getPublicConfig.ts:121\n[D5] Editar la base de conocimiento (admin): KnowledgeBaseEditor.tsx:112 -> validateKB.ts:8 -> saveKnowledgeBase.ts:10\n[D5] El cliente cambia el estado de un lead: LeadStatusActions.tsx:92 -> LeadDetail.tsx:184 -> getClientSession.ts:5 -> updateLeadStatus.ts:21\n[D5] Resumen 'Mi Chatbot' del cliente: dashboard/chatbot/page.tsx:15 -> clientHasChatbot.ts:4 -> page.tsx:24 -> multiTenantQueries.ts:242 -> ChatbotOverview.tsx:40 -> business-metrics.ts:9\n[D5] Analisis mensual del negocio (resultados): dashboard/resultados/analisis/page.tsx:32 -> getMonthlyAnalysisForOrg.ts:53\n[D5] Detector de incidencias de bots: route.ts:7 -> netlify.toml:25 -> AlertSettingsClient.tsx:89 -> detectBotIssues.ts:285\n[D5] Integracion CRM (admin): CrmConfigForm.tsx:48 -> saveCrmIntegration.ts:29 -> testCrmConnection.ts:21 -> RetrySyncButton.tsx:19 -> retryCrmSync.ts:23 -> CrmIntegrationAdminCard.tsx:72 -> getCrmSyncHistory.ts:85\n[D5] Paneles admin de actividad y salud: admin/chatbot/activity/page.tsx:12 -> getActivityChartData.ts:12 -> queries.ts:36 -> admin/chatbot/health/page.tsx:13 -> getLatencyHistory.ts:73\n[D5] Turno de chat del visitante (camino feliz): src/modules/chatbot/hooks/useChatbot.ts:432 -> src/app/api/chatbot/[slug]/chat/route.ts:42 -> src/lib/security/validate-origin.ts:61 -> route.ts:97 -> handleChatRequest.ts:134 -> requestSchema.ts:37 -> resolver.ts:18 -> degradedResponse.ts:84\n[D5] Falla del proveedor LLM (Vertex vencido) — control E10: handleChatRequest.ts:1046 -> reconcile.ts:512 -> persistTurn.ts:353 -> useChatbot.ts:470 -> checkHealth.ts:47 -> buildHealthVerdict.ts:61 -> detectBotIssues.ts:85\n[D5] Config pública del widget: handleConfigRequest.ts:11 -> getPublicConfig.ts:69\n[D5] Sync de lead al CRM del cliente (n8n): saveCrmIntegration.ts:60 -> validateWebhookUrl.ts:44 -> src/modules/chatbot/server/tools/captureLead.ts:500 -> syncLeadToCrm.ts:41 -> buildLeadPayload.ts:78 -> postToN8n.ts:152 -> getEffectiveSyncStatus.ts:25 -> testCrmConnection.ts:74\n[D5] Export CSV de leads del cliente: route.ts:84 -> buildLeadsCsv.ts:132 -> csvEscape.ts:25\n[D5] Personalizar apariencia del bot (cliente): BotPersonalization.tsx:151 -> updateBotAppearance.ts:55\n[D5] Insights del chatbot: netlify/functions/generate-insights-cron.ts:62 -> src/app/api/cron/generate-insights/route.ts:36 -> src/app/api/admin/chatbot/insights/generate/route.ts:7 -> generateInsights.ts:30 -> getMonthlyAnalysisForOrg.ts:61 -> manageInsight.ts:15\n[D5] Health del bot: admin/chatbot/health/page.tsx:12 -> checkHealth.ts:21 -> buildHealthVerdict.ts:24 -> src/app/api/chatbot/[slug]/health/route.ts:6 -> proxy.ts:172\n[D5] Visitante envia mensaje y recibe respuesta en streaming (camino feliz del chat): src/modules/chatbot/hooks/useChatbot.ts:432 -> shared/historyPolicy.ts:72 -> src/app/api/chatbot/[slug]/chat/route.ts:35 -> src/lib/security/validate-origin.ts:29 -> src/modules/chatbot/server/chat/requestSchema.ts:37 -> handleChatRequest.ts:136 -> quota/checker.ts:32 -> verticals/registry.ts:39\n[D5] capture_lead: el modelo registra un lead con canales verificados y scoring: tools/captureLead.ts:616 -> captureLead.ts:212 -> handleChatRequest.ts:612 -> validateArgentinePhone.ts:52 -> scoring/calculateLeadScore.ts:259 -> persistentLogger.ts:87\n[D5] show_whatsapp_handoff: derivacion a WhatsApp con contexto para el panel: tools/showWhatsappHandoff.ts:172 -> showWhatsappHandoff.ts:96 -> persistentLogger.ts:87 -> src/lib/notifications/telegram.ts:116 -> src/modules/chatbot/server/admin/multiTenantQueries.ts:208\n[D5] confirm_contact_request: el visitante pide que lo contacten: tools/confirmContactRequest.ts:185 -> confirmContactRequest.ts:101 -> persistentLogger.ts:87\n[D5] Cuota agotada: degradacion y alerta de upsell: handleChatRequest.ts:345 -> quota/upsellAlert.ts:46 -> src/lib/isolation/registry.ts:671 -> upsellAlert.ts:68\n[D5] Falla del LLM (control positivo E10: credencial de Vertex vencida): llm/providers/google.ts:71 -> handleChatRequest.ts:1046 -> quota/checker.ts:189 -> src/modules/chatbot/hooks/useChatbot.ts:97 -> detectBotIssues.ts:85 -> health/checkHealth.ts:47 -> reports/buildWeeklyReport.ts:180\n[D5] Reporte semanal del chatbot por email: netlify.toml:28 -> src/app/api/cron/send-weekly-reports/route.ts:7 -> reports/sendWeeklyReports.ts:16 -> reports/buildWeeklyReport.ts:26 -> src/lib/email/templates/weekly-report.ts:25 -> sendWeeklyReports.ts:63\n[D5] Purga de eventos del chatbot: netlify.toml:31 -> netlify/functions/cleanup-old-events-cron.ts:21 -> src/app/api/cron/cleanup-old-events/route.ts:14 -> logging/persistentLogger.ts:154\n[D5] Mensaje entrante de WhatsApp (360dialog -> DB): route.ts:27 -> lib/rate-limit/limiter.ts:44 -> handle-request.ts:21 -> resolve-channel.ts:25 -> auth.ts:47 -> channel-credentials.ts:41 -> payload.ts:134 -> process.ts:52\n[D5] Status de entrega de un mensaje OUT: route.ts:27 -> handle-request.ts:21 -> process.ts:158 -> handle-status.ts:37 -> sendMessage.ts:204\n[D5] Eventos de salud del canal (plantillas, tier, estado del numero): route.ts:27 -> handle-request.ts:53 -> process.ts:109 -> handle-health.ts:126 -> schema.prisma:2216\n[D5] Cambio de numero (user_id_update): route.ts:27 -> handle-request.ts:53 -> process.ts:95 -> identity.ts:106 -> registry.ts:245\n[D5] Envio de salida (solo lo ejercitan los tests): tests/integration/motor-outbound.spec.ts:188 -> sendMessage.ts:204 -> window.ts:32 -> client.ts:252\n[D3] Entrada al admin: guard, badges y shell: src/app/(protected)/admin/layout.tsx:41 -> layout.tsx:43 -> AdminLayoutClient.tsx:74 -> admin-sidebar.tsx:131 -> admin-topbar.tsx:66 -> PageTransition.tsx:20\n[D3] Dashboard de KPIs (/admin): src/app/(protected)/admin/page.tsx:154 -> page.tsx:165 -> dashboard-history-charts.tsx:125 -> chart-card.tsx:18\n[D3] Triage de alertas de bots (/admin/alerts): alerts/page.tsx:5 -> src/modules/chatbot/server/admin/manageAlerts.ts:9 -> AlertsClient.tsx:46 -> alerts-filters.ts:50 -> alert-card.tsx:75 -> manageAlerts.ts:30 -> alert-column-overview.tsx:95\n[D3] Deteccion automatica de alertas (prometida, sin disparador): alerts/page.tsx:17 -> src/app/api/cron/detect-bot-issues/route.ts:13 -> netlify.toml:25 -> vercel.json:2 -> src/app/api/admin/alerts/trigger-detector/route.ts:12 -> admin/layout.tsx:11\n[D3] Publicar novedad del panel: announcements/page.tsx:11 -> announcement-publisher.tsx:53 -> announcements.actions.ts:18 -> get-announcements-for-org.ts:37\n[D3] Retirar novedad: announcement-list.tsx:93 -> announcements.actions.ts:66\n[D3] Audit log: listado, filtros y carga incremental: audit-log/page.tsx:8 -> src/lib/audit-log-queries.ts:16 -> AuditLogClient.tsx:106 -> audit-filters.ts:21 -> audit-period-filter.tsx:131\n[D3] Alta de activo en la boveda de un cliente (admin): src/components/admin/managers/VaultManager.tsx:25 -> clients/[clientId]/_components/tabs/VaultTab.tsx:26 -> agency-actions.ts:98 -> VaultManager.tsx:85 -> boveda/page.tsx:129 -> resolve-credential.ts:24\n[D3] Tarea para aprobacion del cliente: src/components/admin/managers/ProjectManager.tsx:18 -> ProjectsTab.tsx:73 -> agency-actions.ts:19\n[D3] Error de render en una pagina admin: admin/error.tsx:12 -> alerts/error.tsx:12 -> audit-log/error.tsx:12 -> AdminErrorBoundary.tsx:16 -> src/components/ui/SectionErrorBoundary.tsx:55\n[D3] Listado de clientes (activos/archivados, busqueda, filtros, fijados): src/app/(protected)/admin/clients/page.tsx:91 -> page.tsx:62 -> ClientsListClient.tsx:258\n[D3] Archivar y desarchivar cliente: ClientsListClient.tsx:708\n[D3] Eliminar cliente (hard-delete) con confirmacion por texto: ClientsListClient.tsx:609\n[D3] Acciones masivas (exportar leads, pausar bots): ClientsListClient.tsx:392 -> src/lib/bulk-actions.ts:46\n[D3] Detalle del cliente (shell, switcher y tabs): src/app/(protected)/admin/clients/[clientId]/page.tsx:28 -> page.tsx:33 -> ClientHeader.tsx:57 -> ClientSwitcher.tsx:67 -> ClientTabsNav.tsx:32\n[D3] Asignar plan (upgrade inmediato / downgrade programado): OverviewTab.tsx:72 -> PlanAssignmentCard.tsx:17 -> PlanAssignmentForm.tsx:39 -> plan.actions.ts:88\n[D3] Billing override (aplicar / quitar): OverviewTab.tsx:73 -> BillingOverrideCard.tsx:11 -> BillingOverrideForm.tsx:33 -> plan.actions.ts:244\n[D3] Editar datos del cliente: ClientHeader.tsx:135 -> edit/page.tsx:11 -> EditClientForm.tsx:58\n[D3] Notas internas inline: OverviewTab.tsx:98 -> InternalNotesCard.tsx:39\n[D3] Impersonar al cliente: ClientHeader.tsx:142 -> ImpersonateButton.tsx:42 -> client.actions.ts:8 -> src/lib/actions/impersonation.ts:12\n[D3] Re-enviar credenciales al usuario primario: OverviewTab.tsx:19 -> ResendCredentialsButton.tsx:69\n[D3] Envio manual del reporte ejecutivo: OverviewTab.tsx:74 -> ExecutiveReportCard.tsx:20 -> SendExecutiveReportButton.tsx:103\n[D3] Tab Chatbot del cliente: ChatbotTab.tsx:15 -> chatbots/new/page.tsx:16\n[D3] Tab Proyectos y crear entregable: ProjectsTab.tsx:14 -> src/actions/agency-actions.ts:14\n[D3] Tab Boveda: VaultTab.tsx:15 -> agency-actions.ts:94\n[D3] Tab Soporte: SupportTab.tsx:15\n[D3] Alta de cliente: ClientsListClient.tsx:352 -> new/page.tsx:14\n[D3] Redireccion legacy /admin/clients/[x]/chatbot/*: chatbot/[[...tab]]/page.tsx:20 -> page.tsx:28\n[D3] Kanban outbound: mover un lead de estado por drag: src/app/(protected)/admin/leads/page.tsx:21 -> page.tsx:202 -> outbound-leads-view.tsx:28 -> lead-pipeline.shared.ts:117 -> lead-pipeline.tsx:227 -> pipeline-board.tsx:48 -> droppable-column.tsx:22 -> draggable-lead-card.tsx:30\n[D3] Eliminar lead desde la card: lead-card.tsx:116 -> lead-pipeline.tsx:143\n[D3] Alta y edición de lead outbound: page.tsx:159 -> leadId]/page.tsx:277 -> lead-form.tsx:157\n[D3] Ficha del lead: estado, setter, demos, actividad y reunión: lead-card.tsx:69 -> leadId]/page.tsx:183 -> change-status-select.tsx:37 -> assign-setter-control.tsx:63 -> demo-form.tsx:113 -> lead-activity-feed.tsx:75 -> reunion-panel.tsx:61\n[D3] Inbound: listar por período y convertir a Lead OS: inbound-period-filter.tsx:72 -> page.tsx:111 -> inbound-leads-table.tsx:100\n[D3] Demanda de módulos: page.tsx:120 -> module-demand-table.tsx:30 -> upsell.ts:81\n[D3] Bandeja de mensajes del admin: abrir conversación y marcar leído: messages/layout.tsx:17 -> conversation-list-loader.tsx:10 -> message.actions.ts:44 -> conversation-list.tsx:104 -> orgId]/page.tsx:24 -> message-thread.tsx:30\n[D3] Admin responde a un cliente (mensaje + email): message-input.tsx:63 -> message.actions.ts:173 -> src/lib/email/admin-message-notification.ts:19\n[D3] Tablero de proyectos: listar, filtrar y mover de estado: admin/projects/page.tsx:19 -> _actions/project.actions.ts:934 -> _components/projects-board.tsx:89 -> projects-filters.ts:62 -> _components/projects-filters.ts:158 -> _components/project-list.tsx:73 -> droppable-project-column.tsx:23 -> draggable-project-card.tsx:37\n[D3] Alta y edición de proyecto: _components/projects-board.tsx:192 -> projectId]/layout.tsx:232 -> layout.tsx:140 -> page.tsx:9 -> _components/project-form.tsx:152 -> _actions/project.actions.ts:593\n[D3] Ficha del proyecto: resumen, estado y ver como cliente: projectId]/layout.tsx:105 -> projectId]/page.tsx:99 -> projectId]/_components/project-status-control.tsx:43 -> _actions/project.actions.ts:722\n[D3] Eliminar proyecto (tablero y ficha): _components/draggable-project-card.tsx:84 -> _components/projects-board.tsx:149 -> _actions/project.actions.ts:782 -> projectId]/page.tsx:325 -> projectId]/_components/delete-project-button.tsx:58 -> src/lib/actions/projects.ts:108\n[D3] Pagos: hitos y mantenimiento mensual: projectId]/payments/page.tsx:70 -> _actions/milestone.actions.ts:19 -> _actions/maintenance.actions.ts:90 -> schema.prisma:1047\n[D3] Tareas del proyecto y envío a aprobación del cliente: projectId]/tasks/page.tsx:17 -> src/app/(protected)/admin/team/_actions/task.actions.ts:321 -> _components/task-form.tsx:108 -> task.actions.ts:197 -> _components/task-list.tsx:187 -> src/lib/actions/projects.ts:177\n[D3] Horas del proyecto: projectId]/hours/page.tsx:28 -> src/app/(protected)/admin/team/_actions/time-entry.actions.ts:270 -> _components/time-entry-panel.tsx:138 -> time-entry.actions.ts:136\n[D3] Configuración: guardar datos de contacto, alertas, meta de demos y Telegram: src/app/(protected)/admin/settings/page.tsx:6 -> src/app/(protected)/admin/settings/_actions/settings.actions.ts:87 -> src/app/(protected)/admin/settings/_components/settings-console.tsx:100 -> settings.actions.ts:141 -> settings-console.tsx:117 -> src/lib/alerts.ts:111 -> src/lib/notifications/telegram.ts:41\n[D3] Configuración: cambiar el precio de un módulo premium: settings-console.tsx:404 -> settings.actions.ts:175\n[D3] Tickets: bandeja, detalle, respuesta y cambio de estado: src/app/(protected)/admin/tickets/page.tsx:6 -> src/app/(protected)/admin/tickets/_actions/ticket.actions.ts:51 -> src/app/(protected)/admin/tickets/_components/ticket-list.tsx:86 -> ticket-date-filter.tsx:88 -> ticket-list.tsx:166 -> src/app/(protected)/admin/tickets/[ticketId]/page.tsx:13 -> ticket.actions.ts:133 -> ticket-chat.tsx:99\n[D3] Solicitud de eliminación de cuenta vista desde un ticket: ticket-chat.tsx:118 -> src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:251\n[D3] Referidos: confirmar conversión y mes bonificado: src/app/(protected)/admin/referrals/page.tsx:9 -> referrals-admin-table.tsx:79 -> referrals.admin.actions.ts:13\n[D3] Equipo: workload por miembro: src/app/(protected)/admin/team/page.tsx:19 -> team/page.tsx:43 -> member-workload.tsx:215\n[D3] Carga de horas en un proyecto: src/app/(protected)/admin/projects/_components/time-entry-panel.tsx:8 -> time-entry.actions.ts:140 -> time-entry.schemas.ts:33 -> src/app/(protected)/admin/projects/[projectId]/hours/page.tsx:58\n[D3] Tareas de proyecto (crear, editar, borrar): src/app/(protected)/admin/projects/_components/task-form.tsx:7 -> task.actions.ts:155 -> task-list.tsx:17\n[D3] Detector de alertas de bots disparado a mano: src/app/(protected)/admin/settings/alerts/page.tsx:7 -> AlertSettingsClient.tsx:85 -> src/app/api/admin/alerts/trigger-detector/route.ts:5 -> route.ts:3\n[D3] Envío manual de reportes semanales del chatbot: src/app/(protected)/admin/settings/reports/page.tsx:7 -> ReportSettingsClient.tsx:30 -> src/app/api/admin/reports/send-now/route.ts:5 -> route.ts:3\n[D3] Reenviar credenciales a un usuario: src/app/(protected)/admin/clients/[clientId]/_components/ResendCredentialsButton.tsx:18 -> resend-credentials/route.ts:16 -> route.ts:39\n[D3] Reporte ejecutivo semanal enviado a mano para una org: src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts:13 -> route.ts:35\n[D3] Contacto público y atribución de referido: src/app/contact/page.tsx:71 -> contact/page.tsx:119 -> src/lib/actions/contact.ts:100\n[D3] Alertas de la agencia por webhook (inmediatas y periódicas): src/lib/tickets/actions.ts:8 -> src/lib/actions/contact.ts:6 -> messages.ts:4 -> upsell.ts:4 -> referrals.service.ts:4 -> src/lib/alerts.ts:109 -> alerts.ts:131 -> src/app/api/cron/alerts/route.ts:2\n[D3] Acciones masivas sobre clientes: src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:16 -> src/lib/bulk-actions.ts:8 -> bulk-actions.ts:28\n[D3] Audit log: lectura y escritura: src/app/(protected)/admin/audit-log/page.tsx:4 -> src/lib/audit-log-queries.ts:16 -> audit-log-queries.ts:53 -> src/lib/audit-log.ts:17\n[D3] Ficha del cliente: tabs Chatbot, Proyectos y Bóveda: admin/clients/[clientId]/_components/tabs/ChatbotTab.tsx:101 -> src/components/admin/managers/ChatbotManager.tsx:35 -> tabs/ProjectsTab.tsx:7 -> ProjectManager.tsx:12 -> src/actions/agency-actions.ts:14 -> tabs/VaultTab.tsx:6 -> VaultManager.tsx:19\n[D3] Editar datos del cliente (admin): src/app/(protected)/admin/clients/[clientId]/edit/EditClientForm.tsx:79 -> src/modules/chatbot/server/admin/updateClient.ts:29 -> updateClient.ts:33 -> EditClientForm.tsx:93\n[D3] Notas internas inline del cliente: src/app/(protected)/admin/clients/[clientId]/_components/InternalNotesCard.tsx:43 -> src/modules/chatbot/server/admin/updateClientInternalNotes.ts:20 -> updateClientInternalNotes.ts:22 -> InternalNotesCard.tsx:52\n[D3] Archivar / desarchivar cliente: src/app/(protected)/admin/clients/_components/ClientsListClient.tsx:164 -> src/modules/chatbot/server/admin/archiveClient.ts:17 -> archiveClient.ts:25\n[D3] Eliminar cliente definitivamente (hard-delete): ClientsListClient.tsx:196 -> src/modules/chatbot/server/admin/hardDeleteClient.ts:110 -> hardDeleteClient.ts:126 -> prisma/schema.prisma:527\n[D3] Alertas: listar, marcar vista y resolver: src/app/(protected)/admin/alerts/page.tsx:5 -> src/modules/chatbot/server/admin/manageAlerts.ts:9 -> src/app/(protected)/admin/alerts/AlertsClient.tsx:90 -> manageAlerts.ts:31 -> AlertsClient.tsx:110\n[D3] Eliminar proyecto desde el detalle admin: src/app/(protected)/admin/projects/[projectId]/page.tsx:323 -> src/app/(protected)/admin/projects/[projectId]/_components/delete-project-button.tsx:59 -> src/lib/actions/projects.ts:109 -> projects.ts:111 -> project.actions.ts:803\n[D3] Enviar entrega a aprobación del cliente: src/app/(protected)/admin/projects/_components/task-list.tsx:618 -> src/lib/actions/projects.ts:178 -> projects.ts:184\n[D3] Formulario público de contacto: src/app/contact/page.tsx:66 -> src/lib/actions/contact.ts:100 -> contact.ts:23 -> src/lib/rate-limit/limiter.ts:44 -> src/lib/actions/schemas.ts:56\n[D3] Demanda medida de módulos premium (admin): src/app/(protected)/admin/leads/_actions/module-demand.actions.ts:25 -> module-demand.actions.ts:27 -> src/lib/modules/demand.ts:87 -> demand.ts:137 -> src/app/(protected)/admin/leads/_components/module-demand-table.tsx:3\n[D7] Conexión OAuth de Google Business (SUPER_ADMIN, sin botón en la UI): src/app/api/auth/google-business/start/route.ts:6 -> src/lib/integrations/google-business-profile.ts:37 -> src/lib/security/oauth-state.ts:50 -> src/app/api/auth/google-business/callback/route.ts:14 -> oauth-state.ts:72 -> callback/route.ts:38 -> google-business-profile.ts:49 -> src/lib/integrations/gbp-connection.ts:39\n[D7] Conexión OAuth de Tiendanube: ConnectStoreCard.tsx:39 -> src/app/api/auth/tiendanube/start/route.ts:10 -> src/lib/integrations/tiendanube.ts:17 -> src/app/api/auth/tiendanube/callback/route.ts:28 -> tiendanube.ts:24 -> callback/route.ts:63 -> tienda-conectada/page.tsx:306\n[D7] Lectura de Reputación GBP con caché (y su caída en el acierto): reputacion/page.tsx:15 -> src/lib/integrations/google-business-profile.ts:165 -> google-business-profile.ts:178 -> GBPMetricsCard.tsx:124\n[D7] Cron agendado en Netlify -> ruta Next: netlify.toml:25 -> netlify/functions/cleanup-old-events-cron.ts:7 -> generate-insights-cron.ts:45 -> send-weekly-reports-cron.ts:64 -> src/lib/cron/cron-secret.ts:40 -> cleanup-old-events/route.ts:22 -> generate-insights/route.ts:36 -> send-weekly-reports/route.ts:13\n[D7] Crons sin disparador: vercel.json:4 -> netlify.toml:1 -> regenerate-briefs/route.ts:40 -> send-executive-reports/route.ts:26 -> detect-bot-issues/route.ts:13 -> alerts/route.ts:13 -> src/lib/alerts.ts:195\n[D7] Email transaccional por Brevo: src/lib/email/brevo-service.ts:17 -> brevo-service.ts:20\n[D7] Email marketing por Brevo REST y baja por contacto: src/lib/integrations/brevo.ts:9 -> brevo.ts:60 -> src/app/api/email/optout/[contactId]/route.ts:69 -> src/lib/email/unsubscribe-token.ts:97 -> optout/route.ts:91\n[D7] Baja de un clic del reporte ejecutivo: src/lib/email/unsubscribe-token.ts:57 -> src/lib/email/templates/executive-weekly.ts:289 -> route.ts:39\n[D7] Formulario del pie del home -> n8n desde el navegador: src/app/page.tsx:42 -> src/components/sections/home/Footer.tsx:442 -> Footer.tsx:78 -> src/lib/actions/contact.ts:100\n[D7] Inicialización de Sentry: src/instrumentation.ts:4 -> src/lib/sentry/scrub-pii.ts:116 -> src/instrumentation-client.ts:4 -> build/cjs/config/webpack.js:318 -> next.config.ts:254\n[D7] Aviso por Telegram: src/lib/notifications/telegram.ts:67 -> telegram.ts:39\n[D7] GA4 y Search Console con la service account de develOP: trafico/page.tsx:46 -> seo/page.tsx:179 -> src/lib/analytics.ts:85 -> analytics.ts:111 -> src/lib/searchconsole.ts:99\n[D7] E10 · Vertex AI (control positivo): src/modules/chatbot/server/llm/providers/google.ts:54 -> handleChatRequest.ts:1057 -> checkHealth.ts:47 -> detectBotIssues.ts:85 -> src/instrumentation.ts:15\n[D7] E10 · Brevo (BREVO_API_KEY, BREVO_FROM_EMAIL, BREVO_FROM_NAME): src/lib/email/brevo-service.ts:4 -> src/lib/integrations/brevo.ts:4 -> brevo-service.ts:40 -> brevo.ts:81\n[D7] E10 · Resend (RESEND_API_KEY, restos): src/lib/email.ts:4 -> src/lib/email/notify-message.ts:13 -> email.ts:21 -> notify-message.ts:14 -> admin-message-notification.ts:42\n[D7] E10 · GA4 y Search Console (GOOGLE_SERVICE_ACCOUNT_KEY): src/lib/analytics.ts:95 -> src/lib/searchconsole.ts:102 -> settings.ts:279 -> analytics.ts:104 -> searchconsole.ts:108\n[D7] E10 · Google Business Profile (client OAuth + tokens por org): src/lib/integrations/google-business-profile.ts:29 -> gbp-connection-logic.ts:163\n[D7] E10 · Tiendanube (client + token por org): src/lib/integrations/tiendanube.ts:21\n[D7] E10 · Cal.com (calComApiKey por org): src/lib/integrations/cal-com.ts:24 -> cal-com-v2.ts:4\n[D7] E10 · PageSpeed (GOOGLE_PAGESPEED_API_KEY): src/lib/integrations/pagespeed.ts:41\n[D7] E10 · Telegram (AgencySettings -> TELEGRAM_BOT_TOKEN/CHAT_ID): src/lib/notifications/telegram.ts:41\n[D7] E10 · n8n (webhooks de contacto y API): src/lib/n8n.ts:19 -> src/components/sections/home/Footer.tsx:81 -> n8n.ts:183 -> Footer.tsx:84\n[D7] E10 · Sentry (NEXT_PUBLIC_SENTRY_DSN; SENTRY_DSN sin lector vivo): src/instrumentation.ts:7 -> src/instrumentation-client.ts:5 -> sentry.server.config.ts:9 -> sentry.edge.config.ts:6 -> next.config.ts:254\n[D7] E10 · CRON_SECRET: src/lib/cron/cron-secret.ts:41 -> regenerate-briefs/route.ts:19 -> send-executive-reports/route.ts:18 -> alerts/route.ts:5 -> os-follow-up/route.ts:154\n[D7] E10 · Secretos propios (HMAC y cifrado): unsubscribe-token.ts:7 -> oauth-state.ts:27 -> impersonation.ts:16 -> encryptSecret.ts:26 -> sendMessage.ts:210 -> credential-cipher.ts:35 -> api/qa/login/route.ts:102",
+ "higiene": true,
+ "contexto": "ALERTAS DE LOS DOCS PARA ESTE DOMINIO (afirmaciones o contradicciones de documentos, NO evidencia: confirmar o descartar cada una contra el codigo y reportarlo en alertas_verificadas, empezando el campo 'alerta' con su id entre corchetes; si se confirma, tambien va como hallazgo):\n- [D4-A1] Maquina de estados: QUINTA (docs/bitacora-beta-3.md:7400) dice que una APROBADA con gate cerrado y toque vencido cae en 'trabajar' (flow.ts:433); P23 (:10769-10771) dice que grupoPara la manda a seguimiento. Confirmar el comportamiento actual.\n- [D4-A2] Herramientas sin URL (docs/bitacora-beta-3.md:7034, :8479): tras D15-bis el evaluador no tiene pantalla pero sigue en herramientas.ts y en el rail (:8779, :9177). Candidato de poda o pendiente de Franco.\n- [D4-A3] Navegacion del setter: docs/bitacora-beta.md:92 y setter-nav.tsx:38 la fijan por triggerTransition() como 'decision cerrada'; CLAUDE.md pide <Link> en portales y no clasifica /setter.\n- [D4-A4] Drift: docs/bitacora-beta.md:470-511 da por cerrado el drop de convertedToOsLeadId; :1252 lo vuelve a listar; :1271 dice que la migracion 20260619140100 se registro con migrate resolve --applied sin ejecutar el SQL (cruza con D6).\n- [D4-A5] OSLEAD (_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin titulo.md): la tabla :885-899 recoge 11 contradicciones entre docs/decisiones-oslead-vii/ y el codigo; H-04 (:737) marca falso verde el gate del self-check que PROMPT 2 (:298-318) da por correcto.\n- [D4-A6] Main: EL TRONCO (docs/bitacora-beta-3.md:10975) le deja el push a main a Franco, pero origin/main @ 57c421bc ya es 'docs(tronco): EL TRONCO'. Registrar como dato para 09 (quien y cuando movio main).\nPATRONES DEFECTUOSOS QUE YA APARECIERON EN OTROS DOMINIOS (buscalos en tu lote; cada aparicion es un hallazgo con su propia evidencia, o se suma al hallazgo del mismo patron si es la misma causa raiz):\n- [D1-c1] IP del cliente tomada del primer valor de X-Forwarded-For (falsificable segun la plataforma) para rate limit y auditoria (visto en: src/app/login/actions.ts:53, src/lib/security/auth-rate-limit.ts:39, src/lib/audit-log.ts:21)\n- [D1-c1] Alta de usuarios sin normalizar el email (trim + lowercase) mientras el login normaliza (visto en: createClientOnly.ts:26, createClientWithBot.ts:34, admin/chatbots/new/actions.ts:27 -> onboarding/core.ts:70)\n- [D1-c1] Actions que usan session.user.organizationId (fallan en preview admin) frente a resolveOrgId (escriben como el cliente) (visto en: src/lib/actions/profile.ts:29, src/lib/actions/upsell.ts:16 vs email-marketing/_actions.ts:18)\n- [D1-c1] Mensajes internos de error devueltos al cliente (toErrorMessage o error instanceof Error ? error.message) (visto en: src/lib/actions/profile.ts:72, src/lib/actions/settings.ts:92, src/lib/action-utils.ts:31)\n- [D1-c1] Envios de email cuyo resultado se ignora o que fingen exito sin API key (visto en: src/auth.ts:104, src/lib/actions/settings.ts:194, src/lib/email.ts:15-16)\n- [D1-c1] orgMemberships con take:1 sin orderBy (org primaria no deterministica) (visto en: src/auth.ts:37, src/app/login/actions.ts:94, src/app/api/qa/login/route.ts:126)\n- [D1-c1] Texto funcional en text-zinc-600/700 sobre #080a0c (contraste < 4,5:1) (visto en: src/app/login/page.tsx:263, :367, :404; forgot-password, reset-password, accept-invite)\n- [D1-c1] Bloques de error sin role=alert/aria-live (visto en: login/page.tsx:358, forgot-password/page.tsx:157, ResetPasswordForm.tsx:212, AcceptInviteForm.tsx:217)\n- [D1-c1] Paginas admin sin guard propio (dependen de admin/layout + proxy) (visto en: 22 de 34 paginas /admin (p. ej. admin/leads/page.tsx, admin/tickets/[ticketId]/page.tsx, admin/settings/page.tsx))\n- [D1-c1] Modulos 'use server' sin importadores (actions muertas pero publicas si se reconectan) (visto en: src/lib/actions/invitations.ts, src/lib/actions/settings.ts, src/lib/actions/clients.ts)\n- [D1-c1] Fallos manejados que solo hacen console.error (no llegan a Sentry; no hay captureConsoleIntegration) (visto en: forgot-password/actions.ts:105, audit-log.ts:40, brevo-service.ts:41)\n- [D1-c1] Tokens de un solo uso guardados en claro en la DB (visto en: forgot-password/actions.ts:73, invitations.ts:102, settings.ts:180)\n- [D1-c1] requireSuperAdmin reimplementado en varios modulos (visto en: src/lib/auth-guards.ts:3, src/lib/actions/settings.ts:20, src/modules/chatbot/server/admin/requireSuperAdmin.ts)\n- [D1-c1] Config de NextAuth duplicada entre auth.ts y auth.config.ts que diverge (maxAge, callbacks) (visto en: session.maxAge solo en auth.ts:81; jwt callback solo en auth.ts:205)\n- [D1-c2] Página de servidor que lee la base confiando en el guard del layout, sin auth()/require* propio. El render parcial de RSC no re-ejecuta el layout y el proxy decide con claims viejos del JWT (visto en: 15 páginas de /admin (admin/page.tsx:182, team/page.tsx:19, referrals/page.tsx:9, projects/page.tsx:9, leads/page.tsx:23, leados/page.tsx:34, ...). Control: /se)\n- [D1-c2] IP de cliente tomada del primer valor de X-Forwarded-For (visto en: lib/security/auth-rate-limit.ts:39 (forgot, reset, contacto), lib/audit-log.ts:21, app/login/actions.ts:53 (SEC-007) y modules/chatbot/server/chat/requestSchema)\n- [D1-c2] Resolución de la org de sesión paralela a resolveOrgId: orgMember.findFirst sin orderBy, sin mirar el rol y sin honrar la impersonación (visto en: modules/chatbot/server/admin/getClientSession.ts:5-33. La usan dashboard/chatbot/* y api/dashboard/chatbot/leads/export. Puede discrepar de session.user.organiz)\n- [D1-c2] Header de request que nadie setea, leído como si lo pusiera el servidor (x-pathname) (visto en: (protected)/dashboard/layout.tsx:124: el gate de onboarding se saltea mandando el header. dashboard/modules/email-marketing/layout.tsx:24: la tab activa nunca s)\n- [D1-c2] Interpolación sin escapar en el HTML de emails (la variable 'safeName' no escapa) (visto en: lib/email/templates/password-reset.ts:12 y el h1. Es el nombre propio del destinatario, así que el riesgo es bajo. Revisar welcome-client.ts, bot-activated.ts y)\n- [D1-c2] Servidores de desarrollo y QA escuchando en todas las interfaces (sin -H) con flags de QA encendidos (visto en: package.json:7-13 (dev, dev:qa, start, start:qa, start:setter, start:galeria). QA_ALLOW_LOCALHOST también abre los escapes de validate-origin.ts (D3).)\n- [D1-c2] Server action exportada que escribe estado o auditoría sin chequear rol (visto en: lib/actions/impersonation.ts:50 (stopImpersonationAction) y su wrapper admin/clients/_actions/client.actions.ts:12.)\n- [D1-c3] Org de la impersonación resuelta al momento de la acción desde una cookie global (resolveOrgId en server actions que escriben) (visto en: (protected)/dashboard/_actions/business-profile.actions.ts:25, dashboard/modules/email-marketing/_actions.ts:18, lib/tickets/actions.ts, executive-report-prefs.)\n- [D1-c3] Claves de rate limit armadas con datos del pedido sin validar: cada valor nuevo es una fila nueva en rate_limit, que no se purga (visto en: api/motor/webhook/[channelToken]/route.ts:34 (token de la URL), modules/chatbot/server/chat/handleChatRequest.ts:185 (sessionId del body), forgot-password/actio)\n- [D1-c3] Texto libre sin .max() que termina en el prompt del chatbot o en emails (visto en: lib/actions/schemas.ts:15-16, bienvenida/_actions/complete-onboarding.ts:10, actions/onboarding-actions.ts:20, lib/actions/clients.ts:26)\n- [D1-c3] Mutación en la base y después envío por Brevo dentro de la respuesta (SDK con 60 s x 3 intentos): si la función expira, se pierde lo que solo se devolvía al final (visto en: modules/chatbot/server/admin/createClientOnly.ts:142 (tempPassword solo en la respuesta), api/admin/users/[userId]/resend-credentials/route.ts:85, forgot-passwo)\n- [D1-c3] Auditoría escrita después del efecto con un helper que traga el error sin Sentry (visto en: 43 llamadas en 31 archivos; p. ej. modules/chatbot/server/admin/hardDeleteClient.ts:166, archiveClient.ts:37, reset-password/actions.ts:87)\n- [D1-c3] Guards que lanzan Error('Unauthorized') genérico sin try/catch: sesión vencida o invalidada a mitad de una acción lleva a error.tsx y a un evento en Sentry en vez de a /login (visto en: lib/actions/projects.ts:109, :159, :178; (protected)/setter/page.tsx:29)\n- [D1-c3] Fallback de URL base a http://localhost:3000 en links de emails: link roto si falta la variable en producción (check-env.js no corre en el build) (visto en: forgot-password/actions.ts:87 y 11 sitios más (lib/tickets/actions.ts:156, lib/alerts.ts:50, lib/email/unsubscribe-token.ts:58 y :118, lib/reports/executive-wee)\n- [D1-c3] Tokens de un solo uso en el query string que pueden ir a Sentry: scrub-pii no cubre tokens hex y no hay beforeSendTransaction (tracesSampleRate 0.1 y replays on error en el cliente) (visto en: lib/sentry/scrub-pii.ts:53-67, instrumentation-client.ts:6-11)\n- [D1-c3] Escritura fire-and-forget en cada navegación a una columna sin lectores, que durante la impersonación marca al SUPER_ADMIN (visto en: (protected)/dashboard/layout.tsx:80-87)",
+ "parte": 2,
+ "partes": 2,
+ "lotes": [
+  {
+   "id": "D4-L6",
+   "loc": 4016,
+   "archivos": [
+    "src/lib/leados/manual.ts",
+    "src/lib/leados/mis-numeros.ts",
+    "src/lib/leados/notify.ts",
+    "src/lib/leados/novedades-agrupar.ts",
+    "src/lib/leados/novedades-vigencia.ts",
+    "src/lib/leados/novedades.ts",
+    "src/lib/leados/outreach.ts",
+    "src/lib/leados/ownership.ts",
+    "src/lib/leados/paso-admitido.ts",
+    "src/lib/leados/paso.ts",
+    "src/lib/leados/pipeline.ts",
+    "src/lib/leados/progreso.ts",
+    "src/lib/leados/prompts-disenio.ts",
+    "src/lib/leados/prospecto-import.ts",
+    "src/lib/leados/recorrido.ts",
+    "src/lib/leados/revision.ts",
+    "src/lib/leados/setter-carga.ts",
+    "src/lib/leados/setter-meta.ts",
+    "src/lib/leados/timeline.ts",
+    "src/lib/leados/turno.ts"
+   ],
+   "previas": [
+    {
+     "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md",
+     "linea": 68,
+     "id_previo": "C-03",
+     "titulo": "posicionDe no contempla status PERDIDO: el manual invita a contactar un negocio cerrado",
+     "severidad_original": "Sev 4; backlog P1 (ficha B-02, :159)",
+     "estado_declarado": "Abierto; ficha P1 B-02 (:159-164). Posterior: A3-VIABILIDAD-BIS-2026-08.md:819-823 describe una pantalla terminal 'archivo' a la que se llega por status PERDIDO, pero no lo declara como cierre de C-03.",
+     "archivos_citados": [
+      "src/lib/leados/manual.ts:473-581",
+      "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx:148-153",
+      "src/app/(protected)/setter/_actions/outreach.actions.ts:144-195"
+     ],
+     "dominio_probable": "D4",
+     "resumen": "La derivación del manual va solo por stage: un lead PERDIDO sigue derivando vivo (m5 activo con plantilla de toque) y registrarResultado no rebota los status terminales."
+    },
+    {
+     "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md",
+     "linea": 82,
+     "id_previo": "C-17",
+     "titulo": "Un lead DESCARTADA aterriza con el badge y el marco cyan de 'Tu paso ahora'",
+     "severidad_original": "Sev 2 (tabla §4); priorizado P1 en el backlog por la ficha B-02 (:159-162)",
+     "estado_declarado": "Abierto; ficha P1 B-02.",
+     "archivos_citados": [
+      "src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx:134-137",
+      "src/lib/leados/manual.ts:492-495"
+     ],
+     "dominio_probable": "D4",
+     "resumen": "El color accionable se pinta sobre un lead muerto, lo que contradice la disciplina de color B9."
+    },
+    {
+     "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md",
+     "linea": 119,
+     "id_previo": "A-06",
+     "titulo": "NovedadesPanel reconstituye una segunda cola de leads navegables en paralelo al foco",
+     "severidad_original": "sev 3",
+     "estado_declarado": "abierto (confianza media, no verificado en runtime; :123)",
+     "archivos_citados": [
+      "src/app/(protected)/setter/_components/novedades-panel.tsx:67-75",
+      "src/app/(protected)/setter/_components/novedades-panel.tsx:119-147",
+      "src/lib/leados/novedades.ts:156-178",
+      "src/lib/leados/novedades.ts:220-222"
+     ],
+     "dominio_probable": "D4",
+     "resumen": "Debajo del foco aparecen hasta 12 avisos más toda la cola EN_REVISION, cada uno con su link directo a un lead distinto y sin pasar por el mecanismo de anclar foco."
+    },
+    {
+     "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md",
+     "linea": 141,
+     "id_previo": "A-09",
+     "titulo": "El archivo no categoriza la causa de caída y los archivados no suman a la sensación de progreso",
+     "severidad_original": "sev 3",
+     "estado_declarado": "abierto (fix de presentación/agregación, :144)",
+     "archivos_citados": [
+      "src/lib/leados/flow.ts:353",
+      "src/lib/leados/flow.ts:364",
+      "src/app/(protected)/setter/_components/cartera-toolbar.tsx:26",
+      "src/lib/leados/progreso.ts:27-38",
+      "src/lib/leados/mis-numeros.ts:55-56",
+      "src/lib/leados/contracts.ts:52",
+      "src/lib/leados/dossier.ts:193-205"
+     ],
+     "dominio_probable": "D4",
+     "resumen": "PERDIDO y DESCARTADA colapsan en un único grupo 'archivo'. El motivo del descarte se persiste pero nunca se muestra como categoría ni cuenta como métrica."
+    },
+    {
+     "doc": "raiz:AUDITORIA-VS-BRIEF-2026-07.md",
+     "linea": 159,
+     "id_previo": "A-10",
+     "titulo": "El checklist de Construcción y los prompts lead-agnósticos viven desconectados dentro del mismo paso",
+     "severidad_original": "sev 3",
+     "estado_declarado": "abierto (fix: enganchar fase→prompt, :162)",
+     "archivos_citados": [
+      "src/lib/leados/flow-content.ts:91-110",
+      "src/lib/leados/prompts-disenio.ts:59-108",
+      "src/app/(protected)/setter/leads/[leadId]/_components/checklist-construccion.tsx:1-9",
+      "src/app/(protected)/setter/leads/[leadId]/_components/construccion-step.tsx:352,354"
+     ],
+     "dominio_probable": "D4",
+     "resumen": "Los prompts estetica/motion/mobile se listan al final del paso y no dentro de la fase del checklist que los necesita. El patrón para mapearlos ya existe en HARD_CHECK_PROMPT."
+    }
+   ],
+   "previas_omitidas": 0,
+   "planeado": [
+    {
+     "id": "PLAN-712",
+     "clave": "docs/bitacora-beta-3.md:7301",
+     "tipo": "pendiente",
+     "titulo": "Trampa latente en describirFoco (paso.ts) para APROBADA",
+     "descripcion": "En APROBADA diría «Enviá el link de la demo» mirando solo el gate del brief. Hoy no se renderiza; la trampa quedó anotada en el propio archivo.",
+     "estado_declarado": "latente, anotado en el archivo",
+     "refs": [
+      "paso.ts:165",
+      "tambien en docs/bitacora-beta-3.md:8076"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-715",
+     "clave": "docs/bitacora-beta-3.md:7853",
+     "tipo": "pendiente",
+     "titulo": "El cartel del home nombra la fase «Seguimiento»",
+     "descripcion": "paso.ts manda a seguir el contacto en «Seguimiento», que es una fase y no una pantalla; además el envío tiene pantalla propia (m15). Queda fuera del invariante de enlaces.",
+     "estado_declarado": "anotado, sin hacer",
+     "refs": [
+      "paso.ts:184",
+      "tambien en docs/bitacora-beta-3.md:8076"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-811",
+     "clave": "docs/bitacora-roadmap.md:10633",
+     "tipo": "pendiente",
+     "titulo": "Test de aislamiento DB-bound de ownership.ts",
+     "descripcion": "Sembrar 2 setters con leads cruzados para probar listOwnedLeads/getOwnedLead; fuera de scope de 0.2.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "src/lib/leados/ownership.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-859",
+     "clave": "docs/bitacora-beta-3.md:1014",
+     "tipo": "pendiente",
+     "titulo": "Naming histórico del wizard en código",
+     "descripcion": "StepAnchorId y comentarios de paso.ts, ~110 menciones a «wizard» y 13 «Paso N» en comentarios de server actions.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "paso.ts",
+      "también en fuente:1186,3286,3289"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-617",
+     "clave": "docs/bitacora-beta-3.md:4240",
+     "tipo": "pendiente",
+     "titulo": "Residuos de fechas en admin y outreach",
+     "descripcion": "optionalReactivateAtSchema del admin usa z.coerce.date(); limitesDelDiaArgentino duplica dayRangeAR; dates-ar no estaba encadenado.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "outreach.ts",
+      "src/lib/dates-ar.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-777",
+     "clave": "docs/bitacora-beta.md:114",
+     "tipo": "pendiente",
+     "titulo": "Test de aislamiento DB-bound de ownership.ts",
+     "descripcion": "No hay runner unitario; un invariante DB-bound exige sembrar 2 setters con leads cruzados. Quedó fuera de scope (se usaron invariantes puros sin DB).",
+     "estado_declarado": "pendiente (fuera de scope)",
+     "refs": [
+      "src/lib/leados/ownership.ts",
+      "también en docs/bitacora-beta.md:542"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-672",
+     "clave": "docs/bitacora-beta-3.md:7401",
+     "tipo": "idea",
+     "titulo": "Avisarle al admin de las demos aprobadas sin link permanente",
+     "descripcion": "pipeline.ts saca APROBADA de las etapas de producción con SLA infinito, así que Franco no ve como atasco una demo aprobada sin finalUrl. Ese caso solo nace por seeds o tooling, porque la UI exige el link.",
+     "estado_declarado": "no tocado",
+     "refs": [
+      "pipeline.ts",
+      "AprobarRevisionSchema",
+      "scripts/b2-verify-dossier.ts:266",
+      "tambien en docs/bitacora-beta-3.md:7402"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-951",
+     "clave": "docs/bitacora-beta-3.md:9907",
+     "tipo": "idea",
+     "titulo": "Un cuarto turno para la espera de un lead que pausó el setter",
+     "descripcion": "La espera de un postergado dice «Le toca al negocio» y la causa lo aclara abajo, pero el titular no nombra a quien decidió la pausa. Un cuarto turno queda para otro sprint.",
+     "estado_declarado": "anotado",
+     "refs": [
+      "turno.ts",
+      "tambien en docs/bitacora-beta-3.md:9922"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-762",
+     "clave": "docs/bitacora-beta-3.md:431",
+     "tipo": "idea",
+     "titulo": "Mapeo flexible de columnas en la importación CSV",
+     "descripcion": "Formato fijo v1 (COLUMNAS_IMPORT); mapeo flexible queda a futuro.",
+     "estado_declarado": "sin estado",
+     "refs": [
+      "prospecto-import.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-679",
+     "clave": "docs/bitacora-beta.md:890",
+     "tipo": "decision",
+     "titulo": "Antigüedad por etapa derivada de updatedAt + SLA editable",
+     "descripcion": "Sin migración: 'sin movimiento desde' = updatedAt; STAGE_SLA_HORAS (FICHA/EVALUADA/BRIEF 48h, CONSTRUCCION 72h, EN_REVISION 24h, RECHAZADA 48h).",
+     "estado_declarado": "vigente",
+     "refs": [
+      "src/lib/leados/pipeline.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-745",
+     "clave": "docs/bitacora-beta.md:1122",
+     "tipo": "decision",
+     "titulo": "Al setter no se le muestra la alarma 'nunca descarta'",
+     "descripcion": "alarmaNuncaDescarta es lectura de gestión del admin; al setter se le muestra su número, no un juicio.",
+     "estado_declarado": "vigente",
+     "refs": [
+      "src/lib/leados/revision.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-948",
+     "clave": "docs/bitacora-beta-3.md:9711",
+     "tipo": "hecho-declarado",
+     "titulo": "P19 EL PASO QUE CORRESPONDE: barrido de la derivación del paso actual",
+     "descripcion": "373.248 combinaciones contra un oráculo independiente. La postergación entra a la derivación, el re-loop aterriza en mc1, «aparece en tu foco» pasa a «entra a tu cola» y se disuelve la zona vacía de mr. Pantallas no admitidas como paso de ahora: de 29.856 a 0. Invariante paso-admitido; spec 24.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "fix/paso-que-corresponde",
+      "62c6273a",
+      "66d7fe64",
+      "scripts/qa-corridas/barrido-derivacion.ts",
+      "src/lib/leados/paso-admitido.ts",
+      "paso-admitido.invariant.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-846",
+     "clave": "docs/bitacora-beta-3.md:320",
+     "tipo": "hecho-declarado",
+     "titulo": "4·A librería de prompts de diseño + 4·B puente self-check",
+     "descripcion": "src/lib/leados/prompts-disenio.ts (estetica/mobile/motion) y HARD_CHECK_PROMPT/promptParaHardCheck, hoy solo mobile→mobile.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "también en fuente:341",
+      "src/lib/leados/prompts-disenio.ts",
+      "self-check-step.tsx"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-773",
+     "clave": "docs/bitacora-beta-3.md:715",
+     "tipo": "hecho-declarado",
+     "titulo": "Remediación 3.1/3.2: useStepAction, auxiliares y derivarPasoDelLead",
+     "descripcion": "Hook src/lib/use-step-action.ts (9 call-sites), auxiliares extraídos de construccion-step y derivación única src/lib/leados/paso.ts.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "también en fuente:792",
+      "src/lib/use-step-action.ts",
+      "src/lib/leados/paso.ts",
+      "commit 2d8a3bc"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-884",
+     "clave": "docs/bitacora-beta-3.md:2474",
+     "tipo": "hecho-declarado",
+     "titulo": "P6-B Construcción: seis pantallas pasan a dos (mc1/mc2)",
+     "descripcion": "PANTALLA_DE_FASE explícita, invariante pantallas-construccion, seis tildes conservados 3+3, direcciones viejas redirigen.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "commit 742f756",
+      "manual.ts",
+      "pantallas-construccion.invariant.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-894",
+     "clave": "docs/bitacora-beta-3.md:3789",
+     "tipo": "hecho-declarado",
+     "titulo": "P11 a quién le toca (turno)",
+     "descripcion": "src/lib/leados/turno.ts (turnoDelLead, TEXTO_TURNO) e invariante turno; cuarto «todavía no» del envío (aprobada sin finalUrl = Franco).",
+     "estado_declarado": "hecho",
+     "refs": [
+      "commit 513f38b4",
+      "turno.ts",
+      "turno.invariant.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-744",
+     "clave": "docs/bitacora-beta.md:1111",
+     "tipo": "hecho-declarado",
+     "titulo": "0.5.11 'Mis números' del setter",
+     "descripcion": "Leads activos y ratio descarte/avance propios reusando calcularRatioSetters; invariante check:invariant:mis-numeros; ESTADOS_TERMINALES movido a revision.ts.",
+     "estado_declarado": "hecho (verificación con 2 setters pendiente)",
+     "refs": [
+      "src/lib/leados/mis-numeros.ts",
+      "src/lib/leados/mis-numeros.invariant.ts",
+      "src/app/(protected)/setter/_components/mis-numeros.tsx",
+      "src/lib/leados/revision.ts",
+      "src/lib/leados/setter-carga.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-754",
+     "clave": "docs/bitacora-roadmap.md:7888",
+     "tipo": "pendiente",
+     "titulo": "Verificación manual de Franco de B1 y B2 LeadOS",
+     "descripcion": "B2: Prisma Studio con tablas intactas y /admin/leads igual que antes. B1: alta, login, cambio de password, redirects de las 3 identidades, getOwnedLead con lead real y sesión del setter.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "tambien en docs/bitacora-roadmap.md:7892",
+      "tambien en docs/bitacora-roadmap.md:7902",
+      "tambien en docs/bitacora-roadmap.md:7904"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-823",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:655",
+     "tipo": "pendiente",
+     "titulo": "Barrera AST para invariantes de copy y enlaces",
+     "descripcion": "copy-sin-jerga/copy-sin-ubicacion usan AMBITO fijo y enlaces-manual una lista estática; barrera AST estimada en 400-600 LOC, sprint separado.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "docs/barrera-rutas-ast.md",
+      "tambien en :839, :840"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-826",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:723",
+     "tipo": "pendiente",
+     "titulo": "H-03 botón principal mudo en m1",
+     "descripcion": "Registrar evaluación falla sin mostrar errores si el bloque 5 de FichaForm está colapsado.",
+     "estado_declarado": "pendiente (Alta)",
+     "refs": [
+      "m1-ficha.tsx#L225-L231",
+      "evaluacion-form.tsx#L169-L173",
+      "tambien en :806"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-830",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:767",
+     "tipo": "pendiente",
+     "titulo": "H-07 control G3 no implementado",
+     "descripcion": "Falta el chequeo '¿Exportaste después del último refinamiento?' antes de guardar el borrador.",
+     "estado_declarado": "pendiente (Media)",
+     "refs": [
+      "borrador-form.tsx#L170-L206",
+      "tambien en :822, :895"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-833",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:812",
+     "tipo": "pendiente",
+     "titulo": "Guías faltantes para el setter",
+     "descripcion": "Generador de wa.me (m1), modelo/opciones de Claude Design (mc1), dónde está Export (m13) y cronómetro del corte de 10 min.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "tambien en :813, :814, :815"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-602",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:848",
+     "tipo": "pendiente",
+     "titulo": "Horas del equipo siempre en 0.0 h",
+     "descripcion": "Tableros de horas de /admin/team sin registro de actividad de setters.",
+     "estado_declarado": "pendiente",
+     "refs": [],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-912",
+     "clave": "docs/bitacora-beta-3.md:6338",
+     "tipo": "pendiente",
+     "titulo": "Postergaciones con desvío de medianoche UTC en producción: sin contar",
+     "descripcion": "En dev hay 0 filas con el desvío. En producción el número es desconocido porque no se conectó a esa base, y no se migró nada.",
+     "estado_declarado": "sin medir en producción; no migrado",
+     "refs": [
+      "OsLead.reactivateAt"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-914",
+     "clave": "docs/bitacora-beta-3.md:6738",
+     "tipo": "pendiente",
+     "titulo": "Pasada perceptual de Franco (copy y estética) de P3 a P20",
+     "descripcion": "Cada sprint le deja a Franco validar que la copy nueva suene al producto, que tarjetas y pantallas no queden cargadas ni pobres, y el juicio estético en general. Ningún test lo valida.",
+     "estado_declarado": "pendiente (verificación humana)",
+     "refs": [
+      "tambien en docs/bitacora-beta-3.md:7043",
+      "tambien en docs/bitacora-beta-3.md:7129",
+      "tambien en docs/bitacora-beta-3.md:7246",
+      "tambien en docs/bitacora-beta-3.md:7395",
+      "tambien en docs/bitacora-beta-3.md:7859",
+      "tambien en docs/bitacora-beta-3.md:8789"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-930",
+     "clave": "docs/bitacora-beta-3.md:8243",
+     "tipo": "pendiente",
+     "titulo": "B5: la pantalla no acompaña al dato",
+     "descripcion": "Bache de la corrida del novato clasificado como «molesta» y vivo desde agosto. El detalle está en el reporte de la corrida, no en la bitácora.",
+     "estado_declarado": "pendiente (sin tocar en el rango)",
+     "refs": [
+      "docs/corrida-recorrido-2026-08-31/",
+      "tambien en docs/bitacora-beta-3.md:8260",
+      "tambien en docs/bitacora-beta-3.md:8489",
+      "tambien en docs/bitacora-beta-3.md:9915"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-959",
+     "clave": "docs/bitacora-beta-3.md:10862",
+     "tipo": "pendiente",
+     "titulo": "«La revisión que sale a internet sola»",
+     "descripcion": "La anotó la segunda corrida del novato para un sprint propio. Este rango no detalla el defecto.",
+     "estado_declarado": "anotado, sprint propio",
+     "refs": [],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-853",
+     "clave": "docs/bitacora-beta-3.md:673",
+     "tipo": "pendiente",
+     "titulo": "Mutación cruzada testeada en 2 de ~19 writes",
+     "descripcion": "Ownership 100% en capa de aplicación sin RLS; falta prueba dinámica de setter B contra leads de A en dossier/outreach/agenda/cartera/foco.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "también en fuente:677"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-701",
+     "clave": "docs/bitacora-beta-3.md:1877",
+     "tipo": "pendiente",
+     "titulo": "Novedades sin techo y huérfanas",
+     "descripcion": "El home acumula novedades (campana 9+); 77 de 80 avisos eran huérfanos de leads borrados.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "también en fuente:4545,4792"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-883",
+     "clave": "docs/bitacora-beta-3.md:2389",
+     "tipo": "pendiente",
+     "titulo": "Decisiones de producto de la poda a aprobar en preview",
+     "descripcion": "Campos de material, títulos de m2/mc1/mc2/m6/m14, ¿10 obligatorios?, rótulos del foco y textos de turno.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "también en fuente:2235,2663,2927,3030,3166,3300,3937"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-974",
+     "clave": "docs/bitacora-beta-3.md:1979",
+     "tipo": "pendiente",
+     "titulo": "Galería y manual de usuario desfasados y con huecos",
+     "descripcion": "Cartera nunca fotografiada (35 y 36 idénticos), estados sin captura y capítulos desfasados por P11; el índice declara 0 huecos.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "docs/manual-usuario/galeria/INDICE.md",
+      "también en fuente:3397,4513"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-899",
+     "clave": "docs/bitacora-beta-3.md:4234",
+     "tipo": "pendiente",
+     "titulo": "Postergaciones guardadas con el bug UTC",
+     "descripcion": "No se migraron; en producción hay que volver a contarlas.",
+     "estado_declarado": "pendiente",
+     "refs": [
+      "reactivateAt"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-781",
+     "clave": "docs/bitacora-beta.md:197",
+     "tipo": "pendiente",
+     "titulo": "Wizard del lead duplicado en el DOM por variantes responsive",
+     "descripcion": "Una copia vive bajo un ancestro display:none (pre-existente, no tocado); StepAnchor tuvo que esquivarla con offsetParent.",
+     "estado_declarado": "sin estado (pre-existente)",
+     "refs": [
+      "src/app/(protected)/setter/leads/[leadId]/_components/lead-wizard.tsx",
+      "también en docs/bitacora-beta.md:1166"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-1057",
+     "clave": "docs/bitacora-beta.md:414",
+     "tipo": "pendiente",
+     "titulo": "Limpieza opcional del @@index([assignedToId]) suelto de OsLead",
+     "descripcion": "Quedó como prefijo redundante del índice compuesto nuevo; un DROP INDEX lo limpiaría pero no es aditivo.",
+     "estado_declarado": "pendiente (opcional)",
+     "refs": [
+      "prisma/schema.prisma"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-689",
+     "clave": "docs/bitacora-beta-2.md:375",
+     "tipo": "pendiente",
+     "titulo": "Decidir si un lead fijado (pin) accionable puede ser foco",
+     "descripcion": "particionarCartera lo excluye de 'trabajar', así que fijar tu única accionable hace desaparecer el foco; decisión de Franco documentada en el código.",
+     "estado_declarado": "pendiente (decisión de Franco)",
+     "refs": [
+      "src/lib/leados/flow.ts (particionarCartera)",
+      "también en docs/bitacora-beta-2.md:447",
+      "también en docs/bitacora-beta-2.md:466",
+      "también en docs/bitacora-beta-2.md:559"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-906",
+     "clave": "docs/bitacora-beta-3.md:5599",
+     "tipo": "bloque",
+     "titulo": "Rediseño de m14 (chequeo final)",
+     "descripcion": "Trabajo futuro: el rediseño de m14 va a renombrar hard-checks y actualizar el censo. Como el vínculo es por nombre, eso desaprueba los self-checks ya guardados (ver la decisión de la línea 5564).",
+     "estado_declarado": "pendiente (planeado)",
+     "refs": [
+      "flow-content.ts (HARD_CHECKS)",
+      "src/lib/leados/self-check-gate.invariant.ts"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-937",
+     "clave": "docs/bitacora-beta-3.md:9159",
+     "tipo": "bloque",
+     "titulo": "Rediseño de la ficha: cuatro campos nuevos, dos umbrales y el corte de diez minutos",
+     "descripcion": "Dirección, horarios, contacto exacto y «cómo se ve la web» (llenaría el bloque de la web, que hoy tiene un solo campo), más dos umbrales de suficiencia y el corte de diez minutos. Cambian el contrato del blob o requieren decisiones de Franco.",
+     "estado_declarado": "fuera de alcance; pendiente (decisión de Franco)",
+     "refs": [
+      "FichaSchema (contracts.ts)",
+      "tambien en docs/bitacora-beta-3.md:8785",
+      "tambien en docs/bitacora-beta-3.md:8885"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-903",
+     "clave": "docs/bitacora-beta-3.md:4896",
+     "tipo": "bloque",
+     "titulo": "Decisiones OSLead VII no construibles como están",
+     "descripcion": "17 decisiones no construibles (10+7), 7 cambios de schema destructivos y «sacar el Evaluador» (pantalla reversible, enum no); el paso 2 de A3 no se corrió.",
+     "estado_declarado": "pendiente de decisión",
+     "refs": [
+      "docs/decisiones-oslead-vii/",
+      "plan-de-accion-v4.md",
+      "también en fuente:4955,4959,4992,5049"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-805",
+     "clave": "docs/bitacora-beta.md:1518",
+     "tipo": "bloque",
+     "titulo": "FG-2.1→2.3 formulario estructurado para los 4 rubros",
+     "descripcion": "No se deriva hasta que corra el experimento 5 vs 5; FG-2 también recibe la capa 'cómo dirigir la IA' / ejemplos de prompt.",
+     "estado_declarado": "bloqueado (gate abierto)",
+     "refs": [
+      "también en docs/bitacora-beta.md:286",
+      "también en docs/bitacora-beta.md:340",
+      "también en docs/bitacora-beta.md:1558",
+      "también en docs/bitacora-beta.md:1636"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-684",
+     "clave": "docs/bitacora-beta-2.md:136",
+     "tipo": "bloque",
+     "titulo": "Bloques 1 y 3–6 del rediseño del flujo del setter sin entrada",
+     "descripcion": "La bitácora prevé agregar 'franja admin, 1-6' uno por bloque; solo registra pre-bloque 0, franja admin y Bloque 2.",
+     "estado_declarado": "sin estado",
+     "refs": [],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-920",
+     "clave": "docs/bitacora-beta-3.md:7253",
+     "tipo": "idea",
+     "titulo": "Referencia de plazo en las esperas (enRevisionAt / SLA)",
+     "descripcion": "Las esperas no pueden decir hace cuánto que esperan: no hay marca de entrada a revisión ni SLA persistido. Cerrarlo pide un campo nuevo.",
+     "estado_declarado": "no hecho (requiere campo nuevo)",
+     "refs": [
+      "OsLeadDossier (aprobadaAt, enviadaAt)"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-723",
+     "clave": "docs/bitacora-beta-3.md:10635",
+     "tipo": "idea",
+     "titulo": "El mapa de la cartera queda al fondo de todo",
+     "descripcion": "Con «Para trabajar» abierto, los otros siete encabezados quedan detrás de 49 tarjetas. Una salida posible es una franja de conteos en la cabecera de la cartera. El grupo abierto, además, está fijo en VISTA_ABIERTA y la cartera sigue colapsada por defecto.",
+     "estado_declarado": "anotado, no hecho",
+     "refs": [
+      "VISTA_ABIERTA",
+      "tambien en docs/bitacora-beta-3.md:10641",
+      "tambien en docs/bitacora-beta-3.md:10643"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-609",
+     "clave": "_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md:60",
+     "tipo": "decision",
+     "titulo": "OsLead no pertenece a una org; convertedToOsLeadId sin FK",
+     "descripcion": "El vínculo cliente↔lead es indirecto, vía Project.osLeadId. convertedToOsLeadId es un string suelto a propósito, para no acoplar el chatbot con una relación dura.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "OsLead",
+      "Project.osLeadId",
+      "ChatbotLead.convertedToOsLeadId",
+      "tambien en Olme/Ideas de nuevas features.md:18"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-817",
+     "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:26",
+     "tipo": "decision",
+     "titulo": "mc2 con tilde único, no cinco",
+     "descripcion": "Un solo tilde persiste en bloque ['cta','calidad','mobile'] para no romper progresoJson/FASE_IDS; la spec pedía 5 (ver H-05).",
+     "estado_declarado": "hecho",
+     "refs": [
+      "src/lib/leados/contracts.ts (FASE_IDS)",
+      "tambien en :143, :745"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-940",
+     "clave": "docs/bitacora-beta-3.md:9358",
+     "tipo": "decision",
+     "titulo": "Plegar las guías numeradas de m13, m16 y m5 lo decide Franco",
+     "descripcion": "A 390 lo que queda arriba del trabajo ya no es cromo sino contenido. Plegarlo mejoraría el número, pero sería sacarle al manual lo que es.",
+     "estado_declarado": "pendiente (decisión de Franco)",
+     "refs": [
+      "tambien en docs/bitacora-beta-3.md:9453"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-815",
+     "clave": "docs/bitacora-roadmap.md:10799",
+     "tipo": "decision",
+     "titulo": "Regla para superficies nuevas del setter",
+     "descripcion": "Deben deferir al stepper canónico de 5 etapas y a 'cyan = accionable, resto informativo'.",
+     "estado_declarado": "hecho",
+     "refs": [],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-844",
+     "clave": "docs/bitacora-beta-3.md:177",
+     "tipo": "decision",
+     "titulo": "Línea roja del flujo invertido del envío",
+     "descripcion": "El link de la demo solo sale con APROBADA ∧ finalUrl ∧ (respondió ∨ caliente); claim atómico y re-validación server.",
+     "estado_declarado": "vigente",
+     "refs": [
+      "flow.ts gateEnvioDemo",
+      "dossier.ts marcarDemoEnviadaOwned",
+      "outreach.actions.ts enviarDemoAprobada",
+      "también en fuente:1175"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-887",
+     "clave": "docs/bitacora-beta-3.md:2913",
+     "tipo": "decision",
+     "titulo": "gateBriefAbierto del recorrido viejo frena construir en frío",
+     "descripcion": "Exige respondió ∨ caliente, así un lead evaluado y frío no puede construir; decisión de producto de Franco.",
+     "estado_declarado": "pendiente de decisión",
+     "refs": [
+      "flow.ts gateBriefAbierto",
+      "también en fuente:3025"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-736",
+     "clave": "docs/bitacora-beta.md:715",
+     "tipo": "decision",
+     "titulo": "Snooze de cartera (personal) y 'Postergar' del Paso 9 (comercial) conviven",
+     "descripcion": "Son cosas distintas a propósito; si se confunden en uso, revisar etiquetas.",
+     "estado_declarado": "vigente",
+     "refs": [],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-924",
+     "clave": "docs/bitacora-beta-3.md:7685",
+     "tipo": "hecho-declarado",
+     "titulo": "P10 DESTINOS ALCANZABLES: censo de los destinos que nombran las quince pantallas",
+     "descripcion": "Se encontraron 19 menciones con defecto en cinco clases. Se arreglaron las clases 1 a 3 y el enlace que rebotaba: EnlacePantalla, el enlace a «Correcciones» desde mc1/mc2 y M16Municion con estadoDeAgenda. Invariante enlaces-manual (6.912 estados); spec 17-destinos.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "fix/destinos-alcanzables",
+      "1596b1cb",
+      "EnlacePantalla",
+      "src/lib/leados/enlaces-manual.invariant.ts",
+      "tests/setter/17-destinos-alcanzables.spec.ts",
+      "cierra pendiente de docs/bitacora-beta-3.md:7134"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-860",
+     "clave": "docs/bitacora-beta-3.md:1099",
+     "tipo": "hecho-declarado",
+     "titulo": "7.0 smoke-test del manual",
+     "descripcion": "41 hallazgos, 2 arreglados (role=alert), 39 (b) volcados a docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "commit 036d70b",
+      "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-971",
+     "clave": "docs/bitacora-beta-3.md:1752",
+     "tipo": "hecho-declarado",
+     "titulo": "Corrida D1: método LeadOS destilado",
+     "descripcion": "docs/metodo/LECCIONES-LEADOS.md, PROPUESTA-CIMIENTO.md (21 cambios de método) y MAPA-LEADOS.md.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "commits 23a19c3,f01a178,69d0fb4",
+      "docs/metodo/"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-975",
+     "clave": "docs/bitacora-beta-3.md:2006",
+     "tipo": "hecho-declarado",
+     "titulo": "PROBE terreno para la poda",
+     "descripcion": "docs/probe-poda-terreno.md: 10 ítems relevados y 55 hallazgos laterales (rama redesign/home).",
+     "estado_declarado": "hecho",
+     "refs": [
+      "docs/probe-poda-terreno.md"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-1035",
+     "clave": "docs/bitacora-beta-3.md:5380",
+     "tipo": "hecho-declarado",
+     "titulo": "C1b invariantes que prueban lo que prometen (parcial en rango)",
+     "descripcion": "Declara cuatro invariantes reforzados solo en *.invariant.ts; en el rango solo la Fase 1 (Node 24 en ci.yml, tabla de runners 19 ts-node / 24 tsx). El resto sigue después de L5500.",
+     "estado_declarado": "hecho (detalle fuera de rango)",
+     "refs": [
+      "commit 3f636437"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-748",
+     "clave": "docs/bitacora-beta.md:1291",
+     "tipo": "hecho-declarado",
+     "titulo": "FG-1.1 Onboarding del setter enseña el flujo invertido",
+     "descripcion": "4 tarjetas (el score marca el camino, opener antes que demo, la espera, caliente adelanta la demo) y banda 'Ojo'.",
+     "estado_declarado": "hecho (sign-off perceptual de Franco)",
+     "refs": [
+      "src/app/(protected)/setter/_components/onboarding-hint.tsx"
+     ],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-802",
+     "clave": "docs/bitacora-beta.md:1486",
+     "tipo": "hecho-declarado",
+     "titulo": "Cierre del bloque FG-1 (capa de mentoría del setter)",
+     "descripcion": "FG-1.pre, 1.0, 1.1, 1.2, 1.4 y 1.3 completos; gates y autosave intactos; verificación perceptual en manos de Franco.",
+     "estado_declarado": "hecho",
+     "refs": [],
+     "zona_franco": true
+    },
+    {
+     "id": "PLAN-749",
+     "clave": "docs/bitacora-beta.md:1673",
+     "tipo": "hecho-declarado",
+     "titulo": "Seed de estados del setter (7 leads QA)",
+     "descripcion": "qaLeadSeeds con ensureLeadDossier idempotente en seed-agency-os.ts: ficha a medias, caliente, en revisión, aprobado, rechazado, descartado y postergado vencido.",
+     "estado_declarado": "hecho",
+     "refs": [
+      "prisma/seed-agency-os.ts",
+      "también en docs/bitacora-beta-2.md:83"
+     ],
+     "zona_franco": true
+    }
+   ],
+   "planeado_omitidos": [],
+   "insumos": null
+  }
+ ]
+}

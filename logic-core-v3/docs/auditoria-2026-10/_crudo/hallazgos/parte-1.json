@@ -2088,6 +2088,26 @@
      "ruta": "docs/bitacora-roadmap.md",
      "linea": 6493,
      "fragmento": "| **F4** | [`src/app/(protected)/admin/projects/[projectId]/payments/page.tsx:69-103`] ... Loader sin auth check"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/page.tsx",
+     "linea": 35,
+     "fragmento": "where: { stage: 'EN_REVISION' },"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
+     "linea": 53,
+     "fragmento": "const dossier = await prisma.osLeadDossier.findUnique({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/setter/[setterId]/page.tsx",
+     "linea": 37,
+     "fragmento": "prisma.user.findUnique({ where: { id: setterId },"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/fg2-lab/page.tsx",
+     "linea": 29,
+     "fragmento": "const dossiers = await prisma.osLeadDossier.findMany({"
     }
    ],
    "impacto": "Bloqueante para el primer cliente real. Escenario: se filtra la cookie del SUPER_ADMIN (PC compartida, malware, extensión) y develOP reacciona cambiando la contraseña. El corte por sessionVersion no llega al panel. El proxy decide /admin con el rol del JWT (auth.config.ts no tiene callback jwt ni mira sessionVersion) y re-firma la cookie por 30 días (SEC-010). En un pedido RSC con el árbol del layout ya montado, Next no ejecuta admin/layout.tsx y renderiza solo la página. Es lo que manda el router en cada clic, o un curl con Next-Router-State-Tree. Hay 15 páginas de /admin que consultan Prisma sin auth() propio:\n- admin (KPIs y cobros)\n- team (usuarios admin)\n- referrals (emails de referidos de todos los clientes)\n- projects, projects/[id]/payments y projects/[id]/tasks\n- leads y leads/[leadId]\n- messages/[orgId] (nombre de la org)\n- announcements\n- chatbot/activity\n- leados, leados/[leadId] y leados/setter/[setterId]\n- fg2-lab\nLo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de otro dispositivo que sigue navegando por clics después del cambio de contraseña. Las mutaciones sí fallan porque las actions llaman requireSuperAdmin. Contraste: /setter carga sus datos con requireSetter en _data.ts y el portal con resolveOrgId, que releen la base.",
@@ -2157,6 +2177,13 @@
       "titulo": "El checklist B-SEC.3c renumera los fixes y el F4 original (loader de pagos de proyecto sin guard propio) sigue abierto",
       "severidad": "MEDIA",
       "nota_padre": "Mismo patrón (loader de pagos de proyecto sin guard propio); suma que el checklist B-SEC.3c renumeró los fixes y el F4 original sigue abierto (alerta D3-A2)."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L1/H13",
+      "titulo": "Las páginas de /admin/leados y /admin/fg2-lab leen la base sin guard propio",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo patrón (/admin/leados, su detalle, la evaluación por setter y /admin/fg2-lab leen la base confiando en el layout); SEC-023 ya marca estas páginas como ZONA-FRANCO."
      }
     ]
    },

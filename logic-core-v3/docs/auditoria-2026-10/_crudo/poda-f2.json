@@ -1178,6 +1178,154 @@
     "SEC-042"
    ],
    "que_rompe": "nada"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "archivo": "src/app/(protected)/admin/fg2-lab/page.tsx (+ _components/fg2-lab-client.tsx, _components/medicion-panel.tsx)",
+   "senales": [
+    "Encabezado 'EXPERIMENTAL / DESCARTABLE ... Borrar tras la decisión del experimento' (page.tsx:2-8, fg2-lab-client.tsx:3-8, medicion-panel.tsx:3-7)",
+    "git grep fg2-lab fuera de su carpeta: 0 enlaces (control: /admin/leados sí está en admin-sidebar.tsx)",
+    "Último cambio 629fe016 del 2026-06-29",
+    "docs/experimentos/fg2-brief-experimento.md:3-4: gate abierto, experimento no corrido"
+   ],
+   "que_rompe": "Nada de producción; quedarían huérfanos src/lib/leados/_experimental/fg2-*.ts y scripts/_experimental/fg2-gen-prompts.ts. Requiere decisión de Franco sobre el experimento."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "archivo": "src/app/(protected)/admin/leads/_actions/lead.actions.ts (funciones listLeads :249 y getLeadById :275)",
+   "senales": [
+    "git grep -w listLeads|getLeadById: solo las definiciones (control: assignLeadSetter tiene 2 importadores)",
+    "Devuelven error.message crudo y en inglés"
+   ],
+   "que_rompe": "Nada; los tipos LeadListItem/SerializedLeadDetail (:22-50) quedarían sin uso."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "archivo": "src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx (VEREDICTO_TONES :30-34)",
+   "senales": [
+    "Copia deliberada de dossier-panels.tsx:55-59 (PLAN-677)",
+    "Mapa STAGE_PILL también duplicado entre [leadId]/page.tsx:36-44 y pipeline-board.tsx:25-33"
+   ],
+   "que_rompe": "Nada si se extraen a src/lib/leados-ui.ts junto a STAGE_TONE."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "archivo": "src/lib/leados/herramientas.ts (entrada 'evaluador'; fuera del lote, la muestra tools-rail.tsx)",
+   "senales": [
+    "url null con TODO (herramientas.ts:63)",
+    "ningún ToolGuide ni HerramientaLauncher con id evaluador en src (git grep)",
+    "el paso Evaluación se fusionó con la ficha (bitácora D15-bis), así que la fila anuncia una fase retirada"
+   ],
+   "que_rompe": "tests/setter/16-municiones-salida.spec.ts:132, que espera ['evaluador','gemDiseno','claudeDesign','gemOutreach'] como herramientas sin URL; y el tipo HerramientaId si algo lo referencia."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx",
+   "senales": [
+    "Su único consumidor es m1-ficha.tsx:212 y siempre pasa editable={false} (git grep '<FichaStep').",
+    "La rama editable (ficha-step.tsx:53-90) monta FichaForm sin cierre y un CopyBlock para el Evaluador externo, que desde D15-bis no tiene pantalla.",
+    "El header 'Paso' duplicado que señaló auditoria-consistencia-setter.md:125 vive solo en esta rama muerta."
+   ],
+   "que_rompe": "Nada en runtime. Quitar la rama editable reduce el archivo a la vista congelada; hay que revisar la referencia en comentario de guidance-content.ts:307."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "archivo": "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx",
+   "senales": [
+    "TEXTOS_WIZARD (evaluacion-form.tsx:55-59) es el default de textos, pero el único consumidor (m1-ficha.tsx:196-201) siempre pasa TEXTOS_M1.",
+    "VEREDICTO_LABELS (:42-46) está copiado tal cual en TEXTOS_M1.veredictoLabels (m1-ficha.tsx:137-141).",
+    "Los comentarios hablan del 'wizard' y de 'm2', que ya no existen."
+   ],
+   "que_rompe": "Nada. Es una limpieza parcial (el componente está vivo); tests/qa-persona/corrida-1-novato-frio.spec.ts lo nombra solo en una captura."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "archivo": "src/lib/leados/_experimental/fg2-brief-lab.ts",
+   "senales": [
+    "Encabezado 'EXPERIMENTAL / DESCARTABLE … BORRAR tras la decisión del experimento' (fg2-brief-lab.ts:2-8)",
+    "No está conectado al flujo del setter; consumidores: solo admin/fg2-lab (page.tsx:17, fg2-lab-client.tsx:28, medicion-panel.tsx:19) y scripts/_experimental/fg2-gen-prompts.ts:12"
+   ],
+   "que_rompe": "La ruta /admin/fg2-lab y el script de generación de prompts: hay que borrarlos juntos"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "archivo": "src/lib/leados/_experimental/fg2-casos-gastro.ts",
+   "senales": [
+    "'BORRAR junto con el resto del prototipo tras la decisión' (fg2-casos-gastro.ts:9)",
+    "Datos representativos y WhatsApp de ejemplo (fg2-casos-gastro.ts:43-44)"
+   ],
+   "que_rompe": "fg2-lab-client.tsx:29 y scripts/_experimental/fg2-gen-prompts.ts:13"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "archivo": "src/lib/leados/guidance-content.ts",
+   "senales": [
+    "GUIA_CONSTRUCCION (:643), GUIA_TRASPASO (:887) y GUIA_REVISION.aprobada (:958) sin lectores; TeachPanel solo usa 'objeciones' y 'selfCheck'",
+    "GUIA_EVALUACION.porque/ejemplos (:519-538) no se renderizan y contradicen el gate",
+    "Tipo SelfCheckRazon y campo selfCheckRazones sin uso (:167-170, :276)"
+   ],
+   "que_rompe": "Nada si solo se quitan esas claves y sus entradas en GUIA_PASOS (:1201, :1208); el resto del archivo está vivo"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "archivo": "src/lib/leados/flow.ts",
+   "senales": [
+    "agruparParaHome (flow.ts:653-667) sin consumidores en src, tests ni scripts (git grep -w)"
+   ],
+   "que_rompe": "Nada (verificar invariantes que la importen: git grep no encontró ninguno)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "archivo": "src/lib/leados/herramientas.ts",
+   "senales": [
+    "Entrada 'evaluador' (herramientas.ts:53-64) sin pantalla desde D15-bis; solo la usa el rail genérico"
+   ],
+   "que_rompe": "tests/setter/16-municiones-salida.spec.ts:132, que afirma la lista de herramientas sin URL"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "archivo": "src/lib/leados/paso.ts",
+   "senales": [
+    "derivarPasoDelLead tiene un único consumidor: manual.ts:552 (git grep)",
+    "manual.ts lee solo paso.anchor==='opener' y paso.foco.tono en la rama EVALUADA (:574-578); indice y las ramas de foco/anchor de otros stages no tienen lector",
+    "los consumidores que cita la cabecera (DossierStepper, PasoActualBanner, StepAnchor) solo aparecen en paso.ts (git grep)",
+    "conserva la trampa APROBADA sin finalUrl (paso.ts:169-192) y el copy «Seguimiento» (:184)"
+   ],
+   "que_rompe": "Reducirlo (no borrarlo) toca manual.ts:552-578; aprobada-sin-link.invariant.ts:369 lista el archivo y habría que actualizar la lista."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "archivo": "src/lib/leados/paso-admitido.ts",
+   "senales": [
+    "solo lo importan paso-admitido.invariant.ts y aprobada-sin-link.invariant.ts (git grep)",
+    "contiene el generador del barrido y fixtures de test con 'as unknown as' (:189-192, :200-214)",
+    "la fixture FICHA tiene la forma vieja de la ficha (contracts.ts:52)"
+   ],
+   "que_rompe": "Moverlo junto a los invariantes rompe los imports relativos de esos dos invariantes; no lo usa ningún código de producción."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "archivo": "src/lib/leados/herramientas.ts (entrada 'evaluador')",
+   "senales": [
+    "url null con TODO: URL (herramientas.ts:63)",
+    "sigue en HERRAMIENTAS_ORDEN (:123) y lo pinta tools-rail.tsx:26",
+    "ninguna pantalla del manual lo usa desde D15-bis (manual.ts:157-162)"
+   ],
+   "que_rompe": "Si se borra del union HerramientaId: revisar tool-guide.tsx y cualquier dondeSeUsa que lo nombre; sacarlo solo de HERRAMIENTAS_ORDEN no rompe tipos."
   }
  ]
 }

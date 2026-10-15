@@ -2197,7 +2197,7 @@
   {
    "id": "BUG-038",
    "prefijo": "BUG",
-   "titulo": "Configurar la agenda de un cliente rompe la agenda del setter: LeadOS busca 'la unica org con calComUsername'",
+   "titulo": "La agenda del setter usa «la única org con calComUsername»: con dos orgs configuradas se rompe, y si la única es un cliente reserva en su Cal.com con el nombre y el email del prospecto",
    "dominio": "D2",
    "severidad": "MEDIA",
    "tipo": "bug",
@@ -2218,6 +2218,51 @@
      "ruta": "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
      "linea": 325,
      "fragmento": "select: { calComApiKey: true, calComUsername: true, calComEmbedUrl: true },  // mismos campos"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 134,
+     "fragmento": "const config = await getCalConfigLeadOS()"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 59,
+     "fragmento": "where: { calComUsername: { not: null } },"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 86,
+     "fragmento": "const [org] = orgs"
+    },
+    {
+     "ruta": "src/lib/integrations/cal-com-v2.ts",
+     "linea": 10,
+     "fragmento": "POST /v2/bookings         → SIN auth"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx",
+     "linea": 141,
+     "fragmento": "confirmacion.run(() => confirmarReunion(leadId, input), {"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 218,
+     "fragmento": "metadata: { leadId },"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 213,
+     "fragmento": "const booking = await createBooking({\n  username: config.username,\n  eventTypeSlug: config.eventTypeSlug,"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 217,
+     "fragmento": "attendee: { name: nombre, email },\nmetadata: { leadId },"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 64,
+     "fragmento": "console.warn(\n  '[leados agenda] Cal.com sin configurar: ninguna Organization tiene calComUsername. ' +"
     }
    ],
    "impacto": "El dia que develOP configure Cal.com para su primer cliente del modulo Agenda, el setter deja de poder agendar reuniones hasta que alguien borre el username de una de las dos orgs.",
@@ -2229,7 +2274,12 @@
     "h2.cli-agenda.panel-de-agenda",
     "lib.leados",
     "int.calcom",
-    "modelo.Organization"
+    "modelo.Organization",
+    "h5.set-manual",
+    "h5.set-manual.agenda-reunion",
+    "h2.cli-agenda",
+    "h5.set-manual.agenda",
+    "h5.set-lead.agenda-reunion"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -2241,7 +2291,40 @@
     "tmp": "D2-c1/D2-L1/H40",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L1/H01",
+      "titulo": "La agenda de LeadOS toma la configuración de Cal.com de cualquier organización, incluida la de un cliente",
+      "severidad": "ALTA",
+      "nota_padre": "Leído: lib/leados/agenda.ts:57-61 (findMany global de orgs con calComUsername, sin filtro por la org de develOP), :70-84 (con más de una corta) y :86-96 (con una sola toma su username y slug); setter/_actions/agenda.actions.ts:134-143 y :185-219 piden horarios y reservan con esa config. Misma causa que BUG-038; suma el caso de la única org que es un cliente. Dos verificadores la bajaron a MEDIA y uno la sostuvo ALTA; queda MEDIA porque hoy calCom* no tiene escritor en la app (FAL-004) y el escenario exige cargarlo a mano."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L3/H02",
+      "titulo": "La agenda del setter reserva en «la única Organization con calComUsername», que puede ser un cliente",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa (agenda.ts:57-96); suma createBooking con nombre y email del prospecto en la cuenta ajena."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L5/H01",
+      "titulo": "La agenda de LeadOS toma la cuenta de Cal.com de cualquier organización con el campo cargado, incluidas las de clientes",
+      "severidad": "ALTA",
+      "nota_padre": "Misma causa (agenda.ts:58-61 y :86-96)."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L1/H01",
+      "antes": {
+       "titulo": "Configurar la agenda de un cliente rompe la agenda del setter: LeadOS busca 'la unica org con calComUsername'"
+      },
+      "nota_padre": "Leído: lib/leados/agenda.ts:57-61 (findMany global de orgs con calComUsername, sin filtro por la org de develOP), :70-84 (con más de una corta) y :86-96 (con una sola toma su username y slug); setter/_actions/agenda.actions.ts:134-143 y :185-219 piden horarios y reservan con esa config. Misma causa que BUG-038; suma el caso de la única org que es un cliente. Dos verificadores la bajaron a MEDIA y uno la sostuvo ALTA; queda MEDIA porque hoy calCom* no tiene escritor en la app (FAL-004) y el escenario exige cargarlo a mano."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -5358,6 +5441,26 @@
      "ruta": "src/app/(protected)/dashboard/page.tsx",
      "linea": 227,
      "fragmento": "Tu primer resumen ejecutivo se genera el próximo lunes con los datos de tu semana."
+    },
+    {
+     "ruta": "vercel.json",
+     "linea": 4,
+     "fragmento": "\"path\": \"/api/cron/os-follow-up\","
+    },
+    {
+     "ruta": "netlify.toml",
+     "linea": 26,
+     "fragmento": "schedule = \"0 9 * * *\"  (solo 3 schedules: :26, :29, :32; ninguno es os-follow-up)"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 184,
+     "fragmento": "notIn: [LeadStatus.CERRADO, LeadStatus.PERDIDO],"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 153,
+     "fragmento": "export async function GET(request: Request) {"
     }
    ],
    "impacto": "netlify.toml:25-32 y netlify/functions solo agendan generate-insights, send-weekly-reports y cleanup-old-events; nada dispara /api/cron/regenerate-briefs ni /api/cron/send-executive-reports. En producción el brief solo se genera al abrir el home (y hoy, con la credencial Vertex vencida, nunca) y el email ejecutivo semanal de Pro/Business no sale. La UI promete 'Próxima actualización automática: lunes', el estado vacío dice 'se genera el próximo lunes' (page.tsx:226) y el error de regeneración 'se actualiza automaticamente cada lunes' (executive-brief.ts:161).",
@@ -5372,7 +5475,12 @@
     "h2.cli-reportes-email.reporte-semanal",
     "int.brevo",
     "modelo.WeeklyReportLog",
-    "lib.reports"
+    "lib.reports",
+    "int.cron.os-follow-up",
+    "h4.adm-leads",
+    "h5.set-dia",
+    "int.telegram",
+    "h4.adm-leads.digest-follow-ups-telegram"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5395,6 +5503,20 @@
       "titulo": "El reporte ejecutivo semanal no tiene disparador en producción (Netlify)",
       "severidad": "ALTA",
       "nota_padre": "Mismo cron sin disparador (send-executive-reports); el verificador corrige que el brief de Inicio se regenera igual al visitar Inicio."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L1/H12",
+      "titulo": "El cron os-follow-up solo está agendado en vercel.json: en Netlify no corre",
+      "severidad": "MEDIA",
+      "nota_padre": "BUG-047 ya registra que os-follow-up solo está en vercel.json; suma lo que deja de pasar (el digest de follow-ups y el reactivado de postergados)."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L4/H04",
+      "titulo": "El cron os-follow-up solo está agendado en vercel.json: en el deploy de Netlify no corre",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo faltante (os-follow-up sin disparador en Netlify)."
      }
     ]
    },
@@ -7224,167 +7346,6 @@
     "ciclo": "D2-c2",
     "lote": "D2-T1",
     "tmp": "D2-c2/D2-T1/H03",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-061",
-   "prefijo": "BUG",
-   "titulo": "Las bajas de un clic se ejecutan en el GET: un escáner de enlaces del correo da de baja al dueño del reporte semanal y a los contactos de las campañas sin que nadie haga clic",
-   "dominio": "D2",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
-     "linea": 103,
-     "fragmento": "export async function GET(request: Request) {\n  return handle(request)"
-    },
-    {
-     "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
-     "linea": 77,
-     "fragmento": "data: { executiveReportOptOut: true },"
-    },
-    {
-     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
-     "linea": 93,
-     "fragmento": "data: { optedOut: true, optedOutAt: new Date() },  // dentro del GET de :69"
-    },
-    {
-     "ruta": "src/lib/email/templates/executive-weekly.ts",
-     "linea": 289,
-     "fragmento": "<a href=\"${escapeHtml(input.unsubscribeUrl)}\" ...>Dejar de recibir este reporte</a>"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 155,
-     "fragmento": "<a href=\"${appUrl}/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}\""
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 99,
-     "fragmento": "if (org.executiveReportOptOut || org.executiveReportFrequency === 'DISABLED') {"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/_actions/executive-report-prefs.actions.ts",
-     "linea": 41,
-     "fragmento": "...(parsed.data.frequency !== 'DISABLED' ? { executiveReportOptOut: false } : {}),"
-    },
-    {
-     "ruta": "src/app/api/email/unsubscribe-executive/route.ts",
-     "linea": 75,
-     "fragmento": "await prisma.organization.update({\n      where: { id: orgId },\n      data: { executiveReportOptOut: true },"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 191,
-     "fragmento": "unsubscribeUrl: buildUnsubscribeUrl(organizationId),"
-    },
-    {
-     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
-     "linea": 91,
-     "fragmento": "await prisma.emailContact.updateMany({\n    where: { id: contactId },\n    data: { optedOut: true, optedOutAt: new Date() },   (dentro de GET, :69)"
-    },
-    {
-     "ruta": "src/lib/email/unsubscribe-token.ts",
-     "linea": 63,
-     "fragmento": "return `${base}/api/email/unsubscribe-executive?org=${encodeURIComponent(\n    organizationId,\n  )}&token=${token}`"
-    }
-   ],
-   "impacto": "Los filtros de correo corporativos (Microsoft Defender Safe Links, Mimecast, Proofpoint) abren cada enlace del mail al recibirlo. Con el primer cliente PRO/BUSINESS que use un correo asi, el primer reporte semanal lo da de baja solo: el lunes siguiente build.ts lo saltea por OPTOUT y Perfil muestra 'No recibir' sin que lo haya pedido; si lo reactiva, el proximo mail lo vuelve a dar de baja. En email marketing, los destinatarios detras de esos filtros quedan como 'Bajas' tras la primera campana (hoy ensucia el conteo porque la baja no llega a Brevo, BUG-021; al arreglar BUG-021 dejarian de recibir sin haberlo pedido). El comentario de route.ts:107 cita RFC 8058, que recomienda confirmar en la pagina justamente porque el antispam hace GET automatico.",
-   "propuesta": "Separar los verbos en ambas rutas: el GET muestra una pagina con un boton 'Confirmar baja' (form POST) y no escribe; el POST (el que usan Gmail/Outlook con List-Unsubscribe-Post) hace la baja. Opcional: guardar fecha y origen de la baja para auditarla.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-reportes-email.reporte-semanal",
-    "h2.cli-reportes-email.preferencias-reporte",
-    "h2.cli-email-mkt.baja-de-contactos",
-    "h6.vis-optout",
-    "int.brevo",
-    "modelo.Organization",
-    "modelo.EmailContact",
-    "h2.cli-reportes-email",
-    "h2.cli-email-mkt"
-   ],
-   "relacionados_ids": [
-    "BUG-007",
-    "BUG-021"
-   ],
-   "previas": [],
-   "relacionados_texto": "BUG-007 (mismo patron en el magic link), BUG-021, SEC-039",
-   "vh": "VH-063",
-   "origen": {
-    "ciclo": "D2-c2",
-    "lote": "D2-T1",
-    "tmp": "D2-c2/D2-T1/H04",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D2-c2",
-      "tmp": "D2-c2/D2-T2/H02",
-      "titulo": "Las bajas del reporte semanal y de email marketing se ejecutan con un GET: el escáner de enlaces del correo da de baja sin que nadie haga clic",
-      "severidad": "MEDIA",
-      "nota_padre": "Mismo hallazgo (unsubscribe-executive y optout escriben en el GET)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-062",
-   "prefijo": "BUG",
-   "titulo": "Aprobar y pedir cambios en una entrega es check-then-act: el estado se lee fuera de la transaccion y el update no exige PENDING_APPROVAL",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/actions/dashboard-actions.ts",
-     "linea": 26,
-     "fragmento": "const task = await prisma.task.findUnique({ where: { id: parsed.data.taskId }, include: { project: true } })"
-    },
-    {
-     "ruta": "src/actions/dashboard-actions.ts",
-     "linea": 39,
-     "fragmento": "if (task.approvalStatus !== 'PENDING_APPROVAL') {"
-    },
-    {
-     "ruta": "src/actions/dashboard-actions.ts",
-     "linea": 44,
-     "fragmento": "await tx.task.update({\n        where: { id: parsed.data.taskId },\n        data: { approvalStatus: 'APPROVED' },"
-    },
-    {
-     "ruta": "src/actions/dashboard-actions.ts",
-     "linea": 132,
-     "fragmento": "await tx.task.update({\n        where: { id: parsed.data.taskId },  // REJECTED, mismo patron"
-    }
-   ],
-   "impacto": "Dos pedidos casi simultaneos (aprobar en una pestana y pedir cambios en otra, o llamadas directas a la action) pasan los dos el control: quedan en Mensajes 'Aprobé la entrega' y 'Solicité cambios', dos tandas de notificaciones a todos los SUPER_ADMIN y un estado final que depende de cual escribio ultimo. Frente al primer cliente, el equipo no sabe si la entrega quedo aprobada.",
-   "propuesta": "Decision para Valentino (dashboard-actions.ts es congelado): dentro de la transaccion usar updateMany con where { id, approvalStatus: 'PENDING_APPROVAL', project: { organizationId } } y abortar si count === 0 antes de crear mensajes y notificaciones.",
-   "esfuerzo": "S",
-   "zona": "FROZEN",
-   "nodos": [
-    "h2.cli-proyecto.aprobar-o-pedir-cambios",
-    "modelo.Task",
-    "lib.actions"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "SEC-043 (mismo patron en el brief), BUG-045",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c2",
-    "lote": "D2-T1",
-    "tmp": "D2-c2/D2-T1/H05",
     "verificado_padre": false,
     "nota_padre": "",
     "verificador": null

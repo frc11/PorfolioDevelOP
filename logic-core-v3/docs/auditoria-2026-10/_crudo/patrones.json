@@ -2449,6 +2449,405 @@
    "patron": "Fallbacks literales de remitente, número o dominio legacy en lugar del módulo canónico",
    "como_buscarlo": "git grep -n -E 'develop-agency\\.com|@gmail\\.com|wa\\.me/' origin/main -- logic-core-v3/src",
    "donde_aparecio": "brevo-service.ts:33, email.ts:21, brevo.ts:124, Footer.tsx:8, ActionRequiredEmail.tsx:23"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "Configuración de la agencia resuelta como 'cualquier organización que tenga el campo cargado' en vez de la org de develOP",
+   "como_buscarlo": "git grep -n -E \"organization\\.find(Many|First)\\(\\{\\s*where: \\{ \\w+: \\{ not: null\" origin/main -- logic-core-v3/src; revisar todo uso de campos de integración de Organization desde código de develOP (no del portal)",
+   "donde_aparecio": "src/lib/leados/agenda.ts:58-60 (getCalConfigLeadOS)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "iframe con src controlado por otro usuario sin atributo sandbox (CSP solo report-only)",
+   "como_buscarlo": "git grep -n \"<iframe\" origin/main -- logic-core-v3/src y verificar sandbox/allow",
+   "donde_aparecio": "src/app/(protected)/admin/leados/[leadId]/page.tsx:237"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "z.string().url() sin restringir protocolo, renderizado luego como href (zod 3.25 acepta javascript:/data:)",
+   "como_buscarlo": "git grep -n \"\\.url(\" origin/main -- logic-core-v3/src | cruzar con href={...Url}",
+   "donde_aparecio": "setter/_actions/prospecto.schemas.ts:25-28 y admin/leads/_actions/lead.schemas.ts:26 -> admin/leados/[leadId]/page.tsx:178-180"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "Métricas por persona calculadas con el dueño actual del registro en vez del autor del evento",
+   "como_buscarlo": "git grep -n \"assignedTo\" en cálculos de ratios/rankings (lib/leados/revision.ts, setter-carga.ts, mis-numeros.ts)",
+   "donde_aparecio": "admin/leados/page.tsx:52-60, :128; admin/leados/setter/[setterId]/page.tsx:42"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "Pares de escrituras (status + blob JSON / rastro / aviso) sin prisma.$transaction cuyo reintento rebota",
+   "como_buscarlo": "en server actions, dos awaits de prisma/transition seguidos fuera de $transaction con guard de idempotencia antes",
+   "donde_aparecio": "dossier.actions.ts:145-156, reunion.actions.ts:71-84, lead.actions.ts:161-203, demo.actions.ts:38-56"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "Estados terminales definidos en un lugar (ESTADOS_TERMINALES) y omitidos en otra clasificación",
+   "como_buscarlo": "git grep -n \"'PERDIDO'\" origin/main -- logic-core-v3/src/lib/leados | revisar ramas que no mencionan CERRADO",
+   "donde_aparecio": "flow.ts:417 y proximaAccionPara vs revision.ts:27"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "Compensaciones con .catch(() => undefined) seguidas de un mensaje que afirma que la compensación ocurrió",
+   "como_buscarlo": "git grep -n \"\\.catch(() => undefined)\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "setter/_actions/agenda.actions.ts:253-259"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "mapError/fail genérico en catch sin captureException ni log (peor que console.error)",
+   "como_buscarlo": "git grep -n \"function mapError\" origin/main -- logic-core-v3/src y catch blocks que solo hacen return fail(",
+   "donde_aparecio": "setter/_actions/{dossier,outreach,cartera,agenda,foco}.actions.ts"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "patron": "Cambios de estado manuales del admin que saltean la máquina de estados compartida (os-commercial) y no limpian fechas de seguimiento",
+   "como_buscarlo": "git grep -n \"osLead.update\" origin/main -- logic-core-v3/src | excluir lib/os-commercial.ts",
+   "donde_aparecio": "admin/leads/_actions/lead.actions.ts:102-110, reunion.actions.ts:81-84, demo.actions.ts:53-56"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "Fecha calendario local armada en el cliente con toISOString().slice(0, 10) (UTC): entre las 21 y las 24 h de Argentina da el día siguiente",
+   "como_buscarlo": "git grep -n \"toISOString().slice(0, 10)\" origin/main -- src y revisar cuáles representan «hoy» o «hoy + N» local",
+   "donde_aparecio": "foco-surface.tsx:71 y lead-card-actions.tsx:37 (fuera del lote también: admin/projects/_components/time-entry-panel.tsx:72, setter/.../seguimiento-form.tsx:95, admin/projects/_components/project-form.tsx:72, admin/clients/[clientId]/_components/BillingOverrideForm.tsx:23)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "router.push en un portal después de una server action, sin comentario inline que lo justifique",
+   "como_buscarlo": "git grep -n \"router.push\" origin/main -- \"src/app/(protected)\" y mirar si la línea anterior lo justifica",
+   "donde_aparecio": "foco-surface.tsx:90, novedades-abrir-foco.tsx:47, trabajar-lead-button.tsx:31 (fuera del lote: setter/nuevo/nuevo-prospecto-form.tsx:98)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "triggerTransition (cortina global de 300 ms) usado en portales protegidos",
+   "como_buscarlo": "git grep -n \"triggerTransition(\" origin/main -- \"src/app/(protected)\"",
+   "donde_aparecio": "setter-nav.tsx:49 (fuera del lote: admin/clients/[clientId]/edit/EditClientForm.tsx:92 y :232)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "Drawer mobile oculto solo con -translate-x-full: sigue focusable, sin inert, sin Escape y sin aria-expanded en el disparador",
+   "como_buscarlo": "git grep -n -- \"-translate-x-full\" origin/main -- src (shells)",
+   "donde_aparecio": "setter-shell.tsx:54 (también AdminLayoutClient.tsx:63 y DashboardLayoutClient.tsx:81)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "Atajos globales de una letra en window keydown sin forma de desactivarlos (WCAG 2.1.4)",
+   "como_buscarlo": "git grep -l \"addEventListener('keydown'\" origin/main -- src y revisar cuáles mapean letras sueltas fuera de un componente con foco",
+   "donde_aparecio": "use-keyboard-shortcuts.ts:53 con bindings en foco-surface.tsx:150-155"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "Feedback de éxito que no mira el resultado de la operación (portapapeles)",
+   "como_buscarlo": "git grep -n -E \"execCommand|clipboard.writeText\" origin/main -- src",
+   "donde_aparecio": "copy-block.tsx:47-50"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "aria-label que reemplaza al texto visible y no lo contiene (WCAG 2.5.3)",
+   "como_buscarlo": "git grep -n -B3 \"aria-label={\" origin/main -- src y comparar con el texto hijo del mismo control",
+   "donde_aparecio": "lead-card-actions.tsx:144-153 y :283"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "URLs operativas en código como null con TODO, visibles en la UI",
+   "como_buscarlo": "git grep -n \"url: null, // TODO\" origin/main -- src",
+   "donde_aparecio": "herramientas.ts:63, :78, :90, :117 (las muestra tools-rail.tsx:29-44)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "patron": "Agenda de LeadOS que busca «la única org con calComUsername» y aborta si hay más de una (H-09 del doc OSLEAD, marcado Crítica allí)",
+   "como_buscarlo": "git grep -n -A12 \"calComUsername: { not: null }\" origin/main -- src/lib/leados/agenda.ts; cruzar con dónde escriben calComUsername los clientes",
+   "donde_aparecio": "src/lib/leados/agenda.ts:59 y :70 (fuera del lote, dominio D4; verificado solo por git grep)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "Schema.parse() (que lanza) de un contrato persistido llamado en el render o en un useMemo de un formulario cliente",
+   "como_buscarlo": "git grep -n -E \"Schema\\.parse\\(\" origin/main -- logic-core-v3/src/app logic-core-v3/src/components, y cruzar con archivos 'use client'",
+   "donde_aparecio": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx:148 (llamado desde :200)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "Schema de entrada sin el tope del contrato persistido (input sin .max mientras el contrato usa textoLibre de 5000): el server lanza al persistir con un error genérico",
+   "como_buscarlo": "Comparar cada *InputSchema de setter/_actions/*.schemas.ts con su contrato en src/lib/leados/contracts.ts (textoLibre, TEXTO_LIBRE_MAX) y buscar *Schema.parse( en src/lib/leados/dossier.ts y agenda.ts",
+   "donde_aparecio": "dossier.schemas.ts:89 (pegadoGem) vs contracts.ts:119 y dossier.ts:444; EvaluacionSchema.razonamiento sin tope (contracts.ts:96)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "Estado de formulario sin persistir dentro del contenido de un acordeón que se desmonta al plegarse",
+   "como_buscarlo": "git grep -n \"BloquesSecuenciales\" y \"estaAbierto &&\" origin/main -- logic-core-v3/src; revisar qué formularios con useState viajan como contenido",
+   "donde_aparecio": "bloques-secuenciales.tsx:215 + ficha-form.tsx:388-401 (EvaluacionForm como cierre)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "Toggles optimistas que reconstruyen un array persistido completo desde la prop del server (base vieja si hay clics concurrentes)",
+   "como_buscarlo": "git grep -n useOptimistic origin/main -- logic-core-v3/src y revisar si la action recibe el array entero",
+   "donde_aparecio": "fase-auto-reporte.tsx:62-74"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "Identificar la org de develOP con un campo que también usan los clientes ('la única con X no nulo')",
+   "como_buscarlo": "git grep -n -E \"organization\\.(findMany|findFirst)\\(\" origin/main -- logic-core-v3/src/lib, buscando where con { not: null } sin slug ni id fijo",
+   "donde_aparecio": "src/lib/leados/agenda.ts:58-59, :86"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "Intl.DateTimeFormat sin timeZone en Server Components (el server corre en UTC)",
+   "como_buscarlo": "git grep -n -A4 \"new Intl.DateTimeFormat\" origin/main -- logic-core-v3/src | grep -L timeZone (revisar a mano los bloques sin timeZone)",
+   "donde_aparecio": "lead-timeline.helpers.ts:72, manual-nav.tsx:81"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "Links crudos a pantallas del manual sin chequear accesibilidad (fuera de EnlacePantalla/EnlaceChequeoFinal)",
+   "como_buscarlo": "git grep -n \"rutaManual(leadId, '\" origin/main -- logic-core-v3/src/app/(protected)/setter",
+   "donde_aparecio": "m15-envio.tsx:127-128, m16-agenda.tsx:220-221, m14-chequeo.tsx:136-137"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "useUnsavedGuard sin avisaEnSalidaInterna en formularios sin autoguardado",
+   "como_buscarlo": "git grep -n \"useUnsavedGuard(\" origin/main -- logic-core-v3/src y cruzar con los que no usan useAutosave",
+   "donde_aparecio": "opener-form.tsx:44, agenda-form.tsx:105"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "patron": "Prefijo 'hace' duplicado al interpolar formatEspera, que ya devuelve 'hace X'",
+   "como_buscarlo": "git grep -n -B1 -A1 \"formatEspera\" origin/main -- logic-core-v3/src y buscar 'hace ${' en los consumidores",
+   "donde_aparecio": "escalamiento-construccion.tsx:39"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Write-path compartido que cambia el status sin mirar el status actual (puede bajar un estado más avanzado: CALL_AGENDADA -> RESPONDIO/POSTERGADO)",
+   "como_buscarlo": "git grep -n \"status: LeadStatus\\.\" origin/main -- logic-core-v3/src/lib logic-core-v3/src/app/(protected)/admin/leads/_actions; revisar cada update de OsLead.status y si chequea el status previo",
+   "donde_aparecio": "src/lib/os-commercial.ts:85-94 y :181-191, alcanzado desde m5 completada ([paso]/page.tsx:71-73)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Dos caminos de alta de la misma entidad con reglas de dedupe distintas",
+   "como_buscarlo": "git grep -n \"osLead.create\\|osLead.createMany\" origin/main -- logic-core-v3/src; comparar el dedupe de cada caller (prospecto.actions, prospecto-bulk.actions, admin lead.actions, convert-chatbot-lead.actions)",
+   "donde_aparecio": "setter/_actions/prospecto.actions.ts:28 sin dedupe vs prospecto-bulk.actions.ts:80-98"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Identificar la configuración propia de develOP como 'la única Organization con X'",
+   "como_buscarlo": "git grep -n -A3 \"organization.findMany\" origin/main -- logic-core-v3/src | grep -n \"not: null\"; y buscar 'length > 1' cerca",
+   "donde_aparecio": "src/lib/leados/agenda.ts:58-84 (getCalConfigLeadOS)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Cron agendado solo en vercel.json en un deploy de Netlify",
+   "como_buscarlo": "comparar los path de vercel.json con [functions.*] de netlify.toml y netlify/functions/",
+   "donde_aparecio": "vercel.json:4 os-follow-up (también regenerate-briefs y send-executive-reports; FAL-016)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Mensajes de Telegram armados sin tope de largo",
+   "como_buscarlo": "git grep -n \"sendTelegram(\" origin/main -- logic-core-v3/src y revisar si el texto se arma con .map sobre colecciones sin take",
+   "donde_aparecio": "src/app/api/cron/os-follow-up/route.ts:120-140, :176"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Fecha de date-picker calculada con toISOString().slice(0,10) (día UTC, no AR)",
+   "como_buscarlo": "git grep -n \"toISOString().slice(0, 10)\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "setter/leads/[leadId]/manual/_components/seguimiento-form.tsx:95"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Copias privadas del borde del día AR con -03:00 hardcodeado",
+   "como_buscarlo": "git grep -n \"T00:00:00.000-03:00\\|T23:59:59.999-03:00\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "api/cron/os-follow-up/route.ts:56-57, lib/leados/outreach.ts:30-31"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Escrituras multi-paso en libs compartidas sin prisma.$transaction (create + update encadenados)",
+   "como_buscarlo": "en src/lib/**, funciones con más de un await prisma.<modelo>.(create|update) y sin $transaction",
+   "donde_aparecio": "src/lib/os-commercial.ts:57-115 y :137-169; setter/_actions/outreach.actions.ts:188-197"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Tabla Notification usada como candado de idempotencia de crons",
+   "como_buscarlo": "git grep -n \"notification.findFirst\" origin/main -- logic-core-v3/src/app/api/cron",
+   "donde_aparecio": "api/cron/os-follow-up/route.ts:168-175 y :276-289"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Página índice que carga todo para solo redirigir",
+   "como_buscarlo": "page.tsx cuyo cuerpo es await loader(...) seguido de redirect(...) sin render",
+   "donde_aparecio": "setter/leads/[leadId]/manual/page.tsx:18-21"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Comentarios de justificación de router.push que nombran pantallas que ya no existen (wizard)",
+   "como_buscarlo": "git grep -n -B3 \"router.push\" origin/main -- \"logic-core-v3/src/app/(protected)/setter\" | grep -i wizard",
+   "donde_aparecio": "setter/nuevo/nuevo-prospecto-form.tsx:95-97"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "patron": "Copy de toast que asume el stage (p. ej. 'se abrió el brief') en un formulario reusado en varias etapas",
+   "como_buscarlo": "revisar los textos de toast de los forms montados en pantallas repetibles (m5 antes y después del envío)",
+   "donde_aparecio": "seguimiento-form.tsx:67"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Configuración de un tenant resuelta por un findMany global ('la única org que tenga el campo cargado') en vez de por la org de la sesión o una org explícita",
+   "como_buscarlo": "git grep -n -A2 \"organization.findMany\\|organization.findFirst\" origin/main -- src/lib src/modules | grep -v organizationId",
+   "donde_aparecio": "src/lib/leados/agenda.ts:58-61"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Clasificación por status que solo archiva PERDIDO y olvida otros terminales (CERRADO) definidos en ESTADOS_TERMINALES",
+   "como_buscarlo": "git grep -n \"status === 'PERDIDO'\" origin/main -- src; comparar contra los usos de ESTADOS_TERMINALES (src/lib/leados/revision.ts:27)",
+   "donde_aparecio": "src/lib/leados/flow.ts:417 frente a src/lib/leados/revision.ts:27"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Blob Json armado a mano (spread + campo nuevo) y escrito sin re-parsear con su contrato zod",
+   "como_buscarlo": "git grep -n -B4 \"as Prisma.InputJsonValue\" origin/main -- src | grep -v \"Schema.parse\"",
+   "donde_aparecio": "src/lib/leados/dossier.ts:185-188 (DESCARTADA); dossier.ts:219 (rechazos, hoy protegido por los topes del admin)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Read-modify-write del blob Json entero con where solo por estado (lost update) y efecto de 'una sola vez' separado de la escritura que lo acompaña",
+   "como_buscarlo": "git grep -n \"path: \\['estado'\\]\" origin/main -- src; revisar si el data reescribe el blob leído antes",
+   "donde_aparecio": "src/lib/leados/agenda.ts:349-356 y :370-380; status aparte en reunion.actions.ts:81"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Rango de fechas con toISOString().slice(0, 10) (día UTC) en código que razona en día argentino",
+   "como_buscarlo": "git grep -n \"toISOString().slice(0, 10)\" origin/main -- src",
+   "donde_aparecio": "src/lib/leados/agenda.ts:113"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Regex de detección de links/dominios con '\\S+\\.(tld)\\b' sin exigir forma de dominio (falsos positivos con '...me', 'palabra.Me')",
+   "como_buscarlo": "git grep -n \"\\\\\\\\S+\\\\\\\\.(\" origin/main -- src",
+   "donde_aparecio": "src/lib/leados/flow.ts:218-219 (aplicado en el server, outreach.schemas.ts:41)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Funciones de lib que reciben leadId y no verifican dueño ni rol (lo delegan al caller): cada caller debe pasar por getOwnedLead o requireSuperAdmin",
+   "como_buscarlo": "git grep -n \"transitionDossier(\\|marcarReunionRealizadaAdmin(\\|guardarResultadoReunionAdmin(\" origin/main -- src/app y verificar el guard previo en cada action",
+   "donde_aparecio": "src/lib/leados/dossier.ts:116; src/lib/leados/agenda.ts:348, :365, :384"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Contenido de guía registrado pero nunca renderizado que conserva reglas de gate desactualizadas",
+   "como_buscarlo": "Para cada export GUIA_* de guidance-content.ts: git grep -w <export> origin/main -- src; y los ids de <TeachPanel>",
+   "donde_aparecio": "src/lib/leados/guidance-content.ts:526-528 (score 4–5 'deja construir sin esperar respuesta')"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "patron": "Configuración faltante o ambigua avisada solo por console.warn/console.error (no llega a Sentry)",
+   "como_buscarlo": "git grep -n \"console.warn(\" origin/main -- src/lib src/app | grep -iv test",
+   "donde_aparecio": "src/lib/leados/agenda.ts:64, :74, :90 (se suma al patrón D1-c1)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "Definición de 'lead activo/terminal' solo por status, sin mirar el stage DESCARTADA del dossier",
+   "como_buscarlo": "git grep -n -E \"ESTADOS_TERMINALES|leadActivo\\(|status: \\{ notIn\" origin/main -- src; comparar con el corte de grupoPara (flow.ts:417)",
+   "donde_aparecio": "src/lib/leados/mis-numeros.ts:94, src/lib/leados/setter-carga.ts:65-67"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "Tres derivaciones paralelas del 'qué toca ahora' (posicionDe del manual, grupoPara/proximaAccionPara del home, admitePantalla del oráculo) que divergen en ramas de borde",
+   "como_buscarlo": "Para cada rama nueva de stage/status, git grep -n \"followUpVencido\\|finalUrl\\|CERRADO\" en src/lib/leados/manual.ts, flow.ts y paso-admitido.ts, y comparar caso por caso",
+   "donde_aparecio": "manual.ts:670-671 vs flow.ts:440-443 vs paso-admitido.ts:95-99; manual.ts:520 vs turno.ts:104-108"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "Contrato 'fire-and-forget' documentado pero awaited en la action (suma latencia de Telegram a la respuesta del setter)",
+   "como_buscarlo": "git grep -n -E \"await notificar[A-Z]\" origin/main -- src/app",
+   "donde_aparecio": "dossier.actions.ts:165 (notificarEvaluacionScoreAlto), agenda.actions.ts:263; contrato en notify.ts:6-7"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "Fechas de calendario parseadas con z.coerce.date() (fecha sola = medianoche UTC = día anterior en AR)",
+   "como_buscarlo": "git grep -n \"z.coerce.date()\" origin/main -- src",
+   "donde_aparecio": "src/app/(protected)/admin/leads/_actions/lead.schemas.ts:32-40 (reactivateAt); dates-ar.ts:86-90 documenta el bug"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "Reimplementaciones privadas del día argentino en lugar de dates-ar/tz-ar",
+   "como_buscarlo": "git grep -n \"America/Argentina/Buenos_Aires'\" origin/main -- src",
+   "donde_aparecio": "src/lib/leados/outreach.ts:15-33, src/app/api/cron/os-follow-up/route.ts:7"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "findMany de listas sin take con include de relaciones JSON completas",
+   "como_buscarlo": "git grep -n -A4 \"findMany({\" origin/main -- src/lib | grep -B2 \"dossier: true\"",
+   "donde_aparecio": "src/lib/leados/ownership.ts:53-64"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "Libs que importan @/lib/prisma sin import 'server-only' (foco-cookie.ts sí lo tiene)",
+   "como_buscarlo": "git grep -l \"@/lib/prisma\" origin/main -- src/lib/leados y restarle git grep -l \"^import 'server-only'\"",
+   "donde_aparecio": "notify.ts, novedades.ts, outreach.ts, ownership.ts, progreso.ts, setter-carga.ts, setter-meta.ts, timeline.ts"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "Fixtures de test con 'as unknown as' dentro de src/ de producción",
+   "como_buscarlo": "git grep -n \"as unknown as\" origin/main -- src/lib",
+   "donde_aparecio": "src/lib/leados/paso-admitido.ts:192, :214"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "patron": "Relaciones onDelete: SetNull en tablas de avisos que nadie purga",
+   "como_buscarlo": "git grep -n \"onDelete: SetNull\" origin/main -- prisma/schema.prisma y buscar purga del modelo en src",
+   "donde_aparecio": "prisma/schema.prisma:950 (OsSetterNotice.lead)"
   }
  ]
 }

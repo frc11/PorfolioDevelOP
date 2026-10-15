@@ -5,60 +5,6 @@
   {
    "ciclo": "D7-c1",
    "lote": "D7-L1",
-   "herramienta": "h2.cli-resultados",
-   "id": "h2.cli-resultados.velocidad-sitio",
-   "nombre": "Velocidad del sitio (PageSpeed)",
-   "descripcion": "Score y Core Web Vitals del sitio del cliente.",
-   "archivos": [
-    "src/lib/integrations/pagespeed.ts"
-   ],
-   "entradas": [
-    "/dashboard/resultados/trafico"
-   ],
-   "madurez": "L2",
-   "madurez_evidencia": "trafico/page.tsx:125 -> pagespeed.ts:26-35 (caché 6 h) -> :37-74 -> :76-149.",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "si",
-     "evidencia": "URL del sitio de la org (fuera del lote)"
-    },
-    "vacios": {
-     "cumple": "parcial",
-     "evidencia": "null sin distinguir falta de key, URL inválida o error"
-    },
-    "errores": {
-     "cumple": "no",
-     "evidencia": "null cacheado 6 h (:63-65); fecha cruda en el acierto (PageSpeedCard.tsx:60)"
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "página fuera del lote"
-    },
-    "validacion_servidor": {
-     "cumple": "parcial",
-     "evidencia": "url.startsWith('http') (:47)"
-    },
-    "mobile": {
-     "cumple": "n/a",
-     "evidencia": "página fuera del lote"
-    },
-    "sentry": {
-     "cumple": "no",
-     "evidencia": "console.error (:64, :71)"
-    },
-    "sin_mocks_todos": {
-     "cumple": "si",
-     "evidencia": "sin mock"
-    },
-    "autonomia": {
-     "cumple": "si",
-     "evidencia": "lectura automática"
-    }
-   }
-  },
-  {
-   "ciclo": "D7-c1",
-   "lote": "D7-L1",
    "herramienta": "h2.cli-reportes-email",
    "id": "h2.cli-reportes-email.envio-automatico-semanal",
    "nombre": "Envío automático del reporte ejecutivo semanal",
@@ -658,6 +604,4794 @@
     "autonomia": {
      "cumple": "si",
      "evidencia": "rotable desde /admin/settings sin redeploy"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.cola-del-dia",
+   "nombre": "Cola del día, foco y espera",
+   "descripcion": "Home del setter: cola accionable con foco sticky, estado 'todo en espera' por turno, cartera y números propios",
+   "archivos": [
+    "src/app/(protected)/setter/page.tsx",
+    "src/app/(protected)/setter/layout.tsx",
+    "src/app/(protected)/setter/loading.tsx",
+    "src/app/(protected)/setter/error.tsx"
+   ],
+   "entradas": [
+    "SetterHomePage",
+    "SetterLayout"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: page.tsx:29-30 requireSetter+listOwnedLeads -> :44-47 partición/foco/cola -> :115-125 render. No L3: Sentry solo en render; CERRADO no se archiva (hallazgo).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "page.tsx:30 listOwnedLeads(userId) con assignedToId de sesión (isolation.ts:34-35)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "page.tsx:115-125 HomeEmpty sin leads y HomeEnEspera sin cola"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "setter/error.tsx:38-49 EmptyState con Reintentar, sin detalle técnico"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setter/loading.tsx:11-31 skeleton (silueta algo desfasada de P21)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura sin input"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "layout.tsx:73 nombre oculto en mobile; el drawer vive en SetterShell (fuera del lote)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "setter/error.tsx:32-35 captureException con tag setter"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin datos de mentira en page.tsx"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "leads ganados (CERRADO) siguen en la cola (flow.ts:417) y confunden al setter"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.cartera-palancas",
+   "nombre": "Fijar, pausar, reanudar y nota propia",
+   "descripcion": "Organización privada de la cartera del setter sin tocar el status comercial",
+   "archivos": [
+    "src/app/(protected)/setter/_actions/cartera.actions.ts",
+    "src/app/(protected)/setter/_actions/cartera.schemas.ts",
+    "src/app/(protected)/setter/_actions/foco.actions.ts"
+   ],
+   "entradas": [
+    "fijarLead",
+    "pausarLead",
+    "reanudarLead",
+    "guardarNota",
+    "anclarFoco",
+    "soltarFoco"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "cartera.actions.ts:40-51 ownership -> :65/:101/:117/:140 upsertSetterMeta(leadId,userId); foco.actions.ts:41-45. UI fuera del lote.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "cartera.actions.ts:48 getOwnedLead; meta keyed por (leadId, userId)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acciones"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "cartera.actions.ts:27-33 mapError con copy propio"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "PinSchema/SnoozeSchema/NotaSchema + finDePausaAR (cartera.schemas.ts:12-53)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "mapError sin captureException (cartera.actions.ts:27-33)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "el setter lo resuelve solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.set-nuevo",
+   "id": "h5.set-nuevo.alta-prospecto",
+   "nombre": "Alta manual de prospecto propio",
+   "descripcion": "El setter carga un negocio que encontró; entra frío, en FICHA, a su nombre",
+   "archivos": [
+    "src/app/(protected)/setter/_actions/prospecto.actions.ts",
+    "src/app/(protected)/setter/_actions/prospecto.schemas.ts"
+   ],
+   "entradas": [
+    "cargarProspecto"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "prospecto.actions.ts:25-39 requireSetter -> zod -> create(ownedLeadCreateData) -> revalidate",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "prospecto.actions.ts:29 dueño de sesión; isolation.ts:96 caliente false"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "prospecto.actions.ts:41 toErrorMessage expone error.message de Prisma"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "form fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "NuevoProspectoSchema; opcionales sin .max (prospecto.schemas.ts:20)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "form fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "self-service"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.ficha-y-evaluacion",
+   "nombre": "Ficha de observación y veredicto",
+   "descripcion": "Guardar ficha, registrar score/veredicto y descarte automático 1-2",
+   "archivos": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts",
+    "src/app/(protected)/setter/_actions/dossier.schemas.ts"
+   ],
+   "entradas": [
+    "guardarFicha",
+    "registrarEvaluacion"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dossier.actions.ts:100 saveOwnedFicha -> :139-156 transiciones EVALUADA/DESCARTADA",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "dossier.actions.ts:130-133 getOwnedLead/getOwnedDossier"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formularios fuera del lote"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "mapError con copyOperativo (:71-80); faltantes de ficha explícitos (:140-142)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setter/leads/[leadId]/loading.tsx existe (git ls-tree)"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "EvaluacionInputSchema sin .max en razonamiento (dossier.schemas.ts:29)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "render sí (leads/[leadId]/error.tsx); actions no"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "rail con evaluador sin URL (herramientas.ts:63 TODO)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "fallo entre las dos transiciones deja el lead sin poder descartarse (dossier.actions.ts:135-157)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.brief-construccion-revision",
+   "nombre": "Brief, construcción, borrador, chequeo final y envío a revisión",
+   "descripcion": "Del brief a EN_REVISION con gate de draft y self-check, más escalamiento 'me trabé'",
+   "archivos": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts",
+    "src/app/(protected)/setter/_actions/dossier.schemas.ts"
+   ],
+   "entradas": [
+    "guardarBrief",
+    "iniciarConstruccion",
+    "reabrirConstruccion",
+    "guardarProgreso",
+    "guardarDraftUrl",
+    "guardarSelfCheck",
+    "enviarARevision",
+    "escalarConstruccion"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dossier.actions.ts:205-210 -> :238 -> :326 -> :355-356 -> :382-398; escalamiento :433-443",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "saveOwned*/getOwnedDossier/marcarEscaladoOwned en todas"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "gates con mensaje accionable (:384-396)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx en leads/[leadId] y manual"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "zod en todas; brief y selfcheck sin topes (dossier.schemas.ts:82-89, :144-145)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "render sí; actions sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "herramientas gemDiseno/claudeDesign con url null y TODO (herramientas.ts:78, :90)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "depende de herramientas externas sin link y de que Franco publique la URL permanente"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.outreach-y-envio-demo",
+   "nombre": "Opener, toques de seguimiento y envío de la demo aprobada",
+   "descripcion": "Registro del primer DM, resultados de cada toque y envío del link con claim idempotente",
+   "archivos": [
+    "src/app/(protected)/setter/_actions/outreach.actions.ts",
+    "src/app/(protected)/setter/_actions/outreach.schemas.ts"
+   ],
+   "entradas": [
+    "registrarOpener",
+    "registrarResultado",
+    "enviarDemoAprobada"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "outreach.actions.ts:103-135, :164-203, :226-264",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getOwnedLead/getOwnedDossier/listOwnedLeadActivities"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "mensajes de guardas (:105-123, :169-178, :239-241)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx de manual"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "OpenerInputSchema sin links, ResultadoInputSchema con fecha AR"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "actions sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "gemOutreach url null TODO (herramientas.ts:117)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "sin cierre al tercer toque (A-08): PERDIDO lo decide Franco"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.agenda-reunion",
+   "nombre": "Ofrecer horarios y agendar la reunión (Cal.com)",
+   "descripcion": "m16: slots reales de la agenda de Franco, booking con notas de traspaso y compensación",
+   "archivos": [
+    "src/app/(protected)/setter/_actions/agenda.actions.ts",
+    "src/app/(protected)/setter/_actions/agenda.schemas.ts"
+   ],
+   "entradas": [
+    "ofrecerHorarios",
+    "confirmarReunion"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Código completo (agenda.actions.ts:125-271) pero inoperante: ninguna org tiene Cal.com y no hay camino de escritura de la config (agenda.ts:63-69, git grep sin writes); nunca se ejecutó (PLAN-931)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "no",
+     "evidencia": "la agenda se resuelve por cualquier org con calComUsername (agenda.ts:59), incluida una de cliente"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "agenda.actions.ts:146-148 sin slots con mensaje"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "mapError (:68-77); compensación afirma cancelación aunque falle (:253-259)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ConfirmarReunionSchema (agenda.schemas.ts:9-35)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error solo (:258)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs en el lote"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "sin Cal.com configurado el setter no puede agendar; tras RE_SEGUIMIENTO no puede re-agendar (:108)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.adm-revision-demos",
+   "id": "h5.adm-revision-demos.cola-y-veredicto",
+   "nombre": "Cola de revisión y veredicto aprobar/rechazar",
+   "descripcion": "Franco revisa la demo embebida con evaluación, brief, self-check, rechazos y ficha; aprueba con URL permanente o rechaza con dirección",
+   "archivos": [
+    "src/app/(protected)/admin/leados/page.tsx",
+    "src/app/(protected)/admin/leados/[leadId]/page.tsx",
+    "src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx",
+    "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
+    "src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx",
+    "src/app/(protected)/admin/leados/_actions/revision.actions.ts",
+    "src/app/(protected)/admin/leados/_actions/revision.schemas.ts"
+   ],
+   "entradas": [
+    "LeadOsRevisionPage",
+    "LeadOsRevisionDetailPage",
+    "aprobarRevision",
+    "rechazarRevision"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:34-49 -> [leadId]/page.tsx:53 -> decision-bar.tsx:129-141 -> revision.actions.ts:78-87 -> decision-bar.tsx:120-123",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "actions con requireSuperAdmin (:71, :98); páginas sin guard propio"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "page.tsx:201-205; dossier-panels.tsx:64-66, :96-97, :270-273"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "admin/leados/error.tsx; decision-bar.tsx:235-238 serverError"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/leados/loading.tsx y [leadId]/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "AprobarRevisionSchema/RechazarRevisionSchema"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "[leadId]/page.tsx:213 grid xl; iframe h-[60vh]; overlay p-4 max-h-[90vh] (decision-bar.tsx:65-66)"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "render vía AdminErrorBoundary -> SectionErrorBoundary.tsx:64; actions no"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "no muestra materiales de la ficha (dossier-panels.tsx:236-243)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.adm-revision-demos",
+   "id": "h5.adm-revision-demos.pipeline-produccion",
+   "nombre": "Panorama de producción, atascos y escaladas",
+   "descripcion": "Conteo por etapa con antigüedad, atascos por SLA y setters trabados",
+   "archivos": [
+    "src/app/(protected)/admin/leados/page.tsx",
+    "src/app/(protected)/admin/leados/_components/pipeline-board.tsx"
+   ],
+   "entradas": [
+    "LeadOsRevisionPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:64-103 -> pipeline-board.tsx:42-131",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "página sin guard propio (heredado)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "pipeline-board.tsx:218-225, :294-300, :140"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "admin/leados/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "admin/leados/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "lectura"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "pipeline-board.tsx:228 flex-wrap, :255 min-w-[140px]"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary admin con captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "read-only"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.adm-revision-demos",
+   "id": "h5.adm-revision-demos.metrica-descarte",
+   "nombre": "Métrica descarte/avance por setter y drill-down",
+   "descripcion": "Ratio de descartes total y 30 días con alarma 'nunca descarta' y lista de evaluaciones",
+   "archivos": [
+    "src/app/(protected)/admin/leados/page.tsx",
+    "src/app/(protected)/admin/leados/setter/[setterId]/page.tsx",
+    "src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx"
+   ],
+   "entradas": [
+    "LeadOsRevisionPage",
+    "LeadOsSetterEvaluacionesPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:52-60, :122-134 -> setter/[setterId]/page.tsx:36-95 -> setter-evaluaciones.tsx:36-99",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "sin guard propio; atribución por dueño actual, no por evaluador"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "page.tsx:265-268; setter-evaluaciones.tsx:37-43"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "admin/leados/error.tsx; redirect si setter inexistente (:55-57)"
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "loading.tsx de /admin/leados; setter/[setterId] sin loading propio"
+    },
+    "validacion_servidor": {
+     "cumple": "no",
+     "evidencia": "setterId sin validar (:30)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap y grid sm:grid-cols-2"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "boundary admin"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "métrica errónea tras reasignaciones"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h5.adm-fg2lab",
+   "id": "h5.adm-fg2lab.prompt-estructurado",
+   "nombre": "Lab FG-2 de prompt estructurado (gastronomía)",
+   "descripcion": "Prototipo descartable: formulario que arma un prompt para Claude Design y harness de medición",
+   "archivos": [
+    "src/app/(protected)/admin/fg2-lab/page.tsx",
+    "src/app/(protected)/admin/fg2-lab/_components/fg2-lab-client.tsx",
+    "src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx"
+   ],
+   "entradas": [
+    "Fg2LabPage"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Declarado 'EXPERIMENTAL / DESCARTABLE' (page.tsx:2-8); experimento no corrido (docs/experimentos/fg2-brief-experimento.md:3-4)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "heredado del layout admin"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "fg2-lab-client.tsx:143-145 sin leads con ficha"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "copiar con toast de error (:49-56)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "sin loading propio"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "no escribe"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid lg:grid-cols-2, sm:grid-cols-3"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "boundary admin"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "casos precargados con arquetipos no reales (PLAN-662)"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna de experimento"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.asignacion-setter",
+   "nombre": "Asignar lead a setter y marcar caliente",
+   "descripcion": "Curaduría del admin que define la cartera de cada setter, con rastro y novedades",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+    "src/app/(protected)/admin/leads/_actions/lead.schemas.ts"
+   ],
+   "entradas": [
+    "assignLeadSetter"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "lead.actions.ts:137-224 (rol destino, update, rastro, novedades, revalidate)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :132; destino SETTER :151-157"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": ":226 error.message crudo"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "AssignLeadSetterSchema"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Franco lo hace solo"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.crud-y-estado",
+   "nombre": "Alta, edición, cambio de estado y borrado de leads outbound",
+   "descripcion": "CRUD de OsLead y kanban de estados",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+    "src/app/(protected)/admin/leads/_actions/lead.schemas.ts"
+   ],
+   "entradas": [
+    "createLead",
+    "updateLead",
+    "updateLeadStatus",
+    "deleteLead",
+    "listLeads",
+    "getLeadById"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "lead.actions.ts:52-121, :230-247; UI trazada en [D3] Kanban outbound y Alta y edición de lead outbound",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin en todas"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "error.message crudo y en inglés (:68, :91, :118, :245)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "zod sin topes de longitud (lead.schemas.ts:44-55); status sin transición legal"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "borrado destructivo sin auditoría ni aviso al setter"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.actividad-y-demos",
+   "nombre": "Actividad comercial y demos desde el admin",
+   "descripcion": "Registrar contacto, crear demo y marcarla vista",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_actions/activity.actions.ts",
+    "src/app/(protected)/admin/leads/_actions/demo.actions.ts"
+   ],
+   "entradas": [
+    "createActivity",
+    "createDemo",
+    "markDemoViewed"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "activity.actions.ts:13-29 -> os-commercial; demo.actions.ts:15-25, :35-62",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "error.message crudo"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "notes sin .max"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "self-service"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.cierre-reunion",
+   "nombre": "Cierre de loop post-reunión",
+   "descripcion": "Marcar reunión realizada y resultado GANADO/PERDIDO/RE_SEGUIMIENTO",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_actions/reunion.actions.ts",
+    "src/app/(protected)/admin/leads/_actions/reunion.schemas.ts"
+   ],
+   "entradas": [
+    "marcarReunionRealizada",
+    "registrarResultadoReunion"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "Requiere una agenda AGENDADA que solo crea confirmarReunion, inoperante sin Cal.com; RE_SEGUIMIENTO deja estado sin salida",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin :47, :68"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": ":51-53, :76-78 mensajes sin reunión"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "error.message crudo en catch"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3 (reunion-panel)"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "zod con nota max 1000"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "CERRADO no se archiva en el setter; RE_SEGUIMIENTO bloquea re-agendar"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.inbound-a-oslead",
+   "nombre": "Inbound por período y conversión a OsLead",
+   "descripcion": "Listado de ContactSubmission y conversión idempotente por email",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_actions/inbound.actions.ts",
+    "src/app/(protected)/admin/leads/_actions/inbound.schemas.ts"
+   ],
+   "entradas": [
+    "listInboundLeads",
+    "convertInboundToLead"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "inbound.actions.ts:55-113, :123-174; UI en [D3] Inbound",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin; datos globales"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "error.message crudo (:115, :176)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "InboundRangeSchema/ConvertInboundToLeadSchema"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "rango custom en UTC (:29-30)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.demanda-modulos",
+   "nombre": "Demanda medida de módulos premium",
+   "descripcion": "Ranking cross-org de pedidos de upsell",
+   "archivos": [
+    "src/app/(protected)/admin/leads/_actions/module-demand.actions.ts"
+   ],
+   "entradas": [
+    "listModuleDemand"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "module-demand.actions.ts:25-50; UI en [D3] Demanda de módulos",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin; cross-org deliberado"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": ":52 error.message crudo"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI en D3"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "sin captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODOs"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "read-only"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.foco-ahora",
+   "nombre": "Tu foco ahora (Ir a trabajarlo, Pausar, Saltar, Soltar y atajos)",
+   "descripcion": "Tarjeta protagonista con el lead a trabajar, su próxima acción y su porqué; ancla el sticky, pausa, salta al próximo o suelta el anclaje.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/foco-surface.tsx",
+    "src/app/(protected)/setter/_components/shortcuts-help.tsx",
+    "src/app/(protected)/setter/_components/use-keyboard-shortcuts.ts"
+   ],
+   "entradas": [
+    "foco.actions.ts#anclarFoco (fuera del lote)",
+    "foco.actions.ts#soltarFoco (fuera del lote)",
+    "cartera.actions.ts#pausarLead (fuera del lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz en el lote: foco-surface.tsx:231 -> :85 anclarFoco -> :90 router.push; Saltar :258 -> :97 -> :107-109; Soltar :272 -> :129 -> :137-139; Pausar :291 -> :115 -> :120-123. Le faltan para L3 la fecha en hora AR y las acciones fuera del lote verificadas.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Guard de rol SETTER en setter/layout.tsx:32 (contexto fijo). El leadId sale del cliente (foco-surface.tsx:85,97,115) y la propiedad del lead la tiene que validar la action, fuera del lote y no verificada."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin ítems la cola no se monta (cola-del-dia.tsx:91) y la page muestra HomeEnEspera o HomeEmpty; Saltar se deshabilita sin próximo (foco-surface.tsx:259-260)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast.error(result.error) en las cuatro acciones (foco-surface.tsx:87,99,117,131); la calidad del mensaje depende de la action."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "disabled={isPending} en todos los controles (foco-surface.tsx:232,242,259,273,292,310); existe src/app/(protected)/setter/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Solo min de fecha en cliente (foco-surface.tsx:303); la validación de 'hasta' y del leadId está en cartera.actions/foco.actions, fuera del lote."
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "CTAs con flex-wrap (foco-surface.tsx:227) y padding responsive (:164); la pastilla de atajos queda fija abajo a la derecha en touch (shortcuts-help.tsx:32)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "setter/error.tsx llama a captureException (git); los fallos devueltos como {success:false} solo van a un toast."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO, FIXME ni datos fijos en los tres archivos."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Funciona sin ayuda, salvo las pausas entre 21 y 24 h, que quedan un día más largas (foco-surface.tsx:68-71)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.cola-de-hoy",
+   "nombre": "Tu cola de hoy",
+   "descripcion": "Lista del día con el foco como primer ítem, filas compactas con «Trabajar» y el pie de cuántos quedan en la cartera.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/cola-del-dia.tsx",
+    "src/app/(protected)/setter/_components/trabajar-lead-button.tsx"
+   ],
+   "entradas": [
+    "foco.actions.ts#anclarFoco (fuera del lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "cola-del-dia.tsx:109 FocoSurface + :113-115 FilaCola -> :83 TrabajarLeadButton -> trabajar-lead-button.tsx:26 anclarFoco -> :31 router.push.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Los ítems los arma la page con la cola del setter (fuera del lote); el leadId de trabajar-lead-button.tsx:26 lo valida la action, no verificada."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "return null sin ítems (cola-del-dia.tsx:91); el pie nombra los ocultos (:122-127)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast.error(result.error) en trabajar-lead-button.tsx:28."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "disabled={isPending} (trabajar-lead-button.tsx:39)."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "No hay entrada libre en el lote; solo leadId hacia anclarFoco."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap y min-w-0 en la fila (cola-del-dia.tsx:48-49), nombre con truncate (:51)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "error.tsx del setter con captureException; los fallos de la action solo van a toast."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO ni datos fijos."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El setter llega a cada lead desde la fila (cola-del-dia.tsx:83)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.cartera-agrupada",
+   "nombre": "Cartera completa agrupada con búsqueda, filtro y orden",
+   "descripcion": "Plegable con todos los leads del setter agrupados por vista; buscar la vuelve plana; cada tarjeta lleva al detalle.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/cartera-view.tsx",
+    "src/app/(protected)/setter/_components/cartera-toolbar.tsx",
+    "src/app/(protected)/setter/_components/home-sections.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "cartera-view.tsx:81 -> :106 toolbar -> :58 filtrarYOrdenarCartera -> :64 agruparCartera -> :131 GrupoPlegable -> :208 ListaTarjetas -> home-sections.tsx:68 Link al detalle.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "La lista llega como prop desde la page (page.tsx:129, fuera del lote); el lote no consulta datos."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Vacío por filtro con salida (cartera-view.tsx:118-123); cartera vacía total en HomeEmpty (home-empty.tsx:14-20)."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Filtro y orden en memoria del cliente; no hay llamadas."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Datos ya cargados por el server; setter/loading.tsx cubre la carga de la page."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin escritura."
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Toolbar flex-col sm:flex-row (cartera-toolbar.tsx:58) y grilla sm:grid-cols-2 (cartera-view.tsx:157); la fila de dos selects con min-w 9,5rem + 10rem sin wrap (cartera-toolbar.tsx:75-89) desborda a 320 px."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones que fallen fuera del render (error.tsx del setter cubre el render)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Rótulos de VISTAS_CARTERA (cartera-toolbar.tsx:27-30); sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Busca, filtra y entra al lead sin ayuda."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.palancas-de-card",
+   "nombre": "Palancas privadas de la card: fijar, pausar, nota y reanudar",
+   "descripcion": "Organización propia del setter sobre cada lead de la cartera, con editores inline.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/lead-card-actions.tsx"
+   ],
+   "entradas": [
+    "cartera.actions.ts#fijarLead (fuera del lote)",
+    "cartera.actions.ts#pausarLead (fuera del lote)",
+    "cartera.actions.ts#reanudarLead (fuera del lote)",
+    "cartera.actions.ts#guardarNota (fuera del lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "lead-card-actions.tsx:147 -> :80 fijarLead -> :85-86; :190 -> :92 pausarLead -> :97-100; :235 -> :119 guardarNota -> :124-126; :170 -> :106 reanudarLead.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "leadId del cliente hacia las actions (lead-card-actions.tsx:80,92,106,119); la privacidad por setter (OsLeadSetterMeta) está fuera del lote y requiere el caso manual con dos setters."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Controles sobre un lead existente."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast.error(result.error) en las cuatro acciones (:82,94,108,121)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "disabled={isPending} y Button loading (:148,156,164,171,235)."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Cliente: maxLength={NOTA_MAX} y contador (:223-231), NOTA_MAX importado de cartera.schemas.ts (:16); la validación server está fuera del lote."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Editores inline dentro de la card (:180-249), fecha con flex gap-2 (:199)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Fallos devueltos solo a toast."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Pausas desplazadas un día entre 21 y 24 h (lead-card-actions.tsx:34-37)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.novedades",
+   "nombre": "Novedades y demos esperando a Franco",
+   "descripcion": "Avisos dirigidos sin leer, agrupados, con «Abrir» que ancla el foco si la orden sigue vigente, y resumen de la cola de revisión.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/novedades-panel.tsx",
+    "src/app/(protected)/setter/_components/novedades-abrir-foco.tsx",
+    "src/app/(protected)/setter/_components/novedades-marcar-visto.tsx"
+   ],
+   "entradas": [
+    "foco.actions.ts#anclarFoco (fuera del lote)",
+    "novedades.actions.ts#marcarNovedadesVistasAction (fuera del lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "novedades-panel.tsx:160-162 AvisoItem -> :122 AbrirFocoButton -> novedades-abrir-foco.tsx:41 -> :47; novedades-panel.tsx:155 -> novedades-marcar-visto.tsx:21 -> :27.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Datos de getNovedadesSetter y la action de marcar, ambas fuera del lote."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin filas ni revisión no renderiza (novedades-panel.tsx:134); los ocultos se nombran (:166-171)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "toast.error en novedades-marcar-visto.tsx:23 y novedades-abrir-foco.tsx:43."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "disabled={isPending} (novedades-marcar-visto.tsx:35, novedades-abrir-foco.tsx:55)."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin entrada libre."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap en el encabezado (:141); el subtítulo se oculta en mobile (:149)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Fallos devueltos solo a toast."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Abre el lead del aviso y limpia los avisos sin ayuda."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.panel-en-espera-y-vacio",
+   "nombre": "Estados «todo en espera» y «cartera vacía»",
+   "descripcion": "Pantallas para cuando no hay nada accionable (con conteos por turno, fijados y pausados) o cuando el setter no tiene leads.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/home-en-espera.tsx",
+    "src/app/(protected)/setter/_components/home-empty.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "La page monta HomeEmpty (page.tsx:116) y HomeEnEspera (page.tsx:120, git); home-en-espera.tsx:45-115 arma el texto por turno y los chips; home-empty.tsx:14-27 ofrece cargar o importar.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Presentación de conteos ya calculados por la page."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Son los estados vacíos, con salida (home-en-espera.tsx:107-112; home-empty.tsx:19,21-27)."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin escritura."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Columna centrada con flex-wrap en los chips (home-en-espera.tsx:53,73)."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Textos de TEXTO_TURNO; sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Indica a quién le toca y ofrece adelantar trabajo."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.mis-numeros-y-semana",
+   "nombre": "Tu semana y Mis números",
+   "descripcion": "Señal sobria de avance de 7 días y criterio descarte vs avance, sin rankings.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/progreso-semana.tsx",
+    "src/app/(protected)/setter/_components/mis-numeros.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "page.tsx:141 y :144 (git) montan MisNumeros y ProgresoSemana; progreso-semana.tsx:17-40 filtra métricas con valor; mis-numeros.tsx:25-88 pinta el criterio.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Los datos los calculan progreso.ts y mis-numeros.ts (fuera del lote)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Se ocultan en cero (progreso-semana.tsx:15; mis-numeros.tsx:25)."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin escritura."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap (progreso-semana.tsx:47); grilla de una columna (mis-numeros.tsx:35)."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Solo lectura."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.rail-navegacion",
+   "nombre": "Shell y rail de navegación del setter",
+   "descripcion": "Grilla rail + contenido con drawer mobile, destino «Tu día» y acción «Cargar prospecto».",
+   "archivos": [
+    "src/app/(protected)/setter/_components/setter-shell.tsx",
+    "src/app/(protected)/setter/_components/setter-nav.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "setter-shell.tsx:70 -> setter-nav.tsx:97 -> :49 triggerTransition -> TransitionContext.tsx:116-118 router.push.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Heredado: el guard SETTER vive en setter/layout.tsx:32 (contexto fijo); el shell no lee datos."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Navegación fija."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "La cortina global cubre 300 ms (TransitionContext.tsx:111-120); no hay indicador propio."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin escritura."
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Drawer y botón de menú bajo lg (setter-shell.tsx:31-56), pero el drawer cerrado sigue focusable y sin Escape."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Solo rutas reales (setter-nav.tsx:36-38)."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Dos destinos claros."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.herramientas-externas",
+   "nombre": "Herramientas externas (rail «Tus herramientas» y lanzadores por paso)",
+   "descripcion": "Accesos a Gems, Claude Design y Netlify Drop en el rail y en cada paso, con explicación plegable.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/tools-rail.tsx",
+    "src/app/(protected)/setter/_components/tool-guide.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L1",
+   "madurez_evidencia": "4 de 5 herramientas con url null y TODO (herramientas.ts:63,78,90,117): el rail las pinta como «pendiente» sin destino (tools-rail.tsx:29-44). Solo Netlify Drop abre (herramientas.ts:105 -> tools-rail.tsx:50-55).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Links estáticos."
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "ToolGuide muestra la salida «pedíselo a Franco» (tool-guide.tsx:61-67,95); el rail no (tools-rail.tsx:41-43)."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin escritura."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap en ToolGuide (tool-guide.tsx:88); el rail cierra el drawer al abrir (tools-rail.tsx:54)."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones."
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "TODO en herramientas.ts:63,78,90,117 y fila inerte 'evaluador' (:123)."
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "Sin links el setter depende de Franco (tool-guide.tsx:65)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.ayudas-de-paso",
+   "nombre": "Ayudas de paso: TeachPanel, ejemplos ideales, bloques copiables, guardrail de rol y cartel del canal",
+   "descripcion": "Piezas de enseñanza y munición que comparten las pantallas del manual.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/teach-panel.tsx",
+    "src/app/(protected)/setter/_components/ejemplo-ideal.tsx",
+    "src/app/(protected)/setter/_components/copy-block.tsx",
+    "src/app/(protected)/setter/_components/guardrail-rol.tsx",
+    "src/app/(protected)/setter/_components/canal-seguridad.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L2",
+   "madurez_evidencia": "copy-block.tsx:64 -> :37 -> :50; teach-panel.tsx:100-148 desde GUIA_PASOS; ejemplo-ideal.tsx:79-131; guardrail-rol.tsx:35-39 monta CopyBlock; canal-seguridad.tsx:11-56 lee CANAL_INSTAGRAM (flow-content.ts:317).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Presentación de contenido estático."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "TeachPanel no renderiza sin contenido (teach-panel.tsx:102-104)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "CopyBlock anuncia «Copiado» aunque el copiado falle (copy-block.tsx:47-50)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones asíncronas salvo el portapapeles."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin escritura."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap (copy-block.tsx:56; canal-seguridad.tsx:31); pre con break-words y scroll (copy-block.tsx:89)."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin operaciones de servidor."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Contenido de guidance-content/flow; sin TODO en el lote."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Enseña el porqué y deja copiar los guiones."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.ficha-por-bloques",
+   "nombre": "Ficha por bloques con avance por completitud y nudges de calidad",
+   "descripcion": "Acordeón de una sección abierta que avanza al salir del bloque; nudge de calidad al salir de un campo flojo; indicador de autoguardado.",
+   "archivos": [
+    "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+    "src/app/(protected)/setter/_components/campo-mejora.tsx",
+    "src/app/(protected)/setter/_components/autosave-status.tsx"
+   ],
+   "entradas": [],
+   "madurez": "L?",
+   "madurez_evidencia": "El lote tiene solo la mecánica (bloques-secuenciales.tsx:136-146, :179, :215-223; autosave-status.tsx:26-53); el guardado y la regla de avance viven en ficha-form.tsx:412 y ficha-bloques.ts (otro lote), así que el camino feliz no se cierra dentro del lote.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Presentación."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "El padre arma los bloques."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "AutosaveStatus pinta el error con mensaje accionable (autosave-status.tsx:35-41,64) y role=status (:73)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "«Guardando…» con Spinner (autosave-status.tsx:32-34)."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Fuera del lote."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Título y estado en dos renglones en todos los anchos (bloques-secuenciales.tsx:167-180)."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Fuera del lote."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Todas las cabeceras abren con un clic (bloques-secuenciales.tsx:34-37,179), pero el avance puede dispararse al cambiar de ventana (:138-145)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.ficha-y-veredicto",
+   "nombre": "Ficha por fuentes y veredicto (m1)",
+   "descripcion": "El setter observa el negocio por fuente (acordeón con autoguardado) y cierra el paso con score, veredicto y razonamiento. Con score 1-2 se descarta.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m1-ficha.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx"
+   ],
+   "entradas": [
+    "sale a dossier.actions.ts guardarFicha / registrarEvaluacion (otro lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: m1-ficha.tsx:224-229 -> ficha-form.tsx:193-197 autoguarda con guardarFicha (FichaSchema.safeParse en dossier.actions.ts:97) -> evaluacion-form.tsx:142-160 -> :125 registrarEvaluacion. No llega a L3 por dos cosas: un texto de más de 5000 caracteres rompe la pantalla (ficha-form.tsx:148,200) y plegar el bloque de cierre pierde el veredicto (bloques-secuenciales.tsx:215).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Lo hereda de las actions: el patrón requireSetter + getOwnedDossier está en dossier.actions.ts:191,201. LeadOS no tiene organizationId (tenant único develOP); la propiedad del lead se resuelve por setter."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "m1-ficha.tsx:47-53 (el alta no trajo links), ficha-step.tsx:45-47 (ficha congelada vacía), ficha-form.tsx:360-365 (bloque opcional)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "serverError con role=alert en ficha-form.tsx:439-443 y evaluacion-form.tsx:261-265. Un texto de más de 5000 caracteres lleva al error boundary sin decir por qué."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx:9-28; Button con loading en ficha-form.tsx:448; barra con loading en evaluacion-form.tsx:172; AutosaveStatus en ficha-form.tsx:453."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "FichaSchema.safeParse en dossier.actions.ts:97. El gate de señal mínima del veredicto se declara server-side (evaluacion-form.tsx:74-77) pero no lo leí."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Botones del score h-11 w-11 (evaluacion-form.tsx:201), filas con flex-wrap y acción en la barra sticky."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Boundary con captureException en error.tsx:35-38 (manual/error.tsx es de otro lote). Los rebotes de las actions solo muestran un toast."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay marcadores TODO/FIXME en el lote (git grep). FichaEjemplo es un ejemplo explícito, no un dato falso."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "El veredicto se pierde al plegar el bloque (evaluacion-form.tsx:85-87 estado local) y el campo de reseñas no muestra su tope."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.opener",
+   "nombre": "Mandar el opener (m4)",
+   "descripcion": "Arma el opener con el Gem de outreach, lo copia, lo manda a mano por Instagram y lo registra. Un link en el texto lo bloquea.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m4-opener.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/opener-form.tsx"
+   ],
+   "entradas": [
+    "sale a outreach.actions.ts registrarOpener"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m4-opener.tsx:101 -> opener-form.tsx:72-79 (barra) -> :46-66 registrarOpener -> router.refresh en :65.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Lo hereda de registrarOpener: ownership, stage y «un solo primer contacto», según opener-form.tsx:24-26 (no leído)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "m4-opener.tsx:39-46."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "opener-form.tsx:55-58 (error en el campo y toast); gate de link con role=alert en :101-108."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "opener-form.tsx:75 loading en la barra."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "OpenerInputSchema en el cliente (opener-form.tsx:48); el server lo re-valida según el comentario de :21-22."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Formulario de una columna y acción en la barra sticky."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary (error.tsx:35-38)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "El Gem de outreach tiene url null con un TODO (herramientas.ts:117), servido en m4-opener.tsx:63."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Sin link al Gem; el opener se pierde al navegar dentro del manual (opener-form.tsx:44 no avisa en salidas internas)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.seguimiento",
+   "nombre": "Registrar lo que pasó (m5)",
+   "descripcion": "Estado de la cadencia, mensaje base del próximo toque, objeciones y registro del resultado.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx"
+   ],
+   "entradas": [
+    "sale a manual/_components/seguimiento-form.tsx (otro lote)"
+   ],
+   "madurez": "L?",
+   "madurez_evidencia": "La presentación está trazada (m5-seguimiento.tsx:41-286), pero el registro sale del lote en m5-seguimiento.tsx:284 hacia seguimiento-form.tsx, así que el camino feliz no se pudo trazar entero.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado (fuera del lote)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "m5-seguimiento.tsx:248 (sin último toque), :186-192 (cadencia agotada), :76-78 (sin teléfono)."
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "El registro vive en seguimiento-form.tsx (fuera del lote)."
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "loading.tsx de la ruta; el form está fuera del lote."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Fuera del lote."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap en m5-seguimiento.tsx:69 y :85."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "parcial",
+     "evidencia": "El lanzador del Gem de outreach apunta a una herramienta sin link (m5-seguimiento.tsx:229-231, herramientas.ts:117); Date.now() en el render (:63, error de lint)."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "La cadencia agotada lleva al cierre (m5-seguimiento.tsx:118-123, :186-192)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.brief",
+   "nombre": "Decidir cómo va a ser la demo (m6)",
+   "descripcion": "Pega el resultado del Gem de diseño y escribe título, secciones, CTA y concepto. Guardar hace EVALUADA->BRIEF; después hay un sanity-check y un re-pegado con autoguardado.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m6-brief.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/brief-sanity.tsx"
+   ],
+   "entradas": [
+    "sale a dossier.actions.ts guardarBrief"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m6-brief.tsx:90 -> brief-form.tsx:131-147 -> dossier.actions.ts:186-216 (requireSetter :191, BriefInputSchema :196, getOwnedDossier :201, transición :208-209).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "dossier.actions.ts:191 requireSetter y :201 getOwnedDossier(leadId, userId)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "m6-brief.tsx:40-47; faltante del pegado nombrado en brief-form.tsx:276-280."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "role=alert en brief-form.tsx:223-227. Un pegado de más de 5000 caracteres termina en un error genérico de mapError (dossier.actions.ts:215)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "brief-form.tsx:155 loading; AutosaveStatus en :235."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "dossier.actions.ts:196 BriefInputSchema.safeParse."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Grilla lg:grid-cols-2 que en mobile queda en una columna (brief-form.tsx:182)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "El Gem de diseño tiene url null con un TODO (herramientas.ts:78), servido en m6-brief.tsx:60."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Sin el link al Gem, el setter escribe el plano solo; el pegado largo falla sin explicar por qué."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.construccion",
+   "nombre": "Construcción de la demo (mc1/mc2)",
+   "descripcion": "Bloque para Claude Design, munición por fase, arranque de la construcción y tildes de auto-reporte por fase.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/construccion-ctas.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/fase-auto-reporte.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/badge-provisorio.tsx"
+   ],
+   "entradas": [
+    "sale a dossier.actions.ts iniciarConstruccion / guardarProgreso"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m-construccion.tsx:271-278 -> construccion-ctas.tsx:28-38 iniciarConstruccion; tildes en m-construccion.tsx:302-313 -> fase-auto-reporte.tsx:67-81 guardarProgreso. Hay una carrera conocida cuando se tilda en ráfaga.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado de las actions (patrón de dossier.actions.ts:191,201)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "m-construccion.tsx:57-65 (sin brief)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "fase-auto-reporte.tsx:75-78 solo muestra un toast; la carrera deja marcas falsas sin error."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Loader2 en fase-auto-reporte.tsx:108-109; loading en construccion-ctas.tsx:36."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Guarda de stage en el server según fase-auto-reporte.tsx:37-41 (no leída)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Tildes de ancho completo con p-4 (fase-auto-reporte.tsx:91)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "El badge permanente «Guía preliminar — en validación» (badge-provisorio.tsx:7, usado en m-construccion.tsx:127) y Claude Design sin link (herramientas.ts:90)."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Depende de la herramienta sin link; el progreso persistido puede no coincidir con lo tildado."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.escalar-a-franco",
+   "nombre": "Me trabé: avisar a Franco",
+   "descripcion": "Modal que deja la marca de escalado en el dossier y manda un Telegram a Franco. Si ya escaló, muestra un banner con la espera y la nota anterior.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/_components/escalar-modal.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/escalamiento-construccion.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/use-hidratado.ts"
+   ],
+   "entradas": [
+    "sale a dossier.actions.ts escalarConstruccion"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "escalamiento-construccion.tsx:62 -> escalar-modal.tsx:36-66 -> escalarConstruccion -> router.refresh en :56 -> banner en escalamiento-construccion.tsx:31-56.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado de la action."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "No hay colección."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "escalar-modal.tsx:45-48 (error y toast) y :61-65 (aviso si Telegram falla)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "escalar-modal.tsx:91 loading; el modal no se cierra mientras está pendiente (:82)."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "EscalamientoInputSchema en el cliente (escalar-modal.tsx:37); en el server no se leyó."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-col sm:flex-row en escalamiento-construccion.tsx:34."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Funciona aunque Telegram falle (escalar-modal.tsx:61-65)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.retrabajo",
+   "nombre": "Retrabajo tras el rechazo",
+   "descripcion": "Guía con lo que Franco pidió corregir y el botón «Reabrir construcción» (RECHAZADA->CONSTRUCCION).",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/_components/guia-retrabajo.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/construccion-ctas.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m13-borrador.tsx"
+   ],
+   "entradas": [
+    "sale a dossier.actions.ts reabrirConstruccion"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m13-borrador.tsx:118-131 -> construccion-ctas.tsx:42-53 reabrirConstruccion; guia-retrabajo.tsx:46-80 muestra el último rechazo y los anteriores.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado de la action."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin vueltas anteriores no muestra nada (guia-retrabajo.tsx:61)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "useStepAction con toast (construccion-ctas.tsx:47-49)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "construccion-ctas.tsx:50 loading."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Guarda de stage server-side según construccion-ctas.tsx:13-14."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Callout de ancho completo."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El pedido acompaña cada pantalla (guia-retrabajo.tsx:37-40)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.borrador",
+   "nombre": "Publicar y registrar el borrador (m13)",
+   "descripcion": "Pega la URL de Netlify Drop y confirma que carga. Puede cambiar el link mientras siga en construcción.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m13-borrador.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/borrador-form.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/enlace-chequeo.tsx"
+   ],
+   "entradas": [
+    "sale a dossier.actions.ts guardarDraftUrl"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m13-borrador.tsx:147 -> borrador-form.tsx:54-92 guardarDraftUrl -> router.refresh en :90 -> estado publicado en :112-150 con el enlace al chequeo (enlace-chequeo.tsx:63-66).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado de la action."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "m13-borrador.tsx:29-37."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Errores por control en borrador-form.tsx:55-72 y :201-212; errorMap en castellano en dossier.schemas.ts:129-133."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "borrador-form.tsx:106 loading."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "DraftUrlInputSchema con https y largo (dossier.schemas.ts:112-134); el server re-parsea el mismo schema (borrador-form.tsx:77-78)."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "break-all en el link (borrador-form.tsx:122)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Netlify Drop sí tiene URL (herramientas.ts:105)."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El salto al chequeo final se nombra y se enlaza (borrador-form.tsx:128-137)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.chequeo-final",
+   "nombre": "Chequeo final y envío a revisión (m14)",
+   "descripcion": "Diez obligatorios en dos grupos y delatores de diseño, con autoguardado. Habilita el envío a la cola de Franco.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m14-chequeo.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx"
+   ],
+   "entradas": [
+    "sale a dossier.actions.ts guardarSelfCheck / enviarARevision"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m14-chequeo.tsx:147 -> chequeo-form.tsx:146-157 autoguardado -> :160-181 guardarSelfCheck + enviarARevision; el server re-valida con selfCheckAprobado (flow.ts:204-209).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado de las actions."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Sin borrador explica y ofrece el salto (m14-chequeo.tsx:129-144)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "serverError con role=alert (chequeo-form.tsx:296-300) y errorLabel del autoguardado (:307)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "chequeo-form.tsx:190 loading; AutosaveStatus en :303-308."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "selfCheckAprobado recorre todos los HARD_CHECKS (flow.ts:206-207); invariante en self-check-gate.invariant.ts:73-86."
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "Los obligatorios solo se tildan desde el Toggle (chequeo-form.tsx:109)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay TODO."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El motivo del bloqueo se ve en la barra (chequeo-form.tsx:193-197) y el arreglo aparece bajo cada punto (:102-107)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.envio-demo",
+   "nombre": "Mandar el link aprobado (m15)",
+   "descripcion": "Con la demo aprobada y el gate de envío abierto, copia el mensaje con el finalUrl y registra el envío.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m15-envio.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/envio-form.tsx"
+   ],
+   "entradas": [
+    "sale a outreach.actions.ts enviarDemoAprobada"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m15-envio.tsx:97-102 gateEnvioDemo -> envio-form.tsx:52-57 barra -> :37-46 enviarDemoAprobada (idempotente según el toast de :42-44).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Heredado; la action re-valida el gate (comentario en m15-envio.tsx:14-17)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "m15-envio.tsx:27-33 (sin finalUrl)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "envio-form.tsx:75-79 con role=alert."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "envio-form.tsx:55 loading."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "No hay input; el gate lo vuelve a evaluar el server."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Bloque de una columna."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "En APROBADA sin link ofrece el toque aunque el turno es de Franco (m15-envio.tsx:113-133)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.agenda",
+   "nombre": "Agendar la reunión en Cal.com (m16)",
+   "descripcion": "Confirmar al decisor, buscar horarios libres de Franco, pasárselos al prospecto, elegir uno y confirmar la reserva real con notas de traspaso.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m16-agenda.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx"
+   ],
+   "entradas": [
+    "sale a agenda.actions.ts ofrecerHorarios / confirmarReunion"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m16-agenda.tsx:236-244 -> agenda-form.tsx:107-119 ofrecerHorarios -> :122-137 ConfirmarReunionSchema -> :139-155 confirmarReunion -> agenda.actions.ts:185 getCalConfigLeadOS -> agenda.ts:57-97. Necesita Cal.com configurado; si no, devuelve AGENDA_NO_CONECTADA (agenda.ts:46-48).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "no",
+     "evidencia": "La agenda se resuelve como «la única Organization con calComUsername» (agenda.ts:58-59, :86), que puede ser un cliente."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "m16-agenda.tsx:209-229 (gate cerrado con salida) y :61 (sin teléfono)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "role=alert en agenda-form.tsx:316-320, :345-357; SLOT_OCUPADO en :147-150."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "agenda-form.tsx:212, :241 y :174 loading."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "ConfirmarReunionSchema con decisor, email y notas de 30 a 2000 (agenda.schemas.ts:9-35). La búsqueda no valida el decisor."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid sm:grid-cols-3 (agenda-form.tsx:256 y :286)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Depende de que la agenda de Franco esté conectada (agenda.ts:46-48)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.recorrido-y-barra",
+   "nombre": "Layout del manual: franja, barra de acción, cabecera, estados y archivo",
+   "descripcion": "Layout común de las catorce pantallas: cabecera del lead con salida guardada, franja de nueve pasos, zonas, barra sticky con la acción principal, pantallas de espera, revisión y archivo, boundary y skeleton.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/franja-recorrido.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/salida-manual.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/manual-nav.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/enlace-pantalla.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/estado-manual.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/archivo-manual.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/urgencia-banner.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/error.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/loading.tsx"
+   ],
+   "entradas": [
+    "la page manual/[paso]/page.tsx es de otro lote"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "pantalla-manual.tsx:142-255 -> franja-recorrido.tsx:79-211 -> barra-accion.tsx:156-194; estado-manual.tsx:63-157; archivo-manual.tsx:39-121; error.tsx:29-39.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "Guard en setter/layout.tsx:32 (contexto fijo); la propiedad del lead se resuelve en _data.ts (otro lote)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Las pantallas de estado y archivo explican la espera o el cierre (estado-manual.tsx:121-131, archivo-manual.tsx:76-78)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "error.tsx:41-61 con mensaje útil y dos salidas, sin mostrar el stack."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading.tsx:9-28."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo presenta."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Franja con flex-nowrap y overflow-x-auto (franja-recorrido.tsx:124); cabecera text-2xl sm:text-3xl con line-clamp (manual-nav.tsx:96); barra sticky (barra-accion.tsx:169)."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "error.tsx:35-38 Sentry.captureException con tag de sección."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "La barra aparece recién al hidratar (barra-accion.tsx:47-49) y la guardia interna solo cubre el veredicto (salida-manual.tsx:53-57)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.historial-del-lead",
+   "nombre": "Historial del lead",
+   "descripcion": "Cronología colapsable de contactos comerciales y eventos de sistema (reasignación) al pie de cada pantalla.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/historial-lead.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.helpers.ts"
+   ],
+   "entradas": [
+    "datos desde manual/_data.ts (otro lote)"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "historial-lead.tsx:14-28 -> lead-timeline.tsx:62-93 -> lead-timeline.helpers.ts:21-79.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "La lectura vive en _data.ts y listOwnedLeadTimeline (fuera del lote)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "lead-timeline.tsx:75-79; historial-lead.tsx:21."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Lo cubre el boundary de la ruta."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Skeleton de la ruta."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo lectura."
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "break-words en lead-timeline.tsx:146 y flex-wrap en :121."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Solo el boundary."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "No hay TODO."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Las horas se muestran sin huso (lead-timeline.helpers.ts:72)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.puerta-unica",
+   "nombre": "Puerta única al lead",
+   "descripcion": "Todo link a /setter/leads/[id] redirige al manual, que deriva la pantalla actual.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/page.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/page.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/leads/[leadId]/page.tsx#SetterLeadPage",
+    "src/app/(protected)/setter/leads/[leadId]/manual/page.tsx#ManualDelLeadPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "leads/[leadId]/page.tsx:23 -> manual/page.tsx:18-21 -> _data.ts:145-148 -> [paso]/page.tsx:64-73. Camino feliz trazado; dos redirects y doble carga (PERF).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSetter _data.ts:145 + getOwnedLead :147 -> notFound manual/page.tsx:20"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "entidad única; lead inexistente -> 404 (setter/not-found.tsx)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:36-55 con reintentar y volver; leads/[leadId]/error.tsx existe"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx:8-28; leads/[leadId]/loading.tsx existe"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ownership como validación de leadId; esPantallaId [paso]/page.tsx:69"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "solo redirects"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30 captureException"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "git grep de TODO|FIXME|mock en los archivos del lote: solo falsos positivos ('TODO el retrabajo')"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "aterriza solo en la pantalla que corresponde"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.aterrizaje-y-guardia",
+   "nombre": "Pantalla del manual con guardia de servidor",
+   "descripcion": "Renderiza la pantalla pedida solo si está habilitada o completada; si no, redirige a la actual. Despacha los tres slots por pantalla.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+    "src/app/(protected)/setter/leads/[leadId]/manual/error.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/loading.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx#PantallaDelManualPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "[paso]/page.tsx:64 -> _data.ts:145-234 -> [paso]/page.tsx:69-73 guardia -> :213-438 slots -> :442 PantallaManual. Falla L3 por autonomía (herramientas sin URL) y por mobile no verificable dentro del lote.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "_data.ts:145-147 requireSetter + getOwnedLead; helpers owned (outreach.ts:44)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "pantallas de estado (espera/revisión/archivo) cubren 'nada que hacer' [paso]/page.tsx:118-173"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:40-41 mensaje útil sin stack"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx:10-27 skeleton espejo"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "esPantallaId :69 y accesibilidad :71-73"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "el layout vive en PantallaManual (fuera del lote); el lote solo aporta space-y-5"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO/FIXME en el lote"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "4 herramientas externas con url:null (herramientas.ts:63,78,90,117)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.cabecera-e-historial",
+   "nombre": "Cabecera del lead e historial al pie",
+   "descripcion": "Badges, teléfono, notas, asignación, fecha de postergación y la cronología completa en todas las pantallas.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "_data.ts:236-293 serializa -> [paso]/page.tsx:99-116 cabecera e historial -> :139/:170/:450",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "listOwnedLeadTimeline(leadId, userId) _data.ts:158"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "timeline ?? [] (_data.ts:277); el vacío lo resuelve HistorialDelLead (fuera del lote)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura"
+    },
+    "mobile": {
+     "cumple": "parcial",
+     "evidencia": "render en manual-nav/historial-lead (fuera del lote)"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "respondioDesde cae a updatedAt (_data.ts:286)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.registrar-resultado-toque",
+   "nombre": "Registrar el resultado de un toque (m5)",
+   "descripcion": "El setter marca No respondió / Respondió / Postergar / Rechazó con nota opcional; el sistema mueve el estado y la cadencia.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
+    "src/lib/os-commercial.ts",
+    "src/lib/follow-up.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "seguimiento-form.tsx:104-124 -> outreach.actions.ts:188 (fuera) -> os-commercial.ts:57-115. Falla L3: pisa CALL_AGENDADA (hallazgo ALTA).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "ownership en la action (outreach.actions.ts:163); no protege status CALL_AGENDADA (:169 solo terminales)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "onError -> <p role=alert> seguimiento-form.tsx:117,195-199"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "loading: registro.isPending :133"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ResultadoInputSchema re-validado en la action (outreach.actions.ts:158)"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid gap-2 sm:grid-cols-2 :147; botones p-3"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "errores de la action vuelven como ActionResult; dependen de useStepAction/mapError (fuera del lote)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "min de fecha en UTC :94-96; toast 'se abrió el brief' también tras la demo enviada :67"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.cadencia-follow-up",
+   "nombre": "Cadencia +2/+2/+3 y corte",
+   "descripcion": "El sistema agenda el próximo toque y corta al cuarto SIN_RESPUESTA; agotada, no se ofrece más 'No respondió'.",
+   "archivos": [
+    "src/lib/follow-up.ts",
+    "src/lib/os-commercial.ts",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "follow-up.ts:3-13 -> os-commercial.ts:68-82 (null limpia el toque) -> _data.ts:182 -> seguimiento-form.tsx:87-89",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "cuenta actividades del lead owned (outreach.ts:50)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "cálculo"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "escrituras sin transacción (os-commercial.ts:57,79)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "cálculo de servidor"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "el setter nunca envía fechas de cadencia (seguimiento-form.tsx:19-21)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lógica"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "depende del caller"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "agotada, el lead queda en seguimiento indefinido; el cierre es de Franco (seguimiento-form.tsx:56)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.postergar-y-retomar",
+   "nombre": "Postergar un lead y retomarlo",
+   "descripcion": "POSTERGADO con fecha de vuelta; vencida, el lead vuelve a 'Para trabajar' y se retoma con un toque.",
+   "archivos": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
+    "src/lib/os-commercial.ts",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "seguimiento-form.tsx:175-183 -> outreach.actions.ts:197 (fuera) -> os-commercial.ts:181-191 -> _data.ts:167-170 -> flow.ts:420-423. Retomar no reanuda la cadencia (PLAN-866).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "ownership en la action"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "role=alert :196"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "isPending :133"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "parseCalendarDayAR en outreach.schemas.ts:60"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "Input type=date en Field :176-183"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "fuera del lote"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "el POSTERGADO retomado queda en seguimiento y su toque no vuelve a la cola (os-commercial.ts:19-22, flow.ts:420-423)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-nuevo",
+   "id": "h5.set-nuevo.alta-manual",
+   "nombre": "Cargar un prospecto a mano",
+   "descripcion": "Formulario con nombre obligatorio y datos opcionales; crea el lead en Ficha y abre el manual.",
+   "archivos": [
+    "src/app/(protected)/setter/nuevo/page.tsx",
+    "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/nuevo/page.tsx#NuevoProspectoPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "nuevo/page.tsx:18 -> nuevo-prospecto-form.tsx:76-99 -> prospecto.actions.ts:21-41 (fuera) -> router.push :98",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "requireSetter :18 y ownedLeadCreateData; sin dedupe contra otras carteras (hallazgo)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "formulario"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "serverError :191 sin role=alert y con texto crudo; sin try/catch alrededor de la action :87-99"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Button loading={isPending} :196"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "NuevoProspectoSchema.parse en la action; campos opcionales sin .max()"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "grid gap-4 lg:grid-cols-2 :126; max-w-2xl page.tsx:29"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "solo excepciones vía setter/error.tsx:32; los fail() no se reportan"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "crea y lleva directo al manual"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-nuevo",
+   "id": "h5.set-nuevo.aviso-duplicado",
+   "nombre": "Aviso no bloqueante de posible duplicado",
+   "descripcion": "Mientras escribe el nombre, avisa si ya hay un lead igual en su propia cartera.",
+   "archivos": [
+    "src/app/(protected)/setter/nuevo/page.tsx",
+    "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "nuevo/page.tsx:22-26 -> nuevo-prospecto-form.tsx:59-74 -> :119-124",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "ownedListWhere(userId) page.tsx:23"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "nombre vacío no avisa :73"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "cálculo local"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "datos ya en props"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "aviso"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "bloque de texto :120"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin I/O"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "no cubre duplicados de otros setters"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-importar",
+   "id": "h5.set-importar.importar-csv",
+   "nombre": "Importar una lista CSV",
+   "descripcion": "Sube un CSV, ve la vista previa, importa y recibe el reporte de creados, inválidos y duplicados.",
+   "archivos": [
+    "src/app/(protected)/setter/nuevo/importar/page.tsx",
+    "src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/nuevo/importar/page.tsx#ImportarProspectosPage"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "importar/page.tsx:16 -> importar-prospectos-form.tsx:64-76 -> :32-46 -> :84-100 importarProspectos (fuera) -> :191-249 reporte",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSetter :16; dedupe por cartera y sistema en la action"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'No hay filas de datos' :36; 'No se creó ningún lead nuevo' :205"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "previewError :144-148, errorImport :163-167, filas inválidas con motivo :208-226"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "Button loading :172"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "re-validación server (comentario :27); campos sin .max()"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap y listas max-h-56 overflow-y-auto :213,:233"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "excepciones vía setter/error.tsx:32; reader.onerror sin manejar"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "CSV de Excel es-AR (; y ANSI) no entra (hallazgo UX)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h5.set-importar",
+   "id": "h5.set-importar.plantilla-csv",
+   "nombre": "Descargar plantilla y referencia de columnas",
+   "descripcion": "Baja la plantilla CSV y muestra qué columnas son obligatorias.",
+   "archivos": [
+    "src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "importar-prospectos-form.tsx:103-111 Blob + descarga; :251-280 ColumnasReferencia desde COLUMNAS_IMPORT",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "contenido estático"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "estático"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "sin I/O de servidor"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "inmediato"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "si",
+     "evidencia": "flex-wrap :262"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin I/O"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "la plantilla es CSV con coma; abierta en Excel es-AR se desarma"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.digest-follow-ups-telegram",
+   "nombre": "Digest diario de follow-ups por Telegram",
+   "descripcion": "Cron que le manda a Franco la lista de toques vencidos y postergados que vuelven hoy, una vez por día.",
+   "archivos": [
+    "src/app/api/cron/os-follow-up/route.ts"
+   ],
+   "entradas": [
+    "src/app/api/cron/os-follow-up/route.ts#GET"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "El código del camino feliz está completo (route.ts:153-295), pero solo está agendado en vercel.json:4 y el deploy es Netlify (netlify.toml:25-32 no lo agenda): en producción no corre.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "CRON_SECRET, falla cerrado :157"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "no_pending_leads :228-230"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "500 sin detalle; mensaje sin tope de largo"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "job"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Telegram"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error :297; rama !sent :267-273"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "no",
+     "evidencia": "sin disparador en Netlify"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.foco-y-cola",
+   "nombre": "Foco del día y cola visible",
+   "descripcion": "Elige un lead accionable (con sticky por cookie) y arma la cola de hasta 5 con el motivo de cada posición.",
+   "archivos": [
+    "src/lib/leados/flow.ts",
+    "src/lib/leados/foco.ts",
+    "src/lib/leados/cola.ts",
+    "src/lib/leados/foco-cookie.ts",
+    "src/lib/leados/home.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "setter/page.tsx:31 -> home.ts:24 -> flow.ts:629 -> setter/page.tsx:44 -> flow.ts:813 -> foco.ts:49 -> cola.ts:64; no llega a L3 por los leads CERRADO en la cola (flow.ts:417) y la APROBADA no accionable (flow.ts:441)",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "lista por ownedListWhere (isolation.ts:34, ownership.ts:54); meta por setterId (isolation.ts:108); sticky solo si el lead está en la cola propia (foco.ts:61-62)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "foco null -> cola vacía (foco.ts:54-56, cola.ts:69); el mensaje 'todo en espera' se pinta fuera del lote (no verificado)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "setter/error.tsx:32 con Sentry.captureException"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "src/app/(protected)/setter/loading.tsx existe (git ls-files)"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo lectura; la cookie se valida por pertenencia (foco.ts:61)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura sin layout; la UI está fuera del lote"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "setter/error.tsx:32"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO/FIXME en flow.ts, foco.ts, cola.ts, home.ts (git grep)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "un lead ganado vuelve a 'trabajar' (flow.ts:416-445) y una APROBADA no accionable puede ser el foco (flow.ts:441)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.cartera-vistas-y-filtros",
+   "nombre": "Cartera agrupada, búsqueda, filtros y archivo por causa",
+   "descripcion": "Agrupa la cartera por vista (trabajar, seguimiento, revisión, agendadas, pausados, postergados, descartados, perdidos), con búsqueda sin tildes y cuatro órdenes.",
+   "archivos": [
+    "src/lib/leados/flow.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_components/cartera-view.tsx",
+    "src/app/(protected)/setter/_components/home-sections.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "cartera-view.tsx:58 -> flow.ts:1054; cartera-view.tsx:64 -> flow.ts:983 -> flow.ts:914; home-sections.tsx:42 -> flow.ts:1012",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "misma lista propia (ownership.ts:54); la nota es privada por setterId (isolation.ts:108)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "agruparCartera devuelve solo grupos con leads (flow.ts:980-996); el vacío total se pinta fuera del lote"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "setter/error.tsx:32"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setter/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "filtro en memoria sobre datos ya aislados"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "setter/error.tsx:32"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO en flow.ts"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "no hay vista para ganados: CERRADO cae en trabajar o seguimiento (VISTAS_CARTERA flow.ts:943-956)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.ficha-y-veredicto",
+   "nombre": "Ficha de observación y veredicto del setter",
+   "descripcion": "Guarda la ficha con autosave, exige la señal mínima y registra score/veredicto; score 1-2 descarta con motivo.",
+   "archivos": [
+    "src/lib/leados/dossier.ts",
+    "src/lib/leados/contracts.ts",
+    "src/lib/leados/flow.ts",
+    "src/lib/leados/ficha-bloques.ts",
+    "src/lib/leados/ficha-calidad.ts",
+    "src/lib/leados/error-copy.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dossier.actions.ts:100 -> dossier.ts:253-274; dossier.actions.ts:139 -> flow.ts:295; :145 -> dossier.ts:150-158; :152 -> dossier.ts:174-189",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "ensureOwnedDossier/getOwnedDossier derivan de getOwnedLead (dossier.ts:73, :87)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "fichaFaltantes devuelve qué falta en lenguaje del setter (flow.ts:295-310)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "error-copy.ts:92 copyOperativo (dossier.actions.ts:73); [leadId]/error.tsx:35"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setter/leads/[leadId]/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "FichaSchema.parse (dossier.ts:263) y EvaluacionSchema.parse (dossier.ts:151); motivoDescarte y razonamiento sin tope, y DESCARTADA no re-parsea (dossier.ts:185-188)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "[leadId]/error.tsx:35"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO en dossier.ts, contracts.ts y ficha-*.ts"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "recorrido por fuentes sin bloqueo (ficha-bloques.ts:216-235) y gate explicado"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.brief-y-construccion",
+   "nombre": "Brief de diseño y construcción guiada",
+   "descripcion": "Captura el brief (gate respondió o caliente), arma los bloques para el Gem y Claude Design, registra el progreso por fase y el borrador.",
+   "archivos": [
+    "src/lib/leados/dossier.ts",
+    "src/lib/leados/copy-blocks.ts",
+    "src/lib/leados/flow-content.ts",
+    "src/lib/leados/herramientas.ts",
+    "src/lib/leados/contracts.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dossier.actions.ts:205 -> dossier.ts:434; :209 -> dossier.ts:160-172; m-construccion.tsx:70 -> copy-blocks.ts:177; :297 -> dossier.ts:366; :326 -> dossier.ts:281",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getOwnedDossier en cada write (dossier.ts:286, :371, :439)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "los bloques omiten lo vacío y nombran el faltante por herramienta sin link (copy-blocks.ts:27-31, :251-257)"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "mensajes del motor traducidos (error-copy.ts:34-79)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "[leadId]/loading.tsx y manual/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "BriefSchema.parse (dossier.ts:444), ProgresoSchema.parse (dossier.ts:376); draftUrl validada en la action (dossier.actions.ts:326, fuera del lote)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "[leadId]/manual/error.tsx:30"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "herramientas.ts:78 y :90 con TODO url null; SHELL_CONSTRUCCION marcado PROVISORIO (flow-content.ts:42)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "sin link al Gem de diseño ni a Claude Design el setter depende de Franco (herramientas.ts:78, :90)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.chequeo-final-y-revision",
+   "nombre": "Chequeo final y envío a revisión",
+   "descripcion": "Self-check de 10 obligatorios y 4 delatores; el server arma los nombres y valida el gate antes de EN_REVISION.",
+   "archivos": [
+    "src/lib/leados/flow.ts",
+    "src/lib/leados/flow-content.ts",
+    "src/lib/leados/dossier.ts",
+    "src/lib/leados/escalamiento.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dossier.actions.ts:355 -> flow.ts:183 -> dossier.ts:334 -> flow.ts:204 -> dossier.actions.ts:398 -> dossier.ts:116",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getOwnedDossier (dossier.ts:339)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no es una colección"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "error-copy.ts:68-69"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "los nombres los arma el server desde HARD_CHECKS (flow.ts:188); SelfCheckSchema.parse (dossier.ts:344); gate contra la lista vigente (flow.ts:206)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO en el gate"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "cada obligatorio trae cómo verificar y el arreglo (flow-content.ts:171-261)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.escalar-me-trabe",
+   "nombre": "Pedir ayuda durante la construcción",
+   "descripcion": "Marca el dossier como escalado con nota; se resetea en toda transición.",
+   "archivos": [
+    "src/lib/leados/dossier.ts",
+    "src/lib/leados/escalamiento.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dossier.actions.ts:433 -> dossier.ts:309-327 -> escalamiento.ts:42-45; reset dossier.ts:145",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getOwnedDossier (dossier.ts:314)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "error-copy.ts:63-66"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "trim y tope de 1000 (escalamiento.ts:26, :43); stage CONSTRUCCION (dossier.ts:316)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "persistido aunque falle Telegram (dossier.ts:301-308)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.envio-demo",
+   "nombre": "Envío del link de la demo aprobada",
+   "descripcion": "Gate de envío (APROBADA + finalUrl + respondió o caliente), claim idempotente y mensaje base con el link.",
+   "archivos": [
+    "src/lib/leados/flow.ts",
+    "src/lib/leados/dossier.ts",
+    "src/lib/leados/copy-blocks.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/outreach.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m15-envio.tsx:98 -> flow.ts:92; outreach.actions.ts:237 -> :244 -> dossier.ts:394-409 -> (falla) outreach.actions.ts:258 -> dossier.ts:416",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getOwnedDossier (dossier.ts:398, :420)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "error-copy.ts:74-75; outreach.actions.ts:54 copyOperativo"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "gate re-validado en el server (outreach.actions.ts:237); claim atómico (dossier.ts:404-407)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "las cuatro esperas explicadas (guidance-content.ts:994-1050)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.opener-sin-link",
+   "nombre": "Opener sin link y seguimiento por cadencia",
+   "descripcion": "Bloquea links en el primer mensaje, arma los bloques para el Gem de outreach y muestra el estado de la cadencia +2/+2/+3.",
+   "archivos": [
+    "src/lib/leados/flow.ts",
+    "src/lib/leados/flow-content.ts",
+    "src/lib/leados/copy-blocks.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/outreach.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "opener-form.tsx:38 -> flow.ts:221; outreach.schemas.ts:41 -> flow.ts:221; m4-opener.tsx:52 -> copy-blocks.ts:110; estado-manual.tsx:83 -> flow.ts:243",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "reglas puras; la escritura vive en outreach.actions (fuera del lote)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "no es una colección"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "gate explicado (guidance-content.ts:779-788)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "contieneLink en el schema del server (outreach.schemas.ts:41), con falsos positivos (flow.ts:218-219)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "Gem de outreach sin url (herramientas.ts:117)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "un falso positivo bloquea el registro del opener sin decir dónde está el 'link'"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.agenda-reunion",
+   "nombre": "Agendar la reunión con Cal.com",
+   "descripcion": "Ofrece 3 horarios reales con memoria, claim anti doble click, booking y compensaciones.",
+   "archivos": [
+    "src/lib/leados/agenda.ts",
+    "src/lib/leados/contracts.ts",
+    "src/lib/leados/action-codes.ts",
+    "src/lib/leados/copy-blocks.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/agenda.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "agenda.actions.ts:134 -> agenda.ts:57; :154 -> agenda.ts:270; :204 -> agenda.ts:194; :213 -> cal-com-v2.ts:108; :236 -> agenda.ts:324; compensaciones :223 -> agenda.ts:235 y :257 -> agenda.ts:300",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "no",
+     "evidencia": "los writes van por getOwnedDossier, pero la cuenta de Cal.com sale de un findMany global de organizaciones (agenda.ts:58-61)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "elegirTresSlots devuelve lo que haya (agenda.ts:122-148); el 'sin horarios' se pinta fuera del lote"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "AGENDA_NO_CONECTADA en lenguaje del setter (agenda.ts:46-48); SLOT_OCUPADO (action-codes.ts:18)"
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "AgendaSchema.parse en cada write (agenda.ts:283, :332); slot re-validado (agenda.ts:155)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "config faltante o ambigua solo por console.warn (agenda.ts:64, :74, :90)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO en agenda.ts"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "tras RE_SEGUIMIENTO no se puede re-agendar (agenda.actions.ts:108); la config la carga Franco a mano (agenda.ts:24)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.guia-y-herramientas",
+   "nombre": "Guía por paso y rail de herramientas externas",
+   "descripcion": "Copy de enseñanza (porqué, ejemplos, gates explicados) y accesos a las herramientas externas con 'Link pendiente'.",
+   "archivos": [
+    "src/lib/leados/guidance-content.ts",
+    "src/lib/leados/herramientas.ts",
+    "src/lib/leados/flow-content.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_components/teach-panel.tsx",
+    "src/app/(protected)/setter/_components/tools-rail.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "teach-panel.tsx:100 -> guidance-content.ts:1197; tools-rail.tsx:26 -> herramientas.ts:122; m-construccion.tsx:135 ToolGuide claudeDesign",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "contenido estático"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "contenido estático"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "contenido estático"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "contenido estático"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin entrada de usuario"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "sin I/O"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "4 TODO url null (herramientas.ts:63, :78, :90, :117); contenido muerto con una regla vieja (guidance-content.ts:526-528)"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "tres herramientas no se pueden abrir desde el panel"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.adm-revision-demos",
+   "id": "h5.adm-revision-demos.aprobar-rechazar",
+   "nombre": "Aprobar o rechazar la demo",
+   "descripcion": "El admin aprueba con la URL permanente o rechaza con qué, dónde y arreglo; el rechazo reabre la construcción y limpia el self-check.",
+   "archivos": [
+    "src/lib/leados/dossier.ts",
+    "src/lib/leados/dossier-stage.ts",
+    "src/lib/leados/escalamiento.ts",
+    "src/lib/leados/contracts.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/leados/_actions/revision.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "revision.actions.ts:78 -> dossier.ts:191-200; revision.actions.ts:106 -> dossier.ts:202-221; re-loop dossier.ts:146 -> escalamiento.ts:102",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "parcial",
+     "evidencia": "el guard de rol vive en la action (dossier.ts:111-113 lo delega a requireSuperAdmin); no se leyó revision.actions.ts"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "acción puntual"
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "DossierTransitionError con mensajes (dossier.ts:205, :233)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "FinalUrlSchema https obligatorio y topes de rechazo (revision.schemas.ts:14-49)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "admin/error.tsx (flujo D3); no verificado en la action"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "rechazo estructurado llega al setter (flow.ts:149-161)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.cierre-post-reunion",
+   "nombre": "Marcar reunión realizada y registrar el resultado",
+   "descripcion": "El admin marca la reunión como realizada y registra GANADO/PERDIDO/RE_SEGUIMIENTO, que mueve el status del lead.",
+   "archivos": [
+    "src/lib/leados/agenda.ts",
+    "src/lib/leados/contracts.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/leads/_actions/reunion.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "reunion.actions.ts:50 -> agenda.ts:348-358; reunion.actions.ts:71 -> agenda.ts:365-382 -> reunion.actions.ts:81-84",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "requireSuperAdmin en la action (reunion.actions.ts:68)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "sin reunión agendada devuelve false y la action lo explica (agenda.ts:350, :371; reunion.actions.ts:77)"
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "la action devuelve error.message crudo (reunion.actions.ts:90-92)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "ResultadoReunionInputSchema (reunion.actions.ts:69); AgendaSchema.parse (agenda.ts:352, :373)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "catch que solo devuelve fail sin captureException (reunion.actions.ts:89-92)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "RE_SEGUIMIENTO deja la agenda bloqueada; resultado y status no atómicos (agenda.ts:371, reunion.actions.ts:81)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.rastro-reasignacion",
+   "nombre": "Rastro de la reasignación de un lead",
+   "descripcion": "Registra la reasignación como evento SISTEMA y el setter nuevo ve cuándo se lo asignaron.",
+   "archivos": [
+    "src/lib/leados/assignment-trail.ts",
+    "src/lib/leados/isolation.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "lead.actions.ts:180 -> assignment-trail.ts:42-55; manual/_data.ts:154 -> assignment-trail.ts:68-80",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "lectura del setter por getOwnedLead (assignment-trail.ts:72); SISTEMA excluido de lo comercial (isolation.ts:116)"
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "null para leads sin rastro (assignment-trail.ts:62-66)"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "lib"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "lib"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "sin input de usuario"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "lib"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "el aviso 'te asignaron' sale del rastro"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.set-nuevo",
+   "id": "h5.set-nuevo.alta-propia",
+   "nombre": "Alta de prospecto propio",
+   "descripcion": "El setter carga un lead y el sistema fuerza dueño, frío y fuente.",
+   "archivos": [
+    "src/lib/leados/isolation.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/prospecto.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "prospecto.actions.ts:29 -> isolation.ts:80-99",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "assignedToId sale del userId de la sesión, nunca del input (isolation.ts:95)"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "alta"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "fuera del lote"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "recibe el input ya parseado (prospecto.actions.ts:29 'parsed')"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lib pura"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "fuera del lote"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin TODO"
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "googleMapsUrl no se puede cargar en el alta (isolation.ts:44-54)"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "herramienta": "h5.adm-fg2lab",
+   "id": "h5.adm-fg2lab.prompt-estructurado-gastro",
+   "nombre": "Laboratorio FG-2: prompt estructurado de gastronomía",
+   "descripcion": "Arma un prompt prescriptivo para Claude Design desde un formulario, estima tokens y genera filas TSV del experimento.",
+   "archivos": [
+    "src/lib/leados/_experimental/fg2-brief-lab.ts",
+    "src/lib/leados/_experimental/fg2-casos-gastro.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/fg2-lab/page.tsx"
+   ],
+   "madurez": "L1",
+   "madurez_evidencia": "prototipo declarado descartable y no conectado al flujo (fg2-brief-lab.ts:2-8); camino: page.tsx:17 -> fg2-lab-client.tsx:136 -> fg2-brief-lab.ts:231",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "guard SUPER_ADMIN heredado de admin/layout.tsx:47"
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "lab"
+    },
+    "errores": {
+     "cumple": "n/a",
+     "evidencia": "lab"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "lab"
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "solo string-building en cliente"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "lab"
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "lab"
+    },
+    "sin_mocks_todos": {
+     "cumple": "no",
+     "evidencia": "casos representativos y WhatsApp de ejemplo (fg2-casos-gastro.ts:43-44, :155-158)"
+    },
+    "autonomia": {
+     "cumple": "n/a",
+     "evidencia": "herramienta interna de experimento"
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.mis-numeros",
+   "nombre": "Mis números",
+   "descripcion": "Leads activos, total en cartera y ratio descarte/avance propio (total y 30 días).",
+   "archivos": [
+    "src/lib/leados/mis-numeros.ts",
+    "src/lib/leados/revision.ts",
+    "src/lib/leados/ownership.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "Camino feliz: setter/page.tsx:30 listOwnedLeads -> ownership.ts:52-64 -> setter/page.tsx:78 derivarMisNumeros -> mis-numeros.ts:117 -> :89 -> :69 -> revision.ts:96-134. No llega a L3: 'activos' incluye descartados (hallazgo) y la UI (mis-numeros.tsx) está fuera del lote.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Cartera por ownedListWhere(userId) (ownership.ts:54); filas atribuidas al userId de sesión (mis-numeros.ts:79). OsLead no tiene organizationId: el aislamiento es por setter."
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "criterio null sin evaluaciones (mis-numeros.ts:99-107); el render del vacío está en mis-numeros.tsx (fuera del lote)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Sin catch propio: un fallo sube a setter/error.tsx."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "src/app/(protected)/setter/loading.tsx existe."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Solo lectura derivada."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "setter/error.tsx:32 Sentry.captureException (heredado)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME en el archivo (git grep)."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "El número de activos no cierra con la cartera (descartados contados como activos)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.novedades-dirigidas",
+   "nombre": "Novedades dirigidas al setter",
+   "descripcion": "Avisos de handoff (asignado, demo aprobada o rechazada, reasignado) con pliegue, vigencia, badge y marcar vistas.",
+   "archivos": [
+    "src/lib/leados/novedades.ts",
+    "src/lib/leados/novedades-agrupar.ts",
+    "src/lib/leados/novedades-vigencia.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/page.tsx",
+    "src/app/(protected)/setter/layout.tsx",
+    "src/app/(protected)/setter/_actions/novedades.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "admin lead.actions.ts:194 -> novedades.ts:108-133 (create) -> setter/layout.tsx:40 contarNovedadesSinLeer (novedades.ts:312) -> setter/page.tsx:95 getNovedadesSetter (novedades.ts:229-306) -> novedades-vigencia.ts:88 -> novedades-agrupar.ts:98 -> novedades.actions.ts:20 marcarNovedadesVistas (novedades.ts:327).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "ownSetterNoticeWhere(userId) en lectura, conteo y marcado (novedades.ts:257, :270, :315, :329); destinatario por regla única (:115)."
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "filas [] y revision null (novedades.ts:205, :304); el texto del vacío está en novedades-panel.tsx (fuera del lote)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Una lectura fallida devuelve vacío, igual que 'sin novedades' (novedades.ts:302-305)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setter/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "La emisión usa datos del server (destinatarioNovedad); no hay input del cliente."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "Solo console.error (novedades.ts:131, :303, :319)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME (git grep)."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "«Abrir» ancla el foco (novedades-agrupar.ts:29-34) y el aviso caducado dice qué pide hoy el lead (novedades.ts:293-297)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.progreso-semana",
+   "nombre": "Progreso de los últimos 7 días",
+   "descripcion": "Contactos, demos enviadas, reuniones agendadas y archivados del setter en ventana móvil.",
+   "archivos": [
+    "src/lib/leados/progreso.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "setter/page.tsx:99 -> progreso.ts:105-126 -> count por performedById :114-120 -> derivarProgresoSemana :56-97.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Contactos por performedById=userId (progreso.ts:116); demos y reuniones de la cartera owned."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "total 0 oculta la señal (progreso.ts:41-42)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Si falla el conteo, contactos=0 en silencio (progreso.ts:121-123)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setter/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "UI en progreso-semana.tsx (fuera del lote)."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "console.error en progreso.ts:122."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Lectura informativa sin acción requerida."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.resumen-cola-revision",
+   "nombre": "Resumen de demos en revisión",
+   "descripcion": "Cuántas demos del setter esperan a Franco y hace cuánto la más vieja.",
+   "archivos": [
+    "src/lib/leados/novedades.ts",
+    "src/lib/leados/revision.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "setter/page.tsx:95 -> novedades.ts:246 derivarColaRevision (:190-207) -> revision.ts:61 formatEspera.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Deriva de los leads owned (novedades.ts:184-187)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "null oculta el bloque (novedades.ts:205)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Pura; se calcula antes del try y sobrevive al fallo de avisos (novedades.ts:246, :304)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setter/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Sin catch propio; error.tsx heredado."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Informativo (A-06)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.turno-de-espera",
+   "nombre": "A quién le toca",
+   "descripcion": "Chip y titular del turno (negocio, Franco, setter) derivado de la causa de espera.",
+   "archivos": [
+    "src/lib/leados/turno.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_components/home-en-espera.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "flow.ts:473-479 esperaDe -> turno.ts:164 turnoDelLead -> :131 causaDeEspera -> :199 TEXTO_TURNO -> home-en-espera.tsx:82.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Función pura sobre leads ya filtrados."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Siempre devuelve una causa (turno.ts:156)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Total por construcción (satisfies Record, turno.ts:124)."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "setter/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Heredado de error.tsx."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Distingue espera de Franco y trabajo propio (turno.ts:131-157)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-dia",
+   "id": "h5.set-dia.meta-privada-cartera",
+   "nombre": "Pin, snooze y nota privada",
+   "descripcion": "Meta personal del setter por lead, aislada por (leadId, setterId).",
+   "archivos": [
+    "src/lib/leados/setter-meta.ts",
+    "src/lib/leados/ownership.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/cartera.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "cartera.actions.ts:65/:101/:117/:140 -> setter-meta.ts:53-63 upsert -> lectura ownership.ts:61 -> setter-meta.ts:34-44.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Upsert por la unique (leadId, setterId) (setter-meta.ts:59); la lectura trae solo la fila propia (ownership.ts:61); el ownership del lead se valida en la action (fuera del lote)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "EMPTY_SETTER_META (setter-meta.ts:24-28)."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "El upsert lanza al caller; el manejo está en cartera.actions.ts (fuera del lote)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Mutación puntual."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "La nota tiene .max(NOTA_MAX) en cartera.schemas.ts:16 (fuera del lote)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Depende del catch de la action (fuera del lote)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El setter opera sin develOP."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.derivacion-de-pantalla",
+   "nombre": "Pantalla actual del manual",
+   "descripcion": "A qué pantalla aterriza el setter, qué quedó hecho y qué puede abrir, derivado en cada request.",
+   "archivos": [
+    "src/lib/leados/manual.ts",
+    "src/lib/leados/paso.ts",
+    "src/lib/leados/paso-admitido.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "manual/_data.ts:213 -> manual.ts:687 -> :446 completadasDe -> :509 posicionDe (:520, :542, :552 -> paso.ts:251, :656 -> flow.ts:92) -> :691-697 -> [paso]/page.tsx:69-73 guard. No llega a L3: APROBADA con toque vencido y CERRADO dan órdenes contradictorias (hallazgos).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "La entrada se arma en manual/_data.ts con lecturas owned (outreach.ts:44, timeline.ts:49); la derivación es pura."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Siempre devuelve una actual accesible (manual.ts:691-697)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "El never-guard (manual.ts:674-678) lanza hacia manual/error.tsx."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "El paso de la URL se valida contra el registro (esPantallaId manual.ts:64; page.tsx:69)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30 captureException."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Contradicciones en APROBADA sin enviar con toque vencido (manual.ts:670) y en CERRADO (manual.ts:520)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.franja-recorrido",
+   "nombre": "Franja del recorrido",
+   "descripcion": "Los nueve pasos del recorrido con su estado (actual, completado, alcanzable, futuro) y destino navegable.",
+   "archivos": [
+    "src/lib/leados/recorrido.ts",
+    "src/lib/leados/manual.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/franja-recorrido.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "franja-recorrido.tsx:79 -> recorrido.ts:132-160 -> :111-122 destinoDeFase (mismo alcance que el guard) -> manual.ts:303-316 FASES_MANUAL.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Pura sobre la posición ya derivada."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Siempre nueve pasos (recorrido.ts:54-64)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Pura y total."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Heredado de manual/error.tsx."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "destino null evita enlaces que rebotan (recorrido.ts:86-92)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.prompts-de-diseno",
+   "nombre": "Prompts de diseño",
+   "descripcion": "Prompts copiables por fase de Construcción y por check fallado del chequeo final.",
+   "archivos": [
+    "src/lib/leados/prompts-disenio.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "m-construccion.tsx:79 -> prompts-disenio.ts:191-197; chequeo-form.tsx:84 -> :150-154.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "n/a",
+     "evidencia": "Contenido estático lead-agnóstico."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "[] o null sin mapeo (prompts-disenio.ts:152, :193)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Puro."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Estático."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "n/a",
+     "evidencia": "Sin I/O."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Contenido real; el comentario de los seis hard-blocks quedó viejo (higiene)."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Se copia y se pega sin develOP."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-manual",
+   "id": "h5.set-manual.pantalla-de-espera-con-causa",
+   "nombre": "Pantalla de espera con causa",
+   "descripcion": "Estado sin trabajo que nombra el turno y la causa real, con la salida a m5.",
+   "archivos": [
+    "src/lib/leados/turno.ts",
+    "src/lib/leados/manual.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "manual.ts:548/:588/:672 actual 'espera' -> [paso]/page.tsx:118, :154 causaDeEspera (turno.ts:131) -> estado-manual.tsx:74; salida ofreceSalida manual.ts:719-725.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Datos del lead owned vía manual/_data.ts."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Es el estado sin trabajo."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Heredado de manual/error.tsx."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Ofrece registrar una respuesta anticipada (manual.ts:719-725)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.timeline",
+   "nombre": "Timeline del lead",
+   "descripcion": "Historial del lead: contactos comerciales y eventos de sistema, del más nuevo al más viejo.",
+   "archivos": [
+    "src/lib/leados/timeline.ts",
+    "src/lib/leados/ownership.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "manual/_data.ts:158 -> timeline.ts:45-63 -> ownership.ts:24 getOwnedLead -> findMany timelineActivityWhere(lead.id).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "getOwnedLead antes de leer (timeline.ts:49-50); null sin filtrar existencia."
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "Devuelve []; el vacío lo pinta lead-timeline.tsx (fuera del lote)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Sin catch: va a manual/error.tsx."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "leadId resuelto por ownership (timeline.ts:49)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "manual/error.tsx:30."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Lectura."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.contador-dms-hoy",
+   "nombre": "DMs mandados hoy",
+   "descripcion": "Conteo informativo de DMs de Instagram del setter en el día argentino.",
+   "archivos": [
+    "src/lib/leados/outreach.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/outreach.actions.ts",
+    "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "manual/_data.ts:153 / outreach.actions.ts:73 -> outreach.ts:67-72 -> :21-33 -> dmsMandadosHoyWhere (isolation.ts, gte/lte).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Filtrado por performedById en isolation (outreach.ts:70)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Un número."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Sin catch: error.tsx."
+    },
+    "carga": {
+     "cumple": "si",
+     "evidencia": "manual/loading.tsx."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Sin input."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Heredado."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Informativo, no bloquea."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.escalamiento-construccion",
+   "nombre": "Me trabé (escalamiento)",
+   "descripcion": "Aviso por Telegram a Franco con contexto cuando el setter se traba construyendo la demo.",
+   "archivos": [
+    "src/lib/leados/notify.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dossier.actions.ts:438 -> notify.ts:36-72 -> sendTelegram (flujo D7 'Aviso por Telegram').",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "El lib no valida ownership (notify.ts:41); la action llama después de marcarEscaladoOwned (notify.ts:29-35)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Mutación."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Devuelve false para que la UI le pida al setter escribir directo (notify.ts:14-16, :67-71)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Lo resuelve el form (fuera del lote)."
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "Descripción recortada a 800 y escapada (notify.ts:64); el schema está en la action (fuera del lote)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error en notify.ts:69."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "El registro durable no depende de Telegram (notify.ts:31-34)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.aviso-reunion-agendada",
+   "nombre": "Traspaso de reunión agendada",
+   "descripcion": "Telegram a Franco con negocio, horario, invitado y notas al agendar.",
+   "archivos": [
+    "src/lib/leados/notify.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/agenda.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "agenda.actions.ts:263 -> notify.ts:79-118 -> sendTelegram.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Lo llama la action tras su ownership; el lib lee por leadId (notify.ts:81)."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Mutación."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "No devuelve resultado: un fallo no se le informa a nadie (notify.ts:115-117)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Fondo."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "AgendaSchema.safeParse y estado AGENDADA (notify.ts:95-96); valores escapados."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error notify.ts:116."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Automático."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-lead",
+   "id": "h5.set-lead.aviso-score-alto",
+   "nombre": "Aviso de evaluación con score alto",
+   "descripcion": "Telegram informativo a Franco cuando el setter evalúa con score >= 4, una sola vez por dossier.",
+   "archivos": [
+    "src/lib/leados/notify.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/dossier.actions.ts"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "dossier.actions.ts:164-166 -> notify.ts:128-177 (idempotencia :147, marca tras envío :165-173).",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Lo llama registrarEvaluacion tras su ownership."
+    },
+    "vacios": {
+     "cumple": "n/a",
+     "evidencia": "Mutación."
+    },
+    "errores": {
+     "cumple": "parcial",
+     "evidencia": "Fallo silencioso (notify.ts:174-176)."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Fondo (aunque la action hace await)."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "EvaluacionSchema.safeParse (notify.ts:144)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI."
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error notify.ts:175."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Automático."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.set-importar",
+   "id": "h5.set-importar.csv",
+   "nombre": "Importación CSV de prospectos",
+   "descripcion": "Alta masiva por CSV con plantilla, preview, dedup en lote y reporte de inválidas y duplicadas.",
+   "archivos": [
+    "src/lib/leados/prospecto-import.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts",
+    "src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "prospecto-bulk.actions.ts:40 requireSetter -> :48 parseCsv (prospecto-import.ts:89) / mapearFilas (:182) -> :53 MAX_FILAS_IMPORT -> dedupEnLote :254 -> construirAltasLote :280 -> ownedLeadCreateData.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Dueño forzado a la sesión por fila (prospecto-import.ts:280-285; prospecto-bulk.actions.ts:40)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "'El archivo está vacío.' (prospecto-import.ts:183-185); sin filas de datos (prospecto-bulk.actions.ts:50-52)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Mensajes útiles por columna faltante (prospecto-import.ts:196-202) y por fila (FilaInvalida :288-293)."
+    },
+    "carga": {
+     "cumple": "parcial",
+     "evidencia": "El estado pending del form está fuera del lote."
+    },
+    "validacion_servidor": {
+     "cumple": "si",
+     "evidencia": "NuevoProspectoSchema por fila (prospecto.schemas.ts:40-46); tope de 500 (prospecto-bulk.actions.ts:53)."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "parcial",
+     "evidencia": "Depende del catch de la action (fuera del lote)."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "La plantilla de ejemplo es una descarga, no un dato del camino (prospecto-import.ts:54-68)."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "Una comilla suelta se traga filas sin aviso (hallazgo)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.adm-revision-demos",
+   "id": "h5.adm-revision-demos.panorama-produccion",
+   "nombre": "Panorama de producción",
+   "descripcion": "Carriles por etapa con SLA, atascos (incluye RECHAZADA) y escalamientos vigentes.",
+   "archivos": [
+    "src/lib/leados/pipeline.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/leados/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "admin/leados/page.tsx:101-103 -> pipeline.ts:109-125, :135-143, :167-184.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "SUPER_ADMIN por admin/layout.tsx:47 (heredado; patrón D1-c2 de páginas sin guard propio)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Carriles vacíos incluidos (pipeline.ts:104-107)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Puro; error.tsx del admin."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Fuera del lote."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI en el lote."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Heredado."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "APROBADA sin link no se ve como atasco (SLA Infinity pipeline.ts:58; PLAN-672)."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h5.adm-revision-demos",
+   "id": "h5.adm-revision-demos.ratio-descarte",
+   "nombre": "Ratio descarte/avance por setter",
+   "descripcion": "Métrica anti-rubber-stamp total y de 30 días con alarma 'nunca descarta'.",
+   "archivos": [
+    "src/lib/leados/revision.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/leados/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "admin/leados/page.tsx:274 -> revision.ts:143 alarmaNuncaDescarta; revision.ts:96-134 calcularRatioSetters.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Admin (layout heredado)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "pctDescarte null sin evaluaciones (revision.ts:137-140)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Puro."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Fuera del lote."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Heredado."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "Lectura de gestión."
+    }
+   }
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "herramienta": "h4.adm-leads",
+   "id": "h4.adm-leads.carga-por-setter",
+   "nombre": "Carga y ratio en la asignación",
+   "descripcion": "Leads activos y % de descarte de cada setter en el selector de asignación del lead.",
+   "archivos": [
+    "src/lib/leados/setter-carga.ts"
+   ],
+   "entradas": [
+    "src/app/(protected)/admin/leads/[leadId]/page.tsx"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "admin/leads/[leadId]/page.tsx:225 -> setter-carga.ts:55-122 -> revision.ts:96.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "Admin (layout heredado)."
+    },
+    "vacios": {
+     "cumple": "si",
+     "evidencia": "Setter sin datos: activos 0 y ratio null (setter-carga.ts:51-53, :106-119)."
+    },
+    "errores": {
+     "cumple": "si",
+     "evidencia": "Sin catch: error.tsx del admin."
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "Fuera del lote."
+    },
+    "validacion_servidor": {
+     "cumple": "n/a",
+     "evidencia": "Lectura."
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "Sin UI."
+    },
+    "sentry": {
+     "cumple": "si",
+     "evidencia": "Heredado."
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "Sin TODO/FIXME."
+    },
+    "autonomia": {
+     "cumple": "parcial",
+     "evidencia": "La carga incluye leads descartados (setter-carga.ts:65-67)."
     }
    }
   }

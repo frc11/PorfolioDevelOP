@@ -1,0 +1,487 @@
+{
+ "D4-c1/D4-L1/H01": {
+  "decision": "fusionar",
+  "con": "BUG-038",
+  "nota_padre": "Leído: lib/leados/agenda.ts:57-61 (findMany global de orgs con calComUsername, sin filtro por la org de develOP), :70-84 (con más de una corta) y :86-96 (con una sola toma su username y slug); setter/_actions/agenda.actions.ts:134-143 y :185-219 piden horarios y reservan con esa config. Misma causa que BUG-038; suma el caso de la única org que es un cliente. Dos verificadores la bajaron a MEDIA y uno la sostuvo ALTA; queda MEDIA porque hoy calCom* no tiene escritor en la app (FAL-004) y el escenario exige cargarlo a mano.",
+  "verificado_padre": true,
+  "destino": {
+   "titulo": "La agenda del setter usa «la única org con calComUsername»: con dos orgs configuradas se rompe, y si la única es un cliente reserva en su Cal.com con el nombre y el email del prospecto"
+  }
+ },
+ "D4-c1/D4-L3/H02": {
+  "decision": "fusionar",
+  "con": "BUG-038",
+  "nota_padre": "Misma causa (agenda.ts:57-96); suma createBooking con nombre y email del prospecto en la cuenta ajena."
+ },
+ "D4-c1/D4-L5/H01": {
+  "decision": "fusionar",
+  "con": "BUG-038",
+  "nota_padre": "Misma causa (agenda.ts:58-61 y :86-96)."
+ },
+ "D4-c1/D4-L1/H12": {
+  "decision": "fusionar",
+  "con": "BUG-047",
+  "nota_padre": "BUG-047 ya registra que os-follow-up solo está en vercel.json; suma lo que deja de pasar (el digest de follow-ups y el reactivado de postergados)."
+ },
+ "D4-c1/D4-L4/H04": {
+  "decision": "fusionar",
+  "con": "BUG-047",
+  "nota_padre": "Mismo faltante (os-follow-up sin disparador en Netlify)."
+ },
+ "D4-c1/D4-L1/H13": {
+  "decision": "fusionar",
+  "con": "SEC-023",
+  "nota_padre": "Mismo patrón (/admin/leados, su detalle, la evaluación por setter y /admin/fg2-lab leen la base confiando en el layout); SEC-023 ya marca estas páginas como ZONA-FRANCO."
+ },
+ "D4-c1/D4-L3/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: lib/leados/contracts.ts:20-27 (todo textoLibre tiene max 5000), ficha-form.tsx:134-149 (aPayload: si safeParse falla solo vacía los enlaces y vuelve a llamar FichaSchema.parse, que lanza) y :200 (aPayload corre en un useMemo del render); el Textarea del kit no pone maxLength. Pegar más de 5000 caracteres tira la pantalla al error boundary y lo pegado se pierde. El verificador la bajó a MEDIA (afecta al setter, no a un cliente) y se le sigue.",
+  "severidad": "MEDIA",
+  "caso_indice": 0,
+  "titulo": "Textos de más de 5000 caracteres rompen el trabajo del setter: en la ficha tiran la pantalla y se pierde lo pegado, y el pegado del Gem y el motivo de descarte se cortan o invalidan la evaluación (las entradas no tienen tope y el contrato corta en 5000)"
+ },
+ "D4-c1/D4-L3/H05": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L3/H01",
+  "nota_padre": "Misma causa (entrada sin maxLength contra el contrato de 5000 caracteres) en el pegado del Gem de diseño."
+ },
+ "D4-c1/D4-L5/H07": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L3/H01",
+  "nota_padre": "Muestreado: dossier.schemas.ts:28-35 (motivoDescarte sin max), dossier.ts:185-189 (se guarda dentro de evaluacionJson sin re-validar) y contracts.ts:97 (el contrato lo tipa como textoLibre de 5000): misma causa.",
+  "verificado_padre": true
+ },
+ "D4-c1/D4-L4/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: manual.ts:462-467 (m5 cuenta como completada con toques en APROBADA) y :639-648 (con reunión agendada la pantalla actual es m16), el registro de toque (outreach.actions.ts registrarResultado → os-commercial.ts:32-36: un resultado RESPONDIO escribe status RESPONDIO sin mirar el status anterior). Un toque cargado desde m5 sobre un lead CALL_AGENDADA le pisa el estado. El verificador la bajó a MEDIA y se le sigue.",
+  "severidad": "MEDIA",
+  "caso_indice": 0
+ },
+ "D4-c1/D4-L1/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: reunion.actions.ts:31 (RE_SEGUIMIENTO → status RESPONDIO), agenda.ts:377-379 (el cierre solo reescribe la agenda que está AGENDADA, sin pasarla a otro estado en ese resultado), flow.ts:170-172 (reunionAgendada) y agenda.actions.ts:107-109 (bloquea ofrecer horarios con la reunión vieja «agendada»).",
+  "caso_indice": 1
+ },
+ "D4-c1/D4-L5/H03": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L1/H02",
+  "nota_padre": "Mismo defecto (la reunión vieja sigue AGENDADA tras RE_SEGUIMIENTO)."
+ },
+ "D4-c1/D4-L1/H03": {
+  "decision": "aceptar",
+  "caso_indice": 2,
+  "titulo": "Un lead CERRADO (ganado) nunca se archiva en el panel del setter: vuelve a la cola de trabajo, a veces como foco, y el manual sigue pidiendo trabajo"
+ },
+ "D4-c1/D4-L5/H02": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L1/H03",
+  "nota_padre": "Muestreado: flow.ts:417 (solo PERDIDO o DESCARTADA van al archivo; CERRADO no) y reunion.actions.ts:29 (GANADO → CERRADO). Mismo defecto.",
+  "verificado_padre": true
+ },
+ "D4-c1/D4-L6/H05": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L1/H03",
+  "nota_padre": "Mismo defecto (CERRADO no corta la derivación del manual ni del home)."
+ },
+ "D4-c1/D4-L2/H03": {
+  "decision": "aceptar",
+  "titulo": "Cuatro de las cinco herramientas externas del recorrido del setter siguen sin link (TODO) y el rail ofrece el «Chat de evaluación» que el recorrido ya no usa"
+ },
+ "D4-c1/D4-L3/H06": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L2/H03",
+  "nota_padre": "Mismo faltante (herramientas.ts con links en null y el evaluador retirado en el rail)."
+ },
+ "D4-c1/D4-L5/H04": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L2/H03",
+  "nota_padre": "Mismo faltante (herramientas.ts con links en null y el evaluador retirado en el rail)."
+ },
+ "D4-c1/D4-L4/H06": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L2/H03",
+  "nota_padre": "Mismo faltante (herramientas.ts con links en null y el evaluador retirado en el rail)."
+ },
+ "D4-c1/D4-L1/H16": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L2/H03",
+  "nota_padre": "Mismo faltante (registro de herramientas con cuatro links en null y el evaluador obsoleto)."
+ },
+ "D4-c1/D4-L3/H13": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L2/H03",
+  "nota_padre": "Muestreado: herramientas.ts:54-56 y :123 (el «Chat de evaluación» sigue en HERRAMIENTAS_ORDEN) y tools-rail.tsx:26 lo pinta. Mismo hallazgo.",
+  "verificado_padre": true
+ },
+ "D4-c1/D4-L6/H09": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L2/H03",
+  "nota_padre": "Mismo hallazgo (el Chat de evaluación sin pantalla ni link en el rail)."
+ },
+ "D4-c1/D4-L4/H17": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: setter-nav.tsx:45 (triggerTransition como «decisión cerrada · CLAUDE.md»), nuevo-prospecto-form.tsx:95 (router.push justificado) y nuevo/page.tsx:44 (<Link>). CLAUDE.md clasifica solo /admin y /dashboard como portales: /setter queda sin regla. Va a la propuesta de CLAUDE.md de F6.",
+  "titulo": "La navegación del portal del setter no está clasificada en CLAUDE.md: conviven triggerTransition («decisión cerrada»), router.push con y sin justificación y <Link>",
+  "relacionados_ids": [
+   "DEU-035",
+   "DEU-039"
+  ]
+ },
+ "D4-c1/D4-L1/H09": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H17",
+  "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+ },
+ "D4-c1/D4-L3/H12": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H17",
+  "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+ },
+ "D4-c1/D4-L3/H14": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H17",
+  "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+ },
+ "D4-c1/D4-L2/H02": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H17",
+  "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+ },
+ "D4-c1/D4-L6/H10": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H17",
+  "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+ },
+ "D4-c1/D4-L2/H01": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H17",
+  "nota_padre": "Muestreado: foco-surface.tsx:90, novedades-abrir-foco.tsx:47 y trabajar-lead-button.tsx:31 hacen router.push sin comentario. Mismo tema.",
+  "verificado_padre": true
+ },
+ "D4-c1/D4-L2/H04": {
+  "decision": "aceptar",
+  "titulo": "Fechas del setter calculadas con el día UTC: de 21 a 24 h (hora argentina) las pausas quedan un día más largas, Postergar bloquea elegir mañana y la oferta de horarios no incluye los de mañana",
+  "relacionados_ids": [
+   "BUG-034",
+   "BUG-113"
+  ],
+  "caso_indice": 0
+ },
+ "D4-c1/D4-L4/H11": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L2/H04",
+  "nota_padre": "Mismo mecanismo (día calculado en UTC) en la fecha mínima de Postergar."
+ },
+ "D4-c1/D4-L5/H09": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L2/H04",
+  "nota_padre": "Mismo mecanismo en el rango de la oferta de horarios."
+ },
+ "D4-c1/D4-L1/H07": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: novedades.actions.ts:24-26 y lead.actions.ts:67-68 devuelven error.message; prospecto.actions.ts:41 pasa por toErrorMessage (action-utils.ts:31, FROZEN-inferido, SEC-092).",
+  "relacionados_ids": [
+   "SEC-092",
+   "SEC-062"
+  ]
+ },
+ "D4-c1/D4-L4/H19": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L1/H07",
+  "nota_padre": "Mismo defecto (el alta de prospectos muestra el error crudo del servidor)."
+ },
+ "D4-c1/D4-L1/H08": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "FAL-029",
+   "FAL-015"
+  ],
+  "titulo": "Los fallos de LeadOS no llegan a Sentry: las server actions tragan las excepciones y los avisos, el escalamiento y el cron os-follow-up solo hacen console.error"
+ },
+ "D4-c1/D4-L6/H03": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L1/H08",
+  "nota_padre": "Misma causa (fallos de LeadOS solo a console.error: avisos dirigidos, escalamiento, Telegram)."
+ },
+ "D4-c1/D4-L4/H15": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L1/H08",
+  "nota_padre": "Misma causa en el cron os-follow-up."
+ },
+ "D4-c1/D4-L1/H19": {
+  "decision": "aceptar",
+  "titulo": "Schemas de LeadOS con texto libre sin tope de longitud (ficha, alta manual e importación de prospectos)"
+ },
+ "D4-c1/D4-L4/H18": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L1/H19",
+  "nota_padre": "Mismo defecto en el alta manual y la importación."
+ },
+ "D4-c1/D4-L4/H07": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: flow.ts:438-442 (con followUpVencido el grupo es «trabajar») y :539 (la sugerencia dice esperar mientras la demo no se envió).",
+  "caso_indice": 7,
+  "titulo": "Una APROBADA con link, demo sin mandar, gate cerrado y toque vencido entra a «Para trabajar» con una sugerencia de espera, y el manual y el grupo del home se contradicen"
+ },
+ "D4-c1/D4-L5/H05": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H07",
+  "nota_padre": "Mismo escenario y misma contradicción."
+ },
+ "D4-c1/D4-L6/H02": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H07",
+  "nota_padre": "Mismo escenario (manual, grupo y sugerencia se contradicen)."
+ },
+ "D4-c1/D4-L4/H10": {
+  "decision": "aceptar",
+  "titulo": "La maquinaria comercial de LeadOS escribe en pasos sueltos sin transacción (registro de toques, ficha y evaluación, cierre post-reunión con el blob de agenda reescrito entero)"
+ },
+ "D4-c1/D4-L1/H14": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H10",
+  "nota_padre": "Misma causa (escrituras encadenadas sin transacción)."
+ },
+ "D4-c1/D4-L5/H08": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H10",
+  "nota_padre": "Misma causa en el cierre post-reunión."
+ },
+ "D4-c1/D4-L5/H11": {
+  "decision": "aceptar",
+  "titulo": "Blobs del dossier y el gate del self-check acoplados a texto visible o a enums: un renombre los invalida"
+ },
+ "D4-c1/D4-L1/H17": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L5/H11",
+  "nota_padre": "Muestreado: contracts.ts:127 y flow.ts:206-208 (el gate compara item.nombre con el texto de cada chequeo). Misma causa.",
+  "verificado_padre": true
+ },
+ "D4-c1/D4-L4/H13": {
+  "decision": "aceptar",
+  "titulo": "LeadOS reimplementa el día argentino (cron os-follow-up y contador de DMs de outreach) en vez de usar dayRangeAR, y el cron copia la verificación del secreto y el predicado del postergado vencido"
+ },
+ "D4-c1/D4-L6/H11": {
+  "decision": "fusionar",
+  "con": "D4-c1/D4-L4/H13",
+  "nota_padre": "Muestreado: outreach.ts:21-31 arma el día con Intl y -03:00 a mano mientras dates-ar.ts:75 exporta dayRangeAR. Misma deuda.",
+  "verificado_padre": true
+ },
+ "D4-c1/D4-L1/H22": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: inbound.actions.ts:29-30 (startOfDay/endOfDay sobre la fecha del servidor, en UTC en Netlify).",
+  "relacionados_ids": [
+   "BUG-113"
+  ]
+ },
+ "D4-c1/D4-L3/H03": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: bloques-secuenciales.tsx:215 (el contenido solo se monta con el bloque abierto) y evaluacion-form.tsx:85 (score, veredicto y razonamiento en estado local del componente que se desmonta)."
+ },
+ "D4-c1/D4-L3/H08": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: agenda-form.tsx:213 (el primer «Buscar» exige decisorOk) y :237 («Buscar de nuevo» sin disabled); agenda.schemas.ts:10 declara la confirmación pero ofrecerHorarios no la recibe."
+ },
+ "D4-c1/D4-L3/H18": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: evaluacion-form.tsx:192-198 (radiogroup con role=radio en botones, sin manejo de flechas)."
+ },
+ "D4-c1/D4-L2/H06": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: use-keyboard-shortcuts.ts:53 (listener global de keydown) y foco-surface.tsx:151 (t, s, p de una sola letra) sin opción de apagarlos."
+ },
+ "D4-c1/D4-L6/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: mis-numeros.ts:94 (activos = leadActivo(status)) y setter-carga.ts:66 (notIn ESTADOS_TERMINALES = CERRADO y PERDIDO): un descartado conserva su status y cuenta como activo, aunque flow.ts:417 lo manda al archivo.",
+  "caso_indice": 1
+ },
+ "D4-c1/D4-L6/H06": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: prospecto-import.ts:110-130 (una comilla en cualquier posición abre inQuotes y el resto del archivo queda dentro del campo).",
+  "caso_indice": 2
+ },
+ "D4-c1/D4-L4/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: nuevo-prospecto-form.tsx:69 (aviso no bloqueante solo contra la cartera propia), nuevo/page.tsx:22 (lee solo ownedListWhere) y prospecto.actions.ts:28 (crea sin buscar en el sistema); la importación masiva sí deduplica (prospecto-bulk.actions.ts:95).",
+  "caso_indice": 1
+ },
+ "D4-c1/D4-L4/H12": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: manual/_data.ts:208 (comentario: no usar lead.updatedAt) y :286 (cae a lead.updatedAt sin respuesta registrada)."
+ },
+ "D4-c1/D4-L4/H22": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: schema.prisma:876-877 dice que nadie setea ni lee caliente; manual/_data.ts:217 lo lee. El comentario está en el schema (FROZEN): se corrige como decisión para Valentino y Franco."
+ },
+ "D4-c1/D4-L1/H04": {
+  "decision": "aceptar",
+  "caso_indice": 3
+ },
+ "D4-c1/D4-L1/H05": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L1/H06": {
+  "decision": "aceptar",
+  "caso_indice": 4,
+  "relacionados_ids": [
+   "SEC-027"
+  ]
+ },
+ "D4-c1/D4-L1/H10": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L1/H11": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-086"
+  ]
+ },
+ "D4-c1/D4-L1/H15": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L1/H18": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L1/H20": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L1/H21": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "A11Y-019"
+  ]
+ },
+ "D4-c1/D4-L2/H05": {
+  "decision": "aceptar",
+  "caso_indice": 1
+ },
+ "D4-c1/D4-L2/H07": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L2/H08": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L2/H09": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L2/H10": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D4-L3/H07"
+  ]
+ },
+ "D4-c1/D4-L3/H04": {
+  "decision": "aceptar",
+  "caso_indice": 2
+ },
+ "D4-c1/D4-L3/H07": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D4-L2/H10"
+  ]
+ },
+ "D4-c1/D4-L3/H09": {
+  "decision": "aceptar",
+  "caso_indice": 6
+ },
+ "D4-c1/D4-L3/H10": {
+  "decision": "aceptar",
+  "caso_indice": 5,
+  "relacionados_ids": [
+   "BUG-034"
+  ]
+ },
+ "D4-c1/D4-L3/H11": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L3/H15": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L3/H16": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L3/H17": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L4/H03": {
+  "decision": "aceptar",
+  "caso_indice": 2
+ },
+ "D4-c1/D4-L4/H05": {
+  "decision": "aceptar",
+  "caso_indice": 4,
+  "relacionados_ids": [
+   "BUG-100"
+  ]
+ },
+ "D4-c1/D4-L4/H08": {
+  "decision": "aceptar",
+  "caso_indice": 6
+ },
+ "D4-c1/D4-L4/H09": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L4/H14": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L4/H16": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L4/H20": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "A11Y-021"
+  ]
+ },
+ "D4-c1/D4-L4/H21": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-136"
+  ]
+ },
+ "D4-c1/D4-L5/H06": {
+  "decision": "aceptar",
+  "caso_indice": 3
+ },
+ "D4-c1/D4-L5/H10": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D4-L6/H08"
+  ]
+ },
+ "D4-c1/D4-L6/H04": {
+  "decision": "aceptar",
+  "caso_indice": 3
+ },
+ "D4-c1/D4-L6/H07": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L6/H08": {
+  "decision": "aceptar",
+  "relacionados_tmp": [
+   "D4-L5/H10"
+  ]
+ },
+ "D4-c1/D4-L6/H12": {
+  "decision": "aceptar"
+ },
+ "D4-c1/D4-L6/H13": {
+  "decision": "aceptar"
+ }
+}

@@ -2191,6 +2191,4214 @@
     "verificador": null
    },
    "estado": "vigente"
+  },
+  {
+   "id": "BUG-146",
+   "prefijo": "BUG",
+   "titulo": "Tras RE_SEGUIMIENTO el setter no puede volver a agendar: la agenda queda AGENDADA para siempre",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/reunion.actions.ts",
+     "linea": 31,
+     "fragmento": "RE_SEGUIMIENTO: LeadStatus.RESPONDIO,"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 378,
+     "fragmento": "where: { leadId, agendaJson: { path: ['estado'], equals: 'AGENDADA' } },"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 171,
+     "fragmento": "return agenda?.estado === 'AGENDADA' && Boolean(agenda.calBookingUid)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 108,
+     "fragmento": "if (reunionAgendada(parseAgenda(dossier.agendaJson))) {"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 373,
+     "fragmento": "const parsed = AgendaSchema.parse({\n  ...agenda,\n  resultado: { tipo, fecha: new Date().toISOString(), nota },"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 174,
+     "fragmento": "const PARTIDA_RECLAMABLE: Prisma.OsLeadDossierWhereInput[] = [\n  { agendaJson: { equals: Prisma.AnyNull } },\n  { agendaJson: { path: ['estado'], equals: 'OFRECIDOS' } },"
+    }
+   ],
+   "impacto": "El resultado RE_SEGUIMIENTO devuelve el lead a RESPONDIO pero solo agrega 'resultado' al blob de agenda; gateAgenda sigue viendo una reunión agendada y rechaza ofrecer horarios y confirmar. El lead queda en un estado sin salida desde el panel (b8a H2 sigue abierto); la única vía es que Franco agende por fuera y mueva el estado a mano.",
+   "propuesta": "Que el resultado RE_SEGUIMIENTO archive la agenda anterior (o que reunionAgendada ignore las agendas con resultado) y cubrirlo con un caso de prueba del ciclo agendar -> re-seguimiento -> re-agendar.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h4.adm-leads.cierre-reunion",
+    "h5.set-manual.agenda-reunion",
+    "lib.leados",
+    "modelo.OsLeadDossier",
+    "h5.set-lead.agenda-reunion",
+    "h4.adm-leads.cierre-post-reunion"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "b8a H2",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H02",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: reunion.actions.ts:31 (RE_SEGUIMIENTO → status RESPONDIO), agenda.ts:377-379 (el cierre solo reescribe la agenda que está AGENDADA, sin pasarla a otro estado en ese resultado), flow.ts:170-172 (reunionAgendada) y agenda.actions.ts:107-109 (bloquea ofrecer horarios con la reunión vieja «agendada»).",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L5/H03",
+      "titulo": "Tras un resultado RE_SEGUIMIENTO la reunión vieja sigue 'agendada' y el setter no puede volver a agendar",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo defecto (la reunión vieja sigue AGENDADA tras RE_SEGUIMIENTO)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-147",
+   "prefijo": "BUG",
+   "titulo": "Un lead CERRADO (ganado) nunca se archiva en el panel del setter: vuelve a la cola de trabajo, a veces como foco, y el manual sigue pidiendo trabajo",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/reunion.actions.ts",
+     "linea": 29,
+     "fragmento": "GANADO: LeadStatus.CERRADO,"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 417,
+     "fragmento": "if (input.status === 'PERDIDO' || input.stage === 'DESCARTADA') return 'archivo'"
+    },
+    {
+     "ruta": "src/lib/leados/revision.ts",
+     "linea": 27,
+     "fragmento": "export const ESTADOS_TERMINALES: LeadStatus[] = ['CERRADO', 'PERDIDO']"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/outreach.actions.ts",
+     "linea": 169,
+     "fragmento": "if (!leadActivo(lead.status)) {"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 73,
+     "fragmento": "'CERRADO',"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 740,
+     "fragmento": "if (lead.stage === 'EVALUADA' && lead.gateAbierto) return TRABAJO_TIER.CONSTRUIR"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 99,
+     "fragmento": "if (lead.status !== LeadStatus.RESPONDIO) {"
+    },
+    {
+     "ruta": "src/lib/leados/ownership.ts",
+     "linea": 54,
+     "fragmento": "where: ownedListWhere(userId),"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 520,
+     "fragmento": "if (input.status === 'PERDIDO') {\n    return { actual: 'archivo', habilitadas: [] }"
+    },
+    {
+     "ruta": "src/lib/leados/paso-admitido.ts",
+     "linea": 47,
+     "fragmento": "return i.status === 'PERDIDO' || i.stage === 'DESCARTADA'"
+    },
+    {
+     "ruta": "src/lib/leados/turno.ts",
+     "linea": 106,
+     "fragmento": "CERRADO: 'cierre',"
+    }
+   ],
+   "impacto": "grupoPara y proximaAccionPara no contemplan CERRADO: un lead ganado vía reunión (o movido a CERRADO desde el kanban con updateLeadStatus, lead.actions.ts:102-108) sigue en 'seguimiento' o incluso en la cola 'trabajar' del setter, mientras registrarResultado lo rechaza como cerrado. El setter ve trabajo sobre un negocio ya vendido y los contadores de 'en vuelo' quedan inflados.",
+   "propuesta": "Tratar CERRADO como terminal también en la partición (archivo o grupo 'ganados') usando la misma fuente ESTADOS_TERMINALES; agregar el caso al invariante de partición.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia.cola-del-dia",
+    "h4.adm-leads.cierre-reunion",
+    "h4.adm-leads.crud-y-estado",
+    "lib.leados",
+    "modelo.OsLead",
+    "h5.set-dia",
+    "h5.set-dia.foco-y-cola",
+    "h5.set-dia.cartera-vistas-y-filtros",
+    "h4.adm-leads.cierre-post-reunion",
+    "h5.set-manual.derivacion-de-pantalla"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "C-03",
+   "vh": "VH-142",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H03",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L5/H02",
+      "titulo": "Un lead ganado (CERRADO) vuelve a la cola de trabajo del setter, a veces como foco",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: flow.ts:417 (solo PERDIDO o DESCARTADA van al archivo; CERRADO no) y reunion.actions.ts:29 (GANADO → CERRADO). Mismo defecto."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L6/H05",
+      "titulo": "CERRADO no corta la derivación: el manual y el home siguen pidiendo trabajo sobre un negocio cerrado",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo defecto (CERRADO no corta la derivación del manual ni del home)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-148",
+   "prefijo": "BUG",
+   "titulo": "La métrica descarte/avance atribuye cada evaluación al dueño actual del lead, no al setter que evaluó",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leados/page.tsx",
+     "linea": 53,
+     "fragmento": "where: { lead: { assignedToId: { not: null } } },"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/page.tsx",
+     "linea": 128,
+     "fragmento": "setterId: assignedTo.id,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/setter/[setterId]/page.tsx",
+     "linea": 42,
+     "fragmento": "where: { lead: { assignedToId: setterId } },"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 93,
+     "fragmento": "export const EvaluacionSchema = z.object({ score, veredicto, razonamiento, ... fecha })"
+    }
+   ],
+   "impacto": "El blob de evaluación no guarda quién evaluó. Después de una reasignación, los descartes del setter A cuentan para B; la alarma 'Nunca descarta — revisar criterio' puede encenderse o apagarse sobre la persona equivocada, y los leads desasignados desaparecen de la métrica. Es el criterio con el que Franco juzga a los setters.",
+   "propuesta": "Estampar el userId del evaluador en la evaluación al transicionar a EVALUADA y agrupar por ese campo; las evaluaciones viejas, como 'sin autor'.",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.adm-revision-demos.metrica-descarte",
+    "lib.leados",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-676, PLAN-619",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-149",
+   "prefijo": "BUG",
+   "titulo": "La compensación de confirmarReunion silencia el fallo de cancelación y afirma que el booking se canceló",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 253,
+     "fragmento": "await cancelBooking(bookingUid, 'LeadOS no pudo registrar la reunión — reintentar').catch(() => undefined,)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 258,
+     "fragmento": "console.error('[b7 confirmarReunion] registro local falló, booking compensado:', error)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 259,
+     "fragmento": "return fail('No se pudo registrar la reunión — el booking se canceló solo, reintentá')"
+    }
+   ],
+   "impacto": "Si falla el registro local y también falla cancelBooking, el prospecto ya recibió la confirmación de Cal.com, LeadOS dice que se canceló y el setter reintenta: doble reunión en el calendario de Franco. El evento solo queda en console.error, sin Sentry.",
+   "propuesta": "Distinguir en el mensaje si la cancelación se confirmó; si no, avisar a Franco (Telegram/novedad) con el uid y capturar en Sentry. b8a H1 queda resuelto en lo demás.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.agenda-reunion",
+    "int.calcom",
+    "int.sentry"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "b8a H1",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-100",
+   "prefijo": "SEC",
+   "titulo": "El panel SUPER_ADMIN embebe la URL del borrador del setter en un iframe sin sandbox",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
+     "linea": 237,
+     "fragmento": "<iframe src={dossier.draftUrl} title={`Demo de ${dossier.lead.businessName}`} ..."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.schemas.ts",
+     "linea": 118,
+     "fragmento": ".refine((url) => url.startsWith('https://'), 'La URL tiene que empezar con https://')"
+    },
+    {
+     "ruta": "next.config.ts",
+     "linea": 72,
+     "fragmento": "key: 'Content-Security-Policy-Report-Only',"
+    }
+   ],
+   "impacto": "Un usuario SETTER (rol de menor privilegio) controla una página que se carga, sin atributo sandbox y con la CSP solo en modo report, dentro de la vista de revisión del SUPER_ADMIN: puede mostrar un falso 'sesión vencida, volvé a entrar', abrir popups o disparar descargas desde el contexto de confianza del admin.",
+   "propuesta": "Agregar sandbox (allow-scripts, allow-same-origin solo si hace falta para la demo) y referrerpolicy al iframe, o restringir draftUrl a dominios esperados (*.netlify.app).",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.adm-revision-demos.cola-y-veredicto",
+    "h5.set-lead.brief-construccion-revision",
+    "lib.security"
+   ],
+   "relacionados_ids": [
+    "SEC-027"
+   ],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-143",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-101",
+   "prefijo": "SEC",
+   "titulo": "Acciones de LeadOS devuelven mensajes internos de error (Prisma/Zod) al setter y al admin",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_actions/novedades.actions.ts",
+     "linea": 25,
+     "fragmento": "error instanceof Error ? error.message : 'No se pudieron marcar las novedades',"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/prospecto.actions.ts",
+     "linea": 41,
+     "fragmento": "return fail(toErrorMessage(error, 'No se pudo cargar el prospecto'))"
+    },
+    {
+     "ruta": "src/lib/action-utils.ts",
+     "linea": 31,
+     "fragmento": "if (error instanceof Error) { return error.message"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "linea": 68,
+     "fragmento": "return fail(error instanceof Error ? error.message : 'Failed to create lead')"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
+     "linea": 90,
+     "fragmento": "setServerError(result.error)\n        toast.error(result.error)"
+    }
+   ],
+   "impacto": "Un error de base en el alta/importación (prospecto-bulk.actions.ts:120 igual) o al marcar novedades le muestra al setter el texto crudo de Prisma (tablas, constraints) o 'Unauthorized'; en las 16 acciones admin de admin/leads/_actions pasa lo mismo. Viola la regla del repo y confunde a un usuario no técnico.",
+   "propuesta": "Usar el mapError con fallback que ya usan dossier/outreach/cartera (que solo traduce errores conocidos) en novedades, prospecto y prospecto-bulk, y en las acciones admin; toErrorMessage es FROZEN (action-utils): decisión para Valentino si se acota a ZodError.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia.novedades",
+    "h5.set-nuevo.alta-prospecto",
+    "h5.set-importar.importar-csv",
+    "h4.adm-leads",
+    "lib.actions",
+    "h5.set-nuevo.alta-manual"
+   ],
+   "relacionados_ids": [
+    "SEC-092",
+    "SEC-062"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c1",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H07",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: novedades.actions.ts:24-26 y lead.actions.ts:67-68 devuelven error.message; prospecto.actions.ts:41 pasa por toErrorMessage (action-utils.ts:31, FROZEN-inferido, SEC-092).",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L4/H19",
+      "titulo": "El alta de prospectos le muestra al setter el texto crudo del error del servidor",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo defecto (el alta de prospectos muestra el error crudo del servidor)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-031",
+   "prefijo": "FAL",
+   "titulo": "Los fallos de LeadOS no llegan a Sentry: las server actions tragan las excepciones y los avisos, el escalamiento y el cron os-follow-up solo hacen console.error",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.actions.ts",
+     "linea": 71,
+     "fragmento": "function mapError(error: unknown, fallback: string) { ... return fail(fallback) }"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/outreach.actions.ts",
+     "linea": 52,
+     "fragmento": "function mapError(error: unknown, fallback: string): ActionResult<never> {"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/_actions/revision.actions.ts",
+     "linea": 52,
+     "fragmento": "console.error('[revision] aviso al setter no fatal:', error)"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 297,
+     "fragmento": "console.error('[cron os-follow-up] execution error:', error)"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 270,
+     "fragmento": "return NextResponse.json(\n        { ok: false, error: 'Telegram send failed' },"
+    },
+    {
+     "ruta": "src/lib/leados/novedades.ts",
+     "linea": 131,
+     "fragmento": "console.error('[novedades] fallo no fatal al emitir novedad:', error)"
+    },
+    {
+     "ruta": "src/lib/leados/novedades.ts",
+     "linea": 303,
+     "fragmento": "console.error('[novedades] fallo no fatal al leer avisos:', error)\n    return { filas: [], ocultos: 0, revision, totalSinLeer: 0 }"
+    },
+    {
+     "ruta": "src/lib/leados/notify.ts",
+     "linea": 69,
+     "fragmento": "console.error('[leados notify] fallo no fatal:', error)"
+    },
+    {
+     "ruta": "src/lib/leados/notify.ts",
+     "linea": 175,
+     "fragmento": "console.error('[leados notify] fallo no fatal:', error)"
+    },
+    {
+     "ruta": "src/lib/leados/progreso.ts",
+     "linea": 122,
+     "fragmento": "console.error('[progreso] fallo no fatal al contar contactos:', error)"
+    }
+   ],
+   "impacto": "Ninguna de las ~40 acciones del lote llama a captureException (git grep: 0); la mayoría ni siquiera loguea. Un fallo de Neon o de Cal.com en el flujo del setter queda como un toast genérico, invisible para Franco y para Sentry. Bloquea el criterio Sentry de L3 en todo LeadOS.",
+   "propuesta": "En cada mapError, antes del fallback, capturar con Sentry (tag section: leados, acción y leadId) los errores no esperados; mantener el copy al usuario.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-lead",
+    "h5.set-manual",
+    "h5.adm-revision-demos",
+    "int.sentry",
+    "lib.leados",
+    "int.cron.os-follow-up",
+    "h5.set-dia.novedades-dirigidas",
+    "h5.set-lead.escalamiento-construccion",
+    "int.telegram",
+    "modelo.OsSetterNotice"
+   ],
+   "relacionados_ids": [
+    "FAL-029",
+    "FAL-015"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c1 (console.error sin Sentry)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L4/H15",
+      "titulo": "Los fallos del cron os-follow-up solo van a console.error (sin Sentry)",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa en el cron os-follow-up."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L6/H03",
+      "titulo": "Fallos de LeadOS que solo hacen console.error: avisos y novedades que se pierden sin rastro en Sentry",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa (fallos de LeadOS solo a console.error: avisos dirigidos, escalamiento, Telegram)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-032",
+   "prefijo": "FAL",
+   "titulo": "La revisión de Franco no muestra los materiales de la ficha",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
+     "linea": 236,
+     "fragmento": "const FICHA_BLOQUES: Array<{ key: keyof Ficha; label: string }> = ["
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
+     "linea": 256,
+     "fragmento": "return typeof valor === 'string' && valor.trim() !== '' ? valor : null"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 73,
+     "fragmento": "materiales: z.object({ resenasUrl, imagenesUrl, otraRedUrl, queVende, comoSePresenta })"
+    }
+   ],
+   "impacto": "El setter carga en la ficha los links de reseñas e imágenes reales, qué vende y cómo se presenta (P5-A), pero el panel de revisión solo lista los seis bloques viejos y descarta todo lo que no es string: Franco aprueba o rechaza la demo sin ver el material que debía usar (PLAN-667 sigue abierto).",
+   "propuesta": "Agregar un bloque 'Material del negocio' que renderice materiales (links como enlaces externos) en FichaPanel.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.adm-revision-demos.cola-y-veredicto",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-667",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-074",
+   "prefijo": "DEU",
+   "titulo": "deleteLead borra en cascada el trabajo del setter sin auditoría ni aviso",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "linea": 237,
+     "fragmento": "await prisma.osLead.delete({ where: { id: parsedLeadId },"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 919,
+     "fragmento": "lead   OsLead @relation(fields: [leadId], references: [id], onDelete: Cascade)"
+    }
+   ],
+   "impacto": "Un borrado desde el kanban elimina dossier, brief, self-check, historial de rechazos, actividades, demos y meta del setter (relaciones Cascade en schema.prisma:919, :965, :983, :1017) sin AuditLog y sin la novedad 'te sacaron un lead' que sí emite la reasignación (lead.actions.ts:199-203). Ninguna acción admin de este lote escribe auditoría.",
+   "propuesta": "Registrar auditoría y emitir LEAD_REASIGNADO_SALIENTE al dueño antes de borrar; evaluar soft-delete (archivar) para leads con dossier. El schema es FROZEN: el cambio de modelo es decisión para Valentino.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h4.adm-leads.crud-y-estado",
+    "modelo.OsLead",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [
+    "SEC-086"
+   ],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-150",
+   "prefijo": "BUG",
+   "titulo": "updateLeadStatus del kanban mueve el status por fuera de la puerta comercial",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "linea": 102,
+     "fragmento": "const lead = await prisma.osLead.update({ where: { id: parsed.leadId }, data: { status: parsed.status,"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.actions.ts",
+     "linea": 238,
+     "fragmento": "// La puerta comercial EXISTENTE: mueve a CALL_AGENDADA y frena follow-ups."
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 184,
+     "fragmento": "notIn: [LeadStatus.CERRADO, LeadStatus.PERDIDO],"
+    }
+   ],
+   "impacto": "Un drag a CALL_AGENDADA/RESPONDIO no limpia nextFollowUpAt ni deja actividad, y no crea agenda: el lead aparece agendado sin reunión, el gate del setter (agenda.actions.ts:96-98) lo trata como agendado y el cron (si corriera) seguiría avisando toques vencidos.",
+   "propuesta": "Hacer pasar los cambios manuales por os-commercial (o limpiar nextFollowUpAt y registrar una actividad SISTEMA) y restringir los estados que el kanban puede setear a mano.",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h4.adm-leads.crud-y-estado",
+    "int.cron.os-follow-up",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H15",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-102",
+   "prefijo": "SEC",
+   "titulo": "La importación lee todos los OsLead del sistema y expone si un negocio ya existe",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts",
+     "linea": 144,
+     "fragmento": "const todos = await prisma.osLead.findMany({ select: { businessName: true } })"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts",
+     "linea": 95,
+     "fragmento": "duplicadas.push({ fila: u.fila, nombre: u.data.businessName, motivo: 'en-sistema' })"
+    }
+   ],
+   "impacto": "Cada tanda trae la tabla completa a memoria (crece sin tope) y un setter puede sondear nombres para saber si otro setter ya tiene ese negocio. Es la excepción documentada (PLAN-763); con un equipo chico es aceptable.",
+   "propuesta": "Si crece: consulta por lote de nombres normalizados (in) con índice, en vez de traer todo.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-importar.importar-csv",
+    "modelo.OsLead"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-763",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H18",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-103",
+   "prefijo": "SEC",
+   "titulo": "Schemas de LeadOS con texto libre sin tope de longitud (ficha, alta manual e importación de prospectos)",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.schemas.ts",
+     "linea": 29,
+     "fragmento": "razonamiento: z.string().trim().min(1, 'Escribí por qué le pusiste ese score'),"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.schemas.ts",
+     "linea": 82,
+     "fragmento": "titulo: z.string().trim().min(1, ...), concepto, secciones, notasMarca, cta, pegadoGem sin .max"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/prospecto.schemas.ts",
+     "linea": 20,
+     "fragmento": "const optionalString = z.preprocess(emptyToUndefined, z.string().optional())"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.schemas.ts",
+     "linea": 44,
+     "fragmento": "businessName: z.string().trim().min(1, 'Business name is required'),"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
+     "linea": 79,
+     "fragmento": "const parsed = NuevoProspectoSchema.safeParse(form)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx",
+     "linea": 43,
+     "fragmento": "if (!NuevoProspectoSchema.safeParse(f.data).success) invalidas++"
+    }
+   ],
+   "impacto": "Razonamiento, brief, campos del alta y notas de actividad/demo (activity.schemas.ts:15, demo.schemas.ts:17) aceptan cualquier largo hasta el límite del body: blobs JSON enormes en el dossier y en las pantallas de Franco. Usuarios internos, riesgo bajo.",
+   "propuesta": "Agregar .max razonables (como ya tienen nota 240, opener 1000, rechazo 2000).",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-lead",
+    "h5.set-nuevo",
+    "h4.adm-leads",
+    "h5.set-nuevo.alta-manual",
+    "h5.set-importar.importar-csv"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c3",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H19",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L4/H18",
+      "titulo": "Campos de texto libre del alta de prospectos sin .max() (alta manual e importación)",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo defecto en el alta manual y la importación."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-075",
+   "prefijo": "DEU",
+   "titulo": "listLeads y getLeadById son server actions públicas sin importadores",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "linea": 249,
+     "fragmento": "export async function listLeads(): Promise<"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "linea": 275,
+     "fragmento": "export async function getLeadById("
+    }
+   ],
+   "impacto": "Código muerto expuesto como endpoint de server action (guardado por requireSuperAdmin) que devuelve error.message crudo; confunde a quien busque la fuente de verdad del listado.",
+   "propuesta": "Borrarlas.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h4.adm-leads"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c1 (use server sin importadores)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H20",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-026",
+   "prefijo": "A11Y",
+   "titulo": "Los modales de aprobar/rechazar no son diálogos accesibles y sus errores no se anuncian",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx",
+     "linea": 65,
+     "fragmento": "<div className=\"fixed inset-0 z-[130] flex items-center justify-center ...\">"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx",
+     "linea": 236,
+     "fragmento": "<div className=\"rounded-2xl border border-rose-400/20 bg-rose-500/10 ...\">{serverError}"
+    }
+   ],
+   "impacto": "El overlay no tiene role=dialog, aria-modal, cierre con Escape ni foco inicial/atrapado; los errores de campo (:231, :277) y del servidor no tienen role=alert ni aria-describedby. Con lector de pantalla o teclado la decisión de revisión es difícil.",
+   "propuesta": "Usar un componente de diálogo con foco atrapado (o agregar role/aria-modal/Escape) y role=alert en los bloques de error.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.adm-revision-demos.cola-y-veredicto"
+   ],
+   "relacionados_ids": [
+    "A11Y-019"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c1 (errores sin role=alert)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H21",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-151",
+   "prefijo": "BUG",
+   "titulo": "El rango personalizado de inbound se calcula en UTC, no en hora argentina",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/inbound.actions.ts",
+     "linea": 29,
+     "fragmento": "const from = range.from ? startOfDay(new Date(range.from)) : subMonths(now, 1)"
+    }
+   ],
+   "impacto": "new Date('YYYY-MM-DD') es medianoche UTC: el filtro 'desde/hasta' incluye la noche anterior y corta las últimas 3 horas del último día en AR. Contactos inbound del cierre del día quedan fuera del rango elegido.",
+   "propuesta": "Usar parseCalendarDayAR (dates-ar) como ya hacen outreach.schemas.ts:59-62 y cartera.schemas.ts:49-53.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h4.adm-leads.inbound-a-oslead",
+    "modelo.ContactSubmission"
+   ],
+   "relacionados_ids": [
+    "BUG-113"
+   ],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L1",
+    "tmp": "D4-c1/D4-L1/H22",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: inbound.actions.ts:29-30 (startOfDay/endOfDay sobre la fecha del servidor, en UTC en Netlify).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-033",
+   "prefijo": "FAL",
+   "titulo": "Cuatro de las cinco herramientas externas del recorrido del setter siguen sin link (TODO) y el rail ofrece el «Chat de evaluación» que el recorrido ya no usa",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 63,
+     "fragmento": "url: null, // TODO: URL — chat de evaluación en Sonnet (pedir a Franco)"
+    },
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 123,
+     "fragmento": "'evaluador',"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+     "linea": 41,
+     "fragmento": "<span className=\"shrink-0 text-[10px] uppercase tracking-wide text-amber-300/50\">\n  pendiente"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+     "linea": 26,
+     "fragmento": "{HERRAMIENTAS_ORDEN.map((id) => {"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.schemas.ts",
+     "linea": 14,
+     "fragmento": "El veredicto del setter (D15-bis: antes era la transcripción de un chat de evaluación externo)"
+    },
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 78,
+     "fragmento": "url: null, // TODO: URL — Gem privado de diseño/brief (pedir a Franco)"
+    },
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 90,
+     "fragmento": "url: null, // TODO: URL — acceso a Claude Design que usa el equipo (pedir a Franco)"
+    },
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 117,
+     "fragmento": "url: null, // TODO: URL — Gem privado de outreach (pedir a Franco)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m4-opener.tsx",
+     "linea": 63,
+     "fragmento": "<ToolGuide id=\"gemOutreach\" />"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m6-brief.tsx",
+     "linea": 60,
+     "fragmento": "return <ToolGuide id=\"gemDiseno\" />"
+    },
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 55,
+     "fragmento": "nombre: 'Chat de evaluación (Sonnet)',"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m1-ficha.tsx",
+     "linea": 85,
+     "fragmento": "Lo que se fue con la fusión es el `ToolGuide` del chat de evaluación: sin"
+    },
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 62,
+     "fragmento": "dondeSeUsa: 'Evaluación',\n    url: null, // TODO: URL — chat de evaluación en Sonnet (pedir a Franco)"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 307,
+     "fragmento": "ficha: { titulo: 'Ficha', pantallas: ['m1'] },  // ninguna etapa se llama 'Evaluación' (:307-315)"
+    },
+    {
+     "ruta": "src/lib/leados/guidance-content.ts",
+     "linea": 474,
+     "fragmento": "SETTER. Hasta acá el veredicto salía de un chat de evaluación externo y el\nsetter transcribía la respuesta; el chat quedó afuera"
+    },
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 53,
+     "fragmento": "evaluador: {\n    id: 'evaluador',\n    nombre: 'Chat de evaluación (Sonnet)',"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 160,
+     "fragmento": "// no tiene link cargado, así que los tres campos —obligatorios, porque\n  // sostienen el gate— no se podían llenar sin inventarlos. Ahora el juicio es\n  // del setter"
+    }
+   ],
+   "impacto": "Bloqueante de autonomía para el primer setter real: Gem de diseño (herramientas.ts:78), Claude Design (:90) y Gem de outreach (:117) también tienen url null con TODO. El rail, que es el panel persistente, las muestra como «pendiente» sin decir qué hacer (la salida SalidaLinkPendiente de tool-guide.tsx:61-67 existe pero el rail no la usa) y anuncia una herramienta del paso Evaluación que tras la fusión no tiene pantalla: ningún ToolGuide ni HerramientaLauncher con id evaluador en src (solo el test tests/setter/16-municiones-salida.spec.ts:132).",
+   "propuesta": "Franco carga las URLs (mejor en configuración editable que en código) y decide sacar 'evaluador' de HERRAMIENTAS_ORDEN, ajustando tests/setter/16-municiones-salida.spec.ts:132. Mientras falten, el rail debería mostrar la misma salida que ToolGuide.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.herramientas-externas",
+    "lib.leados",
+    "h5.set-lead",
+    "h5.set-manual.opener",
+    "h5.set-manual.brief",
+    "h5.set-manual.construccion",
+    "h5.set-dia",
+    "h5.set-manual.ficha-y-veredicto",
+    "h5.set-manual",
+    "h5.set-manual.guia-y-herramientas",
+    "h5.set-lead.brief-y-construccion"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "D4-A2, PLAN-708, PLAN-717, PLAN-782",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L2",
+    "tmp": "D4-c1/D4-L2/H03",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L1/H16",
+      "titulo": "Registro de herramientas con cuatro links en null y el evaluador obsoleto en el rail",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo faltante (registro de herramientas con cuatro links en null y el evaluador obsoleto)."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L3/H06",
+      "titulo": "Tres de las cuatro herramientas externas del recorrido siguen sin link (TODO)",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo faltante (herramientas.ts con links en null y el evaluador retirado en el rail)."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L3/H13",
+      "titulo": "El rail «Tus herramientas» sigue ofreciendo el «Chat de evaluación» que D15-bis sacó del recorrido",
+      "severidad": "BAJA",
+      "nota_padre": "Muestreado: herramientas.ts:54-56 y :123 (el «Chat de evaluación» sigue en HERRAMIENTAS_ORDEN) y tools-rail.tsx:26 lo pinta. Mismo hallazgo."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L4/H06",
+      "titulo": "Cuatro de las cinco herramientas externas del setter siguen sin URL y el rail anuncia una «Evaluación» que ya no es un paso",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo faltante (herramientas.ts con links en null y el evaluador retirado en el rail)."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L5/H04",
+      "titulo": "Tres herramientas del recorrido siguen sin link y el evaluador retirado sigue en el rail",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo faltante (herramientas.ts con links en null y el evaluador retirado en el rail)."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L6/H09",
+      "titulo": "El Chat de evaluación sigue en el rail de herramientas sin pantalla ni link",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo hallazgo (el Chat de evaluación sin pantalla ni link en el rail)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-152",
+   "prefijo": "BUG",
+   "titulo": "Fechas del setter calculadas con el día UTC: de 21 a 24 h (hora argentina) las pausas quedan un día más largas, Postergar bloquea elegir mañana y la oferta de horarios no incluye los de mañana",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+     "linea": 70,
+     "fragmento": "fecha.setDate(fecha.getDate() + dias)\n  return fecha.toISOString().slice(0, 10)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+     "linea": 36,
+     "fragmento": "fecha.setDate(fecha.getDate() + dias)\n  return fecha.toISOString().slice(0, 10)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+     "linea": 144,
+     "fragmento": "setMinDate(fechaEnDias(1))"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
+     "linea": 94,
+     "fragmento": "const [minReactivacion] = useState(() =>\n    new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 110,
+     "fragmento": "export function rangoOferta(desde: Date = new Date()): { start: string; end: string } {\n  const start = new Date(desde.getTime() + 24 * 60 * 60 * 1000)"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 113,
+     "fragmento": "return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) }"
+    }
+   ],
+   "impacto": "Argentina es UTC−3: entre las 21:00 y las 23:59 toISOString ya está en el día siguiente, así que «3 días / 1 semana / 2 semanas» mandan hoy+4/+8/+15 y el mínimo del selector de fecha salta a pasado mañana (no se puede pausar «hasta mañana»). El cálculo del cliente está verificado por lectura; cómo guarda pausarLead la fecha está fuera del lote (cartera.actions.ts:78). El helper y el panel de pausa están duplicados en los dos archivos (foco-surface.tsx:61-72 y :283-318; lead-card-actions.tsx:34-44 y :180-217).",
+   "propuesta": "Un único helper de «fecha calendario en hora AR» compartido por FocoSurface y LeadCardActions (si va en dates-ar.ts/tz-ar.ts, que son FROZEN-inferido, es decisión para Valentino), y extraer el panel de pausa a un componente.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia.foco-ahora",
+    "h5.set-dia.palancas-de-card",
+    "modelo.OsLeadSetterMeta",
+    "h5.set-manual.postergar-y-retomar",
+    "h5.set-lead.agenda-reunion",
+    "lib.leados",
+    "int.calcom"
+   ],
+   "relacionados_ids": [
+    "BUG-034",
+    "BUG-113"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-735",
+   "vh": "VH-144",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L2",
+    "tmp": "D4-c1/D4-L2/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L4/H11",
+      "titulo": "La fecha mínima de «Postergar» se calcula en UTC: de 21 a 24 h (AR) bloquea elegir mañana",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo mecanismo (día calculado en UTC) en la fecha mínima de Postergar."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L5/H09",
+      "titulo": "La oferta de horarios calcula el rango con el día UTC: de noche no ofrece los horarios de mañana",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo mecanismo en el rango de la oferta de horarios."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-153",
+   "prefijo": "BUG",
+   "titulo": "La ficha por bloques puede avanzar sola cuando el setter cambia de pestaña o de ventana",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+     "linea": 138,
+     "fragmento": "const destino = evento.relatedTarget\n    // El foco sigue adentro del bloque (tabular entre sus campos) → no es salir.\n    if (destino instanceof Node && evento.currentTarget.contains(destino)) return"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+     "linea": 145,
+     "fragmento": "onSalirDelBloque(id)"
+    }
+   ],
+   "impacto": "Cuando la ventana pierde el foco el navegador emite focusout con relatedTarget null; el componente lo trata como salida del bloque (no hay puntero apretado en esta ventana) y el padre puede plegarlo y abrir el siguiente. El uso típico de la ficha por fuentes es ir a Instagram o Google a mirar: el setter vuelve y el bloque donde escribía ya no está montado (no pierde datos, pierde el lugar). Depende de la regla de completitud del padre (ficha-form.tsx:412, fuera del lote).",
+   "propuesta": "Ignorar la salida cuando document.hasFocus() es false, o diferirla al próximo focusin fuera del bloque; sumar el caso a la spec 21.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.ficha-por-bloques"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-934",
+   "vh": "VH-145",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L2",
+    "tmp": "D4-c1/D4-L2/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-027",
+   "prefijo": "A11Y",
+   "titulo": "Atajos globales de una sola letra (t, p, s, ?) sin forma de apagarlos (WCAG 2.1.4)",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_components/use-keyboard-shortcuts.ts",
+     "linea": 53,
+     "fragmento": "window.addEventListener('keydown', onKeyDown)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+     "linea": 151,
+     "fragmento": "t: () => trabajarRef.current?.click(),\n    s: () => saltarRef.current?.click(),\n    p: toggleSnooze,"
+    }
+   ],
+   "impacto": "Con el foco fuera de un campo (por ejemplo en un botón), una tecla suelta navega al lead (t) o re-ancla el foco al próximo (s). Quien usa dictado por voz o un teclado alternativo dispara acciones sin querer, y no hay ajuste para desactivar ni remapear los atajos, que es el requisito de nivel A.",
+   "propuesta": "Preferencia para apagar los atajos, o activarlos solo con el foco dentro de la tarjeta del foco; mantener «?» como ayuda.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia.foco-ahora"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-737",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L2",
+    "tmp": "D4-c1/D4-L2/H06",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: use-keyboard-shortcuts.ts:53 (listener global de keydown) y foco-surface.tsx:151 (t, s, p de una sola letra) sin opción de apagarlos.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-028",
+   "prefijo": "A11Y",
+   "titulo": "El drawer mobile del setter cerrado sigue en el orden de tabulación y no se cierra con Escape",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+     "linea": 53,
+     "fragmento": "className={`fixed left-0 top-0 h-screen w-[240px] transition-transform lg:translate-x-0 ${\n          mobileOpen ? 'translate-x-0' : '-translate-x-full'"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+     "linea": 36,
+     "fragmento": "aria-label=\"Abrir menú\""
+    }
+   ],
+   "impacto": "Por debajo de 1024 px el rail cerrado queda fuera de pantalla pero focusable: Tab recorre «Cargar prospecto», «Tu día» y los links de herramientas invisibles. Abierto, no se cierra con Escape ni recibe el foco, y el disparador no expone aria-expanded. El mismo patrón está en AdminLayoutClient.tsx:63 y DashboardLayoutClient.tsx:81.",
+   "propuesta": "inert (o aria-hidden más sacar del tab order) en el aside cerrado bajo lg; Escape y foco al abrir; aria-expanded y aria-controls en el botón de menú.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia.rail-navegacion"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-756",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L2",
+    "tmp": "D4-c1/D4-L2/H07",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-029",
+   "prefijo": "A11Y",
+   "titulo": "Las palancas de la card tienen un nombre accesible que no contiene su rótulo visible (WCAG 2.5.3)",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+     "linea": 152,
+     "fragmento": "label={estaPausado ? 'Cambiar la pausa' : 'Pausar en tu cartera'}\n          texto=\"Pausar\""
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+     "linea": 283,
+     "fragmento": "aria-label={label}\n      title={label}"
+    }
+   ],
+   "impacto": "Quien maneja el navegador por voz dice «Pausar» o «Fijado» y no activa el botón cuando el nombre accesible es «Cambiar la pausa» o «Quitar de fijados» (:144-145). El comentario de :272-275 lo declara intencional.",
+   "propuesta": "Que el aria-label empiece con el texto visible («Pausar: cambiar la pausa») o pasar el estado a aria-pressed/aria-describedby.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia.palancas-de-card"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-722",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L2",
+    "tmp": "D4-c1/D4-L2/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-154",
+   "prefijo": "BUG",
+   "titulo": "«Copiar bloque» confirma «Copiado» aunque el copiado falle",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_components/copy-block.tsx",
+     "linea": 47,
+     "fragmento": "document.execCommand('copy')\n      document.body.removeChild(area)\n    }"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/copy-block.tsx",
+     "linea": 50,
+     "fragmento": "setCopiado(true)"
+    }
+   ],
+   "impacto": "Si la Clipboard API no está (http por IP, como dev:qa) y execCommand devuelve false, el botón igual dice «Copiado» y el setter pega en el Gem lo que tenía antes en el portapapeles, que puede ser el bloque de otro negocio. execCommand además está deprecado.",
+   "propuesta": "Mirar el booleano de execCommand y, si falla, mostrar un error con el texto seleccionable para copiar a mano.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.ayudas-de-paso"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L2",
+    "tmp": "D4-c1/D4-L2/H09",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-076",
+   "prefijo": "DEU",
+   "titulo": "La bitácora declara pendiente el ascenso a main que ya ocurrió (EL TRONCO está en origin/main)",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "docs/bitacora-beta-3.md",
+     "linea": 10975,
+     "fragmento": "- **No se pusheó a `main`.** Ni una vez. El push es de Franco."
+    }
+   ],
+   "impacto": "El doc de cierre y PLAN-1042 dejan el push a main como pendiente, pero origin/main = 57c421bc «docs(tronco): EL TRONCO» (autor y committer Franco, 2026-09-06 03:13 -0300). Es un fast-forward de 50 commits sobre 17727117 y el reflog local lo recibió por fetch el 2026-09-06 20:14 -0300. Git no registra quién hizo el push. Quien lea la bitácora cree que main sigue atrás.",
+   "propuesta": "Anotar en 09-PARA-FRANCO quién y cuándo pusheó main y si corrió ci.yml (on: [push, pull_request]); actualizar «Lo que queda para el humano».",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5"
+   ],
+   "relacionados_ids": [
+    "DEU-077"
+   ],
+   "previas": [],
+   "relacionados_texto": "D4-A6, PLAN-1042",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L2",
+    "tmp": "D4-c1/D4-L2/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-155",
+   "prefijo": "BUG",
+   "titulo": "Textos de más de 5000 caracteres rompen el trabajo del setter: en la ficha tiran la pantalla y se pierde lo pegado, y el pegado del Gem y el motivo de descarte se cortan o invalidan la evaluación (las entradas no tienen tope y el contrato corta en 5000)",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx",
+     "linea": 148,
+     "fragmento": "return FichaSchema.parse(aObjeto(sinEnlaces))"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx",
+     "linea": 200,
+     "fragmento": "const faltantesEnVivo = useMemo(() => fichaFaltantes(aPayload(form)), [form])"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 22,
+     "fragmento": "const TEXTO_LIBRE_MAX = 5000"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 60,
+     "fragmento": "resenas: textoLibre,"
+    },
+    {
+     "ruta": "src/lib/leados/guidance-content.ts",
+     "linea": 351,
+     "fragmento": "hint: 'Copiá textuales las reseñas con queja que se repite"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx",
+     "linea": 296,
+     "fragmento": "<TextArea value={form[campo]} ... rows={FILAS_TEXTAREA[campo]} /> (sin maxLength)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx",
+     "linea": 174,
+     "fragmento": "<TextArea\n          value={form.pegadoGem}"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.schemas.ts",
+     "linea": 89,
+     "fragmento": "pegadoGem: z.string().trim(),"
+    },
+    {
+     "ruta": "src/lib/leados/dossier.ts",
+     "linea": 444,
+     "fragmento": "const parsed = BriefSchema.parse(brief)"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 119,
+     "fragmento": "pegadoGem: textoLibre, // B3: respuesta cruda del Gem de diseño"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.actions.ts",
+     "linea": 215,
+     "fragmento": "return mapError(error, 'No se pudo guardar el brief')"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.schemas.ts",
+     "linea": 29,
+     "fragmento": "razonamiento: z.string().trim().min(1, 'Escribí por qué le pusiste ese score'),\nmotivoDescarte: z\n  .string()"
+    },
+    {
+     "ruta": "src/lib/leados/dossier.ts",
+     "linea": 185,
+     "fragmento": "data.evaluacionJson = {\n  ...evaluacion.data,\n  motivoDescarte: motivo,"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 97,
+     "fragmento": "motivoDescarte: textoLibre,"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 112,
+     "fragmento": "export function parseEvaluacion(json: unknown): Evaluacion | null {\n  const parsed = EvaluacionSchema.safeParse(json)"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 4,
+     "fragmento": "Regla: todo write a `fichaJson` / `evaluacionJson` / `briefJson` /\n`selfCheckJson` / `rechazos` se parsea con estos schemas ANTES de tocar"
+    }
+   ],
+   "impacto": "Bloqueante para el primer setter real que pegue un bloque largo de reseñas, que es lo que la guía le pide: cuando un campo pasa los 5000 caracteres, FichaSchema.safeParse falla, el fallback solo vacía los enlaces y llama a .parse, que lanza ZodError durante el render (useMemo). La pantalla cae al error boundary, y se pierde lo pegado más lo tipeado desde el último autoguardado. Si vuelve a pegar, se repite, y nunca le dicen cuál es el límite.",
+   "propuesta": "Que aPayload nunca lance: safeParse también en el fallback, y que el campo largo quede marcado con su error. Mostrar el tope en cada textarea (maxLength o contador) leyendo el mismo TEXTO_LIBRE_MAX del contrato. Coordinarlo con Franco.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.ficha-y-veredicto",
+    "lib.leados",
+    "modelo.OsLeadDossier",
+    "h5.set-manual.brief",
+    "h5.set-lead.ficha-y-veredicto"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-872 (introdujo el tope de 5000); patrón schema de entrada vs contrato persistido; hallazgo del pegado del Gem",
+   "vh": "VH-146",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: lib/leados/contracts.ts:20-27 (todo textoLibre tiene max 5000), ficha-form.tsx:134-149 (aPayload: si safeParse falla solo vacía los enlaces y vuelve a llamar FichaSchema.parse, que lanza) y :200 (aPayload corre en un useMemo del render); el Textarea del kit no pone maxLength. Pegar más de 5000 caracteres tira la pantalla al error boundary y lo pegado se pierde. El verificador la bajó a MEDIA (afecta al setter, no a un cliente) y se le sigue.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "MEDIA"
+    },
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L3/H05",
+      "titulo": "El pegado del Gem de diseño no tiene tope en la entrada, pero el contrato lo corta en 5000 caracteres",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa (entrada sin maxLength contra el contrato de 5000 caracteres) en el pegado del Gem de diseño."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L5/H07",
+      "titulo": "Descartar: el motivo no tiene tope y se guarda sin re-validar; si pasa los 5000 caracteres la evaluación entera deja de leerse",
+      "severidad": "BAJA",
+      "nota_padre": "Muestreado: dossier.schemas.ts:28-35 (motivoDescarte sin max), dossier.ts:185-189 (se guarda dentro de evaluacionJson sin re-validar) y contracts.ts:97 (el contrato lo tipa como textoLibre de 5000): misma causa."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-156",
+   "prefijo": "BUG",
+   "titulo": "Plegar el bloque «Tu decisión» descarta el veredicto cargado sin aviso",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+     "linea": 215,
+     "fragmento": "{estaAbierto && ("
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx",
+     "linea": 388,
+     "fragmento": "if (cierre) {\n    bloques.push({\n      id: 'cierre',"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx",
+     "linea": 416,
+     "fragmento": "onAbrir={(id) => setAbierto(id as BloqueId)}"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx",
+     "linea": 85,
+     "fragmento": "const [score, setScore] = useState<number | null>(null)\n  const [veredicto, setVeredicto] = useState<string>('')\n  const [razonamiento, setRazonamiento] = useState('')"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m1-ficha.tsx",
+     "linea": 35,
+     "fragmento": "el paso — en ese orden, porque el segundo se decide mirando el primero."
+    }
+   ],
+   "impacto": "Un setter carga score, veredicto y razonamiento y abre un bloque de la ficha para releer lo que anotó, que es lo que la pantalla le pide. Al volver encuentra los tres campos vacíos. El estado vive dentro de EvaluacionForm, que se desmonta al cambiar de bloque. La guardia de salida se desmonta con él, así que no hay aviso. Es el «juicio entero» que P23 quiso proteger.",
+   "propuesta": "Subir el estado del veredicto a FichaForm o a M1Registro, o mantener montado (oculto) el contenido del bloque de cierre. La otra opción es pedir confirmación antes de cambiar de bloque cuando hay trabajo sin registrar.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.ficha-y-veredicto",
+    "h5.set-manual"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-834, PLAN-946",
+   "vh": "VH-147",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H03",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: bloques-secuenciales.tsx:215 (el contenido solo se monta con el bloque abierto) y evaluacion-form.tsx:85 (score, veredicto y razonamiento en estado local del componente que se desmonta).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-157",
+   "prefijo": "BUG",
+   "titulo": "Tildar varias fases de construcción seguidas guarda solo la última (carrera sobre progresoJson)",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/fase-auto-reporte.tsx",
+     "linea": 69,
+     "fragmento": "const siguiente = marcar\n      ? [...completadas.filter((id) => id !== faseId), faseId]\n      : completadas.filter((id) => id !== faseId)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/fase-auto-reporte.tsx",
+     "linea": 74,
+     "fragmento": "const result = await guardarProgreso(leadId, { completadas: siguiente })"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx",
+     "linea": 309,
+     "fragmento": "completadas={completadas}"
+    },
+    {
+     "ruta": "docs/bitacora-beta-3.md",
+     "linea": 8238,
+     "fragmento": "(B3) tildar tres fases de construcción seguidas (400 ms) guarda una y la pantalla muestra tres — reproducido dos veces contra la base"
+    }
+   ],
+   "impacto": "Cada tilde arma el array completo a partir de la misma prop que mandó el server. Si no hay un refresh entre clics, el último guardado pisa a los anteriores: el setter ve sus marcas y en la base queda una sola, y Franco lee en el panel menos avance del real. Es MEDIA porque el tilde es auto-reporte y no gatea nada.",
+   "propuesta": "Integrar o rehacer el arreglo de P25, con un único dueño del blob por pantalla y el guardado de cada fase serializado o resuelto en el server. Hoy ese arreglo vive fuera de main: d0b37c71 en p25/carrera-tildes y 130492e8 en p25/rafaga-tildes.",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.construccion",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-929; hallazgo 'main no tiene P25–P43'",
+   "vh": "VH-148",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-077",
+   "prefijo": "DEU",
+   "titulo": "main no tiene P25–P43: el trabajo posterior de LeadOS vive en origin/p25/rafaga-tildes",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "docs/bitacora-beta-3.md",
+     "linea": 10975,
+     "fragmento": "- **No se pusheó a `main`.** Ni una vez. El push es de Franco."
+    },
+    {
+     "ruta": "docs/bitacora-beta-3.md",
+     "linea": 10976,
+     "fragmento": "- **No se rehizo el arreglo de la carrera de tildes.** Su diagnóstico sigue en pie"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/fase-auto-reporte.tsx",
+     "linea": 69,
+     "fragmento": "const siguiente = marcar"
+    }
+   ],
+   "impacto": "Se auditó origin/main @57c421bc (Franco, 2026-09-06). origin/p25/rafaga-tildes (Franco, 2026-09-18) suma 5 commits sin integrar (P25 'la ráfaga', P26, P27 'aislamiento probado', P28 y el WIP P36-P43) que tocan 51 archivos del setter y de lib/leados (+4544/−320). Entre ellos están brief-form, fase-auto-reporte y m-construccion de este lote. Algunos hallazgos de esta auditoría pueden estar resueltos o reescritos en esa rama, y los que la auditoría de OSLEAD reportó sobre ella (H-01) no aparecen en main.",
+   "propuesta": "Para 09-PARA-FRANCO: decidir si p25/rafaga-tildes se integra o se descarta antes de arreglar nada en main, y volver a correr este lote sobre el resultado.",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual",
+    "h5.set-manual.construccion",
+    "h5.set-manual.brief"
+   ],
+   "relacionados_ids": [
+    "DEU-076"
+   ],
+   "previas": [],
+   "relacionados_texto": "Alerta D4-A6; PLAN-818, PLAN-929, PLAN-824",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H07",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-158",
+   "prefijo": "BUG",
+   "titulo": "La búsqueda de horarios no exige confirmar al decisor («Buscar de nuevo» ni la action)",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx",
+     "linea": 213,
+     "fragmento": "disabled={!decisorOk}"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx",
+     "linea": 237,
+     "fragmento": "<Button\n              variant=\"secondary\"\n              size=\"sm\" (sin disabled)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx",
+     "linea": 113,
+     "fragmento": "busqueda.run(() => ofrecerHorarios(leadId), {"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/agenda.schemas.ts",
+     "linea": 10,
+     "fragmento": "/** El setter confirma que habla con el dueño/decisor ANTES de ofrecer. */"
+    }
+   ],
+   "impacto": "Cuando el lead ya tiene horarios ofrecidos, el setter puede volver a buscar y a guardar la oferta sin confirmar que habla con quien decide. El server no puede validarlo porque la action no recibe ese dato. Como la confirmación final sí lo exige, el daño es de proceso.",
+   "propuesta": "Deshabilitar «Buscar de nuevo» con el mismo !decisorOk y mostrar el motivo. Si el gate importa, pasarlo a ofrecerHorarios y validarlo en el server.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.agenda",
+    "int.calcom"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-831 (H-08); alerta D4-A5",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H08",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: agenda-form.tsx:213 (el primer «Buscar» exige decisorOk) y :237 («Buscar de nuevo» sin disabled); agenda.schemas.ts:10 declara la confirmación pero ofrecerHorarios no la recibe.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-053",
+   "prefijo": "UX",
+   "titulo": "La guardia de salida interna solo cubre el veredicto: el opener y las notas de traspaso se pierden al navegar dentro del manual",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/opener-form.tsx",
+     "linea": 44,
+     "fragmento": "useUnsavedGuard(hayCambiosSinGuardar)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx",
+     "linea": 105,
+     "fragmento": "useUnsavedGuard(hayCambiosSinGuardar)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx",
+     "linea": 102,
+     "fragmento": "useUnsavedGuard(hayCambiosSinGuardar, { avisaEnSalidaInterna: true })"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/franja-recorrido.tsx",
+     "linea": 184,
+     "fragmento": "<Link\n                  href={rutaManual(leadId, paso.destino)}"
+    }
+   ],
+   "impacto": "m4 y m16 no tienen autoguardado. Un clic en «Volver a tu día» o en un chip de la franja descarta sin preguntar el opener o las notas de traspaso (hasta 2000 caracteres). Ni los chips de la franja ni «Ir a tu paso actual» consultan la guardia, tampoco para el veredicto.",
+   "propuesta": "Declarar avisaEnSalidaInterna también en el opener y en la agenda. Que los enlaces internos del manual (franja, EnlacePantalla y la salida de avance) consulten useHayTrabajoSinRegistrar, igual que SalidaDelManual.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.opener",
+    "h5.set-manual.agenda",
+    "h5.set-manual.recorrido-y-barra"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "P23; hallazgo del veredicto que se pierde al plegar",
+   "vh": "VH-149",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H09",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-159",
+   "prefijo": "BUG",
+   "titulo": "El historial del lead y la fecha de asignación se formatean sin huso horario",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.helpers.ts",
+     "linea": 72,
+     "fragmento": "return new Intl.DateTimeFormat('es-AR', {\n    day: '2-digit', (sin timeZone)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/manual-nav.tsx",
+     "linea": 81,
+     "fragmento": "? new Intl.DateTimeFormat('es-AR', {"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 260,
+     "fragmento": "return new Intl.DateTimeFormat('es-AR', {\n    timeZone: 'America/Argentina/Buenos_Aires',"
+    }
+   ],
+   "impacto": "LeadTimeline y ManualHeader son Server Components. Si el server corre en UTC (Netlify), cada contacto del historial aparece con 3 h de corrimiento y una asignación hecha de noche figura al día siguiente. El resto del manual usa el huso de Buenos Aires.",
+   "propuesta": "Pasar timeZone 'America/Argentina/Buenos_Aires' en los dos formateadores, o usar el helper congelado tz-ar/dates-ar.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.historial-del-lead",
+    "h5.set-manual.recorrido-y-barra"
+   ],
+   "relacionados_ids": [
+    "BUG-034"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-793",
+   "vh": "VH-150",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-054",
+   "prefijo": "UX",
+   "titulo": "Con la demo aprobada pero sin link, m15 manda a «registrá un toque» aunque el turno es de Franco",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m15-envio.tsx",
+     "linea": 114,
+     "fragmento": "stage === 'APROBADA'\n      ? finalUrl\n        ? GUIA_ENVIO.espera.aprobadaSinEnganche"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m15-envio.tsx",
+     "linea": 127,
+     "fragmento": "<Link\n        href={rutaManual(leadId, 'm5')}"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 434,
+     "fragmento": "Franco. El toque vencido tampoco lo rescata — la sugerencia de esta rama\n    // nunca ofrece el toque"
+    }
+   ],
+   "impacto": "La cartera muestra el lead esperando a Franco y no ofrece el toque. m15 dice lo mismo en el texto, pero su único botón empuja al setter a escribirle al negocio. El salto es un Link crudo, no pasa por EnlacePantalla, así que no avisa si m5 está disponible.",
+   "propuesta": "En aprobadaSinLink no ofrecer el toque, o pasar por EnlacePantalla con el accesible que calcula el server.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.envio-demo"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "Alerta D4-A1",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-078",
+   "prefijo": "DEU",
+   "titulo": "Restos del wizard en los registros compartidos: rama editable muerta, etiquetas duplicadas, comentarios viejos",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m1-ficha.tsx",
+     "linea": 212,
+     "fragmento": "<FichaStep leadId={leadId} lead={lead} ficha={ficha} editable={false} />"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx",
+     "linea": 53,
+     "fragmento": "return (\n    <Card padding=\"lg\" className=\"space-y-5\"> (rama editable sin consumidores)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx",
+     "linea": 42,
+     "fragmento": "export const VEREDICTO_LABELS: Record<Evaluacion['veredicto'], string> = {"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m1-ficha.tsx",
+     "linea": 137,
+     "fragmento": "veredictoLabels: {\n    DESCARTAR: 'Descartar',"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx",
+     "linea": 180,
+     "fragmento": "* NOTA de redacción, y no es cosmética: `expectToast` de la suite busca el texto"
+    }
+   ],
+   "impacto": "FichaStep con editable=true (incluido su bloque copiable para el Evaluador, que ya no tiene pantalla) no se ejecuta en ningún lado. Las etiquetas del veredicto están duplicadas, y el comentario de m-construccion describe un expectToast que ya se acotó a [data-sonner-toast] (tests/helpers/setter-ui.ts:103). Todo esto encarece cada cambio en la zona.",
+   "propuesta": "Reducir FichaStep a la vista congelada, unificar las etiquetas del veredicto y actualizar o borrar el comentario de expectToast junto con la redacción en subjuntivo (PLAN-927).",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.ficha-y-veredicto",
+    "h5.set-manual.construccion"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-927; previa auditoria-consistencia-setter.md:125",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H15",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-079",
+   "prefijo": "DEU",
+   "titulo": "Date.now() en el render de m5 (error de lint react-hooks/purity)",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx",
+     "linea": 63,
+     "fragmento": "new Date(proximoToque as string).getTime() <= Date.now() &&"
+    }
+   ],
+   "impacto": "Es uno de los 102 errores del baseline de eslint (react-hooks/purity, línea 63). Si el CI pasa a exigir lint, falla. En un Server Component el valor es correcto en cada request.",
+   "propuesta": "Resolver toqueVencido en _data.ts, como ya se hace con postergadoVencido.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.seguimiento"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-925",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H16",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-030",
+   "prefijo": "A11Y",
+   "titulo": "Los obligatorios del chequeo final solo se tildan desde el interruptor; la fila no responde al toque",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx",
+     "linea": 109,
+     "fragmento": "<Toggle checked={ok} onChange={onChange} label={check.nombre} />"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx",
+     "linea": 254,
+     "fragmento": "<label\n                    key={soft.id}\n                    className=\"flex cursor-pointer items-center justify-between gap-3 py-1\""
+    }
+   ],
+   "impacto": "En el celular, los diez puntos obligatorios (que sostienen el gate) solo se tildan acertándole a un control chico al costado. Los delatores, que no son obligatorios, sí aceptan el toque en toda la fila.",
+   "propuesta": "Que toda la fila sea área de toque (label o botón), como en los delatores.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.chequeo-final"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-895",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H17",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-031",
+   "prefijo": "A11Y",
+   "titulo": "El score de la evaluación usa role=radio sin navegación con flechas",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx",
+     "linea": 192,
+     "fragmento": "<div role=\"radiogroup\" aria-label=\"Score de la evaluación\" className=\"flex gap-2\">"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx",
+     "linea": 197,
+     "fragmento": "role=\"radio\"\n              aria-checked={score === valor}"
+    }
+   ],
+   "impacto": "El lector de pantalla anuncia un grupo de radios, pero las flechas no mueven la selección y cada botón es una parada de Tab. El patrón ARIA queda a medias.",
+   "propuesta": "Agregar tabindex itinerante con flechas, o usar inputs radio nativos con estilo.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.ficha-y-veredicto"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L3",
+    "tmp": "D4-c1/D4-L3/H18",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: evaluacion-form.tsx:192-198 (radiogroup con role=radio en botones, sin manejo de flechas).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-160",
+   "prefijo": "BUG",
+   "titulo": "Un toque registrado en m5 sobre un lead con reunión agendada le pisa el estado CALL_AGENDADA",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx",
+     "linea": 71,
+     "fragmento": "const accesible =\n    posicion.completadas.includes(paso) || posicion.habilitadas.includes(paso)"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 466,
+     "fragmento": "if (toquesHechos > 0 && stage !== null && STAGES_POST_BRIEF.includes(stage)) {\n    done.add('m5')"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx",
+     "linea": 284,
+     "fragmento": "<SeguimientoForm leadId={leadId} cadenciaAgotada={cadenciaAgotada} />"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/outreach.actions.ts",
+     "linea": 169,
+     "fragmento": "if (!leadActivo(lead.status)) {   // solo rechaza CERRADO/PERDIDO (revision.ts:27)"
+    },
+    {
+     "ruta": "src/lib/os-commercial.ts",
+     "linea": 85,
+     "fragmento": "if (input.result === ActivityResult.RESPONDIO) {\n    await prisma.osLead.update({ ... status: LeadStatus.RESPONDIO,"
+    },
+    {
+     "ruta": "src/lib/os-commercial.ts",
+     "linea": 188,
+     "fragmento": "status: LeadStatus.POSTERGADO,\n      reactivateAt,"
+    }
+   ],
+   "impacto": "Con la reunión ya reservada (status CALL_AGENDADA, m16 completada) m5 sigue figurando completada y navegable, y su formulario se monta sin mirar el status. Si el negocio escribe para confirmar y el setter registra «Respondió», el lead vuelve a RESPONDIO; si registra «Postergar», pasa a POSTERGADO; «No respondió» rearma la cadencia sobre una reunión ya agendada. El lead sale de «Agendadas» en el panel del setter y cambia de columna en el kanban de Franco sin aviso: estado comercial corrompido en el primer cliente real que se agende.",
+   "propuesta": "Decisión para Franco: que registrarResultado rechace RESPONDIO/POSTERGADO/SIN_RESPUESTA cuando el status es CALL_AGENDADA (o que os-commercial nunca baje un status ya más avanzado), y que M5Registro muestre la charla en solo lectura cuando hay reunión agendada.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual",
+    "h5.set-manual.registrar-resultado-toque",
+    "lib.leados",
+    "modelo.OsLead",
+    "h4.adm-leads"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-845; flujo 'Registrar el resultado de un toque (m5)'",
+   "vh": "VH-151",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: manual.ts:462-467 (m5 cuenta como completada con toques en APROBADA) y :639-648 (con reunión agendada la pantalla actual es m16), el registro de toque (outreach.actions.ts registrarResultado → os-commercial.ts:32-36: un resultado RESPONDIO escribe status RESPONDIO sin mirar el status anterior). Un toque cargado desde m5 sobre un lead CALL_AGENDADA le pisa el estado. El verificador la bajó a MEDIA y se le sigue.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-161",
+   "prefijo": "BUG",
+   "titulo": "El alta manual de un prospecto no deduplica contra el sistema: dos setters pueden trabajar el mismo negocio",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
+     "linea": 69,
+     "fragmento": "// Aviso NO bloqueante: el setter ya tiene un lead con ese nombre. No frena el"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/page.tsx",
+     "linea": 22,
+     "fragmento": "const existentes = await prisma.osLead.findMany({\n    where: ownedListWhere(userId),"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/prospecto.actions.ts",
+     "linea": 28,
+     "fragmento": "const lead = await prisma.osLead.create({\n      data: ownedLeadCreateData(parsed, userId),"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/prospecto-bulk.actions.ts",
+     "linea": 95,
+     "fragmento": "duplicadas.push({ fila: u.fila, nombre: u.data.businessName, motivo: 'en-sistema' })"
+    }
+   ],
+   "impacto": "La importación por CSV salta los negocios que ya están en la cartera de otro setter, pero el alta a mano los crea igual y sin aviso (el cotejo es solo contra la cartera propia, y OsLead no tiene unique en businessName). Dos setters pueden mandarle DMs al mismo negocio, construir dos demos y llegar a Franco con dos leads del mismo comercio: mala imagen frente al prospecto y trabajo duplicado.",
+   "propuesta": "Aplicar en cargarProspecto el mismo cotejo 'en-sistema' (nombresEnSistema) que usa la importación, devolviendo un aviso que no revele de quién es el lead; decidir con Franco si bloquea o pide confirmación.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-nuevo",
+    "h5.set-nuevo.alta-manual",
+    "h5.set-nuevo.aviso-duplicado",
+    "modelo.OsLead",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "flujo 'Cargar un prospecto a mano'",
+   "vh": "VH-152",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H02",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: nuevo-prospecto-form.tsx:69 (aviso no bloqueante solo contra la cartera propia), nuevo/page.tsx:22 (lee solo ownedListWhere) y prospecto.actions.ts:28 (crea sin buscar en el sistema); la importación masiva sí deduplica (prospecto-bulk.actions.ts:95).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-162",
+   "prefijo": "BUG",
+   "titulo": "Un POSTERGADO retomado queda POSTERGADO sin fecha y su cadencia nueva nunca vuelve a la cola de trabajo",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/os-commercial.ts",
+     "linea": 19,
+     "fragmento": "todo contacto real (...) limpia además el vencimiento del postergado (reactivateAt:null) (...) El status NO se toca acá"
+    },
+    {
+     "ruta": "src/lib/os-commercial.ts",
+     "linea": 79,
+     "fragmento": "await prisma.osLead.update({\n      where: { id: input.leadId },\n      data: { nextFollowUpAt, reactivateAt: null },"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 420,
+     "fragmento": "if (input.status === 'POSTERGADO') {\n    ...\n    return input.postergadoVencido ? 'trabajar' : 'seguimiento'"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+     "linea": 167,
+     "fragmento": "lead.status === 'POSTERGADO' &&\n    lead.reactivateAt !== null &&"
+    }
+   ],
+   "impacto": "Cuando vence la postergación y el setter registra «No respondió — mandé un toque», se agenda un próximo toque pero el lead sigue POSTERGADO con reactivateAt nulo: postergadoVencido da false y grupoPara lo deja en «seguimiento» antes de mirar el toque vencido. El próximo toque nunca aparece en «Para trabajar»; el negocio que pidió que lo contacten más adelante se enfría sin que nadie lo vea (solo lo listaría el cron, que en Netlify no corre).",
+   "propuesta": "Decisión para Franco (PLAN-866): definir la transición POSTERGADO -> status de trabajo al registrar el retomar, o que grupoPara/derivarPantalla consideren followUpVencido cuando un POSTERGADO no tiene reactivateAt.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.postergar-y-retomar",
+    "h5.set-dia",
+    "lib.leados",
+    "modelo.OsLead"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-866, PLAN-710",
+   "vh": "VH-153",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H03",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-163",
+   "prefijo": "BUG",
+   "titulo": "El digest de Telegram del cron no tiene tope: con muchos pendientes supera el límite del mensaje y falla todos los días",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 176,
+     "fragmento": "prisma.osLead.findMany({\n        where: {\n          OR: ["
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 121,
+     "fragmento": "const lines = leads.map((lead) => {"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 267,
+     "fragmento": "if (!sent) {\n      // (...) No creamos el marker de idempotencia → la próxima corrida reintenta."
+    }
+   ],
+   "impacto": "La consulta no tiene take y el mensaje lleva una línea por lead. sendTelegram (telegram.ts:67) no parte ni recorta el texto (no se encontró manejo de largo), y Telegram rechaza mensajes de más de ~4096 caracteres. Con unos 60-70 leads pendientes el envío falla, el cron devuelve 500 sin crear el marcador y vuelve a fallar cada día, sin aviso porque el error solo va a console.error.",
+   "propuesta": "Recortar el digest (top N + 'y X más' con link a /admin/leads) o partirlo en varios mensajes, y registrar el fallo en Sentry.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "int.cron.os-follow-up",
+    "int.telegram",
+    "h4.adm-leads.digest-follow-ups-telegram"
+   ],
+   "relacionados_ids": [
+    "BUG-100"
+   ],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-154",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-164",
+   "prefijo": "BUG",
+   "titulo": "Una APROBADA con link, demo sin mandar, gate cerrado y toque vencido entra a «Para trabajar» con una sugerencia de espera, y el manual y el grupo del home se contradicen",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 438,
+     "fragmento": "if (input.finalUrl === null && !input.demoEnviada) return 'seguimiento'"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 441,
+     "fragmento": "if (input.followUpVencido) return 'trabajar'"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 539,
+     "fragmento": "if (!input.demoEnviada) {\n        return esperaDe("
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 745,
+     "fragmento": "if (lead.followUpVencido || lead.postergadoVencido) return TRABAJO_TIER.ESPERA_TU_ACCION"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 670,
+     "fragmento": "return input.followUpVencido\n        ? { actual: 'm5', habilitadas: ['m5', 'm15'] }\n        : { actual: 'espera', habilitadas: ['espera', 'm5', 'm15'] }"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 440,
+     "fragmento": "if (input.finalUrl === null && !input.demoEnviada) return 'seguimiento'"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 443,
+     "fragmento": "if (input.followUpVencido) return 'trabajar'"
+    },
+    {
+     "ruta": "src/lib/leados/paso-admitido.ts",
+     "linea": 97,
+     "fragmento": "return i.followUpVencido || cadenciaInfo(i.followUpCount).agotada\n        ? SI"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx",
+     "linea": 132,
+     "fragmento": "const esPasoActivo = esActual && posicion.habilitadas.length > 0"
+    }
+   ],
+   "impacto": "El grupo y la accionabilidad salen de dos escaleras independientes (grupoPara y proximaAccionPara, ambas en clasificarLead :641). Si el lead tiene finalUrl, la demo no se mandó, el gate está cerrado (por ejemplo Franco desmarcó caliente o movió el status desde el kanban) y hay un toque vencido, cae en 'trabajar' (y puede ser el foco) con una card no accionable que dice «esperá». P23 solo cubrió el caso sin link (:438).",
+   "propuesta": "Que grupoPara derive 'trabajar' solo cuando proximaAccionPara es accionable (una fuente única), o agregar la rama faltante; cubrirlo en flow.invariant.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia",
+    "lib.leados",
+    "h5.set-dia.foco-y-cola",
+    "h5.set-manual.derivacion-de-pantalla",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "D4-A1",
+   "vh": "VH-155",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H07",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: flow.ts:438-442 (con followUpVencido el grupo es «trabajar») y :539 (la sugerencia dice esperar mientras la demo no se envió).",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L5/H05",
+      "titulo": "Una demo APROBADA con link, gate cerrado y toque vencido entra a 'Para trabajar' con una sugerencia de espera",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo escenario y misma contradicción."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L6/H02",
+      "titulo": "Aprobada sin enviar con gate cerrado y toque vencido: el manual, el grupo y la sugerencia se contradicen",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo escenario (manual, grupo y sugerencia se contradicen)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-055",
+   "prefijo": "UX",
+   "titulo": "La importación CSV solo entiende coma y UTF-8: una lista exportada de Excel en español no entra o llega con acentos rotos",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx",
+     "linea": 76,
+     "fragmento": "reader.readAsText(file)"
+    },
+    {
+     "ruta": "src/lib/leados/prospecto-import.ts",
+     "linea": 131,
+     "fragmento": "if (ch === ',') {"
+    }
+   ],
+   "impacto": "Excel con configuración regional es-AR guarda «CSV (delimitado por comas)» con punto y coma y en Windows-1252. El parser solo corta por coma y el FileReader lee como UTF-8: la lista «que te pasó Franco» se rechaza por encabezados o entra con nombres de negocio con caracteres rotos (Caf�), que después viajan a los DMs y a la demo.",
+   "propuesta": "Detectar el separador (coma o punto y coma) por el encabezado y la codificación (o pedir 'CSV UTF-8' en la plantilla y en el texto de ayuda); mostrar en la vista previa el primer nombre leído para que el setter detecte acentos rotos.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-importar",
+    "h5.set-importar.importar-csv",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-156",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-080",
+   "prefijo": "DEU",
+   "titulo": "manual/[paso]/page.tsx: 453 líneas y una escalera de diez ternarios anidados para despachar pantallas",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx",
+     "linea": 213,
+     "fragmento": "const slots =\n    pantalla.id === 'm1'\n      ? {"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx",
+     "linea": 385,
+     "fragmento": ": pantalla.id === 'm5'"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx",
+     "linea": 438,
+     "fragmento": ": {}"
+    }
+   ],
+   "impacto": "Cada pantalla nueva o cambio de props obliga a editar un ternario de 225 líneas con indentación de 26 espacios; el fallback {} renderiza una pantalla vacía en silencio si una id nueva no se cablea. CLAUDE.md prohíbe componentes de más de 300 líneas sin separación (anti-vibecode).",
+   "propuesta": "Un registro Record<PantallaId, (manual) => Slots> en un módulo aparte, con exhaustividad de tipos (sin fallback {}), como sprint propio de Franco (PLAN-881).",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual",
+    "h5.set-manual.aterrizaje-y-guardia"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-881",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H09",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-165",
+   "prefijo": "BUG",
+   "titulo": "La maquinaria comercial de LeadOS escribe en pasos sueltos sin transacción (registro de toques, ficha y evaluación, cierre post-reunión con el blob de agenda reescrito entero)",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/os-commercial.ts",
+     "linea": 57,
+     "fragmento": "const activity = await prisma.osLeadActivity.create({"
+    },
+    {
+     "ruta": "src/lib/os-commercial.ts",
+     "linea": 79,
+     "fragmento": "await prisma.osLead.update({\n      where: { id: input.leadId },\n      data: { nextFollowUpAt, reactivateAt: null },"
+    },
+    {
+     "ruta": "src/lib/os-commercial.ts",
+     "linea": 150,
+     "fragmento": "const nextFollowUpAt = calculateNextFollowUp(0) ?? calculateNextFollowUp(1)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.actions.ts",
+     "linea": 152,
+     "fragmento": "await transitionDossier(leadId.data, { to: 'DESCARTADA', motivoDescarte, })"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/reunion.actions.ts",
+     "linea": 81,
+     "fragmento": "await prisma.osLead.update({ where: { id: parsed.leadId }, data: { status, reactivateAt: null } })"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "linea": 180,
+     "fragmento": "await registrarReasignacion({"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 352,
+     "fragmento": "const parsed = AgendaSchema.parse({ ...agenda, realizadaAt: new Date().toISOString() })\nconst updated = await prisma.osLeadDossier.updateMany({\n  where: { leadId, agendaJson: { path: ['estado'], equals: 'AGENDADA' } },"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 371,
+     "fragmento": "if (!agenda || agenda.resultado) return false"
+    }
+   ],
+   "impacto": "Actividad, conteo y update del lead (más postergarLead en outreach.actions.ts:197) son escrituras separadas. Si falla una del medio (Neon serverless), queda un toque registrado sin la cadencia actualizada o un POSTERGADO sin status, y el reintento del setter duplica la actividad y adelanta la cadencia. crearDemoComercial tiene el mismo patrón, y su primera llamada calculateNextFollowUp(0) siempre da null (código muerto).",
+   "propuesta": "Envolver registrarContactoComercial, la postergación y crearDemoComercial en prisma.$transaction; reemplazar la expresión de :150 por la constante que expresa la intención (+2 días).",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "lib.leados",
+    "modelo.OsLead",
+    "modelo.OsLeadActivity",
+    "h5.set-manual.registrar-resultado-toque",
+    "h5.set-lead.ficha-y-evaluacion",
+    "h4.adm-leads.cierre-reunion",
+    "h4.adm-leads.asignacion-setter",
+    "h4.adm-leads.actividad-y-demos",
+    "h4.adm-leads.cierre-post-reunion",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L1/H14",
+      "titulo": "Escrituras encadenadas sin transacción dejan estados sin salida en LeadOS",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa (escrituras encadenadas sin transacción)."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L5/H08",
+      "titulo": "Cierre post-reunión: el blob de agenda se reescribe entero y el status va aparte, sin atomicidad",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa en el cierre post-reunión."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-166",
+   "prefijo": "BUG",
+   "titulo": "respondioDesde cae a lead.updatedAt, el mismo dato que su comentario descarta por falso",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+     "linea": 208,
+     "fragmento": "// NO `lead.updatedAt` (cualquier mutación del dossier lo pisa y falsea la\n  // espera)."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+     "linea": 286,
+     "fragmento": "? (ultimaRespuesta?.createdAt ?? lead.updatedAt).toISOString()"
+    }
+   ],
+   "impacto": "Si el status RESPONDIO llegó sin una actividad RESPONDIO (Franco lo mueve desde el kanban admin), el UrgenciaBanner de Construcción mide el turnaround desde la última edición del lead y no desde la respuesta: muestra urgencia falsa o la esconde.",
+   "propuesta": "Sin actividad de respuesta, no mostrar el banner (null) o usar una marca explícita de 'respondió el' escrita por el cambio de status.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.cabecera-e-historial",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H12",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: manual/_data.ts:208 (comentario: no usar lead.updatedAt) y :286 (cae a lead.updatedAt sin respuesta registrada).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-081",
+   "prefijo": "DEU",
+   "titulo": "LeadOS reimplementa el día argentino (cron os-follow-up y contador de DMs de outreach) en vez de usar dayRangeAR, y el cron copia la verificación del secreto y el predicado del postergado vencido",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 56,
+     "fragmento": "startOfDay: new Date(`${year}-${month}-${day}T00:00:00.000-03:00`),"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 142,
+     "fragmento": "function getProvidedCronSecret(request: Request): string | null {"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 112,
+     "fragmento": "function isReactivationLead(lead: PendingLead, endOfDay: Date): boolean {"
+    },
+    {
+     "ruta": "src/lib/leados/outreach.ts",
+     "linea": 21,
+     "fragmento": "function limitesDelDiaArgentino(ahora: Date): { desde: Date; hasta: Date } {"
+    },
+    {
+     "ruta": "src/lib/leados/outreach.ts",
+     "linea": 30,
+     "fragmento": "desde: new Date(`${fecha}T00:00:00.000-03:00`),\n    hasta: new Date(`${fecha}T23:59:59.999-03:00`),"
+    },
+    {
+     "ruta": "src/lib/dates-ar.ts",
+     "linea": 75,
+     "fragmento": "export function dayRangeAR(now: Date = new Date()): UTCRange {"
+    }
+   ],
+   "impacto": "Hay helpers canónicos (dates-ar.ts:65/:70 startOfDayAR/endOfDayAR, cron-secret.ts:40 isAuthorizedCronRequest) y el predicado de postergado vencido también vive en _data.ts:167-170 y en home.ts. El cron usa endOfDay y el panel usa ahora. Cualquier cambio de criterio (o de huso) obliga a tocar cuatro copias que divergen en silencio.",
+   "propuesta": "Usar dates-ar.ts e isAuthorizedCronRequest en el cron y extraer un predicado único postergadoVencido(lead, ahora) en src/lib/leados.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "int.cron.os-follow-up",
+    "lib.leados",
+    "h5.set-lead.contador-dms-hoy"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-923, PLAN-1044",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L6/H11",
+      "titulo": "outreach.ts reimplementa el día argentino en lugar de usar dayRangeAR",
+      "severidad": "BAJA",
+      "nota_padre": "Muestreado: outreach.ts:21-31 arma el día con Intl y -03:00 a mano mientras dates-ar.ts:75 exporta dayRangeAR. Misma deuda."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-104",
+   "prefijo": "SEC",
+   "titulo": "El candado diario del cron es una Notification de un usuario, sin atomicidad y con fallback a cualquier usuario",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 248,
+     "fragmento": "(await prisma.user.findFirst({\n        select: {\n          id: true,"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 276,
+     "fragmento": "await prisma.notification.create({\n      data: {\n        userId: markerUser.id,"
+    }
+   ],
+   "impacto": "Sin SUPER_ADMIN, el marcador '[os-follow-up] fecha' se guarda como notificación del usuario más viejo, que puede ser un CLIENT y verla en su historial con link a /admin/leads. Además, leer el marcador, enviar y escribirlo no es atómico: dos ejecuciones simultáneas (reintento del scheduler) mandan el digest dos veces.",
+   "propuesta": "Guardar la idempotencia en una tabla o clave propia de cron (p. ej. upsert único por día) y no en Notification; nunca caer a un usuario cualquiera.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "int.cron.os-follow-up",
+    "modelo.Notification"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H14",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-014",
+   "prefijo": "PERF",
+   "titulo": "Abrir un lead carga el manual completo dos veces y re-chequea la propiedad del lead en cada lectura",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/page.tsx",
+     "linea": 18,
+     "fragmento": "const manual = await cargarManualDelLead(leadId)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx",
+     "linea": 64,
+     "fragmento": "const manual = await cargarManualDelLead(leadId)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+     "linea": 147,
+     "fragmento": "const lead = await getOwnedLead(leadId, userId)\n  if (!lead) return null"
+    }
+   ],
+   "impacto": "Todo link a un lead pasa por /setter/leads/[id] -> /manual (carga completa solo para elegir la pantalla) -> /manual/[paso] (segunda carga completa). Cada helper del Promise.all vuelve a llamar getOwnedLead (p. ej. outreach.ts:44), así que se hacen unas 20 consultas a Neon por apertura, más dos redirects.",
+   "propuesta": "Que el índice calcule solo la posición con una lectura mínima o que los links apunten directo a la pantalla; pasar el lead ya verificado a los helpers en vez de re-chequear.",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-lead",
+    "h5.set-manual.aterrizaje-y-guardia",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H16",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-082",
+   "prefijo": "DEU",
+   "titulo": "La navegación del portal del setter no está clasificada en CLAUDE.md: conviven triggerTransition («decisión cerrada»), router.push con y sin justificación y <Link>",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+     "linea": 45,
+     "fragmento": "// Navegación SOLO por triggerTransition (decisión cerrada · CLAUDE.md). El"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
+     "linea": 95,
+     "fragmento": "// Portal (no es el sitio público): navegación imperativa post-submit al\n      // wizard del lead recién creado. No hay alternativa declarativa — el id sale\n      router.push(`/setter/leads/${result.data.id}`)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/page.tsx",
+     "linea": 44,
+     "fragmento": "<Link\n        href=\"/setter/nuevo/importar\""
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+     "linea": 49,
+     "fragmento": "triggerTransition(href)"
+    },
+    {
+     "ruta": "src/components/layout/publicRoute.ts",
+     "linea": 16,
+     "fragmento": "export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as const"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/foco-surface.tsx",
+     "linea": 90,
+     "fragmento": "router.push(`/setter/leads/${foco.id}`)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/trabajar-lead-button.tsx",
+     "linea": 31,
+     "fragmento": "router.push(`/setter/leads/${leadId}`)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/novedades-abrir-foco.tsx",
+     "linea": 47,
+     "fragmento": "router.push(`/setter/leads/${leadId}`)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+     "linea": 97,
+     "fragmento": "onClick={() => handleNavigate(item.href)}"
+    },
+    {
+     "ruta": "src/context/TransitionContext.tsx",
+     "linea": 116,
+     "fragmento": "setTimeout(() => {\n    startTransition(() => {\n        router.push(target);"
+    },
+    {
+     "ruta": "src/app/layout.tsx",
+     "linea": 114,
+     "fragmento": "<Shutter />"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+     "linea": 43,
+     "fragmento": "const { triggerTransition } = useTransitionContext()"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/salida-manual.tsx",
+     "linea": 46,
+     "fragmento": "router.push('/setter')"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/salida-manual.tsx",
+     "linea": 32,
+     "fragmento": "imperativa (`router.push`) corre SÓLO cuando el setter confirma que quiere"
+    },
+    {
+     "ruta": "raíz:CLAUDE.md",
+     "linea": 15,
+     "fragmento": "- **Portales** (admin `/admin/*` y cliente `/dashboard/*`): usar `<Link>`"
+    }
+   ],
+   "impacto": "CLAUDE.md dice que triggerTransition no aplica en portales y no clasifica /setter. La barra del setter usa el shutter del sitio público mientras los formularios usan router.push con justificación y las páginas usan <Link>. El comentario de :95-97 nombra un wizard que ya no existe, y la action podría hacer redirect() (la alternativa que CLAUDE.md prefiere). Quien agregue la próxima pantalla no sabe qué regla seguir.",
+   "propuesta": "Decisión para Valentino y Franco: declarar /setter como portal en CLAUDE.md (<Link> + redirect() en actions) y retirar triggerTransition de setter-nav, o documentar la excepción. En el alta, mover la navegación a redirect() dentro de cargarProspecto.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-nuevo",
+    "h5.set-dia",
+    "lib.ui",
+    "h5.set-dia.foco-ahora",
+    "h5.set-dia.cola-de-hoy",
+    "h5.set-dia.novedades",
+    "h5.set-dia.rail-navegacion",
+    "h5",
+    "h5.set-manual",
+    "h5.set-manual.recorrido-y-barra"
+   ],
+   "relacionados_ids": [
+    "DEU-035",
+    "DEU-039"
+   ],
+   "previas": [],
+   "relacionados_texto": "D4-A3, PLAN-758",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H17",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: setter-nav.tsx:45 (triggerTransition como «decisión cerrada · CLAUDE.md»), nuevo-prospecto-form.tsx:95 (router.push justificado) y nuevo/page.tsx:44 (<Link>). CLAUDE.md clasifica solo /admin y /dashboard como portales: /setter queda sin regla. Va a la propuesta de CLAUDE.md de F6.",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L1/H09",
+      "titulo": "La navegación del setter usa triggerTransition y router.push sin justificar en un portal",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L2/H01",
+      "titulo": "router.push sin justificación inline en tres controles del panel del setter",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreado: foco-surface.tsx:90, novedades-abrir-foco.tsx:47 y trabajar-lead-button.tsx:31 hacen router.push sin comentario. Mismo tema."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L2/H02",
+      "titulo": "El rail del setter navega con triggerTransition y botones, contra la regla de portales de CLAUDE.md",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L3/H12",
+      "titulo": "La navegación del setter usa triggerTransition() en un portal, contra CLAUDE.md",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L3/H14",
+      "titulo": "router.push en la salida del manual (portal, con la justificación en un comentario)",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+     },
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L6/H10",
+      "titulo": "La navegación de /setter se fija por triggerTransition citando CLAUDE.md, que no clasifica /setter",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo tema: navegación del setter con triggerTransition o router.push mientras CLAUDE.md no clasifica /setter."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-032",
+   "prefijo": "A11Y",
+   "titulo": "El error del servidor en el alta de prospectos no se anuncia a lectores de pantalla",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
+     "linea": 191,
+     "fragmento": "{serverError && <p className=\"text-xs text-red-400\">{serverError}</p>}"
+    }
+   ],
+   "impacto": "El mensaje aparece al pie del formulario sin role=alert ni aria-live: quien usa lector de pantalla no se entera de que el alta falló (patrón D1-c1). seguimiento-form.tsx:196 sí lo hace bien.",
+   "propuesta": "role=\"alert\" en el párrafo (mismo patrón que seguimiento-form.tsx:196).",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-nuevo.alta-manual"
+   ],
+   "relacionados_ids": [
+    "A11Y-021"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c1 (errores sin role=alert)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H20",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-083",
+   "prefijo": "DEU",
+   "titulo": "Las páginas del setter usan un guard que lanza Error('Unauthorized'): un rol o una sesión inválidos terminan en error.tsx y en Sentry",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+     "linea": 145,
+     "fragmento": "const userId = await requireSetter()"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/page.tsx",
+     "linea": 18,
+     "fragmento": "const userId = await requireSetter()"
+    },
+    {
+     "ruta": "src/lib/auth-guards.ts",
+     "linea": 16,
+     "fragmento": "if (session?.user?.role !== 'SETTER' || !session.user.id) {\n    throw new Error('Unauthorized')"
+    }
+   ],
+   "impacto": "Cuando el guard falla (por ejemplo en un render parcial con la sesión invalidada), el setter ve «No se pudo abrir el manual de este lead» (manual/error.tsx:40) en vez de volver a /login, y cada caso suma un evento a Sentry (:30). Mismo patrón D1-c3 en importar/page.tsx:16.",
+   "propuesta": "Que las páginas hagan redirect('/login') cuando el guard no autoriza (envolverlo o un requireSetterPage que redirija); auth-guards.ts es FROZEN-inferido, así que el cambio va en los callers o como decisión para Valentino.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual",
+    "h5.set-nuevo",
+    "h5.set-importar",
+    "lib.auth"
+   ],
+   "relacionados_ids": [
+    "BUG-136"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c3 (guards que lanzan Unauthorized)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H21",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-084",
+   "prefijo": "DEU",
+   "titulo": "El comentario del schema dice que nadie lee OsLead.caliente, pero el manual y los gates lo leen",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 876,
+     "fragmento": "// admin-1a: \"caliente\" persistido que Franco marca a ojo (D4). Hoy NADIE lo\n  // setea ni lo lee — el comportamiento sigue siendo el del score"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_data.ts",
+     "linea": 217,
+     "fragmento": "caliente: lead.caliente,"
+    }
+   ],
+   "impacto": "El comentario contradice el código (gateBriefAbierto y derivarPantalla leen el campo desde admin-1b) y confunde a quien toque el gate o una migración del modelo.",
+   "propuesta": "Decisión para Valentino (schema.prisma es FROZEN): actualizar el comentario en la próxima migración coordinada con Franco.",
+   "esfuerzo": "S",
+   "zona": "FROZEN + ZONA-FRANCO",
+   "nodos": [
+    "modelo.OsLead",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-1002",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L4",
+    "tmp": "D4-c1/D4-L4/H22",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: schema.prisma:876-877 dice que nadie setea ni lee caliente; manual/_data.ts:217 lo lee. El comentario está en el schema (FROZEN): se corrige como decisión para Valentino y Franco.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-167",
+   "prefijo": "BUG",
+   "titulo": "El bloqueo de links del opener rechaza mensajes sin link ('...me encantó', 'cuenta.Me')",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 218,
+     "fragmento": "const LINK_PATTERN =\n  /(https?:\\/\\/|www\\.|wa\\.me\\/|bit\\.ly\\/|linktr\\.ee\\/|\\S+\\.(com|com\\.ar|ar|net|org|io|app|dev|shop|online|site|me)\\b)/i"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/outreach.schemas.ts",
+     "linea": 41,
+     "fragmento": "(texto) => !contieneLink(texto),"
+    }
+   ],
+   "impacto": "El patrón '\\S+\\.me\\b' (sin distinguir mayúsculas) matchea puntos suspensivos o un punto sin espacio seguidos de 'me', algo muy común en DMs: 'Hola!...me encantó tu local' o 'Vi tu cuenta.Me gustó'. Se probó con grep -P sobre esas frases. El server rechaza el opener con 'El link NO va en el opener' y el setter no encuentra ningún link. La salida es agregar un espacio.",
+   "propuesta": "Exigir forma de dominio: sin puntos consecutivos antes del TLD y TLD seguido de fin, espacio o barra. Sumar los casos negativos ('...me', 'palabra.Me') al invariante o spec del opener.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-lead.opener-sin-link",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-877",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L5",
+    "tmp": "D4-c1/D4-L5/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-085",
+   "prefijo": "DEU",
+   "titulo": "Guía y exports sin consumidores, uno de ellos con una regla de gate que ya no existe",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/guidance-content.ts",
+     "linea": 526,
+     "fragmento": "'El score marca el camino: ',\n{ enfasis: '1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad' },\n' (y deja construir la demo sin esperar respuesta). La mayoría son 3 —fríos— y eso está bien: es el caso normal.',"
+    },
+    {
+     "ruta": "src/lib/leados/guidance-content.ts",
+     "linea": 643,
+     "fragmento": "export const GUIA_CONSTRUCCION = {"
+    },
+    {
+     "ruta": "src/lib/leados/guidance-content.ts",
+     "linea": 887,
+     "fragmento": "const GUIA_TRASPASO = {"
+    },
+    {
+     "ruta": "src/lib/leados/guidance-content.ts",
+     "linea": 958,
+     "fragmento": "aprobada: ["
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 653,
+     "fragmento": "export function agruparParaHome(inputs: HomeLeadInput[]): Record<HomeGroupKey, HomeLead[]> {"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 118,
+     "fragmento": "referenciasFicha: textoLibre,"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx",
+     "linea": 214,
+     "fragmento": "<TeachPanel id=\"objeciones\" collapsible={false} />"
+    }
+   ],
+   "impacto": "TeachPanel solo se invoca con 'objeciones' y 'selfCheck'. GUIA_CONSTRUCCION, GUIA_TRASPASO, GUIA_REVISION.aprobada, GUIA_EVALUACION.porque/ejemplos, SelfCheckRazon y agruparParaHome no tienen lectores. El 'porque' de la evaluación enseña que un score 4–5 abre la construcción sin respuesta, lo que contradice gateBriefAbierto (flow.ts:81-83, que mira solo el campo caliente): si se conecta un TeachPanel 'evaluacion', enseña una regla falsa. referenciasFicha no tiene lector y se borra en cada re-guardado del brief (brief-form.tsx:38).",
+   "propuesta": "Borrar el contenido y los exports muertos, o corregir el 'porque' de la evaluación si se piensa usar. Sacar referenciasFicha del contrato.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.guia-y-herramientas",
+    "lib.leados"
+   ],
+   "relacionados_ids": [
+    "DEU-087"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-926, PLAN-873, PLAN-703, PLAN-688, PLAN-857, PLAN-795; A-07",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L5",
+    "tmp": "D4-c1/D4-L5/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-086",
+   "prefijo": "DEU",
+   "titulo": "Blobs del dossier y el gate del self-check acoplados a texto visible o a enums: un renombre los invalida",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 188,
+     "fragmento": "itemsDuros: HARD_CHECKS.map((check) => ({\n  nombre: check.nombre,\n  ok: duros[check.id] === true,"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 207,
+     "fragmento": "selfCheck.itemsDuros.some((item) => item.nombre === check.nombre && item.ok),"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 126,
+     "fragmento": "z.object({\n  nombre: z.string().trim().min(1),\n  ok: z.boolean(),"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 133,
+     "fragmento": "export function parseProgreso(json: unknown): Progreso {\n  const parsed = ProgresoSchema.safeParse(json)\n  return parsed.success ? parsed.data : { completadas: [] }"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 127,
+     "fragmento": "nombre: z.string().trim().min(1),"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.actions.ts",
+     "linea": 392,
+     "fragmento": "if (!selfCheckAprobado(selfCheck)) {"
+    }
+   ],
+   "impacto": "El self-check se une a la lista por el texto visible: corregir una coma desaprueba todos los chequeos guardados. Un id de fase muerto vacía el checklist entero de cada setter, sin log. Hoy un invariante lo frena (self-check-gate.invariant.ts:134-178), pero la causa sigue y pasar a id es destructivo.",
+   "propuesta": "Guardar el id junto al nombre con lectura tolerante (por id y, si falta, por nombre) y parsear el progreso ítem por ítem. Decisión de Franco.",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-lead.chequeo-final-y-revision",
+    "h5.set-lead.brief-y-construccion",
+    "lib.leados",
+    "modelo.OsLeadDossier",
+    "h5.set-lead.brief-construccion-revision",
+    "h5.adm-revision-demos.cola-y-veredicto"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-892, PLAN-905, PLAN-876, PLAN-907; A3 B3",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L5",
+    "tmp": "D4-c1/D4-L5/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D4-c1",
+      "tmp": "D4-c1/D4-L1/H17",
+      "titulo": "El gate del self-check depende del texto visible de cada chequeo",
+      "severidad": "BAJA",
+      "nota_padre": "Muestreado: contracts.ts:127 y flow.ts:206-208 (el gate compara item.nombre con el texto de cada chequeo). Misma causa."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-168",
+   "prefijo": "BUG",
+   "titulo": "Mis números y la carga del admin cuentan como activos los leads descartados",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/mis-numeros.ts",
+     "linea": 94,
+     "fragmento": "const activos = leads.reduce((n, lead) => (leadActivo(lead.status) ? n + 1 : n), 0)"
+    },
+    {
+     "ruta": "src/lib/leados/revision.ts",
+     "linea": 27,
+     "fragmento": "export const ESTADOS_TERMINALES: LeadStatus[] = ['CERRADO', 'PERDIDO']"
+    },
+    {
+     "ruta": "src/lib/leados/setter-carga.ts",
+     "linea": 66,
+     "fragmento": "assignedToId: { in: setterIds },\n        status: { notIn: ESTADOS_TERMINALES },"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/dossier.actions.ts",
+     "linea": 152,
+     "fragmento": "await transitionDossier(leadId.data, {\n        to: 'DESCARTADA',\n        motivoDescarte,"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 417,
+     "fragmento": "if (input.status === 'PERDIDO' || input.stage === 'DESCARTADA') return 'archivo'"
+    },
+    {
+     "ruta": "src/lib/leados/mis-numeros.invariant.ts",
+     "linea": 56,
+     "fragmento": "{ status: 'PROSPECTO', dossier: { evaluacionJson: ev('DESCARTAR', RECIENTE) } },"
+    }
+   ],
+   "impacto": "El descarte solo mueve el stage del dossier (dossier.actions.ts:150-157; ninguna escritura de OsLead.status en ese camino), así que un lead descartado sigue en PROSPECTO. «Mis números» lo cuenta como activo mientras el home lo manda al archivo, y Franco asigna leads mirando una carga viva inflada con descartes. Para el primer setter real: números propios que no cierran con su cartera, y asignaciones sesgadas.",
+   "propuesta": "Definir 'lead vivo' en un único predicado que mire status y stage (PERDIDO/CERRADO o dossier DESCARTADA), igual al corte de grupoPara, y usarlo en mis-numeros y en setter-carga (excluir dossier.stage DESCARTADA del groupBy o contar en memoria). Corregir el fixture del invariante mis-numeros, que hoy fija el comportamiento.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia.mis-numeros",
+    "h4.adm-leads.carga-por-setter",
+    "lib.leados",
+    "modelo.OsLead",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "A-09; CERRADO no corta la derivación",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L6",
+    "tmp": "D4-c1/D4-L6/H01",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: mis-numeros.ts:94 (activos = leadActivo(status)) y setter-carga.ts:66 (notIn ESTADOS_TERMINALES = CERRADO y PERDIDO): un descartado conserva su status y cuenta como activo, aunque flow.ts:417 lo manda al archivo.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-015",
+   "prefijo": "PERF",
+   "titulo": "El home del setter carga toda la cartera con el dossier completo en cada render",
+   "dominio": "D4",
+   "severidad": "MEDIA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/ownership.ts",
+     "linea": 53,
+     "fragmento": "return prisma.osLead.findMany({\n    where: ownedListWhere(userId),\n    include: {"
+    },
+    {
+     "ruta": "src/lib/leados/ownership.ts",
+     "linea": 56,
+     "fragmento": "dossier: true,"
+    },
+    {
+     "ruta": "src/lib/leados/prospecto-import.ts",
+     "linea": 24,
+     "fragmento": "export const MAX_FILAS_IMPORT = 500"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/page.tsx",
+     "linea": 30,
+     "fragmento": "const leads = await listOwnedLeads(userId)"
+    }
+   ],
+   "impacto": "La cartera crece de a 500 leads por tanda de import, sin tope total, y cada visita al home trae todos los OsLeadDossier con sus blobs JSON (ficha, brief, evaluación, agenda, progreso, rechazos), aunque las tarjetas usan pocos campos. Con algunos miles de leads, el TTFB del home y la memoria de la función suben en forma lineal.",
+   "propuesta": "Antes de tocar, medir. Después: un select acotado del dossier a los campos que leen buildHomeLeads, mis-numeros, progreso y novedades, y evaluar paginar o cargar aparte el grupo Archivo.",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia",
+    "lib.leados",
+    "modelo.OsLead",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "h5.set-importar.csv",
+   "vh": "VH-157",
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L6",
+    "tmp": "D4-c1/D4-L6/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-169",
+   "prefijo": "BUG",
+   "titulo": "El parser CSV abre comillas en medio de un campo y se traga el resto del archivo",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/prospecto-import.ts",
+     "linea": 126,
+     "fragmento": "if (ch === '\"') {\n      inQuotes = true\n      i++"
+    },
+    {
+     "ruta": "src/lib/leados/prospecto-import.ts",
+     "linea": 110,
+     "fragmento": "if (inQuotes) {"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_actions/prospecto.schemas.ts",
+     "linea": 45,
+     "fragmento": ".max(200, 'Demasiado largo para un nombre de negocio'),"
+    }
+   ],
+   "impacto": "Cualquier comilla dentro de un campo sin comillas (p. ej. «Pizzería 5\"» o una nota con una comilla suelta) activa el modo comillas. Las comas y los saltos de línea siguientes quedan en un solo campo hasta la próxima comilla. Sin otra comilla, el resto del archivo se vuelve una sola fila, que el schema rechaza por largo: el reporte muestra 1 inválida y las demás filas desaparecen sin aviso.",
+   "propuesta": "Entrar al modo comillas solo al inicio de un campo (RFC 4180) y devolver un error de estructura si el archivo termina con comillas abiertas. Sumar el caso al invariante prospecto-import.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-importar.csv",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-762",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L6",
+    "tmp": "D4-c1/D4-L6/H06",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: prospecto-import.ts:110-130 (una comilla en cualquier posición abre inQuotes y el resto del archivo queda dentro del campo).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-170",
+   "prefijo": "BUG",
+   "titulo": "Los avisos del setter no se purgan: los de leads borrados quedan plegados para siempre",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 950,
+     "fragmento": "lead   OsLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)"
+    },
+    {
+     "ruta": "src/lib/leados/novedades.ts",
+     "linea": 328,
+     "fragmento": "const result = await prisma.osSetterNotice.updateMany({\n    where: { ...ownSetterNoticeWhere(userId), read: false },\n    data: { read: true },"
+    },
+    {
+     "ruta": "src/lib/leados/novedades-agrupar.ts",
+     "linea": 75,
+     "fragmento": "/** P23 — ver `AvisoView.vigente`. Una fila plegada es siempre vigente: los\n   *  avisos que se pliegan no dan órdenes (`leadId: null`). */"
+    },
+    {
+     "ruta": "src/lib/leados/novedades-vigencia.ts",
+     "linea": 93,
+     "fragmento": "if (!estado) return { vigente: false, enSuLugar: YA_NO_ES_TUYO }"
+    }
+   ],
+   "impacto": "Al borrar un lead, sus avisos quedan con leadId null. Se pliegan por tipo («Te asignaron un lead» ×N) con «Este negocio ya no está en tu cartera» y suman al badge hasta que el setter marca todo como visto. La tabla no tiene purga: osSetterNotice.delete* solo aparece en scripts de QA (la bitácora midió 77 huérfanos sobre 80). El comentario de que una fila plegada siempre está vigente no vale para estos avisos.",
+   "propuesta": "Borrar o marcar como leídos los avisos del lead al borrarlo (cascade en lugar de SetNull para los kinds con orden), o una purga periódica de los leídos y los huérfanos. Corregir el comentario.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia.novedades-dirigidas",
+    "modelo.OsSetterNotice",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-701",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L6",
+    "tmp": "D4-c1/D4-L6/H07",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-087",
+   "prefijo": "DEU",
+   "titulo": "paso.ts: casi toda la derivación quedó sin consumidor y conserva la trampa de APROBADA",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 552,
+     "fragmento": "const paso = derivarPasoDelLead(stage, gateAbierto, openerPendiente)"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 574,
+     "fragmento": "if (paso.anchor === 'opener') {"
+    },
+    {
+     "ruta": "src/lib/leados/paso.ts",
+     "linea": 247,
+     "fragmento": " * `indice` → DossierStepper · `foco` → PasoActualBanner (y el tono del marco del\n * step activo) · `anchor` → StepAnchor."
+    },
+    {
+     "ruta": "src/lib/leados/paso.ts",
+     "linea": 169,
+     "fragmento": "// ⚠️ Esta rama NO mira `finalUrl`, así que con el link todavía sin cargar\n      // diría «Enviá el link de la demo» sobre un link que no existe"
+    }
+   ],
+   "impacto": "El único consumidor (manual.ts:552) lee solo anchor==='opener' y foco.tono en EVALUADA (:574-578). `indice`, el anchor de los otros stages y siete de las ocho ramas de describirFoco (copy, íconos de lucide) no se renderizan en ninguna parte: DossierStepper, PasoActualBanner y StepAnchor ya no existen (git grep). Son cerca de 200 líneas que los invariantes de copy siguen barriendo, con la trampa de APROBADA sin finalUrl y el «Seguimiento» como pantalla listos para volver si alguien reusa el descriptor.",
+   "propuesta": "Reducir paso.ts a la decisión de EVALUADA que usa posicionDe (o inlinearla) y borrar indice, anchor y las ramas de foco de los otros stages. Eso cierra PLAN-712 y PLAN-715 por eliminación.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual",
+    "lib.leados"
+   ],
+   "relacionados_ids": [
+    "DEU-085"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-712; PLAN-715; PLAN-773; PLAN-815",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L6",
+    "tmp": "D4-c1/D4-L6/H08",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-088",
+   "prefijo": "DEU",
+   "titulo": "El oráculo del barrido vive en src/lib y su ficha de prueba tiene la forma vieja oculta por un doble cast",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/paso-admitido.ts",
+     "linea": 200,
+     "fragmento": "const FICHA = {\n  negocio: 'Bar Modelo',\n  instagram: '@barmodelo',"
+    },
+    {
+     "ruta": "src/lib/leados/paso-admitido.ts",
+     "linea": 214,
+     "fragmento": "} as unknown as DerivacionManualInput['ficha']"
+    },
+    {
+     "ruta": "src/lib/leados/contracts.ts",
+     "linea": 52,
+     "fragmento": "export const FichaSchema = z.object({"
+    }
+   ],
+   "impacto": "FichaSchema hoy es identidad, presenciaDigital, resenas, contenidoReal, materiales y otros; la ficha del barrido usa campos que ya no existen y el doble cast lo esconde. Solo lo importan dos invariantes (paso-admitido y aprobada-sin-link). El día que la derivación lea la ficha, el barrido de 373.248 estados va a correr con datos fuera de contrato sin que el compilador avise. Además, el oráculo comparte el punto ciego de APROBADA con toque vencido.",
+   "propuesta": "Mover el generador y las fixtures junto a los invariantes y construir la ficha con FichaSchema.parse, sin casts.",
+   "esfuerzo": "S",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.derivacion-de-pantalla",
+    "lib.leados"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-948; Aprobada sin enviar con gate cerrado y toque vencido",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L6",
+    "tmp": "D4-c1/D4-L6/H12",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-056",
+   "prefijo": "UX",
+   "titulo": "En el re-loop el paso actual queda en «Construir» hasta mandar a revisión",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 622,
+     "fragmento": "const reloop = enConstruccion && input.hayRechazo"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 625,
+     "fragmento": ": enConstruccion && !reloop\n          ? input.draftUrl"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 618,
+     "fragmento": "// LÍMITE CONOCIDO, y es de datos: el producto no registra QUÉ correcciones\n      // se aplicaron"
+    }
+   ],
+   "impacto": "Después de reabrir, rehacer y republicar el borrador, el manual sigue marcando mc1 «Construí la demo» como «Tu paso ahora». El setter tiene que encontrar solo el chequeo final (alcanzable, pero no señalado), justo en el tramo donde Franco espera la corrección.",
+   "propuesta": "Decisión de Franco: derivar el fin del retrabajo de un dato existente (borrador registrado después de la fecha del último rechazo) o persistir una marca de «correcciones aplicadas».",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-manual.derivacion-de-pantalla",
+    "lib.leados",
+    "modelo.OsLeadDossier"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-948",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "D4-L6",
+    "tmp": "D4-c1/D4-L6/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-089",
+   "prefijo": "DEU",
+   "titulo": "Higiene de UI — D4: 97 detalles cosméticos (contraste 41, otro 26, copy 24, inline 4, tilde 2)",
+   "dominio": "D4",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/setter/layout.tsx",
+     "linea": 53,
+     "fragmento": "[contraste] Rótulo 'develOP' en text-zinc-600 sobre fondo oscuro (menos de 4,5:1)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/page.tsx",
+     "linea": 322,
+     "fragmento": "[contraste] Texto funcional sobre evaluaciones sin fecha en text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/page.tsx",
+     "linea": 323,
+     "fragmento": "[copy] Jerga de sprint '(pre-B5)' en la UI"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
+     "linea": 244,
+     "fragmento": "[contraste] Ayuda 'Si el embed no carga…' en text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
+     "linea": 251,
+     "fragmento": "[copy] 'draft URL' y 'embeber' como jerga en el vacío del preview"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
+     "linea": 65,
+     "fragmento": "[copy] 'no debería pasar en EN_REVISION' expone el enum interno"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
+     "linea": 78,
+     "fragmento": "[copy] Veredicto mostrado como enum crudo (DESCARTAR/AVANZAR/CALIENTE)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
+     "linea": 168,
+     "fragmento": "[copy] Jerga de sprint '(B4)' en el vacío del self-check"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx",
+     "linea": 72,
+     "fragmento": "[copy] Veredicto como enum crudo"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx",
+     "linea": 82,
+     "fragmento": "[contraste] 'sin fecha (pre-B5)' en text-zinc-600 y con jerga de sprint"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx",
+     "linea": 65,
+     "fragmento": "[otro] z-[130] y bg-[#05070a] literales en vez del token zIndex de design-tokens.ts:227"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx",
+     "linea": 133,
+     "fragmento": "[inline] transition/willChange en style inline (dinámico, justificable)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx",
+     "linea": 146,
+     "fragmento": "[inline] gridTemplateRows/opacity/transition en style inline"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
+     "linea": 36,
+     "fragmento": "[otro] STAGE_PILL duplicado con pipeline-board.tsx:25-33"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/loading.tsx",
+     "linea": 15,
+     "fragmento": "[otro] El skeleton dibuja eyebrow y descripción que la página ya no renderiza desde P21 (page.tsx:104-109)"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.schemas.ts",
+     "linea": 44,
+     "fragmento": "[copy] Mensajes de validación en inglés ('Business name is required', 'Invalid lead id')"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/demo.schemas.ts",
+     "linea": 26,
+     "fragmento": "[copy] 'A valid demo URL is required' en inglés"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
+     "linea": 142,
+     "fragmento": "[copy] 'Lead not found' y fallbacks 'Failed to …' en inglés"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx",
+     "linea": 139,
+     "fragmento": "[contraste] Ayuda del cronómetro en text-zinc-600"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
+     "linea": 83,
+     "fragmento": "[contraste] text-zinc-700 en la nota «sin fecha» da ≈1,9:1 sobre el fondo oscuro."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
+     "linea": 77,
+     "fragmento": "[contraste] text-zinc-600 en «Últimos 30 días» da ≈2,6:1."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
+     "linea": 31,
+     "fragmento": "[contraste] El rótulo «Mis números» en text-zinc-600 a 11 px da ≈2,6:1."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+     "linea": 33,
+     "fragmento": "[contraste] El nombre de la herramienta pendiente en text-zinc-600 da ≈2,6:1."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+     "linea": 37,
+     "fragmento": "[contraste] dondeSeUsa en text-zinc-700 a 10 px da ≈1,9:1."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+     "linea": 41,
+     "fragmento": "[contraste] «pendiente» en text-amber-300/50 a 10 px no llega a AA."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+     "linea": 59,
+     "fragmento": "[contraste] dondeSeUsa de las herramientas con link en text-zinc-600 a 10 px."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+     "linea": 95,
+     "fragmento": "[contraste] El cuerpo caducado en text-zinc-600 y tachado da ≈2,6:1 y se lee mal."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+     "linea": 113,
+     "fragmento": "[contraste] El «hace …» del aviso en text-zinc-600 a 11 px."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+     "linea": 179,
+     "fragmento": "[contraste] El encabezado «Tus demos esperando a Franco» en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
+     "linea": 196,
+     "fragmento": "[contraste] La instrucción «Las ves en tu cartera → filtro…» en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/cola-del-dia.tsx",
+     "linea": 123,
+     "fragmento": "[contraste] El pie «Quedan N más para trabajar» en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/cola-del-dia.tsx",
+     "linea": 76,
+     "fragmento": "[contraste] Rubro y zona de la fila en text-zinc-600 a 11 px."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/home-sections.tsx",
+     "linea": 97,
+     "fragmento": "[contraste] La meta de la card (rubro · zona · antigüedad) en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/home-en-espera.tsx",
+     "linea": 102,
+     "fragmento": "[contraste] «Tu cartera completa sigue disponible.» en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/cartera-view.tsx",
+     "linea": 122,
+     "fragmento": "[contraste] La ayuda del vacío por filtro en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/progreso-semana.tsx",
+     "linea": 58,
+     "fragmento": "[contraste] «últimos N días» en text-zinc-600 a 11 px."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
+     "linea": 223,
+     "fragmento": "[contraste] El contador de caracteres de la nota en text-zinc-600 a 10 px."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/canal-seguridad.tsx",
+     "linea": 46,
+     "fragmento": "[contraste] La lista de disciplina en text-zinc-500 a 11 px da ≈4,1:1, por debajo de 4,5:1."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
+     "linea": 149,
+     "fragmento": "[otro] aria-label en un div genérico sin role: los lectores de pantalla lo ignoran (usar role=\"group\" o una región)."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/novedades-abrir-foco.tsx",
+     "linea": 61,
+     "fragmento": "[otro] Varios botones «Abrir» con el mismo nombre accesible y sin el negocio; TrabajarLeadButton sí lo incluye (trabajar-lead-button.tsx:40)."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/home-sections.tsx",
+     "linea": 27,
+     "fragmento": "[copy] diasDesde cuenta bloques de 24 h, no días calendario: un lead de ayer a las 23 h aparece como «hoy» a la mañana."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
+     "linea": 89,
+     "fragmento": "[otro] «Tu día» queda marcado como activo también en /setter/nuevo por el startsWith."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/shortcuts-help.tsx",
+     "linea": 32,
+     "fragmento": "[otro] La pastilla de atajos queda fija abajo a la derecha también en touch, donde no sirve y tapa contenido."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/cartera-toolbar.tsx",
+     "linea": 75,
+     "fragmento": "[otro] Los dos selects (min-w 9,5rem + 10rem) no hacen wrap: desbordan ≈41 px a 320 px y 1 px a 360 px."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
+     "linea": 52,
+     "fragmento": "[otro] Los links externos con target=_blank no avisan al lector de pantalla que abren una pestaña nueva."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
+     "linea": 29,
+     "fragmento": "[inline] El z-index va por style inline con tokens (:29, :34, :45, :52, :60) en lugar de clases."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/escalamiento-construccion.tsx",
+     "linea": 39,
+     "fragmento": "[copy] Interpola '(hace ${esperaEscalado})', pero formatEspera ya devuelve 'hace X': se lee «hace hace 3 h»."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx",
+     "linea": 306,
+     "fragmento": "[contraste] Nota funcional de score 3 en text-zinc-600 sobre fondo oscuro."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx",
+     "linea": 460,
+     "fragmento": "[contraste] La promesa de guardado de la ficha está en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx",
+     "linea": 310,
+     "fragmento": "[contraste] La promesa de guardado del chequeo está en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.tsx",
+     "linea": 76,
+     "fragmento": "[contraste] Estado vacío del historial en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.tsx",
+     "linea": 152,
+     "fragmento": "[contraste] Aclaración «Evento del sistema» en text-zinc-600 italic."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx",
+     "linea": 46,
+     "fragmento": "[contraste] Texto de ficha congelada vacía en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m16-agenda.tsx",
+     "linea": 61,
+     "fragmento": "[contraste] «Sin teléfono cargado» en text-zinc-600 (igual en m5-seguimiento.tsx:77)."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m14-chequeo.tsx",
+     "linea": 39,
+     "fragmento": "[contraste] Rótulo «Tu borrador» en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/franja-recorrido.tsx",
+     "linea": 56,
+     "fragmento": "[contraste] Los pasos futuros de la franja usan text-zinc-600 para su nombre y número."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx",
+     "linea": 67,
+     "fragmento": "[contraste] Rótulos de zona «Contexto del lead» y «Munición» en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/manual-nav.tsx",
+     "linea": 207,
+     "fragmento": "[contraste] La explicación de la navegación libre está en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/escalamiento-construccion.tsx",
+     "linea": 61,
+     "fragmento": "[contraste] «¿Algo no sale como la guía dice?» en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/historial-lead.tsx",
+     "linea": 20,
+     "fragmento": "[contraste] El conteo de movimientos está en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx",
+     "linea": 228,
+     "fragmento": "[contraste] «Abrí el Gem para pegarlo:» en text-zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx",
+     "linea": 291,
+     "fragmento": "[copy] Jerga visible «auto-reporte» (también en manual-nav.tsx:208)."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx",
+     "linea": 260,
+     "fragmento": "[copy] Rótulo «CTA:» en inglés técnico (también en chequeo-form.tsx:99)."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m16-agenda.tsx",
+     "linea": 138,
+     "fragmento": "[copy] Muestra el uid interno de Cal.com como «Código de la reserva», y además en zinc-600."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m14-chequeo.tsx",
+     "linea": 118,
+     "fragmento": "[copy] Plural con paréntesis «delator(es)»."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/badge-provisorio.tsx",
+     "linea": 7,
+     "fragmento": "[copy] Badge permanente «Guía preliminar — en validación» en el camino del setter."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx",
+     "linea": 168,
+     "fragmento": "[inline] style={{ zIndex: zIndex.sticky }} en línea (token de design-tokens)."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m15-envio.tsx",
+     "linea": 90,
+     "fragmento": "[otro] Condicional redundante 'demoEnviadaAt ?' dentro de la rama donde ya es truthy."
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx",
+     "linea": 180,
+     "fragmento": "[otro] El comentario describe un expectToast de página entera que ya no existe y fuerza la redacción en subjuntivo (PLAN-927)."
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 125,
+     "fragmento": "[copy] La línea 'Se reactiva hoy' del digest empieza con un espacio donde quedó un emoji borrado"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 134,
+     "fragmento": "[copy] El encabezado del digest ' <b>Follow-ups pendientes' arranca con un espacio de un emoji borrado"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 100,
+     "fragmento": "[tilde] 'Respondio' sin tilde en statusLabel"
+    },
+    {
+     "ruta": "src/app/api/cron/os-follow-up/route.ts",
+     "linea": 130,
+     "fragmento": "[tilde] 'Ultimo contacto' sin tilde en el digest"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
+     "linea": 201,
+     "fragmento": "[contraste] Texto funcional de 11px en text-zinc-600 sobre fondo oscuro (~2,6:1, menor a 4,5:1)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx",
+     "linea": 239,
+     "fragmento": "[contraste] 'fila N' de los duplicados en text-zinc-600 (~2,6:1)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
+     "linea": 169,
+     "fragmento": "[contraste] Detalle de cada opción en text-[11px] text-zinc-500 (~4,1:1, por debajo de AA para texto chico); lo mismo en :142"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
+     "linea": 143,
+     "fragmento": "[copy] 'si no respondió, se enfría solo' promete un comportamiento automático que no existe (el lead queda en seguimiento hasta que Franco lo cierre)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
+     "linea": 67,
+     "fragmento": "[copy] El toast de 'Respondió' dice 'se abrió el brief. A construir la demo' también cuando la demo ya se mandó (m5 post-envío)"
+    },
+    {
+     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/loading.tsx",
+     "linea": 10,
+     "fragmento": "[otro] aria-label en un div sin role: los lectores no lo anuncian; usar role=\"status\""
+    },
+    {
+     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
+     "linea": 95,
+     "fragmento": "[copy] El comentario que justifica router.push nombra 'el wizard del lead', que ya no existe (es el manual)"
+    },
+    {
+     "ruta": "src/lib/leados/guidance-content.ts",
+     "linea": 1186,
+     "fragmento": "[copy] El ejemplo del chequeo final dice 'Los 6 obligatorios en verde' y hoy son 10 hard-checks (flow-content.ts:171-261)"
+    },
+    {
+     "ruta": "src/lib/leados/escalamiento.ts",
+     "linea": 87,
+     "fragmento": "[otro] El comentario habla de 'los 6 hard-checks' y hoy son 10"
+    },
+    {
+     "ruta": "src/lib/leados/agenda.ts",
+     "linea": 296,
+     "fragmento": "[otro] El comentario dice que el claim exigió agendaJson NULL; desde 6.1 también acepta OFRECIDOS"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 650,
+     "fragmento": "[otro] El comentario de agruparParaHome dice 'calientes (score >= 4)'; el caliente hoy es el campo de Franco"
+    },
+    {
+     "ruta": "src/lib/leados/flow.ts",
+     "linea": 412,
+     "fragmento": "[otro] El doc de grupoPara dice 'APROBADA → en seguimiento (el envío llega en bloques posteriores)'; el código (:430-443) ya manda a trabajar"
+    },
+    {
+     "ruta": "src/lib/leados/guidance-content.ts",
+     "linea": 24,
+     "fragmento": "[otro] El encabezado dice 'hoy el registro solo tiene la ficha (m1)'; el registro tiene once pasos"
+    },
+    {
+     "ruta": "src/lib/leados/herramientas.ts",
+     "linea": 8,
+     "fragmento": "[otro] Dice que SHELL_CONSTRUCCION y CANAL_INSTAGRAM están en flow.ts; viven en flow-content.ts"
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 517,
+     "fragmento": "[otro] El comentario dice que DESCARTADA mantiene su case en m2 con el veredicto a la vista; hoy aterriza en 'archivo' (:564-572) y m2 no existe."
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 327,
+     "fragmento": "[otro] 'Ruta canónica... (ruta paralela al wizard)': el wizard ya no existe."
+    },
+    {
+     "ruta": "src/lib/leados/manual.ts",
+     "linea": 336,
+     "fragmento": "[otro] El comentario cita 'WizardData en la página del wizard' y el 'gate del wizard' (:342), que ya no existen."
+    },
+    {
+     "ruta": "src/lib/leados/prompts-disenio.ts",
+     "linea": 121,
+     "fragmento": "[otro] 'Estado de los seis hard-blocks' lista seis; HARD_CHECKS hoy tiene diez (flow-content.ts:171+)."
+    },
+    {
+     "ruta": "src/lib/leados/prompts-disenio.ts",
+     "linea": 161,
+     "fragmento": "[otro] Cita las pantallas M7-M12 y <PromptsDisenio /> del wizard, ya borrados."
+    },
+    {
+     "ruta": "src/lib/leados/paso.ts",
+     "linea": 184,
+     "fragmento": "[copy] «seguí el contacto en «Seguimiento»» nombra una fase como si fuera una pantalla (rama sin render, PLAN-715)."
+    },
+    {
+     "ruta": "src/lib/leados/paso.ts",
+     "linea": 4,
+     "fragmento": "[otro] La cabecera describe consumidores (stepper, banner, anchor) que ya no existen."
+    },
+    {
+     "ruta": "src/lib/leados/turno.ts",
+     "linea": 204,
+     "fragmento": "[copy] «Cuando toque un toque vuelve a tu cola»: repetición de 'toque' que se lee rara en el detalle del turno negocio."
+    },
+    {
+     "ruta": "src/lib/leados/novedades-agrupar.ts",
+     "linea": 75,
+     "fragmento": "[otro] 'Una fila plegada es siempre vigente' no vale para avisos huérfanos de leads borrados (vigenciaDeAviso con estado null da false)."
+    },
+    {
+     "ruta": "src/lib/leados/notify.ts",
+     "linea": 6,
+     "fragmento": "[otro] El contrato dice fire-and-forget, pero los callers hacen await (dossier.actions.ts:165, agenda.actions.ts:263)."
+    }
+   ],
+   "impacto": "Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.",
+   "propuesta": "Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.",
+   "esfuerzo": "M",
+   "zona": "ZONA-FRANCO",
+   "nodos": [
+    "h5.set-dia",
+    "h5.adm-revision-demos",
+    "h4.adm-leads",
+    "h5.adm-fg2lab",
+    "h5.set-manual",
+    "h5.set-lead",
+    "lib.leados",
+    "h5.set-nuevo",
+    "h5.set-importar"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D4-c1",
+    "lote": "todos",
+    "tmp": "D4-c1/HIGIENE",
+    "verificado_padre": false,
+    "nota_padre": "DEC-55: higiene de UI agrupada, sin verificación individual",
+    "verificador": null
+   },
+   "estado": "vigente"
   }
  ]
 }

@@ -2606,6 +2606,62 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - Propuesta: borrar
 - Zona: libre
 
+### [POD-367] src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx (D4-c1)
+- Hallado en F2 (D4-L1) · `src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx` · Nodo(s): h5.adm-revision-demos · Alcance: fusión con otra implementación (no se borra sin consolidar) — copia deliberada de dossier-panels.tsx:55-59 (PLAN-677) y el mapa STAGE_PILL duplicado en [leadId]/page.tsx:36-44 y pipeline-board.tsx:25-33 · Señales: Copia deliberada de dossier-panels.tsx:55-59 (PLAN-677); Mapa STAGE_PILL también duplicado entre [leadId]/page.tsx:36-44 y pipeline-board.tsx:25-33
+- Qué rompe si se borra: Nada si se extraen a src/lib/leados-ui.ts junto a STAGE_TONE.
+- Confianza de poda: MEDIA
+- Propuesta: extraer a un helper compartido de LeadOS junto a STAGE_TONE (decidir (Franco))
+- Zona: ZONA-FRANCO
+
+### [POD-368] src/lib/leados/herramientas.ts (D4-c1)
+- Hallado en F2 (D4-L2, D4-L5, D4-L6) · `src/lib/leados/herramientas.ts` · Nodo(s): lib.leados · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — la entrada «evaluador» (:53-64), sin pantalla desde D15-bis y todavía en HERRAMIENTAS_ORDEN (:123) · Señales: url null con TODO (herramientas.ts:63); ningún ToolGuide ni HerramientaLauncher con id evaluador en src (git grep); el paso Evaluación se fusionó con la ficha (bitácora D15-bis), así que la fila anuncia una fase retirada; Entrada 'evaluador' (herramientas.ts:53-64) sin pantalla desde D15-bis; solo la usa el rail genérico; url null con TODO: URL (herramientas.ts:63); sigue en HERRAMIENTAS_ORDEN (:123) y lo pinta tools-rail.tsx:26; ninguna pantalla del manual lo usa desde D15-bis (manual.ts:157-162)
+- Qué rompe si se borra: tests/setter/16-municiones-salida.spec.ts:132, que espera ['evaluador','gemDiseno','claudeDesign','gemOutreach'] como herramientas sin URL; y el tipo HerramientaId si algo lo referencia. / tests/setter/16-municiones-salida.spec.ts:132, que afirma la lista de herramientas sin URL / Si se borra del union HerramientaId: revisar tool-guide.tsx y cualquier dondeSeUsa que lo nombre; sacarlo solo de HERRAMIENTAS_ORDEN no rompe tipos.
+- Confianza de poda: MEDIA
+- Propuesta: sacarla del orden y del union HerramientaId, actualizando tests/setter/16-municiones-salida.spec.ts:132 (FAL-033) (decidir (Franco))
+- Zona: ZONA-FRANCO
+
+### [POD-369] src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx (D4-c1)
+- Hallado en F2 (D4-L3) · `src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx` · Nodo(s): h5.set-lead · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — la rama editable (:53-90): el único consumidor (m1-ficha.tsx:212) pasa siempre editable={false} · Señales: Su único consumidor es m1-ficha.tsx:212 y siempre pasa editable={false} (git grep '<FichaStep').; La rama editable (ficha-step.tsx:53-90) monta FichaForm sin cierre y un CopyBlock para el Evaluador externo, que desde D15-bis no tiene pantalla.; El header 'Paso' duplicado que señaló auditoria-consistencia-setter.md:125 vive solo en esta rama muerta.
+- Qué rompe si se borra: Nada en runtime. Quitar la rama editable reduce el archivo a la vista congelada; hay que revisar la referencia en comentario de guidance-content.ts:307.
+- Confianza de poda: MEDIA
+- Propuesta: quitar la rama editable y su CopyBlock del evaluador externo (decidir (Franco))
+- Zona: ZONA-FRANCO
+
+### [POD-370] src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx (D4-c1)
+- Hallado en F2 (D4-L3) · `src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx` · Nodo(s): h5.set-lead · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — TEXTOS_WIZARD (:55-59) y VEREDICTO_LABELS (:42-46), restos del wizard: el único consumidor pasa TEXTOS_M1 · Señales: TEXTOS_WIZARD (evaluacion-form.tsx:55-59) es el default de textos, pero el único consumidor (m1-ficha.tsx:196-201) siempre pasa TEXTOS_M1.; VEREDICTO_LABELS (:42-46) está copiado tal cual en TEXTOS_M1.veredictoLabels (m1-ficha.tsx:137-141).; Los comentarios hablan del 'wizard' y de 'm2', que ya no existen.
+- Qué rompe si se borra: Nada. Es una limpieza parcial (el componente está vivo); tests/qa-persona/corrida-1-novato-frio.spec.ts lo nombra solo en una captura.
+- Confianza de poda: MEDIA
+- Propuesta: borrarlos y dejar TEXTOS_M1 como única fuente (decidir (Franco))
+- Zona: ZONA-FRANCO
+
+### [POD-371] src/lib/leados/guidance-content.ts (D4-c1)
+- Hallado en F2 (D4-L5) · `src/lib/leados/guidance-content.ts` · Nodo(s): lib.leados · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — GUIA_CONSTRUCCION (:643), GUIA_TRASPASO (:887), GUIA_REVISION.aprobada (:958), GUIA_EVALUACION.porque y .ejemplos (:519-538) y el tipo SelfCheckRazon (:167-170), sin lectores · Señales: GUIA_CONSTRUCCION (:643), GUIA_TRASPASO (:887) y GUIA_REVISION.aprobada (:958) sin lectores; TeachPanel solo usa 'objeciones' y 'selfCheck'; GUIA_EVALUACION.porque/ejemplos (:519-538) no se renderizan y contradicen el gate; Tipo SelfCheckRazon y campo selfCheckRazones sin uso (:167-170, :276)
+- Qué rompe si se borra: Nada si solo se quitan esas claves y sus entradas en GUIA_PASOS (:1201, :1208); el resto del archivo está vivo
+- Confianza de poda: MEDIA
+- Propuesta: quitar esas claves y sus entradas en GUIA_PASOS; el resto del archivo está vivo (decidir (Franco))
+- Zona: ZONA-FRANCO
+
+### [POD-372] src/lib/leados/flow.ts (D4-c1)
+- Hallado en F2 (D4-L5) · `src/lib/leados/flow.ts` · Nodo(s): lib.leados · Alcance: exports sueltos (el archivo sigue vivo) — agruparParaHome (:653-667) sin consumidores en src, tests ni scripts · Señales: agruparParaHome (flow.ts:653-667) sin consumidores en src, tests ni scripts (git grep -w)
+- Qué rompe si se borra: Nada (verificar invariantes que la importen: git grep no encontró ninguno)
+- Confianza de poda: MEDIA
+- Propuesta: borrar (decidir (Franco))
+- Zona: ZONA-FRANCO
+
+### [POD-373] src/lib/leados/paso.ts (D4-c1)
+- Hallado en F2 (D4-L6) · `src/lib/leados/paso.ts` · Nodo(s): lib.leados · Alcance: código muerto dentro del archivo (el archivo sigue vivo) — derivarPasoDelLead: manual.ts:552-578 solo lee anchor «opener» y foco.tono; el resto de la derivación no tiene lector · Señales: derivarPasoDelLead tiene un único consumidor: manual.ts:552 (git grep); manual.ts lee solo paso.anchor==='opener' y paso.foco.tono en la rama EVALUADA (:574-578); indice y las ramas de foco/anchor de otros stages no tienen lector; los consumidores que cita la cabecera (DossierStepper, PasoActualBanner, StepAnchor) solo aparecen en paso.ts (git grep); conserva la trampa APROBADA sin finalUrl (paso.ts:169-192) y el copy «Seguimiento» (:184)
+- Qué rompe si se borra: Reducirlo (no borrarlo) toca manual.ts:552-578; aprobada-sin-link.invariant.ts:369 lista el archivo y habría que actualizar la lista.
+- Confianza de poda: MEDIA
+- Propuesta: reducirlo a lo que lee manual.ts y actualizar la lista de aprobada-sin-link.invariant.ts:369 (decidir (Franco))
+- Zona: ZONA-FRANCO
+
+### [POD-374] src/lib/leados/paso-admitido.ts (D4-c1)
+- Hallado en F2 (D4-L6) · `src/lib/leados/paso-admitido.ts` · Nodo(s): lib.leados · Alcance: el archivo entero — generador del barrido y fixtures de test (con la ficha de forma vieja) viviendo en src/lib; solo lo importan dos invariantes · Señales: solo lo importan paso-admitido.invariant.ts y aprobada-sin-link.invariant.ts (git grep); contiene el generador del barrido y fixtures de test con 'as unknown as' (:189-192, :200-214); la fixture FICHA tiene la forma vieja de la ficha (contracts.ts:52)
+- Qué rompe si se borra: Moverlo junto a los invariantes rompe los imports relativos de esos dos invariantes; no lo usa ningún código de producción.
+- Confianza de poda: MEDIA
+- Propuesta: moverlo junto a los invariantes, fuera de src/lib, con la ficha de la forma nueva (decidir (Franco))
+- Zona: ZONA-FRANCO
+
 ### Refuerzos de F2 sobre fichas de F1
 
 - [POD-046] `src/lib/actions/invitations.ts` (D1-c1): inviteClientAction sin callers (git grep inviteClient -> solo :43); Construye inviteUrl (:110) y no la usa ni la envia; el mensaje dice 'impreso en la consola' (:116). Qué rompe: Nada; confirmar con D4 junto a settings.ts y clients.ts (tambien sin importadores)
@@ -2633,6 +2689,10 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 - [POD-076] `src/lib/actions/contact.ts` (D3-c1): markLeadAsRead (:110) sin importadores; contactFormAction exportada solo para el wrapper submitContactForm (:100-105). Qué rompe: Nada si se quita markLeadAsRead; contact/page.tsx:6 usa submitContactForm.
 - [POD-059] `src/lib/actions/gbp-connection.ts` (D7-c1): 'use server' sin importadores (acciones públicas latentes, SEC-053). Qué rompe: el futuro selector de sucursal P3-A.2
 - [POD-084] `vercel.json` (D7-c1): el hosting es Netlify (netlify.toml:1-10, AGENTS.md:21); sus 3 crons no corren. Qué rompe: nada, si los crons se migran a functions de Netlify
+- [POD-080] `src/app/(protected)/admin/fg2-lab/page.tsx` (D4-c1): Encabezado 'EXPERIMENTAL / DESCARTABLE ... Borrar tras la decisión del experimento' (page.tsx:2-8, fg2-lab-client.tsx:3-8, medicion-panel.tsx:3-7); git grep fg2-lab fuera de su carpeta: 0 enlaces (control: /admin/leados sí está en admin-sidebar.tsx); Último cambio 629fe016 del 2026-06-29; docs/experimentos/fg2-brief-experimento.md:3-4: gate abierto, experimento no corrido. Qué rompe: Nada de producción; quedarían huérfanos src/lib/leados/_experimental/fg2-*.ts y scripts/_experimental/fg2-gen-prompts.ts. Requiere decisión de Franco sobre el experimento.
+- [POD-070] `src/app/(protected)/admin/leads/_actions/lead.actions.ts` (D4-c1): git grep -w listLeads|getLeadById: solo las definiciones (control: assignLeadSetter tiene 2 importadores); Devuelven error.message crudo y en inglés. Qué rompe: Nada; los tipos LeadListItem/SerializedLeadDetail (:22-50) quedarían sin uso.
+- [POD-063] `src/lib/leados/_experimental/fg2-brief-lab.ts` (D4-c1): Encabezado 'EXPERIMENTAL / DESCARTABLE … BORRAR tras la decisión del experimento' (fg2-brief-lab.ts:2-8); No está conectado al flujo del setter; consumidores: solo admin/fg2-lab (page.tsx:17, fg2-lab-client.tsx:28, medicion-panel.tsx:19) y scripts/_experimental/fg2-gen-prompts.ts:12. Qué rompe: La ruta /admin/fg2-lab y el script de generación de prompts: hay que borrarlos juntos
+- [POD-064] `src/lib/leados/_experimental/fg2-casos-gastro.ts` (D4-c1): 'BORRAR junto con el resto del prototipo tras la decisión' (fg2-casos-gastro.ts:9); Datos representativos y WhatsApp de ejemplo (fg2-casos-gastro.ts:43-44). Qué rompe: fg2-lab-client.tsx:29 y scripts/_experimental/fg2-gen-prompts.ts:13
 
 ## §docs
 

@@ -8502,58 +8502,6 @@
   {
    "ciclo": "D3-c1",
    "lote": "D3-L6",
-   "herramienta": "h4.adm-leads",
-   "id": "h4.adm-leads.demanda-modulos",
-   "nombre": "Demanda medida de módulos",
-   "descripcion": "Ranking de qué módulos premium piden más orgs (incluye 'avisame cuando esté').",
-   "archivos": [
-    "src/lib/modules/demand.ts"
-   ],
-   "entradas": [],
-   "madurez": "L2",
-   "madurez_evidencia": "module-demand.actions.ts:25-50 (ZONA-FRANCO) → demand.ts:87-134 → demand.ts:137-153 → module-demand-table.tsx:3; invariantes modules.invariant.ts:91-120",
-   "criterios_l3": {
-    "permisos_tenant": {
-     "cumple": "si",
-     "evidencia": "requireSuperAdmin module-demand.actions.ts:25; cruce de orgs deliberado (demand.ts:5-9)"
-    },
-    "vacios": {
-     "cumple": "n/a",
-     "evidencia": "NO EVALUADO (tabla fuera del lote); rankModuleDemand([]) → [] (modules.invariant.ts:120)"
-    },
-    "errores": {
-     "cumple": "parcial",
-     "evidencia": "la action devuelve ok() (module-demand.actions.ts:50); el catch no se leyó"
-    },
-    "carga": {
-     "cumple": "n/a",
-     "evidencia": "NO EVALUADO"
-    },
-    "validacion_servidor": {
-     "cumple": "n/a",
-     "evidencia": "sin input"
-    },
-    "mobile": {
-     "cumple": "n/a",
-     "evidencia": "NO EVALUADO"
-    },
-    "sentry": {
-     "cumple": "n/a",
-     "evidencia": "NO EVALUADO"
-    },
-    "sin_mocks_todos": {
-     "cumple": "si",
-     "evidencia": "lógica pura sin TODO (demand.ts)"
-    },
-    "autonomia": {
-     "cumple": "si",
-     "evidencia": "lectura directa en el tab de demanda"
-    }
-   }
-  },
-  {
-   "ciclo": "D3-c1",
-   "lote": "D3-L6",
    "herramienta": "h4.adm-equipo",
    "id": "h4.adm-equipo.invitar-miembro",
    "nombre": "Invitar miembro del equipo",
@@ -9158,6 +9106,60 @@
     "autonomia": {
      "cumple": "parcial",
      "evidencia": "la service account tiene que estar agregada al sitio"
+    }
+   }
+  },
+  {
+   "ciclo": "D7-c1",
+   "lote": "D7-L1",
+   "herramienta": "h2.cli-resultados",
+   "id": "h2.cli-resultados.velocidad-sitio",
+   "nombre": "Velocidad del sitio (PageSpeed)",
+   "descripcion": "Score y Core Web Vitals del sitio del cliente.",
+   "archivos": [
+    "src/lib/integrations/pagespeed.ts"
+   ],
+   "entradas": [
+    "/dashboard/resultados/trafico"
+   ],
+   "madurez": "L2",
+   "madurez_evidencia": "trafico/page.tsx:125 -> pagespeed.ts:26-35 (caché 6 h) -> :37-74 -> :76-149.",
+   "criterios_l3": {
+    "permisos_tenant": {
+     "cumple": "si",
+     "evidencia": "URL del sitio de la org (fuera del lote)"
+    },
+    "vacios": {
+     "cumple": "parcial",
+     "evidencia": "null sin distinguir falta de key, URL inválida o error"
+    },
+    "errores": {
+     "cumple": "no",
+     "evidencia": "null cacheado 6 h (:63-65); fecha cruda en el acierto (PageSpeedCard.tsx:60)"
+    },
+    "carga": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "validacion_servidor": {
+     "cumple": "parcial",
+     "evidencia": "url.startsWith('http') (:47)"
+    },
+    "mobile": {
+     "cumple": "n/a",
+     "evidencia": "página fuera del lote"
+    },
+    "sentry": {
+     "cumple": "no",
+     "evidencia": "console.error (:64, :71)"
+    },
+    "sin_mocks_todos": {
+     "cumple": "si",
+     "evidencia": "sin mock"
+    },
+    "autonomia": {
+     "cumple": "si",
+     "evidencia": "lectura automática"
     }
    }
   }

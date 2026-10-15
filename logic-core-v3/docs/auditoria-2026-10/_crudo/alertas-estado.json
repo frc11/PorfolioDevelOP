@@ -1203,6 +1203,276 @@
    "alerta": "[D7-A6] Token de Vercel Blob quitado del .env: confirmar que no quedan lecturas de BLOB_READ_WRITE_TOKEN",
    "resultado": "confirmada",
    "evidencia": "git grep -n -E 'BLOB_READ_WRITE_TOKEN|@vercel/blob' origin/main -- logic-core-v3 ':!logic-core-v3/docs' -> exit 1 (control positivo: TELEGRAM_BOT_TOKEN aparece en telegram.ts). Sin defecto: no requiere hallazgo."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "alerta": "[D4-A1] APROBADA con gate cerrado y toque vencido: QUINTA dice 'trabajar', P23 dice 'seguimiento'",
+   "resultado": "parcial",
+   "evidencia": "Las dos describen ramas distintas de src/lib/leados/flow.ts grupoPara: :438 APROBADA sin finalUrl y sin demo enviada -> 'seguimiento' (el toque vencido no la rescata); :440-441 con finalUrl, gate cerrado y followUpVencido -> 'trabajar'. Hoy decide la presencia del link permanente."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "alerta": "[D4-A2] Herramientas sin URL: el evaluador sigue en herramientas.ts y en el rail tras D15-bis",
+   "resultado": "confirmada",
+   "hallazgo_titulo": "Registro de herramientas con cuatro links en null y el evaluador obsoleto en el rail",
+   "evidencia": "herramientas.ts:53-63 evaluador con url null y TODO; :123 en HERRAMIENTAS_ORDEN; tools-rail.tsx:26 lo renderiza; dossier.schemas.ts:14 D15-bis"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "alerta": "[D4-A3] Navegación del setter por triggerTransition como 'decisión cerrada' vs CLAUDE.md (<Link> en portales)",
+   "resultado": "confirmada",
+   "hallazgo_titulo": "La navegación del setter usa triggerTransition y router.push sin justificar en un portal",
+   "evidencia": "setter-nav.tsx:45-49 triggerTransition; publicRoute.ts:16 /setter es portal; router.push sin comentario en foco-surface.tsx:90, novedades-abrir-foco.tsx:47, trabajar-lead-button.tsx:31"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "alerta": "[D4-A4] Drift de convertedToOsLeadId: drop dado por cerrado, relistado y migración resuelta sin ejecutar",
+   "resultado": "parcial",
+   "evidencia": "El drop no es el estado final: migraciones 20260617184913:5 ADD, 20260619140100:9 DROP IF EXISTS, 20260621120000:29 DROP IF EXISTS, 20260622120000:21 ADD IF NOT EXISTS; prisma/schema.prisma:1510 y convert-chatbot-lead.actions.ts:39 dependen de la columna. Si 20260619140100 se marcó --applied sin ejecutar depende del historial de la DB (cruza D6, no verificable por git)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "alerta": "[D4-A5] OSLEAD: 11 contradicciones docs vs código y H-04 falso verde del gate del self-check",
+   "resultado": "parcial",
+   "evidencia": "H-04 y PROMPT 2 (:298-318) describen HARD_CHECKS_BASE y un campo 'estado' que no existen en origin/main ni en ninguna rama remota (git grep HARD_CHECKS_BASE: 0; control: HARD_CHECKS en flow-content.ts:171). En main selfCheckAprobado (flow.ts:204-208) exige TODOS los HARD_CHECKS por nombre: omitir uno falla, así que H-04 no aplica a main. De la tabla se confirman en main: m6 (dossier.schemas.ts:82 título obligatorio, :88 CTA opcional, :83 'concepto') y m16 (ofrecerHorarios no exige el check del decisor: agenda.actions.ts:125-160; solo confirmarReunion, agenda.schemas.ts:11-13); m14 no aplica a main."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L1",
+   "alerta": "[D4-A6] EL TRONCO le deja el push a main a Franco, pero origin/main @ 57c421bc ya es EL TRONCO",
+   "resultado": "parcial",
+   "evidencia": "origin/main = 57c421bc 'docs(tronco): EL TRONCO' (autor y committer 'Franco', 2026-09-06 03:13 -0300), mismo commit que origin/leados/v2-a-main. git no registra quién hizo el push: dato para 09-PARA-FRANCO."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "alerta": "[D4-A1] APROBADA con gate cerrado y toque vencido: ¿'trabajar' (QUINTA) o 'seguimiento' (P23)?",
+   "resultado": "parcial",
+   "evidencia": "Las dos tienen razón en parte. En flow.ts:430-443, una APROBADA sin link permanente y sin demo enviada (finalUrl === null) va a 'seguimiento' aunque el toque esté vencido (:438), como dice P23. Con el link cargado, o con finalUrl undefined en superficies que no proyectan el campo (:437), y gate cerrado, el toque vencido la manda a 'trabajar' (:441), como dice QUINTA. La línea :433 que cita QUINTA hoy es un comentario."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "alerta": "[D4-A2] Herramientas sin URL: el evaluador sigue en herramientas.ts y en el rail sin pantalla",
+   "resultado": "confirmada",
+   "evidencia": "herramientas.ts:53-63 (evaluador con url null y TODO) y :123 en HERRAMIENTAS_ORDEN; tools-rail.tsx:26-44 lo lista como «pendiente». No hay ToolGuide ni HerramientaLauncher con id evaluador en src (git grep; control positivo con otros ids en m-construccion.tsx:135, m13-borrador.tsx:65, m4-opener.tsx:63). Gem de diseño, Claude Design y Gem de outreach también están en null (:78, :90, :117).",
+   "hallazgo_titulo": "4 de 5 herramientas externas sin link y el rail ofrece un «Chat de evaluación» que ningún paso usa"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "alerta": "[D4-A3] Navegación del setter fijada por triggerTransition como «decisión cerrada» mientras CLAUDE.md pide <Link> en portales",
+   "resultado": "confirmada",
+   "evidencia": "setter-nav.tsx:45 (antes :38) dice «decisión cerrada · CLAUDE.md» y navega por triggerTransition (:49, :65, :97). CLAUDE.md solo clasifica /admin y /dashboard como portales y dice que triggerTransition no aplica ahí. Su premisa «el Shutter no existe ahí» es falsa: Shutter está montado en app/layout.tsx:114 y triggerTransition pone 300 ms de cortina antes de router.push (TransitionContext.tsx:111-120).",
+   "hallazgo_titulo": "El rail del setter navega con triggerTransition y botones, contra la regla de portales de CLAUDE.md"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "alerta": "[D4-A4] Drift de convertedToOsLeadId: drop dado por cerrado, re-listado, y migración 20260619140100 registrada con resolve --applied",
+   "resultado": "parcial",
+   "evidencia": "El drop no quedó cerrado. La columna se dropea en 20260619140100/migration.sql:9 y otra vez en 20260621120000:29, y se re-agrega en 20260622120000_readd_client_columns_dropped_by_reconcile/migration.sql:21 (ADD COLUMN IF NOT EXISTS). Hoy vive en schema.prisma:1510 y se escribe en convert-chatbot-lead.actions.ts:71. Si 20260619140100 se registró con migrate resolve --applied sin ejecutar el SQL solo se ve en _prisma_migrations (cruce con D6); por el IF NOT EXISTS el estado final converge en los dos casos."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "alerta": "[D4-A5] Doc OSLEAD: 11 contradicciones doc↔código y H-04 falso verde del gate de self-check",
+   "resultado": "parcial",
+   "evidencia": "H-04 no se reproduce hoy: selfCheckAprobado exige los 10 HARD_CHECKS (flow.ts:204-208; flow-content.ts:171) y HARD_CHECKS_BASE, tresColores y botonInvita no existen (git grep: 0; control positivo: HARD_CHECKS en flow.ts, 8 coincidencias). Lo que sigue pendiente es la decisión m14 de 4 criterios de diseño bloqueantes, que no está construida. De la tabla :887-899 siguen en pie: título obligatorio (dossier.schemas.ts:82), CTA opcional (:88), m13 congelado (m13-borrador.tsx:122), G3 ausente (git grep 0; control: confirmoCarga en borrador-form.tsx), m16 sin decisor (agenda.actions.ts:125-131 recibe solo leadIdRaw; decisorConfirmado solo en agenda.schemas.ts:11), numeración de toques (estado-manual.tsx:86 vs m5-seguimiento.tsx:195) y «Contexto del lead» (pantalla-manual.tsx:205). La fila de mc2 no se verificó: mc2-refinar.tsx ya no existe. Además, el «falso positivo» 3 del doc (:878-879) afirma que registrarCorteFicha existe y no está en origin/main (PLAN-821). H-09 (agenda.ts:59 y :70, Cal.com con más de una org) sigue en el código, fuera del lote: va como patrón."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L2",
+   "alerta": "[D4-A6] EL TRONCO le deja el push a main a Franco, pero origin/main @ 57c421bc ya es EL TRONCO",
+   "resultado": "confirmada",
+   "evidencia": "git log: 57c421bc «docs(tronco): EL TRONCO» tiene autor y committer Franco (2026-09-06 03:13 -0300). Es un fast-forward de 50 commits sobre 17727117 (merge-base --is-ancestor). El reflog local registra «fetch origin: fast-forward» el 2026-09-06 20:14 -0300. Git no guarda quién pusheó. La bitácora sigue diciendo que el push está pendiente (docs/bitacora-beta-3.md:10975).",
+   "hallazgo_titulo": "La bitácora declara pendiente el ascenso a main que ya ocurrió (EL TRONCO está en origin/main)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "alerta": "[D4-A1] Máquina de estados: APROBADA con gate cerrado y toque vencido, ¿'trabajar' (QUINTA) o 'seguimiento' (P23)?",
+   "resultado": "parcial",
+   "evidencia": "Las dos afirmaciones son ciertas, para casos distintos. Si es APROBADA sin finalUrl y sin demo enviada, va a 'seguimiento' aunque el toque esté vencido (flow.ts:438, lo de P23). Si tiene finalUrl, gate cerrado y followUpVencido, va a 'trabajar' (flow.ts:440-441, lo de QUINTA). La cabecera de grupoPara (flow.ts:412, '6. APROBADA → en seguimiento') quedó desactualizada. m15-envio.tsx:127-133 ofrece el toque incluso en APROBADA sin link.",
+   "hallazgo_titulo": "Con la demo aprobada pero sin link, m15 manda a «registrá un toque» aunque el turno es de Franco"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "alerta": "[D4-A2] Herramientas sin URL: el evaluador sigue en herramientas.ts y en el rail tras D15-bis",
+   "resultado": "confirmada",
+   "evidencia": "herramientas.ts:53-63 ('evaluador', url null con TODO) y :122-123 (primero en HERRAMIENTAS_ORDEN); tools-rail.tsx:26 lo recorre. m1-ficha.tsx:84-86 reconoce que el ToolGuide del chat de evaluación se fue con la fusión.",
+   "hallazgo_titulo": "El rail «Tus herramientas» sigue ofreciendo el «Chat de evaluación» que D15-bis sacó del recorrido"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "alerta": "[D4-A3] Navegación del setter por triggerTransition() como 'decisión cerrada' vs CLAUDE.md (Link en portales)",
+   "resultado": "confirmada",
+   "evidencia": "setter-nav.tsx:43-49 navega con triggerTransition y lo justifica en :45. CLAUDE.md dice que triggerTransition no aplica en portales. Dentro del lote se navega siempre con <Link> (franja-recorrido.tsx:184, enlace-pantalla.tsx:54, estado-manual.tsx:147, archivo-manual.tsx:111) más un router.push justificado (salida-manual.tsx:46). Fuera del lote hay router.push en foco-surface.tsx:90, novedades-abrir-foco.tsx:47, trabajar-lead-button.tsx:31 y nuevo-prospecto-form.tsx:98.",
+   "hallazgo_titulo": "La navegación del setter usa triggerTransition() en un portal, contra CLAUDE.md"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "alerta": "[D4-A4] Drift: drop de convertedToOsLeadId cerrado vs reaparece; 20260619140100 registrada con resolve --applied",
+   "resultado": "parcial",
+   "evidencia": "El drop no está cerrado. 20260619140100_drop_chatbot_lead_converted_column (:9) y 20260621120000 (:29) hacen DROP COLUMN IF EXISTS, pero 20260622120000_readd_client_columns_dropped_by_reconcile (:21) la vuelve a agregar y schema.prisma:1510 la declara. La leen admin/chatbots/[botId]/page.tsx:97 y ConvertChatbotLeadButton.tsx:11. Que se haya aplicado con 'migrate resolve --applied' sin ejecutar el SQL no se puede verificar por código: queda para D6 (prisma-migrate-status)."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "alerta": "[D4-A5] OSLEAD: 11 contradicciones entre docs/decisiones-oslead-vii/ y el código; H-04 marca falso verde el gate del self-check",
+   "resultado": "parcial",
+   "evidencia": "H-04 queda descartado en main y en origin/p25/rafaga-tildes: selfCheckAprobado recorre todos los HARD_CHECKS (flow.ts:206-207) y el invariante 4b prueba que un hard faltante no aprueba (self-check-gate.invariant.ts:73-86). H-01 (doble formulario en m6) describe código de origin/p25/rafaga-tildes (vueltas-gem.tsx); en main hay un solo formulario (brief-form.tsx:158-238). H-08 se confirma en main (agenda-form.tsx:237-245). No revisé las 11 filas de la tabla una por una.",
+   "hallazgo_titulo": "La búsqueda de horarios no exige confirmar al decisor («Buscar de nuevo» ni la action)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L3",
+   "alerta": "[D4-A6] Main: EL TRONCO deja el push a Franco; origin/main @57c421bc ya es 'docs(tronco): EL TRONCO'",
+   "resultado": "confirmada",
+   "evidencia": "57c421bc tiene autor y committer Franco <francopizzi2003@gmail.com>, 2026-09-06 03:13 -0300. Coincide con docs/bitacora-beta-3.md:10975 ('El push es de Franco'). Git no registra la fecha del push. Además, origin/p25/rafaga-tildes (Franco, 2026-09-18) suma 5 commits sin integrar sobre main.",
+   "hallazgo_titulo": "main no tiene P25–P43: el trabajo posterior de LeadOS vive en origin/p25/rafaga-tildes"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "alerta": "[D4-A1] APROBADA con gate cerrado y toque vencido: ¿'trabajar' (QUINTA) o 'seguimiento' (P23)?",
+   "resultado": "confirmada",
+   "evidencia": "Las dos lecturas valen a medias. flow.ts:438 manda a seguimiento la APROBADA sin link y sin demo enviada (el caso de P23). Con finalUrl cargado, demo sin mandar, gate cerrado y toque vencido, flow.ts:441 devuelve 'trabajar' mientras proximaAccionPara (flow.ts:539-545) la da por no accionable: la inconsistencia de QUINTA sigue viva (la línea pasó de :433 a :441).",
+   "hallazgo_titulo": "Una APROBADA con link, demo sin mandar, gate cerrado y toque vencido entra a «Para trabajar» con una sugerencia de espera"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "alerta": "[D4-A2] Herramientas sin URL; el evaluador sin pantalla sigue en herramientas.ts y en el rail",
+   "resultado": "confirmada",
+   "evidencia": "herramientas.ts:62-63, :78, :90 y :117 tienen url:null en cuatro de cinco herramientas. HERRAMIENTAS_ORDEN (:121-124) incluye 'evaluador', que tools-rail.tsx:26 recorre. 'evaluador' no aparece fuera de herramientas.ts (git grep), y ninguna etapa del manual se llama 'Evaluación' (manual.ts:307-315).",
+   "hallazgo_titulo": "Cuatro de las cinco herramientas externas del setter siguen sin URL y el rail anuncia una «Evaluación» que ya no es un paso"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "alerta": "[D4-A3] Navegación del setter por triggerTransition como 'decisión cerrada' vs CLAUDE.md (<Link> en portales)",
+   "resultado": "confirmada",
+   "evidencia": "setter-nav.tsx:43-49 navega solo con triggerTransition y cita CLAUDE.md, que dice lo contrario para portales y no clasifica /setter. El resto del setter usa router.push (foco-surface.tsx:90, novedades-abrir-foco.tsx:47, trabajar-lead-button.tsx:31, nuevo-prospecto-form.tsx:98 con justificación) y <Link> (nuevo/page.tsx:44, manual/error.tsx:47).",
+   "hallazgo_titulo": "La navegación del setter no está clasificada: triggerTransition como «decisión cerrada», router.push justificado y <Link> conviven"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "alerta": "[D4-A4] Drift: drop de convertedToOsLeadId dado por cerrado vs migración 20260619140100 registrada con resolve --applied",
+   "resultado": "parcial",
+   "evidencia": "El drop se revirtió: 20260619140100 lo dropea, 20260621120000:29 lo vuelve a dropear y 20260622120000:21 lo re-agrega (ADD COLUMN IF NOT EXISTS). La columna está en schema.prisma:1510 y la usa convert-chatbot-lead.actions.ts:39/:71, así que 'cerrado' es falso. El comentario de 140100 ('NUNCA usó esta columna') quedó viejo. Lo de 'migrate resolve --applied sin ejecutar el SQL' es estado de la DB y no se verifica por código: cruza con D6, sin hallazgo nuevo en este lote."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "alerta": "[D4-A5] OSLEAD: 11 contradicciones decisiones-oslead-vii vs código; H-04 falso verde del gate del self-check",
+   "resultado": "parcial",
+   "evidencia": "El documento audita código que no está en main: docs/decisiones-oslead-vii/ y el trabajo P36-P43 viven en el commit WIP 506e0059, que solo contiene origin/p25/rafaga-tildes. H-04 no se reproduce en main: selfCheckAprobado exige HARD_CHECKS.every(...) (flow.ts:204-209), HARD_CHECKS_BASE/baseAprobada no existen (git grep -> 0; control: 8 apariciones de HARD_CHECKS en flow.ts) y el slice(0,-1) del invariante (self-check-gate.invariant.ts:78) sí tiene dientes. Del resto de la tabla, en main siguen vigentes el rótulo 'Contexto del lead' (pantalla-manual.tsx:205) y H-09 (agenda.ts:70). Las filas de mc2, cinco tildes, G3 y vueltas no aplican a main."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L4",
+   "alerta": "[D4-A6] EL TRONCO deja el push a main a Franco, pero origin/main @ 57c421bc ya es 'docs(tronco): EL TRONCO'",
+   "resultado": "descartada",
+   "evidencia": "No hay contradicción. Dato para 09: 57c421bc tiene autor y committer Franco, 2026-09-06 03:13 -0300, un solo padre ea94dbf8 (fast-forward, sin merge). El clon local lo trajo por 'fetch origin: fast-forward' el 2026-09-06 20:14 -0300 (reflog de origin/main). La bitácora (bitacora-beta-3.md:10975) dice que el sprint no pusheó y deja el push a Franco: el push lo hizo Franco."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "alerta": "[D4-A1] APROBADA con gate cerrado y toque vencido cae en 'trabajar' (QUINTA) vs grupoPara la manda a seguimiento (P23)",
+   "resultado": "parcial",
+   "evidencia": "P23 tiene razón para el caso sin link: flow.ts:438 manda a 'seguimiento' cuando finalUrl === null. QUINTA sigue valiendo con el link cargado: flow.ts:440-441 devuelve 'trabajar' por followUpVencido, mientras flow.ts:539-545 devuelve una espera con accionable false y flow.ts:745 la pone en el tier ESPERA_TU_ACCION",
+   "hallazgo_titulo": "Una demo APROBADA con link, gate cerrado y toque vencido entra a 'Para trabajar' con una sugerencia de espera"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "alerta": "[D4-A2] Herramientas sin URL: tras D15-bis el evaluador no tiene pantalla pero sigue en herramientas.ts y en el rail",
+   "resultado": "confirmada",
+   "evidencia": "herramientas.ts:53-64 (evaluador, url null) y :123 en HERRAMIENTAS_ORDEN; tools-rail.tsx:26 recorre el orden completo; ningún ToolGuide usa id='evaluador' (control: m-construccion.tsx:135 usa claudeDesign); guidance-content.ts:473-476 confirma que el chat quedó afuera",
+   "hallazgo_titulo": "Tres herramientas del recorrido siguen sin link y el evaluador retirado sigue en el rail"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "alerta": "[D4-A3] Navegación del setter por triggerTransition() como 'decisión cerrada' vs CLAUDE.md que pide <Link> en portales",
+   "resultado": "parcial",
+   "evidencia": "setter-nav.tsx:43-49 usa triggerTransition con el comentario 'decisión cerrada · CLAUDE.md'; no hay router.push en setter-nav.tsx (git grep). CLAUDE.md solo define como portales /admin y /dashboard y dice que triggerTransition no aplica en portales; /setter (bajo (protected)) queda sin clasificar. Es una decisión documental para Valentino y Franco, no un defecto de código"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "alerta": "[D4-A4] Drift de convertedToOsLeadId: drop dado por cerrado vs migración 20260619140100 registrada con resolve --applied",
+   "resultado": "parcial",
+   "evidencia": "La columna sigue en schema.prisma:1510 y la usan BotDetailClient.tsx:72 y LeadsTab.tsx:22. La cadena de migraciones la agrega (20260617184913/migration.sql:5), la dropea (20260619140100/migration.sql:9 y 20260621120000/migration.sql:29) y la vuelve a agregar con IF NOT EXISTS (20260622120000/migration.sql:21). El estado final coincide con el schema y el 'drop cerrado' de la bitácora quedó revertido. Si la 0619 se ejecutó o solo se marcó como aplicada es historia de la DB (D6)"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "alerta": "[D4-A5] OSLEAD: 11 contradicciones docs vs código; H-04 marca falso verde del gate del self-check",
+   "resultado": "parcial",
+   "evidencia": "H-04 no se reproduce en origin/main: selfCheckAprobado exige todos los HARD_CHECKS (flow.ts:204-208), y HARD_CHECKS_BASE, jerarquia y tresColores no existen en ninguno de los 117 refs (git grep por ref; control: 8 apariciones de HARD_CHECKS en flow.ts). El invariante tiene censo congelado y blob guardado (self-check-gate.invariant.ts:103-178). Del cuadro, §m6 sí se reproduce: titulo obligatorio (contracts.ts:113), cta opcional (contracts.ts:117), concepto (contracts.ts:114). El documento describe un estado de código que no está en el repo"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L5",
+   "alerta": "[D4-A6] EL TRONCO le deja el push a main a Franco, pero origin/main @ 57c421bc ya es 'docs(tronco): EL TRONCO'",
+   "resultado": "descartada",
+   "evidencia": "Como dato para 09: 57c421bc tiene autor y committer Franco, 2026-09-06 03:13 -0300, mensaje 'docs(tronco): EL TRONCO - veinticinco sprints vuelven a una sola linea' (git log -1 origin/main). Es coherente con que el push lo hiciera Franco, así que no hay contradicción. Git no registra quién empujó"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "alerta": "[D4-A1] APROBADA con gate cerrado y toque vencido: QUINTA dice 'trabajar' (flow.ts:433), P23 dice seguimiento",
+   "resultado": "confirmada",
+   "evidencia": "Las dos tienen razón a medias. grupoPara (flow.ts:416-447): sin link y sin envío -> 'seguimiento' (:440, lo que dice P23); con link, gate cerrado y toque vencido -> 'trabajar' (:443, la rama que QUINTA citó en :433), mientras proximaAccionPara la deja no accionable (:539-545). El manual aterriza en m5 «Tu paso ahora» en los dos casos (manual.ts:670-671), y el oráculo lo admite (paso-admitido.ts:95-99).",
+   "hallazgo_titulo": "Aprobada sin enviar con gate cerrado y toque vencido: el manual, el grupo y la sugerencia se contradicen"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "alerta": "[D4-A2] El evaluador no tiene pantalla tras D15-bis pero sigue en herramientas.ts y en el rail",
+   "resultado": "confirmada",
+   "evidencia": "herramientas.ts:53-63 (url null, TODO: URL) y :123 en HERRAMIENTAS_ORDEN; tools-rail.tsx:26-29 lo recorre; manual.ts:157-162 documenta que el veredicto pasó a m1.",
+   "hallazgo_titulo": "El Chat de evaluación sigue en el rail de herramientas sin pantalla ni link"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "alerta": "[D4-A3] Navegación del setter fijada por triggerTransition como decisión cerrada; CLAUDE.md pide <Link> en portales y no clasifica /setter",
+   "resultado": "confirmada",
+   "evidencia": "setter-nav.tsx:45 'Navegación SOLO por triggerTransition (decisión cerrada · CLAUDE.md)', :49 triggerTransition(href); CLAUDE.md:15 nombra como portales solo /admin y /dashboard.",
+   "hallazgo_titulo": "La navegación de /setter se fija por triggerTransition citando CLAUDE.md, que no clasifica /setter"
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "alerta": "[D4-A4] Drift convertedToOsLeadId: drop dado por cerrado, vuelto a listar, migración 20260619140100 con resolve --applied sin SQL",
+   "resultado": "parcial",
+   "evidencia": "Historia confirmada por migraciones: 20260619140100 DROP COLUMN IF EXISTS (:9), marcada aplicada sin correr (bitacora-beta.md:1271); 20260621120000 vuelve a hacer el DROP (:28-29); 20260622120000 la RE-AGREGA con ADD COLUMN IF NOT EXISTS (:21). Estado final: schema.prisma:1510 la declara y el código la usa (convert-chatbot-lead.actions.ts:39). El 'drop cerrado' de bitacora-beta.md:470-511 quedó contradicho por la re-adición. Cruza con D6, fuera del lote: sin hallazgo propio."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "alerta": "[D4-A5] OSLEAD: 11 contradicciones docs vs código; H-04 marca falso verde el gate del self-check que PROMPT 2 da por correcto",
+   "resultado": "parcial",
+   "evidencia": "El código que describen H-04 y PROMPT 2 (HARD_CHECKS_BASE) ya no existe. Hoy selfCheckAprobado exige cada HARD_CHECK por nombre (flow.ts:204-209), así que no hay falso verde sobre los checks existentes. Pero los criterios de diseño de §m14 (jerarquia, aire, tipografia, botonInvita, tresColores) no existen en src (git grep vacío): la contradicción sigue como 'no implementado'. G3 'exportaste' sigue ausente (fila §m13). mc2 agrupa tres fases (manual.ts:135-137), coherente con la fila §mc2. Las demás filas tocan archivos fuera del lote."
+  },
+  {
+   "ciclo": "D4-c1",
+   "lote": "D4-L6",
+   "alerta": "[D4-A6] EL TRONCO deja el push a main a Franco pero origin/main @ 57c421bc ya es 'docs(tronco): EL TRONCO'",
+   "resultado": "descartada",
+   "evidencia": "No hay contradicción. 57c421bc tiene autor y committer Franco <francopizzi2003@gmail.com>, 2026-09-06 03:13 -0300. En el reflog local de refs/remotes/origin/main entró como 'fetch origin: fast-forward' el 2026-09-06 20:14 -0300, no como 'update by push' desde este checkout (los últimos push locales son del 2026-08-12). Lo movió Franco desde su máquina, como dice bitacora-beta-3.md:10975. Dato para 09."
   }
  ]
 }
