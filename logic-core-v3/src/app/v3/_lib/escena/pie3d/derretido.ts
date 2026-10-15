@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 import { SATINADO } from '../estudio'
 import { FLOOR_Y, INK_COLOR } from '../probeScene'
+import { ACOSTADO } from './acostado'
 import type { UniformesDelPie } from './coreografia'
 
 /**
@@ -45,7 +46,8 @@ export const DERRETIDO = {
 /** Un cuadro del derretido de una pieza: cuánto (0 sólida, 1 en el charco) y la luz de un líquido mientras dura. */
 export function mojar(material: THREE.MeshStandardMaterial, uniformes: UniformesDelPie, derrite: number): void {
   uniformes.uDerriteDelPie.value = derrite
-  material.roughness = SATINADO.roughness + (DERRETIDO.mojado - SATINADO.roughness) * Math.min(1, derrite * 4)
+  const base = SATINADO.roughness + (ACOSTADO.mate - SATINADO.roughness) * uniformes.uAcostadaDelPie.value
+  material.roughness = base + (DERRETIDO.mojado - base) * Math.min(1, derrite * 4)
 }
 
 const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))

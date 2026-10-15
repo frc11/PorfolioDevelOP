@@ -282,6 +282,13 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
   return s
 }
 
+/** [PULIDO 27] Y3 · cuánto está acostada la pieza `i` a los `s` del reloj (0 de pie, 1 acostada): el vuelco de su columna. */
+export function acostadaDeLaCaida(c: CaidaDelPie, i: number, s: number): number {
+  if (i >= c.n || s <= 0) return 0
+  const p = c.piezas[i]
+  return suave(poseDeLaPiezaQueCae(c.columnas[p.columna], c.lugares[p.columna], s).a / (Math.PI / 2))
+}
+
 /** [PULIDO 20] R1 · cuánto se ve el DOM de la pieza `i` a los `s` del reloj (0 a 1; sin caída, entero): el de su columna. */
 export function domDeLaCaida(c: CaidaDelPie, i: number, s: number): number {
   return i >= c.n ? 1 : domDeLaPieza(c.lugares[c.piezas[i].columna], s)

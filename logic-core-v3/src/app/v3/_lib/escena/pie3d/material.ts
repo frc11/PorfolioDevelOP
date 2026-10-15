@@ -2,9 +2,9 @@ import * as THREE from 'three'
 
 import { SATINADO } from '../estudio'
 import { PISO_EN_VIVO } from '../piso/enVivo'
-import { COSTADO_DE_DIA } from '../titulos3d/filo'
 import { DISOLVER_DEL_PIE_GLSL, DISOLVER_DEL_PIE_PARS_GLSL, LETRAS_DEL_PIE_NORMAL_GLSL, LETRAS_DEL_PIE_PARS_GLSL, LETRAS_DEL_PIE_POSICION_GLSL, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { RELLENO_DE_LA_TECLA_GLSL } from './encimaDelPie'
+import { ACOSTADO_POSICION_GLSL, COSTADO_ACOSTADO_GLSL } from './acostado'
 import { DERRETIDO_COLOR_GLSL, DERRETIDO_FRAGMENTO_PARS_GLSL, DERRETIDO_NORMAL_GLSL, DERRETIDO_PARS_GLSL, DERRETIDO_POSICION_GLSL } from './derretido'
 
 /** [RETOQUE DEL ENCASTRE] 1G · el giro de la luz del pie (uno para todas las piezas: lo escribe `armadas.ts` en cada cuadro). */
@@ -54,13 +54,13 @@ export function materialDelPie(uniformes: UniformesDelPie = uniformesDelPie()): 
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\nvarying float vTapaDelPie;\n${LETRAS_DEL_PIE_PARS_GLSL}\n${DERRETIDO_PARS_GLSL}`)
       .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>\n\tvTapaDelPie = step( 0.999, abs( objectNormal.z ) );\n${LETRAS_DEL_PIE_NORMAL_GLSL}\n${DERRETIDO_NORMAL_GLSL}`)
-      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${LETRAS_DEL_PIE_POSICION_GLSL}\n${DERRETIDO_POSICION_GLSL}`)
+      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${LETRAS_DEL_PIE_POSICION_GLSL}\n${ACOSTADO_POSICION_GLSL}\n${DERRETIDO_POSICION_GLSL}`)
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\nvarying float vTapaDelPie;\nuniform mat3 uGiroDeLaLuz;\nuniform float uEncimaDelPie;\n${DISOLVER_DEL_PIE_PARS_GLSL}\n${DERRETIDO_FRAGMENTO_PARS_GLSL}`)
       .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n\tnormal = normalize( uGiroDeLaLuz * normal );')
       .replace('#include <lights_fragment_begin>', LUCES_DEL_PIE_GLSL)
       .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>\n${DISOLVER_DEL_PIE_GLSL}`)
-      .replace('#include <color_fragment>', `#include <color_fragment>\n\tdiffuseColor.rgb = mix( vec3( ${COSTADO_DE_DIA.toFixed(3)} ), diffuseColor.rgb, vTapaDelPie );\n\tdiffuseColor.rgb = mix( diffuseColor.rgb, vec3( ${ENCIMA_DEL_PIE.toFixed(2)} ), uEncimaDelPie * vTapaDelPie * ( 1.0 - step( 0.5, dot( diffuseColor.rgb, vec3( 0.333 ) ) ) ) );\n${RELLENO_DE_LA_TECLA_GLSL}\n${DERRETIDO_COLOR_GLSL}`)
+      .replace('#include <color_fragment>', `#include <color_fragment>\n\tdiffuseColor.rgb = mix( vec3( ${COSTADO_ACOSTADO_GLSL} ), diffuseColor.rgb, vTapaDelPie );\n\tdiffuseColor.rgb = mix( diffuseColor.rgb, vec3( ${ENCIMA_DEL_PIE.toFixed(2)} ), uEncimaDelPie * vTapaDelPie * ( 1.0 - step( 0.5, dot( diffuseColor.rgb, vec3( 0.333 ) ) ) ) );\n${RELLENO_DE_LA_TECLA_GLSL}\n${DERRETIDO_COLOR_GLSL}`)
   }
   m.customProgramCacheKey = () => 'pie-de-volumen'
   return m

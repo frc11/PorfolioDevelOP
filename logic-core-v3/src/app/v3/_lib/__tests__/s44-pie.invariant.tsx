@@ -31,6 +31,7 @@ import { HUNDIDA_DEL_PIE } from '../escena/pie3d/armadas'
 import { SOMBRAS_DEL_PIE_GLSL, formaDeLaSombra } from '../escena/pie3d/sombras'
 import { CAMERA_FOV, FLOOR_Y } from '../escena/probeScene'
 import { COSTADO_DE_DIA, costadoDeDiaGlsl } from '../escena/titulos3d/filo'
+import { ACOSTADO } from '../escena/pie3d/acostado'
 import { aplicar, homografia, matrix3dCss } from '../pie3d/homografia'
 import type { CajaDelPie, LetraDelPie } from '../pie3d/medida'
 import { cuantoSeHunde, type Hundido } from '../pie3d/registro'
@@ -167,7 +168,8 @@ afirmar(faltan.length === 0, '  cada letra del pie está en la Chivo de su peso 
 const shader = { uniforms: {}, vertexShader: '#include <common>\n#include <beginnormal_vertex>', fragmentShader: '#include <common>\n#include <color_fragment>' }
 const mat = materialDelPie()
 mat.onBeforeCompile(shader as unknown as Parameters<THREE.Material['onBeforeCompile']>[0], {} as THREE.WebGLRenderer)
-afirmar(mat.vertexColors && mat.roughness === SATINADO.roughness && /vTapaDelPie = step\( 0\.999, abs\( objectNormal\.z \) \)/.test(shader.vertexShader) && shader.fragmentShader.includes(`mix( vec3( ${COSTADO_DE_DIA.toFixed(3)} ), diffuseColor.rgb, vTapaDelPie )`), '  el negro satinado del logo, con el filo b: los costados, el bisel y las paredes de los pozos en el gris de los títulos')
+// [PULIDO 27] Y3 · de pie, el gris de los costados (el filo b); acostada, va al filo oscuro (`acostado.ts`).
+afirmar(mat.vertexColors && mat.roughness === SATINADO.roughness && /vTapaDelPie = step\( 0\.999, abs\( objectNormal\.z \) \)/.test(shader.vertexShader) && shader.fragmentShader.includes(`mix( vec3( mix( ${COSTADO_DE_DIA.toFixed(4)}, ${ACOSTADO.costado.toFixed(4)}, uAcostadaDelPie ) ), diffuseColor.rgb, vTapaDelPie )`), '  el negro satinado del logo, con el filo b: de pie, los costados, el bisel y las paredes de los pozos en el gris de los títulos (acostada, un filo oscuro)')
 
 // Se hunde en su eje, sin girar; con el mouse, el foco y apretada; y suena como los CTA.
 const h = (encima: boolean, foco: boolean, apretada: boolean): Hundido => ({ encima, foco, apretada })

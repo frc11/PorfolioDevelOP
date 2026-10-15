@@ -18,10 +18,11 @@ import { colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { capaPropia, seguirLaPieza } from './domQueSigue'
 import { encimaDeLaPieza } from './encimaDelPie'
 import { mojar } from './derretido'
+import { luzAcostada, relieveAcostado } from './acostado'
 import { apareceDeLaPieza, avanceDelPie, deLaPieza, ordenesDelGrupo, poseDeLaPieza, progresoDelTramo, tramoDe, uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { armarLaPieza, contenidoDe, type FuentesDelPie } from './geometria'
 import { LUZ_DEL_PIE, giroDeLaLuzDelPie, materialDelPie } from './material'
-import { aplicarLaCaida, armarLaCaida, domDeLaCaida, domSigueEnLaCaida, sombrasDeLaCaida, type CaidaDelPie } from './caida'
+import { acostadaDeLaCaida, aplicarLaCaida, armarLaCaida, domDeLaCaida, domSigueEnLaCaida, sombrasDeLaCaida, type CaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE, escribirLaCaja } from './cajasDelPolvo'
 import { HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
 import { huecosDeLaCaida } from './huecosDeLaCaida'
@@ -170,12 +171,14 @@ export function alCuadro(s: EstadoDelPie, viva: THREE.Camera, principal: THREE.D
   for (let k = 0; k < s.armadas.length; k += 1) {
     const a = s.armadas[k]
     if (!a.grupo.visible) continue
-    a.material.envMapIntensity = nivel
     const izquierda = a.medida.caja.x - scrollX
     const arriba = a.medida.caja.y - sy
     a.d = PROFUNDIDADES[k] > 0 ? PROFUNDIDADES[k] : d
     a.mundoPorPx = colocarLaPieza(a.grupo, camara, izquierda, arriba, cuadro.ancho, cuadro.alto, a.d)
     if (enElFinal) aplicarLaCaida(s.caida, k, a, segundos)
+    // [PULIDO 27] Y3 · acostada, limpia: la extrusión baja, las caras mate y los costados oscuros (`acostado.ts`).
+    a.uniformes.uAcostadaDelPie.value = enElFinal ? acostadaDeLaCaida(s.caida, k, segundos) : 0
+    luzAcostada(a.material, a.uniformes, nivel)
     if (a.pieza.forma === 'enlace') dibujarElSubrayado(a, s.quieto, dt)
     else {
       const pedido = cuantoSeHunde(a.delHundido === null ? undefined : HUNDIDOS.get(a.delHundido), HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
@@ -334,6 +337,7 @@ function armar(pieza: PiezaDelPie, medida: MedidaDeLaPieza, firma: string, estud
   const uniformes = uniformesDelPie()
   uniformes.uCuerpoDelPie.value = medida.letras.reduce((m, l) => Math.max(m, l.cuerpo), 0)
   uniformes.uCajaDelPie.value.set(medida.caja.ancho, medida.caja.alto, espesor)
+  uniformes.uRelieveAcostadoDelPie.value = relieveAcostado(pieza.forma)
   const material = materialDelPie(uniformes)
   material.envMap = estudio
   const grupo = new THREE.Group()

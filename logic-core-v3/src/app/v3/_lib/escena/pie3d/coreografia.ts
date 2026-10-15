@@ -198,6 +198,8 @@ uniform float uLetrasDelPie;
 uniform float uCuerpoDelPie;
 uniform float uApareceDelPie;
 uniform float uQuietoDelPie;
+uniform float uAcostadaDelPie;
+uniform float uRelieveAcostadoDelPie;
 varying float vApareceDelPie;
 varying float vRotuloDelPie;
 varying vec2 vTeclaDelPie;
@@ -238,6 +240,7 @@ varying float vRotuloDelPie;
 varying vec2 vTeclaDelPie;
 uniform float uSinRotuloDelPie;
 uniform float uBarridoDelPie;
+uniform float uAcostadaDelPie;
 `
 export const DISOLVER_DEL_PIE_GLSL = /* glsl */ `
 	if ( vApareceDelPie < 0.999 && fract( 52.9829189 * fract( dot( gl_FragCoord.xy, vec2( 0.06711056, 0.00583715 ) ) ) ) >= vApareceDelPie ) discard;
@@ -260,8 +263,11 @@ export interface UniformesDelPie {
   /** [PULIDO 27] Y1 c · cuánto se derritió (0 sólida, 1 en el charco: `derretido.ts`) y su caja (ancho, alto y espesor, px). */
   readonly uDerriteDelPie: { value: number }
   readonly uCajaDelPie: { value: THREE.Vector3 }
+  /** [PULIDO 27] Y3 · cuánto está acostada (0 de pie, 1 acostada) y la escala de su extrusión acostada (`acostado.ts`). */
+  readonly uAcostadaDelPie: { value: number }
+  readonly uRelieveAcostadoDelPie: { value: number }
 }
 
 export function uniformesDelPie(): UniformesDelPie {
-  return { uLetrasDelPie: { value: -1 }, uCuerpoDelPie: { value: 0 }, uApareceDelPie: { value: 1 }, uQuietoDelPie: { value: 0 }, uSinRotuloDelPie: { value: 0 }, uEncimaDelPie: { value: 0 }, uBarridoDelPie: { value: 0 }, uDerriteDelPie: { value: 0 }, uCajaDelPie: { value: new THREE.Vector3(1, 1, 1) } }
+  return { uLetrasDelPie: { value: -1 }, uCuerpoDelPie: { value: 0 }, uApareceDelPie: { value: 1 }, uQuietoDelPie: { value: 0 }, uSinRotuloDelPie: { value: 0 }, uEncimaDelPie: { value: 0 }, uBarridoDelPie: { value: 0 }, uDerriteDelPie: { value: 0 }, uCajaDelPie: { value: new THREE.Vector3(1, 1, 1) }, uAcostadaDelPie: { value: 0 }, uRelieveAcostadoDelPie: { value: 1 } }
 }
