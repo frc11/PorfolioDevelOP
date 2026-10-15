@@ -24,6 +24,7 @@ import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenada
 import { pasoDeLasBrasas } from '../escena/energia/paso'
 import { POBLACION, antesDelPaso, aparecer, crearPoblacion, regular, sembrar, type Poblacion } from '../escena/energia/poblacion'
 import { REPOSO, crearMemoriaDelGesto, crearRed, leerElGesto, pasoDeLaRed, type Red } from '../escena/energia/reposo'
+import { ARBOL } from '../escena/energia/arbol'
 import { crearCajas, cruzaUnaCaja } from '../escena/energia/cajas'
 import { FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { brilloPorDensidad } from '../escena/energia/vecinas'
@@ -463,7 +464,7 @@ function redQuieta(modo: 'cadenas' | 'toda', conCajas: boolean): { readonly r: R
   return { r, b, d }
 }
 /** Lo que se mide de una red armada: los enlaces, cuántos tapan una caja, si hay un ciclo y cuántas brasas se ven (fuera de las cajas). */
-const medirLaRed = ({ r, b, d }: { readonly r: Red; readonly b: Brasas; readonly d: Dominio }): { readonly enlaces: number; readonly tapan: number; readonly ciclo: boolean; readonly seVen: number; readonly armada: boolean } => {
+const medirLaRed = ({ r, b, d }: { readonly r: Red; readonly b: Brasas; readonly d: Dominio }): { readonly enlaces: number; readonly tapan: number; readonly ciclo: boolean; readonly seVen: number; readonly celdas: number; readonly armada: boolean } => {
   const cajas = crearCajas()
   for (const caja of CAJAS_DE_PRUEBA) {
     cajas.bordes.set(caja, cajas.cuantas * 4)
@@ -483,21 +484,29 @@ const medirLaRed = ({ r, b, d }: { readonly r: Red; readonly b: Brasas; readonly
     else padre[x] = y
   }
   let seVen = 0
+  // [PULIDO 28] AB2 · y las celdas del reparto con alguna que se ve (`arbol.ts`).
+  const ocupadas = new Set<number>()
   for (let i = 0; i < b.n; i += 1) {
     const c = coordenadas(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
-    if (b.vida[i] >= REPOSO.vidaMinima && c.w > d.w0 && c.w < d.w1 && Math.abs(c.u) <= 1 && Math.abs(c.v) <= 1 && !cruzaUnaCaja(cajas, c.u, c.v, c.u, c.v)) seVen += 1
+    if (!(b.vida[i] >= REPOSO.vidaMinima && c.w > d.w0 && c.w < d.w1 && Math.abs(c.u) <= 1 && Math.abs(c.v) <= 1 && !cruzaUnaCaja(cajas, c.u, c.v, c.u, c.v))) continue
+    seVen += 1
+    const N = ARBOL.celdas
+    ocupadas.add(Math.min(N - 1, Math.floor(((c.u + 1) / 2) * N)) + N * Math.min(N - 1, Math.floor(((c.v + 1) / 2) * N)))
   }
-  return { enlaces: r.n, tapan, ciclo, seVen, armada: r.fase === 'armada' }
+  return { enlaces: r.n, tapan, ciclo, seVen, celdas: ocupadas.size, armada: r.fase === 'armada' }
 }
 const CADENAS_CON_CAJAS = medirLaRed(redQuieta('cadenas', true))
 const noTapaBien = (x: ReturnType<typeof medirLaRed>): boolean => x.armada && x.tapan === 0 && x.enlaces >= TOPE_DE_LA_RED * 0.6
 afirmar(noTapaBien(CADENAS_CON_CAJAS), `  con un texto y el logo en el cuadro, la red se arma (${String(CADENAS_CON_CAJAS.enlaces)} enlaces) sin que ninguno los tape`)
 controlPositivo('  el detector VE una red que no mira las cajas (rayos delante del texto y del logo)', medirLaRed(redQuieta('cadenas', false)), noTapaBien)
 const TODA = medirLaRed(redQuieta('toda', true))
-const todaBien = (x: ReturnType<typeof medirLaRed>): boolean => x.armada && x.tapan === 0 && !x.ciclo && x.enlaces >= x.seVen * 0.8
-afirmar(todaBien(TODA), `  ?red=toda: un árbol (sin ciclos) de ${String(TODA.enlaces)} enlaces que une las ${String(TODA.seVen)} brasas que se ven fuera de las cajas, sin tapar ninguna`)
+// [PULIDO 28] AB2 · el sentido cambió por pedido: ya no une TODAS las que se ven (unos 200 enlaces cortos, amontonados) sino las repartidas,
+// una por celda de la grilla del cuadro: un árbol que une al menos el 80 % de ellas, con muchos menos enlaces que brasas a la vista.
+const todaBien = (x: ReturnType<typeof medirLaRed>): boolean => x.armada && x.tapan === 0 && !x.ciclo && x.enlaces >= 0.8 * (x.celdas - 1) && x.enlaces <= x.celdas - 1 && x.enlaces < 0.3 * x.seVen
+afirmar(todaBien(TODA), `  la red toda (la por defecto): un árbol (sin ciclos) de ${String(TODA.enlaces)} enlaces que une las repartidas de ${String(TODA.celdas)} celdas (de ${String(TODA.seVen)} brasas a la vista), sin tapar ninguna`)
 controlPositivo('  el detector VE la red de cadenas (no todo conectado)', CADENAS_CON_CAJAS, todaBien)
 controlPositivo('  y un árbol con un ciclo', { ...TODA, ciclo: true }, todaBien)
+controlPositivo('  y el árbol de antes (todas las que se ven, unidas)', { ...TODA, enlaces: TODA.seVen - 1 }, todaBien)
 
 // En el final del pie no se arma (el final cuenta como gesto): quieta 10 s con `fin` desde el segundo 1.
 const EN_EL_FINAL = correrLaRed(1e9, 1, sinTocar)

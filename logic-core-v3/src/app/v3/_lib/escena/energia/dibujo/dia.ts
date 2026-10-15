@@ -15,10 +15,11 @@ import { DIA_SECUNDARIO } from './particulas'
  *   · `antes`: como estaba (PULIDO 24 V2), para comparar.
  * El rayo y la red en reposo comparten el trazo (`arcos.ts`): la variante vale para los dos. Por defecto, `calma`: el rayo pasa a ser lo
  * que se mira (se lee como tinta) y las cargas siguen secundarias y quietas (negras y titilando, como en PULIDO 23, compiten con el texto).
+ * [PULIDO 28] · por decisión del humano, el por defecto pasa a `ambos`: el rayo de noche y las cargas negras, quietas de brillo.
  */
 export const DE_DIA = {
   variantes: ['antes', 'rayo', 'carga', 'ambos', 'calma'],
-  porDefecto: 'calma',
+  porDefecto: 'ambos',
   /** El arco de día: su ancho (parte del de noche), el gris del núcleo (lineal) y lo que tapan el halo oscuro, el resplandor y el núcleo. */
   arco: {
     antes: { fino: ARCO_DE_DIA.fino, gris: ARCO_DE_DIA.gris, tapa: [0.08, 0.04, 0.95] },

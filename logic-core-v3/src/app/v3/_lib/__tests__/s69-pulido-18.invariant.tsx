@@ -243,17 +243,19 @@ const DIA_POR_DEFECTO = ((): { readonly v: string; readonly u: UniformesDelDia }
   return { v: aplicarElDia(null, u), u }
 })()
 const ARCOS_DIBUJO_Z3 = leer('_lib/escena/energia/dibujo/arcos.ts')
+// [PULIDO 28] · el sentido cambió por decisión del humano: el por defecto es `ambos` (el rayo de noche y las cargas NEGRAS, el tope de PULIDO
+// 23, quietas de brillo); el grafito (`calma`) queda como variante.
 const diaZ3Bien = (d: { readonly v: string; readonly u: UniformesDelDia }, particula: string, arcos: string): boolean =>
-  d.v === DE_DIA.porDefecto && d.u.arco.x >= 1 && d.u.arco.y <= 0.05 && d.u.tapa.w === 1 && d.u.tapa.z >= 0.8 && d.u.tapa.x <= 0.25 && d.u.carga.y === 1 && d.u.carga.x <= 0.4 &&
+  d.v === DE_DIA.porDefecto && d.u.arco.x >= 1 && d.u.arco.y <= 0.05 && d.u.tapa.w === 1 && d.u.tapa.z >= 0.8 && d.u.tapa.x <= 0.25 && d.u.carga.y === 1 && d.u.carga.x >= 0.8 &&
   particula.includes('float calma = uDiaDeLaCarga.y * ( 1.0 - uNoche );') && particula.includes('titila = mix( titila, 1.0, calma );') && particula.includes('destello *= 1.0 - calma;') &&
   arcos.includes('mix( uDiaDelArco.x, 1.0, uNoche )') && !arcos.includes('ARCO_DE_DIA.fino)}')
-afirmar(diaZ3Bien(DIA_POR_DEFECTO, PARTICULA, ARCOS_DIBUJO_Z3), `  de día por defecto (${DIA_POR_DEFECTO.v}): el rayo de noche en el día (${String(DIA_POR_DEFECTO.u.arco.x)} veces el ancho, núcleo de tinta, halo ${String(DIA_POR_DEFECTO.u.tapa.x)}) y las cargas de grafito (tope ${DIA_POR_DEFECTO.u.carga.x.toFixed(2)}) sin titileo; de noche, igual`)
+afirmar(diaZ3Bien(DIA_POR_DEFECTO, PARTICULA, ARCOS_DIBUJO_Z3), `  de día por defecto (${DIA_POR_DEFECTO.v}): el rayo de noche en el día (${String(DIA_POR_DEFECTO.u.arco.x)} veces el ancho, núcleo de tinta, halo ${String(DIA_POR_DEFECTO.u.tapa.x)}) y las cargas negras (tope ${DIA_POR_DEFECTO.u.carga.x.toFixed(2)}) sin titileo; de noche, igual`)
 const conVariante = (valor: string): { readonly v: string; readonly u: UniformesDelDia } => {
   const u = { arco: new THREE.Vector4(), tapa: new THREE.Vector4(), carga: new THREE.Vector4() }
   return { v: aplicarElDia(valor, u), u: u }
 }
 controlPositivo('  el detector VE el día de antes (el rayo al 55 % y gris medio, las cargas titilando)', { ...conVariante('antes'), v: DE_DIA.porDefecto }, (d: { readonly v: string; readonly u: UniformesDelDia }) => diaZ3Bien(d, PARTICULA, ARCOS_DIBUJO_Z3))
-controlPositivo('  y las cargas negras de PULIDO 23', { ...conVariante('carga'), v: DE_DIA.porDefecto }, (d: { readonly v: string; readonly u: UniformesDelDia }) => diaZ3Bien(d, PARTICULA, ARCOS_DIBUJO_Z3))
+controlPositivo('  y el grafito de PULIDO 27 (`calma`, el por defecto de antes)', { ...conVariante('calma'), v: DE_DIA.porDefecto }, (d: { readonly v: string; readonly u: UniformesDelDia }) => diaZ3Bien(d, PARTICULA, ARCOS_DIBUJO_Z3))
 controlPositivo('  y las cargas que siguen titilando de día', PARTICULA.replace('titila = mix( titila, 1.0, calma );', ''), (p: string) => diaZ3Bien(DIA_POR_DEFECTO, p, ARCOS_DIBUJO_Z3))
 
 // ═══════════════════════════════════════════════════════════════════════════

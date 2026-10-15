@@ -22,6 +22,8 @@
  *         durante la caída y la energía vuelve recién cuando todo se asentó, con la quietud de siempre.
  *   AA2 · gracias y error: el derretido se descartó; la placa del form baja por su hueco sobre su plataforma (el fondo del pozo la
  *         acompaña), el piso se cierra sobre ella, se cambian a cubierto, se abre y sube la otra.
+ *   AB1 · AB2 · la red toda (la por defecto): repartida (una brasa por celda de una grilla del cuadro: pareja aunque las brasas no lo
+ *         estén, enlaces más largos y menos rayos) y encendida desde varios focos repartidos que crecen y se unen al final.
  */
 import { empiezaUnGesto, type GestoDeScroll } from '../gestosDelScroll'
 import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida, pedirLaSalida, type FaseDeLaSalida } from '../pie3d/salidas'
@@ -40,6 +42,12 @@ import { HUECOS_DEL_PIE, HUECO_DEL_PIE, QUIETUD, QUIETUD_DEL_PIE } from '../esce
 import { huecosDeLaCaida } from '../escena/pie3d/huecosDeLaCaida'
 import { HUNDIMIENTO_DEL_PIE, PLATAFORMA_EN_VIVO, hundimientoDelPiso } from '../escena/pie3d/transformacionDelPie'
 import { existsSync } from 'node:fs'
+import { ARBOL, armarElArbol } from '../escena/energia/arbol'
+import { DIBUJO_DE_LA_RED } from '../escena/energia/dibujo/red'
+import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
+import { alfaDelDominio, armarElDominio, coordenadas, crearDominio, poblar } from '../escena/energia/dominio'
+import { REPOSO, crearRed } from '../escena/energia/reposo'
+import { FLOOR_Y } from '../escena/probeScene'
 import { poseDeLaPiezaQueCae } from '../escena/final/caidaDelPie'
 import { RELOJ_DEL_FINAL as RELOJ } from '../escena/final/recorridoDelFinal'
 import { POZO_DEL_PIE } from '../escena/pie3d/pozos'
@@ -434,12 +442,12 @@ function correrElReposo(): { readonly malos: number; readonly asentado: number }
   }
   return { malos, asentado: c.ultimaS / RELOJ.duracionS }
 }
-const REPOSO = correrElReposo()
+const EL_REPOSO = correrElReposo()
 const EN_EL_PISO_REPOSO = readFileSync('src/app/v3/_lib/escena/final/enElPiso.ts', 'utf8')
 const reposoBien = (malos: number, piso: string): boolean =>
   malos === 0 && piso.includes(String.raw`clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );\n\tdibujo *= 1.0 - reposoDelPie( xz );`) && piso.indexOf('reposoDelPie( xz )') < piso.indexOf('techoDeLosTextos( xz ), techoDelLogo( xz )')
-afirmar(reposoBien(REPOSO.malos, EN_EL_PISO_REPOSO), `  la caída entera: la zona del pie con todas sus piezas y en reposo hasta que todo se asentó (${REPOSO.asentado.toFixed(3)} del final), la energía de vuelta en ${String(QUIETUD.vuelveS)} s; en el piso, la onda, la luz y los pistones por el reposo (${String(REPOSO.malos)} cuadros mal)`)
-controlPositivo('  el detector VE el piso sin el reposo (el de antes: los pistones subían alrededor del © mientras caía)', EN_EL_PISO_REPOSO.replace(String.raw`\n\tdibujo *= 1.0 - reposoDelPie( xz );`, ''), (p: string) => reposoBien(REPOSO.malos, p))
+afirmar(reposoBien(EL_REPOSO.malos, EN_EL_PISO_REPOSO), `  la caída entera: la zona del pie con todas sus piezas y en reposo hasta que todo se asentó (${EL_REPOSO.asentado.toFixed(3)} del final), la energía de vuelta en ${String(QUIETUD.vuelveS)} s; en el piso, la onda, la luz y los pistones por el reposo (${String(EL_REPOSO.malos)} cuadros mal)`)
+controlPositivo('  el detector VE el piso sin el reposo (el de antes: los pistones subían alrededor del © mientras caía)', EN_EL_PISO_REPOSO.replace(String.raw`\n\tdibujo *= 1.0 - reposoDelPie( xz );`, ''), (p: string) => reposoBien(EL_REPOSO.malos, p))
 controlPositivo('  y una zona sólo con las piezas que ya volcaron (la de antes)', 1, (m: number) => reposoBien(m, EN_EL_PISO_REPOSO))
 QUIETUD_DEL_PIE.uReposoDelPie.value = 0
 QUIETUD_DEL_PIE.uCuantasQuietudes.value = 0
@@ -496,5 +504,83 @@ const PLANO = readFileSync('src/app/v3/_lib/escena/final/planoDeLaLuz.ts', 'utf8
 const planoBien = (p: string): boolean => p.includes('	if ( huecoDelPie( vXZ ) < 0.0 ) discard;') && p.includes('...HUECOS_DEL_PIE, uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie')
 afirmar(planoBien(PLANO), '  el plano de la luz de abajo, recortado por los huecos del pie: en el pozo, las paredes, la placa y su plataforma')
 controlPositivo('  el detector VE el plano entero (el de antes)', PLANO.replace('	if ( huecoDelPie( vXZ ) < 0.0 ) discard;', ''), planoBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('AB1 · AB2 · La red toda: repartida en la pantalla y encendida desde varios focos que se unen al final')
+
+/**
+ * Una red armada (el árbol) sobre 900 brasas con la cámara del recorrido y una población DESPAREJA a propósito (como en el sitio: más
+ * arriba; abajo se apaga el 80 %). Lo que se mide: los enlaces, su largo medio en el cuadro, cuántos caen en cada tercio de alto de la
+ * pantalla (de abajo arriba) por celda de la grilla con alguna brasa a la vista en ese tercio (el reparto, donde hay de dónde) y los
+ * focos: los enlaces que se encienden antes que todos los que tocan (cada foco empieza por uno; donde dos frentes se juntan, ninguno).
+ */
+interface DeLaRedToda {
+  readonly enlaces: number
+  readonly largo: number
+  readonly tercios: readonly number[]
+  readonly aLaVista: readonly number[]
+  readonly porCelda: readonly number[]
+  readonly focos: number
+}
+function redToda(semilla: number): DeLaRedToda {
+  const az = azarConSemilla(semilla)
+  const b = crearBrasas(900, az, FLOOR_Y)
+  const d = crearDominio()
+  const o = [0, 6.4, 19]
+  const largo0 = Math.hypot(o[0], o[1], o[2])
+  const f = o.map((x) => -x / largo0)
+  const r0 = [-f[2], 0, f[0]]
+  const lr = Math.hypot(r0[0], r0[1], r0[2])
+  const rr = r0.map((x) => x / lr)
+  const uu = [rr[1] * f[2] - rr[2] * f[1], rr[2] * f[0] - rr[0] * f[2], rr[0] * f[1] - rr[1] * f[0]]
+  for (let e = 0; e < 3; e += 1) [d.o[e], d.r[e], d.u[e], d.f[e]] = [o[e], rr[e], uu[e], f[e]]
+  armarElDominio(d, 35, 1.6, largo0, FLOOR_Y)
+  poblar(d, b, az, true)
+  const aLaVista = [0, 0, 0]
+  const ocupadas = [new Set<number>(), new Set<number>(), new Set<number>()]
+  for (let i = 0; i < b.n; i += 1) {
+    b.vida[i] = alfaDelDominio(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+    const c = coordenadas(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+    if (c.v < 0 && az() < 0.8) b.vida[i] = 0
+    if (b.vida[i] < REPOSO.vidaMinima || Math.abs(c.u) > 1 || Math.abs(c.v) > 1) continue
+    const tercio = Math.min(2, Math.floor(((c.v + 1) / 2) * 3))
+    aLaVista[tercio] += 1
+    ocupadas[tercio].add(Math.min(ARBOL.celdas - 1, Math.floor(((c.u + 1) / 2) * ARBOL.celdas)) + ARBOL.celdas * Math.min(ARBOL.celdas - 1, Math.floor(((c.v + 1) / 2) * ARBOL.celdas)))
+  }
+  const r = crearRed(900)
+  r.modo = 'toda'
+  armarElArbol(r, b, d, REPOSO.vidaMinima, REPOSO.formaS, az)
+  let largo = 0
+  const tercios = [0, 0, 0]
+  let focos = 0
+  for (let k = 0; k < r.n; k += 1) {
+    let primero = true
+    for (let q = 0; q < r.n && primero; q += 1) if (q !== k && (r.a[q] === r.a[k] || r.a[q] === r.b[k] || r.b[q] === r.a[k] || r.b[q] === r.b[k]) && r.nace[q] < r.nace[k]) primero = false
+    if (primero) focos += 1
+    const ci = coordenadas(d, b.lugar[r.a[k] * 3], b.lugar[r.a[k] * 3 + 1], b.lugar[r.a[k] * 3 + 2])
+    const [ui, vi] = [ci.u, ci.v]
+    const cj = coordenadas(d, b.lugar[r.b[k] * 3], b.lugar[r.b[k] * 3 + 1], b.lugar[r.b[k] * 3 + 2])
+    largo += Math.hypot(cj.u - ui, cj.v - vi) / r.n
+    tercios[Math.min(2, Math.max(0, Math.floor((((vi + cj.v) / 2 + 1) / 2) * 3)))] += 1
+  }
+  return { enlaces: r.n, largo, tercios, aLaVista, porCelda: tercios.map((t, k) => t / Math.max(1, ocupadas[k].size)), focos }
+}
+const parejo = (t: readonly number[]): number => Math.min(...t) / Math.max(1, Math.max(...t))
+const REDES = [7, 11, 29].map(redToda)
+const repartidaBien = (x: DeLaRedToda): boolean => x.enlaces <= ARBOL.celdas * ARBOL.celdas && x.largo >= 0.15 && parejo(x.porCelda) >= 0.5
+const focosBien = (x: DeLaRedToda): boolean => x.focos >= ARBOL.focos[0] && x.focos <= ARBOL.focos[1] + 2
+afirmar(REDES.every(repartidaBien) && REDES.every(focosBien), `  con una población despareja (de abajo arriba, a la vista ${REDES[0].aLaVista.join(' / ')}): ${REDES.map((x) => `${String(x.enlaces)} enlaces de ${x.largo.toFixed(2)} de cuadro, por tercio ${x.tercios.join(' / ')} (${x.porCelda.map((v) => v.toFixed(2)).join(' / ')} por celda con brasas), ${String(x.focos)} focos`).join('; ')}`)
+// Los controles: la de antes, que unía todas las que se veían (sus enlaces van donde están las brasas: uno por brasa), y un solo foco.
+controlPositivo('  el detector VE la red de antes (todas las que se ven, amontonadas arriba)', { ...REDES[0], enlaces: REDES[0].aLaVista.reduce((a, x) => a + x, 0), largo: 0.05, porCelda: REDES[0].aLaVista.map((v, k) => v / Math.max(1, REDES[0].tercios[k])) }, repartidaBien)
+controlPositivo('  y un encendido desde un solo lugar (del centro hacia afuera)', { ...REDES[0], focos: 1 }, focosBien)
+// Por defecto (la de cadenas con `?red=cadenas`), y de noche que no sature: la repartida con su propio brillo (medido en el sitio, de noche en
+// Números: los píxeles claros de 3,7 % a 3,0 %, los muy claros de 1,4 % a 1,0 %).
+const DIBUJO_RED = readFileSync('src/app/v3/_lib/escena/energia/dibujo/red.ts', 'utf8')
+const CARGAS_RED = readFileSync('src/app/v3/_lib/escena/energia/PlasmaYCargas.tsx', 'utf8')
+const porDefectoBien = (dib: string, cargas: string, toda: number): boolean =>
+  toda < DIBUJO_DE_LA_RED.noche.brillo && dib.includes("(r.modo === 'toda' ? DIBUJO_DE_LA_RED.noche.toda : DIBUJO_DE_LA_RED.noche.brillo)") && cargas.includes("a.red.modo = consulta.get('red') === 'cadenas' ? 'cadenas' : 'toda'")
+afirmar(porDefectoBien(DIBUJO_RED, CARGAS_RED, DIBUJO_DE_LA_RED.noche.toda), `  la red toda por defecto (la de cadenas con ?red=cadenas) y de noche con ${String(DIBUJO_DE_LA_RED.noche.toda)} del brillo de siempre`)
+controlPositivo('  el detector VE la de cadenas por defecto (la de antes)', CARGAS_RED.replace("consulta.get('red') === 'cadenas' ? 'cadenas' : 'toda'", "consulta.get('red') === 'toda' ? 'toda' : 'cadenas'"), (c: string) => porDefectoBien(DIBUJO_RED, c, DIBUJO_DE_LA_RED.noche.toda))
+controlPositivo('  y la repartida con el brillo entero de noche', 1, (t: number) => porDefectoBien(DIBUJO_RED, CARGAS_RED, t))
 
 cerrar('s72-pulido-28')

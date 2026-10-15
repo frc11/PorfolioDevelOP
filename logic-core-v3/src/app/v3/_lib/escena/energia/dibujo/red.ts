@@ -38,9 +38,10 @@ export const DIBUJO_DE_LA_RED = {
   rigidez: 0.55,
   /**
    * [PULIDO 22] T1 · de noche, el brillo de la red acotado: su brillo y como mucho el de `tope` enlaces enteros (con más, cada uno baja).
-   * [PULIDO 27] Z2 · entero (son pocos); el tope, para `?red=toda` (cientos de rayos).
+   * [PULIDO 27] Z2 · entero (son pocos); el tope, para `?red=toda` (cientos de rayos). [PULIDO 28] AB2 · `toda`: el de la red repartida (la
+   * por defecto: pocos rayos largos, de noche no satura).
    */
-  noche: { brillo: 1, tope: 140 },
+  noche: { brillo: 1, toda: 0.65, tope: 140 },
 } as const
 
 const TRAMOS = DIBUJO_DE_LA_RED.tramos + DIBUJO_DE_LA_RED.tramosDeRama
@@ -290,7 +291,7 @@ export function rellenarRed(r: Red, b: Brasas, dib: DibujoDeLaRed): void {
   }
   // Vacía, el primer lugar queda nulo (alfa 0: no pinta) y sigue siendo el que arma el programa.
   if (n === 0) D[3] = 0
-  dib.tope.value = DIBUJO_DE_LA_RED.noche.brillo * Math.min(1, DIBUJO_DE_LA_RED.noche.tope / Math.max(1, suma))
+  dib.tope.value = (r.modo === 'toda' ? DIBUJO_DE_LA_RED.noche.toda : DIBUJO_DE_LA_RED.noche.brillo) * Math.min(1, DIBUJO_DE_LA_RED.noche.tope / Math.max(1, suma))
   dib.geometria.setDrawRange(0, Math.max(1, n) * TRAMOS * 6)
   dib.geometriaDelHalo.setDrawRange(0, Math.max(1, n) * TRAMOS * 4)
   if (n > 0 || dib.escrita) dib.enlaces.needsUpdate = true

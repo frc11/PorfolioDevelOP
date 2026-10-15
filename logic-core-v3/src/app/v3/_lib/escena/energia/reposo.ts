@@ -1,4 +1,4 @@
-import { armarElArbol } from './arbol'
+import { ARBOL, armarElArbol } from './arbol'
 import type { Brasas, EntradaDeLasBrasas } from './brasas'
 import { CADENAS, crecerLasCadenas, empezarLasCadenas } from './cadenas'
 import { crearCajas, cruzaUnaCaja, type CajasDeLaRed } from './cajas'
@@ -130,7 +130,8 @@ export function leerElGesto(m: MemoriaDelGesto, scroll: number, x: number, y: nu
 
 /**
  * Forma la red: [PULIDO 23] U2 · empieza las cadenas (vacías); la red crece en cada cuadro de la formación (`cadenas.ts`). [PULIDO 27] Z2 ·
- * con su tope (por las brasas activas); con `?red=toda`, el árbol entero de una vez (se enciende del centro hacia afuera).
+ * con su tope (por las brasas activas); con `?red=toda`, el árbol entero de una vez ([PULIDO 28] AB1 · AB2 · el por defecto: repartido, desde
+ * varios focos).
  */
 function formar(r: Red, b: Brasas, d: Dominio, azar: () => number): void {
   empezarLasCadenas(r, b.n)
@@ -172,7 +173,10 @@ function chasquear(b: Brasas, i: number, j: number): void {
 /** Poda los enlaces de una brasa que saltó (reapareció por una cara del dominio, nació o murió), que se estiró en el cuadro (un enlace no cruza la pantalla) o que tapa una caja. */
 const LARGO_TOPE2 = (REPOSO.alcance * REPOSO.estirado) ** 2
 function podar(r: Red, b: Brasas, d: Dominio): void {
-  const tope = REPOSO.alcanceEnElCuadro * REPOSO.estirado
+  // [PULIDO 28] AB2 · el árbol repartido, con sus alcances (sus enlaces son más largos: con los de las cadenas se caían en el cuadro siguiente).
+  const toda = r.modo === 'toda'
+  const tope = (toda ? ARBOL.enElCuadro : REPOSO.alcanceEnElCuadro) * REPOSO.estirado
+  const largoTope2 = toda ? (ARBOL.alcance * REPOSO.estirado) ** 2 : LARGO_TOPE2
   for (let k = r.n - 1; k >= 0; k -= 1) {
     const i = r.a[k]
     const j = r.b[k]
@@ -185,7 +189,7 @@ function podar(r: Red, b: Brasas, d: Dominio): void {
       fuera = Math.abs(cj.u - ui) > tope || Math.abs(cj.v - vi) > tope
       // [PULIDO 22] T1 · y en el mundo: en ~30 s de formación una brasa deriva (siempre vecinas cercanas).
       const L = b.lugar
-      fuera ||= (L[j * 3] - L[i * 3]) ** 2 + (L[j * 3 + 1] - L[i * 3 + 1]) ** 2 + (L[j * 3 + 2] - L[i * 3 + 2]) ** 2 > LARGO_TOPE2
+      fuera ||= (L[j * 3] - L[i * 3]) ** 2 + (L[j * 3 + 1] - L[i * 3 + 1]) ** 2 + (L[j * 3 + 2] - L[i * 3 + 2]) ** 2 > largoTope2
       // [PULIDO 27] Z2 · y uno que pasó a tapar un texto, un botón o el logo (`cajas.ts`).
       fuera ||= cruzaUnaCaja(r.cajas, ui, vi, cj.u, cj.v)
     }

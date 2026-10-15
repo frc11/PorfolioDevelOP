@@ -56,9 +56,10 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
     const g = grupo.current
     if (g === null) return undefined
     const a = armar(compacto, vista, () => logoGroupRef.current)
-    // [PULIDO 27] Z2 · `?red=toda`: la red en reposo, un árbol que une todas las que se ven (`arbol.ts`); Z3 · `?dia=`: el día (`dia.ts`).
+    // [PULIDO 27] Z2 · la red en reposo, un árbol (`arbol.ts`); [PULIDO 28] AB1 · AB2 · por defecto (la de cadenas, con `?red=cadenas`).
+    // Z3 · `?dia=`: el día (`dia.ts`).
     const consulta = new URLSearchParams(window.location.search)
-    a.red.modo = consulta.get('red') === 'toda' ? 'toda' : 'cadenas'
+    a.red.modo = consulta.get('red') === 'cadenas' ? 'cadenas' : 'toda'
     aplicarElDia(consulta.get('dia'), a.dia)
     g.add(...a.mallas)
     armado.current = a
