@@ -1,4 +1,4 @@
-import { BRASAS, desenlazar, type Brasas } from './brasas'
+import { BRASAS, type Brasas } from './brasas'
 
 /**
  * [PULIDO 19] Q1.b · EL DOMINIO DE LA VISTA — el plasma vive en el MUNDO (no sigue a la cámara ni al logo) pero su dominio cubre lo que se
@@ -9,10 +9,10 @@ import { BRASAS, desenlazar, type Brasas } from './brasas'
  *
  * Q1.c · NADA DESAPARECE DE LA NADA: el ALFA del dominio es una función continua de la posición: entero adentro del cuadro, se
  * funde en el margen de los lados (afuera del cuadro: no se ve) y en las bandas de profundidad (sí se ven: una brasa que se acerca
- * al frente se apaga antes de reaparecer en el fondo, donde se enciende). Al reaparecer vale 0 y se enciende desde ahí. `paso.ts` lo
- * sigue con un tope de cambio por cuadro (`fundidoS`). Y EL REPARTO (`repartir`): cuando el encuadre cambia (la cámara se aleja y el
- * dominio crece) las brasas quedan donde estaban, concentradas; las que sobran en una celda del cuadro se apagan (un fundido), se
- * mudan a la celda más vacía y se encienden ahí (otro). Puro (Node): recibe la cámara como números.
+ * al frente se apaga antes de reaparecer en el fondo, donde se enciende). Al reaparecer vale 0 y se enciende desde ahí. [PULIDO 27]
+ * Z1 · la vida ES el alfa (sin el tope de cambio por cuadro: con la cámara rápida, la que no llegaba a apagarse saltaba al envolverse)
+ * y el reparto (las que sobraban en una celda se apagaban y se mudaban) se fue a `poblacion.ts`: nacen y mueren a la vista, con su
+ * efecto, y la cantidad a la vista es la misma en todo encuadre. Puro (Node): recibe la cámara como números.
  *
  * Sin números por parámetro en lo de cada brasa (`coordenadasDe`, `alfaDe`, `envolver`; el piso vive en el dominio): en el bucle de
  * cada brasa, un número no entero que cruza una función que V8 no inlineó se encaja en un HeapNumber (16 bytes por brasa y cuadro).
@@ -34,12 +34,10 @@ export const DOMINIO = {
   profundidad: 1.7,
   /** Las bandas de fundido en profundidad (fracciones del foco): desde el frente y hasta el fondo. */
   banda: { cerca: 0.3, lejos: 0.45 },
-  /** El fundido en el tiempo (s): ninguna cambia su alfa más rápido (el tope de cambio por cuadro es `dt / fundidoS`). */
-  fundidoS: 0.25,
   /** El foco (u): entre qué distancias vale la de la cámara al logo. */
   foco: [8, 60],
-  /** El reparto: las celdas del cuadro (ancho × alto), cuántas brasas se miran por cuadro, y desde cuánto una celda está llena o vacía (por la media). */
-  reparto: { celdas: [8, 5], porCuadro: 8, llena: 1.2, vacia: 0.45 },
+  /** El reparto: las celdas del cuadro (ancho × alto); qué le toca a cada una y quién nace o muere ahí, en `poblacion.ts`. */
+  reparto: { celdas: [8, 5] },
 } as const
 /** Cuántas celdas tiene el reparto (el largo de `Brasas.celdasDeLaVista`). */
 export const CELDAS_DEL_REPARTO = DOMINIO.reparto.celdas[0] * DOMINIO.reparto.celdas[1]
@@ -63,13 +61,16 @@ export interface Dominio {
   /** Los ejes de la base y qué eje de la cámara es cada uno (para escribirlos sin reservas por cuadro). */
   readonly ejes: readonly (readonly [Float32Array, number, number, number])[]
   listo: boolean
+  /** [PULIDO 27] Z1 · la velocidad de la cámara (u/s) y cuánto saltó en el último cuadro (u; los escribe el cuadro): quién se acerca, y los cortes. */
+  readonly vo: Float32Array
+  salto: number
 }
 
 export function crearDominio(): Dominio {
   const r = new Float32Array([1, 0, 0])
   const u = new Float32Array([0, 1, 0])
   const f = new Float32Array([0, 0, -1])
-  return { o: new Float32Array(3), r, u, f, tanX: 0.5, tanY: 0.3, D: 20, w0: 5, w1: 40, piso: Number.NEGATIVE_INFINITY, caja: new Float32Array(6), ejes: [[r, 1, 0, 0], [u, 0, 1, 0], [f, 0, 0, -1]], listo: false }
+  return { o: new Float32Array(3), r, u, f, tanX: 0.5, tanY: 0.3, D: 20, w0: 5, w1: 40, piso: Number.NEGATIVE_INFINITY, caja: new Float32Array(6), ejes: [[r, 1, 0, 0], [u, 0, 1, 0], [f, 0, 0, -1]], listo: false, vo: new Float32Array(3), salto: 0 }
 }
 
 /** Lo que `coordenadasDe` deja, y el alfa de `alfaDe` (el mismo objeto cada vez: sin reservas). */
@@ -182,7 +183,7 @@ export function pesoDeLaCelda(d: Dominio, k: number): number {
   return hasta ** p - d.w0 ** p
 }
 
-/** Cuántas brasas le tocan a cada celda del cuadro (en `destino`; 0 a las inalcanzables), con `n` brasas. Devuelve cuántas celdas alcanzables hay. */
+/** Cuánto le toca a cada celda del cuadro (en `destino`; 0 a las inalcanzables) de `n` (brasas o vida sumada). Devuelve cuántas celdas alcanzables hay. */
 export function objetivosDelReparto(d: Dominio, n: number, destino: Float32Array): number {
   let suma = 0
   let alcanzables = 0
@@ -204,15 +205,18 @@ function escribir(d: Dominio, b: Brasas, i: number, u: number, v: number, w: num
 
 /**
  * Un lugar al azar de la vista para la brasa `i`, sobre el piso: en todo el cuadro (`k` −1: parejo en el AIRE, como el polvo de una sala:
- * la profundidad se sortea en todo el dominio y lo que cae bajo el piso se sortea de nuevo), o dentro de la celda `k` del reparto (la
+ * la profundidad se sortea en todo el dominio y lo que cae bajo el piso se sortea de nuevo), en todo el dominio con sus márgenes (`k` −2:
+ * la siembra de `poblacion.ts`), sólo en el margen (`k` −3: fuera del cuadro, no se ve) o dentro de la celda `k` del reparto (la
  * profundidad hasta el piso).
  */
-function alAzarEnLaVista(d: Dominio, b: Brasas, i: number, k: number, azar: () => number): boolean {
+export function alAzarEnLaVista(d: Dominio, b: Brasas, i: number, k: number, azar: () => number): boolean {
   const nx = DOMINIO.reparto.celdas[0]
   const ny = DOMINIO.reparto.celdas[1]
-  for (let intento = 0; intento < 12; intento += 1) {
-    const u = k < 0 ? azar() * 2 - 1 : (((k % nx) + azar()) / nx) * 2 - 1
-    const v = k < 0 ? azar() * 2 - 1 : ((Math.floor(k / nx) + azar()) / ny) * 2 - 1
+  const lado = k <= -2 ? 1 + DOMINIO.margen : 1
+  for (let intento = 0; intento < (k === -3 ? 24 : 12); intento += 1) {
+    const u = k < 0 ? (azar() * 2 - 1) * lado : (((k % nx) + azar()) / nx) * 2 - 1
+    const v = k < 0 ? (azar() * 2 - 1) * lado : ((Math.floor(k / nx) + azar()) / ny) * 2 - 1
+    if (k === -3 && Math.abs(u) <= 1 && Math.abs(v) <= 1) continue
     const hasta = hastaElPiso(d, u, v)
     if (hasta <= d.w0 + 0.5) continue
     const w = profundidadAlAzar(d, k < 0 ? d.w1 : hasta, azar)
@@ -224,14 +228,38 @@ function alAzarEnLaVista(d: Dominio, b: Brasas, i: number, k: number, azar: () =
 }
 
 /**
+ * [PULIDO 27] Z1 · como `alAzarEnLaVista` en la celda `k`, pero entre las bandas de profundidad (donde el alfa es entero): la que nace
+ * se ve entera y se queda a la vista (en una banda se iría a la nada enseguida y haría falta otra).
+ */
+export function alAzarALaVista(d: Dominio, b: Brasas, i: number, k: number, azar: () => number): boolean {
+  const nx = DOMINIO.reparto.celdas[0]
+  const ny = DOMINIO.reparto.celdas[1]
+  const desde = d.w0 + DOMINIO.banda.cerca * d.D
+  const p = DOMINIO.profundidad + 1
+  for (let intento = 0; intento < 12; intento += 1) {
+    const u = (((k % nx) + azar()) / nx) * 2 - 1
+    const v = ((Math.floor(k / nx) + azar()) / ny) * 2 - 1
+    const hasta = Math.min(hastaElPiso(d, u, v), d.w1 - DOMINIO.banda.lejos * d.D)
+    if (hasta <= desde + 0.5) continue
+    escribir(d, b, i, u, v, (desde ** p + azar() * (hasta ** p - desde ** p)) ** (1 / p))
+    return true
+  }
+  return false
+}
+
+/**
  * Si la brasa `i` salió del dominio, la vuelve a meter por la cara opuesta (primero en profundidad, después por los lados) y devuelve
- * `true`: ése es el evento (su alfa vale 0 de los dos lados de la cara). Adentro, no toca nada.
+ * `true`: ése es el evento (su alfa vale 0 de los dos lados de la cara). Adentro, no toca nada. [PULIDO 27] Z1 · si por ahí el rayo baja
+ * del piso, a otra profundidad de ese rayo sólo en el margen (fuera del cuadro); si no, AL FONDO (o al margen): antes caía en cualquier
+ * lugar de la vista y aparecía ahí (en reposo, las que subían por el calor y salían por arriba). En la vista sólo se nace por
+ * `poblacion.ts`, con su efecto.
  */
 export function envolver(d: Dominio, b: Brasas, i: number, azar: () => number): boolean {
   const c = coordenadasDe(d, b.lugar, i * 3)
   const m = 1 + DOMINIO.margen
   let { u, v, w } = c
   let salio = false
+  let deCostado = false
   const fondo = d.w1 - d.w0
   if (w < d.w0) {
     w += fondo * Math.ceil((d.w0 - w) / fondo)
@@ -243,22 +271,42 @@ export function envolver(d: Dominio, b: Brasas, i: number, azar: () => number): 
   if (u > m || u < -m) {
     u -= 2 * m * Math.sign(u) * Math.ceil((Math.abs(u) - m) / (2 * m))
     salio = true
+    deCostado = true
   }
   if (v > m || v < -m) {
     v -= 2 * m * Math.sign(v) * Math.ceil((Math.abs(v) - m) / (2 * m))
     salio = true
+    deCostado = true
   }
   if (!salio) return false
+  // [PULIDO 27] Z1 · la que sale por un costado ACERCÁNDOSE a la cámara (la perspectiva la abre hacia afuera) volvía a salir por el
+  // costado opuesto en el cuadro siguiente, y así hasta el frente: quedaban trabadas en el borde del margen, sin verse (medido quieto en
+  // el hero: 65 brasas envolviéndose en casi cada cuadro y la vida en el cuadro bajando un 11 % en 30 s). Vuelve por el fondo.
+  if (deCostado && (b.velocidad[i * 3] - d.vo[0]) * d.f[0] + (b.velocidad[i * 3 + 1] - d.vo[1]) * d.f[1] + (b.velocidad[i * 3 + 2] - d.vo[2]) * d.f[2] < 0 && alFondo(d, b, i, azar)) return true
   u = Math.min(m, Math.max(-m, u))
   v = Math.min(m, Math.max(-m, v))
-  // Si por ahí el rayo baja del piso antes de esa profundidad, a una profundidad que esté sobre el piso (o a cualquier lugar de la vista).
+  // Si por ahí el rayo baja del piso antes de esa profundidad: en el margen, a una profundidad de ese rayo sobre el piso; si no, al margen.
   const hasta = hastaElPiso(d, u, v)
   if (w > hasta) {
-    if (hasta > d.w0 + 0.5) w = profundidadAlAzar(d, hasta, azar)
-    else if (alAzarEnLaVista(d, b, i, -1, azar)) return true
+    if ((Math.abs(u) > 1 || Math.abs(v) > 1) && hasta > d.w0 + 0.5) w = profundidadAlAzar(d, hasta, azar)
+    else if (alFondo(d, b, i, azar) || alAzarEnLaVista(d, b, i, -3, azar)) return true
   }
   escribir(d, b, i, u, v, Math.min(d.w1, Math.max(d.w0, w)))
   return true
+}
+
+/** [PULIDO 27] Z1 · al fondo del dominio (su alfa, casi 0: se enciende al acercarse): un lugar al azar del cuadro o sus márgenes cuyo rayo llega al fondo sobre el piso. */
+function alFondo(d: Dominio, b: Brasas, i: number, azar: () => number): boolean {
+  const m = 1 + DOMINIO.margen
+  const w = d.w1 - 0.02 * d.D
+  for (let intento = 0; intento < 12; intento += 1) {
+    const u = (azar() * 2 - 1) * m
+    const v = (azar() * 2 - 1) * m
+    if (hastaElPiso(d, u, v) < w) continue
+    escribir(d, b, i, u, v, w)
+    return true
+  }
+  return false
 }
 
 /**
@@ -284,60 +332,11 @@ export function poblar(d: Dominio, b: Brasas, azar: () => number, todas: boolean
 }
 
 /** La celda del cuadro de unas coordenadas de la vista (−1 si está fuera del cuadro o del dominio). */
-function celdaDelCuadro(d: Dominio, c: typeof EN_EL_DOMINIO): number {
+export function celdaDelCuadro(d: Dominio, c: typeof EN_EL_DOMINIO): number {
   if (c.w <= d.w0 || c.w >= d.w1 || Math.abs(c.u) > 1 || Math.abs(c.v) > 1) return -1
   const nx = DOMINIO.reparto.celdas[0]
   const ny = DOMINIO.reparto.celdas[1]
   const cx = Math.min(nx - 1, Math.floor(((c.u + 1) / 2) * nx))
   const cy = Math.min(ny - 1, Math.floor(((c.v + 1) / 2) * ny))
   return cy * nx + cx
-}
-
-/** La celda más vacía respecto de lo que le toca, entre las que piden al menos una brasa (−1 si ninguna). */
-function masVacia(cuenta: Int32Array, objetivo: Float32Array): number {
-  let k = -1
-  for (let c = 0; c < cuenta.length; c += 1) if (objetivo[c] >= 1 && (k < 0 || cuenta[c] / objetivo[c] < cuenta[k] / objetivo[k])) k = c
-  return k
-}
-
-/**
- * El reparto de un cuadro: cuenta las brasas por celda del cuadro y lo que le toca a cada una (por el aire que tiene detrás); las que ya
- * se apagaron para mudarse van a la celda más vacía (con la vida en 0: nacen ahí, el evento); y, de a `porCuadro`, las que sobran en
- * una celda llena (mientras haya una vacía) empiezan a apagarse. Devuelve cuántas se mudaron.
- */
-export function repartir(d: Dominio, b: Brasas, azar: () => number): number {
-  const R = DOMINIO.reparto
-  const cuenta = b.celdasDeLaVista
-  cuenta.fill(0)
-  for (let i = 0; i < b.n; i += 1) {
-    const k = celdaDelCuadro(d, coordenadasDe(d, b.lugar, i * 3))
-    if (k >= 0) cuenta[k] += 1
-  }
-  const objetivo = b.objetivoDeLasCeldas
-  if (objetivosDelReparto(d, b.n, objetivo) === 0) return 0
-  let vacia = masVacia(cuenta, objetivo)
-  let mudadas = 0
-  for (let i = 0; i < b.n; i += 1) {
-    if (b.migra[i] === 0 || b.vida[i] > 0.02 || vacia < 0) continue
-    // A la celda más vacía; si ahí no hay lugar (casi todo piso), a cualquier lugar de la vista: nunca se queda apagada esperando.
-    if (!alAzarEnLaVista(d, b, i, vacia, azar) && !alAzarEnLaVista(d, b, i, -1, azar)) continue
-    b.vida[i] = 0
-    b.eventos[i] = 1
-    b.migra[i] = 0
-    desenlazar(b, i)
-    cuenta[vacia] += 1
-    vacia = masVacia(cuenta, objetivo)
-    mudadas += 1
-  }
-  for (let k = 0; k < R.porCuadro; k += 1) {
-    const i = (b.turnoDelReparto + k) % b.n
-    if (b.migra[i] === 1 || vacia < 0 || cuenta[vacia] >= R.vacia * objetivo[vacia]) continue
-    const celda = celdaDelCuadro(d, coordenadasDe(d, b.lugar, i * 3))
-    if (celda >= 0 && cuenta[celda] > R.llena * objetivo[celda]) {
-      b.migra[i] = 1
-      cuenta[celda] -= 1
-    }
-  }
-  b.turnoDelReparto = (b.turnoDelReparto + R.porCuadro) % b.n
-  return mudadas
 }

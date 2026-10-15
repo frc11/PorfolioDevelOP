@@ -1,5 +1,6 @@
-import { CELDAS_DEL_REPARTO, type Dominio } from './dominio'
+import type { Dominio } from './dominio'
 import { largo3 } from './largo'
+import type { Poblacion } from './poblacion'
 
 /**
  * [PULIDO 17] O3 · LAS BRASAS: LAS CARGAS DE PULIDO 15, HECHAS LUZ (`docs/rediseno/PLASMA.md`). Lo que gustó, igual: cargas
@@ -82,17 +83,20 @@ export interface Brasas {
   /**
    * El brillo que se dibuja: la densidad por la vida. [PULIDO 19] Q1.c · `densidad`, el brillo por la densidad local (1: sola; menos,
    * amontonada: un grupo no se satura), perseguido con inercia; `vida`, el alfa del dominio (0 al reaparecer por una cara, 1 adentro
-   * del cuadro), con tope de cambio por cuadro; `eventos`, qué brasas reaparecieron en este paso (el único salto permitido).
+   * del cuadro; [PULIDO 27] Z1 · sin tope: continua en el lugar); `eventos`, qué brasas saltaron en este paso (reaparecieron por una
+   * cara, nacieron o murieron: los únicos saltos permitidos).
    */
   readonly brillo: Float32Array
   readonly densidad: Float32Array
   readonly vida: Float32Array
   readonly eventos: Uint8Array
-  /** [PULIDO 19] Q1.b · el reparto (`dominio.ts`): quién se está apagando para mudarse, cuántas hay por celda del cuadro y por dónde va la ronda. */
-  readonly migra: Uint8Array
-  readonly celdasDeLaVista: Int32Array
-  readonly objetivoDeLasCeldas: Float32Array
-  turnoDelReparto: number
+  /**
+   * [PULIDO 27] Z1 · la población (`poblacion.ts`): las que están en la reserva (no se ven ni se mueven: esperan para nacer) y cuándo nació
+   * cada una (s, el reloj de la escena: el sombreador la hace crecer desde un punto). El reparto de antes (las que se apagaban para
+   * mudarse de celda) se fue: una que sobra muere con una explosión y una que falta nace.
+   */
+  readonly oculta: Uint8Array
+  readonly nace: Float32Array
   readonly pareja: Int32Array
   readonly vidaDelEnlace: Float32Array
   readonly enfriado: Float32Array
@@ -159,13 +163,18 @@ export interface EntradaDeLasBrasas {
   freno: number
   /** [PULIDO 23] U2 · a quién frena: las brasas enlazadas (1); las otras siguen andando. Sin red, todas (null). */
   quietas: Uint8Array | null
+  /** [PULIDO 27] Z1 · la población: una que se va de la vista sin haber llegado a apagarse (la cámara corrió de golpe) explota. Sin ella, nada. */
+  poblacion: Poblacion | null
 }
+
+/** [PULIDO 27] Z1 · el nacimiento de las que no nacieron a la vista (s del reloj de la escena: hace mucho). */
+export const NACIO_HACE_MUCHO = -1e4
 
 /** Cuántos arcos entran al paso como mucho (los lugares de los arcos, `arcos/arcos.ts`). */
 export const ARCOS_EN_LA_ENTRADA = 6
 
 export function crearEntradaDeLasBrasas(): EntradaDeLasBrasas {
-  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100, dominio: null, dt: 1 / 60, freno: 0, quietas: null }
+  return { tiempo: 0, temperatura: 0, rayo: null, cargaDelPuntero: 1, pulsos: new Float32Array(8).fill(-1), anillos: new Float32Array(8), logo: new Float32Array(3), viento: new Float32Array(3), estela: new Float32Array(3), arcos: new Float32Array(ARCOS_EN_LA_ENTRADA * 7), cuantosArcos: 0, piso: -100, dominio: null, dt: 1 / 60, freno: 0, quietas: null, poblacion: null }
 }
 
 /** Un azar con semilla (mulberry32): las mismas brasas y los mismos arcos en cada carga de la página (y en el banco). */
@@ -207,10 +216,8 @@ export function crearBrasas(n: number, azar: () => number, piso = Number.NEGATIV
     densidad: new Float32Array(n).fill(1),
     vida: new Float32Array(n).fill(1),
     eventos: new Uint8Array(n),
-    migra: new Uint8Array(n),
-    celdasDeLaVista: new Int32Array(CELDAS_DEL_REPARTO),
-    objetivoDeLasCeldas: new Float32Array(CELDAS_DEL_REPARTO),
-    turnoDelReparto: 0,
+    oculta: new Uint8Array(n),
+    nace: new Float32Array(n).fill(NACIO_HACE_MUCHO),
     pareja: new Int32Array(n).fill(-1),
     vidaDelEnlace: new Float32Array(n),
     enfriado: new Float32Array(n),

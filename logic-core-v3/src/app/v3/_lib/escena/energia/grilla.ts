@@ -22,6 +22,11 @@ export function ajustarLaGrilla(b: Brasas, caja: ArrayLike<number>): void {
   g.nz = Math.min(GRILLA.celdas, Math.floor((caja[5] - caja[2]) / g.lado) + 1)
   b.cabeza.fill(-1, 0, g.nx * g.ny * g.nz)
   for (let i = 0; i < b.n; i += 1) {
+    // [PULIDO 27] Z1 · las de la reserva (`poblacion.ts`) no están en la grilla: ni fuerzas ni vecinas.
+    if (b.oculta[i] === 1) {
+      b.siguiente[i] = -1
+      continue
+    }
     const k = celdaDe(g, b.lugar, i * 3)
     b.siguiente[i] = b.cabeza[k]
     b.cabeza[k] = i
@@ -51,6 +56,7 @@ export function entreEllas(b: Brasas, azar: () => number): void {
   const g = b.grilla
   let mirados = 0
   for (let i = 0; i < b.n; i += 1) {
+    if (b.oculta[i] === 1) continue
     celdaDe(g, lugar, i * 3)
     const cx = CELDA[0]
     const cy = CELDA[1]

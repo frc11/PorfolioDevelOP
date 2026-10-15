@@ -146,14 +146,14 @@ function chasquear(b: Brasas, i: number, j: number): void {
   b.energia[j] = Math.min(1, b.energia[j] + REPOSO.chasquido)
 }
 
-/** Poda los enlaces de una brasa que saltó (reapareció por una cara del dominio, se está mudando) o que se estiró en el cuadro: un enlace no cruza la pantalla. */
+/** Poda los enlaces de una brasa que saltó (reapareció por una cara del dominio, nació o murió) o que se estiró en el cuadro: un enlace no cruza la pantalla. */
 const LARGO_TOPE2 = (REPOSO.alcance * REPOSO.estirado) ** 2
 function podar(r: Red, b: Brasas, d: Dominio): void {
   const tope = REPOSO.alcanceEnElCuadro * REPOSO.estirado
   for (let k = r.n - 1; k >= 0; k -= 1) {
     const i = r.a[k]
     const j = r.b[k]
-    let fuera = b.eventos[i] !== 0 || b.eventos[j] !== 0 || b.migra[i] !== 0 || b.migra[j] !== 0
+    let fuera = b.eventos[i] !== 0 || b.eventos[j] !== 0 || b.oculta[i] !== 0 || b.oculta[j] !== 0
     if (!fuera) {
       const ci = coordenadasDe(d, b.lugar, i * 3)
       const ui = ci.u

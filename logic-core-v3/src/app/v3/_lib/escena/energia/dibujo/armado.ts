@@ -10,6 +10,7 @@ import { DIRECCIONES } from '../direcciones'
 import { crearDominio, type Dominio } from '../dominio'
 import { crearPuntero, type EstadoDelPuntero } from '../interaccion/interaccion'
 import { REPOSO, crearMemoriaDelGesto, crearRed, type MemoriaDelGesto, type Red } from '../reposo'
+import { crearPoblacion, type Poblacion } from '../poblacion'
 import { largo3 } from '../largo'
 import { FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, VERTICES_DEL_HALO_DEL_ARCO, VERTICES_DE_LOS_ARCOS, uniformesDelTrazo } from './arcos'
 import { DIBUJO, materialDeEnergia, uniformesComunes, type UniformesComunes } from './comun'
@@ -44,6 +45,9 @@ export interface Armado {
   /** [PULIDO 19] Q1.b · el dominio de la vista (`dominio.ts`) y si las brasas ya se sembraron en él (el primer cuadro con cámara). */
   readonly dominio: Dominio
   poblado: boolean
+  /** [PULIDO 27] Z1 · la población (`poblacion.ts`: el objetivo, la reserva, las explosiones) y las brasas de los arcos vivos (no mueren). */
+  readonly poblacion: Poblacion
+  readonly ocupadas: Uint8Array
   /** [PULIDO 19] Q1.d · la red en reposo (`reposo.ts`), lo que el gesto recuerda y su dibujo (`dibujo/red.ts`). */
   readonly red: Red
   readonly gesto: MemoriaDelGesto
@@ -102,11 +106,13 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
   const uniformes = uniformesComunes()
   const mallas: (THREE.Mesh | THREE.Points)[] = []
   const gb = cuadrados(brasas.n)
-  const atributosDeLasBrasas = [new THREE.InstancedBufferAttribute(brasas.lugar, 3), new THREE.InstancedBufferAttribute(brasas.velocidad, 3), new THREE.InstancedBufferAttribute(brasas.energia, 1), new THREE.InstancedBufferAttribute(brasas.brillo, 1)].map((x) => x.setUsage(THREE.DynamicDrawUsage))
+  const atributosDeLasBrasas = [new THREE.InstancedBufferAttribute(brasas.lugar, 3), new THREE.InstancedBufferAttribute(brasas.velocidad, 3), new THREE.InstancedBufferAttribute(brasas.energia, 1), new THREE.InstancedBufferAttribute(brasas.brillo, 1), new THREE.InstancedBufferAttribute(brasas.nace, 1)].map((x) => x.setUsage(THREE.DynamicDrawUsage))
   gb.setAttribute('aLugar', atributosDeLasBrasas[0])
   gb.setAttribute('aVelocidad', atributosDeLasBrasas[1])
   gb.setAttribute('aEnergia', atributosDeLasBrasas[2])
   gb.setAttribute('aBrillo', atributosDeLasBrasas[3])
+  // [PULIDO 27] Z1 · cuándo nació cada una (el sombreador la hace crecer desde un punto).
+  gb.setAttribute('aNace', atributosDeLasBrasas[4])
   const sb = sombreadoresDeParticulas()
   const deLasBrasas = { ...conLoDeLaDireccion(uniformesDelAspecto('chispa'), d.aspecto?.brasas), uIntensidad: { value: d.intensidadDeLasBrasas } }
   const mallaDeBrasas = new THREE.Mesh(gb, materialDeEnergia(sb.vertexShader, sb.fragmentShader, { ...uniformes, ...deLasBrasas }))
@@ -204,8 +210,11 @@ export function armar(compacto: boolean, vista: { readonly current: Vista }, log
     seVe,
     bordeDelLogo,
   }
+  const poblacion = crearPoblacion(compacto)
+  const entrada = crearEntradaDeLasBrasas()
+  entrada.poblacion = poblacion
   return {
-    azar, brasas, entrada: crearEntradaDeLasBrasas(), temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, dominio: crearDominio(), poblado: false, red: crearRed(brasas.n), gesto: crearMemoriaDelGesto(), dibujoDeLaRed, uniformes,
+    azar, brasas, entrada, temperatura: crearTemperatura(), lectura: crearLectura(), arcos: crearArcos(azar), puntero: crearPuntero(), cinta, dominio: crearDominio(), poblado: false, poblacion, ocupadas: new Uint8Array(brasas.n), red: crearRed(brasas.n), gesto: crearMemoriaDelGesto(), dibujoDeLaRed, uniformes,
     atributosDeLasBrasas, atributosDeLaCinta, geometriaDeLaCinta: gt, efectos: { lugar: lugarDeLosEfectos, efecto, geometria: ge }, mallas, centro, v, luces: new Float32Array(DIBUJO.luces * 4),
     puntoDelPuntero: new Float32Array(3), camaraAntes: new THREE.Vector3(Number.NaN, Number.NaN, Number.NaN), puntoAntes: new Float32Array(3).fill(Number.NaN), rayo, entorno, texto: { leidoEn: Number.NEGATIVE_INFINITY, scroll: Number.NaN }, halo: 0, ondas: new Float32Array(8).fill(Number.NEGATIVE_INFINITY),
     ajustables: { brasas: deLasBrasas, arcos: trazo, comun: uniformes, reflejo: delReflejo, red: dibujoDeLaRed.uniformes },

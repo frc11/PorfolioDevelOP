@@ -35,7 +35,8 @@ export function vecinasDe(b: Brasas, i: number, radio: number): number {
 export function brilloPorDensidad(b: Brasas, dt: number): void {
   const D = BRASAS.densidad
   const sigue = 1 - Math.exp((-4 * Math.max(0, dt)) / D.suavizaS)
-  for (let i = b.turno * 2 + (b.paresMirados & 1); i < b.n; i += 4) b.densidad[i] += (1 / (1 + D.baja * vecinasDe(b, i, D.radio)) - b.densidad[i]) * sigue
+  // [PULIDO 27] Z1 · las de la reserva no tienen vecinas (no están en la grilla) ni brillo (su vida es 0).
+  for (let i = b.turno * 2 + (b.paresMirados & 1); i < b.n; i += 4) if (b.oculta[i] === 0) b.densidad[i] += (1 / (1 + D.baja * vecinasDe(b, i, D.radio)) - b.densidad[i]) * sigue
   for (let i = 0; i < b.n; i += 1) b.brillo[i] = b.densidad[i] * b.vida[i]
 }
 

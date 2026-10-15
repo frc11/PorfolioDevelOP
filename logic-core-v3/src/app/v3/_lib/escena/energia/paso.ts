@@ -1,9 +1,10 @@
 import { DE_AFUERA, deAfuera } from './afuera'
 import { DEL_MOVIMIENTO, delMovimiento } from './movimiento'
 import { BRASAS, desenlazar, soltarEnlace, type Brasas, type EntradaDeLasBrasas } from './brasas'
-import { DOMINIO, EN_EL_DOMINIO, alfaDe, envolver } from './dominio'
+import { EN_EL_DOMINIO, alfaDe, envolver } from './dominio'
 import { ajustarLaGrilla, entreEllas } from './grilla'
 import { largo3 } from './largo'
+import { POBLACION, explotar } from './poblacion'
 import { REPOSO } from './reposo'
 import { rotorEnLote } from './ruido'
 
@@ -11,8 +12,8 @@ import { rotorEnLote } from './ruido'
  * [PULIDO 18] P1.b · EL PASO DE LAS BRASAS (salió de `brasas.ts`, que pasaba las 300 líneas): los enlaces, el campo (el curl noise),
  * lo de afuera de cada una (`afuera.ts`), el piso, la energía y la integración (semi-implícita, con amortiguación y tope). Puro (Node).
  * [PULIDO 19] Q1.b/c · la grilla se ajusta a la caja del dominio de la vista (o a la de la cáscara, sin dominio) y, al final, el
- * ENVOLTORIO: la que salió del dominio reaparece por la cara opuesta con la vida en 0 (el evento) y la vida de todas persigue el alfa
- * del dominio con tope de cambio (`DOMINIO.fundidoS`): nada aparece ni desaparece de golpe. Sin números por parámetro en lo de cada
+ * ENVOLTORIO: la que salió del dominio reaparece por la cara opuesta con la vida en 0 (el evento) y la vida de todas es el alfa del
+ * dominio, continuo en el lugar ([PULIDO 27] Z1 · sin el tope de antes, `poblacion.ts`). Sin números por parámetro en lo de cada
  * brasa (`en.dt`, el rotor en lote, el alfa por brasa): un número no entero que cruza una función que V8 no inlineó se encaja en un
  * HeapNumber (medido en Chrome: 51 KB de basura por cuadro que eran de eso).
  */
@@ -67,6 +68,8 @@ export function pasoDeLasBrasas(b: Brasas, dt: number, en: EntradaDeLasBrasas, a
   const enfria = Math.exp(-dt / K.apagaS)
   const reposo = K.base + K.porTemperatura * en.temperatura
   for (let i = 0; i < b.n; i += 1) {
+    // [PULIDO 27] Z1 · las de la reserva no se mueven.
+    if (b.oculta[i] === 1) continue
     const x = lugar[i * 3]
     const y = lugar[i * 3 + 1]
     const z = lugar[i * 3 + 2]
@@ -106,30 +109,35 @@ export function pasoDeLasBrasas(b: Brasas, dt: number, en: EntradaDeLasBrasas, a
     if (lugar[i * 3 + 1] <= en.piso + PISO.minimo && v[i * 3 + 1] < 0) v[i * 3 + 1] = 0
     energia[i] = Math.min(1, reposo + (energia[i] - reposo) * enfria + gana)
   }
-  envolverYVivir(b, en, dt, azar)
+  envolverYVivir(b, en, azar)
 }
 
-/** [PULIDO 19] Q1.b/c · el envoltorio del dominio (la que salió reaparece con la vida en 0: el evento) y la vida que persigue el alfa con tope. */
-function envolverYVivir(b: Brasas, en: EntradaDeLasBrasas, dt: number, azar: () => number): void {
+/** Dónde estaba la brasa que se envuelve (la explosión va ahí). */
+const ANTES = new Float32Array(3)
+
+/**
+ * [PULIDO 19] Q1.b/c · el envoltorio del dominio (la que salió reaparece con la vida en 0: el evento) y la vida, que es el alfa.
+ * [PULIDO 27] Z1 · sin tope: con un tope de cambio por cuadro, si la cámara corría más rápido que el fundido la brasa llegaba a la cara
+ * encendida y desaparecía de golpe al envolverse (en los viajes del navbar). Ahora el alfa es continuo en el lugar; y si igual llega
+ * encendida (un salto de la cámara), explota (`poblacion.ts`). Las de la reserva, quietas.
+ */
+function envolverYVivir(b: Brasas, en: EntradaDeLasBrasas, azar: () => number): void {
   b.eventos.fill(0)
   const d = en.dominio
   if (d === null) return
-  const tope = dt / DOMINIO.fundidoS
   for (let i = 0; i < b.n; i += 1) {
+    if (b.oculta[i] === 1) continue
+    ANTES[0] = b.lugar[i * 3]
+    ANTES[1] = b.lugar[i * 3 + 1]
+    ANTES[2] = b.lugar[i * 3 + 2]
     if (envolver(d, b, i, azar)) {
       b.eventos[i] = 1
-      b.vida[i] = 0
+      if (en.poblacion !== null && !en.poblacion.corte && b.brillo[i] > POBLACION.explosion.desde) explotar(en.poblacion, ANTES, 0, b.brillo[i], en.tiempo)
       // Su pareja quedó del otro lado del dominio: sin el enlace (el resorte la arrastraría por toda la pantalla).
       desenlazar(b, i)
-      continue
     }
-    // Mudándose (el reparto), se apaga: su alfa es 0 hasta que nace en su celda nueva. El alfa se lee de `EN_EL_DOMINIO` (una llamada
-    // que devuelve un número encaja un HeapNumber por brasa si no se inlinea: 800 por cuadro).
-    let alfa = 0
-    if (b.migra[i] !== 1) {
-      alfaDe(d, b.lugar, i * 3)
-      alfa = EN_EL_DOMINIO.alfa
-    }
-    b.vida[i] += Math.max(-tope, Math.min(tope, alfa - b.vida[i]))
+    // El alfa se lee de `EN_EL_DOMINIO` (una llamada que devuelve un número encaja un HeapNumber por brasa si no se inlinea).
+    alfaDe(d, b.lugar, i * 3)
+    b.vida[i] = EN_EL_DOMINIO.alfa
   }
 }

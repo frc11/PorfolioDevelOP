@@ -3,7 +3,9 @@
  * estado de antes o uno roto a propósito).
  *   Q1.b · el dominio de la vista: el plasma cubre el cuadro en cualquier encuadre (la siembra, el envoltorio periódico, el reparto).
  *   Q1.c · nada aparece ni desaparece de golpe: el brillo de cada brasa cambia a lo sumo un tope por cuadro, salvo en un evento (una
- *          que reaparece por una cara del dominio o nace en su celda nueva), que sólo pasa fuera del cuadro o ya apagada.
+ *          que reaparece por una cara del dominio o nace en su celda nueva), que sólo pasa fuera del cuadro o ya apagada. [PULIDO 27] Z1 ·
+ *          o, a la vista, un NACIMIENTO (crece desde un punto) o una MUERTE con su explosión (`poblacion.ts`); y la cantidad a la vista,
+ *          la misma en todo encuadre.
  *   Q1.d · la red en reposo: quieta se arma (hasta tres enlaces por brasa, cortos en el mundo y en el cuadro, del centro hacia afuera),
  *          frena a las brasas, se corta en cascada con un gesto (en `corteS`, con el chasquido) y nunca se arma en el final del pie.
  *   Q2 · las piezas del pie caen después del logo (`caidaDelPie.ts`): sus lugares en el piso no se solapan ni pisan el logo, caen en
@@ -18,8 +20,9 @@ import * as THREE from 'three'
 
 import { amplitudDelCristal } from '../escena/cristal/cristal'
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas, type Brasas } from '../escena/energia/brasas'
-import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenadas, crearDominio, objetivosDelReparto, poblar, repartir, type Dominio } from '../escena/energia/dominio'
+import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenadas, crearDominio, objetivosDelReparto, poblar, type Dominio } from '../escena/energia/dominio'
 import { pasoDeLasBrasas } from '../escena/energia/paso'
+import { POBLACION, antesDelPaso, aparecer, crearPoblacion, regular, sembrar, type Poblacion } from '../escena/energia/poblacion'
 import { REPOSO, crearMemoriaDelGesto, crearRed, leerElGesto, pasoDeLaRed, type Red } from '../escena/energia/reposo'
 import { FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { brilloPorDensidad } from '../escena/energia/vecinas'
@@ -64,18 +67,21 @@ function poner(d: Dominio, azimutGrados: number, altura: number, distancia: numb
 
 /**
  * Cuántas brasas hay en cada celda del cuadro (adentro del dominio) respecto de lo que le toca (por el aire que mira: una celda que mira
- * el piso de cerca pide menos), en centésimos; las celdas que no llegan por encima del piso, −1 (no cuentan).
+ * el piso de cerca pide menos), en centésimos; las celdas que no llegan por encima del piso, −1 (no cuentan). [PULIDO 27] Z1 · lo que le
+ * toca, de las que están en el cuadro: cuántas hay lo decide el objetivo de la población (abajo, «pareja»); esto mira cómo se reparten.
  */
 function porCelda(d: Dominio, b: Brasas): Int32Array {
   const [nx, ny] = DOMINIO.reparto.celdas
   const cuenta = new Int32Array(CELDAS_DEL_REPARTO)
   const objetivo = new Float32Array(CELDAS_DEL_REPARTO)
-  objetivosDelReparto(d, b.n, objetivo)
+  let enElCuadro = 0
   for (let i = 0; i < b.n; i += 1) {
     const c = coordenadas(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
     if (c.w <= d.w0 || c.w >= d.w1 || Math.abs(c.u) > 1 || Math.abs(c.v) > 1) continue
     cuenta[Math.min(ny - 1, Math.floor(((c.v + 1) / 2) * ny)) * nx + Math.min(nx - 1, Math.floor(((c.u + 1) / 2) * nx))] += 1
+    enElCuadro += 1
   }
+  objetivosDelReparto(d, enElCuadro, objetivo)
   // Las celdas a las que les tocan menos de 2 brasas (un piso cercano: casi sin aire) no cuentan.
   for (let k = 0; k < cuenta.length; k += 1) cuenta[k] = objetivo[k] >= 2 ? Math.round((100 * cuenta[k]) / objetivo[k]) : -1
   return cuenta
@@ -83,96 +89,168 @@ function porCelda(d: Dominio, b: Brasas): Int32Array {
 /** Cubierto: cada celda alcanzable tiene al menos `minimo` centésimos de lo que le toca, y hay celdas alcanzables de sobra. */
 const cubierto = (cuenta: Int32Array, minimo = 35): boolean => cuenta.every((c) => c < 0 || c >= minimo) && cuenta.filter((c) => c >= 0).length >= cuenta.length * 0.7
 
+/** [PULIDO 27] Z1 · la cámara de antes (la velocidad de la cámara: `d.vo`, la escribe el cuadro). */
+const CAMARA_ANTES = new Float32Array(3)
+/** La pose del cuadro `t`, la velocidad de la cámara y cuánto saltó (como el cuadro del sitio). */
+function ponerConVelocidad(d: Dominio, t: number, pose: (t: number, d: Dominio) => void): void {
+  CAMARA_ANTES.set(d.o)
+  pose(t, d)
+  for (let e = 0; e < 3; e += 1) d.vo[e] = t > DT ? (d.o[e] - CAMARA_ANTES[e]) / DT : 0
+  d.salto = Math.hypot(d.vo[0], d.vo[1], d.vo[2]) * DT
+}
+
 const sembrada = (azimut: number, altura: number, distancia: number, aspecto: number, todas: boolean): Int32Array => {
   const az = azarConSemilla(5)
   const b = crearBrasas(N, az, FLOOR_Y)
   const d = crearDominio()
   poner(d, azimut, altura, distancia, aspecto)
-  poblar(d, b, az, todas)
-  // Un segundo de reparto (sin física): la siembra es al azar y una celda chica puede salir corta; el reparto la completa enseguida.
-  for (let k = 0; k < 60; k += 1) repartir(d, b, az)
+  const p = crearPoblacion(false)
+  // [PULIDO 27] Z1 · la siembra de la población (`sembrar`); sin ella (el control), las brasas quedan donde las deja `crearBrasas` (la esfera
+  // de antes alrededor del logo). Un segundo de la población (sin física): la siembra es al azar y una celda chica puede salir corta.
+  if (todas) sembrar(p, d, b, az)
+  const ocupadas = new Uint8Array(b.n)
+  for (let k = 1; k <= 60; k += 1) regular(p, d, b, k * DT, az, null, ocupadas)
   return porCelda(d, b)
 }
 const HERO = sembrada(0, 6.4, 19, 1.6, true)
 const LEJOS = sembrada(360, 5, 40, 1.6, true)
 const TELEFONO = sembrada(0, 6.4, 19, 390 / 844, true)
 const NUMEROS = sembrada(130, -3.6, 14, 1.6, true)
-afirmar([HERO, LEJOS, TELEFONO, NUMEROS].every((c) => cubierto(c)), `  la siembra y un segundo de reparto cubren las ${String(CELDAS_DEL_REPARTO)} celdas del cuadro (cada una con al menos el 35 % de lo que le toca por el aire que mira), en el hero, en el cierre (a 40 u), en el teléfono y en Números (bajo y de costado): la celda alcanzable más vacía tiene el ${String(Math.min(...[HERO, LEJOS, TELEFONO, NUMEROS].map((c) => Math.min(...c.filter((x) => x >= 0)))))} %`)
+afirmar([HERO, LEJOS, TELEFONO, NUMEROS].every((c) => cubierto(c)), `  la siembra y un segundo de la población cubren las ${String(CELDAS_DEL_REPARTO)} celdas del cuadro (cada una con al menos el 35 % de lo que le toca por el aire que mira), en el hero, en el cierre (a 40 u), en el teléfono y en Números (bajo y de costado): la celda alcanzable más vacía tiene el ${String(Math.min(...[HERO, LEJOS, TELEFONO, NUMEROS].map((c) => Math.min(...c.filter((x) => x >= 0)))))} %`)
 controlPositivo('  el detector VE la siembra de antes (la esfera alrededor del logo) en el cierre: el centro lleno y los bordes vacíos', sembrada(360, 5, 40, 1.6, false), cubierto)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('Q1.c · Nada aparece ni desaparece de golpe: el brillo cambia a lo sumo un tope por cuadro, salvo en un evento fuera del cuadro o ya apagada')
+titulo('Q1.c · Nada aparece ni desaparece de golpe: el brillo cambia a lo sumo un tope por cuadro, salvo un evento fuera del cuadro, ya apagada, un nacimiento o una muerte con su explosión')
 
-/** Lo que una corrida deja por cuadro: las violaciones (cuadro, brasa, el salto), los eventos y lo cubierto al final. */
+/** Lo que una corrida deja por cuadro: las violaciones (cuadro, brasa, el salto), los eventos, lo cubierto al final y la población. */
 interface Corrida {
   readonly violaciones: readonly (readonly [number, number, number])[]
   readonly eventos: number
   readonly eventosAdentro: number
   readonly saltoMaximo: number
   readonly cubiertoAlFinal: boolean
-  readonly mudadas: number
+  /** [PULIDO 27] Z1 · las que nacieron y murieron a la vista, y la vida sumada en el cuadro (cada cuadro desde `desde`) contra el objetivo. */
+  readonly nacidasALaVista: number
+  readonly muertasALaVista: number
+  readonly nacidas: number
+  readonly muertas: number
+  readonly presentes: readonly number[]
+  readonly objetivo: number
+  /** Los cortes (la cámara saltó), las explosiones en ellos y el brillo más alto de las que se ven en el cuadro siguiente a un corte. */
+  readonly cortes: number
+  readonly explosionesEnCortes: number
+  readonly brilloTrasElCorte: number
 }
 
-/** El tope de cambio del brillo por cuadro: el de la vida más el de la densidad (perseguida con inercia, de a cuatro cuadros). */
-const TOPE = DT / DOMINIO.fundidoS + (1 - Math.exp((-4 * DT) / BRASAS.densidad.suavizaS)) * 0.6 + 1e-4
+/**
+ * El tope de cambio del brillo por cuadro: el de la vida más el de la densidad (perseguida con inercia, de a cuatro cuadros). [PULIDO 27] Z1 ·
+ * la vida ya no tiene un tope propio (es el alfa, continuo en el lugar); el de la prueba es el de siempre: un fundido de un cuarto de segundo.
+ */
+const TOPE = DT / 0.25 + (1 - Math.exp((-4 * DT) / BRASAS.densidad.suavizaS)) * 0.6 + 1e-4
 /** Un evento vale si la brasa estaba fuera del cuadro (no se veía) o ya apagada (brillo ≤ esto). */
 const APAGADA = 0.15
 
+/** Cuántas explosiones empezaron en `t` (s; guardado en float32). */
+const explosionesEn = (p: Poblacion, t: number): number => {
+  let n = 0
+  for (let k = 0; k < POBLACION.explosion.cuantas; k += 1) if (p.explosiones[k * 6 + 3] === Math.fround(t)) n += 1
+  return n
+}
+
 /**
- * Una corrida de `segundos` con la cámara en `pose(t)` (órbita y viaje) y la física entera: cada cuadro, el paso, el reparto y el
- * brillo; después, el salto de cada brasa contra el cuadro anterior. `sabotaje`, si lo hay, toca las brasas después del brillo.
+ * Una corrida de `segundos` con la cámara en `pose(t)` (órbita y viaje) y la física entera: cada cuadro, el paso, la población y el
+ * brillo; después, el salto de cada brasa contra el cuadro anterior. `sabotaje`, si lo hay, toca las brasas después del brillo. [PULIDO 27]
+ * Z1 · un evento a la vista y encendida vale sólo si es un nacimiento (el sombreador la hace crecer desde un punto: su `nace` es este
+ * cuadro) o si en este cuadro hay una explosión por cada una que se fue. Y el tope, en las que se ven (en el cuadro, antes o ahora): la
+ * vida es el alfa del dominio, y en el margen (fuera del cuadro, no se ve) cambia sin tope con la cámara rápida.
  */
-function corrida(segundos: number, pose: (t: number, d: Dominio) => void, sabotaje: ((b: Brasas, k: number) => void) | null = null): Corrida {
+function corrida(segundos: number, pose: (t: number, d: Dominio) => void, sabotaje: ((b: Brasas, k: number) => void) | null = null, desde = 1): Corrida {
   const az = azarConSemilla(11)
   const b = crearBrasas(N, az, FLOOR_Y)
   const en = crearEntradaDeLasBrasas()
   en.piso = FLOOR_Y
   const d = crearDominio()
   en.dominio = d
+  const p = crearPoblacion(false)
+  en.poblacion = p
+  const ocupadas = new Uint8Array(b.n)
   pose(0, d)
-  poblar(d, b, az, true)
-  for (let i = 0; i < b.n; i += 1) b.vida[i] = alfaDelDominio(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+  sembrar(p, d, b, az)
   brilloPorDensidad(b, DT)
   const antes = new Float32Array(b.brillo)
   const adentroAntes = new Uint8Array(b.n)
-  const adentro = (i: number): boolean => {
+  const adentro = (i: number, borde = 1): boolean => {
     const c = coordenadas(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
-    return c.w > d.w0 && c.w < d.w1 && Math.abs(c.u) <= 1 && Math.abs(c.v) <= 1
+    return c.w > d.w0 && c.w < d.w1 && Math.abs(c.u) <= borde && Math.abs(c.v) <= borde
   }
   for (let i = 0; i < b.n; i += 1) adentroAntes[i] = adentro(i) ? 1 : 0
+  const seVeAntes = new Uint8Array(b.n)
+  for (let i = 0; i < b.n; i += 1) seVeAntes[i] = adentro(i) ? 1 : 0
   const violaciones: [number, number, number][] = []
+  const presentes: number[] = []
   let eventos = 0
   let eventosAdentro = 0
   let saltoMaximo = 0
-  let mudadas = 0
+  let nacidasALaVista = 0
+  let muertasALaVista = 0
+  let cortes = 0
+  let explosionesEnCortes = 0
+  let brilloTrasElCorte = 0
+  let trasElCorte = false
   const cuadros = Math.round(segundos / DT)
   for (let k = 1; k <= cuadros; k += 1) {
     const t = k * DT
     en.tiempo = t
     en.temperatura = 0.3
-    pose(t, d)
+    ponerConVelocidad(d, t, pose)
+    antesDelPaso(p, d)
     pasoDeLasBrasas(b, DT, en, az)
-    mudadas += repartir(d, b, az)
+    regular(p, d, b, t, az, null, ocupadas)
     brilloPorDensidad(b, DT)
+    aparecer(p, b, DT)
     sabotaje?.(b, k)
+    // [PULIDO 27] Z1 · en un corte cambia toda la toma (el logo, el piso, todo salta): ese cuadro no se mide; las de la vista nueva
+    // aparecen desde 0 (el cuadro siguiente, casi apagadas) y ninguna explota.
+    if (trasElCorte) for (let i = 0; i < b.n; i += 1) if (adentro(i)) brilloTrasElCorte = Math.max(brilloTrasElCorte, b.brillo[i])
+    trasElCorte = false
+    if (p.corte) {
+      cortes += 1
+      explosionesEnCortes += explosionesEn(p, t)
+      trasElCorte = true
+      for (let i = 0; i < b.n; i += 1) {
+        antes[i] = b.brillo[i]
+        adentroAntes[i] = adentro(i) ? 1 : 0
+        seVeAntes[i] = adentroAntes[i]
+      }
+      if (t >= desde) presentes.push(p.presentes)
+      continue
+    }
+    let seFueron = 0
     for (let i = 0; i < b.n; i += 1) {
       const salto = Math.abs(b.brillo[i] - antes[i])
       if (b.eventos[i] === 1) {
         eventos += 1
-        // Un evento adentro del cuadro y encendida: un pop con nombre.
         if (adentroAntes[i] === 1 && antes[i] > APAGADA) {
           eventosAdentro += 1
-          violaciones.push([k, i, salto])
+          // A la vista y encendida: un nacimiento (crece desde un punto) o una que se fue (su explosión, abajo); si no, un pop con nombre.
+          if (b.nace[i] === Math.fround(t)) nacidasALaVista += 1
+          else {
+            seFueron += 1
+            muertasALaVista += 1
+          }
         }
-      } else {
+      } else if (seVeAntes[i] === 1 || adentro(i)) {
         saltoMaximo = Math.max(saltoMaximo, salto)
         if (salto > TOPE) violaciones.push([k, i, salto])
       }
       antes[i] = b.brillo[i]
       adentroAntes[i] = adentro(i) ? 1 : 0
+      seVeAntes[i] = adentroAntes[i]
     }
+    if (seFueron > explosionesEn(p, t)) violaciones.push([k, -1, seFueron])
+    if (t >= desde) presentes.push(p.presentes)
   }
-  return { violaciones, eventos, eventosAdentro, saltoMaximo, cubiertoAlFinal: cubierto(porCelda(d, b), 25), mudadas }
+  return { violaciones, eventos, eventosAdentro, saltoMaximo, cubiertoAlFinal: cubierto(porCelda(d, b), 25), nacidasALaVista, muertasALaVista, nacidas: p.nacidas, muertas: p.muertas, presentes, objetivo: p.objetivo, cortes, explosionesEnCortes, brilloTrasElCorte }
 }
 
 /** El recorrido de la prueba: 4 s de órbita (0° a 170°, con la altura que baja) y después el viaje al cierre (a 40 u) en 3 s; el resto, quieta. */
@@ -182,17 +260,52 @@ const recorrido = (t: number, d: Dominio): void => {
   poner(d, 170 * orbita + 190 * viaje, 6.4 - 10 * orbita + 8.6 * viaje, 19 - 5 * orbita + 26 * viaje)
 }
 const SANA = corrida(10, recorrido)
-const sinPops = (c: Corrida): boolean => c.violaciones.length === 0 && c.eventos > 50 && c.eventosAdentro === 0 && c.cubiertoAlFinal && c.mudadas > 0
-afirmar(sinPops(SANA), `  10 s de órbita y viaje al cierre (${String(N)} brasas): ${String(SANA.eventos)} eventos (reapariciones y mudanzas, ${String(SANA.mudadas)} mudadas), todos fuera del cuadro o apagadas; fuera de ellos, el salto más grande de brillo por cuadro es ${SANA.saltoMaximo.toFixed(3)} (tope ${TOPE.toFixed(3)}); al llegar, el cuadro cubierto`)
+const sinPops = (c: Corrida): boolean => c.violaciones.length === 0 && c.eventos > 50 && c.cubiertoAlFinal && c.nacidas > 0 && c.muertas > 0
+afirmar(sinPops(SANA), `  10 s de órbita y viaje al cierre (${String(N)} brasas): ${String(SANA.eventos)} eventos (reapariciones, ${String(SANA.nacidas)} nacidas y ${String(SANA.muertas)} muertas), fuera del cuadro, apagadas, nacimientos desde un punto (${String(SANA.nacidasALaVista)} a la vista) o muertes con su explosión (${String(SANA.muertasALaVista)}); fuera de ellos, el salto más grande de brillo por cuadro es ${SANA.saltoMaximo.toFixed(3)} (tope ${TOPE.toFixed(3)}); al llegar, el cuadro cubierto`)
 controlPositivo('  el detector VE un pop (la brasa más encendida se apaga de golpe sin evento)', corrida(6, recorrido, (b, k) => { if (k !== 200) return; let m = 0; for (let i = 1; i < b.n; i += 1) if (b.brillo[i] > b.brillo[m]) m = i; b.brillo[m] = 0 }), sinPops)
-controlPositivo('  y una reaparición adentro del cuadro, encendida (un salto con nombre pero a la vista: la más encendida)', corrida(6, recorrido, (b, k) => { if (k !== 200) return; let m = 0; for (let i = 1; i < b.n; i += 1) if (b.brillo[i] > b.brillo[m]) m = i; b.eventos[m] = 1; b.brillo[m] = 0 }), sinPops)
+controlPositivo('  y una que se va a la vista y encendida sin su explosión (un salto con nombre: la más encendida)', corrida(6, recorrido, (b, k) => { if (k !== 200) return; let m = 0; for (let i = 1; i < b.n; i += 1) if (b.brillo[i] > b.brillo[m]) m = i; b.eventos[m] = 1; b.brillo[m] = 0 }), sinPops)
 controlPositivo('  y la densidad que salta de golpe (la de antes, sin inercia)', corrida(6, recorrido, (b, k) => { if (k % 7 === 0) b.brillo[k % b.n] = b.vida[k % b.n] * 0.5 }), sinPops)
 
-// Con la cámara quieta no hay eventos de sobra: el plasma no parpadea en reposo.
+// [PULIDO 27] Z1 · con la cámara quieta casi nada nace ni muere (el ritmo quieto de la población) ni salta.
 const QUIETA = corrida(6, (_t, d) => poner(d, 0, 6.4, 19))
-const quietaBien = (c: Corrida): boolean => c.violaciones.length === 0 && c.eventos < N * 0.6
-afirmar(quietaBien(QUIETA), `  quieta en el hero 6 s: ${String(QUIETA.eventos)} eventos (sólo las que se van por el frente o por los lados y vuelven), sin saltos`)
-controlPositivo('  el detector VE una quieta que recicla todo el rato', { ...QUIETA, eventos: N * 2 }, quietaBien)
+const quietaBien = (c: Corrida): boolean => c.violaciones.length === 0 && c.nacidas + c.muertas <= POBLACION.ritmo.quieta * 6 + 1
+afirmar(quietaBien(QUIETA), `  quieta en el hero 6 s: ${String(QUIETA.nacidas)} nacidas y ${String(QUIETA.muertas)} muertas (a lo sumo ${String(POBLACION.ritmo.quieta)} por segundo), sin saltos`)
+controlPositivo('  el detector VE una quieta que recicla todo el rato', { ...QUIETA, nacidas: N, muertas: N }, quietaBien)
+
+// [PULIDO 27] Z1 · PAREJA: la vida sumada en el cuadro, la misma en todo encuadre (el objetivo, con su banda muerta), quieta en el hero,
+// en el cierre (a 40 u), alto, bajo y en Números; y al terminar el recorrido. Antes, con las mismas brasas, dependía del encuadre.
+const POSES: readonly (readonly [string, number, number, number])[] = [['el hero', 0, 6.4, 19], ['el cierre', 360, 5, 40], ['alto', 40, 12, 17], ['bajo', 200, -1, 18], ['Números', 130, -3.6, 14]]
+const BANDA_PAREJA = POBLACION.banda.afuera + 0.04
+const EN_POSES = POSES.map(([, az, al, di]) => corrida(5, (_t, d) => poner(d, az, al, di), null, 3))
+const AL_LLEGAR = corrida(14, recorrido, null, 12)
+const pareja = (cs: readonly Corrida[]): boolean => cs.every((c) => c.presentes.length > 0 && c.presentes.every((x) => Math.abs(x - c.objetivo) <= BANDA_PAREJA * c.objetivo))
+const rango = (cs: readonly Corrida[]): string => cs.map((c) => `${Math.min(...c.presentes).toFixed(0)}–${Math.max(...c.presentes).toFixed(0)}`).join(', ')
+afirmar(pareja([...EN_POSES, AL_LLEGAR]), `  la vida sumada en el cuadro, ±${String(Math.round(BANDA_PAREJA * 100))} % del objetivo (${String(POBLACION.objetivo[0])}) en ${POSES.map(([n]) => n).join(', ')} (${rango(EN_POSES)}) y al llegar del recorrido (${rango([AL_LLEGAR])})`)
+// [PULIDO 27] Z1 · EL CORTE: un viaje del navbar que pasa bajo el papel (la escena se pausa) sigue en otra sección y la cámara salta de
+// golpe. Antes llegaban todas a la vez (y después morían cientos); ahora ninguna explota por el salto, la vista nueva se siembra justa
+// para el objetivo (pareja enseguida) y aparece desde 0, sin saltos.
+const SALTO = (t: number, d: Dominio): void => (t < 3 ? poner(d, 0, 6.4, 19) : poner(d, 130, -3.6, 14))
+const CON_CORTE = corrida(5, SALTO, null, 3.05)
+const corteBien = (c: Corrida): boolean => c.cortes === 1 && c.explosionesEnCortes === 0 && c.brilloTrasElCorte < 0.05 && c.violaciones.length === 0 && pareja([c])
+afirmar(corteBien(CON_CORTE), `  un corte (del hero a Números de golpe): ${String(CON_CORTE.cortes)} corte, ${String(CON_CORTE.explosionesEnCortes)} explosiones en él, la vista nueva aparece desde ${CON_CORTE.brilloTrasElCorte.toFixed(3)} sin saltos, y la vida en el cuadro ya en el objetivo (${rango([CON_CORTE])})`)
+controlPositivo('  el detector VE un corte en el que llegan todas de golpe (la vista nueva entera en el cuadro siguiente)', { ...CON_CORTE, brilloTrasElCorte: 0.8 }, corteBien)
+controlPositivo('  y uno con las explosiones de las que se envolvieron por el salto', { ...CON_CORTE, explosionesEnCortes: 40 }, corteBien)
+
+/** El control: las mismas brasas en el dominio, todas a la vista y sin población (la de antes): la vida sumada depende del encuadre. */
+const sinPoblacion = (az: number, al: number, di: number): Corrida => {
+  const azar = azarConSemilla(11)
+  const b = crearBrasas(N, azar, FLOOR_Y)
+  const d = crearDominio()
+  poner(d, az, al, di)
+  poblar(d, b, azar, true)
+  let suma = 0
+  for (let i = 0; i < b.n; i += 1) {
+    const c = coordenadas(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+    if (c.w > d.w0 && c.w < d.w1 && Math.abs(c.u) <= 1 && Math.abs(c.v) <= 1) suma += alfaDelDominio(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+  }
+  return { ...QUIETA, presentes: [suma], objetivo: POBLACION.objetivo[0] }
+}
+controlPositivo('  el detector VE las mismas brasas sin población (la de antes): la cantidad a la vista según el encuadre', POSES.map(([, az, al, di]) => sinPoblacion(az, al, di)), pareja)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Q1.d · La red en reposo: quieta se arma, un gesto la corta en cascada, nunca en el final del pie')
@@ -250,7 +363,7 @@ function correrLaRed(gestoEn: number, finDesde: number, paso: (r: Red, b: Brasas
     paso(r, b, k, en, gesto)
     pasoDeLaRed(r, b, d, en, DT, gesto, 0, 0, az)
     pasoDeLasBrasas(b, DT, en, az)
-    if (r.fase === 'suelta') repartir(d, b, az)
+    // [PULIDO 27] Z1 · el reparto de antes se fue (la población nunca mata una brasa de la red): la red, sobre las mismas brasas de siempre.
     brilloPorDensidad(b, DT)
     if (t < REPOSO.esperaS - DT && r.n > 0) antesDeTiempo += 1
     if (t >= finDesde && r.n > 0) conFinal += 1
@@ -580,8 +693,8 @@ controlPositivo('  y un three que no acota a la placa', { ...ANISOTROPIA, three:
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Q1 · Los módulos nuevos, de menos de 300 líneas; lo de cada cuadro, sin reservas')
 
-const FUENTES: Record<string, string> = Object.fromEntries(['energia/dominio.ts', 'energia/grilla.ts', 'energia/paso.ts', 'energia/cuadro.ts', 'energia/brasas.ts', 'energia/vecinas.ts', 'energia/ruido.ts', 'energia/reposo.ts', 'energia/dibujo/red.ts'].map((m) => [m, leer(`_lib/escena/${m}`)]))
-const POR_CUADRO: readonly (readonly [string, string])[] = [['energia/dominio.ts', 'envolver'], ['energia/dominio.ts', 'alfaDe'], ['energia/dominio.ts', 'coordenadasDe'], ['energia/grilla.ts', 'celdaDe'], ['energia/ruido.ts', 'rotorEnLote'], ['energia/ruido.ts', 'rotorDeLaBrasa'], ['energia/ruido.ts', 'rotorDelPunto'], ['energia/ruido.ts', 'ruidoConGradienteEn'], ['energia/brasas.ts', 'alRayoDesde'], ['energia/reposo.ts', 'pasoDeLaRed'], ['energia/reposo.ts', 'leerElGesto'], ['energia/reposo.ts', 'formar'], ['energia/reposo.ts', 'cortar'], ['energia/dibujo/red.ts', 'rellenarRed'], ['energia/dominio.ts', 'repartir'], ['energia/dominio.ts', 'escribir'], ['energia/dominio.ts', 'armarElDominio'], ['energia/grilla.ts', 'ajustarLaGrilla'], ['energia/grilla.ts', 'entreEllas'], ['energia/paso.ts', 'envolverYVivir'], ['energia/cuadro.ts', 'elDominio'], ['energia/vecinas.ts', 'brilloPorDensidad']]
+const FUENTES: Record<string, string> = Object.fromEntries(['energia/dominio.ts', 'energia/poblacion.ts', 'energia/grilla.ts', 'energia/paso.ts', 'energia/cuadro.ts', 'energia/brasas.ts', 'energia/vecinas.ts', 'energia/ruido.ts', 'energia/reposo.ts', 'energia/dibujo/red.ts'].map((m) => [m, leer(`_lib/escena/${m}`)]))
+const POR_CUADRO: readonly (readonly [string, string])[] = [['energia/dominio.ts', 'envolver'], ['energia/dominio.ts', 'alfaDe'], ['energia/dominio.ts', 'coordenadasDe'], ['energia/grilla.ts', 'celdaDe'], ['energia/ruido.ts', 'rotorEnLote'], ['energia/ruido.ts', 'rotorDeLaBrasa'], ['energia/ruido.ts', 'rotorDelPunto'], ['energia/ruido.ts', 'ruidoConGradienteEn'], ['energia/brasas.ts', 'alRayoDesde'], ['energia/reposo.ts', 'pasoDeLaRed'], ['energia/reposo.ts', 'leerElGesto'], ['energia/reposo.ts', 'formar'], ['energia/reposo.ts', 'cortar'], ['energia/dibujo/red.ts', 'rellenarRed'], ['energia/poblacion.ts', 'regular'], ['energia/poblacion.ts', 'medir'], ['energia/poblacion.ts', 'nacer'], ['energia/poblacion.ts', 'morir'], ['energia/poblacion.ts', 'explotar'], ['energia/dominio.ts', 'alAzarALaVista'], ['energia/dominio.ts', 'alFondo'], ['energia/dominio.ts', 'escribir'], ['energia/dominio.ts', 'armarElDominio'], ['energia/grilla.ts', 'ajustarLaGrilla'], ['energia/grilla.ts', 'entreEllas'], ['energia/paso.ts', 'envolverYVivir'], ['energia/cuadro.ts', 'elDominio'], ['energia/vecinas.ts', 'brilloPorDensidad']]
 const livianoBien = (f: Record<string, string>): boolean => Object.values(f).every((t) => lineasDeCodigo(t) <= 300) && POR_CUADRO.every(([m, fn]) => sinReservasEn(f[m] ?? '', fn))
 afirmar(livianoBien(FUENTES), `  ${Object.entries(FUENTES).map(([m, t]) => `${m.split('/').pop() ?? m} ${String(lineasDeCodigo(t))}`).join(' · ')}; ${String(POR_CUADRO.length)} funciones de cada cuadro sin crear objetos, arreglos ni funciones`, POR_CUADRO.filter(([m, fn]) => !sinReservasEn(FUENTES[m] ?? '', fn)).map(([m, fn]) => `${m}:${fn}`).join(' · '))
 controlPositivo('  el detector VE una reserva en el envoltorio', { ...FUENTES, 'energia/dominio.ts': (FUENTES['energia/dominio.ts'] ?? '').replace('  if (!salio) return false\n', '  const tmp = [u, v]\n  if (!salio) return tmp.length < 0\n') }, livianoBien)

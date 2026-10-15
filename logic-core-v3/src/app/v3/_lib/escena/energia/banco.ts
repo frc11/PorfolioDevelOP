@@ -5,6 +5,7 @@ import { TRAMOS_DEL_CAMINO, puntoDelCamino } from './arcos/camino'
 import { cuantosEnlaces } from './vecinas'
 import { ponerTemperatura } from './calor'
 import type { Armado, Vista } from './dibujo/armado'
+import { explotar } from './poblacion'
 
 /**
  * [PULIDO 17] O3 · LA ENERGÍA PARA EL BANCO (sólo con banco: `hayBanco()`). Qué hay (para medir y capturar), un arco ya, la
@@ -24,7 +25,20 @@ export interface EnergiaDelBanco {
     velocidad: number
     /** [PULIDO 19] Q1.d · la red en reposo: su fase, cuántos enlaces, cuántas veces se formó y se cortó. */
     red: { fase: string; enlaces: number; formadas: number; cortes: number }
+    /** [PULIDO 27] Z1 · cuántas se ven (brillo y vida, en el cuadro y no sobre un texto) y cuántas viven (vida de más de la mitad). */
+    visibles: number
+    vivas: number
+    /** [PULIDO 27] Z1 · las del cuadro (sin mirar el brillo), la densidad media (el brillo por amontonamiento) y el foco del dominio (u). */
+    enCuadro: number
+    densidadMedia: number
+    foco: number
+    /** [PULIDO 27] Z1 · la población (`poblacion.ts`): el objetivo, la vida sumada en el cuadro, las activas y las cuentas. */
+    poblacion: { objetivo: number; presentes: number; activas: number; nacidas: number; muertas: number; mudanzas: number; corrige: number }
   }
+  /** [PULIDO 27] Z1 · otro objetivo de la población (para comparar sin volver a armar). */
+  objetivo: (valor: number) => void
+  /** [PULIDO 27] Z1 · una muerte (su explosión) o un nacimiento a mano en un punto de la pantalla (px de CSS, a la distancia del foco): para verlos de cerca. */
+  efectoEn: (x: number, y: number, que: 'explosion' | 'nacimiento') => boolean
   forzar: (que: ClaseDeArco) => boolean
   /** [PULIDO 19] Q1.d · la red en reposo apagada (para medir sin ella) o no. */
   red: (activa: boolean) => void
@@ -73,6 +87,14 @@ function grupoEnPantalla(a: Armado, vista: Vista, v: THREE.Vector3): [number, nu
   return mejor === null ? null : [mejor[0], mejor[1]]
 }
 
+/** [PULIDO 27] Z1 · las brasas que se ven: con brillo y vida, adentro del cuadro y no sobre un texto. */
+function contarLasVisibles(a: Armado, umbral = 0.15): number {
+  const L = a.brasas.lugar
+  let n = 0
+  for (let i = 0; i < a.brasas.n; i += 1) if (a.brasas.brillo[i] > umbral && a.entorno.seVe(L[i * 3], L[i * 3 + 1], L[i * 3 + 2])) n += 1
+  return n
+}
+
 export function energiaDelBanco(a: Armado, vista: { readonly current: Vista }): EnergiaDelBanco {
   return {
     estado: () => ({
@@ -87,7 +109,31 @@ export function energiaDelBanco(a: Armado, vista: { readonly current: Vista }): 
       carga: a.puntero.carga,
       velocidad: a.lectura.velocidad,
       red: { fase: a.red.fase, enlaces: a.red.n, formadas: a.red.formadas, cortes: a.red.cortes },
+      visibles: contarLasVisibles(a),
+      vivas: a.brasas.vida.reduce((s, x) => s + (x > 0.5 ? 1 : 0), 0),
+      enCuadro: contarLasVisibles(a, -1),
+      densidadMedia: a.brasas.densidad.reduce((s, x) => s + x, 0) / Math.max(1, a.brasas.n),
+      foco: a.dominio.D,
+      poblacion: { objetivo: a.poblacion.objetivo, presentes: a.poblacion.presentes, activas: a.poblacion.activas, nacidas: a.poblacion.nacidas, muertas: a.poblacion.muertas, mudanzas: a.poblacion.mudanzas, corrige: a.poblacion.corrige },
     }),
+    objetivo: (valor) => {
+      a.poblacion.objetivo = valor
+    },
+    efectoEn: (x, y, que) => {
+      const cam = vista.current.camara
+      if (cam === null) return false
+      a.v.set((x / vista.current.ancho) * 2 - 1, 1 - (y / vista.current.alto) * 2, 0.5).unproject(cam).sub(cam.position).normalize()
+      const p = Float32Array.from([cam.position.x + a.v.x * a.dominio.D, cam.position.y + a.v.y * a.dominio.D, cam.position.z + a.v.z * a.dominio.D])
+      if (que === 'explosion') return explotar(a.poblacion, p, 0, 1, a.entrada.tiempo)
+      const b = a.brasas
+      const i = b.oculta.indexOf(1)
+      if (i < 0) return false
+      b.lugar.set(p, i * 3)
+      b.velocidad.fill(0, i * 3, i * 3 + 3)
+      b.oculta[i] = 0
+      b.nace[i] = a.entrada.tiempo
+      return true
+    },
     red: (activa) => {
       a.red.apagada = !activa
     },

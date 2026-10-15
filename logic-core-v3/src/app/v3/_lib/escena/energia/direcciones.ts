@@ -22,8 +22,9 @@ export interface DeLaDireccion {
 export const DIRECCIONES: Readonly<Record<Direccion, DeLaDireccion>> = {
   a: {
     nombre: 'chispas',
-    // [PULIDO 19] Q1.a · más densidad: de 600 y 300 a 800 y 400 (con el dominio de la vista todas están en el cuadro).
-    brasas: [800, 400],
+    // [PULIDO 19] Q1.a · más densidad: de 600 y 300 a 800 y 400 (con el dominio de la vista todas están en el cuadro). [PULIDO 27] Z1 · con
+    // la reserva: 1100 y 550 (activas, las que pide el objetivo de la población en cada encuadre: `poblacion.ts`).
+    brasas: [1100, 550],
     intensidadDeLasBrasas: 1,
     // Chispas suaves de tamaños muy distintos (no bokeh: poco desenfoque); de día, energía oscura translúcida con su destello blanco.
     // [PULIDO 18] P1.d · más partícula, menos nube: núcleos chicos y nítidos con un halo corto (2,5 veces el núcleo, tenue), tamaños

@@ -28,6 +28,7 @@ uniform float uPiso;
 attribute vec3 aLugar;
 attribute float aEnergia;
 attribute float aBrillo;
+attribute float aNace;
 varying vec2 vLocal;
 varying float vRadioPx;
 varying float vBrillo;
@@ -54,7 +55,9 @@ void main() {
 	vec2 suyo = brillar( id, e, signo );
 	float distancia = max( 0.5, - mv.z );
 	float radio = clamp( uEscalaPx * tamanoDeLaChispa( id ) * ( 1.0 + 0.35 * e ) / distancia + uReflejo.w * alto, uTamano.z, 2.0 * uTamano.w + uReflejo.w * uReflejo.x );
-	vRadioPx = radio * uPixel;
+	// [PULIDO 27] Z1 · al nacer, como su chispa (\`alNacer\`).
+	vec2 nacer = alNacer( aNace );
+	vRadioPx = radio * max( 0.02, nacer.x ) * uPixel;
 	float ancho = vRadioPx * 3.0;
 	vec2 mitad = uResolucion * 0.5;
 	vec2 s = c.xy / c.w * mitad + position.xy * ancho;
@@ -66,7 +69,7 @@ void main() {
 	vHastaElPiso = ( uPiso - cameraPosition.y ) / min( - 1e-3, rayo.y ) * dot( rayo, adelante );
 	vTexto = adentroDelTexto( c.xy / c.w );
 	float vivo = uLuz.y + ( 1.0 - uLuz.y ) * e;
-	vBrillo = uReflejo.z * uIntensidad * brilloPropio( id ) * vivo * suyo.x * ( 1.0 + uDestello.z * suyo.y ) * aBrillo * exp( - alto / uReflejo.y );
+	vBrillo = uReflejo.z * uIntensidad * brilloPropio( id ) * vivo * suyo.x * ( 1.0 + uDestello.z * suyo.y ) * aBrillo * exp( - alto / uReflejo.y ) * nacer.y;
 }
 `
 

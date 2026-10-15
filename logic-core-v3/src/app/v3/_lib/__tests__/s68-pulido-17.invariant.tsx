@@ -320,14 +320,15 @@ const dibujoBien = (particulas: string, arcos: string, efectos: string, comun: s
   particulas.includes('float sigma = max( uDiaForma.y * uPixel, vRadioPx * uDiaForma.x );') && /CLARO_EN_REPOSO[^=]*= \{ chispa: 0 \}/.test(particulas) &&
   // Los arcos: dos pasadas (lo oscuro, después el núcleo), una tira en inglete con las puntas afinadas y la luz que corre.
   arcos.includes('uniform float uCapa;') && arcos.includes('float inglete =') && arcos.includes('float afina =') && arcos.includes('float corre =') &&
-  // Los efectos: el piso (de noche) y el toque del logo; sin el disco de la carga.
-  /export const EFECTO = \{ piso: 0, logo: 1 \} as const/.test(efectos) && !efectos.includes('carga: 2') &&
+  // Los efectos: el piso (de noche) y el toque del logo; sin el disco de la carga. [PULIDO 27] Z1 · y la mini explosión de una brasa que
+  // muere (`poblacion.ts`): chispas cortas, no un disco.
+  /export const EFECTO = \{ piso: 0, logo: 1, explosion: 2 \} as const/.test(efectos) && !efectos.includes('carga:') &&
   // El tono de la escena (ACES compensado), la salida premultiplicada y los textos con borde suave.
   comun.includes('c = toneMapping( c );') && comun.includes('cubre * ( 1.0 - uNoche )') && comun.includes('textoBorde: 56,') && comun.includes('vec2 borde = uTextoBorde / uResolucion * uPixel;') && !/EffectComposer|UnrealBloom/.test(particulas + arcos + efectos + comun)
 afirmar(dibujoBien(PARTICULAS, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO), '  núcleo y halo gaussianos (sin disco ni anillo), titila, destella, respira, vibra, viene de la fuente, desenfoque con el brillo conservado, la cara del logo libre y un tope; de día energía oscura translúcida y el destello sólo caliente; arcos en dos pasadas y en tira; sin la luz de la carga; el tono ACES, sin bloom')
 controlPositivo('  el detector VE el disco con borde de PULIDO 15', PARTICULAS.replace('float nucleo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;', 'float nucleo = 1.0 - smoothstep( 1.0 - px, 1.0 + px, r2 );'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
 controlPositivo('  y el destello claro en reposo (los «ojos» de día)', PARTICULAS.replace('{ chispa: 0 }', '{ chispa: 0.3 }'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
-controlPositivo('  y la luz de la carga de vuelta', EFECTOS_DIBUJO.replace('export const EFECTO = { piso: 0, logo: 1 } as const', 'export const EFECTO = { piso: 0, logo: 1, carga: 2 } as const'), (e: string) => dibujoBien(PARTICULAS, ARCOS_DIBUJO, e, COMUN_DIBUJO))
+controlPositivo('  y la luz de la carga de vuelta', EFECTOS_DIBUJO.replace('export const EFECTO = { piso: 0, logo: 1, explosion: 2 } as const', 'export const EFECTO = { piso: 0, logo: 1, explosion: 2, carga: 3 } as const'), (e: string) => dibujoBien(PARTICULAS, ARCOS_DIBUJO, e, COMUN_DIBUJO))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('O3 · El cuadro: el golpe del pie sin arco (una onda), cerca del encastre se apaga, quieto con movimiento reducido, sin reservas por cuadro')

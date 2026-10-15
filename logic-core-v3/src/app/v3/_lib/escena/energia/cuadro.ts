@@ -9,8 +9,9 @@ import { TEMPERATURA, calentar, frentesDelLogo, leerLaEscena, type DeLaEscena } 
 import { EFECTO, EFECTOS } from './dibujo/efectos'
 import { DIBUJO } from './dibujo/comun'
 import { subir, type Armado } from './dibujo/armado'
-import { alfaDelDominio, armarElDominio, poblar, repartir } from './dominio'
+import { armarElDominio } from './dominio'
 import { pasoDeLasBrasas } from './paso'
+import { POBLACION, antesDelPaso, aparecer, regular, sembrar } from './poblacion'
 import { rellenarRed } from './dibujo/red'
 import { leerElGesto, pasoDeLaRed } from './reposo'
 import { brilloPorDensidad, calentarBrasa } from './vecinas'
@@ -113,6 +114,12 @@ function elPuntero(a: Armado, camara: THREE.Camera): void {
 function elDominio(a: Armado, f: Afuera): void {
   const d = a.dominio
   const cam = f.camara
+  // [PULIDO 27] Z1 · y la velocidad de la cámara (quién se le acerca: `envolver`) y cuánto saltó (un corte: `poblacion.ts`).
+  const dt = Math.max(1e-3, f.dt)
+  d.vo[0] = d.listo ? (cam.position.x - d.o[0]) / dt : 0
+  d.vo[1] = d.listo ? (cam.position.y - d.o[1]) / dt : 0
+  d.vo[2] = d.listo ? (cam.position.z - d.o[2]) / dt : 0
+  d.salto = Math.sqrt(d.vo[0] * d.vo[0] + d.vo[1] * d.vo[1] + d.vo[2] * d.vo[2]) * dt
   d.o[0] = cam.position.x
   d.o[1] = cam.position.y
   d.o[2] = cam.position.z
@@ -127,11 +134,10 @@ function elDominio(a: Armado, f: Afuera): void {
   const aspecto = cam instanceof THREE.PerspectiveCamera ? cam.aspect : 1.6
   armarElDominio(d, fov, aspecto, cam.position.distanceTo(a.centro), f.piso)
   a.entrada.dominio = d
-  // La siembra (el primer cuadro con cámara): todas en el dominio de la vista, ya encendidas (la página arranca con el plasma puesto).
+  // La siembra (el primer cuadro con cámara): en el dominio de la vista, ya encendidas (la página arranca con el plasma puesto);
+  // [PULIDO 27] Z1 · las justas para el objetivo de la población, las demás a la reserva (`poblacion.ts`).
   if (!a.poblado) {
-    const b = a.brasas
-    poblar(d, b, a.azar, true)
-    for (let i = 0; i < b.n; i += 1) b.vida[i] = alfaDelDominio(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+    sembrar(a.poblacion, d, a.brasas, a.azar)
     a.poblado = true
   }
 }
@@ -266,7 +272,27 @@ function lucesYEfectos(a: Armado, f: Afuera): number {
     }
   }
   u.uCuantasLuces.value = luces
+  // [PULIDO 27] Z1 · las mini explosiones de las que murieron (`poblacion.ts`): dónde, su radio, su brillo y su edad (0 a 1).
+  const X = a.poblacion.explosiones
+  const P = POBLACION.explosion
+  for (let k = 0; k < P.cuantas; k += 1) {
+    const edad = (f.tiempo - X[k * 6 + 3]) / P.s
+    if (!(edad > -0.01 && edad < 1)) continue
+    const antes = n
+    n = efecto(a, n, X[k * 6], X[k * 6 + 1], X[k * 6 + 2], EFECTO.explosion, P.radio, X[k * 6 + 4])
+    if (n > antes) (a.efectos.efecto.array as Float32Array)[antes * 4 + 3] = Math.max(0, edad)
+  }
   return n
+}
+
+/** [PULIDO 27] Z1 · las brasas de los arcos vivos: no mueren mientras un arco sale de ellas. */
+function ocuparLasDeLosArcos(a: Armado): void {
+  a.ocupadas.fill(0)
+  for (const arco of a.arcos.arcos) {
+    if (!arco.activo) continue
+    if (arco.a >= 0) a.ocupadas[arco.a] = 1
+    if (arco.b >= 0) a.ocupadas[arco.b] = 1
+  }
 }
 
 /** Un cuadro (no con movimiento reducido): la escena, el puntero, el gesto, las brasas, los arcos y el dibujo. */
@@ -291,11 +317,15 @@ export function cuadro(a: Armado, f: Afuera): void {
   en.logo[2] = a.centro.z
   frentesDelLogo(f.anillos, f.tiempo, f.naceEn, en.anillos)
   vientoEstelaYCanales(a, f)
+  antesDelPaso(a.poblacion, a.dominio)
   const pasos = Math.max(1, Math.ceil(f.dt / CUADRO.pasoMaximo))
   for (let k = 0; k < pasos; k += 1) pasoDeLasBrasas(a.brasas, f.dt / pasos, en, a.azar)
-  // [PULIDO 19] Q1.d · con la red armándose o armada no hay reparto (una brasa enlazada que se muda arrastraría su rayo por la pantalla).
-  if (a.red.fase === 'suelta') repartir(a.dominio, a.brasas, a.azar)
+  // [PULIDO 27] Z1 · la población: nacen y mueren a la vista para que la cantidad sea la misma en todo encuadre; nunca una de la red
+  // (su rayo quedaría colgado) ni de un arco.
+  ocuparLasDeLosArcos(a)
+  regular(a.poblacion, a.dominio, a.brasas, f.tiempo, a.azar, a.red.grado, a.ocupadas)
   brilloPorDensidad(a.brasas, f.dt)
+  aparecer(a.poblacion, a.brasas, f.dt)
   rellenarRed(a.red, a.brasas, a.dibujoDeLaRed)
   const entorno = a.entorno
   entorno.camara[0] = f.camara.position.x

@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import { COLOR_DE_LA_ESCENA_GLSL, PROFUNDIDAD_GLSL } from '../../pase/pase'
+import { POBLACION } from '../poblacion'
 import { RUIDO_GLSL } from '../ruido'
 import { AL_TONO, COMUN } from './comun'
 
@@ -69,6 +70,7 @@ export const CLARO_EN_REPOSO: Readonly<Record<Estilo, number>> = { chispa: 0 }
  */
 export const DIA_SECUNDARIO = { tope: 0.36, tamano: 0.7, variacion: 0.6, menos: 0.4, casiNada: 0.12, aerea: 0.9, desde: 0.9, hasta: 2.2, textos: 0.98, desfase: 0.5 } as const
 const D = DIA_SECUNDARIO
+const N = POBLACION.nace
 const g = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
 
 export const ASPECTO_GLSL = /* glsl */ `
@@ -109,6 +111,16 @@ float tamanoDeLaChispa( uint id ) {
 float brilloPropio( uint id ) {
 	return mix( uChispa.y, 1.0, pow( azar01( id, 27u ), 1.8 ) );
 }
+// [PULIDO 27] Z1 · AL NACER (\`poblacion.ts\`): aparece de un punto, crece de más (hasta \`crece\` en \`pico\` del nacimiento) con un destello y
+// se acomoda a su tamaño. Devuelve (la escala del radio, el brillo); fuera del nacimiento, (1, 1).
+vec2 alNacer( float nace ) {
+	float t = ( uTiempo - nace ) / ${g(N.s)};
+	if ( t < 0.0 || t >= 1.0 ) return vec2( 1.0 );
+	float sube = clamp( t / ${g(N.pico)}, 0.0, 1.0 );
+	float escala = mix( ${g(N.crece)} * ( 1.0 - ( 1.0 - sube ) * ( 1.0 - sube ) ), 1.0, smoothstep( ${g(N.pico)}, 1.0, t ) );
+	float pico = ( t - ${g(N.pico)} ) / 0.16;
+	return vec2( escala, smoothstep( 0.0, 0.1, t ) * ( 1.0 + ${g(N.destello)} * exp( - pico * pico ) ) );
+}
 `
 
 function vertices(): string {
@@ -121,6 +133,7 @@ attribute vec3 aLugar;
 attribute vec3 aVelocidad;
 attribute float aEnergia;
 attribute float aBrillo;
+attribute float aNace;
 varying vec2 vLocal;
 varying float vLargo;
 varying float vRadioPx;
@@ -177,6 +190,9 @@ void main() {
 	// [PULIDO 24] V2 · de día, más chica y más variada; y algunas casi no se ven (las mismas, menos presentes).
 	vDia = vec2( mix( ${g(D.tamano)} * ( ${g(1 - D.variacion / 2)} + ${g(D.variacion)} * azar01( id, 29u ) ), 1.0, uNoche ), azar01( id, 30u ) < ${g(D.menos)} ? ${g(D.casiNada)} : 1.0 );
 	radio *= vDia.x;
+	// [PULIDO 27] Z1 · al nacer, desde un punto (y un destello: abajo, en el brillo).
+	vec2 nacer = alNacer( aNace );
+	radio *= max( 0.02, nacer.x );
 	float radioPx = radio * uPixel;
 	vec4 cP = projectionMatrix * mv;
 	vec4 cQ = projectionMatrix * viewMatrix * vec4( p - vel * uMovida.x, 1.0 );
@@ -230,9 +246,9 @@ void main() {
 	float vivo = mix( uDia.z + ( 1.0 - uDia.z ) * e, uLuz.y + ( 1.0 - uLuz.y ) * e, uNoche );
 	// La estela reparte su luz a lo largo: más larga, más tenue por punto.
 	float reparte = 1.0 / ( 1.0 + 0.35 * largo / radioPx );
-	vBrillo = min( uDelante.z, uIntensidad * brilloPropio( id ) * vivo * titila * respira * fuente * ( 1.0 + uDestello.z * destello ) * luz * conserva * reparte * fundido * enElFinal( p - uCentro ) );
-	// El destello blanco de día: tenue en reposo (sobre el logo negro se ve; sobre el papel, no), entero en las calientes.
-	vClaro = mix( uClaroEnReposo, 1.0, smoothstep( uDia.w, uDia.w + 0.35, e + 0.5 * destello ) ) * fuente * fundido * titila;
+	vBrillo = min( uDelante.z, uIntensidad * brilloPropio( id ) * vivo * titila * respira * fuente * ( 1.0 + uDestello.z * destello ) * luz * conserva * reparte * fundido * enElFinal( p - uCentro ) ) * nacer.y;
+	// El destello blanco de día: tenue en reposo (sobre el logo negro se ve; sobre el papel, no), entero en las calientes; y al nacer.
+	vClaro = max( mix( uClaroEnReposo, 1.0, smoothstep( uDia.w, uDia.w + 0.35, e + 0.5 * destello ) ) * fuente * fundido * titila, min( 1.0, nacer.y - 1.0 ) * fundido );
 }
 `
 }
