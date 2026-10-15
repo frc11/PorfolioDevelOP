@@ -72,12 +72,12 @@ Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de
 ### [SEC-037] El overview de Mi Chatbot manda al navegador la fila completa de Organization: tokens de Google Business y Tiendanube, API key de Cal.com y las notas internas de develOP
 - Dominio: D5  ·  Severidad: ALTA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
-- Evidencia: `src/modules/chatbot/server/admin/getClientSession.ts:17` — «include: { organization: { include: {»; `src/app/(protected)/dashboard/chatbot/page.tsx:46` — «<ChatbotOverview session={session}»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:1` — «'use client'»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:30` — «organization: Organization & { botConfig: BotConfig | null }»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:63` — «{session.bot.botName} está atendiendo consultas las 24 horas.»; `prisma/schema.prisma:359` — «gbpAccessToken String? @db.Text gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:402` — «internalNotes String?»
+- Evidencia: `src/modules/chatbot/server/admin/getClientSession.ts:17` — «include: { organization: { include: {»; `src/app/(protected)/dashboard/chatbot/page.tsx:46` — «<ChatbotOverview session={session}»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:1` — «'use client'»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:30` — «organization: Organization & { botConfig: BotConfig | null }»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:63` — «{session.bot.botName} está atendiendo consultas las 24 horas.»; `prisma/schema.prisma:359` — «gbpAccessToken String? @db.Text gbpRefreshToken String? @db.Text»; `prisma/schema.prisma:367` — «tiendanubeAccessToken String? @db.Text»; `prisma/schema.prisma:402` — «internalNotes String?»; `src/modules/chatbot/server/admin/multiTenantQueries.ts:249` — «return forOrg(botInfo.organization.id).quotaUsage.findByPeriod( (findFirst sin select, registry.ts:562)»; `src/app/(protected)/dashboard/chatbot/page.tsx:43` — «const usageSerialized = usage ? { ...usage, costUsd: Number(usage.costUsd) } : null»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:25` — «type SerializedQuotaUsage = Omit<QuotaUsage, 'costUsd'> & { costUsd: number }»; `src/modules/chatbot/components/dashboard/ChatbotOverview.tsx:41` — «monthlyConversations: usage?.conversationsCount ?? 0, (unico campo que usa)»; `src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts:80` — «// SOLO conteos. tokensIn/tokensOut/costUsd son internos — jamás salen de acá.»
 - Impacto: Bloqueante para el primer cliente con Reseñas o Tienda conectada: cualquier usuario de su org (incluido un VIEWER) recibe en el payload RSC de /dashboard/chatbot el access y refresh token de Google Business, el token sin vencimiento de Tiendanube y la API key de Cal.com (credenciales emitidas a la app de develOP sobre sus cuentas), legibles en DevTools y por cualquier XSS o extensión del navegador, y además internalNotes, las notas privadas que develOP escribe sobre ese cliente. El componente solo usa session.bot.botName; getPublicConfig del mismo módulo sí usa select.
 - Propuesta: En getClientChatbotSession leer org y bot con select acotado (lo que usan las páginas: id, slug, siteUrl, companyName y campos del bot) y pasarle a ChatbotOverview solo botName; agregar un invariante que prohíba tipos Prisma completos (Organization, BotConfig, User) en props de componentes 'use client'. Confirmar antes y después con el caso de prueba del payload.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
-- Nodo(s): h3.cli-chatbot, lib.chatbot.admin, modelo.Organization, modelo.BotConfig
+- Nodo(s): h3.cli-chatbot, lib.chatbot.admin, modelo.Organization, modelo.BotConfig, modelo.QuotaUsage, lib.chatbot.server
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-035
 
 ### [SEC-045] El cliente puede fijar su analyticsPropertyId desde el onboarding y GA4 se lee con la service account unica de develOP
@@ -101,6 +101,17 @@ Lo mismo vale para un admin degradado o borrado (DEU-002), y para la pestaña de
 - Relacionado: —
 - Nodo(s): h2.cli-inicio, h2.cli-inicio.resultados-semana, h2.cli-reportes-email, int.vertex, modelo.ContactSubmission, h2.cli-inicio.resultados-de-la-semana, h2.cli-inicio.health-score, lib.dashboard, lib.health-score, h2.cli-inicio.resumen-ia, h2.cli-reportes-email.reporte-semanal, lib.reports, modelo.ExecutiveBriefSnapshot
 - REQUIERE-VERIFICACIÓN-HUMANA: VH-051
+
+### [SEC-074] Cortar la conexion antes de que termine el turno saltea los dos topes de gasto del chat: la conversacion nueva devuelve su cupo y la existente no suma al tope de 40 mensajes
+- Dominio: D5  ·  Severidad: ALTA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:400` — «if (isNewConversation) { const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1320` — «if (info.reason === 'cancelled') { runAbortController.abort()»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1123` — «await compensateReservedQuota?.('stream_abort', { firstTokenDelivered: ttfbAt !== null,»; `src/modules/chatbot/server/chat/reconcile.ts:367` — «case 'stream_abort': // Antes del primer chunk util -> no se entrego nada, se devuelve. return !input.firstTokenDelivered»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1031` — «ttfbAt === null && (chunk.type === 'text-delta' || chunk.type === 'tool-call')»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1140` — «if (accumulatedAssistantText.trim().length > 0) {»; `src/modules/chatbot/server/chat/persistTurn.ts:447` — «messageCount: { increment: 2 }, // user + assistant»; `src/modules/chatbot/server/chat/handleChatRequest.ts:547` — «if ((conversation.messageCount ?? 0) >= HARD_CAP_MESSAGES) {»; `src/modules/chatbot/server/chat/reconcile.ts:370` — «return !input.firstTokenDelivered»; librería ai@6.0.214, dist/index.js línea 7363 — «onAbort == null ? void 0 : onAbort({ steps: recordedSteps });»; `src/modules/chatbot/server/quota/checker.ts:197` — «const discarded = await tx.conversation.deleteMany({ id: input.conversationId, messages: { none: { role: 'ASSISTANT' } },»; `src/modules/chatbot/server/conversation/resolver.ts:94` — «return { conversation, isNew: false }»; `src/modules/chatbot/server/chat/persistTurn.ts:434` — «await tx.chatMessage.create({ conversationId: conversation.id,»; `src/lib/isolation/registry.ts:334` — «client.conversation.findFirst({ where: { id, botConfig: { organizationId } }, select: { id: true } }),»
+- Impacto: Bloqueante para el primer cliente real (con la credencial de Vertex renovada). Los dos techos que acotan el gasto de LLM de un visitante anonimo cuentan recien cuando el turno se cierra: (a) una conversacion nueva reserva 1 cupo, pero si el cliente corta la conexion antes del primer text-delta (el 'thinking' de Gemini 2.5 Flash no cuenta, asi que la ventana es de segundos) onAbort devuelve el cupo y borra la conversacion: el panel del cliente no ve nada; (b) en una conversacion existente, messageCount solo se incrementa dentro de persistTurn (unico escritor) y un turno cortado sin texto no se persiste, asi que el tope de 40 mensajes nunca llega. Con 1 cupo y el limite de 10 pedidos/min por sessionId, una conversacion admite unas 14.400 llamadas por dia, cada una con el system prompt completo (KB de hasta ~220 mil caracteres, ~60 mil tokens). El verificador L8 de SEC-057 dio por sentado que el gasto queda 'acotado por la cuota mensual y por HARD_CAP_MESSAGES': no lo esta. Eslabones inferidos: que la plataforma (Netlify) propague el corte del cliente al stream y que Vertex facture una llamada cortada antes del primer token (entrada + thinking).
+- Propuesta: Separar 'cupo de producto' de 'techo de gasto': contar el intento de LLM (reserva o incremento de turno) antes de llamar al proveedor y no devolverlo en 'stream_abort' (desconexion del cliente), solo en fallas del proveedor ('stream_error'); sumar un techo de llamadas LLM por conversacion y por org/dia que no dependa de la persistencia del turno; registrar los turnos cortados como cobrados.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-057]
+- Nodo(s): h3.vis-api-chatbot, h3.vis-widget-cliente, lib.chatbot.chat, lib.chatbot.quota, int.vertex, modelo.QuotaUsage, modelo.Conversation, lib.chatbot.conversation
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-105
 
 ### [SEC-009] Enumeracion de usuarios: el magic link responde distinto si el email existe (y el login/forgot delatan por tiempo y por 'error inesperado')
 - Dominio: D1  ·  Severidad: MEDIA  ·  Tipo: seguridad
@@ -446,6 +457,39 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Relacionado: —
 - Nodo(s): lib.chatbot.tools, int.telegram, modelo.ChatbotLead
 
+### [SEC-075] El aviso de 'Lead caliente' saltea el tope anti-spam y lo caliente lo dictan las senales del visitante: un anonimo manda un mail por conversacion al dueno y un Telegram por lead y por derivacion al equipo de develOP
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/lib/client-notifications/decide.ts:47` — «if (input.classification === 'hot' && input.hasLeadScoring) { return { notify: true, template: 'hot', bypassCap: true }»; `src/lib/client-notifications/notify.ts:111` — «if (!decision.bypassCap) { const cap = await checkRateLimit({»; `src/modules/chatbot/server/verticals/packs/base.ts:28` — «key: 'requestedAppointment', ... points: 40, ... key: 'providedPhone', ... points: 30,»; `src/modules/chatbot/server/tools/captureLead.ts:358` — «const { score, classification, signals: scoreSignals, dqReason } = calculateLeadScore( { signals: signalValues, category: input.category, phone },»; `src/modules/chatbot/server/tools/captureLead.ts:455` — «void notifyTelegramOptional(telegramMsg).catch((err: unknown) => {»; `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:164` — «void notifyTelegramOptional(tgMsg).catch((err: unknown) => {»; `src/lib/rate-limit/presets.ts:65` — «leadNotifyPerOrg: { limit: 5, windowMs: 60 * 60_000 },»
+- Impacto: Bloqueante para el primer cliente Pro/Business. Con el pack base (default de todo bot nuevo) 'quiero una reunion, mi cel 11 5555 1234' ya suma 70 = caliente (base.ts:60). Un anonimo que abre conversaciones nuevas (Origin y sessionId rotables, SEC-057) produce un mail individual 'Lead caliente' por conversacion hasta agotar el cupo del mes (cientos), sin digest ni el tope de 5 por hora que el diseno promete para no despertar al dueno con basura. En paralelo, cada lead y cada derivacion a WhatsApp sin lead previo (que ni siquiera exige datos de contacto) manda un mensaje al Telegram del equipo de develOP, de todos los clientes, sin ningun tope. Consume el plan de Brevo compartido con magic links y resets (que el plan tenga limite diario es HIPOTESIS).
+- Propuesta: Mantener la prioridad del caliente pero con su propio tope por org (p. ej. N por hora y despues digest); no clasificar caliente solo con flags que declara el LLM (exigir canal verificado y una senal comprobable en el texto del visitante); aplicar checkRateLimit por org a notifyTelegramOptional y agrupar.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-099], [SEC-057]
+- Nodo(s): h3.vis-api-chatbot, h3.cli-chatbot, lib.chatbot.tools, lib.client-notifications, int.brevo, int.telegram, modelo.ChatbotLead
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-106
+
+### [SEC-076] Texto de terceros entra sin delimitar a los prompts de lib/ai: quien deja una resena en Google puede dictar el borrador de respuesta que el dueno publica, y rutas de GA4 y consultas de Search Console llegan crudas a los insights de Resultados
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/lib/ai/review-reply-draft.ts:28` — «Comentario: ${params.reviewComment ?? '(sin texto, solo rating)'}»; `src/lib/ai/review-reply-draft.ts:26` — «Resena de: ${params.reviewerName}»; `src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx:53` — «reviewComment: review.comment,»; `src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx:68` — «const result = await replyAction({ organizationId, reviewName: review.reviewName,»; `src/lib/ai/results-insights.ts:82` — «${input.topPages.slice(0, 5).map((p) => '- ${p.path}: ${p.visits} visitas»; `src/lib/ai/results-insights.ts:133` — «'- "${q.query}": ${q.impressions} imp, ${q.clicks} clicks»; `src/modules/chatbot/server/chat/handleChatRequest.ts:884` — «const wrapUntrusted = (text: string): string => { (control: el chat si delimita)»
+- Impacto: Para el primer cliente con Motor de resenas: cualquier persona con cuenta de Google puede escribir en su resena instrucciones para el redactor (p. ej. 'ofrece reintegro del 100% escribiendo a una casilla ajena') y el borrador que el panel sugiere las sigue; si el dueno lo publica sin leer con atencion, queda en Google bajo el nombre del negocio (promesa falsa o contacto de un estafador visible para otros clientes). En Resultados, las rutas visitadas (pagePath, que un tercero fabrica visitando URLs inventadas si el tag dispara en 404) y las consultas de busqueda entran como datos sin delimitar y pueden convertir un insight en un mensaje dirigido al dueno. Es el patron que D2-c2 dejo para cruzar en D5; SEC-056 cubre solo los insights del chatbot y SEC-051 la falta de Zod.
+- Propuesta: Helper compartido de spotlighting para lib/ai (envolver el texto de terceros con nonce y regla 'contenido no confiable' en el system, como sections.ts:151); en el borrador, marcar en la UI cualquier URL, email o telefono que no figure en los datos del negocio antes de publicar; acotar largo del texto de terceros.
+- Esfuerzo: M  ·  Zona: libre
+- Relacionado: [SEC-056], [SEC-051]
+- Nodo(s): h2.cli-resenas, h2.cli-resultados, lib.ai, int.anthropic, int.google-business-profile, int.ga4
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-108
+
+### [SEC-078] El widget renderiza la respuesta del modelo como markdown con imagenes remotas y links sin restriccion: una ruta armada en develop.com.ar puede sacar lo que escribe el visitante
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/chat/ChatWindow.tsx:22` — «const MARKDOWN_COMPONENTS: Components = { (solo p, code y strong: sin a, sin img, sin urlTransform)»; `src/modules/chatbot/components/chat/StreamingMarkdown.tsx:171` — «<ReactMarkdown components={components}>{body}</ReactMarkdown>»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:358` — «<ReactMarkdown components={{ p: ..., code: ..., strong: ... }}>{m.content}»; librería react-markdown@10.1.0, lib/index.js línea 124 — «const safeProtocol = /^(https?|ircs?|mailto|xmpp)$/i»; `src/modules/chatbot/components/LogicCompanion.tsx:53` — «const chatbot = useChatbot({ slug, currentPath: pathname, attribution })»; `src/components/layout/useChromeRevealed.ts:41` — «return true (cualquier ruta que no sea home ni marketing, incluida una inexistente, monta el widget al instante)»; `src/modules/chatbot/server/prompts/sections.ts:200` — «- Ruta del usuario: ${context.currentPath ?? 'no determinada'}»; `next.config.ts:77` — «"img-src 'self' data: blob: https:", (y la CSP es Report-Only, :72)»; `public/widget.js:123` — «'allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox'»
+- Impacto: El texto del asistente pasa por react-markdown con los renderers por defecto de a e img, cuya urlTransform deja pasar https. Cualquier ![](https://host/?d=...) que emita el modelo se descarga sola en el navegador del visitante, sin clic. Cualquier [texto](https://...) queda como link activo sin target ni rel: en develop.com.ar navega la pestana entera fuera del sitio, y en el embed navega el iframe dentro del sitio del cliente (la charla desaparece). Sumado a SEC-058 (currentPath crudo en el system prompt): un tercero le manda a alguien un link a develop.com.ar/<instrucciones>; cualquier ruta inexistente monta el widget al instante con usePathname como currentPath. Si el modelo obedece, cada respuesta lleva una imagen que manda a un servidor ajeno el nombre, telefono o email que el visitante escriba despues, o un link de phishing que firma el asistente oficial. SEC-058 registro el dano como 'queda en la conversacion del atacante'; este es el canal de salida que alcanza a una victima ajena, y es otra causa: el delimitado de la entrada no garantiza nada sobre la salida. En los bots de clientes (embed, currentPath fijo '/') queda la variante legitima: un link de la KB abre dentro del iframe de 380 px y se pierde la conversacion. Hoy esta latente por la credencial de Vertex vencida; es bloqueante para el primer cliente real si se mantiene.
+- Propuesta: En los tres renderers (ChatWindow, StreamingMarkdown y ChatbotEmbed) no cargar imagenes que vengan del modelo: disallowedElements ['img'] o un renderer de img que muestre solo el alt. Agregar un renderer de a con target _blank y rel 'noopener noreferrer nofollow', con allowlist de hosts (dominio del cliente, wa.me, develop.com.ar); lo que quede fuera se muestra como texto. Unificar un unico mapa de componentes compartido (ver DEU-042). Complementa el arreglo de SEC-058, no lo reemplaza. A mediano plazo pasar la CSP a enforcement con img-src acotado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-058]
+- Nodo(s): h3.vis-widget-develop, h3.vis-widget-cliente, lib.chatbot.components, int.vertex
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-109
+
 ### [SEC-001] Clave de Google AI con el valor completo en dos documentos y en el historial
 - Dominio: D7  ·  Severidad: BAJA  ·  Tipo: seguridad
 - Confianza: VERIFICADO-POR-LECTURA
@@ -756,6 +800,68 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): int.vertex, lib.chatbot.llm
+
+### [SEC-077] El scoring de leads que el plan Starter no incluye viaja igual al navegador: las paginas de contactos pasan la fila completa de ChatbotLead (score, scoreSignals, internalNotes, notificationSent) a componentes cliente
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/app/(protected)/dashboard/chatbot/leads/page.tsx:61` — «// P0.3 — Gate de PRESENTACION de la priorizacion caliente/tibio/frio. El // scoring se computa igual abajo»; `src/app/(protected)/dashboard/chatbot/leads/page.tsx:95` — «...lead, effectiveScore: effective.effectiveScore,»; `src/app/(protected)/dashboard/chatbot/leads/page.tsx:116` — «<ClientLeadsTable leads={leads}»; `src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx:1` — «'use client'»; `src/app/api/dashboard/chatbot/leads/export/route.ts:30` — «* NO se exporta: * - score crudo, scoreSignals, internalNotes, botConfigId, notificationSent*.»; `src/app/(protected)/dashboard/chatbot/page.tsx:30` — «listLeadsByOrgSlug(orgSlug, 5),»
+- Impacto: Un cliente Starter ve en el payload RSC (DevTools) la clasificacion caliente/tibio/frio, el puntaje y su desglose que se venden como mejora a Pro, y la politica que el propio CSV declara ('solo lo legible al dueno') no se cumple en pantalla: tambien viajan notificationSent*, botConfigId y convertedToOsLeadId. Sin cruce entre tenants.
+- Propuesta: Proyectar a un DTO en el servidor para lista, detalle y resumen: si el plan no incluye leadScoring, no enviar score/classification/scoreSignals/effective*; nunca enviar notificationSent*, botConfigId ni convertedToOsLeadId.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, h3.cli-chatbot.contactos, h3.cli-chatbot.contacto-detalle, lib.plan, modelo.ChatbotLead
+
+### [SEC-079] Resumen de Mi Chatbot: leads y uso cacheados con el slug de la org como clave (se reutiliza tras un borrado) y con tags que nada invalida
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/admin/multiTenantQueries.ts:51` — «['chatbot-leads', orgSlug, String(limit)], { revalidate: 120, tags: ['chatbot-leads:${orgSlug}'] }»; `src/modules/chatbot/server/admin/multiTenantQueries.ts:255` — «['chatbot-usage', orgSlug], { revalidate: 300, tags: ['chatbot-usage:${orgSlug}'] }»; `src/app/(protected)/dashboard/chatbot/page.tsx:27` — «const orgSlug = session.organization.slug»; `src/modules/chatbot/server/admin/hardDeleteClient.ts:141` — «await tx.organization.delete({ where: { id: organizationId } })»; `src/modules/chatbot/server/admin/createClientWithBot.ts:107` — «const baseSlug = slugify(parsed.orgName) const uniqueSlug = await findUniqueSlug(baseSlug)»; `src/modules/chatbot/server/admin/updateLeadStatus.ts:78` — «revalidatePath('/dashboard/chatbot/leads') (otra ruta; ningun revalidateTag de chatbot-leads ni chatbot-usage)»
+- Impacto: El resto de las caches del portal usan organizationId o botId (dashboard-hot-leads-count, chatbot-bot-config, chatbot-kb). Estas dos usan el slug, que se libera con el borrado definitivo; el alta se lo reasigna al primer cliente con el mismo nombre. Durante 2 min (leads) y 5 min (uso), el resumen del cliente nuevo puede mostrar nombre, telefono, email y mensaje de los ultimos 5 contactos del cliente borrado, ademas de su consumo. La ventana es chica y depende de una secuencia del admin, por eso BAJA. El efecto de todos los dias es otro: ningun revalidateTag invalida los tags chatbot-leads:* ni chatbot-usage:*, y captureLead y updateLeadStatus revalidan otras rutas. Un lead nuevo tarda hasta 2 min en aparecer en el resumen y el uso del mes, hasta 5 min.
+- Propuesta: Usar organizationId (o botConfigId) como clave y como tag de las dos caches. Invalidarlas con revalidateTag desde captureLead, updateLeadStatus y hardDeleteClient, como ya se hace con hot-leads-count.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.cli-chatbot, lib.chatbot.server, modelo.ChatbotLead, modelo.QuotaUsage, h4.adm-clientes
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-110
+
+### [SEC-080] El embed le avisa al sitio del cliente cada intento de capture_lead con los datos crudos del modelo, aunque el servidor los haya descartado o la captura haya fallado
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:99` — «tc.toolName === 'capture_lead' && !seenToolCallIds.current.has(tc.toolCallId)»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:103` — «notifyParent('lead-captured', tc.input)»; `src/modules/chatbot/hooks/useChatbot.ts:508` — «else if (part.type && part.type.startsWith('tool-')) { ... input: anyPart.input, (:518; no mira state ni output)»; `src/modules/chatbot/server/tools/captureLead.ts:260` — «const phone = phoneReason === 'ok' ? rawPhone : null const email = emailReason === 'ok' ? rawEmail : null»; `src/modules/chatbot/server/tools/captureLead.ts:283` — «if (!phone && !email) { (repregunta y no persiste)»; `public/widget.js:180` — «new CustomEvent('develop:lead', { detail: data.payload })»
+- Impacto: El evento sale la primera vez que aparece la parte de la tool, sin mirar su estado ni el resultado. El sitio anfitrion recibe nombre, telefono, email y el resumen armado por el modelo tambien cuando capture_lead rechazo el canal (no aparece en lo que escribio el visitante o tiene formato invalido, SEC-LLM-03) o cuando la escritura fallo. Sale un evento por intento, incluidos los rechazados, y no uno por lead guardado. Ademas el CustomEvent se dispara en el window del anfitrion, donde cualquier script de terceros (pixeles, chats, librerias) puede escucharlo: rompe el aislamiento que el iframe le da a la PII del visitante. Para el primer cliente que conecte develop:lead a su analitica: conversiones falsas y datos de contacto que develOP decidio no guardar.
+- Propuesta: Emitir lead-captured solo cuando la parte este en output-available con output.success === true. Mandar solo el leadId y un flag de conversion, sin PII, o como mucho los campos que el servidor persistio. Documentar el contrato de develop:lead para los clientes.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-070]
+- Nodo(s): h3.vis-widget-cliente, lib.chatbot.components, modelo.ChatbotLead
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-111
+
+### [SEC-081] La purga de evals borra por prefijo de sessionId en todas las orgs: ese prefijo lo puede elegir cualquier visitante y la purga no se acota a los bots QA
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/evals/cleanup.ts:55` — «where: { sessionId: { startsWith: SESSION_PREFIX } },»; `src/modules/chatbot/evals/cleanup.ts:95` — «sessionId: { startsWith: SESSION_PREFIX }, // doble cinturón»; `src/modules/chatbot/evals/cleanup.ts:108` — «(c) => c.quotaUsage.deleteMany({ where: { botConfigId: { in: botIds } } }), (solo la cuota se acota a los bots QA)»; `src/modules/chatbot/server/chat/requestSchema.ts:55` — «sessionId: z.string().min(1).max(200),»; `src/modules/chatbot/evals/runner.ts:352` — «const purge = await purgeEvalRows({ resetQuota: true })»; `scripts/regression/purge.ts:48` — «where: { sessionId: { startsWith: SESSION_PREFIX } },»
+- Impacto: Corre solo contra la Neon dev, porque guardDevHost compara el host exacto. Pero esa base la comparte Franco y tiene bots que no son de evals (sanmiguel, develop, matsu; seed-eval-bots.ts:7). En cada corrida de npm run evals se borra, con sus leads y eventos, cualquier conversacion de cualquier bot cuyo sessionId empiece con 'evals-' (en scripts/regression/purge.ts, con 'regression-test-'). El sessionId lo manda el navegador sin formato. El escape unsafeGlobalQuery se rotula 'conversaciones de eval', pero el filtro no lo garantiza: el 'doble cinturon' repite el mismo prefijo. Hoy no tiene impacto en prod.
+- Propuesta: Acotar el findMany y los deleteMany a botConfigId in evalBotIds(), ademas del prefijo, como ya hace el reset de cuota. Lo mismo en scripts/regression/purge.ts con los bots de regresion.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): lib.chatbot.evals, modelo.Conversation, modelo.ChatbotLead, modelo.ChatbotEvent
+
+### [SEC-082] El stream del chat le manda al visitante anónimo los argumentos y resultados de las tools: la clasificación interna del lead (spam/empleo/proveedor, señales, resumen para el equipo) y el id interno del lead
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/chat/handleChatRequest.ts:1186` — «const streamed = result.toUIMessageStreamResponse()»; librería ai@6.0.214, dist/index.js línea 8461 — «type: "tool-input-available",»; librería ai@6.0.214, dist/index.js línea 8486 — «type: "tool-output-available",»; `src/modules/chatbot/server/tools/captureLead.ts:79` — «category: z.enum(LEAD_CATEGORIES).default('sales').describe(»; `src/modules/chatbot/server/tools/captureLead.ts:76` — «'Resumen breve (1-2 oraciones) en español rioplatense de qué busca el usuario. Va a la BD para el equipo.'»; `src/modules/chatbot/server/tools/captureLead.ts:555` — «leadId: result.id,»; `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:60` — «purchaseSignals: z.string().max(300).optional().describe(»
+- Impacto: Cualquiera que abra las herramientas de desarrollo en el sitio de un cliente real (o un competidor que lo automatice) lee en el SSE cómo lo clasificó el bot (category 'spam', 'employment' o 'provider', las señales de scoring), el resumen que la propia descripción del schema declara 'para el equipo', las 'señales de compra' citadas del handoff y el cuid interno del lead. capture_lead no renderiza tarjeta (renderToolCall cae en default), así que el widget no necesita nada de eso. El riesgo es bajo, pero expone criterio comercial del cliente e ids internos.
+- Propuesta: Que capture_lead devuelva solo {success, alreadyCaptured} (sin leadId). Filtrar en el borde (TransformStream sobre el UI stream, antes del watchdog) los chunks tool-input-* y tool-output-* de las tools sin tarjeta (capture_lead, confirm_contact_request). Antes de filtrar, verificar en renderToolCall y useChatbot que nadie los consuma.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-api-chatbot, h3.vis-widget-cliente, h3.vis-widget-develop, lib.chatbot.tools, modelo.ChatbotLead
+
+### [SEC-083] show_whatsapp_handoff guarda y manda a Telegram el 'contacto' del visitante sin la validación de formato y pertenencia que capture_lead aplica (SEC-LLM-03)
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: seguridad
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:50` — «visitorContact: z.string().max(200).optional().describe(»; `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:140` — «visitorContact: input.visitorContact ?? null,»; `src/modules/chatbot/server/tools/captureLead.ts:253` — «const phoneReason = classifyChannel(rawPhone, isValidArgentinePhone, (v) =>»
+- Impacto: En un handoff directo, sin capture_lead previo, el modelo puede inventar o completar un teléfono o un email: justo lo que SEC-LLM-03 bloquea en capture_lead. Ese dato queda en la metadata del ChatbotEvent y llega al Telegram de develOP como 'Contacto:'. Con un cliente real, el equipo podría llamar a un tercero. El dueño no ve ese contacto (el panel solo muestra visitorName), así que nadie lo corrige.
+- Propuesta: Extraer classifyChannel, phoneAppearsInVisitorText y emailAppearsInVisitorText de captureLead a un helper y aplicarlos a visitorContact (leyendo los USER persistidos de la conversación): si no pasa, guardar null. Alternativa: sacar visitorContact del schema y tomar el contacto del lead capturado.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-073]
+- Nodo(s): lib.chatbot.tools, int.telegram, modelo.ChatbotEvent, h3.vis-api-chatbot
 
 ## Bugs latentes
 
@@ -1463,6 +1569,37 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: S  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h3.vis-whatsapp.identidad-bsuid, modelo.ContactIdentity, modelo.MotorConversation
+
+### [BUG-108] Bot pausado: en produccion /config responde 403 y el visitante ve 'No pudimos conectar con el chat' en vez de la tarjeta de WhatsApp (B8.3 solo funciona en dev)
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/modules/chatbot/server/config/getPublicConfig.ts:124` — «paused: bot.isActive ? null : buildPausedInfo(bot),»; `src/app/api/chatbot/[slug]/config/route.ts:51` — «if (!origin && isSameOriginBypassApplicable() && isTrustedSameOrigin(request)) { if (!(await isBotServable(slug))) { return new Response(JSON.stringify({ error: 'Origin not allowed' }), {»; `src/app/api/chatbot/[slug]/config/same-origin.ts:72` — «return bot !== null && bot.isActive»; `src/lib/security/validate-origin.ts:67` — «if (!bot.isActive) return { allowed: false, reason: 'bot_inactive' }»; `src/lib/security/validate-origin.ts:56` — «allowed: process.env.NODE_ENV !== 'production',»; `src/modules/chatbot/shared/chatRetryPolicy.ts:68` — «if (status >= 400) return { kind: 'client-error', status, retryAfterMs: parseRetryAfterMs(retryAfter) }»; `src/modules/chatbot/components/embed/ChatbotEmbed.tsx:177` — «if (!chatbot.config) { ... <ConfigLoadError onRetry={chatbot.retryLoadConfig} />»
+- Impacto: El embed vive en develop.com.ar, asi que su GET a /config es same-origin y el navegador no manda Origin: en produccion entra por isBotServable, que exige isActive, y devuelve 403 (y validateOrigin hace lo mismo cross-origin). Cuando develOP pausa el bot de un cliente (impago, KB a corregir), el visitante del sitio del cliente ve un error de conexion con 'Reintentar' que parece una caida, en vez de la tarjeta 'fuera de servicio, escribinos por WhatsApp' que B8.3 diseno. En dev el GET sin Origin pasa (validate-origin.ts:56) y la tarjeta aparece, por eso no se noto. La premisa de BUG-088 (saludo y chips con el bot pausado) solo se reproduce en dev o con la config cacheada antes de pausar.
+- Propuesta: Decidir una sola regla y pinnearla en el invariante fix-origin-same-origin: o /config sirve bots existentes inactivos (solo config con paused; el chat sigue cortando por bot_inactive), o el widget interpreta el 403 con reason bot_inactive como pausado. Hoy dos comentarios del repo afirman lo contrario uno del otro (getPublicConfig.ts:60 vs same-origin.ts:63-66).
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: —
+- Nodo(s): h3.vis-widget-cliente, h3.vis-api-chatbot, lib.security, lib.chatbot.config
+- REQUIERE-VERIFICACIÓN-HUMANA: VH-107
+
+### [BUG-109] Un turno vacío de Vertex en una conversación nueva se paga en Google pero no queda en la base: la compensación descarta la fila y persistTurn sale antes de sumar tokens y costo
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: VERIFICADO-POR-LECTURA
+- Evidencia: `src/modules/chatbot/server/chat/reconcile.ts:371` — «case 'empty_response':»; `src/modules/chatbot/server/chat/reconcile.ts:374` — «return input.toolCallCount === 0»; `src/modules/chatbot/server/chat/persistTurn.ts:340` — «compensate('empty_response', {»; `src/modules/chatbot/server/chat/persistTurn.ts:353` — «if (getConversationDiscarded()) {»; `src/modules/chatbot/server/chat/persistTurn.ts:359` — «turnDiscarded: true,»; `src/modules/chatbot/server/chat/persistTurn.ts:372` — «const costBreakdown = calculateCost(»; `src/modules/chatbot/server/chat/persistTurn.ts:460` — «await incrementQuota(»; `src/modules/chatbot/server/chat/handleChatRequest.ts:1171` — «tokensIn: hasSteps»
+- Impacto: Con el primer cliente real, cada turno que Gemini cierra vacío en una conversación nueva (el bloque MUDEZ lo midió en producción) consume tokens que Google factura. onFinish trae el usage real (handleChatRequest:1171), pero la compensación borra la conversación y persistTurn vuelve en :353-365, antes de calculateCost (:372) y de incrementQuota (:460). El log chat.llm_request_finished de ese camino tampoco lleva tokensIn, tokensOut ni costUsd. QuotaUsage.costUsd y el costo por cliente que ve develOP subestiman el gasto real justo en los turnos anómalos, y no se puede conciliar contra la factura de GCP. Es otro camino que BUG-094 (watchdog) y DEU-048 (insights).
+- Propuesta: Separar devolver el cupo de borrar el costo. Antes del early-return, sumar tokens y costo al QuotaUsage del período reservado (incrementQuota con isNewConversation:false, con su propio deadline) o como mínimo loguear tokensIn, tokensOut y costUsd en chat.llm_request_finished.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-094]
+- Nodo(s): h3.vis-api-chatbot, h3.adm-chatbots, lib.chatbot.chat, lib.chatbot.quota, modelo.QuotaUsage, int.vertex
+
+### [BUG-110] El cron de insights del chatbot no consulta el plan: llama a Vertex por los bots Starter y les manda 'N insights nuevos' que su plan no les deja ver
+- Dominio: D5  ·  Severidad: MEDIA  ·  Tipo: bug
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/cron/generate-insights/route.ts:19` — «where: { isActive: true },»; `src/app/api/cron/generate-insights/route.ts:43` — «const result = await generateInsightsForBot(bot.organization.id, bot.id)»; `src/app/api/cron/generate-insights/route.ts:61` — «await sendInsightsNotificationEmail({»; `src/modules/chatbot/server/insights/generateInsights.ts:102` — «const { object } = await generateObject({»; `prisma/seeds/sync-plans.ts:77` — «insightEnabled: false,»; `src/lib/plan/fallback.ts:59` — «insightEnabled: false,»; `src/app/(protected)/dashboard/resultados/analisis/page.tsx:36` — «const showAnalysis = planAllows(plan, 'insight')»; `src/modules/chatbot/server/notifications/sendInsightsNotification.ts:48` — «Ver mis insights →»; `netlify.toml:26` — «schedule = "0 9 * * *"»
+- Impacto: Un primer cliente Starter (o sin suscripción, que cae al plan fallback con insightEnabled en false) con 10 o más conversaciones en 30 días entra en el cron diario. Gemini le genera insights y le llega el mail 'N insights nuevos para <bot>' con el botón 'Ver mis insights'. En el panel no los encuentra: Análisis y el PDF mensual los ocultan por plan. Es una promesa rota que genera consultas de soporte, y develOP paga el LLM de un beneficio que no cobra. Como los PENDING nunca se resuelven (BUG-023), el gasto se corta al quinto pendiente, pero el mail ya salió. Es el mismo patrón que BUG-060 en un lugar que no cita.
+- Propuesta: En el cron, resolver getPlanForOrg y saltear el bot (sin LLM ni mail) si planAllows(plan,'insight') es false. O decidir que los insights son de todos los planes y mostrarlos. Unificar la decisión con BUG-060.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [BUG-060]
+- Nodo(s): int.cron.generate-insights, lib.chatbot.insights, lib.chatbot.notifications, h2.cli-resultados, int.vertex, int.brevo, modelo.ChatbotInsight
 
 ### [BUG-004] El rol CLIENT existe en el enum pero el proxy lo expulsa de /dashboard: un usuario CLIENT queda en bucle
 - Dominio: D1  ·  Severidad: BAJA  ·  Tipo: bug
@@ -2495,6 +2632,16 @@ Es el mismo patrón que SEC-007 cita solo para loginAction.
 - Esfuerzo: M  ·  Zona: libre
 - Relacionado: —
 - Nodo(s): h3.vis-whatsapp, modelo.MotorConversation
+
+### [DEU-054] POST /api/admin/chatbot/insights/generate es una ruta huérfana que llama a Vertex sin el tope de pendientes del cron, sin Zod y sin manejo de errores
+- Dominio: D5  ·  Severidad: BAJA  ·  Tipo: deuda
+- Confianza: PROBABLE
+- Evidencia: `src/app/api/admin/chatbot/insights/generate/route.ts:12` — «const body = (await req.json()) as { botSlug?: unknown }»; `src/app/api/admin/chatbot/insights/generate/route.ts:24` — «const result = await generateInsightsForBot(bot.organizationId, bot.id)»; `src/app/api/cron/generate-insights/route.ts:38` — «if (pendingCount >= 5) {»
+- Impacto: Hoy nadie la llama (ver ausencias), pero sigue publicada. Un SUPER_ADMIN, o una sesión robada de uno, puede invocarla en bucle: cada llamada es una consulta a Gemini con hasta 50 conversaciones del cliente y le agrega hasta 5 insights PENDING más, sin el freno de 5 pendientes que sí tiene el cron. Esos insights le llegan al cliente en Análisis y en el PDF. Un body que no es JSON da 500 sin captura.
+- Propuesta: Borrarla junto con la poda. Si se quiere un botón 'generar ahora', aplicar el mismo gate de pendientes y de plan, Zod, rate limit por admin y try/catch con Sentry.
+- Esfuerzo: S  ·  Zona: libre
+- Relacionado: [SEC-060]
+- Nodo(s): h3.adm-chatbots, lib.chatbot.insights, int.vertex, modelo.ChatbotInsight
 
 ## Calidad
 

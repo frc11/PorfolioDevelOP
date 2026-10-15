@@ -1805,6 +1805,139 @@
    "patron": "Servicio que recibe orgId como parametro (no de la sesion): el protocolo SEC se traslada al llamador",
    "como_buscarlo": "git grep -n \"orgId: string\" origin/main -- src/modules/*/services src/lib/**/service*.ts",
    "donde_aparecio": "src/modules/motor/services/sendMessage.ts:51, :208"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "patron": "Topes de costo que solo avanzan cuando el trabajo termina bien (o que se devuelven si el cliente corta): el atacante corta antes y el gasto ya ocurrio",
+   "como_buscarlo": "git grep -n -E \"increment|reserve|compensate|release\" origin/main -- logic-core-v3/src y, para cada contador de cupo, ver si se incrementa antes o despues de la llamada costosa y si hay rama de devolucion por abort/desconexion",
+   "donde_aparecio": "modules/chatbot/server/chat/handleChatRequest.ts:400, :1123, :1320; reconcile.ts:367-370; persistTurn.ts:447. Cruzar en el brief IA (SEC-043 check-then-act), executive-brief y en el motor cuando sume LLM (B2)."
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "patron": "Una clasificacion que decide el input (o el LLM) habilita saltear un limitador anti-spam",
+   "como_buscarlo": "git grep -n -E \"bypassCap|skipRateLimit|bypass\" origin/main -- logic-core-v3/src y revisar de donde sale la condicion; ademas listar los llamadores de notifyTelegramOptional( y sendAgencyAlert( sin checkRateLimit",
+   "donde_aparecio": "lib/client-notifications/decide.ts:47-48 + notify.ts:111; captureLead.ts:455 y showWhatsappHandoff.ts:164 (Telegram sin tope). Cruzar en LeadOS (lib/leados/notify.ts, ZONA-FRANCO) y alerts.ts."
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "patron": "Comportamiento que diverge entre NODE_ENV development y production en guardas de seguridad: el defecto no se ve en dev",
+   "como_buscarlo": "git grep -n -E \"NODE_ENV (===|!==) '(production|development)'\" origin/main -- logic-core-v3/src/lib/security logic-core-v3/src/app/api logic-core-v3/src/modules y para cada rama preguntar que flujo de producto solo se probo en dev",
+   "donde_aparecio": "lib/security/validate-origin.ts:39, :56 y app/api/chatbot/[slug]/config/same-origin.ts:26 (la tarjeta de bot pausado solo aparece en dev)."
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "patron": "Texto de terceros (resenas, rutas, consultas, paginas scrapeadas, leads) interpolado sin delimitar en prompts cuya salida se publica o se muestra como recomendacion",
+   "como_buscarlo": "git grep -n -E \"generateObject\\(|generateText\\(|streamText\\(|messages\\.create\\(\" origin/main -- logic-core-v3/src y, en cada llamada, mirar que entra al prompt y donde termina la salida",
+   "donde_aparecio": "lib/ai/review-reply-draft.ts:26-28 (publica en Google), lib/ai/results-insights.ts:82 y :132-133. Falta cruzar en D4 (dossier y demos de LeadOS, ZONA-FRANCO)."
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "patron": "Gates de plan solo de presentacion: el dato que el plan no incluye viaja igual en el payload RSC a componentes 'use client'",
+   "como_buscarlo": "git grep -n \"planAllows(\" origin/main -- \"logic-core-v3/src/app/(protected)/dashboard\" y verificar que las props pasadas al componente cliente se recorten cuando el flag da false",
+   "donde_aparecio": "dashboard/chatbot/leads/page.tsx:61-117, leads/[id]/page.tsx:37-95 y dashboard/chatbot/page.tsx:30 (listLeadsByOrgSlug con ...r). Cruzar en Resultados/brief (BUG-060)."
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "patron": "Cache en memoria a nivel modulo (Map con TTL) invalidado desde una server action: en serverless solo limpia la instancia que corrio la action",
+   "como_buscarlo": "git grep -n -E \"new Map<string, \\{ data\" origin/main -- logic-core-v3/src y buscar sus funciones invalidate*/clear* y quien las llama",
+   "donde_aparecio": "modules/chatbot/server/conversation/resolver.ts:11-49 (botCache, invalidateBotCache desde actions.ts:69 y bulk-actions.ts:37) y lib/plan/get-plan-for-org.ts:21 (planCache). Pausar un bot o editar su KB tarda hasta 60 s en otras lambdas."
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "patron": "react-markdown sobre texto generado por LLM o escrito por terceros sin controlar a, img ni urlTransform",
+   "como_buscarlo": "git grep -n \"ReactMarkdown\\|from 'react-markdown'\" origin/main -- logic-core-v3/src y revisar si cada uso define components.a/img o disallowedElements",
+   "donde_aparecio": "ChatWindow.tsx:384, StreamingMarkdown.tsx:171, ChatbotEmbed.tsx:358 (MarkdownEditor.tsx:80 del admin renderiza la KB, contenido de admin)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "patron": "unstable_cache con clave o tag por un identificador reutilizable o mutable (slug) en vez de organizationId, y tags que ningun revalidateTag invalida",
+   "como_buscarlo": "git grep -n -A6 \"unstable_cache(\" origin/main -- logic-core-v3/src; por cada tag, git grep -n \"revalidateTag(\" con su prefijo",
+   "donde_aparecio": "multiTenantQueries.ts:51-52 y :255-256"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "patron": "Filas Prisma completas como props de componentes 'use client' (QuotaUsage, ChatbotLead, Organization, BotConfig)",
+   "como_buscarlo": "git grep -n \"Omit<QuotaUsage\\|: QuotaUsage\\b\\|ChatbotLead\\[\\]\\|Organization &\" origin/main -- logic-core-v3/src y cruzar con archivos que empiezan con 'use client'",
+   "donde_aparecio": "ChatbotOverview.tsx:25-35 (usage, recentLeads y session)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "patron": "Purgas o limpiezas que filtran por prefijo de un campo que elige el visitante, sin acotar a tenant o bot",
+   "como_buscarlo": "git grep -n \"startsWith: \" origin/main -- logic-core-v3/scripts logic-core-v3/src",
+   "donde_aparecio": "src/modules/chatbot/evals/cleanup.ts:55 y :95; scripts/regression/purge.ts:48"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "patron": "Eventos de window o postMessage que llevan PII del visitante al documento anfitrion",
+   "como_buscarlo": "git grep -n \"CustomEvent(\\|postMessage(\" origin/main -- logic-core-v3/src logic-core-v3/public",
+   "donde_aparecio": "ChatbotEmbed.tsx:103 -> widget.js:180"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "patron": "avatarImageUrlSchema (acepta cualquier http(s)) reusado en acciones del portal: el avatar del bot que elige el cliente se carga en el navegador de cada visitante y en las vistas del admin. Misma causa raiz que SEC-049, para cruzar con su arreglo",
+   "como_buscarlo": "git grep -n \"avatarImageUrlSchema\" origin/main -- logic-core-v3/src",
+   "donde_aparecio": "updateBotAppearance.ts:39 (bot, portal), lib/actions/schemas.ts:17 (empresa, portal), saveBotConfig.ts:31, createClientOnly.ts:22, updateClient.ts:19"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "patron": "Compensación o descarte que borra una fila compartida sin mirar requests concurrentes sobre el mismo recurso (deleteMany condicional + cascade)",
+   "como_buscarlo": "git grep -n \"deleteMany(\" origin/main -- src | y revisar los que van en caminos de rollback o compensación; además git grep -n \"compensate\\|discard\" origin/main -- src",
+   "donde_aparecio": "src/modules/chatbot/server/quota/checker.ts:197 y src/modules/chatbot/server/chat/handleChatRequest.ts:278"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "patron": "Decisión de cobro o devolución de cupo basada en una señal que controla el cliente (desconexión, abort, retry)",
+   "como_buscarlo": "git grep -n \"onAbort\\|'cancelled'\\|stream_abort\" origin/main -- src",
+   "donde_aparecio": "src/modules/chatbot/server/chat/reconcile.ts:367 y handleChatRequest.ts:1123"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "patron": "Crons o rutas que llaman a un LLM sin gate de plan",
+   "como_buscarlo": "git grep -ln \"generateObject(\\|generateText(\\|streamText(\" origin/main -- src  y cruzar con  git grep -L \"planAllows\" origin/main -- <esas rutas y sus callers>",
+   "donde_aparecio": "src/app/api/cron/generate-insights/route.ts:43 (lib/ai ya en BUG-060)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "patron": "Tools del LLM que persisten datos de contacto sin la validación SEC-LLM-03",
+   "como_buscarlo": "git grep -n \"tool({\" origin/main -- src  y revisar en cada execute los campos phone/email/contact que se escriben (ChatbotEvent, ChatbotLead, Telegram)",
+   "donde_aparecio": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts:50/140"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "patron": "Resultados de tools con ids internos o datos 'para el equipo' que viajan al navegador por el UI message stream",
+   "como_buscarlo": "git grep -n \"return {\" origin/main -- src/modules/chatbot/server/tools  y git grep -n \"toUIMessageStreamResponse\\|toUIMessageStream(\" origin/main -- src",
+   "donde_aparecio": "src/modules/chatbot/server/tools/captureLead.ts:555 + handleChatRequest.ts:1186"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "patron": "Rutas API huérfanas que gastan LLM o email",
+   "como_buscarlo": "listar git ls-files \"src/app/api/**/route.ts\" y, para cada path, git grep -n \"<path sin src/app>\" origin/main -- src scripts public netlify",
+   "donde_aparecio": "src/app/api/admin/chatbot/insights/generate/route.ts"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "patron": "avatarImageUrlSchema acepta URLs http(s) arbitrarias: el avatar del bot que pone el cliente se carga en el widget de los visitantes y en las vistas del admin (mismo esquema que SEC-049)",
+   "como_buscarlo": "git grep -n \"avatarImageUrlSchema\" origin/main -- src",
+   "donde_aparecio": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts:39 (y SEC-049 en el avatar de la org)"
   }
  ]
 }

@@ -1,0 +1,84 @@
+{
+ "D5-c2/D5-T1/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Leído: handleChatRequest.ts:1119-1126 (onAbort compensa con firstTokenDelivered = ttfbAt !== null), :1316-1322 (el corte del cliente aborta el run), reconcile.ts:365-370 (antes del primer chunk útil se devuelve el cupo), quota/checker.ts:196-200 (borra la conversación sin ASSISTANT y libera el cupo), persistTurn.ts:446-451 (el único escritor de messageCount) y handleChatRequest.ts:547 (el tope de 40 mensajes lee messageCount). Que la desconexión del cliente llegue a la función en Netlify y que Vertex facture el turno cortado es runtime → PROBABLE con su VH. Los dos verificadores la sostienen ALTA. Agrava SEC-057: ahí el cupo frena al atacante; acá el cupo no frena nada.",
+  "confianza_padre": "PROBABLE",
+  "relacionados_ids": [
+   "SEC-057"
+  ]
+ },
+ "D5-c2/D5-T3/H01": {
+  "decision": "fusionar",
+  "con": "D5-c2/D5-T1/H01",
+  "nota_padre": "Misma compensación por stream_abort; suma la variante con dos pedidos del mismo sessionId (el segundo recibe la respuesta completa y no queda transcript ni costo)."
+ },
+ "D5-c2/D5-T1/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: decide.ts:47-48 (lead «hot» con scoring → bypassCap), notify.ts:108-114 (el tope anti-spam solo corre sin bypassCap) y presets.ts:65 (leadNotifyPerOrg 5/h); las señales que suman puntos las elige el visitante.",
+  "relacionados_ids": [
+   "BUG-099",
+   "SEC-057"
+  ]
+ },
+ "D5-c2/D5-T2/H01": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: ChatWindow.tsx:22-32 (MARKDOWN_COMPONENTS solo redefine p, code y strong), StreamingMarkdown.tsx:171 (ReactMarkdown con esos componentes: a e img quedan con el render por defecto) y la urlTransform por defecto de react-markdown admite https. Que el modelo emita la imagen depende de la inyección (eslabón de runtime) → PROBABLE.",
+  "confianza_padre": "PROBABLE",
+  "relacionados_ids": [
+   "SEC-058"
+  ],
+  "caso_indice": 0
+ },
+ "D5-c2/D5-T3/H02": {
+  "decision": "aceptar",
+  "verificado_padre": true,
+  "nota_padre": "Muestreado: reconcile.ts:371-374 (respuesta vacía sin tools → se devuelve el cupo) y persistTurn.ts:350-359 (con la conversación descartada sale antes de sumar tokens y costo).",
+  "relacionados_ids": [
+   "BUG-094"
+  ]
+ },
+ "D5-c2/D5-T2/H03": {
+  "decision": "fusionar",
+  "con": "SEC-037",
+  "nota_padre": "Misma causa raíz: el resumen de Mi Chatbot pasa filas completas de Prisma a componentes cliente; a la fila de Organization se suma la de QuotaUsage (tokens y costo en USD)."
+ },
+ "D5-c2/D5-T3/H03": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "BUG-060"
+  ]
+ },
+ "D5-c2/D5-T1/H04": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-056",
+   "SEC-051"
+  ]
+ },
+ "D5-c2/D5-T3/H05": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-073"
+  ]
+ },
+ "D5-c2/D5-T2/H04": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-070"
+  ],
+  "caso_indice": 3
+ },
+ "D5-c2/D5-T2/H02": {
+  "decision": "aceptar",
+  "caso_indice": 1
+ },
+ "D5-c2/D5-T3/H06": {
+  "decision": "aceptar",
+  "relacionados_ids": [
+   "SEC-060"
+  ]
+ }
+}

@@ -2323,6 +2323,125 @@
    "afirmacion": "No hay beforeSendTransaction ni patron de token hex en el scrubber de Sentry (el channelToken va en el path)",
    "comando": "git grep -n \"beforeSendTransaction\" origin/main -- src/lib/sentry src/instrumentation.ts sentry.server.config.ts",
    "control_positivo": "Solo aparece el comentario en scrub-pii.ts:115; beforeSend existe en src/instrumentation.ts:11 y sentry.server.config.ts:13"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "afirmacion": "lib/ai no tiene ningun delimitador ni regla de texto no confiable para datos de terceros (a diferencia del chat)",
+   "comando": "git grep -n -E \"wrapUntrusted|vmsg_|no confiable|untrusted\" origin/main -- logic-core-v3/src/lib/ai  -> 0 resultados (exit 1)",
+   "control_positivo": "git grep -n -E \"wrapUntrusted|vmsg_\" origin/main -- logic-core-v3/src/modules/chatbot/server/chat/handleChatRequest.ts -> :878, :883, :884"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "afirmacion": "No existe un tope propio para los avisos de lead caliente (el bypass no tiene limitador alternativo)",
+   "comando": "git grep -n -E \"leadHotPerOrg|hotNotify|leadNotifyHot\" origin/main -- logic-core-v3/src  -> 0 resultados (exit 1)",
+   "control_positivo": "git grep -n \"leadNotifyPerOrg\" origin/main -- logic-core-v3/src/lib/rate-limit/presets.ts -> :65"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "afirmacion": "notifyTelegramOptional no aplica rate limit",
+   "comando": "git grep -n -E \"checkRateLimit\" origin/main -- logic-core-v3/src/lib/notifications/telegram.ts  -> 0 resultados (exit 1)",
+   "control_positivo": "git grep -n \"checkRateLimit\" origin/main -- logic-core-v3/src/lib/client-notifications/notify.ts -> :12, :19"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "afirmacion": "No hay un techo de gasto de LLM independiente del cupo de conversaciones",
+   "comando": "git grep -n -i -E \"maxCostUsd|costCap|spendCap|dailyBudget|llmBudget|monthlyCostLimit\" origin/main -- logic-core-v3/src logic-core-v3/prisma/schema.prisma  -> 0 resultados (exit 1)",
+   "control_positivo": "git grep -n \"estimatedCostUsd\" origin/main -- logic-core-v3/prisma/schema.prisma -> :1399 (el costo se registra, pero nada lo usa como tope)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "afirmacion": "persistTurn es el unico escritor de Conversation.messageCount (el tope de 40 solo avanza al persistir el turno)",
+   "comando": "git grep -n \"messageCount: { increment\" origin/main -- logic-core-v3/src  -> solo src/modules/chatbot/server/chat/persistTurn.ts:447",
+   "control_positivo": "git grep -n \"messageCount\" origin/main -- logic-core-v3/prisma/schema.prisma -> :1396 (el campo existe)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "afirmacion": "Ninguna rama de /config (route, same-origin, validateOrigin) deja pasar un bot pausado en produccion",
+   "comando": "git grep -n -E \"paused|bot_paused\" origin/main -- \"logic-core-v3/src/app/api/chatbot/[slug]/config/route.ts\" \"logic-core-v3/src/app/api/chatbot/[slug]/config/same-origin.ts\" logic-core-v3/src/lib/security/validate-origin.ts  -> 0 resultados (exit 1); los gates exigen isActive en same-origin.ts:72 y validate-origin.ts:67",
+   "control_positivo": "git grep -n \"paused: bot.isActive\" origin/main -- logic-core-v3/src/modules/chatbot/server/config/getPublicConfig.ts -> :124"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T1",
+   "afirmacion": "Las paginas de contactos y el resumen no recortan el scoring en el servidor cuando el plan no lo incluye",
+   "comando": "git grep -n -E \"showScoring \\?|if \\(!showScoring\\)|omit.*score\" origin/main -- \"logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/page.tsx\" \"logic-core-v3/src/app/(protected)/dashboard/chatbot/leads/[id]/page.tsx\" \"logic-core-v3/src/app/(protected)/dashboard/chatbot/page.tsx\"  -> 0 resultados (exit 1)",
+   "control_positivo": "git grep -n \"includeClassification: showScoring\" origin/main -- logic-core-v3/src/app/api/dashboard/chatbot/leads/export/route.ts -> :168 (el CSV si recorta)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "afirmacion": "Ningun revalidateTag invalida los tags chatbot-leads:* ni chatbot-usage:*",
+   "comando": "git grep -n \"chatbot-leads:\\|chatbot-usage:\\|revalidateTag(`chatbot-leads\\|revalidateTag(`chatbot-usage\" origin/main -- logic-core-v3/src  -> solo las definiciones en multiTenantQueries.ts:52 y :256",
+   "control_positivo": "git grep -n \"revalidateTag(`hot-leads-count\" origin/main -- logic-core-v3/src -> updateLeadStatus.ts:88 y captureLead.ts:438"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "afirmacion": "Los renderers de markdown del widget (chat y embed) no sobreescriben a ni img ni pasan urlTransform, allowedElements, disallowedElements o skipHtml",
+   "comando": "git grep -n \"urlTransform\\|allowedElements\\|disallowedElements\\|skipHtml\\|img:\\|a: (\" origin/main -- logic-core-v3/src/modules/chatbot/components/chat logic-core-v3/src/modules/chatbot/components/embed -> 0 resultados",
+   "control_positivo": "git grep -n \"strong: (\" origin/main -- (mismas rutas) -> ChatWindow.tsx:38 y ChatbotEmbed.tsx:375"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "afirmacion": "Nada en la app consume develop:lead; solo lo emite widget.js y lo escucha la pagina de prueba",
+   "comando": "git grep -n \"develop:lead['\\\"]\" origin/main -- logic-core-v3/src logic-core-v3/public -> widget.js:180 (emisor) y test-widget.html:100",
+   "control_positivo": "git grep -n \"develop:lead-captured\" origin/main -- logic-core-v3/public -> widget.js:177"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "afirmacion": "El unico codigo que cambia Organization.slug (updateClientAction) no tiene importadores: el slug solo se libera con el borrado definitivo",
+   "comando": "git grep -n \"updateClientAction\" origin/main -- logic-core-v3/src -> solo lib/actions/clients.ts:149 y :153 (definicion y comentario)",
+   "control_positivo": "El mismo grep encuentra la definicion; git grep -n \"organization.update\" lista los demas escritores, ninguno toca slug (updateClient.ts:86-96 sin slug)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T2",
+   "afirmacion": "cleanup.ts no acota las conversaciones a purgar por botConfigId",
+   "comando": "git grep -n \"botConfigId\" origin/main -- logic-core-v3/src/modules/chatbot/evals/cleanup.ts -> solo :108 (reset de QuotaUsage)",
+   "control_positivo": "El mismo grep encuentra :108, asi que el patron matchea en el archivo; el filtro de conversaciones (:55, :95) es solo por sessionId"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "afirmacion": "Ni el cron generate-insights, ni generateInsightsForBot, ni la function de Netlify consultan el plan (insightEnabled) antes de llamar a Vertex y mandar el mail",
+   "comando": "git grep -n \"planAllows\\|insightEnabled\\|getPlanForOrg\" origin/main -- src/app/api/cron/generate-insights/route.ts src/modules/chatbot/server/insights netlify/functions/generate-insights-cron.ts  → 0 resultados",
+   "control_positivo": "git grep -n \"planAllows(plan, 'insight')\" origin/main -- \"src/app/(protected)/dashboard/resultados/analisis/page.tsx\" → :36 (el gate existe en la vista)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "afirmacion": "show_whatsapp_handoff no aplica la validación SEC-LLM-03 (formato + pertenencia) a visitorContact",
+   "comando": "git grep -n \"isValidArgentinePhone\\|AppearsInVisitorText\\|classifyChannel\" origin/main -- src/modules/chatbot/server/tools/showWhatsappHandoff.ts → 0 resultados",
+   "control_positivo": "git grep -n \"classifyChannel(\" origin/main -- src/modules/chatbot/server/tools/captureLead.ts → :137, :253, :256"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "afirmacion": "Nadie llama a /api/admin/chatbot/insights/generate (ruta huérfana)",
+   "comando": "git grep -n \"insights/generate\" origin/main -- src scripts public e2e tests netlify → 0 resultados",
+   "control_positivo": "git grep -n \"api/admin/chatbot/events\" origin/main -- src → src/modules/chatbot/components/admin/ActivityLog.tsx:106 y src/instrumentation.ts:25 (la otra ruta admin del chatbot sí tiene consumidor)"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "afirmacion": "El stream del chat se arma con toUIMessageStreamResponse() sin opciones: no hay filtro de las partes de tools hacia el navegador",
+   "comando": "git grep -n \"toUIMessageStreamResponse(\" origin/main -- src/modules/chatbot/server src/app/api → única llamada de producción handleChatRequest.ts:1186, sin argumentos",
+   "control_positivo": "el mismo grep devuelve la llamada (prueba que el patrón matchea); en node_modules/ai/dist/index.js:8461/8486 se ven los chunks tool-input-available/tool-output-available que emite por defecto"
+  },
+  {
+   "ciclo": "D5-c2",
+   "lote": "D5-T3",
+   "afirmacion": "En persistTurn no hay incrementQuota ni calculateCost antes del early-return de la conversación descartada (353-365)",
+   "comando": "git grep -n \"incrementQuota\\|calculateCost\" origin/main -- src/modules/chatbot/server/chat/persistTurn.ts → :49, :50 (imports), :372, :460: todos fuera del bloque 353-365",
+   "control_positivo": "el mismo grep encuentra las dos llamadas en el camino normal (:372 y :460)"
   }
  ]
 }

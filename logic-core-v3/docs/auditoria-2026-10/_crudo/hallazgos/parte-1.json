@@ -5790,6 +5790,31 @@
      "ruta": "prisma/schema.prisma",
      "linea": 402,
      "fragmento": "internalNotes String?"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/multiTenantQueries.ts",
+     "linea": 249,
+     "fragmento": "return forOrg(botInfo.organization.id).quotaUsage.findByPeriod(   (findFirst sin select, registry.ts:562)"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+     "linea": 43,
+     "fragmento": "const usageSerialized = usage ? { ...usage, costUsd: Number(usage.costUsd) } : null"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+     "linea": 25,
+     "fragmento": "type SerializedQuotaUsage = Omit<QuotaUsage, 'costUsd'> & { costUsd: number }"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+     "linea": 41,
+     "fragmento": "monthlyConversations: usage?.conversationsCount ?? 0,   (unico campo que usa)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+     "linea": 80,
+     "fragmento": "// SOLO conteos. tokensIn/tokensOut/costUsd son internos — jamás salen de acá."
     }
    ],
    "impacto": "Bloqueante para el primer cliente con Reseñas o Tienda conectada: cualquier usuario de su org (incluido un VIEWER) recibe en el payload RSC de /dashboard/chatbot el access y refresh token de Google Business, el token sin vencimiento de Tiendanube y la API key de Cal.com (credenciales emitidas a la app de develOP sobre sus cuentas), legibles en DevTools y por cualquier XSS o extensión del navegador, y además internalNotes, las notas privadas que develOP escribe sobre ese cliente. El componente solo usa session.bot.botName; getPublicConfig del mismo módulo sí usa select.",
@@ -5800,7 +5825,9 @@
     "h3.cli-chatbot",
     "lib.chatbot.admin",
     "modelo.Organization",
-    "modelo.BotConfig"
+    "modelo.BotConfig",
+    "modelo.QuotaUsage",
+    "lib.chatbot.server"
    ],
    "relacionados_ids": [],
    "previas": [],
@@ -5815,7 +5842,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "D5-c2",
+      "tmp": "D5-c2/D5-T2/H03",
+      "titulo": "El resumen de Mi Chatbot manda al navegador la fila completa de QuotaUsage: tokens y costo en USD que develOP paga por el bot del cliente",
+      "severidad": "BAJA",
+      "nota_padre": "Misma causa raíz: el resumen de Mi Chatbot pasa filas completas de Prisma a componentes cliente; a la fila de Organization se suma la de QuotaUsage (tokens y costo en USD)."
+     }
+    ]
    },
    "estado": "vigente"
   },

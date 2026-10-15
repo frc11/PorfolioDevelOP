@@ -1,0 +1,1205 @@
+{
+ "dominio": "D5",
+ "ciclo": "D5-c2",
+ "lote": "D5-T3",
+ "run": "wf_15878710-3fa",
+ "fecha": "2026-10-15T13:44:43.999Z",
+ "lectura": {
+  "archivos_leidos": [
+   {
+    "ruta": "src/modules/chatbot/server/chat/chunkTally.ts",
+    "lineas_total": 67,
+    "leido_completo": false,
+    "rangos": "grep de exports (46)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/dedup.ts",
+    "lineas_total": 63,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/degradedResponse.ts",
+    "lineas_total": 111,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+    "lineas_total": 1412,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/hookOps.ts",
+    "lineas_total": 86,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/index.ts",
+    "lineas_total": 1,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+    "lineas_total": 679,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+    "lineas_total": 551,
+    "leido_completo": false,
+    "rangos": "120-135, 337-440 + grep de constantes (_MS)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/requestSchema.ts",
+    "lineas_total": 115,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/silenceFrames.ts",
+    "lineas_total": 50,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/streamProbe.ts",
+    "lineas_total": 152,
+    "leido_completo": false,
+    "rangos": "1-152 sin comentarios de línea"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/streamWatchdog.ts",
+    "lineas_total": 478,
+    "leido_completo": false,
+    "rangos": "grep de cancel/emit (36-429) y export (260)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/toolSuspension.ts",
+    "lineas_total": 118,
+    "leido_completo": false,
+    "rangos": "grep de export (58)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/chat/withDeadline.ts",
+    "lineas_total": 168,
+    "leido_completo": false,
+    "rangos": "grep de exports (50, 157)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/config/envValidator.ts",
+    "lineas_total": 125,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/config/getPublicConfig.ts",
+    "lineas_total": 126,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/config/handleConfigRequest.ts",
+    "lineas_total": 25,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/config/index.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/conversation/index.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/conversation/resolver.ts",
+    "lineas_total": 145,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/crm/buildLeadPayload.ts",
+    "lineas_total": 115,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/crm/encryptSecret.ts",
+    "lineas_total": 98,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/crm/getEffectiveSyncStatus.ts",
+    "lineas_total": 47,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/crm/index.ts",
+    "lineas_total": 49,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/crm/postToN8n.ts",
+    "lineas_total": 208,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/crm/syncLeadToCrm.ts",
+    "lineas_total": 158,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/crm/validateWebhookUrl.ts",
+    "lineas_total": 96,
+    "leido_completo": false,
+    "rangos": "no leído (SSRF ya en SEC-072/BUG-095)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+    "lineas_total": 139,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/health/buildHealthVerdict.ts",
+    "lineas_total": 133,
+    "leido_completo": false,
+    "rangos": "1-90 sin comentarios"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/health/checkHealth.ts",
+    "lineas_total": 99,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/health/index.ts",
+    "lineas_total": 9,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
+    "lineas_total": 135,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/insights/index.ts",
+    "lineas_total": 7,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/insights/manageInsight.ts",
+    "lineas_total": 54,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/insights/queries.ts",
+    "lineas_total": 46,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/intent/detectIntent.ts",
+    "lineas_total": 51,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/intent/index.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts",
+    "lineas_total": 208,
+    "leido_completo": false,
+    "rangos": "1-140"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/leads/csv/csvEscape.ts",
+    "lineas_total": 53,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/leads/csv/index.ts",
+    "lineas_total": 21,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/factory.ts",
+    "lineas_total": 54,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/index.ts",
+    "lineas_total": 23,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/providerMapper.ts",
+    "lineas_total": 28,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/providerStreamClose.ts",
+    "lineas_total": 224,
+    "leido_completo": false,
+    "rangos": "grep de export (92)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/resolveEffectiveModel.ts",
+    "lineas_total": 65,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/types.ts",
+    "lineas_total": 67,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/providers/anthropic.ts",
+    "lineas_total": 60,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/providers/google.ts",
+    "lineas_total": 112,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/llm/providers/openai.ts",
+    "lineas_total": 54,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/logging/index.ts",
+    "lineas_total": 10,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/logging/logger.ts",
+    "lineas_total": 186,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/logging/persistentLogger.ts",
+    "lineas_total": 163,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/notifications/index.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/notifications/sendInsightsNotification.ts",
+    "lineas_total": 58,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/notifications/sendLeadNotification.ts",
+    "lineas_total": 108,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/pricing/costs.ts",
+    "lineas_total": 51,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/pricing/index.ts",
+    "lineas_total": 2,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/prompts/buildSystemPrompt.ts",
+    "lineas_total": 47,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/prompts/helpers.ts",
+    "lineas_total": 49,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/prompts/index.ts",
+    "lineas_total": 8,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/prompts/sections.ts",
+    "lineas_total": 223,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/prompts/types.ts",
+    "lineas_total": 65,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/quota/checker.ts",
+    "lineas_total": 213,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/quota/index.ts",
+    "lineas_total": 15,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/quota/upsellAlert.ts",
+    "lineas_total": 91,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
+    "lineas_total": 190,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/reports/sendWeeklyReports.ts",
+    "lineas_total": 93,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/safety/index.ts",
+    "lineas_total": 3,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/safety/ipHash.ts",
+    "lineas_total": 33,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/safety/validateOutput.ts",
+    "lineas_total": 92,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/scoring/calculateLeadScore.ts",
+    "lineas_total": 528,
+    "leido_completo": false,
+    "rangos": "no leído (scoring puro, fuera de la lente)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/scoring/dqFilter.ts",
+    "lineas_total": 25,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/scoring/index.ts",
+    "lineas_total": 38,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/scoring/validateArgentinePhone.ts",
+    "lineas_total": 85,
+    "leido_completo": false,
+    "rangos": "grep de regex (59)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+    "lineas_total": 627,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/tools/confirmContactRequest.ts",
+    "lineas_total": 200,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/tools/getTools.ts",
+    "lineas_total": 132,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/tools/index.ts",
+    "lineas_total": 24,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/tools/navigateToPage.ts",
+    "lineas_total": 69,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/tools/offerHandoffOptions.ts",
+    "lineas_total": 35,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
+    "lineas_total": 185,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/tools/types.ts",
+    "lineas_total": 81,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/verticals/index.ts",
+    "lineas_total": 17,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/verticals/packs/agencia.ts",
+    "lineas_total": 93,
+    "leido_completo": false,
+    "rangos": "no leído (patrones en código)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/verticals/packs/base.ts",
+    "lineas_total": 97,
+    "leido_completo": false,
+    "rangos": "no leído (patrones en código)"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/verticals/packs/usados.ts",
+    "lineas_total": 221,
+    "leido_completo": false,
+    "rangos": "grep de patrones 84-127"
+   },
+   {
+    "ruta": "src/modules/chatbot/server/verticals/registry.ts",
+    "lineas_total": 53,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/server/verticals/types.ts",
+    "lineas_total": 209,
+    "leido_completo": false,
+    "rangos": "no leído (tipos)"
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/appearance.ts",
+    "lineas_total": 43,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/attribution.ts",
+    "lineas_total": 72,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/businessInitials.ts",
+    "lineas_total": 14,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/chatRetryPolicy.ts",
+    "lineas_total": 70,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/configCache.ts",
+    "lineas_total": 65,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/field-normalize.ts",
+    "lineas_total": 60,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/historyPolicy.ts",
+    "lineas_total": 104,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/publicConfig.ts",
+    "lineas_total": 62,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/types.ts",
+    "lineas_total": 71,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/chatbot/shared/zIndex.ts",
+    "lineas_total": 28,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/auth.ts",
+    "lineas_total": 62,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-health.ts",
+    "lineas_total": 255,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-message.ts",
+    "lineas_total": 81,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-request.ts",
+    "lineas_total": 87,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
+    "lineas_total": 72,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/index.ts",
+    "lineas_total": 6,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/payload.ts",
+    "lineas_total": 251,
+    "leido_completo": false,
+    "rangos": "grep de schemas 39-147"
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/process.ts",
+    "lineas_total": 167,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/inbound/resolve-channel.ts",
+    "lineas_total": 38,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/adapters/whatsapp/outbound/client.ts",
+    "lineas_total": 290,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/bsuid.ts",
+    "lineas_total": 38,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/channel-credentials.ts",
+    "lineas_total": 46,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/identity.ts",
+    "lineas_total": 155,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/prisma-errors.ts",
+    "lineas_total": 19,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/domain/window.ts",
+    "lineas_total": 39,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/modules/motor/services/sendMessage.ts",
+    "lineas_total": 256,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+    "lineas_total": 111,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/chatbot/[slug]/config/route.ts",
+    "lineas_total": 85,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/chatbot/[slug]/config/same-origin.ts",
+    "lineas_total": 73,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/chatbot/[slug]/health/route.ts",
+    "lineas_total": 20,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/motor/webhook/[channelToken]/route.ts",
+    "lineas_total": 58,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/chatbot/insights/generate/route.ts",
+    "lineas_total": 26,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/chatbot/events/route.ts",
+    "lineas_total": 37,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/chatbot/demo-chat/[slug]/route.ts",
+    "lineas_total": 117,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/admin/chatbot/test-prompt/route.ts",
+    "lineas_total": 112,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/dashboard/chatbot/leads/export/route.ts",
+    "lineas_total": 208,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/api/cron/generate-insights/route.ts",
+    "lineas_total": 96,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/embed/[slug]/page.tsx",
+    "lineas_total": 45,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/app/embed/layout.tsx",
+    "lineas_total": 10,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/security/validate-origin.ts",
+    "lineas_total": 88,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/security/origin-matcher.ts",
+    "lineas_total": 43,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/notifications/telegram.ts",
+    "lineas_total": 118,
+    "leido_completo": true
+   },
+   {
+    "ruta": "src/lib/rate-limit/presets.ts",
+    "lineas_total": 60,
+    "leido_completo": false,
+    "rangos": "1-60"
+   },
+   {
+    "ruta": "src/lib/isolation/registry.ts",
+    "lineas_total": 800,
+    "leido_completo": false,
+    "rangos": "320-345 (chatMessageConfig) + grep upsertByExternalId 469-485"
+   },
+   {
+    "ruta": "node_modules/ai/dist/index.js",
+    "lineas_total": 0,
+    "leido_completo": false,
+    "rangos": "7335-7400 (onAbort en pull), 8305-8530 (toUIMessageStream: onError por defecto, tool-input/output chunks)"
+   }
+  ],
+  "cobertura_lente": [
+   {
+    "que": "Entrada POST/OPTIONS /api/chatbot/[slug]/chat (route.ts) + handleChatRequest, requestSchema, degradedResponse, dedup, hookOps, persistTurn",
+    "resultado": "Público por diseño; la org sale del bot resuelto por slug y fija forOrg para todo el request; las tools reciben ctx de servidor. NUEVOS: la compensación de cupo la dispara un corte del cliente y borra una conversación que otro pedido del mismo sessionId está usando (SEC nuevo, PROBABLE) y los turnos compensados descartan su costo (BUG nuevo, verificado). Ya registrados y no repetidos: SEC-057 (Origin/XFF/cupo y el historial de 30×4000), SEC-058 (historial assistant y currentPath), SEC-061, BUG-091/092/093/094."
+   },
+   {
+    "que": "GET/OPTIONS /api/chatbot/[slug]/config + same-origin.ts + getPublicConfig/handleConfigRequest/configCache",
+    "resultado": "select explícito sin KB, modelo, tono ni cupo; el atajo same-origin se falsifica con curl (Sec-Fetch-Site/Referer) pero el efecto es el mismo que SEC-068 (config pública de cualquier bot activo). Errores sin detalle. Sin hallazgo nuevo."
+   },
+   {
+    "que": "GET /api/chatbot/[slug]/health + checkHealth, buildHealthVerdict, envValidator",
+    "resultado": "Ya cubierto por SEC-059 y BUG-063; el veredicto con el error crudo del proveedor solo lo ve el admin. Sin nuevo."
+   },
+   {
+    "que": "Aislamiento por tenant: resolver de conversaciones, quota/checker, insights (generate/manage/queries), reports, persistentLogger, captureLead, crm/syncLeadToCrm, motor inbound/outbound",
+    "resultado": "Todas las lecturas y escrituras pasan por forOrg. unsafeGlobalQuery solo con TENANT-RESOLUTION (slug→bot, leadId→org, channelToken→canal), PUBLIC-CONFIG y PLATFORM-HEALTH/CRON/MAINTENANCE, y la razón se sostiene. unstable_cache del panel lleva orgId/botId en la clave (knowledge, layout, settings, multiTenantQueries). El cache en memoria por slug (60 s) es del propio bot. ContactIdentity es única por (org, canal, externalId). No hay fuga entre tenants nueva."
+   },
+   {
+    "que": "Prompt injection y tools: sections/buildSystemPrompt, getTools, captureLead, confirmContactRequest, showWhatsappHandoff, navigateToPage, offerHandoffOptions",
+    "resultado": "El visitante va envuelto con nonce; KB y botName los escribe el admin; companyName, welcome y quick replies del cliente solo afectan su propio bot (largo en SEC-032); proactiveOpener se valida por igualdad exacta; navigate_to_page está restringido al bot develop; capture_lead tiene SEC-LLM-03. NUEVO: show_whatsapp_handoff persiste visitorContact sin SEC-LLM-03. Salida del modelo: react-markdown sin HTML crudo y con urlTransform por defecto; los emails de lead y el semanal escapan; Telegram ya está en BUG-100/SEC-073."
+   },
+   {
+    "que": "Webhook del motor POST /api/motor/webhook/[channelToken] + inbound/* (auth, handle-request, process, handle-message/status/health, payload, resolve-channel)",
+    "resultado": "Bearer por canal comparado timing-safe sobre SHA-256; token de 256 bits validado por regex antes de la DB; cruce de phone_number_id; idempotencia por wamid (unique global); techo de 1 MB aplicado después de leer el body (acotado por la plataforma); 500 solo en infra. Sin nuevo: SEC-031, BUG-027/102/103/105/106/107, FAL-021/022 y DEU-051/052/053 ya lo cubren."
+   },
+   {
+    "que": "Motor de salida: outbound/client, services/sendMessage, domain (window, channel-credentials, identity, bsuid)",
+    "resultado": "La API key de 360dialog se cifra con secret-box (MOTOR_CHANNEL_SECRET_KEY), se descifra en memoria y se redacta del error persistido; la regla de la ventana de 24 h es pura. Hoy está latente (FAL-021). Sin nuevo."
+   },
+   {
+    "que": "Credenciales del chatbot y del motor (Vertex, 360dialog, Telegram, n8n)",
+    "resultado": "Vertex por env (SEC-064/071/059). El secreto del CRM va en AES-256-GCM con CRM_SECRET_KEY y solo se descifra en postToN8n. El token de Telegram está en env o en AgencySettings en claro (SEC-036). Ningún log ni respuesta del lote imprime valores. Sin nuevo."
+   },
+   {
+    "que": "Costo y cupo: reserva/compensación, pricing, upsellAlert, cron generate-insights, ruta admin insights/generate, demo-chat, test-prompt",
+    "resultado": "La reserva atómica es correcta. NUEVOS: compensación abusable con borrado compartido; costo descartado en turnos compensados; cron de insights sin gate de plan (Vertex y mail a Starter); ruta admin de insights huérfana y sin tope. demo-chat y test-prompt son solo SUPER_ADMIN (SEC-060/066, BUG-074)."
+   },
+   {
+    "que": "Lo que viaja al navegador: degradedResponse, PublicBotConfig, UI message stream, export CSV",
+    "resultado": "La config pública está acotada. Los errores del stream los enmascara el onError por defecto de ai@6 ('An error occurred.') y el 500 es genérico en prod. NUEVO: los inputs y outputs de las tools (clasificación interna y leadId) llegan al visitante. El CSV pasa por csvEscape y usa la org de la sesión."
+   },
+   {
+    "que": "Logs y PII: logger, persistentLogger, streamProbe, logs de captureLead",
+    "resultado": "Allowlist de consola en logChatbotEvent; sanitizeErrorMessage para PrismaClientValidationError; probe tipado sin contenido y apagado por env; chatbotDebug apagado en prod. Sin nuevo."
+   },
+   {
+    "que": "Server actions del lote: updateBotAppearance y actOnInsight",
+    "resultado": "Sesión + resolveOrgId/getClientChatbotSession, Zod (strict/parse) y forOrg. Sin nuevo: OrgRole en SEC-018, rate limit en SEC-047, URL del avatar en SEC-049 (mismo avatarImageUrlSchema), actOnInsight sin UI en BUG-023."
+   },
+   {
+    "que": "Notificaciones y reportes: sendLeadNotification, sendInsightsNotification, buildWeeklyReport, sendWeeklyReports",
+    "resultado": "El aviso de lead y el semanal escapan HTML; insights ya en DEU-049; destinatario y opt-out en FAL-020. NUEVO solo el mail de insights a Starter (dentro del hallazgo del cron)."
+   },
+   {
+    "que": "Scoring, intent, verticals, shared/* y helpers del stream (watchdog, withDeadline, toolSuspension, silenceFrames, chunkTally, providerStreamClose)",
+    "resultado": "Regex simples sin backtracking catastrófico sobre ≤4000 caracteres; los packs están en código; los helpers no exponen contenido. Sin superficie de la lente."
+   },
+   {
+    "que": "/embed/[slug] (page + layout) y /api/dashboard/chatbot/leads/export",
+    "resultado": "El embed hace findUnique anónimo y solo pasa el slug (frame-ancestors y handshake ya en SEC-057/068/070). El export usa la sesión del cliente, la org de la sesión, csvEscape y audit log (BUG-022/BUG-071 ya registrados). Sin nuevo."
+   },
+   {
+    "que": "Rutas admin del chatbot (events, demo-chat, test-prompt, insights/generate)",
+    "resultado": "Verifican SUPER_ADMIN en la ruta. events toma el slug de la query, aceptable para el rol. insights/generate no tiene consumidores (hallazgo nuevo de deuda)."
+   }
+  ],
+  "hallazgos": [
+   {
+    "titulo": "Un corte del cliente antes del primer texto devuelve el cupo y borra la conversación aunque otro pedido del mismo sessionId siga respondiendo: respuestas completas sin cupo, sin transcript y sin costo",
+    "prefijo": "SEC",
+    "severidad": "ALTA",
+    "tipo": "seguridad",
+    "confianza": "PROBABLE",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+      "linea": 367,
+      "fragmento": "case 'stream_abort':"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+      "linea": 370,
+      "fragmento": "return !input.firstTokenDelivered"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 1123,
+      "fragmento": "await compensateReservedQuota?.('stream_abort', {\n  firstTokenDelivered: ttfbAt !== null,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 1320,
+      "fragmento": "if (info.reason === 'cancelled') {\n  runAbortController.abort()"
+     },
+     {
+      "ruta": "node_modules/ai/dist/index.js",
+      "linea": 7363,
+      "fragmento": "onAbort == null ? void 0 : onAbort({ steps: recordedSteps });"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/quota/checker.ts",
+      "linea": 197,
+      "fragmento": "const discarded = await tx.conversation.deleteMany({\n  id: input.conversationId,\n  messages: { none: { role: 'ASSISTANT' } },"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/conversation/resolver.ts",
+      "linea": 94,
+      "fragmento": "return { conversation, isNew: false }"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 400,
+      "fragmento": "if (isNewConversation) {\n  const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+      "linea": 434,
+      "fragmento": "await tx.chatMessage.create({\n  conversationId: conversation.id,"
+     },
+     {
+      "ruta": "src/lib/isolation/registry.ts",
+      "linea": 334,
+      "fragmento": "client.conversation.findFirst({ where: { id, botConfig: { organizationId } }, select: { id: true } }),"
+     }
+    ],
+    "impacto": "Bloqueante para el primer cliente real, apenas se renueve la credencial de Vertex. Un script anónimo abre una conversación nueva (pedido A, que reserva 1 cupo) y, medio segundo después, manda otro pedido B con el mismo sessionId; B encuentra la conversación y no reserva. Corta A antes de su primer texto. onAbort de A compensa: devuelve el cupo y borra la conversación, porque B todavía no persistió ningún ASSISTANT; el cascade se lleva también el mensaje de B. B igual recibe la respuesta completa de Vertex, pero su persistTurn falla en el parentCheck y no quedan mensajes, tokens ni costo. Repetido con sessionIds nuevos, el tope mensual del plan (el único freno de gasto por cliente, 500/3000/5000) ya no acota lo que develOP le paga a Google, y el dueño no ve esas conversaciones. Aun sin B, cada corte antes del primer texto deja a Vertex procesando el prompt de sistema y el historial (más el razonamiento de Gemini 2.5) sin cobrar cupo ni registrar costo. SEC-057 cubre agotar el cupo; esto es lo contrario: gastar sin consumirlo. Si se confirma en runtime, por la rúbrica sube a CRÍTICA.",
+    "propuesta": "Decisión de diseño, alineada con la parte (2) de SEC-057. (a) No devolver el cupo por stream_abort cuando ya se llamó al proveedor: la desconexión la controla el cliente. Compensar solo si el request nunca salió hacia Vertex (unhandled antes de streamText, no_user_message). (b) No borrar la conversación si hay otro request en vuelo sobre ella: condicionar el delete a que no haya mensajes USER posteriores al de este request, o usar un lease/flag por conversación. (c) Registrar siempre tokens y costo del run, también al compensar. (d) Contar compensaciones por bot e IP y alertar.",
+    "esfuerzo": "M",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-api-chatbot",
+     "h3.vis-widget-cliente",
+     "lib.chatbot.chat",
+     "lib.chatbot.quota",
+     "lib.chatbot.conversation",
+     "int.vertex",
+     "modelo.QuotaUsage",
+     "modelo.Conversation"
+    ],
+    "requiere_verificacion_humana": true,
+    "relacionados": "SEC-057, BUG-091, BUG-092, BUG-094, BUG-018"
+   },
+   {
+    "titulo": "Un turno vacío de Vertex en una conversación nueva se paga en Google pero no queda en la base: la compensación descarta la fila y persistTurn sale antes de sumar tokens y costo",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+      "linea": 371,
+      "fragmento": "case 'empty_response':"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+      "linea": 374,
+      "fragmento": "return input.toolCallCount === 0"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+      "linea": 340,
+      "fragmento": "compensate('empty_response', {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+      "linea": 353,
+      "fragmento": "if (getConversationDiscarded()) {"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+      "linea": 359,
+      "fragmento": "turnDiscarded: true,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+      "linea": 372,
+      "fragmento": "const costBreakdown = calculateCost("
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+      "linea": 460,
+      "fragmento": "await incrementQuota("
+     },
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 1171,
+      "fragmento": "tokensIn: hasSteps"
+     }
+    ],
+    "impacto": "Con el primer cliente real, cada turno que Gemini cierra vacío en una conversación nueva (el bloque MUDEZ lo midió en producción) consume tokens que Google factura. onFinish trae el usage real (handleChatRequest:1171), pero la compensación borra la conversación y persistTurn vuelve en :353-365, antes de calculateCost (:372) y de incrementQuota (:460). El log chat.llm_request_finished de ese camino tampoco lleva tokensIn, tokensOut ni costUsd. QuotaUsage.costUsd y el costo por cliente que ve develOP subestiman el gasto real justo en los turnos anómalos, y no se puede conciliar contra la factura de GCP. Es otro camino que BUG-094 (watchdog) y DEU-048 (insights).",
+    "propuesta": "Separar devolver el cupo de borrar el costo. Antes del early-return, sumar tokens y costo al QuotaUsage del período reservado (incrementQuota con isNewConversation:false, con su propio deadline) o como mínimo loguear tokensIn, tokensOut y costUsd en chat.llm_request_finished.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-api-chatbot",
+     "h3.adm-chatbots",
+     "lib.chatbot.chat",
+     "lib.chatbot.quota",
+     "modelo.QuotaUsage",
+     "int.vertex"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-094, DEU-048, BUG-063"
+   },
+   {
+    "titulo": "El cron de insights del chatbot no consulta el plan: llama a Vertex por los bots Starter y les manda 'N insights nuevos' que su plan no les deja ver",
+    "prefijo": "BUG",
+    "severidad": "MEDIA",
+    "tipo": "bug",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/cron/generate-insights/route.ts",
+      "linea": 19,
+      "fragmento": "where: { isActive: true },"
+     },
+     {
+      "ruta": "src/app/api/cron/generate-insights/route.ts",
+      "linea": 43,
+      "fragmento": "const result = await generateInsightsForBot(bot.organization.id, bot.id)"
+     },
+     {
+      "ruta": "src/app/api/cron/generate-insights/route.ts",
+      "linea": 61,
+      "fragmento": "await sendInsightsNotificationEmail({"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
+      "linea": 102,
+      "fragmento": "const { object } = await generateObject({"
+     },
+     {
+      "ruta": "prisma/seeds/sync-plans.ts",
+      "linea": 77,
+      "fragmento": "insightEnabled: false,"
+     },
+     {
+      "ruta": "src/lib/plan/fallback.ts",
+      "linea": 59,
+      "fragmento": "insightEnabled: false,"
+     },
+     {
+      "ruta": "src/app/(protected)/dashboard/resultados/analisis/page.tsx",
+      "linea": 36,
+      "fragmento": "const showAnalysis = planAllows(plan, 'insight')"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/notifications/sendInsightsNotification.ts",
+      "linea": 48,
+      "fragmento": "Ver mis insights →"
+     },
+     {
+      "ruta": "netlify.toml",
+      "linea": 26,
+      "fragmento": "schedule = \"0 9 * * *\""
+     }
+    ],
+    "impacto": "Un primer cliente Starter (o sin suscripción, que cae al plan fallback con insightEnabled en false) con 10 o más conversaciones en 30 días entra en el cron diario. Gemini le genera insights y le llega el mail 'N insights nuevos para <bot>' con el botón 'Ver mis insights'. En el panel no los encuentra: Análisis y el PDF mensual los ocultan por plan. Es una promesa rota que genera consultas de soporte, y develOP paga el LLM de un beneficio que no cobra. Como los PENDING nunca se resuelven (BUG-023), el gasto se corta al quinto pendiente, pero el mail ya salió. Es el mismo patrón que BUG-060 en un lugar que no cita.",
+    "propuesta": "En el cron, resolver getPlanForOrg y saltear el bot (sin LLM ni mail) si planAllows(plan,'insight') es false. O decidir que los insights son de todos los planes y mostrarlos. Unificar la decisión con BUG-060.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "int.cron.generate-insights",
+     "lib.chatbot.insights",
+     "lib.chatbot.notifications",
+     "h2.cli-resultados",
+     "int.vertex",
+     "int.brevo",
+     "modelo.ChatbotInsight"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-060, BUG-023, DEU-048, DEU-049, SEC-056"
+   },
+   {
+    "titulo": "El stream del chat le manda al visitante anónimo los argumentos y resultados de las tools: la clasificación interna del lead (spam/empleo/proveedor, señales, resumen para el equipo) y el id interno del lead",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+      "linea": 1186,
+      "fragmento": "const streamed = result.toUIMessageStreamResponse()"
+     },
+     {
+      "ruta": "node_modules/ai/dist/index.js",
+      "linea": 8461,
+      "fragmento": "type: \"tool-input-available\","
+     },
+     {
+      "ruta": "node_modules/ai/dist/index.js",
+      "linea": 8486,
+      "fragmento": "type: \"tool-output-available\","
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+      "linea": 79,
+      "fragmento": "category: z.enum(LEAD_CATEGORIES).default('sales').describe("
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+      "linea": 76,
+      "fragmento": "'Resumen breve (1-2 oraciones) en español rioplatense de qué busca el usuario. Va a la BD para el equipo.'"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+      "linea": 555,
+      "fragmento": "leadId: result.id,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
+      "linea": 60,
+      "fragmento": "purchaseSignals: z.string().max(300).optional().describe("
+     }
+    ],
+    "impacto": "Cualquiera que abra las herramientas de desarrollo en el sitio de un cliente real (o un competidor que lo automatice) lee en el SSE cómo lo clasificó el bot (category 'spam', 'employment' o 'provider', las señales de scoring), el resumen que la propia descripción del schema declara 'para el equipo', las 'señales de compra' citadas del handoff y el cuid interno del lead. capture_lead no renderiza tarjeta (renderToolCall cae en default), así que el widget no necesita nada de eso. El riesgo es bajo, pero expone criterio comercial del cliente e ids internos.",
+    "propuesta": "Que capture_lead devuelva solo {success, alreadyCaptured} (sin leadId). Filtrar en el borde (TransformStream sobre el UI stream, antes del watchdog) los chunks tool-input-* y tool-output-* de las tools sin tarjeta (capture_lead, confirm_contact_request). Antes de filtrar, verificar en renderToolCall y useChatbot que nadie los consuma.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.vis-api-chatbot",
+     "h3.vis-widget-cliente",
+     "h3.vis-widget-develop",
+     "lib.chatbot.tools",
+     "modelo.ChatbotLead"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-069, SEC-058"
+   },
+   {
+    "titulo": "show_whatsapp_handoff guarda y manda a Telegram el 'contacto' del visitante sin la validación de formato y pertenencia que capture_lead aplica (SEC-LLM-03)",
+    "prefijo": "SEC",
+    "severidad": "BAJA",
+    "tipo": "seguridad",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
+      "linea": 50,
+      "fragmento": "visitorContact: z.string().max(200).optional().describe("
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
+      "linea": 140,
+      "fragmento": "visitorContact: input.visitorContact ?? null,"
+     },
+     {
+      "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+      "linea": 253,
+      "fragmento": "const phoneReason = classifyChannel(rawPhone, isValidArgentinePhone, (v) =>"
+     }
+    ],
+    "impacto": "En un handoff directo, sin capture_lead previo, el modelo puede inventar o completar un teléfono o un email: justo lo que SEC-LLM-03 bloquea en capture_lead. Ese dato queda en la metadata del ChatbotEvent y llega al Telegram de develOP como 'Contacto:'. Con un cliente real, el equipo podría llamar a un tercero. El dueño no ve ese contacto (el panel solo muestra visitorName), así que nadie lo corrige.",
+    "propuesta": "Extraer classifyChannel, phoneAppearsInVisitorText y emailAppearsInVisitorText de captureLead a un helper y aplicarlos a visitorContact (leyendo los USER persistidos de la conversación): si no pasa, guardar null. Alternativa: sacar visitorContact del schema y tomar el contacto del lead capturado.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "lib.chatbot.tools",
+     "int.telegram",
+     "modelo.ChatbotEvent",
+     "h3.vis-api-chatbot"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "SEC-073, BUG-100, SEC-058"
+   },
+   {
+    "titulo": "POST /api/admin/chatbot/insights/generate es una ruta huérfana que llama a Vertex sin el tope de pendientes del cron, sin Zod y sin manejo de errores",
+    "prefijo": "DEU",
+    "severidad": "BAJA",
+    "tipo": "deuda",
+    "confianza": "VERIFICADO-POR-LECTURA",
+    "evidencia": [
+     {
+      "ruta": "src/app/api/admin/chatbot/insights/generate/route.ts",
+      "linea": 12,
+      "fragmento": "const body = (await req.json()) as { botSlug?: unknown }"
+     },
+     {
+      "ruta": "src/app/api/admin/chatbot/insights/generate/route.ts",
+      "linea": 24,
+      "fragmento": "const result = await generateInsightsForBot(bot.organizationId, bot.id)"
+     },
+     {
+      "ruta": "src/app/api/cron/generate-insights/route.ts",
+      "linea": 38,
+      "fragmento": "if (pendingCount >= 5) {"
+     }
+    ],
+    "impacto": "Hoy nadie la llama (ver ausencias), pero sigue publicada. Un SUPER_ADMIN, o una sesión robada de uno, puede invocarla en bucle: cada llamada es una consulta a Gemini con hasta 50 conversaciones del cliente y le agrega hasta 5 insights PENDING más, sin el freno de 5 pendientes que sí tiene el cron. Esos insights le llegan al cliente en Análisis y en el PDF. Un body que no es JSON da 500 sin captura.",
+    "propuesta": "Borrarla junto con la poda. Si se quiere un botón 'generar ahora', aplicar el mismo gate de pendientes y de plan, Zod, rate limit por admin y try/catch con Sentry.",
+    "esfuerzo": "S",
+    "zona": "libre",
+    "nodos": [
+     "h3.adm-chatbots",
+     "lib.chatbot.insights",
+     "int.vertex",
+     "modelo.ChatbotInsight"
+    ],
+    "requiere_verificacion_humana": false,
+    "relacionados": "BUG-023, DEU-048, DEU-027, SEC-060"
+   }
+  ],
+  "planeado_cruzado": [],
+  "alertas_verificadas": [],
+  "casos_prueba_manual": [
+   {
+    "titulo": "Corte del cliente durante el primer turno con un segundo pedido en paralelo del mismo sessionId",
+    "entorno": "Local: npm run dev contra la base de dev (Neon compartida con Franco), con una credencial de Vertex válida en .env.local. Hoy está vencida: con ella vencida todo turno falla antes del primer token y la prueba no discrimina. Repetir después en un deploy preview de Netlify para confirmar que el corte del cliente llega a la función.",
+    "precondiciones": "Un bot de prueba activo con slug conocido, con cupo disponible en el mes. Anotar QuotaUsage.conversationsCount, tokensIn y costUsd del bot para el mes actual (Prisma Studio o panel de uso del admin). Crear dos archivos: a.json con {\"sessionId\":\"race-test-1\",\"messages\":[{\"role\":\"user\",\"content\":\"Hola, que servicios tienen?\"}]} y b.json con el mismo sessionId y el contenido \"Y cuanto sale una web?\".",
+    "pasos": [
+     "PowerShell 1: curl.exe -N -X POST http://localhost:3000/api/chatbot/<slug>/chat -H \"Origin: http://localhost:3000\" -H \"Content-Type: application/json\" --max-time 2 -d \"@a.json\"  (corta a los 2 s, antes del primer texto)",
+     "Medio segundo después de lanzar el paso 1, en PowerShell 2: curl.exe -N -X POST http://localhost:3000/api/chatbot/<slug>/chat -H \"Origin: http://localhost:3000\" -H \"Content-Type: application/json\" -d \"@b.json\"  (sin --max-time)",
+     "Esperar a que el comando del paso 2 termine de imprimir la respuesta completa del bot",
+     "En la base: buscar Conversation con sessionId 'race-test-1' y sus ChatMessage; releer QuotaUsage del bot del mes; buscar ChatbotEvent de tipo chat.quota_compensated",
+     "En la consola del dev server: buscar chat.persist_failed y chat.quota_compensated",
+     "Opcional (costo sin cupo): repetir solo el paso 1 con otro sessionId y revisar en GCP (Vertex AI, métricas de tokens) si la llamada cortada registró tokens de entrada"
+    ],
+    "esperado": "La respuesta del pedido B queda persistida (conversación race-test-1 con USER y ASSISTANT) y el mes suma 1 conversación y los tokens del turno. Si A se compensa, la conversación de B no se borra.",
+    "senal_falla": "B imprime la respuesta completa pero no existe ninguna Conversation con sessionId race-test-1, conversationsCount y costUsd no cambiaron, hay un ChatbotEvent chat.quota_compensated con trigger stream_abort y la consola muestra chat.persist_failed para el turno de B.",
+    "escribe_db_o_email": true,
+    "hallazgos": "Un corte del cliente antes del primer texto devuelve el cupo y borra la conversación aunque otro pedido del mismo sessionId siga respondiendo"
+   }
+  ],
+  "ausencias": [
+   {
+    "afirmacion": "Ni el cron generate-insights, ni generateInsightsForBot, ni la function de Netlify consultan el plan (insightEnabled) antes de llamar a Vertex y mandar el mail",
+    "comando": "git grep -n \"planAllows\\|insightEnabled\\|getPlanForOrg\" origin/main -- src/app/api/cron/generate-insights/route.ts src/modules/chatbot/server/insights netlify/functions/generate-insights-cron.ts  → 0 resultados",
+    "control_positivo": "git grep -n \"planAllows(plan, 'insight')\" origin/main -- \"src/app/(protected)/dashboard/resultados/analisis/page.tsx\" → :36 (el gate existe en la vista)"
+   },
+   {
+    "afirmacion": "show_whatsapp_handoff no aplica la validación SEC-LLM-03 (formato + pertenencia) a visitorContact",
+    "comando": "git grep -n \"isValidArgentinePhone\\|AppearsInVisitorText\\|classifyChannel\" origin/main -- src/modules/chatbot/server/tools/showWhatsappHandoff.ts → 0 resultados",
+    "control_positivo": "git grep -n \"classifyChannel(\" origin/main -- src/modules/chatbot/server/tools/captureLead.ts → :137, :253, :256"
+   },
+   {
+    "afirmacion": "Nadie llama a /api/admin/chatbot/insights/generate (ruta huérfana)",
+    "comando": "git grep -n \"insights/generate\" origin/main -- src scripts public e2e tests netlify → 0 resultados",
+    "control_positivo": "git grep -n \"api/admin/chatbot/events\" origin/main -- src → src/modules/chatbot/components/admin/ActivityLog.tsx:106 y src/instrumentation.ts:25 (la otra ruta admin del chatbot sí tiene consumidor)"
+   },
+   {
+    "afirmacion": "El stream del chat se arma con toUIMessageStreamResponse() sin opciones: no hay filtro de las partes de tools hacia el navegador",
+    "comando": "git grep -n \"toUIMessageStreamResponse(\" origin/main -- src/modules/chatbot/server src/app/api → única llamada de producción handleChatRequest.ts:1186, sin argumentos",
+    "control_positivo": "el mismo grep devuelve la llamada (prueba que el patrón matchea); en node_modules/ai/dist/index.js:8461/8486 se ven los chunks tool-input-available/tool-output-available que emite por defecto"
+   },
+   {
+    "afirmacion": "En persistTurn no hay incrementQuota ni calculateCost antes del early-return de la conversación descartada (353-365)",
+    "comando": "git grep -n \"incrementQuota\\|calculateCost\" origin/main -- src/modules/chatbot/server/chat/persistTurn.ts → :49, :50 (imports), :372, :460: todos fuera del bloque 353-365",
+    "control_positivo": "el mismo grep encuentra las dos llamadas en el camino normal (:372 y :460)"
+   }
+  ],
+  "patrones_a_cruzar": [
+   {
+    "patron": "Compensación o descarte que borra una fila compartida sin mirar requests concurrentes sobre el mismo recurso (deleteMany condicional + cascade)",
+    "como_buscarlo": "git grep -n \"deleteMany(\" origin/main -- src | y revisar los que van en caminos de rollback o compensación; además git grep -n \"compensate\\|discard\" origin/main -- src",
+    "donde_aparecio": "src/modules/chatbot/server/quota/checker.ts:197 y src/modules/chatbot/server/chat/handleChatRequest.ts:278"
+   },
+   {
+    "patron": "Decisión de cobro o devolución de cupo basada en una señal que controla el cliente (desconexión, abort, retry)",
+    "como_buscarlo": "git grep -n \"onAbort\\|'cancelled'\\|stream_abort\" origin/main -- src",
+    "donde_aparecio": "src/modules/chatbot/server/chat/reconcile.ts:367 y handleChatRequest.ts:1123"
+   },
+   {
+    "patron": "Crons o rutas que llaman a un LLM sin gate de plan",
+    "como_buscarlo": "git grep -ln \"generateObject(\\|generateText(\\|streamText(\" origin/main -- src  y cruzar con  git grep -L \"planAllows\" origin/main -- <esas rutas y sus callers>",
+    "donde_aparecio": "src/app/api/cron/generate-insights/route.ts:43 (lib/ai ya en BUG-060)"
+   },
+   {
+    "patron": "Tools del LLM que persisten datos de contacto sin la validación SEC-LLM-03",
+    "como_buscarlo": "git grep -n \"tool({\" origin/main -- src  y revisar en cada execute los campos phone/email/contact que se escriben (ChatbotEvent, ChatbotLead, Telegram)",
+    "donde_aparecio": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts:50/140"
+   },
+   {
+    "patron": "Resultados de tools con ids internos o datos 'para el equipo' que viajan al navegador por el UI message stream",
+    "como_buscarlo": "git grep -n \"return {\" origin/main -- src/modules/chatbot/server/tools  y git grep -n \"toUIMessageStreamResponse\\|toUIMessageStream(\" origin/main -- src",
+    "donde_aparecio": "src/modules/chatbot/server/tools/captureLead.ts:555 + handleChatRequest.ts:1186"
+   },
+   {
+    "patron": "Rutas API huérfanas que gastan LLM o email",
+    "como_buscarlo": "listar git ls-files \"src/app/api/**/route.ts\" y, para cada path, git grep -n \"<path sin src/app>\" origin/main -- src scripts public netlify",
+    "donde_aparecio": "src/app/api/admin/chatbot/insights/generate/route.ts"
+   },
+   {
+    "patron": "avatarImageUrlSchema acepta URLs http(s) arbitrarias: el avatar del bot que pone el cliente se carga en el widget de los visitantes y en las vistas del admin (mismo esquema que SEC-049)",
+    "como_buscarlo": "git grep -n \"avatarImageUrlSchema\" origin/main -- src",
+    "donde_aparecio": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts:39 (y SEC-049 en el avatar de la org)"
+   }
+  ]
+ },
+ "verificacion": {
+  "veredictos": [
+   {
+    "titulo": "SEC: un corte del cliente antes del primer texto devuelve el cupo y borra la conversación aunque otro pedido del mismo sessionId siga respondiendo; ese pedido entrega la respuesta completa sin cupo, sin transcript y sin costo registrado",
+    "se_sostiene": true,
+    "severidad_ajustada": "ALTA",
+    "confianza_ajustada": "PROBABLE",
+    "motivo": "La cadena cierra por lectura en todos los eslabones de código. Solo queda un eslabón de runtime. (1) A, con un sessionId nuevo, crea la conversación con isNew=true y reserva 1 cupo (handleChatRequest.ts:215-247, :400-401) y arma compensateReservedQuota (:467-534). (2) B llega con el mismo sessionId: findFirst la encuentra y devuelve isNew:false (resolver.ts:80-94), así que no reserva y su compensador queda en null. No hay ningún lock por conversación en curso: busqué inflight, advisory y FOR UPDATE en el módulo y no aparece nada. El rate limit por slug+sessionId (presets.ts:33, 10/min) permite el segundo pedido. (3) Cuando A recibe 'cancelled', el watchdog llama a runAbortController.abort() (:1320-1322). Con un pull pendiente, el SDK entra en abort(), que llama a onAbort sin await (ai/dist/index.js:7362-7389; el error del doStream abortado llega por .catch->addStream, :8129-8135, o por isAbortError, :7385). onAbort compensa con ttfbAt===null (:1123-1126, reconcile.ts:366-370). (4) compensateNewConversationReservation hace deleteMany con la única condición 'sin ASSISTANT persistido' (checker.ts:196-211). B todavía no persistió nada, así que la fila se borra, se libera el cupo y el cascade (schema.prisma:1421) se lleva el USER de B. El comentario de checker.ts:175-180 solo prevé el caso del turno ya persistido, no el de un pedido en vuelo. (5) B no vuelve a verificar nada y sigue streameando hasta el final. Su persistTurn ve getConversationDiscarded()=false (persistTurn.ts:353) e intenta el create. El parentCheck (registry.ts:330-335, scoped-model.ts:352-361) lanza IsolationNotFoundError, la tx hace rollback y se pierden mensaje, tokens, costo e incrementQuota (:406-472). Resultado: una respuesta entregada con cupo neto 0 y costo 0 registrado, repetible con sessionIds nuevos. Eso deja sin efecto el tope mensual del plan, que es el único techo total de gasto: el rate limit de route.ts:79-85 (30/min por origin+IP) limita la velocidad, no el total. Mantengo ALTA y no CRÍTICA por tres razones: hoy no es explotable porque la credencial de Vertex está vencida; el impacto es costo y transcripts perdidos, sin cruce de tenants; y depende del runtime. El eslabón PROBABLE: que en Netlify el corte del cliente llegue a transformer.cancel() del watchdog y que la tx de compensación de onAbort (sin await, best-effort según handleChatRequest.ts:462-465) termine antes del freeze. La causa raíz es más amplia que el corte del cliente: la compensación por 'empty_response' (persistTurn.ts:337-345, con await dentro de onFinish, sin depender del runtime) usa el mismo guard y tendría el mismo efecto sobre un B en vuelo. El fix tiene que cubrir los dos disparadores. Nodos: h3, lib.chatbot.chat, lib.chatbot.quota, lib.isolation, int.vertex, modelo.Conversation, modelo.QuotaUsage, modelo.ChatMessage. Para el primer cliente real: un script anónimo puede hacer que develOP le pague a Google respuestas fuera del tope de su plan, y esas conversaciones no aparecen en el panel del dueño.",
+    "evidencia_contra": [
+     "La credencial de Vertex está vencida (hecho conocido): hoy B no recibe respuesta y no hay gasto. Mientras no se renueve no puede ser CRÍTICA, aunque se confirme en runtime.",
+     "Eslabón de runtime no verificado: en @netlify/plugin-nextjs (netlify.toml:10) no está probado que la desconexión del cliente se propague como cancel() del body. Si no se propaga, A termina normalmente por onFinish y no hay reembolso.",
+     "onAbort lo invoca el SDK sin await (ai/dist/index.js:7363) y el propio código declara la compensación best-effort (handleChatRequest.ts:462-465): si el freeze la corta, la tx hace rollback y el cupo queda cobrado, o sea que el ataque falla.",
+     "La bitácora (docs/bitacora-roadmap.md, fila 15 del mapa MUDEZ) documentaba 'cancel -> tee congela (onAbort NO corre desde abajo)'. Después de commit 1, el abort de handleChatRequest.ts:1320-1322 lo habilita vía el pull pendiente, pero no hay registro de prod de onAbort_enter por 'cancelled'.",
+     "El rate limit por origin+IP (route.ts:79-85, 30/min) y por slug+sessionId (10/min) acota la velocidad por IP: el gasto crece con la cantidad de IPs, no es instantáneo.",
+     "La parte 'aun sin B' (cortar A sin gastar cupo) es HIPÓTESIS y está casi cubierta por diseño: el abort mata el fetch de Vertex (:931-939) y no está trazado que Google facture un pedido cortado antes del primer token. Además, devolver el cupo en ese caso es una decisión explícita (reconcile.ts:359-370).",
+     "La carrera depende del momento del corte: el atacante tiene que cortar A antes de su primer text-delta o tool-call (TTFB medido de 1,5 a 1,7 s) y después de que B pasó los gates. Es factible porque B devuelve headers recién tras persistir el USER, pero no es determinista."
+    ]
+   }
+  ]
+ }
+}
