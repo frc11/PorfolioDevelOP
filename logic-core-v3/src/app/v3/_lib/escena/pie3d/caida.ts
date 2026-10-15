@@ -106,6 +106,8 @@ export interface CaidaDelPie {
   ultimaS: number
   /** La escala de la pared (u por px). */
   mundoPorPx: number
+  /** [PULIDO 28] AC1 · la profundidad de la pared con alguna pieza a la vista (sin ninguna nunca, NaN). */
+  pared: number
 }
 
 const CAIDA_NULA = caidaIntegrada({ alto: 1, espesor: 0.1 })
@@ -121,7 +123,7 @@ export function crearLaCaidaDelPie(): CaidaDelPie {
     lugares.push(crearLugar())
     caidas.push(CAIDA_NULA)
   }
-  return { piezas, columnas, lugares, caidas, base: { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: 6.9, logoFondo: 4.78 }, huella: new Float64Array(2), n: 0, m: 0, primeraS: Number.POSITIVE_INFINITY, ultimaS: 0, mundoPorPx: 1 }
+  return { piezas, columnas, lugares, caidas, base: { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: 6.9, logoFondo: 4.78 }, huella: new Float64Array(2), n: 0, m: 0, primeraS: Number.POSITIVE_INFINITY, ultimaS: 0, mundoPorPx: 1, pared: Number.NaN }
 }
 
 const TEMP = new THREE.Object3D()
@@ -163,9 +165,14 @@ function ladoDeLaPieza(a: Armada, b: BaseMutable, camara: THREE.PerspectiveCamer
  * Arma la caída de este cuadro: las piezas y sus columnas con la cámara de antes del final (`camara`, a la profundidad `d` de la pared, con
  * el scroll del pie), los lugares de las columnas, la distancia de la cámara desde arriba y la calma (en `EN_VIVO`), y la pose de cada
  * columna a los segundos del reloj (lo que sus piezas siguen). Devuelve los segundos del reloj.
+ * [PULIDO 28] AC1 · sin ninguna pieza a la vista (un viaje que se aleja del pie con el final rebobinando) `d` es infinita: la caída salía
+ * NaN y con ella el centro del pie, el blanco y la cámara del final; las cargas guardaban el NaN para siempre (sin cargas y el cristal
+ * negro). Ahora, la última pared con una pieza a la vista (sin ninguna nunca, nada que armar).
  */
 export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX: number, sy: number, camara: THREE.PerspectiveCamera, cuadro: { readonly ancho: number; readonly alto: number }, d: number, profundidades: ArrayLike<number> | null = null): number {
   const s = segundosDelFinal(EN_VIVO.fin)
+  if (Number.isFinite(d)) c.pared = d
+  if (!Number.isFinite(c.pared)) return s
   horizontal(DERECHA, 1, 0, camara, 1, 0)
   horizontal(ATRAS, 0, -1, camara, 0, -1)
   const b = c.base
@@ -187,7 +194,7 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
     const x = caja.x - scrollX
     const y = caja.y - sy
     // [PULIDO 25] W1 · la profundidad de su columna (en línea con el logo), si se la dan; si no, la de la pared.
-    const di = profundidades !== null && profundidades[i] > 0 ? profundidades[i] : d
+    const di = profundidades !== null && profundidades[i] > 0 ? profundidades[i] : c.pared
     const lado = ladoDeLaPieza(a, b, camara, x, y, cuadro, di)
     let k = 0
     while (k < c.m && c.columnas[k].lado !== lado) k += 1

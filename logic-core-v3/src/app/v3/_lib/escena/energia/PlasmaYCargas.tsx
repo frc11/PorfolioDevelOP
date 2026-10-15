@@ -77,7 +77,8 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
   }, [compacto, logoGroupRef])
   useFrame((state, delta) => {
     const a = armado.current
-    if (a === null) return
+    // [PULIDO 28] AC1 · un cuadro con la cámara sin número no entra: las brasas guardarían el NaN para siempre (sin cargas, el cristal negro).
+    if (a === null || !Number.isFinite(state.camera.position.lengthSq() + state.camera.quaternion.lengthSq())) return
     const u = a.uniformes
     vista.current.camara = state.camera
     vista.current.ancho = state.size.width

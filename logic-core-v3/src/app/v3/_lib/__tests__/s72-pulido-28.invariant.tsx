@@ -6,6 +6,10 @@
  *         su tiempo y después el scroll se suelta.
  *   AA3 · al tocar el navbar desde el pie, el giro del quieto y la órbita del mouse vuelven a lo largo del viaje entero (antes, con el
  *         rebobinado comprimido hasta el golpe: media vuelta en un tercio de segundo con la cámara arriba, toda la escena giraba).
+ *   AC1 · un viaje que se aleja del pie con el final rebobinando: sin ninguna pieza a la vista la pared era infinita y la caída salía NaN
+ *         (el centro del pie, el blanco y la cámara del final; las cargas lo guardaban para siempre y el cristal quedaba negro). Ahora, la
+ *         última pared con una pieza a la vista; y la energía no toma un cuadro con la cámara sin número. EL AVISO «1 Issue» de Next era
+ *         el mismo NaN: el orden de los bloques del piso pedía el sector NaN y tiraba un TypeError en cada cuadro.
  */
 import { empiezaUnGesto, type GestoDeScroll } from '../gestosDelScroll'
 import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida, pedirLaSalida, type FaseDeLaSalida } from '../pie3d/salidas'
@@ -13,7 +17,12 @@ import { RELOJ_DEL_FINAL, decidirElGesto, pasoDelReloj, relojQuieto, type RelojD
 import { avanceDelPie, salidaDelPie } from '../escena/pie3d/coreografia'
 import { FIN_DEL_GOLPE, quedaDelQuieto } from '../escena/final/recorridoDelFinal'
 import { quedaEnElViaje } from '../escena/final/quietoEnElViaje'
+import { EN_VIVO, blancoDelFinal } from '../escena/final/recorridoDelFinal'
+import type { Armada } from '../escena/pie3d/armadas'
+import { armarLaCaida, crearLaCaidaDelPie } from '../escena/pie3d/caida'
+import { armarLosOrdenes, ponerElOrden, sectorDe } from '../escena/piso/ordenDeLosBloques'
 import { readFileSync } from 'node:fs'
+import * as THREE from 'three'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const DT = 1 / 60
@@ -140,5 +149,68 @@ afirmar(giroBien(AHORA, CUADRO_DEL_FINAL), `  media vuelta de quieto en un viaje
 const ANTES = giroEnElViaje((_t, fin) => quedaDelQuieto(fin, 1))
 controlPositivo(`  el detector VE el de antes (hasta el golpe, ${String(FIN_DEL_GOLPE.toFixed(2))} del fin: ${ANTES.maximoPorCuadro.toFixed(1)}° en un cuadro)`, ANTES, (g: typeof ANTES) => giroBien(g, CUADRO_DEL_FINAL))
 controlPositivo('  y un cuadro que no lo cablea', CUADRO_DEL_FINAL.replace('const orbita = orbitaDelFinalAhora(s.reloj.fase, fin)', 'const orbita = orbitaDelFinal(fin)'), (c: string) => giroBien(AHORA, c))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('AC1 · Un viaje que se aleja del pie: sin piezas a la vista la caída sigue con su última pared, nada sale NaN')
+
+// El pie de 1440 del sitio (`entregas/pulido-20`: la cámara de antes del final, la pared y las piezas).
+const PIE = JSON.parse(readFileSync('docs/rediseno/entregas/pulido-20/pie-1440.json', 'utf8')) as { readonly ancho: number; readonly alto: number; readonly camara: { readonly posicion: number[]; readonly cuaternion: number[]; readonly fov: number; readonly d: number }; readonly piezas: readonly { readonly forma: string; readonly caja: readonly number[]; readonly espesor: number }[] }
+const CAMARA_DEL_PIE = new THREE.PerspectiveCamera(PIE.camara.fov, PIE.ancho / PIE.alto, 0.1, 500)
+CAMARA_DEL_PIE.position.fromArray(PIE.camara.posicion)
+CAMARA_DEL_PIE.quaternion.fromArray(PIE.camara.cuaternion)
+CAMARA_DEL_PIE.updateProjectionMatrix()
+CAMARA_DEL_PIE.updateMatrixWorld(true)
+const ARMADAS = PIE.piezas.map((p) => ({ pieza: { forma: p.forma }, medida: { caja: { x: p.caja[0], y: p.caja[1], ancho: p.caja[2], alto: p.caja[3] } }, espesor: p.espesor, grupo: new THREE.Group() }) as unknown as Armada)
+/**
+ * El rebobinado de un viaje desde el pie entero, cuadro a cuadro: con las piezas a la vista el primer tercio (la pared del sitio) y después
+ * ninguna (`d` infinita, como la manda `armadas.ts`; `profundidades`: las de cada columna, sin piezas a la vista 0). Cuántos cuadros
+ * dejaron sin número el centro del pie, su distancia o el blanco de la cámara.
+ */
+function sinNumeroEnElViaje(profundidad: number): number {
+  const c = crearLaCaidaDelPie()
+  const blanco = new THREE.Vector3()
+  let malos = 0
+  for (let k = 0; k <= 120; k += 1) {
+    EN_VIVO.fin = 1 - k / 120
+    const aLaVista = k < 40
+    armarLaCaida(c, ARMADAS, 0, 0, CAMARA_DEL_PIE, { ancho: PIE.ancho, alto: PIE.alto }, aLaVista ? PIE.camara.d : Number.POSITIVE_INFINITY, ARMADAS.map(() => (aLaVista ? 0 : profundidad)))
+    blancoDelFinal(EN_VIVO.fin, blanco)
+    if (!Number.isFinite(EN_VIVO.centroDelPie.x + EN_VIVO.centroDelPie.y + EN_VIVO.distanciaDelPie + blanco.x + blanco.y + blanco.z)) malos += 1
+  }
+  return malos
+}
+const SIN_NUMERO = sinNumeroEnElViaje(0)
+afirmar(SIN_NUMERO === 0, `  120 cuadros de rebobinado, 80 sin ninguna pieza a la vista: ${String(SIN_NUMERO)} con el centro del pie, su distancia o el blanco sin número`)
+const NUNCA = crearLaCaidaDelPie()
+EN_VIVO.centroDelPie.set(0, 0)
+EN_VIVO.fin = 0.5
+armarLaCaida(NUNCA, ARMADAS, 0, 0, CAMARA_DEL_PIE, { ancho: PIE.ancho, alto: PIE.alto }, Number.POSITIVE_INFINITY, ARMADAS.map(() => 0))
+afirmar(Number.isFinite(EN_VIVO.centroDelPie.x + EN_VIVO.centroDelPie.y) && NUNCA.m === 0, '  sin ninguna pieza a la vista nunca, nada que armar (el centro, como estaba)')
+// El control: una pared infinita que llega a las columnas (lo que pasaba antes sin piezas a la vista: `d` iba derecho a cada una).
+controlPositivo('  el detector VE una pared infinita en las columnas (la de antes)', sinNumeroEnElViaje(Number.POSITIVE_INFINITY), (malos: number) => malos === 0)
+const CARGAS = readFileSync('src/app/v3/_lib/escena/energia/PlasmaYCargas.tsx', 'utf8')
+const GUARDA = 'if (a === null || !Number.isFinite(state.camera.position.lengthSq() + state.camera.quaternion.lengthSq())) return'
+const guardaBien = (c: string): boolean => c.includes(GUARDA) && c.indexOf(GUARDA) < c.indexOf('cuadro(a, f)')
+afirmar(guardaBien(CARGAS), '  la energía no toma un cuadro con la cámara sin número (las brasas guardarían el NaN para siempre)')
+controlPositivo('  y una energía sin la guarda', CARGAS.replace(GUARDA, 'if (a === null) return'), guardaBien)
+// El aviso «1 Issue» (el servidor de desarrollo): con la cámara sin número el sector del piso es NaN y `ponerElOrden` leía un orden que no
+// existe (`TypeError` en cada cuadro). Ahora no cambia nada; el control: el detector ve un orden que tira.
+const ORDENES = armarLosOrdenes(Float32Array.from([0, 0, 1, 0, 0, 1]), new Float32Array(48), new Float32Array(6))
+const BLOQUES = new THREE.InstancedMesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial(), 3)
+const CELDAS = new THREE.InstancedBufferAttribute(new Float32Array(6), 2)
+const sinTirar = (f: () => void): boolean => {
+  try {
+    f()
+    return true
+  } catch {
+    return false
+  }
+}
+const SECTOR_SIN_NUMERO = sectorDe(Number.NaN, Number.NaN)
+afirmar(sinTirar(() => ponerElOrden(BLOQUES, CELDAS, ORDENES, SECTOR_SIN_NUMERO)) && ORDENES.puesto === -1, `  el piso con la cámara sin número (sector ${String(SECTOR_SIN_NUMERO)}): no tira y deja el orden como estaba`)
+controlPositivo('  el detector VE un orden que tira (el de antes leía un orden que no existe)', () => {
+  throw new TypeError("Cannot read properties of undefined (reading 'length')")
+}, sinTirar)
+EN_VIVO.fin = 0
 
 cerrar('s72-pulido-28')

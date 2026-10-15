@@ -62,6 +62,8 @@ export function profundidadEstricta(bloques: THREE.InstancedMesh, si: boolean): 
 
 /** Pone el orden pedido si no es el puesto: copia las matrices y las celdas en ese orden, en los arreglos de siempre. */
 export function ponerElOrden(bloques: THREE.InstancedMesh, celdas: THREE.InstancedBufferAttribute, o: OrdenDeLosBloques, cual: number): void {
+  // [PULIDO 28] AC1 · un orden que no existe (la cámara sin número: su sector es NaN) no cambia nada; antes tiraba en cada cuadro.
+  if (!(cual >= 0 && cual < o.ordenes.length)) return
   if (cual === o.puesto) return
   o.puesto = cual
   const orden = o.ordenes[cual]
