@@ -13,6 +13,9 @@
  *   AA1 · la letra del form no titila con la cámara: los rótulos y el de la tecla, impresos en la cara (una textura con mipmaps, en una
  *         escala potencia de dos), no en relieve; el DOM que sigue a la pieza, con la fase fija (la forma se sostiene, la traslación va
  *         de a píxel entero).
+ *   AA4 · los huecos, ajustados al bloque: el piso alrededor normal (sin el techo de los bloques alrededor de cada hueco, el núcleo y la
+ *         bajada sólo para los bloques enteros adentro), el hueco la silueta exacta (sin margen ni labio, con el radio de la placa 3D) y la
+ *         pared del pozo cortada en el tope de cada bloque del borde: la cara del corte.
  */
 import { empiezaUnGesto, type GestoDeScroll } from '../gestosDelScroll'
 import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida, pedirLaSalida, type FaseDeLaSalida } from '../pie3d/salidas'
@@ -27,6 +30,11 @@ import { armarLosOrdenes, ponerElOrden, sectorDe } from '../escena/piso/ordenDeL
 import { DOM_QUE_SIGUE, fijarLaFase } from '../escena/pie3d/domQueSigue'
 import { IMPRESAS } from '../escena/pie3d/impresas'
 import { aplicar, homografia } from '../pie3d/homografia'
+import { HUECO_DEL_PIE, QUIETUD } from '../escena/pie3d/huecos'
+import { POZO_DEL_PIE } from '../escena/pie3d/pozos'
+import { PISO_VIVO } from '../escena/piso/bloques'
+import { LUZ_DE_ABAJO } from '../escena/final/luzDeAbajo'
+import { VOLUMEN_DEL_PIE } from '../escena/pie3d/geometria'
 import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
@@ -278,5 +286,42 @@ const impresasBien = (escala: number, g: string): boolean =>
 afirmar(impresasBien(IMPRESAS.escala, GEOMETRIA), `  las letras del form, impresas: sin relieve, a ${String(IMPRESAS.escala)}x con sus mipmaps y el filtro anisótropo (medido en el sitio: el vaivén de la tinta de un rótulo entre cuadros, de 0,88 % a 0,19 %; el de Enviar, de 0,9 % a 0,37 %)`)
 controlPositivo('  el detector VE los rótulos en relieve (los de antes)', GEOMETRIA.replace('relieveDe(m, fuentes, false, 0, false)', 'relieveDe(m, fuentes, false, 0)'), (g: string) => impresasBien(IMPRESAS.escala, g))
 controlPositivo('  y una escala que no es potencia de dos (con 3 la letra quedaba blanda)', 3, (e: number) => impresasBien(e, GEOMETRIA))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('AA4 · Los huecos, ajustados al bloque: el piso normal alrededor y los bloques del borde cortados por la silueta')
+
+const HUECOS_TS = readFileSync('src/app/v3/_lib/escena/pie3d/huecos.ts', 'utf8')
+const EN_EL_PISO_TS = readFileSync('src/app/v3/_lib/escena/final/enElPiso.ts', 'utf8')
+const POZOS_TS = readFileSync('src/app/v3/_lib/escena/pie3d/pozos.ts', 'utf8')
+interface DelPisoAlrededor {
+  readonly huecos: string
+  readonly piso: string
+  readonly margen: number
+}
+// El piso alrededor: ningún techo de los huecos en la altura de los bloques (sólo el del logo y el de los textos), el núcleo y la bajada sólo
+// para los bloques enteros adentro (el centro, a más de media diagonal del borde), sin labio y la silueta exacta.
+const alrededorBien = (d: DelPisoAlrededor): boolean =>
+  !d.huecos.includes('techoDeLosHuecos') && !d.piso.includes('techoDeLosHuecos') && d.piso.includes('dibujo = min( dibujo, min( techoDeLosTextos( xz ), techoDelLogo( xz ) ) ) - bajaEnLosHuecos( xz );') &&
+  d.huecos.includes('step( afueraDeLaHuella( xz, uQuietudDelPie[ k ] ) + 0.7072 * uLado, 0.0 )') && d.huecos.includes('+ 0.7072 * uLado ) / max( h.zw, vec2( 1e-3 ) )') &&
+  !d.huecos.includes('labioDelHuecoDelPie') && !d.piso.includes('labioDelHuecoDelPie') && d.margen === 0
+const ALREDEDOR: DelPisoAlrededor = { huecos: HUECOS_TS, piso: EN_EL_PISO_TS, margen: HUECO_DEL_PIE.margen }
+afirmar(alrededorBien(ALREDEDOR), '  el piso alrededor de cada hueco, normal: sin el techo de los huecos (la banda a ras del labio: el mail y WhatsApp en un rectángulo hundido, las redes en un bloque), el núcleo y la bajada sólo para los bloques enteros adentro, sin labio y la silueta exacta')
+controlPositivo('  el detector VE el techo de los huecos en la altura de los bloques (el de antes)', { ...ALREDEDOR, piso: EN_EL_PISO_TS.replace('min( techoDeLosTextos( xz ), techoDelLogo( xz ) )', 'min( techoDeLosTextos( xz ), min( techoDeLosHuecos( xz ), techoDelLogo( xz ) ) )') }, alrededorBien)
+controlPositivo('  y el margen de antes (3 %)', { ...ALREDEDOR, margen: 0.03 }, alrededorBien)
+// La pared del pozo: sube más que el bloque más alto que puede haber en la zona calma (la onda, la luz y el pistón quieto) y cada punto se
+// corta en el tope del bloque de ese lugar, leído de las alturas del piso vivo con la grilla del polvo.
+const MAS_ALTO = PISO_VIVO.onda.tope + 1.4 * LUZ_DE_ABAJO.alturas[1] + QUIETUD.piston
+const paredBien = (p: string, tope: number): boolean =>
+  tope >= MAS_ALTO && p.includes('if ( vMundoDelPozo.y > topeDelBloque( vMundoDelPozo.xz ) ) discard;') && p.includes('ivec2 celda = ivec2( floor( xz / uGrillaDelPiso.y + uGrillaDelPiso.x * 0.5 ) );') && p.includes('texelFetch( uPisoVivo, celda, 0 ).b') && p.includes('Object.assign(shader.uniforms, HUECOS_DEL_PIE, PISO_EN_VIVO,')
+afirmar(paredBien(POZOS_TS, POZO_DEL_PIE.tope), `  la pared del pozo hasta ${String(POZO_DEL_PIE.tope)} u (el bloque más alto de la zona calma, ${MAS_ALTO.toFixed(2)} u), cortada en el tope de cada bloque del borde: la cara del corte`)
+controlPositivo('  el detector VE la pared lisa de antes (hasta el labio, sin cortarse)', POZOS_TS.replace('if ( vMundoDelPozo.y > topeDelBloque( vMundoDelPozo.xz ) ) discard;', ''), (p: string) => paredBien(p, POZO_DEL_PIE.tope))
+// El radio del hueco: el de la placa 3D. El form del sitio no tiene radio en el DOM: su placa usa el de reserva y el hueco también.
+const RADIOS = crearLaCaidaDelPie()
+EN_VIVO.fin = 0.5
+armarLaCaida(RADIOS, ARMADAS, 0, 0, CAMARA_DEL_PIE, { ancho: PIE.ancho, alto: PIE.alto }, PIE.camara.d)
+const radioDelForm = (piezas: readonly { readonly radioPx: number }[]): number => piezas[PIE.piezas.findIndex((x) => x.forma === 'formulario')]?.radioPx ?? -1
+afirmar(radioDelForm(RADIOS.piezas) === 2 * VOLUMEN_DEL_PIE.radio, `  el hueco del form con el radio de su placa 3D (${String(radioDelForm(RADIOS.piezas))} px): sin el pozo a la vista en las esquinas`)
+controlPositivo('  el detector VE el radio del DOM (0, el de antes: esquinas rectas)', [{ radioPx: 0 }], (p: readonly { readonly radioPx: number }[]) => p[0].radioPx === 2 * VOLUMEN_DEL_PIE.radio)
+EN_VIVO.fin = 0
 
 cerrar('s72-pulido-28')

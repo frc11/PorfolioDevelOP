@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 
 import { FINAL_EN_EL_PISO } from '../final/enElPiso'
+import { PISO_EN_VIVO } from '../piso/enVivo'
+import { PISO_VIVO } from '../piso/bloques'
 import { FLOOR_Y, PAPER_COLOR } from '../probeScene'
 import { HUECOS_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, TECHO_DE_LOS_HUECOS } from './huecos'
 
@@ -11,8 +13,11 @@ import { HUECOS_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, TECHO_DE_LOS_HUECOS } from '.
  * desde el labio hasta su fondo, y el FONDO; del papel del piso con su oscuro del final, más sombreado hacia abajo. Una sola malla para
  * todos (hasta `MAXIMO_DE_HUECOS_DEL_PIE`): cada vértice dice de qué hueco es y dónde está en su contorno, y el sombreador lo pone con los
  * uniformes de los huecos de este cuadro (un hueco cerrado no se dibuja: sus vértices se juntan en un punto).
+ * [PULIDO 28] AA4 · LOS BLOQUES ARMAN LA PARED: alrededor del hueco el piso queda normal (sin la banda a ras del labio), y el bloque que
+ * cruza el borde se corta ahí: la pared sube hasta `tope` (u sobre el piso) y cada punto se corta en el tope del bloque de ese lugar (las
+ * alturas del piso vivo, como el polvo): arriba del piso es la cara del corte de ese bloque (sin el oscuro del pozo); abajo, el pozo.
  */
-export const POZO_DEL_PIE = { lados: 72, labio: TECHO_DE_LOS_HUECOS.labio - 0.002, sombra: { pared: [0.86, 0.62], fondo: 0.66 } } as const
+export const POZO_DEL_PIE = { lados: 72, labio: TECHO_DE_LOS_HUECOS.labio - 0.002, tope: 2, sombra: { pared: [0.86, 0.62], fondo: 0.66 } } as const
 
 const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
 
@@ -23,6 +28,8 @@ uniform vec4 uFormaDeLosHuecosDelPie[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform int uCuantosHuecosDelPie;
 uniform vec4 uBaseDelPie;
 varying float vHondoDelPozo;
+varying vec3 vMundoDelPozo;
+varying float vFondoDelPozo;
 // Un punto del contorno del rectángulo redondeado (medias medidas \`m\`, radio \`r\`) en \`u\` (0 a 1, la vuelta): (x a lo largo de la derecha,
 // y a lo largo de atrás) y su normal hacia afuera.
 vec4 contornoDelPozo( float u, vec2 m, float r ) {
@@ -50,6 +57,27 @@ vec4 contornoDelPozo( float u, vec2 m, float r ) {
 }
 `
 
+/** [PULIDO 28] AA4 · el tope del bloque del piso vivo en `xz` (en el mundo; sin piso vivo, el piso). */
+const TOPE_DEL_BLOQUE_GLSL = /* glsl */ `
+uniform sampler2D uPisoVivo;
+uniform vec4 uGrillaDelPiso;
+float topeDelBloque( vec2 xz ) {
+	if ( uGrillaDelPiso.z < 0.5 ) return ${f(FLOOR_Y)};
+	ivec2 celda = ivec2( floor( xz / uGrillaDelPiso.y + uGrillaDelPiso.x * 0.5 ) );
+	if ( celda.x < 0 || celda.y < 0 || celda.x >= int( uGrillaDelPiso.x ) || celda.y >= int( uGrillaDelPiso.x ) ) return ${f(FLOOR_Y)};
+	return ${f(FLOOR_Y)} + texelFetch( uPisoVivo, celda, 0 ).b;
+}
+`
+const L = PISO_VIVO.luz
+/** [PULIDO 28] AA4 · la pared: cortada en el tope del bloque; arriba del piso, la cara del bloque; abajo, el pozo (más oscuro hacia el fondo). */
+const PARED_GLSL = /* glsl */ `
+	if ( vMundoDelPozo.y > topeDelBloque( vMundoDelPozo.xz ) ) discard;
+	float hondoDeLaPared = clamp( ( ${f(FLOOR_Y + POZO_DEL_PIE.labio)} - vMundoDelPozo.y ) / max( 1e-3, ${f(FLOOR_Y + POZO_DEL_PIE.labio)} - vFondoDelPozo ), 0.0, 1.0 );
+	float sobreElPiso = vMundoDelPozo.y - ${f(FLOOR_Y + POZO_DEL_PIE.labio)};
+	// Arriba del piso, como el costado de un bloque (\`piso/bloques.ts\`): más oscuro hacia la rendija, que acá es el borde del hueco.
+	float costadoDelCorte = ${f(L.costado)} * ( 1.0 - ${f(L.rendija[0])} * exp( - max( 0.0, sobreElPiso ) / ${f(L.rendija[1])} ) );
+	diffuseColor.rgb *= sobreElPiso > 0.0 ? costadoDelCorte : mix( ${f(POZO_DEL_PIE.sombra.pared[0])}, ${f(POZO_DEL_PIE.sombra.pared[1])}, hondoDeLaPared )`
+
 /**
  * El material del pozo (`deFondo`: el fondo; si no, las paredes): el del papel, con su lugar en el sombreador. `aPozo`: (hueco, vuelta 0 a
  * 1, 0 arriba / 1 abajo / 2 el medio del fondo).
@@ -58,7 +86,7 @@ function materialDelPozo(deFondo: boolean): THREE.MeshStandardMaterial {
   const S = POZO_DEL_PIE.sombra
   const m = new THREE.MeshStandardMaterial({ color: new THREE.Color(PAPER_COLOR), roughness: 0.95, metalness: 0, side: THREE.DoubleSide })
   m.onBeforeCompile = (shader) => {
-    Object.assign(shader.uniforms, HUECOS_DEL_PIE, { uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie, uOscuroDelBrillo: FINAL_EN_EL_PISO.uOscuroDelBrillo })
+    Object.assign(shader.uniforms, HUECOS_DEL_PIE, PISO_EN_VIVO, { uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie, uOscuroDelBrillo: FINAL_EN_EL_PISO.uOscuroDelBrillo })
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${VERTICES_GLSL}`)
       .replace(
@@ -78,14 +106,16 @@ function materialDelPozo(deFondo: boolean): THREE.MeshStandardMaterial {
         `#include <begin_vertex>
 	float abajoDelPozo = ${deFondo ? '1.0' : 'aPozo.z'};
 	vHondoDelPozo = abajoDelPozo;
-	transformed = vec3( xzDelPozo.x, mix( ${f(FLOOR_Y + POZO_DEL_PIE.labio)}, ${f(FLOOR_Y)} - formaDelPozo.z, abajoDelPozo ), xzDelPozo.y );
-	if ( kDelPozo >= uCuantosHuecosDelPie || formaDelPozo.x <= 0.0 ) transformed = vec3( 0.0, - 1000.0, 0.0 );`,
+	transformed = vec3( xzDelPozo.x, mix( ${f(FLOOR_Y + (deFondo ? POZO_DEL_PIE.labio : POZO_DEL_PIE.tope))}, ${f(FLOOR_Y)} - formaDelPozo.z, abajoDelPozo ), xzDelPozo.y );
+	if ( kDelPozo >= uCuantosHuecosDelPie || formaDelPozo.x <= 0.0 ) transformed = vec3( 0.0, - 1000.0, 0.0 );
+	vMundoDelPozo = transformed;
+	vFondoDelPozo = ${f(FLOOR_Y)} - formaDelPozo.z;`,
       )
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', '#include <common>\nvarying float vHondoDelPozo;\nuniform float uOscuroDelBrillo;')
+      .replace('#include <common>', `#include <common>\nvarying float vHondoDelPozo;\nvarying vec3 vMundoDelPozo;\nvarying float vFondoDelPozo;\nuniform float uOscuroDelBrillo;\n${TOPE_DEL_BLOQUE_GLSL}`)
       .replace(
         '#include <color_fragment>',
-        `#include <color_fragment>\n\tdiffuseColor.rgb *= ${deFondo ? f(S.fondo) : `mix( ${f(S.pared[0])}, ${f(S.pared[1])}, vHondoDelPozo )`} * ( 1.0 - uOscuroDelBrillo );`,
+        `#include <color_fragment>\n${deFondo ? `\tdiffuseColor.rgb *= ${f(S.fondo)}` : PARED_GLSL} * ( 1.0 - uOscuroDelBrillo );`,
       )
   }
   m.customProgramCacheKey = () => `pozo-del-pie-${deFondo ? 'fondo' : 'pared'}`

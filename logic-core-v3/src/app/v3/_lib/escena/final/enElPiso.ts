@@ -139,7 +139,7 @@ uniform float uCalmaDelPieFuerza;
 ${QUIETUD_DEL_PIE_GLSL}
 // [PULIDO 6] E2 · la distancia al logo, para medir desde el filo (\`hueco.ts\`).
 ${DISTANCIA_AL_LOGO_GLSL}
-// [PULIDO 27] Y2 b · c · los huecos de las piezas del pie: los bloques de adentro bajan al abrirse y los de alrededor, a ras del labio.
+// [PULIDO 27] Y2 b · los huecos de las piezas del pie: los bloques de adentro bajan al abrirse ([PULIDO 28] AA4 · los de alrededor, normales).
 ${HUECOS_DEL_PIE_GLSL}
 ${BAJA_EN_LOS_HUECOS_GLSL}
 // [PULIDO 27] Y2 c · alrededor del logo acostado ningún bloque por encima de su filo (los pistones quietos de las piezas de al lado no
@@ -216,7 +216,7 @@ export function conElFinalEnLaSimulacion(glsl: string): string {
       ANCLAS_DEL_FINAL.empuje,
       `${ANCLAS_DEL_FINAL.empuje}\n\tfuerza += empujeDelGolpe( p * uLado ) + empujeDelRastro( p, h );\n\tfloat calmaAqui = calmaDelFinal( p * uLado );\n\tfuerza *= 1.0 - calmaAqui;\n\tamortigua += ${f(CALMA_EN_EL_PISO.amortigua)} * calmaAqui;`,
     )
-    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tfloat quietaAqui = quietudDelPie( xz );\n\tfloat pistonQuieto = ${f(QUIETUD.piston)} * azarDeLaQuietud( floor( floor( xz / uLado ) / 3.0 ) ) * min( 1.0, energiaAqui );\n\tpistonAqui = mix( pistonAqui, pistonQuieto, quietaAqui );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );\n\tdibujo = min( dibujo, min( techoDeLosTextos( xz ), min( techoDeLosHuecos( xz ), techoDelLogo( xz ) ) ) ) - bajaEnLosHuecos( xz );\n\tenergiaAqui *= mix( 1.0, ${f(QUIETUD.brillo)}, quietaAqui );`)
+    .replace(ANCLAS_DEL_FINAL.dibujo, `${ANCLAS_DEL_FINAL.dibujo}\n\tdibujo *= 1.0 - calmaDelFinal( xz );\n\tdibujo -= ${f(HUECO.bajoElRas)} * calmaDelFinal( xz );\n\tfloat pistonAqui;\n\tfloat energiaAqui = energiaDeLaLuz( xz, pistonAqui );\n\tfloat quietaAqui = quietudDelPie( xz );\n\tfloat pistonQuieto = ${f(QUIETUD.piston)} * azarDeLaQuietud( floor( floor( xz / uLado ) / 3.0 ) ) * min( 1.0, energiaAqui );\n\tpistonAqui = mix( pistonAqui, pistonQuieto, quietaAqui );\n\tdibujo += alturaDeLaLuz( xz, energiaAqui ) + pistonAqui;\n\tdibujo = mix( dibujo, fondoDeLaLuz( dibujo ), clamp( uEnergiaDeLaLuz * 4.0, 0.0, 1.0 ) );\n\tdibujo = min( dibujo, min( techoDeLosTextos( xz ), techoDelLogo( xz ) ) ) - bajaEnLosHuecos( xz );\n\tenergiaAqui *= mix( 1.0, ${f(QUIETUD.brillo)}, quietaAqui );`)
     .replace(ANCLAS_DEL_FINAL.salida, 'salida = vec4( nueva, h, dibujo, energiaAqui );')
     .replace(ANCLAS_DEL_FINAL.techo, 'if ( uConLogo > 0.5 && uCalmaDelFinal <= 0.0 ) {')
     .replace(ONDA_CON_TOPE, 'float topeDeLaOnda = topeConElGolpe( $1 );\n\tfloat onda = topeDeLaOnda * tanh( nueva / topeDeLaOnda );')
@@ -325,7 +325,7 @@ export function conElFinalEnElPiso<T extends THREE.Material>(material: T): T {
       .replace(ANCLAS_DEL_DIBUJO.funcion, `${DIBUJO_GLSL}${ANCLAS_DEL_DIBUJO.funcion}`)
       .replace(ANCLAS_DEL_HUECO.descarte, `${ANCLAS_DEL_HUECO.descarte}\n\tif ( enElHueco( vPiso.xz ) ) discard;\n\tfloat alHuecoDelPie = huecoDelPie( vPiso.xz );\n\tif ( alHuecoDelPie < 0.0 ) discard;`)
       .replace(ANCLAS_DEL_HUECO.mancha, 'vec2 m = manchaDelContacto( vPiso.xz ) * ( 1.0 - uSinMancha );')
-      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - labioDelHuecoDelPie( alHuecoDelPie );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
+      .replace(ANCLAS_DEL_HUECO.niebla, `gl_FragColor.rgb *= 1.0 - ${f(CALMA_EN_EL_PISO.labio)} * labioDelHueco( vPiso.xz );\n\tgl_FragColor.rgb *= 1.0 - uOscuroDelBrillo;\n\tgl_FragColor.rgb = conLasJuntas( gl_FragColor.rgb, vPiso.xz );\n${ANCLAS_DEL_HUECO.niebla}`)
   }
   return material
 }

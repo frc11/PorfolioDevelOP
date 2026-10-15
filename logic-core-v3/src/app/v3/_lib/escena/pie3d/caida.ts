@@ -224,7 +224,8 @@ export function armarLaCaida(c: CaidaDelPie, armadas: readonly Armada[], scrollX
     p.altoPx = caja.alto
     p.espesorPx = a.espesor
     p.conSombra = a.pieza.forma === 'placa' || a.pieza.forma === 'formulario'
-    p.radioPx = caja.radio
+    // [PULIDO 28] AA4 · el radio de la placa 3D (sin el del DOM, el de reserva: `geometria.ts`): el hueco no deja ver el pozo en las esquinas.
+    p.radioPx = caja.radio > 0 ? caja.radio : (a.pieza.forma === 'formulario' ? 2 : 1) * VOLUMEN_DEL_PIE.radio
     p.esTexto = a.pieza.forma === 'texto' || a.pieza.forma === 'enlace'
   }
   // Cada columna en el mundo: su canto (el medio de abajo y de atrás) y sus medidas (u); la caída de su tamaño.
