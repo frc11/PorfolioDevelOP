@@ -8,6 +8,33 @@ import * as THREE from 'three'
  */
 export const TEXTO_EN_PANTALLA = { cajas: 8, margenPx: 14, cadaMs: 200, conScrollMs: 50 } as const
 
+const CAJA_DEL_LOGO = new THREE.Box3()
+const ESQUINA = new THREE.Vector3()
+
+/**
+ * [PULIDO 27] Z2 · la caja del logo en la pantalla (NDC: x0, y0, x1, y1 y, en el quinto, 1 si vale): su caja del mundo (gira con él)
+ * proyectada; detrás de la cámara, no vale. La red en reposo no se forma delante (`cajas.ts`).
+ */
+export function cajaDelLogo(logo: THREE.Object3D, camara: THREE.Camera, destino: Float32Array): void {
+  destino[4] = 0
+  CAJA_DEL_LOGO.setFromObject(logo)
+  if (CAJA_DEL_LOGO.isEmpty()) return
+  const { min, max } = CAJA_DEL_LOGO
+  destino[0] = Number.POSITIVE_INFINITY
+  destino[1] = Number.POSITIVE_INFINITY
+  destino[2] = Number.NEGATIVE_INFINITY
+  destino[3] = Number.NEGATIVE_INFINITY
+  for (let k = 0; k < 8; k += 1) {
+    ESQUINA.set(k & 1 ? max.x : min.x, k & 2 ? max.y : min.y, k & 4 ? max.z : min.z).project(camara)
+    if (ESQUINA.z > 1) return
+    destino[0] = Math.min(destino[0], ESQUINA.x)
+    destino[1] = Math.min(destino[1], ESQUINA.y)
+    destino[2] = Math.max(destino[2], ESQUINA.x)
+    destino[3] = Math.max(destino[3], ESQUINA.y)
+  }
+  destino[4] = 1
+}
+
 // [PULIDO 21] S2 · las tarjetas de las demos, por su estante y su carrusel enteros (una caja: no gastan los lugares de a una).
 const ENTERAS = 'a, button, [data-pieza="estante"], [data-pieza="carrusel"]'
 const SELECTOR_DEL_TEXTO = `[data-v3] :is(h1, h2, h3, p, li, blockquote, figcaption, ${ENTERAS}):not([data-pieza="libro"], [data-parte="portada"])`

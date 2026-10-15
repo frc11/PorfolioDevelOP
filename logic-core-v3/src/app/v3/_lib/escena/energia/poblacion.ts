@@ -114,12 +114,16 @@ export function sembrar(p: Poblacion, d: Dominio, b: Brasas, azar: () => number)
   objetivosDelReparto(d, p.objetivo, p.toca)
   p.vista.fill(0)
   let i = 0
-  for (let k = 0; k < p.toca.length; k += 1) {
-    // Hasta media brasa antes de lo que le toca: la última, en promedio, completa (si no, cada celda se pasaba hasta una entera).
-    while (i < b.n && p.vista[k] < p.toca[k] - 0.5 && alAzarEnLaVista(d, b, i, k, azar)) {
+  // De a una por celda en cada vuelta (los índices, mezclados en el cuadro: quien recorre las brasas en orden, como las cadenas de la red,
+  // no empieza por una esquina); cada una hasta media brasa antes de lo que le toca (la última, en promedio, completa).
+  for (let falta = true; falta && i < b.n; ) {
+    falta = false
+    for (let k = 0; k < p.toca.length && i < b.n; k += 1) {
+      if (p.vista[k] >= p.toca[k] - 0.5 || !alAzarEnLaVista(d, b, i, k, azar)) continue
       activar(d, b, i)
       p.vista[k] += b.vida[i]
       i += 1
+      falta = true
     }
   }
   const m = 1 + DOMINIO.margen

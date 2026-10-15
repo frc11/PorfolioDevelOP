@@ -14,6 +14,7 @@ import { pasoDeLasBrasas } from './paso'
 import { POBLACION, antesDelPaso, aparecer, regular, sembrar } from './poblacion'
 import { rellenarRed } from './dibujo/red'
 import { leerElGesto, pasoDeLaRed } from './reposo'
+import { ponerLasCajas } from './cajas'
 import { brilloPorDensidad, calentarBrasa } from './vecinas'
 import { avanzar } from './interaccion/interaccion'
 import { largo3 } from './largo'
@@ -306,6 +307,7 @@ export function cuadro(a: Armado, f: Afuera): void {
   // del corte es el puntero si está (si no, el centro).
   const pt = a.puntero
   const gesto = leerElGesto(a.gesto, f.scroll, pt.x, pt.y, a.rayo.activo, pt.dedo || pt.apretado || pt.pulso || pt.descarga, f.fin)
+  ponerLasCajas(a.red.cajas, a.uniformes.uTextos.value, a.uniformes.uCuantosTextos.value, a.dominio, a.centro.x, a.centro.y, a.centro.z)
   pasoDeLaRed(a.red, a.brasas, a.dominio, en, f.dt, gesto, a.rayo.activo ? pt.x : 0, a.rayo.activo ? pt.y : 0, a.azar)
   elGesto(a, f)
   en.tiempo = f.tiempo

@@ -17,7 +17,7 @@ import { crearAfuera, cuadro, cuadroQuieto, type Afuera } from './cuadro'
 import { armar, soltar, type Armado, type Vista } from './dibujo/armado'
 import { escucharElPuntero } from './interaccion/puntero'
 import { juntarLasLucesVivas } from './lucesVivas'
-import { TEXTO_EN_PANTALLA, cajasDelTexto } from './textoEnPantalla'
+import { TEXTO_EN_PANTALLA, cajaDelLogo, cajasDelTexto } from './textoEnPantalla'
 
 /**
  * [PULIDO 17] O3 · LA ENERGÍA: el plasma A ([PULIDO 18] el producto, sin pedir nada; [PULIDO 19] Q0 · la única dirección: B se borró
@@ -55,6 +55,8 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
     const g = grupo.current
     if (g === null) return undefined
     const a = armar(compacto, vista, () => logoGroupRef.current)
+    // [PULIDO 27] Z2 · `?red=toda`: la red en reposo, un árbol que une todas las que se ven (`arbol.ts`).
+    a.red.modo = new URLSearchParams(window.location.search).get('red') === 'toda' ? 'toda' : 'cadenas'
     g.add(...a.mallas)
     armado.current = a
     quietas.current.listo = false
@@ -98,6 +100,8 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
       a.texto.leidoEn = ahora
       a.texto.scroll = window.scrollY
       u.uCuantosTextos.value = cajasDelTexto(u.uTextos.value, state.size.width, state.size.height)
+      // [PULIDO 27] Z2 · y la del logo (la red en reposo no se forma delante).
+      if (logoGroupRef.current !== null) cajaDelLogo(logoGroupRef.current, state.camera, a.red.cajas.logo)
     }
     // Con movimiento reducido: quietas (sin titilar, sin arcos ni pulsos).
     if (quieto) {

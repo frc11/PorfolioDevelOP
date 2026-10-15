@@ -24,16 +24,23 @@ import { COMUN, materialDeEnergia } from './comun'
  * puntos y su resplandor, el mismo trazo), quieto como la captura de un rayo, y cada uno tiembla leve (sus puntos) y titila a su ritmo.
  */
 export const DIBUJO_DE_LA_RED = {
-  /** El golpe (el núcleo y el halo) y el resplandor del rayo quieto, el titileo (cuánto baja) y el temblor (parte de su largo). */
-  uRed: [1, 0.5, 0.3, 0.012],
+  /**
+   * El golpe (el núcleo y el halo) y el resplandor del rayo quieto, el titileo (cuánto baja) y el temblor (parte de su largo). [PULIDO 27]
+   * Z2 · el brillo de un arco real de noche (era 1 y 0,5 con un tope que los bajaba a un cuarto) y el canal más GRUESO (`ancho`).
+   */
+  uRed: [1.3, 0.55, 0.3, 0.012],
+  ancho: 1.35,
   /** Los tramos del camino y los de la rama; la rama, más fina (parte del ancho). */
   tramos: 16,
   tramosDeRama: 4,
   rama: 0.6,
   /** [PULIDO 22] T1 · casi rígido: cuánto del desvío del plasma se queda (un filamento tenso, no un arco que se comba). */
   rigidez: 0.55,
-  /** [PULIDO 22] T1 · de noche, el brillo de la red acotado: su brillo y como mucho el de `tope` enlaces enteros (con más, cada uno baja). */
-  noche: { brillo: 0.6, tope: 140 },
+  /**
+   * [PULIDO 22] T1 · de noche, el brillo de la red acotado: su brillo y como mucho el de `tope` enlaces enteros (con más, cada uno baja).
+   * [PULIDO 27] Z2 · entero (son pocos); el tope, para `?red=toda` (cientos de rayos).
+   */
+  noche: { brillo: 1, tope: 140 },
 } as const
 
 const TRAMOS = DIBUJO_DE_LA_RED.tramos + DIBUJO_DE_LA_RED.tramosDeRama
@@ -156,7 +163,7 @@ Rayo rayoDelVertice() {
 	float titila = 1.0 - uRed.z * ( 0.5 + 0.5 * sin( uTiempo * ( 4.0 + b.w * 5.0 ) + b.w * 40.0 ) );
 	float destello = max( a.w - 1.0, 0.0 );
 	float k = ( min( a.w, 1.0 ) * titila + destello * 1.5 ) * abierto * enElFinal( r.punto - uCentro ) * mix( 1.0, uTopeDeLaRed, uNoche );
-	r.forma = vec4( position.x, rama < 0.5 ? 1.0 : ${DIBUJO_DE_LA_RED.rama.toFixed(2)}, uRed.x * k, uRed.y * k );
+	r.forma = vec4( position.x, ( rama < 0.5 ? 1.0 : ${DIBUJO_DE_LA_RED.rama.toFixed(2)} ) * ${DIBUJO_DE_LA_RED.ancho.toFixed(2)}, uRed.x * k, uRed.y * k );
 	r.extra = vec4( t, b.w * 40.0, rama, 0.0 );
 	r.nulo = a.w <= 0.001 ? 1.0 : 0.0;
 	return r;

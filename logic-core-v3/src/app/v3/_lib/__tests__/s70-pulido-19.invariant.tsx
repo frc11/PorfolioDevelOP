@@ -24,6 +24,7 @@ import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenada
 import { pasoDeLasBrasas } from '../escena/energia/paso'
 import { POBLACION, antesDelPaso, aparecer, crearPoblacion, regular, sembrar, type Poblacion } from '../escena/energia/poblacion'
 import { REPOSO, crearMemoriaDelGesto, crearRed, leerElGesto, pasoDeLaRed, type Red } from '../escena/energia/reposo'
+import { crearCajas, cruzaUnaCaja } from '../escena/energia/cajas'
 import { FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { brilloPorDensidad } from '../escena/energia/vecinas'
 import { ANISOTROPIA_DE_LAS_TRAMAS } from '../escena/gpu/anisotropia'
@@ -353,6 +354,17 @@ function correrLaRed(gestoEn: number, finDesde: number, paso: (r: Red, b: Brasas
   let energiaAntes = 0
   let energiaDespues = 0
   let conFinal = 0
+  // [PULIDO 27] Z2 · el chasquido, en las brasas de la red (son menos: el promedio de todas casi no se movía).
+  const enLaRed = new Uint8Array(N)
+  const mediaDeLaRed = (b: Brasas): number => {
+    let suma = 0
+    let cuantas = 0
+    for (let i = 0; i < b.n; i += 1) if (enLaRed[i] === 1) {
+      suma += b.energia[i]
+      cuantas += 1
+    }
+    return suma / Math.max(1, cuantas)
+  }
   // [PULIDO 22] T1 · la red se forma en ~30 s: la corrida dura hasta 3 s después del gesto (al menos 10 s).
   const cuadros = Math.max(600, gestoEn < 1e6 ? Math.round((gestoEn + 3) / DT) : 0)
   for (let k = 1; k <= cuadros; k += 1) {
@@ -382,13 +394,14 @@ function correrLaRed(gestoEn: number, finDesde: number, paso: (r: Red, b: Brasas
         const cj = coordenadas(d, b.lugar[j * 3], b.lugar[j * 3 + 1], b.lugar[j * 3 + 2])
         enElCuadroMaximo = Math.max(enElCuadroMaximo, Math.hypot(cj.u - ui, cj.v - vi))
       }
-      energiaAntes = b.energia.reduce((s, x) => s + x, 0) / b.n
+      for (let i = 0; i < b.n; i += 1) enLaRed[i] = r.grado[i] > 0 ? 1 : 0
+      energiaAntes = mediaDeLaRed(b)
     }
     if (r.fase === 'cortando' && cortadaEn < 0) {
       cortadaEn = t
       for (let q = 0; q < r.n; q += 1) muereMaximo = Math.max(muereMaximo, r.muere[q])
     }
-    if (cortadaEn > 0 && Math.abs(t - (cortadaEn + REPOSO.corteS + REPOSO.destelloS + DT)) < DT / 2) energiaDespues = b.energia.reduce((s, x) => s + x, 0) / b.n
+    if (cortadaEn > 0 && Math.abs(t - (cortadaEn + REPOSO.corteS + REPOSO.destelloS + DT)) < DT / 2) energiaDespues = mediaDeLaRed(b)
     if (cortadaEn > 0 && t > cortadaEn + REPOSO.sueltaS * 4) frenoSuelta = Math.min(frenoSuelta, r.freno)
   }
   return { antesDeTiempo, armadaEn, enlaces, gradoMaximo, largoMaximo, enElCuadroMaximo, frenoArmada, cortadaEn, muereMaximo, frenoSuelta, energiaAntes, energiaDespues, conFinal, formadas: r.formadas }
@@ -399,19 +412,92 @@ const sinTocar = (): void => undefined
 const GESTO = Math.ceil(REPOSO.esperaS + REPOSO.formaS + REPOSO.enciendeS + 2)
 const LA_RED = correrLaRed(GESTO, 1e9, sinTocar)
 // Ningún enlace más largo que el alcance (en el mundo ni en el cuadro) al armarse: una brasa que salta (el envoltorio, una mudanza) pierde sus enlaces.
+// [PULIDO 27] Z2 · MENOS rayos y más grandes: como mucho `enlaces` por brasa activa (eran ~0,45: la maraña) y al menos el 60 % de eso.
+const TOPE_DE_LA_RED = Math.round(REPOSO.enlaces * N)
 const redBien = (x: DeLaRed): boolean => x.antesDeTiempo === 0 && x.armadaEn > REPOSO.esperaS && x.armadaEn < REPOSO.esperaS + REPOSO.formaS + REPOSO.enciendeS + 0.1 &&
-  x.enlaces >= N * 0.4 && x.gradoMaximo <= REPOSO.porBrasa && x.largoMaximo <= REPOSO.alcance * REPOSO.estirado && x.enElCuadroMaximo <= REPOSO.alcanceEnElCuadro * REPOSO.estirado * Math.SQRT2 + 1e-3 && x.frenoArmada > 0.95 &&
+  x.enlaces >= TOPE_DE_LA_RED * 0.6 && x.enlaces <= TOPE_DE_LA_RED && x.gradoMaximo <= REPOSO.porBrasa && x.largoMaximo <= REPOSO.alcance * REPOSO.estirado && x.enElCuadroMaximo <= REPOSO.alcanceEnElCuadro * REPOSO.estirado * Math.SQRT2 + 1e-3 && x.frenoArmada > 0.95 &&
   x.cortadaEn > GESTO - DT && x.cortadaEn < GESTO + 2 * DT && x.muereMaximo <= REPOSO.corteS + 1e-6 && x.frenoSuelta < 0.05 && x.energiaDespues > x.energiaAntes + 0.1 && x.formadas === 1
 afirmar(redBien(LA_RED), `  quieta, la red se arma a los ${LA_RED.armadaEn.toFixed(2)} s (${String(LA_RED.enlaces)} enlaces para ${String(N)} brasas, ≤ ${String(LA_RED.gradoMaximo)} por brasa, ≤ ${LA_RED.largoMaximo.toFixed(2)} u y ≤ ${LA_RED.enElCuadroMaximo.toFixed(3)} del cuadro) y frena (${LA_RED.frenoArmada.toFixed(2)}); el gesto a los ${String(GESTO)} s la corta (todos los enlaces mueren en ≤ ${LA_RED.muereMaximo.toFixed(2)} s) con el chasquido (la energía media ${LA_RED.energiaAntes.toFixed(3)} → ${LA_RED.energiaDespues.toFixed(3)}) y suelta el freno (${LA_RED.frenoSuelta.toFixed(3)})`)
 controlPositivo('  el detector VE una red que se arma antes de tiempo', { ...LA_RED, antesDeTiempo: 3 }, redBien)
+controlPositivo('  y la maraña de antes (unos 0,45 enlaces por brasa)', { ...LA_RED, enlaces: Math.round(N * 0.45) }, redBien)
 controlPositivo('  y una brasa con cuatro enlaces', { ...LA_RED, gradoMaximo: 4 }, redBien)
-controlPositivo('  y un enlace que cruza media pantalla', { ...LA_RED, enElCuadroMaximo: 0.6 }, redBien)
+// [PULIDO 27] Z2 · media pantalla es 1 del cuadro (NDC; 0,6 era más que el tope de antes, no del de ahora: rayos más grandes).
+controlPositivo('  y un enlace que cruza media pantalla', { ...LA_RED, enElCuadroMaximo: 1 }, redBien)
 controlPositivo('  y un corte que no termina en corteS', { ...LA_RED, muereMaximo: REPOSO.corteS * 2 }, redBien)
 controlPositivo('  y un corte sin chasquido', { ...LA_RED, energiaDespues: LA_RED.energiaAntes }, redBien)
 controlPositivo('  y un freno que no se suelta', { ...LA_RED, frenoSuelta: 0.5 }, redBien)
 // Y la red que ignora el gesto (la de antes de existir el corte): una corrida con el gesto a los 7 s pero la máquina sorda.
 const SORDA = correrLaRed(GESTO, 1e9, (r, _b, k) => { if (k === GESTO * 60) r.quietaS = 99 })
 controlPositivo('  y una red sorda al gesto (no se corta)', { ...SORDA, cortadaEn: -1 }, redBien)
+
+// [PULIDO 27] Z2 · NO TAPA: la red quieta no se forma delante de los textos, los botones, los elementos ni el logo (las cajas proyectadas,
+// `cajas.ts`); y `?red=toda`: un árbol que une todas las que se ven por sus vecinas más cercanas, con la misma regla (`arbol.ts`).
+const CAJAS_DE_PRUEBA: readonly (readonly [number, number, number, number])[] = [[-0.9, -0.15, -0.3, 0.4], [-0.25, -0.35, 0.3, 0.35]]
+/** Una red quieta hasta armarse (como `correrLaRed`, sin gesto), en su modo y con las cajas (o sin ellas: el control). */
+function redQuieta(modo: 'cadenas' | 'toda', conCajas: boolean): { readonly r: Red; readonly b: Brasas; readonly d: Dominio } {
+  const az = azarConSemilla(23)
+  const b = crearBrasas(N, az, FLOOR_Y)
+  const en = crearEntradaDeLasBrasas()
+  en.piso = FLOOR_Y
+  const d = crearDominio()
+  en.dominio = d
+  poner(d, 0, 6.4, 19)
+  poblar(d, b, az, true)
+  for (let i = 0; i < b.n; i += 1) b.vida[i] = alfaDelDominio(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+  const r = crearRed(N)
+  r.modo = modo
+  const m = crearMemoriaDelGesto()
+  const cuadros = Math.round((REPOSO.esperaS + REPOSO.formaS + REPOSO.enciendeS + 1) / DT)
+  for (let k = 1; k <= cuadros && r.fase !== 'armada'; k += 1) {
+    en.tiempo = k * DT
+    en.temperatura = 0.2
+    r.cajas.cuantas = 0
+    if (conCajas) for (const caja of CAJAS_DE_PRUEBA) {
+      r.cajas.bordes.set(caja, r.cajas.cuantas * 4)
+      r.cajas.cuantas += 1
+    }
+    pasoDeLaRed(r, b, d, en, DT, leerElGesto(m, 0, 0, 0, false, false, 0), 0, 0, az)
+    pasoDeLasBrasas(b, DT, en, az)
+    brilloPorDensidad(b, DT)
+  }
+  return { r, b, d }
+}
+/** Lo que se mide de una red armada: los enlaces, cuántos tapan una caja, si hay un ciclo y cuántas brasas se ven (fuera de las cajas). */
+const medirLaRed = ({ r, b, d }: { readonly r: Red; readonly b: Brasas; readonly d: Dominio }): { readonly enlaces: number; readonly tapan: number; readonly ciclo: boolean; readonly seVen: number; readonly armada: boolean } => {
+  const cajas = crearCajas()
+  for (const caja of CAJAS_DE_PRUEBA) {
+    cajas.bordes.set(caja, cajas.cuantas * 4)
+    cajas.cuantas += 1
+  }
+  const padre = Array.from({ length: b.n }, (_, i) => i)
+  const raiz = (i: number): number => (padre[i] === i ? i : (padre[i] = raiz(padre[i])))
+  let tapan = 0
+  let ciclo = false
+  for (let k = 0; k < r.n; k += 1) {
+    const ci = coordenadas(d, b.lugar[r.a[k] * 3], b.lugar[r.a[k] * 3 + 1], b.lugar[r.a[k] * 3 + 2])
+    const [u, v] = [ci.u, ci.v]
+    const cj = coordenadas(d, b.lugar[r.b[k] * 3], b.lugar[r.b[k] * 3 + 1], b.lugar[r.b[k] * 3 + 2])
+    if (cruzaUnaCaja(cajas, u, v, cj.u, cj.v)) tapan += 1
+    const [x, y] = [raiz(r.a[k]), raiz(r.b[k])]
+    if (x === y) ciclo = true
+    else padre[x] = y
+  }
+  let seVen = 0
+  for (let i = 0; i < b.n; i += 1) {
+    const c = coordenadas(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
+    if (b.vida[i] >= REPOSO.vidaMinima && c.w > d.w0 && c.w < d.w1 && Math.abs(c.u) <= 1 && Math.abs(c.v) <= 1 && !cruzaUnaCaja(cajas, c.u, c.v, c.u, c.v)) seVen += 1
+  }
+  return { enlaces: r.n, tapan, ciclo, seVen, armada: r.fase === 'armada' }
+}
+const CADENAS_CON_CAJAS = medirLaRed(redQuieta('cadenas', true))
+const noTapaBien = (x: ReturnType<typeof medirLaRed>): boolean => x.armada && x.tapan === 0 && x.enlaces >= TOPE_DE_LA_RED * 0.6
+afirmar(noTapaBien(CADENAS_CON_CAJAS), `  con un texto y el logo en el cuadro, la red se arma (${String(CADENAS_CON_CAJAS.enlaces)} enlaces) sin que ninguno los tape`)
+controlPositivo('  el detector VE una red que no mira las cajas (rayos delante del texto y del logo)', medirLaRed(redQuieta('cadenas', false)), noTapaBien)
+const TODA = medirLaRed(redQuieta('toda', true))
+const todaBien = (x: ReturnType<typeof medirLaRed>): boolean => x.armada && x.tapan === 0 && !x.ciclo && x.enlaces >= x.seVen * 0.8
+afirmar(todaBien(TODA), `  ?red=toda: un árbol (sin ciclos) de ${String(TODA.enlaces)} enlaces que une las ${String(TODA.seVen)} brasas que se ven fuera de las cajas, sin tapar ninguna`)
+controlPositivo('  el detector VE la red de cadenas (no todo conectado)', CADENAS_CON_CAJAS, todaBien)
+controlPositivo('  y un árbol con un ciclo', { ...TODA, ciclo: true }, todaBien)
 
 // En el final del pie no se arma (el final cuenta como gesto): quieta 10 s con `fin` desde el segundo 1.
 const EN_EL_FINAL = correrLaRed(1e9, 1, sinTocar)
@@ -693,8 +779,8 @@ controlPositivo('  y un three que no acota a la placa', { ...ANISOTROPIA, three:
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Q1 · Los módulos nuevos, de menos de 300 líneas; lo de cada cuadro, sin reservas')
 
-const FUENTES: Record<string, string> = Object.fromEntries(['energia/dominio.ts', 'energia/poblacion.ts', 'energia/grilla.ts', 'energia/paso.ts', 'energia/cuadro.ts', 'energia/brasas.ts', 'energia/vecinas.ts', 'energia/ruido.ts', 'energia/reposo.ts', 'energia/dibujo/red.ts'].map((m) => [m, leer(`_lib/escena/${m}`)]))
-const POR_CUADRO: readonly (readonly [string, string])[] = [['energia/dominio.ts', 'envolver'], ['energia/dominio.ts', 'alfaDe'], ['energia/dominio.ts', 'coordenadasDe'], ['energia/grilla.ts', 'celdaDe'], ['energia/ruido.ts', 'rotorEnLote'], ['energia/ruido.ts', 'rotorDeLaBrasa'], ['energia/ruido.ts', 'rotorDelPunto'], ['energia/ruido.ts', 'ruidoConGradienteEn'], ['energia/brasas.ts', 'alRayoDesde'], ['energia/reposo.ts', 'pasoDeLaRed'], ['energia/reposo.ts', 'leerElGesto'], ['energia/reposo.ts', 'formar'], ['energia/reposo.ts', 'cortar'], ['energia/dibujo/red.ts', 'rellenarRed'], ['energia/poblacion.ts', 'regular'], ['energia/poblacion.ts', 'medir'], ['energia/poblacion.ts', 'nacer'], ['energia/poblacion.ts', 'morir'], ['energia/poblacion.ts', 'explotar'], ['energia/dominio.ts', 'alAzarALaVista'], ['energia/dominio.ts', 'alFondo'], ['energia/dominio.ts', 'escribir'], ['energia/dominio.ts', 'armarElDominio'], ['energia/grilla.ts', 'ajustarLaGrilla'], ['energia/grilla.ts', 'entreEllas'], ['energia/paso.ts', 'envolverYVivir'], ['energia/cuadro.ts', 'elDominio'], ['energia/vecinas.ts', 'brilloPorDensidad']]
+const FUENTES: Record<string, string> = Object.fromEntries(['energia/dominio.ts', 'energia/poblacion.ts', 'energia/cajas.ts', 'energia/arbol.ts', 'energia/cadenas.ts', 'energia/grilla.ts', 'energia/paso.ts', 'energia/cuadro.ts', 'energia/brasas.ts', 'energia/vecinas.ts', 'energia/ruido.ts', 'energia/reposo.ts', 'energia/dibujo/red.ts'].map((m) => [m, leer(`_lib/escena/${m}`)]))
+const POR_CUADRO: readonly (readonly [string, string])[] = [['energia/dominio.ts', 'envolver'], ['energia/dominio.ts', 'alfaDe'], ['energia/dominio.ts', 'coordenadasDe'], ['energia/grilla.ts', 'celdaDe'], ['energia/ruido.ts', 'rotorEnLote'], ['energia/ruido.ts', 'rotorDeLaBrasa'], ['energia/ruido.ts', 'rotorDelPunto'], ['energia/ruido.ts', 'ruidoConGradienteEn'], ['energia/brasas.ts', 'alRayoDesde'], ['energia/reposo.ts', 'pasoDeLaRed'], ['energia/reposo.ts', 'leerElGesto'], ['energia/reposo.ts', 'formar'], ['energia/reposo.ts', 'cortar'], ['energia/dibujo/red.ts', 'rellenarRed'], ['energia/poblacion.ts', 'regular'], ['energia/poblacion.ts', 'medir'], ['energia/poblacion.ts', 'nacer'], ['energia/poblacion.ts', 'morir'], ['energia/poblacion.ts', 'explotar'], ['energia/dominio.ts', 'alAzarALaVista'], ['energia/dominio.ts', 'alFondo'], ['energia/cajas.ts', 'ponerLasCajas'], ['energia/cajas.ts', 'cruzaUnaCaja'], ['energia/arbol.ts', 'armarElArbol'], ['energia/arbol.ts', 'candidatas'], ['energia/dominio.ts', 'escribir'], ['energia/dominio.ts', 'armarElDominio'], ['energia/grilla.ts', 'ajustarLaGrilla'], ['energia/grilla.ts', 'entreEllas'], ['energia/paso.ts', 'envolverYVivir'], ['energia/cuadro.ts', 'elDominio'], ['energia/vecinas.ts', 'brilloPorDensidad']]
 const livianoBien = (f: Record<string, string>): boolean => Object.values(f).every((t) => lineasDeCodigo(t) <= 300) && POR_CUADRO.every(([m, fn]) => sinReservasEn(f[m] ?? '', fn))
 afirmar(livianoBien(FUENTES), `  ${Object.entries(FUENTES).map(([m, t]) => `${m.split('/').pop() ?? m} ${String(lineasDeCodigo(t))}`).join(' · ')}; ${String(POR_CUADRO.length)} funciones de cada cuadro sin crear objetos, arreglos ni funciones`, POR_CUADRO.filter(([m, fn]) => !sinReservasEn(FUENTES[m] ?? '', fn)).map(([m, fn]) => `${m}:${fn}`).join(' · '))
 controlPositivo('  el detector VE una reserva en el envoltorio', { ...FUENTES, 'energia/dominio.ts': (FUENTES['energia/dominio.ts'] ?? '').replace('  if (!salio) return false\n', '  const tmp = [u, v]\n  if (!salio) return tmp.length < 0\n') }, livianoBien)

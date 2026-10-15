@@ -1,4 +1,5 @@
 import type { Brasas } from './brasas'
+import { cruzaUnaCaja } from './cajas'
 import { coordenadasDe, type Dominio } from './dominio'
 import { CELDA, celdaDe, indice } from './grilla'
 import type { Red } from './reposo'
@@ -87,7 +88,8 @@ export function crecerLasCadenas(r: Red, b: Brasas, d: Dominio, ahoraS: number, 
   const g = b.grilla
   const A2 = alcance * alcance
   const C2 = enElCuadro * enElCuadro
-  for (; r.intentos < hasta && r.n < r.maximo; r.intentos += 1) {
+  // [PULIDO 27] Z2 · hasta el tope de esta formación (menos rayos, más grandes).
+  for (; r.intentos < hasta && r.n < Math.min(r.maximo, r.tope); r.intentos += 1) {
     const i = r.cursor
     r.cursor = (r.cursor + 1) % b.n
     if (b.vida[i] < vidaMinima || r.grado[i] >= CADENAS.porBrasa) continue
@@ -111,7 +113,8 @@ export function crecerLasCadenas(r: Red, b: Brasas, d: Dominio, ahoraS: number, 
         const cj = coordenadasDe(d, L, j * 3)
         const du = cj.u - ui
         const dv = cj.v - vi
-        if (du * du + dv * dv >= C2) continue
+        // [PULIDO 27] Z2 · ni delante de un texto, un botón o el logo (`cajas.ts`).
+        if (du * du + dv * dv >= C2 || cruzaUnaCaja(r.cajas, ui, vi, cj.u, cj.v)) continue
         mejor = j
         dMejor = dd
       }

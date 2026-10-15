@@ -1,5 +1,7 @@
+import { armarElArbol } from './arbol'
 import type { Brasas, EntradaDeLasBrasas } from './brasas'
 import { CADENAS, crecerLasCadenas, empezarLasCadenas } from './cadenas'
+import { crearCajas, cruzaUnaCaja, type CajasDeLaRed } from './cajas'
 import { coordenadasDe, type Dominio } from './dominio'
 
 /**
@@ -25,10 +27,12 @@ export const REPOSO = {
   chasquido: 0.4,
   /**
    * Los enlaces: hasta qué distancia en el mundo (u) y en el cuadro (NDC: las cercanas a la cámara no cruzan media pantalla), cuántos
-   * por brasa, cuántos en total por brasa (el búfer) y la vida mínima para enlazarse.
+   * por brasa, cuántos en total por brasa (el búfer) y la vida mínima para enlazarse. [PULIDO 27] Z2 · rayos más GRANDES (de 2,2 u y 0,2
+   * del cuadro a 3,4 y 0,3) y MENOS: como mucho `enlaces` por brasa activa (eran unos 0,45: una maraña de rayos finos).
    */
-  alcance: 2.2,
-  alcanceEnElCuadro: 0.2,
+  alcance: 3.4,
+  alcanceEnElCuadro: 0.3,
+  enlaces: 0.08,
   porBrasa: CADENAS.porBrasa,
   porBrasaEnTotal: 1.5,
   vidaMinima: 0.6,
@@ -73,6 +77,17 @@ export interface Red {
   formadas: number
   cortes: number
   apagada: boolean
+  /**
+   * [PULIDO 27] Z2 · cómo se forma (`cadenas`, la de siempre; `toda`, `?red=toda`: un árbol que une todas las que se ven, `arbol.ts`),
+   * cuántos enlaces como mucho en esta formación, las cajas que no tapa (`cajas.ts`) y los búferes del árbol (sus aristas candidatas,
+   * sus claves y el bosque).
+   */
+  modo: 'cadenas' | 'toda'
+  tope: number
+  readonly cajas: CajasDeLaRed
+  readonly aristas: Int32Array
+  readonly claves: Float64Array
+  readonly padre: Int32Array
 }
 
 export function crearRed(brasas: number): Red {
@@ -81,6 +96,7 @@ export function crearRed(brasas: number): Red {
     fase: 'suelta', quietaS: 0, faseS: 0, freno: 0, chasquido: 0, n: 0, maximo,
     a: new Int32Array(maximo), b: new Int32Array(maximo), nace: new Float32Array(maximo), muere: new Float32Array(maximo), alfa: new Float32Array(maximo), semilla: new Float32Array(maximo),
     grado: new Uint8Array(brasas), quieta: new Uint8Array(brasas), cadena: new Int32Array(brasas), tamano: new Uint8Array(brasas), cursor: 0, intentos: 0, formadas: 0, cortes: 0, apagada: false,
+    modo: 'cadenas', tope: maximo, cajas: crearCajas(), aristas: new Int32Array(brasas * 16), claves: new Float64Array(brasas * 8), padre: new Int32Array(brasas),
   }
 }
 
@@ -112,9 +128,16 @@ export function leerElGesto(m: MemoriaDelGesto, scroll: number, x: number, y: nu
   return gesto
 }
 
-/** Forma la red: [PULIDO 23] U2 · empieza las cadenas (vacías); la red crece en cada cuadro de la formación (`cadenas.ts`). */
-function formar(r: Red, b: Brasas): void {
+/**
+ * Forma la red: [PULIDO 23] U2 · empieza las cadenas (vacías); la red crece en cada cuadro de la formación (`cadenas.ts`). [PULIDO 27] Z2 ·
+ * con su tope (por las brasas activas); con `?red=toda`, el árbol entero de una vez (se enciende del centro hacia afuera).
+ */
+function formar(r: Red, b: Brasas, d: Dominio, azar: () => number): void {
   empezarLasCadenas(r, b.n)
+  let activas = 0
+  for (let i = 0; i < b.n; i += 1) activas += 1 - b.oculta[i]
+  r.tope = Math.min(r.maximo, Math.round(REPOSO.enlaces * activas))
+  if (r.modo === 'toda') armarElArbol(r, b, d, REPOSO.vidaMinima, REPOSO.formaS, azar)
   r.fase = 'formando'
   r.faseS = 0
   r.formadas += 1
@@ -146,7 +169,7 @@ function chasquear(b: Brasas, i: number, j: number): void {
   b.energia[j] = Math.min(1, b.energia[j] + REPOSO.chasquido)
 }
 
-/** Poda los enlaces de una brasa que saltó (reapareció por una cara del dominio, nació o murió) o que se estiró en el cuadro: un enlace no cruza la pantalla. */
+/** Poda los enlaces de una brasa que saltó (reapareció por una cara del dominio, nació o murió), que se estiró en el cuadro (un enlace no cruza la pantalla) o que tapa una caja. */
 const LARGO_TOPE2 = (REPOSO.alcance * REPOSO.estirado) ** 2
 function podar(r: Red, b: Brasas, d: Dominio): void {
   const tope = REPOSO.alcanceEnElCuadro * REPOSO.estirado
@@ -163,6 +186,8 @@ function podar(r: Red, b: Brasas, d: Dominio): void {
       // [PULIDO 22] T1 · y en el mundo: en ~30 s de formación una brasa deriva (siempre vecinas cercanas).
       const L = b.lugar
       fuera ||= (L[j * 3] - L[i * 3]) ** 2 + (L[j * 3 + 1] - L[i * 3 + 1]) ** 2 + (L[j * 3 + 2] - L[i * 3 + 2]) ** 2 > LARGO_TOPE2
+      // [PULIDO 27] Z2 · y uno que pasó a tapar un texto, un botón o el logo (`cajas.ts`).
+      fuera ||= cruzaUnaCaja(r.cajas, ui, vi, cj.u, cj.v)
     }
     if (!fuera) continue
     r.grado[i] -= 1
@@ -196,13 +221,13 @@ export function pasoDeLaRed(r: Red, b: Brasas, d: Dominio, en: EntradaDeLasBrasa
   if (r.n > 0) podar(r, b, d)
   if (r.fase === 'suelta') {
     r.quietaS = gesto || r.apagada ? 0 : r.quietaS + dt
-    if (r.quietaS >= REPOSO.esperaS && d.listo) formar(r, b)
+    if (r.quietaS >= REPOSO.esperaS && d.listo) formar(r, b, d, azar)
   } else if (r.fase === 'formando' || r.fase === 'armada') {
     if (gesto || r.apagada) cortar(r, b, d, ox, oy, azar)
     else {
       r.faseS += dt
       if (r.fase === 'formando') {
-        crecerLasCadenas(r, b, d, r.faseS, REPOSO.formaS, REPOSO.alcance, REPOSO.alcanceEnElCuadro, REPOSO.vidaMinima, azar)
+        if (r.modo === 'cadenas') crecerLasCadenas(r, b, d, r.faseS, REPOSO.formaS, REPOSO.alcance, REPOSO.alcanceEnElCuadro, REPOSO.vidaMinima, azar)
         let todas = r.faseS >= REPOSO.formaS
         for (let k = 0; k < r.n; k += 1) {
           const v = Math.min(1, Math.max(0, (r.faseS - r.nace[k]) / REPOSO.enciendeS))
