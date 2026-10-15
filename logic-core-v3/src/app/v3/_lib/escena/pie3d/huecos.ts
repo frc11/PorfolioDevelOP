@@ -19,10 +19,9 @@ export const HUECO_DEL_PIE = {
   /** Lo que el hueco sobra de la placa (parte). [PULIDO 28] AA4 · nada: la silueta exacta (era 3 %, con un labio oscuro de 0,05 u). */
   margen: 0,
   /**
-   * [PULIDO 27] Y2 b · cuánto antes del contacto termina de abrirse (s), lo hondo que tiene de más que la placa (u) y desde dónde bajan
-   * los bloques de adentro (la parte de su camino del medio al borde: bajan antes de que llegue el corte).
+   * [PULIDO 27] Y2 b · lo hondo que tiene de más que la placa (u) y desde dónde bajan los bloques de adentro (la parte de su camino del
+   * medio al borde: bajan antes de que llegue el corte). [PULIDO 28] AA5 · se abre con el vuelco (ya no por tiempo hasta antes del contacto).
    */
-  antesDelContactoS: 0.08,
   hondoDeMas: 0.04,
   bajanAntes: 0.5,
 } as const
@@ -38,7 +37,7 @@ export const TECHO_DE_LOS_HUECOS = { labio: -0.01, banda: 0.7, ancho: 2.5, alto:
 export const HUECOS_DEL_PIE = {
   /** (centro x, centro z, medio ancho a lo largo de `derecha`, medio fondo a lo largo de `atras`), en el mundo (la base del pie). */
   uHuecosDelPie: { value: Array.from({ length: MAXIMO_DE_HUECOS_DEL_PIE }, () => new THREE.Vector4()) },
-  /** (cuánto se abrió, 0 a 1; el radio de sus esquinas, u; 0, 0). */
+  /** (cuánto se abrió, 0 a 1; el radio de sus esquinas, u; [PULIDO 28] AA5 · lo hondo ahora, u, y la franja abierta desde el canto, 0 a 1). */
   uFormaDeLosHuecosDelPie: { value: Array.from({ length: MAXIMO_DE_HUECOS_DEL_PIE }, () => new THREE.Vector4()) },
   uCuantosHuecosDelPie: { value: 0 },
 }
@@ -83,6 +82,10 @@ export const HUECOS_DEL_PIE_GLSL = /* glsl */ `
 uniform vec4 uHuecosDelPie[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform vec4 uFormaDeLosHuecosDelPie[ ${String(MAXIMO_DE_HUECOS_DEL_PIE)} ];
 uniform int uCuantosHuecosDelPie;
+// [PULIDO 28] AA5 · hasta dónde llega la franja abierta (a lo largo de atrás, desde el centro de la huella).
+float limiteDeLaFranja( float medio, float franja ) {
+	return - medio + 2.0 * medio * franja;
+}
 float huecoDelPie( vec2 xz ) {
 	float m = 1e4;
 	for ( int k = 0; k < ${String(MAXIMO_DE_HUECOS_DEL_PIE)}; k ++ ) {
@@ -93,8 +96,10 @@ float huecoDelPie( vec2 xz ) {
 		vec2 d = xz - h.xy;
 		vec2 medio = h.zw * forma.x;
 		float r = min( forma.y, min( medio.x, medio.y ) );
-		vec2 q = vec2( abs( dot( d, uBaseDelPie.xy ) ), abs( dot( d, uBaseDelPie.zw ) ) ) - medio + r;
-		m = min( m, length( max( q, 0.0 ) ) + min( max( q.x, q.y ), 0.0 ) - r );
+		vec2 local = vec2( dot( d, uBaseDelPie.xy ), dot( d, uBaseDelPie.zw ) );
+		vec2 q = abs( local ) - medio + r;
+		// [PULIDO 28] AA5 · sólo la franja debajo de la pieza: desde su borde cercano al canto (hacia atrás está el lejano).
+		m = min( m, max( length( max( q, 0.0 ) ) + min( max( q.x, q.y ), 0.0 ) - r, local.y - limiteDeLaFranja( medio.y, forma.w ) ) );
 	}
 	return m;
 }
@@ -180,7 +185,7 @@ float bajaEnLosHuecos( vec2 xz ) {
 		vec2 d = xz - h.xy;
 		vec2 q = ( vec2( abs( dot( d, uBaseDelPie.xy ) ), abs( dot( d, uBaseDelPie.zw ) ) ) + 0.7072 * uLado ) / max( h.zw, vec2( 1e-3 ) );
 		float rho = max( q.x, q.y );
-		if ( rho >= 1.0 ) continue;
+		if ( rho >= 1.0 || dot( d, uBaseDelPie.zw ) + 0.7072 * uLado > limiteDeLaFranja( h.w, forma.w ) ) continue;
 		baja = max( baja, forma.z * smoothstep( max( 0.0, rho - ${f(HUECO_DEL_PIE.bajanAntes)} ), max( 0.05, rho - 0.05 ), forma.x ) );
 	}
 	return baja;

@@ -16,6 +16,8 @@
  *   AA4 · los huecos, ajustados al bloque: el piso alrededor normal (sin el techo de los bloques alrededor de cada hueco, el núcleo y la
  *         bajada sólo para los bloques enteros adentro), el hueco la silueta exacta (sin margen ni labio, con el radio de la placa 3D) y la
  *         pared del pozo cortada en el tope de cada bloque del borde: la cara del corte.
+ *   AA5 · el piso se abre sólo en el encastre: debajo de la pieza (la franja de su silueta que su proyección ya tapa) y tan hondo como
+ *         volcó (nada al empezar a inclinarse, entero al incrustarse); el fondo baja con ella.
  */
 import { empiezaUnGesto, type GestoDeScroll } from '../gestosDelScroll'
 import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, pasoDeLaSalida, pedirLaSalida, type FaseDeLaSalida } from '../pie3d/salidas'
@@ -30,7 +32,10 @@ import { armarLosOrdenes, ponerElOrden, sectorDe } from '../escena/piso/ordenDeL
 import { DOM_QUE_SIGUE, fijarLaFase } from '../escena/pie3d/domQueSigue'
 import { IMPRESAS } from '../escena/pie3d/impresas'
 import { aplicar, homografia } from '../pie3d/homografia'
-import { HUECO_DEL_PIE, QUIETUD } from '../escena/pie3d/huecos'
+import { HUECOS_DEL_PIE, HUECO_DEL_PIE, QUIETUD } from '../escena/pie3d/huecos'
+import { huecosDeLaCaida } from '../escena/pie3d/huecosDeLaCaida'
+import { poseDeLaPiezaQueCae } from '../escena/final/caidaDelPie'
+import { RELOJ_DEL_FINAL as RELOJ } from '../escena/final/recorridoDelFinal'
 import { POZO_DEL_PIE } from '../escena/pie3d/pozos'
 import { PISO_VIVO } from '../escena/piso/bloques'
 import { LUZ_DE_ABAJO } from '../escena/final/luzDeAbajo'
@@ -322,6 +327,82 @@ armarLaCaida(RADIOS, ARMADAS, 0, 0, CAMARA_DEL_PIE, { ancho: PIE.ancho, alto: PI
 const radioDelForm = (piezas: readonly { readonly radioPx: number }[]): number => piezas[PIE.piezas.findIndex((x) => x.forma === 'formulario')]?.radioPx ?? -1
 afirmar(radioDelForm(RADIOS.piezas) === 2 * VOLUMEN_DEL_PIE.radio, `  el hueco del form con el radio de su placa 3D (${String(radioDelForm(RADIOS.piezas))} px): sin el pozo a la vista en las esquinas`)
 controlPositivo('  el detector VE el radio del DOM (0, el de antes: esquinas rectas)', [{ radioPx: 0 }], (p: readonly { readonly radioPx: number }[]) => p[0].radioPx === 2 * VOLUMEN_DEL_PIE.radio)
+EN_VIVO.fin = 0
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('AA5 · El piso se abre sólo en el encastre: debajo de la pieza, tan hondo como volcó')
+
+/**
+ * La caída del pie de 1440 cuadro a cuadro (120 por s, todo el reloj): por placa, lo que volcó su columna (su ángulo sobre el del final),
+ * lo que su proyección ya tapa de su silueta (vuelca sobre el canto: un punto a `d` del canto cae a `d·sen a`; desde su borde cercano) y
+ * su hueco. `hueco`: cómo lo escribe el pie (lo de ahora) o la regla de antes (el control). Cuántos cuadros con el hueco abierto sin la
+ * silueta entera, con otra profundidad que el vuelco, abierto más allá de lo que la pieza tapa o sin estar entero al incrustarse; y al 10 %
+ * del vuelco, la profundidad (parte de la entera), lo abierto de la silueta y lo que la pieza tapa.
+ */
+interface DeLaApertura {
+  readonly malos: number
+  readonly alDiez: readonly [number, number, number]
+}
+type Hueco = (c: ReturnType<typeof crearLaCaidaDelPie>, s: number) => void
+function correrLaApertura(hueco: Hueco): DeLaApertura {
+  const c = crearLaCaidaDelPie()
+  SALIDA_EN_VIVO.hunde = 0
+  let malos = 0
+  let alDiez: [number, number, number] = [Number.NaN, Number.NaN, Number.NaN]
+  for (let k = 0; k <= RELOJ.duracionS * 120; k += 1) {
+    const s = k / 120
+    EN_VIVO.fin = s / RELOJ.duracionS
+    armarLaCaida(c, ARMADAS, 0, 0, CAMARA_DEL_PIE, { ancho: PIE.ancho, alto: PIE.alto }, PIE.camara.d)
+    hueco(c, s)
+    let h = 0
+    for (let i = 0; i < c.n; i += 1) {
+      const p = c.piezas[i]
+      if (!p.conSombra) continue
+      const col = c.columnas[p.columna]
+      const l = c.lugares[p.columna]
+      const final = poseDeLaPiezaQueCae(col, l, l.incrustada + 1).a
+      const pose = poseDeLaPiezaQueCae(col, l, s)
+      const volco = Math.min(1, Math.max(0, pose.a / final))
+      if (volco <= 0) continue
+      const lejos = (col.y1 - col.y0 - p.dy) * col.mpp
+      const cerca = lejos - p.altoPx * col.mpp
+      const tapa = Math.max(0, (lejos * Math.sin(Math.min(pose.a, Math.PI / 2)) - cerca) / (lejos - cerca))
+      const hondo = p.espesor + HUECO_DEL_PIE.hondoDeMas
+      const forma = HUECOS_DEL_PIE.uFormaDeLosHuecosDelPie.value[h]
+      h += 1
+      const incrusta = pose.hundido > 0 && (forma.z < hondo - 1e-9 || forma.w < 1 - 1e-9)
+      if (h > HUECOS_DEL_PIE.uCuantosHuecosDelPie.value || forma.x < 1 - 1e-9 || Math.abs(forma.z / hondo - volco) > 1e-6 || forma.w > tapa + 1e-6 || incrusta) malos += 1
+      if (Number.isNaN(alDiez[0]) && volco >= 0.1) alDiez = [forma.z / hondo, forma.w * forma.x, tapa]
+    }
+    if (h < HUECOS_DEL_PIE.uCuantosHuecosDelPie.value) malos += 1
+  }
+  return { malos, alDiez }
+}
+const APERTURA = correrLaApertura((c, s) => {
+  HUECOS_DEL_PIE.uCuantosHuecosDelPie.value = huecosDeLaCaida(c, s)
+})
+const pct = (x: number): string => `${(x * 100).toFixed(0)} %`
+afirmar(APERTURA.malos === 0, `  la caída entera del pie de 1440: ${String(APERTURA.malos)} cuadros con un hueco sin la silueta entera, con otra profundidad que el vuelco, abierto más allá de la pieza o a medias al incrustarse (al 10 % del vuelco: ${pct(APERTURA.alDiez[0])} de hondo y abierto el ${pct(APERTURA.alDiez[1])}, lo que la pieza ya tapa)`)
+// El control: la regla de antes (desde que empieza a inclinarse hasta un poco antes de tocar, por tiempo: la silueta crece desde el medio
+// con el pozo entero; al 10 % del vuelco el hueco ya iba por la mitad, hondo del todo y a la vista fuera de la pieza).
+const suaveDeAntes = (x: number): number => {
+  const u = Math.min(1, Math.max(0, x))
+  return u * u * (3 - 2 * u)
+}
+const APERTURA_DE_ANTES = correrLaApertura((c, s) => {
+  let k = 0
+  for (let i = 0; i < c.n; i += 1) {
+    const p = c.piezas[i]
+    const l = c.lugares[p.columna]
+    const abre = suaveDeAntes((s - l.inclina) / Math.max(1e-3, l.toca - 0.08 - l.inclina))
+    if (abre <= 0 || !p.conSombra) continue
+    HUECOS_DEL_PIE.uFormaDeLosHuecosDelPie.value[k].set(abre, 0, p.espesor + HUECO_DEL_PIE.hondoDeMas, 1)
+    k += 1
+  }
+  HUECOS_DEL_PIE.uCuantosHuecosDelPie.value = k
+})
+controlPositivo(`  el detector VE la de antes (al 10 % del vuelco, ${pct(APERTURA_DE_ANTES.alDiez[0])} de hondo y abierto el ${pct(APERTURA_DE_ANTES.alDiez[1])}, con la pieza tapando el ${pct(APERTURA_DE_ANTES.alDiez[2])})`, APERTURA_DE_ANTES, (a: DeLaApertura) => a.malos === 0)
+HUECOS_DEL_PIE.uCuantosHuecosDelPie.value = 0
 EN_VIVO.fin = 0
 
 cerrar('s72-pulido-28')

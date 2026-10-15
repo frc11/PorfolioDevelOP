@@ -15,8 +15,15 @@ import { SALIDA_EN_VIVO, cerradoParaElViaje } from '../../pie3d/salidas'
  * [PULIDO 27] Y2 b · EL PISO SE ABRE DONDE VA A CAER: antes el hueco (y la quietud) seguían la SOMBRA de la pieza que volcaba y crecían
  * desde su canto, debajo de ella: aparecían de la nada. Ahora están en su HUELLA FINAL (donde queda acostada e incrustada: la pose de su
  * columna al final, con la base de la cámara de antes del final) y se abren con su vuelco: desde que empieza a inclinarse hasta justo antes
- * del contacto (`antesDelContactoS`). Lo que se abre lo hace la simulación del piso: los bloques de adentro bajan del medio hacia el borde,
+ * del contacto. Lo que se abre lo hace la simulación del piso: los bloques de adentro bajan del medio hacia el borde,
  * hasta el fondo del hueco (`hondo`: el espesor de la placa y `hondoDeMas`), y el corte los sigue (`bajaEnLosHuecos`).
+ * [PULIDO 28] AA5 · SÓLO EN EL ENCASTRE: el hueco crecía desde el medio de la huella con el pozo ya hondo mientras la pieza todavía estaba en
+ * el aire (se armaba aparte y la pieza flotaba encima). Ahora es siempre la SILUETA entera y lo que se abre es su PROFUNDIDAD, al ritmo del
+ * vuelco de la pieza (el ángulo de su columna sobre el del final): al empezar a inclinarse, nada; al tocar, entera. El fondo del pozo baja
+ * con ella, con las juntas de la grilla (`pozos.ts`): los bloques de la silueta se retraen; el resto del piso, quieto. Y sólo DEBAJO de la
+ * pieza: la franja de su silueta que ya tapa su proyección (vuelca sobre el canto de su columna: un punto a `d` del canto cae a `d·sen a`;
+ * desde su borde cercano hasta donde llega su borde lejano), nunca un pozo a la vista fuera de ella. El cierre para un viaje, como antes:
+ * la silueta se achica sobre la pieza hundida.
  */
 const OFFSET = new THREE.Vector3()
 const POSE: PoseDeLaPieza = { ...POSE_DE_LA_PIEZA }
@@ -28,11 +35,6 @@ const Q = new THREE.Quaternion()
 const Q_TIP = new THREE.Quaternion()
 const EJE_X = new THREE.Vector3(1, 0, 0)
 const ESQUINA = new THREE.Vector3()
-
-const suave = (x: number): number => {
-  const u = Math.min(1, Math.max(0, x))
-  return u * u * (3 - 2 * u)
-}
 
 export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
   const huecos = HUECOS_DEL_PIE.uHuecosDelPie.value
@@ -51,9 +53,14 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     const p = c.piezas[i]
     const col = c.columnas[p.columna]
     const l = c.lugares[p.columna]
-    // [PULIDO 27] Y4 b · y antes de un viaje desde el pie acostado, el piso se cierra sobre la pieza hundida.
-    const abre = suave((s - l.inclina) / Math.max(1e-3, l.toca - HUECO_DEL_PIE.antesDelContactoS - l.inclina)) * (1 - cerradoParaElViaje(SALIDA_EN_VIVO.hunde))
-    if (abre <= 0) continue
+    // [PULIDO 28] AA5 · lo que bajó la silueta: el vuelco de su columna (su ángulo sobre el del final). [PULIDO 27] Y4 b · y antes de un
+    // viaje desde el pie acostado, el piso se cierra sobre la pieza hundida (la silueta se achica).
+    // (La pose es un objeto compartido: el ángulo final, como número, antes de pedir la de ahora.)
+    const final = poseDeLaPiezaQueCae(col, l, l.incrustada + 1).a
+    const a = poseDeLaPiezaQueCae(col, l, s).a
+    const baja = Math.min(1, Math.max(0, a / Math.max(1e-3, final)))
+    const abre = 1 - cerradoParaElViaje(SALIDA_EN_VIVO.hunde)
+    if (baja <= 0 || abre <= 0) continue
     // La columna acostada e incrustada (su esquina de arriba a la izquierda) y el canto de la pieza en ella.
     const fin = poseDeLaPiezaQueCae(col, l, l.incrustada + 1)
     Q.setFromRotationMatrix(BASE).multiply(Q_TIP.setFromAxisAngle(EJE_X, -fin.a))
@@ -70,13 +77,17 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     // [PULIDO 25] W2 a · la quietud de la energía del piso debajo de toda pieza acostada (placas y textos).
     if (q < MAXIMO_DE_HUECOS_DEL_PIE) {
       quietudes[q].set(huella.x, huella.z, huella.medioAncho - SOMBRA_DEL_PIE.sobra, huella.medioFondo - SOMBRA_DEL_PIE.sobra)
-      fuerzas[q] = abre
+      fuerzas[q] = baja * abre
       QUIETUD_DEL_PIE.uEsTextoLaQuietud.value[q] = p.conSombra ? 0 : 1
       q += 1
     }
     if (!p.conSombra) continue
     huecos[k].set(huella.x, huella.z, (huella.medioAncho - SOMBRA_DEL_PIE.sobra) * sobra, (huella.medioFondo - SOMBRA_DEL_PIE.sobra) * sobra)
-    formas[k].set(abre, p.radioPx * col.mpp * sobra, p.espesor + HUECO_DEL_PIE.hondoDeMas, 0)
+    // (la silueta, el radio, lo hondo ahora y la franja debajo de la pieza: de su borde cercano al canto, la parte de su largo que ya tapa).
+    const lejos = ((col.y1 - col.y0) - p.dy) * col.mpp
+    const cerca = lejos - p.altoPx * col.mpp
+    const franja = abre < 1 ? 1 : Math.min(1, Math.max(0, (lejos * Math.sin(Math.min(a, Math.PI / 2)) - cerca) / Math.max(1e-3, lejos - cerca)))
+    formas[k].set(abre, p.radioPx * col.mpp * sobra, (p.espesor + HUECO_DEL_PIE.hondoDeMas) * baja, franja)
     k += 1
   }
   QUIETUD_DEL_PIE.uCuantasQuietudes.value = q
