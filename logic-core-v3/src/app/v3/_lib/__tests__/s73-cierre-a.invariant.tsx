@@ -13,6 +13,8 @@
  *   A7 · la caída del pie, un 35 % más corta: el reloj del final corre más rápido; la física, el golpe, el sonido, los huecos y la cámara
  *        cuelgan de él (sincronizados); el rebobinado, también un 35 % más corto.
  *   A8 · gracias y error: la bajada de la placa y el cierre del piso, al mismo ritmo (las dos en el promedio de las de antes).
+ *   A9 · el logo de la tarjeta de gracias no se ve doble (la ranura aparece al contacto); las caras de corte dentro del pozo, oscuras como
+ *        pared interior.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { motionValue } from 'motion/react'
@@ -27,6 +29,9 @@ import { FIN_DEL_GOLPE, LOGO_DE_SIEMPRE, REBOBINADO, RELOJ_DEL_FINAL, VIAJE_DEL_
 import { CAIDA_AL_HUECO, anguloEnElReloj } from '../escena/final/caidaAlHueco'
 import { pisoDelHundimiento } from '../escena/pie3d/transformacionDelPie'
 import { duracionDelCambioDelPie } from '../formularios/volteo'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { EncajeDelLogo } from '../../_componentes/formularios/EncajeDelLogo'
+import { POZO_DEL_PIE } from '../escena/pie3d/pozos'
 import { DIBUJO_DE_LA_RED, VERTICES_DE_LA_RED, armarLaRed } from '../escena/energia/dibujo/red'
 import { TRAZO } from '../escena/energia/dibujo/arcos'
 import * as THREE from 'three'
@@ -432,5 +437,33 @@ const PROMEDIO_A8 = (0.84 + 0.36) / 2
 const alMismoRitmo = (c: DelCambio): boolean => [c.bajada, c.cierre, c.apertura, c.subida].every((d) => Math.abs(d - PROMEDIO_A8) < 0.02)
 afirmar(alMismoRitmo(CAMBIO), `  la bajada ${CAMBIO.bajada.toFixed(2)} s y el cierre ${CAMBIO.cierre.toFixed(2)} s; a la vuelta la apertura ${CAMBIO.apertura.toFixed(2)} y la subida ${CAMBIO.subida.toFixed(2)} (antes 0,84 y 0,36: el promedio, ${PROMEDIO_A8.toFixed(2)})`)
 controlPositivo('  el detector VE el cambio de antes (la bajada 2,3 veces el cierre)', { bajada: 0.84, cierre: 0.36, apertura: 0.36, subida: 0.84 }, alMismoRitmo)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A9 · Sin el logo doble en la tarjeta de gracias; las caras de corte del pozo, oscuras como pared interior')
+
+/**
+ * El encastre de la tarjeta, renderizado: con la caída en curso (empezó y no tocó), la ranura (el pozo con la forma del logo, su sombra y
+ * su borde) está apagada, así a la vista hay UN logo (la pieza que baja); en el estado final (movimiento reducido: el contacto directo),
+ * encendida. Antes la ranura estaba siempre: con la pieza todavía translúcida bajando encima, dos logos un instante.
+ */
+const encaje = (resultado: 'encaja' | 'no-encaja', quieto: boolean): string => renderToStaticMarkup(<EncajeDelLogo resultado={resultado} empieza quieto={quieto} alTerminar={() => undefined} />)
+const ranuraDe = (html: string): string => /<g data-ranura=""[^>]*>[\s\S]*?<\/g><path[^>]*><\/path><\/g>/.exec(html)?.[0] ?? ''
+const opacidadDe = (bloque: string): number => Number(/^<g data-ranura=""[^>]*opacity="([\d.]+)"/.exec(bloque)?.[1] ?? 'NaN')
+const unSoloLogo = (cayendo: string, final: string): boolean => {
+  const r = ranuraDe(cayendo)
+  return r.includes('fill="var(--resultado-pozo)"') && opacidadDe(r) === 0 && opacidadDe(ranuraDe(final)) === 1 &&
+    // Afuera de la ranura, ningún pozo con la forma del logo (sólo la luz de la pieza, adentro de ella).
+    (cayendo.replace(r, '').match(/fill="var\(--resultado-pozo\)"(?! data-luz-de-la-pieza)/g) ?? []).length === 0
+}
+afirmar(unSoloLogo(encaje('encaja', false), encaje('encaja', true)) && unSoloLogo(encaje('no-encaja', false), encaje('no-encaja', true)), '  mientras la pieza baja, la ranura apagada (un solo logo a la vista); al contacto y en el final, encendida (con el éxito y con el error)')
+controlPositivo('  el detector VE la ranura a la vista mientras cae (la de antes)', [encaje('encaja', false).replace('<g data-ranura="" opacity="0">', '<g data-ranura="" opacity="1">'), encaje('encaja', true)] as const, (x: readonly string[]) => unSoloLogo(x[0], x[1]))
+
+/** La cara del corte (la pared del pozo arriba del piso): del tono de la pared interior en el labio y con poco de la luz directa. */
+const POZOS_A9 = leer('../escena/pie3d/pozos.ts')
+const corteBien = (p: string, corte: number): boolean =>
+  corte > 0 && corte <= 0.25 && p.includes('float costadoDelCorte = ${f(POZO_DEL_PIE.sombra.pared[0])} *') &&
+  p.includes('if ( sobreElPiso > 0.0 ) {\\n\\t\\treflectedLight.directDiffuse *= ${f(POZO_DEL_PIE.corte)};') && p.includes("deFondo ? '#include <lights_fragment_end>'")
+afirmar(corteBien(POZOS_A9, POZO_DEL_PIE.corte), `  las caras de corte: el tono de la pared interior (${String(POZO_DEL_PIE.sombra.pared[0])}) y ${String(POZO_DEL_PIE.corte)} de la luz directa (las que daban al sol salían claras)`)
+controlPositivo('  el detector VE la cara del corte de antes (el costado de un bloque, con la luz entera)', [POZOS_A9.replace('float costadoDelCorte = ${f(POZO_DEL_PIE.sombra.pared[0])} *', 'float costadoDelCorte = ${f(L.costado)} *'), 1] as const, (x: readonly [string, number]) => corteBien(x[0], x[1]))
 
 cerrar('s73-cierre-a')

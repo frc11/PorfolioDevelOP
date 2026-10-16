@@ -123,7 +123,8 @@ controlPositivo('  y sin las secciones (de canto, rayas)', CARGA_TSX.replace('{[
 titulo('K2 c · El éxito encaja y se enciende: nada de luz afuera de los bordes')
 const ENCAJE_TSX = leer('_componentes/formularios/EncajeDelLogo.tsx')
 const sinLuzAfuera = (e: string): boolean => {
-  const pieza = e.slice(e.indexOf('<motion.g initial={false} animate={pieza}'), e.indexOf('</motion.g>'))
+  // [CIERRE A] A9 · la ranura también va en un grupo animado (aparece al contacto): el de la pieza cierra en el primer `</motion.g>` después de él.
+  const pieza = e.slice(e.indexOf('<motion.g initial={false} animate={pieza}'), e.indexOf('</motion.g>', e.indexOf('<motion.g initial={false} animate={pieza}')))
   return (
     // Nada que se abra ni resplandezca alrededor: ni la onda (un contorno que crece), ni la elipse, ni un degradé.
     !/ellipse|radialGradient|ENCAJE\.onda/.test(e) &&

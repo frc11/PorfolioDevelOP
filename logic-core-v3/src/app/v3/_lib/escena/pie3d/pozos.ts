@@ -21,8 +21,10 @@ import { HUECOS_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, TECHO_DE_LOS_HUECOS } from '.
  * [PULIDO 28] AA5 · el fondo baja con lo hondo de ahora (el vuelco: `huecosDeLaCaida.ts`), con las juntas de la grilla (`junta`: su medio
  * ancho en partes del lado y cuánto oscurece) y oscuro según lo que bajó (`oscuroHasta`, u): al empezar, es el piso; al tocar, el pozo.
  * Y recortado a la franja debajo de la pieza: lo del contorno más allá se junta en el borde de la franja (su pared, de frente al canto).
+ * [CIERRE A] A9 · la cara del corte, como PARED INTERIOR: las que daban a la luz salían claras dentro del pozo (la luz directa les pegaba
+ * de lleno; a la pared de abajo del piso no le llega). Del tono de la pared en el labio y con `corte` de la luz directa.
  */
-export const POZO_DEL_PIE = { lados: 72, labio: TECHO_DE_LOS_HUECOS.labio - 0.002, tope: 2, junta: [0.03, 0.18], oscuroHasta: 0.25, sombra: { pared: [0.86, 0.62], fondo: 0.66 } } as const
+export const POZO_DEL_PIE = { lados: 72, labio: TECHO_DE_LOS_HUECOS.labio - 0.002, tope: 2, junta: [0.03, 0.18], oscuroHasta: 0.25, sombra: { pared: [0.86, 0.62], fondo: 0.66 }, corte: 0.15 } as const
 
 const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
 
@@ -85,8 +87,9 @@ const PARED_GLSL = /* glsl */ `
 	if ( vMundoDelPozo.y > topeDelBloque( vMundoDelPozo.xz ) ) discard;
 	float hondoDeLaPared = clamp( ( ${f(FLOOR_Y + POZO_DEL_PIE.labio)} - vMundoDelPozo.y ) / max( 1e-3, ${f(FLOOR_Y + POZO_DEL_PIE.labio)} - vFondoDelPozo ), 0.0, 1.0 );
 	float sobreElPiso = vMundoDelPozo.y - ${f(FLOOR_Y + POZO_DEL_PIE.labio)};
-	// Arriba del piso, como el costado de un bloque (\`piso/bloques.ts\`): más oscuro hacia la rendija, que acá es el borde del hueco.
-	float costadoDelCorte = ${f(L.costado)} * ( 1.0 - ${f(L.rendija[0])} * exp( - max( 0.0, sobreElPiso ) / ${f(L.rendija[1])} ) );
+	// Arriba del piso, la cara del corte: la pared interior en el labio, más oscura hacia la rendija (\`piso/bloques.ts\`), que acá es el
+	// borde del hueco. [CIERRE A] A9 · era el costado de un bloque (más claro) y con la luz directa entera.
+	float costadoDelCorte = ${f(POZO_DEL_PIE.sombra.pared[0])} * ( 1.0 - ${f(L.rendija[0])} * exp( - max( 0.0, sobreElPiso ) / ${f(L.rendija[1])} ) );
 	diffuseColor.rgb *= sobreElPiso > 0.0 ? costadoDelCorte : mix( ${f(POZO_DEL_PIE.sombra.pared[0])}, ${f(POZO_DEL_PIE.sombra.pared[1])}, hondoDeLaPared )`
 
 /**
@@ -132,6 +135,11 @@ function materialDelPozo(deFondo: boolean): THREE.MeshStandardMaterial {
       .replace(
         '#include <color_fragment>',
         `#include <color_fragment>\n${deFondo ? FONDO_GLSL : PARED_GLSL} * ( 1.0 - uOscuroDelBrillo );`,
+      )
+      // [CIERRE A] A9 · la cara del corte, con poco de la luz directa (como la pared de abajo del piso, a la que no le llega).
+      .replace(
+        '#include <lights_fragment_end>',
+        deFondo ? '#include <lights_fragment_end>' : `#include <lights_fragment_end>\n\tif ( sobreElPiso > 0.0 ) {\n\t\treflectedLight.directDiffuse *= ${f(POZO_DEL_PIE.corte)};\n\t\treflectedLight.directSpecular *= ${f(POZO_DEL_PIE.corte)};\n\t}`,
       )
   }
   m.customProgramCacheKey = () => `pozo-del-pie-${deFondo ? 'fondo' : 'pared'}`

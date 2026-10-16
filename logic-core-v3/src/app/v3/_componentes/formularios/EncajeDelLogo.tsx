@@ -20,6 +20,8 @@ import { sonar } from '../../_lib/sonido/bus'
  *
  * Arranca con `empieza` (cuando la tarjeta ya se ve: terminado el volteo) y avisa con `alTerminar`. Con movimiento reducido, el
  * estado final directo (y el sonido igual: no es movimiento). Los tiempos, en `ENCAJE`. SVG con Motion: sin lienzo propio.
+ * [CIERRE A] A9 · la RANURA aparece recién cuando la pieza llega (con el éxito, tapada por ella; con el error, con su borde rojo): con la
+ * ranura a la vista mientras la pieza bajaba (y todavía translúcida) se veían dos logos un instante al terminar el cambio.
  */
 export const ENCAJE = {
   /** Cuánto baja la pieza (unidades del logo: su alto es 681) y cuánto más grande arranca (más cerca de la cámara). */
@@ -108,14 +110,17 @@ export function EncajeDelLogo({ resultado, empieza, quieto, alTerminar, precalen
           <feGaussianBlur stdDeviation="16" />
         </filter>
       </defs>
-      {/* La ranura: un pozo con la forma del logo, con la sombra de su borde de arriba adentro (se lee hundida). */}
-      <path d={LOGO_PATH_D} fill="var(--resultado-pozo)" />
-      <g clipPath={`url(#ranura-${id})`}>
-        <path d={LOGO_PATH_D} fill="none" stroke="var(--resultado-sombra)" strokeWidth={46} filter={`url(#desenfoque-${id})`} transform="translate(0 16)" />
-      </g>
-      {/* El borde, tenue; con el error, al chocar se enciende encima en ROJO: sólo cambia la opacidad (Motion no interpola un color
-          hecho con color-mix). [PULIDO 13] K2 · con el éxito el borde no se enciende: la luz es de la pieza. */}
-      <path d={LOGO_PATH_D} fill="none" strokeWidth={exito ? 7 : 10} stroke="var(--resultado-borde)" />
+      {/* La ranura: un pozo con la forma del logo, con la sombra de su borde de arriba adentro (se lee hundida). [CIERRE A] A9 · desde el
+          contacto (antes, nada: una sola pieza cayendo). */}
+      <motion.g data-ranura="" initial={false} animate={{ opacity: contacto ? 1 : 0 }} transition={{ duration: quieto || exito ? 0 : 0.15 }}>
+        <path d={LOGO_PATH_D} fill="var(--resultado-pozo)" />
+        <g clipPath={`url(#ranura-${id})`}>
+          <path d={LOGO_PATH_D} fill="none" stroke="var(--resultado-sombra)" strokeWidth={46} filter={`url(#desenfoque-${id})`} transform="translate(0 16)" />
+        </g>
+        {/* El borde, tenue; con el error, al chocar se enciende encima en ROJO: sólo cambia la opacidad (Motion no interpola un color
+            hecho con color-mix). [PULIDO 13] K2 · con el éxito el borde no se enciende: la luz es de la pieza. */}
+        <path d={LOGO_PATH_D} fill="none" strokeWidth={exito ? 7 : 10} stroke="var(--resultado-borde)" />
+      </motion.g>
       {!exito && (
         <motion.path d={LOGO_PATH_D} fill="none" strokeWidth={10} stroke="var(--rojo-del-error)" initial={false} animate={{ opacity: !contacto ? 0 : quieto ? 0.85 : [1, 0.85] }} transition={{ duration: quieto ? 0 : 0.35 }} />
       )}
