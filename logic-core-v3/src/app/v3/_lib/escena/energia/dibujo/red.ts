@@ -7,8 +7,9 @@ import { CANAL_DEL_ARCO, FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, 
 import { COMUN, materialDeEnergia } from './comun'
 
 /**
- * [PULIDO 19] Q1.d · EL DIBUJO DE LA RED EN REPOSO (`reposo.ts`: la máquina; `docs/rediseno/PLASMA.md`). De día tinta translúcida, de noche
- * luz; detrás de un texto se apaga (la máscara por píxel) y en el final del pie, cerca del logo. Siempre al menos un lugar dibujado (nulo):
+ * [PULIDO 19] Q1.d · EL DIBUJO DE LA RED EN REPOSO (`reposo.ts`: la máquina; `docs/rediseno/PLASMA.md`). Luz ([CIERRE A] A3 · sólo de
+ * noche, como los arcos: cada rayo entra con la noche); detrás de un texto se apaga (la máscara por píxel) y en el final del pie, cerca
+ * del logo. Siempre al menos un lugar dibujado (nulo):
  * el programa se arma al cargar, no con la primera red.
  *
  * [PULIDO 20] R3 · RAYOS CONGELADOS (el humano: «en vez de una línea recta, que sea un rayo congelado en el aire: literalmente los rayos
@@ -163,7 +164,7 @@ Rayo rayoDelVertice() {
 	float abierto = c.x <= 0.0 ? 1.0 : smoothstep( c.x - 0.06, c.x + 0.02, abs( vT - 0.5 ) * 2.0 );
 	float titila = 1.0 - uRed.z * ( 0.5 + 0.5 * sin( uTiempo * ( 4.0 + b.w * 5.0 ) + b.w * 40.0 ) );
 	float destello = max( a.w - 1.0, 0.0 );
-	float k = ( min( a.w, 1.0 ) * titila + destello * 1.5 ) * abierto * enElFinal( r.punto - uCentro ) * mix( 1.0, uTopeDeLaRed, uNoche );
+	float k = ( min( a.w, 1.0 ) * titila + destello * 1.5 ) * abierto * enElFinal( r.punto - uCentro ) * uTopeDeLaRed;
 	r.forma = vec4( position.x, ( rama < 0.5 ? 1.0 : ${DIBUJO_DE_LA_RED.rama.toFixed(2)} ) * ${DIBUJO_DE_LA_RED.ancho.toFixed(2)}, uRed.x * k, uRed.y * k );
 	r.extra = vec4( t, b.w * 40.0, rama, 0.0 );
 	r.nulo = a.w <= 0.001 ? 1.0 : 0.0;

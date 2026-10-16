@@ -26,14 +26,13 @@ export const DIRECCIONES: Readonly<Record<Direccion, DeLaDireccion>> = {
     // la reserva: 1100 y 550 (activas, las que pide el objetivo de la población en cada encuadre: `poblacion.ts`).
     brasas: [1100, 550],
     intensidadDeLasBrasas: 1,
-    // Chispas suaves de tamaños muy distintos (no bokeh: poco desenfoque); de día, energía oscura translúcida con su destello blanco.
+    // Chispas suaves de tamaños muy distintos (no bokeh: poco desenfoque).
     // [PULIDO 18] P1.d · más partícula, menos nube: núcleos chicos y nítidos con un halo corto (2,5 veces el núcleo, tenue), tamaños
     // por una ley de potencia (de 0,012 a 0,08 u), casi sin desenfoque (era el bokeh: 0,3 px por u y hasta 6 px), un tope de 3,2 px.
     // El núcleo, brillante (2,8): con 1,3 y el reposo en 0,18, de noche eran puntitos tenues y el plasma perdía presencia (mini-banco).
-    // P1.c · de día, su propia ganancia: un alfa chico sobre el papel no se ve (la noche suma luz sobre negro, que sí): el cuerpo, 2,6
-    // y la mitad visible en reposo; el velo, angosto (con tope en el sombreador). [PULIDO 19] Q1.b · la FUENTE apenas (de 0,75 a 0,2, y más
-    // ancha: 9 u): el plasma está en toda la vista, con un poco más cerca del logo.
-    aspecto: { brasas: { uFuente: [9, 0.2, 0.55, 0.22], uLuz: [2.8, 0.26, 0.2, 2.5], uTamano: [0.012, 0.08, 0.7, 3.2], uMovida: [0, 1.2, 0.06, 1.5], uChispa: [2.3, 0.5, 0.55, 7], uNucleo: [1.5, 0, 0, 0], uDia: [2.6, 0.55, 0.5, 0.6], uDiaForma: [1.6, 1.2, 0.45, 0] } },
+    // [PULIDO 19] Q1.b · la FUENTE apenas (de 0,75 a 0,2, y más ancha: 9 u): el plasma está en toda la vista, con un poco más cerca del
+    // logo. [CIERRE A] A3 · la de día (su cuerpo y su velo) se borró con el día de la energía.
+    aspecto: { brasas: { uFuente: [9, 0.2, 0.55, 0.22], uLuz: [2.8, 0.26, 0.2, 2.5], uTamano: [0.012, 0.08, 0.7, 3.2], uMovida: [0, 1.2, 0.06, 1.5], uChispa: [2.3, 0.5, 0.55, 7], uNucleo: [1.5, 0, 0, 0] } },
   },
 }
 

@@ -8,26 +8,16 @@ import { AL_TONO, COMUN, SALIDA, f } from './comun'
  * sombreador abre en la pantalla a los dos lados de cada punto, con la unión en inglete (el ancho en px de la pantalla: un canal fino
  * se ve fino lejos y cerca). El canal tiene tres capas gaussianas: el NÚCLEO fino de cada golpe, su HALO y el RESPLANDOR residual
  * (más ancho y tenue: lo que queda entre golpe y golpe). Menos dibujado que un trazo: las puntas se afinan hasta casi nada, la luz
- * CORRE por el canal (una ondulación del brillo a lo largo que se mueve) y las ramas son más tenues. De día, el halo es energía
- * oscura (grafito muy translúcido y ancho: el marco que deja ver el núcleo) y el núcleo, más blanco que el papel (o tinta, con
- * `uArcoDia.w`): en DOS PASADAS (`uCapa`): primero lo oscuro, después los núcleos. De noche suman. Sobre un texto, nada.
+ * CORRE por el canal (una ondulación del brillo a lo largo que se mueve) y las ramas son más tenues. En DOS PASADAS (`uCapa`): el halo y
+ * el resplandor, después los núcleos (suman). Sobre un texto, nada. [CIERRE A] A3 · sólo de noche: cada uno entra y se va con la noche,
+ * corrido por su semilla (`deNoche`, `comun.ts`), su luz y su ancho juntos; el de día (la tinta, el gris) se borró.
  */
 export const TRAZO = {
   /** El medio ancho del canal (px de CSS, por el ancho de su clase), el del núcleo (px), cuánto corre la luz y cuánto se afinan las puntas. */
   uArcoForma: [11, 0.85, 0.3, 1],
-  /**
-   * De día: cuánto tapa el halo oscuro, el resplandor oscuro, el núcleo y su color (0 blanco, 1 tinta). [PULIDO 18] P1.c · el núcleo de
-   * tinta y el halo tenue: con el núcleo blanco (invisible sobre el papel) quedaba una banda de humo gris; ahora, un rayo de tinta.
-   */
-  uArcoDia: [0.08, 0.04, 0.95, 1],
-  /** De noche: la luz del halo, la del resplandor y la del núcleo. */
+  /** La luz del halo, la del resplandor y la del núcleo. */
   uArcoNoche: [0.16, 0.18, 1.7, 0],
-  /** [PULIDO 27] Z3 · de día: el ancho (parte del de noche) y el gris del núcleo (lineal); los pone la variante del día (`dia.ts`). */
-  uDiaDelArco: [0.55, 0.21, 0, 0],
 } as const
-
-/** [PULIDO 24] V2 · de día los arcos, finos (parte del ancho) y en gris medio (lineal: el gris del núcleo): no compiten con el texto. */
-export const ARCO_DE_DIA = { fino: TRAZO.uDiaDelArco[0], gris: TRAZO.uDiaDelArco[1] } as const
 
 /** [PULIDO 18] P1.a · en cuánto se desvanece el canal contra lo opaco (u): corto (donde toca el logo, casi hasta el borde). */
 export const ARCO_BLANDO = 0.15
@@ -36,14 +26,12 @@ export type NombreDelTrazo = keyof typeof TRAZO
 
 export function uniformesDelTrazo(): Record<NombreDelTrazo, { value: THREE.Vector4 }> {
   const v = (n: NombreDelTrazo): { value: THREE.Vector4 } => ({ value: new THREE.Vector4(TRAZO[n][0], TRAZO[n][1], TRAZO[n][2], TRAZO[n][3]) })
-  return { uArcoForma: v('uArcoForma'), uArcoDia: v('uArcoDia'), uArcoNoche: v('uArcoNoche'), uDiaDelArco: v('uDiaDelArco') }
+  return { uArcoForma: v('uArcoForma'), uArcoNoche: v('uArcoNoche') }
 }
 
 export const TRAZO_GLSL = /* glsl */ `
 uniform vec4 uArcoForma;
-uniform vec4 uArcoDia;
 uniform vec4 uArcoNoche;
-uniform vec4 uDiaDelArco;
 uniform float uCapa;
 `
 
@@ -52,6 +40,7 @@ uniform float uCapa;
  * arma su sombreador). Necesita `COMUN` y `TRAZO_GLSL` antes.
  */
 export const CANAL_DEL_ARCO = /* glsl */ `
+varying float vEscala;
 varying float vLado;
 varying float vAncho;
 varying float vGolpe;
@@ -68,16 +57,19 @@ void canalDelArco( vec3 aPunto, vec3 aAntes, vec3 aDespues, vec4 aForma, vec4 aE
 	vec4 c = projectionMatrix * viewMatrix * vec4( aPunto, 1.0 );
 	vec4 cA = projectionMatrix * viewMatrix * vec4( aAntes, 1.0 );
 	vec4 cD = projectionMatrix * viewMatrix * vec4( aDespues, 1.0 );
+	// [CIERRE A] A3 · con la noche, corrido por su semilla: la luz y el ancho.
+	float vive = deNoche( azarDeLaSemilla( aExtra.y ) );
 	vLado = aForma.x;
-	vGolpe = aForma.z;
-	vResidual = aForma.w;
+	vGolpe = aForma.z * vive;
+	vResidual = aForma.w * vive;
 	vLargo = aExtra.x;
 	vSemilla = aExtra.y;
 	vRama = aExtra.z;
 	vTexto = 0.0;
 	vAncho = 1.0;
+	vEscala = 1.0;
 	vDistancia = c.w;
-	if ( aForma.y <= 0.0 || c.w <= 0.05 || cA.w <= 0.05 || cD.w <= 0.05 ) {
+	if ( vive <= 0.0 || aForma.y <= 0.0 || c.w <= 0.05 || cA.w <= 0.05 || cD.w <= 0.05 ) {
 		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
 		return;
 	}
@@ -98,7 +90,8 @@ void canalDelArco( vec3 aPunto, vec3 aAntes, vec3 aDespues, vec4 aForma, vec4 aE
 	// Las puntas se afinan (el canal hacia sus dos puntas; cada rama hacia la suya).
 	float afina = vRama > 0.5 ? mix( 1.0, 0.15, vLargo ) : 0.12 + 0.88 * smoothstep( 0.0, 0.16, vLargo ) * smoothstep( 1.0, 0.84, vLargo );
 	afina = mix( 1.0, afina, uArcoForma.w );
-	float medio = ( uCapa < 0.5 ? uArcoForma.x * aForma.y : uArcoForma.y * 3.0 * max( 0.6, aForma.y ) ) * uPixel * afina * mix( uDiaDelArco.x, 1.0, uNoche );
+	float medio = ( uCapa < 0.5 ? uArcoForma.x * aForma.y : uArcoForma.y * 3.0 * max( 0.6, aForma.y ) ) * uPixel * afina * vive;
+	vEscala = vive;
 	vAncho = medio;
 	vTexto = adentroDelTexto( c.xy / c.w );
 	gl_Position = vec4( ( s + normal * vLado * medio * inglete ) / ( uResolucion * 0.5 ) * c.w, c.z, c.w );
@@ -131,6 +124,7 @@ float textoDelArco( float porVertice ) {
 `
 
 export const FRAGMENTOS_DE_LOS_ARCOS = /* glsl */ `
+varying float vEscala;
 varying float vLado;
 varying float vAncho;
 varying float vGolpe;
@@ -150,15 +144,11 @@ void main() {
 	// La luz que corre por el canal: una ondulación a lo largo que se mueve rápido (no un brillo parejo de trazo).
 	float corre = 1.0 - uArcoForma.z + uArcoForma.z * ( 0.5 + 0.5 * sin( vLargo * 23.0 - uTiempo * 41.0 + vSemilla ) * sin( vLargo * 9.0 + uTiempo * 17.0 + vSemilla * 1.3 ) );
 	float rama = vRama > 0.5 ? 0.6 : 1.0;
-	float nucleo = exp( - pow( x / ( uArcoForma.y * uPixel * mix( uDiaDelArco.x, 1.0, uNoche ) ), 2.0 ) ) * vGolpe * corre * rama;
+	float nucleo = exp( - pow( x / ( uArcoForma.y * uPixel * max( 1e-3, vEscala ) ), 2.0 ) ) * vGolpe * corre * rama;
 	// [PULIDO 18] P1.d · la luz que corre, sólo en el núcleo: en el halo ancho dibujaba rayas de través (una espina de pescado).
 	float halo = exp( - pow( x / ( vAncho * 0.45 ), 2.0 ) ) * vGolpe * rama;
 	float resplandor = exp( - pow( x / ( vAncho * 0.85 ), 2.0 ) ) * vResidual * rama;
-	// La capa 0: la energía oscura (de día) y la luz del halo y del resplandor (de noche). La capa 1: el núcleo.
-	float oscuro = min( 1.0, halo * uArcoDia.x + resplandor * uArcoDia.y );
-	float blanco = min( 1.0, nucleo * uArcoDia.z );
-	float aDia = uCapa < 0.5 ? oscuro : blanco;
-	vec3 colorDia = uCapa < 0.5 ? uTintaDia : mix( mix( uClaroDia, uTintaDia, uArcoDia.w ), vec3( uDiaDelArco.y ), uArcoDia.w );
+	// La capa 0: la luz del halo y del resplandor. La capa 1: el núcleo.
 	vec3 luzNoche = uCapa < 0.5 ? uLuzNoche * ( halo * uArcoNoche.x + resplandor * uArcoNoche.y ) : uLuzNoche * nucleo * uArcoNoche.z;
 	// [PULIDO 18] P1.a · blando contra lo opaco en una distancia corta (ningún brillo corta una superficie).
 	float blando = smoothstep( 0.0, ${f(ARCO_BLANDO)}, distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia );
@@ -168,8 +158,7 @@ void main() {
 `
 
 /**
- * [PULIDO 18] P1.d · EL HALO DEL CANAL, CON PUNTOS (la pasada 0): un punto suave por punto del camino, del ancho del halo, aditivo de
- * noche y energía oscura de día; su peso, por lo que avanza hasta el siguiente punto en la pantalla (un tubo parejo, sin cuentas). Como
+ * [PULIDO 18] P1.d · EL HALO DEL CANAL, CON PUNTOS (la pasada 0): un punto suave por punto del camino, del ancho del halo, aditivo; su peso, por lo que avanza hasta el siguiente punto en la pantalla (un tubo parejo, sin cuentas). Como
  * cinta, en un quiebre cerrado el halo ancho se plegaba en esquirlas blancas (visto de cerca); los puntos no se pliegan. El núcleo
  * sigue siendo la cinta fina (la pasada 1). Los mismos atributos de la cinta: sólo cuenta un lado (el otro no llega a dibujarse).
  */
@@ -187,8 +176,10 @@ varying float vTexto;
 varying float vPeso;
 varying float vDistancia;
 void haloDelArco( vec3 aPunto, vec3 aDespues, vec4 aForma, vec4 aExtra ) {
-	vGolpe = aForma.z;
-	vResidual = aForma.w;
+	// [CIERRE A] A3 · con la noche, corrido por su semilla (la del canal: el mismo arco entra entero).
+	float vive = deNoche( azarDeLaSemilla( aExtra.y ) );
+	vGolpe = aForma.z * vive;
+	vResidual = aForma.w * vive;
 	vTexto = 0.0;
 	vPeso = 0.0;
 	vDistancia = 0.0;
@@ -197,7 +188,7 @@ void haloDelArco( vec3 aPunto, vec3 aDespues, vec4 aForma, vec4 aExtra ) {
 	vec3 punto = aForma.x < 0.0 ? mix( aPunto, aDespues, 0.5 ) : aPunto;
 	vec4 c = projectionMatrix * viewMatrix * vec4( punto, 1.0 );
 	vec4 cP = projectionMatrix * viewMatrix * vec4( aPunto, 1.0 );
-	if ( aForma.y <= 0.0 || c.w <= 0.05 || cP.w <= 0.05 ) {
+	if ( vive <= 0.0 || aForma.y <= 0.0 || c.w <= 0.05 || cP.w <= 0.05 ) {
 		gl_Position = vec4( 2.0, 2.0, 2.0, 1.0 );
 		gl_PointSize = 0.0;
 		return;
@@ -212,8 +203,8 @@ void haloDelArco( vec3 aPunto, vec3 aDespues, vec4 aForma, vec4 aExtra ) {
 	// El radio, al menos lo que hay hasta el punto que sigue (la mitad del tramo: hay uno en el medio): en un arco largo los puntos
 	// quedaban separados (un collar de cuentas). Lo que crece por el paso no suma luz: más ancho, más tenue (base / radio).
 	float paso = 0.5 * length( d - s );
-	float base = max( 0.75, uArcoForma.x * aForma.y * uPixel * afina * ${f(HALO_DEL_ARCO.radio)} );
-	float radio = max( base, 1.1 * paso * afina );
+	float base = max( 0.75, uArcoForma.x * aForma.y * uPixel * afina * ${f(HALO_DEL_ARCO.radio)} ) * vive;
+	float radio = max( max( 1e-3, base ), 1.1 * paso * afina * vive );
 	vPeso = clamp( paso / ( 2.2 * radio ), 0.05, 0.85 ) * ( base / radio ) * ( rama > 0.5 ? 0.6 : 1.0 );
 	gl_PointSize = 2.0 * radio * ${f(HALO_DEL_ARCO.llega)};
 	gl_Position = c;
@@ -252,8 +243,6 @@ void main() {
 	float borde = 1.0 - smoothstep( ${f((HALO_DEL_ARCO.llega - 0.6) ** 2)}, ${f(HALO_DEL_ARCO.llega ** 2)}, r2 );
 	float halo = exp( - r2 ) * vGolpe * vPeso * borde;
 	float resplandor = exp( - r2 * 0.28 ) * vResidual * vPeso * borde;
-	float aDia = min( 1.0, halo * uArcoDia.x + resplandor * uArcoDia.y );
-	vec3 colorDia = uTintaDia;
 	vec3 luzNoche = uLuzNoche * ( halo * uArcoNoche.x + resplandor * uArcoNoche.y );
 	float blando = smoothstep( 0.0, ${f(ARCO_BLANDO)}, distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia );
 	float vis = ( 1.0 - ${f(0.95)} * textoDelArco( vTexto ) ) * ( 1.0 - uApagado ) * blando;

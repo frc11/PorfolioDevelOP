@@ -15,7 +15,6 @@ import { FLOOR_Y } from '../probeScene'
 import { energiaDelBanco, type EnergiaDelBanco } from './banco'
 import { crearAfuera, cuadro, cuadroQuieto, type Afuera } from './cuadro'
 import { armar, soltar, type Armado, type Vista } from './dibujo/armado'
-import { aplicarElDia } from './dibujo/dia'
 import { escucharElPuntero } from './interaccion/puntero'
 import { juntarLasLucesVivas } from './lucesVivas'
 import { TEXTO_EN_PANTALLA, cajaDelLogo, cajasDelTexto } from './textoEnPantalla'
@@ -57,10 +56,8 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
     if (g === null) return undefined
     const a = armar(compacto, vista, () => logoGroupRef.current)
     // [PULIDO 27] Z2 · la red en reposo, un árbol (`arbol.ts`); [PULIDO 28] AB1 · AB2 · por defecto (la de cadenas, con `?red=cadenas`).
-    // Z3 · `?dia=`: el día (`dia.ts`).
     const consulta = new URLSearchParams(window.location.search)
     a.red.modo = consulta.get('red') === 'cadenas' ? 'cadenas' : 'toda'
-    aplicarElDia(consulta.get('dia'), a.dia)
     g.add(...a.mallas)
     armado.current = a
     quietas.current.listo = false
@@ -89,10 +86,9 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
     state.gl.getDrawingBufferSize(u.uResolucion.value)
     u.uPixel.value = state.gl.getPixelRatio()
     if (state.camera instanceof THREE.PerspectiveCamera) u.uEscalaPx.value = u.uResolucion.value.y / (2 * Math.tan(THREE.MathUtils.degToRad(state.camera.fov) / 2))
-    // [PULIDO 26] X3 · la noche de la energía sigue al frente del amanecer (sin el salto del cambio: `nocheDeLaEnergia`).
+    // [PULIDO 26] X3 · la noche de la energía sigue al frente del amanecer (sin el salto del cambio: `nocheDeLaEnergia`). [CIERRE A] A3 ·
+    // y con ella entran y se van las cargas, los arcos y la red (de día, nada: `deNoche`, `dibujo/comun.ts`).
     u.uNoche.value = nocheDeLaEnergia(VIVO.uNoche.value, AMANECER_EN_VIVO.uBarridoDelDia.value, AMANECER_EN_VIVO.uFrenteDelDia.value)
-    // [PULIDO 18] P1.c · de día, el calor refracta lo de atrás: la copia del cuadro (el pase compartido).
-    if (u.uNoche.value < 0.97) PEDIDOS_DEL_PASE.colorEsteCuadro = true
     u.uFoco.value = state.camera.position.distanceTo(a.centro)
     const despues = Math.min(1, Math.max(0, (EN_VIVO.fin - FIN_DEL_GOLPE) / DESPUES_DEL_GOLPE))
     u.uApagado.value = EN_VIVO.camara * despues * despues * (3 - 2 * despues)

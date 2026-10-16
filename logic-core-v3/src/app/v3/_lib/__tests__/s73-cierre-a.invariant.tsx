@@ -5,8 +5,10 @@
  *        Y la vista previa del destino (al pasar por un ítem del menú) ya no gira la cámara: queda en la luz.
  *   A2 · el pie, estable: la órbita del mouse al 40 % y el doble de amortiguada, de pie (el paralaje del recorrido, que entra con el pie)
  *        y acostado (la órbita del final).
+ *   A3 · partículas y rayos sólo de noche: de día no hay cargas, arcos ni red; entran y se van con la noche de la energía (el factor del
+ *        amanecer y el atardecer), cada una corrida por su azar, su luz y su tamaño juntos, sin saltos. El día de la energía se borró.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { motionValue } from 'motion/react'
 import { CONTROLES_FIJOS, ORBITA_EN_EL_PIE, PUNTERO_DE_LA_ORBITA, enElPie, escalaDeLaOrbita, moverElPunteroDeLaOrbita, perseguirElPunteroDeLaOrbita } from '../escena/punteroDeLaOrbita'
 import { crearDesplazamiento, desplazamientoDelMouse, perseguirAlPuntero } from '../escena/modulacionDeLaPose'
@@ -14,6 +16,7 @@ import { MOUSE_TAU } from '../escena/choreographyPhysics'
 import { ORBITA_DEL_MOUSE, nuevaOrbita, pasoDeLaOrbita } from '../escena/final/orbitaDelMouse'
 import { TRAMOS_DEL_PIE } from '../escena/pie3d/coreografia'
 import { PROGRESO_DEL_PIE } from '../pie3d/registro'
+import { DE_NOCHE, f as glsl } from '../escena/energia/dibujo/comun'
 import { ANTICIPACION } from '../escena/interfaz/anticipacion'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -180,5 +183,87 @@ controlPositivo('  el detector VE la órbita acostada de antes', ANTES, acostado
 const conLaEscala = (orbit: string): boolean => orbit.includes('desplazamientoDelMouse(desplazamiento, mouse, distance, rigValues.mouseScale * escalaDeLaOrbita(), rigValues.progress)')
 afirmar(conLaEscala(leer('../escena/OrbitRig.tsx')), '  OrbitRig: el paralaje del recorrido con la escala del pie')
 controlPositivo('  el detector VE el paralaje sin la escala', leer('../escena/OrbitRig.tsx').replace(' * escalaDeLaOrbita()', ''), conLaEscala)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A3 · Partículas y rayos sólo de noche: entran y se van con la noche, cada una corrida, sin saltos; sin el día')
+
+/**
+ * La entrada (`deNoche`, la misma cuenta que el sombreador): con la noche de la energía `n` (0 de día, 1 de noche) y el azar de cada una.
+ * Lo que se mide sobre 200 azares y la noche de 0 a 1 en pasos de 0,001: de día (n = 0) ninguna; de noche entera (n = 1) todas; ningún
+ * salto (el mayor cambio de un paso al siguiente); cada una sube sin volver; y el desfase: a mitad del cambio, unas enteras y otras nada.
+ */
+type Entrada = (azar: number, n: number) => number
+const suave = (a: number, b: number, x: number): number => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)))
+  return t * t * (3 - 2 * t)
+}
+const DE_NOCHE_TS: Entrada = (azar, n) => suave(DE_NOCHE.desde + azar * DE_NOCHE.desfase, DE_NOCHE.desde + azar * DE_NOCHE.desfase + DE_NOCHE.ancho, n)
+interface DeLaEntrada {
+  readonly deDia: number
+  readonly deNoche: number
+  readonly salto: number
+  readonly vuelve: boolean
+  readonly enteras: number
+  readonly nada: number
+}
+function entrada(e: Entrada): DeLaEntrada {
+  let deDia = 0
+  let deNoche = 1
+  let salto = 0
+  let vuelve = false
+  let enteras = 0
+  let nada = 0
+  for (let k = 0; k < 200; k += 1) {
+    const azar = (k + 0.5) / 200
+    deDia = Math.max(deDia, e(azar, 0))
+    deNoche = Math.min(deNoche, e(azar, 1))
+    let antes = e(azar, 0)
+    for (let i = 1; i <= 1000; i += 1) {
+      const v = e(azar, i / 1000)
+      salto = Math.max(salto, Math.abs(v - antes))
+      if (v < antes - 1e-12) vuelve = true
+      antes = v
+    }
+    const medio = e(azar, 0.5)
+    if (medio > 0.99) enteras += 1
+    if (medio < 0.01) nada += 1
+  }
+  return { deDia, deNoche, salto, vuelve, enteras, nada }
+}
+const entradaBien = (x: DeLaEntrada): boolean => x.deDia === 0 && x.deNoche === 1 && x.salto < 0.01 && !x.vuelve && x.enteras >= 20 && x.nada >= 20
+const ENTRADA = entrada(DE_NOCHE_TS)
+afirmar(entradaBien(ENTRADA), `  de día ninguna (${String(ENTRADA.deDia)}), de noche todas (${String(ENTRADA.deNoche)}), sin saltos (a lo sumo ${ENTRADA.salto.toFixed(4)} por milésima de noche) y corridas: a mitad del cambio ${String(ENTRADA.enteras)} de 200 enteras y ${String(ENTRADA.nada)} nada`)
+controlPositivo('  el detector VE una entrada sin desfase (todas a la vez)', entrada((_, n) => suave(0.3, 0.8, n)), entradaBien)
+controlPositivo('  y una de golpe (pop)', entrada((azar, n) => (n >= 0.1 + 0.8 * azar ? 1 : 0)), entradaBien)
+controlPositivo('  y la de día (la de antes: ya se ve con la noche en cero)', entrada((azar, n) => 0.4 + 0.6 * DE_NOCHE_TS(azar, n)), entradaBien)
+
+/** El sombreador hace la misma cuenta, y cada dibujo la usa en su luz y en su tamaño (las cargas, su reflejo, los arcos, su halo, la red, los efectos). */
+const DIBUJO = (archivo: string): string => leer(`../escena/energia/dibujo/${archivo}`)
+const FUENTES_A3 = { comun: DIBUJO('comun.ts'), particulas: DIBUJO('particulas.ts'), arcos: DIBUJO('arcos.ts'), reflejos: DIBUJO('reflejos.ts'), efectos: DIBUJO('efectos.ts'), red: DIBUJO('red.ts') }
+type FuentesA3 = typeof FUENTES_A3
+const cableadoA3 = (x: FuentesA3): boolean =>
+  x.comun.includes('float desde = ${f(DE_NOCHE.desde)} + azar * ${f(DE_NOCHE.desfase)};') && x.comun.includes('return smoothstep( desde, desde + ${f(DE_NOCHE.ancho)}, uNoche );') &&
+  x.comun.includes('gl_FragColor = vec4( alTono( noche ), 0.0 );') &&
+  x.particulas.includes('float vive = deNoche( azar01( id, 34u ) );') && x.particulas.includes('radio *= max( 0.02, nacer.x ) * vive;') && x.particulas.includes('* nacer.y * vive;') && x.particulas.includes('if ( vive <= 0.0 ||') &&
+  x.reflejos.includes('float vive = deNoche( azar01( id, 34u ) );') && x.reflejos.includes('* vive * uPixel;') && x.reflejos.includes('* nacer.y * vive;') &&
+  (x.arcos.match(/float vive = deNoche\( azarDeLaSemilla\( aExtra\.y \) \);/g) ?? []).length === 2 && (x.arcos.match(/vGolpe = aForma\.z \* vive;/g) ?? []).length === 2 &&
+  x.arcos.includes('* uPixel * afina * vive;') && x.arcos.includes('* afina * ${f(HALO_DEL_ARCO.radio)} ) * vive;') &&
+  x.efectos.includes('float k = vEfecto.z * deNoche( vSemilla );') && x.red.includes('canalDelArco( r.punto, r.antes, r.despues, r.forma, r.extra );') && x.red.includes('haloDelArco( r.punto, r.despues, r.forma, r.extra );') &&
+  x.red.includes('enElFinal( r.punto - uCentro ) * uTopeDeLaRed;')
+afirmar(cableadoA3(FUENTES_A3), '  la cuenta del sombreador es la misma (con sus constantes) y la usan las cargas (luz y tamaño), su reflejo, los arcos y su halo (luz y ancho), la red (con el mismo canal) y los efectos; la salida, sólo luz')
+controlPositivo('  el detector VE las cargas que entran sólo de brillo (sin la escala)', { ...FUENTES_A3, particulas: FUENTES_A3.particulas.replace('radio *= max( 0.02, nacer.x ) * vive;', 'radio *= max( 0.02, nacer.x );') }, cableadoA3)
+controlPositivo('  y los arcos sin la entrada', { ...FUENTES_A3, arcos: FUENTES_A3.arcos.replace('vGolpe = aForma.z * vive;', 'vGolpe = aForma.z;') }, cableadoA3)
+controlPositivo('  y la red con su tope de día', { ...FUENTES_A3, red: FUENTES_A3.red.replace('* uTopeDeLaRed;', '* mix( 1.0, uTopeDeLaRed, uNoche );') }, cableadoA3)
+// La cuenta del sombreador, con los números puestos (lo que ve la GPU).
+afirmar(glsl(DE_NOCHE.desde) === '0.02' && DE_NOCHE.desde > 0 && DE_NOCHE.desde + DE_NOCHE.desfase + DE_NOCHE.ancho <= 1, `  de día nada (desde ${String(DE_NOCHE.desde)}) y de noche entera todas (hasta ${String(DE_NOCHE.desde + DE_NOCHE.desfase + DE_NOCHE.ancho)})`)
+
+/** Sin el día: ni su módulo, ni sus uniformes, ni lo que tapaba (alfa), ni la copia del cuadro que pedía; la noche de la energía, la del amanecer. */
+const PLASMA_A3 = leer('../escena/energia/PlasmaYCargas.tsx')
+const sinElDia = (x: FuentesA3, plasma: string): boolean =>
+  !existsSync(new URL('../escena/energia/dibujo/dia.ts', import.meta.url)) && !Object.values(x).some((t) => /uTintaDia|uClaroDia|colorDia|aDia\b|uDia\b|uDiaForma|uCalorDia|uArcoDia|uDiaDelArco|uDiaDeLaCarga/.test(t)) &&
+  !/colorEsteCuadro|aplicarElDia/.test(plasma) && plasma.includes('u.uNoche.value = nocheDeLaEnergia(VIVO.uNoche.value, AMANECER_EN_VIVO.uBarridoDelDia.value, AMANECER_EN_VIVO.uFrenteDelDia.value)')
+afirmar(sinElDia(FUENTES_A3, PLASMA_A3), '  sin el día de la energía: ni `dia.ts`, ni la tinta, ni lo que tapaba, ni el calor sobre la copia del cuadro; la noche, la del amanecer y el atardecer')
+controlPositivo('  el detector VE la tinta de día de vuelta', { ...FUENTES_A3, arcos: `${FUENTES_A3.arcos}\nuniform vec3 uTintaDia;` }, (x: FuentesA3) => sinElDia(x, PLASMA_A3))
+controlPositivo('  y la copia del cuadro pedida de día', FUENTES_A3, (x: FuentesA3) => sinElDia(x, `${PLASMA_A3}\nif (u.uNoche.value < 0.97) PEDIDOS_DEL_PASE.colorEsteCuadro = true`))
 
 cerrar('s73-cierre-a')

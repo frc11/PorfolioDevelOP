@@ -6,10 +6,12 @@ import { TEXTO_EN_PANTALLA } from '../textoEnPantalla'
 /**
  * [PULIDO 17] O3 · LO COMÚN DEL DIBUJO DE LA ENERGÍA (`docs/rediseno/PLASMA.md`; de PULIDO 16). Las uniformes que comparten las
  * partículas, los arcos y los efectos; cuánto adentro de una caja de texto está un punto (ahí se apagan: pasan por detrás); las luces
- * de los arcos (iluminan un instante lo que tienen cerca); y LA SALIDA. Cada sombreador calcula dos cosas: DE DÍA, energía oscura (su
- * color y cuánto tapa: `colorDia`, `aDia`) y DE NOCHE, luz (premultiplicada: `luzNoche`, suma). Las dos pasan por el tono de la
- * escena (el ACES compensado, `tono.ts`) y por el espacio de color de salida, cada una por su lado, y se mezclan con la noche: de día
- * tapa con su alfa, de noche suma con alfa 0. Sin bloom: cada brillo es su propio halo. Monocromo.
+ * de los arcos (iluminan un instante lo que tienen cerca); y LA SALIDA: luz (`luzNoche`, premultiplicada con alfa 0: suma), por el
+ * tono de la escena (el ACES compensado, `tono.ts`) y el espacio de color de salida. Sin bloom: cada brillo es su propio halo. Monocromo.
+ *
+ * [CIERRE A] A3 · SÓLO DE NOCHE: de día no hay cargas, arcos ni red (la energía oscura de día y sus variantes, `?dia=`, se borraron).
+ * Aparecen y se van con la noche de la energía (`uNoche`: el mismo factor continuo del amanecer y del atardecer, `nocheDeLaEnergia`), cada
+ * una corrida por su azar (`DE_NOCHE`): su luz y su tamaño van juntos de nada a enteros, sin saltos.
  */
 export const DIBUJO = {
   /** Detrás de un texto, cuánto se apagan. */
@@ -17,17 +19,20 @@ export const DIBUJO = {
   /** Cuántas luces de arco como mucho y su alcance (u). */
   luces: 5,
   luzRadio: 1.7,
-  /**
-   * La paleta, en lineal (antes del tono). DE DÍA: la tinta de la energía oscura (grafito, translúcido) y el brillo claro mínimo (el
-   * destello de las calientes y el núcleo de los arcos: más blanco que el papel, el tono lo lleva al blanco). DE NOCHE: luz blanca.
-   */
-  paleta: { tintaDia: [0.05, 0.05, 0.055], claroDia: [3, 3, 3], luzNoche: [1, 1, 1] },
+  /** La paleta, en lineal (antes del tono): luz blanca. */
+  paleta: { luzNoche: [1, 1, 1] },
   /** Detrás de los textos: el borde suave (px de CSS: un campo denso no deja un rectángulo vacío) y cuánto se apagan. */
   textoBorde: 56,
   textoFuerza: 0.9,
 } as const
 
 export const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
+
+/**
+ * [CIERRE A] A3 · cómo entra cada una con la noche (`uNoche`, 0 de día y 1 de noche): desde `desde` más su azar por `desfase`, en `ancho`
+ * de noche (suave). Con la noche en `desde` o menos, ninguna; desde `desde + desfase + ancho`, todas enteras.
+ */
+export const DE_NOCHE = { desde: 0.02, desfase: 0.6, ancho: 0.33 } as const
 
 /**
  * Cuánto adentro de una caja de texto está un punto de la pantalla (NDC), con el borde suave; lo comparten la energía y el espejo
@@ -64,10 +69,17 @@ uniform float uFoco;
 uniform float uCercaDelFinal;
 uniform vec4 uLuces[ ${String(DIBUJO.luces)} ];
 uniform float uCuantasLuces;
-uniform vec3 uTintaDia;
-uniform vec3 uClaroDia;
 uniform vec3 uLuzNoche;
 ${TEXTOS_GLSL}
+// [CIERRE A] A3 · cuánto está (0 a 1: su luz y su tamaño) con la noche de este cuadro, corrida por su azar (0 a 1).
+float deNoche( float azar ) {
+	float desde = ${f(DE_NOCHE.desde)} + azar * ${f(DE_NOCHE.desfase)};
+	return smoothstep( desde, desde + ${f(DE_NOCHE.ancho)}, uNoche );
+}
+// El azar de una semilla cualquiera (los arcos y la red): de 0 a 1.
+float azarDeLaSemilla( float s ) {
+	return fract( sin( s * 12.9898 + 4.1 ) * 43758.5453 );
+}
 // La luz de los arcos en un punto (del mundo): cada una cae con la distancia.
 float luzDeLosArcos( vec3 p ) {
 	float l = 0.0;
@@ -84,7 +96,7 @@ float enElFinal( vec3 p ) {
 }
 `
 
-/** El tono y el espacio de color de la escena, como función (para pasar el día y la noche cada uno por su lado). */
+/** El tono y el espacio de color de la escena, como función. */
 export const AL_TONO = /* glsl */ `
 vec3 alTono( vec3 c ) {
 #ifdef TONE_MAPPING
@@ -94,12 +106,11 @@ vec3 alTono( vec3 c ) {
 }
 `
 
-/** La salida: `colorDia` y `aDia` (lo que tapa de día), `luzNoche` (la luz que suma de noche), por `vis` (textos, el final). */
+/** La salida: `luzNoche` (la luz que suma, con su entrada con la noche ya puesta) por `vis` (textos, el final). */
 export const SALIDA = /* glsl */ `
-	float cubre = clamp( aDia * vis, 0.0, 1.0 );
 	vec3 noche = luzNoche * vis;
-	if ( cubre * ( 1.0 - uNoche ) < 0.002 && max( noche.r, max( noche.g, noche.b ) ) * uNoche < 0.002 ) discard;
-	gl_FragColor = vec4( mix( alTono( colorDia ) * cubre, alTono( noche ), uNoche ), cubre * ( 1.0 - uNoche ) );
+	if ( max( noche.r, max( noche.g, noche.b ) ) < 0.002 ) discard;
+	gl_FragColor = vec4( alTono( noche ), 0.0 );
 `
 
 const v3 = (c: readonly number[]): { value: THREE.Vector3 } => ({ value: new THREE.Vector3(c[0], c[1], c[2]) })
@@ -123,8 +134,6 @@ export function uniformesComunes() {
     uTextoFuerza: { value: DIBUJO.textoFuerza },
     uLuces: { value: Array.from({ length: DIBUJO.luces }, () => new THREE.Vector4()) },
     uCuantasLuces: { value: 0 },
-    uTintaDia: v3(p.tintaDia),
-    uClaroDia: v3(p.claroDia),
     uLuzNoche: v3(p.luzNoche),
     // [PULIDO 18] P1.a · la profundidad de lo opaco (el pase compartido): las partículas y los arcos blandos.
     uProfundidad: PASE_EN_VIVO.uProfundidad,
@@ -134,7 +143,7 @@ export function uniformesComunes() {
 }
 export type UniformesComunes = ReturnType<typeof uniformesComunes>
 
-/** Premultiplicado: de noche el alfa es 0 y la luz suma; de día la energía oscura tapa con su alfa. Pasa por el tono de la escena. */
+/** Premultiplicado con alfa 0: la luz suma. Pasa por el tono de la escena. */
 export function materialDeEnergia(vertexShader: string, fragmentShader: string, uniforms: Record<string, THREE.IUniform>): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor })
 }

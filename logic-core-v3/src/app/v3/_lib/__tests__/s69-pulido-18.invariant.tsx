@@ -11,7 +11,8 @@
  *          compartido); el reflejo tenue en el piso, de noche.
  *   P1.d · más partícula, menos nube: el núcleo con tope, el halo corto, la ley de potencia, las intensidades, la cruz chica; el halo de
  *          los arcos con puntos (sin esquirlas).
- *   P1.c · de día: el cuerpo oscuro, el velo, el especular mínimo; el calor de las calientes refracta la copia del cuadro.
+ *   P1.c · de día: el cuerpo oscuro, el velo, el especular mínimo; el calor de las calientes refracta la copia del cuadro. [CIERRE A] A3 ·
+ *          con el sentido nuevo: de día no hay energía (ni su código de día); la presencia de noche queda.
  *   P1.e · la física nueva: la convección, el pinch, la estela del puntero, el viento del scroll; estable y contenida.
  *   P2 · la dimensión espejo (`?espejo=`): las banderas, los disparos (raro y lento; mantener después del gesto del plasma), sólo el
  *        fondo (nunca el logo, los títulos ni los textos), se cura, el pliegue es la identidad en cero, los ecos no tocan el logo.
@@ -22,9 +23,7 @@ import * as THREE from 'three'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_SUELTAS, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { DE_AFUERA, deAfuera } from '../escena/energia/afuera'
 import { BRASAS, azarConSemilla, crearBrasas, crearEntradaDeLasBrasas } from '../escena/energia/brasas'
-import { TRAZO } from '../escena/energia/dibujo/arcos'
 import { ORDEN_DE_LA_ENERGIA } from '../escena/energia/dibujo/armado'
-import { DE_DIA, aplicarElDia, type UniformesDelDia } from '../escena/energia/dibujo/dia'
 import { ASPECTO } from '../escena/energia/dibujo/particulas'
 import { DIRECCIONES, DIRECCION_RECOMENDADA } from '../escena/energia/direcciones'
 import { largo3 } from '../escena/energia/largo'
@@ -179,7 +178,8 @@ const blandasBien = (pase: string, particula: string, arco: string, reflejo: str
   particula.includes('float blanda = clamp( ( distanciaALoOpaco( gl_FragCoord.xy / uResolucion ) - vDistancia ) / vSuave, 0.0, 1.0 );') && /\* blanda \* blanda \* \( 3\.0 - 2\.0 \* blanda \)/.test(particula) &&
   (arco.match(/distanciaALoOpaco\( gl_FragCoord\.xy \/ uResolucion \) - vDistancia/g) ?? []).length === 2 &&
   plasma.includes('PEDIDOS_DEL_PASE.profundidad += 1') && stage.trimEnd().endsWith('</Canvas>\n  )\n}') && /<PaseDeLaEscena \/>\n\s*<\/Suspense>/.test(stage) &&
-  reflejo.includes('if ( alto > uReflejo.x || uNoche < 0.02 || c.w <= 0.05 )') && reflejo.includes('float esPiso = 1.0 - smoothstep(') && /materialDelReflejo\.depthTest = false/.test(leer('_lib/escena/energia/dibujo/armado.ts'))
+  // [CIERRE A] A3 · de noche: entra con su chispa (el mismo azar), no con un umbral de la noche de la sala.
+  reflejo.includes('float vive = deNoche( azar01( id, 34u ) );') && reflejo.includes('if ( alto > uReflejo.x || vive <= 0.0 || c.w <= 0.05 )') && reflejo.includes('float esPiso = 1.0 - smoothstep(') && /materialDelReflejo\.depthTest = false/.test(leer('_lib/escena/energia/dibujo/armado.ts'))
 afirmar(blandasBien(PASE_SRC, PARTICULA, ARCO, REFLEJO_SRC, PLASMA, STAGE), '  las partículas y los arcos se desvanecen contra lo opaco (la profundidad de la pasada, con la cámara del cuadro, el último cuadro antes de dibujar); el reflejo, de noche, sólo de las cercanas al piso y sólo donde se ve el piso')
 controlPositivo('  el detector VE la partícula dura (sin la profundidad)', PARTICULA.replace('* blanda * blanda * ( 3.0 - 2.0 * blanda )', ''), (p: string) => blandasBien(PASE_SRC, p, ARCO, REFLEJO_SRC, PLASMA, STAGE))
 controlPositivo('  y el pase que no va último', STAGE.replace('<PaseDeLaEscena />\n', '').replace('<OrbitRig', '<PaseDeLaEscena />\n<OrbitRig'), (s: string) => blandasBien(PASE_SRC, PARTICULA, ARCO, REFLEJO_SRC, PLASMA, s))
@@ -214,49 +214,34 @@ controlPositivo('  el detector VE el aspecto de PULIDO 17 (el bokeh)', { ...A_AS
 controlPositivo('  y los arcos en dos cintas (las esquirlas)', ARMADO.replace('new THREE.Points(gh,', 'new THREE.Mesh(gh,'), (m: string) => nitidaBien(A_ASPECTO, PARTICULA, ARCO, m))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('P1.c · De día: un cuerpo oscuro y nítido, un velo, un especular mínimo y, en las calientes, el calor que refracta lo de atrás')
+titulo('P1.c · De día [CIERRE A] A3 · con el sentido nuevo: sin energía de día (ni su código); la presencia de noche')
 
-const diaBien = (particula: string, plasma: string, armado: string): boolean =>
-  particula.includes('float cuerpo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;') && particula.includes('vec2 alBrillo = vLocal - vec2( - 0.5, 0.5 ) * sigma;') &&
-  !particula.includes('float punto =') && particula.includes('colorDeAtras( ( gl_FragCoord.xy + corrido ) / uResolucion )') && particula.includes('corridoAtras * corridoAtras') &&
-  plasma.includes('if (u.uNoche.value < 0.97) PEDIDOS_DEL_PASE.colorEsteCuadro = true') && armado.includes('m.renderOrder = ORDEN_DE_LA_ENERGIA + k') &&
-  ORDEN_DE_LA_ENERGIA > PASE.orden && ORDEN_DE_LA_ENERGIA + 6 < 1 && A_ASPECTO.uCalorDia[0] > 0 && A_ASPECTO.uDia[1] > 0
-afirmar(diaBien(PARTICULA, PLASMA, ARMADO), '  de día: el cuerpo oscuro nítido (el núcleo), el especular corrido hacia la luz (sin el punto blanco al centro: los ojos), el calor de las calientes refracta la copia del cuadro y oscurece los medios (el papel queda blanco); la energía se dibuja después de la copia y antes del haz')
-controlPositivo('  el detector VE el punto blanco al centro (los ojos)', PARTICULA.replace('float cuerpo =', 'float punto = 1.0;\n\tfloat cuerpo ='), (p: string) => diaBien(p, PLASMA, ARMADO))
-controlPositivo('  y el contraste que aclara el papel (los aros)', PARTICULA.replace('corridoAtras * corridoAtras', 'clamp( ( corridoAtras - 0.5 ) * 1.6 + 0.5, 0.0, 1.0 )'), (p: string) => diaBien(p, PLASMA, ARMADO))
-// Lo que mostró el mini-banco: de noche, puntitos tenues (el plasma sin presencia); de día, un alfa chico que no se ve sobre el papel
-// (colgaba del reposo de la noche), y el arco de día, una banda de humo con el núcleo blanco (invisible sobre el papel).
-const VIVO = 'float vivo = mix( uDia.z + ( 1.0 - uDia.z ) * e, uLuz.y + ( 1.0 - uLuz.y ) * e, uNoche );'
-const presenciaBien = (a: Aspecto, particula: string, trazoDia: readonly number[]): boolean =>
-  a.uLuz[0] >= 2 && a.uLuz[1] >= 0.25 && a.uDia[0] >= 2 && a.uDia[2] >= 0.4 && particula.includes(VIVO) &&
-  particula.includes('min( 0.25, humo * uDiaForma.z * vBrillo * 2.0 )') && trazoDia[0] <= 0.12 && trazoDia[2] >= 0.8 && trazoDia[3] === 1
-afirmar(presenciaBien(A_ASPECTO, PARTICULA, TRAZO.uArcoDia), `  la presencia: de noche el núcleo en ${String(A_ASPECTO.uLuz[0])} y el reposo en ${String(A_ASPECTO.uLuz[1])}; de día su propio reposo (${String(A_ASPECTO.uDia[2])}), el cuerpo en ${String(A_ASPECTO.uDia[0])}, el velo con tope (no un lunar) y el arco de tinta`)
-controlPositivo('  el detector VE los puntitos tenues de la noche (el núcleo en 1,3, el reposo en 0,18)', { ...A_ASPECTO, uLuz: [1.3, 0.18, 0.14, 2] as const }, (a: Aspecto) => presenciaBien(a, PARTICULA, TRAZO.uArcoDia))
-controlPositivo('  y el día colgado del reposo de la noche', PARTICULA.replace(VIVO, 'float vivo = uLuz.y + ( 1.0 - uLuz.y ) * e;'), (p: string) => presenciaBien(A_ASPECTO, p, TRAZO.uArcoDia))
-controlPositivo('  y el arco de día con el núcleo blanco (la banda de humo)', [0.22, 0.1, 1, 0] as const, (t: readonly number[]) => presenciaBien(A_ASPECTO, PARTICULA, t))
+// [CIERRE A] A3 · el cuerpo oscuro, el velo, el especular y el calor que refractaba la copia del cuadro eran la energía de DÍA: se borraron
+// (de día no hay cargas, arcos ni red; entran con la noche: `s73` A3). Lo que queda de P1.c: la energía se dibuja después de la copia
+// del cuadro y antes del haz, y ya no pide la copia (de día la pedía en cada cuadro).
+const sinDia = (particula: string, plasma: string, armado: string): boolean =>
+  !/uDia\b|uDiaForma|uCalorDia|colorDeAtras|corridoAtras|float cuerpo =|float humo =|aDia|colorDia/.test(particula) && !plasma.includes('colorEsteCuadro') &&
+  armado.includes('m.renderOrder = ORDEN_DE_LA_ENERGIA + k') && ORDEN_DE_LA_ENERGIA > PASE.orden && ORDEN_DE_LA_ENERGIA + 6 < 1
+afirmar(sinDia(PARTICULA, PLASMA, ARMADO), '  sin energía de día: ni el cuerpo oscuro, ni el velo, ni el calor sobre la copia del cuadro (que ya no se pide); la energía se dibuja después de la copia y antes del haz')
+controlPositivo('  el detector VE el calor de antes (la copia del cuadro corrida)', PARTICULA.replace('void main() {', 'void main() {\n\tvec3 corridoAtras = colorDeAtras( gl_FragCoord.xy / uResolucion );'), (p: string) => sinDia(p, PLASMA, ARMADO))
+controlPositivo('  y el pedido de la copia de día', `${PLASMA}\n    if (u.uNoche.value < 0.97) PEDIDOS_DEL_PASE.colorEsteCuadro = true`, (p: string) => sinDia(PARTICULA, p, ARMADO))
+// Lo que mostró el mini-banco: de noche, puntitos tenues (el plasma sin presencia). El reposo, el de la noche (el del día se fue con él).
+const VIVO = 'float vivo = uLuz.y + ( 1.0 - uLuz.y ) * e;'
+const presenciaBien = (a: Aspecto, particula: string): boolean => a.uLuz[0] >= 2 && a.uLuz[1] >= 0.25 && particula.includes(VIVO)
+afirmar(presenciaBien(A_ASPECTO, PARTICULA), `  la presencia de noche: el núcleo en ${String(A_ASPECTO.uLuz[0])} y el reposo en ${String(A_ASPECTO.uLuz[1])}`)
+controlPositivo('  el detector VE los puntitos tenues de la noche (el núcleo en 1,3, el reposo en 0,18)', { ...A_ASPECTO, uLuz: [1.3, 0.18, 0.14, 2] as const }, (a: Aspecto) => presenciaBien(a, PARTICULA))
+controlPositivo('  y el reposo del día de vuelta', PARTICULA.replace(VIVO, 'float vivo = mix( uDia.z + ( 1.0 - uDia.z ) * e, uLuz.y + ( 1.0 - uLuz.y ) * e, uNoche );'), (p: string) => presenciaBien(A_ASPECTO, p))
 
-// [PULIDO 27] Z3 · DE DÍA POR DEFECTO (`dibujo/dia.ts`, `?dia=`): el rayo de noche en el día (entero o más, el núcleo de tinta casi negra,
-// con un halo suave: se lee sobre el papel) y las cargas secundarias (el grafito, con su tope) y quietas de brillo (sin titileo ni
-// destellos sueltos). De noche nada cambia: lo del día entra sólo por `1 - uNoche` (el ancho del arco, la calma de las cargas).
-const DIA_POR_DEFECTO = ((): { readonly v: string; readonly u: UniformesDelDia } => {
-  const u = { arco: new THREE.Vector4(), tapa: new THREE.Vector4(), carga: new THREE.Vector4() }
-  return { v: aplicarElDia(null, u), u }
-})()
+// [PULIDO 27] Z3 · el día por defecto (`dibujo/dia.ts`, `?dia=`: el rayo de tinta y las cargas negras quietas). [CIERRE A] A3 · con el
+// sentido nuevo: el día de la energía se borró con sus variantes; ni el módulo, ni la consulta, ni sus uniformes en los sombreadores.
 const ARCOS_DIBUJO_Z3 = leer('_lib/escena/energia/dibujo/arcos.ts')
-// [PULIDO 28] · el sentido cambió por decisión del humano: el por defecto es `ambos` (el rayo de noche y las cargas NEGRAS, el tope de PULIDO
-// 23, quietas de brillo); el grafito (`calma`) queda como variante.
-const diaZ3Bien = (d: { readonly v: string; readonly u: UniformesDelDia }, particula: string, arcos: string): boolean =>
-  d.v === DE_DIA.porDefecto && d.u.arco.x >= 1 && d.u.arco.y <= 0.05 && d.u.tapa.w === 1 && d.u.tapa.z >= 0.8 && d.u.tapa.x <= 0.25 && d.u.carga.y === 1 && d.u.carga.x >= 0.8 &&
-  particula.includes('float calma = uDiaDeLaCarga.y * ( 1.0 - uNoche );') && particula.includes('titila = mix( titila, 1.0, calma );') && particula.includes('destello *= 1.0 - calma;') &&
-  arcos.includes('mix( uDiaDelArco.x, 1.0, uNoche )') && !arcos.includes('ARCO_DE_DIA.fino)}')
-afirmar(diaZ3Bien(DIA_POR_DEFECTO, PARTICULA, ARCOS_DIBUJO_Z3), `  de día por defecto (${DIA_POR_DEFECTO.v}): el rayo de noche en el día (${String(DIA_POR_DEFECTO.u.arco.x)} veces el ancho, núcleo de tinta, halo ${String(DIA_POR_DEFECTO.u.tapa.x)}) y las cargas negras (tope ${DIA_POR_DEFECTO.u.carga.x.toFixed(2)}) sin titileo; de noche, igual`)
-const conVariante = (valor: string): { readonly v: string; readonly u: UniformesDelDia } => {
-  const u = { arco: new THREE.Vector4(), tapa: new THREE.Vector4(), carga: new THREE.Vector4() }
-  return { v: aplicarElDia(valor, u), u: u }
-}
-controlPositivo('  el detector VE el día de antes (el rayo al 55 % y gris medio, las cargas titilando)', { ...conVariante('antes'), v: DE_DIA.porDefecto }, (d: { readonly v: string; readonly u: UniformesDelDia }) => diaZ3Bien(d, PARTICULA, ARCOS_DIBUJO_Z3))
-controlPositivo('  y el grafito de PULIDO 27 (`calma`, el por defecto de antes)', { ...conVariante('calma'), v: DE_DIA.porDefecto }, (d: { readonly v: string; readonly u: UniformesDelDia }) => diaZ3Bien(d, PARTICULA, ARCOS_DIBUJO_Z3))
-controlPositivo('  y las cargas que siguen titilando de día', PARTICULA.replace('titila = mix( titila, 1.0, calma );', ''), (p: string) => diaZ3Bien(DIA_POR_DEFECTO, p, ARCOS_DIBUJO_Z3))
+const sinVariantesDelDia = (particula: string, arcos: string, plasma: string): boolean =>
+  !existsSync(new URL('../escena/energia/dibujo/dia.ts', import.meta.url)) && !/aplicarElDia|get\('dia'\)/.test(plasma) &&
+  !/uDiaDeLaCarga|float calma =/.test(particula) && !/uDiaDelArco|uArcoDia|ARCO_DE_DIA|uTintaDia|uClaroDia/.test(arcos)
+afirmar(sinVariantesDelDia(PARTICULA, ARCOS_DIBUJO_Z3, PLASMA), '  sin las variantes del día (`?dia=`): ni su módulo, ni la consulta, ni la calma de las cargas, ni la tinta del rayo')
+controlPositivo('  el detector VE la calma de las cargas de día (Z3)', PARTICULA.replace('void main() {', 'void main() {\n\tfloat calma = uDiaDeLaCarga.y * ( 1.0 - uNoche );'), (p: string) => sinVariantesDelDia(p, ARCOS_DIBUJO_Z3, PLASMA))
+controlPositivo('  y el rayo de tinta', ARCOS_DIBUJO_Z3.replace('uniform vec4 uArcoNoche;', 'uniform vec4 uArcoNoche;\nuniform vec4 uDiaDelArco;'), (a: string) => sinVariantesDelDia(PARTICULA, a, PLASMA))
+controlPositivo('  y la consulta de `?dia=`', `${PLASMA}\n    aplicarElDia(consulta.get('dia'), a.dia)`, (p: string) => sinVariantesDelDia(PARTICULA, ARCOS_DIBUJO_Z3, p))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('P1.e · La física nueva: convección, el pinch de los arcos, la estela del puntero, el viento del scroll; estable y contenida')

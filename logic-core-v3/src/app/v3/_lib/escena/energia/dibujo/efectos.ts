@@ -4,11 +4,12 @@ import { AL_TONO, COMUN, SALIDA, f } from './comun'
 /**
  * [PULIDO 17] O3 · LOS EFECTOS DE LA ENERGÍA (`docs/rediseno/PLASMA.md`), instanciados, todos gaussianos (ninguna figura: ni anillos
  * ni halos dibujados alrededor del cursor):
- *   · el PISO, debajo de cada arco, se ilumina un instante (de noche: de día, sobre el papel, no se ve);
+ *   · el PISO, debajo de cada arco, se ilumina un instante;
  *   · el LOGO: donde un arco lo toca, un destello;
  *   · [PULIDO 27] Z1 · la EXPLOSIÓN de una brasa que muere (`poblacion.ts`): un destello chico en su lugar y chispas sueltas, cada una
- *     con su rapidez, su largo y su brillo, que salen rápido, frenan, caen un poco y se apagan, con la cabeza más brillante que la cola
- *     (de noche luz; de día, grafito). Su edad (0 a 1) en el cuarto número.
+ *     con su rapidez, su largo y su brillo, que salen rápido, frenan, caen un poco y se apagan, con la cabeza más brillante que la cola.
+ *     Su edad (0 a 1) en el cuarto número.
+ * [CIERRE A] A3 · sólo de noche, como los arcos y las brasas: cada uno entra con la noche, corrido por su lugar (`deNoche`).
  * (La luz de la CARGA del puntero se fue: era un disco sobre el logo. La carga se ve en cómo se juntan y se calientan las partículas.)
  * Sobre un texto se apagan.
  */
@@ -16,10 +17,10 @@ export const EFECTO = { piso: 0, logo: 1, explosion: 2 } as const
 /** Los lugares: los del piso y del logo (por los arcos) y los de las explosiones. */
 export const EFECTOS = { cuantos: 14 + POBLACION.explosion.cuantas } as const
 /**
- * [PULIDO 27] Z1 · la explosión: cuántas chispas, su ancho (px), su luz (de noche) y su tinta (de día), cuánto caen (partes del radio) y el
- * destello del principio (cuánto y cuánto dura, en partes de la explosión).
+ * [PULIDO 27] Z1 · la explosión: cuántas chispas, su ancho (px), su luz, cuánto caen (partes del radio) y el destello del principio
+ * (cuánto y cuánto dura, en partes de la explosión).
  */
-export const EXPLOSION = { chispas: 6, ancho: 0.9, luz: 3, tinta: 0.75, caen: 0.2, destello: 2.6, destelloDura: 0.12 } as const
+export const EXPLOSION = { chispas: 6, ancho: 0.9, luz: 3, caen: 0.2, destello: 2.6, destelloDura: 0.12 } as const
 const X = EXPLOSION
 
 export const VERTICES_DE_LOS_EFECTOS = /* glsl */ `
@@ -66,17 +67,12 @@ ${AL_TONO}
 void main() {
 	float r2 = dot( vLocal, vLocal );
 	float tipo = vEfecto.x;
-	float k = vEfecto.z;
-	vec3 colorDia = uTintaDia;
-	float aDia = 0.0;
+	float k = vEfecto.z * deNoche( vSemilla );
 	vec3 luzNoche = vec3( 0.0 );
 	if ( tipo < 0.5 ) {
 		luzNoche = uLuzNoche * exp( - r2 * 3.2 ) * k * ${f(0.09)};
 	} else if ( tipo < 1.5 ) {
-		float g = exp( - r2 * 5.0 ) * k;
-		colorDia = uClaroDia;
-		aDia = g * 0.7;
-		luzNoche = uLuzNoche * g * 2.2;
+		luzNoche = uLuzNoche * exp( - r2 * 5.0 ) * k * 2.2;
 	} else {
 		// La explosión: cada chispa, un tramo suelto que sale del punto (rápido, frenando y cayendo un poco), con la cabeza más brillante
 		// que la cola, su rapidez y su brillo; todas se apagan. Un destello chico al empezar.
@@ -99,7 +95,6 @@ void main() {
 		float vive = pow( 1.0 - t, 1.5 );
 		float destello = exp( - r2 * 40.0 ) * exp( - t / ${f(X.destelloDura)} ) * ${f(X.destello)};
 		luzNoche = uLuzNoche * ( chispas * vive * ${f(X.luz)} + destello ) * k;
-		aDia = min( 0.6, ( chispas * vive + destello * 0.4 ) * k * ${f(X.tinta)} );
 	}
 	float vis = ( 1.0 - ${f(0.95)} * vTexto ) * ( 1.0 - uApagado );
 	${SALIDA}

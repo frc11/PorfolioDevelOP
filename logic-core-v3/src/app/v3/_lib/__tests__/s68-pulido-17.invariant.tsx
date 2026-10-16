@@ -299,7 +299,7 @@ afirmar(cintaBien(cinta), `  la cinta: ${String(VERTICES_DE_LA_CINTA)} vértices
 controlPositivo('  el detector VE un lugar sin arco que pinta', (() => { const c = crearCinta(); c.forma[1] = 1; return c })(), cintaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('O3 · El dibujo: luz suave sin figuras; de día, energía oscura con un brillo claro mínimo; detrás de los textos; sin bloom')
+titulo('O3 · El dibujo: luz suave sin figuras; [CIERRE A] A3 · sólo de noche (de día, nada); detrás de los textos; sin bloom')
 
 const PARTICULAS = leer('_lib/escena/energia/dibujo/particulas.ts')
 const ARCOS_DIBUJO = leer('_lib/escena/energia/dibujo/arcos.ts')
@@ -315,19 +315,21 @@ const dibujoBien = (particulas: string, arcos: string, efectos: string, comun: s
   particulas.includes('float titila =') && particulas.includes('float destello =') && particulas.includes('float respira =') && particulas.includes('vec2 tiembla =') && particulas.includes('float fuente =') && particulas.includes('float conserva =') &&
   // La cara del logo libre y el tope del brillo (flashero con límite).
   particulas.includes('vBrillo = min( uDelante.z,') &&
-  // De día: la energía oscura del tamaño de la partícula y el destello claro sólo en las calientes (en reposo, ninguno).
-  // [PULIDO 18] P1.0 · sin el estilo de C (`estela`); [PULIDO 19] Q0 · ni el de B (`mota`): `{ chispa: 0 }`.
-  particulas.includes('float sigma = max( uDiaForma.y * uPixel, vRadioPx * uDiaForma.x );') && /CLARO_EN_REPOSO[^=]*= \{ chispa: 0 \}/.test(particulas) &&
+  // De día: la energía oscura del tamaño de la partícula y el destello claro sólo en las calientes (en reposo, ninguno). [CIERRE A] A3 ·
+  // con el sentido nuevo: de día no hay energía (ni la oscura ni su destello claro): cada una entra con la noche (`deNoche`).
+  particulas.includes('float vive = deNoche( azar01( id, 34u ) );') && !/uDiaForma|CLARO_EN_REPOSO|uClaroEnReposo/.test(particulas) &&
   // Los arcos: dos pasadas (lo oscuro, después el núcleo), una tira en inglete con las puntas afinadas y la luz que corre.
   arcos.includes('uniform float uCapa;') && arcos.includes('float inglete =') && arcos.includes('float afina =') && arcos.includes('float corre =') &&
   // Los efectos: el piso (de noche) y el toque del logo; sin el disco de la carga. [PULIDO 27] Z1 · y la mini explosión de una brasa que
   // muere (`poblacion.ts`): chispas cortas, no un disco.
   /export const EFECTO = \{ piso: 0, logo: 1, explosion: 2 \} as const/.test(efectos) && !efectos.includes('carga:') &&
-  // El tono de la escena (ACES compensado), la salida premultiplicada y los textos con borde suave.
-  comun.includes('c = toneMapping( c );') && comun.includes('cubre * ( 1.0 - uNoche )') && comun.includes('textoBorde: 56,') && comun.includes('vec2 borde = uTextoBorde / uResolucion * uPixel;') && !/EffectComposer|UnrealBloom/.test(particulas + arcos + efectos + comun)
-afirmar(dibujoBien(PARTICULAS, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO), '  núcleo y halo gaussianos (sin disco ni anillo), titila, destella, respira, vibra, viene de la fuente, desenfoque con el brillo conservado, la cara del logo libre y un tope; de día energía oscura translúcida y el destello sólo caliente; arcos en dos pasadas y en tira; sin la luz de la carga; el tono ACES, sin bloom')
+  // El tono de la escena (ACES compensado), la salida premultiplicada (luz que suma: [CIERRE A] A3 · sin lo que tapaba de día) y los textos
+  // con borde suave.
+  comun.includes('c = toneMapping( c );') && comun.includes('gl_FragColor = vec4( alTono( noche ), 0.0 );') && comun.includes('textoBorde: 56,') && comun.includes('vec2 borde = uTextoBorde / uResolucion * uPixel;') && !/EffectComposer|UnrealBloom/.test(particulas + arcos + efectos + comun)
+afirmar(dibujoBien(PARTICULAS, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO), '  núcleo y halo gaussianos (sin disco ni anillo), titila, destella, respira, vibra, viene de la fuente, desenfoque con el brillo conservado, la cara del logo libre y un tope; sólo de noche (de día, nada); arcos en dos pasadas y en tira; sin la luz de la carga; el tono ACES, sin bloom')
 controlPositivo('  el detector VE el disco con borde de PULIDO 15', PARTICULAS.replace('float nucleo = exp( - 0.5 * d2 / ( rNucleo * rNucleo ) ) * cola;', 'float nucleo = 1.0 - smoothstep( 1.0 - px, 1.0 + px, r2 );'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
-controlPositivo('  y el destello claro en reposo (los «ojos» de día)', PARTICULAS.replace('{ chispa: 0 }', '{ chispa: 0.3 }'), (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
+controlPositivo('  y el destello claro de día de vuelta (los «ojos»)', `${PARTICULAS}\nexport const CLARO_EN_REPOSO = { chispa: 0.3 }`, (p: string) => dibujoBien(p, ARCOS_DIBUJO, EFECTOS_DIBUJO, COMUN_DIBUJO))
+controlPositivo('  y la salida que tapaba de día', COMUN_DIBUJO.replace('gl_FragColor = vec4( alTono( noche ), 0.0 );', 'gl_FragColor = vec4( mix( alTono( colorDia ) * cubre, alTono( noche ), uNoche ), cubre * ( 1.0 - uNoche ) );'), (c: string) => dibujoBien(PARTICULAS, ARCOS_DIBUJO, EFECTOS_DIBUJO, c))
 controlPositivo('  y la luz de la carga de vuelta', EFECTOS_DIBUJO.replace('export const EFECTO = { piso: 0, logo: 1, explosion: 2 } as const', 'export const EFECTO = { piso: 0, logo: 1, explosion: 2, carga: 3 } as const'), (e: string) => dibujoBien(PARTICULAS, ARCOS_DIBUJO, e, COMUN_DIBUJO))
 
 // ═══════════════════════════════════════════════════════════════════════════
