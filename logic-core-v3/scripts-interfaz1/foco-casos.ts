@@ -28,8 +28,8 @@ interface Caso {
 }
 
 const TODOS_LOS_CASOS: readonly Caso[] = [
-  { id: 'libro-1-1440', ancho: 1440, alto: 900, selector: '[data-pieza="libro"]', nombre: 'Zero Protocol' },
-  { id: 'carrusel-zero-390', ancho: 390, alto: 844, selector: '[data-pieza="carrusel"] a', nombre: 'Zero Protocol' },
+  { id: 'libro-1-1440', ancho: 1440, alto: 900, selector: '[data-pieza="libro"]', nombre: 'The Ethereal Resort' },
+  { id: 'carrusel-ethereal-390', ancho: 390, alto: 844, selector: '[data-pieza="carrusel"] a', nombre: 'The Ethereal Resort' },
   { id: 'carrusel-nexo-390', ancho: 390, alto: 844, selector: '[data-pieza="carrusel"] a', nombre: 'NEXO Bold' },
   { id: 'tunel-esquina-390', ancho: 390, alto: 844, selector: '[data-pieza="enlace-de-proyecto"]', nombre: 'Esquina Estudio' },
   { id: 'tunel-banu-390', ancho: 390, alto: 844, selector: '[data-pieza="enlace-de-proyecto"]', nombre: 'Banú Scents' },

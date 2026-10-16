@@ -24,8 +24,14 @@ import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_PORTADA, type Demo } from './catalogo'
 /**
  * EL CARRUSEL DE DEMOS — abajo de 1024, en lugar del estante. **[MÓVIL-TRABAJOS · MÓVIL 2]**
  *
- * En el teléfono son dos renglones con demos DISTINTAS —arriba las cuatro primeras,
- * abajo las otras cuatro— y en tablet uno solo con las ocho. Los dos renglones son
+ * En el teléfono son dos renglones —arriba las cinco y abajo las cinco en otro orden,
+ * para que no se lean iguales— y en tablet uno solo con las cinco. El orden de abajo
+ * toma de a dos (la i-ésima es la `2i` de arriba, en la vuelta): como los renglones se
+ * corren uno contra el otro, con la lista sólo rotada coincidían las cinco a la vez;
+ * así, en cualquier corrimiento coincide una sola columna. [CIERRE A] A5 · eran
+ * cuatro y cuatro distintas (de ocho); con cinco, un renglón de dos no llenaba el ancho
+ * al envolver. El de abajo es decoración: fuera del orden de tabulación y escondido a
+ * los lectores (las cinco ya están arriba). Los dos renglones son
  * UNA fila: una posición y una velocidad (`fisicaDelCarrusel.ts`) que el de arriba
  * lee hacia la derecha y el de abajo hacia la izquierda. Un dedo sobre cualquiera
  * de los dos mueve la fila, así que se mueven los dos. Un solo `requestAnimationFrame`
@@ -40,15 +46,13 @@ import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_PORTADA, type Demo } from './catalogo'
  * túnel deja de cortarse por su agujero (`CapaDeDemos`). Las pistas se promueven
  * recién cuando la cinta arranca, que es con el vacío ya lleno.
  *
- * Las demos de abajo existen en los dos renglones del marcado, pero cada ancho
- * muestra UNA copia: en el teléfono las 4–7 del de arriba van `hidden` y en tablet el
- * de abajo entero. Lo oculto con `display: none` no es parada ni se anuncia.
+ * En tablet el de abajo no se ve (`display: none`): ni parada ni anuncio.
  */
-const MITAD = CATALOGO_DE_DEMOS.length / 2
+const N = CATALOGO_DE_DEMOS.length
 export const RENGLONES_DEL_CARRUSEL = [
-  { sentido: 1, demos: CATALOGO_DE_DEMOS, clase: undefined },
-  { sentido: -1, demos: CATALOGO_DE_DEMOS.slice(MITAD), clase: 'hidden max-movil:block' },
-] as const satisfies readonly { sentido: SentidoDelRenglon; demos: readonly Demo[]; clase: string | undefined }[]
+  { sentido: 1, demos: CATALOGO_DE_DEMOS, clase: undefined, decorado: false },
+  { sentido: -1, demos: CATALOGO_DE_DEMOS.map((_, i) => CATALOGO_DE_DEMOS[(2 * i) % N]), clase: 'hidden max-movil:block', decorado: true },
+] as const satisfies readonly { sentido: SentidoDelRenglon; demos: readonly Demo[]; clase: string | undefined; decorado: boolean }[]
 
 type Gesto = { sentido: SentidoDelRenglon; x0: number; y0: number; t0: number; xDeLaFila: number; muestras: Muestra[]; intencion: 'horizontal' | 'vertical' | null }
 
@@ -209,7 +213,7 @@ export function Carrusel({ enMarcha }: { readonly enMarcha?: () => boolean }): R
       {RENGLONES_DEL_CARRUSEL.map((r) => (
         <div key={r.sentido} data-parte="renglon" data-sentido={r.sentido > 0 ? 'derecha' : 'izquierda'} className={r.clase}>
           <div data-parte="pista">
-            <Lista demos={r.demos} enfocable />
+            <Lista demos={r.demos} enfocable={!r.decorado} escondida={r.decorado} />
             <Lista demos={r.demos} enfocable={false} copia />
           </div>
         </div>
@@ -218,21 +222,19 @@ export function Carrusel({ enMarcha }: { readonly enMarcha?: () => boolean }): R
   )
 }
 
-/** En el renglón de arriba, las demos de la segunda mitad son de tablet: en el teléfono están abajo.
- *  La `!` le gana al `display: block` de la portada en `demos.css`. */
-const soloEnTablet = (demo: Demo): boolean => CATALOGO_DE_DEMOS.indexOf(demo) >= MITAD
-
-/** Las demos que se VEN en cada renglón de un aparato, leídas de las mismas dos reglas que el marcado. */
+/** Las demos que se VEN en cada renglón de un aparato, leídas de la misma regla que el marcado. */
 export function demosQueSeVen(aparato: 'movil' | 'tablet'): readonly (readonly string[])[] {
-  return RENGLONES_DEL_CARRUSEL.filter((r) => aparato === 'movil' || r.clase === undefined).map((r) =>
-    r.demos.filter((d) => !(aparato === 'movil' && r.demos.length === CATALOGO_DE_DEMOS.length && soloEnTablet(d))).map((d) => d.slug),
-  )
+  return RENGLONES_DEL_CARRUSEL.filter((r) => aparato === 'movil' || r.clase === undefined).map((r) => r.demos.map((d) => d.slug))
 }
 
-function Lista({ demos, enfocable, copia = false }: { readonly demos: readonly Demo[]; readonly enfocable: boolean; readonly copia?: boolean }): React.JSX.Element {
-  const deArriba = demos.length === CATALOGO_DE_DEMOS.length
+/** Las demos de un renglón que son parada de teclado y se anuncian (las del de abajo son decoración). */
+export function demosQueSeAnuncian(): readonly string[] {
+  return RENGLONES_DEL_CARRUSEL.filter((r) => !r.decorado).flatMap((r) => r.demos.map((d) => d.slug))
+}
+
+function Lista({ demos, enfocable, copia = false, escondida = false }: { readonly demos: readonly Demo[]; readonly enfocable: boolean; readonly copia?: boolean; readonly escondida?: boolean }): React.JSX.Element {
   return (
-    <div className="flex" {...(copia ? { 'aria-hidden': true, 'data-parte': 'copia' } : {})}>
+    <div className="flex" {...(copia ? { 'aria-hidden': true, 'data-parte': 'copia' } : escondida ? { 'aria-hidden': true } : {})}>
       {demos.map((demo: Demo) => (
         <a
           key={demo.slug}
@@ -242,7 +244,6 @@ function Lista({ demos, enfocable, copia = false }: { readonly demos: readonly D
           aria-label={`${demo.nombre}, ${demo.rubro}`}
           data-parte="portada"
           draggable={false}
-          className={deArriba && soloEnTablet(demo) ? 'max-movil:hidden!' : undefined}
           {...(enfocable ? {} : { tabIndex: -1 })}
         >
           <Imagen src={demo.portada} alt="" ancho={MEDIDA_DE_LA_PORTADA.ancho} alto={MEDIDA_DE_LA_PORTADA.alto} sizes="(min-width: 426px) 20vw, 34vw" />

@@ -90,7 +90,7 @@ export function afirmarLasDemos(): void {
     vivo,
     `el catálogo de /v3 es el del sitio vivo, en su orden: ${String(vivo.length)} demos, mismos nombres y mismas URLs`,
   )
-  controlPositivo('  el detector ve una demo del sitio vivo que la copia perdió', VIVO.replace('name: "YAKU Nebula"', 'name: "YAKU Nebula 2"'), (f: string) =>
+  controlPositivo('  el detector ve una demo del sitio vivo que la copia perdió', VIVO.replace('name: "NEXO Bold"', 'name: "NEXO Bold 2"'), (f: string) =>
     JSON.stringify(catalogoDelSitioVivo(f)) === JSON.stringify(CATALOGO_DE_DEMOS.map((d) => ({ nombre: d.nombre, url: d.url }))),
   )
 

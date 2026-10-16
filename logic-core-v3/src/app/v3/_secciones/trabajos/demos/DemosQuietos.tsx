@@ -13,7 +13,9 @@ import { TextoDeDemos } from './TextoDeDemos'
  * vivo y sin hover: tocar una portada abre el template en otra pestaña. Es CSS
  * puro (`demos.css`): la pista lleva la lista dos veces y se traslada media pista
  * por vuelta, así que no hay costura ni una línea de JS por cuadro. Con
- * movimiento reducido queda quieta y se desliza a mano.
+ * movimiento reducido queda quieta y se desliza a mano. [CIERRE A] A5 · con cinco
+ * demos la lista mide 800 px y a 1024 la media pista no llenaba el ancho: cada mitad
+ * lleva la lista dos veces (cuatro en total; las tres de más, decoración).
  *
  * ⚠️ **La segunda copia es decoración**: `aria-hidden` y fuera del orden de
  * tabulación. El texto anunciado de esta rama es la lista UNA vez, igual que el
@@ -35,6 +37,8 @@ export function DemosQuietos(): React.JSX.Element {
       <div data-pieza="cinta" className="-mx-[var(--pad-lateral-compacto)] max-escritorio:hidden">
         <div data-parte="pista">
           <Lista />
+          <Lista copia />
+          <Lista copia />
           <Lista copia />
         </div>
       </div>

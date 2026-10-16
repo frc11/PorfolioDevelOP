@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 
 import { CATALOGO_DE_DEMOS } from './demos/catalogo'
-import { demosQueSeVen } from './demos/Carrusel'
+import { demosQueSeAnuncian, demosQueSeVen } from './demos/Carrusel'
 import {
   FISICA_DEL_CARRUSEL,
   arrastrarLaFila,
@@ -114,14 +114,24 @@ export function afirmarAbajoDe1024(): void {
   afirmarIgual(velocidadDelGesto(muestras, 450), 1000, 'la velocidad sale de las muestras de la ventana: lo de antes de 80 ms no cuenta')
   afirmarIgual(velocidadDelGesto([{ t: 0, x: 0 }, { t: 10, x: 500 }], 10), TOPE, `  y un tirón queda en el tope de ${String(TOPE)} px/s`)
 
-  // ── MÓVIL 2: CUATRO Y CUATRO, Y UNA SOLA FILA ─────────────────────────
+  // ── MÓVIL 2: DOS RENGLONES Y UNA SOLA FILA ────────────────────────────
+  // [CIERRE A] A5 · con el sentido nuevo: eran cuatro y cuatro distintas (de ocho); con cinco, un renglón de dos no llenaba el ancho al
+  // envolver. Ahora arriba las cinco y abajo las cinco en otro orden, el de abajo de decoración: las paradas y lo que se anuncia, las
+  // cinco una sola vez. Los renglones se corren uno contra el otro: en NINGÚN corrimiento (de a una portada) coinciden más de una columna
+  // (con la lista sólo rotada, en uno coincidían las cinco: dos renglones iguales).
   const todas = CATALOGO_DE_DEMOS.map((d) => d.slug)
+  const coincidenAlCorrer = (arriba: readonly string[], abajo: readonly string[]): number =>
+    Math.max(...arriba.map((_, s) => arriba.filter((d, i) => d === abajo[(i + s) % abajo.length]).length))
+  const renglonesBien = (r: readonly (readonly string[])[], anunciadas: readonly string[]): boolean => {
+    const [arriba, abajo] = r
+    return r.length === 2 && arriba.join() === todas.join() && [...abajo].sort().join() === [...todas].sort().join() && coincidenAlCorrer(arriba, abajo) <= 1 && anunciadas.join() === todas.join()
+  }
   const [arriba, abajo] = demosQueSeVen('movil')
-  afirmar(
-    arriba.length === 4 && abajo.length === 4 && arriba.every((d) => !abajo.includes(d)) && [...arriba, ...abajo].join() === todas.join(),
-    `en el teléfono, arriba ${arriba.join(' · ')} y abajo ${abajo.join(' · ')}: cuatro y cuatro, ninguna repetida entre renglones`,
-  )
-  afirmarIgual(demosQueSeVen('tablet'), [todas], '  y en tablet un solo renglón con las ocho')
+  afirmar(renglonesBien(demosQueSeVen('movil'), demosQueSeAnuncian()), `en el teléfono, arriba ${arriba.join(' · ')} y abajo ${abajo.join(' · ')}: las cinco en los dos, en otro orden (al correrse, a lo sumo ${String(coincidenAlCorrer(arriba, abajo))} columna igual), y se anuncian una vez`)
+  controlPositivo('  el detector VE los dos renglones iguales', [todas, todas] as const, (r: readonly (readonly string[])[]) => renglonesBien(r, todas))
+  controlPositivo('  y la lista sólo rotada (al correrse, coinciden las cinco)', [todas, [...todas.slice(3), ...todas.slice(0, 3)]] as const, (r: readonly (readonly string[])[]) => renglonesBien(r, todas))
+  controlPositivo('  y el reparto de antes (tres y dos)', [todas.slice(0, 3), todas.slice(3)] as const, (r: readonly (readonly string[])[]) => renglonesBien(r, todas))
+  afirmarIgual(demosQueSeVen('tablet'), [todas], `  y en tablet un solo renglón con las ${String(todas.length)}`)
   const quieta = { x: 0, v: V0 }
   const lanzadaAbajo = lanzarLaFila(quieta, -1, 900)
   afirmar(

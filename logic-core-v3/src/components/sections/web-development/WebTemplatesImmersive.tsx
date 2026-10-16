@@ -27,15 +27,6 @@ const SNAP_IDLE_MS = 100
 
 const TEMPLATES: TemplateItem[] = [
     {
-        slug: "zero",
-        name: "Zero Protocol",
-        tagline: "Tech / High contrast terminal",
-        description: "Impacto ciberpunk y lectura ultra rápida para marcas técnicas con tono agresivo.",
-        accent: "#00ff41",
-        rgb: "0,255,65",
-        url: "https://template-zero.netlify.app/",
-    },
-    {
         slug: "ethereal",
         name: "The Ethereal Resort",
         tagline: "Hospitality / Premium calm",
@@ -72,15 +63,6 @@ const TEMPLATES: TemplateItem[] = [
         url: "https://template-bold.netlify.app/",
     },
     {
-        slug: "nebula",
-        name: "YAKU Nebula",
-        tagline: "SaaS / Neon performance",
-        description: "Look futurista con claridad de producto para soluciones de crecimiento acelerado.",
-        accent: "#00e5ff",
-        rgb: "0,229,255",
-        url: "https://template-nebula.netlify.app/",
-    },
-    {
         slug: "niche",
         name: "Niche Perfumes",
         tagline: "Perfumery / High-end",
@@ -88,15 +70,6 @@ const TEMPLATES: TemplateItem[] = [
         accent: "#d4af37",
         rgb: "212,175,55",
         url: "https://nicheperfumeria.netlify.app/",
-    },
-    {
-        slug: "aura",
-        name: "AXON Studio",
-        tagline: "Agency / Web design studio",
-        description: "Agencia de diseño web que crea sitios, e-commerce y branding para negocios.",
-        accent: "#00ff88",
-        rgb: "0,255,136",
-        url: "https://template-aura-develop.netlify.app/",
     },
 ]
 

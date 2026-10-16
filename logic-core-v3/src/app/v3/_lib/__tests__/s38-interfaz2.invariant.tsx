@@ -221,8 +221,9 @@ controlPositivo('el chequeo de Servicios ve el recorrido montado', '<ProcesoEnVi
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Cierre · 4 · El cartel de las demos: uno solo, pegado al cursor')
 
-const libro = { closest: (s: string) => (s.includes('libro') ? libro : null), getAttribute: (a: string) => (a === 'data-demo' ? 'zero' : null) } as unknown as Element
-afirmar(estadoBajo(libro, false) === 'demo' && demoBajo(libro)?.texto === 'Click para ver Zero Protocol', 'sobre un libro: el estado de la demo y el texto de la pastilla («Click para ver Zero Protocol»)', demoBajo(libro)?.texto)
+const libro = { closest: (s: string) => (s.includes('libro') ? libro : null), getAttribute: (a: string) => (a === 'data-demo' ? 'ethereal' : null) } as unknown as Element
+// [CIERRE A] A5 · el libro de ejemplo, uno que sigue en el catálogo (Zero Protocol se fue).
+afirmar(estadoBajo(libro, false) === 'demo' && demoBajo(libro)?.texto === 'Click para ver The Ethereal Resort', 'sobre un libro: el estado de la demo y el texto de la pastilla («Click para ver The Ethereal Resort»)', demoBajo(libro)?.texto)
 const CURSOR_CSS = sinComentarios(leer('_estilos/cursor-sala.css'))
 afirmar(!/etiqueta|Abrir/.test(CURSOR_CSS + sinComentarios(leer('_chrome/cursor/CursorDeLaSala.tsx'))) && /\[data-estado="demo"\] :is\(\[data-parte="nucleo"\], \[data-parte="halo"\]\) \{\s*scale: 0;/.test(CURSOR_CSS), 'el círculo «Abrir» se borró: sobre una demo el punto y el halo se van y queda el cartel')
 const declaracion = (hoja: string, selector: string, propiedad: string): string => new RegExp(`${selector.replace(/[[\]().*+?^$|\\]/g, '\\$&')} \\{[^}]*?${propiedad}: ([^;]+);`).exec(hoja)?.[1] ?? '?'

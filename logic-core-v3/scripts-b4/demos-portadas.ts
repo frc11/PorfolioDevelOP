@@ -31,9 +31,9 @@ const VISTAS = [
 /** Los templates tienen intros animados: se espera a que asienten. */
 const ESPERA_MS = 5000
 /**
- * Uso: sin argumentos, las ocho. Con slugs (`... demos-portadas.ts aura`), sólo
- * ésas y con el doble de espera: AXON tiene un intro de más de 5 s y la primera
- * foto lo agarró a mitad de la transición.
+ * Uso: sin argumentos, todas las del catálogo. Con slugs (`... demos-portadas.ts niche`),
+ * sólo ésas y con el doble de espera: un intro de más de 5 s se agarra a mitad de la
+ * transición en la primera foto.
  */
 const SOLO = process.argv.slice(2)
 

@@ -170,10 +170,13 @@ controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un
 // SPRINT DEMOS · más las portadas de las demos: la cinta las lleva dos veces (la copia es decoración).
 // MÓVIL-TRABAJOS: el carrusel de abajo de 1024, en las dos ramas, con cada lista dos veces.
 // MÓVIL 2: arriba las ocho (las 4–7 sólo en tablet) y abajo las 4–7 (sólo en el teléfono): 16 + 8.
-const DEL_CARRUSEL = 3 * DEMOS.length
-/** Paradas del carrusel EN EL MARCADO: las ocho de arriba y las cuatro de abajo. Cada ancho muestra ocho. */
-const PARADAS_DEL_CARRUSEL = DEMOS.length + DEMOS.length / 2
-afirmarIgual(veces(quieto, '<img'), 3 + 2 * DEMOS.length + DEL_CARRUSEL, `las TRES capturas reales llegan a la rama quieta: una por proyecto, y ninguna más — más las ${2 * DEMOS.length} portadas de la cinta`)
+// [CIERRE A] A5 · con cinco demos: los dos renglones llevan las cinco (el de abajo corrido y de decoración), cada uno dos veces (20); la
+// cinta, la lista cuatro veces (con cinco, dos no llenaban 1024 al envolver); y paradas, sólo las cinco del de arriba.
+const DEL_CARRUSEL = 4 * DEMOS.length
+const DE_LA_CINTA = 4 * DEMOS.length
+/** Paradas del carrusel EN EL MARCADO: las cinco de arriba (el de abajo es decoración). */
+const PARADAS_DEL_CARRUSEL = DEMOS.length
+afirmarIgual(veces(quieto, '<img'), 3 + DE_LA_CINTA + DEL_CARRUSEL, `las TRES capturas reales llegan a la rama quieta: una por proyecto, y ninguna más — más las ${String(DE_LA_CINTA)} portadas de la cinta`)
 afirmarIgual(veces(conMotion, '<img'), 3 + DEMOS.length + DEL_CARRUSEL, '  y las mismas tres con la coreografía puesta: el túnel muestra la misma imagen que la lista, con otro gesto — y el estante, una portada por demo')
 afirmar(!quieto.includes('transform:'), 'la rama quieta no escribe una sola transformada')
 afirmar(!quieto.includes('will-change'), '  ni promueve una capa de composición')
@@ -238,8 +241,8 @@ afirmarIgual(veces(quieto, '<button'), 0, 'cero botones')
 // ancla, porque tres paradas seguidas al mismo destino se anuncian tres veces
 // igual. Quedan las dos que hacen falta: el nombre, que es lo que se lee, y la
 // captura, que es lo que se ve. La de la imagen declara su `aria-label`.
-afirmarIgual(veces(quieto, '<a '), 7 + 2 * DEMOS.length + DEL_CARRUSEL, 'SIETE enlaces: el nombre y la captura de cada proyecto, más el CTA del final — y las demos de la cinta, dos veces')
-afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), 6 + 2 * DEMOS.length + DEL_CARRUSEL, '  los SEIS que salen del sitio abren afuera sin darle acceso a esta ventana ni el referente — el séptimo es el CTA, que lleva adentro; las demos también salen')
+afirmarIgual(veces(quieto, '<a '), 7 + DE_LA_CINTA + DEL_CARRUSEL, 'SIETE enlaces: el nombre y la captura de cada proyecto, más el CTA del final — y las demos de la cinta, cuatro veces')
+afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), 6 + DE_LA_CINTA + DEL_CARRUSEL, '  los SEIS que salen del sitio abren afuera sin darle acceso a esta ventana ni el referente — el séptimo es el CTA, que lleva adentro; las demos también salen')
 afirmarIgual(veces(conMotion, '<a '), 7 + DEMOS.length + DEL_CARRUSEL, '  y los mismos siete con la coreografía puesta: el recorrido de teclado no cambia con el ancho — más una pieza por demo')
 afirmarIgual(enlacesFueraDelContenido(quieto, [...PROYECTOS.map((p) => p.enlace), DESTINO_DEL_CTA, ...DEMOS.map((d) => d.url)]), [], '  y ni un `href` que no salga del contenido o de la tabla de navegación: ninguna URL inventada acá')
 afirmarIgual(enlacesConNombreSucio(quieto, PROYECTOS), [], '  el nombre accesible de cada uno es el del cliente y nada más: la métrica queda AFUERA')

@@ -31,8 +31,8 @@ export const SELECTOR_DE_ENLACES = 'a[href], [role="link"]'
 
 /**
  * [Cierre de INTERFAZ 2] La demo bajo el puntero y su cartel: la pieza (para apoyar el cartel arriba de su cara) y el
- * texto («Click para ver Zero Protocol»), el mismo de la pastilla fija (`TEXTO_DE_DEMOS`). El nombre sale del catálogo
- * por el `data-demo` del libro, o del nombre accesible de la pieza («Zero Protocol, Tecnología»).
+ * texto («Click para ver The Ethereal Resort»), el mismo de la pastilla fija (`TEXTO_DE_DEMOS`). El nombre sale del catálogo
+ * por el `data-demo` del libro, o del nombre accesible de la pieza («The Ethereal Resort, Hotelería»).
  */
 export function demoBajo(debajo: Element | null): { readonly pieza: Element; readonly texto: string } | null {
   const pieza = debajo?.closest(SELECTOR_DE_DEMOS) ?? null
