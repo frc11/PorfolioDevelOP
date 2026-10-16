@@ -117,6 +117,8 @@ export interface Pruebas {
    * [CIERRE A-ter] A10b · el rebote pasó al producto: la prueba es apagarlo, `?rebote=no` (pide `sin-rebote`, por lo que pide).
    */
   readonly 'sin-rebote': 'si' | 'no'
+  /** [CIERRE A-ter] A4b · más rayos en la red de noche: `red-densidad=1.25|1.5|1.75` (veces los de A-bis; `1`, los de A-bis). Sin la bandera, la del producto (`energia/arbol.ts`). */
+  readonly 'red-densidad': '1' | '1.25' | '1.5' | '1.75' | 'no'
 }
 
 /**
@@ -150,10 +152,10 @@ export interface Pruebas {
  * se borró con C. P2 · entran `espejo=cristal|pliegue|caleidoscopio|ecos|espiral`, `espejo-disparo=ambiente|scroll|mantener` y
  * `espejo-prisma=si` (la dimensión espejo). [PULIDO 19] Q0 · `plasma=` se borró con B (el plasma A es el único; el cristal reemplaza a B).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no', 'sin-cristal': 'no', 'sin-moire': 'no', 'sin-rebote': 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no', 'sin-cristal': 'no', 'sin-moire': 'no', 'sin-rebote': 'no', 'red-densidad': 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'espejo', 'espejo-disparo', 'espejo-prisma'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'espejo', 'espejo-disparo', 'espejo-prisma', 'red-densidad'] as const
 
 /**
  * [PULIDO 20] R2 · lo que pide el fondo, también suelto en la URL: `?cristal=no` (PULIDO 19 lo documentó, pero sólo andaba con el banco)
@@ -186,6 +188,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     'sin-moire': valor('fondo') === 'cristal' || valor('fondo') === 'espejo' ? 'si' : 'no',
     // [CIERRE A-ter] A10b · el rebote al caer es el producto: la prueba es apagarlo (`rebote=no`).
     'sin-rebote': valor('rebote') === 'no' ? 'si' : 'no',
+    'red-densidad': unoDe<'1' | '1.25' | '1.5' | '1.75'>(['1', '1.25', '1.5', '1.75'], valor('red-densidad')),
   }
 }
 

@@ -1,3 +1,4 @@
+import { entornoDeLaEscena } from '../entorno'
 import type { Brasas } from './brasas'
 import { cruzaUnaCaja } from './cajas'
 import { coordenadasDe, type Dominio } from './dominio'
@@ -29,8 +30,28 @@ export const ARBOL = {
   enciende: 0.45,
 } as const
 
+/**
+ * [CIERRE A-ter] A4b · MÁS RAYOS: la densidad de la red (cuántas veces los rayos de A-bis). La grilla del reparto crece con su raíz (una
+ * brasa por celda: los rayos del árbol son las celdas menos uno), sin tocar el grosor, el brillo de cada rayo ni la estabilidad; y la
+ * formación entera sigue en ~7 s (cada rayo nace por su distancia por el árbol a un foco, en la misma parte de la formación). Las variantes
+ * con `?red-densidad=1.25|1.5|1.75` (y `1`, la de A-bis, para comparar); sin la bandera, `producto`.
+ */
+export const DENSIDAD_DE_LA_RED = { producto: 1.5, variantes: [1, 1.25, 1.5, 1.75] } as const
+
+/** Las celdas por lado de la grilla del reparto con una densidad: 9 × √densidad (1,5: 11; 1,75: 12). */
+export const celdasDelArbol = (densidad: number): number => Math.round(ARBOL.celdas * Math.sqrt(densidad))
+
+let pedida: number | null = null
+/** La densidad de esta carga: la pedida (`?red-densidad=`) o la del producto (se lee una vez). */
+export function densidadDeLaRed(): number {
+  if (pedida !== null) return pedida
+  const v = entornoDeLaEscena().pruebas['red-densidad']
+  pedida = v === 'no' ? DENSIDAD_DE_LA_RED.producto : Number(v)
+  return pedida
+}
+
 /** Lo repartido: por celda, la brasa y su distancia al punto; después, las elegidas, sus coordenadas, su distancia por el árbol a un foco. */
-const MAXIMO = ARBOL.celdas * ARBOL.celdas
+const MAXIMO = celdasDelArbol(Math.max(...DENSIDAD_DE_LA_RED.variantes)) ** 2
 const POR_CELDA = new Int32Array(MAXIMO)
 const A_LA_CELDA = new Float64Array(MAXIMO)
 const PUNTO = new Float64Array(MAXIMO * 2)
@@ -59,9 +80,9 @@ function raiz(padre: Int32Array, i: number): number {
 }
 
 /** AB2 · el reparto: una brasa por celda del cuadro, la más cerca del punto de su celda. Devuelve cuántas (sus índices en `NODO`). */
-function repartir(r: Red, b: Brasas, d: Dominio, vidaMinima: number, azar: () => number): number {
-  const N = ARBOL.celdas
-  for (let k = 0; k < MAXIMO; k += 1) {
+function repartir(r: Red, b: Brasas, d: Dominio, vidaMinima: number, azar: () => number, densidad: number): number {
+  const N = celdasDelArbol(densidad)
+  for (let k = 0; k < N * N; k += 1) {
     POR_CELDA[k] = -1
     A_LA_CELDA[k] = Number.POSITIVE_INFINITY
     PUNTO[k * 2] = -1 + (2 * ((k % N) + 0.5 + (azar() * 2 - 1) * ARBOL.corre)) / N
@@ -77,7 +98,7 @@ function repartir(r: Red, b: Brasas, d: Dominio, vidaMinima: number, azar: () =>
     POR_CELDA[k] = i
   }
   let n = 0
-  for (let k = 0; k < MAXIMO; k += 1) {
+  for (let k = 0; k < N * N; k += 1) {
     if (POR_CELDA[k] < 0) continue
     const c = coordenadasDe(d, b.lugar, POR_CELDA[k] * 3)
     NODO[n] = POR_CELDA[k]
@@ -163,8 +184,8 @@ function focos(r: Red, desde: number, n: number, azar: () => number): void {
  * Arma el árbol en la red (vacía): reparte las que se ven, ordena las aristas candidatas por largo y, de la más corta a la más larga, las que
  * unen dos partes distintas; cada enlace nace (se enciende) por su distancia por el árbol al foco más cercano: desde los focos hacia afuera.
  */
-export function armarElArbol(r: Red, b: Brasas, d: Dominio, vidaMinima: number, formaS: number, azar: () => number): void {
-  const n = repartir(r, b, d, vidaMinima, azar)
+export function armarElArbol(r: Red, b: Brasas, d: Dominio, vidaMinima: number, formaS: number, azar: () => number, densidad: number = densidadDeLaRed()): void {
+  const n = repartir(r, b, d, vidaMinima, azar, densidad)
   let m = 0
   for (let p = 0; p < n; p += 1) {
     r.padre[p] = p

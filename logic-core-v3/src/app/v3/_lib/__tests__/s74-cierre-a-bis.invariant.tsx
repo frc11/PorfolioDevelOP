@@ -1,12 +1,13 @@
 /**
  * CIERRE A-bis — CUATRO RETOQUES. Cada cosa con su control positivo (el detector ve el estado de antes o uno roto a propósito).
  *   A4 · la red de noche se forma más rápido (toda en ~7 s, era ~11), con la estabilidad de CIERRE A (el temblor y el titileo, igual).
+ *        [CIERRE A-ter] A4b: más rayos (la densidad del producto, con `?red-densidad=`), sin más grosor ni brillo, y entera en el mismo tiempo.
  *   A8 · gracias y error: la bajada de la placa, el cierre del piso, la apertura y la subida, un 15 % más rápidas (al mismo ritmo).
  *   A10 · las piezas del pie rebotan chico y amortiguado al tocar el piso, cada una con su fase; el golpe sigue en su lugar y se
  *         incrustan cuando terminan. [CIERRE A-ter] A10b: prendido por defecto; `?rebote=no` lo apaga (era `?rebote=si`, apagado).
  *   A11 · la tarjeta de gracias y de error ya no titila con la cámara: su texto, impreso en la placa (la solución de AA1), y el DOM vivo.
  */
-import { ARBOL, armarElArbol } from '../escena/energia/arbol'
+import { ARBOL, DENSIDAD_DE_LA_RED, armarElArbol, celdasDelArbol, densidadDeLaRed } from '../escena/energia/arbol'
 import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
 import { alfaDelDominio, armarElDominio, crearDominio, poblar } from '../escena/energia/dominio'
 import { DIBUJO_DE_LA_RED } from '../escena/energia/dibujo/red'
@@ -32,7 +33,7 @@ titulo('A4 · La red se forma más rápido, igual de estable')
  * La red por defecto (el árbol repartido, `arbol.ts`) armada con la vista de siempre: cuándo nace el último rayo (s desde que se forma).
  * Con `enciendeS`, cuándo están todos enteros; y cuándo, la mitad.
  */
-function nacimientos(semilla: number): readonly number[] {
+function nacimientos(semilla: number, densidad: number = densidadDeLaRed()): readonly number[] {
   const az = azarConSemilla(semilla)
   const b = crearBrasas(900, az, FLOOR_Y)
   const d = crearDominio()
@@ -49,7 +50,7 @@ function nacimientos(semilla: number): readonly number[] {
   for (let i = 0; i < b.n; i += 1) b.vida[i] = alfaDelDominio(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
   const r = crearRed(900)
   r.modo = 'toda'
-  armarElArbol(r, b, d, REPOSO.vidaMinima, REPOSO.formaS, az)
+  armarElArbol(r, b, d, REPOSO.vidaMinima, REPOSO.formaS, az, densidad)
   return Array.from(r.nace.subarray(0, r.n)).sort((x, y) => x - y)
 }
 interface DeLaFormacion {
@@ -74,6 +75,32 @@ const formacionBien = (x: DeLaFormacion): boolean =>
 afirmar(formacionBien(AHORA), `  ${String(NACE.length)} rayos: la mitad enteros a los ${AHORA.mitadS.toFixed(2)} s y todos a los ${AHORA.enteraS.toFixed(2)} s (antes ${ANTES.mitadS.toFixed(2)} y ${ANTES.enteraS.toFixed(2)}); el temblor ${String(AHORA.temblor)} y el titileo ${String(AHORA.titileo)}, los de CIERRE A`)
 controlPositivo('  el detector VE la formación de CIERRE A (~11 s)', ANTES, formacionBien)
 controlPositivo('  y una rápida que volvió a temblar (el temblor de antes)', { ...AHORA, temblor: 0.012 }, formacionBien)
+
+// [CIERRE A-ter] A4b · MÁS RAYOS: con la densidad del producto, más rayos que en A-bis (la grilla del reparto, 9 × √densidad), sin más
+// grosor ni brillo por rayo (el canal y el golpe de A-bis; el tope del brillo de noche no baja ninguno) y la red entera en el mismo tiempo.
+interface DeLaDensidad {
+  readonly densidad: number
+  readonly antes: readonly (readonly number[])[]
+  readonly ahora: readonly (readonly number[])[]
+  readonly ancho: number
+  readonly golpe: readonly number[]
+  readonly tope: number
+}
+const SEMILLAS_A4B = [3, 7, 11, 19]
+const enteraDe = (nace: readonly number[]): number => formacion(nace, 1, REPOSO.enciendeS).enteraS
+const promedio = (xs: readonly number[]): number => xs.reduce((a, x) => a + x, 0) / xs.length
+const densidadBien = (x: DeLaDensidad): boolean => {
+  const razon = promedio(x.ahora.map((n) => n.length)) / promedio(x.antes.map((n) => n.length))
+  return (DENSIDAD_DE_LA_RED.variantes as readonly number[]).includes(x.densidad) && x.densidad > 1 && razon >= 1 + 0.6 * (x.densidad - 1) && razon <= 1.25 * x.densidad &&
+    x.ahora.every((n, k) => Math.abs(enteraDe(n) - enteraDe(x.antes[k])) <= 0.35 && enteraDe(n) <= 7.5) &&
+    x.ancho === 1.35 && x.golpe[0] === 1.3 && x.golpe[1] === 0.55 && Math.max(...x.ahora.map((n) => n.length)) <= x.tope
+}
+const DENSIDAD_A4B: DeLaDensidad = { densidad: densidadDeLaRed(), antes: SEMILLAS_A4B.map((k) => nacimientos(k, 1)), ahora: SEMILLAS_A4B.map((k) => nacimientos(k)), ancho: DIBUJO_DE_LA_RED.ancho, golpe: DIBUJO_DE_LA_RED.uRed, tope: DIBUJO_DE_LA_RED.noche.tope }
+afirmar(densidadBien(DENSIDAD_A4B), `  la densidad ${String(DENSIDAD_A4B.densidad)} (la grilla de ${String(celdasDelArbol(DENSIDAD_A4B.densidad))} por lado, era ${String(ARBOL.celdas)}): ${DENSIDAD_A4B.ahora.map((n) => n.length).join(', ')} rayos contra ${DENSIDAD_A4B.antes.map((n) => n.length).join(', ')} de A-bis; enteros a los ${DENSIDAD_A4B.ahora.map((n) => enteraDe(n).toFixed(2)).join(', ')} s (A-bis ${DENSIDAD_A4B.antes.map((n) => enteraDe(n).toFixed(2)).join(', ')}); el canal y el golpe de A-bis`)
+controlPositivo('  el detector VE la red de A-bis (la misma cantidad de rayos)', { ...DENSIDAD_A4B, densidad: 1, ahora: DENSIDAD_A4B.antes }, densidadBien)
+controlPositivo('  y más rayos con el canal más grueso', { ...DENSIDAD_A4B, ancho: 1.6 }, densidadBien)
+controlPositivo('  y más rayos que tardan más en encenderse (un tercio más)', { ...DENSIDAD_A4B, ahora: DENSIDAD_A4B.ahora.map((n) => n.map((t) => t * 1.35)) }, densidadBien)
+controlPositivo('  y tantos que el tope del brillo de noche los baja a todos', { ...DENSIDAD_A4B, tope: 60 }, densidadBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A8 · Gracias y error, un 15 % más rápido: las cuatro fases del cambio al mismo ritmo')

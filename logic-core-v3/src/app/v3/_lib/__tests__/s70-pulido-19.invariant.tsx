@@ -24,7 +24,7 @@ import { CELDAS_DEL_REPARTO, DOMINIO, alfaDelDominio, armarElDominio, coordenada
 import { pasoDeLasBrasas } from '../escena/energia/paso'
 import { POBLACION, antesDelPaso, aparecer, crearPoblacion, regular, sembrar, type Poblacion } from '../escena/energia/poblacion'
 import { REPOSO, crearMemoriaDelGesto, crearRed, leerElGesto, pasoDeLaRed, type Red } from '../escena/energia/reposo'
-import { ARBOL } from '../escena/energia/arbol'
+import { celdasDelArbol, densidadDeLaRed } from '../escena/energia/arbol'
 import { crearCajas, cruzaUnaCaja } from '../escena/energia/cajas'
 import { FRAGMENTOS_DE_LA_RED, VERTICES_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { brilloPorDensidad } from '../escena/energia/vecinas'
@@ -490,7 +490,7 @@ const medirLaRed = ({ r, b, d }: { readonly r: Red; readonly b: Brasas; readonly
     const c = coordenadas(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
     if (!(b.vida[i] >= REPOSO.vidaMinima && c.w > d.w0 && c.w < d.w1 && Math.abs(c.u) <= 1 && Math.abs(c.v) <= 1 && !cruzaUnaCaja(cajas, c.u, c.v, c.u, c.v))) continue
     seVen += 1
-    const N = ARBOL.celdas
+    const N = celdasDelArbol(densidadDeLaRed()) // [CIERRE A-ter] A4b · la grilla de la densidad del producto.
     ocupadas.add(Math.min(N - 1, Math.floor(((c.u + 1) / 2) * N)) + N * Math.min(N - 1, Math.floor(((c.v + 1) / 2) * N)))
   }
   return { enlaces: r.n, tapan, ciclo, seVen, celdas: ocupadas.size, armada: r.fase === 'armada' }

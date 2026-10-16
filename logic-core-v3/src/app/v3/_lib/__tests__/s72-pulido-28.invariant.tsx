@@ -42,7 +42,7 @@ import { HUECOS_DEL_PIE, HUECO_DEL_PIE, QUIETUD, QUIETUD_DEL_PIE } from '../esce
 import { huecosDeLaCaida } from '../escena/pie3d/huecosDeLaCaida'
 import { HUNDIMIENTO_DEL_PIE, PLATAFORMA_EN_VIVO, hundimientoDelPiso } from '../escena/pie3d/transformacionDelPie'
 import { existsSync } from 'node:fs'
-import { ARBOL, armarElArbol } from '../escena/energia/arbol'
+import { ARBOL, armarElArbol, celdasDelArbol, densidadDeLaRed } from '../escena/energia/arbol'
 import { DIBUJO_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
 import { alfaDelDominio, armarElDominio, coordenadas, crearDominio, poblar } from '../escena/energia/dominio'
@@ -522,6 +522,7 @@ interface DeLaRedToda {
   readonly porCelda: readonly number[]
   readonly focos: number
 }
+const CELDAS_DEL_REPARTO = celdasDelArbol(densidadDeLaRed())
 function redToda(semilla: number): DeLaRedToda {
   const az = azarConSemilla(semilla)
   const b = crearBrasas(900, az, FLOOR_Y)
@@ -545,7 +546,8 @@ function redToda(semilla: number): DeLaRedToda {
     if (b.vida[i] < REPOSO.vidaMinima || Math.abs(c.u) > 1 || Math.abs(c.v) > 1) continue
     const tercio = Math.min(2, Math.floor(((c.v + 1) / 2) * 3))
     aLaVista[tercio] += 1
-    ocupadas[tercio].add(Math.min(ARBOL.celdas - 1, Math.floor(((c.u + 1) / 2) * ARBOL.celdas)) + ARBOL.celdas * Math.min(ARBOL.celdas - 1, Math.floor(((c.v + 1) / 2) * ARBOL.celdas)))
+    // [CIERRE A-ter] A4b · la grilla del reparto es la de la densidad del producto (`celdasDelArbol`).
+    ocupadas[tercio].add(Math.min(CELDAS_DEL_REPARTO - 1, Math.floor(((c.u + 1) / 2) * CELDAS_DEL_REPARTO)) + CELDAS_DEL_REPARTO * Math.min(CELDAS_DEL_REPARTO - 1, Math.floor(((c.v + 1) / 2) * CELDAS_DEL_REPARTO)))
   }
   const r = crearRed(900)
   r.modo = 'toda'
@@ -567,7 +569,7 @@ function redToda(semilla: number): DeLaRedToda {
 }
 const parejo = (t: readonly number[]): number => Math.min(...t) / Math.max(1, Math.max(...t))
 const REDES = [7, 11, 29].map(redToda)
-const repartidaBien = (x: DeLaRedToda): boolean => x.enlaces <= ARBOL.celdas * ARBOL.celdas && x.largo >= 0.15 && parejo(x.porCelda) >= 0.5
+const repartidaBien = (x: DeLaRedToda): boolean => x.enlaces <= CELDAS_DEL_REPARTO * CELDAS_DEL_REPARTO && x.largo >= 0.15 && parejo(x.porCelda) >= 0.5
 const focosBien = (x: DeLaRedToda): boolean => x.focos >= ARBOL.focos[0] && x.focos <= ARBOL.focos[1] + 2
 afirmar(REDES.every(repartidaBien) && REDES.every(focosBien), `  con una población despareja (de abajo arriba, a la vista ${REDES[0].aLaVista.join(' / ')}): ${REDES.map((x) => `${String(x.enlaces)} enlaces de ${x.largo.toFixed(2)} de cuadro, por tercio ${x.tercios.join(' / ')} (${x.porCelda.map((v) => v.toFixed(2)).join(' / ')} por celda con brasas), ${String(x.focos)} focos`).join('; ')}`)
 // Los controles: la de antes, que unía todas las que se veían (sus enlaces van donde están las brasas: uno por brasa), y un solo foco.
