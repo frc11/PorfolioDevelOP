@@ -26,7 +26,8 @@ export function duracionDelVolteo(reducido: boolean): number {
  * mismo charco. [PULIDO 28] AA2 · se hunde por su hueco sobre su plataforma, el piso se cierra, se cambian y sube la otra
  * (`escena/pie3d/transformacionDelPie.ts`). La duración entera (s), la mitad de cada lado; con movimiento reducido, el fundido de siempre.
  */
-export const CAMBIO_DEL_PIE = { s: 2.4 } as const
+// [CIERRE A-bis] A8 · un 15 % más rápido (era 2,4): la bajada, el cierre, la apertura y la subida, 0,51 s cada una.
+export const CAMBIO_DEL_PIE = { s: 2.04 } as const
 
 export function duracionDelCambioDelPie(reducido: boolean): number {
   return reducido ? VOLTEO.fundido.s : CAMBIO_DEL_PIE.s

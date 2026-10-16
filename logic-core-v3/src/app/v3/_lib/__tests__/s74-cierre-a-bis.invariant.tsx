@@ -1,6 +1,7 @@
 /**
  * CIERRE A-bis — CUATRO RETOQUES. Cada cosa con su control positivo (el detector ve el estado de antes o uno roto a propósito).
  *   A4 · la red de noche se forma más rápido (toda en ~7 s, era ~11), con la estabilidad de CIERRE A (el temblor y el titileo, igual).
+ *   A8 · gracias y error: la bajada de la placa, el cierre del piso, la apertura y la subida, un 15 % más rápidas (al mismo ritmo).
  */
 import { ARBOL, armarElArbol } from '../escena/energia/arbol'
 import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
@@ -8,6 +9,8 @@ import { alfaDelDominio, armarElDominio, crearDominio, poblar } from '../escena/
 import { DIBUJO_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { REPOSO, crearRed } from '../escena/energia/reposo'
 import { FLOOR_Y } from '../escena/probeScene'
+import { pisoDelHundimiento } from '../escena/pie3d/transformacionDelPie'
+import { duracionDelCambioDelPie } from '../formularios/volteo'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -59,5 +62,30 @@ const formacionBien = (x: DeLaFormacion): boolean =>
 afirmar(formacionBien(AHORA), `  ${String(NACE.length)} rayos: la mitad enteros a los ${AHORA.mitadS.toFixed(2)} s y todos a los ${AHORA.enteraS.toFixed(2)} s (antes ${ANTES.mitadS.toFixed(2)} y ${ANTES.enteraS.toFixed(2)}); el temblor ${String(AHORA.temblor)} y el titileo ${String(AHORA.titileo)}, los de CIERRE A`)
 controlPositivo('  el detector VE la formación de CIERRE A (~11 s)', ANTES, formacionBien)
 controlPositivo('  y una rápida que volvió a temblar (el temblor de antes)', { ...AHORA, temblor: 0.012 }, formacionBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A8 · Gracias y error, un 15 % más rápido: las cuatro fases del cambio al mismo ritmo')
+
+/** Lo que dura cada fase del cambio (s): la bajada de la placa, el cierre del piso y, a la vuelta, la apertura y la subida. */
+function fasesDelCambio(D: number): readonly number[] {
+  const N = 4000
+  const en = (f: (t: number) => boolean, desde: number): number => {
+    for (let i = desde; i <= N; i += 1) if (f(i / N)) return i
+    return N
+  }
+  const abajo = en((t) => pisoDelHundimiento(t).baja >= 1, 0)
+  const cerrado = en((t) => pisoDelHundimiento(t).cerrado >= 1, abajo)
+  const abre = en((t) => pisoDelHundimiento(t).cerrado < 1, cerrado)
+  const abierto = en((t) => pisoDelHundimiento(t).cerrado <= 0, abre)
+  const sube = en((t) => pisoDelHundimiento(t).baja < 1, abierto)
+  const arriba = en((t) => pisoDelHundimiento(t).baja <= 0, sube)
+  return [abajo, cerrado - abajo, abierto - abre + 1, arriba - sube + 1].map((x) => (x / N) * D)
+}
+// En CIERRE A, 0,6 s cada una: ahora el 85 %, las cuatro iguales.
+const fasesBien = (f: readonly number[]): boolean => f.every((d) => Math.abs(d - 0.6 * 0.85) < 0.015)
+const FASES = fasesDelCambio(duracionDelCambioDelPie(false))
+afirmar(fasesBien(FASES), `  la bajada ${FASES[0].toFixed(3)} s, el cierre ${FASES[1].toFixed(3)}, la apertura ${FASES[2].toFixed(3)} y la subida ${FASES[3].toFixed(3)} (en CIERRE A, 0,6 cada una: el 85 %)`)
+controlPositivo('  el detector VE el cambio de CIERRE A (0,6 s cada fase)', fasesDelCambio(2.4), fasesBien)
+controlPositivo('  y uno más rápido sólo en la bajada', [0.45, 0.51, 0.51, 0.51] as const, fasesBien)
 
 cerrar('s74-cierre-a-bis')

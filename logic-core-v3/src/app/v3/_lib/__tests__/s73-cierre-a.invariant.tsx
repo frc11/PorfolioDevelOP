@@ -433,9 +433,10 @@ const delCambio = (): DelCambio => {
   return { bajada: (abajo / N) * D, cierre: ((cerrado - abajo) / N) * D, apertura: ((abierto - abre + 1) / N) * D, subida: ((arriba - sube + 1) / N) * D }
 }
 const CAMBIO = delCambio()
-const PROMEDIO_A8 = (0.84 + 0.36) / 2
+// [CIERRE A-bis] A8 · las cuatro, un 15 % más rápidas (al mismo ritmo entre sí): el 85 % del promedio.
+const PROMEDIO_A8 = ((0.84 + 0.36) / 2) * 0.85
 const alMismoRitmo = (c: DelCambio): boolean => [c.bajada, c.cierre, c.apertura, c.subida].every((d) => Math.abs(d - PROMEDIO_A8) < 0.02)
-afirmar(alMismoRitmo(CAMBIO), `  la bajada ${CAMBIO.bajada.toFixed(2)} s y el cierre ${CAMBIO.cierre.toFixed(2)} s; a la vuelta la apertura ${CAMBIO.apertura.toFixed(2)} y la subida ${CAMBIO.subida.toFixed(2)} (antes 0,84 y 0,36: el promedio, ${PROMEDIO_A8.toFixed(2)})`)
+afirmar(alMismoRitmo(CAMBIO), `  la bajada ${CAMBIO.bajada.toFixed(2)} s y el cierre ${CAMBIO.cierre.toFixed(2)} s; a la vuelta la apertura ${CAMBIO.apertura.toFixed(2)} y la subida ${CAMBIO.subida.toFixed(2)} (antes 0,84 y 0,36: el 85 % del promedio, ${PROMEDIO_A8.toFixed(2)})`)
 controlPositivo('  el detector VE el cambio de antes (la bajada 2,3 veces el cierre)', { bajada: 0.84, cierre: 0.36, apertura: 0.36, subida: 0.84 }, alMismoRitmo)
 
 // ═══════════════════════════════════════════════════════════════════════════
