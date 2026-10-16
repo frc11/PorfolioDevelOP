@@ -91,6 +91,11 @@ export function Remate(): React.JSX.Element {
           else reproducir(animaciones, 1)
         } else if (gesto === 'vuelta') {
           reproducir(animaciones, -1)
+        } else if (animaciones.length === 0 && puestoTras(cruce)) {
+          // [CIERRE A-ter] A13 · un salto que pasó por encima de la línea (se cargó abajo de ella y se saltó más allá) no cruzó nada:
+          // quedaba invisible para siempre. Ya pasada, se posa donde toca, sin gesto (como el primer aviso).
+          armar()
+          for (const a of animaciones) a.finish()
         }
       },
       { rootMargin: margenDelDisparo(DISPARO_DEL_REMATE) },

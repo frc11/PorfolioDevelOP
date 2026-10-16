@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react'
 
 import { OPCIONES_DE_LENIS } from '@/components/layout/SmoothScroll'
 
+import { anotarElLenis } from '../_lib/diagnostico/anotar'
 import { relojDelCuadro } from '../_lib/escena/viaje'
 import { MARCA_SCROLL_SUAVE } from '../_lib/marcaScrollSuave'
 import { ATRIBUTO_SCROLL_SUAVE } from '../_lib/scrollSuave'
@@ -80,6 +81,7 @@ export default function ScrollSuaveDeV3(): null {
     // [PULIDO 12] · el estado del scroll en un atributo de `[data-v3]` y no en una clase de `<html>` (recalculaba la página entera).
     sinClasesDeScroll(lenis)
     instancia.current = lenis
+    anotarElLenis(lenis) // [CIERRE A-ter] A13 · el diagnóstico de la carga (`?diag=carga`).
     document.documentElement.setAttribute(ATRIBUTO_SCROLL_SUAVE, MARCA_SCROLL_SUAVE)
 
     // [INTERFAZ 1] T1 · la velocidad del scroll, una vez por cuadro y en px/s, para el texto con inercia.
@@ -105,6 +107,7 @@ export default function ScrollSuaveDeV3(): null {
       lenis.destroy()
       document.querySelector('[data-v3]')?.removeAttribute(ATRIBUTO_DEL_SCROLL_EN_CURSO)
       instancia.current = null
+      anotarElLenis(null)
       document.documentElement.removeAttribute(ATRIBUTO_SCROLL_SUAVE)
     }
   }, [])

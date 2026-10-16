@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+import { anotarElSuelto, anotarLaImpresion } from '../../diagnostico/anotar'
+import { conReimpresion, versionDeLasFuentes } from '../../fuentes'
 import type { Armada } from './armadas'
 import { pintar, sinLetra } from './geometria'
 import { IMPRESAS } from './impresas'
@@ -18,6 +20,7 @@ import { materialDelPie } from './material'
 export const TARJETA_IMPRESA = { escala: IMPRESAS.escala, margen: 4, apagado: 'opacity(0)' } as const
 
 interface Impresa {
+  readonly id: string
   firma: string
   readonly bloque: HTMLElement
   readonly malla: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>
@@ -42,9 +45,12 @@ function bloqueDe(a: Armada): HTMLElement | null {
   return null
 }
 
-/** Lo que se ve del bloque (si cambia, se vuelve a imprimir): el texto, la caja y los colores de cada elemento (el hover, el foco). */
+/**
+ * Lo que se ve del bloque (si cambia, se vuelve a imprimir): el texto, la caja y los colores de cada elemento (el hover, el foco). [CIERRE
+ * A-ter] A13 · y las fuentes cargadas (impresa con la de respaldo, se vuelve a imprimir cuando llega la suya).
+ */
 function firmaDe(bloque: HTMLElement): string {
-  let f = `${bloque.textContent}|${String(bloque.offsetWidth)}x${String(bloque.offsetHeight)}`
+  let f = `${conReimpresion() ? String(versionDeLasFuentes()) : ''}|${bloque.textContent}|${String(bloque.offsetWidth)}x${String(bloque.offsetHeight)}`
   for (const e of [bloque, ...bloque.querySelectorAll('*')]) {
     const s = getComputedStyle(e)
     f += `|${s.color}${s.backgroundColor}${s.borderTopColor}${s.textDecorationColor}`
@@ -163,6 +169,7 @@ function soltarLaImpresa(i: Impresa): void {
   i.malla.geometry.dispose()
   i.malla.material.map?.dispose()
   i.malla.material.dispose()
+  anotarElSuelto(i.id)
   // El DOM, otra vez a la vista (si ninguna otra lo imprime).
   if (![...DE_LA_ARMADA.values()].some((x) => x !== i && x.bloque === i.bloque)) i.bloque.style.filter = ''
 }
@@ -197,7 +204,7 @@ export function imprimirLasTarjetas(armadas: readonly Armada[]): void {
       const hecha = imprimir(a, bloque)
       if (hecha === null) continue
       if (i === undefined) {
-        i = { firma, bloque, malla: colgar(a, hecha.geometria, hecha.textura) }
+        i = { id: `tarjeta:${a.pieza.id}`, firma, bloque, malla: colgar(a, hecha.geometria, hecha.textura) }
         DE_LA_ARMADA.set(a, i)
       } else {
         i.malla.geometry.dispose()
@@ -208,6 +215,7 @@ export function imprimirLasTarjetas(armadas: readonly Armada[]): void {
         i.firma = firma
       }
       bloque.style.filter = TARJETA_IMPRESA.apagado
+      anotarLaImpresion(i.id, bloque)
     }
     // La entrada del texto (Motion: su opacidad y lo que sube), en la placa: lo calculado (Motion puede animar sin escribir el estilo).
     const calculado = getComputedStyle(bloque)

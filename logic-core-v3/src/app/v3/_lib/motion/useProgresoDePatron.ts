@@ -10,6 +10,8 @@ import {
   type ParDeAnclas,
   type RangoDeScroll,
 } from './anclas'
+import { anotarElBloque } from '../diagnostico/anotar'
+import { topeEnReposo } from './enReposo'
 import { useEpocaDeMedicion } from './epoca'
 
 /**
@@ -125,13 +127,17 @@ export function useProgresoDePatron({
     if (elemento === null || foto.alto === 0) return
 
     const caja = elemento.getBoundingClientRect()
+    // [CIERRE A-ter] A13 · el tope sin lo que corren los `sticky`: una época a mitad de una sección clavada no corre el rango (`enReposo.ts`).
     const medida: CajaMedida = {
-      topDoc: caja.top + window.scrollY,
+      topDoc: topeEnReposo(elemento),
       alto: caja.height,
     }
     rango.current = rangoDeScroll(anclas, medida, foto.alto)
     version.set(version.get() + 1)
   }, [ref, foto, anclas, version])
+
+  // [CIERRE A-ter] A13 · el diagnóstico de la carga (`?diag=carga`): su elemento medido, su rango y sus anclas.
+  useEffect(() => anotarElBloque({ elemento: () => ref.current, rango: () => rango.current, anclas }), [ref, anclas])
 
   const crudo = useTransform<number, number>([scrollY, version], ([y]) => {
     const r = rango.current

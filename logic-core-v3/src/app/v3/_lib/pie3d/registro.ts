@@ -4,6 +4,7 @@ import type { MotionValue } from 'motion/react'
 import { createContext, useContext, useEffect, useSyncExternalStore, type RefObject } from 'react'
 
 import { CONSULTA_ESCENARIO } from '../compuerta'
+import { anotar } from '../diagnostico/anotar'
 import { entornoDeLaEscena } from '../escena/entorno'
 import { pedirLaOnda } from '../escena/interfaz/pedidos'
 import { useAnchoMinimo } from '../useAnchoMinimo'
@@ -118,6 +119,7 @@ const oyentesDelListo = new Set<() => void>()
 export function marcarElPieListo(v: boolean): void {
   if (listo === v) return
   listo = v
+  anotar(v ? 'listo' : 'no-listo', 'pie')
   for (const f of oyentesDelListo) f()
 }
 function suscribirAlListo(f: () => void): () => void {
@@ -126,6 +128,9 @@ function suscribirAlListo(f: () => void): () => void {
     oyentesDelListo.delete(f)
   }
 }
+/** [CIERRE A-ter] A13 · para el diagnóstico de la carga: ¿el pie de volumen está armado y compilado? */
+export const pieListo = (): boolean => listo
+
 export function usePieListo(): boolean {
   return useSyncExternalStore(suscribirAlListo, () => listo, () => false)
 }

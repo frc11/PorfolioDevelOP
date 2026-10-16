@@ -4,9 +4,12 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
 
+import { anotarLasPiezas } from '../../diagnostico/anotar'
+import { alCargarseLasFuentes, conReimpresion } from '../../fuentes'
 import { PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, marcarElPieListo, suscribirALasPiezas, versionDeLasPiezas } from '../../pie3d/registro'
 import { SALIDA_EN_VIVO, pasoDelHundimiento } from '../../pie3d/salidas'
 import { viajeEnCurso } from '../viaje'
+import { contextoPerdido, useVersionDelContexto } from '../contextoDelLienzo'
 import { hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { calentar } from '../gpu/Precompilar'
@@ -58,6 +61,8 @@ function alCuadroDelBanco(camara: THREE.Camera | null, x: number, y: number, z: 
 export default function PieDeVolumen({ keyLightRef }: Props) {
   const version = useSyncExternalStore(suscribirALasPiezas, versionDeLasPiezas, versionDeLasPiezas)
   const gl = useThree((s) => s.gl)
+  // [CIERRE A-ter] A13 · el contexto perdido y repuesto: todo lo armado se suelta (el DOM a la vista) y se rehace con un estudio nuevo.
+  const contexto = useVersionDelContexto(gl)
   const escena = useThree((s) => s.scene)
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
@@ -109,7 +114,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       marcarElPieListo(false)
       rt.dispose()
     }
-  }, [gl])
+  }, [gl, contexto])
 
   // Se arma (y se rearma lo que cambió) con las fuentes cargadas: al anotarse, al cambiar el cuadro o una caja.
   useEffect(() => {
@@ -120,12 +125,13 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     let vivo = true
     let reloj = 0
     const armarYa = (): void => {
-      if (!vivo || !s.fuentes || s.estudio === null) return
+      if (!vivo || !s.fuentes || s.estudio === null || contextoPerdido()) return
       rearmar(s, g, s.estudio)
       // [CIERRE A-bis] A11 · la tarjeta de gracias o de error, impresa en su placa (se compila con la entrante).
       imprimirLasTarjetas(s.armadas)
       // [PULIDO 10] J4 · la placa de una transformación (la tarjeta de gracias), compilada antes de girar.
       prepararLasTransformaciones(s, gl, escena, camara)
+      anotarLasPiezas(s.armadas) // [CIERRE A-ter] A13 · el diagnóstico de la carga (`?diag=carga`).
       if (s.listo || s.compilando || s.armadas.length === 0) return
       s.compilando = true
       void gl.compileAsync(escena, camara).then(() => {
@@ -151,13 +157,16 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       s.fuentes = true
       if (vivo) pedir()
     })
+    // [CIERRE A-ter] A13 · una fuente que carga después (la red lenta) cambia lo medido: se rearma lo que cambió (`rearmar` compara la firma).
+    const sinLasFuentes = conReimpresion() ? alCargarseLasFuentes(pedir) : () => undefined
     return () => {
       vivo = false
       window.clearTimeout(reloj)
       tamanos.disconnect()
       textos.disconnect()
+      sinLasFuentes()
     }
-  }, [version, tam.width, tam.height, gl, escena, camara])
+  }, [version, tam.width, tam.height, gl, escena, camara, contexto])
 
   useEffect(() => {
     if (!hayBanco()) return undefined

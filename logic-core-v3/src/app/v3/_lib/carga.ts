@@ -1,3 +1,5 @@
+import { anotar } from './diagnostico/anotar'
+
 /**
  * [AJUSTES FINALES] A4 · LA CARGA DE LA PÁGINA (provisorio hasta el preloader) — hasta acá al cargar se veían primero piezas
  * sueltas (la bajada y los CTA del hero sobre blanco, el chrome) y recién después la escena y el titular de volumen. Ahora:
@@ -64,6 +66,7 @@ function avisar(): void {
 export function marcarElPrimerCuadro(): void {
   if (primerCuadro) return
   primerCuadro = true
+  anotar('primer-cuadro')
   avisar()
 }
 
@@ -73,6 +76,7 @@ export const hayPrimerCuadro = (): boolean => primerCuadro
 export function abrirLaCarga(): void {
   if (lista) return
   lista = true
+  anotar('carga-abierta')
   avisar()
 }
 

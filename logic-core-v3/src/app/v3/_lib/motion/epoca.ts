@@ -50,6 +50,9 @@
 
 import { useSyncExternalStore } from 'react'
 
+import { anotar } from '../diagnostico/anotar'
+import { alCargarseLasFuentes, conReimpresion } from '../fuentes'
+
 /** Los cinco eventos que pueden mover el estado. No hay un sexto. */
 export type EventoDeMedicion = 'fuentes' | 'resize' | 'reposo' | 'visible' | 'oculto'
 
@@ -185,6 +188,7 @@ function emitir(evento: EventoDeMedicion): void {
     ancho: window.innerWidth,
     alto: altoDeLaVentana(),
   }
+  anotar('epoca', evento, `${String(foto.epoca)} · alto ${String(foto.alto)}`)
   for (const oyente of oyentes) oyente()
 }
 
@@ -211,8 +215,11 @@ function cablear(): void {
   if (cableado) return
   cableado = true
 
-  // El estado arranca con la visibilidad real, no con la supuesta.
-  estado = { ...EPOCA_INICIAL, visible: medicionConfiable() }
+  // El estado arranca con la visibilidad real, no con la supuesta. [CIERRE A-ter] A13 · cableada con la pestaña oculta, la medición del
+  // montaje queda DEBIDA: al volver a verse se toma (antes quedaba el alto en 0 y ningún bloque resolvía su ancla: todo quieto).
+  const visible = medicionConfiable()
+  estado = { ...EPOCA_INICIAL, visible, pendiente: !visible }
+  anotar('epoca-cableada', '', `${estado.visible ? 'visible' : 'OCULTA'} · fuentes ${document.fonts?.status ?? '?'}`)
   if (estado.visible) {
     foto = { epoca: 0, ancho: window.innerWidth, alto: altoDeLaVentana() }
     // ⚠ Avisar acá NO es redundante. El primer render devolvió el corte de
@@ -225,31 +232,39 @@ function cablear(): void {
     for (const oyente of oyentes) oyente()
   }
 
-  window.addEventListener(
-    'resize',
-    () => {
+  const alCambiarElCuadro = (): void => {
+    sincronizarVisibilidad()
+    emitir('resize')
+    if (temporizadorDeReposo !== undefined) clearTimeout(temporizadorDeReposo)
+    temporizadorDeReposo = setTimeout(() => {
+      temporizadorDeReposo = undefined
       sincronizarVisibilidad()
-      emitir('resize')
-      if (temporizadorDeReposo !== undefined) clearTimeout(temporizadorDeReposo)
-      temporizadorDeReposo = setTimeout(() => {
-        temporizadorDeReposo = undefined
-        sincronizarVisibilidad()
-        emitir('reposo')
-      }, REPOSO_MS)
-    },
-    { passive: true },
-  )
+      emitir('reposo')
+    }, REPOSO_MS)
+  }
+  window.addEventListener('resize', alCambiarElCuadro, { passive: true })
 
   document.addEventListener('visibilitychange', sincronizarVisibilidad)
 
+  // [CIERRE A-ter] A13 · el layout que cambia sin que cambie la ventana (la página que crece al montarse la coreografía o al estirarse el
+  // túnel, un texto que se rearma): las secciones de abajo se corren y los rangos quedaban viejos. El alto del cuerpo, con el mismo reposo.
+  let altoDelCuerpo = -1
+  new ResizeObserver(() => {
+    const alto = document.body.offsetHeight
+    if (altoDelCuerpo >= 0 && alto !== altoDelCuerpo) alCambiarElCuadro()
+    altoDelCuerpo = alto
+  }).observe(document.body)
+
   // Si las fuentes YA están cargadas no hay nada que rehacer, y no se gasta una
   // época: la medición del montaje ya sale con la métrica definitiva.
-  if (document.fonts !== undefined && document.fonts.status !== 'loaded') {
-    void document.fonts.ready.then(() => {
-      sincronizarVisibilidad()
-      emitir('fuentes')
-    })
+  // [CIERRE A-ter] A13 · y cada tanda de caras que termina de cargar después (`loadingdone`), no sólo la que cargaba al cablearse: una
+  // fuente que llega tarde (la red lenta, un texto que se monta después) cambia las cajas.
+  const alCargar = (): void => {
+    sincronizarVisibilidad()
+    emitir('fuentes')
   }
+  if (conReimpresion()) alCargarseLasFuentes(alCargar)
+  else if (document.fonts !== undefined && document.fonts.status !== 'loaded') void document.fonts.ready.then(alCargar)
 }
 
 function suscribir(alCambiar: () => void): () => void {
@@ -274,6 +289,9 @@ function leer(): FotoDeEpoca {
  * así que un `useEffect` con `[foto]` en las dependencias corre exactamente una
  * vez por época — que es la definición de "nunca por cuadro".
  */
+/** [CIERRE A-ter] A13 · el corte de ahora, para el diagnóstico de la carga. */
+export const fotoDeLaEpocaActual = (): FotoDeEpoca => foto
+
 export function useEpocaDeMedicion(): FotoDeEpoca {
   // Las tres funciones son de módulo, no del render: su identidad ya es estable
   // y envolverlas en `useCallback` no agregaría nada.

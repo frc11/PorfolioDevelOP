@@ -221,7 +221,11 @@ export function CapaDeLaGota({ className }: { readonly className?: string }): Re
     const laIda = new IntersectionObserver(
       ([e]) => {
         if (restaurarSiHaceFalta(e)) return
-        if (queHace(e) === 'ida') arrancar('ida')
+        const gesto = queHace(e)
+        if (gesto === 'ida') arrancar('ida')
+        // [CIERRE A-ter] A13 · un salto que pasó por encima del disparo (el ancla nativa, un clic antes de que monte el viaje) no cruza
+        // nada: sin barrido en curso ni viaje ni el día del final, la noche que deja el scroll, puesta sin gesto (la regla de las cuatro entradas).
+        else if (gesto === 'nada' && sentido === null && viajeEnCurso() === null && !DIA_DEL_FINAL.activo) NOCHE_DISPARADA.cantidad = nocheDelScroll()
       },
       { rootMargin: `0px 0px ${DISPARO_DE_LA_NOCHE.ida}% 0px` },
     )

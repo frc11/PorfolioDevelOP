@@ -74,6 +74,8 @@ export interface Armado {
   readonly ahora: LugarVivo
   /** [PULIDO 10] J1 · en cuántos renglones lo compuso el DOM al armarlo (el origen va en el primero). */
   readonly renglones: number
+  /** [CIERRE A-ter] A13 · la x de cada letra en el DOM al armarlo (em): si cambia (la fuente cargó después), se vuelve a armar. */
+  readonly letras: readonly number[] | null
 }
 
 export function ponerElEstudio(material: THREE.MeshStandardMaterial, rt: THREE.WebGLRenderTarget): void {
@@ -160,7 +162,7 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   malla.visible = false
   const grupo = new THREE.Group()
   grupo.add(malla)
-  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, fuente, contorno, sinLetras: letras === 0, colocado: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 }, ahora: { izquierda: 0, arriba: 0, linea: 0, cuerpo: 0, ancho: 0, alto: 0 }, renglones }
+  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, fuente, contorno, sinLetras: letras === 0, colocado: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 }, ahora: { izquierda: 0, arriba: 0, linea: 0, cuerpo: 0, ancho: 0, alto: 0 }, renglones, letras: dom?.x ?? null }
 }
 
 export function soltar(a: Armado): void {

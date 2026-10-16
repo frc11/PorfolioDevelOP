@@ -7,6 +7,8 @@ import { entornoDeLaEscena, type TitulosDeVolumen } from '../escena/entorno'
 import type { Lectura } from '../escena/titulos3d/colocacion'
 import type { FormaDeLaLlegada, LlegadaDelTitulo } from '../escena/titulos3d/llegada'
 import type { AsientoDeLaLlegada } from './repeticiones'
+import { anotar } from '../diagnostico/anotar'
+import { alCargarseLasFuentes, conReimpresion } from '../fuentes'
 
 /** [RETOQUE 3D] Con qué fuente se extruye (la que el DOM pinta: `scripts-retoque/fuentes-3d.py`). */
 export type FuenteDelTitulo = 'chivo-400' | 'archivo-700' | 'chivo-300-italica' | 'chivo-700' | 'chivo-300'
@@ -138,6 +140,15 @@ export function suscribirALosTitulos(f: () => void): () => void {
 }
 export const versionDeLosTitulos = (): number => version
 
+/**
+ * [CIERRE A-ter] A13 · otra sincronía de la escena con el registro sin que nada entre ni salga: cuando termina de cargar una fuente (lo
+ * armado con otra métrica se rehace: `sincronia.ts`) o cuando el perro guardián encuentra un título a la vista sin armar.
+ */
+export function pedirOtraSincronia(): void {
+  avisar()
+}
+let escuchaLasFuentes = false
+
 /** Progresos quietos, para cuando no hay uno (la pieza quieta: llegada; sin salida): los ganchos no son condicionales. */
 const NADA = motionValue(0)
 const LLEGADO = motionValue(1)
@@ -175,6 +186,10 @@ export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, lleg
   useEffect(() => {
     const el = lugar.current
     if (!activo || el === null) return undefined
+    if (!escuchaLasFuentes && conReimpresion()) {
+      escuchaLasFuentes = true
+      alCargarseLasFuentes(pedirOtraSincronia)
+    }
     TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, forma, esquivaElLogo, alejamiento, parteDelMouse, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
     avisar()
     return () => {
@@ -212,8 +227,12 @@ export function marcarListo(id: string, listo: boolean): void {
   if (listos.has(id) === listo) return
   if (listo) listos.add(id)
   else listos.delete(id)
+  anotar(listo ? 'listo' : 'no-listo', `titulo:${id}`)
   for (const f of oyentesDeLosListos) f()
 }
+
+/** [CIERRE A-ter] A13 · para el diagnóstico de la carga: ¿el título `id` está armado y compilado? */
+export const tituloListo = (id: string): boolean => listos.has(id)
 
 function suscribirALosListos(f: () => void): () => void {
   oyentesDeLosListos.add(f)

@@ -7,6 +7,7 @@ import * as THREE from 'three'
 import { acotar01 } from '../../acotar'
 import { cargaLista } from '../../carga'
 import { RELEVO_DE_LOS_TITULOS, TITULOS_DE_VOLUMEN, suscribirALosTitulos, versionDeLosTitulos } from '../../titulos3d/registro'
+import { useVersionDelContexto } from '../contextoDelLienzo'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { KEY_INTENSITY } from '../probeLighting'
@@ -68,6 +69,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
   const variante: Variante = entornoDeLaEscena().titulos === 'blanco' ? 'blanco' : 'negro'
   const version = useSyncExternalStore(suscribirALosTitulos, versionDeLosTitulos, versionDeLosTitulos)
   const gl = useThree((s) => s.gl)
+  const contexto = useVersionDelContexto(gl) // [CIERRE A-ter] A13 · perdido y repuesto: el estudio y los armados, de nuevo.
   const escena = useThree((s) => s.scene)
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
@@ -97,7 +99,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
       estudio.current = null
       rt.dispose()
     }
-  }, [gl])
+  }, [gl, contexto])
 
   // [PASADA FINAL] A1 · los títulos anotados, en sincronía con el registro (`sincronia.ts`): lo nuevo se arma (el hero ya;
   // los demás con la página ociosa), lo que se fue se suelta y un título remontado sólo cambia de lugar. Al irse, todo.
@@ -117,7 +119,7 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
     const g = raiz.current
     if (g === null) return undefined
     return sincronizar({ gl, escena, camara, raiz: g, variante, estudio: () => estudio.current }, m.current.armados, TITULOS_DE_VOLUMEN.values(), () => vivo.current)
-  }, [version, variante, gl, escena, camara])
+  }, [version, variante, gl, escena, camara, contexto])
 
   // Al cambiar el tamaño del cuadro, cada título se vuelve a colocar en su próxima llegada (o ya, si está a la vista).
   useEffect(() => descolocar(m.current.armados, tam.width), [tam.width, tam.height])

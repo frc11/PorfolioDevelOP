@@ -5,6 +5,8 @@
  * importa el DOM.
  */
 
+import { alCargarseLasFuentes, conReimpresion } from '../../fuentes'
+
 /**
  * Un renglón de texto del DOM que la escena reemplaza: su elemento y lo que sube su pieza en la lectura (fracción del cuadro).
  */
@@ -67,8 +69,14 @@ export function avisarDelLugar(): void {
   for (const f of oyentesDelLugar) f()
 }
 export const versionDelLugarDelCta = (): number => versionDelLugar
+let escuchaLasFuentes = false
 export function suscribirAlLugarDelCta(f: () => void): () => void {
   oyentesDelLugar.add(f)
+  // [CIERRE A-ter] A13 · una fuente que carga después (la red lenta) cambia los lugares medidos: la escena se vuelve a armar.
+  if (!escuchaLasFuentes && conReimpresion()) {
+    escuchaLasFuentes = true
+    alCargarseLasFuentes(avisarDelLugar)
+  }
   return () => {
     oyentesDelLugar.delete(f)
   }

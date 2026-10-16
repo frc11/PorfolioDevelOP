@@ -277,10 +277,10 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
 
       // Un click a mitad de vuelo: el `<main>` ya es inerte, así que no debería
       // llegar. Si llegara por otro camino, se ignora en vez de encimar dos
-      // animaciones.
-      if (enVuelo) return
-
+      // animaciones. [CIERRE A-ter] A13 · llega: la barra va afuera del `<main>`. Y el `return` iba ANTES del
+      // `preventDefault`: el ancla nativa saltaba encima del viaje (dos clics en menos de medio segundo). Ahora se ignora de verdad.
       evento.preventDefault()
+      if (enVuelo) return
 
       /**
        * ⚠ **EL HISTORIAL SE REPONE A MANO, Y SI NO, ATRÁS SE VA DEL DOCUMENTO.**
@@ -303,7 +303,6 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       origen = enlace
       destino = seccion
       objetivo = elAncla === seccion ? null : elAncla
-      enVuelo = true
       // [VIAJES] El destino es un nudo de la coreografía (`destinosDelViaje.ts`), medido en el click; y
       // la escena se entera de adónde va y con qué luz sale y llega (`planDelViaje.ts`).
       // [PULIDO 10] J8 · un ancla con destino propio adentro de su sección (Demos, en Trabajos) viaja a ése.
@@ -316,6 +315,8 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       const duracionMs = Math.max(DURACION_DE_LOS_VIAJES.minimoMs - PRELUDIO_MS, duracionDelViaje(pantallasDelViaje(destinoEnPx)) - demora)
       // [PULIDO 2] 2 · y su curva, repartida por lo que se ve cambiar (la cámara que gira cuesta tiempo: `repartoDelViaje.ts`).
       const curva = curvaDelViaje(destinoEnPx, CURVA_DEL_VIAJE)
+      // [CIERRE A-ter] A13 · en vuelo recién con el destino calculado: si la cuenta fallara, el próximo clic no queda ignorado para siempre.
+      enVuelo = true
       window.clearTimeout(relojDeLaEscena)
       // [PULIDO 1] P5 · y cuánto dura, del click al frenazo: el final del pie vuelve a cero adentro de esto, en paralelo.
       const empezar = (): void => empezarElViaje({ ...planDelViaje(seccion.id, destinoEnPx), duracionMs: PRELUDIO_MS + duracionMs })
