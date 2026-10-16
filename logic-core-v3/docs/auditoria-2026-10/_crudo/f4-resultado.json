@@ -1,0 +1,931 @@
+{
+ "candidatas": [
+  {
+   "titulo": "«Atención hoy» con lo que pasa en el negocio, no solo con develOP",
+   "problema": "Hoy «Atención hoy» solo muestra cosas de develOP: factura vencida, entrega para aprobar, mensajes del equipo y onboarding. El dueño no ve ahí lo que le hace perder plata: leads calientes que nadie contestó, reseñas de Google sin responder y productos por agotarse.",
+   "habilitadores": [
+    "src/lib/dashboard/attention.ts:9 — el tipo 'review' está declarado y nunca se emite; :37-67 Promise.all donde se suman señales; :28-31 caché de 300 s por org",
+    "src/components/dashboard/home/AttentionStack.tsx:23-28 — ICON_MAP ya mapea review→Star (el hueco está precableado)",
+    "src/modules/chatbot/server/admin/multiTenantQueries.ts:140-142 — countHotNewLeadsForOrg (hot + NEW, aislado por org con forOrg)",
+    "src/lib/integrations/google-business-profile.ts:215 — campo replied por reseña dentro de getGBPMetrics, cacheado 3600 s (:178-182)",
+    "src/lib/integrations/tiendanube.ts:140-148 — lowStockProducts (stock ≤ 3), cacheado 1800 s (:74-79)"
+   ],
+   "que_falta": "Tres ramas nuevas en computeAttentionItems (attention.ts): 'lead' para el caliente sin contactar (→ /dashboard/chatbot/leads), 'review' para las reseñas sin respuesta entre las 10 recientes (→ /dashboard/modules/motor-resenas, como alerta si isModuleActive y como teaser si no) y 'stock' (→ /dashboard/modules/tienda-conectada). Hay que ampliar la unión de tipos y el ICON_MAP. Cada lectura de integración lleva timeout y fallo silencioso que no tire abajo el bloque. Más casos de orden y prioridad en un invariante puro.",
+   "esfuerzo": "S: es orquestación sobre helpers que ya existen y ya están cacheados; sin schema ni LLM.",
+   "costo_operativo": "Sin costo marginal. Suma un count indexado en Neon (índice [botConfigId, classification, capturedAt], schema.prisma:1524), como mucho cada 5 min por org. GBP y Tiendanube salen de las cachés que ya existen. Con caché fría: 1 llamada a GBP por hora y 4 a Tiendanube cada 30 min por org.",
+   "riesgo": "Con la caché de Tiendanube fría son 4 fetch secuenciales (tiendanube.ts:92-118) dentro del render de Inicio, contra el techo de 10 s de Netlify. Si una integración falla, devuelve null sin aviso (FAL-029) y la alerta desaparece sin que nadie se entere. Y no hay que usar las alertas para empujar módulos que el cliente no contrató.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "Pedile la reseña al cliente que te compró",
+   "problema": "El dueño toca «Vendido» y ahí se termina todo. Justo cuando el cliente está más conforme no se le pide la reseña, y el Motor de Reseñas depende de un QR genérico.",
+   "habilitadores": [
+    "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx:53 — botón «Vendido» de un tap (WON), con toast y deshacer",
+    "src/modules/chatbot/components/dashboard/LeadDetail.tsx:177-179 y :596 — ya arma wa.me al teléfono del lead con mensaje precargado (buildWhatsappMessage)",
+    "src/app/(protected)/dashboard/modules/motor-resenas/_components/AskReviewSection.tsx:42 (URL writereview?placeid=) y :108 (compartir por wa.me)",
+    "prisma/schema.prisma:363 googleMapsPlaceId; :1449 ChatbotLead.phone; :1448 ChatbotLead.email"
+   ],
+   "que_falta": "Después de WON, en el toast o en LeadDetail, una acción «Pedile la reseña» que abra wa.me/<phone>?text=<plantilla + reviewUrl>, o un mailto. Hace falta un helper puro que arme el link (reusando la normalización de LeadDetail.tsx:179) y pasarle googleMapsPlaceId al componente. Si el Motor de Reseñas no está activo, se muestra como teaser. Depende de FAL-004: googleMapsPlaceId no tiene escritor en la app.",
+   "esfuerzo": "S: un link y una plantilla sobre componentes que ya existen; sin schema ni server action nueva.",
+   "costo_operativo": "Sin costo marginal: el mensaje sale del WhatsApp del propio dueño (wa.me). No usa la API de Meta, ni LLM, ni envíos de Brevo.",
+   "riesgo": "Sin placeId cargado la acción no se puede ofrecer (FAL-004). Un teléfono argentino sin el 549 genera un wa.me inválido. Las políticas de Google prohíben incentivar reseñas, así que el texto no puede ofrecer nada a cambio.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "Lo que te preguntan y el bot no supo contestar: respondelo desde el panel",
+   "problema": "El bot ya detecta las preguntas frecuentes que no sabe contestar (KB_GAP), pero el dueño solo puede leerlas en Análisis y no tiene cómo darle la respuesta. El bot sigue fallando en lo mismo y se pierden consultas.",
+   "habilitadores": [
+    "prisma/schema.prisma:227 InsightCategory.KB_GAP; src/modules/chatbot/server/insights/generateInsights.ts:80 (instrucción KB_GAP) y :100 (gemini-2.5-flash); netlify.toml:25-26 cron diario",
+    "src/modules/chatbot/server/insights/manageInsight.ts:15 actOnInsight (APPLY/DISMISS, aislado por org): no tiene ningún consumidor en la UI",
+    "src/components/dashboard/results/analysis/DiscoveriesSection.tsx:87 — muestra suggestedAction, solo lectura; src/modules/chatbot/lib/monthly-analysis.ts:178 lo rotula «Preguntas sin respuesta»",
+    "src/lib/data/message-context.ts:1 MESSAGE_CONTEXTS y src/lib/actions/messages.ts:114 sendClientMessageAction (mensaje precargado a develOP)",
+    "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts:21 — develOP ya edita la KB por org"
+   ],
+   "que_falta": "En DiscoveriesSection, para los KB_GAP: un campo «Tu respuesta» con un botón que (a) le mande el mensaje a develOP con un context nuevo 'kb' en message-context.ts y (b) llame a actOnInsight con APPLY, más un «No aplica» que haga DISMISS. develOP pasa la respuesta a la KB con saveKnowledgeBaseByOrgSlug. Además, que el link del email de insights (sendInsightsNotification.ts:47) lleve a esa pantalla.",
+   "esfuerzo": "S-M: es UI y una acción; el motor, el modelo y el cron ya existen. Pasa a M si se deja que el cliente escriba en la KB sin pasar por develOP.",
+   "costo_operativo": "Sin costo marginal de LLM: los insights ya se generan hoy (≤50 conversaciones × 400 caracteres + 1.000 de KB ≈ 6k tokens de entrada a USD 0,30/M más 1-2k de salida a USD 2,50/M ≈ USD 0,007 por bot y por día, ya pagados). Cada respuesta que entra a la KB suma unos 200 caracteres ≈ 57 tokens por turno ≈ USD 0,000017 por turno con flash (tokens-estimate.ts:6-9, google.ts:14-18).",
+   "riesgo": "El dueño puede responder con promesas o precios que después el bot repite: conviene que pase por develOP y por forbiddenStatements. Si no se automatiza, es trabajo manual de develOP por cliente. El cron de insights corre de a un bot por vez (generate-insights-cron.ts) y con muchos bots se pasa del techo de las funciones.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "El bot ofrece turnos de la agenda del negocio (Cal.com)",
+   "problema": "Cuando un visitante quiere agendar, el bot solo toma el dato o lo deriva a WhatsApp. El dueño tiene que coordinar a mano y el turno se enfría.",
+   "habilitadores": [
+    "prisma/schema.prisma:1463 requestedAppointment y :160 ChatbotLeadIntent.SCHEDULE_VISIT — la intención ya se detecta",
+    "prisma/schema.prisma:376-377 calComUsername/calComEmbedUrl; src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:347 ya arma la URL pública de reserva",
+    "src/lib/integrations/cal-com-v2.ts:50 getSlots y :108 createBooking (públicos por username + eventTypeSlug, sin API key); src/lib/leados/agenda.ts:100 parseEventTypeSlug",
+    "src/modules/chatbot/server/tools/getTools.ts:13-21 TOOL_BUILDERS y :48-55 CARD_RENDERING_TOOL_CONNECTORS; src/modules/chatbot/components/tool-cards/renderToolCall.tsx:48-71 tarjetas"
+   ],
+   "que_falta": "Una tool `offer_booking` (builder más tarjeta): en la v1, link de reserva con nombre y email ya completados; en la v2, 3 horarios traídos con getSlots. Dar de alta el slug en Plan.tools de la DB con un script puntual, porque correr el seed pisa los precios (prisma/seeds/sync-plans.ts:47-51). Un camino para que el cliente configure su Cal.com (FAL-004). Y sobre todo, cambiar getCalConfigLeadOS (src/lib/leados/agenda.ts:57-83): hoy toma la única org con calComUsername como la agenda de Franco y, si hay dos o más, devuelve «ambiguo». Apenas un cliente cargue su Cal.com, el paso de agenda del setter se rompe; hay que anclarlo a la org 'develop'.",
+   "esfuerzo": "M: tool, tarjeta, Plan.tools y configuración, más la corrección obligatoria en LeadOS.",
+   "costo_operativo": "Cal.com público, sin costo. LLM: un paso extra solo en los turnos de agenda. Con un contexto supuesto de ~4k tokens (a medir con Conversation.tokensIn, schema.prisma:1397) son unos USD 0,0012 a 0,30/M. Latencia: getSlots más el paso extra tienen que entrar en stepCountIs(3) (handleChatRequest.ts:953) y en el techo de 10 s de Netlify; la ruta declara maxDuration=30 (chat/route.ts:8), que Netlify no aplica (TEC-006). La v1 con solo el link evita la llamada a getSlots dentro del turno.",
+   "riesgo": "Rompe LeadOS si no se corrige agenda.ts:57-83. Si se confunde la org, la reserva cae en el calendario equivocado. Con Cal.com caído la tarjeta queda sin horarios.",
+   "zona": "ZONA-FRANCO (la corrección en src/lib/leados/agenda.ts es obligatoria; lo nuevo del bot es libre)",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "Ventas de tu tienda que vinieron del bot (Tiendanube cruzado con leads)",
+   "problema": "El dueño con Tiendanube ve una «plata estimada» que es leads × un ticket que carga él mismo, y «Vendido» depende de que se acuerde de tocar el botón. No sabe cuántas compras reales salieron de las consultas del bot.",
+   "habilitadores": [
+    "src/lib/integrations/tiendanube.ts:92-96 — ya trae las órdenes del mes (open/paid/packed/fulfilled), cacheadas 1800 s (:74-79); hoy solo tipa total y products (:96)",
+    "prisma/schema.prisma:1448-1449 ChatbotLead.email/phone y capturedAt; :409 averageTicketUsd",
+    "src/lib/dashboard/home-metrics-logic.ts:93-96 estimateMoney y :117-123 buildFunnel (sold cuenta solo el WON manual)",
+    "src/components/dashboard/home/MoneyEstimate.tsx:4-5 — la cifra hoy se presenta siempre como «estimado»"
+   ],
+   "que_falta": "Ampliar el tipo de la orden con contact_email/contact_phone (campos de la API de Tiendanube, a verificar). Una función pura que cruce lead con orden: email normalizado, teléfono por los últimos 8 dígitos, orden posterior a capturedAt y dentro de 30 días, con su invariante. Una tarjeta «Compras confirmadas en tu tienda» en Inicio y en tienda-conectada, y una línea en el reporte semanal. Opcional: sugerir «Marcar vendido» en los leads que cruzaron. Paginar el fetch: hoy pide per_page=200 sin paginar (:93).",
+   "esfuerzo": "M: lógica pura más una tarjeta; reusa el fetch que ya existe pero hay que sumarle paginación.",
+   "costo_operativo": "Sin costo marginal: usa la misma llamada a Tiendanube que ya se hace (sin requests nuevos) y una query a Neon con los leads con email o teléfono de los últimos 60 días por org.",
+   "riesgo": "La tasa de cruce puede ser baja (muchos leads dejan solo teléfono, en formatos distintos): mostrar «al menos N» y nunca inventar. Los meses con más de 200 órdenes quedan truncados. El corte de mes usa la hora del servidor (tiendanube.ts:86-88), no la de Argentina. No mostrar en la UI el email de los compradores.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "El bot consulta el catálogo y el stock de Tiendanube",
+   "problema": "El visitante pregunta «¿tenés X en talle M?, ¿cuánto sale?» y el bot solo sabe lo que develOP cargó a mano en la KB, que se desactualiza. Se pierden ventas o se promete un stock que no hay.",
+   "habilitadores": [
+    "src/lib/integrations/tiendanube.ts:104-111 — ya lee productos con variantes y stock; :52 getAuth por org",
+    "src/modules/chatbot/server/tools/types.ts:13 ToolCallContext.organizationId; src/modules/chatbot/server/tools/getTools.ts:13-21 catálogo de tools",
+    "src/modules/chatbot/server/prompts/sections.ts:61 — servicesOrProducts entra al prompt como texto fijo (prisma/schema.prisma:1355)",
+    "src/lib/tokens-estimate.ts:6-9 (3,5 caracteres por token) y src/modules/chatbot/server/llm/providers/google.ts:14-18 (flash: USD 0,30 de entrada y 2,50 de salida por M)",
+    "prisma/schema.prisma:369 tiendanubeConnectedAt (para habilitar la tool)"
+   ],
+   "que_falta": "Una tool server-side `buscar_producto` que consulte /products?q= de Tiendanube (búsqueda por texto, a verificar en la API) con unstable_cache corto por (org, término) y devuelva hasta 5 productos con precio y stock. Una tarjeta de producto con link a la tienda. Habilitarla solo con tiendanubeConnectedAt. Darla de alta en Plan.tools (sync-plans.ts:47-51). Y una regla de prompt: «el stock es orientativo, no confirmes disponibilidad».",
+   "esfuerzo": "M: tool, tarjeta y habilitación; el cliente HTTP ya existe.",
+   "costo_operativo": "Meter 200 productos × ~60 caracteres en el prompt son ~3.400 tokens en cada turno ≈ USD 0,001 por turno; con 4 turnos por conversación y 5.000 conversaciones del plan Business (sync-plans.ts:104), ≈ USD 20/mes contra un precio de USD 150. Con la tool, el costo aparece solo en los turnos que preguntan: paso extra (~4k de contexto supuesto) + ~170 tokens de resultado + ~150 de salida ≈ USD 0,0017 por consulta; si pregunta el 30% de las conversaciones, 1.500 × 0,0017 ≈ USD 2,6/mes. La API de Tiendanube no tiene costo.",
+   "riesgo": "La latencia de Tiendanube cae dentro del turno (techo de 10 s de Netlify, stepCountIs(3) en handleChatRequest.ts:953). Por la caché, precio y stock pueden estar desfasados: el bot no debe confirmar disponibilidad. Con el token revocado devuelve null sin avisar (FAL-029). El límite de requests de la app de Tiendanube está a confirmar.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "Lo que Google te trajo: llamadas, cómo llegar y clics a tu web",
+   "problema": "Reputación muestra rating y reseñas, pero no cuántas personas llamaron, pidieron cómo llegar o entraron a la web desde Google, que es lo que más le importa a un local.",
+   "habilitadores": [
+    "src/lib/integrations/google-business-profile.ts:8 — el OAuth ya pide el scope businessprofileperformance",
+    "src/lib/integrations/google-business-profile.ts:217-223 — performance devuelve ceros fijos (profileViews, websiteClicks, callClicks, directionRequests)",
+    "src/components/dashboard/results/GBPMetricsCard.tsx:39-41 (FIXME data-truth) y :65 filter(value > 0): el bloque nunca se muestra; la UI ya está diseñada",
+    "src/lib/integrations/gbp-connection-logic.ts:17-20 y :97-98 — conversión de resource names v1/v4 (Performance usa locations/{id})"
+   ],
+   "que_falta": "Llamar a Business Profile Performance API (fetchMultiDailyMetricsTimeSeries) con el id de location sacado del gbpLocationId v4 y sumar 30 días. Llevar el dato a «Tu semana en números» y al reporte semanal, con un invariante del parseo.",
+   "esfuerzo": "S: un fetch y un parseo; la UI, el scope y la caché ya existen.",
+   "costo_operativo": "Sin costo marginal: la API es gratuita con cuota, y la caché de 3600 s por org (:178-182) la limita a 24 llamadas por día y por org como máximo.",
+   "riesgo": "El proyecto de Google tiene que tener habilitada la Performance API (acceso aprobado). Depende de FAL-011: la conexión con GBP no tiene entrada en ninguna UI. Google entrega los datos con días de demora, así que hay que rotular el período.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "Aviso: tenés un lead caliente sin contestar",
+   "problema": "El aviso de lead llega una sola vez, al capturarlo. Si el dueño no lo vio, el lead caliente se enfría. El panel ya mide la demora en responder, pero nada empuja a contestar.",
+   "habilitadores": [
+    "src/lib/client-notifications/notify.ts:87 notifyClientOfLead y decide.ts:43-52 (el lead caliente en Pro/Business se saltea el tope de avisos)",
+    "prisma/schema.prisma:1487 firstContactedAt (lo sella «Lo contacté» en src/modules/chatbot/server/admin/updateLeadStatus.ts:40-46) e índice en :1524",
+    "src/lib/dashboard/home-metrics-logic.ts:69-79 computeVelocity (de capturedAt a firstContactedAt)",
+    "src/lib/rate-limit/limiter.ts:37 checkRateLimit sobre la tabla RateLimit (prisma/schema.prisma:1765): sirve para marcar «ya avisé» sin schema nuevo",
+    "netlify/functions/generate-insights-cron.ts y netlify.toml:25-26 — molde de función programada"
+   ],
+   "que_falta": "La ruta /api/cron/hot-lead-reminder (con CRON_SECRET) más netlify/functions/hot-lead-reminder-cron.ts, agendada en netlify.toml y no en vercel.json: vercel.json:3-14 agenda 3 crons que en Netlify no corren. Una query de leads hot/NEW sin firstContactedAt y con más de 2 h. checkRateLimit con una clave por lead para mandar un solo aviso. Y una plantilla de email «sigue esperando» con link al lead.",
+   "esfuerzo": "S: un cron y una plantilla sobre piezas que ya existen.",
+   "costo_operativo": "Brevo: una sola BREVO_API_KEY de develOP para todos los clientes (src/lib/email/brevo-service.ts:4 y src/lib/integrations/brevo.ts:4), así que los recordatorios comparten el free tier de 300 emails por día con los avisos de lead, los insights y las campañas; máximo 1 por lead. Neon: cada corrida despierta el cómputo (~5 min de autosuspend). Una corrida por hora son ~60 h/mes del cupo de cómputo del free tier; cada 3 h entre las 9 y las 21 (5 corridas por día) son ~12 h/mes. La función tarda menos de 1 s por corrida si se limita a ~20 envíos, lejos del techo de 10 s.",
+   "riesgo": "Puede volverse spam si el dueño trabaja el lead por WhatsApp y no toca «Lo contacté»: mitigar con un solo aviso por lead y una baja en preferencias (hoy 4 de las 5 preferencias de notificación no tienen efecto, FAL-013). El cupo diario de Brevo es compartido.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "Tus contactos del bot entran solos a tu lista de email (con consentimiento)",
+   "problema": "El dueño que paga email marketing tiene que exportar el CSV del bot e importarlo a mano. Los leads que no compraron nunca vuelven a recibir nada.",
+   "habilitadores": [
+    "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:86-118 — upsert de EmailContact y syncContact a Brevo con token de baja firmado; :94 source 'csv_import'",
+    "prisma/schema.prisma:1213-1232 EmailContact con tags (:1220) y source (:1221), único por (organizationId, email)",
+    "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts y src/app/api/dashboard/chatbot/leads/export/route.ts — ya se extraen los leads con email por org",
+    "prisma/schema.prisma:1528-1534 ChatbotLeadStatus (WON/LOST) para segmentar"
+   ],
+   "que_falta": "Una acción «Sumar a mi lista», masiva desde Contactos o automática con un toggle, que haga upsert de EmailContact con source 'chatbot' y tags por estado. Segmentar al enviar: hoy createCampaignAction cuenta a toda la lista (_actions.ts:143-146) y sendCampaignAction manda a [listId] (:188-195); hace falta una lista de Brevo por segmento o un filtro por tag. Y un texto de consentimiento en el bot.",
+   "esfuerzo": "M: sumar los contactos es poco; la segmentación de campañas y el consentimiento son lo que pesa.",
+   "costo_operativo": "Sumar contactos a Brevo no consume envíos; enviar sí. Hay una sola cuenta de Brevo para todos los clientes (brevo.ts:4, listas «develOP - {org}» en :9-16): una campaña de 300 contactos de un solo cliente agota el free tier de 300 emails del día, y ese día fallan también los avisos de lead, que usan la misma clave (brevo-service.ts:4). Si se usa en serio no entra en el free tier: hace falta un plan pago de Brevo (el precio no está en el repo) o subcuentas.",
+   "riesgo": "Ley 25.326: el lead dejó su email para una consulta, no para recibir marketing. Hay que pedir consentimiento en el bot y mostrar una política de privacidad, que hoy el widget no enlaza (FAL-018). Los rebotes y el spam dañan la reputación del dominio compartido. En Contactos solo se ven los últimos 50, sin paginación (FAL-008).",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "«Ideas para crecer» con datos de la tienda, de Google y de la velocidad de respuesta",
+   "problema": "«Ideas para crecer» hoy tiene 4 reglas que solo miran el bot y el plan, y 3 de ellas son upsell de develOP. No usa lo que ya sabemos del negocio: carritos abandonados, rating bajo, demora en contestar.",
+   "habilitadores": [
+    "src/lib/recommendations/rules.ts:156-161 RECOMMENDATION_RULES (4 reglas), :16-25 THRESHOLDS con muestra mínima y :175 evaluateRules (puro)",
+    "src/lib/recommendations/types.ts:16-46 RecommendationSignals; src/lib/recommendations/get-recommendations-for-org.ts:32-41 armado de señales aislado por org",
+    "src/lib/dashboard/home-metrics-logic.ts:69-79 computeVelocity; src/lib/integrations/google-business-profile.ts:209 averageRating; src/lib/integrations/tiendanube.ts:71 y :158 abandonedCarts7d",
+    "src/lib/recommendations/recommendations.invariant.ts — banco de pruebas puro donde se agregan los casos"
+   ],
+   "que_falta": "Tres señales nuevas (avgResponseMinutes, googleRating, abandonedCarts) leídas de cachés existentes, con timeout. Tres reglas: «contestás en X h; los que contestan en menos de 1 h venden más» (una acción, sin módulo), «N carritos abandonados → email marketing» y «rating menor a 4,2 → Motor de Reseñas». Más los casos en el invariante.",
+   "esfuerzo": "S: el motor es declarativo y puro, y agregar reglas es justamente su punto de extensión.",
+   "costo_operativo": "Sin costo marginal: no usa LLM. Las señales salen de cachés que ya existen (Tiendanube 30 min, GBP 1 h) y de una query de velocidad sobre leads que Inicio ya lee.",
+   "riesgo": "El conteo de carritos puede dar siempre 0: tiendanube.ts:114-115 llama a /carts?abandoned=true, pero el recurso documentado de Tiendanube para checkouts abandonados es /checkouts (verificarlo antes de apoyar una regla en ese número). Respetar la honestidad del motor: muestra mínima y nada de empujar módulos que no corresponden. Con la caché fría suma latencia al render de Inicio.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "cliente"
+  },
+  {
+   "titulo": "Radar de cartera en riesgo: un parte diario por Telegram y una sección «En riesgo» en el admin",
+   "problema": "De develOP: hoy nadie se entera de que un cliente se está enfriando. Las alertas de churn y el detector de bots existen pero ningún cron los dispara (FAL-016 y FAL-026), y el admin no tiene ninguna vista de quién está en riesgo. Al cliente le llega así: develOP lo llama antes de que se dé de baja, cuando el bot lleva 7 días sin conversaciones (widget roto o sacado del sitio), cuando sus contactos se acumulan sin atender o cuando no hay movimiento en 30 días.",
+   "habilitadores": [
+    "src/lib/alerts.ts:195-270: runPeriodicAgencyAlerts ya calcula la inactividad de 30 días (mensajes, tickets, facturas, bóveda) y los vencimientos",
+    "src/app/api/cron/alerts/route.ts:4-18: la ruta GET con X-Cron-Secret existe pero no tiene disparador",
+    "src/modules/chatbot/server/admin/detectBotIssues.ts:180-195: detecta CLIENT_NO_ACTIVITY (bot activo sin conversaciones en 7 días); entrada en :285 runAlertDetector; tipo en prisma/schema.prisma:146",
+    "src/lib/notifications/telegram.ts:67: sendTelegram, con las credenciales configurables en Configuración",
+    "netlify/functions/generate-insights-cron.ts:44 y netlify.toml:25-32: molde de una scheduled function que llama a una ruta /api/cron con CRON_SECRET",
+    "src/lib/client-health.ts:20: un getHealthScore puro de 1 a 5 (login, no leídos, tickets, suscripción, aprobación) sin importadores, reutilizable como puntaje del admin",
+    "src/lib/dashboard/home-metrics-logic.ts:114-126: conteo de leads 'pending' (NEW sin contacto)"
+   ],
+   "que_falta": "src/lib/admin/cartera-riesgo.ts: señales por org con pocas queries agrupadas (groupBy por org/bot), sin N+1, más una regla pura testeable por invariante. Una sección 'En riesgo' en src/app/(protected)/admin/page.tsx o un filtro en admin/clients. netlify/functions/agency-alerts-cron.ts y detect-bot-issues-cron.ts, con las entradas correspondientes en netlify.toml (no en vercel.json, que en Netlify no corre). Un solo mensaje de Telegram por día con la lista en lugar de un webhook por cliente.",
+   "esfuerzo": "M: una lib de señales, una sección del admin y dos wrappers de cron calcados del molde; sin schema.",
+   "costo_operativo": "Dos crons diarios suman ~60 wrappers y ~60 rutas por mes, unas 120 invocaciones contra las 125.000/mes del Free de Netlify (0,1%). Telegram Bot API es gratis. Neon: el radar con groupBy son unas pocas queries por corrida. Ojo: el detector actual hace ~10 queries secuenciales por bot (detectBotIssues.ts:38 en adelante); con 30 bots son ~300 queries más el cold start de Neon, y roza el techo de 10 s de Netlify, así que hay que paginar por lotes.",
+   "riesgo": "Falsos positivos: la 'actividad' de alerts.ts no considera el login (FAL-001, no se registra), así que un cliente que entra y mira sin escribir figura como inactivo. Cuando el radar empieza a funcionar con datos reales, la facturación seedeada (FAL-006) puede hacerlo gritar por suscripciones que en realidad no vencen. Hay que rotular la señal con su fuente.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "SLA de soporte: tickets y mensajes del cliente sin respuesta de develOP, escalados por Telegram y marcados en la bandeja",
+   "problema": "Al cliente PyME le prometemos «develOP será notificado de inmediato», pero hoy solo avisa la creación de un ticket HIGH/URGENT. Una respuesta del cliente en un ticket ya abierto, o un ticket MEDIUM/LOW, no avisan a nadie (FAL-014). El cliente espera días y se va. La feature escala lo que lleva más de N horas sin respuesta del equipo.",
+   "habilitadores": [
+    "prisma/schema.prisma:762-791: Ticket (prioridad, estado) y TicketMessage con isAdmin; con esto alcanza para saber quién habló último",
+    "src/lib/tickets/actions.ts:88-95: hoy solo se alerta al crear un ticket HIGH/URGENT; :110-171 replyToTicketAction manda email solo cuando responde el admin",
+    "src/lib/actions/messages.ts:154-163: el MESSAGE_NEW inmediato existe para el chat, sin escalamiento si nadie contesta",
+    "src/lib/health-score.ts:350-383: computeReplyScore ya calcula el tiempo de respuesta de develOP a partir de Message.fromAdmin (lógica reutilizable)",
+    "src/lib/notifications/telegram.ts:67: sendTelegram"
+   ],
+   "que_falta": "src/lib/support/sla.ts con una función pura: último mensaje del cliente sin respuesta admin posterior y umbral por prioridad (URGENT 2 h, HIGH 8 h, MEDIUM/LOW 24 h hábiles, como constantes en código, sin tocar AgencySettings ni el schema). Una ruta /api/cron/support-sla con su wrapper en netlify/functions y netlify.toml. Un badge 'vencido' en admin/tickets/page.tsx y en la bandeja de admin/messages. Un solo digest de Telegram por corrida.",
+   "esfuerzo": "S: una función pura, un cron y un badge; sin schema ni UI nueva grande.",
+   "costo_operativo": "Sin costo marginal. Un cron horario de 9 a 21 son 12 corridas por día, ~360/mes; con el wrapper son ~720 invocaciones contra 125.000/mes. Son 2 queries agregadas por corrida (tickets abiertos con su último mensaje y orgs con mensajes no respondidos). Telegram es gratis.",
+   "riesgo": "Ruido si los umbrales no respetan horario hábil o feriados de Argentina (usar src/lib/dates-ar.ts). Duplicación con el webhook inmediato si ambos están prendidos: el SLA tiene que escalar, no repetir el aviso.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "Activar el «Digest diario» de contactos y sumar un recordatorio al dueño de los contactos que llevan más de 24 h sin atender",
+   "problema": "El dueño de la PyME pierde ventas porque los contactos del bot se enfrían en NEW. Hoy recibe un email por lead (con tope anti-spam), pero nada le recuerda los que no tocó. Además, el admin puede elegir «Digest diario» en la config del bot y esa opción se comporta como «Inmediato»: la UI promete algo que no existe.",
+   "habilitadores": [
+    "src/lib/client-notifications/notify.ts:91-95: el comentario lo dice textual, 'DAILY_DIGEST queda reservado para el resumen diario por cron — no existe aún'",
+    "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:120: la opción 'Digest diario' ya se ofrece y se persiste (prisma/schema.prisma:344 leadNotificationMode)",
+    "src/lib/client-notifications/decide.ts:84: digestCountWhere, un filtro org-scoped con invariante de aislamiento; src/lib/client-notifications/templates.ts:196-206 digestEmailSubject y renderDigestEmail",
+    "src/lib/dashboard/home-metrics-logic.ts:114-126: 'pending' = leads NEW sin primer contacto; src/modules/chatbot/lead-status-rules.ts:34 statusImpliesContact",
+    "src/lib/dashboard/attention.ts:33: computeAttentionItems, la pila 'Atención hoy' del Inicio, que hoy no incluye contactos sin atender"
+   ],
+   "que_falta": "La ruta /api/cron/lead-digest con su wrapper en netlify/functions y netlify.toml. Una rama en notify.ts: si el modo es DAILY_DIGEST, no se envía en el momento y el cron arma un email con los leads del día más los NEW de más de 24 h, cada uno con link a /dashboard/chatbot/leads/[id], donde están los botones 'Lo contacté / Vendido / No avanzó'. Un item 'N contactos esperando' en attention.ts. El recordatorio de >24 h también para el modo IMMEDIATE, como máximo 1 por día y por org.",
+   "esfuerzo": "M: cron, template y rama en notify.ts; las piezas puras y el invariante de aislamiento ya existen.",
+   "costo_operativo": "Como máximo 1 email por org por día y solo si hay pendientes: con 30 orgs son ≤30 emails/día contra los 300/día del Free de Brevo (sendTransactionalEmail en src/lib/email/brevo-service.ts:17). Ese cupo es la cuenta única de develOP, compartida con los avisos inmediatos y las campañas. Las orgs en DAILY_DIGEST dejan de recibir N avisos inmediatos, así que en neto puede bajar el volumen. ~60 invocaciones/mes. Sin LLM.",
+   "riesgo": "Destinatario: hay que reusar resolveRecipientEmail (notify.ts:61) y no inventar otro. Si el cron falla en silencio (FAL-029), las orgs en DAILY_DIGEST se quedan sin ningún aviso, peor que hoy: hace falta un fallback a inmediato si el digest no salió en 26 h.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "Pre-aviso de cuota al 80% al dueño y a develOP, con el upgrade a un clic, antes de que el bot se degrade",
+   "problema": "Cuando la cuota mensual se agota, el bot de la PyME pasa a respuesta degradada frente a sus propios visitantes, y el dueño no recibe ningún aviso (FAL-019). develOP se entera recién al 100% (alerta de upsell), con el daño hecho. Con el pre-aviso, el cliente no pierde contactos a fin de mes y develOP vende el upgrade en el momento justo.",
+   "habilitadores": [
+    "prisma/schema.prisma:1587-1588: alert80Sent / alert80SentAt ya existen en QuotaUsage y nadie los usa",
+    "src/modules/chatbot/server/quota/checker.ts:126-151: tryReserveConversation devuelve conversationsUsed y conversationsLimit en cada conversación nueva",
+    "src/lib/isolation/registry.ts:675-692: markDegradedIfFirst, un UPDATE condicional atómico y org-scoped, molde exacto para un markAlert80IfFirst",
+    "src/modules/chatbot/server/quota/upsellAlert.ts:46-91: alerta idempotente a develOP (webhook y Telegram), hoy solo al agotarse; llamada en src/modules/chatbot/server/chat/handleChatRequest.ts:374 y :425",
+    "src/components/dashboard/plan/UpgradeCtaButton.tsx:37: el CTA de upgrade ya usa requestUpsellAction"
+   ],
+   "que_falta": "markAlert80IfFirst en registry.ts, con su invariante del helper de aislamiento. triggerQuota80AlertIfFirst en src/modules/chatbot/server/quota/, llamado tras una reserva exitosa con used ≥ 0,8 × limit. Un template de email para el dueño ('usaste el 80% de tus conversaciones del mes', con link a /dashboard/plan). Sumar el email al dueño también en triggerUpsellAlertIfFirst (al 100%). Un item en attention.ts mientras el uso del mes sea ≥80%.",
+   "esfuerzo": "S: un accessor atómico, un template y una llamada; el patrón idempotente ya está probado.",
+   "costo_operativo": "Sin costo marginal: como máximo 2 emails por bot por mes (80% y 100%); con 30 bots son ≤60 emails/mes en Brevo. 1 UPDATE extra solo al cruzar el umbral, sin LLM y sin cron.",
+   "riesgo": "Corre en el camino caliente del chat: el envío tiene que ser fire-and-forget (como upsellAlert, con allSettled) para no sumar latencia ni romper el stream. Hay que cuidar no mostrarle al visitante del cliente nada de esto.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "Tablero de oportunidades de upsell para develOP: las mismas reglas de «Ideas para crecer», corridas sobre toda la cartera",
+   "problema": "De develOP: las señales de upsell están dispersas. Las recomendaciones solo las ve el cliente en su Inicio, el «avisame» vive en una pestaña de Leads y la cuota agotada llega como alerta suelta. Nadie arma la lista de a quién ofrecerle qué esta semana. Al cliente le llega como una propuesta pertinente (por ejemplo, reseñas cuando tiene tráfico y pocas reseñas), basada en las mismas señales que ya ve en su panel y no en un empuje genérico.",
+   "habilitadores": [
+    "src/lib/recommendations/rules.ts:156-160 y :212: RECOMMENDATION_RULES y computeRecommendations son puros, sin Prisma ni reloj",
+    "src/lib/recommendations/get-recommendations-for-org.ts:29-66: arma las señales por org (análisis mensual, uso, módulos activos, calientes, GBP)",
+    "src/app/(protected)/admin/leads/_actions/module-demand.actions.ts:23: listModuleDemand (demanda medida del 'avisame'), hoy visible solo en el tab de admin/leads/page.tsx:120",
+    "prisma/schema.prisma:1201-1202: OrganizationModule.upsellRequestCount y upsellLastRequestedAt",
+    "src/app/(protected)/admin/messages/[orgId]/page.tsx:27-38: el hilo abre para cualquier org existente, así que el tablero puede llevar a 'escribirle' aunque no haya conversación previa (atenúa FAL-025)"
+   ],
+   "que_falta": "src/lib/recommendations/get-recommendations-for-all-orgs.ts, un loader en lote con unstable_cache de 1 h. Una pestaña 'Oportunidades' en admin/leads o una página /admin/upsell que liste org → recomendación → señal → último pedido del cliente, con cuota agotada este mes como fila aparte (QuotaUsage.degradedAt). Un botón 'Escribirle' a /admin/messages/[orgId] con el texto sugerido. Sin persistir el descarte en v1 (evita tocar el schema).",
+   "esfuerzo": "M: loader en lote y una vista; las reglas ya están escritas y probadas.",
+   "costo_operativo": "Se calcula al abrir la página: 5 lecturas en paralelo por org (get-recommendations-for-org.ts:32-41) más el análisis mensual. Con 30 orgs son ~150+ queries por carga; cacheado 1 h (como health-score.ts:59-65) no despierta Neon en cada clic y entra en los 10 s. Sin LLM ni email.",
+   "riesgo": "Las reglas fueron pensadas para que las lea el cliente: el umbral de muestra mínima (rules.ts:16-25) evita recomendar con pocos datos, y conviene no bajarlo para el admin. Ofrecer algo que el cliente ya pidió y no se le activó (FAL-005, la activación de módulos no tiene camino) quema confianza: hay que mostrar ese estado.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "«Pedile la reseña»: al marcar un contacto como Vendido, el dueño le manda el link de reseña de Google por WhatsApp o email con un toque",
+   "problema": "La PyME tiene clientes contentos que nunca dejan reseña, y el momento de pedirla (la venta recién cerrada) pasa sin que nadie lo aproveche. Hoy el QR y el link de reseñas están en otra pantalla del módulo y se comparten a mano, sin destinatario. Así la reputación crece sola desde el flujo que el dueño ya usa.",
+   "habilitadores": [
+    "src/modules/chatbot/lead-status-rules.ts:17-27: 'Vendido' pasa a WON, un estado ya registrado por el dueño",
+    "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx:52-53 y :92: botón 'Vendido' que llama a updateLeadStatus (componente único para lista y detalle)",
+    "src/app/(protected)/dashboard/modules/motor-resenas/_components/AskReviewSection.tsx:42 (URL writereview?placeid=) y :108 (wa.me con texto precargado)",
+    "prisma/schema.prisma:1447-1449: el lead tiene name, email y phone; :363 googleMapsPlaceId de la org",
+    "src/lib/actions/upsell.ts:10: requestUpsellAction, para el teaser si el Motor de Reseñas no está activo"
+   ],
+   "que_falta": "Una tarjeta post-'Vendido' en LeadDetail/LeadStatusActions con wa.me/<teléfono E.164>?text=… y mailto: prearmados con el nombre del lead y el link de reseña. Un ChatbotEvent 'review.requested' para medir. El escritor de googleMapsPlaceId en la edición del cliente (src/modules/chatbot/server/admin/updateClient.ts y EditClientForm), porque hoy no tiene escritor (FAL-004); sin él la tarjeta se oculta. Si motor-resenas no está activo, la tarjeta muestra el teaser.",
+   "esfuerzo": "S: una tarjeta y un campo de formulario; el link y el QR ya existen.",
+   "costo_operativo": "Sin costo marginal: wa.me y mailto salen del teléfono o el correo del dueño, nada pasa por Brevo, Resend ni el LLM. 1 fila ChatbotEvent por pedido (ya hay purga a 30 días).",
+   "riesgo": "Teléfonos mal formados (el bot los captura libres) que rompen wa.me: hay que normalizar a E.164 AR o mostrar solo email. Pedir reseña a un cliente con problemas: solo después de 'Vendido', nunca automático.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "Reactivar los «No avanzó»: llevar los contactos del bot a Email marketing con un clic y mandarles una campaña segmentada",
+   "problema": "La PyME acumula contactos que preguntaron y no compraron (LOST) y nunca vuelve a hablarles. Hoy, para usarlos en una campaña tendría que exportar el CSV del bot e importarlo en el módulo de email, y la campaña sale a todos los contactos sin segmento. Esto convierte esos contactos en ventas recuperadas y le da uso al módulo premium de email.",
+   "habilitadores": [
+    "src/modules/chatbot/lead-status-rules.ts:19 y :26: 'No avanzó' pasa a LOST, un estado marcado por el dueño",
+    "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:71-126: importContactsAction hace upsert de EmailContact con source y sincroniza con Brevo con token de baja firmado (:104-117)",
+    "prisma/schema.prisma:1213-1229: EmailContact ya tiene tags String[], source y @@unique(organizationId, email)",
+    "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts:132: la exportación de leads ya existe (la selección por estado se reusa)",
+    "src/lib/integrations/brevo.ts:31: syncContact a la lista de la org"
+   ],
+   "que_falta": "Una action importFromChatbotLeads({ status }) org-scoped vía forOrg, solo para leads con email, que etiquete 'bot:no-avanzo'. Un parámetro de segmento por tag en createCampaignAction, que hoy toma todos los no dados de baja (_actions.ts:143-146). Un botón en ClientLeadsTable, visible solo si email-marketing está activo, con aviso de base legal. Usar el import masivo de Brevo (/contacts/import) en vez de un fetch por contacto.",
+   "esfuerzo": "M: una action nueva, la segmentación de campañas y el chequeo de consentimiento.",
+   "costo_operativo": "Brevo Free da 300 emails/día en una sola cuenta (BREVO_API_KEY global, brevo.ts:4), compartida por todos los clientes y por los avisos transaccionales: una campaña de 300 contactos agota el día de todos. Antes de abrirlo hace falta un tope por org o un plan pago de Brevo. Importación: hoy es upsert más fetch secuencial por contacto (_actions.ts:84-122); a ~200-400 ms cada uno entran ~25-40 contactos en los 10 s de Netlify, por eso el import masivo o los lotes.",
+   "riesgo": "Legal: el lead dejó su email para una consulta, no para marketing (Ley 25.326). Hace falta consentimiento o base legal explícita y el opt-out ya firmado. Reputación del remitente compartido.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "Checklist de onboarding operable desde la ficha del cliente, con autochequeo de lo que ya está conectado",
+   "problema": "El cliente ve en su Inicio «Estamos configurando tu negocio — N de M listas», pero nadie puede marcar esas tareas: las actions existen sin pantalla. Además, los clientes dados de alta con el wizard ni siquiera reciben las tareas. La card queda eterna o no aparece, y develOP no tiene una lista de qué le falta a cada cliente para ver valor (GA4, GBP y Cal.com sin camino de activación: FAL-004, FAL-010, FAL-011).",
+   "habilitadores": [
+    "src/actions/admin/onboarding-tasks.ts:8-48: updateTaskStatus (SUPER_ADMIN) sin ningún llamador; al completar la última tarea le escribe al cliente '100% configurado' (:33-40); revalida /admin/clients/[id]/onboarding (:44), una ruta que no existe",
+    "src/components/dashboard/OnboardingStatusCard.tsx:17-36: la card del cliente lee OnboardingTask y se oculta sola al completar",
+    "src/lib/onboarding/seed-tasks-for-org.ts:4: la siembra solo la llaman src/lib/actions/invitations.ts:93 y src/lib/actions/clients.ts:139 (createClientAction, sin importadores); el wizard vivo (createClientWithBot / createClientOnly) no siembra",
+    "src/lib/data/onboarding-tasks.ts:43-72: el catálogo incluye 'Conectar Google Analytics 4', 'Conectar Google Business Profile', etc.",
+    "prisma/schema.prisma:337 analyticsPropertyId, :362 gbpConnectedAt, :375 calComApiKey: señales que permiten marcar tareas solas"
+   ],
+   "que_falta": "Una pestaña Onboarding en la ficha (admin/clients/[clientId]/_components/tabs/OnboardingTab.tsx) con estado y nota por tarea. Zod en onboarding-tasks.ts, que hoy no valida. Seed en src/lib/onboarding/core.ts (wizard). src/lib/onboarding/auto-status.ts, puro, que marca COMPLETED las tareas cuyo dato existe. Corregir el revalidatePath a la ficha real.",
+   "esfuerzo": "M: la pestaña con toggles es S; seed en el wizard más autochequeo con invariante lo llevan a M.",
+   "costo_operativo": "Sin costo marginal: lecturas de columnas que ya existen al abrir la ficha; ningún cron obligatorio (el autochequeo corre al abrir la ficha o al conectar una integración). Un Message al cliente al terminar.",
+   "riesgo": "Los clientes viejos sin tareas y los nuevos sembrados conviven: hay que decidir si se siembra retroactivamente. El autochequeo no debe marcar como lista una conexión rota (credencial vencida, E10): solo presencia del dato y, cuando se pueda, la última sync.",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "Cobro del mantenimiento en un paso: del mes generado a la factura con link de pago, el recordatorio y el estado en el portal",
+   "problema": "De develOP: el mantenimiento mensual se registra a mano y no llega al cliente. Nadie crea Invoice, la suscripción nunca sale de ACTIVE y el portal muestra facturación de seed (FAL-006, FAL-023). Se pierde plata por no reclamar, y el cliente no ve qué debe ni cómo pagarlo. Con esto el cliente recibe la factura con su link y la ve en Facturación, y develOP ve quién está atrasado.",
+   "habilitadores": [
+    "src/app/(protected)/admin/projects/_actions/maintenance.actions.ts:90 generatePendingMaintenance (genera los meses) y :60 markMaintenancePaid",
+    "prisma/schema.prisma:670-686: Invoice ya tiene status, dueDate, paidAt, paymentLink y pdfUrl",
+    "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx:70: el portal ya lista las Invoice de la org",
+    "src/lib/dashboard/attention.ts:70-78: item crítico 'Tu factura está vencida' cuando la Subscription está en PAST_DUE",
+    "src/lib/alerts.ts:241-249: alerta de vencimientos por renewalDate (hoy sin escritor)"
+   ],
+   "que_falta": "En generatePendingMaintenance: crear Invoice PENDING con dueDate y paymentLink (link de Mercado Pago pegado a mano en el proyecto, sin integración nueva) y mandar email al cliente. En markMaintenancePaid: Invoice PAID. Una ruta y cron diarios que pasen la Subscription a PAST_DUE con una factura vencida de más de N días y la vuelvan a ACTIVE al pagar. El escritor de Project.maintenanceStartDate en project-form, porque sin él generatePendingMaintenance falla (maintenance.actions.ts:121, FAL-007). Sin FK entre Invoice y OsMaintenancePayment hay que matchear por org y mes.",
+   "esfuerzo": "L: toca cobro real (Invoice, Subscription.status, emails, cron y un campo de proyecto), con estados que bloquean o desbloquean el portal.",
+   "costo_operativo": "1 email de factura y como máximo 1 recordatorio por cliente por mes: con 30 clientes son ~60 emails/mes (Resend Free 3.000/mes o Brevo 300/día). 1 cron diario son ~60 invocaciones/mes. Sin comisiones de plataforma nuevas (el link de pago es manual).",
+   "riesgo": "Marcar PAST_DUE a quien pagó por fuera (transferencia) dispara banner y alerta crítica al cliente: hace falta confirmación manual antes de degradar. Invoice.amount es Float frente a Decimal en mantenimiento. Matchear sin FK es frágil.",
+   "zona": "libre en la versión sin vínculo; congelado si se agrega Invoice.osMaintenancePaymentId (migración aditiva en prisma/schema.prisma), que es lo recomendable",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  },
+  {
+   "titulo": "Pedir el referido en el momento de valor: tras la primera venta registrada (o 3 en el mes), «Atención hoy» le ofrece su link",
+   "problema": "El programa de referidos existe, pero solo funciona si el cliente entra por su cuenta a /dashboard/referidos; ninguna superficie se lo propone. Pedirlo justo cuando el dueño marca ventas que vinieron del bot (y no tiene tickets abiertos) le da a develOP clientes nuevos sin costo de adquisición, y al cliente su mes bonificado.",
+   "habilitadores": [
+    "src/lib/referrals/referrals.service.ts:28: getOrCreateReferralCodeForOrg; src/lib/referrals/code.ts:29 buildReferralLink",
+    "src/modules/chatbot/lead-status-rules.ts:18 y :23-27: 'Vendido' pasa a WON, la señal de valor que registra el dueño (persistida por src/modules/chatbot/server/admin/updateLeadStatus.ts:40-56)",
+    "src/lib/dashboard/attention.ts:33: computeAttentionItems, una superficie priorizada del Inicio (cache de 5 min)",
+    "prisma/schema.prisma:1850-1859: Referral con status, referredOrgId y rewardedAt; la gestión admin ya existe (admin/referrals)"
+   ],
+   "que_falta": "src/lib/referrals/value-moment.ts, una regla pura: primer WON o ≥3 WON en 30 días, 0 tickets abiertos y no ofrecido en los últimos 30 días (sin schema: se deriva de la ausencia de Referral reciente y de los conteos). Un item en attention.ts con el link y el botón de copiar. Un bloque opcional en src/lib/email/templates/executive-weekly.ts.",
+   "esfuerzo": "S: una regla pura, un item de Atención y un bloque de email.",
+   "costo_operativo": "Sin costo marginal: usa superficies existentes (Atención hoy cacheada y el email semanal que ya se manda); 1-2 counts extra por carga del Inicio; sin LLM.",
+   "riesgo": "El envío automático del reporte ejecutivo está registrado en vercel.json:3-15 y no en netlify.toml, así que en Netlify ese bloque no llegaría solo: la superficie principal tiene que ser Atención hoy. No pedir referidos a quien tiene problemas abiertos (la regla lo filtra).",
+   "zona": "libre",
+   "origen": "nueva",
+   "perspectiva": "operacion"
+  }
+ ],
+ "olme": [
+  {
+   "idea": "Cerrar lead → convertir en cliente con vínculo de ID duro",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:11-22",
+   "factibilidad_hoy": "Está más avanzada de lo que supone el documento. El vínculo duro ya existe por otro camino: Project.osLeadId @unique con relación a OsLead (prisma/schema.prisma:557, :562). convertLeadToProject (src/app/(protected)/admin/projects/_actions/project.actions.ts:833) crea el Project ligado, sincroniza el Service y pasa el OsLead a CERRADO en una transacción. No hace falta romper el no-acople de ChatbotLead.convertedToOsLeadId (schema.prisma:1510): la trazabilidad queda ChatbotLead → OsLead → Project → Organization. Falta: (a) el botón está siempre deshabilitado (admin/leads/[leadId]/page.tsx:280-288, gate en :227) y ConvertLeadDialog (projects/_components/convert-lead-dialog.tsx:72) no se monta en ningún lado (FAL-024); (b) el diálogo no manda organizationId, así que el proyecto cae como interno en la org 'develop' (project.actions.ts:229-239): falta elegir o crear la Organization, reusando src/modules/chatbot/server/admin/createClientOnly.ts. Esfuerzo M, sin schema. ZONA-FRANCO (OsLead, admin/leads). Valor interno, no para la PyME."
+  },
+  {
+   "idea": "Scoping per-tenant de Inteligencia (Actividad, Health, Alertas)",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:28-32",
+   "factibilidad_hoy": "No hacen falta las 3 migraciones: ChatbotEvent y BotAlert ya tienen botConfigId con relación (schema.prisma:1601, :1624), y BotConfig lleva organizationId. Alertas ya lista todas las orgs con el nombre de cada una (src/modules/chatbot/server/admin/manageAlerts.ts:8-27), y la actividad por bot ya existe en chatbots/[botId]/tabs/ActivityTab.tsx:11. Siguen los hardcodes: activity/page.tsx:11 y :34, health/page.tsx:12 (checkChatbotHealth ya acepta un slug, checkHealth.ts:21), y getActivityChartData es global con un PENDIENTE-DECISIÓN (getActivityChartData.ts:3-11). Solo latencyMs tipado exigiría schema (congelado); hoy se lee de metadata Json (getLatencyHistory.ts:92-93). Esfuerzo S-M (selector de bot + parámetro). Libre. Valor interno."
+  },
+  {
+   "idea": "Color de acento por ruta en el widget en runtime",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:34-37",
+   "factibilidad_hoy": "Sigue sin empezar. routeColorMap se guarda (saveBotConfig.ts:55, BehaviorTab.tsx:43-44) y viaja en la config pública (getPublicConfig.ts:94, :121), pero el widget solo lee accentColor (ChatWindow.tsx:116-119, LogicCompanion.tsx:226, :247); resolveAccentColor no existe. Para el widget de develOP, que usa el pathname de la propia página, es S. Para el widget embebido de un cliente es M: corre en un iframe (/embed/[slug]) y el path que ve es el del iframe, así que public/widget.js tendría que pasarle la ruta de la página padre. Libre. Valor bajo para la PyME."
+  },
+  {
+   "idea": "pipelineOrder del kanban de Leads",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:39-42",
+   "factibilidad_hoy": "No empezado: model OsLead (schema.prisma:862-899) no tiene ningún campo de orden. Exige una migración aditiva de prisma/schema.prisma (congelado; reset prohibido) y tocar OsLead y admin/leads (ZONA-FRANCO). Esfuerzo M. Valor solo interno."
+  },
+  {
+   "idea": "Route B del preloader + Paint sprint (sitio público)",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:44-47",
+   "factibilidad_hoy": "Route B ya está hecho: src/components/ui/MarketingIntro.tsx:68, BrandedIntroCanvas.tsx:95, src/lib/marketing-routes.ts:1 y la rama en Preloader.tsx:299. El Paint sprint (clipping con THREE.Plane) no está empezado: 0 coincidencias de clippingPlanes o THREE.Plane en src. Viviría en src/components/ui/* (congelado) y sin tocar HeroArtifact.tsx. Esfuerzo L. Sin valor para el cliente del portal."
+  },
+  {
+   "idea": "Simplificar ensureAgencySettingsRecord con el singleton",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:53",
+   "factibilidad_hoy": "Pendiente y factible. Sigue usando findFirst orderBy updatedAt (src/app/(protected)/admin/settings/_actions/settings.actions.ts:38-52), aunque singleton Boolean @unique ya está en el schema (schema.prisma:823). Pasar a findUnique o upsert por singleton es S. Libre."
+  },
+  {
+   "idea": "Máscara del token de Telegram en un único helper",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:54",
+   "factibilidad_hoy": "Hecho: settings.actions.ts:11 y settings-console.tsx:18 importan maskSecret de src/lib/mask-secret.ts, y el invariante src/lib/mask-secret.invariant.ts fija el comportamiento. maskFromInput solo sobrevive en comentarios. No queda nada por hacer."
+  },
+  {
+   "idea": "updateTimeEntry sin guard de pertenencia",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:55",
+   "factibilidad_hoy": "Sigue abierto. src/app/(protected)/admin/team/_actions/time-entry.actions.ts:195-235 descarta el userId que devuelve requireSuperAdmin (:199), y el select de la entrada (:203-212) no trae userId. El alta sí compara (:140, :160). Agregar la comparación es S. Libre."
+  },
+  {
+   "idea": "Stat cards del Audit log según el filtro activo",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:56",
+   "factibilidad_hoy": "Sigue como se decidió («globales por ahora»): getAuditLogStats no recibe parámetros y cuenta total y 7 días (src/lib/audit-log-queries.ts:53-70). Si se cambia la decisión, agregar el filtro al contrato es S. Libre."
+  },
+  {
+   "idea": "date-preset-filter compartido",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:64",
+   "factibilidad_hoy": "Sigue duplicado y creció: alerts/_components/alerts-date-filter.tsx, audit-log/_components/audit-filters.ts, leads/_components/lead-filters.ts, src/modules/chatbot/components/admin/activity/activityFilters.ts y además tickets/_components/ticket-date-filter.tsx (5 copias). Refactor S-M. lead-filters.ts está en admin/leads (ZONA-FRANCO)."
+  },
+  {
+   "idea": "column-overview compartido",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:65",
+   "factibilidad_hoy": "Sigue duplicado: admin/alerts/_components/alert-column-overview.tsx y admin/leads/_components/column-overview.tsx. Esfuerzo S; la copia de leads está en ZONA-FRANCO."
+  },
+  {
+   "idea": "Dropdown de período compartido",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:66",
+   "factibilidad_hoy": "Sigue duplicado: admin/audit-log/_components/audit-period-filter.tsx y admin/projects/_components/projects-period-dropdown.tsx, y hay un tercero en admin/leads/_components/inbound-period-filter.tsx (ZONA-FRANCO). Esfuerzo S."
+  },
+  {
+   "idea": "3 wrappers de hover de Clientes a @/components/ui",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:67",
+   "factibilidad_hoy": "Siguen: admin/clients/_components/HoverScaleCard.tsx, admin/tickets/_components/hover-scale.tsx (ya no está en Clientes) y admin/messages/_components/message-bubble.tsx. El helper compartido adminHoverCls vive en src/lib/hover.ts:5, no en @/components/ui. Llevarlos a @/components/ui choca con el congelado src/components/ui/*: el destino posible es src/lib/hover.ts o src/components/admin. Esfuerzo S."
+  },
+  {
+   "idea": "Merge de la lane del setter de Franco (OsLeadSetterMeta como ya aplicado)",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:73",
+   "factibilidad_hoy": "En el repo ya está mergeado: prisma/migrations/20260619160000_add_os_lead_setter_meta/migration.sql y model OsLeadSetterMeta (schema.prisma:909). No se puede verificar sin correr prisma migrate status (prohibido en esta fase) si en Neon quedó registrada con migrate resolve --applied. ZONA-FRANCO. No es una feature."
+  },
+  {
+   "idea": "Cerrar lead → convertir en cliente (con vínculo de ID duro)",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:11-22",
+   "factibilidad_hoy": "Alta, y más barata que la 'Complejidad: Alta' del doc (:22). El vínculo duro ya existe por Project: Project.osLeadId @unique con relación a OsLead (prisma/schema.prisma:557 y :562) más Project.organizationId (:559-560). Lead → proyecto → cliente ya es trazable sin romper la regla de no-acople, que es de otro boundary (ChatbotLead.convertedToOsLeadId, :1510). La action convertLeadToProject existe (admin/projects/_actions/project.actions.ts:833): crea el proyecto, linkea osLeadId y pasa el lead a CERRADO en una transacción. El diálogo existe (admin/projects/_components/convert-lead-dialog.tsx). Falta: (a) el botón de la ficha está fijo en disabled y sin diálogo (admin/leads/[leadId]/page.tsx:281-289, FAL-024); (b) el diálogo no manda organizationId (convert-lead-dialog.tsx:109-112), así que el proyecto cae en la org de la agencia 'develop' (project.actions.ts:229-239); (c) no da de alta la Organization desde el lead: reusar src/modules/chatbot/server/admin/createClientOnly.ts dentro del flujo. Sin schema. Esfuerzo M. Ojo: Project tiene onDelete: Cascade desde Organization, así que un hard-delete del cliente borra la traza. Zona: escribe OsLead.status (modelo OsLead*, ZONA-FRANCO) → coordinar con Franco."
+  },
+  {
+   "idea": "Scoping per-tenant de Inteligencia (Actividad, Health, Alertas)",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:28-32",
+   "factibilidad_hoy": "Media y sin las 3 migraciones del doc: ChatbotEvent y BotAlert ya cuelgan de botConfigId (prisma/schema.prisma:1599-1612 y :1621-1625), y BotConfig tiene organizationId, así que el join alcanza y denormalizar tocaría el schema congelado sin necesidad. El hardcode sigue: admin/chatbot/activity/page.tsx:11 y :34 (slug 'develop') y admin/chatbot/health/page.tsx:12 (checkChatbotHealth('develop')). El gráfico y la latencia son globales y lo admiten en comentario (getActivityChartData.ts:8-9, getLatencyHistory.ts:71). Alertas ya es multi-bot (manageAlerts.ts:9), y cada bot tiene su pestaña de actividad. Falta un selector ?bot=slug y pasar el botId a getActivityChartData y getLatencyHistory. Esfuerzo S/M, zona libre."
+  },
+  {
+   "idea": "Color de acento por ruta en el widget runtime",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:34-37",
+   "factibilidad_hoy": "Parcialmente resuelto: el 'cyan hardcodeado' ya no es tal, porque ChatWindow.tsx:67 y :116 y LogicCompanion.tsx:226 y :247 usan config.accentColor con cyan solo de fallback. El routeColorMap se edita (BehaviorTab.tsx:43-44), se valida (saveBotConfig.ts:55) y viaja en la config pública (getPublicConfig.ts:94 y :121; tipo en shared/publicConfig.ts:50), pero ningún hook ni componente lo lee: resolveAccentColor sigue sin existir. Para el widget de develOP es S (usePathname más lookup). Para el widget embebido del cliente es M: el iframe /embed/[slug] no conoce la ruta de la página anfitriona y public/widget.js tendría que pasarla. Valor operativo bajo; zona libre."
+  },
+  {
+   "idea": "pipelineOrder del kanban de Leads",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:39-42",
+   "factibilidad_hoy": "Sin hacer. Exige una migración aditiva en prisma/schema.prisma (congelado; OsLead no tiene pipelineOrder, :862-900), y OsLead es modelo de ZONA-FRANCO. El drag & drop ya existe (admin/leads/_components/draggable-lead-card.tsx y droppable-column.tsx) y el board ordena por updatedAt desc (admin/leads/page.tsx:50-52). Técnicamente es M, pero el valor operativo es bajo frente a tocar un archivo congelado de otra zona: postergable."
+  },
+  {
+   "idea": "Route B del preloader + Paint sprint (sitio público)",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:44-47",
+   "factibilidad_hoy": "Route B está hecha: la intro branded de marketing vive en src/components/ui/MarketingIntro.tsx con las rutas en src/lib/marketing-routes.ts (feature h6.vis-contacto.intro-branded, L2). El Paint sprint no: no hay THREE.Plane ni clippingPlanes en src/. Es 3D del sitio público, fuera de la operación que mira F4, y MarketingIntro.tsx cae en src/components/ui/* (congelado); HeroArtifact.tsx sigue intocable."
+  },
+  {
+   "idea": "Simplificar ensureAgencySettingsRecord a findUnique({ singleton: true })",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:53",
+   "factibilidad_hoy": "Pendiente y trivial (S, sin schema): admin/settings/_actions/settings.actions.ts:38-41 sigue con findFirst orderBy updatedAt pese a singleton @unique (prisma/schema.prisma:823). El mismo patrón se repite en src/lib/alerts.ts:111 y :154 y en src/lib/actions/messages.ts:148, así que conviene un único getAgencySettings()."
+  },
+  {
+   "idea": "Máscara del token de Telegram en un único helper",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:54",
+   "factibilidad_hoy": "Hecho: src/lib/mask-secret.ts:1 (maskSecret) lo importan settings.actions.ts:11 y settings-console.tsx:18, con el invariante src/lib/mask-secret.invariant.ts:3-25 que fija que el output es igual al de los dos originales. Se puede cerrar."
+  },
+  {
+   "idea": "updateTimeEntry sin guard de pertenencia",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:55",
+   "factibilidad_hoy": "Sigue igual: admin/team/_actions/time-entry.actions.ts:195-219 exige SUPER_ADMIN y que la entrada exista, pero no compara OsTimeEntry.userId (prisma/schema.prisma:1055) con la sesión. El riesgo real hoy es bajo, porque todo usuario de /admin es SUPER_ADMIN y no hay gestión de equipo con roles menores (FAL-028). Guard de S cuando entren miembros con otro rol."
+  },
+  {
+   "idea": "Stat cards del Audit log según el filtro activo",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:56",
+   "factibilidad_hoy": "Sigue global: getAuditLogStats() no recibe parámetros (src/lib/audit-log-queries.ts:53-59) y se llama sin argumentos en admin/audit-log/page.tsx:15. Es S (pasar el mismo filtro que listAuditLog), pero es una decisión de producto con valor operativo bajo."
+  },
+  {
+   "idea": "Deuda de consolidación (date-preset, column-overview, dropdown de período, wrappers de hover)",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:64-67",
+   "factibilidad_hoy": "No es una feature, y sigue viva: column-overview sigue duplicado (admin/alerts/_components/alert-column-overview.tsx frente a admin/leads/_components/column-overview.tsx) y siguen los wrappers de hover (admin/clients/_components/HoverScaleCard.tsx y admin/tickets/_components/hover-scale.tsx). Llevarlos a src/components/ui/* toca un archivo congelado y requiere autorización."
+  },
+  {
+   "idea": "Merge de la lane de setter de Franco (OsLeadSetterMeta + ActivityChannel)",
+   "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:73",
+   "factibilidad_hoy": "Resuelto en el código: prisma/migrations/20260619160000_add_os_lead_setter_meta/migration.sql:7 crea OsLeadSetterMeta (modelo en prisma/schema.prisma:909) y 20260619150000_add_activity_channel_sistema/migration.sql:7 agrega SISTEMA a ActivityChannel. Si en Neon se registró como ya aplicada (migrate resolve) no se puede verificar sin correr prisma migrate status, fuera de las reglas de esta fase."
+  }
+ ],
+ "final": {
+  "ranking": [
+   {
+    "titulo": "Las preguntas que el bot no supo contestar: respondelas desde Análisis (y se destraba el motor de descubrimientos)",
+    "problema": "El dueño ve en Análisis las «Preguntas sin respuesta» (KB_GAP), pero no puede hacer nada con ellas. El bot sigue fallando en lo mismo y se pierden consultas. Encima, como nadie puede marcar un descubrimiento como aplicado o descartado, el cron deja de generar descubrimientos para ese bot en cuanto junta 5 pendientes, y «Lo que descubrimos este mes» queda congelado.",
+    "habilitadores": [
+     "prisma/schema.prisma:227 InsightCategory.KB_GAP; src/modules/chatbot/server/insights/generateInsights.ts:80 (instrucción KB_GAP) y :100 (gemini-2.5-flash)",
+     "src/modules/chatbot/server/insights/manageInsight.ts:15 actOnInsight (APPLY/DISMISS, forOrg, Zod). Es el único escritor de status (:37) y no tiene consumidor en la UI: solo aparece en los re-exports de index.server.ts:73 e insights/index.ts:2",
+     "src/app/api/cron/generate-insights/route.ts:38: saltea el bot que tiene ≥5 PENDING; netlify.toml:25-26: cron diario",
+     "src/components/dashboard/results/analysis/DiscoveriesSection.tsx:87: muestra suggestedAction, solo lectura; src/modules/chatbot/lib/monthly-analysis.ts:178: rótulo «Preguntas sin respuesta»",
+     "src/lib/data/message-context.ts:1 MESSAGE_CONTEXTS y src/lib/actions/messages.ts:114 sendClientMessageAction",
+     "src/modules/chatbot/server/admin/saveKnowledgeBaseByOrgSlug.ts:21: develOP edita la KB por org, con requireSuperAdmin y auditoría"
+    ],
+    "que_falta": "Una isla cliente dentro de DiscoveriesSection (hoy es server component) con «Ya lo resolví» (APPLY) y «No aplica» (DISMISS) para todas las categorías. Para KB_GAP, además, un campo «Tu respuesta» que le mande el mensaje a develOP con un context nuevo 'kb' en message-context.ts y después haga APPLY. En manageInsight.ts: safeParse en lugar de parse (:19) y que revalide también /dashboard/resultados/analisis (hoy solo revalida /dashboard/chatbot, :52). Que el botón del email (sendInsightsNotification.ts:47) lleve a Análisis. develOP pasa la respuesta a la KB con saveKnowledgeBaseByOrgSlug.",
+    "esfuerzo": "S-M: es una isla de UI más ajustes a una action que ya existe; el motor, el modelo y el cron ya están. Pasa a M si se deja que el cliente escriba directo en la KB.",
+    "costo_operativo": "La UI no tiene costo marginal. Pero al destrabar el cron vuelve la generación en los bots que hoy están frenados: ≈50 conversaciones × 400 caracteres (generateInsights.ts:59, :66) más ~1.000 de KB ≈ 6k tokens de entrada × USD 0,30/M ≈ USD 0,002, más ~1,5k de salida × USD 2,50/M ≈ USD 0,004 (google.ts:14-18). Son ≈ USD 0,006 por bot y por día, unos USD 0,18 por bot al mes (con 30 bots, ≈ USD 5,4/mes). Cada respuesta que entra a la KB suma ~200 caracteres ≈ 57 tokens por turno, ≈ USD 0,000017 por turno (tokens-estimate.ts:6-9). El email de insights vuelve a salir por el Brevo compartido: como mucho 1 por bot y por día.",
+    "riesgo": "El dueño puede contestar con precios o promesas que después el bot repite, así que conviene que pase por develOP y por forbiddenStatements. Si no se automatiza, es trabajo manual de develOP por cliente. El cron corre el LLM bot por bot, en serie (route.ts:33), bajo el techo de 10 s de Netlify (TEC-006): con varios bots activos se corta a mitad de la lista. Fuera de scope: el cron no mira Plan.insightEnabled (route.ts:19 solo filtra isActive, y Starter tiene insightEnabled=false en sync-plans.ts:77), así que los bots Starter también gastan LLM.",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 5,
+    "factibilidad": 4,
+    "costo": 2,
+    "cuenta": "5 × 4 ÷ 2 = 10,0. Impacto 5: el bot deja de fallar en las mismas preguntas y revive una sección que hoy se congela sola después de ~5 descubrimientos. Factibilidad 4: la action, el modelo, el cron y la página ya existen; falta la isla cliente y un context. Costo 2: S-M; el LLM ya se paga, salvo lo que se suma al destrabar (~USD 0,18 por bot al mes).",
+    "verificacion": "manageInsight.ts:1-55: APPLY/DISMISS con forOrg, parse sin safe en :19, revalidatePath('/dashboard/chatbot') en :52. Grep de chatbotInsight.update/updateMany/delete en src: solo manageInsight.ts:37. Grep de actOnInsight: solo re-exports. generate-insights/route.ts:10-60: findMany con isActive y sin plan; skip con pendingCount ≥ 5 en :38. queries.ts:35-46 cuenta PENDING sin ventana de fecha. generateInsights.ts:59-100. DiscoveriesSection.tsx:1-20 (sin 'use client') y :70-95 (solo lectura); su único importador es resultados/analisis/page.tsx:11. message-context.ts:1-45, messages.ts:114-163, saveKnowledgeBaseByOrgSlug.ts:1-45 y sendInsightsNotification.ts:27 y :47."
+   },
+   {
+    "titulo": "Aviso al 80% de la cuota, al dueño y a develOP, antes de que el bot se degrade",
+    "problema": "Cuando se agota la cuota del mes, el bot de la PyME pasa a respuesta degradada delante de sus propios visitantes y el dueño no recibe ningún aviso. develOP se entera recién al 100%, por la alerta de upsell, cuando el daño ya está hecho. Con un aviso al 80%, el cliente no pierde consultas a fin de mes y develOP ofrece el upgrade a tiempo.",
+    "habilitadores": [
+     "prisma/schema.prisma:1587-1588: QuotaUsage.alert80Sent y alert80SentAt; grep 'alert80' en src: 0 usos",
+     "src/modules/chatbot/server/quota/checker.ts:126-151: tryReserveConversation devuelve conversationsUsed y conversationsLimit",
+     "src/lib/isolation/registry.ts:675-692: markDegradedIfFirst (UPDATE condicional atómico con guard de org por EXISTS), el molde exacto de un markAlert80IfFirst",
+     "src/modules/chatbot/server/quota/upsellAlert.ts:46-91: triggerUpsellAlertIfFirst (idempotente, allSettled), llamado en src/modules/chatbot/server/chat/handleChatRequest.ts:374 y :425",
+     "src/lib/client-notifications/notify.ts:61: resolveRecipientEmail (destinatario del dueño, aislado por org)",
+     "src/components/dashboard/plan/UsageMeter.tsx:176: el % ya se ve en Inicio, pero no se avisa"
+    ],
+    "que_falta": "markAlert80IfFirst en registry.ts, con su caso en el invariante del helper de aislamiento. triggerQuota80AlertIfFirst en src/modules/chatbot/server/quota/, llamado después de una reserva exitosa cuando used ≥ 0,8 × limit. Exportar o mover resolveRecipientEmail, que hoy es privada de notify.ts. Un template de email «usaste el 80% de tus conversaciones» con link a /dashboard/plan. Sumar ese email al dueño también en upsellAlert.ts (el 100%). Opcional: un ítem en attention.ts mientras el uso del mes sea ≥80%.",
+    "esfuerzo": "S: un accessor atómico, un template y una llamada; el patrón idempotente ya está probado.",
+    "costo_operativo": "Sin costo marginal relevante: como mucho 2 emails por bot por mes (80% y 100%). Con 30 bots son ≤60 emails/mes, contra los 300/día del Free de la cuenta única de Brevo (src/lib/email/brevo-service.ts:4). Un UPDATE condicional solo en el turno que cruza el umbral. Sin LLM y sin cron.",
+    "riesgo": "Corre en el camino caliente del chat: el aviso de upsell se espera con await Promise.allSettled (upsellAlert.ts:70-91). Repetir ese patrón suma la latencia del envío una vez por mes en un solo turno, lo cual es aceptable, pero el email nunca puede romper el stream. Nada de esto se le muestra al visitante. Los planes fallback pueden tener otra cuota: hay que medir contra el limit que devuelve la reserva.",
+    "zona": "libre (registry.ts es el helper de aislamiento: no está congelado, pero tiene invariantes que hay que correr)",
+    "origen": "nueva",
+    "impacto": 4,
+    "factibilidad": 5,
+    "costo": 2,
+    "cuenta": "4 × 5 ÷ 2 = 10,0. Impacto 4: evita que el bot se degrade delante de los clientes del dueño y vende el upgrade en el momento justo. Factibilidad 5: las columnas existen y nadie las usa, el patrón atómico está probado y la reserva ya devuelve los números. Costo 2: es S y no tiene costo marginal, pero toca el camino caliente del chat y el helper de aislamiento.",
+    "verificacion": "schema.prisma:1587-1588 leídas; grep 'alert80' en src sin resultados. checker.ts:120-151: reserveConversation devuelve reserved y conversationsUsed. registry.ts:670-692: markDegradedIfFirst con EXISTS por organizationId. upsellAlert.ts:40-91: allSettled con webhook y Telegram. handleChatRequest.ts:368-378 y :420-430: las dos llamadas. notify.ts:61 es 'async function resolveRecipientEmail', sin export. UsageMeter.tsx:129 y :176."
+   },
+   {
+    "titulo": "Lo que Google te trajo: llamadas, «cómo llegar» y clics a tu web",
+    "problema": "Reputación muestra rating y reseñas, pero no cuántas personas llamaron, pidieron cómo llegar o entraron a la web desde Google, que es lo que más le importa a un local. El bloque ya está diseñado y nunca aparece porque los números vienen en cero fijo.",
+    "habilitadores": [
+     "src/lib/integrations/google-business-profile.ts:8: el OAuth ya pide el scope businessprofileperformance",
+     "src/lib/integrations/google-business-profile.ts:218-224: performance con ceros fijos; caché de 3600 s por org (:181)",
+     "src/components/dashboard/results/GBPMetricsCard.tsx:39-41 (FIXME data-truth) y :65 filter(value > 0): la UI existe y nunca se muestra",
+     "src/lib/integrations/gbp-connection-logic.ts:97-98 extractId (pasa de accounts/x/locations/y al id pelado que pide Performance)"
+    ],
+    "que_falta": "En fetchGBPMetrics, llamar a locations/{id}:fetchMultiDailyMetricsTimeSeries con el id que da extractId(gbpLocationId): CALL_CLICKS, WEBSITE_CLICKS, BUSINESS_DIRECTION_REQUESTS y las BUSINESS_IMPRESSIONS_* sumadas como vistas. Tomar 30 días que terminen unos días antes de hoy. Un parseo puro con su invariante. Promise.allSettled, para que una falla de Performance no tire abajo las reseñas. Rotular el período en la tarjeta y sacar el FIXME. Opcional: llevar el dato al reporte semanal.",
+    "esfuerzo": "S: un fetch y un parseo dentro de una función que ya está cacheada; la UI y el scope ya existen.",
+    "costo_operativo": "Sin costo marginal: la API es gratuita con cuota, y con la caché de 1 h son como mucho 24 llamadas por día y por org.",
+    "riesgo": "El proyecto de Google tiene que tener habilitada la Business Profile Performance API (a verificar). Hoy llega a pocos: conectar GBP solo se puede tipeando /api/auth/google-business/start?orgId=… como SUPER_ADMIN (start/route.ts:7), y elegir la sucursal no tiene UI (listAvailableLocations y setActiveLocation, src/lib/actions/gbp-connection.ts:17 y :36, sin consumidores; FAL-011). Google entrega los datos con días de demora.",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 3,
+    "factibilidad": 3,
+    "costo": 1,
+    "cuenta": "3 × 3 ÷ 1 = 9,0. Impacto 3: para un local es un dato muy valioso, pero hoy solo llega a las orgs que develOP conecte a mano. Factibilidad 3: el scope, la caché, la UI y la conversión de ids están listos; depende de habilitar la API y de conexiones manuales. Costo 1: S y gratis.",
+    "verificacion": "google-business-profile.ts:1-20 (SCOPES incluye businessprofileperformance) y :170-235 (reseñas v4, performance en cero, revalidate 3600 en :181). GBPMetricsCard.tsx:30-75. gbp-connection-logic.ts:10-25 y :90-100. api/auth/google-business/start/route.ts:1-16: solo SUPER_ADMIN; grep 'api/auth/google-business' fuera de app/api: 0. Grep de importadores de '@/lib/actions/gbp-connection': 0."
+   },
+   {
+    "titulo": "«Pedile la reseña»: al marcar Vendido, el link de reseña de Google por WhatsApp o email en un toque",
+    "problema": "El dueño toca «Vendido» y ahí termina todo: justo cuando el cliente está más conforme, nadie le pide la reseña. El link y el QR viven en otra pantalla (Motor de Reseñas) y se comparten sin destinatario. Así la reputación crece desde el flujo que el dueño ya usa.",
+    "habilitadores": [
+     "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx:52-58: botón «Vendido» de un toque, con toast y Deshacer; es el componente único de la lista y del detalle; llama a updateLeadStatus en :92",
+     "src/modules/chatbot/lead-status-rules.ts:23-27: OWNER_ACTION_STATUS (sold → WON)",
+     "src/modules/chatbot/components/dashboard/LeadDetail.tsx:177-180: ya arma wa.me al teléfono del lead con mensaje precargado (buildWhatsappMessage, :596)",
+     "src/app/(protected)/dashboard/modules/motor-resenas/_components/AskReviewSection.tsx:42 (URL writereview?placeid=) y :108 (wa.me con texto)",
+     "prisma/schema.prisma:363 googleMapsPlaceId; :1447-1449 name, email y phone del lead"
+    ],
+    "que_falta": "Un escritor de googleMapsPlaceId, que hoy no tiene: solo se lee en motor-resenas/page.tsx:113 y :161. Va en src/modules/chatbot/server/admin/updateClient.ts y en EditClientForm.tsx, con Zod. Un helper puro que arme el link (la URL de AskReviewSection más la normalización del teléfono de LeadDetail.tsx:179, sumando el 549 de Argentina), con su invariante. La acción «Pedile la reseña» en el toast de Vendido o en LeadDetail, con wa.me y mailto. Decidir si se ofrece solo con motor-resenas activo (isModuleActive, src/lib/modules/check-activation.ts:3) o como teaser. Opcional: un ChatbotEvent 'review.requested' para medirlo.",
+    "esfuerzo": "S: un link, una plantilla y un campo de formulario; sin schema ni LLM.",
+    "costo_operativo": "Sin costo marginal: el mensaje sale del WhatsApp o del correo del propio dueño; no pasa por Brevo, Resend, la API de Meta ni el LLM. Si se mide, es 1 fila de ChatbotEvent por pedido, que ya se purga a los 30 días con cleanup-old-events-cron.",
+    "riesgo": "Sin placeId cargado no se puede ofrecer (FAL-004). El teléfono se captura como texto libre y el replace(/\\D/g, '') de hoy deja wa.me inválidos cuando falta el 549. Política de Google: no se puede ofrecer nada a cambio ni pedírsela solo a los conformes; se pide en todo «Vendido», sin filtrar por satisfacción. Ofrecerlo fuera del módulo premium puede canibalizar el Motor de Reseñas: es una decisión de producto.",
+    "zona": "libre",
+    "origen": "nueva (la propusieron los dos generadores; acá quedan fusionadas)",
+    "impacto": 4,
+    "factibilidad": 4,
+    "costo": 2,
+    "cuenta": "4 × 4 ÷ 2 = 8,0. Impacto 4: la reputación en Google es lo que más mueve a una PyME local, y se pide en el momento justo. Factibilidad 4: el botón, el link y el wa.me ya existen; falta el escritor de un campo que ya está en el schema. Costo 2: S y sin costo marginal, pero arrastra una decisión de producto (premium o no).",
+    "verificacion": "LeadStatusActions.tsx:1-110 ('sold' en :52-53, updateLeadStatus en el startTransition). lead-status-rules.ts:1-40. LeadDetail.tsx:165-190 y :596-599. AskReviewSection.tsx:30-50 y :100-112. Grep de googleMapsPlaceId en src: solo lecturas en motor-resenas/page.tsx:113 y :161, ningún escritor. updateClient.ts y admin/clients/[clientId]/edit/EditClientForm.tsx existen."
+   },
+   {
+    "titulo": "SLA de soporte: lo que el cliente escribió y develOP no contestó, escalado por Telegram y marcado en la bandeja",
+    "problema": "Al responder un ticket, el cliente lee «El equipo de develOP será notificado de inmediato. Respuesta asíncrona estándar en menos de 24hs». Pero si el cliente responde en un ticket abierto, no se avisa a nadie; un ticket MEDIUM/LOW tampoco avisa; y los mensajes del chat solo alertan si alertOnClientMessages está prendido, y viene apagado por defecto. El cliente espera días y se va.",
+    "habilitadores": [
+     "src/components/dashboard/TicketReplyForm.tsx:32: la promesa de aviso inmediato y de respuesta en menos de 24 h",
+     "src/lib/tickets/actions.ts:88-95: solo alerta al crear un ticket HIGH/URGENT; :150-157: manda email solo cuando responde el admin",
+     "prisma/schema.prisma:762-791 Ticket (priority, status) y TicketMessage.isAdmin; :833 alertOnClientMessages @default(false)",
+     "src/lib/actions/messages.ts:148-163: MESSAGE_NEW condicionado a alertOnClientMessages",
+     "src/lib/health-score.ts:350-383: computeReplyScore (tiempo de respuesta calculado desde Message.fromAdmin)",
+     "src/lib/notifications/telegram.ts:67 sendTelegram; src/lib/dates-ar.ts (hora de Argentina)"
+    ],
+    "que_falta": "src/lib/support/sla.ts, puro: último mensaje del cliente sin una respuesta admin posterior, con umbrales por prioridad (URGENT 2 h, HIGH 8 h, MEDIUM/LOW 24 h hábiles) como constantes, y su invariante. La ruta /api/cron/support-sla con CRON_SECRET, netlify/functions/support-sla-cron.ts y su entrada en netlify.toml (no en vercel.json). Un badge «vencido» en admin/tickets y en admin/messages. Un solo digest de Telegram por corrida, solo con lo que venció de nuevo, usando una clave en RateLimit (checkRateLimit, src/lib/rate-limit/limiter.ts:37) para no repetir el mismo vencido cada hora.",
+    "esfuerzo": "S-M: una función pura, un cron y un badge; sin schema.",
+    "costo_operativo": "Un cron por hora de 9 a 21 son 13 corridas por día, ≈390 por mes; con el wrapper, ≈780 invocaciones/mes, el 0,6% de las 125.000/mes del Free (el plan real no se puede confirmar desde el repo: netlify/functions/generate-insights-cron.ts:26). Son 2 queries agregadas por corrida. Cada corrida puede despertar Neon (~5 min de cómputo): si la base estaba dormida, ≈13 × 5 min × 30 ≈ 32 h/mes; corriendo cada 3 h baja a ~12 h/mes. Telegram es gratis.",
+    "riesgo": "Hace ruido si no respeta el horario hábil y los feriados de Argentina. Se duplica con el aviso inmediato si los dos están prendidos: el SLA tiene que escalar, no repetir.",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 4,
+    "factibilidad": 4,
+    "costo": 2,
+    "cuenta": "4 × 4 ÷ 2 = 8,0. Impacto 4: cumple una promesa que está escrita en la UI y ataca una causa de baja silenciosa. Factibilidad 4: los datos para saber quién habló último ya están (isAdmin, fromAdmin); faltan la regla y el cron. Costo 2: S-M; las invocaciones y el Neon que suma son marginales.",
+    "verificacion": "TicketReplyForm.tsx:32. tickets/actions.ts:80-100 (TICKET_URGENT solo para HIGH/URGENT al crear) y :108-175 (replyToTicketAction: isAdmin = SUPER_ADMIN; sendEmail solo dentro de if (isAdmin), :150-157). schema.prisma:762-791 y :833. messages.ts:140-163. health-score.ts:345-383. telegram.ts:60-75. src/lib/dates-ar.ts existe."
+   },
+   {
+    "titulo": "«Atención hoy» con lo que pasa en el negocio: reseñas sin responder y productos por agotarse",
+    "problema": "Hoy «Atención hoy» solo muestra cosas de develOP: factura vencida, entrega para aprobar, mensajes y conexiones. El dueño no ve ahí las reseñas de Google que nadie contestó ni los productos que se están por agotar en su tienda.",
+    "habilitadores": [
+     "src/lib/dashboard/attention.ts:9: el tipo 'review' está declarado y nunca se emite; :25-31 caché de 300 s por org; :37-67 Promise.all de señales",
+     "src/components/dashboard/home/AttentionStack.tsx:23-29: ICON_MAP ya mapea review → Star",
+     "src/lib/integrations/google-business-profile.ts:215: campo replied de cada reseña (getGBPMetrics, caché de 3600 s en :181)",
+     "src/lib/integrations/tiendanube.ts:140-148: lowStockProducts; caché de 1800 s en :74-79"
+    ],
+    "que_falta": "Dos ramas en computeAttentionItems: 'review' (reseñas sin respuesta entre las 10 recientes → /dashboard/modules/motor-resenas) y 'stock' (→ /dashboard/modules/tienda-conectada), ampliando la unión de tipos y el ICON_MAP. Cada lectura de integración con timeout y un fallo que no tire abajo el bloque. Antes, corregir el bug de stock: tiendanube.ts:144 hace v.stock ?? 0, así que el stock null (stock ilimitado en Tiendanube) queda en 0 y :147 lo marca como «por agotarse», y saldrían alertas falsas. La rama 'lead' que proponía el generador sobra: los calientes sin contactar ya son el badge del sidebar (src/app/(protected)/dashboard/layout.tsx:47) y los cubre la idea «Contactos sin atender». Un invariante puro del orden y la prioridad.",
+    "esfuerzo": "S: es orquestación sobre helpers que ya existen y ya están cacheados, más el arreglo de una línea en tiendanube.ts.",
+    "costo_operativo": "Sin costo marginal: GBP y Tiendanube salen de las cachés que ya existen. Con la caché fría son 1 llamada a GBP por hora y 4 fetch a Tiendanube cada 30 min por org.",
+    "riesgo": "Con la caché de Tiendanube fría son 4 fetch secuenciales (tiendanube.ts:92-118) dentro del render de Inicio, que tiene Suspense por sección (dashboard/page.tsx:177-180) pero sigue bajo el techo de 10 s. Si una integración falla devuelve null sin aviso (FAL-029) y la alerta desaparece. Las reseñas solo llegan a las orgs con GBP conectado a mano. No usar las alertas para empujar módulos no contratados.",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 3,
+    "factibilidad": 4,
+    "costo": 2,
+    "cuenta": "3 × 4 ÷ 2 = 6,0. Impacto 3: pone a la vista dos pérdidas reales del negocio, pero las reseñas dependen de una conexión manual y la parte de leads ya está cubierta por el badge. Factibilidad 4: hueco precableado y helpers cacheados; hay que arreglar antes el bug de stock null. Costo 2: S, sin costo marginal, con riesgo de latencia.",
+    "verificacion": "attention.ts:1-127 completo: 'review' solo aparece en la unión de :9; no hay ninguna rama que lo emita. AttentionStack.tsx:1-40. google-business-profile.ts:170-235. tiendanube.ts:52-160: :144 stock: v.stock ?? 0 y :147 filter(p.stock !== null && p.stock <= 3), donde la condición !== null es siempre verdadera. Grep de countHotNewLeadsForOrg: dashboard/layout.tsx:47, chatbot/layout.tsx:14, home-metrics.ts:116 y get-recommendations-for-org.ts:36."
+   },
+   {
+    "titulo": "Contactos sin atender: recordatorio al dueño y el «Digest diario» que la configuración ya ofrece",
+    "problema": "El aviso de lead llega una sola vez, al capturarlo. Si el dueño no lo vio, el lead caliente se enfría en NEW, y aunque el panel mide la demora, nada empuja a contestar. Además, el admin puede elegir «Digest diario» y esa opción se comporta como «Inmediato»: la UI promete algo que no existe.",
+    "habilitadores": [
+     "src/lib/client-notifications/notify.ts:91-95 (el comentario dice que DAILY_DIGEST «no existe aún»), :61 resolveRecipientEmail y :87 notifyClientOfLead",
+     "src/modules/chatbot/components/admin/config/tabs/AdvancedTab.tsx:120: la opción 'Digest diario' se ofrece y se guarda en prisma/schema.prisma:344 leadNotificationMode",
+     "src/lib/client-notifications/decide.ts:84 digestCountWhere (aislado por org, con invariante); src/lib/client-notifications/templates.ts:196-206 (el digest de hoy dice «en la última hora»)",
+     "prisma/schema.prisma:1487 firstContactedAt (lo sella src/modules/chatbot/server/admin/updateLeadStatus.ts:40-46) e índices :1519 [status] y :1524",
+     "src/lib/rate-limit/limiter.ts:37 checkRateLimit: sirve para marcar «ya avisé» sin schema",
+     "netlify/functions/generate-insights-cron.ts y netlify.toml:25-26: el molde de una función programada"
+    ],
+    "que_falta": "La ruta /api/cron/lead-reminders (con CRON_SECRET), su wrapper netlify/functions/lead-reminders-cron.ts y la entrada en netlify.toml (vercel.json:3-14 agenda crons que en Netlify no corren). En notify.ts, la rama DAILY_DIGEST: no se manda nada en el momento. El cron, una vez por día y por org: (a) en DAILY_DIGEST, los leads del día; (b) en todos los modos, los NEW sin firstContactedAt de más de 24 h (y los hot de más de 2 h en Pro/Business), cada uno con link a /dashboard/chatbot/leads/[id]. Un solo email por org y por día, marcado con checkRateLimit. Un template nuevo «siguen esperando». Fallback a inmediato si el digest no salió en 26 h. La query que cruza orgs pasa por el helper de aislamiento (unsafeGlobalQuery con motivo).",
+    "esfuerzo": "M: cron, template y una rama en notify.ts; las piezas puras y el invariante de aislamiento ya existen.",
+    "costo_operativo": "Como mucho 1 email por org y por día, y solo si hay pendientes: con 30 orgs son ≤30 por día contra los 300/día de la cuenta única de Brevo (brevo-service.ts:4), compartida con los avisos inmediatos, los insights y las campañas. Las orgs en DAILY_DIGEST dejan de recibir N avisos inmediatos, así que en neto el volumen puede bajar. Una corrida diaria son ~60 invocaciones/mes con el wrapper y un despertar de Neon por día (~5 min). El recordatorio de 2 h para los calientes pide correr cada 2-3 h: ≈5 corridas por día, ≈12 h/mes de cómputo de Neon si la base estaba dormida. Sin LLM.",
+    "riesgo": "Puede volverse spam si el dueño trabaja el lead por WhatsApp y no toca «Lo contacté»: un solo recordatorio por lead y respetar DISABLED. Si el cron falla en silencio (FAL-029), las orgs en DAILY_DIGEST se quedan sin ningún aviso, peor que hoy; por eso el fallback es obligatorio.",
+    "zona": "libre",
+    "origen": "nueva (fusiona «Aviso: tenés un lead caliente sin contestar» y «Activar el Digest diario»)",
+    "impacto": 4,
+    "factibilidad": 4,
+    "costo": 3,
+    "cuenta": "4 × 4 ÷ 3 = 5,3. Impacto 4: los leads que se enfrían son plata perdida, y además se corrige una opción de la UI que miente. Factibilidad 4: notify, decide, templates, firstContactedAt y el molde de cron existen; falta el cron y la rama. Costo 3: M, con Brevo compartido y despertares de Neon.",
+    "verificacion": "notify.ts:1-12 y :50-175 (resolveRecipientEmail privada en :61; comentario de DAILY_DIGEST en :91-95; el digest «por hora» va por checkRateLimit). decide.ts:35-100. AdvancedTab.tsx:110-125. templates.ts:190-210. updateLeadStatus.ts:30-60. limiter.ts:30-45. schema.prisma:1512-1527 (índices). netlify.toml y vercel.json completos; netlify/functions tiene solo 3 archivos."
+   },
+   {
+    "titulo": "«Ideas para crecer» con la velocidad de respuesta, el rating de Google y los carritos de la tienda",
+    "problema": "«Ideas para crecer» tiene 4 reglas que miran solo el bot y el plan, y 3 son upsell de develOP. No usa lo que ya se sabe del negocio: cuánto tarda el dueño en contestar, el rating de Google y los carritos abandonados.",
+    "habilitadores": [
+     "src/lib/recommendations/rules.ts:156-161 RECOMMENDATION_RULES (4 reglas), :16-25 THRESHOLDS con muestra mínima y :175 evaluateRules (puro)",
+     "src/lib/recommendations/types.ts:16-46 RecommendationSignals; src/lib/recommendations/get-recommendations-for-org.ts:32-41 arma las señales aisladas por org",
+     "src/lib/dashboard/home-metrics-logic.ts:69-79 computeVelocity; src/lib/integrations/google-business-profile.ts:209 averageRating; src/lib/integrations/tiendanube.ts:71 y :158 abandonedCarts7d",
+     "src/lib/recommendations/recommendations.invariant.ts: el banco puro donde se suman los casos"
+    ],
+    "que_falta": "Señales nuevas leídas de cachés existentes y con timeout: avgResponseMinutes (computeVelocity) y googleRating (getGBPMetrics); abandonedCarts solo después de verificar el endpoint. Reglas: «contestás en X h» (una acción, sin módulo), «rating < 4,2 → Motor de Reseñas» y, si el dato se confirma, «N carritos → email marketing». Cada una con muestra mínima y sus casos en el invariante.",
+    "esfuerzo": "S: el motor es declarativo y puro, y agregar reglas es justamente su punto de extensión.",
+    "costo_operativo": "Sin costo marginal: no usa LLM; las señales salen de cachés que ya existen (Tiendanube 30 min, GBP 1 h) y de una query de velocidad sobre leads.",
+    "riesgo": "El número de carritos no es confiable: tiendanube.ts:115 llama a /carts?abandoned=true (el recurso documentado de Tiendanube para checkouts abandonados es /checkouts, a verificar) y :158 cuenta hasta 50, sin filtro de 7 días, aunque el campo se llame abandonedCarts7d. No apoyar una regla en ese número hasta verificarlo. El rating solo existe para orgs conectadas a mano. Hay que mantener la honestidad del motor. Con la caché fría suma latencia al Inicio.",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 3,
+    "factibilidad": 3,
+    "costo": 2,
+    "cuenta": "3 × 3 ÷ 2 = 4,5. Impacto 3: consejos accionables a partir de datos propios en lugar de upsell. Factibilidad 3: la regla de velocidad está lista; el rating depende de conexiones manuales y los carritos de un endpoint dudoso. Costo 2: S, sin costo marginal.",
+    "verificacion": "rules.ts:1-60 y :140-230 (connect-gbp, reviews-engine, hot-leads-crm y executive-report; evaluateRules en :175, computeRecommendations en :212). types.ts:14-48. get-recommendations-for-org.ts:25-70 (hotLeads ya es señal). home-metrics-logic.ts:60-90. tiendanube.ts:71, :113-118 y :158."
+   },
+   {
+    "titulo": "Pedir el referido en el momento de valor: después de ventas registradas, «Atención hoy» ofrece el link",
+    "problema": "El programa de referidos existe, pero solo funciona si el cliente entra por su cuenta a /dashboard/referidos; ninguna pantalla se lo propone. Pedirlo cuando el dueño marca ventas que vinieron del bot (y no tiene problemas abiertos) le trae a develOP clientes sin costo de adquisición, y al cliente su beneficio.",
+    "habilitadores": [
+     "src/lib/referrals/referrals.service.ts:28 getOrCreateReferralCodeForOrg; src/lib/referrals/code.ts:29 buildReferralLink",
+     "src/modules/chatbot/lead-status-rules.ts:23-27 (sold → WON), lo persiste src/modules/chatbot/server/admin/updateLeadStatus.ts:40-56",
+     "src/lib/dashboard/attention.ts:25-31: superficie priorizada del Inicio, cacheada 5 min",
+     "prisma/schema.prisma:1850-1859 Referral (status, referredOrgId, rewardedAt); admin/referrals ya existe",
+     "netlify.toml:28-29 send-weekly-reports-cron: src/lib/email/templates/weekly-report.ts es el email semanal que sí sale en Netlify"
+    ],
+    "que_falta": "src/lib/referrals/value-moment.ts, puro: primer WON, o ≥3 WON en 30 días, con 0 tickets abiertos. Un ítem en attention.ts con el link y un botón de copiar. Un marcador de «ya ofrecido», porque la ausencia de Referral no sirve (ofrecer no es referir): sin él, el ítem queda fijo mientras dure la condición. Puede ser una clave en RateLimit con ventana de 30 días al cerrar o copiar. El bloque de email va en weekly-report.ts, no en executive-weekly.ts: ese envío está agendado solo en vercel.json:11-13 y en Netlify no corre.",
+    "esfuerzo": "S: una regla pura, un ítem de Atención, un marcador y un bloque de email.",
+    "costo_operativo": "Sin costo marginal: 1-2 counts por carga del Inicio (cacheado 5 min) y un bloque dentro de un email que ya se manda. Sin LLM.",
+    "riesgo": "La señal WON depende de que el dueño toque «Vendido». Sin el marcador se vuelve insistente. No pedirlo a quien tiene problemas abiertos (la regla lo filtra).",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 3,
+    "factibilidad": 3,
+    "costo": 2,
+    "cuenta": "3 × 3 ÷ 2 = 4,5. Impacto 3: adquisición sin costo para develOP y beneficio para el cliente, pero depende de que se marquen ventas. Factibilidad 3: el servicio, el link y la superficie existen; falta un marcador que la idea original creía derivable y no lo es. Costo 2: S, sin costo marginal.",
+    "verificacion": "referrals.service.ts:20-40 y code.ts:25-35. lead-status-rules.ts:1-40. updateLeadStatus.ts:30-60. attention.ts:25-31. schema.prisma:1850-1859. netlify.toml (send-weekly-reports-cron) y vercel.json (send-executive-reports). Existen src/lib/email/templates/weekly-report.ts y executive-weekly.ts. Existen dashboard/referidos y admin/referrals."
+   },
+   {
+    "titulo": "El bot consulta el catálogo y el stock de Tiendanube",
+    "problema": "El visitante pregunta «¿tenés X en talle M?, ¿cuánto sale?» y el bot solo sabe lo que develOP cargó a mano en la KB, que se desactualiza. Se pierden ventas o se promete un stock que no hay.",
+    "habilitadores": [
+     "src/lib/integrations/tiendanube.ts:104-111: ya lee productos con variantes y stock; :52 getAuth por org",
+     "src/modules/chatbot/server/tools/types.ts:13: ToolCallContext.organizationId; src/modules/chatbot/server/tools/getTools.ts:13-21 TOOL_BUILDERS y :48-55 CARD_RENDERING_TOOL_CONNECTORS",
+     "src/modules/chatbot/components/tool-cards/renderToolCall.tsx:48-71: tarjetas por tool",
+     "src/modules/chatbot/server/prompts/sections.ts:61: servicesOrProducts entra como texto fijo (prisma/schema.prisma:1355)",
+     "prisma/schema.prisma:369 tiendanubeConnectedAt (para habilitar la tool); src/modules/chatbot/server/llm/providers/google.ts:14-18 (flash: USD 0,30 de entrada y 2,50 de salida por M)"
+    ],
+    "que_falta": "Una tool server-side buscar_producto contra /products?q= de Tiendanube (a verificar en la API), con unstable_cache corto por (org, término), que devuelva hasta 5 productos con precio y stock. Una tarjeta de producto con link a la tienda, sumada a CARD_RENDERING_TOOL_CONNECTORS. Habilitarla solo con tiendanubeConnectedAt. Darla de alta en Plan.tools con un script puntual: correr el seed pisa los precios (prisma/seeds/sync-plans.ts:47-51). Una regla de prompt: «el stock es orientativo, no confirmes disponibilidad». Corregir antes el stock null → 0 (tiendanube.ts:144); si no, el bot dice «sin stock» de productos con stock ilimitado.",
+    "esfuerzo": "M: tool, tarjeta y habilitación; el cliente HTTP ya existe.",
+    "costo_operativo": "Con la tool, el costo aparece solo en los turnos que preguntan: paso extra con ~4k de contexto supuesto más ~170 tokens de resultado × USD 0,30/M ≈ USD 0,0013, más ~150 de salida × USD 2,50/M ≈ USD 0,0004, o sea ≈ USD 0,0017 por consulta. Si pregunta el 30% de las 5.000 conversaciones del Business (sync-plans.ts:104), 1.500 × 0,0017 ≈ USD 2,6/mes contra un precio de USD 150. La alternativa de meter 200 productos en el prompt (~3.400 tokens por turno) costaría ≈ USD 20/mes. La API de Tiendanube no tiene costo.",
+    "riesgo": "La latencia de Tiendanube cae dentro del turno (techo de 10 s de Netlify; la ruta declara maxDuration=30 en src/app/api/chatbot/[slug]/chat/route.ts:8, que Netlify no aplica, TEC-006) y en stopWhen: stepCountIs(3) (handleChatRequest.ts:953): si en el mismo turno también corre capture_lead, faltan pasos. Por la caché, precio y stock pueden estar desfasados. Con el token revocado devuelve null sin avisar (FAL-029). El límite de requests de Tiendanube está a confirmar.",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 4,
+    "factibilidad": 3,
+    "costo": 3,
+    "cuenta": "4 × 3 ÷ 3 = 4,0. Impacto 4: para el cliente con tienda es contestar precio y stock reales en lugar de mandar a WhatsApp. Factibilidad 3: el cliente HTTP, el contexto con organizationId y el catálogo de tools existen; la búsqueda por texto no está verificada y el presupuesto de pasos es justo. Costo 3: M, con LLM marginal chico (~USD 2,6/mes por cliente Business) y latencia dentro del turno.",
+    "verificacion": "tiendanube.ts:40-160 (getAuth en :52; products en :104-111; stock null → 0 en :144). tools/types.ts:1-30. getTools.ts:1-70. renderToolCall.tsx:45-72. sections.ts:55-66. sync-plans.ts:40-110 (BASE_TOOLS_5 y STARTER_TOOLS; quota 5000). google.ts:1-30. handleChatRequest.ts:945-960. Grep de maxDuration en app/api."
+   },
+   {
+    "titulo": "Radar de cartera en riesgo: un parte diario por Telegram y una sección «En riesgo» en el admin",
+    "problema": "De develOP: hoy nadie se entera de que un cliente se está enfriando. Las alertas de inactividad y el detector de bots existen, pero ningún cron los dispara, y el admin no tiene una vista de quién está en riesgo. Al cliente le llega como un llamado de develOP antes de que se dé de baja: el bot lleva 7 días sin conversaciones (widget roto o sacado del sitio), sus contactos se acumulan sin atender o no hay movimiento.",
+    "habilitadores": [
+     "src/lib/alerts.ts:195-270 runPeriodicAgencyAlerts (inactividad de 30 días y vencimientos); src/app/api/cron/alerts/route.ts:4-18: ruta con X-Cron-Secret sin disparador",
+     "src/modules/chatbot/server/admin/detectBotIssues.ts:180-195 CLIENT_NO_ACTIVITY (bot activo sin conversaciones en 7 días); :285 runAlertDetector; prisma/schema.prisma:146",
+     "src/lib/notifications/telegram.ts:67 sendTelegram",
+     "netlify/functions/generate-insights-cron.ts y netlify.toml:25-32: el molde de función programada",
+     "src/lib/dashboard/home-metrics-logic.ts:114-126: conteo de leads 'pending' (NEW sin contacto)"
+    ],
+    "que_falta": "No alcanza con programar las rutas que existen (ver riesgo). Hace falta src/lib/admin/cartera-riesgo.ts con señales agregadas por groupBy, sin N+1: conversaciones del bot en 7 días, leads NEW sin tocar, mensajes y tickets del cliente sin respuesta, estado de la suscripción. Una regla pura con invariante. Una sección «En riesgo» en src/app/(protected)/admin/page.tsx. Un cron diario (netlify/functions más netlify.toml) que mande un único digest de Telegram. CLIENT_NO_ACTIVITY se usa como señal, no por su email.",
+    "esfuerzo": "M: una lib de señales, una sección del admin y un wrapper de cron calcado del molde; sin schema.",
+    "costo_operativo": "Un cron diario son ~60 invocaciones por mes con el wrapper, frente a las 125.000/mes del Free (el plan real no se puede confirmar desde el repo, generate-insights-cron.ts:26). Unas pocas queries agrupadas por corrida y un despertar de Neon por día. Telegram es gratis. Brevo: 0 si el parte va solo por Telegram.",
+    "riesgo": "Si se programan las rutas tal cual, salen mal. runPeriodicAgencyAlerts mide la «actividad» con mensajes, tickets, facturas, bóveda y brandProfile (alerts.ts:204-237): un cliente con el bot vendiendo y sin tickets figura inactivo, y además se manda un webhook por org en cada corrida, sin deduplicar (alerts.ts:266-274). El detector manda un email por cada issue nueva, INFO incluido (detectBotIssues.ts:267), con una deduplicación de 24 h (:251): un cron diario volvería a alertar todos los días por el Brevo compartido. También hace ~10 queries secuenciales por bot (desde :38), lo que con 30 bots roza los 10 s. Falsos positivos: el login no se registra (FAL-001) y la facturación seedeada (FAL-006) puede disparar alarmas. Fuera de scope: la ruta detect-bot-issues le devuelve String(error) al cliente (route.ts:17).",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 4,
+    "factibilidad": 3,
+    "costo": 3,
+    "cuenta": "4 × 3 ÷ 3 = 4,0. Impacto 4: retener clientes es la palanca más barata de develOP y llega al cliente como soporte proactivo. Factibilidad 3: las señales sueltas existen, pero las dos rutas que ya están dan señales sesgadas y sin deduplicar, y hay que rehacer la agregación. Costo 3: M, con costo operativo bajo.",
+    "verificacion": "alerts.ts:190-275 (el select de organizations no incluye conversaciones ni login; sendAgencyAlert por org en :274 y :284). cron/alerts/route.ts completo. netlify.toml solo agenda generate-insights, send-weekly-reports y cleanup-old-events; netlify/functions tiene esos 3 archivos. detectBotIssues.ts:24-60, :175-200 y :240-320. detect-bot-issues/route.ts:1-20. telegram.ts:60-75."
+   },
+   {
+    "titulo": "Checklist de onboarding operable desde la ficha del cliente, con autochequeo de lo que ya está conectado",
+    "problema": "El cliente ve en Inicio el avance de las tareas de configuración, pero nadie puede marcarlas: la action existe y no tiene pantalla. Los clientes dados de alta con el wizard ni siquiera reciben las tareas. La tarjeta queda eterna o no aparece, y develOP no tiene una lista de lo que le falta a cada cliente para ver valor.",
+    "habilitadores": [
+     "src/actions/admin/onboarding-tasks.ts:8-48 updateTaskStatus (SUPER_ADMIN), sin ningún llamador; al completar la última tarea le escribe al cliente (:33-40)",
+     "src/components/dashboard/OnboardingStatusCard.tsx:17-36: lee OnboardingTask y se oculta sola al completar; se renderiza en src/app/(protected)/dashboard/page.tsx:61",
+     "src/lib/onboarding/seed-tasks-for-org.ts:4: la llaman solo src/lib/actions/clients.ts:139 (createClientAction, sin importadores) y src/lib/actions/invitations.ts:93; el wizard (src/lib/onboarding/core.ts:58 onboardClientCore) no siembra",
+     "src/lib/data/onboarding-tasks.ts:43-72: catálogo con GA4, Search Console, GBP, etc.",
+     "prisma/schema.prisma:337 analyticsPropertyId, :362 gbpConnectedAt, :375 calComApiKey: datos para marcar tareas solas"
+    ],
+    "que_falta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/OnboardingTab.tsx (la carpeta tabs ya tiene Chatbot, Overview, Projects, Support y Vault), con estado y nota por tarea. Zod en onboarding-tasks.ts, que hoy no valida y lanza Error en lugar de devolver ActionResult (:10-12). Sembrar las tareas en onboardClientCore. src/lib/onboarding/auto-status.ts, puro, que marque COMPLETED las tareas cuyo dato existe. Corregir el revalidatePath (:44), que apunta a /admin/clients/[id]/onboarding, una ruta que no existe. Unificar con el ítem «Estamos configurando tu negocio» de attention.ts (:110-123), que usa otra fuente (Organization.dataConnections): hoy conviven dos sistemas de onboarding.",
+    "esfuerzo": "M: la pestaña con toggles es S; la siembra en el wizard, el autochequeo con invariante y la unificación lo llevan a M.",
+    "costo_operativo": "Sin costo marginal: lee columnas que ya existen al abrir la ficha. Ningún cron obligatorio. Un Message al cliente al terminar.",
+    "riesgo": "Conviven clientes viejos sin tareas con clientes nuevos sembrados: hay que decidir si se siembra para atrás. El autochequeo no debe dar por lista una conexión rota (credencial vencida): solo presencia del dato y, cuando se pueda, la última sincronización.",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 3,
+    "factibilidad": 4,
+    "costo": 3,
+    "cuenta": "4,0 = 3 × 4 ÷ 3. Impacto 3: saca al cliente de una tarjeta trabada y le da a develOP la lista de pendientes por cliente. Factibilidad 4: la action, la tarjeta, el catálogo y la siembra existen; falta la pantalla y conectar la siembra. Costo 3: M, sin costo operativo.",
+    "verificacion": "onboarding-tasks.ts:1-50. Grep de updateTaskStatus y updateTaskNotes: fuera del archivo solo aparece updateTaskStatusAction de projects.ts, que es otra cosa. Grep de seedOnboardingTasksForOrg(: clients.ts:139 e invitations.ts:93. Grep de createClientAction: solo su definición. OnboardingStatusCard.tsx:1-40 y dashboard/page.tsx:61. data/onboarding-tasks.ts:40-75. Listado de admin/clients/[clientId]/_components/tabs. attention.ts:110-123."
+   },
+   {
+    "titulo": "Tablero de oportunidades de upsell para develOP: las reglas de «Ideas para crecer» corridas sobre toda la cartera",
+    "problema": "De develOP: las señales de upsell están dispersas. Las recomendaciones solo las ve el cliente en su Inicio, el «avisame» vive en una pestaña de Leads y la cuota agotada llega como alerta suelta. Nadie arma la lista de a quién ofrecerle qué esta semana. Al cliente le llega una propuesta basada en las mismas señales que ya ve en su panel.",
+    "habilitadores": [
+     "src/lib/recommendations/rules.ts:156-161 y :212: RECOMMENDATION_RULES y computeRecommendations, puros",
+     "src/lib/recommendations/get-recommendations-for-org.ts:29-66: arma las señales por org",
+     "src/app/(protected)/admin/leads/_actions/module-demand.actions.ts:23 listModuleDemand (con requireSuperAdmin); hoy solo se ve en el tab de admin/leads/page.tsx:120",
+     "prisma/schema.prisma:1201-1202 OrganizationModule.upsellRequestCount y upsellLastRequestedAt",
+     "src/app/(protected)/admin/messages/[orgId]/page.tsx:27-38: el hilo abre para cualquier org existente"
+    ],
+    "que_falta": "src/lib/recommendations/get-recommendations-for-all-orgs.ts: un loader en lotes (no 150 queries en paralelo contra el pool de Neon), con unstable_cache de 1 h. Una página propia, /admin/upsell, que liste org → recomendación → señal → último pedido del cliente, con la cuota agotada del mes (QuotaUsage.degradedAt) como fila aparte. Un botón «Escribirle» a /admin/messages/[orgId] con el texto sugerido. En la v1 no se persiste el descarte, para no tocar el schema.",
+    "esfuerzo": "M: un loader en lote y una vista; las reglas ya están escritas y probadas.",
+    "costo_operativo": "Son 5 lecturas por org (get-recommendations-for-org.ts:32-41) más el análisis mensual: con 30 orgs, ~150+ queries por carga. Cacheado 1 h, no despierta Neon en cada clic. Sin LLM ni email.",
+    "riesgo": "Las reglas se pensaron para que las lea el cliente: el umbral de muestra mínima (rules.ts:16-25) no se baja para el admin. Ofrecer algo que el cliente ya pidió y nunca se le activó (FAL-005) quema confianza, así que hay que mostrar ese estado. Montarlo como pestaña de admin/leads es meterse en la página del CRM de OsLead (admin/leads/page.tsx:116 carga getLeads), adyacente a ZONA-FRANCO: va como página aparte.",
+    "zona": "libre (como /admin/upsell; no como pestaña de admin/leads)",
+    "origen": "nueva",
+    "impacto": 3,
+    "factibilidad": 4,
+    "costo": 3,
+    "cuenta": "3 × 4 ÷ 3 = 4,0. Impacto 3: ordena la venta de develOP; al cliente le llega solo como una propuesta mejor apuntada. Factibilidad 4: las reglas son puras y las señales ya se arman por org; falta el loader en lote. Costo 3: M, con ~150 queries por carga mitigadas con caché.",
+    "verificacion": "rules.ts:140-230. get-recommendations-for-org.ts:25-70. module-demand.actions.ts:15-40 (requireSuperAdmin; cruza orgs a propósito). admin/leads/page.tsx:110-125 (getLeads más listModuleDemand en el tab 'demand'). admin/messages/[orgId]/page.tsx:20-40. schema.prisma:1201-1202. El listado de admin/ confirma que existen admin/leads (CRM de OsLead) y admin/leados por separado."
+   },
+   {
+    "titulo": "Ventas de tu tienda que vinieron del bot (Tiendanube cruzado con los contactos)",
+    "problema": "El dueño con Tiendanube ve una «plata estimada» que es leads × un ticket que carga él mismo, y «Vendido» depende de que se acuerde de tocar el botón. No sabe cuántas compras reales salieron de las consultas del bot.",
+    "habilitadores": [
+     "src/lib/integrations/tiendanube.ts:92-100: ya trae las órdenes del mes y del mes anterior (cacheadas 1800 s, :74-79); hoy solo tipa total y products (:96)",
+     "prisma/schema.prisma:1448-1449 ChatbotLead.email y phone; :409 averageTicketUsd",
+     "src/lib/dashboard/home-metrics-logic.ts:93-96 estimateMoney y :117-126 buildFunnel (sold cuenta solo el WON manual)",
+     "src/components/dashboard/home/MoneyEstimate.tsx:4-5: la cifra se presenta siempre como estimado"
+    ],
+    "que_falta": "Ampliar el tipo de la orden con contact_email y contact_phone (campos de la API de Tiendanube, a verificar). Una función pura que cruce lead con orden: email normalizado, teléfono por los últimos 8 dígitos, orden posterior a capturedAt y dentro de 30 días; como esa ventana cruza meses, usa también las órdenes del mes anterior (:99). Con su invariante. Paginación: hoy pide per_page=200 sin paginar (:93). Una tarjeta «Compras confirmadas en tu tienda» en Inicio y en tienda-conectada. Opcional: sugerir «Marcar vendido» en los leads que cruzaron.",
+    "esfuerzo": "M: lógica pura más una tarjeta, sobre un fetch que hay que tipar mejor y paginar.",
+    "costo_operativo": "Sin costo marginal: usa las mismas llamadas a Tiendanube que ya se hacen (más las páginas extra en los meses con más de 200 órdenes) y una query a Neon por org con los leads con email o teléfono de los últimos 60 días.",
+    "riesgo": "La tasa de cruce puede ser baja (muchos leads dejan solo teléfono, en formatos distintos): mostrar «al menos N» y nunca inventar. El corte del mes usa la hora del servidor (tiendanube.ts:86-88), no la de Argentina. Nunca mostrar en la UI el email de los compradores.",
+    "zona": "libre",
+    "origen": "nueva",
+    "impacto": 4,
+    "factibilidad": 2,
+    "costo": 3,
+    "cuenta": "4 × 2 ÷ 3 = 2,7. Impacto 4: es la prueba de retorno más fuerte que develOP le puede mostrar a un cliente con tienda. Factibilidad 2: los campos de contacto de la orden no están verificados, el fetch no pagina y el cruce por teléfono es frágil. Costo 3: M, sin costo marginal.",
+    "verificacion": "tiendanube.ts:84-118 (tipos de orden solo con total y products en :96 y solo total en :100; per_page=200 en :93 y :99; monthStart con la hora del servidor en :87). schema.prisma:409 y :1447-1449. home-metrics-logic.ts:90-126. No pude verificar los campos contact_email y contact_phone de la API (no se consulta la web en esta fase)."
+   },
+   {
+    "titulo": "El bot ofrece turnos de la agenda del negocio (Cal.com)",
+    "problema": "Cuando un visitante quiere agendar, el bot solo toma el dato o lo deriva a WhatsApp. El dueño coordina a mano y el turno se enfría.",
+    "habilitadores": [
+     "prisma/schema.prisma:1463 requestedAppointment y :160 ChatbotLeadIntent.SCHEDULE_VISIT: la intención ya se detecta",
+     "prisma/schema.prisma:376-377 calComUsername y calComEmbedUrl; src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx:347 ya arma la URL pública de reserva",
+     "src/lib/integrations/cal-com-v2.ts:50 getSlots y :108 createBooking (sin auth, según el encabezado :9-10); src/lib/leados/agenda.ts:100 parseEventTypeSlug",
+     "src/modules/chatbot/server/tools/getTools.ts:13-21 TOOL_BUILDERS y :48-55 CARD_RENDERING_TOOL_CONNECTORS; src/modules/chatbot/components/tool-cards/renderToolCall.tsx:48-71"
+    ],
+    "que_falta": "Primero, y obligatorio: anclar getCalConfigLeadOS (src/lib/leados/agenda.ts:58-83) a la org 'develop'. Hoy toma cualquier org con calComUsername y, si hay dos o más, devuelve «ambiguo»: en cuanto se cargue el Cal.com de un cliente, el paso de agenda del setter se rompe. Recién después: un escritor de calComUsername y calComEmbedUrl (hoy no hay ninguno en la app, solo lecturas), la tool offer_booking más su tarjeta (en la v1, el link de reserva con nombre y email ya completados; en la v2, 3 horarios traídos con getSlots), el alta en Plan.tools con un script puntual (sync-plans.ts:47-51) y una regla de prompt.",
+    "esfuerzo": "M: tool, tarjeta, Plan.tools y configuración, más la corrección en LeadOS coordinada con Franco.",
+    "costo_operativo": "Cal.com público, sin costo. LLM: un paso extra solo en los turnos de agenda, ~4k de contexto supuesto × USD 0,30/M ≈ USD 0,0012 (a medir con Conversation.tokensIn, schema.prisma:1397). La v1 (solo el link) evita llamar a getSlots dentro del turno.",
+    "riesgo": "Si no se corrige antes agenda.ts:58-83, se rompe LeadOS, y es un bug latente aunque esta idea no se haga. Si se confunde la org, la reserva cae en el calendario equivocado. createBooking va sin auth: una v2 que reserve desde el bot permite que cualquiera reserve en nombre de cualquiera, así que la v1 es solo el link. Hay que entrar en stepCountIs(3) (handleChatRequest.ts:953) y en el techo de 10 s (TEC-006). Con Cal.com caído, la tarjeta queda sin horarios.",
+    "zona": "ZONA-FRANCO (la corrección en src/lib/leados/agenda.ts es obligatoria; lo nuevo del bot es libre)",
+    "origen": "nueva",
+    "impacto": 4,
+    "factibilidad": 2,
+    "costo": 3,
+    "cuenta": "4 × 2 ÷ 3 = 2,7. Impacto 4: un turno tomado en el momento vale mucho para una PyME de servicios. Factibilidad 2: obliga a tocar ZONA-FRANCO antes que nada, no hay escritor de la configuración y hay que dar de alta Plan.tools en la DB. Costo 3: M, con costo marginal mínimo.",
+    "verificacion": "agenda.ts:50-110: findMany sin filtro de org y rama orgs.length > 1 → «ambiguo». cal-com-v2.ts:1-60 y :100-125. agenda-inteligente/page.tsx:340-352. Grep de 'calComUsername' fuera de selects y de leados: solo lecturas en page.tsx:347-348; ningún escritor. getTools.ts:1-70. renderToolCall.tsx:45-72. sync-plans.ts:40-75. schema.prisma:160, :376-377 y :1463."
+   }
+  ],
+  "descartadas": [
+   {
+    "titulo": "Tus contactos del bot entran solos a tu lista de email / Reactivar los «No avanzó» con una campaña segmentada (fusionadas)",
+    "motivo": "El habilitador no hace lo que la idea da por hecho. El token de baja firmado existe, pero la baja solo marca EmailContact.optedOut en Postgres (src/app/api/email/optout/[contactId]/route.ts:91-94); en todo src no hay nada que saque al contacto de la lista de Brevo. Y sendCampaignAction le manda a la lista entera de Brevo (src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:188-195; createCampaign con recipients.listIds en src/lib/integrations/brevo.ts). O sea: quien se dio de baja sigue recibiendo campañas. Sumar a ese circuito leads que dejaron el email para una consulta (Ley 25.326) agranda un problema legal. Además, hay una sola cuenta de Brevo para todos los clientes (brevo.ts:4, brevo-service.ts:4): una campaña de 300 contactos agota el día de todos, avisos de lead incluidos. Y el fromEmail del cliente (_actions.ts:131-134) no está verificado como remitente en esa cuenta. Antes hay que propagar la baja a Brevo y segmentar las campañas; eso es un arreglo, no una feature. Recién después se puede reevaluar."
+   },
+   {
+    "titulo": "Cobro del mantenimiento en un paso (del mes generado a la factura con link de pago)",
+    "motivo": "Queda fuera del top 15 por puntaje: 4 × 2 ÷ 4 = 2,0. Es sobre todo remediación de escritores que faltan. En src no hay ningún escritor de Invoice (grep de invoice.create/upsert/update: 0), y maintenanceStartDate tampoco tiene escritor, así que generatePendingMaintenance falla en src/app/(protected)/admin/projects/_actions/maintenance.actions.ts:121-123. Además mueve estados de plata real: PAST_DUE dispara el ítem crítico de attention.ts:70-78 a quien quizá pagó por transferencia. Y la versión robusta pide Invoice.osMaintenancePaymentId en prisma/schema.prisma (congelado). Va al plan de remediación de FAL-006, FAL-007 y FAL-023, no a F4."
+   },
+   {
+    "titulo": "Pedile la reseña al cliente que te compró (generador 1)",
+    "motivo": "Duplicado. Se fusionó en «Pedile la reseña» del ranking con la versión del generador 2, que suma el escritor de googleMapsPlaceId."
+   },
+   {
+    "titulo": "Aviso: tenés un lead caliente sin contestar",
+    "motivo": "Duplicado parcial. Se fusionó en «Contactos sin atender: recordatorio al dueño y el Digest diario»: los dos usan el mismo cron, el mismo destinatario (resolveRecipientEmail) y la misma marca de «ya avisé» (checkRateLimit)."
+   },
+   {
+    "titulo": "Activar el «Digest diario» de contactos y recordatorio de más de 24 h",
+    "motivo": "Duplicado parcial. Se fusionó en «Contactos sin atender: recordatorio al dueño y el Digest diario». La parte del ítem «N contactos esperando» en attention.ts no se suma, porque ese conteo ya es el badge del sidebar (src/app/(protected)/dashboard/layout.tsx:47)."
+   },
+   {
+    "titulo": "Rama 'lead' de «Atención hoy» (parte de la idea del generador 1)",
+    "motivo": "Redundante. countHotNewLeadsForOrg ya alimenta el badge del sidebar (dashboard/layout.tsx:47 y chatbot/layout.tsx:14) y el recordatorio fusionado cubre el empuje. La idea de «Atención hoy» queda en el ranking solo con las ramas de reseñas y stock."
+   }
+  ],
+  "olme": [
+   {
+    "idea": "Cerrar lead → convertir en cliente, con vínculo de ID duro",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:11-22",
+    "factibilidad_hoy": "Más barata que la «Complejidad: Alta» del doc (:22). El vínculo duro ya existe por Project, sin schema nuevo: Project.osLeadId @unique con relación a OsLead (prisma/schema.prisma:557, :562) y Project.organizationId (:559-560). convertLeadToProject existe (admin/projects/_actions/project.actions.ts:833, con requireSuperAdmin y transacción). Lo que falta: el botón de la ficha está fijo en disabled (admin/leads/[leadId]/page.tsx:281-289, gate en :227); ConvertLeadDialog no se monta en ningún lado (grep: 0 importadores); el diálogo no manda organizationId (convert-lead-dialog.tsx:109-112), así que el proyecto cae en la org 'develop' (project.actions.ts:229-239); y no da de alta la Organization (habría que reusar createClientOnly). Esfuerzo M. Escribe OsLead.status, así que es ZONA-FRANCO y hay que coordinarlo con Franco. Valor interno.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Scoping per-tenant de Inteligencia (Actividad, Health, Alertas)",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:28-32",
+    "factibilidad_hoy": "No hacen falta las 3 migraciones: ChatbotEvent y BotAlert ya cuelgan de botConfigId (schema.prisma:1601, :1624) y BotConfig tiene organizationId. Siguen los hardcodes: admin/chatbot/activity/page.tsx:11 y :34 ('develop') y health/page.tsx:12. checkChatbotHealth ya acepta un slug (checkHealth.ts:21). getActivityChartData y getLatencyHistory son globales con un PENDIENTE-DECISIÓN escrito en el código. Alcanza con un selector ?bot=slug y pasar el botId. Esfuerzo S-M, zona libre. Valor solo interno.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Color de acento por ruta en el widget en runtime",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:34-37",
+    "factibilidad_hoy": "Parcial. El cyan ya es solo el fallback (ChatWindow.tsx:67 y :116; LogicCompanion.tsx:226 y :247 usan config.accentColor). routeColorMap se valida (saveBotConfig.ts:55), se edita (BehaviorTab.tsx:43-44) y viaja en la config pública (getPublicConfig.ts:94, :121), pero nadie lo lee: resolveAccentColor no existe (grep: 0). Para el widget de develOP es S (usePathname). Para el widget embebido del cliente es M: el iframe /embed/[slug] no conoce la ruta de la página anfitriona. Zona libre. Valor bajo para la PyME.",
+    "en_ranking": false
+   },
+   {
+    "idea": "pipelineOrder del kanban de Leads",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:39-42",
+    "factibilidad_hoy": "Sin hacer: model OsLead (schema.prisma:862) no tiene ningún campo de orden (grep pipelineOrder: 0). Exige una migración aditiva en prisma/schema.prisma (congelado) sobre un modelo OsLead* (ZONA-FRANCO). Esfuerzo M. Valor interno bajo frente al costo de tocar dos zonas protegidas: postergable.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Route B del preloader + Paint sprint (sitio público)",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:44-47",
+    "factibilidad_hoy": "Route B está hecho (existen src/components/ui/MarketingIntro.tsx y src/lib/marketing-routes.ts). El Paint sprint no: grep de clippingPlanes/THREE.Plane en src da 0. Viviría en src/components/ui/* (congelado) sin tocar HeroArtifact.tsx. Esfuerzo L. Es sitio público, fuera de la operación que mira F4.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Simplificar ensureAgencySettingsRecord con el singleton",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:53",
+    "factibilidad_hoy": "Pendiente y trivial: admin/settings/_actions/settings.actions.ts:38-41 sigue con findFirst orderBy updatedAt, aunque singleton @unique ya existe (schema.prisma:823). El mismo patrón se repite en src/lib/alerts.ts:111 y :154 y en src/lib/actions/messages.ts:148, así que conviene un único getAgencySettings(). Esfuerzo S, libre. Es refactor, no feature.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Máscara del token de Telegram en un único helper",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:54",
+    "factibilidad_hoy": "Hecho: maskSecret (src/lib/mask-secret.ts) lo importan settings.actions.ts:11 y settings-console.tsx:18, y src/lib/mask-secret.invariant.ts fija su comportamiento. Se puede cerrar.",
+    "en_ranking": false
+   },
+   {
+    "idea": "updateTimeEntry sin guard de pertenencia",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:55",
+    "factibilidad_hoy": "Sigue abierto: admin/team/_actions/time-entry.actions.ts:199 descarta lo que devuelve requireSuperAdmin y el select de :203-212 no trae userId, así que no compara con la sesión. Esfuerzo S. Hoy el riesgo real es bajo, porque todo usuario de /admin es SUPER_ADMIN. Es un guard de seguridad, no una feature.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Stat cards del Audit log según el filtro activo",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:56",
+    "factibilidad_hoy": "Sigue como se decidió («globales»): getAuditLogStats() no recibe parámetros (src/lib/audit-log-queries.ts:53) y se llama sin argumentos (admin/audit-log/page.tsx:15). Pasarle el mismo filtro que a listAuditLog es S. Es una decisión de producto, con valor bajo.",
+    "en_ranking": false
+   },
+   {
+    "idea": "date-preset-filter compartido",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:64",
+    "factibilidad_hoy": "Sigue y creció a 5 copias: alerts-date-filter.tsx, audit-filters.ts, leads/_components/lead-filters.ts (admin/leads, el CRM de OsLead), activityFilters.ts más ActivityDateFilter.tsx, y tickets/_components/ticket-date-filter.tsx. Refactor S-M, no feature.",
+    "en_ranking": false
+   },
+   {
+    "idea": "column-overview compartido",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:65",
+    "factibilidad_hoy": "Sigue duplicado: admin/alerts/_components/alert-column-overview.tsx y admin/leads/_components/column-overview.tsx. Esfuerzo S. La copia de leads está en el CRM de OsLead: hay que coordinar con Franco.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Dropdown de período compartido",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:66",
+    "factibilidad_hoy": "Sigue duplicado y hay una tercera copia: admin/audit-log/_components/audit-period-filter.tsx, admin/projects/_components/projects-period-dropdown.tsx y admin/leads/_components/inbound-period-filter.tsx. Esfuerzo S. Refactor.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Los 3 wrappers de hover de Clientes a @/components/ui",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:67",
+    "factibilidad_hoy": "Siguen: admin/clients/_components/HoverScaleCard.tsx, admin/tickets/_components/hover-scale.tsx y admin/messages/_components/message-bubble.tsx. El helper compartido adminHoverCls vive en src/lib/hover.ts:5. El destino que propone el doc, @/components/ui, está congelado: el destino posible es src/lib/hover.ts o src/components/admin. Esfuerzo S. Refactor.",
+    "en_ranking": false
+   },
+   {
+    "idea": "Merge de la lane del setter de Franco (OsLeadSetterMeta y ActivityChannel)",
+    "cita": "docs/_insumos/drive/Olme/Ideas de nuevas features.md:73",
+    "factibilidad_hoy": "En el repo ya está: están las migraciones prisma/migrations/20260619160000_add_os_lead_setter_meta y 20260619150000_add_activity_channel_sistema, y model OsLeadSetterMeta (schema.prisma:909). Sin correr prisma migrate status (prohibido en esta fase) no se puede verificar si en Neon quedaron registradas como ya aplicadas. Es ZONA-FRANCO y no es una feature.",
+    "en_ranking": false
+   }
+  ]
+ }
+}

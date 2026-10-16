@@ -39,6 +39,7 @@ Scripts de Node sin dependencias nuevas (solo `node:*` y `git`). Todos son de **
 | `planeado-extraer.mjs` | Un solo uso: junta la salida de los agentes de extracción de F1.12 (journal del workflow) en `_crudo/planeado-extraido/` |
 | `congelados-md.mjs` | Un solo uso (C17): escribe `11-CONGELADOS.md` desde los datos medidos, el análisis de los dos agentes (`_crudo/congelados-resultado.json`) y el registro; la política de niveles es texto del padre |
 | `diseno-md.mjs` | Un solo uso (C18): escribe `04-DISENO.md` desde el censo y `_crudo/f3-resultado.json`, con los DIS del padre, y agrega VH-174 a `08` |
+| `ideas-md.mjs` | Un solo uso (C20): escribe `05-IDEAS.md` desde `_crudo/f4-resultado.json`; comprueba cada cita de habilitador contra la base |
 | `atlas/semilla.mjs` | Un solo uso (F5): siembra los datos que después mantienen las personas (`funcionalidades.json`, `zonas.json`, `entradas.json`, `atlas.curado.json`); no pisa lo que ya existe |
 
 ## Reglas
