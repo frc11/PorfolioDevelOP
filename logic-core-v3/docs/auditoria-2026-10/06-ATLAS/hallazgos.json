@@ -25,13 +25,13 @@
   {
    "id": "FAL-010",
    "titulo": "Tráfico (GA4) sin camino de activación: nadie escribe analyticsPropertyId y el CTA no hace nada",
-   "severidad": "ALTA",
+   "severidad": "MEDIA",
    "tipo": "faltante",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h2.cli-resultados.trafico-ga4",
     "h2.cli-bienvenida.wizard-3-pasos",
-    "int.google-analytics",
+    "int.ga4",
     "h4.adm-clientes",
     "modelo.Organization"
    ],
@@ -39,7 +39,14 @@
    "linea": 115,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "h2.cli-resultados.trafico-ga4",
+    "h2.cli-bienvenida.wizard-3-pasos",
+    "int.google-analytics",
+    "h4.adm-clientes",
+    "modelo.Organization"
+   ]
   },
   {
    "id": "FAL-011",
@@ -50,17 +57,25 @@
    "nodo": [
     "h2.cli-resultados.reputacion-gbp",
     "h4.adm-clientes",
-    "int.google-business-profile",
+    "int.gbp",
     "h2.cli-resenas",
     "h4.adm-clientes.conectar-google-business",
-    "h2.cli-resenas.selector-sucursal",
-    "int.gbp"
+    "h2.cli-resenas.selector-sucursal"
    ],
    "archivo": "src/app/api/auth/google-business/start/route.ts",
    "linea": 7,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "h2.cli-resultados.reputacion-gbp",
+    "h4.adm-clientes",
+    "int.google-business-profile",
+    "h2.cli-resenas",
+    "h4.adm-clientes.conectar-google-business",
+    "h2.cli-resenas.selector-sucursal",
+    "int.gbp"
+   ]
   },
   {
    "id": "FAL-005",
@@ -109,7 +124,7 @@
     "h2.cli-soporte",
     "h2.cli-soporte.responder-ticket",
     "h4.adm-tickets",
-    "int.alert-webhook",
+    "lib.alerts",
     "modelo.Ticket",
     "modelo.Notification"
    ],
@@ -117,7 +132,15 @@
    "linea": 32,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "h2.cli-soporte",
+    "h2.cli-soporte.responder-ticket",
+    "h4.adm-tickets",
+    "int.alert-webhook",
+    "modelo.Ticket",
+    "modelo.Notification"
+   ]
   },
   {
    "id": "FAL-015",
@@ -132,14 +155,24 @@
     "h2.cli-referidos",
     "h2.cli-resultados.informe-mensual-pdf",
     "lib.actions",
-    "lib.ai",
-    "lib.dashboard"
+    "int.anthropic",
+    "h2.cli-inicio"
    ],
    "archivo": "src/lib/tickets/actions.ts",
    "linea": 101,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "int.sentry",
+    "h2.cli-soporte",
+    "h2.cli-reportes-email",
+    "h2.cli-referidos",
+    "h2.cli-resultados.informe-mensual-pdf",
+    "lib.actions",
+    "lib.ai",
+    "lib.dashboard"
+   ]
   },
   {
    "id": "FAL-006",
@@ -221,13 +254,20 @@
     "h2.cli-resenas",
     "h4.adm-clientes",
     "modelo.Organization",
-    "int.calcom"
+    "int.cal-com"
    ],
    "archivo": "prisma/schema.prisma",
    "linea": 375,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "h2.cli-agenda",
+    "h2.cli-resenas",
+    "h4.adm-clientes",
+    "modelo.Organization",
+    "int.calcom"
+   ]
   },
   {
    "id": "FAL-019",
@@ -297,13 +337,18 @@
    "nodo": [
     "h3.vis-widget-cliente",
     "h3.vis-widget-develop",
-    "int.vertex"
+    "lib.chatbot.llm"
    ],
    "archivo": "src/modules/chatbot/components/chat/ChatWindow.tsx",
    "linea": 311,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "h3.vis-widget-cliente",
+    "h3.vis-widget-develop",
+    "int.vertex"
+   ]
   },
   {
    "id": "FAL-021",
@@ -316,15 +361,22 @@
     "h3.vis-whatsapp.respuesta-automatica",
     "h3.vis-whatsapp.alta-canal",
     "modelo.MotorMessage",
-    "modelo.WabaChannel",
-    "int.360dialog",
-    "lib.motor"
+    "modelo.WabaChannel"
    ],
    "archivo": "src/app/api/motor/webhook/[channelToken]/route.ts",
    "linea": 9,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "h3.vis-whatsapp",
+    "h3.vis-whatsapp.respuesta-automatica",
+    "h3.vis-whatsapp.alta-canal",
+    "modelo.MotorMessage",
+    "modelo.WabaChannel",
+    "int.360dialog",
+    "lib.motor"
+   ]
   },
   {
    "id": "FAL-022",
@@ -454,13 +506,25 @@
     "h4.adm-alertas.deteccion-automatica",
     "int.cron.alerts",
     "h4.adm-config",
-    "int.vertex"
+    "lib.chatbot.llm"
    ],
    "archivo": "netlify.toml",
    "linea": 25,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "int.cron.detect-bot-issues",
+    "h4.adm-alertas",
+    "h3.adm-health",
+    "lib.chatbot.admin",
+    "modelo.BotAlert",
+    "h4.adm-alertas.detector-incidencias",
+    "h4.adm-alertas.deteccion-automatica",
+    "int.cron.alerts",
+    "h4.adm-config",
+    "int.vertex"
+   ]
   },
   {
    "id": "FAL-026",
@@ -507,7 +571,7 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h1.auth-login",
-    "h1.auth-login.password",
+    "h1.auth-login.login-password",
     "h1.auth-login.magic-link",
     "lib.auth",
     "int.sentry"
@@ -516,7 +580,14 @@
    "linea": 76,
    "zona": "FROZEN + ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "h1.auth-login",
+    "h1.auth-login.password",
+    "h1.auth-login.magic-link",
+    "lib.auth",
+    "int.sentry"
+   ]
   },
   {
    "id": "FAL-031",
@@ -530,7 +601,6 @@
     "h5.adm-revision-demos",
     "int.sentry",
     "lib.leados",
-    "int.cron.os-follow-up",
     "h5.set-dia.novedades-dirigidas",
     "h5.set-lead.escalamiento-construccion",
     "int.telegram",
@@ -540,7 +610,19 @@
    "linea": 71,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "h5.set-lead",
+    "h5.set-manual",
+    "h5.adm-revision-demos",
+    "int.sentry",
+    "lib.leados",
+    "int.cron.os-follow-up",
+    "h5.set-dia.novedades-dirigidas",
+    "h5.set-lead.escalamiento-construccion",
+    "int.telegram",
+    "modelo.OsSetterNotice"
+   ]
   },
   {
    "id": "FAL-032",
@@ -612,6 +694,24 @@
     "int.brevo",
     "int.gbp",
     "int.ga4",
+    "int.search-console",
+    "int.telegram",
+    "int.tiendanube",
+    "int.cal-com",
+    "int.pagespeed",
+    "int.cron.detect-bot-issues",
+    "lib.premium-modules"
+   ],
+   "archivo": "src/lib/analytics.ts",
+   "linea": 196,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "int.sentry",
+    "int.brevo",
+    "int.gbp",
+    "int.ga4",
     "int.searchconsole",
     "int.telegram",
     "int.tiendanube",
@@ -619,12 +719,7 @@
     "int.pagespeed",
     "int.cron.detect-bot-issues",
     "lib.integrations"
-   ],
-   "archivo": "src/lib/analytics.ts",
-   "linea": 196,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   ]
   },
   {
    "id": "FAL-030",
@@ -633,14 +728,17 @@
    "tipo": "faltante",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.sentry",
-    "lib.sentry"
+    "int.sentry"
    ],
    "archivo": "src/instrumentation.ts",
    "linea": 7,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "02-PENDIENTE.md"
+   "documento": "02-PENDIENTE.md",
+   "nodo_citado": [
+    "int.sentry",
+    "lib.sentry"
+   ]
   },
   {
    "id": "SEC-005",
@@ -673,7 +771,7 @@
     "lib.rate-limit",
     "lib.chatbot.chat",
     "lib.chatbot.quota",
-    "int.vertex",
+    "lib.chatbot.llm",
     "modelo.QuotaUsage",
     "modelo.Conversation"
    ],
@@ -681,7 +779,18 @@
    "linea": 400,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-api-chatbot",
+    "h3.vis-widget-cliente",
+    "lib.security",
+    "lib.rate-limit",
+    "lib.chatbot.chat",
+    "lib.chatbot.quota",
+    "int.vertex",
+    "modelo.QuotaUsage",
+    "modelo.Conversation"
+   ]
   },
   {
    "id": "SEC-002",
@@ -761,6 +870,31 @@
     "modelo.Organization",
     "modelo.AgencySettings",
     "modelo.ClientAsset",
+    "int.gbp",
+    "int.tiendanube",
+    "int.cal-com",
+    "int.telegram",
+    "h2.cli-resenas",
+    "h2.cli-tienda",
+    "h2.cli-agenda",
+    "h2.cli-cuenta",
+    "lib.crypto",
+    "h2.cli-cuenta.boveda",
+    "h4.adm-clientes",
+    "lib.actions",
+    "h2.cli-cuenta.boveda-solicitar-documento",
+    "h4.adm-clientes.boveda-alta-activo",
+    "h4.adm-clientes.boveda-carga"
+   ],
+   "archivo": "prisma/migrations/20260503150000_add_gbp_fields/migration.sql",
+   "linea": 5,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "modelo.Organization",
+    "modelo.AgencySettings",
+    "modelo.ClientAsset",
     "int.google-business-profile",
     "int.tiendanube",
     "int.calcom",
@@ -777,12 +911,7 @@
     "h2.cli-cuenta.boveda-solicitar-documento",
     "h4.adm-clientes.boveda-alta-activo",
     "h4.adm-clientes.boveda-carga"
-   ],
-   "archivo": "prisma/migrations/20260503150000_add_gbp_fields/migration.sql",
-   "linea": 5,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   ]
   },
   {
    "id": "SEC-037",
@@ -796,13 +925,53 @@
     "modelo.Organization",
     "modelo.BotConfig",
     "modelo.QuotaUsage",
-    "lib.chatbot.server"
+    "lib.chatbot"
    ],
    "archivo": "src/modules/chatbot/server/admin/getClientSession.ts",
    "linea": 17,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.cli-chatbot",
+    "lib.chatbot.admin",
+    "modelo.Organization",
+    "modelo.BotConfig",
+    "modelo.QuotaUsage",
+    "lib.chatbot.server"
+   ]
+  },
+  {
+   "id": "SEC-044",
+   "titulo": "Email marketing: las 3 server actions no verifican el módulo contratado, no validan con Zod ni tienen rate limit, y mandan el remitente y el HTML del formulario por la cuenta Brevo de develOP",
+   "severidad": "ALTA",
+   "tipo": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "h2.cli-email-mkt",
+    "h2.cli-email-mkt.crear-y-enviar-campana",
+    "h2.cli-email-mkt.importar-contactos",
+    "int.brevo",
+    "lib.rate-limit",
+    "modelo.EmailCampaign",
+    "lib.premium-modules",
+    "modelo.EmailContact"
+   ],
+   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+   "linea": 17,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-email-mkt",
+    "h2.cli-email-mkt.crear-y-enviar-campana",
+    "h2.cli-email-mkt.importar-contactos",
+    "int.brevo",
+    "lib.rate-limit",
+    "modelo.EmailCampaign",
+    "lib.modules",
+    "modelo.EmailContact"
+   ]
   },
   {
    "id": "SEC-045",
@@ -832,6 +1001,24 @@
     "h2.cli-inicio",
     "h2.cli-inicio.resultados-semana",
     "h2.cli-reportes-email",
+    "lib.chatbot.llm",
+    "modelo.ContactSubmission",
+    "h2.cli-inicio.resultados-de-la-semana",
+    "h2.cli-inicio.health-score",
+    "lib.health-score",
+    "h2.cli-inicio.resumen-ia",
+    "h2.cli-reportes-email.reporte-semanal",
+    "modelo.ExecutiveBriefSnapshot"
+   ],
+   "archivo": "src/lib/dashboard/week-results.ts",
+   "linea": 43,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-inicio",
+    "h2.cli-inicio.resultados-semana",
+    "h2.cli-reportes-email",
     "int.vertex",
     "modelo.ContactSubmission",
     "h2.cli-inicio.resultados-de-la-semana",
@@ -842,12 +1029,34 @@
     "h2.cli-reportes-email.reporte-semanal",
     "lib.reports",
     "modelo.ExecutiveBriefSnapshot"
+   ]
+  },
+  {
+   "id": "SEC-051",
+   "titulo": "Motor de reseñas: replyAction publica en cualquier reseña que alcance el token de Google de la org (reviewName sin validar contra su sucursal: escritura entre clientes si comparten la cuenta de agencia), y las acciones no tienen Zod ni rate limit para el LLM",
+   "severidad": "ALTA",
+   "tipo": "seguridad",
+   "confianza": "PROBABLE",
+   "nodo": [
+    "h2.cli-resenas",
+    "int.gbp",
+    "int.anthropic",
+    "h2.cli-resenas.responder-resenas-con-ia",
+    "lib.rate-limit"
    ],
-   "archivo": "src/lib/dashboard/week-results.ts",
-   "linea": 43,
+   "archivo": "src/components/dashboard/modules/motor-resenas/_actions.ts",
+   "linea": 11,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resenas",
+    "int.gbp",
+    "int.anthropic",
+    "lib.ai",
+    "h2.cli-resenas.responder-resenas-con-ia",
+    "lib.rate-limit"
+   ]
   },
   {
    "id": "SEC-074",
@@ -860,7 +1069,7 @@
     "h3.vis-widget-cliente",
     "lib.chatbot.chat",
     "lib.chatbot.quota",
-    "int.vertex",
+    "lib.chatbot.llm",
     "modelo.QuotaUsage",
     "modelo.Conversation",
     "lib.chatbot.conversation"
@@ -869,7 +1078,17 @@
    "linea": 400,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-api-chatbot",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.chat",
+    "lib.chatbot.quota",
+    "int.vertex",
+    "modelo.QuotaUsage",
+    "modelo.Conversation",
+    "lib.chatbot.conversation"
+   ]
   },
   {
    "id": "SEC-009",
@@ -1100,7 +1319,7 @@
     "h2.cli-cuenta",
     "h2.cli-bienvenida",
     "h3.vis-api-chatbot",
-    "int.vertex",
+    "lib.chatbot.llm",
     "modelo.Organization",
     "lib.actions"
    ],
@@ -1108,7 +1327,15 @@
    "linea": 15,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-cuenta",
+    "h2.cli-bienvenida",
+    "h3.vis-api-chatbot",
+    "int.vertex",
+    "modelo.Organization",
+    "lib.actions"
+   ]
   },
   {
    "id": "SEC-035",
@@ -1200,6 +1427,26 @@
    "tipo": "seguridad",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
+    "lib.prisma.seeds",
+    "lib.isolation",
+    "modelo.BotConfig",
+    "modelo.KnowledgeBase",
+    "lib.prisma",
+    "h3.adm-actividad",
+    "h3.adm-health",
+    "h4.adm-alertas",
+    "h4.adm-mensajes",
+    "modelo.ChatbotEvent",
+    "modelo.Conversation",
+    "modelo.Message",
+    "lib.scripts"
+   ],
+   "archivo": "src/modules/chatbot/prisma/seed.ts",
+   "linea": 272,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
     "lib.seeds",
     "lib.isolation",
     "modelo.BotConfig",
@@ -1214,34 +1461,7 @@
     "modelo.Message",
     "lib.scripts",
     "lib.prisma.seeds"
-   ],
-   "archivo": "src/modules/chatbot/prisma/seed.ts",
-   "linea": 272,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
-  },
-  {
-   "id": "SEC-044",
-   "titulo": "Email marketing: las 3 server actions no verifican el módulo contratado, no validan con Zod ni tienen rate limit, y mandan el remitente y el HTML del formulario por la cuenta Brevo de develOP",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "nodo": [
-    "h2.cli-email-mkt",
-    "h2.cli-email-mkt.crear-y-enviar-campana",
-    "h2.cli-email-mkt.importar-contactos",
-    "int.brevo",
-    "lib.rate-limit",
-    "modelo.EmailCampaign",
-    "lib.modules",
-    "modelo.EmailContact"
-   ],
-   "archivo": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-   "linea": 17,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   ]
   },
   {
    "id": "SEC-047",
@@ -1250,6 +1470,28 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
+    "h2.cli-soporte.crear-ticket",
+    "h2.cli-servicios.vitrina-modulos",
+    "h2.cli-resultados.informe-mensual-pdf",
+    "lib.rate-limit",
+    "lib.alerts",
+    "h2.cli-cuenta.perfil-empresa",
+    "h2.cli-servicios.solicitar-modulo",
+    "lib.actions",
+    "h2.cli-mensajes",
+    "h2.cli-soporte",
+    "h2.cli-cuenta.cambiar-password",
+    "h2.cli-servicios",
+    "h2.cli-plan",
+    "h4.adm-leads",
+    "modelo.ContactSubmission"
+   ],
+   "archivo": "src/lib/tickets/schemas.ts",
+   "linea": 5,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
     "h2.cli-soporte.crear-ticket",
     "h2.cli-servicios.vitrina-modulos",
     "h2.cli-resultados.informe-mensual-pdf",
@@ -1267,32 +1509,7 @@
     "modelo.ContactSubmission",
     "lib.tickets",
     "int.alert-webhook"
-   ],
-   "archivo": "src/lib/tickets/schemas.ts",
-   "linea": 5,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
-  },
-  {
-   "id": "SEC-051",
-   "titulo": "Acciones del motor de reseñas sin Zod ni rate limit: rating, nombre y texto que van al LLM los manda el navegador, reviewName se interpola en la URL de Google y los errores crudos vuelven al cliente",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "confianza": "PROBABLE",
-   "nodo": [
-    "h2.cli-resenas",
-    "int.gbp",
-    "int.anthropic",
-    "lib.ai",
-    "h2.cli-resenas.responder-resenas-con-ia",
-    "lib.rate-limit"
-   ],
-   "archivo": "src/components/dashboard/modules/motor-resenas/_actions.ts",
-   "linea": 11,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   ]
   },
   {
    "id": "SEC-053",
@@ -1327,17 +1544,28 @@
     "h6.vis-contacto",
     "h4.adm-config",
     "lib.alerts",
-    "int.slack",
     "h2.cli-soporte",
     "h2.cli-mensajes",
-    "h2.cli-servicios",
-    "int.webhook-alertas"
+    "h2.cli-servicios"
    ],
    "archivo": "src/lib/alerts.ts",
    "linea": 64,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-soporte.crear-ticket",
+    "h2.cli-mensajes.enviar-mensaje",
+    "h2.cli-servicios.solicitar-modulo",
+    "h6.vis-contacto",
+    "h4.adm-config",
+    "lib.alerts",
+    "int.slack",
+    "h2.cli-soporte",
+    "h2.cli-mensajes",
+    "h2.cli-servicios",
+    "int.webhook-alertas"
+   ]
   },
   {
    "id": "SEC-056",
@@ -1350,14 +1578,22 @@
     "h3.vis-widget-cliente",
     "lib.chatbot.insights",
     "modelo.ChatbotInsight",
-    "int.vertex",
+    "lib.chatbot.llm",
     "int.cron.generate-insights"
    ],
    "archivo": "src/modules/chatbot/server/insights/generateInsights.ts",
    "linea": 62,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.insights",
+    "modelo.ChatbotInsight",
+    "int.vertex",
+    "int.cron.generate-insights"
+   ]
   },
   {
    "id": "SEC-058",
@@ -1369,13 +1605,19 @@
     "h3.vis-api-chatbot",
     "lib.chatbot.prompts",
     "lib.chatbot.chat",
-    "int.vertex"
+    "lib.chatbot.llm"
    ],
    "archivo": "src/modules/chatbot/server/chat/requestSchema.ts",
    "linea": 56,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-api-chatbot",
+    "lib.chatbot.prompts",
+    "lib.chatbot.chat",
+    "int.vertex"
+   ]
   },
   {
    "id": "SEC-059",
@@ -1391,14 +1633,24 @@
     "h3.adm-health",
     "lib.rate-limit",
     "lib.proxy",
-    "int.neon",
     "lib.prisma"
    ],
    "archivo": "src/app/api/chatbot/[slug]/health/route.ts",
    "linea": 12,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-api-chatbot",
+    "h3.vis-api-chatbot.health-publico",
+    "lib.chatbot.health",
+    "lib.security",
+    "h3.adm-health",
+    "lib.rate-limit",
+    "lib.proxy",
+    "int.neon",
+    "lib.prisma"
+   ]
   },
   {
    "id": "SEC-060",
@@ -1465,7 +1717,7 @@
     "h3.vis-widget-cliente",
     "h3.vis-widget-cliente.chat-embebido",
     "lib.security",
-    "int.vertex",
+    "lib.chatbot.llm",
     "modelo.BotConfig",
     "h4.adm-clientes.alta-cliente-con-bot"
    ],
@@ -1473,7 +1725,15 @@
    "linea": 129,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-cliente",
+    "h3.vis-widget-cliente.chat-embebido",
+    "lib.security",
+    "int.vertex",
+    "modelo.BotConfig",
+    "h4.adm-clientes.alta-cliente-con-bot"
+   ]
   },
   {
    "id": "SEC-072",
@@ -1519,7 +1779,7 @@
     "h3.vis-api-chatbot",
     "h3.cli-chatbot",
     "lib.chatbot.tools",
-    "lib.client-notifications",
+    "h2.cli-shell",
     "int.brevo",
     "int.telegram",
     "modelo.ChatbotLead"
@@ -1528,7 +1788,16 @@
    "linea": 47,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-api-chatbot",
+    "h3.cli-chatbot",
+    "lib.chatbot.tools",
+    "lib.client-notifications",
+    "int.brevo",
+    "int.telegram",
+    "modelo.ChatbotLead"
+   ]
   },
   {
    "id": "SEC-076",
@@ -1539,16 +1808,23 @@
    "nodo": [
     "h2.cli-resenas",
     "h2.cli-resultados",
-    "lib.ai",
     "int.anthropic",
-    "int.google-business-profile",
+    "int.gbp",
     "int.ga4"
    ],
    "archivo": "src/lib/ai/review-reply-draft.ts",
    "linea": 28,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resenas",
+    "h2.cli-resultados",
+    "lib.ai",
+    "int.anthropic",
+    "int.google-business-profile",
+    "int.ga4"
+   ]
   },
   {
    "id": "SEC-078",
@@ -1559,14 +1835,20 @@
    "nodo": [
     "h3.vis-widget-develop",
     "h3.vis-widget-cliente",
-    "lib.chatbot.components",
-    "int.vertex"
+    "lib.chatbot",
+    "lib.chatbot.llm"
    ],
    "archivo": "src/modules/chatbot/components/chat/ChatWindow.tsx",
    "linea": 22,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-develop",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.components",
+    "int.vertex"
+   ]
   },
   {
    "id": "SEC-084",
@@ -1706,7 +1988,7 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.deps",
+    "lib.plataforma.package",
     "lib.auth",
     "h1.auth-login",
     "lib.proxy"
@@ -1715,7 +1997,13 @@
    "linea": 154,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.deps",
+    "lib.auth",
+    "h1.auth-login",
+    "lib.proxy"
+   ]
   },
   {
    "id": "SEC-106",
@@ -1724,7 +2012,7 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.next-config",
+    "lib.plataforma.next-config",
     "lib.security",
     "h2.cli-shell",
     "h4.adm-shell"
@@ -1733,7 +2021,13 @@
    "linea": 66,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.next-config",
+    "lib.security",
+    "h2.cli-shell",
+    "h4.adm-shell"
+   ]
   },
   {
    "id": "SEC-001",
@@ -1742,7 +2036,7 @@
    "tipo": "seguridad",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
-    "int.google-ai",
+    "lib.chatbot.llm",
     "doc.audits-2026-05-bfg-leak-cleanup",
     "doc.bitacora-roadmap"
    ],
@@ -1750,7 +2044,12 @@
    "linea": 94,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.google-ai",
+    "doc.audits-2026-05-bfg-leak-cleanup",
+    "doc.bitacora-roadmap"
+   ]
   },
   {
    "id": "SEC-003",
@@ -1866,13 +2165,18 @@
    "nodo": [
     "h1.auth-impersonacion.iniciar",
     "h1.auth-impersonacion.navegar-como-cliente",
-    "lib.impersonation"
+    "h1.auth-impersonacion"
    ],
    "archivo": "src/lib/impersonation.ts",
    "linea": 15,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h1.auth-impersonacion.iniciar",
+    "h1.auth-impersonacion.navegar-como-cliente",
+    "lib.impersonation"
+   ]
   },
   {
    "id": "SEC-022",
@@ -1967,14 +2271,18 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.seeds",
-    "int.neon"
+    "lib.prisma.seeds",
+    "lib.prisma"
    ],
    "archivo": "prisma/seed-guard.ts",
    "linea": 26,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.seeds",
+    "int.neon"
+   ]
   },
   {
    "id": "SEC-042",
@@ -2000,7 +2308,7 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h2.cli-inicio",
-    "int.vertex",
+    "lib.chatbot.llm",
     "modelo.Organization",
     "h2.cli-inicio.resumen-ejecutivo-ia",
     "lib.rate-limit"
@@ -2009,7 +2317,14 @@
    "linea": 157,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-inicio",
+    "int.vertex",
+    "modelo.Organization",
+    "h2.cli-inicio.resumen-ejecutivo-ia",
+    "lib.rate-limit"
+   ]
   },
   {
    "id": "SEC-046",
@@ -2075,14 +2390,20 @@
     "h2.cli-referidos",
     "h6.vis-contacto",
     "h6.vis-contacto.atribucion-de-referido",
-    "modelo.Referral",
-    "lib.referrals"
+    "modelo.Referral"
    ],
    "archivo": "src/lib/referrals/referrals.service.ts",
    "linea": 115,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-referidos",
+    "h6.vis-contacto",
+    "h6.vis-contacto.atribucion-de-referido",
+    "modelo.Referral",
+    "lib.referrals"
+   ]
   },
   {
    "id": "SEC-055",
@@ -2147,7 +2468,6 @@
    "tipo": "seguridad",
    "confianza": "HIPÓTESIS",
    "nodo": [
-    "int.vertex",
     "lib.chatbot.llm",
     "modelo.ChatbotEvent",
     "int.sentry"
@@ -2156,7 +2476,13 @@
    "linea": 72,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.vertex",
+    "lib.chatbot.llm",
+    "modelo.ChatbotEvent",
+    "int.sentry"
+   ]
   },
   {
    "id": "SEC-066",
@@ -2230,16 +2556,21 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.vertex",
     "lib.chatbot.llm",
     "lib.scripts",
-    "int.neon"
+    "lib.prisma"
    ],
    "archivo": "scripts/encode-vertex-creds.js",
    "linea": 8,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.vertex",
+    "lib.chatbot.llm",
+    "lib.scripts",
+    "int.neon"
+   ]
   },
   {
    "id": "SEC-077",
@@ -2249,7 +2580,6 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h3.cli-chatbot",
-    "h3.cli-chatbot.contactos",
     "h3.cli-chatbot.contacto-detalle",
     "lib.plan",
     "modelo.ChatbotLead"
@@ -2258,7 +2588,14 @@
    "linea": 61,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.cli-chatbot",
+    "h3.cli-chatbot.contactos",
+    "h3.cli-chatbot.contacto-detalle",
+    "lib.plan",
+    "modelo.ChatbotLead"
+   ]
   },
   {
    "id": "SEC-079",
@@ -2268,7 +2605,7 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h3.cli-chatbot",
-    "lib.chatbot.server",
+    "lib.chatbot",
     "modelo.ChatbotLead",
     "modelo.QuotaUsage",
     "h4.adm-clientes"
@@ -2277,7 +2614,14 @@
    "linea": 51,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.cli-chatbot",
+    "lib.chatbot.server",
+    "modelo.ChatbotLead",
+    "modelo.QuotaUsage",
+    "h4.adm-clientes"
+   ]
   },
   {
    "id": "SEC-080",
@@ -2287,14 +2631,19 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h3.vis-widget-cliente",
-    "lib.chatbot.components",
+    "lib.chatbot",
     "modelo.ChatbotLead"
    ],
    "archivo": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
    "linea": 99,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-cliente",
+    "lib.chatbot.components",
+    "modelo.ChatbotLead"
+   ]
   },
   {
    "id": "SEC-081",
@@ -2446,15 +2795,19 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.email",
-    "int.brevo",
-    "int.resend"
+    "int.email",
+    "int.brevo"
    ],
    "archivo": "src/lib/email/templates/welcome-client.ts",
    "linea": 46,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.email",
+    "int.brevo",
+    "int.resend"
+   ]
   },
   {
    "id": "SEC-096",
@@ -2479,7 +2832,7 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.email",
+    "int.email",
     "lib.security",
     "h6.vis-optout",
     "h2.cli-reportes-email"
@@ -2488,7 +2841,13 @@
    "linea": 8,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.email",
+    "lib.security",
+    "h6.vis-optout",
+    "h2.cli-reportes-email"
+   ]
   },
   {
    "id": "SEC-098",
@@ -2497,7 +2856,7 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.cron",
+    "int.cron",
     "int.cron.alerts",
     "int.cron.regenerate-briefs",
     "int.cron.send-executive-reports"
@@ -2506,7 +2865,13 @@
    "linea": 43,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.cron",
+    "int.cron.alerts",
+    "int.cron.regenerate-briefs",
+    "int.cron.send-executive-reports"
+   ]
   },
   {
    "id": "SEC-107",
@@ -2515,16 +2880,21 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.neon",
-    "modelo.OrganizationModule",
     "lib.prisma",
+    "modelo.OrganizationModule",
     "modelo.User"
    ],
    "archivo": "prisma/backups/organization-module-pre-push.json",
    "linea": 4,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.neon",
+    "modelo.OrganizationModule",
+    "lib.prisma",
+    "modelo.User"
+   ]
   },
   {
    "id": "SEC-108",
@@ -2534,13 +2904,17 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "lib.scripts",
-    "int.calcom"
+    "int.cal-com"
    ],
    "archivo": "scripts/b7-smoke-calcom.ts",
    "linea": 76,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.scripts",
+    "int.calcom"
+   ]
   },
   {
    "id": "SEC-109",
@@ -2595,13 +2969,24 @@
     "modelo.OrganizationModule",
     "h2.cli-shell",
     "h2.cli-shell.navegacion-sidebar",
-    "lib.modules"
+    "lib.premium-modules"
    ],
    "archivo": "src/lib/data/premium-modules.ts",
    "linea": 38,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-email-mkt",
+    "h2.cli-email-mkt.acceso-al-modulo",
+    "h2.cli-servicios",
+    "lib.data",
+    "modelo.PremiumModule",
+    "modelo.OrganizationModule",
+    "h2.cli-shell",
+    "h2.cli-shell.navegacion-sidebar",
+    "lib.modules"
+   ]
   },
   {
    "id": "BUG-021",
@@ -2640,27 +3025,6 @@
    "documento": "03-MEJORAS.md"
   },
   {
-   "id": "BUG-039",
-   "titulo": "Tendencias «vs mes anterior» inventadas en Tráfico y SEO, también sobre datos reales",
-   "severidad": "ALTA",
-   "tipo": "bug",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "nodo": [
-    "h2.cli-resultados",
-    "h2.cli-resultados.trafico-ga4",
-    "h2.cli-resultados.seo-search-console",
-    "h2.cli-resultados.trafico",
-    "h2.cli-resultados.seo",
-    "int.google-analytics",
-    "int.search-console"
-   ],
-   "archivo": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
-   "linea": 204,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
-  },
-  {
    "id": "BUG-040",
    "titulo": "Detalle de ticket en mobile: el hilo de mensajes colapsa a 0 px",
    "severidad": "ALTA",
@@ -2690,8 +3054,7 @@
     "h2.cli-reportes-email.reporte-semanal",
     "int.brevo",
     "modelo.WeeklyReportLog",
-    "lib.reports",
-    "int.cron.os-follow-up",
+    "lib.leados",
     "h4.adm-leads",
     "h5.set-dia",
     "int.telegram",
@@ -2701,7 +3064,22 @@
    "linea": 8,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.cron.regenerate-briefs",
+    "int.cron.send-executive-reports",
+    "h2.cli-inicio.resumen-ia",
+    "h2.cli-reportes-email",
+    "h2.cli-reportes-email.reporte-semanal",
+    "int.brevo",
+    "modelo.WeeklyReportLog",
+    "lib.reports",
+    "int.cron.os-follow-up",
+    "h4.adm-leads",
+    "h5.set-dia",
+    "int.telegram",
+    "h4.adm-leads.digest-follow-ups-telegram"
+   ]
   },
   {
    "id": "BUG-063",
@@ -2710,6 +3088,31 @@
    "tipo": "bug",
    "confianza": "PROBABLE",
    "nodo": [
+    "h3.adm-health",
+    "h3.vis-api-chatbot",
+    "h3.cli-chatbot",
+    "lib.chatbot.llm",
+    "int.sentry",
+    "lib.chatbot.health",
+    "lib.chatbot.chat",
+    "lib.chatbot.quota",
+    "modelo.ChatbotEvent",
+    "h3.vis-widget-develop",
+    "h3.adm-health.latencia-p50-p95",
+    "h3.cli-chatbot.resumen",
+    "h4.adm-alertas.detector-incidencias",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.admin",
+    "h3.adm-actividad",
+    "lib.chatbot.logging",
+    "lib.chatbot.tools"
+   ],
+   "archivo": "src/modules/chatbot/server/health/checkHealth.ts",
+   "linea": 48,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
     "h3.adm-health",
     "h3.vis-api-chatbot",
     "h3.cli-chatbot",
@@ -2729,31 +3132,7 @@
     "lib.chatbot.logging",
     "lib.chatbot.tools",
     "lib.chatbot.llm"
-   ],
-   "archivo": "src/modules/chatbot/server/health/checkHealth.ts",
-   "linea": 48,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
-  },
-  {
-   "id": "BUG-085",
-   "titulo": "Las metricas del resumen del chatbot son constantes o estan mal calculadas (oportunidades, valor estimado, tiempo de respuesta)",
-   "severidad": "ALTA",
-   "tipo": "bug",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "nodo": [
-    "h3.cli-chatbot.resumen",
-    "modelo.ChatbotLead",
-    "modelo.QuotaUsage",
-    "h3.cli-chatbot",
-    "lib.chatbot.lib"
-   ],
-   "archivo": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
-   "linea": 42,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   ]
   },
   {
    "id": "BUG-141",
@@ -2765,13 +3144,19 @@
     "h2.cli-resultados.reputacion-gbp",
     "h2.cli-resultados.velocidad-sitio",
     "int.gbp",
-    "lib.integrations"
+    "lib.premium-modules"
    ],
    "archivo": "src/lib/integrations/google-business-profile.ts",
    "linea": 178,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados.reputacion-gbp",
+    "h2.cli-resultados.velocidad-sitio",
+    "int.gbp",
+    "lib.integrations"
+   ]
   },
   {
    "id": "BUG-145",
@@ -2780,15 +3165,19 @@
    "tipo": "bug",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.vertex",
-    "h3.vis-widget-develop",
-    "lib.chatbot.llm"
+    "lib.chatbot.llm",
+    "h3.vis-widget-develop"
    ],
    "archivo": "src/modules/chatbot/server/llm/providers/google.ts",
    "linea": 54,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.vertex",
+    "h3.vis-widget-develop",
+    "lib.chatbot.llm"
+   ]
   },
   {
    "id": "BUG-171",
@@ -2797,14 +3186,17 @@
    "tipo": "bug",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
-    "int.github-actions",
-    "int.neon"
+    "lib.prisma"
    ],
    "archivo": "raíz:.github/workflows/db-backup.yml",
    "linea": 93,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.github-actions",
+    "int.neon"
+   ]
   },
   {
    "id": "BUG-001",
@@ -2854,7 +3246,7 @@
    "tipo": "bug",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.seeds",
+    "lib.prisma.seeds",
     "modelo.Project",
     "modelo.Organization",
     "h4.adm-proyectos"
@@ -2863,7 +3255,13 @@
    "linea": 1302,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.seeds",
+    "modelo.Project",
+    "modelo.Organization",
+    "h4.adm-proyectos"
+   ]
   },
   {
    "id": "BUG-013",
@@ -2892,15 +3290,19 @@
    "confianza": "PROBABLE",
    "nodo": [
     "lib.prisma",
-    "int.neon",
-    "int.netlify",
-    "lib.migraciones"
+    "int.netlify"
    ],
    "archivo": "netlify.toml",
    "linea": 2,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.prisma",
+    "int.neon",
+    "int.netlify",
+    "lib.migraciones"
+   ]
   },
   {
    "id": "BUG-015",
@@ -2977,13 +3379,21 @@
     "modelo.Task",
     "h2.cli-proyecto",
     "h4.adm-proyectos",
-    "lib.migraciones"
+    "lib.prisma"
    ],
    "archivo": "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql",
    "linea": 46,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "modelo.Project",
+    "modelo.Organization",
+    "modelo.Task",
+    "h2.cli-proyecto",
+    "h4.adm-proyectos",
+    "lib.migraciones"
+   ]
   },
   {
    "id": "BUG-020",
@@ -2993,7 +3403,6 @@
    "confianza": "PROBABLE",
    "nodo": [
     "lib.prisma",
-    "int.neon",
     "h1.auth-login",
     "h6.vis-contacto",
     "h3.vis-api-chatbot"
@@ -3002,7 +3411,14 @@
    "linea": 5,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.prisma",
+    "int.neon",
+    "h1.auth-login",
+    "h6.vis-contacto",
+    "h3.vis-api-chatbot"
+   ]
   },
   {
    "id": "BUG-022",
@@ -3034,14 +3450,21 @@
     "h3.cli-chatbot",
     "h2.cli-resultados",
     "int.cron.generate-insights",
-    "int.vertex",
+    "lib.chatbot.llm",
     "modelo.ChatbotInsight"
    ],
    "archivo": "src/app/api/cron/generate-insights/route.ts",
    "linea": 38,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.cli-chatbot",
+    "h2.cli-resultados",
+    "int.cron.generate-insights",
+    "int.vertex",
+    "modelo.ChatbotInsight"
+   ]
   },
   {
    "id": "BUG-024",
@@ -3050,6 +3473,28 @@
    "tipo": "bug",
    "confianza": "PROBABLE",
    "nodo": [
+    "h3.adm-chatbots",
+    "h4.adm-alertas",
+    "h3.vis-api-chatbot",
+    "modelo.BotConfig",
+    "modelo.Plan",
+    "lib.plan",
+    "lib.chatbot.llm",
+    "h3.adm-chatbots.config-llm-y-cuota",
+    "h3.adm-chatbots.detalle-overview",
+    "lib.chatbot.chat",
+    "h2.cli-shell",
+    "h3.adm-chatbots.editar-config-bot",
+    "h4.adm-clientes.alta-cliente-con-bot",
+    "h3.adm-chatbots.editar-config",
+    "h4.adm-clientes.tab-chatbot"
+   ],
+   "archivo": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+   "linea": 345,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
     "h3.adm-chatbots",
     "h4.adm-alertas",
     "h3.vis-api-chatbot",
@@ -3066,12 +3511,7 @@
     "lib.chatbot.llm",
     "h3.adm-chatbots.editar-config",
     "h4.adm-clientes.tab-chatbot"
-   ],
-   "archivo": "src/modules/chatbot/server/chat/handleChatRequest.ts",
-   "linea": 345,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   ]
   },
   {
    "id": "BUG-025",
@@ -3228,17 +3668,55 @@
    "nodo": [
     "h2.cli-mensajes.aviso-por-email",
     "h4.adm-mensajes",
-    "int.resend",
+    "int.email",
     "h4.adm-tickets",
     "h4.adm-tickets.responder-y-avisar-por-email",
-    "int.brevo",
-    "lib.email"
+    "int.brevo"
    ],
    "archivo": "src/lib/email/notify-message.ts",
    "linea": 50,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-mensajes.aviso-por-email",
+    "h4.adm-mensajes",
+    "int.resend",
+    "h4.adm-tickets",
+    "h4.adm-tickets.responder-y-avisar-por-email",
+    "int.brevo",
+    "lib.email"
+   ]
+  },
+  {
+   "id": "BUG-039",
+   "titulo": "Tendencias «vs mes anterior» inventadas en Tráfico y SEO, también sobre datos reales",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "h2.cli-resultados",
+    "h2.cli-resultados.trafico-ga4",
+    "h2.cli-resultados.seo-search-console",
+    "h2.cli-resultados.trafico",
+    "h2.cli-resultados.seo",
+    "int.ga4",
+    "int.search-console"
+   ],
+   "archivo": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+   "linea": 204,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados",
+    "h2.cli-resultados.trafico-ga4",
+    "h2.cli-resultados.seo-search-console",
+    "h2.cli-resultados.trafico",
+    "h2.cli-resultados.seo",
+    "int.google-analytics",
+    "int.search-console"
+   ]
   },
   {
    "id": "BUG-041",
@@ -3248,9 +3726,9 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h2.cli-resultados",
-    "int.google-analytics",
+    "int.ga4",
     "int.search-console",
-    "int.google-business-profile",
+    "int.gbp",
     "int.sentry",
     "h2.cli-resultados.informe-mensual-pdf"
    ],
@@ -3258,7 +3736,15 @@
    "linea": 196,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados",
+    "int.google-analytics",
+    "int.search-console",
+    "int.google-business-profile",
+    "int.sentry",
+    "h2.cli-resultados.informe-mensual-pdf"
+   ]
   },
   {
    "id": "BUG-042",
@@ -3272,15 +3758,23 @@
     "h2.cli-reportes-email",
     "modelo.ChatbotLead",
     "lib.chatbot.scoring",
-    "h2.cli-inicio.ideas-para-crecer",
-    "lib.reports",
-    "lib.recommendations"
+    "h2.cli-inicio.ideas-para-crecer"
    ],
    "archivo": "src/lib/reports/client-monthly/get-client-monthly-report-data.ts",
    "linea": 56,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados.informe-mensual-pdf",
+    "h2.cli-inicio",
+    "h2.cli-reportes-email",
+    "modelo.ChatbotLead",
+    "lib.chatbot.scoring",
+    "h2.cli-inicio.ideas-para-crecer",
+    "lib.reports",
+    "lib.recommendations"
+   ]
   },
   {
    "id": "BUG-044",
@@ -3352,13 +3846,17 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h2.cli-inicio.semana-en-numeros",
-    "lib.dashboard"
+    "h2.cli-inicio"
    ],
    "archivo": "src/lib/dashboard/home-metrics-logic.ts",
    "linea": 27,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-inicio.semana-en-numeros",
+    "lib.dashboard"
+   ]
   },
   {
    "id": "BUG-050",
@@ -3370,13 +3868,19 @@
     "h2.cli-cuenta",
     "modelo.OrganizationModule",
     "modelo.Subscription",
-    "lib.billing"
+    "lib.subscription"
    ],
    "archivo": "src/lib/billing/get-current-plan.ts",
    "linea": 70,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-cuenta",
+    "modelo.OrganizationModule",
+    "modelo.Subscription",
+    "lib.billing"
+   ]
   },
   {
    "id": "BUG-054",
@@ -3409,14 +3913,21 @@
     "h2.cli-reportes-email.reporte-semanal",
     "h4.adm-clientes",
     "modelo.ExecutiveBriefSnapshot",
-    "lib.reports",
-    "int.vertex"
+    "h2.cli-reportes-email",
+    "lib.chatbot.llm"
    ],
    "archivo": "src/lib/reports/executive-weekly/build.ts",
    "linea": 113,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-reportes-email.reporte-semanal",
+    "h4.adm-clientes",
+    "modelo.ExecutiveBriefSnapshot",
+    "lib.reports",
+    "int.vertex"
+   ]
   },
   {
    "id": "BUG-060",
@@ -3429,16 +3940,25 @@
     "h2.cli-resultados.insights-ia",
     "h2.cli-plan.vitrina-de-planes-y-upgrade",
     "lib.plan",
-    "lib.ai",
-    "int.vertex",
     "int.anthropic",
+    "lib.chatbot.llm",
     "int.cron.regenerate-briefs"
    ],
    "archivo": "src/app/(protected)/dashboard/page.tsx",
    "linea": 193,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-inicio.resumen-ejecutivo-ia",
+    "h2.cli-resultados.insights-ia",
+    "h2.cli-plan.vitrina-de-planes-y-upgrade",
+    "lib.plan",
+    "lib.ai",
+    "int.vertex",
+    "int.anthropic",
+    "int.cron.regenerate-briefs"
+   ]
   },
   {
    "id": "BUG-061",
@@ -3527,14 +4047,21 @@
     "h3.cli-chatbot",
     "h2.cli-inicio",
     "h2.cli-reportes-email",
-    "lib.chatbot.lead-status-rules",
+    "lib.chatbot.leads",
     "modelo.ChatbotLead"
    ],
    "archivo": "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
    "linea": 8,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.cli-chatbot",
+    "h2.cli-inicio",
+    "h2.cli-reportes-email",
+    "lib.chatbot.lead-status-rules",
+    "modelo.ChatbotLead"
+   ]
   },
   {
    "id": "BUG-070",
@@ -3565,14 +4092,19 @@
    "nodo": [
     "h3.cli-chatbot",
     "lib.chatbot.leads",
-    "lib.chatbot.lead-presentation",
     "modelo.ChatbotLead"
    ],
    "archivo": "src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts",
    "linea": 37,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.cli-chatbot",
+    "lib.chatbot.leads",
+    "lib.chatbot.lead-presentation",
+    "modelo.ChatbotLead"
+   ]
   },
   {
    "id": "BUG-073",
@@ -3610,14 +4142,19 @@
    "nodo": [
     "h3.adm-chatbots.probar-prompt",
     "lib.chatbot.llm",
-    "int.vertex",
     "int.sentry"
    ],
    "archivo": "src/modules/chatbot/components/admin/kb/TestPromptSandbox.tsx",
    "linea": 46,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.adm-chatbots.probar-prompt",
+    "lib.chatbot.llm",
+    "int.vertex",
+    "int.sentry"
+   ]
   },
   {
    "id": "BUG-075",
@@ -3708,6 +4245,25 @@
    "documento": "03-MEJORAS.md"
   },
   {
+   "id": "BUG-085",
+   "titulo": "Las metricas del resumen del chatbot son constantes o estan mal calculadas (oportunidades, valor estimado, tiempo de respuesta)",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "h3.cli-chatbot.resumen",
+    "modelo.ChatbotLead",
+    "modelo.QuotaUsage",
+    "h3.cli-chatbot",
+    "lib.chatbot.lib"
+   ],
+   "archivo": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+   "linea": 42,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md"
+  },
+  {
    "id": "BUG-086",
    "titulo": "Bot pausado: el cliente ve el header 'Pausado' y debajo la landing de venta, y no tiene como reactivarlo",
    "severidad": "MEDIA",
@@ -3784,14 +4340,19 @@
    "nodo": [
     "h3.vis-api-chatbot",
     "lib.chatbot.chat",
-    "int.vertex",
     "lib.chatbot.llm"
    ],
    "archivo": "src/modules/chatbot/server/chat/handleChatRequest.ts",
    "linea": 952,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-api-chatbot",
+    "lib.chatbot.chat",
+    "int.vertex",
+    "lib.chatbot.llm"
+   ]
   },
   {
    "id": "BUG-093",
@@ -3951,13 +4512,21 @@
     "lib.chatbot.chat",
     "lib.chatbot.quota",
     "modelo.QuotaUsage",
-    "int.vertex"
+    "lib.chatbot.llm"
    ],
    "archivo": "src/modules/chatbot/server/chat/reconcile.ts",
    "linea": 371,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-api-chatbot",
+    "h3.adm-chatbots",
+    "lib.chatbot.chat",
+    "lib.chatbot.quota",
+    "modelo.QuotaUsage",
+    "int.vertex"
+   ]
   },
   {
    "id": "BUG-110",
@@ -3970,7 +4539,7 @@
     "lib.chatbot.insights",
     "lib.chatbot.notifications",
     "h2.cli-resultados",
-    "int.vertex",
+    "lib.chatbot.llm",
     "int.brevo",
     "modelo.ChatbotInsight"
    ],
@@ -3978,7 +4547,16 @@
    "linea": 19,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.cron.generate-insights",
+    "lib.chatbot.insights",
+    "lib.chatbot.notifications",
+    "h2.cli-resultados",
+    "int.vertex",
+    "int.brevo",
+    "modelo.ChatbotInsight"
+   ]
   },
   {
    "id": "BUG-111",
@@ -4299,14 +4877,22 @@
     "int.cron.regenerate-briefs",
     "int.cron.send-weekly-reports",
     "h4.adm-clientes",
-    "int.vertex",
+    "lib.chatbot.llm",
     "int.brevo"
    ],
    "archivo": "src/app/api/cron/generate-insights/route.ts",
    "linea": 18,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.cron.generate-insights",
+    "int.cron.regenerate-briefs",
+    "int.cron.send-weekly-reports",
+    "h4.adm-clientes",
+    "int.vertex",
+    "int.brevo"
+   ]
   },
   {
    "id": "BUG-143",
@@ -4319,13 +4905,20 @@
     "h2.cli-resultados.velocidad-sitio",
     "h2.cli-resultados.reputacion-gbp",
     "h2.cli-agenda",
-    "lib.integrations"
+    "lib.premium-modules"
    ],
    "archivo": "src/lib/integrations/tiendanube.ts",
    "linea": 75,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-tienda.resumen-tienda",
+    "h2.cli-resultados.velocidad-sitio",
+    "h2.cli-resultados.reputacion-gbp",
+    "h2.cli-agenda",
+    "lib.integrations"
+   ]
   },
   {
    "id": "BUG-175",
@@ -4337,13 +4930,19 @@
     "h5.set-dia",
     "h5.set-manual",
     "h5.set-lead",
-    "lib.smooth-scroll"
+    "lib.sitio-publico"
    ],
    "archivo": "src/components/layout/SmoothScroll.tsx",
    "linea": 30,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h5.set-dia",
+    "h5.set-manual",
+    "h5.set-lead",
+    "lib.smooth-scroll"
+   ]
   },
   {
    "id": "BUG-176",
@@ -4406,14 +5005,17 @@
    "tipo": "bug",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
-    "int.github-actions",
     "lib.tests"
    ],
    "archivo": "raíz:.github/workflows/ci.yml",
    "linea": 206,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.github-actions",
+    "lib.tests"
+   ]
   },
   {
    "id": "BUG-187",
@@ -4476,13 +5078,18 @@
    "nodo": [
     "h1.auth-cambio",
     "h2.cli-cuenta",
-    "h1.auth-login.password"
+    "h1.auth-login.login-password"
    ],
    "archivo": "src/app/cambiar-password/actions.ts",
    "linea": 14,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h1.auth-cambio",
+    "h2.cli-cuenta",
+    "h1.auth-login.password"
+   ]
   },
   {
    "id": "BUG-018",
@@ -4532,14 +5139,20 @@
     "h3.vis-whatsapp",
     "modelo.MotorMessage",
     "modelo.WabaChannel",
-    "lib.motor",
     "h3.vis-whatsapp.estados-entrega"
    ],
    "archivo": "src/modules/motor/adapters/whatsapp/inbound/handle-status.ts",
    "linea": 53,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-whatsapp",
+    "modelo.MotorMessage",
+    "modelo.WabaChannel",
+    "lib.motor",
+    "h3.vis-whatsapp.estados-entrega"
+   ]
   },
   {
    "id": "BUG-028",
@@ -4604,13 +5217,18 @@
    "nodo": [
     "h2.cli-inicio.resultados-semana",
     "h2.cli-inicio.resumen-ia",
-    "lib.dashboard"
+    "h2.cli-inicio"
    ],
    "archivo": "src/lib/dashboard/week-results.ts",
    "linea": 41,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-inicio.resultados-semana",
+    "h2.cli-inicio.resumen-ia",
+    "lib.dashboard"
+   ]
   },
   {
    "id": "BUG-052",
@@ -4619,7 +5237,7 @@
    "tipo": "bug",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
-    "int.webhook-alertas",
+    "lib.alerts",
     "lib.actions",
     "h6.vis-contacto.enviar-formulario",
     "int.sentry",
@@ -4629,7 +5247,14 @@
    "linea": 99,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.webhook-alertas",
+    "lib.actions",
+    "h6.vis-contacto.enviar-formulario",
+    "int.sentry",
+    "int.n8n"
+   ]
   },
   {
    "id": "BUG-053",
@@ -4675,13 +5300,18 @@
    "nodo": [
     "h2.cli-reportes-email.reporte-semanal",
     "modelo.OrgMember",
-    "lib.reports"
+    "h2.cli-reportes-email"
    ],
    "archivo": "src/lib/reports/executive-weekly/build.ts",
    "linea": 78,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-reportes-email.reporte-semanal",
+    "modelo.OrgMember",
+    "lib.reports"
+   ]
   },
   {
    "id": "BUG-058",
@@ -4692,13 +5322,18 @@
    "nodo": [
     "h2.cli-reportes-email.reporte-semanal",
     "h2.cli-reportes-email.preferencias-del-reporte",
-    "lib.reports"
+    "h2.cli-reportes-email"
    ],
    "archivo": "src/lib/reports/executive-weekly/top-hot-leads.ts",
    "linea": 91,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-reportes-email.reporte-semanal",
+    "h2.cli-reportes-email.preferencias-del-reporte",
+    "lib.reports"
+   ]
   },
   {
    "id": "BUG-059",
@@ -4709,7 +5344,7 @@
    "nodo": [
     "h2.cli-reportes-email.reporte-semanal",
     "h4.adm-tickets",
-    "lib.email",
+    "int.email",
     "h2.cli-email-mkt.crear-y-enviar-campana",
     "h2.cli-email-mkt.baja-de-contactos",
     "h6.vis-optout"
@@ -4718,7 +5353,15 @@
    "linea": 187,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-reportes-email.reporte-semanal",
+    "h4.adm-tickets",
+    "lib.email",
+    "h2.cli-email-mkt.crear-y-enviar-campana",
+    "h2.cli-email-mkt.baja-de-contactos",
+    "h6.vis-optout"
+   ]
   },
   {
    "id": "BUG-062",
@@ -4745,14 +5388,18 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h2.cli-resultados",
-    "int.anthropic",
-    "lib.ai"
+    "int.anthropic"
    ],
    "archivo": "src/lib/ai/results-insights.ts",
    "linea": 37,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados",
+    "int.anthropic",
+    "lib.ai"
+   ]
   },
   {
    "id": "BUG-067",
@@ -4763,13 +5410,18 @@
    "nodo": [
     "h3.cli-chatbot.aviso-lead-email",
     "int.brevo",
-    "lib.client-notifications"
+    "h2.cli-shell"
    ],
    "archivo": "src/lib/client-notifications/notify.ts",
    "linea": 135,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.cli-chatbot.aviso-lead-email",
+    "int.brevo",
+    "lib.client-notifications"
+   ]
   },
   {
    "id": "BUG-072",
@@ -4991,13 +5643,17 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h3.vis-whatsapp.envio-mensajes",
-    "int.360dialog"
+    "h3.vis-whatsapp"
    ],
    "archivo": "src/modules/motor/adapters/whatsapp/outbound/client.ts",
    "linea": 233,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-whatsapp.envio-mensajes",
+    "int.360dialog"
+   ]
   },
   {
    "id": "BUG-106",
@@ -5287,13 +5943,17 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h6.vis-contacto",
-    "lib.seo"
+    "lib.sitio-publico"
    ],
    "archivo": "src/app/layout.tsx",
    "linea": 32,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h6.vis-contacto",
+    "lib.seo"
+   ]
   },
   {
    "id": "BUG-174",
@@ -5463,17 +6123,22 @@
    "titulo": "Agenda inteligente usa la API v1 de Cal.com, apagada segun el propio repo, con la API key en la query string",
    "severidad": "ALTA",
    "tipo": "tech-vieja",
-   "confianza": "PROBABLE",
+   "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h2.cli-agenda.panel-de-agenda",
-    "int.calcom",
+    "int.cal-com",
     "modelo.Organization"
    ],
    "archivo": "src/lib/integrations/cal-com.ts",
    "linea": 4,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-agenda.panel-de-agenda",
+    "int.calcom",
+    "modelo.Organization"
+   ]
   },
   {
    "id": "TEC-003",
@@ -5482,10 +6147,8 @@
    "tipo": "tech-vieja",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.vertex",
-    "int.anthropic",
     "lib.chatbot.llm",
-    "lib.ai",
+    "int.anthropic",
     "lib.plan",
     "h3.vis-api-chatbot"
    ],
@@ -5493,7 +6156,15 @@
    "linea": 14,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.vertex",
+    "int.anthropic",
+    "lib.chatbot.llm",
+    "lib.ai",
+    "lib.plan",
+    "h3.vis-api-chatbot"
+   ]
   },
   {
    "id": "TEC-006",
@@ -5521,13 +6192,17 @@
    "confianza": "HIPÓTESIS",
    "nodo": [
     "int.netlify",
-    "lib.tailwind"
+    "lib.plataforma.tailwind-config"
    ],
    "archivo": "netlify.toml",
    "linea": 7,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.netlify",
+    "lib.tailwind"
+   ]
   },
   {
    "id": "TEC-008",
@@ -5536,7 +6211,7 @@
    "tipo": "tech-vieja",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.deps",
+    "lib.plataforma.package",
     "lib.auth",
     "lib.prisma"
    ],
@@ -5544,7 +6219,12 @@
    "linea": 87,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.deps",
+    "lib.auth",
+    "lib.prisma"
+   ]
   },
   {
    "id": "TEC-001",
@@ -5554,14 +6234,18 @@
    "confianza": "PROBABLE",
    "nodo": [
     "lib.prisma",
-    "lib.seeds",
-    "lib.migraciones"
+    "lib.prisma.seeds"
    ],
    "archivo": "package.json",
    "linea": 133,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.prisma",
+    "lib.seeds",
+    "lib.migraciones"
+   ]
   },
   {
    "id": "TEC-004",
@@ -5570,14 +6254,17 @@
    "tipo": "tech-vieja",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
-    "lib.chatbot.llm",
-    "int.vertex"
+    "lib.chatbot.llm"
    ],
    "archivo": "package.json",
    "linea": 141,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.chatbot.llm",
+    "int.vertex"
+   ]
   },
   {
    "id": "TEC-005",
@@ -5605,13 +6292,19 @@
     "h2.cli-resultados.seo-search-console",
     "h2.cli-resultados.trafico-ga4",
     "int.search-console",
-    "int.google-analytics"
+    "int.ga4"
    ],
    "archivo": "src/app/(protected)/dashboard/resultados/seo/page.tsx",
    "linea": 179,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados.seo-search-console",
+    "h2.cli-resultados.trafico-ga4",
+    "int.search-console",
+    "int.google-analytics"
+   ]
   },
   {
    "id": "PERF-004",
@@ -5621,14 +6314,19 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h2.cli-inicio.resumen-ia",
-    "int.vertex",
-    "lib.ai"
+    "lib.chatbot.llm",
+    "int.anthropic"
    ],
    "archivo": "src/app/(protected)/dashboard/page.tsx",
    "linea": 193,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-inicio.resumen-ia",
+    "int.vertex",
+    "lib.ai"
+   ]
   },
   {
    "id": "PERF-007",
@@ -5638,13 +6336,17 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h3.vis-widget-develop",
-    "lib.chatbot.barrel"
+    "lib.chatbot"
    ],
    "archivo": "src/components/layout/ChatWidgetMount.tsx",
    "linea": 12,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-develop",
+    "lib.chatbot.barrel"
+   ]
   },
   {
    "id": "PERF-008",
@@ -5655,13 +6357,18 @@
    "nodo": [
     "h3.adm-actividad.stream-eventos",
     "h3.adm-chatbots.actividad-por-bot",
-    "int.neon"
+    "lib.prisma"
    ],
    "archivo": "src/modules/chatbot/components/admin/ActivityLog.tsx",
    "linea": 103,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.adm-actividad.stream-eventos",
+    "h3.adm-chatbots.actividad-por-bot",
+    "int.neon"
+   ]
   },
   {
    "id": "PERF-009",
@@ -5673,17 +6380,26 @@
     "h3.adm-chatbots",
     "h3.cli-chatbot",
     "h3.vis-widget-cliente",
-    "lib.chatbot.components",
+    "lib.chatbot",
     "h3.adm-chatbots.editar-config-bot",
     "h4.adm-clientes.alta-cliente-con-bot",
-    "lib.chatbot.avatar",
     "h3.vis-widget-develop"
    ],
    "archivo": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
    "linea": 940,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.adm-chatbots",
+    "h3.cli-chatbot",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.components",
+    "h3.adm-chatbots.editar-config-bot",
+    "h4.adm-clientes.alta-cliente-con-bot",
+    "lib.chatbot.avatar",
+    "h3.vis-widget-develop"
+   ]
   },
   {
    "id": "PERF-012",
@@ -5694,13 +6410,18 @@
    "nodo": [
     "int.cron.generate-insights",
     "h3.adm-chatbots",
-    "int.vertex"
+    "lib.chatbot.llm"
    ],
    "archivo": "src/app/api/cron/generate-insights/route.ts",
    "linea": 33,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.cron.generate-insights",
+    "h3.adm-chatbots",
+    "int.vertex"
+   ]
   },
   {
    "id": "PERF-016",
@@ -5905,13 +6626,17 @@
    "confianza": "PROBABLE",
    "nodo": [
     "lib.ui",
-    "lib.next-config"
+    "lib.plataforma.next-config"
    ],
    "archivo": "src/app/layout.tsx",
    "linea": 78,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.ui",
+    "lib.next-config"
+   ]
   },
   {
    "id": "PERF-019",
@@ -5921,13 +6646,17 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h6",
-    "lib.smooth-scroll"
+    "lib.sitio-publico"
    ],
    "archivo": "src/components/layout/SmoothScroll.tsx",
    "linea": 102,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h6",
+    "lib.smooth-scroll"
+   ]
   },
   {
    "id": "PERF-022",
@@ -5937,13 +6666,17 @@
    "confianza": "PROBABLE",
    "nodo": [
     "lib.sitio-publico",
-    "lib.raiz-repo.node-modules-react-three-fiber-dist-events-b389eeca-esm"
+    "lib.plataforma.package"
    ],
    "archivo": "src/components/3d/HeroArtifact.tsx",
    "linea": 125,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.sitio-publico",
+    "lib.raiz-repo.node-modules-react-three-fiber-dist-events-b389eeca-esm"
+   ]
   },
   {
    "id": "DEU-005",
@@ -5991,15 +6724,18 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.prisma",
-    "lib.migraciones",
-    "int.neon"
+    "lib.prisma"
    ],
    "archivo": "prisma/schema.prisma",
    "linea": 7,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.prisma",
+    "lib.migraciones",
+    "int.neon"
+   ]
   },
   {
    "id": "DEU-013",
@@ -6030,15 +6766,21 @@
     "modelo.Organization",
     "modelo.AgencySettings",
     "modelo.ChatbotLead",
-    "lib.prisma",
-    "int.neon",
-    "lib.migraciones"
+    "lib.prisma"
    ],
    "archivo": "prisma/migrations/20260619234252_add_organization_city_avatar_notes_softdelete/migration.sql",
    "linea": 2,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "modelo.Organization",
+    "modelo.AgencySettings",
+    "modelo.ChatbotLead",
+    "lib.prisma",
+    "int.neon",
+    "lib.migraciones"
+   ]
   },
   {
    "id": "DEU-016",
@@ -6048,15 +6790,20 @@
    "confianza": "PROBABLE",
    "nodo": [
     "lib.prisma",
-    "lib.seeds",
-    "int.github-actions",
-    "lib.deps"
+    "lib.prisma.seeds",
+    "lib.plataforma.package"
    ],
    "archivo": "prisma/seeds/sync-plans.ts",
    "linea": 13,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.prisma",
+    "lib.seeds",
+    "int.github-actions",
+    "lib.deps"
+   ]
   },
   {
    "id": "DEU-017",
@@ -6066,6 +6813,20 @@
    "confianza": "PROBABLE",
    "nodo": [
     "lib.isolation",
+    "lib.prisma",
+    "modelo.Organization",
+    "modelo.User",
+    "h5.set-manual",
+    "modelo.OsLead",
+    "lib.tests"
+   ],
+   "archivo": "playwright.integration.config.ts",
+   "linea": 37,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.isolation",
     "int.neon",
     "lib.prisma",
     "modelo.Organization",
@@ -6074,12 +6835,7 @@
     "modelo.OsLead",
     "int.github-actions",
     "lib.tests"
-   ],
-   "archivo": "playwright.integration.config.ts",
-   "linea": 37,
-   "zona": "libre",
-   "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   ]
   },
   {
    "id": "DEU-023",
@@ -6163,7 +6919,7 @@
     "h4.adm-clientes.alta-cliente-con-bot",
     "lib.ui",
     "h4.adm-clientes.editar-datos",
-    "lib.transition",
+    "lib.context",
     "h5.set-dia",
     "h4.adm-clientes"
    ],
@@ -6171,7 +6927,15 @@
    "linea": 11,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h4.adm-clientes.alta-cliente-con-bot",
+    "lib.ui",
+    "h4.adm-clientes.editar-datos",
+    "lib.transition",
+    "h5.set-dia",
+    "h4.adm-clientes"
+   ]
   },
   {
    "id": "DEU-042",
@@ -6183,13 +6947,19 @@
     "h3.vis-widget-develop",
     "h3.vis-widget-cliente",
     "h3.adm-chatbots",
-    "lib.chatbot.components"
+    "lib.chatbot"
    ],
    "archivo": "src/modules/chatbot/components/chat/ChatWindow.tsx",
    "linea": 43,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-develop",
+    "h3.vis-widget-cliente",
+    "h3.adm-chatbots",
+    "lib.chatbot.components"
+   ]
   },
   {
    "id": "DEU-048",
@@ -6199,7 +6969,7 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h3.adm-chatbots",
-    "int.vertex",
+    "lib.chatbot.llm",
     "int.cron.generate-insights",
     "modelo.ChatbotInsight"
    ],
@@ -6207,7 +6977,13 @@
    "linea": 102,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.adm-chatbots",
+    "int.vertex",
+    "int.cron.generate-insights",
+    "modelo.ChatbotInsight"
+   ]
   },
   {
    "id": "DEU-051",
@@ -6291,14 +7067,18 @@
    "confianza": "PROBABLE",
    "nodo": [
     "int.brevo",
-    "int.resend",
-    "lib.email"
+    "int.email"
    ],
    "archivo": "src/lib/email/brevo-service.ts",
    "linea": 33,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.brevo",
+    "int.resend",
+    "lib.email"
+   ]
   },
   {
    "id": "DEU-090",
@@ -6307,7 +7087,6 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.github-actions",
     "lib.isolation",
     "lib.tests"
    ],
@@ -6315,7 +7094,12 @@
    "linea": 20,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.github-actions",
+    "lib.isolation",
+    "lib.tests"
+   ]
   },
   {
    "id": "DEU-104",
@@ -6342,7 +7126,7 @@
     "h1.auth-invite.emitir-invitacion",
     "h1.auth-invite.aceptar-invitacion",
     "h4.adm-config",
-    "int.resend",
+    "int.email",
     "h4.adm-equipo",
     "h4.adm-equipo.invitar-miembro",
     "h1.auth-invite"
@@ -6351,7 +7135,16 @@
    "linea": 110,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h1.auth-invite.emitir-invitacion",
+    "h1.auth-invite.aceptar-invitacion",
+    "h4.adm-config",
+    "int.resend",
+    "h4.adm-equipo",
+    "h4.adm-equipo.invitar-miembro",
+    "h1.auth-invite"
+   ]
   },
   {
    "id": "DEU-003",
@@ -6411,7 +7204,7 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.seeds",
+    "lib.prisma.seeds",
     "modelo.Organization",
     "modelo.OsLead",
     "modelo.User"
@@ -6420,7 +7213,13 @@
    "linea": 1799,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.seeds",
+    "modelo.Organization",
+    "modelo.OsLead",
+    "modelo.User"
+   ]
   },
   {
    "id": "DEU-010",
@@ -6430,14 +7229,19 @@
    "confianza": "PROBABLE",
    "nodo": [
     "modelo.BotConfig",
-    "lib.seeds",
+    "lib.prisma.seeds",
     "h3.adm-chatbots"
    ],
    "archivo": "prisma/schema.prisma",
    "linea": 1324,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "modelo.BotConfig",
+    "lib.seeds",
+    "h3.adm-chatbots"
+   ]
   },
   {
    "id": "DEU-011",
@@ -6447,14 +7251,18 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "lib.prisma",
-    "lib.seeds",
-    "lib.migraciones"
+    "lib.prisma.seeds"
    ],
    "archivo": "prisma/schema.prisma",
    "linea": 399,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.prisma",
+    "lib.seeds",
+    "lib.migraciones"
+   ]
   },
   {
    "id": "DEU-012",
@@ -6637,7 +7445,6 @@
     "modelo.ChatbotLead",
     "h2.cli-reportes-email",
     "h2.cli-reportes-email.pdf-reporte-ejecutivo",
-    "lib.reports",
     "int.ga4",
     "int.search-console"
    ],
@@ -6645,7 +7452,17 @@
    "linea": 21,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados",
+    "h3.cli-chatbot",
+    "modelo.ChatbotLead",
+    "h2.cli-reportes-email",
+    "h2.cli-reportes-email.pdf-reporte-ejecutivo",
+    "lib.reports",
+    "int.ga4",
+    "int.search-console"
+   ]
   },
   {
    "id": "DEU-028",
@@ -6728,14 +7545,18 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h2.cli-reportes-email",
-    "lib.reports",
     "lib.plan"
    ],
    "archivo": "src/lib/reports/executive-weekly/report-eligible-plan.ts",
    "linea": 9,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-reportes-email",
+    "lib.reports",
+    "lib.plan"
+   ]
   },
   {
    "id": "DEU-033",
@@ -6746,14 +7567,20 @@
    "nodo": [
     "h4.adm-clientes",
     "h2.cli-reportes-email.reporte-semanal",
-    "lib.reports",
+    "h2.cli-reportes-email",
     "int.brevo"
    ],
    "archivo": "src/lib/reports/executive-weekly/send-manual.ts",
    "linea": 27,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h4.adm-clientes",
+    "h2.cli-reportes-email.reporte-semanal",
+    "lib.reports",
+    "int.brevo"
+   ]
   },
   {
    "id": "DEU-034",
@@ -6780,14 +7607,17 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.chatbot.barrel",
-    "lib.chatbot.components"
+    "lib.chatbot"
    ],
    "archivo": "src/modules/chatbot/index.ts",
    "linea": 40,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.chatbot.barrel",
+    "lib.chatbot.components"
+   ]
   },
   {
    "id": "DEU-037",
@@ -6796,7 +7626,7 @@
    "tipo": "deuda",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
-    "lib.chatbot.lead-presentation",
+    "lib.chatbot.leads",
     "h3.cli-chatbot",
     "modelo.ChatbotLead"
    ],
@@ -6804,7 +7634,12 @@
    "linea": 45,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.chatbot.lead-presentation",
+    "h3.cli-chatbot",
+    "modelo.ChatbotLead"
+   ]
   },
   {
    "id": "DEU-040",
@@ -6844,13 +7679,16 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.chatbot.components"
+    "lib.chatbot"
    ],
    "archivo": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx",
    "linea": 601,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.chatbot.components"
+   ]
   },
   {
    "id": "DEU-044",
@@ -6859,13 +7697,16 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.chatbot.components"
+    "lib.chatbot"
    ],
    "archivo": "src/modules/chatbot/components/chat/revealSafeMarkdown.ts",
    "linea": 15,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.chatbot.components"
+   ]
   },
   {
    "id": "DEU-045",
@@ -6876,13 +7717,18 @@
    "nodo": [
     "h3.cli-chatbot",
     "h3.adm-chatbots",
-    "lib.chatbot.components"
+    "lib.chatbot"
    ],
    "archivo": "src/modules/chatbot/components/avatar/avatarStyleSchema.ts",
    "linea": 45,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.cli-chatbot",
+    "h3.adm-chatbots",
+    "lib.chatbot.components"
+   ]
   },
   {
    "id": "DEU-046",
@@ -6991,14 +7837,20 @@
    "nodo": [
     "h3.adm-chatbots",
     "lib.chatbot.insights",
-    "int.vertex",
+    "lib.chatbot.llm",
     "modelo.ChatbotInsight"
    ],
    "archivo": "src/app/api/admin/chatbot/insights/generate/route.ts",
    "linea": 12,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.adm-chatbots",
+    "lib.chatbot.insights",
+    "int.vertex",
+    "modelo.ChatbotInsight"
+   ]
   },
   {
    "id": "DEU-056",
@@ -7256,13 +8108,16 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.tailwind"
+    "lib.plataforma.tailwind-config"
    ],
    "archivo": "tailwind.config.ts",
    "linea": 19,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.tailwind"
+   ]
   },
   {
    "id": "DEU-092",
@@ -7271,13 +8126,16 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.next-config"
+    "lib.plataforma.next-config"
    ],
    "archivo": "next.config.ts",
    "linea": 1,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.next-config"
+   ]
   },
   {
    "id": "DEU-093",
@@ -7286,14 +8144,17 @@
    "tipo": "deuda",
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
-    "int.github-actions",
-    "lib.next-config"
+    "lib.plataforma.next-config"
    ],
    "archivo": "eslint.config.mjs",
    "linea": 9,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.github-actions",
+    "lib.next-config"
+   ]
   },
   {
    "id": "DEU-094",
@@ -7302,7 +8163,7 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.deps",
+    "lib.plataforma.package",
     "lib.ui",
     "h6"
    ],
@@ -7310,7 +8171,12 @@
    "linea": 3,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.deps",
+    "lib.ui",
+    "h6"
+   ]
   },
   {
    "id": "DEU-095",
@@ -7495,7 +8361,6 @@
    "confianza": "PROBABLE",
    "nodo": [
     "lib.ui",
-    "doc.ra-z-lane-services-log",
     "h2.cli-resultados",
     "h2.cli-inicio"
    ],
@@ -7503,7 +8368,13 @@
    "linea": 1,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.ui",
+    "doc.ra-z-lane-services-log",
+    "h2.cli-resultados",
+    "h2.cli-inicio"
+   ]
   },
   {
    "id": "DEU-108",
@@ -7514,13 +8385,18 @@
    "nodo": [
     "lib.context",
     "lib.sitio-publico",
-    "lib.raiz-repo.rama-bead847c-src-app-page"
+    "rama.rediseno-home"
    ],
    "archivo": "src/context/TransitionContext.tsx",
    "linea": 28,
    "zona": "FROZEN",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.context",
+    "lib.sitio-publico",
+    "lib.raiz-repo.rama-bead847c-src-app-page"
+   ]
   },
   {
    "id": "DEU-109",
@@ -7529,16 +8405,19 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "lib.raiz-repo.rama-bead847c-src-components-layout-carga-diferida-contrato",
-    "lib.raiz-repo.rama-bead847c-src-components-layout-carga-diferida-tests-s8-diferido-invariant",
-    "lib.raiz-repo.rama-bead847c-src-app-v3-lib-tests-s3-frontera-invariant",
-    "lib.raiz-repo.rama-bead847c-src-app-v3-lib-tests-s3-git"
+    "rama.rediseno-home"
    ],
    "archivo": "rama:bead847c:src/components/layout/carga-diferida/contrato.ts",
    "linea": 236,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "lib.raiz-repo.rama-bead847c-src-components-layout-carga-diferida-contrato",
+    "lib.raiz-repo.rama-bead847c-src-components-layout-carga-diferida-tests-s8-diferido-invariant",
+    "lib.raiz-repo.rama-bead847c-src-app-v3-lib-tests-s3-frontera-invariant",
+    "lib.raiz-repo.rama-bead847c-src-app-v3-lib-tests-s3-git"
+   ]
   },
   {
    "id": "DEU-110",
@@ -7613,8 +8492,7 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h1.auth-recupero",
-    "h1.auth-recupero.forgot",
-    "h1.auth-recupero.reset",
+    "h1.auth-recupero.restablecer-password",
     "lib.rate-limit",
     "int.brevo"
    ],
@@ -7622,7 +8500,14 @@
    "linea": 76,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h1.auth-recupero",
+    "h1.auth-recupero.forgot",
+    "h1.auth-recupero.reset",
+    "lib.rate-limit",
+    "int.brevo"
+   ]
   },
   {
    "id": "UX-006",
@@ -7657,13 +8542,26 @@
     "lib.plan",
     "h2.cli-servicios.vitrina-de-modulos",
     "h2.cli-resenas",
-    "lib.modules"
+    "lib.premium-modules"
    ],
    "archivo": "src/components/dashboard/PremiumModuleCard.tsx",
    "linea": 300,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-servicios.vitrina-modulos",
+    "h2.cli-soporte",
+    "h2.cli-mensajes",
+    "h2.cli-bienvenida",
+    "h2.cli-servicios",
+    "h2.cli-mensajes.conversacion",
+    "h2.cli-plan",
+    "lib.plan",
+    "h2.cli-servicios.vitrina-de-modulos",
+    "h2.cli-resenas",
+    "lib.modules"
+   ]
   },
   {
    "id": "UX-010",
@@ -7756,7 +8654,7 @@
    "nodo": [
     "h3.vis-widget-cliente",
     "h3.vis-widget-develop",
-    "int.vertex",
+    "lib.chatbot.llm",
     "int.sentry",
     "h3.vis-widget-cliente.conversar",
     "h3.vis-whatsapp",
@@ -7766,7 +8664,16 @@
    "linea": 475,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-cliente",
+    "h3.vis-widget-develop",
+    "int.vertex",
+    "int.sentry",
+    "h3.vis-widget-cliente.conversar",
+    "h3.vis-whatsapp",
+    "lib.chatbot.hooks"
+   ]
   },
   {
    "id": "UX-027",
@@ -8015,13 +8922,19 @@
     "h2.cli-resultados.insights-ia",
     "h2.cli-resultados.analisis-mensual",
     "int.anthropic",
-    "int.vertex"
+    "lib.chatbot.llm"
    ],
    "archivo": "src/components/dashboard/results/InsightsBlock.tsx",
    "linea": 52,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados.insights-ia",
+    "h2.cli-resultados.analisis-mensual",
+    "int.anthropic",
+    "int.vertex"
+   ]
   },
   {
    "id": "UX-012",
@@ -8099,14 +9012,21 @@
     "h3.vis-widget-develop",
     "h3.vis-widget-cliente",
     "h3.vis-widget-cliente.conversar",
-    "lib.chatbot.components",
+    "lib.chatbot",
     "h3.adm-chatbots"
    ],
    "archivo": "src/modules/chatbot/components/chat/ChatWindow.tsx",
    "linea": 321,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-develop",
+    "h3.vis-widget-cliente",
+    "h3.vis-widget-cliente.conversar",
+    "lib.chatbot.components",
+    "h3.adm-chatbots"
+   ]
   },
   {
    "id": "UX-019",
@@ -8574,13 +9494,17 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h3.vis-widget-develop",
-    "lib.chatbot.components"
+    "lib.chatbot"
    ],
    "archivo": "src/modules/chatbot/components/LogicCompanion.tsx",
    "linea": 180,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-develop",
+    "lib.chatbot.components"
+   ]
   },
   {
    "id": "A11Y-014",
@@ -8704,13 +9628,18 @@
    "nodo": [
     "h6",
     "h1.auth-login",
-    "lib.smooth-scroll"
+    "lib.sitio-publico"
    ],
    "archivo": "src/components/layout/SmoothScroll.tsx",
    "linea": 79,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h6",
+    "h1.auth-login",
+    "lib.smooth-scroll"
+   ]
   },
   {
    "id": "A11Y-037",
@@ -8815,13 +9744,17 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h2.cli-resultados.informe-mensual-pdf",
-    "lib.reports"
+    "h2.cli-reportes-email"
    ],
    "archivo": "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx",
    "linea": 24,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h2.cli-resultados.informe-mensual-pdf",
+    "lib.reports"
+   ]
   },
   {
    "id": "A11Y-008",
@@ -8913,13 +9846,18 @@
    "nodo": [
     "h3.vis-widget-develop",
     "h3.vis-widget-cliente",
-    "lib.chatbot.components"
+    "lib.chatbot"
    ],
    "archivo": "src/modules/chatbot/components/chat/ChatWindow.tsx",
    "linea": 445,
    "zona": "libre",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h3.vis-widget-develop",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.components"
+   ]
   },
   {
    "id": "A11Y-018",
@@ -9156,7 +10094,7 @@
     "h5.set-lead",
     "h2.cli-agenda.panel-de-agenda",
     "lib.leados",
-    "int.calcom",
+    "int.cal-com",
     "modelo.Organization",
     "h5.set-manual",
     "h5.set-manual.agenda-reunion",
@@ -9168,7 +10106,19 @@
    "linea": 58,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h5.set-lead",
+    "h2.cli-agenda.panel-de-agenda",
+    "lib.leados",
+    "int.calcom",
+    "modelo.Organization",
+    "h5.set-manual",
+    "h5.set-manual.agenda-reunion",
+    "h2.cli-agenda",
+    "h5.set-manual.agenda",
+    "h5.set-lead.agenda-reunion"
+   ]
   },
   {
    "id": "BUG-146",
@@ -9239,14 +10189,19 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h5.set-manual.agenda-reunion",
-    "int.calcom",
+    "int.cal-com",
     "int.sentry"
    ],
    "archivo": "src/app/(protected)/setter/_actions/agenda.actions.ts",
    "linea": 253,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h5.set-manual.agenda-reunion",
+    "int.calcom",
+    "int.sentry"
+   ]
   },
   {
    "id": "BUG-152",
@@ -9261,13 +10216,22 @@
     "h5.set-manual.postergar-y-retomar",
     "h5.set-lead.agenda-reunion",
     "lib.leados",
-    "int.calcom"
+    "int.cal-com"
    ],
    "archivo": "src/app/(protected)/setter/_components/foco-surface.tsx",
    "linea": 70,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h5.set-dia.foco-ahora",
+    "h5.set-dia.palancas-de-card",
+    "modelo.OsLeadSetterMeta",
+    "h5.set-manual.postergar-y-retomar",
+    "h5.set-lead.agenda-reunion",
+    "lib.leados",
+    "int.calcom"
+   ]
   },
   {
    "id": "BUG-153",
@@ -9398,7 +10362,7 @@
    "tipo": "bug",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.cron.os-follow-up",
+    "lib.leados",
     "int.telegram",
     "h4.adm-leads.digest-follow-ups-telegram"
    ],
@@ -9406,7 +10370,12 @@
    "linea": 176,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.cron.os-follow-up",
+    "int.telegram",
+    "h4.adm-leads.digest-follow-ups-telegram"
+   ]
   },
   {
    "id": "BUG-164",
@@ -9539,14 +10508,18 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h1.auth-login",
-    "h1.auth-login.qa-login",
     "lib.auth"
    ],
    "archivo": "src/app/api/qa/login/route.ts",
    "linea": 54,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h1.auth-login",
+    "h1.auth-login.qa-login",
+    "lib.auth"
+   ]
   },
   {
    "id": "SEC-100",
@@ -9731,14 +10704,18 @@
    "confianza": "PROBABLE",
    "nodo": [
     "h4.adm-leads.crud-y-estado",
-    "int.cron.os-follow-up",
     "lib.leados"
    ],
    "archivo": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
    "linea": 102,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h4.adm-leads.crud-y-estado",
+    "int.cron.os-follow-up",
+    "lib.leados"
+   ]
   },
   {
    "id": "BUG-151",
@@ -9779,13 +10756,17 @@
    "confianza": "VERIFICADO-POR-LECTURA",
    "nodo": [
     "h5.set-manual.agenda",
-    "int.calcom"
+    "int.cal-com"
    ],
    "archivo": "src/app/(protected)/setter/leads/[leadId]/manual/_components/agenda-form.tsx",
    "linea": 213,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "h5.set-manual.agenda",
+    "int.calcom"
+   ]
   },
   {
    "id": "BUG-159",
@@ -9993,7 +10974,6 @@
    "tipo": "deuda",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.cron.os-follow-up",
     "lib.leados",
     "h5.set-lead.contador-dms-hoy"
    ],
@@ -10001,7 +10981,12 @@
    "linea": 56,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.cron.os-follow-up",
+    "lib.leados",
+    "h5.set-lead.contador-dms-hoy"
+   ]
   },
   {
    "id": "DEU-082",
@@ -10227,14 +11212,18 @@
    "tipo": "seguridad",
    "confianza": "PROBABLE",
    "nodo": [
-    "int.cron.os-follow-up",
+    "lib.leados",
     "modelo.Notification"
    ],
    "archivo": "src/app/api/cron/os-follow-up/route.ts",
    "linea": 248,
    "zona": "ZONA-FRANCO",
    "estado": "abierto",
-   "documento": "03-MEJORAS.md"
+   "documento": "03-MEJORAS.md",
+   "nodo_citado": [
+    "int.cron.os-follow-up",
+    "modelo.Notification"
+   ]
   },
   {
    "id": "UX-053",
@@ -10421,6 +11410,277 @@
    "zona": "libre",
    "estado": "abierto",
    "documento": "04-DISENO.md"
+  },
+  {
+   "id": "IDEA-001",
+   "titulo": "Las preguntas que el bot no supo contestar: respondelas desde Análisis (y se destraba el motor de descubrimientos)",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "lib.prisma",
+    "lib.chatbot.insights",
+    "int.cron.generate-insights",
+    "lib.plataforma.netlify",
+    "h2.cli-resultados"
+   ],
+   "archivo": "prisma/schema.prisma",
+   "linea": 227,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-002",
+   "titulo": "Aviso al 80% de la cuota, al dueño y a develOP, antes de que el bot se degrade",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "lib.prisma",
+    "lib.chatbot.quota",
+    "lib.isolation",
+    "lib.chatbot.chat",
+    "lib.chatbot.notifications"
+   ],
+   "archivo": "prisma/schema.prisma",
+   "linea": 1587,
+   "zona": "congelado (libre (registry.ts es el helper de aislamiento: no está congelado, pero tiene invariantes que hay que correr))",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-003",
+   "titulo": "Lo que Google te trajo: llamadas, «cómo llegar» y clics a tu web",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "int.gbp",
+    "h2.cli-resultados"
+   ],
+   "archivo": "src/lib/integrations/google-business-profile.ts",
+   "linea": 8,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-004",
+   "titulo": "«Pedile la reseña»: al marcar Vendido, el link de reseña de Google por WhatsApp o email en un toque",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "h3.cli-chatbot",
+    "lib.chatbot",
+    "lib.prisma"
+   ],
+   "archivo": "src/modules/chatbot/components/dashboard/LeadStatusActions.tsx",
+   "linea": 52,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-005",
+   "titulo": "SLA de soporte: lo que el cliente escribió y develOP no contestó, escalado por Telegram y marcado en la bandeja",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "lib.componentes-dashboard",
+    "h2.cli-soporte",
+    "lib.prisma",
+    "h2.cli-mensajes",
+    "lib.health-score"
+   ],
+   "archivo": "src/components/dashboard/TicketReplyForm.tsx",
+   "linea": 32,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-006",
+   "titulo": "«Atención hoy» con lo que pasa en el negocio: reseñas sin responder y productos por agotarse",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "h2.cli-inicio",
+    "int.gbp",
+    "int.tiendanube"
+   ],
+   "archivo": "src/lib/dashboard/attention.ts",
+   "linea": 9,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-007",
+   "titulo": "Contactos sin atender: recordatorio al dueño y el «Digest diario» que la configuración ya ofrece",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "lib.chatbot.notifications",
+    "h3.adm-chatbots",
+    "lib.prisma",
+    "lib.chatbot.admin",
+    "lib.rate-limit"
+   ],
+   "archivo": "src/lib/client-notifications/notify.ts",
+   "linea": 91,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-008",
+   "titulo": "«Ideas para crecer» con la velocidad de respuesta, el rating de Google y los carritos de la tienda",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "h2.cli-inicio",
+    "int.gbp",
+    "int.tiendanube"
+   ],
+   "archivo": "src/lib/recommendations/rules.ts",
+   "linea": 156,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-009",
+   "titulo": "Pedir el referido en el momento de valor: después de ventas registradas, «Atención hoy» ofrece el link",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "h2.cli-referidos",
+    "lib.chatbot",
+    "lib.chatbot.admin",
+    "h2.cli-inicio",
+    "lib.prisma"
+   ],
+   "archivo": "src/lib/referrals/referrals.service.ts",
+   "linea": 28,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-010",
+   "titulo": "El bot consulta el catálogo y el stock de Tiendanube",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "int.tiendanube",
+    "lib.chatbot.tools",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.prompts",
+    "lib.prisma"
+   ],
+   "archivo": "src/lib/integrations/tiendanube.ts",
+   "linea": 104,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-011",
+   "titulo": "Radar de cartera en riesgo: un parte diario por Telegram y una sección «En riesgo» en el admin",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "lib.alerts",
+    "int.cron.alerts",
+    "lib.chatbot.admin",
+    "lib.prisma",
+    "int.telegram"
+   ],
+   "archivo": "src/lib/alerts.ts",
+   "linea": 195,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-012",
+   "titulo": "Checklist de onboarding operable desde la ficha del cliente, con autochequeo de lo que ya está conectado",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "lib.actions",
+    "lib.componentes-dashboard",
+    "lib.onboarding",
+    "h4.adm-clientes",
+    "h1.auth-invite"
+   ],
+   "archivo": "src/actions/admin/onboarding-tasks.ts",
+   "linea": 8,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-013",
+   "titulo": "Tablero de oportunidades de upsell para develOP: las reglas de «Ideas para crecer» corridas sobre toda la cartera",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "h2.cli-inicio",
+    "lib.prisma"
+   ],
+   "archivo": "src/lib/recommendations/rules.ts",
+   "linea": 156,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-014",
+   "titulo": "Ventas de tu tienda que vinieron del bot (Tiendanube cruzado con los contactos)",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "int.tiendanube",
+    "lib.prisma",
+    "h2.cli-inicio"
+   ],
+   "archivo": "src/lib/integrations/tiendanube.ts",
+   "linea": 92,
+   "zona": "libre",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
+  },
+  {
+   "id": "IDEA-015",
+   "titulo": "El bot ofrece turnos de la agenda del negocio (Cal.com)",
+   "severidad": null,
+   "tipo": "idea",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "nodo": [
+    "lib.prisma",
+    "int.cal-com",
+    "lib.leados",
+    "lib.chatbot.tools",
+    "h3.vis-widget-cliente"
+   ],
+   "archivo": "prisma/schema.prisma",
+   "linea": 1463,
+   "zona": "ZONA-FRANCO (ZONA-FRANCO (la corrección en src/lib/leados/agenda.ts es obligatoria; lo nuevo del bot es libre))",
+   "estado": "abierto",
+   "documento": "05-IDEAS.md"
   }
  ]
 }

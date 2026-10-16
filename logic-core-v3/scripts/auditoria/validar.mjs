@@ -12,13 +12,15 @@
 //  5. Zona coherente con el ledger (aviso): evidencia en archivo ZONA-FRANCO o FROZEN
 //     con Zona «libre».
 //  6. Cero coincidencias de patrones de secrets en toda la carpeta (incluido _crudo/).
-// Con --emitir escribe 06-ATLAS/hallazgos.json (ENMIENDA-01 E7) desde los bloques.
+// Con --emitir escribe 06-ATLAS/hallazgos.json (ENMIENDA-01 E7) desde los bloques, con cada nodo citado resuelto al
+// nodo real de atlas.json (alias curado en 06-ATLAS/alias.json o prefijo existente; ver atlas/alias.mjs).
 //
 // Uso (desde logic-core-v3): node scripts/auditoria/validar.mjs [--ref origin/main] [--emitir]
 
 import { execFileSync, spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { cargarAlias, resolverLista } from './atlas/alias.mjs'
 
 const args = process.argv.slice(2)
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 && args[i + 1] ? args[i + 1] : d }
@@ -157,6 +159,17 @@ for (const f of todos) {
 if (args.includes('--emitir')) {
   const destino = path.join(DIR, '06-ATLAS')
   mkdirSync(destino, { recursive: true })
+  const fAtlas = path.join(destino, 'atlas.json')
+  if (existsSync(fAtlas)) {
+    const ids = new Set(JSON.parse(readFileSync(fAtlas, 'utf8')).nodos.map((n) => n.id))
+    const alias = cargarAlias(destino)
+    for (const h of hallazgos) {
+      const reales = resolverLista(h.nodo, ids, alias)
+      if (reales.join() !== h.nodo.join()) h.nodo_citado = h.nodo
+      h.nodo = reales
+      if (!reales.length) aviso(h.documento, `${h.id}: ningún nodo citado existe en atlas.json (${(h.nodo_citado ?? []).join(', ')}): sumar un alias en 06-ATLAS/alias.json`)
+    }
+  }
   writeFileSync(path.join(destino, 'hallazgos.json'), JSON.stringify({ schemaVersion: 1, generado: { ref: REF }, hallazgos }, null, 1) + '\n', 'utf8')
 }
 

@@ -683,3 +683,170 @@
 - Ficha completa: UX-056 en 03-MEJORAS.md
 
 ## Bloques a ejecutar: estado contra el código
+
+> 86 ítems (no empezado 50 · parcial 15 · hecho 19 · abandonado 2). Los extrajeron los agentes de F6b (run `wf_7cfe2151-e7b`, `_crudo/f6b-extraccion/`) desde `Franco/Bloques a Ejecutar/` de Drive (insumo local, no se commitea) y desde las bitácoras y sprints del repo, y cada uno trae su evidencia en `origin/main` @ `57c421bc` (o la búsqueda que prueba que falta). El padre muestreó 5 contra la base y se sostuvieron (`handleChatRequest.ts:952`, `agenda.ts:70`, `brief-form.tsx:85`, `historyPolicy.ts:31-61`, `herramientas.ts:63-117`). Lo marcado «dudoso» por el extractor no se verificó.
+
+### Pendientes de las bitácoras y sprints del repo — 16 ítems (no empezado 7 · parcial 4 · hecho 3 · abandonado 2)
+
+| Bloque | Ítem | Estado | Evidencia | Fuente |
+|---|---|---|---|---|
+| B0.6 leak | Force-push de la historia purgada (enviroment.env) | no empezado | bitacora-roadmap.md:45-48; el archivo sigue en git log --all (39535583/c351b793, alcanzable desde main) | `docs/bitacora-roadmap.md` |
+| INFRA.1 | Setear NEXT_PUBLIC_SENTRY_DSN en Netlify | no empezado | infra-1:69; bitacora-roadmap.md:17135 («Sentry sigue INACTIVO en prod») | `docs/sprints/infra-1-observabilidad.md` |
+| P3-A.2 | Cerrar el precio del Motor de Reseñas ([FALTA:precio]) | no empezado | p3-a-2:153; LockedView.tsx:151 | `docs/sprints/p3-a-2-venta.md` |
+| AUD-2 | Cargar las 4 URLs de herramientas.ts (Gems y Claude Design) | no empezado | bitacora-beta-3.md:1209; src/lib/leados/herramientas.ts:63, 78, 90, 117 con url:null | `docs/bitacora-beta-3.md` |
+| FG-2.0 | Correr el experimento 5 vs 5 del formulario de brief | no empezado | bitacora-beta.md:1556-1562; docs/experimentos/fg2-brief-experimento.md:185-187 en blanco; /admin/fg2-lab sigue en src | `docs/bitacora-beta.md` |
+| BLOQUE PRIVACIDAD | Decisión de producto: Telegram con PII de visitantes | no empezado | bitacora-roadmap.md:16897 (pendiente, sin registro posterior en los docs revisados) | `docs/bitacora-roadmap.md` |
+| Carril seguridad | RT-2, RE-13, RE-16, RE-7, RT-13, CO-7+PD-1, A.4 | no empezado | roadmap-pendientes.md:175; dudoso: no se verificó contra el código en esta extracción | `docs/roadmap-pendientes.md` |
+| B14.3 backups | Cargar los secrets BACKUP_GPG_PASSPHRASE y DIRECT_DATABASE_URL_PROD/DEV y validar el primer run | parcial | bitacora-roadmap.md:9527-9532; el workflow existe (.github/workflows/db-backup.yml:39-42); la ejecución no es verificable | `docs/bitacora-roadmap.md` |
+| B14.4 salida a prod | Checklist de deploy en 7 fases + tag v1.0.0-rc.1 | parcial | bitacora-roadmap.md:9675-9705; no hay tags v* locales y package.json:3 = 0.1.0 | `docs/bitacora-roadmap.md` |
+| Rediseño home | GATE 1: permutación de acentos y familia del display | parcial | bitacora-rediseno.md:509-537; los acentos A quedaron en el código y CLAUDE.md; el display quedó sin efecto con la home clásica | `docs/bitacora-rediseno.md` |
+| Beta Matsu | Onboarding real de Matsu y firma de v1.0.0 | parcial | STATUS.md:174-178; bitacora-roadmap.md:9707-9718, 2423; no se puede confirmar uso real en prod | `STATUS.md` |
+| Bloque 2 foco | Decidir si el pin puede ser foco | hecho | bitacora-beta-2.md:556 → bitacora-beta-3.md:1024 (Sprint 6.1) | `docs/bitacora-beta-2.md` |
+| Franja admin D4 | Gate de demo preventiva por el campo caliente | hecho | bitacora-beta-2.md:561; dossier.ts usa gateBriefAbierto | `docs/bitacora-beta-2.md` |
+| EL TRONCO | Push de main a la punta reconciliada | hecho | bitacora-beta-3.md:10975; ea94dbf8 y 57c421bc son ancestros de origin/main | `docs/bitacora-beta-3.md` |
+| Rediseño home | Cerrar los 27 placeholders del gate de merge y las fotos de los socios | abandonado | bitacora-rediseno.md:3323-3360; HOME-CLASICO (3604) restauró la home clásica | `docs/bitacora-rediseno.md` |
+| B0-bis / B0.5 | Verificación en el teléfono + Lighthouse mobile del preview antes del merge | abandonado | sprint-b0-bis-cierre.md:57-60; la home restaurada dejó sin objeto la medición | `docs/sprints/sprint-b0-bis-cierre.md` |
+
+### CHATBOT — 33 ítems (no empezado 17 · parcial 6 · hecho 10)
+
+Fuente: `DERIVACION-chat-panel.md`, `HANDOFF-cierre-sesion-evolucion.md`, `ROADMAP-MEJORA-post-auditoria.md`.
+
+| Ítem | Estado | Evidencia |
+|---|---|---|
+| (a) Widget «Salud del bot» en el dashboard del dueño (render de MH.4) | no empezado | git grep -i 'salud del bot\|botHealth\|visitas atendidas' en src: vacío. El health existe solo en el admin: src/app/(protected)/admin/chatbot/health/page.tsx:12 checkChatbotHealth('develop'). |
+| (b) Copy de contadores «conversaciones atendidas» después de MH.2 | no empezado | git grep -i 'conversaciones atendidas': vacío. MH.2 ya descarta las conversaciones degradadas (handleChatRequest.ts:261-300), así que el cambio de semántica existe y el copy no se ajustó. |
+| E1: superficie «el bot no supo responder» + aprobación de propuestas de KB | no empezado | git grep -i 'kbGap\|KbProposal\|unanswered\|knowledgeGap' en src y schema.prisma: vacío. |
+| Auditoría III: getActivityChartData trae todos los eventos de 7 días sin take | no empezado | modules/chatbot/server/admin/getActivityChartData.ts:12-19: findMany sin take y global (unsafeGlobalQuery con PENDIENTE-DECISIÓN en :6-11). |
+| Auditoría III: getLatencyHistory hace take:2000 sin orderBy | no empezado | modules/chatbot/server/admin/getLatencyHistory.ts:76-83: findMany con take: 2000 y sin orderBy. |
+| Render genérico de señales para un vertical no-autos | no empezado | git grep '\.signals' en app/(protected)/dashboard y components/dashboard: vacío (el dato existe: schema.prisma:1477 signals Json?). |
+| E0: identidad persistente + cierre/timeout de conversación | no empezado | git grep 'endedAt\|visitorId' en src/modules/chatbot: vacío. |
+| Decisión abierta #1: política de retención de datos del visitante | no empezado | Solo se purga chatbot_events a 30 días (api/cron/cleanup-old-events/route.ts:14); privacidad-afirmaciones-cliente.md:68-72 confirma que no existe retención de conversaciones ni leads. |
+| E3 catálogo/inventario y E4 vertical salud | no empezado | git grep -i 'catalog\|inventory\|inventario' en src/modules/chatbot: vacío; verticals/packs/ no tiene pack de salud. |
+| MH.1: orderBy en buildWeeklyReport (3 sets) y en getLatencyHistory | no empezado | modules/chatbot/server/reports/buildWeeklyReport.ts:74-102 (take 100/500 sin orderBy); getLatencyHistory.ts:76-83. |
+| MH.3: messageCount real + generateInsightsForBot liviano (take:50, count) | no empezado | chat/persistTurn.ts:447 messageCount { increment: 2 }; insights/generateInsights.ts:29-42 (take 200 con todos los mensajes) y :59 slice(0, 50) en memoria. |
+| MH.4: servicio «Salud del bot» por org y período | no empezado | git grep -i 'botHealth\|attendedRate\|uptime' en src/modules/chatbot: vacío. |
+| EST.0 (A5.1): extraer un shell de chat común on-site/embed | no empezado | Siguen dos shells separados: modules/chatbot/components/chat/ChatWindow.tsx:12 y components/embed/ChatbotEmbed.tsx:14; git grep 'ChatShell': vacío. |
+| A1.2: unique compuesto (botConfigId, sessionId) | no empezado | prisma/schema.prisma:1375 sessionId String @unique (global). |
+| A1.8: decay sobre actividad real (lastStatusChangeAt ?? capturedAt) | no empezado | Los callers pasan lastActivityAt: new Date(lead.capturedAt) (dashboard/chatbot/leads/page.tsx:87; api/dashboard/chatbot/leads/export/route.ts:126; lib/reports/executive-weekly/top-hot-leads.ts:108). |
+| A4.3: /health info-disclosure (carril de seguridad) | no empezado | app/api/chatbot/[slug]/health/route.ts:7-20 es público y sin auth; modules/chatbot/server/health/checkHealth.ts:35,56,81,93 devuelve error.message y el detalle de env. |
+| A4.6: invalidación de cache multi-instancia (diferido) | no empezado | Diferido por diseño; TTL de 60 s documentado en chatbot-sprints.md:79. No se buscó implementación. |
+| R1 reporte de ROI: input del dueño (tasa de cierre + ticket) y render | parcial | Hay ticket promedio (dashboard/_actions/business-profile.actions.ts:17) y estimateMoney (src/lib/dashboard/home-metrics-logic.ts:93). git grep 'calculatePotentialValue' y la tasa de cierre del dueño: vacíos. |
+| El panel escribe firstContactedAt / lastStatusChangeAt como insumo del decay del score | parcial | Se escriben en modules/chatbot/server/admin/updateLeadStatus.ts:45-46, pero el decay sigue sobre capturedAt (dashboard/chatbot/leads/page.tsx:87; api/dashboard/leads/recent/route.ts:42). |
+| BLOQUE EV: packs verticales en código y backfill de verticalPack | parcial | Packs en src/modules/chatbot/server/verticals/packs/{base,agencia,usados}.ts; schema.prisma:1329 verticalPack @default('base'). El smoke de usados falló por bot inexistente/inactivo (ev4-transcripts/usados-*.md, HTTP 404; ev5-transcripts/README.md). |
+| Q1: batería de evals (~36 escenarios, asserts + juez) | parcial | src/modules/chatbot/evals/{capture,client,cleanup}.ts y __tests__/q1-2.invariant.ts existen; el juez perceptual nunca corrió (consolidacion-planoA-runtime.md:27). |
+| A5.2: descomponer handleChatRequest | parcial | persistTurn.ts fue extraído, pero handleChatRequest.ts sigue con 1.412 líneas en 57c421bc. |
+| A5.5/A5.6: constantes de event-types + LEAD_INTENTS unificado | parcial | LEAD_INTENTS unificado con HANDOFF_INTENTS (tools/captureLead.ts:32-36). Las constantes de event-types no se verificaron (dudoso). |
+| UTM: captura (EV.2/UTM.1) y render «¿De dónde vienen mis leads?» | hecho | prisma/schema.prisma:1384 utmSource; conversation/resolver.ts:106; requestSchema.ts:64; src/components/dashboard/home/LeadOrigins.tsx:1,32. |
+| Integrar T0/MH/RB al índice de ejecución | hecho | Fusionado en docs/consolidacion-planoA-runtime.md:5,45-93 (backlog runtime consolidado, 2026-07-07). |
+| MS-E6.3: hash de IP real (la docstring «GDPR-friendly» era falsa) | hecho | modules/chatbot/server/config/envValidator.ts:61-65 (salt obligatorio en prod; hashIp aborta sin él); git grep -i 'GDPR' en src: vacío. |
+| T0.1: gate a /smoke (CRON_SECRET o SUPER_ADMIN + rate limit) | hecho | Se resolvió eliminando el endpoint: commit 02a2f812 «deprecar el endpoint smoke publico»; git ls-tree 57c421bc src/app/api/chatbot no tiene smoke. |
+| T0.2: cron que llama a cleanupOldEvents | hecho | src/app/api/cron/cleanup-old-events/route.ts:14-23; netlify.toml [functions."cleanup-old-events-cron"] a las 06:00; netlify/functions/cleanup-old-events-cron.ts. |
+| T0.3: tipar el any del cron + CRON_SECRET que falle cerrado | hecho | src/lib/cron/cron-secret.ts:40-44 (usado por cleanup, detect-bot-issues, generate-insights, send-weekly-reports); chequeo inline en os-follow-up/route.ts:154, regenerate-briefs/route.ts:19, send-executive-reports/route.ts:18, alerts/route.ts:5. |
+| MH.2: no contar conversaciones degradadas + compensar el cupo si el stream muere | hecho | handleChatRequest.ts:261-300 (descarta la conversación nueva degradada); compensación en handleChatRequest.ts:462-527 y __tests__/onf1-reconcile.invariant.ts:41-46. |
+| RB.1: P2002 como éxito en getOrCreateConversation y en capture_lead | hecho | modules/chatbot/server/conversation/resolver.ts:116-132; tools/captureLead.ts:560-587 (alreadyCaptured: true). |
+| RB.2: techo de historial del lado del server (truncar en vez de 400) | hecho | modules/chatbot/shared/historyPolicy.ts:31 (HISTORY_WINDOW_MESSAGES=30), :61 (HARD_CAP_MESSAGES=40); hooks/useChatbot.ts:17; chat/requestSchema.ts:44. |
+| RB.3: onFinish transaccional + fallback ante respuesta vacía | hecho | chat/persistTurn.ts:412 scope.$transaction; chat/__tests__/empty-fallback-pipeline.invariant.ts. |
+
+### DASHBOARD — 18 ítems (no empezado 7 · parcial 5 · hecho 6)
+
+Fuente: `HANDOFF-chatbot-arranque.md`, `ROADMAP-CHATBOT-bloques-C.md`.
+
+| Ítem | Estado | Evidencia |
+|---|---|---|
+| C1.1: nonce estable por conversación (HMAC) para un prefijo cacheable | no empezado | chat/handleChatRequest.ts:883 visitorTag = vmsg_ + randomUUID() en cada request. |
+| C1.4: medir el efecto de caché (tokensIn / cachedContentTokenCount) | no empezado | git grep -i 'cachedContentTokenCount\|cachedTokens' en src/modules/chatbot/server: vacío. |
+| C2.1: detección de consultas sin responder | no empezado | git grep -i 'unanswered\|kbGap' en src/modules/chatbot: vacío. |
+| C2.2: catálogo visual en el chat | no empezado | git grep -i 'catalog\|show_vehicles\|inventory' en src/modules/chatbot: vacío. |
+| C2.3: memoria del visitante | no empezado | git grep 'visitorId\|returningVisitor' en src/modules/chatbot: vacío; depende de C3.2, que no está hecho. |
+| C3.2: sessionId compuesto + key del widget por slug | no empezado | prisma/schema.prisma:1375 sessionId String @unique. |
+| C3.3: knobs que no mienten (temperature/maxOutputTokens, monthlyQuota rotulado legacy) | no empezado | chat/handleChatRequest.ts:952 temperature: 0.7 fijo; admin/chatbots/[botId]/tabs/ConfigTab.tsx:35-37 sigue editando temperature y monthlyQuota sin rótulo legacy. |
+| Arrancar el roadmap de runtime por C0 y dejar C3.2 cerrado antes de C2.3 | parcial | C0.1–C0.3 hechos (ver abajo); C3.2 no empezado (schema.prisma:1375); C2.3 no empezado. |
+| C1.2: ventana de historial + caps de schema al percentil real (≤30 ítems) | parcial | Ventana de 30 (historyPolicy.ts:31), pero MAX_MESSAGES_SHAPE=50 y MAX_MESSAGE_CHARS=4000 (historyPolicy.ts:39,50). |
+| C3.4: menos round-trips a la DB (rate-limit doble, reusar el bot, paralelizar writes) | parcial | Un solo checkRateLimit en handleChatRequest.ts:184 y validateOrigin en route.ts (comentario en :304); los writes de onFinish van en $transaction por decisión (consolidacion-planoA-runtime.md:76). El resto no se verificó (dudoso). |
+| C3.6: deuda del handler (persistTurn, renombrar checkQuota→readQuotaUsage) | parcial | chat/persistTurn.ts existe; quota/checker.ts:32 sigue llamándose checkQuota. |
+| Carril de seguridad: P-4 /smoke público + /health que expone internos | parcial | /smoke eliminado (commit 02a2f812); /health sigue público y expone detalle (health/route.ts:7-20; health/checkHealth.ts:93). |
+| C0.1: navigate_to_page fuera de los bots de clientes | hecho | modules/chatbot/server/tools/getTools.ts:62-82 (TOOLS_RESTRICTED_TO_AGENCY_BOT = ['navigate_to_page']). |
+| C0.2: que la conversación no muera muda (ventana deslizante + slice + degradación) | hecho | shared/historyPolicy.ts:31,61; hooks/useChatbot.ts:17,88; chat/degradedResponse.ts:22 ('conversation_limit'). |
+| C0.3: modelo efectivo unificado para costo y ejecución, con fallback y WARN | hecho | llm/resolveEffectiveModel.ts:7-21 (fallback gemini-2.5-flash); chat/persistTurn.ts:369-377 (calculateCost con effectiveModel). |
+| C1.3: cap duro de ~40 turnos con CTA a WhatsApp | hecho | shared/historyPolicy.ts:61 HARD_CAP_MESSAGES = 40; handleChatRequest.ts:46; degradedResponse.ts:22. |
+| C3.1: corte de provider a mitad del stream (onError, no contar el turno, liberar cupo) | hecho | chat/handleChatRequest.ts:1046 onError; compensación de cupo en :462-527. |
+| C3.5: conversaciones huérfanas | hecho | chat/handleChatRequest.ts:261-300 (borrado scoped de la conversación nueva degradada). |
+
+### OSLEAD — 19 ítems (no empezado 19)
+
+Fuente: `Documento sin título.md`.
+
+| Ítem | Estado | Evidencia |
+|---|---|---|
+| P43 «Refinar» (mc2): 5 prompts de refinamiento en prompts-refinamiento.ts + un tilde único | no empezado | En 57c421bc no existen mc2-refinar.tsx ni prompts-refinamiento.ts (git ls-tree). tildeUnico solo aparece en el checkpoint WIP 506e0059 de origin/p25/rafaga-tildes, que no es ancestro de la base. |
+| M14: 15 checks (5 de oficio visual), selector tripartito, «primera mirada», gate con los 10 base | no empezado | git log --all -S'ESTADO_ITEM_CHEQUEO' y -S'primeraMirada': vacíos. En la base, lib/leados/flow.ts:204 selfCheckAprobado exige todos los HARD_CHECKS (flow-content.ts:171). |
+| Calibración del self-check: checkId en el rechazo + métrica de checks falsamente verdes | no empezado | git log --all -S'calcularCalibracionSelfCheck': vacío. checkId solo aparece en lib/leados/guidance-content.ts:164-168. |
+| M1 calidad de ficha: 4 campos nuevos, umbrales alcanzaParaDecidir/Diseñar y corte de 10 min (registrarCorteFicha) | no empezado | git log --all -S'registrarCorteFicha': vacío. alcanzaParaDisenar solo aparece en docs/auditorias (commit 8e6c3c3d). |
+| G2: ángulo wow en m4/m15/m5 (obtenerAnguloWow, AnguloWowCard) | no empezado | git log --all -S'obtenerAnguloWow': vacío; AnguloWowCard solo en docs de esta auditoría. |
+| F1: Modal compartido con role=dialog y aria-modal | no empezado | git grep 'aria-modal\|role=' en src/components/ui/Modal.tsx (57c421bc): vacío. |
+| F2: franja de conteos de la cartera (irAGrupo) | no empezado | git log --all -S'irAGrupo': vacío. |
+| F3: carga on-demand del iframe del borrador (draft-preview) | no empezado | git log --all -S'draft-preview': solo en docs de esta auditoría. |
+| F4: invariantes reforzados (REQUISITOS_CONGELADOS) + docs/barrera-rutas-ast.md | no empezado | git log --all -S'REQUISITOS_CONGELADOS': vacío; docs/barrera-rutas-ast.md no existe en 57c421bc. |
+| H-01: doble formulario en m6 (pegadoGem obligatorio) | no empezado | (setter)/_actions/dossier.schemas.ts:93 sigue exigiendo pegadoGem cuando el Gem tiene link. Las 4 vueltas no existen en la base. |
+| H-02: el trabajo del brief en m6 se pierde con F5 (autosave apagado) | no empezado | setter/leads/[leadId]/_components/brief-form.tsx:85 autosaveEnabled = false; :115 enabled: autosaveEnabled && briefValido. |
+| H-03: el botón fijo «Registrar evaluación» no abre el bloque con errores | no empezado | _components/evaluacion-form.tsx:142-171 (intentarEnviar sin acceso al acordeón); ficha-form.tsx:189 estado local abierto/setAbierto. No se ejecutó (probable). |
+| H-04: falso verde del gate de self-check con los criterios de diseño | no empezado | No aplica a la base: lib/leados/flow.ts:204 exige todos los HARD_CHECKS; el falso verde era del árbol WIP. Los criterios de diseño no existen en 57c421bc. |
+| H-05: cinco tildes por prompt en mc2 | no empezado | mc2 no existe en 57c421bc (ver P43). |
+| H-06: m13 en RECHAZADA debe permitir cambiar el link del borrador | no empezado | manual/_components/m13-borrador.tsx:118-122 («Borrador congelado por el rechazo»). |
+| H-07: control G3 «¿Exportaste después del último refinamiento?» | no empezado | (setter)/_actions/dossier.schemas.ts:129 solo pide confirmoCarga; git grep -i 'exportaste después': vacío. |
+| H-08: gate de decisor en el servidor para buscar horarios | no empezado | (setter)/_actions/agenda.schemas.ts:9-13: decisorConfirmado solo en ConfirmarReunionSchema, no en la búsqueda de horarios. |
+| H-09: Cal.com de LeadOS se rompe con más de una org con calComUsername | no empezado | src/lib/leados/agenda.ts:70-81 (si orgs.length > 1 aborta con «Hay más de una agenda conectada…»). |
+| S7: eliminar el rótulo «CONTEXTO DEL LEAD» | no empezado | manual/_components/pantalla-manual.tsx:205 <Zona etiqueta="Contexto del lead">. |
+
+## Tarjetas del backlog en tu zona
+
+> 46 tarjetas de `07-BACKLOG.md` tocan tu zona. Son **decisión tuya**: la auditoría no propone tocar nada de la zona sin coordinación. Detalle completo en `07-BACKLOG.md`.
+
+| Tarjeta | Bloque | Tamaño | Hallazgos | Coordinación |
+|---|---|---|---|---|
+| [B-04] Subir next, next-auth y @auth/core a las versiones con fix | Ahora | S | SEC-105 | libre (coordinar con Franco: cambia el runtime de auth que usa el setter) |
+| [B-09] Sesión que no se revive: sessionVersion en 'update', maxAge alineado y falla de base sin rebote | Ahora | L | SEC-006, BUG-001, SEC-010, BUG-006 | también requiere decisión FROZEN (Valentino) |
+| [B-10] Guardia SUPER_ADMIN al lado del dato en /admin (páginas, actions y rutas) | Ahora | L | SEC-023, SEC-065, SEC-060, SEC-084 | libre (admin/leados y fg2-lab coordinados con Franco) |
+| [B-14] Crons con disparador real en Netlify (y que solo los invoque el scheduler) | Ahora | M | BUG-047, FAL-016, FAL-026, SEC-099, UX-049 | libre (el disparador de os-follow-up, coordinado con Franco) |
+| [B-27] Magic link y errores de auth en auth.ts: envío que falla, link que no gasta un escáner, Google y Sentry | Próximo | L | BUG-003, BUG-007, UX-002, FAL-003, FAL-001 | también requiere decisión FROZEN (Valentino) |
+| [B-29] Reenviar credenciales solo a cuentas de cliente, con destinatario fijo y aviso a la cuenta | Próximo | S | SEC-087 | libre (afecta cuentas SETTER: avisar a Franco) |
+| [B-31] LeadOS: decidir e integrar (o descartar) p25/rafaga-tildes antes de tocar LeadOS en main | Próximo | L | DEU-077 | ZONA-FRANCO |
+| [B-32] LeadOS: la agenda reserva en la org de develOP por un identificador explícito | Próximo | S | BUG-038 | ZONA-FRANCO |
+| [B-45] Ciclo de vida del cliente: archivar corta acceso y crons, borrar no se lleva lo de la agencia | Próximo | L | SEC-014, BUG-015, BUG-138, BUG-142, DEU-005 | también requiere decisión FROZEN (Valentino) |
+| [B-79] Ficha y manual del setter sin pérdida de trabajo | Próximo | M | BUG-153, BUG-155, BUG-156, BUG-157 | ZONA-FRANCO |
+| [B-80] LeadOS: un solo predicado de estado vivo y terminal para la cola del setter | Próximo | L | BUG-146, BUG-147, BUG-160, BUG-162, BUG-164, BUG-168 | ZONA-FRANCO |
+| [B-81] LeadOS: errores mapeados al usuario y reportados a Sentry | Próximo | M | SEC-101, FAL-031, BUG-149, BUG-163 | ZONA-FRANCO |
+| [B-82] Revisión de demos: métrica por evaluador, materiales visibles e iframe con sandbox | Próximo | M | BUG-148, FAL-032, SEC-100 | ZONA-FRANCO |
+| [B-83] Fechas del setter en día calendario argentino | Próximo | S | BUG-152 | también requiere decisión FROZEN (Valentino) |
+| [B-84] Alta manual de prospectos con aviso de duplicado en el sistema | Próximo | S | BUG-161 | ZONA-FRANCO |
+| [B-85] Importación de prospectos: CSV de Excel en español | Próximo | S | UX-055 | ZONA-FRANCO |
+| [B-86] LeadOS: herramientas externas del recorrido con link y sin el «Chat de evaluación» | Próximo | S | FAL-033 | ZONA-FRANCO |
+| [B-87] Convertir un lead en proyecto desde la ficha del lead | Próximo | S | FAL-024 | ZONA-FRANCO (la conversión lee y marca OsLead: decide Franco) |
+| [B-90] Docs: decidir los 37 «a decidir» de 14-DOCS-CONSOLIDADOS | Después | S |  | libre (los ítems 8–12, 33, 35 y 36 los decide Franco) |
+| [B-92] Secretos y PII fuera del árbol: docs, scripts que imprimen credenciales y backups versionados | Después | S | SEC-001, SEC-003, SEC-071, SEC-107, POD-161, POD-162, POD-287, POD-288 | libre (b1/b2 son QA del setter: aviso a Franco) |
+| [B-93] /api/qa/login atado a localhost, a un secreto por corrida y sin delatar la guarda | Después | S | SEC-024, SEC-021 | ZONA-FRANCO |
+| [B-103] auth.ts protegido: callbacks a módulo puro con invariante, org primaria determinística y usuario borrado sin sesión | Después | M | DEU-002, BUG-005, SEC-008, POD-283 | también requiere decisión FROZEN (Valentino) |
+| [B-104] auth-guards protegido: error tipado y variante de página que redirige | Después | S | BUG-136, DEU-083 | también requiere decisión FROZEN (Valentino) |
+| [B-105] Migración aditiva agrupada del schema: índices, Decimal, enums y columnas pendientes | Después | L | PERF-001, DEU-008, DEU-010, DEU-084, POD-203, POD-204 | también requiere decisión FROZEN (Valentino) |
+| [B-106] Retención de datos: purga de rate_limit y tokens, y política para mensajes y formularios | Después | M | SEC-031, DEU-006 | libre (plazos acordados con Franco: la Neon es compartida) |
+| [B-129] Leads del admin: un módulo de presentación, conteos coherentes y card operable por teclado | Después | S | DEU-061, BUG-122, BUG-123, UX-045, A11Y-023, POD-351, POD-352, POD-353 | libre (admin/leads/_actions es ZONA-FRANCO y no se toca) |
+| [B-134] LeadOS: escrituras comerciales atómicas, por la puerta comercial y con candado propio | Después | M | BUG-165, BUG-150, DEU-060, SEC-104, BUG-170 | ZONA-FRANCO |
+| [B-135] LeadOS: borrado de lead auditado y backfill de caliente con guard | Después | S | DEU-074, BUG-177 | ZONA-FRANCO |
+| [B-136] LeadOS: fechas en hora argentina y un solo predicado de vencido | Después | S | BUG-151, BUG-159, DEU-081, DEU-079 | ZONA-FRANCO |
+| [B-137] LeadOS: entradas validadas (topes, CSV, link del opener y decisor) | Después | M | SEC-103, BUG-169, BUG-167, BUG-158, SEC-102 | ZONA-FRANCO |
+| [B-138] LeadOS: estado derivado del manual fiel y blobs del dossier atados a ids | Después | M | BUG-166, UX-056, UX-054, DEU-086 | ZONA-FRANCO |
+| [B-139] Manual del setter: nada de lo tipeado se pierde (hooks de acción y autosave, guardia de salida en opener y traspaso) | Después | S | BUG-181, BUG-182, UX-053 | ZONA-FRANCO (los hooks de src/lib son libres; los consumidores son del setter) |
+| [B-140] Setter: lecturas acotadas en el home y el manual, y despacho del manual por registro | Después | M | PERF-015, PERF-014, DEU-080 | ZONA-FRANCO |
+| [B-141] Setter: accesibilidad de la cabina, del drawer y del manual | Después | M | A11Y-026, A11Y-027, A11Y-028, A11Y-029, A11Y-030, A11Y-031, A11Y-032, BUG-154 | ZONA-FRANCO |
+| [B-142] Setter: lienzo propio del portal y navegación clasificada | Después | M | DIS-003, DEU-082 | ZONA-FRANCO (useThemeObserver.tsx y publicRoute.ts son libres) |
+| [B-143] Higiene de UI del setter (D4: 97 detalles) | Después | S | DEU-089 | ZONA-FRANCO |
+| [B-159] Una sola fuente de acentos y de z-index: design-tokens reemplazado | Después | M | DEU-100, DEU-101, DEU-110, DEU-111, DIS-008, UX-031, POD-383, POD-068 | también requiere decisión FROZEN (Valentino) |
+| [B-165] Poda de scripts sueltos y salidas generadas commiteadas (103 ALTA + 10 MEDIA) | Después | S | POD-085, POD-086, POD-087, POD-088, POD-089, POD-090, POD-091, POD-092 y 109 más | libre (qa-corridas y los QA b4–b7 son del setter: aviso a Franco) |
+| [B-169] LeadOS: poda del wizard, del laboratorio FG-2 y de exports sin consumidor | Después | M | DEU-075, DEU-078, DEU-085, DEU-087, DEU-088, POD-052, POD-053, POD-054 y 13 más | ZONA-FRANCO |
+| [B-170] Ramas: borrar las 43 mergeadas y archivar con tag las 14 con trabajo propio | Después | S | POD-205, POD-206, POD-207, POD-208, POD-209, POD-210, POD-211, POD-212 y 49 más | libre (leados/* y las fix/* del setter: confirmar con Franco) |
+| [B-171] Docs consolidados: publicar los 10 vivos y borrar 128 docs | Después | M | POD-083, DEU-056, DEU-076 | libre (LEADOS.md y los docs de LeadOS los aprueba Franco) |
+| [B-172] Aplicar el CLAUDE.md propuesto: raíz de 172 líneas y tres anidados (setter, chatbot, prisma) | Después | M | DEU-025, DEU-062, DEU-098 | libre (setter/CLAUDE.md: ZONA-FRANCO) |
+| [B-173] De prosa a mecanismo: eslint.gate en CI, hooks PreToolUse, CODEOWNERS e invariantes de convención | Después | L | DEU-099, DEU-071 | libre (CODEOWNERS de la zona de Franco: Franco) |
+| [B-177] Capa de roles del portal y puente de paleta, con foco visible de dos tonos | Después | L | DIS-001, DIS-005 | también requiere decisión FROZEN (Valentino) |
+| [B-178] Shells de los tres portales con roles y Toaster condicionado | Después | M | DIS-002, DIS-009 | libre (setter: ZONA-FRANCO) |
+| [B-185] Migrar el setter al tema | Después | L |  | ZONA-FRANCO |

@@ -1,0 +1,2751 @@
+{
+ "run": "wf_b8f7655d-c09",
+ "nota": "Backlog final de F6.4 (crítico por bloque). Lo lee backlog-md.mjs.",
+ "parte": 2,
+ "partes": 2,
+ "tarjetas": [
+  {
+   "titulo": "Admin: validación estricta y listados con tope",
+   "objetivo": "Que las entradas del admin pasen por Zod y que ningún listado traiga tablas enteras.",
+   "hallazgos": [
+    "DEU-066",
+    "PERF-011"
+   ],
+   "archivos_tocar": "src/lib/audit-log-queries.ts (enum de AuditActionType; pageSize ≤ 100); src/lib/bulk-actions.ts (orgIds con schema; export en streaming con tope); admin/team/_actions/task.schemas.ts (assignedToId SUPER_ADMIN; .max en los textos); admin/tickets/_actions/ticket.actions.ts (cursor y filtros en el servidor); admin/team/page.tsx (workload solo de tareas no DONE o en una ventana); admin/leads/page.tsx (con tope); resúmenes de proyectos con take.",
+   "archivos_no": "admin/leads/_actions/* (ZONA-FRANCO); el hilo de mensajes (lo pagina «Mensajes y tickets…»); src/lib/alerts.ts (el barrido protegido va con «Avisos internos…»).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. Se quitaron de acá el hilo de mensajes y el barrido de alerts.ts (protegido) para no duplicar.",
+   "prereqs": [
+    "Mensajes y tickets: paginación, leído fuera del render, orgs archivadas y orden por actividad",
+    "Alertas y tickets del admin que no esconden pendientes"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "listAuditLog con un actionType inválido o pageSize 10000 devuelve error de validación; la bandeja de tickets pagina por cursor; en esos archivos no queda findMany sin take; exportar 10.000 leads no los carga todos en memoria; asignar una tarea a un ORG_MEMBER falla.",
+   "nodos": [
+    "h4.adm-audit.listado",
+    "h4.adm-clientes.acciones-masivas",
+    "h4.adm-proyectos.tareas",
+    "h4.adm-tickets.bandeja",
+    "h4.adm-equipo.workload"
+   ],
+   "worktree": "wt/admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Dashboard del admin: KPIs en funciones puras, en hora argentina y con la tasa de respuesta por eventos",
+   "objetivo": "Sacar el cálculo de KPIs de admin/page.tsx a funciones puras testeables, calcularlas con días argentinos y medir la tasa de respuesta sobre respuestas reales.",
+   "hallazgos": [
+    "DEU-055",
+    "BUG-114",
+    "BUG-113"
+   ],
+   "archivos_tocar": "src/app/(protected)/admin/page.tsx → módulo nuevo en src/lib/ con las consultas y los KPIs como funciones puras (sin reasignar un let; límites de hoy, semana y mes con dayRangeAR, weekRangeAR y monthRangeAR de dates-ar; tasa de respuesta sobre eventos de respuesta, card y chart con el mismo criterio) y sus tests; la página queda como composición; admin/announcements/_actions/announcements.actions.ts (expiresOn al fin del día AR).",
+   "archivos_no": "src/lib/dates-ar.ts (ya tiene los rangos: se usa, no se cambia); src/lib/leados/** (los eventos de OsLead solo se leen).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo: comparar los KPIs antes y después con un test. Fusiona DEU-055 con BUG-114 (misma función) y BUG-113 (mismo archivo; dates-ar ya alcanza, sin esperar la fusión de tz-ar). PERF-008 pasó a la tarjeta del stream de actividad.",
+   "prereqs": [
+    "Guardia SUPER_ADMIN al lado del dato en /admin (páginas, actions y rutas)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "admin/page.tsx queda por debajo de 300 líneas y sin el error react-hooks/immutability; los KPIs dan lo mismo antes y después (test) salvo los corregidos; a las 22:00 AR los KPIs de hoy cuentan el día argentino (test con TZ=UTC); un lead que respondió y quedó PERDIDO cuenta como respondido y card y chart dan el mismo número; una novedad con expiresOn de hoy vence a las 23:59 AR.",
+   "nodos": [
+    "h4.adm-dashboard",
+    "h4.adm-dashboard.kpis-operativos-y-financieros",
+    "h4.adm-dashboard.tendencias-historicas",
+    "h4.adm-dashboard.kpis-comerciales",
+    "h4.adm-novedades.publicar",
+    "modelo.OsLead",
+    "lib.dates-ar",
+    "int.neon"
+   ],
+   "worktree": "wt/admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Novedades del admin: retirar con feedback y dejar rastro",
+   "objetivo": "Que retirar una novedad muestre si falló y que publicar y retirar queden en la auditoría.",
+   "hallazgos": [
+    "UX-036"
+   ],
+   "archivos_tocar": "admin/announcements/_components/announcement-list.tsx (mirar result.success; error en la fila) y _actions/announcements.actions.ts (logAdminAction al publicar y al retirar).",
+   "archivos_no": "src/lib/audit-log.ts.",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Bajo. Se separó del dashboard: es otra causa.",
+   "prereqs": [],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Con la action de retiro forzada a fallar, el error aparece en la fila; publicar y retirar dejan una fila en AdminAuditLog.",
+   "nodos": [
+    "h4.adm-novedades",
+    "h4.adm-novedades.listar-y-retirar",
+    "modelo.PanelAnnouncement"
+   ],
+   "worktree": "wt/admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "LeadOS: escrituras comerciales atómicas, por la puerta comercial y con candado propio",
+   "objetivo": "Que la maquinaria comercial de LeadOS escriba en una transacción, que todo cambio de estado pase por os-commercial y que el cron no dependa de una Notification.",
+   "hallazgos": [
+    "BUG-165",
+    "BUG-150",
+    "DEU-060",
+    "SEC-104",
+    "BUG-170"
+   ],
+   "archivos_tocar": "src/lib/os-commercial.ts (registrarContactoComercial, la postergación y crearDemoComercial en $transaction; constante explícita de +2 días); setter/_actions/dossier.actions.ts; admin/leads/_actions/reunion.actions.ts y lead.actions.ts (updateLeadStatus por os-commercial; reactivateAt calculado en el servidor con fechas AR); lead.schemas.ts; admin/leads/_components/change-status-select.tsx y lead-pipeline.tsx; src/lib/leados/agenda.ts; api/cron/os-follow-up/route.ts (idempotencia con clave propia de cron, sin fallback a un usuario cualquiera); src/lib/leados/novedades*.ts (purga de avisos de leads borrados).",
+   "archivos_no": "prisma/schema.prisma (si BUG-170 pide cascade, va en la migración agrupada); src/auth.ts.",
+   "zona": "ZONA-FRANCO",
+   "tamano": "M",
+   "riesgo": "Medio. BUG-149, BUG-160 y BUG-162 (Próximo) tocan la misma maquinaria antes; test:leados necesita la base de test.",
+   "prereqs": [
+    "LeadOS: un solo predicado de estado vivo y terminal para la cola del setter",
+    "LeadOS: errores mapeados al usuario y reportados a Sentry",
+    "CI que corre de verdad: base de test aislada, build, lint y e2e sin efectos"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Con un fallo inyectado a mitad de registrarContactoComercial no queda actividad sin status (test:leados); mover un lead en el kanban limpia nextFollowUpAt y registra una actividad SISTEMA; corrido dos veces el mismo día el cron manda un solo digest; borrar un lead no deja avisos plegados; Franco aprobó.",
+   "nodos": [
+    "lib.leados",
+    "modelo.OsLead",
+    "modelo.OsLeadActivity",
+    "h4.adm-leads.crud-y-estado",
+    "int.cron.os-follow-up",
+    "h4.adm-leads.ficha-y-estado",
+    "h4.adm-leads.pipeline-kanban",
+    "modelo.Notification",
+    "h5.set-dia.novedades-dirigidas",
+    "modelo.OsSetterNotice"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "LeadOS: borrado de lead auditado y backfill de caliente con guard",
+   "objetivo": "Que borrar un lead deje auditoría y avise al setter dueño, y que el backfill de caliente no pise las marcas manuales de Franco.",
+   "hallazgos": [
+    "DEU-074",
+    "BUG-177"
+   ],
+   "archivos_tocar": "admin/leads/_actions/lead.actions.ts (logAdminAction y LEAD_REASIGNADO_SALIENTE al dueño antes de borrar; evaluar archivar los leads con dossier); scripts/admin-1a-backfill-caliente.ts (borrarlo, o --confirm con dry-run y abortar si algún caliente difiere de la regla).",
+   "archivos_no": "prisma/schema.prisma (soft-delete: decisión FROZEN); src/lib/leados/* salvo leer.",
+   "zona": "ZONA-FRANCO",
+   "tamano": "S",
+   "riesgo": "Medio: el script ya se aplicó una vez; correrlo de nuevo pisa marcas manuales. Esta es la única tarjeta que toca el backfill (se sacó de la poda de LeadOS).",
+   "prereqs": [
+    "Auditoría que no se pierde y cubre lo sensible del admin"
+   ],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Borrar un lead con dossier deja AdminAuditLog y una novedad para el setter dueño; correr el backfill sin --confirm no escribe y lista lo que cambiaría (o el script ya no existe); Franco aprobó.",
+   "nodos": [
+    "h4.adm-leads.crud-y-estado",
+    "modelo.OsLead",
+    "modelo.OsLeadDossier",
+    "h4.adm-leads",
+    "h5.adm-revision-demos"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "LeadOS: fechas en hora argentina y un solo predicado de vencido",
+   "objetivo": "Que LeadOS use dates-ar en vez de reimplementar el día argentino, y que «vencido» y la verificación del secreto del cron se calculen en un solo lugar.",
+   "hallazgos": [
+    "BUG-151",
+    "BUG-159",
+    "DEU-081",
+    "DEU-079"
+   ],
+   "archivos_tocar": "admin/leads/_actions/inbound.actions.ts (parseCalendarDayAR); setter/leads/[leadId]/_components/lead-timeline.helpers.ts y manual/_components/manual-nav.tsx (timeZone AR); src/lib/leados/flow.ts; api/cron/os-follow-up/route.ts (dayRangeAR e isAuthorizedCronRequest compartido con timingSafeEqual); src/lib/leados/outreach.ts (contador de DMs con dayRangeAR); predicado único postergadoVencido(lead, ahora) en src/lib/leados; manual/_components/m5-seguimiento.tsx (toqueVencido resuelto en _data.ts).",
+   "archivos_no": "src/lib/dates-ar.ts (ya exporta dayRangeAR y parseCalendarDayAR: se usa, no se cambia).",
+   "zona": "ZONA-FRANCO",
+   "tamano": "S",
+   "riesgo": "Bajo. BUG-152 (Próximo) tiene la misma causa y va antes; esta cubre los sitios que esa no toca. Se quitó la dependencia de la fusión de tz-ar: dates-ar ya tiene lo necesario.",
+   "prereqs": [
+    "Fechas del setter en día calendario argentino"
+   ],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "A las 22:00 AR el rango de inbound, el historial y el contador de DMs usan el día argentino (casos con TZ=UTC en el invariante); en src/lib/leados y el cron el grep de toISOString().slice(0,10) da 0; m5 no tiene el error react-hooks/purity.",
+   "nodos": [
+    "h4.adm-leads.inbound-a-oslead",
+    "modelo.ContactSubmission",
+    "h5.set-manual.historial-del-lead",
+    "h5.set-manual.recorrido-y-barra",
+    "int.cron.os-follow-up",
+    "lib.leados",
+    "h5.set-lead.contador-dms-hoy",
+    "h5.set-manual.seguimiento"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "LeadOS: entradas validadas (topes, CSV, link del opener y decisor)",
+   "objetivo": "Cerrar los bordes de entrada de LeadOS: textos sin tope, CSV mal parseado, falsos positivos del opener, agenda sin decisor e importación que expone el sistema.",
+   "hallazgos": [
+    "SEC-103",
+    "BUG-169",
+    "BUG-167",
+    "BUG-158",
+    "SEC-102"
+   ],
+   "archivos_tocar": "setter/_actions/dossier.schemas.ts, prospecto.schemas.ts, admin/leads/_actions/lead.schemas.ts, setter/nuevo/nuevo-prospecto-form.tsx e importar-prospectos-form.tsx (.max razonables y maxLength); src/lib/leados/prospecto-import.ts (comillas solo al inicio de un campo, RFC 4180; error si quedan abiertas); src/lib/leados/flow.ts y setter/_actions/outreach.schemas.ts (forma de dominio en el bloqueo de links); manual/_components/agenda-form.tsx y _actions/agenda.schemas.ts (decisorOk en «Buscar de nuevo» y en el servidor); setter/_actions/prospecto-bulk.actions.ts (consulta por lote de nombres normalizados).",
+   "archivos_no": "prisma/schema.prisma; /api/qa/login (SEC-021 pasó a su tarjeta).",
+   "zona": "ZONA-FRANCO",
+   "tamano": "M",
+   "riesgo": "Bajo. BUG-155 (textos > 5000), BUG-161 y UX-055 (dedupe y CSV de Excel) van antes en Próximo sobre los mismos archivos.",
+   "prereqs": [
+    "Alta e importación de prospectos: dedupe contra el sistema y CSV de Excel",
+    "Ficha y manual del setter sin pérdida de trabajo (decidir antes p25/rafaga-tildes)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Los invariantes de prospecto-import y del opener pasan con los casos nuevos ('…me encantó', 'cuenta.Me', comilla en medio de un campo); un campo de 50.000 caracteres se rechaza con mensaje; sin decisor confirmado «Buscar de nuevo» está deshabilitado y la action lo rechaza; la importación hace una consulta por lote y no devuelve leads de otros setters.",
+   "nodos": [
+    "h5.set-lead",
+    "h5.set-nuevo",
+    "h4.adm-leads",
+    "h5.set-importar.csv",
+    "lib.leados",
+    "h5.set-lead.opener-sin-link",
+    "h5.set-manual.agenda",
+    "int.calcom",
+    "h5.set-importar.importar-csv",
+    "modelo.OsLead"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "LeadOS: estado derivado del manual fiel y blobs del dossier atados a ids",
+   "objetivo": "Que el manual del setter muestre el estado real y que los blobs del dossier sobrevivan a un cambio de texto visible.",
+   "hallazgos": [
+    "BUG-166",
+    "UX-056",
+    "UX-054",
+    "DEU-086"
+   ],
+   "archivos_tocar": "setter/leads/[leadId]/manual/_data.ts (respondioDesde sin caer a updatedAt); src/lib/leados/manual.ts (el fin del retrabajo se deriva de un dato existente o de una marca de «correcciones aplicadas»); manual/_components/m15-envio.tsx (sin ofrecer el toque con la demo aprobada sin link); src/lib/leados/flow.ts, contracts.ts y setter/_actions/dossier.actions.ts (id junto al nombre, lectura tolerante; progreso ítem por ítem).",
+   "archivos_no": "prisma/schema.prisma (si la marca pide columna, va en la migración agrupada, con Franco); la guardia de salida del opener (UX-053, pasó a la tarjeta de pérdida de trabajo).",
+   "zona": "ZONA-FRANCO",
+   "tamano": "M",
+   "riesgo": "Medio: cambiar el formato de los blobs exige leer bien los ya guardados. BUG-164 y BUG-153 (Próximo) tocan la misma derivación antes.",
+   "prereqs": [
+    "LeadOS: un solo predicado de estado vivo y terminal para la cola del setter",
+    "Ficha y manual del setter sin pérdida de trabajo (decidir antes p25/rafaga-tildes)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "El barrido de derivación no muestra regresiones; un lead sin actividad de respuesta no muestra el banner; después de aplicar las correcciones el paso sale de «Construir»; con la demo aprobada sin link m15 no ofrece registrar un toque; renombrar un ítem visible no invalida un dossier guardado (test con un blob viejo); Franco aprobó.",
+   "nodos": [
+    "h5.set-manual.cabecera-e-historial",
+    "lib.leados",
+    "h5.set-manual.derivacion-de-pantalla",
+    "modelo.OsLeadDossier",
+    "h5.set-manual.envio-demo",
+    "h5.set-lead.chequeo-final-y-revision",
+    "h5.set-lead.brief-y-construccion"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Manual del setter: nada de lo tipeado se pierde (hooks de acción y autosave, guardia de salida en opener y traspaso)",
+   "objetivo": "Que una excepción de una action termine en un toast, que navegar no pierda lo último tipeado y que salir del opener o de las notas de traspaso con texto sin registrar pida confirmación.",
+   "hallazgos": [
+    "BUG-181",
+    "BUG-182",
+    "UX-053"
+   ],
+   "archivos_tocar": "src/lib/use-step-action.ts (try/catch con toast.error genérico, onError y captureException); src/lib/use-autosave.ts (flush al desmontar en vez de cancelar); src/lib/use-unsaved-guard.ts; setter/leads/[leadId]/_components/opener-form.tsx, manual/_components/agenda-form.tsx, evaluacion-form.tsx y franja-recorrido.tsx (avisaEnSalidaInterna y useHayTrabajoSinRegistrar en los enlaces internos).",
+   "archivos_no": "src/lib/leados/** (lógica).",
+   "zona": "ZONA-FRANCO (los hooks de src/lib son libres; los consumidores son del setter)",
+   "tamano": "S",
+   "riesgo": "Medio: un flush fire-and-forget al desmontar puede escribir después de que el setter salió; probarlo en el manual. Fusiona la tarjeta de hooks con UX-053: es la misma causa (trabajo que se pierde al navegar). BUG-156 (Próximo) cubre el veredicto y va antes.",
+   "prereqs": [
+    "Ficha y manual del setter sin pérdida de trabajo (decidir antes p25/rafaga-tildes)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Una action que lanza muestra un toast y no error.tsx (test del hook); escribir y navegar antes del debounce guarda el texto (probado en el manual); salir del opener con texto sin registrar pide confirmación; Franco lo recorrió.",
+   "nodos": [
+    "h5.set-manual",
+    "lib.actions",
+    "lib.use-step-action",
+    "lib.use-autosave",
+    "lib.use-unsaved-guard",
+    "h5.set-manual.opener",
+    "h5.set-manual.agenda",
+    "h5.set-manual.recorrido-y-barra"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Setter: lecturas acotadas en el home y el manual, y despacho del manual por registro",
+   "objetivo": "Medir el home del setter con carteras grandes, leer el dossier con select acotado, que abrir un lead no cargue el manual dos veces y despachar las pantallas del manual con un registro tipado.",
+   "hallazgos": [
+    "PERF-015",
+    "PERF-014",
+    "DEU-080"
+   ],
+   "archivos_tocar": "src/lib/leados/ownership.ts, prospecto-import.ts y setter/page.tsx (medir primero; select acotado a los campos que leen buildHomeLeads, mis-numeros, progreso y novedades; grupo Archivo aparte); setter/leads/[leadId]/manual/page.tsx y manual/[paso]/page.tsx (índice con lectura mínima; el lead ya verificado se pasa a los helpers; Record<PantallaId, (manual) => Slots> en un módulo aparte con exhaustividad de tipos, PLAN-881).",
+   "archivos_no": "prisma/schema.prisma; src/lib/leados/flow.ts salvo tipos.",
+   "zona": "ZONA-FRANCO",
+   "tamano": "M",
+   "riesgo": "Bajo: medir antes de tocar. Suma PERF-014 desde la poda de LeadOS: es el mismo archivo y la misma causa (lecturas de más).",
+   "prereqs": [
+    "Ficha y manual del setter sin pérdida de trabajo (decidir antes p25/rafaga-tildes)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "VH-157: tiempo de render y filas del dossier del home medidos con la cartera más grande antes y después, registrados en el PR; abrir un lead carga el manual una sola vez (log de queries); la página del manual queda sin la escalera de ternarios ni fallback {}, con exhaustividad de tipos; test:setter pasa.",
+   "nodos": [
+    "h5.set-dia",
+    "lib.leados",
+    "modelo.OsLead",
+    "modelo.OsLeadDossier",
+    "h5.set-manual",
+    "h5.set-manual.aterrizaje-y-guardia",
+    "h5.set-lead"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Setter: accesibilidad de la cabina, del drawer y del manual",
+   "objetivo": "Que el panel del setter y la revisión de demos se operen con teclado y con lector de pantalla.",
+   "hallazgos": [
+    "A11Y-026",
+    "A11Y-027",
+    "A11Y-028",
+    "A11Y-029",
+    "A11Y-030",
+    "A11Y-031",
+    "A11Y-032",
+    "BUG-154"
+   ],
+   "archivos_tocar": "admin/leados/[leadId]/_components/decision-bar.tsx (diálogo con foco atrapado; role=alert); setter/_components/use-keyboard-shortcuts.ts y foco-surface.tsx (atajos que se apagan o activos solo con foco en la tarjeta); setter/_components/setter-shell.tsx (inert y Escape en el aside cerrado; aria-expanded y aria-controls); lead-card-actions.tsx (aria-label que empieza con el rótulo visible); manual/_components/chequeo-form.tsx (fila tocable); _components/evaluacion-form.tsx (radios nativos o tabindex itinerante); nuevo/nuevo-prospecto-form.tsx (role=alert); _components/copy-block.tsx (mirar el booleano de execCommand; texto seleccionable si falla).",
+   "archivos_no": "src/components/ui/*.",
+   "zona": "ZONA-FRANCO",
+   "tamano": "M",
+   "riesgo": "Bajo. Reutilizar el modal accesible que crea la tarjeta de Próximo. Suma A11Y-028 (drawer) desde la tarjeta del shell del setter.",
+   "prereqs": [
+    "Modal compartido accesible y el modal de ticket migrado a él"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "axe no reporta violaciones en /setter, /setter/nuevo, un paso del manual ni en la revisión de demos; con el drawer cerrado el Tab no entra al rail y Escape lo cierra; los atajos se apagan desde «?»; el score se opera con flechas; con el portapapeles bloqueado «Copiar bloque» avisa; Franco lo recorrió.",
+   "nodos": [
+    "h5.adm-revision-demos.cola-y-veredicto",
+    "h5.set-dia.foco-ahora",
+    "h5.set-dia.palancas-de-card",
+    "h5.set-dia.rail-navegacion",
+    "h5.set-manual.ayudas-de-paso",
+    "h5.set-manual.chequeo-final",
+    "h5.set-manual.ficha-y-veredicto",
+    "h5.set-nuevo.alta-manual"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Setter: lienzo propio del portal y navegación clasificada",
+   "objetivo": "Que el lienzo del setter no herede el tema claro del home y que su navegación siga una regla escrita.",
+   "hallazgos": [
+    "DIS-003",
+    "DEU-082"
+   ],
+   "archivos_tocar": "setter/_components/setter-shell.tsx (lienzo con un rol propio del portal o el literal de los otros shells en vez de var(--color-void)); setter/_components/shortcuts-help.tsx:37,80; src/hooks/useThemeObserver.tsx (quitar data-theme al desmontar; archivo libre); setter/_components/setter-nav.tsx (<Link> en vez de triggerTransition si se declara portal); nuevo/nuevo-prospecto-form.tsx y nuevo/page.tsx (redirect() en cargarProspecto); foco-surface.tsx; trabajar-lead-button.tsx; src/components/layout/publicRoute.ts.",
+   "archivos_no": "src/context/TransitionContext.tsx (solo deja de importarse); src/app/globals.css.",
+   "zona": "ZONA-FRANCO (useThemeObserver.tsx y publicRoute.ts son libres)",
+   "tamano": "M",
+   "riesgo": "Medio. DIS-003 es PROBABLE: confirmarlo con VH-174 (home → login → setter sin recargar). BUG-175 (Lenis en /setter, Próximo) toca el mismo recorrido antes. Se separaron el drawer (a la tarjeta de a11y) y la higiene D4 (tarjeta propia).",
+   "prereqs": [
+    "Docs: decidir los 37 «a decidir» de 14-DOCS-CONSOLIDADOS",
+    "Lenis solo en el sitio público y respetando reducir movimiento"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "El recorrido home → /login → /setter sin recargar pinta el lienzo oscuro (visual-qa desktop+mobile); al salir del home <html> no conserva data-theme; setter-nav no usa triggerTransition, o la excepción está escrita en CLAUDE.md y en el padrón del invariante de navegación; Franco aprobó.",
+   "nodos": [
+    "h5.set-dia",
+    "h5.set-dia.rail-navegacion",
+    "h5.set-nuevo",
+    "lib.ui",
+    "h5.adm-revision-demos"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Higiene de UI del setter (D4: 97 detalles)",
+   "objetivo": "Pasar la checklist de higiene de D4 sobre el setter y la revisión de demos, archivo por archivo.",
+   "hallazgos": [
+    "DEU-089"
+   ],
+   "archivos_tocar": "Los archivos de la lista de DEU-089 en 03-MEJORAS (setter/layout.tsx, setter/** y admin/leados/**): contraste (41), copy (24), inline (4), tildes (2) y otros (26), de a uno.",
+   "archivos_no": "src/lib/leados/**; src/components/ui/*.",
+   "zona": "ZONA-FRANCO",
+   "tamano": "S",
+   "riesgo": "Bajo. Va antes de migrar el setter al tema para no remapear dos veces.",
+   "prereqs": [],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Las 97 entradas de la checklist de DEU-089 están tachadas o anotadas; los 41 casos de contraste dan ≥ 4,5:1 medido; Franco lo recorrió.",
+   "nodos": [
+    "h5.set-dia",
+    "h5.set-manual",
+    "h5.adm-revision-demos",
+    "h4.adm-leads"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Motor de WhatsApp: decidir si es producto y dejar correcta la salida (estados, idempotencia y cierre)",
+   "objetivo": "Que Valentino decida si el motor de WhatsApp es producto y, si lo es, dejar correcta la salida y la salud del motor antes de cablearlo: sin duplicados, sin estados pisados y sin conversaciones abiertas para siempre.",
+   "hallazgos": [
+    "BUG-027",
+    "BUG-103",
+    "BUG-104",
+    "BUG-105",
+    "BUG-106",
+    "BUG-107",
+    "DEU-052",
+    "DEU-053",
+    "POD-341",
+    "POD-069"
+   ],
+   "archivos_tocar": "Paso 0: decisión de alcance escrita en DECISIONES (si no es producto, esta tarjeta y la de cableado se archivan). src/modules/motor/adapters/whatsapp/inbound/handle-status.ts (updateMany condicional por rango de estado); handle-health.ts (dedupe por severidad y templateId; REINSTATED y DISABLED mapeados; unmapped-event en warn); process.ts y handle-request.ts; handle-message.ts (política de cierre al reutilizar una conversación); outbound/client.ts (sin reintento tras timeout; presupuesto ≤ maxDuration); services/sendMessage.ts (wamid antes del despacho; idempotencia que mira FAILED y PENDING vencido; canal no enviable frena el envío); domain/identity.ts (no grabar unknown-identity si la transición existe); domain/prisma-errors.ts reemplazado por isUniqueViolation de src/lib/isolation/scoped-model.ts.",
+   "archivos_no": "src/lib/isolation/registry.ts salvo el export; prisma/schema.prisma.",
+   "zona": "libre (decisión de Valentino sobre el alcance del motor)",
+   "tamano": "L",
+   "riesgo": "Medio: sin tráfico real todo se valida con tests y el sandbox de 360dialog. La decisión se movió acá desde la tarjeta de cableado para que la salida quede correcta antes de recibir mensajes reales.",
+   "prereqs": [
+    "Frontera de aislamiento completa: nested writes, id vacío y regla de lint en CI"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "La decisión de alcance queda escrita. Tests del motor: un 'sent' tardío no pisa un 'read'; reintentar con la misma clave tras un 5xx agotado re-despacha o devuelve 'previously_failed'; un timeout no produce dos envíos; restringido → baneado crea alerta nueva; REINSTATED vuelve a APPROVED; reprocesar un batch no crea transiciones falsas; una conversación inactiva > 24 h se cierra; el grep del isUniqueViolation propio da 0; test:integration motor-isolation pasa.",
+   "nodos": [
+    "h3.vis-whatsapp",
+    "modelo.MotorMessage",
+    "modelo.WabaChannel",
+    "h3.vis-whatsapp.salud-canal",
+    "modelo.MotorAlert",
+    "h3.vis-whatsapp.envio-mensajes",
+    "int.360dialog",
+    "modelo.MotorTemplate",
+    "lib.isolation",
+    "h3.vis-whatsapp.identidad-bsuid",
+    "modelo.ContactIdentityTransition",
+    "modelo.MotorConversation"
+   ],
+   "worktree": "wt/motor",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Motor de WhatsApp: cablear entrada, alertas, identidad y errores (si se decidió producto)",
+   "objetivo": "Si el motor es producto: que responda los mensajes entrantes, permita dar de alta canales, haga llegar las alertas de salud, no confunda identidades por teléfono reciclado y reporte sus errores.",
+   "hallazgos": [
+    "FAL-021",
+    "BUG-102",
+    "FAL-022",
+    "DEU-051"
+   ],
+   "archivos_tocar": "src/app/api/motor/webhook/[channelToken]/route.ts (captureException con flush); src/modules/motor/adapters/whatsapp/inbound/handle-message.ts (consumidor de los IN con org derivada del canal autenticado) y handle-health.ts (alertas CRITICAL y HIGH por email o Telegram y visibles en /admin/chatbot/health); services/sendMessage.ts (llamador real; rechazo tipado con canal BANNED; logger real por default dentro del motor); domain/identity.ts (legacy solo si externalId no es BSUID) y el caso nuevo en tests/integration/motor-inbound.spec.ts; alta y rotación de canal (script o pantalla admin, S6-08).",
+   "archivos_no": "prisma/schema.prisma; src/lib/logger.ts (protegido: se cablea en el motor); src/lib/alerts.ts (solo consumir).",
+   "zona": "libre",
+   "tamano": "L",
+   "riesgo": "Alto: mensajes reales de WhatsApp a terceros y plantillas de Meta; probar con un número de prueba.",
+   "prereqs": [
+    "Motor de WhatsApp: decidir si es producto y dejar correcta la salida (estados, idempotencia y cierre)",
+    "Frontera de aislamiento completa: nested writes, id vacío y regla de lint en CI"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Con un número de prueba: un mensaje entrante genera respuesta; un canal se da de alta y rota; una alerta de número baneado llega por email o Telegram (VH-091); el caso BSUID con teléfono reciclado pasa; un error del webhook aparece en Sentry.",
+   "nodos": [
+    "h3.vis-whatsapp",
+    "h3.vis-whatsapp.respuesta-automatica",
+    "h3.vis-whatsapp.alta-canal",
+    "modelo.MotorMessage",
+    "modelo.WabaChannel",
+    "int.360dialog",
+    "lib.motor",
+    "h3.vis-whatsapp.identidad-bsuid",
+    "modelo.ContactIdentity",
+    "modelo.MotorConversation",
+    "h3.vis-whatsapp.salud-canal",
+    "modelo.MotorAlert",
+    "h3.adm-health",
+    "int.sentry",
+    "lib.logger"
+   ],
+   "worktree": "wt/motor",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Hooks y embed del chatbot: currentPath vivo, sessionId por bot, byte NUL y reglas del React Compiler",
+   "objetivo": "Que el bot sepa en qué página está el visitante, que dos bots en el mismo origen no choquen y que los archivos del embed pasen el lint.",
+   "hallazgos": [
+    "BUG-072",
+    "BUG-018",
+    "DEU-044",
+    "DEU-047"
+   ],
+   "archivos_tocar": "src/modules/chatbot/hooks/useChatbot.ts (currentPath de un ref en prepareSendMessagesRequest; sessionId con clave por slug); server/conversation/resolver.ts; components/chat/revealSafeMarkdown.ts (byte literal por '\\u0000'); tooltip/useTooltipTriggers.ts y tooltip/ProactiveTooltip.tsx; embed/ChatbotEmbed.tsx (useCallback; sin setState en un effect).",
+   "archivos_no": "prisma/schema.prisma (el unique (botConfigId, sessionId) va en la migración agrupada).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Bajo: cambiar la clave del sessionId corta una vez la conversación en curso. BUG-087 (embed manda '/', Próximo) va antes sobre el mismo handshake.",
+   "prereqs": [
+    "Widget embebido: origen del host contra allowedDomains y bot pausado coherente"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Después de navegar en el sitio de develOP el prompt recibe la ruta nueva (log del request); dos bots bajo el mismo origen no dan P2002; git diff --stat muestra revealSafeMarkdown.ts como texto; el eslint de esos 3 archivos no da errores del React Compiler.",
+   "nodos": [
+    "h3.vis-widget-develop",
+    "lib.chatbot.hooks",
+    "modelo.Conversation",
+    "h3.vis-widget-cliente",
+    "h3.vis-api-chatbot",
+    "lib.chatbot.components",
+    "h3.vis-widget-develop.tooltip-proactivo",
+    "h3.vis-widget-cliente.chat-embebido"
+   ],
+   "worktree": "wt/widget",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Leads del chatbot en el portal: intención legible, DQ sin perder NULL, copiar y exportar honestos",
+   "objetivo": "Que la sección de contactos de Mi Chatbot muestre datos legibles y completos y no anuncie éxitos que no ocurrieron.",
+   "hallazgos": [
+    "UX-028",
+    "BUG-101",
+    "UX-030",
+    "A11Y-018",
+    "DEU-037",
+    "POD-317"
+   ],
+   "archivos_tocar": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx, dashboards/ConversationsTable.tsx y LeadsTable.tsx (la etiqueta de intención compartida que deja «Un solo armador de CSV…» y las keys del enum real); server/scoring/dqFilter.ts (classification null o distinta de dq); installation/SnippetCopyBlock.tsx y dashboard/ExportLeadsButton.tsx (await con catch; export con chequeo de status); ClientLeadsTable.tsx, LeadDetail.tsx y tooltip/ProactiveTooltip.tsx (aria-pressed, htmlFor, button, aria-current, role=alert); lead-intent-labels.ts (Object.hasOwn o Map); lead-detail-presentation.ts y server/tools/captureLead.ts (escribir channel o quitar la fila Canal).",
+   "archivos_no": "prisma/schema.prisma.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. BUG-071 (mismo vocabulario de intención en el CSV) y BUG-084/085 (misma pantalla) van antes en Próximo.",
+   "prereqs": [
+    "Un solo armador de CSV para leads (fórmulas neutralizadas y etiquetas legibles)",
+    "Mi Chatbot: conversación visible y métricas reales"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Ninguna pantalla del cliente muestra PURCHASE_READY y usa el mismo vocabulario que el CSV; los leads con classification NULL entran en el conteo (invariante del filtro); con el portapapeles bloqueado «Copiar» muestra error; los chips anuncian su estado; la fila Canal muestra un dato o no aparece.",
+   "nodos": [
+    "h3.cli-chatbot.resumen",
+    "h3.cli-chatbot.conversaciones",
+    "h3.adm-chatbots.leads-del-bot",
+    "lib.chatbot.scoring",
+    "modelo.ChatbotLead",
+    "h3.cli-chatbot.instalacion",
+    "h3.cli-chatbot.exportar-csv",
+    "h3.cli-chatbot.contactos-lista",
+    "h3.cli-chatbot.contacto-detalle",
+    "lib.chatbot.lead-presentation"
+   ],
+   "worktree": "wt/chatbot",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Editor y detalle del bot (admin): ids estables, labels asociados, CRM que prueba lo editado y diálogos accesibles",
+   "objetivo": "Que el editor y el alta del bot no marquen cambios fantasma, tengan labels asociados y errores anunciados, prueben lo que se edita y no tengan ciclos de tipos.",
+   "hallazgos": [
+    "BUG-079",
+    "DEU-041",
+    "DEU-040",
+    "UX-024",
+    "UX-019",
+    "BUG-095",
+    "A11Y-009",
+    "A11Y-011",
+    "A11Y-010",
+    "POD-319",
+    "POD-320"
+   ],
+   "archivos_tocar": "src/modules/chatbot/components/admin/BotConfigEditor.tsx y config/BotConfigDiffModal.tsx (normalizar una vez; contador; FIELD_LABELS completo; 'generico'; sin el onSave muerto); server/dashboard/updateBotAppearance.ts (preserva ids); config/Field.tsx, Input.tsx y ColorPicker.tsx reemplazados por src/components/ui/Field.tsx del kit (role=alert y aria-live en errores); onboarding/Step1Company.tsx y Step5Review.tsx; onboarding/kb-templates/index.ts, concesionaria.ts y admin/chatbots/[botId]/tabs/ConfigTab.tsx (tipos a types.ts para cortar el ciclo); integrations/CrmConfigForm.tsx y server/admin/integrations/testCrmConnection.ts (prueban la URL editada); server/crm/validateWebhookUrl.ts (prefijos IPv6 solo si el host tiene ':'); admin/chatbots/[botId]/BotDetailClient.tsx (curl con NEXT_PUBLIC_APP_URL; tablist); tabs/OverviewTab.tsx; activation/ActivationModal.tsx, kb/SaveConfirmModal.tsx, kb/TestPromptSandbox.tsx, config/tabs/BehaviorTab.tsx y AdvancedTab.tsx (diálogos accesibles; aria-label).",
+   "archivos_no": "src/components/ui/Field.tsx y Modal.tsx (protegidos: solo usar); .dependency-cruiser.cjs salvo quitar la excepción del ciclo; el contraste de ActivityLog, Step2BotIdentity y ColorPicker (A11Y-012, pasó a la tarjeta de contraste).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. Suma A11Y-010 (antes en una tarjeta mezclada con el kanban de leads): mismo editor y mismos Field/Input que POD-319/320. SEC-072 (SSRF del CRM) y UX-021 (Zod crudo en el editor) van antes en Próximo.",
+   "prereqs": [
+    "Webhook CRM sin SSRF",
+    "Admin: errores esperados como resultado tipado, no throw"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Abrir un bot con respuestas rápidas sin id no marca «cambios sin guardar»; depcruise no encuentra ciclos de tipos en kb-templates ni en el detalle; «Probar conexión» usa la URL del formulario; se acepta un webhook a fc.example.com; axe no reporta violaciones de label ni de nombre en el editor, el alta y los modales; los archivos config/Field.tsx e Input.tsx ya no existen.",
+   "nodos": [
+    "h3.adm-chatbots.editar-config-bot",
+    "h3.cli-chatbot",
+    "h4.adm-clientes.plantilla-kb-industria",
+    "h3.adm-chatbots",
+    "h3.adm-chatbots.integracion-crm",
+    "int.n8n",
+    "lib.chatbot.crm",
+    "h3.adm-health",
+    "h3.adm-chatbots.activar-bot-preflight",
+    "h3.adm-chatbots.editar-kb",
+    "h3.adm-chatbots.probar-prompt",
+    "h4.adm-clientes.alta-cliente-con-bot",
+    "lib.ui"
+   ],
+   "worktree": "wt/chatbot-admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Un solo ChatShell para los tres paneles de chat, accesible por teclado",
+   "objetivo": "Extraer un ChatShell común para el widget de develOP, el embed del cliente y la vista previa del admin, operable por teclado, con nombres accesibles, anuncio correcto para lectores y navegación sin recargar.",
+   "hallazgos": [
+    "DEU-042",
+    "A11Y-013",
+    "A11Y-014",
+    "A11Y-008",
+    "A11Y-015",
+    "BUG-068"
+   ],
+   "archivos_tocar": "src/modules/chatbot/components/chat/ChatWindow.tsx, embed/ChatbotEmbed.tsx y preview/BotConfigPreview.tsx (ChatShell común parametrizado por config, estilos a clases y tokens; textarea con label, «Enviar mensaje», textos ≥ 4,5:1); LogicCompanion.tsx y tooltip/ProactiveTooltip.tsx (launcher como button, Escape, aria-modal, trampa y retorno de foco); public/widget.js (foco al abrir, burbuja fuera del Tab con el panel abierto, Escape); chat/StreamingMarkdown.tsx (aria-busy en el revelado y anuncio único en onTypingDone); hooks/useChatbot.ts y tool-cards/renderToolCall.tsx (navegar con triggerTransition en el sitio público manteniendo el widget; VALID_PATHS espejado).",
+   "archivos_no": "src/context/TransitionContext.tsx (protegido: solo usar); los avatares 3D (otra tarjeta).",
+   "zona": "libre",
+   "tamano": "L",
+   "riesgo": "Alto: tres superficies de chat a la vez; detrás de una bandera y con visual-qa desktop y mobile. Suma A11Y-008 y A11Y-015 (misma causa: panel no accesible) desde la tarjeta de copy del widget. Va después de los arreglos de seguridad del embed para no refactorizar dos veces.",
+   "prereqs": [
+    "Widget del cliente: respetar su configuración, avisar que es IA y no caerse por WebGL",
+    "Texto no confiable en prompts y en la salida del modelo",
+    "Widget público: el visitante no recibe datos internos y el embed valida con quién habla"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "VH-079, VH-082 y VH-094: en los dos widgets el launcher abre con Enter o Espacio, Escape cierra y devuelve el foco y el lector anuncia el mensaje completo una sola vez y «Escribí tu consulta» / «Enviar mensaje»; ir a una sección desde el chat no recarga ni pierde la charla; los tres paneles usan el mismo ChatShell sin estilos inline; visual-qa desktop+mobile sin ❌.",
+   "nodos": [
+    "h3.vis-widget-develop",
+    "h3.vis-widget-cliente",
+    "h3.vis-widget-cliente.conversar",
+    "h3.adm-chatbots",
+    "lib.chatbot.components",
+    "lib.chatbot.hooks"
+   ],
+   "worktree": "wt/widget",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Widget: saludo en vos, aviso de degradado honesto y launcher que no tapa en mobile",
+   "objetivo": "Que el widget hable como develOP, no prometa WhatsApp sin número y no tape el sitio del cliente en mobile.",
+   "hallazgos": [
+    "UX-018",
+    "UX-026",
+    "UX-020"
+   ],
+   "archivos_tocar": "tool-cards/WhatsappHandoffCard.tsx y preview/BotConfigPreview.tsx (saludo en vos); components/chat/DegradedBanner.tsx y hooks/useChatbot.ts (título según haya número; copy por defecto si el mensaje viene vacío); shared/zIndex.ts y LogicCompanion.tsx (rango documentado; launcher más chico u oculto por debajo de cierto ancho).",
+   "archivos_no": "src/modules/chatbot/components/avatar/*; la accesibilidad del panel (va con el ChatShell).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Bajo. A11Y-008 y A11Y-015 pasaron al ChatShell. La relación con la escala global de capas la documenta «Una sola fuente de acentos y de z-index…».",
+   "prereqs": [],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "El saludo del widget de develOP no dice «asistirle»; sin número de WhatsApp la tarjeta de degradado no promete WhatsApp y tiene un CTA; a 390 px el launcher no tapa el CTA del sitio (visual-qa).",
+   "nodos": [
+    "h3.vis-widget-cliente",
+    "h3.vis-widget-develop"
+   ],
+   "worktree": "wt/widget",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Canvas 3D según la regla: dpr 1.5, pausa fuera de viewport y sin WebGL no montar",
+   "objetivo": "Que los avatares 3D y el fondo DotMatrix sigan la regla del repo: dpr [1,1.5], pausa fuera de viewport o con la pestaña oculta, frame estático con reducir movimiento y nada sin WebGL.",
+   "hallazgos": [
+    "PERF-009",
+    "PERF-018"
+   ],
+   "archivos_tocar": "src/modules/chatbot/components/avatar/LegacyNeuroAvatar.tsx, NeuroAvatar.tsx, ParticleSphere.tsx (dpr [1,1.5]; frameloop 'demand' o IntersectionObserver y visibilitychange; Vector3 reutilizado y rotación por delta) y AvatarPicker.tsx (thumbnail estático; canvas solo en hover o selección); src/components/canvas/DotMatrix.tsx (dpr [1,1.5], esferas de 6-8 segmentos, pausa, frame estático con reduce, sin Canvas sin WebGL).",
+   "archivos_no": "src/components/3d/HeroArtifact.tsx (FROZEN); avatar/CoreHalo.tsx (patrón de referencia); sin EffectComposer sobre canvas transparente.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio: cambios de render visibles; comparar capturas. BUG-081 (boundary de WebGL, Próximo) toca los mismos avatares antes.",
+   "prereqs": [
+    "Widget del cliente: respetar su configuración, avisar que es IA y no caerse por WebGL"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "VH-083 y VH-098: con los avatares fuera de viewport no se renderizan frames (performance trace); git grep de dpr con tope mayor a 1.5 da 0; con 'reducir movimiento' DotMatrix queda estático; visual-qa desktop+mobile de login y del widget sin ❌.",
+   "nodos": [
+    "h3.adm-chatbots",
+    "h3.cli-chatbot",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.components",
+    "h3.adm-chatbots.editar-config-bot",
+    "h4.adm-clientes.alta-cliente-con-bot",
+    "lib.chatbot.avatar",
+    "h3.vis-widget-develop",
+    "h1.auth-login",
+    "h1.auth-recupero",
+    "h1.auth-invite"
+   ],
+   "worktree": "wt/canvas-3d",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Avatares del widget: fallback liviano, estado por instancia y LegacyNeuroAvatar limpio",
+   "objetivo": "Que un avatar mal configurado no descargue three ni R3F, que dos instancias no compartan estado y que LegacyNeuroAvatar pase el lint sin any.",
+   "hallazgos": [
+    "BUG-082",
+    "BUG-083",
+    "DEU-043",
+    "DEU-045"
+   ],
+   "archivos_tocar": "src/modules/chatbot/components/avatar/AvatarRenderer.tsx y registry.ts (style image o emoji incompleto → monograma); LegacyNeuroAvatar.tsx (refs por instancia; color del accent real; BufferAttribute tipado sin any; random en useState lazy; comentarios en UTF-8); legacyStateMapper.ts; avatarStyleSchema.ts (un schema con los ids en una constante pura, sin importar componentes cliente).",
+   "archivos_no": "src/components/3d/HeroArtifact.tsx; CoreHalo.tsx; sin EffectComposer sobre canvas transparente.",
+   "zona": "libre (confirmar con Valentino que LegacyNeuroAvatar no está protegido)",
+   "tamano": "M",
+   "riesgo": "Medio, por ser 3D: hoy dos widgets en la misma página comparten el mouse. Mismo archivo que la tarjeta de canvas: mismo worktree.",
+   "prereqs": [
+    "Widget del cliente: respetar su configuración, avisar que es IA y no caerse por WebGL"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "Un bot con style=image y sin URL no descarga three ni R3F (network); dos instancias con accents distintos pintan cada una su color; eslint sobre LegacyNeuroAvatar.tsx sin errores ni any; el archivo sin mojibake; la validación server de avatarStyle no importa el registry cliente (depcruise); visual-qa del widget.",
+   "nodos": [
+    "h3.vis-widget-cliente",
+    "h3.vis-widget-develop",
+    "lib.chatbot.components",
+    "h3.cli-chatbot",
+    "h3.adm-chatbots"
+   ],
+   "worktree": "wt/canvas-3d",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Contraste AA en el texto funcional del portal, Mi Chatbot y el admin de chatbots",
+   "objetivo": "Que el texto con información del portal, de Mi Chatbot y del admin de chatbots llegue a 4,5:1 sobre el fondo oscuro.",
+   "hallazgos": [
+    "A11Y-002",
+    "A11Y-017",
+    "A11Y-012"
+   ],
+   "archivos_tocar": "dashboard/soporte/[ticketId]/page.tsx, services/page.tsx, components/dashboard/PremiumModuleCard.tsx, tienda-conectada/_components/ConnectStoreCard.tsx, email-marketing/campaigns/page.tsx, cuenta e inicio; chatbot/components/dashboard/LeadDetail.tsx, ChatbotOverview.tsx, BusinessLeadCard.tsx y dashboards/LeadsTable.tsx; chatbot/components/admin/ActivityLog.tsx, onboarding/Step2BotIdentity.tsx y BotConfigEditor.tsx:144 (text-zinc-500/600/700 → zinc-400 o el token de texto secundario; mínimo 11-12 px).",
+   "archivos_no": "src/components/ui/* (protegido); src/lib/design-tokens.ts; ColorPicker.tsx (lo reemplaza la tarjeta del editor).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Bajo. Suma A11Y-012 (misma causa) desde la tarjeta del editor del bot.",
+   "prereqs": [],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "git grep de text-zinc-600 y text-zinc-700 en texto funcional de esos archivos da 0; la medición de contraste de las pantallas citadas da ≥ 4,5:1.",
+   "nodos": [
+    "h2.cli-soporte.conversacion-ticket",
+    "h2.cli-servicios.servicios-contratados",
+    "h2.cli-servicios.vitrina-modulos",
+    "h2.cli-tienda",
+    "h2.cli-email-mkt",
+    "h2.cli-cuenta.boveda",
+    "h2.cli-inicio",
+    "h2.cli-shell",
+    "h3.cli-chatbot.contacto-detalle",
+    "h3.cli-chatbot.resumen",
+    "h3.cli-chatbot.contactos-lista",
+    "h3.adm-actividad.stream-eventos",
+    "h4.adm-clientes.alta-cliente-con-bot",
+    "lib.ui"
+   ],
+   "worktree": "wt/portal-cliente",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Portal: accesibilidad de formularios, notificaciones y navegación",
+   "objetivo": "Que el portal del cliente anuncie sus errores, se opere con teclado y tenga sus PDF en contraste AA.",
+   "hallazgos": [
+    "A11Y-004",
+    "A11Y-005",
+    "A11Y-006",
+    "A11Y-007",
+    "DEU-029"
+   ],
+   "archivos_tocar": "components/dashboard/NotificationCenter.tsx y NotificationHistoryModal.tsx (filas como <button>); FormFeedback compartido (role=alert y role=status) en ProfileForms.tsx, ClientChatComposer.tsx, ReferralPanel.tsx, VaultRequestModal.tsx, email-marketing/campaigns/new/page.tsx, módulos y bienvenida; ProjectTaskTabs.tsx (descripción expandible); DashboardLayoutClient.tsx (inert en el aside cerrado); SidebarNav.tsx (aria-current); ProfileForms.tsx (toggles de contraseña dentro del Tab); src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx (zinc-600 y cian #0e7490); etiquetas de ticket, hook de posición de popover y la consulta Prisma de OnboardingStatusCard llevados a lib.",
+   "archivos_no": "src/components/ui/*; NewTicketModal.tsx (lo migra «Modal compartido accesible…»); src/lib/reports/MonthlyReport.tsx (lo borra la poda del portal).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. A11Y-003 (Próximo) migra el modal de ticket antes. DEU-029 es la única tarjeta que mueve la consulta de OnboardingStatusCard (se sacó de IDEA-012).",
+   "prereqs": [
+    "Modal compartido accesible y el modal de ticket migrado a él"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "La campana se opera con Tab y Enter; axe no reporta violaciones de aria en esas pantallas; con el drawer mobile cerrado el foco no entra al aside; el link activo tiene aria-current; el PDF mensual da ≥ 4,5:1 medido; PRIORITY_MAP, CATEGORY_MAP y calcPosition tienen una sola definición; OnboardingStatusCard no importa prisma.",
+   "nodos": [
+    "h2.cli-shell.campana-notificaciones",
+    "h2.cli-cuenta",
+    "h2.cli-soporte",
+    "h2.cli-mensajes",
+    "h2.cli-proyecto.tareas-por-estado",
+    "h2.cli-shell.navegacion-sidebar",
+    "h2.cli-cuenta.cambiar-password",
+    "h2.cli-resultados.informe-mensual-pdf",
+    "lib.reports",
+    "h2.cli-inicio.estado-onboarding",
+    "h2.cli-shell"
+   ],
+   "worktree": "wt/portal-cliente",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Shell del admin: topbar en español, menú mobile usable, diálogos accesibles y loading propios",
+   "objetivo": "Que el armazón del admin se lea en español, se opere con teclado y muestre la carga correcta en cada sección.",
+   "hallazgos": [
+    "UX-034",
+    "UX-035",
+    "A11Y-019",
+    "A11Y-020",
+    "A11Y-021",
+    "UX-039",
+    "TEC-005",
+    "POD-355"
+   ],
+   "archivos_tocar": "admin/_components/admin-topbar.tsx (mapa completo; IDs detectados por formato cuid; aria-label; sin h1 duplicado); AdminLayoutClient.tsx y admin-sidebar.tsx (hamburguesa oculta con el drawer abierto; Escape, foco y aria-expanded); confirm-dialog.tsx, type-to-confirm-dialog.tsx, inline-confirm.tsx, leads/_components/lead-form.tsx y projects/_components/overlay-modal.tsx sobre el modal accesible compartido; AdminBreadcrumbs.tsx (nav con aria-label); announcement-publisher.tsx, AuditLogClient.tsx, BillingOverrideForm.tsx, InternalNotesCard.tsx y message-input.tsx (labels asociados; role=alert); loading.tsx en announcements, referrals y fg2-lab; admin/layout.tsx (sin el noStore redundante).",
+   "archivos_no": "src/components/ui/Callout.tsx y Modal.tsx; admin/leados/** y fg2-lab/_components (ZONA-FRANCO: solo el loading.tsx de la ruta, con aviso).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. Reutiliza el modal de Próximo en vez de crear otro hook. DIS-002 (shells con roles) vuelve a tocar AdminLayoutClient después.",
+   "prereqs": [
+    "Modal compartido accesible y el modal de ticket migrado a él"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "/admin/announcements se titula «Novedades» y ninguna sección sale en inglés; en mobile el drawer cierra con Escape y el logo se ve; los diálogos destructivos atrapan el foco y lo devuelven; cada página tiene un solo h1; axe sin violaciones de label en esos formularios; /admin/referrals muestra su propio skeleton.",
+   "nodos": [
+    "h4.adm-shell",
+    "h4.adm-shell.navegacion",
+    "h4.adm-novedades",
+    "h4.adm-shell.confirmaciones",
+    "h4.adm-leads.alta-edicion",
+    "h4.adm-novedades.publicar",
+    "h4.adm-audit.listado-y-filtros",
+    "lib.ui",
+    "h4.adm-referidos",
+    "h4.adm-shell.acceso-y-layout"
+   ],
+   "worktree": "wt/admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Páginas de auth: AuthShell compartido y login partido",
+   "objetivo": "Un solo fondo y armazón para las pantallas de auth y una página de login por debajo de 300 líneas, sin estilos inline.",
+   "hallazgos": [
+    "DEU-004"
+   ],
+   "archivos_tocar": "AuthShell nuevo (src/components/auth/AuthShell.tsx) con el fondo; src/app/login/page.tsx (de 511 líneas a LoginForm y MagicLinkForm en archivos propios, sin estilos inline); src/app/forgot-password/page.tsx; src/app/reset-password/page.tsx; src/app/accept-invite/InviteBackground.tsx.",
+   "archivos_no": "src/auth.ts; src/components/canvas/DotMatrix.tsx (tarjeta de canvas); next.config.ts (SEC-027 pasó a la tarjeta de cabeceras).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. A11Y-001 (Próximo) y PERF-018 tocan las mismas páginas: van antes. SEC-027 se separó: es otra causa y otro archivo.",
+   "prereqs": [
+    "Acceso a L3: regla única de contraseña, tokens hasheados, redirect seguro y avisos"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Las 4 páginas usan AuthShell y el fondo se define una vez; login/page.tsx baja de 300 líneas y no tiene style={{}}; visual-qa desktop+mobile de las 4 no muestra cambios visibles.",
+   "nodos": [
+    "h1.auth-login",
+    "h1.auth-recupero",
+    "h1.auth-invite",
+    "h1.auth-cambio"
+   ],
+   "worktree": "wt/auth-borde",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Fronteras de error y 404 por superficie: embed, admin y dashboard con su vuelta",
+   "objetivo": "Que cada superficie tenga su página de error y su 404 con la vuelta a su inicio, y que la 404 respete el movimiento reducido.",
+   "hallazgos": [
+    "UX-057",
+    "UX-058",
+    "A11Y-034",
+    "POD-344"
+   ],
+   "archivos_tocar": "src/app/embed/[slug]/not-found.tsx y error.tsx nuevos (silenciosos, avisan al widget); not-found.tsx nuevos en (protected)/dashboard y (protected)/admin con vuelta al panel; src/components/ui/SectionErrorBoundary.tsx (prop homeHref con default '/dashboard'; <Link>); admin/_components/AdminErrorBoundary.tsx (homeHref '/admin'; los error.tsx del admin apuntan a él); src/app/not-found.tsx (frame estático con reducir movimiento; pausa con visibilitychange o IntersectionObserver).",
+   "archivos_no": "src/app/(protected)/setter/error.tsx (Franco).",
+   "zona": "requiere decisión FROZEN (SectionErrorBoundary está en ui/*)",
+   "tamano": "S",
+   "riesgo": "Bajo: cambio de API aditivo con default idéntico.",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "/embed/inexistente ya no muestra la 404 de marketing; un notFound() en /admin/clients/x ofrece volver a /admin; el error de una sección del admin vuelve a /admin; con movimiento reducido la 404 no anima y en una pestaña oculta no consume CPU (performance trace).",
+   "nodos": [
+    "h3.vis-widget-cliente",
+    "h2.cli-shell",
+    "h4.adm-shell",
+    "lib.ui",
+    "lib.proxy",
+    "lib.use-reduced-motion"
+   ],
+   "worktree": "wt/kit-ui",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Kit ui/* protegido: estados accesibles, StatCard es-AR, un solo EmptyState y huérfanos fuera",
+   "objetivo": "Arreglar dentro del kit, ya con su gate, lo que solo se arregla editándolo: estados que se anuncian, locale, duplicados y huérfanos.",
+   "hallazgos": [
+    "A11Y-039",
+    "BUG-185",
+    "DEU-107",
+    "DEU-102",
+    "POD-045",
+    "POD-381",
+    "POD-382",
+    "POD-326"
+   ],
+   "archivos_tocar": "src/components/ui/LoadingState.tsx, Spinner.tsx y skeletons/* (role=status, aria-live, texto sr-only); Tabs.tsx (aria-current en modo nav; tablist en modo value); Input.tsx y hermanos (aria-invalid); StatCard.tsx ('es-AR'); EmptyState.tsx y EmptyStateMuted.tsx (una primitiva a partir de ResultEmptyState); LogoStrokeOverlay.tsx, IntroLockupText.tsx y buttons/MagneticCta.tsx (useIsClient y cn de lib); src/lib/use-is-client.ts; src/modules/chatbot/components/admin/useIsClient.ts (repuntar sus 4 imports); borrar ui/HeroTitle.tsx, ui/ErrorState.tsx y ui/HyperText.tsx.",
+   "archivos_no": "src/components/ui/index.ts salvo exports aditivos; Button, Card y Modal (kit semántico y A11Y-037); los componentes del intro y del home clásico.",
+   "zona": "requiere decisión FROZEN",
+   "tamano": "M",
+   "riesgo": "Alto por alcance: el kit tiene 344 dependientes, 53 en la zona de Franco. A11Y-037 (Modal, Próximo) toca el mismo kit antes.",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Commit aparte con prefijo ui/ y cambios de API aditivos con default idéntico; tsc, el lint de los tocados y check:invariants en verde; visual-qa desktop+mobile de una pantalla por dominio consumidor (admin, portal, setter, admin de chatbots); LoadingState anuncia «Cargando»; un Input inválido expone aria-invalid; el grep de los 3 huérfanos da 0.",
+   "nodos": [
+    "lib.ui",
+    "lib.use-is-client",
+    "lib.componentes-dashboard",
+    "h2.cli-agenda",
+    "h2.cli-tienda",
+    "h2.cli-resultados",
+    "h2.cli-cuenta",
+    "doc.ra-z-lane-services-log"
+   ],
+   "worktree": "wt/kit-ui",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Una sola fuente de acentos y de z-index: design-tokens reemplazado",
+   "objetivo": "Que los colores por servicio y la escala de capas tengan una sola fuente, verificada por invariantes, antes de construir la capa de tema del portal.",
+   "hallazgos": [
+    "DEU-100",
+    "DEU-101",
+    "DEU-110",
+    "DEU-111",
+    "DIS-008",
+    "UX-031",
+    "POD-383",
+    "POD-068"
+   ],
+   "archivos_tocar": "src/lib/design-tokens.ts (zIndex a src/lib/z-index.ts con un tier 'popover' por encima de modal; colors.service y el resto se borran); sus consumidores (ui/Modal.tsx, setter-shell.tsx, DashboardLayoutClient.tsx); ui/Select.tsx y los ~10 popovers con zIndex 210 literal; chatbot/shared/zIndex.ts (relación documentada); src/lib/chromeReveal.ts (comentario); logic-core-v3/AGENTS.md:54-58; chatbot/prisma/seed.ts:222-226 (routeColorMap con la paleta de CLAUDE.md, WhatsApp sin fallback ficticio, verticalPack 'agencia'); globals.css:56-58 (comentario de GATE 1); tests/e2e/22-visual-regression.spec.ts (sale /admin/_design); invariantes check:invariant:acentos-servicio y check:invariant:z-index.",
+   "archivos_no": "src/components/design-system/accent.ts; los valores de globals.css:60-63; la rama rediseno/home.",
+   "zona": "requiere decisión FROZEN (design-tokens y Select; setter-shell es ZONA-FRANCO: aviso)",
+   "tamano": "M",
+   "riesgo": "Bajo-medio: un tier mal puesto cambia el orden de capas (Select dentro de Modal). El seed del bot se vuelve a correr con el guard de destino.",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "check:invariant:acentos-servicio confirma los 4 hex de CLAUDE.md en globals.css, DESIGN.md y el módulo de tokens; check:invariant:z-index fija appShell < … < modal < popover y toast; el grep de zIndex 210 y z-[210] da 0; un Select dentro de un Modal queda encima (visual-qa); ni AGENTS.md ni el seed conservan la permutación equivocada.",
+   "nodos": [
+    "lib.design-tokens",
+    "lib.ui",
+    "lib.chromereveal",
+    "h5.set-dia",
+    "h3.vis-widget-develop",
+    "h3.vis-widget-develop.contenido-bot-develop",
+    "modelo.BotConfig",
+    "lib.tests",
+    "lib.sitio-publico"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Movimiento reducido correcto desde el primer render y una sola política en portales y widget",
+   "objetivo": "Que quien pidió menos movimiento no vea animaciones desde el primer cuadro, en el admin, en el portal ni en el widget.",
+   "hallazgos": [
+    "A11Y-040",
+    "DIS-007",
+    "DEU-057",
+    "UX-014",
+    "A11Y-016",
+    "POD-345"
+   ],
+   "archivos_tocar": "src/lib/use-reduced-motion.ts (useSyncExternalStore con snapshot de servidor; mismo nombre exportado); admin/_components/PageTransition.tsx y components/dashboard/PageTransition.tsx (pasan a template.tsx con árbol estable); admin/layout.tsx y DashboardLayoutClient.tsx (MotionConfig reducedMotion=\"user\"); AnimatedCounter.tsx, AnimatedProgressBar.tsx y AnalyticsMetricCard.tsx (es-AR; valor final en SSR; pausa con IntersectionObserver); chatbot/components/avatar/AvatarRenderer.tsx, PulseAvatar.tsx, MonogramAvatar.tsx y chat/ChatWindow.tsx (los puntos de «pensando»).",
+   "archivos_no": "src/components/ui/EmptyState.tsx; la coreografía de scroll de v3; el setter.",
+   "zona": "requiere decisión FROZEN (use-reduced-motion: reemplazar)",
+   "tamano": "M",
+   "riesgo": "Medio. v3 importa el hook por su nombre: la firma no cambia. Remontar desde template.tsx reinicia el estado de formularios abiertos.",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "Con prefers-reduced-motion: reduce emulado, ni los PageTransition ni los contadores ni los avatares animan desde el primer cuadro (grabación o visual-qa); sin el ajuste, el PageTransition anima en cada navegación del admin y del portal; los contadores salen en es-AR; tsc y check:invariants en verde.",
+   "nodos": [
+    "lib.use-reduced-motion",
+    "h4.adm-shell",
+    "h4.adm-shell.acceso-y-layout",
+    "lib.componentes-dashboard",
+    "h2.cli-resultados.trafico",
+    "h2.cli-proyecto.tareas-por-estado",
+    "h3.vis-widget-develop",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.components"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "TransitionContext protegido: el hash abre el shutter cuando pintó el destino y el destino declara su alineación",
+   "objetivo": "Que la navegación con hash no abra el shutter antes de tiempo y que el contexto no dependa de ids de sección fijos.",
+   "hallazgos": [
+    "BUG-189",
+    "DEU-108"
+   ],
+   "archivos_tocar": "src/context/TransitionContext.tsx (la rama de hash usa startTransition más pendingRouteReveal; scroll al ancla cuando cae isPending; isManualTransition se borra; alineación leída de un data-atributo o de scroll-margin); src/components/layout/Navbar.tsx y DynamicDock.tsx; src/components/sections/nosotros/Nosotros.tsx, o la sección que lleve el atributo.",
+   "archivos_no": "src/components/3d/HeroArtifact.tsx; src/context/PreloaderContext.tsx; src/app/(protected)/** (el invariante de navegación pasó a «Navegación de los portales…»).",
+   "zona": "requiere decisión FROZEN",
+   "tamano": "M",
+   "riesgo": "Medio: envuelve todas las rutas públicas y no tiene test. Los ids 'servicios' y 'caracteristicas' cambian con rediseno/home (bead847c).",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "visual-qa desktop+mobile de / → /contact, de /web-development → /#servicios (el shutter no abre antes de que pinte el destino) y de back/forward, más /admin y /dashboard sin shutter; el grep de 'servicios' y 'caracteristicas' en TransitionContext da 0.",
+   "nodos": [
+    "lib.context",
+    "lib.sitio-publico",
+    "lib.raiz-repo.rama-bead847c-src-app-page"
+   ],
+   "worktree": "wt/protegidos",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Plataforma: configs tipadas, dependencias reales, Sentry sin duplicados y recursos propios",
+   "objetivo": "Que la configuración de plataforma diga la verdad: config tipada, dependencias declaradas, una sola inicialización de Sentry, sin recursos de terceros y con una versión que identifique el deploy.",
+   "hallazgos": [
+    "DEU-091",
+    "DEU-092",
+    "DEU-093",
+    "DEU-094",
+    "DEU-095",
+    "BUG-172",
+    "BUG-173",
+    "PERF-017",
+    "SEC-042",
+    "POD-084",
+    "POD-360",
+    "POD-361",
+    "POD-362",
+    "POD-363",
+    "POD-364",
+    "POD-365",
+    "POD-366",
+    "POD-375",
+    "POD-376",
+    "POD-377",
+    "POD-378",
+    "POD-379"
+   ],
+   "archivos_tocar": "tailwind.config.ts (se borra); next.config.ts (tipado NextConfig; analyzer detrás de ANALYZE; sin el remotePattern de placehold.co); eslint.config.mjs, .gitignore y tsconfig.json ('.next*/', sin los includes de .next-perf-*); package.json (three-stdlib declarado; framer-motion → motion/react en About.tsx y Hero.tsx; sin html2canvas ni jspdf; @types/three a devDependencies); .env.example (OAUTH_STATE_SECRET; sin RESEND_FROM_EMAIL; nota de NEXT_PUBLIC_BUILD_TIME); src/app/api/version/route.ts (SHA de Netlify y fecha de build); public/og-image.png o opengraph-image por ruta; src/app/layout.tsx (sin preconnects de terceros); noise.svg servido desde public/; los sentry.*.config duplicados de la raíz; bloques de métricas de src/lib/integrations/brevo.ts y src/lib/n8n.ts; src/app/api/track/route.ts (se borra); vercel.json (se borra: los crons ya los registra «Crons con disparador real…»); netlify.toml (rewrite muerto).",
+   "archivos_no": "src/components/3d/HeroArtifact.tsx (three-stdlib solo se declara); src/components/ui/KineticText.tsx; src/app/api/test-sentry/route.ts (SEC-093, Ahora).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio. Si se borran los sentry.*.config sin confirmar cuál carga Next 16, Sentry queda inerte: FAL-030 está en Ahora (no es MEDIA de Próximo) y va antes. Los crons de vercel.json los pasa a Netlify la tarjeta de Ahora.",
+   "prereqs": [
+    "Inventario de vencimientos de credenciales y Sentry que de verdad recibe",
+    "Crons con disparador real en Netlify (y que solo los invoque el scheduler)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "npm run build y tsc en verde; three-stdlib declarado y html2canvas y jspdf fuera; /api/version devuelve el SHA del deploy; /og-image.png responde 200 o la meta og apunta a un asset que existe; ningún preconnect a grainy-gradients ni a placehold.co; un evento de prueba llega a Sentry después de borrar los duplicados; POST /api/track devuelve 404; vercel.json no existe.",
+   "nodos": [
+    "lib.tailwind",
+    "lib.next-config",
+    "int.github-actions",
+    "lib.deps",
+    "int.brevo",
+    "lib.security",
+    "int.netlify",
+    "h2.cli-shell",
+    "h4.adm-shell",
+    "h6.vis-contacto",
+    "lib.seo",
+    "lib.ui",
+    "modelo.PageView"
+   ],
+   "worktree": "wt/plataforma",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Build y stack: memoria medida y plan de upgrades por etapas",
+   "objetivo": "Medir la memoria real del build, acotar el escaneo de Tailwind y dejar un plan de upgrades mayores por etapas con Node alineado entre entornos.",
+   "hallazgos": [
+    "TEC-007",
+    "TEC-008"
+   ],
+   "archivos_tocar": "netlify.toml (heap medido); next.config.ts; src/app/globals.css (@source not sobre docs/ y los distDirs); package.json (engines, @types/node alineado, plugin de Netlify fijado); plan escrito con un sprint por pieza: next-auth estable, Prisma 7, zod 4; evaluar Turbopack.",
+   "archivos_no": "src/auth.ts; prisma/schema.prisma (Prisma 7 es su propia tarjeta).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio: cambiar el bundler o la versión de Node puede romper el deploy; probar en un deploy preview.",
+   "prereqs": [
+    "Subir next, next-auth y @auth/core a las versiones con fix"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "VH-161: el build termina en un clon limpio con 4096 MB y queda registrado el pico; Tailwind no escanea docs/; engines y la versión de Node coinciden entre CI, Netlify y local; el plan de upgrades tiene un sprint por pieza.",
+   "nodos": [
+    "int.netlify",
+    "lib.tailwind",
+    "lib.deps",
+    "lib.auth",
+    "lib.prisma"
+   ],
+   "worktree": "wt/plataforma",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Poda ALTA de src: 17 archivos huérfanos (1.899 LOC)",
+   "objetivo": "Borrar los archivos de src con confianza ALTA y decidir de paso si la invitación se borra o se reconecta.",
+   "hallazgos": [
+    "POD-002",
+    "POD-003",
+    "POD-004",
+    "POD-005",
+    "POD-013",
+    "POD-014",
+    "POD-015",
+    "POD-016",
+    "POD-017",
+    "POD-018",
+    "POD-019",
+    "POD-023",
+    "POD-046",
+    "POD-047",
+    "POD-048",
+    "POD-049",
+    "POD-050",
+    "DEU-001",
+    "POD-284"
+   ],
+   "archivos_tocar": "src/actions/metrics-actions.ts y task-approvals.ts; admin/clients/_actions/client.schemas.ts; admin/projects/_components/convert-lead-dialog.tsx (solo si «Convertir un lead en proyecto…» no lo reconectó); components/dashboard/{AnalyticsPeriodSelector,AnimatedTaskList,CurrentMilestone,DownloadReportButton,LeakMeter,TicketStatusSelector,UpsellCard}.tsx; components/onboarding/OnboardingWizard.tsx; src/lib/actions/invitations.ts y src/app/accept-invite/ si se decide borrar la invitación (DEU-001); src/lib/client-health.ts, cn.ts y design-patterns.ts; chatbot/components/admin/config/Toggle.tsx.",
+   "archivos_no": "src/actions/admin/onboarding-tasks.ts (POD-001, va con IDEA-012); src/components/ui/HeroTitle.tsx (POD-045, va con el kit); la lección de CLAUDE.md que cita TicketStatusSelector (se actualiza con el CLAUDE.md propuesto).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Bajo: cada borrado tiene dos señales independientes. FAL-024 (Próximo) decide si convert-lead-dialog vive: va antes. Registrar la decisión de DEU-001 antes de tocar invitations.ts.",
+   "prereqs": [
+    "Convertir un lead en proyecto desde la ficha del lead"
+   ],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Los archivos de la lista ya no existen (salvo convert-lead-dialog si se reconectó) y el grep de cada specifier da 0; tsc --noEmit, check:invariants y npm run build en verde; la decisión sobre la invitación queda registrada.",
+   "nodos": [
+    "lib.actions",
+    "h4.adm-clientes",
+    "h4.adm-proyectos",
+    "lib.componentes-dashboard",
+    "lib.client-health",
+    "lib.cn",
+    "lib.design-patterns",
+    "h3.adm-chatbots",
+    "h1.auth-invite"
+   ],
+   "worktree": "wt/poda",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Poda de scripts sueltos y salidas generadas commiteadas (103 ALTA + 10 MEDIA)",
+   "objetivo": "Sacar del repo los scripts one-off ya cumplidos, los sueltos de la raíz y los reportes y logs commiteados, y decidir uno por uno los 10 MEDIA.",
+   "hallazgos": [
+    "POD-085",
+    "POD-086",
+    "POD-087",
+    "POD-088",
+    "POD-089",
+    "POD-090",
+    "POD-091",
+    "POD-092",
+    "POD-093",
+    "POD-094",
+    "POD-095",
+    "POD-096",
+    "POD-097",
+    "POD-098",
+    "POD-099",
+    "POD-100",
+    "POD-101",
+    "POD-102",
+    "POD-103",
+    "POD-104",
+    "POD-105",
+    "POD-106",
+    "POD-107",
+    "POD-108",
+    "POD-109",
+    "POD-110",
+    "POD-111",
+    "POD-112",
+    "POD-113",
+    "POD-114",
+    "POD-115",
+    "POD-116",
+    "POD-117",
+    "POD-118",
+    "POD-119",
+    "POD-120",
+    "POD-121",
+    "POD-122",
+    "POD-123",
+    "POD-124",
+    "POD-125",
+    "POD-126",
+    "POD-127",
+    "POD-128",
+    "POD-129",
+    "POD-130",
+    "POD-131",
+    "POD-132",
+    "POD-133",
+    "POD-134",
+    "POD-135",
+    "POD-136",
+    "POD-137",
+    "POD-138",
+    "POD-139",
+    "POD-140",
+    "POD-141",
+    "POD-142",
+    "POD-143",
+    "POD-144",
+    "POD-145",
+    "POD-146",
+    "POD-147",
+    "POD-148",
+    "POD-149",
+    "POD-150",
+    "POD-151",
+    "POD-152",
+    "POD-153",
+    "POD-154",
+    "POD-155",
+    "POD-156",
+    "POD-157",
+    "POD-173",
+    "POD-174",
+    "POD-175",
+    "POD-176",
+    "POD-177",
+    "POD-178",
+    "POD-179",
+    "POD-180",
+    "POD-181",
+    "POD-182",
+    "POD-183",
+    "POD-184",
+    "POD-185",
+    "POD-186",
+    "POD-187",
+    "POD-188",
+    "POD-189",
+    "POD-190",
+    "POD-191",
+    "POD-192",
+    "POD-193",
+    "POD-194",
+    "POD-195",
+    "POD-196",
+    "POD-197",
+    "POD-198",
+    "POD-199",
+    "POD-200",
+    "POD-201",
+    "POD-202",
+    "POD-158",
+    "POD-159",
+    "POD-160",
+    "POD-163",
+    "POD-164",
+    "POD-165",
+    "POD-166",
+    "POD-167",
+    "POD-171",
+    "POD-172",
+    "DEU-106",
+    "DEU-105",
+    "SEC-004",
+    "SEC-108"
+   ],
+   "archivos_tocar": "Los 73 scripts ALTA (sueltos de la raíz de la app: script*.js, replace_analytics.js, find_unused.js, test-chat.mjs; en scripts/: _b13-*, _b14-*, logs _b3x/_ms*, _b5x-test-scoring, _db-cleanup-*, b4–b9 QA y smokes, encode-vertex-creds.js, p41-inject-campaigns.ts, 11 de qa-corridas, regression/diag-timings.ts, seed-matsu-*.ts, seed-messages-demo.ts, set-matsu-password.ts y utm1-smoke.mjs); las 30 salidas (_tmp_*.html, .eslint_output.txt, audit.txt, prisma_err.txt, prisma/migrations/__diff_check.sql, ts_errors.*, ts_prune_output.txt, unused_report*.txt y logs/JSON de scripts/ y tests/); .gitignore con patrones; los 10 MEDIA (_b13-latency-analyze, _b14-2-cleanup/seed-bench-prod, b3-qa-assign-leads, cleanup-messages-demo, 3 de qa-corridas, seed-matsu.ts y v1-qa-wizard-states): borrado o anotado con motivo.",
+   "archivos_no": "Los scripts que nombra package.json o un doc vigente; scripts/auditoria/; scripts/regression/{cases,purge,run-baseline}.ts (tarjeta de evals); b1-verify-setter-ownership.ts y b2-verify-dossier.ts (tarjeta de secretos).",
+   "zona": "libre (qa-corridas y los QA b4–b7 son del setter: aviso a Franco)",
+   "tamano": "S",
+   "riesgo": "Bajo: git conserva la historia. Lista cerrada: S mecánica, no poda masiva cruzada. scripts/qa-corridas/_p23/censo-ubicaciones.ts lee docs/baselines/p23-pliegue-antes.json: si se queda, el JSON también. Si _b14-2-cleanup se queda, BUG-176 lo arregla la tarjeta de seeds.",
+   "prereqs": [],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Un script que recorre la lista ALTA encuentra 0 archivos presentes; package.json no referencia ninguno de los borrados; npm run build, tsc y check:invariants en verde; .gitignore cubre *.log y _tmp_*; cada MEDIA está borrado o anotado «se queda» con motivo.",
+   "nodos": [
+    "lib.scripts",
+    "lib.raiz-repo",
+    "int.calcom",
+    "int.vertex"
+   ],
+   "worktree": "wt/poda",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Poda del portal y de src/lib/actions: código muerto con hallazgo (decide Valentino)",
+   "objetivo": "Decidir y borrar los motores PDF, las rutas, las actions y los módulos legacy del portal sin consumidores, incluida la escritura de lastDashboardVisit que nadie lee.",
+   "hallazgos": [
+    "DEU-022",
+    "DEU-027",
+    "DEU-030",
+    "PERF-006",
+    "POD-058",
+    "POD-059",
+    "POD-060",
+    "POD-061",
+    "POD-062",
+    "POD-076",
+    "POD-077",
+    "POD-079",
+    "POD-296",
+    "POD-297",
+    "POD-298",
+    "POD-299",
+    "POD-300",
+    "POD-301",
+    "POD-302",
+    "POD-303",
+    "POD-307",
+    "POD-359"
+   ],
+   "archivos_tocar": "src/actions/onboarding-actions.ts; api/reports/monthly/route.ts y src/lib/reports/MonthlyReport.tsx; api/dashboard/leads/recent/route.ts (con sus dos asserts de tests/e2e/40); components/dashboard/ExecutiveReportTemplate.tsx; src/lib/premium-modules.ts (quedan activateModule y cancelModule; getActiveModuleSlugs a lib/modules); src/lib/actions/messages.ts (las 3 actions admin); los módulos de src/lib/actions/{clients,leads,leads-constants,services,settings,projects,contact,gbp-connection}.ts que sigan sin importadores después de las tarjetas de Próximo; dashboard/layout.tsx (la escritura de lastDashboardVisit); los loading.tsx de cuenta y campaigns/[id]; src/app/bienvenida/ según la decisión de DEU-023.",
+   "archivos_no": "markNotificationReadAction (POD-078: es el gemelo correcto); src/actions/admin/onboarding-tasks.ts y src/lib/data/onboarding-tasks.ts (IDEA-012); gbp-connection.ts si se construye la UI de sucursal (FAL-011).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio: «sin llamador» se midió con grep. DEU-023 (/bienvenida, Ahora) y DEU-067 (módulos legacy, en «Proyectos del admin: alta, edición…») deciden antes; la tarjeta de proyectos de este bloque usa exports de lib/actions/projects.ts.",
+   "prereqs": [
+    "Poda ALTA de src: 17 archivos huérfanos (1.899 LOC)",
+    "dashboard-actions libre: aprobación de entregas atómica y una sola action de notificaciones",
+    "Onboarding /bienvenida: decidir su destino y que el cliente no pueda fijar la propiedad de GA4",
+    "Proyectos del admin: alta, edición y borrado coherentes",
+    "Proyectos del admin: archivados fuera, proyecto interno con helper, aviso de aprobación y horas con dueño"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Cada archivo o export de la lista está borrado o anotado «se queda» con motivo; tsc, check:invariants y el e2e 40 en verde; el grep de los símbolos borrados da 0; el layout del portal ya no escribe User.lastDashboardVisit.",
+   "nodos": [
+    "h2.cli-bienvenida.guardar-perfil-legacy",
+    "modelo.ClientAsset",
+    "h2.cli-resultados",
+    "h3.cli-chatbot",
+    "modelo.ChatbotLead",
+    "lib.premium-modules",
+    "lib.actions",
+    "h2.cli-shell.layout-y-navegacion",
+    "modelo.User"
+   ],
+   "worktree": "wt/poda",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Poda del módulo chatbot: barrels, componentes y server code sin uso",
+   "objetivo": "Recortar el módulo chatbot a lo que se consume, para achicar la superficie de server actions y el bundle del widget.",
+   "hallazgos": [
+    "DEU-036",
+    "DEU-046",
+    "DEU-054",
+    "POD-051",
+    "POD-313",
+    "POD-314",
+    "POD-315",
+    "POD-316",
+    "POD-318",
+    "POD-321",
+    "POD-322",
+    "POD-323",
+    "POD-324",
+    "POD-325",
+    "POD-327",
+    "POD-328",
+    "POD-329",
+    "POD-330",
+    "POD-333",
+    "POD-334",
+    "POD-335",
+    "POD-339",
+    "POD-340"
+   ],
+   "archivos_tocar": "src/modules/chatbot/index.ts, index.server.ts, components/admin/index.ts, components/chat/index.ts y types.ts (recortados a lo consumido); chat/QuickReplyChips.tsx, ChatMessages.tsx, ChatMessage.tsx y ChatInput.tsx; dashboard/ClientSettingsForm.tsx con server/admin/saveClientSettings.ts; getLeadSyncHistory de getCrmSyncHistory.ts; server/admin/preflightChecks.ts (solo si «Alta y activación de bots…» no la cableó); las 2 funciones sin uso de insights/queries.ts; requireChatbotEnv de envValidator.ts; server/chat/reconcile.ts; api/admin/chatbot/insights/generate/route.ts. A decidir: api/admin/chatbot/demo-chat/[slug]/route.ts, update-proactive-prompts.ts, llm/providers/anthropic.ts y openai.ts, scoring/calculateLeadScore.ts.",
+   "archivos_no": "server/insights/manageInsight.ts (POD-332: lo usa IDEA-001); src/lib/isolation/*.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio. PERF-007 (peso del widget) depende de este recorte. El guard de runPreflightChecks (SEC-065) lo pone la tarjeta de Ahora; acá solo se borra si quedó sin uso.",
+   "prereqs": [
+    "Alta y activación de bots: preflight en el servidor, KB sin placeholders y credenciales que no dependen del mail",
+    "Guardia SUPER_ADMIN al lado del dato en /admin (páginas, actions y rutas)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "tsc, el eslint de la frontera y check:invariants en verde; el grep de cada símbolo borrado da 0; el bundle de /embed/[slug] ya no incluye editores de admin (medido con ANALYZE); POST /api/admin/chatbot/insights/generate devuelve 404.",
+   "nodos": [
+    "lib.chatbot.barrel",
+    "lib.chatbot.components",
+    "h3.cli-chatbot.personalizacion",
+    "lib.actions",
+    "h3.adm-chatbots",
+    "lib.chatbot.insights",
+    "int.vertex"
+   ],
+   "worktree": "wt/poda",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Poda del admin: actions sin llamador, rutas huérfanas y catálogos copiados",
+   "objetivo": "Borrar las actions y rutas del admin que nadie llama y dejar una sola fuente para catálogos y helpers duplicados.",
+   "hallazgos": [
+    "DEU-065",
+    "POD-071",
+    "POD-072",
+    "POD-073",
+    "POD-074",
+    "POD-081",
+    "POD-082",
+    "POD-346",
+    "POD-350",
+    "POD-356"
+   ],
+   "archivos_tocar": "admin/projects/_actions/maintenance.actions.ts#createMaintenancePayment, milestone.actions.ts#unmarkMilestonePaid y project.actions.ts#getProjectById; team/_actions/task.actions.ts#reorderTasks y #listTasksByUser; admin/settings/alerts/ y settings/reports/ (borrarlas o enlazarlas); _components/dashboard-history-charts.tsx (formatCurrency a un util compartido); messages/_components/emoji-popover.tsx (componente compartido); src/lib/premium-features.ts (con lib/actions/settings.ts); settings/_actions/settings.actions.ts (moduleKey tipado; BotAlertType de @prisma/client); settings/alerts/AlertSettingsClient.tsx; ASSET_TYPES con una sola fuente.",
+   "archivos_no": "listLeads y getLeadById (Franco, POD-070); admin/leados/**; time-entry.actions.ts (POD-075 va con la tarjeta de proyectos).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Bajo. FAL-007 y FAL-023 (Próximo) pueden necesitar createMaintenancePayment: ya decididos antes.",
+   "prereqs": [
+    "Poda del portal y de src/lib/actions: código muerto con hallazgo (decide Valentino)"
+   ],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Cada export de la lista está borrado o anotado «se queda» con motivo; tsc y check:invariants en verde; el grep de 'pendiente de prisma generate' da 0; /admin/settings/alerts y /reports están borradas o tienen entrada en el menú.",
+   "nodos": [
+    "h4.adm-config.precios-modulos",
+    "lib.premium-features",
+    "h4.adm-alertas.detector-incidencias",
+    "h4.adm-proyectos",
+    "h4.adm-equipo",
+    "h4.adm-config"
+   ],
+   "worktree": "wt/poda",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "LeadOS: poda del wizard, del laboratorio FG-2 y de exports sin consumidor",
+   "objetivo": "Sacar de LeadOS el código que quedó del wizard, los exports sin consumidor y, si FG-2 se descarta, su laboratorio.",
+   "hallazgos": [
+    "DEU-075",
+    "DEU-078",
+    "DEU-085",
+    "DEU-087",
+    "DEU-088",
+    "POD-052",
+    "POD-053",
+    "POD-054",
+    "POD-063",
+    "POD-064",
+    "POD-070",
+    "POD-080",
+    "POD-367",
+    "POD-368",
+    "POD-369",
+    "POD-370",
+    "POD-371",
+    "POD-372",
+    "POD-373",
+    "POD-374",
+    "POD-380"
+   ],
+   "archivos_tocar": "admin/leads/_actions/lead.actions.ts (listLeads y getLeadById); setter/leads/[leadId]/_components/ficha-step.tsx (rama editable y su CopyBlock), evaluacion-form.tsx, manual/_components/m1-ficha.tsx y m-construccion.tsx (etiquetas del veredicto unificadas; comentario de expectToast); src/lib/leados/guidance-content.ts, flow.ts, contracts.ts (referenciasFicha), herramientas.ts, paso.ts (reducido a la decisión de EVALUADA) y paso-admitido.ts (junto a los invariantes, con FichaSchema.parse y sin casts); admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx (helper compartido); admin/fg2-lab/** y src/lib/leados/_experimental/* (si FG-2 se descarta, «a decidir» 33); setter/leads/[leadId]/_components/brief-form.tsx.",
+   "archivos_no": "src/lib/leados/manual.ts salvo lo que lea paso.ts; prisma/schema.prisma; scripts/admin-1a-backfill-caliente.ts (tarjeta de borrado auditado); manual/page.tsx y [paso]/page.tsx (PERF-014 pasó a la tarjeta de lecturas del setter); docs/bitacora-beta-3.md (DEU-076 se cierra al borrar la bitácora).",
+   "zona": "ZONA-FRANCO",
+   "tamano": "M",
+   "riesgo": "Medio. DEU-077 (P25–P43 fuera de main) puede reintroducir lo que se poda: decidir antes qué rama manda. Borrar fg2-lab depende de cerrar FG-2.",
+   "prereqs": [
+    "Docs: decidir los 37 «a decidir» de 14-DOCS-CONSOLIDADOS",
+    "Ficha y manual del setter sin pérdida de trabajo (decidir antes p25/rafaga-tildes)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "tsc, test:leados, test:setter y los invariantes de LeadOS en verde; el grep de cada símbolo borrado da 0; Franco aprobó cada borrado.",
+   "nodos": [
+    "h4.adm-leads",
+    "h5.set-manual.ficha-y-veredicto",
+    "h5.set-manual.construccion",
+    "h5.set-manual.guia-y-herramientas",
+    "lib.leados",
+    "h5.set-manual",
+    "h5.set-manual.derivacion-de-pantalla",
+    "h5",
+    "h5.adm-fg2lab"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Ramas: borrar las 43 mergeadas y archivar con tag las 14 con trabajo propio",
+   "objetivo": "Dejar en origin solo las ramas vivas: borrar las mergeadas y conservar con tag las que tienen commits propios.",
+   "hallazgos": [
+    "POD-205",
+    "POD-206",
+    "POD-207",
+    "POD-208",
+    "POD-209",
+    "POD-210",
+    "POD-211",
+    "POD-212",
+    "POD-213",
+    "POD-214",
+    "POD-215",
+    "POD-216",
+    "POD-217",
+    "POD-218",
+    "POD-219",
+    "POD-220",
+    "POD-221",
+    "POD-222",
+    "POD-223",
+    "POD-224",
+    "POD-225",
+    "POD-226",
+    "POD-227",
+    "POD-228",
+    "POD-229",
+    "POD-230",
+    "POD-231",
+    "POD-232",
+    "POD-233",
+    "POD-234",
+    "POD-235",
+    "POD-236",
+    "POD-237",
+    "POD-238",
+    "POD-239",
+    "POD-240",
+    "POD-241",
+    "POD-242",
+    "POD-243",
+    "POD-244",
+    "POD-245",
+    "POD-246",
+    "POD-247",
+    "POD-248",
+    "POD-249",
+    "POD-250",
+    "POD-251",
+    "POD-252",
+    "POD-253",
+    "POD-254",
+    "POD-255",
+    "POD-256",
+    "POD-257",
+    "POD-258",
+    "POD-259",
+    "POD-260",
+    "POD-266"
+   ],
+   "archivos_tocar": "Ningún archivo del árbol: refs de origin (git tag archivo/<rama> en las 14 MEDIA/BAJA antes de borrarlas, después git push --delete) y regenerar 06-ATLAS/ramas.md.",
+   "archivos_no": "rediseno/* y v3/* dormidas (esperan el merge de rediseno/home); main; auditoria/renovacion-2026-10; p25/* y las demás ramas de Franco con trabajo vivo; los respaldo-*.",
+   "zona": "libre (leados/* y las fix/* del setter: confirmar con Franco)",
+   "tamano": "S",
+   "riesgo": "Bajo: el tag conserva los commits propios. Las operaciones de git las ejecuta Valentino a mano; el agente solo arma la lista de comandos.",
+   "prereqs": [],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "`git branch -r` ya no lista las 43 mergeadas; las 14 restantes tienen su tag archivo/<nombre> en origin antes de borrarse; ramas.md regenerado ya no las muestra.",
+   "nodos": [
+    "rama.leados-v2-a-main",
+    "rama.fix-callejones",
+    "rama.redisign-home",
+    "rama.chore-auditoria-seguridad",
+    "rama.experimento-estetica-goal",
+    "rama.revert-home-abortado",
+    "rama.leados-b8a-iii"
+   ],
+   "worktree": "sin worktree (operaciones de git de Valentino)",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Docs consolidados: publicar los 10 vivos y borrar 128 docs",
+   "objetivo": "Reemplazar los ~140 docs dispersos por los 10 vivos de 14-DOCS-CONSOLIDADOS, con las decisiones ya tomadas, y aplicar la lista de borrado de 10-PODA §docs.",
+   "hallazgos": [
+    "POD-083",
+    "DEU-056",
+    "DEU-076"
+   ],
+   "archivos_tocar": "Mover VISION, ARQUITECTURA, ROADMAP, DECISIONES, OPERACIONES, LECCIONES, SEGURIDAD-Y-PRIVACIDAD, LEADOS, DISENO e HISTORIAL a logic-core-v3/docs/. Borrar los 54 «borrar» y los 74 «consolidado» de la tabla §docs: raíz lane-*.md y AUDITORIA-VS-BRIEF; logic-core-v3/STATUS.md, DEPLOY.md, CHANGELOG*.md, _lane-*.md y __dev_task.md; .txt de reportes viejos; docs/bitacora-*.md (cierra DEU-076), sprints/*, audits/*, auditorias/*, regression/*.md, admin-changelog/*, client-portal/*, operations/*, baselines/* (incluye roadmap-pendientes.md, cierra DEU-056); logic-core-v3/README.md con el puntero a los 10.",
+   "archivos_no": "Los 15 «mantener»: CLAUDE.md, DESIGN.md, PRODUCT.md, AGENTS.md, README.md, BRIEF-VISION-FLUJO-SETTER-v3.md, manual-usuario/*, impeccable-baseline.json, .github/skills/impeccable, docs/auditoria-2026-10/ y fg2-brief-experimento.md hasta que se decida FG-2; docs/_insumos/ (nunca se commitea); docs/baselines/p23-pliegue-antes.json mientras viva censo-ubicaciones.ts:34.",
+   "zona": "libre (LEADOS.md y los docs de LeadOS los aprueba Franco)",
+   "tamano": "M",
+   "riesgo": "Bajo-medio. Borrar del árbol no saca de la historia los secretos que enumeran los docs (decidido en los «a decidir» 30 y 31). Separada de las decisiones: lista cerrada, S mecánica.",
+   "prereqs": [
+    "Docs: decidir los 37 «a decidir» de 14-DOCS-CONSOLIDADOS"
+   ],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Los 10 docs vivos están en su lugar final; un script que recorre la tabla §docs no encuentra ninguno de los 128 marcados borrar/consolidado; fuera de docs/auditoria-2026-10, `rg` de STATUS.md, bitacora-roadmap y DEPLOY.md no devuelve punteros rotos; README apunta a los 10 y no publica contraseñas de seed.",
+   "nodos": [
+    "doc.bitacora-roadmap",
+    "doc.bitacora-beta-3",
+    "doc.roadmap-pendientes",
+    "doc.audits-2026-05-bfg-leak-cleanup",
+    "doc.demo-guion",
+    "doc.leados-alta-setter",
+    "h4.adm-clientes"
+   ],
+   "worktree": "wt/docs",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Aplicar el CLAUDE.md propuesto: raíz de 172 líneas y tres anidados (setter, chatbot, prisma)",
+   "objetivo": "Reemplazar el CLAUDE.md raíz por el borrador de 13-CLAUDE-MD-PROPUESTO, sin sus 3 afirmaciones falsas y con lo de cada área en CLAUDE.md anidados.",
+   "hallazgos": [
+    "DEU-025",
+    "DEU-062",
+    "DEU-098"
+   ],
+   "archivos_tocar": "CLAUDE.md raíz (borrador §2: alcance por superficie DESIGN.md/CLAUDE.md, regla de IDs en URLs reescrita para cuid opacos, roles con SETTER, motion en vez de Framer Motion, protegidos según la política y definición de terminado de 8 puntos); nuevos logic-core-v3/src/app/(protected)/setter/CLAUDE.md, src/modules/chatbot/CLAUDE.md y prisma/CLAUDE.md; logic-core-v3/AGENTS.md (puntero de ~5 líneas); docs/operations/00-entornos.md:17,86,146 (si sobrevive a la poda de docs, o su contenido en OPERACIONES); src/modules/chatbot/README.md (regla 1 de la frontera y stack); .claude/agents/visual-qa.md (tres servers y «VERIFICACIÓN PENDIENTE») y .claude/launch.json unificado.",
+   "archivos_no": "Código de src/; DESIGN.md y PRODUCT.md (se citan); setter/CLAUDE.md no se commitea sin la aprobación de Franco.",
+   "zona": "libre (setter/CLAUDE.md: ZONA-FRANCO)",
+   "tamano": "M",
+   "riesgo": "Medio. El borrador supone aplicados los mecanismos (hooks, eslint.gate, skill): si va antes, las marcas «(hook)» y «(gate)» se borran. Si la regla de IDs prohíbe también los cuid, DEU-025/DEU-062 abren una tarjeta de tokens públicos en vez de cerrarse acá.",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar",
+    "Docs consolidados: publicar los 10 vivos y borrar 128 docs"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "El CLAUDE.md raíz tiene ≤ 200 líneas, no presenta Framer Motion como stack, incluye SETTER en los roles y tiene reescrita la regla de IDs; cita qué documento manda en cada superficie; existen los tres anidados y AGENTS.md es un puntero; ningún doc vivo manda imprimir DATABASE_URL; Franco aprobó setter/CLAUDE.md.",
+   "nodos": [
+    "lib.ui",
+    "h6",
+    "h2.cli-soporte",
+    "h3.cli-chatbot",
+    "h4.adm-mensajes",
+    "h4.adm-leads",
+    "h4.adm-clientes",
+    "h5.set-dia",
+    "lib.prisma"
+   ],
+   "worktree": "wt/docs",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "De prosa a mecanismo: eslint.gate en CI, hooks PreToolUse, CODEOWNERS e invariantes de convención",
+   "objetivo": "Que las reglas no negociables de CLAUDE.md las verifique una máquina: cero any, motion en vez de framer-motion, frontera del chatbot, archivos protegidos, comandos prohibidos, dpr y Zod.",
+   "hallazgos": [
+    "DEU-099",
+    "DEU-071"
+   ],
+   "archivos_tocar": "Nuevo logic-core-v3/eslint.gate.config.mjs (no-explicit-any; no-restricted-imports de framer-motion y de la frontera chatbot/motor; no-restricted-syntax para PrismaClient y console con process.env); eslint.config.mjs; .github/workflows/ci.yml (paso del gate y escaneo de secretos del diff con secrets-historial.mjs --rango); .claude/settings.json con .claude/hooks/proteger-archivos.mjs y comandos-bloqueados.mjs; .github/CODEOWNERS; scripts/run-invariants.mjs:81,106 (descubrir los test:* con .invariant.ts); invariantes nuevos de dpr y padrón de Zod; src/lib/integrations/pagespeed.ts (unknown con guards); los any restantes de src.",
+   "archivos_no": "src/components/3d/HeroArtifact.tsx; las reglas del lint completo que no están en cero; el invariante de navegación (va con «Navegación de los portales…»).",
+   "zona": "libre (CODEOWNERS de la zona de Franco: Franco)",
+   "tamano": "L",
+   "riesgo": "Medio. Un hook mal escrito bloquea a todos los agentes: probar caso positivo y negativo. CODEOWNERS solo bloquea con «Require review from Code Owners» en main. DEU-090 (CI sin lint) está en este mismo bloque, en «CI que corre de verdad…»: va antes.",
+   "prereqs": [
+    "Aplicar el CLAUDE.md propuesto: raíz de 172 líneas y tres anidados (setter, chatbot, prisma)",
+    "Plataforma: configs tipadas, dependencias reales, Sentry sin duplicados y recursos propios",
+    "CI que corre de verdad: base de test aislada, build, lint y e2e sin efectos",
+    "Canvas 3D según la regla: dpr 1.5, pausa fuera de viewport y sin WebGL no montar"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "`npx eslint -c eslint.gate.config.mjs src` da 0 y corre en ci.yml; el grep de `from 'framer-motion'`, `: any` y `as any` en src da 0; el hook bloquea un Edit sobre un protegido no declarado y un `git add .`, y deja pasar un Edit libre; CODEOWNERS existe; run-invariants descubre los 28 test:* e INVARIANTES_ESPERADOS está al día; el escaneo de secretos corre sin imprimir valores.",
+   "nodos": [
+    "int.pagespeed",
+    "h3.cli-chatbot",
+    "lib.ui",
+    "lib.deps",
+    "int.github-actions",
+    "h2.cli-resultados.velocidad-sitio"
+   ],
+   "worktree": "wt/mecanismos",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Ciclo del Atlas: skill atlas-actualizar, hooks SessionStart/Stop y job de CI",
+   "objetivo": "Que el Atlas de 06-ATLAS acompañe cada sprint que toca src/ o prisma/ sin depender de que alguien se acuerde.",
+   "hallazgos": [],
+   "archivos_tocar": ".claude/skills/atlas-actualizar/SKILL.md (con su excepción en .gitignore); .claude/settings.json (SessionStart, y un Stop que solo actúa ante «## Cierre del sprint»); scripts/auditoria/atlas/generar.mjs (flag --sin-historial y `git ls-files --others --exclude-standard` en modo worktree); .github/workflows/ci.yml (job atlas que avisa sin romper el build); scripts/auditoria/ llevado a main.",
+   "archivos_no": "atlas.curado.json, zonas.json, funcionalidades.json y entradas.json (datos de personas).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. El Stop solo actúa ante el encabezado de cierre. Requiere scripts/auditoria en main.",
+   "prereqs": [
+    "De prosa a mecanismo: eslint.gate en CI, hooks PreToolUse, CODEOWNERS e invariantes de convención"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Correr la skill después de un cambio en src/ deja atlas.json al día y `node scripts/auditoria/atlas/validar-atlas.mjs` pasa; una corrida de sprint no agrega líneas a historial.jsonl; un archivo nuevo sin git add aparece en el Atlas; el job atlas corre en CI y avisa sin fallar.",
+   "nodos": [],
+   "worktree": "wt/mecanismos",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Decisiones de diseño del portal antes de cualquier token (§4 de 04-DISENO)",
+   "objetivo": "Que Valentino responda las 8 preguntas de §4 de 04-DISENO, sin trasladar al portal las decisiones del home, para que la capa de roles tenga valores.",
+   "hallazgos": [
+    "DIS-004"
+   ],
+   "archivos_tocar": "DISENO.md y DECISIONES.md de los docs consolidados. Las 8 preguntas: base y dark mode, CTA, set de acentos, a qué se ata el acento, tipografía (y si Chivo llega al portal con el merge), escala, motion y glass. Si se acota Chivo al home, también rediseno/home (v3:src/app/globals.css:15-17) antes del merge.",
+   "archivos_no": "src/components/ui/*; el globals.css de main.",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Alto si se saltea: asumir las decisiones del home repite el error que F3 prohíbe, y el merge de rediseno/home cambia la familia del portal a Chivo como efecto lateral.",
+   "prereqs": [],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Las 8 preguntas tienen respuesta con fecha en DECISIONES; queda una línea explícita sobre Chivo en el portal, escrita antes del merge; las respuestas fijan el valor de cada rol que pide la capa.",
+   "nodos": [
+    "lib.ui",
+    "rama.rediseno-home"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Banco visual del kit con auth y contraste por token",
+   "objetivo": "Tener dónde ver el kit ui/* y los wrappers bajo cada tema y medir el contraste de cada token antes del primer cambio de piel.",
+   "hallazgos": [
+    "DIS-006"
+   ],
+   "archivos_tocar": "Ruta nueva con auth SUPER_ADMIN dentro de src/app/(protected)/admin/: renderiza las primitivas de ui/* y los wrappers del portal bajo cada tema, con la razón de contraste de cada par texto/fondo; src/app/styleguide/page.tsx detrás de auth o borrada.",
+   "archivos_no": "src/components/ui/* (se renderiza, no se edita).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. Hoy /styleguide es pública (noindex) y no renderiza ui/*.",
+   "prereqs": [],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "La página muestra las 22 primitivas con variantes y estados vacío, carga y error, con la razón de contraste de cada par; sin sesión SUPER_ADMIN redirige; /styleguide ya no es pública; visual-qa desktop+mobile.",
+   "nodos": [
+    "lib.ui"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Capa de roles del portal y puente de paleta, con foco visible de dos tonos",
+   "objetivo": "Re-tematizar los portales sin editar ui/*: roles semánticos en @theme static, un puente que redefine las variables de Tailwind dentro del scope del portal y un foco que pasa 3:1 sobre la base.",
+   "hallazgos": [
+    "DIS-001",
+    "DIS-005"
+   ],
+   "archivos_tocar": "src/app/portal-theme.css nuevo, importado desde globals.css después de tailwindcss: @theme static con prefijo propio (canvas, panel, fg, fg-muted, rule, control-stroke, accent, on-accent, success, warning, danger, info, foco, radios y sombras), scopes [data-portal-theme] sin @layer y un puente que redefine --color-white/black, zinc y cyan, los estados, --radius-lg…3xl, --shadow-lg/2xl y --blur-xl/2xl; src/components/portal/PortalThemeScope.tsx (atributo en <html>, limpiado al desmontar), montado en AdminLayoutClient.tsx, DashboardLayoutClient.tsx y setter-shell.tsx (con Franco); regla :focus-visible única de dos tonos; src/lib/utils.ts solo si se registran tamaños --text-* nuevos (con test:s7-cn).",
+   "archivos_no": "src/components/ui/*; src/hooks/useThemeObserver.tsx (no repetir su patrón); el sitio público.",
+   "zona": "libre (setter-shell.tsx: ZONA-FRANCO; utils.ts: requiere decisión FROZEN)",
+   "tamano": "L",
+   "riesgo": "Alto. El puente no es semántico: zinc-950 es superficie y texto sobre acento, así que un tema claro rompe el contraste si no se edita el kit. Modal y Select portalean a body: el atributo va en <html>. `@theme` a secas poda tokens y `@theme inline` no deja llegar el override.",
+   "prereqs": [
+    "Decisiones de diseño del portal antes de cualquier token (§4 de 04-DISENO)",
+    "Banco visual del kit con auth y contraste por token"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "En el banco, bajo cada tema, todos los pares texto/fondo del kit pasan AA y el foco da 3:1 contra la base; volver del portal al sitio público no deja el atributo ni las variables (visual-qa del home después de /dashboard); el kit se re-tiñe sin diff en src/components/ui; tsc y check:invariants en verde.",
+   "nodos": [
+    "lib.ui",
+    "h4.adm-shell",
+    "h2.cli-shell",
+    "h5.set-dia"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Shells de los tres portales con roles y Toaster condicionado",
+   "objetivo": "Que lienzo, velo, vidrio, radio y pie de los shells de admin, dashboard y setter lean roles en vez de literales, y que el Toaster tome el tema del portal sin cambiar el sitio público.",
+   "hallazgos": [
+    "DIS-002",
+    "DIS-009"
+   ],
+   "archivos_tocar": "admin/_components/AdminLayoutClient.tsx (:30-41, :46, :97, :104), admin-sidebar.tsx y admin-topbar.tsx; components/dashboard/DashboardLayoutClient.tsx (:51-62, :109, :124-127, :171, :179); con Franco, setter/_components/setter-shell.tsx (:28, :35, :69) y setter/layout.tsx (:44-75); src/app/layout.tsx:125-134 (Toaster que lee los roles dentro del scope, o uno por shell).",
+   "archivos_no": "src/components/ui/*; el aspecto del Toaster del sitio público.",
+   "zona": "libre (setter: ZONA-FRANCO)",
+   "tamano": "M",
+   "riesgo": "Medio: el Toaster es global. El pie text-zinc-700 sobre #080a0c (≈1,9:1) tiene que subir a AA.",
+   "prereqs": [
+    "Capa de roles del portal y puente de paleta, con foco visible de dos tonos"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "En los tres shells el grep de bg-[#080a0c], rgba( y rounded-[28px] da 0; los pies dan 4,5:1 medido; un toast en el sitio público se ve igual que antes y en el portal toma el tema; visual-qa desktop+mobile de /admin, /dashboard y /setter.",
+   "nodos": [
+    "h4.adm-shell",
+    "h2.cli-shell",
+    "h5.set-dia",
+    "lib.ui"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Higiene de UI del portal del cliente: acentos, strokeWidth, inline, copy sin terminar y módulos DEPRECATED",
+   "objetivo": "Que el portal del cliente cumpla las convenciones de CLAUDE.md, no muestre copy sin terminar, no esconda un módulo DEPRECATED activo y que Agenda copie el link en vez de descargarlo.",
+   "hallazgos": [
+    "DEU-028",
+    "UX-012",
+    "BUG-043",
+    "UX-008"
+   ],
+   "archivos_tocar": "dashboard/services/page.tsx (SERVICE_TYPE_CONFIG con #10b981, #f59e0b y #8b5cf6; DEPRECATED si la org lo tiene ACTIVE o PAUSED; longDescription en el modal); src/lib/modules/showroom.ts; components/dashboard/PremiumModuleCard.tsx («Consultar»); ResultadosTabs.tsx (tilde de Tráfico); bienvenida/_components/Step3Tour.tsx; email-marketing/campaigns/new/page.tsx; agenda-inteligente/page.tsx (copiar con clipboard y aria-label; grid-cols-1 sm:grid-cols-3; <Link>); motor-resenas/_components/ReviewItem.tsx; cuenta/facturacion/page.tsx (clases Tailwind en vez de inline; strokeWidth={1.5}).",
+   "archivos_no": "src/components/ui/*; globals.css.",
+   "zona": "libre (Valentino confirma si un módulo DEPRECATED activo se muestra)",
+   "tamano": "S",
+   "riesgo": "Bajo. Suma UX-008 desde la tarjeta de CTAs: mismo archivo de Agenda y es higiene de UI, no navegación.",
+   "prereqs": [],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "En esos archivos el grep de Lucide sin strokeWidth={1.5} y de style={{ da 0; el detalle de un módulo muestra su longDescription y no PLACEHOLDER; una org con un módulo DEPRECATED activo lo ve en «Tus módulos»; «Copiar link» de Agenda copia al portapapeles y tiene aria-label; visual-qa de Servicios, Facturación y Agenda (mobile).",
+   "nodos": [
+    "h2.cli-servicios.vitrina-modulos",
+    "h2.cli-servicios.servicios-contratados",
+    "h2.cli-resultados",
+    "lib.ui",
+    "h2.cli-email-mkt",
+    "modelo.PremiumModule",
+    "modelo.OrganizationModule",
+    "h2.cli-agenda.panel-de-agenda"
+   ],
+   "worktree": "wt/portal-cliente",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Higiene de UI del admin: 180 detalles (tildes, copy, strokeWidth, contraste, inline)",
+   "objetivo": "Pasar la checklist de higiene de D3 sobre el admin, archivo por archivo.",
+   "hallazgos": [
+    "DEU-069"
+   ],
+   "archivos_tocar": "Los archivos de la lista de DEU-069 en 03-MEJORAS (admin-sidebar.tsx, AdminLayoutClient.tsx, admin-topbar.tsx, AdminBackButton.tsx, AdminErrorBoundary.tsx, admin/error.tsx y el resto de src/app/(protected)/admin/**), de a uno.",
+   "archivos_no": "admin/leados/** y fg2-lab (su higiene es DEU-089, de Franco); src/components/ui/*.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Bajo. Va antes de migrar el admin al tema.",
+   "prereqs": [],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Las 180 entradas de la checklist de DEU-069 están tachadas o anotadas; fuera de leados el grep de Lucide sin strokeWidth={1.5} en el admin da 0; visual-qa desktop+mobile de 5 rutas del admin sin ❌.",
+   "nodos": [
+    "h4.adm-shell",
+    "h4.adm-alertas",
+    "h4.adm-audit"
+   ],
+   "worktree": "wt/admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Higiene de UI de integraciones, plataforma y kit compartido (D7, D8, D9)",
+   "objetivo": "Pasar las checklists de higiene de D7 (15), D8 (17) y D9 (44) en los archivos libres.",
+   "hallazgos": [
+    "DEU-073",
+    "DEU-096",
+    "DEU-103"
+   ],
+   "archivos_tocar": "Las listas de DEU-073 (Footer.tsx, src/emails/ActionRequiredEmail.tsx y TicketReplyEmail.tsx, templates/welcome-client.ts y weekly-report.ts, api/email/optout/[contactId]/route.ts), DEU-096 (src/app/error.tsx, global-error.tsx, not-found.tsx, layout.tsx, globals.css) y DEU-103 (Navbar.tsx, brand/BrandMark.tsx, VersionBadge.tsx, canvas/DotMatrix.tsx y el resto), de a un archivo.",
+   "archivos_no": "Las 25 entradas de DEU-103 en src/components/ui/* (van con el kit protegido); scripts/seed-matsu.ts si la poda de scripts lo borró.",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Bajo.",
+   "prereqs": [],
+   "nivel_proceso": "S",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
+   "ultracode": "OFF",
+   "criterio": "Las entradas libres de las tres checklists están tachadas o anotadas; los 28 casos de contraste dan ≥ 4,5:1 en texto o 3:1 en UI, medido; visual-qa de la 404, del pie y de un email renderizado.",
+   "nodos": [
+    "h6.vis-contacto",
+    "int.email",
+    "h6.vis-optout",
+    "lib.plataforma.app-raiz",
+    "lib.sitio-publico",
+    "lib.scripts",
+    "lib.ui"
+   ],
+   "worktree": "wt/sitio-publico",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Migrar auth y widget al tema del portal",
+   "objetivo": "Llevar al tema decidido las 7 pantallas de mayor puntaje de §5 (impacto 3, esfuerzo S): las 6 de auth y el widget embebido.",
+   "hallazgos": [],
+   "archivos_tocar": "src/app/{login,reset-password,accept-invite,cambiar-password,forgot-password,bienvenida}/**; src/app/embed/[slug]/** con chatbot/components/embed/ChatbotEmbed.tsx y chat/ChatWindow.tsx (o el ChatShell) (clases de paleta → roles; wrappers en src/components/portal/* donde el puente no alcanza).",
+   "archivos_no": "src/components/ui/*; public/widget.js salvo lo visual del launcher.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio: el widget vive en sitios de clientes y su tema respeta el accent del tenant. Con AuthShell y ChatShell hechos antes, cada pantalla se migra una sola vez.",
+   "prereqs": [
+    "Shells de los tres portales con roles y Toaster condicionado",
+    "Páginas de auth: AuthShell compartido y login partido",
+    "Un solo ChatShell para los tres paneles de chat, accesible por teclado"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "El censo de diseño (scripts/auditoria/censo-diseno.mjs) de esas 7 pantallas baja a ~0 en paleta y literales fuera de los permitidos; visual-qa desktop+mobile de cada una bajo el tema decidido; contraste AA en el banco.",
+   "nodos": [
+    "h1.auth-login",
+    "h1.auth-recupero",
+    "h1.auth-invite",
+    "h1.auth-cambio",
+    "h2.cli-bienvenida",
+    "h3.vis-widget-cliente"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Migrar el portal del cliente al tema",
+   "objetivo": "Pasar las 32 pantallas del portal (~2.300 referencias de paleta) de clases de paleta a roles, pantalla por pantalla, en el orden de §5.",
+   "hallazgos": [],
+   "archivos_tocar": "src/app/(protected)/dashboard/**, src/components/dashboard/** y chatbot/components/{dashboard,dashboards,installation}/**. Primero las de puntaje 1,5 (cuenta, resultados, email-marketing, chatbot/knowledge…) y después las L (contactos, agenda, mensajes, tienda, chatbot).",
+   "archivos_no": "src/components/ui/*; src/lib/email/templates/* (en un email el literal es obligatorio).",
+   "zona": "libre",
+   "tamano": "L",
+   "riesgo": "Alto por volumen: durante la transición conviven pantallas con rol y con paleta; sin el banco cada remapeo es una regresión a ciegas.",
+   "prereqs": [
+    "Shells de los tres portales con roles y Toaster condicionado",
+    "Higiene de UI del portal del cliente: acentos, strokeWidth, inline, copy sin terminar y módulos DEPRECATED"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "ON",
+   "criterio": "El censo de diseño del portal muestra paleta y literales cerca de 0 fuera de los permitidos; cada pantalla migrada tiene su visual-qa desktop+mobile sin ❌; tsc y check:invariants en verde.",
+   "nodos": [
+    "h2.cli-shell",
+    "h2.cli-inicio",
+    "h2.cli-resultados",
+    "h2.cli-cuenta",
+    "h2.cli-email-mkt",
+    "h3.cli-chatbot"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Migrar el admin y el admin de chatbots al tema",
+   "objetivo": "Pasar las pantallas del admin y del admin de chatbots (~4.300 referencias) de clases de paleta a roles, en el orden de §5.",
+   "hallazgos": [],
+   "archivos_tocar": "src/app/(protected)/admin/** fuera de leados y fg2-lab; src/components/admin/**; src/modules/chatbot/components/admin/**.",
+   "archivos_no": "admin/leados/** y fg2-lab/** (ZONA-FRANCO); src/components/ui/*.",
+   "zona": "libre",
+   "tamano": "L",
+   "riesgo": "Alto por volumen: 191 tsx en el admin y 96 en el módulo chatbot.",
+   "prereqs": [
+    "Shells de los tres portales con roles y Toaster condicionado",
+    "Higiene de UI del admin: 180 detalles (tildes, copy, strokeWidth, contraste, inline)",
+    "Shell del admin: topbar en español, menú mobile usable, diálogos accesibles y loading propios"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "ON",
+   "criterio": "El censo de diseño del admin baja a cerca de 0 fuera de los permitidos; cada pantalla migrada tiene su visual-qa desktop+mobile; tsc y check:invariants en verde.",
+   "nodos": [
+    "h4.adm-shell",
+    "h4.adm-clientes",
+    "h3.adm-chatbots",
+    "h4.adm-alertas",
+    "h4.adm-proyectos"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Migrar el setter al tema",
+   "objetivo": "Llevar el panel del setter y la revisión de demos al tema del portal, con visual-qa por pantalla.",
+   "hallazgos": [],
+   "archivos_tocar": "src/app/(protected)/setter/**, admin/leados/** y admin/fg2-lab/** (si FG-2 sigue).",
+   "archivos_no": "src/lib/leados/** (lógica); src/components/ui/*.",
+   "zona": "ZONA-FRANCO",
+   "tamano": "L",
+   "riesgo": "Medio: 81 tsx y 928 referencias. Franco decide el lenguaje visual del setter mirando.",
+   "prereqs": [
+    "Shells de los tres portales con roles y Toaster condicionado",
+    "Setter: lienzo propio del portal y navegación clasificada",
+    "Higiene de UI del setter (D4: 97 detalles)"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "El censo de diseño del setter baja a cerca de 0 fuera de los permitidos; visual-qa desktop+mobile de las 6 pantallas del setter y de la revisión de demos; test:setter en verde; Franco aprobó.",
+   "nodos": [
+    "h5.set-dia",
+    "h5.set-lead",
+    "h5.set-manual",
+    "h5.set-nuevo",
+    "h5.adm-revision-demos"
+   ],
+   "worktree": "wt/franco-leados",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Kit semántico: migrar ui/* a roles (lo que el puente no alcanza)",
+   "objetivo": "Si Valentino descongela el kit, migrar sus internos de clases de paleta a roles para que el tema claro y oscuro sea solo CSS y no dependa del puente.",
+   "hallazgos": [],
+   "archivos_tocar": "src/components/ui/* (~25 archivos, 377 referencias): on-accent separado de superficie (Button.tsx:36, Badge.tsx, Tabs.tsx:80 frente a Modal.tsx:47, Card.tsx:32 y Toggle.tsx:40); el CTA primario que se decida; radios por tipo (skeletons rounded-[28px] y [26px], Card y Button); el glow cian literal (Card.tsx:31, :57); backdrop-blur sin sufijo y [20px]; className o surface en Modal y Toggle y slots en Select y Tabs; escala micro como tokens; el gradiente de PageHeader.",
+   "archivos_no": "Los componentes del intro y del home clásico dentro de ui/.",
+   "zona": "requiere decisión FROZEN",
+   "tamano": "L",
+   "riesgo": "Alto: 344 dependientes. Cada cambio de API es aditivo con default idéntico o migra todos los call sites en el mismo commit.",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar",
+    "Capa de roles del portal y puente de paleta, con foco visible de dos tonos"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "El kit de portal queda casi sin clases de paleta (solo roles); el banco pasa AA bajo cada tema aun sin el puente; commits con prefijo ui/; visual-qa de una pantalla por dominio consumidor.",
+   "nodos": [
+    "lib.ui"
+   ],
+   "worktree": "wt/diseno-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Peso del widget y del layout raíz",
+   "objetivo": "Que el widget público no cargue el barrel completo del chatbot y que el iframe /embed no cargue el chrome de marketing.",
+   "hallazgos": [
+    "PERF-007",
+    "PERF-016"
+   ],
+   "archivos_tocar": "src/components/layout/ChatWidgetMount.tsx (import directo de LogicCompanion); src/modules/chatbot/index.ts (partido por superficie, sobre el recorte de la poda); src/app/layout.tsx y un route group del sitio de marketing con su layout (decisión de Valentino: reordena PreloaderProvider y TransitionProvider); @next/bundle-analyzer detrás de ANALYZE para medir.",
+   "archivos_no": "src/context/TransitionContext.tsx y PreloaderContext.tsx (no romper el flujo de fases); src/components/3d/HeroArtifact.tsx.",
+   "zona": "requiere decisión FROZEN (providers del layout raíz)",
+   "tamano": "L",
+   "riesgo": "Alto: mover providers rompe la coreografía del home; se hace después del merge de rediseno/home, sobre el resultado.",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar",
+    "Poda del módulo chatbot: barrels, componentes y server code sin uso",
+    "Un solo ChatShell para los tres paneles de chat, accesible por teclado",
+    "Después del merge de rediseno/home: borrar el home clásico, HeroArtifact y las ramas v3 dormidas"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "VH-071 y VH-162: el bundle del widget y el de /embed bajan (bundle-analyzer, antes y después en el PR) y /embed no carga Navbar, Dock, Shutter, Preloader ni Lenis; visual-qa desktop+mobile del home sin ❌.",
+   "nodos": [
+    "h3.vis-widget-develop",
+    "lib.chatbot.barrel",
+    "h3.vis-widget-cliente",
+    "h2.cli-shell",
+    "lib.ui"
+   ],
+   "worktree": "wt/post-merge-home",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Después del merge de rediseno/home: borrar el home clásico, HeroArtifact y las ramas v3 dormidas",
+   "objetivo": "Cuando /v3 reemplace a /, sacar la cadena del hero viejo, las secciones y landings sin consumidor y las ramas dormidas, y reducir PreloaderContext a un provider mínimo.",
+   "hallazgos": [
+    "PERF-022",
+    "POD-348",
+    "POD-386",
+    "POD-006",
+    "POD-007",
+    "POD-008",
+    "POD-009",
+    "POD-010",
+    "POD-011",
+    "POD-012",
+    "POD-020",
+    "POD-021",
+    "POD-022",
+    "POD-024",
+    "POD-025",
+    "POD-026",
+    "POD-027",
+    "POD-028",
+    "POD-029",
+    "POD-030",
+    "POD-031",
+    "POD-032",
+    "POD-033",
+    "POD-034",
+    "POD-035",
+    "POD-036",
+    "POD-037",
+    "POD-038",
+    "POD-039",
+    "POD-040",
+    "POD-041",
+    "POD-042",
+    "POD-043",
+    "POD-044",
+    "POD-055",
+    "POD-056",
+    "POD-057",
+    "POD-261",
+    "POD-262",
+    "POD-263",
+    "POD-264",
+    "POD-265",
+    "POD-267",
+    "POD-268",
+    "POD-269",
+    "POD-270",
+    "POD-271",
+    "POD-272",
+    "POD-273",
+    "POD-274",
+    "POD-275",
+    "POD-276",
+    "POD-277",
+    "POD-278",
+    "POD-279",
+    "POD-280",
+    "POD-281"
+   ],
+   "archivos_tocar": "src/components/3d/HeroArtifact.tsx y su cadena (Hero.tsx, HeroCanvas, HeroArtifactLayer, HeroLogoSlot, BrandedLogoWhite.tsx); los 31 archivos ALTA de src/components/{automation,canvas,ia,sections,software,layout} y los 3 BAJA (SectionShell, CalculadorIA, PortfolioWebCases) tras verificarlos; src/context/PreloaderContext.tsx (isDone, setPhase('done') y el flag de automatización a lib/); src/lib/chromeReveal.ts (según sus consumidores); admin/clients/_components/HoverScaleCard.tsx (unificar); contrato.ts:237-239 (huella); las ramas rediseno/* y v3/* dormidas (tag y borrado, a mano por Valentino).",
+   "archivos_no": "src/components/ui/buttons/MagneticCta.tsx (POD-386: el hero nuevo la necesita); src/context/TransitionContext.tsx; src/lib/utils.ts salvo lo que traiga la rama con test:s7-cn.",
+   "zona": "requiere decisión FROZEN",
+   "tamano": "L",
+   "riesgo": "Alto. Borrar el hero viejo antes de que /v3 reemplace a / deja la home sin hero. HeroArtifact es la única prohibición con razón escrita (AGENTS.md:76).",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar",
+    "Antes del merge de rediseno/home: la huella del layout sin auth.ts, schema ni prisma"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "ON",
+   "criterio": "/ sirve la home v3; el grep de HeroArtifact, HeroArtifactLayer y de los 31 archivos da 0; tsc, check:invariants, test:s8-diferido (huella actualizada en el mismo commit) y test:s7-cn (registrado como check:invariant:cn) en verde; e2e 01-landing y visual-qa de /, de una landing con MarketingIntro y de /dashboard; las 20 ramas dormidas tienen tag de archivo y no están en origin.",
+   "nodos": [
+    "lib.sitio-publico",
+    "lib.context",
+    "lib.chromereveal",
+    "lib.utils",
+    "rama.rediseno-home",
+    "rama.rediseno-chrome",
+    "rama.rediseno-cimientos",
+    "rama.rediseno-motion",
+    "rama.rediseno-secciones-a",
+    "rama.rediseno-secciones-b",
+    "rama.v3-escena",
+    "rama.v3-luz",
+    "lib.raiz-repo.node-modules-react-three-fiber-dist-events-b389eeca-esm"
+   ],
+   "worktree": "wt/post-merge-home",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Sitio público: CTA del hero, menú mobile accesible y animaciones que respetan reducir movimiento",
+   "objetivo": "Que lo que sobreviva del sitio público tras el merge tenga CTAs con destino, menú mobile accesible, video liviano, intro que no bloquee el scroll y titular que respete reducir movimiento.",
+   "hallazgos": [
+    "A11Y-035",
+    "BUG-179",
+    "PERF-020",
+    "PERF-021",
+    "A11Y-038"
+   ],
+   "archivos_tocar": "Lo que sobreviva al merge de: src/components/layout/Hero.tsx (href a /contact o getWhatsappHref() y triggerTransition al portfolio) o el hero nuevo; src/components/layout/Navbar.tsx (aria-label que alterne, aria-expanded, aria-controls; hoja como diálogo con Escape y foco); sections/web-development/WebDevelopmentSensory.tsx (preload none, poster, carga en viewport; video recodificado < 1,5 MB); con decisión de Valentino, ui/MagneticCta.tsx (href u onClick obligatorio), VideoCard.tsx, MarketingIntro.tsx, Preloader.tsx y TypewriterText.tsx.",
+   "archivos_no": "src/components/3d/HeroArtifact.tsx; src/context/PreloaderContext.tsx (no romper el flujo de fases); src/context/TransitionContext.tsx.",
+   "zona": "requiere decisión FROZEN (src/components/ui/*)",
+   "tamano": "M",
+   "riesgo": "Alto: el home se reemplaza con rediseno/home; si Hero.tsx o TypewriterText se borran en el post-merge, BUG-179 y A11Y-038 se cierran verificando el hero nuevo.",
+   "prereqs": [
+    "Política de niveles: «congelado» pasa a protegido, libre o borrar",
+    "Después del merge de rediseno/home: borrar el home clásico, HeroArtifact y las ramas v3 dormidas"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "VH-167: los CTA del hero llevan a contacto y al portfolio; VH-170: el scroll no queda bloqueado más que el trazo del intro; VH-171: con 'reducir movimiento' el titular es estático; /web-development no descarga el video antes de que entre en viewport (network); el menú mobile se abre con Enter, cierra con Escape y anuncia aria-expanded (axe sin violaciones).",
+   "nodos": [
+    "h6",
+    "h6.vis-contacto",
+    "h1.auth-login",
+    "lib.ui"
+   ],
+   "worktree": "wt/sitio-publico",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Sitio público: SmoothScroll sin loops, scroll-lock con red, precios y WhatsApp de una sola fuente",
+   "objetivo": "Cerrar los defectos del chrome público que sobreviven al rediseño: loops de rAF, una home que puede quedar sin scroll y datos duplicados.",
+   "hallazgos": [
+    "PERF-019",
+    "BUG-178",
+    "DEU-097",
+    "BUG-144",
+    "PERF-013"
+   ],
+   "archivos_tocar": "src/components/layout/SmoothScroll.tsx (cancelar el rAF en el cleanup, o autoRaf: true); EarlyScrollLock.tsx (setTimeout de seguridad con MARKETING_SCROLL_SAFETY_MS); Navbar.tsx y sections/home/OurServices.tsx (precios desde un módulo de datos con la moneda explícita); sections/home/Footer.tsx (strokeDashoffset con getTotalLength y opacidad en vez de blur).",
+   "archivos_no": "src/components/3d/HeroArtifact.tsx; src/context/*; el número de WhatsApp del pie (BUG-144 lo cierra BUG-180 en «Contactos, SLA y promesas…»: acá solo se verifica).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Medio: verificar qué sobrevive al merge antes de invertir (EarlyScrollLock y Footer podrían irse). BUG-175 (Lenis en el setter, Próximo) toca SmoothScroll antes.",
+   "prereqs": [
+    "Lenis solo en el sitio público y respetando reducir movimiento",
+    "Contactos, SLA y promesas de develOP desde una sola fuente",
+    "Después del merge de rediseno/home: borrar el home clásico, HeroArtifact y las ramas v3 dormidas"
+   ],
+   "nivel_proceso": "S",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
+   "ultracode": "OFF",
+   "criterio": "Tras 10 navegaciones públicas queda un solo loop de rAF de Lenis (performance trace); si el Hero no llega a 'done' el scroll se libera solo; el grep de precios literales en Navbar da 0; el pie usa lib/whatsapp.ts; visual-qa del pie desktop y mobile.",
+   "nodos": [
+    "h6",
+    "lib.smooth-scroll",
+    "h6.vis-contacto.formulario-pie-home",
+    "h6.vis-contacto",
+    "lib.ui"
+   ],
+   "worktree": "wt/sitio-publico",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "Prisma 7 como sprint propio",
+   "objetivo": "Planificar y ejecutar el salto de Prisma 6.19 a 7.x una vez cerrado el estado de las migraciones de producción.",
+   "hallazgos": [
+    "TEC-001"
+   ],
+   "archivos_tocar": "package.json; prisma/schema.prisma (generator y datasource); prisma.config.ts (datasource con directUrl); prisma/seed-guard.ts y los seeds y scripts que cargan .env (carga explícita).",
+   "archivos_no": "Las migraciones aplicadas.",
+   "zona": "requiere decisión FROZEN",
+   "tamano": "L",
+   "riesgo": "Alto: cambia el generador y la carga de entorno de seeds y scripts; con las migraciones de producción sin cerrar puede dejar drift.",
+   "prereqs": [
+    "Migración aditiva agrupada del schema: índices, Decimal, enums y columnas pendientes",
+    "Build y stack: memoria medida y plan de upgrades por etapas"
+   ],
+   "nivel_proceso": "L",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Prisma 7.x instalado; npx prisma generate, tsc, check:invariants, test:integration y test:p2002 en verde contra la base de test; los seeds corren con el entorno explícito; migrate status sin drift.",
+   "nodos": [
+    "lib.prisma",
+    "lib.seeds",
+    "lib.migraciones"
+   ],
+   "worktree": "wt/protegidos-schema",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-001 (resto): el dueño contesta desde Análisis las preguntas que el bot no supo",
+   "objetivo": "Que el dueño pueda responder los huecos de la KB (KB_GAP) desde Análisis y que esa respuesta llegue a develOP para cargarla.",
+   "hallazgos": [
+    "IDEA-001",
+    "POD-332"
+   ],
+   "archivos_tocar": "src/components/dashboard/results/analysis/DiscoveriesSection.tsx (para KB_GAP, «Tu respuesta» además de los botones que pone BUG-023); src/modules/chatbot/server/insights/manageInsight.ts (safeParse; revalida /dashboard/resultados/analisis); src/lib/data/message-context.ts (context 'kb').",
+   "archivos_no": "generateInsights.ts y el cron; los botones Aplicar/Descartar y el link del email (BUG-023, «Avisos del chatbot al cliente…»); la KB del cliente (la carga develOP con saveKnowledgeBaseByOrgSlug).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Medio. El dueño puede contestar precios o promesas que el bot repetiría: la respuesta pasa por develOP y por forbiddenStatements. Se recortó a lo que BUG-023 no cubre.",
+   "prereqs": [
+    "Avisos del chatbot al cliente: cupo, reporte semanal con baja e insights accionables",
+    "Cron de insights: costo visible y procesamiento por lotes"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Una respuesta a un KB_GAP llega a develOP como mensaje con context 'kb' y saca el descubrimiento de pendientes; un payload inválido a manageInsight se rechaza; visual-qa de Análisis.",
+   "nodos": [
+    "lib.chatbot.insights",
+    "int.cron.generate-insights",
+    "h2.cli-resultados",
+    "lib.prisma"
+   ],
+   "worktree": "wt/ideas-chatbot",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-002 (resto): el cruce del 80 % de la cuota también avisa a develOP y aparece en Atención hoy",
+   "objetivo": "Que develOP se entere cuando un cliente cruza el 80 % del cupo y que el dueño lo vea en Atención hoy, además del email que manda FAL-019.",
+   "hallazgos": [
+    "IDEA-002"
+   ],
+   "archivos_tocar": "src/modules/chatbot/server/quota/ (aviso a develOP por sendAgencyAlert al cruzar el 80 %, sobre el mismo marcador idempotente alert80Sent que usa FAL-019); src/lib/dashboard/attention.ts (ítem de cuota con link a /dashboard/plan).",
+   "archivos_no": "prisma/schema.prisma (alert80Sent ya existe); el email al dueño al 80 % y al degradar (FAL-019, Próximo).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Bajo. Corre en el camino caliente del chat: el aviso nunca puede romper el stream. Se recortó: el email al dueño ya lo cubre FAL-019.",
+   "prereqs": [
+    "Avisos del chatbot al cliente: cupo, reporte semanal con baja e insights accionables"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Al cruzar el 80 % sale un solo aviso a develOP por mes (test del accessor idempotente); Atención hoy muestra el ítem de cuota; un fallo del webhook no corta el turno.",
+   "nodos": [
+    "lib.chatbot.quota",
+    "lib.isolation",
+    "lib.chatbot.chat",
+    "lib.chatbot.notifications",
+    "h2.cli-inicio"
+   ],
+   "worktree": "wt/ideas-chatbot",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-003: lo que Google te trajo (llamadas, «cómo llegar» y clics), con el error distinto de «no conectado»",
+   "objetivo": "Cablear la Performance API de GBP en la tarjeta que hoy está stubbeada en 0.",
+   "hallazgos": [
+    "IDEA-003",
+    "UX-015"
+   ],
+   "archivos_tocar": "src/lib/integrations/google-business-profile.ts (fetchMultiDailyMetricsTimeSeries con CALL_CLICKS, WEBSITE_CLICKS, BUSINESS_DIRECTION_REQUESTS e impresiones, 30 días con corrimiento, Promise.allSettled y parseo puro con invariante); components/dashboard/results/GBPMetricsCard.tsx (período rotulado; sin FIXME); dashboard/resultados/reputacion/page.tsx (un error no se muestra como «pendiente de conexión»).",
+   "archivos_no": "El flujo OAuth de GBP (su UI es FAL-011).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Medio: verificar que la Performance API esté habilitada en el proyecto de Google; la cuenta de Google por org la decide la tarjeta de Ahora.",
+   "prereqs": [
+    "Motor de reseñas: responder solo en la sucursal de la org y decidir la cuenta de Google de cada org",
+    "Integraciones: distinguir error de vacío, reportar a Sentry y no cachear fallas"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Con una org conectada la tarjeta muestra llamadas, cómo llegar y clics del período rotulado; un fallo de Performance no tumba las reseñas; un error de la API se ve como error; el invariante del parseo corre en check:invariants.",
+   "nodos": [
+    "int.gbp",
+    "h2.cli-resultados"
+   ],
+   "worktree": "wt/ideas-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-004: «Pedile la reseña» al marcar Vendido",
+   "objetivo": "Que, al cerrar una venta, el dueño mande en un toque el link de reseña de Google por WhatsApp o email.",
+   "hallazgos": [
+    "IDEA-004"
+   ],
+   "archivos_tocar": "Helper puro del link (URL de AskReviewSection más teléfono normalizado con 549) con su invariante; src/modules/chatbot/components/dashboard/LeadStatusActions.tsx o LeadDetail.tsx (acción con wa.me y mailto); opcional, un ChatbotEvent 'review.requested'.",
+   "archivos_no": "prisma/schema.prisma; el escritor de googleMapsPlaceId (FAL-004, «Ficha del cliente: sección Integraciones…»).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Medio. Política de Google: se pide en todo «Vendido», sin filtrar por satisfacción. Ofrecerlo fuera del Motor de Reseñas puede canibalizarlo (decisión de producto). Se quitó el escritor del placeId: ya lo hace FAL-004.",
+   "prereqs": [
+    "Ficha del cliente: sección Integraciones (Cal.com, GA4, Google Business, Place ID)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Con placeId cargado, al marcar Vendido aparece «Pedile la reseña» con un wa.me válido aunque el teléfono venga sin 549 (invariante); sin placeId no se ofrece.",
+   "nodos": [
+    "h3.cli-chatbot",
+    "lib.chatbot",
+    "lib.prisma"
+   ],
+   "worktree": "wt/ideas-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-005: SLA de soporte, con lo no contestado escalado por Telegram y marcado en la bandeja",
+   "objetivo": "Que develOP vea, y reciba por Telegram, lo que un cliente escribió y nadie contestó a tiempo.",
+   "hallazgos": [
+    "IDEA-005"
+   ],
+   "archivos_tocar": "src/lib/support/sla.ts nuevo (puro; umbrales por prioridad en horario hábil, leídos de la fuente única de SLA) con su invariante; src/app/api/cron/support-sla/route.ts (CRON_SECRET); netlify/functions/support-sla-cron.ts y su entrada en netlify.toml; badge «vencido» en admin/tickets y admin/messages; un digest de Telegram por corrida, marcado con una clave en RateLimit.",
+   "archivos_no": "vercel.json.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio: si no respeta horario hábil y feriados hace ruido; no duplicar el aviso inmediato. UX-009 (Próximo) unifica los SLA prometidos: los umbrales salen de ahí.",
+   "prereqs": [
+    "Mensajes y tickets: paginación, leído fuera del render, orgs archivadas y orden por actividad",
+    "Contactos, SLA y promesas de develOP desde una sola fuente",
+    "Crons con disparador real en Netlify (y que solo los invoque el scheduler)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "El invariante de sla.ts cubre fin de semana y prioridades; corrido dos veces en la misma hora el cron manda un solo digest; la bandeja marca los vencidos; netlify.toml registra la función.",
+   "nodos": [
+    "lib.componentes-dashboard",
+    "h2.cli-soporte",
+    "h2.cli-mensajes",
+    "lib.health-score",
+    "int.telegram"
+   ],
+   "worktree": "wt/ideas-admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-006 + IDEA-009: «Atención hoy» con lo que pasa en el negocio y el pedido de referido en el momento de valor",
+   "objetivo": "Sumar a Atención hoy las reseñas sin responder, los productos por agotarse y el pedido de referido después de las primeras ventas.",
+   "hallazgos": [
+    "IDEA-006",
+    "IDEA-009"
+   ],
+   "archivos_tocar": "src/lib/dashboard/attention.ts (ramas 'review', 'stock' y 'referral'; unión de tipos); components/dashboard/home/AttentionStack.tsx (ICON_MAP); src/lib/referrals/value-moment.ts nuevo (puro) con invariante; marcador «ya ofrecido» en RateLimit (30 días); bloque en src/lib/email/templates/weekly-report.ts.",
+   "archivos_no": "executive-weekly.ts; el tratamiento de stock null de tiendanube.ts (BUG-033, «Integraciones: distinguir error de vacío…»).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio. Con la caché de Tiendanube fría son 4 fetch en serie en el render de Inicio, bajo el techo de 10 s. Se quitó el arreglo de stock null: lo hace BUG-033 antes.",
+   "prereqs": [
+    "Integraciones: distinguir error de vacío, reportar a Sentry y no cachear fallas"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Una org con reseñas sin responder ve el ítem con link a motor-resenas; un producto con stock ilimitado no se marca «por agotarse»; después del primer WON sin tickets abiertos el referido aparece una vez y, al cerrarlo, desaparece 30 días (invariante); una integración caída no tumba el bloque.",
+   "nodos": [
+    "h2.cli-inicio",
+    "int.gbp",
+    "int.tiendanube",
+    "h2.cli-referidos",
+    "lib.chatbot",
+    "lib.chatbot.admin"
+   ],
+   "worktree": "wt/ideas-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-007: contactos sin atender, con recordatorio al dueño y el «Digest diario» que la configuración ya ofrece",
+   "objetivo": "Que el modo DAILY_DIGEST funcione y que un lead sin contactar genere un recordatorio.",
+   "hallazgos": [
+    "IDEA-007"
+   ],
+   "archivos_tocar": "src/app/api/cron/lead-reminders/route.ts; netlify/functions/lead-reminders-cron.ts y netlify.toml; src/lib/client-notifications/notify.ts (rama DAILY_DIGEST); plantilla «siguen esperando»; marca con checkRateLimit; si el digest no salió en 26 h, aviso inmediato; la query que cruza orgs pasa por el helper de aislamiento.",
+   "archivos_no": "vercel.json.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio. Spam si el dueño trabaja el lead por WhatsApp sin tocar «Lo contacté»: un solo recordatorio por lead y respetar DISABLED. El outbox de avisos post-lead (Próximo) toca el mismo camino de notificación antes.",
+   "prereqs": [
+    "Crons con disparador real en Netlify (y que solo los invoque el scheduler)",
+    "Avisos post-lead confiables y acotados: outbox, Telegram escapado y tope del lead caliente"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Una org en DAILY_DIGEST recibe un solo email por día con los leads del día; un lead NEW de más de 24 h genera un solo recordatorio; el invariante de aislamiento cubre la query; netlify.toml registra la función.",
+   "nodos": [
+    "lib.chatbot.notifications",
+    "h3.adm-chatbots",
+    "lib.chatbot.admin",
+    "lib.rate-limit",
+    "lib.prisma"
+   ],
+   "worktree": "wt/ideas-chatbot",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-008 + IDEA-013: «Ideas para crecer» con señales nuevas y el tablero de upsell para develOP",
+   "objetivo": "Sumar señales al motor de recomendaciones y correr sus reglas sobre toda la cartera en una página del admin.",
+   "hallazgos": [
+    "IDEA-008",
+    "IDEA-013"
+   ],
+   "archivos_tocar": "src/lib/recommendations/rules.ts y types.ts (avgResponseMinutes y googleRating; carritos recién después de verificar /checkouts); get-recommendations-for-org.ts; src/lib/recommendations/get-recommendations-for-all-orgs.ts nuevo (en lotes; unstable_cache de 1 h); admin/upsell/page.tsx nueva (org → recomendación → señal → último pedido; cuota agotada como fila aparte; «Escribirle»).",
+   "archivos_no": "admin/leads/page.tsx (página aparte); prisma/schema.prisma.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio. abandonedCarts7d no es confiable (tiendanube.ts:115, :158); no bajar la muestra mínima para el admin; mostrar lo pedido y nunca activado (FAL-005).",
+   "prereqs": [
+    "Plan efectivo: una lectura por request y el estado de la suscripción"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Las reglas nuevas tienen sus casos en el invariante del motor; /admin/upsell carga con 150 orgs sin abrir 150 conexiones a la vez; solo la ve SUPER_ADMIN.",
+   "nodos": [
+    "h2.cli-inicio",
+    "int.gbp",
+    "int.tiendanube",
+    "lib.prisma"
+   ],
+   "worktree": "wt/ideas-admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-010: el bot consulta el catálogo y el stock de Tiendanube",
+   "objetivo": "Que el bot de un cliente con tienda conectada pueda buscar productos y mostrar precio y stock.",
+   "hallazgos": [
+    "IDEA-010"
+   ],
+   "archivos_tocar": "src/modules/chatbot/server/tools/ (tool buscar_producto con unstable_cache corto por org y término); getTools.ts y types.ts; components/tool-cards/ (tarjeta de producto) y renderToolCall.tsx; server/prompts/sections.ts (el stock es orientativo); script puntual para Plan.tools.",
+   "archivos_no": "prisma/seeds/sync-plans.ts (pisa los precios); el stock null de tiendanube.ts (BUG-033).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Alto. La latencia de Tiendanube cae dentro del turno, bajo los 10 s y stepCountIs(3); con el token revocado hoy devuelve null sin avisar (lo arregla BUG-033 antes).",
+   "prereqs": [
+    "Integraciones: distinguir error de vacío, reportar a Sentry y no cachear fallas",
+    "El plan como única fuente de cupo, modelo y funciones de IA"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Con tiendanubeConnectedAt la tool está disponible y sin conexión no; una búsqueda devuelve hasta 5 productos con precio y stock y la tarjeta enlaza a la tienda; un producto con stock null no se informa «sin stock»; el turno con la tool entra en el presupuesto (medido).",
+   "nodos": [
+    "int.tiendanube",
+    "lib.chatbot.tools",
+    "h3.vis-widget-cliente",
+    "lib.chatbot.prompts",
+    "lib.prisma"
+   ],
+   "worktree": "wt/ideas-chatbot",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-011: radar de cartera en riesgo, con sección en el admin y parte diario por Telegram",
+   "objetivo": "Que develOP vea a diario qué clientes están en riesgo, con señales que no den falsos positivos.",
+   "hallazgos": [
+    "IDEA-011"
+   ],
+   "archivos_tocar": "src/lib/admin/cartera-riesgo.ts nuevo (señales por groupBy; regla pura con invariante); sección «En riesgo» en el módulo de KPIs del dashboard del admin; cron diario (netlify/functions y netlify.toml) con un solo digest de Telegram.",
+   "archivos_no": "runPeriodicAgencyAlerts de src/lib/alerts.ts tal como está; detectBotIssues.ts (se usa como señal).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio. Falsos positivos posibles: el login no se registra (FAL-001) y la facturación no tiene escritor (FAL-006).",
+   "prereqs": [
+    "Avisos internos a develOP: logger y alerts.ts libres, envíos con after(), dedupe propio y fallas a Sentry",
+    "Alertas de bots: reconocer silencia, transiciones condicionales, detector sin N+1 y vista mobile",
+    "Crons con disparador real en Netlify (y que solo los invoque el scheduler)",
+    "Dashboard del admin: KPIs en funciones puras, en hora argentina y con la tasa de respuesta por eventos"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Un cliente con el bot vendiendo y sin tickets no figura en riesgo (invariante); el parte de Telegram sale una vez por día; la sección se calcula con un número fijo de queries.",
+   "nodos": [
+    "lib.alerts",
+    "int.cron.alerts",
+    "lib.chatbot.admin",
+    "lib.prisma",
+    "int.telegram",
+    "lib.plataforma.netlify",
+    "h4.adm-dashboard"
+   ],
+   "worktree": "wt/ideas-admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-012: checklist de onboarding operable desde la ficha del cliente, o retirar el catálogo huérfano",
+   "objetivo": "Decidir el destino del catálogo de tareas de onboarding (reconectarlo como pestaña del admin con autochequeo, o retirarlo) y ejecutarlo.",
+   "hallazgos": [
+    "IDEA-012",
+    "DEU-018",
+    "POD-001",
+    "POD-292",
+    "POD-308"
+   ],
+   "archivos_tocar": "admin/clients/[clientId]/_components/tabs/OnboardingTab.tsx nuevo; src/actions/admin/onboarding-tasks.ts (Zod; ActionResult; un revalidatePath que exista); src/lib/onboarding/core.ts (siembra en onboardClientCore); seed-tasks-for-org.ts; src/lib/onboarding/auto-status.ts nuevo (puro); src/lib/data/onboarding-tasks.ts (títulos para el cliente); unificación con el ítem de attention.ts. Si se retira: borrar catálogo, siembras, actions y tarjeta.",
+   "archivos_no": "src/lib/actions/invitations.ts y clients.ts (sus siembras se van con la poda); la consulta de OnboardingStatusCard a lib (DEU-029, tarjeta de a11y del portal).",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio. Si se retira, baja a S. Conviven clientes viejos sin tareas y nuevos sembrados; el autochequeo no da por conectada una credencial vencida.",
+   "prereqs": [],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "La decisión queda registrada. Si se reconecta: un alta nueva siembra las tareas, el admin las avanza desde la pestaña, las conectadas se marcan solas (invariante de auto-status) y el cliente ve títulos para el cliente. Si se retira: el grep del catálogo da 0.",
+   "nodos": [
+    "lib.actions",
+    "lib.componentes-dashboard",
+    "lib.onboarding",
+    "h4.adm-clientes",
+    "h1.auth-invite",
+    "h2.cli-inicio",
+    "h2.cli-inicio.estado-onboarding",
+    "lib.data"
+   ],
+   "worktree": "wt/ideas-admin",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-014: ventas de la tienda que vinieron del bot",
+   "objetivo": "Mostrarle al dueño cuántas compras de su tienda hizo gente que antes habló con el bot.",
+   "hallazgos": [
+    "IDEA-014"
+   ],
+   "archivos_tocar": "src/lib/integrations/tiendanube.ts (tipo de orden con contact_email y contact_phone; también el mes anterior, sobre la paginación que agrega BUG-033); función pura de cruce lead↔orden con invariante; tarjeta «Compras confirmadas en tu tienda» en Inicio y en tienda-conectada.",
+   "archivos_no": "prisma/schema.prisma.",
+   "zona": "libre",
+   "tamano": "M",
+   "riesgo": "Medio. La tasa de cruce puede ser baja: mostrar «al menos N»; el corte del mes con fechas AR; nunca mostrar emails de compradores.",
+   "prereqs": [
+    "Integraciones: distinguir error de vacío, reportar a Sentry y no cachear fallas"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "El invariante del cruce cubre email normalizado, teléfono por los últimos 8 dígitos y la ventana de 30 días entre meses; la tarjeta no muestra datos de compradores; el fetch pagina más allá de 200 órdenes.",
+   "nodos": [
+    "int.tiendanube",
+    "lib.prisma",
+    "h2.cli-inicio"
+   ],
+   "worktree": "wt/ideas-portal",
+   "bloque": "Después"
+  },
+  {
+   "titulo": "IDEA-015: el bot ofrece turnos de la agenda del negocio (Cal.com)",
+   "objetivo": "Que el bot de un cliente con Cal.com ofrezca reservar un turno, sin romper la agenda del setter.",
+   "hallazgos": [
+    "IDEA-015"
+   ],
+   "archivos_tocar": "Tool offer_booking con su tarjeta (v1: link con nombre y email precompletados); alta en Plan.tools con un script puntual; regla de prompt.",
+   "archivos_no": "src/lib/leados/agenda.ts (anclarla a develOP es BUG-038, «LeadOS: herramientas externas…»); el escritor de calComUsername (FAL-004, «Ficha del cliente…»); createBooking desde el bot (v2, sin auth).",
+   "zona": "libre",
+   "tamano": "S",
+   "riesgo": "Alto si se hace sin sus prerrequisitos: cargar el Cal.com de un cliente hoy rompe la agenda del setter (BUG-038) y la v1 de Cal.com está apagada (TEC-002). Se recortó a la parte del bot: lo de Franco y el escritor ya están en otras tarjetas.",
+   "prereqs": [
+    "Agenda inteligente: migrar Cal.com a la API v2 con la key fuera de la URL",
+    "LeadOS: herramientas externas con link y agenda con org explícita",
+    "Ficha del cliente: sección Integraciones (Cal.com, GA4, Google Business, Place ID)"
+   ],
+   "nivel_proceso": "M",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "high",
+   "ultracode": "OFF",
+   "criterio": "Con dos orgs con calComUsername la agenda del setter sigue usando la de develOP (test:leados); un bot con Cal.com ofrece la tarjeta con el link precompletado y sin Cal.com no; el turno entra en stepCountIs(3).",
+   "nodos": [
+    "lib.prisma",
+    "int.cal-com",
+    "lib.chatbot.tools",
+    "h3.vis-widget-cliente"
+   ],
+   "worktree": "wt/ideas-chatbot",
+   "bloque": "Después"
+  }
+ ]
+}

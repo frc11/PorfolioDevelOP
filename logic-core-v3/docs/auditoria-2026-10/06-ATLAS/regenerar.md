@@ -12,10 +12,13 @@ Después de cada merge a `main` que agregue, mueva o borre páginas, handlers, s
 # 1. atlas.json desde main (o una rama, o el árbol de trabajo con --ref worktree); agrega una línea a historial.jsonl
 node scripts/auditoria/atlas/generar.mjs --ref origin/main
 
-# 2. hallazgos.json desde los .md de la auditoría (02, 03, 04, 05, 10)
+# 2. hallazgos.json desde los .md de la auditoría (02, 03, 04, 05), con los nodos resueltos por alias.json
 node scripts/auditoria/validar.mjs --emitir
 
-# 3. las vistas .md (rutas, datos, dependencias, ramas, modulos/)
+# 2b. backlog.json desde 07-BACKLOG.md (después de cambiar el estado de una tarjeta o de sumar una)
+node scripts/auditoria/atlas/backlog.mjs
+
+# 3. las vistas .md (rutas, datos, dependencias, ramas, modulos/ con sus tarjetas abiertas)
 node scripts/auditoria/atlas/vistas.mjs
 
 # 4. controlar los JSON contra el contrato y la integridad del grafo

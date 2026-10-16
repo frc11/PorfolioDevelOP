@@ -1,6 +1,6 @@
 # Rutas
 
-> GENERADO por `scripts/auditoria/atlas/vistas.mjs` desde `atlas.json` (57c421bc @ `57c421bc`, 2026-10-15). No se edita a mano: se regenera (ver `regenerar.md`). Auth, rol y tenant salen de `entradas.json` (verificados por lectura en la auditoría 2026-10); «sin dato» = la entrada no tiene registro y hay que verificarla.
+> GENERADO por `scripts/auditoria/atlas/vistas.mjs` desde `atlas.json` (57c421bc @ `57c421bc`, 2026-10-16). No se edita a mano: se regenera (ver `regenerar.md`). Auth, rol y tenant salen de `entradas.json` (verificados por lectura en la auditoría 2026-10); «sin dato» = la entrada no tiene registro y hay que verificarla.
 
 Control: 86 páginas, 36 route handlers y 92 archivos con server actions.
 

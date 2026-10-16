@@ -26,7 +26,7 @@ const validar = (v, s, donde) => {
   }
   if (tipoDe(v) === 'array' && s.items) v.forEach((x, i) => validar(x, s.items, `${donde}[${i}]`))
 }
-const ARCHIVOS = { 'atlas.json': 'atlas', 'atlas.curado.json': 'curado', 'funcionalidades.json': 'funcionalidades', 'zonas.json': 'zonas', 'entradas.json': 'entradas', 'hallazgos.json': 'hallazgos', 'backlog.json': 'backlog' }
+const ARCHIVOS = { 'atlas.json': 'atlas', 'atlas.curado.json': 'curado', 'funcionalidades.json': 'funcionalidades', 'zonas.json': 'zonas', 'entradas.json': 'entradas', 'hallazgos.json': 'hallazgos', 'backlog.json': 'backlog', 'alias.json': 'alias' }
 let vistos = 0
 for (const [f, d] of Object.entries(ARCHIVOS)) {
   if (!existsSync(path.join(ATLAS, f))) continue
@@ -41,6 +41,18 @@ for (const a of huerfanas.slice(0, 20)) errores.push(`arista ${a.tipo} ${a.de} �
 const curado = existsSync(path.join(ATLAS, 'atlas.curado.json')) ? JSON.parse(readFileSync(path.join(ATLAS, 'atlas.curado.json'), 'utf8')).nodos : {}
 const sinNodo = Object.keys(curado).filter((k) => !ids.has(k))
 for (const k of sinNodo.slice(0, 20)) errores.push(`atlas.curado.json: «${k}» no es un nodo de atlas.json`)
+// el alias curado apunta a nodos reales, y todo hallazgo de hallazgos.json tiene al menos un nodo (E7, regla 1)
+const alias = existsSync(path.join(ATLAS, 'alias.json')) ? JSON.parse(readFileSync(path.join(ATLAS, 'alias.json'), 'utf8')).alias : {}
+for (const [k, d] of Object.entries(alias)) if (!ids.has(d)) errores.push(`alias.json: «${k}» apunta a «${d}», que no es un nodo`)
+const hall = existsSync(path.join(ATLAS, 'hallazgos.json')) ? JSON.parse(readFileSync(path.join(ATLAS, 'hallazgos.json'), 'utf8')).hallazgos : []
+for (const h of hall) { const malos = [].concat(h.nodo ?? []).filter((n) => !ids.has(n)); if (![].concat(h.nodo ?? []).length) errores.push(`hallazgos.json: ${h.id} sin ningún nodo del Atlas (sumar un alias)`); else if (malos.length) errores.push(`hallazgos.json: ${h.id} apunta a ${malos.join(', ')}, que no existe`) }
+// cada tarjeta del backlog apunta a nodos que existen (E7, regla 1)
+const tarjetas = existsSync(path.join(ATLAS, 'backlog.json')) ? JSON.parse(readFileSync(path.join(ATLAS, 'backlog.json'), 'utf8')).tarjetas : []
+for (const t of tarjetas) {
+  const malos = (t.nodos ?? []).filter((n) => !ids.has(n))
+  if (!t.nodos?.length) errores.push(`backlog.json: ${t.id} sin nodos`)
+  else if (malos.length === t.nodos.length) errores.push(`backlog.json: ${t.id} solo apunta a nodos inexistentes (${malos.slice(0, 3).join(', ')})`)
+}
 for (const e of errores.slice(0, 50)) console.log(`  ERROR ${e}`)
 console.log(`validar-atlas: ${vistos} archivos · ${atlas.nodos.length} nodos · ${atlas.aristas.length} aristas · errores ${errores.length}`)
 process.exit(errores.length ? 1 : 0)

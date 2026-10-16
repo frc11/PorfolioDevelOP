@@ -16,6 +16,8 @@
 | Ramas | 43 | 5 | 9 | 20 | 0 |
 | **Total** | **165** | **36** | **26** | **54** | **31203** |
 
+Además, **105 candidatos de F2** con confianza MEDIA en su sección («Candidatos de F2»), sin LOC contadas porque muchos son exports sueltos o fusiones. Con ellos, el total es 386 fichas: ALTA 165 · MEDIA 141 · BAJA 26 · esperar rediseño 54.
+
 ## Regla por defecto para F2 (PODA-ALTA)
 
 Los archivos de confianza ALTA (categorías archivo y script, fuera de `rediseno/home`) que el ledger tenía como **profundo** pasan a lectura **superficial** (estado `superficial`, nota `PODA-ALTA`): **31 archivos, 4648 LOC** que quedan fuera de la lectura profunda. Lista: `_crudo/lista-poda-alta.txt`. Si Valentino decide conservar alguno, se audita en ese momento.

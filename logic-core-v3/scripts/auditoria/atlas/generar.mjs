@@ -31,7 +31,17 @@ const leerJson = (f, d) => (existsSync(path.join(ATLAS, f)) ? JSON.parse(readFil
 const todos = (REF === 'worktree' ? git('ls-files', '--', APP) : git('ls-tree', '-r', '--name-only', gitRef, '--', APP)).split('\n').filter(Boolean)
 const rel = (r) => r.slice(APP.length + 1)
 const CODIGO = /\.(tsx?|jsx?|mjs|cjs)$/
-const relevantes = todos.filter((r) => /^(src|netlify)\//.test(rel(r)) || ['prisma/schema.prisma', 'netlify.toml', 'vercel.json'].includes(rel(r)))
+// src/ y netlify/ enteros; además el código de scripts/, tests/ y prisma/ (seeds, migraciones; sin los dumps de
+// prisma/backups/) y la config de la raíz de la app, para que los hallazgos sobre scripts, tests, seeds y config
+// tengan nodo (lib.scripts, lib.tests, lib.prisma.*, lib.plataforma.*)
+const CONFIG_RAIZ = /^[^/]+\.(ts|mjs|cjs|js|json|toml)$/
+const relevantes = todos.filter((r) => {
+  const x = rel(r)
+  return /^(src|netlify)\//.test(x) || ['prisma/schema.prisma', 'netlify.toml', 'vercel.json'].includes(x) ||
+    (/^(scripts|tests)\//.test(x) && CODIGO.test(x)) ||
+    (/^prisma\//.test(x) && !/^prisma\/backups\//.test(x) && (CODIGO.test(x) || /\.sql$/.test(x))) ||
+    (CONFIG_RAIZ.test(x) && x !== 'package-lock.json')
+})
 function leerVarios(rutas) {
   const m = new Map()
   if (REF === 'worktree') { for (const r of rutas) m.set(r, readFileSync(path.join(REPO, r), 'utf8')); return m }
@@ -73,9 +83,10 @@ for (const [a, nombre] of Object.entries(AREAS)) nodo(a, { nombre })
 for (const [h, [a, nombre]] of Object.entries(HERRAMIENTAS)) nodo(`${a}.${h}`, { nombre, padre: a, area: a })
 
 const nodoDeArchivo = new Map()
+const enRelevantes = new Set(relevantes)
 for (const r of todos) {
   const id = nodoDeRuta(r)
-  if (!/^(src|netlify|prisma)\//.test(rel(r)) && !/^docs\//.test(rel(r))) continue
+  if (!/^(src|netlify|prisma)\//.test(rel(r)) && !/^docs\//.test(rel(r)) && !enRelevantes.has(r)) continue
   if (/^docs\/(auditoria-|_insumos)/.test(rel(r))) continue
   nodoDeArchivo.set(r, id)
   const n = nodo(id)

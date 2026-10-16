@@ -1,12 +1,12 @@
 # Ramas
 
-> GENERADO por `scripts/auditoria/atlas/vistas.mjs` desde `atlas.json` (57c421bc @ `57c421bc`, 2026-10-15). No se edita a mano: se regenera (ver `regenerar.md`). Solo recomendación: nada se mergea ni se borra desde la auditoría.
+> GENERADO por `scripts/auditoria/atlas/vistas.mjs` desde `atlas.json` (57c421bc @ `57c421bc`, 2026-10-16). No se edita a mano: se regenera (ver `regenerar.md`). Solo recomendación: nada se mergea ni se borra desde la auditoría.
 
 89 ramas.
 
 | Rama | Adelante | Atrás | Último commit | Estado | Worktree | Nodos tocados | Recomendación |
 |---|---|---|---|---|---|---|---|
-| rediseno/home | 598 | 0 | 2026-10-15 | viva | `C:/rediseno-home` | 2012 | revisar con su dueño: mergear o seguir |
+| rediseno/home | 605 | 0 | 2026-10-16 | viva | `C:/rediseno-home` | 2012 | revisar con su dueño: mergear o seguir |
 | respaldo/panel-2026-09-23 | 121 | 0 | 2026-09-23 | viva | — | 1665 | revisar con su dueño: mergear o seguir |
 | respaldo/rediseno-2026-09-23 | 121 | 0 | 2026-09-23 | viva | — | 1666 | revisar con su dueño: mergear o seguir |
 | respaldo/servicios-2026-09-22 | 105 | 0 | 2026-09-22 | viva | — | 1643 | revisar con su dueño: mergear o seguir |
@@ -30,9 +30,9 @@
 | v3/tipo | 40 | 50 | 2026-09-02 | dormida | — | 86 | revisar: mergear lo útil o archivar |
 | rediseno/secciones-a | 29 | 50 | 2026-08-30 | dormida | — | 72 | revisar: mergear lo útil o archivar |
 | rediseno/secciones-b | 29 | 50 | 2026-08-30 | dormida | — | 72 | revisar: mergear lo útil o archivar |
+| auditoria/renovacion-2026-10 | 25 | 0 | 2026-10-16 | viva | `C:/auditoria-2026-10` | 284 | revisar con su dueño: mergear o seguir |
 | rediseno/chrome | 23 | 50 | 2026-08-29 | dormida | — | 67 | revisar: mergear lo útil o archivar |
 | rediseno/motion | 23 | 50 | 2026-08-29 | dormida | — | 66 | revisar: mergear lo útil o archivar |
-| auditoria/renovacion-2026-10 | 21 | 0 | 2026-10-15 | viva | `C:/auditoria-2026-10` | 191 | revisar con su dueño: mergear o seguir |
 | rediseno/cimientos | 18 | 52 | 2026-08-28 | dormida | — | 61 | revisar: mergear lo útil o archivar |
 | experimento/estetica-goal | 15 | 904 | 2026-06-02 | abandonada | — | 14 | archivar salvo que su dueño la reclame |
 | b0-isolation-motor-chatbot | 8 | 211 | 2026-07-16 | abandonada | — | 13 | archivar salvo que su dueño la reclame |

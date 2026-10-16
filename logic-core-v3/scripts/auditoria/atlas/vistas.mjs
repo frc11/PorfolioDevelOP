@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Atlas — genera las vistas .md de 06-ATLAS/ desde los datos: rutas.md, datos.md, dependencias.md, ramas.md y
 // modulos/<herramienta>.md (ENMIENDA-01 E7, regla 3). Portable: solo Node nativo; lee atlas.json, atlas.curado.json,
-// entradas.json y, si existe, hallazgos.json. No lee el código.
+// entradas.json y, si existen, hallazgos.json y backlog.json. No lee el código.
 // Uso: node scripts/auditoria/atlas/vistas.mjs [--atlas <carpeta 06-ATLAS>]
 
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -15,6 +15,7 @@ if (!atlas) { console.error('falta atlas.json: correr antes generar.mjs'); proce
 const curado = leer('atlas.curado.json', { nodos: {} }).nodos
 const entradas = leer('entradas.json', { entradas: [] }).entradas
 const hallazgos = leer('hallazgos.json', { hallazgos: [] }).hallazgos
+const tarjetas = leer('backlog.json', { tarjetas: [] }).tarjetas ?? []
 const N = new Map(atlas.nodos.map((n) => [n.id, n]))
 const cab = (titulo, extra = '') => `# ${titulo}\n\n> GENERADO por \`scripts/auditoria/atlas/vistas.mjs\` desde \`atlas.json\` (${atlas.generado.ref} @ \`${atlas.generado.sha.slice(0, 8)}\`, ${atlas.generado.fecha}). No se edita a mano: se regenera (ver \`regenerar.md\`).${extra}\n`
 const esc = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ')
@@ -84,6 +85,7 @@ rmSync(dirMod, { recursive: true, force: true }); mkdirSync(dirMod, { recursive:
 const madurezDe = (h) => { const fs = atlas.nodos.filter((n) => n.padre === h.id && n.tipo === 'funcionalidad'); const c = {}; for (const f of fs) { const m = curado[f.id]?.madurez ?? 'L?'; c[m] = (c[m] ?? 0) + 1 } return { fs, c } }
 const resumenMad = (c) => ORDEN_MAD.filter((m) => c[m]).map((m) => `${m} ${c[m]}`).join(' · ') || 'sin funcionalidades'
 const hallDe = (id) => hallazgos.filter((h) => [].concat(h.nodo ?? []).some((x) => x === id || x.startsWith(`${id}.`)))
+const tarjetasDe = (id) => tarjetas.filter((t) => (t.nodos ?? []).some((x) => x === id || x.startsWith(`${id}.`)) && !['hecha', 'descartada'].includes(t.estado))
 const herrs = atlas.nodos.filter((n) => n.tipo === 'herramienta').sort((a, b) => a.id.localeCompare(b.id))
 const indice = []
 for (const h of herrs) {
@@ -94,7 +96,9 @@ for (const h of herrs) {
   const hs = hallDe(h.id)
   const graves = hs.filter((x) => ['CRÍTICA', 'ALTA'].includes(x.severidad))
   const sev = ['CRÍTICA', 'ALTA', 'MEDIA', 'BAJA'].map((s) => hs.filter((x) => x.severidad === s).length).join('/')
+  const tjs = tarjetasDe(h.id)
   const empezar = [
+    tjs.length ? `la tarjeta del backlog: ${tjs.slice(0, 3).map((x) => `${x.id} (${x.bloque})`).join(', ')} en \`07-BACKLOG.md\`` : null,
     h.rutas.length ? `la entrada: \`${h.archivos.find((a) => /page\.tsx$/.test(a)) ?? h.archivos[0]}\` (${h.rutas.slice(0, 3).join(', ')})` : null,
     h.archivos.find((a) => /_actions\/|actions?\.ts$/.test(a)) ? `las acciones: \`${h.archivos.find((a) => /_actions\/|actions?\.ts$/.test(a))}\`` : null,
     sale[0] ? `lo que más usa: ${sale.slice(0, 3).map((a) => `${a.a} (${a.peso})`).join(', ')}` : null,
@@ -113,12 +117,13 @@ for (const h of herrs) {
     `- **Ramas donde cambia:** ${h.ramas.length ? h.ramas.join(', ') : '—'}`,
     `- **Hallazgos vinculados (C/A/M/B):** ${sev}${hs.length ? ` — ${hs.slice(0, 20).map((x) => x.id).join(', ')}${hs.length > 20 ? ` y ${hs.length - 20} más` : ''}` : ''}`, '',
     '## Por dónde empezar si querés tocarlo', '', ...empezar.map((x) => `- ${x}`), '',
+    ...(tjs.length ? ['## Tarjetas abiertas del backlog', '', '| Tarjeta | Bloque | Tamaño | Zona |', '|---|---|---|---|', ...tjs.map((x) => `| ${x.id} · ${corto(x.titulo, 100)} | ${x.bloque} | ${x.tamano} | ${corto(x.zona, 60)} |`), ''] : []),
     '## Funcionalidades', '', '| Id | Nombre | Madurez | Veredicto | Alcance propuesto | Criterios L3 que faltan |', '|---|---|---|---|---|---|',
     ...fs.map((f) => { const k = curado[f.id] ?? {}; return `| ${f.id.slice(h.id.length + 1)} | ${corto(f.nombre, 80)} | ${k.madurez ?? 'L?'} | ${k.veredicto ?? '—'} | ${k.alcance_propuesto ?? '—'} | ${corto((k.criterios_l3_faltantes ?? []).join('; '), 120) || '—'} |` }), '',
     '## Archivos', '', ...h.archivos.map((a) => `- \`${a}\``), '',
   ]
   writeFileSync(path.join(dirMod, `${h.id}.md`), md.join('\n'), 'utf8')
-  indice.push(`| [${h.id}](modulos/${h.id}.md) | ${h.nombre} | ${h.dueno} | ${resumenMad(c)} | ${sev} | ${cur.alcance_propuesto ?? '—'} |`)
+  indice.push(`| [${h.id}](modulos/${h.id}.md) | ${h.nombre} | ${h.dueno} | ${resumenMad(c)} | ${sev} | ${cur.alcance_propuesto ?? '—'} | ${tjs.length ? tjs.map((x) => x.id).join(', ') : '—'} |`)
 }
-writeFileSync(path.join(ATLAS, '_indice-modulos.md'), ['| Módulo | Nombre | Dueño | Madurez | Hallazgos C/A/M/B | Alcance propuesto |', '|---|---|---|---|---|---|', ...indice, ''].join('\n'), 'utf8')
+writeFileSync(path.join(ATLAS, '_indice-modulos.md'), ['| Módulo | Nombre | Dueño | Madurez | Hallazgos C/A/M/B | Alcance propuesto | Tarjetas abiertas |', '|---|---|---|---|---|---|---|', ...indice, ''].join('\n'), 'utf8')
 console.log(`vistas: rutas.md, datos.md, dependencias.md (${fuertes.length} aristas dibujadas), ramas.md (${ramas.length}), modulos/ (${herrs.length}), _indice-modulos.md`)

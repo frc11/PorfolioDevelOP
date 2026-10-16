@@ -81,6 +81,7 @@ md.push('## Resumen', '')
 md.push('| Categoría | ALTA | MEDIA | BAJA | Esperar rediseño | LOC |', '|---|---|---|---|---|---|')
 for (const k of ORDEN.filter((k) => tabla[k])) md.push(`| ${NOMBRE_CAT[k]} | ${tabla[k].ALTA} | ${tabla[k].MEDIA} | ${tabla[k].BAJA} | ${tabla[k].rediseno} | ${tabla[k].loc} |`)
 md.push(`| **Total** | **${fuera.filter((c) => c.confianza === 'ALTA').length}** | **${fuera.filter((c) => c.confianza === 'MEDIA').length}** | **${fuera.filter((c) => c.confianza === 'BAJA').length}** | **${rediseno.length}** | **${ordenados.reduce((s, c) => s + c.loc, 0)}** |`, '')
+const iNotaF2 = md.length
 md.push('## Regla por defecto para F2 (PODA-ALTA)', '')
 md.push(`Los archivos de confianza ALTA (categorías archivo y script, fuera de \`rediseno/home\`) que el ledger tenía como **profundo** pasan a lectura **superficial** (estado \`superficial\`, nota \`PODA-ALTA\`): **${altaProfundos.length} archivos, ${locAltaProfundo} LOC** que quedan fuera de la lectura profunda. Lista: \`_crudo/lista-poda-alta.txt\`. Si Valentino decide conservar alguno, se audita en ese momento.`, '')
 for (const k of ORDEN) {
@@ -146,6 +147,8 @@ if (nuevosF2.length || refuerzos.length) {
     md.push('')
   }
 }
+// el Resumen cuenta las fichas de F1; los candidatos de F2 (MEDIA, sin LOC: muchos son exports o fusiones) van aparte
+if (nuevosF2.length) md.splice(iNotaF2, 0, `Además, **${nuevosF2.length} candidatos de F2** con confianza MEDIA en su sección («Candidatos de F2»), sin LOC contadas porque muchos son exports sueltos o fusiones. Con ellos, el total es ${ordenados.length + nuevosF2.length} fichas: ALTA ${fuera.filter((c) => c.confianza === 'ALTA').length} · MEDIA ${fuera.filter((c) => c.confianza === 'MEDIA').length + nuevosF2.length} · BAJA ${fuera.filter((c) => c.confianza === 'BAJA').length} · esperar rediseño ${rediseno.length}.`, '')
 // §docs (E11, DEC-44): la lista de borrado de docs la arma la síntesis de F6b en _crudo/poda-docs.json
 const docsPoda = existsSync(path.join(CRUDO, 'poda-docs.json')) ? JSON.parse(readFileSync(path.join(CRUDO, 'poda-docs.json'), 'utf8')).items ?? [] : []
 md.push('## §docs', '')

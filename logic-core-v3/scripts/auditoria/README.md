@@ -41,6 +41,8 @@ Scripts de Node sin dependencias nuevas (solo `node:*` y `git`). Todos son de **
 | `diseno-md.mjs` | Un solo uso (C18): escribe `04-DISENO.md` desde el censo y `_crudo/f3-resultado.json`, con los DIS del padre, y agrega VH-174 a `08` |
 | `ideas-md.mjs` | Un solo uso (C20): escribe `05-IDEAS.md` desde `_crudo/f4-resultado.json`; comprueba cada cita de habilitador contra la base |
 | `consolidados-md.mjs` | Un solo uso (C22): escribe `13-CLAUDE-MD-PROPUESTO.md`, `14-DOCS-CONSOLIDADOS/` y `_crudo/poda-docs.json` (la §docs de `10-PODA.md`, que agrega `poda-md.mjs`) desde `_crudo/f6b-resultado.json` y `_crudo/f6b-extraccion/` |
+| `backlog-md.mjs` | Un solo uso (C23): escribe `07-BACKLOG.md` desde `_crudo/f6c-resultado/` con los controles del padre (IDs, nodos por alias, zona, toda CRÍTICA y ALTA en Ahora, prerrequisitos, tabla de E12); después `atlas/backlog.mjs` saca `backlog.json` del .md |
+| `franco-md.mjs` | Un solo uso (C23): completa `09-PARA-FRANCO.md` desde «## Bloques a ejecutar» (bloques de Franco de `_crudo/f6b-extraccion/` y sus tarjetas de `backlog.json`) |
 | `atlas/semilla.mjs` | Un solo uso (F5): siembra los datos que después mantienen las personas (`funcionalidades.json`, `zonas.json`, `entradas.json`, `atlas.curado.json`); no pisa lo que ya existe |
 
 ## Reglas

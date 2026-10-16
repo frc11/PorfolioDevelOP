@@ -1,15 +1,21 @@
 # Dependencias
 
-> GENERADO por `scripts/auditoria/atlas/vistas.mjs` desde `atlas.json` (57c421bc @ `57c421bc`, 2026-10-15). No se edita a mano: se regenera (ver `regenerar.md`). Grafo por módulo, no por archivo. Amarillo = ZONA-FRANCO; azul = congelado (restricción de la auditoría; ver `11-CONGELADOS.md`).
+> GENERADO por `scripts/auditoria/atlas/vistas.mjs` desde `atlas.json` (57c421bc @ `57c421bc`, 2026-10-16). No se edita a mano: se regenera (ver `regenerar.md`). Grafo por módulo, no por archivo. Amarillo = ZONA-FRANCO; azul = congelado (restricción de la auditoría; ver `11-CONGELADOS.md`).
 
-Se dibujan las 199 dependencias con 3 imports o más (de 686); la tabla completa va abajo.
+Se dibujan las 208 dependencias con 3 imports o más (de 716); la tabla completa va abajo.
 
 ```mermaid
 flowchart LR
   classDef franco fill:#fde68a,stroke:#b45309,color:#111
   classDef congelado fill:#bfdbfe,stroke:#1d4ed8,color:#111
-  lib_actions["lib.actions"]
+  lib_scripts["lib.scripts"]
+  lib_chatbot_scoring["lib.chatbot.scoring"]
+  lib_leados["lib.leados"]:::franco
   lib_prisma["lib.prisma"]
+  lib_chatbot_crm["lib.chatbot.crm"]
+  lib_prisma_seeds["lib.prisma.seeds"]
+  lib_chatbot_tools["lib.chatbot.tools"]
+  lib_actions["lib.actions"]
   lib_auth["lib.auth"]
   h4_adm_shell["h4.adm-shell"]
   lib_ui["lib.ui"]:::congelado
@@ -24,7 +30,6 @@ flowchart LR
   lib_motion_variants["lib.motion-variants"]:::congelado
   lib_audit_log["lib.audit-log"]:::congelado
   h5_adm_fg2lab["h5.adm-fg2lab"]:::franco
-  lib_leados["lib.leados"]:::franco
   h5_adm_revision_demos["h5.adm-revision-demos"]:::franco
   lib_utils["lib.utils"]:::congelado
   h4_adm_leads["h4.adm-leads"]
@@ -41,7 +46,6 @@ flowchart LR
   h3_cli_chatbot["h3.cli-chatbot"]
   lib_chatbot["lib.chatbot"]
   lib_plan["lib.plan"]
-  lib_chatbot_scoring["lib.chatbot.scoring"]
   lib_tz_ar["lib.tz-ar"]:::congelado
   h2_cli_cuenta["h2.cli-cuenta"]
   lib_componentes_dashboard["lib.componentes-dashboard"]
@@ -91,15 +95,20 @@ flowchart LR
   lib_chatbot_evals["lib.chatbot.evals"]
   lib_isolation["lib.isolation"]
   lib_chatbot_config["lib.chatbot.config"]
-  lib_chatbot_crm["lib.chatbot.crm"]
   lib_rate_limit["lib.rate-limit"]
   lib_chatbot_logging["lib.chatbot.logging"]
   lib_chatbot_conversation["lib.chatbot.conversation"]
   lib_chatbot_chat["lib.chatbot.chat"]
   lib_chatbot_insights["lib.chatbot.insights"]
   lib_chatbot_pricing["lib.chatbot.pricing"]
-  lib_chatbot_tools["lib.chatbot.tools"]
   lib_chatbot_verticals["lib.chatbot.verticals"]
+  lib_tests["lib.tests"]
+  lib_scripts -->|3| lib_chatbot_scoring
+  lib_scripts -->|36| lib_leados
+  lib_scripts -->|29| lib_prisma
+  lib_scripts -->|3| lib_chatbot_crm
+  lib_scripts -->|4| lib_prisma_seeds
+  lib_scripts -->|3| lib_chatbot_tools
   lib_actions -->|6| lib_prisma
   lib_actions -->|8| lib_auth
   h4_adm_shell -->|3| lib_ui
@@ -299,6 +308,9 @@ flowchart LR
   lib_chatbot_tools -->|4| lib_chatbot_chat
   lib_chatbot_verticals -->|3| lib_chatbot_scoring
   h3_vis_whatsapp -->|9| lib_isolation
+  lib_tests -->|43| lib_leados
+  lib_tests -->|6| lib_isolation
+  lib_tests -->|6| h3_vis_whatsapp
 ```
 
 ## Todas las dependencias entre módulos
@@ -307,10 +319,13 @@ flowchart LR
 |---|---|---|
 | h5.set-manual | lib.leados | 69 |
 | h5.set-dia | lib.leados | 59 |
+| lib.tests | lib.leados | 43 |
 | h3.adm-chatbots | lib.ui | 38 |
+| lib.scripts | lib.leados | 36 |
 | h3.cli-chatbot | lib.ui | 36 |
 | h5.set-manual | h5.set-dia | 36 |
 | h3.adm-chatbots | lib.chatbot.admin | 30 |
+| lib.scripts | lib.prisma | 29 |
 | h3.vis-widget-cliente | lib.chatbot.shared | 24 |
 | h4.adm-clientes | lib.ui | 23 |
 | lib.chatbot.admin | lib.isolation | 23 |
@@ -383,6 +398,8 @@ flowchart LR
 | lib.chatbot.admin | lib.plan | 6 |
 | lib.chatbot.admin | lib.rate-limit | 6 |
 | lib.chatbot.pricing | lib.chatbot.llm | 6 |
+| lib.tests | lib.isolation | 6 |
+| lib.tests | h3.vis-whatsapp | 6 |
 | h4.adm-alertas | lib.ui | 5 |
 | h3.adm-chatbots | h4.adm-shell | 5 |
 | h5.adm-fg2lab | lib.leados | 5 |
@@ -409,6 +426,7 @@ flowchart LR
 | lib.chatbot.hooks | lib.chatbot.shared | 5 |
 | lib.chatbot.chat | lib.chatbot.shared | 5 |
 | lib.chatbot.llm | lib.chatbot.shared | 5 |
+| lib.scripts | lib.prisma.seeds | 4 |
 | h4.adm-audit | lib.ui | 4 |
 | h4.adm-clientes | lib.motion-variants | 4 |
 | h4.adm-clientes | lib.use-reduced-motion | 4 |
@@ -445,6 +463,9 @@ flowchart LR
 | lib.chatbot.chat | lib.chatbot.logging | 4 |
 | lib.chatbot.tools | lib.chatbot.verticals | 4 |
 | lib.chatbot.tools | lib.chatbot.chat | 4 |
+| lib.scripts | lib.chatbot.scoring | 3 |
+| lib.scripts | lib.chatbot.crm | 3 |
+| lib.scripts | lib.chatbot.tools | 3 |
 | h4.adm-shell | lib.ui | 3 |
 | h4.adm-shell | lib.use-reduced-motion | 3 |
 | h5.adm-fg2lab | lib.ui | 3 |
@@ -504,6 +525,9 @@ flowchart LR
 | lib.chatbot.tools | lib.isolation | 3 |
 | lib.chatbot.tools | lib.chatbot.logging | 3 |
 | lib.chatbot.verticals | lib.chatbot.scoring | 3 |
+| lib.scripts | h3.adm-chatbots | 2 |
+| lib.scripts | lib.chatbot.leads | 2 |
+| lib.scripts | lib.tests | 2 |
 | lib.actions | int.email | 2 |
 | h4.adm-shell | lib.sitio-publico | 2 |
 | h4.adm-shell | lib.use-is-client | 2 |
@@ -648,6 +672,17 @@ flowchart LR
 | lib.chatbot.reports | int.email | 2 |
 | lib.chatbot.scoring | lib.chatbot.verticals | 2 |
 | lib.chatbot.tools | int.telegram | 2 |
+| lib.tests | h5.set-dia | 2 |
+| lib.plataforma.instrumentation | lib.plataforma.sentry-server-config | 1 |
+| lib.plataforma.instrumentation | lib.plataforma.sentry-edge-config | 1 |
+| lib.prisma.seeds | lib.agency-settings | 1 |
+| lib.prisma.seeds | lib.data | 1 |
+| lib.scripts | int.sentry | 1 |
+| lib.scripts | int.cal-com | 1 |
+| lib.scripts | lib.dates-ar | 1 |
+| lib.scripts | lib.chatbot.conversation | 1 |
+| lib.plataforma.sentry-edge-config | int.sentry | 1 |
+| lib.plataforma.sentry-server-config | int.sentry | 1 |
 | lib.actions | lib.preview | 1 |
 | h4.adm-shell | lib.motion-variants | 1 |
 | h4.adm-shell | lib.utils | 1 |
@@ -991,6 +1026,13 @@ flowchart LR
 | lib.chatbot.verticals | lib.chatbot.crm | 1 |
 | h3.vis-whatsapp | lib.crypto | 1 |
 | lib.proxy | lib.auth | 1 |
+| lib.plataforma.tailwind-config | lib.design-tokens | 1 |
+| lib.tests | int.email | 1 |
+| lib.tests | lib.chatbot.logging | 1 |
+| lib.tests | h2.cli-reportes-email | 1 |
+| lib.tests | h3.vis-api-chatbot | 1 |
+| lib.tests | lib.chatbot.insights | 1 |
+| lib.tests | lib.crypto | 1 |
 
 ## Crons (aristas «dispara»)
 

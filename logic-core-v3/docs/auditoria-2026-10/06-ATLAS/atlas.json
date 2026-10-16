@@ -5,7 +5,7 @@
   "app": "logic-core-v3",
   "ref": "57c421bc",
   "sha": "57c421bc872105cb270350f5f2f7a827d1925ef8",
-  "fecha": "2026-10-15"
+  "fecha": "2026-10-16"
  },
  "control": {
   "paginas": 86,
@@ -12942,11 +12942,12 @@
    "area": "h3",
    "descripcion": "Headers que permiten que cualquier sitio cargue widget.js y enmarque /embed/[slug], y las fronteras raíz que atienden ese iframe.",
    "archivos": [
+    "next.config.ts",
     "src/app/not-found.tsx",
     "src/app/error.tsx",
     "src/app/embed/[slug]/page.tsx"
    ],
-   "loc": 314,
+   "loc": 575,
    "rutas": [],
    "modelos": [],
    "entradas": [
@@ -12958,10 +12959,7 @@
     "sha": "ef6dd076",
     "fecha": "2026-05-26"
    },
-   "ramas": [],
-   "archivos_ausentes": [
-    "next.config.ts"
-   ]
+   "ramas": []
   },
   {
    "id": "h3.vis-widget-cliente.estados-degradados",
@@ -14071,9 +14069,10 @@
    "archivos": [
     "src/modules/chatbot/server/admin/archiveClient.ts",
     "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
-    "src/app/(protected)/admin/clients/page.tsx"
+    "src/app/(protected)/admin/clients/page.tsx",
+    "prisma/migrations/20260619234252_add_organization_city_avatar_notes_softdelete/migration.sql"
    ],
-   "loc": 975,
+   "loc": 983,
    "rutas": [],
    "modelos": [],
    "entradas": [],
@@ -14083,10 +14082,7 @@
     "sha": "aa176f73",
     "fecha": "2026-07-09"
    },
-   "ramas": [],
-   "archivos_ausentes": [
-    "prisma/migrations/20260619234252_add_organization_city_avatar_notes_softdelete/migration.sql"
-   ]
+   "ramas": []
   },
   {
    "id": "h4.adm-clientes.avatar-cliente",
@@ -14370,9 +14366,11 @@
    "descripcion": "El admin ve un resumen, confirma escribiendo ELIMINAR y borra la org con todo lo que cuelga.",
    "archivos": [
     "src/modules/chatbot/server/admin/hardDeleteClient.ts",
-    "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx"
+    "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+    "prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql",
+    "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql"
    ],
-   "loc": 963,
+   "loc": 1189,
    "rutas": [],
    "modelos": [],
    "entradas": [],
@@ -14382,11 +14380,7 @@
     "sha": "aa176f73",
     "fecha": "2026-07-09"
    },
-   "ramas": [],
-   "archivos_ausentes": [
-    "prisma/migrations/20260525182135_b11_1_project_organizationid_not_null/migration.sql",
-    "prisma/migrations/20260406010000_v2-unify-project-task/migration.sql"
-   ]
+   "ramas": []
   },
   {
    "id": "h4.adm-clientes.eliminar-definitivo",
@@ -15034,9 +15028,10 @@
    "archivos": [
     "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
     "src/lib/data/premium-modules.ts",
+    "prisma/seeds/sync-premium-modules.ts",
     "src/components/sections/modulos-opcionales/ModuloActiveCard.tsx"
    ],
-   "loc": 653,
+   "loc": 836,
    "rutas": [],
    "modelos": [],
    "entradas": [],
@@ -15046,10 +15041,7 @@
     "sha": "78b510ac",
     "fecha": "2026-08-12"
    },
-   "ramas": [],
-   "archivos_ausentes": [
-    "prisma/seeds/sync-premium-modules.ts"
-   ]
+   "ramas": []
   },
   {
    "id": "h4.adm-config.precios-modulos",
@@ -22485,6 +22477,703 @@
    ]
   },
   {
+   "id": "lib.plataforma.dependency-cruiser",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.dependency-cruiser",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    ".dependency-cruiser.cjs"
+   ],
+   "loc": 45,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.eslint-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.eslint-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "eslint.config.mjs"
+   ],
+   "loc": 91,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": [
+    "chore/security-quick-wins"
+   ]
+  },
+  {
+   "id": "lib.plataforma.find-unused",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.find-unused",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "find_unused.js"
+   ],
+   "loc": 66,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.instrumentation",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.instrumentation",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "instrumentation.ts"
+   ],
+   "loc": 9,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.knip",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.knip",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "knip.ts"
+   ],
+   "loc": 26,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.netlify",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.netlify",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "netlify.toml"
+   ],
+   "loc": 33,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.next-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.next-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "next.config.ts"
+   ],
+   "loc": 261,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": [
+    "rediseno/deslizar",
+    "rediseno/deslizar2",
+    "rediseno/home",
+    "respaldo/panel-2026-09-23",
+    "respaldo/rediseno-2026-09-23",
+    "respaldo/servicios-2026-09-22",
+    "respaldo/trabajos-2026-09-22",
+    "v3/acomodamiento",
+    "v3/cierre-etapa",
+    "v3/contenido",
+    "v3/costura",
+    "v3/defectos",
+    "v3/emite",
+    "v3/escena",
+    "v3/escena-premium",
+    "v3/escena-viva",
+    "v3/luz",
+    "v3/medicion",
+    "v3/momentos",
+    "v3/preloader",
+    "v3/sincronia",
+    "v3/tipo"
+   ]
+  },
+  {
+   "id": "lib.plataforma.package",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.package",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "package.json"
+   ],
+   "loc": 203,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": [
+    "b0-isolation-motor-chatbot",
+    "rediseno/chrome",
+    "rediseno/cimientos",
+    "rediseno/deslizar",
+    "rediseno/deslizar2",
+    "rediseno/home",
+    "rediseno/motion",
+    "rediseno/secciones-a",
+    "rediseno/secciones-b",
+    "respaldo/panel-2026-09-23",
+    "respaldo/rediseno-2026-09-23",
+    "respaldo/servicios-2026-09-22",
+    "respaldo/trabajos-2026-09-22",
+    "v3/acomodamiento",
+    "v3/cierre-etapa",
+    "v3/contenido",
+    "v3/costura",
+    "v3/defectos",
+    "v3/emite",
+    "v3/escena",
+    "v3/escena-premium",
+    "v3/escena-viva",
+    "v3/luz",
+    "v3/medicion",
+    "v3/momentos",
+    "v3/preloader",
+    "v3/sincronia",
+    "v3/tipo",
+    "chore/gs-aislamiento",
+    "p25/rafaga-tildes"
+   ]
+  },
+  {
+   "id": "lib.plataforma.playwright-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.playwright-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "playwright.config.ts"
+   ],
+   "loc": 35,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.playwright-galeria-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.playwright-galeria-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "playwright.galeria.config.ts"
+   ],
+   "loc": 91,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.playwright-helpers-probe-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.playwright-helpers-probe-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "playwright.helpers-probe.config.ts"
+   ],
+   "loc": 42,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.playwright-integration-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.playwright-integration-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "playwright.integration.config.ts"
+   ],
+   "loc": 50,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.playwright-leados-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.playwright-leados-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "playwright.leados.config.ts"
+   ],
+   "loc": 37,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": [
+    "p25/rafaga-tildes"
+   ]
+  },
+  {
+   "id": "lib.plataforma.playwright-qa-persona-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.playwright-qa-persona-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "playwright.qa-persona.config.ts"
+   ],
+   "loc": 51,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.playwright-qa-walkthrough-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.playwright-qa-walkthrough-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "playwright.qa-walkthrough.config.ts"
+   ],
+   "loc": 55,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.playwright-setter-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.playwright-setter-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "playwright.setter.config.ts"
+   ],
+   "loc": 86,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": [
+    "p25/rafaga-tildes"
+   ]
+  },
+  {
+   "id": "lib.plataforma.postcss-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.postcss-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "postcss.config.mjs"
+   ],
+   "loc": 8,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.replace-analytics",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.replace-analytics",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "replace_analytics.js"
+   ],
+   "loc": 275,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.script",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.script",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "script.js"
+   ],
+   "loc": 41,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.script-aiscene",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.script-aiscene",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "script_aiscene.js"
+   ],
+   "loc": 332,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.script-analytics",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.script-analytics",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "script_analytics.js"
+   ],
+   "loc": 141,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.script-leads",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.script-leads",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "script_leads.js"
+   ],
+   "loc": 251,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.script-magnetic",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.script-magnetic",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "script_magnetic.js"
+   ],
+   "loc": 90,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.script-maps",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.script-maps",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "script_maps.js"
+   ],
+   "loc": 329,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.script2",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.script2",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "script2.js"
+   ],
+   "loc": 227,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.script3",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.script3",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "script3.js"
+   ],
+   "loc": 217,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.sentry-edge-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.sentry-edge-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "sentry.edge.config.ts"
+   ],
+   "loc": 14,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.sentry-server-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.sentry-server-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "sentry.server.config.ts"
+   ],
+   "loc": 17,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.tailwind-config",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.tailwind-config",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "tailwind.config.ts"
+   ],
+   "loc": 38,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.test-chat",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.test-chat",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "test-chat.mjs"
+   ],
+   "loc": 27,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
+   "id": "lib.plataforma.tsconfig",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.tsconfig",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "tsconfig.json"
+   ],
+   "loc": 55,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": [
+    "rediseno/chrome",
+    "rediseno/cimientos",
+    "rediseno/deslizar",
+    "rediseno/deslizar2",
+    "rediseno/home",
+    "rediseno/motion",
+    "rediseno/secciones-a",
+    "rediseno/secciones-b",
+    "respaldo/panel-2026-09-23",
+    "respaldo/rediseno-2026-09-23",
+    "respaldo/servicios-2026-09-22",
+    "respaldo/trabajos-2026-09-22",
+    "v3/acomodamiento",
+    "v3/cierre-etapa",
+    "v3/contenido",
+    "v3/costura",
+    "v3/defectos",
+    "v3/emite",
+    "v3/escena",
+    "v3/escena-premium",
+    "v3/escena-viva",
+    "v3/luz",
+    "v3/medicion",
+    "v3/momentos",
+    "v3/preloader",
+    "v3/sincronia",
+    "v3/tipo",
+    "p25/rafaga-tildes"
+   ]
+  },
+  {
+   "id": "lib.plataforma.vercel",
+   "tipo": "lib",
+   "nombre": "lib.plataforma.vercel",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "vercel.json"
+   ],
+   "loc": 17,
+   "rutas": [],
+   "modelos": [],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": []
+  },
+  {
    "id": "lib.plataforma.version",
    "tipo": "lib",
    "nombre": "lib.plataforma.version",
@@ -22587,6 +23276,7 @@
    "area": null,
    "descripcion": "",
    "archivos": [
+    "prisma.config.ts",
     "prisma/migrations/20260318202838_init/migration.sql",
     "prisma/migrations/20260319113436_add_analytics_property_id/migration.sql",
     "prisma/migrations/20260319120419_add_site_url/migration.sql",
@@ -22678,7 +23368,7 @@
     "prisma/schema.prisma",
     "src/lib/prisma.ts"
    ],
-   "loc": 2257,
+   "loc": 5029,
    "rutas": [],
    "modelos": [],
    "entradas": [],
@@ -22735,9 +23425,37 @@
     "prisma/seeds/sync-plans.ts",
     "prisma/seeds/sync-premium-modules.ts"
    ],
-   "loc": 0,
+   "loc": 4190,
    "rutas": [],
-   "modelos": [],
+   "modelos": [
+    "Project",
+    "Task",
+    "OsLead",
+    "User",
+    "Organization",
+    "OrgMember",
+    "Service",
+    "Subscription",
+    "Plan",
+    "AgencySettings",
+    "OsLeadActivity",
+    "OsDemo",
+    "OsLeadDossier",
+    "OsPaymentMilestone",
+    "OsMaintenancePayment",
+    "OsTimeEntry",
+    "Message",
+    "Ticket",
+    "TicketMessage",
+    "ContactSubmission",
+    "Invoice",
+    "ClientAsset",
+    "Notification",
+    "BotConfig",
+    "KnowledgeBase",
+    "PremiumModule",
+    "OrganizationModule"
+   ],
    "entradas": [],
    "dueno": "Valentino",
    "zona": "libre",
@@ -22791,6 +23509,143 @@
     "fecha": "2026-07-09"
    },
    "ramas": []
+  },
+  {
+   "id": "lib.scripts",
+   "tipo": "lib",
+   "nombre": "lib.scripts",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "scripts/_b13-2-fix-demo-bots.mjs",
+    "scripts/_b13-2-list-bots.mjs",
+    "scripts/_b13-latency-analyze.mjs",
+    "scripts/_b13-latency-test.mjs",
+    "scripts/_b14-2-cleanup-bench-prod.ts",
+    "scripts/_b14-2-prod-bot-latency.mjs",
+    "scripts/_b14-2-prod-coldstart.mjs",
+    "scripts/_b14-2-prod-pages-ttfb.mjs",
+    "scripts/_b14-2-seed-bench-prod.ts",
+    "scripts/_b14-4-smoke-prod.mjs",
+    "scripts/_b14-5-scrub-smoke.mjs",
+    "scripts/_b14-analyze.mjs",
+    "scripts/_b52-test-scoring.ts",
+    "scripts/_b53-test-scoring.ts",
+    "scripts/_b54-test-scoring.ts",
+    "scripts/_db-cleanup-execute.mjs",
+    "scripts/_db-cleanup-inspect.mjs",
+    "scripts/_db-cleanup-inspect2.mjs",
+    "scripts/_experimental/fg2-gen-prompts.ts",
+    "scripts/admin-1a-backfill-caliente.ts",
+    "scripts/b1-verify-setter-ownership.ts",
+    "scripts/b2-verify-dossier.ts",
+    "scripts/b3-qa-assign-leads.ts",
+    "scripts/b4-qa-construccion.ts",
+    "scripts/b5-qa-review-queue.ts",
+    "scripts/b58-smoke.ts",
+    "scripts/b59-smoke.ts",
+    "scripts/b6-qa-outreach.ts",
+    "scripts/b7-qa-agenda.ts",
+    "scripts/b7-smoke-calcom.ts",
+    "scripts/b9-4-dedupe-kb-develop.mjs",
+    "scripts/check-env.js",
+    "scripts/cleanup-messages-demo.ts",
+    "scripts/demos-seed-review-queue.ts",
+    "scripts/dev/_vseed.ts",
+    "scripts/dev/m0-galeria-indice.ts",
+    "scripts/dev/m0-galeria-seed.ts",
+    "scripts/dev/qa-manual-m5-m16.ts",
+    "scripts/dev/qa-seed-leads-clean.ts",
+    "scripts/dev/qa-seed-leads.ts",
+    "scripts/dev/seed-alerts.ts",
+    "scripts/dev/seed-events.ts",
+    "scripts/dev/seed-latency.ts",
+    "scripts/encode-vertex-creds.js",
+    "scripts/ev4-smoke.mjs",
+    "scripts/ev5-smoke.mjs",
+    "scripts/load-test/chatbot-baseline.ts",
+    "scripts/p41-inject-campaigns.ts",
+    "scripts/qa-corridas/_p21-corrida.ts",
+    "scripts/qa-corridas/_p23/capturas.ts",
+    "scripts/qa-corridas/_p23/censo-ubicaciones.ts",
+    "scripts/qa-corridas/_verify-b61.ts",
+    "scripts/qa-corridas/_verify-home-aviso.ts",
+    "scripts/qa-corridas/_verify-scroll-gap.ts",
+    "scripts/qa-corridas/barrido-derivacion.ts",
+    "scripts/qa-corridas/capturar-franja.ts",
+    "scripts/qa-corridas/corrida-1-import-csv.ts",
+    "scripts/qa-corridas/medir-cartera.ts",
+    "scripts/qa-corridas/medir-panel-setter.ts",
+    "scripts/qa-corridas/medir-pliegue-manual.ts",
+    "scripts/qa-corridas/p19-capturas.ts",
+    "scripts/qa-corridas/rejection-reloop.ts",
+    "scripts/regression/cases.ts",
+    "scripts/regression/diag-timings.ts",
+    "scripts/regression/purge.ts",
+    "scripts/regression/run-baseline.ts",
+    "scripts/run-invariants.mjs",
+    "scripts/seed-matsu-chatbot.ts",
+    "scripts/seed-matsu-notifications.ts",
+    "scripts/seed-matsu-onboarding.ts",
+    "scripts/seed-matsu-week-results.ts",
+    "scripts/seed-matsu.ts",
+    "scripts/seed-messages-demo.ts",
+    "scripts/set-matsu-password.ts",
+    "scripts/utm1-smoke.mjs",
+    "scripts/utm1-verify-attribution.ts",
+    "scripts/v1-qa-wizard-states.ts"
+   ],
+   "loc": 17491,
+   "rutas": [],
+   "modelos": [
+    "BotConfig",
+    "Conversation",
+    "Organization",
+    "ChatbotEvent",
+    "ChatbotLead",
+    "Message",
+    "KnowledgeBase",
+    "QuotaUsage",
+    "OrgMember",
+    "User",
+    "Project",
+    "Task",
+    "OsPaymentMilestone",
+    "OsMaintenancePayment",
+    "OsTimeEntry",
+    "Subscription",
+    "ClientBrandProfile",
+    "ChatMessage",
+    "Service",
+    "OsLead",
+    "OsLeadDossier",
+    "OsLeadActivity",
+    "OsSetterNotice",
+    "BotAlert",
+    "Notification",
+    "OnboardingTask"
+   ],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": [
+    "auditoria/renovacion-2026-10",
+    "b0-isolation-motor-chatbot",
+    "rediseno/deslizar",
+    "rediseno/deslizar2",
+    "rediseno/home",
+    "respaldo/panel-2026-09-23",
+    "respaldo/rediseno-2026-09-23",
+    "respaldo/servicios-2026-09-22",
+    "respaldo/trabajos-2026-09-22",
+    "v3/cierre-etapa",
+    "v3/emite",
+    "b2-s1-bot-sync-surface",
+    "chore/security-quick-wins",
+    "p25/rafaga-tildes"
+   ]
   },
   {
    "id": "lib.security",
@@ -23080,6 +23935,147 @@
     "fecha": "2026-06-05"
    },
    "ramas": []
+  },
+  {
+   "id": "lib.tests",
+   "tipo": "lib",
+   "nombre": "lib.tests",
+   "padre": null,
+   "area": null,
+   "descripcion": "",
+   "archivos": [
+    "tests/e2e/01-landing.spec.ts",
+    "tests/e2e/02-chat-flow.spec.ts",
+    "tests/e2e/03-lead-capture.spec.ts",
+    "tests/e2e/04-health.spec.ts",
+    "tests/e2e/05-config-public.spec.ts",
+    "tests/e2e/06-admin-login.spec.ts",
+    "tests/e2e/07-admin-navigation.spec.ts",
+    "tests/e2e/08-admin-onboarding.spec.ts",
+    "tests/e2e/09-admin-bot-config.spec.ts",
+    "tests/e2e/10-admin-kb-edit.spec.ts",
+    "tests/e2e/11-client-login.spec.ts",
+    "tests/e2e/12-client-chatbot-section.spec.ts",
+    "tests/e2e/13-client-perf.spec.ts",
+    "tests/e2e/14-e2e-critical-flow.spec.ts",
+    "tests/e2e/15-client-personalization.spec.ts",
+    "tests/e2e/16-admin-bulk-actions.spec.ts",
+    "tests/e2e/17-admin-alerts-triage.spec.ts",
+    "tests/e2e/18-admin-audit-log.spec.ts",
+    "tests/e2e/19-security.spec.ts",
+    "tests/e2e/20-idor-optout.spec.ts",
+    "tests/e2e/20-mobile-responsive.spec.ts",
+    "tests/e2e/21-performance.spec.ts",
+    "tests/e2e/22-visual-regression.spec.ts",
+    "tests/e2e/30-onboarding-e2e-complete.spec.ts",
+    "tests/e2e/40-lead-capture-e2e.spec.ts",
+    "tests/e2e/41-admin-executive-report-send-now.spec.ts",
+    "tests/e2e/42-client-executive-report-prefs.spec.ts",
+    "tests/e2e/43-client-monthly-report-download.spec.ts",
+    "tests/galeria/captura.spec.ts",
+    "tests/helpers-probe/console-guard.probe.spec.ts",
+    "tests/helpers-probe/setter-ui.probe.spec.ts",
+    "tests/helpers/auth.ts",
+    "tests/helpers/chatbot-fixtures.ts",
+    "tests/helpers/form.ts",
+    "tests/helpers/setter-auth.ts",
+    "tests/helpers/setter-db.ts",
+    "tests/helpers/setter-ui.ts",
+    "tests/integration/alerts-detector.spec.ts",
+    "tests/integration/chatbot-isolation.spec.ts",
+    "tests/integration/cleanup-old-events-retention.spec.ts",
+    "tests/integration/executive-report-lead-count.spec.ts",
+    "tests/integration/fix-origin-same-origin-config.spec.ts",
+    "tests/integration/fixtures/motor-inbound-payloads.ts",
+    "tests/integration/generate-insights-pending-guard.spec.ts",
+    "tests/integration/motor-health.spec.ts",
+    "tests/integration/motor-inbound.spec.ts",
+    "tests/integration/motor-isolation.spec.ts",
+    "tests/integration/motor-outbound.spec.ts",
+    "tests/integration/motor-window.spec.ts",
+    "tests/leados/alta-import.spec.ts",
+    "tests/leados/campo-sin-herramienta.spec.ts",
+    "tests/leados/dossier-gates.spec.ts",
+    "tests/leados/envio-demo-rechazo.spec.ts",
+    "tests/leados/foco-no-miente.spec.ts",
+    "tests/leados/progreso-construccion.spec.ts",
+    "tests/leados/selfcheck-anti-bypass.spec.ts",
+    "tests/qa-persona/corrida-1-novato-frio.spec.ts",
+    "tests/qa-walkthrough/corrida-1.spec.ts",
+    "tests/setter/00-surfaces.spec.ts",
+    "tests/setter/01-flow.spec.ts",
+    "tests/setter/02-isolation.spec.ts",
+    "tests/setter/03-cabina.spec.ts",
+    "tests/setter/04-admin.spec.ts",
+    "tests/setter/05-empty-mobile-a11y.spec.ts",
+    "tests/setter/06-claim-atomico.spec.ts",
+    "tests/setter/07-admin-assign-caliente.spec.ts",
+    "tests/setter/08-m5-cadencia-agotada.spec.ts",
+    "tests/setter/09-archivo-terminal.spec.ts",
+    "tests/setter/10-unsaved-guard.spec.ts",
+    "tests/setter/11-fase-disabled.spec.ts",
+    "tests/setter/12-claim-agenda.spec.ts",
+    "tests/setter/13-m16-memoria.spec.ts",
+    "tests/setter/14-motivo-rechazo.spec.ts",
+    "tests/setter/15-callejones-borrador-chequeo.spec.ts",
+    "tests/setter/16-municiones-salida.spec.ts",
+    "tests/setter/17-datos-que-viajan.spec.ts",
+    "tests/setter/17-destinos-alcanzables.spec.ts",
+    "tests/setter/18-quinta-superficie.spec.ts",
+    "tests/setter/19-config-que-falta.spec.ts",
+    "tests/setter/20-veredicto-abre-construir.spec.ts",
+    "tests/setter/21-ficha-por-fuentes.spec.ts",
+    "tests/setter/22-cromo-primer-pliegue.spec.ts",
+    "tests/setter/23-accion-a-la-vista.spec.ts",
+    "tests/setter/24-paso-que-corresponde.spec.ts",
+    "tests/setter/25-franja-recorrido.spec.ts",
+    "tests/setter/26-cola-de-trabajo.spec.ts",
+    "tests/setter/27-cartera-agrupada.spec.ts",
+    "tests/setter/28-veredicto-y-ciclo.spec.ts"
+   ],
+   "loc": 15827,
+   "rutas": [],
+   "modelos": [
+    "ChatbotLead",
+    "Organization",
+    "BotConfig",
+    "KnowledgeBase",
+    "OrgMember",
+    "EmailContact",
+    "User",
+    "OsLead",
+    "OsLeadDossier",
+    "OsLeadActivity",
+    "OsSetterNotice",
+    "BotAlert",
+    "ChatbotEvent",
+    "Conversation",
+    "ChatMessage",
+    "CrmSyncAttempt",
+    "ChatbotInsight",
+    "WabaChannel",
+    "MotorTemplate",
+    "MotorAlert",
+    "ContactIdentity",
+    "MotorConversation",
+    "MotorMessage",
+    "ContactIdentityTransition",
+    "OsDemo",
+    "OsLeadSetterMeta"
+   ],
+   "entradas": [],
+   "dueno": "Valentino",
+   "zona": "libre",
+   "ultimo_commit": null,
+   "ramas": [
+    "b1-s1-bsp-inbound",
+    "b2-s1-bot-sync-surface",
+    "chore/gs-aislamiento",
+    "chore/security-quick-wins",
+    "claude/sad-burnell-2f5e2d",
+    "p25/carrera-tildes",
+    "p25/rafaga-tildes"
+   ]
   },
   {
    "id": "lib.tokens-estimate",
@@ -26030,14 +27026,14 @@
    "dueno": "",
    "zona": "libre",
    "ultimo_commit": {
-    "fecha": "2026-10-15"
+    "fecha": "2026-10-16"
    },
    "ramas": [],
-   "ahead": 21,
+   "ahead": 25,
    "behind": 0,
    "estado": "viva",
    "worktree": "C:/auditoria-2026-10",
-   "nodos_tocados": 191
+   "nodos_tocados": 284
   },
   {
    "id": "rama.b0-isolation-motor-chatbot",
@@ -27499,10 +28495,10 @@
    "dueno": "",
    "zona": "libre",
    "ultimo_commit": {
-    "fecha": "2026-10-15"
+    "fecha": "2026-10-16"
    },
    "ramas": [],
-   "ahead": 598,
+   "ahead": 605,
    "behind": 0,
    "estado": "viva",
    "worktree": "C:/rediseno-home",
@@ -28641,6 +29637,120 @@
    "a": "modelo.WabaChannel",
    "tipo": "depende",
    "campo": "wabaChannel"
+  },
+  {
+   "de": "lib.plataforma.instrumentation",
+   "a": "lib.plataforma.sentry-server-config",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.plataforma.instrumentation",
+   "a": "lib.plataforma.sentry-edge-config",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "lib.agency-settings",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "lib.data",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.scripts",
+   "a": "h3.adm-chatbots",
+   "tipo": "importa",
+   "peso": 2
+  },
+  {
+   "de": "lib.scripts",
+   "a": "int.sentry",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.chatbot.scoring",
+   "tipo": "importa",
+   "peso": 3
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.leados",
+   "tipo": "importa",
+   "peso": 36
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.prisma",
+   "tipo": "importa",
+   "peso": 29
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.chatbot.crm",
+   "tipo": "importa",
+   "peso": 3
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.chatbot.leads",
+   "tipo": "importa",
+   "peso": 2
+  },
+  {
+   "de": "lib.scripts",
+   "a": "int.cal-com",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.tests",
+   "tipo": "importa",
+   "peso": 2
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.dates-ar",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.prisma.seeds",
+   "tipo": "importa",
+   "peso": 4
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.chatbot.conversation",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.scripts",
+   "a": "lib.chatbot.tools",
+   "tipo": "importa",
+   "peso": 3
+  },
+  {
+   "de": "lib.plataforma.sentry-edge-config",
+   "a": "int.sentry",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.plataforma.sentry-server-config",
+   "a": "int.sentry",
+   "tipo": "importa",
+   "peso": 1
   },
   {
    "de": "lib.actions",
@@ -32759,6 +33869,443 @@
    "peso": 1
   },
   {
+   "de": "lib.plataforma.tailwind-config",
+   "a": "lib.design-tokens",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "int.email",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "lib.leados",
+   "tipo": "importa",
+   "peso": 43
+  },
+  {
+   "de": "lib.tests",
+   "a": "lib.isolation",
+   "tipo": "importa",
+   "peso": 6
+  },
+  {
+   "de": "lib.tests",
+   "a": "lib.chatbot.logging",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "h2.cli-reportes-email",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "h3.vis-api-chatbot",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "lib.chatbot.insights",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "h3.vis-whatsapp",
+   "tipo": "importa",
+   "peso": 6
+  },
+  {
+   "de": "lib.tests",
+   "a": "lib.crypto",
+   "tipo": "importa",
+   "peso": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "h5.set-dia",
+   "tipo": "importa",
+   "peso": 2
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Project",
+   "tipo": "usa-modelo",
+   "lee": 3,
+   "escribe": 3
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Task",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 3
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OsLead",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 2
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.User",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 7
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Organization",
+   "tipo": "usa-modelo",
+   "lee": 3,
+   "escribe": 4
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OrgMember",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 3
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Service",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 3
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Subscription",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 2
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Plan",
+   "tipo": "usa-modelo",
+   "lee": 4,
+   "escribe": 4
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.AgencySettings",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 2
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OsLeadActivity",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OsDemo",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OsLeadDossier",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OsPaymentMilestone",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 2
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OsMaintenancePayment",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OsTimeEntry",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Message",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 2
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Ticket",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 3
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.TicketMessage",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 5
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.ContactSubmission",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Invoice",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 2
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.ClientAsset",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.Notification",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.BotConfig",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 2
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.KnowledgeBase",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 1
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.PremiumModule",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 3
+  },
+  {
+   "de": "lib.prisma.seeds",
+   "a": "modelo.OrganizationModule",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 1
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.BotConfig",
+   "tipo": "usa-modelo",
+   "lee": 22,
+   "escribe": 9
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.Conversation",
+   "tipo": "usa-modelo",
+   "lee": 11,
+   "escribe": 11
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.Organization",
+   "tipo": "usa-modelo",
+   "lee": 23,
+   "escribe": 5
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.ChatbotEvent",
+   "tipo": "usa-modelo",
+   "lee": 5,
+   "escribe": 9
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.ChatbotLead",
+   "tipo": "usa-modelo",
+   "lee": 6,
+   "escribe": 12
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.Message",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 6
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.KnowledgeBase",
+   "tipo": "usa-modelo",
+   "lee": 3,
+   "escribe": 4
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.QuotaUsage",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 5
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OrgMember",
+   "tipo": "usa-modelo",
+   "lee": 3,
+   "escribe": 3
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.User",
+   "tipo": "usa-modelo",
+   "lee": 28,
+   "escribe": 13
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.Project",
+   "tipo": "usa-modelo",
+   "lee": 13,
+   "escribe": 2
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.Task",
+   "tipo": "usa-modelo",
+   "lee": 5,
+   "escribe": 2
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OsPaymentMilestone",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 0
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OsMaintenancePayment",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 0
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OsTimeEntry",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 0
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.Subscription",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 0
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.ClientBrandProfile",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 0
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.ChatMessage",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 1
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.Service",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 0
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OsLead",
+   "tipo": "usa-modelo",
+   "lee": 26,
+   "escribe": 33
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OsLeadDossier",
+   "tipo": "usa-modelo",
+   "lee": 11,
+   "escribe": 27
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OsLeadActivity",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 2
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OsSetterNotice",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 6
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.BotAlert",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 2
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.Notification",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 2
+  },
+  {
+   "de": "lib.scripts",
+   "a": "modelo.OnboardingTask",
+   "tipo": "usa-modelo",
+   "lee": 8,
+   "escribe": 2
+  },
+  {
    "de": "lib.actions",
    "a": "modelo.OnboardingTask",
    "tipo": "usa-modelo",
@@ -34654,6 +36201,188 @@
    "tipo": "usa-modelo",
    "lee": 0,
    "escribe": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.ChatbotLead",
+   "tipo": "usa-modelo",
+   "lee": 7,
+   "escribe": 9
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.Organization",
+   "tipo": "usa-modelo",
+   "lee": 20,
+   "escribe": 18
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.BotConfig",
+   "tipo": "usa-modelo",
+   "lee": 11,
+   "escribe": 11
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.KnowledgeBase",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.OrgMember",
+   "tipo": "usa-modelo",
+   "lee": 4,
+   "escribe": 0
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.EmailContact",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 3
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.User",
+   "tipo": "usa-modelo",
+   "lee": 4,
+   "escribe": 3
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.OsLead",
+   "tipo": "usa-modelo",
+   "lee": 11,
+   "escribe": 23
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.OsLeadDossier",
+   "tipo": "usa-modelo",
+   "lee": 10,
+   "escribe": 17
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.OsLeadActivity",
+   "tipo": "usa-modelo",
+   "lee": 3,
+   "escribe": 1
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.OsSetterNotice",
+   "tipo": "usa-modelo",
+   "lee": 1,
+   "escribe": 3
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.BotAlert",
+   "tipo": "usa-modelo",
+   "lee": 7,
+   "escribe": 3
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.ChatbotEvent",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 11
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.Conversation",
+   "tipo": "usa-modelo",
+   "lee": 3,
+   "escribe": 6
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.ChatMessage",
+   "tipo": "usa-modelo",
+   "lee": 4,
+   "escribe": 4
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.CrmSyncAttempt",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 4
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.ChatbotInsight",
+   "tipo": "usa-modelo",
+   "lee": 0,
+   "escribe": 4
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.WabaChannel",
+   "tipo": "usa-modelo",
+   "lee": 5,
+   "escribe": 6
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.MotorTemplate",
+   "tipo": "usa-modelo",
+   "lee": 3,
+   "escribe": 6
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.MotorAlert",
+   "tipo": "usa-modelo",
+   "lee": 11,
+   "escribe": 0
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.ContactIdentity",
+   "tipo": "usa-modelo",
+   "lee": 13,
+   "escribe": 6
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.MotorConversation",
+   "tipo": "usa-modelo",
+   "lee": 5,
+   "escribe": 8
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.MotorMessage",
+   "tipo": "usa-modelo",
+   "lee": 16,
+   "escribe": 8
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.ContactIdentityTransition",
+   "tipo": "usa-modelo",
+   "lee": 2,
+   "escribe": 0
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.OsDemo",
+   "tipo": "usa-modelo",
+   "lee": 5,
+   "escribe": 0
+  },
+  {
+   "de": "lib.tests",
+   "a": "modelo.OsLeadSetterMeta",
+   "tipo": "usa-modelo",
+   "lee": 4,
+   "escribe": 0
   },
   {
    "de": "h1",
