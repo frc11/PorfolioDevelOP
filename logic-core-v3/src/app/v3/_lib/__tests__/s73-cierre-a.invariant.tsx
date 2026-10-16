@@ -10,6 +10,8 @@
  *   A4 · la red de noche, estable: el temblor de los vértices al 20 % y más lento; el titileo, suave y lento.
  *   A6 · el indicador de progreso (el infinito con el porcentaje) se sacó en escritorio y en el teléfono; la esquina de abajo a la derecha,
  *        libre (el chatbot); el teléfono, el parlante a la izquierda y el menú al centro; en escritorio el parlante arriba a la izquierda.
+ *   A7 · la caída del pie, un 35 % más corta: el reloj del final corre más rápido; la física, el golpe, el sonido, los huecos y la cámara
+ *        cuelgan de él (sincronizados); el rebobinado, también un 35 % más corto.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { motionValue } from 'motion/react'
@@ -20,6 +22,8 @@ import { ORBITA_DEL_MOUSE, nuevaOrbita, pasoDeLaOrbita } from '../escena/final/o
 import { TRAMOS_DEL_PIE } from '../escena/pie3d/coreografia'
 import { PROGRESO_DEL_PIE } from '../pie3d/registro'
 import { DE_NOCHE, f as glsl } from '../escena/energia/dibujo/comun'
+import { FIN_DEL_GOLPE, LOGO_DE_SIEMPRE, REBOBINADO, RELOJ_DEL_FINAL, VIAJE_DEL_FINAL, pasoDelReloj, relojQuieto, segundosDelFinal, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
+import { CAIDA_AL_HUECO, anguloEnElReloj } from '../escena/final/caidaAlHueco'
 import { DIBUJO_DE_LA_RED, VERTICES_DE_LA_RED, armarLaRed } from '../escena/energia/dibujo/red'
 import { TRAZO } from '../escena/energia/dibujo/arcos'
 import * as THREE from 'three'
@@ -338,5 +342,57 @@ const lugaresBien = (esquina: string, sonido: string, menu: string): boolean => 
 }
 afirmar(lugaresBien(ESQUINA_A6, SONIDO_A6, MENU_A6), '  el teléfono: el parlante arriba a la izquierda y el menú al centro (el mismo eje, la zona segura); escritorio: el parlante arriba a la izquierda, del alto de la barra y en su vidrio, enfrente de Contacto y Login')
 controlPositivo('  el detector VE el parlante de escritorio abajo a la derecha (el de antes)', ESQUINA_A6.replace('escritorio:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]', 'escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)]'), (e: string) => lugaresBien(e, SONIDO_A6, MENU_A6))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A7 · La caída del pie, un 35 % más corta: el reloj del final más rápido, con la física y las sincronías; el rebobinado acompaña')
+
+/**
+ * La corrida sola (al fondo, con el pie entero, sin gestos) con el reloj del final, cuadro a cuadro: cuánto dura de verdad, cuándo cruza
+ * el golpe (`FIN_DEL_GOLPE`: el sonido, la súper onda y el filo se disparan ahí) y el ángulo del logo en el tiempo de verdad (la física:
+ * baja, vuelca cada vez más rápido —la gravedad—, toca y rebota). Todo lo de la caída es función de `fin` (los huecos por el ángulo, la
+ * cámara por `fin`): con el reloj más rápido van juntos.
+ */
+const DT_A7 = 1 / 240
+const ENTRA: EntradaDelReloj = { alFondo: true, pieEntero: true, rebobinar: false, haciaAbajo: false, sinGestoS: 0, viajeS: 0 }
+type PasoA7 = (r: RelojDelFinal, e: EntradaDelReloj, dt: number) => void
+interface DeLaCorrida {
+  readonly duraS: number
+  readonly golpeS: number
+  readonly aceleraAntes: boolean
+  readonly rebota: boolean
+}
+function corrida(paso: PasoA7): DeLaCorrida {
+  const r = relojQuieto()
+  let t = 0
+  let golpe = Number.NaN
+  const angulos: number[] = []
+  for (let i = 0; i < 20 * 240 && r.fin < 1; i += 1) {
+    const antes = r.fin
+    paso(r, ENTRA, DT_A7)
+    t += DT_A7
+    if (antes < FIN_DEL_GOLPE && r.fin >= FIN_DEL_GOLPE) golpe = t
+    angulos.push(anguloEnElReloj(LOGO_DE_SIEMPRE, segundosDelFinal(r.fin)).a)
+  }
+  // La velocidad del vuelco (rad/s de verdad) en el último cuarto de segundo antes del golpe: crece (la gravedad); y después del golpe
+  // el ángulo vuelve a bajar un poco (el rebote) antes de asentarse.
+  const k = Math.round(golpe / DT_A7)
+  const vel = (j: number): number => (angulos[j] - angulos[j - 12]) / (12 * DT_A7)
+  const aceleraAntes = k > 120 && vel(k - 2) > vel(k - 30) && vel(k - 30) > vel(k - 60) && vel(k - 60) > 0
+  const despues = angulos.slice(k, k + Math.round(0.6 / DT_A7))
+  const rebota = despues.some((a, j) => j > 0 && a < despues[j - 1] - 1e-4)
+  return { duraS: t, golpeS: golpe, aceleraAntes, rebota }
+}
+const CORRIDA = corrida(pasoDelReloj)
+// El de antes: el mismo reloj a un segundo suyo por segundo (con su arranque, la inercia del reloj, a esa escala).
+const pasoDeAntes: PasoA7 = (r, e, dt) => pasoDelReloj(r, e, dt / RELOJ_DEL_FINAL.ritmo)
+const ANTES_A7 = corrida(pasoDeAntes)
+const corridaBien = (c: DeLaCorrida, antes: DeLaCorrida): boolean =>
+  Math.abs(c.duraS / antes.duraS - 0.65) < 0.02 && Math.abs(c.golpeS / antes.golpeS - 0.65) < 0.02 && c.aceleraAntes && c.rebota && antes.aceleraAntes && antes.rebota
+afirmar(corridaBien(CORRIDA, ANTES_A7), `  sola dura ${CORRIDA.duraS.toFixed(2)} s (antes ${ANTES_A7.duraS.toFixed(2)}: el ${((CORRIDA.duraS / ANTES_A7.duraS) * 100).toFixed(0)} %) y el golpe cae a los ${CORRIDA.golpeS.toFixed(2)} s (antes ${ANTES_A7.golpeS.toFixed(2)}: en su mismo lugar del reloj, ${String(CAIDA_AL_HUECO.golpeS)} de ${String(RELOJ_DEL_FINAL.duracionS)}); el vuelco acelera hasta el golpe y rebota`)
+controlPositivo('  el detector VE la caída de antes (la misma duración)', ANTES_A7, (c: DeLaCorrida) => corridaBien(c, ANTES_A7))
+// El rebobinado acompaña: desde el final entero y en un viaje del menú, el 65 % de lo de antes (1,4 s y 1 s).
+const rebobinadoBien = (tope: number, minimo: number, dentro: number): boolean => Math.abs(tope / 1.4 - 0.65) < 0.01 && Math.abs(minimo / 1 - 0.65) < 0.01 && Math.abs(dentro / 1 - 0.65) < 0.01
+afirmar(rebobinadoBien(REBOBINADO.topeS, REBOBINADO.minimoS, VIAJE_DEL_FINAL.dentroS), `  el rebobinado acompaña: desde el final entero ${String(REBOBINADO.topeS)} s (era 1,4), su mínimo ${String(REBOBINADO.minimoS)} (era 1) y en un viaje ${String(VIAJE_DEL_FINAL.dentroS)} (era 1)`)
+controlPositivo('  el detector VE el rebobinado de antes', [1.4, 1, 1] as const, (x: readonly number[]) => rebobinadoBien(x[0], x[1], x[2]))
 
 cerrar('s73-cierre-a')

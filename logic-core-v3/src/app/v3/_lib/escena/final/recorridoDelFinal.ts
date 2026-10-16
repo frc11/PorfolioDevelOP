@@ -107,7 +107,9 @@ export const FINAL_DEL_PIE = {
 // [PULIDO 19] Q2 · y las piezas del pie que caen después del logo (`caidaDelPie.ts`: `hastaS`, con el destello y la expansión al final).
 // Con el reloj más largo la subida de la cámara es más empinada en `fin`: la salida la deja bajar de punta a punta en 0,95 s (era 1,2)
 // y mira un poco más adelante (0,13): sale en menos de 3 s sin pasar el tope (s52 A2).
-export const RELOJ_DEL_FINAL = { duracionS: CAIDA_AL_HUECO.golpeS + CAIDA_DEL_PIE.hastaS, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 0.95, mira: 0.13 }, inerciaS: 0.12 } as const
+// [CIERRE A] A7 · LA CAÍDA, MÁS RÁPIDA: corriendo, el reloj avanza `ritmo` segundos suyos por segundo (era 1): todo lo que cuelga de él
+// (la física de la caída, el golpe, el sonido, los huecos y la cámara) va igual en su reloj y dura un 35 % menos (de 6 s a 3,9).
+export const RELOJ_DEL_FINAL = { duracionS: CAIDA_AL_HUECO.golpeS + CAIDA_DEL_PIE.hastaS, ritmo: 1 / 0.65, vuelveAEmpezarS: 2.5, topeDelGestoS: 0.8, colaDelGesto: 0.5, cambioDeSentidoS: 0.3, salida: { finS: 1.2, camaraS: 0.95, mira: 0.13 }, inerciaS: 0.12 } as const
 
 /** [PULIDO 13] K4 · `fin` del golpe: de ahí para arriba el logo está acostado y la cámara en el cenit. */
 export const FIN_DEL_GOLPE = CAIDA_AL_HUECO.golpeS / RELOJ_DEL_FINAL.duracionS
@@ -120,7 +122,8 @@ export const FIN_DEL_GOLPE = CAIDA_AL_HUECO.golpeS / RELOJ_DEL_FINAL.duracionS
  * (`quietoRebobinado`): desde cualquier punto, todo vuelve en a lo sumo `topeS`.
  */
 // [PULIDO 22] T4 · `topeS` desde el final entero, en lo visible (`rebobinadoVisible.ts`): el vuelco vuelve en ~0,55 s (antes, en ~0,1 s).
-export const REBOBINADO = { topeS: 1.4, curva: 'simetrica', minimoS: 1 } as const satisfies { readonly topeS: number; readonly curva: NombreDeCurva; readonly minimoS: number }
+// [CIERRE A] A7 · el rebobinado acompaña a la caída: un 35 % más corto (era 1,4 y 1).
+export const REBOBINADO = { topeS: 0.91, curva: 'simetrica', minimoS: 0.65 } as const satisfies { readonly topeS: number; readonly curva: NombreDeCurva; readonly minimoS: number }
 
 /**
  * [PULIDO 1] P2 · cuánto dura el rebobinado desde `desde` (lo avanzado, 0 a 1). Con `minimo` (la prueba
@@ -168,7 +171,8 @@ export function quietoRebobinado(alEmpezar: { readonly giro: number; readonly al
  * (`segundosDelViaje`, el mismo que mueve el scroll): la cámara del recorrido no se adelanta a la vuelta. Se fueron el reparto
  * del tiempo por lo que se veía cambiar (pesos de cámara, logo y piso), el techo en una fracción del viaje y `vuelta=corta`.
  */
-export const VIAJE_DEL_FINAL = { dentroS: 1 } as const
+// [CIERRE A] A7 · en un viaje, también un 35 % más corta (era 1 s).
+export const VIAJE_DEL_FINAL = { dentroS: 0.65 } as const
 
 /** [PULIDO 2] 2 · cuánto tarda el final en volver en un viaje desde `desde`: el rebobinado de P2, comprimido a `dentroS`. */
 export function duracionDeLaVuelta(desde: number): number {
@@ -300,7 +304,7 @@ export function pasoDelReloj(r: RelojDelFinal, e: EntradaDelReloj, dt: number): 
       }
       return
     }
-    if (r.fase === 'corre') objetivo = 1 / R.duracionS
+    if (r.fase === 'corre') objetivo = R.ritmo / R.duracionS
     else if (r.fase === 'parada') objetivo = 0
     else objetivo = -velocidadDeSalida(r.fin)
   }

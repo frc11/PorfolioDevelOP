@@ -175,16 +175,23 @@ const rebobinarDesde = (paso: PasoDelReloj, desde: number): Rebobinado => {
   r.fin = desde
   paso(r, { ...AL_FONDO, rebobinar: true }, DT)
   const pasos: number[] = []
+  // [CIERRE A] A7 · y sus pasos en LO VISIBLE (donde corre la curva, `rebobinadoVisible.ts`): con el rebobinado un 35 % más corto, en
+  // `fin` el primer cuadro cruza rápido lo quieto de después del golpe (lo que no se ve moverse) y ya no servía de medida del in-out.
+  const visibles: number[] = []
   let t = DT
   let antes = r.fin
+  let antesVisible = visibleHasta(r.fin, LOGO_DE_SIEMPRE)
   for (let i = 0; i < 1200 && r.fin > 0; i += 1) {
     paso(r, { ...AL_FONDO, sinGestoS: t }, DT)
     t += DT
     pasos.push(antes - r.fin)
     antes = r.fin
+    const v = visibleHasta(r.fin, LOGO_DE_SIEMPRE)
+    visibles.push(antesVisible - v)
+    antesVisible = v
   }
-  const pico = Math.max(...pasos)
-  return { dura: r.fin === 0 ? t : Number.POSITIVE_INFINITY, primerPaso: pasos[1] ?? 0, ultimoPaso: pasos[pasos.length - 1] ?? 0, pico, monotono: pasos.every((p) => p >= -1e-9), fase: r.fase }
+  const pico = Math.max(...visibles)
+  return { dura: r.fin === 0 ? t : Number.POSITIVE_INFINITY, primerPaso: visibles[1] ?? 0, ultimoPaso: visibles[visibles.length - 1] ?? 0, pico, monotono: pasos.every((p) => p >= -1e-9), fase: r.fase }
 }
 const DESDES = [0.1, 0.25, 0.5, 0.75, 1] as const
 const rebobinadoBien = (paso: PasoDelReloj): boolean =>
@@ -225,7 +232,8 @@ const vuelcoAlRebobinar = (paso: PasoDelReloj): number => {
   return s
 }
 const VUELCO = vuelcoAlRebobinar(pasoDelReloj)
-afirmar(VUELCO >= 0.45 && VUELCO <= 0.7, `  [PULIDO 22] T4 · rebobinando desde el final, el vuelco del logo vuelve en ${VUELCO.toFixed(2)} s (entre 0,45 y 0,7: no vuela)`)
+// [CIERRE A] A7 · con el rebobinado un 35 % más corto, la ventana también (era de 0,45 a 0,7 s).
+afirmar(VUELCO >= 0.45 * 0.65 && VUELCO <= 0.7 * 0.65, `  [PULIDO 22] T4 · rebobinando desde el final, el vuelco del logo vuelve en ${VUELCO.toFixed(2)} s (entre 0,29 y 0,46 —[CIERRE A] A7: el 65 % de 0,45 y 0,7—: no vuela)`)
 const parejoComoP2: PasoDelReloj = (r, e, dt) => {
   if (r.fase === 'rebobina') {
     r.rebobinado.s += dt
@@ -279,8 +287,9 @@ for (let i = 0; i < 1200 && mediaVuelta.x !== 0; i += 1) {
 afirmar(tMedia > 2, '  (con la vuelta con tope, media vuelta del quieto tardaba más de 2 s: el motivo de atarlo al rebobinado)', `${tMedia.toFixed(2)} s`)
 
 // La otra lectura del pedido («entre 1 y 2 s desde cualquier punto»), atrás de `?rebobinado=minimo`: nunca menos de 1 s.
-const minimoBien = (f: typeof duracionDelRebobinado): boolean => [0.05, 0.3, 0.6].every((d) => f(d, REBOBINADO.minimoS) >= 1 && f(d, REBOBINADO.minimoS) <= 2) && f(1, REBOBINADO.minimoS) === REBOBINADO.topeS && f(0.05) < 0.1
-afirmar(minimoBien(duracionDelRebobinado) && entornoPedido('producto,rebobinado=minimo').pruebas.rebobinado === 'minimo' && ENTORNO.pruebas.rebobinado === 'no', '  la alternativa `?rebobinado=minimo` (al menos 1 s desde cualquier punto) existe y está apagada en el producto')
+// [CIERRE A] A7 · el mínimo, un 35 % más corto (era 1 s).
+const minimoBien = (f: typeof duracionDelRebobinado): boolean => [0.05, 0.3, 0.6].every((d) => f(d, REBOBINADO.minimoS) >= 0.65 && f(d, REBOBINADO.minimoS) <= 2) && f(1, REBOBINADO.minimoS) === REBOBINADO.topeS && f(0.05) < 0.1
+afirmar(minimoBien(duracionDelRebobinado) && entornoPedido('producto,rebobinado=minimo').pruebas.rebobinado === 'minimo' && ENTORNO.pruebas.rebobinado === 'no', '  la alternativa `?rebobinado=minimo` (al menos 0,65 s desde cualquier punto: [CIERRE A] A7) existe y está apagada en el producto')
 controlPositivo('  el detector VE una alternativa que no pone el mínimo', ((d: number) => REBOBINADO.topeS * d) as typeof duracionDelRebobinado, minimoBien)
 
 // ═══════════════════════════════════════════════════════════════════════════

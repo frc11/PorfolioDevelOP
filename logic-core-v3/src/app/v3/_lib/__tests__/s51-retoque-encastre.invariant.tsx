@@ -165,7 +165,8 @@ const cinematica = (paso: PasoDelReloj): Cinematica => {
 }
 const R = RELOJ_DEL_FINAL
 const cinematicaBien = (c: Cinematica): boolean =>
-  c.esperaAlPie === 0 && Math.abs(c.sola - R.duracionS) < 0.25 && Math.abs(c.conRuedaAbajo - c.sola) <= DT && Math.abs(c.rebobinaSola - REBOBINADO.topeS) < 0.1 && c.saliendo < 3 && c.viaje < 3
+  // [CIERRE A] A7 · sola, en lo que dura su reloj a su ritmo (`duracionS / ritmo`: 3,9 s, era 6).
+  c.esperaAlPie === 0 && Math.abs(c.sola - R.duracionS / R.ritmo) < 0.25 && Math.abs(c.conRuedaAbajo - c.sola) <= DT && Math.abs(c.rebobinaSola - REBOBINADO.topeS) < 0.1 && c.saliendo < 3 && c.viaje < 3
 const medida = cinematica(pasoDelReloj)
 afirmar(cinematicaBien(medida), 'al fondo espera al pie entero y corre sola a UNA velocidad (la rueda hacia abajo no la adelanta); UN gesto hacia arriba la rebobina entera, sola ([PULIDO 1] P2: en 1,6 s desde el final entero, no a la velocidad de la cinemática); fuera del fondo o con un viaje del menú vuelve a cero', `sola ${medida.sola.toFixed(2)} s · con la rueda abajo ${medida.conRuedaAbajo.toFixed(2)} s · rebobina sola en ${medida.rebobinaSola.toFixed(2)} s · saliendo ${medida.saliendo.toFixed(2)} s · viaje ${medida.viaje.toFixed(2)} s`)
 // Los controles: el reloj de EL ENCASTRE (la rueda hacia abajo lo adelanta: la cola entera, la secuencia entera) y el de

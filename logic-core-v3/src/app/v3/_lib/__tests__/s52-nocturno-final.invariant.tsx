@@ -111,7 +111,8 @@ const unGesto = (paso: PasoDelReloj): UnGesto => {
 // [PULIDO 1] P2 · la velocidad cambió por pedido (de la de la cinemática, 6,4 s, a lo avanzado por 1,6 s con curva in-out):
 // lo que A1 fija sigue igual de fuerte (entero, solo, hasta parada; el reinicio a los 2,5 s) y la velocidad es la de P2 (el
 // detalle, en `s52-pulido-1`): desde el final entero entre 1 y 2 s, sin pasar el pico de su curva (2/`topeS` por segundo).
-const unGestoBien = (g: UnGesto): boolean => g.rebobinaS >= 1 && g.rebobinaS <= 2 && Math.abs(g.rebobinaS - REBOBINADO.topeS) < 0.1 && g.velocidadMaxima <= (2 / REBOBINADO.topeS) * 1.001 && g.fase === 'parada' && Math.abs(g.paradaS - R.vuelveAEmpezarS) < 0.05
+// [CIERRE A] A7 · el rebobinado acompaña a la caída, un 35 % más corto: desde el final entero, `topeS` (0,91 s; el piso era 1 s).
+const unGestoBien = (g: UnGesto): boolean => g.rebobinaS >= 0.65 && g.rebobinaS <= 2 && Math.abs(g.rebobinaS - REBOBINADO.topeS) < 0.1 && g.velocidadMaxima <= (2 / REBOBINADO.topeS) * 1.001 && g.fase === 'parada' && Math.abs(g.paradaS - R.vuelveAEmpezarS) < 0.05
 const g1 = unGesto(pasoDelReloj)
 afirmar(unGestoBien(g1), 'UN gesto hacia arriba (un solo cuadro con el pedido) rebobina la cinemática ENTERA, sola, en lo de P2 de PULIDO 1 ([PULIDO 22] T4: `topeS` desde el final entero, en lo visible; nunca más de 2) hasta el logo parado; parada, vuelve a empezar sola a los 2,5 s sin gestos', `rebobina en ${g1.rebobinaS.toFixed(2)} s · a lo sumo ${g1.velocidadMaxima.toFixed(4)}/s · parada ${g1.paradaS.toFixed(2)} s`)
 const mientrasSiga: PasoDelReloj = (r, e, dt) => {
