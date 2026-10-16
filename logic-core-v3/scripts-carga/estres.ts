@@ -15,7 +15,7 @@
  *   … SOLO=normal,cpu  (sólo esas condiciones)   PRIMERAS=12 (las primeras N corridas)   AGRESIVO=1 (CPU ×6, las fuentes 5 s tarde)
  *   … SIN_REIMPRESION=1 (el control positivo: la página con `&reimpresion=no`)
  */
-import { chromium, type BrowserContext, type CDPSession, type Page } from '@playwright/test'
+import { chromium, type CDPSession, type Page } from '@playwright/test'
 import { execSync } from 'node:child_process'
 import { appendFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
@@ -111,12 +111,24 @@ interface Pulso {
   readonly viaje: string | null
   readonly lenis: string | null
   readonly visible: boolean
+  readonly escenaLista?: boolean
 }
 async function pulso(p: Page): Promise<Pulso | null> {
   return p.evaluate(() => {
     const d = (window as unknown as { __v3diag?: { pulso: () => Pulso } }).__v3diag
     return d === undefined ? null : d.pulso()
   })
+}
+
+/** Espera a que la escena haya dibujado su primer cuadro (o se haya caído): con la CPU lenta y en frío tarda segundos. Devuelve cuánto. */
+async function esperarLaEscena(p: Page, topeMs = 30000): Promise<number> {
+  const t0 = Date.now()
+  while (Date.now() - t0 < topeMs) {
+    const x = await pulso(p).catch(() => null)
+    if (x !== null && x.escenaLista !== false) break
+    await dormir(150)
+  }
+  return Date.now() - t0
 }
 
 /** Espera la llegada: sin viaje, el scroll quieto 600 ms y el Lenis sin moverse (a lo sumo `topeMs`). Devuelve cuánto tardó. */
@@ -153,18 +165,30 @@ async function clickear(p: Page, item: Item, t0: number): Promise<{ readonly ms:
   return { ms: Date.now() - t0, ok: true }
 }
 
-/** La pestaña al fondo (otra adelante) y de vuelta. */
-async function alFondo(ctx: BrowserContext, p: Page, ms: number): Promise<string> {
-  const otra = await ctx.newPage()
-  await otra.goto('about:blank')
-  await otra.bringToFront()
-  await dormir(200)
-  const estado = await p.evaluate(() => document.visibilityState).catch(() => '?')
+/**
+ * La pestaña al fondo y de vuelta, EMULADA: Playwright mantiene sus páginas visibles aunque la ventana se minimice o se tape (medido: ni
+ * otra pestaña ni minimizar cambian `document.visibilityState`). Se emula la señal que el código lee —`visibilityState`, `hidden` y su
+ * evento— con un guion de arranque (`EMULAR_LA_VISIBILIDAD`); los cuadros y los relojes siguen andando. Devuelve lo que la página dijo.
+ */
+async function alFondo(p: Page, ms: number): Promise<string> {
+  const poner = (oculta: boolean): Promise<string> =>
+    p.evaluate((o) => {
+      ;(window as unknown as { __ocultaDelArnes: boolean }).__ocultaDelArnes = o
+      document.dispatchEvent(new Event('visibilitychange'))
+      return document.visibilityState
+    }, oculta)
+  const estado = await poner(true).catch(() => '?')
   await dormir(ms)
-  await otra.close()
-  await p.bringToFront()
+  await poner(false).catch(() => '?')
   return estado
 }
+
+/** El guion de arranque de la visibilidad emulada (en cada navegación; sin pedir nada, visible). */
+const EMULAR_LA_VISIBILIDAD = `(() => {
+  window.__ocultaDelArnes = false
+  Object.defineProperty(Document.prototype, 'visibilityState', { configurable: true, get() { return window.__ocultaDelArnes ? 'hidden' : 'visible' } })
+  Object.defineProperty(Document.prototype, 'hidden', { configurable: true, get() { return window.__ocultaDelArnes } })
+})()`
 
 async function condicionar(cdp: CDPSession, c: Condicion): Promise<void> {
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: c === 'cpu' ? (AGRESIVO ? 6 : 4) : 1 })
@@ -242,6 +266,7 @@ async function main(): Promise<void> {
     args: ['--force_high_performance_gpu', '--window-size=1460,1000', '--window-position=0,0', '--no-first-run', '--no-default-browser-check', '--mute-audio', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion,Translate,MediaRouter'],
   })
   const p = ctx.pages()[0] ?? (await ctx.newPage())
+  await ctx.addInitScript(EMULAR_LA_VISIBILIDAD)
   const cdp = await ctx.newCDPSession(p)
   await cdp.send('Network.enable')
   // Ninguna ruta real: todo /api/ bloqueado (sin interceptar: la caché sigue andando).
@@ -301,13 +326,21 @@ async function main(): Promise<void> {
       } else await p.goto(url, { waitUntil: 'commit', timeout: 120000 })
       if (e.condicion === 'fondo') {
         await dormir(200)
-        fondo = await alFondo(ctx, p, 4000)
+        fondo = await alFondo(p, 4000)
         t0 = Date.now()
       }
       await dormir(t0 + e.momentoMs - Date.now())
       const clic = await clickear(p, e.item, t0)
       const segundo = e.segundo === null ? null : (await dormir(250), await clickear(p, e.segundo, t0))
       const llegada = await esperarLaLlegada(p)
+      // La llegada es con la escena lista (su primer cuadro): si no lo estaba al terminar el viaje, lo literal (a 1,5 s del fin del viaje) aparte.
+      let alLlegar: Revision | null = null
+      let escenaMs = 0
+      if ((await pulso(p).catch(() => null))?.escenaLista === false) {
+        await dormir(1500)
+        alLlegar = await revisar(p, ref)
+        escenaMs = await esperarLaEscena(p)
+      }
       let contexto: string | null = null
       if (e.condicion === 'contexto') {
         contexto = await p.evaluate(async () => {
@@ -331,10 +364,10 @@ async function main(): Promise<void> {
       await dormir(1500)
       const trasScroll = await revisar(p, ref)
       const eventos = await p.evaluate(() => (window as unknown as { __v3diag?: { eventos: () => unknown[] } }).__v3diag?.eventos().slice(-150) ?? [])
-      const fila = { tipo: 'corrida', ...e, fondo, clic, segundoClic: segundo, llegada, contexto, estricto, persistente, trasScroll, errores: [...new Set(errores)].slice(0, 12), avisos: avisos.length, eventos }
+      const fila = { tipo: 'corrida', ...e, fondo, clic, segundoClic: segundo, llegada, escenaMs, alLlegar, contexto, estricto, persistente, trasScroll, errores: [...new Set(errores)].slice(0, 12), avisos: avisos.length, eventos }
       appendFileSync(archivo, `${JSON.stringify(fila)}\n`)
       const fs = (r: Revision | null): string => (r === null ? 'SIN DIAG' : r.fallas.length === 0 ? 'ok' : [...new Set(r.fallas.map((f) => f.tipo))].join('+'))
-      console.log(`${String(e.n).padStart(3)} ${e.condicion.padEnd(8)} ${e.carga.padEnd(7)} ${String(e.momentoMs).padStart(4)}ms ${e.item}${e.segundo === null ? '' : `+${e.segundo}`} · llega ${String(llegada.ms)}ms · ${fs(estricto)} | ${fs(persistente)} | ${fs(trasScroll)}${errores.length > 0 ? ` · ${String(errores.length)} errores` : ''}`)
+      console.log(`${String(e.n).padStart(3)} ${e.condicion.padEnd(8)} ${e.carga.padEnd(7)} ${String(e.momentoMs).padStart(4)}ms ${e.item}${e.segundo === null ? '' : `+${e.segundo}`} · llega ${String(llegada.ms)}ms${escenaMs > 0 ? ` (+${String(escenaMs)}ms la escena: ${fs(alLlegar)})` : ''} · ${fs(estricto)} | ${fs(persistente)} | ${fs(trasScroll)}${errores.length > 0 ? ` · ${String(errores.length)} errores` : ''}`)
     } catch (err) {
       appendFileSync(archivo, `${JSON.stringify({ tipo: 'corrida', ...e, error: String(err).slice(0, 300) })}\n`)
       console.log(`${String(e.n).padStart(3)} ERROR ${String(err).slice(0, 160)}`)

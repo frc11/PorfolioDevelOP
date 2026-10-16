@@ -126,11 +126,10 @@ export function useProgresoDePatron({
     // devuelve ceros, y un cero no es una medición chica, es una medición falsa.
     if (elemento === null || foto.alto === 0) return
 
-    const caja = elemento.getBoundingClientRect()
-    // [CIERRE A-ter] A13 · el tope sin lo que corren los `sticky`: una época a mitad de una sección clavada no corre el rango (`enReposo.ts`).
+    // [CIERRE A-ter] A13 · en el layout, sin lo que corren los `sticky` ni las transformadas: una época a mitad de la página no corre el rango (`enReposo.ts`).
     const medida: CajaMedida = {
       topDoc: topeEnReposo(elemento),
-      alto: caja.height,
+      alto: elemento.offsetHeight,
     }
     rango.current = rangoDeScroll(anclas, medida, foto.alto)
     version.set(version.get() + 1)

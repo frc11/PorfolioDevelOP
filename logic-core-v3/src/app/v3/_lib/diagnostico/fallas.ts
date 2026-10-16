@@ -27,6 +27,8 @@ export const UMBRALES_DE_LA_CARGA = {
   letrasEm: 0.02,
   /** Llegado y no ido (el pedido de su progreso). */
   llegado: 0.99,
+  /** Lo que tarda el cambio del DOM al impreso (el fundido del DOM, ~0,4 s, y el primer cuadro): antes no cuenta como «los dos» ni «ninguno». */
+  cambioMs: 1000,
   /** Lo que el túnel puede ir atrás de lo que pide el scroll (fracción de su tramo). */
   tunel: 0.05,
 } as const
@@ -34,6 +36,8 @@ export const UMBRALES_DE_LA_CARGA = {
 export interface TextoDelDiag {
   readonly id: string
   readonly sistema: 'titulo' | 'pie' | 'tarjeta'
+  /** Hace cuánto (ms) quedó listo (`null`: no se sabe, se cuenta como hace mucho). */
+  readonly listoHaceMs?: number | null
   readonly listo: boolean
   readonly enPantalla: boolean
   readonly domOpacidad: number
@@ -80,19 +84,23 @@ export interface FallaDeLaCarga {
 
 const f2 = (x: number): string => x.toFixed(2)
 
+/** Los umbrales, cualquier número (para los controles de s75). */
+export type UmbralesDeLaCarga = { readonly [K in keyof typeof UMBRALES_DE_LA_CARGA]: number }
+
 /** Las fallas de un estado (vacío: la carga está bien). */
-export function fallasDe(e: EstadoDelDiag, u: typeof UMBRALES_DE_LA_CARGA = UMBRALES_DE_LA_CARGA): FallaDeLaCarga[] {
+export function fallasDe(e: EstadoDelDiag, u: UmbralesDeLaCarga = UMBRALES_DE_LA_CARGA): FallaDeLaCarga[] {
   const fallas: FallaDeLaCarga[] = []
   const falla = (tipo: TipoDeFalla, id: string, detalle: string): void => {
     fallas.push({ tipo, id, detalle })
   }
   if (!e.visible) return fallas
   for (const x of e.textos) {
+    const asentado = (x.listoHaceMs ?? Number.POSITIVE_INFINITY) > u.cambioMs
     if (x.enPantalla && !x.listo) falla('sin-imprimir', x.id, `DOM ${f2(x.domOpacidad)}`)
     if (x.listo && x.impreso !== null && !x.impreso.fuenteCargada) falla('fuente-de-respaldo', x.id, `impreso a los ${String(x.impreso.t)} ms (v${String(x.impreso.version)}); ahora ${x.fuenteCargadaAhora ? 'cargada' : 'sin cargar'}`)
     if (x.listo && x.letrasCorridasEm !== null && x.letrasCorridasEm > u.letrasEm) falla('letras-corridas', x.id, `${x.letrasCorridasEm.toFixed(3)} em`)
-    if (x.listo && x.enPantalla && x.domOpacidad > u.domVisible) falla('dom-visible', x.id, `DOM ${f2(x.domOpacidad)}`)
-    if (x.listo && x.enPantalla && x.debeDibujarse && x.domOpacidad <= u.domVisible && x.dibujada === false && e.viaje === null) falla('ninguno-visible', x.id, 'DOM apagado y la pieza sin dibujarse')
+    if (x.listo && asentado && x.enPantalla && x.domOpacidad > u.domVisible) falla('dom-visible', x.id, `DOM ${f2(x.domOpacidad)}`)
+    if (x.listo && asentado && x.enPantalla && x.debeDibujarse && x.domOpacidad <= u.domVisible && x.dibujada === false && e.viaje === null) falla('ninguno-visible', x.id, 'DOM apagado y la pieza sin dibujarse')
   }
   if (e.epoca.alto === 0 && e.bloques.length > 0) falla('epoca-sin-medir', 'epoca', `época ${String(e.epoca.epoca)} con el alto en 0`)
   if (e.viaje === null) {

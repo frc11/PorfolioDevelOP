@@ -392,9 +392,13 @@ afirmar(
   '  🔴 el reloj de seguridad sale del TOTAL (el preludio, el recorrido de ESTE viaje y el margen): si se olvidara uno, abortaría un viaje válido a mitad de camino',
 )
 // [PULIDO 27] Y4 b · más el hundimiento del pie acostado, que va antes.
+// [CIERRE A-ter] A13 · cambió por pedido (la carga a prueba de todo): con la CPU lenta el viaje tarda más que su total (avanza a lo sumo un
+// tope por cuadro) y el reloj lo abortaba a mitad de camino: ahora, cumplido el total, espera otro margen mientras Lenis siga yendo.
 afirmar(
-  FUENTE_DEL_EFECTO.includes('window.setTimeout(() => terminar(false), demora + relojDeSeguridadMs(duracionMs))'),
-  '  y es ese total (más el hundimiento del pie, que va antes) el que se le pasa al reloj, no una cuenta escrita de nuevo',
+  FUENTE_DEL_EFECTO.includes('reloj = window.setTimeout(vigilarElViaje, demora + relojDeSeguridadMs(duracionMs))') &&
+    FUENTE_DEL_EFECTO.includes("if (lenis !== null && lenis.isScrolling !== false && document.visibilityState === 'visible') reloj = window.setTimeout(vigilarElViaje, MARGEN_DEL_RELOJ_MS)") &&
+    /else terminar\(false\)/.test(FUENTE_DEL_EFECTO),
+  '  y es ese total (más el hundimiento del pie, que va antes) el que se le pasa al reloj, no una cuenta escrita de nuevo; y no aborta un viaje que Lenis sigue haciendo',
 )
 afirmar(
   /window\.clearTimeout\(relojDeArranque\)/.test(FUENTE_DEL_EFECTO),
@@ -542,7 +546,8 @@ const sinFreno = (f: string): boolean => f.includes('soltarLaRueda = retenerLosG
 afirmar(sinFreno(EFECTO_LIMPIO), '  salida 2 — [RETOQUE DEL ENCASTRE] 2C · cambió por pedido: la rueda ya no cancela; mientras viaja, los gestos de scroll se retienen (antes que Lenis) y el viaje termina en su destino')
 controlPositivo('  el detector VE la rueda que cancelaba (con Lenis)', EFECTO_LIMPIO + "\nsoltarLaRueda = lenis.on('virtual-scroll', ({ deltaX, deltaY }) => {", sinFreno)
 afirmar(EFECTO_LIMPIO.includes("window.addEventListener('popstate'"), '  salida 3 — el botón de atrás a mitad de vuelo')
-afirmar(EFECTO_LIMPIO.includes('window.setTimeout(() => terminar(false)'), '  salida 4 — el reloj, que es la única que corre con la pestaña tapada')
+// [CIERRE A-ter] A13 · el reloj espera mientras Lenis sigue yendo con la pestaña a la vista; con la pestaña tapada sale como siempre.
+afirmar(EFECTO_LIMPIO.includes('reloj = window.setTimeout(vigilarElViaje,') && EFECTO_LIMPIO.includes("document.visibilityState === 'visible') reloj") && EFECTO_LIMPIO.includes('else terminar(false)'), '  salida 4 — el reloj, que es la única que corre con la pestaña tapada')
 afirmar(/return \(\) => \{[\s\S]*terminar\(false\)/.test(EFECTO_LIMPIO), '  salida 5 — la limpieza: desmontar no deja un `<main>` inerte')
 afirmar(EFECTO_LIMPIO.includes('lock: false'), 'el viaje va con `lock: false`, EXPLÍCITO: Lenis no encierra nada por su cuenta (RETOQUE DEL ENCASTRE 2C: la rueda no le llega mientras viaja; la retiene `gestosDelScroll.ts`)')
 afirmar(

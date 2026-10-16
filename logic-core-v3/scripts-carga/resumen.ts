@@ -32,6 +32,8 @@ interface Corrida {
   readonly momentoMs: number
   readonly error?: string
   readonly estricto?: Revision | null
+  /** Lo literal (a 1,5 s del fin del viaje) cuando la escena todavía no estaba lista; si lo estaba, es lo estricto. */
+  readonly alLlegar?: Revision | null
   readonly persistente?: Revision | null
   readonly trasScroll?: Revision | null
   readonly errores?: readonly string[]
@@ -44,6 +46,7 @@ const fallo = (r: Revision | null | undefined): boolean => r === null || r === u
 
 export interface Tasa {
   readonly corridas: number
+  readonly alLlegar: number
   readonly estricto: number
   readonly persistente: number
   readonly trasScroll: number
@@ -51,7 +54,7 @@ export interface Tasa {
 
 function tasas(cs: readonly Corrida[]): Tasa {
   const ok = cs.filter((c) => c.error === undefined)
-  return { corridas: ok.length, estricto: ok.filter((c) => fallo(c.estricto)).length, persistente: ok.filter((c) => fallo(c.persistente)).length, trasScroll: ok.filter((c) => fallo(c.trasScroll)).length }
+  return { corridas: ok.length, alLlegar: ok.filter((c) => fallo(c.alLlegar ?? c.estricto)).length, estricto: ok.filter((c) => fallo(c.estricto)).length, persistente: ok.filter((c) => fallo(c.persistente)).length, trasScroll: ok.filter((c) => fallo(c.trasScroll)).length }
 }
 
 function porDimension(cs: readonly Corrida[], clave: (c: Corrida) => string): Record<string, Tasa> {
@@ -114,11 +117,11 @@ export function resumir(archivo: string): ResumenDeLaTanda {
   }
 }
 
-const pct = (t: Tasa, k: 'estricto' | 'persistente' | 'trasScroll'): string => (t.corridas === 0 ? '—' : `${String(t[k])}/${String(t.corridas)} (${Math.round((100 * t[k]) / t.corridas)} %)`)
+const pct = (t: Tasa, k: 'alLlegar' | 'estricto' | 'persistente' | 'trasScroll'): string => (t.corridas === 0 ? '—' : `${String(t[k])}/${String(t.corridas)} (${Math.round((100 * t[k]) / t.corridas)} %)`)
 
 export function tabla(titulo: string, filas: Record<string, Tasa>): string {
-  const lineas = [`| ${titulo} | corridas | a 1,5 s | a 5,5 s | tras scrollear |`, '|---|---|---|---|---|']
-  for (const [k, t] of Object.entries(filas)) lineas.push(`| ${k} | ${String(t.corridas)} | ${pct(t, 'estricto')} | ${pct(t, 'persistente')} | ${pct(t, 'trasScroll')} |`)
+  const lineas = [`| ${titulo} | corridas | a 1,5 s del viaje | a 1,5 s con la escena | a 5,5 s | tras scrollear |`, '|---|---|---|---|---|---|']
+  for (const [k, t] of Object.entries(filas)) lineas.push(`| ${k} | ${String(t.corridas)} | ${pct(t, 'alLlegar')} | ${pct(t, 'estricto')} | ${pct(t, 'persistente')} | ${pct(t, 'trasScroll')} |`)
   return lineas.join('\n')
 }
 
@@ -127,7 +130,7 @@ function main(): void {
   const resumenes = archivos.map(resumir)
   for (const r of resumenes) {
     console.log(`\n## ${r.modo} · ${r.tanda} (${r.archivo}) · ${r.gpu}`)
-    console.log(`total: ${pct(r.total, 'estricto')} a 1,5 s · ${pct(r.total, 'persistente')} a 5,5 s · ${pct(r.total, 'trasScroll')} tras scrollear · ${String(r.errores)} corridas con error del arnés`)
+    console.log(`total: ${pct(r.total, 'alLlegar')} a 1,5 s del viaje · ${pct(r.total, 'estricto')} a 1,5 s con la escena · ${pct(r.total, 'persistente')} a 5,5 s · ${pct(r.total, 'trasScroll')} tras scrollear · ${String(r.errores)} corridas con error del arnés`)
     console.log(`clics que fueron el salto nativo: ${String(r.clicsNativos)} · avisos del guardián: ${String(r.avisosDelGuardian)} · errores de la consola: ${String(r.erroresDeConsola)}`)
     console.log(tabla('condición', r.porCondicion))
     console.log(tabla('carga', r.porCarga))

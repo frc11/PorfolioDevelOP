@@ -39,6 +39,8 @@ export interface PulsoDeLaCarga {
   readonly lenis: string | null
   readonly visible: boolean
   readonly listo: boolean
+  /** La escena dibujó su primer cuadro (o se cayó): la página terminó de cargar lo que se ve. */
+  readonly escenaLista: boolean
 }
 
 interface Diagnostico {
@@ -79,7 +81,14 @@ function letrasCorridas(antes: readonly number[] | null, el: HTMLElement): numbe
   return ahora.reduce((m, x, k) => Math.max(m, Math.abs(x - antes[k])), 0)
 }
 
+/** Hace cuánto (ms) se marcó listo `id` por última vez (de la línea de tiempo); `null` si no se sabe. */
+function listoHace(id: string, ahora: number): number | null {
+  for (let k = EVENTOS.length - 1; k >= 0; k -= 1) if (EVENTOS[k].que === 'listo' && EVENTOS[k].id === id) return ahora - EVENTOS[k].t
+  return null
+}
+
 function textos(): TextoDelDiag[] {
+  const ahora = Math.round(performance.now())
   const lista: TextoDelDiag[] = []
   const viaje = viajeEnCurso() !== null
   for (const t of TITULOS_DE_VOLUMEN.values()) {
@@ -88,16 +97,16 @@ function textos(): TextoDelDiag[] {
     const armado = VISTOS.titulos?.find((a) => a.titulo.id === t.id) ?? null
     const listo = tituloListo(t.id)
     const debe = !viaje && !RELEVO_DE_LOS_TITULOS.relevado(t.id) && t.llegada >= UMBRALES_DE_LA_CARGA.llegado && t.salida <= 1 - UMBRALES_DE_LA_CARGA.llegado && (t.queda && !t.rearma ? cargaLista() : true)
-    lista.push({ id, sistema: 'titulo', listo, enPantalla: enPantalla(t.lugar), domOpacidad: opacidadEfectiva(t.lugar), impreso: i, fuenteCargadaAhora: fuenteCargadaPara(t.lugar), letrasCorridasEm: listo && i !== null ? letrasCorridas(i.letras, t.lugar) : null, dibujada: armado === null ? null : armado.malla.visible, debeDibujarse: debe })
+    lista.push({ id, sistema: 'titulo', listoHaceMs: listoHace(id, ahora), listo, enPantalla: enPantalla(t.lugar), domOpacidad: opacidadEfectiva(t.lugar), impreso: i, fuenteCargadaAhora: fuenteCargadaPara(t.lugar), letrasCorridasEm: listo && i !== null ? letrasCorridas(i.letras, t.lugar) : null, dibujada: armado === null ? null : armado.malla.visible, debeDibujarse: debe })
   }
   const elPie = pieListo()
   for (const p of PIEZAS_DEL_PIE.values()) {
     const id = `pie:${p.id}`
-    lista.push({ id, sistema: 'pie', listo: elPie, enPantalla: enPantalla(p.elemento), domOpacidad: opacidadEfectiva(p.elemento), impreso: IMPRESIONES.get(id) ?? null, fuenteCargadaAhora: fuenteCargadaPara(p.elemento), letrasCorridasEm: null, dibujada: null, debeDibujarse: false })
+    lista.push({ id, sistema: 'pie', listoHaceMs: listoHace('pie', ahora), listo: elPie, enPantalla: enPantalla(p.elemento), domOpacidad: opacidadEfectiva(p.elemento), impreso: IMPRESIONES.get(id) ?? null, fuenteCargadaAhora: fuenteCargadaPara(p.elemento), letrasCorridasEm: null, dibujada: null, debeDibujarse: false })
   }
   for (const [id, i] of IMPRESIONES) {
     if (!id.startsWith('tarjeta:')) continue
-    lista.push({ id, sistema: 'tarjeta', listo: i.elemento.isConnected, enPantalla: enPantalla(i.elemento), domOpacidad: opacidadEfectiva(i.elemento), impreso: i, fuenteCargadaAhora: fuenteCargadaPara(i.elemento), letrasCorridasEm: null, dibujada: null, debeDibujarse: false })
+    lista.push({ id, sistema: 'tarjeta', listoHaceMs: ahora - i.t, listo: i.elemento.isConnected, enPantalla: enPantalla(i.elemento), domOpacidad: opacidadEfectiva(i.elemento), impreso: i, fuenteCargadaAhora: fuenteCargadaPara(i.elemento), letrasCorridasEm: null, dibujada: null, debeDibujarse: false })
   }
   return lista
 }
@@ -243,7 +252,7 @@ export function publicarElDiagnostico(): void {
   const ventana = window as VentanaDelDiag
   if (ventana.__v3diag !== undefined) return
   escuchar()
-  const pulso = (): PulsoDeLaCarga => ({ t: Math.round(performance.now()), scrollY, viaje: viajeEnCurso()?.destino ?? null, lenis: VISTOS.lenis === null ? null : String(VISTOS.lenis.isScrolling), visible: document.visibilityState === 'visible', listo: document.readyState === 'complete' })
+  const pulso = (): PulsoDeLaCarga => ({ t: Math.round(performance.now()), scrollY, viaje: viajeEnCurso()?.destino ?? null, lenis: VISTOS.lenis === null ? null : String(VISTOS.lenis.isScrolling), visible: document.visibilityState === 'visible', listo: document.readyState === 'complete', escenaLista: hayPrimerCuadro() || laEscenaCayo() })
   ventana.__v3diag = { version: 1, pulso, estado, fallas: (referencia) => fallasDe(estado(referencia)), eventos: () => [...EVENTOS] }
   anotar('diagnostico')
 }

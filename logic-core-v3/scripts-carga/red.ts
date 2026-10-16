@@ -51,23 +51,20 @@ async function deLaRed(p: Page): Promise<DeLaRed | null> {
 
 /** Los cuadros por segundo (por rAF) durante `ms`: el promedio y el p95 del intervalo. */
 async function cuadros(p: Page, ms: number): Promise<{ readonly fps: number; readonly p95: number; readonly n: number }> {
-  return p.evaluate(
-    (dura) =>
-      new Promise<{ fps: number; p95: number; n: number }>((resolver) => {
-        const ts: number[] = []
-        const t0 = performance.now()
-        const paso = (t: number): void => {
-          ts.push(t)
-          if (t - t0 < dura) requestAnimationFrame(paso)
-          else {
-            const d = ts.slice(1).map((x, k) => x - ts[k]).sort((a, b) => a - b)
-            resolver({ fps: (1000 * d.length) / (ts[ts.length - 1] - ts[0]), p95: d[Math.floor(d.length * 0.95)] ?? 0, n: d.length })
-          }
-        }
-        requestAnimationFrame(paso)
-      }),
-    ms,
-  )
+  // Como texto: tsx le pone `__name` a las funciones con nombre y en la página no existe.
+  return p.evaluate(`new Promise((resolver) => {
+    const ts = []
+    const t0 = performance.now()
+    function paso(t) {
+      ts.push(t)
+      if (t - t0 < ${String(ms)}) requestAnimationFrame(paso)
+      else {
+        const d = ts.slice(1).map((x, k) => x - ts[k]).sort((a, b) => a - b)
+        resolver({ fps: (1000 * d.length) / (ts[ts.length - 1] - ts[0]), p95: d[Math.floor(d.length * 0.95)] || 0, n: d.length })
+      }
+    }
+    requestAnimationFrame(paso)
+  })`)
 }
 
 async function main(): Promise<void> {

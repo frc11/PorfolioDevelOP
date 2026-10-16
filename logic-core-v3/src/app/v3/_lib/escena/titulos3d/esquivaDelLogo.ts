@@ -22,7 +22,15 @@ export interface Caja {
   readonly abajo: number
 }
 
-export const ESQUIVA = { margenPx: 10, muestras: 600, seVaS: 0.3, llegaS: 0.9 } as const
+/**
+ * [CIERRE A-ter] A13 · `sueltaMs`: con la página quieta ese tiempo, el que esquiva llega igual. Un salto del menú (el ancla nativa, antes de
+ * que monte el viaje) deja el panel de Quiénes somos «entrando» (su tope 72 px abajo del borde) con el titular encima del logo: pedía 0
+ * para siempre, con su DOM ya apagado, y no se veía ninguno de los dos. En una pausa corta del scroll sigue esquivando.
+ */
+export const ESQUIVA = { margenPx: 10, muestras: 600, seVaS: 0.3, llegaS: 0.9, sueltaMs: 1000 } as const
+
+/** Dónde estaba la página y desde cuándo (lo comparten los títulos que esquivan, en el mismo cuadro). */
+const QUIETA = { y: Number.NaN, desde: 0 }
 
 /** ¿Se cruzan las dos cajas, con `margen` px de aire alrededor de la segunda? */
 export function seCruzan(a: Caja, b: Caja, margen: number = ESQUIVA.margenPx): boolean {
@@ -131,8 +139,14 @@ export function cajaDelLogo(grupo: THREE.Object3D, camara: THREE.Camera, ancho: 
  * reanudarse el lazo, lo pedido tal cual (sin perseguir desde un estado viejo).
  */
 export function llegadaQueEsquiva(t: TituloDeVolumen, mostrado: number, y: number, logo: () => Caja | null, asentar: boolean, reanudado: boolean, dt: number): number {
+  const ahora = performance.now()
+  if (y !== QUIETA.y) {
+    QUIETA.y = y
+    QUIETA.desde = ahora
+  }
   const enElCuadro = cajaDelTitulo(t.lugar, window.scrollX, y)
-  const pedido = enElCuadro === null || !enElCuadro.entrando ? t.llegada : pedidoQueEsquiva(t.llegada, true, enElCuadro.caja, logo())
+  const entrando = enElCuadro !== null && enElCuadro.entrando && ahora - QUIETA.desde < ESQUIVA.sueltaMs
+  const pedido = enElCuadro === null || !entrando ? t.llegada : pedidoQueEsquiva(t.llegada, true, enElCuadro.caja, logo())
   if (reanudado) return acotar01(pedido)
   return mostradoDelScroll(mostrado, pedido, asentar, dt, pedido < t.llegada ? ESQUIVA.seVaS : (t.minimoS ?? ESQUIVA.llegaS), t.asiento)
 }

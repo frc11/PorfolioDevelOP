@@ -73,6 +73,12 @@ function cambioSuMetrica(a: Armado): boolean {
   return corridas(a)
 }
 
+/** ¿Su lugar del DOM está a la vista (en el cuadro, con caja)? */
+function aLaVista(el: HTMLElement): boolean {
+  const r = el.getBoundingClientRect()
+  return el.isConnected && r.width > 0 && r.bottom > 0 && r.top < innerHeight
+}
+
 /** Lo que espera su fuente o el ocio, y lo que compila: el guardián no los toca. Lo mostrado de los que se rearman, para seguir donde iban. */
 const ESPERANDO = new Set<string>()
 const COMPILANDO = new Set<string>()
@@ -149,8 +155,9 @@ export function sincronizar(t: Taller, armados: Armado[], registro: Iterable<Tit
   }
   for (const a of armados) anotados.delete(a.titulo.id)
   const faltan = [...anotados.values()]
-  const urgentes = faltan.filter((x) => !x.rearma)
-  const demorados = faltan.filter((x) => x.rearma)
+  // [CIERRE A-ter] A13 · y los que están a la vista: la sección adonde se llegó se imprime primero (con la CPU lenta el ocio tardaba segundos).
+  const urgentes = faltan.filter((x) => !x.rearma || aLaVista(x.lugar))
+  const demorados = faltan.filter((x) => !urgentes.includes(x))
   if (faltan.length === 0) return () => undefined
   let pendiente = true
   let soltarElOcio = (): void => undefined
@@ -195,10 +202,8 @@ export interface EstadoDelTitulo {
 export const estaTrabado = (e: EstadoDelTitulo): boolean => e.aLaVista && e.conSuFuente && !e.listo && !e.esperando && !e.compilando
 
 function trabado(titulo: TituloDeVolumen): boolean {
-  const el = titulo.lugar
-  const r = el.getBoundingClientRect()
-  const aLaVista = el.isConnected && r.width > 0 && r.bottom > 0 && r.top < innerHeight
-  return estaTrabado({ listo: tituloListo(titulo.id), esperando: ESPERANDO.has(titulo.id), compilando: COMPILANDO.has(titulo.id), aLaVista, conSuFuente: aLaVista && fuenteCargadaPara(el) })
+  const visto = aLaVista(titulo.lugar)
+  return estaTrabado({ listo: tituloListo(titulo.id), esperando: ESPERANDO.has(titulo.id), compilando: COMPILANDO.has(titulo.id), aLaVista: visto, conSuFuente: visto && fuenteCargadaPara(titulo.lugar) })
 }
 
 function revisar(): void {

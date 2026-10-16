@@ -1,0 +1,923 @@
+[
+ {
+  "archivo": "build-antes.jsonl",
+  "modo": "build",
+  "tanda": "antes",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "total": {
+   "corridas": 107,
+   "alLlegar": 80,
+   "estricto": 83,
+   "persistente": 82,
+   "trasScroll": 78
+  },
+  "errores": 0,
+  "porCondicion": {
+   "normal": {
+    "corridas": 26,
+    "alLlegar": 18,
+    "estricto": 19,
+    "persistente": 19,
+    "trasScroll": 18
+   },
+   "cpu": {
+    "corridas": 26,
+    "alLlegar": 22,
+    "estricto": 23,
+    "persistente": 21,
+    "trasScroll": 19
+   },
+   "red": {
+    "corridas": 26,
+    "alLlegar": 19,
+    "estricto": 20,
+    "persistente": 21,
+    "trasScroll": 20
+   },
+   "fondo": {
+    "corridas": 26,
+    "alLlegar": 18,
+    "estricto": 18,
+    "persistente": 18,
+    "trasScroll": 18
+   },
+   "contexto": {
+    "corridas": 3,
+    "alLlegar": 3,
+    "estricto": 3,
+    "persistente": 3,
+    "trasScroll": 3
+   }
+  },
+  "porCarga": {
+   "fria": {
+    "corridas": 24,
+    "alLlegar": 6,
+    "estricto": 7,
+    "persistente": 6,
+    "trasScroll": 2
+   },
+   "cache": {
+    "corridas": 27,
+    "alLlegar": 26,
+    "estricto": 27,
+    "persistente": 27,
+    "trasScroll": 27
+   },
+   "recarga": {
+    "corridas": 24,
+    "alLlegar": 24,
+    "estricto": 24,
+    "persistente": 24,
+    "trasScroll": 24
+   },
+   "hash": {
+    "corridas": 24,
+    "alLlegar": 16,
+    "estricto": 17,
+    "persistente": 17,
+    "trasScroll": 17
+   }
+  },
+  "porMomento": {
+   "300": {
+    "corridas": 24,
+    "alLlegar": 16,
+    "estricto": 20,
+    "persistente": 19,
+    "trasScroll": 16
+   },
+   "1000": {
+    "corridas": 24,
+    "alLlegar": 18,
+    "estricto": 17,
+    "persistente": 17,
+    "trasScroll": 17
+   },
+   "2000": {
+    "corridas": 27,
+    "alLlegar": 17,
+    "estricto": 17,
+    "persistente": 17,
+    "trasScroll": 16
+   },
+   "5000": {
+    "corridas": 24,
+    "alLlegar": 21,
+    "estricto": 21,
+    "persistente": 21,
+    "trasScroll": 21
+   }
+  },
+  "porItem": {
+   "quienes-somos": {
+    "corridas": 16,
+    "alLlegar": 10,
+    "estricto": 12,
+    "persistente": 12,
+    "trasScroll": 9
+   },
+   "trabajos": {
+    "corridas": 17,
+    "alLlegar": 14,
+    "estricto": 14,
+    "persistente": 13,
+    "trasScroll": 13
+   },
+   "servicios": {
+    "corridas": 17,
+    "alLlegar": 12,
+    "estricto": 14,
+    "persistente": 14,
+    "trasScroll": 13
+   },
+   "tu-panel": {
+    "corridas": 16,
+    "alLlegar": 13,
+    "estricto": 13,
+    "persistente": 13,
+    "trasScroll": 13
+   },
+   "por-que-develop": {
+    "corridas": 17,
+    "alLlegar": 10,
+    "estricto": 10,
+    "persistente": 9,
+    "trasScroll": 9
+   },
+   "contacto": {
+    "corridas": 16,
+    "alLlegar": 13,
+    "estricto": 12,
+    "persistente": 13,
+    "trasScroll": 13
+   }
+  },
+  "dobles": {
+   "corridas": 8,
+   "alLlegar": 8,
+   "estricto": 8,
+   "persistente": 8,
+   "trasScroll": 8
+  },
+  "tipos": {
+   "estricto": {
+    "ninguno-visible": 7,
+    "fuente-de-respaldo": 75,
+    "noche-desfasada": 6,
+    "sin-imprimir": 6,
+    "animacion-desfasada": 1
+   },
+   "persistente": {
+    "ninguno-visible": 10,
+    "fuente-de-respaldo": 75,
+    "noche-desfasada": 6,
+    "animacion-desfasada": 1,
+    "dom-visible": 1
+   },
+   "trasScroll": {
+    "fuente-de-respaldo": 75,
+    "ninguno-visible": 4,
+    "noche-desfasada": 1,
+    "animacion-desfasada": 1,
+    "dom-visible": 1
+   }
+  },
+  "clicsNativos": 6,
+  "avisosDelGuardian": 0,
+  "erroresDeConsola": 0,
+  "ejemplos": [
+   "#0 normal/fria/300ms/quienes-somos: ninguno-visible(titulo:agencia-1-antes: DOM apagado y la pieza sin dibujarse) · ninguno-visible(titulo:agencia-1-marcado: DOM apagado y la pieza sin dibujarse) · ninguno-visible(titulo:agencia-2-antes: DOM apagado y la pieza sin dibujarse) · ninguno-visible(titulo:agencia-2-marcado: DOM apagado y la",
+   "#6 normal/cache/2000ms/quienes-somos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1694 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2527 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2559 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#7 normal/cache/5000ms/trabajos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1654 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2505 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2538 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#8 normal/cache/300ms/servicios: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1750 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2585 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2618 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#9 normal/cache/1000ms/tu-panel: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1659 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2560 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2593 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-",
+   "#10 normal/cache/2000ms/por-que-develop: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1657 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2476 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2509 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-",
+   "#11 normal/cache/5000ms/contacto: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1658 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2479 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2511 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#12 normal/recarga/300ms/quienes-somos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1689 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2515 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2547 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#13 normal/recarga/1000ms/trabajos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1742 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2630 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2662 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#14 normal/recarga/2000ms/servicios: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1674 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2502 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2534 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#15 normal/recarga/5000ms/tu-panel: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1658 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2439 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2470 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-",
+   "#16 normal/recarga/300ms/por-que-develop: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1727 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2576 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2608 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo"
+  ]
+ },
+ {
+  "archivo": "build-antes-fondo.jsonl",
+  "modo": "build",
+  "tanda": "antes-fondo",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "total": {
+   "corridas": 26,
+   "alLlegar": 26,
+   "estricto": 26,
+   "persistente": 26,
+   "trasScroll": 26
+  },
+  "errores": 0,
+  "porCondicion": {
+   "fondo": {
+    "corridas": 26,
+    "alLlegar": 26,
+    "estricto": 26,
+    "persistente": 26,
+    "trasScroll": 26
+   }
+  },
+  "porCarga": {
+   "fria": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   },
+   "cache": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   },
+   "recarga": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   },
+   "hash": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   }
+  },
+  "porMomento": {
+   "300": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   },
+   "1000": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   },
+   "2000": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   },
+   "5000": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   }
+  },
+  "porItem": {
+   "quienes-somos": {
+    "corridas": 4,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 4,
+    "trasScroll": 4
+   },
+   "trabajos": {
+    "corridas": 4,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 4,
+    "trasScroll": 4
+   },
+   "servicios": {
+    "corridas": 4,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 4,
+    "trasScroll": 4
+   },
+   "tu-panel": {
+    "corridas": 4,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 4,
+    "trasScroll": 4
+   },
+   "por-que-develop": {
+    "corridas": 4,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 4,
+    "trasScroll": 4
+   },
+   "contacto": {
+    "corridas": 4,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 4,
+    "trasScroll": 4
+   }
+  },
+  "dobles": {
+   "corridas": 2,
+   "alLlegar": 2,
+   "estricto": 2,
+   "persistente": 2,
+   "trasScroll": 2
+  },
+  "tipos": {
+   "estricto": {
+    "epoca-sin-medir": 26,
+    "animacion-desfasada": 26,
+    "fuente-de-respaldo": 18
+   },
+   "persistente": {
+    "epoca-sin-medir": 26,
+    "animacion-desfasada": 26,
+    "fuente-de-respaldo": 18
+   },
+   "trasScroll": {
+    "epoca-sin-medir": 26,
+    "animacion-desfasada": 26,
+    "fuente-de-respaldo": 18
+   }
+  },
+  "clicsNativos": 2,
+  "avisosDelGuardian": 0,
+  "erroresDeConsola": 0,
+  "ejemplos": [
+   "#78 fondo/fria/300ms/quienes-somos: epoca-sin-medir(epoca: época 0 con el alto en 0) · animacion-desfasada(quienes-somos|ventana-de-la-mascara|bw9rff|0: SIN MEDIR: 0.00 contra 1.00) · animacion-desfasada(quienes-somos|ventana-del-trazo|42zdp1|0: SIN MEDIR: 0.00 contra 1.00) · animacion-desfasada(quienes-somos|ventana-de-la-mascara|bw9",
+   "#79 fondo/fria/1000ms/trabajos: epoca-sin-medir(epoca: época 0 con el alto en 0) · animacion-desfasada(trabajos|seccion|16klhaq|0: SIN MEDIR: 0.00 contra 0.11) · animacion-desfasada(trabajos|ventana-de-la-mascara|bw9rff|0: SIN MEDIR: 0.00 contra 1.00) · animacion-desfasada(trabajos|ventana-visible|1e4ycr0|0: SIN MEDIR: 0.00 contra",
+   "#80 fondo/fria/2000ms/servicios: epoca-sin-medir(epoca: época 0 con el alto en 0) · animacion-desfasada(trabajos|seccion|16klhaq|0: SIN MEDIR: 0.00 contra 1.00) · animacion-desfasada(servicios|ventana-de-la-mascara|bw9rff|0: SIN MEDIR: 0.00 contra 1.00)",
+   "#81 fondo/fria/5000ms/tu-panel: epoca-sin-medir(epoca: época 0 con el alto en 0) · animacion-desfasada(tu-panel|ventana-visible|1e4ycr0|0: SIN MEDIR: 0.00 contra 1.00) · animacion-desfasada(tu-panel|ventana-visible|1e4ycr0|7: SIN MEDIR: 0.00 contra 0.61) · animacion-desfasada(tu-panel|ventana-visible|1e4ycr0|12: SIN MEDIR: 0.00 co",
+   "#82 fondo/fria/300ms/por-que-develop: epoca-sin-medir(epoca: época 0 con el alto en 0) · animacion-desfasada(por-que-develop|del-patron|13lvp73|0: SIN MEDIR: 0.00 contra 0.30)",
+   "#83 fondo/fria/1000ms/contacto: epoca-sin-medir(epoca: época 0 con el alto en 0) · animacion-desfasada(hero|del-patron|1e4ycr0|0: SIN MEDIR: 0.00 contra 1.00) · animacion-desfasada(hero|del-patron|16klhaq|0: SIN MEDIR: 0.00 contra 1.00)",
+   "#84 fondo/cache/2000ms/quienes-somos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1670 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2504 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2537 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#85 fondo/cache/5000ms/trabajos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1646 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2446 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2478 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#86 fondo/cache/300ms/servicios: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1631 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2461 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2492 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#87 fondo/cache/1000ms/tu-panel: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1656 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2480 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2518 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-",
+   "#88 fondo/cache/2000ms/por-que-develop: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1638 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2459 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2490 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-",
+   "#89 fondo/cache/5000ms/contacto: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 1679 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2484 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2516 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo"
+  ]
+ },
+ {
+  "archivo": "build-despues-2.jsonl",
+  "modo": "build",
+  "tanda": "despues-2",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "total": {
+   "corridas": 107,
+   "alLlegar": 8,
+   "estricto": 4,
+   "persistente": 0,
+   "trasScroll": 0
+  },
+  "errores": 0,
+  "porCondicion": {
+   "normal": {
+    "corridas": 26,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "cpu": {
+    "corridas": 26,
+    "alLlegar": 6,
+    "estricto": 1,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "red": {
+    "corridas": 26,
+    "alLlegar": 2,
+    "estricto": 3,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "fondo": {
+    "corridas": 26,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "contexto": {
+    "corridas": 3,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porCarga": {
+   "fria": {
+    "corridas": 24,
+    "alLlegar": 5,
+    "estricto": 2,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "cache": {
+    "corridas": 27,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "recarga": {
+    "corridas": 24,
+    "alLlegar": 3,
+    "estricto": 2,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "hash": {
+    "corridas": 24,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porMomento": {
+   "300": {
+    "corridas": 24,
+    "alLlegar": 3,
+    "estricto": 2,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "1000": {
+    "corridas": 24,
+    "alLlegar": 5,
+    "estricto": 2,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "2000": {
+    "corridas": 27,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "5000": {
+    "corridas": 24,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porItem": {
+   "quienes-somos": {
+    "corridas": 16,
+    "alLlegar": 1,
+    "estricto": 2,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "trabajos": {
+    "corridas": 17,
+    "alLlegar": 1,
+    "estricto": 1,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "servicios": {
+    "corridas": 17,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "tu-panel": {
+    "corridas": 16,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "por-que-develop": {
+    "corridas": 17,
+    "alLlegar": 2,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "contacto": {
+    "corridas": 16,
+    "alLlegar": 4,
+    "estricto": 1,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "dobles": {
+   "corridas": 8,
+   "alLlegar": 0,
+   "estricto": 0,
+   "persistente": 0,
+   "trasScroll": 0
+  },
+  "tipos": {
+   "estricto": {
+    "dom-visible": 4
+   },
+   "persistente": {},
+   "trasScroll": {}
+  },
+  "clicsNativos": 0,
+  "avisosDelGuardian": 0,
+  "erroresDeConsola": 0,
+  "ejemplos": [
+   "#43 cpu/recarga/1000ms/contacto: dom-visible(titulo:hero-registro-1: DOM 1.00) · dom-visible(titulo:hero-registro-2: DOM 1.00)",
+   "#52 red/fria/300ms/quienes-somos: dom-visible(titulo:agencia-1-antes: DOM 1.00) · dom-visible(titulo:agencia-1-marcado: DOM 1.00) · dom-visible(titulo:agencia-2-antes: DOM 1.00) · dom-visible(titulo:agencia-2-marcado: DOM 1.00) · dom-visible(titulo:agencia-signo: DOM 1.00)",
+   "#53 red/fria/1000ms/trabajos: dom-visible(titulo:demos: DOM 1.00)",
+   "#64 red/recarga/300ms/quienes-somos: dom-visible(titulo:agencia-1-antes: DOM 1.00) · dom-visible(titulo:agencia-1-marcado: DOM 1.00) · dom-visible(titulo:agencia-2-antes: DOM 1.00) · dom-visible(titulo:agencia-2-marcado: DOM 1.00) · dom-visible(titulo:agencia-signo: DOM 1.00)"
+  ]
+ },
+ {
+  "archivo": "build-despues-fondo.jsonl",
+  "modo": "build",
+  "tanda": "despues-fondo",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "total": {
+   "corridas": 26,
+   "alLlegar": 0,
+   "estricto": 0,
+   "persistente": 0,
+   "trasScroll": 0
+  },
+  "errores": 0,
+  "porCondicion": {
+   "fondo": {
+    "corridas": 26,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porCarga": {
+   "fria": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "cache": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "recarga": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "hash": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porMomento": {
+   "300": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "1000": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "2000": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "5000": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porItem": {
+   "quienes-somos": {
+    "corridas": 4,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "trabajos": {
+    "corridas": 4,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "servicios": {
+    "corridas": 4,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "tu-panel": {
+    "corridas": 4,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "por-que-develop": {
+    "corridas": 4,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   },
+   "contacto": {
+    "corridas": 4,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "dobles": {
+   "corridas": 2,
+   "alLlegar": 0,
+   "estricto": 0,
+   "persistente": 0,
+   "trasScroll": 0
+  },
+  "tipos": {
+   "estricto": {},
+   "persistente": {},
+   "trasScroll": {}
+  },
+  "clicsNativos": 0,
+  "avisosDelGuardian": 0,
+  "erroresDeConsola": 0,
+  "ejemplos": []
+ },
+ {
+  "archivo": "build-control.jsonl",
+  "modo": "build",
+  "tanda": "control",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "total": {
+   "corridas": 26,
+   "alLlegar": 18,
+   "estricto": 18,
+   "persistente": 19,
+   "trasScroll": 19
+  },
+  "errores": 0,
+  "porCondicion": {
+   "red": {
+    "corridas": 26,
+    "alLlegar": 18,
+    "estricto": 18,
+    "persistente": 19,
+    "trasScroll": 19
+   }
+  },
+  "porCarga": {
+   "fria": {
+    "corridas": 6,
+    "alLlegar": 0,
+    "estricto": 0,
+    "persistente": 1,
+    "trasScroll": 1
+   },
+   "cache": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   },
+   "recarga": {
+    "corridas": 6,
+    "alLlegar": 6,
+    "estricto": 6,
+    "persistente": 6,
+    "trasScroll": 6
+   },
+   "hash": {
+    "corridas": 6,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 4,
+    "trasScroll": 4
+   }
+  },
+  "porMomento": {
+   "300": {
+    "corridas": 6,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 4,
+    "trasScroll": 4
+   },
+   "1000": {
+    "corridas": 6,
+    "alLlegar": 4,
+    "estricto": 4,
+    "persistente": 5,
+    "trasScroll": 5
+   },
+   "2000": {
+    "corridas": 6,
+    "alLlegar": 3,
+    "estricto": 3,
+    "persistente": 3,
+    "trasScroll": 3
+   },
+   "5000": {
+    "corridas": 6,
+    "alLlegar": 5,
+    "estricto": 5,
+    "persistente": 5,
+    "trasScroll": 5
+   }
+  },
+  "porItem": {
+   "quienes-somos": {
+    "corridas": 4,
+    "alLlegar": 2,
+    "estricto": 2,
+    "persistente": 2,
+    "trasScroll": 2
+   },
+   "trabajos": {
+    "corridas": 4,
+    "alLlegar": 3,
+    "estricto": 3,
+    "persistente": 3,
+    "trasScroll": 3
+   },
+   "servicios": {
+    "corridas": 4,
+    "alLlegar": 3,
+    "estricto": 3,
+    "persistente": 3,
+    "trasScroll": 3
+   },
+   "tu-panel": {
+    "corridas": 4,
+    "alLlegar": 3,
+    "estricto": 3,
+    "persistente": 3,
+    "trasScroll": 3
+   },
+   "por-que-develop": {
+    "corridas": 4,
+    "alLlegar": 2,
+    "estricto": 2,
+    "persistente": 2,
+    "trasScroll": 2
+   },
+   "contacto": {
+    "corridas": 4,
+    "alLlegar": 3,
+    "estricto": 3,
+    "persistente": 4,
+    "trasScroll": 4
+   }
+  },
+  "dobles": {
+   "corridas": 2,
+   "alLlegar": 2,
+   "estricto": 2,
+   "persistente": 2,
+   "trasScroll": 2
+  },
+  "tipos": {
+   "estricto": {
+    "fuente-de-respaldo": 18
+   },
+   "persistente": {
+    "dom-visible": 1,
+    "fuente-de-respaldo": 18
+   },
+   "trasScroll": {
+    "dom-visible": 1,
+    "fuente-de-respaldo": 18
+   }
+  },
+  "clicsNativos": 0,
+  "avisosDelGuardian": 0,
+  "erroresDeConsola": 0,
+  "ejemplos": [
+   "#57 red/fria/1000ms/contacto: ",
+   "#58 red/cache/2000ms/quienes-somos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2041 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2852 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2884 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#59 red/cache/5000ms/trabajos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2029 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2854 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2886 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#60 red/cache/300ms/servicios: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2082 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2937 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2972 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#61 red/cache/1000ms/tu-panel: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2302 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 3219 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 3257 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-",
+   "#62 red/cache/2000ms/por-que-develop: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2050 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2870 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2902 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-",
+   "#63 red/cache/5000ms/contacto: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2129 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2998 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 3030 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#64 red/recarga/300ms/quienes-somos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2069 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2111 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2145 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#65 red/recarga/1000ms/trabajos: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2317 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 3213 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 3244 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#66 red/recarga/2000ms/servicios: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2057 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2881 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2913 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo",
+   "#67 red/recarga/5000ms/tu-panel: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2044 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 2865 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 2896 ms (v1); ahora cargada) · fuente-de-respaldo(titulo:agencia-",
+   "#68 red/recarga/300ms/por-que-develop: fuente-de-respaldo(titulo:hero-registro-2: impreso a los 2128 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-antes: impreso a los 3037 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo:agencia-1-marcado: impreso a los 3070 ms (v1); ahora sin cargar) · fuente-de-respaldo(titulo"
+  ]
+ },
+ {
+  "archivo": "dev-calentar.jsonl",
+  "modo": "dev",
+  "tanda": "calentar",
+  "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5050 (0x00002D83) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "total": {
+   "corridas": 1,
+   "alLlegar": 1,
+   "estricto": 0,
+   "persistente": 0,
+   "trasScroll": 0
+  },
+  "errores": 0,
+  "porCondicion": {
+   "normal": {
+    "corridas": 1,
+    "alLlegar": 1,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porCarga": {
+   "fria": {
+    "corridas": 1,
+    "alLlegar": 1,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porMomento": {
+   "300": {
+    "corridas": 1,
+    "alLlegar": 1,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "porItem": {
+   "quienes-somos": {
+    "corridas": 1,
+    "alLlegar": 1,
+    "estricto": 0,
+    "persistente": 0,
+    "trasScroll": 0
+   }
+  },
+  "dobles": {
+   "corridas": 0,
+   "alLlegar": 0,
+   "estricto": 0,
+   "persistente": 0,
+   "trasScroll": 0
+  },
+  "tipos": {
+   "estricto": {},
+   "persistente": {},
+   "trasScroll": {}
+  },
+  "clicsNativos": 0,
+  "avisosDelGuardian": 0,
+  "erroresDeConsola": 0,
+  "ejemplos": []
+ }
+]

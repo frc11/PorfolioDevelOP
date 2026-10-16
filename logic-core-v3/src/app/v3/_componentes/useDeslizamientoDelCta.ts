@@ -353,7 +353,15 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
        */
       soltarLaRueda = retenerLosGestos(() => true)
 
-      reloj = window.setTimeout(() => terminar(false), demora + relojDeSeguridadMs(duracionMs))
+      // [CIERRE A-ter] A13 · el reloj no aborta un viaje que el motor sigue haciendo: con la CPU lenta el viaje avanza a lo sumo
+      // `TOPE_DEL_CUADRO_DEL_VIAJE_MS` por cuadro y tarda más que su duración; abortado, la escena salía del viaje con la página en
+      // camino (la noche se asentaba en otra sección). Mientras Lenis siga yendo con la pestaña a la vista, espera otro margen; con la
+      // pestaña tapada (no hay cuadros), sale como siempre.
+      const vigilarElViaje = (): void => {
+        if (lenis !== null && lenis.isScrolling !== false && document.visibilityState === 'visible') reloj = window.setTimeout(vigilarElViaje, MARGEN_DEL_RELOJ_MS)
+        else terminar(false)
+      }
+      reloj = window.setTimeout(vigilarElViaje, demora + relojDeSeguridadMs(duracionMs))
 
       /**
        * 🔴 LA PAUSA. El viaje NO arranca en el mismo cuadro que el velo: espera
