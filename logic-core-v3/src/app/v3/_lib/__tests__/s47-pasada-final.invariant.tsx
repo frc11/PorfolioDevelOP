@@ -258,22 +258,23 @@ const fuenteDe = (archivo: string): FontData => JSON.parse(readFileSync(`${V3}/_
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('C1 · El parlante: justo encima del infinito, con el ícono animado, el cartel «Sonido / activado» y su anuncio')
 
-// La esquina: una columna fija; el parlante, encima del infinito y centrado con él (antes, a su izquierda en escritorio).
-const esquinaDelRecorrido = sinComentarios(leer('_chrome/recorrido/InfinitoDelRecorrido.tsx'))
-const parlanteEncima = (c: string): boolean => {
-  const columna = c.indexOf('data-pieza="esquina-del-recorrido"')
-  const encima = c.indexOf('{encima}')
-  const infinito = c.indexOf('data-pieza="infinito-del-recorrido"')
-  return columna > 0 && columna < encima && encima < infinito && /data-pieza="esquina-del-recorrido" className="pointer-events-none fixed [^"]*flex-col items-center/.test(c) && /data-pieza="infinito-del-recorrido" aria-hidden="true"/.test(c)
+// La esquina: una caja fija que no se come el puntero, con el parlante adentro. [CIERRE A] A6 · con el sentido nuevo: el infinito se
+// sacó y la esquina es la del sonido (arriba a la izquierda; la de abajo a la derecha, libre): `EsquinaDelSonido.tsx`.
+const esquinaDelSonido = sinComentarios(leer('_chrome/sonido/EsquinaDelSonido.tsx'))
+const parlanteEnSuEsquina = (c: string): boolean => {
+  const caja = c.indexOf('data-pieza="esquina-del-sonido"')
+  const lugar = c.indexOf('<div data-parte="lugar-del-parlante">')
+  const parlante = c.indexOf('<SonidoDelHome />')
+  return caja > 0 && caja < lugar && lugar < parlante && /data-pieza="esquina-del-sonido" className="pointer-events-none fixed /.test(c) && !/\bright-|\bbottom-/.test(/data-pieza="esquina-del-sonido" className="([^"]*)"/.exec(c)?.[1] ?? 'right-')
 }
-afirmar(parlanteEncima(esquinaDelRecorrido), 'la esquina es UNA columna fija: lo que va encima (el parlante), justo encima del infinito y centrado con él; la columna no se come el puntero y el infinito sigue mudo')
-controlPositivo('el detector VE el parlante debajo del infinito', esquinaDelRecorrido.replace('{encima}', '').replace('</svg>', '</svg>{encima}'), parlanteEncima)
+afirmar(parlanteEnSuEsquina(esquinaDelSonido), 'la esquina del sonido es UNA caja fija (arriba a la izquierda, ninguna de abajo ni de la derecha) con el parlante adentro; la caja no se come el puntero')
+controlPositivo('el detector VE el parlante fuera de su esquina', esquinaDelSonido.replace('<SonidoDelHome />', ''), parlanteEnSuEsquina)
 const chromeDelHome = sinComentarios(leer('_chrome/ChromeDelHome.tsx'))
 const claseDe = (c: string, pieza: string): string => new RegExp(`data-pieza="${pieza}"[^>]*?className="([^"]*)"`).exec(c)?.[1] ?? 'no está'
-const enLaColumna = (ch: string): boolean => ch.includes('<InfinitoDelRecorrido encima={<SonidoDelHome />} />') && !ch.replace('<InfinitoDelRecorrido encima={<SonidoDelHome />} />', '').includes('<SonidoDelHome />')
+const enLaColumna = (ch: string): boolean => ch.includes('<EsquinaDelSonido />') && !ch.includes('<SonidoDelHome />')
 const sueltoDeLaEsquina = (c: string): boolean => claseDe(c, 'sonido-de-la-esquina').split(' ').includes('pointer-events-auto') && !/\bfixed\b/.test(claseDe(c, 'sonido-de-la-esquina')) && !/\bfixed\b/.test(claseDe(c, 'control-del-sonido'))
-afirmar(enLaColumna(chromeDelHome) && sueltoDeLaEsquina(control), '  el chrome se lo da al infinito (no se ubica solo: ya no hay dos cajas fijas que puedan chocar) y sólo él recibe el puntero')
-controlPositivo('el detector VE el parlante suelto de antes (montado aparte)', chromeDelHome.replace('<InfinitoDelRecorrido encima={<SonidoDelHome />} />', '<InfinitoDelRecorrido />\n      <SonidoDelHome />'), enLaColumna)
+afirmar(enLaColumna(chromeDelHome) && sueltoDeLaEsquina(control), '  el chrome monta la esquina (el parlante no se ubica solo) y sólo él recibe el puntero')
+controlPositivo('el detector VE el parlante suelto (montado aparte)', chromeDelHome.replace('<EsquinaDelSonido />', '<EsquinaDelSonido />\n      <SonidoDelHome />'), enLaColumna)
 controlPositivo('el detector VE el botón fijo por su cuenta', control.replace('data-pieza="control-del-sonido"', 'data-pieza="control-del-sonido" className="fixed"'), sueltoDeLaEsquina)
 
 // El ícono: las ondas se dibujan o se cortan (una tras otra), la cruz de siempre al apagarlo; con movimiento reducido, fundidos.
@@ -302,10 +303,11 @@ controlPositivo('el detector VE el dibujo con movimiento reducido', icono(false,
 
 // El cartel: dos líneas encima, cambia con su animación y se va solo; lo que se ve no se anuncia, se anuncia aparte.
 // [PULIDO 11] C2 · encima en escritorio (y con `?progreso=abajo`); en la cabecera de abajo de 1024 el parlante está arriba a la
-// izquierda y el cartel va debajo (encima se saldría del cuadro): la clase elige con `abajo`.
+// izquierda y el cartel va debajo (encima se saldría del cuadro). [CIERRE A] A6 · el parlante está arriba en todos los anchos: debajo,
+// apoyado a la izquierda, siempre.
 const cartelMs = Number(/export const CARTEL_MS = (\d+)/.exec(control)?.[1] ?? 'NaN')
-const conCartel = (c: string): boolean => /<AnimatePresence mode="wait">\s*\{cartel && \(\s*<motion\.div\s+key=\{prendido \? 'activado' : 'desactivado'\}\s+data-pieza="cartel-del-sonido"/.test(c) && /<Micro como="span"[^>]*>\s*Sonido\s*<\/Micro>\s*<Micro como="span"[^>]*>\s*\{prendido \? 'activado' : 'desactivado'\}\s*<\/Micro>/.test(c) && /<div aria-hidden="true" className=\{cn\('pointer-events-none absolute bottom-full [^']*', abajo \? '[^']*' : '[^']*'\)\}>\s*<AnimatePresence/.test(c) && /const reloj = window\.setTimeout\(\(\) => setCartel\(false\), CARTEL_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)\s*\}, \[cartel, prendido\]\)/.test(c)
-afirmar(conCartel(control) && cartelMs >= 1200 && cartelMs <= 2500, 'al tocarlo, un cartel encima en dos líneas, «Sonido» y «activado» o «desactivado»: cambia con su animación (sale uno y entra el otro) y se va solo; otro toque lo renueva', `${String(cartelMs)} ms`)
+const conCartel = (c: string): boolean => /<AnimatePresence mode="wait">\s*\{cartel && \(\s*<motion\.div\s+key=\{prendido \? 'activado' : 'desactivado'\}\s+data-pieza="cartel-del-sonido"/.test(c) && /<Micro como="span"[^>]*>\s*Sonido\s*<\/Micro>\s*<Micro como="span"[^>]*>\s*\{prendido \? 'activado' : 'desactivado'\}\s*<\/Micro>/.test(c) && /<div aria-hidden="true" className="pointer-events-none absolute top-full left-0 mt-\[var\(--spacing-2\)\]">\s*<AnimatePresence/.test(c) && /const reloj = window\.setTimeout\(\(\) => setCartel\(false\), CARTEL_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)\s*\}, \[cartel, prendido\]\)/.test(c)
+afirmar(conCartel(control) && cartelMs >= 1200 && cartelMs <= 2500, 'al tocarlo, un cartel debajo en dos líneas, «Sonido» y «activado» o «desactivado»: cambia con su animación (sale uno y entra el otro) y se va solo; otro toque lo renueva', `${String(cartelMs)} ms`)
 controlPositivo('el detector VE un cartel que no se va', control.replace('const reloj = window.setTimeout(() => setCartel(false), CARTEL_MS)', 'const reloj = 0'), conCartel)
 const conSusMovimientos = (c: string): boolean => /initial=\{reducido \? \{ opacity: 0 \} : \{ opacity: 0, y: 6, scale: 0\.96 \}\}/.test(c) && /exit=\{reducido \? \{ opacity: 0, transition: SALIDA_DEL_CARTEL \} : \{ opacity: 0, y: -4, scale: 0\.98, transition: SALIDA_DEL_CARTEL \}\}/.test(c) && /transition=\{\{ type: 'spring', stiffness: 380, damping: 38, mass: 0\.9 \}\}/.test(c) && /const SALIDA_DEL_CARTEL = \{ duration: 0\.14, ease: CURVAS\.principal \} as const/.test(c)
 afirmar(conSusMovimientos(control), '  sube un poco al entrar, con el resorte de la interfaz (380/38/0,9), y se va subiendo en 140 ms (medido: con el resorte también a la salida, el cambio de texto tardaba ~700 ms, con 300 ms sin cartel); con movimiento reducido, sólo fundidos')

@@ -11,7 +11,7 @@ import { TRAMOS_DEL_PIE } from './pie3d/coreografia'
  * por `perseguirElPunteroDeLaOrbita`) y en el final del pie (`FinalDelPie`, su propia órbita). Lo demás que mira el puntero (el polvo, el piso, la
  * energía) sigue con el de r3f.
  */
-export const CONTROLES_FIJOS = '[data-pieza="barra"], [data-pieza="sonido-de-la-esquina"], [data-pieza="control-del-sonido"], [data-pieza="menu-movil"], [data-pieza="vidrio"], [data-pieza="esquina-del-recorrido"], [data-control-fijo]'
+export const CONTROLES_FIJOS = '[data-pieza="barra"], [data-pieza="sonido-de-la-esquina"], [data-pieza="control-del-sonido"], [data-pieza="menu-movil"], [data-pieza="vidrio"], [data-control-fijo]'
 
 /** El último puntero válido (de −1 a 1, como el de r3f), si ya hubo uno, y si el oyente está puesto. */
 export const PUNTERO_DE_LA_ORBITA = { x: 0, y: 0, hay: false, escuchando: false }

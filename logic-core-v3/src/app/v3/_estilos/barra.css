@@ -113,7 +113,7 @@
 
 /*
  * [RETOQUE 3D] N1 · LA ESQUINA — «Contacto» salió de la pastilla y va arriba a la derecha con «Login», en su propia
- * pastilla del mismo vidrio. Siempre arriba (no nace al pie como la barra: ahí abajo están el infinito y el parlante).
+ * pastilla del mismo vidrio. Siempre arriba (no nace al pie como la barra). [CIERRE A] A6 · enfrente, a la izquierda, el parlante.
  */
 [data-v3] [data-pieza="barra"] > [data-parte="esquina"] {
   position: fixed;
@@ -153,7 +153,7 @@
 /* =========================================================================
  * [PULIDO 13] K5 · LA ZONA DE LA CABECERA DEL TELÉFONO
  * =========================================================================
- * Abajo de 1024 los controles fijos (el parlante, el menú y el progreso) son discos de `--spacing-12` a
+ * Abajo de 1024 los controles fijos (el parlante y el menú) son discos de `--spacing-12` a
  * `max(--spacing-4, safe-area-inset-top)` del borde de arriba: la zona va de ahí hasta su borde de abajo más un aire. Lo que
  * tiene que verse en el reposo de una sección arranca debajo (el relleno de arriba del pie, el de Demos).
  */
@@ -164,13 +164,13 @@
 /* Al fondo, si el pie no entra en la pantalla, lo de arriba del pie (cortado por el borde) quedaría debajo de los controles: se
    retiran hacia arriba (el pie ya trae el recorrido y el contacto) y vuelven al subir (`cabeceraAlFondo.ts`). La transición
    repite la de los colores de cada uno (una sola lista por elemento). */
-[data-v3] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"], [data-pieza="infinito-del-recorrido"]) {
+[data-v3] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"]) {
   transition-property: color, background-color, border-color, translate, opacity;
   transition-duration: var(--duracion-media);
   transition-timing-function: var(--ease-salida);
 }
 
-[data-v3][data-cabecera-retirada] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"], [data-pieza="infinito-del-recorrido"]) {
+[data-v3][data-cabecera-retirada] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"]) {
   translate: 0 calc(-1 * var(--zona-de-la-cabecera));
   opacity: 0;
   pointer-events: none;

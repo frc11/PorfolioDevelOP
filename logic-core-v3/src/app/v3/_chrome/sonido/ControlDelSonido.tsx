@@ -3,8 +3,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
-import { cn } from '@/lib/utils'
-
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { CURVAS } from '../../_lib/motion/curvas'
 import { sonar } from '../../_lib/sonido/bus'
@@ -12,16 +10,14 @@ import type { MotorDelSonido } from '../../_lib/sonido/motor'
 import { guardarPrendido, leerPrendido, suscribirAlPrendido } from '../../_lib/sonido/preferencia'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { SELECTOR_DE_LOS_CTA } from '../escena/RespuestaDeLaEscena'
-import { progresoAbajo } from '../recorrido/InfinitoDelRecorrido'
 import { apagarElGiroscopio, giroscopioPedido, prenderElGiroscopio } from '../../_lib/escena/giroscopio'
 import { IconoDelParlante } from './IconoDelParlante'
 import { estadoDelMotor, pedirElMotor, soltarElMotor, suscribirAlMotor } from './motorCompartido'
 
 /**
- * [3D Y SONIDO] T2 · EL CONTROL DEL SONIDO — un parlante chico, [PASADA FINAL] C1: justo encima del infinito del recorrido y
- * centrado con él, en la columna de su esquina (`recorrido/InfinitoDelRecorrido.tsx`, que lo recibe en `encima`), en su mismo lenguaje
- * (trazo fino, puntas redondas, el borde tenue del tono contrario) y con su mismo tono: copia el que el infinito leyó de
- * lo que hay debajo (`data-seccion`), así no hay una segunda lectura. [RETOQUE 3D] En el producto (era sólo con la prueba).
+ * [3D Y SONIDO] T2 · EL CONTROL DEL SONIDO — un parlante chico (trazo fino, puntas redondas). [RETOQUE 3D] En el producto (era sólo
+ * con la prueba). [CIERRE A] A6 · el infinito del recorrido se fue: el parlante va en su esquina (`EsquinaDelSonido.tsx`), en escritorio
+ * arriba a la izquierda en un disco del vidrio de Contacto y Login (del alto de la barra), y abajo de 1024 en el disco de la cabecera.
  *
  *   · **Apagado por defecto**, y la elección se recuerda (`preferencia.ts`, con try/catch).
  *   · **Nada suena sin una acción.** Prenderlo es un clic; si quedó prendido de otra visita, el motor (howler y el
@@ -52,8 +48,6 @@ const DE_LAS_DEMOS_DEL_PANEL = '[data-pieza="demo-del-panel"]'
 /** Cuánto se queda el cartel después de tocar el parlante (ms), y su salida: corta, así el cambio de texto no se arrastra. */
 export const CARTEL_MS = 1800
 const SALIDA_DEL_CARTEL = { duration: 0.14, ease: CURVAS.principal } as const
-const sinCambios = (): (() => void) => () => undefined
-const abajoEnLaPagina = (): boolean => progresoAbajo(window.location.search)
 
 export default function ControlDelSonido(): React.JSX.Element {
   const raiz = useRef<HTMLDivElement>(null)
@@ -65,24 +59,6 @@ export default function ControlDelSonido(): React.JSX.Element {
   // [PASADA FINAL] C1 · el cartel (se ve) y el anuncio (se oye): los escribe el toque, no la carga.
   const [cartel, setCartel] = useState(false)
   const [anuncio, setAnuncio] = useState('')
-  // [PULIDO 11] C2 · abajo de 1024 (salvo `?progreso=abajo`) es el disco de arriba a la izquierda de la cabecera.
-  const abajo = useSyncExternalStore(sinCambios, abajoEnLaPagina, () => false)
-
-  // El tono: el del infinito, que ya lo lee de lo que hay debajo (los dos están en la misma esquina).
-  useEffect(() => {
-    const infinito = document.querySelector('[data-pieza="infinito-del-recorrido"]')
-    const el = raiz.current
-    if (infinito === null || el === null) return undefined
-    const copiar = (): void => {
-      if (infinito.getAttribute('data-seccion') === 'invertida') el.setAttribute('data-seccion', 'invertida')
-      else el.removeAttribute('data-seccion')
-    }
-    copiar()
-    const espia = new MutationObserver(copiar)
-    espia.observe(infinito, { attributes: true, attributeFilter: ['data-seccion'] })
-    return () => espia.disconnect()
-  }, [])
-
   // Prendido: el motor, con una acción de por medio (la del clic que lo prendió ya cuenta).
   useEffect(() => {
     if (!prendido) return undefined
@@ -198,14 +174,14 @@ export default function ControlDelSonido(): React.JSX.Element {
   }
 
   return (
-    // En la columna de la esquina (que no recibe el puntero): sólo esto lo recibe. Lleva el tono del infinito (`data-seccion`).
+    // En su esquina (que no recibe el puntero): sólo esto lo recibe. El disco lleva su fondo: se lee sobre cualquier sección.
     <div ref={raiz} data-pieza="sonido-de-la-esquina" className="text-tinta pointer-events-auto relative flex justify-center">
       <span role="status" data-pieza="anuncio-del-sonido" className="sr-only">
         {anuncio}
       </span>
       {/* El cartel: centrado sobre el parlante en escritorio; en el teléfono, apoyado a su derecha (no se sale del cuadro). [PULIDO
           11] C2 · en la cabecera, debajo y apoyado a su izquierda (arriba se saldría del cuadro). */}
-      <div aria-hidden="true" className={cn('pointer-events-none absolute bottom-full left-1/2 mb-[var(--spacing-2)] -translate-x-1/2 max-escritorio:translate-x-0', abajo ? 'max-escritorio:right-0 max-escritorio:left-auto' : 'max-escritorio:top-full max-escritorio:bottom-auto max-escritorio:left-0 max-escritorio:mt-[var(--spacing-2)] max-escritorio:mb-0')}>
+      <div aria-hidden="true" className="pointer-events-none absolute top-full left-0 mt-[var(--spacing-2)]">
         <AnimatePresence mode="wait">
           {cartel && (
             <motion.div
@@ -234,7 +210,7 @@ export default function ControlDelSonido(): React.JSX.Element {
         aria-pressed={prendido}
         aria-label="Sonido"
         onClick={tocar}
-        className={cn('flex h-[var(--spacing-8)] w-[var(--spacing-8)] cursor-pointer items-center justify-center rounded-[var(--radius-circulo)] transition-colors duration-[var(--duracion-media)]', !abajo && 'max-escritorio:size-[var(--spacing-12)] max-escritorio:rounded-full max-escritorio:border max-escritorio:border-borde max-escritorio:bg-fondo max-escritorio:shadow-[var(--shadow-flotante)]')}
+        className="flex cursor-pointer items-center justify-center rounded-full border-borde shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)] max-escritorio:size-[var(--spacing-12)] max-escritorio:border max-escritorio:bg-fondo escritorio:size-[calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))] escritorio:border-[length:var(--border-hairline)] escritorio:bg-[var(--color-superficie-translucida)] escritorio:backdrop-blur-[var(--blur-panel)]\"
       >
         <IconoDelParlante prendido={prendido} suena={estadoReal === 'listo'} reducido={reducido} />
       </button>

@@ -10,14 +10,12 @@
  *
  * Lo que necesita navegador está en los bancos de `scripts-interfaz2/` y sus entregas en `~/.cache/b4-medicion/interfaz2/`.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import * as THREE from 'three'
 
 import { SELECTOR_DE_LOS_ITEMS } from '../../_chrome/escena/AnticipacionDelMenu'
 import { SELECTOR_DE_LOS_CTA, SELECTOR_DE_LOS_VALORES, centroNormalizado } from '../../_chrome/escena/RespuestaDeLaEscena'
 import { demoBajo, estadoBajo, nocheQueSeVe, tonoBajo } from '../../_chrome/cursor/estado'
-import { CAJA_DEL_INFINITO, TRAMOS, TRAZO_DEL_INFINITO, porcentajeDelRecorrido, puntoDeLaLemniscata, textoDelPorcentaje } from '../../_chrome/recorrido/recorrido'
-import { SELECTOR_DE_LOS_VIAJES } from '../../_componentes/deslizamiento'
 import { ONDA_DE_LA_PORTADA, colaDeLaOnda, frenteDeLaOnda, pixelDelMapa } from '../../_secciones/trabajos/demos/ondaDeLaPortada'
 import { ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { ENCENDIDO } from '../escena/entorno/encendido'
@@ -241,28 +239,22 @@ afirmar(CURSOR_TSX.includes("if (nuevo === 'demo' && (demo === null || Number(ge
 afirmar(leer('_secciones/trabajos/demos/Biblioteca.tsx').includes('if (!PRESENCIA_DEL_CURSOR.montado) mostrarElCartel(e.currentTarget, demo)') && CURSOR_TSX.includes('PRESENCIA_DEL_CURSOR.montado = true'), 'sin el cursor de la sala (táctil, movimiento reducido) y con el teclado queda la pastilla fija de siempre')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('Cierre · 5 · El infinito del recorrido: sólo indica')
+titulo('Cierre · 5 · El infinito del recorrido: [CIERRE A] A6 · se sacó (la esquina de abajo a la derecha, libre)')
 
-const [x0, y0] = puntoDeLaLemniscata(Math.PI / 2)
-const [xi] = puntoDeLaLemniscata(Math.PI)
-const [xd] = puntoDeLaLemniscata(2 * Math.PI)
-afirmar(Math.abs(x0) < 1e-9 && Math.abs(y0) < 1e-9 && xi < -40 && xd > 40, 'una lemniscata (no el logo): arranca en el cruce del centro, pasa por el lazo de la izquierda y por el de la derecha')
-const puntos = TRAZO_DEL_INFINITO.split(/[ML]/).filter((p) => p.trim() !== '')
-afirmar(puntos.length === TRAMOS + 1 && puntos[0].trim() === puntos[puntos.length - 1].trim(), `  y vuelve al centro: al 100 % el infinito se cierra (${String(puntos.length)} puntos)`)
-afirmar(CAJA_DEL_INFINITO.startsWith('-52 ') && porcentajeDelRecorrido(-0.2) === 0 && porcentajeDelRecorrido(0.374) === 37 && porcentajeDelRecorrido(1.3) === 100 && textoDelPorcentaje(0.5) === '50 %', 'el porcentaje: entero, acotado de 0 a 100, con su espacio fino («50 %»)')
-const INFINITO = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
-afirmar(!/<a\b|<button|onClick|href=/.test(INFINITO) && INFINITO.includes('pointer-events-none') && !SELECTOR_DE_LOS_VIAJES.includes('recorrido'), 'sin botones ni clics: no navega (el menú navega) y no se come el puntero')
-afirmar(INFINITO.includes('aria-hidden="true"') && INFINITO.includes('NVDA'), 'mudo para el lector, con su porqué escrito (un progressbar que cambia con cada scroll pitaría en NVDA)')
-afirmar(INFINITO.includes('tabular-nums') && INFINITO.includes('strokeLinecap="round"') && INFINITO.includes('opacity={0.2}') && INFINITO.includes('useSpring(scrollYProgress, INERCIA_DEL_INFINITO)') && INFINITO.includes('const avance = reducido ? scrollYProgress : suave'), 'el número no baila, las puntas redondeadas, la pista tenue, el avance con inercia (y sin ella con movimiento reducido)')
-afirmar(INFINITO.includes('const debajo = document.elementFromPoint(') && INFINITO.includes('escritorio:right-[var(--spacing-6)]') && !INFINITO.includes('max-escritorio:hidden'), 'el tono de lo que hay debajo (como el cursor); en escritorio y, más chico, en el teléfono')
+// [CIERRE A] A6 · con el sentido nuevo: el indicador (la lemniscata que se completaba con el porcentaje) se sacó en escritorio y en el
+// teléfono: ni su componente, ni su módulo, ni su montaje (el parlante, en su esquina: `s73` A6). Lo que queda de esta sección es el tono
+// del cursor sobre la noche que se ve.
+const CHROME_T4 = leer('_chrome/ChromeDelHome.tsx')
+const sinElInfinito = (chrome: string): boolean =>
+  !existsSync(`${V3}/_chrome/recorrido/InfinitoDelRecorrido.tsx`) && !existsSync(`${V3}/_chrome/recorrido/recorrido.ts`) && !/InfinitoDelRecorrido|infinito-del-recorrido/.test(chrome) && chrome.includes('<EsquinaDelSonido />')
+afirmar(sinElInfinito(CHROME_T4), 'el infinito del recorrido no se monta ni existe: el chrome monta la esquina del sonido')
+controlPositivo('  el detector VE el infinito montado (el de antes)', CHROME_T4.replace('<EsquinaDelSonido />', '<InfinitoDelRecorrido encima={<SonidoDelHome />} />'), sinElInfinito)
 const salaDeTrabajos = { tagName: 'SECTION', parentElement: null, hasAttribute: (n: string) => n === 'data-panel', getAttribute: () => 'trabajos' } as unknown as Element
 const tonoDeTrabajos = (noche: number): boolean => tonoBajo(salaDeTrabajos, noche, () => 'rgba(0, 0, 0, 0)') === 'oscuro'
 BRILLO_DE_LA_NOCHE.uNoche.value = 1
-afirmar(nocheQueSeVe() === 1 && tonoDeTrabajos(nocheQueSeVe()) && INFINITO.includes('tonoBajo(debajo, nocheQueSeVe())') && CURSOR_TSX.includes('tonoBajo(debajo, nocheQueSeVe())'), '  la noche que SE VE (la del arco o la de la gota): llegando a Trabajos de un salto, claro sobre la noche (el infinito y el cursor)')
+afirmar(nocheQueSeVe() === 1 && tonoDeTrabajos(nocheQueSeVe()) && CURSOR_TSX.includes('tonoBajo(debajo, nocheQueSeVe())'), '  la noche que SE VE (la del arco o la de la gota): llegando a Trabajos de un salto, claro sobre la noche (el cursor)')
 BRILLO_DE_LA_NOCHE.uNoche.value = 0
 controlPositivo('el chequeo del tono ve la noche de la gota sola (cero después de un salto) dejándolo oscuro sobre la noche', 0, tonoDeTrabajos)
-afirmar(INFINITO.includes('window.setInterval(') && INFINITO.includes('RELECTURA_MS'), '  y lo relee también quieto: la noche cae con la página quieta (la gota, el arco con su inercia)')
-afirmar(/if \(el !== null && el\.textContent !== texto\) el\.textContent = texto/.test(INFINITO) && !/useState/.test(INFINITO), '  y React no se vuelve a dibujar con el scroll: el número se escribe sólo cuando cambia el entero')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Cierre · 6 · La sombra de día: una sola, la del logo')

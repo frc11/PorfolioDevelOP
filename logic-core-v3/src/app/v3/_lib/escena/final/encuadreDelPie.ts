@@ -128,7 +128,7 @@ export function encuadreEntreLasCajas(vista: { readonly ancho: number; readonly 
 /** Lo que el pie tiene encima de la escena (el texto, los enlaces, los campos, los íconos) y lo pesado (el titular). */
 const LO_QUE_TAPA = 'h2, p, a, label, input, textarea, button, select'
 const LO_PESADO = 'h2'
-const LO_FIJO = '[data-parte="boton-del-menu"], [data-pieza="sonido-de-la-esquina"], [data-pieza="infinito-del-recorrido"]'
+const LO_FIJO = '[data-parte="boton-del-menu"], [data-pieza="sonido-de-la-esquina"]'
 
 /** El encuadre en vivo (lo lee el cuadro del final abajo de 1024): `null` hasta medirlo. */
 export const ENCUADRE_EN_VIVO: { valor: EncuadreEnPantalla | null; vista: { ancho: number; alto: number } } = { valor: null, vista: { ancho: 0, alto: 0 } }

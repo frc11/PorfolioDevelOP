@@ -36,18 +36,20 @@ interface Parada {
   readonly choques: readonly string[]
 }
 const CABECERA = recibo<{ antes: Parada[]; despues: Parada[] }>('cabecera.json')
-const ESQUINA = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
+// [CIERRE A] A6 · el progreso se sacó: lo que queda de la esquina es el parlante (`EsquinaDelSonido.tsx`).
+const ESQUINA = leer('_chrome/sonido/EsquinaDelSonido.tsx')
 const APERTURA = leer('_chrome/contacto/apertura.ts')
 const cabeceraLimpia = (paradas: readonly Parada[]): boolean => paradas.length >= 21 && paradas.some((p) => p.ancho >= 1000 && p.ancho < 1024) && paradas.filter((p) => p.ancho < 1024).every((p) => p.choques.length === 0)
+// [CIERRE A] A6 · con el sentido nuevo: sin el progreso no hay qué bajar; con la barra a la vista la cabecera del teléfono no se retira (la
+// barra manda) y el parlante sigue arriba a la izquierda, sin bandera.
 const progresoAlPie = (c: string, a: string): boolean =>
-  c.includes('const conLaBarra = useLaBarraSeVe()') && c.includes('const alPie = abajo || conLaBarra') && c.includes("data-abajo={alPie ? '' : undefined}") &&
-  // El parlante sigue arriba a la izquierda con la barra (sólo la bandera lo baja).
-  c.includes("<div data-parte=\"lugar-del-parlante\" className={cn(!abajo && 'max-escritorio:fixed") &&
+  c.includes('const conLaBarra = useLaBarraSeVe()') && c.includes('useCabeceraAlFondo(!conLaBarra)') && !/progreso|data-abajo/.test(c) &&
+  c.includes('<div data-parte="lugar-del-parlante">') &&
   // En el servidor, sin la barra (abajo de 1024 lo común es el menú): el HTML no dibuja el progreso abajo en el teléfono.
   a.includes("return useSyncExternalStore(suscribir, conLaBarra, () => false)")
-afirmar(cabeceraLimpia(CABECERA.despues) && progresoAlPie(ESQUINA, APERTURA), `1 · de 390 a 1023 (arriba, a 1400 y a 4200 px) ningún control fijo se pisa con otro (${String(CABECERA.despues.length)} paradas): con la barra a la vista el progreso va abajo`)
+afirmar(cabeceraLimpia(CABECERA.despues) && progresoAlPie(ESQUINA, APERTURA), `1 · de 390 a 1023 (arriba, a 1400 y a 4200 px) ningún control fijo se pisa con otro (${String(CABECERA.despues.length)} paradas; [CIERRE A] A6 · el progreso se sacó): con la barra a la vista, la cabecera no se retira`)
 controlPositivo('1 · el detector VE la cabecera de antes (a 1000 y 1023, Login × progreso)', CABECERA.antes, cabeceraLimpia)
-controlPositivo('  y el progreso que no mira la barra', ESQUINA.replace("data-abajo={alPie ? '' : undefined}", "data-abajo={abajo ? '' : undefined}"), (c: string) => progresoAlPie(c, APERTURA))
+controlPositivo('  y una esquina que no mira la barra', ESQUINA.replace('useCabeceraAlFondo(!conLaBarra)', 'useCabeceraAlFondo(true)'), (c: string) => progresoAlPie(c, APERTURA))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('C1 · El pie simétrico')

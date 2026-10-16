@@ -269,7 +269,8 @@ const zonaBien = (banda: string, barra: string, retira: typeof retiradaAlFondo):
   barra.includes('--zona-de-la-cabecera: calc(max(var(--spacing-4), env(safe-area-inset-top)) + var(--spacing-12) + var(--spacing-4));') &&
   /\[data-v3\] \[data-panel='cierre'\] \[data-pieza='pie'\] \{\s*padding-block: var\(--zona-de-la-cabecera\) var\(--spacing-4\);/.test(banda) &&
   leer('_secciones/trabajos/demos/CapaDeDemos.tsx').includes('max-escritorio:content-center max-escritorio:pt-[var(--zona-de-la-cabecera)]') &&
-  barra.includes('[data-v3][data-cabecera-retirada] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"], [data-pieza="infinito-del-recorrido"]) {') &&
+  // [CIERRE A] A6 · el menú y el parlante (el progreso se sacó).
+  barra.includes('[data-v3][data-cabecera-retirada] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"]) {') &&
   // Al fondo con el pie más alto que la pantalla, sí; al fondo con el pie entero, o lejos del fondo, no.
   retira(1000, 600, 1600, -40) && !retira(1000, 600, 1600, 10) && !retira(800, 600, 1600, -400)
 afirmar(zonaBien(BANDA, BARRA_CSS, retiradaAlFondo), '  el código: la zona de la cabecera (los controles más un aire, con el inset seguro) arriba del pie y de Demos, y el retiro sólo al fondo con el pie cortado')

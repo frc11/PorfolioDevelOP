@@ -3,8 +3,8 @@
 import { useEffect } from 'react'
 
 /**
- * [PULIDO 13] K5 · AL FONDO, SI EL PIE NO ENTRA, LA CABECERA SE RETIRA — abajo de 1024 los controles fijos (el parlante, el menú y
- * el progreso) flotan arriba. En el reposo de cada sección nada queda debajo (la zona de la cabecera, `barra.css`); al fondo, si el
+ * [PULIDO 13] K5 · AL FONDO, SI EL PIE NO ENTRA, LA CABECERA SE RETIRA — abajo de 1024 los controles fijos (el parlante y el menú;
+ * [CIERRE A] A6 · el progreso se sacó) flotan arriba. En el reposo de cada sección nada queda debajo (la zona de la cabecera, `barra.css`); al fondo, si el
  * pie es más alto que la pantalla, lo de arriba del pie (cortado por el borde) quedaba debajo de ellos y no hay relleno que lo
  * arregle. Ahí se retiran (`data-cabecera-retirada` en la raíz de /v3: el pie ya trae el recorrido y el contacto) y vuelven al
  * subir. Sólo con la cabecera del teléfono (con la barra a la vista, no).

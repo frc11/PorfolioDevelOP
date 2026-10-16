@@ -8,6 +8,8 @@
  *   A3 · partículas y rayos sólo de noche: de día no hay cargas, arcos ni red; entran y se van con la noche de la energía (el factor del
  *        amanecer y el atardecer), cada una corrida por su azar, su luz y su tamaño juntos, sin saltos. El día de la energía se borró.
  *   A4 · la red de noche, estable: el temblor de los vértices al 20 % y más lento; el titileo, suave y lento.
+ *   A6 · el indicador de progreso (el infinito con el porcentaje) se sacó en escritorio y en el teléfono; la esquina de abajo a la derecha,
+ *        libre (el chatbot); el teléfono, el parlante a la izquierda y el menú al centro; en escritorio el parlante arriba a la izquierda.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { motionValue } from 'motion/react'
@@ -308,5 +310,33 @@ const formaDeLaRed = (armarLaRed(4, {}).malla.material as THREE.ShaderMaterial).
 const correBien = (corre: number): boolean => corre > 0 && corre <= 0.3 * TRAZO.uArcoForma[2]
 afirmar(correBien(formaDeLaRed.z) && formaDeLaRed.x === TRAZO.uArcoForma[0] && formaDeLaRed.y === TRAZO.uArcoForma[1], `  la luz que corre por los rayos de la red, ${String(formaDeLaRed.z)} (la de los arcos, ${String(TRAZO.uArcoForma[2])}): el mismo canal, casi quieto`)
 controlPositivo('  el detector VE la luz que corre de los arcos en la red (la de antes)', TRAZO.uArcoForma[2], correBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A6 · Sin el indicador de progreso: la esquina de abajo a la derecha libre; el parlante a la izquierda y el menú al centro')
+
+/**
+ * Lo fijo del chrome: cada caja `fixed` de sus componentes y adónde se ancla (sus clases de lugar). La esquina de abajo a la derecha está
+ * libre si ninguna se ancla abajo Y a la derecha a la vez (en ningún ancho). El indicador (el infinito del recorrido) no existe ni se
+ * monta; el parlante: abajo de 1024 arriba a la izquierda (con el menú al centro, en el mismo eje), en escritorio arriba a la izquierda,
+ * en la fila de la barra (el alto de la barra y el vidrio de Contacto y Login).
+ */
+const CHROME_A6 = ['ChromeDelHome.tsx', 'sonido/EsquinaDelSonido.tsx', 'sonido/ControlDelSonido.tsx', 'menu/MenuMovil.tsx', 'barra/BarraDelHome.tsx'].map((f) => leer(`../../_chrome/${f}`))
+const cajasFijas = (fuentes: readonly string[]): string[] => fuentes.flatMap((t) => Array.from(t.matchAll(/className="([^"]*\bfixed\b[^"]*)"/g), (m) => m[1]))
+const abajoALaDerecha = (clases: string): boolean => /(^|\s)([a-z-]+:)*bottom-/.test(clases) && /(^|\s)([a-z-]+:)*right-/.test(clases)
+const esquinaLibre = (fuentes: readonly string[]): boolean => cajasFijas(fuentes).length > 0 && !cajasFijas(fuentes).some(abajoALaDerecha) && !fuentes.some((t) => /InfinitoDelRecorrido|infinito-del-recorrido|esquina-del-recorrido/.test(t))
+afirmar(esquinaLibre(CHROME_A6) && !existsSync(new URL('../../_chrome/recorrido/InfinitoDelRecorrido.tsx', import.meta.url)), `  la esquina de abajo a la derecha, libre: ninguna de las ${String(cajasFijas(CHROME_A6).length)} cajas fijas del chrome se ancla abajo y a la derecha; el infinito no existe ni se monta`)
+controlPositivo('  el detector VE la esquina del infinito (la de antes)', [...CHROME_A6, '<div data-pieza="esquina-del-recorrido" className="pointer-events-none fixed right-[var(--spacing-4)] bottom-[var(--spacing-4)]">'], esquinaLibre)
+const ESQUINA_A6 = leer('../../_chrome/sonido/EsquinaDelSonido.tsx')
+const SONIDO_A6 = leer('../../_chrome/sonido/ControlDelSonido.tsx')
+const MENU_A6 = leer('../../_chrome/menu/MenuMovil.tsx')
+const ARRIBA_A6 = 'top-[max(var(--spacing-4),env(safe-area-inset-top))]'
+const lugaresBien = (esquina: string, sonido: string, menu: string): boolean => {
+  const delMenu = /data-parte="boton-del-menu"[\s\S]*?className="([^"]*)"/.exec(menu)?.[1] ?? ''
+  return esquina.includes(`fixed ${ARRIBA_A6} left-[max(var(--spacing-4),env(safe-area-inset-left))]`) && esquina.includes('escritorio:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]') &&
+    delMenu.split(' ').includes(ARRIBA_A6) && delMenu.includes('inset-x-0') && delMenu.includes('mx-auto') &&
+    sonido.includes('escritorio:size-[calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))]') && sonido.includes('escritorio:bg-[var(--color-superficie-translucida)] escritorio:backdrop-blur-[var(--blur-panel)]')
+}
+afirmar(lugaresBien(ESQUINA_A6, SONIDO_A6, MENU_A6), '  el teléfono: el parlante arriba a la izquierda y el menú al centro (el mismo eje, la zona segura); escritorio: el parlante arriba a la izquierda, del alto de la barra y en su vidrio, enfrente de Contacto y Login')
+controlPositivo('  el detector VE el parlante de escritorio abajo a la derecha (el de antes)', ESQUINA_A6.replace('escritorio:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]', 'escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)]'), (e: string) => lugaresBien(e, SONIDO_A6, MENU_A6))
 
 cerrar('s73-cierre-a')

@@ -3,13 +3,12 @@ import { CompuertaDelCursor } from './cursor/CompuertaDelCursor'
 import { Contacto } from './contacto/Contacto'
 import { OndaDeLasPortadas } from '../_secciones/trabajos/demos/OndaDeLasPortadas'
 import { AnticipacionDelMenu } from './escena/AnticipacionDelMenu'
-import { InfinitoDelRecorrido } from './recorrido/InfinitoDelRecorrido'
 import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
 import { MenuMovil } from './menu/MenuMovil'
 import { BarraDelHome } from './barra/BarraDelHome'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
-import { SonidoDelHome } from './sonido/SonidoDelHome'
+import { EsquinaDelSonido } from './sonido/EsquinaDelSonido'
 
 /**
  * EL CHROME DEL HOME — la pastilla que viaja, y el cursor detrás de su decisión.
@@ -168,10 +167,9 @@ export function ChromeDelHome(): React.JSX.Element {
       <AnticipacionDelMenu />
       {/* [INTERFAZ 2] T3: las portadas de las demos ondean al pasar. */}
       <OndaDeLasPortadas />
-      {/* [INTERFAZ 2] T4: el infinito del recorrido (el cierre dejó éste: sólo indica, el menú navega). [3D Y SONIDO] T2: el
-          sonido; [RETOQUE 3D] el parlante, en el producto (apagado por defecto); `?sonidos=1`, la página de prueba. [PASADA
-          FINAL] C1: el parlante va en la esquina del infinito, justo encima de él. */}
-      <InfinitoDelRecorrido encima={<SonidoDelHome />} />
+      {/* [3D Y SONIDO] T2: el sonido; [RETOQUE 3D] el parlante, en el producto (apagado por defecto); `?sonidos=1`, la página de
+          prueba. [CIERRE A] A6: el infinito del recorrido se sacó; el parlante, en su esquina (arriba a la izquierda). */}
+      <EsquinaDelSonido />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

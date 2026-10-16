@@ -488,7 +488,7 @@ afirmar(limpioBien(PIE_B, PANEL_B), 'B6 · el éxito limpia el formulario: los v
 controlPositivo('B6 · el detector VE campos que no se vuelven a montar (el autocompletado viejo se queda)', PIE_B.replace('setVuelta((n) => n + 1)', ''), (p: string) => limpioBien(p, PANEL_B))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('C2 · La cabecera abajo de 1024: parlante, menú y progreso del mismo tamaño y en el mismo eje')
+titulo('C2 · La cabecera abajo de 1024: parlante y menú del mismo tamaño y en el mismo eje ([CIERRE A] A6 · el progreso se sacó)')
 
 // Lo pedido: el SONIDO arriba a la izquierda, el MENÚ al centro y el PROGRESO (el infinito) arriba a la derecha, los tres del
 // tamaño del botón del menú (un disco de 48 px: fondo, borde y sombra), en el mismo eje horizontal y adentro de la zona segura.
@@ -496,8 +496,10 @@ titulo('C2 · La cabecera abajo de 1024: parlante, menú y progreso del mismo ta
 // infinito (s47: no se ubica solo en escritorio); abajo de 1024, su lugar es fijo arriba a la izquierda. Con `?progreso=abajo`, la
 // columna de abajo de antes. Lo que se ve (y que no tape nada a 320, 375 y 390), en el banco.
 const ARRIBA = 'top-[max(var(--spacing-4),env(safe-area-inset-top))]'
-const DISCO = 'max-escritorio:size-[var(--spacing-12)] max-escritorio:rounded-full max-escritorio:border max-escritorio:border-borde max-escritorio:bg-fondo max-escritorio:shadow-[var(--shadow-flotante)]'
-const ESQUINA_C2 = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
+// [CIERRE A] A6 · con el sentido nuevo: sin el progreso (se sacó); el parlante, su disco (el redondo, el borde y la sombra son de todos los
+// anchos: en escritorio es el vidrio de Contacto y Login) en su esquina, arriba a la izquierda; a la derecha, nada.
+const DISCO = 'max-escritorio:size-[var(--spacing-12)] max-escritorio:border max-escritorio:bg-fondo'
+const ESQUINA_C2 = leer('_chrome/sonido/EsquinaDelSonido.tsx')
 const SONIDO_C2 = leer('_chrome/sonido/ControlDelSonido.tsx')
 const MENU_C2 = leer('_chrome/menu/MenuMovil.tsx')
 const cabeceraBien = (esquina: string, sonido: string, menu: string): boolean => {
@@ -505,18 +507,14 @@ const cabeceraBien = (esquina: string, sonido: string, menu: string): boolean =>
   return (
     // El menú: el disco de 48 px, al centro, en el eje.
     delMenu.split(' ').includes(ARRIBA) && delMenu.includes('inset-x-0') && delMenu.includes('mx-auto') && delMenu.includes('size-[var(--spacing-12)]') && delMenu.includes('rounded-full') &&
-    // El progreso: arriba a la derecha (zona segura) y su caja, el mismo disco.
-    esquina.includes(`max-escritorio:not-data-abajo:${ARRIBA} max-escritorio:not-data-abajo:right-[max(var(--spacing-4),env(safe-area-inset-right))]`) &&
-    // [PULIDO 12] 1 · con la barra a la vista (de 860 a 1023), el progreso vuelve abajo (`alPie`): s63.
-    esquina.includes(`!alPie && '${DISCO} max-escritorio:justify-center max-escritorio:gap-0'`) &&
-    // El parlante: su lugar fijo arriba a la izquierda (zona segura) y su botón, el mismo disco; el cartel, debajo (arriba se saldría).
-    esquina.includes(`<div data-parte="lugar-del-parlante" className={cn(!abajo && 'max-escritorio:fixed max-escritorio:${ARRIBA} max-escritorio:left-[max(var(--spacing-4),env(safe-area-inset-left))]')}>`) &&
-    sonido.includes(`!abajo && '${DISCO}'`) && sonido.includes("'max-escritorio:top-full max-escritorio:bottom-auto max-escritorio:left-0") &&
-    sonido.includes('const abajo = useSyncExternalStore(sinCambios, abajoEnLaPagina, () => false)')
+    // El parlante: su esquina fija arriba a la izquierda (zona segura), nada a la derecha; su botón, el mismo disco; el cartel, debajo.
+    esquina.includes(`fixed ${ARRIBA} left-[max(var(--spacing-4),env(safe-area-inset-left))]`) && !/\bright-/.test(esquina) &&
+    sonido.includes(DISCO) && sonido.includes('rounded-full border-borde shadow-[var(--shadow-flotante)]') && sonido.includes('className="pointer-events-none absolute top-full left-0')
   )
 }
-afirmar(cabeceraBien(ESQUINA_C2, SONIDO_C2, MENU_C2), 'C2 · abajo de 1024: el parlante arriba a la izquierda, el menú al centro y el progreso arriba a la derecha, los tres discos de 48 px en el mismo eje y la zona segura')
-controlPositivo('C2 · el detector VE la cabecera de antes (el parlante en fila con el progreso, chico)', SONIDO_C2.replace(`!abajo && '${DISCO}'`, "!abajo && ''"), (so: string) => cabeceraBien(ESQUINA_C2, so, MENU_C2))
+afirmar(cabeceraBien(ESQUINA_C2, SONIDO_C2, MENU_C2), 'C2 · abajo de 1024: el parlante arriba a la izquierda y el menú al centro, discos de 48 px en el mismo eje y la zona segura; a la derecha, nada (el progreso se sacó)')
+controlPositivo('C2 · el detector VE el parlante chico, sin el disco (el de antes de C2)', SONIDO_C2.replace(DISCO, ''), (so: string) => cabeceraBien(ESQUINA_C2, so, MENU_C2))
+controlPositivo('  y algo a la derecha de la cabecera (el progreso)', ESQUINA_C2.replace('left-[max(var(--spacing-4),env(safe-area-inset-left))]', 'left-[max(var(--spacing-4),env(safe-area-inset-left))] right-[max(var(--spacing-4),env(safe-area-inset-right))]'), (e: string) => cabeceraBien(e, SONIDO_C2, MENU_C2))
 controlPositivo('  y un menú fuera del eje (sin la zona segura)', MENU_C2.replace(ARRIBA, 'top-[var(--spacing-4)]'), (m: string) => cabeceraBien(ESQUINA_C2, SONIDO_C2, m))
 
 // ═══════════════════════════════════════════════════════════════════════════

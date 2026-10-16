@@ -242,21 +242,19 @@ const enLaEsquina = (c: string): boolean => /\{ENLACES_DE_SECCION\.map\(/.test(c
 afirmar(enLaEsquina(barra), '  la esquina: Contacto (un enlace del viaje, como los de la pastilla) y Login (un botón)')
 controlPositivo('el detector VE a Contacto adentro de la pastilla', barra.replace('ENLACES_DE_SECCION.map(', 'ENLACES_DEL_HOME.map('), enLaEsquina)
 const cssDeLaBarra = readFileSync(`${V3}/_estilos/barra.css`, 'utf8')
-afirmar(/\[data-parte="esquina"\] \{\s*position: fixed;\s*top: var\(--barra-reposo\);\s*right: var\(--pad-lateral-compacto\);/.test(cssDeLaBarra) && /\[data-modo="menu"\] > :is\(\[data-parte="pastilla"\], \[data-parte="esquina"\]\)/.test(cssDeLaBarra) && /AIRE_DE_LA_ESQUINA/.test(barra), '  arriba a la derecha, siempre arriba (al pie del hero están el infinito y el parlante); si no entra al lado de la pastilla, el menú del teléfono')
+afirmar(/\[data-parte="esquina"\] \{\s*position: fixed;\s*top: var\(--barra-reposo\);\s*right: var\(--pad-lateral-compacto\);/.test(cssDeLaBarra) && /\[data-modo="menu"\] > :is\(\[data-parte="pastilla"\], \[data-parte="esquina"\]\)/.test(cssDeLaBarra) && /AIRE_DE_LA_ESQUINA/.test(barra), '  arriba a la derecha, siempre arriba (enfrente, el parlante: [CIERRE A] A6); si no entra al lado de la pastilla, el menú del teléfono')
 const menu = sinComentarios(leer('_chrome/menu/PanelDelMenu.tsx'))
 // [CIERRE RETOQUE 3D] N1: Contacto, un botón que abre el panel. [NOCTURNO FINAL] C5 · cambió por pedido: en el teléfono
 // Contacto es el último ítem de la lista (debajo de «Por qué develOP») y Login queda sólo en la barra de escritorio.
 afirmar(/\{ENLACES_DE_SECCION\.map\([\s\S]*\{ENLACE_DE_CONTACTO\.rotulo\}\s*<\/button>\s*<\/li>\s*<\/ul>\s*<\/nav>/.test(menu) && !/ENLACE_DE_LOGIN|pie-del-menu/.test(menu), '  en el teléfono, Contacto al final de la lista del menú de vidrio, y sin Login')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('N2 · El infinito, 1,3 veces más grande')
+titulo('N2 · El infinito, 1,3 veces más grande — [CIERRE A] A6 · se sacó')
 
-const infinito = leer('_chrome/recorrido/InfinitoDelRecorrido.tsx')
-const masGrande = (c: string): boolean => c.includes('w-[calc(var(--spacing-12)*1.3)]') && c.includes('escritorio:w-[calc(var(--spacing-8)*2.6)]')
-afirmar(masGrande(infinito), 'de 48 a 62 px en el teléfono y de 64 a 83 en escritorio (el trazo crece con él: es del dibujo)')
-controlPositivo('el detector VE el de antes', infinito.replace('*1.3)]', ')]').replace('*2.6)]', '*2)]'), masGrande)
-// [PASADA FINAL] C1 · el parlante dejó la izquierda del infinito: va justo encima, centrado, en la misma columna (s47 · C1).
-afirmar(leer('_chrome/ChromeDelHome.tsx').includes('<InfinitoDelRecorrido encima={<SonidoDelHome />} />') && leer('_chrome/recorrido/InfinitoDelRecorrido.tsx').includes('{encima}'), '  y el parlante se corre con él: [PASADA FINAL] C1, justo encima, en su misma columna (medido en vivo con scripts-pasada/c1-esquina.ts)')
+// [CIERRE A] A6 · con el sentido nuevo: el infinito del recorrido se sacó (escritorio y teléfono); el parlante quedó en su esquina.
+const montadoElInfinito = (chrome: string): boolean => /InfinitoDelRecorrido/.test(chrome) || existsSync(`${V3}/_chrome/recorrido/InfinitoDelRecorrido.tsx`)
+afirmar(!montadoElInfinito(leer('_chrome/ChromeDelHome.tsx')) && leer('_chrome/sonido/EsquinaDelSonido.tsx').includes('<SonidoDelHome />'), 'el infinito no existe ni se monta; el parlante, en la esquina del sonido')
+controlPositivo('el detector VE el infinito montado (el de antes)', '<InfinitoDelRecorrido encima={<SonidoDelHome />} />', (c: string) => !montadoElInfinito(c))
 
 // [CIERRE] Sonido · el clic, el pestillo (S1), y el ambiente, generativo (S2): s42 · S1 y S2.
 
