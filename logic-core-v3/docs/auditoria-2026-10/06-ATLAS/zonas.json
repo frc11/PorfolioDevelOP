@@ -1,0 +1,38 @@
+{
+ "schemaVersion": 1,
+ "nota": "Restricción de escritura de la auditoría 2026-10 (PROMPT, DEC-10). 11-CONGELADOS.md propone reemplazarla por niveles «protegido» y «libre»: cuando se decida, se actualiza acá.",
+ "congelados": [
+  "logic-core-v3/src/components/3d/HeroArtifact.tsx",
+  "logic-core-v3/src/context/TransitionContext.tsx",
+  "logic-core-v3/src/context/PreloaderContext.tsx",
+  "logic-core-v3/prisma/schema.prisma",
+  "logic-core-v3/src/auth.ts",
+  "logic-core-v3/src/lib/prisma.ts",
+  "logic-core-v3/src/actions/dashboard-actions.ts",
+  "logic-core-v3/src/lib/utils.ts",
+  "logic-core-v3/src/lib/action-utils.ts",
+  "logic-core-v3/src/lib/use-is-client.ts",
+  "logic-core-v3/src/lib/auth-guards.ts",
+  "logic-core-v3/src/lib/audit-log.ts",
+  "logic-core-v3/src/lib/logger.ts",
+  "logic-core-v3/src/lib/alerts.ts",
+  "logic-core-v3/src/lib/tz-ar.ts",
+  "logic-core-v3/src/lib/dates-ar.ts",
+  "logic-core-v3/src/lib/design-tokens.ts",
+  "logic-core-v3/src/lib/use-reduced-motion.ts",
+  "logic-core-v3/src/lib/hover.ts",
+  "logic-core-v3/src/lib/motion-variants.ts",
+  "logic-core-v3/src/lib/chromeReveal.ts",
+  "logic-core-v3/src/components/ui/"
+ ],
+ "franco": [
+  "^logic-core-v3/src/lib/leados/",
+  "^logic-core-v3/src/app/\\(protected\\)/setter/",
+  "^logic-core-v3/src/app/\\(protected\\)/admin/leados/",
+  "^logic-core-v3/src/app/\\(protected\\)/admin/leads/_actions/",
+  "^logic-core-v3/src/app/\\(protected\\)/admin/fg2-lab/",
+  "^logic-core-v3/src/auth\\.ts$",
+  "^logic-core-v3/src/lib/auth-cookies\\.ts$",
+  "^logic-core-v3/src/app/api/qa/login/route\\.ts$"
+ ]
+}

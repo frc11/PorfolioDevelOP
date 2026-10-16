@@ -1,0 +1,106 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "$id": "atlas.schema.json",
+ "title": "Atlas de develOP — contrato de datos (ENMIENDA-01 E7)",
+ "description": "schemaVersion 1. Cada archivo del Atlas declara su schemaVersion y valida contra la definición de su nombre. El contrato son estos JSON, no el código de la app.",
+ "schemaVersion": 1,
+ "definitions": {
+  "zona": { "type": "string", "enum": ["libre", "franco", "congelado"] },
+  "madurez": { "type": "string", "enum": ["L0", "L1", "L2", "L3", "L4", "L?"] },
+  "nodo": {
+   "type": "object",
+   "required": ["id", "tipo", "nombre", "padre", "area", "descripcion", "archivos", "loc", "rutas", "modelos", "entradas", "dueno", "zona", "ultimo_commit", "ramas"],
+   "properties": {
+    "id": { "type": "string", "pattern": "^(h[1-6](\\.[a-z0-9-]+){0,2}|lib(\\.[a-z0-9-]+)+|int(\\.[a-z0-9-]+)+|modelo\\.[A-Za-z0-9]+|rama\\.[a-z0-9-]+|doc\\.[a-z0-9-]+)$" },
+    "tipo": { "type": "string", "enum": ["area", "herramienta", "funcionalidad", "lib", "modelo", "integracion", "rama", "doc"] },
+    "nombre": { "type": "string" },
+    "padre": { "type": ["string", "null"] },
+    "area": { "type": ["string", "null"] },
+    "descripcion": { "type": "string" },
+    "archivos": { "type": "array", "items": { "type": "string" } },
+    "loc": { "type": "integer" },
+    "rutas": { "type": "array", "items": { "type": "string" } },
+    "modelos": { "type": "array", "items": { "type": "string" } },
+    "entradas": { "type": "array", "items": { "type": "string" } },
+    "dueno": { "type": "string" },
+    "zona": { "$ref": "#/definitions/zona" },
+    "ultimo_commit": { "type": ["object", "null"] },
+    "ramas": { "type": "array", "items": { "type": "string" } }
+   }
+  },
+  "arista": {
+   "type": "object",
+   "required": ["de", "a", "tipo"],
+   "properties": {
+    "de": { "type": "string" },
+    "a": { "type": "string" },
+    "tipo": { "type": "string", "enum": ["contiene", "importa", "usa-modelo", "llama-api", "dispara", "depende"] }
+   }
+  },
+  "atlas": {
+   "type": "object",
+   "required": ["schemaVersion", "generado", "nodos", "aristas"],
+   "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "generado": { "type": "object", "required": ["repo", "ref", "sha", "fecha"], "properties": { "repo": { "type": "string" }, "ref": { "type": "string" }, "sha": { "type": "string" }, "fecha": { "type": "string" } } },
+    "nodos": { "type": "array", "items": { "$ref": "#/definitions/nodo" } },
+    "aristas": { "type": "array", "items": { "$ref": "#/definitions/arista" } }
+   }
+  },
+  "curado": {
+   "type": "object",
+   "required": ["schemaVersion", "nodos"],
+   "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "nodos": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": ["veredicto", "alcance", "alcance_propuesto", "notas", "decisiones"],
+      "properties": {
+       "madurez": { "$ref": "#/definitions/madurez" },
+       "madurez_evidencia": { "type": "string" },
+       "criterios_l3_faltantes": { "type": "array", "items": { "type": "string" } },
+       "veredicto": { "type": "string", "enum": ["mantener", "mejorar", "fusionar", "borrar", "decidir"] },
+       "alcance": { "type": "string", "enum": ["1.0", "despues", "descartado", "sin-decidir"] },
+       "alcance_propuesto": { "type": "string", "enum": ["1.0", "despues", "descartado"] },
+       "notas": { "type": "string" },
+       "decisiones": { "type": "array", "items": { "type": "object", "required": ["fecha", "texto", "quien"] } }
+      }
+     }
+    }
+   }
+  },
+  "funcionalidades": {
+   "type": "object",
+   "required": ["schemaVersion", "funcionalidades"],
+   "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "funcionalidades": { "type": "array", "items": { "type": "object", "required": ["id", "nombre", "padre", "archivos"], "properties": { "id": { "type": "string", "pattern": "^h[1-6]\\.[a-z0-9-]+\\.[a-z0-9-]+$" }, "nombre": { "type": "string" }, "padre": { "type": "string" }, "archivos": { "type": "array", "items": { "type": "string" } } } } }
+   }
+  },
+  "zonas": {
+   "type": "object",
+   "required": ["schemaVersion", "congelados", "franco"],
+   "properties": { "schemaVersion": { "type": "integer", "enum": [1] }, "congelados": { "type": "array", "items": { "type": "string" } }, "franco": { "type": "array", "items": { "type": "string" } } }
+  },
+  "entradas": {
+   "type": "object",
+   "required": ["schemaVersion", "entradas"],
+   "properties": { "schemaVersion": { "type": "integer", "enum": [1] }, "entradas": { "type": "array", "items": { "type": "object", "required": ["archivo", "tipo", "auth"] } } }
+  },
+  "hallazgos": {
+   "type": "object",
+   "required": ["schemaVersion", "hallazgos"],
+   "properties": { "schemaVersion": { "type": "integer", "enum": [1] }, "hallazgos": { "type": "array", "items": { "type": "object", "required": ["id", "severidad", "tipo", "confianza", "nodo", "zona", "estado"] } } }
+  },
+  "backlog": {
+   "type": "object",
+   "required": ["schemaVersion", "tarjetas"],
+   "properties": {
+    "schemaVersion": { "type": "integer", "enum": [1] },
+    "tarjetas": { "type": "array", "items": { "type": "object", "required": ["id", "titulo", "nodos", "hallazgos", "bloque", "nivel_proceso", "tamano", "estado"], "properties": { "nivel_proceso": { "type": "string", "enum": ["S", "M", "L"] } } } }
+   }
+  }
+ }
+}

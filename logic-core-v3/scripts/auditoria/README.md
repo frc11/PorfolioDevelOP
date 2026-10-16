@@ -22,6 +22,8 @@ Scripts de Node sin dependencias nuevas (solo `node:*` y `git`). Todos son de **
 | `censo-diseno.mjs` | F3.1: censo de diseño de las páginas internas y su cierre de archivos (grafo de depcruise): colores literales y arbitrarios frente a tokens, paleta por familia, tipografías, tamaños arbitrarios, radios, sombras, estilos inline y vidrio; control positivo con una muestra sintética | `_crudo/censo-diseno.json` |
 | `planeado-md.mjs` | Genera `12-PLANEADO.md` desde lo extraído y los cruces por dominio; conserva los `PLAN-NNN` | `12-PLANEADO.md` |
 | `atlas/nodos.mjs` | Contrato de IDs del Atlas y mapeo ruta → nodo. Portable: sin imports de `src/` | módulo |
+| `atlas/generar.mjs`, `atlas/vistas.mjs`, `atlas/validar-atlas.mjs` | El Atlas como datos (E7): `atlas.json` y `historial.jsonl` desde el árbol de cualquier ref; las vistas `.md`; la validación contra `atlas.schema.json`. Portables (Node nativo y git). Detalle en `atlas/README.md` | `06-ATLAS/` |
+| `congelados-datos.mjs` | Datos medidos de cada congelado: historia en git, importadores por dominio, hallazgos y fichas de poda que lo citan, menciones en docs y cambios en rediseno/home | `_crudo/congelados-datos.json` |
 
 ## De esta corrida
 
@@ -35,6 +37,9 @@ Scripts de Node sin dependencias nuevas (solo `node:*` y `git`). Todos son de **
 | `f2-decidir.mjs` | Aplica las decisiones del padre (`_crudo/ciclos/<ciclo>-decisiones.json`: aceptar, descartar o fusionar, casos de prueba, campos corregidos; `confianza_padre` para una ALTA leída con un eslabón de runtime, `relacionados_tmp` para relacionar hallazgos del mismo ciclo y `destino` para corregir el hallazgo registrado que recibe una fusión) |
 | `f2-escribir.mjs` | Vuelca un ciclo revisado: IDs globales, registro de hallazgos, fusiones (y la corrección del destino, con su valor anterior en `origen.cambios`), relaciones dentro del ciclo, VH en 08, cruces de lo planeado, acumulados, ledger, y regenera 03/02/09 y 12 |
 | `planeado-extraer.mjs` | Un solo uso: junta la salida de los agentes de extracción de F1.12 (journal del workflow) en `_crudo/planeado-extraido/` |
+| `congelados-md.mjs` | Un solo uso (C17): escribe `11-CONGELADOS.md` desde los datos medidos, el análisis de los dos agentes (`_crudo/congelados-resultado.json`) y el registro; la política de niveles es texto del padre |
+| `diseno-md.mjs` | Un solo uso (C18): escribe `04-DISENO.md` desde el censo y `_crudo/f3-resultado.json`, con los DIS del padre, y agrega VH-174 a `08` |
+| `atlas/semilla.mjs` | Un solo uso (F5): siembra los datos que después mantienen las personas (`funcionalidades.json`, `zonas.json`, `entradas.json`, `atlas.curado.json`); no pisa lo que ya existe |
 
 ## Reglas
 
