@@ -23,7 +23,8 @@ import { EncajeDelLogo, PROPORCION_DEL_ENCAJE } from './EncajeDelLogo'
  *
  * `empieza`: el encastre arranca cuando la tarjeta ya se ve (el que la monta lo sabe: en el DOM, al terminar de entrar; en el pie
  * de volumen, cuando la escena termina de voltear). En la placa 3D del pie (`enVolumen`) la tarjeta es transparente (la cara la
- * dibuja la escena) y no se mide para la placa (`data-sin-volumen`: la placa es lisa y se arma al toque).
+ * dibuja la escena) y no se mide para la placa (`data-sin-volumen`: la placa es lisa y se arma al toque). [CIERRE A-bis] A11 · su texto
+ * (`data-texto-de-la-tarjeta`) lo imprime la escena en la placa (`escena/pie3d/tarjetaImpresa.ts`): con la cámara, el DOM titilaba.
  */
 interface Props {
   readonly tipo: TipoDeResultado
@@ -91,7 +92,7 @@ export function TarjetaDeResultado({ tipo, mensaje, alto, empieza, enVolumen = f
           <EncajeDelLogo resultado={exito ? 'encaja' : 'no-encaja'} empieza={empieza} quieto={reducido} alTerminar={() => setListo(true)} precalentar={precalentar} />
         </div>
       </div>
-      <motion.div className="flex flex-col items-center gap-[var(--spacing-2)]" initial={false} animate={listo || precalentar ? { opacity: 1, y: 0 } : { opacity: 0, y: reducido ? 0 : 8 }} transition={{ duration: reducido ? 0 : 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
+      <motion.div data-texto-de-la-tarjeta="" className="flex flex-col items-center gap-[var(--spacing-2)]" initial={false} animate={listo || precalentar ? { opacity: 1, y: 0 } : { opacity: 0, y: reducido ? 0 : 8 }} transition={{ duration: reducido ? 0 : 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}>
         <p className={cn('font-display font-fuerte tracking-display leading-titulo uppercase', compacto ? 'text-fluido-titulo-s' : 'text-fluido-titulo-m', !exito && 'text-[var(--texto-del-error)]')}>{exito ? RESULTADO.exito.titulo : RESULTADO.error.titulo}</p>
         <p className="text-cuerpo leading-texto max-w-[42ch]">{exito ? RESULTADO.exito.bajada : mensaje}</p>
         {!exito && alReintentar !== undefined && (

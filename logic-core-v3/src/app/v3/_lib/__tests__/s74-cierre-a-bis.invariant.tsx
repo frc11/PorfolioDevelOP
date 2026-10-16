@@ -4,6 +4,7 @@
  *   A8 · gracias y error: la bajada de la placa, el cierre del piso, la apertura y la subida, un 15 % más rápidas (al mismo ritmo).
  *   A10 · `?rebote=si` (apagado por defecto): las piezas del pie rebotan chico y amortiguado al tocar el piso, cada una con su fase; el
  *         golpe sigue en su lugar y se incrustan cuando terminan.
+ *   A11 · la tarjeta de gracias y de error ya no titila con la cámara: su texto, impreso en la placa (la solución de AA1), y el DOM vivo.
  */
 import { ARBOL, armarElArbol } from '../escena/energia/arbol'
 import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
@@ -17,6 +18,11 @@ import { ENTORNO, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
 import { CAIDA_AL_HUECO, caidaIntegrada } from '../escena/final/caidaAlHueco'
 import { crearLugar, lugaresEnElPiso, type BaseDelPie, type LugarEnElPiso, type PiezaDePie } from '../escena/final/caidaDelPie'
 import { REBOTE_DEL_PIE, altoDelRebote, duracionDelRebote, reboteDeLaPieza } from '../escena/final/reboteDelPie'
+import { readFileSync } from 'node:fs'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
+import { IMPRESAS } from '../escena/pie3d/impresas'
+import { TARJETA_IMPRESA, subidaDe } from '../escena/pie3d/tarjetaImpresa'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -149,5 +155,37 @@ controlPositivo('  el detector VE una que se incrusta mientras salta', [SIN, SIN
 controlPositivo('  y una que toca después del golpe', [SIN, CON.map((l) => ({ ...l, toca: l.toca + 0.1 }))] as const, (x: readonly (readonly LugarEnElPiso[])[]) => enElPisoBien(x[0], x[1]))
 // El alto de cada una, distinto de sus vecinas.
 afirmar(PIEZAS_A10.every((i) => i === 0 || Math.abs(altoDelRebote(i) - altoDelRebote(i - 1)) > 0.01), '  cada pieza con su alto (distinto del de sus vecinas)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A11 · La tarjeta de gracias y de error, impresa en su placa: no titila con la cámara')
+
+const leerA11 = (r: string): string => readFileSync(new URL(r, import.meta.url), 'utf8')
+interface FuentesA11 {
+  readonly impresa: string
+  readonly pie: string
+  readonly tarjeta: string
+}
+const FUENTES_A11: FuentesA11 = { impresa: leerA11('../escena/pie3d/tarjetaImpresa.ts'), pie: leerA11('../escena/pie3d/PieDeVolumen.tsx'), tarjeta: renderToStaticMarkup(<TarjetaDeResultado tipo="error" mensaje="x" empieza={false} enVolumen alReintentar={() => undefined} />) }
+/**
+ * Lo impreso (`tarjetaImpresa.ts`): el bloque de texto de la tarjeta (`data-texto-de-la-tarjeta`, en el marcado) sólo en la pieza armada
+ * con la tarjeta; una textura a la escala de AA1 (potencia de dos), con el filtro anisótropo y los colores del DOM (sin luz ni tono); el
+ * DOM con su dibujo apagado por `filter` (sigue recibiendo los clics y el foco: ni `visibility` ni `display`). El pie la imprime al
+ * rearmar ANTES de compilar la transformación (se compila con la entrante: sin un tirón al aparecer el texto) y en cada cuadro.
+ */
+const impresaBien = (f: FuentesA11, escala: number): boolean => {
+  const rearma = f.pie.indexOf('rearmar(s, g, s.estudio)')
+  const imprime = f.pie.indexOf('imprimirLasTarjetas(s.armadas)', rearma)
+  return f.tarjeta.includes('data-texto-de-la-tarjeta=""') && f.impresa.includes("a.estado !== 'resultado'") && escala === IMPRESAS.escala && Math.log2(escala) % 1 === 0 &&
+    f.impresa.includes('textura.anisotropy = IMPRESAS.anisotropia') && f.impresa.includes('material.toneMapped = false') && f.impresa.includes('material.emissiveMap = textura') &&
+    TARJETA_IMPRESA.apagado === 'opacity(0)' && f.impresa.includes('bloque.style.filter = TARJETA_IMPRESA.apagado') && !/style\.(visibility|display)\s*=/.test(f.impresa) &&
+    rearma > 0 && imprime > rearma && imprime < f.pie.indexOf('prepararLasTransformaciones(s, gl, escena, camara)') && f.pie.includes('imprimirLasTarjetas(m.current.armadas)')
+}
+afirmar(impresaBien(FUENTES_A11, TARJETA_IMPRESA.escala), `  el texto de la tarjeta, impreso en su placa a ${String(TARJETA_IMPRESA.escala)}x con los colores del DOM; el DOM, vivo con su dibujo apagado; impresa antes de compilar la transformación`)
+controlPositivo('  el detector VE la tarjeta impresa también en la placa del formulario', { ...FUENTES_A11, impresa: FUENTES_A11.impresa.replace("a.estado !== 'resultado'", 'false') }, (x: FuentesA11) => impresaBien(x, TARJETA_IMPRESA.escala))
+controlPositivo('  y una escala que no es potencia de dos (la mezcla de mipmaps la ablanda)', 3, (e: number) => impresaBien(FUENTES_A11, e))
+controlPositivo('  y el DOM apagado con `visibility` (sin clics)', { ...FUENTES_A11, impresa: `${FUENTES_A11.impresa}\nbloque.style.visibility = 'hidden'` }, (x: FuentesA11) => impresaBien(x, TARJETA_IMPRESA.escala))
+controlPositivo('  y la impresa después de compilar', { ...FUENTES_A11, pie: FUENTES_A11.pie.replace(/(rearmar\(s, g, s\.estudio\)\n)[^\n]*\n\s*imprimirLasTarjetas\(s\.armadas\)\n/, '$1').replace('prepararLasTransformaciones(s, gl, escena, camara)', 'prepararLasTransformaciones(s, gl, escena, camara)\n      imprimirLasTarjetas(s.armadas)') }, (x: FuentesA11) => impresaBien(x, TARJETA_IMPRESA.escala))
+// La entrada del texto (lo que sube), de la transformada calculada.
+afirmar(subidaDe('none') === 0 && subidaDe('matrix(1, 0, 0, 1, 0, 8)') === 8 && subidaDe('matrix(1, 0, 0, 1, 0, 2.5)') === 2.5, '  lo impreso sube con la entrada del texto (la transformada calculada de Motion)')
 
 cerrar('s74-cierre-a-bis')

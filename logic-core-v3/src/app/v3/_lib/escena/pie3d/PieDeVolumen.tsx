@@ -18,6 +18,7 @@ import { CAJAS_DEL_PIE } from './cajasDelPolvo'
 import { HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
 import { crearLosPozosDelPie } from './pozos'
 import { SOMBRAS_DEL_PIE } from './sombras'
+import { imprimirLasTarjetas } from './tarjetaImpresa'
 import { PLATAFORMA_EN_VIVO } from './transformacionDelPie'
 
 /**
@@ -97,6 +98,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       SALIDA_EN_VIVO.fase = 'presente'
       for (const a of s.armadas) soltar(a)
       s.armadas = []
+      imprimirLasTarjetas(s.armadas)
       s.estudio = null
       SOMBRAS_DEL_PIE.uCuantasSombrasDelPie.value = 0
       HUECOS_DEL_PIE.uCuantosHuecosDelPie.value = 0
@@ -120,6 +122,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     const armarYa = (): void => {
       if (!vivo || !s.fuentes || s.estudio === null) return
       rearmar(s, g, s.estudio)
+      // [CIERRE A-bis] A11 · la tarjeta de gracias o de error, impresa en su placa (se compila con la entrante).
+      imprimirLasTarjetas(s.armadas)
       // [PULIDO 10] J4 · la placa de una transformación (la tarjeta de gracias), compilada antes de girar.
       prepararLasTransformaciones(s, gl, escena, camara)
       if (s.listo || s.compilando || s.armadas.length === 0) return
@@ -194,6 +198,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     SALIDA_EN_VIVO.hunde = pasoDelHundimiento(performance.now(), viajeEnCurso() !== null)
     SALIDA_EN_VIVO.acostado = false
     alCuadro(m.current, state.camera, keyLightRef.current, { ancho: tam.width, alto: tam.height }, Math.min(delta, 0.1))
+    imprimirLasTarjetas(m.current.armadas)
     pozos.current?.alCuadro()
   })
 
