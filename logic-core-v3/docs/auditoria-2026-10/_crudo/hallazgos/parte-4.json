@@ -3,6 +3,53 @@
  "partes": 6,
  "hallazgos": [
   {
+   "id": "UX-029",
+   "prefijo": "UX",
+   "titulo": "Personalizacion: sin validacion de largo minimo en el cliente y error generico 'Datos invalidos'",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
+     "linea": 40,
+     "fragmento": "welcomeMessage: z.string().trim().min(10).max(200).optional(),"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
+     "linea": 311,
+     "fragmento": "update('welcomeMessage', event.target.value.slice(0, 200))  (solo tope maximo)"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
+     "linea": 167,
+     "fragmento": "toast.error(`Error: ${result.error}`)"
+    }
+   ],
+   "impacto": "Un mensaje de bienvenida de menos de 10 caracteres (o vacio, aunque el campo dice 'required') termina en 'Error: Datos invalidos' sin decir que campo; el cliente queda sin saber que corregir. Los details del servidor (:66-72) no se usan.",
+   "propuesta": "Validar min 10 en el cliente con mensaje en el campo y mapear details del Zod a errores por campo.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot.personalizacion"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L5",
+    "tmp": "D5-c1/D5-L5/H15",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: updateBotAppearance.ts:40 (mínimo 10 en el servidor) y BotPersonalization.tsx:311 (el cliente solo corta en 200).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "UX-030",
    "prefijo": "UX",
    "titulo": "Copiar snippet y Exportar CSV anuncian exito sin saber el resultado",

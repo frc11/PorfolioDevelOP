@@ -71,6 +71,7 @@ export const HERRAMIENTAS = {
   'adm-fg2lab': ['h5', 'FG-2 Lab (experimento)'],
   'vis-contacto': ['h6', 'Formulario de contacto público'],
   'vis-optout': ['h6', 'Baja de emails de marketing'],
+  'vis-sitio': ['h6', 'Chrome del sitio público (menú mobile, scroll y transición; alcance superficial)'],
 }
 
 export const herramienta = (id) => `${HERRAMIENTAS[id][0]}.${id}`

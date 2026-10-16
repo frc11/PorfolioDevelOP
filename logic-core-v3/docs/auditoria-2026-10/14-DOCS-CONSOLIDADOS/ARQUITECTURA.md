@@ -37,7 +37,7 @@ Fuente: atlas:arquitectura.md:17-25, 67-72; herramientas en atlas:atlas.curado.j
 - **Crons.** Netlify dispara 3 scheduled functions; otros 3 crons están solo en `vercel.json` y no corren (BUG-047); el detector de alertas no tiene disparador (FAL-016) (atlas:arquitectura.md:72).
 - **Emails.** Brevo y Resend conviven, con varios remitentes (DEU-070) (atlas:arquitectura.md:73).
 - **Observabilidad.** Sentry depende de `NEXT_PUBLIC_SENTRY_DSN` en el build (FAL-030) y las integraciones casi no reportan (FAL-029) (atlas:arquitectura.md:74).
-- **Respaldo.** El backup diario nunca corrió por falta de secrets (BUG-171) (atlas:arquitectura.md:75).
+- **Respaldo.** El backup diario corre todos los días pero nunca terminó bien: 140 corridas fallidas por falta del secret (gh run list, 2026-10-15; BUG-171) (atlas:arquitectura.md:75).
 
 ## 4. Aislamiento multi-tenant
 

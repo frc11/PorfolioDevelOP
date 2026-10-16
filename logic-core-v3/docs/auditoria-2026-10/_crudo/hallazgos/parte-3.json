@@ -2899,7 +2899,7 @@
      "fragmento": "llmModel: 'gemini-2.5-flash',"
     }
    ],
-   "impacto": "Si Google discontinúa gemini-2.5-flash en Vertex, caen todos los bots a la vez y el health sigue en 'Todo OK' (solo mira una lista estática). Cambiar de modelo exige tocar seeds de planes, fallback, provider, rutas y lib/ai. claude-haiku-4-5-20251001 sigue activo pero es la generación anterior (USD 1/5 por millón contra 0,10/0,50 de Haiku 5.5); las opciones Anthropic del admin no coinciden con la lista del provider, que además es un stub. La vigencia de Gemini en Vertex no se pudo verificar (WebSearch no permitido en esta tarea).",
+   "impacto": "Si Google discontinúa gemini-2.5-flash en Vertex, caen todos los bots a la vez y el health sigue en 'Todo OK' (solo mira una lista estática). Cambiar de modelo exige tocar seeds de planes, fallback, provider, rutas y lib/ai. claude-haiku-4-5-20251001 es de una generación anterior; su vigencia y su precio frente a modelos más nuevos no se verificaron (sin WebSearch en esta corrida; se confirma en la consola de Anthropic); las opciones Anthropic del admin no coinciden con la lista del provider, que además es un stub. La vigencia de Gemini en Vertex no se pudo verificar (WebSearch no permitido en esta tarea).",
    "propuesta": "Un registro único de modelos por uso; chequear la fecha de discontinuación en Vertex; una llamada real mínima en el health; evaluar Haiku 5.5 para lib/ai.",
    "esfuerzo": "M",
    "zona": "libre",
@@ -2936,6 +2936,15 @@
       "titulo": "Modelo gemini-2.5-flash fijado en codigo y planes sin estrategia de version: verificar fecha de retiro en Vertex",
       "severidad": "MEDIA",
       "nota_padre": "Mismo modelo fijado sin control de vigencia."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "F7",
+      "antes": {
+       "impacto": "Si Google discontinúa gemini-2.5-flash en Vertex, caen todos los bots a la vez y el health sigue en 'Todo OK' (solo mira una lista estática). Cambiar de modelo exige tocar seeds de planes, fallback, provider, rutas y lib/ai. claude-haiku-4-5-20251001 sigue activo pero es la generación anterior (USD 1/5 por millón contra 0,10/0,50 de Haiku 5.5); las opciones Anthropic del admin no coinciden con la lista del provider, que además es un stub. La vigencia de Gemini en Vertex no se pudo verificar (WebSearch no permitido en esta tarea)."
+      },
+      "nota_padre": "Corrección de la re-lectura de cierre (K14)."
      }
     ]
    },
@@ -7313,53 +7322,6 @@
     "tmp": "D5-c1/D5-L5/H14",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "UX-029",
-   "prefijo": "UX",
-   "titulo": "Personalizacion: sin validacion de largo minimo en el cliente y error generico 'Datos invalidos'",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "ux",
-   "tipo_detalle": "ux",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/dashboard/updateBotAppearance.ts",
-     "linea": 40,
-     "fragmento": "welcomeMessage: z.string().trim().min(10).max(200).optional(),"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
-     "linea": 311,
-     "fragmento": "update('welcomeMessage', event.target.value.slice(0, 200))  (solo tope maximo)"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/dashboard/BotPersonalization.tsx",
-     "linea": 167,
-     "fragmento": "toast.error(`Error: ${result.error}`)"
-    }
-   ],
-   "impacto": "Un mensaje de bienvenida de menos de 10 caracteres (o vacio, aunque el campo dice 'required') termina en 'Error: Datos invalidos' sin decir que campo; el cliente queda sin saber que corregir. Los details del servidor (:66-72) no se usan.",
-   "propuesta": "Validar min 10 en el cliente con mensaje en el campo y mapear details del Zod a errores por campo.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.cli-chatbot.personalizacion"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D5-c1",
-    "lote": "D5-L5",
-    "tmp": "D5-c1/D5-L5/H15",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: updateBotAppearance.ts:40 (mínimo 10 en el servidor) y BotPersonalization.tsx:311 (el cliente solo corta en 200).",
     "verificador": null
    },
    "estado": "vigente"

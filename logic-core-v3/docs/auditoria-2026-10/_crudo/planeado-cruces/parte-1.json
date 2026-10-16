@@ -251,8 +251,8 @@
   {
    "clave": "docs/bitacora-roadmap.md:11989",
    "valor": {
-    "estado": "hecho",
-    "evidencia": "prisma/migrations/20260702223350_add_executive_report_config/migration.sql:2-6; schema.prisma:396-397 y :493-497",
+    "estado": "parcial",
+    "evidencia": "En el repo: prisma/migrations/20260702223350_add_executive_report_config/migration.sql:2-6; schema.prisma:396-397 y :493-497. La aplicación en la Neon no se ve leyendo el código (VH-004). Corregido en F7 (K10).",
     "sentido": "no",
     "nota": "La aplicación en Neon no es verificable por lectura (migrate status de F0 falló).",
     "ciclo": "D6-c1, lector D6-L1"
@@ -485,8 +485,8 @@
   {
    "clave": "STATUS.md:223",
    "valor": {
-    "estado": "hecho",
-    "evidencia": "logic-core-v3/.env.example:21-24 (local → branch dev, prod → branch main); seed-guard.ts:18-30 reconoce la branch dev",
+    "estado": "parcial",
+    "evidencia": "logic-core-v3/.env.example:21-24 documenta la intención (local → branch dev, prod → branch main) y seed-guard.ts:18-30 reconoce la branch dev; a qué branch apunta DATABASE_URL en Netlify no se ve en el código (VH-177). Corregido en F7 (K1).",
     "sentido": "no",
     "ciclo": "D6-c1, lector D6-L1"
    }
@@ -838,8 +838,8 @@
   {
    "clave": "docs/bitacora-roadmap.md:9446",
    "valor": {
-    "estado": "hecho",
-    "evidencia": ".github/workflows/db-backup.yml:36-41 y job restore-test; scripts/db-backup-local.sh, scripts/db-restore-local.sh y docs/operations/neon-backups.md presentes. La primera corrida no es verificable leyendo.",
+    "estado": "parcial",
+    "evidencia": ".github/workflows/db-backup.yml:36-41 y job restore-test; scripts/db-backup-local.sh, scripts/db-restore-local.sh y docs/operations/neon-backups.md presentes. Nunca terminó bien: gh run list (2026-10-15) dio 140 corridas fallidas y 0 secrets (BUG-171). Corregido en F7 (K6).",
     "sentido": "si",
     "ciclo": "D6-c1, lector D6-L2"
    }
@@ -7437,24 +7437,6 @@
    "valor": {
     "estado": "no empezado",
     "evidencia": "setter/_components/setter-shell.tsx:78 main ... py-8",
-    "sentido": "decidir",
-    "ciclo": "D4-c1, lector D4-L1"
-   }
-  },
-  {
-   "clave": "docs/bitacora-beta-3.md:9813",
-   "valor": {
-    "estado": "no empezado",
-    "evidencia": "manual.ts:344 ficha: Ficha | null; git grep 'input\\.ficha' en manual.ts: 0 (control: input.status en :488)",
-    "sentido": "si",
-    "ciclo": "D4-c1, lector D4-L1"
-   }
-  },
-  {
-   "clave": "docs/bitacora-beta-3.md:10857",
-   "valor": {
-    "estado": "no empezado",
-    "evidencia": "el rango del doc no describe N8; no es verificable contra código",
     "sentido": "decidir",
     "ciclo": "D4-c1, lector D4-L1"
    }

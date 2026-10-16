@@ -9,7 +9,7 @@
 ## 1. Deploy
 
 - Hosting en Netlify con `@netlify/plugin-nextjs`. Build `npx prisma generate && npm run build`, publish `.next`, Node 22, `NODE_OPTIONS=--max-old-space-size=4096` (netlify.toml:1-10). El plugin no está pineado (docs/baselines/2026-07-auditoria-seguridad.md:3542).
-- URL servida: develop-portfolio.netlify.app; dominio canónico configurado: develop.com.ar (`metadataBase`, src/app/layout.tsx:23; docs/bitacora-roadmap.md:9607, 9721-9723). **A verificar:** qué dominio sirve hoy `widget.js`; el snippet de instalación apunta a develop.com.ar (docs/operations/06-instalar-widget.md:29).
+- URL servida: develop-portfolio.netlify.app; dominio canónico configurado: develop.com.ar (`metadataBase`, src/app/layout.tsx:23; docs/bitacora-roadmap.md:9607, 9721-9723). **A verificar (VH-175):** qué dominio sirve hoy `widget.js`; el snippet de instalación apunta a develop.com.ar (docs/operations/06-instalar-widget.md:29).
 - **Migraciones:** el build no corre `prisma migrate deploy` (netlify.toml:2). **[A DECIDIR]** docs/operations/00-entornos.md:86 y docs/chatbot-deploy.md:71-74 dicen que sí. Mientras tanto se aplican a mano contra la branch main, con el SQL a la vista (§4).
 - Cache de CDN: hubo un incidente con «/» servido con Age de ~71 días; se mitiga con «Clear cache and deploy site» (docs/bitacora-roadmap.md:14137-14143).
 - `vercel.json` y `logic-core-v3/DEPLOY.md` son legado de Vercel (CE: `docs/_insumos/drive/Franco/Work Flow/Proyecto DevelOP/Contexto/develOP-contexto-estable-v1.0.md:51`). **[A DECIDIR]** qué hacer con los 3 crons que solo están ahí (§2).
@@ -20,9 +20,9 @@
 
 | Cron | Agenda (UTC) | Registrador | Qué hace | ¿Corre? | Fuente |
 |---|---|---|---|---|---|
-| generate-insights | `0 9 * * *` | netlify.toml:25-26 | Insights del chatbot | sí | netlify/functions/generate-insights-cron.ts |
-| send-weekly-reports | `0 12 * * MON` | netlify.toml:28-29 | Reporte semanal | sí | netlify/functions/ |
-| cleanup-old-events | `0 6 * * *` | netlify.toml:31-32 | Purga `chatbot_events` a 30 días | sí | src/app/api/cron/cleanup-old-events/route.ts:14 |
+| generate-insights | `0 9 * * *` | netlify.toml:25-26 | Insights del chatbot | declarado; en producción sin verificar (VH-136) | netlify/functions/generate-insights-cron.ts |
+| send-weekly-reports | `0 12 * * MON` | netlify.toml:28-29 | Reporte semanal | declarado; en producción sin verificar (VH-136) | netlify/functions/ |
+| cleanup-old-events | `0 6 * * *` | netlify.toml:31-32 | Purga `chatbot_events` a 30 días | declarado; en producción sin verificar (VH-136) | src/app/api/cron/cleanup-old-events/route.ts:14 |
 | os-follow-up | `0 12 * * *` | vercel.json:4-5 | Follow-up de LeadOS | no (BUG-047) | atlas:arquitectura.md:72 |
 | regenerate-briefs | `0 10 * * 1` | vercel.json:8-9 | Briefs | no (BUG-047) | atlas:arquitectura.md:72 |
 | send-executive-reports | `0 12 * * 1` | vercel.json:12-13 | Reporte ejecutivo | no (BUG-047) | atlas:arquitectura.md:72 |
@@ -36,8 +36,8 @@
 ## 3. Backups y recuperación
 
 - Workflow raíz:.github/workflows/db-backup.yml: cron diario 06:00 UTC (:41) más disparo manual prod/dev; `pg_dump --no-owner --no-acl` → gzip → GPG AES256 → artifact de 30 días → restore-test sobre `postgres:16` con conteo de filas (:56-199; docs/operations/neon-backups.md:12-43).
-- Secrets (nombres): `DIRECT_DATABASE_URL_PROD`, `DIRECT_DATABASE_URL_DEV` (db-backup.yml:84-85), `BACKUP_GPG_PASSPHRASE` (:105, :182). La passphrase vive solo en el secret y en el password manager de Franco (docs/operations/neon-backups.md:54-56).
-- **Estado:** el workflow nunca corrió por falta de secrets (BUG-171); la única red hoy es la retención propia de Neon (atlas:arquitectura.md:75). Cargar los secrets y validar el primer run es de Franco (docs/bitacora-roadmap.md:9527-9532).
+- Secrets (nombres): `DIRECT_DATABASE_URL_PROD`, `DIRECT_DATABASE_URL_DEV` (db-backup.yml:84-85), `BACKUP_GPG_PASSPHRASE` (:105, :182). Según docs/operations/neon-backups.md:54-56 (2026-05-26), la passphrase iba a vivir como secret de GitHub y en el password manager de Franco; el 2026-10-15 el repo no tenía ningún secret de Actions (BUG-171), así que hoy no está en GitHub.
+- **Estado:** el workflow corre todos los días pero nunca terminó bien: 140 corridas fallidas por falta del secret (gh run list, 2026-10-15; BUG-171); la única red hoy es la retención propia de Neon (atlas:arquitectura.md:75). Cargar los secrets y validar el primer run es de Franco (docs/bitacora-roadmap.md:9527-9532).
 - Restaurar en emergencia: bajar el artifact del último run bueno, `gpg --decrypt` → `gunzip` → `psql` a una base nueva, verificar `_prisma_migrations` y apuntar `DATABASE_URL` en Netlify. Rollback parcial: restaurar en una base temporal y copiar la tabla con cuidado de FKs (docs/operations/neon-backups.md:112-144).
 - Scripts locales: `scripts/db-backup-local.sh` y `scripts/db-restore-local.sh`; el restore aborta si el destino no es dev o localhost, salvo `--i-know-what-im-doing` (docs/operations/neon-backups.md:148-172).
 - DR: RTO ~1 h, RPO 24 h. Escalar a Neon Launch y bucket externo si la base pasa 1 GB, hay 10 o más clientes con data crítica o el RPO deja de alcanzar (docs/operations/neon-backups.md:176-201).

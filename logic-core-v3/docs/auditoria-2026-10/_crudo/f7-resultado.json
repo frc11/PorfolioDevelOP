@@ -1,0 +1,648 @@
+{
+ "run": "wf_1bc3c339-ad5",
+ "f7:contradicciones": {
+  "revisado": "Lente: contradicciones entre entregables. Leí RESUMEN.md entero; 00-PLAN-Y-LOG.md (cuadro «Estado de la corrida», Estado por dominio, §3, DEC-50 y log C15 a C23); los 13 _reportes (D1 a D9, F3 a F6); 07-BACKLOG.md (Resumen, Por worktree, las 87 tarjetas de Ahora y Próximo, Hallazgos sin tarjeta y Controles del padre); 09-PARA-FRANCO.md (encabezado, los 75 hallazgos solo por severidad y dominio, y las dos últimas secciones completas); 11-CONGELADOS.md (resumen, tabla, política y las líneas de gate de las fichas); 13-CLAUDE-MD-PROPUESTO.md (§1 entero, la tabla de protegidos del §2 y §5) y 14-DOCS-CONSOLIDADOS/README.md entero. Los contrasté con los encabezados de 01, 02, 03, 08, 10 y 12, con las fichas citadas y con el registro (_crudo/hallazgos/parte-1..6.json: 571 = C 2 · A 23 · M 258 · B 288). También usé 06-ATLAS (atlas.json, atlas.curado.json, backlog.json, zonas.json, README y regenerar.md). Lo que hay que comprobar en el código lo miré en 57c421bc con git show y git grep, sin escribir nada.\n\nLo que cierra con el registro: los conteos de RESUMEN y Estado (571, VH 174, POD 386, PLAN 1.351, CNG 22, 1.267/1.298, 691/691, 204 tarjetas, 635 puntos, Atlas de 1.032 nodos); la severidad y la zona de las 571 fichas de 02 y 03; la cobertura del backlog (25 CRÍTICA/ALTA en Ahora, ningún hallazgo sin tarjeta ni repetido); los 75 hallazgos de 09; la tabla de 46 tarjetas de 09 contra 07; los conteos de 11 (15/3/4/0, 12 protegidos y 9 libres, 44 hallazgos en zona congelada); la cuenta de 13 §1 (35/12/13/3, 63) y los conteos 86/50/15/19/2 de 09.\n\nEncontré 23 problemas: 1 de gravedad alta, 8 media y 14 baja.",
+  "problemas": [
+   {
+    "doc": "RESUMEN.md",
+    "linea": "25",
+    "dice": "Riesgo 8: «SEC-006, SEC-023, SEC-007 | `auth.ts`: FROZEN + ZONA-FRANCO»",
+    "problema": "Le pone a toda la fila la zona FROZEN + ZONA-FRANCO, y eso solo vale para SEC-006. SEC-023 y SEC-007 son zona libre y sus tarjetas no tocan auth.ts. Quien lea el top 10 va a creer que dos ALTA esperan la decisión de congelados y a Franco. El mismo RESUMEN, en :57, pone B-10 en «el resto de Ahora», libre.",
+    "evidencia": "03-MEJORAS.md:45 (SEC-007, «Zona: libre») y :61 (SEC-023, «Zona: libre»); en el registro solo SEC-006 es «FROZEN + ZONA-FRANCO» (03:4871). En 07-BACKLOG.md, B-08 (:156-160) cierra SEC-007 con «Zona: libre» y pone src/auth.ts entre lo que no se toca; B-10 (:178-182) cierra SEC-023 con «Zona: libre». La única tarjeta FROZEN de Ahora es B-09 (07:23 y :172).",
+    "correccion": "Reescribir la columna Zona de la fila 8 así: «SEC-006: `auth.ts` FROZEN + ZONA-FRANCO (B-09); SEC-023 y SEC-007: libre (B-10, B-08)».",
+    "gravedad": "alta"
+   },
+   {
+    "doc": "RESUMEN.md",
+    "linea": "22",
+    "dice": "Riesgo 5 (SEC-036, SEC-037): «libre (el cifrado toca el schema: decisión FROZEN)»",
+    "problema": "Contradice la ficha y la tarjeta. Según las dos, cifrar en reposo no cambia columnas ni toca el schema, y la tarjeta es libre.",
+    "evidencia": "03-MEJORAS.md:69-70 (SEC-036): la propuesta es cifrar en los write-paths con un backfill, sin migración, y su zona es libre. 07-BACKLOG.md:202-203 (B-12) dice «Archivos que NO se tocan: prisma/schema.prisma y migraciones (el cifrado no cambia columnas)», «Zona: libre». La columna FROZEN de Ahora, en 07:20, vale 1, y esa es B-09.",
+    "correccion": "Reemplazar el paréntesis por «libre (B-12: el cifrado no cambia columnas)».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "RESUMEN.md",
+    "linea": "9",
+    "dice": "«Ninguna herramienta llega entera a L3 (su madurez es la de su funcionalidad más floja: L2 23 · L1 18 · L0 5 · sin medir 6)» y cita `02-PENDIENTE.md`",
+    "problema": "Cita a 02 como fuente, pero 02 da otra distribución por herramienta. Las cuentas salen de reglas distintas: RESUMEN manda a «sin medir» toda herramienta que tenga alguna funcionalidad L?; 02 toma la funcionalidad más floja que esté medida.",
+    "evidencia": "Contando «Madurez de la herramienta» en las 51 secciones de 02-PENDIENTE.md da L2 22 · L1 22 · L0 5 · L? 2. Recalculado desde atlas.json y atlas.curado.json da L2 23 · L1 18 · L0 5, más 6 herramientas con alguna L? (4 con L1 y 2 con L2). 00-PLAN-Y-LOG.md:53 (C23) confirma que la cifra de RESUMEN sale de un script sobre el Atlas.",
+    "correccion": "Elegir una regla y usarla en los dos documentos. Lo mínimo: en RESUMEN, citar `06-ATLAS/atlas.curado.json` y aclarar «sin medir = alguna funcionalidad en L?», o pasar a las cifras de 02 (L2 22 · L1 22 · L0 5 · L? 2, más h6.vis-sitio).",
+    "gravedad": "media"
+   },
+   {
+    "doc": "01-INVENTARIO.md",
+    "linea": "27",
+    "dice": "«6 áreas y 51 herramientas»",
+    "problema": "La cantidad de herramientas no coincide entre documentos: 51 en 01, en F5 y en 14, y 52 en RESUMEN y en el Atlas. La que falta es h6.vis-sitio: se sumó en F5, pero no tiene entrada en atlas.curado.json ni sección en 02. Además 02 la cuenta en su resumen y da «3 / 2» herramientas medidas para h6, que es imposible.",
+    "evidencia": "_reportes/F5.md:9 dice «52 fichas de módulo» y :17 «de 51 herramientas, 1.0 = 36, después = 14, descartado = 1». 14-DOCS-CONSOLIDADOS/README.md:11 da 36/14/1 (suma 51). RESUMEN.md:9 y atlas.json dan 52 nodos `herramienta`. 02-PENDIENTE.md:14 tiene «h6 … | 3 / 2 | 13». En 02, `grep vis-sitio` da 0 y las tablas tienen 443 funcionalidades contra las 445 del resumen. En atlas.curado.json no existe la clave «h6.vis-sitio», aunque sus dos funcionalidades sí están (L2, «despues»).",
+    "correccion": "Dar de alta h6.vis-sitio en atlas.curado.json con su alcance_propuesto y regenerar 02 con su sección. Después corregir 01:27 y F5:17 a «52 herramientas» y la línea de 14/README:11 a la cuenta sobre 52 (o «51 + h6.vis-sitio sin curar»).",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "81, 136, 147, 180, 213, 224, 235, 323, 380, 435, 545, 589, 644, 710, 743, 765, 820, 831, 842, 919, 930, 941, 996, 1007",
+    "dice": "Las tarjetas mandan partes de su trabajo a otras tarjetas citándolas por título. Por ejemplo, B-01: «SEC-064, va en 'Runtime del chat: contabilidad del watchdog, contratos de cuota, credencial de Vertex y pin de ai@6'».",
+    "problema": "Esos títulos son del borrador y en 07 no existen. C23 dice que los títulos viejos se resolvieron, pero solo se arreglaron los de «Prerrequisitos»; las referencias de «Archivos que NO se tocan» siguen apuntando a títulos que no existen. En el caso de B-01 el destino es incorrecto: SEC-064 lo cierra B-121, no B-120.",
+    "evidencia": "Títulos inexistentes y su tarjeta real: «Runtime del chat … ai@6» (B-01, B-07, B-13, B-47 y B-63) → B-120 (07:1392), con SEC-064 en B-121 (07:1403-1404). «audit-log protegido: … auditoría que no se pierde …» (B-06, B-28) → B-102. «Inteligencia del chatbot: guard propio …» (B-10) → B-124. «Widget: accesibilidad, saludo en vos …» (B-13, B-52) → B-150. «Fechas argentinas: … admin, alertas y análisis» (B-14, B-69) → B-110. «Inicio y Resultados: números que no inventan …» (B-15, B-56) → B-116. «Altas y perfiles: …» (B-23) → B-126. «CI que corre de verdad: … lint de fronteras …» (B-33, B-43) → B-88. «Editor y detalle del bot (admin): … higiene …» (B-58, B-61) → B-148. «Sitio público (home clásica): …» (B-68, B-78) → B-190. «Leads y proyectos del admin: …» (B-70) → B-129/B-130. «Páginas de auth: AuthShell compartido y sin embeber …» (B-77) → B-156. «Hooks de acción y autosave: …» (B-79) → B-139. «LeadOS: entradas validadas (…) y /api/qa/login mudo» (B-84, B-85) → B-137. Ver 00-PLAN-Y-LOG.md:51 y 07:2331-2357.",
+    "correccion": "Cambiar cada cita por el ID que corresponde, por ejemplo «va en [B-121]», «va en [B-102]». Que backlog-md.mjs y validar.mjs rechacen un título entre comillas que no coincida con una tarjeta.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "13-CLAUDE-MD-PROPUESTO.md",
+    "linea": "170, 173, 176, 178",
+    "dice": "En la tabla de protegidos del borrador, los gates son: PreloaderContext «QA visual del sitio público»; prisma.ts «`check:types`»; utils.ts «`check:types` + QA visual»; ui/* «`check:types` + QA visual»",
+    "problema": "Contradice la regla central de 11 («Un gate que no corre en CI no es un gate») y debilita los gates de las fichas de 11, de donde dice salir. La QA visual no corre en CI, y se pierden los invariantes y las suites que 11 exige.",
+    "evidencia": "11-CONGELADOS.md:56 (regla 1: cada protegido lleva un invariante registrado como check:invariant:*). Fichas: :97 (CNG-003: test:s8-diferido, peso de /login, e2e smoke y tsc), :135 (CNG-006: tsc, check:invariants, test:p2002 y test:integration contra DATABASE_URL_TEST, más la medición del cold start), :159 (CNG-008: `test:s7-cn` registrado como `check:invariant:cn` en CI) y :327 (CNG-022: tsc, lint de lo tocado, check:invariants y visual-qa por dominio).",
+    "correccion": "Reescribir la columna Gate de esas cuatro filas según la ficha de 11 correspondiente. Ejemplo para utils.ts: «`check:invariant:cn` (test:s7-cn) + `check:types`».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "09-PARA-FRANCO.md",
+    "linea": "700",
+    "dice": "«B14.3 backups | Cargar los secrets BACKUP_GPG_PASSPHRASE y DIRECT_DATABASE_URL_PROD/DEV y validar el primer run | parcial | … la ejecución no es verificable»",
+    "problema": "La ejecución sí se verificó: el padre consultó GitHub y está registrado como hecho verificado (BUG-171). Los secrets no están cargados y el primer run nunca pasó, así que el ítem no está empezado.",
+    "evidencia": "00-PLAN-Y-LOG.md:610 (C15): «gh run list --workflow db-backup.yml da 140 corridas fallidas y 1 cancelada … la API de secrets del repo da total_count 0». También _reportes/D8.md:7, RESUMEN.md:11 y 14-DOCS-CONSOLIDADOS/README.md:126.",
+    "correccion": "Estado: «no empezado». Evidencia: «BUG-171: 140 corridas fallidas, 0 secrets de Actions (consulta del 2026-10-15)».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "12-PLANEADO.md",
+    "linea": "6612",
+    "dice": "PLAN-817 «mc2 con tilde único, no cinco» — «Estado en código: hecho — manual.ts:135-137 cta/calidad/mobile mapean a mc2»",
+    "problema": "Un ítem hecho en 12 figura no empezado en 09. Lo que cita 12 como prueba es el mapeo de fases a pantalla, no un tilde único. En la base, mc2 dibuja un tilde por fase (tres) y `tildeUnico` existe solo en el WIP de p25/rafaga-tildes.",
+    "evidencia": "09-PARA-FRANCO.md:781 («P43 … + un tilde único | no empezado … tildeUnico solo aparece en el checkpoint WIP 506e0059»). En 57c421bc, `git grep -i tildeUnico -- src` da 0, y fase-auto-reporte.tsx:13-15 dice «se renderizan TRES por pantalla (mc1/mc2) — uno por fase».",
+    "correccion": "Pasar PLAN-817 a «no empezado» con la evidencia de 09:781, o a «contradicho» si se considera que el doc de OSLEAD lo declara hecho.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "13-CLAUDE-MD-PROPUESTO.md",
+    "linea": "436, 456-459",
+    "dice": "Skill atlas-actualizar: «Los datos que mantienen las personas … `funcionalidades.json`, `zonas.json`, `entradas.json` y `atlas.curado.json`. Los generados …: `atlas.json`, `historial.jsonl`, `hallazgos.json` y las vistas»; para regenerar corre solo generar, vistas y validar-atlas",
+    "problema": "La skill es anterior a DEC-58 y a backlog.mjs (C23) y contradice al Atlas que dice mantener. No incluye alias.json, que es curado; no incluye backlog.json ni el paso backlog.mjs, y no pide pasar la tarjeta a otro estado. Con esa skill, el estado de las tarjetas en el Atlas nunca se actualizaría.",
+    "evidencia": "06-ATLAS/README.md:58 (backlog.json lo genera backlog.mjs) y :59 (alias.json lo mantienen «personas (nunca un generador)»). 06-ATLAS/regenerar.md:18-19 («backlog.json desde 07-BACKLOG.md (después de cambiar el estado de una tarjeta …)»). 07-BACKLOG.md:3 («si cambia una tarjeta, se cambia acá y se regenera»). DEC-58 en 00-PLAN-Y-LOG.md:173.",
+    "correccion": "En 13:436, sumar alias.json a los datos curados y backlog.json a los generados. En 13:456-459, agregar `node scripts/auditoria/atlas/backlog.mjs`. Al punto (6) de la definición de terminado (13:424 y :258) sumarle «la tarjeta de 07 pasa a su nuevo Estado».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "09-PARA-FRANCO.md",
+    "linea": "794",
+    "dice": "«H-05: cinco tildes por prompt en mc2 | no empezado | mc2 no existe en 57c421bc (ver P43).»",
+    "problema": "La evidencia es falsa: la pantalla mc2 existe en la base. Lo que no existe es mc2-refinar.tsx. 12 dice lo mismo que el código.",
+    "evidencia": "En 57c421bc: src/lib/leados/manual.ts:107 (`PANTALLAS_CONSTRUCCION = ['mc1', 'mc2']`) y :135-137 (cta, calidad y mobile van a 'mc2'); manual/[paso]/page.tsx:52 y :92. 12-PLANEADO.md:6452 («Construcción se partió en mc1/mc2»).",
+    "correccion": "Reescribir la evidencia como «mc2 existe (manual.ts:107, :135-137) con un tilde por fase; mc2-refinar.tsx y los cinco tildes por prompt existen solo en el WIP 506e0059».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "13-CLAUDE-MD-PROPUESTO.md",
+    "linea": "64",
+    "dice": "«Never expose internal error messages… | No se cumple en tres casos: SEC-006 y SEC-092 (fuga de toErrorMessage, 11-CONGELADOS.md:40), y SEC-082»",
+    "problema": "SEC-006 no es una fuga de mensajes internos: es la sesión que revive. 13 leyó mal 11:40, donde SEC-006 aparece en una lista de defectos de archivos congelados y el paréntesis se refiere solo a SEC-092.",
+    "evidencia": "03-MEJORAS.md:4871 (SEC-006: «La invalidacion por sessionVersion se revive con POST /api/auth/session»). Los hallazgos de errores crudos que sí corresponden son 03:817 (SEC-062) y 03:5161 (SEC-101).",
+    "correccion": "Reemplazar «SEC-006 y SEC-092» por «SEC-092 y SEC-062 (o SEC-101)».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "08-VERIFICACION-HUMANA.md",
+    "linea": "780",
+    "dice": "VH-087: «Verifica: [BUG-085] · Prioridad: alta»",
+    "problema": "BUG-085 bajó a MEDIA en F6.2, pero su VH quedó en prioridad alta. Es la única VH cuya prioridad no sigue la severidad del hallazgo. Las de SEC-044 y SEC-051, que subieron, sí se actualizaron.",
+    "evidencia": "03-MEJORAS.md:1685 (BUG-085, Severidad MEDIA). 00-PLAN-Y-LOG.md:677 (C21, baja a MEDIA). Cruzando las 174 VH con el registro, MEDIA → media en 114 casos y MEDIA → alta solo en VH-087.",
+    "correccion": "«Prioridad: media».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "_reportes/D5.md",
+    "linea": "7",
+    "dice": "«SEC-057 (CRÍTICA): un anónimo agota en ≈ 17 min el cupo mensual de cualquier bot»",
+    "problema": "La ficha da otra cifra. Con dos orígenes de develOP son 60 conversaciones por minuto y Starter se agota en unos 8 min; los 17 min salen de contar un solo origen. El log C10 repite los 17 min.",
+    "evidencia": "03-MEJORAS.md:21: «Con el tope de 30/min por (origin, IP) y los dos orígenes de develOP son 60 conversaciones/min … Starter (500) se agota en ~8 min». 00-PLAN-Y-LOG.md:543 dice «≈ 17 min». En el código, presets.ts:27 tiene chatbotPerSession 30/min y route.ts:80 usa la clave por origin e IP.",
+    "correccion": "«agota en ≈ 8 min (Starter, dos orígenes de develOP) el cupo mensual», según 03:21.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "_reportes/D1.md",
+    "linea": "8",
+    "dice": "«SEC-023 (ALTA): 22 páginas de `/admin` leen sin `auth()` propio»",
+    "problema": "La ficha cuenta y lista 15 páginas. La cifra de 22 es la de C03 (00-PLAN-Y-LOG.md:476) y no se actualizó.",
+    "evidencia": "03-MEJORAS.md:54-64: «Hay 15 páginas de /admin que consultan Prisma sin auth() propio», con la lista de las 15.",
+    "correccion": "«15 páginas de `/admin` consultan Prisma sin `auth()` propio» (03:54).",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "157-158",
+    "dice": "B-08 cierra «[SEC-005], [SEC-007], [SEC-015], [SEC-009], [UX-001]», y en lo que no toca dice: «el bcrypt dummy y el chequeo de emailVerified de SEC-009 van en 'Magic link y errores de auth en auth.ts…'»",
+    "problema": "La parte de SEC-009 que toca auth.ts se manda a B-27, pero B-27 no lista SEC-009. Esa parte queda sin una tarjeta que la cierre, y B-08 da SEC-009 por cerrado entero.",
+    "evidencia": "07-BACKLOG.md:368 (B-27 cierra BUG-003, BUG-007, UX-002, FAL-003 y FAL-001). 03-MEJORAS.md:154 (SEC-009: la parte libre y la «Decision para Valentino (auth.ts FROZEN)»).",
+    "correccion": "Sumar [SEC-009] a «Hallazgos que cierra» de B-27, con la nota «(parte auth.ts)», y en B-08 escribir «[SEC-009] (parte libre)».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "RESUMEN.md",
+    "linea": "42",
+    "dice": "«De 143 docs a 10 vivos (…), con 37 contradicciones listadas para decidir»",
+    "problema": "Contradice la lista de poda: 15 docs se mantienen, así que quedan 10 nuevos más 15, no 10. Además, 143 son filas de la tabla, no documentos: varias filas agrupan muchos archivos, y el repo tiene 266 docs.",
+    "evidencia": "10-PODA.md:2788 («mantener 15 · borrar 54 · consolidado 74»). 07-BACKLOG.md:1953 (B-171: «borrar 128 docs»). Filas agrupadas en 10:2804 («_CHANGELOG-lane-project.md y los 8 _lane-*.md») y 10:2795. 00-PLAN-Y-LOG.md:191 (DOC 266).",
+    "correccion": "«De 143 entradas de docs: 10 vivos nuevos, 15 que se mantienen y 128 a borrar o consolidar».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "RESUMEN.md",
+    "linea": "7",
+    "dice": "«Los nueve dominios cerraron con `[DOMINIO-ABIERTO]` por el tope de ciclos (DEC-50)»",
+    "problema": "D1 y D6 cerraron antes de que existiera DEC-50, con los topes anteriores, y DEC-50 los deja expresamente como estaban.",
+    "evidencia": "00-PLAN-Y-LOG.md:164 (DEC-50 (c): «reemplaza los topes de DEC-26 y de la ENMIENDA E4 … D1 y D6 quedan como están»). _reportes/D1.md:3 (cerrado en C04 con 3 de 3) y _reportes/D6.md:3 (C06).",
+    "correccion": "«… por el tope de ciclos (DEC-26/E4 en D1 y D6; DEC-50 en los otros siete)».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "_reportes/D6.md",
+    "linea": "6",
+    "dice": "«33 propios de D6 hoy (C 0 · A 2 · M 17 · B 14 …)»",
+    "problema": "Dice «hoy», pero la cuenta quedó vieja. En C15, DEU-016 (de D6) subió de BAJA a MEDIA.",
+    "evidencia": "En el registro, D6 tiene A 2 · M 18 · B 13 (33). 03-MEJORAS.md:3089 (DEU-016, D6, MEDIA). 00-PLAN-Y-LOG.md:28 y _reportes/D8.md:10 (DEU-016 sube a MEDIA).",
+    "correccion": "«(C 0 · A 2 · M 18 · B 13; DEU-016 subió a MEDIA en D8)».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "00-PLAN-Y-LOG.md",
+    "linea": "15",
+    "dice": "«último push: `e4121247` (C22, 2026-10-16 01:00); C23 se pushea al commitear»",
+    "problema": "El cuadro de estado quedó viejo: el commit de C23 ya está en el remoto.",
+    "evidencia": "`git log --oneline -1 origin/auditoria/renovacion-2026-10` da `dc09aac7 docs(auditoria): F6.4 y F6.5, backlog de 204 tarjetas, RESUMEN y bloques de Franco`.",
+    "correccion": "«último push: `dc09aac7` (C23)».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "27",
+    "dice": "Por worktree: «ahora/credenciales | B-02, B-03, B-05»",
+    "problema": "Falta B-01, que según su propia tarjeta va en ese worktree, y RESUMEN la pone primera en «esta semana». Además la tabla omite sin decirlo los worktrees de una sola tarjeta: ahora/deps (B-04), ahora/crons (B-14), proximo/* y otros.",
+    "evidencia": "07-BACKLOG.md:87 (B-01: «Worktree: ahora/credenciales (la renovación es operativa, fuera del repo)»). RESUMEN.md:49.",
+    "correccion": "«ahora/credenciales | B-01, B-02, B-03, B-05», y una nota bajo la tabla: «solo worktrees con dos o más tarjetas».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "_reportes/D4.md",
+    "linea": "3",
+    "dice": "«Todo el dominio es de Franco: cada hallazgo está también en `09-PARA-FRANCO.md`» (también 00-PLAN-Y-LOG.md:24, «todo ZONA-FRANCO»)",
+    "problema": "D4 tiene un hallazgo de zona libre que no está en 09. Además §3 del plan reconoce cuatro archivos libres dentro de D4.",
+    "evidencia": "03-MEJORAS.md:610-616 (SEC-003: «Dominio: D4 … Zona: libre»). En 09, la búsqueda de SEC-003 en la sección Hallazgos da 0 (los 75 de 09 son exactamente los ZONA-FRANCO del registro). 00-PLAN-Y-LOG.md:184 («+ 4 libres»).",
+    "correccion": "«Todo el dominio es de Franco salvo SEC-003 (libre); los 62 restantes están también en 09».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "09-PARA-FRANCO.md",
+    "linea": "694",
+    "dice": "«INFRA.1 | Setear NEXT_PUBLIC_SENTRY_DSN en Netlify | no empezado | infra-1:69; bitacora-roadmap.md:17135»",
+    "problema": "Da como hecho un estado de configuración que no se puede ver en el código y que los otros entregables dejan sin verificar.",
+    "evidencia": "RESUMEN.md:87 («según la bitácora seguía inactivo en producción … se confirma con VH-135»). 02-PENDIENTE.md, ficha FAL-030 en «Faltantes transversales» (Confianza: PROBABLE, VH-135). 07-BACKLOG.md:130 (B-05, criterio VH-135).",
+    "correccion": "Estado: «sin verificar (VH-135); según la bitácora, sin DSN en 2026-08».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "09-PARA-FRANCO.md",
+    "linea": "703",
+    "dice": "«Beta Matsu | Onboarding real de Matsu y firma de v1.0.0 | parcial | … no se puede confirmar uso real en prod»",
+    "problema": "Da por empezado un onboarding real cuando la premisa de la corrida es que no hay clientes reales. 14 deja el tema de Matsu como «a decidir».",
+    "evidencia": "00-PLAN-Y-LOG.md:39 (ENMIENDA-01 §0: «No hay clientes reales. Todo el sistema es de prueba o ficticio»). RESUMEN.md:3. 14-DOCS-CONSOLIDADOS/README.md:22-28 (a decidir #1, Matsu).",
+    "correccion": "Estado: «no empezado (sin clientes reales, ENMIENDA-01 §0); ver a decidir #1 de 14».",
+    "gravedad": "baja"
+   }
+  ]
+ },
+ "f7:configuracion": {
+  "problemas": [
+   {
+    "doc": "06-ATLAS/arquitectura.md",
+    "linea": "74",
+    "dice": "«**Observabilidad.** Sentry recibe los errores de render y del chat.»",
+    "problema": "Afirma como hecho que Sentry recibe eventos en producción. Eso depende de que `NEXT_PUBLIC_SENTRY_DSN` haya estado en el build de Netlify, y nadie lo verificó. Es un dato de configuración de Netlify y de una cuenta de Sentry.",
+    "evidencia": "RESUMEN.md:87: «según la bitácora seguía inactivo en producción (docs/bitacora-roadmap.md:17135); se confirma con VH-135». 14-DOCS-CONSOLIDADOS/OPERACIONES.md:98: «[A DECIDIR] estado real en prod». 12-PLANEADO.md:9049-9054 (PLAN-1122): «el entorno no es verificable». 01-INVENTARIO.md:116 (sin DSN, el SDK queda inerte). VH-135 (08:1211).",
+    "correccion": "«**Observabilidad.** Sentry está cableado para los errores de render y del chat, pero solo recibe si `NEXT_PUBLIC_SENTRY_DSN` estaba en el build (FAL-030). Según docs/bitacora-roadmap.md:17135 seguía inactivo en producción en 2026-08; se confirma con VH-135. Las integraciones y los crons casi no reportan (FAL-029).»",
+    "gravedad": "alta"
+   },
+   {
+    "doc": "12-PLANEADO.md",
+    "linea": "9431 (PLAN-1170, bloque 9426-9432)",
+    "dice": "«Estado en código: **hecho** — logic-core-v3/.env.example:21-24 (local → branch dev, prod → branch main); seed-guard.ts:18-30 reconoce la branch dev»",
+    "problema": "Marca como hecho un dato de configuración de Netlify: que prod apunta a la branch main de Neon. `.env.example:21-24` es un comentario de plantilla con `DATABASE_URL=` vacío. No prueba a qué base apunta la variable en Netlify.",
+    "evidencia": "`git show 57c421bc:logic-core-v3/.env.example`: las líneas :21-24 son solo comentarios («# Prod (Netlify env vars) → branch `main`»). 14-DOCS-CONSOLIDADOS/OPERACIONES.md:48 lo deja **[A DECIDIR]** porque docs/audits/2026-05-auditoria-db.md:57 y docs/audits/2026-06-revalidacion-dashboard-chatbot.md:21 dicen que dev y prod compartían base (también 14/README.md:116-118). Ninguna VH de 08 mira el DATABASE_URL de Netlify: VH-004 solo corre migrate status.",
+    "correccion": "«**parcial** — .env.example:21-24 documenta la intención (local → dev, prod → main). A qué branch apunta DATABASE_URL en Netlify no es verificable por lectura.» Además, pasar a 08 como VH: Netlify → Environment variables (Production), anotar host y branch de DATABASE_URL sin copiar el valor.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "14-DOCS-CONSOLIDADOS/OPERACIONES.md",
+    "linea": "23-25",
+    "dice": "Columna «¿Corre?» = «sí» para generate-insights, send-weekly-reports y cleanup-old-events. La misma afirmación está en 06-ATLAS/arquitectura.md:72: «Netlify dispara 3 scheduled functions…».",
+    "problema": "Afirma que los crons se ejecutan en producción, pero el repo solo prueba que están declarados. Que corran depende del deploy de las functions y de URL y CRON_SECRET en el entorno de Netlify. Ninguna fuente citada lo verifica.",
+    "evidencia": "docs/bitacora-roadmap.md:13841-13849 (CRON-2, 2026-07-11): prod no ejecutaba ninguno, y el arreglo quedó «listo para verificar en prod». netlify/functions/generate-insights-cron.ts:44-48 aborta si faltan URL o CRON_SECRET. Las verificaciones existen sin correr: VH-127 paso 1, VH-136, VH-159 paso 3 y VH-134 paso 2 (CRON_SECRET).",
+    "correccion": "Cambiar «sí» por «declarado (netlify.toml:25-32 + netlify/functions/); en prod sin verificar: VH-127 paso 1, VH-136». En arquitectura.md:72: «Netlify tiene declaradas 3 scheduled functions…».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "14-DOCS-CONSOLIDADOS/OPERACIONES.md",
+    "linea": "39",
+    "dice": "«La passphrase vive solo en el secret y en el password manager de Franco (docs/operations/neon-backups.md:54-56).»",
+    "problema": "Da como estado actual una configuración de GitHub Actions que el padre verificó y es falsa: el repo no tiene ningún secret.",
+    "evidencia": "00-PLAN-Y-LOG.md:609: la API de secrets del repo dio `total_count` 0 el 2026-10-15. neon-backups.md es del 2026-05-26 (:3) y describe el diseño, no el estado. BUG-171 (03-MEJORAS.md:1180).",
+    "correccion": "«Según docs/operations/neon-backups.md:54-56 (2026-05-26), la passphrase iba a vivir como secret de GitHub y en el password manager de Franco. El 2026-10-15 el repo no tenía ningún secret de Actions (00-PLAN-Y-LOG.md:609, BUG-171): hoy no está en GitHub.»",
+    "gravedad": "media"
+   },
+   {
+    "doc": "01-INVENTARIO.md",
+    "linea": "114",
+    "dice": "Fila Neon, columna «¿El sistema se entera?»: «…el backup fallido avisa por GitHub»",
+    "problema": "Afirma sin verificar cómo están configuradas las notificaciones de GitHub. La única base es un comentario de intención, y contradice la ficha del hallazgo.",
+    "evidencia": "03-MEJORAS.md:1184 (BUG-171): «Nadie se entera: la falla diaria queda en la pestaña Actions sin aviso». El único respaldo es el comentario `raíz:.github/workflows/db-backup.yml:18` («el workflow falla → notificación a Franco»). El workflow no tiene paso de aviso (git show 57c421bc:.github/workflows/db-backup.yml, grep notif/slack/telegram/failure(): sin pasos). 140 corridas fallaron sin que nadie lo registrara (00-PLAN-Y-LOG.md:609).",
+    "correccion": "«…el backup fallido queda solo en la pestaña Actions. Según el comentario de db-backup.yml:18, GitHub le avisaría a Franco por email; no está verificado (140 corridas fallidas pasaron sin registro). Sumar a VH-160 quién recibe el aviso de GitHub.»",
+    "gravedad": "media"
+   },
+   {
+    "doc": "03-MEJORAS.md",
+    "linea": "1183 (Evidencia de BUG-171)",
+    "dice": "La Evidencia cita solo db-backup.yml:93, ci.yml:120 («Al 2026-08-25 el repo NO tiene ningún secret configurado») y db-backup.yml:4. El título afirma «las 140 corridas del workflow fallaron… y el repo tiene 0 secrets de Actions».",
+    "problema": "Los dos hechos de la cuenta de GitHub (corridas y secrets) no traen en la ficha el comando ni la fecha. Lo único que trae es un comentario de agosto. La verificación existe, pero solo en el log. Pasa lo mismo en _reportes/D8.md:7 («verificado en GitHub», sin comando ni fecha) y en DEU-017 (03-MEJORAS.md:3099-3102: «falta DATABASE_URL_TEST»): su evidencia es ci.yml:144, que solo es el texto del warning.",
+    "evidencia": "00-PLAN-Y-LOG.md:609 (2026-10-15): `gh run list --workflow db-backup.yml` da 140 fallidas y 1 cancelada; la API de secrets da `total_count` 0.",
+    "correccion": "Agregar a la Evidencia de BUG-171: «`gh run list --repo frc11/PorfolioDevelOP --workflow db-backup.yml` (2026-10-15): 140 fallidas, 1 cancelada, 0 exitosas; `gh api repos/frc11/PorfolioDevelOP/actions/secrets` (2026-10-15): total_count 0 (00-PLAN-Y-LOG.md:609)». Citar lo mismo en DEU-017 y en _reportes/D8.md:7.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "09-PARA-FRANCO.md",
+    "linea": "700",
+    "dice": "«| B14.3 backups | Cargar los secrets BACKUP_GPG_PASSPHRASE y DIRECT_DATABASE_URL_PROD/DEV y validar el primer run | parcial | …; la ejecución no es verificable |»",
+    "problema": "Dice que no es verificable algo que sí se verificó con gh, y el resultado fue negativo: no hay secrets y ninguna corrida terminó bien. Lo mismo pasa en 02-PENDIENTE.md:683 («depende de secrets no verificables por lectura; ci.yml:120-121 registraba 0 secrets al 2026-08-25»), en 12-PLANEADO.md:9006 («La primera corrida no es verificable leyendo») y en 14-DOCS-CONSOLIDADOS/ROADMAP.md:63 («parcial»).",
+    "evidencia": "00-PLAN-Y-LOG.md:609 (2026-10-15). 12-PLANEADO.md:9022 (PLAN-1118) y :8354 (PLAN-1034) ya lo dan como «no empezado».",
+    "correccion": "«no empezado — gh run list (2026-10-15): 140 corridas fallidas por «secret faltante para target=prod» y 0 secrets en el repo (00-PLAN-Y-LOG.md:609, BUG-171)». Aplicar la misma cita en 02:683, 12:9006 y ROADMAP.md:63.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "14-DOCS-CONSOLIDADOS/OPERACIONES.md",
+    "linea": "40",
+    "dice": "«**Estado:** el workflow nunca corrió por falta de secrets (BUG-171)». Igual en 14-DOCS-CONSOLIDADOS/ARQUITECTURA.md:40, 14-DOCS-CONSOLIDADOS/README.md:128 y 06-ATLAS/arquitectura.md:75.",
+    "problema": "Describe mal el hecho verificado. El workflow sí corrió: corre todos los días y falla.",
+    "evidencia": "00-PLAN-Y-LOG.md:609: 140 fallidas y 1 cancelada, la última del 15/10 con «secret faltante para target=prod». Título de BUG-171 (03-MEJORAS.md:1180). RESUMEN.md:11: «nunca corrió bien: 140 corridas fallidas…».",
+    "correccion": "«el workflow corre todos los días pero nunca terminó bien: 140 corridas fallidas por falta del secret (gh run list, 2026-10-15; BUG-171)», en las cuatro líneas.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "05-IDEAS.md",
+    "linea": "39 (también :114, :174, :249 y 07-BACKLOG.md:2243)",
+    "dice": "«…bajo el techo de 10 s de Netlify (TEC-006)…» / «sigue bajo el techo de 10 s»",
+    "problema": "Da como hecho el límite del plan de la cuenta de Netlify. El hallazgo que cita lo deja sin verificar, y el código da otra cifra.",
+    "evidencia": "03-MEJORAS.md:2769 (TEC-006): «la propia bitácora asume ~10 s (docs/bitacora-roadmap.md:13963, contexto, no evidencia) y ~26 s como tope duro», con VH-159. netlify/functions/generate-insights-cron.ts:22-27: «no puede pasar de ~26s… El plan de Netlify real de este sitio NO es confirmable desde el repo». 05-IDEAS.md:98 reconoce que «el plan real no se puede confirmar desde el repo».",
+    "correccion": "«bajo el techo de las funciones de Netlify, sin verificar (≈10 s según PROMPT.md:178 y la bitácora; ≈26 s según generate-insights-cron.ts:22-23; VH-159)», en las cinco líneas.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "05-IDEAS.md",
+    "linea": "53 (también :128)",
+    "dice": "«contra los 300/día del Free de la cuenta única de Brevo (src/lib/email/brevo-service.ts:4)»",
+    "problema": "El plan de la cuenta de Brevo y su cupo diario son datos de un tercero que no están en el código. La cita solo prueba que hay una única API key.",
+    "evidencia": "`git show 57c421bc:logic-core-v3/src/lib/email/brevo-service.ts` :4 es `return new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? '' })`. 03-MEJORAS.md:475: «que el plan tenga limite diario es HIPOTESIS». VH-134 (08:1202) es la que revisa cada consola.",
+    "correccion": "«contra el cupo de la cuenta única de Brevo (brevo-service.ts:4); plan y cupo diario sin verificar (300/día si es el plan Free, según <página de precios de Brevo, fecha>; VH-134)».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "12-PLANEADO.md",
+    "linea": "9140 (PLAN-1133)",
+    "dice": "«Estado en código: **hecho** — prisma/migrations/20260702223350_add_executive_report_config/migration.sql:2-6; schema.prisma:396-397 y :493-497»",
+    "problema": "El ítem es «Revisar y aplicar en la Neon compartida» (:9138), pero la evidencia solo prueba que la migración está en el repo. Si se aplicó en la base no se ve en el código, y `migrate status` no corrió.",
+    "evidencia": "01-INVENTARIO.md:80 y :143 (`prisma migrate status` no disponible, P1012). VH-004 (08:32-39). El ítem gemelo PLAN-997 (12-PLANEADO.md:8060) sí aclara «La aplicación en prod no es verificable leyendo».",
+    "correccion": "Agregar «La aplicación en la Neon no es verificable leyendo (VH-004)», como en PLAN-997, o bajar el estado a «parcial».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "08-VERIFICACION-HUMANA.md",
+    "linea": "495 (VH-055)",
+    "dice": "«Pasos: 1) Netlify → Site → Functions → filtrar Scheduled 2) Buscar regenerate-briefs y send-executive-reports …»",
+    "problema": "Varios entregables afirman que os-follow-up no corre en producción (BUG-047 lo incluye), pero ninguna VH lo verifica. VH-127 es de /api/cron/alerts y VH-067 es de detect-bot-issues.",
+    "evidencia": "03-MEJORAS.md:1136 (título de BUG-047: «y el de os-follow-up»). 02-PENDIENTE.md:823: «en producción no corre». 09-PARA-FRANCO.md:154: «el cron, que en Netlify no corre». 14-DOCS-CONSOLIDADOS/OPERACIONES.md:26. 06-ATLAS/arquitectura.md:72. 07-BACKLOG.md:228 (el criterio de B-14 se apoya en VH-055/067/127).",
+    "correccion": "En el paso 2 de VH-055, sumar «y os-follow-up (y cualquier cron externo que llame a /api/cron/os-follow-up)». En el paso 4, sumar los logs diarios de las 12:00 UTC. En el campo Verifica, nombrar os-follow-up.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "14-DOCS-CONSOLIDADOS/OPERACIONES.md",
+    "linea": "12",
+    "dice": "«**A verificar:** qué dominio sirve hoy `widget.js`; el snippet de instalación apunta a develop.com.ar»",
+    "problema": "Marca un dato de dominio y DNS como «a verificar», pero no hay VH que lo cubra. Mientras tanto, las VH dan por producción dos dominios distintos.",
+    "evidencia": "08:1242 (VH-138, Entorno Producción): «Abrir https://develop.com.ar/api/test-sentry». 08:1269 (VH-141 paso 3): «Abrir el widget en develop.com.ar». 08:1483 (VH-165): «Producción (develop-portfolio.netlify.app)». docs/bitacora-roadmap.md:9607 usa develop-portfolio.netlify.app para el smoke de prod. Un grep de «DNS|dominio sirve» en 08 no da resultados.",
+    "correccion": "Pasar a 08 como VH: «¿Qué dominio sirve producción? Netlify → Domain management (dominio primario y DNS) y `curl -sI` de /widget.js en develop.com.ar y en develop-portfolio.netlify.app». Después, que VH-138, VH-141 y VH-165 apunten al dominio que resulte.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "09-PARA-FRANCO.md",
+    "linea": "694",
+    "dice": "«| INFRA.1 | Setear NEXT_PUBLIC_SENTRY_DSN en Netlify | no empezado | infra-1:69; bitacora-roadmap.md:17135 («Sentry sigue INACTIVO en prod») |». Igual en 14-DOCS-CONSOLIDADOS/ROADMAP.md:64.",
+    "problema": "Da como actual el estado de una variable de Netlify a partir de una fuente de 2026-08, sin VH. Otro entregable dice que no es verificable.",
+    "evidencia": "12-PLANEADO.md:9049-9054 (PLAN-1122): «parcial … el entorno no es verificable». VH-135 (08:1211) es la verificación que corresponde.",
+    "correccion": "«sin verificar — según bitacora-roadmap.md:17135 (2026-08) seguía inactivo; VH-135», en 09:694 y en ROADMAP.md:64.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "03-MEJORAS.md",
+    "linea": "2758 (Impacto de TEC-003)",
+    "dice": "«claude-haiku-4-5-20251001 sigue activo pero es la generación anterior (USD 1/5 por millón contra 0,10/0,50 de Haiku 5.5)»",
+    "problema": "La vigencia y los precios de modelos de un tercero (Anthropic) van sin fuente ni fecha. La misma ficha dice que no se pudo usar WebSearch, y la VH del hallazgo solo cubre Gemini.",
+    "evidencia": "03-MEJORAS.md:2758: «La vigencia de Gemini en Vertex no se pudo verificar (WebSearch no permitido en esta tarea)». VH-069 (08:617-624) solo mira gemini-2.5-flash en Vertex. El código solo fija el id (src/lib/ai/results-insights.ts:4).",
+    "correccion": "Escribirlo como «según <fuente con fecha>» o reescribir: «la vigencia y el precio de claude-haiku-4-5-20251001 frente a modelos más nuevos no se verificaron». Sumar a VH-069 un paso en la consola de Anthropic.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "03-MEJORAS.md",
+    "linea": "1051 y 1054 (SEC-107)",
+    "dice": "Título: «Repo público con datos de infraestructura…». La única evidencia de visibilidad es `raíz:.github/workflows/db-backup.yml:21` («# El repo es PÚBLICO…»).",
+    "problema": "La visibilidad del repo se apoya en un comentario de mayo, sin comando con fecha ni DEC. Además, SEC-002 (03-MEJORAS.md:32) cita SEC-107 como fuente de «El repo sigue público».",
+    "evidencia": "La verificación fechada está en SEC-001 (03-MEJORAS.md:603: `gh repo view … --json visibility` → PUBLIC el 2026-10-13 y el 2026-10-14) y en DEC-52/DEC-54 (00-PLAN-Y-LOG.md:166-168).",
+    "correccion": "Agregar a la Evidencia de SEC-107: «`gh repo view frc11/PorfolioDevelOP --json visibility` → PUBLIC (2026-10-13 y 2026-10-14); sigue público por decisión de Valentino (DEC-52, DEC-54)». En SEC-002 (:32), citar DEC-54 en lugar de SEC-107.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "08-VERIFICACION-HUMANA.md",
+    "linea": "27-29 (VH-003)",
+    "dice": "«Pasos: 1) Ver si existe el secret `DATABASE_URL_TEST`…» / «Señal de falla: … el CI … migra y escribe ahí en cada push sin `[skip ci]`.»",
+    "problema": "La existencia del secret ya se verificó (no existe), pero la VH sigue tratándola como incógnita. La señal de falla describe un estado que hoy no puede darse.",
+    "evidencia": "00-PLAN-Y-LOG.md:609: `total_count` 0 el 2026-10-15. DEU-017 (03-MEJORAS.md:3099).",
+    "correccion": "Anotar en VH-003: «Paso 1 resuelto el 2026-10-15: el repo no tiene ningún secret (00-PLAN-Y-LOG.md:609); la VH aplica cuando se cargue DATABASE_URL_TEST (DEU-017)».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "_reportes/F4.md",
+    "linea": "26",
+    "dice": "«La métrica de Performance de Google Business depende de habilitar la API en Google Cloud (VH en F6).»",
+    "problema": "Remite a una VH que no existe. 05-IDEAS.md:69 lo deja como «(a verificar)» y 07-BACKLOG.md:2210 como riesgo. El estado del proyecto de Google Cloud queda sin verificación.",
+    "evidencia": "`grep -i performance 08-VERIFICACION-HUMANA.md` solo da la VH de DevTools (08:745-747). Ninguna VH verifica IDEA-003.",
+    "correccion": "Pasar a 08 como VH: «Google Cloud → APIs & Services del proyecto de la app OAuth de GBP: ¿está habilitada la Business Profile Performance API?». Citarla en F4.md:26, 05-IDEAS.md:69 y 07-BACKLOG.md:2210.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "11-CONGELADOS.md",
+    "linea": "253",
+    "dice": "«pausa-dia corre con TZ=UTC, que es el caso de Netlify.»",
+    "problema": "Afirma sin fuente el huso horario del runtime de Netlify. Otros entregables lo dejan condicional y hay una VH para eso.",
+    "evidencia": "09-PARA-FRANCO.md:418: «Si el server corre en UTC (Netlify)…». 03-MEJORAS.md:1384: «Con el server en UTC (no hay TZ en vercel.json ni netlify.toml…)». VH-150 (08:1346): hora en el entorno desplegado.",
+    "correccion": "«…con TZ=UTC, que es lo esperable en Netlify si no se configura TZ (sin verificar: VH-150)».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "05-IDEAS.md",
+    "linea": "98 (también :188, :68, :173, :248)",
+    "dice": "«≈780 invocaciones/mes, el 0,6% de las 125.000/mes del Free … Cada corrida puede despertar Neon (~5 min de cómputo)»; :68 «la API es gratuita con cuota» (GBP); :173 «La API de Tiendanube no tiene costo»; :248 «Cal.com público, sin costo».",
+    "problema": "Límites y precios de planes de terceros (Netlify, Neon, Google Business, Tiendanube, Cal.com) sin fuente ni fecha. El propio doc reconoce que no se conoce el plan de Netlify.",
+    "evidencia": "netlify/functions/generate-insights-cron.ts:26-27: el plan de Netlify «NO es confirmable desde el repo». 14-DOCS-CONSOLIDADOS/OPERACIONES.md:52: «[A DECIDIR] plan de Neon».",
+    "correccion": "Escribir cada cifra como «según <página de precios o límites del proveedor, fecha>» o «sin verificar», y remitir a VH-134 y VH-159 para el plan real de cada cuenta.",
+    "gravedad": "baja"
+   }
+  ],
+  "revisado": "Lente DEC-54 sobre logic-core-v3/docs/auditoria-2026-10/ (base origin/main 57c421bc), en solo lectura.\n\n**Leídos completos:**\n- 01-INVENTARIO §5-§13 y RESUMEN\n- 14-DOCS-CONSOLIDADOS/OPERACIONES y SEGURIDAD-Y-PRIVACIDAD\n- 06-ATLAS: arquitectura.md (§flujos) y regenerar.md\n- _reportes/D1-D9 y F3-F6\n- §0 de ENMIENDA-01 y el contexto §1.0 y DEC-48 a DEC-58 de 00-PLAN-Y-LOG\n\n**Revisados por búsqueda dirigida** de visibilidad, Netlify, Vercel, Neon, Brevo, Sentry, GitHub y sus secrets, dominios y DNS, credenciales, planes y límites, migraciones aplicadas y «en producción»:\n- 02, 03, 04, 05, 07, 08, 09, 10, 11 y 13\n- 12-PLANEADO, filtrando los PLAN «hecho/parcial» que hablan de configuración\n- el resto de 14-DOCS-CONSOLIDADOS y PROMPT\n\n**Contrastado contra el código** con `git show 57c421bc`:\n- .env.example\n- brevo-service.ts\n- generate-insights-cron.ts\n- google.ts\n- db-backup.yml\n- docs/bitacora-roadmap.md y docs/operations/neon-backups.md\n\n**Lo que ya está bien respaldado:**\n- La visibilidad del repo: SEC-001 y DEC-52/54.\n- Vertex vencida: ENMIENDA §0.\n- Cal.com v1: cal-com-v2.ts:4.\n- La mayoría de las tablas de credenciales, que llevan VH-134/141.\n\n**Dónde están los problemas:** son sobre todo afirmaciones de estado de producción o de cuentas que figuran como hecho sin VH:\n- Sentry recibiendo.\n- Crons que corren.\n- Netlify apuntando a la branch main.\n- Techo de 10 s y cupo de Brevo.\n- Una migración aplicada.\n\nTambién hay verificaciones con gh del 2026-10-15 que existen solo en el log (00-PLAN-Y-LOG.md:609) y que las fichas y tablas no citan, o contradicen («no verificable», «nunca corrió», «la passphrase vive en el secret»).\n\nNo se encontró ningún valor de secret en los entregables revisados."
+ },
+ "f7:backlog": {
+  "revisado": "Leí completo 07-BACKLOG.md: 204 tarjetas parseadas; Ahora y Próximo (B-01 a B-87) enteros y unas 45 de Después (B-88 a B-110, B-119, B-120, B-121, B-124, B-126, B-131, B-132, B-137, B-151, B-152, B-155 a B-161, B-164 a B-171, B-177, B-178, B-180, B-182 a B-188, B-190, B-191, B-192, B-193, B-204, y la sección «Controles del padre»). Contrasté cada tarjeta con: las fichas que cierra en 02, 03, 05, 10 y 11 (severidad, zona y propuesta); la tabla E12 de ENMIENDA-01; las VH citadas en 08; y 09-PARA-FRANCO.md:801-852. En el código verifiqué con git show y git grep sobre origin/main @ 57c421bc. Primero, lo que está bien. Las 2 CRÍTICA y las 23 ALTA están en Ahora. Las 46 filas de la tabla de 09 coinciden con 07 en título, bloque, tamaño y hallazgos. Los 75 hallazgos de 09 tienen su tarjeta en la tabla. Los conteos del Resumen (24/63/117; ZONA-FRANCO 4/14/28; FROZEN 1/10/21) cuadran con el campo Zona. Ahora, los problemas. La mayoría de las dependencias rotas de Después salen del mapeo por parecido de títulos viejos que hizo el padre (07:2331-2357): ese mapeo perdió la mitad de las tarjetas que se habían partido. La tabla de 09 sale solo del campo Zona, por eso faltan tarjetas que exigen una acción o una revisión de Franco.",
+  "problemas": [
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "202",
+    "dice": "B-12 · Archivos a tocar: «Write-paths con …credential-cipher.ts o secret-box.ts: callback de GBP, callback de Tiendanube, settings de Telegram, carga de Cal.com y agency-actions.ts; lectura por src/lib/crypto/resolve-credential.ts (ya tolera ambos formatos)». NO se tocan: «src/lib/crypto/* salvo bug».",
+    "problema": "Los lectores reales de esas credenciales quedan fuera del alcance, y resolve-credential no los cubre: solo exporta resolveCredentialDisplay(description), que usa la Bóveda. Después del backfill, GBP, Tiendanube, Cal.com y Telegram mandarían el texto cifrado como token, y el refresh de GBP volvería a escribir el token en claro. Dentro del alcance listado no se puede cumplir el criterio de 07:206 («GBP, Tiendanube y Cal.com siguen leyendo»). Además, B-21 (Ahora, en otro worktree) reescribe cal-com.ts en paralelo.",
+    "evidencia": "origin/main:src/lib/crypto/resolve-credential.ts:16 es la única export y solo la importan dashboard/cuenta/boveda/page.tsx:25 y admin/clients/[clientId]/_components/tabs/VaultTab.tsx:8. src/lib/integrations/google-business-profile.ts:56-72 lee gbpAccessToken y gbpRefreshToken crudos, y :78-85 escribe en claro el token del refresh. tiendanube.ts:55-58 y cal-com.ts:27-29 leen la columna cruda. src/lib/notifications/telegram.ts:41-48 lee osTelegramBotToken crudo. La misma afirmación está en 03-MEJORAS.md:77 (SEC-036).",
+    "correccion": "Sumar a «Archivos a tocar»: «lectura con descifrado tolerante en google-business-profile.ts:56-90 (la escritura del refresh cifra), tiendanube.ts:55-58, cal-com.ts:27-29 y telegram.ts:41-48, mediante un helper nuevo readCredential() en src/lib/crypto (si isEncrypted descifra, si no devuelve el valor tal cual)». Cambiar «src/lib/crypto/* salvo bug» por «src/lib/crypto/* salvo el helper de lectura». Agregar al Riesgo: «cal-com.ts lo reescribe B-21: rebasar sobre la que entre primero». Corregir igual 03-MEJORAS.md:77.",
+    "gravedad": "alta"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "83 (y 149)",
+    "dice": "B-01 Riesgo: «Bajo en código, alto operativo: la key no se imprime ni se commitea…». B-07: «Prerrequisitos: [B-06], [B-01]».",
+    "problema": "Según SEC-057 (CRÍTICA), hoy el abuso queda tapado por la credencial vencida y «se activa al renovarla». El backlog renueva la key en producción primero (el criterio de B-01 pide que el widget de develop.com.ar responda) y recién después pone el techo de gasto de B-07, que es L. B-01 no lo advierte. Para desarrollar y probar B-07 alcanza una key válida en local o en preview: VH-065 pide «Preview/QA con credencial válida».",
+    "evidencia": "03-MEJORAS.md:21: «Hoy queda enmascarado por la credencial de Vertex vencida (cada fallo devuelve el cupo); se activa al renovarla». Criterio de B-01 en producción: 07-BACKLOG.md:85. Entorno de VH-065: 08-VERIFICACION-HUMANA.md:583.",
+    "correccion": "Agregar al Riesgo de B-01: «Renovar en producción activa SEC-057 (03-MEJORAS.md:21). La key se carga en Netlify producción recién con B-07 desplegado, o en el mismo ciclo con un techo temporal de conversaciones nuevas por IP. Para desarrollar B-07 alcanza la key local o la de preview». En B-07, Prerrequisitos: «[B-06]; key de Vertex válida en local o preview (paso local de B-01)».",
+    "gravedad": "alta"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1132",
+    "dice": "B-96: «UX-005 abre un open redirect si el callbackUrl no pasa por la validación de SEC-011; por eso va después de «Acceso a L3». … Prerrequisitos: [B-25], [B-27], [B-08]».",
+    "problema": "SEC-011 lo cierra B-26, que no figura en los prerrequisitos. «Acceso a L3» no existe como tarjeta: el padre la mapeó solo a B-25 (recupero e invitación) y se perdió la parte «redirect seguro». La tarjeta usa «el isSafeCallbackUrl corregido por SEC-011» (07:1130), así que sin B-26 deja abierto un open redirect.",
+    "evidencia": "B-26 cierra SEC-011: 07-BACKLOG.md:356-358. Mapeo «Acceso a L3: … redirect seguro …» → B-25 con parecido 0.33: 07-BACKLOG.md:2334. UX-005 exige SEC-011: 03-MEJORAS.md:4204.",
+    "correccion": "Prerrequisitos: [B-25], [B-26], [B-27], [B-08]. Reemplazar «después de «Acceso a L3»» por «después de [B-26]».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "2186 (y 776, 2188)",
+    "dice": "B-192, NO se tocan: «los botones Aplicar/Descartar y el link del email (BUG-023, «Avisos del chatbot al cliente…»)», con Prerrequisitos [B-48], [B-125]. B-64 (07:776), NO se tocan: «los botones Aplicar y Descartar en Análisis y el link del email (la otra mitad de BUG-023) van en 'IDEA-001…'».",
+    "problema": "Las dos tarjetas se pasan la otra mitad de BUG-023. B-64 la manda a B-192, y B-192 la manda a «Avisos del chatbot al cliente…», que no existe: el padre la mapeó a B-48, cuyo único hallazgo es FAL-019. Ninguna tarjeta implementa APPLY/DISMISS ni corrige el link del email, y B-192 da por hecho que los botones existen («además de los botones que pone BUG-023»). Esto contradice 07:2329 («todo hallazgo vigente está en una tarjeta»).",
+    "evidencia": "Propuesta de BUG-023: 03-MEJORAS.md:1312. IDEA-001 incluye «Ya lo resolví» y «No aplica» para todas las categorías y el botón del email a Análisis: 05-IDEAS.md:34. B-48 solo cierra FAL-019: 07-BACKLOG.md:599. Mapeo a B-48: 07-BACKLOG.md:2354.",
+    "correccion": "En B-192, pasar a «Archivos a tocar»: «isla cliente en DiscoveriesSection.tsx con APPLY/DISMISS para todas las categorías (llama a actOnInsight) y link del email de sendInsightsNotification.ts:47 a /dashboard/resultados/analisis (mitad de BUG-023)», y sacarlo de «NO se tocan». Prerrequisitos: [B-64], [B-125].",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "151",
+    "dice": "B-07, criterio: «VH-065: … no se pueden abrir más de N conversaciones por hora contra el bot de QA; VH-105: cortar la conexión antes del primer token consume el intento y suma al tope de 40».",
+    "problema": "N no está definido en la tarjeta. Además, las dos VH citadas tienen en 08 como resultado esperado el defecto, no el arreglo: VH-065 espera que el cupo se agote en el pedido 21 sin ningún 429 antes del 30, y VH-105 se titula «…no consume cupo ni suma al tope de 40». Quien corra la VH tal como está escrita marca en verde el comportamiento vulnerable.",
+    "evidencia": "VH-065, resultado esperado = cupo agotado: 08-VERIFICACION-HUMANA.md:586. VH-105, título y resultado esperado = el corte no consume: 08-VERIFICACION-HUMANA.md:941 y :946.",
+    "correccion": "Reescribir el criterio: «Con el preset nuevo de conversaciones nuevas por IP y por hora = N (fijado en presets.ts y anotado en el PR), el pedido N+1 de VH-065 con un sessionId nuevo responde 429 y conversationsCount ≤ N. En VH-105, tras 10 cortes con -m 1 el contador del mes sube 10 y no hay eventos 'Cupo devuelto (stream_abort)'». En 08, agregar la variante posterior al arreglo de VH-065 y VH-105, o marcarlas «resultado esperado invertido tras B-07».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "93",
+    "dice": "B-02: «Zona: libre». En 07:92: «Secrets de GitHub Actions DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE (los carga Franco)». En 07:94: «Coordinar con Franco la carga de los secrets».",
+    "problema": "Es una tarjeta de Ahora que no avanza sin una acción de Franco. La Zona no lo dice y la tabla «Tarjetas del backlog en tu zona» de 09 no la incluye. Franco no se entera de que su carga de secrets bloquea B-12, B-43, B-45 y B-91.",
+    "evidencia": "Tabla de 09 sin B-02: 09-PARA-FRANCO.md:801-852 (solo figura el ítem de bitácora «B14.3 backups» en 09:700). BUG-171 dice «lo hace Franco»: 03-MEJORAS.md:1185. Tarjetas con [B-02] como prerrequisito: 07-BACKLOG.md:204, :547, :569 y :1077.",
+    "correccion": "Zona: «libre (los secrets los carga Franco: coordinar)». Sumar a la tabla de 09 la fila «[B-02] Cargar los secrets del backup diario… | Ahora | S | BUG-171 | Franco carga DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1054",
+    "dice": "B-89: «Zona: requiere decisión FROZEN».",
+    "problema": "B-89 cierra CNG-004 y CNG-005, que en 11 tienen zona «congelado + ZONA-FRANCO», y su propio riesgo y su criterio exigen la firma de Franco. Aun así no figura en la tabla de 09, y es habilitadora de 16 tarjetas, varias de su zona (B-103, B-104, B-105).",
+    "evidencia": "Zona de CNG-004 y CNG-005: 11-CONGELADOS.md:112 y :125. «Franco firma por auth.ts, OsLead*, ui/*…»: 07-BACKLOG.md:1055. «la firma de Franco»: 07-BACKLOG.md:1057. Tabla de 09 sin B-89: 09-PARA-FRANCO.md:805-852.",
+    "correccion": "Zona: «requiere decisión FROZEN + ZONA-FRANCO (CNG-004, CNG-005 y la firma de Franco por auth.ts, OsLead*, ui/*, auth-guards, utils, action-utils y dates-ar)». Agregar la fila de B-89 en la tabla de 09.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "909, 1186, 1813",
+    "dice": "B-76: «Zona: requiere decisión FROZEN (src/components/ui/Modal.tsx)». B-101 y B-158: «Zona: requiere decisión FROZEN».",
+    "problema": "La política de 11 pone a Franco como segundo revisor de ui/* y de action-utils, porque tienen importadores en su zona. Estas tres tarjetas cambian el comportamiento de pantallas del setter. B-158 lo reconoce («53 en la zona de Franco») y pide visual-qa del setter, y B-101 pide «Franco fue avisado». Pero la Zona no lo dice y 09 no las lista.",
+    "evidencia": "Política del segundo revisor: 11-CONGELADOS.md:58. git grep sobre origin/main: Modal en setter/leads/[leadId]/_components/escalar-modal.tsx:7, evaluacion-form.tsx:6 y manual/_components/salida-manual.tsx:7; LoadingState en admin/leados/loading.tsx:1; Spinner en setter/_components/autosave-status.tsx:5; EmptyState en setter/error.tsx:6. `git grep -l action-utils` sobre setter, lib/leados, admin/leados y admin/leads/_actions da 16 archivos. Texto de las tarjetas: 07-BACKLOG.md:1814-1815 y :1189.",
+    "correccion": "En las tres, Zona: «requiere decisión FROZEN + revisión de Franco (consumidores en el setter, 11-CONGELADOS.md:58)». Sumar al criterio de B-76: «escalar-modal, evaluacion-form y salida-manual del setter siguen operables con teclado». Agregar B-76, B-101 y B-158 a la tabla de 09.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1737, 1748",
+    "dice": "B-151 y B-152: «Prerrequisitos: [B-52]». B-151 agrega: «BUG-081 (boundary de WebGL, Próximo) toca los mismos avatares antes».",
+    "problema": "BUG-081 y los archivos de avatares los toca B-53, no B-52. B-52 excluye explícitamente los avatares 3D («otra tarjeta»). El padre mapeó «…y no caerse por WebGL» solo a B-52. Además, B-52 depende de B-36 y B-36 de B-07, así que el trabajo de canvas queda bloqueado detrás de toda la cadena del widget sin motivo.",
+    "evidencia": "B-53 cierra BUG-081 y toca AvatarRenderer.tsx y HeavyAvatarsLazy.tsx: 07-BACKLOG.md:654-655. B-52 dice «los avatares 3D (otra tarjeta)»: 07-BACKLOG.md:644. B-152 toca AvatarRenderer.tsx: 07-BACKLOG.md:1746. Mapeo a B-52: 07-BACKLOG.md:2349-2350.",
+    "correccion": "Prerrequisitos de B-151 y de B-152: [B-53].",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1922 (y 1921)",
+    "dice": "B-168, Archivos a tocar: «…milestone.actions.ts#unmarkMilestonePaid…». Hallazgos que cierra: incluye [POD-072].",
+    "problema": "B-71 (Próximo) conecta unmarkMilestonePaid como «Deshacer» y declara que POD-072 deja de aplicar. B-168 lo sigue listando para borrar y como hallazgo cerrado. Ejecutada tal cual, B-168 borraría el Deshacer de los pagos.",
+    "evidencia": "B-71: «conectar unmarkMilestonePaid como Deshacer … POD-072 … deja de aplicar»: 07-BACKLOG.md:853. POD-072 propone «decidir (Valentino)»: 10-PODA.md:288-292.",
+    "correccion": "Quitar «milestone.actions.ts#unmarkMilestonePaid» y [POD-072] de B-168. Sumar [POD-072] a «Hallazgos que cierra» de B-71 con la nota «se conecta, no se borra».",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "224 (y 226)",
+    "dice": "B-14, Archivos a tocar: «netlify/functions/ (… os-follow-up-cron.ts con el molde de send-weekly-reports-cron.ts)». «Prerrequisitos: [B-01]».",
+    "problema": "B-14 agenda por primera vez el cron os-follow-up en Netlify (hoy no corre, BUG-047). Los defectos que lo hacen fallar o duplicar quedan para tarjetas posteriores: BUG-163 (digest sin tope que, con 60-70 pendientes, falla todos los días dejando solo un console.error) está en B-81, que depende de B-31; SEC-104 (candado no atómico que manda el digest doble en los reintentos) está en B-134, en Después. El criterio de B-14 exige una corrida registrada de cada cron.",
+    "evidencia": "BUG-163: 03-MEJORAS.md:5057. SEC-104: 03-MEJORAS.md:5557. B-81 cierra BUG-163 y depende de [B-31]: 07-BACKLOG.md:962 y :965. Criterio de B-14: 07-BACKLOG.md:228.",
+    "correccion": "En B-14, agregar: «el disparador de os-follow-up se activa después de [B-81] (BUG-163) y con Franco; hasta entonces queda la función sin schedule». La alternativa es sumar [B-81] como prerrequisito solo para esa función.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "658, 933 (y 315, 337)",
+    "dice": "B-53 y B-78: «Nivel de proceso: S · Modelo sugerido: Sonnet 5.5 · Esfuerzo: medium · Ultracode: OFF». B-22 y B-24 llevan lo mismo.",
+    "problema": "E12 reserva Sonnet medium para «S mecánica (borrar con lista cerrada, renombrar, regenerar, docs)». B-53 es 3D (boundary y detección de WebGL de los avatares) y B-78 es timing de scroll (Lenis, reducir movimiento, DotMatrix): les corresponde la fila «Visual fino, 3D, timing → Opus 5.5 · xhigh». El mismo backlog le da Opus xhigh a B-151 y B-152 (mismos avatares) y a B-190 (mismo SmoothScroll.tsx). B-22 y B-24 son bugs ALTA de Ahora, no tareas mecánicas: un arreglo de serialización con test y un layout mobile con visual-qa.",
+    "evidencia": "Tabla E12: ENMIENDA-01.md:213, :214 y :216. Opus xhigh en las tarjetas hermanas: 07-BACKLOG.md:1738, :1749 y :2167.",
+    "correccion": "B-53 y B-78: «Opus 5.5 · xhigh · OFF». B-22: «Sonnet 5.5 · high · OFF». B-24: «Sonnet 5.5 · high · OFF», u «Opus 5.5 · xhigh» si se la trata como visual fino.",
+    "gravedad": "media"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "2164 (y 820, 824)",
+    "dice": "B-190: «el número de WhatsApp del pie (BUG-144 lo cierra BUG-180 en «Contactos, SLA y promesas…»: acá solo se verifica)». B-68: «el WhatsApp del pie del home (BUG-144) va en 'Sitio público (home clásica): …'», con el criterio «git grep de 'wa.me/' fuera de src/lib/whatsapp.ts y del pie del home = 0».",
+    "problema": "Cada tarjeta le deja el pie a la otra, así que nadie migra el WhatsApp del Footer. Sin embargo BUG-180 lo incluye, y B-190 lo cuenta como cerrado y exige «el pie usa lib/whatsapp.ts». B-39 también lo excluye.",
+    "evidencia": "BUG-180 propone migrar «ChatbotUpsellLanding, Footer, CalculadorIA y PortalDemoCTA»: 03-MEJORAS.md:2090. BUG-144: 03-MEJORAS.md:2613. Exclusión en B-39: 07-BACKLOG.md:501.",
+    "correccion": "En B-190, pasar a «Archivos a tocar»: «sections/home/Footer.tsx: número de WhatsApp con getWhatsappHref de lib/whatsapp.ts (BUG-144)» y borrar «acá solo se verifica».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1583",
+    "dice": "B-137: «BUG-155 (textos > 5000), BUG-161 y UX-055 (dedupe y CSV de Excel) van antes en Próximo sobre los mismos archivos. · Prerrequisitos: [B-85], [B-79]».",
+    "problema": "BUG-161 lo cierra B-84, que falta en los prerrequisitos. B-84 crea en el alta manual el cotejo con nombresEnSistema que SEC-102 (en B-137) tiene que acotar, y las dos tocan nuevo-prospecto-form.tsx. El mapeo del padre partió «Alta e importación de prospectos: dedupe … y CSV» y se quedó solo con B-85.",
+    "evidencia": "B-84 cierra BUG-161, toca nuevo-prospecto-form.tsx y manda SEC-102 a B-137: 07-BACKLOG.md:995-996. Archivos de B-137: 07-BACKLOG.md:1581. Mapeo: 07-BACKLOG.md:2345.",
+    "correccion": "Prerrequisitos: [B-84], [B-85], [B-79].",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1792",
+    "dice": "B-156: «A11Y-001 (Próximo) y PERF-018 tocan las mismas páginas: van antes. … Prerrequisitos: [B-25]».",
+    "problema": "A11Y-001 es B-77 (login/page.tsx: h1, tablist y visor de contraseña) y PERF-018 es B-151 (DotMatrix, el fondo de auth). Ninguna de las dos está en los prerrequisitos. B-25 entró por el mapeo de «Acceso a L3» (parecido 0,33) y casi no comparte archivos con B-156.",
+    "evidencia": "B-77: 07-BACKLOG.md:918-919. B-151 con PERF-018 y DotMatrix: 07-BACKLOG.md:1734-1735. Mapeo: 07-BACKLOG.md:2351.",
+    "correccion": "Prerrequisitos: [B-77], [B-151].",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "2318, 2320",
+    "dice": "B-204: «src/lib/leados/agenda.ts (anclarla a develOP es BUG-038, «LeadOS: herramientas externas…»)» y «Prerrequisitos: [B-21], [B-86], [B-55]».",
+    "problema": "BUG-038 lo cierra B-32, no B-86. B-86 (links del rail del setter y «Chat de evaluación») no tiene que ver con que el bot ofrezca turnos, y bloquea esta idea libre detrás de una tarjeta de Franco. El criterio de B-204 («la agenda del setter sigue usando la de develOP») es justamente lo que hace B-32.",
+    "evidencia": "B-32 cierra BUG-038: 07-BACKLOG.md:423. B-86 cierra FAL-033: 07-BACKLOG.md:1017. Mapeo a B-86: 07-BACKLOG.md:2357.",
+    "correccion": "Prerrequisitos: [B-21], [B-32], [B-55]. Puntero: «anclarla a develOP es BUG-038, [B-32]».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1846 (y 1849)",
+    "dice": "B-161: «Zona: requiere decisión FROZEN». Criterio: «… más /admin y /dashboard sin shutter».",
+    "problema": "El único portal que navega con triggerTransition es el setter (setter-nav.tsx). La tarjeta borra isManualTransition, que el contexto usa en cada navegación manual. El criterio no prueba /setter y la Zona no avisa a Franco.",
+    "evidencia": "origin/main:src/app/(protected)/setter/_components/setter-nav.tsx:7 y :43-49. Uso de isManualTransition: src/context/TransitionContext.tsx:73 y :139. CNG-002 nombra a setter-nav como importador en ZONA-FRANCO: 11-CONGELADOS.md:82.",
+    "correccion": "Zona: «requiere decisión FROZEN (aviso a Franco: setter-nav.tsx:43 usa triggerTransition)». Sumar al criterio: «la navegación del setter (destinos y drawer de setter-nav) no tiene regresiones en desktop ni en mobile».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1780 (y 1779)",
+    "dice": "B-155: «Zona: libre». Archivos a tocar: «loading.tsx en announcements, referrals y fg2-lab». NO se tocan: «fg2-lab/_components (ZONA-FRANCO: solo el loading.tsx de la ruta, con aviso)».",
+    "problema": "La tarjeta crea un archivo dentro de admin/fg2-lab, que ella misma y SEC-023 tratan como ZONA-FRANCO. Aun así su Zona dice «libre» y no tiene fila en 09.",
+    "evidencia": "SEC-023: «admin/leados/* y fg2-lab, que son ZONA-FRANCO»: 03-MEJORAS.md:66. Tabla de 09 sin B-155: 09-PARA-FRANCO.md:805-852.",
+    "correccion": "Zona: «libre (loading.tsx de admin/fg2-lab: ZONA-FRANCO, con aviso)» y agregar la fila en 09. La alternativa es sacar fg2-lab de la lista de loading.tsx.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "206",
+    "dice": "B-12, criterio: «la Bóveda no muestra 'AES-256' ni registros de acceso inventados».",
+    "problema": "Después del backfill de la propia B-12, la Bóveda queda cifrada con AES-256-GCM, así que el sello pasa a ser cierto y el criterio obliga a sacar una afirmación verdadera. Además, FAL-009 es «Decisión para Valentino» (ocultar o implementar) y la tarjeta la resuelve sin marcarla como decisión.",
+    "evidencia": "ALGORITHM = 'aes-256-gcm': origin/main:src/lib/crypto/secret-box.ts:22 y credential-cipher.ts:18. Sello y registro en la página: src/app/(protected)/dashboard/cuenta/boveda/page.tsx:85, :148, :260 y :265. FAL-009: 02-PENDIENTE.md:334.",
+    "correccion": "Reescribir: «la Bóveda muestra 'AES-256' solo si VH-031 da 0 credenciales en claro; no muestra 'Registro de integridad y accesos' ni 'Monitoreo activo' hasta SEC-085 (decisión de Valentino sobre FAL-009)».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "116 (y 7)",
+    "dice": "B-04 cierra solo [SEC-105] y dice «Prerrequisitos: ninguno». 07:7: «Ahora = toda CRÍTICA y ALTA, y lo que bloquea L3 en el camino del cliente».",
+    "problema": "SEC-105 es MEDIA y, según el texto, B-04 no bloquea L3. La única tarjeta de Ahora que depende de ella es B-09, que no explica para qué necesita el upgrade. B-05 y B-06 (también MEDIA) se justifican como prerrequisitos de B-13 y de B-07/B-08, pero la definición de 07:7 no incluye prerrequisitos.",
+    "evidencia": "SEC-105 MEDIA: 03-MEJORAS.md:579. Las de B-05 y B-06, también MEDIA: 03-MEJORAS.md:546, 02-PENDIENTE.md:1210 y 03-MEJORAS.md:233. Prerrequisito [B-04] de B-09: 07-BACKLOG.md:171.",
+    "correccion": "En 07:7, agregar «y sus prerrequisitos directos». En B-09, explicar la dependencia («subir next-auth antes de editar el callback jwt, para no probar dos veces»). La alternativa es pasar B-04 a Próximo y sacarla de los prerrequisitos de B-09.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "239",
+    "dice": "B-15, criterio: «VH-051: dos clientes distintos ven números de leads distintos que coinciden con sus ChatbotLead no descalificados».",
+    "problema": "Que dos orgs muestren números distintos no prueba el arreglo: dos orgs de QA sin leads dan 0 y 0, y el criterio falla aunque el código esté bien. VH-051 pide otra cosa: que el número no cambie por un contacto del sitio.",
+    "evidencia": "Pasos, resultado esperado y señal de falla de VH-051: 08-VERIFICACION-HUMANA.md:459-461.",
+    "correccion": "«VH-051: el número de cada org coincide con el count de sus ChatbotLead no descalificados del período y no cambia al enviar un formulario en /contact».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "582",
+    "dice": "B-46, criterio: «VH-106: diez leads calientes seguidos producen a lo sumo N mails por hora y un digest».",
+    "problema": "N no está fijado ni en la tarjeta ni en la propuesta de los hallazgos, así que el criterio no se puede verificar.",
+    "evidencia": "El objetivo y los archivos de B-46 (07-BACKLOG.md:577-578) tampoco definen el tope.",
+    "correccion": "Fijar N, por ejemplo «a lo sumo 3 mails por hora por org y el resto en el digest», o escribir «a lo sumo el tope fijado en client-notifications/decide.ts y anotado en el PR».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1156",
+    "dice": "B-98, criterio: «/admin y /dashboard en enforce sin violaciones legítimas tras una semana de reportes; 'unsafe-eval' fuera de los portales».",
+    "problema": "«Violaciones legítimas» no está definido y el criterio depende de una semana de tráfico de producción. «'unsafe-eval' fuera de los portales» se puede leer de dos maneras: sacarlo de los portales o dejarlo solo fuera de ellos.",
+    "evidencia": "Riesgo de la misma tarjeta («medir una semana de reportes antes»): 07-BACKLOG.md:1154.",
+    "correccion": "«/admin y /dashboard en enforce; el PR lista los reportes de CSP de 7 días en Report-Only previos al enforce, cada uno con su resolución; la CSP de /admin y /dashboard no contiene 'unsafe-eval'».",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1437 (y 1438)",
+    "dice": "B-124: «Hallazgos que cierra: [SEC-063], …». NO se tocan: «El guard de las páginas activity y health (SEC-063 lo cierra «Guardia SUPER_ADMIN…», en Ahora: acá solo se verifica)».",
+    "problema": "SEC-063 se cierra en B-10, que lo reclama en su texto, pero figura como hallazgo de B-124 (Después). Así, backlog.json lo va a mostrar abierto hasta que se haga B-124.",
+    "evidencia": "B-10: «cuyo guard de página (SEC-063) queda cubierto por este helper»: 07-BACKLOG.md:180.",
+    "correccion": "Mover [SEC-063] a «Hallazgos que cierra» de B-10 y dejar en B-124 solo la verificación.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1090 (y 1086)",
+    "dice": "B-92 (Después), criterio: «queda registrada la constancia de clave revocada».",
+    "problema": "Confirmar que la clave de Google AI publicada en el repo público está revocada es una verificación operativa de credenciales, y queda para Después. La tabla de credenciales que B-01 completa en Ahora (VH-134) no tiene fila de Google AI, así que nadie la revisa antes.",
+    "evidencia": "SEC-001, impacto si sigue viva y propuesta de confirmar la revocación: 03-MEJORAS.md:603-604. La §6.1 no tiene Google AI y CHATBOT_GOOGLE_API_KEY solo aparece en :127: 01-INVENTARIO.md:95-117. Alcance de B-01: 07-BACKLOG.md:81 y :85.",
+    "correccion": "Sumar a B-01: «fila de Google AI (CHATBOT_GOOGLE_API_KEY) en la tabla de credenciales, con la constancia de revocación (SEC-001)». Dejar en B-92 solo la limpieza de docs.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "81, 147, 213, 589, 765, 941, 996, 1130",
+    "dice": "Ejemplos: «va en 'Runtime del chat: contabilidad del watchdog, contratos de cuota, credencial de Vertex y pin de ai@6'» (B-01, B-07, B-13, B-47, B-63); «después de «Acceso a L3»» (B-96); UX-053 «va en 'LeadOS: estado derivado del manual fiel…'» (B-79).",
+    "problema": "Varias tarjetas delegan alcance en títulos que ya no existen porque las tarjetas se renombraron o se partieron. El padre corrigió solo los prerrequisitos (07:2331-2357), no estas referencias del cuerpo. Un agente que ejecute la tarjeta no sabe a cuál delegar. Ejemplos: SEC-064, TEC-004 y UX-033 están en B-121, no en la tarjeta «Runtime del chat…» (B-120); UX-053 está en B-139, no en B-138; «Acceso a L3» se partió en B-25 y B-26.",
+    "evidencia": "Un script de node comparó los títulos citados con los encabezados `### [B-NNN]` y dio 18 títulos citados sin tarjeta. Encabezados de B-120/B-121 y B-138/B-139: 07-BACKLOG.md:1392, :1403, :1590 y :1601.",
+    "correccion": "Reemplazar cada título citado por su id: [B-121], [B-139], [B-25]/[B-26], [B-148], [B-126], [B-110], [B-116], [B-149]/[B-150], [B-137], [B-88], [B-156], [B-130], [B-190], [B-192], [B-193] y [B-124]. Después regenerar con backlog.mjs.",
+    "gravedad": "baja"
+   },
+   {
+    "doc": "07-BACKLOG.md",
+    "linea": "1056",
+    "dice": "B-89: «Nivel de proceso: M · Modelo sugerido: Opus 5.5 · Esfuerzo: high · Ultracode: OFF».",
+    "problema": "La tarjeta no edita código (07:1053): escribe en CLAUDE.md, AGENTS.md, zonas.json y DECISIONES una política que deciden Valentino y Franco y que ya está redactada en 11. Por E12 es una tarjeta de docs (Sonnet medium), como su par B-90, que la lleva (07:1067).",
+    "evidencia": "Fila «S mecánica (… docs)» de E12: ENMIENDA-01.md:213. «esta tarjeta no edita código»: 07-BACKLOG.md:1053.",
+    "correccion": "«Nivel de proceso: S · Modelo sugerido: Sonnet 5.5 · Esfuerzo: medium · Ultracode: OFF».",
+    "gravedad": "baja"
+   }
+  ]
+ }
+}

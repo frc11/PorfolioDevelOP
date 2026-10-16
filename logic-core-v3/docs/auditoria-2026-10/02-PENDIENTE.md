@@ -11,7 +11,7 @@
 | h3 · Chatbot centralizado | 8 / 8 | 112 | 3 | Sentry (66), errores (64), autonomía (52) | 6 |
 | h4 · Panel de admin | 13 / 13 | 115 | 3 | Sentry (82), errores (69), validación en servidor (42) | 8 |
 | h5 · Setter y LeadOS | 7 / 7 | 78 | 0 | autonomía (39), Sentry (39), permisos y tenant (26) | 3 |
-| h6 · Entradas públicas que alimentan lo interno | 3 / 2 | 13 | 0 | Sentry (7), errores (7), autonomía (7) | 0 |
+| h6 · Entradas públicas que alimentan lo interno | 3 / 3 | 13 | 0 | Sentry (7), errores (7), autonomía (7) | 0 |
 
 ## h1 · Acceso
 
@@ -674,13 +674,13 @@
 
 ### h4.adm-shell — Shell del admin
 
-- Madurez de la herramienta: **L?** (la de su funcionalidad más floja; 4 funcionalidades: 2×L2, 1×L3, 1×L?).
+- Madurez de la herramienta: **L1** (la de su funcionalidad más floja; 4 funcionalidades: 2×L2, 1×L3, 1×L1).
 - Criterios de L3 que faltan en alguna funcionalidad: mobile, validación en servidor, sin mocks ni TODO.
 
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h4.adm-shell.acceso-y-layout` Guard SUPER_ADMIN y shell del admin | L2 | mobile | Camino feliz: layout.tsx:41-49 (auth + rol) -> :52-55 badges -> AdminLayoutClient.tsx:74-101 (sidebar + main). No llega a L3 por mobile parcial (hamburguesa sobre el drawer, AdminLayoutClient.tsx:43-46). |
-| `h4.adm-shell.backup-diario-de-la-base` Backup diario cifrado de la base con prueba de restore | L? | validación en servidor, sin mocks ni TODO | Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero que corra depende de secrets no verificables por lectura; ci.yml:120-121 registraba 0 secrets al 2026-08-25. |
+| `h4.adm-shell.backup-diario-de-la-base` Backup diario cifrado de la base con prueba de restore | L1 | validación en servidor, sin mocks ni TODO | Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero nunca terminó bien: gh run list (2026-10-15) dio 140 corridas fallidas por el secret faltante y 0 secrets en el repo (BUG-171). |
 | `h4.adm-shell.confirmaciones` Confirmaciones de acciones destructivas | L3 | — | Consumidores fuera del lote (ClientsListClient, BotDetailClient, BulkActionBar, ImpersonateButton, BillingOverrideForm por git grep) -> confirm-dialog.tsx:42 portal a body -> :85-96 confirmar con isPending; type-to-confirm-dialog.tsx:41, :107 exige la frase. F |
 | `h4.adm-shell.navegacion` Sidebar, topbar y volver | L2 | mobile | admin-sidebar.tsx:57-100 secciones -> :131-195 Link con activo y badge (datos de layout.tsx:11, :21) -> admin-topbar.tsx:66-77 breadcrumb/título -> :85 signOutAction (flujo D1 'Logout'). Título 'Detalle' en Novedades (admin-topbar.tsx:12-13) y mobile parcial. |
 
@@ -1137,6 +1137,16 @@
 | Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
 |---|---|---|---|
 | `h6.vis-optout.baja-campania` Darse de baja de una campaña de email marketing | L2 | errores, Sentry, autonomía | email-marketing/_actions.ts:155 (fuera) -> optout/route.ts:69-104 -> unsubscribe-token.ts:97-109. |
+
+### h6.vis-sitio — Chrome del sitio público (menú mobile, scroll y transición; alcance superficial)
+
+- Madurez de la herramienta: **L2** (la de su funcionalidad más floja; 2 funcionalidades: 2×L2).
+- Criterios de L3 que faltan en alguna funcionalidad: sin mocks ni TODO, errores, autonomía.
+
+| Funcionalidad | Madurez | Faltan para L3 | Evidencia de la madurez |
+|---|---|---|---|
+| `h6.vis-sitio.menu-mobile` Menú mobile del sitio público | L2 | sin mocks ni TODO | Camino feliz: Navbar.tsx:232-245 abre/cierra; :321-345 ítem -> triggerTransition(item.href) y cierre; :371-379 servicios; :95 Acceder -> /login. No llega a L3/L4 por a11y (botón sin nombre :232-258, sin Escape ni foco) y precios literales sin moneda (:35-38). |
+| `h6.vis-sitio.scroll-y-transicion` Scroll suave, transición de ruta y bloqueo de scroll del intro | L2 | errores, autonomía | Camino feliz: SmoothScroll.tsx:78-107 crea Lenis y su loop; Shutter.tsx:7-14 cubre en isAnimating; EarlyScrollLock.tsx:27 y :34-38 bloquean '/' hasta Hero.tsx:486-489. Defectos: Lenis activo en /setter (SmoothScroll.tsx:30), rAF sin cancelar (:102-112), sin re |
 
 ## ZONA-FRANCO
 

@@ -60,8 +60,8 @@ Estructura prevista: una sección por zona del Atlas (h1 a h6) y una transversal
 | Ítem | Estado | Evidencia |
 |---|---|---|
 | Purga del secret de la historia y force-push (B0.6) | no empezado | docs/bitacora-roadmap.md:45-48; `git log --all -- logic-core-v3/enviroment.env` |
-| Cargar los secrets del backup y validar el primer run (B14.3) | parcial | docs/bitacora-roadmap.md:9527-9532; atlas:arquitectura.md:75 |
-| `NEXT_PUBLIC_SENTRY_DSN` en Netlify | no empezado | docs/sprints/infra-1-observabilidad.md:69; docs/bitacora-roadmap.md:17135 |
+| Cargar los secrets del backup y validar el primer run (B14.3) | no empezado (gh, 2026-10-15: 140 corridas fallidas y 0 secrets; BUG-171) | docs/bitacora-roadmap.md:9527-9532; atlas:arquitectura.md:75 |
+| `NEXT_PUBLIC_SENTRY_DSN` en Netlify | sin verificar (según la bitácora, inactivo en 2026-08; VH-135) | docs/sprints/infra-1-observabilidad.md:69; docs/bitacora-roadmap.md:17135 |
 | Precio del Motor de Reseñas | no empezado | docs/sprints/p3-a-2-venta.md:153; LockedView.tsx:151 |
 | 4 URLs de herramientas del setter | no empezado | src/lib/leados/herramientas.ts:63, 78, 90, 117 |
 | Experimento FG-2 | no empezado | docs/bitacora-beta.md:1556-1562; docs/experimentos/fg2-brief-experimento.md:166-201 |

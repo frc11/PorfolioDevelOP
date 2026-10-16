@@ -43,6 +43,7 @@ Scripts de Node sin dependencias nuevas (solo `node:*` y `git`). Todos son de **
 | `consolidados-md.mjs` | Un solo uso (C22): escribe `13-CLAUDE-MD-PROPUESTO.md`, `14-DOCS-CONSOLIDADOS/` y `_crudo/poda-docs.json` (la §docs de `10-PODA.md`, que agrega `poda-md.mjs`) desde `_crudo/f6b-resultado.json` y `_crudo/f6b-extraccion/` |
 | `backlog-md.mjs` | Un solo uso (C23): escribe `07-BACKLOG.md` desde `_crudo/f6c-resultado/` con los controles del padre (IDs, nodos por alias, zona, toda CRÍTICA y ALTA en Ahora, prerrequisitos, tabla de E12); después `atlas/backlog.mjs` saca `backlog.json` del .md |
 | `franco-md.mjs` | Un solo uso (C23): completa `09-PARA-FRANCO.md` desde «## Bloques a ejecutar» (bloques de Franco de `_crudo/f6b-extraccion/` y sus tarjetas de `backlog.json`) |
+| `f7-correcciones.mjs` | Un solo uso (C24): aplica las correcciones verificadas de la re-lectura de cierre (`_crudo/f7-resultado.json`) en 07, RESUMEN, 01, 05, 08, 11, 13, 14, los reportes y los datos (registro, funcionalidades, curado y cruces de lo planeado); aborta si un texto a cambiar no está. **Después de C24 no se vuelven a correr `backlog-md.mjs`, `consolidados-md.mjs` ni `ideas-md.mjs`**: 07, 13, 14 y 05 tienen correcciones a mano y la fuente pasa a ser el .md |
 | `atlas/semilla.mjs` | Un solo uso (F5): siembra los datos que después mantienen las personas (`funcionalidades.json`, `zonas.json`, `entradas.json`, `atlas.curado.json`); no pisa lo que ya existe |
 
 ## Reglas

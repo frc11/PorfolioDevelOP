@@ -4,9 +4,9 @@
 
 ## Estado general
 
-- **Cobertura:** profunda 1.267 / 1.298 archivos; los 31 restantes son candidatos a poda de confianza ALTA y se leyeron en superficial (`10-PODA.md`). Superficial 691 / 691. Los nueve dominios cerraron con `[DOMINIO-ABIERTO]` por el tope de ciclos (DEC-50), ninguno por falta de cobertura.
+- **Cobertura:** profunda 1.267 / 1.298 archivos; los 31 restantes son candidatos a poda de confianza ALTA y se leyeron en superficial (`10-PODA.md`). Superficial 691 / 691. Los nueve dominios cerraron con `[DOMINIO-ABIERTO]` por el tope de ciclos (D1 y D6 con los de DEC-26 y E4; los otros siete con DEC-50), ninguno por falta de cobertura.
 - **Hallazgos:** 571 (**CRÍTICA 2 · ALTA 23 · MEDIA 258 · BAJA 288**) en `02` y `03`, más 9 de diseño (`04`) y 15 ideas (`05`). 174 verificaciones manuales en `08`. La auditoría ciega de F6 no encontró ninguna causa raíz nueva, y las 26 CRÍTICA/ALTA se sostuvieron al releerlas (tres bajaron a MEDIA por la rúbrica).
-- **Madurez:** 445 funcionalidades en 52 herramientas. Por funcionalidad: L3 19 · L2 365 · L1 47 · L0 7 · sin medir 7. **Ninguna herramienta llega entera a L3** (su madurez es la de su funcionalidad más floja: L2 23 · L1 18 · L0 5 · sin medir 6). Lo que más falta para L3 en todas las áreas es lo mismo: errores capturados en Sentry, estados de error con mensaje útil y que el cliente pueda terminar la tarea sin ayuda (`02-PENDIENTE.md`, Resumen por área).
+- **Madurez:** 445 funcionalidades en 52 herramientas. Por funcionalidad: L3 19 · L2 365 · L1 48 · L0 7 · sin medir 6. **Ninguna herramienta llega entera a L3**: su madurez es la de su funcionalidad más floja, con la regla de `02-PENDIENTE.md`, y da L2 23 · L1 23 · L0 5 · L? 1. Lo que más falta para L3 en todas las áreas es lo mismo: errores capturados en Sentry, estados de error con mensaje útil y que el cliente pueda terminar la tarea sin ayuda (`02-PENDIENTE.md`, Resumen por área).
 - **La hipótesis de Valentino** («el admin y el portal están muy desarrollados y les faltan módulos») **se confirma a medias:** las pantallas existen y el camino feliz anda en casi todas, pero lo que falta no son módulos sino la plomería de activación (GA4, Google Business, módulos premium, crons sin disparador) y la verdad de los datos (leads de toda la agencia contados como del cliente, tendencias fijas). Los cuatro módulos premium tienen un bloqueante cada uno (`02`, medición de D2).
 - **Hoy, dos cosas no funcionan y nadie se entera:** el chatbot de develOP y el de todos los clientes no responde porque la credencial de Vertex está vencida (dato de Valentino; BUG-145), y el health dice «Todo OK» (BUG-063). El backup diario de la base **nunca corrió bien**: 140 corridas fallidas por falta del secret (consultado en GitHub el 2026-10-15; BUG-171).
 - **Avance 1.0 propuesto:** 16 de 351 funcionalidades en L3 o más (**4,6 %**), con el alcance que propone la auditoría (`alcance_propuesto` en `06-ATLAS/atlas.curado.json`; el `alcance` real lo deciden Valentino y Franco). **Barrera de 1.0:** 20 de las 25 CRÍTICA/ALTA abiertas están en nodos propuestos para la 1.0.
@@ -19,10 +19,10 @@
 | 2 | El magic link no tiene rate limit: cualquiera dispara emails ilimitados por Brevo a cualquier cuenta | SEC-005 (CRÍTICA) | libre |
 | 3 | El chatbot no responde (Vertex vencida) y ni el health ni el panel lo muestran | BUG-145, BUG-063 | libre |
 | 4 | Lo programado no corre: el backup diario nunca funcionó; los crons del reporte ejecutivo, del brief IA y del detector de alertas no tienen disparador en Netlify | BUG-171, BUG-047, FAL-016 | libre |
-| 5 | Credenciales de terceros (Google Business, Tiendanube, Cal.com, Telegram) en claro en la base, y el overview del chatbot manda la fila entera al navegador | SEC-036, SEC-037 | libre (el cifrado toca el schema: decisión FROZEN) |
+| 5 | Credenciales de terceros (Google Business, Tiendanube, Cal.com, Telegram) en claro en la base, y el overview del chatbot manda la fila entera al navegador | SEC-036, SEC-037 | libre (B-12: el cifrado no cambia columnas) |
 | 6 | Datos entre clientes: los contactos de toda la agencia cuentan como leads del cliente; el motor de reseñas puede responder reseñas de otro cliente | SEC-048, SEC-051 | libre |
 | 7 | Email marketing: las acciones no verifican el módulo ni validan, y la baja no llega a Brevo (quien se dio de baja sigue recibiendo) | SEC-044, BUG-021 | libre |
-| 8 | Sesiones: la invalidación por cambio de contraseña se revive, un admin degradado o borrado sigue leyendo `/admin`, y el login no tiene freno real contra fuerza bruta | SEC-006, SEC-023, SEC-007 | `auth.ts`: FROZEN + ZONA-FRANCO |
+| 8 | Sesiones: la invalidación por cambio de contraseña se revive, un admin degradado o borrado sigue leyendo `/admin`, y el login no tiene freno real contra fuerza bruta | SEC-006, SEC-023, SEC-007 | SEC-006: `auth.ts`, FROZEN + ZONA-FRANCO (B-09); SEC-023 y SEC-007: libre (B-10, B-08) |
 | 9 | Repo público con credenciales: el email y la contraseña de las cuentas de prueba (en el seed de marzo a junio y en docs), y una clave vieja de Google AI en dos documentos y en el historial | SEC-002, SEC-001 | libre (purgar la historia es decisión de Valentino) |
 | 10 | Módulos premium que el cliente paga y no puede usar: Email Marketing Pro inalcanzable, «Conectar mi tienda» da 401, Agenda contra la API v1 apagada de Cal.com | BUG-012, BUG-032, TEC-002 | libre |
 
@@ -39,7 +39,7 @@
 | 7 | Soltar 15 de los 22 congelados con la política protegido/libre: destraba los arreglos de `auth.ts`, el schema y la renovación visual | `11-CONGELADOS.md` |
 | 8 | Llevar el sistema de diseño de `rediseno/home` al portal sin tocar `ui/*`, en nueve pasos | `04-DISENO.md` §3 |
 | 9 | Pasar las reglas de `CLAUDE.md` de prosa a mecanismo (gate de eslint en CI, hooks de Claude Code, invariantes) y atar el Atlas a cada sprint | `13-CLAUDE-MD-PROPUESTO.md` |
-| 10 | De 143 docs a 10 vivos (VISION, ARQUITECTURA, ROADMAP, DECISIONES, OPERACIONES…), con 37 contradicciones listadas para decidir | `14-DOCS-CONSOLIDADOS/` |
+| 10 | De las 143 entradas de la lista de docs: 10 documentos vivos nuevos (VISION, ARQUITECTURA, ROADMAP, DECISIONES, OPERACIONES…), 15 que se mantienen y 128 a borrar o consolidar, con 37 contradicciones listadas para decidir | `14-DOCS-CONSOLIDADOS/` |
 
 ## Qué hacer primero
 
@@ -66,7 +66,7 @@ El backlog (`07-BACKLOG.md`) tiene **204 tarjetas** (Ahora 24 · Próximo 63 · 
 
 - **Poda (LOC por confianza):** ALTA 165 fichas · 14.635 LOC · MEDIA 141 · 4.726 LOC · BAJA 26 · 3.492 LOC · esperar el merge de `rediseno/home` 54 · 8.350 LOC · **total 386 · 31.203 LOC**. Docs: 143 (mantener 15 · borrar 54 · consolidar 74). Nada se borró en esta corrida.
 - **Congelados a soltar:** de 22, descongelar 15 · reemplazar 3 · después del merge de `rediseno/home` 4 · mantener 0 (`11-CONGELADOS.md`).
-- **Planeado contra lo real:** 1.351 ítems — hecho 601 · parcial 226 · no empezado 456 · abandonado 29 · contradicho 39 (`12-PLANEADO.md`).
+- **Planeado contra lo real:** 1.351 ítems — hecho 597 · parcial 229 · no empezado 457 · abandonado 29 · contradicho 39 (`12-PLANEADO.md`).
 - **Avance 1.0 propuesto:** 16 / 351 (4,6 %). Trabajo restante en nodos 1.0: 551 puntos en 179 tarjetas abiertas. Barrera: 20 CRÍTICA/ALTA abiertas en nodos 1.0.
 - **Credenciales y cuentas externas** (una línea por servicio; detalle en `01-INVENTARIO.md` §6.1 y la revisión de vencimientos en VH-134; «¿se entera?» = si el sistema detecta que venció):
   - **Vertex AI:** vencida hoy según Valentino; se cae el chatbot de todos · se entera a medias (Sentry si hay DSN; el health da ok).

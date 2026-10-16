@@ -684,23 +684,23 @@
 
 ## Bloques a ejecutar: estado contra el código
 
-> 86 ítems (no empezado 50 · parcial 15 · hecho 19 · abandonado 2). Los extrajeron los agentes de F6b (run `wf_7cfe2151-e7b`, `_crudo/f6b-extraccion/`) desde `Franco/Bloques a Ejecutar/` de Drive (insumo local, no se commitea) y desde las bitácoras y sprints del repo, y cada uno trae su evidencia en `origin/main` @ `57c421bc` (o la búsqueda que prueba que falta). El padre muestreó 5 contra la base y se sostuvieron (`handleChatRequest.ts:952`, `agenda.ts:70`, `brief-form.tsx:85`, `historyPolicy.ts:31-61`, `herramientas.ts:63-117`). Lo marcado «dudoso» por el extractor no se verificó.
+> 86 ítems (no empezado 51 · parcial 13 · sin verificar 1 · hecho 19 · abandonado 2). Los extrajeron los agentes de F6b (run `wf_7cfe2151-e7b`, `_crudo/f6b-extraccion/`) desde `Franco/Bloques a Ejecutar/` de Drive (insumo local, no se commitea) y desde las bitácoras y sprints del repo, y cada uno trae su evidencia en `origin/main` @ `57c421bc` (o la búsqueda que prueba que falta). El padre muestreó 5 contra la base y se sostuvieron (`handleChatRequest.ts:952`, `agenda.ts:70`, `brief-form.tsx:85`, `historyPolicy.ts:31-61`, `herramientas.ts:63-117`). Lo marcado «dudoso» por el extractor no se verificó.
 
-### Pendientes de las bitácoras y sprints del repo — 16 ítems (no empezado 7 · parcial 4 · hecho 3 · abandonado 2)
+### Pendientes de las bitácoras y sprints del repo — 16 ítems (no empezado 8 · parcial 2 · sin verificar 1 · hecho 3 · abandonado 2)
 
 | Bloque | Ítem | Estado | Evidencia | Fuente |
 |---|---|---|---|---|
 | B0.6 leak | Force-push de la historia purgada (enviroment.env) | no empezado | bitacora-roadmap.md:45-48; el archivo sigue en git log --all (39535583/c351b793, alcanzable desde main) | `docs/bitacora-roadmap.md` |
-| INFRA.1 | Setear NEXT_PUBLIC_SENTRY_DSN en Netlify | no empezado | infra-1:69; bitacora-roadmap.md:17135 («Sentry sigue INACTIVO en prod») | `docs/sprints/infra-1-observabilidad.md` |
+| B14.3 backups | Cargar los secrets BACKUP_GPG_PASSPHRASE y DIRECT_DATABASE_URL_PROD/DEV y validar el primer run | no empezado | gh run list (2026-10-15): 140 corridas fallidas y 1 cancelada, ninguna exitosa, y 0 secrets de Actions en el repo (BUG-171); el workflow existe (.github/workflows/db-backup.yml:39-42). [F7 C6/K6] | `docs/bitacora-roadmap.md` |
 | P3-A.2 | Cerrar el precio del Motor de Reseñas ([FALTA:precio]) | no empezado | p3-a-2:153; LockedView.tsx:151 | `docs/sprints/p3-a-2-venta.md` |
 | AUD-2 | Cargar las 4 URLs de herramientas.ts (Gems y Claude Design) | no empezado | bitacora-beta-3.md:1209; src/lib/leados/herramientas.ts:63, 78, 90, 117 con url:null | `docs/bitacora-beta-3.md` |
 | FG-2.0 | Correr el experimento 5 vs 5 del formulario de brief | no empezado | bitacora-beta.md:1556-1562; docs/experimentos/fg2-brief-experimento.md:185-187 en blanco; /admin/fg2-lab sigue en src | `docs/bitacora-beta.md` |
 | BLOQUE PRIVACIDAD | Decisión de producto: Telegram con PII de visitantes | no empezado | bitacora-roadmap.md:16897 (pendiente, sin registro posterior en los docs revisados) | `docs/bitacora-roadmap.md` |
 | Carril seguridad | RT-2, RE-13, RE-16, RE-7, RT-13, CO-7+PD-1, A.4 | no empezado | roadmap-pendientes.md:175; dudoso: no se verificó contra el código en esta extracción | `docs/roadmap-pendientes.md` |
-| B14.3 backups | Cargar los secrets BACKUP_GPG_PASSPHRASE y DIRECT_DATABASE_URL_PROD/DEV y validar el primer run | parcial | bitacora-roadmap.md:9527-9532; el workflow existe (.github/workflows/db-backup.yml:39-42); la ejecución no es verificable | `docs/bitacora-roadmap.md` |
+| Beta Matsu | Onboarding real de Matsu y firma de v1.0.0 | no empezado | No hay clientes reales (ENMIENDA-01 §0); STATUS.md:174-178 y bitacora-roadmap.md:9707-9718 lo dejaban pendiente, y el tema Matsu está entre los «a decidir» de 14-DOCS-CONSOLIDADOS. [F7 C22] | `STATUS.md` |
 | B14.4 salida a prod | Checklist de deploy en 7 fases + tag v1.0.0-rc.1 | parcial | bitacora-roadmap.md:9675-9705; no hay tags v* locales y package.json:3 = 0.1.0 | `docs/bitacora-roadmap.md` |
 | Rediseño home | GATE 1: permutación de acentos y familia del display | parcial | bitacora-rediseno.md:509-537; los acentos A quedaron en el código y CLAUDE.md; el display quedó sin efecto con la home clásica | `docs/bitacora-rediseno.md` |
-| Beta Matsu | Onboarding real de Matsu y firma de v1.0.0 | parcial | STATUS.md:174-178; bitacora-roadmap.md:9707-9718, 2423; no se puede confirmar uso real en prod | `STATUS.md` |
+| INFRA.1 | Setear NEXT_PUBLIC_SENTRY_DSN en Netlify | sin verificar | Según bitacora-roadmap.md:17135 (2026-08) Sentry seguía inactivo en producción; el estado de la variable en Netlify no se ve en el código (VH-135). [F7 C21/K13] | `docs/sprints/infra-1-observabilidad.md` |
 | Bloque 2 foco | Decidir si el pin puede ser foco | hecho | bitacora-beta-2.md:556 → bitacora-beta-3.md:1024 (Sprint 6.1) | `docs/bitacora-beta-2.md` |
 | Franja admin D4 | Gate de demo preventiva por el campo caliente | hecho | bitacora-beta-2.md:561; dossier.ts usa gateBriefAbierto | `docs/bitacora-beta-2.md` |
 | EL TRONCO | Push de main a la punta reconciliada | hecho | bitacora-beta-3.md:10975; ea94dbf8 y 57c421bc son ancestros de origin/main | `docs/bitacora-beta-3.md` |
@@ -791,7 +791,7 @@ Fuente: `Documento sin título.md`.
 | H-02: el trabajo del brief en m6 se pierde con F5 (autosave apagado) | no empezado | setter/leads/[leadId]/_components/brief-form.tsx:85 autosaveEnabled = false; :115 enabled: autosaveEnabled && briefValido. |
 | H-03: el botón fijo «Registrar evaluación» no abre el bloque con errores | no empezado | _components/evaluacion-form.tsx:142-171 (intentarEnviar sin acceso al acordeón); ficha-form.tsx:189 estado local abierto/setAbierto. No se ejecutó (probable). |
 | H-04: falso verde del gate de self-check con los criterios de diseño | no empezado | No aplica a la base: lib/leados/flow.ts:204 exige todos los HARD_CHECKS; el falso verde era del árbol WIP. Los criterios de diseño no existen en 57c421bc. |
-| H-05: cinco tildes por prompt en mc2 | no empezado | mc2 no existe en 57c421bc (ver P43). |
+| H-05: cinco tildes por prompt en mc2 | no empezado | mc2 existe (manual.ts:107 y :135-137) con un tilde por fase; mc2-refinar.tsx y los cinco tildes por prompt existen solo en el WIP 506e0059 de origin/p25/rafaga-tildes. [F7 C9] |
 | H-06: m13 en RECHAZADA debe permitir cambiar el link del borrador | no empezado | manual/_components/m13-borrador.tsx:118-122 («Borrador congelado por el rechazo»). |
 | H-07: control G3 «¿Exportaste después del último refinamiento?» | no empezado | (setter)/_actions/dossier.schemas.ts:129 solo pide confirmoCarga; git grep -i 'exportaste después': vacío. |
 | H-08: gate de decisor en el servidor para buscar horarios | no empezado | (setter)/_actions/agenda.schemas.ts:9-13: decisorConfirmado solo en ConfirmarReunionSchema, no en la búsqueda de horarios. |
@@ -800,19 +800,21 @@ Fuente: `Documento sin título.md`.
 
 ## Tarjetas del backlog en tu zona
 
-> 46 tarjetas de `07-BACKLOG.md` tocan tu zona. Son **decisión tuya**: la auditoría no propone tocar nada de la zona sin coordinación. Detalle completo en `07-BACKLOG.md`.
+> 53 tarjetas de `07-BACKLOG.md` tocan tu zona. Son **decisión tuya**: la auditoría no propone tocar nada de la zona sin coordinación. Detalle completo en `07-BACKLOG.md`.
 
 | Tarjeta | Bloque | Tamaño | Hallazgos | Coordinación |
 |---|---|---|---|---|
+| [B-02] Cargar los secrets del backup diario y que su falla avise | Ahora | S | BUG-171 | libre (los secrets los carga Franco: coordinar) |
 | [B-04] Subir next, next-auth y @auth/core a las versiones con fix | Ahora | S | SEC-105 | libre (coordinar con Franco: cambia el runtime de auth que usa el setter) |
 | [B-09] Sesión que no se revive: sessionVersion en 'update', maxAge alineado y falla de base sin rebote | Ahora | L | SEC-006, BUG-001, SEC-010, BUG-006 | también requiere decisión FROZEN (Valentino) |
-| [B-10] Guardia SUPER_ADMIN al lado del dato en /admin (páginas, actions y rutas) | Ahora | L | SEC-023, SEC-065, SEC-060, SEC-084 | libre (admin/leados y fg2-lab coordinados con Franco) |
+| [B-10] Guardia SUPER_ADMIN al lado del dato en /admin (páginas, actions y rutas) | Ahora | L | SEC-023, SEC-065, SEC-060, SEC-084, SEC-063 | libre (admin/leados y fg2-lab coordinados con Franco) |
 | [B-14] Crons con disparador real en Netlify (y que solo los invoque el scheduler) | Ahora | M | BUG-047, FAL-016, FAL-026, SEC-099, UX-049 | libre (el disparador de os-follow-up, coordinado con Franco) |
-| [B-27] Magic link y errores de auth en auth.ts: envío que falla, link que no gasta un escáner, Google y Sentry | Próximo | L | BUG-003, BUG-007, UX-002, FAL-003, FAL-001 | también requiere decisión FROZEN (Valentino) |
+| [B-27] Magic link y errores de auth en auth.ts: envío que falla, link que no gasta un escáner, Google y Sentry | Próximo | L | BUG-003, BUG-007, UX-002, FAL-003, FAL-001, SEC-009 | también requiere decisión FROZEN (Valentino) |
 | [B-29] Reenviar credenciales solo a cuentas de cliente, con destinatario fijo y aviso a la cuenta | Próximo | S | SEC-087 | libre (afecta cuentas SETTER: avisar a Franco) |
 | [B-31] LeadOS: decidir e integrar (o descartar) p25/rafaga-tildes antes de tocar LeadOS en main | Próximo | L | DEU-077 | ZONA-FRANCO |
 | [B-32] LeadOS: la agenda reserva en la org de develOP por un identificador explícito | Próximo | S | BUG-038 | ZONA-FRANCO |
 | [B-45] Ciclo de vida del cliente: archivar corta acceso y crons, borrar no se lleva lo de la agencia | Próximo | L | SEC-014, BUG-015, BUG-138, BUG-142, DEU-005 | también requiere decisión FROZEN (Valentino) |
+| [B-76] Modal compartido accesible y el modal de ticket migrado a él | Próximo | M | A11Y-037, A11Y-003 | también requiere decisión FROZEN (Valentino) |
 | [B-79] Ficha y manual del setter sin pérdida de trabajo | Próximo | M | BUG-153, BUG-155, BUG-156, BUG-157 | ZONA-FRANCO |
 | [B-80] LeadOS: un solo predicado de estado vivo y terminal para la cola del setter | Próximo | L | BUG-146, BUG-147, BUG-160, BUG-162, BUG-164, BUG-168 | ZONA-FRANCO |
 | [B-81] LeadOS: errores mapeados al usuario y reportados a Sentry | Próximo | M | SEC-101, FAL-031, BUG-149, BUG-163 | ZONA-FRANCO |
@@ -822,9 +824,11 @@ Fuente: `Documento sin título.md`.
 | [B-85] Importación de prospectos: CSV de Excel en español | Próximo | S | UX-055 | ZONA-FRANCO |
 | [B-86] LeadOS: herramientas externas del recorrido con link y sin el «Chat de evaluación» | Próximo | S | FAL-033 | ZONA-FRANCO |
 | [B-87] Convertir un lead en proyecto desde la ficha del lead | Próximo | S | FAL-024 | ZONA-FRANCO (la conversión lee y marca OsLead: decide Franco) |
+| [B-89] Política de niveles: «congelado» pasa a protegido, libre o borrar | Después | S | CNG-001, CNG-002, CNG-003, CNG-004, CNG-005, CNG-006, CNG-007, CNG-008 y 15 más | también requiere decisión FROZEN (Valentino) |
 | [B-90] Docs: decidir los 37 «a decidir» de 14-DOCS-CONSOLIDADOS | Después | S |  | libre (los ítems 8–12, 33, 35 y 36 los decide Franco) |
 | [B-92] Secretos y PII fuera del árbol: docs, scripts que imprimen credenciales y backups versionados | Después | S | SEC-001, SEC-003, SEC-071, SEC-107, POD-161, POD-162, POD-287, POD-288 | libre (b1/b2 son QA del setter: aviso a Franco) |
 | [B-93] /api/qa/login atado a localhost, a un secreto por corrida y sin delatar la guarda | Después | S | SEC-024, SEC-021 | ZONA-FRANCO |
+| [B-101] Errores crudos a la UI: toErrorMessage solo pasa UserFacingError y el resto va a Sentry | Después | M | SEC-092, SEC-062, SEC-046 | también requiere decisión FROZEN (Valentino) |
 | [B-103] auth.ts protegido: callbacks a módulo puro con invariante, org primaria determinística y usuario borrado sin sesión | Después | M | DEU-002, BUG-005, SEC-008, POD-283 | también requiere decisión FROZEN (Valentino) |
 | [B-104] auth-guards protegido: error tipado y variante de página que redirige | Después | S | BUG-136, DEU-083 | también requiere decisión FROZEN (Valentino) |
 | [B-105] Migración aditiva agrupada del schema: índices, Decimal, enums y columnas pendientes | Después | L | PERF-001, DEU-008, DEU-010, DEU-084, POD-203, POD-204 | también requiere decisión FROZEN (Valentino) |
@@ -840,7 +844,10 @@ Fuente: `Documento sin título.md`.
 | [B-141] Setter: accesibilidad de la cabina, del drawer y del manual | Después | M | A11Y-026, A11Y-027, A11Y-028, A11Y-029, A11Y-030, A11Y-031, A11Y-032, BUG-154 | ZONA-FRANCO |
 | [B-142] Setter: lienzo propio del portal y navegación clasificada | Después | M | DIS-003, DEU-082 | ZONA-FRANCO (useThemeObserver.tsx y publicRoute.ts son libres) |
 | [B-143] Higiene de UI del setter (D4: 97 detalles) | Después | S | DEU-089 | ZONA-FRANCO |
+| [B-155] Shell del admin: topbar en español, menú mobile usable, diálogos accesibles y loading propios | Después | M | UX-034, UX-035, A11Y-019, A11Y-020, A11Y-021, UX-039, TEC-005, POD-355 | libre (el `loading.tsx` de `admin/fg2-lab` es ZONA-FRANCO: con aviso a Franco) |
+| [B-158] Kit ui/* protegido: estados accesibles, StatCard es-AR, un solo EmptyState y huérfanos fuera | Después | M | A11Y-039, BUG-185, DEU-107, DEU-102, POD-045, POD-381, POD-382, POD-326 | también requiere decisión FROZEN (Valentino) |
 | [B-159] Una sola fuente de acentos y de z-index: design-tokens reemplazado | Después | M | DEU-100, DEU-101, DEU-110, DEU-111, DIS-008, UX-031, POD-383, POD-068 | también requiere decisión FROZEN (Valentino) |
+| [B-161] TransitionContext protegido: el hash abre el shutter cuando pintó el destino y el destino declara su alineación | Después | M | BUG-189, DEU-108 | también requiere decisión FROZEN (Valentino) |
 | [B-165] Poda de scripts sueltos y salidas generadas commiteadas (103 ALTA + 10 MEDIA) | Después | S | POD-085, POD-086, POD-087, POD-088, POD-089, POD-090, POD-091, POD-092 y 109 más | libre (qa-corridas y los QA b4–b7 son del setter: aviso a Franco) |
 | [B-169] LeadOS: poda del wizard, del laboratorio FG-2 y de exports sin consumidor | Después | M | DEU-075, DEU-078, DEU-085, DEU-087, DEU-088, POD-052, POD-053, POD-054 y 13 más | ZONA-FRANCO |
 | [B-170] Ramas: borrar las 43 mergeadas y archivar con tag las 14 con trabajo propio | Después | S | POD-205, POD-206, POD-207, POD-208, POD-209, POD-210, POD-211, POD-212 y 49 más | libre (leados/* y las fix/* del setter: confirmar con Franco) |

@@ -19799,10 +19799,10 @@
   {
    "id": "h6.vis-sitio",
    "tipo": "herramienta",
-   "nombre": "h6.vis-sitio",
+   "nombre": "Chrome del sitio público (menú mobile, scroll y transición; alcance superficial)",
    "padre": "h6",
    "area": "h6",
-   "descripcion": "Herramienta que solo nombran las funcionalidades: falta en nodos.mjs.",
+   "descripcion": "",
    "archivos": [],
    "loc": 0,
    "rutas": [],
@@ -27029,11 +27029,11 @@
     "fecha": "2026-10-16"
    },
    "ramas": [],
-   "ahead": 25,
+   "ahead": 26,
    "behind": 0,
    "estado": "viva",
    "worktree": "C:/auditoria-2026-10",
-   "nodos_tocados": 284
+   "nodos_tocados": 295
   },
   {
    "id": "rama.b0-isolation-motor-chatbot",

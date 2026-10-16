@@ -40,7 +40,7 @@
 | [h4.adm-novedades](modulos/h4.adm-novedades.md) | Novedades | Valentino | L2 2 | 0/1/0/7 | despues | B-10, B-101, B-132, B-133, B-155 |
 | [h4.adm-proyectos](modulos/h4.adm-proyectos.md) | Proyectos | Valentino | L1 1 · L2 11 | 0/1/17/11 | 1.0 | B-10, B-28, B-41, B-43, B-45, B-69, B-70, B-71, B-75, B-87, B-130, B-131, B-164, B-168, B-184 |
 | [h4.adm-referidos](modulos/h4.adm-referidos.md) | Referidos (admin) | Valentino | L2 1 | 0/1/2/2 | despues | B-10, B-28, B-58, B-117, B-155 |
-| [h4.adm-shell](modulos/h4.adm-shell.md) | Shell del admin | Valentino | L2 2 · L3 1 · L? 1 | 0/1/5/13 | 1.0 | B-09, B-10, B-75, B-98, B-104, B-155, B-157, B-160, B-162, B-177, B-178, B-180, B-184 |
+| [h4.adm-shell](modulos/h4.adm-shell.md) | Shell del admin | Valentino | L1 1 · L2 2 · L3 1 | 0/1/5/13 | 1.0 | B-09, B-10, B-75, B-98, B-104, B-155, B-157, B-160, B-162, B-177, B-178, B-180, B-184 |
 | [h4.adm-tickets](modulos/h4.adm-tickets.md) | Tickets | Valentino | L2 6 | 0/0/4/11 | 1.0 | B-40, B-41, B-45, B-73, B-97, B-104, B-112, B-113, B-131 |
 | [h5.adm-fg2lab](modulos/h5.adm-fg2lab.md) | FG-2 Lab (experimento) | Franco | L1 2 | 0/1/0/1 | descartado | B-10, B-169 |
 | [h5.adm-revision-demos](modulos/h5.adm-revision-demos.md) | Revisión de demos (LeadOS) | Franco | L2 6 | 0/1/5/3 | despues | B-10, B-81, B-82, B-135, B-141, B-142, B-143, B-185 |
@@ -51,4 +51,4 @@
 | [h5.set-nuevo](modulos/h5.set-nuevo.md) | Cargar un prospecto | Franco | L2 4 | 0/0/2/5 | 1.0 | B-81, B-84, B-104, B-137, B-141, B-142, B-185 |
 | [h6.vis-contacto](modulos/h6.vis-contacto.md) | Formulario de contacto público | Valentino | L1 1 · L2 9 | 0/0/14/8 | 1.0 | B-06, B-38, B-39, B-44, B-68, B-106, B-117, B-162, B-181, B-189, B-190 |
 | [h6.vis-optout](modulos/h6.vis-optout.md) | Baja de emails de marketing | Valentino | L2 1 | 0/1/2/3 | 1.0 | B-18, B-94, B-181 |
-| [h6.vis-sitio](modulos/h6.vis-sitio.md) | h6.vis-sitio | Valentino | L2 2 | 0/0/0/0 | — | — |
+| [h6.vis-sitio](modulos/h6.vis-sitio.md) | Chrome del sitio público (menú mobile, scroll y transición; alcance superficial) | Valentino | L2 2 | 0/0/0/0 | despues | — |

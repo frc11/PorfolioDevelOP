@@ -24,7 +24,7 @@
 - Verifica: DEC-47 (pregunta P5 de F0) · Prioridad: media
 - Entorno: GitHub → Settings → Secrets and variables → Actions del repo `frc11/PorfolioDevelOP`.
 - Precondiciones: permisos de admin del repo.
-- Pasos: 1) Ver si existe el secret `DATABASE_URL_TEST` (el valor no se puede leer). 2) Confirmar con quien lo cargó a qué base apunta (host de Neon y branch).
+- Pasos: 1) Ver si existe el secret `DATABASE_URL_TEST` (el valor no se puede leer). **Resuelto el 2026-10-15:** el repo no tenía ningún secret de Actions (`gh api`, ver BUG-171); esta VH aplica cuando se cargue (DEU-017). 2) Confirmar con quien lo cargó a qué base apunta (host de Neon y branch).
 - Resultado esperado: no existe, o apunta a una base/branch de test que se puede migrar y ensuciar sin riesgo.
 - Señal de falla: apunta a la Neon compartida con Franco o a producción → el CI (`raíz:.github/workflows/ci.yml:162-170`, `:212-223`) migra y escribe ahí en cada push sin `[skip ci]`.
 - ¿Escribe en la base o manda emails?: no.
@@ -488,11 +488,11 @@
 - Señal de falla: El sidebar queda clickeable, Esc no hace nada, el foco escapa o el boton queda fuera de pantalla
 - ¿Escribe en la base o manda emails?: no
 
-### [VH-055] Crons del brief y del email ejecutivo en Netlify
+### [VH-055] Crons del brief, del email ejecutivo y de os-follow-up en Netlify
 - Verifica: [BUG-047] · Prioridad: alta
 - Entorno: Panel de Netlify del sitio de producción + lectura de la base
 - Precondiciones: Acceso de lectura al panel y a la base
-- Pasos: 1) Netlify → Site → Functions → filtrar Scheduled 2) Buscar regenerate-briefs y send-executive-reports 3) Leer Organization.cachedExecutiveBriefAt y el último ExecutiveBriefSnapshot de un cliente activo 4) Revisar logs de un lunes a las 10:00 y 12:00 UTC
+- Pasos: 1) Netlify → Site → Functions → filtrar Scheduled 2) Buscar regenerate-briefs, send-executive-reports y os-follow-up (y cualquier cron externo que llame a /api/cron/os-follow-up) 3) Leer Organization.cachedExecutiveBriefAt y el último ExecutiveBriefSnapshot de un cliente activo 4) Revisar logs de un lunes a las 10:00 y 12:00 UTC, y los diarios de las 12:00 UTC de os-follow-up
 - Resultado esperado: Ambas funciones agendadas los lunes y un snapshot por semana
 - Señal de falla: No aparecen; los snapshots solo existen cuando alguien abrió el home
 - ¿Escribe en la base o manda emails?: no
@@ -777,7 +777,7 @@
 - ¿Escribe en la base o manda emails?: no
 
 ### [VH-087] Metricas del resumen del chatbot
-- Verifica: [BUG-085] · Prioridad: alta
+- Verifica: [BUG-085] · Prioridad: media
 - Entorno: local con seed de Matsu (9 leads, 1 DQ)
 - Precondiciones: Org con mas de 5 leads historicos
 - Pasos: 1) Entrar a /dashboard/chatbot como el cliente 2) Leer 'Oportunidades', 'Valor estimado' y 'Responde en ~'
@@ -1567,3 +1567,30 @@
 - Resultado esperado: el fondo del panel es oscuro antes y después de recargar; el html no tiene data-theme="light"
 - Señal de falla: antes de recargar el fondo es casi blanco (#fafafa) con texto claro, y el html tiene data-theme="light"
 - ¿Escribe en la base o manda emails?: no (solo un login)
+
+### [VH-175] ¿Qué dominio sirve producción y el widget?
+- Verifica: el dominio de producción que dan por hecho VH-138, VH-141 y VH-165, y la instalación del widget de `14-DOCS-CONSOLIDADOS/OPERACIONES.md` (DEC-54) · Prioridad: media
+- Entorno: panel de Netlify del sitio y una terminal
+- Precondiciones: acceso de lectura al panel de Netlify
+- Pasos: 1) Netlify → Domain management: anotar el dominio primario y si develop.com.ar apunta al sitio (DNS) 2) `curl -sI https://develop.com.ar/widget.js` y `curl -sI https://develop-portfolio.netlify.app/widget.js` 3) Comparar con el snippet de instalación (`docs/operations/06-instalar-widget.md:29`)
+- Resultado esperado: develop.com.ar es el dominio primario y sirve `widget.js` con 200; el snippet apunta a él
+- Señal de falla: develop.com.ar no responde o no es el primario; el snippet apunta a un dominio que no sirve el widget. Si pasa, actualizar VH-138, VH-141 y VH-165 con el dominio real
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-176] ¿Está habilitada la Business Profile Performance API?
+- Verifica: [IDEA-003] · Prioridad: baja
+- Entorno: Google Cloud Console del proyecto de la app OAuth de Google Business
+- Precondiciones: acceso al proyecto de Google Cloud
+- Pasos: 1) Google Cloud → APIs & Services → Enabled APIs del proyecto de la app OAuth de GBP 2) Buscar «Business Profile Performance API»
+- Resultado esperado: habilitada (o se sabe qué hace falta para habilitarla)
+- Señal de falla: no está y requiere aprobación de Google: IDEA-003 no se puede construir hasta tenerla
+- ¿Escribe en la base o manda emails?: no
+
+### [VH-177] ¿A qué branch de Neon apunta DATABASE_URL en producción?
+- Verifica: PLAN-1170 (aislamiento dev/prod con Neon branching) · Prioridad: media
+- Entorno: panel de Netlify del sitio (Environment variables, contexto Production) y consola de Neon
+- Precondiciones: acceso de lectura a los dos paneles
+- Pasos: 1) Netlify → Site configuration → Environment variables → `DATABASE_URL` en Production: anotar host y branch (sin copiar el valor) 2) En Neon, confirmar que ese endpoint es el de la branch main 3) Repetir para Deploy previews
+- Resultado esperado: producción apunta a la branch main y los previews a otra branch o a ninguna base de producción
+- Señal de falla: producción apunta a la branch dev, o los previews escriben en la base de producción
+- ¿Escribe en la base o manda emails?: no

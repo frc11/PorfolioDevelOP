@@ -6,13 +6,13 @@
 
 | Campo | Valor |
 |---|---|
-| Fase | **F7 — Cierre** (F1 a F6 cerradas) |
+| Fase | **Corrida terminada** (F0 a F7 cerradas, 2026-10-16) |
 | Base auditada | `origin/main` @ `57c421bc` (último commit 2026-09-06; refs traídas el 2026-10-13 16:23) |
-| Último ciclo registrado | C23 · F6.4 backlog y F6.5 (`07-BACKLOG.md`, `RESUMEN.md`, `09-PARA-FRANCO.md`) |
-| Próximo paso | **F7**: programar el par de despertadores y lanzar `_crudo/f7.workflow.js` (tres lectores de solo lectura: contradicciones entre entregables, afirmaciones de configuración sin verificar según DEC-54, y coherencia del backlog y de 09). Corregir lo que se sostenga, `validar.mjs` y `validar-atlas.mjs` en 0, commit final, push y mensaje final de ≤ 20 líneas (cobertura, hallazgos por severidad, las 5 primeras tarjetas de Ahora y los dominios sin cobertura total con su razón) |
+| Último ciclo registrado | C24 · F7, cierre (re-lectura de punta a punta y correcciones) |
+| Próximo paso | Ninguno de la corrida. Lo que sigue es de Valentino y Franco: decidir el `alcance` 1.0 en `06-ATLAS/atlas.curado.json`, la política de congelados (B-89), la rama `p25/rafaga-tildes` (B-31), las decisiones de diseño (B-175) y los 37 «a decidir» de `14-DOCS-CONSOLIDADOS/` (B-90); correr las VH de `08` empezando por las de prioridad alta; y arrancar el bloque Ahora de `07-BACKLOG.md` (orden sugerido en `RESUMEN.md`) |
 | Cobertura profunda | 1.267 / 1.298 archivos (97,6 %) · los 31 `PODA-ALTA` quedan fuera de lotes · superficial hecho 691 / 691 (DOC 266, PUB 138, D1 1, D2 13, D4 34, D5 52, D6 7, D7 4, D8 7, D9 169) |
-| Hallazgos escritos | 571 en 02/03 (C 2 · A 23 · M 258 · B 288) + 9 DIS en 04 + 15 IDEA en 05 · VH 174 · POD 386 · CNG 22 · PLAN 1.351 (todos cruzados) · **204 tarjetas en 07** (Ahora 24 · Próximo 63 · Después 117) · Atlas en `06-ATLAS/` (1.032 nodos) |
-| Push | al cierre de cada dominio y de cada fase, con `[skip ci]` (DEC-04); **el repo sigue público y se pushea igual** (DEC-52 reemplaza a DEC-48) · último push: `e4121247` (C22, 2026-10-16 01:00); C23 se pushea al commitear |
+| Hallazgos escritos | 571 en 02/03 (C 2 · A 23 · M 258 · B 288) + 9 DIS en 04 + 15 IDEA en 05 · VH 177 · POD 386 · CNG 22 · PLAN 1.351 (hecho 597 · parcial 229 · no empezado 457 · abandonado 29 · contradicho 39) · **204 tarjetas en 07** (Ahora 24 · Próximo 63 · Después 117) · Atlas en `06-ATLAS/` (1.032 nodos, 52 herramientas) |
+| Push | al cierre de cada dominio y de cada fase, con `[skip ci]` (DEC-04); **el repo sigue público y se pushea igual** (DEC-52 reemplaza a DEC-48) · último push: `dc09aac7` (C23, 2026-10-16 02:23); C24, el commit final, se pushea al commitear |
 
 ### Estado por dominio
 
@@ -694,6 +694,25 @@ Corrido el 2026-10-13, uno por vez, desde `logic-core-v3` (detalle en `01-INVENT
 - **`10-PODA.md`**: el Resumen aclara que, aparte de su tabla (fichas de F1), hay 105 candidatos de F2 con confianza MEDIA. Total: 386.
 - `_reportes/F6.md` escrito. El arnés volvió a marcar como «con forma de instrucción» el bloque `.claude/settings.json` de la propuesta (B-173/B-174): son datos, no se ejecutó nada.
 
+### C24 · F7 — 2026-10-16 02:25 → 02:57 — cierre: re-lectura de punta a punta y correcciones
+- Commit `dc09aac7` (C23) pusheado a las 02:23. El workflow F7 (`_crudo/f7.workflow.js`, run `wf_1bc3c339-ad5`) corrió de 02:25 a 02:45 (20 min, 3 lectores de solo lectura, 0 errores, 1,12 M): uno buscó contradicciones entre entregables, otro afirmaciones de configuración sin verificar (DEC-54) y otro la coherencia del backlog y de 09. Resultado en `_crudo/f7-resultado.json`. Despertadores `ce6cdd72` y `eede3625` borrados al cerrar.
+- **70 problemas** (alta 4 · media 29 · baja 37). **Ninguno se refutó y se aplicaron los 70** con `scripts/auditoria/f7-correcciones.mjs` (cada operación aborta si no encuentra el texto; en 07 cada cambio lleva «[F7 …]»), más `franco-md.mjs` para los ítems de bloques de 09. Antes de aplicar, verifiqué contra el código o los docs los que cambian un hecho:
+  - B-12 dejaba sin descifrar a los lectores de credenciales: `resolve-credential.ts` solo exporta `resolveCredentialDisplay`, y `google-business-profile.ts:59-89`, `cal-com.ts:27-29`, Tiendanube y Telegram leen directo de la base.
+  - Renovar Vertex activa SEC-057: así lo dice su Impacto en `03-MEJORAS.md`. B-01 ahora espera a B-07 en producción.
+  - B-168 borraba el `unmarkMilestonePaid` que B-71 conecta como Deshacer.
+  - SEC-057 se agota en ≈ 8 min (03, con los dos orígenes). SEC-023 son 15 páginas. SEC-003 es D4 y de zona libre.
+  - mc2 tiene un tilde por fase (`manual.ts:107`, `:135-137`).
+  - SEC-006 es la sesión que revive y no la fuga de mensajes. **El mismo error estaba en `11-CONGELADOS.md:40` y lo corregí también.**
+  - La visibilidad del repo se apoya en DEC-48 (`gh repo view` → PUBLIC el 2026-10-13).
+- **Qué cambió**:
+  - **RESUMEN**: la zona del riesgo 8; el riesgo 5 es libre; la madurez por herramienta sale con la regla de 02 (L2 23 · L1 23 · L0 5 · L? 1); docs 143 = 10 nuevos + 15 que se mantienen + 128 a borrar o consolidar; los topes de D1 y D6.
+  - **07**: 69 referencias a títulos viejos o abreviados pasan a `[B-##]`; prerrequisitos de B-96, B-137, B-151, B-152, B-156, B-192 y B-204; zonas de B-02, B-76, B-89, B-101, B-155, B-158 y B-161 (las tarjetas que tocan la zona de Franco pasan de 46 a 53); modelos de B-22, B-24, B-53, B-78 y B-89; criterios de B-07, B-12, B-15, B-46 y B-98; POD-072 pasa de B-168 a B-71 y SEC-063 de B-124 a B-10; SEC-009 se reparte entre B-08 y B-27; B-01 suma Google AI; B-12 suma los lectores; B-190 migra el WhatsApp del pie.
+  - **DEC-54**: los crons de Netlify pasan a «declarados» (VH-136); el backup pasa a «corre y falla»; Sentry y el branch de Neon quedan como «sin verificar»; `05-IDEAS.md` aclara que los límites de terceros son los públicos, sin verificar contra las cuentas. VH nuevas: VH-175 (dominio de producción), VH-176 (Performance API de GBP) y VH-177 (branch de `DATABASE_URL` en producción). VH-087 baja a media; VH-003 y VH-055 se actualizan.
+  - **13**: los gates de la tabla de protegidos salen de las fichas de 11; la skill del Atlas suma `alias.json`, `backlog.json` y el estado de la tarjeta.
+  - **Datos**: `h6.vis-sitio` se curó (alcance propuesto «después») y entró a la gramática (`nodos.mjs`): 02 la muestra y 01, F5 y 14 cuentan 52 herramientas. La funcionalidad del backup pasa de L? a L1 (madurez: L1 48 · sin medir 6). PLAN-817 pasa a no empezado; PLAN-1170, PLAN-1133 y PLAN-1116 a parcial (planeado: hecho 597 · parcial 229 · no empezado 457). En el registro, BUG-171 suma la verificación con `gh`, SEC-107 la de visibilidad, SEC-002 cita DEC-54 y el precio de TEC-003 queda como «sin verificar».
+- Regenerado: `hallazgos-md.mjs`, `planeado-md.mjs`, `atlas/backlog.mjs`, `franco-md.mjs`, `generar.mjs --ref 57c421bc` (tercera línea de `historial.jsonl`), `validar.mjs --emitir`, `vistas.mjs` y `validar-atlas.mjs`. `_reportes/F7.md` escrito. Desde C24, `backlog-md.mjs`, `consolidados-md.mjs` e `ideas-md.mjs` no se vuelven a correr: 07, 13, 14 y 05 tienen correcciones a mano (`scripts/auditoria/README.md`).
+- **Cierre de la corrida**: cobertura profunda 1.267 / 1.298 (los 31 restantes son PODA-ALTA, leídos en superficial por E2) y superficial 691 / 691; los nueve dominios cerrados con `[DOMINIO-ABIERTO]` por el tope de ciclos, ninguno por falta de cobertura.
+
 ## 14. Autorrevisión §10 por commit
 
 | Commit | ¿Hallazgo sin ruta:línea? | ¿«Funciona»/«no existe» sin prueba? | ¿Valor de secret? | ¿Propuesta sobre FROZEN/ZONA-FRANCO sin marcar? | ¿Archivo fuera de las dos carpetas? | validar.mjs |
@@ -723,3 +742,4 @@ Corrido el 2026-10-13, uno por vez, desde `logic-core-v3` (detalle en `01-INVENT
 | C21-F6a | No: las fusiones suman la evidencia `ruta:línea` de los ciegos al registro | No: el padre leyó las dos que suben a ALTA; las 26 re-lecturas traen su búsqueda con control positivo; el control de lecturas de los ciegos dio 0 docs | No: `secrets-salida.mjs` antes del commit (ver abajo) | No: los cambios de severidad son del registro; nada propone editar congelados | No (solo las dos carpetas) | ver abajo |
 | C22-F6b | No: 13 cita `CLAUDE.md:línea` y la evidencia con `ruta:línea`; 14 cita `doc:línea` o `ruta:línea` por afirmación; la §docs no trae hallazgos | No: el padre midió en `57c421bc` las cifras del muestreo (ver C22); los «no existe» del agente traen su búsqueda | No: `secrets-salida.mjs` = 0 en 325 archivos; los secrets que nombra la síntesis van por línea, sin valor | No: todo es propuesta; los anidados de setter y la zona de Franco quedan como coordinación, los congelados según `11-CONGELADOS.md` | No (solo las dos carpetas; `_insumos/` sin stagear) | 0 errores · 273 avisos |
 | C23-F6c | No: las tarjetas no son hallazgos y citan IDs que existen (validar.mjs lo controla); RESUMEN y 09 citan IDs y docs | No: las cifras nuevas de RESUMEN (LOC por confianza, madurez por herramienta, barrera) salen de scripts sobre los datos; las afirmaciones de configuración citan su fuente o su VH | No: `secrets-salida.mjs` antes del commit (ver abajo) | No: 46 tarjetas tocan la zona de Franco o piden coordinarla, y las que tocan congelados dicen «requiere decisión FROZEN» (backlog-md.mjs lo fuerza desde las zonas de sus hallazgos) | No (solo las dos carpetas; `_insumos/` sin stagear) | 0 errores · validar-atlas 0 |
+| C24-F7 | No: las correcciones citan su fuente; las VH nuevas siguen el formato de 08 | No: lo que cambia un hecho se verificó en el código o en los docs (ver C24); lo que depende de una cuenta externa quedó como «sin verificar» con su VH (DEC-54) | No: `secrets-salida.mjs` = 0 antes del commit | No: las zonas de 07 dicen FROZEN o Franco donde corresponde (B-02, B-76, B-89, B-101, B-155, B-158, B-161) | No (solo las dos carpetas; `_insumos/` sin stagear) | 0 errores · validar-atlas 0 |

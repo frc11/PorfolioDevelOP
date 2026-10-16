@@ -3,6 +3,24 @@
  "partes": 2,
  "items": [
   {
+   "clave": "docs/bitacora-beta-3.md:9813",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "manual.ts:344 ficha: Ficha | null; git grep 'input\\.ficha' en manual.ts: 0 (control: input.status en :488)",
+    "sentido": "si",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
+   "clave": "docs/bitacora-beta-3.md:10857",
+   "valor": {
+    "estado": "no empezado",
+    "evidencia": "el rango del doc no describe N8; no es verificable contra código",
+    "sentido": "decidir",
+    "ciclo": "D4-c1, lector D4-L1"
+   }
+  },
+  {
    "clave": "docs/bitacora-beta-3.md:54",
    "valor": {
     "estado": "parcial",
@@ -2835,8 +2853,8 @@
   {
    "clave": "_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md:26",
    "valor": {
-    "estado": "hecho",
-    "evidencia": "manual.ts:135-137 cta/calidad/mobile mapean a mc2 sin tocar FASE_IDS (:125-127).",
+    "estado": "no empezado",
+    "evidencia": "manual.ts:135-137 mapea cta/calidad/mobile a mc2, pero mc2 dibuja un tilde por fase (tres); el tilde único (tildeUnico) y mc2-refinar.tsx existen solo en el WIP 506e0059 de origin/p25/rafaga-tildes (git log --all). Corregido en F7 (C7).",
     "sentido": "decidir",
     "ciclo": "D4-c1, lector D4-L6"
    }

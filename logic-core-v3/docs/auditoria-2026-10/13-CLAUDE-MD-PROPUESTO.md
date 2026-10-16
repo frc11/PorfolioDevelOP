@@ -61,7 +61,7 @@ Audité las 63 afirmaciones del CLAUDE.md raíz (196 líneas, idéntico a 57c421
 | Never self-confirm a sprint works because it compiles. User verifies. | CLAUDE.md:21 | vigente | Coincide con el nivel 3 (verificación humana) de la definición de terminado de Franco (Franco/Work Flow/develOP-manual-flujo (1).md:652-658) y con la memoria repo_verification_workflow.md:17. |
 | Never touch files outside the current sprint scope. | CLAUDE.md:22 | vigente | Se repite dentro del mismo archivo (CLAUDE.md:119 y :140). Coincide con el principio «no tocar lo que no se pidió» de Recursos DevelOP.md:396. |
 | Never hardcode secrets, API keys, or credentials in code. | CLAUDE.md:23 | duplicada | Se repite en AGENTS.md:84. En docs sí hay credenciales en texto plano: contraseñas de seed en README.md:29-30 y STATUS.md:258-259 (valores omitidos), y el repo es público (§10.26). Ya no hacen falta ahí: prisma/seed-guard.ts:9-10 pide la contraseña por variable de entorno. |
-| Never expose internal error messages or stack traces to the client. | CLAUDE.md:24 | vigente | No se cumple en tres casos: SEC-006 y SEC-092 (fuga de toErrorMessage, 11-CONGELADOS.md:40), y SEC-082 (el stream del chat le manda al visitante anónimo los argumentos y resultados de las tools, con la clasificación interna y el id del lead). |
+| Never expose internal error messages or stack traces to the client. | CLAUDE.md:24 | vigente | No se cumple en tres casos: SEC-092 y SEC-062 (fuga de toErrorMessage y mensajes crudos del admin), y SEC-082 (el stream del chat le manda al visitante anónimo los argumentos y resultados de las tools, con la clasificación interna y el id del lead). |
 | Never add a dependency without first checking if a native or already-installed alternative exists. | CLAUDE.md:25 | vigente | Tiene casos concretos en el repo: dependency-cruiser ^17.4.3 y knip ^6.16.1 ya estaban instalados (§10.4). typescript-eslint ya está en node_modules como dependencia de eslint-config-next. |
 | Components that fetch data must have loading, error, and empty states. | CLAUDE.md:31 | vigente | Es un principio de UI que vale para todas las superficies. No tiene mecanismo. |
 | Forms must have client-side and server-side validation with visible feedback. | CLAUDE.md:32 | vigente | Principio vigente. La parte de servidor se mide en la fila de Zod (CLAUDE.md:58). |
@@ -167,15 +167,15 @@ La lista vive en `06-ATLAS/zonas.json`, que es lo que lee el hook.
 |---|---|---|
 | `src/components/3d/HeroArtifact.tsx` | nada: no se edita, se borra con el merge de `rediseno/home` | — |
 | `src/context/TransitionContext.tsx` | la navegación del sitio público | invariante a escribir + QA visual |
-| `src/context/PreloaderContext.tsx` | el flujo de fases del preloader | QA visual del sitio público |
+| `src/context/PreloaderContext.tsx` | el flujo de fases del preloader | `test:s8-diferido` + peso de /login + e2e 01-landing + `check:types` (CNG-003) |
 | `prisma/schema.prisma` | los datos | `prisma/CLAUDE.md` |
 | `src/auth.ts`, `src/lib/auth-guards.ts` | autenticación y autorización | invariante a escribir + Franco |
-| `src/lib/prisma.ts` | el cliente único de la base | `check:types` |
+| `src/lib/prisma.ts` | el cliente único de la base | `check:types` + `check:invariants` + `test:p2002` y `test:integration` contra la base de test (CNG-006) |
 | `src/lib/action-utils.ts` | qué error de una server action llega al cliente | invariante a escribir |
 | `src/lib/audit-log.ts` | que la auditoría no se pierda | invariante a escribir |
-| `src/lib/utils.ts` | `cn()` y los helpers de todo el repo | `check:types` + QA visual |
+| `src/lib/utils.ts` | `cn()` y los helpers de todo el repo | `check:invariant:cn` (test:s7-cn) + `check:types` (CNG-008) |
 | `src/lib/tz-ar.ts`, `src/lib/dates-ar.ts` | las fechas en hora argentina (fallan en silencio) | `check:invariant:dates-ar` |
-| `src/components/ui/*` (las 22 primitivas del kit) | el kit de los portales | `check:types` + QA visual |
+| `src/components/ui/*` (las 22 primitivas del kit) | el kit de los portales | `check:types`, lint y `check:invariants` + visual-qa por dominio y regresión visual (CNG-022) |
 
 Todo lo demás es libre: alcanza con la definición de terminado y la verificación de UI.
 
@@ -252,7 +252,7 @@ Un sprint está terminado cuando se cumple todo esto:
 4. Si tocó `prisma/schema.prisma`: la migración se generó según `prisma/CLAUDE.md` y se corrió `npx prisma generate`.
 5. Si tocó pantallas: el subagente `visual-qa` revisó las rutas tocadas en desktop y mobile. Con ❌ no se cierra. Con ❓,
    o si el subagente no tiene sus herramientas de preview, queda «VERIFICACIÓN PENDIENTE» para la persona.
-6. Si tocó `src/` o `prisma/`: el Atlas está al día, con la skill `atlas-actualizar`. El hook Stop lo exige.
+6. Si tocó `src/` o `prisma/`: el Atlas está al día, con la skill `atlas-actualizar`, y la tarjeta de `07-BACKLOG.md` pasó a su nuevo Estado. El hook Stop lo exige.
 7. Hay un reporte final con el encabezado `## Cierre del sprint` que lista los archivos tocados, los comandos corridos y su
    resultado, las decisiones que no estaban pedidas, los hallazgos fuera de alcance, los `git add <archivo>` uno por uno
    y un mensaje de commit sugerido sin tildes.
@@ -421,7 +421,7 @@ no tener `DATABASE_URL`; y `migrate dev` ofrece un reset si detecta drift.
 
 ## 5. Ciclo de actualización del mapa
 
-- **Definición de terminado (en CLAUDE.md):** Va en el CLAUDE.md raíz, en la sección «Definición de terminado» del borrador. Un sprint está terminado cuando se cumplen estos ocho puntos: (1) `npm run check:types` en verde; (2) `npm run check:invariants` en verde, con el invariante de la lógica tocada si es de negocio o aislamiento, e INVARIANTES_ESPERADOS al día; (3) `npx eslint -c eslint.gate.config.mjs src` en verde; (4) si tocó el schema, migración generada sin base según prisma/CLAUDE.md y `npx prisma generate`; (5) si tocó pantallas, visual-qa en desktop y mobile, o «VERIFICACIÓN PENDIENTE»; (6) si tocó logic-core-v3/src/ o logic-core-v3/prisma/, Atlas al día con la skill atlas-actualizar: atlas.curado.json refleja el cambio y `validar-atlas.mjs` sale 0; (7) un reporte con el encabezado `## Cierre del sprint` que lista archivos, comandos y resultados, decisiones no pedidas, hallazgos fuera de alcance, `git add` archivo por archivo y un mensaje sin tildes; (8) verificación humana del fondo. El encabezado fijo del punto 7 es lo que el hook Stop usa para saber que el agente está cerrando, y no frenarlo cuando hace una pregunta a mitad de sprint. La regeneración oficial del Atlas no es parte del sprint: después del merge a main, una persona corre regenerar.md con `--ref origin/main`, y eso suma la línea de historial con el sha de main (regenerar.md:7). Esta definición sale de juntar la de Franco (develOP-manual-flujo (1).md:652-658: tres niveles más el registro) y su DoD de ejecución (config-ejecucion-claude-desktop.md:65-69: tsc como gate y prisma generate). La bitácora se reemplaza por las `notas` del Atlas, salvo que Franco decida mantener docs/bitacora-beta-3.md.
+- **Definición de terminado (en CLAUDE.md):** Va en el CLAUDE.md raíz, en la sección «Definición de terminado» del borrador. Un sprint está terminado cuando se cumplen estos ocho puntos: (1) `npm run check:types` en verde; (2) `npm run check:invariants` en verde, con el invariante de la lógica tocada si es de negocio o aislamiento, e INVARIANTES_ESPERADOS al día; (3) `npx eslint -c eslint.gate.config.mjs src` en verde; (4) si tocó el schema, migración generada sin base según prisma/CLAUDE.md y `npx prisma generate`; (5) si tocó pantallas, visual-qa en desktop y mobile, o «VERIFICACIÓN PENDIENTE»; (6) si tocó logic-core-v3/src/ o logic-core-v3/prisma/, Atlas al día con la skill atlas-actualizar: atlas.curado.json refleja el cambio, la tarjeta de 07-BACKLOG.md pasó a su nuevo Estado y `validar-atlas.mjs` sale 0; (7) un reporte con el encabezado `## Cierre del sprint` que lista archivos, comandos y resultados, decisiones no pedidas, hallazgos fuera de alcance, `git add` archivo por archivo y un mensaje sin tildes; (8) verificación humana del fondo. El encabezado fijo del punto 7 es lo que el hook Stop usa para saber que el agente está cerrando, y no frenarlo cuando hace una pregunta a mitad de sprint. La regeneración oficial del Atlas no es parte del sprint: después del merge a main, una persona corre regenerar.md con `--ref origin/main`, y eso suma la línea de historial con el sha de main (regenerar.md:7). Esta definición sale de juntar la de Franco (develOP-manual-flujo (1).md:652-658: tres niveles más el registro) y su DoD de ejecución (config-ejecucion-claude-desktop.md:65-69: tsc como gate y prisma generate). La bitácora se reemplaza por las `notas` del Atlas, salvo que Franco decida mantener docs/bitacora-beta-3.md.
 - **Skill de proyecto `atlas-actualizar`:** Archivo: `.claude/skills/atlas-actualizar/SKILL.md` en la raíz del repo, versionado con la excepción de .gitignore descrita en mecanismos.
 
 ---
@@ -433,7 +433,7 @@ allowed-tools: Read, Grep, Glob, Edit, Bash(git status:*), Bash(git diff:*), Bas
 # Atlas: actualizar al cerrar un sprint
 
 Todo se corre desde `logic-core-v3/`. El Atlas es `docs/auditoria-2026-10/06-ATLAS/`.
-Hay dos clases de archivos. Los datos que mantienen las personas se editan a mano y ningún generador los pisa: `funcionalidades.json`, `zonas.json`, `entradas.json` y `atlas.curado.json`. Los generados no se editan: `atlas.json`, `historial.jsonl`, `hallazgos.json` y las vistas `.md`.
+Hay dos clases de archivos. Los datos que mantienen las personas se editan a mano y ningún generador los pisa: `funcionalidades.json`, `zonas.json`, `entradas.json`, `atlas.curado.json`, `alias.json` y `07-BACKLOG.md` (el estado de cada tarjeta). Los generados no se editan: `atlas.json`, `historial.jsonl`, `hallazgos.json`, `backlog.json` y las vistas `.md`.
 
 ## 1. Qué cambió
 `git status --porcelain -- src prisma` (modificados, borrados y sin rastrear). Si no hay cambios ahí, terminás y lo decís.
@@ -455,6 +455,7 @@ Cada ruta se busca en `atlas.json` (`nodos[].archivos`) y en `funcionalidades.js
 
 ## 4. Regenerar y validar
     node scripts/auditoria/atlas/generar.mjs --ref worktree --sin-ramas --sin-historial
+    node scripts/auditoria/atlas/backlog.mjs
     node scripts/auditoria/atlas/vistas.mjs
     node scripts/auditoria/atlas/validar-atlas.mjs
 `validar-atlas` tiene que salir 0. Si el sprint cambió los registros de la auditoría (02, 03, 04, 05 o 10), antes se corre `node scripts/auditoria/validar.mjs --emitir`. Hay que comparar el `control` que imprime generar (páginas, handlers, archivos con acciones, modelos, funcionalidades) con el de `atlas.json` anterior: si cambia sin que haya cambiado el código correspondiente, se rompió el generador y se reporta.

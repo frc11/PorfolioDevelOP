@@ -832,7 +832,7 @@
      "fragmento": "# GitHub Actions solo descubre workflows en <repo_root>/.github/workflows/. El\n# archivo logic-core-v3/.github/workflows/e2e.yml está MAL ubicado y nunca corrió"
     }
    ],
-   "impacto": "Bloqueante para el primer cliente real: el workflow de B14.3 (pg_dump cifrado con restore de prueba) nunca produjo un respaldo y el restore nunca se probó. La única red es la retención nativa de Neon, que el propio doc describe como corta y sin PITR en el plan Free (docs/operations/neon-backups.md:5). Pesa más con un historial de migraciones que ya borró y re-agregó columnas con datos de clientes (DEU-014). Nadie se entera: la falla diaria queda en la pestaña Actions sin aviso. El comentario de cabecera quedó viejo (e2e.yml ya no existe). Los mismos 0 secrets apagan los jobs de LeadOS y E2E del CI (DEU-017).",
+   "impacto": "Bloqueante para el primer cliente real: el workflow de B14.3 (pg_dump cifrado con restore de prueba) nunca produjo un respaldo y el restore nunca se probó. La única red es la retención nativa de Neon, que el propio doc describe como corta y sin PITR en el plan Free (docs/operations/neon-backups.md:5). Pesa más con un historial de migraciones que ya borró y re-agregó columnas con datos de clientes (DEU-014). Nadie se entera: la falla diaria queda en la pestaña Actions sin aviso. El comentario de cabecera quedó viejo (e2e.yml ya no existe). Los mismos 0 secrets apagan los jobs de LeadOS y E2E del CI (DEU-017). Verificado en GitHub en solo lectura el 2026-10-15: `gh run list --repo frc11/PorfolioDevelOP --workflow db-backup.yml` dio 140 corridas fallidas, 1 cancelada y 0 exitosas, y `gh api repos/frc11/PorfolioDevelOP/actions/secrets` dio total_count 0 (log C15 de 00-PLAN-Y-LOG.md).",
    "propuesta": "Verificar secrets y corridas (casos de prueba). Cargar DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE (lo hace Franco). Hacer visible el fallo, por ejemplo con un aviso al canal de alertas, y endurecer la validación con conteos mínimos de tablas críticas además de _prisma_migrations. Actualizar el comentario.",
    "esfuerzo": "S",
    "zona": "libre",
@@ -857,7 +857,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "cambios": [
+     {
+      "ciclo": "F7",
+      "antes": {
+       "impacto": "Bloqueante para el primer cliente real: el workflow de B14.3 (pg_dump cifrado con restore de prueba) nunca produjo un respaldo y el restore nunca se probó. La única red es la retención nativa de Neon, que el propio doc describe como corta y sin PITR en el plan Free (docs/operations/neon-backups.md:5). Pesa más con un historial de migraciones que ya borró y re-agregó columnas con datos de clientes (DEU-014). Nadie se entera: la falla diaria queda en la pestaña Actions sin aviso. El comentario de cabecera quedó viejo (e2e.yml ya no existe). Los mismos 0 secrets apagan los jobs de LeadOS y E2E del CI (DEU-017)."
+      },
+      "nota_padre": "Corrección de la re-lectura de cierre (K5)."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -1528,7 +1537,7 @@
      "fragmento": "const EXPECTED_DEV_HOST = 'ep-…-pooler.sa-east-1.aws.neon.tech'  // host literal, no es credencial"
     }
    ],
-   "impacto": "Cualquiera puede leer el hostname del endpoint real de la Neon compartida (sin credenciales) y volcados de las tablas de catálogo y de activación de módulos con IDs internos (prisma/backups/*.json y backup.js, versionados aunque .gitignore:67 ignora backups/). Sumado al historial de origin/main, que conserva enviroment.env (commit 39535583; ya hay hallazgo de credenciales en el historial), facilita un ataque dirigido.",
+   "impacto": "Cualquiera puede leer el hostname del endpoint real de la Neon compartida (sin credenciales) y volcados de las tablas de catálogo y de activación de módulos con IDs internos (prisma/backups/*.json y backup.js, versionados aunque .gitignore:67 ignora backups/). Sumado al historial de origin/main, que conserva enviroment.env (commit 39535583; ya hay hallazgo de credenciales en el historial), facilita un ataque dirigido. Visibilidad: público según `gh repo view` antes de cada push hasta el 2026-10-15 (DEC-48); sigue público por decisión de Valentino (DEC-52, DEC-54).",
    "propuesta": "Reemplazar el hostname por un placeholder en .env.example. Quitar prisma/backups/ del repo (git rm --cached; queda en el historial). Decidir si el repo pasa a privado, coordinado con PLAN-1075.",
    "esfuerzo": "S",
    "zona": "libre",
@@ -1558,6 +1567,15 @@
       "titulo": "Scripts imprimen el host de DATABASE_URL y el email del SUPER_ADMIN; host de la rama dev de Neon versionado",
       "severidad": "BAJA",
       "nota_padre": "Muestreado: _b14-2-seed-bench-prod.ts:93 imprime el host y seed-alerts.ts:302 el email del SUPER_ADMIN; regression/purge.ts:25 versiona el host de la rama dev de Neon. Es dato de infraestructura en un repo público, la misma clase que SEC-107."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "F7",
+      "antes": {
+       "impacto": "Cualquiera puede leer el hostname del endpoint real de la Neon compartida (sin credenciales) y volcados de las tablas de catálogo y de activación de módulos con IDs internos (prisma/backups/*.json y backup.js, versionados aunque .gitignore:67 ignora backups/). Sumado al historial de origin/main, que conserva enviroment.env (commit 39535583; ya hay hallazgo de credenciales en el historial), facilita un ataque dirigido."
+      },
+      "nota_padre": "Corrección de la re-lectura de cierre (K15)."
      }
     ]
    },

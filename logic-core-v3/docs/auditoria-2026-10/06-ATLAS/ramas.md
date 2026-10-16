@@ -30,7 +30,7 @@
 | v3/tipo | 40 | 50 | 2026-09-02 | dormida | — | 86 | revisar: mergear lo útil o archivar |
 | rediseno/secciones-a | 29 | 50 | 2026-08-30 | dormida | — | 72 | revisar: mergear lo útil o archivar |
 | rediseno/secciones-b | 29 | 50 | 2026-08-30 | dormida | — | 72 | revisar: mergear lo útil o archivar |
-| auditoria/renovacion-2026-10 | 25 | 0 | 2026-10-16 | viva | `C:/auditoria-2026-10` | 284 | revisar con su dueño: mergear o seguir |
+| auditoria/renovacion-2026-10 | 26 | 0 | 2026-10-16 | viva | `C:/auditoria-2026-10` | 295 | revisar con su dueño: mergear o seguir |
 | rediseno/chrome | 23 | 50 | 2026-08-29 | dormida | — | 67 | revisar: mergear lo útil o archivar |
 | rediseno/motion | 23 | 50 | 2026-08-29 | dormida | — | 66 | revisar: mergear lo útil o archivar |
 | rediseno/cimientos | 18 | 52 | 2026-08-28 | dormida | — | 61 | revisar: mergear lo útil o archivar |

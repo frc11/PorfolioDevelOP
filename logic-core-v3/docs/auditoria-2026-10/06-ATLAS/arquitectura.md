@@ -69,10 +69,10 @@ flowchart LR
 - **Portal del cliente.** Lee de Neon lo de su organización (proyecto, tickets, mensajes, plan, leads, resultados) y de las integraciones conectadas: GA4, Search Console, Google Business Profile, Tiendanube y Cal.com. Los resúmenes con IA (brief semanal, insights) se generan por cron y por demanda con Vertex o Anthropic.
 - **Admin.** Opera sobre todas las organizaciones (clientes, proyectos, tickets, mensajes, chatbots, alertas y configuración). Es el único lugar con lecturas cross-tenant legítimas, por eso cada página exige SUPER_ADMIN (SEC-023: hoy lo hace solo el layout).
 - **Setter y LeadOS.** Pipeline comercial interno: prospectos (`OsLead*`), agenda con Cal.com, manual del lead y revisión de demos. Todo es zona de Franco (`09-PARA-FRANCO.md`).
-- **Crons.** Netlify dispara 3 scheduled functions que llaman a rutas `/api/cron/*` con `CRON_SECRET`: insights, reporte semanal y limpieza de eventos. Otros 3 crons están registrados solo en `vercel.json`, así que en Netlify no corren: reporte ejecutivo, briefs y follow-up de LeadOS (BUG-047). El detector de alertas no tiene ningún disparador (FAL-016).
+- **Crons.** Netlify tiene declaradas 3 scheduled functions (`netlify.toml:25-32`; que corran en producción se confirma con VH-136) que llaman a rutas `/api/cron/*` con `CRON_SECRET`: insights, reporte semanal y limpieza de eventos. Otros 3 crons están registrados solo en `vercel.json`, así que en Netlify no corren: reporte ejecutivo, briefs y follow-up de LeadOS (BUG-047). El detector de alertas no tiene ningún disparador (FAL-016).
 - **Emails.** Brevo para transaccionales y marketing, Resend para avisos. Hay dos proveedores y varios remitentes (DEU-070).
-- **Observabilidad.** Sentry recibe los errores de render y del chat. Las integraciones y los crons casi no reportan (FAL-029), y el SDK depende de `NEXT_PUBLIC_SENTRY_DSN` en el build (FAL-030).
-- **Respaldo.** El workflow de backup diario nunca corrió por falta de secrets (BUG-171). La única red es la retención propia de Neon.
+- **Observabilidad.** Sentry está cableado para los errores de render y del chat, pero solo recibe si `NEXT_PUBLIC_SENTRY_DSN` estaba en el build (FAL-030); según `docs/bitacora-roadmap.md:17135` seguía inactivo en producción en 2026-08, y se confirma con VH-135. Las integraciones y los crons casi no reportan (FAL-029), y el SDK depende de `NEXT_PUBLIC_SENTRY_DSN` en el build (FAL-030).
+- **Respaldo.** El workflow de backup diario corre todos los días pero nunca terminó bien: 140 corridas fallidas por falta del secret de la URL y 0 secrets de Actions en el repo (`gh`, 2026-10-15; BUG-171). La única red es la retención propia de Neon.
 
 ## Dónde mirar después
 

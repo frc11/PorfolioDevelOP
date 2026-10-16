@@ -19,7 +19,19 @@ const esc = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ').tri
 
 const ext = leerPartido(path.join(DIR, '_crudo'), 'f6b-extraccion', { items: [] }).items
 const items = ext.flatMap((e) => (e.bloques_franco ?? []).map((x) => ({ ...x, extractor: e.extractor })))
-const ORDEN = ['no empezado', 'parcial', 'hecho', 'abandonado', 'contradicho']
+// Correcciones de F7 (re-lectura de cierre, _crudo/f7-resultado.json), verificadas por el padre: [comienzo del ítem, cambios]
+const CORRECCIONES = [
+  ['Cargar los secrets BACKUP_GPG_PASSPHRASE', { estado: 'no empezado', evidencia: 'gh run list (2026-10-15): 140 corridas fallidas y 1 cancelada, ninguna exitosa, y 0 secrets de Actions en el repo (BUG-171); el workflow existe (.github/workflows/db-backup.yml:39-42). [F7 C6/K6]' }],
+  ['H-05: cinco tildes por prompt en mc2', { evidencia: 'mc2 existe (manual.ts:107 y :135-137) con un tilde por fase; mc2-refinar.tsx y los cinco tildes por prompt existen solo en el WIP 506e0059 de origin/p25/rafaga-tildes. [F7 C9]' }],
+  ['Setear NEXT_PUBLIC_SENTRY_DSN en Netlify', { estado: 'sin verificar', evidencia: 'Según bitacora-roadmap.md:17135 (2026-08) Sentry seguía inactivo en producción; el estado de la variable en Netlify no se ve en el código (VH-135). [F7 C21/K13]' }],
+  ['Onboarding real de Matsu y firma de v1.0.0', { estado: 'no empezado', evidencia: 'No hay clientes reales (ENMIENDA-01 §0); STATUS.md:174-178 y bitacora-roadmap.md:9707-9718 lo dejaban pendiente, y el tema Matsu está entre los «a decidir» de 14-DOCS-CONSOLIDADOS. [F7 C22]' }],
+]
+for (const [inicio, cambios] of CORRECCIONES) {
+  const x = items.find((i) => String(i.item).startsWith(inicio))
+  if (!x) { console.error('no está el ítem', inicio); process.exit(1) }
+  Object.assign(x, cambios)
+}
+const ORDEN = ['no empezado', 'parcial', 'sin verificar', 'hecho', 'abandonado', 'contradicho']
 const cuenta = (xs) => ORDEN.map((k) => [k, xs.filter((x) => x.estado === k).length]).filter(([, n]) => n).map(([k, n]) => `${k} ${n}`).join(' · ')
 
 const md = ['## Bloques a ejecutar: estado contra el código', '']

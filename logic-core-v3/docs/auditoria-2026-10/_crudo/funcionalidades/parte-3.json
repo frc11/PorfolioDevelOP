@@ -5519,8 +5519,8 @@
     ".github/workflows/db-backup.yml"
    ],
    "entradas": [],
-   "madurez": "L?",
-   "madurez_evidencia": "Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero que corra depende de secrets no verificables por lectura; ci.yml:120-121 registraba 0 secrets al 2026-08-25.",
+   "madurez": "L1",
+   "madurez_evidencia": "Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero nunca terminó bien: gh run list (2026-10-15) dio 140 corridas fallidas por el secret faltante y 0 secrets en el repo (BUG-171).",
    "criterios_l3": {
     "permisos_tenant": {
      "cumple": "n/a",

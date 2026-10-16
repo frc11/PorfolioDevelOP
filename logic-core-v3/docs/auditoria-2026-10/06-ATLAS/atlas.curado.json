@@ -6296,8 +6296,8 @@
    "decisiones": []
   },
   "h4.adm-shell.backup-diario-de-la-base": {
-   "madurez": "L?",
-   "madurez_evidencia": "Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero que corra depende de secrets no verificables por lectura; ci.yml:120-121 registraba 0 secrets al 2026-08-25.",
+   "madurez": "L1",
+   "madurez_evidencia": "Código completo (db-backup.yml:39-41 -> :102-124 -> :180-218), pero nunca terminó bien: gh run list (2026-10-15) dio 140 corridas fallidas por el secret faltante y 0 secrets en el repo (BUG-171).",
    "criterios_l3_faltantes": [
     "validacion_servidor (parcial)",
     "sin_mocks_todos (parcial)"
@@ -6419,6 +6419,13 @@
    "alcance": "sin-decidir",
    "alcance_propuesto": "1.0",
    "notas": "Propuesta de la auditoría 2026-10 (D9-c1): camino del cliente o de la operación diaria que el primer cliente real necesita (acceso, portal, chatbot, admin básico, contacto y baja de emails); el setter entra porque la operación comercial ya corre sobre él.",
+   "decisiones": []
+  },
+  "h6.vis-sitio": {
+   "veredicto": "decidir",
+   "alcance": "sin-decidir",
+   "alcance_propuesto": "despues",
+   "notas": "Propuesta de la auditoría 2026-10 (F7): el chrome del sitio público (menú mobile, scroll y transición), de alcance superficial; sus dos funcionalidades ya estaban como «después». La madurez de la herramienta se calcula desde sus funcionalidades.",
    "decisiones": []
   }
  }

@@ -28,7 +28,7 @@
    "zona": "libre",
    "nivel_proceso": "S",
    "tamano": "S",
-   "riesgo": "Bajo en código, alto operativo: la key no se imprime ni se commitea y la vieja se borra recién con el bot respondiendo. La prueba escribe en la base: correrla contra una base local propia y sin emails reales, nunca contra la Neon compartida ni producción.",
+   "riesgo": "Bajo en código, alto operativo: la key no se imprime ni se commitea y la vieja se borra recién con el bot respondiendo. La prueba escribe en la base: correrla contra una base local propia y sin emails reales, nunca contra la Neon compartida ni producción. Renovar en producción activa SEC-057: hoy la credencial vencida lo enmascara (03-MEJORAS.md, SEC-057). La key nueva se carga en Netlify producción recién con [B-07] desplegado, o en el mismo ciclo con un techo temporal de conversaciones nuevas por IP; para desarrollar [B-07] alcanza la key local o la de un deploy preview [F7 B1]",
    "prereqs": [],
    "modelo": "Sonnet 5.5",
    "esfuerzo": "medium",
@@ -48,7 +48,7 @@
    "nodos": [
     "lib.prisma"
    ],
-   "zona": "libre",
+   "zona": "libre (los secrets los carga Franco: coordinar)",
    "nivel_proceso": "S",
    "tamano": "S",
    "riesgo": "Medio: el workflow maneja la URL directa de producción; el aviso no debe imprimir la URL ni la passphrase. Coordinar con Franco la carga de los secrets.",
@@ -202,7 +202,7 @@
    "modelo": "Opus 5.5",
    "esfuerzo": "high",
    "ultracode": "OFF",
-   "criterio": "VH-065: desde un solo cliente HTTP con Origin de develop.com.ar no se pueden abrir más de N conversaciones por hora contra el bot de QA; VH-105: cortar la conexión antes del primer token consume el intento y suma al tope de 40; una conversación en curso sigue respondiendo cuando otra llena el cupo; streamText recibe maxOutputTokens; un turno vacío deja tokens y costo en QuotaUsage; los 403 de origen no escriben un ChatbotEvent por pedido.",
+   "criterio": "Con el preset nuevo de conversaciones nuevas por IP y por hora = N (fijado en presets.ts y anotado en el PR): en el escenario de VH-065, el pedido N+1 con un sessionId nuevo responde 429 y conversationsCount no pasa de N; en el de VH-105, tras 10 cortes con -m 1 el contador del mes sube 10 y el tope de 40 cuenta los intentos (las dos VH describen hoy el defecto: su resultado esperado se invierte); una conversación en curso sigue respondiendo cuando otra llena el cupo; streamText recibe maxOutputTokens; un turno vacío deja tokens y costo en QuotaUsage; los 403 de origen no escriben un ChatbotEvent por pedido. [F7 B4]",
    "worktree": "ahora/chat-runtime",
    "estado": "abierta"
   },
@@ -271,7 +271,7 @@
    "zona": "ZONA-FRANCO; requiere decisión FROZEN (src/auth.ts)",
    "nivel_proceso": "L",
    "tamano": "L",
-   "riesgo": "Alto: el callback jwt corre en cada request; un error cierra todas las sesiones o deja a todos afuera, setter incluido. Requiere la prueba multi-dispositivo de PLAN-006.",
+   "riesgo": "Alto: el callback jwt corre en cada request; un error cierra todas las sesiones o deja a todos afuera, setter incluido. Requiere la prueba multi-dispositivo de PLAN-006. Depende de [B-04] para subir next-auth antes de editar el callback jwt y no probar dos veces [F7 B19]",
    "prereqs": [
     "B-04"
    ],
@@ -291,7 +291,8 @@
     "SEC-023",
     "SEC-065",
     "SEC-060",
-    "SEC-084"
+    "SEC-084",
+    "SEC-063"
    ],
    "nodos": [
     "h4.adm-shell",
@@ -406,7 +407,7 @@
    "modelo": "Opus 5.5",
    "esfuerzo": "high",
    "ultracode": "OFF",
-   "criterio": "VH-031: después del backfill, 0 credenciales en claro en Organization, AgencySettings y ClientAsset (consulta de solo lectura por el prefijo del formato cifrado); en una org de prueba GBP, Tiendanube y Cal.com siguen leyendo; una credencial nueva se guarda cifrada; la Bóveda no muestra 'AES-256' ni registros de acceso inventados.",
+   "criterio": "VH-031: después del backfill, 0 credenciales en claro en Organization, AgencySettings y ClientAsset (consulta de solo lectura por el prefijo del formato cifrado); en una org de prueba GBP, Tiendanube y Cal.com siguen leyendo; una credencial nueva se guarda cifrada; la Bóveda muestra 'AES-256' solo si VH-031 da 0 credenciales en claro, y no muestra 'Registro de integridad y accesos' ni 'Monitoreo activo' hasta SEC-085 (FAL-009 es decisión de Valentino: ocultar o implementar). [F7 B18]",
    "worktree": "ahora/datos-sensibles",
    "estado": "abierta"
   },
@@ -550,7 +551,7 @@
    "modelo": "Opus 5.5",
    "esfuerzo": "high",
    "ultracode": "OFF",
-   "criterio": "VH-051: dos clientes distintos ven números de leads distintos que coinciden con sus ChatbotLead no descalificados; PDF, semanal e Inicio dan el mismo total para el mismo período; ningún pedido de upsell de otro cliente cuenta como lead; el invariante nuevo pasa.",
+   "criterio": "VH-051: el número de leads de cada org coincide con el count de sus ChatbotLead no descalificados del período y no cambia al enviar un formulario en /contact; PDF, semanal e Inicio dan el mismo total para el mismo período; ningún pedido de upsell de otro cliente cuenta como lead; el invariante nuevo pasa. [F7 B20]",
    "worktree": "ahora/portal-inicio",
    "estado": "abierta"
   },
@@ -765,7 +766,7 @@
    "riesgo": "Bajo.",
    "prereqs": [],
    "modelo": "Sonnet 5.5",
-   "esfuerzo": "medium",
+   "esfuerzo": "high",
    "ultracode": "OFF",
    "criterio": "VH-133: una segunda visita a Reputación dentro de la hora renderiza sin error; el test de serialización pasa.",
    "worktree": "ahora/integraciones",
@@ -818,7 +819,7 @@
    "riesgo": "Bajo; verificar con visual-qa en 390 px y desktop.",
    "prereqs": [],
    "modelo": "Sonnet 5.5",
-   "esfuerzo": "medium",
+   "esfuerzo": "high",
    "ultracode": "OFF",
    "criterio": "VH-050: a 390 px el hilo muestra los mensajes con alto mayor a 0 y el composer queda accesible; visual-qa desktop y mobile sin ROTO ni BUG.",
    "worktree": "ahora/portal-soporte",
@@ -894,7 +895,8 @@
     "BUG-007",
     "UX-002",
     "FAL-003",
-    "FAL-001"
+    "FAL-001",
+    "SEC-009"
    ],
    "nodos": [
     "h1.auth-login.magic-link",
@@ -1625,7 +1627,7 @@
    "modelo": "Opus 5.5",
    "esfuerzo": "high",
    "ultracode": "OFF",
-   "criterio": "VH-101: con Brevo o n8n lentos el aviso llega igual por reintento y no se duplica; VH-102: un lead con '_*[' en el nombre llega a Telegram con link absoluto; VH-106: diez leads calientes seguidos producen a lo sumo N mails por hora y un digest; el Telegram del equipo no recibe datos personales sin opt-in del cliente.",
+   "criterio": "VH-101: con Brevo o n8n lentos el aviso llega igual por reintento y no se duplica; VH-102: un lead con '_*[' en el nombre llega a Telegram con link absoluto; VH-106: diez leads calientes seguidos producen a lo sumo el tope de mails por hora fijado en `client-notifications/decide.ts` (anotado en el PR) y un digest; el Telegram del equipo no recibe datos personales sin opt-in del cliente. [F7 B21]",
    "worktree": "proximo/post-lead",
    "estado": "abierta"
   },
@@ -1853,8 +1855,8 @@
    "tamano": "S",
    "riesgo": "Bajo; verificar con WebGL deshabilitado en el navegador.",
    "prereqs": [],
-   "modelo": "Sonnet 5.5",
-   "esfuerzo": "medium",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
    "ultracode": "OFF",
    "criterio": "VH-084: con WebGL deshabilitado se ve el monograma y el widget sigue respondiendo; un error forzado en el chunk del avatar aparece en Sentry y no tumba la página.",
    "worktree": "proximo/widget",
@@ -2578,7 +2580,8 @@
    "hallazgos": [
     "BUG-126",
     "BUG-127",
-    "UX-046"
+    "UX-046",
+    "POD-072"
    ],
    "nodos": [
     "h4.adm-proyectos.pagos-hitos",
@@ -2735,7 +2738,7 @@
     "h5.set-manual",
     "h2.cli-soporte.crear-ticket"
    ],
-   "zona": "requiere decisión FROZEN (src/components/ui/Modal.tsx)",
+   "zona": "requiere decisión FROZEN + revisión de Franco (consumidores en el setter, `11-CONGELADOS.md`)",
    "nivel_proceso": "M",
    "tamano": "M",
    "riesgo": "Medio: el Modal lo usan otras pantallas; recorrerlas todas con teclado.",
@@ -2743,7 +2746,7 @@
    "modelo": "Sonnet 5.5",
    "esfuerzo": "high",
    "ultracode": "OFF",
-   "criterio": "VH-054 y VH-168: el modal de ticket y el de la Bóveda abren con el foco adentro, cierran con Escape, devuelven el foco, quedan por encima del sidebar y scrollean a 600 px de alto; las demás pantallas que usan Modal siguen funcionando con teclado.",
+   "criterio": "VH-054 y VH-168: el modal de ticket y el de la Bóveda abren con el foco adentro, cierran con Escape, devuelven el foco, quedan por encima del sidebar y scrollean a 600 px de alto; las demás pantallas que usan Modal siguen funcionando con teclado. escalar-modal, evaluacion-form y salida-manual del setter siguen operables con teclado [F7 B7]",
    "worktree": "ahora/portal-soporte",
    "estado": "abierta"
   },
@@ -2797,8 +2800,8 @@
    "tamano": "S",
    "riesgo": "Bajo; el home usa Lenis en su coreografía: verificar también en la rama rediseno/home.",
    "prereqs": [],
-   "modelo": "Sonnet 5.5",
-   "esfuerzo": "medium",
+   "modelo": "Opus 5.5",
+   "esfuerzo": "xhigh",
    "ultracode": "OFF",
    "criterio": "VH-164: la rueda scrollea /setter en desktop; VH-174 en verde; con 'reducir movimiento' el sitio público no crea Lenis, el chrome no anima en bucle y DotMatrix queda en un frame estático; visual-qa del home sin ROTO ni BUG.",
    "worktree": "proximo/lenis",
@@ -3205,13 +3208,13 @@
     "lib.use-is-client",
     "lib.sitio-publico"
    ],
-   "zona": "requiere decisión FROZEN",
-   "nivel_proceso": "M",
+   "zona": "requiere decisión FROZEN + ZONA-FRANCO (CNG-004 y CNG-005; firma de Franco por `auth.ts`, `OsLead*`, `ui/*`, `auth-guards`, `utils`, `action-utils` y `dates-ar`)",
+   "nivel_proceso": "S",
    "tamano": "S",
    "riesgo": "Bajo en código y alto en proceso: sin el hook PreToolUse ni los gates la política queda en prosa. Franco firma por auth.ts, OsLead*, ui/* (53 importadores suyos), auth-guards, utils, action-utils y dates-ar. Es habilitador de 16 tarjetas del bloque.",
    "prereqs": [],
-   "modelo": "Opus 5.5",
-   "esfuerzo": "high",
+   "modelo": "Sonnet 5.5",
+   "esfuerzo": "medium",
    "ultracode": "OFF",
    "criterio": "CLAUDE.md nombra los 12 protegidos con su propiedad y su gate, los libres y la salida borrar; zonas.json ya no tiene la clave `congelados` y `node scripts/auditoria/atlas/validar-atlas.mjs` pasa; la decisión figura en DECISIONES con fecha, quién la tomó y la firma de Franco para los archivos con importadores en su zona.",
    "worktree": "wt/docs",
@@ -3230,7 +3233,7 @@
    "zona": "libre (los ítems 8–12, 33, 35 y 36 los decide Franco)",
    "nivel_proceso": "S",
    "tamano": "S",
-   "riesgo": "Bajo. Separada del borrado para que «Roles en el borde», «Setter: lienzo propio…» y «LeadOS: poda…» no esperen a mover 140 docs.",
+   "riesgo": "Bajo. Separada del borrado para que «Roles en el borde», [B-142] y [B-169] no esperen a mover 140 docs.",
    "prereqs": [],
    "modelo": "Sonnet 5.5",
    "esfuerzo": "medium",
@@ -3383,7 +3386,7 @@
    "zona": "libre",
    "nivel_proceso": "M",
    "tamano": "S",
-   "riesgo": "Bajo-medio. Cambiar el hash del rate limit resetea los contadores vivos. Si los secretos nuevos no están en Netlify antes del deploy se rompen bajas y OAuth. Toca los mismos crons que «Crons con disparador real…» (SEC-099 está en Ahora, no en Próximo): va después.",
+   "riesgo": "Bajo-medio. Cambiar el hash del rate limit resetea los contadores vivos. Si los secretos nuevos no están en Netlify antes del deploy se rompen bajas y OAuth. Toca los mismos crons que [B-14] (SEC-099 está en Ahora, no en Próximo): va después.",
    "prereqs": [
     "B-14"
    ],
@@ -3457,9 +3460,10 @@
    "zona": "libre",
    "nivel_proceso": "M",
    "tamano": "S",
-   "riesgo": "Medio: UX-005 abre un open redirect si el callbackUrl no pasa por la validación de SEC-011; por eso va después de «Acceso a L3». El limiter del login ya lo unifica la tarjeta de rate limit de Ahora.",
+   "riesgo": "Medio: UX-005 abre un open redirect si el callbackUrl no pasa por la validación de SEC-011; por eso va después de [B-25] y [B-26]. El limiter del login ya lo unifica la tarjeta de rate limit de Ahora.",
    "prereqs": [
     "B-25",
+    "B-26",
     "B-27",
     "B-08"
    ],
@@ -3538,7 +3542,7 @@
    "modelo": "Opus 5.5",
    "esfuerzo": "high",
    "ultracode": "OFF",
-   "criterio": "curl -I a /login, /forgot-password, /reset-password, /bienvenida y /dashboard devuelve X-Frame-Options DENY, y a /embed/<slug> no; los reportes de CSP llegan al destino; /admin y /dashboard en enforce sin violaciones legítimas tras una semana de reportes; 'unsafe-eval' fuera de los portales.",
+   "criterio": "curl -I a /login, /forgot-password, /reset-password, /bienvenida y /dashboard devuelve X-Frame-Options DENY, y a /embed/<slug> no; los reportes de CSP llegan al destino; /admin y /dashboard en enforce; el PR lista los reportes de CSP de 7 días en Report-Only previos al enforce, cada uno con su resolución; la CSP de /admin y /dashboard no contiene 'unsafe-eval'. [F7 B22]",
    "worktree": "wt/plataforma",
    "estado": "abierta"
   },
@@ -3633,7 +3637,7 @@
     "h2.cli-resenas",
     "int.brevo"
    ],
-   "zona": "requiere decisión FROZEN",
+   "zona": "requiere decisión FROZEN + revisión de Franco (consumidores en el setter, `11-CONGELADOS.md`)",
    "nivel_proceso": "M",
    "tamano": "M",
    "riesgo": "Medio: cambia el texto que ven las pantallas de los 33 importadores; los throw que hoy llegan a la UI a propósito se vuelven genéricos si no se marcan como UserFacingError. Las tarjetas de Próximo de errores del portal y del admin van antes: acá solo el contrato y los sitios restantes.",
@@ -3887,7 +3891,7 @@
    "zona": "requiere decisión FROZEN",
    "nivel_proceso": "M",
    "tamano": "M",
-   "riesgo": "Medio. SEC-054 (Próximo) y el camino único de contacto tocan alerts.ts y contact.ts antes. FAL-026 (alerts sin disparador) está en Ahora, en «Crons con disparador real…», no en Próximo.",
+   "riesgo": "Medio. SEC-054 (Próximo) y el camino único de contacto tocan alerts.ts y contact.ts antes. FAL-026 (alerts sin disparador) está en Ahora, en [B-14], no en Próximo.",
    "prereqs": [
     "B-89",
     "B-38",
@@ -4274,7 +4278,7 @@
    "zona": "libre",
    "nivel_proceso": "M",
    "tamano": "M",
-   "riesgo": "Bajo. Suma DEU-026 (misma regla) desde la tarjeta de CTAs; el invariante de navegación sale de «De prosa a mecanismo» y de la de TransitionContext para vivir con la regla. lead-card.tsx también lo toca «Leads del admin…».",
+   "riesgo": "Bajo. Suma DEU-026 (misma regla) desde la tarjeta de CTAs; el invariante de navegación sale de «De prosa a mecanismo» y de la de TransitionContext para vivir con la regla. lead-card.tsx también lo toca [B-129].",
    "prereqs": [],
    "modelo": "Sonnet 5.5",
    "esfuerzo": "high",
@@ -4429,7 +4433,6 @@
    "bloque": "Después",
    "objetivo": "Que actividad y health midan lo que dicen medir, que el stream no pierda eventos y que no consulte cada 3 s con la pestaña oculta.",
    "hallazgos": [
-    "SEC-063",
     "DEU-019",
     "BUG-078",
     "PERF-008"
@@ -4453,7 +4456,7 @@
    "modelo": "Sonnet 5.5",
    "esfuerzo": "high",
    "ultracode": "OFF",
-   "criterio": "Un ORG_MEMBER con token válido recibe redirect en /admin/chatbot/activity y /health (verificación de SEC-063); el grep de 'PENDIENTE-DECISIÓN' en el registro da 0; dos eventos con el mismo createdAt llegan los dos al stream (test del cursor); VH-076: con la pestaña oculta no hay pedidos cada 3 s.",
+   "criterio": "Un ORG_MEMBER con token válido recibe redirect en /admin/chatbot/activity y /health (verificación de SEC-063); el grep de 'PENDIENTE-DECISIÓN' en el registro da 0; dos eventos con el mismo createdAt llegan los dos al stream (test del cursor); VH-076: con la pestaña oculta no hay pedidos cada 3 s. SEC-063 lo cierra [B-10]; acá solo se verifica [F7 B23]",
    "worktree": "wt/chatbot-admin",
    "estado": "abierta"
   },
@@ -4623,7 +4626,7 @@
    "zona": "libre (admin/leads/_actions es ZONA-FRANCO y no se toca)",
    "nivel_proceso": "M",
    "tamano": "S",
-   "riesgo": "Bajo. Se separó de Proyectos (otra causa) y suma A11Y-023 de la tarjeta de formularios del admin. lead-card.tsx también lo toca «Navegación de los portales…».",
+   "riesgo": "Bajo. Se separó de Proyectos (otra causa) y suma A11Y-023 de la tarjeta de formularios del admin. lead-card.tsx también lo toca [B-119].",
    "prereqs": [],
    "modelo": "Sonnet 5.5",
    "esfuerzo": "high",
@@ -4896,6 +4899,7 @@
    "tamano": "M",
    "riesgo": "Bajo. BUG-155 (textos > 5000), BUG-161 y UX-055 (dedupe y CSV de Excel) van antes en Próximo sobre los mismos archivos.",
    "prereqs": [
+    "B-84",
     "B-85",
     "B-79"
    ],
@@ -5366,7 +5370,7 @@
    "zona": "libre",
    "nivel_proceso": "M",
    "tamano": "S",
-   "riesgo": "Bajo. A11Y-008 y A11Y-015 pasaron al ChatShell. La relación con la escala global de capas la documenta «Una sola fuente de acentos y de z-index…».",
+   "riesgo": "Bajo. A11Y-008 y A11Y-015 pasaron al ChatShell. La relación con la escala global de capas la documenta [B-159].",
    "prereqs": [],
    "modelo": "Sonnet 5.5",
    "esfuerzo": "high",
@@ -5401,7 +5405,7 @@
    "tamano": "M",
    "riesgo": "Medio: cambios de render visibles; comparar capturas. BUG-081 (boundary de WebGL, Próximo) toca los mismos avatares antes.",
    "prereqs": [
-    "B-52"
+    "B-53"
    ],
    "modelo": "Opus 5.5",
    "esfuerzo": "xhigh",
@@ -5433,7 +5437,7 @@
    "tamano": "M",
    "riesgo": "Medio, por ser 3D: hoy dos widgets en la misma página comparten el mouse. Mismo archivo que la tarjeta de canvas: mismo worktree.",
    "prereqs": [
-    "B-52"
+    "B-53"
    ],
    "modelo": "Opus 5.5",
    "esfuerzo": "xhigh",
@@ -5546,7 +5550,7 @@
     "h4.adm-referidos",
     "h4.adm-shell.acceso-y-layout"
    ],
-   "zona": "libre",
+   "zona": "libre (el `loading.tsx` de `admin/fg2-lab` es ZONA-FRANCO: con aviso a Franco)",
    "nivel_proceso": "M",
    "tamano": "M",
    "riesgo": "Bajo. Reutiliza el modal de Próximo en vez de crear otro hook. DIS-002 (shells con roles) vuelve a tocar AdminLayoutClient después.",
@@ -5579,7 +5583,8 @@
    "tamano": "M",
    "riesgo": "Bajo. A11Y-001 (Próximo) y PERF-018 tocan las mismas páginas: van antes. SEC-027 se separó: es otra causa y otro archivo.",
    "prereqs": [
-    "B-25"
+    "B-77",
+    "B-151"
    ],
    "modelo": "Sonnet 5.5",
    "esfuerzo": "high",
@@ -5645,7 +5650,7 @@
     "h2.cli-resultados",
     "h2.cli-cuenta"
    ],
-   "zona": "requiere decisión FROZEN",
+   "zona": "requiere decisión FROZEN + revisión de Franco (consumidores en el setter, `11-CONGELADOS.md`)",
    "nivel_proceso": "M",
    "tamano": "M",
    "riesgo": "Alto por alcance: el kit tiene 344 dependientes, 53 en la zona de Franco. A11Y-037 (Modal, Próximo) toca el mismo kit antes.",
@@ -5751,7 +5756,7 @@
     "lib.sitio-publico",
     "rama.rediseno-home"
    ],
-   "zona": "requiere decisión FROZEN",
+   "zona": "requiere decisión FROZEN (aviso a Franco: `setter-nav.tsx:43` usa triggerTransition)",
    "nivel_proceso": "M",
    "tamano": "M",
    "riesgo": "Medio: envuelve todas las rutas públicas y no tiene test. Los ids 'servicios' y 'caracteristicas' cambian con rediseno/home (bead847c).",
@@ -5761,7 +5766,7 @@
    "modelo": "Opus 5.5",
    "esfuerzo": "xhigh",
    "ultracode": "OFF",
-   "criterio": "visual-qa desktop+mobile de / → /contact, de /web-development → /#servicios (el shutter no abre antes de que pinte el destino) y de back/forward, más /admin y /dashboard sin shutter; el grep de 'servicios' y 'caracteristicas' en TransitionContext da 0.",
+   "criterio": "visual-qa desktop+mobile de / → /contact, de /web-development → /#servicios (el shutter no abre antes de que pinte el destino) y de back/forward, más /admin y /dashboard sin shutter; el grep de 'servicios' y 'caracteristicas' en TransitionContext da 0. La navegación del setter (destinos y drawer de setter-nav) no tiene regresiones en desktop ni en mobile [F7 B16]",
    "worktree": "wt/protegidos",
    "estado": "abierta"
   },
@@ -6088,7 +6093,7 @@
    "zona": "libre",
    "nivel_proceso": "M",
    "tamano": "M",
-   "riesgo": "Medio: «sin llamador» se midió con grep. DEU-023 (/bienvenida, Ahora) y DEU-067 (módulos legacy, en «Proyectos del admin: alta, edición…») deciden antes; la tarjeta de proyectos de este bloque usa exports de lib/actions/projects.ts.",
+   "riesgo": "Medio: «sin llamador» se midió con grep. DEU-023 (/bienvenida, Ahora) y DEU-067 (módulos legacy, en [B-70]) deciden antes; la tarjeta de proyectos de este bloque usa exports de lib/actions/projects.ts.",
    "prereqs": [
     "B-164",
     "B-109",
@@ -6164,7 +6169,6 @@
    "hallazgos": [
     "DEU-065",
     "POD-071",
-    "POD-072",
     "POD-073",
     "POD-074",
     "POD-081",
@@ -6422,7 +6426,7 @@
    "zona": "libre (CODEOWNERS de la zona de Franco: Franco)",
    "nivel_proceso": "L",
    "tamano": "L",
-   "riesgo": "Medio. Un hook mal escrito bloquea a todos los agentes: probar caso positivo y negativo. CODEOWNERS solo bloquea con «Require review from Code Owners» en main. DEU-090 (CI sin lint) está en este mismo bloque, en «CI que corre de verdad…»: va antes.",
+   "riesgo": "Medio. Un hook mal escrito bloquea a todos los agentes: probar caso positivo y negativo. CODEOWNERS solo bloquea con «Require review from Code Owners» en main. DEU-090 (CI sin lint) está en este mismo bloque, en [B-88]: va antes.",
    "prereqs": [
     "B-172",
     "B-162",
@@ -7037,8 +7041,7 @@
    "tamano": "S",
    "riesgo": "Medio. El dueño puede contestar precios o promesas que el bot repetiría: la respuesta pasa por develOP y por forbiddenStatements. Se recortó a lo que BUG-023 no cubre.",
    "prereqs": [
-    "B-48",
-    "B-125"
+    "B-64"
    ],
    "modelo": "Sonnet 5.5",
    "esfuerzo": "high",
@@ -7092,7 +7095,7 @@
    "zona": "libre",
    "nivel_proceso": "M",
    "tamano": "S",
-   "riesgo": "Medio: verificar que la Performance API esté habilitada en el proyecto de Google; la cuenta de Google por org la decide la tarjeta de Ahora.",
+   "riesgo": "Medio: verificar que la Performance API esté habilitada en el proyecto de Google (VH-176); la cuenta de Google por org la decide la tarjeta de Ahora.",
    "prereqs": [
     "B-19",
     "B-54"
@@ -7182,7 +7185,7 @@
    "zona": "libre",
    "nivel_proceso": "M",
    "tamano": "M",
-   "riesgo": "Medio. Con la caché de Tiendanube fría son 4 fetch en serie en el render de Inicio, bajo el techo de 10 s. Se quitó el arreglo de stock null: lo hace BUG-033 antes.",
+   "riesgo": "Medio. Con la caché de Tiendanube fría son 4 fetch en serie en el render de Inicio, bajo el techo de 10 s (según el PROMPT; sin verificar, VH-159). Se quitó el arreglo de stock null: lo hace BUG-033 antes.",
    "prereqs": [
     "B-54"
    ],
@@ -7397,7 +7400,7 @@
    "riesgo": "Alto si se hace sin sus prerrequisitos: cargar el Cal.com de un cliente hoy rompe la agenda del setter (BUG-038) y la v1 de Cal.com está apagada (TEC-002). Se recortó a la parte del bot: lo de Franco y el escritor ya están en otras tarjetas.",
    "prereqs": [
     "B-21",
-    "B-86",
+    "B-32",
     "B-55"
    ],
    "modelo": "Sonnet 5.5",

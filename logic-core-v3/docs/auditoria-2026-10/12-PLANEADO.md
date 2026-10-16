@@ -7,7 +7,7 @@
 ## Resumen
 
 - Ítems: **1351** — por tipo: decision 212 · hecho-declarado 443 · idea 56 · pendiente 556 · promesa 6 · bloque 78.
-- Estado en código: hecho 601 · parcial 226 · no empezado 456 · abandonado 29 · contradicho 39.
+- Estado en código: hecho 597 · parcial 229 · no empezado 457 · abandonado 29 · contradicho 39.
 - ZONA-FRANCO: 361 ítems.
 - TODO/FIXME en el código de `origin/main`: 70 (`_crudo/todos-codigo.json`).
 
@@ -6609,7 +6609,7 @@
 - Nodo(s): h5.set-manual
 - Qué es: Un solo tilde persiste en bloque ['cta','calidad','mobile'] para no romper progresoJson/FASE_IDS; la spec pedía 5 (ver H-05).
 - Referencias: src/lib/leados/contracts.ts (FASE_IDS) · tambien en :143, :745
-- Estado en código: **hecho** — manual.ts:135-137 cta/calidad/mobile mapean a mc2 sin tocar FASE_IDS (:125-127). (D4-c1, lector D4-L6)
+- Estado en código: **no empezado** — manual.ts:135-137 mapea cta/calidad/mobile a mc2, pero mc2 dibuja un tilde por fase (tres); el tilde único (tildeUnico) y mc2-refinar.tsx existen solo en el WIP 506e0059 de origin/p25/rafaga-tildes (git log --all). Corregido en F7 (C7). (D4-c1, lector D4-L6)
 - ¿Sigue teniendo sentido?: decidir
 
 #### [PLAN-818] Trabajo LeadOS sin commitear
@@ -9003,7 +9003,7 @@
 - Nodo(s): lib.plataforma
 - Qué es: GH Action diaria pg_dump cifrado GPG + job de restore-test; scripts locales de backup/restore.
 - Referencias: .github/workflows/db-backup.yml · scripts/db-backup-local.sh · scripts/db-restore-local.sh · docs/operations/neon-backups.md
-- Estado en código: **hecho** — .github/workflows/db-backup.yml:36-41 y job restore-test; scripts/db-backup-local.sh, scripts/db-restore-local.sh y docs/operations/neon-backups.md presentes. La primera corrida no es verificable leyendo. (D6-c1, lector D6-L2)
+- Estado en código: **parcial** — .github/workflows/db-backup.yml:36-41 y job restore-test; scripts/db-backup-local.sh, scripts/db-restore-local.sh y docs/operations/neon-backups.md presentes. Nunca terminó bien: gh run list (2026-10-15) dio 140 corridas fallidas y 0 secrets (BUG-171). Corregido en F7 (K6). (D6-c1, lector D6-L2)
 - ¿Sigue teniendo sentido?: si
 
 #### [PLAN-1117] Backups cifrados por ser repo público
@@ -9137,7 +9137,7 @@
 - Nodo(s): lib.plataforma
 - Qué es: Revisar y aplicar en la Neon compartida, regenerar Prisma y correr invariantes y tests.
 - Referencias: prisma/schema.prisma · también en fuente:11946 · también en fuente:11986
-- Estado en código: **hecho** — prisma/migrations/20260702223350_add_executive_report_config/migration.sql:2-6; schema.prisma:396-397 y :493-497 (D6-c1, lector D6-L1)
+- Estado en código: **parcial** — En el repo: prisma/migrations/20260702223350_add_executive_report_config/migration.sql:2-6; schema.prisma:396-397 y :493-497. La aplicación en la Neon no se ve leyendo el código (VH-004). Corregido en F7 (K10). (D6-c1, lector D6-L1)
 - ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1134] D6 infra de tests de integración
@@ -9428,7 +9428,7 @@
 - Nodo(s): lib.plataforma
 - Qué es: .env apunta a la branch dev; prod a main desde Netlify.
 - Referencias: B0.1
-- Estado en código: **hecho** — logic-core-v3/.env.example:21-24 (local → branch dev, prod → branch main); seed-guard.ts:18-30 reconoce la branch dev (D6-c1, lector D6-L1)
+- Estado en código: **parcial** — logic-core-v3/.env.example:21-24 documenta la intención (local → branch dev, prod → branch main) y seed-guard.ts:18-30 reconoce la branch dev; a qué branch apunta DATABASE_URL en Netlify no se ve en el código (VH-177). Corregido en F7 (K1). (D6-c1, lector D6-L1)
 - ¿Sigue teniendo sentido?: no
 
 #### [PLAN-1171] Plan de Neon y política de retención
