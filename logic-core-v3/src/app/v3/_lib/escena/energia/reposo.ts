@@ -19,7 +19,8 @@ export const REPOSO = {
   esperaS: 3.5,
   // [PULIDO 22] T1 · gradual (pocos al principio: la cuenta crece con el cuadrado del tiempo). [PULIDO 23] U2 · en ~15 s (eran 30).
   formaS: 15,
-  enciendeS: 0.6,
+  // [CIERRE A-bis] A4 · cada rayo entra más rápido (era 0,6): quietos, se notaban más tarde que cuando entraban temblando.
+  enciendeS: 0.4,
   /** El corte: la cascada desde el origen del gesto (s), el destello de cada enlace al morir (s, y cuánto brilla: alfa por encima de 1) y el golpe de energía a sus brasas. */
   corteS: 0.3,
   destelloS: 0.1,

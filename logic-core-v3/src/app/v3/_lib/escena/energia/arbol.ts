@@ -25,7 +25,8 @@ export const ARBOL = {
   /** Los focos (entre cuántos), entre cuántas de las más lejanas se elige cada uno, y en qué parte de la formación se termina de encender. */
   focos: [5, 8],
   entre: 3,
-  enciende: 0.7,
+  // [CIERRE A-bis] A4 · la red entera en ~7 s (era 0,7: ~11 s).
+  enciende: 0.45,
 } as const
 
 /** Lo repartido: por celda, la brasa y su distancia al punto; después, las elegidas, sus coordenadas, su distancia por el árbol a un foco. */

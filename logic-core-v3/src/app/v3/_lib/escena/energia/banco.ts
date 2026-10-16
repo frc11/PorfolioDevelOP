@@ -24,7 +24,8 @@ export interface EnergiaDelBanco {
     carga: number
     velocidad: number
     /** [PULIDO 19] Q1.d · la red en reposo: su fase, cuántos enlaces, cuántas veces se formó y se cortó. */
-    red: { fase: string; enlaces: number; formadas: number; cortes: number }
+    // [CIERRE A-bis] A4 · y cuánto está encendida (el alfa medio de sus enlaces: 0 a 1) y desde cuándo está en su fase (s).
+    red: { fase: string; enlaces: number; formadas: number; cortes: number; encendida: number; faseS: number }
     /** [PULIDO 27] Z1 · cuántas se ven (brillo y vida, en el cuadro y no sobre un texto) y cuántas viven (vida de más de la mitad). */
     visibles: number
     vivas: number
@@ -108,7 +109,7 @@ export function energiaDelBanco(a: Armado, vista: { readonly current: Vista }): 
       cursor: a.rayo.activo,
       carga: a.puntero.carga,
       velocidad: a.lectura.velocidad,
-      red: { fase: a.red.fase, enlaces: a.red.n, formadas: a.red.formadas, cortes: a.red.cortes },
+      red: { fase: a.red.fase, enlaces: a.red.n, formadas: a.red.formadas, cortes: a.red.cortes, encendida: a.red.alfa.subarray(0, a.red.n).reduce((s, x) => s + Math.min(1, x), 0) / Math.max(1, a.red.n), faseS: a.red.faseS },
       visibles: contarLasVisibles(a),
       vivas: a.brasas.vida.reduce((s, x) => s + (x > 0.5 ? 1 : 0), 0),
       enCuadro: contarLasVisibles(a, -1),
