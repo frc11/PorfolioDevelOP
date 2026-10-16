@@ -154,6 +154,31 @@
      "ruta": "src/lib/rate-limit/presets.ts",
      "linea": 8,
      "fragmento": "export const RATE_LIMIT_PRESETS = {\n  // ── Auth ──\n  forgotPasswordPerIp: { limit: 5, windowMs: 15 * 60_000 },"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 97,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 174,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 42,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/email/brevo-service.ts",
+     "linea": 17,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 37,
+     "fragmento": ""
     }
    ],
    "impacto": "Bloqueante para el primer cliente real: cualquiera puede pedir magic links sin limite para su email, por la action o directo por POST /api/auth/signin/resend (CSRF de /api/auth/csrf). El cliente recibe rafagas de 'Tu acceso a develOP' y la cuenta Brevo compartida gasta cuota y reputacion; si Brevo limita o suspende, dejan de salir resets, bienvenidas y avisos de leads. Por la rubrica (operacion con costo de emails, anonima, sin limite) es CRITICA aunque solo alcance emails registrados, que ademas se enumeran con el mismo endpoint.",
@@ -179,7 +204,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "CRÍTICA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H01",
+      "titulo": "Magic link sin rate limit: cualquier anónimo dispara emails ilimitados (Brevo) a cualquier cuenta registrada y además obtiene un oráculo de existencia de cuentas",
+      "severidad": "CRÍTICA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -217,6 +251,46 @@
      "ruta": "node_modules/@auth/core/lib/actions/session.js",
      "linea": 30,
      "fragmento": "...(isUpdate && { trigger: \"update\" }),"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 207,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 225,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/reset-password/actions.ts",
+     "linea": 75,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 56,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 228,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/actions/auth-actions.ts",
+     "linea": 5,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 44,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 61,
+     "fragmento": ""
     }
    ],
    "impacto": "Si alguien obtiene la cookie de sesion de un cliente (PC compartida, malware, cookie filtrada), que el cliente cambie o restablezca la contrasena NO lo echa: con la cookie vieja, GET /api/auth/csrf + POST /api/auth/session (double-submit, sin conocer la contrasena) dispara el callback jwt con trigger 'update', que saltea la comparacion y re-firma el token con la sessionVersion nueva. SEC-AUTH-03 queda cerrado solo contra reuso pasivo.",
@@ -243,7 +317,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H03",
+      "titulo": "La revocación de sesiones (sessionVersion) se evade con un update de sesión: una cookie robada sobrevive al reset o cambio de contraseña",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -366,6 +449,51 @@
      "ruta": "src/auth.ts",
      "linea": 157,
      "fragmento": "const isValid = await bcrypt.compare(String(credentials.password), user.password)"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 134,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 152,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 8,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 50,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 77,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/rate-limit/limiter.ts",
+     "linea": 37,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/rate-limit/presets.ts",
+     "linea": 8,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 20,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 65,
+     "fragmento": ""
     }
    ],
    "impacto": "Un anonimo puede probar contrasenas sin limite contra cualquier cuenta (incluido el SUPER_ADMIN) por POST /api/auth/callback/credentials con el CSRF de /api/auth/csrf; ni siquiera por loginAction hay freno real: el Map es por instancia serverless, se pierde en cada lambda fria, se indexa por el primer X-Forwarded-For y cualquier redirect limpia el contador (actions.ts:125-127). Las contrasenas de reset/accept-invite solo exigen 8 caracteres y las temporales tienen ~34 bits.",
@@ -391,7 +519,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H02",
+      "titulo": "Fuerza bruta de contraseñas sin límite efectivo: el endpoint de credenciales de NextAuth saltea el limitador, y ese limitador está en memoria y usa un header que manda el cliente",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -444,6 +581,51 @@
      "ruta": "prisma/schema.prisma",
      "linea": 1229,
      "fragmento": "@@unique([organizationId, email])"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 34,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 112,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientOnly.ts",
+     "linea": 62,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/onboarding/core.ts",
+     "linea": 69,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/components/admin/onboarding/Step5Review.tsx",
+     "linea": 94,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 65,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 76,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 176,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+     "linea": 71,
+     "fragmento": ""
     }
    ],
    "impacto": "Bloqueante para el primer cliente real: si el admin carga 'Juan@Empresa.com' (o el teclado del celular capitaliza), el User queda con mayuscula; el login con contrasena (auth.ts:143), el magic link (signIn callback auth.ts:176-184) y forgot-password (ForgotPasswordSchema toLowerCase, schemas.ts:80) buscan en minuscula con igualdad exacta -> 'Email o contrasena incorrectos' para siempre. Tambien permite duplicados que difieren solo en mayusculas. El arreglo ya existe en el camino viejo (clients.ts:96-100) y en updateClient.ts:71, pero no en los tres caminos vivos de alta.",
@@ -480,6 +662,13 @@
       "titulo": "Unicidad de email sensible a mayúsculas en User y EmailContact",
       "severidad": "BAJA",
       "nota_padre": "Misma causa raíz que BUG-002 (email sin semántica case-insensitive); suma User.email y EmailContact.email @unique sensibles a mayúsculas."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H04",
+      "titulo": "El alta de clientes guarda el email con mayúsculas y el login lo busca en minúsculas: el cliente no puede entrar nunca (ni con contraseña, ni con reset, ni con magic link)",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -519,6 +708,31 @@
      "ruta": ".env.example",
      "linea": 73,
      "fragmento": "NEXTAUTH_URL="
+    },
+    {
+     "ruta": "src/auth.config.ts",
+     "linea": 10,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 101,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 146,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/forgot-password/actions.ts",
+     "linea": 86,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 191,
+     "fragmento": ""
     }
    ],
    "impacto": "Endurecimiento. Con trustHost: true fijo (auth.ts:78), Auth.js no falla cerrado si en producción falta AUTH_URL/NEXTAUTH_URL, y en ese caso el signIn de magicLinkAction arma la URL del link con X-Forwarded-Host. NEXTAUTH_URL figura como obligatoria en la documentación, pero scripts/check-env.js no corre en el build (no hay prebuild y netlify.toml usa npm run build). Para el primer cliente real solo es explotable si la variable falta y Netlify deja pasar el header del cliente: el email legítimo llevaría el token a un dominio ajeno (toma de cuenta).",
@@ -543,7 +757,16 @@
     "verificador": {
      "se_sostiene": false,
      "severidad_ajustada": "BAJA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H07",
+      "titulo": "trustHost: true y la URL del magic link sin validar: inyección de host posible en el link del mail (condicionada a la configuración)",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -812,6 +1035,26 @@
      "ruta": "src/auth.ts",
      "linea": 95,
      "fragmento": "pages: { signIn: LOGIN_PATH },"
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 122,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 188,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/login/page.tsx",
+     "linea": 192,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/login/actions.ts",
+     "linea": 162,
+     "fragmento": ""
     }
    ],
    "impacto": "Sin cuenta Google vinculada (y no existe codigo que vincule: git grep de account.create/linkAccount vacio) el signIn callback recibe user.id = sub de Google, no encuentra usuario y devuelve '/login?error=unauthorized'; /login no lee searchParams, asi que el cliente vuelve al login sin mensaje. Si faltan AUTH_GOOGLE_ID/SECRET (no estan en .env.example) termina en un error de Google. Mismo silencio para cualquier ?error del signIn callback; el magic link vencido cae en la pagina de error por defecto de Auth.js en ingles (pages.error no configurado).",
@@ -833,7 +1076,16 @@
     "tmp": "D1-c1/D1-L1/H11",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H06",
+      "titulo": "«Continuar con Google» falla siempre y sin aviso; la pantalla del magic link le dice al cliente que busque el link en la consola del servidor",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -856,6 +1108,21 @@
      "ruta": "src/proxy.ts",
      "linea": 135,
      "fragmento": "if (isSafeCallbackUrl(callbackUrl) && callbackUrl !== LOGIN_PATH) {\n  return NextResponse.redirect(new URL(callbackUrl as string, nextUrl))"
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 18,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 80,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 134,
+     "fragmento": ""
     }
    ],
    "impacto": "Un link https://develop.com.ar/login?callbackUrl=/%5Cevil.com enviado a un cliente logueado lo manda a https://evil.com: el parser WHATWG trata la barra invertida como '/' en http(s) y elimina tabs (/%09/evil.com). Phishing con dominio legitimo ('tu sesion vencio, ingresa de nuevo'). El eslabon inferido es el parser de URL en runtime.",
@@ -876,7 +1143,16 @@
     "tmp": "D1-c1/D1-L1/H12",
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene leyendo las líneas citadas. Prueba local del parser WHATWG con la misma función: \"/\\evil\" y \"/<tab>/evil\" pasan el filtro y resuelven a https://evil.example/.",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H05",
+      "titulo": "Open redirect en /login: callbackUrl='/\\\\dominio' pasa isSafeCallbackUrl y el middleware redirige a un dominio externo",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -909,6 +1185,26 @@
      "ruta": "src/app/cambiar-password/actions.ts",
      "linea": 17,
      "fragmento": ".regex(/[A-Z]/, 'La nueva contraseña debe incluir al menos una mayúscula.')"
+    },
+    {
+     "ruta": "src/app/accept-invite/actions.ts",
+     "linea": 19,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/cambiar-password/actions.ts",
+     "linea": 9,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 22,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 172,
+     "fragmento": ""
     }
    ],
    "impacto": "Un cliente que se olvida la contrasena puede elegir 'aaaaaaaa' y un usuario invitado (las invitaciones de equipo eran SUPER_ADMIN) tambien; contradice la decision de una sola regla (PLAN-003) y abarata la fuerza bruta. accept-invite ademas valida a mano con casts 'as string', sin Zod.",
@@ -930,7 +1226,16 @@
     "tmp": "D1-c1/D1-L1/H13",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H08",
+      "titulo": "Política de contraseñas inconsistente: reset y aceptar invitación aceptan «aaaaaaaa»; acceptInviteAction no tiene Zod ni rate limit",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -968,6 +1273,26 @@
      "ruta": "node_modules/@auth/core/lib/actions/signin/send-token.js",
      "linea": 63,
      "fragmento": "token: await createHash(`${token}${secret}`),"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 317,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 180,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/accept-invite/actions.ts",
+     "linea": 36,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/accept-invite/actions.ts",
+     "linea": 58,
+     "fragmento": ""
     }
    ],
    "impacto": "Quien lea la tabla PasswordResetToken (backup, Neon compartida, logs) puede usar cualquier token vigente (45 min reset, 7 dias invitacion) y fijar la contrasena de esa cuenta; Auth.js si hashea el token del magic link, el reset propio no. Dos envios simultaneos del mismo token pasan ambos (check-then-update) y tras un reset exitoso no se borran otros tokens pendientes.",
@@ -989,7 +1314,16 @@
     "tmp": "D1-c1/D1-L1/H14",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H09",
+      "titulo": "Tokens de reset e invitación guardados en claro; la invitación SUPER_ADMIN dura 7 días y accept-invite acepta cualquier token de reset",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -1042,6 +1376,56 @@
      "ruta": "src/modules/chatbot/server/conversation/resolver.ts",
      "linea": 38,
      "fragmento": "if (!bot || !bot.isActive || !bot.knowledgeBase) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+     "linea": 32,
+     "fragmento": ""
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 419,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 19,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 192,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/preview.ts",
+     "linea": 6,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/layout.tsx",
+     "linea": 18,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/layout.tsx",
+     "linea": 121,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/plan/get-plan-for-org.ts",
+     "linea": 74,
+     "fragmento": ""
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 658,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/components/dashboard/SubscriptionBanner.tsx",
+     "linea": 8,
+     "fragmento": ""
     }
    ],
    "impacto": "Si 'archivar' se usa para dar de baja a un cliente (falta de pago, fin de contrato), sus usuarios siguen entrando y operando el portal; ningun punto de auth ni del portal lee deletedAt (git grep). Depende de la intencion del producto.",
@@ -1083,6 +1467,13 @@
       "titulo": "No existe suspensión de cliente: el soft-delete (Organization.deletedAt) solo oculta la org del listado del admin",
       "severidad": "MEDIA",
       "nota_padre": "Muestreo DEC-37: se sostiene (git grep deletedAt en src: solo admin/clients/page.tsx:23,34, admin/announcements/page.tsx:27 y archiveClient.ts). Misma causa raíz que SEC-014 (archivar no corta el acceso): se fusiona."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H03",
+      "titulo": "Una org archivada (soft-delete) o con suscripción CANCELED mantiene el acceso completo al portal y su plan",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -1221,6 +1612,41 @@
      "ruta": "src/lib/action-utils.ts",
      "linea": 31,
      "fragmento": "if (error instanceof Error) {\n  return error.message\n}"
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 70,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 144,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 242,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 15,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 29,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 81,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/preview.ts",
+     "linea": 6,
+     "fragmento": ""
     }
    ],
    "impacto": "Un error de Prisma (p. ej. P2025 'Invalid prisma.organization.update() invocation...') llega textual a la UI del cliente (viola 'nunca exponer errores internos'); el campo WhatsApp acepta cualquier texto de cualquier largo (lo ve el admin en ClientHeader/OverviewTab). Mismo toErrorMessage en :99, :146, :183, :244.",
@@ -1241,7 +1667,16 @@
     "tmp": "D1-c1/D1-L1/H18",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H11",
+      "titulo": "Las actions de perfil devuelven al navegador el mensaje interno de Prisma, guardan whatsapp sin validar e ignoran la impersonación",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -2247,6 +2682,31 @@
      "ruta": "node_modules/next/dist/server/lib/start-server.js",
      "linea": 267,
      "fragmento": "server.listen(port, hostname);"
+    },
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 20,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 49,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 65,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 84,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/qa/login/route.ts",
+     "linea": 151,
+     "fragmento": ""
     }
    ],
    "impacto": "La 'triple guarda' (route.ts:14-23) queda reducida a la variable QA_ALLOW_LOCALHOST, que los cuatro scripts QA encienden: el Host lo escribe el cliente y la guarda de hosting no aplica en una PC. dev:qa, start:qa, start:setter y start:galeria no pasan -H, así que Next llama server.listen(port, undefined), escucha en todas las interfaces e imprime la URL 'Network'. Un tercero en la misma red (cowork, bar, oficina) hace POST http://<IP>:3002/api/qa/login con 'Host: localhost' y {persona:'super-admin'}. Recibe un JWT de SUPER_ADMIN firmado con el AUTH_SECRET local y válido 8 h, que usa contra ese servidor: panel admin completo y escritura sobre la base del .env local, que según el PROMPT §3 es la Neon compartida. Además, ese servidor expuesto corre en Windows con next 16.2.9, que tiene un advisory crítico de RCE para servidores Windows (la versión la evalúa D8).",
@@ -2271,7 +2731,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "MEDIA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D1/H10",
+      "titulo": "/api/qa/login: la «triple guarda» depende de un header Host que controla el cliente y el endpoint mintea una cookie SUPER_ADMIN; en producción además revela que existe",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6187,6 +6656,41 @@
      "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
      "linea": 80,
      "fragmento": "// SOLO conteos. tokensIn/tokensOut/costUsd son internos — jamás salen de acá."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getClientSession.ts",
+     "linea": 15,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getClientSession.ts",
+     "linea": 29,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+     "linea": 24,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ChatbotOverview.tsx",
+     "linea": 27,
+     "fragmento": ""
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 375,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/auth/google-business/callback/route.ts",
+     "linea": 53,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/auth/tiendanube/callback/route.ts",
+     "linea": 67,
+     "fragmento": ""
     }
    ],
    "impacto": "Bloqueante para el primer cliente con Reseñas o Tienda conectada: cualquier usuario de su org (incluido un VIEWER) recibe en el payload RSC de /dashboard/chatbot el access y refresh token de Google Business, el token sin vencimiento de Tiendanube y la API key de Cal.com (credenciales emitidas a la app de develOP sobre sus cuentas), legibles en DevTools y por cualquier XSS o extensión del navegador, y además internalNotes, las notas privadas que develOP escribe sobre ese cliente. El componente solo usa session.bot.botName; getPublicConfig del mismo módulo sí usa select.",
@@ -6222,6 +6726,13 @@
       "titulo": "El resumen de Mi Chatbot manda al navegador la fila completa de QuotaUsage: tokens y costo en USD que develOP paga por el bot del cliente",
       "severidad": "BAJA",
       "nota_padre": "Misma causa raíz: el resumen de Mi Chatbot pasa filas completas de Prisma a componentes cliente; a la fila de Organization se suma la de QuotaUsage (tokens y costo en USD)."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D5/H02",
+      "titulo": "/dashboard/chatbot envía al navegador la fila completa de Organization: tokens de GBP, Tiendanube y Cal.com en claro y las notas internas del admin",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -6271,6 +6782,21 @@
      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
      "linea": 143,
      "fragmento": "const activeContacts = await prisma.emailContact.findMany({ where: { organizationId: org.id, optedOut: false }  // solo el conteo excluye bajas"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 40,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 150,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 188,
+     "fragmento": ""
     }
    ],
    "impacto": "Bloqueante para el primer cliente que use Email Marketing: la baja solo cambia optedOut en la base; la campaña se manda a la lista de Brevo completa, así que la persona sigue recibiendo aunque la página le confirmó que fue removida, y si el cliente reimporta su CSV el contacto vuelve a entrar a la lista. Expone al cliente a denuncias por spam y a develOP a la suspensión de la cuenta Brevo compartida; recipientCount (cuenta solo los no dados de baja) tampoco coincide con lo que Brevo envía.",
@@ -6306,6 +6832,13 @@
       "titulo": "La baja de un contacto no llega a Brevo: las campanas salen a la lista completa y siguen llegando a quien se dio de baja",
       "severidad": "ALTA",
       "nota_padre": "Misma baja que no llega a Brevo (optout/route.ts:91, _actions.ts:143); ya registrada en D6-c2."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H02",
+      "titulo": "La baja de email marketing no llega a Brevo y los atributos de contacto se pisan entre organizaciones",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -6398,314 +6931,6 @@
       "titulo": "No existe camino en la app para activar un módulo premium: cada venta de módulo exige escribir en la base a mano",
       "severidad": "ALTA",
       "nota_padre": "DEC-31: el verificador la bajó a MEDIA (operación interna con workaround; el pedido del cliente llega a develOP) y es el mismo hallazgo que FAL-005 (premium-modules.ts:103, upsell.ts:66, onboarding-tasks.ts:37)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "FAL-006",
-   "prefijo": "FAL",
-   "titulo": "La facturación no tiene escritor: ninguna pantalla crea ni cambia Invoice, Subscription.status nunca sale de ACTIVE y renewalDate no se escribe, pero el portal, las alertas, el MRR y el health score los leen",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "faltante",
-   "tipo_detalle": "faltante",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
-     "linea": 187,
-     "fragmento": "await prisma.subscription.create({\n        data: {\n          organizationId,"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
-     "linea": 70,
-     "fragmento": "prisma.invoice.findMany({\n      where: { organizationId },"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
-     "linea": 118,
-     "fragmento": "Tu suscripción está vencida.{' '}"
-    },
-    {
-     "ruta": "src/components/dashboard/SubscriptionBanner.tsx",
-     "linea": 8,
-     "fragmento": "if (!subscription || subscription.status !== 'PAST_DUE') {"
-    },
-    {
-     "ruta": "src/lib/alerts.ts",
-     "linea": 244,
-     "fragmento": "renewalDate: {\n          gte: today,"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/page.tsx",
-     "linea": 222,
-     "fragmento": "prisma.subscription.aggregate({\n      where: {\n        status: SubscriptionStatus.ACTIVE,"
-    },
-    {
-     "ruta": "src/lib/plan/get-plan-for-org.ts",
-     "linea": 98,
-     "fragmento": "const plan = sub?.plan"
-    },
-    {
-     "ruta": "src/lib/health-score.ts",
-     "linea": 442,
-     "fragmento": "if (sub.status === 'PAST_DUE') return 30"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
-     "linea": 164,
-     "fragmento": "Tus facturas apareceran aca automaticamente cada mes."
-    },
-    {
-     "ruta": "prisma/seed.ts",
-     "linea": 595,
-     "fragmento": "await prisma.invoice.upsert({  // unico escritor de Invoice junto con :618"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 96,
-     "fragmento": "enum AssetType {  // DOCUMENT IMAGE BRANDBOOK LOGO ACCESS OTHER, sin INVOICE"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
-     "linea": 106,
-     "fragmento": "const billingEmail = session?.user?.email ?? ''  // en soporte muestra el email del admin"
-    }
-   ],
-   "impacto": "Para el primer cliente: el historial de pagos de /dashboard/cuenta/facturacion queda vacío para siempre (Invoice solo la escribe prisma/seed.ts), nunca ve 'Pago pendiente' ni el aviso de vencimiento, y si deja de pagar sigue ACTIVE: el MRR y el conteo de clientes activos del admin lo incluyen, el health score no baja, la alerta SUBSCRIPTION_EXPIRING no puede disparar (renewalDate null en toda alta hecha desde la app) y el bot conserva el plan completo porque getPlanForOrg no mira status. Las suscripciones del seed traen renewalDate a 30 días: pasada esa fecha la org demo ve 'Tu suscripción está vencida' sin forma de salir.",
-   "propuesta": "Decidir dónde vive la facturación: si es externa, ocultar el historial y los avisos que dependen de Invoice/status/renewalDate y sacarlos del MRR; si es interna, agregar en el admin alta de Invoice, marcar pagada (paidAt) y las transiciones de Subscription (ACTIVE, PAST_DUE, CANCELED con renewalDate), y que getPlanForOrg caiga al plan de respaldo con CANCELED.",
-   "esfuerzo": "L",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-plan",
-    "h4.adm-clientes",
-    "h4.adm-dashboard",
-    "modelo.Invoice",
-    "modelo.Subscription",
-    "lib.plan",
-    "h2.cli-cuenta.historial-de-facturas"
-   ],
-   "relacionados_ids": [
-    "BUG-010"
-   ],
-   "previas": [],
-   "relacionados_texto": "BUG-010 (Subscription.price solo al crear); FAL-004 (patrón); SEC-014",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H04",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D2-c1",
-      "tmp": "D2-c1/D2-L1/H17",
-      "titulo": "Facturacion: el historial promete facturas 'automaticamente cada mes' pero nada en el sistema crea Invoice",
-      "severidad": "MEDIA",
-      "nota_padre": "Muestreo DEC-37: se sostiene (facturacion/page.tsx:164 promete facturas automáticas; git grep de invoice.create/upsert: solo prisma/seed.ts:595 y :618; control: la lectura facturacion/page.tsx:70). Misma causa que FAL-006 (D6-c2)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-038",
-   "prefijo": "SEC",
-   "titulo": "Notification es por usuario pero el portal la lee y la marca por organización: el cliente ve y apaga las notificaciones dirigidas al SUPER_ADMIN, con links a /admin/projects/<id>",
-   "dominio": "D2",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 718,
-     "fragmento": "userId String"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/layout.tsx",
-     "linea": 101,
-     "fragmento": "prisma.notification.findMany({\n        where: { organizationId },"
-    },
-    {
-     "ruta": "src/lib/actions/notifications.ts",
-     "linea": 33,
-     "fragmento": "await prisma.notification.updateMany({\n      where: { id: parsed.data.id, organizationId },"
-    },
-    {
-     "ruta": "src/lib/actions/notifications.ts",
-     "linea": 82,
-     "fragmento": "const notifications = await prisma.notification.findMany({\n      where: { organizationId },"
-    },
-    {
-     "ruta": "src/actions/dashboard-actions.ts",
-     "linea": 67,
-     "fragmento": "userId: admin.id,\n            organizationId,\n            taskId: task.id,"
-    },
-    {
-     "ruta": "src/actions/dashboard-actions.ts",
-     "linea": 70,
-     "fragmento": "actionUrl: `/admin/projects/${task.projectId}`,"
-    },
-    {
-     "ruta": "src/actions/agency-actions.ts",
-     "linea": 54,
-     "fragmento": "const notifications = orgMembers.map(member => ({"
-    },
-    {
-     "ruta": "src/components/dashboard/NotificationCenter.tsx",
-     "linea": 125,
-     "fragmento": "router.push(notif.actionUrl)"
-    },
-    {
-     "ruta": "src/actions/dashboard-actions.ts",
-     "linea": 62,
-     "fragmento": "await tx.notification.createMany({ data: superAdmins.map((admin) => ({ ... userId: admin.id, organizationId,"
-    },
-    {
-     "ruta": "src/lib/actions/notifications.ts",
-     "linea": 55,
-     "fragmento": "await prisma.notification.updateMany({\n      where: { organizationId, read: false },"
-    },
-    {
-     "ruta": "src/lib/actions/upsell.ts",
-     "linea": 107,
-     "fragmento": "const superAdmin = await prisma.user.findFirst({\n          where: { role: 'SUPER_ADMIN' },"
-    }
-   ],
-   "impacto": "Cuando un cliente aprueba o rechaza una entrega, la campana de todos los miembros de su org muestra las notificaciones escritas para el SUPER_ADMIN ('Cliente pidio cambios en...', 'Entrega aprobada por cliente...'), con un link a /admin/projects/<id> que expone el id interno y rebota en el proxy; cada miembro ve también las copias de los demás (una por miembro en cada pedido de aprobación) y cualquiera las marca leídas para todos. Ninguna pantalla del admin lee Notification, así que los avisos al SUPER_ADMIN (upsell, mensajes, referidos, aprobaciones) solo terminan en la campana del cliente o en ningún lado.",
-   "propuesta": "En dashboard/layout.tsx y lib/actions/notifications.ts (libres) filtrar lectura y marcado por { userId de la sesión, organizationId }. Decisión para Valentino (dashboard-actions.ts es FROZEN): no poner organizationId en las notificaciones del admin y decidir si el equipo necesita una bandeja propia o si esos avisos van solo por alerta/email.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-shell",
-    "h2.cli-proyecto",
-    "h4.adm-proyectos",
-    "modelo.Notification",
-    "lib.actions",
-    "h2.cli-shell.notificaciones",
-    "h2.cli-proyecto.aprobar-o-pedir-cambios",
-    "h2.cli-shell.campana-notificaciones",
-    "h2.cli-proyecto.aprobacion-entregas",
-    "h4.adm-dashboard"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "Patrón D6-c1 'Notification se escribe con userId pero se lee por organizationId'; SEC-018",
-   "vh": null,
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H05",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D2-c1",
-      "tmp": "D2-c1/D2-L1/H26",
-      "titulo": "Las notificaciones para los SUPER_ADMIN se guardan con la org del cliente y aparecen en su campana con links a /admin",
-      "severidad": "MEDIA",
-      "nota_padre": "Misma causa que SEC-038 (notificaciones del admin con la org del cliente); se suma su evidencia."
-     },
-     {
-      "ciclo": "D2-c1",
-      "tmp": "D2-c1/D2-L3/H05",
-      "titulo": "La campana y el historial del cliente listan notificaciones por organizationId sin userId: muestran las del SUPER_ADMIN y 'Marcar todas' marca las de toda la org",
-      "severidad": "MEDIA",
-      "nota_padre": "Muestreo DEC-37: se sostiene (dashboard-actions.ts:60-70 crea la notificación del SUPER_ADMIN con organizationId del cliente; dashboard/layout.tsx:101 y notifications.ts:55 y :82 leen y marcan por organizationId). Misma causa que SEC-038 (D6-c2)."
-     },
-     {
-      "ciclo": "D2-c1",
-      "tmp": "D2-c1/D2-L4/H07",
-      "titulo": "Notificaciones del cliente filtradas solo por organización: muestran y marcan copias dirigidas al SUPER_ADMIN y a otros miembros",
-      "severidad": "MEDIA",
-      "nota_padre": "Misma causa que SEC-038 (notificaciones leídas y marcadas por organización)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-039",
-   "prefijo": "SEC",
-   "titulo": "La baja de una campaña puede caer en otro cliente: CONTACT_ID y OPTOUT_TOKEN se guardan en el contacto global de Brevo y el último import de ese email los pisa",
-   "dominio": "D2",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 114,
-     "fragmento": "CONTACT_ID: contact.id,\n            OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id),"
-    },
-    {
-     "ruta": "src/lib/integrations/brevo.ts",
-     "linea": 49,
-     "fragmento": "listIds: params.listIds,\n        updateEnabled: true,"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 155,
-     "fragmento": "/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 1229,
-     "fragmento": "@@unique([organizationId, email])"
-    },
-    {
-     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
-     "linea": 91,
-     "fragmento": "await prisma.emailContact.updateMany({\n    where: { id: contactId },"
-    },
-    {
-     "ruta": "src/lib/integrations/brevo.ts",
-     "linea": 39,
-     "fragmento": "const res = await fetch(`${API_BASE}/contacts`, { method: 'POST', ... updateEnabled: true"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 113,
-     "fragmento": "attributes: { CONTACT_ID: contact.id, OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id) },"
-    }
-   ],
-   "impacto": "Si dos clientes de develOP tienen al mismo destinatario (caso común), el contacto de Brevo es uno solo por email en la cuenta compartida y queda con el CONTACT_ID del último cliente que importó. Cuando esa persona se da de baja desde la campaña del cliente A, el link apunta al EmailContact del cliente B: se marca optedOut en la base de B (escritura entre tenants disparada por un tercero) y A la sigue contando como activa. Un cliente con el módulo puede provocarlo a propósito importando emails de la lista de otro.",
-   "propuesta": "No guardar ids por tenant en atributos globales de Brevo: firmar un token que incluya organizationId y email y resolver la fila por (org, email) en la ruta de baja, o usar atributos por lista/org y el desuscribe nativo por lista. Verificar el modelo de contactos de Brevo con el caso de prueba.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-email-mkt",
-    "h6.vis-optout",
-    "int.brevo",
-    "modelo.EmailContact",
-    "h2.cli-email-mkt.baja-de-contactos"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "Hallazgo 'la baja no llega a Brevo' (este ciclo); BUG-012; previa S2b-01; BUG-002 (email sensible a mayúsculas)",
-   "vh": "VH-037",
-   "origen": {
-    "ciclo": "D6-c2",
-    "lote": "D6-T1",
-    "tmp": "D6-c2/D6-T1/H06",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D2-c1",
-      "tmp": "D2-c1/D2-L1/H04",
-      "titulo": "Contactos de Brevo compartidos entre clientes: CONTACT_ID, OPTOUT_TOKEN y nombre de un contacto se pisan entre organizaciones",
-      "severidad": "MEDIA",
-      "nota_padre": "Muestreo DEC-37: se sostiene (brevo.ts:39-51 POST /contacts con updateEnabled: true pisa los atributos globales; _actions.ts:113-117 CONTACT_ID y OPTOUT_TOKEN por import). Misma causa que SEC-039 (D6-c2)."
      }
     ]
    },

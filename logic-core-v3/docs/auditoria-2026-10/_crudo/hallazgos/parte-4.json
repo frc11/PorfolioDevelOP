@@ -3,6 +3,1046 @@
  "partes": 6,
  "hallazgos": [
   {
+   "id": "UX-030",
+   "prefijo": "UX",
+   "titulo": "Copiar snippet y Exportar CSV anuncian exito sin saber el resultado",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/components/installation/SnippetCopyBlock.tsx",
+     "linea": 29,
+     "fragmento": "navigator.clipboard.writeText(snippet)\n    setCopied(true)\n    toast.success(toastMessage)"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ExportLeadsButton.tsx",
+     "linea": 63,
+     "fragmento": "a.click()\n    document.body.removeChild(a)  ... toast.success(... 'Exportando tus contactos…')"
+    }
+   ],
+   "impacto": "Si el portapapeles esta bloqueado (permisos, iframe) el cliente pega nada en su sitio creyendo que copio el snippet; si el export falla (sesion vencida, 500) el toast igual dice que exporta.",
+   "propuesta": "await + catch del clipboard con fallback de seleccion; export via fetch con chequeo de status y blob, o al menos sin toast de exito.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot.instalacion",
+    "h3.cli-chatbot.exportar-csv"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patron: exito optimista sin resultado",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L5",
+    "tmp": "D5-c1/D5-L5/H16",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-046",
+   "prefijo": "DEU",
+   "titulo": "ClientSettingsForm muerto, con tres any y un toggle 'Activar Chatbot' que no hace nada",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+     "linea": 26,
+     "fragmento": "(bot.quickReplies as any[]) ?? []"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/ClientSettingsForm.tsx",
+     "linea": 36,
+     "fragmento": "accentColor: accentColor as any,\n        position: position as any,"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/dashboard/index.ts",
+     "linea": 3,
+     "fragmento": "export { ClientSettingsForm } from './ClientSettingsForm'  (unico importador; modules/chatbot/index.ts:85 no lo re-exporta)"
+    },
+    {
+     "ruta": "src/modules/chatbot/index.ts",
+     "linea": 89,
+     "fragmento": "export { saveClientSettings } from './server/admin/saveClientSettings'"
+    }
+   ],
+   "impacto": "Viola la regla 'cero any' (3 errores del baseline de eslint), mantiene viva una server action publica sin consumidor y un toggle que el servidor ignora; cualquiera que lo reconecte creeria que el cliente puede activar su bot.",
+   "propuesta": "Borrar ClientSettingsForm, su export y saveClientSettings (BotPersonalization lo reemplaza).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot.personalizacion",
+    "lib.actions"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L5",
+    "tmp": "D5-c1/D5-L5/H19",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-070",
+   "prefijo": "SEC",
+   "titulo": "Handshake del embed sin validar la ventana emisora; antes del handshake los eventos salen a '*'",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+     "linea": 29,
+     "fragmento": "const parentOriginRef = useRef<string>('*')"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+     "linea": 67,
+     "fragmento": "if (event.data?.type === 'develop:init') {\n        parentOriginRef.current = event.origin"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+     "linea": 103,
+     "fragmento": "notifyParent('lead-captured', tc.input)"
+    },
+    {
+     "ruta": "public/widget.js",
+     "linea": 165,
+     "fragmento": "if (event.origin !== BASE_URL) return  (control: el host si valida)"
+    }
+   ],
+   "impacto": "Cualquier otro frame del sitio del cliente con referencia al iframe puede fijar la atribucion UTM del visitante y cortar los eventos al host; con un widget.js viejo sin handshake, el lead capturado (nombre, telefono, email) se postea a '*'. Riesgo bajo: el destinatario sigue siendo el padre.",
+   "propuesta": "Aceptar develop:init solo si event.source === window.parent y el origen esta en allowedDomains; no postear PII hasta tener origen confirmado.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-widget-cliente.chat-embebido",
+    "lib.security"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L5",
+    "tmp": "D5-c1/D5-L5/H20",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: ChatbotEmbed.tsx:29 (parentOrigin «*» hasta el handshake) y :67-68 (acepta develop:init de cualquier ventana); widget.js:165 sí valida el origen.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-047",
+   "prefijo": "DEU",
+   "titulo": "Errores de eslint de reglas del React Compiler en el embed y el tooltip proactivo",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/components/tooltip/useTooltipTriggers.ts",
+     "linea": 31,
+     "fragmento": "const lastActivityRef = useRef<number>(Date.now())  (react-hooks/purity)"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/tooltip/ProactiveTooltip.tsx",
+     "linea": 79,
+     "fragmento": "setCurrentPrompt(prompt)  (react-hooks/set-state-in-effect)"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
+     "linea": 317,
+     "fragmento": "chatbot.messages.map((m) => (  (react-hooks/refs)"
+    },
+    {
+     "ruta": "src/modules/chatbot/components/tooltip/useTooltipTriggers.ts",
+     "linea": 89,
+     "fragmento": "const reset = () => setTrigger(null)  (nueva identidad en cada render: re-dispara los effects que la usan)"
+    }
+   ],
+   "impacto": "Errores del baseline de eslint en codigo publico; con el React Compiler activo pueden producir renders inconsistentes. reset sin useCallback hace que ProactiveTooltip re-ejecute su effect en cada render.",
+   "propuesta": "useCallback para reset, inicializar lastActivityRef en el effect, derivar el prompt sin setState en effect; revisar el falso positivo de refs en el embed.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-widget-develop.tooltip-proactivo",
+    "h3.vis-widget-cliente.chat-embebido"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L5",
+    "tmp": "D5-c1/D5-L5/H22",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-089",
+   "prefijo": "BUG",
+   "titulo": "Alta con bot: el slug del bot se toma del de la org sin verificar unicidad en BotConfig",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 85,
+     "fragmento": "c.organization.findUnique({ where: { slug: candidate } }),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 162,
+     "fragmento": "slug: uniqueSlug,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createBot.ts",
+     "linea": 57,
+     "fragmento": "const slug = await findUniqueBotSlug(slugify(input.botName))"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1278,
+     "fragmento": "slug     String  @unique"
+    },
+    {
+     "ruta": "src/lib/onboarding/core.ts",
+     "linea": 25,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/onboarding/core.ts",
+     "linea": 66,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/onboarding/core.ts",
+     "linea": 109,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 80,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createClientWithBot.ts",
+     "linea": 159,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/createBot.ts",
+     "linea": 15,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/new/actions.ts",
+     "linea": 88,
+     "fragmento": ""
+    }
+   ],
+   "impacto": "createBot deriva slugs de bot desde el nombre del bot, asi que puede existir un bot 'sofia' sin org 'sofia'. Si despues se da de alta la org 'Sofia', su slug esta libre en Organization pero choca en BotConfig: P2002, rollback de toda la tx y error generico. Mismo patron en lib/onboarding/core.ts:66 y :111.",
+   "propuesta": "Calcular el slug del bot con findUniqueBotSlug (createBot.ts:12-27) en ambas altas.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.adm-chatbots.alta-cliente-con-bot",
+    "lib.chatbot.admin",
+    "modelo.BotConfig"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L6",
+    "tmp": "D5-c1/D5-L6/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D5/H10",
+      "titulo": "El alta de cliente falla si ya existe un BotConfig con el slug de la org nueva: la unicidad se verifica solo contra Organization",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-010",
+   "prefijo": "PERF",
+   "titulo": "Detector de incidencias secuencial N+1 sin maxDuration",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+     "linea": 28,
+     "fragmento": "const bots = await unsafeGlobalQuery("
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+     "linea": 38,
+     "fragmento": "for (const bot of bots) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/detectBotIssues.ts",
+     "linea": 267,
+     "fragmento": "const emailResult = await sendAlertEmail(issue)"
+    }
+   ],
+   "impacto": "Por bot activo hace hasta 8 consultas en serie (:66-221) y por alerta nueva findFirst + create + email + update + Telegram en serie (:242-280). Aritmetica: 50 bots activos x 8 consultas x ~20 ms ~= 8 s antes de mandar un solo email, contra el timeout por defecto de las funciones sincronicas de Netlify (10 s). La ruta del cron no declara maxDuration (route.ts:5-20). Hoy no corre (no tiene scheduler); importa al arreglar eso.",
+   "propuesta": "Agregados con groupBy por botConfigId en una consulta por tipo de senal, emails al final en lote, y maxDuration explicito en la ruta.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-alertas.detector-incidencias",
+    "int.cron.detect-bot-issues",
+    "lib.chatbot.admin",
+    "modelo.ChatbotEvent"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "hallazgo 'El detector de incidencias de bots no tiene disparador programado'",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L6",
+    "tmp": "D5-c1/D5-L6/H18",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-071",
+   "prefijo": "SEC",
+   "titulo": "Scripts que imprimen credenciales completas por stdout: encode-vertex-creds.js vuelca la service account de Vertex y db-restore-local.sh el usuario y la contraseña de la base destino, creyendo enmascararlos",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "scripts/encode-vertex-creds.js",
+     "linea": 8,
+     "fragmento": "console.log('--- Pegar este VALOR en Netlify como GOOGLE_VERTEX_CREDENTIALS_JSON ---')"
+    },
+    {
+     "ruta": "scripts/encode-vertex-creds.js",
+     "linea": 10,
+     "fragmento": "console.log(JSON.stringify(parsed))"
+    },
+    {
+     "ruta": "scripts/db-restore-local.sh",
+     "linea": 78,
+     "fragmento": "${TARGET_URL%%@*} conserva esquema, usuario y contraseña y oculta el host"
+    },
+    {
+     "ruta": "scripts/db-restore-local.sh",
+     "linea": 92,
+     "fragmento": "la línea final imprime la URL completa en el comando psql sugerido"
+    }
+   ],
+   "impacto": "El helper lee vertex-credentials.json y vuelca la cuenta de servicio entera (incluida la clave privada) a la terminal. Corrido dentro de una sesion de agente o de CI, la credencial queda en transcripts o logs: es un vector plausible de la 'key expuesta en logs' de la bitacora. El archivo nunca fue commiteado (.gitignore:55). No se copio ningun valor.",
+   "propuesta": "Escribir el resultado a un archivo local ignorado o al portapapeles, nunca a stdout; al rotar la credencial vencida, no reutilizar este flujo.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "int.vertex",
+    "lib.chatbot.llm",
+    "lib.scripts",
+    "int.neon"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "D5-A4",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L6",
+    "tmp": "D5-c1/D5-L6/H20",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H09",
+      "titulo": "db-restore-local.sh imprime el usuario y la contraseña de la base destino creyendo que los enmascara",
+      "severidad": "BAJA",
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: db-restore-local.sh:74-94 (${TARGET_URL%%@*} deja usuario y contraseña; la última línea imprime la URL entera). El barrido también señaló que el caso de VH-141 atribuía el volcado de Vertex a check-env.js, que solo lista nombres (check-env.js:85-104): se corrigió en 08. Misma clase que SEC-071 (scripts que imprimen credenciales completas por stdout)."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "D9-c1",
+      "tmp": "D9-c1/PADRE/H09",
+      "antes": {
+       "titulo": "Script que imprime la credencial completa de Vertex por stdout"
+      },
+      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: db-restore-local.sh:74-94 (${TARGET_URL%%@*} deja usuario y contraseña; la última línea imprime la URL entera). El barrido también señaló que el caso de VH-141 atribuía el volcado de Vertex a check-env.js, que solo lista nombres (check-env.js:85-104): se corrigió en 08. Misma clase que SEC-071 (scripts que imprimen credenciales completas por stdout)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-090",
+   "prefijo": "BUG",
+   "titulo": "Analisis mensual: la serie salta meses sin fila y compara contra el ultimo mes con datos",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/lib/monthly-analysis.ts",
+     "linea": 73,
+     "fragmento": "const current = points.length > 0 ? points[points.length - 1] : null"
+    },
+    {
+     "ruta": "src/modules/chatbot/lib/monthly-analysis.ts",
+     "linea": 74,
+     "fragmento": "const prev = points.length > 1 ? points[points.length - 2] : null"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg.ts",
+     "linea": 79,
+     "fragmento": "take: SERIES_MONTHS,"
+    }
+   ],
+   "impacto": "La serie son las ultimas 6 filas de QuotaUsage, no los ultimos 6 meses: un mes sin conversaciones no tiene fila y desaparece del grafico, y la variacion compara con el ultimo mes con datos. Mientras el mes en curso no tenga su primera conversacion, 'como viene tu mes' muestra el mes anterior.",
+   "propuesta": "Generar los 6 meses calendario (en hora AR) y rellenar con 0 los que no tengan fila.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-resultados",
+    "h2.cli-resultados.analisis-mensual",
+    "modelo.QuotaUsage"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L6",
+    "tmp": "D5-c1/D5-L6/H21",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-031",
+   "prefijo": "UX",
+   "titulo": "Seed del bot develOP con WhatsApp ficticio de fallback, colores de servicio invertidos y sin verticalPack",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 231,
+     "fragmento": "whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5493815555555',"
+    },
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 224,
+     "fragmento": "'/ai-implementations': '#8b5cf6',"
+    },
+    {
+     "ruta": "src/app/globals.css",
+     "linea": 61,
+     "fragmento": "--color-ds-accent-ia: #10b981;"
+    },
+    {
+     "ruta": "src/modules/chatbot/prisma/seed.ts",
+     "linea": 51,
+     "fragmento": "- Color de marca: violeta"
+    }
+   ],
+   "impacto": "Si se corre el seed sin la variable, el bot publico de develOP deriva a un numero inventado. Los colores por ruta y los 'Color de marca' de la KB estan cruzados respecto de la paleta canonica (IA verde, automatizacion ambar, software violeta, globals.css:61-63), asi que el bot puede decirle a un prospecto el color equivocado. El seed tampoco deja verticalPack en 'agencia'.",
+   "propuesta": "Fallar el seed si falta NEXT_PUBLIC_WHATSAPP_NUMBER, corregir routeColorMap y el texto de la KB a la paleta canonica, y fijar verticalPack 'agencia'.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-widget-develop",
+    "h3.vis-widget-develop.contenido-bot-develop",
+    "modelo.BotConfig",
+    "modelo.KnowledgeBase"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "hallazgo verticalPack",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L6",
+    "tmp": "D5-c1/D5-L6/H22",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-072",
+   "prefijo": "SEC",
+   "titulo": "SSRF del webhook CRM: solo se valida la URL inicial (pasan redirects, DNS e IPv6 mapeada) y 'Probar conexión' le devuelve al cliente hasta 200 caracteres de la respuesta",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/crm/validateWebhookUrl.ts",
+     "linea": 11,
+     "fragmento": "Deuda conocida (roadmap-pendientes): DNS rebinding."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/crm/validateWebhookUrl.ts",
+     "linea": 87,
+     "fragmento": "hostname === '::1' ||\n    hostname.startsWith('fe80:') ||"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/crm/postToN8n.ts",
+     "linea": 87,
+     "fragmento": "const response = await fetch(input.webhookUrl, {\n      method: 'POST',"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/crm/postToN8n.ts",
+     "linea": 117,
+     "fragmento": "errorMessage: sanitizeSnippet(`HTTP ${response.status}: ${errorBody}`),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/integrations/testCrmConnection.ts",
+     "linea": 115,
+     "fragmento": "error: result.errorMessage ?? 'Falló la conexión',"
+    }
+   ],
+   "impacto": "Un usuario de un cliente con CRM habilitado puede hacer que el servidor de develOP pegue a destinos internos: con una URL https propia que redirige (301/302/307) a http://127.0.0.1:<puerto> o 169.254.169.254, o con https://[::ffff:7f00:1]/ (loopback IPv4 mapeado, que el validador no reconoce), o con un dominio que resuelve a IP privada. Con 'Probar conexión' lee el status y los primeros 200 caracteres de las respuestas de error. Precondición: cuenta de cliente con plan CRM.",
+   "propuesta": "fetch con redirect:'manual' (o validar cada salto); resolver DNS justo antes del POST y bloquear rangos privados, incluidos ::ffff:0:0/96, ::, 0.0.0.0/8 y 100.64.0.0/10; conectar a la IP validada; en 'Probar conexión' devolver solo un estado genérico (ok / código HTTP).",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "lib.chatbot.crm",
+    "int.n8n"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-SSRF-01, SEC-06, PLAN-271",
+   "vh": "VH-099",
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L7",
+    "tmp": "D5-c1/D5-L7/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-091",
+   "prefijo": "BUG",
+   "titulo": "Al llenarse el cupo se cortan también las conversaciones en curso, y la que tomó el último cupo recibe una sola respuesta",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 345,
+     "fragmento": "if (quota.conversationsUsed >= plan.quota) {"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 397,
+     "fragmento": "// Atomic reserve: solo para conversación nueva (mensaje en\n  // convo existente no incrementa el contador, así que no necesita reserve)."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/quota/checker.ts",
+     "linea": 41,
+     "fragmento": "const conversationsUsed = usage?.conversationsCount ?? 0"
+    }
+   ],
+   "impacto": "El gate optimista no distingue conversaciones nuevas de existentes. A fin de mes, un visitante en medio de una consulta que ya consumió su cupo recibe de golpe 'alcanzamos el límite del mes'; la conversación que reservó el último cupo (contador == cupo) se degrada en su segundo mensaje, así que el cliente paga un cupo por una sola respuesta.",
+   "propuesta": "Aplicar el gate de cupo solo cuando isNewConversation; las conversaciones existentes siguen hasta el tope de 40 mensajes.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "modelo.QuotaUsage"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "BUG-024",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L7",
+    "tmp": "D5-c1/D5-L7/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-092",
+   "prefijo": "BUG",
+   "titulo": "El turno del chat no tiene techo absoluto ni de salida: sin maxOutputTokens ni timeout total, dos arranques en frío más un tool o una respuesta larga superan los 30 s de maxDuration",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 952,
+     "fragmento": "temperature: 0.7,\n    stopWhen: stepCountIs(3),"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 954,
+     "fragmento": "// MUDEZ (commit 1) — SIN `timeout`."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+     "linea": 252,
+     "fragmento": "export const PROVIDER_STREAM_INITIAL_IDLE_MS = 12_000"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+     "linea": 281,
+     "fragmento": "export const STREAM_WATCHDOG_TOOL_MAX_MS = 15_000"
+    },
+    {
+     "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
+     "linea": 8,
+     "fragmento": "export const maxDuration = 30"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+     "linea": 115,
+     "fragmento": "export const ROUTE_MAX_DURATION_MS = 30_000"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+     "linea": 389,
+     "fragmento": "// Ante un corte de Netlify (~10s) a mitad de la transacción, la"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
+     "linea": 267,
+     "fragmento": "export const STREAM_WATCHDOG_INITIAL_IDLE_MS = 12_000"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 987,
+     "fragmento": "experimental_onStepStart: () => {\n  watchdogRef.current?.beginStep()"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 953,
+     "fragmento": "stopWhen: stepCountIs(3),"
+    }
+   ],
+   "impacto": "Todas las ventanas son de inactividad, no relojes: hasta 12 s de silencio inicial por step, más hasta 15 s de tool, más otro arranque de 12 s, ya superan 30 s sin que nada corte. Sin maxOutputTokens, un pedido de respuesta larga (o una inyección) genera texto continuo que no dispara ningún idle. Si la plataforma mata la función, el turno no se persiste, el costo no se registra y la reserva de cupo no se compensa. Los comentarios no coinciden sobre el límite real (persistTurn habla de ~10 s, reconcile asume 30 s) y la constante está copiada a mano.",
+   "propuesta": "Fijar maxOutputTokens (por plan, ver BUG-024) y un techo de pared global del run (AbortSignal con ROUTE_MAX_DURATION menos margen) que dispare el mismo camino del watchdog (persistir lo visto y la derivación); mover maxDuration a una constante compartida importable; verificar el timeout real de la función en Netlify.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "lib.chatbot.chat",
+    "int.vertex",
+    "lib.chatbot.llm"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "BUG-024, RESIL-01, D5-A3",
+   "vh": "VH-090",
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L7",
+    "tmp": "D5-c1/D5-L7/H07",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L2/H15",
+      "titulo": "El stream no tiene techo absoluto: el peor caso de ventanas suma ~45 s contra maxDuration 30 s",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo turno sin techo absoluto contra maxDuration 30 s."
+     },
+     {
+      "ciclo": "D5-c1",
+      "tmp": "D5-c1/D5-L8/H10",
+      "titulo": "El peor caso por request supera los 30 s de maxDuration: sin presupuesto global, el turno se descarta sin registrar",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo turno sin presupuesto global contra maxDuration 30 s."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-093",
+   "prefijo": "BUG",
+   "titulo": "Una respuesta del bot de más de 4000 caracteres deja la conversación en 400 en todos los turnos siguientes",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/chat/requestSchema.ts",
+     "linea": 48,
+     "fragmento": "role: z.enum(['user', 'assistant', 'system']),\n        content: z.string().max(MAX_MESSAGE_CHARS),"
+    },
+    {
+     "ruta": "src/modules/chatbot/hooks/useChatbot.ts",
+     "linea": 432,
+     "fragmento": "messages: trimHistory(\n                msgs"
+    },
+    {
+     "ruta": "src/modules/chatbot/shared/historyPolicy.ts",
+     "linea": 45,
+     "fragmento": "mensaje del historial que exceda el cap deja la conversación en 400 hasta que"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 140,
+     "fragmento": "return Response.json({ error: 'Invalid request body' }, { status: 400 })"
+    }
+   ],
+   "impacto": "El tope de 4000 caracteres pensado para el input del visitante se aplica también a los turnos 'assistant' que el widget reenvía completos. Como el modelo no tiene maxOutputTokens, una respuesta larga (listado de servicios, comparación) hace que cada mensaje siguiente devuelva 400 hasta salir de la ventana de 30 mensajes, es decir, por el resto de la conversación (que se cierra a los 40). Es la 'conversación que muere' de C-1 por otra puerta.",
+   "propuesta": "Validar el largo solo en mensajes 'user' y truncar (no rechazar) los 'assistant' en el server o en el widget; fijar maxOutputTokens acorde.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "h3.vis-widget-cliente"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "C-1, PLAN-342",
+   "vh": "VH-100",
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L7",
+    "tmp": "D5-c1/D5-L7/H08",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: historyPolicy.ts:42-48 documenta que un mensaje del historial de más de 4000 caracteres deja la conversación en 400; requestSchema.ts:48 aplica el tope también a los turnos assistant; handleChatRequest.ts:140 responde 400.",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-048",
+   "prefijo": "DEU",
+   "titulo": "Insights del chatbot: costo de LLM invisible y carga de 200 conversaciones completas para usar 50 × 400 caracteres",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
+     "linea": 102,
+     "fragmento": "const { object } = await generateObject({\n      model,\n      schema: InsightsResponseSchema,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
+     "linea": 35,
+     "fragmento": "include: {\n      messages: {\n        select: { role: true, content: true, createdAt: true },"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
+     "linea": 59,
+     "fragmento": ".slice(0, 50)"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/insights/generateInsights.ts",
+     "linea": 99,
+     "fragmento": "const provider = getLLMProvider('google')\n    const model = provider.getModel('gemini-2.5-flash')"
+    },
+    {
+     "ruta": "netlify/functions/generate-insights-cron.ts",
+     "linea": 5,
+     "fragmento": "// Agendada vía netlify.toml: [functions.\"generate-insights-cron\"] schedule = \"0 9 * * *\"."
+    }
+   ],
+   "impacto": "Todos los días, por cada bot activo con al menos 10 conversaciones, se llama a Gemini y el uso no queda en QuotaUsage ni en ningún evento: develOP no ve ese costo ni tiene tope de gasto. Además la query trae todos los mensajes de hasta 200 conversaciones (hasta 40 mensajes de 4000 caracteres cada una) para mandar 50 resúmenes de 400 caracteres; el modelo está fijo y no hay timeout.",
+   "propuesta": "Registrar result.usage (tokens y costo con calculateCost) en un ChatbotEvent o en QuotaUsage; limitar la query a 50 conversaciones y a mensajes USER con take; usar el modelo del plan; pasar abortSignal con timeout.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h3.adm-chatbots",
+    "int.vertex",
+    "int.cron.generate-insights",
+    "modelo.ChatbotInsight"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "OBS-05, BUG-023, SEC-056, PERF-004, PLAN-429",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L7",
+    "tmp": "D5-c1/D5-L7/H10",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-094",
+   "prefijo": "BUG",
+   "titulo": "Cuando actúa el watchdog el turno queda con 0 tokens, costo 0 y sin toolCalls: onFinish no 'recupera la contabilidad' como dice el comentario",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 1250,
+     "fragmento": "//      registrado, onFinish recupera la contabilidad del turno\n      //      (persistTurn es idempotente — el primero en llegar gana)."
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/handleChatRequest.ts",
+     "linea": 1230,
+     "fragmento": "toolCalls: [],\n              tokensIn: 0,\n              tokensOut: 0,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/chat/persistTurn.ts",
+     "linea": 181,
+     "fragmento": "if (turnPersisted) {\n      streamProbe.mark('persistTurn_skipped', { source: input.source })\n      return"
+    }
+   ],
+   "impacto": "El watchdog persiste primero con 0 tokens y sin toolCalls; cuando después llega onFinish con el usage real, persistTurn lo saltea. Subreporta costo en el panel de uso y pierde las tarjetas de tools (handoff, lead) en el transcript de los turnos que cierra el watchdog.",
+   "propuesta": "Si onFinish llega después de un cierre del watchdog, actualizar tokens, costo y toolCalls del mensaje ya persistido (update dirigido) o, como mínimo, corregir el comentario y medir cuántos turnos cierran por watchdog.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "modelo.ChatMessage",
+    "modelo.QuotaUsage"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "OBS-05",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L7",
+    "tmp": "D5-c1/D5-L7/H11",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-095",
+   "prefijo": "BUG",
+   "titulo": "El validador del webhook rechaza dominios legítimos que empiezan con 'fc' o 'fd'",
+   "dominio": "D5",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/crm/validateWebhookUrl.ts",
+     "linea": 89,
+     "fragmento": "hostname.startsWith('fc') ||\n    hostname.startsWith('fd')"
+    }
+   ],
+   "impacto": "Un cliente cuyo n8n vive en un dominio como fdn8n.cliente.com o fc-automatizaciones.com no puede configurar el CRM: recibe 'No se pueden usar IPs privadas o de loopback'.",
+   "propuesta": "Aplicar los prefijos IPv6 solo cuando el hostname es un literal IPv6 (contiene ':').",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "lib.chatbot.crm"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "SEC-SSRF-01",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L7",
+    "tmp": "D5-c1/D5-L7/H13",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: validateWebhookUrl.ts:86-90 compara el hostname con startsWith fc/fd (un dominio como fdsa.com cae).",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-096",
+   "prefijo": "BUG",
+   "titulo": "Reporte semanal: el total de leads tiene tope 10 y el delta se calcula contra un conteo sin tope",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
+     "linea": 67,
+     "fragmento": "take: 10,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
+     "linea": 120,
+     "fragmento": "total: leadsThisWeek.length,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/reports/buildWeeklyReport.ts",
+     "linea": 121,
+     "fragmento": "deltaFromPrevWeek: percentChange(leadsLastWeekCount, leadsThisWeek.length),"
+    }
+   ],
+   "impacto": "Un cliente con 25 leads esta semana y 25 la anterior recibe 'N=10 leads, -60%' y el resumen generado tambien usa 10. El primer cliente real veria su metrica principal subreportada justo cuando el bot rinde.",
+   "propuesta": "Separar el count (scope.chatbotLead.count con el mismo where) de la lista de 10 items para el detalle.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.cli-chatbot",
+    "lib.chatbot.reports",
+    "int.cron.send-weekly-reports",
+    "modelo.ChatbotLead"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "patron nuevo: take:N usado como total",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H03",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-097",
+   "prefijo": "BUG",
+   "titulo": "El system prompt describe tools que el plan no habilita (Starter sin offer_handoff_options; '5 tools' vs '4 tools')",
+   "dominio": "D5",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/prompts/sections.ts",
+     "linea": 84,
+     "fragmento": "- offer_handoff_options se invoca SIEMPRE inmediatamente después de capture_lead exitoso."
+    },
+    {
+     "ruta": "prisma/seeds/sync-plans.ts",
+     "linea": 60,
+     "fragmento": "const STARTER_TOOLS = [ 'capture_lead', 'show_whatsapp_handoff', 'confirm_contact_request' ]"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/prompts/sections.ts",
+     "linea": 80,
+     "fragmento": "Tenés 5 tools — el SDK te pasa la descripción detallada de cada una"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/prompts/sections.ts",
+     "linea": 147,
+     "fragmento": "Tus únicas acciones reales son las 4 tools de la sección 4."
+    }
+   ],
+   "impacto": "buildToolsOverview ignora plan.tools y el gate C0.1: un bot Starter recibe la orden de invocar SIEMPRE una tool que no tiene, y todos los bots de clientes leen reglas de navigate_to_page. Con el modelo obedeciendo instrucciones contradictorias, el cierre tras capturar el lead puede quedar sin la tarjeta o sin texto para el plan de entrada.",
+   "propuesta": "Pasar a buildSystemPrompt la lista efectiva de tools (Object.keys(tools)) y generar la seccion 4 solo con las presentes; unificar el conteo.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h3.vis-api-chatbot",
+    "lib.chatbot.prompts",
+    "lib.chatbot.tools"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "C-4 (previo)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D5-c1",
+    "lote": "D5-L8",
+    "tmp": "D5-c1/D5-L8/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "UX-032",
    "prefijo": "UX",
    "titulo": "Prompt y tools con la filosofia de consultora de develOP y vocabulario de concesionaria para todos los rubros (incluye 'SLA <4hs')",
@@ -1447,6 +2487,36 @@
      "ruta": "src/lib/rate-limit/presets.ts",
      "linea": 65,
      "fragmento": "leadNotifyPerOrg: { limit: 5, windowMs: 60 * 60_000 },"
+    },
+    {
+     "ruta": "src/lib/client-notifications/decide.ts",
+     "linea": 71,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/client-notifications/notify.ts",
+     "linea": 108,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/client-notifications/notify.ts",
+     "linea": 171,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 445,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 464,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/showWhatsappHandoff.ts",
+     "linea": 152,
+     "fragmento": ""
     }
    ],
    "impacto": "Bloqueante para el primer cliente Pro/Business. Con el pack base (default de todo bot nuevo) 'quiero una reunion, mi cel 11 5555 1234' ya suma 70 = caliente (base.ts:60). Un anonimo que abre conversaciones nuevas (Origin y sessionId rotables, SEC-057) produce un mail individual 'Lead caliente' por conversacion hasta agotar el cupo del mes (cientos), sin digest ni el tope de 5 por hora que el diseno promete para no despertar al dueno con basura. En paralelo, cada lead y cada derivacion a WhatsApp sin lead previo (que ni siquiera exige datos de contacto) manda un mensaje al Telegram del equipo de develOP, de todos los clientes, sin ningun tope. Consume el plan de Brevo compartido con magic links y resets (que el plan tenga limite diario es HIPOTESIS).",
@@ -1475,7 +2545,16 @@
     "tmp": "D5-c2/D5-T1/H02",
     "verificado_padre": true,
     "nota_padre": "Muestreado: decide.ts:47-48 (lead «hot» con scoring → bypassCap), notify.ts:108-114 (el tope anti-spam solo corre sin bypassCap) y presets.ts:65 (leadNotifyPerOrg 5/h); las señales que suman puntos las elige el visitante.",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D5/H07",
+      "titulo": "Avisos sin tope disparables por anónimos: los leads «calientes» saltean el cap de emails, y el Telegram de handoff sale en cada turno",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -1523,6 +2602,46 @@
      "ruta": "src/modules/chatbot/components/embed/ChatbotEmbed.tsx",
      "linea": 177,
      "fragmento": "if (!chatbot.config) {\n ...\n        <ConfigLoadError onRetry={chatbot.retryLoadConfig} />"
+    },
+    {
+     "ruta": "src/app/api/chatbot/[slug]/config/same-origin.ts",
+     "linea": 67,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/chatbot/[slug]/config/route.ts",
+     "linea": 61,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/config/getPublicConfig.ts",
+     "linea": 60,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/embed/[slug]/page.tsx",
+     "linea": 34,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/shared/configCache.ts",
+     "linea": 33,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
+     "linea": 18,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/clientHasChatbot.ts",
+     "linea": 5,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/layout.tsx",
+     "linea": 50,
+     "fragmento": ""
     }
    ],
    "impacto": "El embed vive en develop.com.ar, asi que su GET a /config es same-origin y el navegador no manda Origin: en produccion entra por isBotServable, que exige isActive, y devuelve 403 (y validateOrigin hace lo mismo cross-origin). Cuando develOP pausa el bot de un cliente (impago, KB a corregir), el visitante del sitio del cliente ve un error de conexion con 'Reintentar' que parece una caida, en vez de la tarjeta 'fuera de servicio, escribinos por WhatsApp' que B8.3 diseno. En dev el GET sin Origin pasa (validate-origin.ts:56) y la tarjeta aparece, por eso no se noto. La premisa de BUG-088 (saludo y chips con el bot pausado) solo se reproduce en dev o con la config cacheada antes de pausar.",
@@ -1545,7 +2664,16 @@
     "tmp": "D5-c2/D5-T1/H03",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D5/H04",
+      "titulo": "Bot pausado: el widget muestra «no se pudo cargar» en vez de la tarjeta de WhatsApp, y el dashboard del cliente muestra la landing de venta",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -6083,1039 +7211,6 @@
     "ciclo": "D3-c1",
     "lote": "D3-L5",
     "tmp": "D3-c1/D3-L5/H11",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "UX-050",
-   "prefijo": "UX",
-   "titulo": "Acciones del admin cuyo fallo no se muestra: Referidos ignora el resultado y Crear entregable / Subir a Bóveda tragan el error en console.error",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "ux",
-   "tipo_detalle": "ux",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx",
-     "linea": 38,
-     "fragmento": "await action(id)"
-    },
-    {
-     "ruta": "src/components/admin/managers/ProjectManager.tsx",
-     "linea": 21,
-     "fragmento": "// Optionally show a toast here\n} catch (error) {\n  console.error(error)"
-    },
-    {
-     "ruta": "src/components/admin/managers/VaultManager.tsx",
-     "linea": 30,
-     "fragmento": "} catch (error) {\n  console.error(error)"
-    },
-    {
-     "ruta": "src/actions/agency-actions.ts",
-     "linea": 90,
-     "fragmento": "revalidatePath('/admin/clients')"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
-     "linea": 26,
-     "fragmento": "<VaultManager organizationId={clientId} />"
-    }
-   ],
-   "impacto": "Si la action falla (sesión vencida, proyecto de otra org, URL inválida) el admin no ve nada; 'Crear y Notificar al Cliente' tampoco confirma el éxito. revalidatePath('/admin/clients') no es la ruta en la que se está (/admin/clients/<slug>?tab=…), así que la lista puede no refrescarse hasta recargar (PROBABLE).",
-   "propuesta": "Mostrar result.error o el error capturado (toast + role=alert), confirmar el éxito y revalidar la ruta de detalle o hacer router.refresh() tras éxito.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-referidos.gestion-estados",
-    "h4.adm-clientes.crear-entregable",
-    "h4.adm-clientes.boveda-carga",
-    "h4.adm-clientes.tab-boveda",
-    "int.sentry"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": "VH-129",
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H12",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: referrals-admin-table.tsx:37-39 (await action(id) sin mirar el resultado), ProjectManager.tsx:21-23 y VaultManager.tsx:30-31 (catch con console.error, sin aviso).",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D3-c1",
-      "tmp": "D3-c1/D3-L2/H08",
-      "titulo": "Subir a la boveda falla en silencio: VaultManager solo hace console.error",
-      "severidad": "MEDIA",
-      "nota_padre": "Mismo defecto (VaultManager.tsx:30 traga el error en console.error); el caso de D3-L5 cubre la bóveda."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "FAL-028",
-   "prefijo": "FAL",
-   "titulo": "No hay gestión del equipo interno: ninguna pantalla ni action viva da de alta, baja o cambia el rol de un SUPER_ADMIN, y la consola nueva perdió invitar miembro y probar el webhook",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "faltante",
-   "tipo_detalle": "faltante",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/team/page.tsx",
-     "linea": 19,
-     "fragmento": "const users = await prisma.user.findMany({\n  where: {\n    role: Role.SUPER_ADMIN,"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
-     "linea": 521,
-     "fragmento": "Usuarios con rol SUPER_ADMIN habilitados para operar la OS."
-    },
-    {
-     "ruta": "src/lib/actions/settings.ts",
-     "linea": 148,
-     "fragmento": "export async function inviteTeamMemberAction(input: {"
-    },
-    {
-     "ruta": "src/lib/actions/settings.ts",
-     "linea": 309,
-     "fragmento": "export async function testWebhookAction(input?: {"
-    }
-   ],
-   "impacto": "Sumar un colaborador o sacar a uno que se va exige tocar la base a mano (y su JWT sigue vivo, SEC-023). Las funciones del admin clásico (invitar, probar webhook, probar n8n, verificar permisos de Google) siguen en lib/actions/settings.ts, sin importadores. Mide la hipótesis de Valentino: al admin le faltan módulos más que pantallas.",
-   "propuesta": "Módulo Equipo con invitar (reusando inviteTeamMemberAction con token hasheado), desactivar y cambiar rol, todo auditado; botón 'Probar webhook' en Configuración; después podar lib/actions/settings.ts.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-equipo",
-    "h4.adm-equipo.alta-baja-miembros",
-    "h4.adm-config",
-    "modelo.User"
-   ],
-   "relacionados_ids": [
-    "DEU-001"
-   ],
-   "previas": [],
-   "relacionados_texto": "SEC-023; patrón D1-c1 (módulos 'use server' sin importadores)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H13",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "A11Y-024",
-   "prefijo": "A11Y",
-   "titulo": "Formulario público de /contact: labels sin asociar a sus campos y error sin role=alert",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "a11y",
-   "tipo_detalle": "a11y",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/contact/page.tsx",
-     "linea": 151,
-     "fragmento": "<label className=\"mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60\">Nombre *</label>\n<input\n  name=\"name\""
-    },
-    {
-     "ruta": "src/app/contact/page.tsx",
-     "linea": 213,
-     "fragmento": "<p className=\"col-span-2 text-xs text-rose-300\">{state.error}</p>"
-    }
-   ],
-   "impacto": "Ninguno de los seis <label> tiene htmlFor ni envuelve su campo: un lector de pantalla anuncia 'campo de edición' sin nombre; el error de envío no se anuncia. Falla WCAG 1.3.1 y 4.1.2 en el formulario de captación pública.",
-   "propuesta": "id + htmlFor (o label envolvente) en cada campo, aria-invalid/aria-describedby y role=alert en el mensaje de error.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h6.vis-contacto.formulario"
-   ],
-   "relacionados_ids": [
-    "A11Y-005"
-   ],
-   "previas": [],
-   "relacionados_texto": "A11Y-02 (auditoría maestra); patrón D1-c1 (errores sin role=alert)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H14",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-136",
-   "prefijo": "BUG",
-   "titulo": "Contrato del guard SUPER_ADMIN roto en el lote: send-executive-report espera 'UNAUTHORIZED' y siempre responde 403; las páginas muestran 'Unauthorized' o un 404 en vez de ir a /login",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
-     "linea": 17,
-     "fragmento": "const status = message.startsWith('UNAUTHORIZED') ? 401 : 403"
-    },
-    {
-     "ruta": "src/lib/auth-guards.ts",
-     "linea": 7,
-     "fragmento": "throw new Error('Unauthorized')"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/tickets/[ticketId]/page.tsx",
-     "linea": 16,
-     "fragmento": "if (!ticketResult.success) {\n  notFound()"
-    },
-    {
-     "ruta": "src/lib/audit-log-queries.ts",
-     "linea": 5,
-     "fragmento": "import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'"
-    }
-   ],
-   "impacto": "Sin sesión el endpoint responde 403 y el botón no puede decir 'tu sesión venció'; en /admin/settings y /admin/tickets una sesión vencida pinta 'Unauthorized' en una caja roja (settings/page.tsx:31-33, tickets/page.tsx:28-31) y el detalle de ticket da 404 también ante un error de base. Conviven tres guards: auth-guards, el del módulo chatbot (audit-log-queries.ts:5, bulk-actions.ts:6) y chequeos inline en 5 archivos.",
-   "propuesta": "En la ruta, comparar contra el mensaje real o un código tipado (zona libre). Decisión para Valentino: un único requireSuperAdmin con error tipado en auth-guards (FROZEN-inferido) y un manejador común (redirect('/login') en páginas, 401/403 en rutas); distinguir not-found de error en getTicketById.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.auth",
-    "h4.adm-shell",
-    "h4.adm-tickets.conversacion-y-respuesta",
-    "h4.adm-config",
-    "h4.adm-clientes.reporte-ejecutivo-manual"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "Patrones D1-c1 (requireSuperAdmin reimplementado) y D1-c3 (guards que lanzan Error genérico)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H16",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-088",
-   "prefijo": "SEC",
-   "titulo": "Editar y borrar horas no valida a quién pertenecen: un SUPER_ADMIN borra horas ajenas sin rastro (updateTimeEntry además no tiene llamadores)",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
-     "linea": 203,
-     "fragmento": "const existingEntry = await prisma.osTimeEntry.findUnique({\n  where: { id: entryId },"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
-     "linea": 250,
-     "fragmento": "const entry = await prisma.osTimeEntry.delete({"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
-     "linea": 160,
-     "fragmento": "if (task.assignedToId !== null && task.assignedToId !== userId) {"
-    }
-   ],
-   "impacto": "La regla 'nadie registra horas en nombre de otro' (PLAN-604) se cumple al crear pero no al editar ni al borrar: desde el panel de horas (time-entry-panel.tsx:189) un admin puede borrar las de un compañero y no queda audit log. Riesgo bajo entre socios, pero el reporte de horas pierde valor como registro.",
-   "propuesta": "Exigir entry.userId === sesión en update/delete (o auditar si se permite) y podar updateTimeEntry si no se usa.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-proyectos.carga-horas",
-    "modelo.OsTimeEntry"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-605",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H19",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-089",
-   "prefijo": "SEC",
-   "titulo": "El webhook de alertas acepta cualquier URL (http, hosts internos) y el servidor le hace POST sin restricción",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
-     "linea": 25,
-     "fragmento": "alertWebhookUrl: z.preprocess(emptyStringToNull, z.string().url().nullable()),"
-    },
-    {
-     "ruta": "src/lib/alerts.ts",
-     "linea": 131,
-     "fragmento": "const response = await fetch(webhookUrl, {"
-    }
-   ],
-   "impacto": "Con una cuenta SUPER_ADMIN (precondición fuerte) el server de develOP manda POSTs a direcciones internas o a un servidor propio con nombres de clientes y detalle de tickets, y el cambio no se audita.",
-   "propuesta": "Exigir https y una allowlist de hosts (Slack, Discord, n8n propio) o reutilizar validateWebhookUrl del módulo CRM.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-config.datos-y-alertas",
-    "lib.alerts"
-   ],
-   "relacionados_ids": [
-    "SEC-054"
-   ],
-   "previas": [],
-   "relacionados_texto": "SEC-054",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H20",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-137",
-   "prefijo": "BUG",
-   "titulo": "Si el webhook de alertas falla, solo queda un console.error: develOP pierde los avisos de tickets urgentes, leads y mensajes sin enterarse",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/alerts.ts",
-     "linea": 139,
-     "fragmento": "if (!response.ok) {\n  console.error(\n    `[alerts] Webhook respondió ${response.status} ${response.statusText} para ${event.type}.`"
-    },
-    {
-     "ruta": "src/lib/alerts.ts",
-     "linea": 144,
-     "fragmento": "} catch (error) {\n  console.error(`[alerts] No se pudo enviar la alerta ${event.type}:`, error)"
-    }
-   ],
-   "impacto": "Un webhook vencido o mal escrito apaga todas las alertas de la agencia en silencio: no hay Sentry, no hay captureConsoleIntegration y Configuración no muestra el último envío.",
-   "propuesta": "Sentry.captureException/Message con el tipo de evento y mostrar en Configuración el estado del último envío.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-alertas.webhook-agencia",
-    "lib.alerts",
-    "int.sentry"
-   ],
-   "relacionados_ids": [
-    "BUG-052"
-   ],
-   "previas": [],
-   "relacionados_texto": "Patrón D1-c1 (fallos solo con console.error); FAL-014",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H21",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-065",
-   "prefijo": "DEU",
-   "titulo": "Catálogos y tipos copiados a mano: PremiumFeatureKey castea slugs que no le pertenecen, BotAlertType local 'pendiente de prisma generate' y ASSET_TYPES espejado",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
-     "linea": 114,
-     "fragmento": "moduleKey: mod.slug as PremiumFeatureKey,"
-    },
-    {
-     "ruta": "src/lib/premium-features.ts",
-     "linea": 51,
-     "fragmento": "key: 'motor-resenias',"
-    },
-    {
-     "ruta": "src/lib/data/premium-modules.ts",
-     "linea": 24,
-     "fragmento": "slug: 'motor-resenas',"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
-     "linea": 7,
-     "fragmento": "// Include new enum values pending prisma generate\ntype BotAlertType ="
-    }
-   ],
-   "impacto": "El tipo de la consola dice que las claves son las 11 del catálogo legacy pero en runtime llegan los slugs de PremiumModule (otra lista): el compilador no protege nada. El catálogo legacy solo lo usa lib/actions/settings.ts (sin importadores). El enum BotAlertType ya tiene los 9 valores en schema.prisma:139-149, así que la copia local es innecesaria.",
-   "propuesta": "Tipar moduleKey como string (o el tipo del catálogo de premium-modules), importar BotAlertType de @prisma/client y podar premium-features.ts junto con lib/actions/settings.ts.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-config.precios-modulos",
-    "lib.premium-features",
-    "h4.adm-alertas.detector-incidencias",
-    "modelo.PremiumModule"
-   ],
-   "relacionados_ids": [
-    "BUG-017"
-   ],
-   "previas": [],
-   "relacionados_texto": "PLAN-591, PLAN-559, BUG-017, DB-P0-2",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H22",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: settings.actions.ts:114 castea mod.slug a PremiumFeatureKey; premium-features.ts:51 usa «motor-resenias» y premium-modules.ts:24 «motor-resenas».",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "PERF-011",
-   "prefijo": "PERF",
-   "titulo": "Listados y consultas del admin sin paginación ni tope: tickets, workload del equipo, export masivo de leads, barrido de alertas, pipeline de leads, hilo de mensajes y resúmenes de proyectos",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "perf",
-   "tipo_detalle": "perf",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
-     "linea": 59,
-     "fragmento": "const tickets = await prisma.ticket.findMany({"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/team/page.tsx",
-     "linea": 44,
-     "fragmento": "prisma.task.findMany({\n  where: {\n    assignedToId: {"
-    },
-    {
-     "ruta": "src/lib/bulk-actions.ts",
-     "linea": 50,
-     "fragmento": "const leads = await prisma.chatbotLead.findMany({"
-    },
-    {
-     "ruta": "src/lib/alerts.ts",
-     "linea": 205,
-     "fragmento": "prisma.organization.findMany({"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leads/page.tsx",
-     "linea": 23,
-     "fragmento": "const leads = await prisma.osLead.findMany({"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leads/page.tsx",
-     "linea": 202,
-     "fragmento": "<OutboundLeadsView leads={leads} />"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
-     "linea": 144,
-     "fragmento": "const messages = await prisma.message.findMany({\n  where: {\n    organizationId: parsedOrganizationId,"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
-     "linea": 936,
-     "fragmento": "const projects = await prisma.project.findMany({"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
-     "linea": 976,
-     "fragmento": "timeEntries: {\n          select: {\n            id: true,"
-    }
-   ],
-   "impacto": "Con datos de prueba no se nota; con el primer año de clientes /admin/tickets trae todos los tickets de todas las orgs para filtrar en memoria, /admin/team trae todas las tareas históricas (incluidas DONE, que además se listan) con todas sus horas y el export arma el CSV completo en memoria de la action.",
-   "propuesta": "Paginación por cursor y filtros en servidor en tickets; workload solo de tareas no DONE o en ventana; export en streaming con tope.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-tickets.bandeja",
-    "h4.adm-equipo.workload",
-    "h4.adm-clientes.acciones-masivas",
-    "h4.adm-leads.pipeline-kanban",
-    "h4.adm-mensajes.hilo-y-leido",
-    "modelo.OsLead",
-    "modelo.Message",
-    "h4.adm-proyectos.tablero-kanban",
-    "modelo.OsTimeEntry"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-658",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H25",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D3-c1",
-      "tmp": "D3-c1/D3-L3/H18",
-      "titulo": "Consultas sin límite: todo el pipeline OsLead serializado al cliente y el hilo completo de mensajes",
-      "severidad": "BAJA",
-      "nota_padre": "Mismo patrón (consultas del admin sin límite): suma el pipeline OsLead serializado entero y el hilo completo de mensajes."
-     },
-     {
-      "ciclo": "D3-c1",
-      "tmp": "D3-c1/D3-L4/H18",
-      "titulo": "listProjects trae todas las filas de horas, hitos y mantenimiento de todos los proyectos solo para calcular resúmenes",
-      "severidad": "BAJA",
-      "nota_padre": "Mismo patrón (consultas del admin sin tope): listProjects trae todas las horas, hitos y pagos para calcular resúmenes."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-066",
-   "prefijo": "DEU",
-   "titulo": "Validación laxa en entradas del admin: actionType del audit log casteado sin validar, pageSize sin tope, orgIds sin schema y tareas asignables a cualquier usuario",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/audit-log-queries.ts",
-     "linea": 35,
-     "fragmento": "...(filter?.actionType && {\n  actionType: filter.actionType as AuditActionType,"
-    },
-    {
-     "ruta": "src/lib/audit-log-queries.ts",
-     "linea": 19,
-     "fragmento": "pageSize = 10,"
-    },
-    {
-     "ruta": "src/lib/bulk-actions.ts",
-     "linea": 8,
-     "fragmento": "export async function bulkPauseBots(orgIds: string[]) {"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/team/_actions/task.schemas.ts",
-     "linea": 50,
-     "fragmento": "const optionalCreateAssignedToSchema = z.preprocess(\n  emptyStringToUndefined,\n  UserIdSchema.optional()"
-    }
-   ],
-   "impacto": "Un actionType inválido llega a Prisma y rompe la página del audit log (sin try/catch → error.tsx); pageSize lo decide quien llama; una tarea puede quedar asignada a un CLIENT o SETTER y desaparecer del workload (que solo lista SUPER_ADMIN). Títulos, descripciones y notas sin .max().",
-   "propuesta": "Zod en listAuditLog (enum de AuditActionType, pageSize ≤ 100) y en bulk-actions; validar que assignedToId sea SUPER_ADMIN; .max() en textos.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-audit.listado",
-    "h4.adm-clientes.acciones-masivas",
-    "h4.adm-proyectos.tareas"
-   ],
-   "relacionados_ids": [
-    "SEC-084"
-   ],
-   "previas": [],
-   "relacionados_texto": "Patrón D1-c3 (texto libre sin .max())",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L5",
-    "tmp": "D3-c1/D3-L5/H26",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-138",
-   "prefijo": "BUG",
-   "titulo": "El hard-delete y el archivado no protegen la org de la agencia (develOP), que aparece como un cliente más",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/admin/clients/page.tsx",
-     "linea": 22,
-     "fragmento": "prisma.organization.findMany({\n      where: { deletedAt: null },"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/projects/page.tsx",
-     "linea": 11,
-     "fragmento": "where: { slug: { not: 'develop' } },"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
-     "linea": 141,
-     "fragmento": "await tx.organization.delete({ where: { id: organizationId } })"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
-     "linea": 527,
-     "fragmento": "confirmPhrase=\"ELIMINAR\""
-    },
-    {
-     "ruta": "src/app/(protected)/admin/chatbot/activity/page.tsx",
-     "linea": 11,
-     "fragmento": "prisma.botConfig.findUnique({ where: { slug: 'develop' }, ..."
-    },
-    {
-     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
-     "linea": 233,
-     "fragmento": "where: { slug: 'develop' },"
-    }
-   ],
-   "impacto": "La lista de Clientes trae todas las orgs no archivadas, sin excluir la de la agencia, al revés que Proyectos, que sí la excluye. Ni hardDeleteClient ni archiveClient la bloquean del lado del servidor, y la confirmación pide tipear 'ELIMINAR', no el nombre del cliente. Un error del SUPER_ADMIN (elegir la fila de develOP y confirmar) borra en cascada el bot del sitio con sus conversaciones y leads, todos los proyectos internos con sus hitos de pago y horas, más tickets y mensajes. Sin backups (DR-01) no hay vuelta atrás. Además, el widget del sitio, /admin/chatbot/activity y health, que buscan slug 'develop', y el alta de proyectos internos (project.actions.ts:233) dejan de funcionar. Antes del primer cliente real, es el borrado irreversible más grande al que el panel está expuesto.",
-   "propuesta": "Rechazar en el servidor el archivado y el hard-delete de la org de la agencia (slug 'develop' o un flag isAgency) dentro de hardDeleteClient/archiveClient. Excluirla de /admin/clients igual que hace projects/page.tsx:11. Pedir que se tipee el nombre o el slug del cliente en vez de una frase genérica. Exigir que el cliente esté archivado antes del hard-delete. Resolver DR-01 (backups).",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-clientes",
-    "h4.adm-clientes.eliminar-definitivo",
-    "h4.adm-clientes.archivar",
-    "modelo.Organization",
-    "h3.vis-widget-develop",
-    "h4.adm-proyectos"
-   ],
-   "relacionados_ids": [
-    "BUG-015",
-    "DEU-064"
-   ],
-   "previas": [],
-   "relacionados_texto": "DR-01; flujo D6 'Eliminar cliente (hard-delete) y su cascada'",
-   "vh": "VH-130",
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H01",
-    "verificado_padre": true,
-    "nota_padre": "Leído: admin/clients/page.tsx:20-29 (findMany con deletedAt null, sin excluir la org de la agencia), mientras admin/projects/page.tsx:8-12 y [projectId]/layout.tsx:140-148 sí excluyen slug «develop»; hardDeleteClient.ts y archiveClient.ts no miran el slug (grep sin resultados) y el diálogo pide tipear «ELIMINAR» (ClientsListClient.tsx:522-527), no el nombre. La org «develop» la crea el seed del chatbot (modules/chatbot/prisma/seed.ts:186) y es la del bot del sitio. El verificador la bajó a MEDIA (guardarraíl faltante ante un error humano) y se le sigue; que la org exista así en producción es runtime → PROBABLE.",
-    "verificador": {
-     "se_sostiene": true,
-     "severidad_ajustada": "MEDIA"
-    }
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-139",
-   "prefijo": "BUG",
-   "titulo": "Form de contacto: el rate limit consulta la DB fuera del try y un fallo de Neon tira la página de error en vez del mensaje",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/actions/contact.ts",
-     "linea": 24,
-     "fragmento": "const rl = await checkRateLimit({\n    key: `contactFormPerIp:${ipHash}`,"
-    },
-    {
-     "ruta": "src/lib/actions/contact.ts",
-     "linea": 61,
-     "fragmento": "try {"
-    },
-    {
-     "ruta": "src/lib/rate-limit/limiter.ts",
-     "linea": 44,
-     "fragmento": "const rows = await prisma.$queryRawUnsafe<UpsertRow[]>("
-    },
-    {
-     "ruta": "src/lib/prisma.ts",
-     "linea": 6,
-     "fragmento": "globalForPrisma.prisma ?? new PrismaClient({ log: ['error'] })"
-    }
-   ],
-   "impacto": "El upsert del rate limit no tiene catch (limiter.ts:44) y en contactFormAction corre antes del try (:61). Si Neon tarda en despertar o la conexión falla, la action lanza la excepción, useActionState la propaga al error boundary y el visitante ve la pantalla de error en vez de 'No se pudo enviar el formulario'. Es el formulario con el que entran los leads de develOP, y no hay retry ni connect_timeout en prisma.ts.",
-   "propuesta": "Mover getClientIpHash/checkRateLimit adentro del try, o envolverlos con un mensaje útil y captureException. Evaluar retry corto ante cold-start (RESIL-07).",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h6.vis-contacto.enviar-formulario",
-    "lib.rate-limit",
-    "lib.prisma"
-   ],
-   "relacionados_ids": [
-    "SEC-025"
-   ],
-   "previas": [],
-   "relacionados_texto": "RESIL-07",
-   "vh": "VH-131",
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H04",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-090",
-   "prefijo": "SEC",
-   "titulo": "El formulario público de contacto acepta texto sin tope en todos sus campos y lo replica a la DB, la alerta de agencia y n8n",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/actions/schemas.ts",
-     "linea": 57,
-     "fragmento": "name: z.string().trim().min(2, 'Nombre inválido.'),\n  email: z.string().trim().email('El email no es válido.'),"
-    },
-    {
-     "ruta": "src/lib/actions/schemas.ts",
-     "linea": 62,
-     "fragmento": "message: z.string().trim().min(10, 'El mensaje debe tener al menos 10 caracteres.'),"
-    },
-    {
-     "ruta": "src/lib/actions/contact.ts",
-     "linea": 75,
-     "fragmento": "detail: `Nuevo lead desde formulario. Contacto: ${payload.email}. Servicio: ${payload.service || 'General'}.`,"
-    },
-    {
-     "ruta": "src/lib/actions/schemas.ts",
-     "linea": 46,
-     "fragmento": "featureKey: z.string().trim().min(1, 'Feature inválida.'),\n  featureName: z.string().trim().min(1, 'Nombre de feature inválido.'),"
-    }
-   ],
-   "impacto": "Un anónimo puede mandar campos de hasta el límite por defecto del body de server actions (~1 MB; next.config sin bodySizeLimit). Eso se guarda en ContactSubmission (message es @db.Text), entra a la alerta de agencia y al webhook de n8n, y se interpola en texto de alerta (company/name/email/service). El rate limit es de 5 por IP cada 15 min, pero la IP sale del primer X-Forwarded-For (patrón D1-c1) y cada IP falsificada crea una fila nueva en rate_limit (patrón D1-c3). Riesgo para el primer cliente: spam y crecimiento de almacenamiento en Neon, más ruido en las alertas. UpsellRequestSchema (portal autenticado) tiene el mismo defecto en featureKey/featureName.",
-   "propuesta": "Agregar .max() razonables (name 120, email 254, phone 40, company 120, service 60 o enum, message 5000, featureName 120). Opcional: bodySizeLimit explícito para server actions. Escapar los campos del visitante en sendAgencyAlert.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h6.vis-contacto.enviar-formulario",
-    "modelo.ContactSubmission",
-    "lib.actions",
-    "int.n8n",
-    "h2.cli-servicios"
-   ],
-   "relacionados_ids": [
-    "SEC-054",
-    "SEC-055"
-   ],
-   "previas": [],
-   "relacionados_texto": "patrón D1-c3 'Texto libre sin .max()'; patrón D1-c1 X-Forwarded-For; patrón D1-c3 claves de rate limit",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H05",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-067",
-   "prefijo": "DEU",
-   "titulo": "Cuatro módulos 'use server' legacy sin importadores y 6 actions muertas más, que duplican versiones vivas con contratos peores",
-   "dominio": "D3",
-   "severidad": "MEDIA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/actions/settings.ts",
-     "linea": 92,
-     "fragmento": "error: error instanceof Error ? error.message : 'No se pudo guardar la configuración.',"
-    },
-    {
-     "ruta": "src/lib/actions/settings.ts",
-     "linea": 191,
-     "fragmento": "const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'"
-    },
-    {
-     "ruta": "src/lib/actions/leads.ts",
-     "linea": 14,
-     "fragmento": "async function ensureAdmin() {\n  const session = await auth()\n  return session?.user?.role === 'SUPER_ADMIN'"
-    },
-    {
-     "ruta": "src/lib/actions/clients.ts",
-     "linea": 177,
-     "fragmento": "members: {\n        where: { role: 'ADMIN' },"
-    },
-    {
-     "ruta": "src/lib/actions/services.ts",
-     "linea": 21,
-     "fragmento": "export async function createServiceAction("
-    },
-    {
-     "ruta": "src/lib/actions/projects.ts",
-     "linea": 35,
-     "fragmento": "export async function createProjectAction("
-    }
-   ],
-   "impacto": "clients.ts, services.ts, settings.ts y leads.ts (+ leads-constants.ts) no tienen importadores. Tampoco los tienen 5 de las 7 actions de projects.ts ni markLeadAsRead. Duplican _actions vivas (settings.actions.ts:127/:175, project.actions.ts:593/:643, admin/leads/_actions) y arrastran defectos que volverían si alguien las reconecta: error.message crudo (settings.ts:92, :142, :234, :270, :304, y JSON.parse del service account en :285), token de invitación en claro (:180-189), fallback a localhost (:191), usuario creado antes del email (:172-194), guard reimplementado (leads.ts:14-17, settings.ts:20-28), take:1 sin orderBy (clients.ts:177-181) y update sin Zod (clients.ts:157-171). Encarecen cada cambio: hay que adivinar cuál es la versión vigente.",
-   "propuesta": "Borrar clients.ts, services.ts, settings.ts, leads.ts y leads-constants.ts. En projects.ts, migrar los dos consumidores vivos (delete-project-button.tsx:6 → deleteProject; task-list.tsx:22 → una action en admin/projects/_actions) y borrar el archivo. Quitar markLeadAsRead de contact.ts.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.actions",
-    "h4.adm-config",
-    "h4.adm-equipo",
-    "h4.adm-leads",
-    "h4.adm-proyectos",
-    "h4.adm-clientes"
-   ],
-   "relacionados_ids": [
-    "DEU-001",
-    "DEU-018",
-    "DEU-063"
-   ],
-   "previas": [],
-   "relacionados_texto": "patrón D1-c1 módulos 'use server' sin importadores; requireSuperAdmin reimplementado; tokens en claro; D1-c3 fallback localhost",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H06",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-140",
-   "prefijo": "BUG",
-   "titulo": "acknowledgeAlert/resolveAlert no verifican el estado previo: marcar como vista una resuelta la reabre",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
-     "linea": 44,
-     "fragmento": "where: { id },\n        data: {\n          status: 'ACKNOWLEDGED',"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
-     "linea": 87,
-     "fragmento": "where: { id },\n        data: {\n          status: 'RESOLVED',"
-    }
-   ],
-   "impacto": "El update va solo por id. Una doble acción (dos pestañas o dos admins) o un ack tardío sobre una alerta RESOLVED la devuelve a ACKNOWLEDGED, y el badge de pendientes y el historial quedan incoherentes. Si la alerta no existe, el update lanza P2025 (throw, no mensaje).",
-   "propuesta": "Condicionar la transición (where: { id, status: 'PENDING' } para el ack; status distinto de RESOLVED para resolver) con updateMany y devolver ok/fail según count.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-alertas.marcar-vista-resolver",
-    "modelo.BotAlert"
-   ],
-   "relacionados_ids": [
-    "BUG-062"
-   ],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H13",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "UX-051",
-   "prefijo": "UX",
-   "titulo": "'Enviar a aprobación' no avisa al cliente (ni campana ni email), falla en silencio y no audita",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "ux",
-   "tipo_detalle": "ux",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/actions/projects.ts",
-     "linea": 197,
-     "fragmento": "await tx.message.create({\n      data: {\n        content: `📋 Tu entrega \"${task.title}\" está lista para revisión. ..."
-    },
-    {
-     "ruta": "src/actions/agency-actions.ts",
-     "linea": 54,
-     "fragmento": "const notifications = orgMembers.map(member => ({\n      type: 'ACTION_REQUIRED' as const,"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
-     "linea": 628,
-     "fragmento": "await sendTaskForApprovalAction(formData)\n      router.refresh()"
-    }
-   ],
-   "impacto": "El camino vivo para pedir aprobación (task-list) solo crea un Message. A diferencia de createTaskForClientAction, no genera Notification ACTION_REQUIRED ni email, así que el cliente se entera recién cuando entra al portal. La action devuelve void y sale en silencio si la tarea no existe (:182, :188). Un guard vencido lanza dentro de startTransition sin catch y termina en el error boundary. No hay auditoría.",
-   "propuesta": "Reusar la creación de Notification + email de agency-actions (o un helper común), devolver ActionResult y mostrar el feedback en la UI. Agregar logAdminAction.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-proyectos.enviar-a-aprobacion",
-    "h2.cli-proyecto",
-    "modelo.Message",
-    "modelo.Notification"
-   ],
-   "relacionados_ids": [
-    "BUG-112"
-   ],
-   "previas": [],
-   "relacionados_texto": "flujo D2 'Aprobar o pedir cambios en una entrega'; patrón D1-c3 guards que lanzan",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H14",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-091",
-   "prefijo": "SEC",
-   "titulo": "updateClient cambia el email de login del cliente sin avisar al email anterior ni invalidar la sesión",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
-     "linea": 71,
-     "fragmento": "const nextEmail = parsed.userEmail.toLowerCase()"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
-     "linea": 108,
-     "fragmento": "const nextUser = await tx.user.update({\n      where: { id: adminUser.id },\n      data: {"
-    }
-   ],
-   "impacto": "El SUPER_ADMIN reescribe el email con el que el cliente se loguea y recibe el magic link: no se le avisa ni al email viejo ni al nuevo, no se resetea emailVerified y no se sube sessionVersion. Un typo deja al cliente sin acceso por magic link, sin que él sepa por qué. userPhone no tiene .max() (:25).",
-   "propuesta": "Avisar por email (viejo y nuevo) al cambiar el email de login, resetear emailVerified o pedir confirmación, subir sessionVersion y acotar userPhone.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-clientes.editar-datos",
-    "modelo.User",
-    "h1.auth-login"
-   ],
-   "relacionados_ids": [
-    "SEC-014"
-   ],
-   "previas": [],
-   "relacionados_texto": "flujo D1 'Invalidacion de sesion por sessionVersion'",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H15",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-068",
-   "prefijo": "DEU",
-   "titulo": "Instancias del lote: auditoría escrita después del efecto con un helper que traga el error (y archivar se registra como CLIENT_UPDATED)",
-   "dominio": "D3",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
-     "linea": 166,
-     "fragmento": "await logAdminAction({"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
-     "linea": 41,
-     "fragmento": "actionType: 'CLIENT_UPDATED',\n    action: `Archivó (soft-delete reversible) el cliente \"${org.companyName}\"`,"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
-     "linea": 53,
-     "fragmento": "if (before) {\n    await logAdminAction({"
-    }
-   ],
-   "impacto": "Todas las mutaciones auditadas del lote auditan después del efecto, con el helper que solo hace console.error (verificado en D1: audit-log.ts:40): hardDeleteClient.ts:166, archiveClient.ts:37/:73, updateClient.ts:121, updateClientInternalNotes.ts:40, manageAlerts.ts:54/:97. Si el insert del audit falla tras un hard-delete irreversible, no queda registro y nadie se entera. Archivar y desarchivar usan CLIENT_UPDATED, así que el filtro por acción del audit log no los distingue.",
-   "propuesta": "Igual que el patrón D1-c3: captureException en el helper (decisión para Valentino, porque audit-log.ts es FROZEN-inferido) y, para el hard-delete, escribir el audit dentro de la transacción. Agregar CLIENT_ARCHIVED/CLIENT_UNARCHIVED al enum (schema FROZEN: decisión para Valentino).",
-   "esfuerzo": "S",
-   "zona": "FROZEN",
-   "nodos": [
-    "lib.audit-log",
-    "h4.adm-audit",
-    "h4.adm-clientes"
-   ],
-   "relacionados_ids": [
-    "DEU-012"
-   ],
-   "previas": [],
-   "relacionados_texto": "patrón D1-c3 'Auditoría escrita después del efecto'",
-   "vh": null,
-   "origen": {
-    "ciclo": "D3-c1",
-    "lote": "D3-L6",
-    "tmp": "D3-c1/D3-L6/H16",
     "verificado_padre": false,
     "nota_padre": "",
     "verificador": null

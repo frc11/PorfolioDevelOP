@@ -1,0 +1,202 @@
+{
+ "F6-c1/CIEGO-D1/H01": {
+  "decision": "fusionar",
+  "con": "SEC-005",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H02": {
+  "decision": "fusionar",
+  "con": "SEC-007",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H03": {
+  "decision": "fusionar",
+  "con": "SEC-006",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H04": {
+  "decision": "fusionar",
+  "con": "BUG-002",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H05": {
+  "decision": "fusionar",
+  "con": "SEC-011",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H06": {
+  "decision": "fusionar",
+  "con": "UX-002",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H07": {
+  "decision": "fusionar",
+  "con": "SEC-008",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H08": {
+  "decision": "fusionar",
+  "con": "SEC-012",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H09": {
+  "decision": "fusionar",
+  "con": "SEC-013",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H10": {
+  "decision": "fusionar",
+  "con": "SEC-024",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D1/H11": {
+  "decision": "fusionar",
+  "con": "SEC-016",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H01": {
+  "decision": "fusionar",
+  "con": "SEC-044",
+  "verificado_padre": true,
+  "nota_padre": "F6.1: el agente ciego la ubica en ALTA. Leído: email-marketing/_actions.ts (importContactsAction :71, createCampaignAction :128, sendCampaignAction :174) sin isModuleActive, sin Zod y sin rate limit; la org sale de resolveOrgId (:18). Cualquier usuario de un cliente, aunque no haya contratado el módulo, importa contactos y manda campañas con HTML y remitente propios por la cuenta de Brevo de develOP: costo y reputación del dominio. Sube a ALTA (DEC-23: operación con costo por un usuario de cliente con una precondición, tener cuenta).",
+  "destino": {
+   "severidad": "ALTA"
+  }
+ },
+ "F6-c1/CIEGO-D2/H02": {
+  "decision": "fusionar",
+  "con": "BUG-021",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H03": {
+  "decision": "fusionar",
+  "con": "SEC-014",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H04": {
+  "decision": "fusionar",
+  "con": "SEC-045",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H05": {
+  "decision": "fusionar",
+  "con": "SEC-048",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H06": {
+  "decision": "fusionar",
+  "con": "SEC-051",
+  "verificado_padre": true,
+  "nota_padre": "F6.1: el agente ciego mostró que la parte de reviewName de SEC-051 es escritura entre tenants. Leído: _actions.ts:48-62 (replyAction toma la org de la sesión pero pasa reviewName tal cual) y google-business-profile.ts:275-285 (PUT a v4/${reviewName}/reply sin comprobar que empiece con gbpLocationId, que listReviews sí usa). Si la agencia conecta varios clientes con la misma cuenta de Google (el OAuth lo hace el SUPER_ADMIN), un usuario de un cliente responde reseñas del perfil de otro. Sube a ALTA por la rúbrica DEC-23 (escritura entre tenants con una precondición de configuración); PROBABLE porque el alcance del token es de runtime.",
+  "destino": {
+   "severidad": "ALTA",
+   "confianza": "PROBABLE",
+   "titulo": "Motor de reseñas: replyAction publica en cualquier reseña que alcance el token de Google de la org (reviewName sin validar contra su sucursal: escritura entre clientes si comparten la cuenta de agencia), y las acciones no tienen Zod ni rate limit para el LLM"
+  }
+ },
+ "F6-c1/CIEGO-D2/H07": {
+  "decision": "fusionar",
+  "con": "SEC-051",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H08": {
+  "decision": "fusionar",
+  "con": "BUG-035",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H09": {
+  "decision": "fusionar",
+  "con": "BUG-025",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H10": {
+  "decision": "fusionar",
+  "con": "SEC-038",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H11": {
+  "decision": "fusionar",
+  "con": "DEU-027",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H12": {
+  "decision": "fusionar",
+  "con": "FAL-009",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H13": {
+  "decision": "fusionar",
+  "con": "BUG-032",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H14": {
+  "decision": "fusionar",
+  "con": "SEC-047",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H15": {
+  "decision": "fusionar",
+  "con": "SEC-046",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D2/H16": {
+  "decision": "fusionar",
+  "con": "BUG-044",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H01": {
+  "decision": "fusionar",
+  "con": "SEC-057",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H02": {
+  "decision": "fusionar",
+  "con": "SEC-037",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H03": {
+  "decision": "fusionar",
+  "con": "SEC-068",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H04": {
+  "decision": "fusionar",
+  "con": "BUG-108",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H05": {
+  "decision": "fusionar",
+  "con": "SEC-065",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H06": {
+  "decision": "fusionar",
+  "con": "SEC-040",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H07": {
+  "decision": "fusionar",
+  "con": "SEC-075",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H08": {
+  "decision": "fusionar",
+  "con": "SEC-058",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H09": {
+  "decision": "fusionar",
+  "con": "SEC-059",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H10": {
+  "decision": "fusionar",
+  "con": "BUG-089",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ },
+ "F6-c1/CIEGO-D5/H11": {
+  "decision": "fusionar",
+  "con": "BUG-022",
+  "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+ }
+}

@@ -3,6 +3,1039 @@
  "partes": 6,
  "hallazgos": [
   {
+   "id": "UX-050",
+   "prefijo": "UX",
+   "titulo": "Acciones del admin cuyo fallo no se muestra: Referidos ignora el resultado y Crear entregable / Subir a Bóveda tragan el error en console.error",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/referrals/_components/referrals-admin-table.tsx",
+     "linea": 38,
+     "fragmento": "await action(id)"
+    },
+    {
+     "ruta": "src/components/admin/managers/ProjectManager.tsx",
+     "linea": 21,
+     "fragmento": "// Optionally show a toast here\n} catch (error) {\n  console.error(error)"
+    },
+    {
+     "ruta": "src/components/admin/managers/VaultManager.tsx",
+     "linea": 30,
+     "fragmento": "} catch (error) {\n  console.error(error)"
+    },
+    {
+     "ruta": "src/actions/agency-actions.ts",
+     "linea": 90,
+     "fragmento": "revalidatePath('/admin/clients')"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/tabs/VaultTab.tsx",
+     "linea": 26,
+     "fragmento": "<VaultManager organizationId={clientId} />"
+    }
+   ],
+   "impacto": "Si la action falla (sesión vencida, proyecto de otra org, URL inválida) el admin no ve nada; 'Crear y Notificar al Cliente' tampoco confirma el éxito. revalidatePath('/admin/clients') no es la ruta en la que se está (/admin/clients/<slug>?tab=…), así que la lista puede no refrescarse hasta recargar (PROBABLE).",
+   "propuesta": "Mostrar result.error o el error capturado (toast + role=alert), confirmar el éxito y revalidar la ruta de detalle o hacer router.refresh() tras éxito.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-referidos.gestion-estados",
+    "h4.adm-clientes.crear-entregable",
+    "h4.adm-clientes.boveda-carga",
+    "h4.adm-clientes.tab-boveda",
+    "int.sentry"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": "VH-129",
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H12",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: referrals-admin-table.tsx:37-39 (await action(id) sin mirar el resultado), ProjectManager.tsx:21-23 y VaultManager.tsx:30-31 (catch con console.error, sin aviso).",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L2/H08",
+      "titulo": "Subir a la boveda falla en silencio: VaultManager solo hace console.error",
+      "severidad": "MEDIA",
+      "nota_padre": "Mismo defecto (VaultManager.tsx:30 traga el error en console.error); el caso de D3-L5 cubre la bóveda."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "FAL-028",
+   "prefijo": "FAL",
+   "titulo": "No hay gestión del equipo interno: ninguna pantalla ni action viva da de alta, baja o cambia el rol de un SUPER_ADMIN, y la consola nueva perdió invitar miembro y probar el webhook",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/team/page.tsx",
+     "linea": 19,
+     "fragmento": "const users = await prisma.user.findMany({\n  where: {\n    role: Role.SUPER_ADMIN,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/_components/settings-console.tsx",
+     "linea": 521,
+     "fragmento": "Usuarios con rol SUPER_ADMIN habilitados para operar la OS."
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 148,
+     "fragmento": "export async function inviteTeamMemberAction(input: {"
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 309,
+     "fragmento": "export async function testWebhookAction(input?: {"
+    }
+   ],
+   "impacto": "Sumar un colaborador o sacar a uno que se va exige tocar la base a mano (y su JWT sigue vivo, SEC-023). Las funciones del admin clásico (invitar, probar webhook, probar n8n, verificar permisos de Google) siguen en lib/actions/settings.ts, sin importadores. Mide la hipótesis de Valentino: al admin le faltan módulos más que pantallas.",
+   "propuesta": "Módulo Equipo con invitar (reusando inviteTeamMemberAction con token hasheado), desactivar y cambiar rol, todo auditado; botón 'Probar webhook' en Configuración; después podar lib/actions/settings.ts.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-equipo",
+    "h4.adm-equipo.alta-baja-miembros",
+    "h4.adm-config",
+    "modelo.User"
+   ],
+   "relacionados_ids": [
+    "DEU-001"
+   ],
+   "previas": [],
+   "relacionados_texto": "SEC-023; patrón D1-c1 (módulos 'use server' sin importadores)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "A11Y-024",
+   "prefijo": "A11Y",
+   "titulo": "Formulario público de /contact: labels sin asociar a sus campos y error sin role=alert",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "a11y",
+   "tipo_detalle": "a11y",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/contact/page.tsx",
+     "linea": 151,
+     "fragmento": "<label className=\"mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60\">Nombre *</label>\n<input\n  name=\"name\""
+    },
+    {
+     "ruta": "src/app/contact/page.tsx",
+     "linea": 213,
+     "fragmento": "<p className=\"col-span-2 text-xs text-rose-300\">{state.error}</p>"
+    }
+   ],
+   "impacto": "Ninguno de los seis <label> tiene htmlFor ni envuelve su campo: un lector de pantalla anuncia 'campo de edición' sin nombre; el error de envío no se anuncia. Falla WCAG 1.3.1 y 4.1.2 en el formulario de captación pública.",
+   "propuesta": "id + htmlFor (o label envolvente) en cada campo, aria-invalid/aria-describedby y role=alert en el mensaje de error.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto.formulario"
+   ],
+   "relacionados_ids": [
+    "A11Y-005"
+   ],
+   "previas": [],
+   "relacionados_texto": "A11Y-02 (auditoría maestra); patrón D1-c1 (errores sin role=alert)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H14",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-136",
+   "prefijo": "BUG",
+   "titulo": "Contrato del guard SUPER_ADMIN roto en el lote: send-executive-report espera 'UNAUTHORIZED' y siempre responde 403; las páginas muestran 'Unauthorized' o un 404 en vez de ir a /login",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts",
+     "linea": 17,
+     "fragmento": "const status = message.startsWith('UNAUTHORIZED') ? 401 : 403"
+    },
+    {
+     "ruta": "src/lib/auth-guards.ts",
+     "linea": 7,
+     "fragmento": "throw new Error('Unauthorized')"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/tickets/[ticketId]/page.tsx",
+     "linea": 16,
+     "fragmento": "if (!ticketResult.success) {\n  notFound()"
+    },
+    {
+     "ruta": "src/lib/audit-log-queries.ts",
+     "linea": 5,
+     "fragmento": "import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'"
+    }
+   ],
+   "impacto": "Sin sesión el endpoint responde 403 y el botón no puede decir 'tu sesión venció'; en /admin/settings y /admin/tickets una sesión vencida pinta 'Unauthorized' en una caja roja (settings/page.tsx:31-33, tickets/page.tsx:28-31) y el detalle de ticket da 404 también ante un error de base. Conviven tres guards: auth-guards, el del módulo chatbot (audit-log-queries.ts:5, bulk-actions.ts:6) y chequeos inline en 5 archivos.",
+   "propuesta": "En la ruta, comparar contra el mensaje real o un código tipado (zona libre). Decisión para Valentino: un único requireSuperAdmin con error tipado en auth-guards (FROZEN-inferido) y un manejador común (redirect('/login') en páginas, 401/403 en rutas); distinguir not-found de error en getTicketById.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.auth",
+    "h4.adm-shell",
+    "h4.adm-tickets.conversacion-y-respuesta",
+    "h4.adm-config",
+    "h4.adm-clientes.reporte-ejecutivo-manual"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "Patrones D1-c1 (requireSuperAdmin reimplementado) y D1-c3 (guards que lanzan Error genérico)",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H16",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-088",
+   "prefijo": "SEC",
+   "titulo": "Editar y borrar horas no valida a quién pertenecen: un SUPER_ADMIN borra horas ajenas sin rastro (updateTimeEntry además no tiene llamadores)",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+     "linea": 203,
+     "fragmento": "const existingEntry = await prisma.osTimeEntry.findUnique({\n  where: { id: entryId },"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+     "linea": 250,
+     "fragmento": "const entry = await prisma.osTimeEntry.delete({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/time-entry.actions.ts",
+     "linea": 160,
+     "fragmento": "if (task.assignedToId !== null && task.assignedToId !== userId) {"
+    }
+   ],
+   "impacto": "La regla 'nadie registra horas en nombre de otro' (PLAN-604) se cumple al crear pero no al editar ni al borrar: desde el panel de horas (time-entry-panel.tsx:189) un admin puede borrar las de un compañero y no queda audit log. Riesgo bajo entre socios, pero el reporte de horas pierde valor como registro.",
+   "propuesta": "Exigir entry.userId === sesión en update/delete (o auditar si se permite) y podar updateTimeEntry si no se usa.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-proyectos.carga-horas",
+    "modelo.OsTimeEntry"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-605",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H19",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-089",
+   "prefijo": "SEC",
+   "titulo": "El webhook de alertas acepta cualquier URL (http, hosts internos) y el servidor le hace POST sin restricción",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/settings/_actions/settings.schemas.ts",
+     "linea": 25,
+     "fragmento": "alertWebhookUrl: z.preprocess(emptyStringToNull, z.string().url().nullable()),"
+    },
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 131,
+     "fragmento": "const response = await fetch(webhookUrl, {"
+    }
+   ],
+   "impacto": "Con una cuenta SUPER_ADMIN (precondición fuerte) el server de develOP manda POSTs a direcciones internas o a un servidor propio con nombres de clientes y detalle de tickets, y el cambio no se audita.",
+   "propuesta": "Exigir https y una allowlist de hosts (Slack, Discord, n8n propio) o reutilizar validateWebhookUrl del módulo CRM.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-config.datos-y-alertas",
+    "lib.alerts"
+   ],
+   "relacionados_ids": [
+    "SEC-054"
+   ],
+   "previas": [],
+   "relacionados_texto": "SEC-054",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H20",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-137",
+   "prefijo": "BUG",
+   "titulo": "Si el webhook de alertas falla, solo queda un console.error: develOP pierde los avisos de tickets urgentes, leads y mensajes sin enterarse",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 139,
+     "fragmento": "if (!response.ok) {\n  console.error(\n    `[alerts] Webhook respondió ${response.status} ${response.statusText} para ${event.type}.`"
+    },
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 144,
+     "fragmento": "} catch (error) {\n  console.error(`[alerts] No se pudo enviar la alerta ${event.type}:`, error)"
+    }
+   ],
+   "impacto": "Un webhook vencido o mal escrito apaga todas las alertas de la agencia en silencio: no hay Sentry, no hay captureConsoleIntegration y Configuración no muestra el último envío.",
+   "propuesta": "Sentry.captureException/Message con el tipo de evento y mostrar en Configuración el estado del último envío.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-alertas.webhook-agencia",
+    "lib.alerts",
+    "int.sentry"
+   ],
+   "relacionados_ids": [
+    "BUG-052"
+   ],
+   "previas": [],
+   "relacionados_texto": "Patrón D1-c1 (fallos solo con console.error); FAL-014",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H21",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-065",
+   "prefijo": "DEU",
+   "titulo": "Catálogos y tipos copiados a mano: PremiumFeatureKey castea slugs que no le pertenecen, BotAlertType local 'pendiente de prisma generate' y ASSET_TYPES espejado",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "VERIFICADO-POR-LECTURA",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/settings/_actions/settings.actions.ts",
+     "linea": 114,
+     "fragmento": "moduleKey: mod.slug as PremiumFeatureKey,"
+    },
+    {
+     "ruta": "src/lib/premium-features.ts",
+     "linea": 51,
+     "fragmento": "key: 'motor-resenias',"
+    },
+    {
+     "ruta": "src/lib/data/premium-modules.ts",
+     "linea": 24,
+     "fragmento": "slug: 'motor-resenas',"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/settings/alerts/AlertSettingsClient.tsx",
+     "linea": 7,
+     "fragmento": "// Include new enum values pending prisma generate\ntype BotAlertType ="
+    }
+   ],
+   "impacto": "El tipo de la consola dice que las claves son las 11 del catálogo legacy pero en runtime llegan los slugs de PremiumModule (otra lista): el compilador no protege nada. El catálogo legacy solo lo usa lib/actions/settings.ts (sin importadores). El enum BotAlertType ya tiene los 9 valores en schema.prisma:139-149, así que la copia local es innecesaria.",
+   "propuesta": "Tipar moduleKey como string (o el tipo del catálogo de premium-modules), importar BotAlertType de @prisma/client y podar premium-features.ts junto con lib/actions/settings.ts.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-config.precios-modulos",
+    "lib.premium-features",
+    "h4.adm-alertas.detector-incidencias",
+    "modelo.PremiumModule"
+   ],
+   "relacionados_ids": [
+    "BUG-017"
+   ],
+   "previas": [],
+   "relacionados_texto": "PLAN-591, PLAN-559, BUG-017, DB-P0-2",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H22",
+    "verificado_padre": true,
+    "nota_padre": "Muestreado: settings.actions.ts:114 castea mod.slug a PremiumFeatureKey; premium-features.ts:51 usa «motor-resenias» y premium-modules.ts:24 «motor-resenas».",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "PERF-011",
+   "prefijo": "PERF",
+   "titulo": "Listados y consultas del admin sin paginación ni tope: tickets, workload del equipo, export masivo de leads, barrido de alertas, pipeline de leads, hilo de mensajes y resúmenes de proyectos",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "perf",
+   "tipo_detalle": "perf",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/tickets/_actions/ticket.actions.ts",
+     "linea": 59,
+     "fragmento": "const tickets = await prisma.ticket.findMany({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/page.tsx",
+     "linea": 44,
+     "fragmento": "prisma.task.findMany({\n  where: {\n    assignedToId: {"
+    },
+    {
+     "ruta": "src/lib/bulk-actions.ts",
+     "linea": 50,
+     "fragmento": "const leads = await prisma.chatbotLead.findMany({"
+    },
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 205,
+     "fragmento": "prisma.organization.findMany({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/page.tsx",
+     "linea": 23,
+     "fragmento": "const leads = await prisma.osLead.findMany({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/leads/page.tsx",
+     "linea": 202,
+     "fragmento": "<OutboundLeadsView leads={leads} />"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/messages/_actions/message.actions.ts",
+     "linea": 144,
+     "fragmento": "const messages = await prisma.message.findMany({\n  where: {\n    organizationId: parsedOrganizationId,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "linea": 936,
+     "fragmento": "const projects = await prisma.project.findMany({"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "linea": 976,
+     "fragmento": "timeEntries: {\n          select: {\n            id: true,"
+    }
+   ],
+   "impacto": "Con datos de prueba no se nota; con el primer año de clientes /admin/tickets trae todos los tickets de todas las orgs para filtrar en memoria, /admin/team trae todas las tareas históricas (incluidas DONE, que además se listan) con todas sus horas y el export arma el CSV completo en memoria de la action.",
+   "propuesta": "Paginación por cursor y filtros en servidor en tickets; workload solo de tareas no DONE o en ventana; export en streaming con tope.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-tickets.bandeja",
+    "h4.adm-equipo.workload",
+    "h4.adm-clientes.acciones-masivas",
+    "h4.adm-leads.pipeline-kanban",
+    "h4.adm-mensajes.hilo-y-leido",
+    "modelo.OsLead",
+    "modelo.Message",
+    "h4.adm-proyectos.tablero-kanban",
+    "modelo.OsTimeEntry"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "PLAN-658",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H25",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L3/H18",
+      "titulo": "Consultas sin límite: todo el pipeline OsLead serializado al cliente y el hilo completo de mensajes",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo patrón (consultas del admin sin límite): suma el pipeline OsLead serializado entero y el hilo completo de mensajes."
+     },
+     {
+      "ciclo": "D3-c1",
+      "tmp": "D3-c1/D3-L4/H18",
+      "titulo": "listProjects trae todas las filas de horas, hitos y mantenimiento de todos los proyectos solo para calcular resúmenes",
+      "severidad": "BAJA",
+      "nota_padre": "Mismo patrón (consultas del admin sin tope): listProjects trae todas las horas, hitos y pagos para calcular resúmenes."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-066",
+   "prefijo": "DEU",
+   "titulo": "Validación laxa en entradas del admin: actionType del audit log casteado sin validar, pageSize sin tope, orgIds sin schema y tareas asignables a cualquier usuario",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/audit-log-queries.ts",
+     "linea": 35,
+     "fragmento": "...(filter?.actionType && {\n  actionType: filter.actionType as AuditActionType,"
+    },
+    {
+     "ruta": "src/lib/audit-log-queries.ts",
+     "linea": 19,
+     "fragmento": "pageSize = 10,"
+    },
+    {
+     "ruta": "src/lib/bulk-actions.ts",
+     "linea": 8,
+     "fragmento": "export async function bulkPauseBots(orgIds: string[]) {"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/team/_actions/task.schemas.ts",
+     "linea": 50,
+     "fragmento": "const optionalCreateAssignedToSchema = z.preprocess(\n  emptyStringToUndefined,\n  UserIdSchema.optional()"
+    }
+   ],
+   "impacto": "Un actionType inválido llega a Prisma y rompe la página del audit log (sin try/catch → error.tsx); pageSize lo decide quien llama; una tarea puede quedar asignada a un CLIENT o SETTER y desaparecer del workload (que solo lista SUPER_ADMIN). Títulos, descripciones y notas sin .max().",
+   "propuesta": "Zod en listAuditLog (enum de AuditActionType, pageSize ≤ 100) y en bulk-actions; validar que assignedToId sea SUPER_ADMIN; .max() en textos.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-audit.listado",
+    "h4.adm-clientes.acciones-masivas",
+    "h4.adm-proyectos.tareas"
+   ],
+   "relacionados_ids": [
+    "SEC-084"
+   ],
+   "previas": [],
+   "relacionados_texto": "Patrón D1-c3 (texto libre sin .max())",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L5",
+    "tmp": "D3-c1/D3-L5/H26",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-138",
+   "prefijo": "BUG",
+   "titulo": "El hard-delete y el archivado no protegen la org de la agencia (develOP), que aparece como un cliente más",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/clients/page.tsx",
+     "linea": 22,
+     "fragmento": "prisma.organization.findMany({\n      where: { deletedAt: null },"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/page.tsx",
+     "linea": 11,
+     "fragmento": "where: { slug: { not: 'develop' } },"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+     "linea": 141,
+     "fragmento": "await tx.organization.delete({ where: { id: organizationId } })"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/clients/_components/ClientsListClient.tsx",
+     "linea": 527,
+     "fragmento": "confirmPhrase=\"ELIMINAR\""
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbot/activity/page.tsx",
+     "linea": 11,
+     "fragmento": "prisma.botConfig.findUnique({ where: { slug: 'develop' }, ..."
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_actions/project.actions.ts",
+     "linea": 233,
+     "fragmento": "where: { slug: 'develop' },"
+    }
+   ],
+   "impacto": "La lista de Clientes trae todas las orgs no archivadas, sin excluir la de la agencia, al revés que Proyectos, que sí la excluye. Ni hardDeleteClient ni archiveClient la bloquean del lado del servidor, y la confirmación pide tipear 'ELIMINAR', no el nombre del cliente. Un error del SUPER_ADMIN (elegir la fila de develOP y confirmar) borra en cascada el bot del sitio con sus conversaciones y leads, todos los proyectos internos con sus hitos de pago y horas, más tickets y mensajes. Sin backups (DR-01) no hay vuelta atrás. Además, el widget del sitio, /admin/chatbot/activity y health, que buscan slug 'develop', y el alta de proyectos internos (project.actions.ts:233) dejan de funcionar. Antes del primer cliente real, es el borrado irreversible más grande al que el panel está expuesto.",
+   "propuesta": "Rechazar en el servidor el archivado y el hard-delete de la org de la agencia (slug 'develop' o un flag isAgency) dentro de hardDeleteClient/archiveClient. Excluirla de /admin/clients igual que hace projects/page.tsx:11. Pedir que se tipee el nombre o el slug del cliente en vez de una frase genérica. Exigir que el cliente esté archivado antes del hard-delete. Resolver DR-01 (backups).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-clientes",
+    "h4.adm-clientes.eliminar-definitivo",
+    "h4.adm-clientes.archivar",
+    "modelo.Organization",
+    "h3.vis-widget-develop",
+    "h4.adm-proyectos"
+   ],
+   "relacionados_ids": [
+    "BUG-015",
+    "DEU-064"
+   ],
+   "previas": [],
+   "relacionados_texto": "DR-01; flujo D6 'Eliminar cliente (hard-delete) y su cascada'",
+   "vh": "VH-130",
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H01",
+    "verificado_padre": true,
+    "nota_padre": "Leído: admin/clients/page.tsx:20-29 (findMany con deletedAt null, sin excluir la org de la agencia), mientras admin/projects/page.tsx:8-12 y [projectId]/layout.tsx:140-148 sí excluyen slug «develop»; hardDeleteClient.ts y archiveClient.ts no miran el slug (grep sin resultados) y el diálogo pide tipear «ELIMINAR» (ClientsListClient.tsx:522-527), no el nombre. La org «develop» la crea el seed del chatbot (modules/chatbot/prisma/seed.ts:186) y es la del bot del sitio. El verificador la bajó a MEDIA (guardarraíl faltante ante un error humano) y se le sigue; que la org exista así en producción es runtime → PROBABLE.",
+    "verificador": {
+     "se_sostiene": true,
+     "severidad_ajustada": "MEDIA"
+    }
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-139",
+   "prefijo": "BUG",
+   "titulo": "Form de contacto: el rate limit consulta la DB fuera del try y un fallo de Neon tira la página de error en vez del mensaje",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 24,
+     "fragmento": "const rl = await checkRateLimit({\n    key: `contactFormPerIp:${ipHash}`,"
+    },
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 61,
+     "fragmento": "try {"
+    },
+    {
+     "ruta": "src/lib/rate-limit/limiter.ts",
+     "linea": 44,
+     "fragmento": "const rows = await prisma.$queryRawUnsafe<UpsertRow[]>("
+    },
+    {
+     "ruta": "src/lib/prisma.ts",
+     "linea": 6,
+     "fragmento": "globalForPrisma.prisma ?? new PrismaClient({ log: ['error'] })"
+    }
+   ],
+   "impacto": "El upsert del rate limit no tiene catch (limiter.ts:44) y en contactFormAction corre antes del try (:61). Si Neon tarda en despertar o la conexión falla, la action lanza la excepción, useActionState la propaga al error boundary y el visitante ve la pantalla de error en vez de 'No se pudo enviar el formulario'. Es el formulario con el que entran los leads de develOP, y no hay retry ni connect_timeout en prisma.ts.",
+   "propuesta": "Mover getClientIpHash/checkRateLimit adentro del try, o envolverlos con un mensaje útil y captureException. Evaluar retry corto ante cold-start (RESIL-07).",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto.enviar-formulario",
+    "lib.rate-limit",
+    "lib.prisma"
+   ],
+   "relacionados_ids": [
+    "SEC-025"
+   ],
+   "previas": [],
+   "relacionados_texto": "RESIL-07",
+   "vh": "VH-131",
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-090",
+   "prefijo": "SEC",
+   "titulo": "El formulario público de contacto acepta texto sin tope en todos sus campos y lo replica a la DB, la alerta de agencia y n8n",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 57,
+     "fragmento": "name: z.string().trim().min(2, 'Nombre inválido.'),\n  email: z.string().trim().email('El email no es válido.'),"
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 62,
+     "fragmento": "message: z.string().trim().min(10, 'El mensaje debe tener al menos 10 caracteres.'),"
+    },
+    {
+     "ruta": "src/lib/actions/contact.ts",
+     "linea": 75,
+     "fragmento": "detail: `Nuevo lead desde formulario. Contacto: ${payload.email}. Servicio: ${payload.service || 'General'}.`,"
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 46,
+     "fragmento": "featureKey: z.string().trim().min(1, 'Feature inválida.'),\n  featureName: z.string().trim().min(1, 'Nombre de feature inválido.'),"
+    }
+   ],
+   "impacto": "Un anónimo puede mandar campos de hasta el límite por defecto del body de server actions (~1 MB; next.config sin bodySizeLimit). Eso se guarda en ContactSubmission (message es @db.Text), entra a la alerta de agencia y al webhook de n8n, y se interpola en texto de alerta (company/name/email/service). El rate limit es de 5 por IP cada 15 min, pero la IP sale del primer X-Forwarded-For (patrón D1-c1) y cada IP falsificada crea una fila nueva en rate_limit (patrón D1-c3). Riesgo para el primer cliente: spam y crecimiento de almacenamiento en Neon, más ruido en las alertas. UpsellRequestSchema (portal autenticado) tiene el mismo defecto en featureKey/featureName.",
+   "propuesta": "Agregar .max() razonables (name 120, email 254, phone 40, company 120, service 60 o enum, message 5000, featureName 120). Opcional: bodySizeLimit explícito para server actions. Escapar los campos del visitante en sendAgencyAlert.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h6.vis-contacto.enviar-formulario",
+    "modelo.ContactSubmission",
+    "lib.actions",
+    "int.n8n",
+    "h2.cli-servicios"
+   ],
+   "relacionados_ids": [
+    "SEC-054",
+    "SEC-055"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c3 'Texto libre sin .max()'; patrón D1-c1 X-Forwarded-For; patrón D1-c3 claves de rate limit",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-067",
+   "prefijo": "DEU",
+   "titulo": "Cuatro módulos 'use server' legacy sin importadores y 6 actions muertas más, que duplican versiones vivas con contratos peores",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 92,
+     "fragmento": "error: error instanceof Error ? error.message : 'No se pudo guardar la configuración.',"
+    },
+    {
+     "ruta": "src/lib/actions/settings.ts",
+     "linea": 191,
+     "fragmento": "const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'"
+    },
+    {
+     "ruta": "src/lib/actions/leads.ts",
+     "linea": 14,
+     "fragmento": "async function ensureAdmin() {\n  const session = await auth()\n  return session?.user?.role === 'SUPER_ADMIN'"
+    },
+    {
+     "ruta": "src/lib/actions/clients.ts",
+     "linea": 177,
+     "fragmento": "members: {\n        where: { role: 'ADMIN' },"
+    },
+    {
+     "ruta": "src/lib/actions/services.ts",
+     "linea": 21,
+     "fragmento": "export async function createServiceAction("
+    },
+    {
+     "ruta": "src/lib/actions/projects.ts",
+     "linea": 35,
+     "fragmento": "export async function createProjectAction("
+    }
+   ],
+   "impacto": "clients.ts, services.ts, settings.ts y leads.ts (+ leads-constants.ts) no tienen importadores. Tampoco los tienen 5 de las 7 actions de projects.ts ni markLeadAsRead. Duplican _actions vivas (settings.actions.ts:127/:175, project.actions.ts:593/:643, admin/leads/_actions) y arrastran defectos que volverían si alguien las reconecta: error.message crudo (settings.ts:92, :142, :234, :270, :304, y JSON.parse del service account en :285), token de invitación en claro (:180-189), fallback a localhost (:191), usuario creado antes del email (:172-194), guard reimplementado (leads.ts:14-17, settings.ts:20-28), take:1 sin orderBy (clients.ts:177-181) y update sin Zod (clients.ts:157-171). Encarecen cada cambio: hay que adivinar cuál es la versión vigente.",
+   "propuesta": "Borrar clients.ts, services.ts, settings.ts, leads.ts y leads-constants.ts. En projects.ts, migrar los dos consumidores vivos (delete-project-button.tsx:6 → deleteProject; task-list.tsx:22 → una action en admin/projects/_actions) y borrar el archivo. Quitar markLeadAsRead de contact.ts.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "lib.actions",
+    "h4.adm-config",
+    "h4.adm-equipo",
+    "h4.adm-leads",
+    "h4.adm-proyectos",
+    "h4.adm-clientes"
+   ],
+   "relacionados_ids": [
+    "DEU-001",
+    "DEU-018",
+    "DEU-063"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c1 módulos 'use server' sin importadores; requireSuperAdmin reimplementado; tokens en claro; D1-c3 fallback localhost",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "BUG-140",
+   "prefijo": "BUG",
+   "titulo": "acknowledgeAlert/resolveAlert no verifican el estado previo: marcar como vista una resuelta la reabre",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "bug",
+   "tipo_detalle": "bug",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+     "linea": 44,
+     "fragmento": "where: { id },\n        data: {\n          status: 'ACKNOWLEDGED',"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+     "linea": 87,
+     "fragmento": "where: { id },\n        data: {\n          status: 'RESOLVED',"
+    }
+   ],
+   "impacto": "El update va solo por id. Una doble acción (dos pestañas o dos admins) o un ack tardío sobre una alerta RESOLVED la devuelve a ACKNOWLEDGED, y el badge de pendientes y el historial quedan incoherentes. Si la alerta no existe, el update lanza P2025 (throw, no mensaje).",
+   "propuesta": "Condicionar la transición (where: { id, status: 'PENDING' } para el ack; status distinto de RESOLVED para resolver) con updateMany y devolver ok/fail según count.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-alertas.marcar-vista-resolver",
+    "modelo.BotAlert"
+   ],
+   "relacionados_ids": [
+    "BUG-062"
+   ],
+   "previas": [],
+   "relacionados_texto": "",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H13",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "UX-051",
+   "prefijo": "UX",
+   "titulo": "'Enviar a aprobación' no avisa al cliente (ni campana ni email), falla en silencio y no audita",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "ux",
+   "tipo_detalle": "ux",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/lib/actions/projects.ts",
+     "linea": 197,
+     "fragmento": "await tx.message.create({\n      data: {\n        content: `📋 Tu entrega \"${task.title}\" está lista para revisión. ..."
+    },
+    {
+     "ruta": "src/actions/agency-actions.ts",
+     "linea": 54,
+     "fragmento": "const notifications = orgMembers.map(member => ({\n      type: 'ACTION_REQUIRED' as const,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/projects/_components/task-list.tsx",
+     "linea": 628,
+     "fragmento": "await sendTaskForApprovalAction(formData)\n      router.refresh()"
+    }
+   ],
+   "impacto": "El camino vivo para pedir aprobación (task-list) solo crea un Message. A diferencia de createTaskForClientAction, no genera Notification ACTION_REQUIRED ni email, así que el cliente se entera recién cuando entra al portal. La action devuelve void y sale en silencio si la tarea no existe (:182, :188). Un guard vencido lanza dentro de startTransition sin catch y termina en el error boundary. No hay auditoría.",
+   "propuesta": "Reusar la creación de Notification + email de agency-actions (o un helper común), devolver ActionResult y mostrar el feedback en la UI. Agregar logAdminAction.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-proyectos.enviar-a-aprobacion",
+    "h2.cli-proyecto",
+    "modelo.Message",
+    "modelo.Notification"
+   ],
+   "relacionados_ids": [
+    "BUG-112"
+   ],
+   "previas": [],
+   "relacionados_texto": "flujo D2 'Aprobar o pedir cambios en una entrega'; patrón D1-c3 guards que lanzan",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H14",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-091",
+   "prefijo": "SEC",
+   "titulo": "updateClient cambia el email de login del cliente sin avisar al email anterior ni invalidar la sesión",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+     "linea": 71,
+     "fragmento": "const nextEmail = parsed.userEmail.toLowerCase()"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/updateClient.ts",
+     "linea": 108,
+     "fragmento": "const nextUser = await tx.user.update({\n      where: { id: adminUser.id },\n      data: {"
+    }
+   ],
+   "impacto": "El SUPER_ADMIN reescribe el email con el que el cliente se loguea y recibe el magic link: no se le avisa ni al email viejo ni al nuevo, no se resetea emailVerified y no se sube sessionVersion. Un typo deja al cliente sin acceso por magic link, sin que él sepa por qué. userPhone no tiene .max() (:25).",
+   "propuesta": "Avisar por email (viejo y nuevo) al cambiar el email de login, resetear emailVerified o pedir confirmación, subir sessionVersion y acotar userPhone.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h4.adm-clientes.editar-datos",
+    "modelo.User",
+    "h1.auth-login"
+   ],
+   "relacionados_ids": [
+    "SEC-014"
+   ],
+   "previas": [],
+   "relacionados_texto": "flujo D1 'Invalidacion de sesion por sessionVersion'",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H15",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "DEU-068",
+   "prefijo": "DEU",
+   "titulo": "Instancias del lote: auditoría escrita después del efecto con un helper que traga el error (y archivar se registra como CLIENT_UPDATED)",
+   "dominio": "D3",
+   "severidad": "BAJA",
+   "tipo": "deuda",
+   "tipo_detalle": "deuda",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/modules/chatbot/server/admin/hardDeleteClient.ts",
+     "linea": 166,
+     "fragmento": "await logAdminAction({"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/archiveClient.ts",
+     "linea": 41,
+     "fragmento": "actionType: 'CLIENT_UPDATED',\n    action: `Archivó (soft-delete reversible) el cliente \"${org.companyName}\"`,"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/manageAlerts.ts",
+     "linea": 53,
+     "fragmento": "if (before) {\n    await logAdminAction({"
+    }
+   ],
+   "impacto": "Todas las mutaciones auditadas del lote auditan después del efecto, con el helper que solo hace console.error (verificado en D1: audit-log.ts:40): hardDeleteClient.ts:166, archiveClient.ts:37/:73, updateClient.ts:121, updateClientInternalNotes.ts:40, manageAlerts.ts:54/:97. Si el insert del audit falla tras un hard-delete irreversible, no queda registro y nadie se entera. Archivar y desarchivar usan CLIENT_UPDATED, así que el filtro por acción del audit log no los distingue.",
+   "propuesta": "Igual que el patrón D1-c3: captureException en el helper (decisión para Valentino, porque audit-log.ts es FROZEN-inferido) y, para el hard-delete, escribir el audit dentro de la transacción. Agregar CLIENT_ARCHIVED/CLIENT_UNARCHIVED al enum (schema FROZEN: decisión para Valentino).",
+   "esfuerzo": "S",
+   "zona": "FROZEN",
+   "nodos": [
+    "lib.audit-log",
+    "h4.adm-audit",
+    "h4.adm-clientes"
+   ],
+   "relacionados_ids": [
+    "DEU-012"
+   ],
+   "previas": [],
+   "relacionados_texto": "patrón D1-c3 'Auditoría escrita después del efecto'",
+   "vh": null,
+   "origen": {
+    "ciclo": "D3-c1",
+    "lote": "D3-L6",
+    "tmp": "D3-c1/D3-L6/H16",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "SEC-092",
    "prefijo": "SEC",
    "titulo": "toErrorMessage (action-utils, FROZEN-inferido) devuelve al cliente el message crudo de cualquier Error: la alerta D3-A4 quedó resuelta solo para ZodError (configuración, novedades, tareas, horas, tickets) y dos rutas devuelven String(error)",
@@ -5980,1332 +7013,6 @@
     "ciclo": "D4-c1",
     "lote": "D4-L6",
     "tmp": "D4-c1/D4-L6/H13",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-089",
-   "prefijo": "DEU",
-   "titulo": "Higiene de UI — D4: 97 detalles cosméticos (contraste 41, otro 26, copy 24, inline 4, tilde 2)",
-   "dominio": "D4",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/setter/layout.tsx",
-     "linea": 53,
-     "fragmento": "[contraste] Rótulo 'develOP' en text-zinc-600 sobre fondo oscuro (menos de 4,5:1)"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/page.tsx",
-     "linea": 322,
-     "fragmento": "[contraste] Texto funcional sobre evaluaciones sin fecha en text-zinc-600"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/page.tsx",
-     "linea": 323,
-     "fragmento": "[copy] Jerga de sprint '(pre-B5)' en la UI"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
-     "linea": 244,
-     "fragmento": "[contraste] Ayuda 'Si el embed no carga…' en text-zinc-600"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
-     "linea": 251,
-     "fragmento": "[copy] 'draft URL' y 'embeber' como jerga en el vacío del preview"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
-     "linea": 65,
-     "fragmento": "[copy] 'no debería pasar en EN_REVISION' expone el enum interno"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
-     "linea": 78,
-     "fragmento": "[copy] Veredicto mostrado como enum crudo (DESCARTAR/AVANZAR/CALIENTE)"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/dossier-panels.tsx",
-     "linea": 168,
-     "fragmento": "[copy] Jerga de sprint '(B4)' en el vacío del self-check"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx",
-     "linea": 72,
-     "fragmento": "[copy] Veredicto como enum crudo"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/setter/[setterId]/_components/setter-evaluaciones.tsx",
-     "linea": 82,
-     "fragmento": "[contraste] 'sin fecha (pre-B5)' en text-zinc-600 y con jerga de sprint"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/decision-bar.tsx",
-     "linea": 65,
-     "fragmento": "[otro] z-[130] y bg-[#05070a] literales en vez del token zIndex de design-tokens.ts:227"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx",
-     "linea": 133,
-     "fragmento": "[inline] transition/willChange en style inline (dinámico, justificable)"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/_components/ficha-accordion.tsx",
-     "linea": 146,
-     "fragmento": "[inline] gridTemplateRows/opacity/transition en style inline"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leados/[leadId]/page.tsx",
-     "linea": 36,
-     "fragmento": "[otro] STAGE_PILL duplicado con pipeline-board.tsx:25-33"
-    },
-    {
-     "ruta": "src/app/(protected)/setter/loading.tsx",
-     "linea": 15,
-     "fragmento": "[otro] El skeleton dibuja eyebrow y descripción que la página ya no renderiza desde P21 (page.tsx:104-109)"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leads/_actions/lead.schemas.ts",
-     "linea": 44,
-     "fragmento": "[copy] Mensajes de validación en inglés ('Business name is required', 'Invalid lead id')"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leads/_actions/demo.schemas.ts",
-     "linea": 26,
-     "fragmento": "[copy] 'A valid demo URL is required' en inglés"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/leads/_actions/lead.actions.ts",
-     "linea": 142,
-     "fragmento": "[copy] 'Lead not found' y fallbacks 'Failed to …' en inglés"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/fg2-lab/_components/medicion-panel.tsx",
-     "linea": 139,
-     "fragmento": "[contraste] Ayuda del cronómetro en text-zinc-600"
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
-     "linea": 83,
-     "fragmento": "[contraste] text-zinc-700 en la nota «sin fecha» da ≈1,9:1 sobre el fondo oscuro."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
-     "linea": 77,
-     "fragmento": "[contraste] text-zinc-600 en «Últimos 30 días» da ≈2,6:1."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/mis-numeros.tsx",
-     "linea": 31,
-     "fragmento": "[contraste] El rótulo «Mis números» en text-zinc-600 a 11 px da ≈2,6:1."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
-     "linea": 33,
-     "fragmento": "[contraste] El nombre de la herramienta pendiente en text-zinc-600 da ≈2,6:1."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
-     "linea": 37,
-     "fragmento": "[contraste] dondeSeUsa en text-zinc-700 a 10 px da ≈1,9:1."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
-     "linea": 41,
-     "fragmento": "[contraste] «pendiente» en text-amber-300/50 a 10 px no llega a AA."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
-     "linea": 59,
-     "fragmento": "[contraste] dondeSeUsa de las herramientas con link en text-zinc-600 a 10 px."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
-     "linea": 95,
-     "fragmento": "[contraste] El cuerpo caducado en text-zinc-600 y tachado da ≈2,6:1 y se lee mal."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
-     "linea": 113,
-     "fragmento": "[contraste] El «hace …» del aviso en text-zinc-600 a 11 px."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
-     "linea": 179,
-     "fragmento": "[contraste] El encabezado «Tus demos esperando a Franco» en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/novedades-panel.tsx",
-     "linea": 196,
-     "fragmento": "[contraste] La instrucción «Las ves en tu cartera → filtro…» en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/cola-del-dia.tsx",
-     "linea": 123,
-     "fragmento": "[contraste] El pie «Quedan N más para trabajar» en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/cola-del-dia.tsx",
-     "linea": 76,
-     "fragmento": "[contraste] Rubro y zona de la fila en text-zinc-600 a 11 px."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/home-sections.tsx",
-     "linea": 97,
-     "fragmento": "[contraste] La meta de la card (rubro · zona · antigüedad) en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/home-en-espera.tsx",
-     "linea": 102,
-     "fragmento": "[contraste] «Tu cartera completa sigue disponible.» en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/cartera-view.tsx",
-     "linea": 122,
-     "fragmento": "[contraste] La ayuda del vacío por filtro en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/progreso-semana.tsx",
-     "linea": 58,
-     "fragmento": "[contraste] «últimos N días» en text-zinc-600 a 11 px."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/lead-card-actions.tsx",
-     "linea": 223,
-     "fragmento": "[contraste] El contador de caracteres de la nota en text-zinc-600 a 10 px."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/canal-seguridad.tsx",
-     "linea": 46,
-     "fragmento": "[contraste] La lista de disciplina en text-zinc-500 a 11 px da ≈4,1:1, por debajo de 4,5:1."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/bloques-secuenciales.tsx",
-     "linea": 149,
-     "fragmento": "[otro] aria-label en un div genérico sin role: los lectores de pantalla lo ignoran (usar role=\"group\" o una región)."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/novedades-abrir-foco.tsx",
-     "linea": 61,
-     "fragmento": "[otro] Varios botones «Abrir» con el mismo nombre accesible y sin el negocio; TrabajarLeadButton sí lo incluye (trabajar-lead-button.tsx:40)."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/home-sections.tsx",
-     "linea": 27,
-     "fragmento": "[copy] diasDesde cuenta bloques de 24 h, no días calendario: un lead de ayer a las 23 h aparece como «hoy» a la mañana."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/setter-nav.tsx",
-     "linea": 89,
-     "fragmento": "[otro] «Tu día» queda marcado como activo también en /setter/nuevo por el startsWith."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/shortcuts-help.tsx",
-     "linea": 32,
-     "fragmento": "[otro] La pastilla de atajos queda fija abajo a la derecha también en touch, donde no sirve y tapa contenido."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/cartera-toolbar.tsx",
-     "linea": 75,
-     "fragmento": "[otro] Los dos selects (min-w 9,5rem + 10rem) no hacen wrap: desbordan ≈41 px a 320 px y 1 px a 360 px."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/tools-rail.tsx",
-     "linea": 52,
-     "fragmento": "[otro] Los links externos con target=_blank no avisan al lector de pantalla que abren una pestaña nueva."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/_components/setter-shell.tsx",
-     "linea": 29,
-     "fragmento": "[inline] El z-index va por style inline con tokens (:29, :34, :45, :52, :60) en lugar de clases."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/escalamiento-construccion.tsx",
-     "linea": 39,
-     "fragmento": "[copy] Interpola '(hace ${esperaEscalado})', pero formatEspera ya devuelve 'hace X': se lee «hace hace 3 h»."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/evaluacion-form.tsx",
-     "linea": 306,
-     "fragmento": "[contraste] Nota funcional de score 3 en text-zinc-600 sobre fondo oscuro."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-form.tsx",
-     "linea": 460,
-     "fragmento": "[contraste] La promesa de guardado de la ficha está en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/chequeo-form.tsx",
-     "linea": 310,
-     "fragmento": "[contraste] La promesa de guardado del chequeo está en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.tsx",
-     "linea": 76,
-     "fragmento": "[contraste] Estado vacío del historial en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/lead-timeline.tsx",
-     "linea": 152,
-     "fragmento": "[contraste] Aclaración «Evento del sistema» en text-zinc-600 italic."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/ficha-step.tsx",
-     "linea": 46,
-     "fragmento": "[contraste] Texto de ficha congelada vacía en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m16-agenda.tsx",
-     "linea": 61,
-     "fragmento": "[contraste] «Sin teléfono cargado» en text-zinc-600 (igual en m5-seguimiento.tsx:77)."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m14-chequeo.tsx",
-     "linea": 39,
-     "fragmento": "[contraste] Rótulo «Tu borrador» en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/franja-recorrido.tsx",
-     "linea": 56,
-     "fragmento": "[contraste] Los pasos futuros de la franja usan text-zinc-600 para su nombre y número."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/pantalla-manual.tsx",
-     "linea": 67,
-     "fragmento": "[contraste] Rótulos de zona «Contexto del lead» y «Munición» en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/manual-nav.tsx",
-     "linea": 207,
-     "fragmento": "[contraste] La explicación de la navegación libre está en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/escalamiento-construccion.tsx",
-     "linea": 61,
-     "fragmento": "[contraste] «¿Algo no sale como la guía dice?» en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/historial-lead.tsx",
-     "linea": 20,
-     "fragmento": "[contraste] El conteo de movimientos está en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m5-seguimiento.tsx",
-     "linea": 228,
-     "fragmento": "[contraste] «Abrí el Gem para pegarlo:» en text-zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx",
-     "linea": 291,
-     "fragmento": "[copy] Jerga visible «auto-reporte» (también en manual-nav.tsx:208)."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/brief-form.tsx",
-     "linea": 260,
-     "fragmento": "[copy] Rótulo «CTA:» en inglés técnico (también en chequeo-form.tsx:99)."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m16-agenda.tsx",
-     "linea": 138,
-     "fragmento": "[copy] Muestra el uid interno de Cal.com como «Código de la reserva», y además en zinc-600."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m14-chequeo.tsx",
-     "linea": 118,
-     "fragmento": "[copy] Plural con paréntesis «delator(es)»."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/_components/badge-provisorio.tsx",
-     "linea": 7,
-     "fragmento": "[copy] Badge permanente «Guía preliminar — en validación» en el camino del setter."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/barra-accion.tsx",
-     "linea": 168,
-     "fragmento": "[inline] style={{ zIndex: zIndex.sticky }} en línea (token de design-tokens)."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m15-envio.tsx",
-     "linea": 90,
-     "fragmento": "[otro] Condicional redundante 'demoEnviadaAt ?' dentro de la rama donde ya es truthy."
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/m-construccion.tsx",
-     "linea": 180,
-     "fragmento": "[otro] El comentario describe un expectToast de página entera que ya no existe y fuerza la redacción en subjuntivo (PLAN-927)."
-    },
-    {
-     "ruta": "src/app/api/cron/os-follow-up/route.ts",
-     "linea": 125,
-     "fragmento": "[copy] La línea 'Se reactiva hoy' del digest empieza con un espacio donde quedó un emoji borrado"
-    },
-    {
-     "ruta": "src/app/api/cron/os-follow-up/route.ts",
-     "linea": 134,
-     "fragmento": "[copy] El encabezado del digest ' <b>Follow-ups pendientes' arranca con un espacio de un emoji borrado"
-    },
-    {
-     "ruta": "src/app/api/cron/os-follow-up/route.ts",
-     "linea": 100,
-     "fragmento": "[tilde] 'Respondio' sin tilde en statusLabel"
-    },
-    {
-     "ruta": "src/app/api/cron/os-follow-up/route.ts",
-     "linea": 130,
-     "fragmento": "[tilde] 'Ultimo contacto' sin tilde en el digest"
-    },
-    {
-     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
-     "linea": 201,
-     "fragmento": "[contraste] Texto funcional de 11px en text-zinc-600 sobre fondo oscuro (~2,6:1, menor a 4,5:1)"
-    },
-    {
-     "ruta": "src/app/(protected)/setter/nuevo/importar/importar-prospectos-form.tsx",
-     "linea": 239,
-     "fragmento": "[contraste] 'fila N' de los duplicados en text-zinc-600 (~2,6:1)"
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
-     "linea": 169,
-     "fragmento": "[contraste] Detalle de cada opción en text-[11px] text-zinc-500 (~4,1:1, por debajo de AA para texto chico); lo mismo en :142"
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
-     "linea": 143,
-     "fragmento": "[copy] 'si no respondió, se enfría solo' promete un comportamiento automático que no existe (el lead queda en seguimiento hasta que Franco lo cierre)"
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/_components/seguimiento-form.tsx",
-     "linea": 67,
-     "fragmento": "[copy] El toast de 'Respondió' dice 'se abrió el brief. A construir la demo' también cuando la demo ya se mandó (m5 post-envío)"
-    },
-    {
-     "ruta": "src/app/(protected)/setter/leads/[leadId]/manual/loading.tsx",
-     "linea": 10,
-     "fragmento": "[otro] aria-label en un div sin role: los lectores no lo anuncian; usar role=\"status\""
-    },
-    {
-     "ruta": "src/app/(protected)/setter/nuevo/nuevo-prospecto-form.tsx",
-     "linea": 95,
-     "fragmento": "[copy] El comentario que justifica router.push nombra 'el wizard del lead', que ya no existe (es el manual)"
-    },
-    {
-     "ruta": "src/lib/leados/guidance-content.ts",
-     "linea": 1186,
-     "fragmento": "[copy] El ejemplo del chequeo final dice 'Los 6 obligatorios en verde' y hoy son 10 hard-checks (flow-content.ts:171-261)"
-    },
-    {
-     "ruta": "src/lib/leados/escalamiento.ts",
-     "linea": 87,
-     "fragmento": "[otro] El comentario habla de 'los 6 hard-checks' y hoy son 10"
-    },
-    {
-     "ruta": "src/lib/leados/agenda.ts",
-     "linea": 296,
-     "fragmento": "[otro] El comentario dice que el claim exigió agendaJson NULL; desde 6.1 también acepta OFRECIDOS"
-    },
-    {
-     "ruta": "src/lib/leados/flow.ts",
-     "linea": 650,
-     "fragmento": "[otro] El comentario de agruparParaHome dice 'calientes (score >= 4)'; el caliente hoy es el campo de Franco"
-    },
-    {
-     "ruta": "src/lib/leados/flow.ts",
-     "linea": 412,
-     "fragmento": "[otro] El doc de grupoPara dice 'APROBADA → en seguimiento (el envío llega en bloques posteriores)'; el código (:430-443) ya manda a trabajar"
-    },
-    {
-     "ruta": "src/lib/leados/guidance-content.ts",
-     "linea": 24,
-     "fragmento": "[otro] El encabezado dice 'hoy el registro solo tiene la ficha (m1)'; el registro tiene once pasos"
-    },
-    {
-     "ruta": "src/lib/leados/herramientas.ts",
-     "linea": 8,
-     "fragmento": "[otro] Dice que SHELL_CONSTRUCCION y CANAL_INSTAGRAM están en flow.ts; viven en flow-content.ts"
-    },
-    {
-     "ruta": "src/lib/leados/manual.ts",
-     "linea": 517,
-     "fragmento": "[otro] El comentario dice que DESCARTADA mantiene su case en m2 con el veredicto a la vista; hoy aterriza en 'archivo' (:564-572) y m2 no existe."
-    },
-    {
-     "ruta": "src/lib/leados/manual.ts",
-     "linea": 327,
-     "fragmento": "[otro] 'Ruta canónica... (ruta paralela al wizard)': el wizard ya no existe."
-    },
-    {
-     "ruta": "src/lib/leados/manual.ts",
-     "linea": 336,
-     "fragmento": "[otro] El comentario cita 'WizardData en la página del wizard' y el 'gate del wizard' (:342), que ya no existen."
-    },
-    {
-     "ruta": "src/lib/leados/prompts-disenio.ts",
-     "linea": 121,
-     "fragmento": "[otro] 'Estado de los seis hard-blocks' lista seis; HARD_CHECKS hoy tiene diez (flow-content.ts:171+)."
-    },
-    {
-     "ruta": "src/lib/leados/prompts-disenio.ts",
-     "linea": 161,
-     "fragmento": "[otro] Cita las pantallas M7-M12 y <PromptsDisenio /> del wizard, ya borrados."
-    },
-    {
-     "ruta": "src/lib/leados/paso.ts",
-     "linea": 184,
-     "fragmento": "[copy] «seguí el contacto en «Seguimiento»» nombra una fase como si fuera una pantalla (rama sin render, PLAN-715)."
-    },
-    {
-     "ruta": "src/lib/leados/paso.ts",
-     "linea": 4,
-     "fragmento": "[otro] La cabecera describe consumidores (stepper, banner, anchor) que ya no existen."
-    },
-    {
-     "ruta": "src/lib/leados/turno.ts",
-     "linea": 204,
-     "fragmento": "[copy] «Cuando toque un toque vuelve a tu cola»: repetición de 'toque' que se lee rara en el detalle del turno negocio."
-    },
-    {
-     "ruta": "src/lib/leados/novedades-agrupar.ts",
-     "linea": 75,
-     "fragmento": "[otro] 'Una fila plegada es siempre vigente' no vale para avisos huérfanos de leads borrados (vigenciaDeAviso con estado null da false)."
-    },
-    {
-     "ruta": "src/lib/leados/notify.ts",
-     "linea": 6,
-     "fragmento": "[otro] El contrato dice fire-and-forget, pero los callers hacen await (dossier.actions.ts:165, agenda.actions.ts:263)."
-    }
-   ],
-   "impacto": "Bloqueante para el primer cliente real solo en lo visual: textos sin tildes o con jerga, íconos con trazo distinto, contraste bajo y estilos inline que no siguen los tokens. Ninguno cambia datos ni permisos.",
-   "propuesta": "Una pasada de higiene por dominio, de a un archivo, con la lista de abajo como checklist.",
-   "esfuerzo": "M",
-   "zona": "ZONA-FRANCO",
-   "nodos": [
-    "h5.set-dia",
-    "h5.adm-revision-demos",
-    "h4.adm-leads",
-    "h5.adm-fg2lab",
-    "h5.set-manual",
-    "h5.set-lead",
-    "lib.leados",
-    "h5.set-nuevo",
-    "h5.set-importar"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D4-c1",
-    "lote": "todos",
-    "tmp": "D4-c1/HIGIENE",
-    "verificado_padre": false,
-    "nota_padre": "DEC-55: higiene de UI agrupada, sin verificación individual",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-105",
-   "prefijo": "SEC",
-   "titulo": "next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2 con avisos críticos y el arreglo disponible dentro del rango declarado",
-   "dominio": "D8",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "package.json",
-     "linea": 154,
-     "fragmento": "\"next\": \"^16.2.6\","
-    },
-    {
-     "ruta": "package.json",
-     "linea": 155,
-     "fragmento": "\"next-auth\": \"^5.0.0-beta.30\","
-    },
-    {
-     "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
-     "linea": 13,
-     "fragmento": "\"title\": \"Auth.js: Email normalizer validates the address before Unicode normalization, allowing a homoglyph @ bypass\","
-    },
-    {
-     "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
-     "linea": 1333,
-     "fragmento": "\"title\": \"Auth.js: Configuration errors can cause existence-based auth checks to fail open (auth object populated with an error)\","
-    },
-    {
-     "ruta": "docs/auditoria-2026-10/_crudo/npm-audit.json",
-     "linea": 1061,
-     "fragmento": "\"title\": \"Next.js: Denial of Service in App Router using Server Actions\","
-    },
-    {
-     "ruta": "docs/auditoria-2026-10/_crudo/npm-outdated.json",
-     "linea": 226,
-     "fragmento": "\"next\": { \"current\": \"16.2.9\", \"wanted\": \"16.4.0\""
-    },
-    {
-     "ruta": "src/app/login/actions.ts",
-     "linea": 143,
-     "fragmento": "if (!email.includes('@') || email.length > 254) return 'Email inválido.'"
-    }
-   ],
-   "impacto": "Bloqueante para el primer cliente real: el login (magic link y credenciales), el proxy y las server actions corren sobre versiones con avisos críticos y altos publicados. El del normalizador de email de Auth.js es alcanzable por un anónimo: el magic link solo verifica que haya una '@' antes de llamar a signIn('resend') (login/actions.ts:143-146). No aplican en este despliegue: el RCE en servidores Windows (Netlify corre Linux), el bypass del proxy con Turbopack (el build usa --webpack, package.json:9) y el RCE de next/og (git grep 'next/og' sin usos). El aviso de fuga del endpoint MCP del servidor de desarrollo se agrava porque dev escucha en todas las interfaces (patrón D1-c2, package.json:7).",
-   "propuesta": "Subir next dentro del rango ya declarado (16.4.0 entra en ^16.2.6) y next-auth, @auth/core y @auth/prisma-adapter a las versiones con fix (beta.32 / 0.41.3 o superiores según npm audit). Después correr tipos, invariantes y la regresión de login (credenciales, magic link, Google), proxy e impersonación. Validar el email del magic link con Zod antes de signIn. Decidir la estrategia de salida de next-auth v5, que sigue en beta: el tag 'latest' de npm es 4.24.15. Coordinar con Franco porque toca la superficie de auth.ts y auth-cookies.ts (ZONA-FRANCO), aunque no hace falta editarlos.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "lib.deps",
-    "lib.auth",
-    "h1.auth-login",
-    "lib.proxy"
-   ],
-   "relacionados_ids": [
-    "SEC-005",
-    "SEC-009",
-    "TEC-001"
-   ],
-   "previas": [],
-   "relacionados_texto": "SEC-DEP-01 (previo, sigue abierto); patrón D1-c2 servidores dev en todas las interfaces",
-   "vh": "VH-158",
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H01",
-    "verificado_padre": true,
-    "nota_padre": "Leído junto con el verificador: package.json:154-155 (rangos ^16.2.6 y ^5.0.0-beta.30), el lockfile fija next 16.2.9, next-auth 5.0.0-beta.31 y @auth/core 0.41.2, y _crudo/npm-audit.json los marca críticos con arreglo disponible dentro del rango (npm-outdated: 16.4.0 y beta.32). El verificador la bajó a MEDIA y se le sigue: el aviso del normalizador homoglyph no da toma de cuenta porque el callback signIn (auth.ts:174-186) solo autoriza si el email existe en User y el mail sale a ese mismo identificador; el fail-open por error de configuración no aplica porque proxy y guards miran rol; la app no usa getToken de next-auth; el RCE de Image Optimization con AVIF y la SSRF de rewrites no aplican (sin formats avif, destinos internos fijos). Queda aplicable la DoS de Server Actions (alta, <16.2.11), alcanzable desde /login. Es deuda de actualización dentro del rango, bloqueante para el primer cliente, sin explotación trazada.",
-    "verificador": {
-     "se_sostiene": true,
-     "severidad_ajustada": "MEDIA"
-    }
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-106",
-   "prefijo": "SEC",
-   "titulo": "La CSP global sigue en Report-Only y sin destino de reportes: no bloquea nada ni junta los datos que el plan pedía para pasar a enforce",
-   "dominio": "D8",
-   "severidad": "MEDIA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "next.config.ts",
-     "linea": 66,
-     "fragmento": "// CSP in report-only mode while we audit violations.\n// Tighten to enforcement (Content-Security-Policy) after 1–2 weeks"
-    },
-    {
-     "ruta": "next.config.ts",
-     "linea": 72,
-     "fragmento": "key: 'Content-Security-Policy-Report-Only',"
-    },
-    {
-     "ruta": "next.config.ts",
-     "linea": 75,
-     "fragmento": "\"script-src 'self' 'unsafe-inline' 'unsafe-eval'\","
-    }
-   ],
-   "impacto": "El panel del cliente y el admin no tienen ninguna capa de mitigación de XSS más allá del escape de React. Sin report-uri ni report-to (git grep da 0), las violaciones solo aparecen en la consola de cada navegador. Por eso las '1–2 semanas' de observación nunca producen datos para pasar a enforce. frame-ancestors 'none' en Report-Only no protege del framing (D1 ya lo reportó para las páginas de auth) y en /embed genera ruido en cada carga del widget.",
-   "propuesta": "Agregar report-to/report-uri hacia un endpoint propio con rate limit o el endpoint de CSP de Sentry. Medir y pasar a enforce por rutas, portales primero, con nonce para sacar 'unsafe-inline'/'unsafe-eval'. Mantener /embed con su política aparte.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "lib.next-config",
-    "lib.security",
-    "h2.cli-shell",
-    "h4.adm-shell"
-   ],
-   "relacionados_ids": [
-    "SEC-027"
-   ],
-   "previas": [],
-   "relacionados_texto": "D1 'Las páginas de auth y /bienvenida se pueden embeber en un iframe ajeno'; SEC-MISC-01; PLAN-1025; PLAN-991",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H03",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "TEC-006",
-   "prefijo": "TEC",
-   "titulo": "Netlify no aplica los maxDuration de las rutas (30 s el chat, 300 s dos crons) y el presupuesto del chat está calibrado contra un techo que la plataforma probablemente no da",
-   "dominio": "D8",
-   "severidad": "MEDIA",
-   "tipo": "tech-vieja",
-   "tipo_detalle": "tech-vieja",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/api/chatbot/[slug]/chat/route.ts",
-     "linea": 8,
-     "fragmento": "export const maxDuration = 30"
-    },
-    {
-     "ruta": "src/app/api/cron/send-executive-reports/route.ts",
-     "linea": 5,
-     "fragmento": "export const maxDuration = 300"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/chat/reconcile.ts",
-     "linea": 116,
-     "fragmento": "export const ROUTE_MAX_DURATION_MS = 30_000"
-    },
-    {
-     "ruta": "netlify.toml",
-     "linea": 16,
-     "fragmento": "[functions]\n  node_bundler = \"esbuild\""
-    }
-   ],
-   "impacto": "maxDuration es configuración de segmento que lee Vercel. En Netlify el corte lo fija el plan de la función: la propia bitácora asume ~10 s (docs/bitacora-roadmap.md:13963, contexto, no evidencia) y ~26 s como tope duro. Con un techo menor que 30 s, un turno lento del bot muere antes de que reconcile.ts cierre la compensación de cupo y la persistencia, y el visitante del sitio del cliente ve el chat cortado. Los crons que corren dentro del servidor Next (send-weekly-reports, generate-insights) se cortan a mitad del lote.",
-   "propuesta": "Confirmar en Netlify el plan y el timeout real de la función del servidor. Alinear ROUTE_MAX_DURATION_MS y HOOK_SAFETY_MARGIN_MS a ese techo. Mover los trabajos largos a Background Functions o partirlos en lotes reanudables. Dejar el techo documentado junto a netlify.toml.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "int.netlify",
-    "h3.vis-api-chatbot",
-    "int.cron.send-executive-reports",
-    "int.cron.regenerate-briefs"
-   ],
-   "relacionados_ids": [
-    "BUG-092",
-    "BUG-105",
-    "PERF-010",
-    "SEC-099"
-   ],
-   "previas": [],
-   "relacionados_texto": "D5 'El turno del chat no tiene techo absoluto...supera los 30 s de maxDuration'; D7 'generate-insights...dentro de un techo de ~20-26 s'",
-   "vh": "VH-159",
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H04",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-090",
-   "prefijo": "DEU",
-   "titulo": "El CI solo corre tipos y los check:invariant*: no corre build, lint, npm audit, las fronteras, los 35 test:* puros ni los smokes de seguridad, y los jobs con base se saltean",
-   "dominio": "D8",
-   "severidad": "MEDIA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "raíz:.github/workflows/ci.yml",
-     "linea": 20,
-     "fragmento": "# ── Por qué el lint NO está acá ──"
-    },
-    {
-     "ruta": "raíz:.github/workflows/ci.yml",
-     "linea": 97,
-     "fragmento": "- name: 'Tipos: tsc --noEmit'"
-    },
-    {
-     "ruta": "raíz:.github/workflows/ci.yml",
-     "linea": 142,
-     "fragmento": "if [ -z \"$DB\" ]; then\n  echo \"listo=false\" >> \"$GITHUB_OUTPUT\""
-    },
-    {
-     "ruta": "scripts/run-invariants.mjs",
-     "linea": 107,
-     "fragmento": "(nombre) => nombre === 'check:invariant' || nombre.startsWith('check:invariant:'),"
-    },
-    {
-     "ruta": "package.json",
-     "linea": 55,
-     "fragmento": "\"test:ev1\": \"npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts\","
-    },
-    {
-     "ruta": "package.json",
-     "linea": 68,
-     "fragmento": "test:t02: el invariante de auth del cron cleanup-old-events tampoco corre"
-    },
-    {
-     "ruta": "playwright.helpers-probe.config.ts",
-     "linea": 16,
-     "fragmento": "la suite de sabotaje de helpers se declara apta para CI sin base, y ci.yml no la corre"
-    }
-   ],
-   "impacto": "Un build roto, un import que rompe la frontera de aislamiento chatbot/motor o una dependencia con aviso crítico llegan a main sin rojo. El build solo lo detecta Netlify al desplegar y el lint nadie, porque Next 16 ya no lintea en el build y no hay hooks versionados. Los 28 invariantes test:* del chatbot (package.json:55-82) no entran al agregado y no corren nunca en CI. Tampoco hay bloque permissions, así que el GITHUB_TOKEN queda con los permisos por defecto del repo.",
-   "propuesta": "Sumar al CI: un paso de build con el mismo heap que Netlify, eslint acotado a src/ con las reglas de frontera como error y el resto como baseline congelado, y npm audit --audit-level=critical. Agregar permissions: contents: read. Incluir los test:* en el runner, renombrándolos o ampliando el filtro.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "int.github-actions",
-    "lib.isolation",
-    "lib.tests"
-   ],
-   "relacionados_ids": [
-    "DEU-017"
-   ],
-   "previas": [],
-   "relacionados_texto": "D6 'La frontera de aislamiento...la regla de eslint no corre en CI'; PLAN-1006; PLAN-1032; PLAN-1037",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H05",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D9-c1",
-      "tmp": "D9-c1/PADRE/H02",
-      "titulo": "El runner de invariantes no descubre los 35 scripts test:* ni los smokes de seguridad: la red de verificación pura nunca corre en CI",
-      "severidad": "MEDIA",
-      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: run-invariants.mjs:100-107 (filtra check:invariant y check:invariant:*) y package.json:55-74 (35 scripts test:*, ninguno lo corre ci.yml). Misma falta de cobertura del CI que DEU-090; suma la red de invariantes puros que existe y no corre."
-     }
-    ],
-    "cambios": [
-     {
-      "ciclo": "D9-c1",
-      "tmp": "D9-c1/PADRE/H02",
-      "antes": {
-       "titulo": "El CI solo corre tipos e invariantes: no corre build, lint, npm audit ni las fronteras, y los jobs con base se saltean"
-      },
-      "nota_padre": "Sale del barrido de superficiales de D9 (_crudo/ciclos/D9-c1-superficial.json). Leído: run-invariants.mjs:100-107 (filtra check:invariant y check:invariant:*) y package.json:55-74 (35 scripts test:*, ninguno lo corre ci.yml). Misma falta de cobertura del CI que DEU-090; suma la red de invariantes puros que existe y no corre."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-171",
-   "prefijo": "BUG",
-   "titulo": "El backup diario de la base nunca funcionó: las 140 corridas del workflow fallaron por falta del secret de la URL y el repo tiene 0 secrets de Actions",
-   "dominio": "D8",
-   "severidad": "ALTA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "raíz:.github/workflows/db-backup.yml",
-     "linea": 93,
-     "fragmento": "if [ -z \"$URL\" ]; then\n  echo \"ERROR: secret faltante para target=$TARGET\" >&2"
-    },
-    {
-     "ruta": "raíz:.github/workflows/ci.yml",
-     "linea": 120,
-     "fragmento": "# Necesita una DB de test dedicada. Al 2026-08-25 el repo NO tiene ningún\n# secret configurado (`gh api .../actions/secrets` devuelve total_count: 0),"
-    },
-    {
-     "ruta": "raíz:.github/workflows/db-backup.yml",
-     "linea": 4,
-     "fragmento": "# GitHub Actions solo descubre workflows en <repo_root>/.github/workflows/. El\n# archivo logic-core-v3/.github/workflows/e2e.yml está MAL ubicado y nunca corrió"
-    }
-   ],
-   "impacto": "Bloqueante para el primer cliente real: el workflow de B14.3 (pg_dump cifrado con restore de prueba) nunca produjo un respaldo y el restore nunca se probó. La única red es la retención nativa de Neon, que el propio doc describe como corta y sin PITR en el plan Free (docs/operations/neon-backups.md:5). Pesa más con un historial de migraciones que ya borró y re-agregó columnas con datos de clientes (DEU-014). Nadie se entera: la falla diaria queda en la pestaña Actions sin aviso. El comentario de cabecera quedó viejo (e2e.yml ya no existe). Los mismos 0 secrets apagan los jobs de LeadOS y E2E del CI (DEU-017).",
-   "propuesta": "Verificar secrets y corridas (casos de prueba). Cargar DIRECT_DATABASE_URL_PROD y BACKUP_GPG_PASSPHRASE (lo hace Franco). Hacer visible el fallo, por ejemplo con un aviso al canal de alertas, y endurecer la validación con conteos mínimos de tablas críticas además de _prisma_migrations. Actualizar el comentario.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "int.github-actions",
-    "int.neon"
-   ],
-   "relacionados_ids": [
-    "DEU-014",
-    "DEU-017",
-    "BUG-014"
-   ],
-   "previas": [],
-   "relacionados_texto": "PLAN-1034; PLAN-1118; D6 migraciones de reconciliación",
-   "vh": "VH-160",
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H06",
-    "verificado_padre": true,
-    "nota_padre": "Verificado en GitHub (solo lectura, 2026-10-15 19:10): `gh run list --workflow db-backup.yml` da 140 corridas en «failure» y 1 «cancelled», ninguna exitosa; la del 15/10 (run 38724108093) corta en el paso «pg_dump + encrypt» con «secret faltante para target=prod» (db-backup.yml:93-97, exit 1), y `gh api repos/frc11/PorfolioDevelOP/actions/secrets` da total_count 0. Leído además ci.yml:120-127 (el comentario del 2026-08-25 ya decía 0 secrets). Verificado: no existe ningún respaldo hecho por el workflow y el restore nunca se probó; la única red es la retención propia de Neon, que es runtime (VH).",
-    "verificador": {
-     "se_sostiene": true,
-     "severidad_ajustada": "ALTA"
-    }
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "TEC-007",
-   "prefijo": "TEC",
-   "titulo": "Build de producción sin margen de memoria verificable: heap fijo de 4096 MB en Netlify, webpack forzado, type-check dentro del build y Tailwind escaneando docs/",
-   "dominio": "D8",
-   "severidad": "MEDIA",
-   "tipo": "tech-vieja",
-   "tipo_detalle": "tech-vieja",
-   "confianza": "HIPÓTESIS",
-   "evidencia": [
-    {
-     "ruta": "netlify.toml",
-     "linea": 7,
-     "fragmento": "NODE_OPTIONS = \"--max-old-space-size=4096\""
-    },
-    {
-     "ruta": "package.json",
-     "linea": 9,
-     "fragmento": "\"build\": \"next build --webpack\","
-    },
-    {
-     "ruta": "next.config.ts",
-     "linea": 31,
-     "fragmento": "// Sin `typescript.ignoreBuildErrors`: el build vuelve a fallar ante un error de\n// tipos."
-    },
-    {
-     "ruta": "src/app/globals.css",
-     "linea": 1,
-     "fragmento": "@import \"tailwindcss\";"
-    },
-    {
-     "ruta": "docs/bitacora-beta-3.md",
-     "linea": 3647,
-     "fragmento": "`bg-[url('https://grainy-gradients.vercel.app/noise.svg')]` de `web-development/page.tsx` ya"
-    }
-   ],
-   "impacto": "Los docs se contradicen: BP.4 dice que el build entra en el heap por defecto y P1.A, P5.3, UTM.1 y PRIVACIDAD que necesita 6-8 GB. Netlify fija 4096 MB, que en una máquina de 16 GB es más o menos el default, así que si el OOM local es real, el deploy de producción también debería morir. Un deploy que muere deja producción sin el arreglo urgente. El build ahora suma el type-check (CO-1 cerrado) y Tailwind escanea todo lo no ignorado: 7 MB de docs/ versionados y, en local, lo no versionado (docs/_insumos, .next-perf-*).",
-   "propuesta": "Medir el pico de memoria en el log del último deploy de Netlify y en un clon limpio con 4096 MB. Acotar el escaneo de Tailwind con source() o '@source not' sobre docs/ y los distDirs. Evaluar el build con Turbopack, que es el default estable de Next 16, comprobando la compatibilidad con withSentryConfig. Dejar el heap documentado.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "int.netlify",
-    "lib.tailwind"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "D8-A1; D8-A2; CO-1; PLAN-1062; PLAN-1132; PLAN-1079; PLAN-1054; PLAN-1021",
-   "vh": "VH-161",
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H07",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "A11Y-033",
-   "prefijo": "A11Y",
-   "titulo": "Las barras de scroll están ocultas en toda la app, portales incluidos: las tablas y tiras desplazables no muestran que se pueden desplazar",
-   "dominio": "D8",
-   "severidad": "MEDIA",
-   "tipo": "a11y",
-   "tipo_detalle": "a11y",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/app/globals.css",
-     "linea": 333,
-     "fragmento": "html,\n  body {\n    scrollbar-width: none;"
-    },
-    {
-     "ruta": "src/app/globals.css",
-     "linea": 350,
-     "fragmento": "::-webkit-scrollbar {\n    display: none;"
-    },
-    {
-     "ruta": "src/app/globals.css",
-     "linea": 480,
-     "fragmento": "min-width: 980px;"
-    },
-    {
-     "ruta": "src/app/(protected)/admin/clients/[clientId]/_components/PlanAssignmentCard.tsx",
-     "linea": 88,
-     "fragmento": "<div className=\"overflow-x-auto\">"
-    }
-   ],
-   "impacto": "El selector ::-webkit-scrollbar sin prefijo alcanza a todo elemento desplazable en Chromium y Safari. En desktop con mouse, el cliente y el admin no ven que una tabla o una tira tiene contenido a la derecha (.admin-table exige 980 px) ni en qué parte de una página larga están. La barra fina que intenta .chat-messages-area (globals.css:647-659) nunca aparece porque hereda display:none. Ningún componente vuelve a habilitar barras (git grep de webkit-scrollbar solo encuentra más ocultamientos).",
-   "propuesta": "Limitar el ocultamiento al sitio público (o a contenedores con clase explícita) y restaurar barras finas estilizadas en /admin, /dashboard y /setter.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-shell",
-    "h4.adm-shell",
-    "lib.ui"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H08",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: globals.css:330-352 (bloque «Ghost Mode: Scrollbar Exterminated»: scrollbar-width none en html y body, y `::-webkit-scrollbar { display: none }` sin prefijo de elemento, que alcanza a todo contenedor desplazable en Chromium y Safari).",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "PERF-016",
-   "prefijo": "PERF",
-   "titulo": "El layout raíz carga el chrome de marketing (Navbar, Dock, Shutter, Preloader, Lenis) en todas las rutas, incluido el iframe /embed del widget en sitios de clientes",
-   "dominio": "D8",
-   "severidad": "MEDIA",
-   "tipo": "perf",
-   "tipo_detalle": "perf",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/layout.tsx",
-     "linea": 43,
-     "fragmento": "import { Navbar } from \"@/components/layout/Navbar\";\nimport Preloader from \"@/components/ui/Preloader\";"
-    },
-    {
-     "ruta": "src/app/layout.tsx",
-     "linea": 117,
-     "fragmento": "<PublicOnlyComponents>\n  <Navbar />\n</PublicOnlyComponents>"
-    },
-    {
-     "ruta": "src/components/layout/publicRoute.ts",
-     "linea": 16,
-     "fragmento": "export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as const"
-    },
-    {
-     "ruta": "src/app/layout.tsx",
-     "linea": 78,
-     "fragmento": "<link rel=\"preconnect\" href=\"https://grainy-gradients.vercel.app\" crossOrigin=\"anonymous\" />"
-    }
-   ],
-   "impacto": "PublicOnlyComponents solo evita el render. Los componentes cliente que el layout raíz pasa como children quedan referenciados en el payload RSC y en los chunks de la entrada del layout, así que el widget en el sitio del cliente (/embed) y los portales descargan JS del chrome público que nunca pintan (Navbar, DynamicDock, Shutter, Preloader, MarketingIntro, motion y Lenis). El widget carga más lento en mobile. PERF-01 quedó a medias: three.js ya va por next/dynamic (MarketingIntro.tsx:19-20).",
-   "propuesta": "Mover el chrome público a un route group del sitio de marketing con su propio layout y dejar el layout raíz mínimo. Es una decisión para Valentino porque reordena PreloaderProvider y TransitionProvider (FROZEN, no se editan). Antes, cablear @next/bundle-analyzer y medir /embed.",
-   "esfuerzo": "M",
-   "zona": "libre",
-   "nodos": [
-    "h3.vis-widget-cliente",
-    "h2.cli-shell",
-    "lib.ui"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PERF-01 (previo, parcial); PLAN-1020",
-   "vh": "VH-162",
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H09",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-091",
-   "prefijo": "DEU",
-   "titulo": "tailwind.config.ts es código muerto: Tailwind 4 no lo carga (no hay @config) y su plugin ya está en globals.css",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "tailwind.config.ts",
-     "linea": 19,
-     "fragmento": "export default {"
-    },
-    {
-     "ruta": "tailwind.config.ts",
-     "linea": 36,
-     "fragmento": "plugins: [typographyPlugin],"
-    },
-    {
-     "ruta": "src/app/globals.css",
-     "linea": 2,
-     "fragmento": "@plugin \"@tailwindcss/typography\";"
-    }
-   ],
-   "impacto": "Quien edite el tema en ese archivo no ve ningún efecto. Ninguna clase develop-* lo usa (git grep da 0), así que hoy no rompe nada, pero suma un warning de eslint y confunde sobre de dónde salen los tokens.",
-   "propuesta": "Borrar tailwind.config.ts. design-tokens.ts NO se borra: tiene 5 consumidores (Modal, setter-shell, DashboardLayoutClient...) y es FROZEN-inferido (PLAN-1269).",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.tailwind"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-1275; PLAN-1269",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H10",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-092",
-   "prefijo": "DEU",
-   "titulo": "next.config.ts no está tipado (NextConfig se importa y no se usa) y @next/bundle-analyzer está instalado sin cablear",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "next.config.ts",
-     "linea": 1,
-     "fragmento": "import type { NextConfig } from \"next\";"
-    },
-    {
-     "ruta": "next.config.ts",
-     "linea": 3,
-     "fragmento": "const nextConfig = {"
-    },
-    {
-     "ruta": "package.json",
-     "linea": 182,
-     "fragmento": "\"@next/bundle-analyzer\": \"^16.2.7\","
-    }
-   ],
-   "impacto": "Una clave mal escrita o deprecada en la config no da error de tipos, porque no hay chequeo de propiedades de más: el objeto solo se compara estructuralmente al pasarlo a withSentryConfig. Sin el analyzer cableado no hay forma de medir el peso de los bundles (ver el hallazgo del layout raíz).",
-   "propuesta": "Tipar el objeto como NextConfig (o con satisfies). Cablear el analyzer detrás de una variable ANALYZE, o quitarlo.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.next-config"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-1153; PLAN-1020",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H11",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-172",
-   "prefijo": "BUG",
-   "titulo": "/api/version no identifica el deploy: la versión es un '1.0.0' fijo y builtAt es la hora del pedido",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/api/version/route.ts",
-     "linea": 5,
-     "fragmento": "version: '1.0.0',\nbuiltAt: process.env.NEXT_PUBLIC_BUILD_TIME ?? new Date().toISOString(),"
-    },
-    {
-     "ruta": ".env.example",
-     "linea": 295,
-     "fragmento": "# AUTOINYECTADA · Timestamp de build, inyectado por next.config.ts en build."
-    },
-    {
-     "ruta": "package.json",
-     "linea": 3,
-     "fragmento": "\"version\": \"0.1.0\","
-    },
-    {
-     "ruta": "src/components/layout/VersionBadge.tsx",
-     "linea": 1,
-     "fragmento": "const APP_VERSION = 'v1.0.0'"
-    },
-    {
-     "ruta": "src/components/dashboard/DashboardLayoutClient.tsx",
-     "linea": 181,
-     "fragmento": "<VersionBadge />"
-    }
-   ],
-   "impacto": "Ni el smoke de producción (scripts/_b14-4-smoke-prod.mjs:82) ni un monitoreo externo pueden confirmar qué commit está desplegado: el endpoint siempre dice '1.0.0' y la 'fecha de build' cambia en cada pedido. next.config.ts no inyecta ninguna variable env.",
-   "propuesta": "Exponer el SHA del commit que Netlify pasa al build y una fecha de build inyectada de verdad. Corregir .env.example y alinear la versión con package.json.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "int.netlify",
-    "h2.cli-shell",
-    "h4.adm-shell"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "OBS-03; PLAN-1125",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H12",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D9-c1",
-      "tmp": "D9-c1/D9-L1/H10",
-      "titulo": "Versión 'v1.0.0' fija en el pie de los portales y en /api/version, sin release que la respalde",
-      "severidad": "BAJA",
-      "nota_padre": "Misma versión fija; suma el VersionBadge con «v1.0.0» literal en el pie de los portales (VersionBadge.tsx:1-8)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-173",
-   "prefijo": "BUG",
-   "titulo": "La imagen Open Graph del sitio (/og-image.png) no existe: las vistas previas al compartir salen sin imagen",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/app/layout.tsx",
-     "linea": 32,
-     "fragmento": "images: [{ url: \"/og-image.png\", width: 1200, height: 630, alt: \"develOP Agencia Digital\" }],"
-    },
-    {
-     "ruta": "src/app/contact/layout.tsx",
-     "linea": 14,
-     "fragmento": "images: [{ url: \"/og-image.png\", width: 1200, height: 630, alt: \"Contacto develOP\" }],"
-    }
-   ],
-   "impacto": "Al compartir develop.com.ar o /contact por WhatsApp o LinkedIn, la tarjeta sale sin imagen, porque public/ no tiene og-image ni hay un opengraph-image por ruta. Es la carta de presentación comercial de la agencia.",
-   "propuesta": "Agregar el asset de 1200×630 en public/ o un opengraph-image por ruta.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h6.vis-contacto",
-    "lib.seo"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "SEO-01 (previo, sigue abierto)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H13",
-    "verificado_padre": true,
-    "nota_padre": "Muestreado: layout.tsx:32 y contact/layout.tsx:14 declaran /og-image.png; `git ls-tree` de la base no tiene ningún og-image en public/ ni un opengraph-image en src/app.",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "PERF-017",
-   "prefijo": "PERF",
-   "titulo": "Recursos de terceros: noise.svg se hotlinkea de grainy-gradients.vercel.app en tres landings con preconnect en todas las rutas, y placehold.co está preconectado y permitido sin uso",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "perf",
-   "tipo_detalle": "perf",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/layout.tsx",
-     "linea": 78,
-     "fragmento": "<link rel=\"preconnect\" href=\"https://grainy-gradients.vercel.app\" crossOrigin=\"anonymous\" />\n<link rel=\"preconnect\" href=\"https://placehold.co\" crossOrigin=\"anonymous\" />"
-    },
-    {
-     "ruta": "src/app/web-development/page.tsx",
-     "linea": 87,
-     "fragmento": "bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"
-    },
-    {
-     "ruta": "next.config.ts",
-     "linea": 41,
-     "fragmento": "remotePatterns: [\n  {\n    protocol: 'https',"
-    }
-   ],
-   "impacto": "Cada visita a /web-development, /software-development y /process-automation le pasa la IP del visitante a un tercero y depende de que un demo ajeno siga en línea. Los portales y el embed abren conexiones a dos dominios que no usan. placehold.co solo aparece en un comentario de ShowcaseSection.tsx:8, que es un componente huérfano.",
-   "propuesta": "Servir noise.svg desde public/. Quitar los dos preconnect del layout raíz y el remotePattern de placehold.co.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "lib.ui",
-    "lib.next-config"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H14",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-174",
-   "prefijo": "BUG",
-   "titulo": "Redirects legacy: /dashboard/crm lleva a un módulo que ya no está en el catálogo y /dashboard/seo-avanzado encadena dos saltos",
-   "dominio": "D8",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "next.config.ts",
-     "linea": 158,
-     "fragmento": "source: '/dashboard/crm',\ndestination: '/dashboard/services?modulo=mini-crm',"
-    },
-    {
-     "ruta": "next.config.ts",
-     "linea": 210,
-     "fragmento": "source: '/dashboard/seo-avanzado',\ndestination: '/dashboard/seo',"
-    },
-    {
-     "ruta": "next.config.ts",
-     "linea": 244,
-     "fragmento": "source: '/dashboard/seo',\ndestination: '/dashboard/resultados/seo',"
-    }
-   ],
-   "impacto": "Un bookmark viejo de /dashboard/crm abre la vitrina con un modulo que no existe en src/lib/data/premium-modules.ts (solo queda en premium-features.ts:59), y es probable que no se resalte nada. /dashboard/seo-avanzado hace dos 308 seguidos.",
-   "propuesta": "Mandar /dashboard/crm a /dashboard/services sin parámetro y /dashboard/seo-avanzado directo a /dashboard/resultados/seo.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-servicios",
-    "h2.cli-resultados"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-1131",
-   "vh": null,
-   "origen": {
-    "ciclo": "D8-c1",
-    "lote": "D8-L1",
-    "tmp": "D8-c1/D8-L1/H15",
     "verificado_padre": false,
     "nota_padre": "",
     "verificador": null

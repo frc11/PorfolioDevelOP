@@ -3,6 +3,341 @@
  "partes": 6,
  "hallazgos": [
   {
+   "id": "FAL-006",
+   "prefijo": "FAL",
+   "titulo": "La facturación no tiene escritor: ninguna pantalla crea ni cambia Invoice, Subscription.status nunca sale de ACTIVE y renewalDate no se escribe, pero el portal, las alertas, el MRR y el health score los leen",
+   "dominio": "D3",
+   "severidad": "MEDIA",
+   "tipo": "faltante",
+   "tipo_detalle": "faltante",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/admin/clients/_actions/plan.actions.ts",
+     "linea": 187,
+     "fragmento": "await prisma.subscription.create({\n        data: {\n          organizationId,"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+     "linea": 70,
+     "fragmento": "prisma.invoice.findMany({\n      where: { organizationId },"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+     "linea": 118,
+     "fragmento": "Tu suscripción está vencida.{' '}"
+    },
+    {
+     "ruta": "src/components/dashboard/SubscriptionBanner.tsx",
+     "linea": 8,
+     "fragmento": "if (!subscription || subscription.status !== 'PAST_DUE') {"
+    },
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 244,
+     "fragmento": "renewalDate: {\n          gte: today,"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/page.tsx",
+     "linea": 222,
+     "fragmento": "prisma.subscription.aggregate({\n      where: {\n        status: SubscriptionStatus.ACTIVE,"
+    },
+    {
+     "ruta": "src/lib/plan/get-plan-for-org.ts",
+     "linea": 98,
+     "fragmento": "const plan = sub?.plan"
+    },
+    {
+     "ruta": "src/lib/health-score.ts",
+     "linea": 442,
+     "fragmento": "if (sub.status === 'PAST_DUE') return 30"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+     "linea": 164,
+     "fragmento": "Tus facturas apareceran aca automaticamente cada mes."
+    },
+    {
+     "ruta": "prisma/seed.ts",
+     "linea": 595,
+     "fragmento": "await prisma.invoice.upsert({  // unico escritor de Invoice junto con :618"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 96,
+     "fragmento": "enum AssetType {  // DOCUMENT IMAGE BRANDBOOK LOGO ACCESS OTHER, sin INVOICE"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/facturacion/page.tsx",
+     "linea": 106,
+     "fragmento": "const billingEmail = session?.user?.email ?? ''  // en soporte muestra el email del admin"
+    }
+   ],
+   "impacto": "Para el primer cliente: el historial de pagos de /dashboard/cuenta/facturacion queda vacío para siempre (Invoice solo la escribe prisma/seed.ts), nunca ve 'Pago pendiente' ni el aviso de vencimiento, y si deja de pagar sigue ACTIVE: el MRR y el conteo de clientes activos del admin lo incluyen, el health score no baja, la alerta SUBSCRIPTION_EXPIRING no puede disparar (renewalDate null en toda alta hecha desde la app) y el bot conserva el plan completo porque getPlanForOrg no mira status. Las suscripciones del seed traen renewalDate a 30 días: pasada esa fecha la org demo ve 'Tu suscripción está vencida' sin forma de salir.",
+   "propuesta": "Decidir dónde vive la facturación: si es externa, ocultar el historial y los avisos que dependen de Invoice/status/renewalDate y sacarlos del MRR; si es interna, agregar en el admin alta de Invoice, marcar pagada (paidAt) y las transiciones de Subscription (ACTIVE, PAST_DUE, CANCELED con renewalDate), y que getPlanForOrg caiga al plan de respaldo con CANCELED.",
+   "esfuerzo": "L",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-plan",
+    "h4.adm-clientes",
+    "h4.adm-dashboard",
+    "modelo.Invoice",
+    "modelo.Subscription",
+    "lib.plan",
+    "h2.cli-cuenta.historial-de-facturas"
+   ],
+   "relacionados_ids": [
+    "BUG-010"
+   ],
+   "previas": [],
+   "relacionados_texto": "BUG-010 (Subscription.price solo al crear); FAL-004 (patrón); SEC-014",
+   "vh": null,
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H04",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H17",
+      "titulo": "Facturacion: el historial promete facturas 'automaticamente cada mes' pero nada en el sistema crea Invoice",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreo DEC-37: se sostiene (facturacion/page.tsx:164 promete facturas automáticas; git grep de invoice.create/upsert: solo prisma/seed.ts:595 y :618; control: la lectura facturacion/page.tsx:70). Misma causa que FAL-006 (D6-c2)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-038",
+   "prefijo": "SEC",
+   "titulo": "Notification es por usuario pero el portal la lee y la marca por organización: el cliente ve y apaga las notificaciones dirigidas al SUPER_ADMIN, con links a /admin/projects/<id>",
+   "dominio": "D2",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 718,
+     "fragmento": "userId String"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/layout.tsx",
+     "linea": 101,
+     "fragmento": "prisma.notification.findMany({\n        where: { organizationId },"
+    },
+    {
+     "ruta": "src/lib/actions/notifications.ts",
+     "linea": 33,
+     "fragmento": "await prisma.notification.updateMany({\n      where: { id: parsed.data.id, organizationId },"
+    },
+    {
+     "ruta": "src/lib/actions/notifications.ts",
+     "linea": 82,
+     "fragmento": "const notifications = await prisma.notification.findMany({\n      where: { organizationId },"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 67,
+     "fragmento": "userId: admin.id,\n            organizationId,\n            taskId: task.id,"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 70,
+     "fragmento": "actionUrl: `/admin/projects/${task.projectId}`,"
+    },
+    {
+     "ruta": "src/actions/agency-actions.ts",
+     "linea": 54,
+     "fragmento": "const notifications = orgMembers.map(member => ({"
+    },
+    {
+     "ruta": "src/components/dashboard/NotificationCenter.tsx",
+     "linea": 125,
+     "fragmento": "router.push(notif.actionUrl)"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 62,
+     "fragmento": "await tx.notification.createMany({ data: superAdmins.map((admin) => ({ ... userId: admin.id, organizationId,"
+    },
+    {
+     "ruta": "src/lib/actions/notifications.ts",
+     "linea": 55,
+     "fragmento": "await prisma.notification.updateMany({\n      where: { organizationId, read: false },"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 107,
+     "fragmento": "const superAdmin = await prisma.user.findFirst({\n          where: { role: 'SUPER_ADMIN' },"
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 30,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 61,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/actions/dashboard-actions.ts",
+     "linea": 152,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/components/dashboard/NotificationCenter.tsx",
+     "linea": 123,
+     "fragmento": ""
+    }
+   ],
+   "impacto": "Cuando un cliente aprueba o rechaza una entrega, la campana de todos los miembros de su org muestra las notificaciones escritas para el SUPER_ADMIN ('Cliente pidio cambios en...', 'Entrega aprobada por cliente...'), con un link a /admin/projects/<id> que expone el id interno y rebota en el proxy; cada miembro ve también las copias de los demás (una por miembro en cada pedido de aprobación) y cualquiera las marca leídas para todos. Ninguna pantalla del admin lee Notification, así que los avisos al SUPER_ADMIN (upsell, mensajes, referidos, aprobaciones) solo terminan en la campana del cliente o en ningún lado.",
+   "propuesta": "En dashboard/layout.tsx y lib/actions/notifications.ts (libres) filtrar lectura y marcado por { userId de la sesión, organizationId }. Decisión para Valentino (dashboard-actions.ts es FROZEN): no poner organizationId en las notificaciones del admin y decidir si el equipo necesita una bandeja propia o si esos avisos van solo por alerta/email.",
+   "esfuerzo": "S",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-shell",
+    "h2.cli-proyecto",
+    "h4.adm-proyectos",
+    "modelo.Notification",
+    "lib.actions",
+    "h2.cli-shell.notificaciones",
+    "h2.cli-proyecto.aprobar-o-pedir-cambios",
+    "h2.cli-shell.campana-notificaciones",
+    "h2.cli-proyecto.aprobacion-entregas",
+    "h4.adm-dashboard"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "Patrón D6-c1 'Notification se escribe con userId pero se lee por organizationId'; SEC-018",
+   "vh": null,
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H05",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H26",
+      "titulo": "Las notificaciones para los SUPER_ADMIN se guardan con la org del cliente y aparecen en su campana con links a /admin",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa que SEC-038 (notificaciones del admin con la org del cliente); se suma su evidencia."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L3/H05",
+      "titulo": "La campana y el historial del cliente listan notificaciones por organizationId sin userId: muestran las del SUPER_ADMIN y 'Marcar todas' marca las de toda la org",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreo DEC-37: se sostiene (dashboard-actions.ts:60-70 crea la notificación del SUPER_ADMIN con organizationId del cliente; dashboard/layout.tsx:101 y notifications.ts:55 y :82 leen y marcan por organizationId). Misma causa que SEC-038 (D6-c2)."
+     },
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L4/H07",
+      "titulo": "Notificaciones del cliente filtradas solo por organización: muestran y marcan copias dirigidas al SUPER_ADMIN y a otros miembros",
+      "severidad": "MEDIA",
+      "nota_padre": "Misma causa que SEC-038 (notificaciones leídas y marcadas por organización)."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H10",
+      "titulo": "Las notificaciones para SUPER_ADMIN se guardan con el organizationId del cliente: el cliente las ve (con rutas /admin y IDs internos) y el admin nunca",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
+   "id": "SEC-039",
+   "prefijo": "SEC",
+   "titulo": "La baja de una campaña puede caer en otro cliente: CONTACT_ID y OPTOUT_TOKEN se guardan en el contacto global de Brevo y el último import de ese email los pisa",
+   "dominio": "D2",
+   "severidad": "MEDIA",
+   "tipo": "seguridad",
+   "tipo_detalle": "seguridad",
+   "confianza": "PROBABLE",
+   "evidencia": [
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 114,
+     "fragmento": "CONTACT_ID: contact.id,\n            OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id),"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 49,
+     "fragmento": "listIds: params.listIds,\n        updateEnabled: true,"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 155,
+     "fragmento": "/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}"
+    },
+    {
+     "ruta": "prisma/schema.prisma",
+     "linea": 1229,
+     "fragmento": "@@unique([organizationId, email])"
+    },
+    {
+     "ruta": "src/app/api/email/optout/[contactId]/route.ts",
+     "linea": 91,
+     "fragmento": "await prisma.emailContact.updateMany({\n    where: { id: contactId },"
+    },
+    {
+     "ruta": "src/lib/integrations/brevo.ts",
+     "linea": 39,
+     "fragmento": "const res = await fetch(`${API_BASE}/contacts`, { method: 'POST', ... updateEnabled: true"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 113,
+     "fragmento": "attributes: { CONTACT_ID: contact.id, OPTOUT_TOKEN: signEmailContactOptOutToken(contact.id) },"
+    }
+   ],
+   "impacto": "Si dos clientes de develOP tienen al mismo destinatario (caso común), el contacto de Brevo es uno solo por email en la cuenta compartida y queda con el CONTACT_ID del último cliente que importó. Cuando esa persona se da de baja desde la campaña del cliente A, el link apunta al EmailContact del cliente B: se marca optedOut en la base de B (escritura entre tenants disparada por un tercero) y A la sigue contando como activa. Un cliente con el módulo puede provocarlo a propósito importando emails de la lista de otro.",
+   "propuesta": "No guardar ids por tenant en atributos globales de Brevo: firmar un token que incluya organizationId y email y resolver la fila por (org, email) en la ruta de baja, o usar atributos por lista/org y el desuscribe nativo por lista. Verificar el modelo de contactos de Brevo con el caso de prueba.",
+   "esfuerzo": "M",
+   "zona": "libre",
+   "nodos": [
+    "h2.cli-email-mkt",
+    "h6.vis-optout",
+    "int.brevo",
+    "modelo.EmailContact",
+    "h2.cli-email-mkt.baja-de-contactos"
+   ],
+   "relacionados_ids": [],
+   "previas": [],
+   "relacionados_texto": "Hallazgo 'la baja no llega a Brevo' (este ciclo); BUG-012; previa S2b-01; BUG-002 (email sensible a mayúsculas)",
+   "vh": "VH-037",
+   "origen": {
+    "ciclo": "D6-c2",
+    "lote": "D6-T1",
+    "tmp": "D6-c2/D6-T1/H06",
+    "verificado_padre": false,
+    "nota_padre": "",
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "D2-c1",
+      "tmp": "D2-c1/D2-L1/H04",
+      "titulo": "Contactos de Brevo compartidos entre clientes: CONTACT_ID, OPTOUT_TOKEN y nombre de un contacto se pisan entre organizaciones",
+      "severidad": "MEDIA",
+      "nota_padre": "Muestreo DEC-37: se sostiene (brevo.ts:39-51 POST /contacts con updateEnabled: true pisa los atributos globales; _actions.ts:113-117 CONTACT_ID y OPTOUT_TOKEN por import). Misma causa que SEC-039 (D6-c2)."
+     }
+    ]
+   },
+   "estado": "vigente"
+  },
+  {
    "id": "BUG-022",
    "prefijo": "BUG",
    "titulo": "Mi Chatbot resuelve la organización con su propia consulta (orgMember.findFirst sin orderBy) e ignora resolveOrgId: la vista previa del admin no ve el bot del cliente y con dos membresías muestra otra org",
@@ -71,6 +406,16 @@
      "ruta": "src/modules/chatbot/components/dashboard/CrmStatusIndicator.tsx",
      "linea": 21,
      "fragmento": "const organizationId = await resolveOrgId()"
+    },
+    {
+     "ruta": "src/modules/chatbot/server/admin/getClientSession.ts",
+     "linea": 12,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/proxy.ts",
+     "linea": 154,
+     "fragmento": ""
     }
    ],
    "impacto": "Soporte no puede revisar el chatbot de un cliente impersonándolo: con un SUPER_ADMIN sin OrgMember (así lo siembra el seed) /dashboard/chatbot muestra la landing de 'activá tu chatbot' aunque checkClientHasChatbot (con resolveOrgId, page.tsx:15-18) dijo que hay bot, leads y conversaciones redirigen a /dashboard y el CSV da 401, mientras la apariencia sí se edita sobre el cliente. Si un usuario tiene membresías en dos orgs, esta sección puede mostrar y modificar (estado de leads, insights) una org distinta de la del resto del portal en el mismo request.",
@@ -113,6 +458,13 @@
       "titulo": "La org del chatbot del cliente se resuelve por dos caminos distintos en la misma seccion (resolveOrgId vs getClientChatbotSession)",
       "severidad": "MEDIA",
       "nota_padre": "Misma resolución doble de la org en Mi Chatbot (resolveOrgId frente a getClientChatbotSession)."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D5/H11",
+      "titulo": "Un SUPER_ADMIN que impersona a un cliente no puede ver su sección de chatbot (o ve la de su propia org)",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -550,6 +902,16 @@
      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/campaigns/page.tsx",
      "linea": 144,
      "fragmento": "El envio fallo. Revisa la configuracion e intenta de nuevo.  // sin accion de reintento"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 177,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 188,
+     "fragmento": ""
     }
    ],
    "impacto": "Cuando el módulo se habilite: dos envíos concurrentes de la misma campaña (dos pestañas, un reintento) pasan el control de DRAFT y Brevo crea y manda dos campañas a toda la lista; una campaña FAILED (por ejemplo Brevo la creó pero sendNow falló) no se puede reintentar y queda huérfana en Brevo; y la tabla de campañas muestra 0% de aperturas y clics para siempre porque getCampaignStats no tiene llamadores (dato falso en el camino del cliente).",
@@ -588,6 +950,13 @@
       "titulo": "sendCampaignAction informa exito aunque Brevo no haya enviado, y una campana FAILED no se puede reintentar",
       "severidad": "MEDIA",
       "nota_padre": "BUG-025 ya cubre FAILED sin reintento; se suma que sendCampaignAction devuelve ok aunque sendNow falle (_actions.ts:205-217)."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H09",
+      "titulo": "sendCampaignAction hace check-then-act sobre status DRAFT y permite el doble envío",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -642,6 +1011,16 @@
      "ruta": "src/modules/chatbot/server/leads/csv/csvEscape.ts",
      "linea": 25,
      "fragmento": "export function csvEscape(value: string | number | null | undefined): string {"
+    },
+    {
+     "ruta": "src/app/(protected)/admin/chatbots/bulk-actions.ts",
+     "linea": 110,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/modules/chatbot/server/tools/captureLead.ts",
+     "linea": 384,
+     "fragmento": ""
     }
    ],
    "impacto": "El export del cliente ya prefija las celdas peligrosas (csvEscape.ts:5-10 documenta este mismo ataque), pero el export del admin no: un visitante que deja como nombre '=HYPERLINK(...)' o una fórmula IMPORT convierte el CSV que develOP abre en Excel o Google Sheets en un vector para mandar a un tercero nombres, emails y teléfonos de los leads de todas las orgs seleccionadas.",
@@ -675,6 +1054,13 @@
       "titulo": "El export bulk de leads del admin arma el CSV a mano: inyección de fórmulas y columnas rotas (el fix PA-2 no está en main)",
       "severidad": "MEDIA",
       "nota_padre": "Mismo export masivo de leads del admin sin neutralizar fórmulas; suma las columnas rotas."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D5/H06",
+      "titulo": "El export CSV masivo de leads del admin no escapa las celdas: inyección de fórmulas con datos de visitantes anónimos",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -1190,7 +1576,7 @@
    "prefijo": "SEC",
    "titulo": "Email marketing: las 3 server actions no verifican el módulo contratado, no validan con Zod ni tienen rate limit, y mandan el remitente y el HTML del formulario por la cuenta Brevo de develOP",
    "dominio": "D2",
-   "severidad": "MEDIA",
+   "severidad": "ALTA",
    "tipo": "seguridad",
    "tipo_detalle": "seguridad",
    "confianza": "VERIFICADO-POR-LECTURA",
@@ -1229,6 +1615,26 @@
      "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
      "linea": 174,
      "fragmento": "export async function sendCampaignAction(campaignId: string) {\n  const org = await getOrgWithBrevo()"
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 71,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
+     "linea": 131,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/email/brevo-service.ts",
+     "linea": 4,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/auth.ts",
+     "linea": 101,
+     "fragmento": ""
     }
    ],
    "impacto": "Bloqueante para el primer cliente real: cualquier ORG_MEMBER (o un cliente que dio de baja el modulo) que obtenga el ID de las actions puede importar contactos arbitrarios y enviar HTML arbitrario con el remitente que quiera por la cuenta Brevo compartida de develOP, sin tope de tamano ni rate limit. Una denuncia de spam suspende la cuenta Brevo y con ella los emails transaccionales de todos los clientes.",
@@ -1271,6 +1677,23 @@
       "titulo": "Las server actions de email marketing no verifican el módulo contratado ni validan con Zod",
       "severidad": "ALTA",
       "nota_padre": "Mismo defecto (_actions.ts:17-28 sin isModuleActive ni Zod); el verificador lo bajó a MEDIA por las mismas razones."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H01",
+      "titulo": "Email marketing: las server actions no verifican el módulo ni validan remitente, HTML ni volumen; cualquier ORG_MEMBER manda envíos masivos por la cuenta Brevo compartida",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1: el agente ciego la ubica en ALTA. Leído: email-marketing/_actions.ts (importContactsAction :71, createCampaignAction :128, sendCampaignAction :174) sin isModuleActive, sin Zod y sin rate limit; la org sale de resolveOrgId (:18). Cualquier usuario de un cliente, aunque no haya contratado el módulo, importa contactos y manda campañas con HTML y remitente propios por la cuenta de Brevo de develOP: costo y reputación del dominio. Sube a ALTA (DEC-23: operación con costo por un usuario de cliente con una precondición, tener cuenta)."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H01",
+      "antes": {
+       "severidad": "MEDIA"
+      },
+      "nota_padre": "F6.1: el agente ciego la ubica en ALTA. Leído: email-marketing/_actions.ts (importContactsAction :71, createCampaignAction :128, sendCampaignAction :174) sin isModuleActive, sin Zod y sin rate limit; la org sale de resolveOrgId (:18). Cualquier usuario de un cliente, aunque no haya contratado el módulo, importa contactos y manda campañas con HTML y remitente propios por la cuenta de Brevo de develOP: costo y reputación del dominio. Sube a ALTA (DEC-23: operación con costo por un usuario de cliente con una precondición, tener cuenta)."
      }
     ]
    },
@@ -1497,6 +1920,31 @@
      "ruta": "src/app/(protected)/dashboard/modules/tienda-conectada/_components/ConnectStoreCard.tsx",
      "linea": 57,
      "fragmento": "Vas a ser redirigido a Tiendanube para autorizar el acceso."
+    },
+    {
+     "ruta": "src/app/api/auth/tiendanube/start/route.ts",
+     "linea": 9,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx",
+     "linea": 303,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/tienda-conectada/page.tsx",
+     "linea": 333,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+     "linea": 23,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx",
+     "linea": 325,
+     "fragmento": ""
     }
    ],
    "impacto": "Bloqueante para el primer cliente del modulo (150 USD/mes en el catalogo): el CTA principal termina en una pagina con JSON crudo; solo develOP puede conectar la tienda desde el modo soporte y nada se lo explica al cliente.",
@@ -1520,7 +1968,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H13",
+      "titulo": "Tienda conectada y Agenda inteligente: el cliente no tiene camino para conectar el módulo",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -1585,7 +2042,7 @@
    "severidad": "ALTA",
    "tipo": "tech-vieja",
    "tipo_detalle": "tech-vieja",
-   "confianza": "PROBABLE",
+   "confianza": "VERIFICADO-POR-LECTURA",
    "evidencia": [
     {
      "ruta": "src/lib/integrations/cal-com.ts",
@@ -1633,7 +2090,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "cambios": [
+     {
+      "ciclo": "F6.2",
+      "antes": {
+       "confianza": "PROBABLE"
+      },
+      "nota_padre": "Re-lectura adversarial de F6.2: Se sostiene. Que la v1 esté apagada es un hecho externo que el código no prueba, pero el propio repo lo registró con un probe empírico (cal-com-v2.ts:4 y docs/b7-probe-cal-com.md:14), así que la confianza sube de PROBABLE a VERIFICADO-POR-LECTURA más el probe del repo. Con la key cargada, la página siempre cae al error y nunca muestra el link de reservas; sin key (no hay forma de cargarla desde la app) solo deriva a mensajes. Es una integración de un módulo pago y activo que no corre → ALTA. Bloqueante para el primer cliente real del módulo."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -1880,6 +2346,31 @@
      "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
      "linea": 320,
      "fragmento": "Los registros de acceso se mantienen por 30 días para tu auditoría personal."
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+     "linea": 126,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+     "linea": 185,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/components/dashboard/VaultRevealButton.tsx",
+     "linea": 11,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/crypto/resolve-credential.ts",
+     "linea": 17,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/cuenta/boveda/page.tsx",
+     "linea": 53,
+     "fragmento": ""
     }
    ],
    "impacto": "El cliente lee accesos que nunca ocurrieron sobre sus credenciales y garantias de auditoria inexistentes; incumple 'sin datos de mentira' de L3.",
@@ -1901,7 +2392,16 @@
     "tmp": "D2-c1/D2-L1/H16",
     "verificado_padre": true,
     "nota_padre": "Leído: boveda/page.tsx:85 y :148 (sello AES-256 en el encabezado y en cada tarjeta), :51-58 (registro marcado PLACEHOLDER — data fake), :265 y :320. El sello se suma acá desde D2-L4/H02 (la parte de reposo va a SEC-036).",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H12",
+      "titulo": "Bóveda: las credenciales descifradas viajan en claro en el payload al cargar la página y el 'registro de accesos' es ficticio",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -1939,6 +2439,36 @@
      "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
      "linea": 92,
      "fragmento": "propertyId={client.analyticsPropertyId}"
+    },
+    {
+     "ruta": "src/app/bienvenida/_actions/complete-onboarding.ts",
+     "linea": 17,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/analytics.ts",
+     "linea": 60,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+     "linea": 52,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+     "linea": 88,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+     "linea": 147,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/reports/monthly/route.ts",
+     "linea": 74,
+     "fragmento": ""
     }
    ],
    "impacto": "Un cliente que conozca el ID numerico de la propiedad GA4 de otro cliente (a la que la service account de develOP tiene acceso) puede fijarlo en su org y ver el trafico de ese otro negocio en su panel.",
@@ -1968,7 +2498,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H04",
+      "titulo": "El cliente puede poner cualquier analyticsPropertyId y leer el GA4 de otra organización con la service account compartida",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -1996,6 +2535,21 @@
      "ruta": "src/lib/analytics.ts",
      "linea": 66,
      "fragmento": "if (/^G-|^GA-/i.test(trimmed)) {  // lanza 'El Property ID debe ser el ID numerico...'"
+    },
+    {
+     "ruta": "src/app/bienvenida/_components/Step2Conexiones.tsx",
+     "linea": 36,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/analytics.ts",
+     "linea": 65,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/resultados/trafico/page.tsx",
+     "linea": 147,
+     "fragmento": ""
     }
    ],
    "impacto": "Todo cliente que sigue las instrucciones del onboarding termina con la pagina de Trafico en error y no tiene como corregirlo desde su panel.",
@@ -2020,7 +2574,16 @@
     "tmp": "D2-c1/D2-L1/H20",
     "verificado_padre": false,
     "nota_padre": "",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H08",
+      "titulo": "El wizard de bienvenida guarda el Measurement ID (G-…) como Property ID y deja rota la página de Tráfico",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -2144,6 +2707,36 @@
      "ruta": "src/components/dashboard/modules/motor-resenas/_actions.ts",
      "linea": 43,
      "fragmento": "error: err instanceof Error ? err.message : 'Error generando draft',"
+    },
+    {
+     "ruta": "src/lib/action-utils.ts",
+     "linea": 24,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 72,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 99,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/profile.ts",
+     "linea": 244,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/components/dashboard/modules/motor-resenas/_actions.ts",
+     "linea": 41,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/integrations/google-business-profile.ts",
+     "linea": 296,
+     "fragmento": ""
     }
    ],
    "impacto": "El cliente ve cuerpos de error de proveedores (codigos, mensajes de la API, datos de la cuenta de develOP) en vez de un mensaje util; viola la regla de CLAUDE.md de no exponer errores internos.",
@@ -2169,7 +2762,16 @@
     "tmp": "D2-c1/D2-L1/H24",
     "verificado_padre": true,
     "nota_padre": "Muestreo DEC-37: se sostiene (brevo.ts:81-83 arma el error con el cuerpo de la respuesta; _actions.ts:202 lo devuelve y send/page.tsx:21 y :55 lo muestran; google-business-profile.ts:296-299; motor-resenas/_actions.ts:40-45 devuelve err.message).",
-    "verificador": null
+    "verificador": null,
+    "fusionados": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H15",
+      "titulo": "Se devuelven al cliente mensajes de error internos (Prisma, Brevo, Google API, Anthropic)",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -2624,7 +3226,7 @@
    "prefijo": "BUG",
    "titulo": "Tendencias «vs mes anterior» inventadas en Tráfico y SEO, también sobre datos reales",
    "dominio": "D2",
-   "severidad": "ALTA",
+   "severidad": "MEDIA",
    "tipo": "bug",
    "tipo_detalle": "bug",
    "confianza": "VERIFICADO-POR-LECTURA",
@@ -2695,6 +3297,15 @@
       "severidad": "ALTA",
       "nota_padre": "Mismo defecto (literales de trend en trafico/page.tsx y seo/page.tsx)."
      }
+    ],
+    "cambios": [
+     {
+      "ciclo": "F6.2",
+      "antes": {
+       "severidad": "ALTA"
+      },
+      "nota_padre": "Re-lectura adversarial de F6.2: El hecho se sostiene: los deltas «vs mes anterior» son inventados y aparecen también sobre datos reales, y no hay consulta del período anterior que los pueda alimentar. La severidad baja a MEDIA según DEC-23: no es seguridad ni corrupción de datos, y no rompe el flujo, porque los valores absolutos (sesiones, clicks, CTR, posición) son reales; el impacto se acota a 8 badges en 2 páginas y el arreglo es trivial (sacarlos o calcular el período previo). Matiz: en SEO el rótulo «vs mes anterior» es tooltip, no texto visible. Igual hay que resolverlo antes del primer cliente real, porque es lo primero que va a contrastar con su propia consola."
+     }
     ]
    },
    "estado": "vigente"
@@ -2704,7 +3315,7 @@
    "prefijo": "FAL",
    "titulo": "Tráfico (GA4) sin camino de activación: nadie escribe analyticsPropertyId y el CTA no hace nada",
    "dominio": "D2",
-   "severidad": "ALTA",
+   "severidad": "MEDIA",
    "tipo": "faltante",
    "tipo_detalle": "faltante",
    "confianza": "VERIFICADO-POR-LECTURA",
@@ -2773,7 +3384,16 @@
     "verificador": {
      "se_sostiene": true,
      "severidad_ajustada": "ALTA"
-    }
+    },
+    "cambios": [
+     {
+      "ciclo": "F6.2",
+      "antes": {
+       "severidad": "ALTA"
+      },
+      "nota_padre": "Re-lectura adversarial de F6.2: Se sostiene: en el código no hay ningún camino de producto que escriba analyticsPropertyId. El CTA no tiene handler, el admin no tiene el campo y /bienvenida es en la práctica inalcanzable. Bajo la severidad a MEDIA porque no hay riesgo de seguridad ni de datos y hay workaround operativo: develOP escribe la columna directo en la base y el resto de la cadena (getAnalyticsData) funciona. Además el tráfico no figura entre las promesas del plan (plan-presentation.ts no lo menciona). Bloqueante para el primer cliente real solo en la pestaña Tráfico."
+     }
+    ]
    },
    "estado": "vigente"
   },
@@ -3657,6 +4277,36 @@
      "ruta": "src/lib/tickets/actions.ts",
      "linea": 49,
      "fragmento": "const session = await auth()\n  const organizationId = await resolveOrgId()  (sin checkRateLimit en todo el archivo)"
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 22,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/upsell/dedup.ts",
+     "linea": 34,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/tickets/actions.ts",
+     "linea": 38,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/tickets/schemas.ts",
+     "linea": 4,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/messages.ts",
+     "linea": 114,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/alerts.ts",
+     "linea": 131,
+     "fragmento": ""
     }
    ],
    "impacto": "Un usuario de cliente autenticado puede crear tickets urgentes sin límite (cada uno dispara la alerta al webhook de develOP con el título sin tope), inflar upsellRequestCount con clics y forzar renders de PDF en serie. CLAUDE.md exige rate limit en todo envío de formulario; checkRateLimit y RATE_LIMIT_PRESETS ya existen (lib/rate-limit) y no se usan acá.",
@@ -3725,6 +4375,13 @@
       "titulo": "Tickets sin rate limit y sin tope de longitud en título y descripción",
       "severidad": "MEDIA",
       "nota_padre": "Misma falta de rate limit y tope en tickets."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H14",
+      "titulo": "Acciones del cliente sin rate limit ni topes que generan filas internas y alertas: upsell con featureKey libre, tickets URGENT, mensajes",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -4113,6 +4770,26 @@
      "ruta": "src/app/api/reports/monthly/route.ts",
      "linea": 125,
      "fragmento": "const filename = `reporte-${client.companyName.toLowerCase().replace(/\\s+/g, '-')}-${year}-${mon}.pdf`"
+    },
+    {
+     "ruta": "src/app/api/dashboard/leads/recent/route.ts",
+     "linea": 22,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/dashboard/leads/recent/route.ts",
+     "linea": 33,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/layout.tsx",
+     "linea": 117,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/chatbot/leads/page.tsx",
+     "linea": 65,
+     "fragmento": ""
     }
    ],
    "impacto": "Superficie autenticada viva sin dueño: /api/reports/monthly acepta organizationId por query para SUPER_ADMIN y armaría un PDF con datos demo como si fueran reales; /api/dashboard/leads/recent devuelve filas completas (incluye convertedToOsLeadId de LeadOS). Más ExecutiveReportTemplate, AnalyticsPeriodSelector y LeakMeter sin importadores.",
@@ -4154,6 +4831,13 @@
       "titulo": "MonthlyReport.tsx y /api/reports/monthly: endpoint sin UI que imprime datos mock como reales e ignora el mes pedido",
       "severidad": "BAJA",
       "nota_padre": "Muestreo DEC-37: se sostiene (monthly/route.ts:31 el mes solo rotula; MonthlyReport.tsx:296-300 no mira isMockData; la org de un cliente sale de la sesión, :42-50, sin IDOR). Mismo conjunto huérfano que D2-L2/H20."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H11",
+      "titulo": "/api/dashboard/leads/recent saltea el gate de plan del scoring y devuelve filas completas de ChatbotLead",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -4571,6 +5255,41 @@
      "ruta": "src/lib/reports/executive-weekly/build.ts",
      "linea": 174,
      "fragmento": "leads: {\n      value: toNumber(week.leads.value),\n      deltaPercent: week.leads.trend,"
+    },
+    {
+     "ruta": "src/lib/health-score.ts",
+     "linea": 281,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/health-score.ts",
+     "linea": 310,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/ai/executive-brief.ts",
+     "linea": 277,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/ai/executive-brief-input.ts",
+     "linea": 105,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/reports/executive-weekly/build.ts",
+     "linea": 140,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/upsell.ts",
+     "linea": 81,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/actions/schemas.ts",
+     "linea": 45,
+     "fragmento": ""
     }
    ],
    "impacto": "Bloqueante para el primer cliente real: la card 'Leads' de Inicio (dashboard/page.tsx:183), el Health Score (dimensiones leads y conversion, health-score.ts:282-289 y :311-333), el email del reporte ejecutivo semanal y el brief de Gemini muestran el volumen de contactos entrantes de develOP (formulario publico + upsells de todos los clientes) como leads del negocio del cliente. Todos los clientes ven el mismo numero y se filtra un agregado de actividad de otros tenants. El hedge 'En calibracion' solo existe en la card de Inicio, no en el email ni en el brief.",
@@ -4634,6 +5353,13 @@
       "titulo": "Los 'leads' de Inicio, el Health Score y el reporte semanal cuentan ContactSubmission de todos los tenants",
       "severidad": "ALTA",
       "nota_padre": "Mismo conteo global; suma executive-brief.ts:341-344 y build.ts:133-175."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H05",
+      "titulo": "La métrica 'Leads' del cliente, el Health Score y el brief/email semanal cuentan ContactSubmission global de la agencia; cualquier cliente puede inflarla para todos",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -4820,6 +5546,26 @@
      "ruta": "src/lib/recommendations/types.ts",
      "linea": 56,
      "fragmento": " * pre-llenado de /dashboard/messages. Sin `organizationId` a propósito: la\n * acción resuelve la org desde la sesión, el cliente no puede targetear otra."
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/messages/_actions/mark-read.ts",
+     "linea": 12,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/preview.ts",
+     "linea": 14,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/messages/page.tsx",
+     "linea": 27,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/messages/_components/MarkReadOnMount.tsx",
+     "linea": 12,
+     "fragmento": ""
     }
    ],
    "impacto": "En una sesion de soporte (SUPER_ADMIN impersonando) la pagina muestra al cliente pero Mensajes, Boveda→Solicitar documento, Oportunidades SEO, 'Ver todas las notificaciones', marcar leidas, Novedades, Referidos, Desbloquear modulo y Aprobar entrega fallan con 'Sesion invalida.'/'No autorizado.' (en el seed el SUPER_ADMIN no tiene membresia, prisma/seed.ts:80-100) o, si alguna vez la tuviera (auth.ts:37 take:1 sin orderBy), escribirian en esa otra org. Tickets y preferencias del reporte si usan resolveOrgId (tickets/actions.ts:50, executive-report-prefs.actions.ts:23): comportamiento inconsistente dentro del mismo portal.",
@@ -4874,6 +5620,13 @@
       "titulo": "En preview las acciones del lote usan orgs distintas: el admin queda como autor del ticket del cliente y los CTA registran contra su propia org",
       "severidad": "BAJA",
       "nota_padre": "Misma causa (modo soporte); suma el admin como autor del ticket del cliente."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H16",
+      "titulo": "La vista previa del admin (impersonación) marca como leídos los mensajes del equipo al cliente",
+      "severidad": "MEDIA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
      }
     ]
    },
@@ -5932,9 +6685,9 @@
   {
    "id": "SEC-051",
    "prefijo": "SEC",
-   "titulo": "Acciones del motor de reseñas sin Zod ni rate limit: rating, nombre y texto que van al LLM los manda el navegador, reviewName se interpola en la URL de Google y los errores crudos vuelven al cliente",
+   "titulo": "Motor de reseñas: replyAction publica en cualquier reseña que alcance el token de Google de la org (reviewName sin validar contra su sucursal: escritura entre clientes si comparten la cuenta de agencia), y las acciones no tienen Zod ni rate limit para el LLM",
    "dominio": "D2",
-   "severidad": "MEDIA",
+   "severidad": "ALTA",
    "tipo": "seguridad",
    "tipo_detalle": "seguridad",
    "confianza": "PROBABLE",
@@ -5978,6 +6731,66 @@
      "ruta": "src/app/(protected)/dashboard/modules/motor-resenas/_components/ReviewItem.tsx",
      "linea": 49,
      "fragmento": "const result = await generateDraft({ organizationId, rating: review.rating, reviewerName: review.reviewerName, reviewComment: review.comment,"
+    },
+    {
+     "ruta": "src/components/dashboard/modules/motor-resenas/_actions.ts",
+     "linea": 48,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/integrations/google-business-profile.ts",
+     "linea": 275,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/integrations/google-business-profile.ts",
+     "linea": 333,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/auth/google-business/start/route.ts",
+     "linea": 7,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/api/auth/google-business/callback/route.ts",
+     "linea": 14,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/integrations/gbp-discovery.ts",
+     "linea": 37,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/ai/review-reply-draft.ts",
+     "linea": 26,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/ai/executive-brief.ts",
+     "linea": 140,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/ai/executive-brief.ts",
+     "linea": 184,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/lib/ai/executive-brief.ts",
+     "linea": 95,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/page.tsx",
+     "linea": 187,
+     "fragmento": ""
+    },
+    {
+     "ruta": "src/app/(protected)/dashboard/_actions/regenerate-brief.ts",
+     "linea": 9,
+     "fragmento": ""
     }
    ],
    "impacto": "Con el módulo activo, un usuario puede mandar a Claude Haiku texto arbitrario y sin tope (costo, y prompt-injection sobre la respuesta que después publica en Google), sin rate limit; puede apuntar el PUT de respuesta a cualquier recurso v4 que alcance el token OAuth de su org (si develOP conectara GBP con una cuenta de agencia que administra varias fichas, a fichas de otros clientes: HIPÓTESIS); y ve en la UI mensajes internos de Anthropic y de Google (ReviewItem.tsx:59, :76).",
@@ -6019,6 +6832,31 @@
       "titulo": "Borrador de respuesta a reseñas: el texto llega del navegador sin tope al prompt de Anthropic y el error del proveedor vuelve tal cual",
       "severidad": "MEDIA",
       "nota_padre": "Muestreado: motor-resenas/_actions.ts:11 sin Zod ni rate limit y :43 devuelve err.message; review-reply-draft.ts:28 interpola el comentario. Es SEC-051; suma el costo por llamada a Haiku."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H06",
+      "titulo": "replyAction publica respuestas en cualquier reseña que alcance el token GBP de la org: no valida que reviewName sea de su location",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1: el agente ciego mostró que la parte de reviewName de SEC-051 es escritura entre tenants. Leído: _actions.ts:48-62 (replyAction toma la org de la sesión pero pasa reviewName tal cual) y google-business-profile.ts:275-285 (PUT a v4/${reviewName}/reply sin comprobar que empiece con gbpLocationId, que listReviews sí usa). Si la agencia conecta varios clientes con la misma cuenta de Google (el OAuth lo hace el SUPER_ADMIN), un usuario de un cliente responde reseñas del perfil de otro. Sube a ALTA por la rúbrica DEC-23 (escritura entre tenants con una precondición de configuración); PROBABLE porque el alcance del token es de runtime."
+     },
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H07",
+      "titulo": "Uso de LLM sin tope: generateDraft sin rate limit ni límite de entrada, carrera en la regeneración del brief y brief regenerado en cada render cuando falla",
+      "severidad": "ALTA",
+      "nota_padre": "F6.1 (agente sin docs): misma causa que el hallazgo registrado; la auditoría ya lo tenía. Se fusiona y suma su evidencia y su escenario."
+     }
+    ],
+    "cambios": [
+     {
+      "ciclo": "F6-c1",
+      "tmp": "F6-c1/CIEGO-D2/H06",
+      "antes": {
+       "severidad": "MEDIA",
+       "titulo": "Acciones del motor de reseñas sin Zod ni rate limit: rating, nombre y texto que van al LLM los manda el navegador, reviewName se interpola en la URL de Google y los errores crudos vuelven al cliente"
+      },
+      "nota_padre": "F6.1: el agente ciego mostró que la parte de reviewName de SEC-051 es escritura entre tenants. Leído: _actions.ts:48-62 (replyAction toma la org de la sesión pero pasa reviewName tal cual) y google-business-profile.ts:275-285 (PUT a v4/${reviewName}/reply sin comprobar que empiece con gbpLocationId, que listReviews sí usa). Si la agencia conecta varios clientes con la misma cuenta de Google (el OAuth lo hace el SUPER_ADMIN), un usuario de un cliente responde reseñas del perfil de otro. Sube a ALTA por la rúbrica DEC-23 (escritura entre tenants con una precondición de configuración); PROBABLE porque el alcance del token es de runtime."
      }
     ]
    },
@@ -6511,883 +7349,6 @@
     "verificado_padre": false,
     "nota_padre": "",
     "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-054",
-   "prefijo": "BUG",
-   "titulo": "La landing de upsell del chatbot sigue con precio falso y WhatsApp placeholder (CLEAN-H1 abierto)",
-   "dominio": "D5",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
-     "linea": 15,
-     "fragmento": "const WHATSAPP_URL = 'https://wa.me/5493815555555?text=Hola%2C+quiero+saber+m%C3%A1s+sobre+el+chatbot'"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
-     "linea": 148,
-     "fragmento": "$150 USD"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
-     "linea": 152,
-     "fragmento": "Incluye 1.000 conversaciones · reportes semanales · soporte directo"
-    },
-    {
-     "ruta": "src/lib/plan/plan-presentation.ts",
-     "linea": 149,
-     "fragmento": "monthlyPriceUsd: 49,\n    customersPerMonth: 500,"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/chatbot/page.tsx",
-     "linea": 21,
-     "fragmento": "return <ChatbotUpsellLanding />"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
-     "linea": 49,
-     "fragmento": "href={WHATSAPP_URL}"
-    },
-    {
-     "ruta": "src/lib/whatsapp.ts",
-     "linea": 21,
-     "fragmento": "const FALLBACK_WHATSAPP_NUMBER = '5493816223508'"
-    },
-    {
-     "ruta": "src/modules/chatbot/server/admin/clientHasChatbot.ts",
-     "linea": 6,
-     "fragmento": "where: { isActive: true },"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/chatbot/layout.tsx",
-     "linea": 52,
-     "fragmento": ": 'Pausado · no responde hasta que lo reactives'"
-    },
-    {
-     "ruta": "prisma/seeds/sync-plans.ts",
-     "linea": 70,
-     "fragmento": "monthlyPrice: new Prisma.Decimal('49'), ... quota: 500, (Starter); Business :102 '150', quota 5000 :104"
-    },
-    {
-     "ruta": "src/lib/whatsapp.ts",
-     "linea": 41,
-     "fragmento": "export function getWhatsappDigits(): string { ... NEXT_PUBLIC_WHATSAPP_NUMBER || FALLBACK_WHATSAPP_NUMBER"
-    },
-    {
-     "ruta": "src/modules/chatbot/components/dashboard/ChatbotUpsellLanding.tsx",
-     "linea": 105,
-     "fragmento": "title=\"Insights semanales\" ... 'Te llega un email todos los lunes' (Starter reportsEnabled: false, sync-plans.ts:76)"
-    }
-   ],
-   "impacto": "Todo cliente sin chatbot activo ve 'Desde $150 USD / 1.000 conversaciones' (catálogo real: Starter USD 49 con 500, Business USD 150 con 5.000, prisma/seeds/sync-plans.ts:68-111) y el único CTA lleva a un número inexistente: el camino de venta del producto principal está roto y miente el precio. Bloquea L3 del chatbot ('sin datos de mentira').",
-   "propuesta": "Leer precio y cupo de PLAN_PRESENTATIONS (o del Plan en base) y mandar el CTA a /dashboard/messages?context=activacion vía requestUpsellAction.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h3.cli-chatbot",
-    "h2.cli-plan",
-    "lib.plan",
-    "h3.cli-chatbot.activacion-upsell",
-    "lib.chatbot.admin",
-    "h3.cli-chatbot.upsell-activacion",
-    "modelo.Plan"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "CLEAN-H1",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H06",
-    "verificado_padre": true,
-    "nota_padre": "DEC-31: leído ChatbotUpsellLanding.tsx:15 (wa.me con el número de ejemplo) y :146-152 ($150 USD/mes, 1.000 conversaciones, contra sync-plans.ts); el verificador la baja a MEDIA (defecto del embudo de venta, sin datos del cliente ni seguridad). El archivo es del ledger de D5.",
-    "verificador": {
-     "se_sostiene": true,
-     "severidad_ajustada": "MEDIA"
-    },
-    "fusionados": [
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L1/H12",
-      "titulo": "La landing de activación del chatbot manda a un WhatsApp de relleno (5493815555555) y también se muestra a clientes con el bot pausado",
-      "severidad": "MEDIA",
-      "nota_padre": "Misma landing con WhatsApp de relleno (CLEAN-H1); suma que también se muestra con el bot pausado."
-     },
-     {
-      "ciclo": "D5-c1",
-      "tmp": "D5-c1/D5-L5/H04",
-      "titulo": "La landing de activacion promete un precio que no existe y manda a un WhatsApp placeholder (CLEAN-H1 sigue abierto)",
-      "severidad": "ALTA",
-      "nota_padre": "Misma landing (CLEAN-H1): ChatbotUpsellLanding.tsx:15 con wa.me de relleno y $150/1.000 que no coincide con PLANS_CATALOG; el verificador la baja a MEDIA, que es la severidad de BUG-054. Suma que se muestra también con el bot pausado (clientHasChatbot filtra isActive)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-055",
-   "prefijo": "BUG",
-   "titulo": "El reporte semanal puede mandar un brief y métricas de semanas viejas con la etiqueta de la última semana",
-   "dominio": "D2",
-   "severidad": "MEDIA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 113,
-     "fragmento": "const cachedBriefIsCurrent = isBriefCacheCurrent(org.cachedExecutiveBriefAt)\nlet briefText = cachedBriefIsCurrent ? org.cachedExecutiveBrief?.trim() || '' : ''"
-    },
-    {
-     "ruta": "src/lib/ai/executive-brief-input.ts",
-     "linea": 207,
-     "fragmento": "export function isBriefCacheCurrent(cachedAt: Date | null): boolean {\n  return cachedAt !== null && cachedAt.getTime() >= BRIEF_LOGIC_CUTOFF.getTime()"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 122,
-     "fragmento": "const history = await getBriefHistory(organizationId, 2)\nconst current = history[0] ?? null"
-    },
-    {
-     "ruta": "src/lib/ai/brief-history.ts",
-     "linea": 30,
-     "fragmento": "const rows = await prisma.executiveBriefSnapshot.findMany({ where: { organizationId }, orderBy: { createdAt: 'desc' }, take,"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 168,
-     "fragmento": "weekLabel: formatWeekRangeLabel(weekRange.start, weekRange.end),"
-    },
-    {
-     "ruta": "src/lib/ai/executive-brief.ts",
-     "linea": 18,
-     "fragmento": "const CACHE_TTL_DAYS = 7  (TTL que build.ts no aplica)"
-    }
-   ],
-   "impacto": "Con el cron de briefs apagado en Netlify y Vertex vencido, el cache y el último snapshot pueden tener semanas; el mail (hoy disparable con 'Enviar ahora') presenta ese texto y esos números como 'tu semana del X al Y', y el delta de salud compara dos snapshots cualesquiera.",
-   "propuesta": "Exigir que el snapshot usado sea del periodKey de la semana reportada (y el anterior, de la semana previa) y que el brief tenga a lo sumo 7 días; si no se cumple, regenerar o saltear con NO_DATA.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-reportes-email.reporte-semanal",
-    "h4.adm-clientes",
-    "modelo.ExecutiveBriefSnapshot",
-    "lib.reports",
-    "int.vertex"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-098, PLAN-109; hallazgo del cron sin disparador",
-   "vh": "VH-059",
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H07",
-    "verificado_padre": true,
-    "nota_padre": "Muestreo DEC-37: se sostiene (build.ts:113-119 usa el cache si es posterior al corte, sin el TTL de 7 días de executive-brief.ts:18; :122-124 toma los dos últimos snapshots sin mirar la semana; :168 rotula con la semana actual).",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "FAL-014",
-   "prefijo": "FAL",
-   "titulo": "'develOP será notificado de inmediato' es falso: ni la respuesta del cliente ni los tickets de prioridad baja o media avisan",
-   "dominio": "D2",
-   "severidad": "MEDIA",
-   "tipo": "faltante",
-   "tipo_detalle": "faltante",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/components/dashboard/TicketReplyForm.tsx",
-     "linea": 32,
-     "fragmento": "helperText=\"El equipo de develOP será notificado de inmediato. Respuesta asíncrona estándar en menos de 24hs.\""
-    },
-    {
-     "ruta": "src/lib/tickets/actions.ts",
-     "linea": 126,
-     "fragmento": "if (!isAdmin) {\n    const organizationId = await resolveOrgId()  (luego solo ticketMessage.create :140, sin alerta ni Notification)"
-    },
-    {
-     "ruta": "src/lib/tickets/actions.ts",
-     "linea": 88,
-     "fragmento": "if (parsed.data.priority === 'HIGH' || parsed.data.priority === 'URGENT') {"
-    },
-    {
-     "ruta": "src/lib/alerts.ts",
-     "linea": 125,
-     "fragmento": "const webhookUrl = settings?.alertWebhookUrl?.trim()\n    if (!webhookUrl) return"
-    }
-   ],
-   "impacto": "Un cliente que responde un ticket o abre uno de prioridad baja o media queda esperando sin que nadie en develOP se entere (solo el contador del dashboard admin, admin/page.tsx:239). Para el primer cliente real: tickets sin respuesta con una promesa de '< 4h' en pantalla.",
-   "propuesta": "Crear una Notification para SUPER_ADMIN (y la alerta) en createTicketAction para todas las prioridades y en la rama cliente de replyToTicketAction; o cambiar el copy hasta tenerlo.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-soporte",
-    "h2.cli-soporte.responder-ticket",
-    "h4.adm-tickets",
-    "int.alert-webhook",
-    "modelo.Ticket",
-    "modelo.Notification"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-167",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H09",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "FAL-015",
-   "prefijo": "FAL",
-   "titulo": "Los errores del portal no llegan a Sentry: actions, Inicio y módulos solo hacen console.error o dejan una fila FAILED",
-   "dominio": "D2",
-   "severidad": "MEDIA",
-   "tipo": "faltante",
-   "tipo_detalle": "faltante",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/tickets/actions.ts",
-     "linea": 101,
-     "fragmento": "console.error('createTicketAction error:', error)  (idem :173, :196, :219)"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/send.ts",
-     "linea": 207,
-     "fragmento": "result.failed++\n      result.errors.push({ organizationId: orgId, message })"
-    },
-    {
-     "ruta": "src/lib/referrals/referrals.service.ts",
-     "linea": 167,
-     "fragmento": "console.error('[referrals] notificación admin falló:', error)"
-    },
-    {
-     "ruta": "src/app/api/reports/client-monthly/route.ts",
-     "linea": 58,
-     "fragmento": "console.error('[client-monthly-report] PDF generation error', error)"
-    },
-    {
-     "ruta": "src/lib/ai/executive-brief.ts",
-     "linea": 128,
-     "fragmento": "console.error('[Brief] Generation failed:', err)"
-    },
-    {
-     "ruta": "src/lib/actions/upsell.ts",
-     "linea": 153,
-     "fragmento": "console.error('requestUpsellAction error:', error)"
-    },
-    {
-     "ruta": "src/lib/actions/messages.ts",
-     "linea": 205,
-     "fragmento": "console.error('sendClientMessageAction error:', error)"
-    },
-    {
-     "ruta": "src/lib/actions/notifications.ts",
-     "linea": 90,
-     "fragmento": "console.error('getMyNotificationsAction error:', error)"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/page.tsx",
-     "linea": 244,
-     "fragmento": "console.error('[Recommendations] Server wrapper failed:', err)"
-    }
-   ],
-   "impacto": "Un reporte que falla para todas las orgs, un PDF que no se genera o un ticket que no se guarda quedan invisibles salvo para quien lea los logs de la función. Bloquea el criterio Sentry de L3 en Soporte, Reportes, Referidos e Informe PDF.",
-   "propuesta": "captureException en esos catch (o captureConsoleIntegration) y una alerta cuando el cron termine con failed > 0.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "int.sentry",
-    "h2.cli-soporte",
-    "h2.cli-reportes-email",
-    "h2.cli-referidos",
-    "h2.cli-resultados.informe-mensual-pdf",
-    "lib.actions",
-    "lib.ai",
-    "lib.dashboard"
-   ],
-   "relacionados_ids": [
-    "FAL-003",
-    "BUG-041"
-   ],
-   "previas": [],
-   "relacionados_texto": "patrón D1-c1 (fallos manejados solo con console.error)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H15",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D2-c1",
-      "tmp": "D2-c1/D2-L4/H19",
-      "titulo": "Fallos manejados del home y de las actions del lote que solo hacen console.error (no llegan a Sentry)",
-      "severidad": "BAJA",
-      "nota_padre": "Mismo patrón (fallos que solo hacen console.error)."
-     }
-    ]
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-056",
-   "prefijo": "BUG",
-   "titulo": "Ticket.updatedAt no se toca al responder: la lista ordena mal y un cliente activo puede figurar como inactivo",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/tickets/actions.ts",
-     "linea": 140,
-     "fragmento": "const message = await prisma.ticketMessage.create({ data: { content: ..., ticketId: ..., userId, isAdmin },"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/soporte/page.tsx",
-     "linea": 23,
-     "fragmento": "orderBy: { updatedAt: 'desc' },"
-    },
-    {
-     "ruta": "src/lib/alerts.ts",
-     "linea": 97,
-     "fragmento": "organization.tickets[0]?.updatedAt,"
-    }
-   ],
-   "impacto": "Un ticket con respuestas nuevas no sube en la lista del cliente ni del admin, y un cliente que solo conversa por tickets suma alertas de 'Cliente inactivo'.",
-   "propuesta": "Crear el mensaje a través de ticket.update({ data: { messages: { create }, updatedAt: new Date() } }) o en una $transaction.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-soporte",
-    "h4.adm-tickets",
-    "h4.adm-alertas",
-    "modelo.Ticket",
-    "modelo.TicketMessage"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H16",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-057",
-   "prefijo": "BUG",
-   "titulo": "El reporte va a un solo admin elegido sin orden (take: 1 sin orderBy)",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 78,
-     "fragmento": "members: { where: { role: 'ADMIN' }, include: { user: { select: { email: true, name: true } } }, take: 1, },"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 103,
-     "fragmento": "const primary = org.members[0]?.user"
-    }
-   ],
-   "impacto": "Con dos o más admins en la org, el destinatario puede variar entre corridas y el resto nunca recibe el reporte.",
-   "propuesta": "orderBy createdAt asc o un destinatario explícito; evaluar enviar a todos los ADMIN.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-reportes-email.reporte-semanal",
-    "modelo.OrgMember",
-    "lib.reports"
-   ],
-   "relacionados_ids": [
-    "BUG-005"
-   ],
-   "previas": [],
-   "relacionados_texto": "patrón D1-c1 (take:1 sin orderBy)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H18",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-058",
-   "prefijo": "BUG",
-   "titulo": "Top de leads calientes: rankea solo los 50 más recientes y el mail dice 'Tus 3' aunque el dueño eligió 5 o 10",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/reports/executive-weekly/top-hot-leads.ts",
-     "linea": 91,
-     "fragmento": "orderBy: { capturedAt: 'desc' },\n    take: 50,"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/top-hot-leads.ts",
-     "linea": 129,
-     "fragmento": ".slice(0, safeLeadCount)"
-    },
-    {
-     "ruta": "src/lib/email/templates/executive-weekly.ts",
-     "linea": 139,
-     "fragmento": "Tus 3 leads más calientes de la semana"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/_actions/executive-report-prefs.schemas.ts",
-     "linea": 15,
-     "fragmento": "leadCount: z.union([z.literal(3), z.literal(5), z.literal(10)], {"
-    }
-   ],
-   "impacto": "Con más de 50 leads en la semana, un lead de score alto del lunes puede quedar afuera del ranking; el título del bloque contradice la cantidad configurada por el cliente.",
-   "propuesta": "Traer todos los leads con score de la semana (u ordenar por score en la base) antes del decay; título con la cantidad real.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-reportes-email.reporte-semanal",
-    "h2.cli-reportes-email.preferencias-del-reporte",
-    "lib.reports"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-102, PLAN-104",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H19",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-032",
-   "prefijo": "DEU",
-   "titulo": "Gate de plan del reporte duplicado y su invariante no lo compara con build.ts (verde por arnés)",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/reports/executive-weekly/report-eligible-plan.ts",
-     "linea": 9,
-     "fragmento": "export function reportEligiblePlan(planKey: PlanKey): boolean {\n  return planKey === 'PRO' || planKey === 'BUSINESS'"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 91,
-     "fragmento": "if (plan.key !== 'PRO' && plan.key !== 'BUSINESS') {"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/report-eligible-plan.invariant.ts",
-     "linea": 14,
-     "fragmento": "import { reportEligiblePlan, businessOnlyReportSection } from './report-eligible-plan.ts'  (no importa build.ts aunque :7 dice verificar contra él)"
-    },
-    {
-     "ruta": "src/lib/plan/plan-allows.ts",
-     "linea": 19,
-     "fragmento": "case 'reports':\n      return plan.reportsEnabled"
-    }
-   ],
-   "impacto": "Si cambia el gate de build.ts, la tarjeta de preferencias muestra algo falso y el invariante sigue verde; además el gate ignora Plan.reportsEnabled, que el admin puede editar.",
-   "propuesta": "Que build.ts importe reportEligiblePlan, o que ambos usen planAllows(plan, 'reports'); actualizar el comentario que lo declara fuera de scope.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-reportes-email",
-    "lib.reports",
-    "lib.plan"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "PLAN-105; memoria 'verde por arnés'",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H20",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-033",
-   "prefijo": "DEU",
-   "titulo": "send-manual.ts reimplementa la secuencia de send.ts y deja el reenvío expuesto a duplicados por timeout",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
-     "linea": 27,
-     "fragmento": " * P2.B.1) no tiene forma de acotar a 1 org ... Esta función reimplementa la MISMA secuencia"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
-     "linea": 93,
-     "fragmento": "const sendResult = await sendTransactionalEmail({  (después del upsert PENDING :74-89)"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/send-manual.ts",
-     "linea": 151,
-     "fragmento": "return { ok: false, reason: 'UNEXPECTED_ERROR', periodKey, error: message }"
-    }
-   ],
-   "impacto": "Dos copias del flujo crítico divergen con cada cambio; si la función corta después de Brevo y antes del update, el log queda PENDING y el próximo 'Enviar ahora' manda el mail de nuevo. El admin recibe el mensaje de error interno.",
-   "propuesta": "Extraer un sendForOrg(orgId, { respectCadence }) que usen el cron y el botón; tratar un PENDING reciente como envío en vuelo.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h4.adm-clientes",
-    "h2.cli-reportes-email.reporte-semanal",
-    "lib.reports",
-    "int.brevo"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "patrón D1-c3 (mutación y Brevo en la misma respuesta)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H21",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "A11Y-007",
-   "prefijo": "A11Y",
-   "titulo": "Contraste por debajo de AA en los PDF de informes (gris sobre gris claro y cian sobre blanco)",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "a11y",
-   "tipo_detalle": "a11y",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx",
-     "linea": 24,
-     "fragmento": "const GRAY = '#71717a'\nconst LIGHT_BG = '#f4f4f5'  (4,40:1 en cardLabel 7,5 pt :74-80, cardSub :82, emptyText :112)"
-    },
-    {
-     "ruta": "src/lib/reports/client-monthly/ClientMonthlyReportPdf.tsx",
-     "linea": 58,
-     "fragmento": "monthLabel: { fontSize: 12, color: CYAN, fontFamily: 'Helvetica-Bold', marginBottom: 3 },  (#06b6d4 sobre blanco = 2,43:1)"
-    },
-    {
-     "ruta": "src/lib/reports/MonthlyReport.tsx",
-     "linea": 165,
-     "fragmento": "cardValue: { fontSize: 20, fontFamily: 'Helvetica-Bold', color: CYAN,  (sobre LIGHT_BG = 2,21:1, menos de 3:1 aun como texto grande)"
-    }
-   ],
-   "impacto": "El informe pensado para reenviarse al socio o contador tiene etiquetas, fecha y marca difíciles de leer impresas o en pantallas con poco brillo.",
-   "propuesta": "zinc-600 (#52525b, 7,0:1 sobre #f4f4f5) para textos secundarios y un cian oscuro (#0e7490, unos 5,4:1 sobre blanco) para textos de marca.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-resultados.informe-mensual-pdf",
-    "lib.reports"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H23",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "SEC-052",
-   "prefijo": "SEC",
-   "titulo": "Atribución de referidos: guardas anti-abuso con huecos y el email del referido expuesto al referente",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "seguridad",
-   "tipo_detalle": "seguridad",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/referrals/referrals.service.ts",
-     "linea": 115,
-     "fragmento": "prisma.user.findFirst({ where: { email: referredEmail }, select: { id: true } }),"
-    },
-    {
-     "ruta": "src/lib/actions/contact.ts",
-     "linea": 68,
-     "fragmento": "if (referralCode) {\n      await attributeReferralFromContact({ code: referralCode, referredEmail: payload.email })"
-    },
-    {
-     "ruta": "src/lib/referrals/referrals.service.ts",
-     "linea": 151,
-     "fragmento": "const superAdmin = await prisma.user.findFirst({\n        where: { role: 'SUPER_ADMIN' },"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/referidos/page.tsx",
-     "linea": 73,
-     "fragmento": "{referral.referredEmail ?? 'Contacto referido'}"
-    }
-   ],
-   "impacto": "Un cliente existente cuyo User.email tenga mayúsculas (las altas no normalizan) pasa como 'negocio nuevo' y puede terminar en un mes bonificado; cualquiera con un código público puede inflar referidos PENDING con emails inventados (rate limit por IP falsificable, contact.ts:23-27); el email de quien escribió a develOP queda visible para el cliente referente sin consentimiento; solo se notifica a un SUPER_ADMIN cualquiera y los fallos van a console.error. Mitigado porque la conversión la confirma develOP a mano.",
-   "propuesta": "Comparar emails sin distinguir mayúsculas (o normalizar en las altas); mostrar el email enmascarado; notificar a todos los SUPER_ADMIN; Sentry en el catch.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-referidos",
-    "h6.vis-contacto",
-    "h6.vis-contacto.atribucion-de-referido",
-    "modelo.Referral",
-    "lib.referrals"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "patrones D1-c1 (email sin normalizar; IP de X-Forwarded-For)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H24",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "PERF-005",
-   "prefijo": "PERF",
-   "titulo": "Plan y consumo se leen varias veces por request y getPlanForOrg escribe dentro de un camino de lectura",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "perf",
-   "tipo_detalle": "perf",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/app/(protected)/dashboard/plan/page.tsx",
-     "linea": 37,
-     "fragmento": "const snapshot = await getOrgUsageSnapshot(organizationId)  (repetido en :42)"
-    },
-    {
-     "ruta": "src/lib/recommendations/get-recommendations-for-org.ts",
-     "linea": 34,
-     "fragmento": "getOrgUsageSnapshot(organizationId),  (Inicio ya lo llama en dashboard/page.tsx:164 y getPlanForOrg en :116)"
-    },
-    {
-     "ruta": "src/lib/plan/get-plan-for-org.ts",
-     "linea": 69,
-     "fragmento": "const cached = planCache.get(orgId)\n  if (cached && cached.expiresAt > Date.now()) return cached.data\n  await applyPendingPlanIfDue(orgId)"
-    },
-    {
-     "ruta": "src/lib/plan/get-plan-for-org.ts",
-     "linea": 21,
-     "fragmento": "const planCache = new Map<string, CacheEntry>()"
-    }
-   ],
-   "impacto": "Inicio hace dos lecturas de consumo y hasta tres resoluciones de plan por visita; con Suspense en paralelo todas fallan el cache a la vez y cada una puede ejecutar el update de pendingPlan. La invalidación del cache solo limpia la instancia que atiende al admin (:131-133). Bajo hoy; crece con orgs y tráfico.",
-   "propuesta": "Envolver getOrgUsageSnapshot y getPlanForOrg en React cache(): deduplica por request sin romper el streaming de cada Suspense (el lane de Plan lo descartó creyendo lo contrario).",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-plan",
-    "h2.cli-inicio",
-    "lib.plan"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "lane-plan-log.md:103 (doble fetch conservado)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H26",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "DEU-034",
-   "prefijo": "DEU",
-   "titulo": "getPlanForOrg ignora el estado de la suscripción: una org CANCELED o PAST_DUE conserva su plan",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "deuda",
-   "tipo_detalle": "deuda",
-   "confianza": "VERIFICADO-POR-LECTURA",
-   "evidencia": [
-    {
-     "ruta": "src/lib/plan/get-plan-for-org.ts",
-     "linea": 74,
-     "fragmento": "const sub = await prisma.subscription.findUnique({\n    where: { organizationId: orgId },\n    select: { plan: { select: {  (no lee status)"
-    },
-    {
-     "ruta": "prisma/schema.prisma",
-     "linea": 658,
-     "fragmento": "status      SubscriptionStatus @default(ACTIVE)"
-    },
-    {
-     "ruta": "src/lib/reports/executive-weekly/send.ts",
-     "linea": 81,
-     "fragmento": "subscription: { is: { status: 'ACTIVE' } },  (el cron sí lo filtra)"
-    }
-   ],
-   "impacto": "Hoy ningún código pone CANCELED, así que el impacto es latente: cuando develOP dé de baja a un cliente, el bot y el portal siguen con el cupo y las features del plan anterior.",
-   "propuesta": "Definir el plan efectivo para CANCELED y PAST_DUE (fallback o bot en pausa), aplicarlo en getPlanForOrg y cubrirlo con un invariante.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-plan",
-    "h3.cli-chatbot",
-    "lib.plan",
-    "modelo.Subscription"
-   ],
-   "relacionados_ids": [
-    "FAL-006"
-   ],
-   "previas": [],
-   "relacionados_texto": "",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H27",
-    "verificado_padre": true,
-    "nota_padre": "Muestreo DEC-37: se sostiene (get-plan-for-org.ts:74-90 no selecciona status; send.ts:81 sí filtra ACTIVE; git grep: ningún código de src escribe CANCELED ni PAST_DUE).",
-    "verificador": null
-   },
-   "estado": "vigente"
-  },
-  {
-   "id": "BUG-059",
-   "prefijo": "BUG",
-   "titulo": "Links de emails del lote con fallback a http://localhost:3000",
-   "dominio": "D2",
-   "severidad": "BAJA",
-   "tipo": "bug",
-   "tipo_detalle": "bug",
-   "confianza": "PROBABLE",
-   "evidencia": [
-    {
-     "ruta": "src/lib/reports/executive-weekly/build.ts",
-     "linea": 187,
-     "fragmento": "dashboardUrl: `${(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace("
-    },
-    {
-     "ruta": "src/lib/email/unsubscribe-token.ts",
-     "linea": 58,
-     "fragmento": "const base = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').replace(  (usado por build.ts:191)"
-    },
-    {
-     "ruta": "src/lib/tickets/actions.ts",
-     "linea": 156,
-     "fragmento": "const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 141,
-     "fragmento": "const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''"
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 155,
-     "fragmento": "<a href=\"${appUrl}/api/email/optout/{{contact.CONTACT_ID}}?token={{contact.OPTOUT_TOKEN}}\""
-    },
-    {
-     "ruta": "src/app/(protected)/dashboard/modules/email-marketing/_actions.ts",
-     "linea": 165,
-     "fragmento": "htmlContent: htmlWithFooter,"
-    }
-   ],
-   "impacto": "Si falta la variable en producción, el reporte semanal y el aviso de ticket llevan links a localhost (incluido el de baja del reporte, que entonces no funciona).",
-   "propuesta": "Leer la URL base de un helper que falle en build/arranque si falta, sin fallback.",
-   "esfuerzo": "S",
-   "zona": "libre",
-   "nodos": [
-    "h2.cli-reportes-email.reporte-semanal",
-    "h4.adm-tickets",
-    "lib.email",
-    "h2.cli-email-mkt.crear-y-enviar-campana",
-    "h2.cli-email-mkt.baja-de-contactos",
-    "h6.vis-optout"
-   ],
-   "relacionados_ids": [],
-   "previas": [],
-   "relacionados_texto": "patrón D1-c3 (fallback a localhost)",
-   "vh": null,
-   "origen": {
-    "ciclo": "D2-c1",
-    "lote": "D2-L5",
-    "tmp": "D2-c1/D2-L5/H30",
-    "verificado_padre": false,
-    "nota_padre": "",
-    "verificador": null,
-    "fusionados": [
-     {
-      "ciclo": "D2-c2",
-      "tmp": "D2-c2/D2-T1/H07",
-      "titulo": "El link de baja de las campanas se arma con NEXT_PUBLIC_APP_URL ?? '': si falta la variable, el mail sale con un link relativo que no funciona y queda congelado en el borrador",
-      "severidad": "BAJA",
-      "nota_padre": "Misma causa que BUG-059 (URL base de los links de email tomada del entorno con un respaldo inseguro); suma que el pie de baja se congela en el borrador al crear la campaña."
-     }
-    ]
    },
    "estado": "vigente"
   }

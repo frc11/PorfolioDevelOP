@@ -381,7 +381,7 @@
 - ¿Escribe en la base o manda emails?: sí — correrlo solo contra una base local propia y sin emails reales; nunca contra la Neon compartida con Franco ni contra producción
 
 ### [VH-043] Remitente arbitrario en campanas
-- Verifica: [SEC-044] · Prioridad: media
+- Verifica: [SEC-044] · Prioridad: alta
 - Entorno: Org QA con el modulo, lista con una direccion propia
 - Precondiciones: —
 - Pasos: 1) Crear una campana con 'Email remitente' de un dominio ajeno (p. ej. una cuenta gmail) 2) Crear otra con una direccion inventada del dominio de develOP 3) Enviar ambas y revisar el buzon y el error mostrado
@@ -498,7 +498,7 @@
 - ¿Escribe en la base o manda emails?: no
 
 ### [VH-056] Alcance de reviewName en replyAction
-- Verifica: [SEC-051] · Prioridad: media
+- Verifica: [SEC-051] · Prioridad: alta
 - Entorno: Local con un cliente con motor-resenas activo y GBP de PRUEBA conectado
 - Precondiciones: Cuenta Google de prueba con dos fichas; nunca con fichas reales
 - Pasos: 1) Abrir /dashboard/modules/motor-resenas 2) Desde devtools, invocar la server action replyAction con el organizationId propio y un reviewName de la otra ficha de la misma cuenta 3) Repetir con un reviewName inválido ('x')
