@@ -2783,4 +2783,150 @@ Candidatos que `rediseno/home` modifica o borra (`git diff --name-status origin/
 
 ## §docs
 
-Se completa en F6 junto con `14-DOCS-CONSOLIDADOS/` (DEC-44): qué doc se borra, qué consolidado lo reemplaza y qué se pierde, si algo.
+Lista de borrado de docs (E11): mantener 15 · borrar 54 · consolidado 74. **borrar**: se borra sin pasar nada (lo poco que vale ya está en el reemplazo o en git) · **consolidado**: lo vigente ya está en el borrador de `14-DOCS-CONSOLIDADOS/` que se indica y después se borra · **mantener**: sigue como está. Borrar y reemplazar es un sprint S posterior; en esta corrida no se borró nada.
+
+| Doc | Acción | Reemplazo | Qué se pierde |
+|---|---|---|---|
+| `CLAUDE.md (raíz)` | mantener | Instrucciones del agente; los 10 docs lo citan | Nada. Quedan ajustes sujetos a a_decidir: Framer Motion (:3, :80), glassmorphism (:97), rol CLIENT (:109). |
+| `DESIGN.md (raíz)` | mantener | Insumo de Impeccable; DISENO.md lo cita | Nada. |
+| `PRODUCT.md (raíz)` | mantener | Insumo de Impeccable; VISION.md lo cita | Nada. :54 (índigo) y :56 (Framer Motion) están en a_decidir. |
+| `.github/skills/impeccable/* y .github/hooks/impeccable.json (raíz)` | mantener | Tooling; DISENO.md lo cita | Nada. |
+| `AUDITORIA-VS-BRIEF-2026-07.md (raíz)` | borrar | HISTORIAL.md (era) y LEADOS.md §3 (aislamiento) | Los hallazgos A-01 a A-31 contra el brief v2 y la medición del perímetro de tests de aislamiento (A-13: 2 de ~19 escrituras con test de actor cruzado), que quizá sigue vigente. |
+| `lane-LOG.md, lane-dashboard-log.md, lane-plan-log.md, lane-resultados-redesign-log.md (raíz)` | borrar | HISTORIAL.md; la spec de resolveAccentColor (lane-LOG.md:134-142) pasa a ROADMAP §5.4 y las decisiones de Resultados a DECISIONES D-09 | Los logs de lane de junio (recuperables con git). |
+| `logic-core-v3/STATUS.md` | consolidado | ROADMAP.md §5.1, DECISIONES.md (D-21, reemplazadas) y VISION.md §8 | La foto de mayo, hoy engañosa (Plan inexistente, rate limiter en memoria, crons funcionando). Contiene contraseñas de seed en 258-259 y el host de Neon dev en 86 y 299. |
+| `logic-core-v3/AGENTS.md` | mantener | Lo cita raíz:CLAUDE.md:133 como convenciones de app | Nada. :22 (Haiku) y :56-58 (paleta) están en a_decidir. |
+| `logic-core-v3/README.md` | mantener | Punto de entrada del repo; sumarle el puntero a los 10 docs | Nada. |
+| `logic-core-v3/DEPLOY.md` | borrar | OPERACIONES.md §1 | La guía de Vercel de marzo, que no es la plataforma activa. |
+| `logic-core-v3/CHANGELOG.md` | consolidado | HISTORIAL.md | La lista de cambios visibles de v1.0.0 (mayo); el claim de release está en a_decidir. |
+| `logic-core-v3/CHANGELOG-cuenta.md` | borrar | docs/client-portal/changelog/cuenta.md → HISTORIAL.md | Nada: casi duplica cuenta.md. |
+| `logic-core-v3/_CHANGELOG-lane-project.md y los 8 logic-core-v3/_lane-*.md (config-settings-log, cuenta-plan, demos-log, intel-alertas-cierre, intel-alertas-log, project-log, proyectos-log, services-log)` | borrar | HISTORIAL.md | Las fuentes de verdad de cada lane de junio; las decisiones relevantes ya están en los changelogs consolidados. Recuperables con git. |
+| `logic-core-v3/__dev_task.md` | borrar | — | Un prompt de marzo para pulir /process-automation. |
+| `logic-core-v3/{audit.txt, .eslint_output.txt, prisma_err.txt, ts_errors.txt, ts_prune_output.txt, unused_report.txt, unused_report_utf8.txt}` | borrar | LECCIONES.md #14 (regenerar, no citar) | Nada: reportes de marzo y abril, varios en UTF-16 y con rutas de una máquina personal. |
+| `logic-core-v3/docs/bitacora-roadmap.md` | consolidado | DECISIONES, OPERACIONES, LECCIONES e HISTORIAL | El detalle de ejecución (comandos, mediciones, discovery, SHAs), recuperable con git. Contiene el valor de una API key filtrada (19, 36, 50) y contraseñas de seed (6375-6377, 7837, 10534). |
+| `logic-core-v3/docs/bitacora-beta-3.md` | consolidado | LEADOS.md, DECISIONES §G y LECCIONES | Mediciones de pliegue, censos de pantallas, el porqué de cada poda y conteos de suites por fecha. Borrarlo elimina la clase arbitraria con URL de la línea 3647 que envenenó el build de Tailwind. |
+| `logic-core-v3/docs/bitacora-beta.md` | consolidado | LEADOS.md, DECISIONES D-32 y ROADMAP §5.1 (FG-2) | El relato de la cabina del setter (FG-0.5). Contiene contraseñas de seed en la línea 15 y duplica bitacora-roadmap.md:10530-10802. |
+| `logic-core-v3/docs/bitacora-beta-2.md` | consolidado | DECISIONES D-56 a D-60 y reemplazadas; LEADOS.md | La justificación paso a paso de D4 y la línea base e2e de junio. |
+| `logic-core-v3/docs/bitacora-rediseno.md` | consolidado | DISENO.md §1, DECISIONES §F e HISTORIAL | Mediciones de LCP y bundle del rediseño, el inventario de 27 placeholders (3323-3392) y cómo volver al rediseño (3720-3736); se recuperan con git si se retoma. |
+| `logic-core-v3/docs/roadmap-pendientes.md` | consolidado | ROADMAP.md §5.5 | Nada sustantivo si las condiciones de disparo migran; se pierden a propósito las entradas obsoletas (T0.2, vista de CRM, vercel.json). |
+| `logic-core-v3/docs/sprints/alpha-0-cleanup.md, alpha-0-5-cleanup.md, alpha-0-6-cleanup-extended.md, alpha-0-7-baseline-observability.md, alpha-0-8-tests-e2e.md, alpha-0-9-status-verificacion.md, alpha-1-reaudit.md, alpha-2-onboarding.md, alpha-bloque-C-RESUMEN.md, alpha-pre-cierre-RESUMEN.md` | borrar | HISTORIAL.md (era Alpha) y DECISIONES D-44 | Las líneas base de mayo (P95 12.987 ms; tabla de alpha-pre-cierre-RESUMEN.md:37-47), los conteos de la migración del design system y el smoke de 14 endpoints. |
+| `logic-core-v3/docs/sprints/alpha-RESUMEN-FINAL.md` | consolidado | DECISIONES (D-44, reemplazadas), LECCIONES #1 e HISTORIAL | La narrativa de cierre de Alpha y el claim de v1.0, que está en a_decidir. |
+| `logic-core-v3/docs/sprints/infra-1-observabilidad.md` | consolidado | ARQUITECTURA §5, OPERACIONES §8 y DECISIONES D-20 | El discovery con archivo:línea del catch de persistencia (ya derivó). |
+| `logic-core-v3/docs/sprints/infra-2-cold-start-retry.md` | consolidado | ARQUITECTURA §5 y DECISIONES D-19 | El análisis de la carrera de doble respuesta (97-102) y del write-write residual (134-136), útil si alguien agrega un timeout de cliente. |
+| `logic-core-v3/docs/sprints/p3-a-1-gbp-connection.md` | consolidado | ARQUITECTURA §6, DECISIONES D-26 y SEGURIDAD §3.2 | La prueba del puente v1→v4 con líneas exactas (73-84). |
+| `logic-core-v3/docs/sprints/p3-a-2-venta.md` | consolidado | VISION §4.3 y DECISIONES D-07 | El copy de venta (64-82), que también está en el código. |
+| `logic-core-v3/docs/sprints/p4-1-render-utm.md` | borrar | DECISIONES D-08 | Nada que no esté en lead-origin.ts:105-108 y en el invariante de home-metrics. |
+| `logic-core-v3/docs/sprints/q1-1-harness.md y q1-2-scoring.md` | consolidado | src/modules/chatbot/evals/README.md, ARQUITECTURA §5 y LECCIONES #15 | El diagnóstico de pérdida de turnos (q1-1:128-148) si no pasa al README; hay que actualizar las referencias de evals/capture.ts:49 y runner.ts:220. |
+| `logic-core-v3/docs/sprints/sprint-b0-bis-cierre.md` | borrar | DISENO §1.1 (línea base mobile) y DECISIONES (reemplazadas) | Nada más. |
+| `logic-core-v3/docs/sprints/sprint-b05-sanidad-sitio.md` | borrar | DECISIONES D-06, D-54 y D-55 | Nada vigente. |
+| `logic-core-v3/docs/sprints/utm-1-captura.md` | consolidado | ARQUITECTURA §5 y DECISIONES D-18 | La justificación de por qué el first-touch depende de que el update no escriba UTM (94-98). |
+| `logic-core-v3/docs/admin-design-system-audit.md` | borrar | DECISIONES D-45 | El razonamiento de por qué el borrado era seguro (ya ejecutado). |
+| `logic-core-v3/docs/audit-chatbot-runtime.md` | consolidado | ARQUITECTURA §5 (flujo A.0) y ROADMAP §5.2 | El detalle de cada hallazgo con archivo:línea de julio. |
+| `logic-core-v3/docs/audit-repo-20260707.md` | consolidado | SEGURIDAD §3.2 y ROADMAP §5 | La sección C, el cruce con el roadmap viejo y la evidencia de los ítems ya cerrados. |
+| `logic-core-v3/docs/audit/2026-04-dashboard-cleanup-audit.md` | borrar | HISTORIAL.md | La foto de abril del schema y de las rutas eliminadas. |
+| `logic-core-v3/docs/auditoria-consistencia-setter.md` | borrar | DISENO §3 (tres reglas) y LECCIONES #12 | El inventario de duplicados del wizard retirado. |
+| `logic-core-v3/docs/auditoria-recorrido-completo-novato.md` | borrar | LEADOS §5 | La referencia a 32 capturas del wizard retirado. |
+| `logic-core-v3/docs/auditoria-seguridad-2026-05.md` | consolidado | SEGURIDAD §1.4 (Apéndice A) y §3.2 | La evidencia de mayo. Es uno de los docs que enumeran vulnerabilidades en un repo público; borrarlo no lo saca de la historia. |
+| `logic-core-v3/docs/auditoria-total-pre-deploy.md` | consolidado | DISENO §1.1 (no tocar y quick wins) | La medición del bundle de mayo y la evidencia por oportunidad. |
+| `logic-core-v3/docs/auditoria-ux-setter.md` | borrar | — | El conteo de prosa por pantalla del wizard retirado. |
+| `logic-core-v3/docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md` | consolidado | ARQUITECTURA §2 | Las cifras de agosto y la tabla de discrepancias docs↔código (las vivas pasan a a_decidir). |
+| `logic-core-v3/docs/auditorias/A2-SETTER-DOCS-VIABILIDAD-2026-08.md` | borrar | — | El mapa de montaje del shell del setter (A2:11-20), reconstruible desde el código. |
+| `logic-core-v3/docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md` | consolidado | OPERACIONES §7 (puertos) y LECCIONES §8 | El formato de SKILL.md verificado (158-264) y las discrepancias de instalación. |
+| `logic-core-v3/docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md y A3-VIABILIDAD-DECISIONES-2026-08.md` | consolidado | LEADOS §8 y LECCIONES #19, #36 | Las evidencias por frente, el premortem del Evaluador (§7) y el detalle de los 14 cambios de schema. |
+| `logic-core-v3/docs/auditorias/AUDITORIA-CIERRE-2026-07.md` | consolidado | LEADOS, ROADMAP §5.3 y DECISIONES (vigencia sin confirmar) | Las fichas ejecutables con modelo y esfuerzo por ítem y el diseño de la fase PRE (§6). |
+| `logic-core-v3/docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md` | consolidado | LECCIONES #5 y #13 | El protocolo reproducible de sabotaje (§3). |
+| `logic-core-v3/docs/auditorias/REGRESION-FINAL-2026-07.md` | consolidado | LEADOS §3 y DECISIONES D-61 | El conteo de suites de julio (desactualizado). |
+| `logic-core-v3/docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md` | borrar | Absorbido por AUDITORIA-CIERRE → LEADOS | El detalle por pantalla de los 39 hallazgos (b). |
+| `logic-core-v3/docs/audits/2026-05-auditoria-db.md` | borrar | DECISIONES D-01, D-27, D-28 y LECCIONES #36 | Los counts y el uso de índices de mayo. Contiene hosts de Neon (:7, :57, :344), que no son credenciales. |
+| `logic-core-v3/docs/audits/2026-05-auditoria-profunda.md` | borrar | SEGURIDAD §3 y casos de scripts/regression | Los transcripts del bot de mayo como referencia histórica. |
+| `logic-core-v3/docs/audits/2026-05-bfg-leak-cleanup.md` | consolidado | SEGURIDAD §3.1 (sin el valor) y a_decidir (purga) | Nada operativo si los pasos de purga se rescriben sin el valor. :94 contiene el valor completo de la API key de Google Generative AI (prefijos en :143, :189, :204, :262); borrar el archivo no la saca de la historia. |
+| `logic-core-v3/docs/audits/2026-05-cleanup-db-dev.md` | consolidado | OPERACIONES §4 y LECCIONES #38 | El backup JSON de las filas borradas en dev. Los scripts _db-cleanup-*.mjs siguen en scripts/. |
+| `logic-core-v3/docs/audits/2026-06-revalidacion-dashboard-chatbot.md` | borrar | LECCIONES #47 y SEGURIDAD §3 | Las métricas del bot hasta el 23/05 (393 conversaciones, p50 4.077 ms). |
+| `logic-core-v3/docs/audits/2026-06-revalidacion.md` | borrar | SEGURIDAD §3 y LECCIONES #16, #26 | La foto de junio, superada por julio y agosto. |
+| `logic-core-v3/docs/b7-probe-cal-com.md` | consolidado | ARQUITECTURA §6 y DECISIONES D-25 | Los ejemplos de request y response, cubiertos por cal-com-v2.ts. |
+| `logic-core-v3/docs/b8a-auditoria.md y b8a-ii-auditoria.md` | borrar | DECISIONES D-33 y vigencia sin confirmar (re-agendar) | El análisis de tradeoffs de H2 (b8a-auditoria:37-41). |
+| `logic-core-v3/docs/b8a-changelog.md, b8a-ii-changelog.md, b9-changelog.md` | borrar | HISTORIAL.md | El detalle de sprints sobre el wizard retirado. |
+| `logic-core-v3/docs/b9-plan-visual.md` | borrar | DISENO §3 (cian = acción) | La tesis de color semántico de LeadOS (:28, :63). |
+| `logic-core-v3/docs/baselines/2026-05-admin-performance.md` | consolidado | OPERACIONES §4 y DECISIONES D-41 | La tabla antes/después de queries por request. |
+| `logic-core-v3/docs/baselines/2026-05-chatbot-runtime.md` | consolidado | ARQUITECTURA §5 | El método del load test (reconstruible). |
+| `logic-core-v3/docs/baselines/2026-07-auditoria-seguridad.md` | consolidado | SEGURIDAD §3 y a_decidir (visibilidad del repo) | La evidencia y la refutación por hallazgo. El propio doc pide no publicarlo mientras el repo sea público (:3830). |
+| `logic-core-v3/docs/baselines/p17-* a p23-*.json (31 archivos de pliegue, destinos, franja, panel, cartera, barrido y ubicaciones)` | borrar | Regenerables con scripts/qa-corridas/* | La evidencia antes/después de P17–P23 y el residual de P19 (41.376 → 10.368 combinaciones malas). p23-pliegue-antes.json es el input por defecto de scripts/qa-corridas/_p23/censo-ubicaciones.ts:34: si se borra, ese script necesita CENSO_PLIEGUE. |
+| `logic-core-v3/docs/corrida-recorrido-2026-08-31/REPORTE.md` | consolidado | LEADOS §5 y ROADMAP §5.3 | El relato de cada bache y la comparación contra agosto (§6). |
+| `logic-core-v3/docs/corrida-recorrido-2026-08-31/MANIFIESTO.md y .gitignore` | borrar | — | La trazabilidad captura por captura; los PNG ya no están en el repo. |
+| `logic-core-v3/docs/design-system-audit.md` | consolidado | DISENO §2 | Las frecuencias de mayo. |
+| `logic-core-v3/docs/design-system.md` | consolidado | DISENO §2 | El detalle de tokens del portal más allá de @/lib/design-tokens. |
+| `logic-core-v3/docs/diagnostico-visual-2026-08/ (REPORTE.md, MANIFIESTO.md, .gitignore)` | borrar | OPERACIONES §4 (rotar Neon dev), LECCIONES #33 y LEADOS §5 | El texto de pantalla de agosto y las salvedades de reproducibilidad de seeds (201-208). |
+| `logic-core-v3/docs/diagnostico-visual-admin-2026-08/REPORTE.md` | consolidado | LEADOS §5 | La evidencia por pregunta. |
+| `logic-core-v3/docs/diagnostico-visual-admin-2026-08/MANIFIESTO.md y .gitignore` | borrar | — | El texto de pantalla del admin. MANIFIESTO.md:411 tiene un email personal (PII). |
+| `logic-core-v3/docs/experimentos/fg2-brief-experimento.md` | mantener | Hasta decidir FG-2 (a_decidir); si se descarta, se borra junto con /admin/fg2-lab | Nada mientras se mantenga. |
+| `logic-core-v3/docs/experimentos/fg2-prompts-listos.md` | borrar | Regenerable con scripts/_experimental/fg2-gen-prompts.ts | Nada. |
+| `logic-core-v3/docs/microaudit-frozen-frontera-CO.md` | consolidado | OPERACIONES §4 y DECISIONES D-37 | La baseline de lint y tsc de julio (superada). |
+| `logic-core-v3/docs/probe-b2-hero-nav.md` | borrar | LECCIONES (revalidar: gate de 2500 ms) | La tabla de timing de la coreografía, propia de redesign/home. |
+| `logic-core-v3/docs/probe-bundle-inicial.md` | consolidado | DISENO §1.1 | El censo de scripts por chunk. |
+| `logic-core-v3/docs/probe-construccion-p6.md` | borrar | DECISIONES D-62 | Los 8 hallazgos laterales (581-600); verificar si siguen antes de borrar. |
+| `logic-core-v3/docs/probe-monolito-censo.md` | consolidado | VISION §3 y §5, y a_decidir (claims y precios) | El mapa por rango de línea del monolito y las trampas de borrado, útiles solo si se reescribe el home. |
+| `logic-core-v3/docs/probe-motion-sitio.md` | consolidado | DISENO §1 y a_decidir (glass, 3D) | El veredicto por animación con archivo:línea. |
+| `logic-core-v3/docs/probe-poda-terreno.md` | consolidado | SEGURIDAD §3 y LECCIONES #24 | El relevamiento R1-R10 de julio y la lista de ramas fósiles. Contiene un email personal en :28. |
+| `logic-core-v3/docs/regression/*.md (21 corridas baseline y smoke de mayo)` | borrar | ARQUITECTURA §5 (harness FULL de 19 y SMOKE de 4); regenerables con scripts/regression/run-baseline.ts | Las respuestas históricas del bot de mayo. |
+| `logic-core-v3/docs/research/2026-04-entrega-2-pre-research.md` | borrar | HISTORIAL.md | La tabla de métricas para el Health Score (:78-90), solo histórica. |
+| `logic-core-v3/docs/BRIEF-VISION-FLUJO-SETTER-v3.md` | mantener | LEADOS.md lo cita como ley | Nada. Su demo-first y su vigencia frente al v4 están en a_decidir. |
+| `logic-core-v3/docs/HANDOFF-LEADOS-CIERRE.md` | consolidado | LEADOS.md, a_decidir y LECCIONES #22 | El mapa de 10 artefactos y las 8 reglas de terreno en su forma original. |
+| `logic-core-v3/docs/MUNICION-PROMPTS-Y-SKILL.md` | consolidado | LEADOS §7 (anexo) o src/lib/leados/prompts-disenio.ts | Los textos de la cadena P0 a U si no se mueven al anexo o al código. |
+| `logic-core-v3/docs/PILOTO-DEMO-FIRST.md` | borrar | ROADMAP §5.3 (una línea) | El protocolo del piloto de una hora (no hay evidencia de que se haya corrido). |
+| `logic-core-v3/docs/SPRINT-M1-MANUAL-v2.md` | borrar | — | El prompt, ya corrido. |
+| `logic-core-v3/docs/admin-changelog/Admin Operaciones rdc.md` | borrar | Dashboard rdc.md → HISTORIAL.md | Nada: duplicado exacto. |
+| `logic-core-v3/docs/admin-changelog/ (los otros 11: Admin Completo, Chatbot, Clientes, Configuracion, Dashboard, Equipo, Inteligencia, Leads, Operaciones, Proyectos, Revision demos)` | consolidado | HISTORIAL, DECISIONES §E, LECCIONES y ROADMAP §5.4 | La lista de commits por lane (recuperable con git log). |
+| `logic-core-v3/docs/chatbot-deploy.md` | consolidado | OPERACIONES §1 | El monitoreo diario, semanal y mensual. Está desactualizado: usa /smoke (eliminado), exige CHATBOT_GOOGLE_API_KEY y supone migrate deploy en el build. |
+| `logic-core-v3/docs/chatbot-qa-checklist.md` | borrar | OPERACIONES §9 y suites e2e | El checklist manual del MVP. |
+| `logic-core-v3/docs/chatbot-sprints.md` | borrar | HISTORIAL.md | La lista histórica de sprints S0–S23. |
+| `logic-core-v3/docs/client-portal/changelog/*.md (10)` | consolidado | HISTORIAL, DECISIONES D-09, LECCIONES y ROADMAP §5.4 | La tabla de verificaciones humanas pendientes de cuenta.md (457-468) si no se revisa antes. |
+| `logic-core-v3/docs/client-portal/lane-inicio-explore.md, lane-inicio-sprint-log.md, relevamiento-6-secciones.md` | borrar | HISTORIAL.md | Inventarios y logs ya superados. |
+| `logic-core-v3/docs/client-portal/lane-portal-pulido-log.md` | consolidado | HISTORIAL.md | El detalle del batch 2. |
+| `logic-core-v3/docs/client-portal/relevamiento-global.md` | consolidado | ROADMAP §5.4 y a_decidir (rol CLIENT) | El relevamiento completo de junio fuera de §7. |
+| `logic-core-v3/docs/consolidacion-planoA-runtime.md` | consolidado | ROADMAP §5.2 | El cruce de duplicados entre fuentes y 6 decisiones abiertas (103-110). |
+| `logic-core-v3/docs/demo-guion.md` | borrar | VISION.md | Un guion de mayo desactualizado. Tiene credenciales en texto plano (15-16): rotarlas si son reales. |
+| `logic-core-v3/docs/env-vars.md` | consolidado | OPERACIONES §6 | La matriz por estado; le faltan 11 variables que sí están en .env.example. |
+| `logic-core-v3/docs/ev4-transcripts/*.md (8) y docs/ev5-transcripts/*.md (2)` | borrar | HISTORIAL.md | Evidencia puntual de junio (4 transcripts son HTTP 404) y el comando scripts/ev4-smoke.mjs. |
+| `logic-core-v3/docs/impeccable-baseline.json` | mantener | Dato referenciado desde DISENO §1.1 | Nada. |
+| `logic-core-v3/docs/impeccable-baseline.md` | consolidado | DISENO §1.1 | La lectura detallada por categoría. |
+| `logic-core-v3/docs/leados-alta-setter.md` | consolidado | OPERACIONES §9.6 y DECISIONES D-65 | Los comandos de alta. Contiene una contraseña QA en texto plano (:25). |
+| `logic-core-v3/docs/manual-usuario/00-INDICE.md a 13-cierres.md (14 capítulos)` | mantener | Manual del setter; regenerar (desfasado por P11) | Nada. |
+| `logic-core-v3/docs/manual-usuario/metodo-creacion-md-capacitacion.md, galeria/INDICE.md, galeria/.gitignore` | mantener | Norma de redacción del manual y galería generada | Nada. |
+| `logic-core-v3/docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md, BACHES-RE-VERIFICADOS.md, HALLAZGOS-MANUAL-v3.md, VALIDACION-PODA.md` | consolidado | ROADMAP §5.3 y LEADOS §5 | La evidencia detallada por bache y el veredicto de la poda (VALIDACION-PODA:17-28). |
+| `logic-core-v3/docs/manual-usuario/CORRIDA-M1-v3-FRENADA.md, HALLAZGOS-MANUAL.md, PROGRESO-M1.md, galeria/PROGRESO.md` | borrar | HISTORIAL.md | Registros de corrida ya cerrados y la versión pre-poda de los hallazgos. |
+| `logic-core-v3/docs/metodo/LECCIONES-LEADOS.md` | consolidado | LECCIONES.md | La evidencia (commit o línea de bitácora) detrás de cada regla. |
+| `logic-core-v3/docs/metodo/MAPA-LEADOS.md` | consolidado | LEADOS §3 y ARQUITECTURA §4 | El mapa completo de capas y la derivación de pantallas (ya stale según verificacion-arranque:383). |
+| `logic-core-v3/docs/metodo/PROGRESO-D1.md` | borrar | — | Nada. |
+| `logic-core-v3/docs/metodo/PROPUESTA-CIMIENTO.md` | consolidado | LECCIONES §8 y a_decidir (dónde vive el método) | Las propuestas M-01 a M-21 que Franco no incorporó (no se sabe cuáles). |
+| `logic-core-v3/docs/motor-whatsapp/bitacora.md` | consolidado | ARQUITECTURA §6 y DECISIONES D-43 | Las decisiones de diseño del helper de aislamiento (110-150) en detalle y los pendientes del motor (683). |
+| `logic-core-v3/docs/netlify-env-vars.md` | borrar | OPERACIONES §6 | Nada nuevo; su :29 sobre Resend está en a_decidir. |
+| `logic-core-v3/docs/onboarding-data-connections.md` | consolidado | OPERACIONES §9.7 | El troubleshooting y el setup inicial de la service account (80-112). |
+| `logic-core-v3/docs/onboarding-flow.md` | borrar | HISTORIAL.md | El análisis del redirect loop de /bienvenida de abril (vigencia dudosa). |
+| `logic-core-v3/docs/onboarding-modulo-agenda.md` | consolidado | VISION §4.3 y OPERACIONES §9.8 | El setup del módulo sobre Cal.com Cloud, que hoy no funciona (v1 apagada). |
+| `logic-core-v3/docs/operations/00-entornos.md, 01-onboarding-cliente.md, 02-activar-bot.md, 03-editar-kb.md, 04-responder-alerta.md, 05-cliente-no-anda.md, 06-instalar-widget.md, README.md, alerts-types.md, cron-jobs.md, sentry-setup.md` | consolidado | OPERACIONES §2, §4, §8 y §9 | Las plantillas de mensajes al cliente y los pitfalls detallados de cada runbook. |
+| `logic-core-v3/docs/operations/neon-backups.md` | consolidado | OPERACIONES §3 | El setup inicial paso a paso (60-109). Expone el ID del endpoint Neon (80-81), que no es credencial. |
+| `logic-core-v3/docs/operations/b14-deploy-checklist.md` | consolidado | OPERACIONES y ROADMAP §3 | El checklist de 7 fases de salida a prod. |
+| `logic-core-v3/docs/privacidad-afirmaciones-cliente.md` | consolidado | SEGURIDAD-Y-PRIVACIDAD §1 | Nada: se traslada casi completo. |
+| `logic-core-v3/docs/releases/v1.0.0.md` | consolidado | HISTORIAL §2 y a_decidir (versión) | La foto de v1.0 y la lista de lo que no entró. |
+| `logic-core-v3/docs/smoke-report.md` | borrar | HISTORIAL y LECCIONES #2 | El análisis del incidente de drift, ya resuelto con la migración 20260622120000. |
+| `logic-core-v3/docs/sprint-alpha-3-kb-editor.md` | borrar | HISTORIAL.md | Los pendientes de Alpha.3 (historial persistente, tiktoken). |
+| `logic-core-v3/docs/testing-strategy.md` | consolidado | OPERACIONES §7 | La matriz de cobertura de mayo, que no menciona invariantes ni test:leados ni test:setter. |
+| `logic-core-v3/docs/v1.0-smoke-test-checklist.md` | borrar | HISTORIAL.md | Nada vigente. |
+| `logic-core-v3/docs/verificacion-arranque-oslead-vii.md` | consolidado | LEADOS §2 y §5, y ROADMAP §5.3 | Los hallazgos de entorno y censo en detalle (14-77, 376-390). |
+| `logic-core-v3/docs/auditoria-2026-10/` | mantener | Auditoría vigente; fuente del Atlas de donde se regeneran ARQUITECTURA y ROADMAP | Nada. |
+| `logic-core-v3/docs/_insumos/ (carpeta entera, sin trackear)` | borrar | Los originales siguen en el Drive; los 10 docs citan lo necesario | Solo la copia local. Nunca se commitea: según la consigna contiene credenciales, y OSLEAD/Documento sin título.md:452 tiene un hostname de Neon dev. |
+| `docs/_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md y ROADMAP-MEJORA-post-auditoria.md` | consolidado | ROADMAP §5.2 y DECISIONES §B | La frontera runtime/panel en su forma original. |
+| `docs/_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md` | consolidado | DECISIONES §B, LECCIONES y a_decidir | Las decisiones abiertas de la sesión (retención, cuota con memoria, inventario, salud, descargo por alucinaciones) si no entran al backlog. |
+| `docs/_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md` | consolidado | ROADMAP §5.2 y DECISIONES D-13 a D-15 | Nada si C1.1, C1.4, C2.x, C3.2 y C3.3 entran al backlog. |
+| `docs/_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md` | borrar | ROADMAP §5.2 | Poco: repite el roadmap C. |
+| `docs/_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md` | consolidado | LEADOS §6, ROADMAP §5.3 y a_decidir | La especificación de los 5 prompts de refinamiento, los 15 checks y los textos del ángulo wow, que nunca se commitearon. |
+| `docs/_insumos/drive/Franco/Work Flow/03-DESIGN-SYSTEM (1).md y 04-MAPA (1).md` | mantener | En el Drive hasta resolver la dirección visual (a_decidir); DISENO los cita | Nada. |
+| `docs/_insumos/drive/Franco/Work Flow/05-PROMPT-CORTO.md` | borrar | 04-MAPA (1).md | Nada que no esté en 04-MAPA. |
+| `docs/_insumos/drive/Franco/Work Flow/develOP-manual-flujo (1).md, develOP-prompts-auditoria.md, Como usar los prompts.md, Iniciar Nuevo Chat/config-ejecucion-claude-desktop.md, develOP-cimiento-chat (7) (1).md, develOP-kit-continuidad (3).md` | mantener | El método de Franco en el Drive; LECCIONES §8 los cita | Nada. |
+| `docs/_insumos/drive/Franco/Work Flow/Iniciar Nuevo Chat/develOP-manual-resumido (2) (1).md` | consolidado | develOP-manual-flujo (1).md (Drive) | Nada que no esté en el manual completo. |
+| `docs/_insumos/drive/Franco/Work Flow/handoff-producto-develop.md y Proyecto DevelOP/Contexto/develOP-contexto-estable-v1.0.md, develOP-contexto-profundo-v1.0.md` | mantener | Son los que se cargan en los chats de Franco; VISION, DECISIONES y LECCIONES los resumen y citan | Nada. |
+| `docs/_insumos/drive/Olme/Admin - Registro de cambios/* (11 copias) y Olme/Cliente - Registro de cambios/* (10 copias, todas salvo Portal General_)` | borrar | docs/admin-changelog/ y docs/client-portal/changelog/ → HISTORIAL | Nada: solo difieren en formato. |
+| `docs/_insumos/drive/Olme/Chatbot_ registro de cambios.md` | consolidado | HISTORIAL.md | La única versión que une Chatbot rdc.md y lane-LOG.md. |
+| `docs/_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md` | consolidado | HISTORIAL.md | La versión changelog del pulido del portal (el repo solo tiene el log). |
+| `docs/_insumos/drive/Olme/Ideas de nuevas features.md` | consolidado | ROADMAP §5.4 y DECISIONES D-46 | La estimación de complejidad por idea. |
+| `docs/_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md` | consolidado | HISTORIAL, LECCIONES #35, SEGURIDAD §2 y ROADMAP | Los 7 pendientes (84-92) si no entran al backlog. |
+| `docs/_insumos/drive/Recursos DevelOP.md` | borrar | Queda en el Drive como marcadores personales | Solo la copia local de enlaces a herramientas de terceros. |

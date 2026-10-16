@@ -146,6 +146,17 @@ if (nuevosF2.length || refuerzos.length) {
     md.push('')
   }
 }
-md.push('## §docs', '', 'Se completa en F6 junto con `14-DOCS-CONSOLIDADOS/` (DEC-44): qué doc se borra, qué consolidado lo reemplaza y qué se pierde, si algo.', '')
+// §docs (E11, DEC-44): la lista de borrado de docs la arma la síntesis de F6b en _crudo/poda-docs.json
+const docsPoda = existsSync(path.join(CRUDO, 'poda-docs.json')) ? JSON.parse(readFileSync(path.join(CRUDO, 'poda-docs.json'), 'utf8')).items ?? [] : []
+md.push('## §docs', '')
+if (!docsPoda.length) md.push('Se completa en F6 junto con `14-DOCS-CONSOLIDADOS/` (DEC-44): qué doc se borra, qué consolidado lo reemplaza y qué se pierde, si algo.', '')
+else {
+  const cuenta = docsPoda.reduce((a, x) => { a[x.accion] = (a[x.accion] ?? 0) + 1; return a }, {})
+  md.push(`Lista de borrado de docs (E11): ${Object.entries(cuenta).map(([k, v]) => `${k} ${v}`).join(' · ')}. **borrar**: se borra sin pasar nada (lo poco que vale ya está en el reemplazo o en git) · **consolidado**: lo vigente ya está en el borrador de \`14-DOCS-CONSOLIDADOS/\` que se indica y después se borra · **mantener**: sigue como está. Borrar y reemplazar es un sprint S posterior; en esta corrida no se borró nada.`, '')
+  md.push('| Doc | Acción | Reemplazo | Qué se pierde |', '|---|---|---|---|')
+  const e = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ')
+  for (const x of docsPoda) md.push(`| \`${e(x.doc)}\` | ${x.accion} | ${e(x.reemplazo)} | ${e(x.que_se_pierde)} |`)
+  md.push('')
+}
 writeFileSync(MD, md.join('\n'), 'utf8')
 console.log(`10-PODA.md: ${ordenados.length} fichas (POD-001..POD-${String(maximo).padStart(3, '0')}); PODA-ALTA profundos: ${altaProfundos.length} archivos / ${locAltaProfundo} LOC → ${path.relative(appRoot, LISTA_ALTA)}`)

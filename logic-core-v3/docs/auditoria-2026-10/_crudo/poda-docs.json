@@ -1,0 +1,863 @@
+{
+ "nota": "Lista de borrado de docs (E11): la redactó la síntesis de F6b; la aplica un sprint S posterior.",
+ "items": [
+  {
+   "doc": "CLAUDE.md (raíz)",
+   "accion": "mantener",
+   "reemplazo": "Instrucciones del agente; los 10 docs lo citan",
+   "que_se_pierde": "Nada. Quedan ajustes sujetos a a_decidir: Framer Motion (:3, :80), glassmorphism (:97), rol CLIENT (:109)."
+  },
+  {
+   "doc": "DESIGN.md (raíz)",
+   "accion": "mantener",
+   "reemplazo": "Insumo de Impeccable; DISENO.md lo cita",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "PRODUCT.md (raíz)",
+   "accion": "mantener",
+   "reemplazo": "Insumo de Impeccable; VISION.md lo cita",
+   "que_se_pierde": "Nada. :54 (índigo) y :56 (Framer Motion) están en a_decidir."
+  },
+  {
+   "doc": ".github/skills/impeccable/* y .github/hooks/impeccable.json (raíz)",
+   "accion": "mantener",
+   "reemplazo": "Tooling; DISENO.md lo cita",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "AUDITORIA-VS-BRIEF-2026-07.md (raíz)",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md (era) y LEADOS.md §3 (aislamiento)",
+   "que_se_pierde": "Los hallazgos A-01 a A-31 contra el brief v2 y la medición del perímetro de tests de aislamiento (A-13: 2 de ~19 escrituras con test de actor cruzado), que quizá sigue vigente."
+  },
+  {
+   "doc": "lane-LOG.md, lane-dashboard-log.md, lane-plan-log.md, lane-resultados-redesign-log.md (raíz)",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md; la spec de resolveAccentColor (lane-LOG.md:134-142) pasa a ROADMAP §5.4 y las decisiones de Resultados a DECISIONES D-09",
+   "que_se_pierde": "Los logs de lane de junio (recuperables con git)."
+  },
+  {
+   "doc": "logic-core-v3/STATUS.md",
+   "accion": "consolidado",
+   "reemplazo": "ROADMAP.md §5.1, DECISIONES.md (D-21, reemplazadas) y VISION.md §8",
+   "que_se_pierde": "La foto de mayo, hoy engañosa (Plan inexistente, rate limiter en memoria, crons funcionando). Contiene contraseñas de seed en 258-259 y el host de Neon dev en 86 y 299."
+  },
+  {
+   "doc": "logic-core-v3/AGENTS.md",
+   "accion": "mantener",
+   "reemplazo": "Lo cita raíz:CLAUDE.md:133 como convenciones de app",
+   "que_se_pierde": "Nada. :22 (Haiku) y :56-58 (paleta) están en a_decidir."
+  },
+  {
+   "doc": "logic-core-v3/README.md",
+   "accion": "mantener",
+   "reemplazo": "Punto de entrada del repo; sumarle el puntero a los 10 docs",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "logic-core-v3/DEPLOY.md",
+   "accion": "borrar",
+   "reemplazo": "OPERACIONES.md §1",
+   "que_se_pierde": "La guía de Vercel de marzo, que no es la plataforma activa."
+  },
+  {
+   "doc": "logic-core-v3/CHANGELOG.md",
+   "accion": "consolidado",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "La lista de cambios visibles de v1.0.0 (mayo); el claim de release está en a_decidir."
+  },
+  {
+   "doc": "logic-core-v3/CHANGELOG-cuenta.md",
+   "accion": "borrar",
+   "reemplazo": "docs/client-portal/changelog/cuenta.md → HISTORIAL.md",
+   "que_se_pierde": "Nada: casi duplica cuenta.md."
+  },
+  {
+   "doc": "logic-core-v3/_CHANGELOG-lane-project.md y los 8 logic-core-v3/_lane-*.md (config-settings-log, cuenta-plan, demos-log, intel-alertas-cierre, intel-alertas-log, project-log, proyectos-log, services-log)",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "Las fuentes de verdad de cada lane de junio; las decisiones relevantes ya están en los changelogs consolidados. Recuperables con git."
+  },
+  {
+   "doc": "logic-core-v3/__dev_task.md",
+   "accion": "borrar",
+   "reemplazo": "—",
+   "que_se_pierde": "Un prompt de marzo para pulir /process-automation."
+  },
+  {
+   "doc": "logic-core-v3/{audit.txt, .eslint_output.txt, prisma_err.txt, ts_errors.txt, ts_prune_output.txt, unused_report.txt, unused_report_utf8.txt}",
+   "accion": "borrar",
+   "reemplazo": "LECCIONES.md #14 (regenerar, no citar)",
+   "que_se_pierde": "Nada: reportes de marzo y abril, varios en UTF-16 y con rutas de una máquina personal."
+  },
+  {
+   "doc": "logic-core-v3/docs/bitacora-roadmap.md",
+   "accion": "consolidado",
+   "reemplazo": "DECISIONES, OPERACIONES, LECCIONES e HISTORIAL",
+   "que_se_pierde": "El detalle de ejecución (comandos, mediciones, discovery, SHAs), recuperable con git. Contiene el valor de una API key filtrada (19, 36, 50) y contraseñas de seed (6375-6377, 7837, 10534)."
+  },
+  {
+   "doc": "logic-core-v3/docs/bitacora-beta-3.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS.md, DECISIONES §G y LECCIONES",
+   "que_se_pierde": "Mediciones de pliegue, censos de pantallas, el porqué de cada poda y conteos de suites por fecha. Borrarlo elimina la clase arbitraria con URL de la línea 3647 que envenenó el build de Tailwind."
+  },
+  {
+   "doc": "logic-core-v3/docs/bitacora-beta.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS.md, DECISIONES D-32 y ROADMAP §5.1 (FG-2)",
+   "que_se_pierde": "El relato de la cabina del setter (FG-0.5). Contiene contraseñas de seed en la línea 15 y duplica bitacora-roadmap.md:10530-10802."
+  },
+  {
+   "doc": "logic-core-v3/docs/bitacora-beta-2.md",
+   "accion": "consolidado",
+   "reemplazo": "DECISIONES D-56 a D-60 y reemplazadas; LEADOS.md",
+   "que_se_pierde": "La justificación paso a paso de D4 y la línea base e2e de junio."
+  },
+  {
+   "doc": "logic-core-v3/docs/bitacora-rediseno.md",
+   "accion": "consolidado",
+   "reemplazo": "DISENO.md §1, DECISIONES §F e HISTORIAL",
+   "que_se_pierde": "Mediciones de LCP y bundle del rediseño, el inventario de 27 placeholders (3323-3392) y cómo volver al rediseño (3720-3736); se recuperan con git si se retoma."
+  },
+  {
+   "doc": "logic-core-v3/docs/roadmap-pendientes.md",
+   "accion": "consolidado",
+   "reemplazo": "ROADMAP.md §5.5",
+   "que_se_pierde": "Nada sustantivo si las condiciones de disparo migran; se pierden a propósito las entradas obsoletas (T0.2, vista de CRM, vercel.json)."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/alpha-0-cleanup.md, alpha-0-5-cleanup.md, alpha-0-6-cleanup-extended.md, alpha-0-7-baseline-observability.md, alpha-0-8-tests-e2e.md, alpha-0-9-status-verificacion.md, alpha-1-reaudit.md, alpha-2-onboarding.md, alpha-bloque-C-RESUMEN.md, alpha-pre-cierre-RESUMEN.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md (era Alpha) y DECISIONES D-44",
+   "que_se_pierde": "Las líneas base de mayo (P95 12.987 ms; tabla de alpha-pre-cierre-RESUMEN.md:37-47), los conteos de la migración del design system y el smoke de 14 endpoints."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/alpha-RESUMEN-FINAL.md",
+   "accion": "consolidado",
+   "reemplazo": "DECISIONES (D-44, reemplazadas), LECCIONES #1 e HISTORIAL",
+   "que_se_pierde": "La narrativa de cierre de Alpha y el claim de v1.0, que está en a_decidir."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/infra-1-observabilidad.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §5, OPERACIONES §8 y DECISIONES D-20",
+   "que_se_pierde": "El discovery con archivo:línea del catch de persistencia (ya derivó)."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/infra-2-cold-start-retry.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §5 y DECISIONES D-19",
+   "que_se_pierde": "El análisis de la carrera de doble respuesta (97-102) y del write-write residual (134-136), útil si alguien agrega un timeout de cliente."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/p3-a-1-gbp-connection.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §6, DECISIONES D-26 y SEGURIDAD §3.2",
+   "que_se_pierde": "La prueba del puente v1→v4 con líneas exactas (73-84)."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/p3-a-2-venta.md",
+   "accion": "consolidado",
+   "reemplazo": "VISION §4.3 y DECISIONES D-07",
+   "que_se_pierde": "El copy de venta (64-82), que también está en el código."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/p4-1-render-utm.md",
+   "accion": "borrar",
+   "reemplazo": "DECISIONES D-08",
+   "que_se_pierde": "Nada que no esté en lead-origin.ts:105-108 y en el invariante de home-metrics."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/q1-1-harness.md y q1-2-scoring.md",
+   "accion": "consolidado",
+   "reemplazo": "src/modules/chatbot/evals/README.md, ARQUITECTURA §5 y LECCIONES #15",
+   "que_se_pierde": "El diagnóstico de pérdida de turnos (q1-1:128-148) si no pasa al README; hay que actualizar las referencias de evals/capture.ts:49 y runner.ts:220."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/sprint-b0-bis-cierre.md",
+   "accion": "borrar",
+   "reemplazo": "DISENO §1.1 (línea base mobile) y DECISIONES (reemplazadas)",
+   "que_se_pierde": "Nada más."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/sprint-b05-sanidad-sitio.md",
+   "accion": "borrar",
+   "reemplazo": "DECISIONES D-06, D-54 y D-55",
+   "que_se_pierde": "Nada vigente."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprints/utm-1-captura.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §5 y DECISIONES D-18",
+   "que_se_pierde": "La justificación de por qué el first-touch depende de que el update no escriba UTM (94-98)."
+  },
+  {
+   "doc": "logic-core-v3/docs/admin-design-system-audit.md",
+   "accion": "borrar",
+   "reemplazo": "DECISIONES D-45",
+   "que_se_pierde": "El razonamiento de por qué el borrado era seguro (ya ejecutado)."
+  },
+  {
+   "doc": "logic-core-v3/docs/audit-chatbot-runtime.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §5 (flujo A.0) y ROADMAP §5.2",
+   "que_se_pierde": "El detalle de cada hallazgo con archivo:línea de julio."
+  },
+  {
+   "doc": "logic-core-v3/docs/audit-repo-20260707.md",
+   "accion": "consolidado",
+   "reemplazo": "SEGURIDAD §3.2 y ROADMAP §5",
+   "que_se_pierde": "La sección C, el cruce con el roadmap viejo y la evidencia de los ítems ya cerrados."
+  },
+  {
+   "doc": "logic-core-v3/docs/audit/2026-04-dashboard-cleanup-audit.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "La foto de abril del schema y de las rutas eliminadas."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditoria-consistencia-setter.md",
+   "accion": "borrar",
+   "reemplazo": "DISENO §3 (tres reglas) y LECCIONES #12",
+   "que_se_pierde": "El inventario de duplicados del wizard retirado."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditoria-recorrido-completo-novato.md",
+   "accion": "borrar",
+   "reemplazo": "LEADOS §5",
+   "que_se_pierde": "La referencia a 32 capturas del wizard retirado."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditoria-seguridad-2026-05.md",
+   "accion": "consolidado",
+   "reemplazo": "SEGURIDAD §1.4 (Apéndice A) y §3.2",
+   "que_se_pierde": "La evidencia de mayo. Es uno de los docs que enumeran vulnerabilidades en un repo público; borrarlo no lo saca de la historia."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditoria-total-pre-deploy.md",
+   "accion": "consolidado",
+   "reemplazo": "DISENO §1.1 (no tocar y quick wins)",
+   "que_se_pierde": "La medición del bundle de mayo y la evidencia por oportunidad."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditoria-ux-setter.md",
+   "accion": "borrar",
+   "reemplazo": "—",
+   "que_se_pierde": "El conteo de prosa por pantalla del wizard retirado."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §2",
+   "que_se_pierde": "Las cifras de agosto y la tabla de discrepancias docs↔código (las vivas pasan a a_decidir)."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditorias/A2-SETTER-DOCS-VIABILIDAD-2026-08.md",
+   "accion": "borrar",
+   "reemplazo": "—",
+   "que_se_pierde": "El mapa de montaje del shell del setter (A2:11-20), reconstruible desde el código."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §7 (puertos) y LECCIONES §8",
+   "que_se_pierde": "El formato de SKILL.md verificado (158-264) y las discrepancias de instalación."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md y A3-VIABILIDAD-DECISIONES-2026-08.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS §8 y LECCIONES #19, #36",
+   "que_se_pierde": "Las evidencias por frente, el premortem del Evaluador (§7) y el detalle de los 14 cambios de schema."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditorias/AUDITORIA-CIERRE-2026-07.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS, ROADMAP §5.3 y DECISIONES (vigencia sin confirmar)",
+   "que_se_pierde": "Las fichas ejecutables con modelo y esfuerzo por ítem y el diseño de la fase PRE (§6)."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md",
+   "accion": "consolidado",
+   "reemplazo": "LECCIONES #5 y #13",
+   "que_se_pierde": "El protocolo reproducible de sabotaje (§3)."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditorias/REGRESION-FINAL-2026-07.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS §3 y DECISIONES D-61",
+   "que_se_pierde": "El conteo de suites de julio (desactualizado)."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md",
+   "accion": "borrar",
+   "reemplazo": "Absorbido por AUDITORIA-CIERRE → LEADOS",
+   "que_se_pierde": "El detalle por pantalla de los 39 hallazgos (b)."
+  },
+  {
+   "doc": "logic-core-v3/docs/audits/2026-05-auditoria-db.md",
+   "accion": "borrar",
+   "reemplazo": "DECISIONES D-01, D-27, D-28 y LECCIONES #36",
+   "que_se_pierde": "Los counts y el uso de índices de mayo. Contiene hosts de Neon (:7, :57, :344), que no son credenciales."
+  },
+  {
+   "doc": "logic-core-v3/docs/audits/2026-05-auditoria-profunda.md",
+   "accion": "borrar",
+   "reemplazo": "SEGURIDAD §3 y casos de scripts/regression",
+   "que_se_pierde": "Los transcripts del bot de mayo como referencia histórica."
+  },
+  {
+   "doc": "logic-core-v3/docs/audits/2026-05-bfg-leak-cleanup.md",
+   "accion": "consolidado",
+   "reemplazo": "SEGURIDAD §3.1 (sin el valor) y a_decidir (purga)",
+   "que_se_pierde": "Nada operativo si los pasos de purga se rescriben sin el valor. :94 contiene el valor completo de la API key de Google Generative AI (prefijos en :143, :189, :204, :262); borrar el archivo no la saca de la historia."
+  },
+  {
+   "doc": "logic-core-v3/docs/audits/2026-05-cleanup-db-dev.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §4 y LECCIONES #38",
+   "que_se_pierde": "El backup JSON de las filas borradas en dev. Los scripts _db-cleanup-*.mjs siguen en scripts/."
+  },
+  {
+   "doc": "logic-core-v3/docs/audits/2026-06-revalidacion-dashboard-chatbot.md",
+   "accion": "borrar",
+   "reemplazo": "LECCIONES #47 y SEGURIDAD §3",
+   "que_se_pierde": "Las métricas del bot hasta el 23/05 (393 conversaciones, p50 4.077 ms)."
+  },
+  {
+   "doc": "logic-core-v3/docs/audits/2026-06-revalidacion.md",
+   "accion": "borrar",
+   "reemplazo": "SEGURIDAD §3 y LECCIONES #16, #26",
+   "que_se_pierde": "La foto de junio, superada por julio y agosto."
+  },
+  {
+   "doc": "logic-core-v3/docs/b7-probe-cal-com.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §6 y DECISIONES D-25",
+   "que_se_pierde": "Los ejemplos de request y response, cubiertos por cal-com-v2.ts."
+  },
+  {
+   "doc": "logic-core-v3/docs/b8a-auditoria.md y b8a-ii-auditoria.md",
+   "accion": "borrar",
+   "reemplazo": "DECISIONES D-33 y vigencia sin confirmar (re-agendar)",
+   "que_se_pierde": "El análisis de tradeoffs de H2 (b8a-auditoria:37-41)."
+  },
+  {
+   "doc": "logic-core-v3/docs/b8a-changelog.md, b8a-ii-changelog.md, b9-changelog.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "El detalle de sprints sobre el wizard retirado."
+  },
+  {
+   "doc": "logic-core-v3/docs/b9-plan-visual.md",
+   "accion": "borrar",
+   "reemplazo": "DISENO §3 (cian = acción)",
+   "que_se_pierde": "La tesis de color semántico de LeadOS (:28, :63)."
+  },
+  {
+   "doc": "logic-core-v3/docs/baselines/2026-05-admin-performance.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §4 y DECISIONES D-41",
+   "que_se_pierde": "La tabla antes/después de queries por request."
+  },
+  {
+   "doc": "logic-core-v3/docs/baselines/2026-05-chatbot-runtime.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §5",
+   "que_se_pierde": "El método del load test (reconstruible)."
+  },
+  {
+   "doc": "logic-core-v3/docs/baselines/2026-07-auditoria-seguridad.md",
+   "accion": "consolidado",
+   "reemplazo": "SEGURIDAD §3 y a_decidir (visibilidad del repo)",
+   "que_se_pierde": "La evidencia y la refutación por hallazgo. El propio doc pide no publicarlo mientras el repo sea público (:3830)."
+  },
+  {
+   "doc": "logic-core-v3/docs/baselines/p17-* a p23-*.json (31 archivos de pliegue, destinos, franja, panel, cartera, barrido y ubicaciones)",
+   "accion": "borrar",
+   "reemplazo": "Regenerables con scripts/qa-corridas/*",
+   "que_se_pierde": "La evidencia antes/después de P17–P23 y el residual de P19 (41.376 → 10.368 combinaciones malas). p23-pliegue-antes.json es el input por defecto de scripts/qa-corridas/_p23/censo-ubicaciones.ts:34: si se borra, ese script necesita CENSO_PLIEGUE."
+  },
+  {
+   "doc": "logic-core-v3/docs/corrida-recorrido-2026-08-31/REPORTE.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS §5 y ROADMAP §5.3",
+   "que_se_pierde": "El relato de cada bache y la comparación contra agosto (§6)."
+  },
+  {
+   "doc": "logic-core-v3/docs/corrida-recorrido-2026-08-31/MANIFIESTO.md y .gitignore",
+   "accion": "borrar",
+   "reemplazo": "—",
+   "que_se_pierde": "La trazabilidad captura por captura; los PNG ya no están en el repo."
+  },
+  {
+   "doc": "logic-core-v3/docs/design-system-audit.md",
+   "accion": "consolidado",
+   "reemplazo": "DISENO §2",
+   "que_se_pierde": "Las frecuencias de mayo."
+  },
+  {
+   "doc": "logic-core-v3/docs/design-system.md",
+   "accion": "consolidado",
+   "reemplazo": "DISENO §2",
+   "que_se_pierde": "El detalle de tokens del portal más allá de @/lib/design-tokens."
+  },
+  {
+   "doc": "logic-core-v3/docs/diagnostico-visual-2026-08/ (REPORTE.md, MANIFIESTO.md, .gitignore)",
+   "accion": "borrar",
+   "reemplazo": "OPERACIONES §4 (rotar Neon dev), LECCIONES #33 y LEADOS §5",
+   "que_se_pierde": "El texto de pantalla de agosto y las salvedades de reproducibilidad de seeds (201-208)."
+  },
+  {
+   "doc": "logic-core-v3/docs/diagnostico-visual-admin-2026-08/REPORTE.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS §5",
+   "que_se_pierde": "La evidencia por pregunta."
+  },
+  {
+   "doc": "logic-core-v3/docs/diagnostico-visual-admin-2026-08/MANIFIESTO.md y .gitignore",
+   "accion": "borrar",
+   "reemplazo": "—",
+   "que_se_pierde": "El texto de pantalla del admin. MANIFIESTO.md:411 tiene un email personal (PII)."
+  },
+  {
+   "doc": "logic-core-v3/docs/experimentos/fg2-brief-experimento.md",
+   "accion": "mantener",
+   "reemplazo": "Hasta decidir FG-2 (a_decidir); si se descarta, se borra junto con /admin/fg2-lab",
+   "que_se_pierde": "Nada mientras se mantenga."
+  },
+  {
+   "doc": "logic-core-v3/docs/experimentos/fg2-prompts-listos.md",
+   "accion": "borrar",
+   "reemplazo": "Regenerable con scripts/_experimental/fg2-gen-prompts.ts",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "logic-core-v3/docs/microaudit-frozen-frontera-CO.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §4 y DECISIONES D-37",
+   "que_se_pierde": "La baseline de lint y tsc de julio (superada)."
+  },
+  {
+   "doc": "logic-core-v3/docs/probe-b2-hero-nav.md",
+   "accion": "borrar",
+   "reemplazo": "LECCIONES (revalidar: gate de 2500 ms)",
+   "que_se_pierde": "La tabla de timing de la coreografía, propia de redesign/home."
+  },
+  {
+   "doc": "logic-core-v3/docs/probe-bundle-inicial.md",
+   "accion": "consolidado",
+   "reemplazo": "DISENO §1.1",
+   "que_se_pierde": "El censo de scripts por chunk."
+  },
+  {
+   "doc": "logic-core-v3/docs/probe-construccion-p6.md",
+   "accion": "borrar",
+   "reemplazo": "DECISIONES D-62",
+   "que_se_pierde": "Los 8 hallazgos laterales (581-600); verificar si siguen antes de borrar."
+  },
+  {
+   "doc": "logic-core-v3/docs/probe-monolito-censo.md",
+   "accion": "consolidado",
+   "reemplazo": "VISION §3 y §5, y a_decidir (claims y precios)",
+   "que_se_pierde": "El mapa por rango de línea del monolito y las trampas de borrado, útiles solo si se reescribe el home."
+  },
+  {
+   "doc": "logic-core-v3/docs/probe-motion-sitio.md",
+   "accion": "consolidado",
+   "reemplazo": "DISENO §1 y a_decidir (glass, 3D)",
+   "que_se_pierde": "El veredicto por animación con archivo:línea."
+  },
+  {
+   "doc": "logic-core-v3/docs/probe-poda-terreno.md",
+   "accion": "consolidado",
+   "reemplazo": "SEGURIDAD §3 y LECCIONES #24",
+   "que_se_pierde": "El relevamiento R1-R10 de julio y la lista de ramas fósiles. Contiene un email personal en :28."
+  },
+  {
+   "doc": "logic-core-v3/docs/regression/*.md (21 corridas baseline y smoke de mayo)",
+   "accion": "borrar",
+   "reemplazo": "ARQUITECTURA §5 (harness FULL de 19 y SMOKE de 4); regenerables con scripts/regression/run-baseline.ts",
+   "que_se_pierde": "Las respuestas históricas del bot de mayo."
+  },
+  {
+   "doc": "logic-core-v3/docs/research/2026-04-entrega-2-pre-research.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "La tabla de métricas para el Health Score (:78-90), solo histórica."
+  },
+  {
+   "doc": "logic-core-v3/docs/BRIEF-VISION-FLUJO-SETTER-v3.md",
+   "accion": "mantener",
+   "reemplazo": "LEADOS.md lo cita como ley",
+   "que_se_pierde": "Nada. Su demo-first y su vigencia frente al v4 están en a_decidir."
+  },
+  {
+   "doc": "logic-core-v3/docs/HANDOFF-LEADOS-CIERRE.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS.md, a_decidir y LECCIONES #22",
+   "que_se_pierde": "El mapa de 10 artefactos y las 8 reglas de terreno en su forma original."
+  },
+  {
+   "doc": "logic-core-v3/docs/MUNICION-PROMPTS-Y-SKILL.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS §7 (anexo) o src/lib/leados/prompts-disenio.ts",
+   "que_se_pierde": "Los textos de la cadena P0 a U si no se mueven al anexo o al código."
+  },
+  {
+   "doc": "logic-core-v3/docs/PILOTO-DEMO-FIRST.md",
+   "accion": "borrar",
+   "reemplazo": "ROADMAP §5.3 (una línea)",
+   "que_se_pierde": "El protocolo del piloto de una hora (no hay evidencia de que se haya corrido)."
+  },
+  {
+   "doc": "logic-core-v3/docs/SPRINT-M1-MANUAL-v2.md",
+   "accion": "borrar",
+   "reemplazo": "—",
+   "que_se_pierde": "El prompt, ya corrido."
+  },
+  {
+   "doc": "logic-core-v3/docs/admin-changelog/Admin Operaciones rdc.md",
+   "accion": "borrar",
+   "reemplazo": "Dashboard rdc.md → HISTORIAL.md",
+   "que_se_pierde": "Nada: duplicado exacto."
+  },
+  {
+   "doc": "logic-core-v3/docs/admin-changelog/ (los otros 11: Admin Completo, Chatbot, Clientes, Configuracion, Dashboard, Equipo, Inteligencia, Leads, Operaciones, Proyectos, Revision demos)",
+   "accion": "consolidado",
+   "reemplazo": "HISTORIAL, DECISIONES §E, LECCIONES y ROADMAP §5.4",
+   "que_se_pierde": "La lista de commits por lane (recuperable con git log)."
+  },
+  {
+   "doc": "logic-core-v3/docs/chatbot-deploy.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §1",
+   "que_se_pierde": "El monitoreo diario, semanal y mensual. Está desactualizado: usa /smoke (eliminado), exige CHATBOT_GOOGLE_API_KEY y supone migrate deploy en el build."
+  },
+  {
+   "doc": "logic-core-v3/docs/chatbot-qa-checklist.md",
+   "accion": "borrar",
+   "reemplazo": "OPERACIONES §9 y suites e2e",
+   "que_se_pierde": "El checklist manual del MVP."
+  },
+  {
+   "doc": "logic-core-v3/docs/chatbot-sprints.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "La lista histórica de sprints S0–S23."
+  },
+  {
+   "doc": "logic-core-v3/docs/client-portal/changelog/*.md (10)",
+   "accion": "consolidado",
+   "reemplazo": "HISTORIAL, DECISIONES D-09, LECCIONES y ROADMAP §5.4",
+   "que_se_pierde": "La tabla de verificaciones humanas pendientes de cuenta.md (457-468) si no se revisa antes."
+  },
+  {
+   "doc": "logic-core-v3/docs/client-portal/lane-inicio-explore.md, lane-inicio-sprint-log.md, relevamiento-6-secciones.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "Inventarios y logs ya superados."
+  },
+  {
+   "doc": "logic-core-v3/docs/client-portal/lane-portal-pulido-log.md",
+   "accion": "consolidado",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "El detalle del batch 2."
+  },
+  {
+   "doc": "logic-core-v3/docs/client-portal/relevamiento-global.md",
+   "accion": "consolidado",
+   "reemplazo": "ROADMAP §5.4 y a_decidir (rol CLIENT)",
+   "que_se_pierde": "El relevamiento completo de junio fuera de §7."
+  },
+  {
+   "doc": "logic-core-v3/docs/consolidacion-planoA-runtime.md",
+   "accion": "consolidado",
+   "reemplazo": "ROADMAP §5.2",
+   "que_se_pierde": "El cruce de duplicados entre fuentes y 6 decisiones abiertas (103-110)."
+  },
+  {
+   "doc": "logic-core-v3/docs/demo-guion.md",
+   "accion": "borrar",
+   "reemplazo": "VISION.md",
+   "que_se_pierde": "Un guion de mayo desactualizado. Tiene credenciales en texto plano (15-16): rotarlas si son reales."
+  },
+  {
+   "doc": "logic-core-v3/docs/env-vars.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §6",
+   "que_se_pierde": "La matriz por estado; le faltan 11 variables que sí están en .env.example."
+  },
+  {
+   "doc": "logic-core-v3/docs/ev4-transcripts/*.md (8) y docs/ev5-transcripts/*.md (2)",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "Evidencia puntual de junio (4 transcripts son HTTP 404) y el comando scripts/ev4-smoke.mjs."
+  },
+  {
+   "doc": "logic-core-v3/docs/impeccable-baseline.json",
+   "accion": "mantener",
+   "reemplazo": "Dato referenciado desde DISENO §1.1",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "logic-core-v3/docs/impeccable-baseline.md",
+   "accion": "consolidado",
+   "reemplazo": "DISENO §1.1",
+   "que_se_pierde": "La lectura detallada por categoría."
+  },
+  {
+   "doc": "logic-core-v3/docs/leados-alta-setter.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §9.6 y DECISIONES D-65",
+   "que_se_pierde": "Los comandos de alta. Contiene una contraseña QA en texto plano (:25)."
+  },
+  {
+   "doc": "logic-core-v3/docs/manual-usuario/00-INDICE.md a 13-cierres.md (14 capítulos)",
+   "accion": "mantener",
+   "reemplazo": "Manual del setter; regenerar (desfasado por P11)",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "logic-core-v3/docs/manual-usuario/metodo-creacion-md-capacitacion.md, galeria/INDICE.md, galeria/.gitignore",
+   "accion": "mantener",
+   "reemplazo": "Norma de redacción del manual y galería generada",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "logic-core-v3/docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md, BACHES-RE-VERIFICADOS.md, HALLAZGOS-MANUAL-v3.md, VALIDACION-PODA.md",
+   "accion": "consolidado",
+   "reemplazo": "ROADMAP §5.3 y LEADOS §5",
+   "que_se_pierde": "La evidencia detallada por bache y el veredicto de la poda (VALIDACION-PODA:17-28)."
+  },
+  {
+   "doc": "logic-core-v3/docs/manual-usuario/CORRIDA-M1-v3-FRENADA.md, HALLAZGOS-MANUAL.md, PROGRESO-M1.md, galeria/PROGRESO.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "Registros de corrida ya cerrados y la versión pre-poda de los hallazgos."
+  },
+  {
+   "doc": "logic-core-v3/docs/metodo/LECCIONES-LEADOS.md",
+   "accion": "consolidado",
+   "reemplazo": "LECCIONES.md",
+   "que_se_pierde": "La evidencia (commit o línea de bitácora) detrás de cada regla."
+  },
+  {
+   "doc": "logic-core-v3/docs/metodo/MAPA-LEADOS.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS §3 y ARQUITECTURA §4",
+   "que_se_pierde": "El mapa completo de capas y la derivación de pantallas (ya stale según verificacion-arranque:383)."
+  },
+  {
+   "doc": "logic-core-v3/docs/metodo/PROGRESO-D1.md",
+   "accion": "borrar",
+   "reemplazo": "—",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "logic-core-v3/docs/metodo/PROPUESTA-CIMIENTO.md",
+   "accion": "consolidado",
+   "reemplazo": "LECCIONES §8 y a_decidir (dónde vive el método)",
+   "que_se_pierde": "Las propuestas M-01 a M-21 que Franco no incorporó (no se sabe cuáles)."
+  },
+  {
+   "doc": "logic-core-v3/docs/motor-whatsapp/bitacora.md",
+   "accion": "consolidado",
+   "reemplazo": "ARQUITECTURA §6 y DECISIONES D-43",
+   "que_se_pierde": "Las decisiones de diseño del helper de aislamiento (110-150) en detalle y los pendientes del motor (683)."
+  },
+  {
+   "doc": "logic-core-v3/docs/netlify-env-vars.md",
+   "accion": "borrar",
+   "reemplazo": "OPERACIONES §6",
+   "que_se_pierde": "Nada nuevo; su :29 sobre Resend está en a_decidir."
+  },
+  {
+   "doc": "logic-core-v3/docs/onboarding-data-connections.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §9.7",
+   "que_se_pierde": "El troubleshooting y el setup inicial de la service account (80-112)."
+  },
+  {
+   "doc": "logic-core-v3/docs/onboarding-flow.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "El análisis del redirect loop de /bienvenida de abril (vigencia dudosa)."
+  },
+  {
+   "doc": "logic-core-v3/docs/onboarding-modulo-agenda.md",
+   "accion": "consolidado",
+   "reemplazo": "VISION §4.3 y OPERACIONES §9.8",
+   "que_se_pierde": "El setup del módulo sobre Cal.com Cloud, que hoy no funciona (v1 apagada)."
+  },
+  {
+   "doc": "logic-core-v3/docs/operations/00-entornos.md, 01-onboarding-cliente.md, 02-activar-bot.md, 03-editar-kb.md, 04-responder-alerta.md, 05-cliente-no-anda.md, 06-instalar-widget.md, README.md, alerts-types.md, cron-jobs.md, sentry-setup.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §2, §4, §8 y §9",
+   "que_se_pierde": "Las plantillas de mensajes al cliente y los pitfalls detallados de cada runbook."
+  },
+  {
+   "doc": "logic-core-v3/docs/operations/neon-backups.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §3",
+   "que_se_pierde": "El setup inicial paso a paso (60-109). Expone el ID del endpoint Neon (80-81), que no es credencial."
+  },
+  {
+   "doc": "logic-core-v3/docs/operations/b14-deploy-checklist.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES y ROADMAP §3",
+   "que_se_pierde": "El checklist de 7 fases de salida a prod."
+  },
+  {
+   "doc": "logic-core-v3/docs/privacidad-afirmaciones-cliente.md",
+   "accion": "consolidado",
+   "reemplazo": "SEGURIDAD-Y-PRIVACIDAD §1",
+   "que_se_pierde": "Nada: se traslada casi completo."
+  },
+  {
+   "doc": "logic-core-v3/docs/releases/v1.0.0.md",
+   "accion": "consolidado",
+   "reemplazo": "HISTORIAL §2 y a_decidir (versión)",
+   "que_se_pierde": "La foto de v1.0 y la lista de lo que no entró."
+  },
+  {
+   "doc": "logic-core-v3/docs/smoke-report.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL y LECCIONES #2",
+   "que_se_pierde": "El análisis del incidente de drift, ya resuelto con la migración 20260622120000."
+  },
+  {
+   "doc": "logic-core-v3/docs/sprint-alpha-3-kb-editor.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "Los pendientes de Alpha.3 (historial persistente, tiktoken)."
+  },
+  {
+   "doc": "logic-core-v3/docs/testing-strategy.md",
+   "accion": "consolidado",
+   "reemplazo": "OPERACIONES §7",
+   "que_se_pierde": "La matriz de cobertura de mayo, que no menciona invariantes ni test:leados ni test:setter."
+  },
+  {
+   "doc": "logic-core-v3/docs/v1.0-smoke-test-checklist.md",
+   "accion": "borrar",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "Nada vigente."
+  },
+  {
+   "doc": "logic-core-v3/docs/verificacion-arranque-oslead-vii.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS §2 y §5, y ROADMAP §5.3",
+   "que_se_pierde": "Los hallazgos de entorno y censo en detalle (14-77, 376-390)."
+  },
+  {
+   "doc": "logic-core-v3/docs/auditoria-2026-10/",
+   "accion": "mantener",
+   "reemplazo": "Auditoría vigente; fuente del Atlas de donde se regeneran ARQUITECTURA y ROADMAP",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "logic-core-v3/docs/_insumos/ (carpeta entera, sin trackear)",
+   "accion": "borrar",
+   "reemplazo": "Los originales siguen en el Drive; los 10 docs citan lo necesario",
+   "que_se_pierde": "Solo la copia local. Nunca se commitea: según la consigna contiene credenciales, y OSLEAD/Documento sin título.md:452 tiene un hostname de Neon dev."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md y ROADMAP-MEJORA-post-auditoria.md",
+   "accion": "consolidado",
+   "reemplazo": "ROADMAP §5.2 y DECISIONES §B",
+   "que_se_pierde": "La frontera runtime/panel en su forma original."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md",
+   "accion": "consolidado",
+   "reemplazo": "DECISIONES §B, LECCIONES y a_decidir",
+   "que_se_pierde": "Las decisiones abiertas de la sesión (retención, cuota con memoria, inventario, salud, descargo por alucinaciones) si no entran al backlog."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md",
+   "accion": "consolidado",
+   "reemplazo": "ROADMAP §5.2 y DECISIONES D-13 a D-15",
+   "que_se_pierde": "Nada si C1.1, C1.4, C2.x, C3.2 y C3.3 entran al backlog."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md",
+   "accion": "borrar",
+   "reemplazo": "ROADMAP §5.2",
+   "que_se_pierde": "Poco: repite el roadmap C."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md",
+   "accion": "consolidado",
+   "reemplazo": "LEADOS §6, ROADMAP §5.3 y a_decidir",
+   "que_se_pierde": "La especificación de los 5 prompts de refinamiento, los 15 checks y los textos del ángulo wow, que nunca se commitearon."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Work Flow/03-DESIGN-SYSTEM (1).md y 04-MAPA (1).md",
+   "accion": "mantener",
+   "reemplazo": "En el Drive hasta resolver la dirección visual (a_decidir); DISENO los cita",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Work Flow/05-PROMPT-CORTO.md",
+   "accion": "borrar",
+   "reemplazo": "04-MAPA (1).md",
+   "que_se_pierde": "Nada que no esté en 04-MAPA."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Work Flow/develOP-manual-flujo (1).md, develOP-prompts-auditoria.md, Como usar los prompts.md, Iniciar Nuevo Chat/config-ejecucion-claude-desktop.md, develOP-cimiento-chat (7) (1).md, develOP-kit-continuidad (3).md",
+   "accion": "mantener",
+   "reemplazo": "El método de Franco en el Drive; LECCIONES §8 los cita",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Work Flow/Iniciar Nuevo Chat/develOP-manual-resumido (2) (1).md",
+   "accion": "consolidado",
+   "reemplazo": "develOP-manual-flujo (1).md (Drive)",
+   "que_se_pierde": "Nada que no esté en el manual completo."
+  },
+  {
+   "doc": "docs/_insumos/drive/Franco/Work Flow/handoff-producto-develop.md y Proyecto DevelOP/Contexto/develOP-contexto-estable-v1.0.md, develOP-contexto-profundo-v1.0.md",
+   "accion": "mantener",
+   "reemplazo": "Son los que se cargan en los chats de Franco; VISION, DECISIONES y LECCIONES los resumen y citan",
+   "que_se_pierde": "Nada."
+  },
+  {
+   "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/* (11 copias) y Olme/Cliente - Registro de cambios/* (10 copias, todas salvo Portal General_)",
+   "accion": "borrar",
+   "reemplazo": "docs/admin-changelog/ y docs/client-portal/changelog/ → HISTORIAL",
+   "que_se_pierde": "Nada: solo difieren en formato."
+  },
+  {
+   "doc": "docs/_insumos/drive/Olme/Chatbot_ registro de cambios.md",
+   "accion": "consolidado",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "La única versión que une Chatbot rdc.md y lane-LOG.md."
+  },
+  {
+   "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md",
+   "accion": "consolidado",
+   "reemplazo": "HISTORIAL.md",
+   "que_se_pierde": "La versión changelog del pulido del portal (el repo solo tiene el log)."
+  },
+  {
+   "doc": "docs/_insumos/drive/Olme/Ideas de nuevas features.md",
+   "accion": "consolidado",
+   "reemplazo": "ROADMAP §5.4 y DECISIONES D-46",
+   "que_se_pierde": "La estimación de complejidad por idea."
+  },
+  {
+   "doc": "docs/_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md",
+   "accion": "consolidado",
+   "reemplazo": "HISTORIAL, LECCIONES #35, SEGURIDAD §2 y ROADMAP",
+   "que_se_pierde": "Los 7 pendientes (84-92) si no entran al backlog."
+  },
+  {
+   "doc": "docs/_insumos/drive/Recursos DevelOP.md",
+   "accion": "borrar",
+   "reemplazo": "Queda en el Drive como marcadores personales",
+   "que_se_pierde": "Solo la copia local de enlaces a herramientas de terceros."
+  }
+ ]
+}

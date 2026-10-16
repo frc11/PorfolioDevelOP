@@ -1,0 +1,3127 @@
+{
+ "run": "wf_7cfe2151-e7b",
+ "nota": "Tres extractores de docs de F6b (bitácoras, auditorías y el resto con Drive y los bloques de Franco).",
+ "parte": 2,
+ "partes": 2,
+ "items": [
+  {
+   "extractor": "resto",
+   "docs": [
+    {
+     "doc": "docs/BRIEF-VISION-FLUJO-SETTER-v3.md",
+     "tipo": "brief de visión (ley de LeadOS)",
+     "periodo": "jul-2026 (commit 2026-07-31)",
+     "resumen": "Define para qué existe el Panel del Setter (un manual que se ejecuta para producir demos en serie), sus usuarios (Toba, Peter), el recorrido demo-first en 6 etapas, las reglas inviolables y lo diferido. Es la versión corta (11 secciones) de un brief que otros docs citan con §12–§23.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V7 LEADOS-LEY",
+     "que_se_pierde": "La única ley escrita del setter que está en el repo: las reglas inviolables (§4), los criterios de rechazo (§5), lo diferido (§9) y los números de realidad (§10). Su demo-first NO está construido: el código sigue con el contacto primero."
+    },
+    {
+     "doc": "docs/HANDOFF-LEADOS-CIERRE.md",
+     "tipo": "handoff",
+     "periodo": "jul-2026 (2026-07-31)",
+     "resumen": "Punto de entrada de LeadOS al cierre de la planificación: estado de B1–B6/P3.1, mapa de 10 artefactos, 12 decisiones que dependen de Franco y 8 reglas de terreno. Plantea piloto → poda → manual → dogfooding → Toba.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V7 LEADOS-LEY (decisiones pendientes) + V3 METODO-Y-LECCIONES (reglas de terreno)",
+     "que_se_pierde": "Las decisiones que traban el demo-first (permitir link en el opener, qué significa «derivar a Franco», accesos a herramientas) y la lección «escribir el manual encuentra bugs» (:142-144)."
+    },
+    {
+     "doc": "docs/MUNICION-PROMPTS-Y-SKILL.md",
+     "tipo": "borrador de prompts",
+     "periodo": "jul-2026",
+     "resumen": "La cadena P0→P1→P2→R1–R5→U para construir demos, con modelo y esfuerzo por paso, modos de falla y economía de tokens. Tiene huecos [FRANCO] sin completar.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V7 LEADOS-LEY (sección munición)",
+     "que_se_pierde": "Los textos de los prompts y la regla «la herramienta guarda el texto del prompt y recibe el link, nada más» (:10). El código solo tiene 3 prompts en prompts-disenio.ts."
+    },
+    {
+     "doc": "docs/PILOTO-DEMO-FIRST.md",
+     "tipo": "protocolo de piloto",
+     "periodo": "jul-2026",
+     "resumen": "Protocolo de una hora para hacer una demo real con la llave «caliente» del gate, con tabla de qué anotar y 5 preguntas a contestar.",
+     "recomendacion": "borrar",
+     "reemplazo": "V5 ROADMAP-Y-BACKLOG (una línea si el piloto sigue pendiente)",
+     "que_se_pierde": "El protocolo detallado. No hay evidencia de que se haya corrido (dudoso)."
+    },
+    {
+     "doc": "docs/SPRINT-M1-MANUAL-v2.md",
+     "tipo": "prompt de sprint",
+     "periodo": "jul-2026",
+     "resumen": "Prompt autónomo para reescribir el manual del setter sobre el producto podado y validar la poda. Regla de oro: se escribe solo lo que se vio.",
+     "recomendacion": "borrar",
+     "reemplazo": "V3 METODO-Y-LECCIONES (regla de oro del manual)",
+     "que_se_pierde": "El prompt en sí; ya se corrió (existen HALLAZGOS-MANUAL-v3 y VALIDACION-PODA)."
+    },
+    {
+     "doc": "docs/admin-changelog/Admin Completo rdc.md",
+     "tipo": "registro de cierre (admin)",
+     "periodo": "jun-2026",
+     "resumen": "Panorama del admin cerrado: 4 áreas, 14 secciones, migraciones aditivas, decisiones de producto, patrones reutilizables y roadmap fuera del admin.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 HISTORIAL (+ decisiones a V2, patrones a V3)",
+     "que_se_pierde": "Las decisiones (soft+hard delete, avatar, Inteligencia mono-bot, config-design no-go) y los patrones (portal a body por backdrop-filter, Zod en .schemas.ts)."
+    },
+    {
+     "doc": "docs/admin-changelog/Admin Operaciones rdc.md",
+     "tipo": "registro (duplicado)",
+     "periodo": "jun-2026",
+     "resumen": "Registro del lane/dashboard del admin. Es idéntico a Dashboard rdc.md (diff -w = 0 líneas).",
+     "recomendacion": "borrar",
+     "reemplazo": "docs/admin-changelog/Dashboard rdc.md → V10",
+     "que_se_pierde": "Nada: es duplicado exacto."
+    },
+    {
+     "doc": "docs/admin-changelog/Chatbot rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "jun-2026",
+     "resumen": "Cierre del frente admin del chatbot: bugs de config, Select compartido, colores del widget, avatar R3F, modo offline, auditoría de Tono/Industria y P0 de Franco, con deuda y lecciones.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 HISTORIAL + V5 (deuda) + V3 (lecciones)",
+     "que_se_pierde": "La deuda de hardening fichada (CSP en Report-Only, sigue así en next.config.ts:72; 3 endpoints públicos sin rate-limit; QuickReplyChips muerto; leads consolidados) y 8 lecciones (:175-184)."
+    },
+    {
+     "doc": "docs/admin-changelog/Clientes rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "jun-2026",
+     "resumen": "Cierre de clients, tickets y messages: decisiones de borrado (soft/hard, cascade opción C), hallazgo de que OsLead no es org-owned, drift de la lane de Franco y lecciones de migración.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V2 + V3",
+     "que_se_pierde": "El hallazgo «OsLead sin organizationId» (:60) y la lección migrate deploy vs migrate dev (:77)."
+    },
+    {
+     "doc": "docs/admin-changelog/Configuracion rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "2026-06-19",
+     "resumen": "Settings y audit-log cerrados; config-design no-go por tocar ui/*. Pendientes de coordinación: writer canónico del pricing de PremiumModule, máscara del token de Telegram duplicada, leak de ZodError.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "Los pendientes inter-sector (:107-113)."
+    },
+    {
+     "doc": "docs/admin-changelog/Dashboard rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "jun-2026",
+     "resumen": "lane/dashboard del admin: código muerto, typos, labels, empties, loading, hover y animación de entrada, con hash por commit.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 HISTORIAL",
+     "que_se_pierde": "La lista de commits (recuperable con git log)."
+    },
+    {
+     "doc": "docs/admin-changelog/Equipo rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "jun-2026",
+     "resumen": "Bug de horas registradas contra el usuario equivocado (era de autorización), rediseño del display y deuda (updateTimeEntry sin guard de pertenencia).",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V3",
+     "que_se_pierde": "La lección «un bug de autorización no se delega a autoaprobación» (:67)."
+    },
+    {
+     "doc": "docs/admin-changelog/Inteligencia rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "2026-06-19",
+     "resumen": "Alertas, health y actividad del bot: decisiones de UI y deuda (filtros del lado del cliente, desalineación de buckets en getLatencyHistory).",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "La deuda de latencia (:80) y el take fijo de 250 en actividad."
+    },
+    {
+     "doc": "docs/admin-changelog/Leads rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "jun-2026",
+     "resumen": "Kanban fullscreen con drag and drop (@dnd-kit), filtros y deuda: pipelineOrder requiere schema y quedó un refactor del confirm.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "La deuda pipelineOrder (:47), que sigue sin campo en schema.prisma."
+    },
+    {
+     "doc": "docs/admin-changelog/Operaciones rdc.md",
+     "tipo": "registro transversal",
+     "periodo": "jun-2026",
+     "resumen": "El método de lanes en worktrees, los merges, las migraciones supervisadas, el drift de Franco, los episodios de entorno y las lecciones transversales del cierre del admin.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3 METODO-Y-LECCIONES + V10",
+     "que_se_pierde": "Las lecciones operativas (:63-68, :99-104): migrate status no detecta drift, npx tsc toma un binario global, worktree remove en Windows."
+    },
+    {
+     "doc": "docs/admin-changelog/Proyectos rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "jun-2026",
+     "resumen": "lane/proyectos, migración a dnd-kit y bug de proyectos internos. Deuda: updateProjectStatus global y seed develop roto.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5 + V3",
+     "que_se_pierde": "La lección «un criterio duplicado es una bomba → helper» (:82) y la deuda (:66-68)."
+    },
+    {
+     "doc": "docs/admin-changelog/Revision demos rdc.md",
+     "tipo": "registro de cierre",
+     "periodo": "jun-2026",
+     "resumen": "Revisión de demos en /admin/leados: el modal salía descentrado por el backdrop-filter, fix post-merge de decision-bar y seed sin correr.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V3",
+     "que_se_pierde": "La lección de la trampa del backdrop-filter (:82) y «OsDemo ≠ revisión de demos» (:81)."
+    },
+    {
+     "doc": "docs/b8a-changelog.md",
+     "tipo": "changelog de sprint",
+     "periodo": "2026-06-13",
+     "resumen": "Hardening de LeadOS B8A, separado en SEGURO y SENSIBLE (bypass QA, compensación de confirmarReunion), más propuestas no ejecutadas (H2/H4/H6).",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 (una línea)",
+     "que_se_pierde": "El detalle de un sprint sobre el wizard ya retirado (commit 75b9d7f3). Git lo conserva."
+    },
+    {
+     "doc": "docs/b8a-ii-changelog.md",
+     "tipo": "changelog de sprint",
+     "periodo": "2026-06-13",
+     "resumen": "B8A-II: materia prima real en Construcción y el Paso 10 deja de afirmar «Aceptó reunirse». Sin cambios sensibles.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 (una línea)",
+     "que_se_pierde": "Detalle histórico del wizard retirado."
+    },
+    {
+     "doc": "docs/b9-changelog.md",
+     "tipo": "changelog",
+     "periodo": "2026-06-13/14",
+     "resumen": "Refresh visual de LeadOS por superficie (home, wizard, admin) y fix de modal centrado por portal.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Poco: cubría el wizard de página larga, ya retirado."
+    },
+    {
+     "doc": "docs/b9-plan-visual.md",
+     "tipo": "plan visual",
+     "periodo": "2026-06-13",
+     "resumen": "Plan de refresh medio de LeadOS («alinear y jerarquizar, no agregar») con la regla de color semántico (cyan = acción).",
+     "recomendacion": "borrar",
+     "reemplazo": "V9 DISENO (regla cyan=acción, si sigue vigente)",
+     "que_se_pierde": "La tesis de color semántico de LeadOS (:28, :63)."
+    },
+    {
+     "doc": "docs/chatbot-deploy.md",
+     "tipo": "runbook de deploy",
+     "periodo": "may-2026",
+     "resumen": "Deploy del chatbot a Netlify: health, smoke, env vars, verificación post-deploy, rollback y monitoreo.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4 OPERACIONES",
+     "que_se_pierde": "Los pasos de rollback y monitoreo. Está desactualizado: usa /smoke, que fue eliminado (02a2f812), exige CHATBOT_GOOGLE_API_KEY y supone migrate deploy en el build, que netlify.toml no corre."
+    },
+    {
+     "doc": "docs/chatbot-qa-checklist.md",
+     "tipo": "checklist QA manual",
+     "periodo": "may-2026",
+     "resumen": "Checklist manual pre-deploy del widget y del admin del MVP del chatbot.",
+     "recomendacion": "borrar",
+     "reemplazo": "V4 OPERACIONES (resumen si se quiere)",
+     "que_se_pierde": "El checklist del MVP; las suites e2e lo cubren en parte."
+    },
+    {
+     "doc": "docs/chatbot-sprints.md",
+     "tipo": "tracking de sprints",
+     "periodo": "may-2026",
+     "resumen": "S0–S23 del MVP del chatbot, todos marcados [x], con issues conocidos (rate limit en memoria, cache de 60 s).",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 HISTORIAL",
+     "que_se_pierde": "La lista histórica de sprints del MVP."
+    },
+    {
+     "doc": "docs/client-portal/changelog/chatbot.md",
+     "tipo": "changelog portal",
+     "periodo": "jun-2026",
+     "resumen": "/dashboard/chatbot: fix del Decimal, config acotada del cliente, leads estilo pipeline, seed Matsu y pendientes (config completa, conversión dura, avatar con storage).",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "La lección Number() vs .toNumber() con unstable_cache (:123)."
+    },
+    {
+     "doc": "docs/client-portal/changelog/cuenta.md",
+     "tipo": "changelog portal",
+     "periodo": "jun-2026",
+     "resumen": "lane/cuenta: rediseño de Perfil, Facturación y Bóveda; bugs de password, avatar y borrado por ticket; 6 verificaciones humanas pendientes. Casi duplica logic-core-v3/CHANGELOG-cuenta.md.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "La tabla de verificaciones humanas pendientes (:457-468)."
+    },
+    {
+     "doc": "docs/client-portal/changelog/general.md",
+     "tipo": "changelog transversal",
+     "periodo": "jun-2026",
+     "resumen": "Notificaciones, cambios cross-rol en el admin, método de la ola de lanes y lecciones duras; snapshot del estado de las 9 secciones.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3 + V10",
+     "que_se_pierde": "Las lecciones (:88-110): los merges no se delegan a CC, los worktrees no comparten .env.local, los seeds los corre un humano."
+    },
+    {
+     "doc": "docs/client-portal/changelog/inicio.md",
+     "tipo": "changelog portal",
+     "periodo": "jun-2026",
+     "resumen": "Reskin de Inicio y TrendChip ocultado por dato falso. Deuda de datos: leads agency-wide, visitas en 0, centinela ↑100%.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "La deuda de datos vigente: week-results.ts:42-50 sigue contando ContactSubmission sin organizationId."
+    },
+    {
+     "doc": "docs/client-portal/changelog/mensajes.md",
+     "tipo": "changelog portal",
+     "periodo": "jun-2026",
+     "resumen": "/dashboard/messages: estética admin, altura fija, badge de no-leídos y lecciones de revalidación de RSC.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Lecciones menores de UI (:83-91)."
+    },
+    {
+     "doc": "docs/client-portal/changelog/plan.md",
+     "tipo": "changelog portal",
+     "periodo": "jun-2026",
+     "resumen": "Mi plan: reskin frosted, estado sin bot y CTA de upgrade. Pendientes: error.tsx y doble fetch.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "El pendiente «/dashboard/plan sin error.tsx», que sigue faltando en la base."
+    },
+    {
+     "doc": "docs/client-portal/changelog/proyecto.md",
+     "tipo": "changelog portal",
+     "periodo": "2026-06-25/27",
+     "resumen": "/dashboard/project: chrome, hero de progreso, switcher de proyecto múltiple y eliminar proyecto desde el admin.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Notas de merge (:48)."
+    },
+    {
+     "doc": "docs/client-portal/changelog/resultados.md",
+     "tipo": "changelog portal",
+     "periodo": "jun-2026",
+     "resumen": "Resultados (4 tabs): infraestructura _shared, decisiones D1–D6 y deuda de datos preservada con FIXME.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "La lista de deuda de datos (deltas hardcodeados, GBP en 0, CTA muerto)."
+    },
+    {
+     "doc": "docs/client-portal/changelog/servicios.md",
+     "tipo": "log/fuente de lane",
+     "periodo": "2026-06-24",
+     "resumen": "Rediseño visual de /dashboard/services con decisiones del usuario (tipografía admin, accent por módulo) y gaps.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Dos decisiones visuales (:3)."
+    },
+    {
+     "doc": "docs/client-portal/changelog/soporte.md",
+     "tipo": "changelog portal",
+     "periodo": "jun-2026",
+     "resumen": "Soporte a 3 columnas y componente compartido ClientChatThread con datos separados por rol.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10",
+     "que_se_pierde": "La nota crítica de separación de datos del chat compartido (:78)."
+    },
+    {
+     "doc": "docs/client-portal/lane-inicio-explore.md",
+     "tipo": "relevamiento de lane",
+     "periodo": "2026-06-27",
+     "resumen": "Inventario read-only de Inicio, señales sucias y plan de sprints.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Un inventario regenerable."
+    },
+    {
+     "doc": "docs/client-portal/lane-inicio-sprint-log.md",
+     "tipo": "log de sprints",
+     "periodo": "2026-06-27",
+     "resumen": "Ejecución S1–S5 de Inicio y review adversarial.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Nada que no esté en changelog/inicio.md."
+    },
+    {
+     "doc": "docs/client-portal/lane-portal-pulido-log.md",
+     "tipo": "log de lane",
+     "periodo": "2026-06-27/28",
+     "resumen": "Pulido transversal: sidebar de módulos, fullwidth, botón volver, canon de empties y batch de password.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 (junto con Drive «Portal General_»)",
+     "que_se_pierde": "El detalle del batch 2."
+    },
+    {
+     "doc": "docs/client-portal/relevamiento-6-secciones.md",
+     "tipo": "relevamiento",
+     "periodo": "2026-06-24",
+     "resumen": "Mapa de estado y ownership de 6 secciones antes de partir en lanes.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Una foto ya superada."
+    },
+    {
+     "doc": "docs/client-portal/relevamiento-global.md",
+     "tipo": "relevamiento (96 KB)",
+     "periodo": "2026-06-22",
+     "resumen": "Relevamiento del portal cliente: no era greenfield, multi-tenant sólido, chrome distinto al admin. §7 lista bloqueantes P0–P2 para Valentino.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5 + V2 (solo §7); el resto se borra",
+     "que_se_pierde": "Las decisiones abiertas (:613-674): rol CLIENT bloqueado en proxy, impersonation que no escribe, ACTIVITY_LOG falso en la Bóveda (sigue en boveda/page.tsx:53), drift de tickets, sync manual de planes."
+    },
+    {
+     "doc": "docs/consolidacion-planoA-runtime.md",
+     "tipo": "backlog consolidado",
+     "periodo": "2026-07-07/09",
+     "resumen": "Fusiona 4 fuentes (brief, bloques C, T0/MH/RB, auditoría 07-07) en 8 clusters del runtime, con lo ya hecho, el carril de seguridad y decisiones abiertas.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5 ROADMAP-Y-BACKLOG (núcleo runtime)",
+     "que_se_pierde": "El cruce de duplicados entre fuentes y 6 decisiones abiertas (:103-110)."
+    },
+    {
+     "doc": "docs/demo-guion.md",
+     "tipo": "guion de video",
+     "periodo": "2026-05-19",
+     "resumen": "Guion de demo v1.0 de 4–5 minutos (landing, dashboard cliente, admin). Tiene credenciales en texto plano en :15-16.",
+     "recomendacion": "borrar",
+     "reemplazo": "V1 IDENTIDAD-Y-OFERTA (solo si se quiere conservar el pitch)",
+     "que_se_pierde": "Un guion desactualizado (AIExecutiveBrief mock, pricing $X). Si las credenciales son reales, rotarlas."
+    },
+    {
+     "doc": "docs/design-system.md",
+     "tipo": "design system del portal",
+     "periodo": "2026-05-17",
+     "resumen": "Tokens del portal: zinc-950, glass sutil, cyan único, radios 16–24 px, motion.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V9 DISENO (sección portal)",
+     "que_se_pierde": "La referencia de tokens del portal (@/lib/design-tokens)."
+    },
+    {
+     "doc": "docs/env-vars.md",
+     "tipo": "matriz de variables",
+     "periodo": "2026-05-21",
+     "resumen": "Inventario de env vars por estado y entorno, con el leak histórico de enviroment.env y las variables zombie.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4 OPERACIONES",
+     "que_se_pierde": "La matriz. Está desactualizada: le faltan 11 variables que sí están en .env.example (ONBOARDING_SECRET_KEY, MOTOR_CHANNEL_SECRET_KEY, CRM_SECRET_KEY, EMAIL_UNSUBSCRIBE_SECRET, SEED_*_PASSWORD, QA_ALLOW_LOCALHOST, DIRECT_DATABASE_URL, MOTOR_D360_BASE_URL)."
+    },
+    {
+     "doc": "docs/ev4-transcripts/README.md",
+     "tipo": "README de evidencia",
+     "periodo": "2026-06-30",
+     "resumen": "Explica el smoke EV.4 (7 transcripts) y el gate de backfill de verticalPack. Dice «pendiente», pero los transcripts existen.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 (una línea: EV.4)",
+     "que_se_pierde": "El comando para regenerar (scripts/ev4-smoke.mjs)."
+    },
+    {
+     "doc": "docs/ev4-transcripts/agencia-1-web.md",
+     "tipo": "transcript",
+     "periodo": "2026-06-30",
+     "resumen": "Smoke del bot de agencia (web): 3 respuestas reales.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Evidencia puntual de junio."
+    },
+    {
+     "doc": "docs/ev4-transcripts/agencia-2-chatbot-ia.md",
+     "tipo": "transcript",
+     "periodo": "2026-06-30",
+     "resumen": "Smoke del bot de agencia (chatbot IA): 3 respuestas.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Evidencia puntual."
+    },
+    {
+     "doc": "docs/ev4-transcripts/agencia-3-vago.md",
+     "tipo": "transcript",
+     "periodo": "2026-06-30",
+     "resumen": "Smoke del bot de agencia (consulta vaga).",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Evidencia puntual."
+    },
+    {
+     "doc": "docs/ev4-transcripts/usados-1-comprador-caliente.md",
+     "tipo": "transcript fallido",
+     "periodo": "2026-06-30",
+     "resumen": "Los 4 turnos devuelven HTTP 404 «Bot not found or inactive».",
+     "recomendacion": "borrar",
+     "reemplazo": "ninguno",
+     "que_se_pierde": "Nada útil."
+    },
+    {
+     "doc": "docs/ev4-transcripts/usados-2-permuta.md",
+     "tipo": "transcript fallido",
+     "periodo": "2026-06-30",
+     "resumen": "HTTP 404 en todos los turnos.",
+     "recomendacion": "borrar",
+     "reemplazo": "ninguno",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/ev4-transcripts/usados-3-precio-frio.md",
+     "tipo": "transcript fallido",
+     "periodo": "2026-06-30",
+     "resumen": "HTTP 404 en todos los turnos.",
+     "recomendacion": "borrar",
+     "reemplazo": "ninguno",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/ev4-transcripts/usados-4-humano.md",
+     "tipo": "transcript fallido",
+     "periodo": "2026-06-30",
+     "resumen": "HTTP 404 en todos los turnos.",
+     "recomendacion": "borrar",
+     "reemplazo": "ninguno",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/ev5-transcripts/README.md",
+     "tipo": "README de evidencia",
+     "periodo": "2026-06-30",
+     "resumen": "Gate de EV.5: Franco lee la captura de la agencia; usados pendiente porque el bot no existe en la DB.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "El gate de cierre de EV (dudoso si se cerró)."
+    },
+    {
+     "doc": "docs/ev5-transcripts/agencia-captura.md",
+     "tipo": "transcript",
+     "periodo": "2026-06-30",
+     "resumen": "Captura de lead del bot de agencia. El bot cotiza «desde USD 800, 15 días».",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Evidencia puntual."
+    },
+    {
+     "doc": "docs/impeccable-baseline.json",
+     "tipo": "salida cruda de herramienta",
+     "periodo": "2026-07-31",
+     "resumen": "115 hallazgos del detector Impeccable v3.5.0 sobre src/.",
+     "recomendacion": "mantener",
+     "reemplazo": "artefacto de datos referenciado desde V9",
+     "que_se_pierde": "La línea base medible si se borra."
+    },
+    {
+     "doc": "docs/impeccable-baseline.md",
+     "tipo": "baseline de calidad visual",
+     "periodo": "2026-07-31",
+     "resumen": "Lectura del baseline Impeccable: 115 warnings (56 gray-on-color, 37 gradient-text, …) sobre redesign/home @c216079. Impeccable no fija dirección estética.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V9 DISENO",
+     "que_se_pierde": "Los números del baseline pre-rediseño."
+    },
+    {
+     "doc": "docs/leados-alta-setter.md",
+     "tipo": "runbook",
+     "periodo": "2026-06-12",
+     "resumen": "Alta de un usuario SETTER: solo por credentials, con passwordResetRequired, emailVerified y sin OrgMember. Tiene una contraseña QA en texto plano en :25.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4 OPERACIONES",
+     "que_se_pierde": "Las reglas duras del alta (:10-18)."
+    },
+    {
+     "doc": "docs/manual-usuario/00-INDICE.md",
+     "tipo": "manual de usuario (índice)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Recorrido completo del setter (ficha → agenda), las 3 esperas, la anatomía de pantalla y las reglas fijas (el link solo sale tras la aprobación de Franco; el setter nunca cotiza).",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A. Está desfasado por P11 (verificacion-arranque-oslead-vii.md:52-56) y hay que regenerarlo."
+    },
+    {
+     "doc": "docs/manual-usuario/01-tu-dia.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "El home del setter: foco, cartera, novedades.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A (regenerar)."
+    },
+    {
+     "doc": "docs/manual-usuario/02-la-ficha.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Cargar la ficha del negocio.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/03-la-evaluacion.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Evaluación y veredicto.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/04-el-primer-mensaje.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Opener sin link y sin precio.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/05-los-toques.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Cadencia de 3 toques y espera.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/06-decidir-la-demo.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Brief: decidir cómo va a ser la demo.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/07-construir-la-demo.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Construcción en Claude Design, 2 pasos.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/08-publicar-el-borrador.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Publicar en Netlify Drop y registrar el link.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/09-el-chequeo-final.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Self-check y envío a revisión.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/10-correcciones-de-franco.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Reentrada por rechazo.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/11-mandar-el-link.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Envío de la demo aprobada.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/12-agendar-la-reunion.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Agenda por Cal.com.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A (el tramo real de agenda está sin documentar, HALLAZGOS-MANUAL-v3 H-17)."
+    },
+    {
+     "doc": "docs/manual-usuario/13-cierres.md",
+     "tipo": "manual (capítulo)",
+     "periodo": "jul–ago 2026",
+     "resumen": "Descartes, enfriados y cierres.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER",
+     "que_se_pierde": "N/A."
+    },
+    {
+     "doc": "docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md",
+     "tipo": "registro de recorridos (69 KB)",
+     "periodo": "2026-08-11",
+     "resumen": "5 recorridos anotando «lo que hizo falta saber y la pantalla no dijo»: 22 baches.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5 ROADMAP-Y-BACKLOG (baches vivos)",
+     "que_se_pierde": "La evidencia detallada por bache."
+    },
+    {
+     "doc": "docs/manual-usuario/BACHES-RE-VERIFICADOS.md",
+     "tipo": "re-verificación",
+     "periodo": "2026-08-12",
+     "resumen": "Re-verifica los 22 baches sobre main 05ae1a87 ya podado.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5",
+     "que_se_pierde": "El estado bache por bache tras la poda."
+    },
+    {
+     "doc": "docs/manual-usuario/CORRIDA-M1-v3-FRENADA.md",
+     "tipo": "registro de freno",
+     "periodo": "2026-08-10",
+     "resumen": "La corrida M1 v3 se frenó en Fase 0 (2 de 3 condiciones fallaron).",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "El registro del terreno de ese día."
+    },
+    {
+     "doc": "docs/manual-usuario/HALLAZGOS-MANUAL-v3.md",
+     "tipo": "hallazgos",
+     "periodo": "ago-2026",
+     "resumen": "H-00 a H-17 aparecidos al escribir el manual del producto podado: herramientas sin acceso, esperas mal nombradas, Cal.com con jerga técnica, etc.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5",
+     "que_se_pierde": "Hallazgos vivos con evidencia de captura."
+    },
+    {
+     "doc": "docs/manual-usuario/HALLAZGOS-MANUAL.md",
+     "tipo": "hallazgos (histórico)",
+     "periodo": "jul-2026",
+     "resumen": "Los 18 hallazgos del manual pre-poda; el propio doc se declara histórico.",
+     "recomendacion": "borrar",
+     "reemplazo": "V5 (los vivos ya están en v3)",
+     "que_se_pierde": "La versión pre-poda."
+    },
+    {
+     "doc": "docs/manual-usuario/PROGRESO-M1.md",
+     "tipo": "progreso de corrida",
+     "periodo": "2026-08-10",
+     "resumen": "Progreso de la corrida M1 v3.",
+     "recomendacion": "borrar",
+     "reemplazo": "ninguno",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/manual-usuario/VALIDACION-PODA.md",
+     "tipo": "validación",
+     "periodo": "ago-2026",
+     "resumen": "La poda se verificó en la app viva: 9 de 9 bloques, 0 desvíos bitácora↔app, 5 de 18 hallazgos resueltos y 12 vivos.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "El veredicto de la poda (:17-28)."
+    },
+    {
+     "doc": "docs/manual-usuario/galeria/.gitignore",
+     "tipo": "config",
+     "periodo": "ago-2026",
+     "resumen": "Ignora los PNG de la galería.",
+     "recomendacion": "mantener",
+     "reemplazo": "no es doc",
+     "que_se_pierde": "Si se borra, los PNG entrarían a git."
+    },
+    {
+     "doc": "docs/manual-usuario/galeria/INDICE.md",
+     "tipo": "índice generado",
+     "periodo": "ago-2026",
+     "resumen": "Galería de estados del setter, generada por scripts/dev/m0-galeria-indice.ts.",
+     "recomendacion": "mantener",
+     "reemplazo": "V8 MANUAL-SETTER (artefacto generado)",
+     "que_se_pierde": "N/A. Su catálogo de textos quedó viejo (verificacion-arranque:440-446)."
+    },
+    {
+     "doc": "docs/manual-usuario/galeria/PROGRESO.md",
+     "tipo": "progreso de corrida",
+     "periodo": "jul-2026",
+     "resumen": "Corrida M0 de la galería, cerrada.",
+     "recomendacion": "borrar",
+     "reemplazo": "ninguno",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/manual-usuario/metodo-creacion-md-capacitacion.md",
+     "tipo": "guía de estilo",
+     "periodo": "jul-2026",
+     "resumen": "Estructura fija y checklist para escribir capítulos del manual (capa NotebookLM).",
+     "recomendacion": "consolidar",
+     "reemplazo": "V8 MANUAL-SETTER (norma de redacción)",
+     "que_se_pierde": "La plantilla de capítulo."
+    },
+    {
+     "doc": "docs/metodo/LECCIONES-LEADOS.md",
+     "tipo": "lecciones con evidencia",
+     "periodo": "2026-07-23",
+     "resumen": "20 lecciones de la remediación de LeadOS (terreno, verificación, cobertura, efectos de segundo orden, higiene, decisiones tomadas dos veces), cada una con su regla.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3 METODO-Y-LECCIONES",
+     "que_se_pierde": "La evidencia (commit o línea de bitácora) que respalda cada regla."
+    },
+    {
+     "doc": "docs/metodo/MAPA-LEADOS.md",
+     "tipo": "mapa del sistema",
+     "periodo": "2026-07-23 (HEAD 6a88cbe)",
+     "resumen": "Cómo funciona LeadOS: motor, garantías, derivación de pantallas, capas de datos y líneas rojas, con archivo:línea.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V6 ARQUITECTURA-Y-ESTADO (sección LeadOS)",
+     "que_se_pierde": "El mapa; ya está stale según verificacion-arranque:383."
+    },
+    {
+     "doc": "docs/metodo/PROGRESO-D1.md",
+     "tipo": "progreso de corrida",
+     "periodo": "2026-07-23",
+     "resumen": "Progreso de la corrida D1 (destilar el método).",
+     "recomendacion": "borrar",
+     "reemplazo": "ninguno",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/metodo/PROPUESTA-CIMIENTO.md",
+     "tipo": "propuesta de método",
+     "periodo": "2026-07-23",
+     "resumen": "21 cambios propuestos al Cimiento y al Manual (M-01..M-21): worktree por sesión, verificación honesta, invariantes, cierre de sprint.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3 METODO-Y-LECCIONES",
+     "que_se_pierde": "Las propuestas que Franco no incorporó (dudoso cuáles)."
+    },
+    {
+     "doc": "docs/motor-whatsapp/bitacora.md",
+     "tipo": "bitácora de bloque",
+     "periodo": "2026-07-06..10",
+     "resumen": "Motor WhatsApp B0-S1 a B1-S3: módulo motor, schema RLS-ready con FKs compuestas, helper único de aislamiento, adaptadores BSP 360dialog de entrada y salida, salud del canal.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V6 ARQUITECTURA-Y-ESTADO + V2 (decisiones de aislamiento)",
+     "que_se_pierde": "Las decisiones de diseño del helper de aislamiento (:110-150) y los pendientes del motor (:683)."
+    },
+    {
+     "doc": "docs/netlify-env-vars.md",
+     "tipo": "tabla de env",
+     "periodo": "2026-05-16",
+     "resumen": "Variables de Netlify: críticas, Vertex, chatbot y opcionales.",
+     "recomendacion": "borrar",
+     "reemplazo": "V4 (lo cubre env-vars.md)",
+     "que_se_pierde": "Nada nuevo; además dice que los emails van por Resend (:29), en contradicción con otros docs."
+    },
+    {
+     "doc": "docs/onboarding-data-connections.md",
+     "tipo": "runbook",
+     "periodo": "2026-05-04",
+     "resumen": "Activar GA4 y Search Console de un cliente con la service account de develOP.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4 OPERACIONES",
+     "que_se_pierde": "El procedimiento paso a paso."
+    },
+    {
+     "doc": "docs/onboarding-flow.md",
+     "tipo": "auditoría de flujo",
+     "periodo": "2026-04-27",
+     "resumen": "Flujo /bienvenida del cliente (3 pasos), triggers de redirect y TODOs.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V6 (o borrar; vigencia dudosa)",
+     "que_se_pierde": "El análisis de redirect loop."
+    },
+    {
+     "doc": "docs/onboarding-modulo-agenda.md",
+     "tipo": "runbook comercial",
+     "periodo": "2026-05-04",
+     "resumen": "Módulo Agenda Inteligente sobre Cal.com Cloud, a USD 80/mes: cuenta, event types, API key y embed.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4 + V1 (precio del módulo)",
+     "que_se_pierde": "El precio del módulo y su setup."
+    },
+    {
+     "doc": "docs/operations/00-entornos.md",
+     "tipo": "runbook de entornos",
+     "periodo": "2026-05-21",
+     "resumen": "dev/prod con Neon branching, .env y .env.local a dev, reset de dev por recreación de branch, higiene de .env.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4 OPERACIONES",
+     "que_se_pierde": "Las reglas de oro de entornos (:3, :143-148)."
+    },
+    {
+     "doc": "docs/operations/01-onboarding-cliente.md",
+     "tipo": "runbook",
+     "periodo": "may-2026",
+     "resumen": "Wizard de 5 pasos en /admin/clients/new que crea Org, User, Bot y KB y envía credenciales.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "El procedimiento de alta de cliente."
+    },
+    {
+     "doc": "docs/operations/02-activar-bot.md",
+     "tipo": "runbook",
+     "periodo": "may-2026",
+     "resumen": "Pre-flight de 6 checks y prueba antes de activar.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "La plantilla de aviso al cliente."
+    },
+    {
+     "doc": "docs/operations/03-editar-kb.md",
+     "tipo": "runbook",
+     "periodo": "may-2026",
+     "resumen": "Editar la KB con sandbox, diff y rollback vía audit log.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "El procedimiento."
+    },
+    {
+     "doc": "docs/operations/04-responder-alerta.md",
+     "tipo": "runbook",
+     "periodo": "may-2026",
+     "resumen": "Respuesta a cada tipo de alerta y escalamiento.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "Las plantillas de comunicación."
+    },
+    {
+     "doc": "docs/operations/05-cliente-no-anda.md",
+     "tipo": "runbook",
+     "periodo": "may-2026",
+     "resumen": "Triage en 3 minutos y causas por síntoma; sugiere postmortems en docs/incidents (que no existe).",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "El triage."
+    },
+    {
+     "doc": "docs/operations/06-instalar-widget.md",
+     "tipo": "runbook",
+     "periodo": "may-2026",
+     "resumen": "Instalar el widget; requiere dominios permitidos.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "El procedimiento."
+    },
+    {
+     "doc": "docs/operations/README.md",
+     "tipo": "índice",
+     "periodo": "may-2026",
+     "resumen": "Índice de workflows y quién hace qué.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/operations/alerts-types.md",
+     "tipo": "referencia",
+     "periodo": "may-2026",
+     "resumen": "9 tipos de alerta, severidad, notificación (email Brevo / Telegram) y deduplicación.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "La tabla de tipos y canales."
+    },
+    {
+     "doc": "docs/operations/b14-deploy-checklist.md",
+     "tipo": "checklist de salida",
+     "periodo": "2026-05-26",
+     "resumen": "Pasos para llevar B14 (rate-limit, backups, Sentry) a prod, el criterio para firmar v1.0.0 y lo que queda para Matsu/B2.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4 + V5",
+     "que_se_pierde": "El criterio de v1.0.0 (:325-332) y los pendientes (:293-322)."
+    },
+    {
+     "doc": "docs/operations/cron-jobs.md",
+     "tipo": "runbook",
+     "periodo": "may-2026",
+     "resumen": "Solo documenta detect-bot-issues cada 15 minutos.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "Nada. Está incompleto y ningún scheduler registra ese cron."
+    },
+    {
+     "doc": "docs/operations/neon-backups.md",
+     "tipo": "runbook de backups",
+     "periodo": "2026-05-26",
+     "resumen": "pg_dump diario por GitHub Actions cifrado con GPG y restore-test, más restauración, RTO/RPO y manejo de PII.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4 OPERACIONES (núcleo)",
+     "que_se_pierde": "El procedimiento de restauración y DR (:112-191). Expone el ID del endpoint Neon en :80-81 (no es credencial)."
+    },
+    {
+     "doc": "docs/operations/sentry-setup.md",
+     "tipo": "runbook",
+     "periodo": "may-2026",
+     "resumen": "Alert rules y env vars de Sentry.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V4",
+     "que_se_pierde": "Las alert rules."
+    },
+    {
+     "doc": "docs/privacidad-afirmaciones-cliente.md",
+     "tipo": "doc legal-técnico",
+     "periodo": "2026-08-10/11",
+     "resumen": "Qué se puede y qué no se puede afirmar a un cliente sobre los datos de sus visitantes, con respaldo técnico y checklist previo a un contrato.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V1 (promesas permitidas) + V4 (checklist)",
+     "que_se_pierde": "La frontera de promesa de privacidad (:21-89)."
+    },
+    {
+     "doc": "docs/releases/v1.0.0.md",
+     "tipo": "release notes",
+     "periodo": "2026-05-20",
+     "resumen": "Release v1.0.0 del chatbot multi-tenant: qué incluye, fixes R25, tests y lo que no entró.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 HISTORIAL",
+     "que_se_pierde": "La foto de v1.0. Contradice b14 y el handoff de julio, y no hay tag v* local (dudoso)."
+    },
+    {
+     "doc": "docs/smoke-report.md",
+     "tipo": "reporte de smoke + reconciliación",
+     "periodo": "2026-06-22",
+     "resumen": "Smoke del setter más el paquete para reconciliar el drift de migraciones (BOT_DELETED duplicado, columnas dropeadas por reconcile).",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 (una línea) + V3 (lección migrate diff)",
+     "que_se_pierde": "El análisis del incidente; ya se resolvió con la migración 20260622120000_readd_client_columns_dropped_by_reconcile."
+    },
+    {
+     "doc": "docs/sprint-alpha-3-kb-editor.md",
+     "tipo": "nota de sprint",
+     "periodo": "2026-05-17",
+     "resumen": "Editor de KB: markdown, diff, sandbox y validación heurística.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Los pendientes de Alpha.3 (historial persistente, tiktoken)."
+    },
+    {
+     "doc": "docs/testing-strategy.md",
+     "tipo": "estrategia de testing",
+     "periodo": "2026-05-18",
+     "resumen": "22 specs e2e, budgets de performance, visual regression y gaps.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3 + V4",
+     "que_se_pierde": "La matriz de cobertura. Está desactualizada: no menciona invariantes, test:leados ni test:setter."
+    },
+    {
+     "doc": "docs/v1.0-smoke-test-checklist.md",
+     "tipo": "checklist",
+     "periodo": "2026-05-20",
+     "resumen": "Smoke de v1.0: 39 passed / 10 skipped.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Nada vigente."
+    },
+    {
+     "doc": "docs/verificacion-arranque-oslead-vii.md",
+     "tipo": "verificación read-only",
+     "periodo": "2026-08-18",
+     "resumen": "El trabajo de F1–F3 estaba repartido en 4 lugares sin pushear. Además: censo real de 15 pasos, 7 censos documentados que no coinciden, galería y manual desfasados, y configuración faltante (URLs de herramientas en null, Cal.com NULL en 16 orgs).",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5 + V10",
+     "que_se_pierde": "Los hallazgos de entorno y de censo (:14-77, :376-390)."
+    },
+    {
+     "doc": "raíz:AUDITORIA-VS-BRIEF-2026-07.md",
+     "tipo": "auditoría",
+     "periodo": "2026-07-02",
+     "resumen": "LeadOS contra el brief v2: el aislamiento GATEA, con perímetro acotado; 31 hallazgos A-01..A-31 (wizard de página larga, «caliente» en el copy, etc.).",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 + V3 (veredicto de aislamiento)",
+     "que_se_pierde": "La medición del perímetro de tests de aislamiento (A-13: 2 de ~19 escrituras con test de actor cruzado), que puede seguir vigente (dudoso)."
+    },
+    {
+     "doc": "raíz:DESIGN.md",
+     "tipo": "design system del sitio público (formato Impeccable)",
+     "periodo": "2026-07-31..08-04",
+     "resumen": "«Instrumento de precisión»: monocromo cálido, Geist + Geist Mono, un acento por servicio solo sobre oscuro, sin glass ni blur, reglas con contraste medido.",
+     "recomendacion": "mantener",
+     "reemplazo": "V9 DISENO lo referencia (lo usa la herramienta Impeccable desde la raíz)",
+     "que_se_pierde": "Si se borra, la herramienta pierde su insumo y el sitio su dirección escrita."
+    },
+    {
+     "doc": "raíz:PRODUCT.md",
+     "tipo": "product schema (Impeccable)",
+     "periodo": "2026-07-31",
+     "resumen": "Alcance del sitio de marketing, usuarios, propósito (un único CTA a WhatsApp), posicionamiento, compromisos de marca y ausencias que no se deben fabricar.",
+     "recomendacion": "mantener",
+     "reemplazo": "V1 lo referencia",
+     "que_se_pierde": "Si se borra, la herramienta pierde su insumo."
+    },
+    {
+     "doc": "raíz:lane-LOG.md",
+     "tipo": "log de lane (chatbots admin)",
+     "periodo": "2026-06-17",
+     "resumen": "Lotes 1, 2 y 2.1 de /admin/chatbots: eliminar bot, convertir lead, transcript, color por ruta pendiente, avatar uploader.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 (está contenido en Drive «Olme/Chatbot_ registro de cambios»)",
+     "que_se_pierde": "La spec de resolveAccentColor (:134-142), que sigue sin cablear."
+    },
+    {
+     "doc": "raíz:lane-dashboard-log.md",
+     "tipo": "log de lane",
+     "periodo": "2026-06-14/15",
+     "resumen": "Diagnóstico y fases 1–3 del dashboard admin.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10",
+     "que_se_pierde": "Nada que no esté en Dashboard rdc.md."
+    },
+    {
+     "doc": "raíz:lane-plan-log.md",
+     "tipo": "log de lane",
+     "periodo": "2026-06-24/25",
+     "resumen": "Reskin de Mi plan; decisiones locked y pendientes.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "Nada que no esté en changelog/plan.md."
+    },
+    {
+     "doc": "raíz:lane-resultados-redesign-log.md",
+     "tipo": "log/plan de lane",
+     "periodo": "2026-06-25",
+     "resumen": "Relevamiento, plan y ejecución nocturna de Resultados, con decisiones D1–D6.",
+     "recomendacion": "borrar",
+     "reemplazo": "V10 + V5",
+     "que_se_pierde": "Nada que no esté en changelog/resultados.md."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/DERIVACION-chat-panel.md",
+     "tipo": "derivación entre chats",
+     "periodo": "2026-07-06",
+     "resumen": "Lo que el chat Chatbot le pide al chat Panel: widget «Salud del bot», copy de contadores, coordinaciones (UTM, R1, E1, firstContactedAt) y hallazgos admin.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5 ROADMAP-Y-BACKLOG",
+     "que_se_pierde": "La frontera runtime/panel y los pedidos al panel; la mayoría no está hecha."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/HANDOFF-cierre-sesion-evolucion.md",
+     "tipo": "handoff",
+     "periodo": "2026-07-06",
+     "resumen": "Cierre de la sesión de evolución del chatbot: decisiones estresadas y abiertas, descartes, pendientes y cosas a vigilar.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V2 DECISIONES + V5",
+     "que_se_pierde": "Las decisiones cerradas (:33-47), las abiertas (retención, cuota con memoria, inventario, salud, descargo por alucinaciones) y los descartes (:62-65)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/CHATBOT/ROADMAP-MEJORA-post-auditoria.md",
+     "tipo": "roadmap",
+     "periodo": "2026-07-06",
+     "resumen": "Bloques T0, MH y RB más absorciones post Auditoría III; ya fusionado en consolidacion-planoA-runtime.md.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5",
+     "que_se_pierde": "Nada, si V5 conserva MH.1, MH.3, MH.4 y A4.3, que siguen pendientes."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/HANDOFF-chatbot-arranque.md",
+     "tipo": "handoff",
+     "periodo": "2026-07",
+     "resumen": "Arranque del chat de runtime con los bloques C; repite las decisiones D-C.",
+     "recomendacion": "borrar",
+     "reemplazo": "V5 + V2",
+     "que_se_pierde": "Poco (redundante con el roadmap C)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/DASHBOARD/ROADMAP-CHATBOT-bloques-C.md",
+     "tipo": "roadmap",
+     "periodo": "2026-07-06",
+     "resumen": "C0 a C3 (que no se vea roto, economía de precio fijo, lo prometido, confianza operativa) más las decisiones D-C1 a D-C4.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5 + V2",
+     "que_se_pierde": "Los pendientes C1.1, C1.4, C2.x, C3.2 y C3.3, y la regla «build verde ≠ funciona» (:93)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Bloques a Ejecutar/OSLEAD/Documento sin título.md",
+     "tipo": "compilado de 7 reportes de agente (75 KB)",
+     "periodo": "ago-2026",
+     "resumen": "Reportes de P43 (mc2), M14 (15 checks), calibración del self-check, M1 calidad de ficha, G2 ángulo wow, F1–F4 y una auditoría adversarial (H-01..H-09). Nada de lo reportado está en 57c421bc.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5 (hallazgos y lo reportado no integrado)",
+     "que_se_pierde": "La especificación de 5 prompts de refinamiento, 15 checks y 3 textos del ángulo wow; el código nunca se commiteó. Tiene un hostname de Neon dev en :452 (no es credencial)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/03-DESIGN-SYSTEM (1).md",
+     "tipo": "design system propuesto (repo de investigación)",
+     "periodo": "2026-08-25 (borrador)",
+     "resumen": "Sistema de diseño derivado de medir nk.studio: Instrument Sans, escala fluida, color con contraste calculado y objeto de marca propuesto.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V9 (solo lo decidido; el resto se borra)",
+     "que_se_pierde": "Los cálculos de escala y contraste. No se adoptó en el código (layout.tsx usa Geist)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/04-MAPA (1).md",
+     "tipo": "LÉEME de traspaso (investigación)",
+     "periodo": "2026-08-24",
+     "resumen": "Lo decidido (canvas persistente, compuerta en 1025 px, stack con GSAP, Sanity, Instrument Sans), lo abierto y los errores propios del repo de investigación.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V9 + V2 + V3",
+     "que_se_pierde": "La tabla «errores nuestros» y la lección del instrumento (:150-171)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/05-PROMPT-CORTO.md",
+     "tipo": "prompt de inicialización",
+     "periodo": "ago-2026",
+     "resumen": "Condensado de la investigación para abrir chats de construcción del sitio v3.",
+     "recomendacion": "borrar",
+     "reemplazo": "V9",
+     "que_se_pierde": "Nada que no esté en 04-MAPA."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/Como usar los prompts.md",
+     "tipo": "cheat-sheet",
+     "periodo": "jul-2026",
+     "resumen": "Qué prompt se usa en qué chat (inicialización, reencauzar, handoff, chat-juez, auditoría de workflow).",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3",
+     "que_se_pierde": "El flujo de una idea de cero a ejecución (:18-22)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/develOP-manual-flujo (1).md",
+     "tipo": "Manual de Flujo v1.9 (96 KB)",
+     "periodo": "jun-2026",
+     "resumen": "El método completo de develOP: identidad, 5 reglas, arquitectura de 3 capas, ciclo de bloque, ritual, recursos, anatomía de instrucción, anti-patrones y glosario.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3 METODO-Y-LECCIONES",
+     "que_se_pierde": "El método entero; no está en el repo."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/develOP-prompts-auditoria.md",
+     "tipo": "prompts meta",
+     "periodo": "jul-2026",
+     "resumen": "Chat-juez de documentos (3 turnos) y auditoría de workflow contra la industria.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3 (anexo)",
+     "que_se_pierde": "Los prompts de meta-auditoría."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/handoff-producto-develop.md",
+     "tipo": "source of truth de producto",
+     "periodo": "jul-2026",
+     "resumen": "Qué se vende y a qué precio: VENDIBLE/MENCIONABLE/NO EXISTE, precios de web, chatbot y mantenimiento, descuentos, diferenciadores, objeciones, targeting y pendientes.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V1 IDENTIDAD-Y-OFERTA",
+     "que_se_pierde": "Toda la oferta comercial (precios, frontera de promesa de Peter)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/Iniciar Nuevo Chat/config-ejecucion-claude-desktop.md",
+     "tipo": "referencia de ejecución",
+     "periodo": "jul-ago 2026",
+     "resumen": "Cómo se corre Claude Code: qué modelo por tipo de trabajo, esfuerzo vs ultracode, modos de permiso, DoD y guardrails.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3",
+     "que_se_pierde": "La configuración de ejecución y la regla «guardrails estructurales, no de prompt» (:86)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/Iniciar Nuevo Chat/develOP-cimiento-chat (7) (1).md",
+     "tipo": "Cimiento (comportamiento de la IA)",
+     "periodo": "jul-2026",
+     "resumen": "Rol, ley fundamental, ritual de planificación, 5 reglas no negociables, patrones de criterio y modelo, esfuerzo y comandos.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3",
+     "que_se_pierde": "La base de toda conversación de planificación."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/Iniciar Nuevo Chat/develOP-kit-continuidad (3).md",
+     "tipo": "kit de continuidad",
+     "periodo": "jul-2026",
+     "resumen": "Prompts de inicialización y de finalización (handoff) de chats de planificación.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3",
+     "que_se_pierde": "La plantilla de handoff."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/Iniciar Nuevo Chat/develOP-manual-resumido (2) (1).md",
+     "tipo": "resumen del manual",
+     "periodo": "jul-2026",
+     "resumen": "Glosario, registros del proyecto (bitácora, plan maestro, pendientes), recursos, memoria y anti-patrones.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V3 (o borrar si V3 lo absorbe)",
+     "que_se_pierde": "Nada que no esté en el manual completo."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/Proyecto DevelOP/Contexto/develOP-contexto-estable-v1.0.md",
+     "tipo": "contexto estable",
+     "periodo": "2026-07-22",
+     "resumen": "Identidad, tesis comercial, mercado, arquitectura, stack, reglas absolutas, marca y workflow de develOP.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V1 IDENTIDAD-Y-OFERTA (núcleo)",
+     "que_se_pierde": "La definición canónica de develOP."
+    },
+    {
+     "doc": "docs/_insumos/drive/Franco/Work Flow/Proyecto DevelOP/Contexto/develOP-contexto-profundo-v1.0.md",
+     "tipo": "contexto profundo",
+     "periodo": "2026-07-22",
+     "resumen": "Los porqués: autopsia Matsu, posicionamiento, filosofía de producto, arquitectura, Programa Fundadores, marca, lecciones y registro anti-reproposición.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V1 + V2 (descartes §8) + V3 (§7)",
+     "que_se_pierde": "Las decisiones descartadas con su razón (:195-242) y la mecánica de Fundadores."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/ADMIN COMPLETO_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de admin-changelog/Admin Completo rdc.md; solo difiere en formato.",
+     "recomendacion": "borrar",
+     "reemplazo": "docs/admin-changelog/Admin Completo rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Clientes_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de Clientes rdc.md (difiere en 3 líneas de formato).",
+     "recomendacion": "borrar",
+     "reemplazo": "Clientes rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Configuracion_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "2026-06-19",
+     "resumen": "Copia de Configuracion rdc.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "Configuracion rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Inteligencia_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "2026-06-19",
+     "resumen": "Copia de Inteligencia rdc.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "Inteligencia rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Admin (operacion)_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de Admin Operaciones rdc.md, que a su vez es idéntico a Dashboard rdc.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "Dashboard rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Chatbot_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de Chatbot rdc.md (6 líneas de formato).",
+     "recomendacion": "borrar",
+     "reemplazo": "Chatbot rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Equipo_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de Equipo rdc.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "Equipo rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Leads_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de Leads rdc.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "Leads rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Proyectos_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de Proyectos rdc.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "Proyectos rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Operaciones/Revision Demos_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de Revision demos rdc.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "Revision demos rdc.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Admin - Registro de cambios/Transversal (operaciones)_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de Operaciones rdc.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "Operaciones rdc.md → V10/V3",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Chatbot_ registro de cambios.md",
+     "tipo": "registro consolidado (solo en Drive)",
+     "periodo": "jun-2026",
+     "resumen": "Registro consolidado del módulo Chatbots: el frente anterior (config, widget, avatar) más el lane de la 2ª tanda (eliminar bot, convertir lead, transcript, uploader). Reemplaza al registro previo.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 HISTORIAL (es la versión más completa; une Chatbot rdc.md y lane-LOG.md)",
+     "que_se_pierde": "La única versión unificada del registro de Chatbots."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Chatbot_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de client-portal/changelog/chatbot.md; cambia solo el re-wrap de líneas.",
+     "recomendacion": "borrar",
+     "reemplazo": "client-portal/changelog/chatbot.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/General_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/general.md (re-wrap).",
+     "recomendacion": "borrar",
+     "reemplazo": "general.md → V10/V3",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Inicio_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/inicio.md (re-wrap).",
+     "recomendacion": "borrar",
+     "reemplazo": "inicio.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Mensajes_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/mensajes.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "mensajes.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Mi Cuenta_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/cuenta.md (formato).",
+     "recomendacion": "borrar",
+     "reemplazo": "cuenta.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Mi Plan_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/plan.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "plan.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Mi proyecto_ registro de cambio.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/proyecto.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "proyecto.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Portal General_ registro de cambios.md",
+     "tipo": "changelog (solo en Drive)",
+     "periodo": "jun-2026",
+     "resumen": "Changelog del lane portal-pulido: sidebar de módulos, fullwidth, botón volver, empties y visor de password.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 (junto con lane-portal-pulido-log.md)",
+     "que_se_pierde": "La versión changelog del pulido; el repo solo tiene el log."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Resultados_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/resultados.md.",
+     "recomendacion": "borrar",
+     "reemplazo": "resultados.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Servicios_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/servicios.md (formato).",
+     "recomendacion": "borrar",
+     "reemplazo": "servicios.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Cliente - Registro de cambios/Soporte_ registro de cambios.md",
+     "tipo": "copia Drive",
+     "periodo": "jun-2026",
+     "resumen": "Copia de changelog/soporte.md (re-wrap).",
+     "recomendacion": "borrar",
+     "reemplazo": "soporte.md → V10",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/Ideas de nuevas features.md",
+     "tipo": "backlog de ideas",
+     "periodo": "2026-06-20",
+     "resumen": "Ideas: cerrar lead → cliente con vínculo duro, Inteligencia per-tenant, color por ruta, pipelineOrder, Route B del preloader; follow-ups chicos y deuda de consolidación.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V5 ROADMAP-Y-BACKLOG",
+     "que_se_pierde": "El backlog de features con su complejidad."
+    },
+    {
+     "doc": "docs/_insumos/drive/Olme/registro-cambios-2026-07-13-panel-PD1-PA-CO5.md",
+     "tipo": "registro (solo en Drive)",
+     "periodo": "2026-07-13",
+     "resumen": "PD-1 (cifrado AES-GCM de credenciales de la bóveda), PA (CSV anti-inyección, bulk actions), CO-5/6 (índices en prod) y el incidente de las migraciones fantasma del motor B1.",
+     "recomendacion": "consolidar",
+     "reemplazo": "V10 + V3 (regla Neon) + V5 (pendientes)",
+     "que_se_pierde": "El incidente y su regla de proceso (:66-76) y 7 pendientes (:84-92)."
+    },
+    {
+     "doc": "docs/_insumos/drive/Recursos DevelOP.md",
+     "tipo": "marcadores de recursos externos",
+     "periodo": "s/f",
+     "resumen": "Tips de uso de Claude, skills de terceros (GSAP, n8n, 3D, SEO), stacks de monitoreo y referencias de diseño. No tiene credenciales.",
+     "recomendacion": "borrar",
+     "reemplazo": "ninguno (queda en Drive como marcadores personales)",
+     "que_se_pierde": "Enlaces a herramientas de terceros; no es conocimiento propio de develOP."
+    }
+   ],
+   "decisiones": [
+    {
+     "tema": "Verticales del chatbot",
+     "decision": "Los packs verticales viven en código (git), no en DB: un vertical nuevo es un PR.",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:34; develOP-contexto-profundo-v1.0.md:60",
+     "fecha": "2026-07-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Verticales del chatbot",
+     "decision": "Secuencia de verticales: usados/concesionarias → salud (con gate de compliance) → inmobiliarias.",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:33; develOP-contexto-estable-v1.0.md:24-25",
+     "fecha": "2026-07",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Señales del lead",
+     "decision": "Dual-write de señales legacy sin fecha de salida, porque son customer-facing.",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:35",
+     "fecha": "2026-07-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "KB",
+     "decision": "La KB jamás se auto-actualiza: toda sugerencia de IA pasa por aprobación humana.",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:36; develOP-contexto-profundo-v1.0.md:54",
+     "fecha": "2026-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "WhatsApp",
+     "decision": "WhatsApp directo queda FUERA de la evolución del chatbot: bases pasivas sí, abstracciones no.",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:37; develOP-contexto-profundo-v1.0.md:205",
+     "fecha": "2026-07-06",
+     "vigente": "no"
+    },
+    {
+     "tema": "Métricas",
+     "decision": "MH (métricas honestas) es la apuesta comercial #1 y prerrequisito de R1 (ROI).",
+     "fuente": "ROADMAP-MEJORA-post-auditoria.md:3; HANDOFF-cierre-sesion-evolucion.md:39",
+     "fecha": "2026-07-06",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Conversación",
+     "decision": "Identidad persistente del visitante y cierre/timeout de conversación se diseñan juntos (E0).",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:40; develOP-contexto-profundo-v1.0.md:79",
+     "fecha": "2026-07-06",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Infra GCP",
+     "decision": "GCP en un solo proyecto; se revisa recién al cliente activo #5.",
+     "fuente": "ROADMAP-MEJORA-post-auditoria.md:50; HANDOFF-cierre-sesion-evolucion.md:41",
+     "fecha": "2026-07-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Modelos y esfuerzo",
+     "decision": "Tope Opus 4.8, Fable retirado; ultracode solo para builds arquitectónicos; nunca /loop en auditorías.",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:13,42",
+     "fecha": "2026-07-06",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Cap de conversación",
+     "decision": "Cap duro de ~40 turnos con degradación digna a WhatsApp; se renuncia a «ilimitado literal» (D-C2).",
+     "fuente": "ROADMAP-CHATBOT-bloques-C.md:13",
+     "fecha": "2026-07-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Reserva de turnos",
+     "decision": "La reserva de turnos en el chat no es del bot sino del proyecto agenda (D-C3).",
+     "fuente": "ROADMAP-CHATBOT-bloques-C.md:14",
+     "fecha": "2026-07-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Failover LLM",
+     "decision": "Failover cross-provider (Vertex→Anthropic) descartado por doble mantenimiento (D-C4).",
+     "fuente": "ROADMAP-CHATBOT-bloques-C.md:15; develOP-contexto-profundo-v1.0.md:207",
+     "fecha": "2026-07-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Orden de features C2",
+     "decision": "Orden: detección de consultas sin responder → catálogo visual → memoria del visitante (D-C1).",
+     "fuente": "ROADMAP-CHATBOT-bloques-C.md:12",
+     "fecha": "2026-07-06",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Seguridad /smoke y /health",
+     "decision": "/smoke y /health van al carril de seguridad aparte de Franco. /smoke se resolvió eliminando el endpoint; /health sigue público.",
+     "fuente": "ROADMAP-MEJORA-post-auditoria.md:5,52; consolidacion-planoA-runtime.md:35,40",
+     "fecha": "2026-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Historial del chat",
+     "decision": "El server trunca el historial a los últimos N en vez de rechazar con 400; el refinamiento queda para E2.",
+     "fuente": "ROADMAP-MEJORA-post-auditoria.md:37; consolidacion-planoA-runtime.md:60",
+     "fecha": "2026-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "onFinish",
+     "decision": "Se prefiere $transaction (atomicidad) a paralelizar los writes de onFinish.",
+     "fuente": "consolidacion-planoA-runtime.md:76",
+     "fecha": "2026-07-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Frontera de chats",
+     "decision": "Frontera de trabajo por superficie: runtime/widget/KB = chat Chatbot; /admin + /dashboard = chat Panel.",
+     "fuente": "DERIVACION-chat-panel.md:32; develOP-contexto-profundo-v1.0.md:252",
+     "fecha": "2026-07-06",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Inteligencia admin",
+     "decision": "Los paneles de Inteligencia quedan mono-bot (slug develop); el scoping per-tenant se archiva como decisión de producto.",
+     "fuente": "Admin Completo rdc.md:47; Ideas de nuevas features.md:28-32",
+     "fecha": "2026-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Borrado de cliente",
+     "decision": "Soft-delete (archivar) por defecto más hard-delete con confirmación por texto; la cascade opción C preserva los OsLead.",
+     "fuente": "Admin Completo rdc.md:45; Clientes rdc.md:51-52",
+     "fecha": "2026-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Avatar de cliente",
+     "decision": "Avatar del cliente con emoji, imagen base64 del lado del cliente e iniciales editables; sin infraestructura externa.",
+     "fuente": "Admin Completo rdc.md:46",
+     "fecha": "2026-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Editor de tema",
+     "decision": "config-design (editor de tema runtime) es no-go: obligaría a tocar ui/* y crear un modelo nuevo.",
+     "fuente": "Configuracion rdc.md:83-92; Admin Completo rdc.md:48",
+     "fecha": "2026-06-19",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Convenciones admin",
+     "decision": "Los schemas Zod van en .schemas.ts aparte de 'use server'; los modales del admin se portalean a body por el backdrop-filter.",
+     "fuente": "Admin Completo rdc.md:55-57; Leads rdc.md:72-73",
+     "fecha": "2026-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Navegación admin",
+     "decision": "En el admin siempre <Link> y router.refresh(); nunca router.push() directo ni triggerTransition().",
+     "fuente": "Admin Completo rdc.md:58",
+     "fecha": "2026-06",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "LeadOS — link de la demo",
+     "decision": "El link de la demo sale solo después de la aprobación de Franco; el opener va sin link y sin precio.",
+     "fuente": "manual-usuario/00-INDICE.md:43-51; HANDOFF-LEADOS-CIERRE.md:75",
+     "fecha": "2026-07/08",
+     "vigente": "sí"
+    },
+    {
+     "tema": "LeadOS — demo-first",
+     "decision": "El recorrido se invierte: se llega con la demo hecha y el primer contacto ya lleva el link.",
+     "fuente": "BRIEF-VISION-FLUJO-SETTER-v3.md:11,82",
+     "fecha": "2026-07-31",
+     "vigente": "no"
+    },
+    {
+     "tema": "LeadOS — agenda",
+     "decision": "Cal.com deja de ser la fuente de horarios; lo reemplaza una grilla fija declarada por Franco (DIFERIDO).",
+     "fuente": "BRIEF-VISION-FLUJO-SETTER-v3.md:147",
+     "fecha": "2026-07-31",
+     "vigente": "no"
+    },
+    {
+     "tema": "LeadOS — construcción",
+     "decision": "El Gem de diseño se reemplaza por un chat de Sonnet más Claude Design.",
+     "fuente": "BRIEF-VISION-FLUJO-SETTER-v3.md:63,146",
+     "fecha": "2026-07-31",
+     "vigente": "no"
+    },
+    {
+     "tema": "LeadOS — reglas inviolables",
+     "decision": "El precio lo habla Franco; su revisión no se automatiza; el ojo no se proceduraliza; aislamiento por setter; el motor no se toca sin premortem.",
+     "fuente": "BRIEF-VISION-FLUJO-SETTER-v3.md:100-104",
+     "fecha": "2026-07-31",
+     "vigente": "sí"
+    },
+    {
+     "tema": "LeadOS — pin",
+     "decision": "El pin ordena la cola en vez de excluir del foco (revierte la decisión 2.1a).",
+     "fuente": "LECCIONES-LEADOS.md:575-580",
+     "fecha": "2026-07 (Sprint 6.1)",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Precios — web",
+     "decision": "Página web: lista USD 1.000, piso USD 800; por debajo de 800 no se toca.",
+     "fuente": "handoff-producto-develop.md:49,155",
+     "fecha": "2026-07",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Precios — chatbot",
+     "decision": "Planes del chatbot: Starter USD 49/500 conv, Pro USD 90/3.000, Business USD 150/5.000.",
+     "fuente": "handoff-producto-develop.md:53-57; Chatbot rdc.md:130",
+     "fecha": "2026-06/07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Oferta comercial",
+     "decision": "Peter vende página + chatbot; software a medida, automatizaciones y panel avanzado son solo mencionables. La oferta fundador tipo Matsu es palanca de Franco, no precio de lista.",
+     "fuente": "handoff-producto-develop.md:17-23,153-156",
+     "fecha": "2026-07",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Hosting",
+     "decision": "Deploy en Netlify; el vercel.json del repo es legado.",
+     "fuente": "develOP-contexto-estable-v1.0.md:51",
+     "fecha": "2026-07-22",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Stack",
+     "decision": "Animaciones con motion/react, nunca framer-motion.",
+     "fuente": "develOP-contexto-estable-v1.0.md:45",
+     "fecha": "2026-07-22",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Stack",
+     "decision": "NextAuth v5 beta se mantiene pinneada hasta que haya versión stable.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:99",
+     "fecha": "2026-07-22",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Aislamiento",
+     "decision": "Sin RLS: el aislamiento es por helper (forOrg / unsafeGlobalQuery), con lint estructural y golden suite. LeadOS aísla por assignedToId.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:91-93; motor-whatsapp/bitacora.md:110-150",
+     "fecha": "2026-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Backups",
+     "decision": "pg_dump diario cifrado con GPG en GitHub Actions, con restore-test automático; artifacts por 30 días.",
+     "fuente": "operations/neon-backups.md:5-8,37-43",
+     "fecha": "2026-05-26",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Migraciones",
+     "decision": "Nunca prisma migrate reset. En una DB con drift, migrate deploy con SQL a la vista; nada se aplica a la Neon compartida sin estar commiteado y pusheado.",
+     "fuente": "Operaciones rdc.md:66,103; registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:74",
+     "fecha": "2026-06/07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Diseño del sitio público",
+     "decision": "Dirección «instrumento de precisión»: Geist + Geist Mono, sin glass ni blur, acentos solo sobre oscuro.",
+     "fuente": "DESIGN.md:86-101,166-170",
+     "fecha": "2026-07-31",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Color de software",
+     "decision": "Gate 1 cerrado: software = violeta #8b5cf6 (no índigo).",
+     "fuente": "DESIGN.md:125",
+     "fecha": "2026-07/08",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Sitio público",
+     "decision": "Un solo CTA en todo el sitio: escribir por WhatsApp; sin pricing público.",
+     "fuente": "PRODUCT.md:29,41,65",
+     "fecha": "2026-07-31",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Sitio v3 (investigación)",
+     "decision": "Canvas WebGL persistente con paneles DOM encima, compuerta en 1025 px, stack con GSAP, Lenis, Sanity e Instrument Sans.",
+     "fuente": "04-MAPA (1).md:89-104",
+     "fecha": "2026-08-24",
+     "vigente": "no"
+    },
+    {
+     "tema": "Privacidad",
+     "decision": "El aviso de leads por Telegram con nombre y contacto queda como decisión de producto pendiente: mantenerlo y declararlo, o mandar solo un ID.",
+     "fuente": "privacidad-afirmaciones-cliente.md:58-66",
+     "fecha": "2026-08-11",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Portal — datos falsos",
+     "decision": "Se oculta el TrendChip porque su dato es falso; se quita «Fuente Principal: Google Ads» y no se renderiza result.error al cliente.",
+     "fuente": "client-portal/changelog/inicio.md:100; raíz:lane-resultados-redesign-log.md:130-132",
+     "fecha": "2026-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Admin — orden del kanban",
+     "decision": "El orden persistente dentro de una columna (pipelineOrder) se difiere porque toca schema.",
+     "fuente": "Leads rdc.md:47",
+     "fecha": "2026-06",
+     "vigente": "sí"
+    }
+   ],
+   "lecciones": [
+    {
+     "leccion": "Una sesión = un worktree: el índice de git, el build y los puertos son del checkout, no del archivo.",
+     "fuente": "LECCIONES-LEADOS.md:60; HANDOFF-LEADOS-CIERRE.md:100",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un fix que vive solo en el working tree no es un fix: se commitea al cerrar, incluido lo colateral.",
+     "fuente": "LECCIONES-LEADOS.md:88; Chatbot rdc.md:177",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "El exit code de un chequeo pipeado es el del pipe: se lee del proceso, sin | tail.",
+     "fuente": "LECCIONES-LEADOS.md:107; HANDOFF-LEADOS-CIERRE.md:102",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "El autorreporte del agente no es estado verificado; un bloque se da por cerrado con verificación real.",
+     "fuente": "LECCIONES-LEADOS.md:157; HANDOFF-cierre-sesion-evolucion.md:97; ROADMAP-CHATBOT-bloques-C.md:93",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Verde no es verificado: build verde ≠ funciona (C0.3 compilaba con la telemetría de costo corrupta). Hay que declarar qué prueba cada chequeo.",
+     "fuente": "LECCIONES-LEADOS.md:182; ROADMAP-CHATBOT-bloques-C.md:93; develOP-contexto-profundo-v1.0.md:180",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Antes de tocar un guard o gate sin cobertura, primero un test de caracterización.",
+     "fuente": "LECCIONES-LEADOS.md:236; HANDOFF-LEADOS-CIERRE.md:104",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Toda garantía que hoy se verifica mirando debería ser un invariante ejecutable.",
+     "fuente": "LECCIONES-LEADOS.md:291",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un test de invariante crítico se acepta recién después de verlo fallar ante un sabotaje controlado del guard.",
+     "fuente": "develOP-contexto-estable-v1.0.md:58; develOP-contexto-profundo-v1.0.md:95",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Una decisión diferida se escribe donde va a mirar el siguiente (en el comentario del código). Un pendiente que aparece tres veces se vuelve sprint o decisión explícita.",
+     "fuente": "LECCIONES-LEADOS.md:609",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Escribir el manual con honestidad encuentra bugs que ni auditorías ni tests vieron: la instrucción que no se puede escribir derecha es el bug.",
+     "fuente": "HANDOFF-LEADOS-CIERRE.md:142-144",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un backdrop-filter en un ancestro atrapa los position:fixed descendientes: se portalea a body o el blur va en un hermano.",
+     "fuente": "Revision demos rdc.md:82; client-portal/changelog/general.md:13-18; Leads rdc.md:72",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "migrate status no detecta drift estructural (sí lo detecta migrate diff --from-schema-datasource). En una DB con drift, migrate deploy con SQL manual.",
+     "fuente": "Operaciones rdc.md:66; Clientes rdc.md:77; smoke-report.md:181",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "«Model does not exist» con el modelo presente es un cliente Prisma stale: prisma generate. Se resolvió con el postinstall.",
+     "fuente": "Operaciones rdc.md:63; config-ejecucion-claude-desktop.md:92",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "npx tsc puede tomar un binario global: usar node_modules/.bin/tsc desde logic-core-v3.",
+     "fuente": "Operaciones rdc.md:64",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Nada se aplica a la Neon compartida sin estar commiteado y pusheado (incidente de migraciones fantasma del motor B1).",
+     "fuente": "registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:66-74",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "z.infer (output después del transform) usado como tipo de input causa bugs que el compilador no ve; para form-state usar z.input.",
+     "fuente": "Chatbot rdc.md:180",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Antes de editar un componente, hacer grep de montaje: varios fixes cayeron en código muerto (QuickReplyChips).",
+     "fuente": "Chatbot rdc.md:178",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Paridad config ↔ widget: todo campo de estilo se cablea en la preview Y en el widget real.",
+     "fuente": "Chatbot rdc.md:179",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Verificar el entorno antes que el código: el «preloader roto» era el reduced-motion de Windows.",
+     "fuente": "Chatbot rdc.md:183",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Una condición de negocio repetida en más de un lugar es una bomba de tiempo: va a un helper.",
+     "fuente": "Proyectos rdc.md:82",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Distinguir cambio de etiqueta visual de cambio de dato (la org develop la comparte el chatbot en producción).",
+     "fuente": "Proyectos rdc.md:83",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Los merges no se delegan a CC; los seeds y las migraciones los corre un humano. Cada worktree necesita su propio .env.local y npm install.",
+     "fuente": "client-portal/changelog/general.md:90,101,104",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "La parada obligatoria evitó un hard-delete irreversible construido sobre una premisa falsa del modelo.",
+     "fuente": "Clientes rdc.md:76",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un bug de autorización no se delega a autoaprobación: primero se define la regla de negocio.",
+     "fuente": "Equipo rdc.md:67",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "En los boundaries con unstable_cache usar Number() y no .toNumber(): el cache serializa los Decimal.",
+     "fuente": "client-portal/changelog/chatbot.md:123",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "La documentación de estado miente (una versión en STATUS que no coincidía con el tag, colores mal en CLAUDE.md): se verifica contra el repo.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:178",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Nunca diseñar una tarea para consumir cuota, y nunca /loop en auditorías: sin criterio de terminación no converge.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:185-186; HANDOFF-cierre-sesion-evolucion.md:62,86",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Verificar completitud contra el registro y no contra la memoria (E1 había quedado fuera del paquete).",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:88; develOP-contexto-profundo-v1.0.md:183",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Los números de línea de una auditoría caducan con cada bloque: se re-descubren, no se citan como verdad.",
+     "fuente": "HANDOFF-cierre-sesion-evolucion.md:87",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Caso Matsu: el cierre siempre con Franco presente, y toda promesa comercial se audita contra el código antes de firmarla.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:10-13; handoff-producto-develop.md:25",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "El instrumento casi nunca mintió; las inferencias sobre el instrumento, seguido. Medir antes de explicar un número.",
+     "fuente": "04-MAPA (1).md:166-171",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un backup que falla y se normaliza es peor que no tener backup; un backup nunca restaurado es una esperanza.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:101",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "La poda mató pantallas, pero los defectos migraron con los controles: ningún bache murió.",
+     "fuente": "verificacion-arranque-oslead-vii.md:67",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Los guardrails tienen que ser estructurales (invariantes, tests, deny rules); una regla pegada en el prompt se puede fingir.",
+     "fuente": "config-ejecucion-claude-desktop.md:86",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Lint ≠ baseline: distinguir errores nuevos de los aceptados y no perseguir patrones legítimos (hydration gates).",
+     "fuente": "Operaciones rdc.md:68",
+     "vigente": "sí"
+    }
+   ],
+   "operaciones": [
+    {
+     "tema": "Hosting",
+     "dato": "Producción en Netlify (develop-portfolio.netlify.app). Build: «npx prisma generate && npm run build», Node 22, NODE_OPTIONS --max-old-space-size=4096, plugin @netlify/plugin-nextjs.",
+     "fuente": "logic-core-v3/netlify.toml (57c421bc); chatbot-deploy.md:58; 00-entornos.md:12"
+    },
+    {
+     "tema": "Migraciones en deploy",
+     "dato": "El build de Netlify NO corre prisma migrate deploy (la build command no lo incluye). Los docs dicen que sí: hay que aplicarlas a mano contra main.",
+     "fuente": "logic-core-v3/netlify.toml; 00-entornos.md:86; chatbot-deploy.md:71-74"
+    },
+    {
+     "tema": "Crons (Netlify)",
+     "dato": "Scheduled functions: generate-insights a las 09:00 UTC diario, send-weekly-reports los lunes 12:00 UTC y cleanup-old-events a las 06:00 UTC. Llaman a /api/cron/* con CRON_SECRET.",
+     "fuente": "logic-core-v3/netlify.toml; logic-core-v3/netlify/functions/*.ts"
+    },
+    {
+     "tema": "Crons (vercel.json)",
+     "dato": "os-follow-up (12:00 diario), regenerate-briefs (lunes 10:00) y send-executive-reports (lunes 12:00) solo están en vercel.json. Con el deploy en Netlify probablemente no corren (dudoso).",
+     "fuente": "logic-core-v3/vercel.json; develOP-contexto-estable-v1.0.md:51"
+    },
+    {
+     "tema": "Crons huérfanos",
+     "dato": "detect-bot-issues (documentado cada 15 min) y alerts no están en ningún scheduler del repo.",
+     "fuente": "operations/cron-jobs.md:6; operations/alerts-types.md:5; netlify.toml/vercel.json"
+    },
+    {
+     "tema": "Auth de crons",
+     "dato": "Los crons validan CRON_SECRET (Authorization Bearer o X-Cron-Secret) y fallan cerrado si la variable falta.",
+     "fuente": "logic-core-v3/src/lib/cron/cron-secret.ts:40-44"
+    },
+    {
+     "tema": "Retención",
+     "dato": "chatbot_events se purga a los 30 días. Conversaciones, mensajes y leads no tienen retención automática.",
+     "fuente": "src/app/api/cron/cleanup-old-events/route.ts:14; privacidad-afirmaciones-cliente.md:68-72"
+    },
+    {
+     "tema": "Backups",
+     "dato": "GitHub Actions db-backup.yml diario a las 06:00 UTC: pg_dump → gzip → GPG AES256, artifact de 30 días y restore-test en Postgres 16. Secrets: BACKUP_GPG_PASSPHRASE, DIRECT_DATABASE_URL_PROD, DIRECT_DATABASE_URL_DEV.",
+     "fuente": "operations/neon-backups.md:14-43,85-92; .github/workflows/db-backup.yml:39-41,131"
+    },
+    {
+     "tema": "DR",
+     "dato": "RTO ~1 h, RPO 24 h. Escalar a Neon Launch más bucket si la DB pasa 1 GB o hay 10 o más clientes con data crítica.",
+     "fuente": "operations/neon-backups.md:178-201"
+    },
+    {
+     "tema": "Entornos",
+     "dato": "Neon branch dev (local) y main (prod). .env y .env.local apuntan ambos a dev, porque Prisma CLI lee .env. Dev se resetea recreando la branch, nunca con migrate reset.",
+     "fuente": "operations/00-entornos.md:9-19,92-103,145"
+    },
+    {
+     "tema": "Regiones",
+     "dato": "Neon en sa-east-1; Vertex en us-central1. Un único proyecto GCP para dev y prod.",
+     "fuente": "releases/v1.0.0.md:89; netlify-env-vars.md:21; 00-entornos.md:126"
+    },
+    {
+     "tema": "Credenciales (solo nombres)",
+     "dato": "DATABASE_URL, DIRECT_DATABASE_URL, AUTH_SECRET, IMPERSONATION_SECRET, NEXTAUTH_URL, NEXT_PUBLIC_APP_URL, GOOGLE_VERTEX_CREDENTIALS_JSON / GOOGLE_APPLICATION_CREDENTIALS, CHATBOT_GCP_PROJECT_ID, CHATBOT_GCP_LOCATION, CHATBOT_IP_HASH_SALT, CRON_SECRET, RESEND_API_KEY, BREVO_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, NEXT_PUBLIC_SENTRY_DSN, SENTRY_AUTH_TOKEN, ANTHROPIC_API_KEY, GOOGLE_BUSINESS_PROFILE_*, GOOGLE_SERVICE_ACCOUNT_KEY, TIENDANUBE_*, N8N_*, ONBOARDING_SECRET_KEY, MOTOR_CHANNEL_SECRET_KEY, CRM_SECRET_KEY, EMAIL_UNSUBSCRIBE_SECRET, SEED_*_PASSWORD, QA_ALLOW_LOCALHOST.",
+     "fuente": "env-vars.md (matriz); logic-core-v3/.env.example (57c421bc)"
+    },
+    {
+     "tema": "Env vars en doc",
+     "dato": "env-vars.md (2026-05-21) está desactualizado: le faltan 11 variables que sí están en .env.example.",
+     "fuente": "env-vars.md:3 vs logic-core-v3/.env.example"
+    },
+    {
+     "tema": "Salt de IP",
+     "dato": "CHATBOT_IP_HASH_SALT es obligatoria en prod (hashIp aborta sin ella); se creó en Netlify el 2026-08-11. Los hashes históricos usaron un salt público.",
+     "fuente": "src/modules/chatbot/server/config/envValidator.ts:61-65; privacidad-afirmaciones-cliente.md:85-89,99"
+    },
+    {
+     "tema": "Incidente de secret",
+     "dato": "2026-05-21: enviroment.env (con typo) estaba trackeado en el history con una API key de Google ya deshabilitada. Se patcheó .gitignore; el runbook de purga BFG está en docs/audits.",
+     "fuente": "env-vars.md:115-117; 00-entornos.md:133-139"
+    },
+    {
+     "tema": "Credenciales en docs",
+     "dato": "Contraseñas de cuentas demo/seed en texto plano: demo-guion.md:15-16 (admin y cliente, junto a la URL de prod) y leados-alta-setter.md:25 (setter QA). Los mismos valores están en README.md, STATUS.md y bitácoras. Rotar si son reales.",
+     "fuente": "demo-guion.md:15-16; leados-alta-setter.md:25"
+    },
+    {
+     "tema": "Infra expuesta",
+     "dato": "El ID del endpoint Neon dev aparece en docs de un repo público (no es credencial).",
+     "fuente": "operations/neon-backups.md:80-81; env-vars.md:128; Documento sin título.md:452"
+    },
+    {
+     "tema": "Monitoreo",
+     "dato": "Sentry tiene runbook, pero su estado real es dudoso: «hoy inactivo» y «DSN ausente en prod». Las alertas del sistema salen por email (Brevo) y Telegram según severidad.",
+     "fuente": "sentry-setup.md; privacidad-afirmaciones-cliente.md:65; consolidacion-planoA-runtime.md:24; alerts-types.md:24-32"
+    },
+    {
+     "tema": "Rate limit",
+     "dato": "B14.1 pasó a una tabla rate_limit en DB: 30 requests por origin+sessionId, la 31.ª devuelve 429. Las release notes de v1.0 dicen «in-memory 60/min por IP».",
+     "fuente": "b14-deploy-checklist.md:65-79,210-224; releases/v1.0.0.md:25"
+    },
+    {
+     "tema": "QA bypass",
+     "dato": "/api/qa/login solo funciona con el flag QA_ALLOW_LOCALHOST, host localhost y bloqueo en hosting.",
+     "fuente": "raíz:AUDITORIA-VS-BRIEF-2026-07.md:53"
+    },
+    {
+     "tema": "Cifrado de bóveda",
+     "dato": "Las credenciales de onboarding se cifran con AES-256-GCM dentro de description (enc:v1:…) con ONBOARDING_SECRET_KEY; falla duro si falta la key.",
+     "fuente": "registro-cambios-2026-07-13-panel-PD1-PA-CO5.md:8-26; src/lib/crypto/credential-cipher.ts"
+    },
+    {
+     "tema": "Onboarding de cliente",
+     "dato": "Wizard /admin/clients/new de 5 pasos: crea Org, User (password temporal con passwordResetRequired), BotConfig y KB, y envía el email.",
+     "fuente": "operations/01-onboarding-cliente.md:21-26,82-92"
+    },
+    {
+     "tema": "Alta de setter",
+     "dato": "Solo por credentials (Google crea ORG_MEMBER), con emailVerified, passwordResetRequired y sin OrgMember.",
+     "fuente": "leados-alta-setter.md:10-18"
+    },
+    {
+     "tema": "Widget",
+     "dato": "El widget requiere bot activo y dominios permitidos configurados; si no, no carga.",
+     "fuente": "operations/06-instalar-widget.md:9-15"
+    },
+    {
+     "tema": "Configuración faltante",
+     "dato": "Las 4 URLs de herramientas del setter están en null sin pantalla para cargarlas; Cal.com está NULL en las 16 orgs y nadie escribe esos campos.",
+     "fuente": "verificacion-arranque-oslead-vii.md:71-77"
+    },
+    {
+     "tema": "Producción desactualizada",
+     "dato": "Al 2026-05-26, prod servía un deploy viejo con cache CDN de ~71 días en «/».",
+     "fuente": "b14-deploy-checklist.md:12-13,315-317"
+    },
+    {
+     "tema": "Versión",
+     "dato": "package.json en 0.1.0, sin tags v* locales. Hay release notes de v1.0.0 (2026-05-20), pero en julio el handoff habla de v0.9.0-rc.1.",
+     "fuente": "logic-core-v3/package.json:3 (57c421bc); releases/v1.0.0.md:3-4; HANDOFF-cierre-sesion-evolucion.md:9"
+    },
+    {
+     "tema": "Integraciones de datos",
+     "dato": "GA4 y Search Console por service account develop-data-reader (rol Viewer); requiere GOOGLE_SERVICE_ACCOUNT_KEY.",
+     "fuente": "onboarding-data-connections.md:13-40"
+    },
+    {
+     "tema": "Módulo agenda",
+     "dato": "Agenda Inteligente sobre Cal.com Cloud individual por cliente, a USD 80/mes.",
+     "fuente": "onboarding-modulo-agenda.md:3-4"
+    },
+    {
+     "tema": "CSP",
+     "dato": "La CSP principal sigue en Report-Only; pasarla a enforcement es deuda fichada.",
+     "fuente": "logic-core-v3/next.config.ts:72 (57c421bc); Chatbot rdc.md:157"
+    },
+    {
+     "tema": "Logins operativos",
+     "dato": "Cuentas admin operativas nombradas (Franco / socio) en el README de runbooks; solo nombres de usuario.",
+     "fuente": "operations/README.md:33"
+    }
+   ],
+   "vision": [
+    {
+     "afirmacion": "develOP es una agencia de desarrollo web, IA y automatización de dos personas en Tucumán, que vende a PyMEs de Argentina y LATAM. Franco: co-fundador, técnico-comercial, cierra las ventas. Valentino: socio técnico-ejecutor.",
+     "fuente": "develOP-contexto-estable-v1.0.md:8-10; PRODUCT.md:27"
+    },
+    {
+     "afirmacion": "Hoy los ingresos vienen de sitios web premium por proyecto. La dirección estratégica es el producto productizado: chatbot multi-tenant con IA + mantenimiento web por suscripción, feature-complete y sin cliente pago en producción.",
+     "fuente": "develOP-contexto-estable-v1.0.md:13-14"
+    },
+    {
+     "afirmacion": "La web premium es el gancho; la ganancia de fondo está en los servicios (chatbot, automatizaciones, mantenimiento) y el panel.",
+     "fuente": "develOP-contexto-estable-v1.0.md:15; develOP-contexto-profundo-v1.0.md:124"
+    },
+    {
+     "afirmacion": "Posicionamiento: LLM real + servicio gestionado + precio LATAM flat, en el hueco entre el autoservicio (Cliengo, Landbot) y el enterprise de precio oculto.",
+     "fuente": "develOP-contexto-estable-v1.0.md:16; develOP-contexto-profundo-v1.0.md:19"
+    },
+    {
+     "afirmacion": "Cuatro servicios: desarrollo web, agentes/implementaciones de IA, automatización de procesos y software a medida, cada uno con su landing y su acento.",
+     "fuente": "PRODUCT.md:47-54; develOP-contexto-estable-v1.0.md:18"
+    },
+    {
+     "afirmacion": "El sitio de marketing existe para una sola cosa: que el prospecto escriba por WhatsApp para coordinar una llamada. Sin pricing público.",
+     "fuente": "PRODUCT.md:29-31,41"
+    },
+    {
+     "afirmacion": "Cliente: dueño de PyME sin perfil técnico que decide solo. Verticales: concesionarias/usados → salud privada (gate de compliance, Ley 25.326) → inmobiliarias.",
+     "fuente": "develOP-contexto-estable-v1.0.md:23-25; PRODUCT.md:17-19"
+    },
+    {
+     "afirmacion": "El diferencial casi único en el rango de precio es la detección de gaps de conocimiento (qué no supo responder el bot), que además permite a dos personas gestionar muchas KB.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:19,56"
+    },
+    {
+     "afirmacion": "El andamiaje es el producto: la calidad no sale del modelo (Gemini Flash) sino del prompt, las tools, la KB, el scoring y la evaluación.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:52; develOP-contexto-estable-v1.0.md:46"
+    },
+    {
+     "afirmacion": "Servicio gestionado: develOP gestiona la KB, que nunca se auto-actualiza; «nunca inventa» es el activo de confianza y el escudo legal (precedente Air Canada).",
+     "fuente": "develOP-contexto-estable-v1.0.md:34; develOP-contexto-profundo-v1.0.md:25"
+    },
+    {
+     "afirmacion": "El dashboard del cliente es la bandera comercial: pasar de panel de administración del servicio a panel de resultados del negocio, en idioma de dueño, sin exponer costos de IA.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:62-69"
+    },
+    {
+     "afirmacion": "Programa Fundadores: sitios premium sin costo a negocios locales seleccionados, a cambio de prueba social y presentaciones. Boutique, no volumen; regalar solo dentro del programa.",
+     "fuente": "develOP-contexto-estable-v1.0.md:17; develOP-contexto-profundo-v1.0.md:122-138"
+    },
+    {
+     "afirmacion": "Qué se vende hoy: página web premium (2–3 semanas; lista USD 1.000, piso 800) y chatbot con IA (Starter 49, Pro 90, Business 150 USD/mes más setup ~300–400, a confirmar). Software a medida, automatizaciones y panel avanzado son solo mencionables; la integración WhatsApp no se promete.",
+     "fuente": "handoff-producto-develop.md:31-58,109-112"
+    },
+    {
+     "afirmacion": "Mantenimiento web: ediciones chicas gratis desde el panel, cambio mediano desde USD 50, grande desde USD 100, correctivos incluidos. Descuentos de referido 15% y fundador 15%.",
+     "fuente": "handoff-producto-develop.md:61-71"
+    },
+    {
+     "afirmacion": "Diferenciadores declarados: transparencia, stack con SEO/GEO/AEO, páginas autogestionables, calidad de USD 3.000 a 800–1.000, panel multi-tenant con seguridad real y trato del proyecto como propio.",
+     "fuente": "handoff-producto-develop.md:92-101"
+    },
+    {
+     "afirmacion": "Marca: el criterio de calidad es «¿esto prueba que develOP vale precios premium?». Voseo rioplatense, datos por sobre adjetivos, cero jerga de agencia; restraint = premium.",
+     "fuente": "develOP-contexto-estable-v1.0.md:66-70; PRODUCT.md:62-67"
+    },
+    {
+     "afirmacion": "Integridad: no se publican testimonios, logos, métricas ni casos inventados; la falta de prueba se resuelve con especificidad.",
+     "fuente": "PRODUCT.md:75,83; develOP-contexto-profundo-v1.0.md:146"
+    },
+    {
+     "afirmacion": "Equipo de dos, no agencia de veinte: el prospecto habla con quien construye, y eso se declara como ventaja.",
+     "fuente": "PRODUCT.md:35,82"
+    },
+    {
+     "afirmacion": "LeadOS / Panel del Setter: un manual que se ejecuta para que un setter no técnico produzca demos de nivel en serie. No es CRM ni panel de métricas; saca a Franco del camino crítico sin sacar su criterio.",
+     "fuente": "BRIEF-VISION-FLUJO-SETTER-v3.md:17-27; develOP-contexto-profundo-v1.0.md:85"
+    },
+    {
+     "afirmacion": "Lección comercial Matsu: el cierre siempre con Franco presente; el setter es el paso 6, después de 2–3 cierres propios; regalar comunica necesidad y cobrar firme señala valor.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:10-15"
+    },
+    {
+     "afirmacion": "Riesgo estructural #1: Franco concentra planificación, arquitectura, verificación y curación; es punto único de falla.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:188"
+    },
+    {
+     "afirmacion": "Descartes de producto: fine-tuning por cliente, KB auto-aprendida, RAG con embeddings, multi-idioma, omnicanal, white-label tipo GoHighLevel, métricas de vanidad, mini-CRM genérico.",
+     "fuente": "develOP-contexto-profundo-v1.0.md:198-218"
+    },
+    {
+     "afirmacion": "Promesas permitidas sobre privacidad: sin PII en logs de plataforma, IP no guardada (hash con salt), aislamiento entre clientes, eventos técnicos borrados a 30 días. NO se puede afirmar que ningún tercero recibe datos ni que todo se borra.",
+     "fuente": "privacidad-afirmaciones-cliente.md:21-89"
+    }
+   ],
+   "contradicciones": [
+    {
+     "tema": "Orden del recorrido del setter",
+     "posiciones": [
+      {
+       "dice": "Demo-first: se llega con la demo hecha y el primer contacto lleva el link.",
+       "fuente": "BRIEF-VISION-FLUJO-SETTER-v3.md:11,82"
+      },
+      {
+       "dice": "Primero el mensaje sin link; la demo después de que contestan; el link solo cuando Franco aprobó.",
+       "fuente": "manual-usuario/00-INDICE.md:43-51"
+      },
+      {
+       "dice": "El código rechaza links en el opener a propósito; cambiar eso es decisión de Franco.",
+       "fuente": "HANDOFF-LEADOS-CIERRE.md:75"
+      }
+     ]
+    },
+    {
+     "tema": "WhatsApp como canal",
+     "posiciones": [
+      {
+       "dice": "WhatsApp directo queda fuera de la evolución.",
+       "fuente": "HANDOFF-cierre-sesion-evolucion.md:37"
+      },
+      {
+       "dice": "Descartado como canal: es un proyecto entero, no una feature.",
+       "fuente": "develOP-contexto-profundo-v1.0.md:205"
+      },
+      {
+       "dice": "Migrar a BSP oficial 360dialog antes del primer cliente pago.",
+       "fuente": "develOP-contexto-profundo-v1.0.md:240"
+      },
+      {
+       "dice": "Motor WhatsApp B0–B1 construido (módulo motor, webhook, schema, adaptadores 360dialog).",
+       "fuente": "motor-whatsapp/bitacora.md:17,352,468,583; src/app/api/motor/webhook/[channelToken]/route.ts"
+      },
+      {
+       "dice": "Integración WhatsApp a medias, no se promete.",
+       "fuente": "handoff-producto-develop.md:38"
+      }
+     ]
+    },
+    {
+     "tema": "Hosting y crons",
+     "posiciones": [
+      {
+       "dice": "Deploy en Netlify; vercel.json es legado.",
+       "fuente": "develOP-contexto-estable-v1.0.md:51"
+      },
+      {
+       "dice": "Guía de despliegue en Vercel con migrate deploy manual.",
+       "fuente": "logic-core-v3/DEPLOY.md:1-50"
+      },
+      {
+       "dice": "vercel.json registra 3 crons (os-follow-up, regenerate-briefs, send-executive-reports) que netlify.toml no tiene.",
+       "fuente": "logic-core-v3/vercel.json; logic-core-v3/netlify.toml"
+      }
+     ]
+    },
+    {
+     "tema": "Migraciones en el build",
+     "posiciones": [
+      {
+       "dice": "Netlify aplica migrate deploy en el build.",
+       "fuente": "operations/00-entornos.md:86; chatbot-deploy.md:71-74"
+      },
+      {
+       "dice": "La build command es solo prisma generate && npm run build.",
+       "fuente": "logic-core-v3/netlify.toml"
+      }
+     ]
+    },
+    {
+     "tema": "Cron detect-bot-issues",
+     "posiciones": [
+      {
+       "dice": "Corre cada 15 minutos.",
+       "fuente": "operations/cron-jobs.md:6; operations/alerts-types.md:5"
+      },
+      {
+       "dice": "Ningún scheduler del repo lo registra.",
+       "fuente": "logic-core-v3/netlify.toml; logic-core-v3/vercel.json"
+      }
+     ]
+    },
+    {
+     "tema": "Versión y estado de producción",
+     "posiciones": [
+      {
+       "dice": "Release v1.0.0 aprobada el 2026-05-20, primera versión estable.",
+       "fuente": "releases/v1.0.0.md:3-12"
+      },
+      {
+       "dice": "Último tag v0.9.0-rc.1; v1.0.0 solo tras 30 días de Matsu en prod.",
+       "fuente": "operations/b14-deploy-checklist.md:11,279-332"
+      },
+      {
+       "dice": "v0.9.0-rc.1, NO en producción; Matsu pinchó.",
+       "fuente": "HANDOFF-cierre-sesion-evolucion.md:9"
+      },
+      {
+       "dice": "package.json en 0.1.0 y sin tags v* locales.",
+       "fuente": "logic-core-v3/package.json:3 (57c421bc)"
+      }
+     ]
+    },
+    {
+     "tema": "Proveedor de email",
+     "posiciones": [
+      {
+       "dice": "RESEND_API_KEY para emails.",
+       "fuente": "netlify-env-vars.md:29"
+      },
+      {
+       "dice": "Las alertas usan Brevo.",
+       "fuente": "operations/alerts-types.md:31"
+      },
+      {
+       "dice": "Resend transaccional + Brevo campañas.",
+       "fuente": "develOP-contexto-estable-v1.0.md:48"
+      },
+      {
+       "dice": "Runtime = Resend, admin = Brevo; el email no-op devuelve success sin key.",
+       "fuente": "consolidacion-planoA-runtime.md:91"
+      }
+     ]
+    },
+    {
+     "tema": "Asignación de modelos y ultracode",
+     "posiciones": [
+      {
+       "dice": "Tope Opus 4.8, Fable retirado, ultracode solo en builds arquitectónicos.",
+       "fuente": "HANDOFF-cierre-sesion-evolucion.md:13,42"
+      },
+      {
+       "dice": "Correr el manual M1 v2 con Fable + ultracode.",
+       "fuente": "SPRINT-M1-MANUAL-v2.md:12"
+      },
+      {
+       "dice": "Opus ejecuta, Sonnet evalúa en paralelo, Fable audita.",
+       "fuente": "config-ejecucion-claude-desktop.md:9-14"
+      },
+      {
+       "dice": "Planificar con Opus, ejecutar con Sonnet, explorar con Haiku.",
+       "fuente": "develOP-cimiento-chat (7) (1).md:157-165"
+      },
+      {
+       "dice": "Mecánico → Sonnet 4.6 + Máx.",
+       "fuente": "consolidacion-planoA-runtime.md:47"
+      }
+     ]
+    },
+    {
+     "tema": "Dirección visual y stack del sitio público",
+     "posiciones": [
+      {
+       "dice": "Geist + Geist Mono; no se incorporan familias nuevas; sin backdrop-blur.",
+       "fuente": "DESIGN.md:166-170,291; PRODUCT.md:67"
+      },
+      {
+       "dice": "Instrument Sans, GSAP + ScrollTrigger, Sanity: decidido, no se reabre.",
+       "fuente": "04-MAPA (1).md:94-97; 05-PROMPT-CORTO.md:19-34"
+      },
+      {
+       "dice": "Dirección estética abierta (silent luxury vs instrumento de precisión).",
+       "fuente": "develOP-contexto-profundo-v1.0.md:169"
+      },
+      {
+       "dice": "El código usa Geist y no tiene gsap ni sanity en package.json.",
+       "fuente": "logic-core-v3/src/app/layout.tsx:2; logic-core-v3/package.json (57c421bc)"
+      }
+     ]
+    },
+    {
+     "tema": "Glassmorphism",
+     "posiciones": [
+      {
+       "dice": "Convención de stack: glassmorphism bg-white/[0.04] backdrop-blur-[20px].",
+       "fuente": "CLAUDE.md (raíz, Stack conventions)"
+      },
+      {
+       "dice": "Portal: dark mode con glassmorphism sutil.",
+       "fuente": "design-system.md:7"
+      },
+      {
+       "dice": "No usar backdrop-blur ni glassmorphism en ninguna superficie (sitio público).",
+       "fuente": "DESIGN.md:211,291"
+      }
+     ]
+    },
+    {
+     "tema": "Color del servicio Software",
+     "posiciones": [
+      {
+       "dice": "Software = índigo.",
+       "fuente": "PRODUCT.md:54"
+      },
+      {
+       "dice": "Gate cerrado: violeta #8b5cf6, no el índigo del brief.",
+       "fuente": "DESIGN.md:125"
+      },
+      {
+       "dice": "índigo/violeta.",
+       "fuente": "develOP-contexto-estable-v1.0.md:69"
+      }
+     ]
+    },
+    {
+     "tema": "Librería de motion",
+     "posiciones": [
+      {
+       "dice": "Stack con Framer Motion.",
+       "fuente": "CLAUDE.md (raíz, encabezado y Stack conventions)"
+      },
+      {
+       "dice": "motion/react, nunca framer-motion.",
+       "fuente": "develOP-contexto-estable-v1.0.md:45"
+      },
+      {
+       "dice": "215 archivos importan motion/react y 3 todavía importan framer-motion.",
+       "fuente": "git grep en 57c421bc (About.tsx, Portfolio.tsx, KineticText.tsx)"
+      }
+     ]
+    },
+    {
+     "tema": "Rol CLIENT",
+     "posiciones": [
+      {
+       "dice": "ORG_MEMBER / CLIENT → /dashboard/*.",
+       "fuente": "CLAUDE.md (raíz, Auth and multi-tenancy)"
+      },
+      {
+       "dice": "proxy.ts solo admite ORG_MEMBER; CLIENT es redirigido a /login.",
+       "fuente": "client-portal/relevamiento-global.md:20,625-629; src/proxy.ts:14"
+      }
+     ]
+    },
+    {
+     "tema": "Prueba social y casos",
+     "posiciones": [
+      {
+       "dice": "Existe un caso real publicable: Concesionaria San Miguel.",
+       "fuente": "develOP-contexto-profundo-v1.0.md:36"
+      },
+      {
+       "dice": "San Miguel: falta el dato medible publicable.",
+       "fuente": "handoff-producto-develop.md:147"
+      },
+      {
+       "dice": "No hay casos de estudio publicados ni testimonios verificados.",
+       "fuente": "PRODUCT.md:75"
+      },
+      {
+       "dice": "Web de USD 400 a «una concesionaria grande».",
+       "fuente": "develOP-contexto-profundo-v1.0.md:15"
+      },
+      {
+       "dice": "«El garage», cobrado USD 400.",
+       "fuente": "handoff-producto-develop.md:145"
+      }
+     ]
+    },
+    {
+     "tema": "Ediciones ilimitadas desde el panel",
+     "posiciones": [
+      {
+       "dice": "Ediciones chicas gratis e ilimitadas desde el panel.",
+       "fuente": "handoff-producto-develop.md:62"
+      },
+      {
+       "dice": "«Ediciones ilimitadas desde el panel» fue una promesa que el producto no cumple (riesgo Matsu).",
+       "fuente": "develOP-contexto-profundo-v1.0.md:13"
+      }
+     ]
+    },
+    {
+     "tema": "Política de backups",
+     "posiciones": [
+      {
+       "dice": "Respaldo y recuperación: decisión pendiente, no práctica establecida.",
+       "fuente": "develOP-manual-flujo (1).md:723"
+      },
+      {
+       "dice": "Backups diarios cifrados con restore-test implementados (B14.3).",
+       "fuente": "operations/neon-backups.md:5-8; .github/workflows/db-backup.yml"
+      }
+     ]
+    },
+    {
+     "tema": "Dónde vive el método",
+     "posiciones": [
+      {
+       "dice": "El Cimiento y el Manual de Flujo no existen en el repo.",
+       "fuente": "metodo/PROPUESTA-CIMIENTO.md:6-11"
+      },
+      {
+       "dice": "El método está en la carpeta WF/ del repo.",
+       "fuente": "develOP-contexto-estable-v1.0.md:75"
+      },
+      {
+       "dice": "No hay WF/ en 57c421bc; los documentos están en el Drive de Franco.",
+       "fuente": "git ls-tree 57c421bc; _insumos/drive/Franco/Work Flow/"
+      }
+     ]
+    },
+    {
+     "tema": "Brief del setter citado vs brief en el repo",
+     "posiciones": [
+      {
+       "dice": "Cita §9, §12, §20.1 y §21–23 del brief v3 (con los veredictos del recon).",
+       "fuente": "HANDOFF-LEADOS-CIERRE.md:36,56,81-84"
+      },
+      {
+       "dice": "El brief v3 del repo tiene 11 secciones y no tiene recon.",
+       "fuente": "BRIEF-VISION-FLUJO-SETTER-v3.md"
+      },
+      {
+       "dice": "La auditoría OSLead VII usa un brief v4 en docs/decisiones-oslead-vii que no existe en 57c421bc.",
+       "fuente": "Documento sin título.md:691"
+      }
+     ]
+    },
+    {
+     "tema": "Rol del setter en la estrategia",
+     "posiciones": [
+      {
+       "dice": "El setter es el paso 6: después de 2–3 cierres propios de Franco y un guion probado.",
+       "fuente": "develOP-contexto-profundo-v1.0.md:12; develOP-contexto-estable-v1.0.md:13"
+      },
+      {
+       "dice": "Toba (setter online) arranca apenas la herramienta esté lista.",
+       "fuente": "BRIEF-VISION-FLUJO-SETTER-v3.md:33"
+      }
+     ]
+    },
+    {
+     "tema": "Reportes OSLEAD vs código",
+     "posiciones": [
+      {
+       "dice": "P43, M14, calibración, M1 calidad, G2 y F1–F4 implementados con suites en verde.",
+       "fuente": "Documento sin título.md:1-4,322-365,427-455,477-491,580-641,643-680"
+      },
+      {
+       "dice": "Ninguno de esos símbolos está en 57c421bc ni en commit alguno (git log --all -S vacío); solo tildeUnico aparece en el WIP 506e0059 de origin/p25/rafaga-tildes.",
+       "fuente": "git log --all -S'obtenerAnguloWow' / 'ESTADO_ITEM_CHEQUEO' / 'registrarCorteFicha' (vacíos)"
+      }
+     ]
+    },
+    {
+     "tema": "Rate limit del chatbot",
+     "posiciones": [
+      {
+       "dice": "In-memory, 60 req/min por IP.",
+       "fuente": "releases/v1.0.0.md:25; chatbot-sprints.md:78"
+      },
+      {
+       "dice": "Tabla rate_limit en DB: 30 requests por origin+sessionId.",
+       "fuente": "operations/b14-deploy-checklist.md:65-79,215-224"
+      }
+     ]
+    },
+    {
+     "tema": "Sentry",
+     "posiciones": [
+      {
+       "dice": "Monitoreo de errores con scrubbing de PII, parte del rc feature-complete.",
+       "fuente": "operations/b14-deploy-checklist.md:281-283"
+      },
+      {
+       "dice": "Sentry hoy inactivo.",
+       "fuente": "privacidad-afirmaciones-cliente.md:65"
+      },
+      {
+       "dice": "Sentry DSN ausente en prod.",
+       "fuente": "consolidacion-planoA-runtime.md:24"
+      }
+     ]
+    },
+    {
+     "tema": "Smoke y API key en deploy",
+     "posiciones": [
+      {
+       "dice": "El deploy usa /api/chatbot/develop/smoke y exige CHATBOT_GOOGLE_API_KEY.",
+       "fuente": "chatbot-deploy.md:22-31,54,87-92"
+      },
+      {
+       "dice": "/smoke fue eliminado; CHATBOT_GOOGLE_API_KEY no es obligatoria (el runtime usa la service account de Vertex).",
+       "fuente": "commit 02a2f812; env-vars.md:119-120"
+      }
+     ]
+    },
+    {
+     "tema": "Estado de los transcripts EV.4",
+     "posiciones": [
+      {
+       "dice": "Los transcripts no se generaron todavía.",
+       "fuente": "ev4-transcripts/README.md:8-10"
+      },
+      {
+       "dice": "Hay 7 transcripts: los de agencia con respuestas y los de usados con HTTP 404.",
+       "fuente": "ev4-transcripts/agencia-1-web.md; ev4-transcripts/usados-4-humano.md:9"
+      }
+     ]
+    },
+    {
+     "tema": "Censo de pantallas del setter",
+     "posiciones": [
+      {
+       "dice": "Hay siete censos documentados que no coinciden: 23/20, 20, 16, 11 y 16 pantallas.",
+       "fuente": "verificacion-arranque-oslead-vii.md:376-390"
+      },
+      {
+       "dice": "En el código hay 15 pasos (PANTALLA_IDS) sobre 6 rutas.",
+       "fuente": "verificacion-arranque-oslead-vii.md:48-50"
+      }
+     ]
+    }
+   ],
+   "bloques_franco": [
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "(a) Widget «Salud del bot» en el dashboard del dueño (render de MH.4)",
+     "estado": "no empezado",
+     "evidencia": "git grep -i 'salud del bot|botHealth|visitas atendidas' en src: vacío. El health existe solo en el admin: src/app/(protected)/admin/chatbot/health/page.tsx:12 checkChatbotHealth('develop')."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "(b) Copy de contadores «conversaciones atendidas» después de MH.2",
+     "estado": "no empezado",
+     "evidencia": "git grep -i 'conversaciones atendidas': vacío. MH.2 ya descarta las conversaciones degradadas (handleChatRequest.ts:261-300), así que el cambio de semántica existe y el copy no se ajustó."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "UTM: captura (EV.2/UTM.1) y render «¿De dónde vienen mis leads?»",
+     "estado": "hecho",
+     "evidencia": "prisma/schema.prisma:1384 utmSource; conversation/resolver.ts:106; requestSchema.ts:64; src/components/dashboard/home/LeadOrigins.tsx:1,32."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "R1 reporte de ROI: input del dueño (tasa de cierre + ticket) y render",
+     "estado": "parcial",
+     "evidencia": "Hay ticket promedio (dashboard/_actions/business-profile.actions.ts:17) y estimateMoney (src/lib/dashboard/home-metrics-logic.ts:93). git grep 'calculatePotentialValue' y la tasa de cierre del dueño: vacíos."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "E1: superficie «el bot no supo responder» + aprobación de propuestas de KB",
+     "estado": "no empezado",
+     "evidencia": "git grep -i 'kbGap|KbProposal|unanswered|knowledgeGap' en src y schema.prisma: vacío."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "El panel escribe firstContactedAt / lastStatusChangeAt como insumo del decay del score",
+     "estado": "parcial",
+     "evidencia": "Se escriben en modules/chatbot/server/admin/updateLeadStatus.ts:45-46, pero el decay sigue sobre capturedAt (dashboard/chatbot/leads/page.tsx:87; api/dashboard/leads/recent/route.ts:42)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "Auditoría III: getActivityChartData trae todos los eventos de 7 días sin take",
+     "estado": "no empezado",
+     "evidencia": "modules/chatbot/server/admin/getActivityChartData.ts:12-19: findMany sin take y global (unsafeGlobalQuery con PENDIENTE-DECISIÓN en :6-11)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "Auditoría III: getLatencyHistory hace take:2000 sin orderBy",
+     "estado": "no empezado",
+     "evidencia": "modules/chatbot/server/admin/getLatencyHistory.ts:76-83: findMany con take: 2000 y sin orderBy."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "DERIVACION-chat-panel.md",
+     "item": "Render genérico de señales para un vertical no-autos",
+     "estado": "no empezado",
+     "evidencia": "git grep '\\.signals' en app/(protected)/dashboard y components/dashboard: vacío (el dato existe: schema.prisma:1477 signals Json?)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "HANDOFF-cierre-sesion-evolucion.md",
+     "item": "BLOQUE EV: packs verticales en código y backfill de verticalPack",
+     "estado": "parcial",
+     "evidencia": "Packs en src/modules/chatbot/server/verticals/packs/{base,agencia,usados}.ts; schema.prisma:1329 verticalPack @default('base'). El smoke de usados falló por bot inexistente/inactivo (ev4-transcripts/usados-*.md, HTTP 404; ev5-transcripts/README.md)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "HANDOFF-cierre-sesion-evolucion.md",
+     "item": "Q1: batería de evals (~36 escenarios, asserts + juez)",
+     "estado": "parcial",
+     "evidencia": "src/modules/chatbot/evals/{capture,client,cleanup}.ts y __tests__/q1-2.invariant.ts existen; el juez perceptual nunca corrió (consolidacion-planoA-runtime.md:27)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "HANDOFF-cierre-sesion-evolucion.md",
+     "item": "Integrar T0/MH/RB al índice de ejecución",
+     "estado": "hecho",
+     "evidencia": "Fusionado en docs/consolidacion-planoA-runtime.md:5,45-93 (backlog runtime consolidado, 2026-07-07)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "HANDOFF-cierre-sesion-evolucion.md",
+     "item": "E0: identidad persistente + cierre/timeout de conversación",
+     "estado": "no empezado",
+     "evidencia": "git grep 'endedAt|visitorId' en src/modules/chatbot: vacío."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "HANDOFF-cierre-sesion-evolucion.md",
+     "item": "Decisión abierta #1: política de retención de datos del visitante",
+     "estado": "no empezado",
+     "evidencia": "Solo se purga chatbot_events a 30 días (api/cron/cleanup-old-events/route.ts:14); privacidad-afirmaciones-cliente.md:68-72 confirma que no existe retención de conversaciones ni leads."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "HANDOFF-cierre-sesion-evolucion.md",
+     "item": "MS-E6.3: hash de IP real (la docstring «GDPR-friendly» era falsa)",
+     "estado": "hecho",
+     "evidencia": "modules/chatbot/server/config/envValidator.ts:61-65 (salt obligatorio en prod; hashIp aborta sin él); git grep -i 'GDPR' en src: vacío."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "HANDOFF-cierre-sesion-evolucion.md",
+     "item": "E3 catálogo/inventario y E4 vertical salud",
+     "estado": "no empezado",
+     "evidencia": "git grep -i 'catalog|inventory|inventario' en src/modules/chatbot: vacío; verticals/packs/ no tiene pack de salud."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "T0.1: gate a /smoke (CRON_SECRET o SUPER_ADMIN + rate limit)",
+     "estado": "hecho",
+     "evidencia": "Se resolvió eliminando el endpoint: commit 02a2f812 «deprecar el endpoint smoke publico»; git ls-tree 57c421bc src/app/api/chatbot no tiene smoke."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "T0.2: cron que llama a cleanupOldEvents",
+     "estado": "hecho",
+     "evidencia": "src/app/api/cron/cleanup-old-events/route.ts:14-23; netlify.toml [functions.\"cleanup-old-events-cron\"] a las 06:00; netlify/functions/cleanup-old-events-cron.ts."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "T0.3: tipar el any del cron + CRON_SECRET que falle cerrado",
+     "estado": "hecho",
+     "evidencia": "src/lib/cron/cron-secret.ts:40-44 (usado por cleanup, detect-bot-issues, generate-insights, send-weekly-reports); chequeo inline en os-follow-up/route.ts:154, regenerate-briefs/route.ts:19, send-executive-reports/route.ts:18, alerts/route.ts:5."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "MH.1: orderBy en buildWeeklyReport (3 sets) y en getLatencyHistory",
+     "estado": "no empezado",
+     "evidencia": "modules/chatbot/server/reports/buildWeeklyReport.ts:74-102 (take 100/500 sin orderBy); getLatencyHistory.ts:76-83."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "MH.2: no contar conversaciones degradadas + compensar el cupo si el stream muere",
+     "estado": "hecho",
+     "evidencia": "handleChatRequest.ts:261-300 (descarta la conversación nueva degradada); compensación en handleChatRequest.ts:462-527 y __tests__/onf1-reconcile.invariant.ts:41-46."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "MH.3: messageCount real + generateInsightsForBot liviano (take:50, count)",
+     "estado": "no empezado",
+     "evidencia": "chat/persistTurn.ts:447 messageCount { increment: 2 }; insights/generateInsights.ts:29-42 (take 200 con todos los mensajes) y :59 slice(0, 50) en memoria."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "MH.4: servicio «Salud del bot» por org y período",
+     "estado": "no empezado",
+     "evidencia": "git grep -i 'botHealth|attendedRate|uptime' en src/modules/chatbot: vacío."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "RB.1: P2002 como éxito en getOrCreateConversation y en capture_lead",
+     "estado": "hecho",
+     "evidencia": "modules/chatbot/server/conversation/resolver.ts:116-132; tools/captureLead.ts:560-587 (alreadyCaptured: true)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "RB.2: techo de historial del lado del server (truncar en vez de 400)",
+     "estado": "hecho",
+     "evidencia": "modules/chatbot/shared/historyPolicy.ts:31 (HISTORY_WINDOW_MESSAGES=30), :61 (HARD_CAP_MESSAGES=40); hooks/useChatbot.ts:17; chat/requestSchema.ts:44."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "RB.3: onFinish transaccional + fallback ante respuesta vacía",
+     "estado": "hecho",
+     "evidencia": "chat/persistTurn.ts:412 scope.$transaction; chat/__tests__/empty-fallback-pipeline.invariant.ts."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "EST.0 (A5.1): extraer un shell de chat común on-site/embed",
+     "estado": "no empezado",
+     "evidencia": "Siguen dos shells separados: modules/chatbot/components/chat/ChatWindow.tsx:12 y components/embed/ChatbotEmbed.tsx:14; git grep 'ChatShell': vacío."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "A1.2: unique compuesto (botConfigId, sessionId)",
+     "estado": "no empezado",
+     "evidencia": "prisma/schema.prisma:1375 sessionId String @unique (global)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "A5.2: descomponer handleChatRequest",
+     "estado": "parcial",
+     "evidencia": "persistTurn.ts fue extraído, pero handleChatRequest.ts sigue con 1.412 líneas en 57c421bc."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "A1.8: decay sobre actividad real (lastStatusChangeAt ?? capturedAt)",
+     "estado": "no empezado",
+     "evidencia": "Los callers pasan lastActivityAt: new Date(lead.capturedAt) (dashboard/chatbot/leads/page.tsx:87; api/dashboard/chatbot/leads/export/route.ts:126; lib/reports/executive-weekly/top-hot-leads.ts:108)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "A5.5/A5.6: constantes de event-types + LEAD_INTENTS unificado",
+     "estado": "parcial",
+     "evidencia": "LEAD_INTENTS unificado con HANDOFF_INTENTS (tools/captureLead.ts:32-36). Las constantes de event-types no se verificaron (dudoso)."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "A4.3: /health info-disclosure (carril de seguridad)",
+     "estado": "no empezado",
+     "evidencia": "app/api/chatbot/[slug]/health/route.ts:7-20 es público y sin auth; modules/chatbot/server/health/checkHealth.ts:35,56,81,93 devuelve error.message y el detalle de env."
+    },
+    {
+     "bloque": "CHATBOT",
+     "doc": "ROADMAP-MEJORA-post-auditoria.md",
+     "item": "A4.6: invalidación de cache multi-instancia (diferido)",
+     "estado": "no empezado",
+     "evidencia": "Diferido por diseño; TTL de 60 s documentado en chatbot-sprints.md:79. No se buscó implementación."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "HANDOFF-chatbot-arranque.md",
+     "item": "Arrancar el roadmap de runtime por C0 y dejar C3.2 cerrado antes de C2.3",
+     "estado": "parcial",
+     "evidencia": "C0.1–C0.3 hechos (ver abajo); C3.2 no empezado (schema.prisma:1375); C2.3 no empezado."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C0.1: navigate_to_page fuera de los bots de clientes",
+     "estado": "hecho",
+     "evidencia": "modules/chatbot/server/tools/getTools.ts:62-82 (TOOLS_RESTRICTED_TO_AGENCY_BOT = ['navigate_to_page'])."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C0.2: que la conversación no muera muda (ventana deslizante + slice + degradación)",
+     "estado": "hecho",
+     "evidencia": "shared/historyPolicy.ts:31,61; hooks/useChatbot.ts:17,88; chat/degradedResponse.ts:22 ('conversation_limit')."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C0.3: modelo efectivo unificado para costo y ejecución, con fallback y WARN",
+     "estado": "hecho",
+     "evidencia": "llm/resolveEffectiveModel.ts:7-21 (fallback gemini-2.5-flash); chat/persistTurn.ts:369-377 (calculateCost con effectiveModel)."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C1.1: nonce estable por conversación (HMAC) para un prefijo cacheable",
+     "estado": "no empezado",
+     "evidencia": "chat/handleChatRequest.ts:883 visitorTag = vmsg_ + randomUUID() en cada request."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C1.2: ventana de historial + caps de schema al percentil real (≤30 ítems)",
+     "estado": "parcial",
+     "evidencia": "Ventana de 30 (historyPolicy.ts:31), pero MAX_MESSAGES_SHAPE=50 y MAX_MESSAGE_CHARS=4000 (historyPolicy.ts:39,50)."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C1.3: cap duro de ~40 turnos con CTA a WhatsApp",
+     "estado": "hecho",
+     "evidencia": "shared/historyPolicy.ts:61 HARD_CAP_MESSAGES = 40; handleChatRequest.ts:46; degradedResponse.ts:22."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C1.4: medir el efecto de caché (tokensIn / cachedContentTokenCount)",
+     "estado": "no empezado",
+     "evidencia": "git grep -i 'cachedContentTokenCount|cachedTokens' en src/modules/chatbot/server: vacío."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C2.1: detección de consultas sin responder",
+     "estado": "no empezado",
+     "evidencia": "git grep -i 'unanswered|kbGap' en src/modules/chatbot: vacío."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C2.2: catálogo visual en el chat",
+     "estado": "no empezado",
+     "evidencia": "git grep -i 'catalog|show_vehicles|inventory' en src/modules/chatbot: vacío."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C2.3: memoria del visitante",
+     "estado": "no empezado",
+     "evidencia": "git grep 'visitorId|returningVisitor' en src/modules/chatbot: vacío; depende de C3.2, que no está hecho."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C3.1: corte de provider a mitad del stream (onError, no contar el turno, liberar cupo)",
+     "estado": "hecho",
+     "evidencia": "chat/handleChatRequest.ts:1046 onError; compensación de cupo en :462-527."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C3.2: sessionId compuesto + key del widget por slug",
+     "estado": "no empezado",
+     "evidencia": "prisma/schema.prisma:1375 sessionId String @unique."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C3.3: knobs que no mienten (temperature/maxOutputTokens, monthlyQuota rotulado legacy)",
+     "estado": "no empezado",
+     "evidencia": "chat/handleChatRequest.ts:952 temperature: 0.7 fijo; admin/chatbots/[botId]/tabs/ConfigTab.tsx:35-37 sigue editando temperature y monthlyQuota sin rótulo legacy."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C3.4: menos round-trips a la DB (rate-limit doble, reusar el bot, paralelizar writes)",
+     "estado": "parcial",
+     "evidencia": "Un solo checkRateLimit en handleChatRequest.ts:184 y validateOrigin en route.ts (comentario en :304); los writes de onFinish van en $transaction por decisión (consolidacion-planoA-runtime.md:76). El resto no se verificó (dudoso)."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C3.5: conversaciones huérfanas",
+     "estado": "hecho",
+     "evidencia": "chat/handleChatRequest.ts:261-300 (borrado scoped de la conversación nueva degradada)."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "C3.6: deuda del handler (persistTurn, renombrar checkQuota→readQuotaUsage)",
+     "estado": "parcial",
+     "evidencia": "chat/persistTurn.ts existe; quota/checker.ts:32 sigue llamándose checkQuota."
+    },
+    {
+     "bloque": "DASHBOARD",
+     "doc": "ROADMAP-CHATBOT-bloques-C.md",
+     "item": "Carril de seguridad: P-4 /smoke público + /health que expone internos",
+     "estado": "parcial",
+     "evidencia": "/smoke eliminado (commit 02a2f812); /health sigue público y expone detalle (health/route.ts:7-20; health/checkHealth.ts:93)."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "P43 «Refinar» (mc2): 5 prompts de refinamiento en prompts-refinamiento.ts + un tilde único",
+     "estado": "no empezado",
+     "evidencia": "En 57c421bc no existen mc2-refinar.tsx ni prompts-refinamiento.ts (git ls-tree). tildeUnico solo aparece en el checkpoint WIP 506e0059 de origin/p25/rafaga-tildes, que no es ancestro de la base."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "M14: 15 checks (5 de oficio visual), selector tripartito, «primera mirada», gate con los 10 base",
+     "estado": "no empezado",
+     "evidencia": "git log --all -S'ESTADO_ITEM_CHEQUEO' y -S'primeraMirada': vacíos. En la base, lib/leados/flow.ts:204 selfCheckAprobado exige todos los HARD_CHECKS (flow-content.ts:171)."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "Calibración del self-check: checkId en el rechazo + métrica de checks falsamente verdes",
+     "estado": "no empezado",
+     "evidencia": "git log --all -S'calcularCalibracionSelfCheck': vacío. checkId solo aparece en lib/leados/guidance-content.ts:164-168."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "M1 calidad de ficha: 4 campos nuevos, umbrales alcanzaParaDecidir/Diseñar y corte de 10 min (registrarCorteFicha)",
+     "estado": "no empezado",
+     "evidencia": "git log --all -S'registrarCorteFicha': vacío. alcanzaParaDisenar solo aparece en docs/auditorias (commit 8e6c3c3d)."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "G2: ángulo wow en m4/m15/m5 (obtenerAnguloWow, AnguloWowCard)",
+     "estado": "no empezado",
+     "evidencia": "git log --all -S'obtenerAnguloWow': vacío; AnguloWowCard solo en docs de esta auditoría."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "F1: Modal compartido con role=dialog y aria-modal",
+     "estado": "no empezado",
+     "evidencia": "git grep 'aria-modal|role=' en src/components/ui/Modal.tsx (57c421bc): vacío."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "F2: franja de conteos de la cartera (irAGrupo)",
+     "estado": "no empezado",
+     "evidencia": "git log --all -S'irAGrupo': vacío."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "F3: carga on-demand del iframe del borrador (draft-preview)",
+     "estado": "no empezado",
+     "evidencia": "git log --all -S'draft-preview': solo en docs de esta auditoría."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "F4: invariantes reforzados (REQUISITOS_CONGELADOS) + docs/barrera-rutas-ast.md",
+     "estado": "no empezado",
+     "evidencia": "git log --all -S'REQUISITOS_CONGELADOS': vacío; docs/barrera-rutas-ast.md no existe en 57c421bc."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-01: doble formulario en m6 (pegadoGem obligatorio)",
+     "estado": "no empezado",
+     "evidencia": "(setter)/_actions/dossier.schemas.ts:93 sigue exigiendo pegadoGem cuando el Gem tiene link. Las 4 vueltas no existen en la base."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-02: el trabajo del brief en m6 se pierde con F5 (autosave apagado)",
+     "estado": "no empezado",
+     "evidencia": "setter/leads/[leadId]/_components/brief-form.tsx:85 autosaveEnabled = false; :115 enabled: autosaveEnabled && briefValido."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-03: el botón fijo «Registrar evaluación» no abre el bloque con errores",
+     "estado": "no empezado",
+     "evidencia": "_components/evaluacion-form.tsx:142-171 (intentarEnviar sin acceso al acordeón); ficha-form.tsx:189 estado local abierto/setAbierto. No se ejecutó (probable)."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-04: falso verde del gate de self-check con los criterios de diseño",
+     "estado": "no empezado",
+     "evidencia": "No aplica a la base: lib/leados/flow.ts:204 exige todos los HARD_CHECKS; el falso verde era del árbol WIP. Los criterios de diseño no existen en 57c421bc."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-05: cinco tildes por prompt en mc2",
+     "estado": "no empezado",
+     "evidencia": "mc2 no existe en 57c421bc (ver P43)."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-06: m13 en RECHAZADA debe permitir cambiar el link del borrador",
+     "estado": "no empezado",
+     "evidencia": "manual/_components/m13-borrador.tsx:118-122 («Borrador congelado por el rechazo»)."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-07: control G3 «¿Exportaste después del último refinamiento?»",
+     "estado": "no empezado",
+     "evidencia": "(setter)/_actions/dossier.schemas.ts:129 solo pide confirmoCarga; git grep -i 'exportaste después': vacío."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-08: gate de decisor en el servidor para buscar horarios",
+     "estado": "no empezado",
+     "evidencia": "(setter)/_actions/agenda.schemas.ts:9-13: decisorConfirmado solo en ConfirmarReunionSchema, no en la búsqueda de horarios."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "H-09: Cal.com de LeadOS se rompe con más de una org con calComUsername",
+     "estado": "no empezado",
+     "evidencia": "src/lib/leados/agenda.ts:70-81 (si orgs.length > 1 aborta con «Hay más de una agenda conectada…»)."
+    },
+    {
+     "bloque": "OSLEAD",
+     "doc": "Documento sin título.md",
+     "item": "S7: eliminar el rótulo «CONTEXTO DEL LEAD»",
+     "estado": "no empezado",
+     "evidencia": "manual/_components/pantalla-manual.tsx:205 <Zona etiqueta=\"Contexto del lead\">."
+    }
+   ]
+  }
+ ]
+}

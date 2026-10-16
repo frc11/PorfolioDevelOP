@@ -1,0 +1,2883 @@
+{
+ "run": "wf_7cfe2151-e7b",
+ "nota": "Tres extractores de docs de F6b (bitácoras, auditorías y el resto con Drive y los bloques de Franco).",
+ "parte": 1,
+ "partes": 2,
+ "items": [
+  {
+   "extractor": "bitacoras",
+   "docs": [
+    {
+     "doc": "docs/bitacora-roadmap.md",
+     "tipo": "bitácora append-only de cierres de sprint (1436 KB, 17161 líneas, ~177 entradas ##)",
+     "periodo": "2026-05-21 → 2026-08-12 (BLOQUE CARRERAS quedó EN CURSO)",
+     "resumen": "Cierre por sprint de Logic Core v3: purga del leak (B0.6), performance, prompt del bot, planes y gating (B4), scoring/CRM/CSV (B5), reportes (B6), widget (B8), multi-tenant (B11), RC (B12), B14 (rate-limit, backups, Sentry), EV/P1–P5 del panel, INFRA/COST/crons y el runtime del stream (WATCHDOG, MUDEZ, VOZ, PRIVACIDAD, CARRERAS). Es la fuente forense más rica, pero mezcla decisiones vigentes con detalle de ejecución y duplica bitacora-beta.md:11-283 en sus líneas 10530-10802.",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo DECISIONES (solo las vigentes, con fecha) + OPERACIONES (deploy, crons, backups, env) + LECCIONES; el texto íntegro queda en la historia de git",
+     "que_se_pierde": "El detalle de ejecución (comandos, mediciones B1.x de latencia, tablas de discovery, SHAs, hallazgos fuera de scope con archivo:línea). Se recupera con git. Conservarlo tiene un costo: contiene el valor de una API key filtrada (líneas 19, 36 y 50) y passwords literales de seed (6375-6377, 7837, 10534)."
+    },
+    {
+     "doc": "docs/bitacora-beta-3.md",
+     "tipo": "bitácora de ejecución de LeadOS / Panel del Setter (944 KB, 10981 líneas, 121 entradas)",
+     "periodo": "2026-06-29 → 2026-09-06 (su último commit es la base auditada 57c421bc)",
+     "resumen": "Wizard del lead (3.x), manual paso a paso que retira al wizard (5.6), auditorías AUD-1/AUD-2/A3, remediación, poda P1–P23, gate de CI con invariantes (C1) y EL TRONCO, que reúne 25 sprints de ramas sueltas en main. Es el registro más vivo del lado setter y fija sus decisiones de producto (caliente es de Franco, cola de 5, pin que ordena).",
+     "recomendacion": "consolidar",
+     "reemplazo": "docs/metodo/MAPA-LEADOS.md (actualizado al tronco) + DECISIONES + docs/metodo/LECCIONES-LEADOS.md",
+     "que_se_pierde": "Mediciones de pliegue y alturas, censos de las 14–16 pantallas, el porqué de cada poda y los conteos de suites por fecha. Además el archivo es input de Tailwind: la línea 3647 tiene una clase arbitraria con URL que ya envenenó el build (3654, 10924-10935); borrarlo elimina ese riesgo."
+    },
+    {
+     "doc": "docs/bitacora-beta.md",
+     "tipo": "bitácora de la fase beta de LeadOS (241 KB, 1750 líneas)",
+     "periodo": "2026-06-17 → 2026-06-25",
+     "resumen": "C.0 (guard de seeds contra prod), FG-0 (chrome del setter), FG-0.5 (cabina del operador, aislamiento en isolation.ts), FG-1 (capa de guía en guidance-content.ts), FG-2.0 (laboratorio del formulario de brief, experimento sin correr) y el smoke del setter con el drift DB↔schema. Duplica bitacora-roadmap.md:10530-10802 (diff de 4 líneas) y en 1639-1728 repite los sprints 0.2/0.3 de beta-2.",
+     "recomendacion": "consolidar",
+     "reemplazo": "MAPA-LEADOS (aislamiento por assignedToId, fuente única de guía) + DECISIONES (guard de seeds) + pendientes de Franco (experimento FG-2) en ESTADO-Y-ROADMAP",
+     "que_se_pierde": "El relato de cómo se armó la cabina del setter (FG-0.5) y el protocolo del experimento FG-2, que igual vive en docs/experimentos/. Lo demás quedó superado por beta-3 (el manual reemplazó al wizard). Contiene passwords de seed literales en la línea 15."
+    },
+    {
+     "doc": "docs/bitacora-beta-2.md",
+     "tipo": "bitácora del Bloque 2 «foco / modo dirección» y de la franja admin D4 (81 KB, 561 líneas)",
+     "periodo": "2026-06-25 → 2026-06-29",
+     "resumen": "Pre-bloque 0 (cookie del QA-login unificada, línea base e2e 32/10/8, seeds de estados), D4 (el campo OsLead.caliente lo marca Franco y el score del setter pasa a informativo, gate por gateBriefAbierto) y foco 2.1–2.5 (un lead por vez, sticky por cookie, D6 de postergados vencidos). Parte de lo decidido acá lo revirtió beta-3 (pin, cola).",
+     "recomendacion": "consolidar",
+     "reemplazo": "DECISIONES (D4, D6, D7 y su vigencia) + MAPA-LEADOS",
+     "que_se_pierde": "La justificación paso a paso de D4 (admin-0..1d) y la línea base e2e de junio. Ninguna de las dos es necesaria para operar."
+    },
+    {
+     "doc": "docs/bitacora-rediseno.md",
+     "tipo": "bitácora del rediseño del sitio público (207 KB, 3736 líneas)",
+     "periodo": "2026-07-30 → 2026-08-12",
+     "resumen": "B1 (tokens ds-*, componentes y /styleguide), B0.5–B0.8 (sanidad de copy, SEO, motion, anclas), B2–B4 (hero tipográfico, capa 3D, secciones nuevas, inventario de placeholders) y D9. Termina con HOME-CLASICO (3604): por decisión de producto vuelve la home clásica y el rediseño queda experimental en origin/redesign/home.",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo SITIO PÚBLICO / DISEÑO: home vigente, acentos, tipografía, placeholders pendientes, cómo volver al rediseño (3720-3736) y regresión de performance aceptada",
+     "que_se_pierde": "Mediciones de LCP y bundle del rediseño, resolución de conflictos de merge, calibración de Impeccable y el inventario detallado de 27 placeholders (3323-3392), que solo importa si se retoma el rediseño."
+    },
+    {
+     "doc": "docs/roadmap-pendientes.md",
+     "tipo": "backlog de deuda explícita con condición de disparo (20 KB)",
+     "periodo": "2026-05-24 → 2026-07-10 (último commit)",
+     "resumen": "Deuda postergada con sprint de origen y criterio para priorizarla: CRM n8n (cron de retry, DNS rebinding, vista admin, nota PII, Idempotency-Key), CSV, disclaimer de IA, milestones, borrado de índices, UTM, COST-1, RE-2, gaps de entorno y punteros al carril de seguridad de Franco. Varias entradas envejecieron: T0.2 ya está hecho, la vista de CRM la superó CC.2 y vercel.json ya existe.",
+     "recomendacion": "consolidar",
+     "reemplazo": "ESTADO-Y-ROADMAP (backlog único revalidado contra el código)",
+     "que_se_pierde": "Nada sustantivo si las condiciones de disparo («cuándo priorizarlo») migran al backlog vivo. Las entradas obsoletas se pierden a propósito."
+    },
+    {
+     "doc": "docs/sprints/alpha-0-cleanup.md",
+     "tipo": "reporte de sprint (Alpha.0)",
+     "periodo": "2026-05-16",
+     "resumen": "Limpieza de /admin/os, requireSuperAdmin en 6 actions y 1 route, rutas multi-tenant /admin/clients/[orgSlug]/chatbot, tipado estricto, StatCard y sonner unificados, React.cache en auth(). Deja abierta la unificación del Command Center (agency-dashboard).",
+     "recomendacion": "borrar",
+     "reemplazo": "—; la única decisión (eliminar agency-dashboard) va a DECISIONES",
+     "que_se_pierde": "Nada operativo. La decisión pendiente ya se ejecutó: /admin/agency-dashboard no existe en src/app/(protected)/admin."
+    },
+    {
+     "doc": "docs/sprints/alpha-0-5-cleanup.md",
+     "tipo": "reporte de sprint (Alpha.0.5)",
+     "periodo": "2026-05-17",
+     "resumen": "Fixes posteriores al test manual: cache en auth/resolveOrgId, botones del ChatbotManager, «Mi Chatbot» en el sidebar, ChatbotUpsellLanding y checkClientHasChatbot. Lista de cambios sin decisiones de fondo.",
+     "recomendacion": "borrar",
+     "reemplazo": "—",
+     "que_se_pierde": "Nada; el código es la fuente."
+    },
+    {
+     "doc": "docs/sprints/alpha-0-6-cleanup-extended.md",
+     "tipo": "reporte de sprint (Alpha.0.6)",
+     "periodo": "2026-05-17",
+     "resumen": "Borra el SidebarNav duplicado y crea .env.example, docs/env-vars.md y scripts/check-env.js. Mantiene framer-motion como legacy del portfolio.",
+     "recomendacion": "borrar",
+     "reemplazo": "OPERACIONES (los nombres de env vars ya viven en check-env.js)",
+     "que_se_pierde": "La nota del EmptyState huérfano y la decisión de mantener framer-motion. Hoy framer-motion no está en package.json y 2 archivos lo importan (dependencia fantasma)."
+    },
+    {
+     "doc": "docs/sprints/alpha-0-7-baseline-observability.md",
+     "tipo": "reporte de sprint (Alpha.0.7)",
+     "periodo": "2026-05-17",
+     "resumen": "Línea base del chatbot (P95 12.987 ms, DB 1.082 ms), Sentry configurado sin DSN y backups de Neon documentados con plan de DR.",
+     "recomendacion": "borrar",
+     "reemplazo": "OPERACIONES (si se quiere conservar la línea base histórica)",
+     "que_se_pierde": "La línea base de mayo, repetida en alpha-pre-cierre-RESUMEN.md:37-47."
+    },
+    {
+     "doc": "docs/sprints/alpha-0-8-tests-e2e.md",
+     "tipo": "reporte de sprint (Alpha.0.8)",
+     "periodo": "2026-05-17",
+     "resumen": "Suma 9 specs e2e: 7 de 21 pasan y 14 caen por selectores de login. Performance warm del dashboard por debajo de 3 s.",
+     "recomendacion": "borrar",
+     "reemplazo": "—",
+     "que_se_pierde": "Nada vigente; la suite e2e cambió por completo (ver beta-2:52-80)."
+    },
+    {
+     "doc": "docs/sprints/alpha-0-9-status-verificacion.md",
+     "tipo": "reporte de sprint (Alpha.0.9)",
+     "periodo": "2026-05-17",
+     "resumen": "Crea STATUS.md y hace smoke de 14 endpoints: los públicos dan 200 y los protegidos 307 a /login.",
+     "recomendacion": "borrar",
+     "reemplazo": "—",
+     "que_se_pierde": "La tabla de tiempos del smoke de mayo."
+    },
+    {
+     "doc": "docs/sprints/alpha-1-reaudit.md",
+     "tipo": "auditoría read-only con gap analysis (Alpha.1)",
+     "periodo": "2026-05-17",
+     "resumen": "Audita 19 páginas admin y prioriza los gaps: P0 sin error boundaries y wizard sin validación; P1 búsqueda, paginación y toasts. Los mapea a Alpha.2–5.",
+     "recomendacion": "borrar",
+     "reemplazo": "—",
+     "que_se_pierde": "El gap analysis de mayo, superado: los error boundaries llegaron en B12.1 (bitacora-roadmap.md:7351)."
+    },
+    {
+     "doc": "docs/sprints/alpha-2-onboarding.md",
+     "tipo": "reporte de sprint (Alpha.2)",
+     "periodo": "2026-05-17",
+     "resumen": "Wizard de onboarding con draft en localStorage (7 días), sugerencias por industria, preview en vivo y review completo. Quedan pendientes el cronometraje de 8 minutos y los e2e del wizard.",
+     "recomendacion": "borrar",
+     "reemplazo": "—",
+     "que_se_pierde": "La descripción de useOnboardingDraft; el código es la fuente."
+    },
+    {
+     "doc": "docs/sprints/alpha-RESUMEN-FINAL.md",
+     "tipo": "resumen de fase (Alpha → «v1.0»)",
+     "periodo": "abril → 2026-05-19",
+     "resumen": "Declara v1.0 «oficialmente released» tras 21 sprints y lista 6 decisiones arquitectónicas, lecciones y próximos pasos (widget embebible, planes con el socio, Neon Launch, Tiendanube). La declaración de v1.0 la desmiente bitacora-roadmap.md:7662.",
+     "recomendacion": "consolidar",
+     "reemplazo": "DECISIONES (agency-dashboard, audit log, personalización limitada) + LECCIONES (pre-flight, «compila ≠ funciona»)",
+     "que_se_pierde": "La narrativa de cierre de Alpha y el claim de v1.0, que es falso y conviene que no sobreviva."
+    },
+    {
+     "doc": "docs/sprints/alpha-bloque-C-RESUMEN.md",
+     "tipo": "resumen de bloque (Alpha.10–12, design system)",
+     "periodo": "2026-05-17",
+     "resumen": "12 componentes UI, design-tokens.ts y /admin/_design. Migración masiva a Card, Button e Input, con e2e en 5/21.",
+     "recomendacion": "borrar",
+     "reemplazo": "—; el sistema vigente está en docs/design-system.md y en el código",
+     "que_se_pierde": "Conteos de la migración de mayo."
+    },
+    {
+     "doc": "docs/sprints/alpha-pre-cierre-RESUMEN.md",
+     "tipo": "resumen de bloque (Alpha.0.5–0.9)",
+     "periodo": "2026-05-17",
+     "resumen": "Consolida los 5 sprints previos a Alpha: métricas base, issues resueltos y pendientes (6 env vars faltantes, Sentry sin DSN, backups sin verificar) y 4 decisiones (framer legacy, logs JSON, rate limiter, Playwright sobre build de prod).",
+     "recomendacion": "borrar",
+     "reemplazo": "DECISIONES (Playwright sobre `npm run start`, logs estructurales)",
+     "que_se_pierde": "La tabla de métricas de mayo (37-47)."
+    },
+    {
+     "doc": "docs/sprints/infra-1-observabilidad.md",
+     "tipo": "doc fuente de verdad de sprint (plan + log)",
+     "periodo": "2026-07-05",
+     "resumen": "Sink off-Neon logPersistFailure/extractDbErrorInfo hacia stderr (Netlify Function Logs) antes de cualquier write a Neon, onError en streamText y mapa de nombres de evento. Deja sin tocar la causa raíz de conexión (INFRA.3).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Mapa del RUNTIME DEL CHATBOT / OPERACIONES (cómo leer chat.persist_failed en Netlify Logs, firma P1017/P2024/UND_ERR_SOCKET)",
+     "que_se_pierde": "El discovery con archivo:línea del catch de persistencia (los números de línea ya derivaron)."
+    },
+    {
+     "doc": "docs/sprints/infra-2-cold-start-retry.md",
+     "tipo": "doc fuente de verdad de sprint",
+     "periodo": "2026-07-06",
+     "resumen": "Dedup del mensaje del usuario por «cola huérfana» (ventana de 90 s) y retry del widget (3 intentos, backoff de 2 s y 4 s, solo errores de red y 5xx). El estado connection_failed reemplaza al viejo provider_error. Reasigna la causa raíz de conexión a INFRA.3.",
+     "recomendacion": "consolidar",
+     "reemplazo": "DECISIONES + mapa del RUNTIME DEL CHATBOT",
+     "que_se_pierde": "El análisis de la carrera de doble respuesta (97-102) y la del write-write residual (134-136), útiles si alguien agrega un timeout de cliente."
+    },
+    {
+     "doc": "docs/sprints/p3-a-1-gbp-connection.md",
+     "tipo": "doc fuente de verdad de sprint",
+     "periodo": "2026-07-04",
+     "resumen": "Backend de la conexión con Google Business Profile: descubrimiento account/location por fetch crudo v1, gbpLocationId compuesto para v4, estados OPERATIONAL/CONNECTED_NO_LOCATION y servicios org-scoped. Nunca se verificó contra una cuenta GBP real; los tokens OAuth quedan en claro (deuda SEC).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo INTEGRACIONES (GBP: el puente v1→v4, la deuda de cifrado, la verificación viva pendiente)",
+     "que_se_pierde": "La prueba del puente v1→v4 con líneas exactas (73-84), que es lo único difícil de reconstruir."
+    },
+    {
+     "doc": "docs/sprints/p3-a-2-venta.md",
+     "tipo": "doc fuente de verdad de sprint (+ sub-sprint acceso)",
+     "periodo": "2026-07-04",
+     "resumen": "Pantalla de venta del Motor de Reseñas con 3 estados (locked/connecting/operational) y el copy de venta. La vitrina lleva al LockedView como único camino de pedido. El precio queda [FALTA:precio] a propósito.",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo PRODUCTO / PANEL DEL CLIENTE (estados honestos, copy de venta, precio pendiente)",
+     "que_se_pierde": "El copy de venta elegido (64-82), que también está en el código."
+    },
+    {
+     "doc": "docs/sprints/p4-1-render-utm.md",
+     "tipo": "doc fuente de verdad de sprint",
+     "periodo": "2026-07-04",
+     "resumen": "Render de la campaña (utmCampaign) en el detalle del lead y en el home con label humanizado. El null se muestra como «Sin campaña» y el home sin campañas muestra un estado vacío honesto.",
+     "recomendacion": "borrar",
+     "reemplazo": "DECISIONES (2 líneas) + la entrada resumida en bitacora-roadmap.md:12778",
+     "que_se_pierde": "Nada que no esté en lead-origin.ts:105-108 y en el invariante home-metrics."
+    },
+    {
+     "doc": "docs/sprints/q1-1-harness.md",
+     "tipo": "doc fuente de verdad de sprint (+ Q1.1-fix)",
+     "periodo": "2026-07-05",
+     "resumen": "Corredor de 36 conversaciones doradas (12 por pack) contra Gemini real con 3 bots QA dedicados; captura sin evaluar. El fix diagnostica que se pierden ~11-14% de los turnos en onFinish sin dejar rastro, el origen de INFRA.1.",
+     "recomendacion": "consolidar",
+     "reemplazo": "src/modules/chatbot/evals/README.md (ya existe); actualizar las referencias en evals/capture.ts:49 y runner.ts:220",
+     "que_se_pierde": "El diagnóstico de la pérdida de turnos (128-148) si no pasa al README o al mapa del runtime."
+    },
+    {
+     "doc": "docs/sprints/q1-2-scoring.md",
+     "tipo": "doc fuente de verdad de sprint",
+     "periodo": "2026-07-05",
+     "resumen": "Evaluador de la batería: asserts duros deterministas (captura, handoff, mustNotClaim, intent) y un juez LLM Opus solo para lo perceptual. El juez quedó sin probar en vivo por falta de ANTHROPIC_API_KEY.",
+     "recomendacion": "consolidar",
+     "reemplazo": "src/modules/chatbot/evals/README.md",
+     "que_se_pierde": "Nada que no esté en el código de scoring/."
+    },
+    {
+     "doc": "docs/sprints/sprint-b0-bis-cierre.md",
+     "tipo": "brief/prompt de sprint (especificación, no log)",
+     "periodo": "2026-07-30",
+     "resumen": "Pide sacar three del bundle inicial haciendo dinámico MarketingIntro, unificar el badge de ubicación y poner canonical al home. Su ejecución está registrada en bitacora-rediseno.md (consolidación, 980+).",
+     "recomendacion": "borrar",
+     "reemplazo": "—",
+     "que_se_pierde": "La línea base mobile pre-rediseño: Lighthouse 34/100, LCP 6,1 s, JS inicial 723 KB (57-60)."
+    },
+    {
+     "doc": "docs/sprints/sprint-b05-sanidad-sitio.md",
+     "tipo": "brief/prompt de sprint (especificación, no log)",
+     "periodo": "2026-07-30",
+     "resumen": "Pide sacar el claim «+47», corregir ¿ y tildes, borrar los .bak y el mojibake, crear sitemap y robots y corregir los colores de servicio en CLAUDE.md. Ejecutado (bitacora-rediseno.md:669).",
+     "recomendacion": "borrar",
+     "reemplazo": "—; T1 y T6 ya están en el código y en CLAUDE.md",
+     "que_se_pierde": "Nada vigente."
+    },
+    {
+     "doc": "docs/sprints/utm-1-captura.md",
+     "tipo": "doc fuente de verdad de sprint",
+     "periodo": "2026-07-04",
+     "resumen": "Captura first-touch de UTM y referrer del widget a la conversación y al lead, con migración aditiva en Conversation. En el embed usa el parentUrl que widget.js ya mandaba por postMessage. Documenta 4 riesgos sin resolver.",
+     "recomendacion": "consolidar",
+     "reemplazo": "Mapa del RUNTIME DEL CHATBOT (garantía first-touch create-only y riesgos: carrera del embed, sessionId @unique global, cache de 1 h de widget.js, currentPath '/')",
+     "que_se_pierde": "La justificación de por qué el first-touch depende de que el branch update no escriba UTM (94-98)."
+    },
+    {
+     "doc": "logic-core-v3/STATUS.md",
+     "tipo": "documento de estado «fuente única de verdad» (18 KB; no está en la lista de 27 pero la tarea lo nombra)",
+     "periodo": "2026-05-21 (sin actualizar desde entonces)",
+     "resumen": "Fotografía de mayo: v1.0.0, 39/50 tests, Matsu inexistente en la DB, decisiones de Alpha v2 y pendientes para Beta. Hoy es engañoso: afirma que no existe el modelo Plan, que el rate limiter es in-memory, cold start de ~1 s y crons funcionando.",
+     "recomendacion": "consolidar",
+     "reemplazo": "ESTADO-Y-ROADMAP (reescrito contra el código actual)",
+     "que_se_pierde": "Las decisiones de Alpha v2 (214-226), que van a DECISIONES. Contiene passwords de seed en claro (258-259) y el host de Neon dev (86, 299)."
+    }
+   ],
+   "decisiones": [
+    {
+     "tema": "Planes del chatbot",
+     "decision": "Tres planes con 7 dimensiones de gating: STARTER 49/mes (setup 700, cuota 500), PRO 90 (900, 3000), BUSINESS 150 (1000, 5000). Plan.tools es String[] y subscription.planId es nullable con fallback a Starter.",
+     "fecha": "2026-05-22",
+     "fuente": "bitacora-roadmap.md:1977-2030; verificado en prisma/seeds/sync-plans.ts:66-104",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Módulos premium vs plan",
+     "decision": "Los planes NO incluyen módulos premium: son add-ons que se venden aparte con requestUpsellAction, sin auto-activación. User.unlockedFeatures queda deprecado y se borra.",
+     "fecha": "2026-05-23",
+     "fuente": "bitacora-roadmap.md:2495-2501; schema.prisma no tiene unlockedFeatures (0 coincidencias)",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Backups",
+     "decision": "pg_dump diario a las 06:00 UTC por GitHub Actions contra la conexión directa (sin -pooler), cifrado GPG AES256, artifact de 30 días y job de restore-test. Sin pagar Neon Launch ni storage externo.",
+     "fecha": "2026-05 (B14.3)",
+     "fuente": "bitacora-roadmap.md:9446-9532; .github/workflows/db-backup.yml:39-42",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Rate limiting",
+     "decision": "Rate limiter persistente en Neon (tabla rate_limit) en lugar del Map in-memory. Presets chatbotPerSession 30/60s, chatbotPerBotSession 10/60s y los de auth/CRM.",
+     "fecha": "2026-05 (B14.1)",
+     "fuente": "bitacora-roadmap.md:9326-9345; schema.prisma:1765 model RateLimit",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Seeds",
+     "decision": "Guard anti-prod (assertDevSeedTarget, override ALLOW_PROD_SEED=1) y passwords de seed por env var sin default.",
+     "fecha": "2026-06-17",
+     "fuente": "bitacora-beta.md:24-26; prisma/seed-guard.ts existe",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Lead caliente (LeadOS)",
+     "decision": "El caliente operativo es el campo OsLead.caliente, que marca Franco. El score y el veredicto del setter son informativos. El gate de la demo preventiva usa gateBriefAbierto(status, caliente) como regla única en UI, action y server.",
+     "fecha": "2026-06-27/29",
+     "fuente": "bitacora-beta-2.md:179, 260, 294; schema.prisma:880; gateBriefAbierto usado en dossier.ts y dossier.actions.ts",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Foco del setter",
+     "decision": "El home entrega UN lead accionable por vez (modo dirección) y la cartera pasa a secundaria.",
+     "fecha": "2026-06-27",
+     "fuente": "bitacora-beta-2.md:306-341, 549",
+     "vigente": "no"
+    },
+    {
+     "tema": "Cola de trabajo del setter",
+     "decision": "El panel deja de entregar un lead por vez: muestra una cola de 5 (el foco más 4) con dedup de novedades por lead visible.",
+     "fecha": "2026-09-03",
+     "fuente": "bitacora-beta-3.md:10240, 10323-10340; src/lib/leados/cola.ts existe",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Sticky del foco",
+     "decision": "Sticky por cookie httpOnly leados-foco-v1, sin DB, invalidado por construcción.",
+     "fecha": "2026-06-27",
+     "fuente": "bitacora-beta-2.md:317; src/lib/leados/foco-cookie.ts:22",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Pin y foco",
+     "decision": "Primero se decidió que el pin excluye al lead del foco (2.1a). Después se cambió: el pin ordena el foco y no lo excluye (Sprint 6.1, A-05).",
+     "fecha": "2026-06-27 → 2026-07-04",
+     "fuente": "bitacora-beta-2.md:556; bitacora-beta-3.md:1024",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Postergados vencidos (D6)",
+     "decision": "Un POSTERGADO con reactivateAt <= now vuelve a ser accionable (el cron solo notifica). Lo cubre un invariante ejecutable.",
+     "fecha": "2026-06-27",
+     "fuente": "bitacora-beta-2.md:345-393; src/lib/leados/flow.invariant.ts existe",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Foco prioriza construir",
+     "decision": "El foco prioriza construir la demo antes que contactar, porque el setter llega con la demo hecha.",
+     "fecha": "2026-08-04",
+     "fuente": "bitacora-beta-3.md:2795-2800",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Navegación del setter",
+     "decision": "El rail del setter navega SOLO con triggerTransition().",
+     "fecha": "2026-06-18",
+     "fuente": "bitacora-beta.md:268 (B0.2); src/app/(protected)/setter/_components/setter-nav.tsx:45",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Home pública",
+     "decision": "Producción vuelve a servir la home clásica por restauración de archivos (no por revert). El rediseño queda experimental en origin/redesign/home y la regresión de performance se acepta de forma declarada.",
+     "fecha": "2026-08-12",
+     "fuente": "bitacora-rediseno.md:3604-3610, 3683-3693; src/app/page.tsx:7-19 importa Hero, About, PortalDemo, etc. de la versión clásica",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Cursor y grano",
+     "decision": "CustomCursor y NoiseOverlay quedan afuera también en la home clásica (costo de accesibilidad).",
+     "fecha": "2026-08-12",
+     "fuente": "bitacora-rediseno.md:3655-3663; src/app/layout.tsx:84-96 (comentario: los archivos ya no existen)",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Colores de servicio",
+     "decision": "Web cyan #06b6d4, IA verde #10b981, automatización ámbar #f59e0b, software violeta #8b5cf6 (mapeo A del código). CLAUDE.md se corrigió para reflejarlo.",
+     "fecha": "2026-07-30",
+     "fuente": "sprint-b05-sanidad-sitio.md:58-65; bitacora-rediseno.md:515-519; CLAUDE.md (sección de colores)",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Claims del sitio",
+     "decision": "Sale el claim «+47 negocios» y se reemplaza por «Automatizaciones funcionando en negocios del NOA». No se inventan cifras.",
+     "fecha": "2026-07-30",
+     "fuente": "sprint-b05-sanidad-sitio.md:22-30; grep '+47' en src/*.tsx da 0",
+     "vigente": "sí"
+    },
+    {
+     "tema": "SEO base",
+     "decision": "sitemap.ts solo con rutas públicas y robots.ts que excluye dashboard, admin, setter, api, embed, login y bienvenida.",
+     "fecha": "2026-07-30",
+     "fuente": "sprint-b05-sanidad-sitio.md:52-56; src/app/sitemap.ts y robots.ts existen",
+     "vigente": "sí"
+    },
+    {
+     "tema": "three fuera del bundle inicial",
+     "decision": "El plan A (Preloader importa MarketingIntro de forma dinámica) quedó revertido al restaurar la home clásica. Está vigente el plan B: BrandedIntroCanvas dinámico dentro de MarketingIntro.",
+     "fecha": "2026-07-30 / 2026-08-12",
+     "fuente": "sprint-b0-bis-cierre.md:25-33; src/components/ui/Preloader.tsx:10 (import estático); MarketingIntro.tsx:19-20 (dynamic)",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Badge de ubicación",
+     "decision": "Unificar «Tucumán, Argentina — trabajamos con clientes de todo el país» con raya.",
+     "fecha": "2026-07-30",
+     "fuente": "sprint-b0-bis-cierre.md:35-40; About.tsx:245 y 280 siguen con guion simple",
+     "vigente": "no"
+    },
+    {
+     "tema": "Atribución UTM",
+     "decision": "First-touch: los UTM se escriben solo en el create de Conversation y el lead los hereda de la conversación ya resuelta, no del body. Se sanitiza en silencio (strip + cap 255/500) sin rechazar la request.",
+     "fecha": "2026-07-04",
+     "fuente": "utm-1-captura.md:47-56, 94-113; src/modules/chatbot/shared/attribution.ts existe",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Label de campaña",
+     "decision": "El null se muestra como «Sin campaña» y nunca aparece el utm crudo. El home sin campañas muestra un estado vacío honesto.",
+     "fecha": "2026-07-04",
+     "fuente": "p4-1-render-utm.md:26-33; src/lib/dashboard/lead-origin.ts:105-108",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Cold start / retry",
+     "decision": "Dedup del user message por cola huérfana con ventana de 90 s, retry del widget de 3 intentos con backoff de 2 s y 4 s solo en errores de red y 5xx, sin timeout de cliente. El estado connection_failed reemplaza al handoff a WhatsApp ante fallas de red.",
+     "fecha": "2026-07-06",
+     "fuente": "infra-2-cold-start-retry.md:39-53, 74-88; dedup.ts y chatRetryPolicy.ts existen",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Observabilidad de persistencia",
+     "decision": "El sink primario es stderr (Netlify Function Logs) y va antes de cualquier write a Neon. Sentry es secundario y best-effort.",
+     "fecha": "2026-07-05",
+     "fuente": "infra-1-observabilidad.md:18, 35-42; logPersistFailure en handleChatRequest.ts y persistTurn.ts",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Causa raíz de conexión (INFRA.3)",
+     "decision": "Tocar lib/prisma.ts, pooler, DIRECT_URL y el retry en onFinish queda supeditado a la firma real de prod (prismaCode/causeMessage) y al DSN de Sentry.",
+     "fecha": "2026-07-06",
+     "fuente": "infra-2-cold-start-retry.md:7-14, 130-133; roadmap-pendientes.md:176",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Trabajo detached post-turno",
+     "decision": "Se acepta HOY que notifyClient, Telegram y syncLeadToCrm puedan perderse con el freeze de la lambda, sin outbox. El fix durable (outbox transaccional y cron) va en un sprint con migración.",
+     "fecha": "2026-08-12",
+     "fuente": "bitacora-roadmap.md:17140-17161; no existe modelo outbox en schema.prisma",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Crons en Netlify",
+     "decision": "Cada cron es una Netlify Function real que llama por HTTP a la ruta de Next. Nombrar la ruta en netlify.toml no alcanza para agendarla.",
+     "fecha": "2026-07-11",
+     "fuente": "bitacora-roadmap.md:13841-13850; netlify/functions/ (3 archivos); netlify.toml:25-32",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Auth de crons",
+     "decision": "Fallar cerrado si CRON_SECRET falta, con helper compartido (Authorization Bearer o X-Cron-Secret).",
+     "fecha": "2026-08 (H.2)",
+     "fuente": "bitacora-roadmap.md:15846-15870; src/lib/cron/cron-secret.ts",
+     "vigente": "sí"
+    },
+    {
+     "tema": "CRM del cliente",
+     "decision": "El webhook y el secret de n8n salen del dashboard del cliente; los configura SUPER_ADMIN desde el admin y el cliente solo ve «CRM conectado ✓».",
+     "fecha": "2026-05 (CC.2)",
+     "fuente": "bitacora-roadmap.md:9881-9900; src/modules/chatbot/server/admin/integrations/ (4 archivos)",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Retry del CRM",
+     "decision": "3 intentos in-flight más reintento manual desde la UI, sin cron diario hasta que haya volumen.",
+     "fecha": "2026-05-24",
+     "fuente": "roadmap-pendientes.md:9-14",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Borrado de índices",
+     "decision": "No borrar índices con 0 scans mirando la DB dev. Recién después de B14, con la prod de Matsu viva al menos 2 semanas y pg_stat_reset previo.",
+     "fecha": "2026-05-25",
+     "fuente": "roadmap-pendientes.md:94-101",
+     "vigente": "sí"
+    },
+    {
+     "tema": "GBP",
+     "decision": "fetch crudo v1 sin agregar googleapis. gbpLocationId se persiste como compuesto accounts/x/locations/y. Los tokens OAuth quedan en claro, como deuda SEC separada.",
+     "fecha": "2026-07-04",
+     "fuente": "p3-a-1-gbp-connection.md:29-37, 80-94",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Motor de Reseñas: venta",
+     "decision": "3 estados (locked/connecting/operational) donde el gating comercial le gana al técnico. El precio queda [FALTA:precio] visible y la vitrina lleva al LockedView como único camino de pedido.",
+     "fecha": "2026-07-04",
+     "fuente": "p3-a-2-venta.md:18-31, 84-86, 158-193; LockedView.tsx:151; services/page.tsx:325 salesRouteHref",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Evals del bot",
+     "decision": "3 bots QA dedicados, uno por pack (nunca bots demo ni de cliente). Asserts duros para lo binario y juez LLM solo para lo perceptual, con modelo configurable por EVALS_JUDGE_MODEL.",
+     "fecha": "2026-07-05",
+     "fuente": "q1-1-harness.md:29-45; q1-2-scoring.md:12-14, 26-29; evals/scoring/judge.ts:29",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Versión / release",
+     "decision": "v1.0.0 se retira por aspiracional y se re-tagea v0.9.0-rc.1. Después se recomienda v1.0.0-rc.1; la v1.0.0 la firma Matsu usándolo.",
+     "fecha": "2026-05-25 / B14.4",
+     "fuente": "bitacora-roadmap.md:7660-7662, 9694-9705; no hay tags v* locales; package.json:3 = 0.1.0",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Command Center admin",
+     "decision": "Migrar /admin/agency-dashboard a /admin/clients/[id] con tabs.",
+     "fecha": "2026-05",
+     "fuente": "alpha-RESUMEN-FINAL.md:45; la ruta agency-dashboard ya no existe",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Estrategia de testing",
+     "decision": "E2E como estrategia primaria, sin unit tests por ahora.",
+     "fecha": "2026-05-19",
+     "fuente": "alpha-RESUMEN-FINAL.md:50",
+     "vigente": "no"
+    },
+    {
+     "tema": "Gate de verificación",
+     "decision": "check:invariants descubre la lista desde package.json (scripts/run-invariants.mjs) y CI vive en la raíz (.github/workflows/ci.yml); el e2e.yml anidado nunca corrió.",
+     "fecha": "2026-08-25",
+     "fuente": "bitacora-beta-3.md:5182-5200; scripts/run-invariants.mjs y .github/workflows/ci.yml existen",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Panel del cliente",
+     "decision": "El dashboard es para el DUEÑO no técnico: todo lo técnico (URLs, secrets, modelos, KB editable) va al admin de develOP.",
+     "fecha": "2026-05 (CC.1)",
+     "fuente": "bitacora-roadmap.md:9760",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Reportes semanales",
+     "decision": "Reportes sin opt-in porque los clientes ya tienen contrato.",
+     "fecha": "2026-05",
+     "fuente": "STATUS.md:219",
+     "vigente": "no"
+    },
+    {
+     "tema": "Ownership multi-tenant",
+     "decision": "Helpers assertTicketBelongsToOrg/assertProjectBelongsToOrg, uno por modelo, que lanzan error.",
+     "fecha": "2026-05-25",
+     "fuente": "bitacora-roadmap.md:6727-6745; 0 referencias en src: reemplazado por src/lib/isolation (scoped-model.ts)",
+     "vigente": "no"
+    },
+    {
+     "tema": "Widget",
+     "decision": "Iframe más script vanilla (sin React en el sitio del cliente) y CORS dinámico con allowedDomains por bot.",
+     "fecha": "2026-05",
+     "fuente": "STATUS.md:217-218; public/widget.js (7,7 KB)",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Entornos",
+     "decision": ".env y .env.local apuntan a la branch dev de Neon; prod usa main desde Netlify.",
+     "fecha": "2026-05 (B0.1)",
+     "fuente": "STATUS.md:221, 250",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Laboratorio FG-2",
+     "decision": "/admin/fg2-lab y _experimental son descartables y se borran una vez tomada la decisión del experimento.",
+     "fecha": "2026-06-21",
+     "fuente": "bitacora-beta.md:1534-1536",
+     "vigente": "no"
+    },
+    {
+     "tema": "Tipografía y acentos del sistema de diseño",
+     "decision": "Geist + Geist Mono sin reabrir la discusión. Los acentos viven solo sobre fondo oscuro.",
+     "fecha": "2026-07-31/08-03",
+     "fuente": "bitacora-rediseno.md:2223, 2309",
+     "vigente": "dudoso"
+    }
+   ],
+   "lecciones": [
+    {
+     "leccion": "Verde no es verificado: build y tsc verdes no prueban comportamiento. `migrate status` puede dar verde con drift físico de 7 columnas que solo caza `migrate diff`.",
+     "fuente": "bitacora-beta-3.md:1796-1800; bitacora-beta.md:1746",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "El exit code de un gate pipeado es el del head/tail (siempre 0): leer el exit sin pipe o con ${PIPESTATUS[0]}.",
+     "fuente": "bitacora-roadmap.md:17106-17121",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "El invariante ejecutable (*.invariant.ts con tsx, sin DB ni red) es la única verificación que no se evapora; el proyecto pasó de 10 a 55.",
+     "fuente": "bitacora-beta-3.md:1799-1800, 10945",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "La unidad de aislamiento es el worktree: un worktree por sesión y commits con git add por pathspec, verificando git diff --cached. Un fix se perdió dos veces por sesiones que compartían árbol.",
+     "fuente": "bitacora-beta-3.md:1808-1818, 1838-1841",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Tailwind 4 escanea los .md de docs/ y los distDir no ignorados: una clase arbitraria con URL citada en una bitácora envenena el segundo build. Todo distDir alternativo se ignora antes del primer build.",
+     "fuente": "bitacora-beta-3.md:3647-3656, 10924-10935",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Los mensajes de commit describen intenciones; el árbol describe hechos. Verificar contra el código antes de planificar (la doc de estado mintió dos veces).",
+     "fuente": "bitacora-rediseno.md:3680; bitacora-beta-3.md:4458-4460",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Las premisas de los briefs suelen ser falsas (Playwright «bloqueado», googleapis «instalado», cron «agendado»): hacer discovery antes de tocar y frenar y reportar si no coincide.",
+     "fuente": "bitacora-beta-2.md:52-58; p3-a-1-gbp-connection.md:31-33; bitacora-roadmap.md:13841",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Nunca inventar datos ni cifras en copy o demos («+47», «76 días», reseñas inventadas). Lo que falta queda marcado y visible ([FALTA:precio], placeholders).",
+     "fuente": "sprint-b05-sanidad-sitio.md:22-30; bitacora-rediseno.md:533-537; bitacora-beta.md:1602; p3-a-2-venta.md:84-86",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "En serverless, el trabajo fire-and-forget corre carrera contra el freeze de la lambda y se pierde. DB-primero garantiza el dato, no la notificación.",
+     "fuente": "bitacora-roadmap.md:17125-17147",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Con Next Runtime v5, nombrar una ruta en netlify.toml no la agenda: hace falta una Netlify Function real.",
+     "fuente": "bitacora-roadmap.md:13841-13850",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "pg_stat_user_indexes de una DB dev sin tráfico no sirve para decidir borrados: sería borrar a ciegas disfrazado de dato.",
+     "fuente": "roadmap-pendientes.md:99",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "La Neon dev es compartida: dos lanes con migraciones opuestas dropearon columnas que el código usaba. Las migraciones aditivas se avisan al socio.",
+     "fuente": "bitacora-beta.md:1746-1747; utm-1-captura.md:228, 252",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Antes de borrar un archivo «sin consumidores en src», buscar consumidores fuera (premium-modules.ts lo consume un seed que hace deleteMany).",
+     "fuente": "bitacora-rediseno.md:3380-3384",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Después de borrar una ruta, rebuild antes de tsc: los .next/types viejos dan errores falsos.",
+     "fuente": "bitacora-roadmap.md:17122-17124",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Tendencia a asumir que funciona porque compila; reforzar la verificación manual (base de la regla «Never self-confirm» de CLAUDE.md).",
+     "fuente": "sprints/alpha-RESUMEN-FINAL.md:61",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Si un sprint de la cadena frena, se reporta el hueco y se sigue con el hueco a la vista, respetando dependencias declaradas.",
+     "fuente": "bitacora-beta-3.md:1788-1794",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "En Git Bash sobre Windows, `git show <ref>:<path>` da falsos negativos de ausencia: usar ls-tree + grep.",
+     "fuente": "bitacora-beta-3.md:10968-10971",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "El build local necesita NODE_OPTIONS=--max-old-space-size=6144 (OOM con el heap default).",
+     "fuente": "bitacora-beta.md:1733; sprints/utm-1-captura.md:223; bitacora-rediseno.md:3700",
+     "vigente": "dudoso"
+    },
+    {
+     "leccion": "Separar los asserts deterministas del juez LLM: el juez nunca decide lo que un assert puede verificar.",
+     "fuente": "sprints/q1-2-scoring.md:12-14",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Sin herramientas de preview en el subagente visual-qa, declarar el proxy usado y dejar la verificación visual para el humano, sin cerrar a ciegas.",
+     "fuente": "roadmap-pendientes.md:165-169; sprints/p4-1-render-utm.md:98-103",
+     "vigente": "dudoso"
+    },
+    {
+     "leccion": "Pre-flight checks y smoke entre sprints detectaron regresiones temprano; un design system unificado simplificó los sprints posteriores.",
+     "fuente": "sprints/alpha-RESUMEN-FINAL.md:54-58",
+     "vigente": "dudoso"
+    }
+   ],
+   "operaciones": [
+    {
+     "tema": "Deploy",
+     "dato": "Netlify con @netlify/plugin-nextjs: build `npx prisma generate && npm run build`, publish .next, NODE_OPTIONS=--max-old-space-size=4096. vercel.json es legado.",
+     "fuente": "logic-core-v3/netlify.toml:1-7; bitacora-roadmap.md:13531; _insumos/drive/Franco/Work Flow/Proyecto DevelOP/Contexto/develOP-contexto-estable-v1.0.md:51"
+    },
+    {
+     "tema": "Dominio / URL de prod",
+     "dato": "Prod servida en develop-portfolio.netlify.app (incidente de cache CDN con Age de ~71 días: mitigar con «Clear cache and deploy site»). Dominio objetivo: develop.com.ar (canonical y metadataBase).",
+     "fuente": "bitacora-roadmap.md:9607, 9721-9723, 14137-14143; src/app/layout.tsx:23"
+    },
+    {
+     "tema": "Crons activos (Netlify)",
+     "dato": "cleanup-old-events 0 6 * * * · generate-insights 0 9 * * * · send-weekly-reports 0 12 * * MON (UTC). Cada uno es una Netlify Function real que llama a /api/cron/* por HTTP.",
+     "fuente": "netlify.toml:25-32; netlify/functions/*.ts; bitacora-roadmap.md:13841-13850"
+    },
+    {
+     "tema": "Crons sin agenda en Netlify",
+     "dato": "os-follow-up (0 12 * * *), regenerate-briefs (lun 10:00) y send-executive-reports (lun 12:00) solo figuran en vercel.json; alerts y detect-bot-issues no tienen agenda. Si corren en prod es dudoso.",
+     "fuente": "vercel.json; src/app/api/cron/ (8 rutas); bitacora-roadmap.md:13527-13532, 16893-16894"
+    },
+    {
+     "tema": "Auth de crons",
+     "dato": "CRON_SECRET por Authorization: Bearer o X-Cron-Secret, falla cerrado si falta.",
+     "fuente": "bitacora-roadmap.md:15846-15870; src/lib/cron/cron-secret.ts"
+    },
+    {
+     "tema": "Backups",
+     "dato": "Workflow raíz .github/workflows/db-backup.yml: cron 0 6 * * * más dispatch prod/dev. pg_dump por conexión directa, gzip, GPG AES256, artifact de 30 días y restore-test sobre postgres:16. Secrets: BACKUP_GPG_PASSPHRASE, DIRECT_DATABASE_URL_PROD, DIRECT_DATABASE_URL_DEV. La passphrase vive solo en el secret y en el password manager de Franco. Scripts de emergencia: scripts/db-backup-local.sh y db-restore-local.sh (este aborta si el destino no es dev salvo --i-know-what-im-doing). No es verificable desde acá si hubo un primer run exitoso.",
+     "fuente": "bitacora-roadmap.md:9446-9532; .github/workflows/db-backup.yml:39-42, 84-85, 105"
+    },
+    {
+     "tema": "CI",
+     "dato": ".github/workflows/ci.yml en push y PR, Node 24. Secrets: AUTH_SECRET, CHATBOT_GCP_PROJECT_ID, CHATBOT_IP_HASH_SALT, CRON_SECRET, DATABASE_URL_TEST, GOOGLE_VERTEX_CREDENTIALS_JSON. Sin DATABASE_URL_TEST los tests de LeadOS no corren (solo warning).",
+     "fuente": ".github/workflows/ci.yml:65, 87, 144; bitacora-beta-3.md:5182-5200"
+    },
+    {
+     "tema": "Entornos y DB",
+     "dato": "Neon PostgreSQL sa-east-1 con branching: dev para .env/.env.local, main para prod desde Netlify. Neon free autosuspende (cold start de 14-30 s) y la función de Netlify free corta a ~10 s. 86 migraciones al 2026-09-06.",
+     "fuente": "STATUS.md:16, 221, 250; sprints/infra-2-cold-start-retry.md:18-20; bitacora-beta-3.md:10945"
+    },
+    {
+     "tema": "Env vars (solo nombres)",
+     "dato": "ANTHROPIC_API_KEY, AUTH_SECRET, BREVO_API_KEY, BREVO_FROM_EMAIL, BREVO_FROM_NAME, CHATBOT_GCP_LOCATION, CHATBOT_GCP_PROJECT_ID, CHATBOT_GOOGLE_API_KEY, CHATBOT_IP_HASH_SALT, CHATBOT_LLM_PROVIDER, CRON_SECRET, DATABASE_URL, DEVELOP_ALERTS_EMAIL, GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_BUSINESS_PROFILE_CLIENT_ID/_SECRET/_REDIRECT_URI, GOOGLE_PAGESPEED_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY, GOOGLE_VERTEX_CREDENTIALS_JSON, IMPERSONATION_SECRET, NEXTAUTH_URL, NEXT_PUBLIC_APP_URL, NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_WHATSAPP_NUMBER, RESEND_API_KEY, RESEND_FROM_EMAIL, SENTRY_AUTH_TOKEN, SENTRY_ORG, SENTRY_PROJECT, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TIENDANUBE_CLIENT_ID/_SECRET. Más DIRECT_DATABASE_URL (pg_dump), SEED_*_PASSWORD (seeds), QA_ALLOW_LOCALHOST (QA) y EVALS_JUDGE_MODEL.",
+     "fuente": "scripts/check-env.js; bitacora-roadmap.md:9494-9497; bitacora-beta.md:25; q1-2-scoring.md:29"
+    },
+    {
+     "tema": "Observabilidad",
+     "dato": "El sink primario de fallas es stderr en Netlify Function Logs (eventos chat.persist_failed, chat.stream_error, chat.unhandled_failed). Sentry (@sentry/nextjs, scrub de PII en src/lib/sentry/scrub-pii.ts) estaba INACTIVO en prod por falta de NEXT_PUBLIC_SENTRY_DSN.",
+     "fuente": "sprints/infra-1-observabilidad.md:18, 35-44, 69-70; bitacora-roadmap.md:9555-9570, 17135"
+    },
+    {
+     "tema": "Email y notificaciones",
+     "dato": "El transaccional es Brevo (sendTransactionalEmail); Resend queda como alternativa. A agosto de 2026, Brevo y Telegram estaban sin configurar en prod y ningún tenant tenía CRM habilitado. CHATBOT_IP_HASH_SALT ya está creada en Netlify.",
+     "fuente": "bitacora-roadmap.md:11855, 16891, 17142-17145"
+    },
+    {
+     "tema": "QA local",
+     "dato": "`npm run dev:qa` (:3002, QA_ALLOW_LOCALHOST=1), `start:qa` (:3001, build de prod), POST /api/qa/login con personas (super-admin, setter, client-a/b) y triple guard. Suites: test:setter 187, test:leados 33, test:helpers 28, check:invariants 55/55 (al 2026-09-06).",
+     "fuente": "sprints/q1-1-harness.md:19-22; bitacora-beta-2.md:22-48; bitacora-roadmap.md:7676-7678; bitacora-beta-3.md:10945-10950"
+    },
+    {
+     "tema": "Seeds",
+     "dato": "prisma/seed-guard.ts aborta contra prod salvo ALLOW_PROD_SEED=1. sync-plans.ts y sync-premium-modules.ts son ejecutables contra prod a propósito.",
+     "fuente": "bitacora-beta.md:18-26"
+    },
+    {
+     "tema": "Repositorio",
+     "dato": "GitHub frc11/PorfolioDevelOP, descrito como público en mayo; los artifacts de Actions se cifran por eso. Si sigue siendo público hoy no se puede confirmar desde acá.",
+     "fuente": "bitacora-roadmap.md:9454-9456"
+    },
+    {
+     "tema": "Secret filtrado en historia git",
+     "dato": "logic-core-v3/enviroment.env (GOOGLE_GENERATIVE_AI_API_KEY) sigue en la historia: alta en el commit 39535583 y baja en c351b793, alcanzables desde main y desde 117 ramas. La purga y el force-push de B0.6 nunca se aplicaron. La key se reportó deshabilitada antes del hallazgo (no verificable). Valor citado en bitacora-roadmap.md:19, 36, 50 y en docs/audits/2026-05-bfg-leak-cleanup.md.",
+     "fuente": "bitacora-roadmap.md:6-58; docs/audits/2026-05-bfg-leak-cleanup.md:10-16; git log --all -- logic-core-v3/enviroment.env"
+    },
+    {
+     "tema": "Credenciales de seed en docs",
+     "dato": "Passwords de seed dev en claro (tipo: credencial de usuario de seed) en STATUS.md:258-259, bitacora-beta.md:15 y bitacora-roadmap.md:6375-6377, 7837, 10534; también en scripts/b1-verify-setter-ownership.ts y scripts/b2-verify-dossier.ts, fuera de scope. Además hay identificadores de host de Neon en STATUS.md:86, 299 y en bitacora-roadmap.md:1983, 9491-9492 (no son credenciales).",
+     "fuente": "grep sobre los docs nombrados (solo líneas, sin valores)"
+    },
+    {
+     "tema": "Widget",
+     "dato": "/widget.js con Cache-Control max-age=3600: los cambios del snippet tardan hasta 1 h en llegar a los embeds.",
+     "fuente": "sprints/utm-1-captura.md:239-242"
+    },
+    {
+     "tema": "Vigilancia de migraciones",
+     "dato": "Las migraciones se aplican sobre la branch Neon dev compartida y requieren aviso al socio. Las de P5.3a/P5.4a se aplicaron a mano.",
+     "fuente": "sprints/utm-1-captura.md:228, 252; bitacora-roadmap.md:11842"
+    }
+   ],
+   "vision": [
+    {
+     "afirmacion": "develOP es una agencia de desarrollo web, IA y automatización de dos personas (Franco, lead técnico-comercial que cierra las ventas, y Valentino, socio técnico-ejecutor), en Tucumán, que vende a PyMEs de Argentina y LATAM.",
+     "fuente": "_insumos/drive/Franco/Work Flow/Proyecto DevelOP/Contexto/develOP-contexto-estable-v1.0.md:8-10"
+    },
+    {
+     "afirmacion": "Versión anterior (mayo): «develOP es un chatbot multi-tenant para PyMEs LATAM, integrado a Logic Core v3».",
+     "fuente": "STATUS.md:16"
+    },
+    {
+     "afirmacion": "Los 4 servicios del sitio son desarrollo web, implementaciones de IA, automatización de procesos y software a medida, cada uno con su landing y su acento de color.",
+     "fuente": "sprints/sprint-b05-sanidad-sitio.md:54; CLAUDE.md (colores de servicio); develOP-contexto-estable-v1.0.md:18"
+    },
+    {
+     "afirmacion": "Hoy los ingresos vienen de sitios web premium por proyecto. La dirección estratégica es el producto productizado (chatbot multi-tenant con IA más mantenimiento, por suscripción), feature-complete pero sin cliente pago en producción. La web funciona como gancho.",
+     "fuente": "develOP-contexto-estable-v1.0.md:13-15"
+    },
+    {
+     "afirmacion": "Planes del chatbot: STARTER 49/mes (setup 700, 500 conversaciones), PRO 90 (900, 3000) y BUSINESS 150 (1000, 5000, «uso justo»).",
+     "fuente": "prisma/seeds/sync-plans.ts:66-104; bitacora-roadmap.md:2013-2020"
+    },
+    {
+     "afirmacion": "Módulos premium como add-ons mensuales: Motor de Reseñas 60, Email Marketing Pro 80, Agenda Inteligente 80 y Tienda Conectada 150 (activos); WhatsApp Autopilot 150, Facturación AFIP 120, Cobranzas 90 y Reactivación 90 (próximamente).",
+     "fuente": "src/lib/data/premium-modules.ts:24-137; bitacora-roadmap.md:2497-2501"
+    },
+    {
+     "afirmacion": "El panel del cliente es un panel de RESULTADOS del negocio para un dueño no técnico; lo técnico lo opera develOP desde el admin.",
+     "fuente": "bitacora-roadmap.md:9760, 11172"
+    },
+    {
+     "afirmacion": "El chatbot es vertical: packs base, usados (concesionarias) y agencia, con scoring, intents y copy por pack. La secuencia de verticales es usados, luego salud privada (condicionada por compliance) y después inmobiliarias.",
+     "fuente": "bitacora-roadmap.md:11564-11575; develOP-contexto-estable-v1.0.md:24-25"
+    },
+    {
+     "afirmacion": "Posicionamiento: LLM real + servicio gestionado + precio LATAM flat, entre el autoservicio (Cliengo/Landbot) y el enterprise de precio oculto. La calidad sale del andamiaje (prompt, tools, KB, scoring, evaluación).",
+     "fuente": "develOP-contexto-estable-v1.0.md:16, 46"
+    },
+    {
+     "afirmacion": "LeadOS (Panel del Setter) es la herramienta interna de prospección «demo-first»: ficha, evaluación, brief, construcción de la demo con Claude Design, revisión de Franco y envío del link. El setter llega con la demo hecha y el «caliente» lo decide Franco.",
+     "fuente": "bitacora-beta-3.md:283-289, 2795-2800; bitacora-beta-2.md:294"
+    },
+    {
+     "afirmacion": "Cliente piloto: Matsu (concesionaria, plan BUSINESS con override de $0 por 90 días hasta el 2026-08-22). San Miguel es data mock.",
+     "fuente": "STATUS.md:174-184; bitacora-roadmap.md:2423-2426"
+    },
+    {
+     "afirmacion": "Referidos: «recomendá develOP y ganás un mes bonificado».",
+     "fuente": "bitacora-roadmap.md:11777"
+    },
+    {
+     "afirmacion": "El home vende la agencia (proyectos de ticket alto, cierre por llamada) y el portal aparece como prueba de capacidad. La home vigente es la clásica, con PortalDemo, TodoIncluido y ModulosOpcionales.",
+     "fuente": "develOP-contexto-estable-v1.0.md:19; src/app/page.tsx:15-18; bitacora-rediseno.md:3604-3610"
+    },
+    {
+     "afirmacion": "Prioridad de mayo: el widget embebible «multiplica el mercado 10x».",
+     "fuente": "sprints/alpha-RESUMEN-FINAL.md:72"
+    }
+   ],
+   "contradicciones": [
+    {
+     "tema": "Qué es develOP",
+     "posiciones": [
+      {
+       "fuente": "STATUS.md:16",
+       "dice": "develOP es un chatbot multi-tenant para PyMEs LATAM"
+      },
+      {
+       "fuente": "develOP-contexto-estable-v1.0.md:8, 13",
+       "dice": "Es una agencia de web, IA y automatización; los ingresos vienen de sitios web por proyecto y el chatbot es la dirección estratégica"
+      }
+     ]
+    },
+    {
+     "tema": "Plataforma de deploy",
+     "posiciones": [
+      {
+       "fuente": "DEPLOY.md:1-3 + vercel.json",
+       "dice": "Despliegue zero-config en Vercel, con 3 crons propios"
+      },
+      {
+       "fuente": "netlify.toml:1-32; bitacora-roadmap.md:13531",
+       "dice": "La config activa es Netlify, con otros 3 crons distintos"
+      },
+      {
+       "fuente": "roadmap-pendientes.md:14",
+       "dice": "vercel.json «hoy no existe» (falso: existe)"
+      }
+     ]
+    },
+    {
+     "tema": "Versión / release",
+     "posiciones": [
+      {
+       "fuente": "sprints/alpha-RESUMEN-FINAL.md:92; STATUS.md:4",
+       "dice": "develOP v1.0 está oficialmente released (tag v1.0.0)"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:7660-7662",
+       "dice": "v1.0.0 «ya no era cierto»; se re-tagea v0.9.0-rc.1"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:9694-9705",
+       "dice": "Recomienda v1.0.0-rc.1; package.json:3 sigue en 0.1.0 y no hay tags v* locales"
+      }
+     ]
+    },
+    {
+     "tema": "Estrategia de testing",
+     "posiciones": [
+      {
+       "fuente": "sprints/alpha-RESUMEN-FINAL.md:50",
+       "dice": "E2E como estrategia primaria, sin unit tests"
+      },
+      {
+       "fuente": "bitacora-beta-3.md:1799-1800, 5182-5200",
+       "dice": "El invariante ejecutable es la verificación que no se evapora; el gate de CI corre 43 → 55 invariantes"
+      }
+     ]
+    },
+    {
+     "tema": "Cold start de Neon",
+     "posiciones": [
+      {
+       "fuente": "STATUS.md:203",
+       "dice": "~1 s en el primer hit"
+      },
+      {
+       "fuente": "sprints/infra-2-cold-start-retry.md:18-20",
+       "dice": "14–30 s, más que el límite de ~10 s de Netlify free"
+      }
+     ]
+    },
+    {
+     "tema": "Plan de Neon",
+     "posiciones": [
+      {
+       "fuente": "sprints/alpha-RESUMEN-FINAL.md:77; STATUS.md:233",
+       "dice": "Pendiente decidir el upgrade a Neon Launch"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:9450",
+       "dice": "Decidido: pg_dump propio, sin pagar Launch"
+      }
+     ]
+    },
+    {
+     "tema": "Sentry",
+     "posiciones": [
+      {
+       "fuente": "sprints/alpha-0-7-baseline-observability.md:14; bitacora-roadmap.md:9547",
+       "dice": "Sentry instalado / «completado»"
+      },
+      {
+       "fuente": "sprints/infra-1-observabilidad.md:18; bitacora-roadmap.md:17135",
+       "dice": "Sin DSN en prod: Sentry es un no-op silencioso, INACTIVO"
+      }
+     ]
+    },
+    {
+     "tema": "Crons en producción",
+     "posiciones": [
+      {
+       "fuente": "STATUS.md:57",
+       "dice": "Reporte semanal automático por cron de Netlify los lunes a las 9 (hora AR)"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:13841",
+       "dice": "Al 2026-07-11, prod no ejecutaba ninguno de los crons declarados (0 scheduled functions)"
+      }
+     ]
+    },
+    {
+     "tema": "Rate limiter y modelo Plan",
+     "posiciones": [
+      {
+       "fuente": "STATUS.md:199, 204",
+       "dice": "No hay modelo Plan; el rate limiter es in-memory"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:1977, 9326; schema.prisma:1765",
+       "dice": "Modelo Plan creado (B4.1) y rate limiter persistente en Neon (B14.1)"
+      }
+     ]
+    },
+    {
+     "tema": "Configuración del CRM",
+     "posiciones": [
+      {
+       "fuente": "roadmap-pendientes.md:24-29",
+       "dice": "Vista admin del CRM postergada; sin edición desde admin"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:9881-9893",
+       "dice": "CC.2: la config del CRM pasa al admin y la edita SUPER_ADMIN"
+      }
+     ]
+    },
+    {
+     "tema": "Cron T0.2",
+     "posiciones": [
+      {
+       "fuente": "roadmap-pendientes.md:151-154",
+       "dice": "T0.2 (cron cleanupOldEvents) «aún sin hacer»"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:13516; netlify/functions/cleanup-old-events-cron.ts",
+       "dice": "Hecho el 2026-07-11 y agendado"
+      }
+     ]
+    },
+    {
+     "tema": "Navegación en /setter",
+     "posiciones": [
+      {
+       "fuente": "setter-nav.tsx:45; bitacora-beta.md:268",
+       "dice": "Navegación SOLO por triggerTransition (presentada como «decisión cerrada · CLAUDE.md»)"
+      },
+      {
+       "fuente": "CLAUDE.md (Navegación)",
+       "dice": "triggerTransition no aplica en portales y /setter no figura en ninguna rama"
+      },
+      {
+       "fuente": "bitacora-beta-3.md:1803-1806",
+       "dice": "Contradicción viva, abierta como C-26"
+      }
+     ]
+    },
+    {
+     "tema": "Foco del setter",
+     "posiciones": [
+      {
+       "fuente": "bitacora-beta-2.md:549",
+       "dice": "UN lead accionable por vez"
+      },
+      {
+       "fuente": "bitacora-beta-3.md:10240",
+       "dice": "Cola de 5: el panel deja de entregar un lead por vez"
+      }
+     ]
+    },
+    {
+     "tema": "Pin y foco",
+     "posiciones": [
+      {
+       "fuente": "bitacora-beta-2.md:556",
+       "dice": "El fijado accionable queda EXCLUIDO del foco"
+      },
+      {
+       "fuente": "bitacora-beta-3.md:1024",
+       "dice": "El pin ordena el foco, no lo excluye"
+      }
+     ]
+    },
+    {
+     "tema": "Playwright bloqueado",
+     "posiciones": [
+      {
+       "fuente": "bitacora-beta.md:1740-1745",
+       "dice": "Los browsers dan ERR_CONNECTION_REFUSED por bloqueo del host (2026-06-22)"
+      },
+      {
+       "fuente": "bitacora-beta-2.md:52-58; bitacora-beta.md:1641-1650",
+       "dice": "La premisa era falsa: Playwright no está bloqueado (2026-06-25)"
+      }
+     ]
+    },
+    {
+     "tema": "Precio del Motor de Reseñas",
+     "posiciones": [
+      {
+       "fuente": "sprints/p3-a-2-venta.md:84-86; LockedView.tsx:151",
+       "dice": "Precio no cerrado: [FALTA:precio]"
+      },
+      {
+       "fuente": "src/lib/data/premium-modules.ts:31; p3-a-2-venta.md:129-130",
+       "dice": "La vitrina muestra 60 USD/mes"
+      }
+     ]
+    },
+    {
+     "tema": "Colores de servicio",
+     "posiciones": [
+      {
+       "fuente": "bitacora-rediseno.md:515-519",
+       "dice": "El CLAUDE.md viejo decía IA violeta, automatización verde, software ámbar"
+      },
+      {
+       "fuente": "CLAUDE.md actual; sprint-b05-sanidad-sitio.md:58-65",
+       "dice": "IA verde, automatización ámbar, software violeta (resuelto)"
+      }
+     ]
+    },
+    {
+     "tema": "three fuera del bundle y badge del home",
+     "posiciones": [
+      {
+       "fuente": "sprints/sprint-b0-bis-cierre.md:25-40",
+       "dice": "MarketingIntro dinámico en Preloader y badge con raya"
+      },
+      {
+       "fuente": "bitacora-rediseno.md:3641-3647; Preloader.tsx:10; About.tsx:245, 280",
+       "dice": "La home clásica restaurada volvió al import estático y al guion simple (queda el plan B en MarketingIntro.tsx:19)"
+      }
+     ]
+    },
+    {
+     "tema": "Duplicación entre bitácoras",
+     "posiciones": [
+      {
+       "fuente": "bitacora-beta.md:3-5",
+       "dice": "Este archivo arranca en C.0; lo previo vive en bitacora-roadmap.md"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:10530-10802",
+       "dice": "Contiene C.0..FG-0 idénticos (diff de 4 líneas)"
+      },
+      {
+       "fuente": "bitacora-beta-2.md:24 vs bitacora-beta.md:1639-1728",
+       "dice": "Los sprints 0.2/0.3 están escritos en los dos archivos"
+      }
+     ]
+    },
+    {
+     "tema": "Reportes semanales opt-in",
+     "posiciones": [
+      {
+       "fuente": "STATUS.md:219",
+       "dice": "Reportes sin opt-in"
+      },
+      {
+       "fuente": "schema.prisma:387; bitacora-roadmap.md:11939",
+       "dice": "Existe executiveReportOptOut y la frecuencia la configura el dueño"
+      }
+     ]
+    },
+    {
+     "tema": "Backups verificados",
+     "posiciones": [
+      {
+       "fuente": "sprints/alpha-0-7-baseline-observability.md:20-21",
+       "dice": "Plan de DR creado: SÍ"
+      },
+      {
+       "fuente": "sprints/alpha-pre-cierre-RESUMEN.md:63",
+       "dice": "Backups de Neon sin verificar"
+      },
+      {
+       "fuente": "bitacora-roadmap.md:9527-9532",
+       "dice": "El restore-test real depende del primer run que dispare Franco"
+      }
+     ]
+    },
+    {
+     "tema": "Brief de visión del setter",
+     "posiciones": [
+      {
+       "fuente": "bitacora-beta-3.md:1209-1210",
+       "dice": "docs/brief-vision-flujo-setter.md no existe en el repo"
+      },
+      {
+       "fuente": "logic-core-v3/docs/BRIEF-VISION-FLUJO-SETTER-v3.md",
+       "dice": "Hoy existe una v3 en docs/ (agregada después; es dudoso que sea la misma vara)"
+      }
+     ]
+    }
+   ],
+   "bloques_franco": [
+    {
+     "bloque": "B0.6 leak",
+     "doc": "docs/bitacora-roadmap.md",
+     "item": "Force-push de la historia purgada (enviroment.env)",
+     "estado": "no empezado",
+     "evidencia": "bitacora-roadmap.md:45-48; el archivo sigue en git log --all (39535583/c351b793, alcanzable desde main)"
+    },
+    {
+     "bloque": "B14.3 backups",
+     "doc": "docs/bitacora-roadmap.md",
+     "item": "Cargar los secrets BACKUP_GPG_PASSPHRASE y DIRECT_DATABASE_URL_PROD/DEV y validar el primer run",
+     "estado": "parcial",
+     "evidencia": "bitacora-roadmap.md:9527-9532; el workflow existe (.github/workflows/db-backup.yml:39-42); la ejecución no es verificable"
+    },
+    {
+     "bloque": "B14.4 salida a prod",
+     "doc": "docs/bitacora-roadmap.md",
+     "item": "Checklist de deploy en 7 fases + tag v1.0.0-rc.1",
+     "estado": "parcial",
+     "evidencia": "bitacora-roadmap.md:9675-9705; no hay tags v* locales y package.json:3 = 0.1.0"
+    },
+    {
+     "bloque": "INFRA.1",
+     "doc": "docs/sprints/infra-1-observabilidad.md",
+     "item": "Setear NEXT_PUBLIC_SENTRY_DSN en Netlify",
+     "estado": "no empezado",
+     "evidencia": "infra-1:69; bitacora-roadmap.md:17135 («Sentry sigue INACTIVO en prod»)"
+    },
+    {
+     "bloque": "P3-A.2",
+     "doc": "docs/sprints/p3-a-2-venta.md",
+     "item": "Cerrar el precio del Motor de Reseñas ([FALTA:precio])",
+     "estado": "no empezado",
+     "evidencia": "p3-a-2:153; LockedView.tsx:151"
+    },
+    {
+     "bloque": "AUD-2",
+     "doc": "docs/bitacora-beta-3.md",
+     "item": "Cargar las 4 URLs de herramientas.ts (Gems y Claude Design)",
+     "estado": "no empezado",
+     "evidencia": "bitacora-beta-3.md:1209; src/lib/leados/herramientas.ts:63, 78, 90, 117 con url:null"
+    },
+    {
+     "bloque": "FG-2.0",
+     "doc": "docs/bitacora-beta.md",
+     "item": "Correr el experimento 5 vs 5 del formulario de brief",
+     "estado": "no empezado",
+     "evidencia": "bitacora-beta.md:1556-1562; docs/experimentos/fg2-brief-experimento.md:185-187 en blanco; /admin/fg2-lab sigue en src"
+    },
+    {
+     "bloque": "Bloque 2 foco",
+     "doc": "docs/bitacora-beta-2.md",
+     "item": "Decidir si el pin puede ser foco",
+     "estado": "hecho",
+     "evidencia": "bitacora-beta-2.md:556 → bitacora-beta-3.md:1024 (Sprint 6.1)"
+    },
+    {
+     "bloque": "Franja admin D4",
+     "doc": "docs/bitacora-beta-2.md",
+     "item": "Gate de demo preventiva por el campo caliente",
+     "estado": "hecho",
+     "evidencia": "bitacora-beta-2.md:561; dossier.ts usa gateBriefAbierto"
+    },
+    {
+     "bloque": "BLOQUE PRIVACIDAD",
+     "doc": "docs/bitacora-roadmap.md",
+     "item": "Decisión de producto: Telegram con PII de visitantes",
+     "estado": "no empezado",
+     "evidencia": "bitacora-roadmap.md:16897 (pendiente, sin registro posterior en los docs revisados)"
+    },
+    {
+     "bloque": "Carril seguridad",
+     "doc": "docs/roadmap-pendientes.md",
+     "item": "RT-2, RE-13, RE-16, RE-7, RT-13, CO-7+PD-1, A.4",
+     "estado": "no empezado",
+     "evidencia": "roadmap-pendientes.md:175; dudoso: no se verificó contra el código en esta extracción"
+    },
+    {
+     "bloque": "Rediseño home",
+     "doc": "docs/bitacora-rediseno.md",
+     "item": "Cerrar los 27 placeholders del gate de merge y las fotos de los socios",
+     "estado": "abandonado",
+     "evidencia": "bitacora-rediseno.md:3323-3360; HOME-CLASICO (3604) restauró la home clásica"
+    },
+    {
+     "bloque": "Rediseño home",
+     "doc": "docs/bitacora-rediseno.md",
+     "item": "GATE 1: permutación de acentos y familia del display",
+     "estado": "parcial",
+     "evidencia": "bitacora-rediseno.md:509-537; los acentos A quedaron en el código y CLAUDE.md; el display quedó sin efecto con la home clásica"
+    },
+    {
+     "bloque": "EL TRONCO",
+     "doc": "docs/bitacora-beta-3.md",
+     "item": "Push de main a la punta reconciliada",
+     "estado": "hecho",
+     "evidencia": "bitacora-beta-3.md:10975; ea94dbf8 y 57c421bc son ancestros de origin/main"
+    },
+    {
+     "bloque": "B0-bis / B0.5",
+     "doc": "docs/sprints/sprint-b0-bis-cierre.md",
+     "item": "Verificación en el teléfono + Lighthouse mobile del preview antes del merge",
+     "estado": "abandonado",
+     "evidencia": "sprint-b0-bis-cierre.md:57-60; la home restaurada dejó sin objeto la medición"
+    },
+    {
+     "bloque": "Beta Matsu",
+     "doc": "STATUS.md",
+     "item": "Onboarding real de Matsu y firma de v1.0.0",
+     "estado": "parcial",
+     "evidencia": "STATUS.md:174-178; bitacora-roadmap.md:9707-9718, 2423; no se puede confirmar uso real en prod"
+    }
+   ]
+  },
+  {
+   "extractor": "auditorias",
+   "docs": [
+    {
+     "doc": "docs/admin-design-system-audit.md",
+     "tipo": "auditoría read-only (feature)",
+     "periodo": "2026-06-28",
+     "resumen": "Audita el playground /admin/_design: autocontenido, SUPER_ADMIN-only, sin consumidores ni acople con Franco/setter (admin-design-system-audit.md:65-70). Propone Fase 2 (sacar del nav) y Fase 3 (borrar) con OK de Valentino (:72-78); la Fase 3 ya se ejecutó: en 57c421bc no existe ninguna ruta _design bajo src/app/(protected)/admin.",
+     "recomendacion": "borrar",
+     "reemplazo": "Una línea en el doc vivo de decisiones: '/admin/_design borrado; el playground vigente es /styleguide' (auditorias/A1-CENSO-SUPERFICIES-2026-08.md:269).",
+     "que_se_pierde": "Solo el razonamiento de por qué el borrado era seguro; ya ejecutado y queda en git."
+    },
+    {
+     "doc": "docs/audit-chatbot-runtime.md",
+     "tipo": "auditoría de diagnóstico (runtime chatbot)",
+     "periodo": "2026-07-06 (commit 2026-07-15)",
+     "resumen": "Recorre el runtime /api/chatbot/[slug]: aislamiento sin huecos, la conversación muere en el mensaje 51, el costo se calcula con el modelo equivocado, los knobs de BotConfig se ignoran y /smoke quema tokens sin auth (audit-chatbot-runtime.md:11-21). En 57c421bc ya se arreglaron COST-1 (handleChatRequest.ts:710-714) y /smoke (la ruta no existe); sigue sessionId @unique global (schema.prisma:1375).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo Chatbot e IA: mapa del flujo A.0 y hallazgos abiertos (C-1 mensaje 51, C-2 sessionId, C-3 error a mitad del stream, V-1 knobs ignorados, V-4 maxDuration) con su estado.",
+     "que_se_pierde": "Detalle de cada hallazgo con archivo:línea de julio. Lo valioso es el mapa del flujo A.0 (:26-58); conviene llevarlo al doc vivo."
+    },
+    {
+     "doc": "docs/audit-repo-20260707.md",
+     "tipo": "auditoría integral read-only",
+     "periodo": "2026-07-07",
+     "resumen": "Seis pasadas paralelas sobre runtime, panel, admin y lo compartido, con IDs RT/RE/PD/PA/CO, mejoras rankeadas en 4 tiers y un cruce contra el roadmap (audit-repo-20260707.md:1-13,227-340). En 57c421bc están cerrados CO-1 (next.config.ts:31-36), CO-5 (índices en Service/Message/Invoice) y RT-1/RT-2. Siguen abiertos PA-1 (runPreflightChecks es 'use server' sin guard de rol, preflightChecks.ts:1,13), CO-7 (tokens en claro, schema.prisma:359,367,375), CO-10 (resend en package.json:166) y CO-11 (basura en la raíz).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de seguridad y deuda abierta (registro único con estado por ID).",
+     "que_se_pierde": "La sección C, el cruce con el roadmap viejo, y la evidencia línea por línea de los ítems ya cerrados."
+    },
+    {
+     "doc": "docs/audit/2026-04-dashboard-cleanup-audit.md",
+     "tipo": "auditoría previa a sprint (D0.2/D0.3)",
+     "periodo": "2026-04-27",
+     "resumen": "Mapea 14 rutas del dashboard a borrar, el inventario de modelos Prisma de abril y el sistema precario User.unlockedFeatures. Propone PremiumModule/OrganizationModule e instalar date-fns (2026-04-dashboard-cleanup-audit.md:79-133). Todo quedó superado: unlockedFeatures ya no está en el schema y date-fns ^4.1.0 está instalado (package.json:144).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno (histórico).",
+     "que_se_pierde": "La foto de abril del schema y de las rutas eliminadas; queda en git."
+    },
+    {
+     "doc": "docs/auditoria-consistencia-setter.md",
+     "tipo": "auditoría de consistencia de código y diseño",
+     "periodo": "2026-06-23 (commit 2026-06-29)",
+     "resumen": "Mide en la zona del setter la adherencia a tokens, el reuso de Callout/Field/StatCard y la a11y estructural, con verificación adversarial (auditoria-consistencia-setter.md:9-32). Describe el wizard de página larga, que fue reemplazado por el manual paso por pantalla (auditorias/REGRESION-FINAL-2026-07.md:3). El hueco de a11y de Field se cerró en el Sprint 7.2 (REGRESION-FINAL-2026-07.md:128).",
+     "recomendacion": "borrar",
+     "reemplazo": "Si se quiere, 2-3 reglas al doc vivo de diseño: usar Callout y no cajas a mano, eyebrow con el token 0.24em, una sola familia de sombras.",
+     "que_se_pierde": "Inventario de duplicados del wizard viejo; la mayoría de los archivos citados (*-step.tsx) ya no existe."
+    },
+    {
+     "doc": "docs/auditoria-recorrido-completo-novato.md",
+     "tipo": "auditoría perceptual (recorrido con capturas)",
+     "periodo": "2026-07-01",
+     "resumen": "Un setter novato recorre el wizard de punta a punta: llega solo, pero 4 de 5 herramientas externas tienen 'Link pendiente' (auditoria-recorrido-completo-novato.md:13,44-50). Confirma el flujo invertido y los gates autoexplicados (:84-88).",
+     "recomendacion": "borrar",
+     "reemplazo": "Superado por docs/corrida-recorrido-2026-08-31/REPORTE.md (consolidado en el doc vivo LeadOS).",
+     "que_se_pierde": "La referencia a las 32 capturas de docs/proof-screenshots/corrida-2-… (wizard ya retirado)."
+    },
+    {
+     "doc": "docs/auditoria-seguridad-2026-05.md",
+     "tipo": "auditoría de seguridad report-only",
+     "periodo": "2026-05-26",
+     "resumen": "32 hallazgos SEC-* (2 P0, 13 P1, 17 P2) con checklist heredado, apéndice de PII enviada a terceros y mapa del runtime del bot (auditoria-seguridad-2026-05.md:12-51,364-417). Se revalidó en junio y julio: cerrados AUTH-01/02/03/04, RATELIMIT-01, PII-01 (notify-message.ts:62 ya ofusca); abiertos LLM-01..04, PII-02/03, SSRF-01 y RATELIMIT-02 (reabierto como S4-03).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de seguridad: estado por ID y el Apéndice A (PII a terceros) como sección permanente.",
+     "que_se_pierde": "La evidencia original de mayo. Ojo: es uno de los 16 docs que enumeran vulnerabilidades en un repo marcado PUBLIC (baselines/2026-07-auditoria-seguridad.md:3576-3606); borrarlo del árbol no lo saca del historial."
+    },
+    {
+     "doc": "docs/auditoria-total-pre-deploy.md",
+     "tipo": "auditoría de performance (AUDIT-4)",
+     "periodo": "2026-06-02",
+     "resumen": "16 oportunidades de performance (videos autoplay de 12,9 MB, 18 MB de video huérfano, chrome de landing en rutas auth, recharts sin code-split) y una lista explícita de NO TOCAR (auditoria-total-pre-deploy.md:31-104). Se midió sin build fresco porque el build estaba roto (O-2).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de plataforma y performance: sección 'NO TOCAR' (:75-90) y quick wins pendientes.",
+     "que_se_pierde": "La medición del bundle (.next/static de 6,70 MB del 2026-05-26) y el detalle de evidencia por oportunidad."
+    },
+    {
+     "doc": "docs/auditoria-ux-setter.md",
+     "tipo": "auditoría estructural UX",
+     "periodo": "2026-06-23 (commit 2026-06-29)",
+     "resumen": "Diagnóstico de 41 vistas del setter: 4 steps sobrecargados, redundancia sistémica de las reglas del rol y estados de error y carga parciales (auditoria-ux-setter.md:10-20). Fue el insumo del rediseño que reemplazó el wizard por el manual.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno (superado por el manual y su regresión final).",
+     "que_se_pierde": "Conteo de prosa por pantalla del wizard retirado."
+    },
+    {
+     "doc": "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md",
+     "tipo": "censo de arquitectura read-only",
+     "periodo": "2026-08-13",
+     "resumen": "Clasifica cada ruta como interna o de cliente, mide el peso real por dominio (chatbot 49.592 líneas, LeadOS 21.387) y lista el acoplamiento duro D1-D9 y el blando (A1:87-100,207-258). También trae 10 discrepancias entre docs y código (:260-273). Concluye que la frontera real es LeadOS contra el resto (:281-285).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de arquitectura: el mapa de superficies, el acoplamiento y la frontera LeadOS.",
+     "que_se_pierde": "Las cifras de agosto y la tabla de discrepancias. Varias siguen vivas: AGENTS.md:56-58 sigue con la paleta invertida y AGENTS.md:22 sigue diciendo Haiku."
+    },
+    {
+     "doc": "docs/auditorias/A2-SETTER-DOCS-VIABILIDAD-2026-08.md",
+     "tipo": "relevamiento de viabilidad",
+     "periodo": "2026-08-13",
+     "resumen": "Releva qué archivos tocar para sumar una sección de documentación en /setter: gating por rol, dependencias de markdown y riesgos en mobile (A2:9-243). La sección no se construyó: en 57c421bc /setter solo tiene leads/ y nuevo/.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno; si la feature revive, se re-releva (el mapa de archivos envejece rápido).",
+     "que_se_pierde": "El mapa de montaje del shell del setter (A2:11-20), reconstruible desde el código."
+    },
+    {
+     "doc": "docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md",
+     "tipo": "inventario de tooling (ECC/skills/hooks)",
+     "periodo": "2026-08-13",
+     "resumen": "Inventario de .claude/ (9 skills, el agente visual-qa, hooks, launch.json con los puertos 3000/3002/3001) y del estado de ECC. Verifica el formato de SKILL.md (A3-ESTADO:7-283).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de método y workflow (WF/ECC): un párrafo con la ubicación de skills, agentes y puertos.",
+     "que_se_pierde": "El formato de SKILL.md verificado (:158-264) y las discrepancias de instalación."
+    },
+    {
+     "doc": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md",
+     "tipo": "auditoría externa de viabilidad, 2ª pasada (82 KB, recorrida por estructura)",
+     "periodo": "2026-08-24",
+     "resumen": "Cierra 8 frentes y 5 preguntas de las decisiones de OSLead VII: el mecanismo propio NO ALCANZA para S2/S3/S4 y suma 7 decisiones no construibles, 17 en total (A3-BIS:92-140). Arranca con una PARADA porque el doc de corrección que gobernaba la corrida no existe (:17-56). Su hallazgo transversal ('no hay ningún gate automático') ya está resuelto en 57c421bc (.github/workflows/ci.yml:63-105).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo LeadOS: la lista de 17 decisiones no construibles y los sobrecostos de C4/S5 (sin tokens: 111 clases cyan literales).",
+     "que_se_pierde": "Las evidencias por frente; el resto es recuperable de git."
+    },
+    {
+     "doc": "docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md",
+     "tipo": "auditoría externa de viabilidad, 1ª pasada (73 KB, recorrida por estructura)",
+     "periodo": "2026-08-24",
+     "resumen": "Contra el código, 10 decisiones de OSLead VII no se pueden construir como están escritas, implican 14 cambios de schema (7 destructivos) y otras 10 ya estaban construidas (A3-DECISIONES:55-108). Sacar el valor EVALUADA del enum es irreversible sin recrear el tipo (:100-108). Además refuta afirmaciones de los docs de decisiones (:1105-1186).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo LeadOS: veredicto §1 y §8 (lo que el código contradice) junto a las decisiones de OSLead.",
+     "que_se_pierde": "El premortem del Evaluador (§7) y el detalle de schema; recomendable resumirlos."
+    },
+    {
+     "doc": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md",
+     "tipo": "auditoría de cierre y documento de continuidad",
+     "periodo": "2026-07-07",
+     "resumen": "Mide el gap entre LeadOS y el brief tras los Bloques 2-7 (veredicto PARCIAL) y arma el backlog único: 3 P1, 10 P2, 17 P3 y 10 DECISIÓN-Franco, con orden de ataque y propuestas descartadas por guardarraíl (AUDITORIA-CIERRE:15-17,146-260). B-01 ya está hecho (os-commercial.ts:15-23). La DECISIÓN #1 (URLs de herramientas) sigue pendiente (herramientas.ts:63,78,90,117).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo LeadOS: el backlog que sigue vivo y los guardarraíles (§8).",
+     "que_se_pierde": "Las fichas ejecutables con modelo y esfuerzo por ítem y el diseño propuesto de la fase PRE (§6)."
+    },
+    {
+     "doc": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md",
+     "tipo": "auditoría de la red de verificación (sabotaje de invariantes)",
+     "periodo": "2026-08-25",
+     "resumen": "Mide que no había gate automático, que tsc daba 0 errores y lint 102, y sabotea 6 invariantes: 2 falsos verdes, el peor el self-check unido por texto visible y no por id (C0:13-58). Dice además que LEGAL_TRANSITIONS no tiene invariante (:47-52). Encender tipos y CI ya está hecho en 57c421bc (next.config.ts:31-36; ci.yml).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de calidad y verificación: los falsos verdes conocidos y lo que queda sin vigilar (§4).",
+     "que_se_pierde": "El protocolo de sabotaje reproducible (§3)."
+    },
+    {
+     "doc": "docs/auditorias/REGRESION-FINAL-2026-07.md",
+     "tipo": "regresión final (sello del rediseño)",
+     "periodo": "2026-07-04",
+     "resumen": "Sello del rediseño de experiencia del setter: 0 regresiones en 5 frentes (aislamiento, gates, flujo, contenido, invariantes). Deja tsc 0, invariantes 16/16, test:leados 22/22 y test:setter 39/39 (REGRESION-FINAL:9-21,96-107). Fija que el gate inviolable vive en flow.ts:90-101 y no en un archivo gate-envio-demo.ts (:86).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo LeadOS: 'lista de preservación / motor intocable' (gates, línea de envío, aislamiento) y dónde vive cada pieza.",
+     "que_se_pierde": "El conteo de suites de julio (ya desactualizado)."
+    },
+    {
+     "doc": "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md",
+     "tipo": "smoke-test exhaustivo (Sprint 7.0)",
+     "periodo": "2026-07-04",
+     "resumen": "De 41 hallazgos sobre las 16 pantallas del manual aplicó 2 arreglos aria triviales y dejó 39 en (b) (SMOKE:9-35). Lo más serio era el hint del score que dice 'caliente' y el vocabulario muerto del wizard.",
+     "recomendacion": "borrar",
+     "reemplazo": "Absorbido por el backlog de AUDITORIA-CIERRE (C-xx), que va al doc vivo LeadOS.",
+     "que_se_pierde": "El detalle por pantalla de los 39 (b); la mayoría está fusionada en el backlog de cierre."
+    },
+    {
+     "doc": "docs/audits/2026-05-auditoria-db.md",
+     "tipo": "auditoría de schema y DB viva",
+     "periodo": "2026-05-21",
+     "resumen": "El schema está sano para construir encima. Propone el modelo Plan con planId FK, Project.organizationId NOT NULL, enums para strings encubiertos y 3 índices a agregar y 6 a borrar, con 8 decisiones para Franco (2026-05-auditoria-db.md:15-21,139-171,325-334). Casi todo quedó ejecutado: Plan en schema.prisma:606, planName eliminado, unlockedFeatures eliminado.",
+     "recomendacion": "borrar",
+     "reemplazo": "Doc vivo de decisiones: Plan reemplaza planName, LeadStatus y ChatbotLeadStatus quedan separados, las columnas JSON quedan JSON y ChatbotEvent.type queda String.",
+     "que_se_pierde": "La foto de counts de mayo y el uso de índices de pg_stat. Contiene hosts de Neon (:7,57,344), que no son credenciales."
+    },
+    {
+     "doc": "docs/audits/2026-05-auditoria-profunda.md",
+     "tipo": "auditoría profunda de producto",
+     "periodo": "2026-05-20",
+     "resumen": "Tablero P0-P2 de widget, admin, dashboard y bot. Expone que STATUS.md mentía, que el cliente piloto no tenía bot y que no existía sistema de planes; incluye 8 transcripts del bot (2026-05-auditoria-profunda.md:14-74,216-296). Revalidado en junio: la mayoría quedó cerrada (2026-06-revalidacion.md:59-80).",
+     "recomendacion": "borrar",
+     "reemplazo": "Lo vigente ya vive en la revalidación y en el doc vivo de seguridad y deuda. Los 8 escenarios del bot existen como casos en scripts/regression.",
+     "que_se_pierde": "Los transcripts de mayo (calidad del bot develop/Lucía) como referencia histórica."
+    },
+    {
+     "doc": "docs/audits/2026-05-bfg-leak-cleanup.md",
+     "tipo": "runbook (purga de secret del historial)",
+     "periodo": "2026-05-21",
+     "resumen": "Runbook para purgar enviroment.env del historial: la purga se preparó en un mirror con git-filter-repo y el force-push nunca se hizo (2026-05-bfg-leak-cleanup.md:169-205). En 57c421bc el commit 3953558 sigue siendo ancestro. SECRET: :94 contiene el valor completo de la API key de Google Generative AI filtrada (y prefijos en :143,189,204,262); según :17 y :204 está deshabilitada/rotada.",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de operación, con el procedimiento de purga y force-push (pasos 8.3) SIN el valor de la key, más una decisión explícita: ejecutar la purga o aceptar el riesgo.",
+     "que_se_pierde": "Nada operativo si los pasos pasan al doc vivo. Borrar el archivo no saca la key del historial (este mismo doc la repite)."
+    },
+    {
+     "doc": "docs/audits/2026-05-cleanup-db-dev.md",
+     "tipo": "runbook ejecutado (limpieza de datos en branch dev)",
+     "periodo": "2026-05-21",
+     "resumen": "Borró en Neon dev 2 orgs duplicadas, 1 project duplicado y el bot dsa, y reasignó el project huérfano a develop, con backup de las filas crudas (2026-05-cleanup-db-dev.md:11-197). Deja los pasos para replicar en prod (:219-283). La replicación quedó sin verificar (2026-06-revalidacion.md:124).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de operación: un ítem 'replicación del cleanup a Neon main: pendiente o innecesaria' y la regla del script con chequeo de host.",
+     "que_se_pierde": "El backup JSON de las filas borradas en dev (rollback de baja utilidad). Los scripts _db-cleanup-*.mjs siguen en scripts/ (3 archivos en 57c421bc)."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md",
+     "tipo": "revalidación (caja blanca + negra)",
+     "periodo": "2026-06-04/05",
+     "resumen": "Revalida mayo: el bot estaba caído (HTTP 500 por el casing GOOGLE/google), el build roto y el health en 503 falso. Casi todo lo de mayo cerrado (2026-06-revalidacion-dashboard-chatbot.md:13-48). Incluye la corrida Playwright de 12 passed y 7 failed.",
+     "recomendacion": "borrar",
+     "reemplazo": "Duplica en un 80% a 2026-06-revalidacion.md; lo vigente va al doc vivo de seguridad y deuda.",
+     "que_se_pierde": "Las métricas históricas del bot hasta el 23/05 (393 conversaciones, p50 4077 ms, :116)."
+    },
+    {
+     "doc": "docs/audits/2026-06-revalidacion.md",
+     "tipo": "revalidación (estado vs mayo)",
+     "periodo": "2026-06-05",
+     "resumen": "Ledger compacto CERRADO/ABIERTO/PARCIAL de los tableros de mayo y del estado de la DB y los cleanups. Concluye que la app corre contra la branch dev y que el secret sigue en origin/main (2026-06-revalidacion.md:11-42).",
+     "recomendacion": "borrar",
+     "reemplazo": "Sus estados se vuelcan al registro del doc vivo de seguridad y deuda.",
+     "que_se_pierde": "La foto de junio (superada por las auditorías de julio y agosto)."
+    },
+    {
+     "doc": "docs/b7-probe-cal-com.md",
+     "tipo": "probe de integración (Cal.com)",
+     "periodo": "2026-06-12",
+     "resumen": "Confirma que la API v2 de Cal.com lista slots y crea bookings sin API key, y que v1 se apagó el 8/abr/2026 (b7-probe-cal-com.md:7-20,70-74). Fue la base de B7. En 57c421bc existe cal-com-v2.ts:20, pero cal-com.ts:4 sigue llamando a v1.",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de integraciones: setup de Cal.com (cuenta de Franco, event type, calComUsername) y la deuda getCalSummary v1.",
+     "que_se_pierde": "Los ejemplos de request y response, cubiertos por el código de cal-com-v2.ts."
+    },
+    {
+     "doc": "docs/b8a-auditoria.md",
+     "tipo": "auditoría de LeadOS (hardening)",
+     "periodo": "2026-06-13",
+     "resumen": "Hallazgos H1-H8 sobre el wizard (compensación de booking, CALL_AGENDADA, stepper, bypass QA) y qué se ejecutó (b8a-auditoria.md:83-96). El H8 sigue vigente: el seed deja setter-qa con passwordResetRequired:false (prisma/seed.ts:157,165).",
+     "recomendacion": "borrar",
+     "reemplazo": "Si sigue aplicando, el H2 (re-agendar tras RE_SEGUIMIENTO) va como ítem del backlog del doc vivo LeadOS.",
+     "que_se_pierde": "El análisis de tradeoffs de H2 (:37-41)."
+    },
+    {
+     "doc": "docs/b8a-ii-auditoria.md",
+     "tipo": "auditoría de LeadOS (2ª pasada)",
+     "periodo": "2026-06-13",
+     "resumen": "Segunda pasada: una mejora real (NII-1, materiales del negocio en el bloque de Construcción) y un copy menor (b8a-ii-auditoria.md:23-55). Concluye que el siguiente paso no es código sino correr el piloto (:79).",
+     "recomendacion": "borrar",
+     "reemplazo": "La lección 'el próximo paso es el dato del piloto' va al doc vivo de decisiones y lecciones.",
+     "que_se_pierde": "Nada vigente (wizard retirado)."
+    },
+    {
+     "doc": "docs/baselines/2026-05-admin-performance.md",
+     "tipo": "baseline de performance (Sprint R3)",
+     "periodo": "2026-05-19",
+     "resumen": "Diagnostica la lentitud del /admin: sin data cache y con cold start de Neon (~1082 ms, auto-suspend de 5 min en el plan free). Aplica unstable_cache con revalidateTag, que sigue en admin/clients, layout y leads en 57c421bc (2026-05-admin-performance.md:17-71).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de operación: cold start de Neon y sus opciones (plan Launch a $19/mes o ping cada 4 min, :75-90) y las tags de cache del admin.",
+     "que_se_pierde": "La tabla antes/después de queries por request."
+    },
+    {
+     "doc": "docs/baselines/2026-05-chatbot-runtime.md",
+     "tipo": "baseline de carga (chatbot)",
+     "periodo": "2026-05-17/19",
+     "resumen": "Load test local de 30 requests: 33% de éxito por rate-limit, p50 4,07 s y p95 13 s (2026-05-chatbot-runtime.md:10-21). Luego aplicó R2 (paralelización y cache de 60 s) y declaró irreales los SLO de p50 <1500 ms (:76-80).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo Chatbot e IA: latencias de referencia y que Vertex domina la latencia.",
+     "que_se_pierde": "El método del load test (reconstruible)."
+    },
+    {
+     "doc": "docs/baselines/2026-07-auditoria-seguridad.md",
+     "tipo": "auditoría de seguridad dedicada (616 KB, recorrida por estructura y muestreo)",
+     "periodo": "2026-07-29 (sobre origin/main 49fec9b del 2026-07-24)",
+     "resumen": "75 hallazgos (2 ALTO, 25 MEDIO, 48 BAJO) con refutación adversarial, matriz rol × superficie y estado de lo desplegado contra lo arreglado en ramas sin mergear (2026-07-auditoria-seguridad.md:1-95,3745-3830). En 57c421bc siguen abiertos S4-01 (validate-origin.ts:69-72, el escape develop.com.ar antes de allowedDomains) y S2b-01 (gate de email-marketing solo en layout.tsx:20), /api/test-sentry sigue existiendo y no hay tests @isolation.",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de seguridad: tabla priorizada §9, matriz §5 y la lista de verificaciones externas pendientes §8 (Netlify, GCP).",
+     "que_se_pierde": "La evidencia y la refutación por hallazgo (miles de líneas). El propio doc pide no publicarlo mientras el repo sea público (:3830), y está en el árbol de 57c421bc."
+    },
+    {
+     "doc": "docs/baselines/p17-pliegue-antes.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-01",
+     "resumen": "Medición del primer pliegue por pantalla del manual (alturas de cabecera, munición y registro a 1440) antes de P17. La genera scripts/qa-corridas/medir-pliegue-manual.ts.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno (artefacto regenerable con el script).",
+     "que_se_pierde": "La evidencia 'antes' de P17."
+    },
+    {
+     "doc": "docs/baselines/p17-pliegue-despues.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-01",
+     "resumen": "El mismo censo del pliegue después de P17 (achique del layout-tipo, commit c9b1db7a).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia 'después' de P17."
+    },
+    {
+     "doc": "docs/baselines/p18-pliegue-antes.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "Censo del pliegue antes de P18 (commit 66d7fe64).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P18."
+    },
+    {
+     "doc": "docs/baselines/p18-pliegue-despues.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "Censo del pliegue después de P18.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P18."
+    },
+    {
+     "doc": "docs/baselines/p19-barrido-antes.json",
+     "tipo": "baseline de barrido de derivación (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "Barrido de las 373.248 combinaciones de estado del lead antes de P19: 41.376 'malas' (paso señalado incorrecto). Lo genera scripts/qa-corridas/barrido-derivacion.ts:5.",
+     "recomendacion": "borrar",
+     "reemplazo": "Una línea en el doc vivo LeadOS: 'P19: malas 41.376 → 10.368 en el barrido de derivación'.",
+     "que_se_pierde": "Las clases de combinación con ejemplo."
+    },
+    {
+     "doc": "docs/baselines/p19-barrido-despues.json",
+     "tipo": "baseline de barrido de derivación (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "El mismo barrido después de P19: quedan 10.368 'malas' con postergación en el input. Que sean residuo aceptado o defecto: dudoso.",
+     "recomendacion": "borrar",
+     "reemplazo": "La línea de arriba en el doc vivo LeadOS.",
+     "que_se_pierde": "El detalle de las 10.368 restantes (regenerable)."
+    },
+    {
+     "doc": "docs/baselines/p19-pliegue-antes.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "Censo del pliegue antes de P19.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P19."
+    },
+    {
+     "doc": "docs/baselines/p19-pliegue-despues.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "Censo del pliegue después de P19.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P19."
+    },
+    {
+     "doc": "docs/baselines/p20-destinos-antes.json",
+     "tipo": "baseline de navegación (JSON generado)",
+     "periodo": "2026-09-03",
+     "resumen": "Censo de destinos y franja por pantalla del 'brazo viejo' antes de P20 (commit 29d0635f). Lo genera scripts/qa-corridas/capturar-franja.ts.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P20."
+    },
+    {
+     "doc": "docs/baselines/p20-destinos-despues-v2.json",
+     "tipo": "baseline de navegación (JSON generado)",
+     "periodo": "2026-09-03",
+     "resumen": "Segunda medición posterior a P20 de los destinos navegables.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P20."
+    },
+    {
+     "doc": "docs/baselines/p20-destinos-despues.json",
+     "tipo": "baseline de navegación (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "Destinos después de P20 (commit 795d8f31).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P20."
+    },
+    {
+     "doc": "docs/baselines/p20-pliegue-antes.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "Censo del pliegue antes de P20.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P20."
+    },
+    {
+     "doc": "docs/baselines/p20-pliegue-despues.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-02",
+     "resumen": "Censo del pliegue después de P20.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P20."
+    },
+    {
+     "doc": "docs/baselines/p21-franja-antes.json",
+     "tipo": "baseline de navegación (JSON generado)",
+     "periodo": "2026-09-03",
+     "resumen": "Franja de recorrido por pantalla (texto y alto) antes de P21.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P21."
+    },
+    {
+     "doc": "docs/baselines/p21-franja-despues.json",
+     "tipo": "baseline de navegación (JSON generado)",
+     "periodo": "2026-09-03",
+     "resumen": "Franja de recorrido después de P21.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P21."
+    },
+    {
+     "doc": "docs/baselines/p21-panel-antes.json",
+     "tipo": "baseline del panel del setter (JSON generado)",
+     "periodo": "2026-09-03",
+     "resumen": "Orden y posición de los bloques del home del setter (cabecera, foco, novedades de 1346 px, cartera fuera del pliegue) antes de P21. Lo genera scripts/qa-corridas/medir-panel-setter.ts:25.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P21 (cola de trabajo visible)."
+    },
+    {
+     "doc": "docs/baselines/p21-panel-despues.json",
+     "tipo": "baseline del panel del setter (JSON generado)",
+     "periodo": "2026-09-03",
+     "resumen": "Bloques del home después de P21.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P21."
+    },
+    {
+     "doc": "docs/baselines/p21-pliegue-antes.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-03",
+     "resumen": "Censo del pliegue antes de P21.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P21."
+    },
+    {
+     "doc": "docs/baselines/p21-pliegue-despues.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-03",
+     "resumen": "Censo del pliegue después de P21.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P21."
+    },
+    {
+     "doc": "docs/baselines/p22-cartera-antes.json",
+     "tipo": "baseline de cartera (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Cartera del setter antes de P22: 84 tarjetas, 0 en el pliegue, alto total de 11.416 px y 0 grupos. Lo genera scripts/qa-corridas/medir-cartera.ts:28.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P22 (cartera agrupada)."
+    },
+    {
+     "doc": "docs/baselines/p22-cartera-despues.json",
+     "tipo": "baseline de cartera (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Cartera después de P22.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P22."
+    },
+    {
+     "doc": "docs/baselines/p22-destinos-antes.json",
+     "tipo": "baseline de navegación (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Destinos antes de P22.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P22."
+    },
+    {
+     "doc": "docs/baselines/p22-destinos-despues.json",
+     "tipo": "baseline de navegación (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Destinos después de P22.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P22."
+    },
+    {
+     "doc": "docs/baselines/p22-pliegue-antes.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Censo del pliegue antes de P22.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P22."
+    },
+    {
+     "doc": "docs/baselines/p22-pliegue-despues.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Censo del pliegue después de P22.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P22."
+    },
+    {
+     "doc": "docs/baselines/p23-panel-antes.json",
+     "tipo": "baseline del panel (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Bloques del home del setter antes de P23 (commit ea94dbf8).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P23."
+    },
+    {
+     "doc": "docs/baselines/p23-panel-despues.json",
+     "tipo": "baseline del panel (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Bloques del home después de P23.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P23."
+    },
+    {
+     "doc": "docs/baselines/p23-pliegue-antes.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Censo del pliegue antes de P23. Además es el INPUT por defecto de scripts/qa-corridas/_p23/censo-ubicaciones.ts:34 (CENSO_PLIEGUE puede sobreescribirlo).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno; si se borra, el script necesita CENSO_PLIEGUE explícito o regenerar el JSON.",
+     "que_se_pierde": "El input por defecto de ese script de P23."
+    },
+    {
+     "doc": "docs/baselines/p23-pliegue-despues.json",
+     "tipo": "baseline de medición (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Censo del pliegue después de P23.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P23."
+    },
+    {
+     "doc": "docs/baselines/p23-ubicaciones-antes.json",
+     "tipo": "baseline de ubicación de frases (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Frases de munición y la ubicación de su referente en pantalla antes de P23 ('el veredicto que se pierde'). Lo genera scripts/qa-corridas/_p23/censo-ubicaciones.ts:17.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La evidencia de P23."
+    },
+    {
+     "doc": "docs/baselines/p23-ubicaciones-despues.json",
+     "tipo": "baseline de ubicación de frases (JSON generado)",
+     "periodo": "2026-09-04",
+     "resumen": "Después de P23 queda 1 hallazgo: el bloque de objeción del Gem de outreach en m5 sin referente encontrado.",
+     "recomendacion": "borrar",
+     "reemplazo": "Si ese hallazgo sigue vigente, 1 ítem en el backlog LeadOS (dudoso).",
+     "que_se_pierde": "El registro del residual de P23."
+    },
+    {
+     "doc": "docs/corrida-recorrido-2026-08-31/.gitignore",
+     "tipo": "config de carpeta de diagnóstico",
+     "periodo": "2026-08-31",
+     "resumen": "Excluye los *.png de la corrida del repo.",
+     "recomendacion": "borrar",
+     "reemplazo": "Se va con la carpeta.",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/corrida-recorrido-2026-08-31/MANIFIESTO.md",
+     "tipo": "manifiesto de capturas (generado)",
+     "periodo": "2026-08-31",
+     "resumen": "Manifiesto de las 79 PNG a 1440 px del recorrido completo, con el método para esquivar el fold del shell fixed inset-0 (MANIFIESTO.md:1-20). Los PNG no están en el repo.",
+     "recomendacion": "borrar",
+     "reemplazo": "El método de captura (scroller interno y viewport agrandado) como lección en el doc vivo de calidad y verificación.",
+     "que_se_pierde": "La trazabilidad captura por captura; los binarios ya no están."
+    },
+    {
+     "doc": "docs/corrida-recorrido-2026-08-31/REPORTE.md",
+     "tipo": "corrida de recorrido (punta a punta)",
+     "periodo": "2026-08-31",
+     "resumen": "Una persona nueva recorre LeadOS de cartera a agenda, con rechazo y aprobación por la UI real del admin. Registra 9 baches B1-B9 (herramientas sin link, error para programador, tildes que no guardan, pantalla que no acompaña al dato, etc.) y latencias de 3 a 6 s por acción (REPORTE.md:51-260).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo LeadOS: los baches abiertos como backlog y la tabla de latencias.",
+     "que_se_pierde": "El detalle narrativo de cada bache y la comparación contra agosto (§6)."
+    },
+    {
+     "doc": "docs/design-system-audit.md",
+     "tipo": "auditoría de inconsistencias visuales (admin)",
+     "periodo": "2026-05-17/18",
+     "resumen": "Distribución de padding, radius y spacing en el admin, componentes duplicados (StatCard ×4, EmptyState ×2) y una decisión de valores canónicos (design-system-audit.md:88-97).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de diseño: el bloque 'valores canónicos' (p-5 cards, p-6 secciones, rounded-2xl, space-y-6/3, border-white/10, bg-white/[0.02]).",
+     "que_se_pierde": "Las frecuencias de mayo (históricas)."
+    },
+    {
+     "doc": "docs/diagnostico-visual-2026-08/.gitignore",
+     "tipo": "config de carpeta de diagnóstico",
+     "periodo": "2026-08-20",
+     "resumen": "Excluye png/, filas.json y pares.json y declara que la carpeta es diagnóstico descartable.",
+     "recomendacion": "borrar",
+     "reemplazo": "Se va con la carpeta.",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/diagnostico-visual-2026-08/MANIFIESTO.md",
+     "tipo": "manifiesto de capturas (generado)",
+     "periodo": "2026-08-20",
+     "resumen": "47 filas de capturas del panel del setter con estado de DB, md5 y texto del DOM. La propia carpeta se declara descartable (MANIFIESTO.md:1-5).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "El texto de pantalla transcripto de agosto."
+    },
+    {
+     "doc": "docs/diagnostico-visual-2026-08/REPORTE.md",
+     "tipo": "diagnóstico visual (setter)",
+     "periodo": "2026-08-20",
+     "resumen": "Deja 3 cosas medidas: el error de Zod en inglés en m13, el mismo encabezado en espera y revisión, y la pantalla que no acompaña al dato (REPORTE.md:145-178). Las re-verificó la corrida del 31/08 (§6). Registra que se imprimió un fragmento del password de Neon dev en el transcript de la sesión y aconseja rotarla (REPORTE.md:219-222; el doc no contiene el valor).",
+     "recomendacion": "borrar",
+     "reemplazo": "Superado por corrida-recorrido-2026-08-31; la recomendación de rotar la credencial de Neon dev va al doc vivo de operación.",
+     "que_se_pierde": "Las salvedades de reproducibilidad de seeds (:201-208); conviene llevarlas como lección."
+    },
+    {
+     "doc": "docs/diagnostico-visual-admin-2026-08/.gitignore",
+     "tipo": "config de carpeta de diagnóstico",
+     "periodo": "2026-08-22",
+     "resumen": "Excluye png/, *.png y los json de pares.",
+     "recomendacion": "borrar",
+     "reemplazo": "Se va con la carpeta.",
+     "que_se_pierde": "Nada."
+    },
+    {
+     "doc": "docs/diagnostico-visual-admin-2026-08/MANIFIESTO.md",
+     "tipo": "manifiesto de capturas (generado)",
+     "periodo": "2026-08-22",
+     "resumen": "Manifiesto de las capturas del panel admin (lado de Franco). Contiene un email personal en :411 (PII, no credencial).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "El texto de pantalla de agosto del admin."
+    },
+    {
+     "doc": "docs/diagnostico-visual-admin-2026-08/REPORTE.md",
+     "tipo": "diagnóstico visual (admin)",
+     "periodo": "2026-08-22",
+     "resumen": "Responde 6 preguntas del lado de Franco. No hay superficie admin para cargar las URLs de herramientas ni Cal.com (se editan en código, herramientas.ts), y la cola de revisión mide 8.662 px de los que se ven 756 (REPORTE.md:178-200,384-391).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo LeadOS: las 6 respuestas en una tabla corta.",
+     "que_se_pierde": "La evidencia por pregunta."
+    },
+    {
+     "doc": "docs/experimentos/fg2-brief-experimento.md",
+     "tipo": "diseño de experimento (FG-2.0)",
+     "periodo": "2026-06-21 (commit 2026-06-29)",
+     "resumen": "Experimento para probar si el formulario estructurado mejora las demos (gastronomía, 5 contra 5), con GATE ABIERTO: FG-2 no se deriva sin el resultado (fg2-brief-experimento.md:3-5). El log y la decisión están vacíos (:166-201), así que el experimento nunca se corrió. El lab /admin/fg2-lab sigue en el código (3 archivos en 57c421bc).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de decisiones: 'FG-2 bloqueado hasta correr el experimento; lab experimental vivo'. Decidir correrlo o borrar el lab junto con el doc.",
+     "que_se_pierde": "El protocolo paso a paso del experimento (:89-157), recuperable de git."
+    },
+    {
+     "doc": "docs/experimentos/fg2-prompts-listos.md",
+     "tipo": "artefacto generado (10 prompts)",
+     "periodo": "2026-06-29",
+     "resumen": "Los 10 prompts A/B del experimento FG-2, generados por scripts/_experimental/fg2-gen-prompts.ts (fg2-prompts-listos.md:3-4). Incluye datos de un seed (Noir Dining) y WhatsApp de ejemplo.",
+     "recomendacion": "borrar",
+     "reemplazo": "Regenerable con el script.",
+     "que_se_pierde": "Nada que no se regenere."
+    },
+    {
+     "doc": "docs/microaudit-frozen-frontera-CO.md",
+     "tipo": "microauditoría dirigida (precondiciones CO-*)",
+     "periodo": "2026-07-07",
+     "resumen": "Cita textual de las reglas no-negociables y la tabla frozen. Encuentra que auth.ts es 'frozen' solo por convención, que el protocolo de migraciones vive repartido sin doc único y que el e2e.yml estaba mal ubicado y nunca corrió. Da la baseline tsc 1 / lint 239 (microaudit-frozen-frontera-CO.md:65-115,230-305).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de operación: un solo 'protocolo de migraciones' (nunca reset, deploy aditivo, SQL a la vista, no migrate dev con drift) y nota sobre auth.ts.",
+     "que_se_pierde": "La baseline de lint/tsc de julio (superada por C0)."
+    },
+    {
+     "doc": "docs/probe-b2-hero-nav.md",
+     "tipo": "probe read-only (sitio público, rama redesign/home)",
+     "periodo": "2026-07-31",
+     "resumen": "Mapea consumidores de las piezas del hero e intro, la coreografía del preloader (gate de 2500 ms), las anclas del home y la tool navigateToPage (probe-b2-hero-nav.md:236-335). Las anclas rotas que citaba ya están arregladas en 57c421bc (navigateToPage.ts:32, Portfolio.tsx:726).",
+     "recomendacion": "borrar",
+     "reemplazo": "Una lección al doc vivo de decisiones: el preloader espera al 3D con un timeout de 2500 ms (Preloader.tsx:119).",
+     "que_se_pierde": "La tabla de timing de la coreografía (B.6), propia de la rama redesign/home."
+    },
+    {
+     "doc": "docs/probe-bundle-inicial.md",
+     "tipo": "probe read-only (bundle)",
+     "periodo": "2026-08-10 (rama redesign/home)",
+     "resumen": "El widget de chat arrastra 438 kB gz a toda ruta pública, de los cuales 230 kB son three/R3F por los avatares 3D importados estáticos. Sacar el 3D del hero libera poco y diferir el widget no mueve el LCP (probe-bundle-inicial.md:8-24).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de plataforma y performance: los 3 hechos y la tabla de peso.",
+     "que_se_pierde": "El censo de scripts por chunk (§A-C)."
+    },
+    {
+     "doc": "docs/probe-construccion-p6.md",
+     "tipo": "probe read-only (LeadOS, previo a P6)",
+     "periodo": "2026-08-04",
+     "resumen": "Propone fusionar las 6 pantallas de Construcción en 2 (Construir y Refinar, corte 3+3) usando la frontera que ya codifica prompts-disenio.ts (probe-construccion-p6.md:150-175). La propuesta se adoptó: hoy existen mc1/mc2 (A3-VIABILIDAD-DECISIONES:1180-1184). Lista 8 hallazgos (GUIA_CONSTRUCCION muerto, faseActual fantasma, etc.).",
+     "recomendacion": "borrar",
+     "reemplazo": "Una línea en el doc vivo LeadOS sobre el criterio construcción/refinamiento.",
+     "que_se_pierde": "Los 8 hallazgos laterales (:581-600); verificar si siguen antes de borrar (dudoso)."
+    },
+    {
+     "doc": "docs/probe-monolito-censo.md",
+     "tipo": "probe read-only (censo del home)",
+     "periodo": "2026-07-29",
+     "resumen": "Censo de OurServices.tsx y del home: los 4 servicios con precio, plazo, métrica y rubros, el bloque de cierre y los claims cuantitativos a validar (probe-monolito-censo.md:229-480), más qué secciones se pueden borrar (C.1-C.9). En 57c421bc los precios y métricas siguen iguales (OurServices.tsx:70-126).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo 'Qué es develOP y qué vende': B.1 (servicios y precios), B.2 (rubros) y B.5 (claims sin fuente a validar).",
+     "que_se_pierde": "El mapa por rango de línea del monolito (A.1) y las trampas de borrado (D.4), útiles solo si se reescribe el home."
+    },
+    {
+     "doc": "docs/probe-motion-sitio.md",
+     "tipo": "probe read-only (motion del sitio público)",
+     "periodo": "2026-07-30",
+     "resumen": "Inventario de animaciones con 12 ELIMINAR, 18 AJUSTAR y 10 CONSERVAR para la dirección 'instrumento de precisión, editorial', a firmar por Franco (probe-motion-sitio.md:419-460,492-499). Descarta glass, bounce y 3D (:462-478). En main 57c421bc el Hero sigue con R3F (Hero.tsx:3-9).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de sitio público y diseño: la dirección de motion y el bug E1 (loops a 100 Hz en reduced-motion), si siguen vigentes.",
+     "que_se_pierde": "Veredicto por animación con archivo:línea."
+    },
+    {
+     "doc": "docs/probe-poda-terreno.md",
+     "tipo": "probe read-only (terreno para la poda de LeadOS)",
+     "periodo": "2026-07-31",
+     "resumen": "Releva ramas, suites, la regla anti-link, FASE_IDS, el contador de Instagram, el bypass QA y el drift de Prisma (vacío). Suma 55 hallazgos no pedidos, de seguridad (test-sentry, fallback de impersonation, CSP report-only), build, suites y datos (probe-poda-terreno.md:7-71,928-960,1110-1186). Contiene un email personal en :28 (PII).",
+     "recomendacion": "consolidar",
+     "reemplazo": "Doc vivo de seguridad y deuda: los hallazgos de seguridad 16-24 con estado. Doc vivo de operación: concurrencia de sesiones y worktrees, y ramas nunca pusheadas.",
+     "que_se_pierde": "El relevamiento R1-R10 de julio y la lista de ramas fósiles."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-22T22-00-07-164Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-22",
+     "resumen": "Corrida de regresión del bot matsu, 8 casos y 0 errores. La genera scripts/regression/run-baseline.ts:14.",
+     "recomendacion": "borrar",
+     "reemplazo": "El harness de regresión documentado en el doc vivo Chatbot e IA; las corridas son regenerables.",
+     "que_se_pierde": "La respuesta histórica del bot en esa corrida."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-22T22-19-20-185Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-22",
+     "resumen": "Bot matsu, 8 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-22T22-38-03-073Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-22",
+     "resumen": "Bot matsu, 9 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-22T22-49-06-262Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-22",
+     "resumen": "Bot matsu, 12 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-22T23-12-16-181Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-22",
+     "resumen": "Bot matsu, 13 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-22T23-18-15-111Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-22",
+     "resumen": "Bot matsu, 13 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T00-03-05-733Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 13 casos, 1 error.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T00-07-29-708Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 13 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T00-25-44-169Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 13 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T00-44-37-258Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 13 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T00-59-24-888Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 15 casos, 1 error.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T01-03-11-882Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 15 casos, 0 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T18-33-48-648Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 17 casos, 3 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T19-05-38-809Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 17 casos, 4 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T19-42-43-822Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 17 casos, 3 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T20-17-46-942Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 19 casos, 6 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T20-55-17-414Z.md",
+     "tipo": "corrida de regresión del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Bot matsu, 19 casos, 4 errores.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T21-20-32-446Z.md",
+     "tipo": "corrida de regresión FULL del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Set FULL previo al cierre de sprint: bot matsu, 19 casos, 6 errores, 596,5 s.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/baseline-2026-05-23T21-33-39-011Z.md",
+     "tipo": "corrida de regresión FULL del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Última FULL: bot matsu, 19 casos (precio 0km, financiación, usados, jailbreak, capturas de lead, handoffs, soft-cap, cuota), 2 errores por timeout de persistencia, 3505,5 s (baseline-2026-05-23T21-33-39-011Z.md:1-35).",
+     "recomendacion": "borrar",
+     "reemplazo": "Doc vivo Chatbot e IA: lista de los 19 casos y del subset SMOKE de 4, y que el timeout de persistencia es intermitente.",
+     "que_se_pierde": "Las respuestas completas del bot de mayo."
+    },
+    {
+     "doc": "docs/regression/smoke-2026-05-23T21-19-30-029Z.md",
+     "tipo": "corrida SMOKE del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "Set SMOKE (subset crítico de uso diario): bot matsu, 4 casos, 0 errores, 44,3 s. Referenciada por scripts/_ms4-smoke-run.log:28.",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/regression/smoke-2026-05-23T21-46-53-107Z.md",
+     "tipo": "corrida SMOKE del bot (generada)",
+     "periodo": "2026-05-23",
+     "resumen": "SMOKE: bot matsu, 4 casos (price-0km, off-topic, lead-capture-both-channels, whatsapp-handoff-purchase-signal), 0 errores, 505,9 s. Los sessionIds 'regression-test-' se purgan con scripts/regression/purge.ts (smoke-…107Z.md:1-21).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ídem.",
+     "que_se_pierde": "Una corrida histórica."
+    },
+    {
+     "doc": "docs/research/2026-04-entrega-2-pre-research.md",
+     "tipo": "research técnico previo (Entrega 2)",
+     "periodo": "2026-04-27",
+     "resumen": "Convenciones de estilo de abril (paleta, tokens, tipografía), métricas disponibles para el Health Score, el AIExecutiveBrief como mock, y qué componentes del home reusar o descartar (2026-04-entrega-2-pre-research.md:6-182). Superado: el brief es LLM real con historial (2026-06-revalidacion.md:66).",
+     "recomendacion": "borrar",
+     "reemplazo": "Ninguno.",
+     "que_se_pierde": "La tabla de métricas para el Health Score con su origen (:78-90), útil solo como histórico."
+    }
+   ],
+   "decisiones": [
+    {
+     "tema": "Sistema de planes",
+     "decision": "Reemplazar Subscription.planName (string libre) por un modelo Plan con FK planId; mantener Service como dimensión ortogonal y Subscription.price como override.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:240-321",
+     "fecha": "2026-05-21",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Nombres y cuotas de planes",
+     "decision": "La propuesta de mayo sembraba profesional/ai-care/maintenance a $199/$99/$49. Lo sembrado hoy es Starter/Pro/Business con cuotas 500/3000/5000 (prisma/seeds/sync-plans.ts:69-104).",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:294-297",
+     "fecha": "2026-05-21",
+     "vigente": "no"
+    },
+    {
+     "tema": "unlockedFeatures legacy",
+     "decision": "Migrar User.unlockedFeatures a OrganizationModule y dropear la columna. Verificado: 0 apariciones en prisma/schema.prisma en 57c421bc.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:155,330; docs/audits/2026-06-revalidacion.md:80",
+     "fecha": "2026-05-21",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Project huérfano / NOT NULL",
+     "decision": "Asignar el project huérfano a la org develop y volver Project.organizationId NOT NULL.",
+     "fuente": "docs/audits/2026-05-cleanup-db-dev.md:145-161; docs/audits/2026-06-revalidacion.md:37",
+     "fecha": "2026-05-21",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Pipelines de leads separados",
+     "decision": "No fusionar LeadStatus (CRM interno develOP) con ChatbotLeadStatus (tenants). Siguen siendo enums distintos en schema.prisma:1072 y :1528.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:158",
+     "fecha": "2026-05-21",
+     "vigente": "sí"
+    },
+    {
+     "tema": "ChatbotEvent.type",
+     "decision": "Dejar ChatbotEvent.type como String (alta cardinalidad) y enum-izar solo role/intent/level. Verificado: type sigue String.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:154; docs/audits/2026-06-revalidacion-dashboard-chatbot.md:211",
+     "fecha": "2026-05-21",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Columnas JSON",
+     "decision": "Ninguna Json column pasa a relacional; solo documentar sus shapes.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:223",
+     "fecha": "2026-05-21",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Rate limiting",
+     "decision": "Se propuso Upstash Redis; se implementó un limiter atómico en Postgres (UPSERT ON CONFLICT, B14.1). Hoy existe src/lib/rate-limit/limiter.ts y no hay dependencia de Upstash.",
+     "fuente": "docs/auditoria-seguridad-2026-05.md:158; docs/audits/2026-06-revalidacion-dashboard-chatbot.md:80",
+     "fecha": "2026-06",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Cache del admin",
+     "decision": "unstable_cache (30/60 s) con revalidateTag en clients, leads, projects y layout. Verificado presente en admin/clients/page.tsx, admin/layout.tsx y admin/leads/page.tsx.",
+     "fuente": "docs/baselines/2026-05-admin-performance.md:52-62",
+     "fecha": "2026-05-19",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Neon cold start",
+     "decision": "Recomendado: ping cada 4 min (UptimeRobot/BetterStack) ya, y plan Launch de $19/mes cuando haya clientes con uso diario. No hay constancia de que se haya hecho.",
+     "fuente": "docs/baselines/2026-05-admin-performance.md:75-107",
+     "fecha": "2026-05-19",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Purga del secret filtrado",
+     "decision": "Purgar enviroment.env del historial con git-filter-repo y force-push coordinado con el socio. Sigue PENDIENTE: el commit 3953558 es ancestro de 57c421bc.",
+     "fuente": "docs/audits/2026-05-bfg-leak-cleanup.md:169-205; docs/audits/2026-06-revalidacion.md:22,40",
+     "fecha": "2026-05-21",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Separación de entornos de DB",
+     "decision": "Local y dev apuntan a la branch dev de Neon; prod (branch main) corre en Netlify; nunca copiar la URL de main a .env.local. No verificable desde el código (.env fuera de git).",
+     "fuente": "docs/audits/2026-05-cleanup-db-dev.md:4,225; docs/corrida-recorrido-2026-08-31/REPORTE.md:22; docs/microaudit-frozen-frontera-CO.md:115",
+     "fecha": "2026-05-21",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Protocolo de migraciones",
+     "decision": "Nunca migrate reset; migrate deploy aditivo con el SQL a la vista; con drift se escribe el migration.sql a mano y no se usa migrate dev. Vive repartido, sin documento único.",
+     "fuente": "docs/microaudit-frozen-frontera-CO.md:83-115",
+     "fecha": "2026-07-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Seguridad de sesión y OAuth",
+     "decision": "OAuth state firmado con HMAC (signOAuthState/verifyOAuthState), sessionVersion invalida JWT tras reset, y middleware global (proxy.ts). Verificado: sessionVersion en schema.prisma:294 y src/proxy.ts presente.",
+     "fuente": "docs/audits/2026-06-revalidacion.md:90; docs/baselines/2026-07-auditoria-seguridad.md:2934",
+     "fecha": "2026-06/07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Gate de tipos y CI",
+     "decision": "Sacar ignoreBuildErrors y correr tsc, invariantes y tests en CI desde la raíz del repo. Hecho: next.config.ts:31-36 sin ignoreBuildErrors; .github/workflows/ci.yml en push/PR corre check:types y check:invariants.",
+     "fuente": "docs/audit-repo-20260707.md:235; docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md:54-58",
+     "fecha": "2026-07/08",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Anti-clickjacking del setter",
+     "decision": "Incluir /setter en X-Frame-Options DENY con frame-ancestors propio, dejando la CSP global en Report-Only (next.config.ts:90-110).",
+     "fuente": "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:275-279",
+     "fecha": "2026-08",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Tier 1 de la auditoría integral",
+     "decision": "Guard de rol y Zod en runPreflightChecks (PA-1). NO aplicado: preflightChecks.ts es 'use server' sin requireSuperAdmin ni auth() (0 apariciones) y lo invoca BotDetailClient.tsx:140.",
+     "fuente": "docs/audit-repo-20260707.md:231",
+     "fecha": "2026-07-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Cifrado de tokens de terceros",
+     "decision": "Cifrar gbpAccessToken, gbpRefreshToken, tiendanubeAccessToken y calComApiKey con el AES-256-GCM de CrmIntegration. NO aplicado: siguen como String? @db.Text (schema.prisma:359,367,375).",
+     "fuente": "docs/audit-repo-20260707.md:248; docs/microaudit-frozen-frontera-CO.md:215-228",
+     "fecha": "2026-07-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Proveedor de email",
+     "decision": "Brevo canónico: migrar los consumidores de Resend y quitar la dependencia. NO aplicado: resend ^6.9.4 en package.json:166.",
+     "fuente": "docs/audit-repo-20260707.md:258",
+     "fecha": "2026-07-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Cal.com",
+     "decision": "La agenda del setter (B7) se construye sobre la API v2 de Cal.com sin API key para slots y bookings. Vigente (cal-com-v2.ts:20); queda la deuda getCalSummary en v1 apagada (cal-com.ts:4).",
+     "fuente": "docs/b7-probe-cal-com.md:100-105",
+     "fecha": "2026-06-12",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Bypass QA",
+     "decision": "El seed crea setter-qa con passwordResetRequired:false (opción a), sin tocar el path real de auth. Verificado en prisma/seed.ts:157,165.",
+     "fuente": "docs/b8a-auditoria.md:76-79",
+     "fecha": "2026-06-13",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Re-agendar tras RE_SEGUIMIENTO",
+     "decision": "No tocar ahora; convertir agendaJson en historial con migración aditiva después del piloto.",
+     "fuente": "docs/b8a-auditoria.md:37-41,93; docs/b8a-ii-auditoria.md:65-66",
+     "fecha": "2026-06-13",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Experimento FG-2",
+     "decision": "No construir el formulario estructurado para los 4 rubros hasta correr el experimento 5 contra 5 en gastronomía. El experimento nunca se corrió (log vacío) y el lab /admin/fg2-lab sigue en el código.",
+     "fuente": "docs/experimentos/fg2-brief-experimento.md:3-5,166-201",
+     "fecha": "2026-06-21",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Rediseño de experiencia del setter",
+     "decision": "El manual paso por pantalla (manual/[paso]) reemplaza al wizard de página larga; el motor (stages, gates, línea de envío, aislamiento) es intocable y el gate vive en flow.ts:90-101.",
+     "fuente": "docs/auditorias/REGRESION-FINAL-2026-07.md:86,132-136",
+     "fecha": "2026-07-04",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Guardarraíles de LeadOS",
+     "decision": "Descartado: auto-cerrar a PERDIDO, marcar caliente automático con score 4-5, chequeo final asistido, bloquear toques por fecha y embeber los Gems como API.",
+     "fuente": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:254-260",
+     "fecha": "2026-07-07",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Loops del foco (B-01)",
+     "decision": "Con la cadencia agotada se limpia nextFollowUpAt; RECHAZADO y RESPONDIO también lo limpian. Hecho (os-commercial.ts:15-23).",
+     "fuente": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:150-156",
+     "fecha": "2026-07-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "URLs de herramientas externas",
+     "decision": "DECISIÓN-Franco #1, 'la más urgente': cargar las 4 URLs (Evaluador, Gem de diseño, Claude Design, Gem de outreach). Sigue PENDIENTE: url null en herramientas.ts:63,78,90,117, sin superficie admin para cargarlas.",
+     "fuente": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:227; docs/diagnostico-visual-admin-2026-08/REPORTE.md:180-200",
+     "fecha": "2026-07-07",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Construcción en dos pantallas",
+     "decision": "Fusionar las 6 pantallas de construcción en 2 (Construir y Refinar, corte 3+3, criterio brief contra demo construida). Adoptado: existen mc1 y mc2.",
+     "fuente": "docs/probe-construccion-p6.md:150-175; docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:1180-1184",
+     "fecha": "2026-08-04",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Playground de diseño admin",
+     "decision": "Sacar /admin/_design del nav y borrarlo con OK de Valentino. Ejecutado: la ruta no existe en 57c421bc; el playground vigente es /styleguide.",
+     "fuente": "docs/admin-design-system-audit.md:72-78",
+     "fecha": "2026-06-28",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Valores canónicos de diseño (admin)",
+     "decision": "p-5 en cards, p-6 en secciones, rounded-2xl (hero rounded-3xl), space-y-6/3, border-white/10, bg-white/[0.02].",
+     "fuente": "docs/design-system-audit.md:88-97",
+     "fecha": "2026-05-18",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "3D del hero",
+     "decision": "Eliminar el canvas 3D del hero, dado como 'ya decidido' en el probe de motion de la rama redesign/home. En main 57c421bc Hero.tsx:3-9 sigue con R3F, postprocessing y Environment.",
+     "fuente": "docs/probe-motion-sitio.md:428",
+     "fecha": "2026-07-30",
+     "vigente": "no"
+    },
+    {
+     "tema": "Colores de acento por servicio",
+     "decision": "Corregir CLAUDE.md a IA emerald #10b981, Automation amber #f59e0b y Software violet #8b5cf6 (como globals.css). Vigente en CLAUDE.md; AGENTS.md:56-58 sigue con la asignación vieja.",
+     "fuente": "docs/probe-poda-terreno.md:1122; docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:267",
+     "fecha": "2026-07-31",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Diagnósticos visuales",
+     "decision": "Los PNG de los diagnósticos no van al repo; la fuente es MANIFIESTO y REPORTE, y la carpeta es descartable.",
+     "fuente": "docs/diagnostico-visual-2026-08/.gitignore:1-6",
+     "fecha": "2026-08-20",
+     "vigente": "sí"
+    },
+    {
+     "tema": "Visibilidad del repo",
+     "decision": "Decisión pendiente de Franco: pasar el repo a privado, o mover docs/auditoria*, audits y baselines a un repo privado. No verificable desde el código.",
+     "fuente": "docs/baselines/2026-07-auditoria-seguridad.md:73,3594-3606,3830",
+     "fecha": "2026-07-29",
+     "vigente": "dudoso"
+    },
+    {
+     "tema": "Merge de ramas de seguridad",
+     "decision": "Mergear chore/gs-aislamiento (GS.1 @isolation) y chore/security-quick-wins (borrado de /api/test-sentry y frontera ESLint del portal). NO reflejado en 57c421bc: /api/test-sentry/route.ts existe y no hay tests @isolation.",
+     "fuente": "docs/baselines/2026-07-auditoria-seguridad.md:66-89",
+     "fecha": "2026-07-29",
+     "vigente": "sí"
+    }
+   ],
+   "lecciones": [
+    {
+     "leccion": "Confiar en el código y en la DB de hoy, no en los .md de estado. STATUS.md afirmaba '0 failed' y 'AIExecutiveBrief MOCK' y las dos cosas eran falsas; en agosto seguía 3 meses atrasado.",
+     "fuente": "docs/audits/2026-06-revalidacion.md:7; docs/audits/2026-05-auditoria-profunda.md:18,34-35; docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:264-265",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un cast 'as' tapó el mismatch de casing GOOGLE/google y dejó el bot dando 500 unos 12 días. Hay que normalizar enum a union en un helper y borrar los casts.",
+     "fuente": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:19-21,221",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un health check que valida una env var legacy (CHATBOT_GOOGLE_API_KEY) en vez del provider real da 503 falsos y deja el monitoreo inservible. envValidator.ts:54 todavía la declara.",
+     "fuente": "docs/audits/2026-06-revalidacion.md:20; docs/audits/2026-06-revalidacion-dashboard-chatbot.md:26-27",
+     "vigente": "dudoso"
+    },
+    {
+     "leccion": "Medir antes de afirmar (REGLA #0): varios 'graves' de un análisis superficial resultaron falsos al medirlos (Resend en el hot-path, over-fetch de health-score).",
+     "fuente": "docs/auditoria-total-pre-deploy.md:84,88,104",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Postgres no tiene ALTER TYPE … DROP VALUE: agregar valores a un enum es seguro y quitarlos es irreversible sin recrear el tipo y restaurar datos.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:43; docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:100-108",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un rate-limit en memoria no sirve en serverless (un Map por lambda); va contra un store compartido.",
+     "fuente": "docs/auditoria-seguridad-2026-05.md:144-160",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Para operaciones destructivas sobre DB: hacer backup de las filas crudas antes, usar un script con chequeo de host que aborte fuera del entorno esperado, y dejar los pasos de prod como runbook aparte.",
+     "fuente": "docs/audits/2026-05-cleanup-db-dev.md:31-33,253-273",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Preparar una purga no es ejecutarla: el mirror purgado nunca se force-pusheó y el secret siguió alcanzable desde origin/main. Hay que verificar en el remoto, no en la copia local.",
+     "fuente": "docs/audits/2026-06-revalidacion.md:22,40; docs/baselines/2026-07-auditoria-seguridad.md:52",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "GitHub Actions solo descubre workflows en <raíz>/.github/workflows. El e2e.yml anidado en logic-core-v3/.github nunca corrió y el repo estuvo sin gate automático.",
+     "fuente": "docs/microaudit-frozen-frontera-CO.md:240-250; docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:1150-1188",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Con ignoreBuildErrors, un build verde no prueba nada; además los invariantes corrían con type-stripping y no daban señal de tipos.",
+     "fuente": "docs/baselines/2026-07-auditoria-seguridad.md:89; docs/probe-poda-terreno.md:1149,1160",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Hay falsos verdes en los invariantes: el gate del self-check une el blob con la lista vigente por el texto visible y no por id. Renombrar un check traba demos en silencio, y LEGAL_TRANSITIONS no tiene invariante.",
+     "fuente": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md:36-52",
+     "vigente": "dudoso"
+    },
+    {
+     "leccion": "Las server actions no pasan por el middleware: cada action necesita su propio guard de rol. Un gate en layout.tsx es solo de render (caso email-marketing, layout.tsx:20).",
+     "fuente": "docs/baselines/2026-07-auditoria-seguridad.md:45,60-62",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Un arreglo en una rama sin mergear no protege lo desplegado: /api/test-sentry siguió vivo aunque su borrado estaba hecho en una rama.",
+     "fuente": "docs/baselines/2026-07-auditoria-seguridad.md:80-89",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Otras sesiones trabajan sobre el mismo checkout. Hay que usar un worktree propio, un puerto propio y un distDir propio (E2E_DIST_DIR), y git grep en vez de grep -r, porque .claude/worktrees devuelve líneas falsas.",
+     "fuente": "docs/probe-poda-terreno.md:1114-1117; docs/probe-construccion-p6.md:620-631; docs/diagnostico-visual-2026-08/REPORTE.md:17-28",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Al enmascarar un DATABASE_URL, cortar antes del '@' imprime parte del password. Esa credencial de Neon dev quedó en un transcript y se recomendó rotarla.",
+     "fuente": "docs/diagnostico-visual-2026-08/REPORTE.md:219-222",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "La 'vara' (el brief de visión) no estaba en el repo cuando la citaban los sprints; hay que reconstruirla y declararlo. Después se commiteó el v3 con otras secciones y el v4 quedó sin commitear.",
+     "fuente": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:9,264; docs/probe-poda-terreno.md:1126; docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:17-56",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "La verificación adversarial (un agente que intenta refutar) baja falsos positivos y corrige la dirección de hallazgos.",
+     "fuente": "docs/auditoria-consistencia-setter.md:9-14,215-223; docs/baselines/2026-07-auditoria-seguridad.md:33-35",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Sin las URLs de las herramientas externas el setter novato se traba del todo: es el único bloqueo real del recorrido, y se repite en julio y en agosto.",
+     "fuente": "docs/auditoria-recorrido-completo-novato.md:13,44-50; docs/corrida-recorrido-2026-08-31/REPORTE.md:72-96",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Los seeds no revierten actividades, así que las capturas dependen de datos residuales. Además tsx no está declarado y next build edita tsconfig cuando hay distDir propio.",
+     "fuente": "docs/diagnostico-visual-2026-08/REPORTE.md:201-218",
+     "vigente": "dudoso"
+    },
+    {
+     "leccion": "Una integración externa puede morir en silencio: Cal.com v1 se apagó el 8/abr/2026 y getCalSummary devuelve null sin avisar.",
+     "fuente": "docs/b7-probe-cal-com.md:14",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Pasado cierto punto, el próximo paso de mayor valor no es código sino el dato del piloto.",
+     "fuente": "docs/b8a-ii-auditoria.md:75-79",
+     "vigente": "dudoso"
+    },
+    {
+     "leccion": "Los docs de decisiones sobreestiman lo reutilizable: el 'componente de pasos y autoguardado ya existe' resultó ser 32 líneas reutilizables. Toda decisión hay que contrastarla con el código antes de presupuestarla.",
+     "fuente": "docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:86-92,1105-1120",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Los reportes de lint/tsc trackeados (UTF-16, de marzo y abril) estaban viejos y en direcciones opuestas: tsc sobreestimado y lint subestimado. Hay que regenerarlos, no citarlos.",
+     "fuente": "docs/microaudit-frozen-frontera-CO.md:285-305",
+     "vigente": "sí"
+    },
+    {
+     "leccion": "Si se borra el canvas 3D sin tocar Preloader.tsx, el gate de 2500 ms pasa de tope a costo fijo; y three sigue viajando por los avatares 3D del widget.",
+     "fuente": "docs/probe-b2-hero-nav.md:236-250; docs/probe-bundle-inicial.md:12-16",
+     "vigente": "dudoso"
+    }
+   ],
+   "operaciones": [
+    {
+     "tema": "Deploy",
+     "dato": "Netlify: build 'npx prisma generate && npm run build' con plugin @netlify/plugin-nextjs (netlify.toml:2,9-10), sin pinear (S8-05). vercel.json es legado y sigue trackeado.",
+     "fuente": "logic-core-v3/netlify.toml:2-10; docs/baselines/2026-07-auditoria-seguridad.md:3542; docs/audit-repo-20260707.md:216"
+    },
+    {
+     "tema": "Crons",
+     "dato": "Netlify scheduled functions: generate-insights-cron '0 9 * * *', send-weekly-reports-cron '0 12 * * MON', cleanup-old-events-cron '0 6 * * *' (purga chatbot_events a 30 días). Mencionado aparte: /api/cron/os-follow-up. Las rutas de cron exigen CRON_SECRET (RE-8: fail-open si falta).",
+     "fuente": "logic-core-v3/netlify.toml:25-32; docs/baselines/2026-07-auditoria-seguridad.md:2994; docs/audit/2026-04-dashboard-cleanup-audit.md:98; docs/audit-repo-20260707.md:234"
+    },
+    {
+     "tema": "Backups",
+     "dato": "GitHub Action db-backup.yml en la raíz: pg_dump + gzip + gpg y restore-test, cron diario 06:00 UTC. Secrets por nombre: DIRECT_DATABASE_URL_PROD, DIRECT_DATABASE_URL_DEV, BACKUP_GPG_PASSPHRASE. Que el backup esté efectivamente corriendo no se pudo verificar desde el código.",
+     "fuente": ".github/workflows/db-backup.yml:36-135; docs/microaudit-frozen-frontera-CO.md:236; docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:104-108"
+    },
+    {
+     "tema": "CI",
+     "dato": ".github/workflows/ci.yml en push/PR: npm ci, prisma generate, check:types (tsc --noEmit) y check:invariants. test:leados requiere el secret DATABASE_URL_TEST y avisa si falta; E2E Playwright requiere secrets.",
+     "fuente": ".github/workflows/ci.yml:63-180; logic-core-v3/package.json:15"
+    },
+    {
+     "tema": "Entornos de DB",
+     "dato": "Neon PostgreSQL sa-east-1. El 21-may la auditoría de DB vio una sola base para dev y prod; desde el cleanup se trabaja contra la branch dev (host ep-quiet-waterfall…), con prod en la branch main corriendo en Netlify. El .env lo declara ('DEV BRANCH — NUNCA main/prod'). .env y .env.local repiten DATABASE_URL.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:57; docs/audits/2026-05-cleanup-db-dev.md:4,225; docs/corrida-recorrido-2026-08-31/REPORTE.md:22; docs/probe-poda-terreno.md:1172"
+    },
+    {
+     "tema": "Pendientes operativos de DB",
+     "dato": "No se verificó si la limpieza del 21-may se replicó en Neon main/prod. El schema prisma_shadow (32 tablas) sigue ocupando espacio en neondb desde 2026-04-03.",
+     "fuente": "docs/audits/2026-06-revalidacion.md:24,124; docs/probe-poda-terreno.md:1174"
+    },
+    {
+     "tema": "Migraciones",
+     "dato": "Conteo: 42 (may-21), 56 (jun-05), 80 (jul-04), 86 (jul-31/ago-31). En junio, prisma migrate status daba P1001 contra el pooler y se compensó leyendo _prisma_migrations.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:128; docs/audits/2026-06-revalidacion.md:35; docs/auditorias/REGRESION-FINAL-2026-07.md:40; docs/corrida-recorrido-2026-08-31/REPORTE.md:22"
+    },
+    {
+     "tema": "Neon cold start",
+     "dato": "Plan free con auto-suspend de 5 min y ~1082 ms en el primer hit. Opciones: plan Launch de $19/mes o ping a /api/health cada 4 min.",
+     "fuente": "docs/baselines/2026-05-admin-performance.md:30-90"
+    },
+    {
+     "tema": "Secret filtrado en historial",
+     "dato": "logic-core-v3/enviroment.env (GOOGLE_GENERATIVE_AI_API_KEY, formato UUID), commit 3953558, ancestro de 57c421bc. Según el runbook la key estaba deshabilitada. El valor está escrito en docs/audits/2026-05-bfg-leak-cleanup.md:94 (no se reproduce acá).",
+     "fuente": "docs/audits/2026-05-bfg-leak-cleanup.md:11-17,94; docs/baselines/2026-07-auditoria-seguridad.md:52"
+    },
+    {
+     "tema": "Credenciales y env vars (solo nombres)",
+     "dato": "DATABASE_URL, DIRECT_DATABASE_URL, AUTH_SECRET/NEXTAUTH_SECRET, NEXTAUTH_URL/AUTH_URL, IMPERSONATION_SECRET, CRON_SECRET, CHATBOT_GCP_PROJECT_ID, GOOGLE_APPLICATION_CREDENTIALS (Vertex), CHATBOT_GOOGLE_API_KEY (legacy), CHATBOT_IP_HASH_SALT, CRM_SECRET_KEY (AES-256-GCM, 64 hex), MOTOR_CHANNEL_SECRET_KEY, OAUTH_STATE_SECRET, ONBOARDING_SECRET_KEY, EMAIL_UNSUBSCRIBE_SECRET, RESEND_API_KEY, BREVO_*, TELEGRAM_*, NEXT_PUBLIC_SENTRY_DSN, NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL, QA_ALLOW_LOCALHOST, DATABASE_URL_TEST.",
+     "fuente": "docs/audits/2026-06-revalidacion.md:137; docs/microaudit-frozen-frontera-CO.md:198-213; docs/baselines/2026-07-auditoria-seguridad.md:3720-3727; docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:229-232"
+    },
+    {
+     "tema": "Secretos con fallback en código",
+     "dato": "src/lib/impersonation.ts:14-22: getSecret() cae a un string literal hardcodeado si faltan IMPERSONATION_SECRET, AUTH_SECRET y NEXTAUTH_SECRET (sigue así en 57c421bc; no se cita el valor). CHATBOT_IP_HASH_SALT: en prod hoy aborta si falta (ip-hash.invariant.ts:7).",
+     "fuente": "docs/probe-poda-terreno.md:1139; src/lib/impersonation.ts:14-22"
+    },
+    {
+     "tema": "QA bypass y personas",
+     "dato": "/api/qa/login con triple guard (QA_ALLOW_LOCALHOST=1, Host y !NETLIFY && !VERCEL_ENV). La persona setter-qa@develop.test usa la contraseña de $SEED_SETTER_PASSWORD. QA_ALLOW_LOCALHOST tiene una segunda superficie de una sola pata en validate-origin.ts:49.",
+     "fuente": "docs/auditoria-seguridad-2026-05.md:63; docs/probe-poda-terreno.md:1138; prisma/seed.ts:857"
+    },
+    {
+     "tema": "Puertos y suites",
+     "dato": "next-dev :3000, next-dev-qa :3002, next-prod-qa :3001, suite del setter :3003 con distDir .next-setter. Las corridas visuales usan puertos propios (3007, 3021, 3022).",
+     "fuente": "docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md:20; docs/probe-construccion-p6.md:24"
+    },
+    {
+     "tema": "Regresión del bot",
+     "dato": "scripts/regression/run-baseline.ts escribe docs/regression/baseline-{ts}.md. Hay un set FULL (19 casos) y uno SMOKE (4) sobre el bot matsu. Los sessionIds 'regression-test-*' se purgan con scripts/regression/purge.ts.",
+     "fuente": "docs/regression/smoke-2026-05-23T21-46-53-107Z.md:1-12; scripts/regression/run-baseline.ts:14"
+    },
+    {
+     "tema": "LLM y latencia",
+     "dato": "Runtime del bot: Gemini 2.5 Flash sobre Vertex. p50 ~4 s, p95 ~13-14 s; Vertex se lleva ≈85% de la latencia.",
+     "fuente": "docs/baselines/2026-05-chatbot-runtime.md:6,14-21; docs/audits/2026-06-revalidacion-dashboard-chatbot.md:116; docs/audit-chatbot-runtime.md:19"
+    },
+    {
+     "tema": "Email",
+     "dato": "Coexisten Brevo (reportes y canal canónico) y Resend. email.ts devuelve success:true si falta RESEND_API_KEY (mails que nunca salen).",
+     "fuente": "docs/audit-repo-20260707.md:207; docs/auditoria-total-pre-deploy.md:60"
+    },
+    {
+     "tema": "Observabilidad",
+     "dato": "Sentry: el DSN NEXT_PUBLIC_SENTRY_DSN figuraba ausente y el tunnelRoute /monitoring es un endpoint público no inventariado. El scrub no cubre transacciones.",
+     "fuente": "docs/audit-repo-20260707.md:340; docs/baselines/2026-07-auditoria-seguridad.md:2369,3262"
+    },
+    {
+     "tema": "Datos vivos de referencia",
+     "dato": "May-21: 8 orgs, 2 bots y un CRM interno de 15 OsLead. Jun-05: 6 orgs (san-miguel, ejemplo, develop, empresa-demo, matsu, qa-cliente-b), 4 bots, 3 planes y 66 leads. Jul-31: 101 OsLead con 82 dossiers en dev.",
+     "fuente": "docs/audits/2026-05-auditoria-db.md:59-96; docs/audits/2026-06-revalidacion.md:36; docs/audits/2026-06-revalidacion-dashboard-chatbot.md:209; docs/probe-poda-terreno.md:1171"
+    },
+    {
+     "tema": "Herramientas del setter",
+     "dato": "Se editan por código en src/lib/leados/herramientas.ts: 4 de 5 tienen url null y solo Netlify Drop tiene link. No hay modelo ni pantalla admin para cargarlas.",
+     "fuente": "src/lib/leados/herramientas.ts:63,78,90,105,117; docs/diagnostico-visual-admin-2026-08/REPORTE.md:180-200"
+    }
+   ],
+   "vision": [
+    {
+     "afirmacion": "develOP vende 4 servicios (orden en pantalla: Sitios, IA, Software, Automatización), con precio 'desde' y plazo: Sitios & Landings $800 USD en 15 días; Inteligencia Artificial $300 USD en 7 días; Automatización $200 USD en 5 días; Software a medida $1.500 USD por etapas. Siguen iguales en 57c421bc (OurServices.tsx:70-126).",
+     "fuente": "docs/probe-monolito-censo.md:229-330"
+    },
+    {
+     "afirmacion": "Rubros declarados: clínicas (en los 4 servicios), concesionarias, comercios, inmobiliarias, gimnasios, restaurantes, distribuidoras, constructoras y mayoristas.",
+     "fuente": "docs/probe-monolito-censo.md:355-371"
+    },
+    {
+     "afirmacion": "Lema de la sección de servicios: 'EL ECOSISTEMA DEVELOP · Cuatro soluciones. Un solo objetivo. · Todo lo que tu negocio necesita para vender más, operar mejor y crecer sin contratar más gente.'",
+     "fuente": "docs/probe-monolito-censo.md:401-409"
+    },
+    {
+     "afirmacion": "Claims que se pintan como promesa y no tienen fuente en el repo: +340% consultas, 94% respuesta automática, 23 hs/semana ahorradas, 0 licencias, 76 vs 15 días, +850 leads, SLA de respuesta menor a 4 h, 'CASO REAL/CLIENTES REALES' con un solo proyecto real (Concesionaria San Miguel).",
+     "fuente": "docs/probe-monolito-censo.md:411-460"
+    },
+    {
+     "afirmacion": "Módulos premium a $60/$80/$80/$150 USD/mes (catálogo de 4 activos y 4 próximos), y trust signals contractuales: 'Sin permanencia · Sin setup fee · Cancelás cuando quieras' y 'una llamada de 30 minutos'.",
+     "fuente": "docs/probe-monolito-censo.md:452-457"
+    },
+    {
+     "afirmacion": "Producto SaaS: chatbot multi-tenant con widget embebible, bot rioplatense (Lucía es el de develOP), tools capture_lead / show_whatsapp_handoff / offer_handoff_options / navigate_to_page, cuota mensual y planes que gatean modelo, tools, reportes, insights y CRM (Plan.llmModel, reportsEnabled, insightEnabled, crmEnabled).",
+     "fuente": "docs/audits/2026-05-auditoria-profunda.md:118-126; docs/auditoria-seguridad-2026-05.md:386-417; prisma/schema.prisma:606-621"
+    },
+    {
+     "afirmacion": "Superficies del sistema: sitio público (home y 4 landings), /embed y widget, dashboard del cliente, admin de develOP, LeadOS/setter (interno) y motor WhatsApp. La frontera real es LeadOS (setter + admin/leads + admin/leados + fg2-lab + cron os-follow-up) contra el resto.",
+     "fuente": "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:87-100,281-285"
+    },
+    {
+     "afirmacion": "LeadOS es el panel donde un setter sin experiencia técnica ni con IA trabaja leads de punta a punta (ficha, Evaluador, opener, demo con brief, construcción, borrador en Netlify, chequeo, revisión de Franco, link y reunión por Cal.com). Franco revisa cada demo y marca los 'calientes'.",
+     "fuente": "docs/auditorias/AUDITORIA-CIERRE-2026-07.md:13"
+    },
+    {
+     "afirmacion": "Cliente piloto 'de USD 4.000': Concesionaria San Miguel. En junio aparece matsu como 'cliente real' (bot de concesionaria: 0km, usados, financiación).",
+     "fuente": "docs/audits/2026-05-auditoria-profunda.md:16; docs/audits/2026-06-revalidacion-dashboard-chatbot.md:209; docs/regression/baseline-2026-05-23T21-33-39-011Z.md:14-34"
+    },
+    {
+     "afirmacion": "Dirección estética del rediseño del sitio (rama redesign/home): 'instrumento de precisión, editorial', con superficies planas y quietas, sin glass y sin bounce.",
+     "fuente": "docs/probe-motion-sitio.md:7,462-478"
+    }
+   ],
+   "contradicciones": [
+    {
+     "tema": "Una base o dos (dev/prod)",
+     "posiciones": [
+      {
+       "dice": "Una sola base para dev y prod: .env y .env.local apuntan al mismo Neon.",
+       "fuente": "docs/audits/2026-05-auditoria-db.md:57"
+      },
+      {
+       "dice": "La DB Neon es compartida entre dev y prod.",
+       "fuente": "docs/audits/2026-06-revalidacion-dashboard-chatbot.md:21,189"
+      },
+      {
+       "dice": "La app corre contra la branch dev; prod es la branch main y los cleanups no se replicaron ahí.",
+       "fuente": "docs/audits/2026-06-revalidacion.md:24,34; docs/audits/2026-05-cleanup-db-dev.md:4,225"
+      }
+     ]
+    },
+    {
+     "tema": "Colores de acento por servicio",
+     "posiciones": [
+      {
+       "dice": "IA violet #8b5cf6, Automatizaciones emerald #10b981, Software amber #f59e0b.",
+       "fuente": "AGENTS.md:56-58 (sigue así en 57c421bc)"
+      },
+      {
+       "dice": "El código y globals.css dicen IA #10b981, Automation #f59e0b, Software #8b5cf6; CLAUDE.md ya coincide con eso.",
+       "fuente": "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:267; docs/probe-monolito-censo.md:331-344; docs/probe-poda-terreno.md:1122"
+      }
+     ]
+    },
+    {
+     "tema": "Navegación en portales",
+     "posiciones": [
+      {
+       "dice": "triggerTransition() no aplica en portales (el Shutter no existe ahí).",
+       "fuente": "CLAUDE.md (regla de Navegación)"
+      },
+      {
+       "dice": "'Navegación SOLO por triggerTransition (decisión cerrada · CLAUDE.md)' en el rail del setter.",
+       "fuente": "src/app/(protected)/setter/_components/setter-nav.tsx:43-47; docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:273; docs/probe-poda-terreno.md:1133"
+      }
+     ]
+    },
+    {
+     "tema": "Proveedor de IA",
+     "posiciones": [
+      {
+       "dice": "IA: Anthropic SDK (Claude Haiku 4.5).",
+       "fuente": "AGENTS.md:22"
+      },
+      {
+       "dice": "El runtime del bot es Gemini 2.5 Flash sobre Vertex.",
+       "fuente": "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:268; docs/baselines/2026-05-chatbot-runtime.md:6"
+      },
+      {
+       "dice": "AIExecutiveBrief llama a Claude Haiku 4.5 (mayo); en junio pasó a gemini-2.5-flash.",
+       "fuente": "docs/audits/2026-05-auditoria-profunda.md:35; docs/audits/2026-06-revalidacion.md:66"
+      }
+     ]
+    },
+    {
+     "tema": "STATUS.md como fuente de verdad",
+     "posiciones": [
+      {
+       "dice": "STATUS.md se autodefine fuente de verdad (39 passed/0 failed, AIExecutiveBrief mock, 42 migraciones).",
+       "fuente": "docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:264"
+      },
+      {
+       "dice": "Esas afirmaciones son falsas: Playwright fallaba, el brief era LLM real, había 86 migraciones y 0 menciones de setter.",
+       "fuente": "docs/audits/2026-05-auditoria-profunda.md:34-35; docs/auditorias/A1-CENSO-SUPERFICIES-2026-08.md:264-265"
+      }
+     ]
+    },
+    {
+     "tema": "Existencia del brief de visión del setter",
+     "posiciones": [
+      {
+       "dice": "docs/brief-vision-flujo-setter.md no existe en el repo; la vara se reconstruye.",
+       "fuente": "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md:5; docs/auditorias/REGRESION-FINAL-2026-07.md:29; docs/auditorias/AUDITORIA-CIERRE-2026-07.md:9"
+      },
+      {
+       "dice": "BRIEF-VISION-FLUJO-SETTER-v3.md se commiteó (e06e3c4), pero sus secciones no coinciden con las que cita HANDOFF-LEADOS-CIERRE.",
+       "fuente": "docs/probe-poda-terreno.md:1126-1129"
+      },
+      {
+       "dice": "El v4 y el doc de corrección viven en docs/decisiones-oslead-vii sin commitear; el doc de corrección no existe.",
+       "fuente": "docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md:17-56"
+      }
+     ]
+    },
+    {
+     "tema": "Severidad de las CVE de Next.js",
+     "posiciones": [
+      {
+       "dice": "SEC-DEP-01 es P0: 14 advisories en Next 16.2.1.",
+       "fuente": "docs/auditoria-seguridad-2026-05.md:22,72-85"
+      },
+      {
+       "dice": "El P0 de mayo estaba sobredimensionado: npm audit da 2 moderate.",
+       "fuente": "docs/audits/2026-06-revalidacion.md:90"
+      },
+      {
+       "dice": "Se reabrió: next@16.2.9 suma 9 advisories nuevas, 4 alcanzables; next-auth beta.31 trae 2 críticas.",
+       "fuente": "docs/baselines/2026-07-auditoria-seguridad.md:3404,3452"
+      }
+     ]
+    },
+    {
+     "tema": "¿Hay cliente pago en producción?",
+     "posiciones": [
+      {
+       "dice": "Cliente piloto de USD 4.000 (San Miguel); matsu es 'cliente real'.",
+       "fuente": "docs/audits/2026-05-auditoria-profunda.md:16; docs/audits/2026-06-revalidacion-dashboard-chatbot.md:209"
+      },
+      {
+       "dice": "El chatbot multi-tenant está construido pero 'todavía sin cliente pago en producción'.",
+       "fuente": "docs/_insumos/drive/Franco/Work Flow/Proyecto DevelOP/Contexto/develOP-contexto-estable-v1.0.md:14"
+      }
+     ]
+    },
+    {
+     "tema": "El 3D del hero",
+     "posiciones": [
+      {
+       "dice": "NO TOCAR: el Hero 3D ATF es diseño.",
+       "fuente": "docs/auditoria-total-pre-deploy.md:103"
+      },
+      {
+       "dice": "ELIMINAR el canvas 3D del hero, 'ya decidido'.",
+       "fuente": "docs/probe-motion-sitio.md:428"
+      },
+      {
+       "dice": "En main 57c421bc el Hero sigue con R3F, postprocessing y Environment.",
+       "fuente": "src/components/layout/Hero.tsx:3-9"
+      }
+     ]
+    },
+    {
+     "tema": "Glassmorphism",
+     "posiciones": [
+      {
+       "dice": "Patrón de stack: bg-white/[0.04] backdrop-blur-[20px] backdrop-saturate-[180%] border-white/[0.08].",
+       "fuente": "CLAUDE.md (Stack conventions)"
+      },
+      {
+       "dice": "El glassmorphism es lo que se elimina (E7); hay que despatronarlo de CLAUDE.md.",
+       "fuente": "docs/probe-motion-sitio.md:434,466"
+      }
+     ]
+    },
+    {
+     "tema": "Infraestructura reutilizable para las decisiones de OSLead VII",
+     "posiciones": [
+      {
+       "dice": "El componente de pasos, la barra de progreso y el autoguardado ya viven en el repo: 'hay que extenderlo'.",
+       "fuente": "docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:86-88 (citando los docs de decisiones)"
+      },
+      {
+       "dice": "Lo reutilizable son 32 líneas (ProgressBar.tsx); el autoguardado es un borrador en localStorage con clave global.",
+       "fuente": "docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:88-92"
+      }
+     ]
+    },
+    {
+     "tema": "Cantidad de pantallas del manual",
+     "posiciones": [
+      {
+       "dice": "16 pantallas m1-m16 más mr y estados.",
+       "fuente": "docs/auditorias/SMOKE-TEST-MANUAL-2026-07.md:3"
+      },
+      {
+       "dice": "Los docs de decisiones dicen 13, 14 o 15; el código tiene 15 PANTALLA_IDS, 11 en ORDEN_MANUAL.",
+       "fuente": "docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md:1180-1186"
+      }
+     ]
+    },
+    {
+     "tema": "Errores de tipos",
+     "posiciones": [
+      {
+       "dice": "tsc --noEmit: 1 error (searchconsole.ts, colisión de google-auth-library).",
+       "fuente": "docs/microaudit-frozen-frontera-CO.md:256-270"
+      },
+      {
+       "dice": "tsc --noEmit: 0 errores sobre 1.466 archivos; se refuta la premisa de que había deuda.",
+       "fuente": "docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md:22-29"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
