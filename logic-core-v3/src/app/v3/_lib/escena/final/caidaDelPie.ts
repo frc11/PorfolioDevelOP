@@ -1,5 +1,7 @@
 import { FLOOR_Y } from '../probeScene'
 import { CAIDA_AL_HUECO, anguloDeLaCaida, caidaIntegrada, type CaidaIntegrada } from './caidaAlHueco'
+import { duracionDelRebote } from './reboteDelPie'
+export { reboteDeLaPieza } from './reboteDelPie'
 
 /**
  * [PULIDO 19] Q2 · LAS PIEZAS DEL PIE TAMBIÉN CAEN — cada pieza del pie de volumen (los textos extruidos, las placas del mail, WhatsApp
@@ -115,8 +117,9 @@ const aLaDerecha = (p: PiezaDePie, b: BaseDelPie): number => (p.x - b.logoX) * b
 /**
  * Los lugares en el piso de todas las piezas (en `destino`, ya reservado, uno por pieza): las dos pilas y el reloj de cada una. Devuelve
  * cuándo aparece el DOM de la última (s del reloj), o el golpe si no hay piezas. `caidas`: la caída integrada de cada pieza (por su tamaño).
+ * [CIERRE A-bis] A10 · `rebote` (s): con `?rebote=si`, lo que saltan las piezas después del golpe; se incrustan cuando terminan.
  */
-export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, caidas: readonly CaidaIntegrada[], b: BaseDelPie, destino: readonly LugarEnElPiso[]): number {
+export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, caidas: readonly CaidaIntegrada[], b: BaseDelPie, destino: readonly LugarEnElPiso[], rebote: number = duracionDelRebote()): number {
   const n = Math.min(cuantas, piezas.length, destino.length, ORDEN.length)
   const G = CAIDA_AL_HUECO.golpeS
   const I = CAIDA_AL_HUECO.inclinaS
@@ -169,7 +172,7 @@ export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, 
       l.cae = G - c.contactoS / l.rapidez
       l.inclina = l.cae - I / l.rapidez
       l.toca = G
-      l.asentada = l.cae + (Number.isFinite(c.asentadaS) ? c.asentadaS : c.contactoS) / l.rapidez
+      l.asentada = Math.max(G + rebote, l.cae + (Number.isFinite(c.asentadaS) ? c.asentadaS : c.contactoS) / l.rapidez)
       l.incrustada = l.asentada + CAIDA_DEL_PIE.incrustaS
       ultima = Math.max(ultima, l.incrustada + CAIDA_DEL_PIE.domS)
     }

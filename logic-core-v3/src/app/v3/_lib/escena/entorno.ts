@@ -112,6 +112,8 @@ export interface Pruebas {
    */
   readonly 'sin-cristal': 'si' | 'no'
   readonly 'sin-moire': 'si' | 'no'
+  /** [CIERRE A-bis] A10 · `rebote=si`: las piezas del pie rebotan al caer (`final/reboteDelPie.ts`; la luz que rebota es otra: `Entorno.rebote`). */
+  readonly rebote: 'si' | 'no'
 }
 
 /**
@@ -145,10 +147,10 @@ export interface Pruebas {
  * se borró con C. P2 · entran `espejo=cristal|pliegue|caleidoscopio|ecos|espiral`, `espejo-disparo=ambiente|scroll|mantener` y
  * `espejo-prisma=si` (la dimensión espejo). [PULIDO 19] Q0 · `plasma=` se borró con B (el plasma A es el único; el cristal reemplaza a B).
  */
-export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no', 'sin-cristal': 'no', 'sin-moire': 'no' }
+export const PRUEBAS_APAGADAS: Pruebas = { pie: 'no', rebobinado: 'no', angel: 'no', energia: 'no', espejo: 'no', 'espejo-disparo': 'no', 'espejo-prisma': 'no', 'sin-cristal': 'no', 'sin-moire': 'no', rebote: 'no' }
 
 /** [PULIDO 1] Las pruebas del sprint que también se piden sueltas en la URL (`/v3?angel=asentado`), además de `?pruebas=`. */
-export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'espejo', 'espejo-disparo', 'espejo-prisma'] as const
+export const PRUEBAS_SUELTAS = ['rebobinado', 'angel', 'energia', 'espejo', 'espejo-disparo', 'espejo-prisma', 'rebote'] as const
 
 /**
  * [PULIDO 20] R2 · lo que pide el fondo, también suelto en la URL: `?cristal=no` (PULIDO 19 lo documentó, pero sólo andaba con el banco)
@@ -176,6 +178,7 @@ function pruebasDe(valor: (clave: string) => string | undefined): Pruebas {
     'sin-cristal': valor('cristal') === 'no' || valor('fondo') === 'moire' ? 'si' : 'no',
     // [PULIDO 21] S4 · `fondo=cristal` (el cristal solo); `espejo`, su nombre de PULIDO 20.
     'sin-moire': valor('fondo') === 'cristal' || valor('fondo') === 'espejo' ? 'si' : 'no',
+    rebote: unoDe<'si'>(['si'], valor('rebote')),
   }
 }
 

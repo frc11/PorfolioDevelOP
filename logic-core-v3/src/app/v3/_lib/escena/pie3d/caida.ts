@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-import { CAIDA_DEL_PIE, POSE_DE_LA_PIEZA, crearLugar, domDeLaPieza, domSigueALaPieza, huellaDelPie, lugaresEnElPiso, poseDeLaPiezaQueCae, type LugarEnElPiso, type PoseDeLaPieza } from '../final/caidaDelPie'
+import { CAIDA_DEL_PIE, POSE_DE_LA_PIEZA, crearLugar, domDeLaPieza, domSigueALaPieza, huellaDelPie, lugaresEnElPiso, poseDeLaPiezaQueCae, reboteDeLaPieza, type LugarEnElPiso, type PoseDeLaPieza } from '../final/caidaDelPie'
 import { CAIDA_AL_HUECO, caidaIntegrada, type CaidaIntegrada } from '../final/caidaAlHueco'
 import { EN_VIVO, FINAL_DEL_PIE, segundosDelFinal } from '../final/recorridoDelFinal'
 import { sombraDeLaPiezaQueCae } from '../final/sombraDeLaPieza'
@@ -337,7 +337,7 @@ export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number):
   // [PULIDO 26] X2 · y un poco más (`TECHO_DE_LOS_TEXTOS.sube`, u): por encima del techo de los bloques de abajo (el piso no se aplana).
   const sube = p.esTexto ? (p.espesorPx + TECHO_DE_LOS_TEXTOS.sube / col.mpp) * poseDeLaPiezaQueCae(col, c.lugares[p.columna], s).hundido : 0
   OFFSET.set(p.dx, -p.dy, sube).multiplyScalar(col.mpp).applyQuaternion(col.q)
-  grupo.position.copy(col.o).add(OFFSET)
+  grupo.position.copy(col.o).add(OFFSET).y += reboteDeLaPieza(i, s - CAIDA_AL_HUECO.golpeS) // [CIERRE A-bis] A10 · y sus saltos (`?rebote=si`).
   // [PULIDO 27] Y4 b · antes de un viaje desde el pie acostado se hunde en su hueco; hundida, no se dibuja hasta que el viaje termina.
   const h = SALIDA_EN_VIVO.hunde
   if (h <= 0) return

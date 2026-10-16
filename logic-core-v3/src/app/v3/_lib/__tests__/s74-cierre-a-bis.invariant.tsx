@@ -2,6 +2,8 @@
  * CIERRE A-bis — CUATRO RETOQUES. Cada cosa con su control positivo (el detector ve el estado de antes o uno roto a propósito).
  *   A4 · la red de noche se forma más rápido (toda en ~7 s, era ~11), con la estabilidad de CIERRE A (el temblor y el titileo, igual).
  *   A8 · gracias y error: la bajada de la placa, el cierre del piso, la apertura y la subida, un 15 % más rápidas (al mismo ritmo).
+ *   A10 · `?rebote=si` (apagado por defecto): las piezas del pie rebotan chico y amortiguado al tocar el piso, cada una con su fase; el
+ *         golpe sigue en su lugar y se incrustan cuando terminan.
  */
 import { ARBOL, armarElArbol } from '../escena/energia/arbol'
 import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
@@ -11,6 +13,10 @@ import { REPOSO, crearRed } from '../escena/energia/reposo'
 import { FLOOR_Y } from '../escena/probeScene'
 import { pisoDelHundimiento } from '../escena/pie3d/transformacionDelPie'
 import { duracionDelCambioDelPie } from '../formularios/volteo'
+import { ENTORNO, entornoPedido, pedidoDeLaUrl } from '../escena/entorno'
+import { CAIDA_AL_HUECO, caidaIntegrada } from '../escena/final/caidaAlHueco'
+import { crearLugar, lugaresEnElPiso, type BaseDelPie, type LugarEnElPiso, type PiezaDePie } from '../escena/final/caidaDelPie'
+import { REBOTE_DEL_PIE, altoDelRebote, duracionDelRebote, reboteDeLaPieza } from '../escena/final/reboteDelPie'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -87,5 +93,61 @@ const FASES = fasesDelCambio(duracionDelCambioDelPie(false))
 afirmar(fasesBien(FASES), `  la bajada ${FASES[0].toFixed(3)} s, el cierre ${FASES[1].toFixed(3)}, la apertura ${FASES[2].toFixed(3)} y la subida ${FASES[3].toFixed(3)} (en CIERRE A, 0,6 cada una: el 85 %)`)
 controlPositivo('  el detector VE el cambio de CIERRE A (0,6 s cada fase)', fasesDelCambio(2.4), fasesBien)
 controlPositivo('  y uno más rápido sólo en la bajada', [0.45, 0.51, 0.51, 0.51] as const, fasesBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A10 · El rebote al caer, detrás de `?rebote=si`: chico, amortiguado y desfasado; el golpe en su lugar')
+
+// La bandera: apagada en el producto, se pide suelta en la URL.
+const pedidaEnLaUrl = pedidoDeLaUrl('?rebote=si')
+afirmar(ENTORNO.pruebas.rebote === 'no' && pedidaEnLaUrl !== null && entornoPedido(pedidaEnLaUrl).pruebas.rebote === 'si' && entornoPedido('producto,rebote=otro').pruebas.rebote === 'no' && duracionDelRebote() === 0 && reboteDeLaPieza(0, 0.1) === 0, '  apagado por defecto (sin la bandera, ni un salto); `?rebote=si` lo pide')
+
+/** Los saltos de una pieza: sus altos máximos y cuándo vuelve a quedar en el piso del todo (s del reloj desde el golpe). */
+interface DelRebote {
+  readonly picos: readonly number[]
+  readonly terminaS: number
+  readonly antes: number
+}
+function saltosDe(subeA: (u: number) => number): DelRebote {
+  const picos: number[] = []
+  let [subiendo, antes, termina] = [false, 0, 0]
+  for (let k = 1; k <= 2000; k += 1) {
+    const u = k / 1000
+    const y = subeA(u)
+    if (y < antes && subiendo) picos.push(antes)
+    subiendo = y > antes
+    if (y > 1e-6) termina = u
+    antes = y
+  }
+  return { picos, terminaS: termina, antes: subeA(0) + subeA(-0.1) }
+}
+const PIEZAS_A10 = [0, 1, 2, 3, 4, 5]
+const SALTOS = PIEZAS_A10.map((i) => saltosDe((u) => reboteDeLaPieza(i, u, true)))
+// Chico (el primero, a lo sumo 1,5 u: visto de frente, unos % de la pieza), amortiguado (cada uno, menos de la mitad del anterior; al menos dos), sin moverse antes del golpe y
+// terminado dentro de lo que el reloj le da (antes de incrustarse); y desfasados: las piezas no vuelven al piso todas a la vez.
+const reboteBien = (xs: readonly DelRebote[]): boolean =>
+  xs.every((x) => x.antes === 0 && x.picos.length >= 2 && x.picos[0] <= 1.5 && x.picos[0] >= 0.05 && x.picos.every((p, k) => k === 0 || p < 0.5 * x.picos[k - 1]) && x.terminaS <= duracionDelRebote(true) + 1e-3) &&
+  Math.max(...xs.map((x) => x.terminaS)) - Math.min(...xs.map((x) => x.terminaS)) > 0.05
+afirmar(reboteBien(SALTOS), `  ${String(SALTOS[0].picos.length)} saltos (el primero de ${SALTOS.map((x) => x.picos[0].toFixed(2)).join(', ')} u, cada uno con ${String(REBOTE_DEL_PIE.restitucion)} de la velocidad), terminados entre los ${Math.min(...SALTOS.map((x) => x.terminaS)).toFixed(2)} y los ${Math.max(...SALTOS.map((x) => x.terminaS)).toFixed(2)} s del golpe: cada pieza con su fase`)
+controlPositivo('  el detector VE todas en fase (el mismo alto)', PIEZAS_A10.map(() => saltosDe((u) => reboteDeLaPieza(0, u, true))), reboteBien)
+controlPositivo('  y un rebote grande (el triple de alto)', PIEZAS_A10.map((i) => saltosDe((u) => 3 * reboteDeLaPieza(i, u, true))), reboteBien)
+controlPositivo('  y uno sin amortiguar (saltos iguales)', PIEZAS_A10.map((i) => saltosDe((u) => reboteDeLaPieza(i, u % 0.3, true))), reboteBien)
+
+// En el piso: el golpe (tocar) sigue en su lugar del reloj y la columna se incrusta cuando terminan los saltos; sin el rebote, como antes.
+const COLUMNAS_A10: readonly PiezaDePie[] = [{ ancho: 3, alto: 5, espesor: 0.2, x: -6, y: FLOOR_Y, z: 0 }, { ancho: 3, alto: 4, espesor: 0.3, x: 6, y: FLOOR_Y, z: 0 }]
+const BASE_A10: BaseDelPie = { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: 6.9, logoFondo: 4.78 }
+const lugaresA10 = (rebote: number): readonly LugarEnElPiso[] => {
+  const lugares = COLUMNAS_A10.map(() => crearLugar())
+  lugaresEnElPiso(COLUMNAS_A10, COLUMNAS_A10.length, COLUMNAS_A10.map((p) => caidaIntegrada(p)), BASE_A10, lugares, rebote)
+  return lugares
+}
+const [SIN, CON] = [lugaresA10(0), lugaresA10(duracionDelRebote(true))]
+const enElPisoBien = (sin: readonly LugarEnElPiso[], con: readonly LugarEnElPiso[]): boolean =>
+  con.every((l, k) => l.toca === CAIDA_AL_HUECO.golpeS && l.cae === sin[k].cae && l.asentada >= CAIDA_AL_HUECO.golpeS + duracionDelRebote(true) - 1e-9 && l.incrustada > l.asentada) &&
+  sin.every((l) => l.asentada < CAIDA_AL_HUECO.golpeS + duracionDelRebote(true))
+afirmar(enElPisoBien(SIN, CON), `  tocan en el golpe (${String(CAIDA_AL_HUECO.golpeS)} s del reloj, con y sin el rebote) y se incrustan a los ${CON.map((l) => l.asentada.toFixed(2)).join(' y ')} s (sin el rebote, ${SIN.map((l) => l.asentada.toFixed(2)).join(' y ')}): los saltos terminan antes`)
+controlPositivo('  el detector VE una que se incrusta mientras salta', [SIN, SIN] as const, (x: readonly (readonly LugarEnElPiso[])[]) => enElPisoBien(x[0], x[1]))
+controlPositivo('  y una que toca después del golpe', [SIN, CON.map((l) => ({ ...l, toca: l.toca + 0.1 }))] as const, (x: readonly (readonly LugarEnElPiso[])[]) => enElPisoBien(x[0], x[1]))
+// El alto de cada una, distinto de sus vecinas.
+afirmar(PIEZAS_A10.every((i) => i === 0 || Math.abs(altoDelRebote(i) - altoDelRebote(i - 1)) > 0.01), '  cada pieza con su alto (distinto del de sus vecinas)')
 
 cerrar('s74-cierre-a-bis')
