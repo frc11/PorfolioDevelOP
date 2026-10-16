@@ -7,6 +7,7 @@
  *        y acostado (la órbita del final).
  *   A3 · partículas y rayos sólo de noche: de día no hay cargas, arcos ni red; entran y se van con la noche de la energía (el factor del
  *        amanecer y el atardecer), cada una corrida por su azar, su luz y su tamaño juntos, sin saltos. El día de la energía se borró.
+ *   A4 · la red de noche, estable: el temblor de los vértices al 20 % y más lento; el titileo, suave y lento.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { motionValue } from 'motion/react'
@@ -17,6 +18,9 @@ import { ORBITA_DEL_MOUSE, nuevaOrbita, pasoDeLaOrbita } from '../escena/final/o
 import { TRAMOS_DEL_PIE } from '../escena/pie3d/coreografia'
 import { PROGRESO_DEL_PIE } from '../pie3d/registro'
 import { DE_NOCHE, f as glsl } from '../escena/energia/dibujo/comun'
+import { DIBUJO_DE_LA_RED, VERTICES_DE_LA_RED, armarLaRed } from '../escena/energia/dibujo/red'
+import { TRAZO } from '../escena/energia/dibujo/arcos'
+import * as THREE from 'three'
 import { ANTICIPACION } from '../escena/interfaz/anticipacion'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -265,5 +269,44 @@ const sinElDia = (x: FuentesA3, plasma: string): boolean =>
 afirmar(sinElDia(FUENTES_A3, PLASMA_A3), '  sin el día de la energía: ni `dia.ts`, ni la tinta, ni lo que tapaba, ni el calor sobre la copia del cuadro; la noche, la del amanecer y el atardecer')
 controlPositivo('  el detector VE la tinta de día de vuelta', { ...FUENTES_A3, arcos: `${FUENTES_A3.arcos}\nuniform vec3 uTintaDia;` }, (x: FuentesA3) => sinElDia(x, PLASMA_A3))
 controlPositivo('  y la copia del cuadro pedida de día', FUENTES_A3, (x: FuentesA3) => sinElDia(x, `${PLASMA_A3}\nif (u.uNoche.value < 0.97) PEDIDOS_DEL_PASE.colorEsteCuadro = true`))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A4 · La red de noche, estable: el temblor al 20 % y más lento, el titileo suave')
+
+/**
+ * Lo que mueve a un rayo quieto, con la cuenta del sombreador (`tiembla` y `titila`): el temblor de un punto (su amplitud, en partes del
+ * largo del enlace, y su velocidad más alta: la amplitud por el ritmo más rápido) y el titileo (cuánto baja el brillo y su ritmo más
+ * rápido, con la semilla en 1). La de antes: 0,012 del largo a 19 + 14 rad/s y el titileo de 0,3 a 4 + 5 rad/s.
+ */
+interface DelRayo {
+  readonly amplitud: number
+  readonly velocidad: number
+  readonly titileo: number
+  readonly ritmo: number
+}
+const delRayo = (temblor: number, ritmos: { readonly temblor: readonly number[]; readonly titileo: readonly number[] }, titileo: number): DelRayo => ({
+  amplitud: temblor * Math.sqrt(3),
+  velocidad: temblor * Math.sqrt(3) * (ritmos.temblor[0] + ritmos.temblor[1]) * 1.31,
+  titileo,
+  ritmo: ritmos.titileo[0] + ritmos.titileo[1],
+})
+const RAYO_ANTES = delRayo(0.012, { temblor: [19, 14], titileo: [4, 5] }, 0.3)
+const RAYO = delRayo(DIBUJO_DE_LA_RED.uRed[3], DIBUJO_DE_LA_RED.ritmos, DIBUJO_DE_LA_RED.uRed[2])
+const establesBien = (x: DelRayo): boolean =>
+  Math.abs(x.amplitud / RAYO_ANTES.amplitud - 0.2) < 0.03 && x.velocidad <= 0.1 * RAYO_ANTES.velocidad && x.titileo <= 0.5 * RAYO_ANTES.titileo && x.titileo > 0 && x.ritmo <= 0.5 * RAYO_ANTES.ritmo
+afirmar(establesBien(RAYO), `  el temblor al ${((RAYO.amplitud / RAYO_ANTES.amplitud) * 100).toFixed(0)} % (${DIBUJO_DE_LA_RED.uRed[3].toFixed(4)} del largo) y a lo sumo ${RAYO.velocidad.toFixed(3)} largos por segundo (antes ${RAYO_ANTES.velocidad.toFixed(3)}); el titileo baja ${String(RAYO.titileo)} (antes ${String(RAYO_ANTES.titileo)}) a lo sumo a ${String(RAYO.ritmo)} rad/s (antes ${String(RAYO_ANTES.ritmo)}): viva, no apagada`)
+controlPositivo('  el detector VE la red de antes (el temblor rápido y el titileo hondo)', RAYO_ANTES, establesBien)
+controlPositivo('  y una sólo menos amplia (el mismo ritmo)', delRayo(DIBUJO_DE_LA_RED.uRed[3], { temblor: [19, 14], titileo: [4, 5] }, DIBUJO_DE_LA_RED.uRed[2]), establesBien)
+// El sombreador, con los ritmos de la tabla.
+const ritmosEnElSombreador = (v: string): boolean =>
+  v.includes(`float w = ${glsl(DIBUJO_DE_LA_RED.ritmos.temblor[0])} + ${glsl(DIBUJO_DE_LA_RED.ritmos.temblor[1])} * azarDe( s, 60.0 + k );`) &&
+  v.includes(`uTiempo * ( ${glsl(DIBUJO_DE_LA_RED.ritmos.titileo[0])} + b.w * ${glsl(DIBUJO_DE_LA_RED.ritmos.titileo[1])} )`) && v.includes('return puntoDe( A, B, s, rama, i ) + d * uRed.w * length( B - A );')
+afirmar(ritmosEnElSombreador(VERTICES_DE_LA_RED), '  el sombreador de la red usa esos ritmos y esa amplitud')
+controlPositivo('  el detector VE el ritmo de antes en el sombreador', VERTICES_DE_LA_RED.replace(`float w = ${glsl(DIBUJO_DE_LA_RED.ritmos.temblor[0])} +`, 'float w = 19.0 +'), ritmosEnElSombreador)
+// La luz que corre por el canal: la de la red, casi quieta (la de los arcos, igual); su material la lleva propia.
+const formaDeLaRed = (armarLaRed(4, {}).malla.material as THREE.ShaderMaterial).uniforms.uArcoForma.value as THREE.Vector4
+const correBien = (corre: number): boolean => corre > 0 && corre <= 0.3 * TRAZO.uArcoForma[2]
+afirmar(correBien(formaDeLaRed.z) && formaDeLaRed.x === TRAZO.uArcoForma[0] && formaDeLaRed.y === TRAZO.uArcoForma[1], `  la luz que corre por los rayos de la red, ${String(formaDeLaRed.z)} (la de los arcos, ${String(TRAZO.uArcoForma[2])}): el mismo canal, casi quieto`)
+controlPositivo('  el detector VE la luz que corre de los arcos en la red (la de antes)', TRAZO.uArcoForma[2], correBien)
 
 cerrar('s73-cierre-a')

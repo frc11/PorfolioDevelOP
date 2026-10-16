@@ -598,7 +598,9 @@ const arcoBien = (v: string, f: string, u: Record<string, THREE.IUniform>): bool
     camino !== undefined && camino.x === CAMINO.desvio && camino.y === CAMINO.aspereza && camino.z === CAMINO.profundidad && rama !== undefined && rama.x === CAMINO.ramas.largo[0] && rama.w === CAMINO.ramas.angulo[1] &&
     // [PULIDO 21] S1 · el mismo dibujo que los arcos (su canal y sus fragmentos), con el titileo, el destello y el corte en el vértice.
     v.includes('vec3 pA = puntoQueTiembla( a.xyz, b.xyz, b.w, rama, aDato.y );') && v.includes('canalDelArco( r.punto, r.antes, r.despues, r.forma, r.extra );') && f.endsWith(FRAGMENTOS_DE_LOS_ARCOS) &&
-    v.includes('abs( vT - 0.5 ) * 2.0') && v.includes('float destello = max( a.w - 1.0, 0.0 );') && v.includes('uTiempo * ( 4.0 + b.w * 5.0 )')
+    v.includes('abs( vT - 0.5 ) * 2.0') && v.includes('float destello = max( a.w - 1.0, 0.0 );') &&
+    // [CIERRE A] A4 · el titileo, con su ritmo (más lento: era 4 más 5 por la semilla).
+    v.includes(`uTiempo * ( ${String(DIBUJO_DE_LA_RED.ritmos.titileo[0])} + b.w * ${DIBUJO_DE_LA_RED.ritmos.titileo[1].toFixed(1)} )`)
 }
 afirmar(arcoBien(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED, uniformesDeLaRed), '  cada enlace, un arco del plasma: quebrado en cuatro niveles con su aspereza y su profundidad, con su rama; la forma, de la semilla y sin el reloj (congelada; sólo titila); afinado en las puntas; el corte lo abre desde el medio, con el destello')
 controlPositivo('  el detector VE un arco que se mueve con el reloj (no congelado)', VERTICES_DE_LA_RED.replace('float x = t * exp2( float( n ) + 1.0 );', 'float x = t * exp2( float( n ) + 1.0 ) + uTiempo;'), (v: string) => arcoBien(v, FRAGMENTOS_DE_LA_RED, uniformesDeLaRed))

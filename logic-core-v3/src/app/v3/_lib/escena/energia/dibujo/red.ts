@@ -3,8 +3,8 @@ import * as THREE from 'three'
 import { CAMINO } from '../arcos/camino'
 import type { Brasas } from '../brasas'
 import { REPOSO, type Red } from '../reposo'
-import { CANAL_DEL_ARCO, FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, HALO_DEL_CANAL, TRAZO_GLSL, uniformesDelTrazo, type NombreDelTrazo } from './arcos'
-import { COMUN, materialDeEnergia } from './comun'
+import { CANAL_DEL_ARCO, FRAGMENTOS_DEL_HALO_DEL_ARCO, FRAGMENTOS_DE_LOS_ARCOS, HALO_DEL_CANAL, TRAZO, TRAZO_GLSL, uniformesDelTrazo, type NombreDelTrazo } from './arcos'
+import { COMUN, f, materialDeEnergia } from './comun'
 
 /**
  * [PULIDO 19] Q1.d · EL DIBUJO DE LA RED EN REPOSO (`reposo.ts`: la máquina; `docs/rediseno/PLASMA.md`). Luz ([CIERRE A] A3 · sólo de
@@ -28,8 +28,16 @@ export const DIBUJO_DE_LA_RED = {
   /**
    * El golpe (el núcleo y el halo) y el resplandor del rayo quieto, el titileo (cuánto baja) y el temblor (parte de su largo). [PULIDO 27]
    * Z2 · el brillo de un arco real de noche (era 1 y 0,5 con un tope que los bajaba a un cuarto) y el canal más GRUESO (`ancho`).
+   * [CIERRE A] A4 · ESTABLE: el temblor al 20 % (era 0,012) y el titileo suave (era 0,3): quieta y viva, no inestable.
    */
-  uRed: [1.3, 0.55, 0.3, 0.012],
+  uRed: [1.3, 0.55, 0.12, 0.0024],
+  /**
+   * [CIERRE A] A4 · los ritmos (rad/s): el del temblor de cada punto (base más su azar; era 19 más 14) y el del titileo de cada rayo (base
+   * más su semilla; era 4 más 5): más lentos.
+   */
+  ritmos: { temblor: [5, 3.5], titileo: [1.5, 2] },
+  /** [CIERRE A] A4 · la luz que corre por el canal, en la red (la de los arcos es 0,3: `TRAZO.uArcoForma`): casi quieta. */
+  corre: 0.08,
   ancho: 1.35,
   /** Los tramos del camino y los de la rama; la rama, más fina (parte del ancho). */
   tramos: 16,
@@ -130,7 +138,7 @@ vec4 enlace( float k, float fila ) {
 }
 // El temblor de la carga inestable: cada punto a su ritmo (de la semilla), leve y nada en las puntas (siguen en sus brasas).
 vec3 tiembla( float s, float k ) {
-	float w = 19.0 + 14.0 * azarDe( s, 60.0 + k );
+	float w = ${f(DIBUJO_DE_LA_RED.ritmos.temblor[0])} + ${f(DIBUJO_DE_LA_RED.ritmos.temblor[1])} * azarDe( s, 60.0 + k );
 	return vec3( sin( uTiempo * w + k * 1.7 + s * 40.0 ), sin( uTiempo * w * 1.31 + k * 2.3 + s * 13.0 ), sin( uTiempo * w * 0.77 + k * 0.9 + s * 7.0 ) );
 }
 vec3 puntoQueTiembla( vec3 A, vec3 B, float s, float rama, float j ) {
@@ -162,7 +170,7 @@ Rayo rayoDelVertice() {
 	float t = ( aDato.y + position.y ) / n;
 	float vT = rama < 0.5 ? t : floor( 2.0 + azarDe( b.w, 91.0 ) * ${(DIBUJO_DE_LA_RED.tramos - 4).toFixed(1)} ) / ${DIBUJO_DE_LA_RED.tramos.toFixed(1)};
 	float abierto = c.x <= 0.0 ? 1.0 : smoothstep( c.x - 0.06, c.x + 0.02, abs( vT - 0.5 ) * 2.0 );
-	float titila = 1.0 - uRed.z * ( 0.5 + 0.5 * sin( uTiempo * ( 4.0 + b.w * 5.0 ) + b.w * 40.0 ) );
+	float titila = 1.0 - uRed.z * ( 0.5 + 0.5 * sin( uTiempo * ( ${f(DIBUJO_DE_LA_RED.ritmos.titileo[0])} + b.w * ${f(DIBUJO_DE_LA_RED.ritmos.titileo[1])} ) + b.w * 40.0 ) );
 	float destello = max( a.w - 1.0, 0.0 );
 	float k = ( min( a.w, 1.0 ) * titila + destello * 1.5 ) * abierto * enElFinal( r.punto - uCentro ) * uTopeDeLaRed;
 	r.forma = vec4( position.x, ( rama < 0.5 ? 1.0 : ${DIBUJO_DE_LA_RED.rama.toFixed(2)} ) * ${DIBUJO_DE_LA_RED.ancho.toFixed(2)}, uRed.x * k, uRed.y * k );
@@ -251,6 +259,8 @@ export function armarLaRed(maximo: number, comunes: Record<string, THREE.IUnifor
     uTamEnlaces: { value: new THREE.Vector2(maximo, FILAS) },
     uCamino: { value: new THREE.Vector4(CAMINO.desvio, CAMINO.aspereza, CAMINO.profundidad, 0) },
     uTopeDeLaRed: tope,
+    // [CIERRE A] A4 · su propia forma del canal: la de los arcos con la luz que corre casi quieta.
+    uArcoForma: { value: new THREE.Vector4(TRAZO.uArcoForma[0], TRAZO.uArcoForma[1], DIBUJO_DE_LA_RED.corre, TRAZO.uArcoForma[3]) },
     uRama: { value: new THREE.Vector4(CAMINO.ramas.largo[0], CAMINO.ramas.largo[1], CAMINO.ramas.angulo[0], CAMINO.ramas.angulo[1]) },
   }
   const malla = new THREE.Mesh(g, materialDeEnergia(VERTICES_DE_LA_RED, FRAGMENTOS_DE_LA_RED, { ...comunes, ...trazo, ...propias, uCapa: { value: 1 } }))
