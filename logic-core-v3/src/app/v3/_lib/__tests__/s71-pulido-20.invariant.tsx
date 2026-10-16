@@ -22,7 +22,7 @@ import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 
 import { CAIDA_AL_HUECO, caidaIntegrada, poseDeLaCaida } from '../escena/final/caidaAlHueco'
-import { CAIDA_DEL_PIE, crearLugar, distanciaParaElPie, domDeLaPieza, domSigueALaPieza, lugaresEnElPiso, poseDeLaPiezaQueCae, type BaseDelPie, type PiezaDePie } from '../escena/final/caidaDelPie'
+import { CAIDA_DEL_PIE, crearLugar, distanciaParaElPie, domDeLaPieza, domSigueALaPieza, lugaresEnElPiso, poseDeLaPiezaQueCae, reboteDeLaPieza, type BaseDelPie, type PiezaDePie } from '../escena/final/caidaDelPie'
 import { ELEVACION_DEL_FINAL, EN_VIVO, FINAL_DEL_PIE, LOGO_DE_SIEMPRE, RELOJ_DEL_FINAL, blancoDelFinal, camaraDelFinal, pasoDelReloj, relojQuieto } from '../escena/final/recorridoDelFinal'
 import type { Armada } from '../escena/pie3d/armadas'
 import { aplicarLaCaida, armarLaCaida, crearLaCaidaDelPie, sombrasDeLaCaida, type CaidaDelPie } from '../escena/pie3d/caida'
@@ -153,6 +153,8 @@ interface DeLaCaida {
   /** Lo más que cambió la distancia entre dos piezas de la misma columna (u: van pegadas) y lo más que se movió un centro entre cuadros (u, a 120 cps). */
   readonly despegue: number
   readonly salto: number
+  /** [CIERRE A-ter] A10b · lo más que saltó una pieza en el rebote al caer (u; en el producto desde A10b). */
+  readonly rebote: number
   /** Cuántos pares (pieza con pieza, pieza con logo) se cruzaron en algún cuadro, y el primero. */
   readonly cruces: number
   readonly conElLogo: number
@@ -176,6 +178,7 @@ function correrLaCaida(datos: DatosDelPie, mover?: (c: CaidaDelPie) => void): De
   let mpp = 0
   let despegue = 0
   let salto = 0
+  let rebote = 0
   const antes: THREE.Vector3[] = []
   const distancias = new Map<string, number>()
   for (let k = 0; k <= Math.ceil(DUR * 120); k += 1) {
@@ -197,6 +200,12 @@ function correrLaCaida(datos: DatosDelPie, mover?: (c: CaidaDelPie) => void): De
       cajas.push(cajaDeLaPieza(a))
     }
     // Sin saltos (el centro de cada pieza entre cuadros) y pegadas a su columna (la distancia entre dos de la misma, como en la pared).
+    // [CIERRE A-ter] A10b · salvo su propio salto del rebote (en el producto: cada pieza con su alto), que se descuenta y se cuenta aparte.
+    const quietos = cajas.map((x, i) => {
+      const sube = reboteDeLaPieza(i, s - G)
+      rebote = Math.max(rebote, sube)
+      return x.c.clone().setY(x.c.y - sube)
+    })
     for (let i = 0; i < cajas.length; i += 1) {
       if (antes[i] !== undefined) salto = Math.max(salto, antes[i].distanceTo(cajas[i].c))
       antes[i] = cajas[i].c.clone()
@@ -204,7 +213,7 @@ function correrLaCaida(datos: DatosDelPie, mover?: (c: CaidaDelPie) => void): De
         // [PULIDO 23] U3 · un texto sube su espesor al incrustarse su columna (se apoya sobre el piso): el despegue, entre las placas.
         if (c.piezas[i].columna !== c.piezas[j].columna || c.piezas[i].esTexto || c.piezas[j].esTexto) continue
         const clave = `${String(i)}-${String(j)}`
-        const dij = cajas[i].c.distanceTo(cajas[j].c)
+        const dij = quietos[i].distanceTo(quietos[j])
         const d0 = distancias.get(clave)
         if (d0 === undefined) distancias.set(clave, dij)
         else despegue = Math.max(despegue, Math.abs(dij - d0))
@@ -237,15 +246,16 @@ function correrLaCaida(datos: DatosDelPie, mover?: (c: CaidaDelPie) => void): De
     const fin = poseDeLaPiezaQueCae(p, l, DUR)
     if (!fin.quieta || fin.hundido !== 1 || Math.abs(fin.a - Math.PI / 2) > 1e-9 || domDeLaPieza(l, DUR) !== 1) sinIncrustar += 1
   }
-  return { deformacion, despegue, salto, cruces: pares.size - conElLogo, conElLogo, primero, fueraDelGolpe, sinBase, sinIncrustar, piezas: c.n, columnas: c.m }
+  return { deformacion, despegue, salto, rebote, cruces: pares.size - conElLogo, conElLogo, primero, fueraDelGolpe, sinBase, sinIncrustar, piezas: c.n, columnas: c.m }
 }
 const CAIDA = correrLaCaida(DATOS)
 const SALTO_MAXIMO = 1.5
-const caidaBien = (m: DeLaCaida): boolean => m.piezas > 0 && m.columnas === 2 && m.deformacion < 1e-6 && m.despegue < 1e-6 && m.salto <= SALTO_MAXIMO && m.cruces === 0 && m.conElLogo === 0 && m.fueraDelGolpe === 0 && m.sinBase === 0 && m.sinIncrustar === 0
+const caidaBien = (m: DeLaCaida): boolean => m.piezas > 0 && m.columnas === 2 && m.deformacion < 1e-6 && m.despegue < 1e-6 && m.rebote > 0.05 && m.salto <= SALTO_MAXIMO && m.cruces === 0 && m.conElLogo === 0 && m.fueraDelGolpe === 0 && m.sinBase === 0 && m.sinIncrustar === 0
 const CAIDA_1920 = correrLaCaida(DATOS_1920)
 afirmar(caidaBien(CAIDA_1920) && CAIDA_1920.piezas === DATOS_1920.piezas.length, `  las ${String(CAIDA_1920.piezas)} piezas del pie de 1920 en sus ${String(CAIDA_1920.columnas)} columnas: lo mismo (se apartan ${CAIDA_1920.deformacion.toExponential(1)}, se despegan ${CAIDA_1920.despegue.toExponential(1)} u, el salto mayor ${CAIDA_1920.salto.toFixed(2)} u; ningún cruce)`, CAIDA_1920.primero)
-afirmar(caidaBien(CAIDA) && CAIDA.piezas === DATOS.piezas.length, `  las ${String(CAIDA.piezas)} piezas del pie de 1440 en sus ${String(CAIDA.columnas)} columnas, en ${String(Math.ceil(DUR * 120) + 1)} cuadros: cada columna baja parada con el logo, con la base en el piso antes de inclinarse, toca en el golpe (${String(G)} s) y queda incrustada y quieta, con su DOM, al terminar; sus piezas sólidas (se apartan ${CAIDA.deformacion.toExponential(1)} de su escala y sus ángulos rectos), pegadas a ella (se despegan ${CAIDA.despegue.toExponential(1)} u), sin saltos (lo más ${CAIDA.salto.toFixed(2)} u entre cuadros a 120 cps; tope ${String(SALTO_MAXIMO)}); ninguna se cruza con otra ni con el logo`, CAIDA.primero)
+afirmar(caidaBien(CAIDA) && CAIDA.piezas === DATOS.piezas.length, `  las ${String(CAIDA.piezas)} piezas del pie de 1440 en sus ${String(CAIDA.columnas)} columnas, en ${String(Math.ceil(DUR * 120) + 1)} cuadros: cada columna baja parada con el logo, con la base en el piso antes de inclinarse, toca en el golpe (${String(G)} s) y queda incrustada y quieta, con su DOM, al terminar; sus piezas sólidas (se apartan ${CAIDA.deformacion.toExponential(1)} de su escala y sus ángulos rectos), pegadas a ella (se despegan ${CAIDA.despegue.toExponential(1)} u, salvo su propio salto del rebote: hasta ${CAIDA.rebote.toFixed(2)} u), sin saltos (lo más ${CAIDA.salto.toFixed(2)} u entre cuadros a 120 cps; tope ${String(SALTO_MAXIMO)}); ninguna se cruza con otra ni con el logo`, CAIDA.primero)
 controlPositivo('  el detector VE una pieza que se estira', { ...CAIDA, deformacion: 0.05 }, caidaBien)
+controlPositivo('  y la caída sin el rebote (A10b: en el producto)', { ...CAIDA, rebote: 0 }, caidaBien)
 controlPositivo('  y una pieza que se despega de su columna (corrida 50 px en la caída)', correrLaCaida(DATOS, (c) => {
   c.piezas[3].dx += 50
 }), caidaBien)

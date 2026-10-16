@@ -337,7 +337,7 @@ export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number):
   // [PULIDO 26] X2 · y un poco más (`TECHO_DE_LOS_TEXTOS.sube`, u): por encima del techo de los bloques de abajo (el piso no se aplana).
   const sube = p.esTexto ? (p.espesorPx + TECHO_DE_LOS_TEXTOS.sube / col.mpp) * poseDeLaPiezaQueCae(col, c.lugares[p.columna], s).hundido : 0
   OFFSET.set(p.dx, -p.dy, sube).multiplyScalar(col.mpp).applyQuaternion(col.q)
-  grupo.position.copy(col.o).add(OFFSET).y += reboteDeLaPieza(i, s - CAIDA_AL_HUECO.golpeS) // [CIERRE A-bis] A10 · y sus saltos (`?rebote=si`).
+  grupo.position.copy(col.o).add(OFFSET).y += reboteDeLaPieza(i, s - CAIDA_AL_HUECO.golpeS) // [CIERRE A-bis] A10 · y sus saltos (A10b: sin `?rebote=no`).
   // [PULIDO 27] Y4 b · antes de un viaje desde el pie acostado se hunde en su hueco; hundida, no se dibuja hasta que el viaje termina.
   const h = SALIDA_EN_VIVO.hunde
   if (h <= 0) return

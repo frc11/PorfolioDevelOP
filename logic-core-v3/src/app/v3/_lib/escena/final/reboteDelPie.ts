@@ -2,7 +2,7 @@ import { entornoDeLaEscena } from '../entorno'
 import { CAIDA_AL_HUECO } from './caidaAlHueco'
 
 /**
- * [CIERRE A-bis] A10 · EL REBOTE AL CAER (`?rebote=si`; apagado en el producto). Al tocar el piso en el golpe, cada pieza del pie (las de
+ * [CIERRE A-bis] A10 · EL REBOTE AL CAER ([CIERRE A-ter] A10b: en el producto; `?rebote=no` lo apaga). Al tocar el piso en el golpe, cada pieza del pie (las de
  * las columnas, el formulario) da unos saltos chicos y amortiguados antes de incrustarse: el primero de `alto` (u) y cada uno con
  * `restitucion` de la velocidad del anterior, con la gravedad de la escena en el reloj del final (la misma física que la caída). Cada pieza
  * con su alto (± `variacion`, por su lugar en el pie): sus saltos duran distinto y se desfasan. El contacto sigue en el golpe (el sonido,
@@ -13,9 +13,9 @@ export const REBOTE_DEL_PIE = { alto: 1, restitucion: 0.45, saltos: 3, variacion
 
 let pedido: boolean | null = null
 
-/** Si la URL lo pide (se lee una vez por carga). */
+/** Si no se pidió apagarlo (`?rebote=no`; se lee una vez por carga). */
 export function conRebote(): boolean {
-  return (pedido ??= entornoDeLaEscena().pruebas.rebote === 'si')
+  return (pedido ??= entornoDeLaEscena().pruebas['sin-rebote'] !== 'si')
 }
 
 /** El alto del primer salto de la pieza `i` (u): el de todas, corrido por su lugar (con la razón áurea: las vecinas, distintas). */

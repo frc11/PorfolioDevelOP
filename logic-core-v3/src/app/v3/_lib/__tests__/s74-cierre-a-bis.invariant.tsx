@@ -2,8 +2,8 @@
  * CIERRE A-bis — CUATRO RETOQUES. Cada cosa con su control positivo (el detector ve el estado de antes o uno roto a propósito).
  *   A4 · la red de noche se forma más rápido (toda en ~7 s, era ~11), con la estabilidad de CIERRE A (el temblor y el titileo, igual).
  *   A8 · gracias y error: la bajada de la placa, el cierre del piso, la apertura y la subida, un 15 % más rápidas (al mismo ritmo).
- *   A10 · `?rebote=si` (apagado por defecto): las piezas del pie rebotan chico y amortiguado al tocar el piso, cada una con su fase; el
- *         golpe sigue en su lugar y se incrustan cuando terminan.
+ *   A10 · las piezas del pie rebotan chico y amortiguado al tocar el piso, cada una con su fase; el golpe sigue en su lugar y se
+ *         incrustan cuando terminan. [CIERRE A-ter] A10b: prendido por defecto; `?rebote=no` lo apaga (era `?rebote=si`, apagado).
  *   A11 · la tarjeta de gracias y de error ya no titila con la cámara: su texto, impreso en la placa (la solución de AA1), y el DOM vivo.
  */
 import { ARBOL, armarElArbol } from '../escena/energia/arbol'
@@ -101,11 +101,25 @@ controlPositivo('  el detector VE el cambio de CIERRE A (0,6 s cada fase)', fase
 controlPositivo('  y uno más rápido sólo en la bajada', [0.45, 0.51, 0.51, 0.51] as const, fasesBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('A10 · El rebote al caer, detrás de `?rebote=si`: chico, amortiguado y desfasado; el golpe en su lugar')
+titulo('A10 · El rebote al caer (A10b: en el producto; `?rebote=no` lo apaga): chico, amortiguado y desfasado; el golpe en su lugar')
 
-// La bandera: apagada en el producto, se pide suelta en la URL.
-const pedidaEnLaUrl = pedidoDeLaUrl('?rebote=si')
-afirmar(ENTORNO.pruebas.rebote === 'no' && pedidaEnLaUrl !== null && entornoPedido(pedidaEnLaUrl).pruebas.rebote === 'si' && entornoPedido('producto,rebote=otro').pruebas.rebote === 'no' && duracionDelRebote() === 0 && reboteDeLaPieza(0, 0.1) === 0, '  apagado por defecto (sin la bandera, ni un salto); `?rebote=si` lo pide')
+// [CIERRE A-ter] A10b · la bandera al revés: sin nada, el rebote (los saltos); `?rebote=no`, suelto en la URL, lo apaga (pide `sin-rebote`,
+// nombrada por lo que pide: sin URL ninguna prueba pide nada); cualquier otro valor (el `si` de A-bis incluido) es el producto.
+interface BanderaDelRebote {
+  readonly url: typeof pedidoDeLaUrl
+  readonly traductor: typeof entornoPedido
+  readonly saltaPorDefecto: number
+}
+const banderaBien = (b: BanderaDelRebote): boolean => {
+  const apagado = b.url('?rebote=no')
+  return Object.values(ENTORNO.pruebas).every((v) => v === 'no') && apagado !== null && b.traductor(apagado).pruebas['sin-rebote'] === 'si' &&
+    ['producto', 'producto,rebote=si', 'producto,rebote=otro'].every((x) => b.traductor(x).pruebas['sin-rebote'] === 'no') && b.saltaPorDefecto > 0 && duracionDelRebote() === duracionDelRebote(true)
+}
+const BANDERA_A10B: BanderaDelRebote = { url: pedidoDeLaUrl, traductor: entornoPedido, saltaPorDefecto: reboteDeLaPieza(0, 0.1) }
+afirmar(banderaBien(BANDERA_A10B), `  prendido por defecto (sin la bandera, el primer salto sube ${BANDERA_A10B.saltaPorDefecto.toFixed(2)} u a los 0,1 s); \`?rebote=no\` lo apaga`)
+controlPositivo('  el detector VE el rebote de A-bis (apagado por defecto: ni un salto sin la bandera)', { ...BANDERA_A10B, saltaPorDefecto: reboteDeLaPieza(0, 0.1, false) }, banderaBien)
+controlPositivo('  y una URL que no lee `?rebote=` (la bandera no llega)', { ...BANDERA_A10B, url: (q: string) => pedidoDeLaUrl(q.replace('rebote', 'otra')) }, banderaBien)
+controlPositivo('  y un traductor que apaga con cualquier valor', { ...BANDERA_A10B, traductor: (x: string) => { const e = entornoPedido(x); return x.includes('rebote=') ? { ...e, pruebas: { ...e.pruebas, 'sin-rebote': 'si' as const } } : e } }, banderaBien)
 
 /** Los saltos de una pieza: sus altos máximos y cuándo vuelve a quedar en el piso del todo (s del reloj desde el golpe). */
 interface DelRebote {

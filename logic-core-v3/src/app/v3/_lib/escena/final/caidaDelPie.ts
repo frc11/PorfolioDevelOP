@@ -117,7 +117,7 @@ const aLaDerecha = (p: PiezaDePie, b: BaseDelPie): number => (p.x - b.logoX) * b
 /**
  * Los lugares en el piso de todas las piezas (en `destino`, ya reservado, uno por pieza): las dos pilas y el reloj de cada una. Devuelve
  * cuándo aparece el DOM de la última (s del reloj), o el golpe si no hay piezas. `caidas`: la caída integrada de cada pieza (por su tamaño).
- * [CIERRE A-bis] A10 · `rebote` (s): con `?rebote=si`, lo que saltan las piezas después del golpe; se incrustan cuando terminan.
+ * [CIERRE A-bis] A10 · `rebote` (s): lo que saltan las piezas después del golpe (A10b: en el producto; sin `?rebote=no`); se incrustan cuando terminan.
  */
 export function lugaresEnElPiso(piezas: readonly PiezaDePie[], cuantas: number, caidas: readonly CaidaIntegrada[], b: BaseDelPie, destino: readonly LugarEnElPiso[], rebote: number = duracionDelRebote()): number {
   const n = Math.min(cuantas, piezas.length, destino.length, ORDEN.length)
