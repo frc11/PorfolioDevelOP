@@ -20,7 +20,9 @@ import { duracionDelCambioDelPie } from '../../formularios/volteo'
  * y la plataforma sube con la otra hasta su lugar exacto. Las paredes, las de los bloques del borde y el pozo (`pozos.ts`). Sin tramado ni
  * geometría fantasma. El DOM de abajo de 1025 y el panel de Contacto siguen con el volteo (`formularios/volteo.ts`).
  */
-export const HUNDIMIENTO_DEL_PIE = { espesores: 3, baja: 0.35 } as const
+// [CIERRE A] A8 · la bajada y el cierre al mismo ritmo: medidos en el sitio la bajada de la placa duraba 2,3 veces el cierre del piso (0,84
+// y 0,36 s de los 2,4 del cambio, `baja` 0,35); los dos en el promedio, 0,6 s cada uno (y lo mismo a la vuelta: la apertura y la subida).
+export const HUNDIMIENTO_DEL_PIE = { espesores: 3, baja: 0.25 } as const
 export function duracionDeLaTransformacion(quieto: boolean): number {
   return duracionDelCambioDelPie(quieto)
 }

@@ -18,6 +18,7 @@ import { CAJAS_DEL_PIE } from './cajasDelPolvo'
 import { HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
 import { crearLosPozosDelPie } from './pozos'
 import { SOMBRAS_DEL_PIE } from './sombras'
+import { PLATAFORMA_EN_VIVO } from './transformacionDelPie'
 
 /**
  * [RETOQUE DEL PIE] P2 · EL PIE DE VOLUMEN EN LA ESCENA — en un módulo que se descarga aparte, desde 1025 (como los
@@ -43,7 +44,7 @@ interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
 }
 
-type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number; coreografia: () => { readonly mostrado: number; readonly pedido: number | null }; enPantalla: () => unknown; punto: (x: number, y: number, z: number) => number[] } }
+type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number; coreografia: () => { readonly mostrado: number; readonly pedido: number | null }; enPantalla: () => unknown; punto: (x: number, y: number, z: number) => number[]; plataforma: () => { readonly hundido: number; readonly cerrado: number } } }
 
 /** [PULIDO 26] X1 · para el banco: un punto del mundo en la pantalla (px de CSS) con la cámara de este cuadro. */
 const EN_PANTALLA = new THREE.Vector3()
@@ -179,6 +180,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
           return { id: a.pieza.id, forma: a.pieza.forma, visible: a.grupo.visible, esquinas }
         }),
       punto: (x, y, z) => alCuadroDelBanco(vivaDelBanco.current, x, y, z),
+      // [CIERRE A] A8 · la plataforma del cambio de gracias o error: cuánto bajó la placa y cuánto cerró el piso.
+      plataforma: () => ({ ...PLATAFORMA_EN_VIVO }),
     }
     return () => {
       delete ventana.__pieDelBanco

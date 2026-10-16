@@ -12,6 +12,7 @@
  *        libre (el chatbot); el teléfono, el parlante a la izquierda y el menú al centro; en escritorio el parlante arriba a la izquierda.
  *   A7 · la caída del pie, un 35 % más corta: el reloj del final corre más rápido; la física, el golpe, el sonido, los huecos y la cámara
  *        cuelgan de él (sincronizados); el rebobinado, también un 35 % más corto.
+ *   A8 · gracias y error: la bajada de la placa y el cierre del piso, al mismo ritmo (las dos en el promedio de las de antes).
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { motionValue } from 'motion/react'
@@ -24,6 +25,8 @@ import { PROGRESO_DEL_PIE } from '../pie3d/registro'
 import { DE_NOCHE, f as glsl } from '../escena/energia/dibujo/comun'
 import { FIN_DEL_GOLPE, LOGO_DE_SIEMPRE, REBOBINADO, RELOJ_DEL_FINAL, VIAJE_DEL_FINAL, pasoDelReloj, relojQuieto, segundosDelFinal, type EntradaDelReloj, type RelojDelFinal } from '../escena/final/recorridoDelFinal'
 import { CAIDA_AL_HUECO, anguloEnElReloj } from '../escena/final/caidaAlHueco'
+import { pisoDelHundimiento } from '../escena/pie3d/transformacionDelPie'
+import { duracionDelCambioDelPie } from '../formularios/volteo'
 import { DIBUJO_DE_LA_RED, VERTICES_DE_LA_RED, armarLaRed } from '../escena/energia/dibujo/red'
 import { TRAZO } from '../escena/energia/dibujo/arcos'
 import * as THREE from 'three'
@@ -394,5 +397,40 @@ controlPositivo('  el detector VE la caída de antes (la misma duración)', ANTE
 const rebobinadoBien = (tope: number, minimo: number, dentro: number): boolean => Math.abs(tope / 1.4 - 0.65) < 0.01 && Math.abs(minimo / 1 - 0.65) < 0.01 && Math.abs(dentro / 1 - 0.65) < 0.01
 afirmar(rebobinadoBien(REBOBINADO.topeS, REBOBINADO.minimoS, VIAJE_DEL_FINAL.dentroS), `  el rebobinado acompaña: desde el final entero ${String(REBOBINADO.topeS)} s (era 1,4), su mínimo ${String(REBOBINADO.minimoS)} (era 1) y en un viaje ${String(VIAJE_DEL_FINAL.dentroS)} (era 1)`)
 controlPositivo('  el detector VE el rebobinado de antes', [1.4, 1, 1] as const, (x: readonly number[]) => rebobinadoBien(x[0], x[1], x[2]))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('A8 · Gracias y error: la bajada de la placa y el cierre del piso, al mismo ritmo (en el promedio)')
+
+/**
+ * El cambio entero (`duracionDelCambioDelPie`) recorrido en milésimas: cuánto dura la bajada de la placa (hasta que llega abajo), el cierre
+ * del piso (hasta que está cerrado), y a la vuelta la apertura y la subida. Antes (medido en el sitio con `ca-a8.ts` y en el código), la
+ * bajada 0,84 s y el cierre 0,36 s; ahora las dos en su promedio, 0,6 s.
+ */
+interface DelCambio {
+  readonly bajada: number
+  readonly cierre: number
+  readonly apertura: number
+  readonly subida: number
+}
+const delCambio = (): DelCambio => {
+  const D = duracionDelCambioDelPie(false)
+  const N = 2400
+  const en = (f: (t: number) => boolean, desde: number): number => {
+    for (let i = desde; i <= N; i += 1) if (f(i / N)) return i
+    return N
+  }
+  const abajo = en((t) => pisoDelHundimiento(t).baja >= 1, 0)
+  const cerrado = en((t) => pisoDelHundimiento(t).cerrado >= 1, abajo)
+  const abre = en((t) => pisoDelHundimiento(t).cerrado < 1, cerrado)
+  const abierto = en((t) => pisoDelHundimiento(t).cerrado <= 0, abre)
+  const sube = en((t) => pisoDelHundimiento(t).baja < 1, abierto)
+  const arriba = en((t) => pisoDelHundimiento(t).baja <= 0, sube)
+  return { bajada: (abajo / N) * D, cierre: ((cerrado - abajo) / N) * D, apertura: ((abierto - abre + 1) / N) * D, subida: ((arriba - sube + 1) / N) * D }
+}
+const CAMBIO = delCambio()
+const PROMEDIO_A8 = (0.84 + 0.36) / 2
+const alMismoRitmo = (c: DelCambio): boolean => [c.bajada, c.cierre, c.apertura, c.subida].every((d) => Math.abs(d - PROMEDIO_A8) < 0.02)
+afirmar(alMismoRitmo(CAMBIO), `  la bajada ${CAMBIO.bajada.toFixed(2)} s y el cierre ${CAMBIO.cierre.toFixed(2)} s; a la vuelta la apertura ${CAMBIO.apertura.toFixed(2)} y la subida ${CAMBIO.subida.toFixed(2)} (antes 0,84 y 0,36: el promedio, ${PROMEDIO_A8.toFixed(2)})`)
+controlPositivo('  el detector VE el cambio de antes (la bajada 2,3 veces el cierre)', { bajada: 0.84, cierre: 0.36, apertura: 0.36, subida: 0.84 }, alMismoRitmo)
 
 cerrar('s73-cierre-a')
