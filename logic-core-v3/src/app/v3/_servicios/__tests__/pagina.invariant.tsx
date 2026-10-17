@@ -1,0 +1,223 @@
+/**
+ * INVARIANTE — Las páginas de servicio: el template y la ruta. **[SERVICIOS S1b]**
+ *
+ * Corre a mano (P-H7: ningún script de package.json lo ve): `npx tsx src/app/v3/_servicios/__tests__/pagina.invariant.tsx`.
+ *
+ * Renderiza `PaginaDeServicio` DE VERDAD (`renderToStaticMarkup`, sin `Contacto`) con los tres servicios, en desarrollo y en
+ * producción, y afirma sobre el MARCADO. Cada comprobación lleva su control positivo: el MISMO detector, contra una entrada
+ * armada para fallar. Los detectores viven en `pagina-detectores.ts`.
+ */
+
+import { readdirSync, readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import type { ResolvedMetadata } from 'next'
+import { renderToStaticMarkup } from 'react-dom/server'
+
+import { PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
+import { LOGOTIPO } from '../../_componentes/marca/sistema'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
+import { Precio } from '../bloques/Precio'
+import { FUENTE_DE_PROYECTOS } from '../datos/fuenteDeProyectos'
+import { PAGINAS_WEB } from '../datos/paginas-web'
+import { SERVICIOS } from '../datos/servicios'
+import { MARCADOR_A_DEFINIR } from '../formato'
+import { PaginaDeServicio } from '../PaginaDeServicio'
+import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
+import type { Servicio } from '../tipos'
+import {
+  MARCADORES_DE_LA_LLAVE, aperturas, arbitrariasSinToken, bloqueDe, bloquesEnOrden, clasesQueNoApilan, enlacesInternos,
+  hexSueltos, nivelesDeEncabezado, numerosInventados, reservadosEnElMarcado, respetaElOrden, saltaNiveles, sinComentarios,
+  textoVisible, valoresDe, valoresProhibidos,
+} from './pagina-detectores'
+
+const AQUI = path.dirname(fileURLToPath(import.meta.url))
+const pagina = (servicio: Servicio, enDesarrollo: boolean): string =>
+  renderToStaticMarkup(<PaginaDeServicio servicio={servicio} enDesarrollo={enDesarrollo} />)
+
+interface Pagina { readonly servicio: Servicio; readonly enDesarrollo: boolean; readonly html: string; readonly nombre: string }
+const PAGINAS: readonly Pagina[] = SERVICIOS.flatMap((servicio) =>
+  [true, false].map((enDesarrollo) => ({ servicio, enDesarrollo, html: pagina(servicio, enDesarrollo), nombre: `${servicio.slug} (${enDesarrollo ? 'dev' : 'prod'})` })),
+)
+const WEB_DEV = pagina(PAGINAS_WEB, true)
+const WEB_PROD = pagina(PAGINAS_WEB, false)
+/** Los nombres de las páginas (de los tres servicios, en los dos modos) que NO cumplen. `[]` = todas cumplen. */
+const fallan = (cumple: (p: Pagina) => boolean): string[] => PAGINAS.filter((p) => !cumple(p)).map((p) => p.nombre)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1 · Un solo h1, y es el problema')
+
+const unSoloH1 = (html: string): boolean => aperturas(html, 'h1').length === 1
+const h1Dice = (servicio: Servicio) => (html: string): boolean =>
+  unSoloH1(html) && textoVisible(/<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html)?.[1] ?? '') === servicio.problema.titulo
+afirmarIgual(fallan((p) => h1Dice(p.servicio)(p.html)), [], 'las tres páginas, en los dos modos: un solo h1, con el título del problema de SUS datos')
+controlPositivo('dos h1 se detectan', '<main><h1>a</h1><h1>b</h1></main>', unSoloH1)
+controlPositivo('un h1 con otro título se detecta', '<h1>otro</h1>', h1Dice(PAGINAS_WEB))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('2 · Los bloques, en el orden de SPEC §5')
+
+const ORDEN_DEL_SPEC = ['problema', 'que-hacemos', 'que-incluye', 'precio', 'extra', 'proceso', 'prueba', 'faq', 'llamado', 'del-blog', 'cierre']
+afirmarIgual(bloquesEnOrden(WEB_DEV), ORDEN_DEL_SPEC.filter((b) => b !== 'del-blog'), 'Páginas web: los diez bloques con contenido, en orden — Del blog no se monta (sus artículos no tienen href)')
+afirmarIgual(fallan((p) => respetaElOrden(bloquesEnOrden(p.html), ORDEN_DEL_SPEC)), [], 'las tres páginas, en los dos modos: los bloques que hay respetan el orden del SPEC')
+const conBlog = pagina({ ...PAGINAS_WEB, articulos: [{ titulo: 'Una nota', href: '/v3/blog/una-nota' }] }, false)
+afirmar(bloquesEnOrden(conBlog).join() === ORDEN_DEL_SPEC.join(), 'con un artículo que sí tiene href, Del blog se monta entre el llamado y el cierre')
+controlPositivo('dos bloques cambiados de lugar se detectan', ['problema', 'que-incluye', 'que-hacemos', 'precio'], (s: string[]) => respetaElOrden(s, ORDEN_DEL_SPEC))
+controlPositivo('un bloque que no es del SPEC se detecta', ['problema', 'inventado'], (s: string[]) => respetaElOrden(s, ORDEN_DEL_SPEC))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3 · El CTA abre el contacto y precarga el servicio — sin data-servicio (P-S1)')
+
+const envoltorios = (html: string): string[] => aperturas(html, 'div').filter((d) => d.includes('data-abre-contacto'))
+const lleva = (idEnElHome: string) => (apertura: string): boolean =>
+  apertura.includes('data-abre-contacto="panel"') && apertura.includes(`data-precarga="${idEnElHome}"`)
+afirmarIgual(envoltorios(WEB_PROD).length, 2, 'Páginas web: dos envoltorios de apertura — el bloque del CTA y el cierre')
+afirmar(envoltorios(bloqueDe(WEB_PROD, 'llamado') ?? '').length === 1, '  y el bloque del CTA tiene uno')
+afirmarIgual(fallan((p) => envoltorios(p.html).length > 0 && envoltorios(p.html).every(lleva(p.servicio.idEnElHome))), [], 'cada envoltorio lleva data-abre-contacto="panel" y data-precarga con el id del servicio en el home')
+afirmar((PRECARGA_POR_SERVICIO[PAGINAS_WEB.idEnElHome]?.length ?? 0) > 0, `  y el home sabe qué marcar: «${PAGINAS_WEB.idEnElHome}» está en PRECARGA_POR_SERVICIO`)
+controlPositivo('un envoltorio sin data-precarga se detecta', '<div data-abre-contacto="panel" class="a">', lleva('web'))
+const sinDataServicio = (html: string): boolean => !html.includes('data-servicio')
+afirmarIgual(fallan((p) => sinDataServicio(p.html)), [], 'no hay data-servicio en ninguna parte del marcado de ninguna página')
+controlPositivo('un data-servicio armado se detecta', '<div data-servicio="paginas-web">x</div>', sinDataServicio)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('4 · «[a definir]» solo en desarrollo')
+
+const cuenta = (html: string, aguja: string): number => html.split(aguja).length - 1
+const hayMarcador = (html: string): boolean => cuenta(html, MARCADOR_A_DEFINIR) > 0
+afirmarIgual(cuenta(WEB_DEV, MARCADOR_A_DEFINIR), 2, 'Páginas web en desarrollo: dos marcadores — la Simple (autogestionable) y el plan mensual del mantenimiento')
+afirmar(textoVisible(WEB_DEV).includes('Plan mensual') && !textoVisible(WEB_PROD).includes('Plan mensual'), '  la fila «Plan mensual» solo existe en desarrollo')
+afirmarIgual([cuenta(WEB_DEV, 'Autogestionable'), cuenta(WEB_PROD, 'Autogestionable')], [3, 2], '  «Autogestionable»: tres veces en desarrollo, dos en producción (la Simple no lo dice mientras esté en [a definir])')
+afirmarIgual(fallan((p) => p.enDesarrollo || !hayMarcador(p.html)), [], 'en producción no sale ningún marcador, en ninguna de las tres páginas')
+afirmarIgual(fallan((p) => !p.enDesarrollo || hayMarcador(p.html)), [], 'y en desarrollo las tres lo muestran (Software e IA, en el slot de precio que todavía no tiene componente)')
+controlPositivo('los modos cruzados: producción no puede mostrar el marcador', WEB_DEV, (h: string) => !hayMarcador(h))
+controlPositivo('los modos cruzados: desarrollo tiene que mostrarlo', WEB_PROD, hayMarcador)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('5 · Nada del home: ni ids, ni atributos de la escena, ni más de un data-seccion')
+
+const limpio = (html: string): boolean => reservadosEnElMarcado(html).length === 0
+afirmarIgual(fallan((p) => limpio(p.html)), [], 'ninguna página emite un id que el home busque, ni portfolio-…, ni data-panel, data-seccion-id o data-signo-de-la-tuya; data-seccion solo es «invertida», una vez, en la raíz')
+controlPositivo('un id="cierre" se detecta', `${WEB_PROD}<i id="cierre"></i>`, limpio)
+controlPositivo('un id portfolio-la-tuya se detecta', `${WEB_PROD}<i id="portfolio-la-tuya"></i>`, limpio)
+controlPositivo('un data-panel se detecta', `${WEB_PROD}<i data-panel="x"></i>`, limpio)
+controlPositivo('un data-seccion que no es «invertida» se detecta', `${WEB_PROD}<i data-seccion="claro"></i>`, limpio)
+controlPositivo('un segundo data-seccion «invertida» se detecta', `${WEB_PROD}<i data-seccion="invertida"></i>`, limpio)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('6 · El único hex es el del acento, en la raíz')
+
+afirmarIgual(fallan((p) => hexSueltos(p.html).length === 0), [], 'ninguna página tiene un hex fuera de --color-acento')
+afirmarIgual(fallan((p) => p.html.startsWith(`<div data-seccion="invertida" style="--color-acento:${p.servicio.acento.claro}"`)), [], '  y ese es el acento.claro de SUS datos, en el style de la raíz')
+controlPositivo('un hex suelto se detecta', '<p style="color:#ff0000">x</p>', (h: string) => hexSueltos(h).length === 0)
+controlPositivo('el hex del acento puesto fuera de la custom property se detecta', `<p style="color:${PAGINAS_WEB.acento.claro}">x</p>`, (h: string) => hexSueltos(h).length === 0)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('7 · De PROYECTOS salen el nombre, el rubro, la dirección y el póster — nunca la reseña ni lo resuelto')
+
+const PROHIBIDOS = valoresProhibidos(FUENTE_DE_PROYECTOS)
+afirmar(PROHIBIDOS.length > 0, `la lista de lo prohibido no es vacía: ${PROHIBIDOS.length} valores de resena, problemaResuelto, problemaCliente, queHicimos y resultado`)
+const sinLoProhibido = (html: string): boolean => {
+  const texto = textoVisible(html)
+  return [...PROHIBIDOS, ...MARCADORES_DE_LA_LLAVE].every((valor) => !texto.includes(valor))
+}
+afirmarIgual(fallan((p) => sinLoProhibido(p.html)), [], 'ninguno de esos valores llega al marcado, ni los marcadores de la llave del contenido inventado')
+controlPositivo('un render que pinta una reseña se detecta', `${WEB_PROD}<p>${PROHIBIDOS.at(0) ?? 'x'}</p>`, sinLoProhibido)
+controlPositivo('un render que pinta el marcador de la llave se detecta', `${WEB_PROD}<p>[TESTIMONIO] · pendiente</p>`, sinLoProhibido)
+const FUENTE_DE_PRUEBA = sinComentarios(readFileSync(path.join(AQUI, '../bloques/Prueba.tsx'), 'utf8'))
+const leeLoProhibido = (fuente: string): boolean => /\b(resena|problemaResuelto|problemaCliente|queHicimos|resultado)\b/.test(fuente)
+afirmar(!leeLoProhibido(FUENTE_DE_PRUEBA), 'y el código de Prueba.tsx ni nombra esos campos (solo lee nombre, rubro, url, póster y alt)')
+controlPositivo('un fuente que lee la reseña se detecta', 'const r = proyecto.resena', (f: string) => !leeLoProhibido(f))
+const CASOS_DE_WEB = PAGINAS_WEB.prueba.casos.flatMap((caso) => (caso.tipo === 'proyecto' ? [caso] : []))
+const muestraAlProyecto = (html: string) => (slug: string, texto: string): boolean => {
+  const proyecto = FUENTE_DE_PROYECTOS.find((p) => p.slug === slug)
+  if (proyecto === undefined) return false
+  return [proyecto.nombre, proyecto.rubro ?? '', texto].every((t) => textoVisible(html).includes(t)) &&
+    valoresDe(html, 'href').includes(proyecto.url) && html.includes(encodeURIComponent(proyecto.medios.poster.escritorio)) && html.includes(encodeURIComponent(proyecto.medios.poster.movil))
+}
+afirmarIgual(CASOS_DE_WEB.filter((c) => !muestraAlProyecto(WEB_PROD)(c.slug, c.texto)).map((c) => c.slug), [], `los ${CASOS_DE_WEB.length} casos de Páginas web muestran su nombre, rubro, texto, enlace y los dos pósters, todo de la fuente`)
+controlPositivo('una página sin los casos se detecta', '<main></main>', (h: string) => CASOS_DE_WEB.every((c) => muestraAlProyecto(h)(c.slug, c.texto)))
+const imagenesBien = (html: string): boolean => aperturas(html, 'img').every((i) => /\salt="[^"]+"/.test(i) && /\ssizes="[^"]+"/.test(i))
+afirmar(aperturas(WEB_PROD, 'img').length === CASOS_DE_WEB.length * 2 && imagenesBien(WEB_PROD), '  seis imágenes, todas con alt y con sizes (descriptores de ancho)')
+controlPositivo('una imagen sin alt ni sizes se detecta', '<img src="/x.webp">', imagenesBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('8 · Los slots de precio sin componente no muestran un número')
+
+const SIN_COMPONENTE = SERVICIOS.filter((s) => s.precio.tipo !== 'calibres')
+const slot = (s: Servicio, enDesarrollo: boolean): string => renderToStaticMarkup(<Precio precio={s.precio} enDesarrollo={enDesarrollo} />)
+afirmarIgual(SIN_COMPONENTE.map((s) => s.precio.tipo), ['proyecto', 'planes'], 'son dos: el de software (proyecto) y el de IA (planes)')
+afirmarIgual(SIN_COMPONENTE.map((s) => slot(s, false)), ['', ''], 'en producción no montan nada: ni el título del bloque')
+const sinNumero = (html: string): boolean => !/\d/.test(textoVisible(html))
+afirmar(SIN_COMPONENTE.every((s) => sinNumero(slot(s, false)) && sinNumero(slot(s, true))), '  y en ningún modo muestran un número: el de los datos (1.000, 49, 90, 150) no se pinta')
+afirmar(SIN_COMPONENTE.every((s) => textoVisible(slot(s, true)) === `Precio${MARCADOR_A_DEFINIR}`), '  en desarrollo muestran el título del bloque y el marcador, nada más')
+controlPositivo('un 0 se detecta', '<p>0</p>', sinNumero)
+controlPositivo('un precio se detecta', '<p>USD 1.000</p>', sinNumero)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('9 · Estructura: headings, cifras, apilado, clases, enlaces y fuentes')
+
+afirmarIgual(fallan((p) => !saltaNiveles(nivelesDeEncabezado(p.html))), [], 'los headings empiezan en h1 y no saltan de nivel')
+controlPositivo('un salto de h1 a h3 se detecta', [1, 3], (n: number[]) => !saltaNiveles(n))
+controlPositivo('una página que empieza en h2 se detecta', [2, 3], (n: number[]) => !saltaNiveles(n))
+afirmarIgual(fallan((p) => numerosInventados(p.html, p.servicio).length === 0), [], 'todo número del texto sale de los datos (o es el número de lugar de un paso): ninguna cifra escrita en el JSX')
+controlPositivo('una cifra inventada se detecta', `${WEB_PROD}<p>USD 777</p>`, (h: string) => numerosInventados(h, PAGINAS_WEB).length === 0)
+afirmarIgual(fallan((p) => clasesQueNoApilan(p.html).length === 0), [], 'ninguna clase parte en columnas o en fila sin el prefijo de ancho: por debajo de 1024 todo apila')
+controlPositivo('una grilla de tres columnas sin prefijo se detecta', '<div class="grid grid-cols-3">', (h: string) => clasesQueNoApilan(h).length === 0)
+const CON_TOKEN = valoresDe(WEB_PROD, 'class').flatMap((c) => c.split(/\s+/)).filter((c) => c.includes('[')).length
+afirmar(CON_TOKEN > 0 && fallan((p) => arbitrariasSinToken(p.html).length === 0).length === 0, `toda clase arbitraria lee un token con var() (${CON_TOKEN} en la página, ninguna suelta)`)
+controlPositivo('una clase arbitraria sin var() se detecta', `<div class="${['w-', '[', '37px', ']'].join('')}">`, (h: string) => arbitrariasSinToken(h).length === 0)
+const listasConRol = (html: string): boolean => [...aperturas(html, 'ul'), ...aperturas(html, 'ol')].every((l) => l.includes('role="list"'))
+afirmarIgual(fallan((p) => listasConRol(p.html)), [], 'toda lista (ul y ol) lleva role="list": sin marcadores, el navegador le saca la semántica de lista al lector de pantalla')
+controlPositivo('una lista sin role se detecta', '<ul class="flex"><li>a</li></ul>', listasConRol)
+const PERMITIDOS = new Set<string>([HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe), '/login'])
+const enlacesBien = (html: string): boolean => aperturas(html, 'a').every((a) => /\shref="[^"]+"/.test(a)) && enlacesInternos(html).every((h) => PERMITIDOS.has(h))
+afirmarIgual(fallan((p) => enlacesBien(p.html)), [], 'todo <a> tiene href, y los internos solo llevan al home, a una página de PUBLICADOS o a /login')
+controlPositivo('un enlace a una página sin publicar se detecta', '<a href="/v3/software-a-medida">x</a>', enlacesBien)
+const hrefsDelCierre = valoresDe(bloqueDe(WEB_PROD, 'cierre') ?? '', 'href')
+afirmarIgual(hrefsDelCierre, [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)], 'el cierre enlaza al home y a las páginas de PUBLICADOS, nada más')
+const conCabecera = (html: string): boolean => new RegExp(`<header>[\\s\\S]*?<a href="${HREF_DEL_HOME}"[^>]*>[\\s\\S]*?${LOGOTIPO}[\\s\\S]*?</a>[\\s\\S]*?</header>[\\s\\S]*?<main`).test(html)
+afirmar(conCabecera(WEB_PROD), `el encabezado es un enlace a ${HREF_DEL_HOME} con el logotipo, antes del main`)
+controlPositivo('una página sin el enlace del encabezado se detecta', '<header></header><main></main>', conCabecera)
+const preguntas = PAGINAS_WEB.faq.filter((f) => f.respuesta !== null).length
+afirmar(aperturas(WEB_PROD, 'details').length === preguntas && aperturas(WEB_PROD, 'summary').length === preguntas, `el FAQ es un <details> con su <summary> por pregunta: ${preguntas}, con la respuesta en el HTML`)
+
+const raiz = path.join(AQUI, '..')
+const fuentes = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+  e.isDirectory() ? (e.name === '__tests__' ? [] : fuentes(path.join(dir, e.name))) : /\.tsx?$/.test(e.name) ? [path.join(dir, e.name)] : [])
+const FUENTES = fuentes(raiz).map((f) => ({ f: path.relative(raiz, f), codigo: sinComentarios(readFileSync(f, 'utf8')) }))
+const navegaConElRouter = (codigo: string): boolean => /next\/link|next\/navigation|useRouter|router\.push|triggerTransition|['"]use client['"]/.test(codigo)
+afirmarIgual(FUENTES.filter((x) => navegaConElRouter(x.codigo)).map((x) => x.f), [], `ninguno de los ${FUENTES.length} fuentes de _servicios usa next/link, el router, triggerTransition ni 'use client': navegan con <a href>`)
+controlPositivo('un fuente con next/link se detecta', "import Link from 'next/link'", (c: string) => !navegaConElRouter(c))
+controlPositivo('un fuente con router.push se detecta', 'router.push(href)', (c: string) => !navegaConElRouter(c))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('10 · La ruta: publica exactamente PUBLICADOS, y la metadata no hereda el canonical del home')
+
+async function laRuta(): Promise<void> {
+  let ruta: typeof import('../../[servicio]/page')
+  try {
+    ruta = await import('../../[servicio]/page')
+  } catch (error) {
+    noCorre('la ruta', `no se pudo importar en Node (${String(error).slice(0, 120)}): se comprueba en el dev`)
+    return
+  }
+  const publica = (lista: readonly { servicio: string }[]): boolean => JSON.stringify(lista) === JSON.stringify(PUBLICADOS.map((servicio) => ({ servicio })))
+  afirmar(publica(ruta.generateStaticParams()), `generateStaticParams sale de PUBLICADOS: ${PUBLICADOS.join(', ')}`)
+  controlPositivo('una lista con un slug sin publicar se detecta', [{ servicio: 'paginas-web' }, { servicio: 'software-a-medida' }], publica)
+  afirmar(ruta.dynamicParams === false, 'dynamicParams es false: cualquier otro slug es 404')
+  const padre = Promise.resolve({ openGraph: null } as unknown as ResolvedMetadata)
+  const metadataDe = (servicio: string) => ruta.generateMetadata({ params: Promise.resolve({ servicio }) }, padre)
+  const rechaza = async (servicio: string): Promise<boolean> => metadataDe(servicio).then(() => false, () => true)
+  afirmarIgual([await rechaza('software-a-medida'), await rechaza('ia-y-automatizaciones'), await rechaza('xyz')], [true, true, true], 'software-a-medida, ia-y-automatizaciones y xyz dan 404 (notFound), aunque haya datos de las dos primeras')
+  controlPositivo('un slug publicado no da 404', await rechaza('paginas-web'), (r: boolean) => r)
+  const meta = await metadataDe('paginas-web')
+  const robots = typeof meta.robots === 'object' && meta.robots !== null && !(meta.robots instanceof URL) ? meta.robots : null
+  afirmar(meta.title === PAGINAS_WEB.seo.title && meta.description === PAGINAS_WEB.seo.description, 'title y description salen de los datos')
+  afirmar(robots !== null && !('index' in robots ? robots.index : true), 'robots: noindex, como todo /v3')
+  afirmar(meta.alternates?.canonical === hrefDe('paginas-web') && meta.openGraph?.url === hrefDe('paginas-web'), `alternates.canonical y openGraph.url son los de la propia página (${hrefDe('paginas-web')}), no los del home`)
+  controlPositivo('el canonical del home se detecta', 'https://develop.com.ar', (c: string) => c === hrefDe('paginas-web'))
+}
+
+laRuta().then(() => cerrar('pagina.invariant'), (error: unknown) => { console.error(error); process.exit(1) })
