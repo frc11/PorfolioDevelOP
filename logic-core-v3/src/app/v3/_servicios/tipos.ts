@@ -1,0 +1,138 @@
+/**
+ * [SERVICIOS S1a] LOS TIPOS DE LAS PÁGINAS DE SERVICIO — plan: `docs/servicios/SPRINT-S0.md` §8.1.
+ *
+ * Datos puros: este archivo no importa componentes, ni react, ni next. Sus dos imports son de tipo y se
+ * borran al compilar, así que no hay ciclos en runtime.
+ *
+ * Una regla recorre todo el modelo: `null` (o `[]`) quiere decir «el dato todavía no existe» ([a definir]).
+ * La interfaz nunca lo completa con un número o un texto inventado (`formato.ts`).
+ */
+
+import type { IdDeServicio } from '../_secciones/_contrato/acento'
+import type { FUENTE_DE_PROYECTOS } from './datos/fuenteDeProyectos'
+
+/** Los tres servicios, en el orden del SPEC (§4). El tipo se deriva de la lista: una sola fuente. */
+export const SLUGS_DE_SERVICIO = ['paginas-web', 'software-a-medida', 'ia-y-automatizaciones'] as const
+export type ServicioSlug = (typeof SLUGS_DE_SERVICIO)[number]
+
+export function esServicioSlug(valor: string): valor is ServicioSlug {
+  return SLUGS_DE_SERVICIO.some((slug) => slug === valor)
+}
+
+/** El slug de un proyecto del portfolio. Se deriva de la fuente (O-6): servicios no lo escribe. */
+export type ProyectoSlug = (typeof FUENTE_DE_PROYECTOS)[number]['slug']
+
+/** USD. `null` = el dato todavía no existe ([a definir]): la UI nunca inventa un número. */
+export type Usd = number | null
+
+export interface Calibre {
+  readonly nombre: string
+  readonly desde: number
+  readonly descripcion: string
+  /** Lo propio del calibre. Vacío = no se muestra (el SPEC no lo da). */
+  readonly incluye: readonly string[]
+  /** Si trae panel para editar. `null` = [a definir] (SPEC §11: la Simple). */
+  readonly autogestionable: boolean | null
+}
+
+export interface Plan {
+  readonly nombre: string
+  readonly mensual: number
+  readonly conversaciones: number
+  readonly soporte: string
+  readonly cambiosWeb: string
+  /** `null` = [a definir] (SPEC §7.3). */
+  readonly funcionalidades: readonly string[] | null
+}
+
+export type Precio =
+  | { readonly tipo: 'calibres'; readonly calibres: readonly Calibre[] }
+  | { readonly tipo: 'proyecto'; readonly desde: number; readonly nota: string }
+  | {
+      readonly tipo: 'planes'
+      readonly planes: readonly Plan[]
+      readonly implementacionDesde: Usd
+      readonly nota: string
+    }
+
+export interface ItemDeExtra {
+  readonly nombre: string
+  readonly detalle: string
+  /** El precio tal como lo publica el SPEC («Desde USD 50», «Siempre incluidos»). `null` = [a definir]. */
+  readonly precio: string | null
+}
+
+export interface Extra {
+  readonly titulo: string
+  readonly items: readonly ItemDeExtra[]
+  readonly nota: string | null
+}
+
+/** Caso del portfolio (fuente única: PROYECTOS) o caso propio de servicios. */
+export type Caso =
+  | { readonly tipo: 'proyecto'; readonly slug: ProyectoSlug; readonly texto: string }
+  | {
+      readonly tipo: 'propio'
+      readonly nombre: string
+      readonly rubro: string | null
+      readonly texto: string | null
+      /** Captura con datos ficticios. `null` mientras no exista (SPEC §11). */
+      readonly imagen: string | null
+    }
+
+export interface CtaDelPanel {
+  readonly rotulo: string
+  /** `null` = [a definir] (B7/C1). Con D11, en IA es '/login'. */
+  readonly href: string | null
+}
+
+export interface Prueba {
+  readonly casos: readonly Caso[]
+  /** Una línea propia; por ejemplo, «2 sistemas más en desarrollo» (SPEC §7.2). */
+  readonly nota: string | null
+  readonly ctaPanel: CtaDelPanel | null
+}
+
+export interface PreguntaFrecuente {
+  readonly pregunta: string
+  /**
+   * `null` = alguna parte no sale de una línea del SPEC: no se muestra en producción ni entra al JSON-LD.
+   * Escrita = cada afirmación sale del SPEC, con `// SPEC §7.x` al lado. Regla y clasificación: D9 en §12.2.
+   */
+  readonly respuesta: string | null
+}
+
+export interface Articulo {
+  readonly titulo: string
+  /** `null` mientras no exista el blog. */
+  readonly href: string | null
+}
+
+export interface Servicio {
+  readonly slug: ServicioSlug
+  /** El id del mismo servicio en el home: el contexto del acento sobre papel y la precarga del contacto. */
+  readonly idEnElHome: IdDeServicio
+  readonly nombre: string
+  readonly acento: {
+    /** Sobre noche. P-H2: literal hasta que theme-develop.css emita los claros; se reemplaza en esta línea. */
+    readonly claro: string
+  }
+  /** Copy provisorio (// C2). El title se arma con LOGOTIPO: la marca no va escrita suelta (D10). */
+  readonly seo: { readonly title: string; readonly description: string }
+  readonly problema: { readonly titulo: string; readonly texto: string }
+  readonly queHacemos: { readonly titulo: string; readonly texto: string }
+  readonly incluye: readonly string[]
+  /** Vacío = no se muestra. */
+  readonly aparte: readonly string[]
+  readonly precio: Precio
+  readonly extra: Extra | null
+  readonly proceso: { readonly pasos: readonly string[]; readonly plazo: string }
+  readonly prueba: Prueba
+  readonly faq: readonly PreguntaFrecuente[]
+  /**
+   * El SPEC no da el rótulo del botón (D10). `texto` es `null` cuando el SPEC trae solo el título (IA, §7.3):
+   * el bloque se arma sin párrafo, no con uno inventado.
+   */
+  readonly cta: { readonly titulo: string; readonly texto: string | null; readonly boton: string }
+  readonly articulos: readonly Articulo[]
+}
