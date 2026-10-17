@@ -1,0 +1,68 @@
+{
+  "banu-scents/escritorio": {
+    "video": "/portfolio/banu-scents/escritorio.mp4",
+    "poster": "/portfolio/banu-scents/escritorio.webp",
+    "bytesDelVideo": 1965552,
+    "bytesDelPoster": 42004,
+    "crf": 24,
+    "ancho": 1440,
+    "alto": 900,
+    "segundos": 10.1,
+    "cuadros": 303
+  },
+  "banu-scents/movil": {
+    "video": "/portfolio/banu-scents/movil.mp4",
+    "poster": "/portfolio/banu-scents/movil.webp",
+    "bytesDelVideo": 1836812,
+    "bytesDelPoster": 52264,
+    "crf": 30,
+    "ancho": 780,
+    "alto": 1688,
+    "segundos": 10.27,
+    "cuadros": 308
+  },
+  "el-garage/escritorio": {
+    "video": "/portfolio/el-garage/escritorio.mp4",
+    "poster": "/portfolio/el-garage/escritorio.webp",
+    "bytesDelVideo": 1937538,
+    "bytesDelPoster": 30904,
+    "crf": 30,
+    "ancho": 1280,
+    "alto": 800,
+    "segundos": 9.83,
+    "cuadros": 304
+  },
+  "el-garage/movil": {
+    "video": "/portfolio/el-garage/movil.mp4",
+    "poster": "/portfolio/el-garage/movil.webp",
+    "bytesDelVideo": 1726724,
+    "bytesDelPoster": 17236,
+    "crf": 28,
+    "ancho": 780,
+    "alto": 1688,
+    "segundos": 9.77,
+    "cuadros": 302
+  },
+  "esquina-estudio/escritorio": {
+    "video": "/portfolio/esquina-estudio/escritorio.mp4",
+    "poster": "/portfolio/esquina-estudio/escritorio.webp",
+    "bytesDelVideo": 1908021,
+    "bytesDelPoster": 25340,
+    "crf": 26,
+    "ancho": 1440,
+    "alto": 900,
+    "segundos": 9.7,
+    "cuadros": 309
+  },
+  "esquina-estudio/movil": {
+    "video": "/portfolio/esquina-estudio/movil.mp4",
+    "poster": "/portfolio/esquina-estudio/movil.webp",
+    "bytesDelVideo": 1966168,
+    "bytesDelPoster": 21160,
+    "crf": 28,
+    "ancho": 690,
+    "alto": 1494,
+    "segundos": 9.6,
+    "cuadros": 306
+  }
+}
