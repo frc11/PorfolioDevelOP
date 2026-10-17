@@ -43,7 +43,7 @@ Template, bloques, ruta y `pagina.invariant.tsx`, con el CTA ya sin `data-servic
 
 ### 2.2 El segundo commit: vidrio, S2 y S3 — SIN VER EN PANTALLA
 
-Valentino mandó commitearlo **para proteger el trabajo; no es una aprobación**: ni el vidrio ni los slots nuevos ni el JSON-LD se vieron en un navegador (el candado lo tenía el home y el MCP estaba cerrado). `PUBLICADOS` sigue con `paginas-web`. Un solo commit, porque partirlo dejaría commits que no compilan. **Hash:** se anota en la línea de abajo después del commit (un commit no puede llevar su propio hash).
+Valentino mandó commitearlo **para proteger el trabajo; no es una aprobación**: ni el vidrio ni los slots nuevos ni el JSON-LD se vieron en un navegador (el candado lo tenía el home y el MCP estaba cerrado). `PUBLICADOS` sigue con `paginas-web`. Un solo commit, porque partirlo dejaría commits que no compilan. **Hash: `113d52ef`** («S1c-S2-S3 sin publicar: vidrio del home, slots de precio y SEO», 26 archivos, pusheado sin force), anotado en un tercer commit que solo toca este archivo (un commit no puede llevar su propio hash). **SIN VER EN PANTALLA. Sin aprobación.**
 
 
 | Qué | Archivos |
