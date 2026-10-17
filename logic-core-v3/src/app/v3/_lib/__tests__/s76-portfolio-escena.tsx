@@ -11,6 +11,8 @@ import * as THREE from 'three'
 
 import { rayLogoInk } from '@/app/probe-escena/__tests__/frameProbe'
 
+import { TOLERANCIA_DEL_TOPE_PX, enHorizontal, tramosDelPanel, type MuestraDelPanel } from '../../../../../scripts-carga/panel'
+
 import { marcar } from '../../_secciones/_invariantes/render'
 import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
 import { CONSULTA_DEL_PUNTERO_FINO, HOVER, pasoConElPin, seMovioDeVerdad, suenaElCambio } from '../../_secciones/trabajos/portfolio/estado'
@@ -195,6 +197,15 @@ export function afirmarElSelectorVivo(): void {
   const usePortfolio = leer('_secciones/trabajos/portfolio/usePortfolio.ts')
   afirmar(/const mostrable = pasoConElPin\(siguiente, pegado\(caja\)\)/.test(usePortfolio) && /Math\.abs\(escenario\.getBoundingClientRect\(\)\.top\) <= 1/.test(usePortfolio), '  la sección publica el paso con la compuerta del pin, medido en el escenario (su tope en el del cuadro)')
   afirmar(/transition-transform/.test(panel) && /'translate-x-full'/.test(escenario) && !/translate-y|inset-y-[1-9]/.test(panel) && /className="sticky top-0 h-svh w-full overflow-clip"/.test(escenario), '  el panel sólo se traslada en x (`translate-x-full` ↔ 0), adentro del escenario pegado: el tope de su caja no se mueve')
+  // El arnés lo mide en el sitio (`scripts-carga/estres.ts`, al final de cada tanda): la caja, cuadro a cuadro, con la rueda, la barra,
+  // el menú y un ancla. La cuenta es ésta: entrando (hacia la izquierda, a mitad de camino), el tope a ±1 px del de su primer cuadro.
+  const viaje = (tope: (k: number) => number): MuestraDelPanel[] => Array.from({ length: 30 }, (_, k) => ({ top: tope(k), left: 1440 - Math.min(720, k * 30), ancho: 720, vista: 1440 }))
+  const enX = tramosDelPanel(viaje(() => 0))
+  afirmar(enHorizontal(enX.entrada) && enX.entrada.cuadros === 23 && enX.salida.cuadros === 0 && TOLERANCIA_DEL_TOPE_PX === 1, '  el arnés: con scroll rápido, la caja del panel durante la entrada mantiene el tope (±1 px), cuadro a cuadro', `${String(enX.entrada.cuadros)} cuadros entrando`)
+  controlPositivo('  la cuenta ve una entrada que viaja con la página (el escenario suelto)', viaje((k) => 400 - k * 40), (m: MuestraDelPanel[]) => enHorizontal(tramosDelPanel(m).entrada))
+  controlPositivo('  y la ve aunque se corra apenas 2 px', viaje((k) => (k > 10 ? 2 : 0)), (m: MuestraDelPanel[]) => enHorizontal(tramosDelPanel(m).entrada))
+  const estres = leer('../../../scripts-carga/estres.ts')
+  afirmar(/const ok = enHorizontal\(entrada\)/.test(estres) && /METODOS_DEL_PANEL = \['rueda', 'barra', 'menu', 'ancla'\] as const/.test(estres) && /if \(PANEL !== 'no' &&/.test(estres), '  y el arnés la corre al final de cada tanda, de las cuatro maneras')
 
   titulo('B1.2b · 13 · La secuencia de una tira: un gatillo, por tiempo')
 
@@ -222,13 +233,17 @@ export function afirmarElSelectorVivo(): void {
 
   afirmar(OPACIDAD_DE_LA_MARCA >= 0.06 && OPACIDAD_DE_LA_MARCA <= 0.1, `las cuatro con el mismo tratamiento: monocromas (la tinta) y al ${String(OPACIDAD_DE_LA_MARCA * 100)} %`)
   const conAlfa = (b: Buffer): boolean => b.length > 26 && b.toString('latin1', 1, 4) === 'PNG' && b[25] === 6
+  // Un SVG de silueta: sólo contornos (la máscara toma su forma), sin una imagen incrustada que traiga el fondo, sin guiones ni enlaces.
+  const deSilueta = (s: string): boolean => /^<svg [^>]*viewBox="[\d. ]+"/.test(s) && /<path [^>]*d="M/.test(s) && [...s.matchAll(/<([a-zA-Z]+)/g)].every((m) => m[1] === 'svg' || m[1] === 'path') && !/href|script|base64/i.test(s)
   const logos = PROYECTOS.map((q) => {
     if (q.logo === null) return `${q.slug}: el nombre`
     const ruta = path.join(process.cwd(), 'public', q.logo)
+    if (q.logo.endsWith('.svg')) return deSilueta(existsSync(ruta) ? readFileSync(ruta, 'utf8') : '') ? `${q.slug}: SVG de silueta` : `${q.slug}: falta o no es una silueta`
     return conAlfa(existsSync(ruta) ? readFileSync(ruta) : Buffer.alloc(0)) ? `${q.slug}: PNG con alfa` : `${q.slug}: falta o sin alfa`
   })
-  afirmarIgual(logos, ['el-garage: PNG con alfa', 'esquina-estudio: PNG con alfa', 'banu-scents: el nombre'], 'los logos bajados de los sitios (sin fondo: PNG con canal alfa) y Banú con el nombre (su logo trae el fondo pegado)')
+  afirmarIgual(logos, ['el-garage: PNG con alfa', 'esquina-estudio: PNG con alfa', 'banu-scents: SVG de silueta'], 'los logos bajados de los sitios (sin fondo: PNG con canal alfa) y el de Banú, el que pasó Valentino, recortado y vectorizado (sólo las letras: un SVG de contornos)')
   controlPositivo('  el lector ve un PNG sin alfa', Buffer.from([0x89, 0x50, 0x4e, 0x47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 2, 0]), conAlfa)
+  controlPositivo('  y un SVG que incrusta la imagen con su fondo', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 669 183"><image href="data:image/png;base64,iVBOR" width="669" height="183"/><path d="M0 0H1Z"/></svg>', deSilueta)
   const numeros = (d: string): number[] => [...d.matchAll(/-?\d+(\.\d+)?/g)].map((m) => Number(m[0]))
   const n = numeros(CONTORNO_DEL_SIGNO)
   const punto = numeros(PUNTO_DEL_SIGNO)

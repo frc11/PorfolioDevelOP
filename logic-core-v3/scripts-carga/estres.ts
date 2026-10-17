@@ -14,6 +14,11 @@
  *   BASE=http://localhost:3000 MODO=build TANDA=antes npx tsx scripts-carga/estres.ts
  *   … SOLO=normal,cpu  (sólo esas condiciones)   PRIMERAS=12 (las primeras N corridas)   AGRESIVO=1 (CPU ×6, las fuentes 5 s tarde)
  *   … SIN_REIMPRESION=1 (el control positivo: la página con `&reimpresion=no`)
+ *   … PANEL=solo (sólo la entrada del panel del Portfolio) · PANEL=no (sin ella)
+ *
+ * [B1.2b] Al final de la tanda, la entrada del panel del Portfolio con scroll rápido (la rueda, la barra, el menú y un ancla): su caja,
+ * cuadro a cuadro, mientras entra; el tope tiene que quedarse quieto (±1 px, `panel.ts`). La salida se mide donde la hay (la rueda cruza
+ * la cola).
  */
 import { chromium, type CDPSession, type Page } from '@playwright/test'
 import { execSync } from 'node:child_process'
@@ -21,11 +26,14 @@ import { appendFileSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
+import { enHorizontal, tramosDelPanel, type MuestraDelPanel } from './panel'
+
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'build'
 const TANDA = process.env.TANDA ?? 'prueba'
 const AGRESIVO = process.env.AGRESIVO === '1'
 const SIN_REIMPRESION = process.env.SIN_REIMPRESION === '1'
+const PANEL = process.env.PANEL ?? 'si'
 const SALIDA = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'carga')
 const PERFIL = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'perfil')
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
@@ -248,6 +256,74 @@ async function referencia(p: Page): Promise<LaReferencia> {
   return { rangos, delLayout, alCargar: deLaCarga }
 }
 
+/** Cada cuadro, la caja del panel (desde que el guion corre hasta 900 cuadros). */
+const MUESTREO_DEL_PANEL = `(() => {
+  window.__muestrasDelPanel = []
+  const paso = () => {
+    const el = document.querySelector('[data-pieza="panel-del-portfolio"]')
+    if (el) { const b = el.getBoundingClientRect(); window.__muestrasDelPanel.push({ top: b.top, left: b.left, ancho: b.width, vista: innerWidth }) }
+    if (window.__muestrasDelPanel.length < 900) requestAnimationFrame(paso)
+  }
+  requestAnimationFrame(paso)
+})()`
+const METODOS_DEL_PANEL = ['rueda', 'barra', 'menu', 'ancla'] as const
+
+/** La entrada del panel con scroll rápido, de cada manera: una fila `panel` por manera. Devuelve cuántas no entraron en horizontal. */
+async function entradasDelPanel(p: Page, archivo: string): Promise<number> {
+  let fallas = 0
+  for (const metodo of METODOS_DEL_PANEL) {
+    try {
+      await p.goto('about:blank').catch(() => undefined)
+      if (metodo === 'ancla') {
+        // El ancla de un proyecto: el escenario se pega ahí mismo, al cargar; se muestrea desde que existe el panel.
+        await p.goto(`${BASE}/v3?diag=carga#portfolio-esquina-estudio`, { waitUntil: 'commit', timeout: 120000 })
+        await p.waitForSelector('[data-pieza="panel-del-portfolio"]', { state: 'attached', timeout: 60000 })
+        await p.evaluate(MUESTREO_DEL_PANEL)
+      } else {
+        await p.goto(`${BASE}/v3?diag=carga`, { waitUntil: 'load', timeout: 120000 })
+        await esperarLaEscena(p)
+        await dormir(2500)
+        // Desde Quiénes somos, 2,2 pantallas antes de Trabajos.
+        await p.evaluate(() => {
+          const t = document.querySelector<HTMLElement>('[data-panel="trabajos"]')
+          if (t !== null) window.scrollTo({ top: t.getBoundingClientRect().top + scrollY - innerHeight * 2.2, behavior: 'instant' })
+        })
+        await dormir(1500)
+        await p.evaluate(MUESTREO_DEL_PANEL)
+        if (metodo === 'rueda') {
+          await p.mouse.move(400, 450)
+          for (let k = 0; k < 14; k += 1) {
+            await p.mouse.wheel(0, 900)
+            await dormir(16)
+          }
+        } else if (metodo === 'barra') {
+          // Arrastrar la barra: saltos del scroll nativo, uno por cuadro.
+          await p.evaluate(async () => {
+            const desde = scrollY
+            for (let k = 1; k <= 12; k += 1) {
+              window.scrollTo({ top: desde + k * 420, behavior: 'instant' })
+              await new Promise((r) => requestAnimationFrame(r))
+            }
+          })
+        } else await clickear(p, 'trabajos', Date.now())
+      }
+      await dormir(7000)
+      const muestras = await p.evaluate(() => (window as unknown as { __muestrasDelPanel?: MuestraDelPanel[] }).__muestrasDelPanel ?? [])
+      const { entrada, salida } = tramosDelPanel(muestras)
+      const ok = enHorizontal(entrada)
+      if (!ok) fallas += 1
+      appendFileSync(archivo, `${JSON.stringify({ tipo: 'panel', metodo, muestras: muestras.length, entrada, salida, ok })}\n`)
+      const px = (t: { readonly cuadros: number; readonly desvio: number }): string => (t.cuadros === 0 ? 'sin cuadros' : `${String(t.cuadros)} cuadros, el tope a ±${t.desvio.toFixed(1)} px`)
+      console.log(`panel ${metodo.padEnd(6)} · entrada: ${px(entrada)} · salida: ${px(salida)} · ${ok ? 'ok' : 'FALLA'}`)
+    } catch (err) {
+      fallas += 1
+      appendFileSync(archivo, `${JSON.stringify({ tipo: 'panel', metodo, error: String(err).slice(0, 300), ok: false })}\n`)
+      console.log(`panel ${metodo} ERROR ${String(err).slice(0, 160)}`)
+    }
+  }
+  return fallas
+}
+
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
   rmSync(PERFIL, { recursive: true, force: true })
@@ -257,6 +333,7 @@ async function main(): Promise<void> {
   const primeras = Number(process.env.PRIMERAS ?? 0)
   let lista = escenarios().filter((e) => solo === null || solo.includes(e.condicion))
   if (primeras > 0) lista = lista.slice(0, primeras)
+  if (PANEL === 'solo') lista = []
 
   const ctx = await chromium.launchPersistentContext(PERFIL, {
     executablePath: CHROME,
@@ -375,6 +452,12 @@ async function main(): Promise<void> {
     } finally {
       if (e.carga === 'fria') await cdp.send('Network.setCacheDisabled', { cacheDisabled: false }).catch(() => undefined)
     }
+  }
+  if (PANEL !== 'no' && memoriaLibreMB() >= MEMORIA_MINIMA_MB) {
+    await condicionar(cdp, 'normal')
+    demoraDeLasFuentes = 0
+    const fallas = await entradasDelPanel(p, archivo)
+    console.log(`panel: ${fallas === 0 ? 'entra en horizontal de las cuatro maneras' : `${String(fallas)} de ${String(METODOS_DEL_PANEL.length)} maneras con FALLA`}`)
   }
   await ctx.close()
   rmSync(PERFIL, { recursive: true, force: true })

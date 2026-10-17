@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
+import { hayBanco } from './entorno'
 import { DIM_DEL_PORTFOLIO, PORTFOLIO_EN_LA_ESCENA, multiplicadorDelOscurecido } from './portfolioEnLaEscena'
 
 /** El último de la lista transparente del cuadro principal: después del cristal y del pase compartido. */
@@ -18,7 +19,11 @@ export const ORDEN_DEL_OSCURECIDO = 1e9
 interface Armado {
   readonly malla: THREE.Mesh
   readonly material: THREE.ShaderMaterial
+  /** [B1.2b] Sólo el banco lo prende (`__oscurecidoDelBanco`): la luz con el dim en 0 contra 0,35, en el mismo cuadro. */
+  readonly banco: { apagado: boolean }
 }
+
+type VentanaDelBanco = Window & { __oscurecidoDelBanco?: { apagado: (apagado: boolean) => void } }
 
 function armar(): Armado {
   const material = new THREE.ShaderMaterial({
@@ -41,25 +46,31 @@ function armar(): Armado {
   malla.frustumCulled = false
   malla.renderOrder = ORDEN_DEL_OSCURECIDO
   malla.visible = false
-  return { malla, material }
+  return { malla, material, banco: { apagado: false } }
 }
 
 /** El cuadro: el multiplicador de este momento (con el peso en 0 no se dibuja). */
 function aplicar(a: Armado): void {
-  const k = multiplicadorDelOscurecido(DIM_DEL_PORTFOLIO, PORTFOLIO_EN_LA_ESCENA.peso)
+  const k = a.banco.apagado ? 1 : multiplicadorDelOscurecido(DIM_DEL_PORTFOLIO, PORTFOLIO_EN_LA_ESCENA.peso)
   a.malla.visible = k < 0.999
   a.material.uniforms.uMultiplicador.value = k
 }
 
+function alBanco(a: Armado, apagado: boolean): void {
+  a.banco.apagado = apagado
+}
+
 export function OscurecidoDelPortfolio(): React.JSX.Element {
   const armado = useMemo(() => armar(), [])
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    const ventana = window as VentanaDelBanco
+    if (hayBanco()) ventana.__oscurecidoDelBanco = { apagado: (apagado) => alBanco(armado, apagado) }
+    return () => {
+      delete ventana.__oscurecidoDelBanco
       armado.malla.geometry.dispose()
       armado.material.dispose()
-    },
-    [armado],
-  )
+    }
+  }, [armado])
   useFrame(() => aplicar(armado))
   return <primitive object={armado.malla} />
 }

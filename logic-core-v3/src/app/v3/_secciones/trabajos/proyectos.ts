@@ -19,7 +19,8 @@
  *
  * [B1.2b] El `logo` es la marca de agua de la tira: el logo del cliente bajado de su sitio en vivo (sólo GET; SVG si hay, si no el
  * PNG más grande) en `public/portfolio/<slug>/logo.*`. `null` si no salió limpio: va el nombre como marca de agua tipográfica hasta
- * que Valentino pase el archivo (Banú: el único logo del sitio trae el fondo pegado, plan §12.2).
+ * que Valentino pase el archivo. Banú: el del sitio trae el fondo pegado; Valentino pasó uno, y sus letras se recortaron y se
+ * vectorizaron a un SVG de silueta (plan §12.2).
  *
  * El orden es el del recorrido y lo fija la spec: El Garage, Esquina Estudio, Banú Scents.
  */
@@ -116,7 +117,7 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     resultado: null,
     resena: { texto: conLlave(INVENTOS.trabajosResenaDeBanu), autor: conLlave(INVENTOS.trabajosAutorDeBanu) },
     medios: mediosDe('banu-scents'),
-    logo: null,
+    logo: '/portfolio/banu-scents/logo.svg',
     alt: 'Recorrido por la página de Banú Scents: la portada, la selección de casas y los perfumes.',
   },
 ]

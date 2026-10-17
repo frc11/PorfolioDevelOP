@@ -86,6 +86,16 @@ export interface ResumenDeLaTanda {
   readonly avisosDelGuardian: number
   readonly erroresDeConsola: number
   readonly ejemplos: readonly string[]
+  /** [B1.2b] La entrada del panel del Portfolio con scroll rápido, por manera (`estres.ts`, `panel.ts`). */
+  readonly panel: readonly FilaDelPanel[]
+}
+
+interface FilaDelPanel {
+  readonly metodo: string
+  readonly ok: boolean
+  readonly entrada?: { readonly cuadros: number; readonly desvio: number }
+  readonly salida?: { readonly cuadros: number; readonly desvio: number }
+  readonly error?: string
 }
 
 export function resumir(archivo: string): ResumenDeLaTanda {
@@ -114,8 +124,11 @@ export function resumir(archivo: string): ResumenDeLaTanda {
     avisosDelGuardian: cs.reduce((a, c) => a + (c.avisos ?? 0), 0),
     erroresDeConsola: cs.reduce((a, c) => a + (c.errores?.length ?? 0), 0),
     ejemplos,
+    panel: filas.filter((f) => f.tipo === 'panel') as unknown as FilaDelPanel[],
   }
 }
+
+const tramo = (t: FilaDelPanel['entrada']): string => (t === undefined || t.cuadros === 0 ? 'sin cuadros' : `${String(t.cuadros)} cuadros, el tope a ±${t.desvio.toFixed(1)} px`)
 
 const pct = (t: Tasa, k: 'alLlegar' | 'estricto' | 'persistente' | 'trasScroll'): string => (t.corridas === 0 ? '—' : `${String(t[k])}/${String(t.corridas)} (${Math.round((100 * t[k]) / t.corridas)} %)`)
 
@@ -141,6 +154,7 @@ function main(): void {
     console.log('tipos (a 5,5 s):', JSON.stringify(r.tipos.persistente))
     console.log('tipos (tras scrollear):', JSON.stringify(r.tipos.trasScroll))
     for (const e of r.ejemplos) console.log(`  ${e}`)
+    for (const f of r.panel) console.log(`panel ${f.metodo}: ${f.error ?? `entrada ${tramo(f.entrada)} · salida ${tramo(f.salida)}`} · ${f.ok ? 'ok' : 'FALLA'}`)
   }
   const recibo = process.env.RECIBO
   if (recibo !== undefined) {
