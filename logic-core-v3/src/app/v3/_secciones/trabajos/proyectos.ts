@@ -17,6 +17,10 @@
  * y viven en `public/portfolio/<slug>/`. Sus rutas llevan la extensión del archivo, con un dígito, así que no entran a la vista de
  * contenido que escanea `s5-contenido` (`textosDelProyecto`).
  *
+ * [B1.2b] El `logo` es la marca de agua de la tira: el logo del cliente bajado de su sitio en vivo (sólo GET; SVG si hay, si no el
+ * PNG más grande) en `public/portfolio/<slug>/logo.*`. `null` si no salió limpio: va el nombre como marca de agua tipográfica hasta
+ * que Valentino pase el archivo (Banú: el único logo del sitio trae el fondo pegado, plan §12.2).
+ *
  * El orden es el del recorrido y lo fija la spec: El Garage, Esquina Estudio, Banú Scents.
  */
 
@@ -49,6 +53,8 @@ export interface ProyectoDelPortfolio {
   readonly resultado: string | null
   readonly resena: ResenaDelProyecto | null
   readonly medios: MediosDelProyecto
+  /** [B1.2b] La marca de agua: el logo del cliente (sin fondo), o `null` (va el nombre). */
+  readonly logo: string | null
   /** Lo que se ve en el video, para quien no lo ve. */
   readonly alt: string
 }
@@ -78,6 +84,7 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     resultado: null,
     resena: { texto: conLlave(INVENTOS.trabajosResenaDeElGarage), autor: conLlave(INVENTOS.trabajosAutorDeElGarage) },
     medios: mediosDe('el-garage'),
+    logo: '/portfolio/el-garage/logo.png',
     alt: 'Recorrido por la página de El Garage: la portada, los últimos ingresos y el catálogo con sus filtros.',
   },
   {
@@ -93,6 +100,7 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     resultado: null,
     resena: { texto: conLlave(INVENTOS.trabajosResenaDeEsquina), autor: conLlave(INVENTOS.trabajosAutorDeEsquina) },
     medios: mediosDe('esquina-estudio'),
+    logo: '/portfolio/esquina-estudio/logo.png',
     alt: 'Recorrido por la página de Esquina Estudio: la portada, los proyectos y los servicios.',
   },
   {
@@ -108,6 +116,7 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     resultado: null,
     resena: { texto: conLlave(INVENTOS.trabajosResenaDeBanu), autor: conLlave(INVENTOS.trabajosAutorDeBanu) },
     medios: mediosDe('banu-scents'),
+    logo: null,
     alt: 'Recorrido por la página de Banú Scents: la portada, la selección de casas y los perfumes.',
   },
 ]
@@ -117,8 +126,8 @@ export function seMuestraElServicio(proyectos: readonly ProyectoDelPortfolio[]):
   return new Set(proyectos.map((p) => p.servicio).filter((s) => s !== null)).size > 1
 }
 
-/** La vista de CONTENIDO de un proyecto: sus textos, sin los medios (rutas con extensión, o sea con dígitos). */
-export function textosDelProyecto(p: ProyectoDelPortfolio): Omit<ProyectoDelPortfolio, 'medios'> {
+/** La vista de CONTENIDO de un proyecto: sus textos, sin los medios ni el logo (rutas de archivos, no texto). */
+export function textosDelProyecto(p: ProyectoDelPortfolio): Omit<ProyectoDelPortfolio, 'medios' | 'logo'> {
   return {
     slug: p.slug, nombre: p.nombre, url: p.url, rubro: p.rubro, fecha: p.fecha, servicio: p.servicio, queHicimos: p.queHicimos,
     problemaCliente: p.problemaCliente, problemaResuelto: p.problemaResuelto, resultado: p.resultado, resena: p.resena, alt: p.alt,

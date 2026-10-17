@@ -131,10 +131,11 @@ const ultimo = piso[piso.length - 1]
 afirmar(piso.length === 4 && ultimo.scroll === PX_DE_LA_SECCION - MARGEN_DEL_DESPINEADO && ultimo.efecto === PX_DEL_FIN_DE_LA_LLEGADA && enElRiel(piso, PX_DE_LA_SECCION - MARGEN_DEL_DESPINEADO) >= PX_DEL_FIN_DE_LA_LLEGADA && piso[1].scroll === piso[2].scroll, '  el piso del regulador termina la llegada una muesca antes del despineado (el túnel y el salto sobre la espera, los de siempre: s5-trabajos lo simula a todas las velocidades)')
 
 // La capa: lo que llega usa el reloj de la llegada. [EL ENCASTRE] 1B · abajo de 1024 la capa rígida ya no sigue al vacío
-// (cambió por pedido: también más lenta, y las dos con la velocidad tope); lo afirma s50.
+// (cambió por pedido: también más lenta, y las dos con la velocidad tope); lo afirma s50. [B1.2b] La capa rígida rige abajo de
+// 768: la tablet llega como el escritorio, con los renglones del carrusel en el gesto de los libros.
 const capa = sinComentarios(leer('_secciones/trabajos/demos/CapaDeDemos.tsx'))
-const cableada = (c: string): boolean => /progresoDelTitulo\.set\(enElTramo\(l, LLEGADA\.titulo\)\)/.test(c) && /const delParrafo = enElTramo\(l, LLEGADA\.parrafo\)/.test(c) && /poseDelLibro\(enElTramo\(l, tramoDelLibro\(i, libros\.current\.length\)\)\)/.test(c) && /setProperty\('--demos-escala', a\.toFixed\(5\)\)/.test(c) && /aparicion\.current\.mostrada >= 1/.test(c)
-afirmar(cableada(capa), '  la capa: el título, el párrafo y los libros siguen el reloj de la llegada; el carrusel arranca cuando todo llegó (lo mostrado); abajo de 1024 la capa rígida escala con la aparición mostrada')
+const cableada = (c: string): boolean => /progresoDelTitulo\.set\(enElTramo\(l, LLEGADA\.titulo\)\)/.test(c) && /const delParrafo = enElTramo\(l, LLEGADA\.parrafo\)/.test(c) && /for \(const piezas of \[libros\.current, renglones\.current\]\)/.test(c) && /poseDelLibro\(enElTramo\(l, tramoDelLibro\(i, piezas\.length\)\)\)/.test(c) && /setProperty\('--demos-escala', a\.toFixed\(5\)\)/.test(c) && /aparicion\.current\.mostrada >= 1/.test(c) && /max-movil:\[--demos-entrada:rigida\]/.test(c) && !/max-escritorio:\[--demos-entrada/.test(c)
+afirmar(cableada(capa), '  la capa: el título, el párrafo y los libros (y [B1.2b] los renglones del carrusel en tablet) siguen el reloj de la llegada; el carrusel arranca cuando todo llegó (lo mostrado); abajo de 768 la capa rígida escala con la aparición mostrada')
 controlPositivo('el detector VE los libros atados al vacío', capa.replace('poseDelLibro(enElTramo(l, ', 'poseDelLibro(enElTramo(u, '), cableada)
 
 // ═══════════════════════════════════════════════════════════════════════════

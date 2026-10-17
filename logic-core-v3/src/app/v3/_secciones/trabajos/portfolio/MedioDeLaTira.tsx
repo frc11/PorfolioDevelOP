@@ -6,7 +6,7 @@ import { Imagen } from '../../../_componentes/medios/Imagen'
 
 import type { ProyectoDelPortfolio } from '../proyectos'
 
-import { MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL_LOMO } from './medios'
+import { ANCHO_DEL_MEDIO, MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL_LOMO } from './medios'
 
 /** Qué hace el video de una tira, puro (s76 lo afirma sin navegador). */
 export interface EstadoDelVideo {
@@ -52,7 +52,7 @@ export function MedioDeLaTira({
     else v.pause()
   }, [e.reproduce, e.cargado])
   return (
-    <figure aria-label={proyecto.alt} className="relative w-full overflow-clip rounded-sutil bg-tinta/5" style={{ aspectRatio: PROPORCION_DEL_MEDIO }}>
+    <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5" style={{ aspectRatio: PROPORCION_DEL_MEDIO, width: ANCHO_DEL_MEDIO }}>
       <video
         ref={video}
         data-video-del-portfolio={proyecto.slug}

@@ -1,41 +1,44 @@
 'use client'
 
 import { useMotionValue, type MotionValue } from 'motion/react'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 
 import { PORTFOLIO_EN_LA_ESCENA } from '../../../_lib/escena/portfolioEnLaEscena'
 import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimiento'
 
 import { ANCLAS_DEL_PORTFOLIO } from './anclas'
-import { BANDERAS_POR_DEFECTO, banderasDe, type BanderasDelPortfolio } from './banderas'
-import { distanciaEnPasos, vistaDelPaso } from './estado'
+import { distanciaEnPasos, pasoConElPin, vistaDelPaso } from './estado'
 import {
-  ANTES_DEL_PIN, centroDelPaso, mostradoDeDemos, pasoConHisteresis, pasoEn, pxDelScroll, scrollDelPx, type IndiceDePaso,
+  ANTES_DEL_PIN, PANTALLAS_POR_PASO, centroDelPaso, mostradoDeDemos, pasoConHisteresis, pasoEn, pxDelScroll, scrollDelPx, type AnchoDelPortfolio,
+  type IndiceDePaso,
 } from './pasos'
 import { saltarA } from './saltar'
-import { anotarElSelector } from './tramoDelSelector'
+import { anchoDe, anotarElSelector } from './tramoDelSelector'
 
 /**
- * [B1] EL PORTFOLIO, VIVO — el scroll medido, el paso con histéresis, las banderas, el reloj de Demos, la anotación a la escena y
- * el salto a un paso. Corre en las dos ramas (con y sin coreografía): el estado sale del scroll, no del progreso de P7.
+ * [B1] EL PORTFOLIO, VIVO — el scroll medido, el paso con histéresis, el reloj de Demos, la anotación a la escena y el salto a un
+ * paso. Corre en las dos ramas (con y sin coreografía): el estado sale del scroll, no del progreso de P7.
  *
  * El scroll se mide contra el tope del panel (`[data-panel]`, que no es pegajoso ni lleva transformadas) en cada cuadro con
- * scroll; el paso se publica en React sólo cuando cambia. Mientras un salto vuela el estado va derecho a su destino: los bordes del
- * camino no disparan nada (un solo `tic` por salto, B1.2).
+ * scroll; el paso se publica en React sólo cuando cambia. [B1.2b] El paso que se muestra espera al PIN (`pasoConElPin`: el panel se
+ * anima en el escenario pegado, así entra en horizontal a cualquier velocidad). Un salto pone el paso de destino EN EL MISMO
+ * CUADRO (el hover cambia la tira sin esperar al scroll) y, mientras vuela, los bordes del camino no disparan nada.
  */
 export interface PortfolioVivo {
   readonly paso: IndiceDePaso
-  readonly banderas: BanderasDelPortfolio
   readonly reducido: boolean
-  /** La sección está a una pantalla o menos (desde ahí se piden los pósters y el video activo; después, se quedan). */
+  /** La sección está a una pantalla o menos (desde ahí se piden los pósters, las marcas y el video activo; después, se quedan). */
   readonly cerca: boolean
   /** La sección está en el cuadro y la pestaña a la vista (si no, el video se pausa). */
   readonly aLaVista: boolean
   /** El `mostrado` de hoy para Demos (`pasos.ts`: la cola corrida). */
   readonly mostradoDeDemos: MotionValue<number>
-  /** Lleva la página al centro de un paso del selector (0…6). */
+  /** Lleva la página al centro de un paso del selector (0…3) y pone ese paso ya. */
   readonly saltarAlPaso: (i: number) => void
 }
+
+/** [B1.2b] La fracción del ancho que deja el panel en cada ancho (la escena centra el logo en su mitad de abajo): su CSS. */
+export const COLUMNA_DEL_ANCHO: Readonly<Record<AnchoDelPortfolio, number>> = { escritorio: 0.5, tablet: 0.4, movil: 0.4 }
 
 interface Medida {
   readonly px: number
@@ -52,15 +55,21 @@ function medir(caja: HTMLElement | null): Medida | null {
   return { px: pxDelScroll(window.scrollY, tope, alto), tope, alto }
 }
 
-/** Las banderas son de la URL de la carga: no cambian sin navegar, así que no hay a qué suscribirse. */
-const sinSuscripcion = (): (() => void) => () => undefined
-const consultaDelCliente = (): string => window.location.search
-const consultaDelServidor = (): string => ''
+/** ¿El escenario está pegado (su tope en el del cuadro)? Sin escenario, sí (no hay nada que esperar). */
+function pegado(caja: HTMLElement | null): boolean {
+  const escenario = caja?.querySelector<HTMLElement>('[data-pieza="escenario-del-portfolio"]') ?? null
+  return escenario === null || Math.abs(escenario.getBoundingClientRect().top) <= 1
+}
+
+/** Publica un paso (si cambió), con el pin: el panel no entra hasta que el escenario está pegado. */
+function publicar(caja: HTMLElement | null, actual: { current: IndiceDePaso }, setPaso: (p: IndiceDePaso) => void, siguiente: IndiceDePaso): void {
+  const mostrable = pasoConElPin(siguiente, pegado(caja))
+  if (mostrable === actual.current) return
+  actual.current = mostrable
+  setPaso(mostrable)
+}
 
 export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo {
-  // En el servidor (y al hidratar) las de siempre; en el cliente, las de la URL.
-  const consulta = useSyncExternalStore(sinSuscripcion, consultaDelCliente, consultaDelServidor)
-  const banderas = useMemo(() => (consulta === '' ? BANDERAS_POR_DEFECTO : banderasDe(consulta)), [consulta])
   const [paso, setPaso] = useState<IndiceDePaso>(ANTES_DEL_PIN)
   const reducido = usePrefiereMenosMovimiento()
   const mostrado = useMotionValue(0)
@@ -89,15 +98,11 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     }
   }, [caja])
 
-  // Lo que la escena tiene que saber: el panel adentro (la pose del logo y el oscurecido), el lado, la cámara y el oscurecido pedidos.
+  // Lo que la escena tiene que saber: el panel adentro (la pose del logo y el oscurecido) y el movimiento reducido.
   useEffect(() => {
-    const e = PORTFOLIO_EN_LA_ESCENA
-    e.adentro = vistaDelPaso(paso).fase === 'adentro'
-    e.dim = banderas.dim
-    e.lado = banderas.lado
-    e.camara = banderas.camara
-    e.reducido = reducido
-  }, [paso, banderas, reducido])
+    PORTFOLIO_EN_LA_ESCENA.adentro = vistaDelPaso(paso).fase === 'adentro'
+    PORTFOLIO_EN_LA_ESCENA.reducido = reducido
+  }, [paso, reducido])
   useEffect(
     () => () => {
       PORTFOLIO_EN_LA_ESCENA.adentro = false
@@ -105,13 +110,22 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     [],
   )
 
-  // La anotación a la escena (la REGLA DE ALTURAS), con el paso de la bandera.
+  // La anotación a la escena (la REGLA DE ALTURAS) y la columna que deja el panel en este ancho (lo dice el CSS, no el JS).
   useEffect(() => {
     const el = caja.current
     const panel = el?.closest('[data-panel]') ?? null
     if (el === null || panel === null) return undefined
-    return anotarElSelector(el, panel, banderas.paso)
-  }, [caja, banderas.paso])
+    const columna = (): void => {
+      PORTFOLIO_EN_LA_ESCENA.columna = COLUMNA_DEL_ANCHO[anchoDe(el)]
+    }
+    columna()
+    window.addEventListener('resize', columna)
+    const soltar = anotarElSelector(el, panel, PANTALLAS_POR_PASO)
+    return () => {
+      window.removeEventListener('resize', columna)
+      soltar()
+    }
+  }, [caja])
 
   // El scroll: el paso con histéresis (o el destino del salto en vuelo) y el reloj de Demos.
   useLayoutEffect(() => {
@@ -120,13 +134,9 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
       pedido = 0
       const m = medir(caja.current)
       if (m === null) return
-      mostrado.set(mostradoDeDemos(m.px, banderas.paso))
+      mostrado.set(mostradoDeDemos(m.px, PANTALLAS_POR_PASO))
       const vuelo = enVuelo.current
-      const siguiente = vuelo !== null ? pasoEn(vuelo.destino, banderas.paso) : pasoConHisteresis(actual.current, m.px, banderas.paso)
-      if (siguiente !== actual.current) {
-        actual.current = siguiente
-        setPaso(siguiente)
-      }
+      publicar(caja.current, actual, setPaso, vuelo !== null ? pasoEn(vuelo.destino, PANTALLAS_POR_PASO) : pasoConHisteresis(actual.current, m.px, PANTALLAS_POR_PASO))
     }
     const pedir = (): void => {
       if (pedido === 0) pedido = requestAnimationFrame(leer)
@@ -139,27 +149,30 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
       window.removeEventListener('resize', pedir)
       if (pedido !== 0) cancelAnimationFrame(pedido)
     }
-  }, [banderas.paso, caja, mostrado])
+  }, [caja, mostrado])
 
   const saltarAlPaso = useCallback(
     (i: number): void => {
       const m = medir(caja.current)
       if (m === null) return
-      const centro = centroDelPaso(i, banderas.paso)
+      const centro = centroDelPaso(i, PANTALLAS_POR_PASO)
+      const desde = actual.current
       enVuelo.current?.cancelar()
       // El diagnóstico de la carga (`?diag=carga`) no cuenta como desfasado el paso de un salto en vuelo.
       caja.current?.setAttribute('data-en-vuelo', 'si')
       const vuelo = {
         destino: centro,
-        cancelar: saltarA(scrollDelPx(centro, m.tope, m.alto), distanciaEnPasos(actual.current, i), reducido, () => {
+        cancelar: saltarA(scrollDelPx(centro, m.tope, m.alto), distanciaEnPasos(desde, i), reducido, () => {
           if (enVuelo.current !== vuelo) return
           enVuelo.current = null
           caja.current?.removeAttribute('data-en-vuelo')
         }),
       }
       enVuelo.current = vuelo
+      // [B1.2b] El destino, ya: la tira cambia en este cuadro y la página la sigue.
+      publicar(caja.current, actual, setPaso, pasoEn(centro, PANTALLAS_POR_PASO))
     },
-    [banderas.paso, caja, reducido],
+    [caja, reducido],
   )
 
   // El ancla al cargar (`#portfolio-el-garage`, …): el navegador ya saltó al elemento; el Portfolio lo lleva al píxel del paso.
@@ -167,7 +180,7 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     const ancla = ANCLAS_DEL_PORTFOLIO.find((a) => `#${a.id}` === window.location.hash)
     const m = ancla === undefined ? null : medir(caja.current)
     if (ancla === undefined || m === null) return undefined
-    const y = Math.round(scrollDelPx(centroDelPaso(ancla.paso, banderas.paso), m.tope, m.alto))
+    const y = Math.round(scrollDelPx(centroDelPaso(ancla.paso, PANTALLAS_POR_PASO), m.tope, m.alto))
     const el = caja.current
     // El ancla con la que cargó, para el diagnóstico de la carga, hasta que el visitante mueva la página por su cuenta.
     el?.setAttribute('data-ancla-de-la-carga', ancla.id)
@@ -179,7 +192,7 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
       window.clearTimeout(reloj)
       for (const g of gestos) window.removeEventListener(g, soltar)
     }
-  }, [banderas.paso, caja])
+  }, [caja])
 
-  return { paso, banderas, reducido, cerca, aLaVista: enCuadro && visible, mostradoDeDemos: mostrado, saltarAlPaso }
+  return { paso, reducido, cerca, aLaVista: enCuadro && visible, mostradoDeDemos: mostrado, saltarAlPaso }
 }

@@ -94,6 +94,11 @@ export interface TituloDeVolumen {
   readonly alejamiento?: number
   /** [PULIDO 16] N1 · qué parte de la órbita del mouse sigue su plano (`camaraConParteDelMouse`): 0, fijo en el mundo. */
   readonly parteDelMouse?: number
+  /**
+   * [B1.2b] Llega con su gesto y, una vez llegado entero, se va con la CAÍDA de los otros títulos del sitio: la de `levanta` al
+   * revés (se acuesta sobre su pie y su línea lo tapa). Portfolio: entra en su lugar y cae cuando el panel se va.
+   */
+  readonly saleCayendo?: boolean
 }
 
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
@@ -119,11 +124,15 @@ export const LLEGADA_DE_PORTFOLIO = { termina: 0.4713, comoEnEscena10: [0.4426, 
 
 /**
  * Cuándo se lee cada título, medido a 1440 con `scripts-escena10/t3-lectura.ts` (la ventana donde llegó entero y
- * todavía no se fue, en el progreso de la coreografía). Portfolio: la cámara orbita unos 30° de Quiénes somos a Números;
- * se coloca con la cámara de ESCENA 10 (arriba). La frase: se coloca con la de los valores (el nudo `valores`, 0,9233
+ * todavía no se fue, en el progreso de la coreografía). La frase: se coloca con la de los valores (el nudo `valores`, 0,9233
  * desde PASADA FINAL A3), que es cuando la frase ya subió.
+ *
+ * [B1.2b] Portfolio ya no llega con el scroll de la aproximación (con la cámara de ESCENA 10, arriba): llega con el panel adentro,
+ * en su lugar, y la cámara de ese momento es la pose del Portfolio. Así que se coloca con ESA pose (`titulos3d/colocacion.ts`,
+ * `poseDelPortfolio.ts`): queda en su lugar del DOM y de frente. La relación de AJUSTES FINALES (arriba) sigue atando la cámara del
+ * tramo de la aproximación (`camaraDeEntonces.ts`), no la colocación.
  */
-export const LECTURA: { readonly portfolio: Lectura; readonly frase: Lectura } = { portfolio: LLEGADA_DE_PORTFOLIO.comoEnEscena10[1], frase: 'valores' }
+export const LECTURA: { readonly portfolio: Lectura; readonly frase: Lectura } = { portfolio: { portfolio: true }, frase: 'valores' }
 
 /** Quién se entera cuando un título entra o sale del registro (la escena, para armarlo o soltarlo). */
 const oyentes = new Set<() => void>()
@@ -175,13 +184,14 @@ interface Anotacion {
   readonly esquivaElLogo?: boolean
   readonly alejamiento?: number
   readonly parteDelMouse?: number
+  readonly saleCayendo?: boolean
   /** Sólo con la prueba prendida. */
   readonly activo: boolean
 }
 
 const SIN_TRAZOS: readonly TrazoDelTitulo[] = []
 
-export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, asiento = 'cercano', trazos = SIN_TRAZOS, forma = null, esquivaElLogo = false, alejamiento = 1, parteDelMouse = 0, activo }: Anotacion): void {
+export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, asiento = 'cercano', trazos = SIN_TRAZOS, forma = null, esquivaElLogo = false, alejamiento = 1, parteDelMouse = 0, saleCayendo = false, activo }: Anotacion): void {
   const llegada = pedida ?? LLEGADO
   useEffect(() => {
     const el = lugar.current
@@ -190,13 +200,13 @@ export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, lleg
       escuchaLasFuentes = true
       alCargarseLasFuentes(pedirOtraSincronia)
     }
-    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, forma, esquivaElLogo, alejamiento, parteDelMouse, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
+    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, forma, esquivaElLogo, alejamiento, parteDelMouse, saleCayendo, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
     avisar()
     return () => {
       TITULOS_DE_VOLUMEN.delete(id)
       avisar()
     }
-  }, [id, texto, lugar, forma, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos, esquivaElLogo, alejamiento, parteDelMouse, activo])
+  }, [id, texto, lugar, forma, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos, esquivaElLogo, alejamiento, parteDelMouse, saleCayendo, activo])
   useMotionValueEvent(llegada, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.llegada = p

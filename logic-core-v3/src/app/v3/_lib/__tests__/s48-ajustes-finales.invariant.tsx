@@ -115,15 +115,20 @@ const relacion = (lectura: unknown): boolean => {
   // La tolerancia es la de la medida: los pares de la cámara van cada 60 px de scroll (~0,004 de progreso, ~1° acá).
   return Math.abs(pose(lectura).angleDeg - fin.angleDeg - aprobada.az) < 1 && Math.abs(pose(lectura).height - fin.height - aprobada.y) < 0.3
 }
-afirmar(LECTURA.portfolio === 0.4718 && aprobada.az > 5 && aprobada.y > 1 && relacion(LECTURA.portfolio) && Math.abs(comoEntonces(LLEGADA_DE_PORTFOLIO.termina) - 0.4426) < 0.003, 'el título se coloca con la cámara de 0,4718 (la de ESCENA 10, tal cual) y, con la cámara de entonces, al terminar la llegada la cámara está en 0,4426: la relación aprobada (la cámara seguía orbitando 8° de azimut y 1,8 de altura entre terminar de llegar y colocarse)', `Δaz ${aprobada.az.toFixed(2)}° Δy ${aprobada.y.toFixed(2)} · termina en cámara ${comoEntonces(LLEGADA_DE_PORTFOLIO.termina).toFixed(4)}`)
+// [B1.2b] El título ya no llega en la aproximación: llega con el panel adentro y se coloca con la pose del Portfolio (s76 mide que
+// queda en su lugar y de frente). La relación de entonces (la cámara de 0,4718 contra la de 0,4426) queda medida y atando la cámara
+// del tramo de la aproximación (`comoEntonces`), que el rig sigue usando.
+afirmar(JSON.stringify(LECTURA.portfolio) === '{"portfolio":true}' && aprobada.az > 5 && aprobada.y > 1 && relacion(0.4718) && Math.abs(comoEntonces(LLEGADA_DE_PORTFOLIO.termina) - 0.4426) < 0.003, 'el título se coloca con la cámara de 0,4718 (la de ESCENA 10, tal cual) y, con la cámara de entonces, al terminar la llegada la cámara está en 0,4426: la relación aprobada (la cámara seguía orbitando 8° de azimut y 1,8 de altura entre terminar de llegar y colocarse)', `Δaz ${aprobada.az.toFixed(2)}° Δy ${aprobada.y.toFixed(2)} · termina en cámara ${comoEntonces(LLEGADA_DE_PORTFOLIO.termina).toFixed(4)}`)
 controlPositivo('el detector VE la colocación encima de la llegada (0,4426: de frente, cortas)', 0.4426, relacion)
+controlPositivo('  y la lectura de antes (la cámara de 0,4718, no la pose del Portfolio)', 0.4718 as unknown, (l: unknown) => JSON.stringify(l) === '{"portfolio":true}')
 
 // El título: `queda` y nada más (sin huida ni salida propia): la huida del cartel es del DOM.
 const piezasA1 = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
-const soloQueda = (c: string): boolean => /<ConInercia>\s*<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara\} salida=\{salidaDelTitulo\} llegadaDe=\{seccion\.id\} minimoS=\{LENTOS\.llegadaDePortfolioS\} queda \/>\s*<\/ConInercia>/.test(c) && !/PortfolioDePrueba|useVarianteDePortfolio|huidaDelTitulo/.test(c) && /salidaDelTitulo\.set\(afuera \? 1 : 0\)/.test(c)
-// [B1] el túnel se fue: la `salida` ya no la decide su primera foto sino el panel del selector (1 en la cola, cuando se retrae).
-afirmar(soloQueda(piezasA1), 'Portfolio es UN título de volumen, que se queda: su `salida` sólo dice si el panel del selector ya se retrajo (1, la cola) o no (0)')
-controlPositivo('el detector VE el título que se iba con la huida del cartel (la prueba e10)', piezasA1.replace('salida={salidaDelTitulo}', 'salida={huidaDelTitulo}'), soloQueda)
+const soloQueda = (c: string): boolean => /<ConInercia>\s*<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara === null \? null : presencia\} salida=\{null\} llegadaDe=\{seccion\.id\} minimoS=\{LENTOS\.llegadaDePortfolioS\} saleCayendo queda \/>\s*<\/ConInercia>/.test(c) && !/PortfolioDePrueba|useVarianteDePortfolio|huidaDelTitulo/.test(c) && /animate\(presencia, adentro \? 1 : 0/.test(c)
+// [B1] el túnel se fue. [B1.2b] Y el título ya no se esconde de golpe con la cola: llega y se va con la PRESENCIA del encabezado (el
+// panel adentro, por tiempo) y se va cayendo; sin salida propia ni huida.
+afirmar(soloQueda(piezasA1), 'Portfolio es UN título de volumen, que se queda: llega y se va con la presencia del encabezado (el panel adentro), sin salida propia ni huida')
+controlPositivo('el detector VE el título que se iba con la huida del cartel (la prueba e10)', piezasA1.replace('salida={null}', 'salida={huidaDelTitulo}'), soloQueda)
 const escenaA1 = sinComentarios(leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx'))
 const sinSalidaPropia = (c: string): boolean => /const tapado = a\.titulo\.salida >= 0\.999/.test(c) && /m\.salida = 0\s*a\.uniforms\.uLlegada\.value = m\.llegada\s*a\.uniforms\.uSalida\.value = 0/.test(c) && /const visible = m\.llegada > 0 && !fuera && !tapado/.test(c)
 afirmar(sinSalidaPropia(escenaA1), '  en la escena el que se queda no tiene salida (su uniforme va siempre en 0): tapado se esconde sin moverse y destapado reaparece como estaba')

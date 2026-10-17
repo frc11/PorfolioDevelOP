@@ -1,13 +1,14 @@
 /**
  * [B1] EL MAPA DE PASOS DEL PORTFOLIO — puro: la altura de la sección, el paso en cada píxel, las anclas, el reloj de Demos y el
- * descuento que se le anota a la escena (plan: `docs/rediseno/SPRINT-B1-PORTFOLIO.md` §5.3 y §11.2).
+ * descuento que se le anota a la escena (plan: `docs/rediseno/SPRINT-B1-PORTFOLIO.md` §5.3; [B1.2b] §12, punto 5).
  *
  * Todo en **px de la regla** (contados contra un alto de 900, `ALTO_DE_VIEWPORT_DE_LA_REFERENCIA`) desde que arranca el progreso
- * de la sección (su tope en el pie del cuadro), como lo contaba el túnel. Y todo sale de UNA constante, `PANTALLAS_POR_PASO`
- * (`?portfolio-paso=1|0.75|0.6` la cambia para calibrar):
+ * de la sección (su tope en el pie del cuadro), como lo contaba el túnel. Y todo sale de UNA constante, `PANTALLAS_POR_PASO`: lo
+ * que dura cada proyecto (y «la tuya»). Las funciones la reciben como parámetro para que s76 pruebe la derivación con otros
+ * valores; la página usa la constante (las banderas de B1.2 salieron).
  *
- *   0 → 900                 la aproximación, igual que hoy (entra el título)
- *   900 → 900 + 7 pasos     el selector: El Garage portada · ficha, Esquina portada · ficha, Banú portada · ficha, la tuya
+ *   0 → 900                 la aproximación, igual que hoy
+ *   900 → 900 + 4 pasos     el selector: un paso por proyecto (El Garage, Esquina Estudio, Banú Scents) y uno para «la tuya»
  *   → + 2.931               la cola de hoy, al píxel: la salida (1.131, el panel se retrae) y Demos (1.800)
  *
  * ── LA REGLA DE ALTURAS (la tabla no se toca) ─────────────────────────────
@@ -20,13 +21,14 @@
 
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../../_lib/navegacion'
 
-/** Las pantallas que dura cada paso del selector. 0,75 por defecto (§11.2); la bandera calibra con 1 y 0,6. */
-export const PANTALLAS_POR_PASO = 0.75
-export const PASOS_DE_CALIBRACION = [1, 0.75, 0.6] as const
-export type PantallasPorPaso = (typeof PASOS_DE_CALIBRACION)[number]
+/**
+ * [B1.2b] Las pantallas que dura cada proyecto: lo que ocupaban sus dos pasos de B1.2 (portada y ficha, 0,75 cada uno). Un solo
+ * gatillo por proyecto; el resto de su scroll es permanencia. «La tuya» dura lo mismo.
+ */
+export const PANTALLAS_POR_PASO = 1.5
 
-/** Tres proyectos con portada y ficha, más «la próxima es la tuya». */
-export const CANTIDAD_DE_PASOS = 7
+/** Tres proyectos y «la próxima es la tuya»: un paso cada uno. */
+export const CANTIDAD_DE_PASOS = 4
 export const PX_DE_LA_APROXIMACION = ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
 
 /**
@@ -74,16 +76,10 @@ export function anchoDelValor(valor: string): AnchoDelPortfolio {
   return v === 'tablet' || v === 'movil' ? v : 'escritorio'
 }
 
-/** El valor de la bandera, o el de siempre. */
-export function pasoDeLaBandera(valor: string | null): PantallasPorPaso {
-  const n = valor === null ? Number.NaN : Number.parseFloat(valor)
-  return PASOS_DE_CALIBRACION.find((p) => p === n) ?? PANTALLAS_POR_PASO
-}
-
 // ─── Los pasos ────────────────────────────────────────────────────────────
 
-/** −1 antes del pin (la aproximación), 0…6 los pasos, 7 la cola (panel afuera). */
-export type IndiceDePaso = -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+/** −1 antes del pin (la aproximación), 0…3 los pasos (las tiras), 4 la cola (panel afuera). */
+export type IndiceDePaso = -1 | 0 | 1 | 2 | 3 | 4
 export const ANTES_DEL_PIN = -1
 export const EN_LA_COLA = CANTIDAD_DE_PASOS
 
@@ -117,16 +113,6 @@ export function pasoConHisteresis(actual: IndiceDePaso, px: number, paso: number
   return crudo
 }
 
-export type VistaDelPaso = 'portada' | 'ficha'
-/** El proyecto (0…2, y 3 = la tuya) y la vista de un paso del selector (0…6). */
-export function lugarDelPaso(i: number): { readonly proyecto: number; readonly vista: VistaDelPaso } {
-  const j = Math.min(CANTIDAD_DE_PASOS - 1, Math.max(0, i))
-  return { proyecto: Math.floor(j / 2), vista: j % 2 === 1 && j < CANTIDAD_DE_PASOS - 1 ? 'ficha' : 'portada' }
-}
-
-/** El paso de la portada de un proyecto (0…3). */
-export const pasoDeLaPortada = (proyecto: number): number => 2 * Math.min(3, Math.max(0, proyecto))
-
 /** El centro de un paso, en px de la regla: adonde salta el selector. */
 export const centroDelPaso = (i: number, paso: number): number => PX_DE_LA_APROXIMACION + (i + 0.5) * pxDelPaso(paso)
 
@@ -142,7 +128,7 @@ export const pxDelScroll = (scroll: number, topeDelPanel: number, alto: number):
 
 /**
  * Dónde va el ancla de un paso adentro de la sección (en pantallas desde su tope): el salto nativo pone el ancla arriba del
- * cuadro, así que el ancla va una pantalla antes del centro del paso. Sin JS, el salto cae en ese paso.
+ * cuadro, así que el ancla va una pantalla antes del centro del paso. Sin JS, el salto cae en ese paso (en su tira).
  */
 export const pantallasDelAncla = (i: number, paso: number): number => centroDelPaso(i, paso) / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA - 1
 
@@ -151,7 +137,7 @@ export const pantallasDelAncla = (i: number, paso: number): number => centroDelP
 /**
  * Demos cuenta su llegada con el `mostrado` de hoy (la fracción de la sección de 6.813 px). La cola es la misma al píxel, así que
  * el reloj es la cola corrida: el arranque de la salida nueva cae en el de hoy (3.882). Antes, saturado (el vacío en 0). Ya no hay
- * resorte del túnel: Demos llega con el scroll y su propia persecución (§11.4: cambio visible, va al FRENO de B1.2).
+ * resorte del túnel: Demos llega con el scroll y su propia persecución (§11.4).
  */
 export function mostradoDeDemos(px: number, paso: number): number {
   const deHoy = px - (pxDeLaSalida(paso) - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY)

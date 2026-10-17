@@ -25,7 +25,6 @@ import { PROBE_SVG_SCALE } from '../probeScene'
 import { MOIRE_NEAR_RADIUS } from '../probeMoire'
 import { pantallaDeProgreso, progresoDePantalla } from '../recorrido'
 import { manchasDelHaz } from '../sombra/sombraDelHaz'
-import { TUNEL_EN_LA_ESCENA, fueraDelTunel } from '../tunelEnLaEscena'
 import { SOLAPE_DE_LA_SECCION } from '../../../_secciones/trabajos/geometria'
 import { PX_DE_LA_APROXIMACION } from '../../../_secciones/trabajos/portfolio/pasos'
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../navegacion'
@@ -88,14 +87,19 @@ afirmar(noche.opacidadDura > 1 && dia.opacidadDura === 0, 'de noche aparece la m
 afirmar(dia.escalaBlanda > 1 && dia.opacidadBlanda < 1, 'de día la blanda se abre y se aclara')
 
 // ── §7 · el túnel ─────────────────────────────────────────────────────────
-titulo('§7 · el túnel de Trabajos en el progreso de la escena — [B1] desde el pin del selector')
+titulo('§7 · el túnel de Trabajos en el progreso de la escena — [B1] desde el pin del selector; [B1.2b] ya no apaga nada')
 // El progreso de Trabajos corre de `top bottom` a `bottom bottom`: arranca una pantalla antes de la caja,
 // que a su vez empieza el solape antes de la pantalla de su nudo (0,5).
 const arranqueDeLaCaja = pantallaDeProgreso(0.5) - SOLAPE_DE_LA_SECCION - 1
-// [B1] lo que no va adentro se apaga desde el PIN del selector (la aproximación termina a una pantalla del arranque del progreso).
+// [B1] el PIN del selector (la aproximación termina a una pantalla del arranque del progreso): donde entra el panel del Portfolio.
 const derivado = progresoDePantalla(arranqueDeLaCaja + PX_DE_LA_APROXIMACION / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA)
-afirmar(Math.abs(derivado - TUNEL_EN_LA_ESCENA.desde) < 0.001, 'el arranque de la ventana que trae la escena es el pin del selector de la sección', `derivado ${derivado.toFixed(5)} · traído ${String(TUNEL_EN_LA_ESCENA.desde)}`)
-afirmar(fueraDelTunel(0.45) === 1 && fueraDelTunel(TUNEL_EN_LA_ESCENA.desde) === 0 && fueraDelTunel(0.6) === 0 && fueraDelTunel(0.9) === 1, 'fuera de la ventana vale 1 (la aproximación a Trabajos, Por qué develOP) y adentro 0')
+afirmar(Math.abs(derivado - 0.475) < 0.001, 'el pin del selector de la sección cae en p 0,475 (donde entra el panel)', `derivado ${derivado.toFixed(5)}`)
+// [B1.2b] La ventana que apagaba estrellas, fugaces y la formación desde el pin se borró: existía porque el túnel tapaba la sala.
+const VENTANA = /fueraDelTunel|tunelEnLaEscena|TUNEL_EN_LA_ESCENA/
+const sinComentarios = (c: string): string => c.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+const conVentana = ['estrellas/Estrellas.tsx', 'estrellas/Fugaz.tsx', 'formacion/Formacion.tsx'].filter((r) => VENTANA.test(sinComentarios(readFileSync(path.join(process.cwd(), 'src/app/v3/_lib/escena', r), 'utf8'))))
+afirmar(conVentana.length === 0 && !existsSync(path.join(process.cwd(), 'src/app/v3/_lib/escena/tunelEnLaEscena.ts')), 'estrellas, fugaces y la formación siguen durante el Portfolio: ninguno se apaga por una ventana del progreso (y la ventana se borró)', conVentana.join(', '))
+controlPositivo('el detector VE una ventana', 'const visible = fueraDelTunel(rig.current.progress)', (c: string) => !VENTANA.test(sinComentarios(c)))
 
 // ── §8 · la limpieza ──────────────────────────────────────────────────────
 titulo('§8 · del logo con peso, la membrana y M5 no queda código')

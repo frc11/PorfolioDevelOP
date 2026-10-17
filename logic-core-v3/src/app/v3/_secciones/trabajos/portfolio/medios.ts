@@ -21,6 +21,9 @@ export const MEDIDAS_DE_LOS_MEDIOS: Readonly<Record<SlugDelProyecto, { readonly 
 /** La proporción del medio de la tira (la de los videos de escritorio, 16:10); va en línea, no en una clase arbitraria. */
 export const PROPORCION_DEL_MEDIO = '16 / 10'
 
+/** [B1.2b] El ancho del medio: el de la tira, sin pasar del 38 % del alto del cuadro (deja lugar a la ficha, que va siempre abajo). */
+export const ANCHO_DEL_MEDIO = 'min(100%, calc(38svh * 16 / 10))'
+
 /** El `sizes` del medio de la tira activa: la mitad del cuadro desde 1024 (menos los lomos), el 60 % en tablet. */
 export const SIZES_DEL_MEDIO = '(min-width: 1024px) 42vw, 52vw'
 /** El lomo muestra el póster del teléfono (vertical, como el lomo) cubriendo una pantalla de alto. */

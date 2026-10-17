@@ -75,7 +75,7 @@ export function llegadaDeDemos(mostrado: number): number {
  */
 export const APARICION = { minimoS: 1.8, escalaEnVacios: FIN_DE_LA_LLEGADA_EN_EL_VACIO } as const
 
-/** Lo que pide el scroll: desde 1024, la parte que se ve de la llegada; abajo (`rigida`), la escala de la capa. */
+/** Lo que pide el scroll: la parte que se ve de la llegada; con la capa rígida (`rigida`: [B1.2b] abajo de 768), su escala. */
 export function aparicionPedida(mostrado: number, rigida: boolean): number {
   if (rigida) return acotar01(vacioSinTope(mostrado) / APARICION.escalaEnVacios)
   return acotar01((llegadaDeDemos(mostrado) - LLEGADA.titulo.desde) / (1 - LLEGADA.titulo.desde))

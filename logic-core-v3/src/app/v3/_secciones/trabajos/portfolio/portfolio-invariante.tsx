@@ -1,30 +1,33 @@
 /**
  * [B1] §17 DEL INVARIANTE DE TRABAJOS — el selector lateral, sobre el marcado de las dos ramas y sobre su estado puro.
  *
- * Las anclas (los deep links) en su lugar derivado, el acordeón (el patrón de la WAI: cabecera con `aria-expanded` y región
- * nombrada), el estado del servidor (El Garage en portada), las referencias de `aria` que existen, los enlaces que salen del sitio,
- * el botón a la hoja de contacto de siempre y el teclado (`estado.ts`). Cada detector con su control positivo.
+ * Las anclas (los deep links) en su lugar derivado, el acordeón (el patrón de la WAI: cabecera con `aria-expanded` y contenido
+ * nombrado), el estado del servidor (El Garage abierto), las referencias de `aria` que existen, los enlaces que salen del sitio,
+ * el botón a la hoja de contacto de siempre, el vidrio del panel, las marcas de agua y el teclado (`estado.ts`). [B1.2b] Un paso por
+ * proyecto: la tira activa lleva siempre el video y la ficha. Cada detector con su control positivo.
  */
 
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../../_lib/__tests__/afirmar'
 
+import { marcar } from '../../_invariantes/render'
 import { PROYECTOS } from '../proyectos'
 import { referenciasColgadas } from '../trabajos-detectores'
 
 import { ANCLAS_DEL_PORTFOLIO } from './anclas'
-import { saltoDeLaTecla, vistaDelPaso, type TeclaDelSelector } from './estado'
-import { ANTES_DEL_PIN, EN_LA_COLA, PANTALLAS_POR_PASO, pantallasDelAncla, pasoDeLaPortada, type IndiceDePaso } from './pasos'
+import { accionDeLaTecla, vistaDelPaso, type TeclaDelSelector } from './estado'
+import { SignoDePregunta } from './MarcaDeAgua'
+import { ANTES_DEL_PIN, EN_LA_COLA, PANTALLAS_POR_PASO, pantallasDelAncla, type IndiceDePaso } from './pasos'
 
 const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
 const ordenDeLasTiras = (html: string): string[] => [...html.matchAll(/data-tira="([^"]+)"/g)].map((m) => m[1])
 const expandidas = (html: string): string[] => [...html.matchAll(/<button[^>]*id="portfolio-cabecera-([^"]+)"[^>]*aria-expanded="true"/g)].map((m) => m[1])
 
 export function afirmarElSelector(quieto: string, conMotion: string): void {
-  titulo('17 · El selector lateral: las anclas, el acordeón, el estado del servidor y el teclado')
+  titulo('17 · El selector lateral: las anclas, el acordeón, el estado del servidor, el vidrio, las marcas y el teclado')
 
   for (const a of ANCLAS_DEL_PORTFOLIO) {
     const top = `id="${a.id}" aria-hidden="true" class="pointer-events-none absolute left-0 h-px w-px" style="top:${(pantallasDelAncla(a.paso, PANTALLAS_POR_PASO) * 100).toFixed(4)}svh"`
-    afirmar(quieto.includes(top) && conMotion.includes(top), `#${a.id}: el ancla está en las dos ramas, ${(pantallasDelAncla(a.paso, PANTALLAS_POR_PASO) * 100).toFixed(2)}svh debajo del tope (el centro de su portada, una pantalla antes)`)
+    afirmar(quieto.includes(top) && conMotion.includes(top), `#${a.id}: el ancla está en las dos ramas, ${(pantallasDelAncla(a.paso, PANTALLAS_POR_PASO) * 100).toFixed(2)}svh debajo del tope (el centro de su paso, una pantalla antes)`)
   }
   afirmarIgual(ANCLAS_DEL_PORTFOLIO.map((a) => a.id), ['portfolio-el-garage', 'portfolio-esquina-estudio', 'portfolio-banu-scents', 'portfolio-la-tuya'], '  los cuatro deep links de la spec, en su orden')
 
@@ -36,7 +39,7 @@ export function afirmarElSelector(quieto: string, conMotion: string): void {
   afirmarIgual(referenciasColgadas(quieto), [], 'cada `aria-controls` y cada `aria-labelledby` nombra un `id` que existe')
   controlPositivo('  el detector ve una referencia colgada', '<button aria-controls="no-existe"></button>', (html: string) => referenciasColgadas(html).length === 0)
   afirmarIgual(veces(quieto, 'role="region"'), 0, 'los contenidos de las tiras NO son `region`: el acordeón no suma puntos de referencia al documento (s10-acceso los cuenta)')
-  afirmarIgual(veces(quieto, ' hidden=""'), 3 + 3 + PROYECTOS.length + 2 * PROYECTOS.length, '  van `hidden` el medio y el contenido de las tres cerradas, la ficha de los tres proyectos (en portada) y las dos filas que no se muestran de cada ficha')
+  afirmarIgual(veces(quieto, ' hidden=""'), 2 + 2 + 1 + 2 * PROYECTOS.length, '  van `hidden` el medio y el contenido de las dos cerradas de proyecto, el contenido de la tuya y las dos filas que no se muestran de cada ficha ([B1.2b] la ficha ya no se esconde: va siempre en la activa)')
 
   afirmarIgual(veces(quieto, 'data-abre-contacto="panel"'), 1, 'UN botón abre la hoja de contacto de siempre (`data-abre-contacto="panel"`): no hay un modal nuevo')
   afirmar(/<button[^>]*data-abre-contacto="panel"/.test(quieto), '  y es un botón')
@@ -45,27 +48,34 @@ export function afirmarElSelector(quieto: string, conMotion: string): void {
   afirmar(visitar.every((a) => a.includes('target="_blank"') && a.includes('rel="noopener noreferrer"') && a.includes('se abre en una pestaña nueva')), '  que abre en una pestaña nueva, sin `opener` ni referente, y lo dice en su nombre')
   const delMedio = [...quieto.matchAll(/<a [^>]*tabindex="-1"[^>]*>/g)].map((m) => m[0])
   afirmar(delMedio.length >= PROYECTOS.length && delMedio.slice(0, PROYECTOS.length).every((a) => a.includes('aria-hidden="true"') && a.includes('target="_blank"')), 'el medio de cada tira lleva el mismo enlace sólo para el mouse: fuera del teclado y de los lectores')
-  afirmarIgual(veces(quieto, 'data-signo-de-la-tuya=""'), 1, 'el hueco del «?» está en la tira de la tuya')
-  afirmar(/data-signo-de-la-tuya="" aria-hidden="true"/.test(quieto), '  y es decoración para los lectores')
-  afirmar(quieto.includes('data-material="tinta"') && quieto.includes('data-lado="der"'), 'sin banderas: el panel «tinta» (el negro de la marca) y del lado derecho')
+
+  const panel = /<div data-pieza="panel-del-portfolio"[^>]*>/.exec(quieto)?.[0] ?? ''
+  afirmar(/backdrop-filter:blur\(20px\) saturate\(180%\)/.test(panel) && /right-0/.test(panel) && /translate-x-full/.test(panel) && !/data-material|data-lado/.test(quieto), '[B1.2b] el panel, de vidrio y del lado derecho (sin banderas: ni material ni lado en el marcado), afuera en el servidor')
+  afirmar(!/data-marca-de-agua=/.test(quieto) && !PROYECTOS.some((p) => p.logo !== null && quieto.includes(p.logo)), '[B1.2b] las marcas de agua no salen en el servidor: se piden y se dibujan recién con la sección cerca')
+  const signo = marcar(<SignoDePregunta />, { anima: false })
+  afirmar(/<svg aria-hidden="true" focusable="false" data-marca-de-agua="signo"/.test(signo) && veces(signo, '<path') === 4, '[B1.2b] el «?» de «la tuya» es un SVG decorativo (la sombra y la pieza, cada una con el gancho y el punto)')
+  controlPositivo('  el detector ve un «?» que se anuncia', signo.replace('aria-hidden="true" ', ''), (s: string) => /<svg aria-hidden="true" focusable="false" data-marca-de-agua="signo"/.test(s))
 
   titulo('17b · El estado y el teclado, puros (`estado.ts`)')
 
-  const fases = ([ANTES_DEL_PIN, 0, 1, 5, 6, EN_LA_COLA] as const).map((p: IndiceDePaso) => vistaDelPaso(p))
-  afirmarIgual(fases.map((v) => `${v.fase}:${v.tira}:${v.vista}`), ['antes:0:portada', 'adentro:0:portada', 'adentro:0:ficha', 'adentro:2:ficha', 'adentro:3:portada', 'despues:3:portada'], 'antes del pin El Garage, cada proyecto en portada y ficha, la tuya sin ficha, y en la cola la tuya (subiendo entra con ella)')
-  const casos: readonly [TeclaDelSelector, number, IndiceDePaso, number | null][] = [
-    ['ArrowRight', 0, 0, pasoDeLaPortada(1)],
-    ['ArrowDown', 1, 2, pasoDeLaPortada(2)],
-    ['ArrowLeft', 2, 4, pasoDeLaPortada(1)],
-    ['ArrowUp', 0, 0, null],
-    ['ArrowRight', 3, 6, null],
-    ['Enter', 1, 2, 3],
-    ['Enter', 1, 3, 2],
-    ['Enter', 3, 6, null],
-    ['Enter', 2, 0, pasoDeLaPortada(2)],
-    ['Escape', 0, 1, 0],
-    ['Escape', 0, 0, null],
+  const fases = ([ANTES_DEL_PIN, 0, 1, 2, 3, EN_LA_COLA] as const).map((p: IndiceDePaso) => vistaDelPaso(p))
+  afirmarIgual(fases.map((v) => `${v.fase}:${v.tira}`), ['antes:0', 'adentro:0', 'adentro:1', 'adentro:2', 'adentro:3', 'despues:3'], 'antes del pin El Garage, un paso por tira, y en la cola la tuya (subiendo entra con ella)')
+  const casos: readonly [TeclaDelSelector, number | null, IndiceDePaso, string][] = [
+    ['ArrowRight', 0, 0, '1/1'],
+    ['ArrowRight', 1, 0, '2/2'],
+    ['ArrowLeft', 2, 2, '1/1'],
+    ['ArrowLeft', 0, 0, 'nada'],
+    ['ArrowRight', 3, 3, 'nada'],
+    ['ArrowRight', null, 1, '2/2'],
+    ['Escape', 2, 1, '-/1'],
+    ['Escape', null, 3, '-/3'],
+    ['ArrowRight', 0, ANTES_DEL_PIN, 'nada'],
+    ['Escape', 1, EN_LA_COLA, 'nada'],
   ]
-  afirmarIgual(casos.filter(([t, tira, paso, esperado]) => saltoDeLaTecla(t, tira, paso) !== esperado).map(([t, tira, paso]) => `${t}@${tira}/${paso}`), [], '←/↑ y →/↓ van a la portada de la tira de al lado (sin dar la vuelta), Enter abre y cierra la ficha de la activa (y en otra tira va a su portada), Esc vuelve a la portada')
-  controlPositivo('  una tecla mal mapeada se ve', (t: TeclaDelSelector, tira: number, paso: IndiceDePaso) => (t === 'Enter' ? null : saltoDeLaTecla(t, tira, paso)), (f: (t: TeclaDelSelector, tira: number, paso: IndiceDePaso) => number | null) => casos.every(([t, tira, paso, e]) => f(t, tira, paso) === e))
+  const comoTexto = (t: TeclaDelSelector, tira: number | null, paso: IndiceDePaso, f = accionDeLaTecla): string => {
+    const a = f(t, tira, paso)
+    return a === null ? 'nada' : `${a.salto === null ? '-' : String(a.salto)}/${a.foco === null ? '-' : String(a.foco)}`
+  }
+  afirmarIgual(casos.filter(([t, tira, paso, e]) => comoTexto(t, tira, paso) !== e).map(([t, tira, paso]) => `${t}@${String(tira)}/${paso}`), [], '←/→ van al proyecto de al lado de la cabecera con el foco (o de la activa), sin dar la vuelta, y el foco va con él; Esc devuelve el foco al lomo activo; con el panel afuera, nada (Enter en un lomo es su clic)')
+  controlPositivo('  una tecla mal mapeada se ve', ((t: TeclaDelSelector, tira: number | null, paso: IndiceDePaso) => (t === 'Escape' ? null : accionDeLaTecla(t, tira, paso))) as typeof accionDeLaTecla, (f: typeof accionDeLaTecla) => casos.every(([t, tira, paso, e]) => comoTexto(t, tira, paso, f) === e))
 }

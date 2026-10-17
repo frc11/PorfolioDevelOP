@@ -1,25 +1,78 @@
 /**
- * [B1] s76 · B1.2 — EL SELECTOR VIVO, sin navegador: los videos (sólo el activo, nada antes de estar cerca, sin autoplay con
- * movimiento reducido), el Portfolio sin contextos WebGL propios, la pose del logo (un desplazamiento sobre la del scroll: el progreso
- * no se toca), el oscurecido (un multiplicador último, y el «?» después), el hover con intención, los sonidos y las banderas.
+ * [B1] s76 · B1.2 y B1.2b — EL SELECTOR VIVO, sin navegador: los videos (sólo el activo, nada antes de estar cerca, sin autoplay con
+ * movimiento reducido), el Portfolio sin contextos WebGL propios, la pose del logo (una sola, calma: un desplazamiento sobre la del
+ * scroll, el progreso no se toca) con sus criterios medidos (el logo centrado en su mitad, el título en su lugar y sin perspectiva),
+ * el oscurecido (un multiplicador último), el hover instantáneo con sus guardas, el pin del panel, la secuencia por tiempo, las
+ * marcas de agua, «la tuya» y el título que sale cayendo. Y que las banderas de B1.2 salieron.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import * as THREE from 'three'
+
+import { rayLogoInk } from '@/app/probe-escena/__tests__/frameProbe'
 
 import { marcar } from '../../_secciones/_invariantes/render'
 import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
-import { BANDERAS_POR_DEFECTO, DIM_POR_DEFECTO, banderasDe } from '../../_secciones/trabajos/portfolio/banderas'
-import { CONSULTA_DEL_PUNTERO_FINO, INTENCION_DEL_HOVER_MS } from '../../_secciones/trabajos/portfolio/estado'
+import { CONSULTA_DEL_PUNTERO_FINO, HOVER, pasoConElPin, seMovioDeVerdad, suenaElCambio } from '../../_secciones/trabajos/portfolio/estado'
+import { ESTILO_DEL_VIDRIO, OPACIDAD_DEL_VIDRIO } from '../../_secciones/trabajos/portfolio/EscenarioDelPortfolio'
+import { NIVEL_DEL_TITULO_DE_LA_TUYA } from '../../_secciones/trabajos/portfolio/LaTuya'
+import { CONTORNO_DEL_SIGNO, OPACIDAD_DE_LA_MARCA, PUNTO_DEL_SIGNO } from '../../_secciones/trabajos/portfolio/MarcaDeAgua'
 import { MedioDeLaTira, estadoDelVideo } from '../../_secciones/trabajos/portfolio/MedioDeLaTira'
-import {
-  PERSECUCION_DEL_PESO_S, POSES_DEL_PORTFOLIO, POSE_VERTICAL, avanzarElPeso, mezclarLaPose, multiplicadorDelOscurecido, poseParaElAspecto, type PoseDelPortfolio,
-} from '../escena/portfolioEnLaEscena'
+import { ANTES_DEL_PIN, EN_LA_COLA, type IndiceDePaso } from '../../_secciones/trabajos/portfolio/pasos'
+import { SECUENCIA, demoraDe, enLaSecuencia } from '../../_secciones/trabajos/portfolio/secuencia'
+import { COLUMNA_DEL_ANCHO } from '../../_secciones/trabajos/portfolio/usePortfolio'
+import { SOLAPE_DE_LA_SECCION } from '../../_secciones/trabajos/geometria'
+import { fovConFactor, factorDeLaBanda } from '../escena/banda'
+import { progresoDeLaCamara } from '../escena/camaraDeEntonces'
 import type { MutableChoreoPose } from '../escena/choreographyTypes'
+import { CAMARA_DEL_PIN, armarLaCamara, poseDelPortfolio } from '../escena/poseDelPortfolio'
+import { DIM_DEL_PORTFOLIO, PERSECUCION_DEL_PESO_S, PORTFOLIO_EN_LA_ESCENA, avanzarElPeso, mezclarLaPose, multiplicadorDelOscurecido } from '../escena/portfolioEnLaEscena'
+import { CAMERA_FOV } from '../escena/probeScene'
+import { pantallaDeProgreso, progresoDePantalla } from '../escena/recorrido'
+import { camaraDeLaLectura, colocar, lineaDeBase, poseDeLaLectura, type MedidasDeLaFuente } from '../escena/titulos3d/colocacion'
+import { LECTURA } from '../titulos3d/registro'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
 
 const V3 = path.join(process.cwd(), 'src/app/v3')
 const leer = (r: string): string => readFileSync(path.join(V3, r), 'utf8')
+const sinComentarios = (c: string): string => c.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 const veces = (h: string, a: string): number => h.split(a).length - 1
+
+/** El logo medido de la escena (el mesh: `ProbeLogo`), el que el rig le pasa al encuadre. */
+const LOGO = { w: 6.863, h: 4.779 }
+/** Los cuadros donde se mide: escritorio (1440 y 1024) y tablet (parada y acostada), con la columna que deja el panel en cada uno. */
+const CUADROS = [
+  { ancho: 1440, alto: 900, columna: COLUMNA_DEL_ANCHO.escritorio },
+  { ancho: 1024, alto: 768, columna: COLUMNA_DEL_ANCHO.escritorio },
+  { ancho: 820, alto: 1180, columna: COLUMNA_DEL_ANCHO.tablet },
+  { ancho: 1023, alto: 768, columna: COLUMNA_DEL_ANCHO.tablet },
+] as const
+type Cuadro = (typeof CUADROS)[number]
+
+const RAYO = new THREE.Vector3()
+/** La caja del logo en el cuadro (−1…1), por rayos contra su tinta (`frameProbe`): un instrumento distinto del que usa la pose. */
+function cajaPorRayos(c: THREE.PerspectiveCamera): { x0: number; x1: number; y0: number; y1: number } | null {
+  let [x0, x1, y0, y1] = [9, -9, 9, -9]
+  const n = 200
+  const m = 150
+  for (let iy = 0; iy < m; iy += 1) {
+    for (let ix = 0; ix < n; ix += 1) {
+      const x = ((ix + 0.5) / n) * 2 - 1
+      const y = ((iy + 0.5) / m) * 2 - 1
+      RAYO.set(x, y, 0.5).unproject(c).sub(c.position).normalize()
+      if (rayLogoInk([c.position.x, c.position.y, c.position.z], [RAYO.x, RAYO.y, RAYO.z]) === Infinity) continue
+      x0 = Math.min(x0, x)
+      x1 = Math.max(x1, x)
+      y0 = Math.min(y0, y)
+      y1 = Math.max(y1, y)
+    }
+  }
+  return x1 < x0 ? null : { x0, x1, y0, y1 }
+}
+
+const fovDe = (q: Cuadro): number => fovConFactor(CAMERA_FOV, factorDeLaBanda(q.ancho, q.alto))
+const camaraDelCuadro = (q: Cuadro): THREE.PerspectiveCamera =>
+  armarLaCamara(new THREE.PerspectiveCamera(), { ...poseDelPortfolio(q.ancho / q.alto, fovDe(q), LOGO.w, LOGO.h, q.columna) }, q.ancho / q.alto, fovDe(q), LOGO.w, LOGO.h)
 
 export function afirmarElSelectorVivo(): void {
   titulo('B1.2 · 7 · Los videos: sólo el activo, nada antes de estar cerca, sin autoplay con movimiento reducido')
@@ -39,33 +92,36 @@ export function afirmarElSelectorVivo(): void {
   afirmarIgual(veces(activo, 'autoplay'), 0, '  y ningún `autoplay` en el marcado: lo reproduce el efecto, sólo si corresponde')
   controlPositivo('  dos activos a la vez se ven', (i: number) => estadoDelVideo(true, true, false, true).reproduce && i >= 0, (f: (i: number) => boolean) => [0, 1, 2].filter(f).length === 1)
 
-  titulo('B1.2 · 8 · Un solo lienzo: el Portfolio no abre ningún contexto WebGL')
+  titulo('B1.2 · 8 · Un solo lienzo: el Portfolio no abre ningún contexto WebGL ([B1.2b] y el «?» 3D se borró)')
 
-  const DE_LA_ESCENA = ['_lib/escena/portfolioEnLaEscena.ts', '_lib/escena/OscurecidoDelPortfolio.tsx', '_lib/escena/SignoDeLaTuya.tsx'].map((r) => ({ r, t: leer(r) }))
+  const DE_LA_ESCENA = ['_lib/escena/portfolioEnLaEscena.ts', '_lib/escena/poseDelPortfolio.ts', '_lib/escena/OscurecidoDelPortfolio.tsx'].map((r) => ({ r, t: leer(r) }))
   const CONTEXTO = /<Canvas\b|new THREE\.WebGLRenderer|WebGLRenderer\(|getContext\(\s*['"](webgl|experimental-webgl)/
-  afirmar(DE_LA_ESCENA.every(({ t }) => !CONTEXTO.test(t)), 'las tres piezas del Portfolio en la escena no crean un renderer ni piden un contexto')
-  const signo = DE_LA_ESCENA[2].t
-  afirmar(/const gl = useThree\(\(s\) => s\.gl\)/.test(signo) && /addAfterEffect\(/.test(signo) && /gl\.setScissorTest\(true\)/.test(signo), '  el «?» usa el renderer de la escena (`useThree`), después del render (`addAfterEffect`), con scissor')
+  afirmar(DE_LA_ESCENA.every(({ t }) => !CONTEXTO.test(t)), 'las piezas del Portfolio en la escena no crean un renderer ni piden un contexto')
   controlPositivo('  un renderer propio se ve', 'const r = new THREE.WebGLRenderer({ alpha: true })', (t: string) => !CONTEXTO.test(t))
+  const stage = sinComentarios(leer('_lib/escena/ProbeStage.tsx'))
+  afirmar(!existsSync(path.join(V3, '_lib/escena/SignoDeLaTuya.tsx')) && !/SignoDeLaTuya|addAfterEffect/.test(stage), '  el «?» 3D y su pase con scissor se borraron (no se archivan): el «?» de «la tuya» es un SVG en el DOM')
+  controlPositivo('  el detector ve el pase montado', `${stage}\n<SignoDeLaTuya />`, (c: string) => !/SignoDeLaTuya|addAfterEffect/.test(c))
 
-  titulo('B1.2 · 9 · La pose del logo: un desplazamiento sobre la del scroll (el progreso no se toca)')
+  titulo('B1.2b · 9 · Una sola pose, calma: la cámara del pin, alejada y con el encuadre corrido (el progreso no se toca)')
 
   const rig = leer('_lib/escena/OrbitRig.tsx')
   const linea = 'sampleTrack(track, progresoDeLaCamara(progress), target)\n      // [B1]'
-  afirmar(rig.replace(/\r\n/g, '\n').includes(linea) && /if \(isChoreo\) mezclarConElPortfolio\(target, Math\.min\(delta, 0\.1\), state\.size\.width \/ Math\.max\(1, state\.size\.height\)\)/.test(rig), 'el rig mezcla la pose del Portfolio en el objetivo, justo después de muestrear la del scroll y antes de la inercia')
+  afirmar(rig.replace(/\r\n/g, '\n').includes(linea) && /if \(isChoreo\) mezclarConElPortfolio\(target, Math\.min\(delta, 0\.1\), state\.size\.width \/ Math\.max\(1, state\.size\.height\), fovDeLaBanda\(CAMERA_FOV, state\.size\.width, state\.size\.height\), stats\.current\.logoW, stats\.current\.logoH\)/.test(rig), 'el rig mezcla la pose del Portfolio en el objetivo, justo después de muestrear la del scroll y antes de la inercia, con el cuadro de este momento')
   afirmar(!/mezclarConElPortfolio\([^)]*progress/.test(rig), '  y no le pasa el progreso: la regla de B5 (un desplazamiento, nunca un cambio del progreso)')
+  const pin = progresoDePantalla(pantallaDeProgreso(0.5) - SOLAPE_DE_LA_SECCION)
+  const enElPin = poseDeLaLectura(progresoDeLaCamara(pin))
+  afirmar(Math.abs(enElPin.angleDeg - CAMARA_DEL_PIN.angleDeg) < 0.01 && Math.abs(enElPin.height - CAMARA_DEL_PIN.height) < 0.001 && Math.abs(enElPin.distance - CAMARA_DEL_PIN.distance) < 0.001, `la pose parte de la cámara viva en el pin (p ${pin.toFixed(3)}, la de entonces en ${progresoDeLaCamara(pin).toFixed(4)}): ${enElPin.angleDeg.toFixed(2)}°, altura ${enElPin.height.toFixed(2)}, distancia ${enElPin.distance.toFixed(2)}`)
+  const poses = CUADROS.map((q) => ({ ...poseDelPortfolio(q.ancho / q.alto, fovDe(q), LOGO.w, LOGO.h, q.columna) }))
+  const elevacion = (x: { readonly height: number; readonly distance: number }): number => Math.atan2(x.height, x.distance)
+  afirmar(poses.every((x) => x.angleDeg === CAMARA_DEL_PIN.angleDeg && Math.abs(elevacion(x) - elevacion(CAMARA_DEL_PIN)) < 1e-9), 'calma: en todo cuadro el mismo azimut y la misma mirada que el pin (la cámara no gira; se aleja o se acerca y corre el encuadre)', poses.map((x) => `d ${x.distance.toFixed(1)}`).join(' · '))
+  controlPositivo('  una pose que gira (la `a` de B1.2, 210°) se ve', { ...poses[0], angleDeg: 210 }, (x: { readonly angleDeg: number }) => x.angleDeg === CAMARA_DEL_PIN.angleDeg)
   const base = (): MutableChoreoPose => ({ angleDeg: 555, height: 4.5, distance: 20, frameX: -0.85, frameY: 0 })
   const cero = base()
-  mezclarLaPose(cero, POSES_DEL_PORTFOLIO.a, 0, 'der')
+  mezclarLaPose(cero, poses[0], 0)
   afirmarIgual(cero, base(), 'con el peso en 0 la pose es la del scroll, bit a bit')
   const uno = base()
-  mezclarLaPose(uno, POSES_DEL_PORTFOLIO.a, 1, 'der')
-  const igual = (a: PoseDelPortfolio, b: PoseDelPortfolio): boolean => Math.abs(((a.angleDeg - b.angleDeg) % 360 + 360) % 360) < 1e-9 && Math.abs(a.height - b.height) < 1e-12 && Math.abs(a.distance - b.distance) < 1e-12 && Math.abs(a.frameX - b.frameX) < 1e-12 && Math.abs(a.frameY - b.frameY) < 1e-12
-  afirmar(igual(uno, POSES_DEL_PORTFOLIO.a) && Math.abs(uno.angleDeg - 555) <= 180, 'con el peso en 1, la del Portfolio (el ángulo por el camino corto: el acumulado de la vuelta no da una vuelta de más)')
-  const izq = base()
-  mezclarLaPose(izq, POSES_DEL_PORTFOLIO.a, 1, 'izq')
-  afirmar(Math.abs(izq.frameX + POSES_DEL_PORTFOLIO.a.frameX) < 1e-12, '  `?portfolio-lado=izq` espeja el encuadre horizontal')
-  afirmar(poseParaElAspecto('a', 1.6) === POSES_DEL_PORTFOLIO.a && poseParaElAspecto('b', 0.7) === POSE_VERTICAL, '  apaisado, la de la variante; vertical (la tablet parada), la vertical')
+  mezclarLaPose(uno, poses[0], 1)
+  afirmar(Math.abs((((uno.angleDeg - poses[0].angleDeg) % 360) + 360) % 360) < 1e-9 && Math.abs(uno.distance - poses[0].distance) < 1e-12 && Math.abs(uno.frameX - poses[0].frameX) < 1e-12 && Math.abs(uno.angleDeg - 555) <= 180, 'con el peso en 1, la del Portfolio (el ángulo por el camino corto)')
   let peso = 0
   let t = 0
   while (peso < 1 && t < 5) {
@@ -73,28 +129,119 @@ export function afirmarElSelectorVivo(): void {
     t += 1 / 60
   }
   afirmar(Math.abs(t - PERSECUCION_DEL_PESO_S) < 1 / 30 && avanzarElPeso(0, 1, 1 / 60, true) === 1, `el peso llega en ${PERSECUCION_DEL_PESO_S} s (con el panel), y con movimiento reducido de una`)
-  controlPositivo('  una mezcla que no espeja se ve', (o: MutableChoreoPose) => mezclarLaPose(o, POSES_DEL_PORTFOLIO.a, 1, 'der'), (f: (o: MutableChoreoPose) => void) => {
-    const o = base()
-    f(o)
-    return Math.abs(o.frameX + POSES_DEL_PORTFOLIO.a.frameX) < 1e-12
-  })
 
-  titulo('B1.2 · 10 · El oscurecido: un multiplicador último (la exposición no llega a todas las capas), y el «?» después')
+  titulo('B1.2b · 9b · Medido: el logo centrado en el eje de la columna (±1 % del ancho), en su mitad de abajo y entero')
+
+  const desvio = (q: Cuadro, k: { readonly x0: number; readonly x1: number } | null): number => (k === null ? Infinity : Math.abs((k.x0 + k.x1) / 4 + 0.5 - q.columna / 2))
+  for (const q of CUADROS) {
+    const k = cajaPorRayos(camaraDelCuadro(q))
+    const dentro = k !== null && k.x0 > -1 && k.x1 < 2 * q.columna - 1 && k.y1 < 0 && k.y0 > -1
+    afirmar(desvio(q, k) < 0.01 && dentro, `${String(q.ancho)} × ${String(q.alto)} (columna del ${String(q.columna * 100)} %): el centro del logo a ${(desvio(q, k) * 100).toFixed(2)} % del ancho de su eje, y entero adentro de su mitad de abajo`, k === null ? 'sin logo' : `x ${k.x0.toFixed(2)}…${k.x1.toFixed(2)} · y ${k.y0.toFixed(2)}…${k.y1.toFixed(2)}`)
+  }
+  controlPositivo('  el detector ve el logo de la cámara del pin (sin la pose)', CUADROS[0], (q: Cuadro) => desvio(q, cajaPorRayos(armarLaCamara(new THREE.PerspectiveCamera(), { ...enElPin }, q.ancho / q.alto, fovDe(q), LOGO.w, LOGO.h))) < 0.01)
+  const escenario = leer('_secciones/trabajos/portfolio/EscenarioDelPortfolio.tsx')
+  afirmar(/data-pieza="mitad-del-encabezado" className="absolute left-0 top-0 flex h-1\/2 w-1\/2 flex-col items-center justify-center px-8 text-center max-escritorio:w-2\/5"/.test(escenario) && /'absolute inset-y-0 right-0 w-1\/2 [^']*max-escritorio:w-3\/5'/.test(escenario) && COLUMNA_DEL_ANCHO.escritorio === 0.5 && COLUMNA_DEL_ANCHO.tablet === 0.4, 'el título y la bajada, centrados en el mismo eje, en la mitad de ARRIBA de la columna que la escena usa para el logo: la mitad desde 1024 y el 40 % en tablet (el panel, la otra mitad y el 60 %)')
+
+  titulo('B1.2b · 9c · El título 3D: con la pose del Portfolio, en su lugar del DOM y sin perspectiva')
+
+  const fuente = JSON.parse(leer('_fuentes/chivo-400-titulos.json')) as MedidasDeLaFuente
+  afirmarIgual(LECTURA.portfolio, { portfolio: true }, 'Portfolio se lee (y se coloca) con la pose del Portfolio')
+  const cuadro = CUADROS[0]
+  PORTFOLIO_EN_LA_ESCENA.columna = cuadro.columna
+  const lugar = { izquierda: 248, arriba: 190, linea: 113, cuerpo: 101, ancho: cuadro.ancho, alto: cuadro.alto }
+  const grupo = new THREE.Group()
+  colocar(grupo, camaraDeLaLectura(LECTURA.portfolio, cuadro.ancho / cuadro.alto, LOGO.w, LOGO.h, new THREE.PerspectiveCamera()), lugar, fuente)
+  const proyectar = (c: THREE.PerspectiveCamera, x: number, y: number): THREE.Vector2 => {
+    const v = new THREE.Vector3(x, y, 0).applyMatrix4(grupo.matrixWorld).project(c)
+    return new THREE.Vector2(((v.x + 1) / 2) * cuadro.ancho, ((1 - v.y) / 2) * cuadro.alto)
+  }
+  /** La diferencia de alto de las letras entre las dos puntas del título («Portfolio», ~4,6 em). */
+  const perspectiva = (c: THREE.PerspectiveCamera): number => {
+    const izq = proyectar(c, 0, 0).distanceTo(proyectar(c, 0, 0.7))
+    const der = proyectar(c, 4.6, 0).distanceTo(proyectar(c, 4.6, 0.7))
+    return Math.abs(izq - der) / Math.max(izq, der)
+  }
+  const viva = camaraDelCuadro(cuadro)
+  const origen = proyectar(viva, 0, 0)
+  const apartamiento = Math.hypot(origen.x - lugar.izquierda, origen.y - lineaDeBase(lugar, fuente))
+  afirmar(apartamiento < 0.5 && perspectiva(viva) < 0.03, 'con el panel adentro (la cámara ES la pose del Portfolio), el título queda donde el DOM le guarda el lugar y el alto de sus letras no cambia de punta a punta (menos del 3 %)', `apartamiento ${apartamiento.toFixed(3)} px · diferencia de alto ${(perspectiva(viva) * 100).toFixed(2)} %`)
+  const conLaDeB12 = armarLaCamara(new THREE.PerspectiveCamera(), { angleDeg: 210, height: 8.5, distance: 24, frameX: -0.9, frameY: -0.9 }, cuadro.ancho / cuadro.alto, fovDe(cuadro), LOGO.w, LOGO.h)
+  controlPositivo('  el detector ve la perspectiva de la pose `a` de B1.2 (la cámara girada)', conLaDeB12, (c: THREE.PerspectiveCamera) => perspectiva(c) < 0.03)
+
+  titulo('B1.2 · 10 · El oscurecido: un multiplicador último (la exposición no llega a todas las capas), con el dim constante')
 
   const capasSinTono = ['_lib/escena/estrellas/Estrellas.tsx', '_lib/escena/amanecer/haces.ts', '_lib/escena/cieloDeDia/CieloDeDia.tsx', '_lib/escena/final/filoConPoder.ts'].filter((r) => /toneMapped: false/.test(leer(r)))
   afirmarIgual(capasSinTono.length, 4, 'la exposición NO llegaría a todas: estrellas, haces, cielo y filo van con `toneMapped: false` (el ajuste B lo pedía verificar)')
-  afirmarIgual([multiplicadorDelOscurecido(DIM_POR_DEFECTO, 1), multiplicadorDelOscurecido(DIM_POR_DEFECTO, 0), multiplicadorDelOscurecido(2, 1)], [1 - DIM_POR_DEFECTO, 1, 0], `con el panel adentro el color va por ${1 - DIM_POR_DEFECTO}; afuera, intacto; el dim se acota`)
-  const osc = DE_LA_ESCENA[1].t
-  afirmar(/blending: THREE\.CustomBlending/.test(osc) && /blendSrc: THREE\.ZeroFactor/.test(osc) && /blendDst: THREE\.SrcColorFactor/.test(osc) && /toneMapped: false/.test(osc) && /renderOrder = ORDEN_DEL_OSCURECIDO/.test(osc), '  el cuadro multiplica (`dst × src`), sin tono y último del cuadro principal')
-  const stage = leer('_lib/escena/ProbeStage.tsx').replace(/\r\n/g, '\n')
-  afirmar(/<OscurecidoDelPortfolio \/>\n\s*<SignoDeLaTuya \/>\n[\s\S]*<PaseDeLaEscena \/>\n\s*<\/Suspense>/.test(stage), '  montados antes del pase compartido, que sigue último (s69)')
+  afirmarIgual([DIM_DEL_PORTFOLIO, multiplicadorDelOscurecido(DIM_DEL_PORTFOLIO, 1), multiplicadorDelOscurecido(DIM_DEL_PORTFOLIO, 0), multiplicadorDelOscurecido(2, 1)], [0.35, 1 - 0.35, 1, 0], '[B1.2b] el dim es una constante, 0,35: con el panel adentro el color va por 0,65; afuera, intacto; el dim se acota')
+  const osc = DE_LA_ESCENA[2].t
+  afirmar(/blending: THREE\.CustomBlending/.test(osc) && /blendSrc: THREE\.ZeroFactor/.test(osc) && /blendDst: THREE\.SrcColorFactor/.test(osc) && /toneMapped: false/.test(osc) && /renderOrder = ORDEN_DEL_OSCURECIDO/.test(osc) && /multiplicadorDelOscurecido\(DIM_DEL_PORTFOLIO, PORTFOLIO_EN_LA_ESCENA\.peso\)/.test(osc), '  el cuadro multiplica (`dst × src`), sin tono, último del cuadro principal y con el dim de la constante')
+  afirmar(/<OscurecidoDelPortfolio \/>\n[\s\S]*<PaseDeLaEscena \/>\n\s*<\/Suspense>/.test(leer('_lib/escena/ProbeStage.tsx').replace(/\r\n/g, '\n')), '  montado antes del pase compartido, que sigue último (s69)')
 
-  titulo('B1.2 · 11 · El hover, los sonidos y las banderas')
+  titulo('B1.2b · 11 · Sin banderas: ningún lector, y las constantes valen lo pedido')
 
-  const acordeon = leer('_secciones/trabajos/portfolio/Acordeon.tsx')
-  afirmar(INTENCION_DEL_HOVER_MS === 150 && CONSULTA_DEL_PUNTERO_FINO === '(hover: hover) and (pointer: fine)' && /window\.matchMedia\(CONSULTA_DEL_PUNTERO_FINO\)\.matches/.test(acordeon), 'el hover con intención: 150 ms, sólo con un puntero fino (en táctil, el clic)')
-  afirmar(/sonar\('tic'\)/.test(acordeon) && /sonar\('pestillo'\)/.test(acordeon) && /fase === 'adentro' && a\.fase === 'adentro'/.test(acordeon), '`tic` al cambiar de proyecto y `pestillo` al abrir la ficha, sólo con el panel adentro (y no al cargar); el bus respeta el mute')
-  afirmarIgual(banderasDe(''), BANDERAS_POR_DEFECTO, 'sin banderas: lado derecho, panel «tinta», el dim por defecto, el paso de 0,75 y la cámara a')
-  afirmarIgual(banderasDe('?portfolio-lado=izq&portfolio-panel=vidrio&portfolio-dim=0.6&portfolio-paso=0.6&portfolio-camara=c'), { lado: 'izq', material: 'vidrio', dim: 0.6, paso: 0.6, camara: 'c' }, '  con todas puestas')
-  afirmarIgual([banderasDe('?portfolio-dim=2').dim, banderasDe('?portfolio-dim=x').dim, banderasDe('?portfolio-paso=0.5').paso, banderasDe('?portfolio-camara=z').camara], [0.8, DIM_POR_DEFECTO, 0.75, 'a'], '  y lo que no se reconoce cae al default (el dim se acota a 0,8)')
+  const LECTORES = /portfolio-(dim|paso|panel|lado|camara)/
+  const codigo = ['_secciones/trabajos/Trabajos.tsx', '_secciones/trabajos/portfolio/usePortfolio.ts', '_secciones/trabajos/portfolio/EscenarioDelPortfolio.tsx', '_secciones/trabajos/portfolio/Tira.tsx', '_secciones/trabajos/portfolio/Acordeon.tsx', '_lib/escena/portfolioEnLaEscena.ts', '_lib/escena/poseDelPortfolio.ts', '_lib/diagnostico/publicar.ts'].map((r) => sinComentarios(leer(r)))
+  afirmar(codigo.every((c) => !LECTORES.test(c) && !/location\.search/.test(c)) && !existsSync(path.join(V3, '_secciones/trabajos/portfolio/banderas.ts')), '`?portfolio-dim`, `-paso`, `-panel`, `-lado` y `-camara` salieron con sus lectores (`banderas.ts` no existe y nadie lee la consulta)')
+  controlPositivo('  el detector ve un lector', "const dim = Number.parseFloat(q.get('portfolio-dim') ?? '')", (c: string) => !LECTORES.test(c))
+  afirmar(OPACIDAD_DEL_VIDRIO === 0.04 && ESTILO_DEL_VIDRIO.backdropFilter === 'blur(20px) saturate(180%)' && ESTILO_DEL_VIDRIO.borderLeft === '1px solid color-mix(in srgb, var(--color-tinta) 8%, transparent)' && ESTILO_DEL_VIDRIO.background === 'color-mix(in srgb, var(--color-tinta) 4%, transparent)', 'el panel es de vidrio (el del sistema: blanco —la tinta de la sala de noche— al 4 %, desenfoque de 20 px, saturación del 180 %, borde al 8 %)')
+  const panel = /'absolute inset-y-0 right-0 [^']*'/.exec(escenario)?.[0] ?? ''
+  afirmar(panel !== '' && !/bg-fondo/.test(sinComentarios(leer('_secciones/trabajos/portfolio/Tira.tsx'))) && /style=\{ESTILO_DEL_VIDRIO\}/.test(escenario), '  una sola estructura: el vidrio en el panel (del lado derecho) y las tiras de la tinta sin fondo propio')
+
+  titulo('B1.2b · 12 · El panel entra y sale en horizontal: el gatillo espera al pin')
+
+  const casos: readonly [IndiceDePaso, boolean, IndiceDePaso][] = [[2, false, ANTES_DEL_PIN], [2, true, 2], [0, false, ANTES_DEL_PIN], [EN_LA_COLA, false, EN_LA_COLA], [ANTES_DEL_PIN, true, ANTES_DEL_PIN]]
+  afirmarIgual(casos.map(([paso, pegado]) => pasoConElPin(paso, pegado)), casos.map(([, , e]) => e), 'con el escenario suelto (un salto o un scroll rápido que llega antes de que el pin se asiente) el panel no entra; pegado, sí; la cola queda')
+  controlPositivo('  sin la compuerta el panel entra con el escenario suelto', (paso: IndiceDePaso) => paso, (f: (paso: IndiceDePaso) => IndiceDePaso) => f(2) === ANTES_DEL_PIN)
+  const usePortfolio = leer('_secciones/trabajos/portfolio/usePortfolio.ts')
+  afirmar(/const mostrable = pasoConElPin\(siguiente, pegado\(caja\)\)/.test(usePortfolio) && /Math\.abs\(escenario\.getBoundingClientRect\(\)\.top\) <= 1/.test(usePortfolio), '  la sección publica el paso con la compuerta del pin, medido en el escenario (su tope en el del cuadro)')
+  afirmar(/transition-transform/.test(panel) && /'translate-x-full'/.test(escenario) && !/translate-y|inset-y-[1-9]/.test(panel) && /className="sticky top-0 h-svh w-full overflow-clip"/.test(escenario), '  el panel sólo se traslada en x (`translate-x-full` ↔ 0), adentro del escenario pegado: el tope de su caja no se mueve')
+
+  titulo('B1.2b · 13 · La secuencia de una tira: un gatillo, por tiempo')
+
+  afirmar(demoraDe(0) === 0 && demoraDe(1) === SECUENCIA.fichaTrasS && Math.abs(demoraDe(3) - demoraDe(2) - SECUENCIA.escalonS) < 1e-12 && SECUENCIA.fichaTrasS >= 0.3 && SECUENCIA.fichaTrasS <= 0.5, `primero el video y el nombre; a los ${String(SECUENCIA.fichaTrasS * 1000)} ms la ficha, escalonada de a ${String(SECUENCIA.escalonS * 1000)} ms`)
+  const entra = enLaSecuencia(true, 2, false)
+  const seVa = enLaSecuencia(false, 2, false)
+  const quieta = enLaSecuencia(true, 2, true)
+  afirmar(entra.animate.opacity === 1 && seVa.animate.opacity === 0 && quieta.transition.duration === 0 && entra.initial === false, '  por tiempo (Motion), apagada fuera de su tira y de una con movimiento reducido')
+  const tira = sinComentarios(leer('_secciones/trabajos/portfolio/Tira.tsx'))
+  afirmar(!/vista === 'ficha'|VistaDelPaso|portada/.test(tira) && /const visible = activa && vistaDelPaso\(vivo\.paso\)\.fase === 'adentro'/.test(tira), '  sin portada ni ficha: la tira activa muestra siempre el video y la ficha, y la secuencia arranca con su tira (o con el panel entrando)')
+
+  titulo('B1.2b · 14 · El hover instantáneo y sus guardas; el teclado; el sonido')
+
+  const acordeon = sinComentarios(leer('_secciones/trabajos/portfolio/Acordeon.tsx'))
+  afirmar(/flushSync\(\(\) => vivo\.saltarAlPaso\(indice\)\)/.test(acordeon) && !/setTimeout/.test(acordeon) && /onPointerOver=\{alPasar\}/.test(acordeon) && CONSULTA_DEL_PUNTERO_FINO === '(hover: hover) and (pointer: fine)', 'el hover cambia la tira en el mismo cuadro (`flushSync`, sin los 150 ms de antes; el salto de Lenis va después), sólo con puntero fino')
+  controlPositivo('  el detector ve la espera de antes', `${acordeon}\nhover.current = window.setTimeout(() => vivo.saltarAlPaso(i), 150)`, (c: string) => !/setTimeout/.test(c))
+  afirmar(!seMovioDeVerdad({ x: 100, y: 100 }, 102, 101) && seMovioDeVerdad({ x: 100, y: 100 }, 104, 100) && seMovioDeVerdad(null, 0, 0) && HOVER.movimientoMinimoPx === 4, 'después de una activación, un lomo que se reacomoda debajo del puntero no activa nada hasta que el puntero se mueve 4 px o más')
+  controlPositivo('  sin la guarda, el reacomodo activa', (d: { readonly x: number; readonly y: number } | null, x: number, y: number) => d === null || x !== -1 || y !== -1, (f: (d: { readonly x: number; readonly y: number } | null, x: number, y: number) => boolean) => !f({ x: 100, y: 100 }, 101, 100))
+  afirmar(/activacion\.current = puntero\.current/.test(acordeon) && /if \(!seMovioDeVerdad\(activacion\.current, e\.clientX, e\.clientY\)\) return/.test(acordeon), '  la guarda vale para cualquier cambio de tira (el hover, el clic, el teclado o el scroll): el puntero de ese momento')
+  afirmar(suenaElCambio(0, HOVER.rafagaMs) && !suenaElCambio(0, HOVER.rafagaMs - 1) && /if \(cambio && suenaElCambio\(a\.cuando, ahora\)\) sonar\('tic'\)/.test(acordeon) && !/pestillo/.test(acordeon), 'cruzando varios lomos gana el último y suena un solo `tic` (un cambio a menos de 250 ms del anterior no suena); `pestillo` salió de la secuencia')
+  const estado = sinComentarios(leer('_secciones/trabajos/portfolio/estado.ts'))
+  afirmar(/case 'ArrowLeft':/.test(estado) && /case 'ArrowRight':/.test(estado) && !/ArrowUp|ArrowDown/.test(estado), '  ←/→ cambian de proyecto (↑/↓ quedan para la página)')
+
+  titulo('B1.2b · 15 · Las marcas de agua y «la tuya»')
+
+  afirmar(OPACIDAD_DE_LA_MARCA >= 0.06 && OPACIDAD_DE_LA_MARCA <= 0.1, `las cuatro con el mismo tratamiento: monocromas (la tinta) y al ${String(OPACIDAD_DE_LA_MARCA * 100)} %`)
+  const conAlfa = (b: Buffer): boolean => b.length > 26 && b.toString('latin1', 1, 4) === 'PNG' && b[25] === 6
+  const logos = PROYECTOS.map((q) => {
+    if (q.logo === null) return `${q.slug}: el nombre`
+    const ruta = path.join(process.cwd(), 'public', q.logo)
+    return conAlfa(existsSync(ruta) ? readFileSync(ruta) : Buffer.alloc(0)) ? `${q.slug}: PNG con alfa` : `${q.slug}: falta o sin alfa`
+  })
+  afirmarIgual(logos, ['el-garage: PNG con alfa', 'esquina-estudio: PNG con alfa', 'banu-scents: el nombre'], 'los logos bajados de los sitios (sin fondo: PNG con canal alfa) y Banú con el nombre (su logo trae el fondo pegado)')
+  controlPositivo('  el lector ve un PNG sin alfa', Buffer.from([0x89, 0x50, 0x4e, 0x47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 2, 0]), conAlfa)
+  const numeros = (d: string): number[] => [...d.matchAll(/-?\d+(\.\d+)?/g)].map((m) => Number(m[0]))
+  const n = numeros(CONTORNO_DEL_SIGNO)
+  const punto = numeros(PUNTO_DEL_SIGNO)
+  afirmar(n[2] - n[9] === 104 && n[16] - n[18] === 104 && punto[2] - punto[0] === 104, 'el «?»: la cinta del logo, de ancho constante (104 = 252 − 148 en el gancho, el palo y el punto), con su relleno, su filo y su sombra corrida', `radios ${String(n[2])} y ${String(n[9])}`)
+  const anchoDeProxima = (cuerpo: number): number => 3.95 * cuerpo
+  afirmar(NIVEL_DEL_TITULO_DE_LA_TUYA === 'titulo-xl' && anchoDeProxima(28.96 + 0.018779 * 1024) <= 280 && anchoDeProxima(28.96 + 0.018779 * 1440) <= 488 && anchoDeProxima(53.97 + 0.034742 * 1024) > 280, 'el título de «la tuya», el más grande de los titulares que entra sin cortar «próxima» a 1024 y a 1440 (`display-xl` la parte a 1024)')
+  const laTuya = sinComentarios(leer('_secciones/trabajos/portfolio/LaTuya.tsx'))
+  afirmar(/<motion\.button\s+type="button"\s+data-abre-contacto="panel"\s+className="mt-auto self-start rounded-sutil bg-tinta px-8 py-5/.test(laTuya), '  y el CTA, un botón grande con el mismo `data-abre-contacto="panel"`')
+
+  titulo('B1.2b · 16 · El título entra en su lugar y se va cayendo')
+
+  const encabezado = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
+  afirmar(/animate\(presencia, adentro \? 1 : 0/.test(encabezado) && /llegada=\{progresoDeLaMascara === null \? null : presencia\}/.test(encabezado) && /saleCayendo queda/.test(encabezado), 'la presencia del encabezado va por tiempo con el panel adentro (ya pegado: no viaja con la sección) y el título sale cayendo')
+  const titulos = leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
+  afirmar(/if \(m\.llegada >= 1\) a\.cayendo = true/.test(titulos) && /else if \(m\.llegada <= 0\) a\.cayendo = false/.test(titulos) && /a\.uniforms\.uLevanta\.value = a\.cayendo \|\| a\.titulo\.gesto === 'levanta' \? 1 : 0/.test(titulos), '  llegado entero, lo que baja es la caída de `levanta` (se acuesta y su línea lo tapa); de vuelta en 0, su próxima llegada es la de siempre')
 }

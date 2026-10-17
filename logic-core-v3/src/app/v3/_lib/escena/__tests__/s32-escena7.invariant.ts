@@ -159,7 +159,7 @@ for (let l = -1.5; l <= 1.5; l += 0.01) for (let b = -0.3; b <= 0.3; b += 0.005)
 afirmar(masPolvo > 0.9 && VIA_LACTEA.polvo > 0.6, '  con franjas oscuras de polvo que la parten', `el polvo tapa hasta el ${(VIA_LACTEA.polvo * 100).toFixed(0)} %`)
 afirmar(/vec4\( vec3\( luz \), oscuro \)/.test(estrellas) && /vec4\( vec3\( vAlfa \* cuanto \), 1\.0 \)/.test(estrellas), 'monocromo: la banda y las estrellas pintan los tres canales iguales')
 afirmar(CIELO.desde > 0 && CIELO.oscuro < 1, 'el cielo se oscurece hacia arriba y en el horizonte queda del color de la bruma (empalma con el piso del fondo)')
-afirmar(/floor\( px \) \+ 0\.5/.test(estrellas) && ESTRELLAS.titileo.hasta <= 0.3 && /fueraDelTunel/.test(estrellas) && /smoothstep\( aEstrella\.y/.test(estrellas), 'siguen igual: nítidas (al centro del píxel), titileo lento, aparecen con la noche y se van antes del túnel')
+afirmar(/floor\( px \) \+ 0\.5/.test(estrellas) && ESTRELLAS.titileo.hasta <= 0.3 && !/fueraDelTunel/.test(estrellas) && /smoothstep\( aEstrella\.y/.test(estrellas), 'siguen igual: nítidas (al centro del píxel), titileo lento, aparecen con la noche y [B1.2b] ya no se van en el Portfolio (la ventana del túnel se borró)')
 
 // ── T4 · el polvo que se posa ─────────────────────────────────────────────
 titulo('T4 · el polvo que se posa, con los tiempos a la mitad')
@@ -375,12 +375,12 @@ const BORRADAS = /<Fibras|<Enfoque|<Grano|__enfoqueDelBanco|POLVO_ENFOQUE|uBusca
 afirmar(!existsSync(path.join(ESCENA, 'pruebas')) && !codigo(ESCENA).some((c) => BORRADAS.test(c)), 'las fibras, el foco que busca y el grano se borraron: ni los archivos ni el montaje ni el parche del polvo')
 controlPositivo('el detector VE el montaje del grano', '<Grano />', (c: string) => !BORRADAS.test(c))
 afirmar(!['fibras', 'enfoque', 'grano'].some((b) => b in entornoPedido('producto,fibras,enfoque,grano').pruebas), '  y sus banderas tampoco existen')
-afirmar(leer('ProbeStage.tsx').includes('<Fugaz rig={rig} />'), '  la fugaz, montada en la escena')
+afirmar(leer('ProbeStage.tsx').includes('<Fugaz />'), '  la fugaz, montada en la escena')
 // La estrella fugaz.
 const fugaz = leer('estrellas/Fugaz.tsx')
 afirmar(FUGAZ.cada[0] === 5 && FUGAZ.cada[1] === 10, 'fugaz: cada 5 a 10 s')
 afirmar(FUGAZ.dura[1] < 1 && FUGAZ.brillo < 1, '  tenue y rápida', `cruza en ${String(FUGAZ.dura[0])} a ${String(FUGAZ.dura[1])} s, con ${String(FUGAZ.brillo)} de brillo en el pico`)
-afirmar(/VIVO\.uNoche\.value >= FUGAZ\.noche/.test(fugaz) && /fueraDelTunel\(rig\.current\.progress\) > 0\.99/.test(fugaz), '  sólo de noche y fuera del túnel')
+afirmar(/const noche = VIVO\.uNoche\.value >= FUGAZ\.noche\n/.test(fugaz.replace(/\r\n/g, '\n')) && !/fueraDelTunel/.test(fugaz), '  sólo de noche ([B1.2b] también durante el Portfolio: la ventana del túnel se borró)')
 const leeLaTrama = (c: string): boolean => /\* delanteDeLaTrama\( cameraPosition, d \)/.test(c)
 afirmar(leeLaTrama(fugaz) && /renderOrder = MOIRE_FAR_ORDER - 1/.test(fugaz), '  detrás de la trama y de la formación: lee la trama como las estrellas y se dibuja antes que ella')
 controlPositivo('el detector VE una fugaz delante de la trama', 'vAlfa = uBrillo * aK * aK * aparece;', leeLaTrama)
