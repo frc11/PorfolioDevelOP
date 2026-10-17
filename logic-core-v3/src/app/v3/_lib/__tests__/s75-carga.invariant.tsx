@@ -74,6 +74,21 @@ const recienListo = conTexto({ domOpacidad: 0.5, listoHaceMs: 300 })
 afirmar(sana(recienListo) && tiposDe(conTexto({ domOpacidad: 0.5, listoHaceMs: 3 * UMBRALES_DE_LA_CARGA.cambioMs })) === 'dom-visible', `  el fundido del DOM no cuenta: recién listo (300 ms) no es falla; listo hace ${String(3 * UMBRALES_DE_LA_CARGA.cambioMs)} ms con el DOM a la vista, sí`)
 controlPositivo('  el detector VE un detector que cuenta el fundido como «los dos»', recienListo, (e: EstadoDelDiag) => fallasDe(e, { ...UMBRALES_DE_LA_CARGA, cambioMs: 0 }).length === 0)
 
+// [CIERRE A-ter] A13b · el formulario del pie en volumen: su DOM queda vivo a propósito (los campos, el foco, el lector), así que su opacidad no dice
+// si un texto está doble. Se compara cada rótulo impreso (los rótulos, la tecla, el relieve de la tarjeta) contra su propio DOM.
+const ROTULOS_APAGADOS = [{ rotulo: 'Nombre', domOpacidad: 0 }, { rotulo: 'Mail', domOpacidad: 0 }, { rotulo: 'Mensaje', domOpacidad: 0 }, { rotulo: 'Enviar', domOpacidad: 0 }]
+const FORMULARIO: TextoDelDiag = { ...TEXTO_SANO, id: 'pie:formulario-del-pie', sistema: 'pie', letrasCorridasEm: null, dibujada: null, debeDibujarse: false, domOpacidad: 1, rotulos: ROTULOS_APAGADOS }
+const conFormulario = (x: Partial<TextoDelDiag>): EstadoDelDiag => ({ ...SANO, textos: [{ ...FORMULARIO, ...x }] })
+const DOBLE_REAL = conFormulario({ rotulos: ROTULOS_APAGADOS.map((r) => (r.rotulo === 'Mail' ? { ...r, domOpacidad: 1 } : r)) })
+const TECLA_DOBLE = conFormulario({ rotulos: ROTULOS_APAGADOS.map((r) => (r.rotulo === 'Enviar' ? { ...r, domOpacidad: 0.8 } : r)) })
+const dichas = (e: EstadoDelDiag): string => fallasDe(e).map((f) => f.detalle).join(' | ')
+afirmar(sana(conFormulario({})) && fallasDe(DOBLE_REAL).length === 1 && tiposDe(DOBLE_REAL) === 'dom-visible' && dichas(DOBLE_REAL).includes('«Mail»') && tiposDe(TECLA_DOBLE) === 'dom-visible' && dichas(TECLA_DOBLE).includes('«Enviar»'),
+  `  el formulario del pie con el DOM vivo (opacidad 1) y sus rótulos impresos apagados no es falla; un texto doble real sí, y dice cuál (${dichas(DOBLE_REAL)}; ${dichas(TECLA_DOBLE)})`)
+controlPositivo('  el detector VE un texto doble real en el formulario (un rótulo con su DOM a la vista)', DOBLE_REAL, sana)
+controlPositivo('  y la tecla Enviar con su DOM a la vista', TECLA_DOBLE, sana)
+controlPositivo('  y la regla de antes, que miraba el formulario entero (el DOM vivo a propósito: lo marcaba sin que hubiera texto doble)', conFormulario({ rotulos: undefined }), sana)
+controlPositivo('  y otra pieza del pie (sin rótulos aparte) con su DOM a la vista', { ...SANO, textos: [{ ...FORMULARIO, id: 'pie:placa', rotulos: undefined }] }, sana)
+
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A13 · Las causas, arregladas (lo que se afirma sin navegador; en el sitio, el arnés)')
 

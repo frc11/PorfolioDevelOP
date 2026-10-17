@@ -10,7 +10,7 @@ import { RELEVO_DE_LOS_TITULOS, TITULOS_DE_VOLUMEN, tituloListo } from '../titul
 import { lineaDeLaNoche } from '../../_secciones/trabajos/geometria'
 import { cantidadDeLaNoche, cruceDelTramo } from '../../_secciones/trabajos/gota'
 import { EVENTOS, IMPRESIONES, VISTOS, anotar, fuenteCargadaPara, type BloqueVisto, type EventoDeLaCarga } from './anotar'
-import { UMBRALES_DE_LA_CARGA, fallasDe, type BloqueDelDiag, type EstadoDelDiag, type FallaDeLaCarga, type TextoDelDiag } from './fallas'
+import { UMBRALES_DE_LA_CARGA, fallasDe, type BloqueDelDiag, type EstadoDelDiag, type FallaDeLaCarga, type RotuloDelDiag, type TextoDelDiag } from './fallas'
 
 /**
  * [CIERRE A-ter] A13 · `window.__v3diag` (sólo con `?diag=carga`; lo carga `anotar.ts`): el estado de la carga en cada momento, para el
@@ -52,6 +52,16 @@ interface Diagnostico {
 }
 
 type VentanaDelDiag = Window & { __v3diag?: Diagnostico }
+
+/**
+ * [CIERRE A-ter] A13b · lo que la placa del formulario imprime (lo mismo que mide `pie3d/medida.ts`: los rótulos, la tecla y el relieve de la
+ * tarjeta), cada uno con lo que se ve de su propio DOM: el formulario entero queda vivo a propósito, sus textos impresos no.
+ */
+function rotulosDelFormulario(raiz: Element): RotuloDelDiag[] {
+  return [...raiz.querySelectorAll('label, [data-forma="principal"], [data-relieve]')]
+    .map((e) => ({ rotulo: (e.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 24), domOpacidad: opacidadEfectiva(e) }))
+    .filter((r) => r.rotulo !== '')
+}
 
 /** Lo que se ve del DOM de un texto (0 a 1): su opacidad y la de sus ancestros; sin caja, oculto, apagado por filtro o transparente, 0. */
 function opacidadEfectiva(el: Element): number {
@@ -102,7 +112,7 @@ function textos(): TextoDelDiag[] {
   const elPie = pieListo()
   for (const p of PIEZAS_DEL_PIE.values()) {
     const id = `pie:${p.id}`
-    lista.push({ id, sistema: 'pie', listoHaceMs: listoHace('pie', ahora), listo: elPie, enPantalla: enPantalla(p.elemento), domOpacidad: opacidadEfectiva(p.elemento), impreso: IMPRESIONES.get(id) ?? null, fuenteCargadaAhora: fuenteCargadaPara(p.elemento), letrasCorridasEm: null, dibujada: null, debeDibujarse: false })
+    lista.push({ id, sistema: 'pie', listoHaceMs: listoHace('pie', ahora), listo: elPie, enPantalla: enPantalla(p.elemento), domOpacidad: opacidadEfectiva(p.elemento), impreso: IMPRESIONES.get(id) ?? null, fuenteCargadaAhora: fuenteCargadaPara(p.elemento), letrasCorridasEm: null, dibujada: null, debeDibujarse: false, ...(p.forma === 'formulario' ? { rotulos: rotulosDelFormulario(p.elemento) } : {}) })
   }
   for (const [id, i] of IMPRESIONES) {
     if (!id.startsWith('tarjeta:')) continue

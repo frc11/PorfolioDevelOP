@@ -6,7 +6,8 @@
  *   · `sin-imprimir`       un texto con su DOM en pantalla cuya pieza (en volumen o en textura) no está lista;
  *   · `fuente-de-respaldo` un texto impreso mientras su fuente del DOM no estaba cargada (y no se volvió a imprimir);
  *   · `letras-corridas`    un título impreso con la x de sus letras de otro momento (más de `LETRAS_CORRIDAS_EM` de lo que el DOM mide ahora);
- *   · `dom-visible`        el DOM de respaldo de un texto ya impreso, todavía a la vista (los dos a la vez);
+ *   · `dom-visible`        el DOM de respaldo de un texto ya impreso, todavía a la vista (los dos a la vez; [A13b] el formulario del pie, en
+ *                          volumen, deja vivo su DOM —lo que se escribe—: ahí se compara cada rótulo impreso contra su propio DOM);
  *   · `ninguno-visible`    un texto impreso, llegado y en pantalla, con su DOM apagado y su pieza sin dibujarse (ninguno de los dos);
  *   · `animacion-desfasada` un bloque animado en pantalla cuyo progreso (con el rango que midió) no es el de su rango medido ahora;
  *   · `epoca-sin-medir`    la página visible con la época de medición en cero (ningún bloque resolvió su rango: todo quieto);
@@ -49,6 +50,17 @@ export interface TextoDelDiag {
   readonly dibujada: boolean | null
   /** Por su progreso pedido debería dibujarse (llegado, no ido, sin viaje ni relevo). */
   readonly debeDibujarse: boolean
+  /**
+   * [CIERRE A-ter] A13b · sólo el formulario del pie en volumen: lo que la placa imprime de él (rótulos, tecla, relieve de la tarjeta), cada uno con
+   * la opacidad de su propio DOM. El formulario entero queda vivo a propósito (los campos, el foco, el lector), así que su opacidad no dice nada
+   * de si un texto está doble; sin esto (`undefined`), se mira el DOM del texto entero.
+   */
+  readonly rotulos?: readonly RotuloDelDiag[]
+}
+
+export interface RotuloDelDiag {
+  readonly rotulo: string
+  readonly domOpacidad: number
 }
 
 export interface BloqueDelDiag {
@@ -99,7 +111,13 @@ export function fallasDe(e: EstadoDelDiag, u: UmbralesDeLaCarga = UMBRALES_DE_LA
     if (x.enPantalla && !x.listo) falla('sin-imprimir', x.id, `DOM ${f2(x.domOpacidad)}`)
     if (x.listo && x.impreso !== null && !x.impreso.fuenteCargada) falla('fuente-de-respaldo', x.id, `impreso a los ${String(x.impreso.t)} ms (v${String(x.impreso.version)}); ahora ${x.fuenteCargadaAhora ? 'cargada' : 'sin cargar'}`)
     if (x.listo && x.letrasCorridasEm !== null && x.letrasCorridasEm > u.letrasEm) falla('letras-corridas', x.id, `${x.letrasCorridasEm.toFixed(3)} em`)
-    if (x.listo && asentado && x.enPantalla && x.domOpacidad > u.domVisible) falla('dom-visible', x.id, `DOM ${f2(x.domOpacidad)}`)
+    if (x.listo && asentado && x.enPantalla) {
+      if (x.rotulos === undefined) {
+        if (x.domOpacidad > u.domVisible) falla('dom-visible', x.id, `DOM ${f2(x.domOpacidad)}`)
+      } else {
+        for (const r of x.rotulos) if (r.domOpacidad > u.domVisible) falla('dom-visible', x.id, `rótulo «${r.rotulo}» DOM ${f2(r.domOpacidad)}`)
+      }
+    }
     if (x.listo && asentado && x.enPantalla && x.debeDibujarse && x.domOpacidad <= u.domVisible && x.dibujada === false && e.viaje === null) falla('ninguno-visible', x.id, 'DOM apagado y la pieza sin dibujarse')
   }
   if (e.epoca.alto === 0 && e.bloques.length > 0) falla('epoca-sin-medir', 'epoca', `época ${String(e.epoca.epoca)} con el alto en 0`)
