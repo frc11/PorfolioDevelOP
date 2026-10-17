@@ -98,9 +98,9 @@ export function Tira({
       className={cn(CLASES_DE_LA_TIRA.base, CLASES_DE_LA_TIRA.material[vivo.banderas.material], activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo)}
       style={vivo.banderas.material === 'vidrio' ? ESTILO_DEL_VIDRIO : undefined}
     >
-      {activa ? null : <PosterDelLomo proyecto={proyecto} />}
+      {activa ? null : <PosterDelLomo proyecto={proyecto} cerca={vivo.cerca} />}
       <div id={ids.medio} hidden={!activa} className={cn('px-8 pt-12 transition-all duration-500 motion-reduce:transition-none', ficha && 'px-20 pt-6')}>
-        <MedioDeLaTira proyecto={proyecto} activa={activa} />
+        <MedioDeLaTira proyecto={proyecto} activa={activa} cerca={vivo.cerca} aLaVista={vivo.aLaVista} reducido={vivo.reducido} />
       </div>
       <CabeceraDeLaTira id={ids.cabecera} indice={indice} activa={activa} nombre={proyecto.nombre} controla={`${ids.medio} ${ids.region}`} alElegir={() => vivo.saltarAlPaso(pasoDeLaPortada(indice))} />
       <div id={ids.region} hidden={!activa} className="flex min-h-0 flex-1 flex-col gap-6 px-8 pb-12 pt-2">

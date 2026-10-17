@@ -38,6 +38,8 @@ import { MotorDeLaEscena } from './gpu/MotorDeLaEscena'
 import { LuzDelLogo } from './LuzDelLogo'
 import { PruebasDeLaEscena } from './PruebasDeLaEscena'
 import { PaseDeLaEscena } from './pase/PaseDeLaEscena'
+import { OscurecidoDelPortfolio } from './OscurecidoDelPortfolio'
+import { SignoDeLaTuya } from './SignoDeLaTuya'
 import { CristalDeLaEscena } from './cristal/CristalDeLaEscena'
 import { EspejoDeLaEscena } from './espejo/EspejoDeLaEscena'
 import { type ProbeMode, type ProbeParamsStore, type ProbeRigStore, type ProbeStatsStore } from './probeStore'
@@ -322,6 +324,10 @@ export default function ProbeStage({
         {/* [PULIDO 19] Q3 · el cristal de fondo, siempre (pegado a la trama; lee la copia del cuadro: `cristal/`). */}
         <CristalDeLaEscena quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         <EspejoDeLaEscena logoGroupRef={logoGroupRef} quieto={reducedMotion} />
+        {/* [B1] El Portfolio: el oscurecido (un multiplicador, último del cuadro) y el «?» de «la tuya» (después del render, con
+            scissor). Afuera del Portfolio, inertes: el peso es 0 y no hay hueco. */}
+        <OscurecidoDelPortfolio />
+        <SignoDeLaTuya />
         {/* [PULIDO 18] P1.a · el pase compartido (la profundidad de lo opaco): ÚLTIMO, su cuadro corre después de todos. */}
         <PaseDeLaEscena />
       </Suspense>

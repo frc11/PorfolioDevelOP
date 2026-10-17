@@ -6,6 +6,8 @@
  *           `+faststart`, y un póster WebP por video.
  *   B1.1b · la base (`s76-portfolio-mapeo.ts`): la REGLA DE ALTURAS en los tres anchos y los tres pasos (afuera del selector la
  *           escena ve lo de hoy), la noche del tramo, los pasos y las anclas, y el reloj de Demos contra el túnel archivado.
+ *   B1.2  · el selector vivo (`s76-portfolio-escena.tsx`): los videos, un solo lienzo, la pose del logo, el oscurecido, el hover,
+ *           los sonidos y las banderas.
  */
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
@@ -16,6 +18,7 @@ import { CONTENIDO as CONTENIDO_DE_ANTES } from '../../_archivo/tunel-portfolio/
 import { PROYECTOS, mediosDe, seMuestraElServicio, type ProyectoDelPortfolio } from '../../_secciones/trabajos/proyectos'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { afirmarLaBase } from './s76-portfolio-mapeo'
+import { afirmarElSelectorVivo } from './s76-portfolio-escena'
 
 const RAIZ = process.cwd()
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -116,5 +119,6 @@ controlPositivo('  y uno con una pista de audio', caja('moov', `${hdlr('vide')}$
 afirmar(conInicioRapido(Buffer.concat([caja('ftyp'), caja('moov'), caja('mdat')])) && sinAudio(caja('moov', hdlr('vide'))), '  y los lectores aceptan uno bien armado')
 
 afirmarLaBase()
+afirmarElSelectorVivo()
 
 cerrar('s76-portfolio.invariant')

@@ -37,6 +37,7 @@ export function EscenarioDelPortfolio({
   return (
     <div
       data-pieza="escenario-del-portfolio"
+      data-paso={vivo.paso}
       data-fase={fase}
       data-lado={vivo.banderas.lado}
       // `overflow-clip` y no `hidden`: el foco que entra al panel afuera del cuadro no puede correr el recorte (el acordeón lo trae).

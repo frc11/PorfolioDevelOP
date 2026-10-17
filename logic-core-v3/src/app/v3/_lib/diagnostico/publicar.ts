@@ -9,6 +9,10 @@ import { PIEZAS_DEL_PIE, pieListo } from '../pie3d/registro'
 import { RELEVO_DE_LOS_TITULOS, TITULOS_DE_VOLUMEN, tituloListo } from '../titulos3d/registro'
 import { lineaDeLaNoche } from '../../_secciones/trabajos/geometria'
 import { cantidadDeLaNoche, cruceDelTramo } from '../../_secciones/trabajos/gota'
+import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
+import { banderasDe } from '../../_secciones/trabajos/portfolio/banderas'
+import { vistaDelPaso } from '../../_secciones/trabajos/portfolio/estado'
+import { pasoConHisteresis, pxDelScroll, type IndiceDePaso } from '../../_secciones/trabajos/portfolio/pasos'
 import { EVENTOS, IMPRESIONES, VISTOS, anotar, fuenteCargadaPara, type BloqueVisto, type EventoDeLaCarga } from './anotar'
 import { UMBRALES_DE_LA_CARGA, fallasDe, type BloqueDelDiag, type EstadoDelDiag, type FallaDeLaCarga, type RotuloDelDiag, type TextoDelDiag } from './fallas'
 
@@ -200,11 +204,32 @@ function contexto(): 'vivo' | 'perdido' | 'sin' {
   return gl === null ? 'sin' : gl.isContextLost() ? 'perdido' : 'vivo'
 }
 
+/**
+ * [B1] El Portfolio en el diagnóstico: el paso que muestra el escenario (`data-paso`) contra el que pide el scroll, el salto en vuelo
+ * y el ancla de la carga (los marca la caja del Portfolio, `usePortfolio`), y los videos que suenan.
+ */
+function portfolio(): EstadoDelDiag['portfolio'] {
+  const escenario = document.querySelector<HTMLElement>('[data-pieza="escenario-del-portfolio"]')
+  const caja = document.querySelector<HTMLElement>('[data-pieza="caja-del-portfolio"]')
+  const panel = caja?.closest<HTMLElement>('[data-panel]') ?? null
+  if (escenario === null || caja === null || panel === null) return null
+  const mostrado = Number(escenario.getAttribute('data-paso')) as IndiceDePaso
+  const tope = panel.getBoundingClientRect().top + scrollY
+  const ancla = ANCLAS_DEL_PORTFOLIO.find((a) => a.id === caja.getAttribute('data-ancla-de-la-carga'))
+  return {
+    enPantalla: enPantalla(panel),
+    enVuelo: caja.getAttribute('data-en-vuelo') === 'si',
+    pasoMostrado: mostrado,
+    pasoPedido: pasoConHisteresis(mostrado, pxDelScroll(scrollY, tope, innerHeight), banderasDe(location.search).paso),
+    videos: [...document.querySelectorAll<HTMLVideoElement>('[data-video-del-portfolio]')].filter((v) => !v.paused).length,
+    ancla: ancla === undefined ? null : { id: ancla.id, tira: vistaDelPaso(mostrado).tira, esperada: ancla.paso / 2 },
+  }
+}
+
 function estado(referencia?: ReferenciaDeLosBloques): EstadoCompleto {
   const foto = fotoDeLaEpocaActual()
   const { lista, rangos, delLayout } = bloques(referencia, foto.alto > 0 ? foto.alto : innerHeight)
   const remate = document.querySelector<HTMLElement>('[data-pieza="remate-del-panel"]')
-  const tunel = VISTOS.tunel
   const lenis = VISTOS.lenis
   return {
     t: Math.round(performance.now()),
@@ -216,7 +241,7 @@ function estado(referencia?: ReferenciaDeLosBloques): EstadoCompleto {
     bloques: lista,
     noche: { actual: NOCHE_DISPARADA.cantidad, esperada: nocheEsperada() },
     remate: remate === null ? null : { enPantalla: enPantalla(remate), estado: remate.getAttribute('data-estado') },
-    tunel: tunel === null ? null : { enPantalla: enPantalla(tunel.panel), corriendo: tunel.corriendo(), mostrado: tunel.mostrado(), pedido: tunel.pedido() },
+    portfolio: portfolio(),
     fuentes: { estado: document.fonts.status, caras: [...document.fonts].map((f) => `${f.family} ${f.style} ${f.weight}: ${f.status}`) },
     escena: { lienzo: document.querySelector('[data-escena] canvas') !== null, contexto: contexto(), primerCuadro: hayPrimerCuadro(), caida: laEscenaCayo(), cargaLista: cargaLista() },
     lenis: lenis === null ? null : { scroll: lenis.scroll, destino: lenis.targetScroll, moviendose: String(lenis.isScrolling), frenado: lenis.isStopped },

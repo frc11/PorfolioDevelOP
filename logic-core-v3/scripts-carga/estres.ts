@@ -35,7 +35,8 @@ export const ITEMS = ['quienes-somos', 'trabajos', 'servicios', 'tu-panel', 'por
 export const MOMENTOS_MS = [300, 1000, 2000, 5000] as const
 export const CARGAS = ['fria', 'cache', 'recarga', 'hash'] as const
 export const CONDICIONES = ['normal', 'cpu', 'red', 'fondo'] as const
-const ANCLAS_DE_ENTRADA = ['trabajos', 'servicios', 'tu-panel', 'quienes-somos'] as const
+// [B1] y los cuatro deep links del Portfolio: al cargar con uno, el selector tiene que mostrar su proyecto (`portfolio-ancla`).
+const ANCLAS_DE_ENTRADA = ['trabajos', 'servicios', 'tu-panel', 'quienes-somos', 'portfolio-el-garage', 'portfolio-esquina-estudio', 'portfolio-banu-scents', 'portfolio-la-tuya'] as const
 
 type Item = (typeof ITEMS)[number]
 type Carga = (typeof CARGAS)[number]

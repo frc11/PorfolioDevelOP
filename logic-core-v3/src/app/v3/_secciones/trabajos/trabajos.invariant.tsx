@@ -123,10 +123,11 @@ afirmar(!quieto.includes(ROTULO_DE_SECCION_RETIRADO), `y el RÓTULO DE SECCIÓN 
 controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un texto', '<div>Portfolio</div>', (html: string) => TEXTOS.every((h) => html.includes(h.valor)))
 const DEL_CARRUSEL = 4 * DEMOS.length
 const DE_LA_CINTA = 4 * DEMOS.length
-/** Los pósters: el de la tira activa y los dos lomos (la tuya no tiene). */
-const POSTERES = PROYECTOS.length
-afirmarIgual(veces(quieto, '<img'), POSTERES + DE_LA_CINTA + DEL_CARRUSEL, `${POSTERES} pósters (la tira activa y dos lomos) en la rama quieta, más la cinta y el carrusel de Demos`)
-afirmarIgual(veces(conMotion, '<img'), POSTERES + DEMOS.length + DEL_CARRUSEL, '  y los mismos con la coreografía: más el estante de Demos, una portada por demo')
+// [B1] Nada del Portfolio se pide antes de que la sección esté cerca: en el servidor ni un póster, y los tres videos sin `src`.
+afirmarIgual(veces(quieto, '<img'), DE_LA_CINTA + DEL_CARRUSEL, 'en la rama quieta, sólo las imágenes de Demos (la cinta y el carrusel): ni un póster del Portfolio antes de estar cerca')
+afirmarIgual(veces(conMotion, '<img'), DEMOS.length + DEL_CARRUSEL, '  y con la coreografía, sólo las de Demos (el estante y el carrusel)')
+afirmarIgual(veces(quieto, '<video'), PROYECTOS.length, 'un video por proyecto')
+afirmar(!/<video[^>]*\ssrc="/.test(quieto) && !/<video[^>]*\ssrc="/.test(conMotion), '  y ninguno con `src` en el servidor')
 afirmar(!quieto.includes('transform:') && !quieto.includes('will-change'), 'la rama quieta no escribe una transformada ni promueve una capa')
 afirmar(!conPreferencia.includes('transform:'), '  y con `prefers-reduced-motion` tampoco')
 controlPositivo('el chequeo de "no hay transformada" ve un style con transform', '<div style="transform:translateY(10%)"></div>', (html: string) => !html.includes('transform:'))

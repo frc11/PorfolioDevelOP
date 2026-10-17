@@ -27,6 +27,7 @@ titulo('A13 · El detector de fallas de la carga (el del arnés, sobre `window._
 
 const IMPRESO = { version: 1, t: 900, fuenteCargada: true, conectado: true } as const
 const TEXTO_SANO: TextoDelDiag = { id: 'titulo:x', sistema: 'titulo', listo: true, enPantalla: true, domOpacidad: 0, impreso: IMPRESO, fuenteCargadaAhora: true, letrasCorridasEm: 0, dibujada: true, debeDibujarse: true }
+const PORTFOLIO_SANO: NonNullable<EstadoDelDiag['portfolio']> = { enPantalla: true, enVuelo: false, pasoMostrado: 2, pasoPedido: 2, videos: 1, ancla: null }
 const SANO: EstadoDelDiag = {
   t: 5000,
   visible: true,
@@ -37,7 +38,8 @@ const SANO: EstadoDelDiag = {
   bloques: [{ id: 'trabajos|seccion|x|0', enPantalla: true, medido: true, progreso: 0.5, esperado: 0.51 }, { id: 'servicios|propia|y|0', enPantalla: false, medido: false, progreso: 0, esperado: 0.7 }],
   noche: { actual: 1, esperada: 1 },
   remate: { enPantalla: true, estado: 'vivo' },
-  tunel: { enPantalla: true, corriendo: true, mostrado: 0.4, pedido: 0.42 },
+  // [B1] el túnel se fue al archivo: en su lugar el Portfolio (el paso mostrado es el pedido, un video, sin ancla).
+  portfolio: PORTFOLIO_SANO,
 }
 const conTexto = (x: Partial<TextoDelDiag>): EstadoDelDiag => ({ ...SANO, textos: [{ ...TEXTO_SANO, ...x }] })
 /** Un estado roto por falla, con sólo esa falla. */
@@ -51,7 +53,9 @@ const ROTOS: readonly (readonly [TipoDeFalla, EstadoDelDiag])[] = [
   ['epoca-sin-medir', { ...SANO, epoca: { epoca: 0, alto: 0 } }],
   ['noche-desfasada', { ...SANO, noche: { actual: 0, esperada: 1 } }],
   ['remate-dormido', { ...SANO, remate: { enPantalla: true, estado: 'espera' } }],
-  ['tunel-desfasado', { ...SANO, tunel: { enPantalla: true, corriendo: false, mostrado: 0, pedido: 0.6 } }],
+  ['portfolio-desfasado', { ...SANO, portfolio: { ...PORTFOLIO_SANO, pasoMostrado: 2, pasoPedido: 4 } }],
+  ['portfolio-video', { ...SANO, portfolio: { ...PORTFOLIO_SANO, videos: 2 } }],
+  ['portfolio-ancla', { ...SANO, portfolio: { ...PORTFOLIO_SANO, ancla: { id: 'portfolio-banu-scents', tira: 0, esperada: 2 } } }],
 ]
 const tiposDe = (e: EstadoDelDiag): string => [...new Set(fallasDe(e).map((f) => f.tipo))].join(',')
 const sana = (e: EstadoDelDiag): boolean => fallasDe(e).length === 0

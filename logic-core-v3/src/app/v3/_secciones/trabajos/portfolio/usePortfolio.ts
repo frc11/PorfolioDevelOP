@@ -3,11 +3,12 @@
 import { useMotionValue, type MotionValue } from 'motion/react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
 
+import { PORTFOLIO_EN_LA_ESCENA } from '../../../_lib/escena/portfolioEnLaEscena'
 import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimiento'
 
 import { ANCLAS_DEL_PORTFOLIO } from './anclas'
 import { BANDERAS_POR_DEFECTO, banderasDe, type BanderasDelPortfolio } from './banderas'
-import { distanciaEnPasos } from './estado'
+import { distanciaEnPasos, vistaDelPaso } from './estado'
 import {
   ANTES_DEL_PIN, centroDelPaso, mostradoDeDemos, pasoConHisteresis, pasoEn, pxDelScroll, scrollDelPx, type IndiceDePaso,
 } from './pasos'
@@ -26,6 +27,10 @@ export interface PortfolioVivo {
   readonly paso: IndiceDePaso
   readonly banderas: BanderasDelPortfolio
   readonly reducido: boolean
+  /** La sección está a una pantalla o menos (desde ahí se piden los pósters y el video activo; después, se quedan). */
+  readonly cerca: boolean
+  /** La sección está en el cuadro y la pestaña a la vista (si no, el video se pausa). */
+  readonly aLaVista: boolean
   /** El `mostrado` de hoy para Demos (`pasos.ts`: la cola corrida). */
   readonly mostradoDeDemos: MotionValue<number>
   /** Lleva la página al centro de un paso del selector (0…6). */
@@ -59,8 +64,46 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   const [paso, setPaso] = useState<IndiceDePaso>(ANTES_DEL_PIN)
   const reducido = usePrefiereMenosMovimiento()
   const mostrado = useMotionValue(0)
+  const [cerca, setCerca] = useState(false)
+  const [enCuadro, setEnCuadro] = useState(false)
+  const [visible, setVisible] = useState(true)
   const actual = useRef<IndiceDePaso>(ANTES_DEL_PIN)
   const enVuelo = useRef<{ readonly destino: number; readonly cancelar: () => void } | null>(null)
+
+  // Cerca (una pantalla de margen; una vez cerca, queda) y en el cuadro, y la pestaña a la vista.
+  useEffect(() => {
+    const panel = caja.current?.closest('[data-panel]') ?? null
+    if (panel === null) return undefined
+    const cercania = new IntersectionObserver(([e]) => {
+      if (e?.isIntersecting === true) setCerca(true)
+    }, { rootMargin: '100% 0px' })
+    const cuadro = new IntersectionObserver(([e]) => setEnCuadro(e?.isIntersecting === true))
+    const alCambiar = (): void => setVisible(document.visibilityState === 'visible')
+    cercania.observe(panel)
+    cuadro.observe(panel)
+    document.addEventListener('visibilitychange', alCambiar)
+    return () => {
+      cercania.disconnect()
+      cuadro.disconnect()
+      document.removeEventListener('visibilitychange', alCambiar)
+    }
+  }, [caja])
+
+  // Lo que la escena tiene que saber: el panel adentro (la pose del logo y el oscurecido), el lado, la cámara y el oscurecido pedidos.
+  useEffect(() => {
+    const e = PORTFOLIO_EN_LA_ESCENA
+    e.adentro = vistaDelPaso(paso).fase === 'adentro'
+    e.dim = banderas.dim
+    e.lado = banderas.lado
+    e.camara = banderas.camara
+    e.reducido = reducido
+  }, [paso, banderas, reducido])
+  useEffect(
+    () => () => {
+      PORTFOLIO_EN_LA_ESCENA.adentro = false
+    },
+    [],
+  )
 
   // La anotación a la escena (la REGLA DE ALTURAS), con el paso de la bandera.
   useEffect(() => {
@@ -104,10 +147,14 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
       if (m === null) return
       const centro = centroDelPaso(i, banderas.paso)
       enVuelo.current?.cancelar()
+      // El diagnóstico de la carga (`?diag=carga`) no cuenta como desfasado el paso de un salto en vuelo.
+      caja.current?.setAttribute('data-en-vuelo', 'si')
       const vuelo = {
         destino: centro,
         cancelar: saltarA(scrollDelPx(centro, m.tope, m.alto), distanciaEnPasos(actual.current, i), reducido, () => {
-          if (enVuelo.current === vuelo) enVuelo.current = null
+          if (enVuelo.current !== vuelo) return
+          enVuelo.current = null
+          caja.current?.removeAttribute('data-en-vuelo')
         }),
       }
       enVuelo.current = vuelo
@@ -121,9 +168,18 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     const m = ancla === undefined ? null : medir(caja.current)
     if (ancla === undefined || m === null) return undefined
     const y = Math.round(scrollDelPx(centroDelPaso(ancla.paso, banderas.paso), m.tope, m.alto))
+    const el = caja.current
+    // El ancla con la que cargó, para el diagnóstico de la carga, hasta que el visitante mueva la página por su cuenta.
+    el?.setAttribute('data-ancla-de-la-carga', ancla.id)
+    const soltar = (): void => el?.removeAttribute('data-ancla-de-la-carga')
+    const gestos = ['wheel', 'touchstart', 'keydown'] as const
+    for (const g of gestos) window.addEventListener(g, soltar, { once: true, passive: true })
     const reloj = window.setTimeout(() => window.scrollTo({ top: y, behavior: 'instant' }), 0)
-    return () => window.clearTimeout(reloj)
+    return () => {
+      window.clearTimeout(reloj)
+      for (const g of gestos) window.removeEventListener(g, soltar)
+    }
   }, [banderas.paso, caja])
 
-  return { paso, banderas, reducido, mostradoDeDemos: mostrado, saltarAlPaso }
+  return { paso, banderas, reducido, cerca, aLaVista: enCuadro && visible, mostradoDeDemos: mostrado, saltarAlPaso }
 }

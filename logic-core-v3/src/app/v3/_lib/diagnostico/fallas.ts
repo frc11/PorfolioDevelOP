@@ -13,7 +13,10 @@
  *   · `epoca-sin-medir`    la página visible con la época de medición en cero (ningún bloque resolvió su rango: todo quieto);
  *   · `noche-desfasada`    la noche de la sala distinta de la que deja el scroll (la regla de las cuatro entradas), fuera de un viaje;
  *   · `remate-dormido`     el remate de Tu panel («Y más…») en pantalla y todavía esperando su gesto;
- *   · `tunel-desfasado`    el túnel de Trabajos en pantalla, quieto o lejos de lo que pide el scroll (las fotos quietas).
+ *   · [B1] el túnel se fue al archivo y su falla (`tunel-desfasado`) con él; en su lugar, las del Portfolio:
+ *   · `portfolio-desfasado` el selector en pantalla mostrando un paso que no es el que pide el scroll (con su histéresis), sin un salto en vuelo;
+ *   · `portfolio-video`    más de un video reproduciéndose, o alguno con la sección fuera del cuadro;
+ *   · `portfolio-ancla`    la página cargó con un deep link (`#portfolio-…`) y, antes de que el visitante scrollee, muestra otra tira.
  *
  * El progreso «esperado» de un bloque es el que tendría con el rango de una carga limpia (la referencia que el arnés toma desde arriba,
  * sin apuros) o, sin referencia, con su rango medido ahora en el layout (sin lo pegado ni lo transformado).
@@ -30,8 +33,6 @@ export const UMBRALES_DE_LA_CARGA = {
   llegado: 0.99,
   /** Lo que tarda el cambio del DOM al impreso (el fundido del DOM, ~0,4 s, y el primer cuadro): antes no cuenta como «los dos» ni «ninguno». */
   cambioMs: 1000,
-  /** Lo que el túnel puede ir atrás de lo que pide el scroll (fracción de su tramo). */
-  tunel: 0.05,
 } as const
 
 export interface TextoDelDiag {
@@ -83,10 +84,22 @@ export interface EstadoDelDiag {
   /** La noche puesta y la que deja el scroll (`null`: no se evalúa: tapada, el día del final o sin la gota). */
   readonly noche: { readonly actual: number; readonly esperada: number | null }
   readonly remate: { readonly enPantalla: boolean; readonly estado: string | null } | null
-  readonly tunel: { readonly enPantalla: boolean; readonly corriendo: boolean; readonly mostrado: number; readonly pedido: number } | null
+  /**
+   * [B1] El Portfolio (el túnel se fue al archivo): el paso que muestra el selector y el que pide el scroll (con su histéresis, desde
+   * el mostrado), si hay un salto en vuelo (ahí el mostrado ya es el destino), cuántos videos se reproducen, y el ancla con la que
+   * cargó la página mientras el visitante no scrolleó (la tira que muestra y la que pidió el ancla).
+   */
+  readonly portfolio: {
+    readonly enPantalla: boolean
+    readonly enVuelo: boolean
+    readonly pasoMostrado: number
+    readonly pasoPedido: number
+    readonly videos: number
+    readonly ancla: { readonly id: string; readonly tira: number; readonly esperada: number } | null
+  } | null
 }
 
-export type TipoDeFalla = 'sin-imprimir' | 'fuente-de-respaldo' | 'letras-corridas' | 'dom-visible' | 'ninguno-visible' | 'animacion-desfasada' | 'epoca-sin-medir' | 'noche-desfasada' | 'remate-dormido' | 'tunel-desfasado'
+export type TipoDeFalla = 'sin-imprimir' | 'fuente-de-respaldo' | 'letras-corridas' | 'dom-visible' | 'ninguno-visible' | 'animacion-desfasada' | 'epoca-sin-medir' | 'noche-desfasada' | 'remate-dormido' | 'portfolio-desfasado' | 'portfolio-video' | 'portfolio-ancla'
 
 export interface FallaDeLaCarga {
   readonly tipo: TipoDeFalla
@@ -127,8 +140,10 @@ export function fallasDe(e: EstadoDelDiag, u: UmbralesDeLaCarga = UMBRALES_DE_LA
     }
     if (e.noche.esperada !== null && Math.abs(e.noche.actual - e.noche.esperada) > 0.5) falla('noche-desfasada', 'noche', `${f2(e.noche.actual)} contra ${f2(e.noche.esperada)}`)
     if (e.remate !== null && e.remate.enPantalla && e.remate.estado === 'espera') falla('remate-dormido', 'remate', 'en pantalla y esperando su gesto')
-    const t = e.tunel
-    if (t !== null && t.enPantalla && (!t.corriendo || Math.abs(t.mostrado - t.pedido) > u.tunel)) falla('tunel-desfasado', 'tunel', `${t.corriendo ? 'corre' : 'QUIETO'}: ${f2(t.mostrado)} contra ${f2(t.pedido)}`)
+    const p = e.portfolio
+    if (p !== null && p.enPantalla && !p.enVuelo && p.pasoMostrado !== p.pasoPedido) falla('portfolio-desfasado', 'portfolio', `muestra el paso ${String(p.pasoMostrado)} y el scroll pide el ${String(p.pasoPedido)}`)
+    if (p !== null && (p.videos > 1 || (p.videos > 0 && !p.enPantalla))) falla('portfolio-video', 'portfolio', `${String(p.videos)} videos reproduciéndose${p.enPantalla ? '' : ' con la sección fuera del cuadro'}`)
+    if (p !== null && p.ancla !== null && !p.enVuelo && p.ancla.tira !== p.ancla.esperada) falla('portfolio-ancla', p.ancla.id, `muestra la tira ${String(p.ancla.tira)} y el ancla pidió la ${String(p.ancla.esperada)}`)
   }
   return fallas
 }

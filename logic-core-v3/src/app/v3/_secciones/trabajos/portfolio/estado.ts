@@ -8,6 +8,10 @@
 
 import { ANTES_DEL_PIN, CANTIDAD_DE_PASOS, EN_LA_COLA, lugarDelPaso, pasoDeLaPortada, type IndiceDePaso, type VistaDelPaso } from './pasos'
 
+/** El hover con intención: tanto quieto sobre un lomo, con un puntero fino (en táctil, el clic), salta a su portada. */
+export const INTENCION_DEL_HOVER_MS = 150
+export const CONSULTA_DEL_PUNTERO_FINO = '(hover: hover) and (pointer: fine)'
+
 /** El índice de «la próxima es la tuya» entre las tiras (después de los tres proyectos). */
 export const TIRA_DE_LA_TUYA = 3
 export const CANTIDAD_DE_TIRAS = 4

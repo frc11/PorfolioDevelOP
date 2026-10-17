@@ -7,11 +7,12 @@ cada sprint al final).
 escritorio y tablet, historias tipo Instagram en el teléfono. Videos reales de los sitios, una ficha por proyecto, deep links y la
 escena oscurecida, **sin cambiar lo que se ve en el resto de la página**.
 
-**Estado: APROBADO CON AJUSTES (2026-10-17).** Las decisiones de la §9 están resueltas en su lugar y los ajustes de la
-aprobación van en la §11, que **manda sobre el resto del plan** donde lo contradiga (el paso de 0,75 pantallas, los datos dictados,
-la llave para lo que falta, el oscurecido medido por capa). En curso: B1.1a → B1.1b → B1.2, sin frenar hasta el FRENO del final de
-B1.2. El build de medición (`.next-probe`, ignorado por git, BUILD_ID `lcERRvtvbJDOVlh4Me-6P`, el mismo árbol que HEAD: `lente.ts`
-difiere sólo en finales de línea) queda en disco para las capturas «antes» de B1.1b.
+**Estado: B1.1a, B1.1b y B1.2 hechos; FRENADO al final de B1.2 para que Valentino lo mire en :3000 (2026-10-17).** El plan fue
+aprobado con ajustes: las decisiones de la §9 están escritas en su lugar y los ajustes van en la §11, que **manda sobre el resto del
+plan** donde lo contradiga (el paso de 0,75 pantallas, los datos dictados, la llave para lo que falta, el oscurecido medido por capa).
+El log de cada sprint, en la §10; la lista del FRENO, al final del log de B1.2. Lo que no pudo correr por memoria está marcado
+«VERIFICAR TRAS REINICIO». El build de medición «antes» (`.next-probe`, ignorado por git, BUILD_ID `lcERRvtvbJDOVlh4Me-6P`) sigue en
+disco para las capturas de control.
 
 ---
 
@@ -775,6 +776,86 @@ s47 y s76 (394 afirmaciones: el Portfolio y el archivo) en verde. La llave se pr
 firmas de relleno, cero marcadores) y quedó apagada. Sin dev server propio (el de Valentino en :3000 no se tocó). **Pendientes para el
 banco** (memoria: 2,6 GB libres): las capturas de control «antes/después» y visual-qa del reposo; van al cierre de B1.2 si hay
 memoria, si no «VERIFICAR TRAS REINICIO».
+
+### B1.2 · escritorio y tablet (2026-10-17) — FRENADO para que Valentino lo mire en :3000
+
+**Hecho.**
+
+- **El acordeón vivo** (`portfolio/Acordeon.tsx`): el clic en un lomo, el hover con intención (150 ms quieto, sólo con puntero fino:
+  en táctil, el clic), el teclado (←/→ y ↑/↓ cambian de tira y mueven el foco, Enter abre y cierra la ficha de la activa, Esc vuelve
+  a la portada) y un foco de teclado que entra al panel con el panel afuera: todo es un SALTO de la página al centro del paso
+  (`saltar.ts`: `lenis.scrollTo` con duración por distancia; sin Lenis, el viaje sin Lenis; con movimiento reducido, instantáneo) y
+  el estado lo sigue; mientras vuela, los bordes del camino no disparan nada. Suena `tic` al cambiar de proyecto y `pestillo` al
+  abrir la ficha (el bus respeta el mute; no suena al cargar).
+- **Los videos** (`MedioDeLaTira.tsx`): `muted playsInline loop`; sólo el de la tira activa tiene `src` y `preload="auto"`, y sólo
+  con la sección a una pantalla o menos (`cerca`, un IntersectionObserver; una vez cerca queda); los demás nada y `preload="none"`;
+  los lomos muestran el póster del teléfono en grises (también sólo cerca); se pausa fuera de cuadro y con la pestaña oculta; con
+  movimiento reducido no hay autoplay (el póster). En el servidor no sale un solo póster del Portfolio.
+- **La escena** (`_lib/escena/portfolioEnLaEscena.ts`, un objeto que escribe la sección y lee el lazo): **la pose del logo** se
+  mezcla en el rig (`OrbitRig`, una línea después de muestrear la del scroll y antes de la inercia) con un peso que persigue al panel
+  en 0,7 s: un desplazamiento sobre la pose, el progreso no se toca (la regla de B5). Las poses se calibraron puras con el arnés de la
+  caja del logo (`conPose` + `cajaDelLogo`): `a` (producto) deja el logo en x 0,10–0,35 e y 0,60–0,90 del cuadro a 1440 × 900; `b`
+  con el azimut de Trabajos (la entrada más corta); `c` con el logo más chico; y con el cuadro vertical (la tablet parada) una pose
+  propia, porque la apaisada lo metía debajo del panel. **El oscurecido** (ajuste B): la exposición del render NO llega a todas las
+  capas (estrellas, haces, cielo, filo, plano de la luz y tarjeta van con `toneMapped: false`; el plasma hace su propio tono), así
+  que va como un cuadro a pantalla completa que multiplica el color por `1 − dim · peso`, último del cuadro (`OscurecidoDelPortfolio`).
+  **El «?»** (`SignoDeLaTuya`): un tubo a lo largo del trazo del signo y el punto, satinado (`MeshPhysicalMaterial` con `sheen`),
+  girando despacio, con escena, cámara y luces propias, dibujado DESPUÉS del render (`addAfterEffect`) con scissor en el rectángulo
+  del hueco de la tira (sin oscurecer, sin un contexto nuevo). El hueco deja ver el lienzo: el fondo va por tira y la de «la tuya»
+  pinta todo lo demás con una sombra del color de fondo alrededor del hueco transparente.
+- **El diagnóstico de la carga**: la falla del túnel (`tunel-desfasado`) pasó a tres del Portfolio —`portfolio-desfasado` (el paso
+  mostrado no es el que pide el scroll, sin un salto en vuelo), `portfolio-video` (más de uno, o alguno fuera de cuadro) y
+  `portfolio-ancla` (cargó con un deep link y muestra otra tira)— que publica `publicar.ts`; el arnés de estrés entra también por los
+  cuatro deep links.
+- **s76** (101 afirmaciones): los videos (uno solo, nada antes de estar cerca, sin autoplay con movimiento reducido), cero contextos
+  propios, la pose (con el peso en 0 la del scroll bit a bit, en 1 la del Portfolio por el camino corto, el espejo, la vertical, el
+  peso en 0,7 s y de una con movimiento reducido), el oscurecido (las capas sin tono, el multiplicador, el montaje antes del pase que
+  sigue último), el hover, los sonidos y las banderas. **s75-carga** 53 (las tres fallas nuevas, cada una con su control).
+
+**Las banderas y sus defaults.** `?portfolio-lado=der` (default) | `izq` · `?portfolio-panel=tinta` (default: el negro de la marca)
+| `vidrio` · `?portfolio-dim=` de 0 a 0,8 (default **0,35**) · `?portfolio-paso=1` | `0.75` (default) | `0.6` · `?portfolio-camara=a`
+(default) | `b` | `c`.
+
+**Desvíos y por qué.**
+
+- **El oscurecido no es la exposición** (ajuste B, verificado en el código): con la exposición no se habrían oscurecido las estrellas,
+  los haces, el cielo ni el filo. Va como multiplicador del cuadro y el «?» después. La medición de la luminancia por capa en el
+  navegador (dim 0 contra 0,35) quedó para el banco (memoria).
+- **El «?» no sale de la fuente de los títulos**: es un tubo a lo largo de su trazo y una esfera. Evita depender de que el subconjunto
+  de la fuente 3D tenga el glifo, y se lee como un objeto satinado.
+- **Con `vidrio`, la tira de «la tuya» va opaca** (el negro de la marca): sin desenfoque en esa tira (la spec) y es el color con el que
+  la escena limpia el hueco.
+- **El contenido de las tiras cerradas va oculto (`hidden`) y no es `region`**: así el documento no suma cuatro puntos de referencia
+  y un lector de pantalla recorre las tiras por sus cabeceras.
+- **Abajo de 768 el escenario todavía es el de escritorio** (el panel al 60 %): las historias son B1.3.
+- **Sin banco en todo B1.2**: con el dev server de Valentino en :3000 la máquina quedó entre 1,9 y 2,6 GB libres (las reglas piden 3).
+  No corrieron: visual-qa, las capturas de control antes/después, el costo del vidrio en cuadros, el antes/después de la llegada de
+  Demos, la luminancia por capa ni el arnés de la carga. Lo único que se miró del sitio fue un pedido HTTP a `/v3` en el servidor de
+  Valentino (200, el escenario del Portfolio y sus anclas en el marcado del servidor). **VERIFICAR TRAS REINICIO.**
+
+**Verificación.** Lint de los tocados limpio; `tsc --noEmit` sin errores; `npm run verificar`: rojos sólo los 8 grupos de la base (s1, s2, s3,
+s4, s5, s7, s8, s17). Adentro salió una falla nueva en `s5-codigo`, un falso positivo del detector de `hover:` sin `focus-visible:`
+(leía la consulta de medios del puntero fino del acordeón): la constante pasó al módulo puro (`estado.ts`) y el agregado s5 quedó con
+sus dos rojos de la base y la misma cuenta (s5-compacto 1, s5-peso 8). El resto de los invariantes con falla, idénticos a la base.
+s76 en verde (101 del Portfolio y 320 del archivo), s75-carga 53. Banco y visual-qa: no (memoria, ver arriba).
+
+**FRENO — lo que Valentino mira en :3000** (el dev server que ya está corriendo; si no tomó los cambios, recargar):
+
+1. `http://localhost:3000/v3` y bajar hasta Portfolio: el título llega como siempre; con el pin entra el panel desde la derecha con El
+   Garage; el video arranca solo; el logo va abajo a la izquierda y la sala se oscurece. Scroll: El Garage portada → ficha (el video se
+   achica arriba, la ficha abajo, `pestillo`) → Esquina (`tic`) → … → Banú → «la próxima es la tuya» (el «?» girando, el botón abre la
+   hoja de contacto de siempre). Al seguir bajando el panel se retrae y llegan las Demos.
+2. **Demos sin el resorte del túnel** (ajuste C, cambio visible): antes Demos llegaba detrás del resorte del túnel; ahora con el
+   scroll y su propia persecución de 1,8 s. Comparar con la memoria del túnel (el antes/después grabado queda para el banco).
+3. Subir desde Demos: el panel vuelve con «la tuya» activa.
+4. Hover sobre un lomo (150 ms) y clic: salta a su portada. Teclado: Tab hasta una cabecera, ←/→, Enter (ficha), Esc.
+5. Deep links (recargar con cada uno): `/v3#portfolio-el-garage`, `#portfolio-esquina-estudio`, `#portfolio-banu-scents`,
+   `#portfolio-la-tuya`. Y el ítem «Portfolio» del menú: tiene que aterrizar en El Garage en portada.
+6. Banderas: `?portfolio-lado=izq`, `?portfolio-panel=vidrio`, `?portfolio-dim=0` / `0.35` / `0.6`, `?portfolio-camara=b` / `c`,
+   `?portfolio-paso=1` / `0.6`.
+7. Tablet (820 × 1180 o la ventana angosta): el panel al 60 % y el logo con la pose vertical.
+8. La ficha con la llave apagada muestra `[TEXTO]`, `[TESTIMONIO] · pendiente` y `[NOMBRE]`; para ver el relleno, prender a mano
+   `CONTENIDO_INVENTADO` en `src/app/v3/_secciones/_contrato/llave.ts` (sin commitear: el build falla con la llave prendida).
 
 ---
 

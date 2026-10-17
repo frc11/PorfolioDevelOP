@@ -75,6 +75,7 @@ import { celosiaSkyFactor } from './probeCelosia'
 import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
 import { AUTO_ORBIT_DEG_PER_S, ORBIT_TARGET_Y } from './probeScene'
+import { mezclarConElPortfolio } from './portfolioEnLaEscena'
 import type {
   ProbeMode,
   ProbeParamsStore,
@@ -330,6 +331,8 @@ export function OrbitRig({
       const progress = rigValues.progress
       // [AJUSTES FINALES] A1 · la cámara de ESCENA 10 en el tramo de Portfolio (`camaraDeEntonces.ts`); sólo la cámara.
       sampleTrack(track, progresoDeLaCamara(progress), target)
+      // [B1] con el panel del Portfolio adentro, la pose del logo del Portfolio: un desplazamiento sobre la del scroll (el progreso no se toca).
+      if (isChoreo) mezclarConElPortfolio(target, Math.min(delta, 0.1), state.size.width / Math.max(1, state.size.height))
       sampleLightArc(progress, arc)
       // El disparo de Trabajos acota el nivel a la noche mientras dura — `nocheDisparada.ts`.
       arc.level = nivelConLaNocheDisparada(arc.level)
