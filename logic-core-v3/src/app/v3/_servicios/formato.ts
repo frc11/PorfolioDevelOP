@@ -21,6 +21,11 @@ export function usd(n: number): string {
   return `USD ${MILES.format(n)}`
 }
 
+/** «500», «3.000»: un entero con el punto de miles del SPEC (las conversaciones de un plan). */
+export function numero(n: number): string {
+  return MILES.format(n)
+}
+
 /** El texto, o el marcador en desarrollo, o `null` (no se monta) en producción. */
 export function textoOMarcador(valor: string | null, enDesarrollo: boolean): string | null {
   if (valor !== null) return valor

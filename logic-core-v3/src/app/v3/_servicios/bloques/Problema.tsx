@@ -1,14 +1,15 @@
 /**
  * [SERVICIOS S1b] 1 · EL PROBLEMA — el `h1` de la página (SPEC §5: título grande y una línea, sin precio ni CTA).
  *
- * Arriba va el nombre del servicio con la marca de relleno en el acento: es lo único que dice en qué página se está antes
- * de leer el problema. El título y la línea salen de los datos, tal cual.
+ * Va directo sobre el fondo, sin panel (como el titular del hero del home): la sección es transparente. Arriba va el nombre del
+ * servicio con la marca de relleno en el acento: es lo único que dice en qué página se está antes de leer el problema. El título
+ * y la línea salen de los datos, tal cual, y entran por línea con el canal del texto del home.
  */
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { PrefijoDeServicio } from '../../_componentes/marca/Marca'
 import { EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
-import { Titular } from '../../_componentes/tipografia/Titular'
+import { TitularQueEntra } from '../movimiento/TitularQueEntra'
 import type { Servicio } from '../tipos'
 import { idDelTituloDe } from './Bloque'
 
@@ -24,12 +25,23 @@ export function Problema({ servicio }: { readonly servicio: Servicio }): React.J
               {servicio.nombre}
             </EtiquetaDeSeccion>
           </p>
-          <Titular nivel="titulo-xl" como="h1" id={idDelTitulo} className="text-balance escritorio:col-span-10">
-            {servicio.problema.titulo}
-          </Titular>
-          <Titular nivel="titulo-s" como="p" peso="liviano" className="text-tinta-media escritorio:col-span-7">
-            {servicio.problema.texto}
-          </Titular>
+          <TitularQueEntra
+            id={idDelTitulo}
+            texto={servicio.problema.titulo}
+            nivel="titulo-xl"
+            como="h1"
+            className="text-balance"
+            claseDelBloque="block w-full escritorio:col-span-10"
+          />
+          <TitularQueEntra
+            texto={servicio.problema.texto}
+            tipo="parrafo"
+            nivel="titulo-s"
+            como="p"
+            peso="liviano"
+            className="text-tinta-media"
+            claseDelBloque="block w-full escritorio:col-span-7"
+          />
         </div>
       </Envoltorio>
     </section>

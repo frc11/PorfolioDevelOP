@@ -9,8 +9,8 @@ import { Caption, Cuerpo } from '../../../_componentes/tipografia/Textos'
 import { Titular } from '../../../_componentes/tipografia/Titular'
 import { textoOMarcador, usd } from '../../formato'
 import type { Calibre } from '../../tipos'
+import { ROTULO_DEL_PRECIO } from './rotulos'
 
-const ROTULO_DEL_PRECIO = 'Desde' // SPEC §5: el precio es siempre «desde»
 const ROTULO_AUTOGESTIONABLE = 'Autogestionable' // SPEC §7.1
 
 interface CalibresProps {

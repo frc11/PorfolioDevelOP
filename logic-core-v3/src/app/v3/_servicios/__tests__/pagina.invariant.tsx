@@ -18,18 +18,24 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
+import { MARCA_HOME_QUIETO } from '../../_secciones/_contrato/marcaHomeQuieto'
 import { Precio } from '../bloques/Precio'
 import { FUENTE_DE_PROYECTOS } from '../datos/fuenteDeProyectos'
+import { IA_Y_AUTOMATIZACIONES } from '../datos/ia-y-automatizaciones'
 import { PAGINAS_WEB } from '../datos/paginas-web'
 import { SERVICIOS } from '../datos/servicios'
-import { MARCADOR_A_DEFINIR } from '../formato'
+import { SOFTWARE_A_MEDIDA } from '../datos/software-a-medida'
+import { MARCADOR_A_DEFINIR, usd } from '../formato'
 import { PaginaDeServicio } from '../PaginaDeServicio'
+import { PRECIOS_DESDE } from '../precios'
 import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
+import { jsonLdDe } from '../seo'
 import type { Servicio } from '../tipos'
+import { ESTILO_DEL_VIDRIO } from '../vidrio'
 import {
   MARCADORES_DE_LA_LLAVE, aperturas, arbitrariasSinToken, bloqueDe, bloquesEnOrden, clasesQueNoApilan, enlacesInternos,
-  hexSueltos, nivelesDeEncabezado, numerosInventados, reservadosEnElMarcado, respetaElOrden, saltaNiveles, sinComentarios,
-  textoVisible, valoresDe, valoresProhibidos,
+  fondosEnLineaOpacos, fondosOpacos, hexSueltos, nivelesDeEncabezado, numerosInventados, panelesDeVidrio, reservadosEnElMarcado,
+  respetaElOrden, saltaNiveles, sinComentarios, textoVisible, valoresDe, valoresProhibidos,
 } from './pagina-detectores'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
@@ -90,7 +96,7 @@ afirmarIgual(cuenta(WEB_DEV, MARCADOR_A_DEFINIR), 2, 'Páginas web en desarrollo
 afirmar(textoVisible(WEB_DEV).includes('Plan mensual') && !textoVisible(WEB_PROD).includes('Plan mensual'), '  la fila «Plan mensual» solo existe en desarrollo')
 afirmarIgual([cuenta(WEB_DEV, 'Autogestionable'), cuenta(WEB_PROD, 'Autogestionable')], [3, 2], '  «Autogestionable»: tres veces en desarrollo, dos en producción (la Simple no lo dice mientras esté en [a definir])')
 afirmarIgual(fallan((p) => p.enDesarrollo || !hayMarcador(p.html)), [], 'en producción no sale ningún marcador, en ninguna de las tres páginas')
-afirmarIgual(fallan((p) => !p.enDesarrollo || hayMarcador(p.html)), [], 'y en desarrollo las tres lo muestran (Software e IA, en el slot de precio que todavía no tiene componente)')
+afirmarIgual(fallan((p) => !p.enDesarrollo || hayMarcador(p.html)), [], 'y en desarrollo las tres lo muestran (web: la Simple y el plan mensual; software: los casos y las respuestas sin dato; IA: funcionalidades e implementación)')
 controlPositivo('los modos cruzados: producción no puede mostrar el marcador', WEB_DEV, (h: string) => !hayMarcador(h))
 controlPositivo('los modos cruzados: desarrollo tiene que mostrarlo', WEB_PROD, hayMarcador)
 
@@ -143,17 +149,28 @@ afirmar(aperturas(WEB_PROD, 'img').length === CASOS_DE_WEB.length * 2 && imagene
 controlPositivo('una imagen sin alt ni sizes se detecta', '<img src="/x.webp">', imagenesBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · Los slots de precio sin componente no muestran un número')
+titulo('8 · Los tres slots de precio: calibres, proyecto y planes')
 
-const SIN_COMPONENTE = SERVICIOS.filter((s) => s.precio.tipo !== 'calibres')
 const slot = (s: Servicio, enDesarrollo: boolean): string => renderToStaticMarkup(<Precio precio={s.precio} enDesarrollo={enDesarrollo} />)
-afirmarIgual(SIN_COMPONENTE.map((s) => s.precio.tipo), ['proyecto', 'planes'], 'son dos: el de software (proyecto) y el de IA (planes)')
-afirmarIgual(SIN_COMPONENTE.map((s) => slot(s, false)), ['', ''], 'en producción no montan nada: ni el título del bloque')
-const sinNumero = (html: string): boolean => !/\d/.test(textoVisible(html))
-afirmar(SIN_COMPONENTE.every((s) => sinNumero(slot(s, false)) && sinNumero(slot(s, true))), '  y en ningún modo muestran un número: el de los datos (1.000, 49, 90, 150) no se pinta')
-afirmar(SIN_COMPONENTE.every((s) => textoVisible(slot(s, true)) === `Precio${MARCADOR_A_DEFINIR}`), '  en desarrollo muestran el título del bloque y el marcador, nada más')
-controlPositivo('un 0 se detecta', '<p>0</p>', sinNumero)
-controlPositivo('un precio se detecta', '<p>USD 1.000</p>', sinNumero)
+afirmarIgual(SERVICIOS.map((s) => s.precio.tipo), ['calibres', 'proyecto', 'planes'], 'los tres tipos de precio: calibres (web), proyecto (software) y planes (IA)')
+afirmarIgual(fallan((p) => bloqueDe(p.html, 'precio') !== null), [], 'las tres páginas tienen su bloque de precio, en los dos modos: ya no queda un slot sin componente')
+afirmar(textoVisible(slot(SOFTWARE_A_MEDIDA, false)).includes(usd(PRECIOS_DESDE['software-a-medida'].usd)), 'software: el «desde» es el de PRECIOS_DESDE, sacado del dato (USD 1.000)')
+const IA_PROD = slot(IA_Y_AUTOMATIZACIONES, false)
+const IA_DEV = slot(IA_Y_AUTOMATIZACIONES, true)
+const cuentaDe = (html: string, patron: RegExp): number => (html.match(patron) ?? []).length
+const COLUMNAS = /<th[^>]*scope="col"/g
+const FILAS = /<th[^>]*scope="row"/g
+afirmarIgual([cuentaDe(IA_PROD, COLUMNAS), cuentaDe(IA_PROD, FILAS)], [4, 4], 'IA en producción: una tabla de verdad con 4 encabezados de columna (el vacío y los tres planes) y 4 de fila')
+afirmarIgual([cuentaDe(IA_DEV, COLUMNAS), cuentaDe(IA_DEV, FILAS)], [4, 5], '  y en desarrollo suma la fila de funcionalidades')
+afirmar(!IA_PROD.includes(MARCADOR_A_DEFINIR) && IA_DEV.includes(MARCADOR_A_DEFINIR), '  con el marcador (funcionalidades, implementación) solo en desarrollo')
+const cajaConScroll = (html: string): boolean => /<div role="region" aria-label="Planes" tabindex="0" class="[^"]*overflow-x-auto/.test(html)
+afirmar(cajaConScroll(IA_PROD), 'la tabla scrollea adentro de su caja (overflow-x-auto), y la caja es una región con nombre que recibe el foco: el teclado la mueve')
+controlPositivo('una tabla sin su caja se detecta', '<table><tr><td>x</td></tr></table>', cajaConScroll)
+const sinCeroInventado = (html: string): boolean => !/(^|[^\d.,])0([^\d.,]|$)/.test(textoVisible(html))
+afirmarIgual(fallan((p) => sinCeroInventado(p.html)), [], 'ningún precio ni dato sin valor se pinta como 0, en ninguna de las tres páginas')
+controlPositivo('un precio nulo pintado como 0 se detecta', '<p>USD 0</p>', sinCeroInventado)
+afirmarIgual(fallan((p) => !/whatsapp/i.test(textoVisible(p.html))), [], 'el bot de WhatsApp no se ofrece: ni una mención en el texto de ninguna página (el título del blog que lo nombra no se monta: no tiene href)')
+controlPositivo('un texto que lo ofrece se detecta', '<p>Atendé por WhatsApp</p>', (h: string) => !/whatsapp/i.test(textoVisible(h)))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('9 · Estructura: headings, cifras, apilado, clases, enlaces y fuentes')
@@ -187,13 +204,80 @@ const raiz = path.join(AQUI, '..')
 const fuentes = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
   e.isDirectory() ? (e.name === '__tests__' ? [] : fuentes(path.join(dir, e.name))) : /\.tsx?$/.test(e.name) ? [path.join(dir, e.name)] : [])
 const FUENTES = fuentes(raiz).map((f) => ({ f: path.relative(raiz, f), codigo: sinComentarios(readFileSync(f, 'utf8')) }))
-const navegaConElRouter = (codigo: string): boolean => /next\/link|next\/navigation|useRouter|router\.push|triggerTransition|['"]use client['"]/.test(codigo)
-afirmarIgual(FUENTES.filter((x) => navegaConElRouter(x.codigo)).map((x) => x.f), [], `ninguno de los ${FUENTES.length} fuentes de _servicios usa next/link, el router, triggerTransition ni 'use client': navegan con <a href>`)
+const navegaConElRouter = (codigo: string): boolean => /next\/link|next\/navigation|useRouter|router\.push|triggerTransition/.test(codigo)
+afirmarIgual(FUENTES.filter((x) => navegaConElRouter(x.codigo)).map((x) => x.f), [], `ninguno de los ${FUENTES.length} fuentes de _servicios usa next/link, el router ni triggerTransition: navegan con <a href>`)
 controlPositivo('un fuente con next/link se detecta', "import Link from 'next/link'", (c: string) => !navegaConElRouter(c))
 controlPositivo('un fuente con router.push se detecta', 'router.push(href)', (c: string) => !navegaConElRouter(c))
+const nombresQueChocan = (archivos: readonly string[]): string[] => {
+  const porNombre = new Map<string, string[]>()
+  for (const f of archivos) porNombre.set(f.toLowerCase().replace(/\.tsx?$/, ''), [...(porNombre.get(f.toLowerCase().replace(/\.tsx?$/, '')) ?? []), f])
+  return [...porNombre.values()].filter((grupo) => grupo.length > 1).map((grupo) => grupo.join(' ≟ '))
+}
+afirmarIgual(nombresQueChocan(FUENTES.map((x) => x.f.replace(/\\/g, '/'))), [], 'ningún par de archivos comparte el nombre sin contar mayúsculas ni extensión (Planes.tsx contra planes.ts): en Windows el import resuelve al equivocado y el componente llega undefined')
+controlPositivo('Planes.tsx y planes.ts juntos se detectan', ['bloques/precio/Planes.tsx', 'bloques/precio/planes.ts'], (l: string[]) => nombresQueChocan(l).length === 0)
+const deCliente = (codigo: string): boolean => /^\s*['"]use client['"]/.test(codigo)
+const dondeEsDeCliente = (lista: readonly { f: string; codigo: string }[]): string[] => lista.filter((x) => deCliente(x.codigo)).map((x) => x.f.replace(/\\/g, '/')).sort()
+afirmarIgual(dondeEsDeCliente(FUENTES), ['movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx'], 'el único código de cliente son los dos envoltorios de movimiento/ (el contrato del revelado recibe funciones como hijo): todo lo demás es de servidor')
+controlPositivo('un bloque de cliente fuera de movimiento/ se detecta', ["'use client'", 'export const x = 1'].join('\n'), (c: string) => !deCliente(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · La ruta: publica exactamente PUBLICADOS, y la metadata no hereda el canonical del home')
+titulo('10 · Vidrio y movimiento: secciones transparentes, paneles como los del Portfolio, revelados del home')
+
+const SIN_PROBLEMA = (html: string): string[] => bloquesEnOrden(html).filter((b) => b !== 'problema')
+afirmarIgual(fallan((p) => fondosOpacos(p.html).length === 1 && /-z-10/.test(fondosOpacos(p.html)[0] ?? '') && /\bfixed\b/.test(fondosOpacos(p.html)[0] ?? '')), [], 'lo único opaco de cada página es la tapa interina (fixed -z-10): ni la raíz ni una sección pintan fondo propio')
+afirmarIgual(fallan((p) => fondosEnLineaOpacos(p.html).length === 0), [], '  y ningún style pinta un fondo que no sea translúcido')
+const unaSolaTapa = (html: string): boolean => fondosOpacos(html).length === 1
+controlPositivo('una sección con bg-fondo propio se detecta', `${WEB_PROD}<section class="bg-fondo"></section>`, unaSolaTapa)
+controlPositivo('un style con un fondo opaco se detecta', '<div style="background:rgb(14,14,14)"></div>', (h: string) => fondosEnLineaOpacos(h).length === 0)
+afirmarIgual(fallan((p) => panelesDeVidrio(p.html) === SIN_PROBLEMA(p.html).length), [], 'cada bloque con contenido (todos menos el problema, que va directo sobre el fondo) es un panel de vidrio')
+const TIRA = readFileSync(path.join(AQUI, '../../_secciones/trabajos/portfolio/Tira.tsx'), 'utf8')
+const mismoVidrio = (tira: string): boolean => tira.includes(`background: '${ESTILO_DEL_VIDRIO.background}'`) && tira.includes(`backdropFilter: '${ESTILO_DEL_VIDRIO.backdropFilter}'`)
+afirmar(mismoVidrio(TIRA), `el vidrio es el del Portfolio, número por número: ${String(ESTILO_DEL_VIDRIO.backdropFilter)}`)
+controlPositivo('un vidrio con otro desenfoque se detecta', TIRA.replace('blur(20px)', 'blur(8px)'), mismoVidrio)
+controlPositivo('un marcado sin paneles de vidrio se detecta', '<main><section data-bloque="precio"></section></main>', (h: string) => panelesDeVidrio(h) === SIN_PROBLEMA(h).length)
+const conRevelado = (html: string, nombre: string): boolean => (bloqueDe(html, nombre) ?? '').includes(`data-arbol="${MARCA_HOME_QUIETO}"`)
+afirmarIgual(fallan((p) => bloquesEnOrden(p.html).every((b) => conRevelado(p.html, b))), [], 'cada bloque cuelga de los patrones de revelado del home (el seam `Bloque`: sin coreografía, el contenido sale quieto y en su lugar)')
+controlPositivo('un bloque sin revelado se detecta', '<section data-bloque="faq"><h2>FAQ</h2></section>', (h: string) => conRevelado(h, 'faq'))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('11 · El JSON-LD llega al HTML, y el FAQ se lee igual que se declara')
+
+const SCRIPTS_DE_JSON_LD = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g
+const cuerposDeJsonLd = (html: string): string[] => [...html.matchAll(SCRIPTS_DE_JSON_LD)].map((m) => m[1] ?? '')
+const documentosDelHtml = (html: string): unknown[] => cuerposDeJsonLd(html).map((cuerpo) => JSON.parse(cuerpo))
+afirmarIgual(fallan((p) => JSON.stringify(documentosDelHtml(p.html)) === JSON.stringify(jsonLdDe(p.servicio))), [], 'cada página lleva sus documentos JSON-LD en el HTML —un script por documento— y leídos dan exactamente lo que arma seo.ts')
+afirmarIgual(fallan((p) => cuerposDeJsonLd(p.html).every((cuerpo) => !cuerpo.includes('<'))), [], '  sin un `<` adentro: ningún texto puede cerrar el script')
+afirmarIgual(fallan((p) => !textoVisible(p.html).includes('@context')), [], '  y el JSON no es texto visible: no cambia lo que se lee')
+const cuerposParseables = (html: string): boolean => {
+  try {
+    return cuerposDeJsonLd(html).length > 0 && documentosDelHtml(html).length > 0
+  } catch {
+    return false
+  }
+}
+controlPositivo('un script con JSON roto se detecta', '<script type="application/ld+json">{"@type":</script>', cuerposParseables)
+
+const detalles = (html: string): { pregunta: string; respuesta: string }[] =>
+  [...html.matchAll(/<details>\s*<summary[^>]*>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/g)].map((m) => ({ pregunta: textoVisible(m[1] ?? ''), respuesta: textoVisible(m[2] ?? '') }))
+const esperadas = (s: Servicio, enDesarrollo: boolean): { pregunta: string; respuesta: string }[] =>
+  s.faq.flatMap((f) => (f.respuesta !== null ? [{ pregunta: f.pregunta, respuesta: f.respuesta }] : enDesarrollo ? [{ pregunta: f.pregunta, respuesta: MARCADOR_A_DEFINIR }] : []))
+const faqLegible = (html: string, s: Servicio, enDesarrollo: boolean): boolean => JSON.stringify(detalles(html)) === JSON.stringify(esperadas(s, enDesarrollo))
+afirmarIgual(fallan((p) => faqLegible(p.html, p.servicio, p.enDesarrollo)), [], 'el FAQ de cada página: un <details> por pregunta con su <summary> primero, la pregunta y la respuesta de los datos y en orden; en producción solo las que tienen respuesta')
+controlPositivo('un details con la respuesta antes del summary se detecta', '<details><p>r</p><summary>q</summary></details>', (h: string) => detalles(h).length === 1)
+const faqSinAtributosPropios = (html: string): boolean => aperturas(html, 'details').every((a) => a === '<details>') && aperturas(html, 'summary').every((a) => !/\s(aria-[a-z]+|tabindex|role|on[a-z]+)=/.test(a))
+afirmarIgual(fallan((p) => faqSinAtributosPropios(p.html)), [], '  sin aria-expanded, tabindex, role ni manejadores propios: el elemento nativo ya resuelve el teclado y el estado')
+controlPositivo('un summary con tabindex se detecta', '<details><summary tabindex="0">q</summary><p>r</p></details>', faqSinAtributosPropios)
+const faqEnLista = (html: string): boolean => {
+  const faq = bloqueDe(html, 'faq') ?? ''
+  return faq.includes('<ul role="list"') && aperturas(faq, 'details').length === (faq.match(/<li[^>]*><details>/g) ?? []).length
+}
+afirmarIgual(fallan((p) => faqEnLista(p.html)), [], '  las preguntas son una lista (ul con role="list") y cada li lleva un solo details')
+controlPositivo('un FAQ sin lista se detecta', '<section data-bloque="faq"><details><summary>q</summary><p>r</p></details></section>', faqEnLista)
+const preguntasUnicas = (s: Servicio): boolean => new Set(s.faq.map((f) => f.pregunta)).size === s.faq.length
+afirmarIgual(fallan((p) => preguntasUnicas(p.servicio)), [], '  y ninguna pregunta se repite (son la clave de cada ítem)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('12 · La ruta: publica exactamente PUBLICADOS, y la metadata no hereda el canonical del home')
 
 async function laRuta(): Promise<void> {
   let ruta: typeof import('../../[servicio]/page')

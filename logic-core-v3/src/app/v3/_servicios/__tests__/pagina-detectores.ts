@@ -38,9 +38,9 @@ function decodificar(texto: string): string {
     .replace(/&amp;/g, '&')
 }
 
-/** El texto que se lee: sin etiquetas y sin atributos. Las etiquetas se sacan sin dejar hueco, como el texto de un lector. */
+/** El texto que se lee: sin etiquetas, sin atributos y sin lo que no se ve (`script`, `style`). Sin dejar hueco, como un lector. */
 export function textoVisible(html: string): string {
-  return decodificar(html.replace(/<[^>]*>/g, ''))
+  return decodificar(html.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, '').replace(/<[^>]*>/g, ''))
 }
 
 /** Las etiquetas de APERTURA de un elemento, tal cual salieron (`<h1 id="…" class="…">`), en orden de documento. */
@@ -107,7 +107,7 @@ export function reservadosEnElMarcado(html: string): string[] {
 
 /** Los números del texto visible, sin separadores de miles y sin ceros a la izquierda («1.000» → «1000», «01» → «1»). */
 export function numerosDelTexto(html: string): string[] {
-  const texto = decodificar(html.replace(/<[^>]*>/g, ' '))
+  const texto = decodificar(html.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, ' ').replace(/<[^>]*>/g, ' '))
   return (texto.match(/\d[\d.,]*/g) ?? []).map((n) => String(Number(n.replace(/[.,]/g, ''))))
 }
 
@@ -139,6 +139,21 @@ export function arbitrariasSinToken(html: string): string[] {
 /** Los enlaces internos (empiezan con `/`) del marcado. */
 export function enlacesInternos(html: string): string[] {
   return valoresDe(html, 'href').filter((href) => href.startsWith('/'))
+}
+
+/** Las clases de cada elemento que pinta un fondo OPACO del tema (`bg-fondo`, `bg-superficie-N`). `[]` = ninguno. */
+export function fondosOpacos(html: string): string[] {
+  return valoresDe(html, 'class').filter((clases) => clases.split(/\s+/).some((c) => c === 'bg-fondo' || /^bg-superficie-\d$/.test(c)))
+}
+
+/** Los `style` que pintan un `background` sin `transparent` adentro: un fondo propio que no es translúcido. `[]` = ninguno. */
+export function fondosEnLineaOpacos(html: string): string[] {
+  return valoresDe(html, 'style').filter((estilo) => /background/.test(estilo) && !/transparent/.test(estilo))
+}
+
+/** Cuántos paneles tienen el vidrio del Portfolio (desenfoque de 20 px y saturación del 180 %). La variante con prefijo no cuenta. */
+export function panelesDeVidrio(html: string): number {
+  return (html.match(/(?<!-webkit-)backdrop-filter:blur\(20px\) saturate\(180%\)/g) ?? []).length
 }
 
 /** Los textos que `PROYECTOS` guarda y servicios NUNCA lee: los valores no nulos de esos campos, para buscarlos en el marcado. */

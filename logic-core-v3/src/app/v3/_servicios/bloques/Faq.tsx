@@ -1,9 +1,15 @@
 /**
- * [SERVICIOS S1b] 8 · FAQ — las preguntas en acordeón (SPEC §5). `<details>`/`<summary>` del navegador: server, sin JS, con
- * teclado y con las respuestas en el HTML.
+ * [SERVICIOS S1b/S3] 8 · FAQ — las preguntas en acordeón (SPEC §5). `<details>`/`<summary>` del navegador: server, sin JS, con
+ * teclado (Enter y Espacio abren y cierran, y el anillo de foco es el de la regla global) y con las respuestas en el HTML, también
+ * cerradas.
+ *
+ * El marcado es el que un lector de pantalla recorre bien: una LISTA de preguntas (`ul` con `role="list"`, que conserva su
+ * semántica sin viñetas), cada `li` con UN `<details>` y su `<summary>` primero, que lleva solo la pregunta; la respuesta va
+ * después, en su párrafo. Sin `aria-expanded` ni `tabindex` propios: el elemento nativo ya los resuelve, y ponerlos encima es
+ * pisarlos. Lo que se lee acá es lo mismo que sale en el JSON-LD `FAQPage` (`seo.ts`): pregunta y respuesta, palabra por palabra.
  *
  * Una pregunta sin respuesta (`null`: alguna parte no sale del SPEC, regla D9) es [a definir]: el marcador en desarrollo y,
- * en producción, la pregunta no se monta.
+ * en producción, la pregunta no se monta (y tampoco sale en el JSON-LD).
  */
 
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
@@ -27,18 +33,20 @@ export function Faq({ faq, enDesarrollo }: FaqProps): React.JSX.Element | null {
   if (preguntas.length === 0) return null
   return (
     <Bloque nombre="faq" titulo={TITULO}>
-      <div className="flex flex-col">
+      <ul role="list" className="flex flex-col">
         {preguntas.map(({ pregunta, respuesta }) => (
-          <details key={pregunta} className="border-b border-borde py-4">
-            <summary className="cursor-pointer marker:text-acento">
-              <Titular nivel="titulo-s" como="span">
-                {pregunta}
-              </Titular>
-            </summary>
-            <Cuerpo className="mt-3 max-w-[var(--breakpoint-tablet)] text-tinta-media">{respuesta}</Cuerpo>
-          </details>
+          <li key={pregunta} className="border-b border-borde py-4">
+            <details>
+              <summary className="cursor-pointer marker:text-acento">
+                <Titular nivel="titulo-s" como="span">
+                  {pregunta}
+                </Titular>
+              </summary>
+              <Cuerpo className="mt-3 max-w-[var(--breakpoint-tablet)] text-tinta-media">{respuesta}</Cuerpo>
+            </details>
+          </li>
         ))}
-      </div>
+      </ul>
     </Bloque>
   )
 }

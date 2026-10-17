@@ -16,6 +16,17 @@ export const RAIZ_DE_LAS_PAGINAS = '/v3'
 /** El home. Hoy coincide con el prefijo de las páginas; con D8 deja de coincidir (las páginas a `/x`, el home a `/`). */
 export const HREF_DEL_HOME = '/v3'
 
+/**
+ * El origen del sitio, para las URLs absolutas del JSON-LD (las migas y la dirección del servicio). Es el `metadataBase` del layout
+ * raíz (`src/app/layout.tsx`), que no se puede importar (trae CSS y componentes): `seo.invariant.ts` compara los dos.
+ */
+export const ORIGEN_DEL_SITIO = 'https://develop.com.ar'
+
+/** La URL absoluta de una ruta del sitio: `urlAbsolutaDe(hrefDe('paginas-web'))`. */
+export function urlAbsolutaDe(ruta: string): string {
+  return `${ORIGEN_DEL_SITIO}${ruta}`
+}
+
 /** Las páginas que la ruta sirve. S1b: solo Páginas web. El S2 suma las otras dos cambiando esta línea. */
 export const PUBLICADOS: readonly ServicioSlug[] = ['paginas-web']
 

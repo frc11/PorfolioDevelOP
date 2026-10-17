@@ -2,10 +2,11 @@ import type { Metadata, ResolvingMetadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { Contacto } from '../_chrome/contacto/Contacto'
-import { LOGOTIPO } from '../_componentes/marca/sistema'
+import { CompuertaDelHome } from '../_secciones/CompuertaDelHome'
 import { PaginaDeServicio } from '../_servicios/PaginaDeServicio'
 import { servicioDe } from '../_servicios/datos/servicios'
-import { PUBLICADOS, hrefDe } from '../_servicios/rutas'
+import { PUBLICADOS } from '../_servicios/rutas'
+import { metadataDe } from '../_servicios/seo'
 import { esServicioSlug, type Servicio } from '../_servicios/tipos'
 
 /**
@@ -20,16 +21,18 @@ import { esServicioSlug, type Servicio } from '../_servicios/tipos'
  *
  * ── Qué monta ─────────────────────────────────────────────────────────────
  *
- * El template, y como HERMANO —no adentro— el modal de contacto: la raíz del template es invertida (noche), y el modal conserva
- * así sus tokens de papel y su acento por defecto. Es la misma estructura que el home (`v3/page.tsx`). Sin `ChromeDelHome`
- * (D4): su barra arma enlaces relativos que en una subruta no llevan a ninguna parte (P-H3).
+ * El template, dentro de la compuerta de la coreografía del home (`CompuertaDelHome`, la misma de `v3/page.tsx`: instala los
+ * patrones de revelado arriba de 1024 y deja el contenido quieto por debajo o con movimiento reducido), y como HERMANO —no
+ * adentro— el modal de contacto: la raíz del template es invertida (noche), y el modal conserva así sus tokens de papel y su
+ * acento por defecto. Sin `ChromeDelHome` (D4): su barra arma enlaces relativos que en una subruta no llevan a ninguna parte
+ * (P-H3).
  *
- * ── La metadata (mínima; el resto del SEO es del S3) ──────────────────────
+ * ── La metadata ───────────────────────────────────────────────────────────
  *
- * `title` y `description` de los datos, `noindex` como todo /v3 (D12). El layout raíz fija `alternates.canonical` y
- * `openGraph.url` al home, y Next combina la metadata de forma SUPERFICIAL: un hijo que no los pise los hereda. Acá se pisan
- * los dos con la dirección de la propia página. `openGraph` se reemplaza entero, así que se rearma con lo del padre (las
- * imágenes) en vez de dejarlo a medias.
+ * La arma `metadataDe` (`_servicios/seo.ts`): `title` y `description` de los datos, `noindex` como todo /v3 (D12) y la dirección
+ * de la propia página en `alternates.canonical` y `openGraph.url`, que el layout raíz fija al home (Next combina de forma
+ * SUPERFICIAL: un hijo que no los pise los hereda). `openGraph` se reemplaza entero, así que acá se le pasan las imágenes del
+ * padre. El JSON-LD va en el template (`JsonLd`).
  */
 export const dynamicParams = false
 
@@ -53,30 +56,17 @@ export async function generateMetadata(
   padre: ResolvingMetadata,
 ): Promise<Metadata> {
   const servicio = await servicioPublicado(params)
-  const direccion = hrefDe(servicio.slug)
   const { openGraph } = await padre
-  return {
-    title: servicio.seo.title,
-    description: servicio.seo.description,
-    robots: { index: false, follow: false, nocache: true },
-    alternates: { canonical: direccion },
-    openGraph: {
-      type: 'website',
-      locale: 'es_AR',
-      siteName: LOGOTIPO,
-      url: direccion,
-      title: servicio.seo.title,
-      description: servicio.seo.description,
-      images: openGraph?.images ?? [],
-    },
-  }
+  return metadataDe(servicio, openGraph?.images ?? [])
 }
 
 export default async function PaginaDeUnServicio({ params }: PropiedadesDeLaPagina): Promise<React.JSX.Element> {
   const servicio = await servicioPublicado(params)
   return (
     <>
-      <PaginaDeServicio servicio={servicio} />
+      <CompuertaDelHome>
+        <PaginaDeServicio servicio={servicio} />
+      </CompuertaDelHome>
       <Contacto />
     </>
   )

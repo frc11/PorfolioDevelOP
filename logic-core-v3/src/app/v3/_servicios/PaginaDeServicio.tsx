@@ -9,15 +9,18 @@
  *   · `data-seccion="invertida"` da vuelta el tema: noche y tinta clara. Es el ÚNICO `data-seccion` de la página, y está acá.
  *   · `relative z-10`: el contenido queda por encima del lienzo de la escena, que el layout de /v3 monta debajo de todo
  *     (P-H4: la escena se monta en cualquier subruta y no se puede apagar desde acá).
+ *   · SIN fondo propio: ni la raíz ni ninguna sección pinta uno. Los paneles son de vidrio (translúcidos, como los del Portfolio).
  *   · La tapa: una capa `fixed -z-10` con el fondo, adentro del contexto de esta raíz. Queda por encima del lienzo y debajo del
- *     contenido, y cubre también lo que la raíz no alcanza (el rebote del scroll, una ventana más alta que la página). Tapa
- *     la escena, no baja su costo. Es la red de seguridad hasta que el home la resuelva.
+ *     contenido, y cubre también lo que la raíz no alcanza (el rebote del scroll, una ventana más alta que la página). **Es lo
+ *     ÚNICO opaco de la página** y se va con B12 (la escena por ruta): entonces el vidrio deja ver la sala. Tapa la escena, no
+ *     baja su costo.
  *   · El acento entra por la custom property `--color-acento`, con el claro del servicio (`estiloDelAcento`).
  *
  * El modo (desarrollo o producción) se calcula UNA vez, acá, y baja a los bloques que tienen datos que pueden faltar.
  */
 
 import { Encabezado } from './Encabezado'
+import { JsonLd } from './JsonLd'
 import { Cierre } from './bloques/Cierre'
 import { DelBlog } from './bloques/DelBlog'
 import { Extra } from './bloques/Extra'
@@ -46,9 +49,11 @@ export function PaginaDeServicio({ servicio, enDesarrollo = EN_DESARROLLO }: Pag
     <div
       data-seccion="invertida"
       style={estiloDelAcento(servicio.acento.claro)}
-      className="relative z-10 min-h-svh bg-fondo text-tinta"
+      className="relative z-10 min-h-svh text-tinta"
     >
+      {/* La tapa interina: lo único opaco. Se va con B12. */}
       <div aria-hidden="true" className="fixed inset-0 -z-10 bg-fondo" />
+      <JsonLd servicio={servicio} />
       <Encabezado />
       <main>
         <Problema servicio={servicio} />
