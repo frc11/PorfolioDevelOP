@@ -42,7 +42,7 @@ import { HUECOS_DEL_PIE, HUECO_DEL_PIE, QUIETUD, QUIETUD_DEL_PIE } from '../esce
 import { huecosDeLaCaida } from '../escena/pie3d/huecosDeLaCaida'
 import { HUNDIMIENTO_DEL_PIE, PLATAFORMA_EN_VIVO, hundimientoDelPiso } from '../escena/pie3d/transformacionDelPie'
 import { existsSync } from 'node:fs'
-import { ARBOL, armarElArbol, celdasDelArbol, densidadDeLaRed } from '../escena/energia/arbol'
+import { ARBOL, DENSIDAD_DE_LA_RED, armarElArbol, celdasDelArbol, densidadDeLaRed } from '../escena/energia/arbol'
 import { DIBUJO_DE_LA_RED } from '../escena/energia/dibujo/red'
 import { azarConSemilla, crearBrasas } from '../escena/energia/brasas'
 import { alfaDelDominio, armarElDominio, coordenadas, crearDominio, poblar } from '../escena/energia/dominio'
@@ -521,9 +521,12 @@ interface DeLaRedToda {
   readonly aLaVista: readonly number[]
   readonly porCelda: readonly number[]
   readonly focos: number
+  /** [CIERRE A-ter] A4c · las celdas por lado de la grilla de la densidad con que se armó. */
+  readonly celdas: number
 }
-const CELDAS_DEL_REPARTO = celdasDelArbol(densidadDeLaRed())
-function redToda(semilla: number): DeLaRedToda {
+/** [CIERRE A-ter] A4b · la red toda con una densidad (por defecto, la de la escena: A4c, la del producto es 1). */
+function redToda(semilla: number, densidad: number = densidadDeLaRed()): DeLaRedToda {
+  const CELDAS_DEL_REPARTO = celdasDelArbol(densidad)
   const az = azarConSemilla(semilla)
   const b = crearBrasas(900, az, FLOOR_Y)
   const d = crearDominio()
@@ -546,12 +549,12 @@ function redToda(semilla: number): DeLaRedToda {
     if (b.vida[i] < REPOSO.vidaMinima || Math.abs(c.u) > 1 || Math.abs(c.v) > 1) continue
     const tercio = Math.min(2, Math.floor(((c.v + 1) / 2) * 3))
     aLaVista[tercio] += 1
-    // [CIERRE A-ter] A4b · la grilla del reparto es la de la densidad del producto (`celdasDelArbol`).
+    // [CIERRE A-ter] A4b · la grilla del reparto es la de la densidad con que se arma (`celdasDelArbol`).
     ocupadas[tercio].add(Math.min(CELDAS_DEL_REPARTO - 1, Math.floor(((c.u + 1) / 2) * CELDAS_DEL_REPARTO)) + CELDAS_DEL_REPARTO * Math.min(CELDAS_DEL_REPARTO - 1, Math.floor(((c.v + 1) / 2) * CELDAS_DEL_REPARTO)))
   }
   const r = crearRed(900)
   r.modo = 'toda'
-  armarElArbol(r, b, d, REPOSO.vidaMinima, REPOSO.formaS, az)
+  armarElArbol(r, b, d, REPOSO.vidaMinima, REPOSO.formaS, az, densidad)
   let largo = 0
   const tercios = [0, 0, 0]
   let focos = 0
@@ -565,12 +568,16 @@ function redToda(semilla: number): DeLaRedToda {
     largo += Math.hypot(cj.u - ui, cj.v - vi) / r.n
     tercios[Math.min(2, Math.max(0, Math.floor((((vi + cj.v) / 2 + 1) / 2) * 3)))] += 1
   }
-  return { enlaces: r.n, largo, tercios, aLaVista, porCelda: tercios.map((t, k) => t / Math.max(1, ocupadas[k].size)), focos }
+  return { enlaces: r.n, largo, tercios, aLaVista, porCelda: tercios.map((t, k) => t / Math.max(1, ocupadas[k].size)), focos, celdas: CELDAS_DEL_REPARTO }
 }
 const parejo = (t: readonly number[]): number => Math.min(...t) / Math.max(1, Math.max(...t))
-const REDES = [7, 11, 29].map(redToda)
-const repartidaBien = (x: DeLaRedToda): boolean => x.enlaces <= CELDAS_DEL_REPARTO * CELDAS_DEL_REPARTO && x.largo >= 0.15 && parejo(x.porCelda) >= 0.5
+const REDES = [7, 11, 29].map((k) => redToda(k))
+const repartidaBien = (x: DeLaRedToda): boolean => x.enlaces <= x.celdas * x.celdas && x.largo >= 0.15 && parejo(x.porCelda) >= 0.5
 const focosBien = (x: DeLaRedToda): boolean => x.focos >= ARBOL.focos[0] && x.focos <= ARBOL.focos[1] + 2
+// [CIERRE A-ter] A4b/A4c · y con cada densidad de `?red-densidad=` (la grilla crece con su raíz: los mismos reparto parejo y focos).
+const REDES_DE_LAS_VARIANTES = DENSIDAD_DE_LA_RED.variantes.map((d) => ({ d, redes: [7, 11, 29].map((k) => redToda(k, d)) }))
+afirmar(REDES.every((x) => x.celdas === celdasDelArbol(DENSIDAD_DE_LA_RED.producto)) && REDES_DE_LAS_VARIANTES.every(({ redes }) => redes.every(repartidaBien) && redes.every(focosBien)), `  con cada densidad de \`?red-densidad=\` (${REDES_DE_LAS_VARIANTES.map(({ d, redes }) => `${String(d)}: grilla de ${String(redes[0].celdas)}, ${redes.map((x) => String(x.enlaces)).join(' / ')} enlaces`).join('; ')}) el reparto sigue parejo y con sus focos`)
+controlPositivo('  el detector VE una red de la densidad 1,75 medida con la grilla de la 1 (más enlaces que celdas)', { ...REDES_DE_LAS_VARIANTES[3].redes[0], celdas: celdasDelArbol(1) }, repartidaBien)
 afirmar(REDES.every(repartidaBien) && REDES.every(focosBien), `  con una población despareja (de abajo arriba, a la vista ${REDES[0].aLaVista.join(' / ')}): ${REDES.map((x) => `${String(x.enlaces)} enlaces de ${x.largo.toFixed(2)} de cuadro, por tercio ${x.tercios.join(' / ')} (${x.porCelda.map((v) => v.toFixed(2)).join(' / ')} por celda con brasas), ${String(x.focos)} focos`).join('; ')}`)
 // Los controles: la de antes, que unía todas las que se veían (sus enlaces van donde están las brasas: uno por brasa), y un solo foco.
 controlPositivo('  el detector VE la red de antes (todas las que se ven, amontonadas arriba)', { ...REDES[0], enlaces: REDES[0].aLaVista.reduce((a, x) => a + x, 0), largo: 0.05, porCelda: REDES[0].aLaVista.map((v, k) => v / Math.max(1, REDES[0].tercios[k])) }, repartidaBien)

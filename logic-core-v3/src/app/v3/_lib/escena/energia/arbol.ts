@@ -33,12 +33,13 @@ export const ARBOL = {
 /**
  * [CIERRE A-ter] A4b · MÁS RAYOS: la densidad de la red (cuántas veces los rayos de A-bis). La grilla del reparto crece con su raíz (una
  * brasa por celda: los rayos del árbol son las celdas menos uno), sin tocar el grosor, el brillo de cada rayo ni la estabilidad; y la
- * formación entera sigue en ~7 s (cada rayo nace por su distancia por el árbol a un foco, en la misma parte de la formación). Las variantes
- * con `?red-densidad=1.25|1.5|1.75` (y `1`, la de A-bis, para comparar); sin la bandera, `producto`.
+ * formación entera sigue en ~7 s (cada rayo nace por su distancia por el árbol a un foco, en la misma parte de la formación).
+ * [CIERRE A-ter] A4c · Valentino comparó y prefiere la de A-bis: el producto es `1`; `?red-densidad=1.25|1.5|1.75` queda para comparar (la
+ * default de A-ter era 1,5).
  */
-export const DENSIDAD_DE_LA_RED = { producto: 1.5, variantes: [1, 1.25, 1.5, 1.75] } as const
+export const DENSIDAD_DE_LA_RED = { producto: 1, variantes: [1, 1.25, 1.5, 1.75] } as const
 
-/** Las celdas por lado de la grilla del reparto con una densidad: 9 × √densidad (1,5: 11; 1,75: 12). */
+/** Las celdas por lado de la grilla del reparto con una densidad: 9 × √densidad (1: 9; 1,5: 11; 1,75: 12). */
 export const celdasDelArbol = (densidad: number): number => Math.round(ARBOL.celdas * Math.sqrt(densidad))
 
 let pedida: number | null = null

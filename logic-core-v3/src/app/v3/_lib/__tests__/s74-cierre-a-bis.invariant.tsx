@@ -1,7 +1,7 @@
 /**
  * CIERRE A-bis — CUATRO RETOQUES. Cada cosa con su control positivo (el detector ve el estado de antes o uno roto a propósito).
  *   A4 · la red de noche se forma más rápido (toda en ~7 s, era ~11), con la estabilidad de CIERRE A (el temblor y el titileo, igual).
- *        [CIERRE A-ter] A4b: más rayos (la densidad del producto, con `?red-densidad=`), sin más grosor ni brillo, y entera en el mismo tiempo.
+ *        [CIERRE A-ter] A4b: más rayos con `?red-densidad=` (A4c: el producto es la densidad 1), sin más grosor ni brillo, y entera en el mismo tiempo.
  *   A8 · gracias y error: la bajada de la placa, el cierre del piso, la apertura y la subida, un 15 % más rápidas (al mismo ritmo).
  *   A10 · las piezas del pie rebotan chico y amortiguado al tocar el piso, cada una con su fase; el golpe sigue en su lugar y se
  *         incrustan cuando terminan. [CIERRE A-ter] A10b: prendido por defecto; `?rebote=no` lo apaga (era `?rebote=si`, apagado).
@@ -76,12 +76,18 @@ afirmar(formacionBien(AHORA), `  ${String(NACE.length)} rayos: la mitad enteros 
 controlPositivo('  el detector VE la formación de CIERRE A (~11 s)', ANTES, formacionBien)
 controlPositivo('  y una rápida que volvió a temblar (el temblor de antes)', { ...AHORA, temblor: 0.012 }, formacionBien)
 
-// [CIERRE A-ter] A4b · MÁS RAYOS: con la densidad del producto, más rayos que en A-bis (la grilla del reparto, 9 × √densidad), sin más
-// grosor ni brillo por rayo (el canal y el golpe de A-bis; el tope del brillo de noche no baja ninguno) y la red entera en el mismo tiempo.
+// [CIERRE A-ter] A4b · MÁS RAYOS, y [A4c] el producto vuelve a la densidad 1 (Valentino comparó y prefiere la de A-bis): sin la bandera, la red de
+// A-bis; `?red-densidad=1.25|1.5|1.75` (la 1,5 era la default de A-ter) da más rayos (la grilla del reparto, 9 × √densidad), sin más grosor ni
+// brillo por rayo (el canal y el golpe de A-bis) y la red entera en el mismo tiempo.
 interface DeLaDensidad {
-  readonly densidad: number
-  readonly antes: readonly (readonly number[])[]
-  readonly ahora: readonly (readonly number[])[]
+  /** La densidad del producto (`DENSIDAD_DE_LA_RED.producto`) y la que lee la escena sin la bandera. */
+  readonly producto: number
+  readonly sinLaBandera: number
+  readonly lista: readonly number[]
+  /** La URL: lo que la bandera pide (`'no'` sin ella). */
+  readonly pide: (consulta: string) => string
+  readonly base: readonly (readonly number[])[]
+  readonly variantes: readonly { readonly densidad: number; readonly nace: readonly (readonly number[])[] }[]
   readonly ancho: number
   readonly golpe: readonly number[]
   readonly tope: number
@@ -89,18 +95,39 @@ interface DeLaDensidad {
 const SEMILLAS_A4B = [3, 7, 11, 19]
 const enteraDe = (nace: readonly number[]): number => formacion(nace, 1, REPOSO.enciendeS).enteraS
 const promedio = (xs: readonly number[]): number => xs.reduce((a, x) => a + x, 0) / xs.length
-const densidadBien = (x: DeLaDensidad): boolean => {
-  const razon = promedio(x.ahora.map((n) => n.length)) / promedio(x.antes.map((n) => n.length))
-  return (DENSIDAD_DE_LA_RED.variantes as readonly number[]).includes(x.densidad) && x.densidad > 1 && razon >= 1 + 0.6 * (x.densidad - 1) && razon <= 1.25 * x.densidad &&
-    x.ahora.every((n, k) => Math.abs(enteraDe(n) - enteraDe(x.antes[k])) <= 0.35 && enteraDe(n) <= 7.5) &&
-    x.ancho === 1.35 && x.golpe[0] === 1.3 && x.golpe[1] === 0.55 && Math.max(...x.ahora.map((n) => n.length)) <= x.tope
+const laBandera = (consulta: string): string => {
+  const pedido = pedidoDeLaUrl(consulta)
+  return (pedido === null ? ENTORNO : entornoPedido(pedido)).pruebas['red-densidad']
 }
-const DENSIDAD_A4B: DeLaDensidad = { densidad: densidadDeLaRed(), antes: SEMILLAS_A4B.map((k) => nacimientos(k, 1)), ahora: SEMILLAS_A4B.map((k) => nacimientos(k)), ancho: DIBUJO_DE_LA_RED.ancho, golpe: DIBUJO_DE_LA_RED.uRed, tope: DIBUJO_DE_LA_RED.noche.tope }
-afirmar(densidadBien(DENSIDAD_A4B), `  la densidad ${String(DENSIDAD_A4B.densidad)} (la grilla de ${String(celdasDelArbol(DENSIDAD_A4B.densidad))} por lado, era ${String(ARBOL.celdas)}): ${DENSIDAD_A4B.ahora.map((n) => n.length).join(', ')} rayos contra ${DENSIDAD_A4B.antes.map((n) => n.length).join(', ')} de A-bis; enteros a los ${DENSIDAD_A4B.ahora.map((n) => enteraDe(n).toFixed(2)).join(', ')} s (A-bis ${DENSIDAD_A4B.antes.map((n) => enteraDe(n).toFixed(2)).join(', ')}); el canal y el golpe de A-bis`)
-controlPositivo('  el detector VE la red de A-bis (la misma cantidad de rayos)', { ...DENSIDAD_A4B, densidad: 1, ahora: DENSIDAD_A4B.antes }, densidadBien)
+const densidadBien = (x: DeLaDensidad): boolean => {
+  const delProducto = x.base.every((n) => enteraDe(n) <= 7.5 && n.length <= x.tope)
+  const lasVariantes = x.variantes.length === 3 && x.variantes.every((v) => {
+    const razon = promedio(v.nace.map((n) => n.length)) / promedio(x.base.map((n) => n.length))
+    return v.densidad > 1 && razon >= 1 + 0.6 * (v.densidad - 1) && razon <= 1.25 * v.densidad && v.nace.every((n, k) => Math.abs(enteraDe(n) - enteraDe(x.base[k])) <= 0.35 && enteraDe(n) <= 7.5 && n.length <= x.tope)
+  })
+  const labandera = x.pide('') === 'no' && x.lista.join() === '1,1.25,1.5,1.75' && x.variantes.every((v) => x.pide(`?red-densidad=${String(v.densidad)}`) === String(v.densidad)) && x.pide('?red-densidad=1') === '1'
+  return x.producto === 1 && x.sinLaBandera === 1 && delProducto && lasVariantes && labandera && x.ancho === 1.35 && x.golpe[0] === 1.3 && x.golpe[1] === 0.55
+}
+const BASE_A4B = SEMILLAS_A4B.map((k) => nacimientos(k, 1))
+const DENSIDAD_A4B: DeLaDensidad = {
+  producto: DENSIDAD_DE_LA_RED.producto,
+  sinLaBandera: densidadDeLaRed(),
+  lista: DENSIDAD_DE_LA_RED.variantes,
+  pide: laBandera,
+  base: BASE_A4B,
+  variantes: [1.25, 1.5, 1.75].map((densidad) => ({ densidad, nace: SEMILLAS_A4B.map((k) => nacimientos(k, densidad)) })),
+  ancho: DIBUJO_DE_LA_RED.ancho,
+  golpe: DIBUJO_DE_LA_RED.uRed,
+  tope: DIBUJO_DE_LA_RED.noche.tope,
+}
+afirmar(densidadBien(DENSIDAD_A4B), `  por defecto la densidad ${String(DENSIDAD_A4B.sinLaBandera)} (la grilla de ${String(celdasDelArbol(DENSIDAD_A4B.sinLaBandera))} por lado): ${BASE_A4B.map((n) => n.length).join(', ')} rayos, enteros a los ${BASE_A4B.map((n) => enteraDe(n).toFixed(2)).join(', ')} s; con \`?red-densidad=\` ${DENSIDAD_A4B.variantes.map((v) => `${String(v.densidad)}: ${v.nace.map((n) => n.length).join(', ')} rayos (enteros a los ${v.nace.map((n) => enteraDe(n).toFixed(2)).join(', ')} s)`).join('; ')}; el canal y el golpe de A-bis`)
+controlPositivo('  el detector VE la default de A-ter (1,5)', { ...DENSIDAD_A4B, producto: 1.5, sinLaBandera: 1.5 }, densidadBien)
+controlPositivo('  y las variantes sin más rayos (la red de A-bis en cada una)', { ...DENSIDAD_A4B, variantes: DENSIDAD_A4B.variantes.map((v) => ({ ...v, nace: BASE_A4B })) }, densidadBien)
 controlPositivo('  y más rayos con el canal más grueso', { ...DENSIDAD_A4B, ancho: 1.6 }, densidadBien)
-controlPositivo('  y más rayos que tardan más en encenderse (un tercio más)', { ...DENSIDAD_A4B, ahora: DENSIDAD_A4B.ahora.map((n) => n.map((t) => t * 1.35)) }, densidadBien)
-controlPositivo('  y tantos que el tope del brillo de noche los baja a todos', { ...DENSIDAD_A4B, tope: 60 }, densidadBien)
+controlPositivo('  y más rayos que tardan más en encenderse (un tercio más)', { ...DENSIDAD_A4B, variantes: DENSIDAD_A4B.variantes.map((v) => ({ ...v, nace: v.nace.map((n) => n.map((t) => t * 1.35)) })) }, densidadBien)
+controlPositivo('  y tantos rayos que el tope del brillo de noche los baja', { ...DENSIDAD_A4B, tope: 100 }, densidadBien)
+controlPositivo('  y una red de producto que el tope del brillo de noche baja', { ...DENSIDAD_A4B, tope: 60 }, densidadBien)
+controlPositivo('  y una URL que no lee `?red-densidad=` (la bandera no llega)', { ...DENSIDAD_A4B, pide: (q: string) => laBandera(q.replace('red-densidad', 'otra')) }, densidadBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A8 · Gracias y error, un 15 % más rápido: las cuatro fases del cambio al mismo ritmo')

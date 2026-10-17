@@ -490,7 +490,7 @@ const medirLaRed = ({ r, b, d }: { readonly r: Red; readonly b: Brasas; readonly
     const c = coordenadas(d, b.lugar[i * 3], b.lugar[i * 3 + 1], b.lugar[i * 3 + 2])
     if (!(b.vida[i] >= REPOSO.vidaMinima && c.w > d.w0 && c.w < d.w1 && Math.abs(c.u) <= 1 && Math.abs(c.v) <= 1 && !cruzaUnaCaja(cajas, c.u, c.v, c.u, c.v))) continue
     seVen += 1
-    const N = celdasDelArbol(densidadDeLaRed()) // [CIERRE A-ter] A4b · la grilla de la densidad del producto.
+    const N = celdasDelArbol(densidadDeLaRed()) // [CIERRE A-ter] A4b · la grilla de la densidad de la red (A4c: la del producto es 1, la de A-bis).
     ocupadas.add(Math.min(N - 1, Math.floor(((c.u + 1) / 2) * N)) + N * Math.min(N - 1, Math.floor(((c.v + 1) / 2) * N)))
   }
   return { enlaces: r.n, tapan, ciclo, seVen, celdas: ocupadas.size, armada: r.fase === 'armada' }

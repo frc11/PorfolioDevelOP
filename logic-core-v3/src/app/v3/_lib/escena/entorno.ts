@@ -117,7 +117,7 @@ export interface Pruebas {
    * [CIERRE A-ter] A10b · el rebote pasó al producto: la prueba es apagarlo, `?rebote=no` (pide `sin-rebote`, por lo que pide).
    */
   readonly 'sin-rebote': 'si' | 'no'
-  /** [CIERRE A-ter] A4b · más rayos en la red de noche: `red-densidad=1.25|1.5|1.75` (veces los de A-bis; `1`, los de A-bis). Sin la bandera, la del producto (`energia/arbol.ts`). */
+  /** [CIERRE A-ter] A4b · más rayos en la red de noche: `red-densidad=1.25|1.5|1.75` (veces los de A-bis; `1`, los de A-bis). [A4c] Sin la bandera, la del producto: `1` (`energia/arbol.ts`). */
   readonly 'red-densidad': '1' | '1.25' | '1.5' | '1.75' | 'no'
 }
 
