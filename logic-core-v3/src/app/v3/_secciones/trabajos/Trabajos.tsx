@@ -1,54 +1,45 @@
 'use client'
 
-import { useMotionValue } from 'motion/react'
+import { useRef } from 'react'
 
-import { Bloque, CoreografiaEnTodoAncho, useCoreografiaActiva, type Progreso } from '../_contrato/coreografia'
+import { Envoltorio } from '../../_componentes/layout/Envoltorio'
+import { Bloque, CoreografiaEnTodoAncho, type Progreso } from '../_contrato/coreografia'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
 
 import { CapaDeLaGota } from './CapaDeLaGota'
-import { CapaDelTunel } from './CapaDelTunel'
 import { CapaDeDemos } from './demos/CapaDeDemos'
-import { PortadaDeTrabajos, RamaQuieta } from './piezas'
-import { ESTILO_DEL_RITMO } from './ritmo'
+import { DemosQuietos } from './demos/DemosQuietos'
+import { ANCLAS_DEL_PORTFOLIO } from './portfolio/anclas'
+import { EscenarioDelPortfolio } from './portfolio/EscenarioDelPortfolio'
+import { CANTIDAD_DE_PASOS, pantallasDelAncla, pantallasExtra } from './portfolio/pasos'
+import { usePortfolio } from './portfolio/usePortfolio'
 
 /**
- * 04 · TRABAJOS — el preludio, la conversión y el túnel. **[PORTFOLIO]**
+ * 04 · TRABAJOS — el Portfolio: la aproximación, el selector lateral y Demos. **[B1]**
  *
- * ── Los tres tiempos, en el orden en que se leen ─────────────────────────
+ * ── Los tiempos, en el orden en que se leen (`portfolio/pasos.ts`) ─────────
  *
- * 1. **La conversión.** No es un tramo de scroll: es un GATILLO, y lo dispara el
- *    final de Quiénes somos. Una banda diagonal cruza el cuadro en 760 ms y la
- *    sala queda con los colores de la noche. Scrolleando para arriba la misma
- *    animación corre al revés (`gota.ts`, `nocheDisparada.ts`).
- * 2. **El cartel.** «Portfolio» y su bajada, creciendo desde su esquina de arriba
- *    a la izquierda. El cuerpo se pinta palabra por palabra en la meseta, y
- *    después el cartel HUYE — se aleja en z y se desvanece.
- * 3. **El túnel.** Mientras el cartel huye nace la primera captura, centrada, y
- *    crece. Al llegar al tamaño en que el proyecto se lee, nace la siguiente
- *    adentro; la anterior sigue creciendo y se sale del cuadro por los bordes,
- *    donde sigue viéndose. Cuando la última llega al límite de la pantalla,
- *    empieza el tramo de demos.
+ * 1. **La conversión.** Un gatillo, no un tramo: el final de Quiénes somos lleva la sala a la noche (`gota.ts`).
+ * 2. **La aproximación.** El panel sube y entra «Portfolio» con su bajada (el gesto de «El equipo», sin la huida de antes).
+ * 3. **El selector.** Con el pin entra desde la derecha el panel con El Garage; siete pasos: portada y ficha de cada proyecto y
+ *    «la próxima es la tuya». La escena se oscurece y la cámara pone el logo abajo, del lado del texto (B1.2).
+ * 4. **La salida y Demos**, la cola de antes al píxel: el panel se retrae y Demos llega como llegaba.
  *
- * El recorrido de cámara que precede a todo esto **no vive acá**: lo lleva
- * Números, que es de quién es ese tramo de la coreografía.
+ * El túnel (el cartel que huía, las capturas anidadas, la ventana del CTA y el vacío) se fue al archivo
+ * (`src/app/v3/_archivo/tunel-portfolio/`): nadie de la página lo importa.
  *
- * ── El orden del marcado ES el orden de pintura ───────────────────────────
+ * ── El alto (REGLA DE ALTURAS) ────────────────────────────────────────────
  *
- * Hermanos posicionados se pintan en orden de documento: el cartel primero,
- * después el túnel que lo cubre al crecer, y adentro del túnel las capturas en
- * su orden, así que **la que acaba de nacer queda arriba de las viejas** — que es
- * lo que hace cierto «nace adentro de la anterior». La gota va al final y
- * **afuera del bloque**: tapa el cuadro entero durante el disparo, contenido
- * incluido, que es lo que hace que el relevo no se vea.
+ * La tabla (`secciones.ts`) no cambia. La sección suma los pasos del selector sobre lo que la tabla declara, en CSS y desde el
+ * servidor (`--pantallas-extra-del-portfolio`, del paso por defecto; la bandera `?portfolio-paso` la reescribe al montar), y la
+ * escena lo descuenta (`portfolio/tramoDelSelector.ts`). Afuera del selector la escena ve los mismos píxeles que antes.
  *
- * ── ⚠️ EL TÚNEL YA NO PASA POR `ProgresoAmortiguado`, Y ES A PROPÓSITO ────
+ * ── Las dos ramas ─────────────────────────────────────────────────────────
  *
- * Lo envolvía un `useSpring` de 0,5 s —la persecución compartida del sistema, que
- * Quiénes somos sigue usando—. El túnel ahora lleva la suya adentro, con su
- * propia constante declarada: lo que el humano mide al soltar el scroll es UN
- * número y tiene que haber UN número en el código. Dos amortiguaciones en serie
- * habrían dado un tiempo que no es ninguna de las dos.
+ * El escenario es el mismo componente con y sin coreografía: su estado sale del scroll, no del progreso de P7. Lo único que
+ * cambia es Demos: con coreografía llega adentro del escenario pegado (su reloj es la cola, `mostradoDeDemos`); sin ella, el
+ * escenario se pega mientras dura el selector y Demos aparece después, quieto (`DemosQuietos`).
  */
 export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
   // MÓVIL-TRABAJOS: la única sección que corre su coreografía en todo ancho.
@@ -60,63 +51,50 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
 }
 
 /**
- * ⚠️ **ABAJO DE 1024 EL PIN LO PONE LA RAMA, no la tabla.** `secciones.ts` declara
- * a Trabajos `desde-escritorio`, y así sigue: la rama quieta de tablet y de teléfono
- * es una lista más alta que una pantalla y no se clava. Con coreografía la sección
- * se clava en todo ancho —la misma caja de una pantalla, en `svh`— y el bloque deja
- * de heredar el alto de la sección.
+ * El alto en todo ancho: el de la tabla más los pasos (la clase va entera, el escáner de Tailwind la ve). `--ancho-del-portfolio`
+ * le dice al JS qué ancho decidió el CSS (vacío desde 1024): la sección no mide el ancho (`s7-contrato` §5).
  */
-const CLASES_DE_LA_RAMA = {
-  quieta: { seccion: 'relative max-escritorio:min-h-[inherit]', bloque: 'relative h-full w-full max-escritorio:min-h-[inherit]' },
-  // `overflow-x-clip`: el cartel termina su huida grande y oculto, y sin recorte la página se ensanchaba
-  // a 584 px en un teléfono de 375 (el navegador la alejaba para que entrara). `clip` no crea caja de scroll.
-  // MÓVIL 2: la sección crece lo que el túnel se estira (`ritmo.ts`) y el pin baja al bloque.
-  // [PASADA FINAL] D: el recorte, en todo ancho: en escritorio el margen del recorte del túnel (6 px, para los anillos de
-  // foco de sus anclas) dejaba al escenario escalado estirar la página a 1446 en 1440 (afuera del cuadro no se ve nada).
-  animada: {
-    seccion:
-      'relative max-escritorio:[--estiramiento-en-uso:var(--estiramiento-tablet)] max-movil:[--estiramiento-en-uso:var(--estiramiento-movil)] max-escritorio:min-h-[calc(var(--alto-minimo-del-panel)+(var(--estiramiento-en-uso)-1)*var(--tunel-en-pantallas)*100svh)]',
-    bloque: 'relative h-full w-full overflow-x-clip max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-svh',
-  },
-} as const
+const CLASE_DE_LA_SECCION =
+  'relative min-h-[calc(var(--alto-minimo-del-panel)+var(--pantallas-extra-del-portfolio)*100svh)] max-escritorio:[--ancho-del-portfolio:tablet] max-movil:[--ancho-del-portfolio:movil]'
+
+function estiloDeLaSeccion(paso: number): React.CSSProperties {
+  return {
+    '--pantallas-extra-del-portfolio': pantallasExtra(paso).toFixed(5),
+    '--pantallas-de-la-pista': (1 + CANTIDAD_DE_PASOS * paso).toFixed(5),
+  } as React.CSSProperties
+}
 
 function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
-  // ⚠️ UN SOLO valor amortiguado para el cartel y el túnel: lo escribe el túnel y
-  // lo lee el cartel, así que subiendo el cartel no puede volver encima del túnel.
-  const mostrado = useMotionValue(0)
-  const animada = useCoreografiaActiva()
-  const clases = CLASES_DE_LA_RAMA[animada ? 'animada' : 'quieta']
+  const caja = useRef<HTMLDivElement | null>(null)
+  const vivo = usePortfolio(caja)
   return (
-    // ⚠️ Sin `bg-fondo` en móvil: la sección es `oscuro-transparente` y la
-    // oscuridad la tiene que dar la SALA, no el panel. Pintarla acá tapaba el
-    // canvas abajo de 1025 y con él lo único que esta sección viene a mostrar.
-    // Quien la lleva a la noche en los dos lados del umbral es el disparo.
-    <Seccion seccion={seccion} className={clases.seccion} style={animada ? ESTILO_DEL_RITMO : undefined}>
-      {/* ⚠️ El `min-h-[inherit]` viaja por la cadena ENTERA o no llega: el bloque
-          está entre la sección y el envoltorio, y sin él el envoltorio hereda el
-          cero del bloque en vez del alto del panel. Medido: la rama quieta
-          quedaba 2.419 px más corta que su sección. */}
-      <Bloque patron="P7" anclaje="seccion" lente="escena" className={clases.bloque}>
-        {(progreso: Progreso) => {
-          if (progreso === null) return <RamaQuieta seccion={seccion} />
-          return (
-            <>
-              <PortadaDeTrabajos seccion={seccion} progreso={progreso} mostrado={mostrado} />
-              {/* El recorte del túnel NO va acá: va adentro, como estilo, porque
-                  necesita un margen de recorte y eso no es una clase. Ver el
-                  docblock de `RECORTE_DEL_TUNEL` en `CapaDelTunel.tsx`. */}
-              <CapaDelTunel progreso={progreso} mostrado={mostrado} className="pointer-events-none absolute inset-0" />
-              {/* ⚠️ Las demos van DESPUÉS del túnel porque se LEEN después, y se pintan
-                  DEBAJO por su `z-index` negativo: así el túnel no cambia en nada
-                  (`demos/CapaDeDemos.tsx`). */}
-              <CapaDeDemos mostrado={mostrado} className="absolute inset-0 -z-[var(--z-elevado)]" />
-            </>
-          )
-        }}
-      </Bloque>
+    <Seccion seccion={seccion} className={CLASE_DE_LA_SECCION} style={estiloDeLaSeccion(vivo.banderas.paso)}>
+      <div ref={caja} data-pieza="caja-del-portfolio" className="absolute inset-0">
+        {ANCLAS_DEL_PORTFOLIO.map((a) => (
+          <span key={a.id} id={a.id} aria-hidden="true" className="pointer-events-none absolute left-0 h-px w-px" style={{ top: `${(pantallasDelAncla(a.paso, vivo.banderas.paso) * 100).toFixed(4)}svh` }} />
+        ))}
+        <Bloque patron="P7" anclaje="seccion" lente="escena" className="absolute inset-0">
+          {(progreso: Progreso) =>
+            progreso === null ? (
+              <div className="flex h-full flex-col">
+                <div className="relative h-[calc(var(--pantallas-de-la-pista)*100svh)] shrink-0">
+                  <EscenarioDelPortfolio seccion={seccion} vivo={vivo} />
+                </div>
+                <Envoltorio className="flex-1" claseDeContenido="flex h-full flex-col justify-end">
+                  <DemosQuietos />
+                </Envoltorio>
+              </div>
+            ) : (
+              <EscenarioDelPortfolio seccion={seccion} vivo={vivo}>
+                {/* Demos va DESPUÉS del panel porque se lee después, y se pinta debajo por su `z-index` negativo. */}
+                <CapaDeDemos mostrado={vivo.mostradoDeDemos} paso={vivo.banderas.paso} className="absolute inset-0 -z-[var(--z-elevado)]" />
+              </EscenarioDelPortfolio>
+            )
+          }
+        </Bloque>
+      </div>
 
-      {/* Hermano del bloque, no descendiente: vale en las dos ramas y el
-          `s7-arboles` §4 de la rama quieta sigue valiendo. */}
+      {/* Hermano del bloque, no descendiente: vale en las dos ramas. */}
       <CapaDeLaGota className="bg-fondo pointer-events-none fixed inset-0 z-50" />
     </Seccion>
   )

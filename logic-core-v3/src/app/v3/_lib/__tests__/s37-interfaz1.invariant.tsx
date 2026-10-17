@@ -124,7 +124,7 @@ titulo('T1 · 3 · Dónde entra el sistema: las secciones migradas, y las excepc
 const MIGRADAS = [
   ['_secciones/quienes-somos/QuienesSomos.tsx', 1, 1],
   ['_secciones/quienes-somos/equipo.tsx', 3, 0],
-  ['_secciones/trabajos/piezas.tsx', 1, 1],
+  ['_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx', 1, 1],
   ['_secciones/tu-panel/TuPanel.tsx', 1, 0],
   ['_secciones/por-que-develop/PorQueDevelop.tsx', 0, 2],
   ['_secciones/cierre/Cierre.tsx', 1, 0],
@@ -255,8 +255,8 @@ const DONDE_HAY_ROLLOVER = [
   // [RONDA 2] F1 · WhatsApp volvió al pie: el del mail y el suyo. [NOCTURNO FINAL] C4 · y el rótulo corto de WhatsApp del
   // teléfono (en cada ancho se ve uno solo de los dos de WhatsApp: el otro va oculto y no se anuncia).
   ['_secciones/cierre/PiezasDeContacto.tsx', 3],
-  ['_secciones/trabajos/Proyecto.tsx', 1],
-  ['_secciones/trabajos/CapaDelTunel.tsx', 1],
+  ['_archivo/tunel-portfolio/Proyecto.tsx', 1],
+  ['_archivo/tunel-portfolio/CapaDelTunel.tsx', 1],
 ] as const
 for (const [ruta, n] of DONDE_HAY_ROLLOVER) afirmarIgual(veces(leer(ruta), '<DosCopias>'), n, `${ruta}: ${String(n)} rollover(s)`)
 afirmarIgual(veces(leer('layout.tsx'), "import './_estilos/rollover.css'") + veces(leer('layout.tsx'), "import './_estilos/cursor-sala.css'"), 2, 'las dos hojas nuevas entran por el layout, como las demás (un componente que importa CSS rompe los invariantes que corren en Node)')
@@ -434,6 +434,6 @@ afirmar(
 )
 afirmar(/\[data-v3\]\[data-v3\] \[data-pieza="carrusel"\] \[data-parte="portada"\]:focus-visible \{\s*outline-color: transparent;/.test(FOCO), '  y el de afuera queda transparente, sólo en el carrusel (en colores forzados el sistema lo pinta)')
 controlPositivo('el chequeo del anillo de adentro ve el de antes (sólo afuera, sin pseudo-elemento)', '[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible { position: relative; }', (css: string) => anilloDeAdentro(css).includes('inset 0 0 0 '))
-afirmar(leer('_secciones/trabajos/CapaDelTunel.tsx').includes('const MARGEN_DEL_RECORTE_PX = 6'),'el túnel recorta dejando 6 px: el anillo de dos tonos entero (en el teléfono el borde se cortaba y el contorno solo daba 2,6:1)')
+afirmar(leer('_archivo/tunel-portfolio/CapaDelTunel.tsx').includes('const MARGEN_DEL_RECORTE_PX = 6'),'el túnel recorta dejando 6 px: el anillo de dos tonos entero (en el teléfono el borde se cortaba y el contorno solo daba 2,6:1)')
 
 cerrar('s37-interfaz1')

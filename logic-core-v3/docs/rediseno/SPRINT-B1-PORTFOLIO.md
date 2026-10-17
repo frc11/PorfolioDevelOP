@@ -684,6 +684,98 @@ invariantes nuevos arrancan en **s76**.
 adentro de s5 fallan `s5-compacto` (Quiénes somos, de antes) y `s5-peso` (pide el build), los de siempre, y `s5-codigo` (el
 padrón que se tocó) está en verde; s76 en verde. Sin dev server propio (el de Valentino en :3000 no se tocó).
 
+### B1.1b · la base (2026-10-17)
+
+**Hecho.**
+
+- **El túnel al archivo** (`src/app/v3/_archivo/tunel-portfolio/`, con un README de una línea): `tunel.ts`, `CapaDelTunel.tsx`,
+  `piezas.tsx`, `Proyecto.tsx`, `Captura.tsx`, `capturas.ts`, `soporte.ts`, `asentamiento.ts`, `angosto.ts`, `ventana.ts`,
+  `encimaDelCta.ts`, `regulador.ts`, `ritmo.ts`, `estiramiento.ts`, `trabajos-tipeo.ts` y las partes de su invariante, más copias
+  congeladas de lo que la sección reescribió (`Trabajos.tsx`, `geometria.ts`, `contenido.ts`) para que el archivo compile y se pruebe
+  solo, y `entradaDelTunel.ts` (`escalaDeDemos`, la fracción del vacío que el túnel dibujaba). Nadie de la página lo importa; sus
+  tests sí. El invariante de Trabajos de antes se mudó entero (`tunel.invariant.tsx`, `test:s76-archivo-tunel`) y sigue afirmando
+  el código archivado: 320 afirmaciones (las 399 de antes menos §25 Demos y §27 el carrusel, que siguen vivos en la sección).
+- **La sección nueva** (`Trabajos.tsx`): la tabla no cambia; la sección suma los pasos del selector en CSS y desde el servidor
+  (`--pantallas-extra-del-portfolio`); el escenario del Portfolio se pega en todo ancho y en las dos ramas; las cuatro anclas
+  (`#portfolio-el-garage`, `-esquina-estudio`, `-banu-scents`, `-la-tuya`) en su lugar derivado; con coreografía Demos llega adentro
+  del escenario con el reloj de la cola; sin ella, después y quieto.
+- **`portfolio/`**: `pasos.ts` (todo derivado de `PANTALLAS_POR_PASO` = 0,75: el alto, los `k` por ancho, las anclas, la
+  histéresis de 30 px, el reloj de Demos), `estado.ts` (la vista de cada paso y el teclado), `usePortfolio.ts` (el scroll medido,
+  el paso, las banderas por `useSyncExternalStore`, la anotación a la escena, el salto y el ancla al cargar), `tramoDelSelector.ts`
+  (la REGLA DE ALTURAS), `banderas.ts`, `saltar.ts`, `anclas.ts`, `medios.ts`, `tipografia.ts`, y los componentes: el escenario,
+  el encabezado (el cartel sin la huida, con los mismos nombres), el acordeón (el patrón de la WAI: cabecera con `aria-expanded` en
+  un `h3` y región nombrada; la activa ancha, las otras lomos con el nombre girado sobre el póster en grises), la tira, la ficha,
+  el medio (en B1.1b, el póster) y «la tuya» (el hueco del «?» y el botón a la hoja de contacto de siempre).
+- **El contenido**: `CONTENIDO.proyectos` sale de `proyectos.ts`; los rótulos de la ficha; «la tuya» con la frase y el botón que
+  dictó el dueño para el CTA del túnel; `cta.direccion` y las capturas se fueron (el archivo guarda su copia). **Lo que falta va
+  por la llave** (8 casillas en `INVENTOS`: los dos `problemaResuelto` y las tres reseñas con su firma; relleno que se lee como
+  relleno con la llave prendida, `[TEXTO]`, `[TESTIMONIO] · pendiente` y `[NOMBRE]` apagada) y **al `PEDIDO`** (10 entradas, todas de
+  Valentino: las 8 y las dos de prosa sin marcador para C2). La llave sigue apagada. **La fecha**: el año ya estaba en
+  `NUMEROS_PERMITIDOS` (el pie), se le sumó el motivo del Portfolio; y el detector de dígitos del contenido (`LISTA_BLANCA_DE_CIFRAS`)
+  recibió las tres fechas exactas, cada una con su motivo, con `s5-contenido` atándolas a las de `proyectos.ts`.
+- **La escena**: el selector se le anota como tramo estirado con el `k` de su ancho (la sección no consulta el ancho: lo escribe el
+  CSS en `--ancho-del-portfolio`); `sinElEstiramiento` vale también para comprimir (`k < 1`, el paso de 0,6 en el teléfono); la
+  ventana donde no se dibujan estrellas, fugaces ni la formación arranca en el pin (p 0,475; era 0,51143, el arranque del túnel).
+- **Demos sin el túnel**: el reloj del vacío en `demos/relojDeDemos.ts` (los mismos números), lo que heredó del túnel en
+  `demos/herencia.ts` (el velo de la ventana y las dos clases de su texto), el foco que la trae al cuadro contado en la sección nueva.
+- **Los viajes**: el ítem «Portfolio» del menú aterriza en El Garage en portada (el ancla de su paso) y cada deep link tiene su
+  subnudo (`destinosDelViaje.ts`). La instancia de Lenis se anota en `_lib/lenisDelSitio.ts` (una línea en `ScrollSuaveDeV3`).
+- **La placa del contacto** importa el foco de la escena de la geometría viva.
+
+**Los tests, contados (ajuste E).** Afirmaciones por invariante, antes (el `verificar` de B1.1a) y después:
+
+| Invariante | Antes | Después | Δ |
+|---|---:|---:|---:|
+| `test:s21-llave` | 73 | 83 | +10 |
+| `test:s27-viajes` | 54 | 55 | +1 |
+| `test:s47-pasada-final` | 157 | 158 | +1 |
+| `test:s5-contenido` | 59 | 63 | +4 |
+| `test:s5-trabajos` | 399 | 214 | -185 |
+| `test:s7-arboles` | 48 | 50 | +2 |
+| `test:s7-pedido` | 47 | 57 | +10 |
+| `test:s76-archivo-tunel` | — | 320 |  |
+| `test:s76-portfolio` | 32 | 74 | +42 |
+| `test:s8-chrome` | 36 (FALLA) | 37 (FALLA) | +1 |
+
+Total: 6.721 → 6.927 afirmaciones (+206); 158 → 159 invariantes (las suites que no cambiaron de cuenta no figuran).
+
+- **La única que baja es `s5-trabajos` (399 → 214), y no pierde nada**: 320 se mudaron tal cual a `test:s76-archivo-tunel` (el
+  invariante de antes contra el código archivado), las 79 de §25 (Demos, 44) y §27 (abajo de 1024, 35) siguen en `s5-trabajos`, y
+  la sección nueva suma 135 (§1–§17: el puente y la noche, el alto, el contenido y su pedido, los nombres, la ficha completa en el
+  marcado, cero three y cero contextos, el acento, la higiene, los encabezados, las paradas y el selector).
+- **Con el sentido nuevo y la misma cuenta**: `s10-acceso` (los deltas del Portfolio: paradas +1, encabezados +1, marcadores +8, las
+  ocho casillas de la llave; las tiras no son `region`, así que los puntos de referencia siguen en 12), `s30-escena4` (la ventana de la
+  escena desde el pin), `s36`, `s41`, `s48`, `s51` (el título del encabezado y el destino del menú: El Garage en portada), `s49`,
+  `s50` (Demos con su reloj, contra el túnel archivado), `s61`, `s62`, `s42` (re-apuntados al archivo o al encabezado), `s5-compacto` y
+  `s5-tokens` (los componentes nuevos con los tokens del tema), `s47` (el recorte, del escenario) y `movil-invariante` (el pin, del
+  escenario). Ninguna se aflojó: donde un literal cambió de archivo se afirma el mismo literal; donde cambió el sentido, se afirma el
+  nuevo con su control.
+
+**Desvíos y por qué.**
+
+- **El invariante de antes se mudó ENTERO al archivo** en vez de repartir afirmación por afirmación: sigue afirmando lo mismo sobre
+  el código archivado (que es lo que el plan pedía para «lo que afirma el código del túnel»), y la sección nueva tiene el suyo. Las
+  afirmaciones que el inventario de tests clasificó como «la página lo muestra» quedaron como afirmaciones del archivo (el túnel se
+  sigue montando ahí, en su `Trabajos.tsx` congelado) y, donde el sentido seguía vivo, con el sentido nuevo en el test de afuera.
+- **Dos escáneres de cifras, no uno**: la excepción de la fecha va en `NUMEROS_PERMITIDOS` (el texto renderizado; el año ya estaba)
+  y en `LISTA_BLANCA_DE_CIFRAS` (el contenido, por texto exacto). `s5-contenido` tenía un tope de una excepción: pasa a «la del hero
+  y las fechas del Portfolio», y afirma que las de Trabajos son exactamente las de `proyectos.ts`.
+- **Las capturas de control «antes» y «después» quedan para cuando haya memoria**: con el dev server de Valentino en :3000 (1,8 GB)
+  quedaban 2,6 GB libres, debajo de los 3 GB que piden las reglas para el banco. El build «antes» (`.next-probe`) sigue en disco y no
+  se pisa: las capturas se pueden sacar después. En su lugar, el mapeo de la escena afuera del selector está afirmado puro en los tres
+  anchos, con los tres pasos y dos altos de ventana (desvío 0).
+
+**Verificación.** Lint de los tocados limpio (los cuatro avisos de variables sin usar de s10, s47 y s48 ya estaban); `tsc --noEmit` sin errores;
+`npm run verificar` completo: además de los 8 grupos de la base salió rojo `s10-acceso` (los deltas del Portfolio), y adentro de s5,
+s7 y s8 salieron `s5-tokens`, `s7-arboles`, `s5-compacto` (el servicio y el resultado no llegaban al marcado) y `s8-chrome` (los
+subdestinos nuevos). Se arreglaron (los tokens del tema, el §4 de s7-arboles con su sentido nuevo, las filas ocultas, los subdestinos
+en el marcado renderizado de Trabajos) y se volvieron a correr los agregados s5, s7, s8, s10, s21, s47 y s76: rojos sólo los de la
+base y con la misma cuenta (s5-compacto 1, s5-peso 8, s7-compuerta 18, s8-montaje 2, s8-tres 11, s8-chrome 2, s8-peso 14); s10, s21,
+s47 y s76 (394 afirmaciones: el Portfolio y el archivo) en verde. La llave se probó prendida en un render aparte (cinco rellenos y tres
+firmas de relleno, cero marcadores) y quedó apagada. Sin dev server propio (el de Valentino en :3000 no se tocó). **Pendientes para el
+banco** (memoria: 2,6 GB libres): las capturas de control «antes/después» y visual-qa del reposo; van al cierre de B1.2 si hay
+memoria, si no «VERIFICAR TRAS REINICIO».
+
 ---
 
 ## 11. Ajustes de la aprobación (2026-10-17)

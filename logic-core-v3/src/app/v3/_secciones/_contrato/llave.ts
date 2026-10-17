@@ -76,5 +76,5 @@
  * literal `true`, TypeScript estrecha cada `CONTENIDO_INVENTADO ? a : b` a una
  * sola rama y el invariante que comprueba **las dos** no compilaría.
  */
-// FINAL 3: APAGADA. INVENTOS quedó vacío; si alguien agrega una cifra inventada, la prende acá con su entrada.
+// [B1] APAGADA, con las ocho casillas del Portfolio en INVENTOS (el sitio muestra sus marcadores). Para ver la ficha completa se prende a mano, sin commitear.
 export const CONTENIDO_INVENTADO: boolean = false

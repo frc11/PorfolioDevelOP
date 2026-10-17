@@ -90,7 +90,7 @@ afirmar(sostieneEnElViaje(escena3d), 'en un viaje lo pedido es 0 (ninguna letra 
 controlPositivo('el detector VE la llegada que corre con el scroll del viaje', escena3d.split('enViaje ? 0 : a.titulo.llegada').join('a.titulo.llegada'), sostieneEnElViaje)
 const dom = sinComentarios(leer('_componentes/titulos3d/TituloDeVolumen.tsx'))
 afirmar(/const repetible = useLlegadaDelTitulo\(llegadaDe, llegada \?\? LLEGADO\)/.test(dom) && /llegada: llegada === null \? null : repetible/.test(dom), 'al terminar, la llegada que el viaje repite (`llegadaDelTitulo.ts`, la del retoque 3) es la que persigue el título: las letras desde la profundidad, sin mover la cámara')
-const piezas = leer('_secciones/trabajos/piezas.tsx')
+const piezas = leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx')
 const porQue = leer('_secciones/por-que-develop/PorQueDevelop.tsx')
 afirmar(/<CanalDeUnaPieza[^>]*llegadaDe=\{seccion\.id\}>[\s\S]{0,400}<TituloDeVolumen [^>]*llegadaDe=\{seccion\.id\}( minimoS=\{LENTOS\.llegadaDePortfolioS\})?( queda)? \/>/.test(piezas) && /<TituloDeVolumen [^>]*llegadaDe="por-que-develop"( queda)? \/>/.test(porQue) && (porQue.match(/llegadaDe="por-que-develop"/g) ?? []).length === 3, '  Portfolio y la frase, con la MISMA sección que su pieza del DOM (la que el viaje nombra al llegar)')
 

@@ -24,6 +24,7 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from 
 import { DIST, conjuntoInicial, contiene, kib, pesar, todosLosChunks } from '../../_lib/__tests__/s3-bundle'
 import { SUBDESTINOS } from '../../_componentes/destinosDelViaje'
 import { Cierre } from '../../_secciones/cierre/Cierre'
+import { Trabajos } from '../../_secciones/trabajos/Trabajos'
 import { ANCLAS_QUE_EXISTEN, CONTACTO_DEL_PIE, DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
@@ -57,9 +58,12 @@ const ROTULO_EN_EL_PIE: Readonly<Record<string, string>> = { hero: 'Inicio', tra
 const ESPERADOS = ENLAZADAS.flatMap((s) => [{ ancla: `#${s.id}`, rotulo: ROTULO_EN_EL_PIE[s.id] ?? s.nombre }, ...(SUBDESTINO_DEL_PIE[s.id] === undefined ? [] : [SUBDESTINO_DEL_PIE[s.id]])])
 afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.ancla), ESPERADOS.map((d) => d.ancla), `el pie ofrece ${DESTINOS_DE_LA_RUTA.length}, en el ORDEN DEL RECORRIDO y derivadas de la tabla: todas menos el Cierre y Números, y Demos adentro de Trabajos`)
 afirmarIgual(DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ESPERADOS.map((d) => d.rotulo), '  con los rótulos de la misma fila, salvo el hero («Inicio») y Trabajos («Portfolio»); y «Demos»')
-// Un subdestino existe si su `id` está en el marcado de su sección (el de Demos, en el texto de las demos).
-const SUBANCLAS_QUE_EXISTEN = SUBDESTINOS.filter((id) => S.leer('src/app/v3/_secciones/trabajos/demos/TextoDeDemos.tsx').includes(`id="${id}"`)).map((id) => `#${id}`)
-afirmarIgual(SUBANCLAS_QUE_EXISTEN, SUBDESTINOS.map((id) => `#${id}`), '  y cada subdestino tiene su ancla en el marcado (`id="demos"`, en el texto de las demos)')
+// Un subdestino existe si su `id` está en el marcado de su sección. [B1] Se lee del marcado RENDERIZADO de Trabajos (las anclas del
+// Portfolio salen de sus datos, no de un literal): el de Demos, en el texto de las demos; los cuatro deep links, en la sección.
+const MARCADO_DE_TRABAJOS = marcar(createElement(Trabajos, { seccion: seccionDe('trabajos') }), { anima: false })
+const SUBANCLAS_QUE_EXISTEN = SUBDESTINOS.filter((id) => MARCADO_DE_TRABAJOS.includes(`id="${id}"`)).map((id) => `#${id}`)
+afirmarIgual(SUBANCLAS_QUE_EXISTEN, SUBDESTINOS.map((id) => `#${id}`), '  y cada subdestino tiene su ancla en el marcado de Trabajos (`id="demos"` y los cuatro deep links del Portfolio)')
+controlPositivo('  el chequeo ve un subdestino sin su ancla', [...SUBDESTINOS, 'portfolio-inventado'], (ids: readonly string[]) => ids.every((id) => MARCADO_DE_TRABAJOS.includes(`id="${id}"`)))
 const HREFS_DEL_PIE = S.hrefsDe(PIE)
 const esExterno = (h: string): boolean => /^(mailto:|https:\/\/)/.test(h)
 const HREFS_INTERNOS = HREFS_DEL_PIE.filter((h) => !esExterno(h) && h !== CONTACTO_DEL_PIE.destino)

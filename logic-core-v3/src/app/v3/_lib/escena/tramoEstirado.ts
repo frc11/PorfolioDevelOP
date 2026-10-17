@@ -18,7 +18,7 @@ import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../navegacion'
 export interface TramoEstirado {
   /** El panel estirado (`data-panel`): de su tope sale dónde está el tramo en el documento. */
   readonly panel: Element
-  /** Cuánto se estira (mayor que 1). */
+  /** Cuánto se estira (mayor que 1; [B1] menor que 1 si comprime). */
   readonly k: number
   /** Dónde arranca el tramo y cuánto dura SIN estirar, en px de la regla desde el arranque del progreso del panel. */
   readonly arranque: number
@@ -28,9 +28,13 @@ export interface TramoEstirado {
 /** El tramo estirado de esta carga, o ninguno (el producto). */
 export const TRAMO_ESTIRADO: { valor: TramoEstirado | null } = { valor: null }
 
-/** Un punto `y` del documento sin el estiramiento: antes del tramo, igual; adentro, a 1/k; después, sin lo agregado. */
+/**
+ * Un punto `y` del documento sin el estiramiento: antes del tramo, igual; adentro, a 1/k; después, sin lo agregado.
+ * [B1] También comprime (`k < 1`: el selector del Portfolio con el paso de 0,6 mide en el teléfono menos de lo que la escena veía):
+ * la misma cuenta, con lo «agregado» negativo. Con `k = 1` (o un `k` que no es un número positivo) no toca nada.
+ */
 export function sinElEstiramiento(y: number, desde: number, largoEstirado: number, k: number): number {
-  if (!(k > 1) || y <= desde) return y
+  if (!(k > 0) || k === 1 || y <= desde) return y
   if (y <= desde + largoEstirado) return desde + (y - desde) / k
   return y - largoEstirado * (1 - 1 / k)
 }

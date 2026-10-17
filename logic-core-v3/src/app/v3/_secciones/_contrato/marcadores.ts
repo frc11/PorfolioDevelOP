@@ -167,6 +167,14 @@ export const LISTA_BLANCA_DE_CIFRAS: readonly ExcepcionDeCifra[] = [
     motivo:
       'El 24 son las horas que tiene un día, no una medición sobre develOP. La regla que este detector protege es «ningún número que se pueda leer como un HECHO puede ser inventado», y lo que se inventa es una cifra de resultado —«+340 %», «12 proyectos», «3 semanas»—: algo que alguien tendría que haber contado. Las horas del día no las contó nadie. ⚠️ QUEDA DICHO LO QUE SÍ AFIRMA: la frase promete disponibilidad continua, y eso es una afirmación sobre el servicio que el humano tiene que poder sostener. No es una cifra fabricada; es una promesa, y la promesa llegó dictada como copy aprobado en el sprint del titular. Si algún día develOP decide que no la sostiene, lo que cambia es el copy y esta entrada se va con él.',
   },
+  // [B1] Las fechas de los tres trabajos del Portfolio, dictadas por Valentino. s5-contenido exige que las de Trabajos sean
+  // exactamente las de `proyectos.ts`: una cifra cualquiera no puede entrar por acá.
+  ...['Marzo 2026', 'Junio 2026', 'Abril 2026'].map((texto) => ({
+    texto,
+    seccion: 'trabajos',
+    motivo:
+      'Cuándo se hizo el sitio de un cliente real, dictado por el dueño (B1, la ficha del Portfolio). Es una fecha, no una medición: nadie la contó como resultado, y no se puede leer como rendimiento, cantidad ni precio. El año es el del documento (el de la línea legal del pie, en NUMEROS_PERMITIDOS). Si un trabajo cambia de fecha, cambia acá y en proyectos.ts, y s5-contenido lo ata.',
+  })),
 ]
 
 const TEXTOS_EN_LISTA_BLANCA: ReadonlySet<string> = new Set(

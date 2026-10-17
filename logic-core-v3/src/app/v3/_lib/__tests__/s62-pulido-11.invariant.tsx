@@ -38,8 +38,8 @@ import { PlacaDelContacto } from '../../_chrome/contacto/PlacaDelContacto'
 import { pedidoQueEsquiva, seCruzan, type Caja } from '../escena/titulos3d/esquivaDelLogo'
 import { llegadaHastaElPie } from '../../_secciones/quienes-somos/geometria'
 import { DESCANSO_ANTES_DE_SALIR_PX, ENTRADA_EN_CUADRO_PX } from '../../_secciones/_contrato/asentamiento'
-import { opacidadDeLaHuidaAngosta, type AngostoDelCartel } from '../../_secciones/trabajos/angosto'
-import { DISTANCIA_DEL_VUELO, poseDeLaHuida } from '../../_secciones/trabajos/tunel'
+import { opacidadDeLaHuidaAngosta, type AngostoDelCartel } from '../../_archivo/tunel-portfolio/angosto'
+import { DISTANCIA_DEL_VUELO, poseDeLaHuida } from '../../_archivo/tunel-portfolio/tunel'
 import { DESLIZAMIENTO_EN_LA_LISTA, LISTA_DEL_CTA, deslizadoEnLaLista, progresoEnLaLista, tocableEnLaLista } from '../escena/ctaDelFinal/transformacion'
 import { HUNDIMIENTO_DEL_PIE, pisoDelHundimiento, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { transicionDelVolteo, type TransicionDelVolteo } from '../formularios/volteo'
@@ -143,7 +143,7 @@ const noCorta = (f: typeof opacidadDeLaHuidaAngosta): boolean => {
 afirmar(noCorta(opacidadDeLaHuidaAngosta) && DISTANCIA_DEL_VUELO > borde(A_390), 'A3 · abajo de 1024 el cartel ya es invisible cuando la huida lo agranda hasta el borde del cuadro; en escritorio (sin angosto) la de siempre')
 const sinAngosto: typeof opacidadDeLaHuidaAngosta = (o) => o
 controlPositivo('A3 · el detector VE la huida de antes (a ~1,2× todavía se veía, cortado)', sinAngosto, noCorta)
-const piezasA3 = leer('_secciones/trabajos/piezas.tsx')
+const piezasA3 = leer('_archivo/tunel-portfolio/piezas.tsx') // [B1] la huida del cartel se fue con el túnel al archivo
 const enElCartel = (f: string): boolean => f.includes("el.style.setProperty('opacity', opacidadDeLaHuidaAngosta(pose.opacidad, pose.z, angostoDe(el)).toFixed(4))") && f.includes('const angostoDe = useAngostoDelCartel()')
 afirmar(enElCartel(piezasA3), '  el cartel lo usa en cada cuadro de la huida (con las medidas del angosto: margen, mitad y foco de su escenario)')
 controlPositivo('  el detector VE el cartel de antes', piezasA3.replace('opacidadDeLaHuidaAngosta(pose.opacidad, pose.z, angostoDe(el))', 'pose.opacidad'), enElCartel)

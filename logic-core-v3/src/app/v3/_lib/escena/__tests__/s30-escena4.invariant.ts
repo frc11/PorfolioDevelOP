@@ -26,8 +26,9 @@ import { MOIRE_NEAR_RADIUS } from '../probeMoire'
 import { pantallaDeProgreso, progresoDePantalla } from '../recorrido'
 import { manchasDelHaz } from '../sombra/sombraDelHaz'
 import { TUNEL_EN_LA_ESCENA, fueraDelTunel } from '../tunelEnLaEscena'
-import { CAPAS_DEL_TUNEL } from '../../../_secciones/trabajos/tunel'
-import { PANTALLAS_DE_LA_SECCION, SOLAPE_DE_LA_SECCION, ventanaDelTunel } from '../../../_secciones/trabajos/geometria'
+import { SOLAPE_DE_LA_SECCION } from '../../../_secciones/trabajos/geometria'
+import { PX_DE_LA_APROXIMACION } from '../../../_secciones/trabajos/portfolio/pasos'
+import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../navegacion'
 
 // ── §1 · las banderas ─────────────────────────────────────────────────────
 titulo('§1 · el moiré y el polvo prendidos, las pruebas apagadas, salvo en el banco')
@@ -87,13 +88,14 @@ afirmar(noche.opacidadDura > 1 && dia.opacidadDura === 0, 'de noche aparece la m
 afirmar(dia.escalaBlanda > 1 && dia.opacidadBlanda < 1, 'de día la blanda se abre y se aclara')
 
 // ── §7 · el túnel ─────────────────────────────────────────────────────────
-titulo('§7 · el túnel de Trabajos en el progreso de la escena')
+titulo('§7 · el túnel de Trabajos en el progreso de la escena — [B1] desde el pin del selector')
 // El progreso de Trabajos corre de `top bottom` a `bottom bottom`: arranca una pantalla antes de la caja,
 // que a su vez empieza el solape antes de la pantalla de su nudo (0,5).
 const arranqueDeLaCaja = pantallaDeProgreso(0.5) - SOLAPE_DE_LA_SECCION - 1
-const derivado = progresoDePantalla(arranqueDeLaCaja + PANTALLAS_DE_LA_SECCION * ventanaDelTunel(CAPAS_DEL_TUNEL.proyectos.length).desde)
-afirmar(Math.abs(derivado - TUNEL_EN_LA_ESCENA.desde) < 0.001, 'el arranque del túnel que trae la escena es el de la sección', `derivado ${derivado.toFixed(5)} · traído ${String(TUNEL_EN_LA_ESCENA.desde)}`)
-afirmar(fueraDelTunel(0.5) === 1 && fueraDelTunel(TUNEL_EN_LA_ESCENA.desde) === 0 && fueraDelTunel(0.6) === 0 && fueraDelTunel(0.9) === 1, 'fuera del túnel vale 1 (Trabajos arriba, Por qué develOP) y adentro 0')
+// [B1] lo que no va adentro se apaga desde el PIN del selector (la aproximación termina a una pantalla del arranque del progreso).
+const derivado = progresoDePantalla(arranqueDeLaCaja + PX_DE_LA_APROXIMACION / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA)
+afirmar(Math.abs(derivado - TUNEL_EN_LA_ESCENA.desde) < 0.001, 'el arranque de la ventana que trae la escena es el pin del selector de la sección', `derivado ${derivado.toFixed(5)} · traído ${String(TUNEL_EN_LA_ESCENA.desde)}`)
+afirmar(fueraDelTunel(0.45) === 1 && fueraDelTunel(TUNEL_EN_LA_ESCENA.desde) === 0 && fueraDelTunel(0.6) === 0 && fueraDelTunel(0.9) === 1, 'fuera de la ventana vale 1 (la aproximación a Trabajos, Por qué develOP) y adentro 0')
 
 // ── §8 · la limpieza ──────────────────────────────────────────────────────
 titulo('§8 · del logo con peso, la membrana y M5 no queda código')

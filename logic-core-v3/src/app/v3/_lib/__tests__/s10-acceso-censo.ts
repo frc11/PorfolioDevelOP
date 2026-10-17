@@ -120,7 +120,7 @@ export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): r
   // tres veces, porque la tira los repite. Esa multiplicación no la mueve
   // ningún cierre y no se resta con la resta de arriba: se mide contra el
   // recorrido real, post-merge, y no se deriva por aritmética de casillas.
-  afirmarIgual(marcas.length, 26 + DELTA_DEL_PANEL.marcadores + DELTA_DEL_FINAL_EN_EL_CENSO.marcadores, `son ${26 + DELTA_DEL_PANEL.marcadores + DELTA_DEL_FINAL_EN_EL_CENSO.marcadores} marcadores ANUNCIADOS en la rama quieta (26 + el delta de SPRINT PANEL + el del FINAL)`)
+  afirmarIgual(marcas.length, 26 + DELTA_DEL_PANEL.marcadores + DELTA_DEL_FINAL_EN_EL_CENSO.marcadores + DELTA_DEL_PORTFOLIO.marcadores, `son ${26 + DELTA_DEL_PANEL.marcadores + DELTA_DEL_FINAL_EN_EL_CENSO.marcadores + DELTA_DEL_PORTFOLIO.marcadores} marcadores ANUNCIADOS en la rama quieta (26 + el delta de SPRINT PANEL + el del FINAL + [B1] las ocho casillas del Portfolio)`)
   afirmarIgual(
     marcadoresAnunciadosSoloHojas(quieta).length, marcas.length,
     '  y el censo de ANTES da hoy la MISMA cifra sobre el home real: el arreglo de B7 no mueve el número, le saca la dependencia de la forma del marcado',
@@ -158,3 +158,14 @@ export const DELTA_DEL_PANEL = { paradas: 8, encabezados: -4, marcadores: -4 } a
 // FINAL 3 · y el pie se queda sin sus cinco: [ENLACE] × 3, [FECHA] y [NOMBRE].
 // RECURSOS · y las fotos y el video llegaron: −5 [FOTO], −1 [FOTO DEL EQUIPO] y −3 [VIDEO].
 export const DELTA_DEL_FINAL_EN_EL_CENSO = { marcadores: -5 - 5 - 9 } as const
+
+/**
+ * [B1] EL PORTFOLIO (el selector lateral en lugar del túnel), lo que le cambia al censo del home:
+ *
+ *   paradas       +1  ocho contra siete: la cabecera de cada tira (cuatro), los tres «Visitar sitio» y el botón al contacto; el
+ *                     túnel tenía el nombre y la captura de cada trabajo y el CTA del final
+ *   encabezados   +1  cinco h3 contra cuatro: la cabecera de cada tira (las tres y la tuya) y el de Demos
+ *   marcadores    +8  las ocho casillas de la llave (`inventado.ts`): los dos `[TEXTO]` de lo que se resolvió, y las tres reseñas
+ *                     con su firma (`[TESTIMONIO]` y `[NOMBRE]`). Son pedidos abiertos de verdad: bajan cuando lleguen los datos
+ */
+export const DELTA_DEL_PORTFOLIO = { paradas: 1, encabezados: 1, marcadores: 8 } as const

@@ -69,7 +69,7 @@
  * medida de B2 que esta instrucción manda respetar.
  */
 
-import { CORTE_DE_TRAMOS } from '../_contrato/asentamiento'
+import { CORTE_DE_TRAMOS } from '../../_secciones/_contrato/asentamiento'
 
 /** El corte llegada/salida de P7, intermediado por el contrato. La sección no
  *  lee `_lib/motion/`: `s7-contrato` §3 lo prohíbe y la regla no se afloja. */

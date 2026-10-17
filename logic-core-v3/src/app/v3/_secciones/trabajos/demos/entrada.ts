@@ -1,22 +1,18 @@
-import { CAPA_DEL_VACIO, FIN_DE_LA_LLEGADA_EN_EL_VACIO, LLEGADA_DE_LOS_DEMOS, pxDelTunelEn } from '../geometria'
-import { ORIGEN_DEL_TUNEL, PX_DEL_VACIO, fraccionDelVacio, poseDelTunel } from '../tunel'
+import { FIN_DE_LA_LLEGADA_EN_EL_VACIO, LLEGADA_DE_LOS_DEMOS, vacioSinTope } from './relojDeDemos'
 
 /**
  * LA ENTRADA A DEMOS — el vacío crece solo y después LLEGAN las cosas. **[DEMOS]**
  *
  * ── El reloj: la fracción del vacío, no el tiempo ─────────────────────────
  *
- * `escalaDeDemos` es la fracción del vacío —la misma recta con clamp, sobre la
- * misma tabla— y es el ÚNICO reloj de la llegada: todo lo de abajo es una función
- * pura de ella. Scrolleando para arriba se deshace exacto y al revés, y el
+ * La fracción del vacío —la recta de `relojDeDemos.ts`, sobre la misma tabla— es el
+ * ÚNICO reloj de la llegada: todo lo de abajo es una función pura de ella. Scrolleando para arriba se deshace exacto y al revés, y el
  * sobrepaso elástico de los libros no es un resorte con tiempo propio sino la
  * FORMA de su curva sobre su tramo.
  *
- * ⚠️ **SE CALCULA DESDE `mostrado`, NO DESDE EL SCROLL.** `CapaDelTunel` publica en
- * `mostrado` el progreso que su resorte muestra y pinta el vacío con ese valor. La
- * única diferencia es el píxel del ESCENARIO, que lleva su propio resorte; pero su
- * capa topa en 1.420 de la regla y el vacío arranca después de 2.290, así que en
- * todo el tramo del vacío la fracción es bit a bit la misma.
+ * ⚠️ **SE CALCULA DESDE `mostrado`.** [B1] Ya no hay túnel: `mostrado` es la cola de la sección del
+ * Portfolio contada en la sección de antes (`portfolio/pasos.ts`, `mostradoDeDemos`), sin el resorte
+ * que el túnel le ponía. El reloj es el mismo número (`relojDeDemos.ts`).
  *
  * ── La coreografía (el pedido la propuso; se construyó tal cual) ─────────
  *
@@ -36,10 +32,8 @@ import { ORIGEN_DEL_TUNEL, PX_DEL_VACIO, fraccionDelVacio, poseDelTunel } from '
  * Ya no hay recuadro que escala: la capa está en su lugar desde el principio y lo
  * que la muestra es el agujero. Lo rígido era eso.
  */
-export function escalaDeDemos(mostrado: number): number {
-  const px = pxDelTunelEn(mostrado)
-  return fraccionDelVacio(poseDelTunel(px), CAPA_DEL_VACIO, px)
-}
+// [B1] `escalaDeDemos` —la fracción del vacío que el túnel DIBUJABA, con su pose— se fue al archivo con el túnel
+// (`_archivo/tunel-portfolio/entradaDelTunel.ts`). La llegada nunca la leyó: su reloj es la recta sin tope de `relojDeDemos.ts`.
 
 export interface Tramo {
   readonly desde: number
@@ -63,11 +57,6 @@ export const TRAMO_DE_UN_LIBRO = 0.14
 export const LIBRO_QUE_LLEGA = { acostado: 90, perspectiva: 700 } as const
 
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
-
-/** La fracción del vacío sin su tope (pasa de 1 después de que el vacío llenó el cuadro). */
-function vacioSinTope(mostrado: number): number {
-  return (pxDelTunelEn(mostrado) + ORIGEN_DEL_TUNEL - CAPA_DEL_VACIO.arranca) / PX_DEL_VACIO
-}
 
 /** [CIERRE] 1B · el reloj de la llegada: la fracción del vacío (sin su tope) hasta el título; desde ahí, a la mitad. */
 export function llegadaDeDemos(mostrado: number): number {

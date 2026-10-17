@@ -45,6 +45,7 @@ import {
   textosDe,
 } from '../../_secciones/_contrato/marcadores'
 import { sinLoInventado, sinLoInventadoEn, sinLoInventadoEnMarcado } from '../../_secciones/_contrato/restauracion'
+import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
 import { MODULOS_DE_S5 as REGISTRO } from './s5-modulos'
 import { afirmarElPedidoYLasVerdades } from './s5-contenido-piezas'
 
@@ -200,7 +201,11 @@ controlPositivo(
  * pasar, es exactamente el uso que convierte una lista blanca en el lugar donde
  * se esconde lo que molesta — y eso se puede medir.
  */
-afirmar(LISTA_BLANCA_DE_CIFRAS.length <= 1, `la lista blanca tiene ${LISTA_BLANCA_DE_CIFRAS.length} excepción(es): sigue siendo la lista corta y no un colador`)
+// [B1] Y las fechas de los trabajos del Portfolio, pedidas con su motivo en la aprobación de B1: la lista sigue cerrada, porque
+// las de Trabajos tienen que ser EXACTAMENTE las fechas de `proyectos.ts` (una cifra cualquiera no entra por ahí).
+const FECHAS_DEL_PORTFOLIO = PROYECTOS.flatMap((p) => (p.fecha === null ? [] : [p.fecha]))
+afirmar(LISTA_BLANCA_DE_CIFRAS.length <= 1 + FECHAS_DEL_PORTFOLIO.length, `la lista blanca tiene ${LISTA_BLANCA_DE_CIFRAS.length} excepción(es): la del hero y las ${FECHAS_DEL_PORTFOLIO.length} fechas del Portfolio, la lista corta y no un colador`)
+afirmarIgual(LISTA_BLANCA_DE_CIFRAS.filter((e) => e.seccion === 'trabajos').map((e) => e.texto).sort(), [...FECHAS_DEL_PORTFOLIO].sort(), '  y las de Trabajos son exactamente las fechas de los tres trabajos')
 afirmarIgual(
   LISTA_BLANCA_DE_CIFRAS.filter((e) => e.motivo.trim().length < 120 || e.seccion.trim() === '').map((e) => e.texto),
   [],

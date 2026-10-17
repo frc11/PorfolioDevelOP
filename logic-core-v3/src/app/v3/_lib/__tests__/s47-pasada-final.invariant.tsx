@@ -165,7 +165,7 @@ const llegada = (p: number, orden: number): number => 1 - (1 - Math.min(1, Math.
 afirmar([0, 0.3, 0.5, 0.8, 1].every((p) => Math.abs(llegadaDeLaLetra(p, 0) - llegada(p, 0)) < 1e-12 && Math.abs(llegadaDeLaLetra(p, 1) - llegada(p, 1)) < 1e-12) && /return 1\.0 - pow\( 1\.0 - u, 3\.0 \);/.test(LLEGADA_PARS_GLSL) && /aPivote \+ giroDeLaLetra \* \( transformed - aPivote \) \+ faltaDeLaLetra \* aDesde/.test(LLEGADA_POSICION_GLSL), '  la curva (cúbica, frenando al final) y el recorrido (desde `aDesde`, girando sobre su pivote) son los mismos en JS y en el sombreador')
 // La cámara con que se ve: [AJUSTES FINALES] A1 · la de ESCENA 10 en ese tramo y la colocación de entonces (s48 ata la relación).
 afirmar(LECTURA.portfolio === 0.4718 && LLEGADA_DE_PORTFOLIO.termina > 0.4426 && LLEGADA_DE_PORTFOLIO.termina < 0.5, 'el título se coloca con la cámara de ESCENA 10 (0,4718), y la medida de dónde termina la llegada hoy sigue siendo la de la tabla de hoy (después de donde terminaba entonces, antes del nudo de Números)', `${String(LECTURA.portfolio)} · termina ${String(LLEGADA_DE_PORTFOLIO.termina)}`)
-const piezasDePortfolio = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
+const piezasDePortfolio = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
 afirmar(/<TituloDeVolumen id="portfolio"[^>]*lectura=\{LECTURA\.portfolio\}[^>]*minimoS=\{LENTOS\.llegadaDePortfolioS\} queda \/>/.test(piezasDePortfolio), '  Portfolio sigue pidiendo esa lectura, su mínimo y quedarse (lo robusto de F2 y A4 lo cubre s45: se da vuelta con el scroll, nunca a medias, converge)')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -589,13 +589,16 @@ controlPositivo('el detector VE un formulario que no saca la marca', formularioB
 titulo('D · La pasada senior: lo que se arregló directo, cada cosa con lo que la fija')
 
 // D1 · los 6 px de más en Trabajos a 1440: el margen del recorte del túnel (para los anillos de foco) se escapaba del cuadro.
-const trabajosD = sinComentarios(leer('_secciones/trabajos/Trabajos.tsx'))
+// [B1] El túnel se fue al archivo (su margen del recorte se afirma allá) y el que se pega es el escenario del Portfolio: recorta en
+// todos los anchos, así que el panel afuera del cuadro (y el anillo de foco de sus tiras) no ensancha la página.
+const trabajosD = sinComentarios(leer('_secciones/trabajos/portfolio/EscenarioDelPortfolio.tsx'))
 const bloqueRecortado = (c: string): boolean => {
-  const bloque = /animada: \{[\s\S]*?bloque: '([^']*)'/.exec(c)?.[1] ?? ''
-  return bloque.split(' ').includes('overflow-x-clip') && !bloque.includes('max-escritorio:overflow-x-clip')
+  const clase = /data-pieza="escenario-del-portfolio"[\s\S]*?className="([^"]*)"/.exec(c)?.[1] ?? ''
+  return clase.split(' ').includes('overflow-clip') && !clase.includes('max-escritorio:overflow')
 }
-afirmar(bloqueRecortado(trabajosD) && /overflowClipMargin: `\$\{MARGEN_DEL_RECORTE_PX\}px`/.test(sinComentarios(leer('_secciones/trabajos/CapaDelTunel.tsx'))), 'Trabajos recorta a lo ancho en todos los anchos (no sólo abajo de 1024): el túnel sigue pintando sus anillos de foco con su margen, y lo que ese margen deja afuera del cuadro ya no ensancha la página (medido: el documento mide lo que la ventana a 1440, 1024 y 390, en todo el recorrido; antes, 1446 a 1440)')
-controlPositivo('el detector VE el recorte sólo en el teléfono', trabajosD.replace("'relative h-full w-full overflow-x-clip max-escritorio:sticky", "'relative h-full w-full max-escritorio:overflow-x-clip max-escritorio:sticky"), bloqueRecortado)
+afirmar(bloqueRecortado(trabajosD), 'Trabajos recorta en todos los anchos (no sólo abajo de 1024): el panel del Portfolio afuera del cuadro no ensancha la página (antes, el margen del túnel: 1446 a 1440)')
+afirmar(/overflowClipMargin: `\$\{MARGEN_DEL_RECORTE_PX\}px`/.test(sinComentarios(leer('_archivo/tunel-portfolio/CapaDelTunel.tsx'))), '  [archivo] y el túnel sigue pintando sus anillos de foco con su margen')
+controlPositivo('el detector VE el recorte sólo en el teléfono', trabajosD.replace('className="sticky top-0 h-svh w-full overflow-clip"', 'className="sticky top-0 h-svh w-full max-escritorio:overflow-clip"'), bloqueRecortado)
 
 
 // D2 · el tachado 3D de «lo mismo de siempre» se despinta como el del DOM (de la tinta a la tinta media), con su avance.

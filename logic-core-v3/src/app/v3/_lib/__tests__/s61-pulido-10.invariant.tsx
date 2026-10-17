@@ -27,7 +27,7 @@ import { BANDA, enUnidadesDelLogo, factorDeLaBanda, fovConFactor } from '../esce
 import { CAMERA_FOV } from '../escena/probeScene'
 import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { solapesDe, type Silueta } from './solapes'
-import { opacidadDeLaLlegada, recorteDeLaLlegada } from '../../_secciones/trabajos/piezas'
+import { opacidadDeLaLlegada, recorteDeLaLlegada } from '../../_secciones/trabajos/portfolio/tipografia'
 import { RESULTADO } from '../formularios/gracias'
 import { poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
 import { CARGA } from '../../_componentes/carga/Carga'
@@ -264,7 +264,7 @@ titulo('J7 · El cartel de Portfolio llega entero (o invisible) después de un v
 // Al llegar con un viaje, el título repite su llegada (vuelve a 0 con el velo puesto y llega después). P2 lo sube desde el 60 % de
 // su alto adentro de la ventana que recorta: el primer cuadro a la vista era el titular cortado. Mientras se repite, la ventana no
 // recorta y el titular arranca invisible: el primer cuadro visible tiene las letras enteras o la opacidad en 0.
-const PIEZAS_J7 = leer('_secciones/trabajos/piezas.tsx')
+const PIEZAS_J7 = leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx') // [B1] el titular, en el encabezado del selector
 const llegadaBien = (opacidad: (r: number) => number, recorte: (r: number) => string, c: string): boolean =>
   opacidad(0) === 0 && recorte(0) === 'visible' && recorte(0.5) === 'visible' && opacidad(1) === 1 && opacidad(-1) === 1 && recorte(-1) === 'hidden' &&
   [0, 0.05, 0.2, 0.5].every((r) => opacidad(r) === 0 || recorte(r) === 'visible') &&

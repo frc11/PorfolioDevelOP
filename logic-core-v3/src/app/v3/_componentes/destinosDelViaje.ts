@@ -8,6 +8,7 @@ import {
 } from '../_secciones/_contrato/bloqueAnimado'
 import { MARCA_COREOGRAFIA_DEL_HOME } from '../_secciones/_contrato/marcaCoreografia'
 import { VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../_secciones/por-que-develop/geometria'
+import { ANCLAS_DEL_PORTFOLIO } from '../_secciones/trabajos/portfolio/anclas'
 import { destinoDelAncla } from './viajeSinLenis'
 
 /**
@@ -21,9 +22,9 @@ import { destinoDelAncla } from './viajeSinLenis'
  *     la primera pantalla (título, subrayado y tachado, ≠ y cuerpo), que es el fin de la ventana
  *     más tardía de sus bloques; salvo que ahí el título ya esté debajo de la barra (1024 × 768:
  *     esa pose no entra en el cuadro), y entonces el último píxel con el título despejado.
- *   · **Trabajos** — el instante en que «Portfolio» terminó de subir a su lugar: el más tarde de
- *     dos, el fin de su máscara y el pin del cartel (hasta ahí el cartel sube con la página). La
- *     huida empieza una pantalla después.
+ *   · **Trabajos** — [B1] El Garage en portada, con el panel del selector adentro (decisión de la
+ *     aprobación de B1): el ancla de su paso (`#portfolio-el-garage`, `portfolio/anclas.ts`). Antes
+ *     era el fin de la subida de «Portfolio» en el cartel del túnel, que se fue al archivo.
  *   · **Servicios** — un píxel antes de que el 00 pase al 01: el 01 arranca con el primer píxel
  *     del pin (`fronterasDeEstado` da 0 en su primera frontera), así que el destino es el pin,
  *     hacia abajo.
@@ -142,10 +143,10 @@ function finDeLaEntrada(panel: HTMLElement, v: number): number | null {
 const NUDOS: Readonly<Record<string, (panel: HTMLElement, v: number) => number | null>> = {
   hero: (panel) => Math.round(topeDe(panel)),
   'quienes-somos': reposoDeQuienesSomos,
-  trabajos: (panel, v) => {
-    const titulo = panel.querySelector<HTMLElement>(`[data-pieza="cartel"] ${SELECTOR_DEL_BLOQUE_ANIMADO}`)
-    const subida = titulo === null ? null : finDeLaVentana(titulo, v)
-    return Math.ceil(Math.max(topeDe(panel), subida ?? Number.NEGATIVE_INFINITY))
+  // [B1] El Garage en portada: el ancla de su paso está una pantalla antes del centro del paso, así que su tope es el destino.
+  trabajos: (panel) => {
+    const ancla = panel.querySelector<HTMLElement>(`#${ANCLAS_DEL_PORTFOLIO[0].id}`)
+    return ancla === null ? null : Math.round(topeSinPegar(ancla))
   },
   servicios: (panel) => Math.floor(topeDe(panel)),
   // [NAVBAR] Panel: la cabecera entera a la vista (el título, la bajada y el panel en vivo).
@@ -180,6 +181,8 @@ const SUBNUDOS: Readonly<Record<string, (ancla: HTMLElement, v: number) => numbe
     const alto = seccion.getBoundingClientRect().height
     return alto <= v ? null : Math.floor(topeSinPegar(seccion) + alto - v - 2)
   },
+  // [B1] Los deep links del Portfolio (`#portfolio-el-garage`, …): el tope del ancla, que es el centro de la portada de su paso.
+  ...Object.fromEntries(ANCLAS_DEL_PORTFOLIO.map((a) => [a.id, (ancla: HTMLElement): number => Math.round(topeSinPegar(ancla))])),
 }
 
 /** Los anclas con destino propio adentro de su sección. */

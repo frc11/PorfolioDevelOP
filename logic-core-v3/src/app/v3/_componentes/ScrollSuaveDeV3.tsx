@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react'
 import { OPCIONES_DE_LENIS } from '@/components/layout/SmoothScroll'
 
 import { anotarElLenis } from '../_lib/diagnostico/anotar'
+import { LENIS_DEL_SITIO } from '../_lib/lenisDelSitio'
 import { relojDelCuadro } from '../_lib/escena/viaje'
 import { MARCA_SCROLL_SUAVE } from '../_lib/marcaScrollSuave'
 import { ATRIBUTO_SCROLL_SUAVE } from '../_lib/scrollSuave'
@@ -82,6 +83,7 @@ export default function ScrollSuaveDeV3(): null {
     sinClasesDeScroll(lenis)
     instancia.current = lenis
     anotarElLenis(lenis) // [CIERRE A-ter] A13 · el diagnóstico de la carga (`?diag=carga`).
+    LENIS_DEL_SITIO.instancia = lenis // [B1] para el salto del Portfolio a un paso (`portfolio/saltar.ts`).
     document.documentElement.setAttribute(ATRIBUTO_SCROLL_SUAVE, MARCA_SCROLL_SUAVE)
 
     // [INTERFAZ 1] T1 · la velocidad del scroll, una vez por cuadro y en px/s, para el texto con inercia.
@@ -108,6 +110,7 @@ export default function ScrollSuaveDeV3(): null {
       document.querySelector('[data-v3]')?.removeAttribute(ATRIBUTO_DEL_SCROLL_EN_CURSO)
       instancia.current = null
       anotarElLenis(null)
+      if (LENIS_DEL_SITIO.instancia === lenis) LENIS_DEL_SITIO.instancia = null
       document.documentElement.removeAttribute(ATRIBUTO_SCROLL_SUAVE)
     }
   }, [])

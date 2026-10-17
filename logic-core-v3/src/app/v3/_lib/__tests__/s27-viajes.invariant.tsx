@@ -27,6 +27,7 @@ import { BarraDelHome } from '../../_chrome/barra/BarraDelHome'
 import { Menu } from '../../_chrome/menu/MenuMovil'
 import { IDS_DE_SECCION } from '../../_secciones/_contrato/forma'
 import { destinoDelViaje } from '../../_componentes/destinosDelViaje'
+import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
 import { ANCLA_DE_LA_MASCARA, ANCLA_DE_LA_VENTANA_VISIBLE, ANCLA_DEL_TRAZO } from '../../_secciones/_contrato/bloqueAnimado'
 import { MARCA_COREOGRAFIA_DEL_HOME } from '../../_secciones/_contrato/marcaCoreografia'
 import { VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
@@ -159,12 +160,14 @@ conDomFalso(768, 72, () => {
   controlPositivo('  el chequeo vería un reposo que mete el título debajo de la barra', entradaDe(bajo, 768), (d: number) => 900 + 150 - d >= 72)
 })
 conDomFalso(900, 72, () => {
-  const titulo = bloque(5073 + 300, 180, 'ventana-de-la-mascara')
-  const trabajos = new NodoFalso({ tope: 5073.4, alto: 6813 }, { 'data-panel': 'trabajos' }).responde(`[data-pieza="cartel"] ${BLOQUE}`, titulo)
-  afirmarIgual(destinoDelViaje(trabajos as unknown as HTMLElement), 5074, 'Trabajos: el pin del cartel, hacia arriba (el primer píxel pegado), cuando «Portfolio» ya terminó de subir antes (la huida arranca una pantalla después)')
-  const tarde = bloque(5073 + 600, 180, 'ventana-de-la-mascara')
-  const trabajosTarde = new NodoFalso({ tope: 5073, alto: 6813 }, { 'data-panel': 'trabajos' }).responde(`[data-pieza="cartel"] ${BLOQUE}`, tarde)
-  afirmarIgual(destinoDelViaje(trabajosTarde as unknown as HTMLElement), Math.ceil(fin(tarde, 900)), '  y el fin de su subida, si termina después del pin')
+  // [B1] Trabajos aterriza en El Garage en portada, con el panel del selector adentro: el ancla de su paso (una pantalla antes del
+  // centro del paso, `portfolio/anclas.ts`). Era el fin de la subida de «Portfolio» en el cartel del túnel (hoy en el archivo).
+  const ancla = Object.assign(new NodoFalso({ tope: 5073.4 + 337.5, alto: 1 }), { id: ANCLAS_DEL_PORTFOLIO[0].id })
+  const trabajos = new NodoFalso({ tope: 5073.4, alto: 8556 }, { 'data-panel': 'trabajos' }).responde(`#${ANCLAS_DEL_PORTFOLIO[0].id}`, ancla)
+  afirmarIgual(destinoDelViaje(trabajos as unknown as HTMLElement), 5411, 'Trabajos: El Garage en portada (el ancla de su paso, al píxel entero), con el panel del selector adentro')
+  controlPositivo('  el chequeo vería el destino de antes (el pin del cartel)', 5074, (d: number) => d === destinoDelViaje(trabajos as unknown as HTMLElement))
+  const esquina = Object.assign(new NodoFalso({ tope: 5073.4 + 1687.5, alto: 1 }), { id: ANCLAS_DEL_PORTFOLIO[1].id })
+  afirmarIgual(destinoDelViaje(trabajos as unknown as HTMLElement, esquina as unknown as HTMLElement), 6761, '  y un deep link (`#portfolio-esquina-estudio`) va a la portada de su proyecto: su subnudo es el tope de su ancla')
 
   const servicios = new NodoFalso({ tope: 11885.6, alto: 7200 }, { 'data-panel': 'servicios' })
   afirmarIgual(destinoDelViaje(servicios as unknown as HTMLElement), 11885, 'Servicios: el pin, hacia abajo al píxel entero (uno más ya es el 01)')
@@ -241,7 +244,7 @@ afirmar(/cruceDelTramo\(\{ cruza, tope: r\.top, pie: r\.bottom \}\) === 'arriba-
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · El túnel y el rodillo llegan asentados')
 
-const TUNEL = quitarComentarios(leer('src/app/v3/_secciones/trabajos/CapaDelTunel.tsx'))
+const TUNEL = quitarComentarios(leer('src/app/v3/_archivo/tunel-portfolio/CapaDelTunel.tsx')) // [B1] el túnel, en el archivo
 afirmar(TUNEL.includes('if (viajeEnCurso() !== null) reposarEn(scrollDeAhora())'), 'durante el viaje el túnel no reproduce su zoom: lo mostrado va con la página, quieto')
 afirmar(/suscribirAlViaje\(\(\) => \{\s*if \(viajeEnCurso\(\) !== null\) return\s*reposarEn\(scrollDeAhora\(\)\)/.test(TUNEL), '  y al terminar se asienta: resortes y regulador en su reposo para ese punto')
 const DISPARO = quitarComentarios(leer('src/app/v3/_secciones/servicios/disparo.ts'))

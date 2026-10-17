@@ -44,9 +44,10 @@ import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { SUBIDA_DE_LA_FRASE_SVH } from '../../_secciones/por-que-develop/geometria'
 import { LIBRO_QUE_LLEGA, poseDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { DESDE_DONDE_LLEGAN, poseDelValor } from '../../_secciones/por-que-develop/valorEnVolumen'
-import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
-import { CONTENIDO as CONTENIDO_DE_TRABAJOS } from '../../_secciones/trabajos/contenido'
-import { PORCENTAJE_DE_TINTA_TENUE } from '../../_secciones/trabajos/ventana'
+// [B1] el túnel se mudó al archivo: lo que afirma de su código se lee de allá.
+import { primeraFotoTapa, progresoDelPxDelTunel } from '../../_archivo/tunel-portfolio/geometria'
+import { CONTENIDO as CONTENIDO_DE_TRABAJOS } from '../../_archivo/tunel-portfolio/contenido'
+import { PORCENTAJE_DE_TINTA_TENUE } from '../../_archivo/tunel-portfolio/ventana'
 import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../../_chrome/enlaces'
 import { afirmar, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
@@ -57,7 +58,8 @@ const sinComentarios = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '')
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B1 · Portfolio: sin salida propia, se queda y se va con su sección')
 
-const piezas = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
+// [B1] el título de Portfolio vive en el encabezado del selector, armado igual que en el cartel.
+const piezas = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
 const porQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 // [CIERRE RETOQUE 3D] B6: la frase de Por qué develOP también se queda (s42 · B6).
 afirmar(/<TituloDeVolumen id="portfolio"[^>]*\squeda \/>/.test(piezas) && porQue.length > 0, 'Portfolio se queda (`queda`)')
@@ -74,7 +76,7 @@ const pin = { inicio: 5073, fin: 10986 }
 afirmar(corrimiento(pin, 4573) === 500 && corrimiento(pin, 7000) === 0 && corrimiento(pin, 11486) === -500, '  el corrimiento: antes del escenario clavado baja con la sección, clavado no se mueve, después sube con ella')
 afirmar(/const visible = m\.llegada > 0 && !fuera && !tapado/.test(escena), '  fuera del cuadro no se dibuja (y la llegada, función del scroll, ya es la que corresponde cuando vuelve)')
 const tapa = (f: (p: number) => boolean): boolean => !f(progresoDelPxDelTunel(0)) && !f(progresoDelPxDelTunel(400)) && f(progresoDelPxDelTunel(910))
-afirmar(tapa(primeraFotoTapa), '  lo esconde la primera foto del túnel recién cuando tapa el cuadro entero (no la huida del cartel: ahí todavía se veía)')
+afirmar(tapa(primeraFotoTapa), '  [archivo] en el túnel lo escondía la primera foto recién cuando tapaba el cuadro entero (no la huida del cartel: ahí todavía se veía)')
 controlPositivo('el detector VE el escondido con la foto chica', (p: number) => p >= progresoDelPxDelTunel(300), tapa)
 // [AJUSTES FINALES] A4 · el hero, además, espera a que la carga se abra (el velo terminó de fundirse): hasta ahí lo pedido es 0.
 afirmar(/else if \(!fuera && !tapado\) m\.llegada = persigue\(m\.llegada, cargaLista\(\) \? a\.titulo\.llegada : 0, dt, a\.titulo\.minimoS/.test(escena), '  tapado o fuera, el que llega por tiempo (el hero) espera (y hasta que la carga se abre); Portfolio sigue al scroll')
@@ -199,11 +201,11 @@ controlPositivo('el detector VE a todos llegando del mismo lugar', ((p: number) 
 afirmar(/<li ref=\{lugar\}>[\s\S]*?<ValorEnVolumen progreso=\{tramo\} indice=\{indice\}>\s*<PiezaDeValor /.test(porQue) && !porQue.includes('PliegueDelValor') && !/requestAnimationFrame|setInterval/.test(sinComentarios(leer('_secciones/por-que-develop/valorEnVolumen.tsx'))), '  el bloque entero (ícono, título y texto) del DOM, con el progreso de su tramo (sin reloj: al revés para atrás)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3H · El cierre del túnel: «Clickeá acá para empezar»')
+titulo('3H · El cierre del túnel: «Clickeá acá para empezar» (el túnel, en el archivo)')
 
 const cta = CONTENIDO_DE_TRABAJOS.cta as Record<string, string>
 afirmar(cta.empezar === 'Clickeá acá para empezar' && cta.rotulo === undefined && cta.aclaracion === undefined && cta.frase === '¿El próximo proyecto sos vos?', 'la frase queda; «Hablemos» y «(un clic y arrancamos)» se fueron')
-const piezasDeTrabajos = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
+const piezasDeTrabajos = sinComentarios(leer('_archivo/tunel-portfolio/piezas.tsx'))
 const lleva = (c: string): boolean => (c.match(/<a href=\{DESTINO_DEL_CTA\} data-pieza="empezar"[^>]*style=\{ESTILO_DE_EMPEZAR\}>\s*\{CONTENIDO\.cta\.empezar\}/g) ?? []).length === 2 && !/CtaEnlace/.test(c)
 afirmar(lleva(piezasDeTrabajos) && /mt-auto self-center/.test(piezasDeTrabajos) && /after:absolute after:inset-0/.test(piezasDeTrabajos), '  en las dos ramas lleva al pie (el contacto); arriba de 1025 abajo y centrado en la ventana, que sigue siendo entera el enlace; sin 3D')
 controlPositivo('el detector VE el «Hablemos» de antes', `${piezasDeTrabajos}<CtaEnlace href={DESTINO_DEL_CTA} />`, lleva)

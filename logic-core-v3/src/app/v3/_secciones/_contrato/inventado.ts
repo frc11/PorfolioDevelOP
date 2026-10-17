@@ -119,6 +119,38 @@ export const INVENTOS = {
   // testimonio entero (cita, cuerpo y firma). Se fueron con la sección que los mostraba:
   // la nueva son seis valores sin una sola cifra, y ninguna de las cinco mentiras se
   // consume. Salieron las dos puntas juntas, de acá y de `contenido.ts`.
+  // ⚠️ [B1] · EL PORTFOLIO — lo que FALTA de las fichas (las tres reseñas y lo que se le resolvió a Esquina y a Banú). Valentino
+  // las va a pedir. Con la llave prendida el diseño se ve completo con un RELLENO que se lee como relleno («Texto de relleno: …»,
+  // «Nombre del cliente, …»): no es una reseña verosímil atribuida a un cliente real, que es lo que este archivo existe para no
+  // escribir. Con la llave apagada, el marcador. Cada una nombra su proyecto: dos mentiras iguales se pisarían (§3 de s21).
+  trabajosResueltoDeEsquina: {
+    marcador: '[TEXTO]',
+    pedido: '[TEXTO]',
+    mentira: 'Texto de relleno: lo que le resolvimos a Esquina Estudio, en una frase del largo de la real.',
+  },
+  trabajosResueltoDeBanu: {
+    marcador: '[TEXTO]',
+    pedido: '[TEXTO]',
+    mentira: 'Texto de relleno: lo que le resolvimos a Banú Scents, en una frase del largo de la real.',
+  },
+  trabajosResenaDeElGarage: {
+    marcador: '[TESTIMONIO]',
+    pedido: '[TESTIMONIO] · pendiente',
+    mentira: 'Texto de relleno de la reseña de El Garage: dos o tres renglones con el largo de una reseña de verdad, para ver la ficha completa.',
+  },
+  trabajosAutorDeElGarage: { marcador: '[NOMBRE]', pedido: '[NOMBRE]', mentira: 'Nombre del cliente, El Garage' },
+  trabajosResenaDeEsquina: {
+    marcador: '[TESTIMONIO]',
+    pedido: '[TESTIMONIO] · pendiente',
+    mentira: 'Texto de relleno de la reseña de Esquina Estudio: dos o tres renglones con el largo de una reseña de verdad, para ver la ficha completa.',
+  },
+  trabajosAutorDeEsquina: { marcador: '[NOMBRE]', pedido: '[NOMBRE]', mentira: 'Nombre del cliente, Esquina Estudio' },
+  trabajosResenaDeBanu: {
+    marcador: '[TESTIMONIO]',
+    pedido: '[TESTIMONIO] · pendiente',
+    mentira: 'Texto de relleno de la reseña de Banú Scents: dos o tres renglones con el largo de una reseña de verdad, para ver la ficha completa.',
+  },
+  trabajosAutorDeBanu: { marcador: '[NOMBRE]', pedido: '[NOMBRE]', mentira: 'Nombre del cliente, Banú Scents' },
 } as const satisfies Record<string, Invento>
 
 export const LISTA_DE_INVENTOS: readonly Invento[] = Object.values(INVENTOS)

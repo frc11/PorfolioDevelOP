@@ -154,10 +154,11 @@ export function afirmarAbajoDe1024(): void {
   afirmar(anclasEnSvh(EPOCA), 'el motor resuelve las anclas contra el `svh` (una sonda de 100svh), no contra `innerHeight`: la barra de Safari no las mueve')
   controlPositivo('el detector ve el motor viejo', 'foto = { epoca: 0, ancho: window.innerWidth, alto: window.innerHeight }', anclasEnSvh)
   const TRABAJOS = sinComentarios(leer('Trabajos.tsx'))
-  // MÓVIL 2: el pin angosto lo lleva el bloque; la sección es la caja alta que lo contiene.
-  const pinEnSvh = (fuente: string): boolean => /bloque: '[^']*max-escritorio:sticky[^']*max-escritorio:h-svh[^']*'/.test(fuente) && !/\b(h-screen|h-dvh|h-lvh|100vh|100dvh)\b/.test(fuente)
-  afirmar(pinEnSvh(TRABAJOS), '  y abajo de 1024 la rama coreografiada se clava con una caja de 100svh: ni vh, ni dvh')
-  controlPositivo('el detector ve un pin en dvh', "bloque: 'relative max-escritorio:sticky max-escritorio:top-0 max-escritorio:h-dvh' }", pinEnSvh)
+  // [B1] el pin lo lleva el escenario del Portfolio, en todo ancho y en las dos ramas; la sección es la caja alta que lo contiene.
+  const ESCENARIO = sinComentarios(leer('portfolio/EscenarioDelPortfolio.tsx'))
+  const pinEnSvh = (fuente: string): boolean => /className="sticky top-0 h-svh\b/.test(fuente) && !/\b(h-screen|h-dvh|h-lvh|100vh|100dvh)\b/.test(fuente)
+  afirmar(pinEnSvh(ESCENARIO) && !/\b(h-screen|h-dvh|h-lvh|100vh|100dvh)\b/.test(TRABAJOS), '  y el escenario del Portfolio se clava con una caja de 100svh, también abajo de 1024: ni vh, ni dvh')
+  controlPositivo('el detector ve un pin en dvh', 'className="sticky top-0 h-dvh w-full"', pinEnSvh)
 
   // ── LA COREOGRAFÍA QUE CRUZA EL UMBRAL LA PIDE SÓLO TRABAJOS ───────────
   const COMPUERTA = sinComentarios(leer('../CompuertaDelHome.tsx'))

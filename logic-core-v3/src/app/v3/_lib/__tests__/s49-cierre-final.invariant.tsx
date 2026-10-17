@@ -28,11 +28,14 @@ import * as THREE from 'three'
 import { HojaParaElInvariante } from '../../_chrome/contacto/FormularioDeContacto'
 import { ESCALA_AL_NACER, ESPESOR_DE_LA_PLACA_PX, MS_DE_LA_SALIDA_DE_LA_PLACA, PERSPECTIVA_DE_LA_PLACA, TRANSICIONES, paralajeDe, seVeElCostadoIzquierdo, viajeDesdeElFondo } from '../../_chrome/contacto/placa'
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
-import { LLEGADA, escalaDeDemos, llegadaDeDemos, tramoDelLibro } from '../../_secciones/trabajos/demos/entrada'
-import { BANDA_DEL_EFECTO, FIN_DE_LA_LLEGADA_EN_EL_VACIO, LLEGADA_DE_LOS_DEMOS, MARGEN_DEL_DESPINEADO, PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
-import { enElRiel } from '../../_secciones/trabajos/regulador'
-import { ESTIRAMIENTO_DEL_TUNEL, PX_DEL_ARRANQUE_DEL_TUNEL, pantallasExtra, progresoDeLaTabla, pxDeLaTabla } from '../../_secciones/trabajos/ritmo'
-import { PX_DEL_TUNEL, poseDelTunel } from '../../_secciones/trabajos/tunel'
+import { LLEGADA, llegadaDeDemos, tramoDelLibro } from '../../_secciones/trabajos/demos/entrada'
+import { FIN_DE_LA_LLEGADA_EN_EL_VACIO, LLEGADA_DE_LOS_DEMOS } from '../../_secciones/trabajos/demos/relojDeDemos'
+// [B1] el túnel (y la fracción del vacío que dibujaba) se mudó al archivo: 1B compara la llegada viva contra él y 1C afirma su código.
+import { escalaDeDemos } from '../../_archivo/tunel-portfolio/entradaDelTunel'
+import { BANDA_DEL_EFECTO, MARGEN_DEL_DESPINEADO, PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION, progresoDelPxDelTunel } from '../../_archivo/tunel-portfolio/geometria'
+import { enElRiel } from '../../_archivo/tunel-portfolio/regulador'
+import { ESTIRAMIENTO_DEL_TUNEL, PX_DEL_ARRANQUE_DEL_TUNEL, pantallasExtra, progresoDeLaTabla, pxDeLaTabla } from '../../_archivo/tunel-portfolio/ritmo'
+import { PX_DEL_TUNEL, poseDelTunel } from '../../_archivo/tunel-portfolio/tunel'
 import { ANCLAJE, pantallaDeScroll } from '../escena/anclaje'
 import { ANCLAS_DEL_FINAL, conElFinalEnLaSimulacion } from '../escena/final/enElPiso'
 import { FINAL_DEL_PIE, camaraDelFinal, pasoDelReloj, poseDelLogo, relojDelQuieto, relojQuieto, subida } from '../escena/final/recorridoDelFinal'
@@ -138,7 +141,7 @@ controlPositivo('el detector VE los libros atados al vacío', capa.replace('pose
 titulo('1C · El túnel: la misma animación, más larga — la tabla de siempre estirada por k desde 1024 (1,8 desde EL ENCASTRE 1A)')
 
 // Las tres leyes de prueba de AJUSTES FINALES se fueron con su bandera y sus archivos; [EL ENCASTRE] 1A: y la prueba del k.
-const T = '_secciones/trabajos'
+const T = '_archivo/tunel-portfolio'
 const sinLasLeyes = (codigo: string): boolean => !/profundidad|tunel=constante|tunel=tope|tunel=largo|sinResortes|poseMostrada|ritmoMostrado/.test(codigo)
 const delTunel = ['CapaDelTunel.tsx', 'piezas.tsx', 'regulador.ts', 'estiramiento.ts', 'ritmo.ts'].map((r) => sinComentarios(leer(`${T}/${r}`))).join('\n')
 afirmar(sinLasLeyes(delTunel) && !existsSync(`${V3}/${T}/profundidad.ts`) && !existsSync(`${V3}/${T}/largo.ts`) && !('tunel' in PRUEBAS_APAGADAS) && !('tunel' in entornoPedido('producto,tunel=largo').pruebas), '`tunel=constante|tope|largo` se borraron: ni archivos (profundidad.ts, largo.ts), ni ley, ni bandera')

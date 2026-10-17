@@ -291,7 +291,7 @@ const restos = ['_componentes/titulos3d/LetrasQueLlegan.tsx', '_componentes/titu
 // [3D Y SONIDO] T1: los títulos pasaron al producto (`Entorno.titulos`): `dom` y `webgl` no los piden.
 const titulosPedidos = (v: string): unknown => entornoPedido(`producto,titulos=${v}`).titulos
 afirmar(restos.length === 0 && titulosPedidos('dom') !== 'dom' && titulosPedidos('webgl') !== 'webgl', 'V1 (DOM) y V2 (troika) no existen: ni sus archivos, ni la TTF, ni sus banderas', restos.join(', ') || 'nada')
-const secciones = readFileSync(deV3('_secciones/trabajos/piezas.tsx'), 'utf8') + readFileSync(deV3('_secciones/por-que-develop/PorQueDevelop.tsx'), 'utf8')
+const secciones = readFileSync(deV3('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'), 'utf8') + readFileSync(deV3('_secciones/por-que-develop/PorQueDevelop.tsx'), 'utf8')
 afirmar(!/TituloDePrueba|usePruebaDeTitulos|LetrasQueLlegan/.test(secciones), '  y las secciones volvieron a su pieza de siempre')
 
 cerrar('s35-escena9')

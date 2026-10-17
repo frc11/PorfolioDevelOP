@@ -5,13 +5,15 @@ import { fileURLToPath } from 'node:url'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../../_lib/__tests__/afirmar'
-import { arranqueDeDemos, arranqueDeLaSalida } from '../geometria'
+// [B1] la fracción del vacío que el túnel dibujaba y sus ventanas se mudaron con él: se afirman contra el archivo.
+import { arranqueDeDemos, arranqueDeLaSalida } from '../../../_archivo/tunel-portfolio/geometria'
+import { escalaDeDemos } from '../../../_archivo/tunel-portfolio/entradaDelTunel'
 
 import { MS_DEL_GENIE, TIRAS_DEL_GENIE, esquinasDeLaTira, filaDelGenie, liderDelGenie, proyectar, type Caja } from './genie'
 import { Biblioteca } from './Biblioteca'
 import { CATALOGO_DE_DEMOS } from './catalogo'
 import { siguienteFoco } from './dialogo'
-import { LLEGADA, conSobrepaso, enElTramo, escalaDeDemos, poseDelLibro, tramoDelLibro } from './entrada'
+import { LLEGADA, conSobrepaso, enElTramo, poseDelLibro, tramoDelLibro } from './entrada'
 
 /**
  * §25 DEL INVARIANTE DE TRABAJOS — **LAS DEMOS.** Lo llama `trabajos.invariant`.

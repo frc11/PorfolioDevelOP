@@ -4,15 +4,18 @@
  *   B1.1a · los datos (`trabajos/proyectos.ts`): el orden, los nombres reales, las URL de siempre, la fecha y el servicio derivado;
  *           los medios (`public/portfolio/<slug>/`): existen, pesan lo que dice el recibo y entran en el techo, H.264 sin audio y con
  *           `+faststart`, y un póster WebP por video.
+ *   B1.1b · la base (`s76-portfolio-mapeo.ts`): la REGLA DE ALTURAS en los tres anchos y los tres pasos (afuera del selector la
+ *           escena ve lo de hoy), la noche del tramo, los pasos y las anclas, y el reloj de Demos contra el túnel archivado.
  */
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 import { RECIBO_DE_LOS_MEDIOS, TECHO_BYTES, type MedioCodificado } from '../../../../../scripts-portfolio/guiones'
 import { NOMBRES_REALES } from '../../_secciones/_contrato/escaneo'
-import { CONTENIDO } from '../../_secciones/trabajos/contenido'
+import { CONTENIDO as CONTENIDO_DE_ANTES } from '../../_archivo/tunel-portfolio/contenido'
 import { PROYECTOS, mediosDe, seMuestraElServicio, type ProyectoDelPortfolio } from '../../_secciones/trabajos/proyectos'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { afirmarLaBase } from './s76-portfolio-mapeo'
 
 const RAIZ = process.cwd()
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -25,8 +28,8 @@ const esReal = (nombre: string): boolean => NOMBRES_REALES.some((n) => nombre.st
 afirmar(PROYECTOS.every((p) => esReal(p.nombre)), 'los tres nombres son clientes reales (`NOMBRES_REALES`): ninguno inventado')
 controlPositivo('  un cliente que no existe se ve', 'Matsu Automotores', esReal)
 
-const urlDeHoy = (nombre: string): string | undefined => CONTENIDO.proyectos.find((p) => p.nombre === nombre)?.enlace
-afirmar(PROYECTOS.every((p) => p.url === urlDeHoy(p.nombre)), 'cada URL es la del repo (`contenido.ts`, verificadas por el humano): ningún dominio nuevo')
+const urlDeHoy = (nombre: string): string | undefined => CONTENIDO_DE_ANTES.proyectos.find((p) => p.nombre === nombre)?.enlace
+afirmar(PROYECTOS.every((p) => p.url === urlDeHoy(p.nombre)), 'cada URL es la que el repo tenía (`contenido.ts` de antes, hoy en el archivo; verificadas por el humano): ningún dominio nuevo')
 afirmar(PROYECTOS.every((p) => /^https:\/\/[a-z]+\.com\.ar$/.test(p.url)), '  y las tres son https, sin ruta')
 
 const fechaBienFormada = (f: string | null): boolean =>
@@ -111,5 +114,7 @@ controlPositivo('un MP4 con el `mdat` antes del `moov` (sin faststart) se ve', B
 const hdlr = (tipo: string): string => `hdlr\0\0\0\0\0\0\0\0${tipo}`
 controlPositivo('  y uno con una pista de audio', caja('moov', `${hdlr('vide')}${hdlr('soun')}`), sinAudio)
 afirmar(conInicioRapido(Buffer.concat([caja('ftyp'), caja('moov'), caja('mdat')])) && sinAudio(caja('moov', hdlr('vide'))), '  y los lectores aceptan uno bien armado')
+
+afirmarLaBase()
 
 cerrar('s76-portfolio.invariant')

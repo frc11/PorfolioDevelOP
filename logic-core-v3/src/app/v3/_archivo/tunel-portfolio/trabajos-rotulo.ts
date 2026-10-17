@@ -13,7 +13,7 @@
  */
 
 import { afirmar, afirmarIgual, controlPositivo } from '../../_lib/__tests__/afirmar'
-import { leer } from '../_invariantes/soporte'
+import { leer } from '../../_secciones/_invariantes/soporte'
 import { afirmarLaTablaYElNacimiento } from './trabajos-nacimiento'
 import {
   ANCHO_CON_EL_ROTULO_ENTERO,
@@ -25,7 +25,7 @@ import {
   transformDelRotulo,
 } from './tunel'
 
-const FUENTE_DE_LA_CAPA = leer('src/app/v3/_secciones/trabajos/CapaDelTunel.tsx')
+const FUENTE_DE_LA_CAPA = leer('src/app/v3/_archivo/tunel-portfolio/CapaDelTunel.tsx')
 
 /**
  * Lo que la capa ESCRIBE en el `transform` del rótulo. Tiene que ser

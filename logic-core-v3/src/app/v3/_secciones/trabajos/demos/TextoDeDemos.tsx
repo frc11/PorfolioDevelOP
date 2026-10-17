@@ -12,7 +12,7 @@ import { LENTOS } from '../../../_lib/titulos3d/repeticiones'
 import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../../_contrato/canales'
 import type { Progreso } from '../../_contrato/coreografia'
 
-import { CLASE_DEL_CUERPO_DE_DEMOS, CLASE_DEL_TITULAR_DEL_CARTEL } from '../angosto'
+import { CLASE_DEL_CUERPO_DE_DEMOS, CLASE_DEL_TITULAR_DEL_CARTEL } from './herencia'
 import { TEXTO_DE_DEMOS } from './catalogo'
 
 /** La medida del párrafo, en caracteres: la misma del cuerpo del cartel de Portfolio. */

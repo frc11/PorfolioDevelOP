@@ -4,8 +4,9 @@ import { useMotionValue, useMotionValueEvent, type MotionValue } from 'motion/re
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { Envoltorio } from '../../../_componentes/layout/Envoltorio'
-import { CONTENIDO } from '../contenido'
-import { PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION, arranqueDeDemos } from '../geometria'
+import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../../_lib/navegacion'
+import { PANTALLAS_POR_PASO, pxDelMostradoDeDemos, scrollDelPx } from '../portfolio/pasos'
+import { ARRANQUE_DEL_ESPACIO_DE_DEMOS, PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION_DE_HOY } from './relojDeDemos'
 
 import { cn } from '@/lib/utils'
 
@@ -79,9 +80,12 @@ function alcanzar(p: Persecucion): void {
  */
 export function CapaDeDemos({
   mostrado,
+  paso = PANTALLAS_POR_PASO,
   className,
 }: {
   readonly mostrado: MotionValue<number>
+  /** [B1] Las pantallas por paso del Portfolio: con ellas el foco sabe dónde está la cola en la sección nueva. */
+  readonly paso?: number
   readonly className?: string
 }): React.JSX.Element {
   const capa = useRef<HTMLDivElement | null>(null)
@@ -168,24 +172,30 @@ export function CapaDeDemos({
     if (el === null || panel === null) return
     // [CIERRE] 1B · adonde la llegada termina, pasado el arranque de demos ([EL ENCASTRE] 1B: también abajo de 1024).
     const llegaEntera = (): number => aparicion.current.mostrada
-    const demos = arranqueDeDemos(CONTENIDO.proyectos.length)
     let cancelar = (): void => undefined
     const alEntrarElFoco = (e: FocusEvent): void => {
       // Sólo el teclado: un clic en una pieza a medio crecer abre la demo ahí mismo.
       if (llegaEntera() >= 1 || !(e.target instanceof HTMLElement) || !e.target.matches(':focus-visible')) return
-      const arranque = Math.max(demos, PX_DEL_FIN_DE_LA_LLEGADA / PX_DE_LA_SECCION)
-      // El progreso de la sección arranca con su borde de arriba en el pie del cuadro.
-      const cero = panel.getBoundingClientRect().top + window.scrollY - window.innerHeight
+      // [B1] `mostrado` se cuenta en la sección de antes (6.813 px de la regla); la cola está corrida en la nueva (`pasos.ts`).
+      const arranque = Math.max(ARRANQUE_DEL_ESPACIO_DE_DEMOS, PX_DEL_FIN_DE_LA_LLEGADA) / PX_DE_LA_SECCION_DE_HOY
+      const alto = window.innerHeight
+      const tope = panel.getBoundingClientRect().top + window.scrollY
       cancelar()
       // [INTERFAZ 1] Cierre: y si lo mostrado se asienta antes de que la capa llegue, la página sigue (`llevarALaLlegada`).
-      cancelar = llevarALaLlegada({ destino: cero + arranque * panel.offsetHeight, alto: panel.offsetHeight, arranque, mostrado: () => mostrado.get(), llego: () => llegaEntera() >= 0.999 })
+      cancelar = llevarALaLlegada({
+        destino: scrollDelPx(pxDelMostradoDeDemos(arranque, paso), tope, alto),
+        alto: (PX_DE_LA_SECCION_DE_HOY * alto) / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA,
+        arranque,
+        mostrado: () => mostrado.get(),
+        llego: () => llegaEntera() >= 0.999,
+      })
     }
     el.addEventListener('focusin', alEntrarElFoco)
     return () => {
       cancelar()
       el.removeEventListener('focusin', alEntrarElFoco)
     }
-  }, [mostrado])
+  }, [mostrado, paso])
 
   const alAbrir = useCallback((demo: Demo, pieza: HTMLAnchorElement): void => {
     setAbierta({ demo, pieza })

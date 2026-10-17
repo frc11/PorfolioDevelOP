@@ -26,8 +26,11 @@ import { validarContacto, type DatosDeContacto } from '../../_chrome/contacto/en
 import { HojaParaElInvariante } from '../../_chrome/contacto/FormularioDeContacto'
 import { SELECTOR_DE_FOCALIZABLES } from '../../_secciones/trabajos/demos/dialogo'
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
-import { APARICION, LLEGADA, aparicionPedida, enElTramo, escalaDeDemos, llegadaDeDemos, llegadaDeLaAparicion, perseguirLaAparicion, tramoDelLibro } from '../../_secciones/trabajos/demos/entrada'
-import { FIN_DE_LA_LLEGADA_EN_EL_VACIO, progresoDelPxDelTunel } from '../../_secciones/trabajos/geometria'
+import { APARICION, LLEGADA, aparicionPedida, enElTramo, llegadaDeDemos, llegadaDeLaAparicion, perseguirLaAparicion, tramoDelLibro } from '../../_secciones/trabajos/demos/entrada'
+import { FIN_DE_LA_LLEGADA_EN_EL_VACIO } from '../../_secciones/trabajos/demos/relojDeDemos'
+// [B1] la fracción del vacío que el túnel dibujaba se mudó con él al archivo: es la base contra la que se mide la llegada.
+import { escalaDeDemos } from '../../_archivo/tunel-portfolio/entradaDelTunel'
+import { progresoDelPxDelTunel } from '../../_archivo/tunel-portfolio/geometria'
 import { CORRIMIENTO_DE_LA_PLACA, ENTRADA_DEL_PARALAJE, paralajeDe } from '../../_chrome/contacto/placa'
 import { VERTICE_DEL_ENJAMBRE } from '../nanobots/enjambre'
 import { PUNTERO_DEL_ENJAMBRE, pasoDelPuntero, punteroQuieto, type ObjetivoDelPuntero, type PunteroDelEnjambre } from '../nanobots/puntero'
@@ -116,8 +119,10 @@ controlPositivo('el detector VE la capa rígida atada al vacío', capa.replace("
 
 // El título: «Demos», como Portfolio (s42 D3 al día afirma el gesto, el nivel y las clases).
 const texto = sinComentarios(leer('_secciones/trabajos/demos/TextoDeDemos.tsx'))
-const piezas = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
-const comoPortfolio = (t: string): boolean => /<Titular nivel="display-xl" como="h2" className=\{CLASE_DEL_TITULAR_DEL_CARTEL\}>/.test(piezas) && /minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(piezas) && /<Titular nivel="display-xl" como="h3" className=\{CLASE_DEL_TITULAR_DEL_CARTEL\}>/.test(t) && /gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS\.llegadaDePortfolioS/.test(t) && /useAcompananteDelTitulo<HTMLDivElement>\('demos'\)/.test(t)
+// [B1] el titular de Portfolio vive en el encabezado del selector (y abajo de 1024 va en su columna, con su clase); Demos sigue
+// de margen a margen con la del cartel de antes (`demos/herencia.ts`).
+const piezas = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
+const comoPortfolio = (t: string): boolean => /<Titular nivel="display-xl" como="h2" className=\{CLASE_DEL_TITULAR\}>/.test(piezas) && /minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(piezas) && /<Titular nivel="display-xl" como="h3" className=\{CLASE_DEL_TITULAR_DEL_CARTEL\}>/.test(t) && /gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS\.llegadaDePortfolioS/.test(t) && /useAcompananteDelTitulo<HTMLDivElement>\('demos'\)/.test(t)
 afirmar(comoPortfolio(texto), '«Demos» con el nivel, las clases angostas y la llegada del titular de Portfolio (las letras desde la profundidad, con su mínimo); el párrafo va en su plano')
 controlPositivo('el detector VE el título de antes (titulo-l, dos renglones)', texto.replace('nivel="display-xl" como="h3"', 'nivel="titulo-l" como="h3"'), comoPortfolio)
 

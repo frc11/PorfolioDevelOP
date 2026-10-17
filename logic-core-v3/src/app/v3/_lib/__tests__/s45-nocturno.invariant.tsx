@@ -91,7 +91,7 @@ controlPositivo('el detector VE una llegada que termina lo que empezó', ((m: nu
 afirmar(convergeSiempre(portfolio, LENTOS.llegadaDePortfolioS), '  nunca queda a medias: con idas y vueltas rápidas cada cuadro es coherente, y al frenar a mitad asienta a la MISMA velocidad (frenar no acorta la llegada) en armado o desarmado del todo')
 controlPositivo('el detector VE el seguidor sin asiento (al frenar a mitad queda a mitad)', ((m: number, p: number, _a: boolean, dt: number) => mostradoDelScroll(m, p, false, dt, LENTOS.llegadaDePortfolioS)) as Seguidor, (f: Seguidor) => convergeSiempre(f, LENTOS.llegadaDePortfolioS))
 afirmar(cuantoTarda(deF2, 1, 0.4, false, 0.4) <= ASIENTO.alcanceS + DT && convergeSiempre(deF2, ASIENTO.s), '  los demás títulos siguen con F2 tal cual (sin mínimo: alcanzan al scroll en el alcance y asientan en el asiento)')
-const piezas = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
+const piezas = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
 const componente = sinComentarios(leer('_componentes/titulos3d/TituloDeVolumen.tsx'))
 const escena = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts')))
 const enchufada = (c: string): boolean => /<TituloDeVolumen id="portfolio"[^>]*minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(c)
@@ -182,7 +182,7 @@ afirmar(conLaViva(escena) && /el\.style\.transform = css/.test(deLaEscena) && !/
 controlPositivo('el detector VE el texto llevado con la cámara sin el mouse', escena.replace('llevarLosAcompanantes(m.current.armados, state.camera, ', 'llevarLosAcompanantes(m.current.armados, CAMARA_SIN_EL_MOUSE, '), conLaViva)
 const PEGADOS: readonly (readonly [string, RegExp])[] = [
   ['_secciones/hero/Hero.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('hero-registro-2'\)[\s\S]{0,120}<div ref=\{enElPlano\}/],
-  ['_secciones/trabajos/piezas.tsx', /const bajada = useAcompananteDelTitulo<HTMLDivElement>\('portfolio'\)[\s\S]*<div ref=\{bajada\} style=\{\{ maxWidth/],
+  ['_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx', /const bajada = useAcompananteDelTitulo<HTMLDivElement>\('portfolio'\)[\s\S]*<div ref=\{bajada\} style=\{\{ maxWidth/],
   ['_secciones/por-que-develop/PorQueDevelop.tsx', /useAcompananteDelTitulo<HTMLDivElement>\('frase-izquierda'\)[\s\S]*useAcompananteDelTitulo<HTMLDivElement>\('frase-derecha'\)[\s\S]*<div ref=\{valoresDeLaIzquierda\}[\s\S]*<div ref=\{valoresDeLaDerecha\}/],
   // [EL ENCASTRE] 1B · el título de Demos es uno solo («Demos», id `demos`): el párrafo va en su plano.
   ['_secciones/trabajos/demos/TextoDeDemos.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('demos'\)[\s\S]*<div ref=\{enElPlano\}>\s*<div ref=\{refDelParrafo\}>/],
@@ -190,7 +190,7 @@ const PEGADOS: readonly (readonly [string, RegExp])[] = [
 const pegados = PEGADOS.map(([ruta, patron]) => patron.test(sinComentarios(leer(ruta))))
 afirmar(pegados.every(Boolean), '  en el hero (la bajada y los CTA), en Portfolio (su bajada), en Por qué develOP (cada columna de valores con su mitad de la frase) y en Demos (el párrafo)', pegados.map((v, k) => `${PEGADOS[k][0].split('/').pop() ?? ''}: ${v ? 'sí' : 'NO'}`).join(' · '))
 const ids = ['hero-registro-2', 'portfolio', 'frase-izquierda', 'frase-derecha', 'demos']
-const anotados = ['_secciones/hero/Hero.tsx', '_secciones/trabajos/piezas.tsx', '_secciones/por-que-develop/PorQueDevelop.tsx', '_secciones/trabajos/demos/TextoDeDemos.tsx'].map(leer).join('\n')
+const anotados = ['_secciones/hero/Hero.tsx', '_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx', '_secciones/por-que-develop/PorQueDevelop.tsx', '_secciones/trabajos/demos/TextoDeDemos.tsx'].map(leer).join('\n')
 afirmar(ids.every((id) => anotados.includes(`id: '${id}'`) || anotados.includes(`id="${id}"`)), '  cada uno acompaña a un título que existe (el mismo id con que la sección lo anota)')
 
 // ═══════════════════════════════════════════════════════════════════════════

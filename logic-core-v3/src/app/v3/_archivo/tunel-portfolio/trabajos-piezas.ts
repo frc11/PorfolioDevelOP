@@ -12,11 +12,11 @@
  * escáneres persiguen.
  */
 
-import type { CruceObservado, EntradaAlTramo } from './gota'
+import type { CruceObservado, EntradaAlTramo } from '../../_secciones/trabajos/gota'
 
-import { textoVisible } from '../_contrato/escaneo'
-import { tramoDeSecuencia } from '../_contrato/secuencia'
-import { quitarSubarbolesConAtributo } from '../_invariantes/marcado'
+import { textoVisible } from '../../_secciones/_contrato/escaneo'
+import { tramoDeSecuencia } from '../../_secciones/_contrato/secuencia'
+import { quitarSubarbolesConAtributo } from '../../_secciones/_invariantes/marcado'
 
 /** Los elementos que no cierran, para que la pila de ancestros no se desbalancee. */
 const VACIOS = new Set(['img', 'br', 'hr', 'input', 'meta', 'link', 'source'])

@@ -5,9 +5,10 @@
  *
  *   · `resultado` — no hay nada medible en estos trabajos y no lo va a haber (`contenido.ts`, la métrica cerrada): `null`, y la
  *     ficha no lo muestra.
- *   · las tres reseñas y el `problemaResuelto` de Esquina y de Banú — Valentino los va a pedir. Mientras tanto `null`; cuando la
- *     ficha los muestre van por la llave del contenido inventado (`_contrato/inventado.ts`): relleno con la llave prendida, el
- *     marcador visible con la llave apagada, y cada uno en el `PEDIDO` de la sección con su dueño.
+ *   · las tres reseñas y el `problemaResuelto` de Esquina y de Banú — Valentino los va a pedir. Van por la llave del contenido
+ *     inventado (`_contrato/inventado.ts`): con la llave prendida un texto de RELLENO (para ver la ficha completa), con la llave
+ *     apagada el marcador visible (`[TEXTO]`, `[TESTIMONIO] · pendiente`, `[NOMBRE]`); cada uno está en el `PEDIDO` de la sección
+ *     (`contenido.ts`) con su dueño. Cuando llegue el dato real, se escribe derecho acá y su casilla sale de la lista.
  *
  * El servicio va en el dato aunque la ficha no lo muestre mientras los tres digan lo mismo (`seMuestraElServicio`): cuando haya
  * variedad, aparece solo.
@@ -18,6 +19,8 @@
  *
  * El orden es el del recorrido y lo fija la spec: El Garage, Esquina Estudio, Banú Scents.
  */
+
+import { INVENTOS, conLlave } from '../_contrato/inventado'
 
 export type SlugDelProyecto = 'el-garage' | 'esquina-estudio' | 'banu-scents'
 
@@ -73,7 +76,7 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     problemaCliente: 'No tenía catálogo: los autos se le perdían entre las publicaciones de Facebook.',
     problemaResuelto: 'Con la página tienen todo ordenado.',
     resultado: null,
-    resena: null,
+    resena: { texto: conLlave(INVENTOS.trabajosResenaDeElGarage), autor: conLlave(INVENTOS.trabajosAutorDeElGarage) },
     medios: mediosDe('el-garage'),
     alt: 'Recorrido por la página de El Garage: la portada, los últimos ingresos y el catálogo con sus filtros.',
   },
@@ -86,9 +89,9 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     servicio: DESARROLLO_WEB,
     queHicimos: 'Una página acorde a su estética y su marca.',
     problemaCliente: 'No tenían presencia digital.',
-    problemaResuelto: null,
+    problemaResuelto: conLlave(INVENTOS.trabajosResueltoDeEsquina),
     resultado: null,
-    resena: null,
+    resena: { texto: conLlave(INVENTOS.trabajosResenaDeEsquina), autor: conLlave(INVENTOS.trabajosAutorDeEsquina) },
     medios: mediosDe('esquina-estudio'),
     alt: 'Recorrido por la página de Esquina Estudio: la portada, los proyectos y los servicios.',
   },
@@ -101,9 +104,9 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     servicio: DESARROLLO_WEB,
     queHicimos: 'Una página simple pero bonita.',
     problemaCliente: 'No tenían presencia digital.',
-    problemaResuelto: null,
+    problemaResuelto: conLlave(INVENTOS.trabajosResueltoDeBanu),
     resultado: null,
-    resena: null,
+    resena: { texto: conLlave(INVENTOS.trabajosResenaDeBanu), autor: conLlave(INVENTOS.trabajosAutorDeBanu) },
     medios: mediosDe('banu-scents'),
     alt: 'Recorrido por la página de Banú Scents: la portada, la selección de casas y los perfumes.',
   },

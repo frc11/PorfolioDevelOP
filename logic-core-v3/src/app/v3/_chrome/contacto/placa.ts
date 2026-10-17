@@ -3,7 +3,7 @@
 import { animate, useMotionTemplate, useMotionValue, useSpring, type MotionValue } from 'motion/react'
 import { useEffect } from 'react'
 
-import { FOCO_DE_LA_ESCENA_PX } from '../../_secciones/trabajos/tunel'
+import { FOCO_DE_LA_ESCENA_PX } from '../../_secciones/trabajos/geometria'
 
 /**
  * [CIERRE] 2B · EL CONTACTO COMO PLACA — en el producto, desde la barra (escritorio y tablet) y con movimiento. Era la

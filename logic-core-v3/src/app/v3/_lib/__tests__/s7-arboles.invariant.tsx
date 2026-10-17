@@ -216,8 +216,40 @@ controlPositivo(
   (html: string) => transformadas(html) === 0,
 )
 
+/**
+ * [B1] Los posicionados de adentro del primer bloque coreografiado (`data-arbol`) que lo usan a ÉL de bloque contenedor: los que no
+ * tienen, entre ellos y el bloque, otro posicionado; y cualquier `fixed` (la `perspective` del bloque le crea uno). Un recorrido de
+ * etiquetas con su pila: el marcado de `renderToStaticMarkup` es bien formado.
+ */
+const VACIAS = new Set(['img', 'br', 'hr', 'input', 'source', 'meta', 'link', 'wbr', 'area', 'col', 'embed', 'track'])
+const POSICIONADO = /(^|\s)(absolute|relative|sticky|fixed)(\s|$)/
+function colgadosDelBloque(html: string): string[] {
+  const pila: { readonly posicionado: boolean; readonly bloque: boolean }[] = []
+  const salida: string[] = []
+  for (const m of html.matchAll(/<(\/?)([a-zA-Z][a-zA-Z0-9-]*)([^>]*?)(\/?)>/g)) {
+    const [, cierra, etiqueta, atributos, sola] = m
+    if (cierra === '/') {
+      pila.pop()
+      continue
+    }
+    const clase = /\sclass="([^"]*)"/.exec(atributos)?.[1] ?? ''
+    const estilo = /\sstyle="([^"]*)"/.exec(atributos)?.[1] ?? ''
+    const bloque = !pila.some((p) => p.bloque) && /\sdata-arbol="/.test(atributos)
+    const posicionado = POSICIONADO.test(clase) || /position:(absolute|relative|sticky|fixed)/.test(estilo)
+    const adentro = pila.findIndex((p) => p.bloque)
+    // Sólo `absolute` y `fixed` toman su caja del bloque contenedor (un `sticky` o un `relative` se corren sobre sí mismos).
+    const tomaSuCaja = /(^|\s)(absolute|fixed)(\s|$)/.test(clase) || /position:(absolute|fixed)/.test(estilo)
+    if (adentro !== -1 && tomaSuCaja) {
+      const intermedios = pila.slice(adentro + 1)
+      if (/(^|\s)fixed(\s|$)/.test(clase) || !intermedios.some((p) => p.posicionado)) salida.push(`<${etiqueta} class="${clase.slice(0, 60)}">`)
+    }
+    if (sola !== '/' && !VACIAS.has(etiqueta.toLowerCase())) pila.push({ posicionado, bloque })
+  }
+  return salida
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · La rama quieta de Trabajos no tiene descendientes posicionados')
+titulo('4 · La rama quieta de Trabajos no tiene descendientes posicionados — [B1] que cuelguen del bloque')
 
 /**
  * ⚠ NO ES UNA CURIOSIDAD: es la condición que hace inerte la única diferencia
@@ -243,8 +275,14 @@ if (trabajos !== undefined) {
   const sinLaCajaDelPanel = (html: string): string => html.replace(/<div data-caja-sin-solape=""[^>]*><\/div>/g, '')
   const absolutos = (html: string): number => (sinLaCajaDelPanel(html).match(/class="[^"]*\babsolute\b/g) ?? []).length
   afirmar(quieto !== sinLaCajaDelPanel(quieto), '  (la caja sin solape del panel está en el marcado y se descuenta: no es de ninguna rama)')
-  afirmarIgual(absolutos(quieto), 0, 'su rama quieta no tiene un solo descendiente `absolute`')
-  afirmar(absolutos(animado) > 0, `  y la animada tiene ${absolutos(animado)}: el detector ve`)
+  // [B1] La rama quieta YA NO es una lista: es el mismo escenario del Portfolio (pegado, con el panel posicionado) en las dos ramas.
+  // La condición que importa sigue siendo la misma —que la `perspective` del bloque animado sea inerte— y se afirma por el otro
+  // camino: ningún descendiente posicionado del bloque lo usa a él de bloque contenedor (todos cuelgan de un posicionado más
+  // cercano: el escenario pegado) y adentro no hay un `fixed` (para el que la `perspective` sí crearía uno).
+  afirmar(absolutos(quieto) > 0 && absolutos(animado) > 0, `  las dos ramas tienen posicionados (${absolutos(quieto)} y ${absolutos(animado)}): el escenario es el mismo`)
+  afirmarIgual(colgadosDelBloque(quieto), [], 'en la rama quieta ningún posicionado cuelga del bloque: todos tienen un posicionado más cercano')
+  afirmarIgual(colgadosDelBloque(animado), [], '  y en la animada tampoco: la `perspective` del bloque no le cambia el bloque contenedor a nadie')
+  controlPositivo('  el detector ve un absoluto colgado del bloque', `<div data-arbol="x" class="relative"><div class="absolute inset-0"></div></div>`, (h: string) => colgadosDelBloque(h).length === 0)
   afirmar(!quieto.includes('perspective'), '  y la quieta no escribe `perspective`')
   afirmar(animado.includes('perspective'), '  y la animada sí, que es donde significa algo')
 }

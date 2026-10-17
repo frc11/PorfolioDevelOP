@@ -338,6 +338,7 @@
     "test:s75-carga": "npx tsx src/app/v3/_lib/__tests__/s75-carga.invariant.tsx",
     "test:s75": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s75",
     "test:s76-portfolio": "npx tsx src/app/v3/_lib/__tests__/s76-portfolio.invariant.tsx",
+    "test:s76-archivo-tunel": "npx tsx src/app/v3/_archivo/tunel-portfolio/tunel.invariant.tsx",
     "test:s76": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s76",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",

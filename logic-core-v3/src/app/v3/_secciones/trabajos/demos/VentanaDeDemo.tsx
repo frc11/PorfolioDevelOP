@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 
 import { sonar } from '../../../_lib/sonido/bus'
 import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimiento'
-import { VELO_DEL_CTA } from '../tunel'
+import { VELO_DEL_CTA } from './herencia'
 
 import { ESCALA_DEL_FUNDIDO, MS_DEL_FUNDIDO, cajaFinal } from './apertura'
 import { TEXTO_DE_DEMOS, type Demo } from './catalogo'

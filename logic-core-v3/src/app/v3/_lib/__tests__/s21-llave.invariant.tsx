@@ -260,10 +260,32 @@ for (const { id, texto } of TEXTO_DE_LAS_OCHO) {
   )
 }
 // FINAL 3: sin exclusiones. Cada casilla declarada tiene que llegar a la pantalla (con la lista vacía, ninguna).
+// [B1] Con la cara de la llave que está PUESTA. Prendida, la mentira (única: se busca derecho). Apagada, el pedido, que puede
+// repetirse («[TEXTO]» lo usan varias): se cuenta por ocurrencias en la sección que la consume —la clave empieza con su id, como
+// pide `inventado.ts`—, y esa sección tiene que mostrar el pedido al menos tantas veces como casillas suyas lo usan.
+const delId = (id: string): string => id.replace(/-([a-z])/g, (_, l: string) => l.toUpperCase())
+const casillasQueNoLlegan = (casillas: readonly (readonly [string, Invento])[], llave: boolean, textos: readonly { readonly id: string; readonly texto: string }[]): string[] => {
+  if (llave) return casillas.filter(([, i]) => !textos.some(({ texto }) => apareceEn(texto, i))).map(([c]) => c)
+  return casillas
+    .filter(([clave, i]) => {
+      const seccion = textos.find(({ id }) => clave.startsWith(delId(id)))
+      if (seccion === undefined) return true
+      const usan = casillas.filter(([otra, o]) => otra.startsWith(delId(seccion.id)) && o.pedido === i.pedido).length
+      return seccion.texto.split(i.pedido).length - 1 < usan
+    })
+    .map(([c]) => c)
+}
+const CASILLAS = Object.entries(INVENTOS) as readonly (readonly [string, Invento])[]
 afirmarIgual(
-  LISTA_DE_INVENTOS.filter((i) => !enPantalla.has(i.mentira)).map((i) => i.mentira),
+  casillasQueNoLlegan(CASILLAS, CONTENIDO_INVENTADO, TEXTO_DE_LAS_OCHO),
   [],
-  `las ${LISTA_DE_INVENTOS.length} casillas declaradas LLEGAN A LA PANTALLA: ninguna mentira declarada que no se vea`,
+  `las ${LISTA_DE_INVENTOS.length} casillas declaradas LLEGAN A LA PANTALLA con la cara de la llave puesta (${CONTENIDO_INVENTADO ? 'la mentira' : 'el pedido, en su sección'}): ninguna que no se vea`,
+)
+afirmar(CONTENIDO_INVENTADO || LISTA_DE_INVENTOS.every((i) => !enPantalla.has(i.mentira)), '  y con la llave apagada ninguna mentira llega a la pantalla')
+controlPositivo(
+  '  el chequeo ve una casilla cuyo pedido no se muestra en su sección',
+  [...CASILLAS, ['trabajosVideoQueNoEsta', { marcador: '[VIDEO]', pedido: '[VIDEO] · pendiente', mentira: 'un video de relleno' }]] as readonly (readonly [string, Invento])[],
+  (c: readonly (readonly [string, Invento])[]) => casillasQueNoLlegan(c, false, TEXTO_DE_LAS_OCHO).length === 0,
 )
 
 controlPositivo(

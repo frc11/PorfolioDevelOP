@@ -32,7 +32,7 @@ import {
   PX_DE_LA_APROXIMACION,
   PX_DE_LA_SECCION,
 } from './geometria'
-import { ENTRADAS_AL_TRAMO, cruceDelTramo, gestoDelCruce, type CruceObservado, type EntradaAlTramo } from './gota'
+import { ENTRADAS_AL_TRAMO, cruceDelTramo, gestoDelCruce, type CruceObservado, type EntradaAlTramo } from '../../_secciones/trabajos/gota'
 import { afirmarElRotulo } from './trabajos-rotulo'
 import { afirmarElRegulador } from './trabajos-regulador'
 import { afirmarLasVentanas } from './trabajos-ventanas'
@@ -84,8 +84,9 @@ export const FUENTES: readonly { readonly archivo: string; readonly texto: strin
   // El trabajo con sus dos medios: la etapa 1 del portfolio lo volvió pieza de
   // composición, así que entra a la fuente que el instrumento lee.
   'Proyecto.tsx',
-  'CapaDeLaGota.tsx',
-  'gota.ts',
+  // [B1] la gota se quedó viva en la sección: se lee de allá.
+  '../../_secciones/trabajos/CapaDeLaGota.tsx',
+  '../../_secciones/trabajos/gota.ts',
   // PORTFOLIO: el túnel, con el mismo reparto que la gota — el núcleo puro y la
   // capa fina que lo escribe.
   'CapaDelTunel.tsx',

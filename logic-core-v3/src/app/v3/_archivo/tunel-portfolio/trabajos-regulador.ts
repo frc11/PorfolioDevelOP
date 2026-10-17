@@ -24,7 +24,7 @@
  */
 
 import { afirmar, afirmarIgual, controlPositivo } from '../../_lib/__tests__/afirmar'
-import { leer } from '../_invariantes/soporte'
+import { leer } from '../../_secciones/_invariantes/soporte'
 import {
   BANDA_DEL_EFECTO,
   CARTEL,
@@ -171,10 +171,10 @@ function traza(e0: EstadoDelTunelMostrado, pagina: number, pisoDelFoco: number):
 }
 
 export function afirmarElRegulador(cuantas: number): void {
-  const REGULADOR = leer('src/app/v3/_secciones/trabajos/regulador.ts')
-  const CAPA = leer('src/app/v3/_secciones/trabajos/CapaDelTunel.tsx')
-  const TRABAJOS = leer('src/app/v3/_secciones/trabajos/Trabajos.tsx')
-  const PIEZAS = leer('src/app/v3/_secciones/trabajos/piezas.tsx')
+  const REGULADOR = leer('src/app/v3/_archivo/tunel-portfolio/regulador.ts')
+  const CAPA = leer('src/app/v3/_archivo/tunel-portfolio/CapaDelTunel.tsx')
+  const TRABAJOS = leer('src/app/v3/_archivo/tunel-portfolio/Trabajos.tsx')
+  const PIEZAS = leer('src/app/v3/_archivo/tunel-portfolio/piezas.tsx')
 
   // ── LA CONSTANTE, A MANO Y CON SU LÍNEA ────────────────────────────────
   const aMano = (src: string): boolean => /export const VELOCIDAD_MAXIMA_DEL_EFECTO_PX_S = \d+ \/\/ aflojarlo = subirlo/.test(src)

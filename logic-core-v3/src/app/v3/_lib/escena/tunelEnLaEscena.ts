@@ -1,20 +1,18 @@
 /**
- * [ESCENA 4] EL TÚNEL DE TRABAJOS, EN EL PROGRESO DE LA ESCENA — lo que no se dibuja ahí adentro.
+ * [ESCENA 4] EL TÚNEL DE TRABAJOS, EN EL PROGRESO DE LA ESCENA — lo que no se dibuja ahí adentro (estrellas, fugaces, formación).
  *
- * La escena no importa nada de las secciones, así que el túnel se trae como número y el invariante
- * (`s30-escena4`) lo re-deriva de la sección para que no envejezca callado:
+ * [B1] El túnel se fue al archivo y su lugar lo ocupa el selector del Portfolio. La ventana conserva el nombre y ahora arranca en
+ * el PIN del selector (decisión de la aprobación de B1: estrellas, fugaces y la formación se apagan desde que entra el panel). La
+ * escena no importa nada de las secciones, así que el número se trae y el invariante (`s30-escena4`) lo re-deriva de la sección:
  *
- * - el túnel arranca cuando el cartel empieza a huir: `ventanaDelTunel(3).desde` = 0,27154 del
- *   progreso de Trabajos (`_secciones/trabajos/geometria.ts`);
- * - ese progreso corre de `top bottom` a `bottom bottom` de una caja de 7,57 pantallas que empieza en
- *   la pantalla 4,6, así que cae en la pantalla 4,6 + 7,57 × 0,27154 = 6,6556;
- * - y los nudos del anclaje ponen ahí p = 0,5 + 0,125 × (6,6556 − 6) / 7,17 = 0,51143.
+ * - el pin cae a una pantalla del arranque del progreso de Trabajos (900 px de la regla, `portfolio/pasos.ts`);
+ * - ese progreso arranca una pantalla antes de la caja, que empieza el solape antes de la pantalla de su nudo (0,5): el pin queda
+ *   en la pantalla del nudo menos el solape, y los nudos ponen ahí p = 0,475 (la escena descuenta el selector desde el pin, así que
+ *   el número no depende del paso).
  *
- * Termina donde termina el tramo de Trabajos (0,625): después, Servicios y Tu panel tapan la sala y
- * la escena no dibuja. El túnel mostrado puede llegar más tarde que el scroll (lo regula un resorte),
- * nunca antes: esconder desde el arranque del scroll es lo prudente.
+ * Termina donde termina el tramo de Trabajos (0,625): después, Servicios y Tu panel tapan la sala y la escena no dibuja.
  */
-export const TUNEL_EN_LA_ESCENA = { desde: 0.51143, hasta: 0.625 } as const
+export const TUNEL_EN_LA_ESCENA = { desde: 0.475, hasta: 0.625 } as const
 
 /** Cuánto antes del túnel empieza a irse lo que no va adentro. */
 export const FUNDIDO_ANTES_DEL_TUNEL = 0.006

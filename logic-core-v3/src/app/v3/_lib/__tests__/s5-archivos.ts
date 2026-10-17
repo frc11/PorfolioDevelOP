@@ -90,7 +90,19 @@ export const CARPETAS_DE_SECCION: readonly CarpetaDeSeccion[] = [
 // B12 · `piezas.tsx` (plano, portada y rama quieta) y `CapaDeLaGota.tsx` (la
 // máscara de la entrada) salieron de `Trabajos.tsx` al mudar el título al
 // escenario. PINTAN PANTALLA: van acá y no en `ARCHIVOS_DE_APOYO`.
-export const ARCHIVOS_DE_PIEZA = [`${RAIZ_DE_SECCIONES}/numeros/Cifra.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/Proyecto.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/piezas.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/CapaDeLaGota.tsx`]
+// [B1] `Proyecto.tsx` y `piezas.tsx` se fueron con el túnel al archivo (`_archivo/tunel-portfolio/`, fuera del lane); entran las
+// piezas del selector del Portfolio, que PINTAN PANTALLA.
+export const ARCHIVOS_DE_PIEZA = [
+  `${RAIZ_DE_SECCIONES}/numeros/Cifra.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/CapaDeLaGota.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/Acordeon.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/EncabezadoDelPortfolio.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/EscenarioDelPortfolio.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/Ficha.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/LaTuya.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/MedioDeLaTira.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/Tira.tsx`,
+]
 
 /**
  * La ruta de demostración del lane. **Borrada en SITIO-S7**, que es lo que su
@@ -148,17 +160,14 @@ export const ARCHIVOS_DE_APOYO = [
   // [RETOQUE PANEL] T4 · el titular y el ≠ en volumen (`titular3d.tsx`) y la cuenta y la medida de sus rayas (`trazos3d.ts`).
   `${RAIZ_DE_SECCIONES}/quienes-somos/titular3d.tsx`,
   `${RAIZ_DE_SECCIONES}/quienes-somos/trazos3d.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-piezas.ts`,
   // ── B1 · los dos que salieron de Trabajos cuando pasó las 300 líneas ──────
   // `geometria.ts` son los números de la sección —el mismo corte que Servicios
   // ya tenía— y `soporte.ts` el arnés del invariante, el mismo que Cierre.
   // Ninguno de los dos es una heurística de sufijo: entran acá porque alguien
   // lo decidió y lo escribió, que es la regla de esta lista.
   `${RAIZ_DE_SECCIONES}/trabajos/geometria.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/soporte.ts`,
   // B4-A · `asentamiento.ts` es la derivación de la meseta de los planos: el
   // mismo corte que Servicios, Tu panel y el Cierre ya tienen para el suyo.
-  `${RAIZ_DE_SECCIONES}/trabajos/asentamiento.ts`,
   // B12 · `gota.ts`: el núcleo PURO de la entrada (máscara radial, sin DOM).
   `${RAIZ_DE_SECCIONES}/trabajos/gota.ts`,
   // ── ⚠️ LOS SEIS DEL TÚNEL, Y DOS DE ELLOS ESTABAN SIN REGISTRAR ──────────
@@ -177,19 +186,10 @@ export const ARCHIVOS_DE_APOYO = [
   //   `trabajos-nacimiento.ts`  §22 · el nacimiento y el reparto de tamaños
   //   `trabajos-ventanas.ts`    §23 · las cuatro ventanas del recorrido
   //   `trabajos-tipeo.ts`       la máquina de escribir del CTA y su cursor
-  `${RAIZ_DE_SECCIONES}/trabajos/tunel.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/CapaDelTunel.tsx`,
-  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-rotulo.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-nacimiento.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-ventanas.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-tipeo.ts`,
   // El regulador del túnel —la velocidad máxima del efecto y los dos rieles que
   // garantizan que al despinearse nada quedó a medio camino— salió de `tunel.ts`
   // por las 300 líneas, y su §24 de `soporte.ts` por la misma regla y el mismo tema.
-  `${RAIZ_DE_SECCIONES}/trabajos/regulador.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-regulador.ts`,
   // [CIERRE] 1C · el túnel de escritorio estirado (el k de la carga, el panel que crece y lo que la escena descuenta).
-  `${RAIZ_DE_SECCIONES}/trabajos/estiramiento.ts`,
   // TITULAR · los DOS que salieron del Hero al pasar las 300 líneas, mismo corte que Trabajos:
   // `geometria.ts` los números y las dos tipografías (el nivel `display` DERIVA del ancho de la
   // caja) y `soporte.ts` las cuatro cuentas. §11 del invariante escanea el primero, y lo dice.
@@ -199,7 +199,6 @@ export const ARCHIVOS_DE_APOYO = [
   // eran 100% composición: Modo pulido los desarmó enteros. El padrón se
   // retira con ellos, no se deja apuntando a un fantasma.
   // SPRINT DEMOS · lo que pasa con el puntero encima de la ventana del CTA de Trabajos.
-  `${RAIZ_DE_SECCIONES}/trabajos/encimaDelCta.ts`,
   // SPRINT DEMOS · la biblioteca viva, en su carpeta: el catálogo atado al del sitio
   // vivo, la entrada por el vacío, el estante, la ventana y la cinta de abajo de 1025.
   `${RAIZ_DE_SECCIONES}/trabajos/demos/catalogo.ts`,
@@ -217,10 +216,6 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/genie.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/GenieDeDemo.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CromoDeLaVentana.tsx`,
-  `${RAIZ_DE_SECCIONES}/trabajos/capturas.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/Captura.tsx`,
-  `${RAIZ_DE_SECCIONES}/trabajos/capturas-invariante.tsx`,
-  `${RAIZ_DE_SECCIONES}/trabajos/angosto.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/Carrusel.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/fisicaDelCarrusel.ts`,
   // INTERFAZ 1 · cierre: con el teclado, la página sigue hasta que la capa de demos llega (sólo mueve la página).
@@ -230,11 +225,23 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/OndaDeLasPortadas.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/movil-invariante.tsx`,
   // MÓVIL 2
-  `${RAIZ_DE_SECCIONES}/trabajos/ritmo.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/ritmo-invariante.tsx`,
-  `${RAIZ_DE_SECCIONES}/trabajos/ventana.ts`,
   // [B1] el dato tipado del selector lateral del Portfolio: los proyectos, sus fichas y sus medios.
   `${RAIZ_DE_SECCIONES}/trabajos/proyectos.ts`,
+  // [B1] el selector: sus módulos puros y su parte del invariante (§17); los detectores del invariante de la sección; el reloj de
+  // Demos sacado del túnel y lo que Demos heredó del túnel. Los archivos del túnel salieron del padrón: viven en el archivo.
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/anclas.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/banderas.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/estado.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/medios.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/pasos.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/saltar.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/tipografia.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/tramoDelSelector.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/usePortfolio.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/portfolio-invariante.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-detectores.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/relojDeDemos.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/herencia.ts`,
   `${RAIZ_DE_SECCIONES}/servicios/angosto.tsx`,
   `${RAIZ_DE_SECCIONES}/servicios/angosto-invariante.tsx`,
   `${RAIZ_DE_SECCIONES}/servicios/CtaDelServicio.tsx`,

@@ -35,7 +35,7 @@ el archivo que la fila nombra.
 
 ## Resumen
 
-**9 cosas pendientes** en las ocho secciones, de las cuales **1** se ven hoy en la pantalla como un marcador y 8 son prosa de relleno que no se ve como agujero.
+**19 cosas pendientes** en las ocho secciones, de las cuales **9** se ven hoy en la pantalla como un marcador y 10 son prosa de relleno que no se ve como agujero.
 
 
 | sección | pendientes |
@@ -43,7 +43,7 @@ el archivo que la fila nombra.
 | 01 · Hero | 2 |
 | 02 · Quiénes somos | 6 |
 | 03 · Números | 0 |
-| 04 · Trabajos | 0 |
+| 04 · Trabajos | 10 |
 | 05 · Servicios | 1 |
 | 06 · Tu panel | 0 |
 | 07 · Por qué develOP | 0 |
@@ -57,7 +57,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 | quién | cuántas |
 |---|---:|
 | Franco (o un cliente) | 2 |
-| Valentino | 7 |
+| Valentino | 17 |
 | Una decisión, antes que un dato | 0 |
 
 ### Franco (o un cliente) — 2
@@ -65,7 +65,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **02 · Quiénes somos** · `personas[0].descripcion` — Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto.
 - **05 · Servicios** · `CASO_DE_REFERENCIA` — El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.
 
-### Valentino — 7
+### Valentino — 17
 
 - **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
@@ -74,6 +74,16 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **02 · Quiénes somos** · `tituloDelEquipo` — Cómo se titula el bloque del equipo. Va en tipografía gigante, así que dos palabras cortas.
 - **02 · Quiénes somos** · `personas[1].descripcion` — Cómo es Valentino y de qué se ocupa. Se lee sobre la foto, así que corto.
 - **02 · Quiénes somos** · `equipo.descripcion` — Cómo empezó el equipo. Se lee sobre la foto, así que corto.
+- **04 · Trabajos** · `bajada` — La descripción del Portfolio, arriba del lado del texto (la reescribe C2)
+- **04 · Trabajos** · `laTuya.bajada` — El texto de «la próxima es la tuya», debajo de la frase (lo reescribe C2)
+- **04 · Trabajos** · `proyectos[1].problemaResuelto` — Qué le resolvió la página a Esquina Estudio
+- **04 · Trabajos** · `proyectos[2].problemaResuelto` — Qué le resolvió la página a Banú Scents
+- **04 · Trabajos** · `proyectos[0].resena.texto` — La reseña de El Garage (la pide Valentino)
+- **04 · Trabajos** · `proyectos[0].resena.autor` — Quién firma la reseña de El Garage
+- **04 · Trabajos** · `proyectos[1].resena.texto` — La reseña de Esquina Estudio (la pide Valentino)
+- **04 · Trabajos** · `proyectos[1].resena.autor` — Quién firma la reseña de Esquina Estudio
+- **04 · Trabajos** · `proyectos[2].resena.texto` — La reseña de Banú Scents (la pide Valentino)
+- **04 · Trabajos** · `proyectos[2].resena.autor` — Quién firma la reseña de Banú Scents
 
 ### Una decisión, antes que un dato — 0
 
@@ -81,8 +91,14 @@ Ninguna hoy.
 
 ## Lo que conviene pedir primero
 
-**Estas 1, y no porque sean más trabajo.** Son las únicas que no dependen de develOP: el dato vive en el negocio de un cliente y hay que ir a buscarlo afuera —el número que dice qué cambió en cada uno, y lo que dijo alguien con el permiso para publicarlo y con su nombre—. Una captura lleva diez minutos y se hace cuando haya un rato; esto puede tardar semanas y nadie de acá lo puede apurar. Por eso van primero, aunque en la pantalla se vean últimas.
+**Estas 7, y no porque sean más trabajo.** Son las únicas que no dependen de develOP: el dato vive en el negocio de un cliente y hay que ir a buscarlo afuera —el número que dice qué cambió en cada uno, y lo que dijo alguien con el permiso para publicarlo y con su nombre—. Una captura lleva diez minutos y se hace cuando haya un rato; esto puede tardar semanas y nadie de acá lo puede apurar. Por eso van primero, aunque en la pantalla se vean últimas.
 
+- **04 · Trabajos** · `proyectos[0].resena.texto` — La reseña de El Garage (la pide Valentino)
+- **04 · Trabajos** · `proyectos[0].resena.autor` — Quién firma la reseña de El Garage
+- **04 · Trabajos** · `proyectos[1].resena.texto` — La reseña de Esquina Estudio (la pide Valentino)
+- **04 · Trabajos** · `proyectos[1].resena.autor` — Quién firma la reseña de Esquina Estudio
+- **04 · Trabajos** · `proyectos[2].resena.texto` — La reseña de Banú Scents (la pide Valentino)
+- **04 · Trabajos** · `proyectos[2].resena.autor` — Quién firma la reseña de Banú Scents
 - **05 · Servicios** · `CASO_DE_REFERENCIA` — El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.
 
 
@@ -124,6 +140,16 @@ Se edita en `src/app/v3/_secciones/trabajos/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
+| *(prosa)* | `bajada` | Valentino | La descripción del Portfolio, arriba del lado del texto (la reescribe C2) | Una o dos frases, unas veinticinco palabras |
+| *(prosa)* | `laTuya.bajada` | Valentino | El texto de «la próxima es la tuya», debajo de la frase (lo reescribe C2) | Una frase, unas quince palabras |
+| `[TEXTO]` | `proyectos[1].problemaResuelto` | Valentino | Qué le resolvió la página a Esquina Estudio | Una frase |
+| `[TEXTO]` | `proyectos[2].problemaResuelto` | Valentino | Qué le resolvió la página a Banú Scents | Una frase |
+| `[TESTIMONIO]` | `proyectos[0].resena.texto` | Valentino | La reseña de El Garage (la pide Valentino) | Dos o tres renglones, con las palabras del cliente |
+| `[NOMBRE]` | `proyectos[0].resena.autor` | Valentino | Quién firma la reseña de El Garage | Nombre y, si quiere, el cargo |
+| `[TESTIMONIO]` | `proyectos[1].resena.texto` | Valentino | La reseña de Esquina Estudio (la pide Valentino) | Dos o tres renglones, con las palabras del cliente |
+| `[NOMBRE]` | `proyectos[1].resena.autor` | Valentino | Quién firma la reseña de Esquina Estudio | Nombre y, si quiere, el cargo |
+| `[TESTIMONIO]` | `proyectos[2].resena.texto` | Valentino | La reseña de Banú Scents (la pide Valentino) | Dos o tres renglones, con las palabras del cliente |
+| `[NOMBRE]` | `proyectos[2].resena.autor` | Valentino | Quién firma la reseña de Banú Scents | Nombre y, si quiere, el cargo |
 
 
 ## 05 · Servicios

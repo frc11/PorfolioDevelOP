@@ -46,6 +46,9 @@ import { DESTINOS_CON_NUDO, destinoDelViaje } from '../../_componentes/destinosD
 import { ANCLA_DE_LA_MASCARA, ANCLA_DE_LA_VENTANA_VISIBLE, ANCLA_DEL_TRAZO } from '../../_secciones/_contrato/bloqueAnimado'
 import { MARCA_COREOGRAFIA_DEL_HOME } from '../../_secciones/_contrato/marcaCoreografia'
 import { VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
+import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
+import { vistaDelPaso } from '../../_secciones/trabajos/portfolio/estado'
+import { PANTALLAS_POR_PASO, pantallasDelAncla, pasoEn } from '../../_secciones/trabajos/portfolio/pasos'
 import { posicionDeAncla } from '../motion/anclas'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { NodoFalso, VENTANA, conDomFalso } from './s27-dom-falso'
@@ -466,13 +469,14 @@ const enSuPuntoDeLectura = (destino: Destino): Record<string, boolean> => conDom
     .responde('[data-composicion="agencia"] > [data-arbol]', tituloQs)
   const dQs = destino(qs as unknown as HTMLElement)
   r.quienes = dQs >= Math.max(finDe(tituloQs, V), finDe(trazoQs, V)) - 1 && 900 + 224 - dQs >= DESPEJE
-  // Portfolio: el título del cartel termina de subir (su máscara) antes del pin o después; las dos.
-  for (const [nombre, alto] of [['portfolio', 300], ['portfolioTarde', 600]] as const) {
-    const titulo = bloque(5073 + alto, 180, 'ventana-de-la-mascara')
-    const trabajos = new NodoFalso({ tope: 5073, alto: 7997 }, { 'data-panel': 'trabajos' }).responde(`[data-pieza="cartel"] ${BLOQUE}`, titulo)
-    const d = destino(trabajos as unknown as HTMLElement)
-    r[nombre] = d >= finDe(titulo, V) - 1 && d >= 5073 && 5073 + alto - d >= DESPEJE - 1 && 5073 + alto + 180 - d <= V
-  }
+  // [B1] Portfolio: El Garage en portada, con el panel del selector adentro (el título ya llegó entero: su máscara termina antes
+  // del pin). Era «Portfolio» subido entero en el cartel del túnel (hoy en el archivo). El ancla de su paso está en el layout.
+  const ancla = Object.assign(new NodoFalso({ tope: 5073 + V * pantallasDelAncla(0, PANTALLAS_POR_PASO), alto: 1 }), { id: ANCLAS_DEL_PORTFOLIO[0].id })
+  const trabajos = new NodoFalso({ tope: 5073, alto: 8556 }, { 'data-panel': 'trabajos' }).responde(`#${ANCLAS_DEL_PORTFOLIO[0].id}`, ancla)
+  const dT = destino(trabajos as unknown as HTMLElement)
+  const pasoDelDestino = pasoEn(((dT - 5073 + V) * 900) / V, PANTALLAS_POR_PASO)
+  r.portfolio = pasoDelDestino === 0
+  r.portfolioPanel = vistaDelPaso(pasoDelDestino).fase === 'adentro' && vistaDelPaso(pasoDelDestino).vista === 'portada'
   // Servicios: en su 00 (el pin, sin pasar al 01).
   const servicios = new NodoFalso({ tope: 13069.6, alto: 7200 }, { 'data-panel': 'servicios' })
   const dS = destino(servicios as unknown as HTMLElement)
@@ -492,12 +496,12 @@ const enSuPuntoDeLectura = (destino: Destino): Record<string, boolean> => conDom
 })
 const todosEnSuPunto = (r: Record<string, boolean>): boolean => Object.values(r).length === 6 && Object.values(r).every(Boolean)
 const enLosNudos = enSuPuntoDeLectura(destinoDelViaje)
-afirmar(todosEnSuPunto(enLosNudos), '  cada destino cae en su punto de lectura con su llegada completa: Quiénes somos con el título llegado y despejado; Portfolio con «Portfolio» subido entero (llegue antes o después del pin), debajo de la barra; Servicios en su 00; la cabecera del panel entera en el cuadro libre; la frase de Por qué develOP subida entera, sin valores en camino', Object.entries(enLosNudos).map(([k, v]) => `${k} ${v ? 'sí' : 'NO'}`).join(' · '))
+afirmar(todosEnSuPunto(enLosNudos), '  cada destino cae en su punto de lectura con su llegada completa: Quiénes somos con el título llegado y despejado; Portfolio en El Garage en portada, con el panel del selector adentro; Servicios en su 00; la cabecera del panel entera en el cuadro libre; la frase de Por qué develOP subida entera, sin valores en camino', Object.entries(enLosNudos).map(([k, v]) => `${k} ${v ? 'sí' : 'NO'}`).join(' · '))
 const alAncla: Destino = (seccion) => Math.round(seccion.getBoundingClientRect().top + VENTANA.scrollY - DESPEJE)
 controlPositivo('  el detector VE el ancla nativa (el tope menos la barra: títulos a medio llegar)', alAncla, (d: Destino) => todosEnSuPunto(enSuPuntoDeLectura(d)))
 // La llegada aislada (Portfolio y la frase): al llegar, el título de la sección repite su llegada, entera, después del fundido.
 const efectoDelViaje = sinComentarios(leer('_componentes/useDeslizamientoDelCta.ts'))
-const piezasDePortfolio = sinComentarios(leer('_secciones/trabajos/piezas.tsx'))
+const piezasDePortfolio = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
 const fraseDePorQue = sinComentarios(leer('_secciones/por-que-develop/PorQueDevelop.tsx'))
 const llegadaDelTitulo = sinComentarios(leer('_componentes/llegadaDelTitulo.ts'))
 const aislada = (efecto: string): boolean =>

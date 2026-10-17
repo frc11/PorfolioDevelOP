@@ -107,7 +107,10 @@ export const NUMEROS_PERMITIDOS: readonly Excepcion[] = [
   },
   {
     valor: '2026',
-    motivo: '[FINAL 3] el año de la línea legal del pie («© 2026 develOP»). Un dato del documento, no una medición.',
+    motivo:
+      '[FINAL 3] el año de la línea legal del pie («© 2026 develOP»). Un dato del documento, no una medición. ' +
+      '[B1] Y el año de las fechas de los tres trabajos del Portfolio («Marzo 2026», «Junio 2026», «Abril 2026»), que dictó ' +
+      'Valentino: cuándo se hizo cada sitio, no un resultado.',
   },
 ]
 
