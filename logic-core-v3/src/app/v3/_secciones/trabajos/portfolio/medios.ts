@@ -2,7 +2,8 @@
  * [B1] LAS MEDIDAS DE LOS MEDIOS DEL PORTFOLIO — las que dejó la codificación (`scripts-portfolio/codificar.ts`, el recibo en
  * `docs/rediseno/entregas/b1-portfolio/medios.json`). Son geometría y no contenido (`s5-contenido` no deja números en el contenido);
  * s76 las compara contra el recibo. El escritorio de El Garage y el teléfono de Esquina se codificaron más chicos para entrar en
- * el techo de peso: se baja la resolución antes que la calidad.
+ * el techo de peso: se baja la resolución antes que la calidad. [B1.2b] P-H11 · el teléfono de El Garage, en la resolución de su
+ * grabación (390 × 844): el `recordVideo` lo había dejado en el cuarto de arriba a la izquierda de un cuadro gris de 780 × 1688.
  */
 
 import type { SlugDelProyecto } from '../proyectos'
@@ -13,7 +14,7 @@ export interface Medida {
 }
 
 export const MEDIDAS_DE_LOS_MEDIOS: Readonly<Record<SlugDelProyecto, { readonly escritorio: Medida; readonly movil: Medida }>> = {
-  'el-garage': { escritorio: { ancho: 1280, alto: 800 }, movil: { ancho: 780, alto: 1688 } },
+  'el-garage': { escritorio: { ancho: 1280, alto: 800 }, movil: { ancho: 390, alto: 844 } },
   'esquina-estudio': { escritorio: { ancho: 1440, alto: 900 }, movil: { ancho: 690, alto: 1494 } },
   'banu-scents': { escritorio: { ancho: 1440, alto: 900 }, movil: { ancho: 780, alto: 1688 } },
 }

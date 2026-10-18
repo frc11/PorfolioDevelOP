@@ -23,6 +23,14 @@ import type { PortfolioVivo } from './usePortfolio'
 export const NIVEL_DEL_TITULO_DE_LA_TUYA = 'titulo-xl'
 
 /**
+ * [B1.2b] El título de «la tuya» es lo primero de su tira, arriba de todo, y la barra flota en esa franja: la tira activa deja libre
+ * lo que ocupa la barra en reposo (el mismo despeje que el de las anclas, `scroll-padding-top` en `navegacion.css`; s76 compara las
+ * dos expresiones) y la cabecera pone el aire. El banco lo encontró: a 1024 la pastilla tapaba el título (contraste 2,1:1). En
+ * línea: no es una clase del lane.
+ */
+export const DESPEJE_DE_LA_BARRA = 'calc(var(--spacing-6) + var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto))'
+
+/**
  * [B1] «LA PRÓXIMA ES LA TUYA» — la última tira (plan §5.5; [B1.2b] §12, punto 4). El «?» 3D se borró: la marca de agua es un «?» 2D
  * quieto con el estilo del logo, pegado al borde izquierdo (`SignoDePregunta`, el mismo tratamiento que las de los clientes). El
  * título, grande; la frase y la bajada; y el CTA como un botón grande que abre la hoja de contacto de siempre
@@ -34,7 +42,7 @@ export function LaTuya({ activa, vivo }: { readonly activa: boolean; readonly vi
   const c = CONTENIDO.laTuya
   const visible = activa && vistaDelPaso(vivo.paso).fase === 'adentro'
   return (
-    <div data-tira="la-tuya" data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? cn(CLASES_DE_LA_TIRA.activa, 'pt-6') : CLASES_DE_LA_TIRA.lomo)}>
+    <div data-tira="la-tuya" data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo)} style={activa ? { paddingTop: DESPEJE_DE_LA_BARRA } : undefined}>
       {activa ? <SignoDePregunta /> : null}
       <CabeceraDeLaTira id={ids.cabecera} indice={TIRA_DE_LA_TUYA} activa={activa} nombre={c.nombre} controla={ids.region} nivel={NIVEL_DEL_TITULO_DE_LA_TUYA} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(TIRA_DE_LA_TUYA)} />
       <div id={ids.region} hidden={!activa} className="relative flex min-h-0 flex-1 flex-col gap-6 px-8 pb-12 pt-4">

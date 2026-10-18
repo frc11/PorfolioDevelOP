@@ -17,8 +17,8 @@
  *   … PANEL=solo (sólo la entrada del panel del Portfolio) · PANEL=no (sin ella)
  *
  * [B1.2b] Al final de la tanda, la entrada del panel del Portfolio con scroll rápido (la rueda, la barra, el menú y un ancla): su caja,
- * cuadro a cuadro, mientras entra; el tope tiene que quedarse quieto (±1 px, `panel.ts`). La salida se mide donde la hay (la rueda cruza
- * la cola).
+ * cuadro a cuadro, mientras entra; el tope tiene que quedarse quieto (±1 px, `panel.ts`). Y la salida, donde la hay (la rueda cruza la
+ * cola): o ningún cuadro a mitad de camino, o el tope quieto.
  */
 import { chromium, type CDPSession, type Page } from '@playwright/test'
 import { execSync } from 'node:child_process'
@@ -310,7 +310,8 @@ async function entradasDelPanel(p: Page, archivo: string): Promise<number> {
       await dormir(7000)
       const muestras = await p.evaluate(() => (window as unknown as { __muestrasDelPanel?: MuestraDelPanel[] }).__muestrasDelPanel ?? [])
       const { entrada, salida } = tramosDelPanel(muestras)
-      const ok = enHorizontal(entrada)
+      // La entrada, siempre (cada manera la tiene); la salida, donde la hay (la rueda cruza la cola).
+      const ok = enHorizontal(entrada) && (salida.cuadros === 0 || enHorizontal(salida))
       if (!ok) fallas += 1
       appendFileSync(archivo, `${JSON.stringify({ tipo: 'panel', metodo, muestras: muestras.length, entrada, salida, ok })}\n`)
       const px = (t: { readonly cuadros: number; readonly desvio: number }): string => (t.cuadros === 0 ? 'sin cuadros' : `${String(t.cuadros)} cuadros, el tope a ±${t.desvio.toFixed(1)} px`)

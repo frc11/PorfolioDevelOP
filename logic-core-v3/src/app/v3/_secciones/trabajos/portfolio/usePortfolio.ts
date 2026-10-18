@@ -1,9 +1,11 @@
 'use client'
 
+import type Lenis from 'lenis'
 import { useMotionValue, type MotionValue } from 'motion/react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 
 import { PORTFOLIO_EN_LA_ESCENA } from '../../../_lib/escena/portfolioEnLaEscena'
+import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
 import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimiento'
 
 import { ANCLAS_DEL_PORTFOLIO } from './anclas'
@@ -21,7 +23,8 @@ import { anchoDe, anotarElSelector } from './tramoDelSelector'
  *
  * El scroll se mide contra el tope del panel (`[data-panel]`, que no es pegajoso ni lleva transformadas) en cada cuadro con
  * scroll; el paso se publica en React sólo cuando cambia. [B1.2b] El paso que se muestra espera al PIN (`pasoConElPin`: el panel se
- * anima en el escenario pegado, así entra en horizontal a cualquier velocidad). Un salto pone el paso de destino EN EL MISMO
+ * anima en el escenario pegado, así entra en horizontal a cualquier velocidad) y el panel existe sólo pegado (`cortarElPanel`: así
+ * también sale en horizontal). Un salto pone el paso de destino EN EL MISMO
  * CUADRO (el hover cambia la tira sin esperar al scroll) y, mientras vuela, los bordes del camino no disparan nada.
  */
 export interface PortfolioVivo {
@@ -67,6 +70,28 @@ function publicar(caja: HTMLElement | null, actual: { current: IndiceDePaso }, s
   if (mostrable === actual.current) return
   actual.current = mostrable
   setPaso(mostrable)
+}
+
+/**
+ * [B1.2b] EL PANEL EXISTE SÓLO EN EL ESCENARIO PEGADO. Un scroll que cruza la cola (o la aproximación) más rápido que la transición
+ * del panel despegaba el escenario con el panel a mitad de camino y se lo llevaba en vertical (el banco: 1858 px con la rueda).
+ * Despegado, el panel queda afuera y sin transición; pegado, manda su clase otra vez. Imperativo y en el MISMO cuadro en que se
+ * mueve el scroll (se llama sincrónico desde el `scroll` nativo y desde el de Lenis): con un estado de React quedaba un cuadro de
+ * atraso (el banco: 38 px).
+ */
+function cortarElPanel(caja: HTMLElement | null, antes: { current: boolean | null }): void {
+  const ahora = pegado(caja)
+  if (ahora === antes.current) return
+  antes.current = ahora
+  const panel = caja?.querySelector<HTMLElement>('[data-pieza="panel-del-portfolio"]') ?? null
+  if (panel === null) return
+  if (ahora) {
+    panel.style.removeProperty('transition')
+    panel.style.removeProperty('translate')
+  } else {
+    panel.style.setProperty('transition', 'none')
+    panel.style.setProperty('translate', '100% 0')
+  }
 }
 
 export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo {
@@ -130,8 +155,21 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   // El scroll: el paso con histéresis (o el destino del salto en vuelo) y el reloj de Demos.
   useLayoutEffect(() => {
     let pedido = 0
+    // El corte del panel, sincrónico con lo que mueve el scroll: el `scroll` nativo (antes de los cuadros) y el de Lenis (en su
+    // cuadro, apenas mueve la página; se suscribe a la instancia que haya: abajo de 1025 no hay).
+    const pegadoAntes: { current: boolean | null } = { current: null }
+    const cortar = (): void => cortarElPanel(caja.current, pegadoAntes)
+    let lenis: { readonly de: Lenis; readonly soltar: () => void } | null = null
+    const conLenis = (): void => {
+      const de = LENIS_DEL_SITIO.instancia
+      if (de === (lenis?.de ?? null)) return
+      lenis?.soltar()
+      lenis = de === null ? null : { de, soltar: de.on('scroll', cortar) }
+    }
     const leer = (): void => {
       pedido = 0
+      conLenis()
+      cortar()
       const m = medir(caja.current)
       if (m === null) return
       mostrado.set(mostradoDeDemos(m.px, PANTALLAS_POR_PASO))
@@ -141,13 +179,18 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     const pedir = (): void => {
       if (pedido === 0) pedido = requestAnimationFrame(leer)
     }
+    const alMoverse = (): void => {
+      cortar()
+      pedir()
+    }
     pedir()
-    window.addEventListener('scroll', pedir, { passive: true })
+    window.addEventListener('scroll', alMoverse, { passive: true })
     window.addEventListener('resize', pedir)
     return () => {
-      window.removeEventListener('scroll', pedir)
+      window.removeEventListener('scroll', alMoverse)
       window.removeEventListener('resize', pedir)
       if (pedido !== 0) cancelAnimationFrame(pedido)
+      lenis?.soltar()
     }
   }, [caja, mostrado])
 
@@ -182,10 +225,11 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     if (ancla === undefined || m === null) return undefined
     const y = Math.round(scrollDelPx(centroDelPaso(ancla.paso, PANTALLAS_POR_PASO), m.tope, m.alto))
     const el = caja.current
-    // El ancla con la que cargó, para el diagnóstico de la carga, hasta que el visitante mueva la página por su cuenta.
+    // El ancla con la que cargó, para el diagnóstico de la carga, hasta que el visitante mueva la página por su cuenta. [B1.2b] Un clic
+    // también (el menú lleva a otra sección: el arnés lo contaba como un ancla desfasada).
     el?.setAttribute('data-ancla-de-la-carga', ancla.id)
     const soltar = (): void => el?.removeAttribute('data-ancla-de-la-carga')
-    const gestos = ['wheel', 'touchstart', 'keydown'] as const
+    const gestos = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const
     for (const g of gestos) window.addEventListener(g, soltar, { once: true, passive: true })
     const reloj = window.setTimeout(() => window.scrollTo({ top: y, behavior: 'instant' }), 0)
     return () => {

@@ -17,7 +17,7 @@ import { marcar } from '../../_secciones/_invariantes/render'
 import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
 import { CONSULTA_DEL_PUNTERO_FINO, HOVER, pasoConElPin, seMovioDeVerdad, suenaElCambio } from '../../_secciones/trabajos/portfolio/estado'
 import { ESTILO_DEL_VIDRIO, OPACIDAD_DEL_VIDRIO } from '../../_secciones/trabajos/portfolio/EscenarioDelPortfolio'
-import { NIVEL_DEL_TITULO_DE_LA_TUYA } from '../../_secciones/trabajos/portfolio/LaTuya'
+import { DESPEJE_DE_LA_BARRA, NIVEL_DEL_TITULO_DE_LA_TUYA } from '../../_secciones/trabajos/portfolio/LaTuya'
 import { CONTORNO_DEL_SIGNO, OPACIDAD_DE_LA_MARCA, PUNTO_DEL_SIGNO } from '../../_secciones/trabajos/portfolio/MarcaDeAgua'
 import { MedioDeLaTira, estadoDelVideo } from '../../_secciones/trabajos/portfolio/MedioDeLaTira'
 import { ANTES_DEL_PIN, EN_LA_COLA, type IndiceDePaso } from '../../_secciones/trabajos/portfolio/pasos'
@@ -32,6 +32,7 @@ import { DIM_DEL_PORTFOLIO, PERSECUCION_DEL_PESO_S, PORTFOLIO_EN_LA_ESCENA, avan
 import { CAMERA_FOV } from '../escena/probeScene'
 import { pantallaDeProgreso, progresoDePantalla } from '../escena/recorrido'
 import { camaraDeLaLectura, colocar, lineaDeBase, poseDeLaLectura, type MedidasDeLaFuente } from '../escena/titulos3d/colocacion'
+import { VERIFICACION } from '../escena/titulos3d/sincronia'
 import { LECTURA } from '../titulos3d/registro'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
 
@@ -196,7 +197,12 @@ export function afirmarElSelectorVivo(): void {
   controlPositivo('  sin la compuerta el panel entra con el escenario suelto', (paso: IndiceDePaso) => paso, (f: (paso: IndiceDePaso) => IndiceDePaso) => f(2) === ANTES_DEL_PIN)
   const usePortfolio = leer('_secciones/trabajos/portfolio/usePortfolio.ts')
   afirmar(/const mostrable = pasoConElPin\(siguiente, pegado\(caja\)\)/.test(usePortfolio) && /Math\.abs\(escenario\.getBoundingClientRect\(\)\.top\) <= 1/.test(usePortfolio), '  la sección publica el paso con la compuerta del pin, medido en el escenario (su tope en el del cuadro)')
-  afirmar(/transition-transform/.test(panel) && /'translate-x-full'/.test(escenario) && !/translate-y|inset-y-[1-9]/.test(panel) && /className="sticky top-0 h-svh w-full overflow-clip"/.test(escenario), '  el panel sólo se traslada en x (`translate-x-full` ↔ 0), adentro del escenario pegado: el tope de su caja no se mueve')
+  afirmar(/transition-transform duration-700/.test(panel) && /'translate-x-full'/.test(escenario) && !/translate-y|inset-y-[1-9]/.test(panel) && /className="sticky top-0 h-svh w-full overflow-clip"/.test(escenario), '  el panel sólo se traslada en x (`translate-x-full` ↔ 0), adentro del escenario pegado: el tope de su caja no se mueve')
+  const elCorte = (c: string): boolean =>
+    /if \(ahora\) \{\s*panel\.style\.removeProperty\('transition'\)\s*panel\.style\.removeProperty\('translate'\)\s*\} else \{\s*panel\.style\.setProperty\('transition', 'none'\)\s*panel\.style\.setProperty\('translate', '100% 0'\)/.test(c) &&
+    /const alMoverse = \(\): void => \{\s*cortar\(\)\s*pedir\(\)\s*\}/.test(c) && /window\.addEventListener\('scroll', alMoverse, \{ passive: true \}\)/.test(c) && /soltar: de\.on\('scroll', cortar\)/.test(c)
+  afirmar(elCorte(usePortfolio), '  y existe sólo pegado: despegado, afuera y sin transición, en el MISMO cuadro en que se mueve el scroll (sincrónico con el `scroll` nativo y con el de Lenis). El banco: con la rueda, la salida subía 1858 px; con el corte en un render, un cuadro tarde, 38 px')
+  controlPositivo('  el detector ve el corte un cuadro tarde (sólo en la lectura por cuadro)', usePortfolio.replace(/const alMoverse = \(\): void => \{\s*cortar\(\)\s*pedir\(\)\s*\}/, 'const alMoverse = pedir'), elCorte)
   // El arnés lo mide en el sitio (`scripts-carga/estres.ts`, al final de cada tanda): la caja, cuadro a cuadro, con la rueda, la barra,
   // el menú y un ancla. La cuenta es ésta: entrando (hacia la izquierda, a mitad de camino), el tope a ±1 px del de su primer cuadro.
   const viaje = (tope: (k: number) => number): MuestraDelPanel[] => Array.from({ length: 30 }, (_, k) => ({ top: tope(k), left: 1440 - Math.min(720, k * 30), ancho: 720, vista: 1440 }))
@@ -204,8 +210,17 @@ export function afirmarElSelectorVivo(): void {
   afirmar(enHorizontal(enX.entrada) && enX.entrada.cuadros === 23 && enX.salida.cuadros === 0 && TOLERANCIA_DEL_TOPE_PX === 1, '  el arnés: con scroll rápido, la caja del panel durante la entrada mantiene el tope (±1 px), cuadro a cuadro', `${String(enX.entrada.cuadros)} cuadros entrando`)
   controlPositivo('  la cuenta ve una entrada que viaja con la página (el escenario suelto)', viaje((k) => 400 - k * 40), (m: MuestraDelPanel[]) => enHorizontal(tramosDelPanel(m).entrada))
   controlPositivo('  y la ve aunque se corra apenas 2 px', viaje((k) => (k > 10 ? 2 : 0)), (m: MuestraDelPanel[]) => enHorizontal(tramosDelPanel(m).entrada))
+  // La salida: el escenario se despega en el cuadro 8 y sube 100 px por cuadro. Con la compuerta el panel se va de una (en el cuadro 8
+  // ya está afuera); sin ella, sigue a mitad de camino y sube con el escenario.
+  const saliendo = (seVaDeUna: boolean): MuestraDelPanel[] => Array.from({ length: 30 }, (_, k) => ({ top: k < 8 ? 0 : -(k - 7) * 100, left: seVaDeUna && k >= 8 ? 1440 : 720 + Math.min(720, k * 30), ancho: 720, vista: 1440 }))
+  const salidaBien = (m: MuestraDelPanel[]): boolean => {
+    const { salida } = tramosDelPanel(m)
+    return salida.cuadros === 0 || enHorizontal(salida)
+  }
+  afirmar(salidaBien(saliendo(true)) && tramosDelPanel(saliendo(true)).salida.cuadros === 7, '  y en la salida: o ningún cuadro a mitad de camino, o el tope quieto (con la compuerta, el panel se va de una al despegarse)')
+  controlPositivo('  la cuenta ve la salida que sube con el escenario', saliendo(false), salidaBien)
   const estres = leer('../../../scripts-carga/estres.ts')
-  afirmar(/const ok = enHorizontal\(entrada\)/.test(estres) && /METODOS_DEL_PANEL = \['rueda', 'barra', 'menu', 'ancla'\] as const/.test(estres) && /if \(PANEL !== 'no' &&/.test(estres), '  y el arnés la corre al final de cada tanda, de las cuatro maneras')
+  afirmar(/const ok = enHorizontal\(entrada\) && \(salida\.cuadros === 0 \|\| enHorizontal\(salida\)\)/.test(estres) && /METODOS_DEL_PANEL = \['rueda', 'barra', 'menu', 'ancla'\] as const/.test(estres) && /if \(PANEL !== 'no' &&/.test(estres), '  y el arnés la corre al final de cada tanda, de las cuatro maneras, con la entrada y la salida')
 
   titulo('B1.2b · 13 · La secuencia de una tira: un gatillo, por tiempo')
 
@@ -252,6 +267,39 @@ export function afirmarElSelectorVivo(): void {
   afirmar(NIVEL_DEL_TITULO_DE_LA_TUYA === 'titulo-xl' && anchoDeProxima(28.96 + 0.018779 * 1024) <= 280 && anchoDeProxima(28.96 + 0.018779 * 1440) <= 488 && anchoDeProxima(53.97 + 0.034742 * 1024) > 280, 'el título de «la tuya», el más grande de los titulares que entra sin cortar «próxima» a 1024 y a 1440 (`display-xl` la parte a 1024)')
   const laTuya = sinComentarios(leer('_secciones/trabajos/portfolio/LaTuya.tsx'))
   afirmar(/<motion\.button\s+type="button"\s+data-abre-contacto="panel"\s+className="mt-auto self-start rounded-sutil bg-tinta px-8 py-5/.test(laTuya), '  y el CTA, un botón grande con el mismo `data-abre-contacto="panel"`')
+  const expresion = (s: string): string => s.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').trim()
+  const despejeDeLasAnclas = expresion(/html:has\(\[data-v3\]\) \{\s*scroll-padding-top: (calc\([\s\S]*?\));\s*\}/.exec(leer('_estilos/navegacion.css'))?.[1] ?? '?')
+  const despejaLaBarra = (e: string): boolean => despejeDeLasAnclas.startsWith('calc(var(--spacing-6)') && expresion(e) === despejeDeLasAnclas
+  afirmar(despejaLaBarra(DESPEJE_DE_LA_BARRA) && /style=\{activa \? \{ paddingTop: DESPEJE_DE_LA_BARRA \} : undefined\}/.test(laTuya), '  el título no queda debajo de la barra: la tira activa deja libre lo que ocupa la barra en reposo, con la misma expresión que el despeje de las anclas (el banco: a 1024 la pastilla lo tapaba, 2,1:1)', despejeDeLasAnclas)
+  controlPositivo('  el detector ve un despeje que se separó del de las anclas', 'calc(var(--spacing-6) + var(--spacing-2) * 2 + var(--text-cuerpo) * var(--leading-texto))', despejaLaBarra)
+
+  titulo('B1.2b · 17 · Demos en tablet: llega como en escritorio y su título no asoma durante el Portfolio')
+
+  // El banco (820 × 1180, paso 1): sin la capa rígida, el título DOM de Demos (su P2 nace corrido sólo el 60 %) asomaba cortado
+  // durante todo el Portfolio. Fuera de la capa rígida su ventana entra también en opacidad, con su progreso.
+  const capaDeDemos = sinComentarios(leer('_secciones/trabajos/demos/CapaDeDemos.tsx'))
+  const tituloQueNoAsoma = (c: string): boolean =>
+    /titulo\.current = capa\.current\?\.querySelector<HTMLElement>\('#demos > div:first-child'\)/.test(c) &&
+    /progresoDelTitulo\.set\(enElTramo\(l, LLEGADA\.titulo\)\)\s*titulo\.current\?\.style\.setProperty\('opacity', progresoDelTitulo\.get\(\)\.toFixed\(3\)\)/.test(c) &&
+    /parrafo\.current\?\.style\.setProperty\('opacity', '1'\)\s*titulo\.current\?\.style\.removeProperty\('opacity'\)/.test(c)
+  afirmar(tituloQueNoAsoma(capaDeDemos) && /className="block overflow-hidden py-2 -my-2"|VENTANA_QUE_RECORTA = 'block overflow-hidden py-2 -my-2'/.test(leer('_secciones/_contrato/canales.tsx')), 'el título DOM de Demos entra con su progreso también en opacidad (en 0, no asoma); con la capa rígida (abajo de 768) la escala de la capa lo esconde y la opacidad se suelta')
+  controlPositivo('  el detector ve el título que asoma (sólo el P2)', capaDeDemos.replace(/\s*titulo\.current\?\.style\.setProperty\('opacity', progresoDelTitulo\.get\(\)\.toFixed\(3\)\)/, ''), tituloQueNoAsoma)
+
+  titulo('B1.2b · 18 · Lo que encontró el arnés de carga')
+
+  // Con la pestaña oculta al cargar, «Portfolio» se imprimía con la x de las letras de la métrica de respaldo y el relevo del DOM las
+  // corría sin una tanda de fuentes nueva que lo rehiciera (0,121 em en 18 de 26 corridas). El guardián verifica una vez cada armado.
+  const sincronia = sinComentarios(leer('_lib/escena/titulos3d/sincronia.ts'))
+  const verificaLasLetras = (c: string): boolean =>
+    /verificarLasLetras\(v, ahora\)/.test(c) && /if \(VERIFICADOS\.has\(a\) \|\| !tituloListo\(a\.titulo\.id\)\) continue/.test(c) &&
+    /if \(ahora - desde < VERIFICACION\.esperaMs\) continue/.test(c) && /if \(REARMADOS_POR_LAS_LETRAS\.has\(a\.titulo\.id\) \|\| !corridas\(a\)\) continue/.test(c) &&
+    /MOSTRADO_DE_LOS_REARMADOS\.set\(a\.titulo\.id, \{ \.\.\.a\.mostrado \}\)\s*soltarElArmado\(v\.t, v\.armados, a\)\s*pedirOtraSincronia\(\)/.test(c)
+  afirmar(verificaLasLetras(sincronia) && VERIFICACION.esperaMs >= 300, 'un título impreso con las letras de otro momento (el DOM cambió sin una tanda de fuentes nueva) se vuelve a armar, una vez por armado ya relevado y a lo sumo una vez por título y por carga')
+  controlPositivo('  el detector ve el guardián sin la verificación', sincronia.replace(/\s*verificarLasLetras\(v, ahora\)/, ''), verificaLasLetras)
+  // Cargar con el ancla de un proyecto y hacer clic en el menú: la marca del ancla quedaba y el diagnóstico la daba por desfasada.
+  const conElClic = (c: string): boolean => /const gestos = \['wheel', 'touchstart', 'keydown', 'pointerdown'\] as const/.test(c)
+  afirmar(conElClic(sinComentarios(usePortfolio)), '  la marca del ancla con que cargó la página se suelta también con un clic (el menú lleva a otra sección)')
+  controlPositivo('  el detector ve la marca que sólo soltaban la rueda, el tacto y el teclado', usePortfolio.replace(", 'pointerdown'", ''), (c: string) => conElClic(sinComentarios(c)))
 
   titulo('B1.2b · 16 · El título entra en su lugar y se va cayendo')
 

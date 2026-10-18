@@ -28,7 +28,9 @@ export const ESTILO_DEL_VIDRIO: React.CSSProperties = {
  * parte en dos mitades: arriba «Portfolio» y su bajada, centrados; abajo, vacía, el logo de la escena (la pose del Portfolio lo
  * centra en el mismo eje: `_lib/escena/poseDelPortfolio.ts`). El panel entra desde la derecha y sale por la derecha: sólo
  * `translate-x`, adentro del escenario pegado, y el paso que lo mete espera al pin (`pasoConElPin`), así que no tiene componente
- * vertical a ninguna velocidad. La columna es la mitad desde 1024 y el 40 % abajo (el panel, el 60 %): la escena lo lee del CSS
+ * vertical a ninguna velocidad. Y existe sólo pegado (`cortarElPanel` en `usePortfolio.ts`): un scroll que cruza la cola más rápido
+ * que la transición despegaba el escenario con el panel a mitad de camino; despegado, el panel queda afuera y sin transición, en el
+ * mismo cuadro. La columna es la mitad desde 1024 y el 40 % abajo (el panel, el 60 %): la escena lo lee del CSS
  * (`COLUMNA_DEL_ANCHO`). Abajo de 768 lo reemplazan las historias (B1.3).
  */
 export function EscenarioDelPortfolio({

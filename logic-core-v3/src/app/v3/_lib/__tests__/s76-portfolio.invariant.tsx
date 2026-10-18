@@ -9,9 +9,12 @@
  *   B1.2  · el selector vivo (`s76-portfolio-escena.tsx`): los videos, un solo lienzo, la pose del logo, el oscurecido, el hover,
  *           los sonidos y las banderas.
  */
+import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 
+import { decodificarPng, type Imagen } from '../../../../../scripts-b4/png'
+import { AREA_MINIMA, BANDA_MAXIMA, areaDelContenido, bandasDelBorde, cubreElCuadro, type Bandas } from '../../../../../scripts-portfolio/cobertura'
 import { RECIBO_DE_LOS_MEDIOS, TECHO_BYTES, type MedioCodificado } from '../../../../../scripts-portfolio/guiones'
 import { NOMBRES_REALES } from '../../_secciones/_contrato/escaneo'
 import { CONTENIDO as CONTENIDO_DE_ANTES } from '../../_archivo/tunel-portfolio/contenido'
@@ -82,6 +85,15 @@ const sinAudio = (b: Buffer): boolean => {
   return m.includes('vide') && !m.includes('soun')
 }
 const esWebp = (b: Buffer): boolean => b.toString('latin1', 0, 4) === 'RIFF' && b.toString('latin1', 8, 12) === 'WEBP'
+/** [B1.2b] P-H11 · el póster en píxeles: ffmpeg (el de `scripts-portfolio`) lo pasa a PNG y lo lee el decodificador del banco. */
+function pixelesDe(ruta: string): Imagen | null {
+  try {
+    return decodificarPng(execFileSync('ffmpeg', ['-v', 'error', '-i', ruta, '-f', 'image2pipe', '-vcodec', 'png', '-'], { maxBuffer: 64 * 1024 * 1024, windowsHide: true }))
+  } catch {
+    return null
+  }
+}
+const enPorcentaje = (b: Bandas): string => `bandas ${[b.arriba, b.abajo, b.izquierda, b.derecha].map((x) => `${(x * 100).toFixed(1)} %`).join(' / ')} · el contenido, ${(areaDelContenido(b) * 100).toFixed(0)} % del cuadro`
 
 for (const p of PROYECTOS) {
   for (const dispositivo of ['escritorio', 'movil'] as const) {
@@ -103,8 +115,24 @@ for (const p of PROYECTOS) {
       '  H.264, `+faststart` (el `moov` antes del `mdat`), sin pista de audio, y el póster es WebP',
     )
     afirmar(r.segundos >= 9.5 && r.segundos <= 12.5, `  dura ${r.segundos} s: los ~10–12 s de la spec, a 2×`)
+    const px = pixelesDe(enDisco(poster))
+    const bandas = px === null ? null : bandasDelBorde(px.datos, px.ancho, px.alto)
+    afirmar(px !== null && bandas !== null && px.ancho === r.ancho && px.alto === r.alto && cubreElCuadro(bandas), `  [B1.2b] P-H11 · el póster cubre el cuadro (${String(px?.ancho)} × ${String(px?.alto)}, lo del video; ninguna banda lisa pegada a un borde pasa del ${String(BANDA_MAXIMA * 100)} % y el contenido ocupa el ${String(AREA_MINIMA * 100)} % o más)`, bandas === null ? 'sin decodificar' : enPorcentaje(bandas))
   }
 }
+// El control: la captura en el cuarto de arriba a la izquierda y el resto gris (el póster del teléfono de El Garage antes de P-H11).
+const sintetico = (cubre: (x: number, y: number) => boolean, ancho = 390, alto = 844): Uint8Array => {
+  const d = new Uint8Array(ancho * alto * 4)
+  for (let y = 0; y < alto; y += 1) {
+    for (let x = 0; x < ancho; x += 1) {
+      const v = cubre(x, y) ? (x * 7 + y * 13) % 256 : 128
+      d.set([v, v, v, 255], (y * ancho + x) * 4)
+    }
+  }
+  return d
+}
+controlPositivo('  P-H11 · el detector ve un póster recortado (la captura en un cuarto, el resto gris)', sintetico((x, y) => x < 195 && y < 422), (d: Uint8Array) => cubreElCuadro(bandasDelBorde(d, 390, 844)))
+afirmar(cubreElCuadro(bandasDelBorde(sintetico((_, y) => y >= 50 && y < 794), 390, 844)), '  y acepta el margen liso de un sitio (6 % arriba y abajo, como el de Esquina)')
 
 const caja = (tipo: string, cuerpo = ''): Buffer => {
   const b = Buffer.alloc(8 + cuerpo.length)

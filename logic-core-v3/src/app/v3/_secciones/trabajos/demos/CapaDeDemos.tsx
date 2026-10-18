@@ -92,6 +92,13 @@ export function CapaDeDemos({
   const libros = useRef<HTMLElement[]>([])
   /** [B1.2b] Los renglones del carrusel (el de 768 a 1023): llegan con el gesto de los libros. */
   const renglones = useRef<HTMLElement[]>([])
+  /**
+   * [B1.2b] La ventana del título DOM: su P2 nace corrido sólo el 60 % de su alto, así que en 0 asoma la parte de arriba de las
+   * letras. Afuera la capa no se ve en 0 (no entró al cuadro), pero acá está pegada con el Portfolio desde el principio: en tablet
+   * (sin el título 3D, que desde 1024 reemplaza al DOM) «Demos» asomaba cortado durante todo el Portfolio. Entra también en opacidad,
+   * como el párrafo.
+   */
+  const titulo = useRef<HTMLElement | null>(null)
   const parrafo = useRef<HTMLDivElement | null>(null)
   const progresoDelTitulo = useMotionValue(enElTramo(llegadaDeLaAparicion(inicial), LLEGADA.titulo))
   const progresoDelParrafo = useMotionValue(enElTramo(llegadaDeLaAparicion(inicial), LLEGADA.parrafo))
@@ -119,10 +126,12 @@ export function CapaDeDemos({
         progresoDelTitulo.set(1)
         progresoDelParrafo.set(1)
         parrafo.current?.style.setProperty('opacity', '1')
+        titulo.current?.style.removeProperty('opacity')
         return
       }
       const l = llegadaDeLaAparicion(a)
       progresoDelTitulo.set(enElTramo(l, LLEGADA.titulo))
+      titulo.current?.style.setProperty('opacity', progresoDelTitulo.get().toFixed(3))
       const delParrafo = enElTramo(l, LLEGADA.parrafo)
       progresoDelParrafo.set(delParrafo)
       parrafo.current?.style.setProperty('opacity', delParrafo.toFixed(3))
@@ -140,6 +149,7 @@ export function CapaDeDemos({
   useLayoutEffect(() => {
     libros.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="libro"]') ?? [])]
     renglones.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="carrusel"] [data-parte="renglon"]') ?? [])]
+    titulo.current = capa.current?.querySelector<HTMLElement>('#demos > div:first-child') ?? null
     // Se levantan sobre su base: el origen de los libros (`demos.css`).
     for (const r of renglones.current) r.style.setProperty('transform-origin', '50% 100%')
     const p = aparicion.current
