@@ -206,6 +206,34 @@ function trabado(titulo: TituloDeVolumen): boolean {
   return estaTrabado({ listo: tituloListo(titulo.id), esperando: ESPERANDO.has(titulo.id), compilando: COMPILANDO.has(titulo.id), aLaVista: visto, conSuFuente: visto && fuenteCargadaPara(titulo.lugar) })
 }
 
+/**
+ * [B1.2b] Y una vez por armado, ya impreso y con el DOM relevado (`VERIFICACION.esperaMs` después de quedar listo): si sus letras no
+ * están donde las midió, se vuelve a armar con lo mostrado donde iba. Con la pestaña oculta al cargar, un texto se quedaba con la
+ * métrica de respaldo aunque su cara ya hubiera cargado; el título se imprimía con esa x, el relevo creaba el DOM nuevo con la cara
+ * real (otra x) y no venía otra tanda de fuentes que lo rehiciera (el arnés: «Portfolio» a 0,121 em). A lo sumo una vez por título y
+ * por carga: un plano en perspectiva no entra en un bucle.
+ */
+export const VERIFICACION = { esperaMs: 500 } as const
+const LISTO_DESDE = new WeakMap<Armado, number>()
+const VERIFICADOS = new WeakSet<Armado>()
+const REARMADOS_POR_LAS_LETRAS = new Set<string>()
+
+function verificarLasLetras(v: { readonly t: Taller; readonly armados: Armado[] }, ahora: number): void {
+  for (const a of [...v.armados]) {
+    if (VERIFICADOS.has(a) || !tituloListo(a.titulo.id)) continue
+    const desde = LISTO_DESDE.get(a) ?? ahora
+    LISTO_DESDE.set(a, desde)
+    if (ahora - desde < VERIFICACION.esperaMs) continue
+    VERIFICADOS.add(a)
+    if (REARMADOS_POR_LAS_LETRAS.has(a.titulo.id) || !corridas(a)) continue
+    REARMADOS_POR_LAS_LETRAS.add(a.titulo.id)
+    console.warn(`[v3-carga] «${a.titulo.texto}» se imprimió con las letras de otro momento: se vuelve a armar`)
+    MOSTRADO_DE_LOS_REARMADOS.set(a.titulo.id, { ...a.mostrado })
+    soltarElArmado(v.t, v.armados, a)
+    pedirOtraSincronia()
+  }
+}
+
 function revisar(): void {
   const v = vigia
   if (v === null || !v.vivo()) {
@@ -219,6 +247,7 @@ function revisar(): void {
     return
   }
   const ahora = performance.now()
+  verificarLasLetras(v, ahora)
   for (const titulo of TITULOS_DE_VOLUMEN.values()) {
     if (!trabado(titulo)) {
       SIN_ARMAR_DESDE.delete(titulo.id)

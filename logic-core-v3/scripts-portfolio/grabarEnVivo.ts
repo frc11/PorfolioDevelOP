@@ -50,7 +50,9 @@ const RECORRIDO = `(movimientos) => new Promise((listo) => {
 
 function opcionesDe(dispositivo: Dispositivo, dir: string): BrowserContextOptions {
   const p = PANTALLAS[dispositivo]
-  const video = { dir, size: { width: p.ancho * p.escala, height: p.alto * p.escala } }
+  // [B1.2b] P-H11 · `recordVideo` graba en píxeles CSS: con un tamaño de `ancho × escala` dejaba la página en el cuarto de arriba a la
+  // izquierda y el resto gris. Al tamaño del viewport; la extracción de cuadros lo escala después (`scale` con lanczos).
+  const video = { dir, size: { width: p.ancho, height: p.alto } }
   const base: BrowserContextOptions = { viewport: { width: p.ancho, height: p.alto }, deviceScaleFactor: p.escala, locale: 'es-AR', recordVideo: video }
   return dispositivo === 'movil' ? { ...base, isMobile: true, hasTouch: true, userAgent: UA_DEL_TELEFONO } : base
 }

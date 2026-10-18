@@ -361,6 +361,13 @@ function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, rean
   m.salida = 0
   a.uniforms.uLlegada.value = m.llegada
   a.uniforms.uSalida.value = 0
+  // [B1.2b] El que sale cayendo (Portfolio): llegado entero, lo que baje es la caída de los otros títulos (`levanta` al revés: se
+  // acuesta y su línea lo tapa); de vuelta en 0, su próxima llegada es la suya. Al revés a mitad, vuelve por el mismo gesto.
+  if (a.titulo.saleCayendo === true) {
+    if (m.llegada >= 1) a.cayendo = true
+    else if (m.llegada <= 0) a.cayendo = false
+    a.uniforms.uLevanta.value = a.cayendo || a.titulo.gesto === 'levanta' ? 1 : 0
+  }
   const visible = m.llegada > 0 && !fuera && !tapado
   if (visible) ubicar(a, d, viva)
   return visible

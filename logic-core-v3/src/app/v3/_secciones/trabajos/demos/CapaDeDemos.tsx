@@ -61,7 +61,7 @@ function alcanzar(p: Persecucion): void {
  *
  * [CIERRE] 1B · desde 1024 lo que llega sigue el reloj de la llegada (`llegadaDeDemos`,
  * el doble de scroll: el último libro se asienta ya con el vacío lleno); abajo, la capa
- * rígida sigue escalando con el vacío.
+ * rígida sigue escalando con el vacío. [B1.2b] Desde 768: la tablet llega como el escritorio.
  *
  * [EL ENCASTRE] 1B · lo que se muestra PERSIGUE a lo que pide el scroll con una
  * velocidad tope (`APARICION` en `entrada.ts`, como el amanecer), en los dos anchos y en
@@ -80,12 +80,9 @@ function alcanzar(p: Persecucion): void {
  */
 export function CapaDeDemos({
   mostrado,
-  paso = PANTALLAS_POR_PASO,
   className,
 }: {
   readonly mostrado: MotionValue<number>
-  /** [B1] Las pantallas por paso del Portfolio: con ellas el foco sabe dónde está la cola en la sección nueva. */
-  readonly paso?: number
   readonly className?: string
 }): React.JSX.Element {
   const capa = useRef<HTMLDivElement | null>(null)
@@ -93,45 +90,68 @@ export function CapaDeDemos({
   const [inicial] = useState(() => aparicionPedida(mostrado.get(), false))
   const aparicion = useRef<Persecucion>({ pedida: inicial, mostrada: inicial, cuadro: 0, antes: 0 })
   const libros = useRef<HTMLElement[]>([])
+  /** [B1.2b] Los renglones del carrusel (el de 768 a 1023): llegan con el gesto de los libros. */
+  const renglones = useRef<HTMLElement[]>([])
+  /**
+   * [B1.2b] La ventana del título DOM: su P2 nace corrido sólo el 60 % de su alto, así que en 0 asoma la parte de arriba de las
+   * letras. Afuera la capa no se ve en 0 (no entró al cuadro), pero acá está pegada con el Portfolio desde el principio: en tablet
+   * (sin el título 3D, que desde 1024 reemplaza al DOM) «Demos» asomaba cortado durante todo el Portfolio. Entra también en opacidad,
+   * como el párrafo.
+   */
+  const titulo = useRef<HTMLElement | null>(null)
   const parrafo = useRef<HTMLDivElement | null>(null)
   const progresoDelTitulo = useMotionValue(enElTramo(llegadaDeLaAparicion(inicial), LLEGADA.titulo))
   const progresoDelParrafo = useMotionValue(enElTramo(llegadaDeLaAparicion(inicial), LLEGADA.parrafo))
   const [abierta, setAbierta] = useState<{ readonly demo: Demo; readonly pieza: HTMLAnchorElement } | null>(null)
   const [alejada, setAlejada] = useState(false)
   /**
-   * ⚠️ **MÓVIL-TRABAJOS · ABAJO DE 1024 LA ENTRADA ES LA VIEJA: la capa entera, rígida,
+   * ⚠️ **MÓVIL-TRABAJOS · ABAJO DE 768 LA ENTRADA ES LA VIEJA: la capa entera, rígida,
    * crece con el vacío** —una escala y nada más, para ahorrar—. Quién está de qué lado
    * lo dice el CSS (`--demos-entrada`), no una consulta de ancho en JS. [EL ENCASTRE] 1B:
-   * en 1,4 vacíos y con la velocidad tope.
+   * en 1,4 vacíos y con la velocidad tope. [B1.2b] En tablet (768 a 1023) llega como en
+   * escritorio: la misma persecución y el mismo gesto (los renglones del carrusel, como libros).
    */
   const rigida = useRef(false)
 
-  /** Escribe la llegada entera para una aparición mostrada (`a`: abajo de 1024, la escala de la capa). Subiendo se deshace. */
+  /** Escribe la llegada entera para una aparición mostrada (`a`: abajo de 768, la escala de la capa). Subiendo se deshace. */
   const llegar = useCallback(
     (a: number): void => {
       if (rigida.current) {
+        // [B1.2b] Los renglones vuelven a su lugar (con la capa rígida no llegan de a uno: crece la capa entera).
+        for (const r of renglones.current) {
+          r.style.removeProperty('transform')
+          r.style.removeProperty('opacity')
+        }
         capa.current?.style.setProperty('--demos-escala', a.toFixed(5))
         progresoDelTitulo.set(1)
         progresoDelParrafo.set(1)
         parrafo.current?.style.setProperty('opacity', '1')
+        titulo.current?.style.removeProperty('opacity')
         return
       }
       const l = llegadaDeLaAparicion(a)
       progresoDelTitulo.set(enElTramo(l, LLEGADA.titulo))
+      titulo.current?.style.setProperty('opacity', progresoDelTitulo.get().toFixed(3))
       const delParrafo = enElTramo(l, LLEGADA.parrafo)
       progresoDelParrafo.set(delParrafo)
       parrafo.current?.style.setProperty('opacity', delParrafo.toFixed(3))
-      libros.current.forEach((libro, i) => {
-        const pose = poseDelLibro(enElTramo(l, tramoDelLibro(i, libros.current.length)))
-        libro.style.setProperty('transform', pose.transform)
-        libro.style.setProperty('opacity', pose.opacidad.toFixed(3))
-      })
+      for (const piezas of [libros.current, renglones.current]) {
+        piezas.forEach((pieza, i) => {
+          const pose = poseDelLibro(enElTramo(l, tramoDelLibro(i, piezas.length)))
+          pieza.style.setProperty('transform', pose.transform)
+          pieza.style.setProperty('opacity', pose.opacidad.toFixed(3))
+        })
+      }
     },
     [progresoDelTitulo, progresoDelParrafo],
   )
 
   useLayoutEffect(() => {
     libros.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="libro"]') ?? [])]
+    renglones.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="carrusel"] [data-parte="renglon"]') ?? [])]
+    titulo.current = capa.current?.querySelector<HTMLElement>('#demos > div:first-child') ?? null
+    // Se levantan sobre su base: el origen de los libros (`demos.css`).
+    for (const r of renglones.current) r.style.setProperty('transform-origin', '50% 100%')
     const p = aparicion.current
     // Al cambiar de ancho (o de lado de 1024) la aparición pedida es otra: se alcanza de una vez.
     const leerLaEntrada = (): void => {
@@ -183,7 +203,7 @@ export function CapaDeDemos({
       cancelar()
       // [INTERFAZ 1] Cierre: y si lo mostrado se asienta antes de que la capa llegue, la página sigue (`llevarALaLlegada`).
       cancelar = llevarALaLlegada({
-        destino: scrollDelPx(pxDelMostradoDeDemos(arranque, paso), tope, alto),
+        destino: scrollDelPx(pxDelMostradoDeDemos(arranque, PANTALLAS_POR_PASO), tope, alto),
         alto: (PX_DE_LA_SECCION_DE_HOY * alto) / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA,
         arranque,
         mostrado: () => mostrado.get(),
@@ -195,7 +215,7 @@ export function CapaDeDemos({
       cancelar()
       el.removeEventListener('focusin', alEntrarElFoco)
     }
-  }, [mostrado, paso])
+  }, [mostrado])
 
   const alAbrir = useCallback((demo: Demo, pieza: HTMLAnchorElement): void => {
     setAbierta({ demo, pieza })
@@ -211,7 +231,7 @@ export function CapaDeDemos({
       /* ⚠️ Sin `will-change` (ni acá ni en las caras): promovida, obligaba a componer
          el túnel que se pinta encima, y el recorte del vacío dejaba de cortar el
          fondo de la ventana del CTA (medido: el agujero se veía claro). */
-      className={cn(className, 'max-escritorio:[--demos-entrada:rigida] max-escritorio:[transform:scale(var(--demos-escala,0))]')}
+      className={cn(className, 'max-movil:[--demos-entrada:rigida] max-movil:[transform:scale(var(--demos-escala,0))]')}
     >
       <Envoltorio className="h-full" claseDeContenido="grid h-full grid-cols-2 items-center gap-8 max-escritorio:grid-cols-1 max-escritorio:content-center max-escritorio:pt-[var(--zona-de-la-cabecera)]">
         {/* La columna del logo: la escena lo pone ahí, y acá no se tapa. Abajo de 1024 no hay columna. */}

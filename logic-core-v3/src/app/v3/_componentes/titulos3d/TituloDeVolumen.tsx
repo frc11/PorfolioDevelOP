@@ -36,6 +36,7 @@ export function TituloDeVolumen({
   minimoS = null,
   salidaMinimaS = null,
   asiento = 'cercano',
+  saleCayendo = false,
 }: {
   readonly id: string
   readonly texto: string
@@ -55,13 +56,15 @@ export function TituloDeVolumen({
   readonly salidaMinimaS?: number | null
   /** [PASADA FINAL] A3 · dónde asienta la llegada con mínimo al frenar a mitad (`repeticiones.ts`): la frase termina de armarse. */
   readonly asiento?: AsientoDeLaLlegada
+  /** [B1.2b] Llegado, se va con la caída de los otros títulos (`levanta` al revés), no deshaciendo su llegada (`registro.ts`). */
+  readonly saleCayendo?: boolean
 }): React.JSX.Element {
   const material = useTitulosDeVolumen()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const listo = useTituloListo(id)
   const lugar = useRef<HTMLSpanElement | null>(null)
   const repetible = useLlegadaDelTitulo(llegadaDe, llegada ?? LLEGADO)
-  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, corrida, minimoS, salidaMinimaS, asiento, activo: material !== 'no' && escritorio })
+  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, corrida, minimoS, salidaMinimaS, asiento, saleCayendo, activo: material !== 'no' && escritorio })
   return (
     <>
       {listo && <span className="sr-only hidden escritorio:block">{texto}</span>}

@@ -12,8 +12,6 @@ import { pisoConFormacion } from '../formacion/Formacion'
 import type { MoireHandle } from '../MoireScreen'
 import { FLOOR_Y } from '../probeScene'
 import { MOIRE_FAR_ORDER, MOIRE_FAR_RADIUS } from '../probeMoire'
-import type { ProbeRigStore } from '../probeStore'
-import { fueraDelTunel } from '../tunelEnLaEscena'
 import { TRAMA_EN_VIVO, leerLaTrama } from './trama'
 import { AMANECER_EN_VIVO, hayAmanecer } from '../amanecer/luz'
 import { TRAMA_GLSL, VIA_LACTEA, densidadDeLaBanda, direccionDeLaBanda, polvoDeLaBanda, viaLacteaGlsl } from './cielo'
@@ -204,7 +202,6 @@ const RADIO_DE_LA_CUPULA = 360
 type VentanaDelBanco = Window & { __estrellasDelBanco?: { solas: (solas: boolean) => void; cuantas: number } }
 
 interface PropsDeLasEstrellas {
-  readonly rig: ProbeRigStore
   readonly calidad: NivelDeCalidad
   readonly moireRef: RefObject<MoireHandle | null>
 }
@@ -258,7 +255,7 @@ function armarLasEstrellas(): { direccion: Float32Array; estrella: Float32Array;
   return { direccion: direccion.subarray(0, k * 3), estrella: estrella.subarray(0, k * 4), cuantas: k }
 }
 
-function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
+function EstrellasPrendidas({ calidad, moireRef }: PropsDeLasEstrellas) {
   const escenario = pisoConFormacion(calidad)
   const armado = useMemo(() => {
     const { direccion, estrella, cuantas } = armarLasEstrellas()
@@ -337,8 +334,8 @@ function EstrellasPrendidas({ rig, calidad, moireRef }: PropsDeLasEstrellas) {
   }, [scene, armado])
 
   useFrame((state) => {
-    const visible = fueraDelTunel(rig.current.progress)
-    alCuadro(armado.uniforms, armado.puntos, armado.cupula, visible, state.viewport.dpr, state.gl)
+    // [B1.2b] sin la ventana del túnel: también durante el Portfolio (el panel ya no tapa la sala).
+    alCuadro(armado.uniforms, armado.puntos, armado.cupula, 1, state.viewport.dpr, state.gl)
     leerLaTrama(moireRef.current)
     armado.cupula.position.copy(state.camera.position)
   })

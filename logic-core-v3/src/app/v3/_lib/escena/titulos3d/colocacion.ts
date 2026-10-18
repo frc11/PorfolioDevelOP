@@ -6,6 +6,8 @@ import { buildTrack, sampleTrack, type ChoreoTrack } from '../choreographySample
 import type { ChoreoPose } from '../choreographyTypes'
 import { BANDA_EN_VIVO, fovConFactor } from '../banda'
 import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR, ORBIT_TARGET_Y } from '../probeScene'
+import { poseDelPortfolio } from '../poseDelPortfolio'
+import { PORTFOLIO_EN_LA_ESCENA } from '../portfolioEnLaEscena'
 
 /**
  * [ESCENA 10] T3 · DÓNDE VA UN TÍTULO EN EL MUNDO — quieto, como el logo: la cámara lo muestra con los movimientos que
@@ -38,7 +40,15 @@ export interface LecturaRelativa {
   readonly comoEntre: readonly [number, number]
 }
 
-export type Lectura = string | number | LecturaRelativa
+/**
+ * [B1.2b] LA LECTURA DEL PORTFOLIO: la pose del Portfolio (`poseDelPortfolio.ts`), resuelta para el cuadro de ahora. Con el panel
+ * adentro la cámara ES esa pose, así que el título queda en su lugar del DOM y de frente (plan §12, punto 1).
+ */
+export interface LecturaDelPortfolio {
+  readonly portfolio: true
+}
+
+export type Lectura = string | number | LecturaRelativa | LecturaDelPortfolio
 
 function muestrear(progreso: number, destino: PoseEscribible): PoseEscribible {
   pista ??= buildTrack(CHOREO_KEYFRAMES)
@@ -46,9 +56,16 @@ function muestrear(progreso: number, destino: PoseEscribible): PoseEscribible {
   return destino
 }
 
-/** La pose de la cámara en un momento: un nudo por su nombre, un progreso (la pista del home, sin el mouse ni la inercia) o una relativa. */
-export function poseDeLaLectura(lectura: Lectura): ChoreoPose {
+/**
+ * La pose de la cámara en un momento: un nudo por su nombre, un progreso (la pista del home, sin el mouse ni la inercia), una
+ * relativa, o [B1.2b] la del Portfolio (que pide el cuadro: `camaraDeLaLectura`).
+ */
+export function poseDeLaLectura(lectura: Lectura, cuadro: { readonly aspecto: number; readonly fovDeg: number; readonly logoW: number; readonly logoH: number } | null = null): ChoreoPose {
   if (typeof lectura === 'number') return muestrear(lectura, POSE)
+  if (typeof lectura === 'object' && 'portfolio' in lectura) {
+    if (cuadro === null) throw new Error('la lectura del Portfolio se resuelve con el cuadro')
+    return poseDelPortfolio(cuadro.aspecto, cuadro.fovDeg, cuadro.logoW, cuadro.logoH, PORTFOLIO_EN_LA_ESCENA.columna)
+  }
   if (typeof lectura === 'object') {
     muestrear(lectura.comoEntre[0], DESDE)
     muestrear(lectura.comoEntre[1], HASTA)
@@ -65,10 +82,10 @@ export function poseDeLaLectura(lectura: Lectura): ChoreoPose {
 
 /** La cámara del momento de la lectura, armada como la arma `OrbitRig` (la órbita y el encuadre). */
 export function camaraDeLaLectura(lectura: Lectura, aspecto: number, logoW: number, logoH: number, destino: THREE.PerspectiveCamera): THREE.PerspectiveCamera {
-  const { angleDeg, height, distance, frameX, frameY } = poseDeLaLectura(lectura)
   const c = destino
   // [PULIDO 10] J1 · con la banda portátil, como la cámara viva (los títulos existen sólo desde 1024).
   c.fov = fovConFactor(CAMERA_FOV, BANDA_EN_VIVO.factor)
+  const { angleDeg, height, distance, frameX, frameY } = poseDeLaLectura(lectura, { aspecto, fovDeg: c.fov, logoW, logoH })
   c.near = CAMERA_NEAR
   c.far = CAMERA_FAR
   c.aspect = aspecto

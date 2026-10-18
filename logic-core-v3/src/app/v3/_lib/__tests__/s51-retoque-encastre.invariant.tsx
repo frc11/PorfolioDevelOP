@@ -472,11 +472,11 @@ const enSuPuntoDeLectura = (destino: Destino): Record<string, boolean> => conDom
   // [B1] Portfolio: El Garage en portada, con el panel del selector adentro (el título ya llegó entero: su máscara termina antes
   // del pin). Era «Portfolio» subido entero en el cartel del túnel (hoy en el archivo). El ancla de su paso está en el layout.
   const ancla = Object.assign(new NodoFalso({ tope: 5073 + V * pantallasDelAncla(0, PANTALLAS_POR_PASO), alto: 1 }), { id: ANCLAS_DEL_PORTFOLIO[0].id })
-  const trabajos = new NodoFalso({ tope: 5073, alto: 8556 }, { 'data-panel': 'trabajos' }).responde(`#${ANCLAS_DEL_PORTFOLIO[0].id}`, ancla)
+  const trabajos = new NodoFalso({ tope: 5073, alto: 9231 }, { 'data-panel': 'trabajos' }).responde(`#${ANCLAS_DEL_PORTFOLIO[0].id}`, ancla)
   const dT = destino(trabajos as unknown as HTMLElement)
   const pasoDelDestino = pasoEn(((dT - 5073 + V) * 900) / V, PANTALLAS_POR_PASO)
   r.portfolio = pasoDelDestino === 0
-  r.portfolioPanel = vistaDelPaso(pasoDelDestino).fase === 'adentro' && vistaDelPaso(pasoDelDestino).vista === 'portada'
+  r.portfolioPanel = vistaDelPaso(pasoDelDestino).fase === 'adentro' && vistaDelPaso(pasoDelDestino).tira === 0
   // Servicios: en su 00 (el pin, sin pasar al 01).
   const servicios = new NodoFalso({ tope: 13069.6, alto: 7200 }, { 'data-panel': 'servicios' })
   const dS = destino(servicios as unknown as HTMLElement)

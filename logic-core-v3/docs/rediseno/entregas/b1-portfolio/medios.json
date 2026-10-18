@@ -35,11 +35,11 @@
   "el-garage/movil": {
     "video": "/portfolio/el-garage/movil.mp4",
     "poster": "/portfolio/el-garage/movil.webp",
-    "bytesDelVideo": 1726724,
-    "bytesDelPoster": 17236,
-    "crf": 28,
-    "ancho": 780,
-    "alto": 1688,
+    "bytesDelVideo": 1947551,
+    "bytesDelPoster": 12748,
+    "crf": 24,
+    "ancho": 390,
+    "alto": 844,
     "segundos": 9.77,
     "cuadros": 302
   },

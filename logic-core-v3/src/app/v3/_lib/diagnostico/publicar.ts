@@ -10,9 +10,8 @@ import { RELEVO_DE_LOS_TITULOS, TITULOS_DE_VOLUMEN, tituloListo } from '../titul
 import { lineaDeLaNoche } from '../../_secciones/trabajos/geometria'
 import { cantidadDeLaNoche, cruceDelTramo } from '../../_secciones/trabajos/gota'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
-import { banderasDe } from '../../_secciones/trabajos/portfolio/banderas'
-import { vistaDelPaso } from '../../_secciones/trabajos/portfolio/estado'
-import { pasoConHisteresis, pxDelScroll, type IndiceDePaso } from '../../_secciones/trabajos/portfolio/pasos'
+import { pasoConElPin, vistaDelPaso } from '../../_secciones/trabajos/portfolio/estado'
+import { PANTALLAS_POR_PASO, pasoConHisteresis, pxDelScroll, type IndiceDePaso } from '../../_secciones/trabajos/portfolio/pasos'
 import { EVENTOS, IMPRESIONES, VISTOS, anotar, fuenteCargadaPara, type BloqueVisto, type EventoDeLaCarga } from './anotar'
 import { UMBRALES_DE_LA_CARGA, fallasDe, type BloqueDelDiag, type EstadoDelDiag, type FallaDeLaCarga, type RotuloDelDiag, type TextoDelDiag } from './fallas'
 
@@ -205,8 +204,9 @@ function contexto(): 'vivo' | 'perdido' | 'sin' {
 }
 
 /**
- * [B1] El Portfolio en el diagnóstico: el paso que muestra el escenario (`data-paso`) contra el que pide el scroll, el salto en vuelo
- * y el ancla de la carga (los marca la caja del Portfolio, `usePortfolio`), y los videos que suenan.
+ * [B1] El Portfolio en el diagnóstico: el paso que muestra el escenario (`data-paso`) contra el que pide el scroll (con su histéresis
+ * y, [B1.2b], el pin: el panel no entra con el escenario suelto), el salto en vuelo y el ancla de la carga (los marca la caja del
+ * Portfolio, `usePortfolio`), y los videos que suenan.
  */
 function portfolio(): EstadoDelDiag['portfolio'] {
   const escenario = document.querySelector<HTMLElement>('[data-pieza="escenario-del-portfolio"]')
@@ -220,9 +220,9 @@ function portfolio(): EstadoDelDiag['portfolio'] {
     enPantalla: enPantalla(panel),
     enVuelo: caja.getAttribute('data-en-vuelo') === 'si',
     pasoMostrado: mostrado,
-    pasoPedido: pasoConHisteresis(mostrado, pxDelScroll(scrollY, tope, innerHeight), banderasDe(location.search).paso),
+    pasoPedido: pasoConElPin(pasoConHisteresis(mostrado, pxDelScroll(scrollY, tope, innerHeight), PANTALLAS_POR_PASO), Math.abs(escenario.getBoundingClientRect().top) <= 1),
     videos: [...document.querySelectorAll<HTMLVideoElement>('[data-video-del-portfolio]')].filter((v) => !v.paused).length,
-    ancla: ancla === undefined ? null : { id: ancla.id, tira: vistaDelPaso(mostrado).tira, esperada: ancla.paso / 2 },
+    ancla: ancla === undefined ? null : { id: ancla.id, tira: vistaDelPaso(mostrado).tira, esperada: ancla.paso },
   }
 }
 

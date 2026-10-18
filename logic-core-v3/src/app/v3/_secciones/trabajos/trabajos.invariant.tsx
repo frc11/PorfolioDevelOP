@@ -53,8 +53,8 @@ const veces = (html: string, aguja: string): number => html.split(aguja).length 
 
 /** Los fuentes que llegan al navegador: la sección y el Portfolio. */
 const DEL_PORTFOLIO = [
-  'Acordeon.tsx', 'EncabezadoDelPortfolio.tsx', 'EscenarioDelPortfolio.tsx', 'Ficha.tsx', 'LaTuya.tsx', 'MedioDeLaTira.tsx', 'Tira.tsx',
-  'anclas.ts', 'banderas.ts', 'estado.ts', 'medios.ts', 'pasos.ts', 'saltar.ts', 'tipografia.ts', 'tramoDelSelector.ts', 'usePortfolio.ts',
+  'Acordeon.tsx', 'EncabezadoDelPortfolio.tsx', 'EscenarioDelPortfolio.tsx', 'Ficha.tsx', 'LaTuya.tsx', 'MarcaDeAgua.tsx', 'MedioDeLaTira.tsx', 'Tira.tsx',
+  'anclas.ts', 'estado.ts', 'medios.ts', 'pasos.ts', 'saltar.ts', 'secuencia.ts', 'tipografia.ts', 'tramoDelSelector.ts', 'usePortfolio.ts',
 ].map((f) => `portfolio/${f}`)
 const ARCHIVOS = ['Trabajos.tsx', 'CapaDeLaGota.tsx', 'gota.ts', 'geometria.ts', 'contenido.ts', 'proyectos.ts', ...DEL_PORTFOLIO]
 const FUENTES = ARCHIVOS.map((archivo) => ({ archivo, texto: leer(archivo) }))
@@ -78,7 +78,7 @@ titulo('2 · El alto: la tabla no cambia y la sección suma los pasos del select
 
 const FUENTE_DE_TRABAJOS = leer('Trabajos.tsx')
 afirmarIgual(PX_DE_LA_SECCION, 6813, 'la tabla sigue declarando 717svh + 40 de solape: 6.813 px de la regla (lo que la escena lee)')
-afirmarIgual(pxDeLaSeccion(PANTALLAS_POR_PASO), 8556, `la sección mide 900 + 7 × ${PANTALLAS_POR_PASO} × 900 + 2.931 = 8.556 con el paso por defecto`)
+afirmarIgual(pxDeLaSeccion(PANTALLAS_POR_PASO), 9231, `la sección mide 900 + 4 × ${PANTALLAS_POR_PASO} × 900 + 2.931 = 9.231 ([B1.2b] un paso de 1,5 pantallas por proyecto y uno para «la tuya»)`)
 afirmar(FUENTE_DE_TRABAJOS.includes('min-h-[calc(var(--alto-minimo-del-panel)+var(--pantallas-extra-del-portfolio)*100svh)]'), '  y lo suma en CSS sobre el alto del panel, en todo ancho (sin una rama de JS por ancho)')
 afirmar(quieto.includes(`--pantallas-extra-del-portfolio:${pantallasExtra(PANTALLAS_POR_PASO).toFixed(5)}`), `  desde el servidor: ${pantallasExtra(PANTALLAS_POR_PASO).toFixed(5)} pantallas de más, en la rama quieta`)
 afirmar(conMotion.includes(`--pantallas-extra-del-portfolio:${pantallasExtra(PANTALLAS_POR_PASO).toFixed(5)}`), '  y en la animada: las dos ramas miden lo mismo (la escena descuenta igual)')
@@ -138,8 +138,8 @@ titulo('9 · Cero `three` y cero contextos: el Portfolio no abre un lienzo')
 
 const TRES = /from ['"](three|@react-three\/[a-z-]+|three\/[^'"]+)['"]/
 const CONTEXTO = /<Canvas\b|WebGLRenderer|getContext\(\s*['"]webgl/
-for (const { archivo, texto } of FUENTES) afirmar(!TRES.test(texto) && !CONTEXTO.test(texto), `${archivo}: ni three ni un contexto WebGL (el «?» va en el lienzo de la escena, B1.2)`)
-afirmarIgual(FUENTES.length, 22, 'se leyeron del disco los veintidós archivos de la sección y del Portfolio')
+for (const { archivo, texto } of FUENTES) afirmar(!TRES.test(texto) && !CONTEXTO.test(texto), `${archivo}: ni three ni un contexto WebGL ([B1.2b] el «?» es un SVG en el DOM)`)
+afirmarIgual(FUENTES.length, 23, 'se leyeron del disco los veintitrés archivos de la sección y del Portfolio')
 controlPositivo('el detector ve un renderer propio', 'const r = new THREE.WebGLRenderer()', (t: string) => !CONTEXTO.test(t))
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -100,6 +100,7 @@ export const ARCHIVOS_DE_PIEZA = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/EscenarioDelPortfolio.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/Ficha.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/LaTuya.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/MarcaDeAgua.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/MedioDeLaTira.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/Tira.tsx`,
 ]
@@ -230,11 +231,11 @@ export const ARCHIVOS_DE_APOYO = [
   // [B1] el selector: sus módulos puros y su parte del invariante (§17); los detectores del invariante de la sección; el reloj de
   // Demos sacado del túnel y lo que Demos heredó del túnel. Los archivos del túnel salieron del padrón: viven en el archivo.
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/anclas.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/banderas.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/estado.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/medios.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/pasos.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/saltar.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/secuencia.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/tipografia.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/tramoDelSelector.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/usePortfolio.ts`,

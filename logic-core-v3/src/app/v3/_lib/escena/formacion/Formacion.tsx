@@ -10,7 +10,6 @@ import { entornoDeLaEscena, hayBanco } from '../entorno'
 import type { ProbeRigStore } from '../probeStore'
 import type { Escenario } from '../StudioFloor'
 import { NIEBLA_DE_AFUERA } from '../niebla/rasante'
-import { fueraDelTunel } from '../tunelEnLaEscena'
 import { CONTACTO_DE_LA_COPIA, ESCENARIO, armar, contarVisibles } from './armado'
 import type { UniformsDeLaCopia } from './materiales'
 
@@ -24,7 +23,7 @@ import type { UniformsDeLaCopia } from './materiales'
  * `pisoConFormacion`). El desnivel no lleva ningún objeto: se lee porque el borde del escenario tapa el
  * pie de la primera fila.
  *
- * **Dónde no está.** En el túnel de Trabajos (`tunelEnLaEscena.ts`) ni en el teléfono.
+ * **Dónde no está.** En el teléfono. ([B1.2b] La ventana del túnel de Trabajos se borró: también durante el Portfolio.)
  */
 
 interface PropsDeLaFormacion {
@@ -86,7 +85,7 @@ function FormacionPrendida({ rig, logoGroupRef }: PropsDeLaFormacion) {
   useFrame((state, delta) => {
     const m = memoria.current
     m.camara = state.camera
-    alCuadro(armado.copia, armado.contacto, fueraDelTunel(rig.current.progress))
+    alCuadro(armado.copia, armado.contacto, 1)
     // [ESCENA 7] T8: la niebla se abre con la velocidad de la cámara mientras el scroll la mueve (6d).
     if (niebla) {
       const dt = Math.min(Math.max(delta, 1e-3), 0.1)

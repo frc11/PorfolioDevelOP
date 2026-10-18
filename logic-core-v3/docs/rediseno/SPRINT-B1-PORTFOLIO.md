@@ -7,10 +7,11 @@ cada sprint al final).
 escritorio y tablet, historias tipo Instagram en el teléfono. Videos reales de los sitios, una ficha por proyecto, deep links y la
 escena oscurecida, **sin cambiar lo que se ve en el resto de la página**.
 
-**Estado: B1.1a, B1.1b y B1.2 hechos; FRENADO al final de B1.2 para que Valentino lo mire en :3000 (2026-10-17).** El plan fue
+**Estado: B1.1a, B1.1b, B1.2 y B1.2b (los ajustes del FRENO de B1.2, §12) hechos; FRENADO al final de B1.2b para que Valentino lo mire
+en :3000 (2026-10-17); B1.3 arranca recién con su aprobación.** El plan fue
 aprobado con ajustes: las decisiones de la §9 están escritas en su lugar y los ajustes van en la §11, que **manda sobre el resto del
 plan** donde lo contradiga (el paso de 0,75 pantallas, los datos dictados, la llave para lo que falta, el oscurecido medido por capa).
-El log de cada sprint, en la §10; la lista del FRENO, al final del log de B1.2. Lo que no pudo correr por memoria está marcado
+El log de cada sprint, en la §10; la lista del FRENO, al final del log de B1.2b. Lo que no pudo correr por memoria está marcado
 «VERIFICAR TRAS REINICIO». El build de medición «antes» (`.next-probe`, ignorado por git, BUILD_ID `lcERRvtvbJDOVlh4Me-6P`) sigue en
 disco para las capturas de control.
 
@@ -148,6 +149,10 @@ trabajos y no lo va a haber** (`[MÉTRICA]` se cerró por la puerta de adelante)
 | reseña (texto y autor) | falta | falta | falta | `[TESTIMONIO] · pendiente`, nunca una reseña inventada |
 | copy de la descripción del Portfolio | lo reescribe C2 | | | la bajada de hoy, anotada en el pedido |
 | copy de «la próxima es la tuya» | lo reescribe C2 | | | placeholder anotado en el pedido |
+
+**Logo de Banú (la marca de agua de su tira)**: faltaba (el único del sitio trae un degradé pegado) y Banú llevaba su nombre como marca de
+agua hasta tenerlo. **Resuelto el 2026-10-17**: Valentino pasó `scripts-portfolio/fuentes/banu-logo-oscuro.png`; sus letras, recortadas y
+vectorizadas, son `public/portfolio/banu-scents/logo.svg` (B1.2b, aprobado por él).
 
 Cada `null` entra al `PEDIDO` de la sección (`_contrato/pedido.ts`: ruta, clase, marcador, dueño, qué y formato), así que
 `CONTENIDO-PENDIENTE.md` (`s7-documento`) los lista solo y desaparecen cuando se llenan. Ojo para cuando llegue la fecha:
@@ -857,6 +862,170 @@ s76 en verde (101 del Portfolio y 320 del archivo), s75-carga 53. Banco y visual
 8. La ficha con la llave apagada muestra `[TEXTO]`, `[TESTIMONIO] · pendiente` y `[NOMBRE]`; para ver el relleno, prender a mano
    `CONTENIDO_INVENTADO` en `src/app/v3/_secciones/_contrato/llave.ts` (sin commitear: el build falla con la llave prendida).
 
+### B1.2b · los ajustes del FRENO de B1.2 (2026-10-17) — FRENADO para que Valentino lo mire en :3000
+
+El pedido y cómo se resolvió cada punto, en la §12. Acá lo hecho, lo medido y lo que hay que mirar. Commits: `41f91e58` (1/2: el código
+y los tests), `92a01b2c` (2/3: el logo de Banú, el gancho del oscurecido y la entrada del panel en el arnés) y el 3/3 (los tres
+arreglos que encontró el banco, este log). Tres y no dos: el 1/2 no estaba hecho al volver del reinicio y la memoria cortó en el medio.
+
+**Hecho.**
+
+- **Sin banderas** (punto 0): `banderas.ts` se borró con sus lectores; el oscurecido es `DIM_DEL_PORTFOLIO` (0,35), el panel es de vidrio
+  y del lado derecho, y hay una sola pose. Los tests que afirmaban las banderas afirman ahora que nadie lee la consulta y que las
+  constantes valen lo pedido (s76 §11, con su control).
+- **La cámara y la composición** (punto 1): `_lib/escena/poseDelPortfolio.ts`. La cámara del pin (la viva: 177,4°, que el rig
+  muestrea como la de entonces), alejada y con el encuadre corrido, resuelta por cuadro (el encuadre depende del aspecto y del campo
+  de la banda): ni gira ni cambia la dirección de la mirada. El título 3D se coloca con ESA pose (`LECTURA.portfolio`). La columna de
+  la izquierda se parte en dos: el encabezado centrado arriba, el logo centrado abajo, en el mismo eje.
+- **El vidrio con la estructura de la tinta** (punto 2): una sola estructura; el vidrio del sistema va en el panel y las tiras no
+  llevan fondo propio.
+- **El título** (punto 3): la presencia del encabezado va por tiempo con el panel adentro (ya pegado); el título 3D llega en su lugar
+  y se va con la caída de `levanta` (`saleCayendo`); la bajada sube y cae por sus líneas.
+- **«La tuya»** (punto 4): `SignoDeLaTuya` y su pase se borraron; el «?» es un SVG propio con la cinta del logo, de marca de agua; el
+  título en `titulo-xl` (aprobado por Valentino) y el CTA, un botón grande con el mismo `data-abre-contacto="panel"`.
+- **Un gatillo por proyecto** (punto 5): un paso de 1,5 pantallas por proyecto y uno para «la tuya» (la sección, 1025,67svh); la
+  secuencia por tiempo (`secuencia.ts`); las marcas de agua (`MarcaDeAgua.tsx`): los logos de El Garage y Esquina bajados de sus sitios
+  y el de **Banú, el que pasó Valentino** (`scripts-portfolio/fuentes/banu-logo-oscuro.png`: las letras sacadas con un umbral de
+  luminancia 50 —la letra vive en 0–45, el halo y el degradé de 55 para arriba—, vectorizadas con potrace en el scratchpad, sin
+  dependencias nuevas; `public/portfolio/banu-scents/logo.svg`, 8 contornos, 35 KB; Valentino aprobó el recorte); ←/→, Enter, Esc;
+  `tic` sí, `pestillo` no.
+- **Hover instantáneo** (punto 6): `flushSync` en el `pointerover`/`pointermove`, sin espera; las guardas (4 px, la ráfaga de
+  250 ms, para cualquier cambio de tira).
+- **Estrellas, fugaces y formación** (punto 7): `tunelEnLaEscena.ts` se borró; nada se apaga en el Portfolio.
+- **Tablet: Demos como en escritorio** (punto 8): la capa rígida queda sólo abajo de 768; en tablet llegan el título, el párrafo y los
+  renglones del carrusel con el gesto de los libros.
+- **El panel en horizontal** (punto 9): el paso que lo mete espera al pin (`pasoConElPin`) y el panel existe sólo con el escenario
+  pegado (`cortarElPanel`). Afirmado en s76 y en el arnés (`scripts-carga/panel.ts`: la entrada y la salida, cuadro a cuadro).
+- **Para el banco** (punto 10): `__oscurecidoDelBanco` (la luz con el dim en 0 contra 0,35 en el mismo cuadro, sólo con el entorno del
+  banco).
+
+**Lo que encontró el banco y se arregló en el sprint** (cada uno con su afirmación y su control en s76):
+
+1. **La salida del panel con scroll rápido.** Con la rueda fuerte, la cola se cruzaba más rápido que la transición de 700 ms: el
+   escenario se despegaba con el panel a mitad de camino y se lo llevaba para arriba (13 cuadros, hasta 1858 px). Primero, la
+   transición sólo pegado con un estado de React: quedaba un cuadro de atraso (38 px). Ahora el corte es imperativo y en el mismo
+   cuadro en que se mueve el scroll (sincrónico con el `scroll` nativo y con el de Lenis): despegado, el panel queda afuera y sin
+   transición. Medido: 0 px.
+2. **El título de «la tuya» debajo de la barra.** Más grande y arriba de todo, la pastilla de la barra lo tapaba a 1024 (contraste
+   2,1:1 en el p10). La tira activa deja libre lo que ocupa la barra en reposo, con la misma expresión que el despeje de las anclas
+   (`scroll-padding-top` de `navegacion.css`; s76 compara las dos). Medido: 7,45:1.
+3. **«Demos» asomando en tablet durante todo el Portfolio.** Sin la capa rígida (punto 8), el título DOM de Demos (su P2 nace corrido
+   sólo el 60 % de su alto) dejaba ver la parte de arriba de las letras en la capa pegada. Entra ahora también en opacidad con su
+   progreso, como el párrafo (`CapaDeDemos.tsx`). Desde 1024 no cambia nada a la vista: ahí lo reemplaza el título 3D.
+4. **«Portfolio» con las letras corridas cuando la página carga con la pestaña al fondo** (el arnés: 18 de 26 corridas, 0,121 em, también
+   después de scrollear). Con la pestaña oculta, el texto del título se quedaba con la métrica de respaldo aunque su cara ya hubiera
+   cargado (medido: el contenedor del `h2`, 492 px oculta y 467 a la vista); el título 3D se imprimía con esa x, el relevo del DOM (las
+   dos copias) lo creaba de nuevo con la cara real y no venía otra tanda de fuentes que lo rehiciera. El guardián de los títulos
+   (`titulos3d/sincronia.ts`) verifica ahora una vez cada armado ya relevado: si sus letras no están donde las midió, lo vuelve a armar con
+   lo mostrado donde iba, a lo sumo una vez por título y por carga (un plano en perspectiva no entra en un bucle). Avisa en la consola
+   (`[v3-carga]`): es la red de seguridad; la causa (el texto que no cambia de métrica con la pestaña oculta) queda medida acá.
+5. **`portfolio-ancla` después de un clic en el menú** (el arnés: cargar con el ancla de un proyecto y hacer clic en otra sección). La marca
+   del ancla con que cargó la página la soltaban la rueda, el tacto y el teclado, no un clic: el diagnóstico la daba por desfasada. Ahora
+   también `pointerdown`. Era del diagnóstico de B1.2, no del sitio.
+
+**P-H11 · los medios** (pedido de Valentino antes del FRENO). El póster del teléfono de El Garage tenía la captura en el cuarto de arriba a
+la izquierda y el resto gris, y **el video también**: `grabarEnVivo.ts` le pedía al `recordVideo` un tamaño de `ancho × escala` (780 × 1688)
+y Playwright graba en píxeles CSS (390 × 844). Rehecho desde el mismo video: recortado al cuarto con contenido y codificado a su resolución
+real, 390 × 844 (escalado a 780 × 1688 no entraba en el techo de 2 MB ni reducido con CRF 30: 2,68 MB; y escalar no agrega detalle), CRF 24,
+1,95 MB; el póster, su primer cuadro (WebP calidad 80). El recibo (`docs/rediseno/entregas/b1-portfolio/medios.json`) y
+`MEDIDAS_DE_LOS_MEDIOS` dicen 390 × 844; `grabarEnVivo.ts` graba ahora al tamaño del viewport (la extracción ya escalaba). Los otros cinco
+medios, revisados (el primer cuadro, uno del medio y el póster): proporción correcta (16:10 y 390:844), sin bandas ni recortes de la
+exportación; las franjas lisas que hay son del diseño de cada sitio (los márgenes blancos de Esquina, la barra de arriba de Banú, el
+degradé oscuro del pie de la portada de El Garage). s76 lo afirma: cada póster mide lo de su video y lo cubre (ninguna banda lisa pegada a
+un borde pasa del 25 % y el contenido ocupa el 70 % o más: los seis, entre el 81 y el 100 %), con el control de uno recortado (el de antes
+da 25 %). Queda más blando que los otros dos del teléfono (es la resolución que se grabó); para igualarlos hay que volver a grabarlo.
+
+**Medido.** Build de medición `.next-b7` (final: BUILD_ID `F_wdR_GxBlk7RAote3wqT`), `next start` en :3101, Chrome del sistema con
+la placa de alto rendimiento: **NVIDIA GeForce RTX 5050** (`WEBGL_debug_renderer_info` en la página medida). Scripts del banco en el
+scratchpad (`b12b/banco.ts`, `analisis.ts`, `revisar.py`), entregas en `~/.cache/b4-medicion/b12b/`.
+
+- **Composición** (hojas a 1440 × 900, 1024 × 768, 820 × 1180 y 1023 × 768): el centro x del título y de la bajada, a 0,14 % del ancho o
+  menos del eje de su columna (1440: título 0,00 %, bajada 0,14 %; 1024 y 820: 0,00 %; 1023: 0,05 %). El logo proyectado, a 0,25 % del
+  ancho o menos (s76 §9b, por rayos contra la pose de cada cuadro) y entero en su mitad; la perspectiva del título 3D, 0,00 %. Hojas:
+  `hoja-<ancho>x<alto>-paso<n>.png`.
+- **AA sobre el vidrio**, con la escena y la marca de agua detrás (1440 y 1024, las cuatro tiras, p10 de cada caja de texto): los 94 textos
+  pasan; el más bajo, el título de «la tuya» a 1024 con el «?» detrás, 7,57:1 (piso 4,5); los demás, 11,4:1 o más (el peor margen sobre
+  el piso, ×1,68). El botón del CTA se mide sobre su propio relleno: 18:1. La opacidad del vidrio queda en 4 %.
+- **El costo del vidrio**, sin vsync (1440, panel adentro, 6 s por caso): con el vidrio, mediana 2,0 ms, p95 3,4, p99 5,0; sin el
+  desenfoque 1,6 / 2,9 / 19,4; con el panel opaco 1,7 / 2,9 / 18,9. El desenfoque cuesta ~0,4 ms por cuadro en la mediana y ~0,5 en el p95.
+- **La luz con el oscurecido (0,35) y sin él (0)**, en el mismo cuadro (el gancho del banco): sobre el lienzo, píxel a píxel, el valor
+  codificado baja a 0,649–0,658 de mediana en las cuatro zonas (logo, piso, cielo, escena; p10–p90 0,62–0,70): exactamente 1 − 0,35, o sea
+  0,46–0,51 en luz lineal. Parejo para todas las capas de la escena; el DOM (la bajada, la barra, el panel) no se oscurece.
+- **El panel con scroll rápido** (1440; la caja cuadro a cuadro desde 2,2 pantallas antes de Trabajos): la rueda (14 golpes de 900 px),
+  la barra (saltos de 420 px por cuadro), el menú y un ancla. Entrada: 0 px de desvío del tope en las cuatro (34, 43, 49 y 14 cuadros
+  a mitad de camino). Salida (la rueda cruza la cola): 21 cuadros a mitad de camino, todos con el tope en 0.
+- **Estrellas** durante el Portfolio a 1440, 1024 y 820 × 1180: a la vista (160 000), sin apagarse (`estrellas-<ancho>-producto.png`).
+- **Demos, antes y después**, grabados con scroll constante desde la salida del panel hasta el fondo: antes (`.next-probe`, el túnel) en
+  escritorio y tablet; después en escritorio y tablet; y la tablet de B1.2 (la capa rígida). `demos-<rótulo>.webm`.
+- **El teléfono** (390 × 844): sin desborde horizontal (el documento mide 390). La sección todavía es el selector de escritorio
+  apretado, como en B1.2: lo reemplazan las historias de B1.3.
+- **El arnés de carga** (`scripts-carga/estres.ts`, 1440). Entero (107 corridas y el panel) contra el build de los tres arreglos del banco
+  (`F_wdR_GxBlk7RAote3wqT`): a los 5,5 s, fallas sólo en dos cosas, las dos arregladas después (puntos 4 y 5 de arriba): «Portfolio» con
+  las letras corridas en 18 de las 26 corridas con la pestaña al fondo, y `portfolio-ancla` en las 9 cargas con ancla seguidas de un clic
+  en el menú; más una corrida (`recarga`, clic en «Contacto») con `ninguno-visible` en Quiénes somos que no se repitió. El panel, de las
+  cuatro maneras: la entrada a ±0,0 px y la salida (la rueda) a ±0,0 px. Contra el build final (`UkExpcjrJGPC1oqEod6hI`): «normal» y
+  «cpu» enteras y 3 de «red» (55 corridas) con 0 fallas a 1,5 s, a 5,5 s y después de scrollear, 0 avisos del guardián y 0 errores de la
+  consola (al llegar, 9 con `sin-imprimir` hasta el primer cuadro de la escena; A-ter tenía 8). **El resto —«red», las 26 de «fondo», las
+  de «contexto» y el panel— no se midió contra el build final**: lo cortó la memoria dos veces (el sistema con el dev server de Servicios
+  en 4,1 GB, y en el reintento el portero del propio arnés, con 1,36 GB libres). Lo de «fondo» sí se vio en el sitio con una sonda (una
+  carga con la pestaña al fondo, como el arnés): «Portfolio» se imprime corrido 0,121 em, el guardián lo rearma antes de 1,5 s y queda en
+  0 em. El archivo: `~/.cache/b4-medicion/cierre-a-ter/carga/build-b12b*.jsonl`.
+
+**Desvíos y por qué.**
+
+- La secuencia de la tira es sólo de opacidad (el video y el nombre; a los 400 ms la ficha, escalonada de a 80 ms): la rama quieta de
+  la sección no puede escribir `transform` (`trabajos.invariant`), así que la ficha aparece en su lugar en vez de subir.
+- Las marcas de agua se piden y se dibujan recién con la sección cerca (no salen en el HTML del servidor).
+- El «blanco» del vidrio es la tinta de la sala de noche (`--color-tinta`, #F7F7F5) por `color-mix`: `s5-tokens` no admite colores
+  literales en el lane.
+- El título 3D llega con su gesto de siempre (las letras) y sale con la caída de `levanta`.
+- Teclado: ←/→ cambian de proyecto y ↑/↓ quedan para la página; Esc devuelve el foco a la cabecera activa desde cualquier lugar del panel.
+- `visual-qa` no pudo abrir la página: en este entorno no están sus herramientas de captura («VERIFICACIÓN PENDIENTE»). La verificación
+  visual la hizo el banco (las hojas en escritorio y tablet, el teléfono).
+- El candado de los procesos pesados (`C:\develop-pesado.lock`) fue una carpeta con `candado.txt` adentro (Windows no deja a un usuario
+  sin elevar crear archivos en la raíz de `C:\`); Servicios usó el mismo formato. Valentino lo levantó antes del final.
+- El caché de imágenes optimizadas sobrevive al rebuild: el lomo de El Garage siguió mostrando el póster viejo en el build de medición
+  hasta borrar `.next-b7/cache/images` (en el `.next` de :3000 no había). En el navegador, Ctrl+Shift+R.
+
+**Verificación.** `verificar` completo sobre `41f91e58`: los 8 grupos rojos de la base (s1, s2, s3, s4, s5, s7, s8, s17) y ninguna
+falla nueva, comparando la lista entera (127 líneas contra 129 de B1.2: se va la de `hover:` sin `focus-visible:` de s5-codigo, que era
+de B1.2; la de las 300 líneas sigue con los mismos 6 archivos). Y otra vez sobre el árbol final (con los arreglos del banco, los del
+arnés y P-H11): las mismas 127 líneas, ninguna falla nueva, `tsc` limpio. Lint de lo tocado, limpio. s76: 478 afirmaciones y 101
+controles positivos (con s76-archivo-tunel), cada afirmación nueva con su control; s75 53.
+**s38, s44 y s74** (los tres grupos de más en la base que midió Servicios): no dependen del build ni son de B1. Sus sondas llevan `\n`
+literal y fallan en una copia con CRLF (la de Servicios: `core.autocrlf=true` en un checkout nuevo; la de este worktree está casi toda
+en LF). Corridos sueltos sobre copias sin build: con LF pasan y con CRLF falla la misma afirmación de cada uno, igual en `52d38204`
+(antes de B1), en `54655181` (B1.2) y en `41f91e58`. Se arreglan normalizando a `\n` antes de buscar; queda para otro sprint (no es de
+este).
+
+**FRENO — lo que Valentino mira en :3000** (con el dev server suyo prendido). B1.3 arranca recién con su aprobación.
+
+1. **La llegada** — http://localhost:3000/v3 y bajar de Quiénes somos a Trabajos con la rueda: el panel de vidrio entra por la derecha
+   sólo en horizontal; «Portfolio» aparece en su lugar, derecho, por tiempo, y la bajada sube; el logo va a la mitad de abajo, en el mismo
+   eje; el oscurecido. Repetirlo con la rueda fuerte, arrastrando la barra de scroll y con el menú → Portfolio: siempre en horizontal.
+2. **La composición y el vidrio** — http://localhost:3000/v3#portfolio-el-garage: arriba «Portfolio» y su bajada, abajo el logo, centrados en
+   la mitad izquierda; el vidrio con la estructura de la tinta; la secuencia de la tira (el video y el nombre; a los 400 ms la ficha); la
+   marca de agua de El Garage detrás de la ficha.
+3. **Las otras marcas** — http://localhost:3000/v3#portfolio-esquina-estudio y http://localhost:3000/v3#portfolio-banu-scents (el logo de
+   Banú que pasaste, en SVG).
+4. **«La tuya»** — http://localhost:3000/v3#portfolio-la-tuya: el «?» de marca de agua pegado a la izquierda, el título en `titulo-xl`
+   debajo de la barra, el CTA grande (abre la hoja de contacto de siempre).
+5. **Hover, teclado y sonido** — en http://localhost:3000/v3#portfolio-el-garage: pasar el mouse por los lomos cambia en el acto; cruzando
+   varios gana el último y suena un solo `tic`; ←/→ cambian de proyecto, Enter sobre un lomo lo activa, Esc vuelve a la cabecera activa.
+6. **La salida** — desde http://localhost:3000/v3#portfolio-la-tuya seguir bajando: el panel se va por la derecha, «Portfolio» se va con la
+   caída y llegan las Demos. Con la rueda fuerte, el panel desaparece de una (sin subir con la página).
+7. **El cielo** — en http://localhost:3000/v3#portfolio-el-garage las estrellas, las fugaces y la formación siguen prendidas.
+8. **Tablet** (DevTools, 820 × 1180 y 1023 × 768) — http://localhost:3000/v3#portfolio-el-garage: la composición sobre el 40 % de la
+   izquierda; y bajando hasta Demos, la llegada como en escritorio, sin el «Demos» asomando durante el Portfolio. **Una pregunta:** en la
+   tablet parada el «?» de «la tuya» (al 80 % del alto) desborda la tira angosta y se corta —http://localhost:3000/v3#portfolio-la-tuya a
+   820—: ¿lo achico al ancho de la tira?
+9. **El teléfono de El Garage** (P-H11) — el lomo de El Garage en http://localhost:3000/v3#portfolio-esquina-estudio (su póster, entero) y,
+   a 390 de ancho, http://localhost:3000/v3#trabajos (el video). Queda más blando que los otros dos: es la resolución que se grabó.
+10. **El teléfono** (390) — http://localhost:3000/v3#trabajos: la sección sigue con el selector de escritorio apretado, como en B1.2; la
+    reemplazan las historias de B1.3.
+11. **Las grabaciones de Demos, antes y después** — `~/.cache/b4-medicion/b12b/demos-antes-escritorio.webm`, `demos-despues-escritorio.webm`,
+    `demos-antes-tablet.webm`, `demos-b12-tablet-rigida.webm` (la tablet de B1.2) y `demos-despues-tablet.webm`.
+
 ---
 
 ## 11. Ajustes de la aprobación (2026-10-17)
@@ -931,3 +1100,59 @@ afirmación.
 ### 11.7 F · Los videos, con tope
 
 Si el tiempo virtual por CDP no graba limpio en algún sitio en ~30 min, se usa `recordVideo` y se sigue. El sprint no se gasta ahí.
+
+---
+
+## 12. Ajustes del FRENO de B1.2 (B1.2b, 2026-10-17)
+
+Valentino miró B1.2 en :3000 y probó las banderas. Lo que no está acá quedó aprobado (los videos: «me gustan un montón, muy bien
+hechos»). **Esta sección manda sobre todo lo anterior** donde lo contradiga. Al final, FRENO otra vez: B1.3 arranca con su aprobación.
+
+### 12.1 Lo pedido, punto por punto, y cómo se hace
+
+0. **Sin banderas.** Salen `?portfolio-dim`, `-paso`, `-panel`, `-lado` y `-camara`, con sus lectores (`banderas.ts` se borra).
+   Quedan constantes: el oscurecido en 0,35, el panel de vidrio, del lado derecho, y una sola pose de cámara. Los tests que las
+   afirmaban pasan a afirmar que no hay lector de ninguna y que las constantes valen eso, con su control.
+1. **Una pose calma y frontal.** La de B1.2 giraba la cámara 15° a 27° (la `a`, 210°): se va. La nueva conserva el azimut y la altura
+   de la cámara del pin (183,6°, 8,7) y sólo corre el encuadre (y la distancia, para que el logo entre): el logo cae centrado en el
+   cuadrante de abajo de la mitad izquierda. El encuadre se calcula por aspecto (con un encuadre fijo el centro del logo se corre
+   1,8 % del ancho entre 1440 y 1024). **El título 3D se coloca con ESA pose** (una lectura nueva, «la pose del Portfolio»): con el
+   panel adentro queda exactamente en su lugar del DOM y de frente (sin perspectiva). Medido antes de elegir: corriendo sólo el
+   encuadre con la lectura de hoy, la cámara rota ~7° y el título queda con ~4 % de diferencia de alto de punta a punta (pasa del
+   3 %). La mitad izquierda se parte en dos: arriba «Portfolio» y la bajada, abajo el logo, centrados en el mismo eje (25 % del ancho;
+   en tablet, 20 %: el centro del 40 % que deja el panel).
+2. **El vidrio con la estructura de la tinta.** Una sola estructura: el vidrio del sistema va en el PANEL (blanco al 4 %, desenfoque
+   de 20 px, saturación del 180 %, borde blanco al 8 %) y las tiras son las de la tinta (lomos, proporciones, animaciones), sin fondo
+   propio. La tira de «la tuya», igual. AA del texto y costo en cuadros, medidos en el banco.
+3. **El título entra en su lugar y se va cayendo.** La presencia del encabezado es un valor por TIEMPO, prendido con el panel
+   adentro (ya pegado: no viaja con la sección). El título 3D llega con su llegada de siempre y se va con la caída de los otros
+   títulos del sitio (la de `levanta`, al revés: se acuesta y su línea lo tapa); la bajada sube y se va por sus líneas. Reversible.
+4. **«La tuya» sin el «?» 3D.** Se borran `SignoDeLaTuya` y su pase (no se archivan). Un «?» 2D quieto, en SVG propio, con el estilo
+   del logo (la cinta de ancho constante, el relleno gris, el filo claro y la sombra corrida de la pieza de `EncajeDelLogo`), como
+   marca de agua pegada al borde izquierdo de la tira. El título, el más grande de la escala que entre sin cortar palabras a 1024 y
+   a 1440; el CTA, un botón grande con el mismo `data-abre-contacto="panel"`.
+5. **Un solo gatillo por proyecto.** Cada proyecto ocupa 1,5 pantallas (lo que ocupaban sus dos pasos) y «la tuya» lo mismo: la
+   constante es `PANTALLAS_POR_PROYECTO`, y la sección pasa de 950,67svh a 1025,67svh (todo derivado: el alto, el `k` por ancho, las
+   anclas y el reloj de Demos). Al cruzar el borde de un proyecto arranca su secuencia por tiempo: la tira con el video y el nombre,
+   y a los ~400 ms la ficha, escalonada. Sin portada ni ficha: la tira activa muestra siempre el video arriba y la ficha abajo.
+   La marca de agua de cada cliente (su logo, monocromo, ~8 %) detrás de la ficha; los logos se bajaron de los sitios (sólo GET).
+   Teclado: ←/→ cambian de proyecto, Enter en un lomo lo activa, Esc devuelve el foco al lomo activo. Sonido: `tic` al cambiar de
+   proyecto; `pestillo` sale.
+6. **Hover instantáneo.** El cambio de la tira pasa en el mismo cuadro del `pointerenter`; el salto de Lenis va después. Cruzando
+   varios lomos gana el último y suena un solo `tic`; después de una activación, los lomos que se reacomodan debajo del puntero no
+   activan nada hasta que el puntero se mueva 4 px o más.
+7. **Estrellas, fugaces y la formación siguen durante el Portfolio.** La ventana que las apagaba (`tunelEnLaEscena.ts`) se borra.
+8. **Tablet: Demos llega como en escritorio** (la misma persecución y el mismo gesto: la capa rígida que escalaba queda sólo abajo
+   de 768, que es de B1.3). Antes y después, grabados.
+9. **El panel entra y sale en horizontal.** El panel se anima en el escenario pegado; si se llega rápido, el gatillo espera al pin.
+   Afirmado en s76 y en el arnés (con scroll rápido, el tope de la caja del panel constante ±1 px).
+10. **Lo pendiente de B1.2**, al final, con el dev server de Valentino apagado.
+
+### 12.2 Los logos de los clientes (GET a los sitios en vivo)
+
+- **El Garage**: `ElGarageLogo-Modificado.png` (853 × 233, RGBA, fondo transparente): limpio.
+- **Esquina Estudio**: `logo-header-negro.png` (1172 × 384, RGBA, fondo transparente): limpio.
+- **Banú Scents**: NO sale limpio. El único logo del sitio (`logoC.png`, 1536 × 1024) trae un degradé de fondo pegado a la imagen
+  (y el `icon.svg` es una «B» de favicon). Fue el nombre como marca de agua tipográfica hasta que Valentino pasó el archivo
+  (`scripts-portfolio/fuentes/banu-logo-oscuro.png`): las letras, con un umbral de luminancia 50 y potrace, en
+  `public/portfolio/banu-scents/logo.svg` (aprobado por él).

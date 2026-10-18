@@ -39,7 +39,6 @@ import { LuzDelLogo } from './LuzDelLogo'
 import { PruebasDeLaEscena } from './PruebasDeLaEscena'
 import { PaseDeLaEscena } from './pase/PaseDeLaEscena'
 import { OscurecidoDelPortfolio } from './OscurecidoDelPortfolio'
-import { SignoDeLaTuya } from './SignoDeLaTuya'
 import { CristalDeLaEscena } from './cristal/CristalDeLaEscena'
 import { EspejoDeLaEscena } from './espejo/EspejoDeLaEscena'
 import { type ProbeMode, type ProbeParamsStore, type ProbeRigStore, type ProbeStatsStore } from './probeStore'
@@ -305,14 +304,14 @@ export default function ProbeStage({
         {/* [PULIDO 10] J1 · sólo con banco: la silueta del logo en el cuadro (el instrumento de solapes). */}
         <SiluetaDelBanco logoGroupRef={logoGroupRef} />
         <Formacion rig={rig} calidad={calidad} logoGroupRef={logoGroupRef} />
-        <Estrellas rig={rig} calidad={calidad} moireRef={moireRef} />
+        <Estrellas calidad={calidad} moireRef={moireRef} />
         {/* [ESCENA 8] T4 · el cielo de día (detrás de la formación y de la trama); [CALIDAD 1] A2: el pintado celeste, encendido. */}
         <CieloDeDia calidad={calidad} />
         <PisoVivo calidad={calidad} quieto={reducedMotion} />
         {/* [ESCENA 7] T11 · el amanecer (el día entra desde afuera y por la trama); [ESCENA 8] encendido y atado al scroll. */}
         <Amanecer moireRef={moireRef} logoMaterialRef={logoMaterialRef} quieto={reducedMotion} />
         {/* [ESCENA 7] T13 · la estrella fugaz, de noche (encendida en ESCENA 8). */}
-        <Fugaz rig={rig} />
+        <Fugaz />
         {/* [ESCENA 7] T12: de noche, el piso iluminado por el haz aclara apenas la cara de abajo del logo. */}
         <Rebote logoMaterialRef={logoMaterialRef} />
         {/* [CALIDAD 1] El motor: el precompilado (B1), la calidad adaptativa (B11) y el perfil de la GPU con banco. */}
@@ -327,7 +326,6 @@ export default function ProbeStage({
         {/* [B1] El Portfolio: el oscurecido (un multiplicador, último del cuadro) y el «?» de «la tuya» (después del render, con
             scissor). Afuera del Portfolio, inertes: el peso es 0 y no hay hueco. */}
         <OscurecidoDelPortfolio />
-        <SignoDeLaTuya />
         {/* [PULIDO 18] P1.a · el pase compartido (la profundidad de lo opaco): ÚLTIMO, su cuadro corre después de todos. */}
         <PaseDeLaEscena />
       </Suspense>

@@ -11,8 +11,6 @@ import { TRAMA_EN_VIVO } from './trama'
 import { FORMACION } from '../formacion/enFormacion'
 import { AIRE } from '../polvo/parche'
 import { MOIRE_FAR_ORDER } from '../probeMoire'
-import type { ProbeRigStore } from '../probeStore'
-import { fueraDelTunel } from '../tunelEnLaEscena'
 
 /**
  * [ESCENA 7] T13 · ESTRELLA FUGAZ — [ESCENA 8] aprobada: encendida en el producto (`fugaz`; el banco la
@@ -102,15 +100,11 @@ void main() {
 }
 `
 
-interface PropsDeLaFugaz {
-  readonly rig: ProbeRigStore
-}
-
 type VentanaDelBanco = Window & { __fugazDelBanco?: { cuantas: () => number; ya: (fija?: number) => void; donde: () => number[] } }
 
-export function Fugaz(props: PropsDeLaFugaz) {
+export function Fugaz() {
   if (!entornoDeLaEscena().fugaz) return null
-  return <FugazPrendida {...props} />
+  return <FugazPrendida />
 }
 
 /** Un número entre dos, con el azar de la escena (determinista por cuántas van). */
@@ -141,7 +135,7 @@ export function franjaLibre(logo: { readonly x0: number; readonly x1: number; re
   return izquierda[1] - izquierda[0] >= derecha[1] - derecha[0] ? izquierda : derecha
 }
 
-function FugazPrendida({ rig }: PropsDeLaFugaz) {
+function FugazPrendida() {
   const armado = useMemo(() => {
     // La cinta: dos vértices por tramo (a cada lado del eje) y dos triángulos entre tramos.
     const k = new Float32Array(TRAMOS * 2).map((_v, i) => Math.floor(i / 2) / (TRAMOS - 1))
@@ -188,7 +182,8 @@ function FugazPrendida({ rig }: PropsDeLaFugaz) {
   useFrame((state) => {
     const m = memoria.current
     const t = VIVO.uTiempo.value
-    const noche = VIVO.uNoche.value >= FUGAZ.noche && fueraDelTunel(rig.current.progress) > 0.99
+    // [B1.2b] sólo de noche (la ventana del túnel se borró: también durante el Portfolio).
+    const noche = VIVO.uNoche.value >= FUGAZ.noche
     if (!noche) {
       m.proxima = Number.NaN
       apagar(armado.linea)
