@@ -12,11 +12,11 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
-import { vistaDeLosPlanes, type PrecioPorPlanes, type VistaDeLosPlanes } from '../bloques/precio/vistaDeLosPlanes'
+import { vistaDeLosPlanes, type PrecioPorPlanes, type TarjetaDeUnPlan, type VistaDeLosPlanes } from '../bloques/precio/vistaDeLosPlanes'
 import { vistaDelPrecioDeUnProyecto, type PrecioPorProyecto } from '../bloques/precio/vistaDelPrecioPorProyecto'
 import { IA_Y_AUTOMATIZACIONES } from '../datos/ia-y-automatizaciones'
 import { SOFTWARE_A_MEDIDA } from '../datos/software-a-medida'
-import { MARCADOR_A_DEFINIR, usd } from '../formato'
+import { MARCADOR_A_DEFINIR, numero, usd } from '../formato'
 import { PRECIOS_DESDE } from '../precios'
 import type { Plan } from '../tipos'
 
@@ -95,7 +95,33 @@ afirmar(sinWhatsapp(dev) && sinWhatsapp(prod) && sinWhatsapp(proyecto), 'el bot 
 controlPositivo('una vista que lo ofrece se detecta', { monto: 'USD 1', nota: 'Incluye WhatsApp' }, sinWhatsapp)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · Son datos puros: ni react, ni next, ni un .tsx')
+titulo('5 · Las tarjetas (por debajo de 768) son la tabla leída por plan')
+
+const datosDeLaTarjeta = (t: TarjetaDeUnPlan | undefined): string[] => (t?.datos ?? []).map((d) => `${d.rotulo}: ${d.valor}`)
+afirmarIgual(prod.tarjetas.map((t) => t.nombre), prod.columnas, 'una tarjeta por plan, con el nombre y en el orden de las columnas')
+for (const [indice, plan] of PLANES.planes.entries()) {
+  afirmarIgual(
+    datosDeLaTarjeta(prod.tarjetas[indice]),
+    [`Por mes: ${usd(plan.mensual)}`, `Conversaciones: ${numero(plan.conversaciones)}`, `Soporte: ${plan.soporte}`, `Cambios web incluidos: ${plan.cambiosWeb}`],
+    `${plan.nombre}: sus cuatro datos, cada uno con su rótulo, sacados del dato del plan`,
+  )
+}
+afirmarIgual([prod.tarjetas.map((t) => t.datos.length), dev.tarjetas.map((t) => t.datos.length)], [[4, 4, 4], [5, 5, 5]], 'en producción cuatro datos por tarjeta; en desarrollo suma funcionalidades, como la fila de la tabla')
+afirmarIgual(datosDeLaTarjeta(dev.tarjetas[0]).at(-1), `Funcionalidades: ${MARCADOR_A_DEFINIR}`, '  y en desarrollo esa fila es el marcador, igual que en la tabla')
+const comoColumna = (v: VistaDeLosPlanes): boolean =>
+  v.tarjetas.length === v.columnas.length &&
+  v.tarjetas.every((t, i) => t.datos.length === v.filas.length && t.datos.every((d, j) => d.clave === v.filas[j]?.clave && d.rotulo === v.filas[j]?.rotulo && d.valor === v.filas[j]?.celdas[i]))
+afirmar(comoColumna(dev) && comoColumna(prod) && comoColumna(vistaDeLosPlanes(A_MEDIAS, true)), 'cada tarjeta es una columna de la tabla: mismas claves, mismos rótulos, mismos valores y el mismo orden, también con un dato a medias')
+controlPositivo(
+  'una tarjeta con un valor que la tabla no tiene se detecta',
+  { ...prod, tarjetas: prod.tarjetas.map((t, i) => (i === 0 ? { ...t, datos: t.datos.map((d, j) => (j === 0 ? { ...d, valor: 'USD 1' } : d)) } : t)) },
+  comoColumna,
+)
+controlPositivo('una tarjeta a la que le falta un dato se detecta', { ...prod, tarjetas: prod.tarjetas.map((t) => ({ ...t, datos: t.datos.slice(1) })) }, comoColumna)
+afirmarIgual(datosDeLaTarjeta(otros.tarjetas[0]), ['Por mes: USD 77', 'Conversaciones: 12.345', 'Soporte: s', 'Cambios web incluidos: c'], 'con otro plan sale otra tarjeta: ninguna cifra ni rótulo está escrito en la lógica de las tarjetas')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('6 · Son datos puros: ni react, ni next, ni un .tsx')
 
 const sinReact = (codigo: string): boolean => !/from\s+['"](react|react\/[^'"]*|next|next\/[^'"]*)['"]|from\s+['"][^'"]*\.tsx['"]/.test(codigo)
 for (const archivo of ['vistaDeLosPlanes.ts', 'vistaDelPrecioPorProyecto.ts', 'rotulos.ts']) {

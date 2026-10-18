@@ -16,6 +16,7 @@ import type { ResolvedMetadata } from 'next'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
+import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
 import { MARCA_HOME_QUIETO } from '../../_secciones/_contrato/marcaHomeQuieto'
@@ -25,12 +26,13 @@ import { IA_Y_AUTOMATIZACIONES } from '../datos/ia-y-automatizaciones'
 import { PAGINAS_WEB } from '../datos/paginas-web'
 import { SERVICIOS } from '../datos/servicios'
 import { SOFTWARE_A_MEDIDA } from '../datos/software-a-medida'
-import { MARCADOR_A_DEFINIR, usd } from '../formato'
+import { ESTILO_DEL_CTA } from '../estiloDelAcento'
+import { MARCADOR_A_DEFINIR, numero, usd } from '../formato'
 import { PaginaDeServicio } from '../PaginaDeServicio'
 import { PRECIOS_DESDE } from '../precios'
 import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
 import { jsonLdDe } from '../seo'
-import type { Servicio } from '../tipos'
+import type { Plan, Servicio } from '../tipos'
 import { ESTILO_DEL_VIDRIO } from '../vidrio'
 import {
   MARCADORES_DE_LA_LLAVE, aperturas, arbitrariasSinToken, bloqueDe, bloquesEnOrden, clasesQueNoApilan, enlacesInternos,
@@ -166,6 +168,65 @@ afirmar(!IA_PROD.includes(MARCADOR_A_DEFINIR) && IA_DEV.includes(MARCADOR_A_DEFI
 const cajaConScroll = (html: string): boolean => /<div role="region" aria-label="Planes" tabindex="0" class="[^"]*overflow-x-auto/.test(html)
 afirmar(cajaConScroll(IA_PROD), 'la tabla scrollea adentro de su caja (overflow-x-auto), y la caja es una región con nombre que recibe el foco: el teclado la mueve')
 controlPositivo('una tabla sin su caja se detecta', '<table><tr><td>x</td></tr></table>', cajaConScroll)
+
+// S2c · los planes en dos versiones: la tabla desde 768 (el `md` de Tailwind) y una tarjeta por plan por debajo. Las dos van en el marcado; el CSS elige.
+const claseDe = (apertura: string): string[] => (/\sclass="([^"]*)"/.exec(apertura)?.[1] ?? '').split(/\s+/)
+const versionesDeLosPlanes = (html: string, cual: 'tabla' | 'tarjetas'): string[] => aperturas(html, cual === 'tabla' ? 'div' : 'ul').filter((a) => a.includes(`data-planes="${cual}"`))
+/** Una tabla y una lista de tarjetas, cada una oculta SOLO en el ancho que no le toca: la tabla bajo 768, las tarjetas desde 768. */
+const dosVersiones = (html: string): boolean => {
+  const tabla = claseDe(versionesDeLosPlanes(html, 'tabla')[0] ?? '')
+  const tarjetas = claseDe(versionesDeLosPlanes(html, 'tarjetas')[0] ?? '')
+  return versionesDeLosPlanes(html, 'tabla').length === 1 && versionesDeLosPlanes(html, 'tarjetas').length === 1 &&
+    tabla.includes('max-md:hidden') && !tabla.includes('md:hidden') && tarjetas.includes('md:hidden') && !tarjetas.includes('max-md:hidden')
+}
+const cambiandoClases = (html: string, cambio: (clase: string) => string): string =>
+  html.replace(/\sclass="([^"]*)"/g, (_t, valor: string) => ` class="${valor.split(/\s+/).map(cambio).filter((c) => c !== '').join(' ')}"`)
+afirmar(dosVersiones(IA_PROD) && dosVersiones(IA_DEV), 'IA, en los dos modos: la tabla y las tarjetas están en el marcado; la tabla se oculta bajo 768 y las tarjetas desde 768 (display none: tampoco las lee el lector de pantalla ni las alcanza el teclado)')
+afirmarIgual(fallan((p) => (p.servicio.precio.tipo === 'planes' ? dosVersiones(p.html) : versionesDeLosPlanes(p.html, 'tabla').length + versionesDeLosPlanes(p.html, 'tarjetas').length === 0)), [], '  en la página de IA, entera y en los dos modos, están las dos versiones; en las otras dos páginas, ninguna')
+controlPositivo('una tabla que no se oculta bajo 768 se detecta', cambiandoClases(IA_PROD, (c) => (c === 'max-md:hidden' ? '' : c)), dosVersiones)
+controlPositivo('unas tarjetas que no se ocultan desde 768 se detectan', cambiandoClases(IA_PROD, (c) => (c === 'md:hidden' ? '' : c)), dosVersiones)
+controlPositivo('las clases de ocultar cruzadas se detectan', cambiandoClases(IA_PROD, (c) => (c === 'max-md:hidden' ? 'md:hidden' : c === 'md:hidden' ? 'max-md:hidden' : c)), dosVersiones)
+// El corte viejo se arma por partes: una clase entera escrita acá la emitiría el escaneo de Tailwind (que lee hasta los tests) como una regla muerta.
+controlPositivo('un corte viejo, el sm de Tailwind (640), se detecta', cambiandoClases(IA_PROD, (c) => (c === 'max-md:hidden' ? `max-${'sm'}:hidden` : c === 'md:hidden' ? `${'sm'}:hidden` : c)), dosVersiones)
+controlPositivo('una página con una sola de las dos versiones se detecta', IA_PROD.replace(/<ul[^>]*data-planes="tarjetas"[\s\S]*?<\/ul>/, ''), dosVersiones)
+
+const PLANES_DE_IA = ((): readonly Plan[] => {
+  const precio = IA_Y_AUTOMATIZACIONES.precio
+  if (precio.tipo !== 'planes') throw new Error('ia-y-automatizaciones: el precio ya no es por planes')
+  return precio.planes
+})()
+/** De cada tarjeta del marcado: el nombre (h3) y sus pares rótulo/valor (dt/dd), como los lee un lector de pantalla. La fila de funcionalidades no cuenta: es un sexto dato, sin dato todavía. */
+const tarjetasDelMarcado = (html: string): { nombre: string; datos: string[] }[] => {
+  const lista = /<ul[^>]*data-planes="tarjetas"[^>]*>([\s\S]*?)<\/ul>/.exec(html)?.[1] ?? ''
+  return [...lista.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map((li) => ({
+    nombre: textoVisible(/<h3[^>]*>([\s\S]*?)<\/h3>/.exec(li[1] ?? '')?.[1] ?? ''),
+    datos: [...(li[1] ?? '').matchAll(/<dt[^>]*>([\s\S]*?)<\/dt><dd[^>]*>([\s\S]*?)<\/dd>/g)]
+      .map((par) => `${textoVisible(par[1] ?? '')}: ${textoVisible(par[2] ?? '')}`)
+      .filter((dato) => !dato.startsWith('Funcionalidades: ')),
+  }))
+}
+const TARJETAS_DEL_DATO = PLANES_DE_IA.map((plan) => ({
+  nombre: plan.nombre,
+  datos: [`Por mes: ${usd(plan.mensual)}`, `Conversaciones: ${numero(plan.conversaciones)}`, `Soporte: ${plan.soporte}`, `Cambios web incluidos: ${plan.cambiosWeb}`],
+}))
+const cadaPlanConSusCincoDatos = (html: string): boolean => JSON.stringify(tarjetasDelMarcado(html)) === JSON.stringify(TARJETAS_DEL_DATO)
+afirmar(PLANES_DE_IA.length === 3 && cadaPlanConSusCincoDatos(IA_PROD) && cadaPlanConSusCincoDatos(IA_DEV), `cada uno de los ${PLANES_DE_IA.length} planes tiene su tarjeta con los cinco datos —nombre, por mes, conversaciones, soporte y cambios web—, cada dato con su rótulo, sacados del dato del plan; en los dos modos`)
+controlPositivo('una tarjeta a la que le falta un dato se detecta', IA_PROD.replace(/<dt[^>]*>[\s\S]*?<\/dt><dd[^>]*>[\s\S]*?<\/dd>/, ''), cadaPlanConSusCincoDatos)
+controlPositivo('un dato sin su rótulo se detecta', IA_PROD.replace('>Por mes</dt>', '></dt>'), cadaPlanConSusCincoDatos)
+controlPositivo('un plan sin tarjeta se detecta', IA_PROD.replace(/<li[^>]*>(?:(?!<\/li>)[\s\S])*?<h3[\s\S]*?<\/li>/, ''), cadaPlanConSusCincoDatos)
+/** El nivel tipográfico de cada valor de cada tarjeta: el primer `data-nivel` de su `dd` (un Titular pone el suyo en el span de adentro, un Cuerpo en el propio `dd`). */
+const nivelesDeLosValores = (html: string): string[][] => {
+  const lista = /<ul[^>]*data-planes="tarjetas"[^>]*>([\s\S]*?)<\/ul>/.exec(html)?.[1] ?? ''
+  return [...lista.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map((li) => [...(li[1] ?? '').matchAll(/<dd[^>]*>[\s\S]*?<\/dd>/g)].map((dd) => /data-nivel="([^"]+)"/.exec(dd[0])?.[1] ?? ''))
+}
+const precioMasGrande = (html: string): boolean => {
+  const tarjetas = nivelesDeLosValores(html)
+  return tarjetas.length === PLANES_DE_IA.length && tarjetas.every((niveles) => niveles.length > 1 && niveles[0] === 'titulo-m' && niveles.slice(1).every((nivel) => nivel === 'cuerpo'))
+}
+afirmar(precioMasGrande(IA_PROD) && precioMasGrande(IA_DEV), 'en cada tarjeta el «Por mes» va en el nivel titulo-m del Titular (el del precio de los calibres de Páginas web) y los demás valores en Cuerpo: es el más grande y sale de la escala del home, sin un tamaño propio; en los dos modos')
+controlPositivo('un «Por mes» en Cuerpo, igual que los demás valores, se detecta', IA_PROD.replace(/data-nivel="titulo-m"/g, 'data-nivel="cuerpo"'), precioMasGrande)
+controlPositivo('un «Por mes» en un nivel más chico del Titular se detecta', IA_PROD.replace(/data-nivel="titulo-m"/g, 'data-nivel="titulo-s"'), precioMasGrande)
+controlPositivo('otro valor en el nivel del precio se detecta', IA_PROD.replace(/(<dd data-pieza="texto" data-nivel=")cuerpo(")/, '$1titulo-m$2'), precioMasGrande)
 const sinCeroInventado = (html: string): boolean => !/(^|[^\d.,])0([^\d.,]|$)/.test(textoVisible(html))
 afirmarIgual(fallan((p) => sinCeroInventado(p.html)), [], 'ningún precio ni dato sin valor se pinta como 0, en ninguna de las tres páginas')
 controlPositivo('un precio nulo pintado como 0 se detecta', '<p>USD 0</p>', sinCeroInventado)
@@ -284,7 +345,25 @@ const preguntasUnicas = (s: Servicio): boolean => new Set(s.faq.map((f) => f.pre
 afirmarIgual(fallan((p) => preguntasUnicas(p.servicio)), [], '  y ninguna pregunta se repite (son la clave de cada ítem)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('12 · La ruta: publica exactamente PUBLICADOS, y la metadata no hereda el canonical del home')
+titulo('12 · «Probá el panel» (IA) es el CtaEnlace del home, tal cual, y va en tinta como acción secundaria')
+
+// El Cta del home no tiene una variante «secundaria» (sus dos variantes son de forma: en línea y en bloque). La jerarquía de la página la pone
+// el envoltorio de los llamados principales (`ESTILO_DEL_CTA`, que recolorea la tinta del botón con el acento); el enlace al panel no lo lleva.
+const PANEL = IA_Y_AUTOMATIZACIONES.prueba.ctaPanel
+const CTA_DEL_HOME = PANEL === null || PANEL.href === null ? '' : renderToStaticMarkup(<CtaEnlace href={PANEL.href} rotulo={PANEL.rotulo} />)
+const IA_PAGINA = PAGINAS.find((p) => p.servicio.slug === 'ia-y-automatizaciones' && !p.enDesarrollo)?.html ?? ''
+const traeElCtaDelHome = (html: string): boolean => CTA_DEL_HOME !== '' && (bloqueDe(html, 'prueba') ?? '').includes(CTA_DEL_HOME)
+// Redefinir la variable (`--color-tinta:`), no leerla: el vidrio del panel la lee con var() para mezclar su 4 % y eso no recolorea nada.
+const recoloreaLaTinta = (html: string): boolean => valoresDe(html, 'style').some((estilo) => /(^|;)\s*--color-tinta\s*:/.test(estilo))
+const enTinta = (html: string): boolean => !recoloreaLaTinta(bloqueDe(html, 'prueba') ?? '')
+afirmar(CTA_DEL_HOME.includes('data-pieza="cta"') && CTA_DEL_HOME.includes('href="/login"'), 'el CtaEnlace del home con los datos de «Probá el panel» es un <a data-pieza="cta"> a /login (D11)')
+afirmarIgual(fallan((p) => p.servicio.prueba.ctaPanel === null || (traeElCtaDelHome(p.html) && enTinta(p.html))), [], 'en IA, en los dos modos, el bloque Prueba lleva ese <a> byte por byte —sin clase ni style propios— y ningún envoltorio le recolorea la tinta')
+afirmar(recoloreaLaTinta(bloqueDe(IA_PAGINA, 'llamado') ?? ''), '  los llamados principales, en cambio, sí van en el acento (su envoltorio recolorea la tinta): esa es la diferencia entre principal y secundaria')
+controlPositivo('un enlace con una clase propia se detecta', IA_PAGINA.replace(CTA_DEL_HOME, CTA_DEL_HOME.replace('class="', 'class="text-acento ')), traeElCtaDelHome)
+controlPositivo('un enlace dentro del envoltorio de los llamados se detecta', renderToStaticMarkup(<section data-bloque="prueba"><div style={ESTILO_DEL_CTA}><CtaEnlace href="/login" rotulo="Probá el panel" /></div></section>), enTinta)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('13 · La ruta: publica exactamente PUBLICADOS, y la metadata no hereda el canonical del home')
 
 async function laRuta(): Promise<void> {
   let ruta: typeof import('../../[servicio]/page')

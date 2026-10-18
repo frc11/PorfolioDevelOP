@@ -9,6 +9,9 @@
  *     comparación a medias es peor que ninguna;
  *   · lo mismo con «implementación desde»: sin monto no hay línea.
  *
+ * Las tarjetas (una por plan, por debajo de 768) son la MISMA tabla leída por columnas: salen de las filas, no de los planes, así
+ * que ni un valor ni un rótulo se formatea dos veces y las dos versiones no pueden diferir (ni en lo que falta).
+ *
  * El WhatsApp no se ofrece (SPEC §7.3): no es un plan ni una fila, y nada de acá lo nombra.
  */
 
@@ -26,10 +29,25 @@ export interface FilaDeLosPlanes {
   readonly celdas: readonly string[]
 }
 
+/** Un dato de una tarjeta: el rótulo de la fila y lo que el plan dice en ella. */
+export interface DatoDeUnaTarjeta {
+  readonly clave: ClaveDeFila
+  readonly rotulo: string
+  readonly valor: string
+}
+
+/** Un plan leído como tarjeta: su nombre y un dato por fila de la tabla, en el mismo orden. */
+export interface TarjetaDeUnPlan {
+  readonly nombre: string
+  readonly datos: readonly DatoDeUnaTarjeta[]
+}
+
 export interface VistaDeLosPlanes {
   /** Los nombres de los planes, en el orden del SPEC. */
   readonly columnas: readonly string[]
   readonly filas: readonly FilaDeLosPlanes[]
+  /** Las mismas filas leídas por plan: una tarjeta por columna. */
+  readonly tarjetas: readonly TarjetaDeUnPlan[]
   /** «Implementación: pago único.» */
   readonly nota: string
   /** «USD 300», o el marcador en desarrollo, o `null` (sin línea) en producción. */
@@ -55,18 +73,32 @@ function filaDeFuncionalidades(planes: readonly Plan[], enDesarrollo: boolean): 
   return celdas.every((celda): celda is string => celda !== null) ? filaDe('funcionalidades', celdas) : null
 }
 
+/** La tabla leída por columnas: el plan `i` toma la celda `i` de cada fila. */
+function tarjetasDe(columnas: readonly string[], filas: readonly FilaDeLosPlanes[]): readonly TarjetaDeUnPlan[] {
+  return columnas.map((nombre, indice) => ({
+    nombre,
+    datos: filas.flatMap((fila) => {
+      const valor = fila.celdas[indice]
+      return valor === undefined ? [] : [{ clave: fila.clave, rotulo: fila.rotulo, valor }]
+    }),
+  }))
+}
+
 export function vistaDeLosPlanes(precio: PrecioPorPlanes, enDesarrollo: boolean): VistaDeLosPlanes {
   const { planes } = precio
   const funcionalidades = filaDeFuncionalidades(planes, enDesarrollo)
+  const columnas = planes.map((plan) => plan.nombre)
+  const filas = [
+    filaDe('mensual', planes.map((plan) => usd(plan.mensual))),
+    filaDe('conversaciones', planes.map((plan) => numero(plan.conversaciones))),
+    filaDe('soporte', planes.map((plan) => plan.soporte)),
+    filaDe('cambios-web', planes.map((plan) => plan.cambiosWeb)),
+    ...(funcionalidades === null ? [] : [funcionalidades]),
+  ]
   return {
-    columnas: planes.map((plan) => plan.nombre),
-    filas: [
-      filaDe('mensual', planes.map((plan) => usd(plan.mensual))),
-      filaDe('conversaciones', planes.map((plan) => numero(plan.conversaciones))),
-      filaDe('soporte', planes.map((plan) => plan.soporte)),
-      filaDe('cambios-web', planes.map((plan) => plan.cambiosWeb)),
-      ...(funcionalidades === null ? [] : [funcionalidades]),
-    ],
+    columnas,
+    filas,
+    tarjetas: tarjetasDe(columnas, filas),
     nota: precio.nota,
     implementacionDesde: usdOMarcador(precio.implementacionDesde, enDesarrollo),
   }
