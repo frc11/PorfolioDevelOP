@@ -67,27 +67,35 @@ function PanelQueEntra({ panel, children }: { readonly panel: ReveladoDelPanel; 
 }
 
 export function Bloque({ nombre, titulo, children, panel = 'progresivo' }: BloqueProps): React.JSX.Element {
-  const idDelTitulo = idDelTituloDe(nombre)
   return (
-    <section data-bloque={nombre} aria-labelledby={idDelTitulo} className={`${CLASES_DEL_PAPEL} pt-12 escritorio:pt-20`}>
-      <Envoltorio>
-        <div className="flex flex-col gap-8 escritorio:grid escritorio:grid-cols-12 escritorio:gap-x-[var(--grilla-canal-amplio)]">
-          <div className="flex flex-col gap-4 escritorio:col-span-4">
-            <MarcaDeSeccion />
-            <TitularQueEntra
-              id={idDelTitulo}
-              texto={titulo}
-              nivel="titulo-l"
-              como="h2"
-              className="text-balance"
-              claseDelBloque="block w-full"
-            />
-          </div>
-          <div className={CLASES_DE_LA_COLUMNA_DEL_PANEL}>
-            <PanelQueEntra panel={panel}>{children}</PanelQueEntra>
-          </div>
-        </div>
-      </Envoltorio>
+    <section data-bloque={nombre} aria-labelledby={idDelTituloDe(nombre)} className={`${CLASES_DEL_PAPEL} pt-12 escritorio:pt-20`}>
+      <ContenidoDelBloque nombre={nombre} titulo={titulo} panel={panel}>
+        {children}
+      </ContenidoDelBloque>
     </section>
+  )
+}
+
+/** [M2a] Lo de adentro de la sección: el precio lo usa tal cual por debajo de 768, donde nada cambia (D15). */
+export function ContenidoDelBloque({ nombre, titulo, children, panel = 'progresivo' }: BloqueProps): React.JSX.Element {
+  return (
+    <Envoltorio>
+      <div className="flex flex-col gap-8 escritorio:grid escritorio:grid-cols-12 escritorio:gap-x-[var(--grilla-canal-amplio)]">
+        <div className="flex flex-col gap-4 escritorio:col-span-4">
+          <MarcaDeSeccion />
+          <TitularQueEntra
+            id={idDelTituloDe(nombre)}
+            texto={titulo}
+            nivel="titulo-l"
+            como="h2"
+            className="text-balance"
+            claseDelBloque="block w-full"
+          />
+        </div>
+        <div className={CLASES_DE_LA_COLUMNA_DEL_PANEL}>
+          <PanelQueEntra panel={panel}>{children}</PanelQueEntra>
+        </div>
+      </div>
+    </Envoltorio>
   )
 }

@@ -93,6 +93,12 @@ export const PAGINAS_WEB: Servicio = {
         autogestionable: true,
       },
     ],
+    // M2a (dictado): la Mediana al centro, con el acento, su marca y esta línea; ningún otro texto de venta.
+    destacada: {
+      nombre: 'Mediana',
+      marca: 'Recomendada',
+      linea: 'Todo lo de la Simple, en varias páginas y con catálogo o buscador para mostrar lo que vendés.',
+    },
   },
   extra: {
     titulo: 'Mantenimiento',

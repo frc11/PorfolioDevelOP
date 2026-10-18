@@ -45,8 +45,16 @@ export interface Plan {
   readonly funcionalidades: readonly string[] | null
 }
 
+/** [M2a] La opción destacada del precio en diagonales: va al medio, con su marca y una línea. Ningún otro texto de venta. */
+export interface Destacada {
+  /** El nombre de la opción del medio: si no lo es, la vista tira (`bloques/precio/tresOpciones.ts`). */
+  readonly nombre: string
+  readonly marca: string
+  readonly linea: string
+}
+
 export type Precio =
-  | { readonly tipo: 'calibres'; readonly calibres: readonly Calibre[] }
+  | { readonly tipo: 'calibres'; readonly calibres: readonly Calibre[]; readonly destacada: Destacada | null }
   | { readonly tipo: 'proyecto'; readonly desde: number; readonly nota: string }
   | {
       readonly tipo: 'planes'

@@ -54,7 +54,7 @@ afirmar(elMinimoEs49(IA_PRECIO), 'con los planes del SPEC, el mínimo es 49')
 afirmarIgual(precioDesdeDe(IA_CON_UN_PLAN_MAS_BARATO), { usd: 19, periodo: 'mensual' }, '  con un plan más barato, el mínimo es ese')
 controlPositivo('el detector VE que un plan más barato cambia el mínimo', IA_CON_UN_PLAN_MAS_BARATO, elMinimoEs49)
 afirmarIgual(
-  precioDesdeDe({ tipo: 'calibres', calibres: [{ nombre: 'b', desde: 600, descripcion: '', incluye: [], autogestionable: true }, { nombre: 'a', desde: 200, descripcion: '', incluye: [], autogestionable: null }] }),
+  precioDesdeDe({ tipo: 'calibres', calibres: [{ nombre: 'b', desde: 600, descripcion: '', incluye: [], autogestionable: true }, { nombre: 'a', desde: 200, descripcion: '', incluye: [], autogestionable: null }], destacada: null }),
   { usd: 200, periodo: 'unico' },
   'los calibres: el menor, aunque no vaya primero',
 )

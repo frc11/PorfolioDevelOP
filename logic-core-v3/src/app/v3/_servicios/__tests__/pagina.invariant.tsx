@@ -188,10 +188,12 @@ titulo('4 · «[a definir]» solo en desarrollo')
 const cuenta = (html: string, aguja: string): number => html.split(aguja).length - 1
 const hayMarcador = (html: string): boolean => cuenta(html, MARCADOR_A_DEFINIR) > 0
 // [M3] El marcador del video se RETIRÓ con su funcionalidad: el video existe, y el slot de trabajos se monta en los dos modos.
-afirmarIgual(cuenta(WEB_DEV, MARCADOR_A_DEFINIR), 2, 'Páginas web en desarrollo: dos marcadores — la Simple (autogestionable) y el plan mensual del mantenimiento')
+// [M2a] El precio de web va en dos versiones (la de debajo de 768 y las diagonales): la Simple lleva su marcador en cada una.
+const versionDelPrecio = (html: string, cual: 'calibres' | 'diagonales'): string => elementoConAtributo(bloqueDe(html, 'precio') ?? '', 'data-precio="' + cual + '"') ?? ''
+afirmarIgual([cuenta(WEB_DEV, MARCADOR_A_DEFINIR), cuenta(versionDelPrecio(WEB_DEV, 'calibres'), MARCADOR_A_DEFINIR), cuenta(versionDelPrecio(WEB_DEV, 'diagonales'), MARCADOR_A_DEFINIR)], [3, 1, 1], 'Páginas web en desarrollo: tres marcadores — la Simple (autogestionable), una vez en cada versión del precio, y el plan mensual del mantenimiento')
 afirmar(!(bloqueDe(WEB_DEV, 'trabajos') ?? MARCADOR_A_DEFINIR).includes(MARCADOR_A_DEFINIR) && bloqueDe(WEB_PROD, 'trabajos') !== null, '  [M3] el slot de trabajos ya no lleva marcador: se monta con el video, en desarrollo y en producción')
 afirmar(textoVisible(WEB_DEV).includes('Plan mensual') && !textoVisible(WEB_PROD).includes('Plan mensual'), '  la fila «Plan mensual» solo existe en desarrollo')
-afirmarIgual([cuenta(WEB_DEV, 'Autogestionable'), cuenta(WEB_PROD, 'Autogestionable')], [3, 2], '  «Autogestionable»: tres veces en desarrollo, dos en producción (la Simple no lo dice mientras esté en [a definir])')
+afirmarIgual((['calibres', 'diagonales'] as const).map((cual) => [cuenta(versionDelPrecio(WEB_DEV, cual), 'Autogestionable'), cuenta(versionDelPrecio(WEB_PROD, cual), 'Autogestionable')]), [[3, 2], [3, 2]], '  «Autogestionable», en cada versión del precio: tres veces en desarrollo, dos en producción (la Simple no lo dice mientras esté en [a definir])')
 afirmarIgual(fallan((p) => p.enDesarrollo || !hayMarcador(p.html)), [], 'en producción no sale ningún marcador, en ninguna de las tres páginas')
 afirmarIgual(fallan((p) => !p.enDesarrollo || hayMarcador(p.html)), [], 'y en desarrollo las tres lo muestran (web: la Simple y el plan mensual; software: los casos y las respuestas sin dato; IA: funcionalidades e implementación)')
 controlPositivo('los modos cruzados: producción no puede mostrar el marcador', WEB_DEV, (h: string) => !hayMarcador(h))
@@ -438,7 +440,7 @@ afirmarIgual(nombresQueChocan(FUENTES.map((x) => x.f.replace(/\\/g, '/'))), [], 
 controlPositivo('Planes.tsx y planes.ts juntos se detectan', ['bloques/precio/Planes.tsx', 'bloques/precio/planes.ts'], (l: string[]) => nombresQueChocan(l).length === 0)
 const deCliente = (codigo: string): boolean => /^\s*['"]use client['"]/.test(codigo)
 const dondeEsDeCliente = (lista: readonly { f: string; codigo: string }[]): string[] => lista.filter((x) => deCliente(x.codigo)).map((x) => x.f.replace(/\\/g, '/')).sort()
-afirmarIgual(dondeEsDeCliente(FUENTES), ['movimiento/Gatillo.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el único código de cliente son los cuatro de movimiento/ (los dos envoltorios del revelado, [M1] el gatillo, que observa un cruce, y [M3] el video de trabajos): todo lo demás es de servidor')
+afirmarIgual(dondeEsDeCliente(FUENTES), ['movimiento/Gatillo.tsx', 'movimiento/RepartoDelPrecio.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el único código de cliente son los cinco de movimiento/ (los dos envoltorios del revelado, [M1] el gatillo, que observa un cruce, [M2a] el reparto del precio en diagonales y [M3] el video de trabajos): todo lo demás es de servidor')
 controlPositivo('un bloque de cliente fuera de movimiento/ se detecta', ["'use client'", 'export const x = 1'].join('\n'), (c: string) => !deCliente(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -485,8 +487,10 @@ const REVELADO_ESPERADO: Readonly<Record<string, { readonly arbol: number; reado
   cierre: { arbol: 0, gatillo: 0 },
 }
 const cuentaEnElBloque = (html: string, nombre: string, aguja: string): number => (bloqueDe(html, nombre) ?? '').split(aguja).length - 1
+// [M2a] El precio en diagonales (web) suma el Bloque del contrato que reparte el progreso a los tres paneles: una marca más.
+const ESPERADO_DE_LAS_DIAGONALES = { arbol: 3, gatillo: 0 }
 const entraComoDice = (html: string): boolean => SIN_PROBLEMA(html).every((b) => {
-  const esperado = REVELADO_ESPERADO[b]
+  const esperado = b === 'precio' && (bloqueDe(html, 'precio') ?? '').includes('data-precio="diagonales"') ? ESPERADO_DE_LAS_DIAGONALES : REVELADO_ESPERADO[b]
   return esperado !== undefined && cuentaEnElBloque(html, b, `data-arbol="${MARCA_HOME_QUIETO}"`) === esperado.arbol && cuentaEnElBloque(html, b, ' data-gatillo="') === esperado.gatillo
 })
 afirmarIgual(fallan((p) => entraComoDice(p.html)), [], 'cada bloque entra como dice la tabla del M0: progresivo (título y panel), el panel del FAQ quieto, los dos CTA y el slot del video con el gatillo y el cierre sin revelado')

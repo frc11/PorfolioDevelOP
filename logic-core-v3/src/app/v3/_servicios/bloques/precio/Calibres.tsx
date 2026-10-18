@@ -9,9 +9,7 @@ import { Caption, Cuerpo } from '../../../_componentes/tipografia/Textos'
 import { Titular } from '../../../_componentes/tipografia/Titular'
 import { textoOMarcador, usd } from '../../formato'
 import type { Calibre } from '../../tipos'
-import { ROTULO_DEL_PRECIO } from './rotulos'
-
-const ROTULO_AUTOGESTIONABLE = 'Autogestionable' // SPEC §7.1
+import { ROTULO_AUTOGESTIONABLE, ROTULO_DEL_PRECIO } from './rotulos'
 
 interface CalibresProps {
   readonly calibres: readonly Calibre[]
