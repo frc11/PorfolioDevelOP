@@ -21,7 +21,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
+import { rotuloDeParada } from '../../_lib/__tests__/s10-acceso'
 import { paradasDeTabulacion } from '../../_lib/__tests__/s10-lectura'
+import { WHATSAPP } from '../cierre/contacto'
 import { PANTALLAS_DE_NUMEROS } from '../../_lib/secciones'
 import { NOMBRES_REALES } from '../_contrato/escaneo'
 import { ATRIBUTO_DE_PANEL, seccionDe } from '../_contrato/forma'
@@ -55,13 +57,17 @@ const veces = (html: string, aguja: string): number => html.split(aguja).length 
 const DEL_PORTFOLIO = [
   'Acordeon.tsx', 'EncabezadoDelPortfolio.tsx', 'EscenarioDelPortfolio.tsx', 'Ficha.tsx', 'LaTuya.tsx', 'MarcaDeAgua.tsx', 'MedioDeLaTira.tsx', 'Tira.tsx',
   'anclas.ts', 'estado.ts', 'medios.ts', 'pasos.ts', 'saltar.ts', 'secuencia.ts', 'tipografia.ts', 'tramoDelSelector.ts', 'usePortfolio.ts',
+  // [B1.2c] las piezas y los módulos nuevos: las barras y la pista, el formulario corto, el «?» que se arma, el orden, la rueda, la
+  // transición entre proyectos, el hueco del logo, lo que se mide en el DOM y sus ganchos.
+  'BarrasDelPortfolio.tsx', 'FormularioDeLaTuya.tsx', 'SignoDePregunta.tsx', 'orden.ts', 'rueda.ts', 'transicion.ts', 'signo.ts', 'hueco.ts', 'medida.ts',
+  'useOrdenDeLaEscena.ts', 'useRuedaDelPortfolio.ts', 'useTransicionDeLasTiras.ts',
 ].map((f) => `portfolio/${f}`)
 const ARCHIVOS = ['Trabajos.tsx', 'CapaDeLaGota.tsx', 'gota.ts', 'geometria.ts', 'contenido.ts', 'proyectos.ts', ...DEL_PORTFOLIO]
 const FUENTES = ARCHIVOS.map((archivo) => ({ archivo, texto: leer(archivo) }))
 const FUENTE_DE_LA_COMPOSICION = FUENTES.filter((f) => f.archivo.endsWith('.tsx')).map((f) => f.texto).join('\n')
 const FUENTE_DEL_PANEL = leer('../../_componentes/Panel.tsx')
 const CSS = leer('../../../theme-develop.css')
-const { fondo: FONDO_OSCURO, tinta: TINTA_CLARA, acentos: ACENTOS } = coloresDelTema(CSS)
+const { fondo: FONDO_OSCURO, tinta: TINTA_CLARA, acentos: ACENTOS, acentosClaros: ACENTOS_CLAROS } = coloresDelTema(CSS)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El puente del atributo del panel, y las dos líneas de la noche')
@@ -131,7 +137,8 @@ afirmar(!/<video[^>]*\ssrc="/.test(quieto) && !/<video[^>]*\ssrc="/.test(conMoti
 afirmar(!quieto.includes('transform:') && !quieto.includes('will-change'), 'la rama quieta no escribe una transformada ni promueve una capa')
 afirmar(!conPreferencia.includes('transform:'), '  y con `prefers-reduced-motion` tampoco')
 controlPositivo('el chequeo de "no hay transformada" ve un style con transform', '<div style="transform:translateY(10%)"></div>', (html: string) => !html.includes('transform:'))
-afirmarIgual(veces(quieto, 'sr-only'), 0, 'ni un `sr-only`: el nombre accesible del «Visitar sitio» va en su `aria-label`')
+const soloParaLectores = [...quieto.matchAll(/<(\w+)([^>]*)class="sr-only"/g)].map((m) => (/role="(alert|status)"/.exec(m[2])?.[1] ?? m[1]))
+afirmarIgual(soloParaLectores, ['alert', 'status'], 'ningún `sr-only` de nombre: el del «Visitar sitio» va en su `aria-label`; [B1.2c] los dos que hay son las regiones vivas del formulario de la tuya (el aviso y el gracias, como en el contacto)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('9 · Cero `three` y cero contextos: el Portfolio no abre un lienzo')
@@ -139,7 +146,7 @@ titulo('9 · Cero `three` y cero contextos: el Portfolio no abre un lienzo')
 const TRES = /from ['"](three|@react-three\/[a-z-]+|three\/[^'"]+)['"]/
 const CONTEXTO = /<Canvas\b|WebGLRenderer|getContext\(\s*['"]webgl/
 for (const { archivo, texto } of FUENTES) afirmar(!TRES.test(texto) && !CONTEXTO.test(texto), `${archivo}: ni three ni un contexto WebGL ([B1.2b] el «?» es un SVG en el DOM)`)
-afirmarIgual(FUENTES.length, 23, 'se leyeron del disco los veintitrés archivos de la sección y del Portfolio')
+afirmarIgual(FUENTES.length, 23 + 12, 'se leyeron del disco los treinta y cinco archivos de la sección y del Portfolio (los veintitrés de B1.2b y los doce de B1.2c)')
 controlPositivo('el detector ve un renderer propio', 'const r = new THREE.WebGLRenderer()', (t: string) => !CONTEXTO.test(t))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -150,7 +157,16 @@ afirmarIgual(FONDO_OSCURO, '#0E0E0E', 'y el fondo de la sección invertida (el n
 for (const acento of ACENTOS) afirmar(razonDeContraste(acento, FONDO_OSCURO) < 3, `${acento} sobre ${FONDO_OSCURO}: no llega a 3:1`)
 controlPositivo('la cuenta de contraste ve un par que SÍ llega a 3:1', '#FFFFFF', (hex: string) => razonDeContraste(hex, FONDO_OSCURO) < 3)
 afirmar(razonDeContraste(TINTA_CLARA, FONDO_OSCURO) >= 4.5, `la tinta sobre el panel da ${razonDeContraste(TINTA_CLARA, FONDO_OSCURO).toFixed(2)}: AA`)
-afirmarIgual(veces(quieto, 'text-acento') + veces(quieto, 'border-acento'), 0, 'cero `text-acento` y cero `border-acento` en el marcado')
+/** Las clases enteras de un marcado (`text-acento` no es `text-acento-claro`). */
+const clase = (html: string, nombre: string): number => [...html.matchAll(/class="([^"]*)"/g)].reduce((n, m) => n + m[1].split(/\s+/).filter((c) => c === nombre).length, 0)
+afirmarIgual(clase(quieto, 'text-acento') + clase(quieto, 'border-acento'), 0, 'cero `text-acento` y cero `border-acento` en el marcado')
+// [B1.2c] P-H2 · salvo el acento CLARO: el tema emitió las variantes claras (el disparador que dejó escrito) y son las únicas que
+// pueden ser texto sobre la sala de noche. Los rótulos de la ficha las usan, por su alias (`text-acento-claro`, `_contrato/acento.ts`).
+afirmarIgual(ACENTOS_CLAROS.length, 3, '[B1.2c] y se leyeron los tres acentos CLAROS (P-H2)')
+for (const acento of ACENTOS_CLAROS) afirmar(razonDeContraste(acento, FONDO_OSCURO) >= 4.5, `  ${acento} sobre ${FONDO_OSCURO}: ${razonDeContraste(acento, FONDO_OSCURO).toFixed(2)}, AA como texto`)
+controlPositivo('  la cuenta ve un acento claro que no llega (el sólido de web)', ACENTOS[0], (hex: string) => razonDeContraste(hex, FONDO_OSCURO) >= 4.5)
+const ROTULOS_DE_LA_FICHA = PROYECTOS.length * 6 + PROYECTOS.filter((p) => p.resena !== null).length
+afirmarIgual(clase(quieto, 'text-acento-claro'), ROTULOS_DE_LA_FICHA, `  y el acento claro es sólo el de los rótulos de la ficha (seis filas por proyecto y la reseña): ${String(ROTULOS_DE_LA_FICHA)}`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · Higiene: color, foco, interactividad y puertas')
@@ -162,11 +178,11 @@ afirmar(!/-\[\d+(px|rem)\]/.test(quieto), 'cero px o rem suelto en un valor arbi
 controlPositivo('el chequeo del px suelto ve una clase con un valor en px', `<i class="${CLASE_DE_PRUEBA}">`, (html: string) => !/-\[\d+(px|rem)\]/.test(html))
 afirmarIgual(hoversSinFoco(quieto), [], `los ${veces(quieto, 'hover:')} \`hover:\` llevan su \`focus-visible:\` en la misma clase`)
 controlPositivo('  el detector ve un hover sin su gemela', '<a class="hover:underline">x</a>', (html: string) => hoversSinFoco(html).length === 0)
-afirmarIgual(veces(quieto, '<button'), CONTENIDO.proyectos.length + 2, 'CINCO botones: una cabecera por tira (las tres y la tuya) y el que abre el contacto')
-afirmarIgual(veces(quieto, '<a '), 2 * PROYECTOS.length + DE_LA_CINTA + DEL_CARRUSEL, 'SEIS enlaces del Portfolio (el medio de cada tira, sólo para el mouse, y su «Visitar sitio») más los de Demos')
+afirmarIgual(veces(quieto, '<button'), CONTENIDO.proyectos.length + 2, 'CINCO botones: una cabecera por tira (las tres y la tuya) y [B1.2c] «Enviar» del formulario de la tuya (en lugar del que abría el contacto)')
+afirmarIgual(veces(quieto, '<a '), 2 * PROYECTOS.length + 1 + DE_LA_CINTA + DEL_CARRUSEL, 'SIETE enlaces del Portfolio (el medio de cada tira, sólo para el mouse, y su «Visitar sitio»; [B1.2c] y WhatsApp en la tuya) más los de Demos')
 afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), veces(quieto, '<a '), '  todos salen del sitio sin darle acceso a esta ventana ni el referente')
-afirmarIgual(veces(conMotion, '<a '), 2 * PROYECTOS.length + DEMOS.length + DEL_CARRUSEL, '  y los mismos seis con la coreografía puesta')
-afirmarIgual(enlacesFueraDelContenido(quieto, [...PROYECTOS.map((p) => p.url), ...DEMOS.map((d) => d.url)]), [], '  y ni un `href` que no salga del contenido: ninguna URL inventada')
+afirmarIgual(veces(conMotion, '<a '), 2 * PROYECTOS.length + 1 + DEMOS.length + DEL_CARRUSEL, '  y los mismos siete con la coreografía puesta')
+afirmarIgual(enlacesFueraDelContenido(quieto, [...PROYECTOS.map((p) => p.url), ...DEMOS.map((d) => d.url), WHATSAPP.href]), [], '  y ni un `href` que no salga del contenido: ninguna URL inventada ([B1.2c] WhatsApp, el del archivo del pie)')
 controlPositivo('el detector ve un enlace inventado', '<a href="https://inventado.example">Esquina</a>', (html: string) => enlacesFueraDelContenido(html, PROYECTOS.map((p) => p.url)).length === 0)
 afirmarIgual(clicsFueraDeUnBoton(FUENTE_DE_LA_COMPOSICION), [], 'cada `onClick` de la fuente va en un `<button>`: ningún div haciendo de botón')
 controlPositivo('  el detector ve un div con un manejador', '<div className="x" onClick={() => undefined}>', (src: string) => clicsFueraDeUnBoton(src).length === 0)
@@ -201,9 +217,9 @@ titulo('16 · Las paradas de teclado')
 
 const PARADAS_DE_DEMOS = 2 * DEMOS.length
 const PARADAS = paradasDeTabulacion(quieto)
-afirmarIgual(PARADAS.length, PROYECTOS.length + 1 + PROYECTOS.length + 1 + PARADAS_DE_DEMOS, 'OCHO paradas del Portfolio (cuatro cabeceras, tres «Visitar sitio» y el botón al contacto) más las de Demos (la cinta y el carrusel)')
-afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a' && p.etiqueta !== 'button').map((p) => p.etiqueta), [], '  todas son anclas o botones: ningún `tabindex` escrito')
-afirmarIgual(PARADAS.filter((p) => p.rotulo.trim() === '').map((p) => p.destino), [], '  y todas se anuncian con algo')
+afirmarIgual(PARADAS.length, PROYECTOS.length + 1 + PROYECTOS.length + 5 + PARADAS_DE_DEMOS, 'DOCE paradas del Portfolio (cuatro cabeceras, tres «Visitar sitio» y [B1.2c] el formulario de la tuya: tres campos, «Enviar» y WhatsApp) más las de Demos (la cinta y el carrusel)')
+afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a' && p.etiqueta !== 'button' && p.etiqueta !== 'input').map((p) => p.etiqueta), [], '  todas son anclas, botones o [B1.2c] los campos del formulario: ningún `tabindex` escrito')
+afirmarIgual(PARADAS.filter((p) => rotuloDeParada(quieto, p).rotulo.trim() === '').map((p) => p.destino ?? p.etiqueta), [], '  y todas se anuncian con algo (un campo, con su `<label for>`)')
 afirmarIgual(PARADAS.filter((p) => p.ocultoALectores).length, 0, '  ninguna cuelga de algo escondido a los lectores')
 afirmarIgual(paradasDeTabulacion(conMotion).length, PARADAS.length, 'y con la coreografía puesta son las mismas: el recorrido no lo cambia el ancho')
 afirmarIgual(veces(quieto, 'visibility:hidden'), 1, '  y lo único oculto por estilo es la capa del barrido de la gota, que es decoración')

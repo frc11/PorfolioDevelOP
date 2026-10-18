@@ -103,6 +103,10 @@ export const ARCHIVOS_DE_PIEZA = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/MarcaDeAgua.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/MedioDeLaTira.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/Tira.tsx`,
+  // [B1.2c] las barras y la pista de la tablet, el formulario corto y el «?» que se arma de «la tuya».
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/BarrasDelPortfolio.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/FormularioDeLaTuya.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/SignoDePregunta.tsx`,
 ]
 
 /**
@@ -240,6 +244,17 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/tramoDelSelector.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/usePortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/portfolio-invariante.tsx`,
+  // [B1.2c] el orden de la entrada y la salida, la rueda, la transición entre proyectos, el «?» que se arma y el hueco del logo (puros),
+  // sus ganchos, y lo que el Portfolio mide en el DOM (salió de `usePortfolio.ts` por las 300 líneas).
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/orden.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/rueda.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/transicion.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/signo.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/hueco.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/medida.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useOrdenDeLaEscena.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useRuedaDelPortfolio.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useTransicionDeLasTiras.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-detectores.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/relojDeDemos.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/herencia.ts`,

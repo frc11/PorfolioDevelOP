@@ -88,6 +88,15 @@ export interface ResumenDeLaTanda {
   readonly ejemplos: readonly string[]
   /** [B1.2b] La entrada del panel del Portfolio con scroll rápido, por manera (`estres.ts`, `panel.ts`). */
   readonly panel: readonly FilaDelPanel[]
+  /** [B1.2c] La rueda y el hover del Portfolio, por caso (`estres.ts`, `rueda.ts`). */
+  readonly rueda: readonly FilaDeLaRueda[]
+}
+
+interface FilaDeLaRueda {
+  readonly caso: string
+  readonly ok: boolean
+  readonly recorrido?: readonly string[]
+  readonly error?: string
 }
 
 interface FilaDelPanel {
@@ -125,6 +134,7 @@ export function resumir(archivo: string): ResumenDeLaTanda {
     erroresDeConsola: cs.reduce((a, c) => a + (c.errores?.length ?? 0), 0),
     ejemplos,
     panel: filas.filter((f) => f.tipo === 'panel') as unknown as FilaDelPanel[],
+    rueda: filas.filter((f) => f.tipo === 'rueda') as unknown as FilaDeLaRueda[],
   }
 }
 
@@ -154,6 +164,7 @@ function main(): void {
     console.log('tipos (a 5,5 s):', JSON.stringify(r.tipos.persistente))
     console.log('tipos (tras scrollear):', JSON.stringify(r.tipos.trasScroll))
     for (const e of r.ejemplos) console.log(`  ${e}`)
+    for (const f of r.rueda) console.log(`rueda ${f.caso}: ${f.error ?? (f.recorrido ?? []).join(' → ')} · ${f.ok ? 'ok' : 'FALLA'}`)
     for (const f of r.panel) console.log(`panel ${f.metodo}: ${f.error ?? `entrada ${tramo(f.entrada)} · salida ${tramo(f.salida)}`} · ${f.ok ? 'ok' : 'FALLA'}`)
   }
   const recibo = process.env.RECIBO

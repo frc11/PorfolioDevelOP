@@ -13,8 +13,8 @@
  *   · Los tres proyectos (`proyectos.ts`): los nombres reales de `_contrato/escaneo.ts`, los dominios que trajo el humano, y lo que
  *     dictó Valentino para cada ficha —el rubro y qué se hizo (de las frases de PORTFOLIO), la fecha, el servicio y el problema—,
  *     con sus palabras.
- *   · `laTuya.frase` y `laTuya.boton`: las dictó el dueño para el CTA del túnel («¿El próximo proyecto sos vos?», «Clickeá acá
- *     para empezar») y pasan a la última tira.
+ *   · `laTuya.frase`: la dictó el dueño para el CTA del túnel («¿El próximo proyecto sos vos?») y pasa a la última tira. [B1.2c] Su
+ *     botón («Clickeá acá para empezar») se fue: lo reemplaza el formulario corto, cuyos rótulos dictó Valentino.
  *   · Los rótulos de la ficha: son la forma de la ficha, no un dato.
  *
  * Relleno, y por eso va en `PEDIDO` con clase `prosa` y SIN marcador visible (decisión de la aprobación de B1): `bajada` (la
@@ -74,13 +74,22 @@ export const CONTENIDO = {
     abreAparte: 'se abre en una pestaña nueva',
   },
 
-  /** «La próxima es la tuya»: la última tira, con el «?» y el botón a la hoja de contacto de siempre. */
+  /**
+   * «La próxima es la tuya»: la última tira, con el «?» y [B1.2c] un formulario corto en lugar del botón (la validación, el envío y
+   * los textos de gracias y de error son los del contacto: `_chrome/contacto/`). Los rótulos de los dos campos nuevos los dictó
+   * Valentino; el nombre es el del contacto.
+   */
   laTuya: {
     nombre: 'La próxima es la tuya',
     frase: '¿El próximo proyecto sos vos?',
     bajada: 'Contanos qué tenés en mente y lo pensamos desde cero para tu negocio.',
-    boton: 'Clickeá acá para empezar',
+    medio: 'WhatsApp o email',
+    necesitas: '¿Qué necesitás?',
+    whatsapp: 'o escribinos por WhatsApp',
   },
+
+  /** [B1.2c] Tablet: la pista de la primera entrada del panel (se va con el primer paso). */
+  pista: 'Seguí bajando',
 } as const
 
 /**

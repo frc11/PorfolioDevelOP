@@ -15,6 +15,8 @@ export interface ColoresDelTema {
   readonly fondo: string
   readonly tinta: string
   readonly acentos: readonly string[]
+  /** [B1.2c] P-H2 · los tres acentos claros (`--color-acento-<servicio>-claro`), aparte. */
+  readonly acentosClaros: readonly string[]
 }
 
 /** El fondo y la tinta de la sala invertida y los acentos, leídos del tema. */
@@ -29,7 +31,8 @@ export function coloresDelTema(css: string): ColoresDelTema {
   return {
     fondo: hex(bloque[1], /--color-fondo:\s*(#[0-9A-Fa-f]{6})/),
     tinta: hex(bloque[1], /--color-tinta:\s*(#[0-9A-Fa-f]{6})/),
-    acentos: [...css.matchAll(/--color-acento-[a-z-]+:\s*(#[0-9A-Fa-f]{6})/g)].map((m) => m[1]),
+    acentos: [...css.matchAll(/--color-acento-([a-z-]+):\s*(#[0-9A-Fa-f]{6})/g)].filter((m) => !m[1].endsWith('-claro')).map((m) => m[2]),
+    acentosClaros: [...css.matchAll(/--color-acento-([a-z-]+)-claro:\s*(#[0-9A-Fa-f]{6})/g)].map((m) => m[2]),
   }
 }
 

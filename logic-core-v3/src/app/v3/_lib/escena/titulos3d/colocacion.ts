@@ -7,7 +7,7 @@ import type { ChoreoPose } from '../choreographyTypes'
 import { BANDA_EN_VIVO, fovConFactor } from '../banda'
 import { CAMERA_FAR, CAMERA_FOV, CAMERA_NEAR, ORBIT_TARGET_Y } from '../probeScene'
 import { poseDelPortfolio } from '../poseDelPortfolio'
-import { PORTFOLIO_EN_LA_ESCENA } from '../portfolioEnLaEscena'
+import { huecoQueVale } from '../portfolioEnLaEscena'
 
 /**
  * [ESCENA 10] T3 · DÓNDE VA UN TÍTULO EN EL MUNDO — quieto, como el logo: la cámara lo muestra con los movimientos que
@@ -42,7 +42,8 @@ export interface LecturaRelativa {
 
 /**
  * [B1.2b] LA LECTURA DEL PORTFOLIO: la pose del Portfolio (`poseDelPortfolio.ts`), resuelta para el cuadro de ahora. Con el panel
- * adentro la cámara ES esa pose, así que el título queda en su lugar del DOM y de frente (plan §12, punto 1).
+ * adentro la cámara ES esa pose, así que el título queda en su lugar del DOM y de frente (plan §12, punto 1). [B1.2c] Esa pose mira
+ * perpendicular al plano del logo: el título, a la profundidad del centro del logo sobre la mirada, queda EN ese plano.
  */
 export interface LecturaDelPortfolio {
   readonly portfolio: true
@@ -64,7 +65,7 @@ export function poseDeLaLectura(lectura: Lectura, cuadro: { readonly aspecto: nu
   if (typeof lectura === 'number') return muestrear(lectura, POSE)
   if (typeof lectura === 'object' && 'portfolio' in lectura) {
     if (cuadro === null) throw new Error('la lectura del Portfolio se resuelve con el cuadro')
-    return poseDelPortfolio(cuadro.aspecto, cuadro.fovDeg, cuadro.logoW, cuadro.logoH, PORTFOLIO_EN_LA_ESCENA.columna)
+    return poseDelPortfolio(cuadro.aspecto, cuadro.fovDeg, cuadro.logoW, cuadro.logoH, huecoQueVale())
   }
   if (typeof lectura === 'object') {
     muestrear(lectura.comoEntre[0], DESDE)

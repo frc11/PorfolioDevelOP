@@ -182,6 +182,12 @@ async function principal(): Promise<void> {
     // Su motivo entero está en `padron-de-tokens.AGREGADOS`; su contraste, en el comentario del tema.
     '--color-error: #E5484D;',
     '--color-error-texto: #FF9592;',
+    // ⚠ AGREGADOS POR B1.2c (P-H2): los tres acentos claros —el «on-dark» de la marca— y su alias contextual, para el texto
+    // sobre la sección invertida (el disparador que el tema dejó escrito). Su motivo, en `padron-de-tokens.AGREGADOS`.
+    '--color-acento-web-claro: #8FC0E8;',
+    '--color-acento-ia-automatizacion-claro: #7FCBA4;',
+    '--color-acento-software-claro: #AFA0E8;',
+    '--color-acento-claro: var(--color-acento-web-claro);',
     // ⚠ AGREGADO POR TEXTO-3: el cuarto breakpoint, y el primero que se usa
     // hacia abajo. Mismo número que `--fluido-piso` —el ancho más angosto al
     // que se midió el sistema—. Su motivo entero está en

@@ -91,6 +91,10 @@ export const COLOR = {
   acentoWeb: hex(valorDeToken('--color-acento-web')),
   acentoIa: hex(valorDeToken('--color-acento-ia-automatizacion')),
   acentoSoftware: hex(valorDeToken('--color-acento-software')),
+  // [B1.2c] P-H2 · los acentos claros (texto sobre fondo invertido).
+  acentoWebClaro: hex(valorDeToken('--color-acento-web-claro')),
+  acentoIaClaro: hex(valorDeToken('--color-acento-ia-automatizacion-claro')),
+  acentoSoftwareClaro: hex(valorDeToken('--color-acento-software-claro')),
 } as const
 
 /** El alfa de `opacity-casi`, leído del tema. */
@@ -162,7 +166,7 @@ export interface Tinta {
  * hacía, y era el hallazgo. S11 dio vuelta las dos en el tema, así que ahora la
  * cascada dice otra cosa y esta función dice lo mismo que ella.
  */
-export function tintaDeClases(clases: string, invertida: boolean, acento: string): Tinta {
+export function tintaDeClases(clases: string, invertida: boolean, acento: string, acentoClaro: string = COLOR.acentoWebClaro): Tinta {
   const lista = clases.split(/\s+/)
   const base = invertida ? COLOR.tintaInvertida : COLOR.tintaClara
   const alfa = lista.includes('opacity-casi') ? ALFA_CASI : 1
@@ -171,6 +175,7 @@ export function tintaDeClases(clases: string, invertida: boolean, acento: string
   if (lista.includes('text-tinta-tenue'))
     return { token: '--color-tinta-tenue', hex: invertida ? COLOR.tenueInvertida : COLOR.tenue, alfa }
   if (lista.includes('text-acento')) return { token: '--color-acento', hex: acento, alfa }
+  if (lista.includes('text-acento-claro')) return { token: '--color-acento-claro', hex: acentoClaro, alfa }
   return { token: '--color-tinta', hex: base, alfa }
 }
 
@@ -180,6 +185,7 @@ export const UTILIDADES_DE_TINTA: readonly string[] = [
   'text-tinta-media',
   'text-tinta-tenue',
   'text-acento',
+  'text-acento-claro',
   'opacity-casi',
 ]
 
@@ -189,14 +195,22 @@ const ACENTO_POR_SERVICIO: Readonly<Record<string, string>> = {
   software: COLOR.acentoSoftware,
 }
 
-/** El acento vigente para un nodo: el del `[data-servicio]` que lo contiene. */
-export function acentoQueRige(nodos: readonly Nodo[], nodo: Nodo): string {
-  let vigente = COLOR.acentoWeb // el defecto de `@theme`: la home no declara atributo
+/** [B1.2c] Los claros, por el mismo atributo. */
+const ACENTO_CLARO_POR_SERVICIO: Readonly<Record<string, string>> = {
+  web: COLOR.acentoWebClaro,
+  'ia-automatizacion': COLOR.acentoIaClaro,
+  software: COLOR.acentoSoftwareClaro,
+}
+
+/** El acento vigente para un nodo: el del `[data-servicio]` que lo contiene. [B1.2c] `claro`: el de su alias claro. */
+export function acentoQueRige(nodos: readonly Nodo[], nodo: Nodo, claro = false): string {
+  const tabla = claro ? ACENTO_CLARO_POR_SERVICIO : ACENTO_POR_SERVICIO
+  let vigente = claro ? COLOR.acentoWebClaro : COLOR.acentoWeb // el defecto de `@theme`: la home no declara atributo
   for (const candidato of nodos) {
     const servicio = atributo(candidato, 'data-servicio')
     if (servicio === null) continue
     if (candidato.desde > nodo.desde || candidato.hasta < nodo.hasta) continue
-    vigente = ACENTO_POR_SERVICIO[servicio] ?? vigente
+    vigente = tabla[servicio] ?? vigente
   }
   return vigente
 }
@@ -246,6 +260,7 @@ export function cajasDeColor(html: string): CajaDeColor[] {
       declara ? clases : heredada(html, nodos, nodo),
       superficie.invertida,
       acentoQueRige(nodos, nodo),
+      acentoQueRige(nodos, nodo, true),
     )
     const fondo = superficie.fondo
     const pintado = fondo === null ? tinta.hex : componer(tinta.hex, fondo, tinta.alfa)

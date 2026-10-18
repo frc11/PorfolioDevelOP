@@ -10,7 +10,6 @@ import { Titular } from '../../../_componentes/tipografia/Titular'
 import { CONTENIDO } from '../contenido'
 import type { ProyectoDelPortfolio } from '../proyectos'
 
-import { vistaDelPaso } from './estado'
 import { Ficha, piezasDeLaFicha } from './Ficha'
 import { MarcaDeAgua } from './MarcaDeAgua'
 import { MedioDeLaTira, PosterDelLomo } from './MedioDeLaTira'
@@ -78,7 +77,8 @@ export function CabeceraDeLaTira({ id, indice, activa, nombre, controla, nivel =
 /**
  * [B1] UNA TIRA DEL ACORDEÓN — un proyecto (plan §5.9; [B1.2b] §12, punto 5). Activa: el video del recorrido arriba (16:10,
  * contenido), el nombre, y la ficha abajo, SIEMPRE (no hay portada ni ficha): al cruzar el borde de su paso la secuencia entra por
- * tiempo (`secuencia.ts`). Detrás de la ficha, la marca de agua del cliente. Inactiva: un lomo con el nombre girado sobre el póster
+ * tiempo (`secuencia.ts`; [B1.2c] después de la salida completa de la anterior y un respiro, `transicion.ts`). Detrás de la ficha, la
+ * marca de agua del cliente. Inactiva: un lomo con el nombre girado sobre el póster
  * en grises. «Visitar sitio ↗» abre el sitio en una pestaña nueva (`noopener noreferrer`); el medio lleva el mismo enlace sólo
  * para el mouse (una sola parada por tira).
  */
@@ -86,15 +86,18 @@ export function Tira({
   proyecto,
   indice,
   activa,
+  visible,
   vivo,
 }: {
   readonly proyecto: ProyectoDelPortfolio
   readonly indice: number
+  /** La tira abierta (la ancha). */
   readonly activa: boolean
+  /** [B1.2c] Su contenido se muestra: la ancha, quieta (`transicion.ts`), con la escena adentro. */
+  readonly visible: boolean
   readonly vivo: PortfolioVivo
 }): React.JSX.Element {
   const ids = idsDeLaTira(proyecto.slug)
-  const visible = activa && vistaDelPaso(vivo.paso).fase === 'adentro'
   const piezas = piezasDeLaFicha(proyecto)
   return (
     <div data-tira={proyecto.slug} data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo)}>
@@ -104,7 +107,7 @@ export function Tira({
           <MedioDeLaTira proyecto={proyecto} activa={activa} cerca={vivo.cerca} aLaVista={vivo.aLaVista} reducido={vivo.reducido} />
         </motion.div>
       </div>
-      <CabeceraDeLaTira id={ids.cabecera} indice={indice} activa={activa} nombre={proyecto.nombre} controla={`${ids.medio} ${ids.region}`} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(indice)} />
+      <CabeceraDeLaTira id={ids.cabecera} indice={indice} activa={activa} nombre={proyecto.nombre} controla={`${ids.medio} ${ids.region}`} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(indice, true)} />
       <div id={ids.region} hidden={!activa} className="relative flex min-h-0 flex-1 flex-col gap-5 px-8 pb-12 pt-2">
         {proyecto.rubro === null ? null : (
           <motion.div {...enLaSecuencia(visible, 1, vivo.reducido)}>

@@ -6,8 +6,16 @@
 
 import { CLASE_INTERLETRADO, CLASE_INTERLINEADO, NIVELES_TIPOGRAFICOS } from '../../../_lib/tipografia'
 
-/** El titular: `display-xl` desde 1024 (cabe en el 42 % del cuadro); abajo, en el 36 % que deja el panel, `titulo-xl`. */
-export const CLASE_DEL_TITULAR = 'max-escritorio:text-[length:var(--text-titulo-xl)]'
+/**
+ * [B1.2c] EL TITULAR, UN POCO MÁS GRANDE (plan §13, punto 1): su nivel (`display-xl` desde 1024; abajo, en el 40 % que deja el panel,
+ * `titulo-xl`) por `CRECIMIENTO_DEL_TITULO`, sin pasar de lo que entra en la columna: su ancho (`cqw`: la columna es el contenedor)
+ * sobre el avance de «Portfolio» con margen (`ANCHO_DEL_TITULO_EN_EM`; el de Chivo 400 es 4,16 em, s76 lo lee de la fuente). Nada se
+ * corta en ningún ancho. Las clases van enteras (el escáner de Tailwind las ve) y s76 compara sus números con las constantes.
+ */
+export const CRECIMIENTO_DEL_TITULO = 1.15
+export const ANCHO_DEL_TITULO_EN_EM = 4.25
+export const CLASE_DEL_TITULAR =
+  'escritorio:text-[length:min(calc(var(--text-fluido-display-xl)*1.15),calc(100cqw/4.25))] max-escritorio:text-[length:min(calc(var(--text-titulo-xl)*1.15),calc(100cqw/4.25))]'
 
 /** La medida de la bajada, en `ch` (va en línea: el número no se deletrea en una clase). */
 export const MEDIDA_DEL_CUERPO_CH = 50

@@ -2,12 +2,29 @@
 
 import { motion } from 'motion/react'
 
-import { Cuerpo, Micro } from '../../../_componentes/tipografia/Textos'
+import { Caption, Cuerpo, Micro } from '../../../_componentes/tipografia/Textos'
 
+import { idDelServicioLlamado } from '../../_contrato/acento'
 import { CONTENIDO } from '../contenido'
 import { PROYECTOS, seMuestraElServicio, type ProyectoDelPortfolio } from '../proyectos'
 
 import { enLaSecuencia } from './secuencia'
+
+/**
+ * [B1.2c] LOS RÓTULOS DE LA FICHA («Fecha», «El problema», «Qué hicimos», «Lo que resolvimos», «Lo que dice el cliente»): en B1.2b se
+ * confundían con el fondo (`micro` en la tinta al 60 %). Van en Chivo Mono (`font-codigo`), en mayúsculas, con el interletrado
+ * positivo (`micro`, el único del sistema), un paso más grandes (`caption`) y en el acento claro (P-H2: `text-acento-claro`, el de su
+ * servicio por `data-servicio`; los tres son de web). AA medido con la marca de agua detrás (el banco).
+ */
+export const CLASE_DEL_ROTULO = 'font-codigo uppercase text-acento-claro'
+
+function Rotulo({ children }: { readonly children: React.ReactNode }): React.JSX.Element {
+  return (
+    <Caption como="span" interletrado="micro" className={CLASE_DEL_ROTULO}>
+      {children}
+    </Caption>
+  )
+}
 
 /** Las filas de la ficha, en orden, y si cada una se muestra (un dato `null`, o el servicio mientras los tres digan lo mismo, no). */
 function filasDe(p: ProyectoDelPortfolio): readonly { readonly campo: string; readonly rotulo: string; readonly valor: string | null; readonly oculta: boolean }[] {
@@ -43,12 +60,12 @@ export function Ficha({ proyecto, visible, reducido, desde }: { readonly proyect
   const ordenes = filas.map((_, i) => desde + filas.slice(0, i).filter((g) => !g.oculta).length)
   const ordenDeLaResena = desde + filas.filter((f) => !f.oculta).length
   return (
-    <div data-pieza="ficha" className="flex flex-col gap-5">
+    <div data-pieza="ficha" data-servicio={idDelServicioLlamado(proyecto.servicio) ?? undefined} className="flex flex-col gap-5">
       <dl className="grid grid-cols-2 gap-x-8 gap-y-4">
         {filas.map((f, i) => (
           <motion.div key={f.campo} data-fila={f.campo} hidden={f.oculta} className="flex flex-col gap-1" {...enLaSecuencia(visible, ordenes[i], reducido)}>
             <dt>
-              <Micro como="span" className="text-tinta/60">{f.rotulo}</Micro>
+              <Rotulo>{f.rotulo}</Rotulo>
             </dt>
             <dd>
               <Cuerpo como="span">{f.valor ?? ''}</Cuerpo>
@@ -58,7 +75,7 @@ export function Ficha({ proyecto, visible, reducido, desde }: { readonly proyect
       </dl>
       {proyecto.resena === null ? null : (
         <motion.figure className="flex flex-col gap-2" {...enLaSecuencia(visible, ordenDeLaResena, reducido)}>
-          <Micro como="span" className="text-tinta/60">{r.resena}</Micro>
+          <Rotulo>{r.resena}</Rotulo>
           <blockquote>
             <Cuerpo>{proyecto.resena.texto}</Cuerpo>
           </blockquote>

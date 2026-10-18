@@ -268,6 +268,28 @@ export const AGREGADOS: readonly Agregado[] = [
     motivo:
       'B3 · la versión clara del rojo, para el título del error sobre la tarjeta oscura: 8,96:1 sobre la tinta (AA de texto).',
   },
+  {
+    token: '--color-acento-web-claro',
+    sprint: 'B1.2c (P-H2)',
+    motivo:
+      'El acento claro de Desarrollo web, #8FC0E8 (el «on-dark» de la marca, `globals.css`). Cumple el DISPARADOR que el tema dejó escrito en la sección invertida: una sección oscura necesita el acento como TEXTO (los rótulos de la ficha del Portfolio, pedido de Valentino). 10,00:1 sobre #0E0E0E; sobre papel 1,80:1, así que es sólo para fondo invertido.',
+  },
+  {
+    token: '--color-acento-ia-automatizacion-claro',
+    sprint: 'B1.2c (P-H2)',
+    motivo: 'El acento claro de IA y Automatización, #7FCBA4: el mismo motivo y las mismas condiciones que `--color-acento-web-claro`. 10,09:1 sobre #0E0E0E.',
+  },
+  {
+    token: '--color-acento-software-claro',
+    sprint: 'B1.2c (P-H2)',
+    motivo: 'El acento claro de Software a medida, #AFA0E8: el mismo motivo y las mismas condiciones que `--color-acento-web-claro`. 8,29:1 sobre #0E0E0E.',
+  },
+  {
+    token: '--color-acento-claro',
+    sprint: 'B1.2c (P-H2)',
+    motivo:
+      'El ALIAS de los tres acentos claros, con el mismo mecanismo que `--color-acento`: el defecto es el de web y los tres `[data-servicio]` lo retiñen. Es lo único que se consume (`text-acento-claro`, `acento.ts`); nombrar uno de los tres valores es romper el contexto.',
+  },
 ]
 
 /** Los tokens que declara el original de S0, leídos del archivo. */

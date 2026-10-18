@@ -15,10 +15,14 @@
  *   … SOLO=normal,cpu  (sólo esas condiciones)   PRIMERAS=12 (las primeras N corridas)   AGRESIVO=1 (CPU ×6, las fuentes 5 s tarde)
  *   … SIN_REIMPRESION=1 (el control positivo: la página con `&reimpresion=no`)
  *   … PANEL=solo (sólo la entrada del panel del Portfolio) · PANEL=no (sin ella)
+ *   … RUEDA=solo (sólo la rueda y el hover del Portfolio) · RUEDA=no (sin ella)
  *
  * [B1.2b] Al final de la tanda, la entrada del panel del Portfolio con scroll rápido (la rueda, la barra, el menú y un ancla): su caja,
  * cuadro a cuadro, mientras entra; el tope tiene que quedarse quieto (±1 px, `panel.ts`). Y la salida, donde la hay (la rueda cruza la
  * cola): o ningún cuadro a mitad de camino, o el tope quieto.
+ *
+ * [B1.2c] Y la rueda y el hover del Portfolio (`rueda.ts`): con el puntero sobre un lomo y una muesca, de a un proyecto desde el activo
+ * (los cuatro casos de Valentino y «la tuya» → Demos), y con el mouse quieto ningún lomo se reactiva.
  */
 import { chromium, type CDPSession, type Page } from '@playwright/test'
 import { execSync } from 'node:child_process'
@@ -27,6 +31,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 
 import { enHorizontal, tramosDelPanel, type MuestraDelPanel } from './panel'
+import { CASOS_DE_LA_RUEDA, NOMBRES_DE_LOS_PASOS, laRuedaAnduvo, recorridoDeLosPasos } from './rueda'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'build'
@@ -34,6 +39,7 @@ const TANDA = process.env.TANDA ?? 'prueba'
 const AGRESIVO = process.env.AGRESIVO === '1'
 const SIN_REIMPRESION = process.env.SIN_REIMPRESION === '1'
 const PANEL = process.env.PANEL ?? 'si'
+const RUEDA = process.env.RUEDA ?? 'si'
 const SALIDA = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'carga')
 const PERFIL = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'perfil')
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
@@ -325,6 +331,57 @@ async function entradasDelPanel(p: Page, archivo: string): Promise<number> {
   return fallas
 }
 
+/** [B1.2c] Cada cuadro, el paso del escenario del Portfolio (desde la primera muesca hasta 600 cuadros). */
+const MUESTREO_DE_LA_RUEDA = `(() => {
+  window.__pasosDeLaRueda = []
+  const paso = () => {
+    const el = document.querySelector('[data-pieza="escenario-del-portfolio"]')
+    if (el) window.__pasosDeLaRueda.push(Number(el.getAttribute('data-paso')))
+    if (window.__pasosDeLaRueda.length < 600) requestAnimationFrame(paso)
+  }
+  requestAnimationFrame(paso)
+})()`
+
+/**
+ * [B1.2c] La rueda y el hover en el Portfolio (`rueda.ts`): por caso, carga con el ancla de un paso, deja el puntero sobre un lomo (el
+ * hover lo activa) o sobre la columna, y da sus muescas de a una con el mouse QUIETO. Una fila `rueda` por caso; devuelve cuántos fallan.
+ */
+async function laRuedaDelPortfolio(p: Page, archivo: string): Promise<number> {
+  let fallas = 0
+  for (const caso of CASOS_DE_LA_RUEDA) {
+    try {
+      await p.goto('about:blank').catch(() => undefined)
+      await p.goto(`${BASE}/v3#${caso.ancla}`, { waitUntil: 'load', timeout: 120000 })
+      await esperarLaEscena(p)
+      await dormir(3500)
+      const destino = await p.evaluate((slug) => {
+        if (slug === null) return { x: innerWidth * 0.2, y: innerHeight * 0.5 }
+        const b = document.querySelector(`[data-tira="${slug}"]`)?.getBoundingClientRect()
+        return b === undefined ? null : { x: b.left + b.width / 2, y: b.top + b.height / 2 }
+      }, caso.hover)
+      if (destino === null) throw new Error(`sin el lomo de ${String(caso.hover)}`)
+      await p.mouse.move(destino.x, destino.y, { steps: 8 })
+      await dormir(1500)
+      await p.evaluate(MUESTREO_DE_LA_RUEDA)
+      for (const m of caso.muescas) {
+        await p.mouse.wheel(0, 100 * m)
+        await dormir(2800)
+      }
+      const pasos = await p.evaluate(() => (window as unknown as { __pasosDeLaRueda?: number[] }).__pasosDeLaRueda ?? [])
+      const ok = laRuedaAnduvo(caso, pasos)
+      if (!ok) fallas += 1
+      const recorrido = recorridoDeLosPasos(pasos).map((n) => NOMBRES_DE_LOS_PASOS[n] ?? String(n))
+      appendFileSync(archivo, `${JSON.stringify({ tipo: 'rueda', caso: caso.nombre, recorrido, espera: NOMBRES_DE_LOS_PASOS[caso.espera], ok })}\n`)
+      console.log(`rueda ${caso.nombre.padEnd(48)} · ${recorrido.join(' → ')} · ${ok ? 'ok' : 'FALLA'}`)
+    } catch (err) {
+      fallas += 1
+      appendFileSync(archivo, `${JSON.stringify({ tipo: 'rueda', caso: caso.nombre, error: String(err).slice(0, 300), ok: false })}\n`)
+      console.log(`rueda ${caso.nombre} ERROR ${String(err).slice(0, 160)}`)
+    }
+  }
+  return fallas
+}
+
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
   rmSync(PERFIL, { recursive: true, force: true })
@@ -334,7 +391,7 @@ async function main(): Promise<void> {
   const primeras = Number(process.env.PRIMERAS ?? 0)
   let lista = escenarios().filter((e) => solo === null || solo.includes(e.condicion))
   if (primeras > 0) lista = lista.slice(0, primeras)
-  if (PANEL === 'solo') lista = []
+  if (PANEL === 'solo' || RUEDA === 'solo') lista = []
 
   const ctx = await chromium.launchPersistentContext(PERFIL, {
     executablePath: CHROME,
@@ -454,11 +511,17 @@ async function main(): Promise<void> {
       if (e.carga === 'fria') await cdp.send('Network.setCacheDisabled', { cacheDisabled: false }).catch(() => undefined)
     }
   }
-  if (PANEL !== 'no' && memoriaLibreMB() >= MEMORIA_MINIMA_MB) {
+  if (PANEL !== 'no' && RUEDA !== 'solo' && memoriaLibreMB() >= MEMORIA_MINIMA_MB) {
     await condicionar(cdp, 'normal')
     demoraDeLasFuentes = 0
     const fallas = await entradasDelPanel(p, archivo)
     console.log(`panel: ${fallas === 0 ? 'entra en horizontal de las cuatro maneras' : `${String(fallas)} de ${String(METODOS_DEL_PANEL.length)} maneras con FALLA`}`)
+  }
+  if (RUEDA !== 'no' && memoriaLibreMB() >= MEMORIA_MINIMA_MB) {
+    await condicionar(cdp, 'normal')
+    demoraDeLasFuentes = 0
+    const fallas = await laRuedaDelPortfolio(p, archivo)
+    console.log(`rueda: ${fallas === 0 ? `los ${String(CASOS_DE_LA_RUEDA.length)} casos, bien` : `${String(fallas)} de ${String(CASOS_DE_LA_RUEDA.length)} casos con FALLA`}`)
   }
   await ctx.close()
   rmSync(PERFIL, { recursive: true, force: true })

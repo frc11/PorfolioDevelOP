@@ -3,7 +3,7 @@
  *
  * Las anclas (los deep links) en su lugar derivado, el acordeón (el patrón de la WAI: cabecera con `aria-expanded` y contenido
  * nombrado), el estado del servidor (El Garage abierto), las referencias de `aria` que existen, los enlaces que salen del sitio,
- * el botón a la hoja de contacto de siempre, el vidrio del panel, las marcas de agua y el teclado (`estado.ts`). [B1.2b] Un paso por
+ * [B1.2c] el formulario corto de «la tuya» (en lugar del botón), el vidrio del panel, las marcas de agua y el teclado (`estado.ts`). [B1.2b] Un paso por
  * proyecto: la tira activa lleva siempre el video y la ficha. Cada detector con su control positivo.
  */
 
@@ -15,7 +15,9 @@ import { referenciasColgadas } from '../trabajos-detectores'
 
 import { ANCLAS_DEL_PORTFOLIO } from './anclas'
 import { accionDeLaTecla, vistaDelPaso, type TeclaDelSelector } from './estado'
-import { SignoDePregunta } from './MarcaDeAgua'
+import { NUMERO_DE_WHATSAPP } from '../../cierre/contacto'
+
+import { SignoQueSeArma } from './SignoDePregunta'
 import { ANTES_DEL_PIN, EN_LA_COLA, PANTALLAS_POR_PASO, pantallasDelAncla, type IndiceDePaso } from './pasos'
 
 const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
@@ -39,10 +41,16 @@ export function afirmarElSelector(quieto: string, conMotion: string): void {
   afirmarIgual(referenciasColgadas(quieto), [], 'cada `aria-controls` y cada `aria-labelledby` nombra un `id` que existe')
   controlPositivo('  el detector ve una referencia colgada', '<button aria-controls="no-existe"></button>', (html: string) => referenciasColgadas(html).length === 0)
   afirmarIgual(veces(quieto, 'role="region"'), 0, 'los contenidos de las tiras NO son `region`: el acordeón no suma puntos de referencia al documento (s10-acceso los cuenta)')
-  afirmarIgual(veces(quieto, ' hidden=""'), 2 + 2 + 1 + 2 * PROYECTOS.length, '  van `hidden` el medio y el contenido de las dos cerradas de proyecto, el contenido de la tuya y las dos filas que no se muestran de cada ficha ([B1.2b] la ficha ya no se esconde: va siempre en la activa)')
+  afirmarIgual(veces(quieto, ' hidden=""'), 2 + 2 + 1 + 2 * PROYECTOS.length + 1, '  van `hidden` el medio y el contenido de las dos cerradas de proyecto, el contenido de la tuya y las dos filas que no se muestran de cada ficha ([B1.2b] la ficha ya no se esconde: va siempre en la activa) y [B1.2c] la pista de la tablet (con el panel afuera)')
 
-  afirmarIgual(veces(quieto, 'data-abre-contacto="panel"'), 1, 'UN botón abre la hoja de contacto de siempre (`data-abre-contacto="panel"`): no hay un modal nuevo')
-  afirmar(/<button[^>]*data-abre-contacto="panel"/.test(quieto), '  y es un botón')
+  // [B1.2c] «La tuya» lleva el formulario corto en lugar del botón a la hoja de contacto: tres campos, enviar y WhatsApp.
+  const formulario = /<div data-pieza="formulario-de-la-tuya"[\s\S]*?<p role="status"/.exec(quieto)?.[0] ?? ''
+  const whatsapp = `<a href="https://wa.me/${NUMERO_DE_WHATSAPP}?text=`
+  const formularioCorto = (f: string): boolean =>
+    [...f.matchAll(/<input [^>]*name="(nombre|medio|mensaje)"/g)].map((m) => m[1]).join(',') === 'nombre,medio,mensaje' && /<button type="submit"/.test(f) &&
+    f.includes(whatsapp) && /target="_blank" rel="noopener noreferrer" aria-label="o escribinos por WhatsApp, se abre en una pestaña nueva"/.test(f) && /<form noValidate="" class=/.test(f)
+  afirmar(formularioCorto(formulario) && veces(quieto, 'data-abre-contacto="panel"') === 0, '[B1.2c] «la tuya» lleva el formulario corto en lugar del botón: el nombre, «WhatsApp o email» y «¿Qué necesitás?», enviar, y «o escribinos por WhatsApp» (el número del pie, en una pestaña nueva); el formulario, sin nombre propio: no suma un punto de referencia')
+  controlPositivo('  el detector ve el botón de antes (sin el formulario)', '<div data-pieza="formulario-de-la-tuya"><button type="button" data-abre-contacto="panel">Clickeá</button><p role="status">', formularioCorto)
   const visitar = [...quieto.matchAll(/<a [^>]*aria-label="Visitar sitio de [^"]*"[^>]*>/g)].map((m) => m[0])
   afirmarIgual(visitar.length, PROYECTOS.length, 'un «Visitar sitio» por proyecto')
   afirmar(visitar.every((a) => a.includes('target="_blank"') && a.includes('rel="noopener noreferrer"') && a.includes('se abre en una pestaña nueva')), '  que abre en una pestaña nueva, sin `opener` ni referente, y lo dice en su nombre')
@@ -52,9 +60,10 @@ export function afirmarElSelector(quieto: string, conMotion: string): void {
   const panel = /<div data-pieza="panel-del-portfolio"[^>]*>/.exec(quieto)?.[0] ?? ''
   afirmar(/backdrop-filter:blur\(20px\) saturate\(180%\)/.test(panel) && /right-0/.test(panel) && /translate-x-full/.test(panel) && !/data-material|data-lado/.test(quieto), '[B1.2b] el panel, de vidrio y del lado derecho (sin banderas: ni material ni lado en el marcado), afuera en el servidor')
   afirmar(!/data-marca-de-agua=/.test(quieto) && !PROYECTOS.some((p) => p.logo !== null && quieto.includes(p.logo)), '[B1.2b] las marcas de agua no salen en el servidor: se piden y se dibujan recién con la sección cerca')
-  const signo = marcar(<SignoDePregunta />, { anima: false })
-  afirmar(/<svg aria-hidden="true" focusable="false" data-marca-de-agua="signo"/.test(signo) && veces(signo, '<path') === 4, '[B1.2b] el «?» de «la tuya» es un SVG decorativo (la sombra y la pieza, cada una con el gancho y el punto)')
-  controlPositivo('  el detector ve un «?» que se anuncia', signo.replace('aria-hidden="true" ', ''), (s: string) => /<svg aria-hidden="true" focusable="false" data-marca-de-agua="signo"/.test(s))
+  const signo = marcar(<div aria-hidden="true" data-marca-de-agua="signo"><SignoQueSeArma reducido /></div>, { anima: false })
+  const decorativo = (s: string): boolean => /^<div aria-hidden="true" data-marca-de-agua="signo"><svg focusable="false"/.test(s) && veces(s, '<path') === 6 && !/role=|aria-label/.test(s)
+  afirmar(decorativo(signo), '[B1.2b] el «?» de «la tuya» es un SVG decorativo ([B1.2c] el recorte del trazo, la sombra y la pieza del gancho, el filo que se dibuja, la sombra y la pieza del punto)')
+  controlPositivo('  el detector ve un «?» que se anuncia', signo.replace('aria-hidden="true" ', ''), decorativo)
 
   titulo('17b · El estado y el teclado, puros (`estado.ts`)')
 

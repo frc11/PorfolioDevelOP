@@ -8,6 +8,8 @@
  *           escena ve lo de hoy), la noche del tramo, los pasos y las anclas, y el reloj de Demos contra el túnel archivado.
  *   B1.2  · el selector vivo (`s76-portfolio-escena.tsx`): los videos, un solo lienzo, la pose del logo, el oscurecido, el hover,
  *           los sonidos y las banderas.
+ *   B1.2c · los ajustes del FRENO de B1.2b (`s76-portfolio-b12c.tsx`): el orden, los rótulos y los acentos claros, la transición, la
+ *           rueda, el formulario corto, el «?», la tablet y el título (la cámara de frente, en la §9 de la escena).
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
@@ -21,6 +23,7 @@ import { CONTENIDO as CONTENIDO_DE_ANTES } from '../../_archivo/tunel-portfolio/
 import { PROYECTOS, mediosDe, seMuestraElServicio, type ProyectoDelPortfolio } from '../../_secciones/trabajos/proyectos'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { afirmarLaBase } from './s76-portfolio-mapeo'
+import { afirmarB12c } from './s76-portfolio-b12c'
 import { afirmarElSelectorVivo } from './s76-portfolio-escena'
 
 const RAIZ = process.cwd()
@@ -148,5 +151,6 @@ afirmar(conInicioRapido(Buffer.concat([caja('ftyp'), caja('moov'), caja('mdat')]
 
 afirmarLaBase()
 afirmarElSelectorVivo()
+afirmarB12c()
 
 cerrar('s76-portfolio.invariant')
