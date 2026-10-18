@@ -15,7 +15,7 @@
  *   · `quieto`: en su lugar, sin revelado (el FAQ: cambia de alto al abrir una pregunta y un revelado atado al scroll lo correría).
  *
  * `data-bloque` es el gancho de los tests (nunca `data-seccion`, `data-panel` ni ids del home). `Problema` (el `h1`, en la intro),
- * el CTA del precio (solo el botón) y `Cierre` arman su propia caja.
+ * el CTA del precio (solo el botón), [M3] `Trabajos` (el video de fondo) y `Cierre` arman su propia caja.
  */
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'

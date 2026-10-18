@@ -13,9 +13,31 @@
 
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { usd } from '../formato'
-import type { Servicio } from '../tipos'
+import type { Caso, Servicio } from '../tipos'
 
 const NOMBRE = 'Páginas web'
+
+/** Los trabajos de Páginas web: las frases de Cómo trabajamos y, por su nombre, la línea del video. */
+const CASOS: readonly Caso[] = [
+  {
+    tipo: 'proyecto',
+    slug: 'el-garage',
+    texto: 'Ordenó su catálogo, que antes vivía en publicaciones de Facebook que quedaban viejas.',
+  },
+  { tipo: 'proyecto', slug: 'esquina-estudio', texto: 'Pasó a tener presencia online.' },
+  { tipo: 'proyecto', slug: 'banu-scents', texto: 'Catálogo y presencia online.' },
+]
+
+/** [M3] Las demos del video de trabajos (D1), por su slug en el catálogo del home. */
+const DEMOS_DEL_VIDEO = ['ethereal', 'noir', 'skyline'] as const
+
+/**
+ * [M3] La línea del video, dictada por Valentino, con la marca de LOGOTIPO. Los nombres se verificaron contra PROYECTOS (los casos) y
+ * contra la sección Demos del home (las demos), y `pagina.invariant` §12 los vuelve a comparar con las dos fuentes: el dictado decía
+ * «Ethernal, Noir y Skyline» y ganan los nombres del home (anotado en SPRINT-M3). Van escritos y no leídos de las fuentes porque
+ * PROYECTOS no entra al runtime de los datos (`precios.invariant`).
+ */
+const LINEA_DEL_VIDEO = `Sitios para clientes (El Garage, Esquina Estudio y Banú Scents) y demos propias de ${LOGOTIPO} (The Ethereal Resort, Noir Dining in the Void y Skyline Estates).` // M3 (dictado)
 
 const QUE_HACEMOS = {
   titulo: 'Construimos tu presencia, bloque por bloque',
@@ -96,17 +118,16 @@ export const PAGINAS_WEB: Servicio = {
     plazo: 'De 2–3 semanas a 2–3 meses según el calibre',
   },
   prueba: {
-    casos: [
-      {
-        tipo: 'proyecto',
-        slug: 'el-garage',
-        texto: 'Ordenó su catálogo, que antes vivía en publicaciones de Facebook que quedaban viejas.',
-      },
-      { tipo: 'proyecto', slug: 'esquina-estudio', texto: 'Pasó a tener presencia online.' },
-      { tipo: 'proyecto', slug: 'banu-scents', texto: 'Catálogo y presencia online.' },
-    ],
+    casos: CASOS,
     nota: null,
     ctaPanel: null,
+    // M3: los medios los escribe scripts-servicios/montar.ts, y su recibo (docs/servicios/entregas/m3/medios.json) lo lee medios.invariant.
+    video: {
+      horizontal: { video: '/servicios/paginas-web/trabajos-horizontal.mp4', poster: '/servicios/paginas-web/trabajos-horizontal.webp', ancho: 1280, alto: 800 },
+      vertical: { video: '/servicios/paginas-web/trabajos-vertical.mp4', poster: '/servicios/paginas-web/trabajos-vertical.webp', ancho: 720, alto: 1560 },
+      demos: DEMOS_DEL_VIDEO,
+      linea: LINEA_DEL_VIDEO,
+    },
   },
   faq: [
     {

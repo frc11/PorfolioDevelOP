@@ -57,6 +57,7 @@ export const SOFTWARE_A_MEDIDA: Servicio = {
     ],
     nota: '2 sistemas más en desarrollo',
     ctaPanel: null,
+    video: null, // M3: el video de trabajos es solo de Páginas web; el slot 6 no se monta
   },
   faq: [
     {

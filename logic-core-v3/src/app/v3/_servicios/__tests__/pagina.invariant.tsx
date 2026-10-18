@@ -16,6 +16,10 @@
  * cómo entra cada bloque, con el gatillo y su guarda en reposo (§10). RETIRADAS por quitar la funcionalidad, no aflojadas: los casos con rubro, enlace y
  * pósters y las seis imágenes (§7, la sección de casos se fue) y «con un artículo con href, Del blog se monta» (§2: Del blog salió del
  * orden; en su lugar se afirma que no se monta ni con href).
+ *
+ * [M3] El video de trabajos (§12): solo en Páginas web, un `<video>` sin `src` ni `autoplay` en el HTML servido, sin video con
+ * movimiento reducido, la pausa que alterna, el velo y la línea literal. RETIRADAS por quitar la funcionalidad: el marcador del video
+ * (§4: el video ya existe) y «Probá el panel» en el slot de trabajos de IA (el viejo §12: en Software e IA el slot no se monta).
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
@@ -26,7 +30,6 @@ import type { ResolvedMetadata } from 'next'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
-import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
 import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
@@ -35,16 +38,20 @@ import { MARCA_HOME_QUIETO } from '../../_secciones/_contrato/marcaHomeQuieto'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
 import { DISPARO_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { CLASES_DEL_PAPEL } from '../bloques/Bloque'
+import { CLASES_DEL_VELO, VELO_DEL_VIDEO } from '../bloques/veloDelVideo'
 import { Precio } from '../bloques/Precio'
+import { FUENTE_DE_DEMOS } from '../datos/fuenteDeDemos'
 import { FUENTE_DE_PROYECTOS } from '../datos/fuenteDeProyectos'
 import { IA_Y_AUTOMATIZACIONES } from '../datos/ia-y-automatizaciones'
 import { PAGINAS_WEB } from '../datos/paginas-web'
 import { SERVICIOS } from '../datos/servicios'
 import { SOFTWARE_A_MEDIDA } from '../datos/software-a-medida'
-import { ESTILO_DEL_CTA, tokenDelAcento, tokenDelAcentoClaro } from '../estiloDelAcento'
+import { tokenDelAcento, tokenDelAcentoClaro } from '../estiloDelAcento'
 import { MARCADOR_A_DEFINIR, numero, usd } from '../formato'
 import { ATRIBUTO_DE_LA_INTRO } from '../Intro'
 import { ESTADOS_DEL_GATILLO, LINEA_DEL_DISPARO, estaALaVista, siguienteEstado, type EstadoDelGatillo } from '../movimiento/disparo'
+import { ROTULO_DE_LA_PAUSA, debeReproducirse, siguienteDeLaPausa, type MomentoDelVideo } from '../movimiento/reproduccion'
+import { BotonDePausa, CapaDelVideo } from '../movimiento/VideoDeFondo'
 import { PaginaDeServicio } from '../PaginaDeServicio'
 import { PRECIOS_DESDE } from '../precios'
 import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
@@ -124,11 +131,11 @@ titulo('2 · Los bloques, en el orden de la maqueta (M0 §1.3)')
 // [M1] El orden de la maqueta: la intro (el problema) y los diez del cuerpo. «Prueba» y «Del blog» salieron (funcionalidad quitada).
 const ORDEN_DE_LA_MAQUETA = ['problema', 'que-hacemos', 'que-incluye', 'precio', 'llamado-del-precio', 'extra', 'trabajos', 'proceso', 'faq', 'llamado', 'cierre']
 const sin = (...fuera: string[]): string[] => ORDEN_DE_LA_MAQUETA.filter((b) => !fuera.includes(b))
-/** Lo que lleva cada página: Extra solo existe en web; el slot del video, en web solo en desarrollo (su marcador, hasta el M3). */
+/** Lo que lleva cada página: Extra y [M3] el video de trabajos solo existen en web, en los dos modos. */
 const ESPERADO: Readonly<Record<string, { readonly dev: readonly string[]; readonly prod: readonly string[] }>> = {
-  'paginas-web': { dev: ORDEN_DE_LA_MAQUETA, prod: sin('trabajos') },
-  'software-a-medida': { dev: sin('extra'), prod: sin('extra') }, // el slot lleva su nota
-  'ia-y-automatizaciones': { dev: sin('extra'), prod: sin('extra') }, // el slot lleva «Probá el panel»
+  'paginas-web': { dev: ORDEN_DE_LA_MAQUETA, prod: ORDEN_DE_LA_MAQUETA },
+  'software-a-medida': { dev: sin('extra', 'trabajos'), prod: sin('extra', 'trabajos') },
+  'ia-y-automatizaciones': { dev: sin('extra', 'trabajos'), prod: sin('extra', 'trabajos') },
 }
 afirmarIgual(fallan((p) => JSON.stringify(bloquesEnOrden(p.html)) === JSON.stringify(ESPERADO[p.servicio.slug]?.[p.enDesarrollo ? 'dev' : 'prod'])), [], 'las tres páginas, en los dos modos: exactamente los bloques que les tocan, en el orden de la maqueta')
 afirmarIgual(fallan((p) => respetaElOrden(bloquesEnOrden(p.html), ORDEN_DE_LA_MAQUETA)), [], '  y ninguno fuera de su lugar')
@@ -180,8 +187,9 @@ titulo('4 · «[a definir]» solo en desarrollo')
 
 const cuenta = (html: string, aguja: string): number => html.split(aguja).length - 1
 const hayMarcador = (html: string): boolean => cuenta(html, MARCADOR_A_DEFINIR) > 0
-afirmarIgual(cuenta(WEB_DEV, MARCADOR_A_DEFINIR), 3, 'Páginas web en desarrollo: tres marcadores — la Simple (autogestionable), el plan mensual del mantenimiento y [M1] el video del slot de trabajos (M3)')
-afirmar(textoVisible(bloqueDe(WEB_DEV, 'trabajos') ?? '').includes(MARCADOR_A_DEFINIR) && bloqueDe(WEB_PROD, 'trabajos') === null, '  el del video vive en el slot de trabajos, que en producción no se monta hasta el M3')
+// [M3] El marcador del video se RETIRÓ con su funcionalidad: el video existe, y el slot de trabajos se monta en los dos modos.
+afirmarIgual(cuenta(WEB_DEV, MARCADOR_A_DEFINIR), 2, 'Páginas web en desarrollo: dos marcadores — la Simple (autogestionable) y el plan mensual del mantenimiento')
+afirmar(!(bloqueDe(WEB_DEV, 'trabajos') ?? MARCADOR_A_DEFINIR).includes(MARCADOR_A_DEFINIR) && bloqueDe(WEB_PROD, 'trabajos') !== null, '  [M3] el slot de trabajos ya no lleva marcador: se monta con el video, en desarrollo y en producción')
 afirmar(textoVisible(WEB_DEV).includes('Plan mensual') && !textoVisible(WEB_PROD).includes('Plan mensual'), '  la fila «Plan mensual» solo existe en desarrollo')
 afirmarIgual([cuenta(WEB_DEV, 'Autogestionable'), cuenta(WEB_PROD, 'Autogestionable')], [3, 2], '  «Autogestionable»: tres veces en desarrollo, dos en producción (la Simple no lo dice mientras esté en [a definir])')
 afirmarIgual(fallan((p) => p.enDesarrollo || !hayMarcador(p.html)), [], 'en producción no sale ningún marcador, en ninguna de las tres páginas')
@@ -265,8 +273,22 @@ const fraseDelTrabajo = (html: string) => (slug: string, texto: string): boolean
 }
 afirmarIgual(CASOS_DE_WEB.filter((c) => !fraseDelTrabajo(WEB_PROD)(c.slug, c.texto)).map((c) => c.slug), [], `Cómo trabajamos, en Páginas web: una frase por cada uno de los ${CASOS_DE_WEB.length} trabajos, con el nombre de la fuente y el texto propio que ya existía`)
 controlPositivo('una página sin las frases se detecta', '<main></main>', (h: string) => CASOS_DE_WEB.every((c) => fraseDelTrabajo(h)(c.slug, c.texto)))
-afirmarIgual(fallan((p) => aperturas(p.html, 'img').length === 0), [], 'ninguna página lleva imágenes: los pósters se fueron con la sección de casos')
-controlPositivo('  una página con un póster se detecta', `${WEB_PROD}<img src="/portfolio/el-garage/escritorio.webp" alt="El Garage">`, (h: string) => aperturas(h, 'img').length === 0)
+// [M3] Las únicas imágenes son los dos pósters del video de trabajos (Páginas web): decorativas, adentro de su capa aria-hidden.
+const VIDEO_DE_WEB = PAGINAS_WEB.prueba.video
+const POSTERS_DE_WEB = VIDEO_DE_WEB === null ? [] : [VIDEO_DE_WEB.horizontal.poster, VIDEO_DE_WEB.vertical.poster]
+const capaDelVideo = (html: string): string => /<div aria-hidden="true" class="absolute inset-0">[\s\S]*?<\/div>/.exec(bloqueDe(html, 'trabajos') ?? '')?.[0] ?? ''
+const soloLosPosters = (servicio: Servicio) => (html: string): boolean => {
+  const imagenes = aperturas(html, 'img')
+  if (servicio.prueba.video === null) return imagenes.length === 0
+  const enLaCapa = aperturas(capaDelVideo(html), 'img')
+  return imagenes.length === 2 && enLaCapa.length === 2 && enLaCapa.every((img) => img.includes(' alt=""')) &&
+    POSTERS_DE_WEB.every((poster) => enLaCapa.some((img) => img.includes(encodeURIComponent(poster))))
+}
+afirmar(POSTERS_DE_WEB.length === 2, 'Páginas web tiene video de trabajos, con dos pósters')
+afirmarIgual(fallan((p) => soloLosPosters(p.servicio)(p.html)), [], '  y son las únicas imágenes de las tres páginas: los dos, decorativos (alt vacío), adentro de la capa aria-hidden del slot de trabajos; Software e IA, ninguna')
+controlPositivo('  una imagen fuera de la capa se detecta', `${WEB_PROD}<img src="/portfolio/el-garage/escritorio.webp" alt="El Garage">`, soloLosPosters(PAGINAS_WEB))
+controlPositivo('  un póster con texto alternativo se detecta', WEB_PROD.replace(' alt=""', ' alt="Trabajos"'), soloLosPosters(PAGINAS_WEB))
+controlPositivo('  un póster en Software se detecta', `${pagina(SOFTWARE_A_MEDIDA, false)}<img src="/x.webp" alt="">`, soloLosPosters(SOFTWARE_A_MEDIDA))
 const sinCasosDeWeb = (html: string): boolean => CASOS_DE_WEB.every((c) => !textoVisible(html).includes(c.texto))
 afirmarIgual(fallan((p) => p.servicio.slug === 'paginas-web' || sinCasosDeWeb(p.html)), [], '  y en Software e IA no aparece ningún caso de Páginas web (tampoco en el slot de trabajos)')
 controlPositivo('  un caso de web en otra página se detecta', `${pagina(SOFTWARE_A_MEDIDA, false)}<p>${CASOS_DE_WEB[0]?.texto ?? 'x'}</p>`, sinCasosDeWeb)
@@ -416,7 +438,7 @@ afirmarIgual(nombresQueChocan(FUENTES.map((x) => x.f.replace(/\\/g, '/'))), [], 
 controlPositivo('Planes.tsx y planes.ts juntos se detectan', ['bloques/precio/Planes.tsx', 'bloques/precio/planes.ts'], (l: string[]) => nombresQueChocan(l).length === 0)
 const deCliente = (codigo: string): boolean => /^\s*['"]use client['"]/.test(codigo)
 const dondeEsDeCliente = (lista: readonly { f: string; codigo: string }[]): string[] => lista.filter((x) => deCliente(x.codigo)).map((x) => x.f.replace(/\\/g, '/')).sort()
-afirmarIgual(dondeEsDeCliente(FUENTES), ['movimiento/Gatillo.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx'], 'el único código de cliente son los tres de movimiento/ (los dos envoltorios del revelado y [M1] el gatillo, que observa un cruce): todo lo demás es de servidor')
+afirmarIgual(dondeEsDeCliente(FUENTES), ['movimiento/Gatillo.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el único código de cliente son los cuatro de movimiento/ (los dos envoltorios del revelado, [M1] el gatillo, que observa un cruce, y [M3] el video de trabajos): todo lo demás es de servidor')
 controlPositivo('un bloque de cliente fuera de movimiento/ se detecta', ["'use client'", 'export const x = 1'].join('\n'), (c: string) => !deCliente(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -456,7 +478,7 @@ const REVELADO_ESPERADO: Readonly<Record<string, { readonly arbol: number; reado
   precio: { arbol: 2, gatillo: 0 },
   'llamado-del-precio': { arbol: 0, gatillo: 1 },
   extra: { arbol: 2, gatillo: 0 },
-  trabajos: { arbol: 1, gatillo: 1 },
+  trabajos: { arbol: 0, gatillo: 1 }, // [M3] el texto entero con el gatillo: el título vive al pie de un cuadro de una pantalla
   proceso: { arbol: 2, gatillo: 0 },
   faq: { arbol: 1, gatillo: 0 },
   llamado: { arbol: 1, gatillo: 1 },
@@ -549,22 +571,89 @@ const preguntasUnicas = (s: Servicio): boolean => new Set(s.faq.map((f) => f.pre
 afirmarIgual(fallan((p) => preguntasUnicas(p.servicio)), [], '  y ninguna pregunta se repite (son la clave de cada ítem)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('12 · «Probá el panel» (IA) es el CtaEnlace del home, tal cual, en el slot de trabajos, y va en tinta como acción secundaria')
+titulo('12 · [M3] El video de trabajos: solo en Páginas web, sin autoplay, con la pausa que alterna, el velo y la línea literal')
 
-// El Cta del home no tiene una variante «secundaria» (sus dos variantes son de forma: en línea y en bloque). La jerarquía de la página la pone
-// el envoltorio de los llamados principales (`ESTILO_DEL_CTA`, que recolorea la tinta del botón con el acento); el enlace al panel no lo lleva.
-const PANEL = IA_Y_AUTOMATIZACIONES.prueba.ctaPanel
-const CTA_DEL_HOME = PANEL === null || PANEL.href === null ? '' : renderToStaticMarkup(<CtaEnlace href={PANEL.href} rotulo={PANEL.rotulo} />)
-const IA_PAGINA = PAGINAS.find((p) => p.servicio.slug === 'ia-y-automatizaciones' && !p.enDesarrollo)?.html ?? ''
-const traeElCtaDelHome = (html: string): boolean => CTA_DEL_HOME !== '' && (bloqueDe(html, 'trabajos') ?? '').includes(CTA_DEL_HOME)
-// Redefinir la variable (`--color-tinta:`), no leerla: un style que solo la lee con var() no recolorea nada.
-const recoloreaLaTinta = (html: string): boolean => valoresDe(html, 'style').some((estilo) => /(^|;)\s*--color-tinta\s*:/.test(estilo))
-const enTinta = (html: string): boolean => !recoloreaLaTinta(bloqueDe(html, 'trabajos') ?? '')
-afirmar(CTA_DEL_HOME.includes('data-pieza="cta"') && CTA_DEL_HOME.includes('href="/login"'), 'el CtaEnlace del home con los datos de «Probá el panel» es un <a data-pieza="cta"> a /login (D11)')
-afirmarIgual(fallan((p) => p.servicio.prueba.ctaPanel === null || (traeElCtaDelHome(p.html) && enTinta(p.html))), [], 'en IA, en los dos modos, el slot de trabajos lleva ese <a> byte por byte —sin clase ni style propios— y ningún envoltorio le recolorea la tinta')
-afirmar(recoloreaLaTinta(bloqueDe(IA_PAGINA, 'llamado') ?? ''), '  los llamados principales, en cambio, sí van en el acento (su envoltorio recolorea la tinta): esa es la diferencia entre principal y secundaria')
-controlPositivo('un enlace con una clase propia se detecta', IA_PAGINA.replace(CTA_DEL_HOME, CTA_DEL_HOME.replace('class="', 'class="text-acento ')), traeElCtaDelHome)
-controlPositivo('un enlace dentro del envoltorio de los llamados se detecta', renderToStaticMarkup(<section data-bloque="trabajos"><div style={ESTILO_DEL_CTA}><CtaEnlace href="/login" rotulo="Probá el panel" /></div></section>), enTinta)
+// El viejo §12 («Probá el panel» en el slot de trabajos de IA, como el CtaEnlace del home) se RETIRÓ con su funcionalidad: el slot es
+// solo de Páginas web. El dato sigue en IA para la réplica (`datos.invariant.ts`).
+const VIDEO = ((): NonNullable<typeof VIDEO_DE_WEB> => {
+  if (VIDEO_DE_WEB === null) throw new Error('paginas-web: no tiene video de trabajos')
+  return VIDEO_DE_WEB
+})()
+afirmarIgual(SERVICIOS.filter((s) => s.prueba.video !== null).map((s) => s.slug), ['paginas-web'], 'solo Páginas web tiene video de trabajos en sus datos')
+const videos = (html: string): string[] => aperturas(html, 'video')
+/**
+ * Sin movimiento reducido (el árbol ya hidratado): UN `<video>`, mudo, en bucle, en línea y sin precarga, con su atributo propio, y sin
+ * `autoplay` ni `src`. El HTML que sirve /v3 es la rama reducida (el proveedor del home sirve `reducedMotion: 'always'` hasta hidratar):
+ * ahí van solo los pósters, y el navegador lo confirma.
+ */
+const videoServido = (html: string): boolean => {
+  const lista = videos(html)
+  const v = lista[0] ?? ''
+  return lista.length === 1 && [' muted=""', ' loop=""', ' playsinline=""', ' preload="none"', ' data-video-de-trabajos=""'].every((a) => v.toLowerCase().includes(a)) &&
+    !/\s(autoplay|src)=/i.test(v)
+}
+afirmar(videoServido(bloqueDe(WEB_PROD, 'trabajos') ?? '') && videoServido(bloqueDe(WEB_DEV, 'trabajos') ?? '') && videoServido(WEB_PROD), 'Páginas web, en los dos modos, sin movimiento reducido: un solo <video> —muted, loop, playsInline, preload="none", data-video-de-trabajos—, en el slot de trabajos, sin autoplay ni src (la fuente se pide al acercarse)')
+const BLOQUE_DEL_VIDEO = bloqueDe(WEB_PROD, 'trabajos') ?? ''
+controlPositivo('  un <video> con autoplay se detecta', BLOQUE_DEL_VIDEO.replace('<video ', '<video autoplay="" '), videoServido)
+controlPositivo('  uno con la fuente en el HTML servido', BLOQUE_DEL_VIDEO.replace('<video ', `<video src="${VIDEO.horizontal.video}" `), videoServido)
+controlPositivo('  y dos <video>', BLOQUE_DEL_VIDEO.replace(/(<video [^>]*><\/video>)/, '$1$1'), videoServido)
+// Con movimiento reducido, solo el póster: la capa del medio sin <video>, y la decisión de reproducir nunca da verdadero.
+const capa = (reducido: boolean): string => renderToStaticMarkup(<CapaDelVideo horizontal={VIDEO.horizontal} vertical={VIDEO.vertical} reducido={reducido} />)
+const soloElPoster = (html: string): boolean => videos(html).length === 0 && aperturas(html, 'img').length === 2 && !/autoplay/i.test(html)
+afirmar(soloElPoster(capa(true)), 'con movimiento reducido no hay autoplay: la capa del medio no monta el <video> y quedan los dos pósters')
+controlPositivo('  la capa con el video (sin reducir) se detecta', capa(false), soloElPoster)
+const BOOLEANOS = [false, true] as const
+const MOMENTOS: MomentoDelVideo[] = BOOLEANOS.flatMap((reducido) => BOOLEANOS.flatMap((conFuente) => BOOLEANOS.flatMap((enPantalla) =>
+  BOOLEANOS.flatMap((pausadoPorQuienMira) => BOOLEANOS.map((scrollEnMovimiento) => ({ reducido, conFuente, enPantalla, pausadoPorQuienMira, scrollEnMovimiento }))))))
+const nuncaConReducido = (decide: typeof debeReproducirse): boolean => MOMENTOS.every((m) => !m.reducido || !decide(m))
+afirmar(MOMENTOS.length === 32 && nuncaConReducido(debeReproducirse), '  y la decisión de reproducir nunca da verdadero con movimiento reducido, en los 32 momentos posibles')
+afirmarIgual(MOMENTOS.filter(debeReproducirse), [{ reducido: false, conFuente: true, enPantalla: true, pausadoPorQuienMira: false, scrollEnMovimiento: false }], '  sin reducir, anda en un solo momento: con la fuente, en pantalla, sin pausa y con el scroll quieto')
+controlPositivo('  una decisión que ignora el reducido se detecta', ((m: MomentoDelVideo) => debeReproducirse({ ...m, reducido: false })) as typeof debeReproducirse, nuncaConReducido)
+// La pausa (D5, WCAG 2.2.2): un botón conmutable con nombre fijo, `aria-pressed`, el ícono que cambia, y que alterna.
+const botonDeLaPausa = (html: string): string => /<button[^>]*data-pieza="pausa-del-video"[^>]*>[\s\S]*?<\/button>/.exec(html)?.[0] ?? ''
+const PAUSADO = botonDeLaPausa(renderToStaticMarkup(<BotonDePausa pausado={true} />))
+const pausaQueAlterna = (html: string, alterna: (pausado: boolean) => boolean): boolean => {
+  const andando = botonDeLaPausa(html)
+  return andando.includes(' type="button"') && andando.includes(` aria-label="${ROTULO_DE_LA_PAUSA}"`) && andando.includes(' aria-pressed="false"') && andando.includes('lucide-pause') &&
+    PAUSADO.includes(' aria-pressed="true"') && PAUSADO.includes('lucide-play') && alterna(false) && !alterna(true) && alterna(alterna(false)) === false
+}
+afirmar(pausaQueAlterna(BLOQUE_DEL_VIDEO, siguienteDeLaPausa), `el botón de pausa existe en el slot: type="button", nombre «${ROTULO_DE_LA_PAUSA}», aria-pressed="false" con el ícono de pausa; pausado dice aria-pressed="true" con el de reproducir, y apretarlo alterna`)
+controlPositivo('  un botón sin nombre se detecta', BLOQUE_DEL_VIDEO.replace(` aria-label="${ROTULO_DE_LA_PAUSA}"`, ''), (h: string) => pausaQueAlterna(h, siguienteDeLaPausa))
+controlPositivo('  un botón que no alterna se detecta', (() => true) as (pausado: boolean) => boolean, (alterna: (pausado: boolean) => boolean) => pausaQueAlterna(BLOQUE_DEL_VIDEO, alterna))
+controlPositivo('  y una página sin el botón', WEB_PROD.replace(botonDeLaPausa(WEB_PROD), ''), (h: string) => pausaQueAlterna(h, siguienteDeLaPausa))
+const FUENTE_DEL_VIDEO = readFileSync(path.join(AQUI, '../movimiento/VideoDeFondo.tsx'), 'utf8')
+const conElPedido = (fuente: string): boolean => fuente.includes('P-H21: reemplazar por BotonPausa')
+afirmar(conElPedido(FUENTE_DEL_VIDEO), '  el botón lleva el comentario «P-H21: reemplazar por BotonPausa»: es nuestro hasta que el home publique el suyo')
+controlPositivo('  un fuente sin el comentario se detecta', FUENTE_DEL_VIDEO.replace('P-H21', 'P-H2'), conElPedido)
+// La línea, dictada (M3), literal. Sus nombres salen de las fuentes: los casos de PROYECTOS, las demos del catálogo del home y la marca de
+// LOGOTIPO. El dictado decía «Ethernal, Noir y Skyline»: ganan los nombres del home.
+const LINEA_DICTADA = 'Sitios para clientes (El Garage, Esquina Estudio y Banú Scents) y demos propias de develOP (The Ethereal Resort, Noir Dining in the Void y Skyline Estates).'
+const laLinea = (html: string): boolean => parrafos(bloqueDe(html, 'trabajos') ?? '').includes(LINEA_DICTADA)
+afirmar(laLinea(WEB_PROD) && laLinea(WEB_DEV) && VIDEO.linea === LINEA_DICTADA, `la línea del video es literal, en un párrafo del slot: «${LINEA_DICTADA}»`)
+controlPositivo('  la línea con un carácter cambiado se detecta', WEB_PROD.replace('Banú Scents)', 'Banu Scents)'), laLinea)
+controlPositivo('  y la del dictado con los nombres cortos', WEB_PROD.replace('The Ethereal Resort, Noir Dining in the Void y Skyline Estates', 'Ethernal, Noir y Skyline'), laLinea)
+const nombresDeLasFuentes = (linea: string): boolean =>
+  linea.includes(LOGOTIPO) && CASOS_DE_WEB.every((c) => linea.includes(FUENTE_DE_PROYECTOS.find((p) => p.slug === c.slug)?.nombre ?? '\u0000')) &&
+  VIDEO.demos.length === 3 && VIDEO.demos.every((slug) => linea.includes(FUENTE_DE_DEMOS.find((d) => d.slug === slug)?.nombre ?? '\u0000'))
+afirmar(nombresDeLasFuentes(VIDEO.linea), '  y dice la marca (LOGOTIPO), los tres casos con su nombre de PROYECTOS y las tres demos con su nombre de la sección Demos del home')
+controlPositivo('  una línea sin una de las demos se detecta', VIDEO.linea.replace('Skyline Estates', 'Skyline'), nombresDeLasFuentes)
+// En Software e IA el slot no se monta: ni el bloque, ni un <video>, ni la pausa.
+const sinVideoDeTrabajos = (html: string): boolean => bloqueDe(html, 'trabajos') === null && videos(html).length === 0 && !html.includes('data-video-de-trabajos') && !html.includes('pausa-del-video')
+afirmarIgual(fallan((p) => p.servicio.slug === 'paginas-web' || sinVideoDeTrabajos(p.html)), [], 'en Software e IA, en los dos modos, el slot de trabajos no se monta: ni el bloque, ni un <video>, ni la pausa')
+controlPositivo('  Software con el video de web se detecta', pagina({ ...SOFTWARE_A_MEDIDA, prueba: { ...SOFTWARE_A_MEDIDA.prueba, video: VIDEO } }, false), sinVideoDeTrabajos)
+// El velo (D4): las clases dicen los números de `veloDelVideo.ts`, y el texto del slot va en el papel (`text-fondo`) encima.
+const pct = (alfa: number): number => Math.round(alfa * 100)
+const veloComoDice = (clases: string): boolean => {
+  const c = clases.split(/\s+/)
+  return c.includes('bg-linear-to-t') && c.includes(`from-tinta/${pct(VELO_DEL_VIDEO.alfaAlPie)}`) && c.includes(`via-tinta/${pct(VELO_DEL_VIDEO.alfaBajoElTexto)}`) &&
+    c.includes(`via-${pct(VELO_DEL_VIDEO.altoDelTexto)}%`) && c.includes('to-transparent') && VELO_DEL_VIDEO.alfaBajoElTexto >= 0.7
+}
+const textoEnPapel = (html: string): boolean => [...aperturas(html, 'h2'), ...aperturas(html, 'p')].every((a) => clasesDe(a).includes('text-fondo')) && aperturas(html, 'h2').length === 1
+afirmar(veloComoDice(CLASES_DEL_VELO) && BLOQUE_DEL_VIDEO.includes(`<div aria-hidden="true" class="absolute inset-0 ${CLASES_DEL_VELO}">`) && textoEnPapel(BLOQUE_DEL_VIDEO),
+  `el velo es tinta en degradé: ${pct(VELO_DEL_VIDEO.alfaAlPie)} % al pie y ${pct(VELO_DEL_VIDEO.alfaBajoElTexto)} % (0,7 o más) hasta el ${pct(VELO_DEL_VIDEO.altoDelTexto)} % del alto; el título y la línea van en text-fondo encima`)
+// Las clases del control se arman por partes: escritas enteras, el escaneo de Tailwind (que lee los tests) las emitiría.
+controlPositivo('  un velo al 60 % bajo el texto se detecta', CLASES_DEL_VELO.replace(`via-tinta/${pct(VELO_DEL_VIDEO.alfaBajoElTexto)}`, `via-tinta/${'6'}0`), veloComoDice)
+controlPositivo('  y una línea en tinta sobre el velo', BLOQUE_DEL_VIDEO.replace(/(<p[^>]*class="[^"]*)text-fondo/, '$1text-tinta'), textoEnPapel)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('13 · La ruta: publica exactamente PUBLICADOS, y la metadata no hereda el canonical del home')

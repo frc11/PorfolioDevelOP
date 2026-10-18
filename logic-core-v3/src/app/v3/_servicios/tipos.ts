@@ -86,11 +86,32 @@ export interface CtaDelPanel {
   readonly href: string | null
 }
 
+/** [M3] Una versión del video de trabajos: el archivo, su póster (el primer cuadro) y sus medidas. Las escribe `scripts-servicios/montar.ts`. */
+export interface VersionDelVideo {
+  readonly video: string
+  readonly poster: string
+  readonly ancho: number
+  readonly alto: number
+}
+
+/** [M3] El video de trabajos (slot 6): dos versiones (la que toca sale de la orientación de la pantalla) y la línea que va sobre el velo. */
+export interface VideoDeTrabajos {
+  readonly horizontal: VersionDelVideo
+  readonly vertical: VersionDelVideo
+  /** Las demos del montaje, por su slug en el catálogo del home (`datos/fuenteDeDemos.ts`). */
+  readonly demos: readonly string[]
+  /** Dictada (M3): separa los sitios de clientes de las demos propias, con los nombres de las dos fuentes. */
+  readonly linea: string
+}
+
 export interface Prueba {
   readonly casos: readonly Caso[]
-  /** Una línea propia; por ejemplo, «2 sistemas más en desarrollo» (SPEC §7.2). */
+  /** Una línea propia; por ejemplo, «2 sistemas más en desarrollo» (SPEC §7.2). [M3] Sin slot que la muestre: queda para la réplica. */
   readonly nota: string | null
+  /** [M3] Sin slot que lo muestre (el slot 6 es solo de Páginas web): queda para la réplica, con la demo del panel. */
   readonly ctaPanel: CtaDelPanel | null
+  /** [M3] `null` = el slot 6 no se monta. Solo Páginas web lo tiene. */
+  readonly video: VideoDeTrabajos | null
 }
 
 export interface PreguntaFrecuente {

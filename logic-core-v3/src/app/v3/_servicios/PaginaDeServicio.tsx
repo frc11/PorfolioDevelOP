@@ -10,7 +10,7 @@
  *   · El CUERPO, del Qué hacemos al cierre provisorio: secciones opacas en papel, con tinta y el acento oscuro.
  *
  * ── [M1] El orden de la maqueta (M0 §1.3), con cómo entra cada uno ────────
- *     1 Qué hacemos · progresivo        6 Trabajos (el video del M3) · gatillo; hasta el M3, solo su marcador en desarrollo
+ *     1 Qué hacemos · progresivo        6 Trabajos (el video, M3) · gatillo; solo en Páginas web
  *     2 Qué incluye · progresivo        7 Cómo trabajamos · progresivo
  *     3 Precio · progresivo             8 FAQ · el panel quieto
  *     4 El CTA del precio · gatillo     9 El llamado · gatillo
@@ -61,7 +61,7 @@ export function PaginaDeServicio({ servicio, enDesarrollo = EN_DESARROLLO }: Pag
         <Precio precio={servicio.precio} enDesarrollo={enDesarrollo} />
         <LlamadoDelPrecio servicio={servicio} />
         <Extra extra={servicio.extra} enDesarrollo={enDesarrollo} />
-        <Trabajos prueba={servicio.prueba} enDesarrollo={enDesarrollo} />
+        <Trabajos prueba={servicio.prueba} />
         <Proceso proceso={servicio.proceso} prueba={servicio.prueba} enDesarrollo={enDesarrollo} />
         <Faq faq={servicio.faq} enDesarrollo={enDesarrollo} />
         <Llamado servicio={servicio} />

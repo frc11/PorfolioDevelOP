@@ -1,0 +1,205 @@
+{
+  "versiones": {
+    "horizontal": {
+      "video": "/servicios/paginas-web/trabajos-horizontal.mp4",
+      "poster": "/servicios/paginas-web/trabajos-horizontal.webp",
+      "bytesDelVideo": 3962398,
+      "sha256DelVideo": "1f4693a4ddf32139b69e88dbc5934a5d1e3056fea8d04645ddf31fdcc2ed98e5",
+      "bytesDelPoster": 39404,
+      "sha256DelPoster": "cad0fef5c11f4e5ed5ec1babfde6be0919f1ab8b53284f8e81be7ca4ae38df62",
+      "crf": 28,
+      "ancho": 1280,
+      "alto": 800,
+      "cuadros": 720,
+      "segundos": 24,
+      "codec": "avc1",
+      "pixFmt": "yuv420p",
+      "pistasDeAudio": 0,
+      "faststart": true,
+      "tramos": [
+        {
+          "tipo": "caso",
+          "slug": "el-garage",
+          "fuente": "public/portfolio/el-garage/escritorio.mp4",
+          "desdeElCuadro": 82,
+          "cuadros": 68
+        },
+        {
+          "tipo": "demo",
+          "slug": "ethereal",
+          "fuente": "~/.cache/servicios/m3/ethereal-escritorio",
+          "desdeElCuadro": 0,
+          "cuadros": 135
+        },
+        {
+          "tipo": "caso",
+          "slug": "esquina-estudio",
+          "fuente": "public/portfolio/esquina-estudio/escritorio.mp4",
+          "desdeElCuadro": 0,
+          "cuadros": 135
+        },
+        {
+          "tipo": "demo",
+          "slug": "noir",
+          "fuente": "~/.cache/servicios/m3/noir-escritorio",
+          "desdeElCuadro": 0,
+          "cuadros": 135
+        },
+        {
+          "tipo": "caso",
+          "slug": "banu-scents",
+          "fuente": "public/portfolio/banu-scents/escritorio.mp4",
+          "desdeElCuadro": 15,
+          "cuadros": 135
+        },
+        {
+          "tipo": "demo",
+          "slug": "skyline",
+          "fuente": "~/.cache/servicios/m3/skyline-escritorio",
+          "desdeElCuadro": 0,
+          "cuadros": 135
+        },
+        {
+          "tipo": "caso",
+          "slug": "el-garage",
+          "fuente": "public/portfolio/el-garage/escritorio.mp4",
+          "desdeElCuadro": 15,
+          "cuadros": 67
+        }
+      ]
+    },
+    "vertical": {
+      "video": "/servicios/paginas-web/trabajos-vertical.mp4",
+      "poster": "/servicios/paginas-web/trabajos-vertical.webp",
+      "bytesDelVideo": 3661483,
+      "sha256DelVideo": "5f0c63817f6b45a247834d7b66621732afe10002822de9243799a7fe3b853688",
+      "bytesDelPoster": 28016,
+      "sha256DelPoster": "1a4c5d2a15fb275d8dbb4b26eeab112bc2138694f92bfe2fb6eb9f0f5a9ea32c",
+      "crf": 32,
+      "ancho": 720,
+      "alto": 1560,
+      "cuadros": 720,
+      "segundos": 24,
+      "codec": "avc1",
+      "pixFmt": "yuv420p",
+      "pistasDeAudio": 0,
+      "faststart": true,
+      "tramos": [
+        {
+          "tipo": "caso",
+          "slug": "el-garage",
+          "fuente": "public/portfolio/el-garage/movil.mp4",
+          "desdeElCuadro": 79,
+          "cuadros": 68
+        },
+        {
+          "tipo": "demo",
+          "slug": "ethereal",
+          "fuente": "~/.cache/servicios/m3/ethereal-movil",
+          "desdeElCuadro": 0,
+          "cuadros": 135
+        },
+        {
+          "tipo": "caso",
+          "slug": "esquina-estudio",
+          "fuente": "public/portfolio/esquina-estudio/movil.mp4",
+          "desdeElCuadro": 0,
+          "cuadros": 135
+        },
+        {
+          "tipo": "demo",
+          "slug": "noir",
+          "fuente": "~/.cache/servicios/m3/noir-movil",
+          "desdeElCuadro": 0,
+          "cuadros": 135
+        },
+        {
+          "tipo": "caso",
+          "slug": "banu-scents",
+          "fuente": "public/portfolio/banu-scents/movil.mp4",
+          "desdeElCuadro": 15,
+          "cuadros": 135
+        },
+        {
+          "tipo": "demo",
+          "slug": "skyline",
+          "fuente": "~/.cache/servicios/m3/skyline-movil",
+          "desdeElCuadro": 0,
+          "cuadros": 135
+        },
+        {
+          "tipo": "caso",
+          "slug": "el-garage",
+          "fuente": "public/portfolio/el-garage/movil.mp4",
+          "desdeElCuadro": 12,
+          "cuadros": 67
+        }
+      ]
+    }
+  },
+  "fuentes": [
+    {
+      "ruta": "public/portfolio/banu-scents/escritorio.mp4",
+      "bytes": 1965552,
+      "sha256": "35c11047fff712353a6c15d6b12228560d3498826e6e0955f8dd05a0a3201b28"
+    },
+    {
+      "ruta": "public/portfolio/banu-scents/movil.mp4",
+      "bytes": 1836812,
+      "sha256": "9bb0f7ff0419e9556280a430d28bcc152f9a229845e0ec0b0f86c0154cf21b05"
+    },
+    {
+      "ruta": "public/portfolio/el-garage/escritorio.mp4",
+      "bytes": 1937538,
+      "sha256": "17a308e257c888c18796b46ebfec8ffcf5bbf105d5a6cc350c013041ffd00234"
+    },
+    {
+      "ruta": "public/portfolio/el-garage/movil.mp4",
+      "bytes": 1947551,
+      "sha256": "346f3aab5039c4be4d3c60c18943656bd0881c9e77a6a251a7f190ad10d16dda"
+    },
+    {
+      "ruta": "public/portfolio/esquina-estudio/escritorio.mp4",
+      "bytes": 1908021,
+      "sha256": "c192be161b769febc314907dc42229ff00b095cc00248a31d1ea652695294de9"
+    },
+    {
+      "ruta": "public/portfolio/esquina-estudio/movil.mp4",
+      "bytes": 1966168,
+      "sha256": "18fa9ed87eb7c11ca10242e09d9b241977462c8f6bbe0d8767cd0bca033c1406"
+    }
+  ],
+  "demos": [
+    {
+      "slug": "ethereal",
+      "url": "https://template-ethernal.netlify.app/",
+      "grabacion": "escritorio: tiempo virtual · movil: tiempo virtual"
+    },
+    {
+      "slug": "noir",
+      "url": "https://template-noir.netlify.app/",
+      "grabacion": "escritorio: recordVideo · movil: recordVideo"
+    },
+    {
+      "slug": "skyline",
+      "url": "https://template-skyline.netlify.app/",
+      "grabacion": "escritorio: recordVideo · movil: recordVideo"
+    }
+  ],
+  "velo": {
+    "horizontal": {
+      "alfaBajoElTexto": 0.75,
+      "tinta": "#111111",
+      "fondo": "#F7F7F5",
+      "cuadrosMedidos": 48,
+      "peorContraste": 7.88
+    },
+    "vertical": {
+      "alfaBajoElTexto": 0.75,
+      "tinta": "#111111",
+      "fondo": "#F7F7F5",
+      "cuadrosMedidos": 48,
+      "peorContraste": 7.88
+    }
+  }
+}

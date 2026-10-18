@@ -89,6 +89,7 @@ export const IA_Y_AUTOMATIZACIONES: Servicio = {
     casos: [],
     nota: null,
     ctaPanel: { rotulo: 'Probá el panel', href: '/login' }, // D11: el SPEC deja el href [a definir]; mientras tanto va al login
+    video: null, // M3: el video de trabajos es solo de Páginas web; el slot 6 no se monta
   },
   faq: [
     {

@@ -1,61 +1,52 @@
 /**
- * [SERVICIOS M1] 6 · TRABAJOS — el slot del video (M0 §4). Reemplaza a la sección de casos con pósters, que se fue.
+ * [SERVICIOS M1 · M3] 6 · TRABAJOS — el video de trabajos (M0 §4): los sitios de los clientes intercalados con las demos propias.
  *
- * El video no existe todavía (lo graba y lo monta el M3): hasta entonces el slot es su marcador, que en desarrollo se ve y en
- * producción no se monta. Lo que el slot sigue llevando es lo que la sección vieja tenía y NO es un caso:
- *   · en IA, «Probá el panel» (el `CtaEnlace` del home a `/login`, D11), que en la réplica va con la demo del panel;
- *   · en Software, su nota («2 sistemas más en desarrollo»).
- * Ningún caso de Páginas web aparece en las otras dos páginas: los trabajos de cada servicio van en su «Cómo trabajamos».
+ * Arma su propia caja (como `Problema`, el CTA del precio y `Cierre`): la `<section>` en papel, como todo el cuerpo, y adentro un
+ * cuadro de una pantalla de alto con el video de fondo (`movimiento/VideoDeFondo`), el velo de tinta en degradé (D4,
+ * `veloDelVideo.ts`) y el texto en `text-fondo` sobre el velo, abajo, donde el velo es más denso. Sin la marca del acento: sobre el
+ * velo, el oscuro del servicio no pasa (M0 §4.7).
  *
- * Entra con el GATILLO (la tabla del M0). Si no queda nada que mostrar, el bloque no existe.
+ * El texto entero (el título y la línea) entra con el GATILLO, con su guarda en reposo: «gatillo para el texto» (M0 §2.3). El título
+ * NO entra por línea como en los demás bloques: vive al pie de un cuadro de una pantalla, y el revelado por línea termina con el pie a
+ * 240 px del borde de abajo, así que con el cuadro justo en pantalla quedaba a medio revelar (medido a 1440).
+ *
+ * [M3] Solo Páginas web tiene video. Software e IA no muestran este video ni ningún caso web: con `prueba.video` en `null` el slot no
+ * se monta (su nota y «Probá el panel» quedan en los datos para la réplica).
  */
 
-import { CtaEnlace } from '../../_componentes/chrome/Cta'
+import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
-import { textoOMarcador } from '../formato'
+import { Titular } from '../../_componentes/tipografia/Titular'
+import { Gatillo } from '../movimiento/Gatillo'
+import { VideoDeFondo } from '../movimiento/VideoDeFondo'
 import type { Prueba } from '../tipos'
-import { Bloque } from './Bloque'
+import { CLASES_DEL_PAPEL, idDelTituloDe } from './Bloque'
+import { CLASES_DEL_VELO } from './veloDelVideo'
 
-const TITULO = 'Trabajos' // C2: provisorio (el texto del video lo dicta Valentino, D6)
-const ROTULO_DEL_VIDEO = 'Video de trabajos' // C2: provisorio
+const TITULO = 'Trabajos' // C2: provisorio
 
-interface TrabajosProps {
-  readonly prueba: Prueba
-  readonly enDesarrollo: boolean
-}
-
-export function Trabajos({ prueba, enDesarrollo }: TrabajosProps): React.JSX.Element | null {
-  // El montaje del M3 todavía no existe: es un dato que falta, con el marcador en desarrollo y nada en producción.
-  const marcadorDelVideo = textoOMarcador(null, enDesarrollo)
-  const { ctaPanel } = prueba
-  const hayPanel = ctaPanel !== null && (ctaPanel.href !== null || textoOMarcador(null, enDesarrollo) !== null)
-  if (marcadorDelVideo === null && prueba.nota === null && !hayPanel) return null
+export function Trabajos({ prueba }: { readonly prueba: Prueba }): React.JSX.Element | null {
+  const { video } = prueba
+  if (video === null) return null
+  const idDelTitulo = idDelTituloDe('trabajos')
   return (
-    <Bloque nombre="trabajos" titulo={TITULO} panel="gatillo">
-      <div className="flex flex-col gap-8">
-        {marcadorDelVideo === null ? null : <Cuerpo className="text-tinta-media">{`${ROTULO_DEL_VIDEO}: ${marcadorDelVideo}`}</Cuerpo>}
-        {prueba.nota === null ? null : <Cuerpo className="text-tinta-media">{prueba.nota}</Cuerpo>}
-        {hayPanel ? <PanelDeLaDemo ctaPanel={ctaPanel} enDesarrollo={enDesarrollo} /> : null}
-      </div>
-    </Bloque>
-  )
-}
-
-/** «Probá el panel» (IA): un enlace de verdad. Sin destino todavía ([a definir]) es solo un marcador de desarrollo. */
-function PanelDeLaDemo({
-  ctaPanel,
-  enDesarrollo,
-}: {
-  readonly ctaPanel: NonNullable<Prueba['ctaPanel']>
-  readonly enDesarrollo: boolean
-}): React.JSX.Element | null {
-  if (ctaPanel.href === null) {
-    const marcador = textoOMarcador(null, enDesarrollo)
-    return marcador === null ? null : <Cuerpo className="text-tinta-media">{`${ctaPanel.rotulo}: ${marcador}`}</Cuerpo>
-  }
-  return (
-    <div>
-      <CtaEnlace href={ctaPanel.href} rotulo={ctaPanel.rotulo} />
-    </div>
+    <section data-bloque="trabajos" aria-labelledby={idDelTitulo} className={`${CLASES_DEL_PAPEL} pt-12 escritorio:pt-20`}>
+      <Envoltorio>
+        <div className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden bg-tinta">
+          <VideoDeFondo horizontal={video.horizontal} vertical={video.vertical}>
+            <div aria-hidden="true" className={`absolute inset-0 ${CLASES_DEL_VELO}`} />
+            {/* Por debajo de 1024 el texto llega hasta el borde derecho: `pb-20` le deja lugar al botón de pausa, abajo a la derecha. */}
+            <Gatillo className="relative max-w-2xl p-6 pb-20 escritorio:p-12">
+              <div className="flex flex-col gap-4">
+                <Titular id={idDelTitulo} nivel="titulo-l" como="h2" className="text-balance text-fondo">
+                  {TITULO}
+                </Titular>
+                <Cuerpo className="text-fondo">{video.linea}</Cuerpo>
+              </div>
+            </Gatillo>
+          </VideoDeFondo>
+        </div>
+      </Envoltorio>
+    </section>
   )
 }
