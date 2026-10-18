@@ -4,7 +4,7 @@
 
 1. **Leé lo que existe.** Las piezas del home se importan, no se copian:
    - `TituloDeVolumen`;
-   - `Titular` y `Textos` (`_componentes/tipografia/`);
+   - `Titular` y los textos de `Textos.tsx` (`Cuerpo`, `Caption`, `Micro`…), en `_componentes/tipografia/`;
    - los revelados de `_secciones/_contrato/`;
    - `Cta` y `CtaEnlace`;
    - `Contacto`, que se abre con `data-abre-contacto="panel"` + `data-precarga`;

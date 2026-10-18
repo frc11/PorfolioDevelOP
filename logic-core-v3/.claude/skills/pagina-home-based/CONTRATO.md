@@ -50,7 +50,7 @@ Es la parte estable de `claude/ESCENA-CONTRATO.md` (en el proyecto de claude.ai)
 - La variante es un componente de R3F que vive en `src/app/v3/_servicios/escena/` (o en la carpeta de la página dueña), se monta en la ranura que expone el home y recibe, como mínimo:
   - el avance de la intro (de 0 a 1);
   - el acento (el color claro);
-  - la calidad (completa o compacta);
+  - la calidad (plena o compacta: `NivelDeCalidad`, `_lib/escena/calidad.ts`);
   - si el usuario pidió menos movimiento.
 - La firma exacta y el presupuesto por cuadro los fija B12. Buscalos en el código antes de escribir una variante.
 - La ranura la desmonta al salir de la página.
@@ -59,19 +59,19 @@ Es la parte estable de `claude/ESCENA-CONTRATO.md` (en el proyecto de claude.ai)
 
 | Pieza | Dónde |
 |---|---|
-| Modal de contacto | `_chrome/contacto/Contacto.tsx`; abre con `[data-abre-contacto]`; preselección con `data-precarga="<IdDeServicio>"` |
-| `data-servicio` | Solo el contexto del acento del tema (`theme-develop.css`, `acento.ts`) |
+| Modal de contacto | `_chrome/contacto/Contacto.tsx`; abre con `[data-abre-contacto="panel"]` (`_chrome/contacto/apertura.ts`); preselección con `data-precarga="<IdDeServicio>"` |
+| `data-servicio` | Solo el contexto del acento del tema (`src/app/theme-develop.css`, `_secciones/_contrato/acento.ts`) |
 | Logotipo | `LOGOTIPO`, en `_componentes/marca/sistema.ts` |
 | Casos | `PROYECTOS`, en `_secciones/trabajos/proyectos.ts`; los medios, en `public/portfolio/<slug>/`. **Hoy los tres son de desarrollo web:** una página de otro servicio no los muestra como propios |
 | Enlace al Portfolio | Los deep links de B1 (formato en `docs/rediseno/SPRINT-B1-PORTFOLIO.md`), sin filtro por servicio por ahora |
 | Precios | `PRECIOS_DESDE`, en `src/app/v3/_servicios/precios.ts` |
 | Revelados | `_secciones/_contrato/` |
 | Llave de contenido falso | `_secciones/_contrato/llave.ts` |
-| Otras | `Cta`, `Titular`, `Textos`, `Envoltorio`, `Imagen`, `IdDeServicio` |
+| Otras | `Cta`, `Titular`, los textos de `Textos.tsx` (`Cuerpo`, `Caption`, `Micro`…), `Envoltorio`, `Imagen`, `IdDeServicio` |
 
 **Reservados del home**, que las páginas no usan:
 - los ids de las secciones y `portfolio-*`;
-- `data-panel`, `data-seccion-id`, `data-signo-de-la-tuya` y `data-servicio`;
+- `data-panel`, `data-seccion-id` y `data-servicio`;
 - `data-seccion`, salvo `invertida` en la raíz.
 
 ## Colores de servicio
@@ -79,7 +79,7 @@ Es la parte estable de `claude/ESCENA-CONTRATO.md` (en el proyecto de claude.ai)
 | Paleta | Web | Software | IA | Dónde |
 |---|---|---|---|---|
 | Oscuros | `#1D5B8F` | `#57429E` | `#1B6B4C` | Cuerpo en papel. Tokens `--color-acento-web`, `--color-acento-software`, `--color-acento-ia-automatizacion` |
-| Claros | `#8FC0E8` | `#AFA0E8` | `#7FCBA4` | Sobre la escena: la intro, la luz y las variantes. Tokens del tema desde B1.2c |
+| Claros | `#8FC0E8` | `#AFA0E8` | `#7FCBA4` | Sobre la escena: la intro, la luz y las variantes. Tokens `--color-acento-web-claro`, `--color-acento-software-claro`, `--color-acento-ia-automatizacion-claro` (y el alias `--color-acento-claro`), desde B1.2c |
 
 - Se usan los tokens, nunca el hex escrito a mano.
 - La paleta vieja de cian, verde, ámbar y violeta **no se usa**.
@@ -101,5 +101,5 @@ Es la parte estable de `claude/ESCENA-CONTRATO.md` (en el proyecto de claude.ai)
   - `scripts-servicios/**`, sus scripts de producción.
 - **`public/portfolio/` se puede leer** para producir assets propios (por ejemplo, con ffmpeg como binario del sistema, sin dependencia nueva). Nunca se escribe ahí.
 - **Si te sirve un script del home**, copiá el enfoque en tu carpeta: no lo edites ni lo importes.
-- **De nadie** (compartido con el sitio vivo): `src/lib/`, `chrome/`, `scene-camera.ts` y las zonas de Franco.
+- **De nadie** (compartido con el sitio vivo): `src/lib/` (con `scene-camera.ts` y `chromeReveal.ts`), `src/components/layout/` (el chrome del sitio vivo) y las zonas de Franco.
 - Si necesitás algo del otro lado, no lo tocás: lo pedís en el reporte como un pedido nuevo (P-H para el home, P-S para servicios).
