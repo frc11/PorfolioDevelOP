@@ -30,8 +30,13 @@ const CONTEXTO = 'https://schema.org'
 const NOMBRE_DEL_INICIO = 'Inicio' // C2: provisorio (SPEC §8: «Breadcrumb Home › Servicio»)
 
 type ImagenesDeOpenGraph = NonNullable<Metadata['openGraph']>['images']
+type ImagenesDeTwitter = NonNullable<Metadata['twitter']>['images']
 
-export function metadataDe(servicio: Servicio, imagenesDelPadre: ImagenesDeOpenGraph = []): Metadata {
+export function metadataDe(
+  servicio: Servicio,
+  imagenesDelPadre: ImagenesDeOpenGraph = [],
+  imagenesDeTwitterDelPadre: ImagenesDeTwitter = [],
+): Metadata {
   const direccion = hrefDe(servicio.slug)
   return {
     title: servicio.seo.title,
@@ -46,6 +51,13 @@ export function metadataDe(servicio: Servicio, imagenesDelPadre: ImagenesDeOpenG
       title: servicio.seo.title,
       description: servicio.seo.description,
       images: imagenesDelPadre,
+    },
+    // `twitter` también se reemplaza entero: sin esto hereda el título y la descripción del home.
+    twitter: {
+      card: 'summary_large_image',
+      title: servicio.seo.title,
+      description: servicio.seo.description,
+      images: imagenesDeTwitterDelPadre,
     },
   }
 }

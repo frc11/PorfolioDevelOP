@@ -16,8 +16,8 @@ import { esServicioSlug, type Servicio } from '../_servicios/tipos'
  *
  * Solo los slugs de `PUBLICADOS` (`_servicios/rutas.ts`). `generateStaticParams` sale de esa lista y `dynamicParams = false`
  * hace que cualquier otro valor sea 404; `servicioPublicado` lo repite con `notFound()`, así que un servicio con datos pero
- * sin publicar (`software-a-medida` hasta el S2) da 404 igual que `xyz`. Los segmentos estáticos de `/v3` (`componentes`,
- * `tipografia`, `motion`, …) le ganan a este dinámico del mismo nivel: siguen resolviendo.
+ * fuera de la lista (hasta el S2b lo era `software-a-medida`) da 404 igual que `xyz`. Desde el S2b están los tres. Los segmentos
+ * estáticos de `/v3` (`componentes`, `tipografia`, `motion`, …) le ganan a este dinámico del mismo nivel: siguen resolviendo.
  *
  * ── Qué monta ─────────────────────────────────────────────────────────────
  *
@@ -56,8 +56,8 @@ export async function generateMetadata(
   padre: ResolvingMetadata,
 ): Promise<Metadata> {
   const servicio = await servicioPublicado(params)
-  const { openGraph } = await padre
-  return metadataDe(servicio, openGraph?.images ?? [])
+  const { openGraph, twitter } = await padre
+  return metadataDe(servicio, openGraph?.images ?? [], twitter?.images ?? [])
 }
 
 export default async function PaginaDeUnServicio({ params }: PropiedadesDeLaPagina): Promise<React.JSX.Element> {

@@ -3,7 +3,8 @@
  *
  * La sección con su nombre accesible (`aria-labelledby` apunta al `h2`) y adentro un panel de vidrio: el título a la izquierda y el
  * contenido a la derecha desde 1024; por debajo, todo apila. La sección es transparente (sin fondo propio) y el panel es el vidrio
- * del Portfolio; el título entra por línea y el panel, entero, con los patrones de revelado del home (`movimiento/`).
+ * del Portfolio; el título entra por línea y el panel, entero, con los patrones de revelado del home (`movimiento/`), salvo el panel
+ * del FAQ (`panelQuieto`: cambia de alto al abrir una pregunta y un revelado atado al scroll lo correría).
  *
  * `data-bloque` es el gancho de los tests (nunca `data-seccion`, `data-panel` ni ids del home). Los nombres son los de SPEC §5, en
  * su orden. `Problema` (el `h1`, sin panel: va directo sobre el fondo) y `Cierre` arman su propia caja.
@@ -36,14 +37,16 @@ interface BloqueProps {
   readonly nombre: NombreDeBloque
   readonly titulo: string
   readonly children: React.ReactNode
+  /** El panel se queda en su lugar, sin revelado (el del FAQ: cambia de alto al abrir una pregunta). El título entra igual. */
+  readonly panelQuieto?: boolean
 }
 
-export function Bloque({ nombre, titulo, children }: BloqueProps): React.JSX.Element {
+export function Bloque({ nombre, titulo, children, panelQuieto = false }: BloqueProps): React.JSX.Element {
   const idDelTitulo = idDelTituloDe(nombre)
   return (
     <section data-bloque={nombre} aria-labelledby={idDelTitulo} className="py-3 escritorio:py-4">
       <Envoltorio>
-        <PanelDeVidrio>
+        <PanelDeVidrio quieto={panelQuieto}>
           <div className="flex flex-col gap-8 escritorio:grid escritorio:grid-cols-12 escritorio:gap-x-[var(--grilla-canal-amplio)]">
             <TitularQueEntra
               id={idDelTitulo}

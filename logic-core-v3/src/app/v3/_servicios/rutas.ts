@@ -27,8 +27,11 @@ export function urlAbsolutaDe(ruta: string): string {
   return `${ORIGEN_DEL_SITIO}${ruta}`
 }
 
-/** Las páginas que la ruta sirve. S1b: solo Páginas web. El S2 suma las otras dos cambiando esta línea. */
-export const PUBLICADOS: readonly ServicioSlug[] = ['paginas-web']
+/**
+ * Las páginas que la ruta sirve: los tres servicios, en el orden del SPEC (S2b; hasta el S2 era solo `paginas-web`). Sacar uno de
+ * acá lo devuelve a 404 y lo saca del cierre de las otras páginas, sin tocar nada más.
+ */
+export const PUBLICADOS: readonly ServicioSlug[] = ['paginas-web', 'software-a-medida', 'ia-y-automatizaciones']
 
 /** `/v3/paginas-web`. Se navega con `<a href>` y recarga completa, nunca con `router.push`. */
 export function hrefDe(slug: ServicioSlug): string {

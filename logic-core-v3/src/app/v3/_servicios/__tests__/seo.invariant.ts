@@ -12,6 +12,8 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import type { Metadata } from 'next'
+
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { SERVICIOS } from '../datos/servicios'
@@ -131,6 +133,17 @@ for (const servicio of SERVICIOS) {
   afirmar(meta.alternates?.canonical === hrefDe(servicio.slug) && meta.openGraph?.url === hrefDe(servicio.slug), '  canonical y openGraph.url son los de SU página, no los del home')
   afirmar(meta.openGraph?.siteName === LOGOTIPO && meta.openGraph?.title === servicio.seo.title, '  y el openGraph se rearma completo (siteName, title, description)')
 }
+for (const servicio of SERVICIOS) {
+  const meta = metadataDe(servicio)
+  afirmar(meta.twitter?.title === servicio.seo.title && meta.twitter?.description === servicio.seo.description, `${servicio.slug}: twitter lleva el title y la description de SUS datos (sin esto hereda los del home)`)
+}
+const tarjetaDe = (meta: Metadata): string | undefined => {
+  const twitter = meta.twitter
+  return twitter !== null && twitter !== undefined && 'card' in twitter ? twitter.card : undefined
+}
+afirmarIgual(tarjetaDe(metadataDe(PRIMERO)), 'summary_large_image', 'twitter: la tarjeta grande, como la del layout raíz')
+afirmarIgual(metadataDe(PRIMERO, ['/imagen.png'], ['/tarjeta.png']).twitter?.images, ['/tarjeta.png'], 'las imágenes de twitter del padre pasan tal cual (se reemplaza entero)')
+controlPositivo('una metadata sin twitter propio (hereda el del home) se detecta', { ...metadataDe(PRIMERO), twitter: undefined } as Metadata, (m: Metadata) => m.twitter?.title === PRIMERO.seo.title)
 afirmarIgual(metadataDe(PRIMERO, ['/imagen.png']).openGraph?.images, ['/imagen.png'], 'las imágenes del padre pasan tal cual al openGraph (se reemplaza entero)')
 controlPositivo('un canonical al home se detecta', { ...metadataDe(PRIMERO), alternates: { canonical: urlAbsolutaDe(HREF_DEL_HOME) } }, (m) => m.alternates?.canonical === hrefDe(PRIMERO.slug))
 

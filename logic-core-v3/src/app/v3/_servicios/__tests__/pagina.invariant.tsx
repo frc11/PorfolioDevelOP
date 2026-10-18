@@ -191,9 +191,11 @@ controlPositivo('una lista sin role se detecta', '<ul class="flex"><li>a</li></u
 const PERMITIDOS = new Set<string>([HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe), '/login'])
 const enlacesBien = (html: string): boolean => aperturas(html, 'a').every((a) => /\shref="[^"]+"/.test(a)) && enlacesInternos(html).every((h) => PERMITIDOS.has(h))
 afirmarIgual(fallan((p) => enlacesBien(p.html)), [], 'todo <a> tiene href, y los internos solo llevan al home, a una página de PUBLICADOS o a /login')
-controlPositivo('un enlace a una página sin publicar se detecta', '<a href="/v3/software-a-medida">x</a>', enlacesBien)
-const hrefsDelCierre = valoresDe(bloqueDe(WEB_PROD, 'cierre') ?? '', 'href')
-afirmarIgual(hrefsDelCierre, [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)], 'el cierre enlaza al home y a las páginas de PUBLICADOS, nada más')
+controlPositivo('un enlace a una página que no es de PUBLICADOS se detecta', '<a href="/v3/otra-pagina">x</a>', enlacesBien)
+afirmarIgual(fallan((p) => valoresDe(bloqueDe(p.html, 'cierre') ?? '', 'href').join() === [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)].join()), [], 'el cierre de cada página enlaza al home y a las páginas de PUBLICADOS, nada más: con las tres publicadas, las tres')
+controlPositivo('un cierre que no enlaza a todas se detecta', '<footer data-bloque="cierre"><a href="/v3">a</a><a href="/v3/paginas-web">b</a></footer>', (h: string) => valoresDe(bloqueDe(h, 'cierre') ?? '', 'href').join() === [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)].join())
+afirmarIgual(PUBLICADOS, SERVICIOS.map((s) => s.slug), 'PUBLICADOS tiene los tres servicios, en el orden del SPEC (S2b)')
+controlPositivo('un PUBLICADOS al que le falta uno se detecta', ['paginas-web', 'software-a-medida'], (l: readonly string[]) => JSON.stringify(l) === JSON.stringify(SERVICIOS.map((s) => s.slug)))
 const conCabecera = (html: string): boolean => new RegExp(`<header>[\\s\\S]*?<a href="${HREF_DEL_HOME}"[^>]*>[\\s\\S]*?${LOGOTIPO}[\\s\\S]*?</a>[\\s\\S]*?</header>[\\s\\S]*?<main`).test(html)
 afirmar(conCabecera(WEB_PROD), `el encabezado es un enlace a ${HREF_DEL_HOME} con el logotipo, antes del main`)
 controlPositivo('una página sin el enlace del encabezado se detecta', '<header></header><main></main>', conCabecera)
@@ -238,6 +240,11 @@ controlPositivo('un marcado sin paneles de vidrio se detecta', '<main><section d
 const conRevelado = (html: string, nombre: string): boolean => (bloqueDe(html, nombre) ?? '').includes(`data-arbol="${MARCA_HOME_QUIETO}"`)
 afirmarIgual(fallan((p) => bloquesEnOrden(p.html).every((b) => conRevelado(p.html, b))), [], 'cada bloque cuelga de los patrones de revelado del home (el seam `Bloque`: sin coreografía, el contenido sale quieto y en su lugar)')
 controlPositivo('un bloque sin revelado se detecta', '<section data-bloque="faq"><h2>FAQ</h2></section>', (h: string) => conRevelado(h, 'faq'))
+const marcasDeRevelado = (html: string, nombre: string): number => ((bloqueDe(html, nombre) ?? '').match(new RegExp(`data-arbol="${MARCA_HOME_QUIETO}"`, 'g')) ?? []).length
+const MARCAS_ESPERADAS = (nombre: string): number => (nombre === 'faq' || nombre === 'cierre' ? 1 : 2) // título + panel; el FAQ no revela el panel y el cierre no tiene título
+afirmarIgual(fallan((p) => SIN_PROBLEMA(p.html).every((b) => marcasDeRevelado(p.html, b) === MARCAS_ESPERADAS(b))), [], 'se revela el título y el panel de cada bloque, menos el panel del FAQ (S2b): al abrir una pregunta cambia de alto, el motor vuelve a medir y un panel atado al scroll se corría de 15 a 27 px')
+controlPositivo('un FAQ con el panel revelado se detecta', `<section data-bloque="faq"><div data-arbol="${MARCA_HOME_QUIETO}"></div><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, (h: string) => marcasDeRevelado(h, 'faq') === MARCAS_ESPERADAS('faq'))
+controlPositivo('un bloque con el panel sin revelar se detecta', `<section data-bloque="precio"><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, (h: string) => marcasDeRevelado(h, 'precio') === MARCAS_ESPERADAS('precio'))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · El JSON-LD llega al HTML, y el FAQ se lee igual que se declara')
@@ -289,18 +296,21 @@ async function laRuta(): Promise<void> {
   }
   const publica = (lista: readonly { servicio: string }[]): boolean => JSON.stringify(lista) === JSON.stringify(PUBLICADOS.map((servicio) => ({ servicio })))
   afirmar(publica(ruta.generateStaticParams()), `generateStaticParams sale de PUBLICADOS: ${PUBLICADOS.join(', ')}`)
-  controlPositivo('una lista con un slug sin publicar se detecta', [{ servicio: 'paginas-web' }, { servicio: 'software-a-medida' }], publica)
+  controlPositivo('una lista a la que le falta un slug se detecta', [{ servicio: 'paginas-web' }, { servicio: 'software-a-medida' }], publica)
   afirmar(ruta.dynamicParams === false, 'dynamicParams es false: cualquier otro slug es 404')
   const padre = Promise.resolve({ openGraph: null } as unknown as ResolvedMetadata)
   const metadataDe = (servicio: string) => ruta.generateMetadata({ params: Promise.resolve({ servicio }) }, padre)
   const rechaza = async (servicio: string): Promise<boolean> => metadataDe(servicio).then(() => false, () => true)
-  afirmarIgual([await rechaza('software-a-medida'), await rechaza('ia-y-automatizaciones'), await rechaza('xyz')], [true, true, true], 'software-a-medida, ia-y-automatizaciones y xyz dan 404 (notFound), aunque haya datos de las dos primeras')
+  afirmarIgual([await rechaza('xyz'), await rechaza('paginas-web/x'), await rechaza('Paginas-Web')], [true, true, true], 'un slug que no es de ningún servicio da 404 (notFound): xyz, un hijo de una página y una mayúscula de más')
+  for (const servicio of SERVICIOS) {
+    afirmar(!(await rechaza(servicio.slug)), `${servicio.slug}: publicada, no da 404`)
+    const meta = await metadataDe(servicio.slug)
+    const robots = typeof meta.robots === 'object' && meta.robots !== null && !(meta.robots instanceof URL) ? meta.robots : null
+    afirmar(meta.title === servicio.seo.title && meta.description === servicio.seo.description, '  title y description salen de SUS datos')
+    afirmar(robots !== null && !('index' in robots ? robots.index : true), '  robots: noindex, como todo /v3')
+    afirmar(meta.alternates?.canonical === hrefDe(servicio.slug) && meta.openGraph?.url === hrefDe(servicio.slug), `  alternates.canonical y openGraph.url son los de la propia página (${hrefDe(servicio.slug)}), no los del home`)
+  }
   controlPositivo('un slug publicado no da 404', await rechaza('paginas-web'), (r: boolean) => r)
-  const meta = await metadataDe('paginas-web')
-  const robots = typeof meta.robots === 'object' && meta.robots !== null && !(meta.robots instanceof URL) ? meta.robots : null
-  afirmar(meta.title === PAGINAS_WEB.seo.title && meta.description === PAGINAS_WEB.seo.description, 'title y description salen de los datos')
-  afirmar(robots !== null && !('index' in robots ? robots.index : true), 'robots: noindex, como todo /v3')
-  afirmar(meta.alternates?.canonical === hrefDe('paginas-web') && meta.openGraph?.url === hrefDe('paginas-web'), `alternates.canonical y openGraph.url son los de la propia página (${hrefDe('paginas-web')}), no los del home`)
   controlPositivo('el canonical del home se detecta', 'https://develop.com.ar', (c: string) => c === hrefDe('paginas-web'))
 }
 
