@@ -31,7 +31,7 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 
 import { enHorizontal, tramosDelPanel, type MuestraDelPanel } from './panel'
-import { CASOS_DE_LA_RUEDA, NOMBRES_DE_LOS_PASOS, laRuedaAnduvo, recorridoDeLosPasos } from './rueda'
+import { ANCLAS_DE_LOS_PASOS, CASOS_DE_LA_RUEDA, NOMBRES_DE_LOS_PASOS, laRuedaAnduvo, recorridoDeLosPasos } from './rueda'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'build'
@@ -40,6 +40,7 @@ const AGRESIVO = process.env.AGRESIVO === '1'
 const SIN_REIMPRESION = process.env.SIN_REIMPRESION === '1'
 const PANEL = process.env.PANEL ?? 'si'
 const RUEDA = process.env.RUEDA ?? 'si'
+const PILAS = process.env.PILAS === '1'
 const SALIDA = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'carga')
 const PERFIL = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'perfil')
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
@@ -351,16 +352,22 @@ async function laRuedaDelPortfolio(p: Page, archivo: string): Promise<number> {
   for (const caso of CASOS_DE_LA_RUEDA) {
     try {
       await p.goto('about:blank').catch(() => undefined)
+      // Cada caso carga con el mouse quieto sobre el panel, donde caen los lomos: la carga no activa ninguno (el puntero no se movió).
+      await p.mouse.move(1300, 450)
       await p.goto(`${BASE}/v3#${caso.ancla}`, { waitUntil: 'load', timeout: 120000 })
       await esperarLaEscena(p)
       await dormir(3500)
+      const alCargar = await p.evaluate(() => Number(document.querySelector('[data-pieza="escenario-del-portfolio"]')?.getAttribute('data-paso')))
+      const delAncla = (ANCLAS_DE_LOS_PASOS as readonly string[]).indexOf(caso.ancla)
+      if (alCargar !== delAncla) throw new Error(`con el mouse quieto la carga pasó de ${String(NOMBRES_DE_LOS_PASOS[delAncla])} a ${String(NOMBRES_DE_LOS_PASOS[alCargar] ?? alCargar)}`)
       const destino = await p.evaluate((slug) => {
         if (slug === null) return { x: innerWidth * 0.2, y: innerHeight * 0.5 }
         const b = document.querySelector(`[data-tira="${slug}"]`)?.getBoundingClientRect()
         return b === undefined ? null : { x: b.left + b.width / 2, y: b.top + b.height / 2 }
       }, caso.hover)
       if (destino === null) throw new Error(`sin el lomo de ${String(caso.hover)}`)
-      await p.mouse.move(destino.x, destino.y, { steps: 8 })
+      // Sobre un lomo, deslizando (el hover lo activa); a la columna, de un salto: arrastrado cruzaría los lomos y el hover los activaría.
+      await p.mouse.move(destino.x, destino.y, { steps: caso.hover === null ? 1 : 8 })
       await dormir(1500)
       await p.evaluate(MUESTREO_DE_LA_RUEDA)
       for (const m of caso.muescas) {
@@ -411,9 +418,14 @@ async function main(): Promise<void> {
   await demorarLasFuentes(cdp, () => demoraDeLasFuentes)
   const errores: string[] = []
   const avisos: string[] = []
-  p.on('pageerror', (e) => errores.push(String(e.message).slice(0, 200)))
+  p.on('pageerror', (e) => {
+    errores.push(String(e.message).slice(0, 200))
+    // [B1.2c] `PILAS=1`: la pila entera de cada error de la página (el archivo y la columna del chunk), para encontrar el módulo.
+    if (PILAS) console.log(`PILA ${String(e.stack ?? e.message)}`)
+  })
   p.on('console', (m) => {
     if (m.type() === 'error') errores.push(m.text().slice(0, 200))
+    if (PILAS && m.type() === 'error') console.log(`PILA (consola) ${m.text()} @ ${JSON.stringify(m.location())}`)
     if (m.text().includes('[v3-carga]')) avisos.push(m.text().slice(0, 200))
   })
 

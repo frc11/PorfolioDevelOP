@@ -4,7 +4,8 @@
  */
 
 import { pasoConElPin } from './estado'
-import { pxDelScroll, type IndiceDePaso } from './pasos'
+import { PANTALLAS_POR_PASO, pasoEn, pxDelScroll, scrollDelPx, type IndiceDePaso } from './pasos'
+import { saltarA } from './saltar'
 
 export interface Medida {
   readonly px: number
@@ -61,4 +62,41 @@ export function cortarElPanel(caja: HTMLElement | null, antes: { current: boolea
     panel.style.setProperty('transition', 'none')
     panel.style.setProperty('translate', '100% 0')
   }
+}
+
+/** Un salto en vuelo: adónde va (px de la regla) y cómo cancelarlo; `id`, quién es (la llegada sólo suelta el suyo). */
+export interface Vuelo {
+  readonly id: symbol
+  readonly destino: number
+  readonly cancelar: () => void
+}
+
+/**
+ * [B1] Lleva la página a un píxel de la regla en `ms` (0: en silencio) y pone ya el paso de destino; mientras vuela, los bordes del
+ * camino no disparan nada y el diagnóstico de la carga (`?diag=carga`) no cuenta como desfasado su paso (`data-en-vuelo`).
+ *
+ * [B1.2c] El vuelo existe ANTES de lanzar el salto: uno inmediato (el hover, el clic, el tap) llega en el acto y su llegada lo lee. Armado
+ * adentro de su propio inicializador, la llegada sincrónica pedía el vuelo antes de que existiera (el arnés: «Cannot access before
+ * initialization» en cada hover) y la marca `data-en-vuelo` quedaba puesta para siempre.
+ */
+export function volarAlPx(
+  v: { readonly caja: { readonly current: HTMLElement | null }; readonly enVuelo: { current: Vuelo | null }; readonly actual: { current: IndiceDePaso }; readonly setPaso: (p: IndiceDePaso) => void },
+  px: number,
+  ms: number,
+  scrollExtra: number,
+): void {
+  const m = medir(v.caja.current)
+  if (m === null) return
+  v.enVuelo.current?.cancelar()
+  v.caja.current?.setAttribute('data-en-vuelo', 'si')
+  const id = Symbol('vuelo')
+  v.enVuelo.current = { id, destino: px, cancelar: () => undefined }
+  const cancelar = saltarA(scrollDelPx(px, m.tope, m.alto) + scrollExtra, ms, () => {
+    if (v.enVuelo.current?.id !== id) return
+    v.enVuelo.current = null
+    v.caja.current?.removeAttribute('data-en-vuelo')
+  })
+  if (v.enVuelo.current?.id === id) v.enVuelo.current = { id, destino: px, cancelar }
+  // El destino, ya: la tira cambia en este cuadro y la página la sigue.
+  publicar(v.caja.current, v.actual, v.setPaso, pasoEn(px, PANTALLAS_POR_PASO))
 }

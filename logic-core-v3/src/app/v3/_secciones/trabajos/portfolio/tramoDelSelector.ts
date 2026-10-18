@@ -23,6 +23,11 @@ export function anchoDe(caja: Element): AnchoDelPortfolio {
   return anchoDelValor(getComputedStyle(caja).getPropertyValue('--ancho-del-portfolio'))
 }
 
+/** [B1.3] Si el CSS de la sección decidió las historias del teléfono (`--modo-del-portfolio: historias`, abajo de 768). */
+export function historiasDe(caja: Element): boolean {
+  return getComputedStyle(caja).getPropertyValue('--modo-del-portfolio').trim() === 'historias'
+}
+
 /** Anota el selector y lo sigue al cambiar de ancho (relee la variable en cada `resize`). Devuelve cómo soltarlo. */
 export function anotarElSelector(caja: Element, panel: Element, paso: number): () => void {
   let tramo: TramoEstirado | null = null

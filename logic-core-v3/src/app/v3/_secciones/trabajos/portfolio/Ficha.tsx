@@ -60,8 +60,8 @@ export function Ficha({ proyecto, visible, reducido, desde }: { readonly proyect
   const ordenes = filas.map((_, i) => desde + filas.slice(0, i).filter((g) => !g.oculta).length)
   const ordenDeLaResena = desde + filas.filter((f) => !f.oculta).length
   return (
-    <div data-pieza="ficha" data-servicio={idDelServicioLlamado(proyecto.servicio) ?? undefined} className="flex flex-col gap-5">
-      <dl className="grid grid-cols-2 gap-x-8 gap-y-4">
+    <div data-pieza="ficha" data-servicio={idDelServicioLlamado(proyecto.servicio) ?? undefined} className="flex flex-col gap-5 max-escritorio:gap-3">
+      <dl className="grid grid-cols-2 gap-x-8 gap-y-4 max-escritorio:gap-y-3 max-tablet:gap-x-5">
         {filas.map((f, i) => (
           <motion.div key={f.campo} data-fila={f.campo} hidden={f.oculta} className="flex flex-col gap-1" {...enLaSecuencia(visible, ordenes[i], reducido)}>
             <dt>

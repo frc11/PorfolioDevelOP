@@ -29,16 +29,17 @@ const enfocar = (tira: number): void => document.getElementById(idsDeLaTira(SLUG
 /**
  * [B1.2c] ¿Activa el hover? Sólo con un puntero fino, sobre otro lomo, con el panel adentro, y si el puntero se movió de verdad desde
  * la última activación (los lomos que se reacomodan debajo no cuentan) y desde que la rueda tomó el control (`inerte`, `vivo.inerteDesde`: con el mouse
- * quieto, la rueda nunca reactiva un lomo). Puro: s76 lo prueba con los cuatro casos de la rueda.
+ * quieto, la rueda nunca reactiva un lomo). Y sólo con un `pointermove` (`mueve`): un lomo que llega debajo del mouse quieto (la carga,
+ * el scroll) da `pointerover` sin que el puntero se mueva. Puro: s76 lo prueba con los cuatro casos de la rueda.
  */
 export function activaElHover(
-  e: { readonly x: number; readonly y: number; readonly indice: number | null; readonly fino: boolean },
+  e: { readonly x: number; readonly y: number; readonly indice: number | null; readonly fino: boolean; readonly mueve: boolean },
   tira: number,
   adentro: boolean,
   activacion: { readonly x: number; readonly y: number } | null,
   inerte: { readonly x: number; readonly y: number } | null,
 ): boolean {
-  if (e.indice === null || e.indice === tira || !adentro || !e.fino) return false
+  if (e.indice === null || e.indice === tira || !adentro || !e.fino || !e.mueve) return false
   return seMovioDeVerdad(activacion, e.x, e.y) && seMovioDeVerdad(inerte, e.x, e.y)
 }
 
@@ -94,9 +95,12 @@ export function Acordeon({ vivo }: { readonly vivo: PortfolioVivo }): React.JSX.
 
   const alPasar = (e: React.PointerEvent<HTMLDivElement>): void => {
     puntero.current = { x: e.clientX, y: e.clientY }
+    // Sin activación todavía (recién cargada), el primer lugar conocido del puntero es la base: quieto, nunca activa.
+    if (activacion.current === null) activacion.current = puntero.current
     const indice = tiraDe(e.target)
     const fino = indice !== null && window.matchMedia(CONSULTA_DEL_PUNTERO_FINO).matches
-    if (!activaElHover({ x: e.clientX, y: e.clientY, indice, fino }, tira, fase === 'adentro', activacion.current, vivo.inerteDesde(e.clientX, e.clientY)) || indice === null) return
+    const mueve = e.type === 'pointermove'
+    if (!activaElHover({ x: e.clientX, y: e.clientY, indice, fino, mueve }, tira, fase === 'adentro', activacion.current, vivo.inerteDesde(e.clientX, e.clientY)) || indice === null) return
     activacion.current = { x: e.clientX, y: e.clientY }
     // En este cuadro: el proyecto se activa ya y el scroll se acomoda en silencio a su tramo.
     flushSync(() => vivo.saltarAlPaso(indice, true))

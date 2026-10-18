@@ -70,7 +70,7 @@ export function afirmarB12c(): void {
   const escenario = sinComentarios(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`))
   const cableado = (u: string, e: string): boolean =>
     /const caidaS = useTituloListo\('portfolio'\) \? LENTOS\.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO\.s/.test(u) &&
-    /useOrdenDeLaEscena\(fase === 'adentro', fase === 'adentro', caidaS, reducido\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.escena/.test(u) &&
+    /useOrdenDeLaEscena\(fase === 'adentro', historias \? fase === 'antes' && enCuadro : fase === 'adentro', caidaS, reducido\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.escena/.test(u) &&
     /!vivo\.escena && 'translate-x-full'/.test(e) && /<EncabezadoDelPortfolio seccion=\{seccion\} adentro=\{vivo\.encabezado\}/.test(e)
   afirmar(cableado(usePortfolio, escenario), '  y así se cablea: la escena (la cámara y el oscurecido de `PORTFOLIO_EN_LA_ESCENA`, y el panel) y el encabezado salen del orden, no del paso')
   controlPositivo('  el detector ve la escena atada al paso (B1.2b)', usePortfolio.replace('PORTFOLIO_EN_LA_ESCENA.adentro = orden.escena', "PORTFOLIO_EN_LA_ESCENA.adentro = vistaDelPaso(paso).fase === 'adentro'"), (u: string) => cableado(u, escenario))
@@ -137,9 +137,13 @@ export function afirmarB12c(): void {
   afirmarIgual(nombre(recorridoDeLaRueda(0, 1, [-1])), 'El Garage', 'hover en Esquina + una muesca hacia arriba → El Garage')
   afirmarIgual([nombre(destinoDeLaRueda(3, 1)), nombre(destinoDeLaRueda(0, -1)), nombre(recorridoDeLaRueda(0, null, [1, 1, 1, 1]))], ['Demos', 'arriba', 'Demos'], '  después de «la tuya» sigue a Demos; antes del primero sale hacia arriba; de a un proyecto, en orden')
   // Con el mouse quieto la rueda nunca reactiva un lomo: el hover queda inerte desde donde estaba el puntero cuando la rueda tomó el control.
-  const lomo = { x: 900, y: 400, indice: 2, fino: true }
+  const lomo = { x: 900, y: 400, indice: 2, fino: true, mueve: true }
   afirmar(!activaElHover(lomo, 3, true, null, { x: 900, y: 400 }) && !activaElHover({ ...lomo, x: 902, y: 401 }, 3, true, null, { x: 900, y: 400 }) && activaElHover({ ...lomo, x: 905 }, 3, true, null, { x: 900, y: 400 }), 'con el mouse quieto (o corrido menos de 4 px) la rueda nunca reactiva un lomo; moviéndolo de verdad, el hover vuelve')
   controlPositivo('  el detector ve el hover de B1.2b (sin la inercia de la rueda)', (e: typeof lomo, tira: number) => e.indice !== tira, (f: (e: typeof lomo, tira: number) => boolean) => !f(lomo, 3))
+  // El arnés lo encontró: cargando con el mouse quieto sobre el panel, los lomos que llegaban debajo (`pointerover`) se activaban solos.
+  const acordeonDelHover = sinComentarios(leer(`${PORTFOLIO}/Acordeon.tsx`))
+  afirmar(!activaElHover({ ...lomo, mueve: false }, 3, true, null, null) && activaElHover(lomo, 3, true, null, null) && /const mueve = e\.type === 'pointermove'/.test(acordeonDelHover) && /if \(activacion\.current === null\) activacion\.current = puntero\.current/.test(acordeonDelHover), 'un lomo que llega debajo del mouse quieto (la carga, el scroll: `pointerover` sin `pointermove`) no se activa, y recién cargada el primer lugar del puntero es la base; moviéndolo, sí')
+  controlPositivo('  el detector ve el hover de antes (el `pointerover` activaba)', (e: typeof lomo, tira: number) => e.indice !== tira, (f: (e: typeof lomo, tira: number) => boolean) => !f({ ...lomo, mueve: false }, 3))
   const muescas = (eventos: readonly (readonly [number, number])[], ocupado: (t: number) => boolean = () => false): number => {
     let g: GestoDeLaRueda = GESTO_QUIETO
     let pasos = 0
@@ -168,6 +172,11 @@ export function afirmarB12c(): void {
   const atrapa = (c: string): boolean => /if \(destino > scrollDelPx\(hasta, m\.tope, m\.alto\) \|\| destino < scrollDelPx\(desde, m\.tope, m\.alto\)\) saltarAlPaso\(vistaDelPaso\(paso\)\.tira\)/.test(c) && /gesto = \{ acumulado: 0, ultimo: ahora, disparado: true \}/.test(rueda)
   afirmar(atrapa(usePortfolio), '  la entrada del panel atrapa la inercia de un golpe fuerte (Lenis yendo más allá: se frena en el proyecto en que entra) y ese mismo gesto no da un paso')
   controlPositivo('  el detector ve la entrada sin atrapar', usePortfolio.replace('saltarAlPaso(vistaDelPaso(paso).tira)', 'undefined'), atrapa)
+  // El arnés lo encontró (la pila de `PILAS=1`): el salto inmediato llega en el acto, y su llegada pedía el vuelo antes de que existiera.
+  const vueloAntesDelSalto = (c: string): boolean =>
+    /v\.enVuelo\.current = \{ id, destino: px, cancelar: \(\) => undefined \}\s*const cancelar = saltarA\(/.test(c) && /if \(v\.enVuelo\.current\?\.id !== id\) return/.test(c) && !/cancelar: saltarA\(/.test(c)
+  afirmar(vueloAntesDelSalto(sinComentarios(leer(`${PORTFOLIO}/medida.ts`))) && /volarAlPx\(\{ caja, enVuelo, actual, setPaso \}, px, reducido \? 0 : ms, scrollExtra\)/.test(usePortfolio), '  el salto en silencio (el hover, el clic, el tap) no pide su vuelo antes de que exista: el vuelo se arma y después se lanza el salto (el arnés: «Cannot access before initialization» en cada hover, y la marca de vuelo puesta para siempre)')
+  controlPositivo('  el detector ve el vuelo armado adentro de su propio inicializador (B1.2b)', 'const vuelo = {\n  destino: px,\n  cancelar: saltarA(y, ms, () => { if (enVuelo.current !== vuelo) return }),\n}\nenVuelo.current = vuelo', vueloAntesDelSalto)
   afirmar(/return v\.fase === 'adentro' && pegado\(caja\.current\) && !conDialogo\(caja\.current\) \? v\.tira : null/.test(usePortfolio) && /else if \(d\.tipo === 'demos'\) irAlPx\(pxDeLaSeccion\(PANTALLAS_POR_PASO\), salida, -2\)/.test(usePortfolio), '  manda sólo con el panel adentro, pegado y sin un diálogo; a Demos va al final del pin (como el viaje del menú), con el tiempo de la salida en orden')
 
   // ═══════════════════════════════════════════════════════════════════════════

@@ -91,7 +91,7 @@ export function PistaDelPortfolio({ vivo, className }: { readonly vivo: Portfoli
   }, [vista, vivo.escena, vivo.paso])
   // Va siempre en el marcado (el contenido entero llega a las dos ramas) y se esconde con `hidden`.
   return (
-    <div aria-hidden="true" data-pieza="pista-del-portfolio" hidden={vista || !vivo.escena} className={cn('pointer-events-none items-center gap-2 text-tinta', className)}>
+    <div aria-hidden="true" data-pieza="pista-del-portfolio" hidden={vista || !vivo.escena} className={cn('pointer-events-none items-center gap-2 rounded-full bg-fondo/80 px-3 py-1 text-tinta', className)}>
       <Caption como="span" interletrado="micro" className="font-codigo uppercase">
         {CONTENIDO.pista}
       </Caption>

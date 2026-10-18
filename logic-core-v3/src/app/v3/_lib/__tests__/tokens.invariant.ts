@@ -188,6 +188,11 @@ async function principal(): Promise<void> {
     '--color-acento-ia-automatizacion-claro: #7FCBA4;',
     '--color-acento-software-claro: #AFA0E8;',
     '--color-acento-claro: var(--color-acento-web-claro);',
+    // Y el alias claro retiñido por los tres `[data-servicio]` (fuera de `@theme`, al lado de `--color-acento`): el de web repite la
+    // línea del defecto y el comparador no deduplica, así que entra dos veces.
+    '--color-acento-claro: var(--color-acento-web-claro);',
+    '--color-acento-claro: var(--color-acento-ia-automatizacion-claro);',
+    '--color-acento-claro: var(--color-acento-software-claro);',
     // ⚠ AGREGADO POR TEXTO-3: el cuarto breakpoint, y el primero que se usa
     // hacia abajo. Mismo número que `--fluido-piso` —el ancho más angosto al
     // que se midió el sistema—. Su motivo entero está en

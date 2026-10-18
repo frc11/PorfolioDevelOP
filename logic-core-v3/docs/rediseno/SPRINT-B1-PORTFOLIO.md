@@ -7,11 +7,11 @@ cada sprint al final).
 escritorio y tablet, historias tipo Instagram en el teléfono. Videos reales de los sitios, una ficha por proyecto, deep links y la
 escena oscurecida, **sin cambiar lo que se ve en el resto de la página**.
 
-**Estado: B1.1a, B1.1b, B1.2 y B1.2b (los ajustes del FRENO de B1.2, §12) hechos; FRENADO al final de B1.2b para que Valentino lo mire
-en :3000 (2026-10-17); B1.3 arranca recién con su aprobación.** El plan fue
+**Estado: B1.1a, B1.1b, B1.2, B1.2b (§12), B1.2c y B1.3 (los ajustes del FRENO de B1.2b y el teléfono, §13) hechos; FRENADO al final de
+B1.3 para que Valentino lo mire en :3000 (2026-10-18).** El plan fue
 aprobado con ajustes: las decisiones de la §9 están escritas en su lugar y los ajustes van en la §11, que **manda sobre el resto del
 plan** donde lo contradiga (el paso de 0,75 pantallas, los datos dictados, la llave para lo que falta, el oscurecido medido por capa).
-El log de cada sprint, en la §10; la lista del FRENO, al final del log de B1.2b. Lo que no pudo correr por memoria está marcado
+El log de cada sprint, en la §10; la lista del FRENO, al final del log de B1.2c + B1.3. Lo que no pudo correr por memoria está marcado
 «VERIFICAR TRAS REINICIO». El build de medición «antes» (`.next-probe`, ignorado por git, BUILD_ID `lcERRvtvbJDOVlh4Me-6P`) sigue en
 disco para las capturas de control.
 
@@ -1026,6 +1026,158 @@ este).
 11. **Las grabaciones de Demos, antes y después** — `~/.cache/b4-medicion/b12b/demos-antes-escritorio.webm`, `demos-despues-escritorio.webm`,
     `demos-antes-tablet.webm`, `demos-b12-tablet-rigida.webm` (la tablet de B1.2) y `demos-despues-tablet.webm`.
 
+### B1.2c + B1.3 · los ajustes del FRENO de B1.2b y el teléfono (2026-10-17/18) — FRENADO para que Valentino lo mire en :3000
+
+El pedido y cómo se resolvió cada punto, en la §13. Una corrida y un solo FRENO, con dos commits: `233fd262` (B1.2c: el código y los tests
+de los puntos 1 a 7) y el de B1.3 (el teléfono, lo que encontró el banco, el arnés y este log).
+
+**Hecho (B1.2c).**
+
+- **La cámara de frente y el título en el plano del logo** (punto 1): `poseDelPortfolio.ts` resuelve la pose de cinco números para que la
+  mirada quede en +z: la órbita pone la cámara en su lugar y los dos números del encuadre la dejan mirando derecho (un plano paralelo al
+  cuadro se proyecta sin perspectiva en cualquier lugar del cuadro). El título 3D se coloca con esa pose a la profundidad del logo: queda en
+  su plano. La columna es un bloque centrado en el alto: «Portfolio» ×1,15 con tope en el ancho de la columna (en `cqw`: 119,6 px a 1440,
+  103 a 1024, 62,1 a 820, 64,4 a 1023 y en el teléfono), la bajada y debajo el hueco del logo (`hueco.ts`: lo mide la sección en el DOM y
+  la escena encaja el logo adentro).
+- **El orden** (punto 2): `orden.ts` y `useOrdenDeLaEscena`; el panel, la cámara y el oscurecido siguen a `vivo.escena`; el encabezado, a
+  `vivo.encabezado` (el escenario los expone en `data-escena` y `data-encabezado`).
+- **Los rótulos y P-H2** (punto 3): `Ficha.tsx` (`CLASE_DEL_ROTULO`); en `theme-develop.css` los tres acentos claros y su alias con los
+  tres `[data-servicio]`; `AGREGADOS` y `tokens.invariant`; `acento.ts` (`FORMAS_PERMITIDAS_SOBRE_OSCURO`, `FORMAS_PROHIBIDAS_SOBRE_CLARO`);
+  `s5-codigo` admite el acento claro sólo en la sección de noche y el instrumento de contraste de s10 lo reconoce.
+- **La transición** (punto 4): `transicion.ts` y `useTransicionDeLasTiras`.
+- **Hover y rueda** (punto 5): `rueda.ts` y `useRuedaDelPortfolio` (en la captura, antes de Lenis: `lenisStopPropagation` y
+  `preventDefault`); `activaElHover` (el hover inerte); `saltarAlPaso(i, true)` (inmediato); la entrada que atrapa la inercia.
+- **«La tuya»** (punto 6): `FormularioDeLaTuya.tsx` (WhatsApp entra por `_chrome/enlaces.ts`: una sección no importa de otra),
+  `SignoDePregunta.tsx` y `signo.ts`.
+- **Tablet** (punto 7): `BarrasDelPortfolio.tsx` (las barras y la pista).
+
+**Hecho (B1.3, el teléfono).** Las historias son el MISMO marcado restilizado abajo de 768 (`max-tablet:`): la sección escribe
+`--modo-del-portfolio: historias` y el JS lo lee del CSS. Los lomos no se ven; la tira activa ocupa la pantalla con el video del teléfono
+(`MedioDeLaTira` lleva los dos videos y sólo el que está a la vista pide su archivo); la ficha es una hoja de vidrio que sube desde abajo
+(`CLASE_DE_LA_HOJA`: `contents` desde 768) con los rótulos y la marca de agua; dos toques (`ToquesDeLaHistoria`: el tercio izquierdo, el
+anterior; el resto, el siguiente, con el modelo de la rueda); el deslizamiento es el scroll de la página y, quieta, se asienta en el
+centro de su proyecto, a lo sumo uno más allá (`deslizamiento.ts` y `useDeslizamientoDelPortfolio`); «la tuya» al final con el «?», el
+formulario y WhatsApp; y el título llega en la aproximación y se va con la caída antes de que entre la historia (el orden con la regla del
+teléfono). `useAnclaDeLaCarga` salió de `usePortfolio.ts` por las 300 líneas.
+
+**Lo que encontraron el banco y `verificar` en el camino, y se arregló.**
+
+1. **La parallax del mouse en el banco.** Un banco con la ventana a la vista recibe el cursor real de Windows: el logo vivo aparecía 46 px
+   corrido y 8 % más grande que su hueco. Con el puntero de Playwright en el medio del cuadro cae en su hueco a ≤ 3 px. No era del sitio.
+2. **La tablet acostada (1023 × 768)**: las barras le sacaron 82 px a la tira y la ficha de El Garage no entraba (la reseña y «Visitar
+   sitio» quedaban afuera). Abajo de 1024 el medio va al 28 % del alto (`--alto-del-medio`) y la ficha con menos aire; la pista, sobre una
+   pastilla. Medido: entera.
+3. **La hoja del teléfono** medía el 60 % de la TIRA (no de la pantalla): a 375 y 360 «Visitar sitio» de El Garage quedaba debajo. Pasa a
+   dos tercios. Medido: entera.
+4. **`verificar`** (la primera vuelta): la transición de la hoja con la propiedad `translate` entre corchetes es un valor arbitrario que el lane no admite (→ `transition-transform`, que
+   en Tailwind 4 ya cubre `translate`); la sección importaba WhatsApp de otra sección (→ por una puerta del chrome: primero el
+   contenido del contacto, y la vuelta final de `verificar` mostró que s42 · N1 —«sin WhatsApp en el panel»— lee ese archivo entero, así
+   que la puerta es `_chrome/enlaces.ts` y el contenido del contacto quedó como estaba); y los lectores de
+   acentos de s1, s6 y del túnel archivado leían también los claros nuevos (→ los separan: `valoresDeAcentoClaroDelTema`; el buscador de
+   «acentos concretos» del lane suma los valores claros, más estricto).
+5. **Un bucle de `git add`** levantó lo que había dejado otro trabajo (`../.gitignore`, que ahora deja viajar `.claude/skills/`, y esa
+   carpeta): se sacó del índice antes del commit de B1.2c (sin tocar el disco) y no va en ninguno de los dos.
+6. **El arnés: un error de consola al abrir Contacto con «la tuya» activa** (`Cannot access 'l' before initialization`, la pila con
+   `PILAS=1`). Un salto inmediato (el del clic, el de las teclas, el de la carga) llamaba al cierre del vuelo ANTES de que existiera la
+   variable que lo guardaba: tiraba, y además `data-en-vuelo` quedaba puesto para siempre. El vuelo pasa a `volarAlPx` (`medida.ts`) con un
+   id propio: se marca antes de saltar y el cierre suelta sólo su vuelo. s76 lo afirma con su control.
+7. **El arnés: el caso «después de "la tuya", una muesca abajo» fallaba por el instrumento**: el puntero viajaba al medio de la columna en
+   ocho pasos y cruzaba los lomos (el hover los activaba). Va de un paso cuando el caso no tiene hover (`steps: 1`).
+8. **El arnés, otra vez en ese caso, y ésta era del sitio: cargar con el mouse quieto sobre el panel activaba lomos.** El puntero quedaba
+   donde lo había dejado el caso anterior; al cargar `#portfolio-la-tuya`, los lomos que se acomodaban debajo recibían `pointerover`
+   (Chrome los manda cuando el contenido cambia bajo un mouse quieto) y el paso iba de «la tuya» a El Garage y a Esquina sin un solo
+   movimiento (la sonda `b12c/sonda-rueda5.ts`: ningún `pointermove` en 9 s). Ahora activa sólo un `pointermove` (`activaElHover`,
+   `mueve`) y, recién cargada, el primer lugar del puntero es la base de los 4 px. s76 lo afirma con su control; el arnés carga cada caso
+   con el mouse quieto sobre el panel y falla si la carga se mueve del paso de su ancla.
+
+**Medido.** Build de medición `.next-b7` (BUILD_ID `eeL6_2G6-JCDSLx3LOJ7U`), `next start` en :3101, Chrome del sistema con la placa
+**NVIDIA GeForce RTX 5050** (`WEBGL_debug_renderer_info`). Scripts en el scratchpad (`b12c/banco.ts`, `analisis.ts`, `sonda-dedo.ts`),
+capturas en `~/.cache/b4-medicion/b12c/`.
+
+- **La composición** (`hoja-<ancho>x<alto>-<caso>.png`, el puntero en el medio): el título y la bajada a 0,00 % del ancho del eje de la
+  columna en los siete cuadros; el logo vivo (la malla proyectada, `__siluetaDelBanco`) a 0,25 % o menos y en su hueco a ≤ 3 px (de 0,991 a
+  1,003 de su tamaño); nada se corta (el título, la bajada, el logo, el formulario y el «?» adentro de su tira y del cuadro) y sin desborde
+  horizontal, a 1440, 1024, 820 × 1180, 1023 × 768, 390, 375 y 360. Las normales (s76 §9c, por la cuenta de la colocación): 0,0000° entre el
+  título y el logo; 1,35° con la vira del logo en su punta.
+- **El orden, en el sitio** (`orden.json`, 1440, cuadro a cuadro): saliendo, el encabezado se apaga a los 27 ms y la escena a los 1441 ms
+  (la caída entera del título); entrando desde abajo, la escena a los 27 ms y el encabezado a los 733 ms (la cámara llegó).
+- **El AA** (`aa.txt`, la escena, el vidrio, la hoja y las marcas de agua detrás; 1440, 1024, 820 y 390): los 134 textos pasan. Los rótulos
+  nuevos, 5,11:1 o más (el peor, en la hoja del teléfono sobre el video de Banú; en escritorio, 6,93:1 o más); los campos del formulario,
+  12,7:1 o más; «Enviar», 18:1 sobre su relleno; WhatsApp, 12,7:1 o más. El peor margen sobre el piso, ×1,14.
+- **El deslizamiento en el teléfono** (`deslizar.txt`, 390 × 844, eventos táctiles de verdad: el gesto sintético de CDP no scrollea en
+  este Chrome): corto y lento, vuelve al centro de El Garage; largo y rápido, el centro de Esquina; otro, el de Banú; hacia abajo, Esquina.
+  Uno por deslizamiento, centrado.
+- **El arnés de carga** (`scripts-carga/estres.ts`, 1440, el build final `20woPqqJMMEsG0XiPbrPx`, con el arreglo del punto 8): ENTERO
+  y de una sola pasada, sin reintentos (7,9 GB libres al arrancar, 34 min): «normal», «cpu», «red», «fondo» y «contexto» —las tres
+  últimas, las que en B1.2b cortó la memoria—, la entrada del panel y la rueda. Las **107 corridas** bien a 1,5 s, a 5,5 s y después de
+  scrollear; **0 errores** de la consola; ningún bloque medido solo al cargar a más de 2 px de la referencia (los dos que difieren medidos
+  en el layout son el título y la bajada del encabezado del Portfolio, que viven en lo pegado: los mismos de B1.2b); **26 avisos** del
+  guardián de los títulos, uno por corrida de «fondo» (la red de seguridad con la pestaña al fondo, que B1.2b vio con la sonda; el arnés no
+  guarda el texto) y las 26 bien. **El panel** entra en horizontal de las cuatro maneras (rueda, barra, menú y ancla) con el tope a ±0,0
+  px y sin cuadros en la salida. **La rueda**, los cinco casos: Banú → la tuya; El Garage → Esquina; Esquina → El Garage; con el mouse
+  quieto, Esquina → Banú → la tuya; la tuya → Demos; cada uno carga con el mouse quieto sobre el panel y no se mueve del paso de su
+  ancla. Las dos pasadas anteriores (los builds `eeL6_2G6…` y `KOoy8…`) son las que encontraron los puntos 6 y 8. El archivo:
+  `~/.cache/b4-medicion/cierre-a-ter/carga/build-b12c-final2.jsonl`.
+
+**Desvíos y por qué.**
+
+- **La cámara sigue del lado de atrás del logo** (el azimut ~194°, como en todo el tramo de Trabajos): «de frente» es la mirada
+  perpendicular a su plano. Pasar al frente era una vuelta de 180° en la entrada.
+- **«Portfolio» crece ×1,15 y no más** en escritorio (lo dice «un poco más grande»); en la tablet parada lo frena el ancho de la columna
+  (62,1 px: ×1,11).
+- **La salida por la rueda viaja lo que dura el orden** (la caída y el panel, ~2,1 s), así Demos llega después de que el título cayó; los
+  saltos entre proyectos, 420–900 ms.
+- **El hover activa también los lomos de la tablet con mouse** (una ventana de escritorio angosta): es el mismo modelo.
+- **El formulario corto viaja como el del panel** (`origen: 'panel'`, con lo que no pregunta vacío): el servidor no distingue de dónde
+  llegó. Si hace falta saberlo, es un cambio de la ruta (fuera de este sprint).
+- **«La tuya» en el teléfono no lleva los toques** (taparían el formulario): se vuelve deslizando.
+- **`visual-qa`** no pudo abrir la página: en este entorno no están sus herramientas de captura («VERIFICACIÓN PENDIENTE», como en
+  B1.2b). La verificación visual la hizo el banco (las hojas en escritorio, tablet parada y acostada y el teléfono a 390, 375 y 360) y la
+  hace Valentino en el FRENO.
+
+**Verificación.** Con el dev server de Valentino apagado. `tsc --noEmit` del repo entero: 0 errores. Lint de los 31 archivos de
+TypeScript tocados (el Portfolio, Trabajos, el chrome, los tests y el arnés): limpio. `verificar` completo sobre el árbol final: 83
+pasos, los 8 grupos rojos de la base (s1, s2, s3, s4, s5, s7, s8, s17) y ninguna falla nueva contra la lista de B1.2b (127 líneas; sólo
+cambian dos cuentas: el agregado de s5, de 629 a 651 afirmaciones, y s3-peso, de 111 a 115 tokens en el CSS servido, por los cuatro
+acentos claros). s76: 253 afirmaciones (con `s76-portfolio-b12c` y `s76-portfolio-historias`, cada afirmación nueva con su control);
+Trabajos 239; s75-carga 53; s10 240; s42 49, s43 27, s39 61 y s41 59; frontera 23. El build `qUGgP-9YS2PKcX7DGoXAb` sin errores y
+`prisma migrate status` al día (86 migraciones). Ningún envío real: el banco y el arnés bloquean `/api/`.
+
+**FRENO — lo que Valentino mira en :3000** (con su dev server prendido otra vez: lo apagué para el build, el banco y el arnés). B1.3 queda
+hecho; lo que sigue, con su aprobación.
+
+Escritorio (1440 y 1024):
+
+1. **«Portfolio» y el logo, de frente y en bloque** — http://localhost:3000/v3#portfolio-el-garage: el logo derecho (sin la vista desde
+   arriba), «Portfolio» más grande y más cerca, la bajada y el logo debajo, en el mismo eje de la mitad izquierda.
+2. **La salida y la entrada** — desde http://localhost:3000/v3#portfolio-la-tuya, bajar con la barra de scroll (o PageDown) hasta Demos:
+   primero cae el título entero y recién después vuelven la cámara y el oscurecido mientras el panel se va. Subir de nuevo: primero llega
+   la cámara y después aparece el título.
+3. **Los rótulos** — en El Garage, Esquina y Banú: «Fecha», «El problema», «Qué hicimos»… en Chivo Mono, mayúsculas y el celeste de web.
+4. **La transición** — en http://localhost:3000/v3#portfolio-el-garage, pasar el mouse por los lomos: se va entero el que estaba, un
+   respiro y entra el siguiente; cruzando varios rápido, una sola salida y una sola entrada.
+5. **Hover y rueda** — mouse sobre el lomo de Banú y una muesca abajo: «la tuya» (no Demos); sobre El Garage y una muesca abajo: Esquina;
+   sobre Esquina y una muesca arriba: El Garage; con el mouse quieto, la rueda nunca reactiva un lomo. Después de «la tuya», la rueda va a
+   Demos; antes de El Garage, sale hacia arriba. Un golpe fuerte de rueda desde Quiénes somos se frena en El Garage.
+6. **«La tuya»** — http://localhost:3000/v3#portfolio-la-tuya: el «?» centrado que se arma (el trazo, el relleno, el punto que cae y
+   rebota) y queda tenue; al volver a entrar se rearma. El formulario corto y «o escribinos por WhatsApp». Para ver el gracias y el error
+   sin enviar nada: http://localhost:3000/v3?envio=lento#portfolio-la-tuya y http://localhost:3000/v3?envio=error#portfolio-la-tuya (las
+   simulaciones del desarrollo, las mismas del contacto).
+
+Tablet (DevTools):
+
+7. **Parada, 820 × 1180** — http://localhost:3000/v3#portfolio-el-garage: las barras arriba del panel, la pista «Seguí bajando» la primera
+   vez (se va con el primer paso y no vuelve en la sesión), el tap en un lomo; en http://localhost:3000/v3#portfolio-la-tuya el «?» entra
+   entero en la tira angosta (la pregunta del FRENO de B1.2b).
+8. **Acostada, 1023 × 768** — http://localhost:3000/v3#portfolio-el-garage: la ficha entera, con «Visitar sitio».
+
+Teléfono (DevTools, 390 de ancho, con el modo táctil):
+
+9. **Las historias** — http://localhost:3000/v3#trabajos y bajar: «Portfolio» llega en la aproximación y se va con la caída; entra la
+   historia de El Garage (el video a pantalla completa, las barras arriba, la hoja que sube con la ficha y la marca de agua). Tocar a la
+   derecha o a la izquierda: el siguiente o el anterior. Deslizar hacia arriba: de a un proyecto (se asienta en el centro de cada uno). La
+   última es «la tuya» con el «?», el formulario y WhatsApp. Probar también a 375 y 360. El selector de escritorio apretado ya no está.
+
 ---
 
 ## 11. Ajustes de la aprobación (2026-10-17)
@@ -1156,3 +1308,49 @@ hechos»). **Esta sección manda sobre todo lo anterior** donde lo contradiga. A
   (y el `icon.svg` es una «B» de favicon). Fue el nombre como marca de agua tipográfica hasta que Valentino pasó el archivo
   (`scripts-portfolio/fuentes/banu-logo-oscuro.png`): las letras, con un umbral de luminancia 50 y potrace, en
   `public/portfolio/banu-scents/logo.svg` (aprobado por él).
+
+---
+
+## 13. Ajustes del FRENO de B1.2b y el teléfono (B1.2c y B1.3, 2026-10-17)
+
+Valentino miró B1.2b en :3000: «todo lo demás me encanta, muy buena sección». Lo que sigue va en una corrida, con un solo FRENO al final
+y dos commits (B1.2c y B1.3). **Esta sección manda sobre todo lo anterior** donde lo contradiga.
+
+### 13.1 Lo pedido, punto por punto, y cómo se hace
+
+1. **«Portfolio» y el logo miran al mismo lado.** La cámara del Portfolio mira PERPENDICULAR al plano del logo y el logo se corre en el
+   cuadro moviendo la cámara en un plano paralelo, no girándola (un plano paralelo al cuadro se proyecta sin perspectiva en cualquier
+   lugar del cuadro). Es la misma pose de cinco números del rig: la órbita pone la cámara en su lugar y los dos números del encuadre
+   se resuelven para que la mirada quede en +z (`poseDelPortfolio.ts`). El título 3D se coloca con esa pose a la profundidad del centro
+   del logo sobre la mirada: queda EN el plano del logo y de frente. La columna es un bloque centrado en el alto —«Portfolio» un 15 %
+   más grande (sin pasar del ancho de la columna), la bajada y debajo el hueco del logo medido en el DOM (`hueco.ts`)—, todo en el eje
+   de la columna. Criterio: el ángulo entre las normales, menos de 3°; el eje, a menos del 1 %; nada se corta a 1440, 1024 y en tablet.
+2. **La salida del título se tiene que ver.** El orden (`orden.ts`): primero se apaga lo que se apaga y después se prende lo que se
+   prende; entre lo que se apaga, el encabezado antes que la escena; entre lo que se prende, la escena antes que el encabezado. Saliendo,
+   el título y la bajada caen enteros (lo que tarda el título 3D: 1,4 s; sin el 3D, 0,6) y recién después vuelven la cámara y el
+   oscurecido mientras el panel se retrae (0,7 s). Entrando (también al subir), primero llega la cámara y después aparece el título.
+3. **Los rótulos de la ficha.** Chivo Mono (`font-codigo`), mayúsculas, el interletrado positivo del sistema (`micro`), un paso más
+   grandes (`caption`) y el acento claro de web (#8FC0E8). **P-H2**: los tres acentos claros (los «on-dark» de la marca) y su alias
+   `--color-acento-claro` entran al tema y a `AGREGADOS`; la regla de `acento.ts` deja el texto de acento claro sobre fondo invertido (y
+   `s5-codigo` lo admite sólo en la sección de noche). AA medido con la marca de agua detrás.
+4. **La transición entre proyectos** (`transicion.ts`): la salida completa del que se va (su contenido se apaga y las tiras se
+   reacomodan), un respiro de 200 ms y la entrada del siguiente. Con un scroll rápido que cruza varios, va al último con una sola salida
+   y una sola entrada.
+5. **Hover y scroll, el modelo nuevo.** El proyecto activo manda: el hover (y el clic, el tap y las teclas) lo activan y el scroll se
+   acomoda en silencio a su tramo (Lenis inmediato). La rueda avanza o retrocede de a un proyecto desde el activo (un gesto, un paso:
+   `rueda.ts`); después de «la tuya» sigue a Demos y antes del primero sale hacia arriba. Mientras la rueda tiene el control el hover
+   queda inerte hasta que el mouse se mueva 4 px. La entrada del panel atrapa la inercia de un golpe fuerte de rueda (se frena en el
+   proyecto en que entra). Los cuatro casos, en s76 y en el arnés (`scripts-carga/rueda.ts`).
+6. **«La próxima es la tuya».** El formulario corto (nombre, «WhatsApp o email», «¿Qué necesitás?», enviar) con la validación, el envío y
+   los textos de gracias y de error del contacto (importados), y «o escribinos por WhatsApp» con el enlace del pie (el número ya estaba
+   en `_secciones/cierre/contacto.ts`). El «?» centrado en la tira se arma: el trazo y el relleno del preloader (0,85 y 0,45 s) y el
+   punto que cae y rebota con la física de las piezas del pie (restitución 0,45, tres saltos); después queda quieto con el brillo de las
+   marcas de agua. Al volver a entrar se rearma; con movimiento reducido aparece armado. En la tablet parada se achica al ancho de la tira.
+7. **Tablet**: las barras de progreso arriba del panel (una por proyecto y «la tuya»), la pista «Seguí bajando» la primera vez (se va con
+   el primer paso y no vuelve en la sesión) y el tap en un lomo con el modelo del punto 5.
+8. **B1.3 · el teléfono** (abajo de 768): las historias, por CSS sobre el MISMO marcado (las dos ramas dicen lo mismo y la sección no
+   mide el ancho): la historia a pantalla completa con el video del teléfono, las barras arriba, la ficha como una hoja de vidrio que
+   sube desde abajo (con los rótulos y la marca de agua), dos toques (izquierda: anterior; derecha: siguiente), el deslizamiento que es
+   el scroll de la página y se asienta de a un proyecto, «la tuya» al final con el «?», el formulario y WhatsApp, y el título que llega
+   en la aproximación y se va con la caída antes de que entre la historia.
+9. **Verificación** con el dev server de Valentino apagado (§10, B1.2c + B1.3).

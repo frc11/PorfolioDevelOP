@@ -10,19 +10,20 @@ import { useTituloListo } from '../../../_lib/titulos3d/registro'
 import { LENTOS } from '../../../_lib/titulos3d/repeticiones'
 import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimiento'
 
-import { ANCLAS_DEL_PORTFOLIO } from './anclas'
 import { PRESENCIA_DEL_ENCABEZADO } from './EncabezadoDelPortfolio'
 import { distanciaEnPasos, seMovioDeVerdad, vistaDelPaso } from './estado'
 import { medirElHueco } from './hueco'
-import { conDialogo, cortarElPanel, escenarioDe, medir, pegado, publicar } from './medida'
+import { conDialogo, cortarElPanel, escenarioDe, medir, pegado, publicar, volarAlPx, type Vuelo } from './medida'
 import { ORDEN } from './orden'
 import {
   ANTES_DEL_PIN, PANTALLAS_POR_PASO, bordesDelPaso, centroDelPaso, mostradoDeDemos, pasoConHisteresis, pasoEn, pxDeLaSeccion, scrollDelPx,
   type AnchoDelPortfolio, type IndiceDePaso,
 } from './pasos'
-import type { DestinoDeLaRueda } from './rueda'
-import { duracionDelSalto, saltarA } from './saltar'
-import { anchoDe, anotarElSelector } from './tramoDelSelector'
+import { destinoDeLaRueda, type DestinoDeLaRueda } from './rueda'
+import { duracionDelSalto } from './saltar'
+import { anchoDe, anotarElSelector, historiasDe } from './tramoDelSelector'
+import { useAnclaDeLaCarga } from './useAnclaDeLaCarga'
+import { useDeslizamientoDelPortfolio, type ControlDelDeslizamiento } from './useDeslizamientoDelPortfolio'
 import { useOrdenDeLaEscena } from './useOrdenDeLaEscena'
 import { useRuedaDelPortfolio, type ControlDeLaRueda } from './useRuedaDelPortfolio'
 
@@ -61,6 +62,10 @@ export interface PortfolioVivo {
    * puntero de ahora, que la suelta si se movió de verdad.
    */
   readonly inerteDesde: (x: number, y: number) => { readonly x: number; readonly y: number } | null
+  /** [B1.3] Las historias del teléfono (lo decide el CSS, `--modo-del-portfolio`: la sección no mide el ancho). */
+  readonly historias: boolean
+  /** [B1.3] Al proyecto siguiente o al anterior desde el activo (los toques de la historia): el modelo de la rueda, el paso en silencio. */
+  readonly irAl: (sentido: 1 | -1) => void
 }
 
 /** [B1.2c] Lo que dura una rueda «reciente» (ms): la inercia de Lenis después del último evento de un golpe fuerte. */
@@ -77,15 +82,17 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   const [cerca, setCerca] = useState(false)
   const [enCuadro, setEnCuadro] = useState(false)
   const [visible, setVisible] = useState(true)
+  const [historias, setHistorias] = useState(false)
   const actual = useRef<IndiceDePaso>(ANTES_DEL_PIN)
-  const enVuelo = useRef<{ readonly destino: number; readonly cancelar: () => void } | null>(null)
+  const enVuelo = useRef<Vuelo | null>(null)
   const inerte = useRef<{ readonly x: number; readonly y: number } | null>(null)
   const ultimaRueda = useRef(Number.NEGATIVE_INFINITY)
 
-  // [B1.2c] El orden: el encabezado va con el panel (primero llega la cámara, después el título; al irse, al revés).
+  // [B1.2c] El orden: el encabezado va con el panel (primero llega la cámara, después el título; al irse, al revés). [B1.3] En las
+  // historias del teléfono el título llega en la aproximación y se va con la caída antes de que entre la historia.
   const fase = vistaDelPaso(paso).fase
   const caidaS = useTituloListo('portfolio') ? LENTOS.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO.s
-  const orden = useOrdenDeLaEscena(fase === 'adentro', fase === 'adentro', caidaS, reducido)
+  const orden = useOrdenDeLaEscena(fase === 'adentro', historias ? fase === 'antes' && enCuadro : fase === 'adentro', caidaS, reducido)
 
   // Cerca (una pantalla de margen; una vez cerca, queda) y en el cuadro, y la pestaña a la vista.
   useEffect(() => {
@@ -119,7 +126,8 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     [],
   )
 
-  // La anotación a la escena (la REGLA DE ALTURAS), la columna que deja el panel en este ancho (lo dice el CSS, no el JS), y [B1.2c] el hueco del logo, medido en el escenario (cambia con el ancho y con las fuentes: el bloque se centra en el alto).
+  // La anotación a la escena (la REGLA DE ALTURAS), la columna que deja el panel en este ancho y [B1.3] si son las historias (lo dice el
+  // CSS, no el JS), y [B1.2c] el hueco del logo, medido en el escenario (cambia con el ancho y con las fuentes: el bloque se centra).
   useEffect(() => {
     const el = caja.current
     const panel = el?.closest('[data-panel]') ?? null
@@ -128,14 +136,18 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
       PORTFOLIO_EN_LA_ESCENA.columna = COLUMNA_DEL_ANCHO[anchoDe(el)]
       PORTFOLIO_EN_LA_ESCENA.hueco = medirElHueco(escenarioDe(el)) ?? PORTFOLIO_EN_LA_ESCENA.hueco
     }
+    const alCambiar = (): void => {
+      medirLoDelAncho()
+      setHistorias(historiasDe(el))
+    }
     medirLoDelAncho()
-    window.addEventListener('resize', medirLoDelAncho)
+    window.addEventListener('resize', alCambiar)
     const columna = escenarioDe(el)?.querySelector('[data-pieza="columna-del-portfolio"]') ?? null
-    const tamano = new ResizeObserver(medirLoDelAncho)
+    const tamano = new ResizeObserver(alCambiar)
     if (columna !== null) for (const hijo of [columna, ...columna.children]) tamano.observe(hijo)
     const soltar = anotarElSelector(el, panel, PANTALLAS_POR_PASO)
     return () => {
-      window.removeEventListener('resize', medirLoDelAncho)
+      window.removeEventListener('resize', alCambiar)
       tamano.disconnect()
       soltar()
     }
@@ -187,24 +199,7 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
 
   /** Lleva la página a un píxel de la regla en `ms` (0: en silencio) y pone ya el paso de destino. */
   const irAlPx = useCallback(
-    (px: number, ms: number, scrollExtra = 0): void => {
-      const m = medir(caja.current)
-      if (m === null) return
-      enVuelo.current?.cancelar()
-      // El diagnóstico de la carga (`?diag=carga`) no cuenta como desfasado el paso de un salto en vuelo.
-      caja.current?.setAttribute('data-en-vuelo', 'si')
-      const vuelo = {
-        destino: px,
-        cancelar: saltarA(scrollDelPx(px, m.tope, m.alto) + scrollExtra, reducido ? 0 : ms, () => {
-          if (enVuelo.current !== vuelo) return
-          enVuelo.current = null
-          caja.current?.removeAttribute('data-en-vuelo')
-        }),
-      }
-      enVuelo.current = vuelo
-      // El destino, ya: la tira cambia en este cuadro y la página la sigue.
-      publicar(caja.current, actual, setPaso, pasoEn(px, PANTALLAS_POR_PASO))
-    },
+    (px: number, ms: number, scrollExtra = 0): void => volarAlPx({ caja, enVuelo, actual, setPaso }, px, reducido ? 0 : ms, scrollExtra),
     [caja, reducido],
   )
 
@@ -257,28 +252,27 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     if (destino > scrollDelPx(hasta, m.tope, m.alto) || destino < scrollDelPx(desde, m.tope, m.alto)) saltarAlPaso(vistaDelPaso(paso).tira)
   }, [caja, fase, paso, saltarAlPaso])
 
-  // El ancla al cargar (`#portfolio-el-garage`, …): el navegador ya saltó al elemento; el Portfolio lo lleva al píxel del paso.
+  // [B1.3] Los toques de la historia (el modelo de la rueda, el paso en silencio) y el deslizamiento que se asienta de a un proyecto.
+  const irAl = useCallback(
+    (sentido: 1 | -1): void => {
+      const v = vistaDelPaso(actual.current)
+      if (v.fase !== 'adentro') return
+      const d = destinoDeLaRueda(v.tira, sentido)
+      if (d.tipo === 'paso') saltarAlPaso(d.indice, true)
+      else ir(d)
+    },
+    [ir, saltarAlPaso],
+  )
+  const deslizamiento = useRef<ControlDelDeslizamiento | null>(null)
   useEffect(() => {
-    const ancla = ANCLAS_DEL_PORTFOLIO.find((a) => `#${a.id}` === window.location.hash)
-    const m = ancla === undefined ? null : medir(caja.current)
-    if (ancla === undefined || m === null) return undefined
-    const y = Math.round(scrollDelPx(centroDelPaso(ancla.paso, PANTALLAS_POR_PASO), m.tope, m.alto))
-    const el = caja.current
-    // El ancla con la que cargó, para el diagnóstico de la carga, hasta que el visitante mueva la página por su cuenta. [B1.2b] Un clic
-    // también (el menú lleva a otra sección: el arnés lo contaba como un ancla desfasada).
-    el?.setAttribute('data-ancla-de-la-carga', ancla.id)
-    const soltar = (): void => el?.removeAttribute('data-ancla-de-la-carga')
-    const gestos = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const
-    for (const g of gestos) window.addEventListener(g, soltar, { once: true, passive: true })
-    const reloj = window.setTimeout(() => window.scrollTo({ top: y, behavior: 'instant' }), 0)
-    return () => {
-      window.clearTimeout(reloj)
-      for (const g of gestos) window.removeEventListener(g, soltar)
-    }
-  }, [caja])
+    deslizamiento.current = { caja, paso: () => actual.current, ocupado: () => enVuelo.current !== null, irAlPaso: (i) => saltarAlPaso(i) }
+  }, [caja, saltarAlPaso])
+  useDeslizamientoDelPortfolio(historias, deslizamiento)
+
+  useAnclaDeLaCarga(caja)
 
   return useMemo(
-    () => ({ paso, reducido, cerca, aLaVista: enCuadro && visible, mostradoDeDemos: mostrado, escena: orden.escena, encabezado: orden.encabezado, avanceDelPaso: avance, saltarAlPaso, inerteDesde }),
-    [paso, reducido, cerca, enCuadro, visible, mostrado, orden.escena, orden.encabezado, avance, saltarAlPaso, inerteDesde],
+    () => ({ paso, reducido, cerca, aLaVista: enCuadro && visible, mostradoDeDemos: mostrado, escena: orden.escena, encabezado: orden.encabezado, avanceDelPaso: avance, saltarAlPaso, inerteDesde, historias, irAl }),
+    [paso, reducido, cerca, enCuadro, visible, mostrado, orden.escena, orden.encabezado, avance, saltarAlPaso, inerteDesde, historias, irAl],
   )
 }

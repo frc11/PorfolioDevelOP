@@ -15,7 +15,7 @@ import { referenciasColgadas } from '../trabajos-detectores'
 
 import { ANCLAS_DEL_PORTFOLIO } from './anclas'
 import { accionDeLaTecla, vistaDelPaso, type TeclaDelSelector } from './estado'
-import { NUMERO_DE_WHATSAPP } from '../../cierre/contacto'
+import { WHATSAPP } from '../../../_chrome/enlaces'
 
 import { SignoQueSeArma } from './SignoDePregunta'
 import { ANTES_DEL_PIN, EN_LA_COLA, PANTALLAS_POR_PASO, pantallasDelAncla, type IndiceDePaso } from './pasos'
@@ -45,7 +45,7 @@ export function afirmarElSelector(quieto: string, conMotion: string): void {
 
   // [B1.2c] «La tuya» lleva el formulario corto en lugar del botón a la hoja de contacto: tres campos, enviar y WhatsApp.
   const formulario = /<div data-pieza="formulario-de-la-tuya"[\s\S]*?<p role="status"/.exec(quieto)?.[0] ?? ''
-  const whatsapp = `<a href="https://wa.me/${NUMERO_DE_WHATSAPP}?text=`
+  const whatsapp = `<a href="${WHATSAPP.href}"`
   const formularioCorto = (f: string): boolean =>
     [...f.matchAll(/<input [^>]*name="(nombre|medio|mensaje)"/g)].map((m) => m[1]).join(',') === 'nombre,medio,mensaje' && /<button type="submit"/.test(f) &&
     f.includes(whatsapp) && /target="_blank" rel="noopener noreferrer" aria-label="o escribinos por WhatsApp, se abre en una pestaña nueva"/.test(f) && /<form noValidate="" class=/.test(f)

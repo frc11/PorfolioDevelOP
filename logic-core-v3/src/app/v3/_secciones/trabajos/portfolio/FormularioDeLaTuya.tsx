@@ -6,11 +6,11 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 import { CAMPOS, DESPUES_DEL_ENVIO, ROTULO_DEL_ENVIO, ROTULO_ENVIANDO, avisoDeErrores } from '../../../_chrome/contacto/contenido'
+import { WHATSAPP } from '../../../_chrome/enlaces'
 import { enviarContacto, validarContacto, type DatosDeContacto, type ErroresDeContacto } from '../../../_chrome/contacto/enviarContacto'
 import { RESULTADO } from '../../../_lib/formularios/gracias'
 import { MAXIMOS } from '../../../_lib/formularios/validar'
 
-import { WHATSAPP } from '../../cierre/contacto'
 import { CONTENIDO } from '../contenido'
 
 import { enLaSecuencia } from './secuencia'
@@ -39,7 +39,7 @@ const idDelCampo = (campo: string): string => `la-tuya-${campo}`
 /**
  * [B1.2c] EL FORMULARIO CORTO DE «LA TUYA» (plan §13, punto 6) — en lugar del botón, en la misma tira: el nombre, «WhatsApp o email» y
  * «¿Qué necesitás?» (una línea), el botón de enviar y, debajo, «o escribinos por WhatsApp» (el enlace `wa.me` del pie, con su mensaje
- * precargado: el número sale de `_secciones/cierre/contacto.ts`).
+ * precargado: el número sale de `_secciones/cierre/contacto.ts`, por la puerta del contacto).
  *
  * NO es un formulario nuevo: la validación (`validarContacto`: el único obligatorio es el email o el teléfono), el envío
  * (`enviarContacto`, a `/api/contacto` con lo que no pregunta vacío) y los textos (el aviso de errores, «Enviar» / «Enviando…», el

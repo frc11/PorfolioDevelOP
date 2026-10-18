@@ -8,6 +8,9 @@
 /** Los pasos del escenario (`data-paso`): 0…3 las tiras, 4 la cola (Demos). */
 export const NOMBRES_DE_LOS_PASOS = ['El Garage', 'Esquina', 'Banú', 'la tuya', 'Demos'] as const
 
+/** Las anclas de las tiras, en el orden de los pasos: con el mouse quieto, la carga se queda en la suya. */
+export const ANCLAS_DE_LOS_PASOS = ['portfolio-el-garage', 'portfolio-esquina-estudio', 'portfolio-banu-scents', 'portfolio-la-tuya'] as const
+
 export interface CasoDeLaRueda {
   readonly nombre: string
   /** Dónde carga (el ancla de un paso). */

@@ -164,9 +164,9 @@ export function afirmarElSelectorVivo(): void {
   controlPositivo('  el detector ve el logo de la cámara del pin (sin la pose)', CUADROS[0], (q: Cuadro) => desvio(q, cajaPorRayos(armarLaCamara(new THREE.PerspectiveCamera(), { ...enElPin }, q.ancho / q.alto, fovDe(q), LOGO.w, LOGO.h))) < 0.01)
   const escenario = leer('_secciones/trabajos/portfolio/EscenarioDelPortfolio.tsx')
   const enBloque = (c: string): boolean =>
-    /data-pieza="columna-del-portfolio"\s+className="@container absolute inset-y-0 left-0 flex w-1\/2 flex-col items-center justify-center px-8 text-center max-escritorio:w-2\/5"/.test(c) &&
-    /<EncabezadoDelPortfolio [^>]*\/>\s*<div data-pieza="hueco-del-logo" aria-hidden="true" className="mt-8 shrink-0" style=\{ESTILO_DEL_HUECO\} \/>/.test(c)
-  afirmar(enBloque(escenario) && /'absolute inset-y-0 right-0 flex w-1\/2 [^']*max-escritorio:w-3\/5'/.test(escenario) && COLUMNA_DEL_ANCHO.escritorio === 0.5 && COLUMNA_DEL_ANCHO.tablet === 0.4, 'la columna es UN bloque centrado en el alto: «Portfolio», la bajada y debajo el hueco del logo, en el mismo eje (la mitad desde 1024 y el 40 % en tablet; el panel, la otra mitad y el 60 %)')
+    /data-pieza="columna-del-portfolio"\s+className="@container absolute inset-y-0 left-0 flex w-1\/2 flex-col items-center justify-center px-8 text-center max-escritorio:w-2\/5 max-tablet:w-full"/.test(c) &&
+    /<EncabezadoDelPortfolio [^>]*\/>\s*<div data-pieza="hueco-del-logo" aria-hidden="true" className="mt-8 shrink-0 max-tablet:hidden" style=\{ESTILO_DEL_HUECO\} \/>/.test(c)
+  afirmar(enBloque(escenario) && /'absolute inset-y-0 right-0 flex w-1\/2 [^']*max-escritorio:w-3\/5 max-tablet:w-full'/.test(escenario) && COLUMNA_DEL_ANCHO.escritorio === 0.5 && COLUMNA_DEL_ANCHO.tablet === 0.4, 'la columna es UN bloque centrado en el alto: «Portfolio», la bajada y debajo el hueco del logo, en el mismo eje (la mitad desde 1024 y el 40 % en tablet; el panel, la otra mitad y el 60 %; [B1.3] en el teléfono, el título solo y la historia a pantalla completa)')
   controlPositivo('  el detector ve la columna de B1.2b (el encabezado en la mitad de arriba, el logo en la otra)', escenario.replace('data-pieza="columna-del-portfolio"', 'data-pieza="mitad-del-encabezado"'), enBloque)
   afirmar(Math.abs(PROPORCION_DEL_LOGO - LOGO.w / LOGO.h) < 1e-9 && ESTILO_DEL_HUECO.aspectRatio === PROPORCION_DEL_LOGO.toFixed(4), '  el hueco tiene la proporción del logo medido: lo llena por las dos medidas')
 
@@ -228,7 +228,8 @@ export function afirmarElSelectorVivo(): void {
   controlPositivo('  el detector ve un lector', "const dim = Number.parseFloat(q.get('portfolio-dim') ?? '')", (c: string) => !LECTORES.test(c))
   afirmar(OPACIDAD_DEL_VIDRIO === 0.04 && ESTILO_DEL_VIDRIO.backdropFilter === 'blur(20px) saturate(180%)' && ESTILO_DEL_VIDRIO.borderLeft === '1px solid color-mix(in srgb, var(--color-tinta) 8%, transparent)' && ESTILO_DEL_VIDRIO.background === 'color-mix(in srgb, var(--color-tinta) 4%, transparent)', 'el panel es de vidrio (el del sistema: blanco —la tinta de la sala de noche— al 4 %, desenfoque de 20 px, saturación del 180 %, borde al 8 %)')
   const panel = /'absolute inset-y-0 right-0 [^']*'/.exec(escenario)?.[0] ?? ''
-  afirmar(panel !== '' && !/bg-fondo/.test(sinComentarios(leer('_secciones/trabajos/portfolio/Tira.tsx'))) && /style=\{ESTILO_DEL_VIDRIO\}/.test(escenario), '  una sola estructura: el vidrio en el panel (del lado derecho) y las tiras de la tinta sin fondo propio')
+  // [B1.3] Sin fondo propio desde 768: en el teléfono la hoja de la ficha sí lo lleva (`max-tablet:`), sobre el video.
+  afirmar(panel !== '' && !/(?<![:\w-])bg-fondo/.test(sinComentarios(leer('_secciones/trabajos/portfolio/Tira.tsx'))) && /style=\{ESTILO_DEL_VIDRIO\}/.test(escenario), '  una sola estructura: el vidrio en el panel (del lado derecho) y las tiras de la tinta sin fondo propio (desde 768)')
 
   titulo('B1.2b · 12 · El panel entra y sale en horizontal: el gatillo espera al pin')
 
@@ -236,7 +237,7 @@ export function afirmarElSelectorVivo(): void {
   afirmarIgual(casos.map(([paso, pegado]) => pasoConElPin(paso, pegado)), casos.map(([, , e]) => e), 'con el escenario suelto (un salto o un scroll rápido que llega antes de que el pin se asiente) el panel no entra; pegado, sí; la cola queda')
   controlPositivo('  sin la compuerta el panel entra con el escenario suelto', (paso: IndiceDePaso) => paso, (f: (paso: IndiceDePaso) => IndiceDePaso) => f(2) === ANTES_DEL_PIN)
   // [B1.2c] Lo que mide el DOM salió a `medida.ts` (la regla de las 300 líneas): se leen los dos.
-  const usePortfolio = `${leer('_secciones/trabajos/portfolio/usePortfolio.ts')}\n${leer('_secciones/trabajos/portfolio/medida.ts')}`
+  const usePortfolio = `${leer('_secciones/trabajos/portfolio/usePortfolio.ts')}\n${leer('_secciones/trabajos/portfolio/medida.ts')}\n${leer('_secciones/trabajos/portfolio/useAnclaDeLaCarga.ts')}`
   afirmar(/const mostrable = pasoConElPin\(siguiente, pegado\(caja\)\)/.test(usePortfolio) && /Math\.abs\(escenario\.getBoundingClientRect\(\)\.top\) <= 1/.test(usePortfolio), '  la sección publica el paso con la compuerta del pin, medido en el escenario (su tope en el del cuadro)')
   afirmar(/transition-transform duration-700/.test(panel) && /'translate-x-full'/.test(escenario) && !/translate-y|inset-y-[1-9]/.test(panel) && /className="sticky top-0 h-svh w-full overflow-clip"/.test(escenario), '  el panel sólo se traslada en x (`translate-x-full` ↔ 0), adentro del escenario pegado: el tope de su caja no se mueve')
   const elCorte = (c: string): boolean =>
@@ -281,7 +282,7 @@ export function afirmarElSelectorVivo(): void {
   controlPositivo('  el detector ve la espera de antes', `${acordeon}\nhover.current = window.setTimeout(() => vivo.saltarAlPaso(i), 150)`, (c: string) => !/setTimeout/.test(c))
   afirmar(!seMovioDeVerdad({ x: 100, y: 100 }, 102, 101) && seMovioDeVerdad({ x: 100, y: 100 }, 104, 100) && seMovioDeVerdad(null, 0, 0) && HOVER.movimientoMinimoPx === 4, 'después de una activación, un lomo que se reacomoda debajo del puntero no activa nada hasta que el puntero se mueve 4 px o más')
   controlPositivo('  sin la guarda, el reacomodo activa', (d: { readonly x: number; readonly y: number } | null, x: number, y: number) => d === null || x !== -1 || y !== -1, (f: (d: { readonly x: number; readonly y: number } | null, x: number, y: number) => boolean) => !f({ x: 100, y: 100 }, 101, 100))
-  afirmar(/activacion\.current = puntero\.current/.test(acordeon) && /activaElHover\(\{ x: e\.clientX, y: e\.clientY, indice, fino \}, tira, fase === 'adentro', activacion\.current, vivo\.inerteDesde\(e\.clientX, e\.clientY\)\)/.test(acordeon), '  la guarda vale para cualquier cambio de tira (el hover, el clic, el teclado o el scroll): el puntero de ese momento ([B1.2c] y el de la rueda, `activaElHover`)')
+  afirmar(/activacion\.current = puntero\.current/.test(acordeon) && /activaElHover\(\{ x: e\.clientX, y: e\.clientY, indice, fino, mueve \}, tira, fase === 'adentro', activacion\.current, vivo\.inerteDesde\(e\.clientX, e\.clientY\)\)/.test(acordeon), '  la guarda vale para cualquier cambio de tira (el hover, el clic, el teclado o el scroll): el puntero de ese momento ([B1.2c] y el de la rueda, `activaElHover`)')
   afirmar(suenaElCambio(0, HOVER.rafagaMs) && !suenaElCambio(0, HOVER.rafagaMs - 1) && /if \(cambio && suenaElCambio\(a\.cuando, ahora\)\) sonar\('tic'\)/.test(acordeon) && !/pestillo/.test(acordeon), 'cruzando varios lomos gana el último y suena un solo `tic` (un cambio a menos de 250 ms del anterior no suena); `pestillo` salió de la secuencia')
   const estado = sinComentarios(leer('_secciones/trabajos/portfolio/estado.ts'))
   afirmar(/case 'ArrowLeft':/.test(estado) && /case 'ArrowRight':/.test(estado) && !/ArrowUp|ArrowDown/.test(estado), '  ←/→ cambian de proyecto (↑/↓ quedan para la página)')

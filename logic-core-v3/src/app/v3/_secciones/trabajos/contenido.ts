@@ -90,6 +90,9 @@ export const CONTENIDO = {
 
   /** [B1.2c] Tablet: la pista de la primera entrada del panel (se va con el primer paso). */
   pista: 'Seguí bajando',
+
+  /** [B1.3] Teléfono: los dos toques de la historia (el nombre de cada uno, para los lectores). */
+  historias: { anterior: 'Proyecto anterior', siguiente: 'Proyecto siguiente' },
 } as const
 
 /**

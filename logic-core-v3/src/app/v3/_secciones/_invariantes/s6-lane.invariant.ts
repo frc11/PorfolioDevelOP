@@ -27,6 +27,7 @@ import {
   leer,
   recorrer,
   sinCadenas,
+  valoresDeAcentoClaroDelTema,
   valoresDeAcentoDelTema,
 } from './soporte'
 
@@ -200,10 +201,18 @@ const acentos = valoresDeAcentoDelTema()
 afirmarIgual(acentos.length, IDS_DE_SERVICIO.length, `el tema declara ${acentos.length} acentos por servicio`)
 console.log(`  ${acentos.map((a) => a.token).join(' · ')}`)
 
+/**
+ * [B1.2c] P-H2 · y los tres CLAROS: tampoco se nombran (se consumen por su alias, `text-acento-claro`). Los nombres por servicio ya los
+ * cubre la aguja de arriba (`--color-acento-web` está adentro de `--color-acento-web-claro`); faltaban sus valores.
+ */
+const claros = valoresDeAcentoClaroDelTema()
+afirmarIgual(claros.length, IDS_DE_SERVICIO.length, `  [B1.2c] y ${claros.length} acentos claros, uno por servicio (P-H2)`)
+
 /** El buscador: los VALORES concretos y los NOMBRES por servicio, los dos. */
 const buscarAcentoConcreto = (texto: string): string[] => {
   const agujas = [
     ...acentos.map((a) => a.valor),
+    ...claros.map((a) => a.valor),
     ...IDS_DE_SERVICIO.map((id) => `--color-acento-${id}`),
   ]
   return agujas.filter((aguja) => texto.includes(aguja))
@@ -218,6 +227,7 @@ afirmarIgual(
 
 controlPositivo('el buscador ve un valor concreto de acento', acentos[0].valor, (t) => buscarAcentoConcreto(t).length === 0)
 controlPositivo('y ve un token por servicio', '--color-acento-web', (t) => buscarAcentoConcreto(t).length === 0)
+controlPositivo('  [B1.2c] y el valor de un acento claro', claros[0].valor, (t) => buscarAcentoConcreto(t).length === 0)
 
 /**
  * El contrapeso: el alias SÍ se usa, o la afirmación de arriba no dice nada.

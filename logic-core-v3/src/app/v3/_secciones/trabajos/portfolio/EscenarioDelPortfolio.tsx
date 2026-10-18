@@ -9,6 +9,7 @@ import { BarrasDelPortfolio, PistaDelPortfolio } from './BarrasDelPortfolio'
 import { EncabezadoDelPortfolio } from './EncabezadoDelPortfolio'
 import { vistaDelPaso } from './estado'
 import { ESTILO_DEL_HUECO } from './hueco'
+import { CLASE_DEL_ALTO_DEL_MEDIO } from './medios'
 import { DESPEJE_DE_LA_BARRA } from './LaTuya'
 import type { PortfolioVivo } from './usePortfolio'
 
@@ -55,21 +56,24 @@ export function EscenarioDelPortfolio({
       data-paso={vivo.paso}
       data-fase={fase}
       data-escena={vivo.escena ? 'si' : 'no'}
+      // [B1.2c] El orden, a la vista del banco (y del diagnóstico): la escena y el encabezado se prenden y se apagan de a uno.
+      data-encabezado={vivo.encabezado ? 'si' : 'no'}
       // `overflow-clip` y no `hidden`: el foco que entra al panel afuera del cuadro no puede correr el recorte (el acordeón lo trae).
       className="sticky top-0 h-svh w-full overflow-clip"
     >
       <div
         data-pieza="columna-del-portfolio"
-        className="@container absolute inset-y-0 left-0 flex w-1/2 flex-col items-center justify-center px-8 text-center max-escritorio:w-2/5"
+        className="@container absolute inset-y-0 left-0 flex w-1/2 flex-col items-center justify-center px-8 text-center max-escritorio:w-2/5 max-tablet:w-full"
         style={ESTILO_DE_LA_COLUMNA}
       >
         <EncabezadoDelPortfolio seccion={seccion} adentro={vivo.encabezado} reducido={vivo.reducido} />
-        <div data-pieza="hueco-del-logo" aria-hidden="true" className="mt-8 shrink-0" style={ESTILO_DEL_HUECO} />
+        <div data-pieza="hueco-del-logo" aria-hidden="true" className="mt-8 shrink-0 max-tablet:hidden" style={ESTILO_DEL_HUECO} />
       </div>
       <div
         data-pieza="panel-del-portfolio"
         className={cn(
-          'absolute inset-y-0 right-0 flex w-1/2 flex-col transition-transform duration-700 ease-[var(--ease-salida)] motion-reduce:transition-none max-escritorio:w-3/5',
+          'absolute inset-y-0 right-0 flex w-1/2 flex-col transition-transform duration-700 ease-[var(--ease-salida)] motion-reduce:transition-none max-escritorio:w-3/5 max-tablet:w-full',
+          CLASE_DEL_ALTO_DEL_MEDIO,
           !vivo.escena && 'translate-x-full',
         )}
         style={ESTILO_DEL_VIDRIO}
@@ -77,7 +81,7 @@ export function EscenarioDelPortfolio({
         <BarrasDelPortfolio vivo={vivo} className="hidden shrink-0 px-8 pb-2 max-escritorio:flex" style={ESTILO_DE_LA_COLUMNA} />
         <div className="relative min-h-0 flex-1">
           <Acordeon vivo={vivo} />
-          <PistaDelPortfolio vivo={vivo} className="absolute inset-x-0 bottom-6 hidden justify-center max-escritorio:flex" />
+          <PistaDelPortfolio vivo={vivo} className="absolute inset-x-0 bottom-6 hidden justify-center max-escritorio:flex max-tablet:hidden" />
         </div>
       </div>
       {children}

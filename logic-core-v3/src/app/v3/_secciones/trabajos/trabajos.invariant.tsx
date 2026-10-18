@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
 import { rotuloDeParada } from '../../_lib/__tests__/s10-acceso'
 import { paradasDeTabulacion } from '../../_lib/__tests__/s10-lectura'
-import { WHATSAPP } from '../cierre/contacto'
+import { WHATSAPP } from '../../_chrome/enlaces'
 import { PANTALLAS_DE_NUMEROS } from '../../_lib/secciones'
 import { NOMBRES_REALES } from '../_contrato/escaneo'
 import { ATRIBUTO_DE_PANEL, seccionDe } from '../_contrato/forma'
@@ -61,6 +61,8 @@ const DEL_PORTFOLIO = [
   // transición entre proyectos, el hueco del logo, lo que se mide en el DOM y sus ganchos.
   'BarrasDelPortfolio.tsx', 'FormularioDeLaTuya.tsx', 'SignoDePregunta.tsx', 'orden.ts', 'rueda.ts', 'transicion.ts', 'signo.ts', 'hueco.ts', 'medida.ts',
   'useOrdenDeLaEscena.ts', 'useRuedaDelPortfolio.ts', 'useTransicionDeLasTiras.ts',
+  // [B1.3] el deslizamiento de las historias y el ancla al cargar.
+  'deslizamiento.ts', 'useDeslizamientoDelPortfolio.ts', 'useAnclaDeLaCarga.ts',
 ].map((f) => `portfolio/${f}`)
 const ARCHIVOS = ['Trabajos.tsx', 'CapaDeLaGota.tsx', 'gota.ts', 'geometria.ts', 'contenido.ts', 'proyectos.ts', ...DEL_PORTFOLIO]
 const FUENTES = ARCHIVOS.map((archivo) => ({ archivo, texto: leer(archivo) }))
@@ -132,7 +134,7 @@ const DE_LA_CINTA = 4 * DEMOS.length
 // [B1] Nada del Portfolio se pide antes de que la sección esté cerca: en el servidor ni un póster, y los tres videos sin `src`.
 afirmarIgual(veces(quieto, '<img'), DE_LA_CINTA + DEL_CARRUSEL, 'en la rama quieta, sólo las imágenes de Demos (la cinta y el carrusel): ni un póster del Portfolio antes de estar cerca')
 afirmarIgual(veces(conMotion, '<img'), DEMOS.length + DEL_CARRUSEL, '  y con la coreografía, sólo las de Demos (el estante y el carrusel)')
-afirmarIgual(veces(quieto, '<video'), PROYECTOS.length, 'un video por proyecto')
+afirmarIgual(veces(quieto, '<video'), 2 * PROYECTOS.length, 'dos videos por proyecto: el de escritorio y [B1.3] el del teléfono (el CSS esconde uno y sólo el que está a la vista pide su archivo)')
 afirmar(!/<video[^>]*\ssrc="/.test(quieto) && !/<video[^>]*\ssrc="/.test(conMotion), '  y ninguno con `src` en el servidor')
 afirmar(!quieto.includes('transform:') && !quieto.includes('will-change'), 'la rama quieta no escribe una transformada ni promueve una capa')
 afirmar(!conPreferencia.includes('transform:'), '  y con `prefers-reduced-motion` tampoco')
@@ -146,7 +148,7 @@ titulo('9 · Cero `three` y cero contextos: el Portfolio no abre un lienzo')
 const TRES = /from ['"](three|@react-three\/[a-z-]+|three\/[^'"]+)['"]/
 const CONTEXTO = /<Canvas\b|WebGLRenderer|getContext\(\s*['"]webgl/
 for (const { archivo, texto } of FUENTES) afirmar(!TRES.test(texto) && !CONTEXTO.test(texto), `${archivo}: ni three ni un contexto WebGL ([B1.2b] el «?» es un SVG en el DOM)`)
-afirmarIgual(FUENTES.length, 23 + 12, 'se leyeron del disco los treinta y cinco archivos de la sección y del Portfolio (los veintitrés de B1.2b y los doce de B1.2c)')
+afirmarIgual(FUENTES.length, 23 + 12 + 3, 'se leyeron del disco los treinta y ocho archivos de la sección y del Portfolio (los veintitrés de B1.2b, los doce de B1.2c y los tres de B1.3)')
 controlPositivo('el detector ve un renderer propio', 'const r = new THREE.WebGLRenderer()', (t: string) => !CONTEXTO.test(t))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -178,7 +180,7 @@ afirmar(!/-\[\d+(px|rem)\]/.test(quieto), 'cero px o rem suelto en un valor arbi
 controlPositivo('el chequeo del px suelto ve una clase con un valor en px', `<i class="${CLASE_DE_PRUEBA}">`, (html: string) => !/-\[\d+(px|rem)\]/.test(html))
 afirmarIgual(hoversSinFoco(quieto), [], `los ${veces(quieto, 'hover:')} \`hover:\` llevan su \`focus-visible:\` en la misma clase`)
 controlPositivo('  el detector ve un hover sin su gemela', '<a class="hover:underline">x</a>', (html: string) => hoversSinFoco(html).length === 0)
-afirmarIgual(veces(quieto, '<button'), CONTENIDO.proyectos.length + 2, 'CINCO botones: una cabecera por tira (las tres y la tuya) y [B1.2c] «Enviar» del formulario de la tuya (en lugar del que abría el contacto)')
+afirmarIgual(veces(quieto, '<button'), CONTENIDO.proyectos.length + 2 + 2, 'SIETE botones: una cabecera por tira (las tres y la tuya), [B1.2c] «Enviar» del formulario de la tuya (en lugar del que abría el contacto) y [B1.3] los dos toques de la historia activa (sólo en el teléfono)')
 afirmarIgual(veces(quieto, '<a '), 2 * PROYECTOS.length + 1 + DE_LA_CINTA + DEL_CARRUSEL, 'SIETE enlaces del Portfolio (el medio de cada tira, sólo para el mouse, y su «Visitar sitio»; [B1.2c] y WhatsApp en la tuya) más los de Demos')
 afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), veces(quieto, '<a '), '  todos salen del sitio sin darle acceso a esta ventana ni el referente')
 afirmarIgual(veces(conMotion, '<a '), 2 * PROYECTOS.length + 1 + DEMOS.length + DEL_CARRUSEL, '  y los mismos siete con la coreografía puesta')
@@ -217,7 +219,7 @@ titulo('16 · Las paradas de teclado')
 
 const PARADAS_DE_DEMOS = 2 * DEMOS.length
 const PARADAS = paradasDeTabulacion(quieto)
-afirmarIgual(PARADAS.length, PROYECTOS.length + 1 + PROYECTOS.length + 5 + PARADAS_DE_DEMOS, 'DOCE paradas del Portfolio (cuatro cabeceras, tres «Visitar sitio» y [B1.2c] el formulario de la tuya: tres campos, «Enviar» y WhatsApp) más las de Demos (la cinta y el carrusel)')
+afirmarIgual(PARADAS.length, PROYECTOS.length + 1 + PROYECTOS.length + 5 + 2 + PARADAS_DE_DEMOS, 'CATORCE paradas del Portfolio (cuatro cabeceras, tres «Visitar sitio», [B1.2c] el formulario de la tuya: tres campos, «Enviar» y WhatsApp, y [B1.3] los dos toques de la historia) más las de Demos (la cinta y el carrusel)')
 afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a' && p.etiqueta !== 'button' && p.etiqueta !== 'input').map((p) => p.etiqueta), [], '  todas son anclas, botones o [B1.2c] los campos del formulario: ningún `tabindex` escrito')
 afirmarIgual(PARADAS.filter((p) => rotuloDeParada(quieto, p).rotulo.trim() === '').map((p) => p.destino ?? p.etiqueta), [], '  y todas se anuncian con algo (un campo, con su `<label for>`)')
 afirmarIgual(PARADAS.filter((p) => p.ocultoALectores).length, 0, '  ninguna cuelga de algo escondido a los lectores')

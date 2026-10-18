@@ -30,8 +30,33 @@ export const idsDeLaTira = (slug: string): { readonly cabecera: string; readonly
 export const CLASES_DE_LA_TIRA = {
   base: 'relative flex h-full min-w-0 flex-col overflow-clip border-l border-tinta/10 transition-all duration-500 ease-[var(--ease-salida)] motion-reduce:transition-none',
   activa: 'grow basis-0',
-  lomo: 'grow-0 basis-14 shrink-0',
+  // [B1.3] En el teléfono los lomos no se ven: la historia es la activa, a pantalla completa (se cambia con los toques y el scroll).
+  lomo: 'grow-0 basis-14 shrink-0 max-tablet:hidden',
 } as const
+
+/**
+ * [B1.3] LA HOJA DE LA FICHA. Desde 768 no existe (`contents`: el nombre y la ficha siguen en la tira como siempre). En el teléfono es
+ * la hoja de vidrio que sube desde abajo sobre el video cuando la historia entra (su secuencia; con movimiento reducido, ya arriba),
+ * con el nombre, los rótulos nuevos, la ficha y la marca de agua del cliente adentro. Sube con `translate` y no con una transformada
+ * escrita en línea (la rama quieta no escribe una: `trabajos.invariant`).
+ */
+export const CLASE_DE_LA_HOJA =
+  'contents max-tablet:absolute max-tablet:inset-x-0 max-tablet:bottom-0 max-tablet:flex max-tablet:max-h-2/3 max-tablet:flex-col max-tablet:overflow-y-auto max-tablet:rounded-t-[var(--radius-fuerte)] max-tablet:bg-fondo/75 max-tablet:backdrop-blur-[var(--blur-panel)] max-tablet:transition-transform max-tablet:duration-500 max-tablet:ease-[var(--ease-salida)] motion-reduce:transition-none'
+export const CLASE_DE_LA_HOJA_ABAJO = 'max-tablet:translate-y-full'
+
+/**
+ * [B1.3] LOS DOS TOQUES DE LA HISTORIA (sólo en el teléfono): sobre el video y debajo de la hoja, el tercio de la izquierda va al
+ * proyecto anterior y el resto al siguiente (con el modelo del hover: el activo ya y el scroll en silencio; después del último,
+ * Demos; antes del primero, arriba).
+ */
+export function ToquesDeLaHistoria({ vivo }: { readonly vivo: PortfolioVivo }): React.JSX.Element {
+  return (
+    <>
+      <button type="button" data-toque="anterior" aria-label={CONTENIDO.historias.anterior} onClick={() => vivo.irAl(-1)} className="absolute inset-y-0 left-0 hidden w-1/3 focus-visible:outline-2 focus-visible:-outline-offset-4 max-tablet:block" />
+      <button type="button" data-toque="siguiente" aria-label={CONTENIDO.historias.siguiente} onClick={() => vivo.irAl(1)} className="absolute inset-y-0 right-0 hidden w-2/3 focus-visible:outline-2 focus-visible:-outline-offset-4 max-tablet:block" />
+    </>
+  )
+}
 
 /**
  * La cabecera de una tira: el botón del acordeón. Activa, el nombre arriba de su contenido (entra con la secuencia); inactiva, el
@@ -49,7 +74,7 @@ export function CabeceraDeLaTira({ id, indice, activa, nombre, controla, nivel =
   readonly alElegir: () => void
 }): React.JSX.Element {
   return (
-    <h3 className={cn('relative', activa ? 'px-8 pt-6' : 'absolute inset-0')}>
+    <h3 className={cn('relative', activa ? 'px-8 pt-6 max-escritorio:pt-4 max-tablet:px-6' : 'absolute inset-0')}>
       <button
         type="button"
         id={id}
@@ -101,30 +126,34 @@ export function Tira({
   const piezas = piezasDeLaFicha(proyecto)
   return (
     <div data-tira={proyecto.slug} data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo)}>
-      {activa ? <MarcaDeAgua proyecto={proyecto} cerca={vivo.cerca} /> : <PosterDelLomo proyecto={proyecto} cerca={vivo.cerca} />}
-      <div id={ids.medio} hidden={!activa} className="relative px-8 pt-8">
-        <motion.div {...enLaSecuencia(visible, 0, vivo.reducido)}>
+      {activa ? null : <PosterDelLomo proyecto={proyecto} cerca={vivo.cerca} />}
+      <div id={ids.medio} hidden={!activa} className="relative px-8 pt-8 max-escritorio:pt-4 max-tablet:absolute max-tablet:inset-0 max-tablet:p-0">
+        <motion.div className="max-tablet:h-full" {...enLaSecuencia(visible, 0, vivo.reducido)}>
           <MedioDeLaTira proyecto={proyecto} activa={activa} cerca={vivo.cerca} aLaVista={vivo.aLaVista} reducido={vivo.reducido} />
         </motion.div>
       </div>
-      <CabeceraDeLaTira id={ids.cabecera} indice={indice} activa={activa} nombre={proyecto.nombre} controla={`${ids.medio} ${ids.region}`} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(indice, true)} />
-      <div id={ids.region} hidden={!activa} className="relative flex min-h-0 flex-1 flex-col gap-5 px-8 pb-12 pt-2">
-        {proyecto.rubro === null ? null : (
-          <motion.div {...enLaSecuencia(visible, 1, vivo.reducido)}>
-            <Cuerpo className="text-tinta/70">{proyecto.rubro}</Cuerpo>
-          </motion.div>
-        )}
-        <Ficha proyecto={proyecto} visible={visible} reducido={vivo.reducido} desde={2} />
-        <motion.a
-          href={proyecto.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`}
-          className="relative mt-auto self-start font-titulo text-tinta underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4"
-          {...enLaSecuencia(visible, 2 + piezas, vivo.reducido)}
-        >
-          {CONTENIDO.ficha.visitar} <span aria-hidden="true">↗</span>
-        </motion.a>
+      {activa ? <ToquesDeLaHistoria vivo={vivo} /> : null}
+      <div data-pieza="hoja-de-la-ficha" className={cn(CLASE_DE_LA_HOJA, !visible && CLASE_DE_LA_HOJA_ABAJO)}>
+        {activa ? <MarcaDeAgua proyecto={proyecto} cerca={vivo.cerca} /> : null}
+        <CabeceraDeLaTira id={ids.cabecera} indice={indice} activa={activa} nombre={proyecto.nombre} controla={`${ids.medio} ${ids.region}`} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(indice, true)} />
+        <div id={ids.region} hidden={!activa} className="relative flex min-h-0 flex-1 flex-col gap-5 px-8 pb-12 pt-2 max-escritorio:gap-3 max-escritorio:pb-6 max-tablet:px-6">
+          {proyecto.rubro === null ? null : (
+            <motion.div {...enLaSecuencia(visible, 1, vivo.reducido)}>
+              <Cuerpo className="text-tinta/70">{proyecto.rubro}</Cuerpo>
+            </motion.div>
+          )}
+          <Ficha proyecto={proyecto} visible={visible} reducido={vivo.reducido} desde={2} />
+          <motion.a
+            href={proyecto.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`}
+            className="relative mt-auto self-start font-titulo text-tinta underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4"
+            {...enLaSecuencia(visible, 2 + piezas, vivo.reducido)}
+          >
+            {CONTENIDO.ficha.visitar} <span aria-hidden="true">↗</span>
+          </motion.a>
+        </div>
       </div>
     </div>
   )

@@ -255,6 +255,10 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useOrdenDeLaEscena.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useRuedaDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useTransicionDeLasTiras.ts`,
+  // [B1.3] el deslizamiento de las historias del teléfono (puro y su gancho) y el ancla al cargar (salió de `usePortfolio.ts`).
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/deslizamiento.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useDeslizamientoDelPortfolio.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useAnclaDeLaCarga.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-detectores.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/relojDeDemos.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/herencia.ts`,

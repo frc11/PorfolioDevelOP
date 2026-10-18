@@ -52,10 +52,11 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
 
 /**
  * El alto en todo ancho: el de la tabla más los pasos (la clase va entera, el escáner de Tailwind la ve). `--ancho-del-portfolio`
- * le dice al JS qué ancho decidió el CSS (vacío desde 1024): la sección no mide el ancho (`s7-contrato` §5).
+ * le dice al JS qué ancho decidió el CSS (vacío desde 1024): la sección no mide el ancho (`s7-contrato` §5). [B1.3] Y
+ * `--modo-del-portfolio`, si son las historias del teléfono (abajo de 768).
  */
 const CLASE_DE_LA_SECCION =
-  'relative min-h-[calc(var(--alto-minimo-del-panel)+var(--pantallas-extra-del-portfolio)*100svh)] max-escritorio:[--ancho-del-portfolio:tablet] max-movil:[--ancho-del-portfolio:movil]'
+  'relative min-h-[calc(var(--alto-minimo-del-panel)+var(--pantallas-extra-del-portfolio)*100svh)] max-escritorio:[--ancho-del-portfolio:tablet] max-movil:[--ancho-del-portfolio:movil] max-tablet:[--modo-del-portfolio:historias]'
 
 const ESTILO_DE_LA_SECCION = {
   '--pantallas-extra-del-portfolio': pantallasExtra(PANTALLAS_POR_PASO).toFixed(5),
