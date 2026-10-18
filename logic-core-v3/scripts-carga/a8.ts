@@ -31,6 +31,12 @@ export interface Combinacion {
 /** Las entradas que son un salto (el hash, el menú): la velocidad no les cambia nada, van una vez. */
 const SON_UN_SALTO: ReadonlySet<Entrada> = new Set<Entrada>(['hash-trabajos', 'hash-portfolio', 'barra-de-navegacion'])
 
+/**
+ * [B1.2d] A2.3 · Las entradas con la rueda van sólo lentas (de a una muesca): la rápida (el deslizamiento con inercia del trackpad) ES una
+ * ráfaga y ya no entra: saltea el Portfolio. Sus combinaciones pasan a las de la ráfaga (`combinacionesDeRafaga`).
+ */
+const SON_DE_LA_RUEDA: ReadonlySet<Entrada> = new Set<Entrada>(['rueda-desde-arriba', 'rueda-desde-demos'])
+
 /** Cuántas idas y vueltas por combinación. */
 export const IDAS_Y_VUELTAS = 3
 
@@ -38,10 +44,45 @@ export const IDAS_Y_VUELTAS = 3
 export function combinaciones(): Combinacion[] {
   const salida: Combinacion[] = []
   for (const entrada of ENTRADAS) {
-    const velocidades: readonly Velocidad[] = SON_UN_SALTO.has(entrada) ? ['lenta'] : ['lenta', 'rapida']
+    const velocidades: readonly Velocidad[] = SON_UN_SALTO.has(entrada) || SON_DE_LA_RUEDA.has(entrada) ? ['lenta'] : ['lenta', 'rapida']
     for (const s of SALIDAS) for (const hover of [false, true]) for (const velocidad of velocidades) salida.push({ entrada, salida: s, hover, velocidad })
   }
   return salida
+}
+
+/**
+ * [B1.2d] A2.3 · LA RÁFAGA EN LA MATRIZ: entrar con una ráfaga (bajando desde la aproximación, subiendo desde la cola) saltea el Portfolio
+ * entero; con el panel adentro, una ráfaga sale (bajando a Demos, subiendo hacia arriba) sin recorrer los proyectos que faltan. Con
+ * muescas (cinco en 200 ms) y con el trackpad (el deslizamiento con inercia), con y sin hover.
+ */
+export const RAFAGAS = ['entrar-bajando', 'entrar-subiendo', 'adentro-bajando', 'adentro-subiendo'] as const
+export type Rafaga = (typeof RAFAGAS)[number]
+export const GESTOS_DE_RAFAGA = ['muescas', 'trackpad'] as const
+export type GestoDeRafaga = (typeof GESTOS_DE_RAFAGA)[number]
+
+export interface CombinacionDeRafaga {
+  readonly rafaga: Rafaga
+  readonly gesto: GestoDeRafaga
+  readonly hover: boolean
+}
+
+export function combinacionesDeRafaga(): CombinacionDeRafaga[] {
+  const salida: CombinacionDeRafaga[] = []
+  for (const rafaga of RAFAGAS) for (const gesto of GESTOS_DE_RAFAGA) for (const hover of [false, true]) salida.push({ rafaga, gesto, hover })
+  return salida
+}
+
+/**
+ * Lo que la ráfaga no puede hacer, de lo grabado cuadro a cuadro durante el gesto: entrar (la píldora se corrió o el panel entró) cuando
+ * la ráfaga entraba al tramo, o recorrer los proyectos (más de UNO además del de partida: la primera muesca ya dio su paso cuando la
+ * ráfaga se reconoce).
+ */
+export function violacionesDeLaRafaga(r: Rafaga, cuadros: readonly { readonly barra: boolean; readonly panel: boolean; readonly paso: number }[], desde: number): ('entro-con-la-rafaga' | 'recorrio-de-mas')[] {
+  const v: ('entro-con-la-rafaga' | 'recorrio-de-mas')[] = []
+  if (r.startsWith('entrar') && cuadros.some((c) => c.barra || c.panel)) v.push('entro-con-la-rafaga')
+  const visitados = new Set(cuadros.map((c) => c.paso).filter((p) => p >= 0 && p <= 3 && p !== desde))
+  if (r.startsWith('adentro') && visitados.size > 1) v.push('recorrio-de-mas')
+  return v
 }
 
 /** De qué lado del pin arranca cada entrada: desde arriba (la aproximación) o desde Demos. */

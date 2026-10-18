@@ -4,6 +4,7 @@ import { motion } from 'motion/react'
 
 import { cn } from '@/lib/utils'
 
+import { useDespejeDelMedio } from '../../../_chrome/barra/corrimiento'
 import { CtaEnlace } from '../../../_componentes/chrome/Cta'
 import { Cuerpo } from '../../../_componentes/tipografia/Textos'
 import { Titular } from '../../../_componentes/tipografia/Titular'
@@ -125,12 +126,14 @@ export function Tira({
 }): React.JSX.Element {
   const ids = idsDeLaTira(proyecto.slug)
   const piezas = piezasDeLaFicha(proyecto)
+  // [B1.2d] A2.1 · a 1280 y a 1024 la píldora corrida se mete en el panel: el medio baja hasta 16 px debajo de ella y se achica lo mismo.
+  const despeje = useDespejeDelMedio()
   return (
     <div data-tira={proyecto.slug} data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo)}>
       {activa ? null : <PosterDelLomo proyecto={proyecto} cerca={vivo.cerca} />}
-      <div id={ids.medio} hidden={!activa} className="relative px-8 pt-8 max-escritorio:pt-4 max-tablet:absolute max-tablet:inset-0 max-tablet:p-0">
+      <div id={ids.medio} hidden={!activa} className="relative px-8 pt-8 max-escritorio:pt-4 max-tablet:absolute max-tablet:inset-0 max-tablet:p-0" style={despeje === null ? undefined : { paddingTop: despeje }}>
         <motion.div className="max-tablet:h-full" {...enLaSecuencia(visible, 0, vivo.reducido)}>
-          <MedioDeLaTira proyecto={proyecto} activa={activa} cerca={vivo.cerca} aLaVista={vivo.aLaVista} reducido={vivo.reducido} />
+          <MedioDeLaTira proyecto={proyecto} activa={activa} cerca={vivo.cerca} aLaVista={vivo.aLaVista} reducido={vivo.reducido} despeje={despeje} />
         </motion.div>
       </div>
       {activa ? <ToquesDeLaHistoria vivo={vivo} /> : null}

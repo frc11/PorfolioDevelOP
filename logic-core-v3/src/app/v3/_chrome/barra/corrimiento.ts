@@ -79,3 +79,56 @@ export const corrimientoPedido = (): PedidoDeCorrimiento | null => pedido
 export function useCorrimientoPedido(): PedidoDeCorrimiento | null {
   return useSyncExternalStore(suscribir, corrimientoPedido, () => null)
 }
+
+// ─── [B1.2d] A2.1 · El despeje del medio ──────────────────────────────────
+
+/**
+ * La píldora en reposo, medida por la barra (px de la ventana): su ancho, su borde de abajo y el fin del botón de sonido; `puede`: si
+ * se corre en este ancho (desde 1024 y en modo barra).
+ */
+export interface PastillaEnReposo {
+  readonly ancho: number
+  readonly abajo: number
+  readonly finDelSonido: number
+  readonly puede: boolean
+}
+
+/**
+ * Cuánto baja el medio del panel (px desde el tope del panel, que en el escenario pegado es el del cuadro), o `null`: nada. A 1280 y a
+ * 1024 la píldora corrida no entra en la columna y se mete en el panel; ahí el medio (el video o el póster) arranca `aire` debajo de su
+ * borde de abajo. Es de la GEOMETRÍA del ancho y no del momento: con la píldora yendo o volviendo, el medio no salta. A 1440 la píldora
+ * entra con su aire: nada.
+ */
+export function despejeDelMedio(panel: PedidoDeCorrimiento | null, pastilla: PastillaEnReposo | null): number | null {
+  if (panel === null || pastilla === null || !pastilla.puede) return null
+  const derecha = izquierdaCorrida(panel, pastilla.ancho, pastilla.finDelSonido) + pastilla.ancho
+  return derecha + CORRIMIENTO.aire > panel.borde ? pastilla.abajo + CORRIMIENTO.aire : null
+}
+
+let panelDelPortfolio: PedidoDeCorrimiento | null = null
+let pastillaEnReposo: PastillaEnReposo | null = null
+const avisar = (): void => {
+  for (const f of oyentes) f()
+}
+
+/** El Portfolio publica la geometría de su panel (el eje del título y el borde), siempre: no sólo cuando pide el corrimiento. */
+export function publicarElPanel(p: PedidoDeCorrimiento | null): void {
+  if (iguales(panelDelPortfolio, p)) return
+  panelDelPortfolio = p
+  avisar()
+}
+
+/** La barra publica su píldora en reposo. */
+export function publicarLaPastilla(p: PastillaEnReposo | null): void {
+  const igual = p === pastillaEnReposo || (p !== null && pastillaEnReposo !== null && p.puede === pastillaEnReposo.puede && [p.ancho - pastillaEnReposo.ancho, p.abajo - pastillaEnReposo.abajo, p.finDelSonido - pastillaEnReposo.finDelSonido].every((d) => Math.abs(d) < 0.5))
+  if (igual) return
+  pastillaEnReposo = p
+  avisar()
+}
+
+export const despejeActual = (): number | null => despejeDelMedio(panelDelPortfolio, pastillaEnReposo)
+
+/** El despeje de ahora, para las tiras (un número o `null`: la instantánea es estable). */
+export function useDespejeDelMedio(): number | null {
+  return useSyncExternalStore(suscribir, despejeActual, () => null)
+}

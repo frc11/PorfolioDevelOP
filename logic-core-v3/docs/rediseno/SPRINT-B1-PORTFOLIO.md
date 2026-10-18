@@ -1597,3 +1597,89 @@ del diagnóstico. s76: 302 afirmaciones; s75: 55.
 
 **Lo que quedó afuera.** El subsprint B entero, que espera el «seguí» (con el agregado de P-H19 de la §14.2). El arnés de carga de 107
 corridas no corrió: no lo pide el gate de A, y las dos fallas nuevas del diagnóstico entran ahí cuando corra.
+
+### 14.4 Log: B1.2d A2 · los ajustes de A (2026-10-18)
+
+Valentino miró el FRENO A y lo aprobó, con cuatro ajustes (A2): el medio, el tiempo de la píldora y el scroll rápido. «Visitar sitio», el cuarto, ya estaba.
+
+**A2.1 · El medio baja cuando la píldora corrida se le mete al panel.**
+- **El cálculo.** `despejeDelMedio` (`_chrome/barra/corrimiento.ts`) sale de la píldora en reposo y de la geometría del panel. A la píldora la publica la barra (`publicarLaPastilla`); a la geometría, el Portfolio (`publicarElPanel`, SIEMPRE y no sólo con la barra).
+  - Si la píldora corrida no deja sus 16 px de aire contra el panel, el medio de cada tira arranca 16 px debajo de ella.
+  - Es de la geometría del ancho y no del momento: con la píldora yendo o volviendo, el medio no salta.
+  - A 1440 la píldora entra con su aire, así que nada.
+- **El aire.** Sin el aire (sólo con la superposición estricta) a 1280 no cambiaba nada, porque la píldora queda a 6 px del panel. Lo tomé con el aire: decisión mía, anotada abajo.
+- **Para no cambiar la altura**, el medio se achica en su proporción lo que baja (`anchoDelMedioConDespeje`, `medios.ts`). El relleno más el medio miden lo mismo que antes, así que la ficha queda en su lugar.
+  - La primera corrida, sin achicar, mostró la ficha pasándose del panel: 861 de 800 a 1280, 851 de 800 a 1180 y 823 de 768 a 1024.
+- **Medido** (`MODO=a2` de `scripts-carga/matriz.ts`; el fondo del medio, en el mismo lugar):
+
+| Ancho | El medio | La ficha | ¿Se pasa del panel? |
+|---|---|---|---|
+| 1440 × 900 | 32 → 336, igual que antes | hasta 864 | no |
+| 1280 × 800 | 88 → 286, 16 px debajo de la píldora; 254 → 198 px de alto | hasta 805 (ya estaba: un hijo recortado) | no |
+| 1180 × 800 | 88 → 254; 223 → 166 px | hasta 795 | no |
+| 1024 × 768 | 88 → 206; 174 → 118 px | hasta 767 | no |
+
+**A2.2 · El tiempo de la píldora** (`orden.ts`):
+- **Al abrir,** la barra se prende un tiempo antes del panel (`ORDEN.barraPrimerTiempoS`, 200 ms). El borde izquierdo se estira antes, y el panel entra cuando termina ese primer tiempo, A LA PAR de la contracción.
+- **Al salir,** la barra se apaga con el panel: la expansión acompaña la salida del panel y la contracción final va después.
+- **Medido** (el comienzo de la contracción contra la entrada del panel, y el de la expansión contra su salida):
+
+| Ancho | Entrada | Salida |
+|---|---|---|
+| 1440 | 0 ms | 0 ms |
+| 1280 | 0 ms | 0 ms |
+| 1180 | −7 ms | 0 ms |
+| 1024 | 0 ms | +11 ms |
+
+- El criterio era ±50 ms.
+
+**A2.3 · La ráfaga** (`rueda.ts`: `rafagaDeLaRueda`, `calibracionDeLaRafaga`, `entraConLaRafaga`):
+- **Qué es una ráfaga:** 3 muescas o más en menos de 300 ms, o un trackpad a esa velocidad. Lo que cuenta son los px en un mismo sentido dentro de la ventana, a 100 por muesca. Se calibra con `?rafaga=` (`4`, `4-250`, `no`).
+- **El orden:** la rueda del Portfolio la mira ANTES que el gesto de a un proyecto (`useRuedaDelPortfolio`), y la decide `useMandosDelPortfolio`:
+  - con el panel adentro, sale (a Demos o hacia arriba, con la salida de siempre), sin recorrer lo que falta;
+  - afuera, si la ráfaga entra al tramo (Lenis lleva la página más allá del pin, o más acá de la salida), lo saltea entero: el paso de destino es el de Demos (o el de arriba) desde el primer cuadro, así que ni la píldora se corre ni el panel entra;
+  - lo que sigue de la ráfaga se traga mientras vuela.
+- **Lo encontró el arnés:** el destino de Lenis se leía en la captura, antes de que Lenis sume el evento de ahora. Cinco muescas desde la aproximación daban 850 y no 950, y el Portfolio entraba. Ahora se suma el evento (`px * wheelMultiplier`); el control de s76 §40 lo cubre.
+- **La matriz:** las 12 combinaciones de la rueda rápida de A8 (el trackpad con inercia ES una ráfaga: saltea en vez de entrar) pasan a 16 de ráfaga: entrar bajando o subiendo y adentro bajando o subiendo, con muescas o con trackpad, con y sin hover.
+  - Corren con `MODO=rafaga`, y su control es `CONTROL=rafaga` (con `?rafaga=no`, las de entrar tienen que fallar).
+  - Las violaciones nuevas son `entro-con-la-rafaga` y `recorrio-de-mas` (más de un proyecto además del de partida: la primera muesca ya dio su paso cuando se reconoce la ráfaga).
+
+**Las afirmaciones de s76 reemplazadas (cambió la spec):**
+1. **§19, la entrada:** la barra en 1,62 s, no en 1,42. «La barra termina cuando el panel empieza» pasa a «la contracción a ±50 ms del panel», con el control del orden de A.
+2. **§19, la salida:** `CEbp@0.00` y `Cebp@0.42`, no `CeBp@0.42` y `Cebp@0.70`. La barra va con el panel, con el control de la salida de A y la afirmación de la expansión.
+3. **§19, con el título recién llegado:** la barra en 0,92 s y no en 0,72 (y la referencia de su control).
+4. **§19, sin el título 3D:** el mismo cambio que la 2.
+5. **§34, «el Portfolio la suelta al salir»:** la forma nueva de `useBarraDelPortfolio` (`pedirElCorrimiento(barra ? geometria : null)` y `geometriaDelPanel`), con un control nuevo: pedir sin la barra.
+6. **§38, la cuenta de la matriz:** 90 → 78. Las 12 de la rueda rápida pasan a la ráfaga (§41).
+
+Nuevas: `s76-portfolio-a2.tsx`, §39 a §41. s76: 324 afirmaciones.
+
+**Verificación:**
+- lint de los 16 archivos tocados, limpio;
+- `tsc --noEmit`, 0 errores;
+- `verificar`, 84 pasos con los 8 grupos rojos de la base: la lista de fallas (127 líneas) es IDÉNTICA a la del sprint P-H;
+- frontera, 23 afirmaciones sin fallas;
+- s74 34, s75 55, s76 644 en el agregado y s77 35;
+- sin `next build`.
+
+**Lo que no corrió por memoria:**
+- La matriz de la ráfaga en el sitio, después del arreglo: la tanda 0-3 frenó con 594 MB libres. Volvió el dev de servicios (2,5 GB), y con él y el dev del home arriba no quedan 3 GB para un Chrome.
+- La matriz de A8 entera de nuevo (las 78), que tocan el orden y la rueda.
+- Las dos corren con `bash scratchpad/cola2/tanda.sh <rango> MODO=rafaga` (y sin `MODO`, la de A8), contra el dev del home en :3002.
+- **Un error mío:** la primera corrida de `MODO=a2` arrancó con 1,4 GB libres, debajo del piso, y no debió arrancar. Terminó bien.
+
+**Decisiones que tomé sin preguntar:**
+- **El despeje con el aire de 16 px**, no con la superposición estricta: a 1280 la píldora queda a 6 px del panel y el medio también baja.
+- **El medio se achica lo que baja**, para no tocar la altura ni pasar la ficha. A 1024 queda en 118 px de alto.
+- **La ráfaga con el trackpad** usa la misma velocidad (unos 1.000 px/s). Sospecho, sin haberlo medido con un trackpad de verdad, que un deslizamiento moderado ya la supera y saltea el Portfolio. Si saltea de más, se sube con `?rafaga=`.
+- **El dev del home** corre en :3002, porque :3000 lo usa ahora el de servicios.
+
+**Qué mirar (A2)**, en :3002 (`npm run dev -- -p 3002`, o el puerto libre):
+1. **A2.1**, a 1280 × 800, 1180 × 800 y 1024 × 768, en `/v3#portfolio-el-garage`. El video de cada proyecto arranca debajo de la píldora corrida, con aire, y la ficha y «Visitar sitio» entran en el panel. El video queda más chico que antes: es el precio de no tocar la altura. A 1440, igual que antes.
+2. **A2.2**, a 1440, entrando con una muesca desde la aproximación. Primero se estira la píldora y, cuando entra el panel, la píldora se contrae a la par, como si le dejara el lugar. Saliendo hacia arriba, la píldora vuelve a la par de la salida del panel y se contrae después.
+3. **A2.3**, a 1440:
+   - una ráfaga de rueda desde Quiénes somos: el Portfolio no aparece (ni la píldora ni el panel) y entra Demos;
+   - desde Demos, una ráfaga hacia arriba, lo mismo;
+   - adentro (en El Garage), una ráfaga hacia abajo sale a Demos sin pasar por los proyectos;
+   - con muescas sueltas, de a un proyecto, como antes;
+   - con el trackpad: decí si saltea de más.

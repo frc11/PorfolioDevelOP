@@ -108,8 +108,10 @@ export function afirmarB12d(): void {
     /useCorrimientoDeLaPastilla\(pastillaRef\)/.test(b) && !/data-parte="esquina"/.test(h) && !/pointer-events|pointerEvents|inert/.test(h) &&
     /window\.matchMedia\(CORRIMIENTO\.consulta\)\.matches && cabecera\.getAttribute\('data-modo'\) !== 'menu'/.test(h) &&
     /for \(const a of animaciones\.current\) a\.cancel\(\)/.test(h) && /const ahora = bordesDe\(el, origen\)/.test(h) &&
-    /if \(!barra\) \{\s*pedirElCorrimiento\(null\)/.test(p) && /const pedir = \(\): void => \{\s*const escenario = escenarioDe\(caja\.current\)/.test(p) && /return \(\) => \{\s*window\.removeEventListener\('resize', pedir\)\s*pedirElCorrimiento\(null\)/.test(p)
+    /pedirElCorrimiento\(barra \? geometria : null\)/.test(p) && /const pedir = \(\): void => \{\s*const geometria = geometriaDelPanel\(escenarioDe\(caja\.current\)\)/.test(p) && /return \(\) => \{\s*window\.removeEventListener\('resize', pedir\)\s*pedirElCorrimiento\(null\)/.test(p)
   afirmar(soloLaPildora(hook, barra, delPortfolio), '  se mueve sólo la píldora (la esquina no), sigue usándose durante todo el movimiento, sale de donde está si lo pedido cambia a mitad de camino, y el Portfolio la suelta al salir y al desmontarse')
+  // [A2.1] La geometría del panel se publica siempre (el despeje del medio), pero el corrimiento se pide sólo con la barra.
+  controlPositivo('  el detector ve un Portfolio que pide el corrimiento sin la barra (la píldora se correría antes de tiempo)', [hook, barra, delPortfolio.replace('pedirElCorrimiento(barra ? geometria : null)', 'pedirElCorrimiento(geometria)')] as const, ([h, b, p]: readonly [string, string, string]) => soloLaPildora(h, b, p))
   controlPositivo('  el detector ve un corrimiento que arranca de su lugar de reposo (saltaría si se da vuelta en el medio)', [hook.replace('const ahora = bordesDe(el, origen)', 'const ahora = enReposo(el, origen)'), barra, delPortfolio] as const, ([h, b, p]: readonly [string, string, string]) => soloLaPildora(h, b, p))
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -151,7 +153,9 @@ export function afirmarB12d(): void {
   titulo('B1.2d · 38 · A8 · La matriz del arnés: cada combinación y la cuenta del invariante (`scripts-carga/a8.ts`)')
 
   const todas = combinaciones()
-  afirmar(todas.length === 90 && new Set(todas.map((c) => `${c.entrada}|${c.salida}|${String(c.hover)}|${c.velocidad}`)).size === 90 && ENTRADAS.every((e) => todas.some((c) => c.entrada === e)) && IDAS_Y_VUELTAS === 3, `las ${String(todas.length)} combinaciones: ${String(ENTRADAS.length)} entradas por las tres salidas, con y sin hover, lentas y rápidas (las de un salto, una vez), cada una con tres idas y vueltas`)
+  // [B1.2d A2] A2.3 · las 12 de la rueda rápida (el trackpad con inercia ES una ráfaga: saltea en vez de entrar) pasan a las de la ráfaga (§41).
+  const deLaRuedaRapida = todas.filter((c) => c.entrada.startsWith('rueda-') && c.velocidad === 'rapida')
+  afirmar(todas.length === 78 && new Set(todas.map((c) => `${c.entrada}|${c.salida}|${String(c.hover)}|${c.velocidad}`)).size === 78 && deLaRuedaRapida.length === 0 && ENTRADAS.every((e) => todas.some((c) => c.entrada === e)) && IDAS_Y_VUELTAS === 3, `las ${String(todas.length)} combinaciones: ${String(ENTRADAS.length)} entradas por las tres salidas, con y sin hover, lentas y rápidas (las de un salto y [A2.3] las de la rueda, lentas: la rueda rápida es una ráfaga), cada una con tres idas y vueltas`)
   const fotoAdentro: FotoDelPortfolio = { ancho: 1440, quieta: true, paso: 0, panelAdentro: true, ordenQuieto: true, enVuelo: false, barra: true, panelIzq: 720, bordeDelPanel: 720, eje: 360, finDelSonido: 80, pastilla: { l: 96, r: 634 }, pastillaEnLinea: true, fallas: [] }
   const fotoAfuera: FotoDelPortfolio = { ...fotoAdentro, paso: 4, panelAdentro: false, barra: false, panelIzq: 1440, pastilla: { l: 451, r: 989 }, pastillaEnLinea: false }
   const fotoColgada: FotoDelPortfolio = { ...fotoAfuera, quieta: false, enVuelo: true, fallas: ['portfolio-colgado: un salto en vuelo con la página quieta'] }

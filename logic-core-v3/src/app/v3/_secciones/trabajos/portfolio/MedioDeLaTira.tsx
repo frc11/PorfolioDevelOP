@@ -6,7 +6,7 @@ import { Imagen } from '../../../_componentes/medios/Imagen'
 
 import type { ProyectoDelPortfolio } from '../proyectos'
 
-import { ANCHO_DEL_MEDIO, MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL_LOMO } from './medios'
+import { ANCHO_DEL_MEDIO, MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL_LOMO, anchoDelMedioConDespeje } from './medios'
 
 /** Qué hace el video de una tira, puro (s76 lo afirma sin navegador). */
 export interface EstadoDelVideo {
@@ -68,12 +68,15 @@ export function MedioDeLaTira({
   cerca,
   aLaVista,
   reducido,
+  despeje = null,
 }: {
   readonly proyecto: ProyectoDelPortfolio
   readonly activa: boolean
   readonly cerca: boolean
   readonly aLaVista: boolean
   readonly reducido: boolean
+  /** [B1.2d] A2.1 · lo que baja el medio por la píldora corrida (`null`: nada): se achica lo mismo. */
+  readonly despeje?: number | null
 }): React.JSX.Element {
   const movil = useRef<HTMLDivElement | null>(null)
   const [cual, setCual] = useState<CualDeLosVideos>('escritorio')
@@ -87,7 +90,7 @@ export function MedioDeLaTira({
   const estado = (de: CualDeLosVideos): EstadoDelVideo => estadoDelVideo(activa && cual === de, cerca, reducido, aLaVista)
   return (
     <>
-      <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5 max-tablet:hidden" style={{ aspectRatio: PROPORCION_DEL_MEDIO, width: ANCHO_DEL_MEDIO }}>
+      <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5 max-tablet:hidden" style={{ aspectRatio: PROPORCION_DEL_MEDIO, width: despeje === null ? ANCHO_DEL_MEDIO : anchoDelMedioConDespeje(despeje) }}>
         <Video proyecto={proyecto} cual="escritorio" e={estado('escritorio')} />
         <a href={proyecto.url} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
       </figure>

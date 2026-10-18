@@ -7,8 +7,8 @@ import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
 import { vistaDelPaso } from './estado'
 import { conDialogo, medir, pegado, type Vuelo } from './medida'
 import { duracionDeLaSalida } from './orden'
-import { PANTALLAS_POR_PASO, PX_JUSTO_ANTES_DEL_PIN, bordesDelPaso, pxDeLaSeccion, scrollDelPx, type IndiceDePaso } from './pasos'
-import { destinoDeLaRueda, type DestinoDeLaRueda } from './rueda'
+import { PANTALLAS_POR_PASO, PX_JUSTO_ANTES_DEL_PIN, bordesDelPaso, pxDeLaSeccion, pxDelScroll, scrollDelPx, type IndiceDePaso } from './pasos'
+import { destinoDeLaRueda, entraConLaRafaga, type DestinoDeLaRueda } from './rueda'
 import { useClicAfueraDelPanel, type ControlDelClicAfuera } from './useClicAfueraDelPanel'
 import { useDeslizamientoDelPortfolio, type ControlDelDeslizamiento } from './useDeslizamientoDelPortfolio'
 import { useRuedaDelPortfolio, type ControlDeLaRueda } from './useRuedaDelPortfolio'
@@ -53,7 +53,31 @@ export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly irAl: (s
     [irAlPx, saltar, salidaMs],
   )
   const control = useRef<ControlDeLaRueda | null>(null)
+  // [B1.2d] A2.3 · El vuelo de la ráfaga (su salida o su salteo), para tragar el resto de la ráfaga mientras dura.
+  const vueloDeLaRafaga = useRef<Vuelo | null>(null)
   useEffect(() => {
+    const rafaga = (sentido: 1 | -1, px: number): boolean => {
+      const vuelo = enVuelo.current
+      if (vuelo !== null && vuelo === vueloDeLaRafaga.current) return true
+      if (conDialogo(caja.current)) return false
+      const v = vistaDelPaso(actual.current)
+      const destino: DestinoDeLaRueda = sentido > 0 ? { tipo: 'demos' } : { tipo: 'arriba' }
+      // Afuera, con un vuelo en curso (la salida de una muesca): que termine; la rueda ya se traga.
+      if (vuelo !== null && v.fase !== 'adentro') return true
+      if (v.fase !== 'adentro') {
+        const lenis = LENIS_DEL_SITIO.instancia
+        const medida = medir(caja.current)
+        if (lenis === null || medida === null) return false
+        // Adónde va la página: el destino de Lenis y este evento, que Lenis suma DESPUÉS (la rueda del Portfolio escucha en la captura).
+        const hacia = pxDelScroll(lenis.targetScroll + px * lenis.options.wheelMultiplier, medida.tope, medida.alto)
+        if (!entraConLaRafaga(medida.px, hacia, sentido, PANTALLAS_POR_PASO)) return false
+      }
+      // Adentro sale sin recorrer los proyectos que faltan; afuera, la ráfaga que entra al tramo lo saltea entero (el paso de destino ya:
+      // ni la píldora ni el panel).
+      ir(destino, true)
+      vueloDeLaRafaga.current = enVuelo.current
+      return true
+    }
     control.current = {
       manda: () => {
         const v = vistaDelPaso(actual.current)
@@ -61,6 +85,7 @@ export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly irAl: (s
       },
       ocupado: () => enVuelo.current !== null,
       ir: (d) => ir(d, true),
+      rafaga,
       inerte,
       ultimaRueda,
     }

@@ -25,6 +25,7 @@ import { CONTENIDO as CONTENIDO_DE_ANTES } from '../../_archivo/tunel-portfolio/
 import { PROYECTOS, mediosDe, seMuestraElServicio, type ProyectoDelPortfolio } from '../../_secciones/trabajos/proyectos'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { afirmarLaBase } from './s76-portfolio-mapeo'
+import { afirmarA2 } from './s76-portfolio-a2'
 import { afirmarB12c } from './s76-portfolio-b12c'
 import { afirmarB12d } from './s76-portfolio-b12d'
 import { afirmarElSelectorVivo } from './s76-portfolio-escena'
@@ -158,5 +159,6 @@ afirmarElSelectorVivo()
 afirmarB12c()
 afirmarLasHistorias()
 afirmarB12d()
+afirmarA2()
 
 cerrar('s76-portfolio.invariant')

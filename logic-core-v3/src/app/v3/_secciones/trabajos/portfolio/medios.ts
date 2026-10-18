@@ -30,6 +30,12 @@ export const PROPORCION_DEL_MEDIO = '16 / 10'
 export const ANCHO_DEL_MEDIO = 'min(100%, calc(var(--alto-del-medio) * 16 / 10))'
 export const CLASE_DEL_ALTO_DEL_MEDIO = '[--alto-del-medio:38svh] max-escritorio:[--alto-del-medio:28svh]'
 
+/**
+ * [B1.2d] A2.1 · El ancho del medio cuando baja (`despejeDelMedio`): achicado en su proporción lo que baja de más (sobre el relleno de
+ * siempre, `--spacing-8`), así el relleno y el medio ocupan lo mismo que antes y la ficha no se pasa del panel.
+ */
+export const anchoDelMedioConDespeje = (despeje: number): string => `calc(${ANCHO_DEL_MEDIO} - (${String(despeje)}px - var(--spacing-8)) * 16 / 10)`
+
 /** El `sizes` del medio de la tira activa: la mitad del cuadro desde 1024 (menos los lomos), el 60 % en tablet. */
 export const SIZES_DEL_MEDIO = '(min-width: 1024px) 42vw, 52vw'
 /** El lomo muestra el póster del teléfono (vertical, como el lomo) cubriendo una pantalla de alto. */
