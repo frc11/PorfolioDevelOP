@@ -6,8 +6,9 @@
  *   · `// SPEC §7.x` — de qué parte del SPEC sale una respuesta del FAQ. Regla D9: se escribe solo si CADA afirmación
  *     sale del SPEC; si alguna parte no sale, es `null`.
  *   · `// C2: provisorio` — copy que el SPEC no da (D10); lo reemplaza la pasada de textos del final.
- *   · `// P-H2` — el único hex: el acento claro, hasta que el tema lo emita como token.
- * La marca se importa de `LOGOTIPO`: no se escribe suelta en los datos.
+ *   · `// M0 §8 (dictado)` — texto que dictó Valentino en el plan M0, literal (en los otros dos servicios).
+ * La marca se importa de `LOGOTIPO`: no se escribe suelta en los datos. [M1] El acento no se guarda acá: sale del tema por
+ * `idEnElHome` (P-H2 cerrado), así que los datos no tienen ningún color.
  */
 
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
@@ -29,9 +30,6 @@ export const PAGINAS_WEB: Servicio = {
   slug: 'paginas-web',
   idEnElHome: 'web',
   nombre: NOMBRE,
-  acento: {
-    claro: '#8FC0E8', // P-H2: reemplazar por el token claro del tema cuando exista
-  },
   seo: {
     title: `${NOMBRE} · ${LOGOTIPO}`, // C2: provisorio
     description: QUE_HACEMOS.texto, // C2: provisorio

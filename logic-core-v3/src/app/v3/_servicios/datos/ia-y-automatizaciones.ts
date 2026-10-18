@@ -5,7 +5,7 @@
  * ofrece como servicio activo.
  *
  * Textos y números literales del SPEC: nada inventado. Lo que el SPEC deja en [a definir], o no da, va en `null`
- * (plan §8.6). Las marcas son las de `paginas-web.ts`: `// SPEC §7.x`, `// C2: provisorio` y `// P-H2`.
+ * (plan §8.6). Las marcas son las de `paginas-web.ts`: `// SPEC §7.x`, `// C2: provisorio` y `// M0 §8 (dictado)`.
  */
 
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
@@ -23,9 +23,6 @@ export const IA_Y_AUTOMATIZACIONES: Servicio = {
   slug: 'ia-y-automatizaciones',
   idEnElHome: 'ia-automatizacion',
   nombre: NOMBRE,
-  acento: {
-    claro: '#7FCBA4', // P-H2: reemplazar por el token claro del tema cuando exista
-  },
   seo: {
     title: `${NOMBRE} · ${LOGOTIPO}`, // C2: provisorio
     description: QUE_HACEMOS.texto, // C2: provisorio
@@ -96,7 +93,9 @@ export const IA_Y_AUTOMATIZACIONES: Servicio = {
   faq: [
     {
       pregunta: '¿El bot reemplaza a mi equipo?',
-      respuesta: null, // SPEC §7.3 dice que deriva a una persona, pero no da el sí o el no que la pregunta pide
+      // M0 §8 (dictado): el SPEC §7.3 decía que deriva a una persona, pero no daba el sí o el no que la pregunta pide
+      respuesta:
+        'No. Atiende las consultas repetidas y las que llegan fuera de horario, y cuando alguien está listo para comprar le pasa la charla a una persona de tu equipo. El asistente atiende; vos cerrás las ventas.',
     },
     {
       pregunta: '¿Puedo ver las conversaciones?',
@@ -126,7 +125,8 @@ export const IA_Y_AUTOMATIZACIONES: Servicio = {
   ],
   cta: {
     titulo: 'Que tu negocio atienda las 24 hs',
-    texto: null, // SPEC §7.3 trae solo el título del CTA
+    // M0 §8 (dictado): el SPEC §7.3 traía solo el título del CTA
+    texto: 'Contanos tu rubro y cuántas consultas te llegan por mes, y te recomendamos el plan que te conviene.',
     boton: 'Quiero mi asistente con IA', // C2: provisorio
   },
   articulos: [{ titulo: 'Cómo automatizar pedidos por WhatsApp sin perder el trato humano', href: null }],

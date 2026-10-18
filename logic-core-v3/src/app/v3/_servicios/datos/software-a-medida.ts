@@ -2,7 +2,7 @@
  * [SERVICIOS S1a] SOFTWARE A MEDIDA — los datos de SPEC §7.2, tal cual.
  *
  * Textos y números literales del SPEC: nada inventado. Lo que el SPEC deja en [a definir], o no da, va en `null`
- * (plan §8.6). Las marcas son las de `paginas-web.ts`: `// SPEC §7.x`, `// C2: provisorio` y `// P-H2`.
+ * (plan §8.6). Las marcas son las de `paginas-web.ts`: `// SPEC §7.x`, `// C2: provisorio` y `// M0 §8 (dictado)`.
  */
 
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
@@ -23,9 +23,6 @@ export const SOFTWARE_A_MEDIDA: Servicio = {
   slug: 'software-a-medida',
   idEnElHome: 'software',
   nombre: NOMBRE,
-  acento: {
-    claro: '#AFA0E8', // P-H2: reemplazar por el token claro del tema cuando exista
-  },
   seo: {
     title: `${NOMBRE} · ${LOGOTIPO}`, // C2: provisorio
     description: QUE_HACEMOS.texto, // C2: provisorio
@@ -69,7 +66,9 @@ export const SOFTWARE_A_MEDIDA: Servicio = {
     },
     {
       pregunta: '¿Qué pasa si después necesito cambios?',
-      respuesta: null, // SPEC §7.2 no dice cómo se tratan los cambios después de la entrega
+      // M0 §8 (dictado): el SPEC §7.2 no decía cómo se tratan los cambios después de la entrega
+      respuesta:
+        'Los primeros 1 o 2 meses después de entregar, el soporte va incluido. Después, cada cambio o mejora se presupuesta antes de hacerlo: nunca te cobramos algo que no aprobaste.',
     },
     {
       pregunta: '¿El sistema es mío?',

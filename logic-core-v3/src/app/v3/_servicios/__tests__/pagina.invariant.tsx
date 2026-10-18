@@ -10,6 +10,12 @@
  * [S3b] La página tiene dos partes: la INTRO (`data-intro-de-servicio`, lo único invertido, con el acento claro) y el CUERPO, en
  * papel, con el token oscuro del servicio. La comparación del vidrio contra la fórmula del Portfolio se RETIRÓ con el vidrio
  * (la funcionalidad ya no existe): en su lugar, §10 afirma que no queda ningún vidrio.
+ *
+ * [M1] La maqueta: el h1 es el nombre y la bajada son dos párrafos (§1), el orden nuevo con el CTA del precio y el slot de trabajos
+ * (§2-§3), ningún hex porque el claro es el token del tema (§6), los trabajos como frases con el enlace al caso en el Portfolio (§7) y
+ * cómo entra cada bloque, con el gatillo y su guarda en reposo (§10). RETIRADAS por quitar la funcionalidad, no aflojadas: los casos con rubro, enlace y
+ * pósters y las seis imágenes (§7, la sección de casos se fue) y «con un artículo con href, Del blog se monta» (§2: Del blog salió del
+ * orden; en su lugar se afirma que no se monta ni con href).
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
@@ -24,7 +30,10 @@ import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
 import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
+import { ENTRADAS_AL_TRAMO } from '../../_secciones/_contrato/cruce'
 import { MARCA_HOME_QUIETO } from '../../_secciones/_contrato/marcaHomeQuieto'
+import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
+import { DISPARO_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { CLASES_DEL_PAPEL } from '../bloques/Bloque'
 import { Precio } from '../bloques/Precio'
 import { FUENTE_DE_PROYECTOS } from '../datos/fuenteDeProyectos'
@@ -32,9 +41,10 @@ import { IA_Y_AUTOMATIZACIONES } from '../datos/ia-y-automatizaciones'
 import { PAGINAS_WEB } from '../datos/paginas-web'
 import { SERVICIOS } from '../datos/servicios'
 import { SOFTWARE_A_MEDIDA } from '../datos/software-a-medida'
-import { ESTILO_DEL_CTA, tokenDelAcento } from '../estiloDelAcento'
+import { ESTILO_DEL_CTA, tokenDelAcento, tokenDelAcentoClaro } from '../estiloDelAcento'
 import { MARCADOR_A_DEFINIR, numero, usd } from '../formato'
 import { ATRIBUTO_DE_LA_INTRO } from '../Intro'
+import { ESTADOS_DEL_GATILLO, LINEA_DEL_DISPARO, estaALaVista, siguienteEstado, type EstadoDelGatillo } from '../movimiento/disparo'
 import { PaginaDeServicio } from '../PaginaDeServicio'
 import { PRECIOS_DESDE } from '../precios'
 import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
@@ -42,7 +52,7 @@ import { jsonLdDe } from '../seo'
 import type { Plan, Servicio } from '../tipos'
 import {
   MARCADORES_DE_LA_LLAVE, acentosDelTemaPorServicio, aperturaDe, aperturas, arbitrariasSinToken, bloqueDe, bloquesEnOrden, clasesQueNoApilan,
-  elementoConAtributo, enlacesInternos, fondosOpacos, hexSueltos, nivelesDeEncabezado, numerosInventados,
+  declaracionDelTemaPorServicio, elementoConAtributo, enlacesInternos, fondosOpacos, hexSueltos, nivelesDeEncabezado, numerosInventados,
   reservadosEnElMarcado, respetaElOrden, saltaNiveles, sinComentarios, textoVisible, tokensDelTema, valoresDe, valoresProhibidos,
   vidrios,
 } from './pagina-detectores'
@@ -67,42 +77,73 @@ const cuerpo = (html: string): string => {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · La intro es lo primero: lleva su atributo, el único h1 (el problema) y su bajada')
+titulo('1 · La intro es lo primero: su atributo con el IdDeServicio, el único h1 (el nombre) y la bajada en dos párrafos')
 
 const unSoloH1 = (html: string): boolean => aperturas(html, 'h1').length === 1
+// [M1] El h1 es el NOMBRE del servicio: el mismo texto que el título 3D de B12a.
 const h1Dice = (servicio: Servicio) => (html: string): boolean =>
-  unSoloH1(html) && textoVisible(/<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html)?.[1] ?? '') === servicio.problema.titulo
-afirmarIgual(fallan((p) => h1Dice(p.servicio)(p.html)), [], 'las tres páginas, en los dos modos: un solo h1, con el título del problema de SUS datos')
+  unSoloH1(html) && textoVisible(/<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html)?.[1] ?? '') === servicio.nombre
+afirmarIgual(fallan((p) => h1Dice(p.servicio)(p.html)), [], 'las tres páginas, en los dos modos: un solo h1, con el nombre de SUS datos («Páginas web»)')
 controlPositivo('dos h1 se detectan', '<main><h1>a</h1><h1>b</h1></main>', unSoloH1)
 controlPositivo('un h1 con otro título se detecta', '<h1>otro</h1>', h1Dice(PAGINAS_WEB))
+controlPositivo('  y el h1 de antes del M1, el título del problema, también', `<h1>${PAGINAS_WEB.problema.titulo}</h1>`, h1Dice(PAGINAS_WEB))
+/** Los textos de los párrafos de un marcado, en orden. */
+const parrafos = (marcado: string): string[] => [...marcado.matchAll(/<p(?=[\s>])[^>]*>([\s\S]*?)<\/p>/g)].map((m) => textoVisible(m[1] ?? ''))
+/** Los textos de los encabezados (h1 a h6) de un marcado. */
+const encabezados = (marcado: string): string[] => [...marcado.matchAll(/<h([1-6])(?=[\s>])[^>]*>([\s\S]*?)<\/h\1>/g)].map((m) => textoVisible(m[2] ?? ''))
+// [M1] La bajada sale del problema: dos párrafos, la entrada (su título) y su texto, literales y en ese orden. Ningún heading los lleva.
+const bajadaEnDosParrafos = (servicio: Servicio) => (marcado: string): boolean =>
+  JSON.stringify(parrafos(marcado)) === JSON.stringify([servicio.problema.titulo, servicio.problema.texto]) &&
+  !encabezados(marcado).some((t) => t === servicio.problema.titulo || t === servicio.problema.texto)
 /** La primera etiqueta adentro de la raíz. */
 const primeroDeLaRaiz = (html: string): string => /^<div[^>]*>(<[^>]+>)/.exec(html)?.[1] ?? ''
 const laIntro = (servicio: Servicio) => (html: string): boolean => {
   const marcado = intro(html)
   if (marcado === null) return false
-  return primeroDeLaRaiz(html) === aperturaDe(marcado) && aperturaDe(marcado).includes(` ${ATRIBUTO_DE_LA_INTRO}="${servicio.slug}"`) &&
-    h1Dice(servicio)(marcado) && aperturas(cuerpo(html), 'h1').length === 0 &&
-    textoVisible(marcado).includes(servicio.problema.texto) && !textoVisible(cuerpo(html)).includes(servicio.problema.texto)
+  return primeroDeLaRaiz(html) === aperturaDe(marcado) && aperturaDe(marcado).includes(` ${ATRIBUTO_DE_LA_INTRO}="${servicio.idEnElHome}"`) &&
+    h1Dice(servicio)(marcado) && aperturas(cuerpo(html), 'h1').length === 0 && bajadaEnDosParrafos(servicio)(marcado) &&
+    !textoVisible(cuerpo(html)).includes(servicio.problema.texto)
 }
-afirmarIgual(fallan((p) => laIntro(p.servicio)(p.html)), [], `y ese h1 va en la intro: lo primero de la raíz, con ${ATRIBUTO_DE_LA_INTRO} y su slug, el h1 y la bajada (el texto del problema); el cuerpo no lleva ninguno de los dos`)
-controlPositivo('una intro sin su atributo se detecta', WEB_PROD.replace(` ${ATRIBUTO_DE_LA_INTRO}="${PAGINAS_WEB.slug}"`, ''), laIntro(PAGINAS_WEB))
-controlPositivo('un h1 que se va al cuerpo se detecta', WEB_PROD.replace(/<h1(?=[\s>])/, '<h2').replace('</h1>', '</h2>').replace('<main>', `<main><h1>${PAGINAS_WEB.problema.titulo}</h1>`), laIntro(PAGINAS_WEB))
+afirmarIgual(fallan((p) => laIntro(p.servicio)(p.html)), [], `y ese h1 va en la intro: lo primero de la raíz, con ${ATRIBUTO_DE_LA_INTRO} y el IdDeServicio del home (P-H20), el h1 y la bajada en dos párrafos; el cuerpo no lleva ninguno de los dos`)
+controlPositivo('una intro sin su atributo se detecta', WEB_PROD.replace(` ${ATRIBUTO_DE_LA_INTRO}="${PAGINAS_WEB.idEnElHome}"`, ''), laIntro(PAGINAS_WEB))
+controlPositivo('  y una con el slug en vez del IdDeServicio', WEB_PROD.replace(` ${ATRIBUTO_DE_LA_INTRO}="${PAGINAS_WEB.idEnElHome}"`, ` ${ATRIBUTO_DE_LA_INTRO}="${PAGINAS_WEB.slug}"`), laIntro(PAGINAS_WEB))
+controlPositivo('un h1 que se va al cuerpo se detecta', WEB_PROD.replace(/<h1(?=[\s>])/, '<h2').replace('</h1>', '</h2>').replace('<main>', `<main><h1>${PAGINAS_WEB.nombre}</h1>`), laIntro(PAGINAS_WEB))
 controlPositivo('algo antes de la intro se detecta', WEB_PROD.replace(/^(<div[^>]*>)/, '$1<p>antes</p>'), laIntro(PAGINAS_WEB))
+controlPositivo('la bajada en un solo párrafo se detecta', `<div><p>${PAGINAS_WEB.problema.titulo} ${PAGINAS_WEB.problema.texto}</p></div>`, bajadaEnDosParrafos(PAGINAS_WEB))
+controlPositivo('  y el título del problema como heading', `<div><h2>${PAGINAS_WEB.problema.titulo}</h2><p>${PAGINAS_WEB.problema.titulo}</p><p>${PAGINAS_WEB.problema.texto}</p></div>`, bajadaEnDosParrafos(PAGINAS_WEB))
+// El nombre manda en los cuatro lugares que lo dicen: el h1, el `Service` y la segunda miga del JSON-LD, y el comienzo del title.
+const nombreCoherente = (servicio: Servicio, html: string, ld: string): boolean =>
+  h1Dice(servicio)(html) && ld.includes(`"@type":"Service","name":${JSON.stringify(servicio.nombre)}`) &&
+  ld.includes(`"position":2,"name":${JSON.stringify(servicio.nombre)}`) && servicio.seo.title.startsWith(`${servicio.nombre} · `)
+afirmarIgual(fallan((p) => nombreCoherente(p.servicio, p.html, JSON.stringify(jsonLdDe(p.servicio)))), [], '  el h1 dice lo mismo que el Service y la segunda miga del JSON-LD y que el comienzo del title')
+controlPositivo('  un JSON-LD con otro nombre se detecta', JSON.stringify(jsonLdDe(PAGINAS_WEB)).replace(`"position":2,"name":"${PAGINAS_WEB.nombre}"`, '"position":2,"name":"Otra"'), (ld: string) => nombreCoherente(PAGINAS_WEB, WEB_PROD, ld))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · Los bloques, en el orden de SPEC §5')
+titulo('2 · Los bloques, en el orden de la maqueta (M0 §1.3)')
 
-const ORDEN_DEL_SPEC = ['problema', 'que-hacemos', 'que-incluye', 'precio', 'extra', 'proceso', 'prueba', 'faq', 'llamado', 'del-blog', 'cierre']
-afirmarIgual(bloquesEnOrden(WEB_DEV), ORDEN_DEL_SPEC.filter((b) => b !== 'del-blog'), 'Páginas web: los diez bloques con contenido, en orden — Del blog no se monta (sus artículos no tienen href)')
-afirmarIgual(fallan((p) => respetaElOrden(bloquesEnOrden(p.html), ORDEN_DEL_SPEC)), [], 'las tres páginas, en los dos modos: los bloques que hay respetan el orden del SPEC')
+// [M1] El orden de la maqueta: la intro (el problema) y los diez del cuerpo. «Prueba» y «Del blog» salieron (funcionalidad quitada).
+const ORDEN_DE_LA_MAQUETA = ['problema', 'que-hacemos', 'que-incluye', 'precio', 'llamado-del-precio', 'extra', 'trabajos', 'proceso', 'faq', 'llamado', 'cierre']
+const sin = (...fuera: string[]): string[] => ORDEN_DE_LA_MAQUETA.filter((b) => !fuera.includes(b))
+/** Lo que lleva cada página: Extra solo existe en web; el slot del video, en web solo en desarrollo (su marcador, hasta el M3). */
+const ESPERADO: Readonly<Record<string, { readonly dev: readonly string[]; readonly prod: readonly string[] }>> = {
+  'paginas-web': { dev: ORDEN_DE_LA_MAQUETA, prod: sin('trabajos') },
+  'software-a-medida': { dev: sin('extra'), prod: sin('extra') }, // el slot lleva su nota
+  'ia-y-automatizaciones': { dev: sin('extra'), prod: sin('extra') }, // el slot lleva «Probá el panel»
+}
+afirmarIgual(fallan((p) => JSON.stringify(bloquesEnOrden(p.html)) === JSON.stringify(ESPERADO[p.servicio.slug]?.[p.enDesarrollo ? 'dev' : 'prod'])), [], 'las tres páginas, en los dos modos: exactamente los bloques que les tocan, en el orden de la maqueta')
+afirmarIgual(fallan((p) => respetaElOrden(bloquesEnOrden(p.html), ORDEN_DE_LA_MAQUETA)), [], '  y ninguno fuera de su lugar')
+controlPositivo('dos bloques cambiados de lugar se detectan', ['problema', 'que-incluye', 'que-hacemos', 'precio'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
+controlPositivo('un bloque que no es de la maqueta se detecta', ['problema', 'inventado'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
+controlPositivo('  y la sección de casos de antes, «prueba», también', [...sin('trabajos', 'proceso', 'faq', 'llamado', 'cierre'), 'prueba'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
+// Del blog salió del orden: ni con un artículo que sí tenga href se monta.
 const conBlog = pagina({ ...PAGINAS_WEB, articulos: [{ titulo: 'Una nota', href: '/v3/blog/una-nota' }] }, false)
-afirmar(bloquesEnOrden(conBlog).join() === ORDEN_DEL_SPEC.join(), 'con un artículo que sí tiene href, Del blog se monta entre el llamado y el cierre')
-controlPositivo('dos bloques cambiados de lugar se detectan', ['problema', 'que-incluye', 'que-hacemos', 'precio'], (s: string[]) => respetaElOrden(s, ORDEN_DEL_SPEC))
-controlPositivo('un bloque que no es del SPEC se detecta', ['problema', 'inventado'], (s: string[]) => respetaElOrden(s, ORDEN_DEL_SPEC))
+const sinDelBlog = (html: string): boolean => !bloquesEnOrden(html).includes('del-blog') && !textoVisible(html).includes('Del blog')
+afirmar(sinDelBlog(conBlog) && JSON.stringify(bloquesEnOrden(conBlog)) === JSON.stringify(ESPERADO['paginas-web']?.prod), 'Del blog no se monta, ni con un artículo que tiene href: salió del orden hasta que exista el blog')
+controlPositivo('  una página con Del blog se detecta', `${WEB_PROD}<section data-bloque="del-blog"><h2>Del blog</h2></section>`, sinDelBlog)
 // S3b · el orden, ajustado a la intro: el problema es la intro y el cuerpo arranca en Qué hacemos.
 const partidaEnDos = (html: string): boolean =>
   JSON.stringify(bloquesEnOrden(intro(html) ?? '')) === JSON.stringify(['problema']) && bloquesEnOrden(cuerpo(html))[0] === 'que-hacemos' &&
-  respetaElOrden(bloquesEnOrden(cuerpo(html)), ORDEN_DEL_SPEC.filter((b) => b !== 'problema'))
+  respetaElOrden(bloquesEnOrden(cuerpo(html)), sin('problema'))
 afirmarIgual(fallan((p) => partidaEnDos(p.html)), [], 'las tres páginas, en los dos modos: la intro lleva un solo bloque, el problema, y el cuerpo empieza en Qué hacemos y sigue el orden del SPEC')
 controlPositivo('un bloque del cuerpo metido en la intro se detecta', `<div><div ${ATRIBUTO_DE_LA_INTRO}="x"><section data-bloque="problema"></section><section data-bloque="que-hacemos"></section></div><main><section data-bloque="que-incluye"></section></main></div>`, partidaEnDos)
 
@@ -112,8 +153,21 @@ titulo('3 · El CTA abre el contacto y precarga el servicio — sin data-servici
 const envoltorios = (html: string): string[] => aperturas(html, 'div').filter((d) => d.includes('data-abre-contacto'))
 const lleva = (idEnElHome: string) => (apertura: string): boolean =>
   apertura.includes('data-abre-contacto="panel"') && apertura.includes(`data-precarga="${idEnElHome}"`)
-afirmarIgual(envoltorios(WEB_PROD).length, 2, 'Páginas web: dos envoltorios de apertura — el bloque del CTA y el cierre')
-afirmar(envoltorios(bloqueDe(WEB_PROD, 'llamado') ?? '').length === 1, '  y el bloque del CTA tiene uno')
+afirmarIgual(envoltorios(WEB_PROD).length, 3, 'Páginas web: tres envoltorios de apertura — el CTA del precio, el llamado y el cierre')
+afirmar(envoltorios(bloqueDe(WEB_PROD, 'llamado') ?? '').length === 1, '  y el bloque del llamado tiene uno')
+// [M1] El CTA de debajo del precio (D3): el bloque que sigue al precio, con un solo envoltorio y SOLO el botón (ni título ni texto).
+const ctaDelPrecio = (servicio: Servicio) => (html: string): boolean => {
+  const orden = bloquesEnOrden(html)
+  const bloque = bloqueDe(html, 'llamado-del-precio') ?? ''
+  const soloElRotulo = textoVisible(bloque).split(servicio.cta.boton).join('').trim() === '' && textoVisible(bloque).includes(servicio.cta.boton)
+  return orden[orden.indexOf('precio') + 1] === 'llamado-del-precio' && envoltorios(bloque).length === 1 && envoltorios(bloque).every(lleva(servicio.idEnElHome)) &&
+    encabezados(bloque).length === 0 && soloElRotulo
+}
+afirmarIgual(fallan((p) => ctaDelPrecio(p.servicio)(p.html)), [], 'las tres páginas: debajo del precio va el CTA, solo el botón, con data-abre-contacto="panel" y la precarga de SU servicio')
+const BLOQUE_DEL_CTA_DEL_PRECIO = bloqueDe(WEB_PROD, 'llamado-del-precio') ?? ''
+controlPositivo('  un CTA del precio con título se detecta', WEB_PROD.replace(BLOQUE_DEL_CTA_DEL_PRECIO, BLOQUE_DEL_CTA_DEL_PRECIO.replace('<div', '<h2>¿Arrancamos?</h2><div')), ctaDelPrecio(PAGINAS_WEB))
+controlPositivo('  uno con la precarga de otro servicio', WEB_PROD.replace(BLOQUE_DEL_CTA_DEL_PRECIO, BLOQUE_DEL_CTA_DEL_PRECIO.replace('data-precarga="web"', 'data-precarga="software"')), ctaDelPrecio(PAGINAS_WEB))
+controlPositivo('  y uno que se fue detrás de Extra', WEB_PROD.replace(BLOQUE_DEL_CTA_DEL_PRECIO, '').replace(/(<section data-bloque="extra"[\s\S]*?<\/section>)/, `$1${BLOQUE_DEL_CTA_DEL_PRECIO}`), ctaDelPrecio(PAGINAS_WEB))
 afirmarIgual(fallan((p) => envoltorios(p.html).length > 0 && envoltorios(p.html).every(lleva(p.servicio.idEnElHome))), [], 'cada envoltorio lleva data-abre-contacto="panel" y data-precarga con el id del servicio en el home')
 afirmar((PRECARGA_POR_SERVICIO[PAGINAS_WEB.idEnElHome]?.length ?? 0) > 0, `  y el home sabe qué marcar: «${PAGINAS_WEB.idEnElHome}» está en PRECARGA_POR_SERVICIO`)
 controlPositivo('un envoltorio sin data-precarga se detecta', '<div data-abre-contacto="panel" class="a">', lleva('web'))
@@ -126,7 +180,8 @@ titulo('4 · «[a definir]» solo en desarrollo')
 
 const cuenta = (html: string, aguja: string): number => html.split(aguja).length - 1
 const hayMarcador = (html: string): boolean => cuenta(html, MARCADOR_A_DEFINIR) > 0
-afirmarIgual(cuenta(WEB_DEV, MARCADOR_A_DEFINIR), 2, 'Páginas web en desarrollo: dos marcadores — la Simple (autogestionable) y el plan mensual del mantenimiento')
+afirmarIgual(cuenta(WEB_DEV, MARCADOR_A_DEFINIR), 3, 'Páginas web en desarrollo: tres marcadores — la Simple (autogestionable), el plan mensual del mantenimiento y [M1] el video del slot de trabajos (M3)')
+afirmar(textoVisible(bloqueDe(WEB_DEV, 'trabajos') ?? '').includes(MARCADOR_A_DEFINIR) && bloqueDe(WEB_PROD, 'trabajos') === null, '  el del video vive en el slot de trabajos, que en producción no se monta hasta el M3')
 afirmar(textoVisible(WEB_DEV).includes('Plan mensual') && !textoVisible(WEB_PROD).includes('Plan mensual'), '  la fila «Plan mensual» solo existe en desarrollo')
 afirmarIgual([cuenta(WEB_DEV, 'Autogestionable'), cuenta(WEB_PROD, 'Autogestionable')], [3, 2], '  «Autogestionable»: tres veces en desarrollo, dos en producción (la Simple no lo dice mientras esté en [a definir])')
 afirmarIgual(fallan((p) => p.enDesarrollo || !hayMarcador(p.html)), [], 'en producción no sale ningún marcador, en ninguna de las tres páginas')
@@ -147,18 +202,34 @@ controlPositivo('un segundo data-seccion «invertida» se detecta', `${WEB_PROD}
 controlPositivo('el data-seccion en la raíz y no en la intro se detecta', WEB_PROD.replace(' data-seccion="invertida"', '').replace(/^<div /, '<div data-seccion="invertida" '), limpio)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · El único hex es el claro, en la intro; el cuerpo lleva el token oscuro de SU servicio')
+titulo('6 · Ningún hex: la intro lleva el token claro de SU servicio y el cuerpo el oscuro, los dos del tema')
 
-const sinHexEnElCuerpo = (html: string): boolean => hexSueltos(cuerpo(html)).length === 0
-afirmarIgual(fallan((p) => sinHexEnElCuerpo(p.html)), [], 'el cuerpo de cada página —todo lo que no es la intro— no tiene ningún hex')
-afirmarIgual(fallan((p) => JSON.stringify(hexSueltos(p.html)) === JSON.stringify([p.servicio.acento.claro]) && aperturaDe(intro(p.html)).includes(` style="--color-acento:${p.servicio.acento.claro}"`)), [], '  y el único hex del marcado es el acento.claro de SUS datos, en el style de la intro (P-H2)')
-controlPositivo('un hex en el cuerpo se detecta', WEB_PROD.replace('<main>', '<main><p style="color:#1D5B8F">x</p>'), sinHexEnElCuerpo)
-controlPositivo('el claro puesto en el cuerpo se detecta', WEB_PROD.replace('<main>', `<main><p style="color:${PAGINAS_WEB.acento.claro}">x</p>`), sinHexEnElCuerpo)
+// [M1] P-H2 cerrado: el claro dejó de ser un hex en los datos y es el token del tema. Ningún hex en ninguna parte del marcado.
+const sinHex = (html: string): boolean => hexSueltos(html).length === 0
+afirmarIgual(fallan((p) => sinHex(p.html)), [], 'ninguna página tiene un hex en el marcado, ni en el cuerpo ni en la intro')
+controlPositivo('un hex en el cuerpo se detecta', WEB_PROD.replace('<main>', '<main><p style="color:#1D5B8F">x</p>'), sinHex)
+controlPositivo('  y el claro de antes, escrito en el style de la intro', WEB_PROD.replace('--color-acento:var(--color-acento-web-claro)', '--color-acento:#8FC0E8'), sinHex)
 // Lo esperado sale del TEMA (sus reglas de contexto por servicio), no de `tokenDelAcento`: si la derivación se rompe, esto lo ve.
 const TEMA = readFileSync(path.join(AQUI, '../../../theme-develop.css'), 'utf8')
 const TOKENS_DEL_TEMA = tokensDelTema(TEMA)
 const ACENTO_DEL_TEMA = acentosDelTemaPorServicio(TEMA)
 const tokenSegunElTema = (id: string): string => ACENTO_DEL_TEMA.get(id) ?? '(el tema no lo dice)'
+// [M1] El lector del tema lee la declaración que busca entre todas las de la regla: desde B1.2c cada una trae dos (merge-2 §5).
+const leeLasTresReglas = (lector: (css: string) => Map<string, string>): boolean => IDS_DE_SERVICIO.every((id) => lector(TEMA).has(id))
+afirmar(leeLasTresReglas(acentosDelTemaPorServicio) && leeLasTresReglas((css) => declaracionDelTemaPorServicio(css, '--color-acento-claro')), 'el lector del tema encuentra las tres reglas [data-servicio], el acento y su alias claro, aunque cada regla traiga dos declaraciones')
+afirmar(declaracionDelTemaPorServicio('[data-servicio="web"] { --color-acento-claro: var(--b); --color-acento: var(--a); }', '--color-acento').get('web') === '--a', '  y en cualquier orden: el alias claro no se confunde con el acento')
+const LECTOR_DE_ANTES = (css: string): Map<string, string> =>
+  new Map([...css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/\[data-servicio="([^"]+)"\]\s*\{\s*--color-acento:\s*var\((--[a-z0-9-]+)\);\s*\}/g)].map((m) => [m[1] ?? '', m[2] ?? '']))
+controlPositivo('  el lector de antes, que esperaba una sola declaración por regla, se detecta', LECTOR_DE_ANTES, leeLasTresReglas)
+const CLARO_DEL_TEMA = declaracionDelTemaPorServicio(TEMA, '--color-acento-claro')
+const claroSegunElTema = (id: string): string => CLARO_DEL_TEMA.get(id) ?? '(el tema no lo dice)'
+afirmarIgual(IDS_DE_SERVICIO.filter((id) => !TOKENS_DEL_TEMA.has(claroSegunElTema(id)) || tokenDelAcentoClaro(id) !== claroSegunElTema(id)), [], `el token claro de cada servicio es el que el tema le da a su alias claro en su contexto, y está declarado en su @theme static: ${IDS_DE_SERVICIO.map(claroSegunElTema).join(', ')}`)
+controlPositivo('  un servicio sin claro en el tema se detecta', 'otro', (id: string) => CLARO_DEL_TEMA.has(id))
+const acentoDeLaIntro = (servicio: Servicio) => (html: string): boolean =>
+  (/\sstyle="([^"]*)"/.exec(aperturaDe(intro(html)))?.[1] ?? '') === `--color-acento:var(${claroSegunElTema(servicio.idEnElHome)})`
+afirmarIgual(fallan((p) => acentoDeLaIntro(p.servicio)(p.html)), [], '  y la intro fija el acento con el token claro de SU servicio, derivado de idEnElHome, por var()')
+controlPositivo('  el claro de otro servicio en la intro se detecta', WEB_PROD.replace(`var(${claroSegunElTema('web')})`, `var(${claroSegunElTema('software')})`), acentoDeLaIntro(PAGINAS_WEB))
+controlPositivo('  y el oscuro en la intro', WEB_PROD.replace(`var(${claroSegunElTema('web')})`, `var(${tokenSegunElTema('web')})`), acentoDeLaIntro(PAGINAS_WEB))
 afirmarIgual(IDS_DE_SERVICIO.filter((id) => !TOKENS_DEL_TEMA.has(tokenSegunElTema(id)) || tokenDelAcento(id) !== tokenSegunElTema(id)), [], `el token oscuro de cada servicio es el que el tema le da en su contexto, y está declarado en su @theme static: ${IDS_DE_SERVICIO.map(tokenSegunElTema).join(', ')}`)
 controlPositivo('un token que el tema no declara se detecta', '--color-acento-otro', (token: string) => TOKENS_DEL_TEMA.has(token))
 controlPositivo('un servicio que el tema no conoce se detecta', 'otro', (id: string) => ACENTO_DEL_TEMA.has(id))
@@ -166,10 +237,10 @@ const acentoDelCuerpo = (servicio: Servicio) => (html: string): boolean =>
   (/^<div style="([^"]*)"/.exec(html)?.[1] ?? '') === `--color-acento:var(${tokenSegunElTema(servicio.idEnElHome)})`
 afirmarIgual(fallan((p) => acentoDelCuerpo(p.servicio)(p.html)), [], '  y la raíz fija el acento del cuerpo con el token de SU servicio, derivado de idEnElHome, por var(): ningún hex')
 controlPositivo('el token de otro servicio se detecta', WEB_PROD.replace(`var(${tokenSegunElTema('web')})`, `var(${tokenSegunElTema('software')})`), acentoDelCuerpo(PAGINAS_WEB))
-controlPositivo('el claro en la raíz se detecta', WEB_PROD.replace(`var(${tokenSegunElTema('web')})`, PAGINAS_WEB.acento.claro), acentoDelCuerpo(PAGINAS_WEB))
+controlPositivo('el claro en la raíz se detecta', WEB_PROD.replace(`var(${tokenSegunElTema('web')})`, `var(${claroSegunElTema('web')})`), acentoDelCuerpo(PAGINAS_WEB))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · De PROYECTOS salen el nombre, el rubro, la dirección y el póster — nunca la reseña ni lo resuelto')
+titulo('7 · Los trabajos: de PROYECTOS sale el nombre (nunca la reseña ni lo resuelto), y el enlace va al caso en el Portfolio')
 
 const PROHIBIDOS = valoresProhibidos(FUENTE_DE_PROYECTOS)
 afirmar(PROHIBIDOS.length > 0, `la lista de lo prohibido no es vacía: ${PROHIBIDOS.length} valores de resena, problemaResuelto, problemaCliente, queHicimos y resultado`)
@@ -180,22 +251,35 @@ const sinLoProhibido = (html: string): boolean => {
 afirmarIgual(fallan((p) => sinLoProhibido(p.html)), [], 'ninguno de esos valores llega al marcado, ni los marcadores de la llave del contenido inventado')
 controlPositivo('un render que pinta una reseña se detecta', `${WEB_PROD}<p>${PROHIBIDOS.at(0) ?? 'x'}</p>`, sinLoProhibido)
 controlPositivo('un render que pinta el marcador de la llave se detecta', `${WEB_PROD}<p>[TESTIMONIO] · pendiente</p>`, sinLoProhibido)
-const FUENTE_DE_PRUEBA = sinComentarios(readFileSync(path.join(AQUI, '../bloques/Prueba.tsx'), 'utf8'))
+// [M1] La sección de casos con pósters (`Prueba.tsx`) se RETIRÓ con su funcionalidad, y con ella sus tres afirmaciones (los casos con
+// rubro, enlace y pósters, y las seis imágenes con alt y sizes). Los trabajos pasan a ser una frase cada uno en Cómo trabajamos.
+const LEEN_PROYECTOS = ['../bloques/Proceso.tsx', '../rutas.ts'].map((f) => ({ f, codigo: sinComentarios(readFileSync(path.join(AQUI, f), 'utf8')) }))
 const leeLoProhibido = (fuente: string): boolean => /\b(resena|problemaResuelto|problemaCliente|queHicimos|resultado)\b/.test(fuente)
-afirmar(!leeLoProhibido(FUENTE_DE_PRUEBA), 'y el código de Prueba.tsx ni nombra esos campos (solo lee nombre, rubro, url, póster y alt)')
+afirmarIgual(LEEN_PROYECTOS.filter((x) => leeLoProhibido(x.codigo)).map((x) => x.f), [], 'y el código que lee PROYECTOS (Proceso.tsx y rutas.ts) ni nombra esos campos: solo el slug y el nombre')
 controlPositivo('un fuente que lee la reseña se detecta', 'const r = proyecto.resena', (f: string) => !leeLoProhibido(f))
 const CASOS_DE_WEB = PAGINAS_WEB.prueba.casos.flatMap((caso) => (caso.tipo === 'proyecto' ? [caso] : []))
-const muestraAlProyecto = (html: string) => (slug: string, texto: string): boolean => {
+const fraseDelTrabajo = (html: string) => (slug: string, texto: string): boolean => {
   const proyecto = FUENTE_DE_PROYECTOS.find((p) => p.slug === slug)
-  if (proyecto === undefined) return false
-  return [proyecto.nombre, proyecto.rubro ?? '', texto].every((t) => textoVisible(html).includes(t)) &&
-    valoresDe(html, 'href').includes(proyecto.url) && html.includes(encodeURIComponent(proyecto.medios.poster.escritorio)) && html.includes(encodeURIComponent(proyecto.medios.poster.movil))
+  const lista = /<ul[^>]*data-pieza="trabajos-de-servicio"[^>]*>([\s\S]*?)<\/ul>/.exec(bloqueDe(html, 'proceso') ?? '')?.[1] ?? ''
+  return proyecto !== undefined && [...lista.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].some((li) => textoVisible(li[1] ?? '') === `${proyecto.nombre}${texto}`)
 }
-afirmarIgual(CASOS_DE_WEB.filter((c) => !muestraAlProyecto(WEB_PROD)(c.slug, c.texto)).map((c) => c.slug), [], `los ${CASOS_DE_WEB.length} casos de Páginas web muestran su nombre, rubro, texto, enlace y los dos pósters, todo de la fuente`)
-controlPositivo('una página sin los casos se detecta', '<main></main>', (h: string) => CASOS_DE_WEB.every((c) => muestraAlProyecto(h)(c.slug, c.texto)))
-const imagenesBien = (html: string): boolean => aperturas(html, 'img').every((i) => /\salt="[^"]+"/.test(i) && /\ssizes="[^"]+"/.test(i))
-afirmar(aperturas(WEB_PROD, 'img').length === CASOS_DE_WEB.length * 2 && imagenesBien(WEB_PROD), '  seis imágenes, todas con alt y con sizes (descriptores de ancho)')
-controlPositivo('una imagen sin alt ni sizes se detecta', '<img src="/x.webp">', imagenesBien)
+afirmarIgual(CASOS_DE_WEB.filter((c) => !fraseDelTrabajo(WEB_PROD)(c.slug, c.texto)).map((c) => c.slug), [], `Cómo trabajamos, en Páginas web: una frase por cada uno de los ${CASOS_DE_WEB.length} trabajos, con el nombre de la fuente y el texto propio que ya existía`)
+controlPositivo('una página sin las frases se detecta', '<main></main>', (h: string) => CASOS_DE_WEB.every((c) => fraseDelTrabajo(h)(c.slug, c.texto)))
+afirmarIgual(fallan((p) => aperturas(p.html, 'img').length === 0), [], 'ninguna página lleva imágenes: los pósters se fueron con la sección de casos')
+controlPositivo('  una página con un póster se detecta', `${WEB_PROD}<img src="/portfolio/el-garage/escritorio.webp" alt="El Garage">`, (h: string) => aperturas(h, 'img').length === 0)
+const sinCasosDeWeb = (html: string): boolean => CASOS_DE_WEB.every((c) => !textoVisible(html).includes(c.texto))
+afirmarIgual(fallan((p) => p.servicio.slug === 'paginas-web' || sinCasosDeWeb(p.html)), [], '  y en Software e IA no aparece ningún caso de Páginas web (tampoco en el slot de trabajos)')
+controlPositivo('  un caso de web en otra página se detecta', `${pagina(SOFTWARE_A_MEDIDA, false)}<p>${CASOS_DE_WEB[0]?.texto ?? 'x'}</p>`, sinCasosDeWeb)
+// El deep link del Portfolio de B1: `#portfolio-<slug>` (docs/rediseno/SPRINT-B1-PORTFOLIO.md:471). Lo esperado se escribe acá con el
+// formato del documento —no con la función que lo arma— y se confirma que el ancla existe en el home.
+const AL_GARAGE = `${HREF_DEL_HOME}#portfolio-el-garage`
+afirmar(ANCLAS_DEL_PORTFOLIO.some((a) => `${HREF_DEL_HOME}#${a.id}` === AL_GARAGE), `el ancla de El Garage existe en el Portfolio del home (portfolio/anclas.ts): ${AL_GARAGE}`)
+const enlacesAlPortfolio = (html: string): string[] => valoresDe(bloqueDe(html, 'proceso') ?? '', 'href').filter((h) => h.startsWith(`${HREF_DEL_HOME}#`))
+const vaAlGarage = (html: string): boolean => JSON.stringify(enlacesAlPortfolio(html)) === JSON.stringify([AL_GARAGE])
+afirmar(vaAlGarage(WEB_PROD) && vaAlGarage(WEB_DEV), 'Cómo trabajamos, en Páginas web: un enlace, al caso de El Garage en el Portfolio, con el deep link de B1')
+afirmarIgual(fallan((p) => p.servicio.slug === 'paginas-web' || enlacesAlPortfolio(p.html).length === 0), [], '  y en Software e IA, sin un proyecto del Portfolio entre sus casos, no hay enlace a un caso de web')
+controlPositivo('  un enlace a otro caso se detecta', WEB_PROD.replace(AL_GARAGE, `${HREF_DEL_HOME}#portfolio-esquina-estudio`), vaAlGarage)
+controlPositivo('  y uno a la sección y no al caso', WEB_PROD.replace(AL_GARAGE, `${HREF_DEL_HOME}#trabajos`), vaAlGarage)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · Los tres slots de precio: calibres, proyecto y planes')
@@ -277,7 +361,7 @@ controlPositivo('otro valor en el nivel del precio se detecta', IA_PROD.replace(
 const sinCeroInventado = (html: string): boolean => !/(^|[^\d.,])0([^\d.,]|$)/.test(textoVisible(html))
 afirmarIgual(fallan((p) => sinCeroInventado(p.html)), [], 'ningún precio ni dato sin valor se pinta como 0, en ninguna de las tres páginas')
 controlPositivo('un precio nulo pintado como 0 se detecta', '<p>USD 0</p>', sinCeroInventado)
-afirmarIgual(fallan((p) => !/whatsapp/i.test(textoVisible(p.html))), [], 'el bot de WhatsApp no se ofrece: ni una mención en el texto de ninguna página (el título del blog que lo nombra no se monta: no tiene href)')
+afirmarIgual(fallan((p) => !/whatsapp/i.test(textoVisible(p.html))), [], 'el bot de WhatsApp no se ofrece: ni una mención en el texto de ninguna página (el título del blog que lo nombra no se monta: Del blog salió del orden)')
 controlPositivo('un texto que lo ofrece se detecta', '<p>Atendé por WhatsApp</p>', (h: string) => !/whatsapp/i.test(textoVisible(h)))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -296,10 +380,12 @@ controlPositivo('una clase arbitraria sin var() se detecta', `<div class="${['w-
 const listasConRol = (html: string): boolean => [...aperturas(html, 'ul'), ...aperturas(html, 'ol')].every((l) => l.includes('role="list"'))
 afirmarIgual(fallan((p) => listasConRol(p.html)), [], 'toda lista (ul y ol) lleva role="list": sin marcadores, el navegador le saca la semántica de lista al lector de pantalla')
 controlPositivo('una lista sin role se detecta', '<ul class="flex"><li>a</li></ul>', listasConRol)
-const PERMITIDOS = new Set<string>([HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe), '/login'])
+// [M1] Más los deep links del Portfolio del home (las anclas que el home publica, `portfolio/anclas.ts`).
+const PERMITIDOS = new Set<string>([HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe), '/login', ...ANCLAS_DEL_PORTFOLIO.map((a) => `${HREF_DEL_HOME}#${a.id}`)])
 const enlacesBien = (html: string): boolean => aperturas(html, 'a').every((a) => /\shref="[^"]+"/.test(a)) && enlacesInternos(html).every((h) => PERMITIDOS.has(h))
-afirmarIgual(fallan((p) => enlacesBien(p.html)), [], 'todo <a> tiene href, y los internos solo llevan al home, a una página de PUBLICADOS o a /login')
+afirmarIgual(fallan((p) => enlacesBien(p.html)), [], 'todo <a> tiene href, y los internos solo llevan al home, a una página de PUBLICADOS, a /login o a un ancla del Portfolio del home')
 controlPositivo('un enlace a una página que no es de PUBLICADOS se detecta', '<a href="/v3/otra-pagina">x</a>', enlacesBien)
+controlPositivo('  y uno a un ancla del Portfolio que no existe', `<a href="${HREF_DEL_HOME}#portfolio-otro">x</a>`, enlacesBien)
 afirmarIgual(fallan((p) => valoresDe(bloqueDe(p.html, 'cierre') ?? '', 'href').join() === [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)].join()), [], 'el cierre de cada página enlaza al home y a las páginas de PUBLICADOS, nada más: con las tres publicadas, las tres')
 controlPositivo('un cierre que no enlaza a todas se detecta', '<footer data-bloque="cierre"><a href="/v3">a</a><a href="/v3/paginas-web">b</a></footer>', (h: string) => valoresDe(bloqueDe(h, 'cierre') ?? '', 'href').join() === [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)].join())
 afirmarIgual(PUBLICADOS, SERVICIOS.map((s) => s.slug), 'PUBLICADOS tiene los tres servicios, en el orden del SPEC (S2b)')
@@ -330,7 +416,7 @@ afirmarIgual(nombresQueChocan(FUENTES.map((x) => x.f.replace(/\\/g, '/'))), [], 
 controlPositivo('Planes.tsx y planes.ts juntos se detectan', ['bloques/precio/Planes.tsx', 'bloques/precio/planes.ts'], (l: string[]) => nombresQueChocan(l).length === 0)
 const deCliente = (codigo: string): boolean => /^\s*['"]use client['"]/.test(codigo)
 const dondeEsDeCliente = (lista: readonly { f: string; codigo: string }[]): string[] => lista.filter((x) => deCliente(x.codigo)).map((x) => x.f.replace(/\\/g, '/')).sort()
-afirmarIgual(dondeEsDeCliente(FUENTES), ['movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx'], 'el único código de cliente son los dos envoltorios de movimiento/ (el contrato del revelado recibe funciones como hijo): todo lo demás es de servidor')
+afirmarIgual(dondeEsDeCliente(FUENTES), ['movimiento/Gatillo.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx'], 'el único código de cliente son los tres de movimiento/ (los dos envoltorios del revelado y [M1] el gatillo, que observa un cruce): todo lo demás es de servidor')
 controlPositivo('un bloque de cliente fuera de movimiento/ se detecta', ["'use client'", 'export const x = 1'].join('\n'), (c: string) => !deCliente(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -358,14 +444,72 @@ const sinVidrio = (html: string): boolean => vidrios(html) === 0 && !valoresDe(h
 afirmarIgual(fallan((p) => sinVidrio(p.html)), [], 'sin vidrio: ningún backdrop-filter y ningún fondo en un style (S3b: el vidrio se fue, y su test con él)')
 controlPositivo('un panel de vidrio se detecta', `${WEB_PROD}<div style="background:color-mix(in srgb, var(--color-tinta) 4%, transparent);backdrop-filter:blur(20px) saturate(180%)"></div>`, sinVidrio)
 controlPositivo('un style con un fondo opaco se detecta', '<div style="background:rgb(14,14,14)"></div>', sinVidrio)
-const conRevelado = (html: string, nombre: string): boolean => (bloqueDe(html, nombre) ?? '').includes(`data-arbol="${MARCA_HOME_QUIETO}"`)
-afirmarIgual(fallan((p) => bloquesEnOrden(p.html).every((b) => conRevelado(p.html, b))), [], 'cada bloque cuelga de los patrones de revelado del home (el seam `Bloque`: sin coreografía, el contenido sale quieto y en su lugar)')
-controlPositivo('un bloque sin revelado se detecta', '<section data-bloque="faq"><h2>FAQ</h2></section>', (h: string) => conRevelado(h, 'faq'))
-const marcasDeRevelado = (html: string, nombre: string): number => ((bloqueDe(html, nombre) ?? '').match(new RegExp(`data-arbol="${MARCA_HOME_QUIETO}"`, 'g')) ?? []).length
-const MARCAS_ESPERADAS = (nombre: string): number => (nombre === 'faq' || nombre === 'cierre' ? 1 : 2) // título + panel; el FAQ no revela el panel y el cierre no tiene título
-afirmarIgual(fallan((p) => SIN_PROBLEMA(p.html).every((b) => marcasDeRevelado(p.html, b) === MARCAS_ESPERADAS(b))), [], 'se revela el título y el panel de cada bloque, menos el panel del FAQ (S2b): al abrir una pregunta cambia de alto, el motor vuelve a medir y un panel atado al scroll se corría de 15 a 27 px')
-controlPositivo('un FAQ con el panel revelado se detecta', `<section data-bloque="faq"><div data-arbol="${MARCA_HOME_QUIETO}"></div><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, (h: string) => marcasDeRevelado(h, 'faq') === MARCAS_ESPERADAS('faq'))
-controlPositivo('un bloque con el panel sin revelar se detecta', `<section data-bloque="precio"><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, (h: string) => marcasDeRevelado(h, 'precio') === MARCAS_ESPERADAS('precio'))
+/**
+ * [M1] CÓMO ENTRA CADA BLOQUE, la tabla del M0: las marcas del árbol quieto de los revelados del home (`data-arbol`: el título y el
+ * panel progresivos) y los gatillos (`data-gatillo`). El FAQ revela solo el título (S2b: el panel cambia de alto al abrir una pregunta y
+ * un revelado atado al scroll lo corría de 15 a 27 px); los CTA y el slot del video entran con el gatillo; el cierre, sin revelado (así se
+ * fueron los 21 px que quedaba corrido al final del scroll).
+ */
+const REVELADO_ESPERADO: Readonly<Record<string, { readonly arbol: number; readonly gatillo: number }>> = {
+  'que-hacemos': { arbol: 2, gatillo: 0 },
+  'que-incluye': { arbol: 2, gatillo: 0 },
+  precio: { arbol: 2, gatillo: 0 },
+  'llamado-del-precio': { arbol: 0, gatillo: 1 },
+  extra: { arbol: 2, gatillo: 0 },
+  trabajos: { arbol: 1, gatillo: 1 },
+  proceso: { arbol: 2, gatillo: 0 },
+  faq: { arbol: 1, gatillo: 0 },
+  llamado: { arbol: 1, gatillo: 1 },
+  cierre: { arbol: 0, gatillo: 0 },
+}
+const cuentaEnElBloque = (html: string, nombre: string, aguja: string): number => (bloqueDe(html, nombre) ?? '').split(aguja).length - 1
+const entraComoDice = (html: string): boolean => SIN_PROBLEMA(html).every((b) => {
+  const esperado = REVELADO_ESPERADO[b]
+  return esperado !== undefined && cuentaEnElBloque(html, b, `data-arbol="${MARCA_HOME_QUIETO}"`) === esperado.arbol && cuentaEnElBloque(html, b, ' data-gatillo="') === esperado.gatillo
+})
+afirmarIgual(fallan((p) => entraComoDice(p.html)), [], 'cada bloque entra como dice la tabla del M0: progresivo (título y panel), el panel del FAQ quieto, los dos CTA y el slot del video con el gatillo y el cierre sin revelado')
+controlPositivo('un cierre con revelado se detecta', `<footer data-bloque="cierre"><div data-arbol="${MARCA_HOME_QUIETO}"></div></footer>`, entraComoDice)
+controlPositivo('un FAQ con el panel revelado se detecta', `<section data-bloque="faq"><div data-arbol="${MARCA_HOME_QUIETO}"></div><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, entraComoDice)
+controlPositivo('un llamado con el panel progresivo en vez del gatillo se detecta', `<section data-bloque="llamado"><div data-arbol="${MARCA_HOME_QUIETO}"></div><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, entraComoDice)
+controlPositivo('un bloque con el panel sin revelar se detecta', `<section data-bloque="precio"><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, entraComoDice)
+// [M1] El gatillo en reposo: en el HTML servido (sin la coreografía instalada, que es lo mismo que con movimiento reducido) cada uno está
+// QUIETO, a la vista y sin transformada. Nada invisible en reposo.
+/** Las clases del hijo de cada gatillo: el que se corre y se funde. */
+const clasesDeLosGatillos = (html: string): string[][] => [...html.matchAll(/\sdata-gatillo="[^"]*"[^>]*><div class="([^"]*)"/g)].map((m) => (m[1] ?? '').split(/\s+/))
+const gatillosALaVista = (html: string): boolean =>
+  valoresDe(html, 'data-gatillo').length > 0 && valoresDe(html, 'data-gatillo').every((e) => e === 'quieto') &&
+  clasesDeLosGatillos(html).length === valoresDe(html, 'data-gatillo').length &&
+  !clasesDeLosGatillos(html).some((clases) => clases.some((clase) => clase === 'opacity-0' || clase.startsWith('translate-')))
+afirmarIgual(fallan((p) => gatillosALaVista(p.html)), [], 'cada gatillo, en el HTML servido y con movimiento reducido, está quieto y a la vista: sin opacidad cero ni corrimiento')
+controlPositivo('  un gatillo escondido en el servidor se detecta', WEB_PROD.replace('data-gatillo="quieto"', 'data-gatillo="espera"'), gatillosALaVista)
+controlPositivo('  y uno con la clase del escondido', WEB_PROD.replace('data-gatillo="quieto"><div class="', 'data-gatillo="quieto"><div class="opacity-0 '), gatillosALaVista)
+// La máquina del gatillo, pura (`movimiento/disparo.ts`): las reglas del remate del home, sobre las cuatro entradas de `_contrato/cruce.ts`.
+const sinMovimientoALaVista = (maquina: typeof siguienteEstado): boolean => ESTADOS_DEL_GATILLO.every((e) => estaALaVista(maquina(e, { tipo: 'sin-movimiento' })))
+afirmar(sinMovimientoALaVista(siguienteEstado), 'el gatillo sin movimiento (reducido, o sin la coreografía) queda quieto y a la vista desde cualquiera de sus cuatro estados')
+controlPositivo('  una máquina que sin movimiento deja lo escondido escondido se detecta', ((e: EstadoDelGatillo) => e) as typeof siguienteEstado, sinMovimientoALaVista)
+const cargas = (maquina: typeof siguienteEstado): EstadoDelGatillo[] => ENTRADAS_AL_TRAMO.map((entrada) => maquina('quieto', { tipo: 'carga', entrada }))
+afirmarIgual(cargas(siguienteEstado), ['quieto', 'espera', 'quieto', 'quieto'], 'al cargar se posa sin gesto: a la vista en todo cruce salvo debajo de la línea (arriba-bajando, arriba-subiendo, abajo-bajando, abajo-subiendo)')
+const cruces = (maquina: typeof siguienteEstado, desde: EstadoDelGatillo): EstadoDelGatillo[] => ENTRADAS_AL_TRAMO.map((entrada) => maquina(desde, { tipo: 'cruce', entrada }))
+afirmarIgual([cruces(siguienteEstado, 'espera'), cruces(siguienteEstado, 'puesto')], [['puesto', 'ido', 'quieto', 'quieto'], ['puesto', 'ido', 'puesto', 'puesto']], '  bajando por la línea entra, subiendo por encima se va en espejo, y pasarla de largo no la saca; un salto por encima de la línea se posa (A13)')
+const maquinaQueLaSacaArriba: typeof siguienteEstado = (estado, evento) => (evento.tipo === 'cruce' && evento.entrada === 'abajo-bajando' ? 'ido' : siguienteEstado(estado, evento))
+controlPositivo('  una máquina que la saca cuando se va por arriba, bajando, se detecta', maquinaQueLaSacaArriba, (m: typeof siguienteEstado) => JSON.stringify(cruces(m, 'puesto')) === JSON.stringify(['puesto', 'ido', 'puesto', 'puesto']))
+// [M1] La línea vuelve a la del remate del home, para que la salida al subir pase a la vista; la franja de debajo la cubre la guarda.
+const lineaDelRemate = (linea: number): boolean => linea === DISPARO_DEL_REMATE
+afirmar(lineaDelRemate(LINEA_DEL_DISPARO), `la línea de disparo es la del remate del home: ${String(DISPARO_DEL_REMATE)} % desde abajo (tu-panel/entrada.ts)`)
+controlPositivo('  la línea en el borde (la salida pasaría fuera de la vista) se detecta', 0, lineaDelRemate)
+// [M1] LA GUARDA EN REPOSO (P-H25): con el scroll quieto, lo que está a la vista y no se disparó se dispara; lejos de la vista, nada.
+const reposos = (maquina: typeof siguienteEstado, aLaVista: boolean): EstadoDelGatillo[] => ESTADOS_DEL_GATILLO.map((e) => maquina(e, { tipo: 'reposo', aLaVista }))
+afirmarIgual([reposos(siguienteEstado, true), reposos(siguienteEstado, false)], [['quieto', 'puesto', 'puesto', 'puesto'], ['quieto', 'espera', 'puesto', 'ido']], 'en reposo, a la vista se dispara lo que no se disparó (espera e ido pasan a puesto); fuera de la vista nada cambia')
+// El caso de 1024: cargó con el tope ya en el cuadro pero debajo de la línea, y el scroll paró sin cruzarla.
+const enLaFranja = (maquina: typeof siguienteEstado): boolean => estaALaVista(maquina(maquina('quieto', { tipo: 'carga', entrada: 'arriba-subiendo' }), { tipo: 'reposo', aLaVista: true }))
+afirmar(enLaFranja(siguienteEstado), '  un gatillo a la vista que no cruzó la línea queda visible en reposo (el CTA del precio a 1024)')
+const maquinaSinLaGuarda: typeof siguienteEstado = (estado, evento) => (evento.tipo === 'reposo' ? estado : siguienteEstado(estado, evento))
+controlPositivo('  sin la guarda, queda escondido a la vista: se detecta', maquinaSinLaGuarda, enLaFranja)
+// La salida sigue: subiendo por encima de la línea se va, y fuera de la vista el reposo no la vuelve a poner.
+const saleYSeQueda = (maquina: typeof siguienteEstado): boolean => maquina(maquina('puesto', { tipo: 'cruce', entrada: 'arriba-subiendo' }), { tipo: 'reposo', aLaVista: false }) === 'ido'
+afirmar(saleYSeQueda(siguienteEstado), '  y la salida al subir sigue: se va al cruzar la línea, y fuera de la vista el reposo no la trae de vuelta')
+const maquinaQueTodoLoPone: typeof siguienteEstado = (estado, evento) => (evento.tipo === 'reposo' ? 'puesto' : siguienteEstado(estado, evento))
+controlPositivo('  una guarda que pone también lo que no está a la vista se detecta', maquinaQueTodoLoPone, saleYSeQueda)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · El JSON-LD llega al HTML, y el FAQ se lee igual que se declara')
@@ -405,22 +549,22 @@ const preguntasUnicas = (s: Servicio): boolean => new Set(s.faq.map((f) => f.pre
 afirmarIgual(fallan((p) => preguntasUnicas(p.servicio)), [], '  y ninguna pregunta se repite (son la clave de cada ítem)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('12 · «Probá el panel» (IA) es el CtaEnlace del home, tal cual, y va en tinta como acción secundaria')
+titulo('12 · «Probá el panel» (IA) es el CtaEnlace del home, tal cual, en el slot de trabajos, y va en tinta como acción secundaria')
 
 // El Cta del home no tiene una variante «secundaria» (sus dos variantes son de forma: en línea y en bloque). La jerarquía de la página la pone
 // el envoltorio de los llamados principales (`ESTILO_DEL_CTA`, que recolorea la tinta del botón con el acento); el enlace al panel no lo lleva.
 const PANEL = IA_Y_AUTOMATIZACIONES.prueba.ctaPanel
 const CTA_DEL_HOME = PANEL === null || PANEL.href === null ? '' : renderToStaticMarkup(<CtaEnlace href={PANEL.href} rotulo={PANEL.rotulo} />)
 const IA_PAGINA = PAGINAS.find((p) => p.servicio.slug === 'ia-y-automatizaciones' && !p.enDesarrollo)?.html ?? ''
-const traeElCtaDelHome = (html: string): boolean => CTA_DEL_HOME !== '' && (bloqueDe(html, 'prueba') ?? '').includes(CTA_DEL_HOME)
+const traeElCtaDelHome = (html: string): boolean => CTA_DEL_HOME !== '' && (bloqueDe(html, 'trabajos') ?? '').includes(CTA_DEL_HOME)
 // Redefinir la variable (`--color-tinta:`), no leerla: un style que solo la lee con var() no recolorea nada.
 const recoloreaLaTinta = (html: string): boolean => valoresDe(html, 'style').some((estilo) => /(^|;)\s*--color-tinta\s*:/.test(estilo))
-const enTinta = (html: string): boolean => !recoloreaLaTinta(bloqueDe(html, 'prueba') ?? '')
+const enTinta = (html: string): boolean => !recoloreaLaTinta(bloqueDe(html, 'trabajos') ?? '')
 afirmar(CTA_DEL_HOME.includes('data-pieza="cta"') && CTA_DEL_HOME.includes('href="/login"'), 'el CtaEnlace del home con los datos de «Probá el panel» es un <a data-pieza="cta"> a /login (D11)')
-afirmarIgual(fallan((p) => p.servicio.prueba.ctaPanel === null || (traeElCtaDelHome(p.html) && enTinta(p.html))), [], 'en IA, en los dos modos, el bloque Prueba lleva ese <a> byte por byte —sin clase ni style propios— y ningún envoltorio le recolorea la tinta')
+afirmarIgual(fallan((p) => p.servicio.prueba.ctaPanel === null || (traeElCtaDelHome(p.html) && enTinta(p.html))), [], 'en IA, en los dos modos, el slot de trabajos lleva ese <a> byte por byte —sin clase ni style propios— y ningún envoltorio le recolorea la tinta')
 afirmar(recoloreaLaTinta(bloqueDe(IA_PAGINA, 'llamado') ?? ''), '  los llamados principales, en cambio, sí van en el acento (su envoltorio recolorea la tinta): esa es la diferencia entre principal y secundaria')
 controlPositivo('un enlace con una clase propia se detecta', IA_PAGINA.replace(CTA_DEL_HOME, CTA_DEL_HOME.replace('class="', 'class="text-acento ')), traeElCtaDelHome)
-controlPositivo('un enlace dentro del envoltorio de los llamados se detecta', renderToStaticMarkup(<section data-bloque="prueba"><div style={ESTILO_DEL_CTA}><CtaEnlace href="/login" rotulo="Probá el panel" /></div></section>), enTinta)
+controlPositivo('un enlace dentro del envoltorio de los llamados se detecta', renderToStaticMarkup(<section data-bloque="trabajos"><div style={ESTILO_DEL_CTA}><CtaEnlace href="/login" rotulo="Probá el panel" /></div></section>), enTinta)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('13 · La ruta: publica exactamente PUBLICADOS, y la metadata no hereda el canonical del home')

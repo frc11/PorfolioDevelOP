@@ -8,7 +8,9 @@
  * aunque los datos del servicio existan. Está aparte de `SERVICIOS` a propósito (§12.3).
  */
 
-import type { ServicioSlug } from './tipos'
+import { ANCLAS_DEL_PORTFOLIO } from '../_secciones/trabajos/portfolio/anclas'
+import { FUENTE_DE_PROYECTOS } from './datos/fuenteDeProyectos'
+import type { ProyectoSlug, ServicioSlug } from './tipos'
 
 /** El prefijo de las páginas mientras vivan en `/v3`. */
 export const RAIZ_DE_LAS_PAGINAS = '/v3'
@@ -36,4 +38,16 @@ export const PUBLICADOS: readonly ServicioSlug[] = ['paginas-web', 'software-a-m
 /** `/v3/paginas-web`. Se navega con `<a href>` y recarga completa, nunca con `router.push`. */
 export function hrefDe(slug: ServicioSlug): string {
   return `${RAIZ_DE_LAS_PAGINAS}/${slug}`
+}
+
+/**
+ * [M1] El deep link de un caso en el Portfolio del home: `/v3#portfolio-el-garage`. Es el formato de B1
+ * (`docs/rediseno/SPRINT-B1-PORTFOLIO.md:471`): un ancla por proyecto, en el paso de su portada. El id no se escribe acá: se toma de
+ * las anclas del home (`_secciones/trabajos/portfolio/anclas.ts:18-21`) por el lugar del proyecto en `PROYECTOS`, que es el paso
+ * del ancla. `null` si el proyecto no está en el Portfolio.
+ */
+export function hrefDelCasoEnElPortfolio(slug: ProyectoSlug): string | null {
+  const paso = FUENTE_DE_PROYECTOS.findIndex((proyecto) => proyecto.slug === slug)
+  const ancla = ANCLAS_DEL_PORTFOLIO.find((candidata) => candidata.paso === paso)
+  return paso < 0 || ancla === undefined ? null : `${HREF_DEL_HOME}#${ancla.id}`
 }

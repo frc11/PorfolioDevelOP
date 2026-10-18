@@ -110,13 +110,13 @@ export interface Articulo {
 
 export interface Servicio {
   readonly slug: ServicioSlug
-  /** El id del mismo servicio en el home: el contexto del acento sobre papel y la precarga del contacto. */
+  /**
+   * El id del mismo servicio en el home. Es TODO el acento de la página: los dos tokens del tema salen de él (el oscuro sobre papel y,
+   * [M1] P-H2, el claro sobre la noche: `estiloDelAcento.ts`). Los datos no guardan ningún color. También es la precarga del contacto.
+   */
   readonly idEnElHome: IdDeServicio
+  /** [M1] Es el `h1` de la página (el mismo texto que el título 3D de B12a). */
   readonly nombre: string
-  readonly acento: {
-    /** Sobre noche. P-H2: literal hasta que theme-develop.css emita los claros; se reemplaza en esta línea. */
-    readonly claro: string
-  }
   /** Copy provisorio (// C2). El title se arma con LOGOTIPO: la marca no va escrita suelta (D10). */
   readonly seo: { readonly title: string; readonly description: string }
   readonly problema: { readonly titulo: string; readonly texto: string }
@@ -130,8 +130,8 @@ export interface Servicio {
   readonly prueba: Prueba
   readonly faq: readonly PreguntaFrecuente[]
   /**
-   * El SPEC no da el rótulo del botón (D10). `texto` es `null` cuando el SPEC trae solo el título (IA, §7.3):
-   * el bloque se arma sin párrafo, no con uno inventado.
+   * El SPEC no da el rótulo del botón (D10). `texto` es `null` cuando no hay un párrafo dicho por el SPEC o dictado: el bloque se
+   * arma sin párrafo, no con uno inventado.
    */
   readonly cta: { readonly titulo: string; readonly texto: string | null; readonly boton: string }
   readonly articulos: readonly Articulo[]

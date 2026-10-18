@@ -11,7 +11,7 @@
  * Una pregunta sin respuesta (`null`: alguna parte no sale del SPEC, regla D9) es [a definir]: el marcador en desarrollo y,
  * en producción, la pregunta no se monta (y tampoco sale en el JSON-LD).
  *
- * [S2b] El panel NO se revela (`panelQuieto`): su alto cambia cuando se abre una pregunta, y un revelado atado al scroll lo corría
+ * [S2b] El panel NO se revela (`panel="quieto"`): su alto cambia cuando se abre una pregunta, y un revelado atado al scroll lo corría
  * de 15 a 27 px hacia abajo, en dos saltos, con el clic todavía sobre la pregunta. El título del bloque entra por línea como los otros.
  */
 
@@ -35,7 +35,7 @@ export function Faq({ faq, enDesarrollo }: FaqProps): React.JSX.Element | null {
   })
   if (preguntas.length === 0) return null
   return (
-    <Bloque nombre="faq" titulo={TITULO} panelQuieto>
+    <Bloque nombre="faq" titulo={TITULO} panel="quieto">
       <ul role="list" className="flex flex-col">
         {preguntas.map(({ pregunta, respuesta }) => (
           <li key={pregunta} className="border-b border-borde py-4">

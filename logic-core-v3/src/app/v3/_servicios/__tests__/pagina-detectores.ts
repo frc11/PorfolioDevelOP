@@ -85,13 +85,27 @@ export function tokensDelTema(css: string): Set<string> {
 }
 
 /**
- * [S3b] Qué token es el acento de cada servicio SEGÚN EL TEMA: sus reglas de contexto (`[data-servicio="web"]` con
- * `--color-acento: var(--color-acento-web)`, y las otras dos). Es la fuente con la que se compara la página, ajena a su código.
+ * [S3b · M1] Qué token le da el TEMA a una propiedad en el contexto de cada servicio: sus reglas `[data-servicio="web"]` (y las otras
+ * dos), con `--color-acento: var(--color-acento-web)`. Es la fuente con la que se compara la página, ajena a su código.
+ *
+ * [M1] Lee la declaración pedida entre TODAS las de la regla, en cualquier orden: desde B1.2c cada regla trae dos (el acento y su
+ * alias claro), y la primera versión, que esperaba una sola, dejó el mapa vacío (merge-2 §5).
  */
-export function acentosDelTemaPorServicio(css: string): Map<string, string> {
+export function declaracionDelTemaPorServicio(css: string, propiedad: string): Map<string, string> {
   const sinComentariosDeCss = css.replace(/\/\*[\s\S]*?\*\//g, '')
-  const reglas = sinComentariosDeCss.matchAll(/\[data-servicio="([^"]+)"\]\s*\{\s*--color-acento:\s*var\((--[a-z0-9-]+)\);\s*\}/g)
-  return new Map([...reglas].map((m) => [m[1] ?? '', m[2] ?? '']))
+  const mapa = new Map<string, string>()
+  for (const regla of sinComentariosDeCss.matchAll(/\[data-servicio="([^"]+)"\]\s*\{([^}]*)\}/g)) {
+    for (const declaracion of (regla[2] ?? '').split(';')) {
+      const m = /^\s*(--[a-z0-9-]+)\s*:\s*var\((--[a-z0-9-]+)\)\s*$/.exec(declaracion)
+      if (m !== null && m[1] === propiedad) mapa.set(regla[1] ?? '', m[2] ?? '')
+    }
+  }
+  return mapa
+}
+
+/** El token del acento OSCURO de cada servicio según el tema (`--color-acento`). */
+export function acentosDelTemaPorServicio(css: string): Map<string, string> {
+  return declaracionDelTemaPorServicio(css, '--color-acento')
 }
 
 /** El contenido de un elemento por su `data-bloque` (la sección o el pie entero), o `null` si no está montado. */

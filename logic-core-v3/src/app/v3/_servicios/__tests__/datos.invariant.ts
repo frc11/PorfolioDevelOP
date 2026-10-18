@@ -20,6 +20,7 @@ import { IA_Y_AUTOMATIZACIONES } from '../datos/ia-y-automatizaciones'
 import { PAGINAS_WEB } from '../datos/paginas-web'
 import { SERVICIOS, servicioDe } from '../datos/servicios'
 import { SOFTWARE_A_MEDIDA } from '../datos/software-a-medida'
+import { tokenDelAcentoClaro } from '../estiloDelAcento'
 import { hrefDe } from '../rutas'
 import { SLUGS_DE_SERVICIO, esServicioSlug } from '../tipos'
 import type { Servicio } from '../tipos'
@@ -155,30 +156,54 @@ const preguntasIguales = (s: Servicio): boolean => JSON.stringify(s.faq.map((f) 
 afirmar(SERVICIOS.every(preguntasIguales), 'cada servicio trae las preguntas del SPEC, en su orden')
 controlPositivo('el detector VE una pregunta que falta', { ...SOFTWARE_A_MEDIDA, faq: SOFTWARE_A_MEDIDA.faq.slice(1) }, preguntasIguales)
 
-const SIN_RESPUESTA = ['¿Qué pasa si después necesito cambios?', '¿El sistema es mío?', '¿El bot reemplaza a mi equipo?']
+// [M1] Dos de las tres respuestas que faltaban las dictó Valentino (M0 §8): queda sin respuesta solo la que el SPEC deja [a definir].
+const SIN_RESPUESTA = ['¿El sistema es mío?']
 afirmarIgual(
   SERVICIOS.flatMap((s) => s.faq.filter((f) => f.respuesta === null).map((f) => f.pregunta)),
   SIN_RESPUESTA,
-  'sin respuesta (null): cambios, «¿El sistema es mío?» y «¿El bot reemplaza a mi equipo?»',
+  'sin respuesta (null): solo «¿El sistema es mío?» (SPEC §7.2: «respuesta [a definir]»)',
 )
 afirmar(SERVICIOS.every((s) => s.faq.every((f) => f.respuesta === null || f.respuesta.trim().length > 0)), '  y ninguna respuesta es un texto vacío')
 
+/**
+ * [M1] LOS TEXTOS DICTADOS (M0 §8), literales: la otra fuente admitida, además del SPEC. La tabla vive acá, en el test, y no se arma
+ * con los datos: una respuesta que diga «dictado» y no esté en esta tabla, letra por letra, no pasa.
+ */
+const DICTADOS = [
+  { donde: 'Software · ¿Qué pasa si después necesito cambios?', dato: (): string | null => respuestaDe(SOFTWARE_A_MEDIDA, '¿Qué pasa si después necesito cambios?'), texto: 'Los primeros 1 o 2 meses después de entregar, el soporte va incluido. Después, cada cambio o mejora se presupuesta antes de hacerlo: nunca te cobramos algo que no aprobaste.' },
+  { donde: 'IA · ¿El bot reemplaza a mi equipo?', dato: (): string | null => respuestaDe(IA_Y_AUTOMATIZACIONES, '¿El bot reemplaza a mi equipo?'), texto: 'No. Atiende las consultas repetidas y las que llegan fuera de horario, y cuando alguien está listo para comprar le pasa la charla a una persona de tu equipo. El asistente atiende; vos cerrás las ventas.' },
+  { donde: 'IA · el texto del CTA', dato: (): string | null => IA_Y_AUTOMATIZACIONES.cta.texto, texto: 'Contanos tu rubro y cuántas consultas te llegan por mes, y te recomendamos el plan que te conviene.' },
+] as const
+function respuestaDe(s: Servicio, pregunta: string): string | null {
+  return s.faq.find((f) => f.pregunta === pregunta)?.respuesta ?? null
+}
+afirmarIgual(DICTADOS.filter((d) => d.dato() !== d.texto).map((d) => d.donde), [], 'los tres textos dictados (M0 §8) están en los datos, literales: los dos del FAQ y el texto del CTA de IA, que dejan de ser null')
+controlPositivo('  un texto dictado con una letra cambiada se detecta', { dato: (): string | null => DICTADOS[2].texto.replace('rubro', 'rubros'), texto: DICTADOS[2].texto }, (d: { dato: () => string | null; texto: string }) => d.dato() === d.texto)
+
 const COMENTARIO_DEL_SPEC = /\/\/\s*SPEC §7\.\d/
-/** Las líneas de un `respuesta:` que no es null y no tiene `// SPEC §7.x` en su línea ni en la de arriba. */
+const COMENTARIO_DEL_DICTADO = /\/\/\s*M0 §8 \(dictado\)/
+const conFuente = (linea: string): boolean => COMENTARIO_DEL_SPEC.test(linea) || COMENTARIO_DEL_DICTADO.test(linea)
+/** Las líneas de un `respuesta:` que no es null y no tiene `// SPEC §7.x` ni `// M0 §8 (dictado)` en su línea ni en la de arriba. */
 function respuestasSinFuente(texto: string): number[] {
   const lineas = texto.split('\n')
   const sin: number[] = []
   lineas.forEach((linea, i) => {
     if (!/^\s*respuesta:/.test(linea) || /^\s*respuesta:\s*null\b/.test(linea)) return
-    if (!COMENTARIO_DEL_SPEC.test(linea) && !(i > 0 && COMENTARIO_DEL_SPEC.test(lineas[i - 1]))) sin.push(i + 1)
+    if (!conFuente(linea) && !(i > 0 && conFuente(lineas[i - 1]))) sin.push(i + 1)
   })
   return sin
 }
 const todasConFuente = (texto: string): boolean => respuestasSinFuente(texto).length === 0
 const FUENTES_DE_DATOS = ARCHIVOS_DE_DATOS.map((f) => leer(`${CARPETA}/datos/${f}`))
-afirmar(FUENTES_DE_DATOS.every(todasConFuente), 'cada respuesta escrita lleva `// SPEC §7.x` en su línea o en la de arriba')
+afirmar(FUENTES_DE_DATOS.every(todasConFuente), 'cada respuesta escrita lleva `// SPEC §7.x` o `// M0 §8 (dictado)` en su línea o en la de arriba')
 afirmar(FUENTES_DE_DATOS.some((t) => /^\s*respuesta:\s*[^n\s]/m.test(t)), '  y hay respuestas escritas: el barrido mira algo')
 controlPositivo('el detector VE una respuesta sin su línea del SPEC', "{ pregunta: 'x',\n  respuesta: 'algo',\n}", todasConFuente)
+// La marca del dictado vale solo para lo que dictó Valentino: tres marcas, las de la tabla. Una cuarta sería un texto sin fuente con otro nombre.
+// Las líneas de código con la marca (las del docblock, que la nombran entre comillas invertidas, no cuentan).
+const marcasDeDictado = (textos: readonly string[]): number =>
+  textos.reduce((n, t) => n + t.split('\n').filter((linea) => !/^\s*(\/\*\*|\*)/.test(linea) && COMENTARIO_DEL_DICTADO.test(linea)).length, 0)
+afirmarIgual(marcasDeDictado(FUENTES_DE_DATOS), DICTADOS.length, '  y la marca del dictado aparece exactamente una vez por texto dictado: tres')
+controlPositivo('  una respuesta nueva con la marca del dictado, que no está en la tabla, se detecta', [...FUENTES_DE_DATOS, "  // M0 §8 (dictado)\n  respuesta: 'otra',"], (t: readonly string[]) => marcasDeDictado(t) === DICTADOS.length)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · el bot de WhatsApp no se ofrece')
@@ -208,26 +233,34 @@ controlPositivo('el detector VE la marca suelta', "title: 'Páginas web · devel
 afirmar(SERVICIOS.every((s) => s.seo.title === `${s.nombre} · ${LOGOTIPO}`), 'seo.title = nombre · LOGOTIPO')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · el acento: el único hex; el copy provisorio, marcado')
+titulo('8 · el acento: ningún hex, los dos tonos salen del tema; el copy provisorio, marcado')
 
-const CLARO_DEL_SPEC = { 'paginas-web': '#8FC0E8', 'software-a-medida': '#AFA0E8', 'ia-y-automatizaciones': '#7FCBA4' } as const
-afirmar(SLUGS_DE_SERVICIO.every((slug) => servicioDe(slug).acento.claro === CLARO_DEL_SPEC[slug]), 'acento.claro de cada servicio es el de SPEC §9')
+// [M1] P-H2 cerrado: B1.2c emitió los tres claros en el tema (`theme-develop.css:356-358`). El dato del servicio es solo su id del
+// home; lo que se compara contra el SPEC §9 es el TEMA, que es de donde la página toma el color.
+const CLARO_DEL_SPEC = { web: '#8FC0E8', software: '#AFA0E8', 'ia-automatizacion': '#7FCBA4' } as const
+const TEMA = leer('src/app/theme-develop.css').replace(/\/\*[\s\S]*?\*\//g, '')
+const valorEnElTema = (css: string, token: string): string | null => new RegExp(`${token}:\\s*(#[0-9A-Fa-f]{6})\\s*;`).exec(css)?.[1]?.toUpperCase() ?? null
+const clarosDelSpec = (css: string): boolean => SERVICIOS.every((s) => valorEnElTema(css, tokenDelAcentoClaro(s.idEnElHome)) === CLARO_DEL_SPEC[s.idEnElHome])
+afirmar(clarosDelSpec(TEMA), 'el claro de cada servicio, el token del tema que deriva su id (`--color-acento-<id>-claro`), vale lo del SPEC §9')
+controlPositivo('  un claro del tema distinto del SPEC se detecta', TEMA.replace(/(--color-acento-web-claro:\s*)#[0-9A-Fa-f]{6}/, '$1#000000'), clarosDelSpec)
+afirmar(SERVICIOS.every((s) => !('acento' in s)), '  y los datos del servicio no guardan ningún color: ya no tienen el campo `acento`')
+controlPositivo('  un servicio con un color en los datos se detecta', [{ ...PAGINAS_WEB, acento: { claro: 'x' } }], (lista: readonly object[]) => lista.every((s) => !('acento' in s)))
 
-/** Las líneas con un hex que no son un `claro:` con `// P-H2`. */
+/** Las líneas con un hex. */
 function hexSueltos(texto: string): number[] {
   const sin: number[] = []
   texto.split('\n').forEach((linea, i) => {
-    if (/#[0-9a-fA-F]{3,8}\b/.test(linea) && !(/\bclaro:/.test(linea) && /\/\/\s*P-H2/.test(linea))) sin.push(i + 1)
+    if (/#[0-9a-fA-F]{3,8}\b/.test(linea)) sin.push(i + 1)
   })
   return sin
 }
 const sinHexSueltos = (texto: string): boolean => hexSueltos(texto).length === 0
 const FUENTES = fuentesDeServicios(CARPETA)
 const TEXTOS = FUENTES.map(leer)
-afirmar(TEXTOS.every(sinHexSueltos), 'el único hex de `_servicios/` es `acento.claro`, en una línea con `// P-H2`', `${FUENTES.length} archivos`)
-afirmarIgual(TEXTOS.join('\n').match(/#[0-9a-fA-F]{6}\b/g)?.length ?? 0, 3, '  y son tres: el barrido mira algo')
+afirmarIgual(FUENTES.filter((_f, i) => !sinHexSueltos(TEXTOS[i] ?? '')), [], 'cero hex en todo `_servicios/` (fuera de los tests): el acento claro y el oscuro son tokens del tema')
+afirmar(FUENTES.length >= 30 && FUENTES.some((f) => f.endsWith('estiloDelAcento.ts')), `  y el barrido recorre los ${FUENTES.length} fuentes, el del acento incluido: mira algo`)
 controlPositivo('el detector VE un hex suelto', "const rojo = '#FF0000'", sinHexSueltos)
-controlPositivo('  y un `claro` sin su `// P-H2`', "claro: '#8FC0E8',", sinHexSueltos)
+controlPositivo('  y el claro de antes, con su `// P-H2`, también', "claro: '#8FC0E8', // P-H2", sinHexSueltos)
 
 /** Las líneas de copy provisorio (botón, title, description) sin `// C2`. */
 function copySinMarca(texto: string): number[] {
