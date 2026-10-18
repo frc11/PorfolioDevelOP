@@ -53,6 +53,47 @@ export function valoresDe(html: string, atributo: string): string[] {
   return [...html.matchAll(new RegExp(`\\s${atributo}="([^"]*)"`, 'g'))].map((m) => decodificar(m[1] ?? ''))
 }
 
+/**
+ * [S3b] El marcado entero del `div` que lleva el atributo (la intro: `data-intro-de-servicio`), con sus `div` balanceados, o `null`
+ * si no está. El marcado de `renderToStaticMarkup` está bien formado: alcanza con contar aperturas y cierres de `div`.
+ */
+export function elementoConAtributo(html: string, atributo: string): string | null {
+  const inicio = html.search(new RegExp(`<div(?=\\s)[^>]*\\s${atributo}(?=[=\\s>])`))
+  if (inicio < 0) return null
+  const etiquetas = /<(\/?)div(?=[\s>])/g
+  etiquetas.lastIndex = inicio
+  let profundidad = 0
+  for (let etiqueta = etiquetas.exec(html); etiqueta !== null; etiqueta = etiquetas.exec(html)) {
+    profundidad += etiqueta[1] === '/' ? -1 : 1
+    if (profundidad === 0) return html.slice(inicio, etiqueta.index + '</div>'.length)
+  }
+  return null
+}
+
+/** La etiqueta de apertura de un marcado (`<div data-…="…" class="…">`), o `''`. */
+export function aperturaDe(marcado: string | null): string {
+  return /^<[^>]+>/.exec(marcado ?? '')?.[0] ?? ''
+}
+
+/** [S3b] Los nombres de las custom properties que declara el bloque `@theme static` del tema (sin los comentarios, que citan otras). */
+export function tokensDelTema(css: string): Set<string> {
+  const sinComentariosDeCss = css.replace(/\/\*[\s\S]*?\*\//g, '')
+  const inicio = sinComentariosDeCss.indexOf('@theme static {')
+  if (inicio < 0) return new Set()
+  const bloque = sinComentariosDeCss.slice(inicio, sinComentariosDeCss.indexOf('}', inicio))
+  return new Set([...bloque.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1] ?? ''))
+}
+
+/**
+ * [S3b] Qué token es el acento de cada servicio SEGÚN EL TEMA: sus reglas de contexto (`[data-servicio="web"]` con
+ * `--color-acento: var(--color-acento-web)`, y las otras dos). Es la fuente con la que se compara la página, ajena a su código.
+ */
+export function acentosDelTemaPorServicio(css: string): Map<string, string> {
+  const sinComentariosDeCss = css.replace(/\/\*[\s\S]*?\*\//g, '')
+  const reglas = sinComentariosDeCss.matchAll(/\[data-servicio="([^"]+)"\]\s*\{\s*--color-acento:\s*var\((--[a-z0-9-]+)\);\s*\}/g)
+  return new Map([...reglas].map((m) => [m[1] ?? '', m[2] ?? '']))
+}
+
 /** El contenido de un elemento por su `data-bloque` (la sección o el pie entero), o `null` si no está montado. */
 export function bloqueDe(html: string, nombre: string): string | null {
   const inicio = html.search(new RegExp(`<(section|footer)[^>]*data-bloque="${nombre}"`))
@@ -83,14 +124,16 @@ export function saltaNiveles(niveles: readonly number[]): boolean {
   return niveles.some((nivel, i) => (i === 0 ? nivel !== 1 : nivel > (niveles[i - 1] ?? 0) + 1))
 }
 
-/** Todo hex del marcado salvo el del acento de la raíz (`style="--color-acento:#…"`). Las entidades no cuentan. */
+/** Todo hex del marcado, en orden. Las entidades no cuentan. [S3b] Sin excepción: quién puede tener uno lo dice el invariante. */
 export function hexSueltos(html: string): string[] {
-  const sinElAcento = html.replace(/--color-acento:#[0-9a-fA-F]{3,8}/, '').replace(/&#x?[0-9a-fA-F]+;/g, '')
-  return sinElAcento.match(/#[0-9a-fA-F]{3,8}(?![0-9a-zA-Z])/g) ?? []
+  return html.replace(/&#x?[0-9a-fA-F]+;/g, '').match(/#[0-9a-fA-F]{3,8}(?![0-9a-zA-Z])/g) ?? []
 }
 
-/** Lo reservado que aparece en el marcado, descrito. `[]` = limpio. `data-seccion` solo vale una vez, `invertida`, en la raíz. */
-export function reservadosEnElMarcado(html: string): string[] {
+/**
+ * Lo reservado que aparece en el marcado, descrito. `[]` = limpio. `data-seccion` solo vale una vez, `invertida`, y [S3b] en la
+ * apertura de la intro (el elemento con `atributoDeLaIntro`): ya no en la raíz.
+ */
+export function reservadosEnElMarcado(html: string, atributoDeLaIntro: string): string[] {
   const hallados: string[] = []
   for (const id of valoresDe(html, 'id')) {
     if (IDS_RESERVADOS.includes(id) || id.startsWith(PREFIJO_RESERVADO)) hallados.push(`id="${id}"`)
@@ -101,7 +144,8 @@ export function reservadosEnElMarcado(html: string): string[] {
   const secciones = valoresDe(html, 'data-seccion')
   for (const valor of secciones) if (valor !== 'invertida') hallados.push(`data-seccion="${valor}"`)
   if (secciones.length > 1) hallados.push('data-seccion repetido')
-  if (secciones.length === 1 && !html.startsWith('<div data-seccion="invertida"')) hallados.push('data-seccion fuera de la raíz')
+  const enLaIntro = aperturaDe(elementoConAtributo(html, atributoDeLaIntro)).includes(' data-seccion="invertida"')
+  if (secciones.length === 1 && !enLaIntro) hallados.push('data-seccion fuera de la intro')
   return hallados
 }
 
@@ -146,14 +190,9 @@ export function fondosOpacos(html: string): string[] {
   return valoresDe(html, 'class').filter((clases) => clases.split(/\s+/).some((c) => c === 'bg-fondo' || /^bg-superficie-\d$/.test(c)))
 }
 
-/** Los `style` que pintan un `background` sin `transparent` adentro: un fondo propio que no es translúcido. `[]` = ninguno. */
-export function fondosEnLineaOpacos(html: string): string[] {
-  return valoresDe(html, 'style').filter((estilo) => /background/.test(estilo) && !/transparent/.test(estilo))
-}
-
-/** Cuántos paneles tienen el vidrio del Portfolio (desenfoque de 20 px y saturación del 180 %). La variante con prefijo no cuenta. */
-export function panelesDeVidrio(html: string): number {
-  return (html.match(/(?<!-webkit-)backdrop-filter:blur\(20px\) saturate\(180%\)/g) ?? []).length
+/** [S3b] Cuántos `backdrop-filter` hay en el marcado (con prefijo o sin él): un vidrio es eso. Con el cuerpo en papel, ninguno. */
+export function vidrios(html: string): number {
+  return (html.match(/backdrop-filter/g) ?? []).length
 }
 
 /** Los textos que `PROYECTOS` guarda y servicios NUNCA lee: los valores no nulos de esos campos, para buscarlos en el marcado. */

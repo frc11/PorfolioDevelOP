@@ -6,6 +6,10 @@
  * Renderiza `PaginaDeServicio` DE VERDAD (`renderToStaticMarkup`, sin `Contacto`) con los tres servicios, en desarrollo y en
  * producción, y afirma sobre el MARCADO. Cada comprobación lleva su control positivo: el MISMO detector, contra una entrada
  * armada para fallar. Los detectores viven en `pagina-detectores.ts`.
+ *
+ * [S3b] La página tiene dos partes: la INTRO (`data-intro-de-servicio`, lo único invertido, con el acento claro) y el CUERPO, en
+ * papel, con el token oscuro del servicio. La comparación del vidrio contra la fórmula del Portfolio se RETIRÓ con el vidrio
+ * (la funcionalidad ya no existe): en su lugar, §10 afirma que no queda ningún vidrio.
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
@@ -19,25 +23,28 @@ import { PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
+import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import { MARCA_HOME_QUIETO } from '../../_secciones/_contrato/marcaHomeQuieto'
+import { CLASES_DEL_PAPEL } from '../bloques/Bloque'
 import { Precio } from '../bloques/Precio'
 import { FUENTE_DE_PROYECTOS } from '../datos/fuenteDeProyectos'
 import { IA_Y_AUTOMATIZACIONES } from '../datos/ia-y-automatizaciones'
 import { PAGINAS_WEB } from '../datos/paginas-web'
 import { SERVICIOS } from '../datos/servicios'
 import { SOFTWARE_A_MEDIDA } from '../datos/software-a-medida'
-import { ESTILO_DEL_CTA } from '../estiloDelAcento'
+import { ESTILO_DEL_CTA, tokenDelAcento } from '../estiloDelAcento'
 import { MARCADOR_A_DEFINIR, numero, usd } from '../formato'
+import { ATRIBUTO_DE_LA_INTRO } from '../Intro'
 import { PaginaDeServicio } from '../PaginaDeServicio'
 import { PRECIOS_DESDE } from '../precios'
 import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
 import { jsonLdDe } from '../seo'
 import type { Plan, Servicio } from '../tipos'
-import { ESTILO_DEL_VIDRIO } from '../vidrio'
 import {
-  MARCADORES_DE_LA_LLAVE, aperturas, arbitrariasSinToken, bloqueDe, bloquesEnOrden, clasesQueNoApilan, enlacesInternos,
-  fondosEnLineaOpacos, fondosOpacos, hexSueltos, nivelesDeEncabezado, numerosInventados, panelesDeVidrio, reservadosEnElMarcado,
-  respetaElOrden, saltaNiveles, sinComentarios, textoVisible, valoresDe, valoresProhibidos,
+  MARCADORES_DE_LA_LLAVE, acentosDelTemaPorServicio, aperturaDe, aperturas, arbitrariasSinToken, bloqueDe, bloquesEnOrden, clasesQueNoApilan,
+  elementoConAtributo, enlacesInternos, fondosOpacos, hexSueltos, nivelesDeEncabezado, numerosInventados,
+  reservadosEnElMarcado, respetaElOrden, saltaNiveles, sinComentarios, textoVisible, tokensDelTema, valoresDe, valoresProhibidos,
+  vidrios,
 } from './pagina-detectores'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
@@ -52,9 +59,15 @@ const WEB_DEV = pagina(PAGINAS_WEB, true)
 const WEB_PROD = pagina(PAGINAS_WEB, false)
 /** Los nombres de las páginas (de los tres servicios, en los dos modos) que NO cumplen. `[]` = todas cumplen. */
 const fallan = (cumple: (p: Pagina) => boolean): string[] => PAGINAS.filter((p) => !cumple(p)).map((p) => p.nombre)
+/** [S3b] La intro entera (`null` si no está) y el cuerpo: todo lo que no es la intro. */
+const intro = (html: string): string | null => elementoConAtributo(html, ATRIBUTO_DE_LA_INTRO)
+const cuerpo = (html: string): string => {
+  const marcado = intro(html)
+  return marcado === null ? html : html.replace(marcado, '')
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · Un solo h1, y es el problema')
+titulo('1 · La intro es lo primero: lleva su atributo, el único h1 (el problema) y su bajada')
 
 const unSoloH1 = (html: string): boolean => aperturas(html, 'h1').length === 1
 const h1Dice = (servicio: Servicio) => (html: string): boolean =>
@@ -62,6 +75,19 @@ const h1Dice = (servicio: Servicio) => (html: string): boolean =>
 afirmarIgual(fallan((p) => h1Dice(p.servicio)(p.html)), [], 'las tres páginas, en los dos modos: un solo h1, con el título del problema de SUS datos')
 controlPositivo('dos h1 se detectan', '<main><h1>a</h1><h1>b</h1></main>', unSoloH1)
 controlPositivo('un h1 con otro título se detecta', '<h1>otro</h1>', h1Dice(PAGINAS_WEB))
+/** La primera etiqueta adentro de la raíz. */
+const primeroDeLaRaiz = (html: string): string => /^<div[^>]*>(<[^>]+>)/.exec(html)?.[1] ?? ''
+const laIntro = (servicio: Servicio) => (html: string): boolean => {
+  const marcado = intro(html)
+  if (marcado === null) return false
+  return primeroDeLaRaiz(html) === aperturaDe(marcado) && aperturaDe(marcado).includes(` ${ATRIBUTO_DE_LA_INTRO}="${servicio.slug}"`) &&
+    h1Dice(servicio)(marcado) && aperturas(cuerpo(html), 'h1').length === 0 &&
+    textoVisible(marcado).includes(servicio.problema.texto) && !textoVisible(cuerpo(html)).includes(servicio.problema.texto)
+}
+afirmarIgual(fallan((p) => laIntro(p.servicio)(p.html)), [], `y ese h1 va en la intro: lo primero de la raíz, con ${ATRIBUTO_DE_LA_INTRO} y su slug, el h1 y la bajada (el texto del problema); el cuerpo no lleva ninguno de los dos`)
+controlPositivo('una intro sin su atributo se detecta', WEB_PROD.replace(` ${ATRIBUTO_DE_LA_INTRO}="${PAGINAS_WEB.slug}"`, ''), laIntro(PAGINAS_WEB))
+controlPositivo('un h1 que se va al cuerpo se detecta', WEB_PROD.replace(/<h1(?=[\s>])/, '<h2').replace('</h1>', '</h2>').replace('<main>', `<main><h1>${PAGINAS_WEB.problema.titulo}</h1>`), laIntro(PAGINAS_WEB))
+controlPositivo('algo antes de la intro se detecta', WEB_PROD.replace(/^(<div[^>]*>)/, '$1<p>antes</p>'), laIntro(PAGINAS_WEB))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Los bloques, en el orden de SPEC §5')
@@ -73,6 +99,12 @@ const conBlog = pagina({ ...PAGINAS_WEB, articulos: [{ titulo: 'Una nota', href:
 afirmar(bloquesEnOrden(conBlog).join() === ORDEN_DEL_SPEC.join(), 'con un artículo que sí tiene href, Del blog se monta entre el llamado y el cierre')
 controlPositivo('dos bloques cambiados de lugar se detectan', ['problema', 'que-incluye', 'que-hacemos', 'precio'], (s: string[]) => respetaElOrden(s, ORDEN_DEL_SPEC))
 controlPositivo('un bloque que no es del SPEC se detecta', ['problema', 'inventado'], (s: string[]) => respetaElOrden(s, ORDEN_DEL_SPEC))
+// S3b · el orden, ajustado a la intro: el problema es la intro y el cuerpo arranca en Qué hacemos.
+const partidaEnDos = (html: string): boolean =>
+  JSON.stringify(bloquesEnOrden(intro(html) ?? '')) === JSON.stringify(['problema']) && bloquesEnOrden(cuerpo(html))[0] === 'que-hacemos' &&
+  respetaElOrden(bloquesEnOrden(cuerpo(html)), ORDEN_DEL_SPEC.filter((b) => b !== 'problema'))
+afirmarIgual(fallan((p) => partidaEnDos(p.html)), [], 'las tres páginas, en los dos modos: la intro lleva un solo bloque, el problema, y el cuerpo empieza en Qué hacemos y sigue el orden del SPEC')
+controlPositivo('un bloque del cuerpo metido en la intro se detecta', `<div><div ${ATRIBUTO_DE_LA_INTRO}="x"><section data-bloque="problema"></section><section data-bloque="que-hacemos"></section></div><main><section data-bloque="que-incluye"></section></main></div>`, partidaEnDos)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El CTA abre el contacto y precarga el servicio — sin data-servicio (P-S1)')
@@ -105,21 +137,36 @@ controlPositivo('los modos cruzados: desarrollo tiene que mostrarlo', WEB_PROD, 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · Nada del home: ni ids, ni atributos de la escena, ni más de un data-seccion')
 
-const limpio = (html: string): boolean => reservadosEnElMarcado(html).length === 0
-afirmarIgual(fallan((p) => limpio(p.html)), [], 'ninguna página emite un id que el home busque, ni portfolio-…, ni data-panel, data-seccion-id o data-signo-de-la-tuya; data-seccion solo es «invertida», una vez, en la raíz')
+const limpio = (html: string): boolean => reservadosEnElMarcado(html, ATRIBUTO_DE_LA_INTRO).length === 0
+afirmarIgual(fallan((p) => limpio(p.html)), [], 'ninguna página emite un id que el home busque, ni portfolio-…, ni data-panel, data-seccion-id o data-signo-de-la-tuya; data-seccion solo es «invertida», una vez, en la intro (S3b: ya no en la raíz)')
 controlPositivo('un id="cierre" se detecta', `${WEB_PROD}<i id="cierre"></i>`, limpio)
 controlPositivo('un id portfolio-la-tuya se detecta', `${WEB_PROD}<i id="portfolio-la-tuya"></i>`, limpio)
 controlPositivo('un data-panel se detecta', `${WEB_PROD}<i data-panel="x"></i>`, limpio)
 controlPositivo('un data-seccion que no es «invertida» se detecta', `${WEB_PROD}<i data-seccion="claro"></i>`, limpio)
 controlPositivo('un segundo data-seccion «invertida» se detecta', `${WEB_PROD}<i data-seccion="invertida"></i>`, limpio)
+controlPositivo('el data-seccion en la raíz y no en la intro se detecta', WEB_PROD.replace(' data-seccion="invertida"', '').replace(/^<div /, '<div data-seccion="invertida" '), limpio)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · El único hex es el del acento, en la raíz')
+titulo('6 · El único hex es el claro, en la intro; el cuerpo lleva el token oscuro de SU servicio')
 
-afirmarIgual(fallan((p) => hexSueltos(p.html).length === 0), [], 'ninguna página tiene un hex fuera de --color-acento')
-afirmarIgual(fallan((p) => p.html.startsWith(`<div data-seccion="invertida" style="--color-acento:${p.servicio.acento.claro}"`)), [], '  y ese es el acento.claro de SUS datos, en el style de la raíz')
-controlPositivo('un hex suelto se detecta', '<p style="color:#ff0000">x</p>', (h: string) => hexSueltos(h).length === 0)
-controlPositivo('el hex del acento puesto fuera de la custom property se detecta', `<p style="color:${PAGINAS_WEB.acento.claro}">x</p>`, (h: string) => hexSueltos(h).length === 0)
+const sinHexEnElCuerpo = (html: string): boolean => hexSueltos(cuerpo(html)).length === 0
+afirmarIgual(fallan((p) => sinHexEnElCuerpo(p.html)), [], 'el cuerpo de cada página —todo lo que no es la intro— no tiene ningún hex')
+afirmarIgual(fallan((p) => JSON.stringify(hexSueltos(p.html)) === JSON.stringify([p.servicio.acento.claro]) && aperturaDe(intro(p.html)).includes(` style="--color-acento:${p.servicio.acento.claro}"`)), [], '  y el único hex del marcado es el acento.claro de SUS datos, en el style de la intro (P-H2)')
+controlPositivo('un hex en el cuerpo se detecta', WEB_PROD.replace('<main>', '<main><p style="color:#1D5B8F">x</p>'), sinHexEnElCuerpo)
+controlPositivo('el claro puesto en el cuerpo se detecta', WEB_PROD.replace('<main>', `<main><p style="color:${PAGINAS_WEB.acento.claro}">x</p>`), sinHexEnElCuerpo)
+// Lo esperado sale del TEMA (sus reglas de contexto por servicio), no de `tokenDelAcento`: si la derivación se rompe, esto lo ve.
+const TEMA = readFileSync(path.join(AQUI, '../../../theme-develop.css'), 'utf8')
+const TOKENS_DEL_TEMA = tokensDelTema(TEMA)
+const ACENTO_DEL_TEMA = acentosDelTemaPorServicio(TEMA)
+const tokenSegunElTema = (id: string): string => ACENTO_DEL_TEMA.get(id) ?? '(el tema no lo dice)'
+afirmarIgual(IDS_DE_SERVICIO.filter((id) => !TOKENS_DEL_TEMA.has(tokenSegunElTema(id)) || tokenDelAcento(id) !== tokenSegunElTema(id)), [], `el token oscuro de cada servicio es el que el tema le da en su contexto, y está declarado en su @theme static: ${IDS_DE_SERVICIO.map(tokenSegunElTema).join(', ')}`)
+controlPositivo('un token que el tema no declara se detecta', '--color-acento-otro', (token: string) => TOKENS_DEL_TEMA.has(token))
+controlPositivo('un servicio que el tema no conoce se detecta', 'otro', (id: string) => ACENTO_DEL_TEMA.has(id))
+const acentoDelCuerpo = (servicio: Servicio) => (html: string): boolean =>
+  (/^<div style="([^"]*)"/.exec(html)?.[1] ?? '') === `--color-acento:var(${tokenSegunElTema(servicio.idEnElHome)})`
+afirmarIgual(fallan((p) => acentoDelCuerpo(p.servicio)(p.html)), [], '  y la raíz fija el acento del cuerpo con el token de SU servicio, derivado de idEnElHome, por var(): ningún hex')
+controlPositivo('el token de otro servicio se detecta', WEB_PROD.replace(`var(${tokenSegunElTema('web')})`, `var(${tokenSegunElTema('software')})`), acentoDelCuerpo(PAGINAS_WEB))
+controlPositivo('el claro en la raíz se detecta', WEB_PROD.replace(`var(${tokenSegunElTema('web')})`, PAGINAS_WEB.acento.claro), acentoDelCuerpo(PAGINAS_WEB))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · De PROYECTOS salen el nombre, el rubro, la dirección y el póster — nunca la reseña ni lo resuelto')
@@ -257,9 +304,12 @@ afirmarIgual(fallan((p) => valoresDe(bloqueDe(p.html, 'cierre') ?? '', 'href').j
 controlPositivo('un cierre que no enlaza a todas se detecta', '<footer data-bloque="cierre"><a href="/v3">a</a><a href="/v3/paginas-web">b</a></footer>', (h: string) => valoresDe(bloqueDe(h, 'cierre') ?? '', 'href').join() === [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)].join())
 afirmarIgual(PUBLICADOS, SERVICIOS.map((s) => s.slug), 'PUBLICADOS tiene los tres servicios, en el orden del SPEC (S2b)')
 controlPositivo('un PUBLICADOS al que le falta uno se detecta', ['paginas-web', 'software-a-medida'], (l: readonly string[]) => JSON.stringify(l) === JSON.stringify(SERVICIOS.map((s) => s.slug)))
-const conCabecera = (html: string): boolean => new RegExp(`<header>[\\s\\S]*?<a href="${HREF_DEL_HOME}"[^>]*>[\\s\\S]*?${LOGOTIPO}[\\s\\S]*?</a>[\\s\\S]*?</header>[\\s\\S]*?<main`).test(html)
-afirmar(conCabecera(WEB_PROD), `el encabezado es un enlace a ${HREF_DEL_HOME} con el logotipo, antes del main`)
+const conCabecera = (html: string): boolean => new RegExp(`<header>[\\s\\S]*?<a href="${HREF_DEL_HOME}"[^>]*>[\\s\\S]*?${LOGOTIPO}[\\s\\S]*?</a>[\\s\\S]*?</header>[\\s\\S]*?<main`).test(html) &&
+  (intro(html) ?? '').includes('<header>') // S3b: adentro de la intro, en claro (el único data-seccion es el de ella)
+afirmar(conCabecera(WEB_PROD), `el encabezado es un enlace a ${HREF_DEL_HOME} con el logotipo, antes del main y adentro de la intro`)
 controlPositivo('una página sin el enlace del encabezado se detecta', '<header></header><main></main>', conCabecera)
+const HEADER_DE_LA_WEB = /<header>[\s\S]*?<\/header>/.exec(WEB_PROD)?.[0] ?? ''
+controlPositivo('un encabezado fuera de la intro se detecta', WEB_PROD.replace(HEADER_DE_LA_WEB, '').replace(/^(<div[^>]*>)/, `$1${HEADER_DE_LA_WEB}`), conCabecera)
 const preguntas = PAGINAS_WEB.faq.filter((f) => f.respuesta !== null).length
 afirmar(aperturas(WEB_PROD, 'details').length === preguntas && aperturas(WEB_PROD, 'summary').length === preguntas, `el FAQ es un <details> con su <summary> por pregunta: ${preguntas}, con la respuesta en el HTML`)
 
@@ -284,20 +334,30 @@ afirmarIgual(dondeEsDeCliente(FUENTES), ['movimiento/Revelado.tsx', 'movimiento/
 controlPositivo('un bloque de cliente fuera de movimiento/ se detecta', ["'use client'", 'export const x = 1'].join('\n'), (c: string) => !deCliente(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · Vidrio y movimiento: secciones transparentes, paneles como los del Portfolio, revelados del home')
+titulo('10 · Papel y movimiento: el cuerpo es papel opaco, la intro se lee sobre la tapa, sin vidrio, revelados del home')
 
 const SIN_PROBLEMA = (html: string): string[] => bloquesEnOrden(html).filter((b) => b !== 'problema')
-afirmarIgual(fallan((p) => fondosOpacos(p.html).length === 1 && /-z-10/.test(fondosOpacos(p.html)[0] ?? '') && /\bfixed\b/.test(fondosOpacos(p.html)[0] ?? '')), [], 'lo único opaco de cada página es la tapa interina (fixed -z-10): ni la raíz ni una sección pintan fondo propio')
-afirmarIgual(fallan((p) => fondosEnLineaOpacos(p.html).length === 0), [], '  y ningún style pinta un fondo que no sea translúcido')
-const unaSolaTapa = (html: string): boolean => fondosOpacos(html).length === 1
-controlPositivo('una sección con bg-fondo propio se detecta', `${WEB_PROD}<section class="bg-fondo"></section>`, unaSolaTapa)
-controlPositivo('un style con un fondo opaco se detecta', '<div style="background:rgb(14,14,14)"></div>', (h: string) => fondosEnLineaOpacos(h).length === 0)
-afirmarIgual(fallan((p) => panelesDeVidrio(p.html) === SIN_PROBLEMA(p.html).length), [], 'cada bloque con contenido (todos menos el problema, que va directo sobre el fondo) es un panel de vidrio')
-const TIRA = readFileSync(path.join(AQUI, '../../_secciones/trabajos/portfolio/Tira.tsx'), 'utf8')
-const mismoVidrio = (tira: string): boolean => tira.includes(`background: '${ESTILO_DEL_VIDRIO.background}'`) && tira.includes(`backdropFilter: '${ESTILO_DEL_VIDRIO.backdropFilter}'`)
-afirmar(mismoVidrio(TIRA), `el vidrio es el del Portfolio, número por número: ${String(ESTILO_DEL_VIDRIO.backdropFilter)}`)
-controlPositivo('un vidrio con otro desenfoque se detecta', TIRA.replace('blur(20px)', 'blur(8px)'), mismoVidrio)
-controlPositivo('un marcado sin paneles de vidrio se detecta', '<main><section data-bloque="precio"></section></main>', (h: string) => panelesDeVidrio(h) === SIN_PROBLEMA(h).length)
+const clasesDe = (apertura: string): string[] => (/\sclass="([^"]*)"/.exec(apertura)?.[1] ?? '').split(/\s+/)
+const tapas = (html: string): string[] => fondosOpacos(html).filter((clases) => ['fixed', 'inset-0', '-z-10'].every((c) => clases.split(/\s+/).includes(c)))
+afirmarIgual(fallan((p) => tapas(p.html).length === 1 && tapas(intro(p.html) ?? '').length === 1), [], 'la tapa interina (fixed, inset-0, -z-10, bg-fondo) es una sola y va adentro de la intro: pinta la noche')
+const introSinFondo = (html: string): boolean => {
+  const marcado = intro(html) ?? ''
+  return marcado !== '' && fondosOpacos(marcado).length === tapas(marcado).length && !clasesDe(aperturaDe(marcado)).some((c) => c.startsWith('bg-'))
+}
+afirmarIgual(fallan((p) => introSinFondo(p.html)), [], '  y la intro no pinta fondo propio: lo único con fondo adentro de ella es la tapa')
+const APERTURA_DE_LA_INTRO = aperturaDe(intro(WEB_PROD))
+controlPositivo('una intro con fondo propio se detecta', WEB_PROD.replace(APERTURA_DE_LA_INTRO, APERTURA_DE_LA_INTRO.replace(' class="', ' class="bg-fondo ')), introSinFondo)
+const bloquesDelCuerpo = (html: string): string[] => [...aperturas(cuerpo(html), 'section'), ...aperturas(cuerpo(html), 'footer')].filter((a) => a.includes(' data-bloque="'))
+const cuerpoEnPapel = (html: string): boolean => {
+  const bloques = bloquesDelCuerpo(html)
+  return bloques.length > 0 && bloques.length === bloquesEnOrden(cuerpo(html)).length && bloques.every((a) => CLASES_DEL_PAPEL.split(/\s+/).every((c) => clasesDe(a).includes(c)))
+}
+afirmarIgual(fallan((p) => cuerpoEnPapel(p.html)), [], `cada bloque del cuerpo, del Qué hacemos al cierre, es una sección opaca en papel: lleva la superficie papel-opaco del home (${CLASES_DEL_PAPEL})`)
+controlPositivo('un bloque del cuerpo sin papel se detecta', WEB_PROD.replace(/(<section data-bloque="precio"[^>]*class=")([^"]*)"/, (_t, antes: string, clases: string) => `${antes}${clases.replace('bg-fondo', '')}"`), cuerpoEnPapel)
+const sinVidrio = (html: string): boolean => vidrios(html) === 0 && !valoresDe(html, 'style').some((estilo) => /background/.test(estilo))
+afirmarIgual(fallan((p) => sinVidrio(p.html)), [], 'sin vidrio: ningún backdrop-filter y ningún fondo en un style (S3b: el vidrio se fue, y su test con él)')
+controlPositivo('un panel de vidrio se detecta', `${WEB_PROD}<div style="background:color-mix(in srgb, var(--color-tinta) 4%, transparent);backdrop-filter:blur(20px) saturate(180%)"></div>`, sinVidrio)
+controlPositivo('un style con un fondo opaco se detecta', '<div style="background:rgb(14,14,14)"></div>', sinVidrio)
 const conRevelado = (html: string, nombre: string): boolean => (bloqueDe(html, nombre) ?? '').includes(`data-arbol="${MARCA_HOME_QUIETO}"`)
 afirmarIgual(fallan((p) => bloquesEnOrden(p.html).every((b) => conRevelado(p.html, b))), [], 'cada bloque cuelga de los patrones de revelado del home (el seam `Bloque`: sin coreografía, el contenido sale quieto y en su lugar)')
 controlPositivo('un bloque sin revelado se detecta', '<section data-bloque="faq"><h2>FAQ</h2></section>', (h: string) => conRevelado(h, 'faq'))
@@ -353,7 +413,7 @@ const PANEL = IA_Y_AUTOMATIZACIONES.prueba.ctaPanel
 const CTA_DEL_HOME = PANEL === null || PANEL.href === null ? '' : renderToStaticMarkup(<CtaEnlace href={PANEL.href} rotulo={PANEL.rotulo} />)
 const IA_PAGINA = PAGINAS.find((p) => p.servicio.slug === 'ia-y-automatizaciones' && !p.enDesarrollo)?.html ?? ''
 const traeElCtaDelHome = (html: string): boolean => CTA_DEL_HOME !== '' && (bloqueDe(html, 'prueba') ?? '').includes(CTA_DEL_HOME)
-// Redefinir la variable (`--color-tinta:`), no leerla: el vidrio del panel la lee con var() para mezclar su 4 % y eso no recolorea nada.
+// Redefinir la variable (`--color-tinta:`), no leerla: un style que solo la lee con var() no recolorea nada.
 const recoloreaLaTinta = (html: string): boolean => valoresDe(html, 'style').some((estilo) => /(^|;)\s*--color-tinta\s*:/.test(estilo))
 const enTinta = (html: string): boolean => !recoloreaLaTinta(bloqueDe(html, 'prueba') ?? '')
 afirmar(CTA_DEL_HOME.includes('data-pieza="cta"') && CTA_DEL_HOME.includes('href="/login"'), 'el CtaEnlace del home con los datos de «Probá el panel» es un <a data-pieza="cta"> a /login (D11)')

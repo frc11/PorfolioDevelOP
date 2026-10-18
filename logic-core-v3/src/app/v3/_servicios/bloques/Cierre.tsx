@@ -1,6 +1,9 @@
 /**
- * [SERVICIOS S1b] 11 · CIERRE — provisorio hasta B13 (SPEC §5): un llamado simple y los enlaces, en un panel de vidrio. Se
- * reemplaza por el cierre global del home, que trae su propio formulario.
+ * [SERVICIOS S1b · S3b] 11 · CIERRE — provisorio hasta B13 (SPEC §5): un llamado simple y los enlaces. Se reemplaza por el pie
+ * genérico del home, que trae su propio formulario.
+ *
+ * [S3b] En papel, como el resto del cuerpo: el pie con la superficie `papel-opaco` del home y, arriba del contenido, el filete del
+ * borde (el separador decorativo del tema). Sin vidrio.
  *
  * El llamado abre el contacto igual que el del bloque 9 (`AbreElContacto`). Los enlaces son `<a href>` de verdad, con recarga
  * completa: el home y las páginas de `PUBLICADOS`, que es la única lista de lo que existe.
@@ -10,19 +13,20 @@ import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { servicioDe } from '../datos/servicios'
+import { Revelado } from '../movimiento/Revelado'
 import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
 import type { Servicio } from '../tipos'
+import { CLASES_DEL_PAPEL } from './Bloque'
 import { AbreElContacto } from './Llamado'
-import { PanelDeVidrio } from './PanelDeVidrio'
 
 const NOMBRE_DE_LOS_ENLACES = `Más de ${LOGOTIPO}` // C2: provisorio
 
 export function Cierre({ servicio }: { readonly servicio: Servicio }): React.JSX.Element {
   return (
-    <footer data-bloque="cierre" className="pb-12 pt-3 escritorio:pb-20 escritorio:pt-4">
+    <footer data-bloque="cierre" className={`${CLASES_DEL_PAPEL} py-12 escritorio:py-20`}>
       <Envoltorio>
-        <PanelDeVidrio>
-          <div className="flex flex-col gap-8 escritorio:flex-row escritorio:items-end escritorio:justify-between">
+        <Revelado>
+          <div className="flex flex-col gap-8 border-t border-borde pt-8 escritorio:flex-row escritorio:items-end escritorio:justify-between">
             <AbreElContacto servicio={servicio} />
             <nav aria-label={NOMBRE_DE_LOS_ENLACES}>
               <ul role="list" className="flex flex-col gap-3 escritorio:flex-row escritorio:gap-8">
@@ -45,7 +49,7 @@ export function Cierre({ servicio }: { readonly servicio: Servicio }): React.JSX
               </ul>
             </nav>
           </div>
-        </PanelDeVidrio>
+        </Revelado>
       </Envoltorio>
     </footer>
   )

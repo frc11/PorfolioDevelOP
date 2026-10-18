@@ -24,9 +24,11 @@ const ROTULO_DEL_ENLACE = 'Visitar sitio' // C2: provisorio
 const AVISO_DE_PESTANA = 'se abre en una pestaña nueva' // C2: provisorio
 
 /**
- * P-H9: `PROYECTOS` trae las rutas de los pósters pero no sus medidas (viven en un .json de docs). Hasta que el home las sume a
- * `MediosDelProyecto`, la relación de aspecto se declara ACÁ, una sola vez: los pósters de escritorio son 16:10 y los de móvil,
- * 780×1688 (uno mide 690×1494, la misma relación). Las capturas propias de servicios usan la de escritorio.
+ * P-H9: `PROYECTOS` trae las rutas de los pósters pero no sus medidas (desde B1.2b viven en `portfolio/medios.ts`, en
+ * `MEDIDAS_DE_LOS_MEDIOS`, fuera de `MediosDelProyecto`). Hasta que el home las sume ahí, la relación de aspecto se declara ACÁ, una
+ * sola vez. Los pósters de escritorio son 16:10 (1440×900, y 1280×800 el de El Garage). Los de móvil miden 780×1688 (Banu),
+ * 690×1494 (Esquina) y 390×844 (El Garage, rehecho en B1.2b): los tres tienen la relación de 780×1688. Las capturas propias de
+ * servicios usan la de escritorio.
  */
 const MEDIDAS_DE_LA_CAPTURA = {
   escritorio: { ancho: 1440, alto: 900 },

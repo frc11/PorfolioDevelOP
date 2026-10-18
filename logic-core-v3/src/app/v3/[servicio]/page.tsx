@@ -23,9 +23,9 @@ import { esServicioSlug, type Servicio } from '../_servicios/tipos'
  *
  * El template, dentro de la compuerta de la coreografía del home (`CompuertaDelHome`, la misma de `v3/page.tsx`: instala los
  * patrones de revelado arriba de 1024 y deja el contenido quieto por debajo o con movimiento reducido), y como HERMANO —no
- * adentro— el modal de contacto: la raíz del template es invertida (noche), y el modal conserva así sus tokens de papel y su
- * acento por defecto. Sin `ChromeDelHome` (D4): su barra arma enlaces relativos que en una subruta no llevan a ninguna parte
- * (P-H3).
+ * adentro— el modal de contacto: la raíz del template fija el acento del servicio y su intro es invertida (noche), y el modal
+ * conserva así sus tokens de papel y su acento por defecto. Sin `ChromeDelHome` (D4): su barra arma enlaces relativos que en una
+ * subruta no llevan a ninguna parte (P-H3).
  *
  * ── La metadata ───────────────────────────────────────────────────────────
  *

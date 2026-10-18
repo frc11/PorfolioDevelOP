@@ -89,7 +89,7 @@ function TablaDeLosPlanes({ vista }: { readonly vista: VistaDeLosPlanes }): Reac
   )
 }
 
-/** Por debajo de 768, con el mismo lenguaje que los calibres de Páginas web: una regla arriba, sin fondo propio (el vidrio es del panel) y el precio en el `titulo-m`. */
+/** Por debajo de 768, con el mismo lenguaje que los calibres de Páginas web: una regla arriba, sin fondo propio (el papel es de la sección) y el precio en el `titulo-m`. */
 function TarjetasDeLosPlanes({ vista }: { readonly vista: VistaDeLosPlanes }): React.JSX.Element {
   return (
     <ul role="list" aria-label={NOMBRE_DE_LOS_PLANES} className="flex flex-col gap-12 md:hidden" data-planes="tarjetas">
