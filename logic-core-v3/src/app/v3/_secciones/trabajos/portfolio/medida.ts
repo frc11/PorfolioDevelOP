@@ -3,9 +3,11 @@
  * publicado con la compuerta del pin. [B1.2c] Salió de `usePortfolio.ts` (la regla de las 300 líneas), sin cambios.
  */
 
+import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
+
 import { pasoConElPin } from './estado'
 import { PANTALLAS_POR_PASO, pasoEn, pxDelScroll, scrollDelPx, type IndiceDePaso } from './pasos'
-import { saltarA } from './saltar'
+import { CLAVE_DEL_VUELO, saltarA } from './saltar'
 
 export interface Medida {
   readonly px: number
@@ -64,12 +66,44 @@ export function cortarElPanel(caja: HTMLElement | null, antes: { current: boolea
   }
 }
 
-/** Un salto en vuelo: adónde va (px de la regla) y cómo cancelarlo; `id`, quién es (la llegada sólo suelta el suyo). */
+/**
+ * Un salto en vuelo: adónde va (px de la regla) y cómo cancelarlo; `id`, quién es (la llegada sólo suelta el suyo). [B1.2d] `y`: el
+ * scroll de destino (px de la página); `marca`: la del viaje en el `userData` de Lenis (`null`: inmediato, o sin Lenis).
+ */
 export interface Vuelo {
   readonly id: symbol
   readonly destino: number
+  readonly y: number
+  readonly marca: string | null
   readonly cancelar: () => void
 }
+
+/**
+ * [B1.2d] UN VUELO CON DUEÑO Y CON FIN (§14, A8). Hasta B1.3 un vuelo se soltaba sólo con su llegada, y Lenis no la avisa si otro
+ * movimiento le pisa la animación (la rueda, otro `scrollTo`): el vuelo quedaba colgado y el paso clavado en su destino para siempre.
+ * Ahora se suelta también si Lenis ya no lleva su viaje (`vueloPisado`) o si vence (lo que dura más `margenMs`).
+ */
+export const VUELO = { margenMs: 1000 } as const
+
+/**
+ * [B1.2d] El defecto de A8.1, para el control positivo del arnés: el vuelo de B1.3, sin dueño ni fin. Sólo lo pide el arnés antes de
+ * cargar (`window.__defectosDelPortfolio`, como el banco con `__entornoDeLaEscena`); nunca la URL ni el producto.
+ */
+export type DefectoDelPortfolio = 'vuelo-sin-dueno'
+export function conElDefecto(d: DefectoDelPortfolio): boolean {
+  if (typeof window === 'undefined') return false
+  const pedido = (window as Window & { __defectosDelPortfolio?: unknown }).__defectosDelPortfolio
+  return typeof pedido === 'string' && pedido.split(',').includes(d)
+}
+
+/** [B1.2d] ¿Alguien le pisó el viaje? Con Lenis, la marca de su `userData` ya no es la del vuelo (`saltar.ts`). */
+export function vueloPisado(vuelo: Vuelo, lenis: { readonly userData: Readonly<Record<string, unknown>> } | null): boolean {
+  if (lenis === null || vuelo.marca === null || conElDefecto('vuelo-sin-dueno')) return false
+  return lenis.userData[CLAVE_DEL_VUELO] !== vuelo.marca
+}
+
+/** Para la marca de cada vuelo: no se repite en la página. */
+let vuelos = 0
 
 /**
  * [B1] Lleva la página a un píxel de la regla en `ms` (0: en silencio) y pone ya el paso de destino; mientras vuela, los bordes del
@@ -78,6 +112,9 @@ export interface Vuelo {
  * [B1.2c] El vuelo existe ANTES de lanzar el salto: uno inmediato (el hover, el clic, el tap) llega en el acto y su llegada lo lee. Armado
  * adentro de su propio inicializador, la llegada sincrónica pedía el vuelo antes de que existiera (el arnés: «Cannot access before
  * initialization» en cada hover) y la marca `data-en-vuelo` quedaba puesta para siempre.
+ *
+ * [B1.2d] Y se suelta de tres maneras, todas por `soltar` (que también borra el vencimiento: ningún temporizador huérfano): la llegada,
+ * la cancelación (otro vuelo, o `vueloPisado` desde la lectura del scroll) y el vencimiento.
  */
 export function volarAlPx(
   v: { readonly caja: { readonly current: HTMLElement | null }; readonly enVuelo: { current: Vuelo | null }; readonly actual: { current: IndiceDePaso }; readonly setPaso: (p: IndiceDePaso) => void },
@@ -88,15 +125,34 @@ export function volarAlPx(
   const m = medir(v.caja.current)
   if (m === null) return
   v.enVuelo.current?.cancelar()
-  v.caja.current?.setAttribute('data-en-vuelo', 'si')
+  const caja = v.caja.current
+  const y = Math.round(scrollDelPx(px, m.tope, m.alto) + scrollExtra)
   const id = Symbol('vuelo')
-  v.enVuelo.current = { id, destino: px, cancelar: () => undefined }
-  const cancelar = saltarA(scrollDelPx(px, m.tope, m.alto) + scrollExtra, ms, () => {
+  vuelos += 1
+  const marca = ms > 0 && LENIS_DEL_SITIO.instancia !== null ? `portfolio-${String(vuelos)}` : null
+  let vence = 0
+  const soltar = (): void => {
+    window.clearTimeout(vence)
     if (v.enVuelo.current?.id !== id) return
     v.enVuelo.current = null
-    v.caja.current?.removeAttribute('data-en-vuelo')
-  })
-  if (v.enVuelo.current?.id === id) v.enVuelo.current = { id, destino: px, cancelar }
+    caja?.removeAttribute('data-en-vuelo')
+  }
+  caja?.setAttribute('data-en-vuelo', 'si')
+  v.enVuelo.current = { id, destino: px, y, marca, cancelar: soltar }
+  const detener = saltarA(y, ms, soltar, marca)
+  if (v.enVuelo.current?.id === id) {
+    if (!conElDefecto('vuelo-sin-dueno')) vence = window.setTimeout(soltar, ms + VUELO.margenMs)
+    v.enVuelo.current = {
+      id,
+      destino: px,
+      y,
+      marca,
+      cancelar: () => {
+        detener()
+        soltar()
+      },
+    }
+  }
   // El destino, ya: la tira cambia en este cuadro y la página la sigue.
-  publicar(v.caja.current, v.actual, v.setPaso, pasoEn(px, PANTALLAS_POR_PASO))
+  publicar(caja, v.actual, v.setPaso, pasoEn(px, PANTALLAS_POR_PASO))
 }

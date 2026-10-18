@@ -17,6 +17,9 @@
  *   · `portfolio-desfasado` el selector en pantalla mostrando un paso que no es el que pide el scroll (con su histéresis), sin un salto en vuelo;
  *   · `portfolio-video`    más de un video reproduciéndose, o alguno con la sección fuera del cuadro;
  *   · `portfolio-ancla`    la página cargó con un deep link (`#portfolio-…`) y, antes de que el visitante scrollee, muestra otra tira.
+ *   · [B1.2d] `portfolio-colgado` un salto en vuelo con la página quieta (Lenis sin moverse): nadie lo va a soltar y el paso queda en su destino (A8.1);
+ *   · [B1.2d] `portfolio-panel`  con el paso bien y el orden asentado, el panel adentro fuera del tramo, o afuera adentro de él (el paso
+ *                          equivocado ya es `portfolio-desfasado`: juntas son el invariante de A8, cada una con su causa).
  *
  * El progreso «esperado» de un bloque es el que tendría con el rango de una carga limpia (la referencia que el arnés toma desde arriba,
  * sin apuros) o, sin referencia, con su rango medido ahora en el layout (sin lo pegado ni lo transformado).
@@ -92,6 +95,11 @@ export interface EstadoDelDiag {
   readonly portfolio: {
     readonly enPantalla: boolean
     readonly enVuelo: boolean
+    /** [B1.2d] El salto en vuelo con Lenis quieto: colgado (nadie lo va a soltar). */
+    readonly vueloQuieto: boolean
+    /** [B1.2d] Lo que se muestra ya es lo pedido (ninguna entrada ni salida en curso), y si el panel está adentro. */
+    readonly ordenQuieto: boolean
+    readonly panelAdentro: boolean
     readonly pasoMostrado: number
     readonly pasoPedido: number
     readonly videos: number
@@ -99,7 +107,7 @@ export interface EstadoDelDiag {
   } | null
 }
 
-export type TipoDeFalla = 'sin-imprimir' | 'fuente-de-respaldo' | 'letras-corridas' | 'dom-visible' | 'ninguno-visible' | 'animacion-desfasada' | 'epoca-sin-medir' | 'noche-desfasada' | 'remate-dormido' | 'portfolio-desfasado' | 'portfolio-video' | 'portfolio-ancla'
+export type TipoDeFalla = 'sin-imprimir' | 'fuente-de-respaldo' | 'letras-corridas' | 'dom-visible' | 'ninguno-visible' | 'animacion-desfasada' | 'epoca-sin-medir' | 'noche-desfasada' | 'remate-dormido' | 'portfolio-desfasado' | 'portfolio-video' | 'portfolio-ancla' | 'portfolio-colgado' | 'portfolio-panel'
 
 export interface FallaDeLaCarga {
   readonly tipo: TipoDeFalla
@@ -144,6 +152,9 @@ export function fallasDe(e: EstadoDelDiag, u: UmbralesDeLaCarga = UMBRALES_DE_LA
     if (p !== null && p.enPantalla && !p.enVuelo && p.pasoMostrado !== p.pasoPedido) falla('portfolio-desfasado', 'portfolio', `muestra el paso ${String(p.pasoMostrado)} y el scroll pide el ${String(p.pasoPedido)}`)
     if (p !== null && (p.videos > 1 || (p.videos > 0 && !p.enPantalla))) falla('portfolio-video', 'portfolio', `${String(p.videos)} videos reproduciéndose${p.enPantalla ? '' : ' con la sección fuera del cuadro'}`)
     if (p !== null && p.ancla !== null && !p.enVuelo && p.ancla.tira !== p.ancla.esperada) falla('portfolio-ancla', p.ancla.id, `muestra la tira ${String(p.ancla.tira)} y el ancla pidió la ${String(p.ancla.esperada)}`)
+    // [B1.2d] A8 · sin estados colgados: un vuelo que nadie mueve, o el panel en el lado equivocado del tramo con todo quieto.
+    if (p !== null && p.enVuelo && p.vueloQuieto) falla('portfolio-colgado', 'portfolio', `un salto en vuelo con la página quieta: el paso queda en el ${String(p.pasoMostrado)}`)
+    if (p !== null && p.enPantalla && !p.enVuelo && p.ordenQuieto && p.pasoMostrado === p.pasoPedido && p.panelAdentro !== (p.pasoPedido >= 0 && p.pasoPedido <= 3)) falla('portfolio-panel', 'portfolio', `el panel ${p.panelAdentro ? 'adentro' : 'afuera'} y el scroll pide el paso ${String(p.pasoPedido)}`)
   }
   return fallas
 }

@@ -21,6 +21,8 @@
 
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../../_lib/navegacion'
 
+import { ARRANQUE_DEL_VACIO, LLEGADA_DE_LOS_DEMOS, PX_DEL_VACIO } from '../demos/relojDeDemos'
+
 /**
  * [B1.2b] Las pantallas que dura cada proyecto: lo que ocupaban sus dos pasos de B1.2 (portada y ficha, 0,75 cada uno). Un solo
  * gatillo por proyecto; el resto de su scroll es permanencia. «La tuya» dura lo mismo.
@@ -113,6 +115,12 @@ export function pasoConHisteresis(actual: IndiceDePaso, px: number, paso: number
   return crudo
 }
 
+/**
+ * [B1.2d] Justo antes de donde aparece el Portfolio (A11, el clic afuera): debajo del pin, con un margen para el redondeo del scroll
+ * (un píxel de la página puede ser más de uno de la regla). La histéresis lo deja afuera hasta que el scroll vuelva a pasar el pin.
+ */
+export const PX_JUSTO_ANTES_DEL_PIN = PX_DE_LA_APROXIMACION - 4
+
 /** El centro de un paso, en px de la regla: adonde salta el selector. */
 export const centroDelPaso = (i: number, paso: number): number => PX_DE_LA_APROXIMACION + (i + 0.5) * pxDelPaso(paso)
 
@@ -135,16 +143,24 @@ export const pantallasDelAncla = (i: number, paso: number): number => centroDelP
 // ─── El reloj de Demos ────────────────────────────────────────────────────
 
 /**
+ * [B1.2d] A9 · LO QUE SE ADELANTA DEMOS (px de la regla). Con el reloj de B1.2c el título de Demos subía 581 px después del arranque
+ * de la cola, y la salida del Portfolio se dispara 30 después de ese arranque (bajando) y vuelve 30 antes (subiendo): quedaban 551 px de
+ * escena sola bajando y 611 subiendo. Ahora el título empieza a subir en el borde de la cola menos la histéresis, donde el Portfolio
+ * ya se fue en las dos direcciones: 0 px vacíos, y se pisan. Las alturas no cambian (la deriva de la escena es 0).
+ */
+export const ADELANTO_DE_DEMOS = ARRANQUE_DEL_VACIO + LLEGADA_DE_LOS_DEMOS.desde * PX_DEL_VACIO - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY + HISTERESIS_PX
+
+/**
  * Demos cuenta su llegada con el `mostrado` de hoy (la fracción de la sección de 6.813 px). La cola es la misma al píxel, así que
- * el reloj es la cola corrida: el arranque de la salida nueva cae en el de hoy (3.882). Antes, saturado (el vacío en 0). Ya no hay
- * resorte del túnel: Demos llega con el scroll y su propia persecución (§11.4).
+ * el reloj es la cola corrida: el arranque de la salida nueva cae en el de hoy (3.882) [B1.2d] menos `ADELANTO_DE_DEMOS`. Antes,
+ * saturado (el vacío en 0). Ya no hay resorte del túnel: Demos llega con el scroll y su propia persecución (§11.4).
  */
 export function mostradoDeDemos(px: number, paso: number): number {
-  const deHoy = px - (pxDeLaSalida(paso) - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY)
+  const deHoy = px - (pxDeLaSalida(paso) - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY) + ADELANTO_DE_DEMOS
   return Math.min(1, Math.max(0, deHoy / PX_DE_LA_SECCION_EN_LA_TABLA))
 }
 
 /** Al revés: el píxel de la sección nueva para un `mostrado` de hoy en la cola (el destino del foco de Demos). */
 export function pxDelMostradoDeDemos(mostrado: number, paso: number): number {
-  return mostrado * PX_DE_LA_SECCION_EN_LA_TABLA + pxDeLaSalida(paso) - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY
+  return mostrado * PX_DE_LA_SECCION_EN_LA_TABLA + pxDeLaSalida(paso) - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY - ADELANTO_DE_DEMOS
 }

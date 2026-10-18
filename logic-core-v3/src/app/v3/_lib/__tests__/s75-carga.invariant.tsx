@@ -27,7 +27,7 @@ titulo('A13 · El detector de fallas de la carga (el del arnés, sobre `window._
 
 const IMPRESO = { version: 1, t: 900, fuenteCargada: true, conectado: true } as const
 const TEXTO_SANO: TextoDelDiag = { id: 'titulo:x', sistema: 'titulo', listo: true, enPantalla: true, domOpacidad: 0, impreso: IMPRESO, fuenteCargadaAhora: true, letrasCorridasEm: 0, dibujada: true, debeDibujarse: true }
-const PORTFOLIO_SANO: NonNullable<EstadoDelDiag['portfolio']> = { enPantalla: true, enVuelo: false, pasoMostrado: 2, pasoPedido: 2, videos: 1, ancla: null }
+const PORTFOLIO_SANO: NonNullable<EstadoDelDiag['portfolio']> = { enPantalla: true, enVuelo: false, vueloQuieto: false, ordenQuieto: true, panelAdentro: true, pasoMostrado: 2, pasoPedido: 2, videos: 1, ancla: null }
 const SANO: EstadoDelDiag = {
   t: 5000,
   visible: true,
@@ -56,6 +56,9 @@ const ROTOS: readonly (readonly [TipoDeFalla, EstadoDelDiag])[] = [
   ['portfolio-desfasado', { ...SANO, portfolio: { ...PORTFOLIO_SANO, pasoMostrado: 2, pasoPedido: 4 } }],
   ['portfolio-video', { ...SANO, portfolio: { ...PORTFOLIO_SANO, videos: 2 } }],
   ['portfolio-ancla', { ...SANO, portfolio: { ...PORTFOLIO_SANO, ancla: { id: 'portfolio-banu-scents', tira: 0, esperada: 2 } } }],
+  // [B1.2d] A8 · un vuelo que nadie mueve (Lenis quieto: el de A8.1), y el panel afuera con el scroll adentro y el orden asentado.
+  ['portfolio-colgado', { ...SANO, portfolio: { ...PORTFOLIO_SANO, enVuelo: true, vueloQuieto: true } }],
+  ['portfolio-panel', { ...SANO, portfolio: { ...PORTFOLIO_SANO, panelAdentro: false } }],
 ]
 const tiposDe = (e: EstadoDelDiag): string => [...new Set(fallasDe(e).map((f) => f.tipo))].join(',')
 const sana = (e: EstadoDelDiag): boolean => fallasDe(e).length === 0
@@ -70,8 +73,12 @@ const NO_SON: readonly EstadoDelDiag[] = [
   { ...conTexto({ dibujada: false }), viaje: 'trabajos' },
   conTexto({ listo: false, domOpacidad: 1, enPantalla: false }),
   { ...SANO, noche: { actual: 0, esperada: null } },
+  // [B1.2d] Un vuelo en curso (Lenis lo mueve), una entrada todavía en marcha (el orden sin asentar) y el panel afuera en la cola.
+  { ...SANO, portfolio: { ...PORTFOLIO_SANO, enVuelo: true, vueloQuieto: false } },
+  { ...SANO, portfolio: { ...PORTFOLIO_SANO, panelAdentro: false, ordenQuieto: false } },
+  { ...SANO, portfolio: { ...PORTFOLIO_SANO, pasoMostrado: 4, pasoPedido: 4, panelAdentro: false } },
 ]
-afirmar(NO_SON.every(sana), '  y no confunde: con la pestaña oculta, en un viaje o fuera de pantalla no cuenta; donde la noche no rige, tampoco')
+afirmar(NO_SON.every(sana), '  y no confunde: con la pestaña oculta, en un viaje o fuera de pantalla no cuenta; donde la noche no rige, tampoco; [B1.2d] ni un vuelo que Lenis mueve, ni el panel en el medio de su entrada, ni el panel afuera en la cola')
 controlPositivo('  el detector VE un texto sin imprimir en pantalla aunque haya pasado un viaje antes', conTexto({ listo: false, domOpacidad: 1 }), sana)
 // El cambio del DOM al impreso (el fundido del DOM, ~0,4 s) no es «los dos a la vista»: cuenta recién listo hace más de `cambioMs`.
 const recienListo = conTexto({ domOpacidad: 0.5, listoHaceMs: 300 })

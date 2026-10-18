@@ -19,6 +19,7 @@ import { LENTOS } from '../titulos3d/repeticiones'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { CLASES_DE_ACENTO, FORMAS_PERMITIDAS_SOBRE_OSCURO, FORMAS_PROHIBIDAS_SOBRE_CLARO, idDelServicioLlamado } from '../../_secciones/_contrato/acento'
 import { WHATSAPP } from '../../_secciones/cierre/contacto'
+import { CORRIMIENTO } from '../../_chrome/barra/corrimiento'
 import { validarContacto } from '../../_chrome/contacto/enviarContacto'
 import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
 import { activaElHover } from '../../_secciones/trabajos/portfolio/Acordeon'
@@ -26,7 +27,7 @@ import { estadosDeLasBarras } from '../../_secciones/trabajos/portfolio/BarrasDe
 import { PRESENCIA_DEL_ENCABEZADO } from '../../_secciones/trabajos/portfolio/EncabezadoDelPortfolio'
 import { CLASE_DEL_ROTULO, Ficha } from '../../_secciones/trabajos/portfolio/Ficha'
 import { CAMPOS_DE_LA_TUYA, datosDelFormulario } from '../../_secciones/trabajos/portfolio/FormularioDeLaTuya'
-import { AFUERA, ORDEN, recorridoDelOrden, type Orden } from '../../_secciones/trabajos/portfolio/orden'
+import { ADENTRO, AFUERA, ORDEN, duracionDeLaSalida, recorridoDelOrden, type Orden } from '../../_secciones/trabajos/portfolio/orden'
 import { GESTO_QUIETO, RUEDA, destinoDeLaRueda, gestoDeLaRueda, recorridoDeLaRueda, type DestinoDeLaRueda, type GestoDeLaRueda } from '../../_secciones/trabajos/portfolio/rueda'
 import { SignoQueSeArma } from '../../_secciones/trabajos/portfolio/SignoDePregunta'
 import { SIGNO, alturaDelPunto, duracionDelPunto } from '../../_secciones/trabajos/portfolio/signo'
@@ -54,26 +55,41 @@ function contraste(a: string, b: string): number {
 
 export function afirmarB12c(): void {
   // ═══════════════════════════════════════════════════════════════════════════
-  titulo('B1.2c · 19 · El orden: el título cae entero y recién después vuelven la cámara y el oscurecido (y el panel se retrae); al subir, al revés')
+  titulo('B1.2c · 19 · [B1.2d] El orden en cuatro piezas (A10): la cámara, el título, la barra y el panel cuando el título va por el 80 %; al salir, al revés')
 
-  const ADENTRO: Orden = { escena: true, encabezado: true }
-  const comoTexto = (r: readonly { readonly estado: Orden; readonly enS: number }[]): string[] => r.map(({ estado, enS }) => `${estado.escena ? 'E' : 'e'}${estado.encabezado ? 'T' : 't'}@${enS.toFixed(2)}`)
-  const caidaConEl3d = LENTOS.llegadaDePortfolioS
-  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, caidaConEl3d)), ['Et@0.00', 'et@1.40'], 'la salida: primero el título y la bajada (caen enteros, lo que tarda el título 3D: su mínimo de 1,4 s) y DESPUÉS la escena —la cámara, el oscurecido y el panel—')
-  controlPositivo('  el detector ve la salida de B1.2b (todo junto: la cámara volvía antes de que terminara la caída)', (): string[] => ['et@0.00'], (f: () => string[]) => JSON.stringify(f()) === JSON.stringify(['Et@0.00', 'et@1.40']))
-  afirmarIgual(comoTexto(recorridoDelOrden(AFUERA, ADENTRO, caidaConEl3d)), ['Et@0.00', 'ET@0.70'], `la entrada (al subir, y también bajando): primero llega la cámara (el panel y el oscurecido, ${String(ORDEN.camaraS)} s) y después aparece el título`)
-  afirmar(ORDEN.camaraS === PERSECUCION_DEL_PESO_S && ORDEN.panelS === 0.7 && /duration-700/.test(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)), '  las esperas son las de la escena: la persecución de la cámara y la transición del panel (700 ms)')
-  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, caidaConEl3d, true)), ['et@0.00'], '  con movimiento reducido, de una')
-  // Abajo de 1024 no hay título 3D: lo que cae es el del DOM (la presencia, 0,6 s).
-  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, PRESENCIA_DEL_ENCABEZADO.s)), ['Et@0.00', 'et@0.60'], '  sin el título 3D (abajo de 1024), la caída es la del DOM: 0,6 s')
+  const comoTexto = (r: readonly { readonly estado: Orden; readonly enS: number }[]): string[] =>
+    r.map(({ estado: o, enS }) => `${o.camara ? 'C' : 'c'}${o.encabezado ? 'E' : 'e'}${o.barra ? 'B' : 'b'}${o.panel ? 'P' : 'p'}@${enS.toFixed(2)}`)
+  const conEl3d = LENTOS.llegadaDePortfolioS
+  /** El criterio de A10: lo que llevaba recorrido el título (0…1) cuando arrancó el panel. */
+  const delTituloAlPanel = (r: readonly { readonly estado: Orden; readonly enS: number }[], tituloS: number): number => {
+    const t = r.find((x) => x.estado.encabezado)?.enS ?? Number.NaN
+    const p = r.find((x) => x.estado.panel)?.enS ?? Number.NaN
+    return (p - t) / tituloS
+  }
+  const entrada = recorridoDelOrden(AFUERA, ADENTRO, conEl3d)
+  afirmarIgual(comoTexto(entrada), ['Cebp@0.00', 'CEbp@0.70', 'CEBp@1.42', 'CEBP@1.82'], `la entrada: la cámara (${String(ORDEN.camaraS)} s, así el título queda de frente en el plano del logo), el título, la barra (${String(ORDEN.barraS)} s, termina justo antes del panel) y el panel`)
+  afirmar(delTituloAlPanel(entrada, conEl3d) >= 0.8 - 1e-9 && Math.abs(entrada[2].enS + ORDEN.barraS - entrada[3].enS) < 1e-9, '  el panel arranca con el título al 80 % de su llegada (o más), y la barra termina cuando el panel empieza', `${(delTituloAlPanel(entrada, conEl3d) * 100).toFixed(1)} %`)
+  controlPositivo('  el detector ve el orden de B1.2c (el panel entraba con la cámara, antes que el título)', [{ estado: { camara: true, encabezado: false, barra: false, panel: true }, enS: 0 }, { estado: ADENTRO, enS: 0.7 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => delTituloAlPanel(r, conEl3d) >= 0.8 - 1e-9)
+  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, conEl3d)), ['CEBp@0.00', 'CeBp@0.42', 'Cebp@0.70', 'cebp@1.82'], 'la salida, al revés: el panel, la caída del título cuando al panel le falta el mismo 20 %, la barra con el panel afuera y la cámara con el título caído entero')
+  // Lo pedido se da vuelta a mitad de camino: cada pieza recuerda cuándo cambió, así que el panel nunca se adelanta al 80 % del título.
+  const recien = recorridoDelOrden({ camara: true, encabezado: true, barra: false, panel: false }, ADENTRO, conEl3d, false, { camara: -0.7, encabezado: 0, barra: -Infinity, panel: -Infinity })
+  afirmarIgual(comoTexto(recien), ['CEBp@0.72', 'CEBP@1.12'], '  con el título recién llegado, la barra y el panel esperan lo suyo desde ese momento (no desde la vuelta)')
+  controlPositivo('  el detector ve una vuelta que adelanta el panel (B1.2c: el orden sin relojes por pieza)', ['CEBP@0.00'], (r: string[]) => JSON.stringify(r) === JSON.stringify(['CEBp@0.72', 'CEBP@1.12']))
+  afirmarIgual(comoTexto(recorridoDelOrden({ camara: true, encabezado: true, barra: false, panel: false }, AFUERA, conEl3d, false, { camara: -0.7, encabezado: -0.3, barra: -Infinity, panel: -Infinity })), ['Cebp@0.00', 'cebp@1.40'], '  y si se da vuelta para afuera, el título cae desde ahí y la cámara vuelve cuando terminó de caer')
+  afirmar(ORDEN.camaraS === PERSECUCION_DEL_PESO_S && ORDEN.panelS === 0.7 && /duration-700/.test(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)) && ORDEN.barraS === (2 * CORRIMIENTO.tiempoMs) / 1000, '  las esperas son las de la escena: la persecución de la cámara, la transición del panel (700 ms) y los dos tiempos de la barra')
+  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, conEl3d, true)), ['CEBp@0.00', 'CeBp@0.00', 'Cebp@0.00', 'cebp@0.00'], '  con movimiento reducido, de una')
+  // Abajo de 1024 no hay título 3D: lo que llega y cae es el del DOM (la presencia, 0,6 s).
+  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, PRESENCIA_DEL_ENCABEZADO.s)), ['CEBp@0.00', 'CeBp@0.58', 'Cebp@0.70', 'cebp@1.18'], '  sin el título 3D (abajo de 1024), con los 0,6 s del DOM')
+  afirmar(Math.abs(duracionDeLaSalida(conEl3d) - 1.82) < 1e-9, '  la salida de la rueda (a Demos y hacia arriba) dura lo que se ve: el panel y la caída entera del título')
   const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
   const escenario = sinComentarios(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`))
   const cableado = (u: string, e: string): boolean =>
-    /const caidaS = useTituloListo\('portfolio'\) \? LENTOS\.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO\.s/.test(u) &&
-    /useOrdenDeLaEscena\(fase === 'adentro', historias \? fase === 'antes' && enCuadro : fase === 'adentro', caidaS, reducido\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.escena/.test(u) &&
-    /!vivo\.escena && 'translate-x-full'/.test(e) && /<EncabezadoDelPortfolio seccion=\{seccion\} adentro=\{vivo\.encabezado\}/.test(e)
-  afirmar(cableado(usePortfolio, escenario), '  y así se cablea: la escena (la cámara y el oscurecido de `PORTFOLIO_EN_LA_ESCENA`, y el panel) y el encabezado salen del orden, no del paso')
-  controlPositivo('  el detector ve la escena atada al paso (B1.2b)', usePortfolio.replace('PORTFOLIO_EN_LA_ESCENA.adentro = orden.escena', "PORTFOLIO_EN_LA_ESCENA.adentro = vistaDelPaso(paso).fase === 'adentro'"), (u: string) => cableado(u, escenario))
+    /const tituloS = useTituloListo\('portfolio'\) \? LENTOS\.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO\.s/.test(u) &&
+    /const pedidoDelOrden = \{ camara: adentro, encabezado: historias \? fase === 'antes' && enCuadro : adentro, barra: adentro && !historias, panel: adentro \}/.test(u) &&
+    /useOrdenDeLaEscena\(pedidoDelOrden, tituloS, reducido\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.camara/.test(u) && /useBarraDelPortfolio\(caja, orden\.barra\)/.test(u) &&
+    /!vivo\.panel && 'translate-x-full'/.test(e) && /<EncabezadoDelPortfolio seccion=\{seccion\} adentro=\{vivo\.encabezado\}/.test(e)
+  afirmar(cableado(usePortfolio, escenario), '  y así se cablea: la cámara (con el oscurecido de `PORTFOLIO_EN_LA_ESCENA`), el encabezado, la barra y el panel salen del orden, no del paso')
+  controlPositivo('  el detector ve la cámara atada al panel (B1.2c)', usePortfolio.replace('PORTFOLIO_EN_LA_ESCENA.adentro = orden.camara', 'PORTFOLIO_EN_LA_ESCENA.adentro = orden.panel'), (u: string) => cableado(u, escenario))
 
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('B1.2c · 20 · Los rótulos de la ficha: Chivo Mono, mayúsculas, con interletrado, un paso más grandes y en el acento claro (P-H2)')
@@ -142,7 +158,10 @@ export function afirmarB12c(): void {
   controlPositivo('  el detector ve el hover de B1.2b (sin la inercia de la rueda)', (e: typeof lomo, tira: number) => e.indice !== tira, (f: (e: typeof lomo, tira: number) => boolean) => !f(lomo, 3))
   // El arnés lo encontró: cargando con el mouse quieto sobre el panel, los lomos que llegaban debajo (`pointerover`) se activaban solos.
   const acordeonDelHover = sinComentarios(leer(`${PORTFOLIO}/Acordeon.tsx`))
-  afirmar(!activaElHover({ ...lomo, mueve: false }, 3, true, null, null) && activaElHover(lomo, 3, true, null, null) && /const mueve = e\.type === 'pointermove'/.test(acordeonDelHover) && /if \(activacion\.current === null\) activacion\.current = puntero\.current/.test(acordeonDelHover), 'un lomo que llega debajo del mouse quieto (la carga, el scroll: `pointerover` sin `pointermove`) no se activa, y recién cargada el primer lugar del puntero es la base; moviéndolo, sí')
+  // [B1.2d] Sin la base sembrada con el primer `pointerover` (la última vuelta de B1.3): entrar a un lomo desde la columna y quedarse no lo activaba.
+  const sinBaseSembrada = (c: string): boolean => /const mueve = e\.type === 'pointermove'/.test(c) && !/if \(activacion\.current === null\) activacion\.current = puntero\.current/.test(c)
+  afirmar(!activaElHover({ ...lomo, mueve: false }, 3, true, null, null) && activaElHover(lomo, 3, true, null, null) && sinBaseSembrada(acordeonDelHover), 'un lomo que llega debajo del mouse quieto (la carga, el scroll: `pointerover` sin `pointermove`) no se activa; [B1.2d] y entrar a un lomo desde la columna lo activa aunque el mouse se quede ahí (sin la base sembrada)')
+  controlPositivo('  el detector ve la base sembrada de B1.3', `${acordeonDelHover}\nif (activacion.current === null) activacion.current = puntero.current`, sinBaseSembrada)
   controlPositivo('  el detector ve el hover de antes (el `pointerover` activaba)', (e: typeof lomo, tira: number) => e.indice !== tira, (f: (e: typeof lomo, tira: number) => boolean) => !f({ ...lomo, mueve: false }, 3))
   const muescas = (eventos: readonly (readonly [number, number])[], ocupado: (t: number) => boolean = () => false): number => {
     let g: GestoDeLaRueda = GESTO_QUIETO
@@ -169,15 +188,17 @@ export function afirmarB12c(): void {
   afirmar(laRuedaAnduvo(CASOS_DE_LA_RUEDA[0], [2, 2, 3, 3]) && /const ok = laRuedaAnduvo\(caso, pasos\)/.test(readFileSync(path.join(RAIZ, 'scripts-carga/estres.ts'), 'utf8')), '  y su cuenta: termina donde tiene que terminar y el paso sólo avanza en el sentido de la rueda')
   controlPositivo('  la cuenta ve un lomo que se reactiva con el mouse quieto (vuelve a Banú)', [2, 3, 2, 3], (pasos: number[]) => laRuedaAnduvo(CASOS_DE_LA_RUEDA[0], pasos))
   controlPositivo('  y la rueda que sigue de largo hasta Demos (B1.2b)', [2, 3, 4], (pasos: number[]) => laRuedaAnduvo(CASOS_DE_LA_RUEDA[0], pasos))
-  const atrapa = (c: string): boolean => /if \(destino > scrollDelPx\(hasta, m\.tope, m\.alto\) \|\| destino < scrollDelPx\(desde, m\.tope, m\.alto\)\) saltarAlPaso\(vistaDelPaso\(paso\)\.tira\)/.test(c) && /gesto = \{ acumulado: 0, ultimo: ahora, disparado: true \}/.test(rueda)
-  afirmar(atrapa(usePortfolio), '  la entrada del panel atrapa la inercia de un golpe fuerte (Lenis yendo más allá: se frena en el proyecto en que entra) y ese mismo gesto no da un paso')
-  controlPositivo('  el detector ve la entrada sin atrapar', usePortfolio.replace('saltarAlPaso(vistaDelPaso(paso).tira)', 'undefined'), atrapa)
+  // [B1.2d] Los mandos salieron de `usePortfolio.ts` (`useMandosDelPortfolio.ts`, la regla de las 300 líneas).
+  const mandos = sinComentarios(leer(`${PORTFOLIO}/useMandosDelPortfolio.ts`))
+  const atrapa = (c: string): boolean => /if \(destino > scrollDelPx\(hasta, medida\.tope, medida\.alto\) \|\| destino < scrollDelPx\(desde, medida\.tope, medida\.alto\)\) saltar\(vistaDelPaso\(paso\)\.tira, false, true\)/.test(c) && /gesto = \{ acumulado: 0, ultimo: ahora, disparado: true \}/.test(rueda)
+  afirmar(atrapa(mandos), '  la entrada del panel atrapa la inercia de un golpe fuerte (Lenis yendo más allá: se frena en el proyecto en que entra) y ese mismo gesto no da un paso')
+  controlPositivo('  el detector ve la entrada sin atrapar', mandos.replace('saltar(vistaDelPaso(paso).tira, false, true)', 'undefined'), atrapa)
   // El arnés lo encontró (la pila de `PILAS=1`): el salto inmediato llega en el acto, y su llegada pedía el vuelo antes de que existiera.
   const vueloAntesDelSalto = (c: string): boolean =>
-    /v\.enVuelo\.current = \{ id, destino: px, cancelar: \(\) => undefined \}\s*const cancelar = saltarA\(/.test(c) && /if \(v\.enVuelo\.current\?\.id !== id\) return/.test(c) && !/cancelar: saltarA\(/.test(c)
+    /v\.enVuelo\.current = \{ id, destino: px, y, marca, cancelar: soltar \}\s*const detener = saltarA\(y, ms, soltar, marca\)/.test(c) && /if \(v\.enVuelo\.current\?\.id !== id\) return/.test(c) && !/cancelar: saltarA\(/.test(c)
   afirmar(vueloAntesDelSalto(sinComentarios(leer(`${PORTFOLIO}/medida.ts`))) && /volarAlPx\(\{ caja, enVuelo, actual, setPaso \}, px, reducido \? 0 : ms, scrollExtra\)/.test(usePortfolio), '  el salto en silencio (el hover, el clic, el tap) no pide su vuelo antes de que exista: el vuelo se arma y después se lanza el salto (el arnés: «Cannot access before initialization» en cada hover, y la marca de vuelo puesta para siempre)')
   controlPositivo('  el detector ve el vuelo armado adentro de su propio inicializador (B1.2b)', 'const vuelo = {\n  destino: px,\n  cancelar: saltarA(y, ms, () => { if (enVuelo.current !== vuelo) return }),\n}\nenVuelo.current = vuelo', vueloAntesDelSalto)
-  afirmar(/return v\.fase === 'adentro' && pegado\(caja\.current\) && !conDialogo\(caja\.current\) \? v\.tira : null/.test(usePortfolio) && /else if \(d\.tipo === 'demos'\) irAlPx\(pxDeLaSeccion\(PANTALLAS_POR_PASO\), salida, -2\)/.test(usePortfolio), '  manda sólo con el panel adentro, pegado y sin un diálogo; a Demos va al final del pin (como el viaje del menú), con el tiempo de la salida en orden')
+  afirmar(/return v\.fase === 'adentro' && pegado\(caja\.current\) && !conDialogo\(caja\.current\) \? v\.tira : null/.test(mandos) && /else if \(d\.tipo === 'demos'\) irAlPx\(pxDeLaSeccion\(PANTALLAS_POR_PASO\), salidaMs, -2\)/.test(mandos) && /const salidaMs = duracionDeLaSalida\(tituloS\) \* 1000/.test(mandos), '  manda sólo con el panel adentro, pegado y sin un diálogo; a Demos va al final del pin (como el viaje del menú), con el tiempo de la salida en orden')
 
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('B1.2c · 23 · «La tuya»: el formulario corto (la validación, el envío y los textos del contacto) y WhatsApp')
@@ -218,7 +239,7 @@ export function afirmarB12c(): void {
   const escenarioCompleto = leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)
   const barras = leer(`${PORTFOLIO}/BarrasDelPortfolio.tsx`)
   afirmar(/<BarrasDelPortfolio vivo=\{vivo\} className="hidden shrink-0 px-8 pb-2 max-escritorio:flex"/.test(escenarioCompleto) && /<PistaDelPortfolio vivo=\{vivo\} className="absolute inset-x-0 bottom-6 hidden justify-center max-escritorio:flex/.test(escenarioCompleto), '  arriba del panel, abajo de 1024 (en escritorio no), y la pista al pie del panel')
-  afirmar(/if \(desde\.current !== null && \(!vivo\.escena \|\| vivo\.paso !== desde\.current\)\) marcarLaPista\(\)/.test(barras) && /window\.sessionStorage\.setItem\(CLAVE_DE_LA_PISTA, 'vista'\)/.test(barras) && /hidden=\{vista \|\| !vivo\.escena\}/.test(barras), '  la pista: la primera vez que entra el panel; se va con el primer paso (o con el panel) y no vuelve en la sesión')
+  afirmar(/if \(desde\.current !== null && \(!vivo\.panel \|\| vivo\.paso !== desde\.current\)\) marcarLaPista\(\)/.test(barras) && /window\.sessionStorage\.setItem\(CLAVE_DE_LA_PISTA, 'vista'\)/.test(barras) && /hidden=\{vista \|\| !vivo\.panel\}/.test(barras), '  la pista: la primera vez que entra el panel; se va con el primer paso (o con el panel) y no vuelve en la sesión')
   afirmar(/alElegir=\{\(\) => vivo\.saltarAlPaso\(indice, true\)\}/.test(leer(`${PORTFOLIO}/Tira.tsx`)), '  tap en un lomo = saltar a ese proyecto con el modelo del hover: activo ya, el scroll en silencio')
 
   // ═══════════════════════════════════════════════════════════════════════════

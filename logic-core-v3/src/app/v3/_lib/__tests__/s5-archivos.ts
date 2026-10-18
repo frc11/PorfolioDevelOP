@@ -259,6 +259,10 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/deslizamiento.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useDeslizamientoDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useAnclaDeLaCarga.ts`,
+  // [B1.2d] los mandos (la rueda, sus salidas, los toques y el clic afuera, salieron de `usePortfolio.ts`) y el pedido a la barra.
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMandosDelPortfolio.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useClicAfueraDelPanel.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useBarraDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-detectores.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/relojDeDemos.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/herencia.ts`,

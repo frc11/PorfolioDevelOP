@@ -15,12 +15,12 @@ import type { MutableLightLevels } from '../escena/choreographyTypes'
 import { pantallaDeProgreso, progresoDePantalla } from '../escena/recorrido'
 import { TRAMO_ESTIRADO, medidaSinElEstiramiento, sinElEstiramiento, type TramoEstirado } from '../escena/tramoEstirado'
 import { DISPARO_DE_LA_NOCHE, SOLAPE_DE_LA_SECCION } from '../../_secciones/trabajos/geometria'
-import { ARRANQUE_DEL_VACIO, PX_DEL_VACIO, PX_DE_LA_SECCION_DE_HOY, vacioSinTope } from '../../_secciones/trabajos/demos/relojDeDemos'
+import { ARRANQUE_DEL_VACIO, LLEGADA_DE_LOS_DEMOS, PX_DEL_VACIO, PX_DE_LA_SECCION_DE_HOY, vacioSinTope } from '../../_secciones/trabajos/demos/relojDeDemos'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
 import {
-  ANTES_DEL_PIN, CANTIDAD_DE_PASOS, EN_LA_COLA, HISTERESIS_PX, PANTALLAS_POR_PASO, PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA, PX_DE_LA_APROXIMACION,
+  ADELANTO_DE_DEMOS, ANTES_DEL_PIN, CANTIDAD_DE_PASOS, EN_LA_COLA, HISTERESIS_PX, PANTALLAS_POR_PASO, PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA, PX_DE_LA_APROXIMACION,
   bordesDelPaso, centroDelPaso, kDelAncho, mostradoDeDemos, pantallasDelAncla, pasoConHisteresis, pasoEn, pxDeLaSalida, pxDeLaSeccion,
-  pxDelScroll, type AnchoDelPortfolio, type IndiceDePaso,
+  pxDelMostradoDeDemos, pxDelScroll, type AnchoDelPortfolio, type IndiceDePaso,
 } from '../../_secciones/trabajos/portfolio/pasos'
 import { CAPA_DEL_VACIO, arranqueDeLaSalida, pxDeLaSeccion as pxDeLaSeccionDeAntes, pxDelTunelEn } from '../../_archivo/tunel-portfolio/geometria'
 import { ESTIRAMIENTO_DEL_TUNEL, PX_DEL_ARRANQUE_DEL_TUNEL } from '../../_archivo/tunel-portfolio/ritmo'
@@ -138,10 +138,16 @@ export function afirmarLaBase(): void {
   let mismo = true
   for (let m = 0.5; m <= 1; m += 1 / 4096) if (Math.abs(vacioSinTope(m) - (pxDelTunelEn(m) + ORIGEN_DEL_TUNEL - CAPA_DEL_VACIO.arranca) / PX_DEL_VACIO_DEL_TUNEL) > 1e-9) mismo = false
   afirmar(mismo, '  y la fracción del vacío sin tope es la de antes en cada `mostrado`')
+  // [B1.2d] A9 · la cola de antes, corrida `ADELANTO_DE_DEMOS`: el título de Demos arranca en el borde de la cola menos la histéresis,
+  // donde el Portfolio ya se fue bajando y subiendo (0 px de escena sola). Las alturas no cambian.
+  const arranqueDelTitulo = (paso: number, reloj: (m: number, p: number) => number = pxDelMostradoDeDemos): number =>
+    reloj((ARRANQUE_DEL_VACIO + LLEGADA_DE_LOS_DEMOS.desde * PX_DEL_VACIO) / 6813, paso)
   for (const paso of PASOS) {
     const cola = [0, 300, 1131, 2000, 2931].map((d) => mostradoDeDemos(pxDeLaSalida(paso) + d, paso) * 6813)
-    afirmarIgual(cola.map((x) => Math.round(x * 1e6) / 1e6), [0, 300, 1131, 2000, 2931].map((d) => SALIDA_DE_ANTES + d), `paso ${paso}: la cola nueva es la de antes al píxel (la salida en 3.882, Demos hasta 6.813)`)
+    afirmarIgual(cola.map((x) => Math.round(x * 1e6) / 1e6), [0, 300, 1131, 2000, 2931].map((d) => Math.round(Math.min(6813, SALIDA_DE_ANTES + d + ADELANTO_DE_DEMOS) * 1e6) / 1e6), `paso ${paso}: la cola de antes corrida ${ADELANTO_DE_DEMOS.toFixed(1)} px (A9: Demos arranca mientras el Portfolio se va)`)
+    afirmar(Math.abs(arranqueDelTitulo(paso) - (pxDeLaSalida(paso) - HISTERESIS_PX)) < 1e-6, `  paso ${paso}: el título de Demos empieza a subir en ${arranqueDelTitulo(paso).toFixed(1)}, el borde de la cola menos la histéresis (el Portfolio se fue bajando y subiendo)`)
   }
+  controlPositivo('  el detector ve el reloj de B1.2c (el título de Demos 581 px después de la cola: 551 px de escena sola bajando)', (m: number, p: number) => m * 6813 + pxDeLaSalida(p) - SALIDA_DE_ANTES, (reloj: (m: number, p: number) => number) => arranqueDelTitulo(PANTALLAS_POR_PASO, reloj) <= pxDeLaSalida(PANTALLAS_POR_PASO) - HISTERESIS_PX + 1e-6)
   afirmar(mostradoDeDemos(PX_DE_LA_APROXIMACION + 100, PANTALLAS_POR_PASO) * 6813 < SALIDA_DE_ANTES, '  y antes de la cola Demos no llega (el vacío en 0)')
-  controlPositivo('  un reloj que no corre la cola haría llegar a Demos en otro lugar', (px: number) => px / 6813, (reloj: (px: number) => number) => Math.abs(reloj(pxDeLaSalida(PANTALLAS_POR_PASO)) * 6813 - SALIDA_DE_ANTES) < 1e-6)
+  controlPositivo('  un reloj que no corre la cola haría llegar a Demos en otro lugar', (px: number) => px / 6813, (reloj: (px: number) => number) => Math.abs(reloj(pxDeLaSalida(PANTALLAS_POR_PASO)) * 6813 - (SALIDA_DE_ANTES + ADELANTO_DE_DEMOS)) < 1e-6)
 }

@@ -219,6 +219,10 @@ function portfolio(): EstadoDelDiag['portfolio'] {
   return {
     enPantalla: enPantalla(panel),
     enVuelo: caja.getAttribute('data-en-vuelo') === 'si',
+    // [B1.2d] Un salto en vuelo con Lenis quieto (nadie lo mueve: no va a llegar), y el orden y el panel (A8).
+    vueloQuieto: caja.getAttribute('data-en-vuelo') === 'si' && VISTOS.lenis !== null && VISTOS.lenis.isScrolling === false,
+    ordenQuieto: escenario.getAttribute('data-orden-quieto') === 'si',
+    panelAdentro: escenario.getAttribute('data-panel-adentro') === 'si',
     pasoMostrado: mostrado,
     pasoPedido: pasoConElPin(pasoConHisteresis(mostrado, pxDelScroll(scrollY, tope, innerHeight), PANTALLAS_POR_PASO), Math.abs(escenario.getBoundingClientRect().top) <= 1),
     videos: [...document.querySelectorAll<HTMLVideoElement>('[data-video-del-portfolio]')].filter((v) => !v.paused).length,

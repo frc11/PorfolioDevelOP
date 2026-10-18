@@ -18,8 +18,18 @@ export const duracionDelSalto = (pasos: number): number => Math.min(SALTO.topeMs
 /** easeInOutCubic: arranca y llega suave. */
 export const curvaDelSalto = (t: number): number => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
 
-/** Lleva la página a `destino` (px de scroll) en `ms` (0: inmediato). Devuelve cómo cancelarlo; `alLlegar` corre al terminar. */
-export function saltarA(destino: number, ms: number, alLlegar: () => void): () => void {
+/**
+ * [B1.2d] La marca de un viaje con Lenis (su `userData`): Lenis la pone con cada `scrollTo` y la vacía al llegar, y la rueda, otro viaje
+ * o un ancla la reemplazan. Si ya no es la del vuelo, alguien se lo pisó (`vueloPisado`, en `medida.ts`). No se compara el
+ * `targetScroll`: en un viaje programado Lenis lo lleva con el valor animado, cuadro a cuadro.
+ */
+export const CLAVE_DEL_VUELO = 'vueloDelPortfolio'
+
+/**
+ * Lleva la página a `destino` (px de scroll) en `ms` (0: inmediato). Devuelve cómo cancelarlo; `alLlegar` corre al terminar. [B1.2d]
+ * `marca`: la del viaje en el `userData` de Lenis.
+ */
+export function saltarA(destino: number, ms: number, alLlegar: () => void, marca: string | null = null): () => void {
   const y = Math.round(destino)
   const lenis = LENIS_DEL_SITIO.instancia
   if (!(ms > 0)) {
@@ -30,7 +40,7 @@ export function saltarA(destino: number, ms: number, alLlegar: () => void): () =
   }
   if (lenis === null) return viajarSinLenis(y, ms, curvaDelSalto, alLlegar)
   let vivo = true
-  lenis.scrollTo(y, { duration: ms / 1000, easing: curvaDelSalto, force: true, onComplete: () => vivo && alLlegar() })
+  lenis.scrollTo(y, { duration: ms / 1000, easing: curvaDelSalto, force: true, onComplete: () => vivo && alLlegar(), ...(marca === null ? {} : { userData: { [CLAVE_DEL_VUELO]: marca } }) })
   return () => {
     vivo = false
   }

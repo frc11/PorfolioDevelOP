@@ -6,6 +6,8 @@ import { sonar } from '../../_lib/sonido/bus'
 import { ABRE_EL_PANEL, fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
 import { ENLACES_DEL_HOME, ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enlaces'
 
+import { useCorrimientoDeLaPastilla } from './useCorrimientoDeLaPastilla'
+
 /**
  * [NAVBAR] LA BARRA DEL HOME — la pastilla de escritorio, propia de /v3 (antes `NavegacionDelHome` montaba la pieza
  * compartida `_componentes/chrome/Navegacion.tsx`, que sigue igual para la galería).
@@ -52,6 +54,8 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
   /** El ítem que el mouse o el foco señalan (el resaltado va ahí); null: ninguno. */
   const senalado = useRef<HTMLElement | null>(null)
   const ubicarElResaltado = useRef<() => void>(() => undefined)
+  // [B1.2d] Con el Portfolio abierto, la píldora se corre a la columna (`corrimiento.ts`); la esquina se queda.
+  useCorrimientoDeLaPastilla(pastillaRef)
 
   useEffect(() => {
     const paneles = [...document.querySelectorAll<HTMLElement>('[data-panel]')]

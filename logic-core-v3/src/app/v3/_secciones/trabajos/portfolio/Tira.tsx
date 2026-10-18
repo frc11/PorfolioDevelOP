@@ -4,6 +4,7 @@ import { motion } from 'motion/react'
 
 import { cn } from '@/lib/utils'
 
+import { CtaEnlace } from '../../../_componentes/chrome/Cta'
 import { Cuerpo } from '../../../_componentes/tipografia/Textos'
 import { Titular } from '../../../_componentes/tipografia/Titular'
 
@@ -143,16 +144,15 @@ export function Tira({
             </motion.div>
           )}
           <Ficha proyecto={proyecto} visible={visible} reducido={vivo.reducido} desde={2} />
-          <motion.a
-            href={proyecto.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`}
-            className="relative mt-auto self-start font-titulo text-tinta underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4"
-            {...enLaSecuencia(visible, 2 + piezas, vivo.reducido)}
-          >
-            {CONTENIDO.ficha.visitar} <span aria-hidden="true">↗</span>
-          </motion.a>
+          {/* [B1.2d] A2 · el botón simple del sitio (el rollover de dos copias y su subrayado), importado: no una copia. */}
+          <motion.div className="mt-auto self-start" {...enLaSecuencia(visible, 2 + piezas, vivo.reducido)}>
+            <CtaEnlace
+              href={proyecto.url}
+              rotulo={`${CONTENIDO.ficha.visitar} ↗`}
+              etiqueta={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`}
+              externo
+            />
+          </motion.div>
         </div>
       </div>
     </div>
