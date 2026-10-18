@@ -156,6 +156,31 @@ export const INVENTOS = {
 export const LISTA_DE_INVENTOS: readonly Invento[] = Object.values(INVENTOS)
 
 /**
+ * [P-H23] EL PUNTO DE REGISTRO — para que otra carpeta (las páginas de servicios) declare SUS textos genéricos sin editar este archivo
+ * ni `llave.ts` (que tiene que seguir siendo una sola constante: el guardián del build la lee). Cada casilla cumple lo mismo que las de
+ * acá (su `pedido` lleva su marcador, la mentira no está vacía), pasa por la misma puerta (`conLlave`: con la llave apagada, el
+ * marcador) y la restauración del escáner la conoce (`todosLosInventos`). `INVENTOS` y `LISTA_DE_INVENTOS` siguen siendo sólo los del
+ * home: s21 los cuenta contra las secciones.
+ *
+ *     export const INVENTOS_DE_SERVICIOS = registrarInventos('servicios', { precioDeWeb: { marcador: '[PRECIO]', pedido: '[PRECIO]', mentira: '…' } })
+ *     conLlave(INVENTOS_DE_SERVICIOS.precioDeWeb)
+ */
+const REGISTRADOS = new Map<string, readonly Invento[]>()
+
+export function registrarInventos<const T extends Readonly<Record<string, Invento>>>(origen: string, inventos: T): T {
+  for (const [clave, i] of Object.entries(inventos)) {
+    if (!i.pedido.includes(i.marcador) || i.mentira.trim() === '') throw new Error(`[P-H23] la casilla «${origen}.${clave}» no lleva su marcador en el pedido, o su mentira está vacía`)
+  }
+  REGISTRADOS.set(origen, Object.values(inventos))
+  return inventos
+}
+
+/** [P-H23] Los inventos del home y los registrados desde otras carpetas: lo que la restauración del escáner devuelve a su marcador. */
+export function todosLosInventos(): readonly Invento[] {
+  return [...LISTA_DE_INVENTOS, ...[...REGISTRADOS.values()].flat()]
+}
+
+/**
  * LA ÚNICA PUERTA. Todo lo inventado pasa por acá y por ningún otro lado.
  *
  * `llave` es un PARÁMETRO con valor por defecto, y no una lectura directa de la

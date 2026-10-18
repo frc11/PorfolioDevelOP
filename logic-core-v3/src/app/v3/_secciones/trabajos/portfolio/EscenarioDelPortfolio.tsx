@@ -40,7 +40,7 @@ const ESTILO_DE_LA_COLUMNA: React.CSSProperties = { paddingTop: DESPEJE_DE_LA_BA
  * logo (`hueco.ts`: la escena lo llena con el logo de frente, `poseDelPortfolio.ts`), en el mismo eje. Así el título y el logo se leen
  * juntos. El panel entra desde la derecha y sale por la derecha: sólo `translate-x`, adentro del escenario pegado, y el paso que lo
  * mete espera al pin (`pasoConElPin`), así que no tiene componente vertical a ninguna velocidad; existe sólo pegado (`cortarElPanel`).
- * Entra y sale en ORDEN con el encabezado (`orden.ts`: `vivo.escena` y `vivo.encabezado`). En tablet lleva arriba las barras de
+ * Entra y sale en ORDEN con el encabezado (`orden.ts`; [B1.2d] `vivo.panel`, después del 80 % del título). En tablet lleva arriba las barras de
  * progreso y, la primera vez, la pista «Seguí bajando». La columna es la mitad desde 1024 y el 40 % abajo (el panel, el 60 %): la
  * escena lo lee del CSS (`COLUMNA_DEL_ANCHO`).
  */
@@ -55,9 +55,13 @@ export function EscenarioDelPortfolio({
       data-pieza="escenario-del-portfolio"
       data-paso={vivo.paso}
       data-fase={fase}
-      data-escena={vivo.escena ? 'si' : 'no'}
-      // [B1.2c] El orden, a la vista del banco (y del diagnóstico): la escena y el encabezado se prenden y se apagan de a uno.
+      // [B1.2c] El orden, a la vista del banco (y del diagnóstico): [B1.2d] la cámara, el encabezado, la barra y el panel, de a uno.
+      // `data-panel-adentro` y no `data-escena`: ése es el nombre del lienzo de la escena.
+      data-camara={vivo.camara ? 'si' : 'no'}
       data-encabezado={vivo.encabezado ? 'si' : 'no'}
+      data-barra={vivo.barra ? 'si' : 'no'}
+      data-panel-adentro={vivo.panel ? 'si' : 'no'}
+      data-orden-quieto={vivo.ordenQuieto ? 'si' : 'no'}
       // `overflow-clip` y no `hidden`: el foco que entra al panel afuera del cuadro no puede correr el recorte (el acordeón lo trae).
       className="sticky top-0 h-svh w-full overflow-clip"
     >
@@ -74,7 +78,7 @@ export function EscenarioDelPortfolio({
         className={cn(
           'absolute inset-y-0 right-0 flex w-1/2 flex-col transition-transform duration-700 ease-[var(--ease-salida)] motion-reduce:transition-none max-escritorio:w-3/5 max-tablet:w-full',
           CLASE_DEL_ALTO_DEL_MEDIO,
-          !vivo.escena && 'translate-x-full',
+          !vivo.panel && 'translate-x-full',
         )}
         style={ESTILO_DEL_VIDRIO}
       >

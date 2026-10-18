@@ -7,11 +7,11 @@ cada sprint al final).
 escritorio y tablet, historias tipo Instagram en el teléfono. Videos reales de los sitios, una ficha por proyecto, deep links y la
 escena oscurecida, **sin cambiar lo que se ve en el resto de la página**.
 
-**Estado: B1.1a, B1.1b, B1.2, B1.2b (§12), B1.2c y B1.3 (los ajustes del FRENO de B1.2b y el teléfono, §13) hechos; FRENADO al final de
-B1.3 para que Valentino lo mire en :3000 (2026-10-18).** El plan fue
+**Estado: B1.1a, B1.1b, B1.2, B1.2b (§12), B1.2c y B1.3 (§13) y B1.2d A (el scroll, la secuencia y la barra, §14) hechos; FRENADO al
+final de B1.2d A para que Valentino lo mire en :3000 (2026-10-18); B1.2d B espera su «seguí».** El plan fue
 aprobado con ajustes: las decisiones de la §9 están escritas en su lugar y los ajustes van en la §11, que **manda sobre el resto del
 plan** donde lo contradiga (el paso de 0,75 pantallas, los datos dictados, la llave para lo que falta, el oscurecido medido por capa).
-El log de cada sprint, en la §10; la lista del FRENO, al final del log de B1.2c + B1.3. Lo que no pudo correr por memoria está marcado
+El log de cada sprint, en la §10 (el de B1.2d, en la §14.3); la lista del FRENO, al final del log de B1.2d A. Lo que no pudo correr por memoria está marcado
 «VERIFICAR TRAS REINICIO». El build de medición «antes» (`.next-probe`, ignorado por git, BUILD_ID `lcERRvtvbJDOVlh4Me-6P`) sigue en
 disco para las capturas de control.
 
@@ -1354,3 +1354,246 @@ y dos commits (B1.2c y B1.3). **Esta sección manda sobre todo lo anterior** don
    el scroll de la página y se asienta de a un proyecto, «la tuya» al final con el «?», el formulario y WhatsApp, y el título que llega
    en la aproximación y se va con la caída antes de que entre la historia.
 9. **Verificación** con el dev server de Valentino apagado (§10, B1.2c + B1.3).
+
+---
+
+## 14. Ajustes del FRENO de B1.2c + B1.3 (B1.2d, 2026-10-18)
+
+Valentino miró B1.2c + B1.3. Su feedback va en dos subsprints, cada uno con su commit y su FRENO: **A** (el scroll, la secuencia y la
+barra) y **B** (el formulario de «la tuya» y las historias), que arranca recién cuando diga «seguí». Esta sección manda sobre todo lo
+anterior donde lo contradiga. Sin `next build` (contrato O-10): el banco y el arnés corren contra el dev server.
+
+### 14.1 Diagnóstico (escrito antes de tocar el scroll)
+
+**Los estados.** El Portfolio tiene cinco piezas de estado, y la que decide qué se ve es el PASO:
+
+| Pieza | Valores | Dónde |
+|---|---|---|
+| El paso | −1 antes del pin (la aproximación), 0…3 las tiras (la 3 es «la tuya»), 4 la cola (la salida y Demos) | `pasos.ts:81-84`; la fase, `estado.ts:44-48` |
+| El vuelo | ninguno, o un salto en curso con su destino (`data-en-vuelo`) | `medida.ts:85-102` |
+| El orden | la escena (el panel, la cámara y el oscurecido) y el encabezado, que se prenden y apagan de a uno, por tiempo | `orden.ts`, `useOrdenDeLaEscena.ts` |
+| La transición de las tiras | quieta, saliendo, abriendo, respiro | `transicion.ts` |
+| El gesto de la rueda | quieto, acumulando, disparado | `rueda.ts:39-46` |
+
+Los estados de la experiencia salen de combinar el paso con el orden:
+
+- **fuera:** paso −1 o 4, con el orden apagado;
+- **entrando:** paso 0…3, con el orden todavía prendiéndose;
+- **adentro:** paso 0…3, con el orden prendido;
+- **saliendo:** paso −1 o 4, con el orden todavía apagándose;
+- **«la tuya»:** adentro, en el paso 3.
+
+**Qué los mueve.**
+
+- **El scroll** (el `scroll` nativo y el de Lenis): `leer()` en el cuadro siguiente (`usePortfolio.ts:170-181`) publica el paso con su
+  histéresis (`pasos.ts:108`) y con el pin (`estado.ts:54`). **Si hay un vuelo, publica el DESTINO del vuelo** (`usePortfolio.ts:177-178`).
+- **La rueda,** en la fase de captura (`useRuedaDelPortfolio.ts:29-49`), sólo con el panel adentro (`manda()`, `usePortfolio.ts:225-228`):
+  un gesto es un paso → `ir()` → un vuelo de 420 a 900 ms a la tira, o de ~2,1 s a Demos o arriba (`usePortfolio.ts:214-222`).
+- **El hover, el clic, las teclas y el tap:** `saltarAlPaso(i, true)`, un vuelo inmediato (`saltar.ts:28-33`).
+- **La carga con un ancla** (`useAnclaDeLaCarga.ts`), **la entrada que atrapa la inercia** (`usePortfolio.ts:243-253`) y **el
+  deslizamiento** del teléfono.
+- **El orden** sigue a la fase, por tiempo; **la transición**, a la tira, por tiempo.
+
+**Por qué falla A8.1.** Un vuelo se suelta sólo en su llegada, con el `onComplete` del `lenis.scrollTo` (`saltar.ts:34`,
+`medida.ts:94-98`); nada más lo suelta. Y Lenis no llama ese `onComplete` si otro movimiento le pisa la animación: un `scrollTo` nuevo y
+la rueda rearman la suya y la de antes se pierde. La cadena, medida en el sitio con la sonda (`b12d/sonda-a8.ts`, el dev server, 1440):
+
+1. En «la tuya», una muesca hacia abajo arma el vuelo a Demos (2,1 s) y publica YA su destino: el paso 4 (`medida.ts:101`).
+2. Con el paso 4, `manda()` devuelve `null`: la rueda deja de ser del Portfolio, y las muescas siguientes (el visitante que sigue
+   bajando, o la inercia del mismo gesto) van a Lenis, que reemplaza el viaje.
+3. El `onComplete` no llega nunca: el vuelo queda colgado, con `data-en-vuelo` puesto.
+4. Desde ahí `leer()` publica siempre el destino del vuelo, haga lo que haga el scroll. Subiendo con la rueda hasta y = 7843 (el paso 2),
+   el escenario siguió en el paso 4, con el panel afuera y el título apagado: «el Portfolio no aparece más». Y como el paso nunca vuelve
+   a 0…3, la rueda nunca vuelve a mandar: la página «pasa directo a Demos».
+5. `/v3#trabajos` sin recargar no lo arregla: el vuelo colgado sigue ahí y la sección muestra sólo el logo.
+6. El diagnóstico de la carga no lo veía: `portfolio-desfasado` no se evalúa con un vuelo en curso (`_lib/diagnostico/fallas.ts:144`), y
+   un vuelo colgado lo esconde para siempre. Por eso el arnés de B1.3 (107 corridas) no lo encontró.
+
+**A8.2** es la misma cadena con el vuelo hacia arriba: desde El Garage, una muesca arriba arma el vuelo de 2,1 s y publica el paso −1;
+la rueda que vuelve a bajar en el medio se lo pisa y el paso queda en −1 (la sonda lo dejó colgado otra vez en la cola).
+
+**Lo que encontró la sonda, además.** La base del hover sembrada con el primer `pointerover` (la última vuelta de B1.3) no deja activar un
+lomo al que se entra desde la columna si el mouse se queda ahí: la base cae en el punto de entrada y el `pointermove` siguiente, en el
+mismo lugar, no cuenta como movimiento. Va con A3.
+
+### 14.2 El plan del subsprint A
+
+- **A8 · un vuelo con dueño y con fin.**
+  1. Mientras dure un vuelo del Portfolio, la rueda es suya (se traga, dé o no un paso): nadie se lo pisa con la rueda.
+  2. Si igual se lo pisan (un viaje del menú, un ancla, la barra de scroll), se suelta: en cada cuadro de scroll, si el destino de Lenis
+     ya no es el del vuelo, el vuelo se cancela y el paso vuelve a salir del scroll.
+  3. Un vencimiento: lo que dura el vuelo más un margen; si no llegó, se suelta. Se borra al llegar o al cancelar: ningún temporizador
+     huérfano.
+  4. El invariante en el diagnóstico (un vuelo con la página quieta; en reposo, el panel adentro del tramo o afuera de él) y la matriz
+     en el arnés, con el defecto de A8.1 reintroducible para el control positivo.
+- **A3 · la rueda termina lo que empieza.** Durante la transición (el vuelo y la de las tiras) el hover no hace nada; cuando termina,
+  recién un `pointermove` nuevo lo habilita. Y sin la base sembrada.
+- **A10 · el orden, en cuatro piezas.** La cámara (con el oscurecido), el título, la barra y el panel:
+  - la cámara primero: sin ella el título no queda de frente en el plano del logo (B1.2c);
+  - después el título;
+  - la barra durante el título, terminando justo antes del panel;
+  - el panel, cuando el título va por el 80 % de su llegada.
+  - Al salir, al revés: el panel, la barra, la caída del título y la cámara.
+- **A1 · la barra se corre.** El Portfolio le pide el corrimiento a la barra con un almacén chico en `_chrome/barra/` (como el del
+  contacto), con el eje del título y el borde del panel. La píldora va en dos tiempos (el borde izquierdo se estira; el derecho se
+  comprime) con la API de animaciones del navegador: interrumpible y usable siempre. El destino es el eje del título si entra; si no, el
+  margen después del botón de sonido.
+- **A9 · Demos arranca mientras el Portfolio se va.** El reloj de Demos se corre para que su título empiece a subir donde la salida del
+  Portfolio ya se disparó, en las dos direcciones (el borde de la cola menos la histéresis). Las alturas no cambian: la deriva es 0.
+- **A11 · el clic afuera.** Desde 1024, un clic en la columna (fuera del panel, los lomos, la barra y el sonido) lleva el scroll justo
+  antes del pin, con la salida normal.
+- **A2 · «Visitar sitio»** con `CtaEnlace` (el botón simple del sitio), que suma el enlace externo y la etiqueta.
+
+**Medido antes** (el dev server; 1440 × 900, 1280 × 800 y 1024 × 768):
+
+- La píldora mide 538 px a todo ancho y nace centrada en la página. El botón de sonido ocupa de 32 a 80 px. La columna es la mitad, y el
+  eje del título, la mitad de la columna.
+- Centrada en el eje y con 16 px de aire a cada lado, entra recién desde ~1460 px:
+  - a 1440, la píldora en el margen queda a 5 px del eje (0,35 %);
+  - a 1280, su borde derecho queda a 6 px del panel (no a 16);
+  - a 1024 es más ancha que la columna (538 contra 512).
+- Lo de 1280 y 1024 va como decisión al FRENO A.
+
+**Para el subsprint B (agregado de Valentino, P-H19, pedido de servicios).** El componente común de las historias recibe la cantidad de
+pasos por parámetro (el precio de servicios tiene 3; el Portfolio, 4) y no depende de `PortfolioVivo` ni de `[data-panel]`. Hoy las de
+B1.3 dependen de los dos y asumen 4 pasos fijos. Lo propio del Portfolio (los datos, el panel, «la tuya») entra por props o por el
+render de cada ítem. Lleva una prueba que monta el componente con 3 pasos, fuera del Portfolio.
+- El hueco de A9: el título de Demos empieza a subir en el px 6881 de la regla, y la salida del Portfolio se dispara en el 6330 (bajando)
+  y vuelve en el 6270 (subiendo). Son 551 px de escena sola bajando y 611 subiendo.
+
+### 14.3 Log: B1.2d A · el scroll, la secuencia y la barra (2026-10-18) — FRENADO para que Valentino lo mire en :3000
+
+Sin `next build` (contrato O-10): la matriz, el banco y el AA corrieron contra el dev server de :3000.
+
+**Hecho, punto por punto.**
+
+- **A8 · los bugs de scroll, de raíz.** El vuelo tiene dueño y fin (`medida.ts`):
+  - lleva su marca en el `userData` de Lenis (`saltar.ts`), y la lectura del scroll lo suelta si la marca ya no es la suya (la rueda, un
+    viaje del menú o un ancla se lo pisaron);
+  - vence a lo que dura más 1 s;
+  - todo pasa por un `soltar` que también borra el vencimiento: ningún temporizador huérfano.
+  - Mientras dura un vuelo, la rueda es del Portfolio aunque el panel ya no mande (`useRuedaDelPortfolio.ts`): la inercia y las muescas
+    que siguen no se lo pisan.
+  - El diagnóstico de la carga suma `portfolio-colgado` y `portfolio-panel` (s75).
+  - Medido: la matriz entera, 90 de 90 combinaciones con tres idas y vueltas cada una; el control positivo (A8.1 con el defecto
+    reintroducido) falla como tiene que fallar.
+- **A3 · la rueda termina lo que empieza.** Durante la transición que pidió la rueda (su vuelo y el cambio de tiras) ningún
+  `pointermove` activa un lomo; al terminar, la base del hover es el puntero de ese momento. El hover, el clic y los toques no la marcan
+  (cruzar lomos sigue yendo al último). En el sitio: una muesca y 1 px, y una muesca y 8 px de mouse a mitad de la transición: llega a
+  Esquina.
+- **A10 · primero el título, después la barra, el panel al 80 %.** El orden tiene cuatro piezas (`orden.ts`): la cámara, el título, la
+  barra y el panel. Cada pieza recuerda cuándo cambió y cada cambio espera lo suyo: una vuelta a mitad de camino nunca adelanta el panel.
+  Al salir, al revés. Medido en el sitio: el panel arranca con el título al 82,1 % (1440), al 81,4 % (1280) y al 81,7 % (1024).
+- **A1 · la barra se corre.** `_chrome/barra/corrimiento.ts` (el pedido y la cuenta) y `useCorrimientoDeLaPastilla.ts` (los dos tiempos
+  con la API de animaciones del navegador, interrumpible); el Portfolio la pide en su orden (`useBarraDelPortfolio.ts`). Medido a los
+  tres anchos:
+  - 401 ms entre los dos tiempos (373 a 1024), primero el borde izquierdo, nunca más angosta que su ancho;
+  - termina antes de que arranque el panel y los enlaces se pueden usar durante todo el movimiento;
+  - cualquier camino de la matriz la deja en su lugar;
+  - a 1440, a 0,36 % del eje del título (16 px del botón de sonido y 86 del panel); a 1280 y 1024, ver las decisiones.
+- **A9 · Demos entra mientras el Portfolio se va.** El reloj de Demos se adelanta 611 px (`ADELANTO_DE_DEMOS`, `pasos.ts`): su título
+  empieza a subir en el borde de la cola menos la histéresis (px 6270). Las alturas no cambiaron: la deriva de la escena es 0 (el mapeo
+  de s76 sigue bit a bit). Medido en reposo, de a 25 px: 0 px de escena sola bajando y subiendo (antes, 551 y 611); se pisan entre 6270 y
+  6330.
+- **A11 · el clic afuera.** Desde 1024, un clic en la columna (la escena, el título, el logo) fuera del panel, los lomos, la barra y el
+  sonido lleva la página 4 px antes del pin, con la salida normal y sin pista visual. Las 30 combinaciones de la matriz que salen así,
+  bien.
+- **A2 · «Visitar sitio».** Es el `CtaEnlace` del sitio (el rollover de dos copias y su subrayado), importado. Suma dos props opcionales,
+  `externo` y `etiqueta`, que no cambian cómo renderizan los demás.
+- **`#trabajos`** entra al Portfolio (El Garage, como el «Portfolio» de la barra), al cargar y cuando el hash cambia sin recargar
+  (`useAnclaDeLaCarga.ts`): el salto nativo caía en la aproximación, con el logo solo.
+
+**Lo que se encontró en el camino, y se arregló.**
+
+1. **La base del hover de la última vuelta de B1.3 rompía el hover desde la columna** (la sonda de A8.2): sembrada con el primer
+   `pointerover`, caía en el punto de entrada. Sale; activar pide un `pointermove`.
+2. **`targetScroll` no sirve para saber si pisaron un vuelo:** en un viaje programado Lenis lo lleva con el valor animado. La marca va
+   en `userData`, y s76 lo ata al Lenis instalado.
+3. **El clic afuera no hacía nada** (la matriz, en su primera tanda): el oyente quedaba en el escenario del montaje, que se vuelve a
+   montar cuando la sección pasa a la rama con coreografía. Va en la caja; y el pedido de la barra busca sus elementos en cada medición.
+4. **El orden del teléfono:** la historia espera a que el título termine de caer, y el panel no espera a la cámara cuando no hay título.
+5. **El atributo del escenario se llamaba `data-escena`**, el mismo nombre que el lienzo de la escena: ahora es `data-panel-adentro`
+   (con `data-camara`, `data-barra` y `data-orden-quieto`).
+
+**Medido.** El dev server de :3000 y el Chrome del sistema con la NVIDIA. Los archivos: `~/.cache/b4-medicion/b12d/` (la matriz por
+tanda, el control, A3, A1, A9 y el AA con sus capturas).
+
+- **La matriz** (`scripts-carga/matriz.ts`; la cuenta, en `a8.ts`): 90 de 90. Las nueve entradas (la rueda desde arriba y desde Demos,
+  Página abajo y Página arriba, las flechas, el arrastre de la barra de scroll, `#trabajos`, `#portfolio-*` y el «Portfolio» de la barra)
+  por las tres salidas (a Demos, hacia arriba y el clic afuera), con y sin hover, lentas y rápidas, cada una con tres idas y vueltas.
+  Corrió en tandas de a 10 con la memoria medida antes de cada una (O-3), un Chrome por combinación y ningún proceso vivo entre tandas.
+- **El control:** las tres primeras combinaciones, otra vez bien; A8.1 con el defecto, en falla (el vuelo colgado y el Portfolio que no
+  vuelve a entrar).
+- **A3:** 1 px y 8 px de mouse a mitad de la transición → Esquina. **A1 y A10:** los números de arriba. **A9:** 0 px.
+- **El AA:** la píldora corrida, 6,37:1 o más a los tres anchos; «Visitar sitio», 14,83:1 o más (1440, 1024, 820 y 390); el peor margen
+  sobre el piso, ×1,41.
+
+**Decisiones que tomé sin preguntar.**
+
+- **A1 a 1280 y a 1024.** La píldora mide 538 px y no entra entre el botón de sonido y el panel con 16 px de aire: a 1280 queda a 6 px
+  del panel; a 1024 es más ancha que la columna (538 contra 512) y pisa el panel 122 px. Quedó lo más a la izquierda posible, después del
+  sonido, que es lo que menos tapa. Opciones:
+  - (a) así;
+  - (b) a esos anchos no correrla;
+  - (c) achicar su aire mientras está corrida (gana unos 30 px: alcanza a 1280, no a 1024);
+  - (d) ensanchar la columna a esos anchos (cambia la composición aprobada).
+- **La cámara sigue entrando antes que el título** (A10): sin ella el título no queda de frente en el plano del logo (B1.2c). Lo visible
+  va en el orden pedido: el título, la barra y el panel.
+- **Al salir, el título empieza a caer cuando al panel le falta el mismo 20 %** que se pisan al entrar; la barra vuelve con el panel
+  afuera; la cámara, con el título caído entero.
+- **«Visitar sitio» es el `CtaEnlace`**, el botón simple del sitio (el mismo de los CTA y del Enviar del contacto), y su hover también
+  hace reaccionar la escena, como todo CTA.
+- **El arrastre de la barra de scroll se reprodujo por lo que produce** (scroll nativo sin rueda ni teclas): el sitio la oculta
+  (`globals.css`).
+- **El defecto de A8.1 se reintroduce sólo desde el arnés** (`window.__defectosDelPortfolio`, como `__entornoDeLaEscena`): nunca la URL.
+- **El dev server de :3000** llegó a 3,8 GB con las recompilaciones y lo reinicié en el mismo puerto: el proceso de hoy es otro.
+
+**Los tests que cambiaron porque cambió la spec.** Cada uno se reemplazó por la afirmación nueva con su control; ninguno se debilitó.
+
+1. s76 §19 (`s76-portfolio-b12c.tsx`): el orden de dos piezas de B1.2c (la escena y el encabezado) → el de cuatro de A10, con el 80 % y
+   la vuelta a mitad de camino. Controles: el orden de B1.2c y una vuelta que adelanta el panel.
+2. s76 §22: «recién cargada, el primer lugar del puntero es la base» → sin la base sembrada (control: la base de B1.3).
+3. s76 §22: la entrada que atrapa la inercia, la rueda a Demos con su salida y el vuelo antes del salto, leídos ahora en
+   `useMandosDelPortfolio.ts` y en `medida.ts` (con la marca).
+4. s76 §25: la pista y las barras leen `vivo.panel` (antes, `vivo.escena`).
+5. s76 §29 y §30 (`s76-portfolio-historias.tsx`): los toques y el deslizamiento, en los mandos; el orden del teléfono, en cuatro piezas
+   (control nuevo: la historia que entra mientras el título cae).
+6. s76 §6 (`s76-portfolio-mapeo.ts`): «la cola nueva es la de antes al píxel» → la cola corrida `ADELANTO_DE_DEMOS`, con el título de
+   Demos en el borde de la cola menos la histéresis (control: el reloj de B1.2c).
+7. s76 §13 y §14 (`s76-portfolio-escena.tsx`): `visibleLa` con `vivo.panel` y el hover con `deLaRueda`.
+
+Nuevos: `s76-portfolio-b12d.tsx` (§32 a §38: el vuelo, A3, A1, A11, A2, `#trabajos` y la cuenta de la matriz) y, en s75, las dos fallas
+del diagnóstico. s76: 302 afirmaciones; s75: 55.
+
+**Verificación.**
+
+- **Lint** de los 31 archivos de TypeScript tocados: limpio. **`tsc --noEmit`:** 0 errores.
+- **`verificar` completo:** 83 pasos, los 8 grupos rojos de la base y ninguna falla nueva (127 líneas; sólo cambió la cuenta del padrón
+  de las 300 líneas, de 366 a 368 archivos, y los que lo pasan son los mismos 6).
+- **frontera:** 23 afirmaciones, sin fallas. **s76** 302, **s75** 55 y **Trabajos** 239; s5-codigo, s10, s39, s41, s47, s73, s27, s51 y
+  s3-cta, en verde.
+- Sin `next build` (O-10). **`visual-qa`:** sin sus herramientas en este entorno (VERIFICACIÓN PENDIENTE); la coreografía la mira
+  Valentino.
+
+**FRENO A — lo que Valentino mira en :3000** (Ctrl+Shift+R la primera vez).
+
+1. **A8.1** — 1440, http://localhost:3000/v3#quienes-somos: bajar sólo con la rueda hasta entrar al Portfolio, seguir hasta Demos sin
+   parar la rueda y volver a subir con la rueda. El Portfolio vuelve a aparecer (el título, la barra corrida y el panel) y sigue de a un
+   proyecto. Ida y vuelta varias veces.
+2. **A8.2** — 1440, http://localhost:3000/v3#portfolio-esquina-estudio: pasar el mouse por el lomo de El Garage, una muesca hacia
+   arriba (sale) y volver a bajar: entra otra vez.
+3. **`#trabajos`** — 1440, http://localhost:3000/v3#trabajos, y cambiar el hash a `#trabajos` sin recargar: entra a El Garage con el
+   título y el panel, no el logo solo.
+4. **A10** — 1440, entrando con una muesca desde la aproximación: primero el título, después la barra se corre, y el panel entra
+   cuando el título casi terminó. Saliendo hacia arriba: el panel se va, la barra vuelve y el título cae.
+5. **A1** — 1440, 1280 y 1024: la píldora se estira hacia la izquierda y después se comprime, ya en la columna; Contacto y Login no se
+   mueven; los enlaces andan durante el movimiento. A 1280 y 1024, mirar la decisión de arriba.
+6. **A3** — 1440, en El Garage con el mouse sobre los lomos: una muesca hacia abajo y mover un poco el mouse mientras cambia: llega a
+   Esquina.
+7. **A9** — 1440, desde «la tuya», bajar despacio: Demos empieza a entrar mientras el Portfolio se va, sin escena vacía.
+8. **A11** — 1440 y 1024, con el panel adentro: un clic en la escena, el título o el logo de la columna lleva justo antes del
+   Portfolio, con la salida normal; un clic en el panel, un lomo, la barra o el sonido, no.
+9. **A2** — 1440: el hover y el pulsado de «Visitar sitio» en cada proyecto, como los botones del sitio.
+
+**Lo que quedó afuera.** El subsprint B entero, que espera el «seguí» (con el agregado de P-H19 de la §14.2). El arnés de carga de 107
+corridas no corrió: no lo pide el gate de A, y las dos fallas nuevas del diagnóstico entran ahí cuando corra.

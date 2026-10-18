@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { useMovimientoEnTodoAncho } from '../_contrato/coreografia'
 import { cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
+import { siguienteEstado, type EstadoDelGatillo } from '../_contrato/disparo'
+import { vigilarElReposo } from '../_contrato/reposo'
 import { NEWSLETTER, PUNTOS_DE_Y_MAS, Y_MAS } from './contenido'
 import { NewsletterDelPanel } from './NewsletterDelPanel'
 import { CORRIDAS_DEL_REMATE, DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
@@ -73,8 +75,18 @@ export function Remate(): React.JSX.Element {
       setEstado('vivo')
     }
     let primero = true
+    let soltarElReposo: (() => void) | null = null
+    // [P-H25] la guarda en reposo del gatillo común: con el scroll quieto, si asoma y no se disparó (o se fue), entra.
+    const enReposo = (aLaVista: boolean): void => {
+      const antes: EstadoDelGatillo = animaciones.length === 0 ? 'espera' : animaciones.some((a) => a.playbackRate < 0) ? 'ido' : 'puesto'
+      if (siguienteEstado(antes, { tipo: 'reposo', aLaVista }) === antes) return
+      if (animaciones.length === 0) armar()
+      else reproducir(animaciones, 1)
+    }
     const observador = new IntersectionObserver(
       ([e]) => {
+        // Arranca con el primer aviso: el primer reposo encuentra el estado de carga.
+        soltarElReposo ??= vigilarElReposo(raiz, enReposo)
         const cruce = cruceDelTramo({ cruza: e.isIntersecting, tope: e.boundingClientRect.top, pie: e.boundingClientRect.bottom })
         // El primer aviso es el estado de carga, no un cruce: se posa donde toca, sin gesto.
         if (primero) {
@@ -103,6 +115,7 @@ export function Remate(): React.JSX.Element {
     observador.observe(raiz)
     return () => {
       observador.disconnect()
+      soltarElReposo?.()
       for (const a of animaciones) a.cancel()
     }
   }, [anima])
@@ -144,6 +157,8 @@ export function Remate(): React.JSX.Element {
 /** Hacia adelante (1) o en espejo (−1), desde donde esté cada animación. */
 function reproducir(animaciones: readonly Animation[], sentido: 1 | -1): void {
   for (const a of animaciones) {
+    // Ya llegó a ese lado (la guarda la puso): `play()` la rebobinaría y repetiría el gesto.
+    if (a.playbackRate === sentido && a.playState === 'finished') continue
     a.updatePlaybackRate(sentido)
     a.play()
   }

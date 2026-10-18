@@ -21,7 +21,7 @@
  */
 
 import type { Invento } from './inventado'
-import { LISTA_DE_INVENTOS } from './inventado'
+import { todosLosInventos } from './inventado'
 
 /** Los caracteres que hay que escapar para meter un literal en una expresión. */
 const RESERVADOS = /[.*+?^${}()|[\]\\]/g
@@ -75,7 +75,7 @@ export function apareceEn(texto: string, invento: Invento): boolean {
  */
 export function sinLoInventado(
   texto: string,
-  inventos: readonly Invento[] = LISTA_DE_INVENTOS,
+  inventos: readonly Invento[] = todosLosInventos(),
 ): string {
   let salida = texto
   for (const i of [...inventos].sort((a, b) => b.mentira.length - a.mentira.length)) {
@@ -150,7 +150,7 @@ function edicionesDe(texto: string, inventos: readonly Invento[]): Edicion[] {
  */
 export function sinLoInventadoEnMarcado(
   html: string,
-  inventos: readonly Invento[] = LISTA_DE_INVENTOS,
+  inventos: readonly Invento[] = todosLosInventos(),
 ): string {
   const partes = html.split(/(<[^>]*>)/)
   const texto = partes.filter((_, i) => i % 2 === 0).join(JUNTURA)
@@ -193,7 +193,7 @@ export function sinLoInventadoEnMarcado(
  */
 export function sinLoInventadoEn(
   valor: unknown,
-  inventos: readonly Invento[] = LISTA_DE_INVENTOS,
+  inventos: readonly Invento[] = todosLosInventos(),
 ): unknown {
   if (typeof valor === 'string') return sinLoInventado(valor, inventos)
   if (Array.isArray(valor)) return valor.map((v) => sinLoInventadoEn(v, inventos))

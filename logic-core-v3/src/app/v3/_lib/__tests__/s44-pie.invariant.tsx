@@ -38,7 +38,10 @@ import { cuantoSeHunde, type Hundido } from '../pie3d/registro'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
-const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8')
+// [P-H] Los finales de línea normalizados antes de buscar: en CRLF (el worktree de servicios) el control positivo no reemplazaba nada.
+const enLf = (texto: string): string => texto.replace(/\r\n/g, '\n')
+const enCrlf = (texto: string): string => texto.replace(/\n/g, '\r\n')
+const leer = (ruta: string): string => enLf(readFileSync(`${V3}/${ruta}`, 'utf8'))
 const sinComentarios = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -222,5 +225,8 @@ const registro = sinComentarios(leer('_lib/pie3d/registro.ts'))
 const conOnda = (c: string): boolean => !/conOnda|pruebas\.pie === 'onda'/.test(c) && /h\.encima = true\s*const r = el\.getBoundingClientRect\(\)\s*pedirLaOnda\(/.test(c)
 afirmar(conOnda(registro), '  la onda, en el producto: el mouse sobre una pieza hace ondear el piso vivo hacia ella (la onda de los valores de Por qué develOP)')
 controlPositivo('el detector VE la onda si vuelve a tener bandera', registro.replace('      h.encima = true\n', "      h.encima = true\n      if (!conOnda) return\n"), conOnda)
+// [P-H] Con CRLF pasa igual (se lee normalizado), y el defecto real en CRLF (la bandera de vuelta) sigue fallando.
+afirmar(conOnda(enLf(enCrlf(registro))), '  [P-H] y con los finales de línea de Windows (CRLF) también: se busca en el texto normalizado')
+controlPositivo('  [P-H] el detector VE la bandera de vuelta en un archivo con CRLF', enLf(enCrlf(registro).replace('      h.encima = true\r\n', '      h.encima = true\r\n      if (!conOnda) return\r\n')), conOnda)
 
 cerrar('s44-pie')

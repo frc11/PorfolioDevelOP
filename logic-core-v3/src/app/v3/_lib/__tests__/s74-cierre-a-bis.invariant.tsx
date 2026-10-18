@@ -227,7 +227,10 @@ afirmar(PIEZAS_A10.every((i) => i === 0 || Math.abs(altoDelRebote(i) - altoDelRe
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A11 · La tarjeta de gracias y de error, impresa en su placa: no titila con la cámara')
 
-const leerA11 = (r: string): string => readFileSync(new URL(r, import.meta.url), 'utf8')
+// [P-H] Los finales de línea normalizados antes de buscar: en CRLF (el worktree de servicios) el control positivo no reemplazaba nada.
+const enLf = (texto: string): string => texto.replace(/\r\n/g, '\n')
+const enCrlf = (texto: string): string => texto.replace(/\n/g, '\r\n')
+const leerA11 = (r: string): string => enLf(readFileSync(new URL(r, import.meta.url), 'utf8'))
 interface FuentesA11 {
   readonly impresa: string
   readonly pie: string
@@ -253,6 +256,10 @@ controlPositivo('  el detector VE la tarjeta impresa también en la placa del fo
 controlPositivo('  y una escala que no es potencia de dos (la mezcla de mipmaps la ablanda)', 3, (e: number) => impresaBien(FUENTES_A11, e))
 controlPositivo('  y el DOM apagado con `visibility` (sin clics)', { ...FUENTES_A11, impresa: `${FUENTES_A11.impresa}\nbloque.style.visibility = 'hidden'` }, (x: FuentesA11) => impresaBien(x, TARJETA_IMPRESA.escala))
 controlPositivo('  y la impresa después de compilar', { ...FUENTES_A11, pie: FUENTES_A11.pie.replace(/(rearmar\(s, g, s\.estudio\)\n)[^\n]*\n\s*imprimirLasTarjetas\(s\.armadas\)\n/, '$1').replace('prepararLasTransformaciones(s, gl, escena, camara)', 'prepararLasTransformaciones(s, gl, escena, camara)\n      imprimirLasTarjetas(s.armadas)') }, (x: FuentesA11) => impresaBien(x, TARJETA_IMPRESA.escala))
+// [P-H] Con CRLF pasa igual (se lee normalizado), y el defecto real en CRLF (la impresa después de compilar) sigue fallando.
+const comoEnServicios: FuentesA11 = { ...FUENTES_A11, impresa: enLf(enCrlf(FUENTES_A11.impresa)), pie: enLf(enCrlf(FUENTES_A11.pie)) }
+afirmar(impresaBien(comoEnServicios, TARJETA_IMPRESA.escala), '  [P-H] y con los finales de línea de Windows (CRLF) también: se busca en el texto normalizado')
+controlPositivo('  [P-H] el detector VE la impresa después de compilar en un archivo con CRLF', { ...comoEnServicios, pie: enLf(enCrlf(FUENTES_A11.pie).replace(/(rearmar\(s, g, s\.estudio\)\r\n)[^\r\n]*\r\n\s*imprimirLasTarjetas\(s\.armadas\)\r\n/, '$1')) }, (x: FuentesA11) => impresaBien(x, TARJETA_IMPRESA.escala))
 // La entrada del texto (lo que sube), de la transformada calculada.
 afirmar(subidaDe('none') === 0 && subidaDe('matrix(1, 0, 0, 1, 0, 8)') === 8 && subidaDe('matrix(1, 0, 0, 1, 0, 2.5)') === 2.5, '  lo impreso sube con la entrada del texto (la transformada calculada de Motion)')
 

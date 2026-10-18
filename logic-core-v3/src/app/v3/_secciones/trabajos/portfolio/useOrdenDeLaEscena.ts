@@ -2,33 +2,41 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import { AFUERA, siguientePaso, type Orden } from './orden'
+import { AFUERA, NUNCA, siguienteCambio, type Cambios, type Orden } from './orden'
 
 /**
- * [B1.2c] EL ORDEN, POR TIEMPO (`orden.ts`): lleva lo que se muestra hacia lo pedido de a un paso, esperando lo que tarda cada uno.
- * Si lo pedido cambia en el medio, se vuelve a decidir desde lo que se muestra (con la misma regla). Con movimiento reducido, de una.
+ * [B1.2c] EL ORDEN, POR TIEMPO (`orden.ts`): lleva lo que se muestra hacia lo pedido de a un cambio, cada uno cuando le toca. Si lo
+ * pedido cambia en el medio, se vuelve a decidir desde lo que se muestra (con la misma regla y los mismos relojes de cada pieza). Con
+ * movimiento reducido, de una. Un solo temporizador a la vez, y se borra con cada pedido nuevo y al desmontar.
  */
-export function useOrdenDeLaEscena(pedidoEscena: boolean, pedidoEncabezado: boolean, caidaS: number, reducido: boolean): Orden {
+export function useOrdenDeLaEscena(pedido: Orden, tituloS: number, reducido: boolean): Orden {
   const [orden, setOrden] = useState<Orden>(AFUERA)
   const actual = useRef<Orden>(AFUERA)
-  // La caída se lee al decidir (no reinicia una espera en curso: el título 3D puede quedar listo en el medio).
-  const caida = useRef(caidaS)
+  const cambios = useRef<Cambios>(NUNCA)
+  // Lo que tarda el título se lee al decidir (no reinicia una espera en curso: el título 3D puede quedar listo en el medio).
+  const titulo = useRef(tituloS)
   useEffect(() => {
-    caida.current = caidaS
-  }, [caidaS])
+    titulo.current = tituloS
+  }, [tituloS])
+  const { camara, encabezado, barra, panel } = pedido
   useEffect(() => {
-    const pedido: Orden = { escena: pedidoEscena, encabezado: pedidoEncabezado }
+    const pedidoDeAhora: Orden = { camara, encabezado, barra, panel }
     let reloj = 0
     const avanzar = (): void => {
-      const paso = siguientePaso(actual.current, pedido, caida.current, reducido)
-      if (paso === null) return
-      actual.current = paso.estado
-      setOrden(paso.estado)
-      if (paso.esperaS > 0) reloj = window.setTimeout(avanzar, paso.esperaS * 1000)
-      else avanzar()
+      const ahora = performance.now() / 1000
+      const c = siguienteCambio(actual.current, cambios.current, pedidoDeAhora, ahora, titulo.current, reducido)
+      if (c === null) return
+      if (c.en > ahora) {
+        reloj = window.setTimeout(avanzar, (c.en - ahora) * 1000)
+        return
+      }
+      actual.current = { ...actual.current, [c.pieza]: c.valor }
+      cambios.current = { ...cambios.current, [c.pieza]: ahora }
+      setOrden(actual.current)
+      avanzar()
     }
     avanzar()
     return () => window.clearTimeout(reloj)
-  }, [pedidoEscena, pedidoEncabezado, reducido])
+  }, [camara, encabezado, barra, panel, reducido])
   return orden
 }

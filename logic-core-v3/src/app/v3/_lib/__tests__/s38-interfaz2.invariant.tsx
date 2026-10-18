@@ -34,7 +34,10 @@ import { manchasDelHaz } from '../escena/sombra/sombraDelHaz'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
-const leer = (ruta: string): string => readFileSync(`${V3}/${ruta}`, 'utf8')
+// [P-H] Los finales de línea normalizados antes de buscar: en CRLF (el worktree de servicios) lo que busca varias líneas no encontraba nada.
+const enLf = (texto: string): string => texto.replace(/\r\n/g, '\n')
+const enCrlf = (texto: string): string => texto.replace(/\n/g, '\r\n')
+const leer = (ruta: string): string => enLf(readFileSync(`${V3}/${ruta}`, 'utf8'))
 const veces = (texto: string, aguja: string): number => texto.split(aguja).length - 1
 const sinComentarios = (fuente: string): string => fuente.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 
@@ -234,6 +237,10 @@ afirmar(veces(CURSOR_TSX, 'data-parte="cartel"') === 1 && veces(CURSOR_TSX, 'dat
 afirmar(paso.includes('cartel.ancho += (ancho - cartel.ancho) * fn') && paso.includes('cartel.x += (cx - cartel.x) * fh') && paso.includes('cartel.escala += (escala - cartel.escala) * fn'), '  el ancho, la posición y la escala persiguen en segundos (la interpolación del cursor): se estira y se achica continuo')
 afirmar(!/\bnew \w|getBoundingClientRect|\[[^\]]*\] = \[|\.map\(|\.filter\(/.test(paso), '  y el bucle no reserva nada por cuadro', paso.match(/\bnew \w|getBoundingClientRect|\[[^\]]*\] = \[/)?.[0] ?? '')
 afirmar(CURSOR_TSX.includes("if (nuevo === 'demo' && cartel.escala < 0.02) {\n          cartel.x = destino.x\n          cartel.y = destino.y") && paso.includes('const escala = conCartel ? 1 : 0') && paso.includes(': destino.x'), '  nace en el punto del cursor y se va achicándose hacia él')
+// [P-H] Con CRLF pasa igual (se lee normalizado), y un defecto real en CRLF (el cartel que no nace en su lugar) sigue fallando.
+const naceEnSuLugar = (c: string): boolean => c.includes("if (nuevo === 'demo' && cartel.escala < 0.02) {\n          cartel.x = destino.x\n          cartel.y = destino.y")
+afirmar(naceEnSuLugar(enLf(enCrlf(CURSOR_TSX))), '  [P-H] y con los finales de línea de Windows (CRLF) también: se busca en el texto normalizado')
+controlPositivo('  [P-H] el detector VE un defecto real en CRLF (el cartel que no nace en su lugar)', enLf(enCrlf(CURSOR_TSX.replace('cartel.x = destino.x', 'cartel.x = 0'))), naceEnSuLugar)
 afirmar(/cy = conCartel \? Math\.max\(cartel\.tope - cartel\.aire - cartel\.alto \/ 2/.test(paso), '  y se apoya ARRIBA de la cara levantada: no tapa la demo')
 afirmar(CURSOR_TSX.includes("if (nuevo === 'demo' && (demo === null || Number(getComputedStyle(demo.pieza).opacity) < 0.5)) nuevo = 'texto'"), '  y no lo abre un libro apagado: la máscara del vacío del túnel no corta el hit-testing (medido en el cierre: en Portfolio, «Click para ver AXON Studio» sobre la nada)')
 afirmar(leer('_secciones/trabajos/demos/Biblioteca.tsx').includes('if (!PRESENCIA_DEL_CURSOR.montado) mostrarElCartel(e.currentTarget, demo)') && CURSOR_TSX.includes('PRESENCIA_DEL_CURSOR.montado = true'), 'sin el cursor de la sala (táctil, movimiento reducido) y con el teclado queda la pastilla fija de siempre')

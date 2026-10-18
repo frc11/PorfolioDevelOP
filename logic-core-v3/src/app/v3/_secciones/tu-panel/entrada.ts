@@ -15,6 +15,8 @@
  * `linear(…)` muestreada, que la reproduce punto por punto.
  */
 
+import { LINEA_DEL_DISPARO, margenDelDisparo } from '../_contrato/disparo'
+
 /** `expo.out`: rápida al principio y frenando al final. */
 export function salidaExponencial(t: number): number {
   return t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)
@@ -68,7 +70,7 @@ export function cronogramaDelRemate(duracion: number, duracionDelPunto: number, 
  * SPRINT PANEL 3 · la línea de disparo del remate, en % del cuadro desde abajo. [CIERRE RETOQUE 3D] B4: de 35 a 6 — entran ni
  * bien asoman y, subiendo, se van recién cuando están por salir, bien abajo (con 35 se iban en la mitad de abajo del cuadro).
  */
-export const DISPARO_DEL_REMATE = 6
+export const DISPARO_DEL_REMATE = LINEA_DEL_DISPARO
 
 /** [RETOQUE 3D] B4 · cuánto corren la frase y el newsletter al entrar, en corridas de los puntos (`--spacing-8`): cerca de su lugar. */
 export const CORRIDAS_DEL_REMATE = 3
@@ -76,7 +78,5 @@ export const CORRIDAS_DEL_REMATE = 3
 /** SPRINT PANEL 3 · el remate corre 1,6 veces más lento que los tokens (700 → 1120 ms la frase). */
 export const LENTITUD_DEL_REMATE = 1.6
 
-/** El `rootMargin` que baja la línea de disparo: sólo el borde de abajo se mete `desdeAbajo` % del cuadro. */
-export function margenDelDisparo(desdeAbajo: number): string {
-  return [0, 0, -desdeAbajo, 0].map((v) => `${v}%`).join(' ')
-}
+/** [P-H18] el `rootMargin` de la línea es el del gatillo común. */
+export { margenDelDisparo }

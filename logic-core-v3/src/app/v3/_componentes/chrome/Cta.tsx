@@ -155,6 +155,10 @@ export interface CtaEnlaceProps extends CtaComun {
    * `_chrome/contacto/apertura.ts`). El `href` queda: sin JavaScript, el ancla lleva al formulario del pie.
    */
   readonly abreElContacto?: 'panel'
+  /** [B1.2d] Un sitio de afuera: se abre aparte (`target="_blank"`, sin `opener` ni `referrer`). */
+  readonly externo?: boolean
+  /** [B1.2d] El nombre accesible, cuando el rótulo solo no alcanza (de quién es el sitio, que se abre aparte). */
+  readonly etiqueta?: string
 }
 
 export function CtaEnlace({
@@ -166,10 +170,14 @@ export function CtaEnlace({
   mezcla = false,
   className,
   abreElContacto,
+  externo = false,
+  etiqueta,
 }: CtaEnlaceProps) {
   return (
     <a
       href={href}
+      {...(externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      {...(etiqueta === undefined ? {} : { 'aria-label': etiqueta })}
       data-pieza="cta"
       data-variante={variante}
       data-registro={registro}

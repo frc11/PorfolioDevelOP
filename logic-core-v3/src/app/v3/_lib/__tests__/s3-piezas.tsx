@@ -36,6 +36,7 @@ import {
 } from '../../_componentes/chrome/PiePiezas'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
+import { BotonPausa } from '../../_componentes/medios/BotonPausa'
 import { Imagen } from '../../_componentes/medios/Imagen'
 import { Caption, Cuerpo, EtiquetaDeSeccion, Micro, TextoBase } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
@@ -201,5 +202,12 @@ export const PIEZAS: readonly PiezaDelPadron[] = [
     nodo: (
       <Imagen src="/logodevelOP.png" alt="" ancho={1024} alto={1024} sizes={sizesPorViewport(33)} />
     ),
+  },
+  {
+    // [P-H21] la pausa de un video en bucle: un botón (focalizable) con su nombre fijo y el estado en `aria-pressed`.
+    id: 'boton-pausa',
+    archivo: `${V3}/_componentes/medios/BotonPausa.tsx`,
+    interactiva: true,
+    nodo: <BotonPausa pausado={false} alCambiar={() => undefined} de="el video de muestra" />,
   },
 ]

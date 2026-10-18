@@ -37,7 +37,7 @@ Y siempre, antes de tocar código: el log del sprint en curso de tu línea (`doc
 ## Qué tipo de trabajo es
 
 **Una sección del home** (`src/app/v3/_secciones/**`):
-- **REGLA DE ALTURAS:** cambiar el alto de una sección corre el mapeo de la escena. Se compensa con `TRAMO_ESTIRADO` (una k por ancho); `secciones.ts` no se toca. Medí la deriva antes y después.
+- **REGLA DE ALTURAS:** cambiar el alto de una sección corre el mapeo de la escena. Se compensa con `TRAMO_ESTIRADO` (`_lib/escena/tramoEstirado.ts`, una k por ancho); `_lib/secciones.ts` no se toca. Medí la deriva antes y después.
 - Hay invariantes que no se rompen: s74, s75-carga (`?diag=carga`) y s76-portfolio.
 
 **Una página** (`src/app/v3/[servicio]/`, nosotros, blog):
@@ -53,18 +53,18 @@ Y siempre, antes de tocar código: el log del sprint en curso de tu línea (`doc
 
 - Nunca `git add .`: se agregan los archivos por nombre.
 - PROHIBIDO: `merge`, `reset`, `rebase`, `push --force`, `checkout`/`switch`/`restore` que descarte, `git stash`. Los merges entre ramas los hace Valentino a mano.
-- Frozen, solo se consumen: `HeroArtifact.tsx`, `TransitionContext.tsx`, `PreloaderContext.tsx`, `schema.prisma`, `auth.ts`, `lib/prisma.ts`, `src/components/ui/*`.
+- Frozen, solo se consumen: `src/components/3d/HeroArtifact.tsx`, `src/context/TransitionContext.tsx`, `src/context/PreloaderContext.tsx`, `prisma/schema.prisma`, `src/auth.ts`, `src/lib/prisma.ts`, `src/components/ui/*`.
 - Archivos compartidos con el sitio vivo: se cambia CÓMO se importa, nunca QUÉ renderiza. Las zonas de Franco no se tocan.
 - Cero `any`, nunca `router.push` directo, nunca `prisma migrate reset`, nunca secretos hardcodeados.
 - Nunca auto-confirmar que algo funciona porque compila. La coreografía la mira Valentino.
 - Nunca debilitar un test para que pase.
 - Nada de contenido inventado: ni cifras, ni reseñas, ni números de WhatsApp. Lo que falta va marcado con la llave de contenido falso.
 - Los tests y el bench nunca llaman a `/api/contacto` ni a `/api/newsletter` reales (la Neon es compartida).
-- `lente.ts` no entra en ningún commit. Tags solo en hitos. Una sola sesión de CC por worktree.
+- `src/app/v3/_lib/motion/lente.ts` no entra en ningún commit. Tags solo en hitos. Una sola sesión de CC por worktree.
 
 ## Gate de verificación
 
-El build de producción está rojo por errores de base ajenos, así que "build verde" no es el gate. Lo es esto:
+El build de producción está rojo por errores de base ajenos, así que "build verde" no es el gate. No corras `next build` salvo que el prompt lo pida (O-10). El gate es esto:
 
 1. lint limpio en los archivos tocados;
 2. `$env:NODE_OPTIONS="--max-old-space-size=4096"; .\node_modules\.bin\tsc.cmd --noEmit`, sin errores nuevos;

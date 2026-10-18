@@ -2,13 +2,17 @@
 
 import { useEffect, type RefObject } from 'react'
 
+import { conElDefecto } from './medida'
 import { GESTO_QUIETO, destinoDeLaRueda, gestoDeLaRueda, pxDeLaRueda, type DestinoDeLaRueda } from './rueda'
 
 /** Lo que la rueda necesita de la sección, leído en cada evento (una `ref`: nada se vuelve a suscribir). */
 export interface ControlDeLaRueda {
   /** La tira activa si la rueda manda (el panel adentro, el escenario pegado, ningún diálogo abierto), o `null`. */
   readonly manda: () => number | null
-  /** Un salto en vuelo: la rueda no hace nada (sigue siendo el mismo gesto). */
+  /**
+   * Un salto en vuelo: la rueda no hace nada (sigue siendo el mismo gesto). [B1.2d] Y es del Portfolio aunque el panel ya no mande (el
+   * vuelo a Demos o hacia arriba publica su destino en el acto): nadie le pisa el viaje con la rueda.
+   */
   readonly ocupado: () => boolean
   readonly ir: (destino: DestinoDeLaRueda) => void
   /** Dónde estaba el puntero cuando la rueda tomó el control: el hover queda inerte hasta que se mueva de ahí (`seMovioDeVerdad`). */
@@ -33,7 +37,9 @@ export function useRuedaDelPortfolio(control: RefObject<ControlDeLaRueda | null>
       const ahora = performance.now()
       c.ultimaRueda.current = ahora
       const activa = c.manda()
-      if (activa === null) {
+      const ocupado = c.ocupado()
+      const enVuelo = ocupado && !conElDefecto('vuelo-sin-dueno')
+      if (activa === null && !enVuelo) {
         // El gesto que corre la página afuera del panel es de la página: si el panel entra en el medio, ese gesto ya no da un paso
         // (el siguiente, sí).
         gesto = { acumulado: 0, ultimo: ahora, disparado: true }
@@ -43,8 +49,13 @@ export function useRuedaDelPortfolio(control: RefObject<ControlDeLaRueda | null>
       const paraLenis: EventoDeLenis = e
       paraLenis.lenisStopPropagation = true
       if (e.cancelable) e.preventDefault()
+      if (activa === null) {
+        // [B1.2d] El vuelo de la salida (a Demos o hacia arriba) termina sí o sí: la rueda se traga y el gesto queda disparado.
+        gesto = { acumulado: 0, ultimo: ahora, disparado: true }
+        return
+      }
       c.inerte.current = { x: e.clientX, y: e.clientY }
-      const r = gestoDeLaRueda(gesto, pxDeLaRueda(e.deltaY, e.deltaMode), ahora, c.ocupado())
+      const r = gestoDeLaRueda(gesto, pxDeLaRueda(e.deltaY, e.deltaMode), ahora, ocupado)
       gesto = r.gesto
       if (r.sentido !== null) c.ir(destinoDeLaRueda(activa, r.sentido))
     }

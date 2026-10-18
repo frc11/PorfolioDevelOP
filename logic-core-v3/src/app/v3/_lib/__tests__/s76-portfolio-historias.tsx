@@ -64,7 +64,11 @@ export function afirmarLasHistorias(): void {
   }
   afirmarIgual([nombre(0, 1), nombre(1, -1), nombre(2, 1), nombre(0, -1), nombre(3, 1)], ['Esquina', 'El Garage', 'la tuya', 'arriba', 'Demos'], '  con el modelo de la rueda: de a uno desde el activo; antes del primero, arriba; después de «la tuya», Demos')
   const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
-  afirmar(/if \(d\.tipo === 'paso'\) saltarAlPaso\(d\.indice, true\)\s*else ir\(d\)/.test(usePortfolio), '  el proyecto, en silencio (el modelo del hover); las salidas, con su orden')
+  // [B1.2d] Los toques salieron con los mandos (`useMandosDelPortfolio.ts`): `ir(…, false)` es el salto en silencio.
+  const mandos = sinComentarios(leer(`${PORTFOLIO}/useMandosDelPortfolio.ts`))
+  const tocar = (m: string): boolean => /if \(v\.fase === 'adentro'\) ir\(destinoDeLaRueda\(v\.tira, sentido\), false\)/.test(m) && /if \(d\.tipo === 'paso'\) saltar\(d\.indice, !rueda, rueda\)/.test(m)
+  afirmar(tocar(mandos), '  el proyecto, en silencio (el modelo del hover); las salidas, con su orden')
+  controlPositivo('  el detector ve el toque que viaja como la rueda', mandos.replace('ir(destinoDeLaRueda(v.tira, sentido), false)', 'ir(destinoDeLaRueda(v.tira, sentido), true)'), tocar)
   const casos: readonly [IndiceDePaso, IndiceDePaso, number, number | null][] = [
     [0, 2, 0.1, 1],
     [0, 3, 0, 1],
@@ -78,17 +82,21 @@ export function afirmarLasHistorias(): void {
   afirmarIgual(casos.map(([d, c, v]) => asentamiento(d, c, v)), casos.map(([, , , e]) => e), 'deslizar es el scroll de la página y, quieta, se asienta en el centro de su proyecto, a lo sumo uno más allá del que estaba; lo que sale del selector se deja (es la salida)')
   controlPositivo('  el detector ve un deslizamiento que cruza dos proyectos', (_d: IndiceDePaso, c: IndiceDePaso): number | null => c, (f: (d: IndiceDePaso, c: IndiceDePaso, v: number) => number | null) => f(0, 2, 0.1) === 1)
   const deslizamiento = sinComentarios(leer(`${PORTFOLIO}/useDeslizamientoDelPortfolio.ts`))
-  afirmar(/addEventListener\('touchstart', alTocar, \{ passive: true \}\)/.test(deslizamiento) && /addEventListener\('scroll', alMoverse, \{ passive: true \}\)/.test(deslizamiento) && !/preventDefault/.test(deslizamiento) && /useDeslizamientoDelPortfolio\(historias, deslizamiento\)/.test(usePortfolio), '  ningún gesto propio que pelee con el scroll: escuchas pasivos, sin `preventDefault`, y sólo con las historias')
+  afirmar(/addEventListener\('touchstart', alTocar, \{ passive: true \}\)/.test(deslizamiento) && /addEventListener\('scroll', alMoverse, \{ passive: true \}\)/.test(deslizamiento) && !/preventDefault/.test(deslizamiento) && /useDeslizamientoDelPortfolio\(historias, deslizamiento\)/.test(mandos), '  ningún gesto propio que pelee con el scroll: escuchas pasivos, sin `preventDefault`, y sólo con las historias')
 
   titulo('B1.3 · 30 · La entrada y la salida: «Portfolio» llega en la aproximación y se va con la caída antes de la historia')
 
-  const texto = (r: readonly { readonly estado: Orden; readonly enS: number }[]): string[] => r.map(({ estado, enS }) => `${estado.escena ? 'E' : 'e'}${estado.encabezado ? 'T' : 't'}@${enS.toFixed(2)}`)
-  const EN_LA_APROXIMACION: Orden = { escena: false, encabezado: true }
-  const EN_LA_HISTORIA: Orden = { escena: true, encabezado: false }
-  afirmarIgual([texto(recorridoDelOrden(EN_LA_APROXIMACION, EN_LA_HISTORIA, 0.6)), texto(recorridoDelOrden(EN_LA_HISTORIA, EN_LA_APROXIMACION, 0.6)), texto(recorridoDelOrden(EN_LA_HISTORIA, AFUERA, 0.6))], [['et@0.00', 'Et@0.60'], ['et@0.00', 'eT@0.70'], ['et@0.00']], 'entrando, el título cae entero y después entra la historia; subiendo, la historia se va y después vuelve el título; bajando a Demos, la historia se va y el título no vuelve')
-  const reglaDelTelefono = (u: string): boolean => /historias \? fase === 'antes' && enCuadro : fase === 'adentro'/.test(u)
-  afirmar(reglaDelTelefono(usePortfolio), '  en las historias el encabezado se pide en la aproximación (con la sección en el cuadro), no con el panel')
-  controlPositivo('  el detector ve la regla del escritorio en el teléfono', usePortfolio.replace("historias ? fase === 'antes' && enCuadro : fase === 'adentro'", "fase === 'adentro'"), reglaDelTelefono)
+  // [B1.2d] El orden de cuatro piezas (`orden.ts`): cámara, encabezado, barra y panel. En el teléfono la barra no se corre.
+  const texto = (r: readonly { readonly estado: Orden; readonly enS: number }[]): string[] =>
+    r.map(({ estado: o, enS }) => `${o.camara ? 'C' : 'c'}${o.encabezado ? 'E' : 'e'}${o.barra ? 'B' : 'b'}${o.panel ? 'P' : 'p'}@${enS.toFixed(2)}`)
+  const EN_LA_APROXIMACION: Orden = { camara: false, encabezado: true, barra: false, panel: false }
+  const EN_LA_HISTORIA: Orden = { camara: true, encabezado: false, barra: false, panel: true }
+  const recorridos = [texto(recorridoDelOrden(EN_LA_APROXIMACION, EN_LA_HISTORIA, 0.6)), texto(recorridoDelOrden(EN_LA_HISTORIA, EN_LA_APROXIMACION, 0.6)), texto(recorridoDelOrden(EN_LA_HISTORIA, AFUERA, 0.6))]
+  afirmarIgual(recorridos, [['cebp@0.00', 'Cebp@0.60', 'CebP@0.60'], ['Cebp@0.00', 'cebp@0.70', 'cEbp@0.70'], ['Cebp@0.00', 'cebp@0.70']], 'entrando, el título cae entero y después entra la historia; subiendo, la historia se va y después vuelve el título; bajando a Demos, la historia se va y el título no vuelve')
+  controlPositivo('  el detector ve la historia que entra mientras el título cae', [['cebp@0.00', 'CebP@0.00']], (r: string[][]) => JSON.stringify(r[0]) === JSON.stringify(['cebp@0.00', 'Cebp@0.60', 'CebP@0.60']))
+  const reglaDelTelefono = (u: string): boolean => /encabezado: historias \? fase === 'antes' && enCuadro : adentro, barra: adentro && !historias/.test(u)
+  afirmar(reglaDelTelefono(usePortfolio), '  en las historias el encabezado se pide en la aproximación (con la sección en el cuadro), no con el panel; [B1.2d] y la barra no se corre')
+  controlPositivo('  el detector ve la regla del escritorio en el teléfono', usePortfolio.replace("encabezado: historias ? fase === 'antes' && enCuadro : adentro", 'encabezado: adentro'), reglaDelTelefono)
 
   titulo('B1.3 · 31 · Las barras arriba y «la tuya» al final, con el «?», el formulario y WhatsApp')
 
