@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { BotonPausa } from '../../../_componentes/medios/BotonPausa'
 import { Imagen } from '../../../_componentes/medios/Imagen'
 
 import type { ProyectoDelPortfolio } from '../proyectos'
@@ -12,21 +13,18 @@ import { ANCHO_DEL_MEDIO, MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL
 export interface EstadoDelVideo {
   /** Si lleva `src` y póster: sólo la activa, y sólo con la sección cerca (nada se pide antes). */
   readonly cargado: boolean
-  /** Si se reproduce: cargado, sin movimiento reducido y a la vista. */
+  /** Si se reproduce: cargado, sin movimiento reducido, a la vista y [B1.2d B] sin la pausa pedida. */
   readonly reproduce: boolean
   readonly preload: 'auto' | 'none'
 }
 
-export function estadoDelVideo(activa: boolean, cerca: boolean, reducido: boolean, aLaVista: boolean): EstadoDelVideo {
+export function estadoDelVideo(activa: boolean, cerca: boolean, reducido: boolean, aLaVista: boolean, pausado = false): EstadoDelVideo {
   const cargado = activa && cerca
-  return { cargado, reproduce: cargado && !reducido && aLaVista, preload: cargado && !reducido ? 'auto' : 'none' }
+  return { cargado, reproduce: cargado && !reducido && aLaVista && !pausado, preload: cargado && !reducido ? 'auto' : 'none' }
 }
 
-/** [B1.3] Cuál de los dos videos está a la vista: lo decide el CSS (el del teléfono, abajo de 768) y el código lo lee. */
-export type CualDeLosVideos = 'escritorio' | 'movil'
-
-/** Un video del medio: se reproduce si su estado lo pide (y se pausa si no). */
-function Video({ proyecto, cual, e }: { readonly proyecto: ProyectoDelPortfolio; readonly cual: CualDeLosVideos; readonly e: EstadoDelVideo }): React.JSX.Element {
+/** El video del medio: se reproduce si su estado lo pide (y se pausa si no). */
+function Video({ proyecto, e }: { readonly proyecto: ProyectoDelPortfolio; readonly e: EstadoDelVideo }): React.JSX.Element {
   const video = useRef<HTMLVideoElement | null>(null)
   useEffect(() => {
     const v = video.current
@@ -38,14 +36,14 @@ function Video({ proyecto, cual, e }: { readonly proyecto: ProyectoDelPortfolio;
     <video
       ref={video}
       data-video-del-portfolio={proyecto.slug}
-      data-cual={cual}
+      data-cual="escritorio"
       muted
       playsInline
       loop
       preload={e.preload}
       aria-hidden="true"
-      className={cual === 'movil' ? 'h-full w-full object-cover' : 'h-full w-full object-contain'}
-      {...(e.cargado ? { src: proyecto.medios.video[cual], poster: proyecto.medios.poster[cual] } : {})}
+      className="h-full w-full object-contain"
+      {...(e.cargado ? { src: proyecto.medios.video.escritorio, poster: proyecto.medios.poster.escritorio } : {})}
     />
   )
 }
@@ -56,11 +54,8 @@ function Video({ proyecto, cual, e }: { readonly proyecto: ProyectoDelPortfolio;
  *
  * El video es `muted playsInline loop` y SÓLO el de la tira activa tiene `src` (y con la sección cerca: nada se pide antes); los
  * demás no tienen nada y `preload="none"`. Con movimiento reducido no hay autoplay: queda el póster. Se pausa fuera de cuadro y con
- * la pestaña oculta (`aLaVista`, `usePortfolio`).
- *
- * [B1.3] Hay DOS videos: el de escritorio (desde 768) y el del teléfono (abajo: la historia a pantalla completa, `object-cover`
- * porque se grabó con la proporción del teléfono). El CSS esconde uno y el código lee cuál está a la vista (un `ResizeObserver`
- * sobre el del teléfono: sin caja, escondido): sólo ése pide su archivo. La sección no mide el ancho.
+ * la pestaña oculta (`aLaVista`, `usePortfolio`). [B1.2d B] Sólo el de escritorio: debajo de 1024 el video lo pinta la historia
+ * (`HistoriaDelProyecto`). P-H21 · un video en bucle se puede pausar (WCAG 2.2.2): `BotonPausa`, en la esquina, mientras corre solo.
  */
 export function MedioDeLaTira({
   proyecto,
@@ -78,26 +73,14 @@ export function MedioDeLaTira({
   /** [B1.2d] A2.1 · lo que baja el medio por la píldora corrida (`null`: nada): se achica lo mismo. */
   readonly despeje?: number | null
 }): React.JSX.Element {
-  const movil = useRef<HTMLDivElement | null>(null)
-  const [cual, setCual] = useState<CualDeLosVideos>('escritorio')
-  useEffect(() => {
-    const el = movil.current
-    if (el === null) return undefined
-    const tamano = new ResizeObserver(() => setCual(el.offsetParent !== null ? 'movil' : 'escritorio'))
-    tamano.observe(el)
-    return () => tamano.disconnect()
-  }, [])
-  const estado = (de: CualDeLosVideos): EstadoDelVideo => estadoDelVideo(activa && cual === de, cerca, reducido, aLaVista)
+  const [pausado, setPausado] = useState(false)
+  const estado = estadoDelVideo(activa, cerca, reducido, aLaVista, pausado)
   return (
-    <>
-      <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5 max-tablet:hidden" style={{ aspectRatio: PROPORCION_DEL_MEDIO, width: despeje === null ? ANCHO_DEL_MEDIO : anchoDelMedioConDespeje(despeje) }}>
-        <Video proyecto={proyecto} cual="escritorio" e={estado('escritorio')} />
-        <a href={proyecto.url} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
-      </figure>
-      <div ref={movil} aria-hidden="true" data-medio-del-telefono={proyecto.slug} className="hidden h-full w-full bg-tinta/5 max-tablet:block">
-        <Video proyecto={proyecto} cual="movil" e={estado('movil')} />
-      </div>
-    </>
+    <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5" style={{ aspectRatio: PROPORCION_DEL_MEDIO, width: despeje === null ? ANCHO_DEL_MEDIO : anchoDelMedioConDespeje(despeje) }}>
+      <Video proyecto={proyecto} e={estado} />
+      <a href={proyecto.url} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
+      {estado.cargado && !reducido ? <BotonPausa pausado={pausado} alCambiar={setPausado} de={`el video de ${proyecto.nombre}`} className="absolute right-3 bottom-3" /> : null}
+    </figure>
   )
 }
 

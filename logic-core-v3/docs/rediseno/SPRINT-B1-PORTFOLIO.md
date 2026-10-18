@@ -1683,3 +1683,189 @@ Nuevas: `s76-portfolio-a2.tsx`, §39 a §41. s76: 324 afirmaciones.
    - adentro (en El Garage), una ráfaga hacia abajo sale a Demos sin pasar por los proyectos;
    - con muescas sueltas, de a un proyecto, como antes;
    - con el trackpad: decí si saltea de más.
+### 14.5 El plan del subsprint B (el formulario de «la tuya» y las historias)
+
+**P-H19 · las historias como pieza común** (`src/app/v3/_componentes/historias/`). La firma, para el contrato:
+
+```ts
+// maquinaDeLasHistorias.ts — la máquina, pura (sin React, sin el DOM, sin el Portfolio)
+export const HISTORIAS: { duracionMs: 10_000; mantenerMs: 200; toqueMaxPx: 10; desliceMinPx: 40; tercioDeAtras: 1 / 3 }
+export interface ItemDeHistoria { readonly id: string; readonly sinTiempo?: boolean }
+export interface EstadoDeLasHistorias { indice; transcurridoMs; pausada; enfocada; reinicio }
+export type EventoDeLasHistorias = tiempo(ms) | toque(fraccion) | deslice(dx, dy) | mantener | soltar | foco(adentro)
+export type SalidaDeLasHistorias = 'adelante' | 'atras'
+export function siguienteDeLasHistorias(e, ev, items, duracionMs?): { estado; salida: SalidaDeLasHistorias | null; porElUsuario: boolean }
+
+// Historias.tsx — el componente
+export interface PropsDeLasHistorias<T extends ItemDeHistoria> {
+  readonly items: readonly T[]                        // la cantidad de pasos es la de la lista: el Portfolio 4, el precio 3
+  readonly renderItem: (item: T, estado: { indice; pausada; reinicio }) => ReactNode
+  readonly alSalir: (hacia: SalidaDeLasHistorias) => void   // deslizar arriba (o pasar el último): adelante; abajo: atrás
+  readonly etiqueta: string
+  readonly rotulos: { anterior: string; siguiente: string }  // los dos controles del teclado
+  readonly duracionMs?: number
+  readonly alCambiar?: (indice: number) => void
+  readonly className?: string
+}
+export function Historias<T extends ItemDeHistoria>(p: PropsDeLasHistorias<T>): JSX.Element
+```
+
+- **Fuera del Portfolio:** no lee `PortfolioVivo` ni `[data-panel]`. Lo propio de cada uso entra por `items`, `renderItem` y `alSalir`.
+- **Cómo se monta:** cuando las historias tienen que correr, y se desmonta al salir. Así cada entrada arranca del primero, y cada ítem, de cero: `reinicio` vuelve a montar su medio.
+
+**Cómo queda el Portfolio debajo de 1024 (T2 a T8):**
+- **T2:** `--modo-del-portfolio: historias` pasa de `max-tablet` a `max-escritorio`. Las historias van de 1023 a 768 inclusive y siguen debajo, y los lomos de la tablet salen.
+- **El panel:** no se mueve. Adentro, en las historias, va `HistoriasDelPortfolio` en vez del acordeón, con cuatro ítems: los tres proyectos y «la tuya», sin tiempo.
+- **La entrada (T3):** el título «Portfolio» sube desde abajo, por delante del logo, y termina arriba. Recién ahí entran las historias, con un fundido y una subida corta de 700 ms. Los dos se ven en el orden de cuatro piezas; en las historias, el título se pide en la aproximación y se queda.
+- **Las salidas:** deslizar hacia arriba vuela a Demos. Deslizar hacia abajo vuelve al título (justo antes del pin).
+- **T8, el scroll:** nunca avanza las historias.
+  - Mientras corren, la página no se mueve con el dedo (`touch-action: none` y un `touchmove` que no la deja pasar).
+  - La rueda no avanza: sale hacia adelante o hacia atrás.
+  - Se va el asentamiento del scroll de B1.3 (`useDeslizamientoDelPortfolio`).
+- **T4, la ficha:** el nombre y el rubro, el problema, qué hicimos y «Visitar sitio», abajo, en ≤ 25 % del alto. Si no entra, van las versiones cortas, sacadas de los textos reales.
+- **T6 y T7:** «la tuya» con el mismo formulario que en PC (B4/B5). Los toques no cuentan sobre los campos, los botones ni los enlaces, y con un campo enfocado nada avanza.
+- **T1, el sonido:** un solo tic por toque. Lo pone el componente cuando el cambio lo pidió un gesto; el acordeón no suena en las historias.
+
+**B4/B5 · el formulario de «la tuya»:**
+- **Los campos del modal**, la píldora y el texto largo, salen a `_componentes/chrome/Campos.tsx`, y los usan los dos. El modal queda idéntico: la huella sha256 de su marcado antes y después, y captura si hay memoria.
+- **«¿Qué necesitás?»** pasa a ser un texto largo de 4 renglones como mínimo.
+- **«Enviar»** es el `Cta` del sitio, y «o escribinos por WhatsApp» va a la derecha, en la misma fila.
+- **El clic en el título activo** (no hace nada) se saca y no suena: la cabecera activa lleva `aria-disabled`, como pide el acordeón de la WAI cuando el panel no se cierra, y el sonido global no suena con lo deshabilitado.
+
+**Lo demás:**
+- **B6:** el aire de arriba y el de abajo de «la tuya» se reparte (la diferencia, menos del 10 % del alto del panel, a 1440 × 900 y a 1024 × 768).
+- **B7:** el formulario en 3D, detrás de `?form=3d` (perspectiva de CSS sobre los campos reales; giro en reposo calibrable con `?form=3d-10`; con el mouse, ±6° suavizado; con movimiento reducido, plano).
+- **P-H21:** `BotonPausa` en el video en bucle del panel de escritorio. En las historias, la pausa es mantener apretado.
+
+### 14.6 Log: B1.2d B · el formulario de «la tuya» y las historias (2026-10-18)
+
+**Lo hecho, punto por punto:**
+
+**B4/B5 · el formulario de «la tuya»:**
+- **Los campos son los del modal de contacto.** La píldora (`CampoDePildora`), el texto largo (`CampoDeTextoLargo`) y el error (`ErrorDelCampo`) salieron de `_chrome/contacto/CamposDelContacto.tsx` a `_componentes/formularios/Campos.tsx`, y los usan los dos formularios.
+- **El modal quedó IDÉNTICO.** Las huellas sha256 de su marcado, tomadas antes del cambio en cinco casos, son las mismas: la hoja, la hoja con el interés precargado, los campos vacíos, los campos llenos con errores y el modo teléfono. s76 §32 las fija.
+- **«¿Qué necesitás?»** es un texto largo de 4 renglones como mínimo, que crece hasta 8.
+- **«Enviar»** es el `Cta` del sitio (el del modal), y «o escribinos por WhatsApp» va a su derecha, centrado, en la misma fila. En el error, WhatsApp queda como alternativa.
+- **El clic en el título de la tira abierta** no hacía nada y sonaba. Ahora la cabecera abierta lleva `aria-disabled` (como pide el acordeón de la WAI cuando el panel no se cierra) y no tiene `onClick`, y el sonido global no suena con un control deshabilitado (`ControlDelSonido`).
+- **Lo encontró la invariante de Trabajos:** el lector de s10 (`s10-recorrido.ts`) tomaba `aria-disabled` por `disabled`, porque `\b` corta en el guion, y sacaba la cabecera abierta del orden del teclado. Arreglado: el nombre entero.
+
+**B6 · el espacio de «la tuya»:** el bloque entero queda centrado en el alto, con el mismo despeje arriba y abajo. El criterio (< 10 % del alto del panel a 1440 × 900 y 1024 × 768) lo mide el banco: no corrió por memoria.
+
+**B7 · `?form=3d`** (`FormularioEnPerspectiva`): perspectiva de CSS sobre los campos reales.
+- En reposo gira −10°, calibrable de −8° a −12° con `?form=3d-8` … `?form=3d-12`.
+- Con el mouse adentro sigue al puntero, ±6° como mucho, suavizado con una transición de 300 ms, y vuelve al reposo al salir.
+- Con movimiento reducido, en el servidor o sin la bandera: plano, sin una caja de más.
+
+**T2 · debajo de 1024, todo es historias:** `--modo-del-portfolio: historias` pasa de `max-tablet` a `max-escritorio`, así que va de 1023 a 768 inclusive y más abajo.
+- Los lomos, las barras y la pista de la tablet se fueron.
+- La columna va a todo el ancho, con el título arriba.
+- El panel no se desliza: queda transparente y sin puntero mientras está vacío.
+
+**P-H19 · las historias como pieza común** (`_componentes/historias/`):
+- `maquinaDeLasHistorias.ts` es la máquina pura. Se llama así porque `historias.ts` chocaba con `Historias.tsx` en Windows: el import resolvía al `.ts`.
+- `Historias.tsx` es el componente. La firma está en la §14.5.
+- La cantidad de pasos sale de `items`. No depende de `PortfolioVivo` ni de `[data-panel]`: lo propio entra por `items`, `renderItem` y `alSalir`.
+- La prueba la monta con tres pasos fuera del Portfolio (s76 §29).
+
+**T3 · la entrada:**
+- El título «Portfolio» sube desde abajo (55 svh, por delante del logo: el DOM va sobre el lienzo) con su presencia, y se queda arriba.
+- Recién ahí entran las historias: un fundido con una subida corta, de 24 px en 700 ms.
+- En las historias, el título se pide en la aproximación y sigue pedido con ellas adentro, así que al volver (deslizar hacia abajo) está ahí.
+
+**T4/T5 · las historias:**
+- Arriba van las barras, y la de ahora se llena lineal en 10 s.
+- El video del teléfono va a pantalla completa, en bucle mientras dura la historia, y cada una arranca de cero, porque se vuelve a montar.
+- Mantener apretado 200 ms pausa la barra y el video.
+- Un toque en el tercio izquierdo vuelve; en los dos tercios derechos, avanza.
+- De costado, igual. Hacia arriba se va a Demos y hacia abajo, al título.
+- **La ficha:** el nombre y el rubro con el problema a la derecha, y qué hicimos con «Visitar sitio» a la derecha. Va abajo, en el área segura, y nada más.
+  - No agregué versiones cortas: falta medir la ficha (≤ 25 %) en el sitio, y se agregan sólo si la medida lo pide.
+
+**T6/T7 · «la tuya» en las historias:**
+- Sin tiempo: su barra queda llena y se queda hasta que el usuario sale.
+- Tiene el mismo formulario que en PC, apoyado abajo.
+- Los toques no cuentan sobre los campos, los botones ni los enlaces, y con un campo enfocado nada avanza.
+
+**T8 y T1:**
+- El scroll nunca avanza las historias: mientras corren, el dedo no mueve la página (`useSinScrollEnLasHistorias`; un diálogo, sí) y la rueda sale en vez de avanzar.
+- El asentamiento del scroll de B1.3 se fue con sus dos archivos.
+- Un solo sonido por toque: el toque es del puntero sobre la superficie (no un botón: el sonido global no suma su «clic»), y el tic suena sólo si el cambio lo pidió un gesto.
+
+**P-H21:** `BotonPausa` va en el video en bucle del panel de escritorio, mientras corre solo. En las historias, la pausa es mantener apretado.
+
+**Los archivos:**
+- **Nuevos:**
+  - `_componentes/historias/maquinaDeLasHistorias.ts` y `Historias.tsx`;
+  - `_componentes/formularios/Campos.tsx`;
+  - en `trabajos/portfolio/`: `HistoriasDelPortfolio.tsx`, `HistoriaDelProyecto.tsx`, `useSinScrollEnLasHistorias.ts` y `FormularioEnPerspectiva.tsx`.
+- **Borrados:** `BarrasDelPortfolio.tsx`, `deslizamiento.ts` y `useDeslizamientoDelPortfolio.ts`.
+
+**Las afirmaciones reemplazadas porque cambió la spec** (ninguna debilitada; cada una con su control):
+
+| # | Dónde | Antes | Ahora |
+|---|---|---|---|
+| 1 | s76 B1.3 §27 a §31 (`s76-portfolio-historias.tsx`, entero) | las historias eran el acordeón restilizado debajo de 768, avanzadas por el scroll, con dos toques en botones y el título que caía | §27 a §31 nuevas: T2, la historia y su ficha, P-H19 con 3 y 4 pasos, T8 y T1, y T3 |
+| 2 | s76 B1.2c §25 | las barras, la pista y el tap de la tablet | sin barras ni pista (el tap en un lomo queda: escritorio) |
+| 3 | s76 B1.2c §26 | la tablet con la columna al 40 % | con la columna a todo el ancho; el control, con la columna angosta de antes |
+| 4 | s76 B1.2c §19, cableado | la regla del título de B1.3 | la de T3 |
+| 5 | s76 B1.2d §33, cableado de A3 | `ir: (d) => ir(d, true)` | con la salida de las historias |
+| 6 | s76 B1.2b §11, «la columna es UN bloque» | las clases de la tablet | las de las historias |
+| 7 | s76 B1.2b §11, «una sola estructura» | el vidrio siempre | el vidrio fuera de las historias |
+| 8 | s76 B1.2b, el despeje de «la tuya» | sólo arriba | arriba y abajo (B6) |
+| 9 | Trabajos §6, el contenido entero | sin excepciones | salvo los dos rótulos del teclado de las historias, que se montan en el cliente; la pista («Seguí bajando») salió del contenido |
+| 10 | Trabajos, videos | dos por proyecto | uno (el del teléfono es de la historia) |
+| 11 | Trabajos, archivos | 38 | 39 |
+| 12 | Trabajos, botones | 7 | 5 |
+| 13 | Trabajos, paradas | 14 | 12, y el texto largo es una parada válida |
+| 14 | `portfolio-invariante`, los `hidden` | 12 | 11 (la pista) |
+| 15 | `portfolio-invariante`, el formulario corto | tres campos de una línea | el texto largo, el `Cta` y la fila del envío, con un control nuevo |
+| 16 | `s10-acceso-censo` | `DELTA_DEL_PORTFOLIO.paradas` 7 | 5 |
+| 17 | s37 y s61 | leían `CamposDelContacto.tsx` | leen también `Campos.tsx` (los campos se mudaron); el control de s61 busca la clase donde está ahora |
+| 18 | s5-compacto | el contenido entero en el marcado servido | con la misma excepción del cliente (las rutas tienen que existir) |
+| 19 | s77 §1 | «la pausa no está integrada» | «está en el video en bucle del panel, y en ningún otro lado» |
+
+- **El arreglo del lector de s10** (`atributo` y `tieneAtributo`, nombre entero) es una corrección del instrumento, con su control en s76 §32.
+
+**Verificación:**
+- lint de los 36 archivos, limpio;
+- `tsc --noEmit`, 0 errores;
+- `verificar` (con el índice de los borrados): 84 pasos y los 8 grupos de la base. La lista tenía dos líneas nuevas en s5, las dos de B: s5-compacto (los dos rótulos del teclado de las historias no llegan al marcado servido; se declaró la misma excepción que en Trabajos, con su razón) y s5-tokens (un `max-w` de porcentaje en la ficha de la historia: es una grilla de dos columnas). Arregladas y corridas sueltas, s5-compacto y s5-tokens vuelven a su base;
+- s76, 350; Trabajos, 242; s10-acceso, 74; s37, 116; s61, 70; s39, 61; s25, 35; s77, 35; s3-foco, 65;
+- el modal de contacto, idéntico por huella;
+- sin `next build`.
+
+**Lo que no corrió por memoria:**
+- Todo lo del sitio de B. Con el dev de servicios arriba (2,5 GB) y el del home (de 3 a 4,6 GB), no quedan 3 GB para un Chrome.
+- La sonda de las historias (`scratchpad/cola2/historias-sitio.ts`): el modo en 767, 768, 1023 y 1024; la ficha ≤ 25 % en 360, 375, 390, 820 × 1180 y 1023 × 768; el arranque en cero, mantener, los toques, los deslices, el scroll, «la tuya» y las salidas.
+- B6 medido, el AA de lo nuevo (la ficha sobre el video, «Enviar», el disco de la pausa) y la captura del modal en el navegador (la huella del marcado sí corrió).
+
+**Decisiones que tomé sin preguntar:**
+- **La barra de «la tuya» llena y quieta.** «Sin tiempo» lo leí como llena: la otra lectura era vacía.
+- **El último ítem con tiempo se queda lleno y no sale solo.** Salir es del que mira; un toque a la derecha después del último, sí sale.
+- **Un toque a la izquierda en el primero lo reinicia**, como Instagram, sin sonar.
+- **T7:** «más grande» lo resolví con el bloque de «la tuya» de la historia apoyado abajo, con el título en `titulo-xl`. El `Cta` del sitio mide lo mismo en todos lados y su tamaño no lo cambié.
+- **Para el teclado de las historias** hay dos controles escondidos (anterior y siguiente). Mientras uno tiene el foco, el tiempo no corre (WCAG 2.2.2).
+- **Los rótulos de «la tuya»** quedaron del tamaño de los del modal. Los dos usaban `text-caption`, así que no sé si «más grandes» pedía otra cosa: miralo (abajo).
+
+**Qué mirar (FRENO B),** en el dev del home (`npm run dev -- -p 3002`):
+1. **B4/B5**, a 1440 y 1024, en `/v3#portfolio-la-tuya`. Los campos son los del modal de contacto (abrilo desde «Contacto» de la barra y comparalos): la píldora, el padding, los rótulos, el foco (Tab), los errores (Enviar vacío) y el ejemplo.
+   - «¿Qué necesitás?» tiene cuatro renglones.
+   - «Enviar» es el botón simple, legible.
+   - WhatsApp va en la misma fila, a la derecha.
+   - Un clic en «La próxima es la tuya» no suena.
+   - Decí si los rótulos tienen el tamaño que querías.
+2. **El modal de contacto**, a 1440 y 390: igual que antes.
+3. **B6**, a 1440 × 900 y 1024 × 768: «la tuya» centrada en el panel, sin el hueco de abajo.
+4. **B7**, a 1440, en `/v3?form=3d#portfolio-la-tuya` (y `?form=3d-8`, `?form=3d-12`): el formulario inclinado, que sigue al mouse y vuelve. Se escribe y se tabula. Lo más probable es que no quede: decí si sí.
+5. **P-H21**, a 1440, en `/v3#portfolio-el-garage`: el disco de pausa abajo a la derecha del video; pausa y sigue.
+6. **T2**, a 1023, 820 y 768: historias (no lomos). A 1024, el acordeón.
+7. **T3**, a 390 y 820, bajando hasta el Portfolio: «Portfolio» sube desde abajo, pasa por delante del logo y queda arriba, y después entran las historias, tranquilas.
+8. **T4/T5**, a 390, 375 y 360, en el teléfono o con el táctil emulado:
+   - la barra de arriba se llena en 10 s y pasa a la siguiente;
+   - mantener apretado pausa la barra y el video;
+   - toque a la izquierda o a la derecha, y deslizar de costado;
+   - deslizar hacia arriba va a Demos y hacia abajo, al título;
+   - un solo sonido por toque;
+   - la ficha abajo, en el último cuarto.
+9. **T6/T7**, «la tuya» en las historias: no pasa sola; los toques sobre los campos escriben (no cambian de historia); con un campo enfocado nada avanza.
+10. **T8**, con la rueda (a 820 con mouse) y con el dedo: el scroll no avanza las historias.

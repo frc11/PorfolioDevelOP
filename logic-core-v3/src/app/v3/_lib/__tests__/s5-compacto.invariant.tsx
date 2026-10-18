@@ -164,10 +164,20 @@ titulo('3 · Abajo de 1025 el contenido está COMPLETO')
  */
 const esReferencia = (t: string): boolean => /^[#/.]/.test(t)
 
+/**
+ * [B1.2d B] Lo que se pinta SÓLO en el cliente, con su razón: los nombres de los dos controles del teclado de las historias del Portfolio.
+ * Las historias se montan debajo de 1024 y con el panel adentro (el servidor sirve el acordeón). Las rutas tienen que existir: una
+ * excepción vieja se ve.
+ */
+const SOLO_EN_EL_CLIENTE: Readonly<Record<string, readonly string[]>> = { trabajos: ['historias.anterior', 'historias.siguiente'] }
+
 for (let i = 0; i < REGISTRO.length; i++) {
   const { id, contenido } = REGISTRO[i]
   const html = marcar(i, false)
-  const textos = textosDe(contenido).filter((h) => !esReferencia(h.valor))
+  const deLaSeccion = textosDe(contenido).filter((h) => !esReferencia(h.valor))
+  const enElCliente = SOLO_EN_EL_CLIENTE[id] ?? []
+  afirmar(enElCliente.every((r) => deLaSeccion.some((h) => h.ruta === r)), `  \`${id}\`: cada excepción del cliente (${String(enElCliente.length)}) es una ruta del contenido`)
+  const textos = deLaSeccion.filter((h) => !enElCliente.includes(h.ruta))
   const ausentes = textos.filter((h) => !html.includes(escapar(h.valor)))
   afirmarIgual(
     ausentes.map((h) => `${h.ruta}: ${h.valor.slice(0, 40)}`),

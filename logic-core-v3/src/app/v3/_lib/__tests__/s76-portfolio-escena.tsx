@@ -164,9 +164,9 @@ export function afirmarElSelectorVivo(): void {
   controlPositivo('  el detector ve el logo de la cámara del pin (sin la pose)', CUADROS[0], (q: Cuadro) => desvio(q, cajaPorRayos(armarLaCamara(new THREE.PerspectiveCamera(), { ...enElPin }, q.ancho / q.alto, fovDe(q), LOGO.w, LOGO.h))) < 0.01)
   const escenario = leer('_secciones/trabajos/portfolio/EscenarioDelPortfolio.tsx')
   const enBloque = (c: string): boolean =>
-    /data-pieza="columna-del-portfolio"\s+className="@container absolute inset-y-0 left-0 flex w-1\/2 flex-col items-center justify-center px-8 text-center max-escritorio:w-2\/5 max-tablet:w-full"/.test(c) &&
-    /<EncabezadoDelPortfolio [^>]*\/>\s*<div data-pieza="hueco-del-logo" aria-hidden="true" className="mt-8 shrink-0 max-tablet:hidden" style=\{ESTILO_DEL_HUECO\} \/>/.test(c)
-  afirmar(enBloque(escenario) && /'absolute inset-y-0 right-0 flex w-1\/2 [^']*max-escritorio:w-3\/5 max-tablet:w-full'/.test(escenario) && COLUMNA_DEL_ANCHO.escritorio === 0.5 && COLUMNA_DEL_ANCHO.tablet === 0.4, 'la columna es UN bloque centrado en el alto: «Portfolio», la bajada y debajo el hueco del logo, en el mismo eje (la mitad desde 1024 y el 40 % en tablet; el panel, la otra mitad y el 60 %; [B1.3] en el teléfono, el título solo y la historia a pantalla completa)')
+    /data-pieza="columna-del-portfolio"\s+className="@container absolute inset-y-0 left-0 flex w-1\/2 flex-col items-center justify-center px-8 text-center max-escritorio:w-full max-escritorio:justify-start"/.test(c) &&
+    /<EncabezadoDelPortfolio [^>]*\/>\s*<div data-pieza="hueco-del-logo" aria-hidden="true" className="mt-8 shrink-0 max-escritorio:hidden" style=\{ESTILO_DEL_HUECO\} \/>/.test(c)
+  afirmar(enBloque(escenario) && /'absolute inset-y-0 right-0 flex w-1\/2 [^']*max-escritorio:w-full max-escritorio:translate-x-0'/.test(escenario) && COLUMNA_DEL_ANCHO.escritorio === 0.5 && COLUMNA_DEL_ANCHO.tablet === 0.4, 'la columna es UN bloque centrado en el alto: «Portfolio», la bajada y debajo el hueco del logo, en el mismo eje (la mitad desde 1024; el panel, la otra mitad; [B1.2d B] debajo de 1024, las historias: la columna a todo el ancho con el título arriba y el panel en su lugar, sin deslizarse)')
   controlPositivo('  el detector ve la columna de B1.2b (el encabezado en la mitad de arriba, el logo en la otra)', escenario.replace('data-pieza="columna-del-portfolio"', 'data-pieza="mitad-del-encabezado"'), enBloque)
   afirmar(Math.abs(PROPORCION_DEL_LOGO - LOGO.w / LOGO.h) < 1e-9 && ESTILO_DEL_HUECO.aspectRatio === PROPORCION_DEL_LOGO.toFixed(4), '  el hueco tiene la proporción del logo medido: lo llena por las dos medidas')
 
@@ -229,7 +229,7 @@ export function afirmarElSelectorVivo(): void {
   afirmar(OPACIDAD_DEL_VIDRIO === 0.04 && ESTILO_DEL_VIDRIO.backdropFilter === 'blur(20px) saturate(180%)' && ESTILO_DEL_VIDRIO.borderLeft === '1px solid color-mix(in srgb, var(--color-tinta) 8%, transparent)' && ESTILO_DEL_VIDRIO.background === 'color-mix(in srgb, var(--color-tinta) 4%, transparent)', 'el panel es de vidrio (el del sistema: blanco —la tinta de la sala de noche— al 4 %, desenfoque de 20 px, saturación del 180 %, borde al 8 %)')
   const panel = /'absolute inset-y-0 right-0 [^']*'/.exec(escenario)?.[0] ?? ''
   // [B1.3] Sin fondo propio desde 768: en el teléfono la hoja de la ficha sí lo lleva (`max-tablet:`), sobre el video.
-  afirmar(panel !== '' && !/(?<![:\w-])bg-fondo/.test(sinComentarios(leer('_secciones/trabajos/portfolio/Tira.tsx'))) && /style=\{ESTILO_DEL_VIDRIO\}/.test(escenario), '  una sola estructura: el vidrio en el panel (del lado derecho) y las tiras de la tinta sin fondo propio (desde 768)')
+  afirmar(panel !== '' && !/(?<![:\w-])bg-fondo/.test(sinComentarios(leer('_secciones/trabajos/portfolio/Tira.tsx'))) && /style=\{vivo\.historias \? undefined : ESTILO_DEL_VIDRIO\}/.test(escenario), '  una sola estructura: el vidrio en el panel (del lado derecho) y las tiras de la tinta sin fondo propio (desde 1024; [B1.2d B] en las historias el fondo es el video de cada una)')
 
   titulo('B1.2b · 12 · El panel entra y sale en horizontal: el gatillo espera al pin')
 
@@ -313,7 +313,7 @@ export function afirmarElSelectorVivo(): void {
   const expresion = (s: string): string => s.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').trim()
   const despejeDeLasAnclas = expresion(/html:has\(\[data-v3\]\) \{\s*scroll-padding-top: (calc\([\s\S]*?\));\s*\}/.exec(leer('_estilos/navegacion.css'))?.[1] ?? '?')
   const despejaLaBarra = (e: string): boolean => despejeDeLasAnclas.startsWith('calc(var(--spacing-6)') && expresion(e) === despejeDeLasAnclas
-  afirmar(despejaLaBarra(DESPEJE_DE_LA_BARRA) && /style=\{activa \? \{ paddingTop: DESPEJE_DE_LA_BARRA \} : undefined\}/.test(laTuya), '  el título no queda debajo de la barra: la tira activa deja libre lo que ocupa la barra en reposo, con la misma expresión que el despeje de las anclas (el banco: a 1024 la pastilla lo tapaba, 2,1:1)', despejeDeLasAnclas)
+  afirmar(despejaLaBarra(DESPEJE_DE_LA_BARRA) && /style=\{activa \? \{ paddingTop: DESPEJE_DE_LA_BARRA, paddingBottom: DESPEJE_DE_LA_BARRA \} : undefined\}/.test(laTuya), '  el título no queda debajo de la barra: la tira activa deja libre lo que ocupa la barra en reposo, con la misma expresión que el despeje de las anclas (el banco: a 1024 la pastilla lo tapaba, 2,1:1)', despejeDeLasAnclas)
   controlPositivo('  el detector ve un despeje que se separó del de las anclas', 'calc(var(--spacing-6) + var(--spacing-2) * 2 + var(--text-cuerpo) * var(--leading-texto))', despejaLaBarra)
 
   titulo('B1.2b · 17 · Demos en tablet: llega como en escritorio y su título no asoma durante el Portfolio')

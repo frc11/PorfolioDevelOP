@@ -70,15 +70,18 @@ export interface Nodo {
 /** La marca de sección. Se importa del contrato: no puede haber una segunda. */
 export { ATRIBUTO_DE_SECCION }
 
-/** El valor de un atributo del nodo, o `null` si no lo lleva. */
+/**
+ * El valor de un atributo del nodo, o `null` si no lo lleva. [B1.2d B] El nombre ENTERO (al principio o después de un espacio): con `\b`,
+ * `disabled` se encontraba adentro de `aria-disabled`, y una cabecera abierta del acordeón salía del orden del teclado.
+ */
 export function atributo(nodo: Nodo, nombre: string): string | null {
-  const m = new RegExp(`\\b${nombre}="([^"]*)"`).exec(nodo.atributos)
+  const m = new RegExp(`(?:^|\\s)${nombre}="([^"]*)"`).exec(nodo.atributos)
   return m === null ? null : m[1]
 }
 
 /** Si el nodo declara el atributo, con o sin valor. */
 export function tieneAtributo(nodo: Nodo, nombre: string): boolean {
-  return new RegExp(`\\b${nombre}(?=[=\\s>]|$)`).test(nodo.atributos)
+  return new RegExp(`(?:^|\\s)${nombre}(?=[=\\s>/]|$)`).test(nodo.atributos)
 }
 
 /**

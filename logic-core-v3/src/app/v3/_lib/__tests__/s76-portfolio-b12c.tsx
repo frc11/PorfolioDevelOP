@@ -5,7 +5,7 @@
  * no se corta. (La cámara de frente y el título en el plano del logo: §9, §9b y §9c de `s76-portfolio-escena.tsx`.) Cada afirmación
  * con su control positivo. El arnés de carga mide la rueda en el sitio (`scripts-carga/rueda.ts`).
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { HOME_INTRO_PHASES } from '@/components/layout/home-intro/introTimeline'
@@ -23,7 +23,6 @@ import { CORRIMIENTO } from '../../_chrome/barra/corrimiento'
 import { validarContacto } from '../../_chrome/contacto/enviarContacto'
 import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
 import { activaElHover } from '../../_secciones/trabajos/portfolio/Acordeon'
-import { estadosDeLasBarras } from '../../_secciones/trabajos/portfolio/BarrasDelPortfolio'
 import { PRESENCIA_DEL_ENCABEZADO } from '../../_secciones/trabajos/portfolio/EncabezadoDelPortfolio'
 import { CLASE_DEL_ROTULO, Ficha } from '../../_secciones/trabajos/portfolio/Ficha'
 import { CAMPOS_DE_LA_TUYA, datosDelFormulario } from '../../_secciones/trabajos/portfolio/FormularioDeLaTuya'
@@ -92,7 +91,7 @@ export function afirmarB12c(): void {
   const escenario = sinComentarios(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`))
   const cableado = (u: string, e: string): boolean =>
     /const tituloS = useTituloListo\('portfolio'\) \? LENTOS\.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO\.s/.test(u) &&
-    /const pedidoDelOrden = \{ camara: adentro, encabezado: historias \? fase === 'antes' && enCuadro : adentro, barra: adentro && !historias, panel: adentro \}/.test(u) &&
+    /const pedidoDelOrden = \{ camara: adentro, encabezado: historias \? \(fase === 'antes' && enCuadro\) \|\| adentro : adentro, barra: adentro && !historias, panel: adentro \}/.test(u) &&
     /useOrdenDeLaEscena\(pedidoDelOrden, tituloS, reducido\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.camara/.test(u) && /useBarraDelPortfolio\(caja, orden\.barra\)/.test(u) &&
     /!vivo\.panel && 'translate-x-full'/.test(e) && /<EncabezadoDelPortfolio seccion=\{seccion\} adentro=\{vivo\.encabezado\}/.test(e)
   afirmar(cableado(usePortfolio, escenario), '  y así se cablea: la cámara (con el oscurecido de `PORTFOLIO_EN_LA_ESCENA`), el encabezado, la barra y el panel salen del orden, no del paso')
@@ -240,13 +239,13 @@ export function afirmarB12c(): void {
   afirmar(/stroke-dashoffset="0"/.test(armado) && /stroke-dashoffset="1"/.test(armandose) && /<SignoQueSeArma key=\{entrada\}/.test(signo), '  con movimiento reducido aparece armado (el trazo entero); si no, arranca sin dibujar, y cada entrada lo monta de nuevo (se rearma)')
 
   // ═══════════════════════════════════════════════════════════════════════════
-  titulo('B1.2c · 25 · Tablet: las barras de progreso, la pista «Seguí bajando» y el tap en un lomo')
+  titulo('B1.2c · 25 · [B1.2d B] Tablet (T2): ya no hay lomos, barras ni pista; el tap en un lomo queda para el escritorio')
 
-  afirmarIgual([estadosDeLasBarras(0, 'antes'), estadosDeLasBarras(1, 'adentro'), estadosDeLasBarras(3, 'despues')], [['vacia', 'vacia', 'vacia', 'vacia'], ['llena', 'activa', 'vacia', 'vacia'], ['llena', 'llena', 'llena', 'llena']], 'una barra por proyecto y la de «la tuya»: las vistas llenas, la del activo con lo recorrido de su paso, las que vienen vacías')
+  // T2 · debajo de 1024 son las historias (s76 §27): las barras y la pista de la tablet se fueron con su archivo.
   const escenarioCompleto = leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)
-  const barras = leer(`${PORTFOLIO}/BarrasDelPortfolio.tsx`)
-  afirmar(/<BarrasDelPortfolio vivo=\{vivo\} className="hidden shrink-0 px-8 pb-2 max-escritorio:flex"/.test(escenarioCompleto) && /<PistaDelPortfolio vivo=\{vivo\} className="absolute inset-x-0 bottom-6 hidden justify-center max-escritorio:flex/.test(escenarioCompleto), '  arriba del panel, abajo de 1024 (en escritorio no), y la pista al pie del panel')
-  afirmar(/if \(desde\.current !== null && \(!vivo\.panel \|\| vivo\.paso !== desde\.current\)\) marcarLaPista\(\)/.test(barras) && /window\.sessionStorage\.setItem\(CLAVE_DE_LA_PISTA, 'vista'\)/.test(barras) && /hidden=\{vista \|\| !vivo\.panel\}/.test(barras), '  la pista: la primera vez que entra el panel; se va con el primer paso (o con el panel) y no vuelve en la sesión')
+  const sinLaTablet = (e: string): boolean => !/BarrasDelPortfolio|PistaDelPortfolio|max-tablet:/.test(e) && !existsSync(path.join(V3, `${PORTFOLIO}/BarrasDelPortfolio.tsx`))
+  afirmar(sinLaTablet(escenarioCompleto), 'debajo de 1024 no quedan las barras de progreso ni la pista de la tablet: son historias, con las barras del componente común')
+  controlPositivo('  el detector ve el escenario de B1.2c (las barras arriba del panel abajo de 1024)', `${escenarioCompleto}\n<BarrasDelPortfolio vivo={vivo} className="hidden shrink-0 px-8 pb-2 max-escritorio:flex" />`, sinLaTablet)
   afirmar(/alElegir=\{\(\) => vivo\.saltarAlPaso\(indice, true\)\}/.test(leer(`${PORTFOLIO}/Tira.tsx`)), '  tap en un lomo = saltar a ese proyecto con el modelo del hover: activo ya, el scroll en silencio')
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -260,13 +259,15 @@ export function afirmarB12c(): void {
   const tamanos = [
     { ancho: 1440, columna: 0.5, nivel: displayXl(1440) },
     { ancho: 1024, columna: 0.5, nivel: displayXl(1024) },
-    { ancho: 820, columna: 0.4, nivel: 56 },
-    { ancho: 1023, columna: 0.4, nivel: 56 },
+    // [B1.2d B] T2 · en la tablet la columna es todo el ancho (las historias): el título entra con más aire.
+    { ancho: 820, columna: 1, nivel: 56 },
+    { ancho: 1023, columna: 1, nivel: 56 },
   ].map((q) => {
     const caja = q.columna * q.ancho - 64
     const tamano = Math.min(q.nivel * CRECIMIENTO_DEL_TITULO, caja / ANCHO_DEL_TITULO_EN_EM)
     return { ...q, caja, tamano }
   })
   afirmar(tamanos.every((q) => q.tamano > q.nivel && q.tamano * avance <= q.caja), 'más grande que su nivel en los cuatro cuadros y entero en su columna', tamanos.map((q) => `${String(q.ancho)}: ${q.nivel.toFixed(0)} → ${q.tamano.toFixed(1)} px`).join(' · '))
-  controlPositivo('  el detector ve el ×1,15 sin tope (a 820 se corta)', tamanos[2], (q: (typeof tamanos)[number]) => q.nivel * CRECIMIENTO_DEL_TITULO * avance <= q.caja)
+  // [B1.2d B] La columna angosta de la tablet de B1.2c (el 40 % a 820): ahí el ×1,15 sin tope se cortaba.
+  controlPositivo('  el detector ve el ×1,15 sin tope (en una columna angosta, el 40 % a 820, se corta)', { ...tamanos[2], caja: 0.4 * 820 - 64 }, (q: (typeof tamanos)[number]) => q.nivel * CRECIMIENTO_DEL_TITULO * avance <= q.caja)
 }

@@ -173,5 +173,9 @@ export const DELTA_DEL_FINAL_EN_EL_CENSO = { marcadores: -5 - 5 - 9 } as const
  *
  * [B1.3] Y los dos toques de la historia activa (anterior y siguiente, `display: none` desde 768 pero en el marcado de las dos ramas):
  * +2. Catorce contra siete: +7.
+ *
+ * [B1.2d B] Los dos toques se fueron del marcado: debajo de 1024 las historias son el componente común, que se monta en el cliente con
+ * el panel adentro (sus controles del teclado van ahí). Doce contra siete del túnel: +5. («¿Qué necesitás?» pasó a ser un texto largo:
+ * la misma parada.)
  */
-export const DELTA_DEL_PORTFOLIO = { paradas: 1 + 4 + 2, encabezados: 1, marcadores: 8 } as const
+export const DELTA_DEL_PORTFOLIO = { paradas: 1 + 4, encabezados: 1, marcadores: 8 } as const

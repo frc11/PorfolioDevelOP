@@ -3,7 +3,8 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
 
-import { cn } from '@/lib/utils'
+import { Cta } from '../../../_componentes/chrome/Cta'
+import { CampoDePildora, CampoDeTextoLargo, ErrorDelCampo } from '../../../_componentes/formularios/Campos'
 
 import { CAMPOS, DESPUES_DEL_ENVIO, ROTULO_DEL_ENVIO, ROTULO_ENVIANDO, avisoDeErrores } from '../../../_chrome/contacto/contenido'
 import { WHATSAPP } from '../../../_chrome/enlaces'
@@ -20,7 +21,7 @@ const SIN_PREGUNTAR: Pick<DatosDeContacto, 'intereses' | 'presupuesto' | 'empres
 
 type Fase = 'formulario' | 'enviando' | 'exito' | 'error'
 
-/** Los campos del formulario corto, en orden: el nombre (el del contacto), «WhatsApp o email» y «¿Qué necesitás?», de una línea. */
+/** Los campos del formulario corto, en orden: el nombre (el del contacto), «WhatsApp o email» y [B1.2d B] «¿Qué necesitás?», un texto largo de cuatro renglones. */
 export const CAMPOS_DE_LA_TUYA = [
   { campo: 'nombre', rotulo: CAMPOS.nombre.rotulo, ejemplo: CAMPOS.nombre.ejemplo, maximo: MAXIMOS.nombre, autocompletar: 'name' },
   { campo: 'medio', rotulo: CONTENIDO.laTuya.medio, ejemplo: CAMPOS.medio.ejemplo, maximo: MAXIMOS.contacto, autocompletar: 'email' },
@@ -35,6 +36,21 @@ export const datosDelFormulario = (d: Pick<DatosDeContacto, CampoDeLaTuya>): Dat
 const idDelError = (campo: string): string => `la-tuya-error-${campo}`
 /** Cada campo con su `<label for>` (el nombre accesible que leen los instrumentos de s10, como en el formulario del pie). */
 const idDelCampo = (campo: string): string => `la-tuya-${campo}`
+
+/** «o escribinos por WhatsApp»: el enlace `wa.me` del pie, con su mensaje precargado (se abre aparte). */
+function EnlaceDeWhatsApp({ className }: { readonly className?: string }): React.JSX.Element {
+  return (
+    <a
+      href={WHATSAPP.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${CONTENIDO.laTuya.whatsapp}, ${CONTENIDO.ficha.abreAparte}`}
+      className={`text-cuerpo underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 ${className ?? ''}`}
+    >
+      {CONTENIDO.laTuya.whatsapp}
+    </a>
+  )
+}
 
 /**
  * [B1.2c] EL FORMULARIO CORTO DE «LA TUYA» (plan §13, punto 6) — en lugar del botón, en la misma tira: el nombre, «WhatsApp o email» y
@@ -99,58 +115,36 @@ export function FormularioDeLaTuya({ visible, reducido, desde }: { readonly visi
           <button type="button" onClick={() => setFase('formulario')} className="text-cuerpo underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4">
             {fase === 'exito' ? RESULTADO.otro : RESULTADO.reintentar}
           </button>
+          {fase === 'error' ? <EnlaceDeWhatsApp /> : null}
         </div>
       ) : (
         <form noValidate onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-3">
           {CAMPOS_DE_LA_TUYA.map((c) => {
             const error = c.campo === 'mensaje' ? undefined : errores[c.campo]
+            // [B1.2d B] B4/B5 · los campos del modal de contacto (`_componentes/formularios/Campos.tsx`), no una copia: la píldora, el padding,
+            // los rótulos, el foco, el error punteado y el ejemplo. Con `id`, el rótulo nombra al campo (`for`).
+            const comun = {
+              rotulo: c.rotulo, nombre: c.campo, id: idDelCampo(c.campo), valor: datos[c.campo], alEscribir: (v: string) => escribir(c.campo, v),
+              ejemplo: c.ejemplo, maximo: c.maximo, idDelError: idDelError(c.campo), conError: error !== undefined,
+            }
             return (
-              <div key={c.campo} className="flex flex-col gap-1">
-                <label data-foco="pastilla" htmlFor={idDelCampo(c.campo)} className={cn('flex items-center gap-3 rounded-sutil border border-tinta/30 px-4 py-2', error !== undefined && 'border-dashed border-tinta')}>
-                  <span className="shrink-0 text-caption font-medio">{c.rotulo}</span>
-                  <input
-                    id={idDelCampo(c.campo)}
-                    name={c.campo}
-                    type="text"
-                    inputMode={c.campo === 'medio' ? 'email' : undefined}
-                    autoComplete={c.autocompletar}
-                    required={c.campo === 'medio'}
-                    maxLength={c.maximo}
-                    value={datos[c.campo]}
-                    onChange={(e) => escribir(c.campo, e.target.value)}
-                    placeholder={c.ejemplo}
-                    aria-invalid={error !== undefined || undefined}
-                    aria-describedby={error === undefined ? undefined : idDelError(c.campo)}
-                    className="min-w-0 flex-1 bg-transparent text-caption placeholder:text-tinta/50"
-                  />
-                </label>
-                {error === undefined ? null : (
-                  <p id={idDelError(c.campo)} className="text-micro leading-texto">
-                    {error}
-                  </p>
+              <div key={c.campo} className="flex flex-col gap-[var(--spacing-1)]">
+                {c.campo === 'mensaje' ? (
+                  <CampoDeTextoLargo {...comun} renglones={4} />
+                ) : (
+                  <CampoDePildora {...comun} autocompletar={c.autocompletar} requerido={c.campo === 'medio'} modoDeEntrada={c.campo === 'medio' ? 'email' : undefined} />
                 )}
+                <ErrorDelCampo id={idDelError(c.campo)} texto={error} />
               </div>
             )
           })}
-          <button
-            type="submit"
-            disabled={enviando}
-            aria-busy={enviando || undefined}
-            className="mt-1 self-start rounded-sutil bg-tinta px-6 py-3 font-titulo text-[length:var(--text-titulo-s)] text-fondo transition-colors hover:bg-tinta/85 focus-visible:outline-2 focus-visible:outline-offset-4 disabled:opacity-70"
-          >
-            {enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO}
-          </button>
+          {/* [B1.2d B] «Enviar» es el botón simple del sitio (el del contacto), y WhatsApp va a su derecha, en la misma fila. */}
+          <div data-parte="fila-del-envio" className="mt-1 flex items-center justify-between gap-4">
+            <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className="shrink-0" />
+            <EnlaceDeWhatsApp className="text-right" />
+          </div>
         </form>
       )}
-      <a
-        href={WHATSAPP.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`${CONTENIDO.laTuya.whatsapp}, ${CONTENIDO.ficha.abreAparte}`}
-        className="self-start text-cuerpo underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-      >
-        {CONTENIDO.laTuya.whatsapp}
-      </a>
       {/* Las dos regiones vivas existen desde el principio (como en el contacto): el aviso de los errores o el del servidor, y el gracias. */}
       <p role="alert" className="sr-only">
         {aviso}

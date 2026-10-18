@@ -41,15 +41,18 @@ export function afirmarElSelector(quieto: string, conMotion: string): void {
   afirmarIgual(referenciasColgadas(quieto), [], 'cada `aria-controls` y cada `aria-labelledby` nombra un `id` que existe')
   controlPositivo('  el detector ve una referencia colgada', '<button aria-controls="no-existe"></button>', (html: string) => referenciasColgadas(html).length === 0)
   afirmarIgual(veces(quieto, 'role="region"'), 0, 'los contenidos de las tiras NO son `region`: el acordeón no suma puntos de referencia al documento (s10-acceso los cuenta)')
-  afirmarIgual(veces(quieto, ' hidden=""'), 2 + 2 + 1 + 2 * PROYECTOS.length + 1, '  van `hidden` el medio y el contenido de las dos cerradas de proyecto, el contenido de la tuya y las dos filas que no se muestran de cada ficha ([B1.2b] la ficha ya no se esconde: va siempre en la activa) y [B1.2c] la pista de la tablet (con el panel afuera)')
+  afirmarIgual(veces(quieto, ' hidden=""'), 2 + 2 + 1 + 2 * PROYECTOS.length, '  van `hidden` el medio y el contenido de las dos cerradas de proyecto, el contenido de la tuya y las dos filas que no se muestran de cada ficha ([B1.2b] la ficha ya no se esconde: va siempre en la activa; [B1.2d B] la pista de la tablet se fue con las historias, T2)')
 
-  // [B1.2c] «La tuya» lleva el formulario corto en lugar del botón a la hoja de contacto: tres campos, enviar y WhatsApp.
+  // [B1.2c] «La tuya» lleva el formulario corto en lugar del botón a la hoja de contacto: tres campos, enviar y WhatsApp. [B1.2d B] B4/B5:
+  // «¿Qué necesitás?» es un texto largo, «Enviar» es el botón simple del sitio (el `Cta`) y WhatsApp va en su fila.
   const formulario = /<div data-pieza="formulario-de-la-tuya"[\s\S]*?<p role="status"/.exec(quieto)?.[0] ?? ''
   const whatsapp = `<a href="${WHATSAPP.href}"`
   const formularioCorto = (f: string): boolean =>
-    [...f.matchAll(/<input [^>]*name="(nombre|medio|mensaje)"/g)].map((m) => m[1]).join(',') === 'nombre,medio,mensaje' && /<button type="submit"/.test(f) &&
+    [...f.matchAll(/<(input|textarea) [^>]*name="(nombre|medio|mensaje)"/g)].map((m) => `${m[2]}:${m[1]}`).join(',') === 'nombre:input,medio:input,mensaje:textarea' && /<button type="submit" data-pieza="cta"/.test(f) &&
+    /<div data-parte="fila-del-envio"[^>]*>[\s\S]*?<button type="submit"[\s\S]*?<a href=/.test(f) &&
     f.includes(whatsapp) && /target="_blank" rel="noopener noreferrer" aria-label="o escribinos por WhatsApp, se abre en una pestaña nueva"/.test(f) && /<form noValidate="" class=/.test(f)
-  afirmar(formularioCorto(formulario) && veces(quieto, 'data-abre-contacto="panel"') === 0, '[B1.2c] «la tuya» lleva el formulario corto en lugar del botón: el nombre, «WhatsApp o email» y «¿Qué necesitás?», enviar, y «o escribinos por WhatsApp» (el número del pie, en una pestaña nueva); el formulario, sin nombre propio: no suma un punto de referencia')
+  afirmar(formularioCorto(formulario) && veces(quieto, 'data-abre-contacto="panel"') === 0, '[B1.2c] «la tuya» lleva el formulario corto en lugar del botón: el nombre, «WhatsApp o email» y [B1.2d B] «¿Qué necesitás?» (un texto largo), «Enviar» (el botón simple del sitio) y, en su fila, «o escribinos por WhatsApp» (el número del pie, en una pestaña nueva); el formulario, sin nombre propio: no suma un punto de referencia')
+  controlPositivo('  el detector ve el formulario de B1.2c (tres campos de una línea y un botón propio)', formulario.replace(/<textarea /, '<input ').replace(/<button type="submit" data-pieza="cta"/, '<button type="submit" class="x"'), formularioCorto)
   controlPositivo('  el detector ve el botón de antes (sin el formulario)', '<div data-pieza="formulario-de-la-tuya"><button type="button" data-abre-contacto="panel">Clickeá</button><p role="status">', formularioCorto)
   const visitar = [...quieto.matchAll(/<a [^>]*aria-label="Visitar sitio de [^"]*"[^>]*>/g)].map((m) => m[0])
   afirmarIgual(visitar.length, PROYECTOS.length, 'un «Visitar sitio» por proyecto')

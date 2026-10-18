@@ -103,10 +103,14 @@ export const ARCHIVOS_DE_PIEZA = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/MarcaDeAgua.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/MedioDeLaTira.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/Tira.tsx`,
-  // [B1.2c] las barras y la pista de la tablet, el formulario corto y el «?» que se arma de «la tuya».
-  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/BarrasDelPortfolio.tsx`,
+  // [B1.2c] el formulario corto y el «?» que se arma de «la tuya» ([B1.2d B] las barras y la pista de la tablet se fueron con T2).
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/FormularioDeLaTuya.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/SignoDePregunta.tsx`,
+  // [B1.2d B] las historias del Portfolio (con el componente común de `_componentes/historias/`) y la de cada proyecto.
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/HistoriasDelPortfolio.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/HistoriaDelProyecto.tsx`,
+  // [B1.2d B] B7 · el formulario de «la tuya» en perspectiva (`?form=3d`, una prueba).
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/FormularioEnPerspectiva.tsx`,
 ]
 
 /**
@@ -255,14 +259,14 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useOrdenDeLaEscena.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useRuedaDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useTransicionDeLasTiras.ts`,
-  // [B1.3] el deslizamiento de las historias del teléfono (puro y su gancho) y el ancla al cargar (salió de `usePortfolio.ts`).
-  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/deslizamiento.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useDeslizamientoDelPortfolio.ts`,
+  // [B1.3] el ancla al cargar (salió de `usePortfolio.ts`). [B1.2d B] El deslizamiento de las historias se fue: el scroll no las avanza (T8).
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useAnclaDeLaCarga.ts`,
   // [B1.2d] los mandos (la rueda, sus salidas, los toques y el clic afuera, salieron de `usePortfolio.ts`) y el pedido a la barra.
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMandosDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useClicAfueraDelPanel.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useBarraDelPortfolio.ts`,
+  // [B1.2d B] el scroll que no corre mientras corren las historias (T8).
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useSinScrollEnLasHistorias.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-detectores.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/relojDeDemos.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/herencia.ts`,

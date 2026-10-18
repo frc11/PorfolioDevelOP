@@ -401,12 +401,13 @@ controlPositivo('a · el detector VE el nombre repetido en la leyenda del teléf
 
 // c · El panel de Contacto en el teléfono: el contenido centrado en el alto de la hoja; el mensaje crece con lo que se escribe (de
 // dos a ocho renglones, `field-sizing`) y en el angosto su rótulo va en su renglón.
-const CAMPOS_J9 = leer('_chrome/contacto/CamposDelContacto.tsx')
+// [B1.2d B] La píldora y el texto largo del contacto viven en `_componentes/formularios/Campos.tsx` (los comparte «la tuya»).
+const CAMPOS_J9 = leer('_chrome/contacto/CamposDelContacto.tsx') + leer('_componentes/formularios/Campos.tsx')
 const panelAngostoBien = (cm: string, p: string): boolean =>
   cm.includes("'items-start rounded-[var(--radius-fuerte)] max-movil:flex-col max-movil:items-stretch'") && cm.includes('[field-sizing:content] min-h-[2lh] max-h-[8lh]') &&
   p.includes("compacto ? 'min-h-full justify-center gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]'")
 afirmar(panelAngostoBien(CAMPOS_J9, leer('_chrome/contacto/FormularioDeContacto.tsx')), 'c · el panel en el teléfono: centrado en el alto, el mensaje que crece (con tope) y su rótulo en su renglón en el angosto')
-controlPositivo('c · el detector VE el mensaje de alto fijo', CAMPOS_J9.replace(' [field-sizing:content] min-h-[2lh] max-h-[8lh]', ''), (cm: string) => panelAngostoBien(cm, leer('_chrome/contacto/FormularioDeContacto.tsx')))
+controlPositivo('c · el detector VE el mensaje de alto fijo', CAMPOS_J9.replace('[field-sizing:content] min-h-[2lh] max-h-[8lh]', ''), (cm: string) => panelAngostoBien(cm, leer('_chrome/contacto/FormularioDeContacto.tsx')))
 
 // d · El progreso en el teléfono: arriba a la derecha, con el parlante a su izquierda (el botón del menú va arriba al centro);
 // `?progreso=abajo`, la esquina de abajo de antes. En escritorio, como estaba. [PULIDO 11] C2 · el parlante se fue arriba a la

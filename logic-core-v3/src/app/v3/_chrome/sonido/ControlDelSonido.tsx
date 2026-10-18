@@ -111,6 +111,8 @@ export default function ControlDelSonido(): React.JSX.Element {
     const alClic = (e: MouseEvent): void => {
       const blanco = e.target instanceof Element ? e.target : null
       if (blanco === null || blanco.closest('[data-pieza="control-del-sonido"]') !== null) return
+      // [B1.2d B] Nada suena si no pasa nada: un control deshabilitado (la cabecera abierta del acordeón del Portfolio, por ejemplo), no.
+      if (blanco.closest(ENLACES_Y_BOTONES)?.matches('[aria-disabled="true"], :disabled') === true) return
       if (blanco.closest(DE_LAS_DEMOS_DEL_PANEL) !== null) {
         if (blanco.closest(ENLACES_Y_BOTONES) !== null) sonar('pestillo')
         return

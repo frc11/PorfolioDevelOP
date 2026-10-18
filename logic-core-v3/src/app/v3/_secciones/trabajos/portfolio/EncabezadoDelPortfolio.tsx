@@ -25,6 +25,12 @@ import { CLASE_DEL_CUERPO, CLASE_DEL_TITULAR, MEDIDA_DEL_CUERPO_CH, opacidadDeLa
 export const PRESENCIA_DEL_ENCABEZADO = { s: 0.6, curva: [0.25, 0.46, 0.45, 0.94] } as const
 
 /**
+ * [B1.2d B] T3 · En las historias (debajo de 1024) el título viene desde abajo: sube pasando por delante del logo y termina arriba, con
+ * el logo debajo (como la columna de PC). Lo que recorre, en `svh` del cuadro, con la misma presencia (por tiempo).
+ */
+export const SUBIDA_DEL_ENCABEZADO_SVH = 55
+
+/**
  * [B1] EL ENCABEZADO DEL PORTFOLIO — «Portfolio» y su bajada, centrados en la mitad de arriba de la columna (plan §5.1; [B1.2b]
  * §12, puntos 1 y 3).
  *
@@ -37,7 +43,7 @@ export const PRESENCIA_DEL_ENCABEZADO = { s: 0.6, curva: [0.25, 0.46, 0.45, 0.94
  * (`useAcompananteDelTitulo`). Los nombres son los del cartel a propósito: los invariantes que fijan cómo se arma el título los
  * leen acá.
  */
-export function EncabezadoDelPortfolio({ seccion, adentro, reducido, className }: PropsDeSeccion & { readonly adentro: boolean; readonly reducido: boolean; readonly className?: string }): React.JSX.Element {
+export function EncabezadoDelPortfolio({ seccion, adentro, reducido, subeDesdeAbajo = false, className }: PropsDeSeccion & { readonly adentro: boolean; readonly reducido: boolean; readonly subeDesdeAbajo?: boolean; readonly className?: string }): React.JSX.Element {
   // [NOCTURNO] A1 · la bajada va en el plano del título de volumen (la cámara la corre con él).
   const bajada = useAcompananteDelTitulo<HTMLDivElement>('portfolio')
   const presencia = useMotionValue(adentro ? 1 : 0)
@@ -53,7 +59,8 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, className }
   const repeticion = useRepeticionDeLaLlegada(seccion.id)
   const opacidadDelTitular = useTransform(repeticion, opacidadDeLaLlegada)
   const recorteDelTitular = useTransform(repeticion, recorteDeLaLlegada)
-  return (
+  const subida = useTransform(presencia, (p) => `${((1 - p) * SUBIDA_DEL_ENCABEZADO_SVH).toFixed(3)}svh`)
+  const encabezado = (
     <div data-pieza="encabezado-del-portfolio" className={className}>
       <div id={idDelTitularDeSeccion(seccion.id)}>
         <Bloque patron="P2" rango="ventana-de-la-mascara" className="block w-full">
@@ -83,4 +90,6 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, className }
       </div>
     </div>
   )
+  // [B1.2d B] T3 · sólo en las historias: en escritorio el marcado es el de siempre.
+  return subeDesdeAbajo ? <motion.div data-parte="subida-del-encabezado" style={{ y: subida }}>{encabezado}</motion.div> : encabezado
 }

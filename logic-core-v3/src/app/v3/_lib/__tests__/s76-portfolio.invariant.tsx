@@ -26,6 +26,7 @@ import { PROYECTOS, mediosDe, seMuestraElServicio, type ProyectoDelPortfolio } f
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { afirmarLaBase } from './s76-portfolio-mapeo'
 import { afirmarA2 } from './s76-portfolio-a2'
+import { afirmarB } from './s76-portfolio-b'
 import { afirmarB12c } from './s76-portfolio-b12c'
 import { afirmarB12d } from './s76-portfolio-b12d'
 import { afirmarElSelectorVivo } from './s76-portfolio-escena'
@@ -160,5 +161,6 @@ afirmarB12c()
 afirmarLasHistorias()
 afirmarB12d()
 afirmarA2()
+afirmarB()
 
 cerrar('s76-portfolio.invariant')

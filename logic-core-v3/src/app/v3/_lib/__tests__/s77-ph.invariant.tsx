@@ -63,8 +63,11 @@ const elementoPausado = BotonPausa({ pausado: true, alCambiar: (p) => pedidos.pu
 afirmarIgual(pedidos, [true, false], '  el clic pide el estado contrario (corriendo → pausa, en pausa → sigue)')
 
 const usanLaPausa = (archivos: readonly string[], fuente: (a: string) => string): string[] => archivos.filter((a) => /from '[^']*medios\/BotonPausa'/.test(fuente(a)))
-afirmarIgual(usanLaPausa(PRODUCTO, leer), [], '  y no está integrada: ningún archivo de producto la importa todavía (dónde iría lo dice su docblock)')
-controlPositivo('  el detector VE una integración', ['x.tsx'], (l: readonly string[]) => usanLaPausa(l, () => "import { BotonPausa } from '../../_componentes/medios/BotonPausa'").length === 0)
+// [B1.2d B] P-H21 · integrada en el video en bucle del panel de escritorio (en las historias la pausa es mantener apretado); el de cada
+// servicio (`VideoDeServicio`) va cuando se toque esa pieza.
+const DONDE_VA = [`${V3}/_secciones/trabajos/portfolio/MedioDeLaTira.tsx`]
+afirmarIgual(usanLaPausa(PRODUCTO, leer), DONDE_VA, '  y está integrada donde corre un video en bucle del home: el del panel del Portfolio (s76 §34 lo afirma sobre el marcado)')
+controlPositivo('  el detector VE una integración de más', [...DONDE_VA, 'x.tsx'], (l: readonly string[]) => JSON.stringify(usanLaPausa(l, (a) => (a === 'x.tsx' ? "import { BotonPausa } from '../../_componentes/medios/BotonPausa'" : leer(a)))) === JSON.stringify(DONDE_VA))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('§2 · P-H23 · el punto de registro de la llave')
