@@ -22,8 +22,13 @@ export const MEDIDAS_DE_LOS_MEDIOS: Readonly<Record<SlugDelProyecto, { readonly 
 /** La proporción del medio de la tira (la de los videos de escritorio, 16:10); va en línea, no en una clase arbitraria. */
 export const PROPORCION_DEL_MEDIO = '16 / 10'
 
-/** [B1.2b] El ancho del medio: el de la tira, sin pasar del 38 % del alto del cuadro (deja lugar a la ficha, que va siempre abajo). */
-export const ANCHO_DEL_MEDIO = 'min(100%, calc(38svh * 16 / 10))'
+/**
+ * [B1.2b] El ancho del medio: el de la tira, sin pasar del 38 % del alto del cuadro (deja lugar a la ficha, que va siempre abajo).
+ * [B1.2c] Abajo de 1024, el 28 %: las barras de progreso le sacan alto a la tira y en la tablet acostada la ficha no entraba (el
+ * banco). El alto lo pone el panel (`--alto-del-medio`, su clase).
+ */
+export const ANCHO_DEL_MEDIO = 'min(100%, calc(var(--alto-del-medio) * 16 / 10))'
+export const CLASE_DEL_ALTO_DEL_MEDIO = '[--alto-del-medio:38svh] max-escritorio:[--alto-del-medio:28svh]'
 
 /** El `sizes` del medio de la tira activa: la mitad del cuadro desde 1024 (menos los lomos), el 60 % en tablet. */
 export const SIZES_DEL_MEDIO = '(min-width: 1024px) 42vw, 52vw'

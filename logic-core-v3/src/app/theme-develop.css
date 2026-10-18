@@ -343,6 +343,22 @@
 
   --color-acento: var(--color-acento-web);
 
+  /* --- Los tres acentos CLAROS (P-H2, B1.2c) ---------------------------
+   * [medido] · El DISPARADOR de la sección invertida (abajo) se cumplió: una
+   * sección oscura necesita el acento como TEXTO — los rótulos de la ficha del
+   * Portfolio, sobre la sala de noche. Los valores son los «on-dark» de la
+   * marca (los mismos de `globals.css`, `--color-ds-accent-*-on-dark`), y los
+   * tres pasan AA como texto sobre #0E0E0E: 10,00 · 10,09 · 8,29 (Y 0,494 ·
+   * 0,499 · 0,401, todos por arriba del 0,19476 que pedía el disparador).
+   * SOBRE CLARO NO: sobre papel dan 1,80 · 1,78 · 2,17. Son sólo para fondo
+   * invertido, y se consumen por su alias contextual, igual que el acento. */
+
+  --color-acento-web-claro: #8FC0E8;              /* Desarrollo web. 10,00:1 sobre #0E0E0E */
+  --color-acento-ia-automatizacion-claro: #7FCBA4;/* IA y Automatización. 10,09:1 sobre #0E0E0E */
+  --color-acento-software-claro: #AFA0E8;         /* Software a medida. 8,29:1 sobre #0E0E0E */
+
+  --color-acento-claro: var(--color-acento-web-claro);
+
   /* ⚠️ **LOS TRES DEL SEMÁFORO — y NO son de la paleta del sistema.**
    *
    * Son los tres círculos de la barra de una ventana de macOS, y existen para que
@@ -1349,14 +1365,17 @@
 
 [data-servicio="web"] {
   --color-acento: var(--color-acento-web);
+  --color-acento-claro: var(--color-acento-web-claro);
 }
 
 [data-servicio="ia-automatizacion"] {
   --color-acento: var(--color-acento-ia-automatizacion);
+  --color-acento-claro: var(--color-acento-ia-automatizacion-claro);
 }
 
 [data-servicio="software"] {
   --color-acento: var(--color-acento-software);
+  --color-acento-claro: var(--color-acento-software-claro);
 }
 
 /* =========================================================================
@@ -1441,7 +1460,9 @@
    * 1,2957 aplicadas desde #0E0E0E hacia claro— y se verifica que la tinta
    * clara siga pasando AA sobre las tres.
    *
-   * NO se redefine --color-acento ni se emiten variantes claras. [pendiente]
+   * NO se redefine --color-acento. [B1.2c] Las variantes claras SÍ se
+   * emitieron (P-H2): `--color-acento-claro` y sus tres valores, arriba, en
+   * @theme. Son las únicas que pueden ser texto acá.
    *
    * LA REGLA, y sale de la medición, no del espejo con Franco:
    *   el acento acá va como RELLENO o como SUBRAYADO.

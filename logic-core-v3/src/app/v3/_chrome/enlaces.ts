@@ -1,6 +1,12 @@
 import type { EnlaceDeNavegacion } from '../_lib/navegacion'
 
 /**
+ * [B1.2c] WhatsApp del pie (el número y su mensaje precargado), para el formulario corto de «la tuya» en el Portfolio: una sección no
+ * importa de otra y los enlaces del chrome son la puerta. El formulario del panel de contacto sigue sin WhatsApp (s42 · N1).
+ */
+export { WHATSAPP } from '../_secciones/cierre/contacto'
+
+/**
  * [NAVBAR] LOS ÍTEMS DEL MENÚ DEL HOME — los de la barra de escritorio y los del menú del teléfono, en este orden.
  *
  * Son del home y no de la pastilla compartida (`_componentes/chrome/Navegacion.tsx` sigue con `ENLACES_DE_MUESTRA`

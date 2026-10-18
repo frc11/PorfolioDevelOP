@@ -267,6 +267,18 @@ export const CONTENIDO_PROHIBIDO_DE_CONTROL =
  * como literales, que es exactamente lo que la regla prohíbe.
  */
 export function valoresDeAcentoDelTema(): { readonly token: string; readonly valor: string }[] {
+  return declaracionesDeAcento().filter((d) => !d.token.endsWith('-claro'))
+}
+
+/**
+ * [B1.2c] P-H2 · los tres acentos CLAROS por servicio (`--color-acento-<servicio>-claro`): aparte de los de arriba, que siguen siendo
+ * los tres que el lane tiene prohibido nombrar. El alias claro (`--color-acento-claro`) no entra: es un alias, no un acento.
+ */
+export function valoresDeAcentoClaroDelTema(): { readonly token: string; readonly valor: string }[] {
+  return declaracionesDeAcento().filter((d) => d.token.endsWith('-claro') && d.token !== '--color-acento-claro')
+}
+
+function declaracionesDeAcento(): { readonly token: string; readonly valor: string }[] {
   const css = leer('src/app/theme-develop.css').replace(/\/\*[\s\S]*?\*\//g, '')
   return [...css.matchAll(/(--color-acento-[a-z-]+)\s*:\s*([^;]+);/g)].map((m) => ({
     token: m[1],

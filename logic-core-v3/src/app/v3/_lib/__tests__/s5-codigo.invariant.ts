@@ -30,6 +30,7 @@
 
 import path from 'node:path'
 
+import { FORMAS_PERMITIDAS_SOBRE_OSCURO } from '../../_secciones/_contrato/acento'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { apagadosDeFoco, quitarComentarios } from './s3-escaneo'
 import {
@@ -186,20 +187,31 @@ titulo('6 · El acento no es texto, y nadie apaga el anillo de foco')
  * correcta en un panel e incorrecta en el de al lado es una que alguien va a
  * mover.
  */
-const conAcentoDeTexto = PANTALLA.map((archivo) => ({
-  archivo,
-  hallados: [...quitarComentarios(leer(archivo)).matchAll(/\btext-acento\b[a-z-]*/g)].map((m) => m[0]),
-})).filter((r) => r.hallados.length > 0)
+/**
+ * [B1.2c] P-H2 · salvo el acento CLARO (`text-acento-claro`, `_contrato/acento.ts`): el tema emitió las variantes claras y dan 10,00 ·
+ * 10,09 · 8,29 sobre `#0E0E0E`. Es la única forma de texto de acento sobre oscuro, y sólo donde el fondo ES oscuro: la sección que
+ * corre de noche entera (Trabajos: «el tramo del Portfolio es de noche», s76). Sobre papel daría 1,8:1.
+ */
+const TEXTO_DE_ACENTO_SOBRE_OSCURO = FORMAS_PERMITIDAS_SOBRE_OSCURO.filter((c) => c.startsWith('text-'))
+const DE_NOCHE = /[\\/]_secciones[\\/]trabajos[\\/]/
+const acentosDeTexto = (archivo: string, codigo: string): string[] =>
+  [...quitarComentarios(codigo).matchAll(/\btext-acento\b[a-z-]*/g)].map((m) => m[0]).filter((c) => !(DE_NOCHE.test(archivo) && TEXTO_DE_ACENTO_SOBRE_OSCURO.includes(c)))
+const conAcentoDeTexto = PANTALLA.map((archivo) => ({ archivo, hallados: acentosDeTexto(archivo, leer(archivo)) })).filter((r) => r.hallados.length > 0)
 afirmarIgual(
   conAcentoDeTexto,
   [],
-  'cero `text-acento` — sobre oscuro el acento va como relleno o subrayado',
+  'cero `text-acento` — sobre oscuro el acento va como relleno o subrayado ([B1.2c] o como texto con su alias claro, sólo en la sección de noche)',
 )
 
 controlPositivo(
   'el detector ve un text-acento',
   'className="text-acento font-titulo"',
-  (codigo: string) => !/\btext-acento\b/.test(codigo),
+  (codigo: string) => acentosDeTexto('src/app/v3/_secciones/trabajos/portfolio/Ficha.tsx', codigo).length === 0,
+)
+controlPositivo(
+  '  y el acento claro en una sección de día (sobre papel no pasa)',
+  'className="text-acento-claro font-codigo"',
+  (codigo: string) => acentosDeTexto('src/app/v3/_secciones/servicios/Servicios.tsx', codigo).length === 0,
 )
 
 const apagados = PANTALLA.map((archivo) => ({

@@ -194,7 +194,8 @@ export function coloresDelTema(css: string): ColoresDelTema {
   return {
     fondo: hex(bloque[1], /--color-fondo:\s*(#[0-9A-Fa-f]{6})/),
     tinta: hex(bloque[1], /--color-tinta:\s*(#[0-9A-Fa-f]{6})/),
-    acentos: [...css.matchAll(/--color-acento-[a-z-]+:\s*(#[0-9A-Fa-f]{6})/g)].map((m) => m[1]),
+    // [B1.2c] P-H2 · sin los tres acentos CLAROS que entraron al tema (pasan AA sobre oscuro: son otra regla, la de `acento.ts`).
+    acentos: [...css.matchAll(/--color-acento-([a-z-]+):\s*(#[0-9A-Fa-f]{6})/g)].filter((m) => !m[1].endsWith('-claro')).map((m) => m[2]),
   }
 }
 

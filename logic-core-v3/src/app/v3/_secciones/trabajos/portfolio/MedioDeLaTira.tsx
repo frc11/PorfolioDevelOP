@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Imagen } from '../../../_componentes/medios/Imagen'
 
@@ -22,13 +22,45 @@ export function estadoDelVideo(activa: boolean, cerca: boolean, reducido: boolea
   return { cargado, reproduce: cargado && !reducido && aLaVista, preload: cargado && !reducido ? 'auto' : 'none' }
 }
 
+/** [B1.3] Cuál de los dos videos está a la vista: lo decide el CSS (el del teléfono, abajo de 768) y el código lo lee. */
+export type CualDeLosVideos = 'escritorio' | 'movil'
+
+/** Un video del medio: se reproduce si su estado lo pide (y se pausa si no). */
+function Video({ proyecto, cual, e }: { readonly proyecto: ProyectoDelPortfolio; readonly cual: CualDeLosVideos; readonly e: EstadoDelVideo }): React.JSX.Element {
+  const video = useRef<HTMLVideoElement | null>(null)
+  useEffect(() => {
+    const v = video.current
+    if (v === null) return
+    if (e.reproduce) void v.play().catch(() => undefined)
+    else v.pause()
+  }, [e.reproduce, e.cargado])
+  return (
+    <video
+      ref={video}
+      data-video-del-portfolio={proyecto.slug}
+      data-cual={cual}
+      muted
+      playsInline
+      loop
+      preload={e.preload}
+      aria-hidden="true"
+      className={cual === 'movil' ? 'h-full w-full object-cover' : 'h-full w-full object-contain'}
+      {...(e.cargado ? { src: proyecto.medios.video[cual], poster: proyecto.medios.poster[cual] } : {})}
+    />
+  )
+}
+
 /**
  * [B1] EL MEDIO DE LA TIRA ACTIVA — el recorrido del sitio, 16:10 y contenido en su caja, con el mismo enlace que «Visitar sitio»
  * sólo para el mouse (fuera del orden del teclado y de los lectores: la parada es el enlace de la región).
  *
  * El video es `muted playsInline loop` y SÓLO el de la tira activa tiene `src` (y con la sección cerca: nada se pide antes); los
  * demás no tienen nada y `preload="none"`. Con movimiento reducido no hay autoplay: queda el póster. Se pausa fuera de cuadro y con
- * la pestaña oculta (`aLaVista`, `usePortfolio`). El video de escritorio va desde 768; abajo, las historias (B1.3).
+ * la pestaña oculta (`aLaVista`, `usePortfolio`).
+ *
+ * [B1.3] Hay DOS videos: el de escritorio (desde 768) y el del teléfono (abajo: la historia a pantalla completa, `object-cover`
+ * porque se grabó con la proporción del teléfono). El CSS esconde uno y el código lee cuál está a la vista (un `ResizeObserver`
+ * sobre el del teléfono: sin caja, escondido): sólo ése pide su archivo. La sección no mide el ancho.
  */
 export function MedioDeLaTira({
   proyecto,
@@ -43,29 +75,26 @@ export function MedioDeLaTira({
   readonly aLaVista: boolean
   readonly reducido: boolean
 }): React.JSX.Element {
-  const video = useRef<HTMLVideoElement | null>(null)
-  const e = estadoDelVideo(activa, cerca, reducido, aLaVista)
+  const movil = useRef<HTMLDivElement | null>(null)
+  const [cual, setCual] = useState<CualDeLosVideos>('escritorio')
   useEffect(() => {
-    const v = video.current
-    if (v === null) return
-    if (e.reproduce) void v.play().catch(() => undefined)
-    else v.pause()
-  }, [e.reproduce, e.cargado])
+    const el = movil.current
+    if (el === null) return undefined
+    const tamano = new ResizeObserver(() => setCual(el.offsetParent !== null ? 'movil' : 'escritorio'))
+    tamano.observe(el)
+    return () => tamano.disconnect()
+  }, [])
+  const estado = (de: CualDeLosVideos): EstadoDelVideo => estadoDelVideo(activa && cual === de, cerca, reducido, aLaVista)
   return (
-    <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5" style={{ aspectRatio: PROPORCION_DEL_MEDIO, width: ANCHO_DEL_MEDIO }}>
-      <video
-        ref={video}
-        data-video-del-portfolio={proyecto.slug}
-        muted
-        playsInline
-        loop
-        preload={e.preload}
-        aria-hidden="true"
-        className="h-full w-full object-contain"
-        {...(e.cargado ? { src: proyecto.medios.video.escritorio, poster: proyecto.medios.poster.escritorio } : {})}
-      />
-      <a href={proyecto.url} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
-    </figure>
+    <>
+      <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5 max-tablet:hidden" style={{ aspectRatio: PROPORCION_DEL_MEDIO, width: ANCHO_DEL_MEDIO }}>
+        <Video proyecto={proyecto} cual="escritorio" e={estado('escritorio')} />
+        <a href={proyecto.url} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
+      </figure>
+      <div ref={movil} aria-hidden="true" data-medio-del-telefono={proyecto.slug} className="hidden h-full w-full bg-tinta/5 max-tablet:block">
+        <Video proyecto={proyecto} cual="movil" e={estado('movil')} />
+      </div>
+    </>
   )
 }
 

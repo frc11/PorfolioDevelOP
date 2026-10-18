@@ -167,5 +167,11 @@ export const DELTA_DEL_FINAL_EN_EL_CENSO = { marcadores: -5 - 5 - 9 } as const
  *   encabezados   +1  cinco h3 contra cuatro: la cabecera de cada tira (las tres y la tuya) y el de Demos
  *   marcadores    +8  las ocho casillas de la llave (`inventado.ts`): los dos `[TEXTO]` de lo que se resolvió, y las tres reseñas
  *                     con su firma (`[TESTIMONIO]` y `[NOMBRE]`). Son pedidos abiertos de verdad: bajan cuando lleguen los datos
+ *
+ * [B1.2c] «La tuya» cambió el botón al contacto por el formulario corto: +4 paradas (los tres campos —cada uno con su `<label for>`— y
+ * «o escribinos por WhatsApp»; «Enviar» ocupa la parada del botón). Doce contra siete del túnel: +5.
+ *
+ * [B1.3] Y los dos toques de la historia activa (anterior y siguiente, `display: none` desde 768 pero en el marcado de las dos ramas):
+ * +2. Catorce contra siete: +7.
  */
-export const DELTA_DEL_PORTFOLIO = { paradas: 1, encabezados: 1, marcadores: 8 } as const
+export const DELTA_DEL_PORTFOLIO = { paradas: 1 + 4 + 2, encabezados: 1, marcadores: 8 } as const

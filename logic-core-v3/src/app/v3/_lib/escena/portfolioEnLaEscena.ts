@@ -7,7 +7,7 @@
  * ── La pose: un desplazamiento sobre la del scroll, nunca un cambio del progreso (la regla de B5) ──
  *
  * El rig muestrea la pose del scroll y, ANTES de la inercia, la mezcla con la pose del Portfolio (`poseDelPortfolio.ts`, una sola:
- * la cámara del pin, alejada y con el encuadre corrido) con un peso que persigue al objetivo por tiempo (`PERSECUCION_DEL_PESO_S`):
+ * [B1.2c] de frente al plano del logo, con el logo en su hueco) con un peso que persigue al objetivo por tiempo (`PERSECUCION_DEL_PESO_S`):
  * 0 afuera, 1 con el panel adentro. El progreso no se toca. El mouse sigue encima, como en todo el recorrido.
  *
  * ── El oscurecido: un multiplicador al final del cuadro (ajuste B) ──
@@ -24,15 +24,35 @@ export type PoseDelPortfolio = Pick<MutableChoreoPose, 'angleDeg' | 'height' | '
 /** [B1.2b] Cuánto se oscurece la escena con el panel adentro: una constante (la bandera de B1.2 salió). */
 export const DIM_DEL_PORTFOLIO = 0.35
 
+/**
+ * [B1.2c] EL HUECO DEL LOGO, en coordenadas del cuadro (−1…1, y hacia arriba): su centro y sus medidas (2 = el cuadro entero). Lo
+ * guarda el DOM debajo del título y la bajada (`[data-pieza="hueco-del-logo"]`, la columna que deja el panel): el título y el logo se
+ * leen como un bloque, en el mismo eje. La sección lo mide en el escenario y la pose encaja el logo adentro.
+ */
+export interface HuecoDelLogo {
+  readonly x: number
+  readonly y: number
+  readonly ancho: number
+  readonly alto: number
+}
+
+/** Sin medir (antes de montar, o en los tests): el medio de la mitad de abajo de la columna, el 70 % de su ancho y el 60 % de su alto. */
+export const huecoDeLaColumna = (columna: number): HuecoDelLogo => ({ x: columna - 1, y: -0.5, ancho: 1.4 * columna, alto: 0.6 })
+
 /** Lo que escribe la sección. `adentro` con el panel en el cuadro; `columna`, la fracción del ancho que deja el panel (su CSS). */
 export const PORTFOLIO_EN_LA_ESCENA: {
   adentro: boolean
   reducido: boolean
   /** 0,5 desde 1024 (el panel ocupa la mitad); 0,4 abajo (el panel, el 60 %). */
   columna: number
+  /** [B1.2c] El hueco medido en el DOM; `null` sin medir (vale el de la columna). */
+  hueco: HuecoDelLogo | null
   /** El peso mostrado (0…1): lo escribe el rig, lo lee el oscurecido. */
   peso: number
-} = { adentro: false, reducido: false, columna: 0.5, peso: 0 }
+} = { adentro: false, reducido: false, columna: 0.5, hueco: null, peso: 0 }
+
+/** [B1.2c] El hueco que vale: el medido o, sin medir, el de la columna. */
+export const huecoQueVale = (): HuecoDelLogo => PORTFOLIO_EN_LA_ESCENA.hueco ?? huecoDeLaColumna(PORTFOLIO_EN_LA_ESCENA.columna)
 
 /** Cuánto tarda el peso en ir de una punta a la otra (s): la cámara y el oscurecido entran con el panel. */
 export const PERSECUCION_DEL_PESO_S = 0.7

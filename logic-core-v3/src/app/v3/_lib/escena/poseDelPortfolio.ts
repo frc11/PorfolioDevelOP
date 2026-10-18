@@ -3,44 +3,36 @@ import * as THREE from 'three'
 import { aimWithFraming } from './cameraFraming'
 import type { MutableChoreoPose } from './choreographyTypes'
 import { recorridoDeEncuadre } from './encuadre'
-import { PORTFOLIO_EN_LA_ESCENA, avanzarElPeso, mezclarLaPose, type PoseDelPortfolio } from './portfolioEnLaEscena'
+import { PORTFOLIO_EN_LA_ESCENA, avanzarElPeso, huecoQueVale, mezclarLaPose, type HuecoDelLogo, type PoseDelPortfolio } from './portfolioEnLaEscena'
 import { CAMERA_FAR, CAMERA_NEAR, ORBIT_TARGET_Y } from './probeScene'
 
 /**
- * [B1.2b] LA POSE DEL PORTFOLIO, RESUELTA PARA CADA CUADRO (plan §12, punto 1) — una sola, calma y frontal.
+ * [B1.2c] LA POSE DEL PORTFOLIO, RESUELTA PARA CADA CUADRO (plan §13, punto 1) — una sola, DE FRENTE AL PLANO DEL LOGO.
  *
- * Es la cámara del PIN (la viva en p 0,475, cuando entra el panel) con el mismo azimut y la misma dirección de la mirada: la
- * cámara no gira, sólo se aleja y corre el encuadre. El logo cae centrado en la mitad de abajo de la columna que deja el panel
- * (`PORTFOLIO_EN_LA_ESCENA.columna`: la mitad del ancho desde 1024, el 40 % en tablet), con su alto y su ancho acotados a esa
- * mitad. Como el encuadre mueve el logo en FRACCIONES DEL RECORRIDO (`encuadre.ts`) y el recorrido depende del aspecto y del
- * campo de visión (la banda portátil lo abre), un encuadre fijo corría el centro del logo un 1,8 % del ancho entre 1440 y 1024:
- * acá se resuelve para el cuadro de ahora proyectando la caja del logo con la cámara armada como la arma el rig, y se corrige en
- * unos pasos. Se memoriza por cuadro (aspecto, campo, medidas y columna): por cuadro no cuesta nada.
+ * En B1.2b la cámara era la del pin, alejada y con el encuadre corrido: miraba al logo desde arriba (~22°) y el encuadre la giraba
+ * para correrlo, así que el logo se veía girado al lado de un título de frente. Ahora la mirada es PERPENDICULAR al plano del logo
+ * (+z: la cámara está del lado de atrás, como en todo el tramo de Trabajos) y el logo se corre en el cuadro MOVIENDO la cámara en
+ * ese plano, no girándola: un plano paralelo al cuadro se proyecta sin perspectiva en cualquier lugar del cuadro. Con la misma pose de
+ * cinco números del rig: la órbita (azimut, altura y distancia) pone la cámara en su lugar y el encuadre apunta al blanco que deja la
+ * mirada en +z (`aimWithFraming` mueve el blanco en la base de la pantalla: se resuelven sus dos números). El título 3D se coloca con
+ * ESTA pose (`titulos3d/colocacion.ts`, la lectura del Portfolio) a la profundidad del centro del logo sobre la mirada: queda EN el
+ * plano del logo y de frente, los dos con la misma normal.
  *
- * Con ESTA pose se coloca también el título 3D (la lectura del Portfolio, `titulos3d/colocacion.ts`): con el panel adentro y el
- * mouse quieto, el título queda en su lugar del DOM y de frente, sin perspectiva.
+ * El logo va adentro de su HUECO (`HuecoDelLogo`: lo guarda el DOM debajo del título y la bajada, en el eje de la columna): la
+ * distancia lo encaja por la medida que manda (su ancho o su alto) y la cámara se corre para que su centro caiga en el del hueco. Se
+ * memoriza por cuadro (aspecto, campo, medidas y hueco).
  */
-
-/**
- * La cámara viva en el pin (p 0,475, que el rig muestrea como la de entonces en 0,4479: `camaraDeEntonces.ts`): azimut, altura y
- * distancia. s76 la compara con la coreografía.
- */
-export const CAMARA_DEL_PIN = { angleDeg: 177.434, height: 7.267, distance: 17.881 } as const
-
-/**
- * Dónde y de qué tamaño va el logo, en coordenadas del cuadro (−1…1, y hacia arriba): su centro a tres cuartos del alto (el
- * medio de la mitad de abajo) y en el medio de la columna; su alto, a lo sumo el 60 % de esa mitad; su ancho, el 70 % de la
- * columna.
- */
-export const LOGO_EN_SU_MITAD = { centroY: -0.5, alto: 0.6, anchoDeLaColumna: 0.7 } as const
 
 /** Las medidas del logo medido (el mesh: `ProbeLogo`) mientras la escena todavía no las publicó. */
 const LOGO_POR_DEFECTO = { ancho: 6.863, alto: 4.779 } as const
-const ESPESOR_DEL_LOGO = 0.56
-const PASOS_DE_LA_CORRECCION = 3
+export const ESPESOR_DEL_LOGO = 0.56
+/** La mirada del Portfolio: +z (la cámara del lado de atrás del logo, como en el tramo de Trabajos). */
+export const MIRADA_DEL_PORTFOLIO = new THREE.Vector3(0, 0, 1)
 
 const CAMARA = new THREE.PerspectiveCamera()
 const PUNTO = new THREE.Vector3()
+const DERECHA = new THREE.Vector3()
+const ARRIBA = new THREE.Vector3()
 
 /** Arma la cámara como el rig (la órbita, el blanco y el encuadre) para una pose y un cuadro. */
 export function armarLaCamara(c: THREE.PerspectiveCamera, pose: PoseDelPortfolio, aspecto: number, fovDeg: number, logoW: number, logoH: number): THREE.PerspectiveCamera {
@@ -78,33 +70,48 @@ export function cajaProyectada(c: THREE.PerspectiveCamera, logoW: number, logoH:
 let ultimaClave = ''
 const ULTIMA: MutableChoreoPose = { angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 }
 
-/** La pose del Portfolio para un cuadro (memorizada: se recalcula sólo si cambia el cuadro, el campo, el logo o la columna). */
-export function poseDelPortfolio(aspecto: number, fovDeg: number, logoW: number, logoH: number, columna: number): PoseDelPortfolio {
+/**
+ * La pose del Portfolio para un cuadro y un hueco (memorizada: se recalcula sólo si cambia algo).
+ *
+ *   1 · la profundidad D (la del plano del logo sobre la mirada): la cara de adelante entra en el hueco por su ancho y por su alto
+ *       (con la mirada en +z, un ancho W a la profundidad d ocupa W / (d · tan(fov/2) · aspecto) del cuadro);
+ *   2 · la cámara en (x, y, −D): con la mirada en +z el centro del logo cae en x / (D · t · aspecto) y en (y₀ − y) / (D · t), así que
+ *       se despeja para que caiga en el centro del hueco;
+ *   3 · la órbita: el azimut, la altura y la distancia que ponen la cámara ahí;
+ *   4 · el encuadre: el rig mira primero al logo y después al blanco corrido en la base de esa pantalla (`aimWithFraming`); el blanco
+ *       que deja la mirada en +z está a la misma x y la misma y que la cámara, y los dos números del encuadre salen de ahí.
+ */
+export function poseDelPortfolio(aspecto: number, fovDeg: number, logoW: number, logoH: number, hueco: HuecoDelLogo): PoseDelPortfolio {
   const w = logoW > 0 ? logoW : LOGO_POR_DEFECTO.ancho
   const h = logoH > 0 ? logoH : LOGO_POR_DEFECTO.alto
-  const clave = `${aspecto.toFixed(4)}|${fovDeg.toFixed(4)}|${w.toFixed(3)}|${h.toFixed(3)}|${columna.toFixed(3)}`
+  const clave = `${aspecto.toFixed(4)}|${fovDeg.toFixed(4)}|${w.toFixed(3)}|${h.toFixed(3)}|${hueco.x.toFixed(4)}|${hueco.y.toFixed(4)}|${hueco.ancho.toFixed(4)}|${hueco.alto.toFixed(4)}`
   if (clave === ultimaClave) return ULTIMA
   const p = ULTIMA
-  // 1 · El tamaño: desde la cámara del pin, alejarla (o acercarla) hasta que el logo entre en su mitad, sin cambiar la dirección de la mirada.
-  Object.assign(p, CAMARA_DEL_PIN, { frameX: 0, frameY: 0 })
-  const caja = cajaProyectada(armarLaCamara(CAMARA, p, aspecto, fovDeg, w, h), w, h)
-  const escala = Math.max(caja.alto / LOGO_EN_SU_MITAD.alto, caja.ancho / (LOGO_EN_SU_MITAD.anchoDeLaColumna * 2 * columna))
-  p.distance = CAMARA_DEL_PIN.distance * escala
-  p.height = ORBIT_TARGET_Y + (CAMARA_DEL_PIN.height - ORBIT_TARGET_Y) * escala
-  // 2 · El encuadre: el centro de la columna y tres cuartos del alto; primero la cuenta del recorrido, después unos pasos medidos.
-  const objetivo = { x: columna - 1, y: LOGO_EN_SU_MITAD.centroY }
+  const t = Math.tan(THREE.MathUtils.degToRad(fovDeg) / 2)
+  // 1 · La profundidad: la cara de adelante (medio espesor más cerca) entra en el hueco.
+  const D = Math.max(w / (hueco.ancho * t * aspecto), h / (hueco.alto * t)) + ESPESOR_DEL_LOGO / 2
+  // 2 · La cámara en el plano paralelo al del logo.
+  const x = hueco.x * D * t * aspecto
+  const y = ORBIT_TARGET_Y - hueco.y * D * t
+  // 3 · La órbita que la pone ahí (del lado de atrás: el azimut cerca de 180°).
+  p.distance = Math.hypot(x, D)
+  p.height = y
+  p.angleDeg = ((THREE.MathUtils.radToDeg(Math.atan2(x, -D)) % 360) + 360) % 360
+  // 4 · El encuadre: el blanco a la x y la y de la cámara (la mirada queda en +z).
+  p.frameX = 0
+  p.frameY = 0
+  armarLaCamara(CAMARA, p, aspecto, fovDeg, w, h)
+  DERECHA.set(1, 0, 0).applyQuaternion(CAMARA.quaternion)
+  ARRIBA.set(0, 1, 0).applyQuaternion(CAMARA.quaternion)
   const ojo = Math.hypot(p.distance, p.height - ORBIT_TARGET_Y)
-  const medioAlto = Math.tan(THREE.MathUtils.degToRad(fovDeg) / 2) * ojo
-  const medioAncho = medioAlto * aspecto
-  const porX = medioAncho / recorridoDeEncuadre(medioAncho, w)
-  const porY = medioAlto / recorridoDeEncuadre(medioAlto, h)
-  p.frameX = objetivo.x * porX
-  p.frameY = objetivo.y * porY
-  for (let k = 0; k < PASOS_DE_LA_CORRECCION; k += 1) {
-    const ahora = cajaProyectada(armarLaCamara(CAMARA, p, aspecto, fovDeg, w, h), w, h)
-    p.frameX += (objetivo.x - ahora.x) * porX
-    p.frameY += (objetivo.y - ahora.y) * porY
-  }
+  const medioAlto = t * ojo
+  const recorridoX = recorridoDeEncuadre(medioAlto * aspecto, w)
+  const recorridoY = recorridoDeEncuadre(medioAlto, h)
+  // El blanco es (0, y₀, 0) − a·DERECHA − b·ARRIBA; la DERECHA de mirar al logo es horizontal, así que la y la fija `b` sola.
+  const b = (ORBIT_TARGET_Y - y) / ARRIBA.y
+  const a = -(x + b * ARRIBA.x) / DERECHA.x
+  p.frameX = recorridoX > 1e-9 ? a / recorridoX : 0
+  p.frameY = recorridoY > 1e-9 ? b / recorridoY : 0
   ultimaClave = clave
   return p
 }
@@ -116,6 +123,6 @@ export function poseDelPortfolio(aspecto: number, fovDeg: number, logoW: number,
 export function mezclarConElPortfolio(objetivo: MutableChoreoPose, dt: number, aspecto: number, fovDeg: number, logoW: number, logoH: number): number {
   const e = PORTFOLIO_EN_LA_ESCENA
   e.peso = avanzarElPeso(e.peso, e.adentro ? 1 : 0, dt, e.reducido)
-  if (e.peso > 0) mezclarLaPose(objetivo, poseDelPortfolio(aspecto, fovDeg, logoW, logoH, e.columna), e.peso)
+  if (e.peso > 0) mezclarLaPose(objetivo, poseDelPortfolio(aspecto, fovDeg, logoW, logoH, huecoQueVale()), e.peso)
   return e.peso
 }

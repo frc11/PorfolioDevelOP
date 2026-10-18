@@ -42,6 +42,15 @@
  * 2,71 · 2,99 · 2,46. No sólo fallan AA como texto (4,5:1) — tampoco llegan a
  * 3:1, el mínimo de un componente de interfaz. Ahí el acento va como RELLENO o
  * como SUBRAYADO, y nunca como único indicador de un límite.
+ *
+ * ── [B1.2c] P-H2 · salvo el acento CLARO ──────────────────────────────────
+ *
+ * El tema emitió las tres variantes claras (el disparador que dejó escrito: una
+ * sección oscura que necesita el acento como texto — los rótulos de la ficha del
+ * Portfolio). Dan 10,00 · 10,09 · 8,29 sobre `#0E0E0E`, así que sobre fondo
+ * invertido el acento puede ser TEXTO por su alias claro (`--color-acento-claro`,
+ * `text-acento-claro`), que los mismos `[data-servicio]` retiñen. Sobre papel
+ * no (1,80 · 1,78 · 2,17): ahí el texto sigue siendo `text-acento`.
  */
 
 /** Los tres servicios. El `id` ES el valor del atributo `data-servicio`. */
@@ -59,6 +68,9 @@ export const ATRIBUTO_DE_SERVICIO = 'data-servicio'
  */
 export const ALIAS_DE_ACENTO = '--color-acento'
 
+/** [B1.2c] P-H2 · el alias del acento claro: el único texto de acento sobre fondo invertido. */
+export const ALIAS_DE_ACENTO_CLARO = '--color-acento-claro'
+
 /**
  * Las utilidades de Tailwind que resuelven el alias. Están escritas enteras y
  * literales porque Tailwind escanea el código fuente: una clase armada como
@@ -71,6 +83,8 @@ export const CLASES_DE_ACENTO = {
   texto: 'text-acento',
   /** BORDE. Decorativo: no puede ser el único indicador de un límite. */
   borde: 'border-acento',
+  /** [B1.2c] TEXTO CLARO. Sólo sobre fondo invertido (sobre papel no pasa AA). */
+  textoClaro: 'text-acento-claro',
 } as const
 
 /**
@@ -79,7 +93,11 @@ export const CLASES_DE_ACENTO = {
  */
 export const FORMAS_PERMITIDAS_SOBRE_OSCURO: readonly string[] = [
   CLASES_DE_ACENTO.relleno,
+  CLASES_DE_ACENTO.textoClaro,
 ]
+
+/** [B1.2c] Y sobre papel el acento claro no va (es la otra mitad de la regla). */
+export const FORMAS_PROHIBIDAS_SOBRE_CLARO: readonly string[] = [CLASES_DE_ACENTO.textoClaro]
 
 /**
  * La superficie sobre la que el acento entra como relleno: encima va el papel,
@@ -109,6 +127,11 @@ export const SERVICIOS: readonly Servicio[] = [
 
 /** Los ids, DERIVADOS del orden de arriba: dos listas a mano se desvían solas. */
 export const IDS_DE_SERVICIO: readonly IdDeServicio[] = SERVICIOS.map((s) => s.id)
+
+/** [B1.2c] El servicio por su nombre visible (el dato `servicio` de un proyecto del Portfolio), o `null` si no es uno de los tres. */
+export function idDelServicioLlamado(nombre: string | null): IdDeServicio | null {
+  return SERVICIOS.find((s) => s.nombre === nombre)?.id ?? null
+}
 
 export function servicioDe(id: IdDeServicio): Servicio {
   const encontrado = SERVICIOS.find((s) => s.id === id)
