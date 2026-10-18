@@ -10,6 +10,8 @@
 
 import { useEffect, useSyncExternalStore } from 'react'
 
+import { SELECTOR_DE_FOCALIZABLES } from '../../_secciones/trabajos/demos/dialogo'
+
 import { PRECARGA_POR_SERVICIO, type Interes } from './contenido'
 
 /** Desde dónde entra la hoja: arriba con la barra de escritorio, abajo con el menú móvil. */
@@ -56,11 +58,28 @@ export function cerrarContacto(): void {
   avisar()
 }
 
+/**
+ * [P-H10] A quién vuelve el foco: al que abrió, si lo puede recibir; si es un envoltorio (los CTA de Servicios ponen el atributo en
+ * un `div`), al primer control de adentro. Un origen que ya no está en el documento, a nadie.
+ */
+export function focoDelOrigen(origen: HTMLElement | null): HTMLElement | null {
+  if (origen === null || origen.isConnected === false) return null
+  if (typeof origen.matches !== 'function' || origen.matches(SELECTOR_DE_FOCALIZABLES)) return origen
+  return origen.querySelector<HTMLElement>(SELECTOR_DE_FOCALIZABLES) ?? origen
+}
+
+/** [P-H10] El control real del clic: el que se tocó adentro del disparador (con el teclado, el que tenía el foco), o el disparador. */
+export function origenDelClic(tocado: EventTarget | null, disparador: Element): HTMLElement | null {
+  const control = tocado instanceof Element ? tocado.closest<HTMLElement>(SELECTOR_DE_FOCALIZABLES) : null
+  if (control !== null && disparador.contains(control)) return control
+  return disparador instanceof HTMLElement ? disparador : null
+}
+
 /** Le devuelve el foco al disparador. Lo llama el formulario al terminar su animación de salida. */
 export function devolverElFoco(): void {
   // Un cuadro después: la salida termina ANTES de desmontar la hoja, y su trampa de foco retendría el foco adentro.
-  const { origen } = estado
-  requestAnimationFrame(() => origen?.focus({ preventScroll: true }))
+  const destino = focoDelOrigen(estado.origen)
+  requestAnimationFrame(() => destino?.focus({ preventScroll: true }))
 }
 
 /** [PULIDO 12] 1 · si la barra ya midió el modo (hasta entonces el de arranque, `barra`, no dice nada del ancho). */
@@ -134,7 +153,7 @@ export function useAperturaDelContacto(selectorDeLosViajes: string): void {
       const objetivo = e.target instanceof Element ? e.target.closest(SELECTOR_DE_APERTURA) : null
       if (objetivo === null) return
       e.preventDefault()
-      if (objetivo.getAttribute('data-abre-contacto') === ABRE_EL_PANEL) abrirContacto(precargaDe(objetivo), objetivo instanceof HTMLElement ? objetivo : null)
+      if (objetivo.getAttribute('data-abre-contacto') === ABRE_EL_PANEL) abrirContacto(precargaDe(objetivo), origenDelClic(e.target, objetivo))
       else viajarAlContacto(selectorDeLosViajes)
     }
     document.addEventListener('click', alTocar, { capture: true })

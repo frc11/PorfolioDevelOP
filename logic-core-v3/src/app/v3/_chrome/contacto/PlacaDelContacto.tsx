@@ -69,8 +69,9 @@ export function PlacaDelContacto({ activa, children }: { readonly activa: boolea
           {/* [PULIDO 11] A1 · las caras se ven recién con el viaje terminado: en el viaje la placa va de frente (no aportan nada)
               y, antes de que la hoja se rasterice, la de atrás asomaba como un rectángulo en el medio (medido con los cuadros del
               compositor: `pulido-11/_scripts/a1-contacto.ts`). Al irse siguen (se acuesta sobre su base). */}
+          {/* [P-H12] Las caras no reciben el puntero: van después de la hoja en el DOM y tapaban la X (y todo lo de la hoja) al pedir el elemento del punto. */}
           {CARAS.map((c) => (
-            <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className, !llego && 'invisible')} style={c.style} />
+            <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className, !llego && 'invisible')} style={{ ...c.style, pointerEvents: 'none' }} />
           ))}
         </motion.div>
       </motion.div>

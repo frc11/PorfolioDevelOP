@@ -15,7 +15,8 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_l
 import { RAIZ } from '../../_lib/__tests__/s3-archivos'
 import { quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { siguienteFoco } from '../../_secciones/trabajos/demos/dialogo'
-import { abrirContacto, cerrarContacto, devolverElFoco, precargaDe, SELECTOR_DE_APERTURA } from './apertura'
+import { abrirContacto, cerrarContacto, devolverElFoco, focoDelOrigen, precargaDe, SELECTOR_DE_APERTURA } from './apertura'
+import { PlacaDelContacto } from './PlacaDelContacto'
 import { DESPUES_DEL_ENVIO, INTERESES, PRECARGA_POR_SERVICIO, ROTULO_DEL_ENVIO, TITULO } from './contenido'
 import { enviarContacto, validarContacto, type DatosDeContacto } from './enviarContacto'
 import { HojaParaElInvariante } from './FormularioDeContacto'
@@ -51,6 +52,23 @@ devolverElFoco()
 afirmar(enfocado, '  y al terminar la salida el foco vuelve al botón que lo abrió')
 globalThis.requestAnimationFrame = rafAntes
 afirmar(/onExitComplete=\{devolverElFoco\}/.test(FUENTE), '  la devolución cuelga de la salida del diálogo')
+// [P-H10] Al botón REAL: los CTA de Servicios ponen el atributo en un `div` (que no recibe el foco: quedaba en `body`).
+const boton = { isConnected: true, matches: () => true } as unknown as HTMLElement
+const envoltorio = { isConnected: true, matches: () => false, querySelector: () => boton } as unknown as HTMLElement
+const suelto = { isConnected: false, matches: () => true } as unknown as HTMLElement
+const alBotonReal = (f: (o: HTMLElement | null) => HTMLElement | null): boolean => f(envoltorio) === boton && f(boton) === boton && f(suelto) === null && f(null) === null
+afirmar(alBotonReal(focoDelOrigen), '[P-H10] el foco vuelve al control real: el que abrió si lo puede recibir; si es un envoltorio, el primer control de adentro; si ya no está en la página, a nadie')
+controlPositivo('  el detector VE la devolución de antes (el foco al envoltorio, que no lo recibe)', (o: HTMLElement | null): HTMLElement | null => o, alBotonReal)
+const DELEGACION = quitarComentarios(leer('src/app/v3/_chrome/contacto/apertura.ts'))
+afirmar(/=== ABRE_EL_PANEL\) abrirContacto\(precargaDe\(objetivo\), origenDelClic\(e\.target, objetivo\)\)/.test(DELEGACION) && /const destino = focoDelOrigen\(estado\.origen\)/.test(DELEGACION), '  y la delegación guarda el control que se tocó (con el teclado, el que tenía el foco) adentro del disparador')
+// [P-H12] Las caras de la placa no reciben el puntero: van después de la hoja y tapaban la X al pedir el elemento del punto.
+const PLACA = renderToStaticMarkup(<PlacaDelContacto activa><div data-parte="hoja" /></PlacaDelContacto>)
+const sinPuntero = (h: string): boolean => {
+  const caras = [...h.matchAll(/<div data-cara="[a-z]+"[^>]*style="([^"]*)"/g)]
+  return caras.length === 5 && caras.every((c) => /pointer-events:\s*none/.test(c[1]))
+}
+afirmar(sinPuntero(PLACA), '[P-H12] las cinco caras de la placa no reciben el puntero (`pointer-events: none`): el clic en la X llega a la X')
+controlPositivo('  el detector VE las caras de antes (con el puntero)', PLACA.replace(/;?pointer-events:\s*none/g, ''), sinPuntero)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El scroll bloqueado con el formulario abierto')
