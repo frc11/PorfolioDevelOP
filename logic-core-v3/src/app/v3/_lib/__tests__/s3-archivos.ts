@@ -74,6 +74,8 @@ export const ARCHIVOS_DE_COMPONENTE = [
   `${V3}/_componentes/layout/Envoltorio.tsx`,
   `${V3}/_componentes/layout/Grilla.tsx`,
   `${V3}/_componentes/medios/Imagen.tsx`,
+  // [P-H21] la pausa de los videos en bucle (WCAG 2.2.2): sólo el componente, s77 lo prueba.
+  `${V3}/_componentes/medios/BotonPausa.tsx`,
   `${V3}/_componentes/tipografia/Textos.tsx`,
   `${V3}/_componentes/tipografia/Titular.tsx`,
 ]
