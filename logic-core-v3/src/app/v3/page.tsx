@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { ChromeDelHome } from './_chrome/ChromeDelHome'
 import { VeloDeCarga } from './_componentes/VeloDeCarga'
 import { IntroDelHome } from './_intro/IntroDelHome'
+import { PresetDeLaPagina } from './_lib/escena/ruta/PresetDeLaPagina'
+import { PRESET_DEL_HOME } from './_lib/escena/ruta/preset'
 import { CompuertaDelHome } from './_secciones/CompuertaDelHome'
 import { Home } from './_secciones/Home'
 
@@ -65,6 +67,8 @@ export default function PaginaV3() {
   return (
     <>
       {/* [AJUSTES FINALES] A4 · la página arranca toda blanca y todo aparece junto cuando está todo (`_lib/carga.ts`). */}
+      {/* [B12a.1] El home declara su preset (D1): la escena lee el mapeo de sus secciones, como siempre. */}
+      <PresetDeLaPagina preset={PRESET_DEL_HOME} />
       <VeloDeCarga />
       <ChromeDelHome />
       <IntroDelHome />

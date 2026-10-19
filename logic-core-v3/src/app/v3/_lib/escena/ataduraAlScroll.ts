@@ -6,7 +6,9 @@ import {
   subscribeIntroStage,
 } from '@/components/layout/home-intro/introHandoff'
 
+import { hayPrimerCuadro, suscribirALaCarga } from '../carga'
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
+import { bloquesDelPreset, despiertaEnLaPagina, presetActual, suscribirseAlPreset } from './ruta/preset'
 import { medidaSinElEstiramiento } from './tramoEstirado'
 import { avisarQueSeMovioLaPagina } from './paginaMovida'
 import { aplicarElDiaDelFinal, bloqueTapaElCuadro, bloqueVivo, medirElBloqueOpacoEn } from './nocheDisparada'
@@ -16,6 +18,7 @@ import { escenaRetenida } from './retencion'
 import { suscribirAlViaje, viajeEnCurso } from './viaje'
 import {
   ESTADO_INICIAL,
+  MARGEN_DE_REANUDACION,
   escenaEnCuadro,
   siguiente,
   type EstadoDeLaEscena,
@@ -126,7 +129,15 @@ export function useEscenaAtadaAlScroll(
       if (!(ventana > 0)) return
       const desplazamiento = window.scrollY
       const secciones = medirLasSeccionesEn(document, desplazamiento, extension)
-      if (secciones === null) return
+      if (secciones === null) {
+        // [B12a.1] Una página que no es el home: la despiertan sus bloques (su preset, D1); en el papel duerme (D8). Sin preset (las
+        // galerías de /v3) duerme entera, pero recién después de su primer cuadro: el lienzo no queda vacío.
+        const preset = presetActual()
+        const despierta = !hayPrimerCuadro() || despiertaEnLaPagina(preset, bloquesDelPreset(document, preset, desplazamiento), desplazamiento, ventana, MARGEN_DE_REANUDACION)
+        const enLaPagina = despierta ? EN_CUADRO : FUERA_DE_CUADRO
+        if (siguiente(estadoRef.current, enLaPagina) !== estadoRef.current) setEstado((previo) => siguiente(previo, enLaPagina))
+        return
+      }
       const medida = medidaSinElEstiramiento(desplazamiento, secciones.abajo, desplazamiento, ventana, sinEstirar)
 
       const quieta = escenaRetenida(getIntroStage(), introEnteredClean())
@@ -187,6 +198,9 @@ export function useEscenaAtadaAlScroll(
     const desuscribir = subscribeIntroStage(pedir)
     // [VIAJES] Al empezar y al terminar un viaje se vuelve a leer: la escena se enciende o se suspende en el acto.
     const desuscribirDelViaje = suscribirAlViaje(pedir)
+    // [B12a.1] Cuando cambia el preset de la página y cuando la escena dibuja su primer cuadro, otra lectura.
+    const desuscribirDelPreset = suscribirseAlPreset(pedir)
+    const desuscribirDeLaCarga = suscribirALaCarga(pedir)
 
     return () => {
       if (pedido !== 0) cancelAnimationFrame(pedido)
@@ -195,6 +209,8 @@ export function useEscenaAtadaAlScroll(
       document.removeEventListener('visibilitychange', pedir)
       desuscribir()
       desuscribirDelViaje()
+      desuscribirDelPreset()
+      desuscribirDeLaCarga()
     }
     // `retenida` entra en las dependencias para que soltar la escena vuelva a
     // leer el scroll de una vez, sin esperar al próximo evento.

@@ -492,4 +492,37 @@ El orden es el de la tabla: cada uno se apoya en el anterior. B12a.4 y B12a.7 so
 
 ## Log
 
-(Se suma acá cuando arranque B12a.1.)
+### B12a.1 · el preset y la escena consciente de la ruta (2026-10-18)
+
+Valentino decidió D1 a D8 sobre el plan (`d51d95fc`).
+- D1: la página declara su preset.
+- D2: `<Link>` inmediato y la banda, sin View Transitions.
+- D3, corregida: el título de las páginas va con dos variantes de Archivo distintas de las del home, en 2 o 3 combinaciones detrás de `?titulo=1|2|3`.
+- D4: la navbar, en el layout.
+- D5: el desplegable con clic, Enter y hover con retardo; en el teléfono, un acordeón.
+- D6: la flecha devuelve el scroll, la noche y el paso del Portfolio.
+- D7: dos `next build`, al cerrar B12a.5 y B12a.7.
+- D8: el lienzo duerme detrás del papel.
+
+**Lo hecho:**
+- **`esc/ruta/preset.ts`**: `PresetDeLaEscena` (el id, los bloques que despiertan la escena, la noche y el acento), `PRESET_DEL_HOME`, el almacén (una PILA: la página nueva entra antes de que salga la vieja, y cada una saca sólo lo suyo), `despiertaEnLaPagina` (pura) y `bloquesDelPreset`.
+- **`esc/ruta/PresetDeLaPagina.tsx`**: la página lo apila al montarse (con `useLayoutEffect`) y lo saca al desmontarse, sin pintar nada. El home lo declara en `v3/page.tsx` con `PRESET_DEL_HOME`.
+- **`esc/ataduraAlScroll.ts`**: sin las secciones del home, la lectura del scroll pregunta al preset.
+  - Sin preset (las galerías de `/v3`), la escena se suspende (`never`) después de su primer cuadro, para que el lienzo no quede vacío.
+  - Con preset, despierta mientras asoma un bloque suyo, con el margen de encendido del home; en el papel duerme (D8).
+  - Se vuelve a leer cuando cambia el preset y cuando la escena pinta su primer cuadro.
+  - En el home la lectura es la de siempre.
+- **La suite s78-b12a** (`test:s78-b12a` y `test:s78`): 11 afirmaciones y 4 controles.
+
+**Verificación:**
+- lint limpio y `tsc` con 0 errores;
+- s74 34, s75 55, s76 670 (con el mapeo de la deriva), s10 240 y s78 11;
+- `verificar`: el reaper de Claude Code lo cortó por memoria (en segundo plano, con 2 GB libres). Lo reintenté una vez, partido en dos mitades en primer plano (`scratchpad/cola2/verificar-mitad.sh`), más los 16 grupos que no tienen script de agregado. Dio los 8 grupos rojos de la base (s1, s2, s3, s4, s5, s7, s8 y s17) con las mismas cuentas de suites rojas, y todo lo demás en verde (s74, s75, s76, s77 y s78 incluidos). La frontera, aparte: en verde;
+- sin `next build`.
+
+**Lo que no corrió por memoria: el criterio medido de B12a.1.** En `/v3/tipografia` en reposo tiene que dar ≤ 50 ms/s de tareas y 0 cuadros de más de 50 ms (en Fase 0, unos 600 ms/s y 3 o 4 cuadros largos). Con el dev de servicios arriba, el dev del home y un Chrome no entran juntos.
+- La sonda está lista: `scratchpad/ph/costo-subruta.ts`, con `BASE=http://localhost:3002`.
+
+**Qué mirar (B12a.1):**
+1. `/v3` a 1440 y 390: el home, igual que siempre.
+2. `/v3/tipografia` y `/v3/componentes`: la escena de fondo aparece (su primer cuadro) y queda quieta. El ventilador de la máquina se tiene que notar menos que antes.
