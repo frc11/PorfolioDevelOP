@@ -16,8 +16,8 @@
 import { Cta } from '../../_componentes/chrome/Cta'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
+import { Gatillo } from '../../_secciones/_contrato/Gatillo'
 import { ESTILO_DEL_CTA } from '../estiloDelAcento'
-import { Gatillo } from '../movimiento/Gatillo'
 import type { Servicio } from '../tipos'
 import { Bloque, CLASES_DEL_PAPEL, CLASES_DE_LA_COLUMNA_DEL_PANEL } from './Bloque'
 

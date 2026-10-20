@@ -17,7 +17,7 @@
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
-import { Gatillo } from '../movimiento/Gatillo'
+import { Gatillo } from '../../_secciones/_contrato/Gatillo'
 import { VideoDeFondo } from '../movimiento/VideoDeFondo'
 import type { Prueba } from '../tipos'
 import { CLASES_DEL_PAPEL, idDelTituloDe } from './Bloque'

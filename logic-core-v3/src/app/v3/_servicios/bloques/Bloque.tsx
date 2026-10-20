@@ -11,7 +11,7 @@
  * El título a la izquierda y el contenido a la derecha desde 1024; por debajo, todo apila. El título entra por línea. El panel (la
  * columna del contenido) entra de una de tres maneras ([M1], la tabla del M0):
  *   · `progresivo` (el defecto): el revelado del home atado al scroll (`movimiento/Revelado`);
- *   · `gatillo`: entero al cruzar la línea de disparo y en espejo al volver a subir (`movimiento/Gatillo`): los CTA;
+ *   · `gatillo`: entero al cruzar la línea de disparo y en espejo al volver a subir (el gatillo común del home, `_contrato/Gatillo`): los CTA;
  *   · `quieto`: en su lugar, sin revelado (el FAQ: cambia de alto al abrir una pregunta y un revelado atado al scroll lo correría).
  *
  * `data-bloque` es el gancho de los tests (nunca `data-seccion`, `data-panel` ni ids del home). `Problema` (el `h1`, en la intro),
@@ -21,8 +21,8 @@
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { SUPERFICIES } from '../../_lib/superficies'
+import { Gatillo } from '../../_secciones/_contrato/Gatillo'
 import { MarcaDeSeccion } from '../../_secciones/_contrato/Rotulo'
-import { Gatillo } from '../movimiento/Gatillo'
 import { Revelado } from '../movimiento/Revelado'
 import { TitularQueEntra } from '../movimiento/TitularQueEntra'
 

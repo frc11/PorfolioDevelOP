@@ -117,9 +117,9 @@ export function CapaDelVideo({
 }
 
 /**
- * P-H21: reemplazar por BotonPausa. Un botón conmutable: el nombre es fijo y `aria-pressed` dice si está pausado; el teclado es el nativo.
- * Va abajo a la derecha: arriba lo tapaba la barra fija del sitio con el cuadro en pantalla (medido a 1440). El texto le deja lugar
- * (`Trabajos.tsx`).
+ * P-H27: reemplazar por BotonPausa cuando llegue el ajuste de s77. Un botón conmutable: el nombre es fijo y `aria-pressed` dice si está
+ * pausado; el teclado es el nativo. Va abajo a la derecha: arriba lo tapaba la barra fija del sitio con el cuadro en pantalla (medido a
+ * 1440). El texto le deja lugar (`Trabajos.tsx`).
  */
 export function BotonDePausa({ pausado, alApretar }: { readonly pausado: boolean; readonly alApretar?: () => void }): React.JSX.Element {
   return (
