@@ -128,3 +128,59 @@ En orden: `91413a5b`, `8bf0bfdc`, `54766fc1`, `f1cd4b4e`, `eb4a3bbc`, `97e5c667`
 - **Servicios** reemplaza su `disparo.ts` y su `Gatillo.tsx` por el import del contrato en su carril. Sus pruebas los citan por la ruta de ellos.
 - **El `Gatillo` común no suma CSS.** La duración y la curva de los tokens que usa ya están en el home (el Portfolio, Quiénes somos y los títulos 3D). No lo usa ninguna sección del home todavía: el remate sigue con sus animaciones propias.
 - **Para liberar memoria** se bajó el servidor de desarrollo de :3000: el gate no lo necesita. El de servicios (:3001) no se tocó.
+
+## 6. P-H26 y P-H27 (cola P-H28, 2026-10-19)
+
+P-H28 cambió la prioridad: B12a va antes que el subsprint B de B1.2d. A2, B y B12a.1 ya estaban commiteados. B12a.2 estaba en curso: se llevó a un punto estable y se commiteó (`edd64c7c`). Después vinieron estos dos.
+
+### 6.1 P-H26, el foco al cerrar el contacto
+
+**La causa** la midió servicios (`docs/servicios/SPRINT-R1.md` §5.1):
+- `devolverElFoco` pedía un solo `requestAnimationFrame`, pero `onExitComplete` corre ANTES del desmontaje de la hoja.
+- Si el cuadro caía en esos ~4 ms, el foco iba al botón, la trampa del diálogo lo devolvía a la hoja, y la hoja, al irse, lo dejaba en `body`: 30 de 108 cierres.
+
+**El arreglo** (`_chrome/contacto/apertura.ts`):
+- `devolverElFoco` espera cuadro a cuadro a que la hoja (`[data-pieza="contacto"]`) ya no esté en el documento, hasta 30 cuadros, y recién ahí enfoca.
+- Si el contacto se reabre mientras espera, no hace nada.
+- Si el foco no quedó en el que abrió (ya no está o no lo recibe), va al respaldo, `destinoDeRespaldo`: el primer disparador del contacto a la vista, el «Contacto» de la barra antes que los CTA. Si no hay ninguno, nadie.
+- `onExitComplete={devolverElFoco}` no cambió: s25 y s60 lo fijan.
+- `?devolucion=un-cuadro` vuelve a la devolución de antes. Es sólo para el control positivo de la sonda.
+
+**La prueba:** s77 §4 simula la carrera en cuadros, con la trampa y el desmontaje.
+- El foco vuelve al que abrió con la hoja desmontada antes del primer cuadro, o 1, 2 y 4 cuadros después, y se enfoca una sola vez.
+- **El control positivo:** con un solo cuadro y la hoja desmontándose después, el foco cae en `body`.
+- Con la reapertura, el foco no se toca.
+- Con el origen suelto o que no lo recibe, va al respaldo.
+
+**La sonda en el sitio:** `scripts-carga/foco-del-contacto.ts`. Es la de servicios llevada a `/v3`, con los mismos pasos por cierre y los tres disparadores del panel: la barra, el CTA de un servicio y el CTA del final.
+- 108 cierres: 1440 y 1024 con 3 × 12, y 390 con 2 × 18 (sin la barra).
+- El control es la misma corrida con `?devolucion=un-cuadro`.
+- **No corrió por memoria.** El dev del home (:3002) compiló `/v3` y, con el dev de servicios de otra sesión en :3001, quedaron 1,1 GB libres: menos de los 3 GB para abrir el Chromium. Mientras esperaba, el reaper de Claude Code cortó el dev por memoria. Sus hijos (el CLI de next y el servidor, 3 GB) quedaron vivos y se terminaron con `taskkill /T`. El aviso del reaper dice que no se vuelva a levantar sin pedirlo, así que el criterio de 0 en 108 queda sin medir. Se corre así:
+  ```
+  npm run dev -- -p 3002
+  npx tsx scripts-carga/foco-del-contacto.ts 1440 12
+  npx tsx scripts-carga/foco-del-contacto.ts 1024 12
+  npx tsx scripts-carga/foco-del-contacto.ts 390 18
+  npx tsx scripts-carga/foco-del-contacto.ts 1440 12 "?devolucion=un-cuadro"
+  ```
+  El último es el control: tiene que volver a fallar.
+
+### 6.2 P-H27, quién puede importar `BotonPausa`
+
+- s77 §1 exigía que los que importan la pausa fueran EXACTAMENTE el panel del Portfolio. Con el merge de servicios (`_servicios/movimiento/VideoDeFondo.tsx` la importa, como pide P-H21) quedaba en rojo.
+- **Ahora es una lista explícita:** `PUEDEN_IMPORTAR_LA_PAUSA` tiene `MedioDeLaTira.tsx`, que es obligatorio, y `_servicios/movimiento/VideoDeFondo.tsx`.
+  - Pasa: el video de fondo de servicios importándola.
+  - Controles: otro archivo que la importa, y el home sin su integración.
+- El resto de s77 no cambió.
+
+### 6.3 La verificación
+
+- lint limpio en los cuatro archivos tocados y `tsc` con 0 errores (la sonda nueva incluida: `scripts-carga` entra en el `tsconfig`).
+- `verificar`, en mitades en primer plano, y los 17 scripts sin agregado: los 8 grupos rojos de la base con las mismas suites y cuentas, y todo lo demás en verde. s25 da 35, s60 28 y s77 44.
+- Sin `next build`.
+
+### 6.4 Qué mirar (P-H26)
+
+1. `/v3`, a 1440, con el teclado: Tab hasta Contacto en la barra, Enter, Esc. El anillo vuelve a Contacto. **Repetilo 10 veces**: antes, una de cada cuatro caía en `body`.
+2. Lo mismo con el CTA de un servicio (en Servicios) y con el CTA del final, a 1440 y a 390.
+3. Con `/v3?devolucion=un-cuadro`, lo mismo tiene que fallar a veces: es la devolución de antes.

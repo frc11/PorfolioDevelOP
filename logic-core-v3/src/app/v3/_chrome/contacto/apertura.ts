@@ -75,11 +75,54 @@ export function origenDelClic(tocado: EventTarget | null, disparador: Element): 
   return disparador instanceof HTMLElement ? disparador : null
 }
 
-/** Le devuelve el foco al disparador. Lo llama el formulario al terminar su animación de salida. */
+/** [P-H26] La hoja del contacto: mientras esté en el documento, su trampa de foco devuelve adentro cualquier foco que se escape. */
+export const HOJA_DEL_CONTACTO = '[data-pieza="contacto"]'
+/** [P-H26] Los cuadros que se espera, como mucho, a que la hoja se desmonte (llega 3 a 4 ms después de la salida: sobra). */
+export const CUADROS_DE_ESPERA_DEL_FOCO = 30
+/** [P-H26] La devolución de antes, un solo cuadro después de la salida: sólo para el control positivo de la sonda (`?devolucion=un-cuadro`). */
+const conUnCuadro = (): boolean => typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('devolucion') === 'un-cuadro'
+
+/**
+ * [P-H26] Si el que abrió ya no está o no recibe el foco: el primer disparador del contacto a la vista (el «Contacto» de la barra antes
+ * que los CTA), y si no hay ninguno, nadie.
+ */
+export function destinoDeRespaldo(documento: Pick<Document, 'querySelectorAll'>): HTMLElement | null {
+  const disparadores = [...documento.querySelectorAll<HTMLElement>(`[data-abre-contacto="${ABRE_EL_PANEL}"]`), ...documento.querySelectorAll<HTMLElement>(SELECTOR_DE_APERTURA)]
+  for (const d of disparadores) {
+    const control = focoDelOrigen(d)
+    if (control !== null && control.getClientRects().length > 0) return control
+  }
+  return null
+}
+
+/**
+ * Le devuelve el foco al disparador. Lo llama el formulario al terminar su animación de salida.
+ *
+ * [P-H26] Recién con la hoja DESMONTADA. `onExitComplete` corre antes del desmontaje: con un solo cuadro de espera, si el cuadro caía
+ * en esos ~4 ms el foco iba al botón, la trampa del diálogo lo devolvía a la hoja y la hoja, al irse, lo dejaba en `body` (30 de 108
+ * cierres, `docs/servicios/SPRINT-R1.md` §5.1). Ahora se espera cuadro a cuadro a que la hoja no esté; si el contacto se reabre
+ * mientras, no se hace nada. Y si el foco no quedó en el que abrió (ya no está, o no lo recibe), va al respaldo.
+ */
 export function devolverElFoco(): void {
-  // Un cuadro después: la salida termina ANTES de desmontar la hoja, y su trampa de foco retendría el foco adentro.
-  const destino = focoDelOrigen(estado.origen)
-  requestAnimationFrame(() => destino?.focus({ preventScroll: true }))
+  if (conUnCuadro()) {
+    const destino = focoDelOrigen(estado.origen)
+    requestAnimationFrame(() => destino?.focus({ preventScroll: true }))
+    return
+  }
+  let cuadros = 0
+  const devolver = (): void => {
+    if (estado.abierto) return
+    if (typeof document !== 'undefined' && document.querySelector(HOJA_DEL_CONTACTO) !== null && cuadros < CUADROS_DE_ESPERA_DEL_FOCO) {
+      cuadros += 1
+      requestAnimationFrame(devolver)
+      return
+    }
+    const destino = focoDelOrigen(estado.origen)
+    destino?.focus({ preventScroll: true })
+    if (typeof document === 'undefined' || (destino !== null && document.activeElement === destino)) return
+    destinoDeRespaldo(document)?.focus({ preventScroll: true })
+  }
+  requestAnimationFrame(devolver)
 }
 
 /** [PULIDO 12] 1 · si la barra ya midió el modo (hasta entonces el de arranque, `barra`, no dice nada del ancho). */

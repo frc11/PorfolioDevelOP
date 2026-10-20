@@ -1,10 +1,13 @@
 /**
  * s77 · EL SPRINT P-H — las piezas comunes que pidieron las páginas de servicios, con su control cada una.
  *
- *   §1 · P-H21 · la pausa de un video en bucle (`_componentes/medios/BotonPausa.tsx`): sólo el componente, sin integrar.
+ *   §1 · P-H21 · la pausa de un video en bucle (`_componentes/medios/BotonPausa.tsx`), integrada en el panel del Portfolio; P-H27: quién
+ *        puede importarla es una lista explícita (el home y el video de fondo de servicios).
  *   §2 · P-H23 · el punto de registro de la llave (`registrarInventos`): lo registrado pasa por la misma puerta y el escáner lo conoce.
  *   §3 · P-H18 + P-H25 · el gatillo común (`_contrato/disparo.ts`, `reposo.ts`, `Gatillo.tsx`) con la guarda en reposo, y Tu panel
  *        (la sección que lo usa) idéntica antes y después.
+ *   §4 · P-H26 · el foco al cerrar el contacto vuelve recién con la hoja desmontada (con un solo cuadro, la trampa del diálogo lo
+ *        devolvía a la hoja y caía en `body`), y si el que abrió ya no lo recibe, a un respaldo.
  *
  * El log es `docs/rediseno/SPRINT-PH.md`.
  */
@@ -14,6 +17,7 @@ import path from 'node:path'
 
 import React from 'react'
 
+import { CUADROS_DE_ESPERA_DEL_FOCO, HOJA_DEL_CONTACTO, abrirContacto, cerrarContacto, destinoDeRespaldo, devolverElFoco } from '../../_chrome/contacto/apertura'
 import { BotonPausa, nombreDeLaPausa } from '../../_componentes/medios/BotonPausa'
 import { ENTRADAS_AL_TRAMO } from '../../_secciones/_contrato/cruce'
 import { ESTADOS_DEL_GATILLO, LINEA_DEL_DISPARO, aLaVistaEn, margenDelDisparo, siguienteEstado, type EstadoDelGatillo, type EventoDelGatillo } from '../../_secciones/_contrato/disparo'
@@ -63,11 +67,19 @@ const elementoPausado = BotonPausa({ pausado: true, alCambiar: (p) => pedidos.pu
 afirmarIgual(pedidos, [true, false], '  el clic pide el estado contrario (corriendo → pausa, en pausa → sigue)')
 
 const usanLaPausa = (archivos: readonly string[], fuente: (a: string) => string): string[] => archivos.filter((a) => /from '[^']*medios\/BotonPausa'/.test(fuente(a)))
-// [B1.2d B] P-H21 · integrada en el video en bucle del panel de escritorio (en las historias la pausa es mantener apretado); el de cada
-// servicio (`VideoDeServicio`) va cuando se toque esa pieza.
-const DONDE_VA = [`${V3}/_secciones/trabajos/portfolio/MedioDeLaTira.tsx`]
-afirmarIgual(usanLaPausa(PRODUCTO, leer), DONDE_VA, '  y está integrada donde corre un video en bucle del home: el del panel del Portfolio (s76 §34 lo afirma sobre el marcado)')
-controlPositivo('  el detector VE una integración de más', [...DONDE_VA, 'x.tsx'], (l: readonly string[]) => JSON.stringify(usanLaPausa(l, (a) => (a === 'x.tsx' ? "import { BotonPausa } from '../../_componentes/medios/BotonPausa'" : leer(a)))) === JSON.stringify(DONDE_VA))
+// [B1.2d B] P-H21 · integrada en el video en bucle del panel de escritorio (en las historias la pausa es mantener apretado).
+// [P-H27] La lista EXPLÍCITA de quién puede importarla: el del home (obligatorio) y el video de fondo de servicios (P-H21 la pide ahí;
+// `docs/servicios/SPRINT-R1.md` §5.2), que en esta rama todavía no existe. Cualquier otro import la pone en rojo.
+const DONDE_VA = `${V3}/_secciones/trabajos/portfolio/MedioDeLaTira.tsx`
+const PUEDEN_IMPORTAR_LA_PAUSA = [DONDE_VA, `${V3}/_servicios/movimiento/VideoDeFondo.tsx`]
+const IMPORTA_LA_PAUSA = "import { BotonPausa } from '../../_componentes/medios/BotonPausa'"
+const pausaPermitida = (importan: readonly string[]): boolean => importan.includes(DONDE_VA) && importan.every((a) => PUEDEN_IMPORTAR_LA_PAUSA.includes(a))
+const importanLaPausa = usanLaPausa(PRODUCTO, leer)
+afirmar(pausaPermitida(importanLaPausa), '  y está integrada donde corre un video en bucle del home (el panel del Portfolio: s76 §34 lo afirma sobre el marcado); sólo la importan los de la lista', importanLaPausa.join(' · '))
+const conImport = (extra: string): string[] => usanLaPausa([DONDE_VA, extra], (a) => (a === extra ? IMPORTA_LA_PAUSA : leer(a)))
+afirmar(pausaPermitida(conImport(PUEDEN_IMPORTAR_LA_PAUSA[1])), '  P-H27 · el video de fondo de servicios importándola pasa (cuando llegue el merge)')
+controlPositivo('  el detector VE una integración de más (otro archivo que la importa)', conImport(`${V3}/_secciones/trabajos/demos/VentanaDeDemo.tsx`), pausaPermitida)
+controlPositivo('  y el home sin su integración', [PUEDEN_IMPORTAR_LA_PAUSA[1]], pausaPermitida)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('§2 · P-H23 · el punto de registro de la llave')
@@ -179,4 +191,85 @@ async function guardaEnElTiempo(): Promise<void> {
   delete (globalThis as unknown as { window?: typeof ventana }).window
 }
 
-void guardaEnElTiempo().then(() => cerrar('s77-ph'))
+// ═══════════════════════════════════════════════════════════════════════════
+// §4 · P-H26 · el foco al cerrar el contacto. La carrera, en cuadros: `onExitComplete` llama a `devolverElFoco` y la hoja se desmonta
+// después de `k` cuadros (k = 0: antes del primero, el caso bueno de antes; k = 1: después del primero, el malo, ~24 % en el sitio). La
+// trampa del diálogo devuelve adentro un foco que se escapa mientras la hoja está; al desmontarse, un foco que quedó adentro cae en `body`.
+type Activo = 'origen' | 'respaldo' | 'hoja' | 'body'
+interface Cierre {
+  readonly k: number
+  readonly unCuadro?: boolean
+  readonly reabre?: boolean
+  readonly origenConectado?: boolean
+  readonly origenToma?: boolean
+}
+function focoAlCerrar(s: Cierre): { readonly activo: Activo; readonly focos: number } {
+  const g = globalThis as unknown as { document?: unknown; window?: unknown; requestAnimationFrame?: typeof requestAnimationFrame }
+  const antes = { document: g.document, window: g.window, raf: g.requestAnimationFrame }
+  let hoja = true
+  let activo: Activo = 'hoja'
+  let focos = 0
+  const cola: FrameRequestCallback[] = []
+  const elemento = (nombre: 'origen' | 'respaldo', conectado: boolean, toma: boolean): HTMLElement =>
+    ({
+      isConnected: conectado,
+      matches: () => true,
+      getClientRects: () => ({ length: 1 }),
+      focus: () => {
+        focos += 1
+        if (toma) activo = hoja ? 'hoja' : nombre
+      },
+    }) as unknown as HTMLElement
+  const origen = elemento('origen', s.origenConectado ?? true, s.origenToma ?? true)
+  const respaldo = elemento('respaldo', true, true)
+  g.document = {
+    querySelector: (sel: string) => (sel === HOJA_DEL_CONTACTO && hoja ? {} : null),
+    querySelectorAll: () => [respaldo],
+    get activeElement() {
+      return activo === 'origen' ? origen : activo === 'respaldo' ? respaldo : null
+    },
+  }
+  g.window = { location: { search: s.unCuadro === true ? '?devolucion=un-cuadro' : '' } }
+  g.requestAnimationFrame = ((f: FrameRequestCallback) => cola.push(f)) as typeof requestAnimationFrame
+  const desmontar = (): void => {
+    if (hoja && activo === 'hoja') activo = 'body'
+    hoja = false
+  }
+  abrirContacto([], origen)
+  cerrarContacto()
+  devolverElFoco()
+  if (s.reabre === true) abrirContacto([], origen)
+  if (s.k === 0) desmontar()
+  for (let cuadro = 1; cuadro <= 2 * CUADROS_DE_ESPERA_DEL_FOCO && cola.length > 0; cuadro++) {
+    for (const f of cola.splice(0)) f(cuadro * 16)
+    if (cuadro >= s.k && s.reabre !== true) desmontar()
+  }
+  cerrarContacto()
+  g.document = antes.document
+  g.window = antes.window
+  g.requestAnimationFrame = antes.raf
+  return { activo, focos }
+}
+
+function focoDelContacto(): void {
+  titulo('§4 · P-H26 · el foco al cerrar el contacto')
+  const vuelve = (r: { readonly activo: Activo; readonly focos: number }): boolean => r.activo === 'origen' && r.focos === 1
+  const carreras = [0, 1, 2, 4].map((k) => focoAlCerrar({ k }))
+  afirmar(carreras.every(vuelve), `el foco vuelve al que abrió en todas las carreras (la hoja desmontada antes del primer cuadro, o 1, 2 y 4 cuadros después): se espera a que la hoja no esté (hasta ${String(CUADROS_DE_ESPERA_DEL_FOCO)} cuadros) y se enfoca una sola vez`)
+  controlPositivo('  el detector VE la devolución de antes, un solo cuadro, con la hoja desmontándose después del cuadro (el foco cae en `body`)', focoAlCerrar({ k: 1, unCuadro: true }), vuelve)
+  afirmar(vuelve(focoAlCerrar({ k: 0, unCuadro: true })), '  (la de antes andaba cuando la hoja se iba antes del cuadro: por eso fallaba una de cada cuatro)')
+  const reabierto = focoAlCerrar({ k: 1, reabre: true })
+  afirmar(reabierto.focos === 0 && reabierto.activo === 'hoja', '  si el contacto se reabre mientras espera, no toca el foco (queda en la hoja nueva)')
+  afirmarIgual([focoAlCerrar({ k: 1, origenConectado: false }).activo, focoAlCerrar({ k: 1, origenToma: false }).activo], ['respaldo', 'respaldo'], '  si el que abrió ya no está, o no recibe el foco, va al respaldo: el primer disparador del contacto a la vista')
+  const caja = (visible: boolean): HTMLElement => ({ isConnected: true, matches: () => true, getClientRects: () => ({ length: visible ? 1 : 0 }) }) as unknown as HTMLElement
+  const [barra, cta] = [caja(true), caja(true)]
+  const documento = (panel: readonly HTMLElement[], todos: readonly HTMLElement[]): Pick<Document, 'querySelectorAll'> =>
+    ({ querySelectorAll: (sel: string) => (sel.includes('="panel"') ? panel : todos) }) as unknown as Pick<Document, 'querySelectorAll'>
+  const oculta = caja(false)
+  afirmar(destinoDeRespaldo(documento([barra], [cta, barra])) === barra && destinoDeRespaldo(documento([oculta], [cta, oculta])) === cta && destinoDeRespaldo(documento([], [oculta])) === null, '  el respaldo: el «Contacto» del panel antes que los CTA, sólo si se ve; si no hay ninguno a la vista, nadie')
+  afirmar(/<AnimatePresence onExitComplete=\{devolverElFoco\}>/.test(leer(`${V3}/_chrome/contacto/FormularioDeContacto.tsx`)), '  y la devolución sigue colgando de la salida del diálogo')
+}
+
+void guardaEnElTiempo()
+  .then(focoDelContacto)
+  .then(() => cerrar('s77-ph'))
