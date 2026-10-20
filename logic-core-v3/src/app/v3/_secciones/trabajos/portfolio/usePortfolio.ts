@@ -26,7 +26,6 @@ import { useAnclaDeLaCarga } from './useAnclaDeLaCarga'
 import { useBarraDelPortfolio } from './useBarraDelPortfolio'
 import { useMandosDelPortfolio } from './useMandosDelPortfolio'
 import { useOrdenDeLaEscena } from './useOrdenDeLaEscena'
-import { useSinScrollEnLasHistorias } from './useSinScrollEnLasHistorias'
 
 export { RUEDA_RECIENTE_MS } from './useMandosDelPortfolio'
 
@@ -250,7 +249,7 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   const saltarAlPaso = useCallback((i: number, inmediato = false): void => saltar(i, inmediato, false), [saltar])
 
   const { salirDeLasHistorias } = useMandosDelPortfolio({ caja, actual, enVuelo, inerte, ultimaRueda, entradaLista, paso, historias, tituloS, irAlPx, saltar })
-  useSinScrollEnLasHistorias(historias && orden.panel)
+  // [P-H31b] El freno del arrastre mientras corren las historias pasó al componente común (`Historias`: montadas y presentes).
   const inerteDesde = useCallback((x: number, y: number): { readonly x: number; readonly y: number } | null => {
     if (inerte.current !== null && seMovioDeVerdad(inerte.current, x, y)) inerte.current = null
     return inerte.current

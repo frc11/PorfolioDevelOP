@@ -61,8 +61,9 @@ const DEL_PORTFOLIO = [
   // proyectos, el hueco del logo, lo que se mide en el DOM y sus ganchos. [B1.2d B] Las barras de la tablet se fueron (T2).
   'FormularioDeLaTuya.tsx', 'SignoDePregunta.tsx', 'orden.ts', 'rueda.ts', 'transicion.ts', 'signo.ts', 'hueco.ts', 'medida.ts',
   'useOrdenDeLaEscena.ts', 'useRuedaDelPortfolio.ts', 'useTransicionDeLasTiras.ts',
-  // [B1.3] el ancla al cargar. [B1.2d B] Las historias (el deslizamiento de B1.3 se fue: el scroll no las avanza) y su scroll quieto.
-  'useAnclaDeLaCarga.ts', 'HistoriasDelPortfolio.tsx', 'HistoriaDelProyecto.tsx', 'useSinScrollEnLasHistorias.ts',
+  // [B1.3] el ancla al cargar. [B1.2d B] Las historias (el deslizamiento de B1.3 se fue: el scroll no las avanza). [P-H31b] Su scroll quieto
+  // pasó al componente común.
+  'useAnclaDeLaCarga.ts', 'HistoriasDelPortfolio.tsx', 'HistoriaDelProyecto.tsx',
 ].map((f) => `portfolio/${f}`)
 const ARCHIVOS = ['Trabajos.tsx', 'CapaDeLaGota.tsx', 'gota.ts', 'geometria.ts', 'contenido.ts', 'proyectos.ts', ...DEL_PORTFOLIO]
 const FUENTES = ARCHIVOS.map((archivo) => ({ archivo, texto: leer(archivo) }))
@@ -155,8 +156,9 @@ titulo('9 · Cero `three` y cero contextos: el Portfolio no abre un lienzo')
 const TRES = /from ['"](three|@react-three\/[a-z-]+|three\/[^'"]+)['"]/
 const CONTEXTO = /<Canvas\b|WebGLRenderer|getContext\(\s*['"]webgl/
 for (const { archivo, texto } of FUENTES) afirmar(!TRES.test(texto) && !CONTEXTO.test(texto), `${archivo}: ni three ni un contexto WebGL ([B1.2b] el «?» es un SVG en el DOM)`)
-// [F6] Reemplazada por la spec: el formulario en 3D (B7) salió; quedan los tres de las historias.
-afirmarIgual(FUENTES.length, 23 + 11 + 1 + 3, 'se leyeron del disco los treinta y ocho archivos de la sección y del Portfolio (los veintitrés de B1.2b, once de B1.2c, uno de B1.3 y [B1.2d B] los tres de las historias: las barras de la tablet, el deslizamiento y [F6] el formulario en 3D se fueron)')
+// [F6] Reemplazada por la spec: el formulario en 3D (B7) salió; quedan los tres de las historias. [P-H31b] Y su scroll quieto pasó al
+// componente común: quedan dos.
+afirmarIgual(FUENTES.length, 23 + 11 + 1 + 2, 'se leyeron del disco los treinta y siete archivos de la sección y del Portfolio (los veintitrés de B1.2b, once de B1.2c, uno de B1.3 y [B1.2d B] los dos de las historias: las barras de la tablet, el deslizamiento, [F6] el formulario en 3D y [P-H31b] el freno del arrastre, que pasó al componente común, se fueron)')
 controlPositivo('  el detector ve el padrón de B (con el formulario en 3D, que ya no está en el disco)', [...DEL_PORTFOLIO, 'portfolio/FormularioEnPerspectiva.tsx'], (lista: readonly string[]) => lista.every((a) => existsSync(path.join(AQUI, a))))
 controlPositivo('el detector ve un renderer propio', 'const r = new THREE.WebGLRenderer()', (t: string) => !CONTEXTO.test(t))
 

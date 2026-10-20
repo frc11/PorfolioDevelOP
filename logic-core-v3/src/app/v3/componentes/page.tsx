@@ -10,6 +10,7 @@ import { CURSOR_MIN_ANCHO_PX } from '../_lib/cursor'
 
 import { Estado, Ficha } from './_bloques/Ficha'
 import { GaleriaCta } from './_bloques/GaleriaCta'
+import { GaleriaHistorias } from './_bloques/GaleriaHistorias'
 import { GaleriaLayout } from './_bloques/GaleriaLayout'
 import { GaleriaMarca } from './_bloques/GaleriaMarca'
 import { GaleriaMedios } from './_bloques/GaleriaMedios'
@@ -76,6 +77,8 @@ export default function PaginaComponentes() {
             <FichaDelCursor />
             <GaleriaMedios />
             <GaleriaPie />
+            {/* [P-H31] Las historias fuera del Portfolio: la transición propia, el freno y las barras sobre el acento. */}
+            <GaleriaHistorias />
           </Grilla>
         </Envoltorio>
       </div>

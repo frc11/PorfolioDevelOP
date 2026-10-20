@@ -212,6 +212,46 @@ export function EnlaceDeRuta(props: { readonly href: string; readonly children: 
 - **Antes del velo pide `pedirLaSalidaDeLaVariante()` y no navega hasta que se resuelva** (§4). Hasta B12a.6, la página de prueba lo hace con un enlace interino (`prueba-de-pagina/EnlaceConLaSalida.tsx`).
 - Los CTA que abren el contacto siguen siendo `data-abre-contacto="panel"` con su `data-precarga`, sin cambios.
 
+## 6. Las historias (P-H31, 2026-10-20)
+
+El componente común de `_componentes/historias/` (P-H19) lo usan el Portfolio en el teléfono y el precio de servicios. P-H31 le suma dos props y el freno del arrastre. El Portfolio no pasa ninguna de las dos props y su marcado es el de antes (s76 §43).
+
+```tsx
+// _componentes/historias/Historias.tsx
+export interface PropsDeLasHistorias<T extends ItemDeHistoria> {
+  // … las de P-H19, sin cambios (items, renderItem, alSalir, etiqueta, rotulos, duracionMs, alCambiar, arribaDeLasBarras, className)
+  /** a · Una transición propia entre pasos. Sin ella, el corte de siempre (el Portfolio). */
+  readonly transicion?: TransicionDeLasHistorias
+  /** c · El color de las barras sobre un fondo propio: sobre un acento, BARRAS_SOBRE_ACENTO. Sin él, las de la tinta. */
+  readonly colorDeLasBarras?: ColorDeLasBarras
+}
+
+export interface TransicionDeLasHistorias {
+  readonly ms: number
+  readonly Envoltorio: ComponentType<{ readonly avance: MotionValue<number>; readonly sentido: 1 | -1; readonly children: ReactNode }>
+}
+
+export interface ColorDeLasBarras {
+  readonly pista: string    // un color de CSS: lo que falta
+  readonly relleno: string  // lo que pasó y el avance de ahora
+}
+
+export const BARRAS_SOBRE_ACENTO: ColorDeLasBarras   // el papel; la pista, el papel al 25 %
+```
+
+- **a · La transición.**
+  - **Durante `ms`, el paso que entra se pinta ENCIMA del que se va,** envuelto en `Envoltorio`. El que se va sigue montado debajo, en pausa, hasta que termina.
+  - **`avance`** va de 0 a 1, lineal, en un valor de Motion: sin renders por cuadro. La curva la pone el `Envoltorio`.
+  - **`sentido`:** 1 hacia adelante, −1 hacia atrás.
+  - **En reposo el ítem sigue envuelto, con `avance` en 1,** para no volver a montarse al terminar: en 1 el `Envoltorio` no tiene que hacer nada (el recorte, `none`).
+  - **Con movimiento reducido, el corte.**
+- **b · El freno del arrastre.** Mientras las historias están montadas y presentes (`useIsPresent`), el dedo no mueve la página, ni arrastrando desde afuera de su caja. Adentro de un diálogo (`data-lenis-prevent`: el menú, el contacto) no frena.
+  - Lo tiene cualquier uso: **montalas sólo mientras corren**, como el Portfolio, que las monta con su panel. Montadas en reposo, la página no scrollea con el dedo.
+- **c · Las barras sobre un acento (WCAG 1.4.11).** Con `BARRAS_SOBRE_ACENTO` sobre `bg-acento`, en el peor de los tres acentos del tema:
+  - el relleno da 6,02:1 contra el acento y 3,57:1 contra la pista (las de la tinta daban 2,41:1);
+  - medido en el sitio sobre el de web: 6,65:1 y 3,81:1.
+- **Un ejemplo que anda:** `componentes/_bloques/GaleriaHistorias.tsx`, en `/v3/componentes`. Son tres pasos sobre el acento de web, con un corte diagonal de prueba (`componentes/_bloques/corteDiagonal.ts`: hacia adelante destapa desde abajo a la derecha, hacia atrás desde arriba a la izquierda).
+
 ---
 
 ## Qué P-H29 resolvió cada cosa

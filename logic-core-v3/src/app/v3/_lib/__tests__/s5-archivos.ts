@@ -263,8 +263,7 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMandosDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useClicAfueraDelPanel.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useBarraDelPortfolio.ts`,
-  // [B1.2d B] el scroll que no corre mientras corren las historias (T8).
-  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useSinScrollEnLasHistorias.ts`,
+  // [B1.2d B] el scroll que no corre mientras corren las historias (T8): [P-H31b] pasó al componente común (`_componentes/historias/`).
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-detectores.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/relojDeDemos.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/herencia.ts`,

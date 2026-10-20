@@ -277,3 +277,39 @@ Todo con el Chrome del sistema a la vista contra el dev del home (:3002), con `/
 2. **`/v3` a 390, con el teclado** (o con el lector de pantalla), hasta el CTA del final.
    - Debería verse la página ir al bloque del CTA, con el CTA a la vista; Enter abre el contacto.
 3. **El contacto abierto y cerrado muchas veces seguidas, a 390.** Ya no debería pasar nada: la caída era de la sonda.
+
+## 9. P-H31 · Las historias para el precio de servicios (2026-10-20)
+
+Lo pidió servicios para el precio en el teléfono, sobre el componente común de historias (P-H19). La firma está en `B12a-API.md` §6.
+
+**Lo hecho:**
+- **a · La transición propia entre pasos, por prop** (`transicion`): durante `ms`, el paso que entra va encima del que se va, envuelto en el `Envoltorio` de la página (con el avance en un valor de Motion y el sentido). Con movimiento reducido, el corte. El Portfolio no la pasa: el corte de siempre.
+- **b · El freno del arrastre pasó al componente** (`_componentes/historias/frenoDelArrastre.ts`).
+  - Frena mientras las historias están montadas y presentes (`useIsPresent`). Es el `historias && panel` con que frenaba el Portfolio: las monta con su panel, adentro de un `AnimatePresence`, y durante la salida ya no frenaba.
+  - `useSinScrollEnLasHistorias` se borró, y sus padrones se actualizaron (s5-archivos y trabajos.invariant).
+- **c · Las barras sobre un acento:** `colorDeLasBarras`, con `BARRAS_SOBRE_ACENTO`: el papel, y la pista el papel al 25 %. Las de la tinta daban 2,65:1 sobre el de web y 2,41:1 sobre el peor (el verde).
+- **El uso de prueba, fuera del Portfolio:** `/v3/componentes`, la ficha «Historias · tres pasos sobre el acento» (`GaleriaHistorias.tsx`). Son tres pasos sobre el acento de web, con un corte diagonal de prueba (`corteDiagonal.ts`).
+
+**Medido en el sitio** (`scripts-carga/historias-de-prueba.ts`, el Chrome del sistema a 390, táctil, contra el dev):
+- **a · La transición:**
+  - un toque a la derecha pasa al 2 y otro al 3, con el saliente debajo unos 590 ms y el que entra recortado desde abajo a la derecha;
+  - uno a la izquierda vuelve, recortado desde arriba a la izquierda;
+  - al terminar, sin recorte ni saliente.
+- **b · El freno:** con las historias abiertas, un arrastre del dedo que empieza afuera de la caja mueve la página 0 px; cerradas, 245 px. El control (`CONTROL=sin-freno`), rojo: 245 px con las historias abiertas.
+- **c · El contraste**, con los colores que calcula el navegador sobre el acento de web: el relleno 6,65:1 contra el acento y 3,81:1 contra la pista.
+- **El Portfolio, idéntico:** la matriz de sus historias (`scripts-carga/historias.ts`) da 12 de 12 sin violaciones a 390, y todas en verde a 820×1180.
+
+**Afirmaciones** (s76 da 698 de 0):
+- **§43, nueva:**
+  - la transición envuelve el ítem y no hay saliente en reposo; el marcado del Portfolio sin las props es el de antes (las clases de las barras, sin envoltorio);
+  - el corte de prueba crece desde la punta de su sentido;
+  - el contraste con los tokens del tema, en el peor de los tres acentos: 6,02:1 contra el acento y 3,57:1 contra la pista. Controles: las barras de la tinta, y una pista tan clara como el relleno.
+- **Reemplazadas por la spec:**
+  - §30: el freno lo trae el componente, con un control nuevo, el freno que sigue en la salida;
+  - el padrón de trabajos.invariant: 37 archivos, porque el freno se fue al componente.
+
+**Qué mirar (P-H31):**
+1. **`/v3/componentes` a 390, la última ficha:** «Abrir las historias». Tocá a la derecha: el paso 2 entra en diagonal desde abajo a la derecha. A la izquierda, vuelve desde arriba a la izquierda.
+2. **Con las historias abiertas,** arrastrá el dedo por el margen: la página no se mueve. Cerradas, sí.
+3. **Las barras sobre el azul,** en el papel.
+4. **El Portfolio a 390,** igual que antes.
