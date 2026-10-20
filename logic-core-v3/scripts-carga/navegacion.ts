@@ -78,10 +78,15 @@ function juzgar(cuadros: readonly Cuadro[], desde: string): { readonly cambio: C
 async function grabarUnaNavegacion(p: Page, nombre: string, hacer: () => Promise<void>, esperarRuta: (r: string) => boolean): Promise<string[]> {
   const desde = await p.evaluate(() => location.pathname + location.hash)
   await p.evaluate(GRABAR)
+  // [B12a.7] Que la grabación ya tenga cuadros de la ruta de partida: si no, el cuadro del cambio no se ve (la flecha cambia la URL en el acto).
+  await p.waitForFunction(() => ((window as unknown as { __cuadrosDelVelo?: unknown[] }).__cuadrosDelVelo?.length ?? 0) >= 3)
   await hacer()
   const t0 = Date.now()
   while (Date.now() - t0 < 15000 && !esperarRuta(await p.evaluate(() => location.pathname + location.hash))) await dormir(100)
-  await dormir(2500)
+  // [B12a.7] Hasta que el velo se aquieta (destapa cuando la página nueva está quieta: a lo sumo 3,5 s), y un poco más.
+  const t1 = Date.now()
+  while (Date.now() - t1 < 8000 && (await p.evaluate(() => document.querySelector('[data-pieza="velo-de-navegacion"]')?.getAttribute('data-fase') ?? 'quieto')) !== 'quieto') await dormir(100)
+  await dormir(700)
   const cuadros = await p.evaluate(() => {
     ;(window as unknown as { __pararElVelo: boolean }).__pararElVelo = true
     return (window as unknown as { __cuadrosDelVelo: Cuadro[] }).__cuadrosDelVelo
@@ -126,9 +131,8 @@ async function main(): Promise<void> {
   await p.evaluate(() => window.scrollTo({ top: window.innerHeight * 0.75, behavior: 'instant' }))
   await dormir(1500)
   fallas.push(...(await grabarUnaNavegacion(p, 'la página al home (su enlace)', () => p.getByText('Volver al home').first().click(), (r) => r === '/v3')))
-  // 2 · Del home a la página: la flecha (B12a.7 la completa con la posición).
-  // (Informada: el velo de la flecha llega con B12a.7.)
-  await grabarUnaNavegacion(p, 'el home a la página (la flecha; informada, sin el velo hasta B12a.7)', () => p.goBack().then(() => undefined), (r) => r.startsWith('/v3/prueba-de-pagina'))
+  // 2 · Del home a la página: la flecha. [B12a.7] El velo corta (cubre de una) y destapa como siempre.
+  fallas.push(...(await grabarUnaNavegacion(p, 'el home a la página (la flecha)', () => p.goBack().then(() => undefined), (r) => r.startsWith('/v3/prueba-de-pagina'))))
   await dormir(2000)
   // 3 · De la página a una sección del home, por la barra (en el teléfono, por el menú).
   if (!MOVIL) fallas.push(...(await grabarUnaNavegacion(p, 'la página a Portfolio (la barra)', () => p.locator('[data-pieza="barra"] a[data-nav-id="trabajos"]').click(), (r) => r === '/v3#trabajos')))

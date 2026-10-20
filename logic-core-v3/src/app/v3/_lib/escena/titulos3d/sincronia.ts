@@ -87,6 +87,8 @@ const COMPILANDO = new Set<string>()
 const URGENTES = new Set<string>()
 const contarLosUrgentes = (): void => {
   TITULOS_EN_CAMINO.urgentes = URGENTES.size
+  // [B12a.7] Todos los que faltan: los que esperan (su fuente, el ocio) y los que compilan.
+  TITULOS_EN_CAMINO.todos = new Set([...ESPERANDO, ...COMPILANDO]).size
 }
 const MOSTRADO_DE_LOS_REARMADOS = new Map<string, { readonly llegada: number; readonly salida: number }>()
 

@@ -26,13 +26,14 @@ import { enElSostenDelCta } from '../escena/finalDelRecorrido'
 import { NIVEL_DE_LA_NOCHE } from '../escena/lightArc'
 import { azimutDelMouseEn } from '../escena/modulacionDeLaPose'
 import { PresetDeLaPagina } from '../escena/ruta/PresetDeLaPagina'
+import { guardarLaPosicionDelHome, posicionGuardadaDelHome } from '../escena/ruta/posicionDelHome'
 // prettier-ignore
 import { AVANCE_DE_LA_INTRO, COMPOSICION_INICIAL, PANTALLAS_DE_LA_INTRO, PISTA_DE_LA_INTRO, POSE_DE_LA_INTRO, avanceDeLaIntro, luzDeLaPagina, pistaDeLaPagina } from '../escena/ruta/pistaDeLaIntro'
 import { PRESET_DEL_HOME, apilarElPreset, despiertaEnLaPagina, presetActual, type CajaVertical, type PresetDeLaEscena } from '../escena/ruta/preset'
 import { atenderLaSalida, pedirLaSalidaDeLaVariante } from '../escena/ruta/salidaDeLaVariante'
 import { COMPOSICION_DE_LA_LUZ, SALIDA_DE_LA_VARIANTE_MS } from '../escena/ruta/variante'
 import { esFuenteDePagina } from '../escena/titulos3d/fuentesDePagina'
-import { PLUMA_DEL_VELO, coberturaDelVelo, maskDelVelo, siguienteFaseDelVelo } from '../../_chrome/velo/velo'
+import { PLUMA_DEL_VELO, coberturaDelVelo, maskDelVelo, puedeDestapar, siguienteFaseDelVelo } from '../../_chrome/velo/velo'
 import { PLUMA_DE_LA_BANDA, anchoTotalDeLaBanda } from '../../_secciones/trabajos/gota'
 import { nocheDelDestino } from '../veloDeNavegacion'
 import { MARGEN_DE_REANUDACION } from '../escena/visibilidad'
@@ -411,5 +412,66 @@ const enlaceDelVeloBien = (c: string): boolean =>
 afirmar(enlaceDelVeloBien(delEnlace), '`EnlaceDeRuta`: el `<Link>` de next (la navegación cliente: el lienzo y el chrome no se rehacen), nunca `router.push`; pide la salida de la variante, después el velo del destino y, cubierto, deja pasar el clic; un ancla del documento es un `<a>` (el viaje del home)')
 controlPositivo('  el detector ve el enlace que navega sin pedir el velo', delEnlace.replace('.then(() => (sinVelo() ? undefined : cubrirConElVelo(nocheDelDestino(href))))', ''), enlaceDelVeloBien)
 controlPositivo('  y uno con `router.push`', `${delEnlace}\nrouter.push(href)`, enlaceDelVeloBien)
+
+
+titulo('B12a.7 · 12 · La vuelta al home: la flecha con la posición que el home dejó')
+
+// El corte: la flecha cambia la ruta sin pedir nada, así que el velo cubre de una desde cualquier fase.
+const cortaDeUna = (f: SiguienteDelVelo): boolean => (['quieto', 'cubriendo', 'cubierto', 'destapando'] as const).every((fase) => f(fase, 'corte') === 'cubierto')
+afirmar(cortaDeUna(siguienteFaseDelVelo) && maquinaDelVelo(siguienteFaseDelVelo), 'el corte cubre de una desde cualquier fase (la flecha), y la máquina de B12a.6 sigue igual')
+controlPositivo('  el detector ve un velo que con la flecha se queda como estaba', ((f, e) => (e === 'corte' ? f : siguienteFaseDelVelo(f, e))) as SiguienteDelVelo, cortaDeUna)
+// La posición, ida y vuelta por sessionStorage (en Node, uno de mentira); una guardada rota no se usa.
+const almacen = new Map<string, string>()
+Object.defineProperty(globalThis, 'sessionStorage', { configurable: true, value: { getItem: (k: string) => almacen.get(k) ?? null, setItem: (k: string, v: string) => void almacen.set(k, v) } })
+const idaYVuelta = (leer: () => unknown): boolean => {
+  almacen.clear()
+  guardarLaPosicionDelHome({ y: 15234, noche: 1, diaDelFinal: false })
+  const bien = JSON.stringify(leer()) === JSON.stringify({ y: 15234, noche: 1, diaDelFinal: false })
+  almacen.set('v3:posicion-del-home', JSON.stringify({ y: '15234', noche: 1, diaDelFinal: false }))
+  const rota = leer()
+  almacen.set('v3:posicion-del-home', '{')
+  const cortada = leer()
+  almacen.clear()
+  return bien && rota === null && cortada === null && leer() === null
+}
+afirmar(idaYVuelta(posicionGuardadaDelHome), '  la posición del home va y vuelve entera (el scroll, la noche, el día del final); una rota, cortada o ausente da null (la flecha lleva arriba)')
+controlPositivo('  el detector ve una lectura que no valida', () => {
+  try {
+    return JSON.parse(sessionStorage.getItem('v3:posicion-del-home') ?? 'null') as unknown
+  } catch {
+    return null
+  }
+}, idaYVuelta)
+Reflect.deleteProperty(globalThis, 'sessionStorage')
+// La guarda: la limpieza de un efecto de LAYOUT (corre antes de que React saque el DOM del home); la pasiva corre con el scroll de la página.
+const paginaDelHome = leerV3('page.tsx')
+const deLaGuarda = leerV3('_lib/escena/ruta/GuardaDeLaPosicionDelHome.tsx')
+const guardaBien = (pagina: string, guarda: string): boolean =>
+  /<GuardaDeLaPosicionDelHome\s*\/>/.test(pagina) && guarda.includes('useLayoutEffect(() => () => guardarLaPosicionDelHome(posicionDeAhora()), [])')
+afirmar(guardaBien(paginaDelHome, deLaGuarda), 'el home guarda su posición al irse, por cualquier camino: la limpieza de un efecto de layout, con el scroll y la noche todavía suyos')
+controlPositivo('  el detector ve la guarda en un efecto pasivo', [paginaDelHome, deLaGuarda.replace('useLayoutEffect(() => () =>', 'useEffect(() => () =>')] as const, ([p, g]: readonly [string, string]) => guardaBien(p, g))
+// El velo: escucha la flecha, corta, trae la posición sólo hacia el home y la devuelve en el primer cuadro (antes de que la gota observe).
+const delVelo = leerV3('_chrome/velo/VeloDeNavegacion.tsx')
+const vueltaBien = (c: string): boolean =>
+  c.includes("window.addEventListener('popstate', alUsarLaFlecha)") && /pasar\('corte'\)\s*pintar\('cubierto', 1\)/.test(c) &&
+  c.includes('vuelta = destino === RUTA_DEL_HOME && !sinVuelta() ? posicionGuardadaDelHome() : null') &&
+  c.includes('if (guardada !== null) devolverLosAlmacenes(guardada)') && /if \(guardada === null\) scrollDeLaRuta\(\)\s*else llevarElScrollA\(guardada\.y\)/.test(c)
+afirmar(vueltaBien(delVelo), '  el velo: con la flecha corta (el color del destino), trae la posición sólo si vuelve al home, devuelve la noche y el día del final y lleva el scroll en el primer cuadro')
+controlPositivo('  el detector ve un velo sordo a la flecha', delVelo.replace("window.addEventListener('popstate', alUsarLaFlecha)", ''), vueltaBien)
+controlPositivo('  y uno que vuelve arriba', delVelo.replace('else llevarElScrollA(guardada.y)', 'else scrollDeLaRuta()'), vueltaBien)
+// El ancla de la URL (`#trabajos`, que el viaje deja en el historial) no pisa la posición devuelta.
+const delAncla = leerV3('_secciones/trabajos/portfolio/useAnclaDeLaCarga.ts')
+const anclaCede = (c: string): boolean => /const irAlAncla = \(\): \(\(\) => void\) \| null => \{\s*(?:\/\/[^\n]*\n\s*)*if \(VUELTA_AL_HOME\.enCurso\) return null/.test(c)
+afirmar(anclaCede(delAncla), '  el ancla de la carga del Portfolio cede durante la vuelta')
+controlPositivo('  el detector ve el ancla que pisa la vuelta', delAncla.replace('if (VUELTA_AL_HOME.enCurso) return null', ''), anclaCede)
+// El destape espera a la página nueva quieta: 20 cuadros parejos y NINGÚN título en camino (con los del ocio), o 3,5 s (medido en el build, D7).
+type Destapa = typeof puedeDestapar
+const esperaBien = (d: Destapa, velo: string): boolean =>
+  !d(19, 0, 1000) && d(20, 0, 1000) && !d(20, 1, 1000) && !d(0, 0, 3499) && d(0, 4, 3500) && velo.includes('puedeDestapar(parejos, TITULOS_EN_CAMINO.todos, ahora - t0)')
+afirmar(esperaBien(puedeDestapar, delVelo), 'el destape espera 20 cuadros parejos y todos los títulos en camino (los del ocio caían en el destape), a lo sumo 3,5 s')
+controlPositivo('  el detector ve la espera de B12a.6 (sólo los urgentes)', delVelo.replace('TITULOS_EN_CAMINO.todos', 'TITULOS_EN_CAMINO.urgentes'), (v: string) => esperaBien(puedeDestapar, v))
+controlPositivo('  y la de 10 cuadros', ((p, t, ms) => (p >= 10 && t === 0) || ms >= 3500) as Destapa, (d: Destapa) => esperaBien(d, delVelo))
+const deLaSincronia = leerV3('_lib/escena/titulos3d/sincronia.ts')
+afirmar(deLaSincronia.includes('TITULOS_EN_CAMINO.todos = new Set([...ESPERANDO, ...COMPILANDO]).size'), '  la sincronía publica todos los títulos en camino: los que esperan (su fuente, el ocio) y los que compilan')
 
 cerrar('s78-b12a')

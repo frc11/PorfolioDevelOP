@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { VeloDeCarga } from './_componentes/VeloDeCarga'
 import { IntroDelHome } from './_intro/IntroDelHome'
+import { GuardaDeLaPosicionDelHome } from './_lib/escena/ruta/GuardaDeLaPosicionDelHome'
 import { PresetDeLaPagina } from './_lib/escena/ruta/PresetDeLaPagina'
 import { PRESET_DEL_HOME } from './_lib/escena/ruta/preset'
 import { CompuertaDelHome } from './_secciones/CompuertaDelHome'
@@ -68,6 +69,8 @@ export default function PaginaV3() {
       {/* [AJUSTES FINALES] A4 · la página arranca toda blanca y todo aparece junto cuando está todo (`_lib/carga.ts`). */}
       {/* [B12a.1] El home declara su preset (D1): la escena lee el mapeo de sus secciones, como siempre. */}
       <PresetDeLaPagina preset={PRESET_DEL_HOME} />
+      {/* [B12a.7] Al irse, el home guarda dónde estaba: la flecha del navegador lo devuelve ahí. */}
+      <GuardaDeLaPosicionDelHome />
       <VeloDeCarga />
       {/* [B12a.5] El chrome (la barra, el menú, el contacto) lo monta el layout (D4): el mismo en el home y en las páginas. */}
       <IntroDelHome />

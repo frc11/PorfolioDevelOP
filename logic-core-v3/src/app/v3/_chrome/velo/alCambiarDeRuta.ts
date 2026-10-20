@@ -18,11 +18,16 @@ export function reponerLosAlmacenes(): void {
 export function scrollDeLaRuta(): number {
   const ancla = window.location.hash.length > 1 ? document.getElementById(decodeURIComponent(window.location.hash.slice(1))) : null
   const y = ancla === null ? 0 : Math.max(0, ancla.getBoundingClientRect().top + window.scrollY)
+  llevarElScrollA(y)
+  return y
+}
+
+/** [B12a.7] El scroll a `y` sin animación, con Lenis medido de nuevo (su límite era el del documento de la ruta que se fue). */
+export function llevarElScrollA(y: number): void {
   const lenis = LENIS_DEL_SITIO.instancia
   if (lenis !== null) {
     lenis.resize()
     lenis.scrollTo(y, { immediate: true, force: true })
   }
   window.scrollTo({ top: y, behavior: 'instant' })
-  return y
 }

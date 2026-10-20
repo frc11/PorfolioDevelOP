@@ -10,10 +10,14 @@
 
 /** Las fases, de a una; `quieto` es sin velo. */
 export type FaseDelVelo = 'quieto' | 'cubriendo' | 'cubierto' | 'destapando'
-export type EventoDelVelo = 'cubrir' | 'cubrio' | 'llego' | 'destapo'
+export type EventoDelVelo = 'cubrir' | 'cubrio' | 'corte' | 'llego' | 'destapo'
 
-/** Las transiciones: sin un evento que corresponda, la fase se queda (un `cubrir` en medio de otro no lo reinicia). */
+/**
+ * Las transiciones: sin un evento que corresponda, la fase se queda (un `cubrir` en medio de otro no lo reinicia). [B12a.7] El `corte`
+ * cubre de una desde cualquier fase: la flecha del navegador cambia la ruta sin esperar a nadie.
+ */
 export function siguienteFaseDelVelo(fase: FaseDelVelo, evento: EventoDelVelo): FaseDelVelo {
+  if (evento === 'corte') return 'cubierto'
   if (evento === 'cubrir') return fase === 'quieto' || fase === 'destapando' ? 'cubriendo' : fase
   if (evento === 'cubrio') return fase === 'cubriendo' ? 'cubierto' : fase
   if (evento === 'llego') return fase === 'cubierto' ? 'destapando' : fase
@@ -23,11 +27,13 @@ export function siguienteFaseDelVelo(fase: FaseDelVelo, evento: EventoDelVelo): 
 /**
  * Lo que tarda (ms): cubrir y destapar; y cuándo destapa: con la página nueva debajo, recién cuando los cuadros vuelven a ser parejos
  * (`cuadrosParejos` seguidos de menos de `cuadroParejoMs`: el montaje se paga tapado y el destape no tironea), a lo sumo `esperaMaximaMs`.
- * Con movimiento reducido, un corte.
+ * Con movimiento reducido, un corte. [B12a.7] Medido en el build (D7): el home recién montado sigue armando cosas hasta ~2,4 s después del
+ * cambio (la frase del CTA, el pie, los títulos del ocio), con ratos quietos entre medio; con 10 cuadros parejos destapaba en uno de esos
+ * ratos y la tarea siguiente caía en el destape (75–80 ms). Ahora, 20 seguidos y todos los títulos en camino, a lo sumo 3,5 s.
  */
-export const VELO = { cubrirMs: 520, destaparMs: 620, cuadrosParejos: 10, cuadroParejoMs: 34, esperaMaximaMs: 2500 } as const
+export const VELO = { cubrirMs: 520, destaparMs: 620, cuadrosParejos: 20, cuadroParejoMs: 34, esperaMaximaMs: 3500 } as const
 
-/** ¿Ya se puede destapar? Los cuadros parejos seguidos y ningún título urgente armándose (los dos trababan el destape), o la espera cumplida. */
+/** ¿Ya se puede destapar? Los cuadros parejos seguidos y ningún título en camino (los dos trababan el destape), o la espera cumplida. */
 export function puedeDestapar(cuadrosParejosSeguidos: number, titulosEnCamino: number, esperandoMs: number): boolean {
   return (cuadrosParejosSeguidos >= VELO.cuadrosParejos && titulosEnCamino === 0) || esperandoMs >= VELO.esperaMaximaMs
 }

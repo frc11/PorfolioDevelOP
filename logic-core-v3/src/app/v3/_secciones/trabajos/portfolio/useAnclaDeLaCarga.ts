@@ -2,6 +2,8 @@
 
 import { useEffect, type RefObject } from 'react'
 
+import { VUELTA_AL_HOME } from '../../../_lib/escena/ruta/posicionDelHome'
+
 import { ANCLAS_DEL_PORTFOLIO } from './anclas'
 import { medir } from './medida'
 import { PANTALLAS_POR_PASO, centroDelPaso, scrollDelPx } from './pasos'
@@ -24,6 +26,8 @@ export function useAnclaDeLaCarga(caja: RefObject<HTMLElement | null>): void {
   useEffect(() => {
     const el = caja.current
     const irAlAncla = (): (() => void) | null => {
+      // [B12a.7] Volviendo con la flecha, manda la posición que el home dejó (el velo la devuelve), no el ancla que quedó en la URL.
+      if (VUELTA_AL_HOME.enCurso) return null
       const ancla = anclaDelHash(window.location.hash)
       const m = ancla === undefined ? null : medir(caja.current)
       if (ancla === undefined || m === null) return null

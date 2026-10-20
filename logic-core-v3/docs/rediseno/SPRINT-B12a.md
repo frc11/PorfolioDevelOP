@@ -931,3 +931,98 @@ Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta complet
 4. **A 390, desde la página, el menú → una sección:** el mismo velo.
 
 Al pasar: la sonda de la fuga del contacto (`scripts-carga/fuga-del-contacto.ts`) prendía el banco con un objeto. La bandera es una cadena (`'producto'`), como en `navegacion.ts`. Su medida de nodos no dependía del banco.
+
+### B12a.7 · la vuelta al home (2026-10-20)
+
+**AVISO · `next build` de D7 (el segundo, el de la navegación).** Autorizado por Valentino («el `next build` del B12a.7 (D7) está autorizado, avisado en el log»).
+- Corre con `E2E_DIST_DIR=.next-b12`: el mismo distDir del primero, ignorado en `.gitignore` desde antes de construir.
+- Después, `next start` en :3004, y contra ese servidor `scripts-carga/navegacion.ts` (los cuadros con el velo moviéndose, que en el dev daban de 21 a 100 ms) y `scripts-carga/vuelta.ts`.
+- **Corre una segunda vez** con el mismo distDir: verifica el arreglo de lo que encontró la primera (el destape, abajo).
+
+**Lo hecho:**
+- **El home guarda dónde estaba al irse** (`GuardaDeLaPosicionDelHome`, la monta el `page.tsx` del home): el scroll, la noche disparada y el día del final, en `sessionStorage` (`esc/ruta/posicionDelHome.ts`).
+  - Vale para cualquier camino: un enlace, la flecha, el router.
+  - Va en la limpieza de un efecto de LAYOUT, que React corre al desmontar el home antes de sacar su DOM. Después, el documento de la página ya acortó el scroll y la gota ya apagó la noche (en su limpieza pasiva).
+  - **Sin el paso del Portfolio, a diferencia del plan:** el paso sale del scroll (`usePortfolio`: «el estado sale del scroll»), a 1440 y en las historias de 390. Medido: vuelve el mismo.
+- **La flecha del navegador** (`VeloDeNavegacion`): la ruta cambia sin pedir nada, así que el velo cubre de una (el `corte`, en `velo.ts`) con el color del destino.
+  - **Si vuelve al home, trae la posición guardada.** Debajo del velo:
+    1. devuelve la noche y el día del final;
+    2. lleva el scroll ahí en el primer cuadro, ANTES de que la gota observe por primera vez: así repone su noche sin barrido (`CapaDeLaGota`, «la única vez que el color se pone sin gesto»);
+    3. lo vuelve a llevar mientras el documento del home no alcance;
+    4. destapa con la página quieta, como en B12a.6.
+  - Cualquier otra flecha (de página a página, del home a una página) también corta.
+- **El ancla de la URL no pisa la vuelta.** El viaje de la barra deja `#trabajos` en el historial. Al volver, el ancla de la carga del Portfolio (`useAnclaDeLaCarga`) cede mientras dura la vuelta (`VUELTA_AL_HOME`).
+- **«Home»:** un enlace al home sin ancla va a 0 y amanece; lo hacía B12a.6, medido recién ahora.
+  - En la barra y en el menú no hay un ítem «Home». Las entradas son las secciones (cada una con su ancla). Dónde va, si va, es una decisión (abajo).
+- **El sonido respeta el mute.** Era criterio de B12a.6 y no lo había medido. Con el sonido apagado (el producto), el bus no tiene motor (`_lib/sonido/bus.ts`) y la navegación no arranca ninguna fuente de audio.
+
+**Medido en el sitio** (`scripts-carga/vuelta.ts`, el Chrome del sistema contra el dev, una sola carga de documento):
+- **El recorrido:** la ruta de prueba, después «Volver al home», y después «Portfolio» (`#trabajos`, El Garage) más un paso y 120 px. Desde ahí:
+  - **A:** se va a la página con el router de next (lo mismo que hace el `<Link>`; en esta rama el home no tiene un enlace a una página: las de servicio llegan con el merge) y vuelve con la flecha;
+  - **B:** se va con la flecha y vuelve con la flecha.
+- **1440:**
+  - **«Home»:** y 0, noche 0, el velo del color del papel.
+  - **El sonido apagado:** 0 fuentes de audio en la navegación. Prendido, la misma vuelta arranca 1 (el control del contador).
+  - **A y B:** y 7218, paso 1, noche 1,000. Vuelven a y 7218, paso 1, noche 1,000: |Δy| 0.
+  - **Al destapar:** el cuadro del cambio cubierto entero (1,000); desde el primer cuadro destapando, el scroll y la noche ya devueltos y la banda de la gota escondida.
+  - **Cuadros destapando en el dev:** de 34 a 39 ms.
+- **390:** y 7180, paso 1, las historias a la vista (índice 0). Vuelven igual, |Δy| 0. Cuadros destapando: de 19 a 20 ms.
+- **Cargas de documento después de la entrada:** 0.
+- **El control** (`CONTROL=sin-vuelta`, la flecha lleva arriba y el ancla manda): rojo.
+  - A 1440 vuelve a El Garage: |Δy| 1470 px, paso 0.
+  - A 390, |Δy| 1386 px, paso 0, y la gota barre al destapar: la noche no estaba puesta cuando la gota observó.
+- **Cómo se encontró el control:** con el ancla de un paso, el control salía VERDE. El ancla llevaba al mismo píxel que la posición guardada, así que no distinguía. El arnés se para lejos del ancla.
+
+**Afirmaciones** (s78 da 102 de 0): s78 §12, nueva.
+- El corte desde cualquier fase. Control: un velo que con la flecha se queda como estaba.
+- La posición ida y vuelta; una rota, cortada o ausente da null. Control: una lectura que no valida.
+- La guarda en un efecto de layout. Control: el efecto pasivo, que corre con el scroll de la página.
+- El cableado de la flecha en el velo. Controles: sordo a la flecha, y uno que vuelve arriba.
+- El ancla que cede. Control: el ancla que pisa la vuelta.
+
+**Un límite, sin medir:** hay UNA posición guardada, la de la última vez que se fue del home.
+- Con dos entradas del home en el historial (home → página → home por un enlace → página), volver dos veces al home devuelve en la primera la posición de la segunda.
+- Guardarla por entrada pide escribir en el estado del historial, que es de next.
+
+**Qué mirar (B12a.7):**
+
+En esta rama el home no tiene un enlace a una página; con el merge, el desplegable de Servicios lo es.
+
+1. **A 1440,** entrá a `/v3/prueba-de-pagina` y apretá «Volver al home». Después:
+   - «Portfolio» en la barra, y avanzá uno o dos proyectos con la rueda;
+   - ATRÁS dos veces: la primera deshace el ancla, la segunda va a la página, con el velo de tinta;
+   - ADELANTE.
+   - Debería taparse de una con el papel y destaparse en el mismo proyecto, a la misma altura y de noche, sin que la gota barra.
+2. **Lo mismo a 390,** con las historias.
+3. **Desde la página, «Volver al home»:** el home arriba de todo, de día.
+4. **Con el sonido prendido** (la esquina), la vuelta suena con el «abre» del velo. Con el sonido apagado, nada.
+5. **El velo de cualquier navegación,** que ahora espera un poco más tapado (hasta que la página nueva está quieta, a lo sumo 3,5 s). Fijate si la espera se siente larga.
+
+**Lo que encontró el build (D7): el destape caía en el armado diferido del home.**
+- **El build:** 28,8 s, salida 0. `next start` en :3004.
+- **`navegacion.ts` contra producción, 4 corridas a 1440:**
+  - la flecha: 23–26 ms;
+  - la página al home: 43–61 ms (1 de 4 arriba de 50, al empezar a cubrir);
+  - la página a «Portfolio»: 75–80 ms al destapar, en 3 de 4.
+- **A 390:** 19–23 ms.
+- **El discriminador:** los huecos entre cuadros alrededor del cambio, con el velo y sin él (`sin-velo`), con la misma navegación. Sin velo, el home recién montado tironea solo: cuadros de 561, 365, 237 ms hasta unos 2,4 s después del cambio. Con el velo, todo eso queda tapado.
+- **La causa:** destapaba en un rato quieto ENTRE dos de esas tareas, con 10 cuadros parejos (unos 170 ms).
+- **Las tareas** (Long Animation Frames, con su archivo y su posición en el build):
+  - el armado en el ocio de los títulos no urgentes (`requestIdleCallback`, 246 ms): corre justo cuando el hilo se libera, que es cuando el velo destapa;
+  - la frase de volumen del CTA (un `setTimeout`, 193–335 ms);
+  - las piezas del pie (un `setTimeout`, 160 ms).
+- **El cuadro largo al empezar a cubrir** (61–64 ms, intermitente): no tiene ningún script de más de 5 ms ni una tarea de más de 50 ms. La variante todavía está montada (saliendo) y se desmonta ya tapada. Sin atribución en el hilo principal: queda anotado.
+- **El arreglo:**
+  - la sincronía publica también cuántos títulos hay en camino en total (`TITULOS_EN_CAMINO.todos`: los que esperan su fuente o el ocio, y los que compilan), y el velo espera a que no quede ninguno;
+  - 20 cuadros parejos seguidos (unos 330 ms) en vez de 10;
+  - a lo sumo 3,5 s en vez de 2,5.
+- **Medido después del arreglo** (el segundo build, 27,5 s, salida 0; `navegacion.ts` ahora espera a que el velo se aquiete, juzga la flecha y espera cuadros grabados antes de navegar):
+  - **El destape** (3 corridas a 1440): a «Portfolio», 21–27 ms (antes, 75–80); la página al home, 22–27 ms; la flecha, 23–25 ms.
+  - **A 390:** 19–24 ms.
+  - **El control** es el primer build: el mismo código sin el arreglo, rojo en 3 de 4.
+  - **`vuelta.ts` contra producción:** a 1440 y a 390, todo como en el dev (|Δy| 0, el mismo paso, la misma noche, la gota sin barrer), con el destape en 19–25 ms.
+- **El residuo, sin arreglar (P-H32):** el primer tramo al CUBRIR desde la página (el enlace, con la variante saliendo).
+  - **A 1440:** de 44 a 62 ms y una vez 113 ms, en 6 corridas. A 390, 24 ms. Con la flecha (el corte, sin animación) no existe.
+  - **Sin atribución en el hilo principal** (Long Animation Frames: ningún script de más de 5 ms, ninguna tarea de más de 50 ms).
+  - **La hipótesis:** el compositor. La máscara del velo es un `mask-image` que cambia en cada cuadro, así que se vuelve a rasterizar a pantalla entera encima del lienzo que todavía pinta la variante.
+  - **La propuesta, para decidir:** un velo que se mueva con `transform` (el degradé rasterizado una vez, sólo compositor). Es el mismo dibujo con otra mecánica.

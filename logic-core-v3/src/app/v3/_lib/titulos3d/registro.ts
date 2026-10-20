@@ -109,8 +109,10 @@ export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
 /**
  * [B12a.6] Los títulos urgentes (a la vista, o el hero) que se están armando o compilando: el velo de la navegación espera a que no quede
  * ninguno para destapar (armar y compilar un título traba cientos de ms; tapado no se ve). Lo escribe la escena (`sincronia.ts`).
+ * [B12a.7] Y `todos`: con los que se arman en el ocio, que corre justo cuando la página nueva se aquieta (medido en el build: un ocio de
+ * 246 ms caía en el destape). El velo espera a éstos.
  */
-export const TITULOS_EN_CAMINO: { urgentes: number } = { urgentes: 0 }
+export const TITULOS_EN_CAMINO: { urgentes: number; todos: number } = { urgentes: 0, todos: 0 }
 
 /**
  * [PULIDO 2] 5 · los títulos que otra pieza de la escena dibuja en su lugar (el CTA del final con `?cta=`: desde que su
