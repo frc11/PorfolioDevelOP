@@ -2104,3 +2104,24 @@ Valentino miró la Cola 2 y encontró bugs que un navegador hubiera agarrado: ca
 1. `/v3?form=3d#portfolio-la-tuya` a 1440: el formulario, plano. La bandera ya no hace nada.
 2. `/v3#portfolio-el-garage` a 1440: no hay botón de pausa a la vista; pasá el mouse por el video y no aparece. Tabulá hasta el video: aparece la pausa con su anillo, Enter pausa y Enter sigue. Al salir del foco se esconde (si quedó en pausa, Tab de nuevo y Enter).
 3. Con movimiento reducido (el sistema): el póster, quieto, sin pausa.
+
+### 15.5 Las mediciones que no habían corrido (2026-10-20, con la máquina libre)
+
+Todo con el Chrome del sistema a la vista, contra el dev del home (:3002) y con `/api/` bloqueado.
+
+**La matriz de A8 entera, con las ráfagas** (`scripts-carga/matriz.ts`):
+- **90 de 90** combinaciones, tres idas y vueltas cada una: las 9 entradas por las 3 salidas, con y sin hover, lentas y rápidas (las de un salto, una vez; [F2] la rueda rápida, el trackpad, otra vez adentro).
+- **La ráfaga:** 16 de 16, y su control (la rueda de antes), 4 de 4 en falla.
+- El control de A8.1 sigue en rojo.
+
+**El contraste AA de lo nuevo** (`scripts-carga/contraste.ts`):
+- **El método:** dos capturas de cada pieza, como se ve y con su texto (o su ícono) transparente. Los píxeles que cambian son el glifo, y en cada uno se calcula la razón del color del texto contra el fondo de abajo. El color se resuelve con un lienzo: el rubro va en oklab con alfa y se mezcla con el fondo. Se informa el percentil 5.
+- **Qué se midió:**
+  - la ficha de cada historia sobre su video, a 390 y 768, en cuatro cuadros de cada video (10, 35, 60 y 85 %), con la historia apretada para que no pase sola;
+  - el formulario de «la tuya», con «Enviar», a 1440;
+  - el ícono de la pausa con el foco del teclado sobre el video del panel, a 1440 (contra 3:1, porque no es texto).
+- **Resultado: 126 de 126 piezas a la vista en AA.** La más justa es el rubro «Equipo de branding» sobre el video de Esquina: **5,20:1**. Las 24 sin glifo a la vista son la copia escondida del rollover de «Visitar sitio» y no se cuentan.
+
+**La captura del modal en el navegador** (`fotos.ts`, `contacto:barra` a 1440 y `contacto:hero` a 390): el modal de contacto con los campos compartidos de B, «Enviar» y la X, abierto con el teclado; el foco, en el primer enlace. Las capturas están en `~/.cache/b4-medicion/fotos/modal-*.png`.
+
+**Qué mirar (las mediciones):** nada nuevo para mirar. Están en verde y con su número. Lo que encontraron va en P-H (`SPRINT-PH.md` §7).

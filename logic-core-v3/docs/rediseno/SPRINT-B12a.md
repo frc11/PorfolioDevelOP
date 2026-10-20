@@ -645,3 +645,10 @@ Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta complet
 **Qué mirar (B12a.2):**
 1. `/v3/prueba-de-pagina` a 1440 y a 390: arriba, el logo centrado de noche. Scrolleá la intro y volvé: la cámara gira un cuarto de vuelta corto alrededor del logo y vuelve.
 2. `/v3` arriba: el logo sigue cayendo con el titular, como siempre.
+
+### B12a.1 · el criterio medido (2026-10-20)
+
+`scripts-carga/costo-subruta.ts` (el banco de la Fase 0, pasado al repo), `/v3/tipografia` a 1440, tres corridas, con la NVIDIA RTX 5050:
+- **En reposo, 10 s:** **20 ms/s de tareas** (6 de script) y **0 cuadros de más de 50 ms**, en las tres corridas. El criterio era ≤ 50 ms/s y 0. En la Fase 0, sin el preset, daba unos 600 ms/s y 3 o 4 cuadros largos.
+- **Con la rueda, 8 s:** de 32 a 34 ms/s y 0 cuadros largos.
+- El control es la Fase 0: la misma ruta y el mismo banco, antes de B12a.1.

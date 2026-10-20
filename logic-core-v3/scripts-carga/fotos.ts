@@ -121,6 +121,38 @@ async function main(): Promise<void> {
           for (let e = campo?.parentElement ?? null; e !== null && e.getAttribute('data-tira') !== 'la-tuya'; e = e.parentElement) if (/matrix3d|rotate/.test(getComputedStyle(e).transform) || e.style.transform.includes('rotate')) girado = true
           return { variante3d: document.querySelector('[data-forma="3d"]') !== null, girado, hayCampo: campo !== null }
         })))
+      } else if (accion === 'contacto') {
+        // `contacto:<barra|hero>`: abre el contacto con su disparador (el foco y Enter) y espera la hoja.
+        const sel = valor === 'hero' ? 'a[data-pieza="cta"][data-abre-contacto="panel"]' : 'a[data-pieza="barra-enlace"][data-abre-contacto="panel"]'
+        const b = p.locator(sel).first()
+        await b.evaluate((e) => e.scrollIntoView({ block: 'center' }))
+        await dormir(1500)
+        await b.focus()
+        await p.keyboard.press('Enter')
+        await p.waitForSelector('[data-pieza="contacto"] [role="dialog"]', { timeout: 10000 })
+        await dormir(1600)
+      } else if (accion === 'ficha') {
+        // `ficha:`: las piezas de la ficha de la historia (etiqueta, clases, hijos, texto), para elegir qué medir.
+        console.log(JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('[data-pieza="ficha-de-la-historia"] h3, [data-pieza="ficha-de-la-historia"] p, [data-pieza="ficha-de-la-historia"] a span, [data-pieza="ficha-de-la-historia"] span')].map((e) => ({ tag: e.tagName, hijos: e.childElementCount, clase: (typeof e.className === 'string' ? e.className : '').slice(0, 60), texto: (e.textContent ?? '').trim().slice(0, 25), color: getComputedStyle(e).color })))))
+      } else if (accion === 'final') {
+        // `final:<tocar|enter>`: [P-H26] al CTA del final (en volumen) y lo abre con un toque o con Enter; dice si se abrió la hoja.
+        const b = p.locator('a[data-pieza="cta-en-volumen"][data-abre-contacto="panel"]').first()
+        await b.evaluate((e) => e.scrollIntoView({ block: 'center' }))
+        await dormir(6000)
+        const r = await b.boundingBox()
+        if (valor === 'enter') {
+          await b.focus()
+          await p.keyboard.press('Enter')
+        } else if (r !== null) await tocar(cdp, r.x + r.width / 2, r.y + r.height / 2)
+        await dormir(2500)
+        console.log(JSON.stringify({ como: valor, caja: r, abierto: await p.evaluate(() => document.querySelector('[data-pieza="contacto"] [role="dialog"]') !== null) }))
+      } else if (accion === 'disparadores') {
+        // `disparadores:`: [P-H26] los que abren el contacto (`[data-abre-contacto="panel"]`) y lo enfocable de adentro, con si se ven.
+        console.log(JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('[data-abre-contacto="panel"]')].map((e) => {
+          const r = e.getBoundingClientRect()
+          const adentro = [...e.querySelectorAll('a, button, [tabindex]')].map((x) => `${x.tagName}${x.getAttribute('href') === null ? '' : `[${x.getAttribute('href') ?? ''}]`}`)
+          return { pieza: e.getAttribute('data-pieza'), tag: e.tagName, display: getComputedStyle(e).display, caja: [Math.round(r.width), Math.round(r.height)], adentro }
+        }))))
       } else if (accion === 'encima') {
         // `encima:`: qué hay arriba en el medio del cuadro, con y sin los pointer-events forzados (para la sonda de las historias).
         console.log(JSON.stringify(await p.evaluate(() => {
