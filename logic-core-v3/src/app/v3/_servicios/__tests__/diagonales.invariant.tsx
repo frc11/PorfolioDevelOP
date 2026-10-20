@@ -5,13 +5,17 @@
  *
  * La geometría pura (`bloques/precio/geometriaDelPrecio.ts`), la firma de las tres opciones (`tresOpciones.ts`), la coreografía
  * (`movimiento/coreografiaDelPrecio.ts`) y el MARCADO de la página de verdad (`renderToStaticMarkup` de `PaginaDeServicio`): la Mediana
- * literal y sin palabras prohibidas, el orden del DOM, lo de debajo de 768 sin cambios (D15) y todo a la vista sin movimiento. Cada
+ * literal y sin palabras prohibidas, el orden del DOM, el reparto del ancho en 768 (§4) y todo a la vista sin movimiento. Cada
  * comprobación lleva su control positivo: el MISMO detector contra una entrada armada para fallar.
  *
  * [M2a, precio b] La versión única, la que eligió Valentino: la coreografía b (entra primero la Mediana, después las otras dos juntas) y
  * las posiciones escalonadas (la Simple arriba, la Mediana al medio y la Premium abajo). RETIRADAS por quitar la funcionalidad, no
  * aflojadas: «la bandera no existe en producción» y «el reparto lee la url solo en desarrollo» (la bandera ya no existe en ningún modo:
  * en su lugar, §6 afirma que no queda rastro de ella), los valores de la fiel (`a`) y las tres coreografías (queda una).
+ *
+ * [M2b] La §4 cambió con la spec: «por debajo de 768 se ve el bloque de antes, byte por byte» (el D15) se RETIRÓ porque esa versión ya
+ * no existe (por debajo de 768 van las historias, que prueba `historias.invariant.tsx`). Queda, con sus controles, que las dos
+ * versiones se reparten el ancho en 768 y que la del D15 no vuelve.
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
@@ -21,8 +25,6 @@ import { fileURLToPath } from 'node:url'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
-import { Bloque } from '../bloques/Bloque'
-import { Calibres } from '../bloques/precio/Calibres'
 import {
   PARAMETROS, adentro, cortes, franjaDelTexto, puntos, recorte, type IndiceDePanel, type Orientacion, type ParametrosDeLosCortes,
 } from '../bloques/precio/geometriaDelPrecio'
@@ -42,7 +44,7 @@ const PRECIO = ((): { readonly calibres: readonly Calibre[]; readonly destacada:
 const pagina = (enDesarrollo: boolean): string => renderToStaticMarkup(<PaginaDeServicio servicio={PAGINAS_WEB} enDesarrollo={enDesarrollo} />)
 const WEB_PROD = pagina(false)
 const WEB_DEV = pagina(true)
-const version = (html: string, cual: 'calibres' | 'diagonales'): string => elementoConAtributo(bloqueDe(html, 'precio') ?? '', `data-precio="${cual}"`) ?? ''
+const version = (html: string, cual: 'calibres' | 'historias' | 'diagonales'): string => elementoConAtributo(bloqueDe(html, 'precio') ?? '', `data-precio="${cual}"`) ?? ''
 const DIAGONALES = version(WEB_PROD, 'diagonales')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -191,24 +193,18 @@ controlPositivo('  dos cambiadas de lugar se detectan', DIAGONALES.replace(OP0, 
 controlPositivo('  y un h2 a la vista', DIAGONALES.replace(' sr-only">Precio</h2>', '">Precio</h2>'), enOrden)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · Debajo de 768 nada cambia (D15), y las diagonales existen solo desde 768')
+titulo('4 · [M2b] Desde 768 las diagonales; por debajo, las historias (la versión del D15 se fue)')
 
-// Lo de antes del M2a: el bloque del precio con los calibres en su grilla. Su contenido tiene que estar tal cual en la versión chica.
-const ANTES = (enDesarrollo: boolean): string => {
-  const seccion = renderToStaticMarkup(<Bloque nombre="precio" titulo="Precio"><Calibres calibres={PRECIO.calibres} enDesarrollo={enDesarrollo} /></Bloque>)
-  return seccion.replace(/^<section[^>]*>/, '').replace(/<\/section>$/, '')
-}
 const clases = (html: string, atributo: string): string[] => (new RegExp(`<div[^>]*${atributo}[^>]*class="([^"]*)"`).exec(html)?.[1] ?? '').split(/\s+/)
-const debajoDe768SinCambios = (html: string, enDesarrollo: boolean): boolean => {
-  const chica = version(html, 'calibres')
+const seRepartenEl768 = (html: string): boolean => {
   const precio = bloqueDe(html, 'precio') ?? ''
-  return chica.includes(ANTES(enDesarrollo)) && clases(precio, 'data-precio="calibres"').includes('md:hidden') && !clases(precio, 'data-precio="calibres"').includes('max-md:hidden') &&
+  return clases(precio, 'data-precio="historias"').includes('md:hidden') && !clases(precio, 'data-precio="historias"').includes('max-md:hidden') &&
     clases(precio, 'data-precio="diagonales"').includes('max-md:hidden') && !clases(precio, 'data-precio="diagonales"').includes('md:hidden') &&
-    !/data-opcion-del-precio|Recomendada/.test(chica)
+    version(html, 'calibres') === ''
 }
-afirmar(debajoDe768SinCambios(WEB_PROD, false) && debajoDe768SinCambios(WEB_DEV, true), 'por debajo de 768 se ve el bloque de antes, byte por byte (título y calibres en su grilla), y las diagonales se ocultan; desde 768, al revés')
-controlPositivo('  una versión chica con la línea de la Mediana se detecta', WEB_PROD.replace('Varias páginas, buscador o catálogo sin compras</p>', `Varias páginas, buscador o catálogo sin compras</p><p>${LINEA_DE_LA_MEDIANA}</p>`), (h: string) => debajoDe768SinCambios(h, false))
-controlPositivo('  y las clases de ocultar cruzadas', WEB_PROD.replace('class="pt-12 md:hidden"', 'class="pt-12 max-md:hidden"'), (h: string) => debajoDe768SinCambios(h, false))
+afirmar(seRepartenEl768(WEB_PROD) && seRepartenEl768(WEB_DEV), 'desde 768 se ven las diagonales y las historias se ocultan; por debajo, al revés. La versión del D15 (los calibres en su grilla) ya no existe, en los dos modos')
+controlPositivo('  las clases de ocultar cruzadas se detectan', WEB_PROD.replace('data-precio="historias" class="md:hidden"', 'data-precio="historias" class="max-md:hidden"'), seRepartenEl768)
+controlPositivo('  y la versión del D15 todavía montada', WEB_PROD.replace('<div data-precio="diagonales"', '<div data-precio="calibres" class="md:hidden"></div><div data-precio="diagonales"'), seRepartenEl768)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · Sin movimiento (el HTML servido y el movimiento reducido): todo a la vista y quieto, en una pantalla')

@@ -1,20 +1,25 @@
 /**
- * [SERVICIOS S1b/S2 · M2a] 4 · PRECIO — elige el slot según `precio.tipo` (SPEC §5: calibres en web, proyecto en software, planes en IA).
+ * [SERVICIOS S1b/S2 · M2a · M2b] 4 · PRECIO — elige el slot según `precio.tipo` (SPEC §5: calibres en web, proyecto en software, planes en IA).
  *
  * El `switch` es exhaustivo: si alguien suma un tipo de precio sin su rama, esto deja de compilar. Cada slot saca lo que muestra de
  * los datos (`precio/vistaDelPrecioPorProyecto.ts`, `precio/vistaDeLosPlanes.ts` y [M2a] `precio/tresOpciones.ts` son la lógica, sin
  * markup) y lo que falta ([a definir]) se ve solo en desarrollo: en producción ese ítem no se monta, y nunca sale un número inventado.
  *
- * [M2a] Los calibres van en DOS versiones dentro de la misma sección, y el CSS elige (como los planes de IA desde el S2c):
- *   · por debajo de 768, lo de siempre (D15): el bloque con su título y los calibres en su grilla;
- *   · desde 768, las diagonales (`precio/Diagonales.tsx`): la sección anclada a pantalla completa, con el título solo para lectores.
- * La que no toca va con `display: none`: ni se ve, ni la lee el lector de pantalla, ni la alcanza el teclado.
+ * Los calibres van en DOS versiones dentro de la misma sección, y el CSS elige (como los planes de IA desde el S2c):
+ *   · [M2b] por debajo de 768, las historias (`movimiento/PrecioEnHistorias.tsx`): el título y las tres opciones, una por pantalla, con
+ *     las historias comunes del home; con movimiento reducido, las tres quietas, una debajo de la otra;
+ *   · [M2a] desde 768, las diagonales (`precio/Diagonales.tsx`): la sección anclada a pantalla completa, con el título solo para lectores.
+ * La que no toca va con `display: none`: ni se ve, ni la lee el lector de pantalla, ni la alcanza el teclado. Las dos salen de la misma
+ * vista (`tresOpciones.ts`).
  */
 
+import { Envoltorio } from '../../_componentes/layout/Envoltorio'
+import { PrecioEnHistorias } from '../movimiento/PrecioEnHistorias'
 import type { Precio as DatosDePrecio } from '../tipos'
-import { Bloque, CLASES_DEL_PAPEL, ContenidoDelBloque, idDelTituloDe } from './Bloque'
-import { Calibres } from './precio/Calibres'
+import { Bloque, CLASES_DEL_PAPEL, EncabezadoDelBloque, idDelTituloDe } from './Bloque'
 import { Diagonales } from './precio/Diagonales'
+import { pasosDelPrecio } from './precio/historiasDelPrecio'
+import { ListaDeLosPasos } from './precio/PantallaDelPaso'
 import { Planes } from './precio/Planes'
 import { Proyecto } from './precio/Proyecto'
 import { tresOpcionesDeLosCalibres } from './precio/tresOpciones'
@@ -28,15 +33,24 @@ interface PrecioProps {
 
 export function Precio({ precio, enDesarrollo }: PrecioProps): React.JSX.Element {
   if (precio.tipo === 'calibres') {
+    const vista = tresOpcionesDeLosCalibres(precio.calibres, precio.destacada, enDesarrollo)
+    const pasos = pasosDelPrecio(vista)
     return (
       <section data-bloque="precio" aria-labelledby={idDelTituloDe('precio')} className={CLASES_DEL_PAPEL}>
-        <div data-precio="calibres" className="pt-12 md:hidden">
-          <ContenidoDelBloque nombre="precio" titulo={TITULO}>
-            {contenidoDelSlot(precio, enDesarrollo)}
-          </ContenidoDelBloque>
+        <div data-precio="historias" className="md:hidden">
+          <PrecioEnHistorias
+            pasos={pasos}
+            encabezado={
+              <Envoltorio>
+                <EncabezadoDelBloque nombre="precio" titulo={TITULO} />
+              </Envoltorio>
+            }
+          >
+            <ListaDeLosPasos pasos={pasos} />
+          </PrecioEnHistorias>
         </div>
         <div data-precio="diagonales" className="max-md:hidden">
-          <Diagonales vista={tresOpcionesDeLosCalibres(precio.calibres, precio.destacada, enDesarrollo)} titulo={TITULO} />
+          <Diagonales vista={vista} titulo={TITULO} />
         </div>
       </section>
     )
@@ -48,10 +62,11 @@ export function Precio({ precio, enDesarrollo }: PrecioProps): React.JSX.Element
   )
 }
 
-function contenidoDelSlot(precio: DatosDePrecio, enDesarrollo: boolean): React.JSX.Element {
+/** [M2b] Los calibres arman su sección arriba: al slot llegan los otros dos tipos. */
+type PrecioDeUnBloque = Exclude<DatosDePrecio, { readonly tipo: 'calibres' }>
+
+function contenidoDelSlot(precio: PrecioDeUnBloque, enDesarrollo: boolean): React.JSX.Element {
   switch (precio.tipo) {
-    case 'calibres':
-      return <Calibres calibres={precio.calibres} enDesarrollo={enDesarrollo} />
     case 'proyecto':
       return <Proyecto precio={precio} />
     case 'planes':
@@ -61,7 +76,7 @@ function contenidoDelSlot(precio: DatosDePrecio, enDesarrollo: boolean): React.J
   }
 }
 
-/** El `default` del `switch`: con los tres tipos cubiertos `precio` es `never`; un tipo nuevo sin rama no compila. */
+/** El `default` del `switch`: con los tipos cubiertos `precio` es `never`; un tipo nuevo sin rama no compila. */
 function sinSlot(precio: never): never {
   throw new Error(`Precio: tipo sin slot (${String(precio)})`)
 }

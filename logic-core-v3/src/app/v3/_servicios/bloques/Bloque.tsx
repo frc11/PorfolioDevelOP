@@ -76,22 +76,29 @@ export function Bloque({ nombre, titulo, children, panel = 'progresivo' }: Bloqu
   )
 }
 
-/** [M2a] Lo de adentro de la sección: el precio lo usa tal cual por debajo de 768, donde nada cambia (D15). */
-export function ContenidoDelBloque({ nombre, titulo, children, panel = 'progresivo' }: BloqueProps): React.JSX.Element {
+/** [M2b] La marca y el título que entra por línea: la columna de la izquierda del bloque. El precio del teléfono la usa sola. */
+export function EncabezadoDelBloque({ nombre, titulo }: Pick<BloqueProps, 'nombre' | 'titulo'>): React.JSX.Element {
+  return (
+    <div className="flex flex-col gap-4 escritorio:col-span-4">
+      <MarcaDeSeccion />
+      <TitularQueEntra
+        id={idDelTituloDe(nombre)}
+        texto={titulo}
+        nivel="titulo-l"
+        como="h2"
+        className="text-balance"
+        claseDelBloque="block w-full"
+      />
+    </div>
+  )
+}
+
+/** Lo de adentro de la sección: el encabezado y el panel. */
+function ContenidoDelBloque({ nombre, titulo, children, panel = 'progresivo' }: BloqueProps): React.JSX.Element {
   return (
     <Envoltorio>
       <div className="flex flex-col gap-8 escritorio:grid escritorio:grid-cols-12 escritorio:gap-x-[var(--grilla-canal-amplio)]">
-        <div className="flex flex-col gap-4 escritorio:col-span-4">
-          <MarcaDeSeccion />
-          <TitularQueEntra
-            id={idDelTituloDe(nombre)}
-            texto={titulo}
-            nivel="titulo-l"
-            como="h2"
-            className="text-balance"
-            claseDelBloque="block w-full"
-          />
-        </div>
+        <EncabezadoDelBloque nombre={nombre} titulo={titulo} />
         <div className={CLASES_DE_LA_COLUMNA_DEL_PANEL}>
           <PanelQueEntra panel={panel}>{children}</PanelQueEntra>
         </div>

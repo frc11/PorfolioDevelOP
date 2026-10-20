@@ -6,19 +6,20 @@
  *
  *   · Texto real, en el DOM y en orden: el `h2` «Precio» solo para lectores de pantalla (D11) y una lista con las tres opciones, de
  *     arriba a la izquierda a abajo a la derecha, como se leen en pantalla.
- *   · Lo que dice cada opción sale de la vista pura (`tresOpciones.ts`): ningún texto de venta escrito acá.
+ *   · Lo que dice cada opción sale de la vista pura (`tresOpciones.ts`): ningún texto de venta escrito acá. [M2b] Lo pinta
+ *     `ContenidoDeLaOpcion.tsx`, que comparten las historias del teléfono.
  *   · Cómo entra: progresivo con el scroll (`movimiento/RepartoDelPrecio.tsx`). Cada panel lee su `--entrada-N` con reserva 1, así
  *     el HTML servido y el movimiento reducido muestran los tres en su lugar, sin corrimiento ni transparencia.
  *   · Los recortes, los corrimientos y las cajas van en custom properties por orientación (apaisado y retrato), y las clases los leen
  *     con `var()`: ningún polígono escrito en una clase.
  */
 
-import { Caption, Cuerpo } from '../../../_componentes/tipografia/Textos'
 import { Titular } from '../../../_componentes/tipografia/Titular'
 import type { EstiloConVariables } from '../../estiloDelAcento'
 import { RepartoDelPrecio } from '../../movimiento/RepartoDelPrecio'
+import { ContenidoDeLaOpcion, SUPERFICIE_DE_LA_OPCION } from './ContenidoDeLaOpcion'
 import { caja, corrimiento, recorte, type IndiceDePanel } from './geometriaDelPrecio'
-import type { OpcionDeTres, VistaDeTresOpciones } from './tresOpciones'
+import type { VistaDeTresOpciones } from './tresOpciones'
 
 /** Las clases de cada panel. Literales (Tailwind las lee de acá): cambia solo la variable de entrada de cada uno. */
 const CLASES_DEL_PANEL: Readonly<Record<IndiceDePanel, string>> = {
@@ -26,9 +27,6 @@ const CLASES_DEL_PANEL: Readonly<Record<IndiceDePanel, string>> = {
   1: 'absolute inset-0 landscape:[clip-path:var(--recorte-a)] portrait:[clip-path:var(--recorte-r)] landscape:[--dx:var(--dx-a)] portrait:[--dx:var(--dx-r)] landscape:[--dy:var(--dy-a)] portrait:[--dy:var(--dy-r)] translate-x-[calc((1_-_var(--entrada-1,1))*var(--dx))] translate-y-[calc((1_-_var(--entrada-1,1))*var(--dy))] opacity-[var(--entrada-1,1)] motion-safe:will-change-transform',
   2: 'absolute inset-0 landscape:[clip-path:var(--recorte-a)] portrait:[clip-path:var(--recorte-r)] landscape:[--dx:var(--dx-a)] portrait:[--dx:var(--dx-r)] landscape:[--dy:var(--dy-a)] portrait:[--dy:var(--dy-r)] translate-x-[calc((1_-_var(--entrada-2,1))*var(--dx))] translate-y-[calc((1_-_var(--entrada-2,1))*var(--dy))] opacity-[var(--entrada-2,1)] motion-safe:will-change-transform',
 }
-
-/** Las superficies: la Mediana en el acento del servicio (papel sobre el acento), las otras dos en papel. */
-const SUPERFICIE: Readonly<Record<IndiceDePanel, string>> = { 0: 'bg-fondo text-tinta', 1: 'bg-acento text-fondo', 2: 'bg-fondo text-tinta' }
 
 /**
  * La caja del texto, escalonada: la Simple arriba a la izquierda, la Mediana al medio (su franja entera, con el texto centrado) y la
@@ -73,7 +71,7 @@ export function Diagonales({ vista, titulo }: { readonly vista: VistaDeTresOpcio
       <RepartoDelPrecio>
         <ul role="list" data-pieza="precio-en-diagonales" className="relative h-full w-full">
           {PANELES.map((panel) => (
-            <li key={panel} data-opcion-del-precio={panel} style={variablesDelPanel(panel)} className={`${CLASES_DEL_PANEL[panel]} ${SUPERFICIE[panel]}`}>
+            <li key={panel} data-opcion-del-precio={panel} style={variablesDelPanel(panel)} className={`${CLASES_DEL_PANEL[panel]} ${SUPERFICIE_DE_LA_OPCION[panel]}`}>
               <div className={CLASES_DE_LA_CAJA[panel]}>
                 <ContenidoDeLaOpcion opcion={vista.opciones[panel]} destacada={panel === 1 ? vista.destacada : null} />
               </div>
@@ -82,36 +80,5 @@ export function Diagonales({ vista, titulo }: { readonly vista: VistaDeTresOpcio
         </ul>
       </RepartoDelPrecio>
     </>
-  )
-}
-
-function ContenidoDeLaOpcion({ opcion, destacada }: { readonly opcion: OpcionDeTres; readonly destacada: VistaDeTresOpciones['destacada'] }): React.JSX.Element {
-  const [descripcion, ...resto] = opcion.lineas
-  // Sobre el acento todo va en el papel: la tinta media no pasa ahí (M0 §3.3).
-  const secundario = destacada === null ? 'text-tinta-media' : ''
-  return (
-    <div className="flex flex-col gap-3">
-      {destacada === null ? null : (
-        <Caption className="self-start border border-current px-2 py-1 uppercase">{destacada.marca}</Caption>
-      )}
-      <Titular nivel="titulo-s" como="h3">
-        {opcion.nombre}
-      </Titular>
-      <p className="flex flex-wrap items-baseline gap-x-2">
-        <Caption como="span" className={secundario}>
-          {opcion.rotuloDelPrecio}
-        </Caption>{' '}
-        <Titular nivel="titulo-m" como="span" className={destacada === null ? 'text-acento' : ''}>
-          {opcion.precio}
-        </Titular>
-      </p>
-      {descripcion === undefined ? null : <Cuerpo className={secundario}>{descripcion}</Cuerpo>}
-      {destacada === null ? null : <Cuerpo>{destacada.linea}</Cuerpo>}
-      {resto.map((linea) => (
-        <Caption key={linea} className={`uppercase ${secundario}`}>
-          {linea}
-        </Caption>
-      ))}
-    </div>
   )
 }
