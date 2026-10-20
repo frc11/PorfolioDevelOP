@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 
+import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
 import { PAGINAS_DE_SERVICIO, TODOS_LOS_SERVICIOS, destinoDesde } from '../paginas'
 
 /**
@@ -194,9 +195,9 @@ export function ListaDeServicios({ ref, abierto, alEntrar, alSalir, alTeclear, c
         {ITEMS_DEL_DESPLEGABLE.map((p) => (
           <li key={p.id}>
             {/* Cerrada, fuera del recorrido del teclado también en el marcado (la hoja ya la esconde con `visibility`). */}
-            <a href={destinoDesde(ruta, p.destino)} data-pieza="desplegable-enlace" tabIndex={abierto ? undefined : -1} onClick={() => cerrar(false)} className={CLASE_DEL_TEXTO}>
+            <EnlaceDeRuta href={destinoDesde(ruta, p.destino)} data-pieza="desplegable-enlace" tabIndex={abierto ? undefined : -1} onClick={() => cerrar(false)} className={CLASE_DEL_TEXTO}>
               {p.rotulo}
-            </a>
+            </EnlaceDeRuta>
           </li>
         ))}
       </ul>

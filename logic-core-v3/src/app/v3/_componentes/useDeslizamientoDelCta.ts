@@ -1,6 +1,7 @@
 'use client'
 
 import type Lenis from 'lenis'
+import { usePathname } from 'next/navigation'
 import { useEffect, type RefObject } from 'react'
 
 import { getIntroStage } from '@/components/layout/home-intro/introHandoff'
@@ -149,6 +150,8 @@ const relojDeSeguridadMs = (duracionMs: number): number => PRELUDIO_MS + duracio
  * `s18-compuertas.invariant.ts` §3b junto a los otros tres del motor.
  */
 export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo: ModoDelViaje = 'viaje'): void {
+  // [B12a.6] Con la navegación cliente el layout persiste: el `<main>` (y lo que se captura con él) se vuelve a tomar en cada ruta.
+  const ruta = usePathname()
   useEffect(() => {
     const zona = document.querySelector<HTMLElement>(SELECTOR_DEL_MAIN)
     if (zona === null) return
@@ -438,7 +441,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       window.clearTimeout(relojDeLaEscena)
       terminarElViaje()
     }
-  }, [instancia, modo])
+  }, [instancia, modo, ruta])
 }
 
 /** [VIAJES] Cuánto tarda el velo en irse, leído de la hoja: una sola definición del fundido. */

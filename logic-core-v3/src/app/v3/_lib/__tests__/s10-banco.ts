@@ -60,6 +60,7 @@ import { createElement } from 'react'
 
 import { ChromeDelHome } from '../../_chrome/ChromeDelHome'
 import { SaltarAlContenido } from '../../_chrome/SaltarAlContenido'
+import { VeloDeNavegacion } from '../../_chrome/velo/VeloDeNavegacion'
 import { Navegacion } from '../../_componentes/chrome/Navegacion'
 import { MarcaDeLaLlave } from '../../_secciones/_contrato/MarcaDeLaLlave'
 import { marcar } from '../../_secciones/_invariantes/render'
@@ -200,6 +201,14 @@ export const PIEZAS_MONTABLES: ReadonlyMap<string, PiezaMontable> = new Map<stri
       emite: () => createElement(ChromeDelHome),
       porQue:
         '[B12a.5] el chrome entero (el salto, la barra, el menú, el contacto): desde D4 lo monta el LAYOUT, antes de la página, para que no se vuelva a montar entre rutas; la página ya no lo trae',
+    },
+  ],
+  [
+    'VeloDeNavegacion',
+    {
+      emite: () => createElement(VeloDeNavegacion),
+      porQue:
+        '[B12a.6] el velo de la navegación entre páginas: una capa `aria-hidden`, fija y sin recibir el puntero en reposo (ni parada de tabulación ni landmark); el layout la monta para que el velo cubra el cambio de ruta',
     },
   ],
   [

@@ -1,7 +1,8 @@
 import type { EnlaceDeNavegacion } from '../_lib/navegacion'
+import { RUTA_DEL_HOME } from '../_lib/veloDeNavegacion'
 
-/** [B12a.5] El home (`/v3`; con D8, `/`). */
-export const RUTA_DEL_HOME = '/v3'
+/** [B12a.5] El home (`/v3`; con D8, `/`). [B12a.6] Declarado con la señal del velo (`_lib/veloDeNavegacion.ts`), que `_componentes` también lee. */
+export { RUTA_DEL_HOME }
 
 /**
  * [B12a.5] LAS PÁGINAS DE SERVICIO, PARA LA NAVBAR — el desplegable de «Servicios» (D5) y su acordeón en el menú del teléfono. Los datos

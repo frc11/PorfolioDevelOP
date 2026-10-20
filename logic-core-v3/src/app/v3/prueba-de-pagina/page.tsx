@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 
 import { Envoltorio } from '../_componentes/layout/Envoltorio'
+import { EnlaceDeRuta } from '../_componentes/navegacion/EnlaceDeRuta'
 import { IntroDeLaPagina, ParrafoDeLaBajada, SELECTOR_DE_LA_INTRO } from '../_componentes/pagina/IntroDeLaPagina'
 import { TITULOS_CON_LETRAS } from '../_componentes/titulos3d/presets'
 import { Cuerpo } from '../_componentes/tipografia/Textos'
 import { PISTA_DE_LA_INTRO } from '../_lib/escena/ruta/pistaDeLaIntro'
 import type { PresetDeLaEscena } from '../_lib/escena/ruta/preset'
 
-import { EnlaceConLaSalida } from './EnlaceConLaSalida'
 
 /**
  * ⚠️ INSTRUMENTO, NO PANTALLA. [B12a.2] La página de prueba de la intro (plan `docs/rediseno/SPRINT-B12a.md` §10): la intro de 1,5
@@ -48,9 +48,9 @@ export default async function PruebaDePagina({ searchParams }: { readonly search
           <>
             <ParrafoDeLaBajada>Scrolleá la intro (1,5 pantallas) y volvé: la cámara va de la composición inicial a la pose de la intro, y la variante de prueba enciende la luz de abajo con el acento.</ParrafoDeLaBajada>
             {/* [B12a.3] La salida de la variante: el enlace pide la señal (P-H29d), la luz vuelve a la composición y recién después navega (el lienzo sigue). */}
-            <EnlaceConLaSalida href="/v3" className="underline underline-offset-4">
+            <EnlaceDeRuta href="/v3" className="underline underline-offset-4">
               Volver al home (la salida de la variante)
-            </EnlaceConLaSalida>
+            </EnlaceDeRuta>
           </>
         }
       />

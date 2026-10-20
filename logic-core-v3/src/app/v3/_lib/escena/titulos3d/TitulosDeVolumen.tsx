@@ -232,11 +232,13 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
   }
   for (const a of s.armados) {
     if (a.titulo.queda) {
-      if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, viva)
+      // [B12a.6] Y el que se queda también puede seguir al mouse (el título de una página, pegado a su `h1`: la cámara de la página lo sigue).
+      const conElMouse = (a.titulo.parteDelMouse ?? 0) > 0 ? camaraConParteDelMouse(a.titulo.parteDelMouse ?? 0) : viva
+      if (!a.colocado) colocarElArmado(a, s.nudo, aspecto, stats, conElMouse)
       a.uniforms.uQuieto.value = s.quieto ? 1 : 0
       avancesDeLasRayas(a.titulo, a.uniforms.uTrazos.value)
       a.uniforms.uDespinte.value = despinteDelTitulo(a.titulo)
-      a.malla.visible = alCuadroDelQueQueda(a, enViaje, asentar, reanudado, y, dt, viva)
+      a.malla.visible = alCuadroDelQueQueda(a, enViaje, asentar, reanudado, y, dt, conElMouse)
       if (a.malla.visible) iluminar(a, logo, nivel)
       if ((IDS_DEL_TITULAR_DEL_HERO as readonly string[]).includes(a.titulo.id)) {
         llegadaDelTitular = Math.min(llegadaDelTitular, a.mostrado.llegada)

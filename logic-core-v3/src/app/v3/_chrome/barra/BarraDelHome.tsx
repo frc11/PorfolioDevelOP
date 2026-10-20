@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
+import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
 import { sonar } from '../../_lib/sonido/bus'
 import { ABRE_EL_PANEL, fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
 import { ENLACES_DEL_HOME, ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enlaces'
@@ -84,7 +85,8 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
     )
     paneles.forEach((p) => observador.observe(p))
     return () => observador.disconnect()
-  }, [])
+    // [B12a.6] Con la navegación cliente, las secciones son otras en cada ruta: se vuelven a tomar.
+  }, [ruta])
 
   // El modo se decide por el ancho real, una medición acá: las secciones no preguntan el ancho.
   useLayoutEffect(() => {
@@ -173,7 +175,8 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
             }
             return (
               <li key={enlace.id}>
-                <a
+                {/* [B12a.6] Desde una página, al home con el velo (`EnlaceDeRuta`); en el home, el ancla del viaje. */}
+                <EnlaceDeRuta
                   href={destinoDesde(ruta, enlace.destino)}
                   data-pieza="barra-enlace"
                   data-nav-id={enlace.id}
@@ -182,7 +185,7 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
                   className="text-cuerpo tracking-texto leading-texto font-semi"
                 >
                   <span data-parte="rotulo">{enlace.rotulo}</span>
-                </a>
+                </EnlaceDeRuta>
               </li>
             )
           })}

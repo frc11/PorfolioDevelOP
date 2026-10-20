@@ -1,6 +1,7 @@
 import localFont from 'next/font/local'
 
 import { ChromeDelHome } from './_chrome/ChromeDelHome'
+import { VeloDeNavegacion } from './_chrome/velo/VeloDeNavegacion'
 import { CompuertaDelDeslizamiento } from './_componentes/CompuertaDelDeslizamiento'
 import { CompuertaDelScrollSuave } from './_componentes/CompuertaDelScrollSuave'
 import { EscenarioCompuerta } from './_componentes/EscenarioCompuerta'
@@ -327,6 +328,8 @@ export default function DisposicionV3({ children }: { children: React.ReactNode 
         {/* [B12a.5] D4 · el chrome en el layout: la misma píldora, el menú y el contacto en el home y en las páginas (no se vuelve a montar
             entre rutas). Antes de la página: la pastilla nace por geometría arriba de todo, afuera del `<main>` (`ChromeDelHome.tsx`). */}
         <ChromeDelHome />
+        {/* [B12a.6] El velo de la navegación entre páginas (lo pide `EnlaceDeRuta`): encima de todo, sin recibir el puntero en reposo. */}
+        <VeloDeNavegacion />
         {children}
         <MarcaDeLaLlave />
       </div>

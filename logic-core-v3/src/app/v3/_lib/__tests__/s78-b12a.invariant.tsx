@@ -32,6 +32,9 @@ import { PRESET_DEL_HOME, apilarElPreset, despiertaEnLaPagina, presetActual, typ
 import { atenderLaSalida, pedirLaSalidaDeLaVariante } from '../escena/ruta/salidaDeLaVariante'
 import { COMPOSICION_DE_LA_LUZ, SALIDA_DE_LA_VARIANTE_MS } from '../escena/ruta/variante'
 import { esFuenteDePagina } from '../escena/titulos3d/fuentesDePagina'
+import { PLUMA_DEL_VELO, coberturaDelVelo, maskDelVelo, siguienteFaseDelVelo } from '../../_chrome/velo/velo'
+import { PLUMA_DE_LA_BANDA, anchoTotalDeLaBanda } from '../../_secciones/trabajos/gota'
+import { nocheDelDestino } from '../veloDeNavegacion'
 import { MARGEN_DE_REANUDACION } from '../escena/visibilidad'
 import type { FuenteDePagina } from '../titulos3d/registro'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
@@ -70,7 +73,8 @@ titulo('B12a.1 · 2 · La escena en una subruta: duerme, pero recién después d
 
 const atadura = sinComentarios(leer('_lib/escena/ataduraAlScroll.ts'))
 const cableada = (a: string): boolean =>
-  /if \(secciones === null\) \{\s*const preset = presetActual\(\)\s*const intro = [^\n]+\n\s*if \(intro !== null\) AVANCE_DE_LA_INTRO\.current = [^\n]+\n\s*const despierta = !hayPrimerCuadro\(\) \|\| despiertaEnLaPagina\(preset, bloquesDelPreset\(document, preset, desplazamiento\), desplazamiento, ventana, MARGEN_DE_REANUDACION\)/.test(a) &&
+  // [B12a.6] Entre el avance y el despertar, el rig vuelve al progreso del hero (la navegación cliente lo traía del home).
+  /if \(secciones === null\) \{\s*const preset = presetActual\(\)\s*const intro = [^\n]+\n\s*if \(intro !== null\) AVANCE_DE_LA_INTRO\.current = [^\n]+\n(?:\s*if \(rig\.current\.progress !== 0\) rig\.set\('progress', 0\)\n)?\s*const despierta = !hayPrimerCuadro\(\) \|\| despiertaEnLaPagina\(preset, bloquesDelPreset\(document, preset, desplazamiento\), desplazamiento, ventana, MARGEN_DE_REANUDACION\)/.test(a) &&
   /const enLaPagina = despierta \? EN_CUADRO : FUERA_DE_CUADRO\s*if \(siguiente\(estadoRef\.current, enLaPagina\) !== estadoRef\.current\) setEstado/.test(a) &&
   /const desuscribirDelPreset = suscribirseAlPreset\(pedir\)/.test(a) && /const desuscribirDeLaCarga = suscribirALaCarga\(pedir\)/.test(a) && /desuscribirDelPreset\(\)\s*desuscribirDeLaCarga\(\)/.test(a)
 afirmar(cableada(atadura), 'sin las secciones del home, la lectura del scroll pregunta al preset: la escena se suspende (`never`) en una galería y en el papel de una página, y se vuelve a leer cuando cambia el preset o cuando la escena pinta su primer cuadro')
@@ -164,8 +168,10 @@ titulo('B12a.2 · 7 · El cableado: el avance va por su canal, no por el progres
 const enLaPagina = (a: string): string => /if \(secciones === null\) \{[\s\S]*?\n {6}\}\n/.exec(a)?.[0] ?? ''
 const escribeElAvance = (a: string): boolean =>
   /const intro = preset === null \|\| preset\.pista === null \|\| preset\.tramos === null \? null : document\.querySelector\(preset\.tramos\.intro\)\s*if \(intro !== null\) AVANCE_DE_LA_INTRO\.current = avanceDeLaIntro\(intro\.getBoundingClientRect\(\)\.top \+ desplazamiento, desplazamiento, ventana\)/.test(enLaPagina(a)) &&
-  !/rig\.set\(/.test(enLaPagina(a))
-afirmar(escribeElAvance(atadura), 'la lectura del scroll mide el tope de la intro en el layout y escribe su avance en `AVANCE_DE_LA_INTRO`; en una página no toca el progreso del rig (lo leen los títulos, el polvo, la formación y el entorno con el significado del home)')
+  // [B12a.6] Reemplazada por la spec: en una página el progreso del rig sólo vuelve al del hero (0: con la navegación cliente llegaba el del
+  // home); nunca lleva el avance de la intro.
+  (enLaPagina(a).match(/rig\.set\(/g) ?? []).length === 1 && /if \(rig\.current\.progress !== 0\) rig\.set\('progress', 0\)/.test(enLaPagina(a))
+afirmar(escribeElAvance(atadura), 'la lectura del scroll mide el tope de la intro en el layout y escribe su avance en `AVANCE_DE_LA_INTRO`; en una página el progreso del rig no lleva el avance (lo leen los títulos, el polvo, la formación y el entorno con el significado del home): [B12a.6] sólo vuelve al del hero')
 controlPositivo('  el detector ve el avance escrito en el progreso del rig', atadura.replace('AVANCE_DE_LA_INTRO.current = avanceDeLaIntro(', "rig.set('progress', avanceDeLaIntro(") , escribeElAvance)
 
 const rig = sinComentarios(leer('_lib/escena/OrbitRig.tsx'))
@@ -254,9 +260,11 @@ controlPositivo('  el detector ve el acento de la ruta actual (el defecto medido
 const continuaBien = (r: string): boolean => /const yendose = m !== null && \(deLaPagina === null \|\| deLaPagina\.id !== m\.pagina \|\| deLaPagina\.variante !== m\.id\)/.test(r) && /const ahora = saliendo\.current \|\| yendose \|\|/.test(r)
 afirmar(continuaBien(ranura), '  la ranura no suelta la luz entre el cambio de ruta y su salida: con la página ida y la variante montada, sigue siendo la dueña (si no, el final se la quedaba un cuadro)')
 controlPositivo('  el detector ve la ranura que la suelta un cuadro', ranura.replace('saliendo.current || yendose ||', 'saliendo.current ||'), continuaBien)
-const enlace = leerV3('prueba-de-pagina/EnlaceConLaSalida.tsx')
-const enlaceBien = (e: string): boolean => /e\.preventDefault\(\)\s*const enlace = e\.currentTarget\s*void pedirLaSalidaDeLaVariante\(\)\.then\(\(\) => \{\s*dejarPasar\.current = true\s*enlace\.click\(\)/.test(e) && !/useRouter|router\./.test(e) && ruta.includes('<EnlaceConLaSalida href="/v3"')
-afirmar(enlaceBien(enlace), '  la página de prueba vuelve al home pidiendo la señal: espera la salida y recién deja pasar el clic al `<Link>` (nunca `router.push`; interino hasta `EnlaceDeRuta`, B12a.6)')
+// [B12a.6] Reemplazada por la spec: el enlace interino (`EnlaceConLaSalida`) se fue; la página de prueba vuelve con `EnlaceDeRuta`, que pide
+// la señal ANTES del velo (§11 afirma el resto de su cableado).
+const enlace = leerV3('_componentes/navegacion/EnlaceDeRuta.tsx')
+const enlaceBien = (e: string): boolean => /e\.preventDefault\(\)\s*const enlace = e\.currentTarget\s*void pedirLaSalidaDeLaVariante\(\)\s*\.then\(/.test(e) && /dejarPasar\.current = true\s*enlace\.click\(\)/.test(e) && !/useRouter|router\./.test(e) && ruta.includes('<EnlaceDeRuta href="/v3"')
+afirmar(enlaceBien(enlace), '  la página de prueba vuelve al home con `EnlaceDeRuta`: pide la señal, espera la salida (y el velo) y recién deja pasar el clic al `<Link>` (nunca `router.push`)')
 controlPositivo('  el detector ve el enlace que navega sin esperar la salida', enlace.replace('e.preventDefault()', ''), enlaceBien)
 // b · El color de la luz de abajo, en los dos shaders; c · el de la energía, prestado sin pisar al banco.
 const piso = leer('_lib/escena/final/enElPiso.ts')
@@ -370,11 +378,38 @@ controlPositivo('  el detector ve una precargada', layout.replace('preload: fals
 // El cableado: en la pantalla (sigue al `h1` fijo de la intro), con el gesto y el reloj del titular del hero; cae con el gatillo de la intro.
 const delTitulo = leerV3('_componentes/titulos3d/TituloDePagina.tsx')
 const tituloCableado = (c: string): boolean =>
-  /const comun = \{ lectura: 0, salida: null, queda: true, gesto: 'azar', colocacion: 'pantalla', rearma: true, minimoS: LLEGADA_DEL_TITULAR_S, asiento: preset\.asiento, saleCayendo: preset\.saleCayendo, activo \} as const/.test(c) &&
+  /const comun = \{ lectura: 0, salida: null, queda: true, gesto: 'azar', colocacion: 'pantalla', rearma: true, minimoS: LLEGADA_DEL_TITULAR_S, asiento: preset\.asiento, saleCayendo: preset\.saleCayendo, parteDelMouse: 1, activo \} as const/.test(c) &&
   /const activo = material !== 'no' && escritorio && !reducido/.test(c) && /avanceDeLaIntro\(arriba, window\.scrollY, window\.innerHeight\) < CAIDA_DEL_TITULO\.avance/.test(c) &&
   /animate\(presencia, ahora \? 1 : 0, \{ duration: CAIDA_DEL_TITULO\.s,/.test(c) && /const APAGADO = 'escritorio:opacity-0'/.test(c) && /className=\{cn\('block', listo && APAGADO\)\}/.test(c)
 afirmar(tituloCableado(delTitulo) && COMBINACIONES_DEL_TITULO.every((c) => c.saleCayendo) && CAIDA_DEL_TITULO.avance > 1 / PANTALLAS_DE_LA_INTRO / 2 && CAIDA_DEL_TITULO.avance < 1, `  el título en volumen va en la pantalla, llega con el gesto y el reloj del titular del hero y cae (nunca de golpe) cuando la intro pasa ${String(CAIDA_DEL_TITULO.avance)}: el papel ya entró; con las dos partes armadas el DOM se apaga sólo desde 1024 (sigue en el árbol accesible); sin WebGL, con movimiento reducido o abajo de 1024, el \`h1\` es el visible`)
 controlPositivo('  el detector ve el título en volumen con movimiento reducido', delTitulo.replace("material !== 'no' && escritorio && !reducido", "material !== 'no' && escritorio"), tituloCableado)
 controlPositivo('  y el `h1` apagado en todos los anchos', delTitulo.replace("const APAGADO = 'escritorio:opacity-0'", "const APAGADO = 'opacity-0'"), tituloCableado)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B12a.6 · 11 · La navegación entre páginas: el velo y `EnlaceDeRuta`')
+
+// La máquina del velo: quieto → cubriendo → cubierto → (la ruta cambia) destapando → quieto.
+type SiguienteDelVelo = typeof siguienteFaseDelVelo
+const maquinaDelVelo = (f: SiguienteDelVelo): boolean =>
+  f('quieto', 'cubrir') === 'cubriendo' && f('cubriendo', 'cubrio') === 'cubierto' && f('cubierto', 'llego') === 'destapando' && f('destapando', 'destapo') === 'quieto' &&
+  f('cubriendo', 'cubrir') === 'cubriendo' && f('cubierto', 'cubrir') === 'cubierto' && f('quieto', 'llego') === 'quieto' && f('cubriendo', 'llego') === 'cubriendo' && f('destapando', 'cubrir') === 'cubriendo'
+afirmar(maquinaDelVelo(siguienteFaseDelVelo), 'el velo: quieto → cubriendo → cubierto → destapando (recién cuando la ruta cambió) → quieto; un pedido en medio no lo reinicia; destapando, uno nuevo vuelve a cubrir')
+controlPositivo('  el detector ve un velo que destapa sin esperar a la ruta', ((f, e) => (e === 'cubrio' && f === 'cubriendo' ? 'destapando' : siguienteFaseDelVelo(f, e))) as SiguienteDelVelo, maquinaDelVelo)
+// La cobertura: entero en el cuadro del cambio; crece al cubrir y decrece al destapar; sin tapar al empezar y al terminar.
+type Cobertura = typeof coberturaDelVelo
+const coberturaBien = (c: Cobertura): boolean =>
+  c('cubierto', 0) === 1 && c('quieto', 1) === 0 && c('cubriendo', 0) === 0 && c('cubriendo', 1) === 1 && c('destapando', 0) === 1 && c('destapando', 1) === 0 &&
+  [0.25, 0.5, 0.75, 1].every((t, k, a) => k === 0 || c('cubriendo', t) >= c('cubriendo', a[k - 1] ?? 0))
+afirmar(coberturaBien(coberturaDelVelo) && maskDelVelo('cubriendo', 0.5).startsWith('linear-gradient(to top left') && PLUMA_DEL_VELO === PLUMA_DE_LA_BANDA, '  el velo cubre el cuadro ENTERO en el cuadro del cambio (la gota, no: 62 % de la diagonal); entra por abajo a la derecha y sale por arriba a la izquierda, con la pluma de la gota')
+controlPositivo('  el detector ve la banda de la gota (nunca cubre entera)', ((f, t) => Math.min(anchoTotalDeLaBanda() / 100, coberturaDelVelo(f, t))) as Cobertura, coberturaBien)
+afirmar(nocheDelDestino('/v3') === 'dia' && nocheDelDestino('/v3#trabajos') === 'dia' && nocheDelDestino('/v3/paginas-web') === 'noche' && nocheDelDestino('/v3/prueba-de-pagina?nombre=1') === 'noche', '  lleva el amanecer o el anochecer: al home, el papel; a una página, la tinta')
+// EnlaceDeRuta: el <Link>, nunca router.push; pide la salida de la variante, después el velo, y recién deja pasar el clic.
+const delEnlace = leerV3('_componentes/navegacion/EnlaceDeRuta.tsx')
+const enlaceDelVeloBien = (c: string): boolean =>
+  /<Link\s+href=\{href\}\s+scroll=\{false\}/.test(c) && !/router\.push|useRouter|TransitionContext/.test(c) && /if \(href\.startsWith\('#'\)\)/.test(c) &&
+  /void pedirLaSalidaDeLaVariante\(\)\s*\.then\(\(\) => \(sinVelo\(\) \? undefined : cubrirConElVelo\(nocheDelDestino\(href\)\)\)\)\s*\.then\(\(\) => \{\s*dejarPasar\.current = true\s*enlace\.click\(\)/.test(c)
+afirmar(enlaceDelVeloBien(delEnlace), '`EnlaceDeRuta`: el `<Link>` de next (la navegación cliente: el lienzo y el chrome no se rehacen), nunca `router.push`; pide la salida de la variante, después el velo del destino y, cubierto, deja pasar el clic; un ancla del documento es un `<a>` (el viaje del home)')
+controlPositivo('  el detector ve el enlace que navega sin pedir el velo', delEnlace.replace('.then(() => (sinVelo() ? undefined : cubrirConElVelo(nocheDelDestino(href))))', ''), enlaceDelVeloBien)
+controlPositivo('  y uno con `router.push`', `${delEnlace}\nrouter.push(href)`, enlaceDelVeloBien)
 
 cerrar('s78-b12a')

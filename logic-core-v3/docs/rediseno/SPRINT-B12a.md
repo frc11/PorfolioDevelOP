@@ -876,3 +876,58 @@ Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta complet
 5. **`/v3/prueba-de-pagina` a 390:** abrí el menú y tocá «Servicios»: el acordeón con los cuatro.
 6. **Desde la página, «Portfolio» (o cualquier sección):** va al home, a esa sección, con recarga (hasta B12a.6).
 7. **Las páginas de servicio (`/v3/paginas-web`…):** en esta rama dan 404, porque las rutas son de servicios.
+
+### B12a.6 · la navegación cliente y el velo (2026-10-20)
+
+**Lo hecho:**
+- **`EnlaceDeRuta`** (`_componentes/navegacion/EnlaceDeRuta.tsx`): el `<Link>` de next, nunca `router.push`. Con un clic izquierdo sin modificadores:
+  1. pide la salida de la variante (P-H29d, la señal);
+  2. pide el velo del color del destino;
+  3. con el cuadro cubierto, deja pasar el clic al mismo `<Link>`: la navegación cliente, sin rehacer el lienzo ni el chrome.
+  - Un ancla del documento (`#…`) sigue siendo un `<a>`: en el home la recorre el viaje.
+  - Lo usan la barra, el desplegable, el menú del teléfono y la ruta de prueba. El enlace interino de B12a.3 (`EnlaceConLaSalida`) se borró.
+- **El velo** (`_chrome/velo/`, montado en el layout encima de todo):
+  - **`velo.ts`, puro:** las fases, la máscara, la cobertura y cuándo destapar.
+  - **`VeloDeNavegacion.tsx`:** el velo en sí.
+  - **`_lib/veloDeNavegacion.ts`:** la señal, sin react, porque `_componentes` no importa de `_chrome`.
+  - **La forma:** es la banda de la gota (entra por abajo a la derecha y sale por arriba a la izquierda, con su pluma y su curva). A diferencia de la gota, cubre el cuadro ENTERO en el cuadro del cambio.
+  - **El color:** el del destino. Al home amanece (el papel); a una página anochece (la tinta).
+  - **El sonido:** suave al irse y al llegar (`cierra` y `abre`); con el sonido apagado, nada.
+  - **Con movimiento reducido,** un corte.
+- **Destapa recién con la página nueva quieta:** 10 cuadros parejos seguidos y ningún título urgente armándose (`TITULOS_EN_CAMINO`, que publica la escena), o a los 2,5 s.
+  - **Lo encontró la medición:** con dos cuadros de espera, el destape tironeaba hasta 547 ms en el dev. El home arma y compila sus títulos urgentes después de montarse.
+- **Lo que se repone al cambiar de ruta** (`alCambiarDeRuta.ts`, riesgo R1):
+  - la noche disparada, el día del final y el avance de la intro;
+  - el scroll, arriba o en el ancla, con Lenis y sin animación;
+  - en una página, el progreso del rig vuelve al del hero (lo anotaba B12a.2);
+  - el viaje del CTA vuelve a tomar el `<main>`, y la barra, las secciones.
+- **Lo que encontró el sitio:** el título 3D de una página se corría con el mouse (~45 px; con el mouse en el enlace se cortaba contra el borde). La cámara de la página sigue al mouse y el título se colocaba con la cámara sin él. Ahora el que se queda puede seguirlo entero (`parteDelMouse`, en `TitulosDeVolumen`), y el título de la página va pegado a su `h1`.
+
+**Medido en el sitio** (`scripts-carga/navegacion.ts`, el Chrome del sistema contra el dev):
+- **El recorrido:** entra a la ruta de prueba, vuelve al home con su enlace, vuelve con la flecha y va a Portfolio con la barra.
+- **Cargas de documento después de la entrada: 0**, en 4 cambios de URL. Lo dice una marca en `window` que una recarga borraría.
+- **El cuadro del cambio:** el velo, cubierto entero (cobertura 1,000), a 1440 (las dos navegaciones con enlace) y a 390.
+- **La variante:** al empezar a cubrir, su luz ya está en la composición (0,120). Sale antes del velo.
+- **Los cuadros mientras el velo se mueve, en el dev:**
+  - a 1440, de 21 a 100 ms según la corrida (el criterio del plan es ≤ 50 ms);
+  - a 390, 20 ms.
+  - Cubierto, con la página nueva montándose debajo, de 450 a 680 ms: no se ve.
+  - **El dev tironea por su cuenta;** el número de producción sale del build de D7 (B12a.7).
+- **El control** (`CONTROL=sin-velo`): rojo, cobertura 0 en el cambio.
+
+**Afirmaciones** (s78 da 91 de 0):
+- **s78 §11, nueva:** la máquina del velo, la cobertura (entera en el cambio; el control es la banda de la gota) y el color del destino; el cableado de `EnlaceDeRuta` (el control: sin el velo y con `router.push`).
+- **Reemplazadas por la spec:**
+  - s78 §9, el enlace que espera, que pasa a `EnlaceDeRuta`;
+  - s78 §2 y §7, la rama de la página de la lectura del scroll, que ahora devuelve el rig al progreso del hero y nunca le pone el avance;
+  - s10, el banco declara el velo como pieza del layout.
+
+**Qué mirar (B12a.6):**
+1. **`/v3/prueba-de-pagina` a 1440:** scrolleá un poco la intro (la luz celeste) y apretá «Volver al home».
+   - Debería verse la luz bajar, el velo de papel cruzar en diagonal desde abajo a la derecha y cubrir todo, y destapar el home desde abajo a la derecha.
+   - El lienzo no se rehace: no hay pantalla en blanco de carga.
+2. **Desde la página, «Portfolio» en la barra:** el mismo velo, y el home en el Portfolio.
+3. **El título de la página con el mouse:** movelo por la pantalla. El título 3D se queda en su lugar; la sala se mueve detrás.
+4. **A 390, desde la página, el menú → una sección:** el mismo velo.
+
+Al pasar: la sonda de la fuga del contacto (`scripts-carga/fuga-del-contacto.ts`) prendía el banco con un objeto. La bandera es una cadena (`'producto'`), como en `navegacion.ts`. Su medida de nodos no dependía del banco.

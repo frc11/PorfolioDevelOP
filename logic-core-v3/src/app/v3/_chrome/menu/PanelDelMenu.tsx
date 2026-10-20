@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
 import type { Caja } from '../../_secciones/trabajos/demos/genie'
 import { ITEMS_DEL_DESPLEGABLE } from '../barra/DesplegableDeServicios'
 import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO } from '../enlaces'
@@ -104,9 +105,9 @@ export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: 
                   <ul className="flex min-h-0 flex-col gap-[var(--spacing-1)] overflow-hidden pl-[var(--spacing-4)]">
                     {ITEMS_DEL_DESPLEGABLE.map((p) => (
                       <li key={p.id}>
-                        <a href={destinoDesde(ruta, p.destino)} data-parte={servicios ? 'item-del-menu' : 'item-del-acordeon'} onClick={alCerrar} className={CLASE_DEL_SUBITEM}>
+                        <EnlaceDeRuta href={destinoDesde(ruta, p.destino)} data-parte={servicios ? 'item-del-menu' : 'item-del-acordeon'} onClick={alCerrar} className={CLASE_DEL_SUBITEM}>
                           {p.rotulo}
-                        </a>
+                        </EnlaceDeRuta>
                       </li>
                     ))}
                   </ul>
@@ -114,9 +115,9 @@ export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: 
               </li>
             ) : (
               <li key={enlace.id}>
-                <a href={destinoDesde(ruta, enlace.destino)} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM}>
+                <EnlaceDeRuta href={destinoDesde(ruta, enlace.destino)} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM}>
                   {enlace.rotulo}
-                </a>
+                </EnlaceDeRuta>
               </li>
             ),
           )}

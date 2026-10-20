@@ -2,7 +2,7 @@ import type * as THREE from 'three'
 
 import { anotarLaImpresion, anotarLosTitulos, conDiagnostico } from '../../diagnostico/anotar'
 import { conReimpresion, esperarLaFuenteDe, fuenteCargadaPara, versionDeLasFuentes } from '../../fuentes'
-import { TITULOS_DE_VOLUMEN, marcarListo, pedirOtraSincronia, tituloListo, type TituloDeVolumen } from '../../titulos3d/registro'
+import { TITULOS_DE_VOLUMEN, TITULOS_EN_CAMINO, marcarListo, pedirOtraSincronia, tituloListo, type TituloDeVolumen } from '../../titulos3d/registro'
 import { contextoPerdido } from '../contextoDelLienzo'
 import { calentar } from '../gpu/Precompilar'
 import { armar, fuenteDelTitulo, ponerElEstudio, soltar, type Armado, type Variante } from './armado'
@@ -83,6 +83,11 @@ function aLaVista(el: HTMLElement): boolean {
 /** Lo que espera su fuente o el ocio, y lo que compila: el guardián no los toca. Lo mostrado de los que se rearman, para seguir donde iban. */
 const ESPERANDO = new Set<string>()
 const COMPILANDO = new Set<string>()
+/** [B12a.6] Los urgentes (se arman ya) hasta que terminan de compilar: `TITULOS_EN_CAMINO`, para el velo de la navegación. */
+const URGENTES = new Set<string>()
+const contarLosUrgentes = (): void => {
+  TITULOS_EN_CAMINO.urgentes = URGENTES.size
+}
 const MOSTRADO_DE_LOS_REARMADOS = new Map<string, { readonly llegada: number; readonly salida: number }>()
 
 /** Arma un lote, lo compila con las luces de la escena y lo calienta; recién ahí el DOM se entera (regla 2 de ESCENA 10). */
@@ -91,7 +96,10 @@ function armarElLote(t: Taller, armados: Armado[], lote: readonly TituloDeVolume
   for (const titulo of lote) {
     ESPERANDO.delete(titulo.id)
     // [B12a.4] La fuente de una página que no llegó: sin armar (se lee el `h1` del DOM).
-    if (fuenteDelTitulo(titulo.fuente) === null) continue
+    if (fuenteDelTitulo(titulo.fuente) === null) {
+      URGENTES.delete(titulo.id)
+      continue
+    }
     const a = armar(titulo, t.variante)
     TANDA_DEL_ARMADO.set(a, versionDeLasFuentes())
     const antes = MOSTRADO_DE_LOS_REARMADOS.get(titulo.id)
@@ -106,7 +114,10 @@ function armarElLote(t: Taller, armados: Armado[], lote: readonly TituloDeVolume
     nuevos.push(a)
     COMPILANDO.add(titulo.id)
   }
-  if (nuevos.length === 0) return
+  if (nuevos.length === 0) {
+    contarLosUrgentes()
+    return
+  }
   void Promise.all(nuevos.map((a) => t.gl.compileAsync(a.grupo, t.camara, t.escena))).then(() => {
     if (!vivo()) return
     calentar(t.gl, t.escena, t.camara)
@@ -114,7 +125,11 @@ function armarElLote(t: Taller, armados: Armado[], lote: readonly TituloDeVolume
   })
     .catch(() => undefined)
     .finally(() => {
-      for (const a of nuevos) COMPILANDO.delete(a.titulo.id)
+      for (const a of nuevos) {
+        COMPILANDO.delete(a.titulo.id)
+        URGENTES.delete(a.titulo.id)
+      }
+      contarLosUrgentes()
     })
 }
 
@@ -165,6 +180,8 @@ export function sincronizar(t: Taller, armados: Armado[], registro: Iterable<Tit
   let pendiente = true
   let soltarElOcio = (): void => undefined
   for (const x of faltan) ESPERANDO.add(x.id)
+  for (const x of urgentes) URGENTES.add(x.id)
+  contarLosUrgentes()
   // [CIERRE A-ter] A13 · la cara de cada uno (no `fonts.ready`: resuelve con nada cargando, aunque la de un título no esté).
   const fuentes = conReimpresion() ? Promise.all(faltan.map((x) => esperarLaFuenteDe(x.lugar))) : document.fonts.ready
   // [B12a.4] Y la fuente 3D de un título de página (import dinámico, `fuentesDePagina.ts`).
@@ -181,6 +198,8 @@ export function sincronizar(t: Taller, armados: Armado[], registro: Iterable<Tit
     pendiente = false
     soltarElOcio()
     for (const x of faltan) ESPERANDO.delete(x.id)
+    for (const x of urgentes) if (!COMPILANDO.has(x.id)) URGENTES.delete(x.id)
+    contarLosUrgentes()
   }
 }
 

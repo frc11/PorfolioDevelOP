@@ -131,12 +131,17 @@ titulo('4 · EL HOME monta el chrome, el intro y la compuerta — en ese orden')
 const fuenteHome = leer('src/app/v3/page.tsx')
 
 // [B12a.5] Reemplazadas por la spec (D4): el chrome lo importa y lo monta el LAYOUT, antes de la página (el mismo en el home y en las
-// páginas, sin volver a montarse entre rutas); el home ya no.
+// páginas, sin volver a montarse entre rutas); el home ya no. [B12a.6] Entre el chrome y la página puede ir otra pieza del layout
+// sin hijos (el velo), nunca la página.
 const fuenteLayout = leer('src/app/v3/layout.tsx')
 const chromeEnElLayout = (layout: string, home: string): boolean =>
-  layout.includes(`from '${IMPORT_DEL_CHROME}'`) && /<ChromeDelHome\s*\/>\s*\{children\}/.test(layout) && !home.includes(`from '${IMPORT_DEL_CHROME}'`) && !/<ChromeDelHome\s*\/>/.test(home)
+  layout.includes(`from '${IMPORT_DEL_CHROME}'`) &&
+  /<ChromeDelHome\s*\/>(?:\s*(?:\{\/\*[\s\S]*?\*\/\}|<[A-Z]\w*\s*\/>))*\s*\{children\}/.test(layout) &&
+  !home.includes(`from '${IMPORT_DEL_CHROME}'`) &&
+  !/<ChromeDelHome\s*\/>/.test(home)
 afirmar(chromeEnElLayout(fuenteLayout, fuenteHome), `el layout importa el chrome de \`${IMPORT_DEL_CHROME}\` y lo monta antes de la página; el home ya no`)
 controlPositivo('el detector ve el chrome montado por el home (antes de B12a.5)', [fuenteLayout.replace(/<ChromeDelHome\s*\/>/, ''), `${fuenteHome}\nimport { ChromeDelHome } from '${IMPORT_DEL_CHROME}'\n<ChromeDelHome />`] as const, ([l, h]: readonly [string, string]) => chromeEnElLayout(l, h))
+controlPositivo('el detector ve el chrome montado después de la página', [fuenteLayout.replace(/<ChromeDelHome\s*\/>/, '').replace(/\n(\s*)\{children\}/, '\n$1{children}\n$1<ChromeDelHome />'), fuenteHome] as const, ([l, h]: readonly [string, string]) => chromeEnElLayout(l, h))
 afirmar(fuenteHome.includes(`from '${IMPORT_DEL_INTRO}'`), `el home importa el intro de \`${IMPORT_DEL_INTRO}\``)
 afirmar(/<IntroDelHome\s*\/>/.test(fuenteHome), '  y el intro')
 afirmar(existe(MODULO_DEL_INTRO), `el módulo del intro existe: \`${MODULO_DEL_INTRO}\``)

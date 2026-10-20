@@ -137,6 +137,8 @@ export function useEscenaAtadaAlScroll(
         // [B12a.2] El avance de la intro (de 0 a 1 en 1,5 pantallas), medido en el layout sobre su bloque; el progreso del rig no se toca.
         const intro = preset === null || preset.pista === null || preset.tramos === null ? null : document.querySelector(preset.tramos.intro)
         if (intro !== null) AVANCE_DE_LA_INTRO.current = avanceDeLaIntro(intro.getBoundingClientRect().top + desplazamiento, desplazamiento, ventana)
+        // [B12a.6] Con la navegación cliente el rig llega con el progreso del home (el dolly del CTA y el mouse lo leen): en una página, el del hero.
+        if (rig.current.progress !== 0) rig.set('progress', 0)
         const despierta = !hayPrimerCuadro() || despiertaEnLaPagina(preset, bloquesDelPreset(document, preset, desplazamiento), desplazamiento, ventana, MARGEN_DE_REANUDACION)
         const enLaPagina = despierta ? EN_CUADRO : FUERA_DE_CUADRO
         if (siguiente(estadoRef.current, enLaPagina) !== estadoRef.current) setEstado((previo) => siguiente(previo, enLaPagina))

@@ -45,7 +45,8 @@ export function TituloDePagina({ id, titulo, partes: dadas }: { readonly id: IdD
   const id2 = `pagina-${id}-2`
   // `rearma` (como Portfolio): la llegada sigue a la presencia; el que llega una vez por carga (el hero) espera el velo de carga, que en una
   // página no existe (medido en el sitio: el título quedaba armado y sin llegar nunca, como el logo de B12a.2).
-  const comun = { lectura: 0, salida: null, queda: true, gesto: 'azar', colocacion: 'pantalla', rearma: true, minimoS: LLEGADA_DEL_TITULAR_S, asiento: preset.asiento, saleCayendo: preset.saleCayendo, activo } as const
+  // `parteDelMouse` entero: en la página la cámara sigue al mouse, y el título va pegado a su `h1` (sin él, se corría con el mouse: medido).
+  const comun = { lectura: 0, salida: null, queda: true, gesto: 'azar', colocacion: 'pantalla', rearma: true, minimoS: LLEGADA_DEL_TITULAR_S, asiento: preset.asiento, saleCayendo: preset.saleCayendo, parteDelMouse: 1, activo } as const
   useTituloDeVolumen({ ...comun, id: id1, texto: partes[0], lugar: lugar1, llegada: presencia, fuente: preset.fuentes[0] })
   useTituloDeVolumen({ ...comun, id: id2, texto: partes[1], lugar: lugar2, llegada: presencia, fuente: preset.fuentes[1] })
   const listo1 = useTituloListo(id1)
