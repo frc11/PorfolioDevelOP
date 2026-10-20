@@ -101,9 +101,9 @@ export const ARCHIVOS_DE_RUTA = [
   `${V3}/componentes/_bloques/GaleriaMedios.tsx`,
   `${V3}/componentes/_bloques/GaleriaNavegacion.tsx`,
   `${V3}/componentes/_bloques/GaleriaPie.tsx`,
-  // [P-H31] las historias fuera del Portfolio (la transición propia, el freno y las barras sobre el acento) y su corte de prueba.
+  // [P-H31] las historias fuera del Portfolio (la transición propia, el freno y las barras sobre el acento); su corte de prueba usa Motion
+  // y vive con el componente común (`_componentes/historias/corteDiagonal.tsx`).
   `${V3}/componentes/_bloques/GaleriaHistorias.tsx`,
-  `${V3}/componentes/_bloques/corteDiagonal.ts`,
   `${V3}/tipografia/page.tsx`,
   `${V3}/tipografia/muestra/page.tsx`,
   `${V3}/tipografia/_bloques/Escala.tsx`,

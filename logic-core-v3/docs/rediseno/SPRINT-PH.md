@@ -288,7 +288,7 @@ Lo pidió servicios para el precio en el teléfono, sobre el componente común d
   - Frena mientras las historias están montadas y presentes (`useIsPresent`). Es el `historias && panel` con que frenaba el Portfolio: las monta con su panel, adentro de un `AnimatePresence`, y durante la salida ya no frenaba.
   - `useSinScrollEnLasHistorias` se borró, y sus padrones se actualizaron (s5-archivos y trabajos.invariant).
 - **c · Las barras sobre un acento:** `colorDeLasBarras`, con `BARRAS_SOBRE_ACENTO`: el papel, y la pista el papel al 25 %. Las de la tinta daban 2,65:1 sobre el de web y 2,41:1 sobre el peor (el verde).
-- **El uso de prueba, fuera del Portfolio:** `/v3/componentes`, la ficha «Historias · tres pasos sobre el acento» (`GaleriaHistorias.tsx`). Son tres pasos sobre el acento de web, con un corte diagonal de prueba (`corteDiagonal.ts`).
+- **El uso de prueba, fuera del Portfolio:** `/v3/componentes`, la ficha «Historias · tres pasos sobre el acento» (`GaleriaHistorias.tsx`). Son tres pasos sobre el acento de web, con un corte diagonal de prueba (`_componentes/historias/corteDiagonal.tsx`).
 
 **Medido en el sitio** (`scripts-carga/historias-de-prueba.ts`, el Chrome del sistema a 390, táctil, contra el dev):
 - **a · La transición:**
@@ -307,6 +307,8 @@ Lo pidió servicios para el precio en el teléfono, sobre el componente común d
 - **Reemplazadas por la spec:**
   - §30: el freno lo trae el componente, con un control nuevo, el freno que sigue en la salida;
   - el padrón de trabajos.invariant: 37 archivos, porque el freno se fue al componente.
+
+**Lo que encontró `verificar`** (la bisagra antes del push): el corte de prueba vivía en la galería (`componentes/_bloques/`) e importaba Motion. El padrón S3 de la galería no lo deja (s3-navegacion: ningún `useTransform`; s3-codigo: ningún import fuera de su lista blanca). Pasó al componente común (`_componentes/historias/corteDiagonal.tsx`, `CORTE_DIAGONAL_DE_PRUEBA`) y la galería lo importa. s3 volvió a la base, s76 da 698 de 0 y `historias-de-prueba.ts` sigue en verde.
 
 **Qué mirar (P-H31):**
 1. **`/v3/componentes` a 390, la última ficha:** «Abrir las historias». Tocá a la derecha: el paso 2 entra en diagonal desde abajo a la derecha. A la izquierda, vuelve desde arriba a la izquierda.

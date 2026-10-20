@@ -23,7 +23,7 @@ import { HistoriaDelProyecto } from '../../_secciones/trabajos/portfolio/Histori
 import { ITEMS_DE_LAS_HISTORIAS } from '../../_secciones/trabajos/portfolio/HistoriasDelPortfolio'
 import { AFUERA, NUNCA, pideElEncabezado, recorridoDelOrden, type Orden } from '../../_secciones/trabajos/portfolio/orden'
 import { LO_QUE_SE_VE, violacionesDeLasHistorias, type CuadroDeLasHistorias } from '../../../../../scripts-carga/historias-cuenta'
-import { areaDelRecorte, recorteDiagonal } from '../../componentes/_bloques/corteDiagonal'
+import { recorteDiagonal } from '../../_componentes/historias/corteDiagonal'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
 
 const V3 = path.join(process.cwd(), 'src/app/v3')
@@ -255,7 +255,19 @@ export function afirmarLasHistorias(): void {
   controlPositivo('  el detector ve un Portfolio con las barras del acento', [conLasNuevas, fuenteDelPortfolio] as const, ([m, f]: readonly [string, string]) => marcadoDelPortfolio(m, f))
   controlPositivo('  y uno que pasa una transición', [montadas, `${fuenteDelPortfolio}\ntransicion={CORTE}`] as const, ([m, f]: readonly [string, string]) => marcadoDelPortfolio(m, f))
 
-  // La transición de prueba de la galería (un corte diagonal, `componentes/_bloques/corteDiagonal.ts`): crece, y desde la punta del sentido.
+  // La transición de prueba de la galería (un corte diagonal, `_componentes/historias/corteDiagonal.tsx`): crece, y desde la punta del sentido.
+  // El área que deja ver un recorte (0 a 10.000, en % cuadrados), por la fórmula del cordón.
+  const areaDelRecorte = (recorte: string): number => {
+    if (recorte === 'none') return 10_000
+    const puntos = [...recorte.matchAll(/(-?[\d.]+)% (-?[\d.]+)%/g)].map((m) => [Number(m[1]), Number(m[2])] as const)
+    let doble = 0
+    for (let i = 0; i < puntos.length; i++) {
+      const a = puntos[i]
+      const b = puntos[(i + 1) % puntos.length]
+      if (a !== undefined && b !== undefined) doble += a[0] * b[1] - b[0] * a[1]
+    }
+    return Math.abs(doble) / 2
+  }
   type Recorte = typeof recorteDiagonal
   const corteBien = (r: Recorte): boolean => ([1, -1] as const).every((s) => {
     const areas = [0, 0.25, 0.5, 0.75].map((a) => areaDelRecorte(r(a, s)))

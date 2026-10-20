@@ -273,7 +273,7 @@ export const BARRAS_SOBRE_ACENTO: ColorDeLasBarras   // el papel; la pista, el p
 - **c · Las barras sobre un acento (WCAG 1.4.11).** Con `BARRAS_SOBRE_ACENTO` sobre `bg-acento`, en el peor de los tres acentos del tema:
   - el relleno da 6,02:1 contra el acento y 3,57:1 contra la pista (las de la tinta daban 2,41:1);
   - medido en el sitio sobre el de web: 6,65:1 y 3,81:1.
-- **Un ejemplo que anda:** `componentes/_bloques/GaleriaHistorias.tsx`, en `/v3/componentes`. Son tres pasos sobre el acento de web, con un corte diagonal de prueba (`componentes/_bloques/corteDiagonal.ts`: hacia adelante destapa desde abajo a la derecha, hacia atrás desde arriba a la izquierda).
+- **Un ejemplo que anda:** `componentes/_bloques/GaleriaHistorias.tsx`, en `/v3/componentes`. Son tres pasos sobre el acento de web, con un corte diagonal de prueba (`_componentes/historias/corteDiagonal.tsx`, `CORTE_DIAGONAL_DE_PRUEBA`: hacia adelante destapa desde abajo a la derecha, hacia atrás desde arriba a la izquierda).
 
 ---
 
