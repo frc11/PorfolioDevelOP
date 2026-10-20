@@ -9,6 +9,13 @@ import type { ProyectoDelPortfolio } from '../proyectos'
 
 import { ANCHO_DEL_MEDIO, MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL_LOMO } from './medios'
 
+/**
+ * [F7] La pausa del panel, sólo para el teclado: en escala 0 y sin puntero (el mouse nunca la ve ni la toca; sigue en el orden del Tab),
+ * aparece entera con `:focus-visible` al tabular. Escala y no opacidad: la opacidad del sistema son sus escalones (`s5-tokens`). Con
+ * movimiento reducido no hay pausa: el póster, quieto.
+ */
+export const CLASE_DE_LA_PAUSA_DEL_PANEL = 'pointer-events-none absolute right-3 bottom-3 scale-0 focus-visible:scale-100'
+
 /** Qué hace el video de una tira, puro (s76 lo afirma sin navegador). */
 export interface EstadoDelVideo {
   /** Si lleva `src` y póster: sólo la activa, y sólo con la sección cerca (nada se pide antes). */
@@ -55,7 +62,8 @@ function Video({ proyecto, e }: { readonly proyecto: ProyectoDelPortfolio; reado
  * El video es `muted playsInline loop` y SÓLO el de la tira activa tiene `src` (y con la sección cerca: nada se pide antes); los
  * demás no tienen nada y `preload="none"`. Con movimiento reducido no hay autoplay: queda el póster. Se pausa fuera de cuadro y con
  * la pestaña oculta (`aLaVista`, `usePortfolio`). [B1.2d B] Sólo el de escritorio: debajo de 1024 el video lo pinta la historia
- * (`HistoriaDelProyecto`). P-H21 · un video en bucle se puede pausar (WCAG 2.2.2): `BotonPausa`, en la esquina, mientras corre solo.
+ * (`HistoriaDelProyecto`). P-H21 · un video en bucle se puede pausar (WCAG 2.2.2): `BotonPausa`, en la esquina, mientras corre solo;
+ * [F7] sólo para el teclado (`CLASE_DE_LA_PAUSA_DEL_PANEL`).
  */
 export function MedioDeLaTira({
   proyecto,
@@ -76,7 +84,7 @@ export function MedioDeLaTira({
     <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5" style={{ aspectRatio: PROPORCION_DEL_MEDIO, maxWidth: ANCHO_DEL_MEDIO, maxHeight: '100%' }}>
       <Video proyecto={proyecto} e={estado} />
       <a href={proyecto.url} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
-      {estado.cargado && !reducido ? <BotonPausa pausado={pausado} alCambiar={setPausado} de={`el video de ${proyecto.nombre}`} className="absolute right-3 bottom-3" /> : null}
+      {estado.cargado && !reducido ? <BotonPausa pausado={pausado} alCambiar={setPausado} de={`el video de ${proyecto.nombre}`} className={CLASE_DE_LA_PAUSA_DEL_PANEL} /> : null}
     </figure>
   )
 }

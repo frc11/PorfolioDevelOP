@@ -109,8 +109,6 @@ export const ARCHIVOS_DE_PIEZA = [
   // [B1.2d B] las historias del Portfolio (con el componente común de `_componentes/historias/`) y la de cada proyecto.
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/HistoriasDelPortfolio.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/HistoriaDelProyecto.tsx`,
-  // [B1.2d B] B7 · el formulario de «la tuya» en perspectiva (`?form=3d`, una prueba).
-  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/FormularioEnPerspectiva.tsx`,
 ]
 
 /**

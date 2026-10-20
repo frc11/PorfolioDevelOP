@@ -2067,3 +2067,40 @@ Valentino miró la Cola 2 y encontró bugs que un navegador hubiera agarrado: ca
 3. Desde Demos, subí con el dedo: el título vuelve a subir sobre la escena clara y la historia entra con el oscurecido, como desde arriba. Nunca la escena negra sola.
 4. Deslizá hacia abajo: la historia se va, la escena aclara y el título queda arriba. Subí y volvé a bajar.
 5. Lo mismo desde cada historia, incluida «la tuya» (deslizá hacia arriba fuera del formulario).
+
+### 15.4 F6 + F7 · Lo que sobra del panel: el formulario en 3D y la pausa a la vista
+
+**F6 · Reproducido en rojo** (`scripts-carga/fotos.ts`, la acción `formulario:`): `/v3?form=3d#portfolio-la-tuya` a 1440 tenía `data-forma="3d"` y el formulario girado. (Al reproducirlo apareció un error del arnés: con una ruta que ya traía `?`, armaba `?form=3ddiag=carga`. Arreglado.)
+
+**F6 · El arreglo:** la variante sale entera.
+- `FormularioEnPerspectiva.tsx` (con `git rm`).
+- El envoltorio en `LaTuya.tsx`.
+- Su línea en los padrones (`s5-archivos.ts` y `trabajos.invariant.tsx`).
+- Las afirmaciones de B7 en s76 (la bandera, el giro con el mouse, el plano en el servidor).
+
+**F6 · En verde:**
+- Con `?form=3d`, sin variante y sin giro, en la foto el formulario plano.
+- s76 §33 afirma que salió (sin el archivo, sin la bandera, «la tuya» con su formulario directo), con su control (la tira con el envoltorio de B7).
+- `trabajos.invariant` cuenta 38 archivos y no 39, con su control (el padrón de B, con el archivo que ya no está en el disco).
+
+**F7 · Reproducido en rojo** (la acción `pausa:`): en El Garage, a 1440, la pausa se veía sin foco (opacidad 1) y recibía el mouse. Con el teclado, Tab la enfocaba y Enter pausaba.
+
+**F7 · El arreglo** (`MedioDeLaTira.tsx`, `CLASE_DE_LA_PAUSA_DEL_PANEL`): la pausa queda sólo para el teclado. `BotonPausa`, compartido, no se toca: cambia la clase con que lo usa el panel.
+- **Escondida:** en escala 0 y sin puntero. El mouse no la ve ni la toca, y sigue en el orden del Tab.
+- **Al tabular:** aparece entera con `:focus-visible`.
+- **Con movimiento reducido,** sin pausa: el póster, quieto (ya era así).
+- **Por qué escala y no opacidad:** `opacity-0` no es un escalón del sistema (`s5-tokens`: tenue, media, alta, casi), y `invisible` la saca del Tab.
+- **s77 (P-H27) no cambia:** la pausa la sigue importando sólo `MedioDeLaTira`, y la regla de quién puede importarla queda igual.
+
+**F7 · En verde, en el Chrome del sistema:**
+- con el mouse encima, caja 0×0 y no recibe el mouse;
+- Tab (desde lo anterior en el orden del Tab), caja 48×48 con `:focus-visible` y el anillo de la casa;
+- Enter pausa (`aria-pressed`, el video quieto) y Enter sigue;
+- con `REDUCIDO=1`, no hay botón y el video está quieto.
+- **El control:** es la corrida de antes del arreglo, en rojo.
+- s76 §34 suma que la pausa es sólo para el teclado, con su control (la pausa de B, a la vista).
+
+**Qué mirar (F6 + F7):**
+1. `/v3?form=3d#portfolio-la-tuya` a 1440: el formulario, plano. La bandera ya no hace nada.
+2. `/v3#portfolio-el-garage` a 1440: no hay botón de pausa a la vista; pasá el mouse por el video y no aparece. Tabulá hasta el video: aparece la pausa con su anillo, Enter pausa y Enter sigue. Al salir del foco se esconde (si quedó en pausa, Tab de nuevo y Enter).
+3. Con movimiento reducido (el sistema): el póster, quieto, sin pausa.

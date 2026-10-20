@@ -16,7 +16,7 @@
  * ⚠ Entra en 300 líneas por la regla del lane: los detectores puros viven en `trabajos-detectores.ts`.
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -62,7 +62,7 @@ const DEL_PORTFOLIO = [
   'FormularioDeLaTuya.tsx', 'SignoDePregunta.tsx', 'orden.ts', 'rueda.ts', 'transicion.ts', 'signo.ts', 'hueco.ts', 'medida.ts',
   'useOrdenDeLaEscena.ts', 'useRuedaDelPortfolio.ts', 'useTransicionDeLasTiras.ts',
   // [B1.3] el ancla al cargar. [B1.2d B] Las historias (el deslizamiento de B1.3 se fue: el scroll no las avanza) y su scroll quieto.
-  'useAnclaDeLaCarga.ts', 'HistoriasDelPortfolio.tsx', 'HistoriaDelProyecto.tsx', 'useSinScrollEnLasHistorias.ts', 'FormularioEnPerspectiva.tsx',
+  'useAnclaDeLaCarga.ts', 'HistoriasDelPortfolio.tsx', 'HistoriaDelProyecto.tsx', 'useSinScrollEnLasHistorias.ts',
 ].map((f) => `portfolio/${f}`)
 const ARCHIVOS = ['Trabajos.tsx', 'CapaDeLaGota.tsx', 'gota.ts', 'geometria.ts', 'contenido.ts', 'proyectos.ts', ...DEL_PORTFOLIO]
 const FUENTES = ARCHIVOS.map((archivo) => ({ archivo, texto: leer(archivo) }))
@@ -155,7 +155,9 @@ titulo('9 · Cero `three` y cero contextos: el Portfolio no abre un lienzo')
 const TRES = /from ['"](three|@react-three\/[a-z-]+|three\/[^'"]+)['"]/
 const CONTEXTO = /<Canvas\b|WebGLRenderer|getContext\(\s*['"]webgl/
 for (const { archivo, texto } of FUENTES) afirmar(!TRES.test(texto) && !CONTEXTO.test(texto), `${archivo}: ni three ni un contexto WebGL ([B1.2b] el «?» es un SVG en el DOM)`)
-afirmarIgual(FUENTES.length, 23 + 11 + 1 + 4, 'se leyeron del disco los treinta y nueve archivos de la sección y del Portfolio (los veintitrés de B1.2b, once de B1.2c, uno de B1.3 y [B1.2d B] los cuatro de las historias y del formulario en 3D: las barras de la tablet y el deslizamiento se fueron)')
+// [F6] Reemplazada por la spec: el formulario en 3D (B7) salió; quedan los tres de las historias.
+afirmarIgual(FUENTES.length, 23 + 11 + 1 + 3, 'se leyeron del disco los treinta y ocho archivos de la sección y del Portfolio (los veintitrés de B1.2b, once de B1.2c, uno de B1.3 y [B1.2d B] los tres de las historias: las barras de la tablet, el deslizamiento y [F6] el formulario en 3D se fueron)')
+controlPositivo('  el detector ve el padrón de B (con el formulario en 3D, que ya no está en el disco)', [...DEL_PORTFOLIO, 'portfolio/FormularioEnPerspectiva.tsx'], (lista: readonly string[]) => lista.every((a) => existsSync(path.join(AQUI, a))))
 controlPositivo('el detector ve un renderer propio', 'const r = new THREE.WebGLRenderer()', (t: string) => !CONTEXTO.test(t))
 
 // ═══════════════════════════════════════════════════════════════════════════

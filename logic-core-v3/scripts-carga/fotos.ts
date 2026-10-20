@@ -21,6 +21,8 @@ const RUTA = process.env.RUTA ?? '/v3'
 const ANCHO = Number(process.env.ANCHO ?? '1440')
 const ALTO = Number(process.env.ALTO ?? '900')
 const MOVIL = process.env.MOVIL === '1'
+/** `REDUCIDO=1`: con movimiento reducido. */
+const REDUCIDO = process.env.REDUCIDO === '1'
 const PASOS = (process.env.PASOS ?? 'foto:inicio').split(',').map((p) => p.trim()).filter((p) => p !== '')
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/fotos')
@@ -37,6 +39,7 @@ async function main(): Promise<void> {
     deviceScaleFactor: 1,
     isMobile: MOVIL,
     hasTouch: MOVIL,
+    reducedMotion: REDUCIDO ? 'reduce' : 'no-preference',
     args: ['--force_high_performance_gpu', `--window-size=${String(ANCHO + 20)},${String(ALTO + 100)}`, '--window-position=0,0', '--no-first-run', '--no-default-browser-check', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion,Translate,MediaRouter'],
   })
   try {
@@ -45,9 +48,9 @@ async function main(): Promise<void> {
     const cdp = await ctx.newCDPSession(p)
     await cdp.send('Network.enable')
     await cdp.send('Network.setBlockedURLs', { urls: ['*/api/*'] })
-    const separador = RUTA.includes('?') ? '&' : '?'
-    const [camino, hash = ''] = RUTA.split('#')
-    await p.goto(`${BASE}${camino ?? ''}${camino?.includes('?') === true ? '' : separador}diag=carga${hash === '' ? '' : `#${hash}`}`, { waitUntil: 'load', timeout: 240000 })
+    const [camino = '/v3', hash = ''] = RUTA.split('#')
+    const separador = camino.includes('?') ? '&' : '?'
+    await p.goto(`${BASE}${camino ?? ''}${separador}diag=carga${hash === '' ? '' : `#${hash}`}`, { waitUntil: 'load', timeout: 240000 })
     const t0 = Date.now()
     while (Date.now() - t0 < 60000) {
       const lista = await p.evaluate(() => (window as unknown as { __v3diag?: { pulso: () => { escenaLista: boolean } } }).__v3diag?.pulso().escenaLista === true).catch(() => false)
@@ -86,6 +89,35 @@ async function main(): Promise<void> {
           const tope = panel.getBoundingClientRect().top + scrollY
           window.scrollTo({ top: tope - innerHeight + (x * innerHeight) / 900, behavior: 'instant' })
         }, Number(valor))
+      } else if (accion === 'pausa') {
+        // `pausa:`: [F7] el botón de pausa del panel: si se ve (opacidad y caja), si recibe el mouse (lo de arriba en su centro), si tiene el
+        // foco del teclado (`:focus-visible`) y su estado (`aria-pressed`); y si el video corre.
+        console.log(JSON.stringify(await p.evaluate(() => {
+          const b = [...document.querySelectorAll<HTMLElement>('[data-pieza="panel-del-portfolio"] [data-pieza="boton-pausa"]')].find((x) => x.getClientRects().length > 0) ?? null
+          const v = [...document.querySelectorAll<HTMLVideoElement>('[data-video-del-portfolio]')].find((x) => x.getAttribute('src') !== null) ?? null
+          if (b === null) return { existe: false, corre: v !== null && !v.paused }
+          const r = b.getBoundingClientRect()
+          const arriba = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+          return { existe: true, seVe: Number(getComputedStyle(b).opacity) > 0.05 && r.width * r.height > 4, opacidad: Number(getComputedStyle(b).opacity), caja: [Math.round(r.width), Math.round(r.height)], recibeElMouse: arriba === b || b.contains(arriba), enfocado: document.activeElement === b, focoVisible: b.matches(':focus-visible'), apretado: b.getAttribute('aria-pressed'), corre: v !== null && !v.paused }
+        })))
+      } else if (accion === 'tab-a-la-pausa') {
+        // `tab-a-la-pausa:`: el foco en lo anterior a la pausa (en el orden del Tab) y un Tab de verdad.
+        await p.keyboard.press('Shift')
+        await p.evaluate(() => {
+          const b = [...document.querySelectorAll<HTMLElement>('[data-pieza="panel-del-portfolio"] [data-pieza="boton-pausa"]')].find((x) => x.getClientRects().length > 0)
+          const lista = [...document.querySelectorAll<HTMLElement>('a[href], button, input, textarea, select, [tabindex]')].filter((e) => e.tabIndex >= 0 && e.getClientRects().length > 0 && !(e as HTMLButtonElement).disabled)
+          const i = b === undefined ? -1 : lista.indexOf(b)
+          if (i > 0) lista[i - 1]?.focus({ preventScroll: true })
+        })
+        await p.keyboard.press('Tab')
+      } else if (accion === 'formulario') {
+        // `formulario:`: [F6] si el formulario de «la tuya» está en perspectiva (la variante 3D: `data-forma="3d"` o un rotateY).
+        console.log(JSON.stringify(await p.evaluate(() => {
+          const campo = document.querySelector('[data-tira="la-tuya"] input, [data-tira="la-tuya"] textarea')
+          let girado = false
+          for (let e = campo?.parentElement ?? null; e !== null && e.getAttribute('data-tira') !== 'la-tuya'; e = e.parentElement) if (/matrix3d|rotate/.test(getComputedStyle(e).transform) || e.style.transform.includes('rotate')) girado = true
+          return { variante3d: document.querySelector('[data-forma="3d"]') !== null, girado, hayCampo: campo !== null }
+        })))
       } else if (accion === 'encima') {
         // `encima:`: qué hay arriba en el medio del cuadro, con y sin los pointer-events forzados (para la sonda de las historias).
         console.log(JSON.stringify(await p.evaluate(() => {
