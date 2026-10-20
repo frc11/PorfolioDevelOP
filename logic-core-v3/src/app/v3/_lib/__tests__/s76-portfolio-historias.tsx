@@ -1,106 +1,162 @@
 /**
- * [B1.3] s76 · EL TELÉFONO: LAS HISTORIAS (`docs/rediseno/SPRINT-B1-PORTFOLIO.md` §5.10 y §13, punto 8), sin navegador. Abajo de 768 el
- * MISMO marcado se restiliza por CSS (las dos ramas dicen lo mismo y la sección no mide el ancho): la historia a pantalla completa con
- * el video del teléfono, las barras arriba, la ficha como una hoja que sube desde abajo, los dos toques, el deslizamiento que se asienta
- * de a un proyecto, «la tuya» con el «?», el formulario y WhatsApp, y el título que llega en la aproximación y se va con la caída. Las
- * hojas a 390, 375 y 360 las saca el banco. Cada afirmación con su control positivo.
+ * [B1.2d B] s76 · LAS HISTORIAS (`docs/rediseno/SPRINT-B1-PORTFOLIO.md` §14.5 y §14.6), sin navegador. Reemplaza las de B1.3 (§27 a
+ * §31: las historias eran el mismo acordeón restilizado y el scroll las avanzaba): debajo de 1024 el Portfolio monta las historias del
+ * componente común (P-H19, `_componentes/historias/`), con tiempo, toques, deslices y salidas, y el scroll no las avanza. Cada afirmación
+ * con su control positivo. Lo que se mide en el sitio (la ficha ≤ 25 %, los gestos con el dedo) lo corre `scratchpad/cola2/historias-sitio.ts`.
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import { Historias } from '../../_componentes/historias/Historias'
+import {
+  ESTADO_INICIAL, HISTORIAS, barrasDeLasHistorias, gestoDelPuntero, siguienteDeLasHistorias,
+  type EstadoDeLasHistorias, type EventoDeLasHistorias, type ItemDeHistoria, type PasoDeLasHistorias,
+} from '../../_componentes/historias/maquinaDeLasHistorias'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
-import { asentamiento } from '../../_secciones/trabajos/portfolio/deslizamiento'
-import { MedioDeLaTira } from '../../_secciones/trabajos/portfolio/MedioDeLaTira'
+import { ENTRADA_DE_LAS_HISTORIAS } from '../../_secciones/trabajos/portfolio/EscenarioDelPortfolio'
+import { SUBIDA_DEL_ENCABEZADO_SVH } from '../../_secciones/trabajos/portfolio/EncabezadoDelPortfolio'
+import { HistoriaDelProyecto } from '../../_secciones/trabajos/portfolio/HistoriaDelProyecto'
+import { ITEMS_DE_LAS_HISTORIAS } from '../../_secciones/trabajos/portfolio/HistoriasDelPortfolio'
 import { AFUERA, recorridoDelOrden, type Orden } from '../../_secciones/trabajos/portfolio/orden'
-import { ANTES_DEL_PIN, EN_LA_COLA, type IndiceDePaso } from '../../_secciones/trabajos/portfolio/pasos'
-import { destinoDeLaRueda } from '../../_secciones/trabajos/portfolio/rueda'
-import { CLASE_DE_LA_HOJA, CLASE_DE_LA_HOJA_ABAJO, CLASES_DE_LA_TIRA } from '../../_secciones/trabajos/portfolio/Tira'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
 
 const V3 = path.join(process.cwd(), 'src/app/v3')
 const leer = (r: string): string => readFileSync(path.join(V3, r), 'utf8').replace(/\r\n/g, '\n')
 const sinComentarios = (c: string): string => c.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 const PORTFOLIO = '_secciones/trabajos/portfolio'
-const clases = (c: string): string[] => c.split(/\s+/)
+const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
+
+type Maquina = (e: EstadoDeLasHistorias, ev: EventoDeLasHistorias, items: readonly ItemDeHistoria[], d?: number) => PasoDeLasHistorias
+/** Una serie de eventos desde el arranque: el último estado, las salidas y cuántos tics. */
+function correr(m: Maquina, items: readonly ItemDeHistoria[], eventos: readonly EventoDeLasHistorias[]): { readonly e: EstadoDeLasHistorias; readonly salidas: string[]; readonly tics: number } {
+  let e = ESTADO_INICIAL
+  const salidas: string[] = []
+  let tics = 0
+  for (const ev of eventos) {
+    const p = m(e, ev, items)
+    e = p.estado
+    if (p.salida !== null) salidas.push(p.salida)
+    if (p.porElUsuario) tics += 1
+  }
+  return { e, salidas, tics }
+}
 
 export function afirmarLasHistorias(): void {
-  titulo('B1.3 · 27 · Abajo de 768, las historias: lo decide el CSS y el JS lo lee')
+  // ═══════════════════════════════════════════════════════════════════════════
+  titulo('B1.2d B · 27 · T2 · Debajo de 1024, todo es historias (la tablet parada y la acostada, como el teléfono)')
 
-  const trabajos = leer('_secciones/trabajos/Trabajos.tsx')
+  const trabajos = sinComentarios(leer('_secciones/trabajos/Trabajos.tsx'))
   const selector = sinComentarios(leer(`${PORTFOLIO}/tramoDelSelector.ts`))
-  const loDecideElCss = (t: string, s: string): boolean => t.includes('max-tablet:[--modo-del-portfolio:historias]') && /getPropertyValue\('--modo-del-portfolio'\)\.trim\(\) === 'historias'/.test(s)
-  afirmar(loDecideElCss(trabajos, selector), 'la sección escribe `--modo-del-portfolio: historias` abajo de 768 (`max-tablet:`) y el JS lo lee del CSS: no mide el ancho')
-  controlPositivo('  el detector ve una consulta del ancho en JS', [trabajos.replace('max-tablet:[--modo-del-portfolio:historias]', ''), "const historias = window.matchMedia('(max-width: 767px)').matches"] as const, ([t, s]: readonly [string, string]) => loDecideElCss(t, s))
-  afirmar(clases(CLASES_DE_LA_TIRA.lomo).includes('max-tablet:hidden') && !clases(CLASES_DE_LA_TIRA.activa).some((c) => c.startsWith('max-tablet:hidden')), 'en el teléfono los lomos no se ven: la historia es la tira activa, a pantalla completa')
-  const escenario = leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)
-  afirmar(/max-escritorio:w-3\/5 max-tablet:w-full'/.test(escenario) && /max-escritorio:w-2\/5 max-tablet:w-full"/.test(escenario) && /hueco-del-logo" aria-hidden="true" className="mt-8 shrink-0 max-tablet:hidden"/.test(escenario), '  el panel y la columna a todo el ancho; el hueco del logo no va (la historia tapa la escena)')
+  const loDecideElCss = (t: string, s: string): boolean => t.includes('max-escritorio:[--modo-del-portfolio:historias]') && !t.includes('max-tablet:[--modo-del-portfolio') && /getPropertyValue\('--modo-del-portfolio'\)\.trim\(\) === 'historias'/.test(s) && !/matchMedia|innerWidth/.test(s)
+  afirmar(loDecideElCss(trabajos, selector), 'la sección escribe `--modo-del-portfolio: historias` debajo de 1024 (`max-escritorio:`, o sea de 1023 a 768 inclusive y más abajo) y el JS lo lee del CSS: no mide el ancho')
+  controlPositivo('  el detector ve el corte de B1.3 (abajo de 768: la tablet seguía con lomos)', [trabajos.replace('max-escritorio:[--modo-del-portfolio:historias]', 'max-tablet:[--modo-del-portfolio:historias]'), selector] as const, ([t, s]: readonly [string, string]) => loDecideElCss(t, s))
+  const escenario = sinComentarios(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`))
+  const montaLasHistorias = (c: string): boolean =>
+    /\{vivo\.historias \? \(\s*<AnimatePresence mode="wait">\s*\{vivo\.panel \? \(\s*<motion\.div key="historias"[\s\S]*?<HistoriasDelPortfolio [^>]*alSalir=\{vivo\.salirDeLasHistorias\} \/>/.test(c) &&
+    /\) : \(\s*<div className="relative min-h-0 flex-1">\s*<Acordeon vivo=\{vivo\} \/>/.test(c) && !/BarrasDelPortfolio|PistaDelPortfolio/.test(c)
+  afirmar(montaLasHistorias(escenario), '  el escenario monta las historias (mientras el panel está adentro) en vez del acordeón; las barras y la pista de la tablet se fueron')
+  controlPositivo('  el detector ve el escenario de B1.3 (el acordeón en todo ancho, con las barras de la tablet)', escenario.replace('{vivo.historias ? (', '{false ? (') + '\n<BarrasDelPortfolio />', montaLasHistorias)
+  afirmar(/max-escritorio:w-full max-escritorio:justify-start/.test(escenario) && /max-escritorio:w-full max-escritorio:translate-x-0/.test(escenario) && /hueco-del-logo" aria-hidden="true" className="mt-8 shrink-0 max-escritorio:hidden"/.test(escenario), '  la columna a todo el ancho con el título arriba y el panel en su lugar (no se desliza: las historias entran con un fundido)')
 
-  titulo('B1.3 · 28 · La historia: el video del teléfono a pantalla completa y la ficha como una hoja que sube desde abajo')
+  // ═══════════════════════════════════════════════════════════════════════════
+  titulo('B1.2d B · 28 · T4 · La historia de un proyecto: el video del teléfono a pantalla completa y la ficha corta, abajo')
 
   const p = PROYECTOS[0]
-  const activo = marcar(<MedioDeLaTira proyecto={p} activa cerca aLaVista reducido={false} />, { anima: true })
-  const videos = [...activo.matchAll(/<video[^>]*>/g)].map((m) => m[0])
-  afirmar(videos.length === 2 && /data-cual="escritorio"[^>]*\ssrc="\/portfolio\/el-garage\/escritorio\.mp4"/.test(videos[0]) && /data-cual="movil"/.test(videos[1]) && !/\ssrc="/.test(videos[1]) && /object-cover/.test(videos[1]), 'dos videos (el CSS esconde uno) y SÓLO el que está a la vista pide su archivo: en el servidor, el de escritorio; el del teléfono, `object-cover` (se grabó con su proporción)')
-  const medio = sinComentarios(leer(`${PORTFOLIO}/MedioDeLaTira.tsx`))
-  afirmar(/new ResizeObserver\(\(\) => setCual\(el\.offsetParent !== null \? 'movil' : 'escritorio'\)\)/.test(medio) && /estadoDelVideo\(activa && cual === de, cerca, reducido, aLaVista\)/.test(medio) && /max-tablet:hidden" style=\{\{ aspectRatio: PROPORCION_DEL_MEDIO/.test(medio) && /hidden h-full w-full bg-tinta\/5 max-tablet:block/.test(medio), '  cuál está a la vista lo lee el código del CSS (el del teléfono sin caja = escondido), y el estado de cada video depende de eso')
-  controlPositivo('  el detector ve los dos pidiendo su archivo', medio.replace('activa && cual === de', 'activa'), (c: string) => /estadoDelVideo\(activa && cual === de, cerca, reducido, aLaVista\)/.test(c))
-  const tira = sinComentarios(leer(`${PORTFOLIO}/Tira.tsx`))
-  afirmar(/className="relative px-8 pt-8 max-escritorio:pt-4 max-tablet:absolute max-tablet:inset-0 max-tablet:p-0"/.test(tira), '  el medio, detrás de todo y a pantalla completa en el teléfono')
-  const hoja = clases(CLASE_DE_LA_HOJA)
-  const esUnaHoja = (h: readonly string[], abajo: string): boolean =>
-    h[0] === 'contents' && ['max-tablet:absolute', 'max-tablet:bottom-0', 'max-tablet:max-h-2/3', 'max-tablet:overflow-y-auto', 'max-tablet:transition-transform'].every((c) => h.includes(c)) && abajo === 'max-tablet:translate-y-full' && h.every((c) => c === 'contents' || c.startsWith('max-tablet:') || c.startsWith('motion-reduce:'))
-  afirmar(esUnaHoja(hoja, CLASE_DE_LA_HOJA_ABAJO) && /<div data-pieza="hoja-de-la-ficha" className=\{cn\(CLASE_DE_LA_HOJA, !visible && CLASE_DE_LA_HOJA_ABAJO\)\}>\s*\{activa \? <MarcaDeAgua/.test(tira), 'la ficha es una hoja que sube desde abajo cuando la historia entra (con su secuencia), con el nombre, los rótulos, la marca de agua y su scroll propio; desde 768 no existe (`contents`)')
-  controlPositivo('  el detector ve una hoja que también cambia el escritorio', [...hoja, 'absolute'], (h: readonly string[]) => esUnaHoja(h, CLASE_DE_LA_HOJA_ABAJO))
-  const historia = marcar(<div className={`${CLASE_DE_LA_HOJA} ${CLASE_DE_LA_HOJA_ABAJO}`} />, { anima: false })
-  afirmar(!historia.includes('transform:'), '  y sube con clases (`translate`), no con una transformada en línea: la rama quieta no escribe una')
+  const historia = marcar(<HistoriaDelProyecto proyecto={p} pausada={false} cerca aLaVista reducido={false} />, { anima: true })
+  const lejos = marcar(<HistoriaDelProyecto proyecto={p} pausada={false} cerca={false} aLaVista reducido={false} />, { anima: true })
+  afirmar(/<video [^>]*data-cual="movil"[^>]*\sloop=""[^>]*class="h-full w-full object-cover"[^>]*src="\/portfolio\/el-garage\/movil\.mp4"/.test(historia) && /\smuted=""/.test(historia) && !/\ssrc="/.test(lejos), 'el video del teléfono, `muted loop`, a pantalla completa (`object-cover`); sin la sección cerca, nada se pide')
+  const ficha = /<div data-pieza="ficha-de-la-historia"[\s\S]*$/.exec(historia)?.[0] ?? ''
+  const fichaCorta = (f: string): boolean =>
+    /data-fila="uno"[\s\S]*El Garage[\s\S]*Concesionaria[\s\S]*No tenía catálogo/.test(f) && /data-fila="dos"[\s\S]*Un catálogo de muchos filtros[\s\S]*Visitar sitio/.test(f) &&
+    !/<dt|Marzo 2026|Con la página tienen todo ordenado|data-marca-de-agua|\[TESTIMONIO\]|Lo que dice el cliente/.test(f)
+  afirmar(fichaCorta(ficha) && /absolute inset-x-0 bottom-0/.test(ficha) && /safe-area-inset-bottom/.test(ficha), '  la ficha: fila 1, el nombre y el rubro a la izquierda y el problema a la derecha; fila 2, qué hicimos y «Visitar sitio»; abajo, en el área segura, y NADA más (sin rótulos, fecha, lo resuelto, reseña ni marca de agua)')
+  controlPositivo('  el detector ve la ficha entera de escritorio (con sus rótulos y la reseña)', `${ficha}<dt>Fecha</dt><dd>Marzo 2026</dd>`, fichaCorta)
 
-  titulo('B1.3 · 29 · Los gestos: tap a la izquierda o a la derecha; deslizar es el scroll, que se asienta de a un proyecto')
+  // ═══════════════════════════════════════════════════════════════════════════
+  titulo('B1.2d B · 29 · P-H19 · Las historias, puras y comunes: con 3 pasos (el precio de servicios) y con 4 (el Portfolio)')
 
-  afirmar(/aria-label=\{CONTENIDO\.historias\.anterior\} onClick=\{\(\) => vivo\.irAl\(-1\)\} className="absolute inset-y-0 left-0 hidden w-1\/3/.test(tira) && /aria-label=\{CONTENIDO\.historias\.siguiente\} onClick=\{\(\) => vivo\.irAl\(1\)\} className="absolute inset-y-0 right-0 hidden w-2\/3/.test(tira) && /\{activa \? <ToquesDeLaHistoria vivo=\{vivo\} \/> : null\}\s*<div data-pieza="hoja-de-la-ficha"/.test(tira), 'dos toques sobre el video y debajo de la hoja (sólo en el teléfono): el tercio de la izquierda, el anterior; el resto, el siguiente')
-  const nombre = (tira0: number, s: 1 | -1): string => {
-    const d = destinoDeLaRueda(tira0, s)
-    return d.tipo === 'paso' ? ['El Garage', 'Esquina', 'Banú', 'la tuya'][d.indice] : d.tipo === 'demos' ? 'Demos' : 'arriba'
+  const TRES: readonly ItemDeHistoria[] = [{ id: 'a' }, { id: 'b' }, { id: 'c' }]
+  const tiempo = (ms: number): EventoDeLasHistorias => ({ tipo: 'tiempo', ms })
+  const reglas = (m: Maquina): boolean => {
+    const arranque = correr(m, TRES, [tiempo(3000), { tipo: 'toque', fraccion: 0.9 }])
+    const pasa = correr(m, TRES, [tiempo(HISTORIAS.duracionMs - 1), tiempo(2)])
+    const pausada = correr(m, TRES, [{ tipo: 'mantener' }, tiempo(HISTORIAS.duracionMs * 2)])
+    const suelta = correr(m, TRES, [{ tipo: 'mantener' }, { tipo: 'soltar' }, tiempo(HISTORIAS.duracionMs)])
+    const atras = correr(m, TRES, [{ tipo: 'toque', fraccion: 0.9 }, { tipo: 'toque', fraccion: 0.1 }])
+    const costados = correr(m, TRES, [{ tipo: 'deslice', dx: -80, dy: 5 }, { tipo: 'deslice', dx: -80, dy: 5 }, { tipo: 'deslice', dx: 80, dy: -5 }])
+    const arriba = correr(m, TRES, [{ tipo: 'deslice', dx: 4, dy: -120 }])
+    const abajo = correr(m, TRES, [{ tipo: 'deslice', dx: 4, dy: 120 }])
+    const ultimo = correr(m, TRES, [tiempo(HISTORIAS.duracionMs), tiempo(HISTORIAS.duracionMs), tiempo(HISTORIAS.duracionMs * 3)])
+    const despues = correr(m, TRES, [{ tipo: 'toque', fraccion: 0.9 }, { tipo: 'toque', fraccion: 0.9 }, { tipo: 'toque', fraccion: 0.9 }])
+    return arranque.e.indice === 1 && arranque.e.transcurridoMs === 0 && arranque.e.reinicio === 1 &&
+      pasa.e.indice === 1 && pasa.tics === 0 && pausada.e.indice === 0 && suelta.e.indice === 1 &&
+      atras.e.indice === 0 && atras.tics === 2 && costados.e.indice === 1 && costados.tics === 3 &&
+      arriba.salidas.join() === 'adelante' && abajo.salidas.join() === 'atras' && arriba.e.indice === 0 &&
+      ultimo.e.indice === 2 && ultimo.salidas.length === 0 && despues.e.indice === 2 && despues.salidas.join() === 'adelante'
   }
-  afirmarIgual([nombre(0, 1), nombre(1, -1), nombre(2, 1), nombre(0, -1), nombre(3, 1)], ['Esquina', 'El Garage', 'la tuya', 'arriba', 'Demos'], '  con el modelo de la rueda: de a uno desde el activo; antes del primero, arriba; después de «la tuya», Demos')
-  const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
-  // [B1.2d] Los toques salieron con los mandos (`useMandosDelPortfolio.ts`): `ir(…, false)` es el salto en silencio.
+  afirmar(reglas(siguienteDeLasHistorias), 'cada ítem arranca de cero (`reinicio` lo vuelve a montar); a los 10 s pasa solo (sin sonar); mantener pausa y soltar sigue; un toque a la izquierda vuelve y a la derecha avanza; de costado, igual; arriba sale adelante y abajo atrás; el último con tiempo se queda lleno; después del último, un toque sale')
+  controlPositivo('  el detector ve una máquina que no pausa (mantener no frena el tiempo)', ((e, ev, it, d) => siguienteDeLasHistorias({ ...e, pausada: false }, ev, it, d)) as Maquina, reglas)
+  controlPositivo('  y una que suena con el tiempo (dos sonidos por historia: el de B1.3)', ((e, ev, it, d) => {
+    const r = siguienteDeLasHistorias(e, ev, it, d)
+    return { ...r, porElUsuario: r.estado.indice !== e.indice }
+  }) as Maquina, reglas)
+  const CUATRO = ITEMS_DE_LAS_HISTORIAS
+  const conLaTuya = (m: Maquina): boolean => {
+    const quieta = correr(m, CUATRO, [{ tipo: 'toque', fraccion: 0.9 }, { tipo: 'toque', fraccion: 0.9 }, { tipo: 'toque', fraccion: 0.9 }, tiempo(HISTORIAS.duracionMs * 5)])
+    const enfocada = correr(m, CUATRO, [{ tipo: 'foco', adentro: true }, { tipo: 'toque', fraccion: 0.9 }, { tipo: 'deslice', dx: -90, dy: 0 }, tiempo(HISTORIAS.duracionMs * 2)])
+    return quieta.e.indice === 3 && quieta.salidas.length === 0 && enfocada.e.indice === 0 && enfocada.salidas.length === 0
+  }
+  afirmar(CUATRO.length === 4 && CUATRO[3]?.sinTiempo === true && conLaTuya(siguienteDeLasHistorias), '  el Portfolio: cuatro (los tres proyectos y «la tuya», sin tiempo: se queda hasta que el usuario sale); con un campo enfocado, nada avanza (ni el tiempo, ni un toque, ni un deslice)')
+  controlPositivo('  el detector ve una máquina que no mira el foco', ((e, ev, it, d) => siguienteDeLasHistorias({ ...e, enfocada: false }, ev, it, d)) as Maquina, conLaTuya)
+  afirmarIgual([gestoDelPuntero(3, 4, false), gestoDelPuntero(30, 2, false), gestoDelPuntero(1, 1, true)], ['toque', 'deslice', 'nada'], '  el puntero: hasta 10 px es un toque; más, un deslice; si se mantuvo (pausó), al soltar no es nada')
+  afirmarIgual(barrasDeLasHistorias({ ...ESTADO_INICIAL, indice: 1, transcurridoMs: HISTORIAS.duracionMs / 2 }, TRES), [1, 0.5, 0], '  las barras: las vistas llenas, la de ahora con su avance (lineal en 10 s), las que vienen vacías')
+  const montadas = marcar(<Historias items={TRES} etiqueta="El precio" rotulos={{ anterior: 'Anterior', siguiente: 'Siguiente' }} alSalir={() => undefined} renderItem={(it) => <p data-item={it.id}>{it.id}</p>} />, { anima: true })
+  const conTres = (m: string): boolean =>
+    /<div role="group" aria-roledescription="historias" aria-label="El precio" data-pieza="historias" data-indice="0"/.test(m) && veces(m, 'data-parte="barra"') === 3 && /data-item="a"/.test(m) && !/data-item="b"/.test(m) &&
+    /<button type="button" data-toque="anterior" class="sr-only">Anterior<\/button>/.test(m) && /touch-none/.test(m)
+  afirmar(conTres(montadas), '  montadas FUERA del Portfolio con tres pasos: un grupo con nombre, tres barras, sólo el primer ítem pintado y los dos controles del teclado')
+  controlPositivo('  el detector ve las del Portfolio de B1.3 (cuatro fijas)', montadas.replace('data-parte="barra"', 'data-parte="barra"></span><span data-parte="barra"'), conTres)
+  const comunes = ['_componentes/historias/maquinaDeLasHistorias.ts', '_componentes/historias/Historias.tsx'].map((r) => sinComentarios(leer(r))).join('\n')
+  const independientes = (c: string): boolean => !/PortfolioVivo|usePortfolio|data-panel|_secciones\/trabajos/.test(c)
+  afirmar(independientes(comunes), '  y no dependen del Portfolio: ni `PortfolioVivo` ni `[data-panel]` (lo propio entra por `items`, `renderItem` y `alSalir`)')
+  controlPositivo('  el detector ve una pieza que lee el Portfolio', `${comunes}\nimport type { PortfolioVivo } from '../../_secciones/trabajos/portfolio/usePortfolio'`, independientes)
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  titulo('B1.2d B · 30 · T8 y T1 · El scroll nunca avanza las historias, y un solo sonido por toque')
+
+  const sinScroll = sinComentarios(leer(`${PORTFOLIO}/useSinScrollEnLasHistorias.ts`))
   const mandos = sinComentarios(leer(`${PORTFOLIO}/useMandosDelPortfolio.ts`))
-  const tocar = (m: string): boolean => /if \(v\.fase === 'adentro'\) ir\(destinoDeLaRueda\(v\.tira, sentido\), false\)/.test(m) && /if \(d\.tipo === 'paso'\) saltar\(d\.indice, !rueda, rueda\)/.test(m)
-  afirmar(tocar(mandos), '  el proyecto, en silencio (el modelo del hover); las salidas, con su orden')
-  controlPositivo('  el detector ve el toque que viaja como la rueda', mandos.replace('ir(destinoDeLaRueda(v.tira, sentido), false)', 'ir(destinoDeLaRueda(v.tira, sentido), true)'), tocar)
-  const casos: readonly [IndiceDePaso, IndiceDePaso, number, number | null][] = [
-    [0, 2, 0.1, 1],
-    [0, 3, 0, 1],
-    [1, 1, 0.3, 1],
-    [1, 1, 0.01, null],
-    [3, EN_LA_COLA, 0.2, null],
-    [ANTES_DEL_PIN, 2, 0.4, 0],
-    [EN_LA_COLA, 1, 0, 3],
-    [0, ANTES_DEL_PIN, -0.3, null],
-  ]
-  afirmarIgual(casos.map(([d, c, v]) => asentamiento(d, c, v)), casos.map(([, , , e]) => e), 'deslizar es el scroll de la página y, quieta, se asienta en el centro de su proyecto, a lo sumo uno más allá del que estaba; lo que sale del selector se deja (es la salida)')
-  controlPositivo('  el detector ve un deslizamiento que cruza dos proyectos', (_d: IndiceDePaso, c: IndiceDePaso): number | null => c, (f: (d: IndiceDePaso, c: IndiceDePaso, v: number) => number | null) => f(0, 2, 0.1) === 1)
-  const deslizamiento = sinComentarios(leer(`${PORTFOLIO}/useDeslizamientoDelPortfolio.ts`))
-  afirmar(/addEventListener\('touchstart', alTocar, \{ passive: true \}\)/.test(deslizamiento) && /addEventListener\('scroll', alMoverse, \{ passive: true \}\)/.test(deslizamiento) && !/preventDefault/.test(deslizamiento) && /useDeslizamientoDelPortfolio\(historias, deslizamiento\)/.test(mandos), '  ningún gesto propio que pelee con el scroll: escuchas pasivos, sin `preventDefault`, y sólo con las historias')
+  const quieto = (s: string, m: string): boolean =>
+    /document\.addEventListener\('touchmove', frenar, \{ passive: false \}\)/.test(s) && /closest\('\[data-lenis-prevent\]'\)/.test(s) &&
+    /ir: \(d\) => \(historias \? salir\(/.test(m) && !/useDeslizamientoDelPortfolio|asentamiento/.test(m)
+  afirmar(quieto(sinScroll, mandos), 'mientras corren, el dedo no mueve la página (fuera de un diálogo) y la rueda no avanza: sale (abajo a Demos, arriba al título); el asentamiento del scroll de B1.3 se fue')
+  controlPositivo('  el detector ve el deslizamiento de B1.3 (el scroll avanzaba de a un proyecto)', [sinScroll, `${mandos}\nuseDeslizamientoDelPortfolio(historias, deslizamiento)`] as const, ([s, m]: readonly [string, string]) => quieto(s, m))
+  const componente = sinComentarios(leer('_componentes/historias/Historias.tsx'))
+  const unSonido = (c: string): boolean => /if \(p\.porElUsuario\) sonar\('tic'\)/.test(c) && /onPointerUp=\{alSubir\}/.test(c) && !/<button[^>]*onClick=\{\(\) => aplicar\.current\(\{ tipo: 'toque', fraccion: 0\.8/.test(c)
+  afirmar(unSonido(componente), '  un toque es del puntero sobre la superficie (no un botón: el sonido global no suma un «clic») y suena UN tic, sólo si el cambio lo pidió un gesto')
+  controlPositivo('  el detector ve el tic de cada cambio, también el del tiempo', componente.replace('if (p.porElUsuario) sonar(\'tic\')', 'if (p.estado.indice !== antes.indice) sonar(\'tic\')'), unSonido)
 
-  titulo('B1.3 · 30 · La entrada y la salida: «Portfolio» llega en la aproximación y se va con la caída antes de la historia')
+  // ═══════════════════════════════════════════════════════════════════════════
+  titulo('B1.2d B · 31 · T3 · La entrada: el título sube por delante del logo y queda arriba; recién ahí entran las historias')
 
-  // [B1.2d] El orden de cuatro piezas (`orden.ts`): cámara, encabezado, barra y panel. En el teléfono la barra no se corre.
+  const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
+  const regla = (u: string): boolean => /encabezado: historias \? \(fase === 'antes' && enCuadro\) \|\| adentro : adentro, barra: adentro && !historias/.test(u)
+  afirmar(regla(usePortfolio), 'en las historias el título se pide en la aproximación y se QUEDA (con las historias adentro y al volver): no cae antes de que entren')
+  controlPositivo('  el detector ve la regla de B1.3 (el título caía antes de la historia)', usePortfolio.replace("encabezado: historias ? (fase === 'antes' && enCuadro) || adentro : adentro", "encabezado: historias ? fase === 'antes' && enCuadro : adentro"), regla)
   const texto = (r: readonly { readonly estado: Orden; readonly enS: number }[]): string[] =>
     r.map(({ estado: o, enS }) => `${o.camara ? 'C' : 'c'}${o.encabezado ? 'E' : 'e'}${o.barra ? 'B' : 'b'}${o.panel ? 'P' : 'p'}@${enS.toFixed(2)}`)
   const EN_LA_APROXIMACION: Orden = { camara: false, encabezado: true, barra: false, panel: false }
-  const EN_LA_HISTORIA: Orden = { camara: true, encabezado: false, barra: false, panel: true }
-  const recorridos = [texto(recorridoDelOrden(EN_LA_APROXIMACION, EN_LA_HISTORIA, 0.6)), texto(recorridoDelOrden(EN_LA_HISTORIA, EN_LA_APROXIMACION, 0.6)), texto(recorridoDelOrden(EN_LA_HISTORIA, AFUERA, 0.6))]
-  afirmarIgual(recorridos, [['cebp@0.00', 'Cebp@0.60', 'CebP@0.60'], ['Cebp@0.00', 'cebp@0.70', 'cEbp@0.70'], ['Cebp@0.00', 'cebp@0.70']], 'entrando, el título cae entero y después entra la historia; subiendo, la historia se va y después vuelve el título; bajando a Demos, la historia se va y el título no vuelve')
-  controlPositivo('  el detector ve la historia que entra mientras el título cae', [['cebp@0.00', 'CebP@0.00']], (r: string[][]) => JSON.stringify(r[0]) === JSON.stringify(['cebp@0.00', 'Cebp@0.60', 'CebP@0.60']))
-  const reglaDelTelefono = (u: string): boolean => /encabezado: historias \? fase === 'antes' && enCuadro : adentro, barra: adentro && !historias/.test(u)
-  afirmar(reglaDelTelefono(usePortfolio), '  en las historias el encabezado se pide en la aproximación (con la sección en el cuadro), no con el panel; [B1.2d] y la barra no se corre')
-  controlPositivo('  el detector ve la regla del escritorio en el teléfono', usePortfolio.replace("encabezado: historias ? fase === 'antes' && enCuadro : adentro", 'encabezado: adentro'), reglaDelTelefono)
-
-  titulo('B1.3 · 31 · Las barras arriba y «la tuya» al final, con el «?», el formulario y WhatsApp')
-
-  afirmar(/<BarrasDelPortfolio vivo=\{vivo\} className="hidden shrink-0 px-8 pb-2 max-escritorio:flex"/.test(escenario) && /<PistaDelPortfolio vivo=\{vivo\} className="[^"]*max-escritorio:flex max-tablet:hidden"/.test(escenario), 'las barras de progreso arriba de la historia (las mismas de la tablet); la pista es sólo de la tablet')
-  const laTuya = sinComentarios(leer(`${PORTFOLIO}/LaTuya.tsx`))
-  afirmar(/<SignoDePregunta visible=\{visible\} reducido=\{vivo\.reducido\} \/>/.test(laTuya) && /<FormularioDeLaTuya visible=\{visible\} reducido=\{vivo\.reducido\} desde=\{3\} \/>/.test(laTuya) && !/ToquesDeLaHistoria/.test(laTuya), 'la última historia es «la tuya»: el «?» que se arma, el formulario corto y WhatsApp (sin los toques, que taparían el formulario: se vuelve deslizando)')
+  const EN_LA_HISTORIA: Orden = { camara: true, encabezado: true, barra: false, panel: true }
+  const yaLlego = { camara: -Infinity, encabezado: -1, barra: -Infinity, panel: -Infinity }
+  afirmarIgual(texto(recorridoDelOrden(EN_LA_APROXIMACION, EN_LA_HISTORIA, 0.6, false, yaLlego)), ['CEbp@0.00', 'CEbP@0.00'], '  entrando con el título ya arriba (llegó en la aproximación), la historia entra enseguida y el título se queda')
+  afirmarIgual(texto(recorridoDelOrden(EN_LA_HISTORIA, AFUERA, 0.6)), ['CEbp@0.00', 'Cebp@0.58', 'cebp@1.18'], '  y bajando a Demos, la historia se va y después cae el título')
+  const encabezado = sinComentarios(leer(`${PORTFOLIO}/EncabezadoDelPortfolio.tsx`))
+  const sube = (c: string): boolean => /const subida = useTransform\(presencia, \(p\) => `\$\{\(\(1 - p\) \* SUBIDA_DEL_ENCABEZADO_SVH\)\.toFixed\(3\)\}svh`\)/.test(c) && /return subeDesdeAbajo \? <motion\.div data-parte="subida-del-encabezado" style=\{\{ y: subida \}\}>\{encabezado\}<\/motion\.div> : encabezado/.test(c)
+  afirmar(sube(encabezado) && SUBIDA_DEL_ENCABEZADO_SVH > 40 && /subeDesdeAbajo=\{vivo\.historias\}/.test(escenario), `  el título viene desde abajo (${String(SUBIDA_DEL_ENCABEZADO_SVH)} svh, por delante del logo: el DOM va sobre el lienzo) con su presencia; en escritorio, el marcado de siempre`)
+  controlPositivo('  el detector ve el título que aparece en su lugar (sin subir)', encabezado.replace('return subeDesdeAbajo ?', 'return false ?'), sube)
+  afirmar(ENTRADA_DE_LAS_HISTORIAS.duracionS >= 0.6 && ENTRADA_DE_LAS_HISTORIAS.duracionS <= 0.8 && ENTRADA_DE_LAS_HISTORIAS.subidaPx > 0 && ENTRADA_DE_LAS_HISTORIAS.subidaPx <= 32, `  las historias entran tranquilas: un fundido con una subida corta (${String(ENTRADA_DE_LAS_HISTORIAS.subidaPx)} px, ${String(ENTRADA_DE_LAS_HISTORIAS.duracionS * 1000)} ms)`)
+  const salidas = (m: string): boolean => /\(hacia === 'adelante' \? irAlPx\(pxDeLaSeccion\(PANTALLAS_POR_PASO\), salidaMs, -2\) : irAlPx\(PX_JUSTO_ANTES_DEL_PIN, salidaMs\)\)/.test(m)
+  afirmar(salidas(mandos), '  y las salidas: deslizar hacia arriba vuela a Demos; hacia abajo, al título (justo antes del pin)')
+  controlPositivo('  el detector ve una salida hacia abajo que se va al principio de la sección', mandos.replace('irAlPx(PX_JUSTO_ANTES_DEL_PIN, salidaMs))', 'irAlPx(0, salidaMs))'), salidas)
 }

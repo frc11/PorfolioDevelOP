@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 
+import { CampoDePildora, CampoDeTextoLargo, ErrorDelCampo } from '../../_componentes/formularios/Campos'
 import { MAXIMOS } from '../../_lib/formularios/validar'
 import { CAMPOS, INTERESES, PREGUNTAS, type Interes } from './contenido'
 import type { CampoConError, DatosDeContacto, ErroresDeContacto } from './enviarContacto'
@@ -41,20 +42,11 @@ function Pregunta({ numero, texto, id, compacto = false }: { readonly numero: nu
 }
 
 function Error({ campo, errores }: { readonly campo: CampoConError; readonly errores: ErroresDeContacto }): React.JSX.Element | null {
-  const texto = errores[campo]
-  if (texto === undefined) return null
-  return (
-    // [INTERFAZ 1] T3: sin `role="alert"` por campo (sonaban hasta cinco a la vez, y otra vez con cada tecla): el aviso es
-    // UNO, al enviar (`FormularioDeContacto`); éste lo lee el lector al llegar al campo (`aria-describedby`).
-    <p id={idDelError(campo)} className="text-micro leading-texto">
-      {texto}
-    </p>
-  )
+  // [INTERFAZ 1] T3: sin `role="alert"` por campo: el aviso es UNO, al enviar (`FormularioDeContacto`). [B1.2d B] La pieza es común.
+  return <ErrorDelCampo id={idDelError(campo)} texto={errores[campo]} />
 }
 
 const FILA = 'grid gap-[var(--spacing-4)] tablet:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] tablet:gap-[var(--spacing-8)]'
-/** [EL ENCASTRE] 1E · el foco lo dibuja la píldora (`data-foco="pastilla"`, en `foco.css`): su borde, más oscuro y más grueso. */
-const PILDORA = 'flex items-center gap-[var(--spacing-2)] rounded-[var(--radius-pastilla-s)] border border-borde-fuerte px-[var(--spacing-4)] py-[var(--spacing-2)]'
 /** [NAVBAR] T4 · en el teléfono la pregunta va pegada a sus campos. */
 const FILA_COMPACTA = 'grid gap-[var(--spacing-2)]'
 /** [EL ENCASTRE] 1E · lo máximo de cada campo (lo mismo exige el servidor): con todo opcional, el largo lo frena el campo. */
@@ -78,25 +70,22 @@ function Pildora({
   const conError = campo !== 'empresa' && errores[campo] !== undefined
   return (
     <div className="flex flex-col gap-[var(--spacing-1)]">
-      {/* [INTERFAZ 1] T3: el error con borde punteado (el foco es liso: no se confunden). */}
-      <label data-foco="pastilla" className={cn(PILDORA, compacto && 'py-[var(--spacing-1)]', conError && 'border-tinta border-dashed')}>
-        <span className="text-caption shrink-0 font-medio">{CAMPOS[campo].rotulo}</span>
-        <input
-          name={campo}
-          type="text"
-          inputMode={campo === 'medio' ? 'email' : undefined}
-          autoComplete={campo === 'nombre' ? 'name' : campo === 'empresa' ? 'organization' : campo === 'medio' ? 'email' : 'off'}
-          required={requerido}
-          maxLength={MAXIMO_DE[campo]}
-          value={datos[campo]}
-          onChange={(e) => escribir(campo, e.target.value)}
-          onFocus={alEnfocar}
-          placeholder={CAMPOS[campo].ejemplo}
-          aria-invalid={conError || undefined}
-          aria-describedby={conError ? idDelError(campo) : undefined}
-          className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 bg-transparent"
-        />
-      </label>
+      {/* [B1.2d B] B4/B5 · la píldora es la común de los formularios (`_componentes/formularios/Campos.tsx`): la usa también «la tuya». */}
+      <CampoDePildora
+        rotulo={CAMPOS[campo].rotulo}
+        nombre={campo}
+        valor={datos[campo]}
+        alEscribir={(v) => escribir(campo, v)}
+        ejemplo={CAMPOS[campo].ejemplo}
+        maximo={MAXIMO_DE[campo]}
+        idDelError={campo === 'empresa' ? null : idDelError(campo)}
+        conError={conError}
+        alEnfocar={alEnfocar}
+        requerido={requerido}
+        compacto={compacto}
+        autocompletar={campo === 'nombre' ? 'name' : campo === 'empresa' ? 'organization' : campo === 'medio' ? 'email' : 'off'}
+        modoDeEntrada={campo === 'medio' ? 'email' : undefined}
+      />
       {campo !== 'empresa' && <Error campo={campo} errores={errores} />}
     </div>
   )
@@ -163,21 +152,18 @@ export function CamposDelContacto({ datos, errores, alternarInteres, escribir, c
           <div className="flex flex-col gap-[var(--spacing-1)]">
             {/* [PULIDO 10] J9 · en el teléfono angosto el rótulo va en su renglón (al lado, el mensaje quedaba en una columna flaca) y
                 el mensaje crece con lo que se escribe, de dos a ocho renglones (`field-sizing`; sin él, los renglones de siempre). */}
-            <label data-foco="pastilla" className={cn(PILDORA, 'items-start rounded-[var(--radius-fuerte)] max-movil:flex-col max-movil:items-stretch', compacto ? 'py-[var(--spacing-2)]' : 'py-[var(--spacing-3)]', errores.mensaje !== undefined && 'border-tinta border-dashed')}>
-              <span className="text-caption shrink-0 font-medio">{CAMPOS.mensaje.rotulo}</span>
-              <textarea
-                name="mensaje"
-                rows={compacto ? 2 : 3}
-                maxLength={MAXIMOS.mensaje}
-                value={datos.mensaje}
-                onChange={(e) => escribir('mensaje', e.target.value)}
-                onFocus={alEnfocar}
-                placeholder={CAMPOS.mensaje.ejemplo}
-                aria-invalid={errores.mensaje !== undefined || undefined}
-                aria-describedby={errores.mensaje === undefined ? undefined : idDelError('mensaje')}
-                className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 resize-none bg-transparent [field-sizing:content] min-h-[2lh] max-h-[8lh]"
-              />
-            </label>
+            <CampoDeTextoLargo
+              rotulo={CAMPOS.mensaje.rotulo}
+              nombre="mensaje"
+              valor={datos.mensaje}
+              alEscribir={(v) => escribir('mensaje', v)}
+              ejemplo={CAMPOS.mensaje.ejemplo}
+              maximo={MAXIMOS.mensaje}
+              idDelError={idDelError('mensaje')}
+              conError={errores.mensaje !== undefined}
+              alEnfocar={alEnfocar}
+              compacto={compacto}
+            />
             <Error campo="mensaje" errores={errores} />
           </div>
         </div>

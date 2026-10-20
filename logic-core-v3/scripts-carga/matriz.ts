@@ -6,6 +6,8 @@
  *   SOLO=rueda-desde-arriba,flechas npx tsx …       sólo esas entradas
  *   CONTROL=a81 npx tsx …                           el control positivo: el caso de Valentino con el defecto de A8.1 reintroducido
  *   MODO=a3 | a1 | a9 npx tsx …                     la rueda con el mouse que se mueve, la píldora y el orden cuadro a cuadro, el hueco
+ *   MODO=rafaga npx tsx …                           [A2.3] las combinaciones de la ráfaga (CONTROL=rafaga: con `?rafaga=no`, tienen que fallar)
+ *   MODO=a2 npx tsx …                               [A2.1 y A2.2] el despeje del medio y el tiempo de la píldora, a 1440, 1280, 1180 y 1024
  *
  * Cada foto se toma en reposo (sin vuelo, con el orden asentado y el scroll quieto, a lo sumo `ESPERA_MS`) y se cuenta con `a8.ts`.
  * Escribe una fila por combinación en `~/.cache/b4-medicion/b12d/` y una línea por combinación en la consola.
@@ -16,7 +18,7 @@ import path from 'node:path'
 
 import { chromium, type BrowserContext, type Page } from '@playwright/test'
 
-import { IDAS_Y_VUELTAS, combinaciones, desdeDemos, violaciones, type Combinacion, type FotoDelPortfolio, type Violacion } from './a8'
+import { IDAS_Y_VUELTAS, combinaciones, combinacionesDeRafaga, desdeDemos, violaciones, violacionesDeLaRafaga, type Combinacion, type CombinacionDeRafaga, type FotoDelPortfolio, type GestoDeRafaga, type Violacion } from './a8'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'matriz'
@@ -58,9 +60,9 @@ async function abrir(defecto: boolean, ancho = 1440, alto = 900): Promise<{ read
   return { ctx, p }
 }
 
-async function cargar(p: Page, hash = ''): Promise<void> {
+async function cargar(p: Page, hash = '', busqueda = ''): Promise<void> {
   await p.goto('about:blank').catch(() => undefined)
-  await p.goto(`${BASE}/v3?diag=carga${hash}`, { waitUntil: 'load', timeout: 240000 })
+  await p.goto(`${BASE}/v3?diag=carga${busqueda}${hash}`, { waitUntil: 'load', timeout: 240000 })
   const t0 = Date.now()
   while (Date.now() - t0 < 30000) {
     const lista = await p.evaluate(() => {
@@ -416,12 +418,174 @@ async function a9(p: Page, archivo: string): Promise<void> {
   }
 }
 
+// ─── [B1.2d] A2.3: la ráfaga ──────────────────────────────────────────────
+
+/** Px de la regla de la cola, con el Portfolio ya ido (la ráfaga que sube desde ahí entra al tramo con cinco muescas). */
+const PX_EN_LA_COLA = 6700
+/** El centro de Banú (el tercer paso): desde ahí la ráfaga que sube tiene dos proyectos por recorrer. */
+const PX_EN_BANU = 4275
+
+const GRABACION = `(() => {
+  const log = (window.__rafaga = [])
+  const cuadro = () => {
+    const e = document.querySelector('[data-pieza="escenario-del-portfolio"]')
+    log.push({ barra: e ? e.getAttribute('data-barra') === 'si' : false, panel: e ? e.getAttribute('data-panel-adentro') === 'si' : false, paso: Number(e ? e.getAttribute('data-paso') : NaN) })
+    if (log.length < 900) requestAnimationFrame(cuadro)
+  }
+  requestAnimationFrame(cuadro)
+})()`
+
+/** Una ráfaga: cinco muescas en 200 ms, o el deslizamiento con inercia del trackpad (el «rápido» de antes). */
+async function gestoDeRafaga(p: Page, sentido: 1 | -1, gesto: GestoDeRafaga): Promise<void> {
+  if (gesto === 'muescas') {
+    for (let k = 0; k < 5; k++) {
+      await p.mouse.wheel(0, 100 * sentido)
+      await dormir(50)
+    }
+    return
+  }
+  for (let k = 0; k < 45; k++) {
+    await p.mouse.wheel(0, sentido * Math.max(2, 80 * 0.94 ** k))
+    await dormir(16)
+  }
+}
+
+async function unaRafaga(p: Page, c: CombinacionDeRafaga, archivo: string, ancho: number, alto: number, busqueda: string): Promise<boolean> {
+  const fotos: { readonly vuelta: number; readonly momento: string; readonly violaciones: string[]; readonly foto: FotoDelPortfolio }[] = []
+  const puesto = c.hover ? HOVER(ancho, alto) : COLUMNA(ancho, alto)
+  const baja = c.rafaga.endsWith('bajando')
+  await cargar(p, '', busqueda)
+  for (let vuelta = 0; vuelta < IDAS_Y_VUELTAS; vuelta++) {
+    await p.mouse.move(puesto.x, puesto.y, { steps: 4 })
+    let desde = -1
+    if (c.rafaga === 'entrar-bajando') await alPx(p, PX_ARRIBA)
+    else if (c.rafaga === 'entrar-subiendo') await alPx(p, PX_EN_LA_COLA)
+    else {
+      // Adentro: bajando, una muesca suelta desde justo antes del pin (El Garage); subiendo, desde Banú.
+      await alPx(p, baja ? 880 : PX_EN_BANU)
+      await reposo(p)
+      if (baja) await p.mouse.wheel(0, 100)
+      const f0 = await foto(p, await reposo(p))
+      fotos.push({ vuelta, momento: 'adentro', violaciones: violaciones(f0, 'adentro'), foto: f0 })
+      desde = f0.paso
+    }
+    await reposo(p)
+    await p.evaluate(GRABACION)
+    await gestoDeRafaga(p, baja ? 1 : -1, c.gesto)
+    const f = await foto(p, await reposo(p))
+    const cuadros = await p.evaluate(() => (window as unknown as { __rafaga: { barra: boolean; panel: boolean; paso: number }[] }).__rafaga)
+    const llego = f.paso === (baja ? 4 : -1)
+    fotos.push({ vuelta, momento: 'despues', violaciones: [...violaciones(f, 'afuera'), ...violacionesDeLaRafaga(c.rafaga, cuadros, desde), ...(llego ? [] : ['no-llego'])], foto: f })
+  }
+  const malas = fotos.filter((f) => f.violaciones.length > 0)
+  appendFileSync(archivo, `${JSON.stringify({ tipo: 'rafaga', ...c, busqueda, ok: malas.length === 0, fotos })}\n`)
+  const resumen = malas.map((f) => `${String(f.vuelta + 1)}·${f.momento}: ${f.violaciones.join(',')}`).join(' ; ')
+  console.log(`${malas.length === 0 ? 'ok   ' : 'FALLA'} ráfaga ${c.rafaga} · ${c.gesto} · ${c.hover ? 'con hover' : 'sin hover'}${busqueda === '' ? '' : ` (${busqueda})`}${resumen === '' ? '' : ` · ${resumen}`}`)
+  return malas.length === 0
+}
+
+// ─── [B1.2d] A2.1 y A2.2: el despeje del medio y el tiempo de la píldora ──
+
+const MEDIDA_DEL_DESPEJE = `(() => {
+  const pastilla = document.querySelector('[data-pieza="barra"] [data-parte="pastilla"]')
+  const panel = document.querySelector('[data-pieza="panel-del-portfolio"]')
+  const medio = [...document.querySelectorAll('[id^="portfolio-medio-"]')].find((m) => !m.hidden)
+  const figura = medio ? medio.querySelector('figure') : null
+  const region = [...document.querySelectorAll('[id^="portfolio-region-"]')].find((m) => !m.hidden)
+  const p = pastilla ? pastilla.getBoundingClientRect() : null
+  const pa = panel ? panel.getBoundingClientRect() : null
+  const f = figura ? figura.getBoundingClientRect() : null
+  const ultimo = region ? [...region.querySelectorAll('*')].reduce((m, x) => Math.max(m, x.getBoundingClientRect().bottom), 0) : 0
+  return { pastilla: p ? { l: p.left, r: p.right, abajo: p.bottom } : null, panel: pa ? { l: pa.left, abajo: pa.bottom } : null, medio: f ? { arriba: f.top, abajo: f.bottom, alto: f.height } : null,
+    ultimoDeLaFicha: ultimo, desborda: region ? region.scrollHeight > region.clientHeight + 1 : null }
+})()`
+
+interface MedidaDelDespeje {
+  readonly pastilla: { readonly l: number; readonly r: number; readonly abajo: number } | null
+  readonly panel: { readonly l: number; readonly abajo: number } | null
+  readonly medio: { readonly arriba: number; readonly abajo: number; readonly alto: number } | null
+  readonly ultimoDeLaFicha: number
+  readonly desborda: boolean | null
+}
+
+/** El primer cuadro que cumple (su tiempo, ms), o NaN. */
+const primero = (cs: readonly Cuadro[], f: (c: Cuadro, i: number) => boolean): number => cs.find(f)?.t ?? Number.NaN
+
+async function a2(archivo: string): Promise<void> {
+  for (const [ancho, alto] of [[1440, 900], [1280, 800], [1180, 800], [1024, 768]] as const) {
+    const { ctx, p } = await abrir(false, ancho, alto)
+    try {
+      await cargar(p)
+      await p.mouse.move(ancho * 0.2, alto * 0.55)
+      await alPx(p, 880)
+      await reposo(p)
+      await p.evaluate(MUESTREO)
+      await p.mouse.wheel(0, 100)
+      await dormir(4500)
+      const entrada = await p.evaluate(() => (window as unknown as { __cuadros: Cuadro[] }).__cuadros)
+      await reposo(p)
+      const d = (await p.evaluate(MEDIDA_DEL_DESPEJE)) as MedidaDelDespeje
+      // La salida: una muesca hacia arriba desde El Garage (la rueda sale hacia arriba).
+      await p.evaluate(MUESTREO)
+      await p.mouse.wheel(0, -100)
+      await dormir(4500)
+      const salida = await p.evaluate(() => (window as unknown as { __cuadros: Cuadro[] }).__cuadros)
+      const panelEntra = primero(entrada, (c) => c.panelIzq !== null && c.panelIzq < ancho - 1)
+      const rMax = Math.max(...entrada.map((c) => c.r ?? Number.NEGATIVE_INFINITY))
+      const enElMaximo = primero(entrada, (c) => c.r === rMax)
+      const contrae = primero(entrada, (c) => c.r !== null && c.r < rMax - 0.5 && c.t > enElMaximo)
+      const estira = primero(entrada, (c) => c.l !== null && c.l < (entrada[0]?.l ?? 0) - 0.5)
+      const panelSale = primero(salida, (c, i) => i > 0 && c.panelIzq !== null && c.panelIzq > (salida[0]?.panelIzq ?? 0) + 0.5)
+      const expande = primero(salida, (c) => c.r !== null && c.r > (salida[0]?.r ?? 0) + 0.5)
+      const comprime = primero(salida, (c) => c.l !== null && c.l > (salida[0]?.l ?? 0) + 0.5)
+      const superpone = d.pastilla !== null && d.panel !== null && d.pastilla.r + 16 > d.panel.l
+      const medida = {
+        ancho,
+        alto,
+        superpone,
+        alPanel: d.pastilla !== null && d.panel !== null ? Math.round(d.panel.l - d.pastilla.r) : null,
+        medioBajoLaPastilla: d.pastilla !== null && d.medio !== null ? Math.round(d.medio.arriba - d.pastilla.abajo) : null,
+        medio: d.medio,
+        ultimoDeLaFicha: Math.round(d.ultimoDeLaFicha),
+        panelAbajo: d.panel?.abajo ?? null,
+        desborda: d.desborda,
+        entrada: { estiraMs: Math.round(estira), contraeMs: Math.round(contrae), panelMs: Math.round(panelEntra), contraeAlPanelMs: Math.round(contrae - panelEntra) },
+        salida: { panelMs: Math.round(panelSale), expandeMs: Math.round(expande), comprimeMs: Math.round(comprime), expandeALaSalidaMs: Math.round(expande - panelSale) },
+      }
+      appendFileSync(archivo, `${JSON.stringify({ tipo: 'a2', ...medida, entradaCuadros: entrada, salidaCuadros: salida })}\n`)
+      console.log(`A2 · ${String(ancho)}×${String(alto)} · píldora al panel ${String(medida.alPanel)} px (${superpone ? 'se mete' : 'entra'}) · medio ${String(medida.medioBajoLaPastilla)} px bajo la píldora · ficha hasta ${String(medida.ultimoDeLaFicha)} de ${String(medida.panelAbajo)} (desborda ${String(medida.desborda)}) · entrada: estira ${String(medida.entrada.estiraMs)}, contrae ${String(medida.entrada.contraeMs)}, panel ${String(medida.entrada.panelMs)} (Δ ${String(medida.entrada.contraeAlPanelMs)} ms) · salida: panel ${String(medida.salida.panelMs)}, expande ${String(medida.salida.expandeMs)} (Δ ${String(medida.salida.expandeALaSalidaMs)} ms), comprime ${String(medida.salida.comprimeMs)}`)
+    } finally {
+      await ctx.close()
+    }
+  }
+}
+
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
   const archivo = path.join(SALIDA, `${MODO}-${CONTROL ?? TANDA}${RANGO === null ? '' : `-${String(RANGO[0])}-${String(RANGO[1])}`}.jsonl`)
   writeFileSync(archivo, '')
   if (MODO === 'a1') {
     await a1(archivo)
+    return
+  }
+  if (MODO === 'a2') {
+    await a2(archivo)
+    return
+  }
+  if (MODO === 'rafaga') {
+    // Un Chrome nuevo por combinación. Con CONTROL=rafaga, la ráfaga apagada (`?rafaga=no`): las de entrar tienen que fallar.
+    const busqueda = CONTROL === 'rafaga' ? '&rafaga=no' : ''
+    const todas = combinacionesDeRafaga().filter((c, i) => (CONTROL !== 'rafaga' || c.rafaga.startsWith('entrar')) && (RANGO === null || (i >= RANGO[0] && i <= RANGO[1])))
+    let bien = 0
+    for (const c of todas) {
+      const { ctx, p } = await abrir(false)
+      try {
+        if ((await unaRafaga(p, c, archivo, 1440, 900, busqueda)) === (CONTROL !== 'rafaga')) bien += 1
+      } finally {
+        await ctx.close()
+      }
+    }
+    console.log(`ráfaga${CONTROL === null ? '' : ` (control ${CONTROL})`}: ${String(bien)} de ${String(todas.length)} como tenían que dar`)
     return
   }
   if (MODO === 'a3' || MODO === 'a9') {

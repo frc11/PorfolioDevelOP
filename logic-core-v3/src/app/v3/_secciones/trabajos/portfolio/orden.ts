@@ -5,10 +5,12 @@
  * ENCABEZADO («Portfolio» y su bajada), la BARRA (la píldora de la navegación se corre a la columna, A1) y el PANEL. En B1.2c el panel
  * entraba con la cámara y el título llegaba recién cuando el panel terminaba: se leían juntos. Ahora:
  *
- *   entrando   la cámara → el título (cuando la cámara llegó: así queda de frente en el plano del logo) → la barra, que termina justo
- *              antes del panel → el panel, cuando el título va por el 80 % de su llegada (`ORDEN.solape`: el 20 % que se pisan)
- *   saliendo   al revés: el panel → la caída del título, que arranca cuando al panel le falta ese mismo 20 % → la barra, con el panel
- *              afuera → la cámara, con el título caído entero
+ *   entrando   la cámara → el título (cuando la cámara llegó: así queda de frente en el plano del logo) → el primer tiempo de la barra
+ *              (el borde izquierdo se estira) → el panel, cuando el título va por el 80 % de su llegada (`ORDEN.solape`: el 20 % que se
+ *              pisan), A LA PAR del segundo tiempo de la barra: la píldora se contrae y le deja el lugar ([B1.2d] A2.2)
+ *   saliendo   al revés: el panel y, con él, la barra (la expansión que la devuelve va con la salida del panel y la contracción
+ *              final, después: A2.2) → la caída del título, que arranca cuando al panel le falta ese mismo 20 % → la cámara, con el
+ *              título caído entero
  *
  * Primero lo que se apaga y después lo que se prende. Cada pieza recuerda CUÁNDO cambió (`Cambios`), y cada cambio espera lo que le
  * toca desde ahí: si lo pedido se da vuelta a mitad de camino se vuelve a decidir con la misma regla, y el panel nunca entra antes
@@ -37,7 +39,7 @@ export const ADENTRO: Orden = { camara: true, encabezado: true, barra: true, pan
  * Lo que tarda en llegar la cámara, lo que tarda el panel (el de su clase: 700 ms), lo que dura el corrimiento de la barra (sus dos
  * tiempos, `_chrome/barra/corrimiento.ts`) y la fracción del título que se pisa con el panel.
  */
-export const ORDEN = { camaraS: PERSECUCION_DEL_PESO_S, panelS: 0.7, barraS: (2 * CORRIMIENTO.tiempoMs) / 1000, solape: 0.2 } as const
+export const ORDEN = { camaraS: PERSECUCION_DEL_PESO_S, panelS: 0.7, barraS: (2 * CORRIMIENTO.tiempoMs) / 1000, solape: 0.2, barraPrimerTiempoS: CORRIMIENTO.tiempoMs / 1000 } as const
 
 /** Lo que dura la salida que se ve (s): el panel se va y, desde que al panel le falta el solape, el título cae entero. */
 export const duracionDeLaSalida = (tituloS: number): number => ORDEN.panelS + (1 - ORDEN.solape) * tituloS
@@ -65,7 +67,8 @@ function apagado(p: PiezaDelOrden, actual: Orden, c: Cambios, tituloS: number): 
     case 'encabezado':
       return actual.panel ? null : c.panel + ORDEN.panelS - ORDEN.solape * tituloS
     case 'barra':
-      return actual.panel ? null : panelAfuera
+      // [A2.2] Con el panel: su expansión acompaña la salida del panel.
+      return actual.panel ? null : c.panel
     case 'camara':
       return actual.panel || actual.encabezado ? null : Math.max(panelAfuera, c.encabezado + tituloS)
   }
@@ -97,9 +100,10 @@ function prendido(p: PiezaDelOrden, actual: Orden, pedido: Orden, c: Cambios, ti
     case 'encabezado':
       return camaraLista === null ? null : Math.max(base, camaraLista)
     case 'barra':
-      return tituloAlOchenta === null ? null : Math.max(base, tituloAlOchenta - ORDEN.barraS)
+      // [A2.2] Sólo el primer tiempo va antes del panel: el segundo es a la par de su entrada.
+      return tituloAlOchenta === null ? null : Math.max(base, tituloAlOchenta - ORDEN.barraPrimerTiempoS)
     case 'panel': {
-      const barraLista = pedido.barra ? (actual.barra ? c.barra + ORDEN.barraS : null) : -Infinity
+      const barraLista = pedido.barra ? (actual.barra ? c.barra + ORDEN.barraPrimerTiempoS : null) : -Infinity
       if (tituloAlOchenta === null || barraLista === null) return null
       return Math.max(base, tituloAlOchenta, barraLista)
     }

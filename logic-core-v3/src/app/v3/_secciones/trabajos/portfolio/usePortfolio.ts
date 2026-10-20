@@ -4,6 +4,7 @@ import type Lenis from 'lenis'
 import { useMotionValue, type MotionValue } from 'motion/react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 
+import type { SalidaDeLasHistorias } from '../../../_componentes/historias/maquinaDeLasHistorias'
 import { PORTFOLIO_EN_LA_ESCENA } from '../../../_lib/escena/portfolioEnLaEscena'
 import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
 import { useTituloListo } from '../../../_lib/titulos3d/registro'
@@ -24,6 +25,7 @@ import { useAnclaDeLaCarga } from './useAnclaDeLaCarga'
 import { useBarraDelPortfolio } from './useBarraDelPortfolio'
 import { useMandosDelPortfolio } from './useMandosDelPortfolio'
 import { useOrdenDeLaEscena } from './useOrdenDeLaEscena'
+import { useSinScrollEnLasHistorias } from './useSinScrollEnLasHistorias'
 
 export { RUEDA_RECIENTE_MS } from './useMandosDelPortfolio'
 
@@ -70,10 +72,10 @@ export interface PortfolioVivo {
   /** [B1.2d] A3 · si el último salto lo pidió la rueda, y si hay un vuelo en curso (leídos en el evento, no en el render). */
   readonly deLaRueda: () => boolean
   readonly enVuelo: () => boolean
-  /** [B1.3] Las historias del teléfono (lo decide el CSS, `--modo-del-portfolio`: la sección no mide el ancho). */
+  /** [B1.3] Las historias (lo decide el CSS, `--modo-del-portfolio`: la sección no mide el ancho; [B1.2d B] debajo de 1024). */
   readonly historias: boolean
-  /** [B1.3] Al proyecto siguiente o al anterior desde el activo (los toques de la historia): el modelo de la rueda, el paso en silencio. */
-  readonly irAl: (sentido: 1 | -1) => void
+  /** [B1.2d B] Salir de las historias: adelante, a Demos; atrás, al título (justo antes del pin). */
+  readonly salirDeLasHistorias: (hacia: SalidaDeLasHistorias) => void
 }
 
 /** [B1.2b] La fracción del ancho que deja el panel en cada ancho (la escena centra el logo en su columna): su CSS. */
@@ -94,12 +96,13 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   const ultimaRueda = useRef(Number.NEGATIVE_INFINITY)
   const deLaRueda = useRef(false)
 
-  // [B1.2d] El orden: la cámara, el título, la barra y el panel (al irse, al revés). [B1.3] En las historias del teléfono el título
-  // llega en la aproximación y se va con la caída antes de que entre la historia (y la barra no se corre: es el menú).
+  // [B1.2d] El orden: la cámara, el título, la barra y el panel (al irse, al revés). [B1.2d B] T3 · En las historias (debajo de 1024) el
+  // título llega en la aproximación y se QUEDA arriba: recién después entran las historias, y al volver (deslizar hacia abajo) está ahí.
+  // La barra no se corre: es el menú.
   const fase = vistaDelPaso(paso).fase
   const adentro = fase === 'adentro'
   const tituloS = useTituloListo('portfolio') ? LENTOS.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO.s
-  const pedidoDelOrden = { camara: adentro, encabezado: historias ? fase === 'antes' && enCuadro : adentro, barra: adentro && !historias, panel: adentro }
+  const pedidoDelOrden = { camara: adentro, encabezado: historias ? (fase === 'antes' && enCuadro) || adentro : adentro, barra: adentro && !historias, panel: adentro }
   const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido)
   // [B1.2d] El orden llegó a lo pedido (el diagnóstico y el arnés miran el panel sólo así: no en el medio de una entrada o una salida).
   const ordenQuieto = orden.camara === pedidoDelOrden.camara && orden.encabezado === pedidoDelOrden.encabezado && orden.barra === pedidoDelOrden.barra && orden.panel === pedidoDelOrden.panel
@@ -230,7 +233,8 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   )
   const saltarAlPaso = useCallback((i: number, inmediato = false): void => saltar(i, inmediato, false), [saltar])
 
-  const { irAl } = useMandosDelPortfolio({ caja, actual, enVuelo, inerte, ultimaRueda, paso, historias, tituloS, irAlPx, saltar })
+  const { salirDeLasHistorias } = useMandosDelPortfolio({ caja, actual, enVuelo, inerte, ultimaRueda, paso, historias, tituloS, irAlPx, saltar })
+  useSinScrollEnLasHistorias(historias && orden.panel)
   const inerteDesde = useCallback((x: number, y: number): { readonly x: number; readonly y: number } | null => {
     if (inerte.current !== null && seMovioDeVerdad(inerte.current, x, y)) inerte.current = null
     return inerte.current
@@ -243,8 +247,8 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   return useMemo(
     () => ({
       paso, reducido, cerca, aLaVista: enCuadro && visible, mostradoDeDemos: mostrado, camara: orden.camara, encabezado: orden.encabezado, barra: orden.barra,
-      panel: orden.panel, ordenQuieto, avanceDelPaso: avance, saltarAlPaso, inerteDesde, deLaRueda: deLaRuedaAhora, enVuelo: enVueloAhora, historias, irAl,
+      panel: orden.panel, ordenQuieto, avanceDelPaso: avance, saltarAlPaso, inerteDesde, deLaRueda: deLaRuedaAhora, enVuelo: enVueloAhora, historias, salirDeLasHistorias,
     }),
-    [paso, reducido, cerca, enCuadro, visible, mostrado, orden, ordenQuieto, avance, saltarAlPaso, inerteDesde, deLaRuedaAhora, enVueloAhora, historias, irAl],
+    [paso, reducido, cerca, enCuadro, visible, mostrado, orden, ordenQuieto, avance, saltarAlPaso, inerteDesde, deLaRuedaAhora, enVueloAhora, historias, salirDeLasHistorias],
   )
 }

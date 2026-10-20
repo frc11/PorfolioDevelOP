@@ -11,6 +11,7 @@ import { CONTENIDO } from '../contenido'
 
 import { TIRA_DE_LA_TUYA } from './estado'
 import { FormularioDeLaTuya } from './FormularioDeLaTuya'
+import { FormularioEnPerspectiva } from './FormularioEnPerspectiva'
 import { enLaSecuencia } from './secuencia'
 import { SignoDePregunta } from './SignoDePregunta'
 import { CLASES_DE_LA_TIRA, CabeceraDeLaTira, idsDeLaTira } from './Tira'
@@ -41,17 +42,22 @@ export function LaTuya({ activa, visible, vivo }: { readonly activa: boolean; re
   const ids = idsDeLaTira('la-tuya')
   const c = CONTENIDO.laTuya
   return (
-    <div data-tira="la-tuya" data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo)} style={activa ? { paddingTop: DESPEJE_DE_LA_BARRA } : undefined}>
+    // [B1.2d B] B6 · el bloque entero (título, frase, bajada, formulario y la fila del botón), centrado en el alto del panel con el mismo
+    // despeje arriba y abajo: sin el hueco grande de abajo.
+    <div data-tira="la-tuya" data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo, activa && 'justify-center')} style={activa ? { paddingTop: DESPEJE_DE_LA_BARRA, paddingBottom: DESPEJE_DE_LA_BARRA } : undefined}>
       {activa ? <SignoDePregunta visible={visible} reducido={vivo.reducido} /> : null}
       <CabeceraDeLaTira id={ids.cabecera} indice={TIRA_DE_LA_TUYA} activa={activa} nombre={c.nombre} controla={ids.region} nivel={NIVEL_DEL_TITULO_DE_LA_TUYA} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(TIRA_DE_LA_TUYA, true)} />
-      <div id={ids.region} hidden={!activa} className="relative flex min-h-0 flex-1 flex-col gap-5 px-8 pb-12 pt-4">
+      <div id={ids.region} hidden={!activa} className="relative flex min-h-0 flex-col gap-5 px-8 pt-4">
         <motion.div {...enLaSecuencia(visible, 1, vivo.reducido)}>
           <Titular nivel="titulo-m" como="p">{c.frase}</Titular>
         </motion.div>
         <motion.div {...enLaSecuencia(visible, 2, vivo.reducido)}>
           <Cuerpo className="text-tinta/70">{c.bajada}</Cuerpo>
         </motion.div>
-        <FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} />
+        {/* [B1.2d B] B7 · `?form=3d`: el mismo formulario en perspectiva (una prueba; sin la bandera, plano). */}
+        <FormularioEnPerspectiva>
+          <FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} />
+        </FormularioEnPerspectiva>
       </div>
     </div>
   )

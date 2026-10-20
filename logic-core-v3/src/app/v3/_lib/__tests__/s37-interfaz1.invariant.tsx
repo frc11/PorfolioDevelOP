@@ -397,7 +397,8 @@ afirmar(!/group-focus-visible:/.test(MARCO) && veces(MARCO, 'group-has-focus-vis
 // [PULIDO 3B] B1 · el CTA del final es el de la transformación: el mismo gesto, con su progreso. [PULIDO 8] G2 · con el foco del
 // teclado (`:focus-visible`): el clic del mouse, que ya cae a mitad del giro, no salta la página.
 afirmar(leer('_secciones/por-que-develop/PorQueDevelop.tsx').includes('alEnfocar={llevarAlCta}') && leer('_secciones/por-que-develop/CtaTransformado.tsx').includes("onFocus={(e) => e.target.matches(':focus-visible') && alEnfocar(e.currentTarget, progreso.get())}"), 'el «Hablanos» del final: si toma el foco antes de llegar, la página va adonde llega (antes, el anillo alrededor de nada)')
-const CAMPOS_DEL_CONTACTO = leer('_chrome/contacto/CamposDelContacto.tsx')
+// [B1.2d B] La píldora y el texto largo del contacto viven en `_componentes/formularios/Campos.tsx` (los comparte «la tuya»).
+const CAMPOS_DEL_CONTACTO = leer('_chrome/contacto/CamposDelContacto.tsx') + leer('_componentes/formularios/Campos.tsx')
 const FORMULARIO = leer('_chrome/contacto/FormularioDeContacto.tsx')
 const sinComentarios = (fuente: string): string => fuente.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
 afirmarIgual(veces(sinComentarios(CAMPOS_DEL_CONTACTO + FORMULARIO), 'role="alert"'), 1, 'el contacto avisa los errores UNA vez, al enviar (antes, una alerta por campo que volvía a sonar con cada tecla)')

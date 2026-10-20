@@ -492,4 +492,123 @@ El orden es el de la tabla: cada uno se apoya en el anterior. B12a.4 y B12a.7 so
 
 ## Log
 
-(Se suma acá cuando arranque B12a.1.)
+### B12a.1 · el preset y la escena consciente de la ruta (2026-10-18)
+
+Valentino decidió D1 a D8 sobre el plan (`d51d95fc`).
+- D1: la página declara su preset.
+- D2: `<Link>` inmediato y la banda, sin View Transitions.
+- D3, corregida: el título de las páginas va con dos variantes de Archivo distintas de las del home, en 2 o 3 combinaciones detrás de `?titulo=1|2|3`.
+- D4: la navbar, en el layout.
+- D5: el desplegable con clic, Enter y hover con retardo; en el teléfono, un acordeón.
+- D6: la flecha devuelve el scroll, la noche y el paso del Portfolio.
+- D7: dos `next build`, al cerrar B12a.5 y B12a.7.
+- D8: el lienzo duerme detrás del papel.
+
+**Lo hecho:**
+- **`esc/ruta/preset.ts`**: `PresetDeLaEscena` (el id, los bloques que despiertan la escena, la noche y el acento), `PRESET_DEL_HOME`, el almacén (una PILA: la página nueva entra antes de que salga la vieja, y cada una saca sólo lo suyo), `despiertaEnLaPagina` (pura) y `bloquesDelPreset`.
+- **`esc/ruta/PresetDeLaPagina.tsx`**: la página lo apila al montarse (con `useLayoutEffect`) y lo saca al desmontarse, sin pintar nada. El home lo declara en `v3/page.tsx` con `PRESET_DEL_HOME`.
+- **`esc/ataduraAlScroll.ts`**: sin las secciones del home, la lectura del scroll pregunta al preset.
+  - Sin preset (las galerías de `/v3`), la escena se suspende (`never`) después de su primer cuadro, para que el lienzo no quede vacío.
+  - Con preset, despierta mientras asoma un bloque suyo, con el margen de encendido del home; en el papel duerme (D8).
+  - Se vuelve a leer cuando cambia el preset y cuando la escena pinta su primer cuadro.
+  - En el home la lectura es la de siempre.
+- **La suite s78-b12a** (`test:s78-b12a` y `test:s78`): 11 afirmaciones y 4 controles.
+
+**Verificación:**
+- lint limpio y `tsc` con 0 errores;
+- s74 34, s75 55, s76 670 (con el mapeo de la deriva), s10 240 y s78 11;
+- `verificar`: el reaper de Claude Code lo cortó por memoria (en segundo plano, con 2 GB libres). Lo reintenté una vez, partido en dos mitades en primer plano (`scratchpad/cola2/verificar-mitad.sh`), más los 16 grupos que no tienen script de agregado. Dio los 8 grupos rojos de la base (s1, s2, s3, s4, s5, s7, s8 y s17) con las mismas cuentas de suites rojas, y todo lo demás en verde (s74, s75, s76, s77 y s78 incluidos). La frontera, aparte: en verde;
+- sin `next build`.
+
+**Lo que no corrió por memoria: el criterio medido de B12a.1.** En `/v3/tipografia` en reposo tiene que dar ≤ 50 ms/s de tareas y 0 cuadros de más de 50 ms (en Fase 0, unos 600 ms/s y 3 o 4 cuadros largos). Con el dev de servicios arriba, el dev del home y un Chrome no entran juntos.
+- La sonda está lista: `scratchpad/ph/costo-subruta.ts`, con `BASE=http://localhost:3002`.
+
+**Qué mirar (B12a.1):**
+1. `/v3` a 1440 y 390: el home, igual que siempre.
+2. `/v3/tipografia` y `/v3/componentes`: la escena de fondo aparece (su primer cuadro) y queda quieta. El ventilador de la máquina se tiene que notar menos que antes.
+
+### B12a.2 · la intro de la página y la composición inicial (2026-10-19)
+
+**Lo hecho:**
+- **`esc/ruta/pistaDeLaIntro.ts`** (nuevo):
+  - `PANTALLAS_DE_LA_INTRO` (1,5).
+  - `COMPOSICION_INICIAL`: la pose del hero del home con el logo centrado (`frameX` 0; el hero lo corre a 0,5 para su texto). Es una copia: `CHOREO_KEYFRAMES[0]` es el destino del preloader del sitio vivo (`scene-framing.ts:144`) y no se toca.
+  - Las tres poses candidatas de la intro, detrás de `?intro=1|2|3` (sin la bandera, la 1). Las tres dejan el logo centrado y quedan dentro de las alturas y distancias del recorrido del home:
+    - 1, **acercarse**: de frente, más baja;
+    - 2, **girar**: 38° alrededor del logo, a media altura;
+    - 3, **subir**: más alto y un poco más lejos, mirando hacia abajo.
+  - `avanceDeLaIntro`: de 0, con el tope de la intro en el tope del cuadro, a 1, 1,5 pantallas después, medido en el layout.
+  - `AVANCE_DE_LA_INTRO`: el canal del avance, la referencia que el plan le da a la variante (§3.4).
+  - `pistaDeLaPagina`: la pista de la página, armada una vez por preset; no crea nada por cuadro.
+  - `luzDeLaPagina`: la luz del cuadro, que en una página es la del principio del recorrido con la noche del preset.
+- **`esc/ruta/preset.ts`**: suma el campo `pista`, `null` en el home.
+- **`esc/ataduraAlScroll.ts`**: en una página con pista, mide el tope de su intro en el layout y escribe el avance en `AVANCE_DE_LA_INTRO`. En la página no toca el progreso del rig.
+- **`esc/OrbitRig.tsx`**: tres líneas nuevas, y las líneas del home quedan tal cual (s38, s48, s52, s73 y s76 las fijan literalmente):
+  - en una página con pista, la cámara toma esa pista con el avance de la intro, encima de la del recorrido y de la mezcla del Portfolio;
+  - la luz (`luzDeLaPagina`) va antes de la noche disparada, así el nivel natural que ella publica, el que leen los módulos de noche, ya es la noche de la página;
+  - el dolly del CTA y el mouse del recorrido no llevan guarda: leen el progreso del rig, que en una página queda en el del hero.
+  - Queda en 651 líneas, la base de s8.
+- **`_componentes/pagina/IntroDeLaPagina.tsx`** (nuevo): el bloque de 1,5 pantallas, transparente, con el `h1` y la bajada fijos al tope mientras dura. Declara el preset de la página y, de noche, lleva los claros (`data-seccion="invertida"`).
+- **`/v3/prueba-de-pagina`** (nueva, instrumento sin indexar): la intro de noche y un cuerpo en papel. Tiene un enlace a cada pose y un preset por variante, armado una vez. Se borra cuando exista la primera página de servicio con su intro.
+- **s78-b12a**: suma §4 a §8, que son 22 afirmaciones con 8 controles. En total quedan 33.
+  - §4: el avance, 0 arriba y 1 a 1,5 pantallas (± 1 %), a 1440 × 900 y a 390 × 844.
+  - §5: la pose en avance 0 es la composición inicial en las tres variantes. Es la misma pose, así que hay 0 px de diferencia del logo a cualquier ancho.
+  - §6: la bandera, la pista que lee el rig y la luz.
+  - §7: el cableado.
+  - §8: el bloque y la ruta.
+  - De B12a.1 cambió una sola afirmación, la de §2: la lectura de la página ahora tiene las dos líneas del avance antes de decidir si despierta.
+  - Ninguna afirmación de otro sprint se tocó.
+
+**Decisiones mías, para que Valentino las vea:**
+1. **El avance va por un canal propio, no por el progreso del rig.** Ese progreso lo leen también los títulos 3D, el polvo, la formación, el moiré, el entorno, el dolly del CTA y el mouse, con el significado del home: con el avance en 0,4 aparecería en la página lo que el home muestra en 0,4. En una página quedan en el estado del hero (el progreso queda en 0 en una carga directa).
+   - Para B12a.5: al navegar desde el home, la vuelta a la composición inicial también tiene que llevar el progreso a 0. Si no, desde el CTA del home el dolly se metería en la página.
+2. **El cambio de pista vive en el rig, no en `pistaDelHome.ts`** (el árbol del plan, §9, decía ese archivo). La pista cambia con el preset sin un render, y el rig la lee en su cuadro.
+3. **La intro mide 1,5 pantallas, como dice el plan.** Con el avance en 1, el fondo del bloque llega al tope del cuadro: el papel sube desde la media pantalla, así que la última pantalla del movimiento se ve con el papel entrando.
+   - Si Valentino quiere ver el movimiento entero sin papel, el bloque pasa a 2,5 pantallas con el texto fijo, sin tocar el avance.
+
+**Verificación:**
+- lint limpio en los 7 archivos tocados y `tsc` con 0 errores. Para que `tsc` chequeara hubo que borrar `.next/dev/types`, que estaba roto con un error de sintaxis; lo regenera el dev.
+- `verificar`, partido en mitades en primer plano por la memoria (dos FRENO por memoria con los devs de :3000 arriba, retomados donde quedaron), más los 17 scripts sin agregado:
+  - los 8 grupos rojos de la base (s1, s2, s3, s4, s5, s7, s8 y s17) con las mismas suites y las mismas cuentas de fallas que B12a.1;
+  - todo lo demás en verde, s78 con 33.
+- Las suites que leen el rig (21) se corrieron otra vez después del último cambio: todas como en la base.
+- Sin `next build`.
+
+**Lo que no corrió por memoria:** la medición en el sitio, o sea el avance a 1,5 pantallas (± 1 %) y el logo a ≤ 1 px de la composición inicial a 1440 en la ruta de prueba. El modelo lo afirma en s78 (es la misma pose), pero el sitio no se midió: con un dev ajeno arriba, otro dev más un Chrome no entran en la regla de los 3 GB.
+
+**Fuera de scope (anotado, no hecho):**
+- La ruta de prueba no está en el padrón de rutas de demo (`s4-rutas-de-demo.ts`). Sumarla rompe la cuenta escrita a mano en `s7-integracion.invariant.tsx:167` (7 rutas). Su peso recién se mide con build: va con B12a.5 (D7).
+
+**P-H28 (cambio de prioridad, recibido durante B12a.2):** A2 y B ya estaban commiteados (`5ef4ce83` y `8336ba14`), y B12a.1 también (`fcd57f53`). Lo que había en curso era B12a.2, y lo llevé a este punto estable y lo commiteé.
+- El orden de ahora es P-H26 (el foco del modal), P-H27 (la regla de s77), `docs/rediseno/B12a-API.md` con las firmas definitivas, y después el resto de B12a.
+- El subsprint B ya está hecho, así que no queda nada de B1.2d para después de B12a.
+
+**Qué mirar (B12a.2) — elegir la pose de la intro:**
+1. `/v3/prueba-de-pagina?intro=1`, `?intro=2` y `?intro=3`, a 1440 y a 390. Arriba, de noche, el logo centrado: es la composición inicial. Scrolleá la intro (1,5 pantallas) y volvé: la cámara va y vuelve con el scroll. **Elegí la pose**; la elegida queda y la bandera se va.
+2. Sobre la escena de noche, el `h1` y la bajada en claro: que se lean.
+3. Cuando el papel tapa la escena, ella se duerme (D8); al volver, despierta sin saltar.
+4. Si la última pantalla del movimiento, con el papel entrando, te alcanza, o preferís la intro de 2,5 pantallas (decisión 3).
+5. `/v3` a 1440 y 390: el home igual que siempre (se tocó el rig).
+
+### P-H28 · el orden nuevo y la API publicada (2026-10-19)
+
+Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta completa de servicios depende de B12a. B ya estaba commiteado (`8336ba14`), así que no queda nada de B1.2d para después.
+
+**Las firmas definitivas** para servicios están en `docs/rediseno/B12a-API.md`: el preset de ruta, la intro, el preset del título y la ranura de variantes, con el estado de cada pieza.
+- Lo que la API fija y el código todavía no tiene llega con su subsprint:
+  - `variante` en el preset, `SELECTOR_DE_LA_INTRO`, el id de la página como valor del atributo de la intro y el acento en su bloque: B12a.3.
+  - `partes` del título y `TITULO_DE_PAGINA`: B12a.4.
+  - `PISTA_DE_LA_INTRO`: cuando Valentino elija la pose.
+- **La variante va en un módulo `'use client'`.** Así es una referencia de cliente, y el preset puede ir de una página de servidor a `PresetDeLaPagina`: React Flight serializa las referencias de cliente en cualquier prop y rechaza cualquier otra función (verificado en `react-server-dom-webpack-server.node.development.js:2943`).
+
+**El orden se reordenó.** El plan ponía la ranura última (B12a.7), y servicios necesita primero la ranura, la intro, el título y la navegación. La ranura sólo depende del preset (B12a.1), así que adelantarla no cuesta nada. La vuelta al home no bloquea a servicios (es del home), así que queda última.
+
+| # | Qué | En el plan |
+|---|---|---|
+| B12a.3 | la ranura de variantes, con su variante de prueba | B12a.7 |
+| B12a.4 | el título 3D y el `h1` (FRENO: `?titulo=`) | B12a.3 |
+| B12a.5 | la navbar en el layout y el desplegable | B12a.4 |
+| B12a.6 | la navegación cliente y el velo | B12a.5 |
+| B12a.7 | la vuelta al home | B12a.6 |
+
+**Los dos `next build` de D7 siguen a su contenido, no a su número.** Uno va al cerrar la ranura (B12a.3, por el presupuesto de 0,5 ms por cuadro) y el otro al cerrar la navegación cliente (B12a.6). Se avisan acá cuando corran.

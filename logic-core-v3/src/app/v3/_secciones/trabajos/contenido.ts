@@ -88,10 +88,8 @@ export const CONTENIDO = {
     whatsapp: 'o escribinos por WhatsApp',
   },
 
-  /** [B1.2c] Tablet: la pista de la primera entrada del panel (se va con el primer paso). */
-  pista: 'Seguí bajando',
-
-  /** [B1.3] Teléfono: los dos toques de la historia (el nombre de cada uno, para los lectores). */
+  /** [B1.3] Las historias (debajo de 1024): los dos controles del teclado (el nombre de cada uno, para los lectores). [B1.2d B] La pista
+   * de la tablet («Seguí bajando») se fue con las historias. */
   historias: { anterior: 'Proyecto anterior', siguiente: 'Proyecto siguiente' },
 } as const
 

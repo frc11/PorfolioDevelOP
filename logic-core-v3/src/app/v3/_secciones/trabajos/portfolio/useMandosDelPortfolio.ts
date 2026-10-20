@@ -2,15 +2,15 @@
 
 import { useCallback, useEffect, useRef, type RefObject } from 'react'
 
+import type { SalidaDeLasHistorias } from '../../../_componentes/historias/maquinaDeLasHistorias'
 import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
 
 import { vistaDelPaso } from './estado'
 import { conDialogo, medir, pegado, type Vuelo } from './medida'
 import { duracionDeLaSalida } from './orden'
-import { PANTALLAS_POR_PASO, PX_JUSTO_ANTES_DEL_PIN, bordesDelPaso, pxDeLaSeccion, scrollDelPx, type IndiceDePaso } from './pasos'
-import { destinoDeLaRueda, type DestinoDeLaRueda } from './rueda'
+import { PANTALLAS_POR_PASO, PX_JUSTO_ANTES_DEL_PIN, bordesDelPaso, pxDeLaSeccion, pxDelScroll, scrollDelPx, type IndiceDePaso } from './pasos'
+import { entraConLaRafaga, type DestinoDeLaRueda } from './rueda'
 import { useClicAfueraDelPanel, type ControlDelClicAfuera } from './useClicAfueraDelPanel'
-import { useDeslizamientoDelPortfolio, type ControlDelDeslizamiento } from './useDeslizamientoDelPortfolio'
 import { useRuedaDelPortfolio, type ControlDeLaRueda } from './useRuedaDelPortfolio'
 
 /** [B1.2c] Lo que dura una rueda «reciente» (ms): la inercia de Lenis después del último evento de un golpe fuerte. */
@@ -34,11 +34,11 @@ export interface PiezasDeLosMandos {
 
 /**
  * [B1.2d] LOS MANDOS DEL PORTFOLIO — lo que mueve la página porque lo pidió el visitante, fuera del scroll: la rueda de a un proyecto
- * y sus salidas (a Demos y hacia arriba), la entrada que atrapa la inercia de un golpe fuerte, los toques y el deslizamiento de las
- * historias y el clic afuera (A11). Salió de `usePortfolio.ts` (la regla de las 300 líneas). Las salidas tardan lo del orden: el panel
+ * y sus salidas (a Demos y hacia arriba), la entrada que atrapa la inercia de un golpe fuerte, [B1.2d B] las salidas de las historias
+ * (T2 a T8: la rueda y los deslices verticales SALEN; el scroll nunca avanza una historia) y el clic afuera (A11). Salió de `usePortfolio.ts` (la regla de las 300 líneas). Las salidas tardan lo del orden: el panel
  * se va y el título cae entero (`duracionDeLaSalida`).
  */
-export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly irAl: (sentido: 1 | -1) => void } {
+export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly salirDeLasHistorias: (hacia: SalidaDeLasHistorias) => void } {
   const { caja, actual, enVuelo, inerte, ultimaRueda, paso, historias, tituloS, irAlPx, saltar } = m
   const salidaMs = duracionDeLaSalida(tituloS) * 1000
 
@@ -52,19 +52,50 @@ export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly irAl: (s
     },
     [irAlPx, saltar, salidaMs],
   )
+  // [B1.2d B] Las salidas de las historias: adelante, a Demos (como después de «la tuya»); atrás, al título (justo antes del pin).
+  const salir = useCallback(
+    (hacia: SalidaDeLasHistorias): void => (hacia === 'adelante' ? irAlPx(pxDeLaSeccion(PANTALLAS_POR_PASO), salidaMs, -2) : irAlPx(PX_JUSTO_ANTES_DEL_PIN, salidaMs)),
+    [irAlPx, salidaMs],
+  )
   const control = useRef<ControlDeLaRueda | null>(null)
+  // [B1.2d] A2.3 · El vuelo de la ráfaga (su salida o su salteo), para tragar el resto de la ráfaga mientras dura.
+  const vueloDeLaRafaga = useRef<Vuelo | null>(null)
   useEffect(() => {
+    const rafaga = (sentido: 1 | -1, px: number): boolean => {
+      const vuelo = enVuelo.current
+      if (vuelo !== null && vuelo === vueloDeLaRafaga.current) return true
+      if (conDialogo(caja.current)) return false
+      const v = vistaDelPaso(actual.current)
+      const destino: DestinoDeLaRueda = sentido > 0 ? { tipo: 'demos' } : { tipo: 'arriba' }
+      // Afuera, con un vuelo en curso (la salida de una muesca): que termine; la rueda ya se traga.
+      if (vuelo !== null && v.fase !== 'adentro') return true
+      if (v.fase !== 'adentro') {
+        const lenis = LENIS_DEL_SITIO.instancia
+        const medida = medir(caja.current)
+        if (lenis === null || medida === null) return false
+        // Adónde va la página: el destino de Lenis y este evento, que Lenis suma DESPUÉS (la rueda del Portfolio escucha en la captura).
+        const hacia = pxDelScroll(lenis.targetScroll + px * lenis.options.wheelMultiplier, medida.tope, medida.alto)
+        if (!entraConLaRafaga(medida.px, hacia, sentido, PANTALLAS_POR_PASO)) return false
+      }
+      // Adentro sale sin recorrer los proyectos que faltan; afuera, la ráfaga que entra al tramo lo saltea entero (el paso de destino ya:
+      // ni la píldora ni el panel).
+      ir(destino, true)
+      vueloDeLaRafaga.current = enVuelo.current
+      return true
+    }
     control.current = {
       manda: () => {
         const v = vistaDelPaso(actual.current)
         return v.fase === 'adentro' && pegado(caja.current) && !conDialogo(caja.current) ? v.tira : null
       },
       ocupado: () => enVuelo.current !== null,
-      ir: (d) => ir(d, true),
+      // [B1.2d B] T8 · en las historias la rueda no avanza: sale (abajo, a Demos; arriba, al título).
+      ir: (d) => (historias ? salir(d.tipo === 'demos' || (d.tipo === 'paso' && d.indice > vistaDelPaso(actual.current).tira) ? 'adelante' : 'atras') : ir(d, true)),
+      rafaga,
       inerte,
       ultimaRueda,
     }
-  }, [actual, caja, enVuelo, inerte, ir, ultimaRueda])
+  }, [actual, caja, enVuelo, historias, inerte, ir, salir, ultimaRueda])
   useRuedaDelPortfolio(control)
 
   // [B1.2c] La entrada del panel ATRAPA la inercia de la rueda: un golpe fuerte que viene de afuera dejó a Lenis yendo más allá del
@@ -82,24 +113,15 @@ export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly irAl: (s
     if (destino > scrollDelPx(hasta, medida.tope, medida.alto) || destino < scrollDelPx(desde, medida.tope, medida.alto)) saltar(vistaDelPaso(paso).tira, false, true)
   }, [caja, enVuelo, fase, paso, saltar, ultimaRueda])
 
-  // [B1.3] Los toques de la historia (el modelo de la rueda, el paso en silencio), el deslizamiento que se asienta de a un proyecto y
-  // [B1.2d] A11, el clic afuera (justo antes del pin, con la salida normal). Leídos en el evento: un `ref`, como la rueda.
-  const deslizamiento = useRef<ControlDelDeslizamiento | null>(null)
-  const mandos = useRef<ControlDelClicAfuera & { readonly irAl: (sentido: 1 | -1) => void } | null>(null)
+  // [B1.2d] A11, el clic afuera (justo antes del pin, con la salida normal). Leído en el evento: un `ref`, como la rueda.
+  const mandos = useRef<ControlDelClicAfuera | null>(null)
   useEffect(() => {
-    deslizamiento.current = { caja, paso: () => actual.current, ocupado: () => enVuelo.current !== null, irAlPaso: (i) => saltar(i, false, false) }
     mandos.current = {
-      irAl: (sentido) => {
-        const v = vistaDelPaso(actual.current)
-        if (v.fase === 'adentro') ir(destinoDeLaRueda(v.tira, sentido), false)
-      },
       adentro: () => vistaDelPaso(actual.current).fase === 'adentro' && pegado(caja.current) && !conDialogo(caja.current),
       salir: () => irAlPx(PX_JUSTO_ANTES_DEL_PIN, salidaMs),
     }
-  }, [actual, caja, enVuelo, ir, irAlPx, saltar, salidaMs])
-  useDeslizamientoDelPortfolio(historias, deslizamiento)
+  }, [actual, caja, irAlPx, salidaMs])
   useClicAfueraDelPanel(caja, mandos)
-  const irAl = useCallback((sentido: 1 | -1): void => mandos.current?.irAl(sentido), [])
 
-  return { irAl }
+  return { salirDeLasHistorias: salir }
 }

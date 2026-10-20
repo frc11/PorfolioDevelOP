@@ -12,9 +12,9 @@ import { cn } from '@/lib/utils'
  * disco de vidrio del botón de sonido (`ControlDelSonido`: la superficie translúcida, el desenfoque, el borde fino y la sombra
  * flotante) y los íconos de lucide con su trazo de 1,5.
  *
- * Por ahora SÓLO el componente (y su prueba, s77). Dónde va cuando se toquen esas piezas (B1.2d): el video de la tira activa del
- * Portfolio (`_secciones/trabajos/portfolio/MedioDeLaTira.tsx`, en la tira del escritorio y en la historia del teléfono) y el de cada
- * servicio (`_secciones/servicios/VideoDeServicio.tsx`). Las demos vivas de Tu panel ya tienen la suya (`_panel-vivo/DemoDelPanel.tsx`).
+ * [B1.2d B] Integrada en el video en bucle de la tira activa del Portfolio, en escritorio (`_secciones/trabajos/portfolio/MedioDeLaTira.tsx`;
+ * en las historias la pausa es mantener apretado). Falta el de cada servicio (`_secciones/servicios/VideoDeServicio.tsx`), cuando se
+ * toque esa pieza. Las demos vivas de Tu panel ya tienen la suya (`_panel-vivo/DemoDelPanel.tsx`).
  */
 export interface PropsDeBotonPausa {
   /** Si el video está en pausa (el botón, apretado). */

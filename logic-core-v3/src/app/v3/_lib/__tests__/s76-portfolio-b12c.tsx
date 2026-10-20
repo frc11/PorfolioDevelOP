@@ -5,7 +5,7 @@
  * no se corta. (La cámara de frente y el título en el plano del logo: §9, §9b y §9c de `s76-portfolio-escena.tsx`.) Cada afirmación
  * con su control positivo. El arnés de carga mide la rueda en el sitio (`scripts-carga/rueda.ts`).
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { HOME_INTRO_PHASES } from '@/components/layout/home-intro/introTimeline'
@@ -23,7 +23,6 @@ import { CORRIMIENTO } from '../../_chrome/barra/corrimiento'
 import { validarContacto } from '../../_chrome/contacto/enviarContacto'
 import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
 import { activaElHover } from '../../_secciones/trabajos/portfolio/Acordeon'
-import { estadosDeLasBarras } from '../../_secciones/trabajos/portfolio/BarrasDelPortfolio'
 import { PRESENCIA_DEL_ENCABEZADO } from '../../_secciones/trabajos/portfolio/EncabezadoDelPortfolio'
 import { CLASE_DEL_ROTULO, Ficha } from '../../_secciones/trabajos/portfolio/Ficha'
 import { CAMPOS_DE_LA_TUYA, datosDelFormulario } from '../../_secciones/trabajos/portfolio/FormularioDeLaTuya'
@@ -67,25 +66,32 @@ export function afirmarB12c(): void {
     return (p - t) / tituloS
   }
   const entrada = recorridoDelOrden(AFUERA, ADENTRO, conEl3d)
-  afirmarIgual(comoTexto(entrada), ['Cebp@0.00', 'CEbp@0.70', 'CEBp@1.42', 'CEBP@1.82'], `la entrada: la cámara (${String(ORDEN.camaraS)} s, así el título queda de frente en el plano del logo), el título, la barra (${String(ORDEN.barraS)} s, termina justo antes del panel) y el panel`)
-  afirmar(delTituloAlPanel(entrada, conEl3d) >= 0.8 - 1e-9 && Math.abs(entrada[2].enS + ORDEN.barraS - entrada[3].enS) < 1e-9, '  el panel arranca con el título al 80 % de su llegada (o más), y la barra termina cuando el panel empieza', `${(delTituloAlPanel(entrada, conEl3d) * 100).toFixed(1)} %`)
+  afirmarIgual(comoTexto(entrada), ['Cebp@0.00', 'CEbp@0.70', 'CEBp@1.62', 'CEBP@1.82'], `la entrada: la cámara (${String(ORDEN.camaraS)} s, así el título queda de frente en el plano del logo), el título, la barra (su primer tiempo, ${String(ORDEN.barraPrimerTiempoS)} s, antes del panel: [B1.2d] A2.2) y el panel`)
+  // [A2.2] El criterio: la contracción de la píldora (su segundo tiempo, que arranca cuando termina el primero) a ±50 ms de la entrada del panel.
+  const contraccionAlPanel = (r: readonly { readonly estado: Orden; readonly enS: number }[]): number => Math.abs((r.find((x) => x.estado.barra)?.enS ?? Number.NaN) + ORDEN.barraPrimerTiempoS - (r.find((x) => x.estado.panel)?.enS ?? Number.NaN))
+  afirmar(delTituloAlPanel(entrada, conEl3d) >= 0.8 - 1e-9 && contraccionAlPanel(entrada) <= 0.05 && ORDEN.barraPrimerTiempoS * 2 === ORDEN.barraS, '  el panel arranca con el título al 80 % de su llegada (o más), A LA PAR de la contracción de la píldora (A2.2: ±50 ms)', `${(delTituloAlPanel(entrada, conEl3d) * 100).toFixed(1)} % · ${(contraccionAlPanel(entrada) * 1000).toFixed(0)} ms`)
+  controlPositivo('  el detector ve el orden de B1.2d A (los dos tiempos de la barra antes del panel: la contracción iba 200 ms antes)', [{ estado: { camara: true, encabezado: true, barra: true, panel: false }, enS: 1.42 }, { estado: ADENTRO, enS: 1.82 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => contraccionAlPanel(r) <= 0.05)
   controlPositivo('  el detector ve el orden de B1.2c (el panel entraba con la cámara, antes que el título)', [{ estado: { camara: true, encabezado: false, barra: false, panel: true }, enS: 0 }, { estado: ADENTRO, enS: 0.7 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => delTituloAlPanel(r, conEl3d) >= 0.8 - 1e-9)
-  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, conEl3d)), ['CEBp@0.00', 'CeBp@0.42', 'Cebp@0.70', 'cebp@1.82'], 'la salida, al revés: el panel, la caída del título cuando al panel le falta el mismo 20 %, la barra con el panel afuera y la cámara con el título caído entero')
+  const salida = recorridoDelOrden(ADENTRO, AFUERA, conEl3d)
+  afirmarIgual(comoTexto(salida), ['CEBp@0.00', 'CEbp@0.00', 'Cebp@0.42', 'cebp@1.82'], 'la salida, al revés: el panel y con él la barra (A2.2: la expansión de la píldora a la par de la salida del panel, la contracción después), la caída del título cuando al panel le falta el mismo 20 % y la cámara con el título caído entero')
+  const expansionALaSalida = (r: readonly { readonly estado: Orden; readonly enS: number }[]): number => Math.abs((r.find((x) => !x.estado.barra)?.enS ?? Number.NaN) - (r.find((x) => !x.estado.panel)?.enS ?? Number.NaN))
+  controlPositivo('  el detector ve la salida de B1.2d A (la barra volvía con el panel ya afuera, 700 ms después)', [{ estado: { camara: true, encabezado: true, barra: true, panel: false }, enS: 0 }, { estado: { camara: true, encabezado: false, barra: true, panel: false }, enS: 0.42 }, { estado: { camara: true, encabezado: false, barra: false, panel: false }, enS: 0.7 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => expansionALaSalida(r) <= 0.05)
+  afirmar(expansionALaSalida(salida) <= 0.05, '  (la expansión de la píldora arranca a ±50 ms de la salida del panel)')
   // Lo pedido se da vuelta a mitad de camino: cada pieza recuerda cuándo cambió, así que el panel nunca se adelanta al 80 % del título.
   const recien = recorridoDelOrden({ camara: true, encabezado: true, barra: false, panel: false }, ADENTRO, conEl3d, false, { camara: -0.7, encabezado: 0, barra: -Infinity, panel: -Infinity })
-  afirmarIgual(comoTexto(recien), ['CEBp@0.72', 'CEBP@1.12'], '  con el título recién llegado, la barra y el panel esperan lo suyo desde ese momento (no desde la vuelta)')
-  controlPositivo('  el detector ve una vuelta que adelanta el panel (B1.2c: el orden sin relojes por pieza)', ['CEBP@0.00'], (r: string[]) => JSON.stringify(r) === JSON.stringify(['CEBp@0.72', 'CEBP@1.12']))
+  afirmarIgual(comoTexto(recien), ['CEBp@0.92', 'CEBP@1.12'], '  con el título recién llegado, la barra y el panel esperan lo suyo desde ese momento (no desde la vuelta)')
+  controlPositivo('  el detector ve una vuelta que adelanta el panel (B1.2c: el orden sin relojes por pieza)', ['CEBP@0.00'], (r: string[]) => JSON.stringify(r) === JSON.stringify(['CEBp@0.92', 'CEBP@1.12']))
   afirmarIgual(comoTexto(recorridoDelOrden({ camara: true, encabezado: true, barra: false, panel: false }, AFUERA, conEl3d, false, { camara: -0.7, encabezado: -0.3, barra: -Infinity, panel: -Infinity })), ['Cebp@0.00', 'cebp@1.40'], '  y si se da vuelta para afuera, el título cae desde ahí y la cámara vuelve cuando terminó de caer')
   afirmar(ORDEN.camaraS === PERSECUCION_DEL_PESO_S && ORDEN.panelS === 0.7 && /duration-700/.test(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)) && ORDEN.barraS === (2 * CORRIMIENTO.tiempoMs) / 1000, '  las esperas son las de la escena: la persecución de la cámara, la transición del panel (700 ms) y los dos tiempos de la barra')
   afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, conEl3d, true)), ['CEBp@0.00', 'CeBp@0.00', 'Cebp@0.00', 'cebp@0.00'], '  con movimiento reducido, de una')
   // Abajo de 1024 no hay título 3D: lo que llega y cae es el del DOM (la presencia, 0,6 s).
-  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, PRESENCIA_DEL_ENCABEZADO.s)), ['CEBp@0.00', 'CeBp@0.58', 'Cebp@0.70', 'cebp@1.18'], '  sin el título 3D (abajo de 1024), con los 0,6 s del DOM')
+  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, PRESENCIA_DEL_ENCABEZADO.s)), ['CEBp@0.00', 'CEbp@0.00', 'Cebp@0.58', 'cebp@1.18'], '  sin el título 3D (abajo de 1024), con los 0,6 s del DOM')
   afirmar(Math.abs(duracionDeLaSalida(conEl3d) - 1.82) < 1e-9, '  la salida de la rueda (a Demos y hacia arriba) dura lo que se ve: el panel y la caída entera del título')
   const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
   const escenario = sinComentarios(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`))
   const cableado = (u: string, e: string): boolean =>
     /const tituloS = useTituloListo\('portfolio'\) \? LENTOS\.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO\.s/.test(u) &&
-    /const pedidoDelOrden = \{ camara: adentro, encabezado: historias \? fase === 'antes' && enCuadro : adentro, barra: adentro && !historias, panel: adentro \}/.test(u) &&
+    /const pedidoDelOrden = \{ camara: adentro, encabezado: historias \? \(fase === 'antes' && enCuadro\) \|\| adentro : adentro, barra: adentro && !historias, panel: adentro \}/.test(u) &&
     /useOrdenDeLaEscena\(pedidoDelOrden, tituloS, reducido\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.camara/.test(u) && /useBarraDelPortfolio\(caja, orden\.barra\)/.test(u) &&
     /!vivo\.panel && 'translate-x-full'/.test(e) && /<EncabezadoDelPortfolio seccion=\{seccion\} adentro=\{vivo\.encabezado\}/.test(e)
   afirmar(cableado(usePortfolio, escenario), '  y así se cablea: la cámara (con el oscurecido de `PORTFOLIO_EN_LA_ESCENA`), el encabezado, la barra y el panel salen del orden, no del paso')
@@ -233,13 +239,13 @@ export function afirmarB12c(): void {
   afirmar(/stroke-dashoffset="0"/.test(armado) && /stroke-dashoffset="1"/.test(armandose) && /<SignoQueSeArma key=\{entrada\}/.test(signo), '  con movimiento reducido aparece armado (el trazo entero); si no, arranca sin dibujar, y cada entrada lo monta de nuevo (se rearma)')
 
   // ═══════════════════════════════════════════════════════════════════════════
-  titulo('B1.2c · 25 · Tablet: las barras de progreso, la pista «Seguí bajando» y el tap en un lomo')
+  titulo('B1.2c · 25 · [B1.2d B] Tablet (T2): ya no hay lomos, barras ni pista; el tap en un lomo queda para el escritorio')
 
-  afirmarIgual([estadosDeLasBarras(0, 'antes'), estadosDeLasBarras(1, 'adentro'), estadosDeLasBarras(3, 'despues')], [['vacia', 'vacia', 'vacia', 'vacia'], ['llena', 'activa', 'vacia', 'vacia'], ['llena', 'llena', 'llena', 'llena']], 'una barra por proyecto y la de «la tuya»: las vistas llenas, la del activo con lo recorrido de su paso, las que vienen vacías')
+  // T2 · debajo de 1024 son las historias (s76 §27): las barras y la pista de la tablet se fueron con su archivo.
   const escenarioCompleto = leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)
-  const barras = leer(`${PORTFOLIO}/BarrasDelPortfolio.tsx`)
-  afirmar(/<BarrasDelPortfolio vivo=\{vivo\} className="hidden shrink-0 px-8 pb-2 max-escritorio:flex"/.test(escenarioCompleto) && /<PistaDelPortfolio vivo=\{vivo\} className="absolute inset-x-0 bottom-6 hidden justify-center max-escritorio:flex/.test(escenarioCompleto), '  arriba del panel, abajo de 1024 (en escritorio no), y la pista al pie del panel')
-  afirmar(/if \(desde\.current !== null && \(!vivo\.panel \|\| vivo\.paso !== desde\.current\)\) marcarLaPista\(\)/.test(barras) && /window\.sessionStorage\.setItem\(CLAVE_DE_LA_PISTA, 'vista'\)/.test(barras) && /hidden=\{vista \|\| !vivo\.panel\}/.test(barras), '  la pista: la primera vez que entra el panel; se va con el primer paso (o con el panel) y no vuelve en la sesión')
+  const sinLaTablet = (e: string): boolean => !/BarrasDelPortfolio|PistaDelPortfolio|max-tablet:/.test(e) && !existsSync(path.join(V3, `${PORTFOLIO}/BarrasDelPortfolio.tsx`))
+  afirmar(sinLaTablet(escenarioCompleto), 'debajo de 1024 no quedan las barras de progreso ni la pista de la tablet: son historias, con las barras del componente común')
+  controlPositivo('  el detector ve el escenario de B1.2c (las barras arriba del panel abajo de 1024)', `${escenarioCompleto}\n<BarrasDelPortfolio vivo={vivo} className="hidden shrink-0 px-8 pb-2 max-escritorio:flex" />`, sinLaTablet)
   afirmar(/alElegir=\{\(\) => vivo\.saltarAlPaso\(indice, true\)\}/.test(leer(`${PORTFOLIO}/Tira.tsx`)), '  tap en un lomo = saltar a ese proyecto con el modelo del hover: activo ya, el scroll en silencio')
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -253,13 +259,15 @@ export function afirmarB12c(): void {
   const tamanos = [
     { ancho: 1440, columna: 0.5, nivel: displayXl(1440) },
     { ancho: 1024, columna: 0.5, nivel: displayXl(1024) },
-    { ancho: 820, columna: 0.4, nivel: 56 },
-    { ancho: 1023, columna: 0.4, nivel: 56 },
+    // [B1.2d B] T2 · en la tablet la columna es todo el ancho (las historias): el título entra con más aire.
+    { ancho: 820, columna: 1, nivel: 56 },
+    { ancho: 1023, columna: 1, nivel: 56 },
   ].map((q) => {
     const caja = q.columna * q.ancho - 64
     const tamano = Math.min(q.nivel * CRECIMIENTO_DEL_TITULO, caja / ANCHO_DEL_TITULO_EN_EM)
     return { ...q, caja, tamano }
   })
   afirmar(tamanos.every((q) => q.tamano > q.nivel && q.tamano * avance <= q.caja), 'más grande que su nivel en los cuatro cuadros y entero en su columna', tamanos.map((q) => `${String(q.ancho)}: ${q.nivel.toFixed(0)} → ${q.tamano.toFixed(1)} px`).join(' · '))
-  controlPositivo('  el detector ve el ×1,15 sin tope (a 820 se corta)', tamanos[2], (q: (typeof tamanos)[number]) => q.nivel * CRECIMIENTO_DEL_TITULO * avance <= q.caja)
+  // [B1.2d B] La columna angosta de la tablet de B1.2c (el 40 % a 820): ahí el ×1,15 sin tope se cortaba.
+  controlPositivo('  el detector ve el ×1,15 sin tope (en una columna angosta, el 40 % a 820, se corta)', { ...tamanos[2], caja: 0.4 * 820 - 64 }, (q: (typeof tamanos)[number]) => q.nivel * CRECIMIENTO_DEL_TITULO * avance <= q.caja)
 }

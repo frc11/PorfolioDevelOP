@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, type RefObject } from 'react'
 
-import { CORRIMIENTO, izquierdaCorrida, tiemposDelCorrimiento, useCorrimientoPedido, type Bordes } from './corrimiento'
+import { CORRIMIENTO, izquierdaCorrida, publicarLaPastilla, tiemposDelCorrimiento, useCorrimientoPedido, type Bordes } from './corrimiento'
 
 /** Las propiedades que el corrimiento escribe en línea (en reposo la píldora vuelve a las de `barra.css`: centrada). */
 const EN_LINEA = ['left', 'width', 'transform'] as const
@@ -47,8 +47,11 @@ export function useCorrimientoDeLaPastilla(pastilla: RefObject<HTMLElement | nul
       animaciones.current = []
       const reposo = enReposo(el, origen)
       const sonido = document.querySelector('[data-pieza="control-del-sonido"], [data-pieza="sonido-de-la-esquina"]')?.getBoundingClientRect().right ?? 0
-      const corre = pedido !== null && window.matchMedia(CORRIMIENTO.consulta).matches && cabecera.getAttribute('data-modo') !== 'menu'
+      const puede = window.matchMedia(CORRIMIENTO.consulta).matches && cabecera.getAttribute('data-modo') !== 'menu'
+      const corre = pedido !== null && puede
       const ancho = reposo.r - reposo.l
+      // [A2.1] La píldora en reposo, para el despeje del medio del panel (su geometría, no su momento).
+      publicarLaPastilla({ ancho, abajo: el.getBoundingClientRect().bottom, finDelSonido: sonido - origen, puede })
       const l = corre ? izquierdaCorrida(pedido, ancho, sonido - origen) : reposo.l
       const hasta: Bordes = { l, r: l + ancho }
       const dejar = (b: Bordes): void => {
@@ -90,11 +93,12 @@ export function useCorrimientoDeLaPastilla(pastilla: RefObject<HTMLElement | nul
     return () => window.removeEventListener('resize', alCambiarElTamano)
   }, [pastilla, pedido])
 
-  // Al desmontar, ninguna animación colgada.
+  // Al desmontar, ninguna animación colgada (y la píldora deja de despejar el medio).
   useLayoutEffect(
     () => () => {
       for (const a of animaciones.current) a.cancel()
       animaciones.current = []
+      publicarLaPastilla(null)
     },
     [],
   )
