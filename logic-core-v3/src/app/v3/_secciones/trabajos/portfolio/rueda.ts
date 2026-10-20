@@ -70,58 +70,16 @@ export function recorridoDeLaRueda(activa: number, hover: number | null, muescas
   return destino
 }
 
-// ─── [B1.2d] A2.3 · La ráfaga ─────────────────────────────────────────────
+// ─── [F2] La entrada atrapa la rueda ──────────────────────────────────────
 
 /**
- * LA RÁFAGA — una rueda apurada (3 muescas o más en menos de 300 ms, o un trackpad a la misma velocidad: lo que cuenta son los px en
- * un mismo sentido dentro de la ventana, a 100 por muesca). Con una ráfaga el Portfolio no se recorre: si la ráfaga entra al tramo, se
- * saltea entero (ni la píldora ni el panel, directo a Demos o hacia arriba); si llega con el panel adentro, sale sin recorrer los
- * proyectos que faltan. Con muescas sueltas, de a un proyecto, como siempre. Calibrable con `?rafaga=` (`3`, `3-300`: las muescas y la
- * ventana; `no`, apagada).
+ * [F2] EL PORTFOLIO SE VE SIEMPRE — puro. Afuera del tramo, el evento de la rueda que lleva la página adentro (`hacia`: el destino de
+ * Lenis con este evento, en px de la regla) la atrapa, sea una muesca, una ráfaga o la inercia del trackpad: bajando desde antes del pin
+ * aterriza en El Garage; subiendo desde la cola, en «la tuya». Devuelve la tira de aterrizaje, o `null` si la rueda no entra. Lo que
+ * queda del impulso se descarta mientras el Portfolio entra (`useRuedaDelPortfolio`).
  */
-export interface CalibracionDeLaRafaga {
-  readonly muescas: number
-  readonly ventanaMs: number
-}
-
-export const RAFAGA = { muescas: 3, ventanaMs: 300, pxPorMuesca: 100 } as const
-
-/** La calibración de la URL (`?rafaga=`), o la de siempre. */
-export function calibracionDeLaRafaga(busqueda: string): CalibracionDeLaRafaga {
-  const valor = new URLSearchParams(busqueda).get('rafaga')
-  if (valor === null) return RAFAGA
-  if (valor === 'no') return { muescas: Number.POSITIVE_INFINITY, ventanaMs: RAFAGA.ventanaMs }
-  const m = /^(\d+(?:\.\d+)?)(?:-(\d+))?$/.exec(valor)
-  if (m === null) return RAFAGA
-  return { muescas: Number(m[1]), ventanaMs: m[2] === undefined ? RAFAGA.ventanaMs : Number(m[2]) }
-}
-
-/** Un evento de la rueda en el rastro: cuándo (ms) y cuánto (px, con su signo). */
-export interface EventoDelRastro {
-  readonly t: number
-  readonly px: number
-}
-
-/**
- * Un evento más: el rastro que sigue (los de la ventana, en el mismo sentido: un cambio de sentido lo vacía) y, si ya es una ráfaga, su
- * sentido (1 abajo, −1 arriba).
- */
-export function rafagaDeLaRueda(
-  rastro: readonly EventoDelRastro[],
-  px: number,
-  ahora: number,
-  cal: CalibracionDeLaRafaga = RAFAGA,
-): { readonly rastro: readonly EventoDelRastro[]; readonly sentido: 1 | -1 | null } {
-  const signo = Math.sign(px)
-  const sigue = [...rastro.filter((e) => ahora - e.t < cal.ventanaMs && Math.sign(e.px) === signo), { t: ahora, px }]
-  const suma = sigue.reduce((s, e) => s + Math.abs(e.px), 0)
-  return { rastro: sigue, sentido: signo !== 0 && suma >= cal.muescas * RAFAGA.pxPorMuesca ? (signo > 0 ? 1 : -1) : null }
-}
-
-/**
- * ¿La ráfaga entra al tramo del Portfolio? `px`: dónde está la página; `hacia`: adónde la lleva Lenis (los dos en px de la regla).
- * Bajando, de antes de la salida al pin o más allá; subiendo, del pin o más abajo a antes de la salida.
- */
-export function entraConLaRafaga(px: number, hacia: number, sentido: 1 | -1, paso: number): boolean {
-  return sentido > 0 ? px < pxDeLaSalida(paso) && hacia >= PX_DE_LA_APROXIMACION : px >= PX_DE_LA_APROXIMACION && hacia < pxDeLaSalida(paso)
+export function tiraDeLaEntrada(fase: 'antes' | 'adentro' | 'despues', hacia: number, sentido: 1 | -1, paso: number): number | null {
+  if (fase === 'antes' && sentido > 0 && hacia >= PX_DE_LA_APROXIMACION) return 0
+  if (fase === 'despues' && sentido < 0 && hacia < pxDeLaSalida(paso)) return CANTIDAD_DE_PASOS - 1
+  return null
 }

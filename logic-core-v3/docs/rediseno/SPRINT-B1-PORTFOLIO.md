@@ -1869,3 +1869,71 @@ export function Historias<T extends ItemDeHistoria>(p: PropsDeLasHistorias<T>): 
    - la ficha abajo, en el último cuarto.
 9. **T6/T7**, «la tuya» en las historias: no pasa sola; los toques sobre los campos escriben (no cambian de historia); con un campo enfocado nada avanza.
 10. **T8**, con la rueda (a 820 con mouse) y con el dedo: el scroll no avanza las historias.
+
+## 15. Los arreglos F1–F7 (2026-10-20)
+
+Valentino miró la Cola 2 y encontró bugs que un navegador hubiera agarrado: casi todo se había commiteado sin verlo andar en el sitio. Desde acá cambia el método:
+1. Antes de arreglar, el bug se reproduce en el arnés (Playwright con el Chrome del sistema contra el dev, :3002) y la prueba da ROJO.
+2. Con el arreglo da VERDE, y el control positivo (el defecto reintroducido) vuelve a dar rojo.
+3. Nada se commitea sin verlo andar en el navegador.
+4. Cada grupo de arreglos es un commit, con su lista de qué mirar.
+
+### 15.1 F1 + F2 · La rueda: el Portfolio se ve siempre
+
+**F1 · Reproducido en rojo** (`scripts-carga/entrada.ts`): desde `/v3#quienes-somos`, la rueda hasta pasar el Portfolio, grabando cuadro a cuadro el paso, el panel, la barra y el encabezado. Los cuatro casos dieron rojo:
+
+| Ancho | Gesto | Pasos (`+`: con el panel adentro) | Violaciones |
+|---|---|---|---|
+| 1440 | muescas sueltas (cada 700 ms) | -1 → 0 → 1 → 2+ → 3+ → 4+ | no aterrizó en el primero, proyectos sin panel |
+| 1440 | ráfagas (5 muescas en 200 ms) | -1 → 4 | no apareció |
+| 1024 | muescas | -1 → 0 → 1 → 2+ → 3+ → 4+ | igual que a 1440 |
+| 1024 | ráfagas | -1 → 4 | igual que a 1440 |
+
+**Las causas, en los cuadros:** son dos.
+- **Con muescas:** el paso 0 se publica en el pin y la muesca siguiente (455 ms después) ya avanza a Esquina, porque la rueda mandaba apenas el paso estaba adentro. Pero el panel entra recién a los ~1,9 s (la cámara, el título, la píldora y el panel, A10), así que El Garage y Esquina pasaban sin panel. La ráfaga no tenía que ver acá: la matriz de A8 no lo veía porque frenaba la rueda apenas el paso estaba adentro.
+- **Con ráfagas:** la de A2.3 salteaba el Portfolio entero, como pedía la spec equivocada.
+
+**F2 · El arreglo** (A2.3 sale entero):
+- `rueda.ts`: sale la ráfaga (`rafagaDeLaRueda`, `?rafaga=`, `entraConLaRafaga`). Entra `tiraDeLaEntrada`, pura: afuera del tramo, el evento que lleva la página adentro (el destino de Lenis MÁS este evento) aterriza en El Garage bajando y en «la tuya» subiendo, por lejos que vaya.
+- `useRuedaDelPortfolio.ts`: antes que nada, la entrada. El evento que entra se traga y vuela al primero del sentido. Mientras el panel no terminó de entrar, la rueda se traga entera y el gesto queda disparado: el resto del impulso se descarta.
+- `useMandosDelPortfolio.ts`: `atrapa` y `entrando`. `manda` espera además a `entradaLista`.
+- `usePortfolio.ts`: `entradaLista` pasa a `true` 700 ms después de que el orden prende el panel (su transición).
+- Adentro no cambió nada: cada gesto es un paso (`gestoDeLaRueda`: una muesca, una ráfaga o la inercia del trackpad es UN gesto), y a Demos se pasa recién después de «la tuya».
+- En las historias (debajo de 1024) la trampa no corre: la rueda sale, como en B (lo mira F5).
+- **El control positivo:** `window.__defectosDelPortfolio = 'rueda-en-la-entrada'` lo pide el arnés antes de cargar (nunca la URL), y vuelve la rueda de antes: sin la trampa y con pasos mientras el panel entra.
+
+**En verde** (Chrome del sistema, contra el dev):
+- `entrada.ts`, 11 corridas:
+  - bajando desde Quiénes somos: 1440 y 1024 × muescas, ráfagas y trackpad;
+  - subiendo desde Demos: 1440 × muescas, ráfagas y trackpad, y 1024 × ráfagas.
+  - Todas `-1 → 0+ → 1+ → 2+ → 3+ → 4+` (subiendo, al revés), con un paso por gesto y sin la píldora corrida sin panel.
+- **El control:** `DEFECTO=rueda-en-la-entrada`, 1440 con muescas, vuelve a dar rojo (`-1 → 0 → 1 → 2+…`).
+- **La ráfaga en la matriz** (`MODO=rafaga`, reemplaza a la de A2.3), 16 de 16:
+  - entrar bajando y subiendo: una ráfaga y, con el paso ya en el de aterrizaje y el panel todavía afuera, otra; aterriza en El Garage o en «la tuya» y no pasa por otro;
+  - adentro bajando y subiendo: una ráfaga da UN paso.
+  - Las cuatro variantes van con muescas y con el trackpad, con y sin hover.
+  - **Su control** (`CONTROL=rafaga`, la rueda de antes): las 4 de entrar con muescas fallan, 4 de 4 (aterrizan en Esquina o en Banú).
+- **A8, las 24 de la rueda**, incluidas las 12 del trackpad que vuelven: 24 de 24, tres idas y vueltas cada una. El control de A8.1 sigue en rojo.
+- **Lo que el arnés encontró del propio arnés:** cada evento de rueda de Playwright tarda ~64 ms, así que su «trackpad» dura ~2,9 s y su cola ya cubre la entrada entera.
+  - La primera versión mandaba la segunda ráfaga después de la entrada, y avanzaba uno: eso es correcto por spec.
+  - La segunda la mandaba 500 ms después, cuando el paso todavía era -1, así que el control no discriminaba.
+  - Ahora la segunda va con el paso ya en el de aterrizaje y el panel afuera. Es el caso de F1.
+- **Fotos** (`scripts-carga/fotos.ts`): ráfaga desde la aproximación, a 1440 y 1024. A los 3,5 s está El Garage con el panel adentro; otra ráfaga lleva a Esquina.
+
+**Lo que se reemplazó por la spec**, cada uno con su control:
+- s76 §40 «A2.3 · La ráfaga: el Portfolio no se recorre» → «F2 · La entrada atrapa la rueda» (la regla pura, el cableado y que A2.3 salió).
+- s76 §41 «La ráfaga en la matriz» → «F2 · La ráfaga y la entrada con la rueda, en el arnés» (las dos cuentas).
+- s76 §38: la matriz pasa de 78 a 90 (vuelve el trackpad).
+- s76 de B1.2c: «manda sólo con el panel adentro…» suma la espera de `entradaLista`.
+
+**Afuera, anotado:**
+- Las teclas y el arrastre de la barra no pasan por la trampa (no son la rueda).
+- Un `PageDown` rápido puede seguir pasando el Portfolio.
+- Una tecla en los 200 ms entre la píldora y el panel puede correr la píldora sin panel.
+- La matriz A8 entera (las 90) va en las mediciones del final.
+
+**Qué mirar (F1 + F2):**
+1. `/v3#quienes-somos`, a 1440 y a 1024: bajá con la rueda de a una muesca. El Portfolio entra entero (título, píldora y panel) en El Garage. Mientras entra, las muescas no hacen nada; después, cada muesca es un proyecto: Esquina, Banú y «la tuya». Recién después de «la tuya», Demos.
+2. Lo mismo con un golpe fuerte de la rueda o con el trackpad: aterriza en El Garage y lo que sobra se pierde.
+3. Desde Demos subiendo: entra en «la tuya» y sube de a uno hasta El Garage. Después, hacia arriba.
+4. Que la espera de la entrada (unos 2,5 s con la rueda trabada) no se sienta como un cuelgue. Si se siente, se acorta el orden de la entrada (título, píldora y panel); la rueda la sigue igual.
