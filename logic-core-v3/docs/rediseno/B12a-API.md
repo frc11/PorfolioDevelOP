@@ -6,15 +6,17 @@
 
 **La regla:** estas firmas no cambian sin aviso. Si servicios necesita otra cosa, se pide como P-H y el cambio se anota acá con su fecha. Lo que todavía no existe en el código tiene la firma fijada igual, y dice en qué subsprint llega.
 
-**Estado** (2026-10-20, después de `627db1be`):
+**Estado** (2026-10-20, después de `4af1539c`):
 
 | Pieza | Estado |
 |---|---|
 | El preset de ruta | hecho (B12a.1, B12a.2 y B12a.3); `variante` es un id del registro (P-H29e) |
 | La intro | hecha (B12a.2 y B12a.3): la pista compartida con la pose 2 (P-H29g), `SELECTOR_DE_LA_INTRO`, el id de la página como valor del atributo y el acento en el bloque; el título 3D, con B12a.4 |
 | La ranura de variantes | hecha (B12a.3), con P-H29 a–f, medida en el build de D7 |
-| El preset del título | B12a.4 (la familia, a elegir por Valentino con `?titulo=1\|2\|3`) |
-| La navegación entre páginas | B12a.6: `EnlaceDeRuta`, que pide la salida de la variante antes del velo (§5) |
+| El preset del título | hecho (B12a.4, `4a74e290`); la familia, a elegir por Valentino con `?titulo=1\|2\|3` (sin la bandera, la 1) |
+| La navbar | hecha (B12a.5, `c99aaa7e`): el chrome lo monta el layout, el mismo en el home y en las páginas, con el desplegable de Servicios (§5) |
+| La navegación entre páginas | hecha (B12a.6, `f4b37280`): `EnlaceDeRuta`, que pide la salida de la variante antes del velo; la vuelta al home con la flecha (B12a.7, `7cb477d6`) (§5) |
+| Las historias | P-H31 (`4af1539c`): la transición propia, el freno en cualquier uso y las barras sobre el acento (§6) |
 
 **Los cambios de firma desde la primera versión (`8926656a`).** Todos son del 2026-10-20 y los pidió servicios como P-H29 (su `SPRINT-V0.md` §4):
 - `PresetDeLaEscena.variante` pasa de componente a id (e).
@@ -22,6 +24,10 @@
 - Llegan:
   - `SALIDA_DE_LA_VARIANTE_MS`, `pedirLaSalidaDeLaVariante` y `COMPOSICION_DE_LA_LUZ` (d y f);
   - `PISTA_DE_LA_INTRO` con `POSE_DE_LA_INTRO` (g).
+
+**Después (2026-10-20):**
+- **B12a.4:** `PresetDelTitulo` quedó sin `lectura`. `fuentes` son dos fuentes de página y `asiento` es el de la llegada (`AsientoDeLaLlegada`). `TituloDePagina` toma `partes` opcional (§3).
+- **P-H31:** `PropsDeLasHistorias` suma `transicion` y `colorDeLasBarras`, y llega `BARRAS_SOBRE_ACENTO` (§6).
 
 ---
 
@@ -98,27 +104,34 @@ export function ParrafoDeLaBajada(props: { readonly children: React.ReactNode })
 - `_servicios/Intro.tsx` deja su atributo (`data-intro-de-servicio`), su alto de una pantalla y la tapa interina: los tres pasan a ser los de `IntroDeLaPagina`.
 - Es el P-S chico que anticipaba el plan (D2): el bloque lo pone el home, y servicios pone su contenido adentro.
 
-## 3. El preset del título (P-H14)
+## 3. El preset del título (P-H14; hecho en B12a.4)
 
 ```ts
-// _componentes/titulos3d/presets.ts — B12a.4
+// _componentes/titulos3d/presets.ts
 export interface PresetDelTitulo {
-  /** D3: dos variantes de Archivo, ninguna la condensada 700 del home: la primera parte con `fuentes[0]` y la segunda con `fuentes[1]`. */
-  readonly fuentes: readonly [FuenteDelTitulo, FuenteDelTitulo]
-  readonly lectura: Titulo['lectura']
-  readonly asiento: 'cercano' | 'lejano'
+  /** D3: dos variantes de Archivo, ninguna la condensada del home: la primera parte con `fuentes[0]` y la segunda con `fuentes[1]`. */
+  readonly fuentes: readonly [FuenteDePagina, FuenteDePagina]
+  /** Dónde asienta la llegada al frenar a mitad. */
+  readonly asiento: AsientoDeLaLlegada
   /** Se va con una caída, nunca de golpe ni hacia arriba. */
   readonly saleCayendo: true
 }
-export const TITULO_DE_PAGINA: PresetDelTitulo     // el mismo en todas las páginas; las fuentes, las del combo que elija Valentino
+export const COMBINACIONES_DEL_TITULO: readonly [PresetDelTitulo, PresetDelTitulo, PresetDelTitulo]  // las de ?titulo=1|2|3
+export const TITULO_DE_PAGINA: PresetDelTitulo        // la 1, hasta que Valentino elija
+export const TITULOS_CON_LETRAS: readonly string[]    // los títulos que las fuentes de página saben escribir
+export function partesDelTitulo(titulo: string, partes?: readonly [string, string]): readonly [string, string]
 
 // _componentes/titulos3d/TituloDePagina.tsx — lo renderiza IntroDeLaPagina; una página no lo llama directo
-export function TituloDePagina(props: { readonly id: IdDePagina; readonly titulo: string; readonly partes: readonly [string, string] }): React.JSX.Element
+export function TituloDePagina(props: { readonly id: IdDePagina; readonly titulo: string; readonly partes?: readonly [string, string] }): React.JSX.Element
 ```
 
+- **Las partes:** el `h1` lleva el título entero (las dos partes unidas con un espacio). Desde 1024 con la escena, cada parte es un título de volumen en la cara de su instancia: llega con el gesto y el reloj del titular del hero y cae cuando la intro pasa 0,5.
+  - Sin WebGL, con movimiento reducido o abajo de 1024, el visible es el `h1`.
 - **El avance** lo lee el título de `AVANCE_DE_LA_INTRO`: no hay prop, así no se re-renderiza por cuadro.
-- **Las letras:** las de los tres nombres se generan en los JSON de `_fuentes/`, y el invariante de cobertura las exige todas. Un nombre nuevo obliga a regenerar.
-- **La familia, D3:** 2 o 3 combinaciones detrás de `?titulo=1|2|3`. Valentino elige, la bandera se va, y `TITULO_DE_PAGINA` queda con la elegida. La firma no cambia con la elección.
+- **Las fuentes:** un JSON 3D por instancia (unos 13 KB, con import dinámico: el home no las baja) y la misma instancia en WOFF para el DOM (unos 3,8 KB).
+- **Las letras:** las de `TITULOS_CON_LETRAS`, que son los nombres de las páginas de servicio (su `NOMBRE`), los tres de `acento.ts` y el de la prueba. s78 exige cada letra en cada instancia.
+  - Un título nuevo obliga a regenerar con `scripts-retoque/fuentes-3d.py`: pedilo como P-H.
+- **La familia, D3:** tres combinaciones detrás de `?titulo=1|2|3`. Valentino elige, la bandera se va y `TITULO_DE_PAGINA` queda con la elegida. La firma no cambia con la elección.
 
 ## 4. La ranura de variantes (B12a.3, hecha)
 
@@ -201,15 +214,25 @@ export function atenderLaSalida(a: () => Promise<void>): () => void   // sólo l
 - **La memoria:** diez idas y vueltas dejan `renderer.info.memory` como estaba (40/27 a 1440, 32/21 a 390).
 - **Con la escena dormida** (el papel), la variante no corre: no hay cuadros.
 
-## 5. La navegación entre páginas (B12a.6)
+## 5. La navbar y la navegación entre páginas (B12a.5, B12a.6 y B12a.7; hechas)
 
 ```tsx
 // _componentes/navegacion/EnlaceDeRuta.tsx — el <Link> de next con el velo; nunca router.push ni TransitionContext
 export function EnlaceDeRuta(props: { readonly href: string; readonly children: React.ReactNode; readonly className?: string }): React.JSX.Element
 ```
 
-- Un enlace de una página a otra de `/v3` va con `EnlaceDeRuta`, no con `<a>` ni con `<Link>` suelto: el velo y la vuelta a la composición inicial cuelgan de él.
-- **Antes del velo pide `pedirLaSalidaDeLaVariante()` y no navega hasta que se resuelva** (§4). Hasta B12a.6, la página de prueba lo hace con un enlace interino (`prueba-de-pagina/EnlaceConLaSalida.tsx`).
+- **La navbar la monta el layout** (`ChromeDelHome`): la misma píldora, el menú, el contacto y el sonido en el home y en las páginas. Una página no la monta.
+  - El desplegable de Servicios lista `PAGINAS_DE_SERVICIO` (`_chrome/paginas.ts`): la ruta y el `NOMBRE` de cada página de servicio, copiados hasta el merge. Después se importan de `_servicios/` (un P-S chico).
+  - Desde una página, los enlaces de sección van al home con su ancla.
+- **Un enlace de una página a otra de `/v3` va con `EnlaceDeRuta`,** no con `<a>` ni con `<Link>` suelto. Hace, en orden:
+  1. pide `pedirLaSalidaDeLaVariante()` y espera (§4);
+  2. cubre con el velo del color del destino: a una página, la tinta; al home, el papel;
+  3. con el cuadro cubierto entero, deja pasar el clic: la navegación cliente, sin rehacer el lienzo ni el chrome.
+  - Un ancla del documento (`#…`) sigue siendo un `<a>`.
+- **La página nueva se monta tapada.** El velo destapa con 20 cuadros parejos seguidos y ningún título en camino (`TITULOS_EN_CAMINO`), a lo sumo a los 3,5 s. Lo pesado que tu página arme al montarse (la variante, su título) se paga tapado.
+  - Al cambiar de ruta se reponen la noche, el día del final, el avance de la intro y el scroll (arriba, o el ancla).
+- **La flecha del navegador** también pasa por el velo: lo corta (cubre de una) y destapa igual.
+  - Hacia el home, devuelve la posición en que el home quedó al irse: el scroll, la noche y el día del final. No hace falta nada de la página.
 - Los CTA que abren el contacto siguen siendo `data-abre-contacto="panel"` con su `data-precarga`, sin cambios.
 
 ## 6. Las historias (P-H31, 2026-10-20)
@@ -275,7 +298,7 @@ Servicios necesita primero la ranura, la intro, el título y la navegación. La 
 | B12a.1 | el preset y la escena consciente de la ruta | hecho (`fcd57f53`) |
 | B12a.2 | la intro y la composición inicial | hecho (`edd64c7c`; la pose 2, `e2da3dfc`) |
 | **B12a.3** | **la ranura de variantes**, con su variante de prueba y P-H29; build de D7 al cerrarla | hecho (`627db1be`); era B12a.7 |
-| B12a.4 | el título 3D y el `h1`; FRENO: la familia (`?titulo=`) | era B12a.3 |
-| B12a.5 | la navbar en el layout y el desplegable | era B12a.4 |
-| B12a.6 | la navegación cliente y el velo (pide la salida de la variante); build de D7 al cerrarla | era B12a.5 |
-| B12a.7 | la vuelta al home | era B12a.6 |
+| B12a.4 | el título 3D y el `h1`; FRENO: la familia (`?titulo=`) | hecho (`4a74e290`); era B12a.3 |
+| B12a.5 | la navbar en el layout y el desplegable | hecho (`c99aaa7e`); era B12a.4 |
+| B12a.6 | la navegación cliente y el velo (pide la salida de la variante) | hecho (`f4b37280`); era B12a.5 |
+| B12a.7 | la vuelta al home; el build de D7 | hecho (`7cb477d6`); era B12a.6 |
