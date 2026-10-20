@@ -589,3 +589,26 @@ Valentino decidió D1 a D8 sobre el plan (`d51d95fc`).
 3. Cuando el papel tapa la escena, ella se duerme (D8); al volver, despierta sin saltar.
 4. Si la última pantalla del movimiento, con el papel entrando, te alcanza, o preferís la intro de 2,5 pantallas (decisión 3).
 5. `/v3` a 1440 y 390: el home igual que siempre (se tocó el rig).
+
+### P-H28 · el orden nuevo y la API publicada (2026-10-19)
+
+Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta completa de servicios depende de B12a. B ya estaba commiteado (`8336ba14`), así que no queda nada de B1.2d para después.
+
+**Las firmas definitivas** para servicios están en `docs/rediseno/B12a-API.md`: el preset de ruta, la intro, el preset del título y la ranura de variantes, con el estado de cada pieza.
+- Lo que la API fija y el código todavía no tiene llega con su subsprint:
+  - `variante` en el preset, `SELECTOR_DE_LA_INTRO`, el id de la página como valor del atributo de la intro y el acento en su bloque: B12a.3.
+  - `partes` del título y `TITULO_DE_PAGINA`: B12a.4.
+  - `PISTA_DE_LA_INTRO`: cuando Valentino elija la pose.
+- **La variante va en un módulo `'use client'`.** Así es una referencia de cliente, y el preset puede ir de una página de servidor a `PresetDeLaPagina`: React Flight serializa las referencias de cliente en cualquier prop y rechaza cualquier otra función (verificado en `react-server-dom-webpack-server.node.development.js:2943`).
+
+**El orden se reordenó.** El plan ponía la ranura última (B12a.7), y servicios necesita primero la ranura, la intro, el título y la navegación. La ranura sólo depende del preset (B12a.1), así que adelantarla no cuesta nada. La vuelta al home no bloquea a servicios (es del home), así que queda última.
+
+| # | Qué | En el plan |
+|---|---|---|
+| B12a.3 | la ranura de variantes, con su variante de prueba | B12a.7 |
+| B12a.4 | el título 3D y el `h1` (FRENO: `?titulo=`) | B12a.3 |
+| B12a.5 | la navbar en el layout y el desplegable | B12a.4 |
+| B12a.6 | la navegación cliente y el velo | B12a.5 |
+| B12a.7 | la vuelta al home | B12a.6 |
+
+**Los dos `next build` de D7 siguen a su contenido, no a su número.** Uno va al cerrar la ranura (B12a.3, por el presupuesto de 0,5 ms por cuadro) y el otro al cerrar la navegación cliente (B12a.6). Se avisan acá cuando corran.
