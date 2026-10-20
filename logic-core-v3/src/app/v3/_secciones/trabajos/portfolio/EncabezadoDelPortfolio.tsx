@@ -15,6 +15,9 @@ import type { PropsDeSeccion } from '../../_contrato/forma'
 
 import { CONTENIDO } from '../contenido'
 
+import { conElDefecto } from './medida'
+import { duracionDeLaSalida } from './orden'
+
 import { CLASE_DEL_CUERPO, CLASE_DEL_TITULAR, MEDIDA_DEL_CUERPO_CH, opacidadDeLaLlegada, recorteDeLaLlegada } from './tipografia'
 
 /**
@@ -52,9 +55,11 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, subeDesdeAb
       presencia.set(adentro ? 1 : 0)
       return undefined
     }
-    const a = animate(presencia, adentro ? 1 : 0, { duration: PRESENCIA_DEL_ENCABEZADO.s, ease: [...PRESENCIA_DEL_ENCABEZADO.curva] })
+    // [F5] En las historias el título cae a la par de TODA la salida (el panel y la caída, `duracionDeLaSalida`): se va mientras llega Demos.
+    const duracion = subeDesdeAbajo && !adentro && !conElDefecto('historias-de-antes') ? duracionDeLaSalida(PRESENCIA_DEL_ENCABEZADO.s) : PRESENCIA_DEL_ENCABEZADO.s
+    const a = animate(presencia, adentro ? 1 : 0, { duration: duracion, ease: [...PRESENCIA_DEL_ENCABEZADO.curva] })
     return () => a.stop()
-  }, [adentro, reducido, presencia])
+  }, [adentro, reducido, presencia, subeDesdeAbajo])
   // [PULIDO 10] J7 · la llegada de un viaje: el titular entero o invisible (`opacidadDeLaLlegada`, `recorteDeLaLlegada`).
   const repeticion = useRepeticionDeLaLlegada(seccion.id)
   const opacidadDelTitular = useTransform(repeticion, opacidadDeLaLlegada)
@@ -90,6 +95,7 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, subeDesdeAb
       </div>
     </div>
   )
-  // [B1.2d B] T3 · sólo en las historias: en escritorio el marcado es el de siempre.
-  return subeDesdeAbajo ? <motion.div data-parte="subida-del-encabezado" style={{ y: subida }}>{encabezado}</motion.div> : encabezado
+  // [B1.2d B] T3 · sólo en las historias: en escritorio el marcado es el de siempre. [F5] Y con un fundido atado a la presencia: P2 sólo
+  // desplaza (medio alto propio) y no oculta, así que en 0 quedaba el 40 % del título huérfano sobre Demos (como el párrafo de Demos).
+  return subeDesdeAbajo ? <motion.div data-parte="subida-del-encabezado" style={conElDefecto('historias-de-antes') ? { y: subida } : { y: subida, opacity: presencia }}>{encabezado}</motion.div> : encabezado
 }

@@ -15,6 +15,7 @@ import { PRESENCIA_DEL_ENCABEZADO } from './EncabezadoDelPortfolio'
 import { distanciaEnPasos, seMovioDeVerdad, vistaDelPaso } from './estado'
 import { medirElHueco } from './hueco'
 import { cortarElPanel, escenarioDe, medir, publicar, volarAlPx, vueloPisado, type Vuelo } from './medida'
+import { ORDEN } from './orden'
 import {
   ANTES_DEL_PIN, PANTALLAS_POR_PASO, bordesDelPaso, centroDelPaso, mostradoDeDemos, pasoConHisteresis, pasoEn,
   type AnchoDelPortfolio, type IndiceDePaso,
@@ -103,7 +104,7 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   const adentro = fase === 'adentro'
   const tituloS = useTituloListo('portfolio') ? LENTOS.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO.s
   const pedidoDelOrden = { camara: adentro, encabezado: historias ? (fase === 'antes' && enCuadro) || adentro : adentro, barra: adentro && !historias, panel: adentro }
-  const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido)
+  const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido, historias)
   // [B1.2d] El orden llegó a lo pedido (el diagnóstico y el arnés miran el panel sólo así: no en el medio de una entrada o una salida).
   const ordenQuieto = orden.camara === pedidoDelOrden.camara && orden.encabezado === pedidoDelOrden.encabezado && orden.barra === pedidoDelOrden.barra && orden.panel === pedidoDelOrden.panel
 
@@ -139,6 +140,16 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     [],
   )
   useBarraDelPortfolio(caja, orden.barra)
+  // [F2] La entrada terminó: el panel adentro y su transición hecha. Recién ahí la rueda da pasos (antes, se traga: el Portfolio se ve entero).
+  const entradaLista = useRef(false)
+  useEffect(() => {
+    entradaLista.current = false
+    if (!orden.panel) return undefined
+    const reloj = window.setTimeout(() => {
+      entradaLista.current = true
+    }, reducido ? 0 : ORDEN.panelS * 1000)
+    return () => window.clearTimeout(reloj)
+  }, [orden.panel, reducido])
 
   // La anotación a la escena (la REGLA DE ALTURAS), la columna que deja el panel en este ancho y [B1.3] si son las historias (lo dice el
   // CSS, no el JS), y [B1.2c] el hueco del logo, medido en el escenario (cambia con el ancho y con las fuentes: el bloque se centra).
@@ -233,7 +244,7 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   )
   const saltarAlPaso = useCallback((i: number, inmediato = false): void => saltar(i, inmediato, false), [saltar])
 
-  const { salirDeLasHistorias } = useMandosDelPortfolio({ caja, actual, enVuelo, inerte, ultimaRueda, paso, historias, tituloS, irAlPx, saltar })
+  const { salirDeLasHistorias } = useMandosDelPortfolio({ caja, actual, enVuelo, inerte, ultimaRueda, entradaLista, paso, historias, tituloS, irAlPx, saltar })
   useSinScrollEnLasHistorias(historias && orden.panel)
   const inerteDesde = useCallback((x: number, y: number): { readonly x: number; readonly y: number } | null => {
     if (inerte.current !== null && seMovioDeVerdad(inerte.current, x, y)) inerte.current = null

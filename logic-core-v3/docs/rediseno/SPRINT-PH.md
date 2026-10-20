@@ -184,3 +184,21 @@ P-H28 cambió la prioridad: B12a va antes que el subsprint B de B1.2d. A2, B y B
 1. `/v3`, a 1440, con el teclado: Tab hasta Contacto en la barra, Enter, Esc. El anillo vuelve a Contacto. **Repetilo 10 veces**: antes, una de cada cuatro caía en `body`.
 2. Lo mismo con el CTA de un servicio (en Servicios) y con el CTA del final, a 1440 y a 390.
 3. Con `/v3?devolucion=un-cuadro`, lo mismo tiene que fallar a veces: es la devolución de antes.
+
+## 7. P-H26 medido en el sitio y lo que encontraron las mediciones (2026-10-20)
+
+**La sonda del foco** (`scripts-carga/foco-del-contacto.ts`):
+- **Cambios en la sonda:**
+  - corre en el Chrome del sistema a la vista (el Chromium sin cabeza y sin GPU se caía a 390);
+  - suma el «Hablemos» del hero (desde 1024 el CTA de cada servicio está escondido y el que rota no existe);
+  - tiene `SOLO=` y `PRIMERA_MS=`, porque la primera llegada al final tarda.
+- **1440:** barra 12 de 12, hero 12 de 12, final 11 de 12 (más una vez que no abrió).
+- **1024:** lo mismo.
+- **390:** el CTA de un servicio 18 de 18 (el caso que caía en `body`) y el hero 18 de 18.
+- **106 cierres, 0 en `body`.**
+- **El control (`?devolucion=un-cuadro`, la devolución de antes) tampoco falla en el home:** 24 de 24 a 1440 y 18 de 18 a 390 con el CTA de un servicio. La carrera (30 de 108 en las páginas de servicios) no se reproduce acá. El control que discrimina es el modelo de s77 §4, con la trampa y el desmontaje simulados. **Queda medirlo en servicios después del merge.**
+
+**Lo que encontraron las mediciones (para P-H, sin arreglar esta noche):**
+1. **La primera llegada al final no abre el contacto con Enter.** A 1440 y 1024, la primera vez que se lleva el foco al CTA en volumen del final y se aprieta Enter, el contacto no se abre (4 de 4 corridas largas; en una corrida corta, con 6 s de espera, sí abrió). Las siguientes, sí. Parece la llegada del final: el CTA no responde hasta que termina.
+2. **A 390, el ancla del CTA del final (`a[data-pieza="cta-en-volumen"]`) no es el que se ve:** su caja queda en y = 18.933, fuera del cuadro aun después de `scrollIntoView`. Ni un toque ni Enter la abren.
+3. **A 390, la página se cae («Page crashed») después de unas 21 aperturas seguidas del contacto,** en tres de tres corridas y en los dos navegadores. Los nodos del DOM crecen unos 166 por apertura (3.693 → 8.212 en 21) y el heap no. Puede ser que la hoja no se libere, o que lo pague otro proceso. A 1440 y 1024 aguanta 36.

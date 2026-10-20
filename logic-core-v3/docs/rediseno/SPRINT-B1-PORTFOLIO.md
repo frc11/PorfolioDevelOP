@@ -1869,3 +1869,259 @@ export function Historias<T extends ItemDeHistoria>(p: PropsDeLasHistorias<T>): 
    - la ficha abajo, en el último cuarto.
 9. **T6/T7**, «la tuya» en las historias: no pasa sola; los toques sobre los campos escriben (no cambian de historia); con un campo enfocado nada avanza.
 10. **T8**, con la rueda (a 820 con mouse) y con el dedo: el scroll no avanza las historias.
+
+## 15. Los arreglos F1–F7 (2026-10-20)
+
+Valentino miró la Cola 2 y encontró bugs que un navegador hubiera agarrado: casi todo se había commiteado sin verlo andar en el sitio. Desde acá cambia el método:
+1. Antes de arreglar, el bug se reproduce en el arnés (Playwright con el Chrome del sistema contra el dev, :3002) y la prueba da ROJO.
+2. Con el arreglo da VERDE, y el control positivo (el defecto reintroducido) vuelve a dar rojo.
+3. Nada se commitea sin verlo andar en el navegador.
+4. Cada grupo de arreglos es un commit, con su lista de qué mirar.
+
+### 15.1 F1 + F2 · La rueda: el Portfolio se ve siempre
+
+**F1 · Reproducido en rojo** (`scripts-carga/entrada.ts`): desde `/v3#quienes-somos`, la rueda hasta pasar el Portfolio, grabando cuadro a cuadro el paso, el panel, la barra y el encabezado. Los cuatro casos dieron rojo:
+
+| Ancho | Gesto | Pasos (`+`: con el panel adentro) | Violaciones |
+|---|---|---|---|
+| 1440 | muescas sueltas (cada 700 ms) | -1 → 0 → 1 → 2+ → 3+ → 4+ | no aterrizó en el primero, proyectos sin panel |
+| 1440 | ráfagas (5 muescas en 200 ms) | -1 → 4 | no apareció |
+| 1024 | muescas | -1 → 0 → 1 → 2+ → 3+ → 4+ | igual que a 1440 |
+| 1024 | ráfagas | -1 → 4 | igual que a 1440 |
+
+**Las causas, en los cuadros:** son dos.
+- **Con muescas:** el paso 0 se publica en el pin y la muesca siguiente (455 ms después) ya avanza a Esquina, porque la rueda mandaba apenas el paso estaba adentro. Pero el panel entra recién a los ~1,9 s (la cámara, el título, la píldora y el panel, A10), así que El Garage y Esquina pasaban sin panel. La ráfaga no tenía que ver acá: la matriz de A8 no lo veía porque frenaba la rueda apenas el paso estaba adentro.
+- **Con ráfagas:** la de A2.3 salteaba el Portfolio entero, como pedía la spec equivocada.
+
+**F2 · El arreglo** (A2.3 sale entero):
+- `rueda.ts`: sale la ráfaga (`rafagaDeLaRueda`, `?rafaga=`, `entraConLaRafaga`). Entra `tiraDeLaEntrada`, pura: afuera del tramo, el evento que lleva la página adentro (el destino de Lenis MÁS este evento) aterriza en El Garage bajando y en «la tuya» subiendo, por lejos que vaya.
+- `useRuedaDelPortfolio.ts`: antes que nada, la entrada. El evento que entra se traga y vuela al primero del sentido. Mientras el panel no terminó de entrar, la rueda se traga entera y el gesto queda disparado: el resto del impulso se descarta.
+- `useMandosDelPortfolio.ts`: `atrapa` y `entrando`. `manda` espera además a `entradaLista`.
+- `usePortfolio.ts`: `entradaLista` pasa a `true` 700 ms después de que el orden prende el panel (su transición).
+- Adentro no cambió nada: cada gesto es un paso (`gestoDeLaRueda`: una muesca, una ráfaga o la inercia del trackpad es UN gesto), y a Demos se pasa recién después de «la tuya».
+- En las historias (debajo de 1024) la trampa no corre: la rueda sale, como en B (lo mira F5).
+- **El control positivo:** `window.__defectosDelPortfolio = 'rueda-en-la-entrada'` lo pide el arnés antes de cargar (nunca la URL), y vuelve la rueda de antes: sin la trampa y con pasos mientras el panel entra.
+
+**En verde** (Chrome del sistema, contra el dev):
+- `entrada.ts`, 11 corridas:
+  - bajando desde Quiénes somos: 1440 y 1024 × muescas, ráfagas y trackpad;
+  - subiendo desde Demos: 1440 × muescas, ráfagas y trackpad, y 1024 × ráfagas.
+  - Todas `-1 → 0+ → 1+ → 2+ → 3+ → 4+` (subiendo, al revés), con un paso por gesto y sin la píldora corrida sin panel.
+- **El control:** `DEFECTO=rueda-en-la-entrada`, 1440 con muescas, vuelve a dar rojo (`-1 → 0 → 1 → 2+…`).
+- **La ráfaga en la matriz** (`MODO=rafaga`, reemplaza a la de A2.3), 16 de 16:
+  - entrar bajando y subiendo: una ráfaga y, con el paso ya en el de aterrizaje y el panel todavía afuera, otra; aterriza en El Garage o en «la tuya» y no pasa por otro;
+  - adentro bajando y subiendo: una ráfaga da UN paso.
+  - Las cuatro variantes van con muescas y con el trackpad, con y sin hover.
+  - **Su control** (`CONTROL=rafaga`, la rueda de antes): las 4 de entrar con muescas fallan, 4 de 4 (aterrizan en Esquina o en Banú).
+- **A8, las 24 de la rueda**, incluidas las 12 del trackpad que vuelven: 24 de 24, tres idas y vueltas cada una. El control de A8.1 sigue en rojo.
+- **Lo que el arnés encontró del propio arnés:** cada evento de rueda de Playwright tarda ~64 ms, así que su «trackpad» dura ~2,9 s y su cola ya cubre la entrada entera.
+  - La primera versión mandaba la segunda ráfaga después de la entrada, y avanzaba uno: eso es correcto por spec.
+  - La segunda la mandaba 500 ms después, cuando el paso todavía era -1, así que el control no discriminaba.
+  - Ahora la segunda va con el paso ya en el de aterrizaje y el panel afuera. Es el caso de F1.
+- **Fotos** (`scripts-carga/fotos.ts`): ráfaga desde la aproximación, a 1440 y 1024. A los 3,5 s está El Garage con el panel adentro; otra ráfaga lleva a Esquina.
+
+**Lo que se reemplazó por la spec**, cada uno con su control:
+- s76 §40 «A2.3 · La ráfaga: el Portfolio no se recorre» → «F2 · La entrada atrapa la rueda» (la regla pura, el cableado y que A2.3 salió).
+- s76 §41 «La ráfaga en la matriz» → «F2 · La ráfaga y la entrada con la rueda, en el arnés» (las dos cuentas).
+- s76 §38: la matriz pasa de 78 a 90 (vuelve el trackpad).
+- s76 de B1.2c: «manda sólo con el panel adentro…» suma la espera de `entradaLista`.
+
+**Afuera, anotado:**
+- Las teclas y el arrastre de la barra no pasan por la trampa (no son la rueda).
+- Un `PageDown` rápido puede seguir pasando el Portfolio.
+- Una tecla en los 200 ms entre la píldora y el panel puede correr la píldora sin panel.
+- La matriz A8 entera (las 90) va en las mediciones del final.
+
+**Qué mirar (F1 + F2):**
+1. `/v3#quienes-somos`, a 1440 y a 1024: bajá con la rueda de a una muesca. El Portfolio entra entero (título, píldora y panel) en El Garage. Mientras entra, las muescas no hacen nada; después, cada muesca es un proyecto: Esquina, Banú y «la tuya». Recién después de «la tuya», Demos.
+2. Lo mismo con un golpe fuerte de la rueda o con el trackpad: aterriza en El Garage y lo que sobra se pierde.
+3. Desde Demos subiendo: entra en «la tuya» y sube de a uno hasta El Garage. Después, hacia arriba.
+4. Que la espera de la entrada (unos 2,5 s con la rueda trabada) no se sienta como un cuelgue. Si se siente, se acorta el orden de la entrada (título, píldora y panel); la rueda la sigue igual.
+
+### 15.2 F3 + F4 · La píldora que vuelve y el video del panel
+
+**F3 · Reproducido en rojo** (`scripts-carga/pildora.ts`): cuadro a cuadro (rAF), el rectángulo de la píldora contra el del panel, entrando con una muesca y saliendo con otra hacia arriba, dos vueltas por ancho.
+- **A 1440 y 1280:** la entrada da 0 cuadros, pero la salida da 10 a 13. A2.2 hacía volver la píldora a la par de la salida del panel: su borde derecho se expandía (a 1440, hasta 789) cuando el panel todavía estaba en 749. A 1440 se metía 9 cuadros sobre el video.
+- **A 1024:** 247 de 420 cuadros. Ahí la píldora corrida (96–634) no entra en la columna (538 px contra 400 libres) y descansa sobre la franja de arriba del panel (desde 512), por diseño de A2.1: el medio arranca 16 px debajo de ella.
+
+**F3 · El arreglo** (`orden.ts`): la barra se apaga con el panel ya afuera (`c.panel + ORDEN.panelS`), así la vuelta de la píldora (la expansión y después la contracción) nunca se cruza con él. La salida dura lo mismo (1,82 s): la cámara espera la caída del título, que es más larga. Es la vuelta que tenía B1.2d A antes de A2.2.
+- **El defecto para el control:** `pildora-con-el-panel` (`medida.ts`, lo pide el arnés antes de cargar) es la salida de A2.2, tal cual.
+
+**F3 · En verde:**
+- 1440 y 1280: 0 cuadros cruzados, entrando y saliendo, en las dos vueltas.
+- **El control:** con `DEFECTO=pildora-con-el-panel`, la salida vuelve a 10 a 15 cuadros (rojo).
+- **A 1024:** el criterio literal sigue en rojo (248 cuadros entrando y 22 saliendo), todos por el reposo de diseño. Con el medio (el video), 0 cuadros. **Es una decisión visual, va al FRENO:**
+  - (a) queda así: la píldora sobre la franja de arriba del panel, nunca sobre el video;
+  - (b) la píldora se esconde mientras el panel está adentro, en los anchos donde no entra en la columna;
+  - (c) el panel arranca debajo de la píldora en esos anchos.
+
+**F4 · Reproducido en rojo** (`scripts-carga/medio.ts`): por ancho y por proyecto, el video contra su columna (lo que deja la tira entre sus rellenos).
+- A 1440, el 100 %.
+- A 1280, 1180 y 1024, el 77,9 %, 74,8 % y 67,8 %: A2.1 lo achicaba lo mismo que bajaba.
+
+**F4 · El arreglo:**
+- **El tamaño:** el video vuelve a su tamaño (`ANCHO_DEL_MEDIO`, como a 1440) y se corre 16 px debajo de la píldora.
+- **El aire, solo con el despeje** (`AIRE_CON_DESPEJE`, `medios.ts`):
+  - entre la ficha y «Visitar sitio», de 20 a 8 px;
+  - el sobrante de abajo, de 48 a 16 px.
+- **Si aun así la ficha no entra, el medio es lo único que cede alto:**
+  - el medio va con `min-h-0`, la región no se encoge (`shrink-0`) y la figura lleva `maxHeight: 100%` con su proporción;
+  - Chrome transfiere el tope de alto al ancho, y el video se achica lo justo y nada más;
+  - con `flex-1 min-h-0` en la región, «Visitar sitio» quedaba cortado por el panel.
+
+**F4 · Medido después:**
+
+| Ancho | El Garage | Esquina | Banú | «Visitar sitio» |
+|---|---|---|---|---|
+| 1440 | 100 % | 100 % | 100 % | 852 de 900 |
+| 1280 | 79,4 % | 98,3 % | 98,3 % | 784 de 800 |
+| 1180 | 80,7 % | 100 % | 100 % | 784 de 800 |
+| 1024 | 73,1 % | 100 % | 100 % | 752 de 768 |
+
+- El video arranca 16 px debajo de la píldora en los tres anchos con despeje, y en ninguno la ficha desborda.
+- **Lo que falta para que El Garage vaya al 100 %** (su ficha es la más larga: «El problema» ocupa 6 renglones a 1024):
+
+| Ancho | Con los 16 px de sobrante abajo | Sin sobrante |
+|---|---|---|
+| 1024 | 47 px | 31 px |
+| 1180 | 43 px | 27 px |
+| 1280 | 52 px | 36 px |
+
+- A 1280, a Esquina y Banú les faltan 5 px.
+- **No achiqué el video a mano:** se achica solo lo que falta, y solo cuando falta. **Va al FRENO:** acortar la ficha de El Garage, sacar más aire, o aceptar el achique.
+- **El control:** es la corrida de antes del arreglo, con el achique de A2.1 puesto: los tres proyectos dan rojo en los tres anchos.
+
+**Las afirmaciones que se reemplazaron por la spec** (s76 §19 de B1.2c, el orden), con su control:
+- la salida pasa a `CEBp@0.00`, `CeBp@0.42`, `Cebp@0.70` y `cebp@1.82` (con el título del DOM, 0,58, 0,70 y 1,18);
+- «la expansión a ±50 ms de la salida del panel» pasa a «la vuelta arranca con el panel ya afuera». El control es la salida de A2.2;
+- y el defecto que pide el arnés es la salida de A2.2, tal cual.
+
+**Qué mirar (F3 + F4):**
+1. `/v3#portfolio-el-garage` a 1440 y a 1280: salí del Portfolio con la rueda (hacia arriba o después de «la tuya»). La píldora vuelve a su lugar recién cuando el panel se fue; en ningún cuadro pasa por encima del panel ni del video. Fijate si la vuelta se siente tarde.
+2. A 1024, el mismo recorrido: la píldora descansa sobre la franja de arriba del panel (nunca sobre el video). Elegí (a), (b) o (c).
+3. A 1280, 1180 y 1024, Esquina y Banú: el video del mismo tamaño que a 1440 (toda su columna), 16 px debajo de la píldora; «Visitar sitio» entra con 16 px abajo.
+4. El Garage a esos anchos: su video más chico (73 a 81 %). Decidí qué hacemos con los px que le faltan.
+
+### 15.3 F5 · Las historias: nunca un fondo vacío ni un título huérfano
+
+**El arnés nuevo:**
+- `scripts-carga/historias.ts`, con la cuenta pura en `historias-cuenta.ts` y los gestos del dedo en `tactil.ts` (`dispatchTouchEvent`: el `synthesizeScrollGesture` de CDP no movía la página).
+- Va con el Chrome del sistema en modo táctil, a 390×844, 768×1024, 820×1180 y 1023×768.
+- Graba cada dos cuadros (rAF) lo que se ve del título «Portfolio», de las historias y de Demos (su área a la vista por su opacidad efectiva y su escala), el paso y la cámara (`data-camara`).
+- **Dos medidas descartadas en el camino:**
+  - el test de toque (`elementFromPoint`) confunde `pointer-events` con visibilidad;
+  - medir el envoltorio de Demos daba 1 siempre: el fundido de su llegada está en los hijos.
+
+**La cuenta (el invariante):** con la sección en el cuadro, nunca:
+- **`fondo-vacio`:** ni título, ni historias, ni Demos, más de 120 ms;
+- **`titulo-huerfano`:** el título sin las historias, con Demos o en la cola, más de 1,3 s (lo que dura la salida, más un margen);
+- **`titulo-pegado`:** el título entero más de 250 ms después de que arrancó la salida;
+- **`oscuro-sin-historias`:** la escena oscurecida sin las historias delante más de 300 ms.
+
+**Reproducido en rojo** (el recorrido completo, en los cuatro anchos: entrar scrolleando con el dedo, salir a Demos, volver, salir hacia arriba y volver):
+- **El título pegado:** 770 ms entero. Caía recién cuando la historia ya se había ido, a los 0,58 s, con la página volando a Demos.
+- **El título huérfano:** de 15 a 23 s. P2 sólo desplaza (medio alto propio) y no oculta: en 0 quedaba el 40 % del título sobre Demos para siempre. Es la misma lección que el párrafo de Demos (`TextoDeDemos`).
+- **El fondo negro:** de 3,8 a 5 s con la escena oscura sin nada delante.
+  - **Volviendo desde Demos:** la cámara del Portfolio, que trae el oscurecido, se prendía primero; el título recién subía 0,7 s después y la historia a los 1,2 s.
+  - **Deslizando hacia abajo:** la cámara esperaba al título, que se queda, así que la escena quedaba oscura con el título solo.
+- A 390 se veía todo negro, con Demos chiquito en el medio y el resto del título.
+
+**El arreglo:**
+- **`orden.ts`:** la opción `historias` cambia tres cosas.
+  - El título cae A LA PAR de la salida, con el panel.
+  - El oscurecido entra y se va CON las historias: la escena se oscurece y aclara mientras ellas se funden, aunque el título se quede.
+  - Al volver, el título sube sin esperar a la cámara. Con el título al 80 %, entran juntos el oscurecido y la historia: como entra desde arriba.
+- **`EncabezadoDelPortfolio.tsx`:** en las historias, el título se funde con su presencia (la subida de 55 svh más el fundido) y su caída dura TODA la salida (`duracionDeLaSalida`, 1,18 s). Así se va mientras llega Demos y no queda un hueco.
+- **`useOrdenDeLaEscena` y `usePortfolio`:** le pasan `historias` al orden.
+- **El defecto para el control:** `historias-de-antes` (el orden de escritorio, sin fundido y con la caída corta), pedido por el arnés antes de cargar.
+
+**En verde:**
+- **Los recorridos completos:** 4 de 4.
+- **La matriz:** cada historia (con deslices de costado hasta ella, incluida «la tuya») × salir hacia arriba (Demos) y hacia abajo (el título) × volver; 32 de 32 en los cuatro anchos.
+  - El arnés confirma que llegó a la historia pedida y que la salida salió; desde «la tuya» el deslice arranca arriba del formulario.
+- **Los peores tramos:**
+  - fondo vacío: 60 ms;
+  - el cruce del título con Demos: 470 ms (el de la salida);
+  - título pegado: 50 ms;
+  - oscuro sin historias: 107 ms.
+- **El control:** `DEFECTO=historias-de-antes`, rojo en los cuatro anchos (huérfano de 14 a 22 s, pegado 770 ms, oscuro de 3,8 a 5 s).
+- **Fotos a 390:**
+  - a 300 ms de la salida, la historia se funde con el título cayendo encima;
+  - a 700 ms, la escena ya está clara, con el título yéndose y Demos llegando;
+  - después, Demos solo, sin el resto del título.
+  - La franja negra de arriba en las fotos del viaje es la barra de la URL que emula el modo móvil.
+
+**Las afirmaciones que se reemplazaron por la spec**, con su control:
+- s76 §31: «bajando a Demos, la historia se va y después cae el título» pasa a «todo a la par de la salida»; el control es la salida de B.
+- s76 §31: la subida del título suma el fundido; el control es la subida de B, sin fundido.
+- s76 §19 (B1.2c): el cableado de `useOrdenDeLaEscena` suma `historias`.
+- Nueva, **s76 §42 (F5):**
+  - la vuelta al título;
+  - la vuelta desde Demos;
+  - el cableado de la caída larga;
+  - la cuenta del arnés con cuadros armados.
+
+**Qué mirar (F5)**, en el teléfono (390) y en la tablet (768, 820 × 1180, 1023 × 768):
+1. `/v3`: bajá con el dedo hasta el Portfolio. El título sube; las historias entran.
+2. Deslizá hacia arriba: la historia se funde, el título cae a la par y Demos llega. No queda ningún resto del título.
+3. Desde Demos, subí con el dedo: el título vuelve a subir sobre la escena clara y la historia entra con el oscurecido, como desde arriba. Nunca la escena negra sola.
+4. Deslizá hacia abajo: la historia se va, la escena aclara y el título queda arriba. Subí y volvé a bajar.
+5. Lo mismo desde cada historia, incluida «la tuya» (deslizá hacia arriba fuera del formulario).
+
+### 15.4 F6 + F7 · Lo que sobra del panel: el formulario en 3D y la pausa a la vista
+
+**F6 · Reproducido en rojo** (`scripts-carga/fotos.ts`, la acción `formulario:`): `/v3?form=3d#portfolio-la-tuya` a 1440 tenía `data-forma="3d"` y el formulario girado. (Al reproducirlo apareció un error del arnés: con una ruta que ya traía `?`, armaba `?form=3ddiag=carga`. Arreglado.)
+
+**F6 · El arreglo:** la variante sale entera.
+- `FormularioEnPerspectiva.tsx` (con `git rm`).
+- El envoltorio en `LaTuya.tsx`.
+- Su línea en los padrones (`s5-archivos.ts` y `trabajos.invariant.tsx`).
+- Las afirmaciones de B7 en s76 (la bandera, el giro con el mouse, el plano en el servidor).
+
+**F6 · En verde:**
+- Con `?form=3d`, sin variante y sin giro, en la foto el formulario plano.
+- s76 §33 afirma que salió (sin el archivo, sin la bandera, «la tuya» con su formulario directo), con su control (la tira con el envoltorio de B7).
+- `trabajos.invariant` cuenta 38 archivos y no 39, con su control (el padrón de B, con el archivo que ya no está en el disco).
+
+**F7 · Reproducido en rojo** (la acción `pausa:`): en El Garage, a 1440, la pausa se veía sin foco (opacidad 1) y recibía el mouse. Con el teclado, Tab la enfocaba y Enter pausaba.
+
+**F7 · El arreglo** (`MedioDeLaTira.tsx`, `CLASE_DE_LA_PAUSA_DEL_PANEL`): la pausa queda sólo para el teclado. `BotonPausa`, compartido, no se toca: cambia la clase con que lo usa el panel.
+- **Escondida:** en escala 0 y sin puntero. El mouse no la ve ni la toca, y sigue en el orden del Tab.
+- **Al tabular:** aparece entera con `:focus-visible`.
+- **Con movimiento reducido,** sin pausa: el póster, quieto (ya era así).
+- **Por qué escala y no opacidad:** `opacity-0` no es un escalón del sistema (`s5-tokens`: tenue, media, alta, casi), y `invisible` la saca del Tab.
+- **s77 (P-H27) no cambia:** la pausa la sigue importando sólo `MedioDeLaTira`, y la regla de quién puede importarla queda igual.
+
+**F7 · En verde, en el Chrome del sistema:**
+- con el mouse encima, caja 0×0 y no recibe el mouse;
+- Tab (desde lo anterior en el orden del Tab), caja 48×48 con `:focus-visible` y el anillo de la casa;
+- Enter pausa (`aria-pressed`, el video quieto) y Enter sigue;
+- con `REDUCIDO=1`, no hay botón y el video está quieto.
+- **El control:** es la corrida de antes del arreglo, en rojo.
+- s76 §34 suma que la pausa es sólo para el teclado, con su control (la pausa de B, a la vista).
+
+**Qué mirar (F6 + F7):**
+1. `/v3?form=3d#portfolio-la-tuya` a 1440: el formulario, plano. La bandera ya no hace nada.
+2. `/v3#portfolio-el-garage` a 1440: no hay botón de pausa a la vista; pasá el mouse por el video y no aparece. Tabulá hasta el video: aparece la pausa con su anillo, Enter pausa y Enter sigue. Al salir del foco se esconde (si quedó en pausa, Tab de nuevo y Enter).
+3. Con movimiento reducido (el sistema): el póster, quieto, sin pausa.
+
+### 15.5 Las mediciones que no habían corrido (2026-10-20, con la máquina libre)
+
+Todo con el Chrome del sistema a la vista, contra el dev del home (:3002) y con `/api/` bloqueado.
+
+**La matriz de A8 entera, con las ráfagas** (`scripts-carga/matriz.ts`):
+- **90 de 90** combinaciones, tres idas y vueltas cada una: las 9 entradas por las 3 salidas, con y sin hover, lentas y rápidas (las de un salto, una vez; [F2] la rueda rápida, el trackpad, otra vez adentro).
+- **La ráfaga:** 16 de 16, y su control (la rueda de antes), 4 de 4 en falla.
+- El control de A8.1 sigue en rojo.
+
+**El contraste AA de lo nuevo** (`scripts-carga/contraste.ts`):
+- **El método:** dos capturas de cada pieza, como se ve y con su texto (o su ícono) transparente. Los píxeles que cambian son el glifo, y en cada uno se calcula la razón del color del texto contra el fondo de abajo. El color se resuelve con un lienzo: el rubro va en oklab con alfa y se mezcla con el fondo. Se informa el percentil 5.
+- **Qué se midió:**
+  - la ficha de cada historia sobre su video, a 390 y 768, en cuatro cuadros de cada video (10, 35, 60 y 85 %), con la historia apretada para que no pase sola;
+  - el formulario de «la tuya», con «Enviar», a 1440;
+  - el ícono de la pausa con el foco del teclado sobre el video del panel, a 1440 (contra 3:1, porque no es texto).
+- **Resultado: 126 de 126 piezas a la vista en AA.** La más justa es el rubro «Equipo de branding» sobre el video de Esquina: **5,20:1**. Las 24 sin glifo a la vista son la copia escondida del rollover de «Visitar sitio» y no se cuentan.
+
+**La captura del modal en el navegador** (`fotos.ts`, `contacto:barra` a 1440 y `contacto:hero` a 390): el modal de contacto con los campos compartidos de B, «Enviar» y la X, abierto con el teclado; el foco, en el primer enlace. Las capturas están en `~/.cache/b4-medicion/fotos/modal-*.png`.
+
+**Qué mirar (las mediciones):** nada nuevo para mirar. Están en verde y con su número. Lo que encontraron va en P-H (`SPRINT-PH.md` §7).

@@ -1,11 +1,11 @@
 /**
- * [B1.2d B] s76 · EL FORMULARIO DE «LA TUYA», SU ESPACIO, SU VARIANTE EN 3D Y LA PAUSA (`docs/rediseno/SPRINT-B1-PORTFOLIO.md` §14.6),
+ * [B1.2d B] s76 · EL FORMULARIO DE «LA TUYA», SU ESPACIO Y LA PAUSA (`docs/rediseno/SPRINT-B1-PORTFOLIO.md` §14.6),
  * sin navegador: los campos del modal de contacto compartidos (y el modal IDÉNTICO: la huella de su marcado, tomada antes del cambio),
- * «Enviar» y WhatsApp en su fila, el clic que no hace nada y no suena, el bloque centrado (B6), `?form=3d` (B7) y `BotonPausa` en el video
+ * «Enviar» y WhatsApp en su fila, el clic que no hace nada y no suena, el bloque centrado (B6), [F6] que `?form=3d` (B7) salió, y `BotonPausa` en el video
  * del panel (P-H21). Cada afirmación con su control positivo.
  */
 import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -14,8 +14,7 @@ import { CamposDelContacto } from '../../_chrome/contacto/CamposDelContacto'
 import { HojaParaElInvariante } from '../../_chrome/contacto/FormularioDeContacto'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { PROYECTOS } from '../../_secciones/trabajos/proyectos'
-import { FORMULARIO_EN_3D, FormularioEnPerspectiva, giroDeLaBandera, giroDelPuntero } from '../../_secciones/trabajos/portfolio/FormularioEnPerspectiva'
-import { MedioDeLaTira, estadoDelVideo } from '../../_secciones/trabajos/portfolio/MedioDeLaTira'
+import { CLASE_DE_LA_PAUSA_DEL_PANEL, MedioDeLaTira, estadoDelVideo } from '../../_secciones/trabajos/portfolio/MedioDeLaTira'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
 import { tieneAtributo, type Nodo } from './s10-recorrido'
 
@@ -77,22 +76,18 @@ export function afirmarB(): void {
   controlPositivo('  el detector ve el lector de antes (`\\b`)', (n: Nodo, a: string) => new RegExp(`\\b${a}(?=[=\\s>]|$)`).test(n.atributos), leeBien)
 
   // ═══════════════════════════════════════════════════════════════════════════
-  titulo('B1.2d B · 33 · B6 y B7 · «La tuya» centrada en el panel, y la prueba del formulario en 3D (`?form=3d`)')
+  titulo('B1.2d B · 33 · B6 · «La tuya» centrada en el panel ([F6] y la prueba del formulario en 3D, `?form=3d`, salió)')
 
   const laTuya = sinComentarios(leer(`${PORTFOLIO}/LaTuya.tsx`))
   const centrada = (c: string): boolean => /activa && 'justify-center'/.test(c) && /paddingTop: DESPEJE_DE_LA_BARRA, paddingBottom: DESPEJE_DE_LA_BARRA/.test(c) && /className="relative flex min-h-0 flex-col gap-5 px-8 pt-4"/.test(c)
   afirmar(centrada(laTuya), 'el bloque entero (título, frase, bajada, formulario y la fila del botón), centrado en el alto con el mismo despeje arriba y abajo: sin el hueco grande de abajo (el criterio, < 10 % del panel, lo mide el banco)')
   controlPositivo('  el detector ve la tira de antes (el contenido arriba, el hueco abajo)', laTuya.replace("activa && 'justify-center'", 'false'), centrada)
-  const bandera = (f: (b: string) => number | null): boolean =>
-    f('') === null && f('?form=2d') === null && f('?form=3d') === FORMULARIO_EN_3D.reposoGrados && f('?form=3d-8') === -8 && f('?form=3d-12') === -12 && f('?form=3d-30') === FORMULARIO_EN_3D.minimoGrados && f('?form=3d-2') === FORMULARIO_EN_3D.maximoGrados
-  afirmar(bandera(giroDeLaBandera) && FORMULARIO_EN_3D.reposoGrados === -10, `  \`?form=3d\`: inclinado ${String(FORMULARIO_EN_3D.reposoGrados)}° en reposo (calibrable de −8° a −12°: \`?form=3d-8\`…); sin la bandera, plano`)
-  controlPositivo('  el detector ve una bandera sin tope', (b: string) => (b.includes('3d-') ? -Number(b.split('-')[1]) : b.includes('3d') ? -10 : null), bandera)
-  const sigue = (f: (x: number, y: number) => { readonly y: number; readonly x: number }): boolean => f(1, 0).y === 6 && f(0, 1).y === -6 && f(0.5, 0.5).y === 0 && f(2, -1).y === 6 && Math.abs(f(0.5, 0).x - 6) < 1e-9
-  afirmar(sigue(giroDelPuntero) && FORMULARIO_EN_3D.sigueGrados === 6, '  con el mouse adentro la perspectiva lo sigue, ±6° como mucho (con el suavizado de una transición corta), y vuelve al reposo al salir')
-  controlPositivo('  el detector ve un giro sin tope', (x: number, y: number) => ({ y: (x - 0.5) * 12, x: (0.5 - y) * 12 }), sigue)
-  const plano = marcar(<FormularioEnPerspectiva><input name="x" /></FormularioEnPerspectiva>, { anima: true })
-  const perspectiva = sinComentarios(leer(`${PORTFOLIO}/FormularioEnPerspectiva.tsx`))
-  afirmar(plano === '<input name="x"/>' && /if \(giro === null \|\| reducido\) return <>\{children\}<\/>/.test(perspectiva) && /<FormularioEnPerspectiva>\s*<FormularioDeLaTuya/.test(laTuya), '  sobre los campos REALES (se escribe, se enfoca y se tabula igual); en el servidor y con movimiento reducido, plano y sin una caja de más')
+  // [F6] La prueba del formulario en 3D (B7, `?form=3d`) salió entera: el código, la bandera y sus afirmaciones (las de la bandera, el
+  // giro con el mouse y el plano en el servidor). Queda la que dice que salió.
+  const sinVariante = (t: string, archivos: readonly string[]): boolean => !archivos.includes('FormularioEnPerspectiva.tsx') && !/FormularioEnPerspectiva|form=3d|data-forma/.test(t) && /<FormularioDeLaTuya visible=\{visible\} reducido=\{vivo\.reducido\} desde=\{3\} \/>/.test(t)
+  const delPortfolio = readdirSync(path.join(V3, PORTFOLIO))
+  afirmar(sinVariante(laTuya, delPortfolio), '  [F6] la prueba del formulario en 3D (`?form=3d`) salió entera: sin el archivo, sin la bandera, y «la tuya» con su formulario plano')
+  controlPositivo('  el detector ve la tira con la prueba de B7', [laTuya.replace('<FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} />', '<FormularioEnPerspectiva><FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} /></FormularioEnPerspectiva>'), [...delPortfolio, 'FormularioEnPerspectiva.tsx']] as const, ([t, a]: readonly [string, readonly string[]]) => sinVariante(t, a))
 
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('B1.2d B · 34 · P-H21 · La pausa del video en bucle del panel de escritorio')
@@ -103,4 +98,11 @@ export function afirmarB(): void {
   afirmar(/<button type="button" data-pieza="boton-pausa" aria-pressed="false" aria-label="Pausar el video de El Garage"/.test(corre) && !/boton-pausa/.test(quieto), 'el video en bucle del panel lleva su pausa (`BotonPausa`, WCAG 2.2.2) mientras corre solo; con movimiento reducido (el póster, sin autoplay) no hace falta')
   afirmarIgual([estadoDelVideo(true, true, false, true).reproduce, estadoDelVideo(true, true, false, true, true).reproduce], [true, false], '  y pausado no se reproduce (en las historias, la pausa es mantener apretado)')
   controlPositivo('  el detector ve una pausa que no pausa', (pausado: boolean) => estadoDelVideo(true, true, false, true).reproduce || pausado, (f: (pausado: boolean) => boolean) => f(true) === false)
+  // [F7] Sale el botón visible: la pausa queda sólo para el teclado (aparece con :focus-visible, nunca con el mouse).
+  const soloTeclado = (m: string): boolean => {
+    const clase = /data-pieza="boton-pausa"[^>]*class="([^"]*)"/.exec(m)?.[1] ?? ''
+    return ['pointer-events-none', 'scale-0', 'focus-visible:scale-100'].every((c) => clase.split(' ').includes(c)) && !clase.split(' ').some((c) => c.startsWith('hover:'))
+  }
+  afirmar(soloTeclado(corre) && CLASE_DE_LA_PAUSA_DEL_PANEL.includes('focus-visible:scale-100'), '  [F7] y es sólo para el teclado: en escala 0 y sin puntero (el mouse no la ve ni la toca; sigue en el orden del Tab); aparece con el foco visible al tabular')
+  controlPositivo('  el detector ve la pausa de B (a la vista y con el mouse)', corre.replace(CLASE_DE_LA_PAUSA_DEL_PANEL, 'absolute right-3 bottom-3'), soloTeclado)
 }

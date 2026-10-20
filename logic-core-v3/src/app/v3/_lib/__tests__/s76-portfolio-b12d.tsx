@@ -153,9 +153,11 @@ export function afirmarB12d(): void {
   titulo('B1.2d · 38 · A8 · La matriz del arnés: cada combinación y la cuenta del invariante (`scripts-carga/a8.ts`)')
 
   const todas = combinaciones()
-  // [B1.2d A2] A2.3 · las 12 de la rueda rápida (el trackpad con inercia ES una ráfaga: saltea en vez de entrar) pasan a las de la ráfaga (§41).
+  // [F2] Reemplazada por la spec: las 12 de la rueda rápida (el trackpad con su inercia) vuelven, porque ya no saltean el Portfolio: quedan
+  // atrapadas en la entrada (A2.3 las había pasado a la ráfaga).
   const deLaRuedaRapida = todas.filter((c) => c.entrada.startsWith('rueda-') && c.velocidad === 'rapida')
-  afirmar(todas.length === 78 && new Set(todas.map((c) => `${c.entrada}|${c.salida}|${String(c.hover)}|${c.velocidad}`)).size === 78 && deLaRuedaRapida.length === 0 && ENTRADAS.every((e) => todas.some((c) => c.entrada === e)) && IDAS_Y_VUELTAS === 3, `las ${String(todas.length)} combinaciones: ${String(ENTRADAS.length)} entradas por las tres salidas, con y sin hover, lentas y rápidas (las de un salto y [A2.3] las de la rueda, lentas: la rueda rápida es una ráfaga), cada una con tres idas y vueltas`)
+  afirmar(todas.length === 90 && new Set(todas.map((c) => `${c.entrada}|${c.salida}|${String(c.hover)}|${c.velocidad}`)).size === 90 && deLaRuedaRapida.length === 12 && ENTRADAS.every((e) => todas.some((c) => c.entrada === e)) && IDAS_Y_VUELTAS === 3, `las ${String(todas.length)} combinaciones: ${String(ENTRADAS.length)} entradas por las tres salidas, con y sin hover, lentas y rápidas (las de un salto, una vez; [F2] la rueda rápida es el trackpad con su inercia), cada una con tres idas y vueltas`)
+  controlPositivo('  el detector ve la matriz de A2.3 (sin la rueda rápida)', combinaciones().filter((c) => !(c.entrada.startsWith('rueda-') && c.velocidad === 'rapida')), (cs: readonly (typeof todas)[number][]) => cs.length === 90 && cs.filter((c) => c.entrada.startsWith('rueda-') && c.velocidad === 'rapida').length === 12)
   const fotoAdentro: FotoDelPortfolio = { ancho: 1440, quieta: true, paso: 0, panelAdentro: true, ordenQuieto: true, enVuelo: false, barra: true, panelIzq: 720, bordeDelPanel: 720, eje: 360, finDelSonido: 80, pastilla: { l: 96, r: 634 }, pastillaEnLinea: true, fallas: [] }
   const fotoAfuera: FotoDelPortfolio = { ...fotoAdentro, paso: 4, panelAdentro: false, barra: false, panelIzq: 1440, pastilla: { l: 451, r: 989 }, pastillaEnLinea: false }
   const fotoColgada: FotoDelPortfolio = { ...fotoAfuera, quieta: false, enVuelo: true, fallas: ['portfolio-colgado: un salto en vuelo con la página quieta'] }

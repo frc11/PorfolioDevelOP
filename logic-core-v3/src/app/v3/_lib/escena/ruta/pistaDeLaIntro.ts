@@ -8,18 +8,16 @@
  * Todas las páginas arrancan de la misma pose: la del hero del home (`CHOREO_KEYFRAMES[0]`) con el logo CENTRADO. Se copia, no se toca:
  * esa pose es el destino del preloader del sitio vivo (`src/lib/scene-framing.ts:144`) y moverla movería el intro de producción.
  *
- * ── La pose de la intro, todavía una decisión de Valentino ───────────────
+ * ── La pose de la intro: GIRAR ───────────────────────────────────────────
  *
- * Tres candidatas detrás de `?intro=1|2|3` (sin la bandera, la 1): Valentino elige mirando, la bandera se va y queda la elegida.
- *   1 · ACERCARSE: la cámara se mete de frente, un poco más baja (el logo crece).
- *   2 · GIRAR: un cuarto de vuelta corto alrededor del logo, a media altura (se ve su espesor).
- *   3 · SUBIR: la cámara sube y se aleja, mirando hacia abajo (aparece el piso con su energía).
- * Las tres dejan el logo centrado (el título va encima) y quedan adentro del rango del recorrido del home (alturas y distancias que
- * el home ya usa).
+ * Valentino la eligió entre tres (2026-10-20; eran `?intro=1|2|3`: acercarse, girar y subir, y la bandera se fue con las otras dos): un
+ * cuarto de vuelta corto alrededor del logo, a media altura (se ve su espesor). Deja el logo centrado (el título va encima) y queda adentro
+ * del rango del recorrido del home (alturas y distancias que el home ya usa).
  */
 
 import { buildTrack, sampleLightArc, type ChoreoTrack } from '../choreographySampler'
 import type { ChoreoKeyframe, ChoreoPose, MutableLightLevels } from '../choreographyTypes'
+import { hayBanco } from '../entorno'
 import { NIVEL_DE_LA_NOCHE } from '../lightArc'
 
 import { presetActual, type PresetDeLaEscena } from './preset'
@@ -30,27 +28,17 @@ export const PANTALLAS_DE_LA_INTRO = 1.5
 /** La composición inicial: la pose del hero del home con el logo centrado (`frameX` 0). */
 export const COMPOSICION_INICIAL: ChoreoPose = { angleDeg: 0, height: 6.4, distance: 19, frameX: 0, frameY: 0 }
 
-export const POSES_DE_LA_INTRO = {
-  1: { angleDeg: 0, height: 4.2, distance: 12.5, frameX: 0, frameY: 0 },
-  2: { angleDeg: 38, height: 5.2, distance: 15, frameX: 0, frameY: 0 },
-  3: { angleDeg: -20, height: 10, distance: 20, frameX: 0, frameY: -0.25 },
-} as const satisfies Readonly<Record<1 | 2 | 3, ChoreoPose>>
+/** La pose de la intro (avance 1): girar. */
+export const POSE_DE_LA_INTRO: ChoreoPose = { angleDeg: 38, height: 5.2, distance: 15, frameX: 0, frameY: 0 }
 
-export type VarianteDeLaIntro = keyof typeof POSES_DE_LA_INTRO
-
-/** La variante de la URL (`?intro=1|2|3`), o la 1. */
-export function varianteDeLaIntro(busqueda: string): VarianteDeLaIntro {
-  const v = new URLSearchParams(busqueda).get('intro')
-  return v === '2' ? 2 : v === '3' ? 3 : 1
-}
-
-/** Las dos poses de la intro, como keyframes (estables por variante: el mismo arreglo cada vez, así la pista se arma una sola vez). */
-const KEYFRAMES: Readonly<Record<VarianteDeLaIntro, readonly ChoreoKeyframe[]>> = {
-  1: [{ at: 0, name: 'composicion-inicial', pose: COMPOSICION_INICIAL }, { at: 1, name: 'intro-acercarse', ease: 'linear', pose: POSES_DE_LA_INTRO[1] }],
-  2: [{ at: 0, name: 'composicion-inicial', pose: COMPOSICION_INICIAL }, { at: 1, name: 'intro-girar', ease: 'linear', pose: POSES_DE_LA_INTRO[2] }],
-  3: [{ at: 0, name: 'composicion-inicial', pose: COMPOSICION_INICIAL }, { at: 1, name: 'intro-subir', ease: 'linear', pose: POSES_DE_LA_INTRO[3] }],
-}
-export const keyframesDeLaIntro = (v: VarianteDeLaIntro): readonly ChoreoKeyframe[] => KEYFRAMES[v]
+/**
+ * La pista de la intro, COMPARTIDA (P-H29 g): de la composición inicial a la pose de la intro. La declara cada página en su preset (`pista`);
+ * es el mismo arreglo siempre, así la escena la arma una sola vez.
+ */
+export const PISTA_DE_LA_INTRO: readonly ChoreoKeyframe[] = [
+  { at: 0, name: 'composicion-inicial', pose: COMPOSICION_INICIAL },
+  { at: 1, name: 'intro-girar', ease: 'linear', pose: POSE_DE_LA_INTRO },
+]
 
 /**
  * El avance de la intro (0…1): 0 con el tope del bloque en el tope del cuadro, 1 después de `PANTALLAS_DE_LA_INTRO` pantallas. `arriba`:
@@ -67,6 +55,9 @@ export function avanceDeLaIntro(arriba: number, scrollY: number, alto: number): 
  * el significado del home, y en una página quedan en el del hero.
  */
 export const AVANCE_DE_LA_INTRO: { current: number } = { current: 0 }
+
+// Sólo con banco: el avance, para medirlo en el sitio (la intro a 1,5 pantallas, ± 1 %).
+if (hayBanco()) (window as Window & { __avanceDeLaIntro?: () => number }).__avanceDeLaIntro = () => AVANCE_DE_LA_INTRO.current
 
 const pistas = new WeakMap<PresetDeLaEscena, { readonly track: ChoreoTrack; readonly noche: boolean }>()
 

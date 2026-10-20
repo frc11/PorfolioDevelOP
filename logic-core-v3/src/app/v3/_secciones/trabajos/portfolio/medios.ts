@@ -31,10 +31,11 @@ export const ANCHO_DEL_MEDIO = 'min(100%, calc(var(--alto-del-medio) * 16 / 10))
 export const CLASE_DEL_ALTO_DEL_MEDIO = '[--alto-del-medio:38svh] max-escritorio:[--alto-del-medio:28svh]'
 
 /**
- * [B1.2d] A2.1 · El ancho del medio cuando baja (`despejeDelMedio`): achicado en su proporción lo que baja de más (sobre el relleno de
- * siempre, `--spacing-8`), así el relleno y el medio ocupan lo mismo que antes y la ficha no se pasa del panel.
+ * [F4] Con el medio corrido por la píldora (`despejeDelMedio`, A2.1), el video queda del MISMO tamaño que a 1440, el de su columna (A2.1 lo
+ * achicaba lo que bajaba: a 1024 quedaba en el 68 %). Lo que baja sale del aire de la ficha: el de antes de «Visitar sitio» (de
+ * `--spacing-5` a `--spacing-2`: un margen negativo le saca la diferencia al `gap`) y el sobrante de abajo (de `--spacing-12` a `--spacing-4`).
  */
-export const anchoDelMedioConDespeje = (despeje: number): string => `calc(${ANCHO_DEL_MEDIO} - (${String(despeje)}px - var(--spacing-8)) * 16 / 10)`
+export const AIRE_CON_DESPEJE = { antesDeVisitar: 'calc(var(--spacing-2) - var(--spacing-5))', debajo: 'var(--spacing-4)' } as const
 
 /** El `sizes` del medio de la tira activa: la mitad del cuadro desde 1024 (menos los lomos), el 60 % en tablet. */
 export const SIZES_DEL_MEDIO = '(min-width: 1024px) 42vw, 52vw'

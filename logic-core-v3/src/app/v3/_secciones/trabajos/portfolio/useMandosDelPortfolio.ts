@@ -6,10 +6,10 @@ import type { SalidaDeLasHistorias } from '../../../_componentes/historias/maqui
 import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
 
 import { vistaDelPaso } from './estado'
-import { conDialogo, medir, pegado, type Vuelo } from './medida'
+import { conDialogo, conElDefecto, medir, pegado, type Vuelo } from './medida'
 import { duracionDeLaSalida } from './orden'
 import { PANTALLAS_POR_PASO, PX_JUSTO_ANTES_DEL_PIN, bordesDelPaso, pxDeLaSeccion, pxDelScroll, scrollDelPx, type IndiceDePaso } from './pasos'
-import { entraConLaRafaga, type DestinoDeLaRueda } from './rueda'
+import { tiraDeLaEntrada, type DestinoDeLaRueda } from './rueda'
 import { useClicAfueraDelPanel, type ControlDelClicAfuera } from './useClicAfueraDelPanel'
 import { useRuedaDelPortfolio, type ControlDeLaRueda } from './useRuedaDelPortfolio'
 
@@ -22,6 +22,8 @@ export interface PiezasDeLosMandos {
   readonly enVuelo: { readonly current: Vuelo | null }
   readonly inerte: { current: { readonly x: number; readonly y: number } | null }
   readonly ultimaRueda: { current: number }
+  /** [F2] Si el panel ya terminó de entrar (su transición hecha): recién ahí la rueda da pasos. */
+  readonly entradaLista: { readonly current: boolean }
   readonly paso: IndiceDePaso
   readonly historias: boolean
   /** Lo que tarda el título en llegar y en caer (s). */
@@ -39,7 +41,7 @@ export interface PiezasDeLosMandos {
  * se va y el título cae entero (`duracionDeLaSalida`).
  */
 export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly salirDeLasHistorias: (hacia: SalidaDeLasHistorias) => void } {
-  const { caja, actual, enVuelo, inerte, ultimaRueda, paso, historias, tituloS, irAlPx, saltar } = m
+  const { caja, actual, enVuelo, inerte, ultimaRueda, entradaLista, paso, historias, tituloS, irAlPx, saltar } = m
   const salidaMs = duracionDeLaSalida(tituloS) * 1000
 
   // [B1.2c] La rueda: de a un proyecto; después de «la tuya», a Demos (el final del pin, como el viaje del menú: dos píxeles antes);
@@ -58,44 +60,37 @@ export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly salirDeL
     [irAlPx, salidaMs],
   )
   const control = useRef<ControlDeLaRueda | null>(null)
-  // [B1.2d] A2.3 · El vuelo de la ráfaga (su salida o su salteo), para tragar el resto de la ráfaga mientras dura.
-  const vueloDeLaRafaga = useRef<Vuelo | null>(null)
   useEffect(() => {
-    const rafaga = (sentido: 1 | -1, px: number): boolean => {
-      const vuelo = enVuelo.current
-      if (vuelo !== null && vuelo === vueloDeLaRafaga.current) return true
-      if (conDialogo(caja.current)) return false
-      const v = vistaDelPaso(actual.current)
-      const destino: DestinoDeLaRueda = sentido > 0 ? { tipo: 'demos' } : { tipo: 'arriba' }
-      // Afuera, con un vuelo en curso (la salida de una muesca): que termine; la rueda ya se traga.
-      if (vuelo !== null && v.fase !== 'adentro') return true
-      if (v.fase !== 'adentro') {
-        const lenis = LENIS_DEL_SITIO.instancia
-        const medida = medir(caja.current)
-        if (lenis === null || medida === null) return false
-        // Adónde va la página: el destino de Lenis y este evento, que Lenis suma DESPUÉS (la rueda del Portfolio escucha en la captura).
-        const hacia = pxDelScroll(lenis.targetScroll + px * lenis.options.wheelMultiplier, medida.tope, medida.alto)
-        if (!entraConLaRafaga(medida.px, hacia, sentido, PANTALLAS_POR_PASO)) return false
-      }
-      // Adentro sale sin recorrer los proyectos que faltan; afuera, la ráfaga que entra al tramo lo saltea entero (el paso de destino ya:
-      // ni la píldora ni el panel).
-      ir(destino, true)
-      vueloDeLaRafaga.current = enVuelo.current
+    // [F1] El defecto, para el control positivo del arnés: la rueda de antes (sin trampa y con pasos mientras el panel entra).
+    const conLaTrampa = !historias && !conElDefecto('rueda-en-la-entrada')
+    // [F2] La entrada atrapa la rueda: el evento que lleva la página adentro desde afuera (con el destino de Lenis y este evento, que Lenis
+    // suma DESPUÉS: la rueda del Portfolio escucha en la captura) vuela al primero del sentido. Sin otro vuelo en curso ni un diálogo.
+    const atrapa = (px: number): boolean => {
+      if (!conLaTrampa || enVuelo.current !== null || conDialogo(caja.current)) return false
+      const lenis = LENIS_DEL_SITIO.instancia
+      const medida = medir(caja.current)
+      if (lenis === null || medida === null) return false
+      const hacia = pxDelScroll(lenis.targetScroll + px * lenis.options.wheelMultiplier, medida.tope, medida.alto)
+      const tira = tiraDeLaEntrada(vistaDelPaso(actual.current).fase, hacia, px > 0 ? 1 : -1, PANTALLAS_POR_PASO)
+      if (tira === null) return false
+      saltar(tira, false, true)
       return true
     }
+    const adentro = (): boolean => vistaDelPaso(actual.current).fase === 'adentro' && !conDialogo(caja.current)
     control.current = {
       manda: () => {
         const v = vistaDelPaso(actual.current)
-        return v.fase === 'adentro' && pegado(caja.current) && !conDialogo(caja.current) ? v.tira : null
+        return v.fase === 'adentro' && pegado(caja.current) && !conDialogo(caja.current) && (entradaLista.current || !conLaTrampa) ? v.tira : null
       },
       ocupado: () => enVuelo.current !== null,
       // [B1.2d B] T8 · en las historias la rueda no avanza: sale (abajo, a Demos; arriba, al título).
       ir: (d) => (historias ? salir(d.tipo === 'demos' || (d.tipo === 'paso' && d.indice > vistaDelPaso(actual.current).tira) ? 'adelante' : 'atras') : ir(d, true)),
-      rafaga,
+      atrapa,
+      entrando: () => conLaTrampa && adentro() && !entradaLista.current,
       inerte,
       ultimaRueda,
     }
-  }, [actual, caja, enVuelo, historias, inerte, ir, salir, ultimaRueda])
+  }, [actual, caja, enVuelo, entradaLista, historias, inerte, ir, salir, saltar, ultimaRueda])
   useRuedaDelPortfolio(control)
 
   // [B1.2c] La entrada del panel ATRAPA la inercia de la rueda: un golpe fuerte que viene de afuera dejó a Lenis yendo más allá del

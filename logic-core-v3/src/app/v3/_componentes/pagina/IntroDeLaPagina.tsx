@@ -1,4 +1,5 @@
 import { PresetDeLaPagina } from '../../_lib/escena/ruta/PresetDeLaPagina'
+import { ATRIBUTO_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import type { PresetDeLaEscena } from '../../_lib/escena/ruta/preset'
 import { Envoltorio } from '../layout/Envoltorio'
 import { Cuerpo } from '../tipografia/Textos'
@@ -13,6 +14,8 @@ import { Titular } from '../tipografia/Titular'
  * El alto va escrito en la clase (Tailwind lee el fuente): son las `PANTALLAS_DE_LA_INTRO` de `pistaDeLaIntro.ts`, y s78 lo afirma.
  */
 export const ATRIBUTO_DE_LA_INTRO_DE_PAGINA = 'data-intro-de-pagina'
+/** [B12a.3] El selector de la intro (el bloque que mide la escena): lo que va en `tramos.intro` del preset de una página. */
+export const SELECTOR_DE_LA_INTRO = `[${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}]`
 
 export interface PropsDeLaIntro {
   /** El nombre de la página: el `h1` del DOM (y desde B12a.3, el título 3D: el MISMO texto). */
@@ -25,7 +28,9 @@ export interface PropsDeLaIntro {
 export function IntroDeLaPagina({ titulo, bajada, preset }: PropsDeLaIntro): React.JSX.Element {
   return (
     <section
-      {...{ [ATRIBUTO_DE_LA_INTRO_DE_PAGINA]: '' }}
+      // [B12a.3] El atributo lleva el id de la página y, con acento, el bloque es del servicio (`[data-servicio]` pone su claro).
+      {...{ [ATRIBUTO_DE_LA_INTRO_DE_PAGINA]: preset.id }}
+      {...(preset.acento === null ? {} : { [ATRIBUTO_DE_SERVICIO]: preset.acento })}
       aria-label={titulo}
       // De noche, sobre la escena, los claros (los tokens de la sección invertida).
       data-seccion={preset.noche === 'noche' ? 'invertida' : undefined}

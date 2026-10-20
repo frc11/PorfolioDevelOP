@@ -6,7 +6,7 @@
  *   SOLO=rueda-desde-arriba,flechas npx tsx …       sólo esas entradas
  *   CONTROL=a81 npx tsx …                           el control positivo: el caso de Valentino con el defecto de A8.1 reintroducido
  *   MODO=a3 | a1 | a9 npx tsx …                     la rueda con el mouse que se mueve, la píldora y el orden cuadro a cuadro, el hueco
- *   MODO=rafaga npx tsx …                           [A2.3] las combinaciones de la ráfaga (CONTROL=rafaga: con `?rafaga=no`, tienen que fallar)
+ *   MODO=rafaga npx tsx …                           [F2] las combinaciones de la ráfaga (CONTROL=rafaga: con la rueda de antes, tienen que fallar)
  *   MODO=a2 npx tsx …                               [A2.1 y A2.2] el despeje del medio y el tiempo de la píldora, a 1440, 1280, 1180 y 1024
  *
  * Cada foto se toma en reposo (sin vuelo, con el orden asentado y el scroll quieto, a lo sumo `ESPERA_MS`) y se cuenta con `a8.ts`.
@@ -30,6 +30,8 @@ const RANGO: readonly [number, number] | null = /^\d+-\d+$/.test(process.env.RAN
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/b12d')
 const ESPERA_MS = 9000
+/** [F1] Los defectos que el arnés reintroduce antes de cargar (`medida.ts`, `DefectoDelPortfolio`): `true` es el de A8.1. */
+type DefectoDelArnes = 'vuelo-sin-dueno' | 'rueda-en-la-entrada'
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 /** Px de la regla (contra 900 de alto) de los lugares de arranque: la aproximación y Demos ya llegado. */
@@ -41,7 +43,7 @@ const ARRANQUE = `(() => {
   try { sessionStorage.setItem('home:intro', '1') } catch (e) {}
 })()`
 
-async function abrir(defecto: boolean, ancho = 1440, alto = 900): Promise<{ readonly ctx: BrowserContext; readonly p: Page }> {
+async function abrir(defecto: boolean | DefectoDelArnes, ancho = 1440, alto = 900): Promise<{ readonly ctx: BrowserContext; readonly p: Page }> {
   const perfil = path.join(os.homedir(), `.cache/b4-medicion/b12d-perfil-${String(Date.now())}`)
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
@@ -52,7 +54,7 @@ async function abrir(defecto: boolean, ancho = 1440, alto = 900): Promise<{ read
     args: ['--force_high_performance_gpu', `--window-size=${String(ancho + 20)},${String(alto + 100)}`, '--window-position=0,0', '--no-first-run', '--no-default-browser-check', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion,Translate,MediaRouter'],
   })
   await ctx.addInitScript(ARRANQUE)
-  if (defecto) await ctx.addInitScript(`window.__defectosDelPortfolio = 'vuelo-sin-dueno'`)
+  if (defecto !== false) await ctx.addInitScript(`window.__defectosDelPortfolio = ${JSON.stringify(defecto === true ? 'vuelo-sin-dueno' : defecto)}`)
   const p = ctx.pages()[0] ?? (await ctx.newPage())
   const cdp = await ctx.newCDPSession(p)
   await cdp.send('Network.enable')
@@ -152,7 +154,7 @@ const adentro = (paso: number): boolean => paso >= 0 && paso <= 3
 
 /** La rueda hasta que se cumpla `listo`: de a una muesca (lenta) o un deslizamiento con inercia (rápida, el trackpad). */
 async function rueda(p: Page, sentido: 1 | -1, velocidad: 'lenta' | 'rapida', listo: (paso: number) => boolean): Promise<void> {
-  for (let i = 0; i < (velocidad === 'lenta' ? 40 : 6); i++) {
+  for (let i = 0; i < (velocidad === 'lenta' ? 40 : 10); i++) {
     if (velocidad === 'lenta') {
       await p.mouse.wheel(0, 100 * sentido)
       await dormir(700)
@@ -450,14 +452,30 @@ async function gestoDeRafaga(p: Page, sentido: 1 | -1, gesto: GestoDeRafaga): Pr
   }
 }
 
-async function unaRafaga(p: Page, c: CombinacionDeRafaga, archivo: string, ancho: number, alto: number, busqueda: string): Promise<boolean> {
+/** [F2] Espera (a lo sumo 4 s) a que el paso sea el de aterrizaje con el panel todavía afuera: `false` si el panel entró antes. */
+async function aterrizandoSinPanel(p: Page, paso: number): Promise<boolean> {
+  const t0 = Date.now()
+  while (Date.now() - t0 < 4000) {
+    const s = await p.evaluate(() => {
+      const e = document.querySelector('[data-pieza="escenario-del-portfolio"]')
+      return { paso: Number(e?.getAttribute('data-paso') ?? NaN), panel: e?.getAttribute('data-panel-adentro') === 'si' }
+    })
+    if (s.panel) return false
+    if (s.paso === paso) return true
+    await dormir(40)
+  }
+  return false
+}
+
+async function unaRafaga(p: Page, c: CombinacionDeRafaga, archivo: string, ancho: number, alto: number): Promise<boolean> {
   const fotos: { readonly vuelta: number; readonly momento: string; readonly violaciones: string[]; readonly foto: FotoDelPortfolio }[] = []
   const puesto = c.hover ? HOVER(ancho, alto) : COLUMNA(ancho, alto)
   const baja = c.rafaga.endsWith('bajando')
-  await cargar(p, '', busqueda)
+  const entra = c.rafaga.startsWith('entrar')
+  await cargar(p)
   for (let vuelta = 0; vuelta < IDAS_Y_VUELTAS; vuelta++) {
     await p.mouse.move(puesto.x, puesto.y, { steps: 4 })
-    let desde = -1
+    let desde = baja ? -1 : 4
     if (c.rafaga === 'entrar-bajando') await alPx(p, PX_ARRIBA)
     else if (c.rafaga === 'entrar-subiendo') await alPx(p, PX_EN_LA_COLA)
     else {
@@ -472,15 +490,18 @@ async function unaRafaga(p: Page, c: CombinacionDeRafaga, archivo: string, ancho
     await reposo(p)
     await p.evaluate(GRABACION)
     await gestoDeRafaga(p, baja ? 1 : -1, c.gesto)
+    // [F2] Entrando, el resto del impulso: con el paso ya en el de aterrizaje y el panel todavía afuera (el caso de F1), otra ráfaga; se tiene
+    // que descartar. El trackpad del arnés dura unos 2,9 s (cada evento de Playwright tarda ~64 ms): su propia cola ya cubre la entrada.
+    const otra = entra && (await aterrizandoSinPanel(p, baja ? 0 : 3))
+    if (otra) await gestoDeRafaga(p, baja ? 1 : -1, c.gesto)
     const f = await foto(p, await reposo(p))
     const cuadros = await p.evaluate(() => (window as unknown as { __rafaga: { barra: boolean; panel: boolean; paso: number }[] }).__rafaga)
-    const llego = f.paso === (baja ? 4 : -1)
-    fotos.push({ vuelta, momento: 'despues', violaciones: [...violaciones(f, 'afuera'), ...violacionesDeLaRafaga(c.rafaga, cuadros, desde), ...(llego ? [] : ['no-llego'])], foto: f })
+    fotos.push({ vuelta, momento: otra ? 'despues (dos ráfagas)' : 'despues', violaciones: [...violaciones(f, 'adentro'), ...violacionesDeLaRafaga(c.rafaga, cuadros, desde, f.paso)], foto: f })
   }
   const malas = fotos.filter((f) => f.violaciones.length > 0)
-  appendFileSync(archivo, `${JSON.stringify({ tipo: 'rafaga', ...c, busqueda, ok: malas.length === 0, fotos })}\n`)
-  const resumen = malas.map((f) => `${String(f.vuelta + 1)}·${f.momento}: ${f.violaciones.join(',')}`).join(' ; ')
-  console.log(`${malas.length === 0 ? 'ok   ' : 'FALLA'} ráfaga ${c.rafaga} · ${c.gesto} · ${c.hover ? 'con hover' : 'sin hover'}${busqueda === '' ? '' : ` (${busqueda})`}${resumen === '' ? '' : ` · ${resumen}`}`)
+  appendFileSync(archivo, `${JSON.stringify({ tipo: 'rafaga', ...c, control: CONTROL, ok: malas.length === 0, fotos })}\n`)
+  const resumen = malas.map((f) => `${String(f.vuelta + 1)}·${f.momento}: ${f.violaciones.join(',')} (paso ${String(f.foto.paso)})`).join(' ; ')
+  console.log(`${malas.length === 0 ? 'ok   ' : 'FALLA'} ráfaga ${c.rafaga} · ${c.gesto} · ${c.hover ? 'con hover' : 'sin hover'}${CONTROL === 'rafaga' ? ' (con la rueda de antes)' : ''}${resumen === '' ? '' : ` · ${resumen}`}`)
   return malas.length === 0
 }
 
@@ -573,14 +594,15 @@ async function main(): Promise<void> {
     return
   }
   if (MODO === 'rafaga') {
-    // Un Chrome nuevo por combinación. Con CONTROL=rafaga, la ráfaga apagada (`?rafaga=no`): las de entrar tienen que fallar.
-    const busqueda = CONTROL === 'rafaga' ? '&rafaga=no' : ''
-    const todas = combinacionesDeRafaga().filter((c, i) => (CONTROL !== 'rafaga' || c.rafaga.startsWith('entrar')) && (RANGO === null || (i >= RANGO[0] && i <= RANGO[1])))
+    // Un Chrome nuevo por combinación. [F2] Con CONTROL=rafaga, la rueda de antes (`rueda-en-la-entrada`: sin la trampa): las de entrar
+    // con muescas tienen que fallar (la segunda ráfaga avanza mientras el Portfolio entra; el trackpad del arnés no discrimina: su cola es
+    // un solo gesto).
+    const todas = combinacionesDeRafaga().filter((c, i) => (CONTROL !== 'rafaga' || (c.rafaga.startsWith('entrar') && c.gesto === 'muescas')) && (RANGO === null || (i >= RANGO[0] && i <= RANGO[1])))
     let bien = 0
     for (const c of todas) {
-      const { ctx, p } = await abrir(false)
+      const { ctx, p } = await abrir(CONTROL === 'rafaga' ? 'rueda-en-la-entrada' : false)
       try {
-        if ((await unaRafaga(p, c, archivo, 1440, 900, busqueda)) === (CONTROL !== 'rafaga')) bien += 1
+        if ((await unaRafaga(p, c, archivo, 1440, 900)) === (CONTROL !== 'rafaga')) bien += 1
       } finally {
         await ctx.close()
       }

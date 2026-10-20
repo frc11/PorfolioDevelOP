@@ -11,7 +11,6 @@ import { CONTENIDO } from '../contenido'
 
 import { TIRA_DE_LA_TUYA } from './estado'
 import { FormularioDeLaTuya } from './FormularioDeLaTuya'
-import { FormularioEnPerspectiva } from './FormularioEnPerspectiva'
 import { enLaSecuencia } from './secuencia'
 import { SignoDePregunta } from './SignoDePregunta'
 import { CLASES_DE_LA_TIRA, CabeceraDeLaTira, idsDeLaTira } from './Tira'
@@ -54,10 +53,7 @@ export function LaTuya({ activa, visible, vivo }: { readonly activa: boolean; re
         <motion.div {...enLaSecuencia(visible, 2, vivo.reducido)}>
           <Cuerpo className="text-tinta/70">{c.bajada}</Cuerpo>
         </motion.div>
-        {/* [B1.2d B] B7 · `?form=3d`: el mismo formulario en perspectiva (una prueba; sin la bandera, plano). */}
-        <FormularioEnPerspectiva>
-          <FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} />
-        </FormularioEnPerspectiva>
+        <FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} />
       </div>
     </div>
   )
