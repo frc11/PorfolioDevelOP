@@ -8,6 +8,7 @@ import {
 
 import { hayPrimerCuadro, suscribirALaCarga } from '../carga'
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
+import { AVANCE_DE_LA_INTRO, avanceDeLaIntro } from './ruta/pistaDeLaIntro'
 import { bloquesDelPreset, despiertaEnLaPagina, presetActual, suscribirseAlPreset } from './ruta/preset'
 import { medidaSinElEstiramiento } from './tramoEstirado'
 import { avisarQueSeMovioLaPagina } from './paginaMovida'
@@ -133,6 +134,9 @@ export function useEscenaAtadaAlScroll(
         // [B12a.1] Una página que no es el home: la despiertan sus bloques (su preset, D1); en el papel duerme (D8). Sin preset (las
         // galerías de /v3) duerme entera, pero recién después de su primer cuadro: el lienzo no queda vacío.
         const preset = presetActual()
+        // [B12a.2] El avance de la intro (de 0 a 1 en 1,5 pantallas), medido en el layout sobre su bloque; el progreso del rig no se toca.
+        const intro = preset === null || preset.pista === null || preset.tramos === null ? null : document.querySelector(preset.tramos.intro)
+        if (intro !== null) AVANCE_DE_LA_INTRO.current = avanceDeLaIntro(intro.getBoundingClientRect().top + desplazamiento, desplazamiento, ventana)
         const despierta = !hayPrimerCuadro() || despiertaEnLaPagina(preset, bloquesDelPreset(document, preset, desplazamiento), desplazamiento, ventana, MARGEN_DE_REANUDACION)
         const enLaPagina = despierta ? EN_CUADRO : FUERA_DE_CUADRO
         if (siguiente(estadoRef.current, enLaPagina) !== estadoRef.current) setEstado((previo) => siguiente(previo, enLaPagina))

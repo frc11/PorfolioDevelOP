@@ -12,6 +12,7 @@
  */
 
 import type { IdDeServicio } from '../../../_secciones/_contrato/acento'
+import type { ChoreoKeyframe } from '../choreographyTypes'
 
 export type IdDePagina = 'home' | IdDeServicio | 'prueba'
 
@@ -22,12 +23,17 @@ export interface PresetDeLaEscena {
    * las secciones (el preset ni se consulta).
    */
   readonly tramos: { readonly intro: string; readonly pie: string | null } | null
+  /**
+   * [B12a.2] La pista de cámara de la intro (`pistaDeLaIntro.ts`: de la composición inicial a la pose de la intro), o `null`: la del home
+   * (`CHOREO_KEYFRAMES`, con el progreso de sus secciones).
+   */
+  readonly pista: readonly ChoreoKeyframe[] | null
   readonly noche: 'dia' | 'noche'
   /** El servicio dueño del acento: el claro sale del token por el id (nunca un hex). */
   readonly acento: IdDeServicio | null
 }
 
-export const PRESET_DEL_HOME: PresetDeLaEscena = { id: 'home', tramos: null, noche: 'dia', acento: null }
+export const PRESET_DEL_HOME: PresetDeLaEscena = { id: 'home', tramos: null, pista: null, noche: 'dia', acento: null }
 
 const pila: PresetDeLaEscena[] = []
 const oyentes = new Set<() => void>()
