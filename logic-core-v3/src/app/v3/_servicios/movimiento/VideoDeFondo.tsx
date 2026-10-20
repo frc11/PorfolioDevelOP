@@ -1,15 +1,15 @@
 'use client'
 
-import { Pause, Play } from 'lucide-react'
 import { useInView } from 'motion/react'
 import { useEffect, useRef, useState, type ReactNode, type Ref } from 'react'
 
+import { BotonPausa } from '../../_componentes/medios/BotonPausa'
 import { Imagen } from '../../_componentes/medios/Imagen'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { seguirElScroll } from '../../_lib/scrollEnMovimiento'
 import { ASIENTO } from '../../_lib/titulos3d/repeticiones'
 import type { VersionDelVideo } from '../tipos'
-import { ROTULO_DE_LA_PAUSA, debeReproducirse, siguienteDeLaPausa } from './reproduccion'
+import { DE_LA_PAUSA, debeReproducirse } from './reproduccion'
 
 /**
  * [SERVICIOS M3] EL VIDEO DE FONDO DE TRABAJOS — el patrón de `VideoDeServicio.tsx` del home (M0 §4.6), con dos versiones y una pausa.
@@ -23,6 +23,8 @@ import { ROTULO_DE_LA_PAUSA, debeReproducirse, siguienteDeLaPausa } from './repr
  *   · Es decorativo (`aria-hidden`): lo que dice la sección lo dice su texto.
  *
  * Los hijos (el velo y el texto) van entre la capa del medio y el botón, así el botón queda arriba de todo.
+ *
+ * [V1] P-H27 · la pausa es la del home (`BotonPausa`), con el comportamiento del panel después de su F7: sólo para el teclado.
  */
 export function VideoDeFondo({
   horizontal,
@@ -75,7 +77,7 @@ export function VideoDeFondo({
     <>
       <CapaDelVideo horizontal={horizontal} vertical={vertical} reducido={reducido} capa={capa} video={video} />
       {children}
-      {reducido ? null : <BotonDePausa pausado={pausado} alApretar={() => setPausado(siguienteDeLaPausa)} />}
+      <PausaDelVideo reducido={reducido} pausado={pausado} alCambiar={setPausado} />
     </>
   )
 }
@@ -117,21 +119,14 @@ export function CapaDelVideo({
 }
 
 /**
- * P-H27: reemplazar por BotonPausa cuando llegue el ajuste de s77. Un botón conmutable: el nombre es fijo y `aria-pressed` dice si está
- * pausado; el teclado es el nativo. Va abajo a la derecha: arriba lo tapaba la barra fija del sitio con el cuadro en pantalla (medido a
- * 1440). El texto le deja lugar (`Trabajos.tsx`).
+ * [V1] La pausa sólo para el teclado, la del panel del home después de su F7 (`CLASE_DE_LA_PAUSA_DEL_PANEL`, `MedioDeLaTira.tsx`): en
+ * escala 0 y sin puntero (el mouse nunca la ve ni la toca; sigue en el orden del Tab), aparece entera con `:focus-visible`. El lugar es el
+ * nuestro, abajo a la derecha: arriba la tapaba la barra fija del sitio con el cuadro en pantalla (medido a 1440). El texto le deja lugar
+ * (`Trabajos.tsx`).
  */
-export function BotonDePausa({ pausado, alApretar }: { readonly pausado: boolean; readonly alApretar?: () => void }): React.JSX.Element {
-  return (
-    <button
-      type="button"
-      data-pieza="pausa-del-video"
-      aria-label={ROTULO_DE_LA_PAUSA}
-      aria-pressed={pausado}
-      onClick={alApretar}
-      className="absolute right-4 bottom-4 flex size-11 items-center justify-center rounded-full border border-fondo/30 bg-tinta/70 text-fondo focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fondo"
-    >
-      {pausado ? <Play className="size-4" strokeWidth={1.5} aria-hidden="true" /> : <Pause className="size-4" strokeWidth={1.5} aria-hidden="true" />}
-    </button>
-  )
+export const CLASE_DE_LA_PAUSA_DEL_VIDEO = 'pointer-events-none absolute right-4 bottom-4 scale-0 focus-visible:scale-100'
+
+/** La pausa del video, o nada con movimiento reducido (queda el póster, quieto). */
+export function PausaDelVideo({ reducido, pausado, alCambiar }: { readonly reducido: boolean; readonly pausado: boolean; readonly alCambiar: (pausado: boolean) => void }): React.JSX.Element | null {
+  return reducido ? null : <BotonPausa pausado={pausado} alCambiar={alCambiar} de={DE_LA_PAUSA} className={CLASE_DE_LA_PAUSA_DEL_VIDEO} />
 }

@@ -18,10 +18,5 @@ export function debeReproducirse(m: MomentoDelVideo): boolean {
   return !m.reducido && m.conFuente && m.enPantalla && !m.pausadoPorQuienMira && !m.scrollEnMovimiento
 }
 
-/** El botón de pausa alterna: pausado ↔ andando. */
-export function siguienteDeLaPausa(pausado: boolean): boolean {
-  return !pausado
-}
-
-/** El nombre del botón: fijo, y `aria-pressed` dice si está pausado (el patrón del botón conmutable). C2: provisorio. */
-export const ROTULO_DE_LA_PAUSA = 'Pausar el video'
+/** [V1] Lo que pausa el botón, para su nombre (`BotonPausa` lo arma: «Pausar el video de trabajos»). C2: provisorio. */
+export const DE_LA_PAUSA = 'el video de trabajos'

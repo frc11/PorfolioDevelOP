@@ -25,6 +25,10 @@
  * la máquina (§10) sigue afirmándose, ahora sobre `_contrato/disparo.ts`, y se suman las afirmaciones del reemplazo (en _servicios no queda
  * copia propia, los tres bloques importan el común y la nota del pedido se fue). La pausa (§12) sigue siendo la nuestra por P-H27: s77 fija
  * que ningún archivo de producto importa `BotonPausa` todavía; la nota del pedido pasó de P-H21 a P-H27.
+ *
+ * [V1] P-H27 · la pausa (§12) es la del home, REEMPLAZADA POR LA COMÚN, no retirada: lo que se afirmaba de la nuestra (el botón, el nombre
+ * fijo, `aria-pressed`, el lugar) se afirma sobre `BotonPausa`, y se suman que no queda la nuestra, que es sólo para el teclado (el F7 del
+ * panel) y que con movimiento reducido no hay pausa. Que alterne lo fija s77 §1 sobre el mismo componente. La nota del pedido se fue.
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
@@ -36,12 +40,14 @@ import { renderToStaticMarkup } from 'react-dom/server'
 
 import { PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
+import { nombreDeLaPausa } from '../../_componentes/medios/BotonPausa'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
 import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import { ENTRADAS_AL_TRAMO } from '../../_secciones/_contrato/cruce'
 import { ESTADOS_DEL_GATILLO, LINEA_DEL_DISPARO, estaALaVista, siguienteEstado, type EstadoDelGatillo } from '../../_secciones/_contrato/disparo'
 import { MARCA_HOME_QUIETO } from '../../_secciones/_contrato/marcaHomeQuieto'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
+import { CLASE_DE_LA_PAUSA_DEL_PANEL } from '../../_secciones/trabajos/portfolio/MedioDeLaTira'
 import { DISPARO_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { CLASES_DEL_PAPEL } from '../bloques/Bloque'
 import { CLASES_DEL_VELO, VELO_DEL_VIDEO } from '../bloques/veloDelVideo'
@@ -55,8 +61,8 @@ import { SOFTWARE_A_MEDIDA } from '../datos/software-a-medida'
 import { tokenDelAcento, tokenDelAcentoClaro } from '../estiloDelAcento'
 import { MARCADOR_A_DEFINIR, numero, usd } from '../formato'
 import { ATRIBUTO_DE_LA_INTRO } from '../Intro'
-import { ROTULO_DE_LA_PAUSA, debeReproducirse, siguienteDeLaPausa, type MomentoDelVideo } from '../movimiento/reproduccion'
-import { BotonDePausa, CapaDelVideo } from '../movimiento/VideoDeFondo'
+import { DE_LA_PAUSA, debeReproducirse, type MomentoDelVideo } from '../movimiento/reproduccion'
+import { CLASE_DE_LA_PAUSA_DEL_VIDEO, CapaDelVideo, PausaDelVideo } from '../movimiento/VideoDeFondo'
 import { PaginaDeServicio } from '../PaginaDeServicio'
 import { PRECIOS_DESDE } from '../precios'
 import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
@@ -565,12 +571,14 @@ const DEFINE_LA_MAQUINA = /export (?:function|const) (?:siguienteEstado|margenDe
 const conMaquinaPropia = (lista: readonly Fuente[]): string[] => lista.filter((x) => DEFINE_LA_MAQUINA.test(x.codigo)).map((x) => enBarras(x.f))
 afirmarIgual(conMaquinaPropia(FUENTES), [], '  y ningún fuente de _servicios define la máquina, la línea, el margen ni la guarda en reposo: son del contrato, una sola vez')
 controlPositivo('  un fuente con su propia máquina se detecta', [{ f: 'movimiento/otra.ts', codigo: 'export function siguienteEstado(estado: string): string { return estado }' }], (l: readonly Fuente[]) => conMaquinaPropia(l).length === 0)
-// La nota de un pedido ya cumplido («P-H18: reemplazar…», «P-H21: reemplazar…») no queda en ningún fuente: se lee cruda, con comentarios.
-const PEDIDOS_CUMPLIDOS = ['P-H18: reemplazar', 'P-H21: reemplazar']
+// La nota de un pedido ya cumplido («P-H18: reemplazar…», «P-H21: reemplazar…», [V1] «P-H27: reemplazar…») no queda en ningún fuente: se
+// lee cruda, con comentarios.
+const PEDIDOS_CUMPLIDOS = ['P-H18: reemplazar', 'P-H21: reemplazar', 'P-H27: reemplazar']
 const CRUDOS: readonly Fuente[] = fuentes(raiz).map((f) => ({ f: path.relative(raiz, f), codigo: readFileSync(f, 'utf8') }))
 const conPedidoPendiente = (lista: readonly Fuente[]): string[] => lista.filter((x) => PEDIDOS_CUMPLIDOS.some((p) => x.codigo.includes(p))).map((x) => enBarras(x.f))
-afirmarIgual(conPedidoPendiente(CRUDOS), [], `  y ningún fuente guarda la nota de un pedido ya cumplido (${PEDIDOS_CUMPLIDOS.join(', ')}): el gatillo quedó reemplazado por el común del home y la pausa espera P-H27 (§12)`)
+afirmarIgual(conPedidoPendiente(CRUDOS), [], `  y ningún fuente guarda la nota de un pedido ya cumplido (${PEDIDOS_CUMPLIDOS.join(', ')}): el gatillo y la pausa quedaron reemplazados por los comunes del home (§12)`)
 controlPositivo('  una nota «P-H21: reemplazar por BotonPausa» sin cumplir se detecta', [{ f: 'movimiento/VideoDeFondo.tsx', codigo: '// P-H21: reemplazar por BotonPausa' }], (l: readonly Fuente[]) => conPedidoPendiente(l).length === 0)
+controlPositivo('  y la de P-H27, la de la pausa', [{ f: 'movimiento/VideoDeFondo.tsx', codigo: '// P-H27: reemplazar por BotonPausa cuando llegue el ajuste de s77' }], (l: readonly Fuente[]) => conPedidoPendiente(l).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · El JSON-LD llega al HTML, y el FAQ se lee igual que se declara')
@@ -648,35 +656,45 @@ const nuncaConReducido = (decide: typeof debeReproducirse): boolean => MOMENTOS.
 afirmar(MOMENTOS.length === 32 && nuncaConReducido(debeReproducirse), '  y la decisión de reproducir nunca da verdadero con movimiento reducido, en los 32 momentos posibles')
 afirmarIgual(MOMENTOS.filter(debeReproducirse), [{ reducido: false, conFuente: true, enPantalla: true, pausadoPorQuienMira: false, scrollEnMovimiento: false }], '  sin reducir, anda en un solo momento: con la fuente, en pantalla, sin pausa y con el scroll quieto')
 controlPositivo('  una decisión que ignora el reducido se detecta', ((m: MomentoDelVideo) => debeReproducirse({ ...m, reducido: false })) as typeof debeReproducirse, nuncaConReducido)
-// La pausa (D5, WCAG 2.2.2): un botón conmutable con nombre fijo, `aria-pressed`, el ícono que cambia, y que alterna. [R1] Sigue siendo
-// la nuestra por P-H27 (s77 fija que BotonPausa no está integrada); del R1 quedan dos afirmaciones más: el nombre igual en los dos estados y
-// el lugar del botón.
-const botonDeLaPausa = (html: string): string => /<button[^>]*data-pieza="pausa-del-video"[^>]*>[\s\S]*?<\/button>/.exec(html)?.[0] ?? ''
-const PAUSADO = botonDeLaPausa(renderToStaticMarkup(<BotonDePausa pausado={true} />))
-const pausaQueAlterna = (html: string, alterna: (pausado: boolean) => boolean, pausado: string = PAUSADO): boolean => {
-  const andando = botonDeLaPausa(html)
-  return andando.includes(' type="button"') && andando.includes(` aria-label="${ROTULO_DE_LA_PAUSA}"`) && andando.includes(' aria-pressed="false"') && andando.includes('lucide-pause') &&
-    pausado.includes(` aria-label="${ROTULO_DE_LA_PAUSA}"`) && pausado.includes(' aria-pressed="true"') && pausado.includes('lucide-play') && alterna(false) && !alterna(true) && alterna(alterna(false)) === false
+// La pausa (D5, WCAG 2.2.2). [V1] P-H27 · REEMPLAZADA POR LA COMÚN DEL HOME: es `BotonPausa`, un botón conmutable con nombre fijo y
+// `aria-pressed` (que alterna lo fija s77 §1 sobre el mismo componente); se afirma sobre el botón servido, como se afirmaba la nuestra.
+const botonDeLaPausa = (html: string): string => /<button[^>]*data-pieza="boton-pausa"[^>]*>[\s\S]*?<\/button>/.exec(html)?.[0] ?? ''
+const NOMBRE_DE_LA_PAUSA = nombreDeLaPausa(DE_LA_PAUSA)
+const laPausaDelHome = (html: string): boolean => {
+  const boton = botonDeLaPausa(html)
+  return boton.includes(' type="button"') && boton.includes(` aria-label="${NOMBRE_DE_LA_PAUSA}"`) && boton.includes(' aria-pressed="false"') && boton.includes('lucide-pause') &&
+    !html.includes('data-pieza="pausa-del-video"')
 }
-afirmar(pausaQueAlterna(BLOQUE_DEL_VIDEO, siguienteDeLaPausa), `el botón de pausa existe en el slot: type="button", nombre «${ROTULO_DE_LA_PAUSA}» igual en los dos estados, aria-pressed="false" con el ícono de pausa; pausado dice aria-pressed="true" con el de reproducir, y apretarlo alterna`)
-controlPositivo('  un botón sin nombre se detecta', BLOQUE_DEL_VIDEO.replace(` aria-label="${ROTULO_DE_LA_PAUSA}"`, ''), (h: string) => pausaQueAlterna(h, siguienteDeLaPausa))
-controlPositivo('  un botón que no alterna se detecta', (() => true) as (pausado: boolean) => boolean, (alterna: (pausado: boolean) => boolean) => pausaQueAlterna(BLOQUE_DEL_VIDEO, alterna))
-controlPositivo('  uno que cambia de nombre al pausar (el lector no anunciaría el mismo control)', PAUSADO.replace(ROTULO_DE_LA_PAUSA, 'Reanudar el video'), (p: string) => pausaQueAlterna(BLOQUE_DEL_VIDEO, siguienteDeLaPausa, p))
-controlPositivo('  y una página sin el botón', WEB_PROD.replace(botonDeLaPausa(WEB_PROD), ''), (h: string) => pausaQueAlterna(h, siguienteDeLaPausa))
+afirmar(laPausaDelHome(BLOQUE_DEL_VIDEO), `la pausa del slot es la del home (BotonPausa): type="button", nombre fijo «${NOMBRE_DE_LA_PAUSA}», aria-pressed="false" con el ícono de pausa; la nuestra ya no está`)
+controlPositivo('  la nuestra de antes se detecta', BLOQUE_DEL_VIDEO.replace('data-pieza="boton-pausa"', 'data-pieza="pausa-del-video"'), laPausaDelHome)
+controlPositivo('  una con otro nombre', BLOQUE_DEL_VIDEO.replace(NOMBRE_DE_LA_PAUSA, 'Pausar el video'), laPausaDelHome)
+controlPositivo('  y una página sin el botón', WEB_PROD.replace(botonDeLaPausa(WEB_PROD), ''), laPausaDelHome)
+const clasesDeLaPausa = (html: string): string[] => (/\sclass="([^"]*)"/.exec(/<button[^>]*>/.exec(botonDeLaPausa(html))?.[0] ?? '')?.[1] ?? '').split(/\s+/)
+// [V1] Sólo para el teclado, como el panel después de su F7: el botón lleva TODAS las clases de comportamiento de la pausa del panel
+// (`CLASE_DE_LA_PAUSA_DEL_PANEL`: en escala 0 y sin puntero, entera con :focus-visible); el lugar es el nuestro.
+const DEL_LUGAR = /^(top|right|bottom|left)-/
+const COMPORTAMIENTO_DEL_PANEL = CLASE_DE_LA_PAUSA_DEL_PANEL.split(/\s+/).filter((c) => c !== '' && !DEL_LUGAR.test(c))
+const soloParaElTeclado = (html: string): boolean => COMPORTAMIENTO_DEL_PANEL.length >= 3 && COMPORTAMIENTO_DEL_PANEL.every((c) => clasesDeLaPausa(html).includes(c))
+afirmar(soloParaElTeclado(BLOQUE_DEL_VIDEO) && CLASE_DE_LA_PAUSA_DEL_VIDEO.split(/\s+/).filter((c) => !DEL_LUGAR.test(c)).join(' ') === COMPORTAMIENTO_DEL_PANEL.join(' '), `  y es sólo para el teclado, como la del panel del home (F7): ${COMPORTAMIENTO_DEL_PANEL.join(', ')}`)
+controlPositivo('  una a la vista con el mouse (sin la escala 0) se detecta', BLOQUE_DEL_VIDEO.replace(' scale-0 ', ' '), soloParaElTeclado)
+controlPositivo('  y una que el puntero alcanza', BLOQUE_DEL_VIDEO.replace('pointer-events-none ', ''), soloParaElTeclado)
 // Va abajo a la derecha del cuadro (arriba la tapaba la barra fija del sitio): lo dicen las clases del botón servido.
 const abajoALaDerecha = (html: string): boolean => {
-  const clases = (/\sclass="([^"]*)"/.exec(/<button[^>]*>/.exec(botonDeLaPausa(html))?.[0] ?? '')?.[1] ?? '').split(/\s+/)
+  const clases = clasesDeLaPausa(html)
   return ['absolute', 'right-4', 'bottom-4'].every((c) => clases.includes(c)) && !clases.some((c) => c.startsWith('top-') || c.startsWith('left-'))
 }
 afirmar(abajoALaDerecha(BLOQUE_DEL_VIDEO), '  y va abajo a la derecha del cuadro (la barra fija del sitio tapaba el de arriba): absolute, right-4 y bottom-4')
 controlPositivo('  uno arriba a la derecha se detecta', BLOQUE_DEL_VIDEO.replace('bottom-4', 'top-4'), abajoALaDerecha)
-// [R1] La pausa es nuestra hasta P-H27: el botón lleva la nota del pedido y el video no importa BotonPausa (lo que s77 fija hoy).
-const FUENTE_DEL_VIDEO = readFileSync(path.join(AQUI, '../movimiento/VideoDeFondo.tsx'), 'utf8')
-const NOTA_DE_LA_PAUSA = 'P-H27: reemplazar por BotonPausa cuando llegue el ajuste de s77'
-const pausaPropiaPorElPedido = (fuente: string): boolean => fuente.includes(NOTA_DE_LA_PAUSA) && !/from '[^']*medios\/BotonPausa'/.test(sinComentarios(fuente))
-afirmar(pausaPropiaPorElPedido(FUENTE_DEL_VIDEO), `  el botón lleva el comentario «${NOTA_DE_LA_PAUSA}» y el video no importa la del home: es nuestro hasta que s77 la deje integrar`)
-controlPositivo('  un fuente sin el comentario se detecta', FUENTE_DEL_VIDEO.replace('P-H27', 'P-H2'), pausaPropiaPorElPedido)
-controlPositivo('  y uno que ya importa BotonPausa (s77 se pondría rojo)', `import { BotonPausa } from '../../_componentes/medios/BotonPausa'\n${FUENTE_DEL_VIDEO}`, pausaPropiaPorElPedido)
+// [V1] Con movimiento reducido no hay pausa: queda el póster, quieto (la capa sin <video>, arriba).
+const pausaSegun = (pausa: typeof PausaDelVideo, reducido: boolean): string => renderToStaticMarkup(pausa({ reducido, pausado: false, alCambiar: () => undefined }))
+const sinPausaConReducido = (pausa: typeof PausaDelVideo): boolean => pausaSegun(pausa, true) === '' && laPausaDelHome(pausaSegun(pausa, false))
+afirmar(sinPausaConReducido(PausaDelVideo), '  con movimiento reducido no hay pausa (no hay video que pausar); sin reducir, la del home')
+controlPositivo('  una pausa que ignora el reducido se detecta', ((props: Parameters<typeof PausaDelVideo>[0]) => PausaDelVideo({ ...props, reducido: false })) as typeof PausaDelVideo, sinPausaConReducido)
+// [V1] La nuestra se fue: ningún fuente de _servicios arma una pausa propia, y el video importa la del home.
+const FUENTE_DEL_VIDEO = sinComentarios(readFileSync(path.join(AQUI, '../movimiento/VideoDeFondo.tsx'), 'utf8'))
+const conPausaPropia = (lista: readonly Fuente[]): string[] => lista.filter((x) => /pausa-del-video|BotonDePausa|siguienteDeLaPausa|ROTULO_DE_LA_PAUSA/.test(x.codigo)).map((x) => enBarras(x.f))
+afirmar(conPausaPropia(FUENTES).length === 0 && /from '\.\.\/\.\.\/_componentes\/medios\/BotonPausa'/.test(FUENTE_DEL_VIDEO), '  y no queda la nuestra: ningún fuente arma una pausa propia, y el video importa BotonPausa del home (s77 lo deja: está en su lista)')
+controlPositivo('  un fuente con la pausa de antes se detecta', [{ f: 'movimiento/VideoDeFondo.tsx', codigo: '<button data-pieza="pausa-del-video" />' }], (l: readonly Fuente[]) => conPausaPropia(l).length === 0)
 // La línea, dictada (M3), literal. Sus nombres salen de las fuentes: los casos de PROYECTOS, las demos del catálogo del home y la marca de
 // LOGOTIPO. El dictado decía «Ethernal, Noir y Skyline»: ganan los nombres del home.
 const LINEA_DICTADA = 'Sitios para clientes (El Garage, Esquina Estudio y Banú Scents) y demos propias de develOP (The Ethereal Resort, Noir Dining in the Void y Skyline Estates).'
