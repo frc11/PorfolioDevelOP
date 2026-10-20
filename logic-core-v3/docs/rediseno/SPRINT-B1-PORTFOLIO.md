@@ -2001,3 +2001,69 @@ Valentino miró la Cola 2 y encontró bugs que un navegador hubiera agarrado: ca
 2. A 1024, el mismo recorrido: la píldora descansa sobre la franja de arriba del panel (nunca sobre el video). Elegí (a), (b) o (c).
 3. A 1280, 1180 y 1024, Esquina y Banú: el video del mismo tamaño que a 1440 (toda su columna), 16 px debajo de la píldora; «Visitar sitio» entra con 16 px abajo.
 4. El Garage a esos anchos: su video más chico (73 a 81 %). Decidí qué hacemos con los px que le faltan.
+
+### 15.3 F5 · Las historias: nunca un fondo vacío ni un título huérfano
+
+**El arnés nuevo:**
+- `scripts-carga/historias.ts`, con la cuenta pura en `historias-cuenta.ts` y los gestos del dedo en `tactil.ts` (`dispatchTouchEvent`: el `synthesizeScrollGesture` de CDP no movía la página).
+- Va con el Chrome del sistema en modo táctil, a 390×844, 768×1024, 820×1180 y 1023×768.
+- Graba cada dos cuadros (rAF) lo que se ve del título «Portfolio», de las historias y de Demos (su área a la vista por su opacidad efectiva y su escala), el paso y la cámara (`data-camara`).
+- **Dos medidas descartadas en el camino:**
+  - el test de toque (`elementFromPoint`) confunde `pointer-events` con visibilidad;
+  - medir el envoltorio de Demos daba 1 siempre: el fundido de su llegada está en los hijos.
+
+**La cuenta (el invariante):** con la sección en el cuadro, nunca:
+- **`fondo-vacio`:** ni título, ni historias, ni Demos, más de 120 ms;
+- **`titulo-huerfano`:** el título sin las historias, con Demos o en la cola, más de 1,3 s (lo que dura la salida, más un margen);
+- **`titulo-pegado`:** el título entero más de 250 ms después de que arrancó la salida;
+- **`oscuro-sin-historias`:** la escena oscurecida sin las historias delante más de 300 ms.
+
+**Reproducido en rojo** (el recorrido completo, en los cuatro anchos: entrar scrolleando con el dedo, salir a Demos, volver, salir hacia arriba y volver):
+- **El título pegado:** 770 ms entero. Caía recién cuando la historia ya se había ido, a los 0,58 s, con la página volando a Demos.
+- **El título huérfano:** de 15 a 23 s. P2 sólo desplaza (medio alto propio) y no oculta: en 0 quedaba el 40 % del título sobre Demos para siempre. Es la misma lección que el párrafo de Demos (`TextoDeDemos`).
+- **El fondo negro:** de 3,8 a 5 s con la escena oscura sin nada delante.
+  - **Volviendo desde Demos:** la cámara del Portfolio, que trae el oscurecido, se prendía primero; el título recién subía 0,7 s después y la historia a los 1,2 s.
+  - **Deslizando hacia abajo:** la cámara esperaba al título, que se queda, así que la escena quedaba oscura con el título solo.
+- A 390 se veía todo negro, con Demos chiquito en el medio y el resto del título.
+
+**El arreglo:**
+- **`orden.ts`:** la opción `historias` cambia tres cosas.
+  - El título cae A LA PAR de la salida, con el panel.
+  - El oscurecido entra y se va CON las historias: la escena se oscurece y aclara mientras ellas se funden, aunque el título se quede.
+  - Al volver, el título sube sin esperar a la cámara. Con el título al 80 %, entran juntos el oscurecido y la historia: como entra desde arriba.
+- **`EncabezadoDelPortfolio.tsx`:** en las historias, el título se funde con su presencia (la subida de 55 svh más el fundido) y su caída dura TODA la salida (`duracionDeLaSalida`, 1,18 s). Así se va mientras llega Demos y no queda un hueco.
+- **`useOrdenDeLaEscena` y `usePortfolio`:** le pasan `historias` al orden.
+- **El defecto para el control:** `historias-de-antes` (el orden de escritorio, sin fundido y con la caída corta), pedido por el arnés antes de cargar.
+
+**En verde:**
+- **Los recorridos completos:** 4 de 4.
+- **La matriz:** cada historia (con deslices de costado hasta ella, incluida «la tuya») × salir hacia arriba (Demos) y hacia abajo (el título) × volver; 32 de 32 en los cuatro anchos.
+  - El arnés confirma que llegó a la historia pedida y que la salida salió; desde «la tuya» el deslice arranca arriba del formulario.
+- **Los peores tramos:**
+  - fondo vacío: 60 ms;
+  - el cruce del título con Demos: 470 ms (el de la salida);
+  - título pegado: 50 ms;
+  - oscuro sin historias: 107 ms.
+- **El control:** `DEFECTO=historias-de-antes`, rojo en los cuatro anchos (huérfano de 14 a 22 s, pegado 770 ms, oscuro de 3,8 a 5 s).
+- **Fotos a 390:**
+  - a 300 ms de la salida, la historia se funde con el título cayendo encima;
+  - a 700 ms, la escena ya está clara, con el título yéndose y Demos llegando;
+  - después, Demos solo, sin el resto del título.
+  - La franja negra de arriba en las fotos del viaje es la barra de la URL que emula el modo móvil.
+
+**Las afirmaciones que se reemplazaron por la spec**, con su control:
+- s76 §31: «bajando a Demos, la historia se va y después cae el título» pasa a «todo a la par de la salida»; el control es la salida de B.
+- s76 §31: la subida del título suma el fundido; el control es la subida de B, sin fundido.
+- s76 §19 (B1.2c): el cableado de `useOrdenDeLaEscena` suma `historias`.
+- Nueva, **s76 §42 (F5):**
+  - la vuelta al título;
+  - la vuelta desde Demos;
+  - el cableado de la caída larga;
+  - la cuenta del arnés con cuadros armados.
+
+**Qué mirar (F5)**, en el teléfono (390) y en la tablet (768, 820 × 1180, 1023 × 768):
+1. `/v3`: bajá con el dedo hasta el Portfolio. El título sube; las historias entran.
+2. Deslizá hacia arriba: la historia se funde, el título cae a la par y Demos llega. No queda ningún resto del título.
+3. Desde Demos, subí con el dedo: el título vuelve a subir sobre la escena clara y la historia entra con el oscurecido, como desde arriba. Nunca la escena negra sola.
+4. Deslizá hacia abajo: la historia se va, la escena aclara y el título queda arriba. Subí y volvé a bajar.
+5. Lo mismo desde cada historia, incluida «la tuya» (deslizá hacia arriba fuera del formulario).

@@ -79,7 +79,7 @@ export function afirmarB12c(): void {
   const vueltaTrasElPanel = (r: readonly { readonly estado: Orden; readonly enS: number }[]): number => (r.find((x) => !x.estado.barra)?.enS ?? Number.NaN) - (r.find((x) => !x.estado.panel)?.enS ?? Number.NaN)
   afirmar(vueltaTrasElPanel(salida) >= ORDEN.panelS - 1e-9, '  (la vuelta de la píldora arranca cuando el panel terminó de salir: su transición entera)', `${(vueltaTrasElPanel(salida) * 1000).toFixed(0)} ms`)
   controlPositivo('  el detector ve la salida de A2.2 (la expansión a la par de la salida del panel)', [{ estado: { camara: true, encabezado: true, barra: true, panel: false }, enS: 0 }, { estado: { camara: true, encabezado: true, barra: false, panel: false }, enS: 0 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => vueltaTrasElPanel(r) >= ORDEN.panelS - 1e-9)
-  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, conEl3d, false, NUNCA, true)), ['CEBp@0.00', 'CEbp@0.00', 'Cebp@0.42', 'cebp@1.82'], '  y el defecto que pide el arnés para su control (`pildora-con-el-panel`) es la salida de A2.2, tal cual')
+  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, conEl3d, false, NUNCA, { pildoraConElPanel: true })), ['CEBp@0.00', 'CEbp@0.00', 'Cebp@0.42', 'cebp@1.82'], '  y el defecto que pide el arnés para su control (`pildora-con-el-panel`) es la salida de A2.2, tal cual')
   // Lo pedido se da vuelta a mitad de camino: cada pieza recuerda cuándo cambió, así que el panel nunca se adelanta al 80 % del título.
   const recien = recorridoDelOrden({ camara: true, encabezado: true, barra: false, panel: false }, ADENTRO, conEl3d, false, { camara: -0.7, encabezado: 0, barra: -Infinity, panel: -Infinity })
   afirmarIgual(comoTexto(recien), ['CEBp@0.92', 'CEBP@1.12'], '  con el título recién llegado, la barra y el panel esperan lo suyo desde ese momento (no desde la vuelta)')
@@ -95,7 +95,7 @@ export function afirmarB12c(): void {
   const cableado = (u: string, e: string): boolean =>
     /const tituloS = useTituloListo\('portfolio'\) \? LENTOS\.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO\.s/.test(u) &&
     /const pedidoDelOrden = \{ camara: adentro, encabezado: historias \? \(fase === 'antes' && enCuadro\) \|\| adentro : adentro, barra: adentro && !historias, panel: adentro \}/.test(u) &&
-    /useOrdenDeLaEscena\(pedidoDelOrden, tituloS, reducido\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.camara/.test(u) && /useBarraDelPortfolio\(caja, orden\.barra\)/.test(u) &&
+    /useOrdenDeLaEscena\(pedidoDelOrden, tituloS, reducido, historias\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.camara/.test(u) && /useBarraDelPortfolio\(caja, orden\.barra\)/.test(u) &&
     /!vivo\.panel && 'translate-x-full'/.test(e) && /<EncabezadoDelPortfolio seccion=\{seccion\} adentro=\{vivo\.encabezado\}/.test(e)
   afirmar(cableado(usePortfolio, escenario), '  y así se cablea: la cámara (con el oscurecido de `PORTFOLIO_EN_LA_ESCENA`), el encabezado, la barra y el panel salen del orden, no del paso')
   controlPositivo('  el detector ve la cámara atada al panel (B1.2c)', usePortfolio.replace('PORTFOLIO_EN_LA_ESCENA.adentro = orden.camara', 'PORTFOLIO_EN_LA_ESCENA.adentro = orden.panel'), (u: string) => cableado(u, escenario))

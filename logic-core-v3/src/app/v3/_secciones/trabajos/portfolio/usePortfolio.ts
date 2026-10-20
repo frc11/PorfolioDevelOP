@@ -104,7 +104,7 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   const adentro = fase === 'adentro'
   const tituloS = useTituloListo('portfolio') ? LENTOS.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO.s
   const pedidoDelOrden = { camara: adentro, encabezado: historias ? (fase === 'antes' && enCuadro) || adentro : adentro, barra: adentro && !historias, panel: adentro }
-  const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido)
+  const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido, historias)
   // [B1.2d] El orden llegó a lo pedido (el diagnóstico y el arnés miran el panel sólo así: no en el medio de una entrada o una salida).
   const ordenQuieto = orden.camara === pedidoDelOrden.camara && orden.encabezado === pedidoDelOrden.encabezado && orden.barra === pedidoDelOrden.barra && orden.panel === pedidoDelOrden.panel
 

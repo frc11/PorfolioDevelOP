@@ -16,8 +16,11 @@
  * toca desde ahí: si lo pedido se da vuelta a mitad de camino se vuelve a decidir con la misma regla, y el panel nunca entra antes
  * del 80 % del título aunque el título haya llegado recién. Con movimiento reducido, todo de una.
  *
- * En el teléfono (las historias, B1.3) el encabezado se pide en la aproximación y no con el panel: la misma regla deja que el título
- * caiga antes de que entre la historia y que vuelva después de que se fue.
+ * En el teléfono (las historias, B1.3) el encabezado se pide en la aproximación y no con el panel. [F5] Y con las historias (`historias`)
+ * cambian tres cosas, para que nunca quede la escena oscura sin nada delante ni el título huérfano: el título cae A LA PAR de la salida
+ * (con el panel, no cuando las historias ya se fueron), el oscurecido (la cámara) entra y se va CON las historias (la escena se oscurece y
+ * aclara mientras ellas se funden) aunque el título se quede (la vuelta al título), y al volver desde Demos el título sube sin esperar a
+ * la cámara, como en la aproximación.
  */
 
 import { CORRIMIENTO } from '../../../_chrome/barra/corrimiento'
@@ -59,20 +62,30 @@ const APAGADO: readonly PiezaDelOrden[] = ['panel', 'encabezado', 'barra', 'cama
 const PRENDIDO: readonly PiezaDelOrden[] = ['camara', 'encabezado', 'barra', 'panel']
 
 /**
- * Lo que espera una pieza para apagarse (o `null` si todavía no puede: otra se tiene que apagar antes). `pildoraConElPanel`: el defecto
- * de F3 (la barra a la par de la salida del panel, como en A2.2), sólo para el control positivo del arnés.
+ * [F5] Las variantes del orden: `historias` (debajo de 1024, arriba) y `pildoraConElPanel`, el defecto de F3 (la barra a la par de la salida
+ * del panel, como en A2.2), sólo para el control positivo del arnés.
  */
-function apagado(p: PiezaDelOrden, actual: Orden, c: Cambios, tituloS: number, pildoraConElPanel: boolean): number | null {
+export interface OpcionesDelOrden {
+  readonly historias?: boolean
+  readonly pildoraConElPanel?: boolean
+}
+
+/** Lo que espera una pieza para apagarse (o `null` si todavía no puede: otra se tiene que apagar antes). */
+function apagado(p: PiezaDelOrden, actual: Orden, c: Cambios, tituloS: number, o: OpcionesDelOrden): number | null {
   const panelAfuera = c.panel + ORDEN.panelS
   switch (p) {
     case 'panel':
       return -Infinity
     case 'encabezado':
-      return actual.panel ? null : c.panel + ORDEN.panelS - ORDEN.solape * tituloS
+      // [F5] En las historias, con el panel: el título cae a la par de la salida.
+      if (actual.panel) return null
+      return o.historias === true ? c.panel : c.panel + ORDEN.panelS - ORDEN.solape * tituloS
     case 'barra':
       // [F3] Con el panel ya afuera: la píldora vuelve sin cruzarse nunca con él.
-      return actual.panel ? null : c.panel + (pildoraConElPanel ? 0 : ORDEN.panelS)
+      return actual.panel ? null : c.panel + (o.pildoraConElPanel === true ? 0 : ORDEN.panelS)
     case 'camara':
+      // [F5] En las historias el oscurecido se va CON ellas (la escena aclara mientras se funden), aunque el título se quede.
+      if (o.historias === true) return actual.panel ? null : c.panel
       return actual.panel || actual.encabezado ? null : Math.max(panelAfuera, c.encabezado + tituloS)
   }
 }
@@ -93,14 +106,18 @@ function finDeLoApagado(actual: Orden, c: Cambios, tituloS: number): number {
  * Lo que espera una pieza para prenderse (o `null` si todavía no puede), según lo pedido. La cámara la pide el título (para quedar de
  * frente en el plano del logo), no el panel: sin título (las historias) el panel no la espera.
  */
-function prendido(p: PiezaDelOrden, actual: Orden, pedido: Orden, c: Cambios, tituloS: number): number | null {
+function prendido(p: PiezaDelOrden, actual: Orden, pedido: Orden, c: Cambios, tituloS: number, o: OpcionesDelOrden): number | null {
   const base = finDeLoApagado(actual, c, tituloS)
   const camaraLista = pedido.camara ? (actual.camara ? c.camara + ORDEN.camaraS : null) : -Infinity
   const tituloAlOchenta = pedido.encabezado ? (actual.encabezado ? c.encabezado + (1 - ORDEN.solape) * tituloS : null) : -Infinity
   switch (p) {
     case 'camara':
+      // [F5] En las historias el oscurecido entra con ellas (el título al 80 %): nunca la escena oscura sin nada delante.
+      if (o.historias === true) return tituloAlOchenta === null ? null : Math.max(base, tituloAlOchenta)
       return base
     case 'encabezado':
+      // [F5] En las historias el título no espera a la cámara: sube sobre la escena clara, como en la aproximación.
+      if (o.historias === true) return base
       return camaraLista === null ? null : Math.max(base, camaraLista)
     case 'barra':
       // [A2.2] Sólo el primer tiempo va antes del panel: el segundo es a la par de su entrada.
@@ -117,7 +134,7 @@ function prendido(p: PiezaDelOrden, actual: Orden, pedido: Orden, c: Cambios, ti
  * El cambio siguiente hacia lo pedido y cuándo puede ocurrir (`null`: ya está). `tituloS`: lo que tarda el título en llegar (y en
  * caer: con el 3D, su mínimo). Las apagadas van antes que las prendidas; entre las que pueden, la que puede antes.
  */
-export function siguienteCambio(actual: Orden, cambios: Cambios, pedido: Orden, ahora: number, tituloS: number, reducido: boolean, pildoraConElPanel = false): CambioDelOrden | null {
+export function siguienteCambio(actual: Orden, cambios: Cambios, pedido: Orden, ahora: number, tituloS: number, reducido: boolean, opciones: OpcionesDelOrden = {}): CambioDelOrden | null {
   const apagar = APAGADO.filter((p) => actual[p] && !pedido[p])
   const prender = PRENDIDO.filter((p) => !actual[p] && pedido[p])
   if (apagar.length === 0 && prender.length === 0) return null
@@ -126,8 +143,8 @@ export function siguienteCambio(actual: Orden, cambios: Cambios, pedido: Orden, 
     return { pieza: p, valor: pedido[p], en: ahora }
   }
   const candidatos = apagar.length > 0
-    ? apagar.map((p) => ({ pieza: p, valor: false, en: apagado(p, actual, cambios, tituloS, pildoraConElPanel) }))
-    : prender.map((p) => ({ pieza: p, valor: true, en: prendido(p, actual, pedido, cambios, tituloS) }))
+    ? apagar.map((p) => ({ pieza: p, valor: false, en: apagado(p, actual, cambios, tituloS, opciones) }))
+    : prender.map((p) => ({ pieza: p, valor: true, en: prendido(p, actual, pedido, cambios, tituloS, opciones) }))
   let mejor: CambioDelOrden | null = null
   for (const k of candidatos) {
     if (k.en === null) continue
@@ -144,13 +161,13 @@ export function recorridoDelOrden(
   tituloS: number,
   reducido = false,
   cambiosDeAntes: Cambios = NUNCA,
-  pildoraConElPanel = false,
+  opciones: OpcionesDelOrden = {},
 ): readonly { readonly estado: Orden; readonly enS: number }[] {
   const salida: { readonly estado: Orden; readonly enS: number }[] = []
   let actual = desde
   let cambios = cambiosDeAntes
   let reloj = 0
-  for (let c = siguienteCambio(actual, cambios, pedido, reloj, tituloS, reducido, pildoraConElPanel); c !== null; c = siguienteCambio(actual, cambios, pedido, reloj, tituloS, reducido, pildoraConElPanel)) {
+  for (let c = siguienteCambio(actual, cambios, pedido, reloj, tituloS, reducido, opciones); c !== null; c = siguienteCambio(actual, cambios, pedido, reloj, tituloS, reducido, opciones)) {
     reloj = c.en
     actual = { ...actual, [c.pieza]: c.valor }
     cambios = { ...cambios, [c.pieza]: reloj }

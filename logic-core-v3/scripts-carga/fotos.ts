@@ -5,13 +5,16 @@
  *   RUTA='/v3#quienes-somos' ANCHO=1440 ALTO=900 PASOS='rueda:500*5,espera:3500,foto:garage' npx tsx scripts-carga/fotos.ts
  *
  * Los pasos, separados por coma: `rueda:<px>[*<veces>]` (una muesca cada 50 ms), `espera:<ms>`, `foto:<nombre>`, `px:<px de la regla del
- * Portfolio>` (un salto del scroll nativo), `tap:<x>/<y>`, `tecla:<tecla>` y `mouse:<x>/<y>`. `MOVIL=1`: táctil.
+ * Portfolio>` (un salto del scroll nativo), `tap:<x>/<y>`, `tecla:<tecla>`, `mouse:<x>/<y>` y, con el dedo (`tactil.ts`), `dedo:<dy>` (el
+ * scroll táctil) y `desliz:<dx>/<dy>` (un deslice desde el medio). `MOVIL=1`: táctil.
  */
 import { mkdirSync, rmSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
 import { chromium } from '@playwright/test'
+
+import { deslizar, desplazarConElDedo, tocar } from './tactil'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const RUTA = process.env.RUTA ?? '/v3'
@@ -68,7 +71,14 @@ async function main(): Promise<void> {
         await p.mouse.move(Number(x), Number(y), { steps: 4 })
       } else if (accion === 'tap') {
         const [x = '0', y = '0'] = valor.split('/')
-        await p.touchscreen.tap(Number(x), Number(y))
+        await tocar(cdp, Number(x), Number(y))
+      } else if (accion === 'dedo') {
+        // `dedo:<dy>`: el scroll táctil del navegador (con su inercia), desde el medio del cuadro.
+        await desplazarConElDedo(cdp, ANCHO / 2, ALTO / 2, Number(valor))
+      } else if (accion === 'desliz') {
+        // `desliz:<dx>/<dy>`: un deslice del dedo desde el medio del cuadro (sobre las historias: cambia o sale).
+        const [dx = '0', dy = '0'] = valor.split('/')
+        await deslizar(cdp, ANCHO / 2, ALTO / 2, Number(dx), Number(dy))
       } else if (accion === 'px') {
         await p.evaluate((x) => {
           const panel = document.querySelector('[data-panel="trabajos"]')
@@ -76,12 +86,38 @@ async function main(): Promise<void> {
           const tope = panel.getBoundingClientRect().top + scrollY
           window.scrollTo({ top: tope - innerHeight + (x * innerHeight) / 900, behavior: 'instant' })
         }, Number(valor))
+      } else if (accion === 'encima') {
+        // `encima:`: qué hay arriba en el medio del cuadro, con y sin los pointer-events forzados (para la sonda de las historias).
+        console.log(JSON.stringify(await p.evaluate(() => {
+          const quien = (e: Element | null): string => { const v: string[] = []; for (let x = e; x !== null && v.length < 6; x = x.parentElement) v.push(`${x.tagName}${x.id === '' ? '' : `#${x.id}`}${x.getAttribute('data-pieza') === null ? '' : `[${x.getAttribute('data-pieza') ?? ''}]`}${x.getAttribute('data-capa') === null ? '' : `{${x.getAttribute('data-capa') ?? ''}}`}.${(typeof x.className === 'string' ? x.className : '').slice(0, 40)}`); return v.join(' < ') }
+          const sin = quien(document.elementFromPoint(innerWidth / 2, innerHeight / 2))
+          const st = document.createElement('style')
+          st.textContent = '* { pointer-events: auto !important; }'
+          document.head.appendChild(st)
+          const con = quien(document.elementFromPoint(innerWidth / 2, innerHeight / 2))
+          st.remove()
+          return { sin, con }
+        })))
+      } else if (accion === 'titulo') {
+        // `titulo:`: cómo está el encabezado del Portfolio (la subida, el titular y sus recortes), para diagnosticar.
+        console.log(JSON.stringify(await p.evaluate(() => {
+          const sub = document.querySelector('[data-parte="subida-del-encabezado"]')
+          const h2 = document.querySelector('[data-pieza="encabezado-del-portfolio"] h2')
+          const cadena: { tag: string; transform: string; opacity: string; overflow: string; clip: string }[] = []
+          for (let e: Element | null = h2; e !== null && e !== sub?.parentElement; e = e.parentElement) {
+            const c = getComputedStyle(e)
+            cadena.push({ tag: `${e.tagName}${e.getAttribute('data-pieza') ?? e.getAttribute('data-parte') ?? ''}`, transform: c.transform, opacity: c.opacity, overflow: c.overflow, clip: c.clipPath })
+          }
+          const r = h2?.getBoundingClientRect()
+          return { h2: r === undefined ? null : [Math.round(r.top), Math.round(r.bottom)], cadena }
+        })))
       } else if (accion === 'foto') {
         const archivo = path.join(SALIDA, `${valor}-${String(ANCHO)}.png`)
         await p.screenshot({ path: archivo })
         const estado = await p.evaluate(() => {
           const e = document.querySelector('[data-pieza="escenario-del-portfolio"]')
-          return `paso ${e?.getAttribute('data-paso') ?? '?'} · panel ${e?.getAttribute('data-panel-adentro') ?? '?'} · barra ${e?.getAttribute('data-barra') ?? '?'} · y ${String(Math.round(scrollY))}`
+          const h = document.querySelector('[data-pieza="historias"]')
+          return `paso ${e?.getAttribute('data-paso') ?? '?'} · panel ${e?.getAttribute('data-panel-adentro') ?? '?'} · encabezado ${e?.getAttribute('data-encabezado') ?? '?'} · barra ${e?.getAttribute('data-barra') ?? '?'} · historia ${h?.getAttribute('data-indice') ?? '-'} · y ${String(Math.round(scrollY))}`
         })
         console.log(`${archivo} · ${estado}`)
       }
