@@ -11,7 +11,10 @@ import { anotar } from '../diagnostico/anotar'
 import { alCargarseLasFuentes, conReimpresion } from '../fuentes'
 
 /** [RETOQUE 3D] Con qué fuente se extruye (la que el DOM pinta: `scripts-retoque/fuentes-3d.py`). */
-export type FuenteDelTitulo = 'chivo-400' | 'archivo-700' | 'chivo-300-italica' | 'chivo-700' | 'chivo-300'
+export type FuenteDelHome = 'chivo-400' | 'archivo-700' | 'chivo-300-italica' | 'chivo-700' | 'chivo-300'
+/** [B12a.4] Las del título de las páginas: instancias de Archivo (ancho/peso) que se cargan sólo en una página (`fuentesDePagina.ts`). */
+export type FuenteDePagina = 'archivo-125-800' | 'archivo-125-300' | 'archivo-75-800' | 'archivo-112-300'
+export type FuenteDelTitulo = FuenteDelHome | FuenteDePagina
 
 /**
  * [RETOQUE PANEL] T4 · UNA RAYA DEL TÍTULO (el subrayado, el tachado, un trazo del ≠): una barra extruida en el plano del

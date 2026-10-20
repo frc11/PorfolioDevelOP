@@ -29,6 +29,8 @@ la licencia permite convertirlas y redistribuirlas con la fuente.
                                    DOM): la escena los arma para la metamorfosis al CTA
   chivo-300-italica-titulos.json   el registro 2 del hero: «LAS 24 HS»
   chivo-{400,500,600}-pie.json     [RETOQUE DEL PIE] P2 · los textos del pie en 3D, cada uno con su peso
+  archivo-*-pagina.json            [B12a.4] el título de las páginas: cuatro instancias del TTF variable (125/800, 125/300, 75/800
+                                   y 112,5/300), con las letras de los tres nombres de servicio y de la ruta de prueba
 
 Sin instalar nada: fontTools necesita brotli para abrir WOFF2 y, si no está, se usa el zlib de Node (que lo trae).
 Si cambian los títulos, se vuelve a correr (los invariantes afirman que cada carácter está en su JSON).
@@ -53,6 +55,13 @@ VALORES = [
     'Tu panel, tu control', 'Ves cómo va tu proyecto y pedís cambios sin esperar un mail.',
     'Hablás con quien lo hace', 'Sin intermediarios: te atienden las personas que construyen tu sitio.',
 ]
+
+# [B12a.4] Los títulos de las páginas (`TITULOS_CON_LETRAS`, `_componentes/titulos3d/presets.ts`): los nombres de las páginas de servicio
+# (su `NOMBRE`, en `_servicios/datos/*.ts` de paginas/servicios), los tres de `acento.ts` (la ruta de prueba, `?nombre=`) y el de la
+# prueba. Un nombre nuevo obliga a volver a correr (s78 exige cada letra en cada instancia).
+TEXTOS_DE_PAGINA = ['Páginas web', 'Software a medida', 'IA y automatizaciones', 'Desarrollo web', 'Integraciones de IA y Automatizaciones', 'Prueba de la intro']
+# [B12a.4] Las instancias (nombre, wdth, wght): 125/800 y 125/300 (la 1 y la 3), 75/800 y 112,5/300 (la 2). `fuentes-de-pagina.py` hace las del DOM.
+INSTANCIAS_DE_PAGINA = [('125-800', 125, 800), ('125-300', 125, 300), ('75-800', 75, 800), ('112-300', 112.5, 300)]
 
 PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
@@ -88,6 +97,12 @@ PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 600, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
      # [PULIDO 10] J8 · «Portfolio» y «Demos» en el recorrido (era «Trabajos»).
      'textos': ['develOP', 'Inicio', 'Quiénes somos', 'Portfolio', 'Demos', 'Servicios', 'Tu panel', 'Por qué develOP', 'contacto@develop.com.ar', 'Escribinos por WhatsApp', 'Enviar', 'Enviando…', 'Enviar otro mensaje', 'Reintentar'], 'destino': 'chivo-600-pie.json'},  # [PULIDO 10] J5 · y Reintentar
+    # [B12a.4] El título de las páginas (D3): cuatro instancias de Archivo, ninguna del home (62/700 del hero, 100/600 y 100/900 del CTA),
+    # con las letras de los tres nombres de servicio (`_secciones/_contrato/acento.ts`) y la ruta de prueba. Se cargan sólo en una página
+    # (`fuentesDePagina.ts`, import dinámico): el home no las baja. Cada instancia lleva todas las letras (las combinaciones cambian de parte).
+    *[{'origen': ARCHIVO_VARIABLE, 'peso': peso, 'ancho': wdth, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt', 'kerning': True,
+       'textos': TEXTOS_DE_PAGINA, 'destino': f'archivo-{nombre}-pagina.json', 'dom': f'archivo-{nombre}-pagina.woff'}
+      for nombre, wdth, peso in INSTANCIAS_DE_PAGINA],
 ]
 
 try:
@@ -294,6 +309,30 @@ def armar(pedido):
         json.dump(typeface, f, ensure_ascii=False, separators=(',', ':'))
         f.write('\n')
     print(destino, len(datos), 'glifos,', os.path.getsize(destino), 'bytes')
+    if 'dom' in pedido:
+        cara_del_dom(fuente, pedido)
+
+
+def cara_del_dom(fuente, pedido):
+    """
+    [B12a.4] LA CARA DEL DOM de una instancia de página: la MISMA instancia estática (así `hmtx` es lo que se pinta y la escena mide las
+    letras del DOM con la métrica del 3D), recortada a las letras de sus textos (más el espacio), con el kerning y sin hinting. En WOFF
+    (zlib): el WOFF2 pide brotli, que no está y no se instala para esto; con ~25 glifos la diferencia es de cientos de bytes.
+    """
+    from fontTools import subset  # noqa: E402
+
+    opciones = subset.Options()
+    opciones.flavor = 'woff'
+    opciones.layout_features = ['kern']
+    opciones.hinting = False
+    opciones.name_IDs = ['*']
+    opciones.notdef_outline = True
+    recorte = subset.Subsetter(opciones)
+    recorte.populate(unicodes={ord(ch) for ch in ''.join(pedido['textos']) + ' '})
+    recorte.subset(fuente)
+    destino = os.path.join(FUENTES, pedido['dom'])
+    subset.save_font(fuente, destino, opciones)
+    print(destino, os.path.getsize(destino), 'bytes')
 
 
 # Con nombres de destino como argumentos, sólo esos (sin argumentos, todos).

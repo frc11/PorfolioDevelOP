@@ -169,7 +169,8 @@ afirmarIgual((layout.match(/weight: '100 900'/g) ?? []).length, 3, 'las TRES fam
  *  sacara a un `localFont` propio, `italic` dejaría de elegirla y el navegador
  *  volvería a sintetizar una oblicua sobre la romana — sin un solo error. */
 afirmar(/style: 'italic'/.test(layout), 'la itálica de Chivo se declara por `style`, adentro del `src` de la familia')
-afirmarIgual((layout.match(/localFont\(/g) ?? []).length, 3, '  y son TRES llamadas a `localFont`, no cuatro: la itálica no es una familia aparte')
+// [B12a.4] Sin contar las cuatro caras del título de las páginas (`-pagina.woff`, estáticas, sin precarga: s78 las afirma).
+afirmarIgual((layout.match(/localFont\((?!\{ src: '\.\/_fuentes\/archivo-[\d-]+-pagina\.woff')/g) ?? []).length, 3, '  y son TRES llamadas a `localFont`, no cuatro: la itálica no es una familia aparte')
 /** Ni `font-stretch` ni `font-variation-settings` en ninguna parte del árbol de
  *  /v3: el ancho de la cara de display viene pinchado EN EL BINARIO. Si alguien
  *  los escribiera, estaría pidiéndole a la fuente un eje que ya no tiene. */

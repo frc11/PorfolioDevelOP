@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { Envoltorio } from '../_componentes/layout/Envoltorio'
 import { IntroDeLaPagina, ParrafoDeLaBajada, SELECTOR_DE_LA_INTRO } from '../_componentes/pagina/IntroDeLaPagina'
+import { TITULOS_CON_LETRAS } from '../_componentes/titulos3d/presets'
 import { Cuerpo } from '../_componentes/tipografia/Textos'
 import { PISTA_DE_LA_INTRO } from '../_lib/escena/ruta/pistaDeLaIntro'
 import type { PresetDeLaEscena } from '../_lib/escena/ruta/preset'
@@ -30,11 +31,18 @@ const PRESET: PresetDeLaEscena = {
   variante: 'prueba',
 }
 
-export default function PruebaDePagina(): React.JSX.Element {
+/**
+ * [B12a.4] El título de la prueba: con `?nombre=1` a `6`, uno de los que las fuentes saben escribir (`TITULOS_CON_LETRAS`: los nombres de las
+ * páginas de servicio primero), para elegir la familia con `?titulo=1|2|3` viendo los de verdad; sin él, el de la prueba.
+ */
+const tituloDeLaPrueba = (nombre: string | string[] | undefined): string => TITULOS_CON_LETRAS[Number(nombre) - 1] ?? 'Prueba de la intro'
+
+export default async function PruebaDePagina({ searchParams }: { readonly searchParams: Promise<Readonly<Record<string, string | string[] | undefined>>> }): Promise<React.JSX.Element> {
+  const { nombre } = await searchParams
   return (
     <main className="relative z-10">
       <IntroDeLaPagina
-        titulo="Prueba de la intro"
+        titulo={tituloDeLaPrueba(nombre)}
         preset={PRESET}
         bajada={
           <>

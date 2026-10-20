@@ -5,13 +5,16 @@
  * sonda de Fase 0 (`scratchpad/ph/costo-subruta.ts`). B12a.2: la intro de la página, su avance (de 0 a 1 en 1,5 pantallas, en un canal
  * propio, no en el progreso del rig) y la composición inicial (la pose en avance 0), con la ruta `/v3/prueba-de-pagina?intro=1|2|3`.
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
+import { inflateSync } from 'node:zlib'
 
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { ATRIBUTO_DE_LA_INTRO_DE_PAGINA, IntroDeLaPagina, SELECTOR_DE_LA_INTRO } from '../../_componentes/pagina/IntroDeLaPagina'
+import { CAIDA_DEL_TITULO, CARA_DEL_DOM, COMBINACIONES_DEL_TITULO, TITULOS_CON_LETRAS, TITULO_DE_PAGINA, combinacionDeLaBandera, partesDelTitulo } from '../../_componentes/titulos3d/presets'
+import { SERVICIOS } from '../../_secciones/_contrato/acento'
 import { REGISTRO_DE_VARIANTES, esIdDeVariante } from '../../_variantes/registro'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
 import { AZIMUT_DEL_MOUSE_POR_PROGRESO } from '../escena/choreographyPhysics'
@@ -28,7 +31,9 @@ import { AVANCE_DE_LA_INTRO, COMPOSICION_INICIAL, PANTALLAS_DE_LA_INTRO, PISTA_D
 import { PRESET_DEL_HOME, apilarElPreset, despiertaEnLaPagina, presetActual, type CajaVertical, type PresetDeLaEscena } from '../escena/ruta/preset'
 import { atenderLaSalida, pedirLaSalidaDeLaVariante } from '../escena/ruta/salidaDeLaVariante'
 import { COMPOSICION_DE_LA_LUZ, SALIDA_DE_LA_VARIANTE_MS } from '../escena/ruta/variante'
+import { esFuenteDePagina } from '../escena/titulos3d/fuentesDePagina'
 import { MARGEN_DE_REANUDACION } from '../escena/visibilidad'
+import type { FuenteDePagina } from '../titulos3d/registro'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
 ;(globalThis as unknown as { React: typeof React }).React = React
@@ -177,9 +182,12 @@ afirmar(!enElSostenDelCta(0) && azimutDelMouseEn(0) === AZIMUT_DEL_MOUSE_POR_PRO
 titulo('B12a.2 · 8 · El bloque de la intro y la ruta de prueba')
 
 const intro = renderToStaticMarkup(<IntroDeLaPagina titulo="Una página" bajada={<p>La bajada.</p>} preset={DE_PRUEBA} />)
+/** El texto del `h1` (sin etiquetas): el que leen el lector de pantalla y los buscadores. */
+const textoDelH1 = (html: string): string | null => /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html)?.[1]?.replace(/<[^>]+>/g, '') ?? null
 const bloqueBien = (html: string): boolean =>
-  // [B12a.3] Reemplazada por la spec: el atributo lleva el id de la página (antes, vacío).
-  html.includes(`${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}="prueba"`) && /<h1[^>]*>Una página<\/h1>/.test(html) && html.includes(`h-[${String(PANTALLAS_DE_LA_INTRO * 100)}svh]`) && html.includes('data-seccion="invertida"') && html.includes('<p>La bajada.</p>')
+  // [B12a.3] Reemplazada por la spec: el atributo lleva el id de la página (antes, vacío). [B12a.4] Y el `h1` dice el nombre con sus dos
+  // partes adentro (el título de la página): se mira su texto, no que el texto sea lo único adentro.
+  html.includes(`${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}="prueba"`) && textoDelH1(html) === 'Una página' && html.includes(`h-[${String(PANTALLAS_DE_LA_INTRO * 100)}svh]`) && html.includes('data-seccion="invertida"') && html.includes('<p>La bajada.</p>')
 afirmar(bloqueBien(intro), 'la intro es un bloque con el atributo que mide la escena, el `h1` con el nombre, el alto de `PANTALLAS_DE_LA_INTRO` y, de noche, los claros (la sección invertida); declara el preset sin pintar nada más')
 controlPositivo('  el detector ve una intro de una pantalla', intro.replace(`h-[${String(PANTALLAS_DE_LA_INTRO * 100)}svh]`, `h-[${String(100)}svh]`), bloqueBien)
 afirmar(DE_PRUEBA.tramos?.intro === `[${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}]`, '  y el selector del preset es el de ese atributo')
@@ -272,5 +280,101 @@ const tipos = leer('_lib/escena/ruta/variante.ts')
 const soloTipos = (t: string): boolean => !/^import (?!type)/m.test(t) && /export const PRESUPUESTO_DE_LA_VARIANTE = \{ cpuMsPorCuadro: 0\.5 \} as const/.test(t)
 afirmar(soloTipos(tipos), '  `variante.ts` (lo que importa servicios) son tipos y números: ningún valor de three ni de react; el presupuesto, 0,5 ms de CPU por cuadro')
 controlPositivo('  el detector ve un valor de three en los tipos', `import * as THREE from 'three'\n${tipos}`, soloTipos)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('B12a.4 · 10 · El título de las páginas (P-H13, P-H14): el `h1` y sus dos partes en volumen, en dos variantes de Archivo (D3)')
+
+const conPartes = (t: string, p?: readonly [string, string]): string => renderToStaticMarkup(<IntroDeLaPagina titulo={t} partes={p} bajada={<p>b</p>} preset={DE_PRUEBA} />)
+const NOMBRES = SERVICIOS.map((s) => s.nombre)
+const h1Bien = (pintar: (t: string) => string): boolean => NOMBRES.every((n) => textoDelH1(pintar(n)) === n) && textoDelH1(pintar('Desarrollo web')) === 'Desarrollo web'
+afirmar(h1Bien((t) => conPartes(t)) && textoDelH1(conPartes('Desarrollo web', ['Desarrollo', 'web'])) === 'Desarrollo web' && partesDelTitulo('Software a medida').join(' ') === 'Software a medida', 'el `h1` dice el nombre entero de cada servicio, el MISMO texto que el título 3D: sus dos partes (las dadas, o la primera palabra y el resto) unidas con un espacio')
+controlPositivo('  el detector ve un `h1` con las partes pegadas (sin el espacio)', (t: string) => conPartes(t).replace('</span> <span', '</span><span'), h1Bien)
+const caraDe = (f: FuenteDePagina): string => `style="font-family:${CARA_DEL_DOM[f].familia};font-weight:${String(CARA_DEL_DOM[f].peso)}"`
+const partesBien = (html: string): boolean => html.includes(`data-parte="titulo-1" class="block" ${caraDe(TITULO_DE_PAGINA.fuentes[0])}`) && html.includes(caraDe(TITULO_DE_PAGINA.fuentes[1]))
+afirmar(partesBien(conPartes('Desarrollo web')) && TITULO_DE_PAGINA === COMBINACIONES_DEL_TITULO[0], '  cada parte va en la cara del DOM de su fuente (la de la combinación 1 sin la bandera), con el peso de su instancia: la escena mide sus letras con la métrica del 3D')
+controlPositivo('  el detector ve las dos partes en la misma cara', conPartes('Desarrollo web').replace(caraDe(TITULO_DE_PAGINA.fuentes[1]), caraDe(TITULO_DE_PAGINA.fuentes[0])), partesBien)
+const banderaBien = (f: (v: string | null) => unknown): boolean =>
+  f('1') === COMBINACIONES_DEL_TITULO[0] && f('2') === COMBINACIONES_DEL_TITULO[1] && f('3') === COMBINACIONES_DEL_TITULO[2] && f(null) === TITULO_DE_PAGINA && f('4') === TITULO_DE_PAGINA && f('x') === TITULO_DE_PAGINA
+afirmar(banderaBien(combinacionDeLaBandera), '  `?titulo=1|2|3` elige la combinación; sin ella o con otra cosa, la 1 (`TITULO_DE_PAGINA`)')
+controlPositivo('  el detector ve una bandera que no se lee', () => TITULO_DE_PAGINA, banderaBien)
+
+// D3: dos variantes de Archivo por combinación, ninguna de las del home (la 62 del hero, la 100/600 y la 100/900 del CTA del final).
+type Instancia = { readonly wght: number; readonly wdth: number; readonly fuente: string }
+const archivoDe = (f: FuenteDePagina): string => `${f}-pagina`
+type FuenteEnJson = { readonly glyphs: Readonly<Record<string, unknown>>; readonly original_font_information: { readonly fontSubfamily: string; readonly source: string } }
+const delJson = (f: FuenteDePagina): FuenteEnJson => JSON.parse(leer(`_fuentes/${archivoDe(f)}.json`)) as FuenteEnJson
+const instanciaDe = (f: FuenteDePagina): Instancia => {
+  const m = /^wght (\d+) wdth ([\d.]+)$/.exec(delJson(f).original_font_information.fontSubfamily)
+  return { wght: Number(m?.[1]), wdth: Number(m?.[2]), fuente: delJson(f).original_font_information.source }
+}
+const USADAS = [...new Set(COMBINACIONES_DEL_TITULO.flatMap((c) => c.fuentes))]
+const delHome = (i: Instancia): boolean => i.wdth === 62 || (i.wdth === 100 && (i.wght === 600 || i.wght === 900))
+const ningunaDelHome = (instancias: readonly Instancia[]): boolean =>
+  instancias.length === USADAS.length && instancias.every((i) => Number.isFinite(i.wght) && Number.isFinite(i.wdth) && i.fuente === 'Archivo[wdth,wght].ttf' && !delHome(i)) && COMBINACIONES_DEL_TITULO.every((c) => c.fuentes[0] !== c.fuentes[1])
+const instancias = USADAS.map(instanciaDe)
+afirmar(USADAS.every(esFuenteDePagina) && ningunaDelHome(instancias), `  D3 · dos variantes de Archivo por combinación, ninguna del home: ${instancias.map((i) => `${String(i.wdth)}/${String(i.wght)}`).join(', ')}`)
+controlPositivo('  el detector ve la del CTA del final (100/600)', [...instancias.slice(1), { wght: 600, wdth: 100, fuente: 'Archivo[wdth,wght].ttf' }], ningunaDelHome)
+
+// La cobertura: cada letra de los tres nombres (y de la ruta de prueba) en cada instancia, en el 3D (JSON) y en el DOM (WOFF).
+/** Los códigos que mapea el `cmap` (formato 4) de un WOFF de `_fuentes/`: un lector propio (zlib), aparte del de `s10-woff2.ts`. */
+function codigosDelWoff(archivo: string): ReadonlySet<number> {
+  const b = readFileSync(path.join(V3, '_fuentes', archivo))
+  if (b.toString('ascii', 0, 4) !== 'wOFF') throw new Error(`${archivo} no es un WOFF`)
+  let cmap: Buffer | null = null
+  for (let i = 0; i < b.readUInt16BE(12); i += 1) {
+    const e = 44 + i * 20
+    if (b.toString('ascii', e, e + 4) !== 'cmap') continue
+    const [desde, comprimido, original] = [b.readUInt32BE(e + 4), b.readUInt32BE(e + 8), b.readUInt32BE(e + 12)]
+    const bloque = b.subarray(desde, desde + comprimido)
+    cmap = comprimido < original ? inflateSync(bloque) : bloque
+  }
+  if (cmap === null) throw new Error(`${archivo} no trae cmap`)
+  const codigos = new Set<number>()
+  for (let r = 0; r < cmap.readUInt16BE(2); r += 1) {
+    const sub = cmap.subarray(cmap.readUInt32BE(4 + r * 8 + 4))
+    if (sub.readUInt16BE(0) !== 4) continue
+    const seg = sub.readUInt16BE(6) / 2
+    for (let s = 0; s < seg; s += 1) {
+      const [hasta, desde] = [sub.readUInt16BE(14 + s * 2), sub.readUInt16BE(16 + seg * 2 + s * 2)]
+      for (let c = desde; c <= hasta && c !== 0xffff; c += 1) codigos.add(c)
+    }
+  }
+  return codigos
+}
+// Las letras: las de los títulos que el preset sabe escribir, la MISMA lista que la del generador (los nombres de las páginas de servicio,
+// los de `acento.ts` y el de la prueba).
+const delGenerador = /^TEXTOS_DE_PAGINA = \[([^\]]*)\]/m.exec(readFileSync(path.join(process.cwd(), 'scripts-retoque/fuentes-3d.py'), 'utf8'))?.[1]?.split(',').map((t) => t.trim().slice(1, -1)) ?? []
+afirmarIgual(delGenerador, [...TITULOS_CON_LETRAS], '  los títulos con letras son los del generador de las fuentes (`TEXTOS_DE_PAGINA`), con los tres de `acento.ts` adentro')
+afirmar(NOMBRES.every((n) => (TITULOS_CON_LETRAS as readonly string[]).includes(n)), '    (los de la ruta de prueba, `?nombre=`, están)')
+const LETRAS = [...new Set(TITULOS_CON_LETRAS.join(''))]
+const cubre = (letras: readonly string[]): boolean =>
+  USADAS.every((f) => {
+    const enElDom = codigosDelWoff(`${archivoDe(f)}.woff`)
+    return letras.every((l) => Object.hasOwn(delJson(f).glyphs, l) && enElDom.has(l.codePointAt(0) ?? -1))
+  })
+afirmar(cubre(LETRAS), `  la cobertura: las ${String(LETRAS.length)} letras de esos títulos están en las ${String(USADAS.length)} instancias, en el 3D y en el DOM (un nombre nuevo obliga a regenerar: \`scripts-retoque/fuentes-3d.py\`)`)
+controlPositivo('  el detector ve un nombre con una letra que no está (la Ñ)', [...LETRAS, 'Ñ'], cubre)
+
+// El home no las baja: las 3D con un import dinámico, las del DOM sin precarga.
+const deLaPagina = leerV3('_lib/escena/titulos3d/fuentesDePagina.ts')
+const conEstatica = (readdirSync(V3, { recursive: true, encoding: 'utf8' }) as string[]).filter((r) => /\.tsx?$/.test(r) && !r.includes('__tests__') && /^import [^\n]*-pagina\.json'/m.test(leer(r)))
+const perezosas = ([f, estaticas]: readonly [string, readonly string[]]): boolean => estaticas.length === 0 && (f.match(/\(\) => import\('\.\.\/\.\.\/\.\.\/_fuentes\/archivo-[\d-]+-pagina\.json'\)/g) ?? []).length === USADAS.length
+afirmar(perezosas([deLaPagina, conEstatica]), '  el home no las baja: las fuentes 3D de las páginas llegan con un import dinámico cada una (`fuentesDePagina.ts`) y ninguna es estática (las del home, sí, con el lienzo)')
+controlPositivo('  el detector ve una importada estática', [deLaPagina, ['_lib/escena/titulos3d/armado.ts']] as const, perezosas)
+const layout = leer('layout.tsx')
+const carasBien = (l: string): boolean =>
+  USADAS.every((f) => l.includes(`localFont({ src: './_fuentes/${archivoDe(f)}.woff', variable: '${CARA_DEL_DOM[f].familia.slice(4, -1)}', weight: '${String(CARA_DEL_DOM[f].peso)}', style: 'normal', display: 'swap', preload: false })`)) && /\$\{CARAS_DE_PAGINA\} font-cuerpo/.test(l)
+afirmar(carasBien(layout), '  y las caras del DOM las declara el layout sin precarga: el home sólo lleva su `@font-face`; una página baja las dos de su combinación')
+controlPositivo('  el detector ve una precargada', layout.replace('preload: false })', 'preload: true })'), carasBien)
+
+// El cableado: en la pantalla (sigue al `h1` fijo de la intro), con el gesto y el reloj del titular del hero; cae con el gatillo de la intro.
+const delTitulo = leerV3('_componentes/titulos3d/TituloDePagina.tsx')
+const tituloCableado = (c: string): boolean =>
+  /const comun = \{ lectura: 0, salida: null, queda: true, gesto: 'azar', colocacion: 'pantalla', rearma: true, minimoS: LLEGADA_DEL_TITULAR_S, asiento: preset\.asiento, saleCayendo: preset\.saleCayendo, activo \} as const/.test(c) &&
+  /const activo = material !== 'no' && escritorio && !reducido/.test(c) && /avanceDeLaIntro\(arriba, window\.scrollY, window\.innerHeight\) < CAIDA_DEL_TITULO\.avance/.test(c) &&
+  /animate\(presencia, ahora \? 1 : 0, \{ duration: CAIDA_DEL_TITULO\.s,/.test(c) && /const APAGADO = 'escritorio:opacity-0'/.test(c) && /className=\{cn\('block', listo && APAGADO\)\}/.test(c)
+afirmar(tituloCableado(delTitulo) && COMBINACIONES_DEL_TITULO.every((c) => c.saleCayendo) && CAIDA_DEL_TITULO.avance > 1 / PANTALLAS_DE_LA_INTRO / 2 && CAIDA_DEL_TITULO.avance < 1, `  el título en volumen va en la pantalla, llega con el gesto y el reloj del titular del hero y cae (nunca de golpe) cuando la intro pasa ${String(CAIDA_DEL_TITULO.avance)}: el papel ya entró; con las dos partes armadas el DOM se apaga sólo desde 1024 (sigue en el árbol accesible); sin WebGL, con movimiento reducido o abajo de 1024, el \`h1\` es el visible`)
+controlPositivo('  el detector ve el título en volumen con movimiento reducido', delTitulo.replace("material !== 'no' && escritorio && !reducido", "material !== 'no' && escritorio"), tituloCableado)
+controlPositivo('  y el `h1` apagado en todos los anchos', delTitulo.replace("const APAGADO = 'escritorio:opacity-0'", "const APAGADO = 'opacity-0'"), tituloCableado)
 
 cerrar('s78-b12a')

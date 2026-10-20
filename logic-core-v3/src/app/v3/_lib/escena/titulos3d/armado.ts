@@ -6,7 +6,7 @@ import datosDeArchivo from '../../../_fuentes/archivo-700-titulos.json'
 import datosDeLaItalica from '../../../_fuentes/chivo-300-italica-titulos.json'
 import datosDeLaFuerte from '../../../_fuentes/chivo-700-titulos.json'
 import datosDeLaLiviana from '../../../_fuentes/chivo-300-titulos.json'
-import type { FuenteDelTitulo, TituloDeVolumen } from '../../titulos3d/registro'
+import type { FuenteDelHome, FuenteDelTitulo, TituloDeVolumen } from '../../titulos3d/registro'
 import { conElAmanecer } from '../amanecer/luz'
 import { SATINADO } from '../estudio'
 import { conLogoDeNoche, hornearContornos, type ContornoDelLogo } from '../logoDeNoche'
@@ -14,6 +14,7 @@ import { EMISION_EN_LA_NOCHE } from '../logoEmision'
 import { INK_COLOR, PAPER_COLOR } from '../probeScene'
 import { enEmDelLugar, letrasDelDom, type LugarEnElCuadro, type PinDelLugar } from './colocacion'
 import { costadoDeDiaGlsl } from './filo'
+import { esFuenteDePagina, fuenteDePagina } from './fuentesDePagina'
 import { armarElTitulo, type RayaEnEm } from './geometria'
 import { DISOLVER_GLSL, DISOLVER_PARS_GLSL, FORMA_DE_LAS_LETRAS, LLEGADA_NORMAL_GLSL, LLEGADA_PARS_GLSL, LLEGADA_POSICION_GLSL, llegadaNormalGlsl, llegadaParsGlsl, llegadaPosicionGlsl, mismaLlegada } from './llegada'
 
@@ -36,13 +37,16 @@ export const FILO_DE_DIA_GLSL = /* glsl */ `
 export type Variante = 'negro' | 'blanco'
 
 /** [RETOQUE 3D] Las fuentes de los títulos: la Chivo 400 de siempre, Archivo 700 y la Chivo 300 itálica del hero. [RETOQUE PANEL] T4: y la Chivo 700 y 300 del titular de Quiénes somos. */
-const FUENTES: Readonly<Record<FuenteDelTitulo, Font>> = {
+const FUENTES: Readonly<Record<FuenteDelHome, Font>> = {
   'chivo-400': new Font(datosDeLaFuente as FontData),
   'archivo-700': new Font(datosDeArchivo as FontData),
   'chivo-300-italica': new Font(datosDeLaItalica as FontData),
   'chivo-700': new Font(datosDeLaFuerte as FontData),
   'chivo-300': new Font(datosDeLaLiviana as FontData),
 }
+
+/** [B12a.4] La fuente de un título: la del home, o la de una página si ya llegó (`fuentesDePagina.ts`: la sincronía la espera). */
+export const fuenteDelTitulo = (f: FuenteDelTitulo): Font | null => (esFuenteDePagina(f) ? fuenteDePagina(f) : FUENTES[f])
 
 /** [RETOQUE 3D] El lugar de un título en el cuadro, escribible: el de `pantalla` se recalcula en cada cuadro sin reservar. */
 export type LugarVivo = { -readonly [K in keyof LugarEnElCuadro]: LugarEnElCuadro[K] }
@@ -123,7 +127,8 @@ export function avancesDeLasRayas(titulo: TituloDeVolumen, destino: THREE.Vector
 }
 
 export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
-  const fuente = FUENTES[titulo.fuente]
+  // [B12a.4] La de una página que no llegó no se arma (`armarElLote` la saltea): la Chivo es sólo para el tipo.
+  const fuente = fuenteDelTitulo(titulo.fuente) ?? FUENTES['chivo-400']
   // [PASADA FINAL] 0 · la forma de su llegada: la de siempre, o una propia con su propio programa (hoy ninguno la trae).
   const forma = titulo.forma ?? FORMA_DE_LAS_LETRAS
   const propia = !mismaLlegada(forma, FORMA_DE_LAS_LETRAS)

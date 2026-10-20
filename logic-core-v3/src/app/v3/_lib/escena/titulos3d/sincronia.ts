@@ -5,8 +5,9 @@ import { conReimpresion, esperarLaFuenteDe, fuenteCargadaPara, versionDeLasFuent
 import { TITULOS_DE_VOLUMEN, marcarListo, pedirOtraSincronia, tituloListo, type TituloDeVolumen } from '../../titulos3d/registro'
 import { contextoPerdido } from '../contextoDelLienzo'
 import { calentar } from '../gpu/Precompilar'
-import { armar, ponerElEstudio, soltar, type Armado, type Variante } from './armado'
+import { armar, fuenteDelTitulo, ponerElEstudio, soltar, type Armado, type Variante } from './armado'
 import { letrasDelDom } from './colocacion'
+import { cargarLaFuenteDePagina, esFuenteDePagina } from './fuentesDePagina'
 import { enOcio } from './ocio'
 
 /**
@@ -89,6 +90,8 @@ function armarElLote(t: Taller, armados: Armado[], lote: readonly TituloDeVolume
   const nuevos: Armado[] = []
   for (const titulo of lote) {
     ESPERANDO.delete(titulo.id)
+    // [B12a.4] La fuente de una página que no llegó: sin armar (se lee el `h1` del DOM).
+    if (fuenteDelTitulo(titulo.fuente) === null) continue
     const a = armar(titulo, t.variante)
     TANDA_DEL_ARMADO.set(a, versionDeLasFuentes())
     const antes = MOSTRADO_DE_LOS_REARMADOS.get(titulo.id)
@@ -164,7 +167,9 @@ export function sincronizar(t: Taller, armados: Armado[], registro: Iterable<Tit
   for (const x of faltan) ESPERANDO.add(x.id)
   // [CIERRE A-ter] A13 · la cara de cada uno (no `fonts.ready`: resuelve con nada cargando, aunque la de un título no esté).
   const fuentes = conReimpresion() ? Promise.all(faltan.map((x) => esperarLaFuenteDe(x.lugar))) : document.fonts.ready
-  void fuentes.then(() => {
+  // [B12a.4] Y la fuente 3D de un título de página (import dinámico, `fuentesDePagina.ts`).
+  const deLaPagina = Promise.all(faltan.flatMap((x) => (esFuenteDePagina(x.fuente) ? [cargarLaFuenteDePagina(x.fuente)] : [])))
+  void Promise.all([fuentes, deLaPagina]).then(() => {
     if (!pendiente || !vivo()) return
     armarElLote(t, armados, urgentes, vivo)
     if (demorados.length === 0) return

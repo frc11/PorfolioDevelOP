@@ -734,3 +734,78 @@ Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta complet
    - Debería verse la luz bajar rápido y calma, en menos de medio segundo y sin ponerse blanca de golpe. Recién después aparece el home.
 3. **La flecha del navegador para volver** a la página de prueba: la variante entra de nuevo.
 4. **Con movimiento reducido** (sistema o DevTools), a 1440: la luz entera desde arriba, quieta, y el enlace va al home en el acto.
+
+### B12a.4 · el título de las páginas (2026-10-20)
+
+**El pedido:** D3, armar las 2 o 3 combinaciones detrás de `?titulo=1|2|3` (variantes de Archivo distintas de las del home), usar la 1 por defecto, seguir con el resto y dejar la elección para el final.
+
+**Las combinaciones** (`_componentes/titulos3d/presets.ts`):
+- Son dos instancias de Archivo cada una, ninguna del home: el hero usa la 62/700 y el CTA del final la 100/600 y la 100/900.
+- La primera parte del título va con `fuentes[0]` y la segunda, debajo, con `fuentes[1]`.
+
+| `?titulo=` | Arriba | Abajo |
+|---|---|---|
+| **1** (por defecto) | Archivo ancha 125/800 | Archivo ancha 125/300 |
+| **2** | Archivo angosta 75/800 | Archivo semiancha 112,5/300 |
+| **3** | Archivo ancha 125/300 | Archivo ancha 125/800 |
+
+**Las letras:**
+- `TITULOS_CON_LETRAS`, la misma lista que `TEXTOS_DE_PAGINA` del generador:
+  - los nombres de las páginas de servicio («Páginas web», «Software a medida», «IA y automatizaciones»: el `NOMBRE` de `_servicios/datos/*.ts`, en paginas/servicios);
+  - los tres de `acento.ts`;
+  - el de la prueba.
+- Son 26 letras. Un nombre nuevo obliga a volver a correr `scripts-retoque/fuentes-3d.py`.
+
+**Lo hecho:**
+- **Las fuentes:** `scripts-retoque/fuentes-3d.py` genera las cuatro instancias del TTF variable.
+  - **El 3D:** un JSON por instancia, de unos 13 KB.
+  - **El DOM:** la misma instancia recortada a esas letras, con el kerning, en WOFF (unos 3,8 KB). WOFF2 pide brotli, que no está instalado, y no se instala para esto.
+- **El home no las baja:**
+  - las 3D llegan con un import dinámico cada una (`esc/titulos3d/fuentesDePagina.ts`), y la sincronía las espera antes de armar;
+  - las del DOM las declara el layout sin precarga, así que el home sólo lleva su `@font-face`.
+- **`TituloDePagina.tsx`** (lo renderiza `IntroDeLaPagina`, que suma `partes`):
+  - el `h1` dice el título entero, con sus dos partes unidas por un espacio, cada una en la cara de su instancia y con su peso exacto;
+  - desde 1024 y con la escena, cada parte es un título de volumen que va en la pantalla (sigue al `h1` fijo de la intro) y llega con el gesto y el reloj del titular del hero (`azar`, 2,4 s);
+  - cae como los otros títulos cuando la intro pasa 0,5 (el papel ya entró) y vuelve a llegar al subir;
+  - con las dos partes armadas, el DOM se apaga sólo desde 1024 y sigue en el árbol accesible;
+  - sin WebGL, con movimiento reducido o abajo de 1024, el `h1` es el visible.
+- **La ruta de prueba:** `?nombre=1` a `6` elige uno de `TITULOS_CON_LETRAS` (los de las páginas de servicio primero).
+
+**Lo que encontró el sitio:**
+- **El título quedaba armado y sin llegar nunca:** el DOM se apagaba y en la escena no había nada.
+  - El que llega una vez por carga (el del hero, `rearma: false`) espera a que se abra la carga, y la carga la abre el velo, que vive sólo en el home. Es el mismo defecto que tenía el logo en B12a.2.
+  - El arreglo: `rearma: true`, como Portfolio. La llegada sigue a la presencia.
+- **Con el chrome en las páginas (B12a.5), el parlante pisaba el título:** va arreglado en B12a.5.
+
+**Medido en el sitio** (`scripts-carga/titulo.ts`, en la ruta de prueba):
+- **A 1440, las tres combinaciones:**
+  - el `h1` dice «Páginas web», con las dos caras de la combinación y el peso de cada una;
+  - con el título armado, el DOM se apaga (opacidad 0);
+  - en la foto se ve el título en volumen, con el filo de noche del logo; cae con la intro pasada la mitad y vuelve al subir.
+- **A 390:** el `h1` del DOM a la vista, en la cara de su combinación.
+- **Los bytes:**
+  - el home no baja ninguna fuente de página;
+  - una página baja las dos de su combinación: dos JSON (unos 5,8 KB cada uno, comprimidos) y dos WOFF (unos 3,8 KB cada uno).
+
+**Afirmaciones** (s78 §10, 21 nuevas con sus controles; s78 da 83 de 0):
+- el `h1` con el nombre entero de cada servicio, sin las partes pegadas;
+- cada parte en la cara de su fuente;
+- la bandera;
+- D3: ninguna instancia del home;
+- la cobertura de las 26 letras en el 3D y en el DOM, con un lector de WOFF propio;
+- ninguna fuente de página estática;
+- las caras sin precarga;
+- el cableado del título: la pantalla, el gesto, la caída, el DOM apagado sólo desde 1024 y el movimiento reducido.
+
+**Reemplazadas por la spec:**
+- **s78 §8:** el `h1` de la intro se mira por su texto y no por ser lo único adentro.
+- **s17-marca y `fuentes.invariant`:** las familias locales del layout suman las cuatro caras, nombradas por su binario; la itálica sigue sin ser una familia aparte.
+- **s47:** la espera de las fuentes suma la de las páginas.
+
+**Qué mirar (B12a.4) — elegir el título:**
+1. **`/v3/prueba-de-pagina?nombre=1&titulo=1` a 1440**, y lo mismo con `titulo=2` y `titulo=3`.
+   - Arriba a la izquierda, «Páginas web» en volumen: la primera parte arriba y la segunda debajo, en las dos variantes de Archivo de esa combinación.
+   - **Elegí la combinación:** la elegida queda y la bandera se va.
+2. **Con otros nombres:** `?nombre=2` (Software a medida) y `?nombre=3` (IA y automatizaciones), con la combinación que te guste.
+3. **Scrolleá la intro hasta la mitad.** El título cae, como los títulos del home; al volver arriba, llega de nuevo.
+4. **`/v3/prueba-de-pagina?nombre=1` a 390.** El `h1` del DOM, en la misma familia, sin volumen.

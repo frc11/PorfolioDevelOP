@@ -128,7 +128,8 @@ const elHeroPrimero = (c: string): boolean => {
   const ocio = c.indexOf('soltarElOcio = enOcio(')
   // [CIERRE A-ter] A13 · «apenas están las fuentes»: la cara de cada título (`esperarLaFuenteDe`), ya no `fonts.ready` (resuelve con nada cargando);
   // y sin esperar el ocio también los que están a la vista (la sección adonde se llegó).
-  return urgentes > 0 && ocio > urgentes && /const urgentes = faltan\.filter\(\(x\) => !x\.rearma \|\| aLaVista\(x\.lugar\)\)/.test(c) && /esperarLaFuenteDe\(x\.lugar\)/.test(c) && /void fuentes\.then\(/.test(c)
+  // [B12a.4] Y la fuente 3D de un título de página (import dinámico): se espera junto con las del DOM.
+  return urgentes > 0 && ocio > urgentes && /const urgentes = faltan\.filter\(\(x\) => !x\.rearma \|\| aLaVista\(x\.lugar\)\)/.test(c) && /esperarLaFuenteDe\(x\.lugar\)/.test(c) && /void Promise\.all\(\[fuentes, deLaPagina\]\)\.then\(/.test(c)
 }
 afirmar(elHeroPrimero(sincronia), 'los títulos que llegan una vez por carga (el hero: `rearma: false`) se arman apenas están las fuentes, sin esperar el ocio; los demás, en el ocio')
 controlPositivo('el detector VE el hero esperando el ocio como los demás', sincronia.replace('armarElLote(t, armados, urgentes, vivo)', '').replace('if (pendiente && vivo()) armarElLote(t, armados, demorados, vivo)', 'if (pendiente && vivo()) armarElLote(t, armados, [...urgentes, ...demorados], vivo)'), elHeroPrimero)
