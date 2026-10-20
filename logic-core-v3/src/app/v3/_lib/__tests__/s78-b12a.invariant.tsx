@@ -21,7 +21,7 @@ import { NIVEL_DE_LA_NOCHE } from '../escena/lightArc'
 import { azimutDelMouseEn } from '../escena/modulacionDeLaPose'
 import { PresetDeLaPagina } from '../escena/ruta/PresetDeLaPagina'
 // prettier-ignore
-import { AVANCE_DE_LA_INTRO, COMPOSICION_INICIAL, PANTALLAS_DE_LA_INTRO, POSES_DE_LA_INTRO, avanceDeLaIntro, keyframesDeLaIntro, luzDeLaPagina, pistaDeLaPagina, varianteDeLaIntro, type VarianteDeLaIntro } from '../escena/ruta/pistaDeLaIntro'
+import { AVANCE_DE_LA_INTRO, COMPOSICION_INICIAL, PANTALLAS_DE_LA_INTRO, PISTA_DE_LA_INTRO, POSE_DE_LA_INTRO, avanceDeLaIntro, luzDeLaPagina, pistaDeLaPagina } from '../escena/ruta/pistaDeLaIntro'
 import { PRESET_DEL_HOME, apilarElPreset, despiertaEnLaPagina, presetActual, type CajaVertical, type PresetDeLaEscena } from '../escena/ruta/preset'
 import { MARGEN_DE_REANUDACION } from '../escena/visibilidad'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
@@ -35,7 +35,7 @@ const sinComentarios = (c: string): string => c.replace(/\/\*[\s\S]*?\*\//g, '')
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B12a.1 · 1 · El preset de la página (D1): lo declara la página, en una pila')
 
-const DE_PRUEBA: PresetDeLaEscena = { id: 'prueba', tramos: { intro: `[${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}]`, pie: null }, pista: keyframesDeLaIntro(1), noche: 'noche', acento: null }
+const DE_PRUEBA: PresetDeLaEscena = { id: 'prueba', tramos: { intro: `[${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}]`, pie: null }, pista: PISTA_DE_LA_INTRO, noche: 'noche', acento: null }
 const antes = presetActual()
 const sacarElHome = apilarElPreset(PRESET_DEL_HOME)
 const sacarLaPrueba = apilarElPreset(DE_PRUEBA)
@@ -94,28 +94,32 @@ controlPositivo('  y uno sin acotar (pasada la intro seguiría girando)', ((a, y
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B12a.2 · 5 · La composición inicial: la pose en avance 0, en las tres variantes')
 
-const VARIANTES: readonly VarianteDeLaIntro[] = [1, 2, 3]
 const poseEn = (keyframes: readonly ChoreoKeyframe[], avance: number): MutableChoreoPose => {
   const p: MutableChoreoPose = { angleDeg: Number.NaN, height: Number.NaN, distance: Number.NaN, frameX: Number.NaN, frameY: Number.NaN }
   sampleTrack(buildTrack(keyframes), avance, p)
   return p
 }
 const igual = (a: ChoreoPose, b: ChoreoPose): boolean => CHOREO_CHANNELS.every((c) => Math.abs(a[c] - b[c]) < 1e-9)
-const parten = (pista: (v: VarianteDeLaIntro) => readonly ChoreoKeyframe[]): boolean =>
-  VARIANTES.every((v) => igual(poseEn(pista(v), 0), COMPOSICION_INICIAL) && igual(poseEn(pista(v), 1), POSES_DE_LA_INTRO[v]))
-afirmar(parten(keyframesDeLaIntro), 'las tres pistas arrancan en la composición inicial (avance 0) y llegan a su pose (avance 1): la misma pose, la misma cámara, 0 px de diferencia del logo a cualquier ancho')
-controlPositivo('  el detector ve una pista que arranca en el hero del home (con el logo corrido para su texto)', (v: VarianteDeLaIntro) => [{ ...keyframesDeLaIntro(v)[0], pose: CHOREO_KEYFRAMES[0].pose }, keyframesDeLaIntro(v)[1]], parten)
+// [B12a.2] Reemplazadas por la decisión (2026-10-20): de las tres poses quedó la 2 (girar); las otras y `?intro=` salieron.
+const parten = (pista: readonly ChoreoKeyframe[]): boolean => igual(poseEn(pista, 0), COMPOSICION_INICIAL) && igual(poseEn(pista, 1), POSE_DE_LA_INTRO)
+afirmar(parten(PISTA_DE_LA_INTRO) && POSE_DE_LA_INTRO.angleDeg === 38 && POSE_DE_LA_INTRO.height === 5.2 && POSE_DE_LA_INTRO.distance === 15, 'la pista de la intro arranca en la composición inicial (avance 0) y llega a la pose elegida, GIRAR (avance 1): la misma pose, la misma cámara, 0 px de diferencia del logo a cualquier ancho')
+controlPositivo('  el detector ve una pista que arranca en el hero del home (con el logo corrido para su texto)', [{ ...PISTA_DE_LA_INTRO[0], pose: CHOREO_KEYFRAMES[0].pose }, PISTA_DE_LA_INTRO[1]] as readonly ChoreoKeyframe[], parten)
+controlPositivo('  y la pista de otra pose (acercarse, la 1 de las candidatas)', [PISTA_DE_LA_INTRO[0], { ...PISTA_DE_LA_INTRO[1], pose: { angleDeg: 0, height: 4.2, distance: 12.5, frameX: 0, frameY: 0 } }] as readonly ChoreoKeyframe[], parten)
 const hero = CHOREO_KEYFRAMES[0].pose
 afirmar(
   COMPOSICION_INICIAL.angleDeg === hero.angleDeg && COMPOSICION_INICIAL.height === hero.height && COMPOSICION_INICIAL.distance === hero.distance && COMPOSICION_INICIAL.frameX === 0 && COMPOSICION_INICIAL.frameY === 0,
   `  y es la pose del hero del home con el logo centrado (frameX 0; el hero lo corre a ${String(hero.frameX)}), copiada: el hero no se toca (es el destino del preloader del sitio vivo)`,
 )
-afirmar(VARIANTES.every((v) => keyframesDeLaIntro(v) === keyframesDeLaIntro(v)) && VARIANTES.every((v) => POSES_DE_LA_INTRO[v].frameX === 0), '  cada variante da siempre el mismo arreglo (la pista se arma una vez) y las tres dejan el logo centrado (el título va encima)')
+const centrada = (p: ChoreoPose): boolean => p.frameX === 0 && p.frameY === 0
+afirmar(centrada(POSE_DE_LA_INTRO) && centrada(poseEn(PISTA_DE_LA_INTRO, 0.5)), '  la pose deja el logo centrado, y todo el camino también (el título va encima)')
+controlPositivo('  el detector ve la pose de subir (la 3 de las candidatas: el logo corrido hacia abajo)', { angleDeg: -20, height: 10, distance: 20, frameX: 0, frameY: -0.25 }, centrada)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('B12a.2 · 6 · La bandera de las poses y la pista que lee el rig')
+titulo('B12a.2 · 6 · La pista que lee el rig ([B12a.2] la bandera de las poses salió)')
 
-afirmarIgual(['', '?intro=2', 'intro=3', '?intro=7', '?otra=2'].map(varianteDeLaIntro), [1, 2, 3, 1, 1], '`?intro=1|2|3` elige la pose; sin la bandera (o con otra cosa), la 1')
+const sinBandera = (c: string): boolean => !/varianteDeLaIntro|keyframesDeLaIntro|POSES_DE_LA_INTRO|intro=/.test(c)
+afirmar(sinBandera(sinComentarios(leer('_lib/escena/ruta/pistaDeLaIntro.ts')) + sinComentarios(leer('prueba-de-pagina/page.tsx'))), '`?intro=1|2|3` salió con las poses 1 y 3: queda la elegida')
+controlPositivo('  el detector ve la bandera de las tres poses', "const v = new URLSearchParams(busqueda).get('intro')\nreturn v === '2' ? 2 : v === '3' ? 3 : 1 // varianteDeLaIntro", sinBandera)
 const sinPagina = pistaDeLaPagina()
 const sacarElDelHome = apilarElPreset(PRESET_DEL_HOME)
 const conElHome = pistaDeLaPagina()
@@ -176,8 +180,8 @@ afirmar(DE_PRUEBA.tramos?.intro === `[${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}]`, '  y 
 
 const ruta = sinComentarios(leer('prueba-de-pagina/page.tsx'))
 const rutaBien = (r: string): boolean =>
-  /const PRESETS: Readonly<Record<VarianteDeLaIntro, PresetDeLaEscena>> = \{ 1: presetDePrueba\(1\), 2: presetDePrueba\(2\), 3: presetDePrueba\(3\) \}/.test(r) && /preset=\{PRESETS\[v\]\}/.test(r) && /robots: \{ index: false, follow: false/.test(r) && /pista: keyframesDeLaIntro\(v\)/.test(r) && /noche: 'noche'/.test(r)
-afirmar(rutaBien(ruta), 'la ruta de prueba (`/v3/prueba-de-pagina`, sin indexar): un preset por variante, armado una vez (el mismo objeto en cada render), de noche, con la pista de la variante de la URL')
-controlPositivo('  el detector ve una ruta que arma el preset en cada render', ruta.replace('preset={PRESETS[v]}', 'preset={presetDePrueba(v)}'), rutaBien)
+  /const PRESET: PresetDeLaEscena = \{[\s\S]*?pista: PISTA_DE_LA_INTRO,[\s\S]*?noche: 'noche',/.test(r) && /preset=\{PRESET\}/.test(r) && /robots: \{ index: false, follow: false/.test(r)
+afirmar(rutaBien(ruta), 'la ruta de prueba (`/v3/prueba-de-pagina`, sin indexar): un preset armado una vez (el mismo objeto en cada render), de noche, con la pista de la intro')
+controlPositivo('  el detector ve una ruta que arma el preset en cada render', ruta.replace('preset={PRESET}', 'preset={{ ...PRESET }}'), rutaBien)
 
 cerrar('s78-b12a')

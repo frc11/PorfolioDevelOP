@@ -82,6 +82,9 @@ async function main(): Promise<void> {
         // `desliz:<dx>/<dy>`: un deslice del dedo desde el medio del cuadro (sobre las historias: cambia o sale).
         const [dx = '0', dy = '0'] = valor.split('/')
         await deslizar(cdp, ANCHO / 2, ALTO / 2, Number(dx), Number(dy))
+      } else if (accion === 'y') {
+        // `y:<px>`: el scroll de la página, de un salto.
+        await p.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), Number(valor))
       } else if (accion === 'px') {
         await p.evaluate((x) => {
           const panel = document.querySelector('[data-panel="trabajos"]')

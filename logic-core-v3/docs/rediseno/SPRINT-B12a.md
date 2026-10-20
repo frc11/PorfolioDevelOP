@@ -612,3 +612,36 @@ Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta complet
 | B12a.7 | la vuelta al home | B12a.6 |
 
 **Los dos `next build` de D7 siguen a su contenido, no a su número.** Uno va al cerrar la ranura (B12a.3, por el presupuesto de 0,5 ms por cuadro) y el otro al cerrar la navegación cliente (B12a.6). Se avisan acá cuando corran.
+
+### B12a.2 · cierre: la pose 2 y la intro medida en el sitio (2026-10-20)
+
+**La decisión de Valentino:** la pose de la intro es la 2 (girar), y la intro sigue en 1,5 pantallas.
+- **`pistaDeLaIntro.ts`:** salen las poses 1 y 3, la variante y `?intro=`. Quedan `POSE_DE_LA_INTRO` (girar) y `PISTA_DE_LA_INTRO`, la pista compartida y exportada: es P-H29 g.
+- **La ruta de prueba:** queda con un solo preset.
+- **s78:** se reemplazaron por la decisión, cada una con su control:
+  - las afirmaciones de las tres variantes (la pista llega a girar; los controles, la pista que arranca en el hero y la de acercarse);
+  - la de la bandera (salió; el control es la bandera de las tres);
+  - y la de la ruta (un preset);
+  - y se sumó que la pose deja el logo centrado en todo el camino (el control es la de subir).
+
+**La medición en el sitio, que antes no había corrido** (`scripts-carga/intro.ts`): el Chrome del sistema contra el dev, con el banco de la escena.
+- **Lo que publica la escena:** el avance (`__avanceDeLaIntro`, sólo con banco) y la silueta del logo (`__siluetaDelBanco`). El mouse quieto en el medio.
+- **El avance:** 0 → 0,0000, 0,5 → 0,5000 y 1 → 1,0000 a 1440 y a 390. Criterio ± 1 %.
+- **ENCONTRÓ UN DEFECTO:** en la página no estaba el logo; se veían su sombra en el piso y la sala.
+  - `CaidaDelLogo` levanta el logo al cargar arriba y lo hace caer con la carga abierta (`cargaLista`).
+  - La carga la abre el velo de carga, que vive sólo en el home (`v3/page.tsx`). En una página no se abría nunca y el logo quedaba arriba para siempre.
+  - **El arreglo:** sin el velo y con la carga cerrada, no hay caída y el logo está en su lugar. El home no cambia: ahí el velo está en el HTML del servidor cuando la escena se monta (la foto lo muestra cayendo con el titular). s52, que fija esa línea, sigue en verde.
+- **El logo en avance 0:**
+  - **A 390:** idéntico al del hero del home (0 px en x, en y y en alto).
+  - **A 1440:** centrado exacto en x (0,0 px). En y da −10 px y en alto −12 px contra el hero, porque ahí el hero corre el logo a la derecha (`frameX` 0,5) y, fuera de eje, la perspectiva lo agranda y lo baja. La composición inicial es esa pose centrada, así que ahí la comparación en y no vale y queda informada.
+- **El control:** es la corrida de antes del arreglo, sin logo (silueta vacía, rojo).
+- **Fotos a 1440:**
+  - avance 0, el logo de noche y centrado;
+  - a las 1,5 pantallas, el papel (la escena duerme);
+  - el home arriba, el logo cayendo con el titular.
+
+**Verificación:** lint y tsc limpios; `verificar` con la misma lista de fallas que la base.
+
+**Qué mirar (B12a.2):**
+1. `/v3/prueba-de-pagina` a 1440 y a 390: arriba, el logo centrado de noche. Scrolleá la intro y volvé: la cámara gira un cuarto de vuelta corto alrededor del logo y vuelve.
+2. `/v3` arriba: el logo sigue cayendo con el titular, como siempre.

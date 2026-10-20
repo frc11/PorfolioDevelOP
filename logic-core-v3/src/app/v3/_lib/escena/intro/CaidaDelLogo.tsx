@@ -35,7 +35,10 @@ export function CaidaDelLogo({ logoGroupRef }: { readonly logoGroupRef: RefObjec
   useLayoutEffect(() => {
     const logo = logoGroupRef.current
     const estado = m.current
-    if (logo === null || window.scrollY >= window.innerHeight * CAIDA_DEL_LOGO.arriba) return undefined
+    // [B12a.2] La caída es la del intro del home: sin el velo de carga (una página, sin el hero) la carga no se abre nunca y el logo quedaba
+    // arriba para siempre (lo encontró la medición del sitio). Ahí el logo ya está en su lugar.
+    const sinVelo = !cargaLista() && document.querySelector('[data-pieza="velo-de-carga"]') === null
+    if (logo === null || window.scrollY >= window.innerHeight * CAIDA_DEL_LOGO.arriba || sinVelo) return undefined
     estado.u = 0
     estado.propio = false
     estado.medido = false
