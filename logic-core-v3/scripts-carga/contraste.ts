@@ -23,7 +23,7 @@ const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/contraste')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
-const TRANSPARENTE = `[data-contraste-objetivo], [data-contraste-objetivo] * { color: transparent !important; -webkit-text-fill-color: transparent !important; text-decoration-color: transparent !important; }
+export const TRANSPARENTE = `[data-contraste-objetivo], [data-contraste-objetivo] * { color: transparent !important; -webkit-text-fill-color: transparent !important; text-decoration-color: transparent !important; }
 [data-contraste-objetivo] svg, [data-contraste-objetivo] svg * { fill: transparent !important; stroke: transparent !important; }`
 
 const lineal = (c: number): number => {
@@ -38,7 +38,7 @@ async function crudo(png: Buffer): Promise<{ readonly datos: Buffer; readonly an
   return { datos: data, ancho: info.width }
 }
 
-interface Medida {
+export interface Medida {
   readonly pieza: string
   readonly texto: string
   readonly glifo: number
@@ -48,7 +48,7 @@ interface Medida {
 }
 
 /** Una pieza: su caja, su color (el del texto o el del trazo del ícono), y la razón píxel a píxel contra el fondo de abajo. */
-async function medirLaPieza(p: Page, el: import('@playwright/test').ElementHandle<Element>, nombre: string, icono = false): Promise<Medida | null> {
+export async function medirLaPieza(p: Page, el: import('@playwright/test').ElementHandle<Element>, nombre: string, icono = false): Promise<Medida | null> {
   const datos = await el.evaluate((e, esIcono) => {
     const r = e.getBoundingClientRect()
     const c = getComputedStyle(esIcono ? (e.querySelector('svg') ?? e) : e)
@@ -234,7 +234,10 @@ async function main(): Promise<void> {
   console.log(`contraste: ${String(medidas.length - sinGlifo - malas)} de ${String(medidas.length - sinGlifo)} piezas a la vista en AA (${String(sinGlifo)} sin glifo a la vista: la copia escondida del rollover)`)
 }
 
-main().catch((e: unknown) => {
-  console.error(e)
-  process.exit(1)
-})
+// Sólo como script: otro arnés lo importa por `medirLaPieza` ([B12a.5] `barra.ts`).
+if (/contraste\.ts$/.test(process.argv[1] ?? '')) {
+  main().catch((e: unknown) => {
+    console.error(e)
+    process.exit(1)
+  })
+}

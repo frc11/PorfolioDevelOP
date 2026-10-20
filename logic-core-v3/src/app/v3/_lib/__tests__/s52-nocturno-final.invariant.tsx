@@ -694,8 +694,9 @@ const panelC5 = sinComentarios(leer('_chrome/menu/PanelDelMenu.tsx'))
 const vidrioDelMenuC5 = sinComentarios(leer('_chrome/menu/MenuDeVidrio.tsx'))
 const franjaC5 = sinComentarios(leer('_chrome/menu/franja.ts'))
 const hojaDelVidrio = leer('_estilos/vidrio.css')
+// [B12a.5] El import suma el chevron del acordeón de «Servicios»; las tres barras, iguales.
 const botonBien = (m: string, p: string): boolean =>
-  m.includes('{TRES_BARRAS}') && !/Isotipo/.test(m) && m.includes("data-seccion={invertido ? 'invertida' : undefined}") && /import \{ Menu as TresBarras \} from 'lucide-react'/.test(p) && /<TresBarras aria-hidden="true" strokeWidth=\{1\.5\}/.test(p)
+  m.includes('{TRES_BARRAS}') && !/Isotipo/.test(m) && m.includes("data-seccion={invertido ? 'invertida' : undefined}") && /import \{ (?:ChevronDown, )?Menu as TresBarras \} from 'lucide-react'/.test(p) && /<TresBarras aria-hidden="true" strokeWidth=\{1\.5\}/.test(p)
 afirmar(botonBien(menuMovilC5, panelC5), 'el botón del menú son las tres barras (era el logo), con el mismo tono por zona que tenía: el del botón (`data-seccion`)')
 controlPositivo('el detector VE el logo de antes', [menuMovilC5.replace('{TRES_BARRAS}', '<Isotipo />'), panelC5] as const, ([m, p]) => botonBien(m, p))
 const sinLoginNiCruz = (p: string): boolean => !/ENLACE_DE_LOGIN|pie-del-menu|lucide-react'.*\bX\b|\{CRUZ\}/.test(p) && /\{ENLACE_DE_CONTACTO\.rotulo\}\s*<\/button>\s*<\/li>\s*<\/ul>\s*<\/nav>/.test(p)

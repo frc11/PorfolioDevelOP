@@ -116,8 +116,9 @@ export function afirmarElModeloDelDocumento(DOC: string): void {
    * árbitro. Los dos fuentes son el mismo salvo dónde cae el `<footer>`: la única
    * variable es la que se está midiendo.
    */
-  const PIE_ADENTRO = 'return <div data-v3=""><main><footer></footer>{children}</main></div>'
-  const PIE_AFUERA = 'return <div data-v3=""><main>{children}</main><footer></footer></div>'
+  // [B12a.5] Con el chrome que monta el layout (D4), como el de verdad: la única variable sigue siendo dónde cae el pie.
+  const PIE_ADENTRO = 'return <div data-v3=""><ChromeDelHome /><main><footer></footer>{children}</main></div>'
+  const PIE_AFUERA = 'return <div data-v3=""><ChromeDelHome /><main>{children}</main><footer></footer></div>'
   const landmarksAdentro = landmarks(componerDocumento(PIE_ADENTRO, 'quieta'))
   const landmarksAfuera = landmarks(componerDocumento(PIE_AFUERA, 'quieta'))
   afirmar(

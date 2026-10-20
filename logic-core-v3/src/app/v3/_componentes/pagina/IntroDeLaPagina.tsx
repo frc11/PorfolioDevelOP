@@ -39,7 +39,8 @@ export function IntroDeLaPagina({ titulo, partes, bajada, preset }: PropsDeLaInt
       className="relative h-[150svh] text-tinta"
     >
       <PresetDeLaPagina preset={preset} />
-      <Envoltorio className="sticky top-0" claseDeContenido="flex flex-col gap-[var(--spacing-4)] pt-[var(--spacing-12)]">
+      {/* [B12a.5] Con el chrome en las páginas, el tope deja libre la cabecera (el parlante, la esquina, el menú): su zona más un aire. */}
+      <Envoltorio className="sticky top-0" claseDeContenido="flex flex-col gap-[var(--spacing-4)] pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-8))]">
         <TituloDePagina id={preset.id} titulo={titulo} partes={partes} />
         <div className="flex max-w-[42ch] flex-col gap-[var(--spacing-3)]">{bajada}</div>
       </Envoltorio>

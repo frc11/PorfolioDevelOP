@@ -62,15 +62,18 @@ for (const [archivo, literal] of literales) {
 }
 const nada = (): void => undefined
 const hrefsDe = (html: string, marca: string): string[] => [...html.matchAll(new RegExp(`<a[^>]*${marca}[^>]*>`, 'g'))].map((m) => /href="([^"]+)"/.exec(m[0])?.[1] ?? '?')
-const BARRA = hrefsDe(renderToStaticMarkup(<BarraDelHome />), 'data-pieza="barra-enlace"')
-const MENU = hrefsDe(renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alSoltar={nada} alContacto={nada} />), 'data-parte="item-del-menu"')
+// [B12a.5] «Servicios» es el botón del desplegable (en el teléfono, del acordeón): su sección va adentro, en «Todos los servicios», con las
+// páginas de servicio (que no son secciones). En la barra la lista va después de la píldora: las cinco, en otro orden.
+const BARRA = hrefsDe(renderToStaticMarkup(<BarraDelHome />), 'data-pieza="(?:barra|desplegable)-enlace"')
+const MENU = hrefsDe(renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alSoltar={nada} alContacto={nada} />), 'data-parte="item-del-(?:menu|acordeon)"')
 const esSeccion = (href: string): boolean => (IDS_DE_SECCION as readonly string[]).includes(href.slice(1))
-afirmarIgual(BARRA.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], 'la barra lleva a cinco secciones de la tabla ([NAVBAR] «Panel» nuevo)')
+afirmarIgual(BARRA.filter(esSeccion).sort(), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'].sort(), 'la barra lleva a cinco secciones de la tabla ([NAVBAR] «Panel» nuevo; [B12a.5] Servicios, por su desplegable)')
 // [RETOQUE 3D] N1: y al pie, Login (otra ruta: no viaja). [CIERRE RETOQUE 3D] N1: Contacto es un botón que abre el panel.
 // [NOCTURNO FINAL] C5 · cambió por pedido: sin Login en el menú del teléfono (por ahora).
-afirmarIgual(MENU, ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], '  y el menú móvil a las mismas cinco (Contacto abre el panel: no es un enlace; sin Login)')
+afirmarIgual(MENU.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], '  y el menú móvil a las mismas cinco (Contacto abre el panel: no es un enlace; sin Login; [B12a.5] Servicios, por su acordeón)')
 // [RETOQUE 3D] 3I: «Contacto» VIAJA: `#contacto` es el formulario del pie, y el efecto resuelve un ancla que no es sección a la suya.
-afirmarIgual(BARRA.filter((h) => !esSeccion(h)), ['#contacto'], '«Contacto» va a `#contacto`, el formulario del pie: no es una sección')
+// [B12a.5] Las anclas que no son sección: sólo Contacto (las páginas de servicio del desplegable son rutas, no anclas).
+afirmarIgual(BARRA.filter((h) => h.startsWith('#') && !esSeccion(h)), ['#contacto'], '«Contacto» va a `#contacto`, el formulario del pie: no es una sección')
 afirmar(/const seccion = elAncla\?\.closest<HTMLElement>\(`\[\$\{ATRIBUTO_DE_PANEL\}\]`\) \?\? elAncla\s*if \(seccion === null \|\| elAncla === null\) return/.test(EFECTO), '  y el efecto lo lleva a la sección que lo contiene (el Cierre) y le da el foco a él al llegar; sin ancla, sale antes del `preventDefault`')
 controlPositivo('  el chequeo de secciones vería un destino inventado', '#inventada', esSeccion)
 

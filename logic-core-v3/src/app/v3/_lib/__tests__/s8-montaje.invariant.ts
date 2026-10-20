@@ -130,13 +130,14 @@ titulo('4 · EL HOME monta el chrome, el intro y la compuerta — en ese orden')
 
 const fuenteHome = leer('src/app/v3/page.tsx')
 
-for (const [que, imp] of [
-  ['el chrome', IMPORT_DEL_CHROME],
-  ['el intro', IMPORT_DEL_INTRO],
-] as const) {
-  afirmar(fuenteHome.includes(`from '${imp}'`), `el home importa ${que} de \`${imp}\``)
-}
-afirmar(/<ChromeDelHome\s*\/>/.test(fuenteHome), 'y monta el chrome')
+// [B12a.5] Reemplazadas por la spec (D4): el chrome lo importa y lo monta el LAYOUT, antes de la página (el mismo en el home y en las
+// páginas, sin volver a montarse entre rutas); el home ya no.
+const fuenteLayout = leer('src/app/v3/layout.tsx')
+const chromeEnElLayout = (layout: string, home: string): boolean =>
+  layout.includes(`from '${IMPORT_DEL_CHROME}'`) && /<ChromeDelHome\s*\/>\s*\{children\}/.test(layout) && !home.includes(`from '${IMPORT_DEL_CHROME}'`) && !/<ChromeDelHome\s*\/>/.test(home)
+afirmar(chromeEnElLayout(fuenteLayout, fuenteHome), `el layout importa el chrome de \`${IMPORT_DEL_CHROME}\` y lo monta antes de la página; el home ya no`)
+controlPositivo('el detector ve el chrome montado por el home (antes de B12a.5)', [fuenteLayout.replace(/<ChromeDelHome\s*\/>/, ''), `${fuenteHome}\nimport { ChromeDelHome } from '${IMPORT_DEL_CHROME}'\n<ChromeDelHome />`] as const, ([l, h]: readonly [string, string]) => chromeEnElLayout(l, h))
+afirmar(fuenteHome.includes(`from '${IMPORT_DEL_INTRO}'`), `el home importa el intro de \`${IMPORT_DEL_INTRO}\``)
 afirmar(/<IntroDelHome\s*\/>/.test(fuenteHome), '  y el intro')
 afirmar(existe(MODULO_DEL_INTRO), `el módulo del intro existe: \`${MODULO_DEL_INTRO}\``)
 

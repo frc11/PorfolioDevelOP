@@ -58,6 +58,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { createElement } from 'react'
 
+import { ChromeDelHome } from '../../_chrome/ChromeDelHome'
 import { SaltarAlContenido } from '../../_chrome/SaltarAlContenido'
 import { Navegacion } from '../../_componentes/chrome/Navegacion'
 import { MarcaDeLaLlave } from '../../_secciones/_contrato/MarcaDeLaLlave'
@@ -191,6 +192,14 @@ export const PIEZAS_MONTABLES: ReadonlyMap<string, PiezaMontable> = new Map<stri
       emite: () => createElement(Navegacion, {}),
       porQue:
         'la pastilla. Desde SITIO-S12 la monta la PÁGINA afuera del `<main>` (defecto 15); si algún día pasa al layout, el modelo la ve por acá sin cambiar una línea',
+    },
+  ],
+  [
+    'ChromeDelHome',
+    {
+      emite: () => createElement(ChromeDelHome),
+      porQue:
+        '[B12a.5] el chrome entero (el salto, la barra, el menú, el contacto): desde D4 lo monta el LAYOUT, antes de la página, para que no se vuelva a montar entre rutas; la página ya no lo trae',
     },
   ],
   [

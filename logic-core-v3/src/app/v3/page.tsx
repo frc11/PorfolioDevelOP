@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 
-import { ChromeDelHome } from './_chrome/ChromeDelHome'
 import { VeloDeCarga } from './_componentes/VeloDeCarga'
 import { IntroDelHome } from './_intro/IntroDelHome'
 import { PresetDeLaPagina } from './_lib/escena/ruta/PresetDeLaPagina'
@@ -23,11 +22,11 @@ import { Home } from './_secciones/Home'
  *
  * ── Las cuatro cosas que esta página hace, y ninguna más ───────────────────
  *
- *   1. Monta **el chrome**, y va PRIMERO por una razón geométrica: el
- *      envoltorio de la pastilla de navegación es `sticky` con alto CERO y la
- *      pastilla vive `absolute` adentro, a `100svh − 72px`. Su posición de
- *      nacimiento la define dónde está en el documento, así que tiene que ser
- *      lo más arriba posible o nace tarde. No empuja nada: mide cero.
+ *   1. [B12a.5] El chrome ya no: lo monta el LAYOUT (D4), antes de la página,
+ *      por la misma razón geométrica de siempre: el envoltorio de la pastilla es
+ *      `sticky` con alto CERO y la pastilla vive `absolute` adentro, a
+ *      `100svh − 72px`. Su nacimiento lo define dónde está en el documento, así
+ *      que va lo más arriba posible. No empuja nada: mide cero.
  *   2. Monta **el intro**, que es el preloader del home. Import ESTÁTICO y no
  *      perezoso: el overlay tiene que viajar en el HTML del servidor, porque el
  *      servidor no conoce `sessionStorage` y quien decide si se ve es el
@@ -70,7 +69,7 @@ export default function PaginaV3() {
       {/* [B12a.1] El home declara su preset (D1): la escena lee el mapeo de sus secciones, como siempre. */}
       <PresetDeLaPagina preset={PRESET_DEL_HOME} />
       <VeloDeCarga />
-      <ChromeDelHome />
+      {/* [B12a.5] El chrome (la barra, el menú, el contacto) lo monta el layout (D4): el mismo en el home y en las páginas. */}
       <IntroDelHome />
       <CompuertaDelHome>
         {/* `max-escritorio:z-auto`: abajo del corte de composición el `<main>` no puede abrir contexto de

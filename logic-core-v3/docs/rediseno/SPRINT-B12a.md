@@ -809,3 +809,70 @@ Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta complet
 2. **Con otros nombres:** `?nombre=2` (Software a medida) y `?nombre=3` (IA y automatizaciones), con la combinación que te guste.
 3. **Scrolleá la intro hasta la mitad.** El título cae, como los títulos del home; al volver arriba, llega de nuevo.
 4. **`/v3/prueba-de-pagina?nombre=1` a 390.** El `h1` del DOM, en la misma familia, sin volumen.
+
+### B12a.5 · la navbar en el layout y el desplegable de servicios (2026-10-20)
+
+**Lo hecho:**
+- **D4, el chrome en el layout:** `layout.tsx` monta `<ChromeDelHome />` antes de la página, en el mismo lugar del documento por geometría; `page.tsx` ya no lo monta.
+  - Son la misma píldora, el menú, el contacto y el sonido en el home y en las páginas.
+  - Con la navegación cliente (B12a.6) no se va a volver a montar.
+- **Los enlaces desde una página:** van al home con el ancla (`destinoDesde`, `_chrome/paginas.ts`): `#servicios` pasa a `/v3#servicios`.
+  - En el home siguen siendo anclas y el viaje las recorre.
+  - Hasta B12a.6, desde una página navegan con recarga.
+- **D5, el desplegable de «Servicios»** (`_chrome/barra/DesplegableDeServicios.tsx`):
+  - **Qué lista:** «Todos los servicios» (la sección del home) y las tres páginas.
+  - **Cómo abre:**
+    - con clic;
+    - con Enter, y el foco entra a la lista;
+    - con el hover con intención: 180 ms quieto encima; el de paso no abre.
+  - **Cómo cierra:**
+    - el que se abrió con el hover se cierra 280 ms después de que el puntero se va;
+    - el que se abrió con clic, con un clic afuera;
+    - Esc lo cierra y devuelve el foco a «Servicios».
+  - **La lista va FUERA de la píldora**, porque la píldora recorta lo que se le sale. El Tab se maneja a mano:
+    - de «Servicios» entra a la lista;
+    - desde el último ítem sigue con «Panel»;
+    - Shift+Tab desde el primero vuelve a «Servicios».
+  - Abre hacia arriba cuando abajo no entra (la píldora nace al pie de la primera pantalla) y elige de nuevo con el scroll.
+  - Lleva el mismo vidrio que la píldora (`barra.css`).
+- **En el teléfono, el acordeón** (`PanelDelMenu.tsx`):
+  - «Servicios» abre la misma lista adentro del menú, con su chevron.
+  - Sus ítems son piezas del menú, que el Genie copia, sólo abiertos.
+  - Al terminar de abrirse o cerrarse, el menú se vuelve a medir.
+- **Las páginas de servicio (los datos de servicios):** la ruta es `hrefDe` con los `PUBLICADOS` (`_servicios/rutas.ts`) y el rótulo, su `NOMBRE`. Van copiados en `_chrome/paginas.ts` hasta el merge, y después se importan de ahí (un P-S chico).
+- **La intro de las páginas deja libre la cabecera:** su zona más un aire. Sin eso, el parlante y el botón del menú pisaban el título.
+
+**Medido en el sitio** (`scripts-carga/barra.ts`):
+- **La píldora, en el home y en la página, a 1440:** la misma caja al cargar (al pie) y pegada arriba, con Δ 0,00 px.
+- **El desplegable, en la página:**
+  - el hover de paso no abre y quieto encima sí;
+  - el puntero que se va cierra el del hover;
+  - el clic deja abierto y un clic afuera cierra;
+  - Enter abre con el foco en «Todos los servicios»;
+  - Tab recorre los cuatro y sigue con «Panel», con la lista cerrada;
+  - Shift+Tab vuelve a «Servicios» (también desde el primero, abierta);
+  - Esc cierra con el foco en «Servicios».
+- **AA:** los cuatro ítems del desplegable sobre la escena dan de 7,83 a 8,30:1, y los cuatro del acordeón a 390, de 7,29 a 7,83:1.
+- **El acordeón a 390:** abre con sus cuatro ítems, como piezas del menú y con su destino.
+- **Lo que encontró el sitio:** al cargar, la lista abría hacia abajo, fuera del cuadro, porque la píldora nace al pie. Ahora abre hacia arriba.
+
+**Reemplazadas por la spec (D4 y D5)**, cada una con su control:
+- **s8-montaje §4:** el layout importa y monta el chrome y el home ya no; el control es el chrome montado por el home.
+- **s48:** el velo de carga lo monta la página y tapa al chrome por su capa (overlay sobre cabecera), no por el orden; el control es un velo en la capa de la cabecera.
+- **s10:**
+  - el banco declara el chrome como pieza del layout y la página ya no lo trae (`s10-marcado`, `s10-banco`, y los layouts de juguete de `s10-banco-modelo` con el chrome);
+  - en `s10-acceso`, «Servicios» es el botón del desplegable, y cerrado sus enlaces no son paradas.
+- **s39:** los seis ítems de la barra, con «Servicios» como botón cerrado.
+- **s52:** el import del menú suma el chevron.
+
+**Qué mirar (B12a.5):**
+1. **`/v3/prueba-de-pagina` a 1440:** la píldora al pie, igual que en el home; scrolleá y queda pegada arriba.
+2. **«Servicios», con el mouse:** quedate quieto encima y abre la lista (hacia arriba al pie, hacia abajo pegada). Al irte, se cierra.
+   - Con un clic queda abierta hasta un clic afuera.
+3. **«Servicios», con el teclado:** Tab hasta «Servicios» y Enter; el foco entra a la lista.
+   - Tab recorre los cuatro y sigue con «Panel».
+   - Esc vuelve a «Servicios».
+4. **`/v3` a 1440:** «Servicios» abre la misma lista; «Todos los servicios» viaja a la sección, como antes viajaba el ítem.
+5. **`/v3/prueba-de-pagina` a 390:** abrí el menú y tocá «Servicios»: el acordeón con los cuatro.
+6. **Desde la página, «Portfolio» (o cualquier sección):** va al home, a esa sección, con recarga (hasta B12a.6).
+7. **Las páginas de servicio (`/v3/paginas-web`…):** en esta rama dan 404, porque las rutas son de servicios.

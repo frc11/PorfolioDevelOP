@@ -188,10 +188,12 @@ afirmar(
   encabezados(QUIETA).length > 0 && QUIETA.includes('id="hero"'),
   '  y su destino EXISTE en el marcado: el salto aterriza en algo',
 )
+// [B12a.5] Reemplazada por la spec (D5): «Servicios» es el botón que abre el desplegable (sin destino propio: «Todos los servicios» va
+// adentro, con las páginas); cerrado, sus enlaces no son paradas.
 afirmarIgual(
-  PARADAS.slice(1, 7).map((p) => p.destino),
-  ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop', '#contacto'],
-  '  y las SEIS siguientes son los ítems de la barra, en su orden ([NAVBAR] «Panel» nuevo; CONTACTO: el último abre el formulario)',
+  PARADAS.slice(1, 7).map((p) => p.destino ?? `<${p.etiqueta}>`),
+  ['#quienes-somos', '#trabajos', '<button>', '#tu-panel', '#por-que-develop', '#contacto'],
+  '  y las SEIS siguientes son los ítems de la barra, en su orden ([NAVBAR] «Panel» nuevo; CONTACTO: el último abre el formulario; [B12a.5] «Servicios», el botón del desplegable)',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

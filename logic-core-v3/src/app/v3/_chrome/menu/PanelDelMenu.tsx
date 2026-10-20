@@ -1,11 +1,15 @@
 'use client'
 
-import { Menu as TresBarras } from 'lucide-react'
+import { ChevronDown, Menu as TresBarras } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import type { Caja } from '../../_secciones/trabajos/demos/genie'
+import { ITEMS_DEL_DESPLEGABLE } from '../barra/DesplegableDeServicios'
 import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO } from '../enlaces'
+import { TODOS_LOS_SERVICIOS, destinoDesde } from '../paginas'
 
 /**
  * [NAVBAR] T3 · EL PANEL DEL MENÚ, LO QUE NO SE MUEVE — su adentro (el botón de cerrar y los ítems, con sus clases) y la
@@ -59,8 +63,14 @@ export const TRES_BARRAS = <TresBarras aria-hidden="true" strokeWidth={1.5} clas
  * recorre (`vidrio.css`); al tocarla se recoge en el círculo y el panel se va en él (`MenuDeVidrio`). Nada de cruz. Después,
  * las secciones y, como una más debajo de «Por qué develOP», Contacto: un botón que cierra el menú y abre el panel de
  * contacto (`MenuMovil`). Sin Login.
+ *
+ * [B12a.5] «Servicios» es un acordeón (D5, en el teléfono): abre la sección del home y las páginas de servicio. Sus ítems cuentan como
+ * piezas del panel (`item-del-menu`: el Genie los copia) sólo abiertos, y al terminar de abrirse o cerrarse el menú vuelve a medirse (el
+ * `resize` que escucha `MenuDeVidrio`). Desde una página, las anclas llevan al home (`destinoDesde`).
  */
 export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: () => void; readonly alContacto: () => void }): React.JSX.Element {
+  const ruta = usePathname()
+  const [servicios, setServicios] = useState(false)
   return (
     <div className="flex size-full flex-col">
       <button type="button" data-parte="cerrar-el-menu" onClick={alCerrar} className="text-tinta">
@@ -75,13 +85,41 @@ export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: 
       </button>
       <nav aria-label="Navegación principal" className="flex flex-1 flex-col justify-center px-[var(--spacing-6)] pb-[var(--spacing-6)]">
         <ul className="flex flex-col gap-[var(--spacing-1)]">
-          {ENLACES_DE_SECCION.map((enlace) => (
-            <li key={enlace.id}>
-              <a href={enlace.destino} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM}>
-                {enlace.rotulo}
-              </a>
-            </li>
-          ))}
+          {ENLACES_DE_SECCION.map((enlace) =>
+            enlace.id === TODOS_LOS_SERVICIOS.id ? (
+              <li key={enlace.id}>
+                <button type="button" data-parte="item-del-menu" aria-expanded={servicios} aria-controls={ID_DEL_ACORDEON} onClick={() => setServicios((a) => !a)} className={cn(CLASE_DEL_ITEM, 'justify-between')}>
+                  {enlace.rotulo}
+                  <ChevronDown aria-hidden="true" strokeWidth={1.5} className={cn('size-[var(--spacing-5)] transition-transform duration-[var(--duracion-media)] ease-[var(--ease-principal)] motion-reduce:transition-none', servicios && 'rotate-180')} />
+                </button>
+                <div
+                  id={ID_DEL_ACORDEON}
+                  data-parte="acordeon-de-servicios"
+                  inert={!servicios}
+                  onTransitionEnd={(e) => {
+                    if (e.target === e.currentTarget) window.dispatchEvent(new Event('resize'))
+                  }}
+                  className={cn('grid transition-[grid-template-rows] duration-[var(--duracion-media)] ease-[var(--ease-principal)] motion-reduce:transition-none', servicios ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]')}
+                >
+                  <ul className="flex min-h-0 flex-col gap-[var(--spacing-1)] overflow-hidden pl-[var(--spacing-4)]">
+                    {ITEMS_DEL_DESPLEGABLE.map((p) => (
+                      <li key={p.id}>
+                        <a href={destinoDesde(ruta, p.destino)} data-parte={servicios ? 'item-del-menu' : 'item-del-acordeon'} onClick={alCerrar} className={CLASE_DEL_SUBITEM}>
+                          {p.rotulo}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ) : (
+              <li key={enlace.id}>
+                <a href={destinoDesde(ruta, enlace.destino)} data-parte="item-del-menu" onClick={alCerrar} className={CLASE_DEL_ITEM}>
+                  {enlace.rotulo}
+                </a>
+              </li>
+            ),
+          )}
           <li>
             <button
               type="button"
@@ -104,7 +142,16 @@ export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: 
 /** [NOCTURNO FINAL] C5 · el círculo del botón del menú (el mismo papel y borde): adentro de la franja y en el Genie. */
 export const CLASE_DEL_CIRCULO = 'bg-fondo text-tinta border-borde grid size-[var(--spacing-12)] place-items-center rounded-full border'
 
+/** [B12a.5] El acordeón de «Servicios» en el menú del teléfono. */
+const ID_DEL_ACORDEON = 'acordeon-de-servicios'
+
 export const CLASE_DEL_ITEM = cn(
   'text-titulo-m font-titulo leading-titulo tracking-titulo flex min-h-[var(--spacing-12)] w-full items-center rounded-[var(--radius-medio)] px-[var(--spacing-4)] py-[var(--spacing-2)] text-left',
+  'hover:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)]',
+)
+
+/** [B12a.5] Un ítem del acordeón: un paso más chico que los de las secciones, con el mismo hover. */
+const CLASE_DEL_SUBITEM = cn(
+  'text-titulo-s font-titulo leading-titulo tracking-titulo flex min-h-[var(--spacing-12)] w-full items-center rounded-[var(--radius-medio)] px-[var(--spacing-4)] py-[var(--spacing-2)] text-left',
   'hover:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)]',
 )

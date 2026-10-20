@@ -257,6 +257,8 @@ export const SELECTOR_DEL_CTA_DEL_HERO = `[${ATRIBUTO_DE_PANEL}="${IDS_DE_SECCIO
 export const SELECTOR_DE_LOS_VIAJES = [
   SELECTOR_DEL_CTA_DEL_HERO,
   '[data-pieza="barra"] a[data-pieza="barra-enlace"]',
+  // [B12a.5] «Todos los servicios», en el desplegable de la barra (las páginas no son anclas: navegan).
+  '[data-pieza="barra"] a[data-pieza="desplegable-enlace"]',
   '[data-pieza="menu-movil"] a[data-parte="item-del-menu"]',
   '[data-pieza="destinos-del-pie"] a[data-pieza="pie-enlace-icono"]',
   // [PULIDO 10] J8 · el recorrido del pie como texto.

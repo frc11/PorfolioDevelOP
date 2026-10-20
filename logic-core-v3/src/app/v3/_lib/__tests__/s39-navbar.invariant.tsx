@@ -83,10 +83,12 @@ afirmar(LLEGADA.includes('(r < 0 ? p : Math.min(p, r))') && /void control\.then\
 titulo('T2 · La barra de escritorio, propia de /v3')
 
 const BARRA_HTML = renderToStaticMarkup(<BarraDelHome />)
-const enlaces = [...BARRA_HTML.matchAll(/<a [^>]*data-pieza="barra-enlace"[^>]*>([\s\S]*?)<\/a>/g)]
-afirmarIgual(enlaces.map((m) => /href="([^"]+)"/.exec(m[0])?.[1]), ENLACES_DEL_HOME.map((e) => e.destino), 'seis enlaces, los del home, en su orden')
+// [B12a.5] Reemplazadas por la spec (D5): «Servicios» es el botón (cerrado) del desplegable de las páginas de servicio; los otros, enlaces.
+const enlaces = [...BARRA_HTML.matchAll(/<(a|button) [^>]*data-pieza="barra-enlace"[^>]*>([\s\S]*?)<\/(?:a|button)>/g)]
+const destinoDelItem = (m: RegExpMatchArray): string | undefined => (m[1] === 'button' ? (/aria-expanded="false" aria-controls="desplegable-de-servicios"/.test(m[0]) ? '<desplegable>' : '<button>') : /href="([^"]+)"/.exec(m[0])?.[1])
+afirmarIgual(enlaces.map(destinoDelItem), ENLACES_DEL_HOME.map((e) => (e.id === 'servicios' ? '<desplegable>' : e.destino)), 'seis ítems, los del home, en su orden ([B12a.5] «Servicios», el botón del desplegable, cerrado)')
 const visible = (html: string): string => html.replace(/<span data-copia="b" aria-hidden="true">[^<]*<\/span>/g, '').replace(/<[^>]+>/g, '')
-afirmar(enlaces.every((m, i) => !m[1].includes('data-rollover') && visible(m[1]) === ENLACES_DEL_HOME[i].rotulo), '  [NAVBAR] Retoque 4: sin el rollover tipo botón (quedó en el CTA, el mail, WhatsApp y los proyectos), y el nombre accesible es el rótulo')
+afirmar(enlaces.every((m, i) => !m[2].includes('data-rollover') && visible(m[2]) === ENLACES_DEL_HOME[i].rotulo), '  [NAVBAR] Retoque 4: sin el rollover tipo botón (quedó en el CTA, el mail, WhatsApp y los proyectos), y el nombre accesible es el rótulo')
 controlPositivo('el chequeo del nombre vería una copia B que se anuncia', '<span data-rollover=""><span data-copia="a">Panel</span><span data-copia="b">Panel</span></span>', (h: string) => visible(h) === 'Panel')
 afirmar(/<header data-pieza="barra"[^>]*><nav data-parte="pastilla" aria-label="Navegación principal"><ul data-parte="lista">/.test(BARRA_HTML) && BARRA_HTML.includes('data-parte="resaltado" aria-hidden="true"'), '  el banner con su navegación (el landmark de siempre) y el indicador del activo, mudo')
 

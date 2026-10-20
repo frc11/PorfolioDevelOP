@@ -15,7 +15,6 @@
 
 import { createElement, Fragment } from 'react'
 
-import { ChromeDelHome } from '../../_chrome/ChromeDelHome'
 import { REGISTRO } from '../../_secciones/_contrato/registro'
 import { Home } from '../../_secciones/Home'
 import { marcar } from '../../_secciones/_invariantes/render'
@@ -35,14 +34,11 @@ import { type Rama } from './s10-referencias'
  * una segunda fuente de la estructura —el esqueleto del LAYOUT se sigue
  * derivando— sino el mismo espejo de `page.tsx` que este helper siempre fue, con
  * una pieza más.
+ *
+ * [B12a.5] El chrome ya no va acá: lo monta el LAYOUT (D4), y el documento lo emite por `PIEZAS_MONTABLES` (`s10-banco.ts`) antes de
+ * la página, en el mismo lugar del documento que antes.
  */
-const HOME = (): React.JSX.Element =>
-  createElement(
-    Fragment,
-    null,
-    createElement(ChromeDelHome),
-    createElement('main', { className: 'relative z-10' }, createElement(Home)),
-  )
+const HOME = (): React.JSX.Element => createElement(Fragment, null, createElement('main', { className: 'relative z-10' }, createElement(Home)))
 
 /** La caché del banco: el mismo árbol no se renderiza dos veces. */
 const cache = new Map<string, string>()

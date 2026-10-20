@@ -1,11 +1,14 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { sonar } from '../../_lib/sonido/bus'
 import { ABRE_EL_PANEL, fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
 import { ENLACES_DEL_HOME, ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enlaces'
+import { TODOS_LOS_SERVICIOS, destinoDesde } from '../paginas'
 
+import { BotonDeServicios, ListaDeServicios, useDesplegable } from './DesplegableDeServicios'
 import { useCorrimientoDeLaPastilla } from './useCorrimientoDeLaPastilla'
 
 /**
@@ -26,6 +29,9 @@ import { useCorrimientoDeLaPastilla } from './useCorrimientoDeLaPastilla'
  * El modo (`data-modo`) lo decide el ancho real: la barra si entra y está encendida, si no el menú del teléfono. Abajo
  * de `medio` la pastilla está apagada (`CLASE_DE_LA_PASTILLA_APAGADA`, en el montaje) y es el menú, aunque la lista
  * entrara: antes quedaba una franja (de 628 a 860) sin barra a la vista y sin menú.
+ *
+ * [B12a.5] Vive en el layout (D4): la misma en el home y en las páginas. Desde una página, sus anclas llevan al home (`destinoDesde`).
+ * «Servicios» abre el desplegable de las páginas de servicio (D5, `DesplegableDeServicios.tsx`).
  */
 
 /** [RETOQUE 3D] N1 · el aire mínimo (px) entre la pastilla centrada y la esquina: si no entra, el menú del teléfono. */
@@ -56,6 +62,8 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
   const ubicarElResaltado = useRef<() => void>(() => undefined)
   // [B1.2d] Con el Portfolio abierto, la píldora se corre a la columna (`corrimiento.ts`); la esquina se queda.
   useCorrimientoDeLaPastilla(pastillaRef)
+  const ruta = usePathname()
+  const { boton: botonDeServicios, panel: listaDeServicios, alTeclearElBoton, alTeclearLaLista, ...desplegable } = useDesplegable()
 
   useEffect(() => {
     const paneles = [...document.querySelectorAll<HTMLElement>('[data-panel]')]
@@ -156,10 +164,17 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
         <ul data-parte="lista">
           {ENLACES_DE_SECCION.map((enlace) => {
             const esActivo = enlace.id === activo
+            if (enlace.id === TODOS_LOS_SERVICIOS.id) {
+              return (
+                <li key={enlace.id}>
+                  <BotonDeServicios ref={botonDeServicios} abierto={desplegable.abierto} alEntrar={desplegable.alEntrar} alSalir={desplegable.alSalir} alClic={desplegable.alClic} alTeclear={alTeclearElBoton} rotulo={enlace.rotulo} activo={esActivo} />
+                </li>
+              )
+            }
             return (
               <li key={enlace.id}>
                 <a
-                  href={enlace.destino}
+                  href={destinoDesde(ruta, enlace.destino)}
                   data-pieza="barra-enlace"
                   data-nav-id={enlace.id}
                   data-activo={esActivo ? 'true' : undefined}
@@ -174,10 +189,11 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
         </ul>
         <span ref={resaltado} data-parte="resaltado" aria-hidden="true" />
       </nav>
+      <ListaDeServicios ref={listaDeServicios} abierto={desplegable.abierto} alEntrar={desplegable.alEntrar} alSalir={desplegable.alSalir} alTeclear={alTeclearLaLista} cerrar={desplegable.cerrar} ruta={ruta} />
       {/* [RETOQUE 3D] N1 · Contacto y Login (el del sitio), en la esquina de arriba a la derecha. [CIERRE] N1: Contacto abre el panel. */}
       <div data-parte="esquina" onPointerEnter={() => sonar('tic')}>
         <a
-          href={ENLACE_DE_CONTACTO.destino}
+          href={destinoDesde(ruta, ENLACE_DE_CONTACTO.destino)}
           data-abre-contacto={ABRE_EL_PANEL}
           data-pieza="barra-enlace"
           data-nav-id={ENLACE_DE_CONTACTO.id}

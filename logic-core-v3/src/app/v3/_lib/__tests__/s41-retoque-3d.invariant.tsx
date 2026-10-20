@@ -240,11 +240,12 @@ titulo('N1 · Contacto y Login, en la esquina')
 
 afirmar(ENLACES_DE_SECCION.every((e) => e.destino.startsWith('#') && e.destino !== '#contacto') && ENLACES_DE_SECCION.length === 5 && ENLACE_DE_CONTACTO.destino === '#contacto' && ENLACE_DE_LOGIN.destino === '/login' && existsSync('src/app/login/page.tsx'), 'la pastilla lleva las cinco secciones; Contacto va al formulario del pie y Login al login que el sitio ya tiene (`/login`)')
 const barra = sinComentarios(leer('_chrome/barra/BarraDelHome.tsx'))
-const enLaEsquina = (c: string): boolean => /\{ENLACES_DE_SECCION\.map\(/.test(c) && /<div data-parte="esquina"[\s\S]*href=\{ENLACE_DE_CONTACTO\.destino\}[\s\S]*data-pieza="barra-login"/.test(c)
+// [B12a.5] Desde una página, el ancla de Contacto lleva al home (`destinoDesde`); en el home, la de siempre.
+const enLaEsquina = (c: string): boolean => /\{ENLACES_DE_SECCION\.map\(/.test(c) && /<div data-parte="esquina"[\s\S]*href=\{destinoDesde\(ruta, ENLACE_DE_CONTACTO\.destino\)\}[\s\S]*data-pieza="barra-login"/.test(c)
 afirmar(enLaEsquina(barra), '  la esquina: Contacto (un enlace del viaje, como los de la pastilla) y Login (un botón)')
 controlPositivo('el detector VE a Contacto adentro de la pastilla', barra.replace('ENLACES_DE_SECCION.map(', 'ENLACES_DEL_HOME.map('), enLaEsquina)
 const cssDeLaBarra = readFileSync(`${V3}/_estilos/barra.css`, 'utf8')
-afirmar(/\[data-parte="esquina"\] \{\s*position: fixed;\s*top: var\(--barra-reposo\);\s*right: var\(--pad-lateral-compacto\);/.test(cssDeLaBarra) && /\[data-modo="menu"\] > :is\(\[data-parte="pastilla"\], \[data-parte="esquina"\]\)/.test(cssDeLaBarra) && /AIRE_DE_LA_ESQUINA/.test(barra), '  arriba a la derecha, siempre arriba (enfrente, el parlante: [CIERRE A] A6); si no entra al lado de la pastilla, el menú del teléfono')
+afirmar(/\[data-parte="esquina"\] \{\s*position: fixed;\s*top: var\(--barra-reposo\);\s*right: var\(--pad-lateral-compacto\);/.test(cssDeLaBarra) && /\[data-modo="menu"\] > :is\(\[data-parte="pastilla"\], \[data-parte="esquina"\](, \[data-parte="desplegable"\])?\)/.test(cssDeLaBarra) && /AIRE_DE_LA_ESQUINA/.test(barra), '  arriba a la derecha, siempre arriba (enfrente, el parlante: [CIERRE A] A6); si no entra al lado de la pastilla, el menú del teléfono')
 const menu = sinComentarios(leer('_chrome/menu/PanelDelMenu.tsx'))
 // [CIERRE RETOQUE 3D] N1: Contacto, un botón que abre el panel. [NOCTURNO FINAL] C5 · cambió por pedido: en el teléfono
 // Contacto es el último ítem de la lista (debajo de «Por qué develOP») y Login queda sólo en la barra de escritorio.

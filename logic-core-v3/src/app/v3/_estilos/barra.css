@@ -98,6 +98,73 @@
   transition-timing-function: var(--ease-principal);
 }
 
+/*
+ * [B12a.5] EL DESPLEGABLE DE SERVICIOS (D5) — la lista de las páginas de servicio, debajo de «Servicios» y fuera de la píldora (la
+ * píldora recorta lo que se le sale). El mismo vidrio que la píldora; nace con ella y se pega con ella (la misma coordenada: la
+ * cabecera). Cerrado no se ve ni se alcanza con el Tab (`visibility`); abre bajando un poco, como el resto de lo que aparece.
+ */
+[data-v3] [data-pieza="barra"] > [data-parte="desplegable"] {
+  position: absolute;
+  top: calc(var(--barra-nacimiento) + var(--barra-alto) + var(--spacing-2));
+  left: var(--desplegable-x, 50%);
+  translate: -50% calc(var(--spacing-2) * -1);
+  padding: var(--spacing-2);
+  border: var(--border-hairline) solid var(--color-borde);
+  border-radius: var(--radius-fuerte);
+  background-color: var(--color-superficie-translucida);
+  backdrop-filter: blur(var(--blur-panel));
+  box-shadow: var(--shadow-flotante);
+  opacity: 0;
+  visibility: hidden;
+  transition-property: opacity, translate, visibility;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3] [data-pieza="barra"] > [data-parte="desplegable"][data-abierto] {
+  translate: -50% 0;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Con la píldora al pie de la primera pantalla, abajo no entra: abre hacia arriba (y sube un poco al aparecer, al revés). */
+[data-v3] [data-pieza="barra"] > [data-parte="desplegable"][data-hacia="arriba"] {
+  top: calc(var(--barra-nacimiento) - var(--spacing-2));
+  translate: -50% calc(100% * -1 + var(--spacing-2));
+}
+
+[data-v3] [data-pieza="barra"] > [data-parte="desplegable"][data-hacia="arriba"][data-abierto] {
+  translate: -50% calc(100% * -1);
+}
+
+[data-v3] [data-pieza="barra"] > [data-parte="desplegable"] > ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-v3] [data-pieza="desplegable-enlace"] {
+  --barra-resaltado: 8%;
+  display: flex;
+  align-items: center;
+  min-block-size: var(--spacing-10);
+  padding-inline: var(--spacing-3);
+  border-radius: var(--radius-pastilla-s);
+  color: var(--color-tinta);
+  text-decoration: none;
+  white-space: nowrap;
+  transition-property: background-color;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3] [data-pieza="desplegable-enlace"]:is(:hover, :focus-visible) {
+  background-color: color-mix(in srgb, var(--color-tinta) var(--barra-resaltado), transparent);
+}
+
 /* Con el formulario de contacto abierto la barra se corre hacia arriba y se apaga, como la de siempre. [PASADA FINAL] B3:
    con la marca que el formulario pone en la raíz (un `:has()` acá recalculaba la página entera ante cualquier nodo nuevo). */
 [data-v3][data-contacto-abierto] [data-pieza="barra"] > [data-parte="pastilla"] {
@@ -106,8 +173,14 @@
   pointer-events: none;
 }
 
+/* [B12a.5] Y el desplegable, si quedó abierto, se va con ella. */
+[data-v3][data-contacto-abierto] [data-pieza="barra"] > [data-parte="desplegable"] {
+  opacity: 0;
+  visibility: hidden;
+}
+
 /* El modo lo decide `BarraDelHome`: la barra si entra y está encendida (desde `medio`), si no el menú del teléfono. */
-[data-v3] [data-pieza="barra"][data-modo="menu"] > :is([data-parte="pastilla"], [data-parte="esquina"]) {
+[data-v3] [data-pieza="barra"][data-modo="menu"] > :is([data-parte="pastilla"], [data-parte="esquina"], [data-parte="desplegable"]) {
   visibility: hidden;
 }
 
