@@ -21,10 +21,10 @@ export interface CuadroDeLasHistorias {
   readonly camara: boolean
 }
 
-export type ViolacionDeLasHistorias = 'fondo-vacio' | 'titulo-huerfano' | 'titulo-pegado' | 'oscuro-sin-historias'
+export type ViolacionDeLasHistorias = 'fondo-vacio' | 'titulo-huerfano' | 'titulo-pegado' | 'oscuro-sin-historias' | 'titulo-desde-demos'
 
 /** Lo que cuenta como «se ve»: el umbral de lo visible y el tramo de cuadros vacíos que se tolera (una transición que se cruza). */
-export const LO_QUE_SE_VE = { umbral: 0.08, vacioMs: 120, cruceMs: 1300, pegadoMs: 250, oscuroMs: 300 } as const
+export const LO_QUE_SE_VE = { umbral: 0.08, vacioMs: 120, cruceMs: 1300, pegadoMs: 250, oscuroMs: 300, desdeDemosMs: 0 } as const
 
 /**
  * Las violaciones, con el tramo más largo de cada una (ms):
@@ -33,11 +33,15 @@ export const LO_QUE_SE_VE = { umbral: 0.08, vacioMs: 120, cruceMs: 1300, pegadoM
  *     salida a Demos, 1,18 s, con un margen: el título cae a la par de ella y se cruza con Demos mientras llega);
  *   · `titulo-pegado`: al salir hacia Demos, el título entero (sin empezar a caer) más de `pegadoMs` después de que arrancó la salida;
  *   · `oscuro-sin-historias`: la escena oscurecida (la cámara del Portfolio) sin las historias delante más de `oscuroMs` (el fondo negro:
- *     el oscurecido va detrás de las historias, que entran y salen con él).
+ *     el oscurecido va detrás de las historias, que entran y salen con él);
+ *   · [F5b] `titulo-desde-demos`: volviendo desde Demos (de la cola a una historia), el título a la vista mientras siguen las historias. De
+ *     Demos se vuelve directo a las historias: el título aparece sólo al salir hacia la sección anterior y al entrar desde arriba.
  */
 export function violacionesDeLasHistorias(cuadros: readonly CuadroDeLasHistorias[]): { readonly violaciones: ViolacionDeLasHistorias[]; readonly peores: Readonly<Record<ViolacionDeLasHistorias, number>> } {
   const u = LO_QUE_SE_VE.umbral
-  const peores: Record<ViolacionDeLasHistorias, number> = { 'fondo-vacio': 0, 'titulo-huerfano': 0, 'titulo-pegado': 0, 'oscuro-sin-historias': 0 }
+  const peores: Record<ViolacionDeLasHistorias, number> = { 'fondo-vacio': 0, 'titulo-huerfano': 0, 'titulo-pegado': 0, 'oscuro-sin-historias': 0, 'titulo-desde-demos': 0 }
+  let vueltaDeDemos = false
+  let desdeDemosDesde: number | null = null
   let oscuroDesde: number | null = null
   let vacioDesde: number | null = null
   let huerfanoDesde: number | null = null
@@ -50,6 +54,12 @@ export function violacionesDeLasHistorias(cuadros: readonly CuadroDeLasHistorias
     // La salida hacia Demos arranca cuando el paso pasa a la cola desde adentro.
     if (antes !== undefined && antes.paso >= 0 && antes.paso <= 3 && c.paso === 4) salida = c.t
     if (c.paso !== 4) salida = null
+    // [F5b] La vuelta desde Demos dura hasta que se sale hacia la sección anterior (antes del pin).
+    if (antes !== undefined && antes.paso === 4 && c.paso >= 0 && c.paso <= 3) vueltaDeDemos = true
+    if (c.paso < 0) vueltaDeDemos = false
+    const desdeDemos = vueltaDeDemos && c.paso >= 0 && c.paso <= 3 && c.titulo >= u
+    desdeDemosDesde = desdeDemos ? (desdeDemosDesde ?? c.t) : null
+    if (desdeDemosDesde !== null) peores['titulo-desde-demos'] = Math.max(peores['titulo-desde-demos'], c.t - desdeDemosDesde)
     const vacio = c.enCuadro && c.titulo < u && c.historias < u && c.demos < u
     vacioDesde = vacio ? (vacioDesde ?? c.t) : null
     if (vacioDesde !== null) peores['fondo-vacio'] = Math.max(peores['fondo-vacio'], c.t - vacioDesde)
@@ -68,5 +78,6 @@ export function violacionesDeLasHistorias(cuadros: readonly CuadroDeLasHistorias
   if (peores['titulo-huerfano'] > LO_QUE_SE_VE.cruceMs) violaciones.push('titulo-huerfano')
   if (peores['titulo-pegado'] > LO_QUE_SE_VE.pegadoMs) violaciones.push('titulo-pegado')
   if (peores['oscuro-sin-historias'] > LO_QUE_SE_VE.oscuroMs) violaciones.push('oscuro-sin-historias')
+  if (peores['titulo-desde-demos'] > LO_QUE_SE_VE.desdeDemosMs) violaciones.push('titulo-desde-demos')
   return { violaciones, peores }
 }

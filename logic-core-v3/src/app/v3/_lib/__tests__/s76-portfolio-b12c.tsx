@@ -94,7 +94,8 @@ export function afirmarB12c(): void {
   const escenario = sinComentarios(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`))
   const cableado = (u: string, e: string): boolean =>
     /const tituloS = useTituloListo\('portfolio'\) \? LENTOS\.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO\.s/.test(u) &&
-    /const pedidoDelOrden = \{ camara: adentro, encabezado: historias \? \(fase === 'antes' && enCuadro\) \|\| adentro : adentro, barra: adentro && !historias, panel: adentro \}/.test(u) &&
+    // [F5b] Reemplazada por la spec: el encabezado sale de `pideElEncabezado` (desde Demos, sin el título; s76 §31 lo afirma).
+    /const pedidoDelOrden = \{ camara: adentro, encabezado, barra: adentro && !historias, panel: adentro \}/.test(u) && /const encabezado = pideElEncabezado\(historias, fase, enCuadro, /.test(u) &&
     /useOrdenDeLaEscena\(pedidoDelOrden, tituloS, reducido, historias\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.camara/.test(u) && /useBarraDelPortfolio\(caja, orden\.barra\)/.test(u) &&
     /!vivo\.panel && 'translate-x-full'/.test(e) && /<EncabezadoDelPortfolio seccion=\{seccion\} adentro=\{vivo\.encabezado\}/.test(e)
   afirmar(cableado(usePortfolio, escenario), '  y así se cablea: la cámara (con el oscurecido de `PORTFOLIO_EN_LA_ESCENA`), el encabezado, la barra y el panel salen del orden, no del paso')

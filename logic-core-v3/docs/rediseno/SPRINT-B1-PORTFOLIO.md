@@ -2125,3 +2125,50 @@ Todo con el Chrome del sistema a la vista, contra el dev del home (:3002) y con 
 **La captura del modal en el navegador** (`fotos.ts`, `contacto:barra` a 1440 y `contacto:hero` a 390): el modal de contacto con los campos compartidos de B, «Enviar» y la X, abierto con el teclado; el foco, en el primer enlace. Las capturas están en `~/.cache/b4-medicion/fotos/modal-*.png`.
 
 **Qué mirar (las mediciones):** nada nuevo para mirar. Están en verde y con su número. Lo que encontraron va en P-H (`SPRINT-PH.md` §7).
+
+### 15.6 F5b · De Demos se vuelve directo a las historias (2026-10-20)
+
+**El pedido de Valentino:** al volver de Demos a las historias (deslizando o scrolleando hacia arriba), el título «Portfolio» aparecía un segundo. No tiene que pasar: de Demos se vuelve directo a las historias. El título aparece sólo al salir de las historias hacia la sección anterior y al entrar desde arriba.
+
+**El arnés** (`scripts-carga/historias.ts`, el Chrome del sistema en modo táctil):
+- **La cuenta suma `titulo-desde-demos`** (`historias-cuenta.ts`): desde que el paso vuelve de la cola a una historia y hasta salir hacia la sección anterior, el título no puede verse.
+- **La matriz suma la vuelta con un deslice** (`VUELTAS=dedo,deslice`): desde cada historia, sale a Demos y vuelve scrolleando con el dedo o con un golpe del dedo. Son 12 casos por ancho.
+- **Una medida del entorno:** con TeamViewer conectado, Windows apaga las animaciones y Chrome pide movimiento reducido. El arnés lo emula apagado (`reducedMotion: 'no-preference'`); si no, mide el sitio quieto.
+
+**Reproducido en rojo** a 390, 768, 820 × 1180 y 1023 × 768, con la vuelta con el dedo y con el deslice: `titulo-desde-demos`.
+- El título sube primero y queda debajo de las historias (3,1 a 3,6 s en el registro).
+- **Se ve solo hasta que la historia lo tapa:** en el registro de anoche, de 0 a 0,96 con las historias en 0, unos 0,5 s.
+
+**El arreglo:**
+- **`orden.ts`, `pideElEncabezado` (pura):** en las historias, el título se pide en la aproximación y, adentro, sólo si se entró desde arriba.
+- **`usePortfolio.ts`:** recuerda de dónde se entró, con `vieneDeDemos`:
+  - pasa a `true` en la cola y a `false` en la aproximación;
+  - es estado ajustado en el render, sin efecto.
+- **`orden.ts`, en las historias:** el título que sube ya no espera a que la historia termine de irse.
+  - Al salir hacia la sección anterior después de volver de Demos, el título no estaba: sube a la par de la historia que se funde, debajo de ella.
+  - Sin esto quedaban unos 200 ms sin nada a la vista.
+- **El defecto, para el control:** `titulo-desde-demos` (`window.__defectosDelPortfolio`), que devuelve la regla de F5.
+
+**En verde:**
+- **La matriz:** 48 de 48, 12 por ancho. Cada historia sale hacia arriba (Demos) y vuelve con el dedo o con un deslice, y sale hacia abajo y vuelve; la salida hacia abajo arranca ya vuelta de Demos.
+- **Los recorridos completos:** 4 de 4.
+- **Los peores tramos:**
+  - fondo vacío: 79 ms (el criterio es 120);
+  - oscuro sin historias: 102 ms (el criterio es 300).
+  - El `fondo-vacio` de 933 ms que tenía el deslice a 768 antes del arreglo no volvió a aparecer.
+- **El control** (`DEFECTO=titulo-desde-demos`): rojo a 390 y a 820 con el dedo y con el deslice (4 de 4).
+
+**Las afirmaciones reemplazadas por la spec**, cada una con su control:
+- **s76 §31:** la regla del título, que pasa a ser `pideElEncabezado` con su cableado. Los controles son la regla de F5, la de B1.3 y el cableado que no recuerda de dónde se entró.
+- **s76 §42:**
+  - la vuelta desde Demos: el oscurecido y la historia juntos, sin el título; el control es la vuelta de F5;
+  - la salida después hacia la sección anterior, con el título a la par; el control es el título que espera 0,7 s;
+  - la cuenta del arnés con cuadros armados de las dos vueltas.
+- **s76 (b12c §19):** el cableado del pedido, con la línea nueva.
+
+**Qué mirar (F5b)**, en el teléfono (390) y en la tablet (768, 820 × 1180, 1023 × 768), con el dedo:
+1. **`/v3`, la vuelta:** entrá al Portfolio, deslizá hasta Demos y volvé (scrolleando hacia arriba o con un golpe del dedo).
+   - Debería verse la historia directo, con el oscurecido, sin el título.
+2. **Desde esa historia, hacia atrás:** deslizá hacia abajo (hacia la sección anterior).
+   - Debería verse la historia fundirse mientras el título sube en su lugar: sin un instante vacío.
+3. **Desde arriba:** entrá desde Números. El título sube y después entran las historias, como siempre.

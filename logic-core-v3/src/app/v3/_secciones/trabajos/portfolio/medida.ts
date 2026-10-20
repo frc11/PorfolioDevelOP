@@ -90,9 +90,9 @@ export const VUELO = { margenMs: 1000 } as const
  * cargar (`window.__defectosDelPortfolio`, como el banco con `__entornoDeLaEscena`); nunca la URL ni el producto. [F1] Y el de F1: la rueda
  * de antes, sin la trampa de la entrada y dando pasos mientras el panel todavía no entró (`rueda-en-la-entrada`). [F3] Y la píldora que
  * vuelve a la par de la salida del panel (`pildora-con-el-panel`). [F5] Y las historias de antes: el orden de escritorio, el título sin
- * fundido y con la caída corta (`historias-de-antes`).
+ * fundido y con la caída corta (`historias-de-antes`). [F5b] Y el título que vuelve con las historias desde Demos (`titulo-desde-demos`).
  */
-export type DefectoDelPortfolio = 'vuelo-sin-dueno' | 'rueda-en-la-entrada' | 'pildora-con-el-panel' | 'historias-de-antes'
+export type DefectoDelPortfolio = 'vuelo-sin-dueno' | 'rueda-en-la-entrada' | 'pildora-con-el-panel' | 'historias-de-antes' | 'titulo-desde-demos'
 export function conElDefecto(d: DefectoDelPortfolio): boolean {
   if (typeof window === 'undefined') return false
   const pedido = (window as Window & { __defectosDelPortfolio?: unknown }).__defectosDelPortfolio

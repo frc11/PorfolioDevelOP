@@ -18,7 +18,7 @@ import { ENTRADA_DE_LAS_HISTORIAS } from '../../_secciones/trabajos/portfolio/Es
 import { SUBIDA_DEL_ENCABEZADO_SVH } from '../../_secciones/trabajos/portfolio/EncabezadoDelPortfolio'
 import { HistoriaDelProyecto } from '../../_secciones/trabajos/portfolio/HistoriaDelProyecto'
 import { ITEMS_DE_LAS_HISTORIAS } from '../../_secciones/trabajos/portfolio/HistoriasDelPortfolio'
-import { AFUERA, NUNCA, recorridoDelOrden, type Orden } from '../../_secciones/trabajos/portfolio/orden'
+import { AFUERA, NUNCA, pideElEncabezado, recorridoDelOrden, type Orden } from '../../_secciones/trabajos/portfolio/orden'
 import { LO_QUE_SE_VE, violacionesDeLasHistorias, type CuadroDeLasHistorias } from '../../../../../scripts-carga/historias-cuenta'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
 
@@ -142,9 +142,19 @@ export function afirmarLasHistorias(): void {
   titulo('B1.2d B · 31 · T3 · La entrada: el título sube por delante del logo y queda arriba; recién ahí entran las historias')
 
   const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
-  const regla = (u: string): boolean => /encabezado: historias \? \(fase === 'antes' && enCuadro\) \|\| adentro : adentro, barra: adentro && !historias/.test(u)
-  afirmar(regla(usePortfolio), 'en las historias el título se pide en la aproximación y se QUEDA (con las historias adentro y al volver): no cae antes de que entren')
-  controlPositivo('  el detector ve la regla de B1.3 (el título caía antes de la historia)', usePortfolio.replace("encabezado: historias ? (fase === 'antes' && enCuadro) || adentro : adentro", "encabezado: historias ? fase === 'antes' && enCuadro : adentro"), regla)
+  // [F5b] Reemplazada por la spec (Valentino, 2026-10-20: «de Demos se vuelve directo a las historias; el título aparece solo al salir de las
+  // historias hacia arriba y al entrar desde arriba»): adentro, el título se queda sólo si se entró desde arriba.
+  type Pide = (h: boolean, f: 'antes' | 'adentro' | 'despues', c: boolean, d: boolean) => boolean
+  const reglaDelTitulo = (f: Pide): boolean =>
+    f(true, 'antes', true, false) && f(true, 'antes', true, true) && !f(true, 'antes', false, false) && f(true, 'adentro', true, false) && !f(true, 'adentro', true, true) &&
+    !f(true, 'despues', true, false) && f(false, 'adentro', true, true) && !f(false, 'antes', true, false)
+  const cableadoDeLaRegla = (u: string): boolean =>
+    /if \(fase === 'despues' && !vieneDeDemos\) setVieneDeDemos\(true\)/.test(u) && /if \(fase === 'antes' && vieneDeDemos\) setVieneDeDemos\(false\)/.test(u) &&
+    /const encabezado = pideElEncabezado\(historias, fase, enCuadro, vieneDeDemos && !conElDefecto\('titulo-desde-demos'\)\)/.test(u) && /const pedidoDelOrden = \{ camara: adentro, encabezado, barra: adentro && !historias, panel: adentro \}/.test(u)
+  afirmar(reglaDelTitulo(pideElEncabezado) && cableadoDeLaRegla(usePortfolio), '[F5b] en las historias el título se pide en la aproximación y, adentro, se QUEDA si se entró desde arriba (no cae antes de que entren); desde Demos se vuelve directo a las historias, sin el título, hasta volver a la aproximación')
+  controlPositivo('  el detector ve la regla de F5 (adentro siempre: al volver desde Demos el título subía un segundo antes de la historia)', ((h, f, c) => (h ? (f === 'antes' && c) || f === 'adentro' : f === 'adentro')) as Pide, reglaDelTitulo)
+  controlPositivo('  y la de B1.3 (el título caía antes de la historia)', ((h, f, c) => (h ? f === 'antes' && c : f === 'adentro')) as Pide, reglaDelTitulo)
+  controlPositivo('  y el cableado que no recuerda de dónde se entró', usePortfolio.replace("if (fase === 'despues' && !vieneDeDemos) setVieneDeDemos(true)", ''), cableadoDeLaRegla)
   const texto = (r: readonly { readonly estado: Orden; readonly enS: number }[]): string[] =>
     r.map(({ estado: o, enS }) => `${o.camara ? 'C' : 'c'}${o.encabezado ? 'E' : 'e'}${o.barra ? 'B' : 'b'}${o.panel ? 'P' : 'p'}@${enS.toFixed(2)}`)
   const EN_LA_APROXIMACION: Orden = { camara: false, encabezado: true, barra: false, panel: false }
@@ -174,9 +184,15 @@ export function afirmarLasHistorias(): void {
   const aLaHistoria = (o: { readonly historias?: boolean }): string[] => texto(recorridoDelOrden(EN_LA_HISTORIA, alTitulo, 0.6, false, NUNCA, o))
   afirmarIgual(aLaHistoria({ historias: true }), ['CEbp@0.00', 'cEbp@0.00'], 'deslizando hacia abajo (al título) el oscurecido se va con la historia y el título se queda: como en la aproximación')
   controlPositivo('  el detector ve la de escritorio (la cámara esperaba al título, que no se va: la escena quedaba oscura con el título solo)', aLaHistoria({}), (r: string[]) => JSON.stringify(r) === JSON.stringify(['CEbp@0.00', 'cEbp@0.00']))
-  const deDemos = (o: { readonly historias?: boolean }): string[] => texto(recorridoDelOrden(AFUERA, EN_LA_HISTORIA, 0.6, false, NUNCA, o))
-  afirmarIgual(deDemos({ historias: true }), ['cEbp@0.00', 'CEbp@0.48', 'CEbP@0.48'], '  volviendo desde Demos, como entra: el título sube sobre la escena clara y, con el título al 80 %, el oscurecido y la historia juntos')
-  controlPositivo('  el detector ve la vuelta de B (primero el oscurecido: 0,7 s de escena negra sin nada delante)', deDemos({}), (r: string[]) => JSON.stringify(r) === JSON.stringify(['cEbp@0.00', 'CEbp@0.48', 'CEbP@0.48']))
+  // [F5b] Reemplazada por la spec: volviendo desde Demos el título subía primero y se veía un segundo antes de la historia (medido en el sitio,
+  // `historias.ts`: el título de 0 a 0,96 con las historias en 0). Ahora no se pide: el oscurecido y la historia juntos, directo.
+  const DESDE_DEMOS: Orden = { camara: true, encabezado: false, barra: false, panel: true }
+  const deDemos = (pedido: Orden): string[] => texto(recorridoDelOrden(AFUERA, pedido, 0.6, false, NUNCA, { historias: true }))
+  afirmarIgual(deDemos(DESDE_DEMOS), ['Cebp@0.00', 'CebP@0.00'], '  [F5b] volviendo desde Demos, directo a las historias: el oscurecido y la historia juntos, sin el título')
+  controlPositivo('  el detector ve la vuelta de F5 (el título sube primero y, al 80 %, la historia)', deDemos(EN_LA_HISTORIA), (r: string[]) => JSON.stringify(r) === JSON.stringify(['Cebp@0.00', 'CebP@0.00']))
+  const alTituloDesdeDemos = texto(recorridoDelOrden(DESDE_DEMOS, alTitulo, 0.6, false, NUNCA, { historias: true }))
+  afirmarIgual(alTituloDesdeDemos, ['Cebp@0.00', 'cebp@0.00', 'cEbp@0.00'], '  [F5b] y saliendo después hacia la sección anterior, el título sube a la par de la historia que se funde (debajo de ella: sin un hueco vacío entre las dos)')
+  controlPositivo('  el detector ve el título que espera a que la historia termine de irse (0,7 s sin nada a la vista)', ['Cebp@0.00', 'cebp@0.00', 'cEbp@0.70'], (r: string[]) => JSON.stringify(r) === JSON.stringify(['Cebp@0.00', 'cebp@0.00', 'cEbp@0.00']))
   const vivo = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
   const elOrden = sinComentarios(leer(`${PORTFOLIO}/useOrdenDeLaEscena.ts`))
   const cae = (e: string, u: string, o: string): boolean =>
@@ -194,11 +210,16 @@ export function afirmarLasHistorias(): void {
   const deB = [...cada(0, 900, (t) => c(t, 0, 1, 1, 0)), ...cada(930, 5000, (t) => c(t, 4, t < 1700 ? 1 : 0.4, Math.max(0, 1 - (t - 930) / 700), Math.min(1, Math.max(0, (t - 1500) / 400)), t < 1700))]
   const vacia = [...cada(0, 900, (t) => c(t, 0, 1, 1, 0)), ...cada(930, 2400, (t) => c(t, 4, 0, Math.max(0, 1 - (t - 930) / 200), t > 2000 ? 1 : 0, false))]
   const oscura = cada(0, 1200, (t) => c(t, 3, 1, 0, 0, true))
+  // [F5b] La vuelta desde Demos: directo a la historia (sana), o con el título que sube antes (el defecto).
+  const desdeDemos = cada(0, 600, (t) => c(t, 4, 0, 0, 1, false))
+  const directa = [...desdeDemos, ...cada(630, 1500, (t) => c(t, 3, 0, Math.min(1, (t - 630) / 400), Math.max(0, 1 - (t - 630) / 300), true))]
+  const conTitulo = [...desdeDemos, ...cada(630, 1500, (t) => c(t, 3, Math.min(1, (t - 630) / 300), t < 1100 ? 0 : 1, 0, t >= 1100))]
   type Cuenta = (cs: readonly CuadroDeLasHistorias[]) => { readonly violaciones: readonly string[] }
   const cuenta = (f: Cuenta): boolean =>
     f(sana).violaciones.length === 0 && ['titulo-huerfano', 'titulo-pegado'].every((v) => f(deB).violaciones.includes(v)) &&
-    f(vacia).violaciones.includes('fondo-vacio') && f(oscura).violaciones.includes('oscuro-sin-historias')
-  afirmar(cuenta(violacionesDeLasHistorias), `  la cuenta del arnés: una salida a la par no viola nada; la de B (el título pegado ${String(LO_QUE_SE_VE.pegadoMs)} ms y huérfano sobre Demos), un hueco sin nada y la escena oscura sin historias se ven por su nombre`)
+    f(vacia).violaciones.includes('fondo-vacio') && f(oscura).violaciones.includes('oscuro-sin-historias') &&
+    f(directa).violaciones.length === 0 && f(conTitulo).violaciones.includes('titulo-desde-demos')
+  afirmar(cuenta(violacionesDeLasHistorias), `  la cuenta del arnés: una salida a la par no viola nada; la de B (el título pegado ${String(LO_QUE_SE_VE.pegadoMs)} ms y huérfano sobre Demos), un hueco sin nada, la escena oscura sin historias y [F5b] el título que vuelve desde Demos se ven por su nombre`)
   controlPositivo('  el detector ve una cuenta que no mira a Demos', (cs: readonly CuadroDeLasHistorias[]) => violacionesDeLasHistorias(cs.map((x) => ({ ...x, demos: 0, paso: 0 }))), cuenta)
 
 }

@@ -8,6 +8,7 @@
  *   DEFECTO=historias-de-antes …          el control positivo (las historias de antes): tiene que fallar
  *   DESDE=0,1,2,3 SALIDAS=arriba,abajo …    desde cada historia (con deslices de costado) sale hacia arriba (Demos) o hacia abajo
  *     (el título) y vuelve: lo de siempre, todas las combinaciones
+ *   VUELTAS=dedo,deslice …    [F5b] cómo se vuelve desde Demos: scrolleando con el dedo, o con un deslice (un golpe del dedo hacia abajo)
  */
 import { appendFileSync, mkdirSync, rmSync } from 'node:fs'
 import os from 'node:os'
@@ -23,6 +24,9 @@ const ANCHOS = (process.env.ANCHOS ?? '390x844,768x1024,820x1180,1023x768').spli
 const RECORRIDO = process.env.RECORRIDO ?? 'matriz'
 const DESDE = (process.env.DESDE ?? '0,1,2,3').split(',').map(Number)
 const SALIDAS = (process.env.SALIDAS ?? 'arriba,abajo').split(',') as ('arriba' | 'abajo')[]
+/** [F5b] Cómo se vuelve desde Demos: scrolleando con el dedo o con un deslice (el dedo hacia abajo de un golpe, con su inercia). */
+type VueltaDeDemos = 'dedo' | 'deslice'
+const VUELTAS = (process.env.VUELTAS ?? 'dedo,deslice').split(',') as VueltaDeDemos[]
 /** El control positivo: `DEFECTO=historias-de-antes` (el orden de escritorio, el título sin fundido): tiene que fallar. */
 const DEFECTO = process.env.DEFECTO ?? null
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
@@ -126,6 +130,8 @@ async function abrir(ancho: number, alto: number): Promise<{ readonly cerrar: ()
     deviceScaleFactor: 1,
     isMobile: true,
     hasTouch: true,
+    // [F5b] Sin las animaciones de Windows (TeamViewer las apaga) el Chrome pide movimiento reducido: el arnés mide el sitio con movimiento.
+    reducedMotion: 'no-preference',
     args: ['--force_high_performance_gpu', `--window-size=${String(ancho + 20)},${String(alto + 100)}`, '--window-position=0,0', '--no-first-run', '--no-default-browser-check', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion,Translate,MediaRouter'],
   })
   await ctx.addInitScript(`(() => { window.__name = window.__name || ((f) => f); try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
@@ -154,8 +160,16 @@ async function entrarScrolleando(c: Contexto): Promise<boolean> {
   return ok
 }
 
-/** Vuelve: desde Demos, el dedo hacia arriba; desde el título, hacia abajo; hasta que las historias corren otra vez. */
-async function volver(c: Contexto, desde: 'demos' | 'titulo'): Promise<boolean> {
+/**
+ * Vuelve: desde Demos, el dedo hacia arriba; desde el título, hacia abajo; hasta que las historias corren otra vez. [F5b] Con un deslice
+ * desde Demos, un golpe y después el dedo si hace falta; si el golpe pasó de largo hasta el título, no volvió (no es lo que se mide).
+ */
+async function volver(c: Contexto, desde: 'demos' | 'titulo', como: VueltaDeDemos = 'dedo'): Promise<boolean> {
+  if (desde === 'demos' && como === 'deslice') {
+    await deslizar(c.cdp, c.ancho / 2, c.alto * 0.35, 0, 300, 140)
+    await dormir(1200)
+    if ((await pasoAhora(c.p)) < 0) return false
+  }
   const ok = await dedoHasta(c, desde === 'demos' ? -300 : 300, adentro)
   await dormir(1500)
   return ok
@@ -204,9 +218,9 @@ async function main(): Promise<void> {
         continue
       }
       for (const desde of DESDE) {
-        for (const salida of SALIDAS) {
+        for (const [salida, como] of SALIDAS.flatMap((s): (readonly ['arriba' | 'abajo', VueltaDeDemos])[] => (s === 'arriba' ? VUELTAS.map((v) => [s, v] as const) : [[s, 'dedo']]))) {
           todas += 1
-          const bien = await grabar(c, `desde la historia ${String(desde)} · sale hacia ${salida} y vuelve`, ancho, alto, async () => {
+          const bien = await grabar(c, `desde la historia ${String(desde)} · sale hacia ${salida} y vuelve${salida === 'arriba' ? ` (${como})` : ''}`, ancho, alto, async () => {
             if (!adentro(await pasoAhora(c.p)) && !(await entrarScrolleando(c))) return false
             // Los deslices de costado: hasta la historia de partida (a la izquierda, la siguiente).
             for (let k = 0; k < desde; k++) {
@@ -219,8 +233,12 @@ async function main(): Promise<void> {
             // Desde «la tuya» el deslice arranca arriba del formulario (sobre los campos, los gestos no cuentan).
             await deslizar(c.cdp, c.ancho / 2, desde === 3 ? c.alto * 0.3 : c.alto / 2, 0, salida === 'arriba' ? -300 : 300)
             await dormir(2500)
-            if ((await pasoAhora(c.p)) !== (salida === 'arriba' ? 4 : -1)) return false
-            return volver(c, salida === 'arriba' ? 'demos' : 'titulo')
+            const llegoA = await pasoAhora(c.p)
+            if (llegoA !== (salida === 'arriba' ? 4 : -1)) {
+              console.log(`    (la salida quedó en el paso ${String(llegoA)})`)
+              return false
+            }
+            return volver(c, salida === 'arriba' ? 'demos' : 'titulo', como)
           })
           if (!bien) malas += 1
         }

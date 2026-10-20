@@ -20,7 +20,8 @@
  * cambian tres cosas, para que nunca quede la escena oscura sin nada delante ni el título huérfano: el título cae A LA PAR de la salida
  * (con el panel, no cuando las historias ya se fueron), el oscurecido (la cámara) entra y se va CON las historias (la escena se oscurece y
  * aclara mientras ellas se funden) aunque el título se quede (la vuelta al título), y al volver desde Demos el título sube sin esperar a
- * la cámara, como en la aproximación.
+ * la cámara, como en la aproximación. [F5b] Desde Demos ya no se pide el título (`pideElEncabezado`): se vuelve directo a las historias, y
+ * el título sube recién al salir hacia la sección anterior, a la par de la historia que se va.
  */
 
 import { CORRIMIENTO } from '../../../_chrome/barra/corrimiento'
@@ -116,8 +117,10 @@ function prendido(p: PiezaDelOrden, actual: Orden, pedido: Orden, c: Cambios, ti
       if (o.historias === true) return tituloAlOchenta === null ? null : Math.max(base, tituloAlOchenta)
       return base
     case 'encabezado':
-      // [F5] En las historias el título no espera a la cámara: sube sobre la escena clara, como en la aproximación.
-      if (o.historias === true) return base
+      // [F5] En las historias el título no espera a la cámara: sube sobre la escena clara, como en la aproximación. [F5b] Y tampoco a que la
+      // historia termine de irse (sólo el título que cae y la barra): saliendo hacia la sección anterior después de volver desde Demos, el
+      // título no estaba y sube a la par de la salida, debajo de la historia que se funde (sin el hueco vacío entre las dos).
+      if (o.historias === true) return Math.max(actual.encabezado ? -Infinity : c.encabezado + tituloS, actual.barra ? -Infinity : c.barra + ORDEN.barraS)
       return camaraLista === null ? null : Math.max(base, camaraLista)
     case 'barra':
       // [A2.2] Sólo el primer tiempo va antes del panel: el segundo es a la par de su entrada.
@@ -152,6 +155,16 @@ export function siguienteCambio(actual: Orden, cambios: Cambios, pedido: Orden, 
     if (mejor === null || en < mejor.en) mejor = { pieza: k.pieza, valor: k.valor, en }
   }
   return mejor
+}
+
+/**
+ * [F5b] SI SE PIDE EL TÍTULO. En escritorio, con el panel adentro. En las historias, en la aproximación (y al salir hacia la sección
+ * anterior: es la misma fase) y, adentro, sólo si se entró desde arriba: de Demos se vuelve directo a las historias, sin el título
+ * (Valentino, 2026-10-20: «el título aparece solo al salir de las historias hacia arriba y al entrar desde arriba»).
+ */
+export function pideElEncabezado(historias: boolean, fase: 'antes' | 'adentro' | 'despues', enCuadro: boolean, vieneDeDemos: boolean): boolean {
+  if (!historias) return fase === 'adentro'
+  return (fase === 'antes' && enCuadro) || (fase === 'adentro' && !vieneDeDemos)
 }
 
 /** Todos los cambios de una vez, con un reloj (para los tests): la secuencia de estados y el segundo de cada uno, desde `desde`. */

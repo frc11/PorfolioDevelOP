@@ -14,8 +14,8 @@ import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimi
 import { PRESENCIA_DEL_ENCABEZADO } from './EncabezadoDelPortfolio'
 import { distanciaEnPasos, seMovioDeVerdad, vistaDelPaso } from './estado'
 import { medirElHueco } from './hueco'
-import { cortarElPanel, escenarioDe, medir, publicar, volarAlPx, vueloPisado, type Vuelo } from './medida'
-import { ORDEN } from './orden'
+import { conElDefecto, cortarElPanel, escenarioDe, medir, publicar, volarAlPx, vueloPisado, type Vuelo } from './medida'
+import { ORDEN, pideElEncabezado } from './orden'
 import {
   ANTES_DEL_PIN, PANTALLAS_POR_PASO, bordesDelPaso, centroDelPaso, mostradoDeDemos, pasoConHisteresis, pasoEn,
   type AnchoDelPortfolio, type IndiceDePaso,
@@ -103,7 +103,12 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   const fase = vistaDelPaso(paso).fase
   const adentro = fase === 'adentro'
   const tituloS = useTituloListo('portfolio') ? LENTOS.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO.s
-  const pedidoDelOrden = { camara: adentro, encabezado: historias ? (fase === 'antes' && enCuadro) || adentro : adentro, barra: adentro && !historias, panel: adentro }
+  // [F5b] De dónde se entró a las historias: desde Demos (la cola) hasta que se vuelve a la aproximación.
+  const [vieneDeDemos, setVieneDeDemos] = useState(false)
+  if (fase === 'despues' && !vieneDeDemos) setVieneDeDemos(true)
+  if (fase === 'antes' && vieneDeDemos) setVieneDeDemos(false)
+  const encabezado = pideElEncabezado(historias, fase, enCuadro, vieneDeDemos && !conElDefecto('titulo-desde-demos'))
+  const pedidoDelOrden = { camara: adentro, encabezado, barra: adentro && !historias, panel: adentro }
   const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido, historias)
   // [B1.2d] El orden llegó a lo pedido (el diagnóstico y el arnés miran el panel sólo así: no en el medio de una entrada o una salida).
   const ordenQuieto = orden.camara === pedidoDelOrden.camara && orden.encabezado === pedidoDelOrden.encabezado && orden.barra === pedidoDelOrden.barra && orden.panel === pedidoDelOrden.panel
