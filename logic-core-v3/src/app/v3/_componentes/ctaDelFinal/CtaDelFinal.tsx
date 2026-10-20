@@ -142,10 +142,22 @@ export function RenglonDeLaFraseDelCta({ indice, children, className }: { readon
  * G2 · tocable desde que su cara se lee en el giro (`ctaTocable`; la escena lleva el enlace a su pose en cada cuadro), con el
  * cursor de un enlace; el hover y el foco visible dibujan su subrayado en la escena; antes de leerse, Enter no lo abre.
  */
+/**
+ * [P-H30] ENTER DURANTE LA LLEGADA NO SE PIERDE. Con el teclado, el foco lleva al final y la transformación tarda en llegar a donde el CTA
+ * se puede tocar (la sigue el pin, que sigue al scroll suave): un Enter en ese tramo se tragaba en silencio (medido: la primera llegada no
+ * abría el contacto, la segunda sí). Ahora queda pendiente y abre apenas se puede tocar; se cancela si el foco se va o a los
+ * `ENTER_PENDIENTE_MS`. El defecto, para el control positivo del arnés (`window.__defectosDelCta = 'enter-perdido'`, nunca la URL).
+ */
+export const ENTER_PENDIENTE_MS = 3000
+const conElDefectoDelCta = (d: 'enter-perdido'): boolean => typeof window !== 'undefined' && (window as Window & { __defectosDelCta?: unknown }).__defectosDelCta === d
+
 // [PULIDO 11] A4 · J9 e · `enLaLista`: tocable apenas se lee el deslizamiento, y sin la escena llega con él (no con el giro).
-export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista = false }: { readonly rotulo: string; readonly destino: string; readonly progreso: MotionValue<number>; readonly className?: string; readonly enLaLista?: boolean }): React.JSX.Element {
+// [P-H30] `alPedirLaLlegada`: con un Enter antes de poder tocarlo, lleva la página al final (como el foco del teclado) y el Enter espera.
+export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista = false, alPedirLaLlegada }: { readonly rotulo: string; readonly destino: string; readonly progreso: MotionValue<number>; readonly className?: string; readonly enLaLista?: boolean; readonly alPedirLaLlegada?: () => void }): React.JSX.Element {
   const listo = useCtaListo()
   const texto = useRef<HTMLSpanElement>(null)
+  const pendiente = useRef<(() => void) | null>(null)
+  useEffect(() => () => pendiente.current?.(), [])
   useEffect(() => {
     const el = texto.current
     CTA_EN_VIVO.destino = el
@@ -179,9 +191,27 @@ export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista 
       }}
       onBlur={() => {
         CTA_EN_VIVO.foco = false
+        pendiente.current?.()
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' && !tocable(progreso.get())) e.preventDefault()
+        if (e.key !== 'Enter' || tocable(progreso.get())) return
+        e.preventDefault()
+        if (conElDefectoDelCta('enter-perdido')) return
+        const enlace = e.currentTarget
+        pendiente.current?.()
+        const soltar = (): void => {
+          quitar()
+          window.clearTimeout(vence)
+          pendiente.current = null
+        }
+        const quitar = progreso.on('change', (p) => {
+          if (!tocable(p)) return
+          soltar()
+          enlace.click()
+        })
+        const vence = window.setTimeout(soltar, ENTER_PENDIENTE_MS)
+        pendiente.current = soltar
+        alPedirLaLlegada?.()
       }}
     >
       <motion.span ref={texto} aria-hidden="true" style={{ opacity: listo ? 0 : llegada }} className={cn('block', FUENTE_DEL_CTA, className)}>

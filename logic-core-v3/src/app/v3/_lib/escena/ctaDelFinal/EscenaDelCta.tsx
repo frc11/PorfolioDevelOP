@@ -424,8 +424,10 @@ function alCuadro(s: EstadoDeLaEscenaDelCta, logo: THREE.MeshStandardMaterial | 
   if (caja !== null && enlace !== null) {
     const dom = { x: caja.lugar.izquierda, y: caja.lugar.arriba + corrimiento(caja.pin, window.scrollY), ancho: enlace.offsetWidth, alto: enlace.offsetHeight }
     const delCta = { x: caja.lugar.izquierda + caja.dx, y: caja.lugar.arriba, ancho: caja.ancho, alto: caja.lugar.linea }
-    // [PULIDO 11] A4 · J9 e · en la lista no hay giro: el enlace, en el plano del CTA (ya corrido con «HABLANOS»).
-    if (enLaLista) llevarElEnlace(s, homografiaDelCta(s.planos.cta, delCta, dom, viva, { ancho: tam.width, alto: tam.height }))
+    // [PULIDO 11] A4 · J9 e · en la lista no hay giro: el enlace, en el plano del CTA (ya corrido con «HABLANOS»). [P-H30] Recién tocable:
+    // antes, el plano corrido llevaba la caja del enlace lejos del cuadro y el foco del teclado (y `scrollIntoView`) iban a cualquier lado.
+    // El defecto, para el control del arnés: `window.__defectosDelCta = 'enlace-corrido'`.
+    if (enLaLista) llevarElEnlace(s, tocable || (window as Window & { __defectosDelCta?: unknown }).__defectosDelCta === 'enlace-corrido' ? homografiaDelCta(s.planos.cta, delCta, dom, viva, { ancho: tam.width, alto: tam.height }) : '')
     else {
       const esquinas = ctaTocable(p) ? esquinasEnElGiro(delCta, cajaDelCta, armado, p, destino[0]?.cuerpo ?? 0, levanta) : undefined
       llevarElEnlace(s, homografiaDelCta(s.planos.cta, delCta, dom, viva, { ancho: tam.width, alto: tam.height }, esquinas))

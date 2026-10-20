@@ -145,7 +145,10 @@ const toqueBien = (t: Toque): boolean => {
     return t.tocable(p) && area.length === 4 && centros.every((q) => dentro(area, q)) && abraza
   })
   return antes && cubre && CARA_LEGIBLE > 0 && CARA_LEGIBLE <= 0.5 &&
-    /* [PULIDO 11] A4 · J9 e · en el escenario el de siempre (`ctaTocable`); en la lista, el del deslizamiento */ domDelCta.includes('const tocable = enLaLista ? tocableEnLaLista : ctaTocable') && domDelCta.includes("const pointerEvents = useTransform(progreso, (p) => (tocable(p) ? 'auto' : 'none'))") && domDelCta.includes("if (e.key === 'Enter' && !tocable(progreso.get())) e.preventDefault()") &&
+    /* [PULIDO 11] A4 · J9 e · en el escenario el de siempre (`ctaTocable`); en la lista, el del deslizamiento */ domDelCta.includes('const tocable = enLaLista ? tocableEnLaLista : ctaTocable') && domDelCta.includes("const pointerEvents = useTransform(progreso, (p) => (tocable(p) ? 'auto' : 'none'))") &&
+    /* [P-H30] Reemplazada por la spec: antes de leerse, Enter no abre EN EL ACTO (el mismo `preventDefault`), pero queda pendiente y abre
+       apenas se puede tocar (antes se tragaba: la primera llegada al final no abría el contacto) */
+    domDelCta.includes("if (e.key !== 'Enter' || tocable(progreso.get())) return\n        e.preventDefault()") && /const quitar = progreso\.on\('change', \(p\) => \{\s*if \(!tocable\(p\)\) return\s*soltar\(\)\s*enlace\.click\(\)/.test(domDelCta) &&
     escenaG2.includes('const esquinas = ctaTocable(p) ? esquinasEnElGiro(delCta, cajaDelCta, armado, p, destino[0]?.cuerpo ?? 0, levanta) : undefined') && escenaG2.includes('homografiaDelCta(s.planos.cta, delCta, dom, viva, { ancho: tam.width, alto: tam.height }, esquinas)')
 }
 afirmar(toqueBien({ tocable: ctaTocable, conElGiro: true }), '1 · tocable apenas su cara se lee en el giro: ahí el área del enlace cubre cada letra (y en cada p hasta el final); un poco antes, no', `legible en p = ${LEGIBLE.toFixed(3)} (la cara muestra ${String(CARA_LEGIBLE * 100)} % de su ancho)`)

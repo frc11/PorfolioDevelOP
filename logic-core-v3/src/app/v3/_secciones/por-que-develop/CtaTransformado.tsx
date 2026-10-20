@@ -66,8 +66,10 @@ export function CtaTransformado({ progreso, claseDelTexto, alEnfocar }: { readon
   useProgresoDelCta(progreso, 'escenario', origenDeLaFrase)
   const texto = useTransform(progreso, llegadaDelTexto)
   const enViaje = useViajando()
+  const caja = useRef<HTMLDivElement>(null)
   return (
     <div
+      ref={caja}
       data-pieza="cta-del-final"
       className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 flex-col items-center px-[var(--pad-lateral-compacto)] text-center"
       style={estiloEnElViaje(enViaje)}
@@ -77,7 +79,7 @@ export function CtaTransformado({ progreso, claseDelTexto, alEnfocar }: { readon
         <FraseDelCta claseDelTexto={claseDelTexto} />
       </CanalDeUnaPieza>
       <div className="mt-[var(--spacing-6)]">
-        <DestinoDelCta rotulo={CTA.rotulo} destino={CTA.destino} progreso={progreso} className={TAMANO_DEL_CTA_EN_VOLUMEN} />
+        <DestinoDelCta rotulo={CTA.rotulo} destino={CTA.destino} progreso={progreso} className={TAMANO_DEL_CTA_EN_VOLUMEN} alPedirLaLlegada={() => caja.current !== null && alEnfocar(caja.current, progreso.get())} />
       </div>
     </div>
   )
@@ -119,8 +121,14 @@ export function CtaTransformadoEnLaLista({ caja, progreso }: { readonly caja: Re
   const enViaje = useViajando()
   // Con el servidor (sin preferencia) y después la del navegador: sin el desfase de la hidratación (el bloque se arma en el servidor).
   const quieto = usePrefiereMenosMovimiento()
+  // [P-H30] El foco del teclado (y un Enter antes de poder tocarlo) lleva al final del bloque, donde el CTA ya llegó (como en el escenario).
+  const llevarAlFinal = (): void => {
+    const el = caja.current
+    if (el === null || progreso.get() >= 1) return
+    window.scrollTo({ top: Math.round(el.getBoundingClientRect().bottom + window.scrollY - window.innerHeight), behavior: 'instant' })
+  }
   return (
-    <div ref={caja} data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className={quieto ? CON_MOVIMIENTO_REDUCIDO : 'min-h-[calc(var(--alto-del-cta-en-lista)*3)]'}>
+    <div ref={caja} data-pieza="cta-del-final" style={ESTILO_DE_LA_LISTA} className={quieto ? CON_MOVIMIENTO_REDUCIDO : 'min-h-[calc(var(--alto-del-cta-en-lista)*3)]'} onFocus={(e) => e.target.matches(':focus-visible') && llevarAlFinal()}>
       <div className="sticky top-0 flex min-h-[var(--alto-del-cta-en-lista)] flex-col items-center justify-center gap-[var(--spacing-8)] text-center">
         {/* En un viaje, sin verse: el envoltorio no tiene caja (`contents`), el bloque se arma igual. */}
         <div className="contents" style={estiloEnElViaje(enViaje)}>
@@ -144,7 +152,7 @@ export function CtaTransformadoEnLaLista({ caja, progreso }: { readonly caja: Re
               <FraseDelCta />
             </motion.div>
           </div>
-          <DestinoDelCta rotulo={CTA.rotulo} destino={CTA.destino} progreso={progreso} enLaLista />
+          <DestinoDelCta rotulo={CTA.rotulo} destino={CTA.destino} progreso={progreso} enLaLista alPedirLaLlegada={llevarAlFinal} />
         </div>
       </div>
     </div>

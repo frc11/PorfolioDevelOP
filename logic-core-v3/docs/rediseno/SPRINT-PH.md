@@ -202,3 +202,78 @@ P-H28 cambió la prioridad: B12a va antes que el subsprint B de B1.2d. A2, B y B
 1. **La primera llegada al final no abre el contacto con Enter.** A 1440 y 1024, la primera vez que se lleva el foco al CTA en volumen del final y se aprieta Enter, el contacto no se abre (4 de 4 corridas largas; en una corrida corta, con 6 s de espera, sí abrió). Las siguientes, sí. Parece la llegada del final: el CTA no responde hasta que termina.
 2. **A 390, el ancla del CTA del final (`a[data-pieza="cta-en-volumen"]`) no es el que se ve:** su caja queda en y = 18.933, fuera del cuadro aun después de `scrollIntoView`. Ni un toque ni Enter la abren.
 3. **A 390, la página se cae («Page crashed») después de unas 21 aperturas seguidas del contacto,** en tres de tres corridas y en los dos navegadores. Los nodos del DOM crecen unos 166 por apertura (3.693 → 8.212 en 21) y el heap no. Puede ser que la hoja no se libere, o que lo pague otro proceso. A 1440 y 1024 aguanta 36.
+
+## 8. P-H30 · Los tres hallazgos de las mediciones (2026-10-20)
+
+Todo con el Chrome del sistema a la vista contra el dev del home (:3002), con `/api/` bloqueado y con el movimiento reducido apagado por emulación (TeamViewer apaga las animaciones de Windows y Chrome pide movimiento reducido).
+
+### 8.1 La «fuga» del contacto: era la sonda, no el sitio
+
+**El arnés:** `scripts-carga/fuga-del-contacto.ts`.
+- Abre y cierra el contacto N veces seguidas: el CTA del hero, Enter y Esc.
+- Después de cada cierre fuerza dos recolecciones de basura y mide los nodos, los oyentes, el heap y lo que queda suelto, agrupado por pieza.
+- El criterio es el de P-H30: 50 aperturas a 390 y a 1440, los nodos estables (±5 %) y la página sin caerse.
+
+**El rojo:** a 390, los nodos crecían 182 por apertura aun recolectando (4.400 → 12.590 en 50) y los oyentes 15. Lo que quedaba suelto era el `div[data-pieza="contacto"]` entero, uno por apertura.
+
+**Quién lo retenía, en una foto del heap:**
+- Cada contacto suelto se marcó con un objeto de una clase propia antes de la foto, y se recorrió el camino más corto desde la raíz.
+- El camino es `(GC roots) → (Global handles) → «DevTools console» → <div role="dialog">`.
+- Es un `ElementHandle`: `page.waitForSelector()` devuelve uno del diálogo y la sesión del protocolo lo retiene hasta liberarlo. La sonda de P-H26 (`foco-del-contacto.ts`) y la de anoche esperaban así.
+- Ningún oyente quedaba colgado de `window` ni de `document`, y en la página no se loguea nada al abrir ni al cerrar.
+
+**Con esperas que no retienen** (`locator.waitFor`):
+- **390:** 50 de 50 aperturas, nodos 3.490 → 3.490 (0,0 %), oyentes 1.119 estables, nada suelto y la página entera.
+- **1440:** 50 de 50 aperturas, nodos 3.958 → 3.958 (0,0 %).
+
+**El control** (`CONTROL=handles`, la espera de anoche): rojo, 4.400 → 6.220 en 15 aperturas.
+
+**Lo que cambió:** en el sitio, nada. En las sondas, `fuga-del-contacto.ts` (nueva) y `foco-del-contacto.ts`, que pasa a `locator.waitFor`. **La caída a las ~21 aperturas a 390 no se reprodujo en 50.** La retención de la sonda es la explicación probable: no se pudo cargar a otra cosa.
+
+### 8.2 El CTA del final no abría con Enter en la primera llegada
+
+**El rojo** (`foco-del-contacto.ts 1440`, `SOLO=final`): la primera vuelta da «NO ABRIÓ» y la segunda abre.
+
+**La causa:**
+- Antes de que la cara se lea, Enter se tragaba con un `preventDefault` sin nada más (PULIDO 8 G2).
+- La transformación llega con retraso, porque la sigue el pin y el pin sigue al scroll suave. Un Enter en ese tramo se perdía en silencio.
+
+**El arreglo** (`CtaDelFinal.tsx`, `DestinoDelCta`):
+- El Enter de antes de poder tocarlo no abre en el acto, pero queda pendiente y abre apenas se puede (`ENTER_PENDIENTE_MS`, 3 s).
+- Pide la llegada (`alPedirLaLlegada`): el escenario usa la de siempre (`llevarAlCta`) y la lista, la suya (abajo).
+- Se cancela si el foco se va.
+- El defecto, para el control: `window.__defectosDelCta = 'enter-perdido'`.
+
+**En verde:** 4 de 4 a 1440 y 4 de 4 a 1024.
+
+**El control** (`DEFECTO=enter-perdido`): rojo, «NO ABRIÓ» en la primera vuelta.
+
+### 8.3 A 390, el ancla del CTA del final no era la que se ve
+
+**El rojo:**
+- A 390 la sonda nunca abría (0 de 2).
+- Antes de su llegada, la caja del ancla medía 3 × 53 px y estaba a ~18.000 px de su bloque.
+- `scrollIntoView` llevaba la página a 2.897 px y el ancla quedaba a 18.942, fuera del cuadro. El foco del teclado iba al mismo lugar.
+
+**La causa:** la escena lleva el enlace al plano de «HABLANOS» con una `matrix3d`, para que el toque caiga donde se ven las letras. En la lista ese plano entra deslizándose desde afuera, y antes de llegar se llevaba la caja del enlace con él.
+
+**El arreglo:**
+- **`EscenaDelCta.tsx`:** en la lista, el enlace sigue al plano recién cuando se puede tocar. Antes queda en su lugar del DOM. El defecto, para el control: `enlace-corrido`.
+- **`CtaTransformado.tsx`, la lista:** el foco del teclado y un Enter antes de poder tocarlo llevan al final de su bloque, donde el CTA ya llegó, como en el escenario.
+
+**En verde:**
+- La sonda: 3 de 3 a 390.
+- `scrollIntoView` lleva la página a su bloque (21.418) y el ancla queda en el cuadro (top 461 de 844).
+
+**El control** (`enlace-corrido`): la página a 2.897 y el ancla a 18.942, el síntoma de antes.
+
+**Las afirmaciones reemplazadas por la spec:**
+- **s59 §1:** el Enter de antes de leerse pasa de «no abre» a «no abre en el acto y queda pendiente».
+- **s62 A4e:** el enlace de la lista suma su llegada pedida.
+
+**Qué mirar (P-H30):**
+1. **`/v3` a 1440, con el teclado:** Tab hasta el CTA del final («HABLANOS») y Enter apenas llega.
+   - Debería verse la página ir al final y el contacto abrirse en cuanto el CTA se lee, sin un segundo Enter.
+2. **`/v3` a 390, con el teclado** (o con el lector de pantalla), hasta el CTA del final.
+   - Debería verse la página ir al bloque del CTA, con el CTA a la vista; Enter abre el contacto.
+3. **El contacto abierto y cerrado muchas veces seguidas, a 390.** Ya no debería pasar nada: la caída era de la sonda.

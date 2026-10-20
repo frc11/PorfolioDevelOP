@@ -9,6 +9,8 @@
  * El criterio: 0 cierres fuera del botón en 108 (1440 y 1024: la barra, el hero y el final × 12; 390, sin la barra: el CTA de un servicio y
  * el final × 18; el hero, además, donde esté). El control positivo es la
  * misma corrida con `?devolucion=un-cuadro` (la devolución de antes): tiene que volver a fallar (en servicios, ~25 %).
+ *
+ * [P-H30] `SOLO=final` y `DEFECTO=enter-perdido`: el control del Enter en la primera llegada al final (el Enter que se tragaba).
  */
 import { rmSync } from 'node:fs'
 import os from 'node:os'
@@ -55,6 +57,7 @@ async function main(): Promise<void> {
     locale: 'es-AR',
     args: ['--force_high_performance_gpu', `--window-size=${String(ancho + 20)},${String(alto + 100)}`, '--window-position=0,0', '--no-first-run', '--no-default-browser-check', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion,Translate,MediaRouter'],
   })
+  if (process.env.DEFECTO === 'enter-perdido' || process.env.DEFECTO === 'enlace-corrido') await ctx.addInitScript(`window.__defectosDelCta = '${process.env.DEFECTO}'`)
   await ctx.addInitScript(() => {
     try {
       sessionStorage.setItem('home:intro', '1')
@@ -90,7 +93,9 @@ async function main(): Promise<void> {
       await page.waitForTimeout(v === 1 ? Number(process.env.PRIMERA_MS ?? '2000') : 2000)
       await boton.focus()
       await page.keyboard.press('Enter')
-      const abrio = await page.waitForSelector(DIALOGO, { state: 'attached', timeout: 10000 }).then(
+      // [P-H30] Con `locator.waitFor`: `waitForSelector` devuelve un ElementHandle del diálogo que la sesión retiene (la «fuga» de 166 nodos
+      // por apertura y la página caída a las ~21 a 390 eran de la sonda: `fuga-del-contacto.ts`).
+      const abrio = await page.locator(DIALOGO).waitFor({ state: 'attached', timeout: 10000 }).then(
         () => true,
         () => false,
       )
@@ -100,7 +105,7 @@ async function main(): Promise<void> {
       }
       await page.waitForTimeout(1600)
       await page.keyboard.press('Escape')
-      await page.waitForSelector(DIALOGO, { state: 'detached', timeout: 10000 })
+      await page.locator(DIALOGO).waitFor({ state: 'detached', timeout: 10000 })
       await page.waitForTimeout(1500)
       const r = await boton.evaluate((e) => {
         const a = document.activeElement

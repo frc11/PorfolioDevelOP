@@ -199,7 +199,8 @@ const sinGiro = (e: string, l: string): boolean =>
   e.includes("const formado = enLaLista ? 1 : p") && /posesDe\(formado, /.test(e) && e.includes('s.cuadro = cuadroDeAhora(s, s.medidas, formado)') &&
   e.includes('const fuera = enLaLista ? 1 - deslizadoEnLaLista(p) : 0') && e.includes('correrDeCostado(a.marco, fuera * tam.width)') && e.includes('correrDeCostado(a.lienzo, -fuera * tam.width)') &&
   e.includes('correrElLugarDeCostado(s.planos.cta, fuera * tam.width)') &&
-  (l.match(/className="pointer-events-none invisible absolute/g) ?? []).length === 2 && !/opacity: listo \? 0 : copia/.test(l) && /<DestinoDelCta rotulo=\{CTA\.rotulo\} destino=\{CTA\.destino\} progreso=\{progreso\} enLaLista \/>/.test(l)
+  // [P-H30] El enlace de la lista suma su llegada pedida (el foco del teclado y un Enter antes de poder tocarlo llevan al final del bloque).
+  (l.match(/className="pointer-events-none invisible absolute/g) ?? []).length === 2 && !/opacity: listo \? 0 : copia/.test(l) && /<DestinoDelCta rotulo=\{CTA\.rotulo\} destino=\{CTA\.destino\} progreso=\{progreso\} enLaLista alPedirLaLlegada=\{llevarAlFinal\} \/>/.test(l)
 afirmar(sinGiro(escenaDelCta, ctaEnLaLista), '  en la escena: poses y frase ya formadas en la lista; el marco a la derecha y el lienzo a la izquierda con el mismo avance (terminan juntos); el enlace va con HABLANOS; las copias, invisibles')
 controlPositivo('  el detector VE la lista de antes (el giro y el volteo con el progreso)', [escenaDelCta.replace('posesDe(formado, ', 'posesDe(p, '), ctaEnLaLista] as const, ([e, l]: readonly [string, string]) => sinGiro(e, l))
 
