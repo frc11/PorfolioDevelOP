@@ -7,7 +7,7 @@ import { Imagen } from '../../../_componentes/medios/Imagen'
 
 import type { ProyectoDelPortfolio } from '../proyectos'
 
-import { ANCHO_DEL_MEDIO, MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL_LOMO, anchoDelMedioConDespeje } from './medios'
+import { ANCHO_DEL_MEDIO, MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL_LOMO } from './medios'
 
 /** Qué hace el video de una tira, puro (s76 lo afirma sin navegador). */
 export interface EstadoDelVideo {
@@ -63,20 +63,17 @@ export function MedioDeLaTira({
   cerca,
   aLaVista,
   reducido,
-  despeje = null,
 }: {
   readonly proyecto: ProyectoDelPortfolio
   readonly activa: boolean
   readonly cerca: boolean
   readonly aLaVista: boolean
   readonly reducido: boolean
-  /** [B1.2d] A2.1 · lo que baja el medio por la píldora corrida (`null`: nada): se achica lo mismo. */
-  readonly despeje?: number | null
 }): React.JSX.Element {
   const [pausado, setPausado] = useState(false)
   const estado = estadoDelVideo(activa, cerca, reducido, aLaVista, pausado)
   return (
-    <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5" style={{ aspectRatio: PROPORCION_DEL_MEDIO, width: despeje === null ? ANCHO_DEL_MEDIO : anchoDelMedioConDespeje(despeje) }}>
+    <figure aria-label={proyecto.alt} className="relative overflow-clip rounded-sutil bg-tinta/5" style={{ aspectRatio: PROPORCION_DEL_MEDIO, maxWidth: ANCHO_DEL_MEDIO, maxHeight: '100%' }}>
       <Video proyecto={proyecto} e={estado} />
       <a href={proyecto.url} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true" className="absolute inset-0" />
       {estado.cargado && !reducido ? <BotonPausa pausado={pausado} alCambiar={setPausado} de={`el video de ${proyecto.nombre}`} className="absolute right-3 bottom-3" /> : null}

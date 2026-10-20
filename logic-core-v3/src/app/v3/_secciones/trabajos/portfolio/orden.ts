@@ -8,9 +8,9 @@
  *   entrando   la cámara → el título (cuando la cámara llegó: así queda de frente en el plano del logo) → el primer tiempo de la barra
  *              (el borde izquierdo se estira) → el panel, cuando el título va por el 80 % de su llegada (`ORDEN.solape`: el 20 % que se
  *              pisan), A LA PAR del segundo tiempo de la barra: la píldora se contrae y le deja el lugar ([B1.2d] A2.2)
- *   saliendo   al revés: el panel y, con él, la barra (la expansión que la devuelve va con la salida del panel y la contracción
- *              final, después: A2.2) → la caída del título, que arranca cuando al panel le falta ese mismo 20 % → la cámara, con el
- *              título caído entero
+ *   saliendo   al revés: el panel → [F3] la barra, cuando el panel terminó de salir (la expansión que la devuelve y la contracción
+ *              final: en A2.2 iba a la par de la salida del panel y se le metía encima un instante) → la caída del título, que arranca
+ *              cuando al panel le falta ese mismo 20 % → la cámara, con el título caído entero
  *
  * Primero lo que se apaga y después lo que se prende. Cada pieza recuerda CUÁNDO cambió (`Cambios`), y cada cambio espera lo que le
  * toca desde ahí: si lo pedido se da vuelta a mitad de camino se vuelve a decidir con la misma regla, y el panel nunca entra antes
@@ -58,8 +58,11 @@ export interface CambioDelOrden {
 const APAGADO: readonly PiezaDelOrden[] = ['panel', 'encabezado', 'barra', 'camara']
 const PRENDIDO: readonly PiezaDelOrden[] = ['camara', 'encabezado', 'barra', 'panel']
 
-/** Lo que espera una pieza para apagarse (o `null` si todavía no puede: otra se tiene que apagar antes). */
-function apagado(p: PiezaDelOrden, actual: Orden, c: Cambios, tituloS: number): number | null {
+/**
+ * Lo que espera una pieza para apagarse (o `null` si todavía no puede: otra se tiene que apagar antes). `pildoraConElPanel`: el defecto
+ * de F3 (la barra a la par de la salida del panel, como en A2.2), sólo para el control positivo del arnés.
+ */
+function apagado(p: PiezaDelOrden, actual: Orden, c: Cambios, tituloS: number, pildoraConElPanel: boolean): number | null {
   const panelAfuera = c.panel + ORDEN.panelS
   switch (p) {
     case 'panel':
@@ -67,8 +70,8 @@ function apagado(p: PiezaDelOrden, actual: Orden, c: Cambios, tituloS: number): 
     case 'encabezado':
       return actual.panel ? null : c.panel + ORDEN.panelS - ORDEN.solape * tituloS
     case 'barra':
-      // [A2.2] Con el panel: su expansión acompaña la salida del panel.
-      return actual.panel ? null : c.panel
+      // [F3] Con el panel ya afuera: la píldora vuelve sin cruzarse nunca con él.
+      return actual.panel ? null : c.panel + (pildoraConElPanel ? 0 : ORDEN.panelS)
     case 'camara':
       return actual.panel || actual.encabezado ? null : Math.max(panelAfuera, c.encabezado + tituloS)
   }
@@ -114,7 +117,7 @@ function prendido(p: PiezaDelOrden, actual: Orden, pedido: Orden, c: Cambios, ti
  * El cambio siguiente hacia lo pedido y cuándo puede ocurrir (`null`: ya está). `tituloS`: lo que tarda el título en llegar (y en
  * caer: con el 3D, su mínimo). Las apagadas van antes que las prendidas; entre las que pueden, la que puede antes.
  */
-export function siguienteCambio(actual: Orden, cambios: Cambios, pedido: Orden, ahora: number, tituloS: number, reducido: boolean): CambioDelOrden | null {
+export function siguienteCambio(actual: Orden, cambios: Cambios, pedido: Orden, ahora: number, tituloS: number, reducido: boolean, pildoraConElPanel = false): CambioDelOrden | null {
   const apagar = APAGADO.filter((p) => actual[p] && !pedido[p])
   const prender = PRENDIDO.filter((p) => !actual[p] && pedido[p])
   if (apagar.length === 0 && prender.length === 0) return null
@@ -123,7 +126,7 @@ export function siguienteCambio(actual: Orden, cambios: Cambios, pedido: Orden, 
     return { pieza: p, valor: pedido[p], en: ahora }
   }
   const candidatos = apagar.length > 0
-    ? apagar.map((p) => ({ pieza: p, valor: false, en: apagado(p, actual, cambios, tituloS) }))
+    ? apagar.map((p) => ({ pieza: p, valor: false, en: apagado(p, actual, cambios, tituloS, pildoraConElPanel) }))
     : prender.map((p) => ({ pieza: p, valor: true, en: prendido(p, actual, pedido, cambios, tituloS) }))
   let mejor: CambioDelOrden | null = null
   for (const k of candidatos) {
@@ -141,12 +144,13 @@ export function recorridoDelOrden(
   tituloS: number,
   reducido = false,
   cambiosDeAntes: Cambios = NUNCA,
+  pildoraConElPanel = false,
 ): readonly { readonly estado: Orden; readonly enS: number }[] {
   const salida: { readonly estado: Orden; readonly enS: number }[] = []
   let actual = desde
   let cambios = cambiosDeAntes
   let reloj = 0
-  for (let c = siguienteCambio(actual, cambios, pedido, reloj, tituloS, reducido); c !== null; c = siguienteCambio(actual, cambios, pedido, reloj, tituloS, reducido)) {
+  for (let c = siguienteCambio(actual, cambios, pedido, reloj, tituloS, reducido, pildoraConElPanel); c !== null; c = siguienteCambio(actual, cambios, pedido, reloj, tituloS, reducido, pildoraConElPanel)) {
     reloj = c.en
     actual = { ...actual, [c.pieza]: c.valor }
     cambios = { ...cambios, [c.pieza]: reloj }

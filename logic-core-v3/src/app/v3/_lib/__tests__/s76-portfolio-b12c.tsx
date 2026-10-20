@@ -26,7 +26,7 @@ import { activaElHover } from '../../_secciones/trabajos/portfolio/Acordeon'
 import { PRESENCIA_DEL_ENCABEZADO } from '../../_secciones/trabajos/portfolio/EncabezadoDelPortfolio'
 import { CLASE_DEL_ROTULO, Ficha } from '../../_secciones/trabajos/portfolio/Ficha'
 import { CAMPOS_DE_LA_TUYA, datosDelFormulario } from '../../_secciones/trabajos/portfolio/FormularioDeLaTuya'
-import { ADENTRO, AFUERA, ORDEN, duracionDeLaSalida, recorridoDelOrden, type Orden } from '../../_secciones/trabajos/portfolio/orden'
+import { ADENTRO, AFUERA, NUNCA, ORDEN, duracionDeLaSalida, recorridoDelOrden, type Orden } from '../../_secciones/trabajos/portfolio/orden'
 import { GESTO_QUIETO, RUEDA, destinoDeLaRueda, gestoDeLaRueda, recorridoDeLaRueda, type DestinoDeLaRueda, type GestoDeLaRueda } from '../../_secciones/trabajos/portfolio/rueda'
 import { SignoQueSeArma } from '../../_secciones/trabajos/portfolio/SignoDePregunta'
 import { SIGNO, alturaDelPunto, duracionDelPunto } from '../../_secciones/trabajos/portfolio/signo'
@@ -73,10 +73,13 @@ export function afirmarB12c(): void {
   controlPositivo('  el detector ve el orden de B1.2d A (los dos tiempos de la barra antes del panel: la contracción iba 200 ms antes)', [{ estado: { camara: true, encabezado: true, barra: true, panel: false }, enS: 1.42 }, { estado: ADENTRO, enS: 1.82 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => contraccionAlPanel(r) <= 0.05)
   controlPositivo('  el detector ve el orden de B1.2c (el panel entraba con la cámara, antes que el título)', [{ estado: { camara: true, encabezado: false, barra: false, panel: true }, enS: 0 }, { estado: ADENTRO, enS: 0.7 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => delTituloAlPanel(r, conEl3d) >= 0.8 - 1e-9)
   const salida = recorridoDelOrden(ADENTRO, AFUERA, conEl3d)
-  afirmarIgual(comoTexto(salida), ['CEBp@0.00', 'CEbp@0.00', 'Cebp@0.42', 'cebp@1.82'], 'la salida, al revés: el panel y con él la barra (A2.2: la expansión de la píldora a la par de la salida del panel, la contracción después), la caída del título cuando al panel le falta el mismo 20 % y la cámara con el título caído entero')
-  const expansionALaSalida = (r: readonly { readonly estado: Orden; readonly enS: number }[]): number => Math.abs((r.find((x) => !x.estado.barra)?.enS ?? Number.NaN) - (r.find((x) => !x.estado.panel)?.enS ?? Number.NaN))
-  controlPositivo('  el detector ve la salida de B1.2d A (la barra volvía con el panel ya afuera, 700 ms después)', [{ estado: { camara: true, encabezado: true, barra: true, panel: false }, enS: 0 }, { estado: { camara: true, encabezado: false, barra: true, panel: false }, enS: 0.42 }, { estado: { camara: true, encabezado: false, barra: false, panel: false }, enS: 0.7 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => expansionALaSalida(r) <= 0.05)
-  afirmar(expansionALaSalida(salida) <= 0.05, '  (la expansión de la píldora arranca a ±50 ms de la salida del panel)')
+  // [F3] Reemplazadas por la spec: la píldora volvía a la par de la salida del panel (A2.2) y se le metía encima un instante (medido: 10 a 13
+  // cuadros a 1440 y 1280, `scripts-carga/pildora.ts`). Ahora vuelve con el panel ya afuera; la salida dura lo mismo.
+  afirmarIgual(comoTexto(salida), ['CEBp@0.00', 'CeBp@0.42', 'Cebp@0.70', 'cebp@1.82'], 'la salida, al revés: el panel, la caída del título cuando al panel le falta el mismo 20 %, [F3] la barra con el panel ya afuera (la expansión de la píldora y después la contracción: nunca se cruza con el panel) y la cámara con el título caído entero')
+  const vueltaTrasElPanel = (r: readonly { readonly estado: Orden; readonly enS: number }[]): number => (r.find((x) => !x.estado.barra)?.enS ?? Number.NaN) - (r.find((x) => !x.estado.panel)?.enS ?? Number.NaN)
+  afirmar(vueltaTrasElPanel(salida) >= ORDEN.panelS - 1e-9, '  (la vuelta de la píldora arranca cuando el panel terminó de salir: su transición entera)', `${(vueltaTrasElPanel(salida) * 1000).toFixed(0)} ms`)
+  controlPositivo('  el detector ve la salida de A2.2 (la expansión a la par de la salida del panel)', [{ estado: { camara: true, encabezado: true, barra: true, panel: false }, enS: 0 }, { estado: { camara: true, encabezado: true, barra: false, panel: false }, enS: 0 }], (r: readonly { readonly estado: Orden; readonly enS: number }[]) => vueltaTrasElPanel(r) >= ORDEN.panelS - 1e-9)
+  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, conEl3d, false, NUNCA, true)), ['CEBp@0.00', 'CEbp@0.00', 'Cebp@0.42', 'cebp@1.82'], '  y el defecto que pide el arnés para su control (`pildora-con-el-panel`) es la salida de A2.2, tal cual')
   // Lo pedido se da vuelta a mitad de camino: cada pieza recuerda cuándo cambió, así que el panel nunca se adelanta al 80 % del título.
   const recien = recorridoDelOrden({ camara: true, encabezado: true, barra: false, panel: false }, ADENTRO, conEl3d, false, { camara: -0.7, encabezado: 0, barra: -Infinity, panel: -Infinity })
   afirmarIgual(comoTexto(recien), ['CEBp@0.92', 'CEBP@1.12'], '  con el título recién llegado, la barra y el panel esperan lo suyo desde ese momento (no desde la vuelta)')
@@ -85,7 +88,7 @@ export function afirmarB12c(): void {
   afirmar(ORDEN.camaraS === PERSECUCION_DEL_PESO_S && ORDEN.panelS === 0.7 && /duration-700/.test(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)) && ORDEN.barraS === (2 * CORRIMIENTO.tiempoMs) / 1000, '  las esperas son las de la escena: la persecución de la cámara, la transición del panel (700 ms) y los dos tiempos de la barra')
   afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, conEl3d, true)), ['CEBp@0.00', 'CeBp@0.00', 'Cebp@0.00', 'cebp@0.00'], '  con movimiento reducido, de una')
   // Abajo de 1024 no hay título 3D: lo que llega y cae es el del DOM (la presencia, 0,6 s).
-  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, PRESENCIA_DEL_ENCABEZADO.s)), ['CEBp@0.00', 'CEbp@0.00', 'Cebp@0.58', 'cebp@1.18'], '  sin el título 3D (abajo de 1024), con los 0,6 s del DOM')
+  afirmarIgual(comoTexto(recorridoDelOrden(ADENTRO, AFUERA, PRESENCIA_DEL_ENCABEZADO.s)), ['CEBp@0.00', 'CeBp@0.58', 'Cebp@0.70', 'cebp@1.18'], '  sin el título 3D (abajo de 1024), con los 0,6 s del DOM ([F3] la barra, con el panel ya afuera)')
   afirmar(Math.abs(duracionDeLaSalida(conEl3d) - 1.82) < 1e-9, '  la salida de la rueda (a Demos y hacia arriba) dura lo que se ve: el panel y la caída entera del título')
   const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
   const escenario = sinComentarios(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`))

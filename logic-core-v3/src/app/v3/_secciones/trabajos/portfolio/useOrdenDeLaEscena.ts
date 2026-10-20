@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { conElDefecto } from './medida'
 import { AFUERA, NUNCA, siguienteCambio, type Cambios, type Orden } from './orden'
 
 /**
@@ -24,7 +25,7 @@ export function useOrdenDeLaEscena(pedido: Orden, tituloS: number, reducido: boo
     let reloj = 0
     const avanzar = (): void => {
       const ahora = performance.now() / 1000
-      const c = siguienteCambio(actual.current, cambios.current, pedidoDeAhora, ahora, titulo.current, reducido)
+      const c = siguienteCambio(actual.current, cambios.current, pedidoDeAhora, ahora, titulo.current, reducido, conElDefecto('pildora-con-el-panel'))
       if (c === null) return
       if (c.en > ahora) {
         reloj = window.setTimeout(avanzar, (c.en - ahora) * 1000)

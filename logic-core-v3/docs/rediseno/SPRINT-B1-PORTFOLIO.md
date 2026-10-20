@@ -1937,3 +1937,67 @@ Valentino miró la Cola 2 y encontró bugs que un navegador hubiera agarrado: ca
 2. Lo mismo con un golpe fuerte de la rueda o con el trackpad: aterriza en El Garage y lo que sobra se pierde.
 3. Desde Demos subiendo: entra en «la tuya» y sube de a uno hasta El Garage. Después, hacia arriba.
 4. Que la espera de la entrada (unos 2,5 s con la rueda trabada) no se sienta como un cuelgue. Si se siente, se acorta el orden de la entrada (título, píldora y panel); la rueda la sigue igual.
+
+### 15.2 F3 + F4 · La píldora que vuelve y el video del panel
+
+**F3 · Reproducido en rojo** (`scripts-carga/pildora.ts`): cuadro a cuadro (rAF), el rectángulo de la píldora contra el del panel, entrando con una muesca y saliendo con otra hacia arriba, dos vueltas por ancho.
+- **A 1440 y 1280:** la entrada da 0 cuadros, pero la salida da 10 a 13. A2.2 hacía volver la píldora a la par de la salida del panel: su borde derecho se expandía (a 1440, hasta 789) cuando el panel todavía estaba en 749. A 1440 se metía 9 cuadros sobre el video.
+- **A 1024:** 247 de 420 cuadros. Ahí la píldora corrida (96–634) no entra en la columna (538 px contra 400 libres) y descansa sobre la franja de arriba del panel (desde 512), por diseño de A2.1: el medio arranca 16 px debajo de ella.
+
+**F3 · El arreglo** (`orden.ts`): la barra se apaga con el panel ya afuera (`c.panel + ORDEN.panelS`), así la vuelta de la píldora (la expansión y después la contracción) nunca se cruza con él. La salida dura lo mismo (1,82 s): la cámara espera la caída del título, que es más larga. Es la vuelta que tenía B1.2d A antes de A2.2.
+- **El defecto para el control:** `pildora-con-el-panel` (`medida.ts`, lo pide el arnés antes de cargar) es la salida de A2.2, tal cual.
+
+**F3 · En verde:**
+- 1440 y 1280: 0 cuadros cruzados, entrando y saliendo, en las dos vueltas.
+- **El control:** con `DEFECTO=pildora-con-el-panel`, la salida vuelve a 10 a 15 cuadros (rojo).
+- **A 1024:** el criterio literal sigue en rojo (248 cuadros entrando y 22 saliendo), todos por el reposo de diseño. Con el medio (el video), 0 cuadros. **Es una decisión visual, va al FRENO:**
+  - (a) queda así: la píldora sobre la franja de arriba del panel, nunca sobre el video;
+  - (b) la píldora se esconde mientras el panel está adentro, en los anchos donde no entra en la columna;
+  - (c) el panel arranca debajo de la píldora en esos anchos.
+
+**F4 · Reproducido en rojo** (`scripts-carga/medio.ts`): por ancho y por proyecto, el video contra su columna (lo que deja la tira entre sus rellenos).
+- A 1440, el 100 %.
+- A 1280, 1180 y 1024, el 77,9 %, 74,8 % y 67,8 %: A2.1 lo achicaba lo mismo que bajaba.
+
+**F4 · El arreglo:**
+- **El tamaño:** el video vuelve a su tamaño (`ANCHO_DEL_MEDIO`, como a 1440) y se corre 16 px debajo de la píldora.
+- **El aire, solo con el despeje** (`AIRE_CON_DESPEJE`, `medios.ts`):
+  - entre la ficha y «Visitar sitio», de 20 a 8 px;
+  - el sobrante de abajo, de 48 a 16 px.
+- **Si aun así la ficha no entra, el medio es lo único que cede alto:**
+  - el medio va con `min-h-0`, la región no se encoge (`shrink-0`) y la figura lleva `maxHeight: 100%` con su proporción;
+  - Chrome transfiere el tope de alto al ancho, y el video se achica lo justo y nada más;
+  - con `flex-1 min-h-0` en la región, «Visitar sitio» quedaba cortado por el panel.
+
+**F4 · Medido después:**
+
+| Ancho | El Garage | Esquina | Banú | «Visitar sitio» |
+|---|---|---|---|---|
+| 1440 | 100 % | 100 % | 100 % | 852 de 900 |
+| 1280 | 79,4 % | 98,3 % | 98,3 % | 784 de 800 |
+| 1180 | 80,7 % | 100 % | 100 % | 784 de 800 |
+| 1024 | 73,1 % | 100 % | 100 % | 752 de 768 |
+
+- El video arranca 16 px debajo de la píldora en los tres anchos con despeje, y en ninguno la ficha desborda.
+- **Lo que falta para que El Garage vaya al 100 %** (su ficha es la más larga: «El problema» ocupa 6 renglones a 1024):
+
+| Ancho | Con los 16 px de sobrante abajo | Sin sobrante |
+|---|---|---|
+| 1024 | 47 px | 31 px |
+| 1180 | 43 px | 27 px |
+| 1280 | 52 px | 36 px |
+
+- A 1280, a Esquina y Banú les faltan 5 px.
+- **No achiqué el video a mano:** se achica solo lo que falta, y solo cuando falta. **Va al FRENO:** acortar la ficha de El Garage, sacar más aire, o aceptar el achique.
+- **El control:** es la corrida de antes del arreglo, con el achique de A2.1 puesto: los tres proyectos dan rojo en los tres anchos.
+
+**Las afirmaciones que se reemplazaron por la spec** (s76 §19 de B1.2c, el orden), con su control:
+- la salida pasa a `CEBp@0.00`, `CeBp@0.42`, `Cebp@0.70` y `cebp@1.82` (con el título del DOM, 0,58, 0,70 y 1,18);
+- «la expansión a ±50 ms de la salida del panel» pasa a «la vuelta arranca con el panel ya afuera». El control es la salida de A2.2;
+- y el defecto que pide el arnés es la salida de A2.2, tal cual.
+
+**Qué mirar (F3 + F4):**
+1. `/v3#portfolio-el-garage` a 1440 y a 1280: salí del Portfolio con la rueda (hacia arriba o después de «la tuya»). La píldora vuelve a su lugar recién cuando el panel se fue; en ningún cuadro pasa por encima del panel ni del video. Fijate si la vuelta se siente tarde.
+2. A 1024, el mismo recorrido: la píldora descansa sobre la franja de arriba del panel (nunca sobre el video). Elegí (a), (b) o (c).
+3. A 1280, 1180 y 1024, Esquina y Banú: el video del mismo tamaño que a 1440 (toda su columna), 16 px debajo de la píldora; «Visitar sitio» entra con 16 px abajo.
+4. El Garage a esos anchos: su video más chico (73 a 81 %). Decidí qué hacemos con los px que le faltan.

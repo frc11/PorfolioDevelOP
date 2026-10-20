@@ -15,6 +15,7 @@ import type { ProyectoDelPortfolio } from '../proyectos'
 import { Ficha, piezasDeLaFicha } from './Ficha'
 import { MarcaDeAgua } from './MarcaDeAgua'
 import { MedioDeLaTira, PosterDelLomo } from './MedioDeLaTira'
+import { AIRE_CON_DESPEJE } from './medios'
 import { enLaSecuencia } from './secuencia'
 import type { PortfolioVivo } from './usePortfolio'
 
@@ -103,19 +104,21 @@ export function Tira({
 }): React.JSX.Element {
   const ids = idsDeLaTira(proyecto.slug)
   const piezas = piezasDeLaFicha(proyecto)
-  // [B1.2d] A2.1 · a 1280 y a 1024 la píldora corrida se mete en el panel: el medio baja hasta 16 px debajo de ella y se achica lo mismo.
+  // [B1.2d] A2.1 · a 1280 y a 1024 la píldora corrida se mete en el panel: el medio baja hasta 16 px debajo de ella. [F4] Del mismo tamaño:
+  // lo que baja sale del aire de la ficha (`AIRE_CON_DESPEJE`).
   const despeje = useDespejeDelMedio()
   return (
     <div data-tira={proyecto.slug} data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo)}>
       {activa ? null : <PosterDelLomo proyecto={proyecto} cerca={vivo.cerca} />}
-      <div id={ids.medio} hidden={!activa} className="relative px-8 pt-8" style={despeje === null ? undefined : { paddingTop: despeje }}>
-        <motion.div {...enLaSecuencia(visible, 0, vivo.reducido)}>
-          <MedioDeLaTira proyecto={proyecto} activa={activa} cerca={vivo.cerca} aLaVista={vivo.aLaVista} reducido={vivo.reducido} despeje={despeje} />
+      {/* [F4] El medio es lo único que cede alto (`min-h-0` y la región que no se encoge): si la ficha no entra, el video se achica lo justo. */}
+      <div id={ids.medio} hidden={!activa} className="relative flex min-h-0 flex-col px-8 pt-8" style={despeje === null ? undefined : { paddingTop: despeje }}>
+        <motion.div className="min-h-0" {...enLaSecuencia(visible, 0, vivo.reducido)}>
+          <MedioDeLaTira proyecto={proyecto} activa={activa} cerca={vivo.cerca} aLaVista={vivo.aLaVista} reducido={vivo.reducido} />
         </motion.div>
       </div>
       {activa ? <MarcaDeAgua proyecto={proyecto} cerca={vivo.cerca} /> : null}
       <CabeceraDeLaTira id={ids.cabecera} indice={indice} activa={activa} nombre={proyecto.nombre} controla={`${ids.medio} ${ids.region}`} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(indice, true)} />
-      <div id={ids.region} hidden={!activa} className="relative flex min-h-0 flex-1 flex-col gap-5 px-8 pb-12 pt-2">
+      <div id={ids.region} hidden={!activa} className="relative flex shrink-0 grow flex-col gap-5 px-8 pb-12 pt-2" style={despeje === null ? undefined : { paddingBottom: AIRE_CON_DESPEJE.debajo }}>
         {proyecto.rubro === null ? null : (
           <motion.div {...enLaSecuencia(visible, 1, vivo.reducido)}>
             <Cuerpo className="text-tinta/70">{proyecto.rubro}</Cuerpo>
@@ -123,14 +126,16 @@ export function Tira({
         )}
         <Ficha proyecto={proyecto} visible={visible} reducido={vivo.reducido} desde={2} />
         {/* [B1.2d] A2 · el botón simple del sitio (el rollover de dos copias y su subrayado), importado: no una copia. */}
-        <motion.div className="mt-auto self-start" {...enLaSecuencia(visible, 2 + piezas, vivo.reducido)}>
-          <CtaEnlace
-            href={proyecto.url}
-            rotulo={`${CONTENIDO.ficha.visitar} ↗`}
-            etiqueta={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`}
-            externo
-          />
-        </motion.div>
+        <div className="mt-auto self-start">
+          <motion.div style={despeje === null ? undefined : { marginTop: AIRE_CON_DESPEJE.antesDeVisitar }} {...enLaSecuencia(visible, 2 + piezas, vivo.reducido)}>
+            <CtaEnlace
+              href={proyecto.url}
+              rotulo={`${CONTENIDO.ficha.visitar} ↗`}
+              etiqueta={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`}
+              externo
+            />
+          </motion.div>
+        </div>
       </div>
     </div>
   )

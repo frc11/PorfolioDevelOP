@@ -221,3 +221,54 @@ export function violaciones(f: FotoDelPortfolio, esperado: 'adentro' | 'afuera')
   if (f.fallas.length > 0) v.push('diagnostico')
   return v
 }
+
+// ─── [F3] La píldora y el panel, cuadro a cuadro ──────────────────────────
+
+/** Un cuadro de `pildora.ts`: cuándo (ms) y los rectángulos de la píldora y del panel (`[izquierda, arriba, derecha, abajo]`, px). */
+export interface CuadroDeLaPildora {
+  readonly t: number
+  readonly p: readonly [number, number, number, number] | null
+  readonly panel: readonly [number, number, number, number] | null
+  /** El medio de la tira activa (el video o el póster), si se ve. */
+  readonly medio?: readonly [number, number, number, number] | null
+}
+
+/** [F3] Los cuadros en que el rectángulo de la píldora se cruza con el del panel (con área: tocarse en un borde no es cruzarse). */
+export function cuadrosCruzados(cuadros: readonly CuadroDeLaPildora[]): CuadroDeLaPildora[] {
+  return cuadros.filter((c) => c.p !== null && c.panel !== null && Math.min(c.p[2], c.panel[2]) - Math.max(c.p[0], c.panel[0]) > 0.5 && Math.min(c.p[3], c.panel[3]) - Math.max(c.p[1], c.panel[1]) > 0.5)
+}
+
+// ─── [F4] El medio del panel ──────────────────────────────────────────────
+
+/** Lo que mide `medio.ts` en un ancho, con una tira activa y en reposo (px de la ventana). */
+export interface MedidaDelMedio {
+  readonly ancho: number
+  readonly alto: number
+  readonly tira: string | null
+  readonly pastillaAbajo: number
+  readonly pastillaDerecha: number
+  readonly panel: { readonly l: number; readonly ancho: number; readonly abajo: number } | null
+  /** Lo que deja el medio de la tira entre sus rellenos (px). */
+  readonly columna: number
+  readonly figura: { readonly arriba: number; readonly ancho: number; readonly alto: number; readonly abajo: number } | null
+  readonly visitarAbajo: number
+  readonly ultimo: number
+  readonly desborda: boolean | null
+}
+
+export type ViolacionDelMedio = 'video-de-otro-tamano' | 'no-baja-de-la-pildora' | 'no-entra'
+
+/**
+ * [F4] El medio de una tira: ocupa de su columna lo mismo que a 1440 (la misma tira, ±1 %); si la píldora corrida se mete en el panel,
+ * arranca 16 px debajo de ella (±1 px); y «Visitar sitio» (lo último de la ficha) entra en el panel, sin desbordar. (`ultimo` queda para el
+ * informe: la copia de abajo del rollover del CTA, recortada, lo pasa del panel sin que se vea.)
+ */
+export function violacionesDelMedio(m: MedidaDelMedio, todas: readonly MedidaDelMedio[]): ViolacionDelMedio[] {
+  const v: ViolacionDelMedio[] = []
+  const deReferencia = todas.find((x) => x.ancho === 1440 && x.tira === m.tira)
+  const llena = (x: MedidaDelMedio): number => (x.figura === null || x.columna <= 0 ? Number.NaN : x.figura.ancho / x.columna)
+  if (deReferencia !== undefined && !(Math.abs(llena(m) - llena(deReferencia)) <= 0.01)) v.push('video-de-otro-tamano')
+  if (m.panel !== null && m.figura !== null && m.pastillaDerecha + 16 > m.panel.l && Math.abs(m.figura.arriba - (m.pastillaAbajo + 16)) > 1) v.push('no-baja-de-la-pildora')
+  if (m.panel === null || m.visitarAbajo > m.panel.abajo + 0.5 || m.desborda === true) v.push('no-entra')
+  return v
+}
