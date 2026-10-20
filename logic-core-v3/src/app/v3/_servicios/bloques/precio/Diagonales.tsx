@@ -30,18 +30,23 @@ const CLASES_DEL_PANEL: Readonly<Record<IndiceDePanel, string>> = {
 /** Las superficies: la Mediana en el acento del servicio (papel sobre el acento), las otras dos en papel. */
 const SUPERFICIE: Readonly<Record<IndiceDePanel, string>> = { 0: 'bg-fondo text-tinta', 1: 'bg-acento text-fondo', 2: 'bg-fondo text-tinta' }
 
-/** La caja del texto: arriba a la izquierda (la Simple y la Mediana) o abajo a la derecha (la Premium), en las dos orientaciones. */
+/**
+ * La caja del texto, escalonada: la Simple arriba a la izquierda, la Mediana al medio (su franja entera, con el texto centrado) y la
+ * Premium abajo a la derecha, en las dos orientaciones.
+ */
 const CLASES_DE_LA_CAJA: Readonly<Record<IndiceDePanel, string>> = {
   0: 'absolute landscape:left-[var(--caja-x-a)] portrait:left-[var(--caja-x-r)] landscape:top-[var(--caja-y-a)] portrait:top-[var(--caja-y-r)] landscape:w-[var(--caja-w-a)] portrait:w-[var(--caja-w-r)]',
-  1: 'absolute landscape:left-[var(--caja-x-a)] portrait:left-[var(--caja-x-r)] landscape:top-[var(--caja-y-a)] portrait:top-[var(--caja-y-r)] landscape:w-[var(--caja-w-a)] portrait:w-[var(--caja-w-r)]',
+  1: 'absolute flex flex-col justify-center landscape:left-[var(--caja-x-a)] portrait:left-[var(--caja-x-r)] landscape:top-[var(--caja-y-a)] portrait:top-[var(--caja-y-r)] landscape:w-[var(--caja-w-a)] portrait:w-[var(--caja-w-r)] landscape:h-[var(--caja-h-a)] portrait:h-[var(--caja-h-r)]',
   2: 'absolute landscape:right-[var(--caja-x-a)] portrait:right-[var(--caja-x-r)] landscape:bottom-[var(--caja-y-a)] portrait:bottom-[var(--caja-y-r)] landscape:w-[var(--caja-w-a)] portrait:w-[var(--caja-w-r)]',
 }
 
-/** Las custom properties de un panel: su recorte, su corrimiento y su caja, en las dos orientaciones. */
+/** Las custom properties de un panel: su recorte, su corrimiento y su caja, en las dos orientaciones (el alto, solo la Mediana). */
 function variablesDelPanel(panel: IndiceDePanel): EstiloConVariables {
   const a = { corrimiento: corrimiento('apaisado', panel), caja: caja('apaisado', panel) }
   const r = { corrimiento: corrimiento('retrato', panel), caja: caja('retrato', panel) }
+  const altos: EstiloConVariables = a.caja.alto === null || r.caja.alto === null ? {} : { '--caja-h-a': a.caja.alto, '--caja-h-r': r.caja.alto }
   return {
+    ...altos,
     '--recorte-a': recorte('apaisado', panel),
     '--recorte-r': recorte('retrato', panel),
     '--dx-a': a.corrimiento.x,

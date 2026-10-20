@@ -1,5 +1,126 @@
 # M2a — El precio en diagonales, desde 768
 
+**Versión 2** (2026-10-19, la corrida desatendida «R1, precio b y V0», tarea 2): **el precio b escalonado, como única versión.** Va primero, en §V2. La versión 1 (2026-10-18) sigue abajo tal cual se escribió; lo que la 2 cambió está marcado ahí.
+
+---
+
+## V2 — El precio b escalonado, única versión
+
+Rama `paginas/servicios`, sobre `5e113990` (el cierre del R1). **Commit «M2a: precio b escalonado como unica version».**
+
+**Lo que decidió Valentino:**
+- **la coreografía b:** entra primero la Mediana y después las otras dos;
+- **la posición escalonada:** la Simple arriba, la Mediana al medio y la Premium abajo.
+
+**Estado en una línea:**
+- **La b es la de producción, y la única.** Se fueron la `a`, la `c`, la bandera `?precio=` y el rótulo `data-coreografia-del-precio`. No queda código muerto.
+- **Las posiciones no estaban escalonadas** en apaisado: la Mediana estaba arriba, a la par de la Simple. Ahora va **al medio**, con su texto centrado en la mitad del alto. En retrato ya lo estaban (tres bandas), y los cortes siguen casi horizontales.
+- **Gate:** lint 0, `tsc` 0, los siete tests en verde (`diagonales` de 36 a 47) y los seis barridos iguales a la base.
+- **Navegador, a 1440, 1024 y 768:**
+  - el texto entra en su panel con 16 px de margen;
+  - contraste mínimo de 6,65:1, sin desborde;
+  - el anclaje no rompe el scroll: la caja queda `sticky`, el CTA del precio llega después y el final de la página también.
+- **Cortado por memoria:** nada. Hubo que esperar 10 minutos antes de la primera corrida (§V2.5).
+
+### V2.1 Los archivos
+
+| Archivo | Qué |
+|---|---|
+| `movimiento/coreografiaDelPrecio.ts` | Queda solo `entradaDelPanel(panel, progreso)`, la b: la Mediana en la primera mitad del recorrido y la Simple y la Premium, juntas, en la segunda. Cada turno llega al 70 % de su mitad y queda quieto. Se fueron `COREOGRAFIAS_DEL_PRECIO`, `COREOGRAFIA_DE_PRODUCCION`, `BANDERA_DEL_PRECIO` y `coreografiaDe` |
+| `movimiento/RepartoDelPrecio.tsx` | Ya no lee la url (`useSyncExternalStore` y `NODE_ENV` se fueron) ni rotula la caja con la coreografía |
+| `bloques/precio/geometriaDelPrecio.ts` | La caja de la Mediana es una **franja con alto**: en apaisado, del 30 % al 70 % del alto, y su ancho sale de lo más adentro que llegan los dos cortes en esa franja, quiebre incluido (`extremosDelCorte`). En retrato, la banda entre los dos cortes. Las cuentas van en términos lineales (`cqw`, `cqh` y `rem`) que se escriben en CSS o se miden en px (`franjaDelTexto`, para el test) |
+| `bloques/precio/Diagonales.tsx` | La caja de la Mediana es `flex flex-col justify-center` con el alto de su franja (`--caja-h-a` y `--caja-h-r`): el texto queda centrado adentro |
+| `__tests__/diagonales.invariant.tsx` | §V2.3 |
+| `docs/servicios/SPRINT-M2a.md` | Esta versión |
+
+### V2.2 Las posiciones, antes y después (medidas, en px de la página)
+
+| | Simple | Mediana | Premium |
+|---|---|---|---|
+| **1440 × 900, antes** | 144–280 | **144–381** (a la par de la Simple) | 710–846 |
+| **1440 × 900, ahora** | 144–280 (centro al 24 %) | **331–568 (centro al 50 %)** | 710–846 (al 87 %) |
+| **1024 × 768, ahora** | 123–275 (26 %) | **246–523 (50 %)** | 570–722 (84 %) |
+| **768 × 1024, ahora** (retrato) | 164–287 (22 %) | **436–659 (54 %)** | 839–962 (88 %) |
+
+- **En apaisado la Mediana se ensanchó:** de 428 a 455 px a 1440, y de 276 a 299 a 1024. La franja empieza más abajo, donde el primer corte ya se fue a la izquierda. A 1024 su texto mide 277 px, en una franja de 307.
+- **En retrato** la Mediana ya estaba en la banda del medio. Ahora ocupa la banda entera y su texto se centra: bajó 5 px. **Los cortes siguen casi horizontales** (8,5°), y un test nuevo lo afirma.
+- La franja de la Mediana cruza el quiebre de los cortes. El ancho ya lo cuenta: el texto queda adentro del panel con 16 px de margen en los tres anchos.
+
+### V2.3 Los tests (`diagonales.invariant.tsx`: de 36 a 47, con 26 controles)
+
+**Nuevas, cada una con su control positivo:**
+
+| Afirmación | Control |
+|---|---|
+| **La Mediana entra primero:** en todo el recorrido va igual o más adelante que las otras dos; llega entera antes de que ellas empiecen; y la Simple y la Premium entran juntas | la Simple primero (la `a` del M2a); la Premium junto con la Mediana |
+| Los valores a 0,2, 0,5 y 0,8: la Mediana en 0,57, 1 y 1; la Simple y la Premium en 0, 0 y 0,86 | — (afirmación exacta) |
+| **El orden de las posiciones:** en las cuatro cajas (1440 × 900, 1024 × 768, 768 × 1024 y 1024 × 1366), el centro de la franja de la Simple está más arriba que el de la Mediana, y ese más arriba que el de la Premium; la Mediana, a la mitad del alto (± 5 %) | la Mediana a la par de la Simple (el M2a); la Simple y la Premium cambiadas |
+| El texto de la Mediana va centrado en su franja: `flex`, `flex-col`, `justify-center` y el alto en las dos orientaciones | una Mediana sin centrar |
+| **En retrato los cortes son casi horizontales:** los tramos largos, a 10° o menos | un retrato con pendiente 0,5 |
+| **La bandera ya no existe:** ningún fuente de `_servicios` (43) lee la consulta (`location.search`, `URLSearchParams`, `useSearchParams`), nombra `?precio=`, la lista de coreografías o su resolvedor, ni rotula la caja | un reparto que vuelve a leer la url; una caja rotulada |
+| La coreografía exporta solo `entradaDelPanel` | un módulo que todavía exporta el resolvedor |
+
+**Retiradas por quitar la funcionalidad, no aflojadas:**
+- «la bandera no existe en producción», con su control, y «el reparto lee la url solo en desarrollo», con el suyo: la bandera ya no existe en ningún modo, y en su lugar está «la bandera ya no existe»;
+- los valores de la fiel (`a`): en su lugar están los de la b.
+
+«Las tres coreografías: de 0 a 1, sin retroceder» sigue, ahora sobre la única, con su control.
+
+### V2.4 El gate
+
+| Paso | Resultado |
+|---|---|
+| Lint de los 5 archivos de código tocados | **0** |
+| `tsc --noEmit` (4 GB) | **0 errores** |
+| `datos` · `precios` · `slots` · `seo` | 55/0 · 22/0 · 44/0 · 56/0 |
+| `pagina` · `medios` · `diagonales` | 240/0 · 26/0 · **47/0 (26)** |
+| s38 · s44 · s74 · `s77` · `s25-contacto` | 57/0 · 45/0 · 34/0 · 35/0 · 35/0 |
+| Los seis barridos | **idénticos a los del cierre del R1**, salida por salida: `s4-paquete` 21/0, `s40-3d-sonido` 38/0, `s53-pulido-2` 54/0, `s8-escena` 33/0, `s8-montaje` 56/2 (las dos de los 300 renglones, de siempre) y `s9-sentry` 22/0 con 2 fuera de ventana |
+| `next build` | no se corrió |
+
+Las salidas están en `C:\paginas-servicios-datos\c2\precio\`.
+
+### V2.5 El navegador
+
+En el dev de :3001, con Chromium sin WebGL. El único error de página es el de siempre, «Error creating WebGL context». **0 llamadas a `/api/*`.** Los JSON y los logs están en `C:\paginas-servicios-datos\c2\precio\navegador\`.
+
+| `/v3/paginas-web` | El texto en su panel (16 px) | Contraste mín. | Desborde | El anclaje | Lo que sigue |
+|---|---|---|---|---|---|
+| 1440 × 900 | los tres (0 puntos afuera), y el de la Mediana, adentro de su franja | 6,65 | no | `sticky` en 0 durante todo el anclaje | el CTA llega a la vista; el final llega (cierre en 0 px, opacidad 1) |
+| 1024 × 768 | ídem | 6,65 | no | ídem | ídem |
+| 768 × 1024 | ídem | 6,65 | no | ídem | ídem |
+| 1440, reducido | ídem | 6,65 | no | una pantalla, los tres con opacidad 1 en todas las paradas | el CTA llega a la vista (el recorrido entero no se corrió con reducido) |
+
+- **El recorrido de la b**, igual en los tres anchos:
+  - la Mediana entra de 0 a 0,4 (0,29, 0,57 y 0,86 en 0,1, 0,2 y 0,3);
+  - de 0,4 a 0,5 está sola;
+  - la Simple y la Premium entran juntas de 0,5 a 0,9.
+  - Quieto, tres muestras a 250 ms dan lo mismo. Subiendo, se deshace el camino.
+- **La bandera ya no existe:** con `/v3/paginas-web?precio=a` el recorrido es exactamente el de arriba.
+- **Dentro del anclaje, en reposo,** los paneles que todavía no llegaron siguen afuera, como en la versión 1 (§3.4): con la b, en la primera mitad, son la Simple y la Premium.
+- **La memoria:** al compilar el dev, la memoria libre bajó a 1,43 GB. Se esperó a tener 3 GB, revisando cada 5 minutos, y a los 10 minutos había 4,96 GB. Durante las corridas (las del precio y las del recorrido entero), lo mínimo fue 3,35 GB. El dev y el navegador se apagaron al terminar.
+
+### V2.6 Decidido por CC, revisar
+
+1. **«Al medio» es la mitad del alto de la pantalla** (el 50 %), no la mitad del lugar que deja la barra fija (que sería el 55 %).
+2. **La franja de la Mediana va del 30 % al 70 % del alto.** Deja lugar a su texto a 768 de alto (277 px en 307) y lo centra. En un apaisado más bajo que 640 px, el texto pasaría la franja: no es un ancho que se mida.
+3. **En retrato no se movió la geometría:** los cortes, las bandas y los anchos son los mismos. Solo el texto de la Mediana se centra en su banda, y baja 5 px.
+4. **El quiebre de los cortes quedó al 62 %.** La Mediana lo cruza ahora, y su ancho lo cuenta. Si se prefiere que el texto no pase por encima del zigzag, hay que moverlo (`PARAMETROS`).
+5. **El rótulo `data-coreografia-del-precio` se fue con la bandera:** solo decía cuál de las tres corría.
+
+### V2.7 Qué mira Valentino
+
+1. http://localhost:3001/v3/paginas-web a **1440**, a **1024 × 768** y a **768 × 1024** (el dev se prende con `npm run dev -- -p 3001`):
+   - bajando: primero entra la Mediana, sola; después la Simple y la Premium, juntas, desde los dos lados;
+   - con todo puesto: la Simple arriba a la izquierda, la Mediana al medio y la Premium abajo a la derecha;
+   - subiendo: se deshace el camino;
+   - el CTA del precio llega después.
+2. **A 390:** el precio es el de siempre.
+
+---
+
+## V1 — La versión del 18 de octubre
+
 2026-10-18 · Autor: CC, en la corrida desatendida (tarea 3) · Viene de: `docs/servicios/SPRINT-M0.md` §3 (el plan) y el prompt de la corrida, que manda donde chocan.
 Rama `paginas/servicios`, sobre `f2631309` (el M3). **Commit «M2a: precio en diagonales (sin ver)».** Valentino lo revisa al volver.
 
@@ -18,7 +139,7 @@ Rama `paginas/servicios`, sobre `f2631309` (el M3). **Commit «M2a: precio en di
 
 ---
 
-## 1. Las variantes (bandera de desarrollo `?precio=a|b|c`)
+## 1. Las variantes (bandera de desarrollo `?precio=a|b|c`) — en la V2 queda solo la b, y la bandera se fue
 
 Producción ve solo `a`. En producción la bandera no existe: `coreografiaDe` ignora la consulta y el reparto lee la url solo detrás de `NODE_ENV`.
 

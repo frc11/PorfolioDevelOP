@@ -3,13 +3,18 @@
  *
  * Corre a mano: `npx tsx src/app/v3/_servicios/__tests__/diagonales.invariant.tsx`.
  *
- * La geometría pura (`bloques/precio/geometriaDelPrecio.ts`), la firma de las tres opciones (`tresOpciones.ts`), la coreografía y su
- * bandera (`movimiento/coreografiaDelPrecio.ts`) y el MARCADO de la página de verdad (`renderToStaticMarkup` de `PaginaDeServicio`):
- * la Mediana literal y sin palabras prohibidas, el orden del DOM, lo de debajo de 768 sin cambios (D15), todo a la vista sin movimiento
- * y la bandera fuera de producción. Cada comprobación lleva su control positivo: el MISMO detector contra una entrada armada para fallar.
+ * La geometría pura (`bloques/precio/geometriaDelPrecio.ts`), la firma de las tres opciones (`tresOpciones.ts`), la coreografía
+ * (`movimiento/coreografiaDelPrecio.ts`) y el MARCADO de la página de verdad (`renderToStaticMarkup` de `PaginaDeServicio`): la Mediana
+ * literal y sin palabras prohibidas, el orden del DOM, lo de debajo de 768 sin cambios (D15) y todo a la vista sin movimiento. Cada
+ * comprobación lleva su control positivo: el MISMO detector contra una entrada armada para fallar.
+ *
+ * [M2a, precio b] La versión única, la que eligió Valentino: la coreografía b (entra primero la Mediana, después las otras dos juntas) y
+ * las posiciones escalonadas (la Simple arriba, la Mediana al medio y la Premium abajo). RETIRADAS por quitar la funcionalidad, no
+ * aflojadas: «la bandera no existe en producción» y «el reparto lee la url solo en desarrollo» (la bandera ya no existe en ningún modo:
+ * en su lugar, §6 afirma que no queda rastro de ella), los valores de la fiel (`a`) y las tres coreografías (queda una).
  */
 
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -19,11 +24,12 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_l
 import { Bloque } from '../bloques/Bloque'
 import { Calibres } from '../bloques/precio/Calibres'
 import {
-  PARAMETROS, adentro, cortes, puntos, recorte, type IndiceDePanel, type Orientacion, type ParametrosDeLosCortes,
+  PARAMETROS, adentro, cortes, franjaDelTexto, puntos, recorte, type IndiceDePanel, type Orientacion, type ParametrosDeLosCortes,
 } from '../bloques/precio/geometriaDelPrecio'
 import { tresOpcionesDeLosCalibres, type VistaDeTresOpciones } from '../bloques/precio/tresOpciones'
 import { PAGINAS_WEB } from '../datos/paginas-web'
-import { COREOGRAFIAS_DEL_PRECIO, COREOGRAFIA_DE_PRODUCCION, coreografiaDe, entradaDelPanel } from '../movimiento/coreografiaDelPrecio'
+import * as COREOGRAFIA from '../movimiento/coreografiaDelPrecio'
+import { entradaDelPanel } from '../movimiento/coreografiaDelPrecio'
 import { PaginaDeServicio } from '../PaginaDeServicio'
 import type { Calibre, Destacada } from '../tipos'
 import { aperturas, bloqueDe, elementoConAtributo, textoVisible } from './pagina-detectores'
@@ -88,6 +94,42 @@ controlPositivo('  una pendiente en % del ancho (el ángulo cambia con la caja) 
 const enUnidadesDelContenedor = (css: string): boolean => /^polygon\(/.test(css) && !/\d(px|%|vw|vh|svh)\b/.test(css) && /cqw|cqh/.test(css)
 afirmar(PANELES.every((panel) => enUnidadesDelContenedor(recorte('apaisado', panel)) && enUnidadesDelContenedor(recorte('retrato', panel))), 'los recortes se escriben en unidades del contenedor (cqw y cqh), sin px, % ni unidades del viewport')
 controlPositivo('  un recorte en % se detecta', 'polygon(0 0, 30% 0, 20% 100%)', enUnidadesDelContenedor)
+/** En retrato los cortes van casi horizontales: los dos tramos largos de cada corte (fuera del zag), a 10° o menos de la horizontal. */
+const casiHorizontales = (p: ParametrosDeLosCortes): boolean => [[768, 1024], [1024, 1366]].every(([ancho = 0, alto = 0]) =>
+  cortes('retrato', p).every((corte) => {
+    const px = corte.map(([x, y]) => [x.w * ancho + x.h * alto, y.w * ancho + y.h * alto] as const)
+    return [[0, 1], [2, 3]].every(([i = 0, k = 0]) => {
+      const [a, b] = [px[i], px[k]]
+      return a !== undefined && b !== undefined && Math.abs((Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI) <= 10
+    })
+  }))
+afirmar(casiHorizontales(PARAMETROS.retrato), 'en retrato (768×1024 y 1024×1366) los cortes son casi horizontales: sus tramos largos, a 10° o menos de la horizontal')
+controlPositivo('  un retrato con los cortes empinados se detecta', { ...PARAMETROS.retrato, pendiente: 0.5 } as ParametrosDeLosCortes, casiHorizontales)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1b · [precio b] Las posiciones, escalonadas: la Simple arriba, la Mediana al medio y la Premium abajo')
+
+type Franja = (orientacion: Orientacion, panel: IndiceDePanel, ancho: number, alto: number) => readonly [number, number]
+const centro = (f: readonly [number, number]): number => (f[0] + f[1]) / 2
+/** En cada caja: el centro de la franja de la Simple, más arriba que el de la Mediana, y ese más arriba que el de la Premium; la Mediana, a la mitad (±5 %). */
+const escalonadas = (franja: Franja): boolean => CAJAS.every(({ orientacion, ancho, alto }) => {
+  const [simple, mediana, premium] = PANELES.map((panel) => centro(franja(orientacion, panel, ancho, alto)))
+  return simple !== undefined && mediana !== undefined && premium !== undefined && simple < mediana && mediana < premium &&
+    Math.abs(mediana - alto / 2) <= 0.05 * alto && simple < alto / 2 && premium > alto / 2
+})
+const centros = (o: Orientacion, ancho: number, alto: number): string => PANELES.map((panel) => (centro(franjaDelTexto(o, panel, ancho, alto)) / alto).toFixed(2)).join(' · ')
+afirmar(escalonadas(franjaDelTexto), `escalonadas en las cuatro cajas: la Simple arriba, la Mediana al medio (a la mitad del alto, ±5 %) y la Premium abajo. Centros, en fracciones del alto: ${centros('apaisado', 1440, 900)} a 1440×900 y ${centros('retrato', 768, 1024)} a 768×1024`)
+controlPositivo('  la Mediana arriba, a la par de la Simple (el M2a), se detecta', ((o, panel, a, h) => franjaDelTexto(o, panel === 1 ? 0 : panel, a, h)) as Franja, escalonadas)
+controlPositivo('  y la Simple y la Premium cambiadas de lugar', ((o, panel, a, h) => franjaDelTexto(o, panel === 0 ? 2 : panel === 2 ? 0 : panel, a, h)) as Franja, escalonadas)
+/** La caja de la Mediana es su franja entera, con el texto centrado: flex en columna con justify-center y su alto en las dos orientaciones. */
+const medianaCentrada = (html: string): boolean => {
+  const apertura = /<li[^>]*data-opcion-del-precio="1"[^>]*>\s*<div[^>]*>/.exec(html)?.[0] ?? ''
+  const c = (/<div[^>]*class="([^"]*)"/.exec(apertura)?.[1] ?? '').split(/\s+/)
+  return ['flex', 'flex-col', 'justify-center', 'landscape:h-[var(--caja-h-a)]', 'portrait:h-[var(--caja-h-r)]'].every((x) => c.includes(x)) &&
+    /--caja-h-a:/.test(apertura) && /--caja-h-r:/.test(apertura)
+}
+afirmar(medianaCentrada(DIAGONALES), '  y el texto de la Mediana va centrado en su franja: su caja es flex en columna con justify-center y lleva el alto de la franja en las dos orientaciones')
+controlPositivo('  una Mediana sin centrar se detecta', DIAGONALES.replace('flex flex-col justify-center ', ''), medianaCentrada)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · La firma de las tres opciones, y la Mediana: al centro, en el acento, con su marca y su línea literal')
@@ -191,25 +233,43 @@ afirmar(altoComoDice(DIAGONALES), 'la sección mide tres pantallas solo con la v
 controlPositivo('  el alto alto sin la variante de movimiento se detecta', DIAGONALES.replace('motion-safe:h-[var(--alto-del-precio)]', 'h-[var(--alto-del-precio)]'), altoComoDice)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · La coreografía y su bandera: producción ve la fiel; ?precio=a|b|c solo en desarrollo')
+titulo('6 · [precio b] La coreografía, una sola: entra primero la Mediana, después las otras dos; la bandera ya no existe')
 
-const CONSULTAS = ['', '?precio=a', '?precio=b', '?precio=c', '?precio=zz']
-const banderaFueraDeProduccion = (resolver: typeof coreografiaDe): boolean =>
-  CONSULTAS.every((q) => resolver(q, false) === COREOGRAFIA_DE_PRODUCCION) && resolver('?precio=b', true) === 'b' && resolver('?precio=c', true) === 'c' && resolver('?precio=zz', true) === COREOGRAFIA_DE_PRODUCCION
-afirmar(banderaFueraDeProduccion(coreografiaDe), `la bandera no existe en producción: con cualquier consulta sale «${COREOGRAFIA_DE_PRODUCCION}», la fiel; en desarrollo, ?precio=b y ?precio=c la cambian`)
-controlPositivo('  un resolvedor que lee la bandera también en producción se detecta', ((q: string) => coreografiaDe(q, true)) as typeof coreografiaDe, banderaFueraDeProduccion)
-const FUENTE_DEL_REPARTO = readFileSync(path.join(AQUI, '../movimiento/RepartoDelPrecio.tsx'), 'utf8')
-const leeLaUrlSoloEnDesarrollo = (fuente: string): boolean => fuente.includes("const EN_DESARROLLO = process.env.NODE_ENV !== 'production'") && fuente.includes('(EN_DESARROLLO ? window.location.search : \'\')') && (fuente.match(/location\.search/g) ?? []).length === 1
-afirmar(leeLaUrlSoloEnDesarrollo(FUENTE_DEL_REPARTO), '  y el reparto lee la url una sola vez, detrás de NODE_ENV: en el build de producción esa rama no existe')
-controlPositivo('  un reparto que lee la url siempre se detecta', FUENTE_DEL_REPARTO.replace('(EN_DESARROLLO ? window.location.search : \'\')', 'window.location.search'), leeLaUrlSoloEnDesarrollo)
-/** Cada coreografía: en 0 todo afuera, en 1 todo adentro, y nada retrocede al avanzar (es scrub: subiendo, deshace el camino). */
-const coreografiaSana = (entrada: typeof entradaDelPanel): boolean => COREOGRAFIAS_DEL_PRECIO.every((c) => PANELES.every((panel) => {
-  const muestras = Array.from({ length: 101 }, (_, i) => entrada(c, panel, i / 100))
+const MUESTRAS = Array.from({ length: 101 }, (_, i) => i / 100)
+/** En 0 todo afuera, en 1 todo adentro, y nada retrocede al avanzar (es scrub: subiendo, deshace el camino). */
+const coreografiaSana = (entrada: typeof entradaDelPanel): boolean => PANELES.every((panel) => {
+  const muestras = MUESTRAS.map((p) => entrada(panel, p))
   return muestras[0] === 0 && muestras[100] === 1 && muestras.every((v, i) => i === 0 || v >= (muestras[i - 1] ?? 0))
-}))
-afirmar(coreografiaSana(entradaDelPanel), 'las tres coreografías: en 0 los tres afuera, en 1 los tres en su lugar, y ninguna entrada retrocede al avanzar')
-controlPositivo('  una que deja la Premium afuera al final se detecta', ((c, panel, p) => (panel === 2 ? 0 : entradaDelPanel(c, panel, p))) as typeof entradaDelPanel, coreografiaSana)
-const enOrdenFiel = PANELES.map((panel) => [0.2, 0.5, 0.8].map((p) => Number(entradaDelPanel('a', panel, p).toFixed(2))))
-afirmarIgual(enOrdenFiel, [[0.86, 1, 1], [0, 0.71, 1], [0, 0, 0.57]], '  la fiel (a), en orden: a un quinto la Simple casi llegada; a la mitad la Mediana entrando; a cuatro quintos la Premium entrando')
+})
+afirmar(coreografiaSana(entradaDelPanel), 'la coreografía: en 0 los tres afuera, en 1 los tres en su lugar, y ninguna entrada retrocede al avanzar')
+controlPositivo('  una que deja la Premium afuera al final se detecta', ((panel, p) => (panel === 2 ? 0 : entradaDelPanel(panel, p))) as typeof entradaDelPanel, coreografiaSana)
+/**
+ * La Mediana entra primero: en todo el recorrido va igual o más adelante que las otras dos, llega entera antes de que ellas empiecen, y
+ * la Simple y la Premium entran juntas (la misma entrada en cada punto).
+ */
+const laMedianaPrimero = (entrada: typeof entradaDelPanel): boolean =>
+  MUESTRAS.every((p) => entrada(1, p) >= entrada(0, p) && entrada(1, p) >= entrada(2, p) && entrada(0, p) === entrada(2, p)) &&
+  MUESTRAS.some((p) => entrada(1, p) === 1 && entrada(0, p) === 0 && entrada(2, p) === 0)
+afirmar(laMedianaPrimero(entradaDelPanel), '  entra primero la Mediana, sola y entera, y después la Simple y la Premium, juntas')
+controlPositivo('  la Simple primero (la fiel del M2a) se detecta', ((panel, p) => entradaDelPanel(panel === 0 ? 1 : panel === 1 ? 0 : panel, p)) as typeof entradaDelPanel, laMedianaPrimero)
+controlPositivo('  y la Premium junto con la Mediana', ((panel, p) => entradaDelPanel(panel === 2 ? 1 : panel, p)) as typeof entradaDelPanel, laMedianaPrimero)
+const valores = PANELES.map((panel) => [0.2, 0.5, 0.8].map((p) => Number(entradaDelPanel(panel, p).toFixed(2))))
+afirmarIgual(valores, [[0, 0, 0.86], [0.57, 1, 1], [0, 0, 0.86]], '  los valores: a un quinto la Mediana entrando; a la mitad la Mediana entera y las otras afuera; a cuatro quintos la Simple y la Premium casi llegadas')
+/** La bandera ya no existe: ningún fuente de _servicios lee la consulta, nombra `?precio=` ni rotula la caja con su coreografía, y la coreografía solo exporta la entrada. */
+const raiz = path.join(AQUI, '..')
+const fuentes = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+  const f = path.join(dir, e.name)
+  return e.isDirectory() ? (e.name === '__tests__' ? [] : fuentes(f)) : /\.tsx?$/.test(e.name) ? [f] : []
+})
+const FUENTES = fuentes(raiz).map((f) => ({ f: path.relative(raiz, f).split(path.sep).join('/'), codigo: readFileSync(f, 'utf8') }))
+const RASTROS_DE_LA_BANDERA = [/location\.search/, /URLSearchParams/, /useSearchParams/, /\?precio=/, /BANDERA_DEL_PRECIO|COREOGRAFIAS_DEL_PRECIO|coreografiaDe\b/, /data-coreografia-del-precio/]
+interface Fuente { readonly f: string; readonly codigo: string }
+const conLaBandera = (lista: readonly Fuente[]): string[] => lista.filter((x) => RASTROS_DE_LA_BANDERA.some((r) => r.test(x.codigo))).map((x) => x.f)
+afirmarIgual(conLaBandera(FUENTES), [], `  la bandera ya no existe: ningún fuente de _servicios (${String(FUENTES.length)}) lee la consulta, nombra ?precio=, la lista de coreografías o su resolvedor, ni rotula la caja con la coreografía`)
+controlPositivo('  un reparto que vuelve a leer la url se detecta', [{ f: 'movimiento/RepartoDelPrecio.tsx', codigo: 'const q = window.location.search' }], (l: readonly Fuente[]) => conLaBandera(l).length === 0)
+controlPositivo('  y una caja rotulada con la coreografía', [{ f: 'movimiento/RepartoDelPrecio.tsx', codigo: '<motion.div data-coreografia-del-precio="b">' }], (l: readonly Fuente[]) => conLaBandera(l).length === 0)
+const soloLaEntrada = (modulo: Readonly<Record<string, unknown>>): boolean => JSON.stringify(Object.keys(modulo).sort()) === JSON.stringify(['entradaDelPanel'])
+afirmar(soloLaEntrada(COREOGRAFIA), '  la coreografía exporta solo la entrada de cada panel: ni variantes, ni la de producción, ni el resolvedor')
+controlPositivo('  un módulo que todavía exporta el resolvedor se detecta', { ...COREOGRAFIA, coreografiaDe: () => 'b' }, soloLaEntrada)
 
 cerrar('diagonales.invariant')

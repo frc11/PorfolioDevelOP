@@ -125,51 +125,130 @@ export function adentro(poligonoEnPx: readonly (readonly [number, number])[], x:
 }
 
 /**
- * DÓNDE VA EL TEXTO DE CADA PANEL: en la parte ancha de su región, al lado del corte, y nunca encima del quiebre. Cada caja se ancla a
- * una esquina (`x` desde la izquierda o la derecha, `y` desde arriba o abajo) y su `ancho` sale del corte que la limita, con un margen
- * de 1rem al corte y 2rem al borde. Arriba se deja `TOPE` libre: la barra fija del sitio pasa por ahí.
+ * DÓNDE VA EL TEXTO DE CADA PANEL: en la parte ancha de su región, al lado del corte, ESCALONADO: la Simple arriba, la Mediana al medio
+ * y la Premium abajo, en las dos orientaciones. Cada caja se ancla a una esquina (`x` desde la izquierda o la derecha, `y` desde arriba
+ * o abajo) y su `ancho` sale del corte que la limita, con un margen de 1rem al corte y 2rem al borde. La Mediana, además, tiene `alto`:
+ * es su franja entera, con el texto centrado adentro (`justify-center`). Arriba se deja `TOPE` libre: la barra fija del sitio pasa por ahí.
  */
 export interface CajaDelTexto {
   readonly x: { readonly lado: 'left' | 'right'; readonly valor: string }
   readonly y: { readonly lado: 'top' | 'bottom'; readonly valor: string }
   readonly ancho: string
+  readonly alto: string | null
 }
 
 const TOPE = 0.16
 const PIE = 0.06
+/** La franja de la Mediana en apaisado, en fracciones del alto: centrada en la mitad de la caja, con lugar para su texto a 768 de alto. */
+const FRANJA_DE_LA_MEDIANA = { desde: 0.3, hasta: 0.7 } as const
 
-function cssLineal(w: number, h: number, rem: number): string {
+/** Un término lineal con rem: `w` fracciones del ancho, `h` del alto y `rem` rems. Se escribe en CSS o se mide en px (1rem = 16 px). */
+interface Lineal {
+  readonly w: number
+  readonly h: number
+  readonly rem: number
+}
+const lineal = (w: number, h: number, rem: number): Lineal => ({ w, h, rem })
+const REM_EN_PX = 16
+
+function cssLineal({ w, h, rem }: Lineal): string {
   const partes = [w !== 0 ? `${redondo(w * 100)}cqw` : '', h !== 0 ? `${redondo(h * 100)}cqh` : '', rem !== 0 ? `${redondo(rem)}rem` : ''].filter((x) => x !== '')
+  if (partes.length === 0) return '0'
+  if (partes.length === 1) return partes[0] ?? '0'
   return `calc(${partes.join(' + ').replace(/\+ -/g, '- ')})`
 }
+const enPx = ({ w, h, rem }: Lineal, ancho: number, alto: number): number => w * ancho + h * alto + rem * REM_EN_PX
 
-export function caja(orientacion: Orientacion, panel: IndiceDePanel): CajaDelTexto {
+interface CajaLineal {
+  readonly x: { readonly lado: 'left' | 'right'; readonly valor: Lineal }
+  readonly y: { readonly lado: 'top' | 'bottom'; readonly valor: Lineal }
+  readonly ancho: Lineal
+  readonly alto: Lineal | null
+  /** La franja vertical para la que se calculó el ancho (donde el texto puede estar), desde arriba. */
+  readonly franja: readonly [Lineal, Lineal]
+}
+
+/**
+ * Apaisado: cuánto se corre un corte, en fracciones del alto, a la altura `y` (también en fracciones del alto). Arriba del quiebre se va a
+ * la izquierda al bajar, en el quiebre el zag lo corre a la derecha, y abajo sigue yéndose a la izquierda: `cortes()`, leído en una altura.
+ */
+function corridaDelCorte(p: ParametrosDeLosCortes, y: number): number {
+  const inicio = p.quiebre.centro - p.quiebre.largo / 2
+  const fin = p.quiebre.centro + p.quiebre.largo / 2
+  if (y <= inicio) return p.pendiente * (inicio - y)
+  if (y <= fin) return (p.quiebre.corrida * (y - inicio)) / p.quiebre.largo
+  return p.quiebre.corrida - p.pendiente * (y - fin)
+}
+/** Lo más a la derecha y lo más a la izquierda que llega un corte entre dos alturas (es lineal por tramos: basta mirar los vértices). */
+function extremosDelCorte(p: ParametrosDeLosCortes, desde: number, hasta: number): { readonly max: number; readonly min: number } {
+  const inicio = p.quiebre.centro - p.quiebre.largo / 2
+  const fin = p.quiebre.centro + p.quiebre.largo / 2
+  const alturas = [desde, hasta, ...[inicio, fin].filter((y) => y > desde && y < hasta)]
+  const corridas = alturas.map((y) => corridaDelCorte(p, y))
+  return { max: Math.max(...corridas), min: Math.min(...corridas) }
+}
+
+function cajaLineal(orientacion: Orientacion, panel: IndiceDePanel): CajaLineal {
   const p = PARAMETROS[orientacion]
   const [en1, en2] = p.en
   const s = p.pendiente
   const inicio = p.quiebre.centro - p.quiebre.largo / 2
   const fin = p.quiebre.centro + p.quiebre.largo / 2
   const j = p.quiebre.corrida
+  const pie = lineal(0, 1 - PIE, 0)
   if (orientacion === 'apaisado') {
-    // Arriba del quiebre (la Simple y la Mediana) el texto termina un 4 % antes de que empiece; abajo (la Premium) empieza un 2 % después.
+    // La Simple termina un 4 % antes de que empiece el quiebre; la Premium empieza un 2 % después de que termina.
     const pieArriba = inicio - 0.04
     const topePremium = fin + 0.02
-    if (panel === 0) return { x: { lado: 'left', valor: '2rem' }, y: { lado: 'top', valor: `${TOPE * 100}cqh` }, ancho: cssLineal(en1, s * (inicio - pieArriba), -4) }
+    if (panel === 0) {
+      return { x: { lado: 'left', valor: lineal(0, 0, 2) }, y: { lado: 'top', valor: lineal(0, TOPE, 0) }, ancho: lineal(en1, s * (inicio - pieArriba), -4), alto: null, franja: [lineal(0, TOPE, 0), lineal(0, pieArriba, 0)] }
+    }
     if (panel === 1) {
+      // La franja cruza el quiebre: la caja se aleja de lo más a la derecha que llega el primer corte y de lo más a la izquierda que llega
+      // el segundo. El margen de 1rem se mide en perpendicular: sobre un corte inclinado, el borde de la caja corrido 1rem cruza el corte
+      // 1rem·s más allá, así que se corre 1rem·(1 + s), más un cuarto de rem de holgura.
+      const { desde, hasta } = FRANJA_DE_LA_MEDIANA
+      const izquierda = extremosDelCorte(p, desde, hasta).max
+      const derecha = extremosDelCorte(p, desde, hasta).min
       return {
-        // El margen de 1rem se mide en perpendicular a la caja: sobre un corte inclinado, el borde de la caja corrido 1rem hacia arriba
-        // cruza el corte 1rem·s más a la derecha, así que la caja se corre 1rem·(1 + s), más un cuarto de rem de holgura.
-        x: { lado: 'left', valor: cssLineal(en1, s * (inicio - TOPE), 1.25 + s) },
-        y: { lado: 'top', valor: `${TOPE * 100}cqh` },
-        ancho: cssLineal(en2 - en1, -s * (pieArriba - TOPE), -2 * (1 + s) - 0.25),
+        x: { lado: 'left', valor: lineal(en1, izquierda, 1.25 + s) },
+        y: { lado: 'top', valor: lineal(0, desde, 0) },
+        ancho: lineal(en2 - en1, derecha - izquierda, -2 * (1 + s) - 0.25),
+        alto: lineal(0, hasta - desde, 0),
+        franja: [lineal(0, desde, 0), lineal(0, hasta, 0)],
       }
     }
-    return { x: { lado: 'right', valor: '2rem' }, y: { lado: 'bottom', valor: `${PIE * 100}cqh` }, ancho: cssLineal(1 - en2, -(j - s * (topePremium - fin)), -(3 + s)) }
+    return { x: { lado: 'right', valor: lineal(0, 0, 2) }, y: { lado: 'bottom', valor: lineal(0, PIE, 0) }, ancho: lineal(1 - en2, -(j - s * (topePremium - fin)), -(3 + s)), alto: null, franja: [lineal(0, topePremium, 0), pie] }
   }
-  // Retrato: la Simple arriba a la izquierda; la Mediana a la derecha del quiebre, debajo del primer corte; la Premium abajo a la derecha.
-  if (panel === 0) return { x: { lado: 'left', valor: '2rem' }, y: { lado: 'top', valor: `${TOPE * 100}cqh` }, ancho: cssLineal(0.62, 0, -2) }
-  if (panel === 1) return { x: { lado: 'left', valor: cssLineal(fin, 0, 1.5) }, y: { lado: 'top', valor: cssLineal(j, en1, 1.5) }, ancho: cssLineal(1 - fin, 0, -3.5) }
-  return { x: { lado: 'right', valor: '2rem' }, y: { lado: 'bottom', valor: `${PIE * 100}cqh` }, ancho: cssLineal(0.6, 0, -2) }
+  // Retrato: tres bandas. La Simple arriba a la izquierda, sobre el primer corte; la Mediana en la banda del medio, a la derecha del quiebre
+  // y centrada entre los dos cortes; la Premium abajo a la derecha, debajo del segundo.
+  if (panel === 0) {
+    return { x: { lado: 'left', valor: lineal(0, 0, 2) }, y: { lado: 'top', valor: lineal(0, TOPE, 0) }, ancho: lineal(0.62, 0, -2), alto: null, franja: [lineal(0, TOPE, 0), lineal(0, en1, -1)] }
+  }
+  if (panel === 1) {
+    // Arriba, el punto más bajo del primer corte sobre la caja (el fin del zag); abajo, el más alto del segundo (en el borde derecho).
+    const tope = lineal(j, en1, 1.5)
+    const base = lineal(j - s * (1 - fin), en2, -1.5)
+    return { x: { lado: 'left', valor: lineal(fin, 0, 1.5) }, y: { lado: 'top', valor: tope }, ancho: lineal(1 - fin, 0, -3.5), alto: lineal(base.w - tope.w, base.h - tope.h, base.rem - tope.rem), franja: [tope, base] }
+  }
+  // La Premium arranca en x = 40 %: ahí el segundo corte está más bajo que en todo el resto de su ancho.
+  return { x: { lado: 'right', valor: lineal(0, 0, 2) }, y: { lado: 'bottom', valor: lineal(0, PIE, 0) }, ancho: lineal(0.6, 0, -2), alto: null, franja: [lineal(j - s * (0.4 - fin), en2, 1), pie] }
+}
+
+export function caja(orientacion: Orientacion, panel: IndiceDePanel): CajaDelTexto {
+  const c = cajaLineal(orientacion, panel)
+  return {
+    x: { lado: c.x.lado, valor: cssLineal(c.x.valor) },
+    y: { lado: c.y.lado, valor: cssLineal(c.y.valor) },
+    ancho: cssLineal(c.ancho),
+    alto: c.alto === null ? null : cssLineal(c.alto),
+  }
+}
+
+/** La franja vertical del texto de un panel en px, para una caja de `ancho × alto`: desde arriba, `[desde, hasta]`. */
+export function franjaDelTexto(orientacion: Orientacion, panel: IndiceDePanel, ancho: number, alto: number): readonly [number, number] {
+  const [desde, hasta] = cajaLineal(orientacion, panel).franja
+  return [enPx(desde, ancho, alto), enPx(hasta, ancho, alto)]
 }
 
 /**
