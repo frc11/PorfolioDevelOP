@@ -12,6 +12,7 @@
  */
 
 import type { IdDeServicio } from '../../../_secciones/_contrato/acento'
+import type { IdDeVariante } from '../../../_variantes/registro'
 import type { ChoreoKeyframe } from '../choreographyTypes'
 
 export type IdDePagina = 'home' | IdDeServicio | 'prueba'
@@ -31,9 +32,14 @@ export interface PresetDeLaEscena {
   readonly noche: 'dia' | 'noche'
   /** El servicio dueño del acento: el claro sale del token por el id (nunca un hex). */
   readonly acento: IdDeServicio | null
+  /**
+   * [B12a.3] P-H29e · la variante de escena de la página, por su id en el registro (`_variantes/registro.ts`), o `null`. Un id y no el
+   * componente: una página de servidor no puede pasarle una función a uno de cliente. La ranura la carga con un import dinámico.
+   */
+  readonly variante: IdDeVariante | null
 }
 
-export const PRESET_DEL_HOME: PresetDeLaEscena = { id: 'home', tramos: null, pista: null, noche: 'dia', acento: null }
+export const PRESET_DEL_HOME: PresetDeLaEscena = { id: 'home', tramos: null, pista: null, noche: 'dia', acento: null, variante: null }
 
 const pila: PresetDeLaEscena[] = []
 const oyentes = new Set<() => void>()

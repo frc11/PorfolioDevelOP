@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 
 import { Envoltorio } from '../_componentes/layout/Envoltorio'
-import { ATRIBUTO_DE_LA_INTRO_DE_PAGINA, IntroDeLaPagina, ParrafoDeLaBajada } from '../_componentes/pagina/IntroDeLaPagina'
+import { IntroDeLaPagina, ParrafoDeLaBajada, SELECTOR_DE_LA_INTRO } from '../_componentes/pagina/IntroDeLaPagina'
 import { Cuerpo } from '../_componentes/tipografia/Textos'
 import { PISTA_DE_LA_INTRO } from '../_lib/escena/ruta/pistaDeLaIntro'
 import type { PresetDeLaEscena } from '../_lib/escena/ruta/preset'
+
+import { EnlaceConLaSalida } from './EnlaceConLaSalida'
 
 /**
  * ⚠️ INSTRUMENTO, NO PANTALLA. [B12a.2] La página de prueba de la intro (plan `docs/rediseno/SPRINT-B12a.md` §10): la intro de 1,5
@@ -20,10 +22,12 @@ export const metadata: Metadata = {
 /** El preset, armado una vez: el mismo objeto en cada render (la escena arma la pista una vez por preset). */
 const PRESET: PresetDeLaEscena = {
   id: 'prueba',
-  tramos: { intro: `[${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}]`, pie: null },
+  tramos: { intro: SELECTOR_DE_LA_INTRO, pie: null },
   pista: PISTA_DE_LA_INTRO,
   noche: 'noche',
-  acento: null,
+  // [B12a.3] El acento de web y la variante de prueba (el registro: `_variantes/registro.ts`), para ejercer la ranura.
+  acento: 'web',
+  variante: 'prueba',
 }
 
 export default function PruebaDePagina(): React.JSX.Element {
@@ -32,7 +36,15 @@ export default function PruebaDePagina(): React.JSX.Element {
       <IntroDeLaPagina
         titulo="Prueba de la intro"
         preset={PRESET}
-        bajada={<ParrafoDeLaBajada>Scrolleá la intro (1,5 pantallas) y volvé: la cámara va de la composición inicial a la pose de la intro.</ParrafoDeLaBajada>}
+        bajada={
+          <>
+            <ParrafoDeLaBajada>Scrolleá la intro (1,5 pantallas) y volvé: la cámara va de la composición inicial a la pose de la intro, y la variante de prueba enciende la luz de abajo con el acento.</ParrafoDeLaBajada>
+            {/* [B12a.3] La salida de la variante: el enlace pide la señal (P-H29d), la luz vuelve a la composición y recién después navega (el lienzo sigue). */}
+            <EnlaceConLaSalida href="/v3" className="underline underline-offset-4">
+              Volver al home (la salida de la variante)
+            </EnlaceConLaSalida>
+          </>
+        }
       />
       <Envoltorio como="section" className="bg-fondo text-tinta relative" claseDeContenido="min-h-[200svh] py-[var(--spacing-20)]">
         <Cuerpo>[CUERPO DE LA PÁGINA] El papel: acá la escena duerme.</Cuerpo>

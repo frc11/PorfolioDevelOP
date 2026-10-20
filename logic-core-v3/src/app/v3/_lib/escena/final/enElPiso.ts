@@ -242,6 +242,7 @@ uniform float uPoder;
 uniform float uOscuroDelBrillo;
 uniform float uRelojDeLaLuz;
 uniform float uBrilloDeLaLuz;
+uniform vec3 uColorDeLaLuz;
 varying float vEnergiaDelBloque;
 ${RUIDO_DE_LA_LUZ_GLSL}
 ${CORRIENTES_DE_LA_LUZ_GLSL}
@@ -270,7 +271,7 @@ vec3 conLasJuntas( vec3 color, vec2 xz ) {
 	junta += descarga * ( 0.4 + min( s, 1.0 ) );
 	// [PULIDO 25] W2 a · debajo de lo que se lee, las juntas en calma.
 	junta *= mix( 1.0, ${f(QUIETUD.juntas)}, quietudDelPie( vPiso.xz ) );
-	return color + vec3( luz * junta * uBrilloDeLaLuz );
+	return color + vec3( luz * junta * uBrilloDeLaLuz ) * uColorDeLaLuz;
 }
 // [EL ENCASTRE] 2D · la máscara del logo acostado en este punto del piso: R, la forma; G, el campo ancho; [PULIDO 7] B, las contraformas.
 vec3 mascaraDelHueco( vec2 xz ) {

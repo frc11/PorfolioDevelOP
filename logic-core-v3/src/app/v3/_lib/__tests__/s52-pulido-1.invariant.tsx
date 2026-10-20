@@ -526,7 +526,9 @@ const dibujoP1 = (() => {
 })()
 const brilloP1 = dibujoP1.slice(dibujoP1.indexOf('vec3 conLasJuntas('), dibujoP1.indexOf('vec2 mascaraDelHueco('))
 // Blanca y sin blanquear las tapas: la luz se SUMA en los costados (desde su base) y en los cantos, nunca la tapa entera.
-const blancoBien = (g: string): boolean => /return color \+ vec3\( luz \* junta \* uBrilloDeLaLuz \);/.test(g) && !/mix\( color, vec3\(/.test(g) && !/vec3\( 1(\.0)?, 0\.[0-9]+, 0\.[0-9]+ \)/.test(g) && !g.includes('lava')
+// [B12a.3] P-H29b · reemplazada por la spec: la luz lleva su color en un uniforme (`uColorDeLaLuz`), blanco salvo en la intro de una página
+// (s78 §9 afirma que es blanco de base).
+const blancoBien = (g: string): boolean => /return color \+ vec3\( luz \* junta \* uBrilloDeLaLuz \) \* uColorDeLaLuz;/.test(g) && !/mix\( color, vec3\(/.test(g) && !/vec3\( 1(\.0)?, 0\.[0-9]+, 0\.[0-9]+ \)/.test(g) && !g.includes('lava')
 afirmar(blancoBien(brilloP1), 'la luz es BLANCA (cero rojo) y se suma por las juntas (los costados y los cantos): las tapas no se ponen blancas')
 controlPositivo('el detector VE las tapas blancas de P1 (rechazadas)', `${brilloP1}\nreturn mix( color, vec3( mix( 0.9, 1.0, vTapa ) ), k );`, blancoBien)
 // Cuantizado al bloque: la energía es UNA por bloque (cada bloque se prende entero), no en cada punto del piso. [PULIDO 3] A1 ·

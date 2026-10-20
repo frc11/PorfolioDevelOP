@@ -652,3 +652,85 @@ Valentino puso B12a antes que el subsprint B de B1.2d, porque la maqueta complet
 - **En reposo, 10 s:** **20 ms/s de tareas** (6 de script) y **0 cuadros de más de 50 ms**, en las tres corridas. El criterio era ≤ 50 ms/s y 0. En la Fase 0, sin el preset, daba unos 600 ms/s y 3 o 4 cuadros largos.
 - **Con la rueda, 8 s:** de 32 a 34 ms/s y 0 cuadros largos.
 - El control es la Fase 0: la misma ruta y el mismo banco, antes de B12a.1.
+
+### B12a.3 · la ranura de variantes y P-H29 (2026-10-20)
+
+**AVISO · `next build` de D7 (el primero de los dos, el de la ranura).** Autorizado por Valentino para esta noche, con la máquina libre. Corre con `E2E_DIST_DIR=.next-b12`, un distDir que ya está en `.gitignore` (lección de Tailwind 4: el intruso tiene que estar ignorado antes de construir). Así no toca el `.next` del dev. Después, `next start` en :3004 y el arnés de la ranura contra ese servidor, para el presupuesto de 0,5 ms por cuadro.
+
+**Lo hecho: la ranura y los siete P-H29** (las firmas, en `B12a-API.md` §4).
+- **e · la variante viaja por id.** `preset.variante` es un `IdDeVariante`; el registro (`_variantes/registro.ts`, fuera de `_lib/`) va de cada id a un import dinámico de su módulo `'use client'` (el componente es el `default`). Una página de servidor no puede pasarle una función a un componente de cliente, y así cada variante queda en su propio pedazo: en el build, la de prueba pesa 1,4 KB, fuera de la carga del lienzo.
+- **La ranura** (`esc/ruta/RanuraDeLaVariante.tsx`) va adentro del lienzo, montada después del final del pie. Carga la variante del preset y le presta lo que puede tocar (`PropsDeLaVariante`, `esc/ruta/variante.ts`: sólo tipos y números).
+- **a · un dueño por tramo.** La luz de abajo del piso es de la ranura mientras la intro está a la vista (o la variante sale); fuera, del final (el pie, B13). En el home no hace nada. La variante la escribe con `luzDeAbajo(energia, color)`, nunca tocando el almacén.
+- **b · el color de esa luz:** `uColorDeLaLuz`, en las juntas (`enElPiso.ts`) y en el plano de debajo (`planoDeLaLuz.ts`). Blanco salvo en la intro de una página.
+- **c · el color de la energía** (`uLuzNoche` de las brasas, los arcos y la red): prestado con `energia(color)`. `PlasmaYCargas` lo copia sólo mientras la ranura lo pide, así el banco no se pisa.
+- **d · la señal de salida:** ver abajo; cambió con la medición en el build.
+- **f · la luz de la composición:** `COMPOSICION_DE_LA_LUZ = { noche: 1, brilloDelPiso: 0.12 }`, del home. La ranura la pone en la intro de toda página, con o sin variante.
+- **g · la pista compartida:** `PISTA_DE_LA_INTRO`, hecha en B12a.2 con la pose 2.
+- **La intro:** el atributo lleva el id de la página, el bloque lleva `data-servicio` con el acento y `SELECTOR_DE_LA_INTRO` está exportado.
+- **La variante de prueba** (`esc/ruta/VarianteDePrueba.tsx`, id `prueba`): en `/v3/prueba-de-pagina`, con el acento de web.
+  - Un anillo de luz en el piso, armado en JSX: R3F lo libera al desmontarse.
+  - Enciende la luz de abajo de 0,12 a 1 en la primera mitad del avance y la tiñe.
+  - Tiñe la energía.
+  - Al salir, 1 − (1 − t)³ en 420 ms.
+
+**El `next build` de D7** (el aviso, arriba) corrió dos veces, las dos en verde (salida 0, compilado en 2,2 min y en 53 s): la primera encontró los defectos de la salida y la segunda verificó el arreglo. `scripts-carga/ranura.ts` corrió contra `next start` en :3004 con el Chrome del sistema, a 1440 y a 390.
+
+**ENCONTRÓ TRES DEFECTOS DE LA SALIDA**, que el dev tapaba: ahí los cuadros ya se trababan por otras razones y el muestreo de afuera no los veía. Reproducidos en rojo en el build, cuadro a cuadro con un rAF en la página:
+1. **Salía con la página nueva ya montándose.** La salida arrancaba cuando cambiaba el preset, o sea con la navegación hecha. El montaje del home trababa los cuadros (huecos de 133 ms a 1440 y de 547 a 390): la luz no bajaba, saltaba. A 390 quedaba en 1 y caía de golpe a 0,12.
+2. **Se ponía blanca de golpe.** El acento salía del preset actual, y al irse ese preset ya era el del home, sin acento.
+3. **Podía soltar la luz un cuadro** entre el cambio de preset y el arranque de la salida: el final se la quedaba (visto una vez, en el muestreo de afuera).
+
+**El arreglo** (P-H29d, que cambia la firma: «antes del velo» de verdad):
+- **La señal:** `pedirLaSalidaDeLaVariante()` (`esc/ruta/salidaDeLaVariante.ts`, sin react ni three). La pide la navegación antes de irse y espera la promesa. La variante vuelve a la composición en 420 ms con la página quieta, y recién después se navega.
+  - Sin variante montada o con la escena tapada por el papel, se resuelve en el acto; con movimiento reducido, también.
+  - La promesa se resuelve siempre.
+  - Hoy la pide el enlace de la página de prueba (`prueba-de-pagina/EnlaceConLaSalida.tsx`): espera y deja pasar el clic al mismo `<Link>`, sin `router.push`. Es interino hasta `EnlaceDeRuta` de B12a.6, que la va a pedir antes del velo.
+- **El respaldo:** si la ruta cambia sin la señal (la flecha del navegador), la salida arranca ahí, como antes, y se desmonta con la salida terminada.
+- **El acento** se fija al cargar la variante.
+- **La ranura no suelta la luz** mientras la página que pidió la variante ya no está y la variante sigue montada.
+
+**Medido en el build, después del arreglo:**
+
+| | 1440 × 900 | 390 × 844 |
+|---|---|---|
+| La carga | por su id | por su id |
+| La energía en avance 0 → 0,25 → 0,5 | 0,120 → 0,561 → 1,000 | 0,120 → 0,561 → 1,000 |
+| El color | ffffff → d1e2f4 → 8fc0e8 | ffffff → d1e2f4 → 8fc0e8 |
+| La salida: llega a la composición (exacta) | 431 ms | 433 ms |
+| …y navega | a los 471–485 ms | a los 473–486 ms |
+| Hueco máximo entre cuadros mientras baja | 14 ms | 14 ms |
+| Baja siempre, teñida y con la ranura de dueña | sí | sí |
+| Diez idas y vueltas (geometrías/texturas) | 40/27 → 40/27 | 32/21 → 32/21 |
+| El costo de la variante (CPU por cuadro, con − sin) | Δ 0,002 ms (A/A 0,10) | Δ −0,059 ms (A/A 0,06) |
+| Con movimiento reducido | entera y quieta desde arriba; salida en 6 ms, navega a los 59 | ídem: 7 ms y 61 |
+
+- **El costo** también se midió en avance 0,5 (Δ −0,049, A/A 0,06): **bajo la resolución del banco (~0,1 ms), con el presupuesto en 0,5.**
+- **Los controles, en rojo:**
+  - `CONTROL=sin-la-senal`: la ranura ignora la señal, que es la salida de antes. Navega a los 70 ms, con huecos de 147 ms (1440) y 67 ms (390).
+  - `CONTROL=pesada`: la página gasta 0,8 ms por cuadro sólo en las medidas «con». Δ 0,662: FALLA por presupuesto. El banco ve ~83 % de una carga conocida.
+- **EL BANCO DEL COSTO MENTÍA, Y SE ARREGLÓ.**
+  - Las primeras seis medidas daban Δ de 0,35 a 0,51 ms, también en avance 0, con la luz en la composición. La bandera «sin variante» se ponía en `window` y la recarga la borraba: «sin» medía con la variante. Esos 0,4 ms eran lo que cuesta la primera carga contra una recarga.
+  - Ahora la bandera viaja en `sessionStorage`, cada medida se toma recién recargada, y en orden con, sin, con, sin (con su A/A).
+  - La medida del dev de antes de esta noche tenía el mismo defecto y no vale.
+- **El criterio de llegada**, corregido a la composición exacta: la curva 1 − (1 − t)³ queda a 0,002 de ella al 87 % del camino, y con ese margen la llegada se medía a los 379 ms.
+
+**Afirmaciones reemplazadas por la spec**, cada una con su control:
+- **s78 §9:** la de la salida «cuando la página se va» sale. Entran:
+  - la señal (comportamiento puro y sin react ni three);
+  - la ranura que la atiende (control: la ranura que la ignora);
+  - el acento fijado al cargar (control: el de la ruta actual);
+  - la ranura que no suelta la luz (control: sin `yendose`);
+  - el enlace que espera (control: sin `preventDefault`).
+  - s78 da 64 de 0.
+- **P-H29b:** en s50 (`sinTinta`), s52 (`blancoBien` y `tapaBien` con su control) y s53 (el plano de la luz), la línea del shader ahora multiplica por `uColorDeLaLuz`. s78 afirma que es blanco de base.
+
+**Verificación:** lint limpio en lo tocado, tsc limpio; `verificar` con la misma lista de fallas que la base (s1-bundle 12, s3-peso 13, s2-bundle 16, s2-css 2, s4-cobertura 1, s4-heredado 4, s5-compacto 1, s5-peso 8, s7-compuerta 18, s8-montaje 2, s8-tres 11, s8-chrome 2, s8-peso 14, s17-revelado 1) y los 17 sueltos en verde.
+
+**Qué mirar (B12a.3):**
+1. **`/v3/prueba-de-pagina` a 1440 y a 390:** scrolleá la primera mitad de la intro y volvé.
+   - Debería verse la luz de abajo subir entre los bloques del piso, teñida de celeste, con un anillo de luz alrededor del logo y el polvo teñido.
+   - Al volver, todo a la composición: el piso apenas encendido y blanco.
+2. **El mismo lugar, con la luz encendida:** apretá «Volver al home (la salida de la variante)».
+   - Debería verse la luz bajar rápido y calma, en menos de medio segundo y sin ponerse blanca de golpe. Recién después aparece el home.
+3. **La flecha del navegador para volver** a la página de prueba: la variante entra de nuevo.
+4. **Con movimiento reducido** (sistema o DevTools), a 1440: la luz entera desde arriba, quieta, y el enlace va al home en el acto.

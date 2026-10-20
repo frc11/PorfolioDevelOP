@@ -42,6 +42,7 @@ void main() {
 varying vec2 vXZ;
 uniform float uRelojDeLaLuz;
 uniform float uBrilloDeLaLuz;
+uniform vec3 uColorDeLaLuz;
 ${LECTURA_DE_LA_LUZ_GLSL}
 ${RUIDO_DE_LA_LUZ_GLSL}
 ${CORRIENTES_DE_LA_LUZ_GLSL}
@@ -56,7 +57,7 @@ void main() {
 	if ( e <= 0.0 ) discard;
 	float luz = e * brilloDeLaJunta( vXZ, uRelojDeLaLuz ) + ( corrientesDeLaLuz( vXZ, uGrillaDelPiso.y ) + descargaDelFilo( vXZ, uGrillaDelPiso.y ) ) * ( 0.4 + min( e, 1.0 ) );
 	if ( luz <= 0.002 ) discard;
-	gl_FragColor = vec4( vec3( ${f(LUZ_DE_ABAJO.plano)} * luz * uBrilloDeLaLuz ), 1.0 );
+	gl_FragColor = vec4( vec3( ${f(LUZ_DE_ABAJO.plano)} * luz * uBrilloDeLaLuz ) * uColorDeLaLuz, 1.0 );
 }`,
     depthWrite: true,
     toneMapped: false,

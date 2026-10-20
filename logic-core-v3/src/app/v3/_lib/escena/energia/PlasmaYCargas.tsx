@@ -13,6 +13,7 @@ import { LUCES_VIVAS, PULSO_VIVO, VIVO } from '../entorno/vivo'
 import { EN_VIVO, FIN_DEL_GOLPE } from '../final/recorridoDelFinal'
 import { FLOOR_Y } from '../probeScene'
 import { energiaDelBanco, type EnergiaDelBanco } from './banco'
+import { ENERGIA_DE_LA_RUTA } from './energiaDeLaRuta'
 import { crearAfuera, cuadro, cuadroQuieto, type Afuera } from './cuadro'
 import { armar, soltar, type Armado, type Vista } from './dibujo/armado'
 import { escucharElPuntero } from './interaccion/puntero'
@@ -44,6 +45,8 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
   const afuera = useRef<Afuera>(crearAfuera())
   const vista = useRef<Vista>({ camara: null, ancho: 1, alto: 1 })
   const quietas = useRef({ listo: false })
+  // [B12a.3] P-H29c · si la energía está teñida por la ranura (para devolverla al blanco una vez, al soltarla).
+  const tenida = useRef(false)
   // [PULIDO 18] P1.a · las partículas y los arcos blandos leen la profundidad del pase compartido (`pase/`).
   useEffect(() => {
     PEDIDOS_DEL_PASE.profundidad += 1
@@ -89,6 +92,14 @@ export function PlasmaYCargas({ logoGroupRef, quieto, compacto }: Props): React.
     // [PULIDO 26] X3 · la noche de la energía sigue al frente del amanecer (sin el salto del cambio: `nocheDeLaEnergia`). [CIERRE A] A3 ·
     // y con ella entran y se van las cargas, los arcos y la red (de día, nada: `deNoche`, `dibujo/comun.ts`).
     u.uNoche.value = nocheDeLaEnergia(VIVO.uNoche.value, AMANECER_EN_VIVO.uBarridoDelDia.value, AMANECER_EN_VIVO.uFrenteDelDia.value)
+    // [B12a.3] P-H29c · el color de la energía, si lo pide la ranura de variantes; al soltarlo, el blanco de la paleta.
+    if (ENERGIA_DE_LA_RUTA.pedido) {
+      u.uLuzNoche.value.set(ENERGIA_DE_LA_RUTA.color.r, ENERGIA_DE_LA_RUTA.color.g, ENERGIA_DE_LA_RUTA.color.b)
+      tenida.current = true
+    } else if (tenida.current) {
+      u.uLuzNoche.value.set(1, 1, 1)
+      tenida.current = false
+    }
     u.uFoco.value = state.camera.position.distanceTo(a.centro)
     const despues = Math.min(1, Math.max(0, (EN_VIVO.fin - FIN_DEL_GOLPE) / DESPUES_DEL_GOLPE))
     u.uApagado.value = EN_VIVO.camara * despues * despues * (3 - 2 * despues)

@@ -42,6 +42,7 @@ import { OscurecidoDelPortfolio } from './OscurecidoDelPortfolio'
 import { CristalDeLaEscena } from './cristal/CristalDeLaEscena'
 import { EspejoDeLaEscena } from './espejo/EspejoDeLaEscena'
 import { type ProbeMode, type ProbeParamsStore, type ProbeRigStore, type ProbeStatsStore } from './probeStore'
+import { RanuraDeLaVariante } from './ruta/RanuraDeLaVariante'
 
 /**
  * La escena. **Cuatro cosas y nada más**: el piso, la envolvente de rendijas,
@@ -294,6 +295,8 @@ export default function ProbeStage({
         {/* [NOCTURNO FINAL] B1 · el logo cae al cargar y llega con el titular del hero (súper onda); con movimiento. */}
         {!reducedMotion && <CaidaDelLogo logoGroupRef={logoGroupRef} />}
         {(!reducedMotion || calidad === 'compacta') && <FinalDelPie logoGroupRef={logoGroupRef} stats={stats} calidad={calidad} estatico={reducedMotion} />}
+        {/* [B12a.3] La ranura de variantes de las páginas: DESPUÉS del final (su cuadro escribe la luz de abajo en la intro de una página). */}
+        <RanuraDeLaVariante calidad={calidad} reducido={reducedMotion} />
         {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
         <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}

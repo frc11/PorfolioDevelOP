@@ -209,6 +209,8 @@ export const LUZ_DE_ABAJO_EN_VIVO = {
   uRelojDeLaLuz: { value: 0 },
   /** [PULIDO 3B] B0 · cuánto brilla la luz (1: [PULIDO 4] C2 · `?energia=intensa`, que la subía, se borró). */
   uBrilloDeLaLuz: { value: 1 },
+  /** [B12a.3] P-H29b · su color (blanco: el de siempre); en la intro de una página lo tiñe la ranura de variantes. Es luz, no superficie. */
+  uColorDeLaLuz: { value: new THREE.Color(1, 1, 1) },
 }
 
 const f = (n: number): string => (Number.isInteger(n) ? n.toFixed(1) : String(n))
