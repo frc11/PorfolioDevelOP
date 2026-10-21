@@ -33,22 +33,35 @@ export function useDeslizDeLaPildora(pastilla: RefObject<HTMLElement | null>, ru
     const alCubrir = (): void => {
       desde.current = el.getBoundingClientRect().top
     }
+    let cuadro = 0
     const alDestapar = (): void => {
       const d = desde.current
       desde.current = null
-      retenida.current?.cancel()
-      retenida.current = null
-      if (d === null) return
-      const corrida = d - el.getBoundingClientRect().top
-      animacion.current?.cancel()
-      if (Math.abs(corrida) < 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-      animacion.current = el.animate([{ translate: `0 ${corrida.toFixed(1)}px` }, { translate: '0 0' }], { duration: DESLIZ_DE_LA_PILDORA_MS, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' })
+      if (d === null) {
+        retenida.current?.cancel()
+        retenida.current = null
+        return
+      }
+      // [B12a.8] En el cuadro siguiente y con la hora de ahora: el del destape es largo (27–35 ms en el build) y la animación tomaba como
+      // inicio el principio de ese cuadro: aparecía ya adelantada (las dos primeras muestras a 7,4 y 5,7 px/ms; su curva da a lo sumo 2,6).
+      cancelAnimationFrame(cuadro)
+      cuadro = requestAnimationFrame(() => {
+        retenida.current?.cancel()
+        retenida.current = null
+        const corrida = d - el.getBoundingClientRect().top
+        animacion.current?.cancel()
+        if (Math.abs(corrida) < 1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+        const a = el.animate([{ translate: `0 ${corrida.toFixed(1)}px` }, { translate: '0 0' }], { duration: DESLIZ_DE_LA_PILDORA_MS, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' })
+        a.startTime = performance.now()
+        animacion.current = a
+      })
     }
     window.addEventListener(EVENTOS_DEL_VELO.cubre, alCubrir)
     window.addEventListener(EVENTOS_DEL_VELO.destapa, alDestapar)
     return () => {
       window.removeEventListener(EVENTOS_DEL_VELO.cubre, alCubrir)
       window.removeEventListener(EVENTOS_DEL_VELO.destapa, alDestapar)
+      cancelAnimationFrame(cuadro)
       retenida.current?.cancel()
       animacion.current?.cancel()
     }

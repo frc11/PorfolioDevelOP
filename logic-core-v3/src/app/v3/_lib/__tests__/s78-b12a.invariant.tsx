@@ -709,7 +709,8 @@ const delaBarra = leerV3('_chrome/barra/useDeslizDeLaPildora.ts')
 const deslizBien = (barra: string, velo: string): boolean =>
   velo.includes('window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))') && velo.includes('window.dispatchEvent(new Event(EVENTOS_DEL_VELO.repuso))') && /pasar\('llego'\)\s*window\.dispatchEvent\(new Event\(EVENTOS_DEL_VELO\.destapa\)\)/.test(velo) &&
   barra.includes('window.addEventListener(EVENTOS_DEL_VELO.cubre, alCubrir)') && barra.includes('window.addEventListener(EVENTOS_DEL_VELO.destapa, alDestapar)') && !barra.includes('EVENTOS_DEL_VELO.repuso,') &&
-  barra.includes("animacion.current = el.animate([{ translate: `0 ${corrida.toFixed(1)}px` }, { translate: '0 0' }]") && barra.includes('retenida.current = el.animate(') && /useLayoutEffect\(\(\) => \{[\s\S]*?\}, \[pastilla, ruta\]\)/.test(barra) &&
+  barra.includes("const a = el.animate([{ translate: `0 ${corrida.toFixed(1)}px` }, { translate: '0 0' }]") && /cuadro = requestAnimationFrame\(\(\) => \{[\s\S]*?a\.startTime = performance\.now\(\)/.test(barra) &&
+  barra.includes('retenida.current = el.animate(') && /useLayoutEffect\(\(\) => \{[\s\S]*?\}, \[pastilla, ruta\]\)/.test(barra) &&
   leerV3('_chrome/barra/BarraDelHome.tsx').includes('useDeslizDeLaPildora(pastillaRef, ruta)') && new Set(Object.values(EVENTOS_DEL_VELO)).size === 4
 afirmar(deslizBien(delaBarra, delVeloNuevo), '  y entre una ruta y otra se desliza: el velo avisa cuándo cubre (se toma dónde está); al cambiar la ruta se la retiene ahí, y al destapar se anima a su lugar')
 controlPositivo('  el detector ve la píldora que arranca con `repuso` (el salto medido)', delaBarra.replace('window.addEventListener(EVENTOS_DEL_VELO.destapa, alDestapar)', 'window.addEventListener(EVENTOS_DEL_VELO.repuso, alDestapar)'), (b: string) => deslizBien(b, delVeloNuevo))
