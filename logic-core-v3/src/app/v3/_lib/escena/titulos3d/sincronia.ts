@@ -44,7 +44,7 @@ export interface Taller {
 
 /** ¿El armado que hay sirve para este título? La misma forma: lo que decide su geometría (sin rayas medidas) y su modo. */
 export function mismaForma(a: TituloDeVolumen, b: TituloDeVolumen): boolean {
-  return a.texto === b.texto && a.fuente === b.fuente && a.gesto === b.gesto && a.trazos.length === 0 && b.trazos.length === 0 && a.queda === b.queda && a.rearma === b.rearma && a.colocacion === b.colocacion && a.forma === b.forma
+  return a.texto === b.texto && a.fuente === b.fuente && a.gesto === b.gesto && a.trazos.length === 0 && b.trazos.length === 0 && a.queda === b.queda && a.rearma === b.rearma && a.colocacion === b.colocacion && a.forma === b.forma && a.material === b.material
 }
 
 export function soltarElArmado(t: Taller, armados: Armado[], a: Armado): void {
@@ -102,7 +102,8 @@ function armarElLote(t: Taller, armados: Armado[], lote: readonly TituloDeVolume
       URGENTES.delete(titulo.id)
       continue
     }
-    const a = armar(titulo, t.variante)
+    // [B12a.8 · P-H33] Con su material, si trae uno (el título de una página de noche, en papel).
+    const a = armar(titulo, titulo.material ?? t.variante)
     TANDA_DEL_ARMADO.set(a, versionDeLasFuentes())
     const antes = MOSTRADO_DE_LOS_REARMADOS.get(titulo.id)
     if (antes !== undefined) Object.assign(a.mostrado, antes)

@@ -76,7 +76,7 @@ import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighti
 import { AUTO_ORBIT_DEG_PER_S, CAMERA_FOV, ORBIT_TARGET_Y } from './probeScene'
 import { fovDeLaBanda } from './banda'
 import { mezclarConElPortfolio } from './poseDelPortfolio'
-import { AVANCE_DE_LA_INTRO, luzDeLaPagina, pistaDeLaPagina } from './ruta/pistaDeLaIntro'
+import { AVANCE_DE_LA_INTRO, luzDeLaPagina, pistaDeLaPagina, poseDeLaIntro } from './ruta/composicionEnLaEscena'
 import type {
   ProbeMode,
   ProbeParamsStore,
@@ -334,9 +334,9 @@ export function OrbitRig({
       sampleTrack(track, progresoDeLaCamara(progress), target)
       // [B1] con el panel del Portfolio adentro, la pose del logo del Portfolio: un desplazamiento sobre la del scroll (el progreso no se toca).
       if (isChoreo) mezclarConElPortfolio(target, Math.min(delta, 0.1), state.size.width / Math.max(1, state.size.height), fovDeLaBanda(CAMERA_FOV, state.size.width, state.size.height), stats.current.logoW, stats.current.logoH)
-      // [B12a.2] En una página con pista (la intro), la cámara la sigue con el avance de la intro, encima de la del recorrido; la luz, la del principio con la noche del preset.
+      // [B12a.2] En una página con pista (la intro), la cámara la sigue con el avance de la intro (y [B12a.8] su composición), encima de la del recorrido; la luz, la del principio con la noche del preset.
       const pagina = pistaDeLaPagina()
-      if (pagina !== null) sampleTrack(pagina.track, AVANCE_DE_LA_INTRO.current, target)
+      if (pagina !== null) poseDeLaIntro(pagina.track, AVANCE_DE_LA_INTRO.current, target, state.size.width / Math.max(1, state.size.height), fovDeLaBanda(CAMERA_FOV, state.size.width, state.size.height), stats.current.logoW, stats.current.logoH)
       luzDeLaPagina(pagina, progress, arc)
       // El disparo de Trabajos acota el nivel a la noche mientras dura — `nocheDisparada.ts`.
       arc.level = nivelConLaNocheDisparada(arc.level)

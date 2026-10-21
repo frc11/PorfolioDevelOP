@@ -3,7 +3,7 @@ import { Font, type FontData } from 'three/examples/jsm/loaders/FontLoader.js'
 import type { FuenteDePagina, FuenteDelTitulo } from '../../titulos3d/registro'
 
 /**
- * [B12a.4] LAS FUENTES 3D DEL TÍTULO DE LAS PÁGINAS — cuatro instancias de Archivo (`scripts-retoque/fuentes-3d.py`), con un import
+ * [B12a.4] LAS FUENTES 3D DEL TÍTULO DE LAS PÁGINAS — instancias de Archivo ([B12a.8] siete: las de las cuatro familias que se comparan) (`scripts-retoque/fuentes-3d.py`), con un import
  * dinámico cada una: no van en la carga del lienzo (las del home sí, estáticas en `armado.ts`), así que el home no las baja. La
  * sincronía espera la de un título antes de armarlo (`sincronia.ts`) y `armado.ts` la lee de acá.
  */
@@ -11,7 +11,11 @@ const CARGAS: Readonly<Record<FuenteDePagina, () => Promise<{ readonly default: 
   'archivo-125-800': () => import('../../../_fuentes/archivo-125-800-pagina.json'),
   'archivo-125-300': () => import('../../../_fuentes/archivo-125-300-pagina.json'),
   'archivo-75-800': () => import('../../../_fuentes/archivo-75-800-pagina.json'),
-  'archivo-112-300': () => import('../../../_fuentes/archivo-112-300-pagina.json'),
+  'archivo-75-900': () => import('../../../_fuentes/archivo-75-900-pagina.json'),
+  'archivo-75-500': () => import('../../../_fuentes/archivo-75-500-pagina.json'),
+  'archivo-125-200': () => import('../../../_fuentes/archivo-125-200-pagina.json'),
+  'archivo-125-500': () => import('../../../_fuentes/archivo-125-500-pagina.json'),
+  'archivo-125-400': () => import('../../../_fuentes/archivo-125-400-pagina.json'), // [B12a.8] T5 · `?legibilidad=peso`
 }
 
 const CARGADAS = new Map<FuenteDePagina, Font>()

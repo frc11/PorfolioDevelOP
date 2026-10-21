@@ -1,5 +1,5 @@
 /**
- * [B12a.3] LA RANURA DE VARIANTES, EN EL SITIO — en la ruta de prueba (`/v3/prueba-de-pagina`, la variante `prueba` y el acento de web), con
+ * [B12a.3] LA RANURA DE VARIANTES, EN EL SITIO — en la ruta de prueba (`/v3/pagina-base`, la variante `prueba` y el acento de web), con
  * el banco de la escena (`__ranuraDelBanco`). Contra el dev server (o el build, con `BASE`), con el Chrome del sistema a la vista y `/api/`
  * bloqueado.
  *
@@ -166,7 +166,7 @@ async function main(): Promise<void> {
       await cdp.send('Network.enable')
       await cdp.send('Network.setBlockedURLs', { urls: ['*/api/*'] })
       await cdp.send('Performance.enable')
-      await p.goto(`${BASE}/v3/prueba-de-pagina`, { waitUntil: 'load', timeout: 240000 })
+      await p.goto(`${BASE}/v3/pagina-base`, { waitUntil: 'load', timeout: 240000 })
       const cargada = await esperar(p, (e) => e.id === 'prueba')
       await dormir(2500)
       if (cargada?.id !== 'prueba') fallas.push('no-cargo')

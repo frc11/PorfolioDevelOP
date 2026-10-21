@@ -10,7 +10,7 @@ import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
 import type { Caja } from '../../_secciones/trabajos/demos/genie'
 import { ITEMS_DEL_DESPLEGABLE } from '../barra/DesplegableDeServicios'
 import { ENLACES_DE_SECCION, ENLACE_DE_CONTACTO } from '../enlaces'
-import { TODOS_LOS_SERVICIOS, destinoDesde } from '../paginas'
+import { SERVICIOS_DEL_HOME, destinoDesde } from '../paginas'
 
 /**
  * [NAVBAR] T3 · EL PANEL DEL MENÚ, LO QUE NO SE MUEVE — su adentro (el botón de cerrar y los ítems, con sus clases) y la
@@ -65,9 +65,12 @@ export const TRES_BARRAS = <TresBarras aria-hidden="true" strokeWidth={1.5} clas
  * las secciones y, como una más debajo de «Por qué develOP», Contacto: un botón que cierra el menú y abre el panel de
  * contacto (`MenuMovil`). Sin Login.
  *
- * [B12a.5] «Servicios» es un acordeón (D5, en el teléfono): abre la sección del home y las páginas de servicio. Sus ítems cuentan como
- * piezas del panel (`item-del-menu`: el Genie los copia) sólo abiertos, y al terminar de abrirse o cerrarse el menú vuelve a medirse (el
- * `resize` que escucha `MenuDeVidrio`). Desde una página, las anclas llevan al home (`destinoDesde`).
+ * [B12a.5] «Servicios» es un acordeón (D5, en el teléfono). Sus ítems cuentan como piezas del panel (`item-del-menu`: el Genie los copia)
+ * sólo abiertos, y al terminar de abrirse o cerrarse el menú vuelve a medirse (el `resize` que escucha `MenuDeVidrio`). Desde una página,
+ * las anclas llevan al home (`destinoDesde`).
+ *
+ * [B12a.8] «Home» va primero. «Servicios» NAVEGA (a la sección del home) y la flechita de al lado abre el acordeón, con las páginas de
+ * servicio (sin «Todos los servicios»: es «Servicios» mismo).
  */
 export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: () => void; readonly alContacto: () => void }): React.JSX.Element {
   const ruta = usePathname()
@@ -87,12 +90,16 @@ export function ContenidoDelMenu({ alCerrar, alContacto }: { readonly alCerrar: 
       <nav aria-label="Navegación principal" className="flex flex-1 flex-col justify-center px-[var(--spacing-6)] pb-[var(--spacing-6)]">
         <ul className="flex flex-col gap-[var(--spacing-1)]">
           {ENLACES_DE_SECCION.map((enlace) =>
-            enlace.id === TODOS_LOS_SERVICIOS.id ? (
+            enlace.id === SERVICIOS_DEL_HOME.id ? (
               <li key={enlace.id}>
-                <button type="button" data-parte="item-del-menu" aria-expanded={servicios} aria-controls={ID_DEL_ACORDEON} onClick={() => setServicios((a) => !a)} className={cn(CLASE_DEL_ITEM, 'justify-between')}>
-                  {enlace.rotulo}
-                  <ChevronDown aria-hidden="true" strokeWidth={1.5} className={cn('size-[var(--spacing-5)] transition-transform duration-[var(--duracion-media)] ease-[var(--ease-principal)] motion-reduce:transition-none', servicios && 'rotate-180')} />
-                </button>
+                <div className="flex items-center gap-[var(--spacing-1)]">
+                  <EnlaceDeRuta href={destinoDesde(ruta, enlace.destino)} data-parte="item-del-menu" onClick={alCerrar} className={cn(CLASE_DEL_ITEM, 'flex-1')}>
+                    {enlace.rotulo}
+                  </EnlaceDeRuta>
+                  <button type="button" data-parte="abrir-el-acordeon" aria-label="Las páginas de servicio" aria-expanded={servicios} aria-controls={ID_DEL_ACORDEON} onClick={() => setServicios((a) => !a)} className={CLASE_DE_LA_FLECHITA}>
+                    <ChevronDown aria-hidden="true" strokeWidth={1.5} className={cn('size-[var(--spacing-5)] transition-transform duration-[var(--duracion-media)] ease-[var(--ease-principal)] motion-reduce:transition-none', servicios && 'rotate-180')} />
+                  </button>
+                </div>
                 <div
                   id={ID_DEL_ACORDEON}
                   data-parte="acordeon-de-servicios"
@@ -148,6 +155,12 @@ const ID_DEL_ACORDEON = 'acordeon-de-servicios'
 
 export const CLASE_DEL_ITEM = cn(
   'text-titulo-m font-titulo leading-titulo tracking-titulo flex min-h-[var(--spacing-12)] w-full items-center rounded-[var(--radius-medio)] px-[var(--spacing-4)] py-[var(--spacing-2)] text-left',
+  'hover:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)]',
+)
+
+/** [B12a.8] La flechita de «Servicios»: un blanco táctil cuadrado (48 px) con el mismo hover que los ítems. */
+const CLASE_DE_LA_FLECHITA = cn(
+  'grid size-[var(--spacing-12)] shrink-0 place-items-center rounded-[var(--radius-medio)]',
   'hover:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--color-tinta)_8%,transparent)]',
 )
 

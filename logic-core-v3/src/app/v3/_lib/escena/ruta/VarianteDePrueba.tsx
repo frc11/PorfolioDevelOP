@@ -14,7 +14,7 @@ const suave = (t: number): number => t * t * (3 - 2 * t)
 const BLANCO = new THREE.Color(1, 1, 1)
 
 /**
- * [B12a.3] LA VARIANTE DE PRUEBA — la de `/v3/prueba-de-pagina` (registro: `prueba`). Ejerce la ranura entera con lo que una variante puede
+ * [B12a.3] LA VARIANTE DE PRUEBA — la de ejemplo de la página base, `/v3/pagina-base` (registro: `prueba`). Ejerce la ranura entera con lo que una variante puede
  * hacer, y nada más:
  * · agrega un objeto a la escena (un anillo de luz en el piso, alrededor del logo, del color del acento) y lo anima en su `useFrame`;
  * · enciende la luz de abajo prestada (de la composición a la entera) y la tiñe del acento, y tiñe la energía (P-H29a, b y c);

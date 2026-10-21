@@ -8,6 +8,7 @@ import { anotarLasPiezas } from '../../diagnostico/anotar'
 import { alCargarseLasFuentes, conReimpresion } from '../../fuentes'
 import { PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, marcarElPieListo, suscribirALasPiezas, versionDeLasPiezas } from '../../pie3d/registro'
 import { SALIDA_EN_VIVO, pasoDelHundimiento } from '../../pie3d/salidas'
+import { esperaAlVelo } from '../../veloDeNavegacion'
 import { viajeEnCurso } from '../viaje'
 import { contextoPerdido, useVersionDelContexto } from '../contextoDelLienzo'
 import { hayBanco } from '../entorno'
@@ -126,6 +127,11 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     let reloj = 0
     const armarYa = (): void => {
       if (!vivo || !s.fuentes || s.estudio === null || contextoPerdido()) return
+      // [B12a.8] (4) Llegando con el velo, lejos del pie: espera al velo quieto (armarlo tapado demoraba el destape ~165 ms).
+      if (esperaAlVelo([...PIEZAS_DEL_PIE.values()].map((p) => p.elemento))) {
+        pedir()
+        return
+      }
       rearmar(s, g, s.estudio)
       // [CIERRE A-bis] A11 · la tarjeta de gracias o de error, impresa en su placa (se compila con la entrante).
       imprimirLasTarjetas(s.armadas)

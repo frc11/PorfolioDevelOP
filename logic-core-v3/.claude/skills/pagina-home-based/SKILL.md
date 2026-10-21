@@ -16,6 +16,7 @@ Esta skill es la copia para Claude Code del criterio del chat que planifica el h
 | Cualquier cosa visible | `GUSTO.md` (qué le gusta y qué no a Valentino) |
 | Un sprint, un plan o un FRENO | `METODO.md` |
 | Algo que cruza la frontera home ↔ páginas, la escena por ruta, la navbar o las transiciones | `CONTRATO.md` |
+| Una página nueva (de servicio, nosotros, blog) | `docs/rediseno/B12a-API.md` §7 (el paso a paso y la lista para cerrar) y la maqueta que anda, `/v3/pagina-base` (`src/app/v3/pagina-base/`) |
 | Una variante de escena de una página | `VARIANTES.md` y `CONTRATO.md` §Ranura |
 
 Y siempre, antes de tocar código: el log del sprint en curso de tu línea (`docs/rediseno/SPRINT-*.md` en el home, `docs/servicios/SPRINT-*.md` en servicios). Leé lo que existe antes de crear; no dupliques lógica.
@@ -41,8 +42,10 @@ Y siempre, antes de tocar código: el log del sprint en curso de tu línea (`doc
 - Hay invariantes que no se rompen: s74, s75-carga (`?diag=carga`) y s76-portfolio.
 
 **Una página** (`src/app/v3/[servicio]/`, nosotros, blog):
-- tiene tres tramos: la intro con escena, el cuerpo en papel y el pie genérico;
+- se arma copiando `/v3/pagina-base` y siguiendo `B12a-API.md` §7: las firmas de la API mandan sobre esta skill;
+- tiene tres tramos: la intro con escena (2,5 pantallas: el título en volumen con su bajada y «de qué se trata», en una de las composiciones de `?composicion=`), el cuerpo en papel y el pie genérico;
 - la escena, la cámara, el título 3D, la navbar y el velo son del home; la página pone el contenido, el cuerpo y su variante;
+- la navegación entre páginas va con `EnlaceDeRuta` (precarga, salida de la variante y velo); el texto sobre la escena no lleva velo ni mancha (sombra pegada a las letras), y se mide su contraste;
 - una sola maqueta se aprueba y se replica por la plantilla: lo propio de cada servicio sale de los datos, no de componentes distintos.
 
 **Una variante de escena** (`src/app/v3/_servicios/escena/`):

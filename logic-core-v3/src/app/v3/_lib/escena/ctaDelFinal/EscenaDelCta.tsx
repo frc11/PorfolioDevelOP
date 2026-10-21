@@ -5,6 +5,7 @@ import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 import * as THREE from 'three'
 
 import { RELEVO_DE_LOS_TITULOS } from '../../titulos3d/registro'
+import { esperaAlVelo } from '../../veloDeNavegacion'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
 import { KEY_INTENSITY } from '../probeLighting'
@@ -164,7 +165,8 @@ export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Pr
       const destino = CTA_EN_VIVO.destino
       const valores = CTA_EN_VIVO.valores
       const frase = CTA_EN_VIVO.frase.flatMap((el) => (el === null ? [] : [el]))
-      if (destino === null || destino.offsetWidth === 0 || origen.length === 0 || frase.length < 3 || valores.some((el) => el === null || el.offsetWidth === 0)) {
+      // [B12a.8] (4) Y llegando con el velo, lejos de su lugar: espera al velo quieto (armarlo tapado demoraba el destape ~360 ms).
+      if (destino === null || destino.offsetWidth === 0 || origen.length === 0 || frase.length < 3 || valores.some((el) => el === null || el.offsetWidth === 0) || esperaAlVelo([destino])) {
         espera = window.setTimeout(intentar, 250)
         return
       }

@@ -1,16 +1,17 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
 import { sonar } from '../../_lib/sonido/bus'
 import { ABRE_EL_PANEL, fijarModoDelChrome, type ModoDelChrome } from '../contacto/apertura'
 import { ENLACES_DEL_HOME, ENLACES_DE_SECCION, ENLACE_DE_CONTACTO, ENLACE_DE_LOGIN } from '../enlaces'
-import { TODOS_LOS_SERVICIOS, destinoDesde } from '../paginas'
+import { RUTA_DEL_HOME, SERVICIOS_DEL_HOME, destinoDesde } from '../paginas'
 
-import { BotonDeServicios, ListaDeServicios, useDesplegable } from './DesplegableDeServicios'
+import { ListaDeServicios, ServiciosDeLaPildora, useDesplegable } from './DesplegableDeServicios'
 import { useCorrimientoDeLaPastilla } from './useCorrimientoDeLaPastilla'
+import { useDeslizDeLaPildora } from './useDeslizDeLaPildora'
 
 /**
  * [NAVBAR] LA BARRA DEL HOME — la pastilla de escritorio, propia de /v3 (antes `NavegacionDelHome` montaba la pieza
@@ -33,7 +34,22 @@ import { useCorrimientoDeLaPastilla } from './useCorrimientoDeLaPastilla'
  *
  * [B12a.5] Vive en el layout (D4): la misma en el home y en las páginas. Desde una página, sus anclas llevan al home (`destinoDesde`).
  * «Servicios» abre el desplegable de las páginas de servicio (D5, `DesplegableDeServicios.tsx`).
+ *
+ * [B12a.8] T2 · DÓNDE NACE: en el home, al pie de la primera pantalla, y sube con el scroll (el gesto del hero); en una página, ARRIBA
+ * desde el principio (donde queda en el home después de subir) y quieta con el scroll (`data-nacimiento`; `?navbar=abajo`, la del home,
+ * para comparar). Entre una y otra, mientras pasa el velo (que pasa por debajo del chrome), la píldora se DESLIZA de su lugar al del
+ * destino: el velo avisa cuándo empieza a cubrir (se toma dónde está) y cuándo la página nueva tiene su scroll (se toma adónde va).
  */
+
+/** [B12a.8] T2 · Dónde nace la píldora en una ruta: en el home, abajo; en una página, arriba (o la de `?navbar=`). */
+export function nacimientoDeLaPildora(ruta: string | null, bandera: string | null): 'arriba' | 'abajo' {
+  if (ruta === null || ruta === RUTA_DEL_HOME) return 'abajo'
+  return bandera === 'abajo' ? 'abajo' : 'arriba'
+}
+
+
+const sinCambios = (): (() => void) => () => undefined
+const banderaDeLaNavbar = (): string | null => new URLSearchParams(window.location.search).get('navbar')
 
 /** [RETOQUE 3D] N1 · el aire mínimo (px) entre la pastilla centrada y la esquina: si no entra, el menú del teléfono. */
 const AIRE_DE_LA_ESQUINA = 16
@@ -64,7 +80,12 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
   // [B1.2d] Con el Portfolio abierto, la píldora se corre a la columna (`corrimiento.ts`); la esquina se queda.
   useCorrimientoDeLaPastilla(pastillaRef)
   const ruta = usePathname()
-  const { boton: botonDeServicios, panel: listaDeServicios, alTeclearElBoton, alTeclearLaLista, ...desplegable } = useDesplegable()
+  const bandera = useSyncExternalStore(sinCambios, banderaDeLaNavbar, () => null)
+  const nacimiento = nacimientoDeLaPildora(ruta, bandera)
+  const { enlace: enlaceDeServicios, boton: botonDeServicios, panel: listaDeServicios, alTeclearElEnlace, alTeclearElBoton, alTeclearLaLista, ...desplegable } = useDesplegable()
+
+  // [B12a.8] T2 · Mientras pasa el velo, se desliza de su lugar al del destino (`useDeslizDeLaPildora.ts`).
+  useDeslizDeLaPildora(pastillaRef, ruta)
 
   useEffect(() => {
     const paneles = [...document.querySelectorAll<HTMLElement>('[data-panel]')]
@@ -161,15 +182,27 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
   }, [])
 
   return (
-    <header data-pieza="barra" className={className}>
+    <header data-pieza="barra" data-nacimiento={nacimiento} className={className}>
       <nav ref={pastillaRef} data-parte="pastilla" aria-label="Navegación principal">
         <ul data-parte="lista">
           {ENLACES_DE_SECCION.map((enlace) => {
             const esActivo = enlace.id === activo
-            if (enlace.id === TODOS_LOS_SERVICIOS.id) {
+            if (enlace.id === SERVICIOS_DEL_HOME.id) {
               return (
                 <li key={enlace.id}>
-                  <BotonDeServicios ref={botonDeServicios} abierto={desplegable.abierto} alEntrar={desplegable.alEntrar} alSalir={desplegable.alSalir} alClic={desplegable.alClic} alTeclear={alTeclearElBoton} rotulo={enlace.rotulo} activo={esActivo} />
+                  <ServiciosDeLaPildora
+                    refDelEnlace={enlaceDeServicios}
+                    refDelBoton={botonDeServicios}
+                    abierto={desplegable.abierto}
+                    alEntrar={desplegable.alEntrar}
+                    alSalir={desplegable.alSalir}
+                    alClic={desplegable.alClic}
+                    alTeclearElEnlace={alTeclearElEnlace}
+                    alTeclearElBoton={alTeclearElBoton}
+                    rotulo={enlace.rotulo}
+                    activo={esActivo}
+                    ruta={ruta}
+                  />
                 </li>
               )
             }

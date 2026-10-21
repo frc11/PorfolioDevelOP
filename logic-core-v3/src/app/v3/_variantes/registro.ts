@@ -15,7 +15,7 @@ import type { ComponenteDeVariante } from '../_lib/escena/ruta/variante'
 type CargaDeLaVariante = () => Promise<{ readonly default: ComponenteDeVariante }>
 
 export const REGISTRO_DE_VARIANTES = {
-  /** La de la ruta de prueba (`/v3/prueba-de-pagina`): ejerce la ranura entera (la luz de abajo, la energía, la salida). */
+  /** La de ejemplo, la de la página base (`/v3/pagina-base`): ejerce la ranura entera (la luz de abajo, la energía, la salida). */
   prueba: () => import('../_lib/escena/ruta/VarianteDePrueba'),
 } as const satisfies Readonly<Record<string, CargaDeLaVariante>>
 

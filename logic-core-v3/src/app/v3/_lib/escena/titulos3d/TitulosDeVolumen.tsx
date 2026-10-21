@@ -63,7 +63,7 @@ interface Props {
   readonly logoGroupRef?: RefObject<THREE.Group | null>
 }
 
-type VentanaDelBanco = Window & { __titulosDelBanco?: { titulos: () => unknown; camara: () => unknown; progreso: () => number } }
+type VentanaDelBanco = Window & { __titulosDelBanco?: { titulos: () => unknown; camara: () => unknown; progreso: () => number; sinLasLetras: (si: boolean) => void } }
 
 export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, rig, logoGroupRef }: Props) {
   const variante: Variante = entornoDeLaEscena().titulos === 'blanco' ? 'blanco' : 'negro'
@@ -156,6 +156,13 @@ export default function TitulosDeVolumen({ keyLightRef, logoMaterialRef, stats, 
         return { viva: [...camara.position.toArray(), ...camara.quaternion.toArray()], calculada: [...calculada.position.toArray(), ...calculada.quaternion.toArray()], logo: [stats.current.logoW, stats.current.logoH], fov: camara instanceof THREE.PerspectiveCamera ? camara.fov : null }
       },
       progreso: () => rig.current.progress,
+      // [B12a.8 · P-H33] Las letras sin color ni profundidad (la escena queda): el fondo real del título, para medir su contraste.
+      sinLasLetras: (si) => {
+        for (const a of m.current.armados) {
+          a.material.colorWrite = !si
+          a.material.depthWrite = !si
+        }
+      },
     }
     return () => {
       delete ventana.__titulosDelBanco
@@ -352,7 +359,8 @@ function iluminar(a: Armado, logo: THREE.MeshStandardMaterial | null, nivel: num
 function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, reanudado: boolean, y: number, dt: number, viva: THREE.Camera): boolean {
   const m = a.mostrado
   const d = corrimiento(a.pin, y)
-  const fuera = fueraDelCuadro(a, d)
+  // [B12a.8] T4 · el que está cayendo, con el corrimiento de cuando empezó (abajo): su lugar ya se fue, él no.
+  const fuera = fueraDelCuadro(a, a.corrimientoDeLaCaida ?? d)
   const tapado = a.titulo.salida >= 0.999
   // [PASADA FINAL] A3 · al reanudarse el lazo, el que se rearma vuelve a lo que dice el scroll (el hero llega una vez, por tiempo).
   if (reanudado && a.titulo.rearma) m.llegada = acotar01(enViaje ? 0 : a.titulo.llegada)
@@ -370,8 +378,12 @@ function alCuadroDelQueQueda(a: Armado, enViaje: boolean, asentar: boolean, rean
     else if (m.llegada <= 0) a.cayendo = false
     a.uniforms.uLevanta.value = a.cayendo || a.titulo.gesto === 'levanta' ? 1 : 0
   }
+  // [B12a.8] T4 · y cae donde estaba: si su lugar se va con el scroll a mitad de la caída (la intro de una página suelta su bloque fijo),
+  // no se lo lleva para arriba mientras se acuesta (medido: subía 260–310 px). En el Portfolio su lugar está clavado mientras cae: igual.
+  const cae = a.titulo.saleCayendo === true && a.cayendo && m.llegada < 1
+  a.corrimientoDeLaCaida = cae ? (a.corrimientoDeLaCaida ?? d) : null
   const visible = m.llegada > 0 && !fuera && !tapado
-  if (visible) ubicar(a, d, viva)
+  if (visible) ubicar(a, a.corrimientoDeLaCaida ?? d, viva)
   return visible
 }
 

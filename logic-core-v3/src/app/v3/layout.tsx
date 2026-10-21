@@ -38,6 +38,7 @@ import './_estilos/cursor-sala.css' // [INTERFAZ 1] T2 · el cursor de la sala
 import './_estilos/titular.css' // [PASADA FINAL] A1 · el titular del hero sin parpadeo 2D (el seguro sin JS)
 import './_estilos/carga.css' // [AJUSTES FINALES] A4 · el velo de carga (el seguro sin JS)
 import './_estilos/resultado.css' // [PULIDO 11] B2 · B3 · la tarjeta del resultado de los formularios
+import './_estilos/intro.css' // [B12a.8 · P-H33] el texto de la intro de las páginas sobre la escena (su halo y su velo)
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.
@@ -279,15 +280,20 @@ const archivo = localFont({
 })
 
 /**
- * [B12a.4] LAS CARAS DEL TÍTULO DE LAS PÁGINAS — cuatro instancias estáticas de Archivo (ancho/peso), recortadas a las letras de los
+ * [B12a.4] LAS CARAS DEL TÍTULO DE LAS PÁGINAS — instancias estáticas de Archivo (ancho/peso; [B12a.8] siete, las de las cuatro familias que
+ * se comparan), recortadas a las letras de los
  * títulos (`scripts-retoque/fuentes-3d.py`): las mismas del título 3D, así la escena mide sus letras en el DOM con su métrica. Sin
  * precarga: el home sólo lleva su `@font-face` y una página baja las dos de su combinación (`_componentes/titulos3d/presets.ts`).
  */
 const pagina125800 = localFont({ src: './_fuentes/archivo-125-800-pagina.woff', variable: '--font-v3-pagina-125-800', weight: '800', style: 'normal', display: 'swap', preload: false })
 const pagina125300 = localFont({ src: './_fuentes/archivo-125-300-pagina.woff', variable: '--font-v3-pagina-125-300', weight: '300', style: 'normal', display: 'swap', preload: false })
 const pagina75800 = localFont({ src: './_fuentes/archivo-75-800-pagina.woff', variable: '--font-v3-pagina-75-800', weight: '800', style: 'normal', display: 'swap', preload: false })
-const pagina112300 = localFont({ src: './_fuentes/archivo-112-300-pagina.woff', variable: '--font-v3-pagina-112-300', weight: '300', style: 'normal', display: 'swap', preload: false })
-const CARAS_DE_PAGINA = [pagina125800, pagina125300, pagina75800, pagina112300].map((c) => c.variable).join(' ')
+const pagina75900 = localFont({ src: './_fuentes/archivo-75-900-pagina.woff', variable: '--font-v3-pagina-75-900', weight: '900', style: 'normal', display: 'swap', preload: false })
+const pagina75500 = localFont({ src: './_fuentes/archivo-75-500-pagina.woff', variable: '--font-v3-pagina-75-500', weight: '500', style: 'normal', display: 'swap', preload: false })
+const pagina125200 = localFont({ src: './_fuentes/archivo-125-200-pagina.woff', variable: '--font-v3-pagina-125-200', weight: '200', style: 'normal', display: 'swap', preload: false })
+const pagina125500 = localFont({ src: './_fuentes/archivo-125-500-pagina.woff', variable: '--font-v3-pagina-125-500', weight: '500', style: 'normal', display: 'swap', preload: false })
+const pagina125400 = localFont({ src: './_fuentes/archivo-125-400-pagina.woff', variable: '--font-v3-pagina-125-400', weight: '400', style: 'normal', display: 'swap', preload: false })
+const CARAS_DE_PAGINA = [pagina125800, pagina125300, pagina75800, pagina75900, pagina75500, pagina125200, pagina125500, pagina125400].map((c) => c.variable).join(' ')
 
 export default function DisposicionV3({ children }: { children: React.ReactNode }) {
   return (

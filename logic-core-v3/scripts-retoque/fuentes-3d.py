@@ -60,8 +60,10 @@ VALORES = [
 # (su `NOMBRE`, en `_servicios/datos/*.ts` de paginas/servicios), los tres de `acento.ts` (la ruta de prueba, `?nombre=`) y el de la
 # prueba. Un nombre nuevo obliga a volver a correr (s78 exige cada letra en cada instancia).
 TEXTOS_DE_PAGINA = ['Páginas web', 'Software a medida', 'IA y automatizaciones', 'Desarrollo web', 'Integraciones de IA y Automatizaciones', 'Prueba de la intro']
-# [B12a.4] Las instancias (nombre, wdth, wght): 125/800 y 125/300 (la 1 y la 3), 75/800 y 112,5/300 (la 2). `fuentes-de-pagina.py` hace las del DOM.
-INSTANCIAS_DE_PAGINA = [('125-800', 125, 800), ('125-300', 125, 300), ('75-800', 75, 800), ('112-300', 112.5, 300)]
+# [B12a.4] Las instancias (nombre, wdth, wght). [B12a.8] Las de las cuatro familias que se comparan (`COMBINACIONES_DEL_TITULO`): 125/800 y
+# 125/300 (la 1, la del «6»), 75/900 y 75/500 (la 2), 125/200 y 125/500 (la 3), 75/800 y 125/300 (la 4); la 112,5/300 salió con la 2 vieja.
+# 125/400: la opción `?legibilidad=peso` (la parte liviana de la 1, un paso más pesada).
+INSTANCIAS_DE_PAGINA = [('125-800', 125, 800), ('125-300', 125, 300), ('75-800', 75, 800), ('75-900', 75, 900), ('75-500', 75, 500), ('125-200', 125, 200), ('125-500', 125, 500), ('125-400', 125, 400)]
 
 PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
@@ -101,7 +103,7 @@ PEDIDOS = [
     # con las letras de los tres nombres de servicio (`_secciones/_contrato/acento.ts`) y la ruta de prueba. Se cargan sólo en una página
     # (`fuentesDePagina.ts`, import dinámico): el home no las baja. Cada instancia lleva todas las letras (las combinaciones cambian de parte).
     *[{'origen': ARCHIVO_VARIABLE, 'peso': peso, 'ancho': wdth, 'familia': 'Archivo', 'licencia': 'OFL-archivo.txt', 'kerning': True,
-       'textos': TEXTOS_DE_PAGINA, 'destino': f'archivo-{nombre}-pagina.json', 'dom': f'archivo-{nombre}-pagina.woff'}
+       'textos': TEXTOS_DE_PAGINA, 'destino': f'archivo-{nombre}-pagina.json', 'dom': f'archivo-{nombre}-pagina.woff', 'metricas': f'archivo-{nombre}'}
       for nombre, wdth, peso in INSTANCIAS_DE_PAGINA],
 ]
 
@@ -311,6 +313,23 @@ def armar(pedido):
     print(destino, len(datos), 'glifos,', os.path.getsize(destino), 'bytes')
     if 'dom' in pedido:
         cara_del_dom(fuente, pedido)
+    if pedido.get('metricas'):
+        METRICAS[pedido['metricas']] = metricas(typeface, pedido['textos'])
+
+
+# [B12a.8] T1 · LAS MÉTRICAS DEL TÍTULO: el título de una página va en UNA línea y ocupa una parte fija del ancho (`anchoDelTitulo.ts`: su
+# tamaño es esa parte dividida por su ancho en em). El ancho en em sale de acá: el avance de cada letra y el kerning de los pares que
+# aparecen en los títulos, en em, por instancia (la misma que pintan el DOM y el 3D). Chico: lo importa la página, no el home.
+METRICAS = {}
+
+
+def metricas(typeface, textos):
+    r = typeface['resolution']
+    pares = {t[i:i + 2] for t in textos for i in range(len(t) - 1)}
+    return {
+        'avance': {ch: round(g['ha'] / r, 5) for ch, g in sorted(typeface['glyphs'].items())},
+        'kerning': {p: round(v / r, 5) for p, v in sorted(typeface.get('kerning', {}).items()) if p in pares},
+    }
 
 
 def cara_del_dom(fuente, pedido):
@@ -339,3 +358,11 @@ def cara_del_dom(fuente, pedido):
 for p in PEDIDOS:
     if len(sys.argv) <= 1 or p['destino'] in sys.argv[1:]:
         armar(p)
+
+# [B12a.8] Con todas las de página armadas, sus métricas en un archivo (el que lee `anchoDelTitulo.ts`).
+if len(METRICAS) == len(INSTANCIAS_DE_PAGINA):
+    destino = os.path.join(FUENTES, 'metricas-del-titulo.json')
+    with open(destino, 'w', encoding='utf-8', newline='\n') as f:
+        json.dump(METRICAS, f, ensure_ascii=False, separators=(',', ':'))
+        f.write('\n')
+    print(destino, os.path.getsize(destino), 'bytes')

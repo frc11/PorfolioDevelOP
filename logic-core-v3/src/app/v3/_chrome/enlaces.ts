@@ -1,5 +1,7 @@
 import type { EnlaceDeNavegacion } from '../_lib/navegacion'
 
+import { HOME } from './paginas'
+
 /**
  * [B1.2c] WhatsApp del pie (el número y su mensaje precargado), para el formulario corto de «la tuya» en el Portfolio: una sección no
  * importa de otra y los enlaces del chrome son la puerta. El formulario del panel de contacto sigue sin WhatsApp (s42 · N1).
@@ -13,11 +15,14 @@ export { WHATSAPP } from '../_secciones/cierre/contacto'
  * para la galería). «Trabajos» pasa a llamarse «Portfolio» (la sección sigue siendo `#trabajos`), y «Panel» es nuevo:
  * lleva a Tu panel. Cada destino es el nudo de su sección (`destinosDelViaje.ts`).
  *
+ * [B12a.8] «Home» va primero (`HOME`, `paginas.ts`): en el home, el viaje al hero; desde una página, el home arriba.
+ *
  * [RETOQUE 3D] 3I · «Contacto» va al formulario del pie (`#contacto`: el viaje lo resuelve a su sección). N1 · sale de la
  * pastilla: con «Login» (el login del sitio, `/login`) va a la esquina de arriba a la derecha; en el teléfono, los dos
  * separados al pie del menú de vidrio. `ENLACES_DEL_HOME` sigue siendo la lista entera (las secciones y Contacto).
  */
 export const ENLACES_DEL_HOME: readonly EnlaceDeNavegacion[] = [
+  HOME,
   { id: 'quienes-somos', rotulo: 'Quiénes somos', destino: '#quienes-somos' },
   { id: 'trabajos', rotulo: 'Portfolio', destino: '#trabajos' },
   { id: 'servicios', rotulo: 'Servicios', destino: '#servicios' },

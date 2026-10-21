@@ -1,5 +1,5 @@
 /**
- * [B12a.4] EL TÍTULO DE LAS PÁGINAS, EN EL SITIO — `/v3/prueba-de-pagina` con el Chrome del sistema a la vista: a 1440, las tres
+ * [B12a.4] EL TÍTULO DE LAS PÁGINAS, EN EL SITIO — `/v3/pagina-base` con el Chrome del sistema a la vista: a 1440, las tres
  * combinaciones de `?titulo=` con un nombre de servicio (`?nombre=`); el título en volumen armado (el `h1` del DOM apagado, que es la
  * señal de la escena: `listo`), la caída con la intro en `CAIDA_DEL_TITULO.avance` y la vuelta; a 390, el `h1` del DOM a la vista, en
  * la cara de su combinación. Fotos en `~/.cache/b4-medicion/titulo/`.
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
     const p = ctx.pages()[0] ?? (await ctx.newPage())
     await p.route('**/api/**', (r) => r.abort())
     for (const combo of movil ? ['1'] : ['1', '2', '3']) {
-      await p.goto(`${BASE}/v3/prueba-de-pagina?nombre=1&titulo=${combo}`, { waitUntil: 'load', timeout: 300000 })
+      await p.goto(`${BASE}/v3/pagina-base?nombre=1&titulo=${combo}`, { waitUntil: 'load', timeout: 300000 })
       await dormir(7000)
       const arriba = await delTitulo(p)
       await p.screenshot({ path: path.join(SALIDA, `${String(ancho)}-titulo${combo}-arriba.png`) })

@@ -51,7 +51,10 @@ function useFuentesListas(): boolean {
 }
 
 export function VeloDeCarga(): React.JSX.Element | null {
-  const [etapa, setEtapa] = useState<Etapa>('espera')
+  // [B12a.8] (4) Sólo en la carga del documento: llegando al home por la navegación cliente (la escena ya pintó, en otra página) el papel
+  // opaco tapaba el chrome y el velo de la navegación hasta su seguro (~270 ms en el build: la pantalla en blanco). Al hidratar da `false`.
+  const [deUnaNavegacion] = useState(hayPrimerCuadro)
+  const [etapa, setEtapa] = useState<Etapa>(deUnaNavegacion ? 'fuera' : 'espera')
   const fuentes = useFuentesListas()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const primerCuadro = useSyncExternalStore(suscribirALaCarga, hayPrimerCuadro, () => false)
@@ -85,6 +88,11 @@ export function VeloDeCarga(): React.JSX.Element | null {
     const reloj = window.setTimeout(terminar, CARGA.fundidoMs + CARGA.margenMs)
     return () => window.clearTimeout(reloj)
   }, [etapa, terminar])
+
+  // [B12a.8] La carga, abierta en el acto (el titular del hero llega con su gesto, como al volver a cuadro).
+  useEffect(() => {
+    if (deUnaNavegacion) abrirLaCarga()
+  }, [deUnaNavegacion])
 
   const alTerminarLaAnimacion = (e: AnimationEvent<HTMLDivElement>): void => {
     if (e.animationName.startsWith('velo-de-carga-sale')) terminar()

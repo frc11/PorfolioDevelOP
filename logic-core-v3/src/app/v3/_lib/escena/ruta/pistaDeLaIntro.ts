@@ -1,7 +1,7 @@
 /**
- * [B12a.2] LA PISTA DE LA INTRO DE UNA PÁGINA — de la composición inicial (avance 0) a la pose de la intro (avance 1), en 1,5 pantallas
- * de scroll sobre el bloque de la intro (plan `docs/rediseno/SPRINT-B12a.md` §5 y §10; CONTRATO: «la cámara se mueve con el scroll
- * durante 1,5 pantallas»).
+ * [B12a.2] LA PISTA DE LA INTRO DE UNA PÁGINA — de la composición inicial (avance 0) a la pose de la intro (avance 1), en
+ * `PANTALLAS_DE_LA_INTRO` pantallas de scroll sobre el bloque de la intro (plan `docs/rediseno/SPRINT-B12a.md` §5 y §10). [B12a.8] La
+ * pose se estira a lo largo de la intro entera (2,5 pantallas).
  *
  * ── La composición inicial, compartida ──────────────────────────────────
  *
@@ -22,8 +22,18 @@ import { NIVEL_DE_LA_NOCHE } from '../lightArc'
 
 import { presetActual, type PresetDeLaEscena } from './preset'
 
-/** Lo que dura la intro, en pantallas de scroll: el avance va de 0 a 1 en eso. */
-export const PANTALLAS_DE_LA_INTRO = 1.5
+/**
+ * Lo que dura la intro, en pantallas de scroll: el avance va de 0 a 1 en eso. [B12a.8] 2,5 (era 1,5: la parte 3D quedaba corta): el
+ * título con su bajada, «de qué se trata» sobre la escena y, en la última pantalla, el papel. Calibrable: el bloque lo lee (su alto es
+ * una variable de CSS con este número).
+ */
+export const PANTALLAS_DE_LA_INTRO = 2.5
+
+/**
+ * [B12a.8] El tramo del título, en pantallas del alto de la intro: el `h1` y la bajada van fijos arriba mientras dura; después pasa «de
+ * qué se trata» (el resto de la intro, sobre la escena todavía) y entra el papel.
+ */
+export const TRAMO_DEL_TITULO = 1.6
 
 /** La composición inicial: la pose del hero del home con el logo centrado (`frameX` 0). */
 export const COMPOSICION_INICIAL: ChoreoPose = { angleDeg: 0, height: 6.4, distance: 19, frameX: 0, frameY: 0 }
@@ -56,7 +66,7 @@ export function avanceDeLaIntro(arriba: number, scrollY: number, alto: number): 
  */
 export const AVANCE_DE_LA_INTRO: { current: number } = { current: 0 }
 
-// Sólo con banco: el avance, para medirlo en el sitio (la intro a 1,5 pantallas, ± 1 %).
+// Sólo con banco: el avance, para medirlo en el sitio (la intro a `PANTALLAS_DE_LA_INTRO` pantallas, ± 1 %).
 if (hayBanco()) (window as Window & { __avanceDeLaIntro?: () => number }).__avanceDeLaIntro = () => AVANCE_DE_LA_INTRO.current
 
 const pistas = new WeakMap<PresetDeLaEscena, { readonly track: ChoreoTrack; readonly noche: boolean }>()

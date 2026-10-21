@@ -1026,3 +1026,304 @@ En esta rama el home no tiene un enlace a una página; con el merge, el desplega
   - **Sin atribución en el hilo principal** (Long Animation Frames: ningún script de más de 5 ms, ninguna tarea de más de 50 ms).
   - **La hipótesis:** el compositor. La máscara del velo es un `mask-image` que cambia en cada cuadro, así que se vuelve a rasterizar a pantalla entera encima del lienzo que todavía pinta la variante.
   - **La propuesta, para decidir:** un velo que se mueva con `transform` (el degradé rasterizado una vez, sólo compositor). Es el mismo dibujo con otra mecánica.
+
+### B12a.8 · la maqueta base de las páginas (2026-10-21)
+
+**AVISO · `next build` (medido en el build).** El pedido dice «objetivo en el build» y «criterio en el build» para el velo (4 y 6) y para el bfcache (P-H35): eso autoriza el build.
+- Corre con `E2E_DIST_DIR=.next-b12`, el distDir de D7, ignorado en `.gitignore` desde antes. `next start` en :3004.
+- **Corrió 12 veces**, cada una con su motivo: la primera, el rojo del velo de B12a.7 (el build viejo); después, una por cada arreglo que encontró la medición (el papel de la carga, la regla del destape, la espera de las obras del home, la lista de la navbar). Una vez se cayó en el chequeo de tipos de next (el banco nuevo del velo, un tipo de la traza); se arregló y se volvió a correr.
+- Nunca con menos de 3 GB libres (`scripts-carga/con-memoria.sh`); el :3001 y los procesos de servicios, sin tocar.
+
+**La placa del banco,** leída en la misma página que se mide (la lección del repo): la AMD integrada en las corridas del velo de la tarde y la NVIDIA (RTX 5050) en las del último build. Cambió sola entre corridas; cada número va con la suya.
+
+#### 1 · La intro, más larga
+
+- **2,5 pantallas** (`PANTALLAS_DE_LA_INTRO`, calibrable; el bloque la lee por una variable de CSS). Dos tramos (`TRAMOS_DE_LA_INTRO`):
+  1. **el del título** (`TRAMO_DEL_TITULO`, 1,6 pantallas): el título en volumen y la bajada, fijos arriba; el título cae al terminar el tramo (`CAIDA_DEL_TITULO`: 0,2 pantallas antes de que el bloque fijo se vaya);
+  2. **«de qué se trata»** (`deQueSeTrata`, opcional), centrado en el resto, sobre la escena; en la base, relleno detrás de la llave.
+- **La pose 2 (girar) se estira sobre la intro entera:** el avance va de 0 a 1 en las 2,5 pantallas.
+- **Medido:** abajo, «1 · La intro de 2,5 pantallas».
+
+#### 2 · El título
+
+**Qué es «el título 6».** `?nombre=6` de la ruta de prueba: el sexto de `TITULOS_CON_LETRAS`, «Prueba de la intro», con la familia por defecto (`?titulo=` ausente = la 1: Archivo ancha 125 negra + ancha 125 fina). O sea: lo que le gustó es la familia 1, la que ya era la de por defecto. Queda.
+
+**Las familias de `?titulo=1|2|3` sí eran distintas, pero poco:** dos de las tres usaban la misma ancha negra; al tamaño del título se distinguían por la segunda parte. Ahora son cuatro bien distintas, todas variantes de Archivo y ninguna la condensada del home:
+1. ancha negra + ancha fina (la del «6», por defecto);
+2. angosta negra + angosta media;
+3. ancha liviana + ancha media;
+4. angosta negra + ancha fina (el contraste de ancho).
+- **La comparación lado a lado:** `/v3/titulos-de-pagina` (sin indexar). Arriba, el título en volumen con `?titulo=` y `?nombre=`; abajo, las cuatro en el DOM con los tres nombres reales y el «6».
+- Las instancias nuevas se generaron con `scripts-retoque/fuentes-3d.py` (75-900, 75-500, 125-200, 125-500; la 112-300 se borró). Las que ya estaban salieron idénticas en el JSON 3D.
+
+**T1 · el título protagonista:**
+- **En una línea, del ancho de su columna:** el tamaño sale del ancho medido del título en su cara (`anchoDelTitulo.ts`, con las métricas que ahora escribe el script de fuentes: avances y kerning por instancia), no de una escala fija.
+  - En la 1 desde 1024, el 74 % del ancho de la intro; en las de costado, el 97 % de su columna; abajo de 1024, el 97 % del ancho útil.
+- **Sigue siendo el `TituloDeVolumen` impreso,** con la llegada y la caída del home; la bajada, claramente segunda.
+
+#### 1 · La intro, medida
+
+**Medido en el build** (`scripts-carga/intro-larga.ts`, a 1440, 1024 y 390):
+- **El avance** da 0, 0,5 y 1 exactos a 0, 1,25 y 2,5 pantallas.
+- **El `h1` se suelta** en 0,26. **El título en volumen cae** en 0,18, antes, y mientras se ve no sube.
+- **En el avance 0,5,** «de qué se trata» a la vista y el papel todavía abajo. **En el avance 1,** el papel arriba.
+- **El control** (`caida-tarde`): rojo desde 1024. El título cae en 0,38, con el bloque ya suelto, y sube 269–315 px a la vista.
+
+#### 3 · La navbar
+
+- **«Home» primero** en la píldora y en el menú del teléfono (`HOME`, `_chrome/paginas.ts`). En el home, el viaje al principio; desde una página, el home arriba con el velo.
+- **«Servicios» es un enlace** a `/v3#servicios` (con el velo desde una página). La lista abre aparte:
+  - con el hover (con su demora de intención);
+  - con el teclado: la flecha abajo sobre «Servicios», o la flechita del costado con Enter;
+  - sin «Todos los servicios».
+- **En el teléfono:** tocar «Servicios» navega y la flechita de al lado abre el acordeón.
+
+**T2 · la píldora en las páginas:**
+- `?navbar=arriba` (por defecto): la píldora nace ARRIBA, en el reposo del home después de subir, y no se mueve con el scroll de la página (`data-nacimiento`, `barra.css`).
+- `?navbar=abajo`: el comportamiento del home, para comparar.
+- **Mientras pasa el velo, se desliza** de su lugar al del destino (`useDeslizDeLaPildora`): el velo avisa cuándo cubre (se toma dónde está), al cambiar la ruta se la retiene ahí (un efecto de layout, antes de pintar) y, cuando el velo empieza a destapar (`EVENTOS_DEL_VELO.destapa`), viaja a su lugar en 560 ms.
+- **Lo que encontró el build:** arrancando con `repuso`, en medio del montaje del home, aparecía ya por el 72 % (un salto de 24 a 606 px). Arrancando al destapar, el salto se fue; quedan las dos primeras muestras rápidas (7,4 y 5,7 px/ms contra 2,6 de su curva), porque el cuadro del destape es largo. Ese último arreglo (arrancar un cuadro después, con su hora real) va en un commit aparte, **WIP sin verificar**.
+
+**La navbar, medida:**
+
+**Medido en el build** (`scripts-carga/barra.ts`, rehecho para esta navbar: 31 comprobaciones, todas en verde):
+- **La píldora a 1440:** en el home nace abajo y sube al reposo. En la página nace arriba, en el reposo del home (Δ 0,00 px), y no se mueve con el scroll. Con `?navbar=abajo`, la del home.
+- **El orden:** «Home» es el primero de la píldora y del menú.
+- **«Servicios»** es un enlace a `/v3#servicios`.
+- **La lista:**
+  - el hover de paso no la abre; quieto encima, sí; el puntero que se va la cierra;
+  - la flechita con un clic la deja abierta, y un clic afuera la cierra;
+  - la flecha abajo en «Servicios», o Enter en la flechita, la abre con el foco adentro;
+  - Tab recorre las tres y sigue con «Panel»; Shift+Tab vuelve a la flechita; Esc devuelve el foco;
+  - sus ítems en AA: 7,28–7,37:1.
+- **A dónde llevan:** «Servicios» desde la página va al home en su sección (a 0 px del tope), con el velo; «Home» desde la página, al home arriba; «Home» en el home, de y 2880 a 0.
+- **A 390:**
+  - «Home» es el primero del menú;
+  - «Servicios» es un enlace con su flechita, que abre el acordeón con las tres páginas (AA 7,20–8,60:1);
+  - tocar «Servicios» navega a su sección y cierra el menú.
+- **El rojo** fue la corrida anterior, en otro build: la lista no tomaba el foco al abrirse con el teclado (T3, abajo).
+
+#### 4, 5 y 6 · El velo: sin pantalla en blanco, contrastado y en el compositor (P-H32)
+
+**El rojo (el build de B12a.7, `VIEJO=1 scripts-carga/velo.ts`):** la banda era una máscara (`mask-image` que cambiaba en cada cuadro) y destapaba con 20 cuadros parejos y todos los títulos en camino.
+- La página → el home: 5,58 s del clic a destapado, 3,66 s tapado entero.
+- Desde el papel → «Portfolio»: 5,06 s, 3,54 s tapado.
+- A 390, por el menú: 3,01 s, 1,11 s tapado.
+- El primer tramo al cubrir: 18,7–27,2 ms (y 44–62 ms en B12a.7, en el dev).
+
+**Lo hecho:**
+- **(6, P-H32) La banda se mueve con `transform`,** en el compositor (una animación de WAAPI): un elemento con su degradé quieto (pluma, cuerpo, pluma), en diagonal (`velo.ts`: `geometriaDeLaBanda`, `transformadaDelVelo`). Cubre en 460 ms y destapa en 560.
+- **(5) El color contrasta con lo que tapa** (`tonoDeLoQueTapa.ts`): sobre papel o la sala de día, la tinta; sobre la escena de noche, el papel. La escena se reconoce por la caja del lienzo (no recibe el puntero: `elementsFromPoint` no lo ve).
+- **(4) Sin pantalla en blanco:**
+  - el destino se precarga (el `prefetch` del `<Link>`; con el puntero encima, el `<Link>` lo adelanta) y se calientan las fuentes de su título (`calentarElDestino`);
+  - la salida de la variante y el velo van juntos;
+  - la página nueva se monta tapada y el velo destapa apenas está montada, con su scroll y dos cuadros pintados (de cualquier duración); los 3,5 s quedan de techo de emergencia.
+- **Lo que encontró el build en el camino** (cada uno con su arreglo, medido otra vez):
+  1. **El papel de la carga del home** se volvía a montar en la navegación cliente: opaco, encima del chrome, hasta su seguro. Eran los cuadros en blanco de verdad (16 a «Portfolio»). Ahora arranca fuera si la escena ya pintó (`VeloDeCarga`).
+  2. **El home armaba al montarse, con el velo encima,** la frase 3D del CTA del final (~360 ms, dos veces), las piezas del pie (~165 ms) y los títulos del ocio (~369 ms) (Long Animation Frames, con su archivo en el build). Tapaba hasta 1,6 s y el destape tironeaba con cuadros de 400 ms. Ahora esas tres obras esperan al velo quieto (`esperaAlVelo` y `cuandoElVeloQuede`, `_lib/veloDeNavegacion.ts`), salvo lo que está a la vista (la vuelta al pie con la flecha), que se arma tapado como antes.
+
+**Medido en el build** (`scripts-carga/velo.ts`, la AMD integrada, `/api/` bloqueado, desde el clic; tres corridas a 1440):
+- **Del home a la página:** 1,21–1,23 s (tapado entero 107–126 ms).
+- **De la página al home («Home»):** 1,69–1,71 s (tapado 551–590 ms: el montaje del home, React y su primer render).
+- **Desde el papel a «Portfolio»:** 1,38–1,40 s (tapado 294–312 ms).
+- **A 390, por el menú a «Portfolio»:** 1,33 s (tapado 214 ms).
+- **Cuadros en blanco o vacíos en el screencast:** 0 en todos.
+- **El color:** el esperado en todos (el papel sobre la escena, la tinta sobre el papel y la sala de día).
+- **El cuadro del cambio de ruta,** cubierto entero en todos.
+- **El control** (`CONTROL=sin-velo`): 0 de 4, el cambio sin cubrir.
+- **El total típico,** la mediana de los cuatro recorridos: 1,36 s. Llega a 1,2 s hacia una página; hacia el home no llega (1,7 s), porque el home tarda en montarse (React más su primer render). Ver «Lo que no llegó».
+
+**(6, P-H32) El primer tramo al cubrir** (los primeros 200 ms), medido en el COMPOSITOR con una traza del navegador (los `DrawFrame` del proceso de la página) y en el hilo (rAF):
+- **Sobre el papel:** 18,2–19,3 ms. Dentro del criterio (≤ 20 ms).
+- **Sobre la escena:** 21,3–47,1 ms.
+- **La escena sola, sin el velo** (la referencia, en la misma corrida): p95 21,3–21,9 ms y máximo 22,1–38,2 ms. En esta máquina, la escena a 1440 ya no entra en 20 ms por cuadro.
+- **Conclusión:** sobre el papel (la escena dormida) se cumple. Sobre la escena, el primer tramo queda en el rango de la escena sola: los máximos van de 22 a 38 ms sin el velo y de 21 a 47 ms con él. El criterio no se cumple ahí, y no por la banda: la escena sola, a 1440 en la integrada, ya pasa los 20 ms.
+
+**En el último build (la NVIDIA, dos corridas a 1440 y una a 390):** del home a la página, 1,15 s; de la página al home, 1,66–1,73 s; desde el papel a «Portfolio», 1,35–1,43 s; a 390 por el menú, 1,35 s. 0 cuadros en blanco en todos. El primer tramo al cubrir, en el compositor, 13,5–14,4 ms sobre la escena y sobre el papel (la escena sola, p95 13,5–13,7 ms): **P-H32 se cumple en la NVIDIA**; en la integrada, no (arriba).
+
+#### 7 · La vuelta al home con dos entradas en el historial
+
+- **La posición se guarda por entrada del historial,** con la clave de la Navigation API (`claveDeLaEntrada`, `posicionDelHome.ts`): una lista de las últimas 24 en `sessionStorage`. La guarda la toma al irse (`GuardaDeLaPosicionDelHome`, siguiendo la entrada de ahora mientras se está en el home). La flecha lee la de la entrada a la que se vuelve.
+- **Sin la Navigation API,** una sola, como antes.
+- **Medido en el build** (`scripts-carga/vuelta-por-entrada.ts`: la página → «Home» → y1 → la página → «Home» → y2 → la página; ATRÁS, ATRÁS, ATRÁS, ADELANTE, ADELANTE):
+  - **1440:** cada vuelta cae en la de su entrada, |Δy| 0 (y1 2240, y2 5748), con 0 cargas de documento.
+  - **390, por el menú:** |Δy| 0 (y1 840, y2 1820).
+- **El control** (`CONTROL=una-sola`, la de B12a.7): rojo. El home 1 vuelve a la posición del 2, |Δy| 3508.
+
+#### P-H35 · el bfcache
+
+- **La ranura de la variante** escucha `pageshow` con `persisted`: si la página que vuelve todavía pide su variante, olvida la salida que se había pedido al irse (vuelve a su avance).
+- **El velo** también lo escucha, y queda quieto.
+- **Medido en el build** (`scripts-carga/bfcache.ts`, con el bfcache prendido y sin interceptar la red; 0 pedidos a `/api/`): la página vuelve del bfcache (`pageshow: bfcache`) y la luz de la variante vuelve a 0,996, la de antes de irse (con la salida, 0,12). El velo, quieto.
+- **El control** (`CONTROL=sin-bfcache`): rojo. La luz se queda en 0,12, «saliendo».
+
+#### P-H33 · el texto de la intro sobre la escena
+
+Ver T5, abajo: el texto sobre la escena sin velo, medido en las tres composiciones.
+
+#### La composición de la intro (`?composicion=1|2|3`)
+
+- **El logo se corre con el encuadre de la cámara:** `frameX` y `frameY`, resueltos por Newton para que el centro del logo caiga en el hueco que deja el DOM (`composicionEnLaEscena.ts`). No se mueve el logo. La pose 2 gira con el logo en su lugar.
+- **Medido en el build** (`scripts-carga/composicion.ts`, los tres nombres reales × las 3 composiciones × 1440, 1280, 1024, 768 y 390: 45 casos):
+  - **El logo en su hueco:** a ≤ 0,5 % en x e y en el avance 0, y ≤ 0,8 % en el 0,5. A 390 el logo es más ancho que el cuadro, como en el hero, y su x no se mide.
+  - **El eje** del título, la bajada y «de qué se trata»: 0,00 %.
+  - **T1, el título en una línea:**
+    - en la 1 desde 1024, del 65 al 67 % del cuadro;
+    - en la 2 y la 3, del 91 al 92,5 % de su columna;
+    - abajo de 1024, del 92 al 93 % del ancho útil, arriba del logo.
+  - **Las distancias:** a la píldora, 47 px o más; al logo, 116 px o más.
+  - **Una corrida intermitente:** «IA y automatizaciones» a 1280 dio una vez 2 fallas, con la página medida una pantalla más abajo. Repetida, 3 de 3. No la volví a ver.
+- **Abajo de 1024 las tres son la 1.** Para tablets apaisadas no encontré algo mejor que proponer: a 1024 × 768 la de costado entra con aire (medido arriba).
+
+#### T4 · el título en 3D, como los del home
+
+**Qué era:** el título ya era el `TituloDeVolumen` desde 1024, pero iba pegado a la pantalla (`parteDelMouse` 1, de B12a.6): con el mouse no cambiaba de perspectiva y se veía plano, como el `h1`.
+
+**Lo hecho:**
+- **Fijo en el mundo, como la mayoría de los títulos del home** (`parteDelMouse` 0, el de siempre): la cámara sigue al mouse con sus topes y su suavizado (los del rig: no hay una reacción nueva) y el título se ve en perspectiva.
+- **Abajo de 1024, la regla de los títulos del home** a ese ancho (`TituloDeVolumen` y `useTextoDeVolumen` se activan con `CONSULTA_ESCENARIO`, desde 1024): el `h1` del DOM. Igual sin WebGL y con movimiento reducido (P-H13).
+- **Las dos variantes tipográficas** («Páginas» pesada, «web» liviana) y el tamaño de T1, como estaban.
+- **Lo que trajo la perspectiva** (visto en `titulo-3d.ts` con el mouse en los extremos):
+  - en las composiciones 2 y 3 el título se salía del cuadro hasta 100 px (a 1280) y pisaba la bajada.
+  - **Arreglo:** 8 vw de aire del lado de afuera y la bajada en el plano del título (`BajadaDeLaIntro`, con `useAcompananteDelTitulo`, la pieza del hero).
+- **La salida:** el bloque fijo se soltaba a mitad de la caída (que dura 2,4 s, el mínimo del titular) y el título subía 264–312 px mientras se acostaba (rueda rápida, humana o lenta). Ahora el que sale cayendo cae donde estaba (`TitulosDeVolumen`).
+
+**Medido en el build** (`scripts-carga/titulo-3d.ts`, las 3 composiciones × 1440, 1280, 1024, 768 y 390):
+- **Desde 1024:**
+  - el 3D montado, con las dos partes llegadas;
+  - la entrada sube a 1;
+  - el `h1` oculto a la vista y en el árbol accesible;
+  - con el mouse de un costado al otro, la caja del título se corre 117–217 px;
+  - en los extremos, dentro del cuadro, debajo de la píldora y con la bajada en su plano;
+  - la salida llega a 0 sin subir, y vuelve a 1 al subir.
+- **A 768 y 390:** el `h1` del DOM a la vista y ningún título en volumen.
+- **El control** (`CONTROL=pegado-al-h1`, el de B12a.6): rojo, la caja se corre 0,0 px.
+- **La referencia del home:** con el mismo barrido del mouse, los títulos del hero se corren unos 180 px. La reacción es la misma.
+
+#### T5 · sin el velo negro
+
+**Lo hecho:**
+- **Fuera el velo radial de la intro** (`intro.css`) y la placa oscura detrás del título 3D (`haloDelTitulo.ts`, borrado).
+- **El título 3D, de noche, en papel:** se lee por su volumen, su material y su luz.
+- **La bajada y «de qué se trata»:** una sombra pegada a las letras (`--sombra-de-la-intro`: 0,06 y 0,12 em, sin las colas de 0,45 y 0,9 em que hacían mancha).
+
+**Medido en el build** (`scripts-carga/contraste-de-la-intro.ts`, AA en el 95 % de los píxeles de cada texto; las 3 composiciones × 5 anchos × los avances 0, 0,5 y 1):
+- **La composición 2:** 25 de 25. **La 3:** 25 de 25.
+- **La composición 1:** 24 de 25. Todos los textos del DOM (la bajada, la etiqueta, «de qué se trata» y el `h1` abajo de 1024), en las tres, al 100 %.
+- **El que no llega:** «web», la parte liviana del título en volumen, a 1280 en la 1: **94,1–94,6 %** (4 corridas).
+  - Lo que le falta (contado píxel por píxel): sobre todo el borde antialiasado de sus trazos finos sobre el fondo oscuro, y una arista brillante del domo que le pasa justo detrás.
+  - El cuerpo de la letra, sin ese borde de 1 px, da 97,9–98,2 %. Va como dato: el criterio no se cambió.
+- **El control** (`CONTROL=sin-sombra`): rojo. Sin la sombra, la bajada, la etiqueta y «de qué se trata» caen a 79–94 %.
+
+**No lo forcé. Dos opciones sin velo, detrás de `?legibilidad=`, para que Valentino elija mirando:**
+- `?legibilidad=peso`: «web» un paso más pesada (Archivo 125/400 en vez de 125/300). **Medido: 9 de 9 en la 1** (a 1440 98,3 %, a 1280 96,4 %, a 1024 95,4 %). **Es la que recomiendo:** agrega cuerpo al trazo en cualquier posición.
+- `?legibilidad=tamano`: el título más grande en la 1 desde 1024 (el 80 % de la intro en vez del 74; ~71 % del cuadro, dentro de T1). **Medido: 8 de 9.** Arregla 1280 (97,8 %), pero a 1024 queda en 92,6 %: depende de qué le pase detrás.
+- **Probé dos más, que no movían el número, y las saqué:** más luz propia en la cara (94,0 %) y menos motas en la zona del título (93,9 %).
+
+#### 8 · La página base
+
+- **`/v3/prueba-de-pagina` pasa a `/v3/pagina-base`** (`git mv`; sin indexar; estática: las banderas se leen en el cliente).
+- **Tiene:**
+  - la intro (el título, la bajada y «de qué se trata»);
+  - el cuerpo en papel con 3 secciones de ejemplo (`CuerpoDeLaBase`, adentro de `CompuertaDelHome`): un revelado progresivo (`Bloque` P2 en su ventana visible, con su canal), el gatillo común (`Gatillo`) y un cierre con un CTA que abre el contacto con `data-precarga="web"` y un enlace al home con la salida de la variante;
+  - el lugar del pie genérico (B13, provisorio: `data-pie-de-pagina`);
+  - la ranura con la variante de ejemplo (`variante: 'prueba'`).
+- Los textos son relleno detrás de la llave (`pagina-base/relleno.ts`).
+- **La API:** `B12a-API.md` §7 «Cómo armar una página, paso a paso» (el código mínimo, qué es del home y qué de la página, las reglas y la lista para cerrar). §2, §3 y §5 al día.
+- **La skill** (`.claude/skills/pagina-home-based/`): `SKILL.md` y `CONTRATO.md` apuntan a la API y a la base, con las decisiones nuevas (la intro, la navbar, el velo).
+
+#### T3 · la auto-revisión: lo que encontré y arreglé
+
+Lo que encontré y arreglé, por separado. Para cada uno: qué era, cómo lo vi y qué test lo fija.
+
+1. **Cuadros en blanco al llegar al home por la navegación cliente.**
+   - **Qué era:** el papel de la carga del home (`VeloDeCarga`, opaco, encima del chrome) se volvía a montar hasta su seguro.
+   - **Cómo lo vi:** en el screencast del build (`velo.ts`): 16 cuadros de papel liso sin chrome yendo a «Portfolio».
+   - **Qué lo fija:** s78 (con control) y `velo.ts` (0 cuadros en blanco).
+2. **El destape esperaba lo que el home arma al montarse** (la frase del CTA del final, las piezas del pie, el ocio de los títulos).
+   - **Cómo lo vi:** Long Animation Frames en `velo.ts`, con su archivo en el build.
+   - **Qué lo fija:** s78 (la espera al velo, con control) y `velo.ts` (la página al home, de 2,1–3,6 s a 1,7 s).
+3. **La lista de Servicios no tomaba el foco al abrirse con el teclado.**
+   - **Qué era:** la lista animaba `visibility` también al abrir: en el cuadro en que se abre todavía es `hidden`, y `focus()` no la toma.
+   - **Cómo lo vi:** `barra.ts` (la flecha abajo y Enter en la flechita dejaban el foco afuera).
+   - **El arreglo:** al abrir, visible en el acto; sólo se anima al cerrar.
+   - **Qué lo fija:** `barra.ts`.
+4. **`EnlaceDeRuta` se caía fuera del router de Next** (`useRouter`, para precargar).
+   - **Cómo lo vi:** s51 se cayó sin resumen (renderiza el chrome en Node).
+   - **El arreglo:** sin `useRouter`. El `<Link>` ya adelanta la precarga con el puntero.
+   - **Qué lo fija:** s78 (un control con `useRouter`) y s51.
+5. **El título de la página se veía plano** (T4).
+   - **Qué era:** estaba pegado a la pantalla (`parteDelMouse` 1, de B12a.6).
+   - **Qué lo fija:** `titulo-3d.ts` (la caja se corre 117–217 px de un lado al otro del mouse; el control `pegado-al-h1`, 0 px) y s78.
+6. **Con el mouse en un costado, el título se salía del cuadro y pisaba la bajada** (las composiciones 2 y 3).
+   - **Cómo lo vi:** `titulo-3d.ts` en los extremos del mouse: hasta 100 px afuera a 1280 y la bajada debajo del título.
+   - **El arreglo:** 8 vw de aire del lado de afuera, y la bajada en el plano del título, como la del hero (`useAcompananteDelTitulo`).
+   - **Qué lo fija:** `titulo-3d.ts` y s78 (los dos con control).
+7. **El título subía mientras caía:** el bloque fijo se soltaba a mitad de la caída (2,4 s).
+   - **Cómo lo vi:** `titulo-3d.ts` y una sonda con la rueda rápida, humana y lenta: subía 264–312 px.
+   - **El arreglo:** el que sale cayendo cae donde estaba.
+   - **Qué lo fija:** `titulo-3d.ts` (la salida) y s78 (con dos controles).
+8. **La píldora saltaba 804 px entre rutas.**
+   - **Qué era:** el layout la ponía en su lugar nuevo un cuadro antes del aviso del velo.
+   - **Cómo lo vi:** `sonda-pildora.ts`.
+   - **El arreglo:** se la retiene en un efecto de layout.
+   - **Qué lo fija:** s78 y `velo.ts` (el salto máximo entre cuadros).
+9. **El velo de tinta sobre la escena:** `elementsFromPoint` no ve el lienzo, que no recibe el puntero.
+   - **Cómo lo vi:** `sonda-tono.ts`.
+   - **Qué lo fija:** `velo.ts` (el color esperado por recorrido).
+10. **El sonido cortado a ~1070 px** (lo que vio Valentino): **no lo reproduje.**
+    - El barrido del chrome de 360 a 1920 (`chrome-en-los-anchos.ts`, 29 anchos) dio 0 cortes ni encimados.
+    - El barrido del cierre (las tres composiciones y el home, 29 anchos cada una) dio 0 cortes y 0 desbordes a lo ancho.
+
+**Los arneses que medían mal** (no eran defectos del sitio; se arreglaron los arneses):
+- **El clic de Playwright** lleva la pieza a la vista y movía el scroll con la cabecera pegada: ahora el clic es con el mouse.
+- **Los renglones del título,** contados con las cajas redondeadas: daban 2 a 1280 con uno solo.
+- **La vuelta del bfcache** no dispara `load`.
+- **A 390,** «Home» está en el menú.
+- **El contraste del título 3D** contaba el borde antialiasado de los trazos finos. Al texto del DOM se lo mide con su color nominal. Ahora el 3D se mide sobre el cuerpo de la letra y el borde queda como dato.
+- **El anillo del cursor** quedaba encima del ítem medido en la lista de Servicios.
+
+**Lo que vi y NO arreglé:**
+- **Un aviso de WebGL en la consola desde 1024,** también en el home: «Feedback loop formed between Framebuffer and active Texture». Está desde antes y no es de este sprint (P-H nuevo).
+- **Lo que encontró el barrido del cierre y NO arreglé (va a la T0):**
+  - abajo de 1024, el cartel del sonido (después de tocar el parlante) pisa el título de la intro, en las tres composiciones;
+  - en la consola de toda la corrida: 12 × «Failed to load resource: 404», 2 × `pageerror` «Cannot read properties of undefined (reading 'isReady')», el aviso de WebGL de arriba y 1 aviso de compilación de un programa (X4122, precisión de una suma). Ningún «NaN».
+
+#### Lo que no corrió
+
+- **`npm run verificar`** (la bisagra) no corrió: el cierre llegó antes. Las suites que sí corrieron, en verde: s78 (160 de 0), s51, s3-tokens, s40, s42, s44, s47, s48, s49, s54 a s59, s62, s74, s75 y s76.
+- **Las matrices del home** (`matriz.ts` en el escritorio e `historias.ts` en el teléfono) no corrieron.
+- **El último arreglo de la píldora** (arrancar un cuadro después) no se midió: va como WIP.
+- **El total típico ≤ 1,2 s:** llega hacia una página (1,15–1,23 s) y no hacia el home (1,66–1,73 s): el home tarda en montarse (React y su primer render). Para bajarlo hay que aligerar el montaje del home o acortar la banda: lo decide Valentino.
+
+#### FRENO · qué mirar
+
+Todo con `npm run dev` (o el build) y la ventana a la vista. La página base es `/v3/pagina-base`; el nombre se cambia con `?nombre=1` («Páginas web»), `2` («Software a medida») o `3` («IA y automatizaciones»).
+
+**1 · La intro y la composición** (una URL por variante; capturas en los avances 0, 0,5 y 1 en `~/.cache/b4-medicion/composicion/c{1,2,3}-n{1,2,3}-{ancho}-avance-{0,0.5,1}.png`):
+- `/v3/pagina-base?composicion=1` — el título centrado arriba del logo;
+- `/v3/pagina-base?composicion=2` — el título a la derecha, el logo a la izquierda;
+- `/v3/pagina-base?composicion=3` — el título a la izquierda, el logo a la derecha (la de por defecto, como el hero).
+- A 1440, 1280 y 1024: scrolleá despacio las 2,5 pantallas. Deberías ver el título en volumen con la bajada, que el título se acuesta y cae antes de que el bloque se vaya, «de qué se trata» sobre la escena y después el papel. La cámara gira (la pose 2) durante toda la intro.
+- A 768 y a 390: las tres son la 1 (el título arriba del logo).
+
+**2 · El título (T1 y T4):**
+- A 1440, en cualquier composición: el título grande, en una línea, y en volumen. **Mové el mouse de un costado al otro:** el título se ve en perspectiva, como los del home (la cámara lo rodea con sus mismos topes y suavizado).
+- Abajo de 1024, como en el home: el `h1` del DOM.
+- **Las familias:** `/v3/titulos-de-pagina` (las cuatro lado a lado con los nombres reales) y `/v3/pagina-base?titulo=1…4`. La 1 es la del «6» (la de por defecto).
+
+**3 · La navbar (punto 3 y T2):**
+- `/v3/pagina-base` a 1440: la píldora ARRIBA desde el principio y quieta al scrollear; `?navbar=abajo` para comparar con la del home.
+- «Home» primero. Pasá el mouse por «Servicios» y quedate: abre la lista (las tres páginas, sin «Todos los servicios»). Con el teclado: Tab hasta «Servicios» y la flecha abajo, o Tab hasta la flechita y Enter.
+- Clic en «Servicios»: el velo y el home en Servicios. Desde el home, «Home» sube al principio.
+- A 390, el menú: «Home» primero; tocar «Servicios» navega; la flechita de al lado abre el acordeón.
+- **La píldora entre rutas:** desde el hero del home (la píldora abajo) a una página, la píldora sube a su lugar mientras pasa el velo; de vuelta, baja.
+
+**4, 5 y 6 · El velo:** ir y venir entre `/v3/pagina-base` y el home con «Home», «Portfolio» y la flecha del navegador, a 1440 y a 390 (el menú). Deberías ver una sola pasada de la banda, sin pantalla en blanco, de tinta sobre el papel y de papel sobre la escena.
+
+**7 · La vuelta con dos entradas:** en esta rama el home no tiene un enlace a una página (llega con el merge), así que a mano no se puede armar el historial; lo mide `scripts-carga/vuelta-por-entrada.ts` (1440 y 390, |Δy| 0). Con el merge: el home → una página → «Home» → bajá → la página → «Home» → bajá más → la página; ATRÁS, ATRÁS, ATRÁS: cada vuelta al home cae donde estaba esa vez.
+
+**8 · La página base:** `/v3/pagina-base` hasta el final: el revelado progresivo, el gatillo, el CTA «Hablemos» (abre el contacto con «Páginas web» marcado) y el enlace «Volver al home», y el lugar del pie.
+
+**P-H33 y T5 · el texto sobre la escena:** sin velo ni mancha detrás del título ni del texto; la bajada y «de qué se trata» con una sombra pegada a las letras.
+- **T5, las dos opciones:** `/v3/pagina-base?composicion=1&legibilidad=peso` y `…&legibilidad=tamano`, a 1280. Comparalas con la de siempre (sin la bandera).

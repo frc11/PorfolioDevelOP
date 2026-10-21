@@ -3,7 +3,7 @@
  * El criterio del plan (§10): la flecha devuelve el scroll con |Δy| ≤ 1 px, el mismo paso del Portfolio y la misma noche; «Home» va a 0
  * y amanece; el sonido respeta el mute. El recorrido (una sola carga de documento):
  *
- *   entra a `/v3/prueba-de-pagina` → «Volver al home» (al principio, amanece) → el ancla de un paso a mitad del Portfolio
+ *   entra a `/v3/pagina-base` → «Volver al home» (al principio, amanece) → el ancla de un paso a mitad del Portfolio
  *   → A · se va a la página (en esta rama el home no tiene un enlace a una página: las de servicio llegan con el merge; se navega con
  *     el router de next, que es lo mismo que hace el `<Link>` de `EnlaceDeRuta`) → atrás (la flecha)
  *   → B · se va con la flecha (adelante) → atrás otra vez
@@ -156,7 +156,7 @@ async function main(): Promise<void> {
   await ctx.addInitScript(CONTAR_SONIDOS)
   const p = ctx.pages()[0] ?? (await ctx.newPage())
   await p.route('**/api/**', (r) => r.abort())
-  await p.goto(`${BASE}/v3/prueba-de-pagina`, { waitUntil: 'load', timeout: 300000 })
+  await p.goto(`${BASE}/v3/pagina-base`, { waitUntil: 'load', timeout: 300000 })
   await dormir(7000)
   await p.evaluate(() => {
     ;(window as unknown as { __marcaDelDocumento: string }).__marcaDelDocumento = 'entrada'
@@ -202,8 +202,8 @@ async function main(): Promise<void> {
   console.log(`·     ${String(ANCHO)} · a mitad del Portfolio: ${texto(enElPortfolio)}`)
 
   // A · Se va a la página (el router de next, como el <Link>) y vuelve con la flecha.
-  await p.evaluate(() => (window as unknown as { next: { router: { push: (h: string) => void } } }).next.router.push('/v3/prueba-de-pagina'))
-  await esperarLlegada(p, (r) => r.startsWith('/v3/prueba-de-pagina'))
+  await p.evaluate(() => (window as unknown as { next: { router: { push: (h: string) => void } } }).next.router.push('/v3/pagina-base'))
+  await esperarLlegada(p, (r) => r.startsWith('/v3/pagina-base'))
   const guardada = await p.evaluate(() => (window as unknown as { __vueltaDelBanco?: () => { guardada: unknown } }).__vueltaDelBanco?.().guardada ?? null)
   console.log(`·     ${String(ANCHO)} · en la página, la posición guardada: ${JSON.stringify(guardada)}`)
   const cuadrosA = await grabar(p, () => p.goBack().then(() => undefined), (r) => r.startsWith('/v3#'))
@@ -212,7 +212,7 @@ async function main(): Promise<void> {
 
   // B · Se va con la flecha (adelante) y vuelve con la flecha.
   await p.goForward()
-  await esperarLlegada(p, (r) => r.startsWith('/v3/prueba-de-pagina'))
+  await esperarLlegada(p, (r) => r.startsWith('/v3/pagina-base'))
   const cuadrosB = await grabar(p, () => p.goBack().then(() => undefined), (r) => r.startsWith('/v3#'))
   const vueltaB = await estado(p)
   fallas.push(...juzgarLaVuelta('B · se fue con la flecha y vuelve con la flecha', cuadrosB, enElPortfolio, vueltaB))
@@ -223,7 +223,7 @@ async function main(): Promise<void> {
     await dormir(4000)
     console.log(`·     ${String(ANCHO)} · el sonido: aria-pressed ${String(await p.locator('[data-pieza="control-del-sonido"]').first().getAttribute('aria-pressed'))}`)
     await p.goForward()
-    await esperarLlegada(p, (r) => r.startsWith('/v3/prueba-de-pagina'))
+    await esperarLlegada(p, (r) => r.startsWith('/v3/pagina-base'))
     const prendidoAntes = await sonidos()
     await p.goBack()
     await esperarLlegada(p, (r) => r.startsWith('/v3#'))

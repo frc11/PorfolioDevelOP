@@ -126,6 +126,8 @@ export interface TitularProps {
   readonly peso?: Peso
   readonly className?: string
   readonly id?: string
+  /** [B12a.8] T1 · el tamaño del título de una página (una parte del ancho entre su ancho en em: `TituloDePagina`). */
+  readonly style?: React.CSSProperties
 }
 
 export function Titular({
@@ -137,6 +139,7 @@ export function Titular({
   peso = 'normal',
   className,
   id,
+  style,
 }: TitularProps) {
   const definicion = NIVELES_TIPOGRAFICOS[nivel]
   // `claseFluida` es `null` sólo en `cuerpo` y `base`, que no son titulares;
@@ -146,6 +149,7 @@ export function Titular({
   return (
     <Etiqueta
       id={id}
+      style={style}
       data-pieza="titular"
       data-nivel={nivel}
       data-fluido={fluido ? 'si' : 'no'}

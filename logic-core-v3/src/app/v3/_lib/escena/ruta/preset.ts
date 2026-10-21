@@ -15,7 +15,7 @@ import type { IdDeServicio } from '../../../_secciones/_contrato/acento'
 import type { IdDeVariante } from '../../../_variantes/registro'
 import type { ChoreoKeyframe } from '../choreographyTypes'
 
-export type IdDePagina = 'home' | IdDeServicio | 'prueba'
+export type IdDePagina = 'home' | IdDeServicio | 'base'
 
 export interface PresetDeLaEscena {
   readonly id: IdDePagina

@@ -2,7 +2,7 @@
  * [B12a.6] LA NAVEGACIÓN CLIENTE Y EL VELO, EN EL SITIO — el Chrome del sistema a la vista contra el dev (o el build de D7), `/api/`
  * bloqueado. En esta rama hay una sola página (la de prueba: las de servicio son de servicios), así que el recorrido es:
  *
- *   entra a `/v3/prueba-de-pagina` (la ÚNICA carga de documento) → «Volver al home» (EnlaceDeRuta) → atrás (la flecha) → «Portfolio» de
+ *   entra a `/v3/pagina-base` (la ÚNICA carga de documento) → «Volver al home» (EnlaceDeRuta) → atrás (la flecha) → «Portfolio» de
  *   la barra (al home, a su sección)
  *
  * y mide, cuadro a cuadro con un rAF en la página (que sobrevive a la navegación cliente: el documento es el mismo):
@@ -119,7 +119,7 @@ async function main(): Promise<void> {
   p.on('framenavigated', (f) => {
     if (f === p.mainFrame()) documentos += 1
   })
-  await p.goto(`${BASE}/v3/prueba-de-pagina`, { waitUntil: 'load', timeout: 300000 })
+  await p.goto(`${BASE}/v3/pagina-base`, { waitUntil: 'load', timeout: 300000 })
   await dormir(7000)
   const cargasAlEntrar = documentos
   // Una marca en el documento: una recarga la borra (la navegación cliente, no).
@@ -132,7 +132,7 @@ async function main(): Promise<void> {
   await dormir(1500)
   fallas.push(...(await grabarUnaNavegacion(p, 'la página al home (su enlace)', () => p.getByText('Volver al home').first().click(), (r) => r === '/v3')))
   // 2 · Del home a la página: la flecha. [B12a.7] El velo corta (cubre de una) y destapa como siempre.
-  fallas.push(...(await grabarUnaNavegacion(p, 'el home a la página (la flecha)', () => p.goBack().then(() => undefined), (r) => r.startsWith('/v3/prueba-de-pagina'))))
+  fallas.push(...(await grabarUnaNavegacion(p, 'el home a la página (la flecha)', () => p.goBack().then(() => undefined), (r) => r.startsWith('/v3/pagina-base'))))
   await dormir(2000)
   // 3 · De la página a una sección del home, por la barra (en el teléfono, por el menú).
   if (!MOVIL) fallas.push(...(await grabarUnaNavegacion(p, 'la página a Portfolio (la barra)', () => p.locator('[data-pieza="barra"] a[data-nav-id="trabajos"]').click(), (r) => r === '/v3#trabajos')))

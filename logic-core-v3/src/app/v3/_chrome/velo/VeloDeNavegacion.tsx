@@ -5,14 +5,14 @@ import { useEffect, useRef } from 'react'
 
 import { hayBanco } from '../../_lib/escena/entorno'
 import { DIA_DEL_FINAL, NOCHE_DISPARADA } from '../../_lib/escena/nocheDisparada'
-import { VUELTA_AL_HOME, devolverLosAlmacenes, posicionGuardadaDelHome, type PosicionDelHome } from '../../_lib/escena/ruta/posicionDelHome'
+import { VUELTA_AL_HOME, claveDeLaEntrada, devolverLosAlmacenes, posicionGuardadaDelHome, type PosicionDelHome } from '../../_lib/escena/ruta/posicionDelHome'
 import { sonar } from '../../_lib/sonido/bus'
-import { TITULOS_EN_CAMINO } from '../../_lib/titulos3d/registro'
-import { RUTA_DEL_HOME, atenderElVelo, nocheDelDestino, type NocheDelVelo } from '../../_lib/veloDeNavegacion'
+import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, VELO_EN_CURSO, atenderElVelo, cubrirConElVelo } from '../../_lib/veloDeNavegacion'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { llevarElScrollA, reponerLosAlmacenes, scrollDeLaRuta } from './alCambiarDeRuta'
-import { CURVA_DEL_VELO, VELO, coberturaDelVelo, maskDelVelo, puedeDestapar, siguienteFaseDelVelo, type EventoDelVelo, type FaseDelVelo } from './velo'
+import { tonoDeLoQueTapa } from './tonoDeLoQueTapa'
+import { CURVA_DEL_VELO, CURVA_DEL_VELO_CSS, VELO, colorDelVelo, coberturaDelVelo, degradeDelVelo, frenteDelVelo, geometriaDeLaBanda, puedeDestapar, siguienteFaseDelVelo, transformadaDelVelo, type EventoDelVelo, type FaseDelVelo } from './velo'
 
 /** Si la ruta no cambia después de cubrir (un error, un enlace a la misma), se destapa igual a los `VENCE_MS`. */
 const VENCE_MS = 4000
@@ -21,21 +21,34 @@ const VENCE_MS = 4000
 const sinVuelta = (): boolean => (window as Window & { __defectosDelVelo?: unknown }).__defectosDelVelo === 'sin-vuelta'
 
 /** [B12a.7] Lo que lee el banco de la vuelta: los almacenes, la posición guardada y si hay una vuelta en curso. */
-type VentanaDelBanco = Window & { __vueltaDelBanco?: () => { readonly noche: number; readonly dia: boolean; readonly guardada: PosicionDelHome | null; readonly enCurso: boolean } }
+type VentanaDelBanco = Window & { __vueltaDelBanco?: () => { readonly noche: number; readonly dia: boolean; readonly guardada: PosicionDelHome | null; readonly enCurso: boolean }; __veloDelBanco?: { readonly cubrir: () => Promise<void> } }
+
+const COLOR = { tinta: 'var(--color-tinta)', papel: 'var(--color-fondo)' } as const
 
 /**
  * [B12a.6] EL VELO DE LA NAVEGACIÓN — en el layout, encima de todo (la capa del overlay), sin recibir el puntero en reposo. `EnlaceDeRuta`
  * lo pide antes de navegar (`cubrirConElVelo`): cubre con el frente de la banda (`velo.ts`), la ruta cambia debajo, se reponen los
- * almacenes y el scroll (`alCambiarDeRuta.ts`), espera a que los cuadros vuelvan a ser parejos (la página nueva montada y quieta: el montaje
- * se paga tapado) y destapa con la cola. Suena suave al irse y al llegar (con el sonido apagado, nada). Con movimiento reducido, un corte. Lo que el banco lee: la fase y la
- * cobertura en el DOM (`data-fase`, `data-cobertura`).
+ * almacenes y el scroll (`alCambiarDeRuta.ts`) y destapa con la cola. Suena suave al irse y al llegar (con el sonido apagado, nada). Con
+ * movimiento reducido, un corte. Lo que el banco lee: la fase y la cobertura en el DOM (`data-fase`, `data-cobertura`).
  *
- * [B12a.7] LA FLECHA DEL NAVEGADOR cambia la ruta sin pedir nada: el velo cubre de una (el corte) con el color del destino. Si vuelve al
- * home, trae la posición que el home guardó al irse (`GuardaDeLaPosicionDelHome`): debajo del velo se devuelven la noche y el día del
- * final, el scroll va ahí (y vuelve a ir mientras el documento del home no alcanza) y recién se destapa.
+ * [B12a.7] LA FLECHA DEL NAVEGADOR cambia la ruta sin pedir nada: el velo cubre de una (el corte). Si vuelve al home, trae la posición que
+ * el home guardó al irse (`GuardaDeLaPosicionDelHome`): debajo del velo se devuelven la noche y el día del final, el scroll va ahí (y
+ * vuelve a ir mientras el documento del home no alcanza) y recién se destapa.
+ *
+ * [B12a.8] UNA PASADA CONTINUA, SIN PANTALLA EN BLANCO:
+ * · la banda es un elemento con su degradé quieto, movido con `transform` por una animación del compositor (P-H32): sigue pareja aunque
+ *   el hilo principal esté montando la página nueva;
+ * · su color contrasta con lo que tapa (`tonoDeLoQueTapa`): sobre papel la tinta, sobre la escena de noche el papel;
+ * · destapa apenas la página nueva tiene su primer cuadro estable (montada, con su scroll y dos cuadros pintados), no 20 cuadros y todos los títulos: lo
+ *   que la página arme después no traba la banda. Los 3,5 s quedan de techo;
+ * · la vuelta al home trae la posición de SU entrada del historial (`claveDeLaEntrada`), no la última;
+ * · al volver una página del bfcache (P-H35, `pageshow` con `persisted`), el velo queda quieto: la navegación que lo puso ya terminó;
+ * · pasa DEBAJO del chrome (la píldora, el parlante, Contacto y Login: el layout los deja en su lugar) y avisa cuándo cubre y cuándo la
+ *   página nueva tiene su scroll (`EVENTOS_DEL_VELO`): la píldora se desliza a su lugar del destino mientras el velo pasa (T2).
  */
 export function VeloDeNavegacion(): React.JSX.Element {
   const capa = useRef<HTMLDivElement>(null)
+  const banda = useRef<HTMLDivElement>(null)
   const reducido = usePrefiereMenosMovimiento()
   const reducidoAhora = useRef(reducido)
   const alCambiarLaRuta = useRef<(ruta: string) => void>(() => undefined)
@@ -48,63 +61,111 @@ export function VeloDeNavegacion(): React.JSX.Element {
 
   useEffect(() => {
     const el = capa.current
-    if (el === null) return undefined
+    const b = banda.current
+    if (el === null || b === null) return undefined
     let fase: FaseDelVelo = 'quieto'
+    let geometria = geometriaDeLaBanda(window.innerWidth, window.innerHeight)
+    let color: string = COLOR.tinta
     let rutaAlCubrir: string | null = null
-    let cancelar = (): void => undefined
+    let animacion: Animation | null = null
+    let siguiendo = 0
     let vence = 0
     let esperando = 0
     let vuelta: PosicionDelHome | null = null
-    const colorear = (noche: NocheDelVelo): void => {
-      el.style.backgroundColor = noche === 'noche' ? 'var(--color-tinta)' : 'var(--color-fondo)'
+    const medir = (): void => {
+      geometria = geometriaDeLaBanda(window.innerWidth, window.innerHeight)
+      b.style.width = `${geometria.largo.toFixed(1)}px`
+      b.style.height = `${geometria.espesor.toFixed(1)}px`
+      b.style.backgroundImage = degradeDelVelo(color, geometria)
     }
-    const pintar = (f: FaseDelVelo, t: number): void => {
-      const mascara = maskDelVelo(f, t)
-      el.style.maskImage = mascara
-      el.style.setProperty('-webkit-mask-image', mascara)
+    const colorear = (): void => {
+      color = COLOR[colorDelVelo(tonoDeLoQueTapa())]
+      el.setAttribute('data-color', color === COLOR.tinta ? 'tinta' : 'papel')
+      b.style.backgroundImage = degradeDelVelo(color, geometria)
+    }
+    /** Lo que lee el banco, y si recibe el puntero (tapado no se toca la página de abajo). */
+    const marcar = (f: FaseDelVelo, t: number): void => {
       el.setAttribute('data-fase', f)
       el.setAttribute('data-cobertura', coberturaDelVelo(f, t).toFixed(3))
       el.style.pointerEvents = f === 'quieto' ? 'none' : 'auto'
+      // [B12a.8] (4) Las obras del home que no se ven esperan al velo quieto (`VELO_EN_CURSO`).
+      const enCurso = VELO_EN_CURSO.activo
+      VELO_EN_CURSO.activo = f !== 'quieto'
+      if (enCurso && f === 'quieto') window.dispatchEvent(new Event(EVENTOS_DEL_VELO.quieto))
+    }
+    const pintar = (f: FaseDelVelo, t: number): void => {
+      animacion?.cancel()
+      animacion = null
+      cancelAnimationFrame(siguiendo)
+      b.style.transform = transformadaDelVelo(frenteDelVelo(f, t, geometria), geometria)
+      b.style.visibility = f === 'quieto' ? 'hidden' : 'visible'
+      marcar(f, t)
     }
     const pasar = (e: EventoDelVelo): void => {
       fase = siguienteFaseDelVelo(fase, e)
     }
+    /** La banda de una punta a la otra de su fase, en el compositor; el banco lee su avance en cada cuadro. */
     const animar = (f: FaseDelVelo, ms: number, alTerminar: () => void): void => {
-      cancelar()
+      animacion?.cancel()
+      cancelAnimationFrame(siguiendo)
       if (reducidoAhora.current || ms <= 0) {
         pintar(f, 1)
         alTerminar()
         return
       }
-      const t0 = performance.now()
-      let cuadro = 0
-      const paso = (ahora: number): void => {
-        const t = Math.min(1, (ahora - t0) / ms)
-        pintar(f, CURVA_DEL_VELO(t))
-        if (t < 1) cuadro = requestAnimationFrame(paso)
-        else alTerminar()
+      b.style.visibility = 'visible'
+      const desde = transformadaDelVelo(frenteDelVelo(f, 0, geometria), geometria)
+      const hasta = transformadaDelVelo(frenteDelVelo(f, 1, geometria), geometria)
+      b.style.transform = desde
+      const a = b.animate([{ transform: desde }, { transform: hasta }], { duration: ms, easing: CURVA_DEL_VELO_CSS, fill: 'forwards' })
+      animacion = a
+      const seguir = (): void => {
+        const t = Math.min(1, Number(a.currentTime ?? 0) / ms)
+        marcar(f, CURVA_DEL_VELO(t))
+        if (animacion === a && t < 1) siguiendo = requestAnimationFrame(seguir)
       }
-      cuadro = requestAnimationFrame(paso)
-      cancelar = () => cancelAnimationFrame(cuadro)
+      marcar(f, 0)
+      siguiendo = requestAnimationFrame(seguir)
+      a.onfinish = () => {
+        if (animacion !== a) return
+        b.style.transform = hasta
+        a.cancel()
+        animacion = null
+        alTerminar()
+      }
     }
     const destapar = (): void => {
       if (fase !== 'cubierto') return
       window.clearTimeout(vence)
       VUELTA_AL_HOME.enCurso = false
       pasar('llego')
+      window.dispatchEvent(new Event(EVENTOS_DEL_VELO.destapa))
       sonar('abre')
       animar('destapando', VELO.destaparMs, () => {
         pasar('destapo')
         pintar('quieto', 0)
       })
     }
+    /** [P-H35] Una página que vuelve del bfcache: la navegación que puso el velo ya terminó (o se fue a otro documento): quieto. */
+    const alVolverDelBfcache = (e: PageTransitionEvent): void => {
+      if (!e.persisted) return
+      window.clearTimeout(vence)
+      cancelAnimationFrame(esperando)
+      VUELTA_AL_HOME.enCurso = false
+      vuelta = null
+      fase = 'quieto'
+      pintar('quieto', 0)
+    }
+    medir()
+    pintar('quieto', 0)
     const soltarElPedido = atenderElVelo((p) => {
       if (fase === 'cubierto') {
         p.cubierto()
         return
       }
-      colorear(p.noche)
+      colorear()
       rutaAlCubrir = window.location.pathname
+      window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))
       pasar('cubrir')
       sonar('cierra')
       animar('cubriendo', VELO.cubrirMs, () => {
@@ -118,11 +179,12 @@ export function VeloDeNavegacion(): React.JSX.Element {
     const alUsarLaFlecha = (): void => {
       const destino = window.location.pathname
       if (destino === rutaDeAhora.current) return
-      cancelar()
       cancelAnimationFrame(esperando)
-      colorear(nocheDelDestino(destino))
+      colorear()
+      window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))
       rutaAlCubrir = rutaDeAhora.current
-      vuelta = destino === RUTA_DEL_HOME && !sinVuelta() ? posicionGuardadaDelHome() : null
+      // [B12a.8] La posición de ESTA entrada del historial (la de la última vez que se estuvo en ella), no la última que se guardó.
+      vuelta = destino === RUTA_DEL_HOME && !sinVuelta() ? posicionGuardadaDelHome(claveDeLaEntrada()) : null
       VUELTA_AL_HOME.enCurso = vuelta !== null
       pasar('corte')
       pintar('cubierto', 1)
@@ -130,9 +192,13 @@ export function VeloDeNavegacion(): React.JSX.Element {
       vence = window.setTimeout(destapar, VENCE_MS)
     }
     window.addEventListener('popstate', alUsarLaFlecha)
+    window.addEventListener('pageshow', alVolverDelBfcache)
+    window.addEventListener('resize', medir)
     const ventana = window as VentanaDelBanco
-    if (hayBanco()) ventana.__vueltaDelBanco = () => ({ noche: NOCHE_DISPARADA.cantidad, dia: DIA_DEL_FINAL.activo, guardada: posicionGuardadaDelHome(), enCurso: VUELTA_AL_HOME.enCurso })
-    // La ruta cambió con el velo puesto: se repone lo de la ruta, se espera la página nueva y se destapa.
+    if (hayBanco()) ventana.__vueltaDelBanco = () => ({ noche: NOCHE_DISPARADA.cantidad, dia: DIA_DEL_FINAL.activo, guardada: posicionGuardadaDelHome(claveDeLaEntrada()), enCurso: VUELTA_AL_HOME.enCurso })
+    // [B12a.8] Sólo con banco: cubrir como lo pide un enlace (en esta rama el home no tiene un enlace a una página: el arnés cubre y navega con el router de next).
+    if (hayBanco()) ventana.__veloDelBanco = { cubrir: () => cubrirConElVelo() }
+    // La ruta cambió con el velo puesto: se repone lo de la ruta y se destapa con el primer cuadro estable de la página nueva.
     alCambiarLaRuta.current = (r) => {
       if (fase !== 'cubierto' || rutaAlCubrir === r) return
       const guardada = r === RUTA_DEL_HOME ? vuelta : null
@@ -140,26 +206,26 @@ export function VeloDeNavegacion(): React.JSX.Element {
       reponerLosAlmacenes()
       if (guardada !== null) devolverLosAlmacenes(guardada)
       // El scroll de la ruta (o el que el home dejó) en el primer cuadro, antes de que la gota observe por primera vez: así repone su
-      // noche sin barrido. Después, se espera a que los cuadros vuelvan a ser parejos (la página nueva quieta).
+      // noche sin barrido. Después, el primer cuadro estable: la página ya montada (estamos después de su commit), su scroll en su lugar y
+      // sus cuadros pintados.
       const t0 = performance.now()
-      let antes = t0
-      let parejos = 0
+      let pintados = 0
       let primero = true
       const esperar = (ahora: number): void => {
         if (primero) {
           primero = false
           if (guardada === null) scrollDeLaRuta()
           else llevarElScrollA(guardada.y)
+          window.dispatchEvent(new Event(EVENTOS_DEL_VELO.repuso))
         } else {
-          parejos = ahora - antes < VELO.cuadroParejoMs ? parejos + 1 : 0
+          pintados += 1
           // Si el documento del home todavía no alcanzaba (lo que mide al montarse), se vuelve a llevar; mientras, no está quieto.
           if (guardada !== null && Math.abs(window.scrollY - guardada.y) > 1) {
             llevarElScrollA(guardada.y)
-            parejos = 0
+            pintados = 0
           }
         }
-        antes = ahora
-        if (puedeDestapar(parejos, TITULOS_EN_CAMINO.todos, ahora - t0)) destapar()
+        if (puedeDestapar(pintados, true, ahora - t0)) destapar()
         else esperando = requestAnimationFrame(esperar)
       }
       cancelAnimationFrame(esperando)
@@ -168,10 +234,14 @@ export function VeloDeNavegacion(): React.JSX.Element {
     return () => {
       soltarElPedido()
       window.removeEventListener('popstate', alUsarLaFlecha)
+      window.removeEventListener('pageshow', alVolverDelBfcache)
+      window.removeEventListener('resize', medir)
       delete ventana.__vueltaDelBanco
+      delete ventana.__veloDelBanco
       VUELTA_AL_HOME.enCurso = false
       alCambiarLaRuta.current = () => undefined
-      cancelar()
+      animacion?.cancel()
+      cancelAnimationFrame(siguiendo)
       cancelAnimationFrame(esperando)
       window.clearTimeout(vence)
     }
@@ -182,5 +252,9 @@ export function VeloDeNavegacion(): React.JSX.Element {
     rutaDeAhora.current = ruta
   }, [ruta])
 
-  return <div ref={capa} aria-hidden="true" data-pieza="velo-de-navegacion" data-fase="quieto" data-cobertura="0" className="bg-fondo pointer-events-none fixed inset-0 z-[var(--z-overlay)]" style={{ maskImage: maskDelVelo('quieto', 0) }} />
+  return (
+    <div ref={capa} aria-hidden="true" data-pieza="velo-de-navegacion" data-fase="quieto" data-cobertura="0" className="pointer-events-none fixed inset-0 z-[calc(var(--z-cabecera)-1)] overflow-hidden">
+      <div ref={banda} data-parte="banda" className="invisible absolute top-1/2 left-1/2 will-change-transform" />
+    </div>
+  )
 }

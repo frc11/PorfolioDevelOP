@@ -439,12 +439,13 @@ titulo('2D · Cada destino del menú cae en su punto de lectura, con su llegada 
 const nada = (): void => undefined
 const hrefsDe = (html: string, marca: string): string[] => [...html.matchAll(new RegExp(`<a[^>]*${marca}[^>]*>`, 'g'))].map((m) => /href="([^"]+)"/.exec(m[0])?.[1] ?? '?')
 const barraHtml = renderToStaticMarkup(<BarraDelHome />)
-// [B12a.5] «Servicios» es el botón del desplegable (en el teléfono, del acordeón): su sección va adentro, en «Todos los servicios».
+// [B12a.8] «Servicios» es el enlace a su sección (en la barra y en el menú); la lista de las páginas abre aparte, con su flechita.
 const menuHtml = renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alSoltar={nada} alContacto={nada} />)
 const delMenu = [...hrefsDe(barraHtml, 'data-pieza="(?:barra|desplegable)-enlace"'), ...hrefsDe(menuHtml, 'data-parte="item-del-(?:menu|acordeon)"')]
 const secciones = delMenu.filter((h) => h.startsWith('#') && h !== '#contacto').map((h) => h.slice(1))
-const conNudo = (ids: readonly string[], nudos: readonly string[]): boolean => ids.length === 10 && ['quienes-somos', 'trabajos', 'servicios', 'tu-panel', 'por-que-develop'].every((id) => ids.filter((x) => x === id).length === 2) && ids.every((id) => nudos.includes(id))
-afirmar(conNudo(secciones, DESTINOS_CON_NUDO) && new RegExp(`href="#contacto"[^>]*data-abre-contacto="${ABRE_EL_PANEL}"`).test(barraHtml), 'la barra y el menú del teléfono llevan a Quiénes somos, Portfolio, Servicios, Panel y Por qué develOP, y cada uno tiene su nudo (su punto de lectura); el Contacto de la barra abre la hoja', secciones.join(' '))
+// [B12a.8] Reemplazada por la spec (3): «Home» va primero en la barra y en el menú (`#hero`, el viaje al principio), con su nudo.
+const conNudo = (ids: readonly string[], nudos: readonly string[]): boolean => ids.length === 12 && ids[0] === 'hero' && ['hero', 'quienes-somos', 'trabajos', 'servicios', 'tu-panel', 'por-que-develop'].every((id) => ids.filter((x) => x === id).length === 2) && ids.every((id) => nudos.includes(id))
+afirmar(conNudo(secciones, DESTINOS_CON_NUDO) && new RegExp(`href="#contacto"[^>]*data-abre-contacto="${ABRE_EL_PANEL}"`).test(barraHtml), 'la barra y el menú del teléfono llevan a Home (primero), Quiénes somos, Portfolio, Servicios, Panel y Por qué develOP, y cada uno tiene su nudo (su punto de lectura); el Contacto de la barra abre la hoja', secciones.join(' '))
 controlPositivo('el detector VE un destino sin nudo (iría al ancla nativa)', DESTINOS_CON_NUDO.filter((id) => id !== 'tu-panel'), (nudos: readonly string[]) => conNudo(secciones, nudos))
 
 // El punto de lectura con la llegada completa, en cada nudo (con la mecánica de verdad sobre un documento falso; los

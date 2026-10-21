@@ -1,5 +1,5 @@
 /**
- * [B12a.2] LA INTRO DE UNA PÁGINA, MEDIDA EN EL SITIO — en la ruta de prueba (`/v3/prueba-de-pagina`, la pose elegida: girar), con el banco
+ * [B12a.2] LA INTRO DE UNA PÁGINA, MEDIDA EN EL SITIO — en la ruta de prueba (`/v3/pagina-base`, la pose elegida: girar), con el banco
  * de la escena (`__entornoDeLaEscena`: publica el avance, `__avanceDeLaIntro`, y la silueta del logo, `__siluetaDelBanco`). Contra el dev
  * server, con el Chrome del sistema a la vista y `/api/` bloqueado. El mouse quieto en el medio (su paralaje en cero).
  *
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
       await dormir(1500)
       const delHome = await cajaDelLogo(p)
       // La página: el avance en tres puntos y el logo en avance 0.
-      await p.goto(`${BASE}/v3/prueba-de-pagina`, { waitUntil: 'load', timeout: 240000 })
+      await p.goto(`${BASE}/v3/pagina-base`, { waitUntil: 'load', timeout: 240000 })
       await esperarLaEscena(p)
       await p.mouse.move(ancho / 2, alto / 2)
       const arriba = await p.evaluate(() => {

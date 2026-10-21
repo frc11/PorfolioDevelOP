@@ -125,6 +125,9 @@
   translate: -50% 0;
   opacity: 1;
   visibility: visible;
+  /* [B12a.8] Al abrir, visible en el acto (sólo al cerrar se anima): con el teclado el foco entra en el mismo cuadro, y una lista que
+     todavía era `hidden` no lo tomaba (lo encontró `scripts-carga/barra.ts`). */
+  transition-property: opacity, translate;
 }
 
 /* Con la píldora al pie de la primera pantalla, abajo no entra: abre hacia arriba (y sube un poco al aparecer, al revés). */
@@ -163,6 +166,38 @@
 
 [data-v3] [data-pieza="desplegable-enlace"]:is(:hover, :focus-visible) {
   background-color: color-mix(in srgb, var(--color-tinta) var(--barra-resaltado), transparent);
+}
+
+/*
+ * [B12a.8] T2 · EN UNA PÁGINA, LA PÍLDORA NACE ARRIBA — donde queda en el home después de subir, y no baja ni sube con el scroll de la
+ * página (`data-nacimiento`, que pone `BarraDelHome`: en el home, abajo; `?navbar=abajo`, la del home para comparar). La cabecera se pega
+ * desde el tope y la píldora y la lista van a su reposo.
+ */
+[data-v3] [data-pieza="barra"][data-nacimiento="arriba"] {
+  top: 0;
+}
+
+[data-v3] [data-pieza="barra"][data-nacimiento="arriba"] > [data-parte="pastilla"] {
+  top: var(--barra-reposo);
+}
+
+[data-v3] [data-pieza="barra"][data-nacimiento="arriba"] > [data-parte="desplegable"] {
+  top: calc(var(--barra-reposo) + var(--barra-alto) + var(--spacing-2));
+}
+
+/* [B12a.8] La flechita de «Servicios» (abre la lista con Enter o con un clic; «Servicios» es el enlace a la sección). */
+[data-v3] [data-pieza="barra"] [data-parte="abrir-servicios"] {
+  margin-inline-start: calc(var(--spacing-1) * -1);
+  border-radius: var(--radius-pastilla-s);
+  color: var(--color-tinta);
+  opacity: var(--opacity-casi);
+  transition-property: opacity;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3] [data-pieza="barra"] [data-parte="abrir-servicios"]:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  opacity: 1;
 }
 
 /* Con el formulario de contacto abierto la barra se corre hacia arriba y se apaga, como la de siempre. [PASADA FINAL] B3:

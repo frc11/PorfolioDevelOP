@@ -1,0 +1,25 @@
+/* =========================================================================
+ * [B12a.8 · P-H33] EL TEXTO DE LA INTRO SOBRE LA ESCENA
+ * =========================================================================
+ * La intro de una página es transparente (se ve la sala de noche) y su texto
+ * es claro: las brasas, los rayos del plasma, las aristas del domo y el filo
+ * blanco del logo le pasan por detrás. Medido en el V1 de servicios y en el
+ * de B12a.8 (`scripts-carga/contraste-de-la-intro.ts`).
+ *
+ * [B12a.8] T5 · SIN VELO: la escena se ve limpia detrás del texto (el velo
+ * radial de la receta del Portfolio formaba una mancha y se sacó). Queda una
+ * sombra oscura PEGADA a las letras (corta y densa, sin colas que se vean
+ * como mancha) en la bajada, en «de qué se trata» y en las partes del `h1`
+ * (que se apagan con el título en volumen desde 1024). El título en volumen
+ * se lee por su propio volumen, su material y su luz.
+ * ========================================================================= */
+
+[data-v3] [data-intro-de-pagina] {
+  --sombra-de-la-intro: 0 0 0.06em var(--color-fondo), 0 0 0.06em var(--color-fondo), 0 0 0.12em var(--color-fondo), 0 0 0.12em var(--color-fondo);
+}
+
+[data-v3] [data-intro-de-pagina] [data-parte='bajada'],
+[data-v3] [data-intro-de-pagina] [data-parte='de-que-se-trata'] [data-parte='columna-de-la-intro'],
+[data-v3] [data-intro-de-pagina] h1 [data-parte^='titulo-'] {
+  text-shadow: var(--sombra-de-la-intro);
+}

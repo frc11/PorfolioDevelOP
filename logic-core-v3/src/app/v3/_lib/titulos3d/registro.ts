@@ -13,7 +13,7 @@ import { alCargarseLasFuentes, conReimpresion } from '../fuentes'
 /** [RETOQUE 3D] Con qué fuente se extruye (la que el DOM pinta: `scripts-retoque/fuentes-3d.py`). */
 export type FuenteDelHome = 'chivo-400' | 'archivo-700' | 'chivo-300-italica' | 'chivo-700' | 'chivo-300'
 /** [B12a.4] Las del título de las páginas: instancias de Archivo (ancho/peso) que se cargan sólo en una página (`fuentesDePagina.ts`). */
-export type FuenteDePagina = 'archivo-125-800' | 'archivo-125-300' | 'archivo-75-800' | 'archivo-112-300'
+export type FuenteDePagina = 'archivo-125-800' | 'archivo-125-300' | 'archivo-75-800' | 'archivo-75-900' | 'archivo-75-500' | 'archivo-125-200' | 'archivo-125-500' | 'archivo-125-400'
 export type FuenteDelTitulo = FuenteDelHome | FuenteDePagina
 
 /**
@@ -102,6 +102,8 @@ export interface TituloDeVolumen {
    * revés (se acuesta sobre su pie y su línea lo tapa). Portfolio: entra en su lugar y cae cuando el panel se va.
    */
   readonly saleCayendo?: boolean
+  /** [B12a.8 · P-H33] Su material, si no es el del entorno: el título de una página de noche va en papel (el claro, como su `h1`). */
+  readonly material?: TitulosDeVolumen
 }
 
 export const TITULOS_DE_VOLUMEN = new Map<string, TituloDeVolumen>()
@@ -196,13 +198,14 @@ interface Anotacion {
   readonly alejamiento?: number
   readonly parteDelMouse?: number
   readonly saleCayendo?: boolean
+  readonly material?: TitulosDeVolumen
   /** Sólo con la prueba prendida. */
   readonly activo: boolean
 }
 
 const SIN_TRAZOS: readonly TrazoDelTitulo[] = []
 
-export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, asiento = 'cercano', trazos = SIN_TRAZOS, forma = null, esquivaElLogo = false, alejamiento = 1, parteDelMouse = 0, saleCayendo = false, activo }: Anotacion): void {
+export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, llegada: pedida, salida, queda = false, corrida = null, fuente = 'chivo-400', gesto = 'letras', colocacion = 'lectura', rearma = true, minimoS = null, salidaMinimaS = null, asiento = 'cercano', trazos = SIN_TRAZOS, forma = null, esquivaElLogo = false, alejamiento = 1, parteDelMouse = 0, saleCayendo = false, material, activo }: Anotacion): void {
   const llegada = pedida ?? LLEGADO
   useEffect(() => {
     const el = lugar.current
@@ -211,13 +214,13 @@ export function useTituloDeVolumen({ id, texto, lugar, lectura, subida = 0, lleg
       escuchaLasFuentes = true
       alCargarseLasFuentes(pedirOtraSincronia)
     }
-    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, forma, esquivaElLogo, alejamiento, parteDelMouse, saleCayendo, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
+    TITULOS_DE_VOLUMEN.set(id, { id, texto, lugar: el, forma, esquivaElLogo, alejamiento, parteDelMouse, saleCayendo, material, lectura, subida, llegada: llegada.get(), salida: salida?.get() ?? 0, queda, corrida: corrida?.get() ?? 0, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos })
     avisar()
     return () => {
       TITULOS_DE_VOLUMEN.delete(id)
       avisar()
     }
-  }, [id, texto, lugar, forma, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos, esquivaElLogo, alejamiento, parteDelMouse, saleCayendo, activo])
+  }, [id, texto, lugar, forma, lectura, subida, llegada, salida, queda, corrida, fuente, gesto, colocacion, rearma, minimoS, salidaMinimaS, asiento, trazos, esquivaElLogo, alejamiento, parteDelMouse, saleCayendo, material, activo])
   useMotionValueEvent(llegada, 'change', (p) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     if (t !== undefined) t.llegada = p

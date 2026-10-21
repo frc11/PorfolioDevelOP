@@ -59,6 +59,8 @@ export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/carga.css`,
   // [PULIDO 11] B2 · B3 · la tarjeta del resultado de los formularios (sus tintas, que se dan vuelta, y el rojo del error).
   `${V3}/_estilos/resultado.css`,
+  // [B12a.8 · P-H33] el texto de la intro de las páginas sobre la escena: su halo y su velo (la receta del Portfolio).
+  `${V3}/_estilos/intro.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

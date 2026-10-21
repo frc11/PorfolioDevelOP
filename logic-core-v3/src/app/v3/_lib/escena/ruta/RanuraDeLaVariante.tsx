@@ -12,7 +12,7 @@ import { LUZ_DE_ABAJO_EN_VIVO } from '../final/luzDeAbajo'
 
 import { AVANCE_DE_LA_INTRO } from './pistaDeLaIntro'
 import { presetActual, suscribirseAlPreset } from './preset'
-import { atenderLaSalida } from './salidaDeLaVariante'
+import { atenderLaSalida, pedirLaSalidaDeLaVariante } from './salidaDeLaVariante'
 import { COMPOSICION_DE_LA_LUZ, SALIDA_DE_LA_VARIANTE_MS, type ComponenteDeVariante } from './variante'
 
 /** Hasta dónde llega la luz de abajo prestada (u): más allá del piso (radio 45 en plena, 34 en compacta), así lo cubre entero. */
@@ -35,9 +35,10 @@ type Salida = { readonly motivo: 'senal' | 'ruta'; hecha: boolean; promesa: Prom
 type EstadoDeLaRanura = { readonly id: string | null; readonly saliendo: boolean; readonly duena: boolean; readonly energia: number; readonly color: string; readonly geometrias: number; readonly texturas: number; readonly salidaMs: number }
 /**
  * Sólo con banco: el estado de la ranura; `__ranuraSinVariante` (la misma página sin montar la variante, para medir su costo) y
- * `__ranuraSinLaSenal` (el control de la salida: la señal se ignora y la variante sale recién cuando cambia la ruta, como antes).
+ * `__ranuraSinLaSenal` (el control de la salida: la señal se ignora y la variante sale recién cuando cambia la ruta, como antes) y
+ * [B12a.8] `__ranuraSinBfcache` (el control de P-H35: al volver del bfcache la salida no se olvida).
  */
-type VentanaDelBanco = Window & { __ranuraDelBanco?: () => EstadoDeLaRanura; __ranuraSinVariante?: boolean; __ranuraSinLaSenal?: boolean }
+type VentanaDelBanco = Window & { __ranuraDelBanco?: () => EstadoDeLaRanura; __pedirLaSalidaDelBanco?: () => Promise<void>; __ranuraSinVariante?: boolean; __ranuraSinLaSenal?: boolean; __ranuraSinBfcache?: boolean }
 
 /**
  * [B12a.3] LA RANURA DE VARIANTES — adentro del lienzo: monta la variante del preset de la página (`preset.variante`, un id del registro,
@@ -147,6 +148,22 @@ export function RanuraDeLaVariante({ calidad, reducido }: { readonly calidad: Ni
     return atenderLaSalida(() => (hayBanco() && (window as VentanaDelBanco).__ranuraSinLaSenal === true ? Promise.resolve() : salir('senal')))
   }, [montada, salir])
 
+  // [B12a.8 · P-H35] La página vuelve del bfcache (la flecha, después de una navegación que cambió de documento): la salida que se pidió
+  // al irse quedó a medias o hecha, con la luz abajo. Si la página sigue pidiendo esta variante, la salida se olvida y la variante vuelve
+  // a su avance (su luz, la del scroll de ahora).
+  useEffect(() => {
+    const alVolver = (e: PageTransitionEvent): void => {
+      if (!e.persisted || (hayBanco() && (window as VentanaDelBanco).__ranuraSinBfcache === true)) return
+      const deLaPagina = presetActual()
+      const m = deQuien.current
+      if (m === null || deLaPagina === null || deLaPagina.id !== m.pagina || deLaPagina.variante !== m.id) return
+      saliendo.current = false
+      salida.current = null
+    }
+    window.addEventListener('pageshow', alVolver)
+    return () => window.removeEventListener('pageshow', alVolver)
+  }, [])
+
   // Al desmontar la ranura (el lienzo se rehace al cruzar 1024), la luz y la energía vuelven a ser del final.
   useEffect(
     () => () => {
@@ -159,9 +176,12 @@ export function RanuraDeLaVariante({ calidad, reducido }: { readonly calidad: Ni
   useEffect(() => {
     if (!hayBanco()) return undefined
     const ventana = window as VentanaDelBanco
+    // [B12a.8] P-H35 · pedir la salida como lo hace una navegación (el arnés del bfcache la pide y después cambia de documento).
+    ventana.__pedirLaSalidaDelBanco = () => pedirLaSalidaDeLaVariante()
     ventana.__ranuraDelBanco = () => ({ id: montada?.id ?? null, saliendo: saliendo.current, duena: duena.current, energia: luz.current.energia, color: luz.current.color.getHexString(), geometrias: gl.info.memory.geometries, texturas: gl.info.memory.textures, salidaMs: tiempos.current.compuesta - tiempos.current.salida })
     return () => {
       delete ventana.__ranuraDelBanco
+      delete ventana.__pedirLaSalidaDelBanco
     }
   }, [montada, gl])
 

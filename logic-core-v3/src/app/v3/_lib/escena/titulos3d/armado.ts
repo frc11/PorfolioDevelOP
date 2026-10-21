@@ -67,6 +67,8 @@ export interface Armado {
   colocado: boolean
   /** [B1.2b] El que sale cayendo (`saleCayendo`): llegado entero, lo que baje es la caída; de vuelta en 0, se apaga. */
   cayendo: boolean
+  /** [B12a.8] T4 · el corrimiento de su lugar cuando empezó a caer: cae donde estaba (`null` si no está cayendo). */
+  corrimientoDeLaCaida: number | null
   /**
    * [RETOQUE 3D] B1 · lo que el que se queda necesita para irse con su sección: dónde quedó colocado (el lugar de lectura,
    * el grupo y la dirección de arriba de la cámara que lo colocó), cuánto mundo es un píxel ahí y el recorrido del escenario.
@@ -169,7 +171,7 @@ export function armar(titulo: TituloDeVolumen, variante: Variante): Armado {
   malla.visible = false
   const grupo = new THREE.Group()
   grupo.add(malla)
-  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, fuente, contorno, sinLetras: letras === 0, colocado: false, cayendo: false, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 }, ahora: { izquierda: 0, arriba: 0, linea: 0, cuerpo: 0, ancho: 0, alto: 0 }, renglones, letras: dom?.x ?? null }
+  return { titulo, mostrado: { llegada: titulo.queda ? 0 : titulo.llegada, salida: titulo.queda ? 0 : titulo.salida }, grupo, malla, material, uniforms, fuente, contorno, sinLetras: letras === 0, colocado: false, cayendo: false, corrimientoDeLaCaida: null, base: new THREE.Vector3(), arriba: new THREE.Vector3(0, 1, 0), mundoPorPx: 0, lugar: null, pin: { inicio: 0, fin: 0 }, ahora: { izquierda: 0, arriba: 0, linea: 0, cuerpo: 0, ancho: 0, alto: 0 }, renglones, letras: dom?.x ?? null }
 }
 
 export function soltar(a: Armado): void {
