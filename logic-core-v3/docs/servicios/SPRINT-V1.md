@@ -82,8 +82,42 @@ Reemplazados por la común del home, no aflojados; cada uno con su control:
 | **Verde, con el arreglo** | ok: «Pausar el video de trabajos», sin apretar; con el mouse, caja 0 × 0, el puntero no la toca y el clic en su lugar no pausa (el video sigue); con Tab, enfocada con `:focus-visible`, 48 × 48 adentro del cuadro; Enter pausa (el video se para) y Enter suelta (anda); el ícono contra el peor píxel de su disco (cinco cuadros con el video andando): **6,70:1**; sin errores ni llamadas a `/api` | ok, lo mismo; 6,70:1 |
 
 - La primera corrida en rojo midió mal la parte del mouse: el botón quedaba debajo del borde del cuadro (y = 1013 con 900 de alto) y el puntero nunca lo alcanzaba. El banco ahora lo centra y exige que el punto esté adentro; con eso, el rojo de arriba es válido.
-- **No corrieron todavía** (O-10: con el dev del home y el nuestro prendidos a la vez la memoria libre no pasa de ~2,4 GB): el control en el navegador (la hoja que la deja a la vista y con puntero: tiene que dar FALLA) y la corrida con movimiento reducido (`REDUCIDO=1`: sin botón, sin `<video>`, el póster). Los dos los cubre el test en el marcado (§2.2).
+- **Corrieron después del commit del grupo** (`92490756`), en la primera ventana de memoria (2026-10-21, 02:25, con el home quieto):
+  - **el control** (`CONTROL=a-la-vista`: una hoja que la deja a la vista y con puntero, el defecto otra vez) a 1440: **FALLA**, como tiene que dar: con el mouse se ve (48 × 48), el puntero la toca y el clic pausa el video;
+  - **con movimiento reducido** (`REDUCIDO=1`) a 1440 y 390: ok, sin botón, sin `<video>` y con el póster cargado a la vista.
 
 ### 2.4 El gate
 
 lint de los archivos tocados: 0 · tsc: 0 · los tests de servicios y los 6 barridos, iguales a la base del Paso 0 salvo `pagina` (244/0) · `s77` 44/0. Las salidas, en `C:\paginas-servicios-datos\v1\gate-g2\`.
+
+---
+
+## 3. Grupo 3 — Lo que quedó sin correr del M2b, y P-H26
+
+Contra la página de hoy (con la tapa: el Grupo 1 todavía no estaba aplicado), el dev en `:3001`, con el home quieto.
+
+### 3.1 El M2b en el navegador
+
+El banco del M2b (`scratchpad/c3/verificar-historias.cjs`, el Chromium sin placa: la escena queda tapada; su único error de consola es «Error creating WebGL context», el de siempre de ese Chromium). Los resultados, en `C:\paginas-servicios-datos\c3\m2b\navegador\`.
+
+| Corrida | Resultado |
+|---|---|
+| **Las historias a 375** (`historias 375`) | **ok**, como el 390 del M2b: la versión del teléfono a la vista y las diagonales no; las historias se montan solo con la caja pegada (la lista quieta, `inert`); los tres pasos se leen, con «Recomendada» y la línea de la Mediana, el texto adentro del cuadro y debajo de las barras, contraste 6,65:1, desborde 0, nada flota encima; los toques van 1, 2, 1, 2 sin mover la página; mantener pausa; el deslice de costado vuelve un paso sin scrollear; las salidas aterrizan donde tienen que aterrizar (adelante 2938, atrás 1474, los dos exactos); avanza a los 10 s; el CTA de debajo abre el contacto con «web» marcado y los campos vacíos, cerrado con Esc; cero `/api` |
+| **No se montan a 768** (`sinmontar 768`) | **ok**: en 13 paradas por el precio, las historias nunca montadas; la versión del teléfono con `display: none`, las diagonales a la vista |
+| **No se montan a 1440** (`sinmontar 1440`) | **ok**, ídem |
+| **Con movimiento reducido a 390** (`reducido 390`) | **ok**: sin historias en ninguna de las 9 paradas; la caja sin anclar (`relative`); los tres pasos quietos, uno debajo del otro, a la vista (Simple 269 px, Mediana 392, Premium 245), contraste 6,65:1, desborde 0 |
+
+### 3.2 P-H26 con nuestra sonda (`scripts-servicios/foco-del-contacto.ts`)
+
+La del R1 (`diag-foco.cjs`, los pasos de `SPRINT-R1.md` §5.1), ahora en el repo: el Chrome del sistema a la vista, `/api/` bloqueado, un Chrome por ancho y la página cargada de nuevo para cada CTA. Por cierre: el CTA a la vista, 2 s, foco + Enter, la hoja, 1,6 s, Esc, que se vaya, 1,5 s y `document.activeElement`.
+
+| | El CTA del precio | El llamado | El cierre | Total |
+|---|---|---|---|---|
+| 1440 | 12 de 12 | 12 de 12 | 12 de 12 | 36/36 |
+| 1024 | 12 de 12 | 12 de 12 | 12 de 12 | 36/36 |
+| 390 | 12 de 12 | 12 de 12 | 12 de 12 | 36/36 |
+| **108 cierres** | | | | **108 con el foco en el botón, 0 en BODY** |
+
+- **El control positivo** (la devolución de antes, `?devolucion=un-cuadro`, a 1440, 36 cierres): **2 en BODY** (el CTA del precio en la vuelta 10 y el cierre en la 9). La carrera se reproduce en servicios con la devolución de antes y no con la de ahora: el arreglo del home (P-H26, merge-4) anda en servicios.
+- Con el Chromium sin placa del R1 la carrera daba ~25 %; con el Chrome del sistema, ~6 % (2 de 36). Es otra máquina de tiempos: el criterio es el 0 de 108, y el control dice que el banco ve la carrera.
+- Cero llamadas a `/api` y cero errores en las 144 vueltas.
