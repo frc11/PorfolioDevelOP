@@ -121,3 +121,129 @@ La del R1 (`diag-foco.cjs`, los pasos de `SPRINT-R1.md` §5.1), ahora en el repo
 - **El control positivo** (la devolución de antes, `?devolucion=un-cuadro`, a 1440, 36 cierres): **2 en BODY** (el CTA del precio en la vuelta 10 y el cierre en la 9). La carrera se reproduce en servicios con la devolución de antes y no con la de ahora: el arreglo del home (P-H26, merge-4) anda en servicios.
 - Con el Chromium sin placa del R1 la carrera daba ~25 %; con el Chrome del sistema, ~6 % (2 de 36). Es otra máquina de tiempos: el criterio es el 0 de 108, y el control dice que el banco ve la carrera.
 - Cero llamadas a `/api` y cero errores en las 144 vueltas.
+
+---
+
+## 4. Grupo 1 — La intro con la escena y la variante de web (commiteado con el «commit» de Valentino, 2026-10-21)
+
+### 4.1 Lo hecho
+
+| Archivo | Qué |
+|---|---|
+| `_servicios/Intro.tsx` | **La intro es la del home:** `IntroDeLaPagina` con el nombre (`h1`), la bajada en dos `ParrafoDeLaBajada` (la entrada del problema y su texto) y el preset de la página. Se fueron nuestro atributo (`data-intro-de-servicio`), nuestro alto de una pantalla (`ALTO_DE_LA_INTRO`), **la tapa interina** y la marca de la sección |
+| `_servicios/escena/presets.ts` (nuevo) | Los presets de las tres páginas, una constante cada uno (B12a-API §1): de noche, `PISTA_DE_LA_INTRO`, el tramo `SELECTOR_DE_LA_INTRO`, el acento de su servicio y la variante del registro (`web` en Páginas web; Software e IA, ninguna) |
+| `_servicios/escena/VarianteDeWeb.tsx` (nuevo) | **La variante de Páginas web**, `'use client'` y `default`: en su `useFrame` pide la luz del cuadro (`cuadroDeLaVariante`) y escribe SOLO `luzDeAbajo` (la luz de abajo del piso, del blanco al celeste) y `energia` (las brasas, los arcos y la red, teñidos). No agrega objetos: el color va solo en la luz. Devuelve `null` |
+| `_variantes/registro.ts` (del home: **una línea**) | `web: () => import('../_servicios/escena/VarianteDeWeb')`: el registro por id que la API manda que cada servicio complete (§1.2). Es el único archivo fuera de nuestras carpetas |
+| `_servicios/escena/estructura.ts` | Pura, a la API: tres canales de luz (el brillo del piso y los dos tintes); la composición y la salida, las del home (`COMPOSICION_DE_LA_LUZ`, `SALIDA_DE_LA_VARIANTE_MS`); el encendido suave de 0 a 0,5 y quieto hasta 1; con reducido, el final quieto y la salida inmediata; el cuadro de la variante (`cuadroDeLaVariante`) |
+| `_servicios/escena/luzDeWeb.ts` | La encendida de web y el token (era `varianteDeWeb.ts`: cambió de nombre para no chocar con `VarianteDeWeb.tsx` en Windows) |
+| `_servicios/movimiento/RaizDeLaPagina.tsx` y `salidaDeLaPagina.ts` (nuevos) | **La salida:** la raíz de la página (el mismo `div`, ahora de cliente) atiende en la captura el clic en cualquier enlace que se va de la página (el logo, el Portfolio, el cierre); lo frena, pide `pedirLaSalidaDeLaVariante()`, la espera y vuelve a apretar el MISMO enlace, que esta vez pasa. Nunca `router.push`. No se va: un ancla de la misma página, un CTA que abre el contacto, un clic con tecla o con otro botón, un `target`, una descarga, uno de afuera |
+| `_servicios/Encabezado.tsx` | El logo va ANTES de la intro y fuera de ella, con su propio `data-seccion="invertida"` (en claro sobre la escena) |
+| `_servicios/PaginaDeServicio.tsx` | La raíz es `RaizDeLaPagina`; el encabezado, la intro del home, el cuerpo |
+| Se fueron | `escena/firmas.ts` (las copias de las firmas: se importan del home), `escena/presetDeWeb.ts` y `bloques/Problema.tsx` (su contenido es la bajada) |
+| `scripts-servicios/escena.ts` (nuevo) y `navegador.ts` | El banco del navegador de la escena; `peorContraste` suma el p99, el lugar y el color del peor píxel |
+
+**El título 3D (P-H14):** no está en la API todavía (B12a.4). El `h1` queda visible, siempre en el DOM, y un test lo afirma.
+
+### 4.2 Los tests
+
+`escena.invariant`: 45 → **61/0**. `pagina.invariant`: 244 → **256/0**. `historias` 37/0 y `diagonales` 47/0, iguales. `s78` (del home, por la línea del registro) 64/0. Los demás tests de servicios y los 6 barridos, iguales a la base; s40 corrió con un índice temporal con los borrados (la trampa de memoria: un borrado sin indexar lo tira), 38/0.
+
+**Lo que pidió el prompt, cada uno con su control:**
+
+| Test | Dónde | Control |
+|---|---|---|
+| la variante está registrada con su id (el import dinámico; el módulo `'use client'` con `default`) | escena §7 | un registro sin la línea; uno que la importa entera |
+| el avance 0 da la composición compartida (la del home) | escena §1 | una curva que arranca encendida; una composición propia; una teñida |
+| a 0,5 la luz está completa y después queda quieta (y sube suave, sin bajar) | escena §2 | una que sigue subiendo; una que baja y sube; una lineal |
+| el color va solo en la luz (los canales; el componente escribe solo las dos funciones de la ranura y no crea nada) | escena §4 | un anillo de color en el piso; el almacén del home escrito directo; el acento entero desde el principio |
+| cada enlace de salida pide la salida antes de navegar (la decisión y el manejador en el tiempo) | escena §10 | una decisión que deja ir al Portfolio sin salida; una que frena el clic con Control; un manejador que navega sin esperar; uno que no la pide |
+| el h1 siempre en el DOM y a la vista | pagina §1 | un h1 `sr-only`; uno adentro de algo `aria-hidden` |
+| no queda la tapa (y ni la intro ni el encabezado pintan fondo) | pagina §10 | la tapa de antes en la intro; una intro con fondo; un encabezado con fondo |
+
+**Reemplazadas por la spec nueva, no aflojadas** (cada una con su control, en el docblock de los dos tests):
+- escena: la noche ya no es un canal (la pone el preset); «la compacta cuesta un cuarto» → la variante no tiene costo propio por calidad; «las 5 firmas con la nota» → se importan; «sin montar» → la intro importa los presets y la variante entra solo por el registro;
+- pagina §1 la intro es la `<section>` del home, después del encabezado; §2 el problema ya no es un bloque; §3 `data-servicio` una vez, en la intro (P-S1 acotado); §5 `data-seccion` en la intro y en el encabezado; §6 el acento de la intro por `data-servicio`; §9 el encabezado antes de la intro, en claro, el código de cliente suma la raíz y la variante, y las clases arbitrarias de la intro son las del componente del home; §10 sin tapa.
+
+### 4.3 En el navegador (`scripts-servicios/escena.ts`: el Chrome del sistema a la vista, el banco de la escena del home, `/api/` bloqueado; contra el dev)
+
+**El rojo, con el código de antes (1440):** sin la variante de web, sin la intro del home, la escena no se ve (0 píxeles distintos con y sin el lienzo: la tapa), el avance clavado en 0, sin el h1 ni la bajada de la intro, y el logo navegando sin salida (159 ms, la luz sin moverse).
+
+**El verde:**
+
+| | 1440 | 1024 | 768 | 390 |
+|---|---|---|---|---|
+| **La escena se ve en la intro** (píxeles que cambian sin el lienzo) | 99,6 % | 99,5 % | 99,6 % | 99,2 % |
+| **El avance** (±1 %) | 0 · 0,2504 · 0,5 · 0,7504 · 0,9504 · 1 | ok | ok | ok |
+| **La luz** en 0 / 0,25 / 0,5 – 0,95 | 0,12 blanca / 0,561 teñida / 1 en el celeste (`8fc0e8`), quieta | ídem | ídem | ídem |
+| **El h1 y la bajada** (peor píxel; el 99 % del fondo) | **1,15:1** (3,2) | **1,01:1** (2,3) | **1,00:1** (2,63) | **1,00:1** (1,45) |
+| **El papel tapa la escena** (posiciones, fugas, píxeles distintos sin el lienzo) | 14 · 0 · 0 | 15 · 0 · 0 | 14 · 0 · 0 | 14 · 0 · 0 |
+| **La salida** desde 0,5 (la luz en la composición · navega) | 434 · 424 ms (hueco máx. 14) | 433 · 423 | 434 · 422 | 435 · 424 |
+| el clic real del mouse en el logo (navega) | 433 ms | 433 | 422 | 422 |
+| desde el papel (el cierre: en el acto) | 10 ms | 10 | 10 | 10 |
+| **Consola** | 0 errores · 0 NaN · 0 `/api` | ídem | ídem | ídem |
+
+- **Con movimiento reducido** (1440 y 390): la variante quieta en su estado final (1, el celeste) en cualquier avance, y la salida en el acto (1 ms por código, 10 con el mouse).
+- **El costo** (contra el dev: relativo; con y sin la variante, alternadas y recién recargadas): **1440 Δ −0,046 ms por cuadro** (A/A 0,023), **390 Δ +0,051** (A/A 0,019). Las dos bajo la resolución del banco, contra un presupuesto de **0,5 ms** (`PRESUPUESTO_DE_LA_VARIANTE`).
+- **Los controles** (1440, el defecto reintroducido por una hoja o un escucha): la tapa → **FALLA** (0 píxeles distintos); los enlaces sin la salida → **FALLA** (navega a los 0 ms y la luz nunca baja); el cuerpo transparente → **FALLA** (10,45 M píxeles distintos). El de texto oscuro no corrió: el contraste ya falla en verde.
+- **Las capturas** de la intro en los avances 0, 0,5 y 1, en los cuatro anchos: `C:\paginas-servicios-datos\v1\escena\escena-<ancho>-avance-<0|0.5|1>.png`. En 0: la composición, de noche, el piso apenas encendido y blanco. En 0,5: la luz de abajo encendida entre los bloques y las brasas y los rayos en celeste, la cámara girada (la pose 2), y el papel que entra desde abajo. En 1: el papel.
+- Los avisos de la consola: uno de compilación de un shader del home (D3D, «X4122»), y con reducido los de Motion («Reduced Motion enabled»).
+
+### 4.4 El contraste de la intro NO llega (hallazgo para el home)
+
+El criterio del prompt es 4,5:1 contra el peor píxel detrás del texto, y **no se cumple en ningún ancho**. No es nuestro marcado: el h1 y la bajada son los de `IntroDeLaPagina` (el texto arriba, fijo mientras dura la intro) y lo que pasa por detrás es la escena del home de noche:
+- **las brasas** (los puntos blancos y, desde 0,25, celestes) pasan por detrás de las letras: el peor píxel es una brasa (por ejemplo, 227, 232, 236 a 1440);
+- **las aristas del domo** (los bordes claros de su armazón, 148–190 de gris) cruzan la bajada en el avance 0;
+- **a 390 y 768** el título cae sobre la franja más densa de brasas, arriba del domo en la vista compacta: ahí ni el 99 % del fondo pasa (1,45:1 a 390).
+
+Las capturas sin el texto son limpias (se miró una a 1440 y una a 390): la medida vale. A 1440, de 0,25 a 0,75 el 99 % del fondo sí pasa (8–15:1); el peor sigue siendo una brasa (2,9–4,7). Va como **P-H31a** (§6).
+
+---
+
+## 5. Decidido por CC, revisar
+
+1. **El orden de la corrida** (arriba): los grupos 2 y 3 antes del 1.
+2. **La línea del registro en `_variantes/registro.ts`,** fuera de nuestras carpetas: la API dice que cada servicio agrega SU línea ahí (§4), y sin ella la variante no se puede registrar. Es una línea, con su comentario; s78 (el test del home sobre el registro) sigue 64/0.
+3. **La navegación sigue siendo `<a href>` con recarga completa,** después de la salida: `EnlaceDeRuta` (B12a.6) no existe, la vuelta al home (B12a.7) tampoco, y nuestro test prohíbe `next/link` desde el S1b. La salida la pide un solo escucha en la raíz para todos los enlaces (los de hoy y los que vengan). No hay velo todavía: la luz baja y después se navega.
+4. **El encabezado (el logo) va antes de la intro,** fuera de ella y con su propio `data-seccion="invertida"`: la intro del home no tiene lugar para él. El `h1` arranca un encabezado más abajo; el avance cuenta desde el tope de la intro. Se va con la navbar en el layout (B12a.5).
+5. **Software e IA también tienen la intro con la escena** (la plantilla es una): de noche, con su acento y sin variante (la luz de la composición).
+6. **La bajada usa `ParrafoDeLaBajada`** (lo que dice la API): las dos líneas quedan en el cuerpo de texto; antes eran `titulo-m` (la entrada) y `titulo-s` liviano (el texto). Y la marca de la sección (el cuadradito del acento) ya no está en la intro.
+7. **Se fue `Problema.tsx`** (su contenido es la bajada) y `firmas.ts`, `presetDeWeb.ts` y el nombre `varianteDeWeb.ts`.
+8. **P-S1 acotado:** `data-servicio` va una vez, en la intro, y lo pone el home.
+9. **La variante no agrega objetos:** el color va solo en la luz, como en el V0 (VARIANTES.md, «web: el piso brilloso»).
+10. **En el celular, nada propio:** el campo de la luz a media resolución del V0 no se puede hacer por la API (la luz de abajo la dibuja el piso del home); la compacta del home baja el costo.
+11. **La memoria:** desde el «seguí» de Valentino (2026-10-21), el umbral de O-10 fue 2 GB con el home quieto (sin su dev ni su arnés); con nuestro dev compilado la máquina no pasaba de ~2,5 GB libres. Con 3 GB hubo que esperar más de una hora (§6).
+12. **Los criterios del banco:** «navega después de la salida» se mide en `beforeunload` (la navegación arranca en el mismo tic en que la ranura resuelve, un cuadro antes del que pinta la composición exacta: se pide que el último cuadro pintado esté a 0,002 de ella); el contraste, en los avances 0 a 0,75 (desde ~0,8 el texto fijo de la intro sube con la página).
+
+---
+
+## 6. Pedidos al home (P-H31) y lo que no corrió
+
+| # | Qué | Por qué |
+|---|---|---|
+| **P-H31a** | **El texto de la intro sobre la escena no llega a AA.** Peor píxel 1,0–1,15:1 en los cuatro anchos; a 390, ni el 99 % del fondo (1,45:1) | Las brasas detrás de las letras, las aristas del domo y, en el teléfono, la franja densa de brasas detrás del título (§4.4). Opciones, a decidir: un velo o el vidrio detrás del texto, una sombra al texto, las brasas fuera de la franja del texto, o en el teléfono el texto abajo como el hero |
+| **P-H31b** | **El encabezado de una página hasta B12a.5:** la intro no tiene lugar para el logo | Hoy va antes de la intro, fuera de ella (§5.4); con la navbar en el layout se va |
+| **P-H31c** | **La salida y el bfcache:** con la recarga completa, si el navegador devuelve la página desde el bfcache (la flecha atrás), la ranura queda «saliendo» y la luz en la composición hasta recargar | No se pudo medir en el dev (su conexión del HMR saca la página del bfcache); vale para el build. Con `EnlaceDeRuta` (navegación cliente) no pasa |
+
+**Lo que no corrió:** el control del texto oscuro (el contraste ya falla en verde); el costo contra el build (sin `next build`: O-10).
+
+**La memoria (O-10):** desde las 15:34 del 2026-10-20 el home tuvo su dev en `:3002` (3,9 GB) y su arnés en tandas; con los dos devs prendidos la memoria libre no pasaba de ~2,4 GB. Se apagó nuestro dev mientras tanto (para no restarle margen a los bancos del home) y se esperó. Tres utilidades de Chrome huérfanas del banco del home (`foco-perfil`, 07:01–07:21) no se tocaron ni se contaron.
+
+---
+
+## 7. Qué mira Valentino (FRENO del Grupo 1)
+
+El dev queda prendido: **http://localhost:3001/v3/paginas-web** (para levantarlo de nuevo: `npm run dev -- -p 3001`).
+
+1. **A 1440, de la intro al cierre:** al cargar, la composición (la sala de noche, el logo centrado, el piso apenas encendido y blanco). Scrolleando la primera pantalla y media: la cámara gira y la luz de abajo se enciende entre los bloques en celeste, con las brasas y los rayos teñidos, hasta la mitad; de ahí quieta. Después entra el papel, que tapa la escena, y el resto de la página es la de siempre.
+2. **El h1 y la bajada sobre la escena** (P-H31a): ¿se leen? Las brasas pasan por detrás de las letras y, en el avance 0, las aristas del domo cruzan la bajada.
+3. **A 390, lo mismo:** la intro sobre la escena compacta (el logo grande en el medio) y el título sobre la franja densa de brasas de arriba; el resto de la página igual.
+4. **A 1024 y 768:** lo mismo; a 768 el precio son las diagonales.
+5. **Un clic en un enlace de salida:**
+   - el logo de arriba al cargar: la página espera ~420 ms (la luz ya está en la composición: no se ve nada) y va al home;
+   - el enlace «develOP» del cierre: va en el acto;
+   - para ver la luz bajar hay que irse con la intro encendida, y ahí el logo ya se fue con el scroll: no hay hoy ningún enlace a la vista en la intro encendida (el banco lo aprieta por código). Todavía no hay velo (B12a.6).
+6. **Con movimiento reducido:** la intro ya encendida en celeste desde arriba, quieta; los enlaces navegan en el acto.
+7. **Software e IA** (`/v3/software-a-medida`, `/v3/ia-y-automatizaciones`): la intro con la escena de noche, sin variante (la luz blanca de la composición). **No se miró en el navegador:** lo afirman los tests (los presets y el marcado de las tres páginas).
+8. **El encabezado** (§5.4) y **la bajada sin la jerarquía de antes** (§5.6).
+
+**Con el «commit»:** staging archivo por archivo (los borrados con `git rm`), mensaje «V1: intro con la escena y la variante de Paginas web», push sin force y el dev apagado.

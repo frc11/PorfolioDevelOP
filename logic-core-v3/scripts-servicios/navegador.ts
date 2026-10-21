@@ -114,23 +114,32 @@ export async function pixeles(png: Buffer): Promise<{ readonly datos: Uint8Array
 
 /**
  * El peor contraste entre un color de texto (o de un ícono) y los píxeles de una captura SIN él, dentro de unas cajas (px de la captura):
- * el fondo de verdad detrás, píxel por píxel. Devuelve el peor y cuántos píxeles miró.
+ * el fondo de verdad detrás, píxel por píxel. Devuelve el peor, cuántos píxeles miró, [V1] dónde está el peor y de qué color, y el
+ * contraste que cumple el 99 % de los píxeles (para saber si el peor es un punto o el fondo entero).
  */
-export function peorContraste(fondo: { readonly datos: Uint8Array; readonly ancho: number; readonly alto: number }, texto: readonly [number, number, number], cajas: readonly { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number }[]): { readonly peor: number; readonly mirados: number } {
+export function peorContraste(fondo: { readonly datos: Uint8Array; readonly ancho: number; readonly alto: number }, texto: readonly [number, number, number], cajas: readonly { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number }[]): { readonly peor: number; readonly mirados: number; readonly p99: number; readonly donde: readonly [number, number]; readonly colorDelPeor: readonly [number, number, number] } {
   const lt = luminancia(texto[0], texto[1], texto[2])
   let peor = Number.POSITIVE_INFINITY
-  let mirados = 0
+  let donde: [number, number] = [-1, -1]
+  let colorDelPeor: [number, number, number] = [0, 0, 0]
+  const todos: number[] = []
   for (const c of cajas) {
     for (let y = Math.max(0, Math.floor(c.y)); y < Math.min(fondo.alto, Math.ceil(c.y + c.alto)); y++) {
       for (let x = Math.max(0, Math.floor(c.x)); x < Math.min(fondo.ancho, Math.ceil(c.x + c.ancho)); x++) {
         const i = (y * fondo.ancho + x) * 4
-        const k = contraste(lt, luminancia(fondo.datos[i] ?? 0, fondo.datos[i + 1] ?? 0, fondo.datos[i + 2] ?? 0))
-        if (k < peor) peor = k
-        mirados += 1
+        const rgb: [number, number, number] = [fondo.datos[i] ?? 0, fondo.datos[i + 1] ?? 0, fondo.datos[i + 2] ?? 0]
+        const k = contraste(lt, luminancia(rgb[0], rgb[1], rgb[2]))
+        todos.push(k)
+        if (k < peor) {
+          peor = k
+          donde = [x, y]
+          colorDelPeor = rgb
+        }
       }
     }
   }
-  return { peor, mirados }
+  todos.sort((a, b) => a - b)
+  return { peor, mirados: todos.length, p99: todos[Math.floor(todos.length * 0.01)] ?? Number.NaN, donde, colorDelPeor }
 }
 
 /** Un color de CSS resuelto (`rgb(…)`/`rgba(…)`/`color(srgb …)`) a sRGB de 0 a 255, leído en la página por un lienzo. */

@@ -1,51 +1,34 @@
 /**
- * [SERVICIOS S3b · M1] LA INTRO — la primera pantalla de las tres páginas (contrato v4 §0: las páginas son «home-based»).
+ * [SERVICIOS S3b · M1 · V1] LA INTRO — la primera parte de las tres páginas (contrato v4 §0: las páginas son «home-based»).
  *
- * La intro con la escena la hace el home en B12; servicios solo RESERVA el bloque: transparente (sin fondo propio), con el `h1` y
- * su bajada (`Problema`) y, arriba, el enlace al home (`Encabezado`). Se lee sobre la tapa interina, y el cuerpo, que es opaco, la
- * tapa al scrollear.
- *
- * ── Lo que B12a encuentra acá (P-H20) ─────────────────────────────────────
- *   · el bloque, por su atributo propio: `data-intro-de-servicio`, con el `IdDeServicio` del home como valor (`web`, `software`,
- *     `ia-automatizacion`): el mismo vocabulario de los tokens y de los presets. Nunca `data-panel`, `data-seccion-id`,
- *     `data-servicio` ni un id que el home busque;
- *   · el `h1`, que es el nombre del servicio (`Problema`): el mismo texto que el título 3D, siempre en el DOM;
- *   · la bajada, dos párrafos sin heading;
- *   · el alto, en `ALTO_DE_LA_INTRO`.
- *
- * ── Lo demás ──────────────────────────────────────────────────────────────
- *   · `data-seccion="invertida"`, el ÚNICO de la página (Paso 0 del S3b): el tema da vuelta el fondo, las tintas y los bordes adentro
- *     de este bloque y en ningún otro lado, así que el cuerpo queda en el papel del tema sin tocar el tema.
- *   · `text-tinta` en el mismo elemento: el color se hereda ya resuelto, así que la tinta clara se pide acá y no en la raíz.
- *   · El acento claro del servicio (`estiloDelAcentoSobreNoche`, el token del tema desde el M1). El cuerpo usa el oscuro.
- *   · La tapa interina, ADENTRO de este bloque para pintar la noche: `fixed inset-0 -z-10`, por encima del lienzo de la escena y
- *     debajo de todo el contenido de la raíz. Tapa la escena, no baja su costo, y se va con B12.
- *   · El encabezado también va adentro: en claro, y con el anillo de foco claro (el foco ES la tinta).
+ * [V1] Es la del home: `IntroDeLaPagina` (B12a-API §2), con su preset (`escena/presets.ts`). El home pone el bloque y servicios su
+ * contenido adentro (D2):
+ *   · el bloque mide 1,5 pantallas (`PANTALLAS_DE_LA_INTRO`), es transparente (se ve la escena, de noche, con su variante) y lleva
+ *     `data-intro-de-pagina` con el id de la página (el selector del tramo de la escena: el avance se mide sobre él),
+ *     `data-seccion="invertida"` (los claros, sobre la noche) y `data-servicio` con el acento (el tema pone su claro);
+ *   · el `h1` es el NOMBRE del servicio («Páginas web»), siempre en el DOM: el mismo texto que el título 3D cuando llegue su preset
+ *     (P-H14, B12a.4); hasta entonces es el que se ve;
+ *   · la bajada, dos párrafos sin heading, literales de los datos: la entrada del problema (su título) y su texto. Fija arriba mientras dura
+ *     la intro.
+ * Se fueron, porque los pone el home: nuestro atributo (`data-intro-de-servicio`), nuestro alto de una pantalla, la tapa interina que
+ * pintaba la noche y la marca de la sección.
  */
 
-import { Encabezado } from './Encabezado'
-import { Problema } from './bloques/Problema'
-import { estiloDelAcentoSobreNoche } from './estiloDelAcento'
+import { IntroDeLaPagina, ParrafoDeLaBajada } from '../_componentes/pagina/IntroDeLaPagina'
+import { PRESETS_DE_LAS_PAGINAS } from './escena/presets'
 import type { Servicio } from './tipos'
-
-/** El atributo por el que B12a encuentra la intro. Una sola fuente: la intro lo emite y los tests lo buscan. */
-export const ATRIBUTO_DE_LA_INTRO = 'data-intro-de-servicio'
-
-/** Una pantalla, como piso: si el título se parte en más líneas, la intro crece en vez de desbordar sobre el papel. */
-export const ALTO_DE_LA_INTRO = 'min-h-svh' // el alto lo fija B12a (1,5 pantallas cuando llegue)
 
 export function Intro({ servicio }: { readonly servicio: Servicio }): React.JSX.Element {
   return (
-    <div
-      {...{ [ATRIBUTO_DE_LA_INTRO]: servicio.idEnElHome }}
-      data-seccion="invertida"
-      style={estiloDelAcentoSobreNoche(servicio.idEnElHome)}
-      className={`flex flex-col text-tinta ${ALTO_DE_LA_INTRO}`}
-    >
-      {/* La tapa interina: lo único opaco de la intro. Se va con B12. */}
-      <div aria-hidden="true" className="fixed inset-0 -z-10 bg-fondo" />
-      <Encabezado />
-      <Problema servicio={servicio} />
-    </div>
+    <IntroDeLaPagina
+      titulo={servicio.nombre}
+      preset={PRESETS_DE_LAS_PAGINAS[servicio.idEnElHome]}
+      bajada={
+        <>
+          <ParrafoDeLaBajada>{servicio.problema.titulo}</ParrafoDeLaBajada>
+          <ParrafoDeLaBajada>{servicio.problema.texto}</ParrafoDeLaBajada>
+        </>
+      }
+    />
   )
 }

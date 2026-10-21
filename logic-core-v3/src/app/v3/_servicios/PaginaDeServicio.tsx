@@ -1,13 +1,14 @@
 /**
- * [SERVICIOS S1b · S3b · M1] LA PÁGINA DE UN SERVICIO — el template (plan §7): una página, tres juegos de datos (SPEC §5).
+ * [SERVICIOS S1b · S3b · M1 · V1] LA PÁGINA DE UN SERVICIO — el template (plan §7): una página, tres juegos de datos (SPEC §5).
  *
- * Server, sin JS propio (lo de cliente vive en `movimiento/`). El modal de contacto NO está acá: la ruta lo monta como hermano, fuera
- * de esta raíz, para que conserve sus tokens de papel y su acento por defecto (plan §4.2).
+ * Server, salvo la raíz (`movimiento/RaizDeLaPagina`, [V1]) y lo que vive en `movimiento/`. El modal de contacto NO está acá: la ruta lo
+ * monta como hermano, fuera de esta raíz, para que conserve sus tokens de papel y su acento por defecto (plan §4.2).
  *
- * ── Las dos partes (S3b, contrato v4 §0) ──────────────────────────────────
- *   · La INTRO (`Intro`): la primera pantalla, transparente sobre la tapa interina, con el `h1` (el nombre), su bajada y el enlace al
- *     home. Es lo único invertido de la página (el único `data-seccion`) y lleva el acento claro. La llena el home con la escena en B12.
- *   · El CUERPO, del Qué hacemos al cierre provisorio: secciones opacas en papel, con tinta y el acento oscuro.
+ * ── Las partes (S3b, contrato v4 §0; [V1] la intro con la escena) ─────────
+ *   · El ENCABEZADO (`Encabezado`): el enlace al home, sobre la escena, en claro.
+ *   · La INTRO (`Intro`, [V1] la del home: `IntroDeLaPagina`): 1,5 pantallas transparentes sobre la escena, de noche, con su variante, el
+ *     `h1` (el nombre) y la bajada. Junto con el encabezado, lo único invertido de la página.
+ *   · El CUERPO, del Qué hacemos al cierre provisorio: secciones opacas en papel, con tinta y el acento oscuro. Tapan la escena.
  *
  * ── [M1] El orden de la maqueta (M0 §1.3), con cómo entra cada uno ────────
  *     1 Qué hacemos · progresivo        6 Trabajos (el video, M3) · gatillo; solo en Páginas web
@@ -18,16 +19,17 @@
  *   «Del blog» salió del orden hasta que exista el blog (los artículos siguen en los datos).
  *
  * ── La raíz ────────────────────────────────────────────────────────────────
- *   · `relative z-10`: el contenido queda por encima del lienzo de la escena, que el layout de /v3 monta debajo de todo (P-H4: la
- *     escena se monta en cualquier subruta y no se puede apagar desde acá). La tapa de la intro (`-z-10`) pinta dentro de este
- *     contexto: arriba del lienzo y abajo del cuerpo.
+ *   · `relative z-10`: el contenido queda por encima del lienzo de la escena, que el layout de /v3 monta debajo de todo (P-H4). [V1] La
+ *     tapa interina se fue: la escena se ve a través del encabezado y de la intro, y el papel del cuerpo la tapa.
  *   · El acento del cuerpo entra por la custom property `--color-acento`, con el token oscuro del servicio
- *     (`estiloDelAcentoSobrePapel`): ningún hex. La intro lo pisa con el token claro.
- *   · Los documentos JSON-LD van al final: no se ven, y así la intro es lo primero de la página.
+ *     (`estiloDelAcentoSobrePapel`): ningún hex. La intro lleva el de su servicio por `data-servicio` (lo pone el home).
+ *   · [V1] Atiende el clic en cualquier enlace que se va de la página: antes de navegar, la salida de la variante (P-H29d).
+ *   · Los documentos JSON-LD van al final: no se ven.
  *
  * El modo (desarrollo o producción) se calcula UNA vez, acá, y baja a los bloques que tienen datos que pueden faltar.
  */
 
+import { Encabezado } from './Encabezado'
 import { Intro } from './Intro'
 import { JsonLd } from './JsonLd'
 import { Cierre } from './bloques/Cierre'
@@ -40,6 +42,7 @@ import { QueHacemos } from './bloques/QueHacemos'
 import { QueIncluye } from './bloques/QueIncluye'
 import { Trabajos } from './bloques/Trabajos'
 import { estiloDelAcentoSobrePapel } from './estiloDelAcento'
+import { RaizDeLaPagina } from './movimiento/RaizDeLaPagina'
 import type { Servicio } from './tipos'
 
 /** En producción `[a definir]` no se ve nunca y el ítem que depende del dato no se monta (plan §8.4). */
@@ -53,7 +56,8 @@ interface PaginaDeServicioProps {
 
 export function PaginaDeServicio({ servicio, enDesarrollo = EN_DESARROLLO }: PaginaDeServicioProps): React.JSX.Element {
   return (
-    <div style={estiloDelAcentoSobrePapel(servicio.idEnElHome)} className="relative z-10 text-tinta">
+    <RaizDeLaPagina estilo={estiloDelAcentoSobrePapel(servicio.idEnElHome)} className="relative z-10 text-tinta">
+      <Encabezado />
       <Intro servicio={servicio} />
       <main>
         <QueHacemos queHacemos={servicio.queHacemos} />
@@ -68,6 +72,6 @@ export function PaginaDeServicio({ servicio, enDesarrollo = EN_DESARROLLO }: Pag
       </main>
       <Cierre servicio={servicio} />
       <JsonLd servicio={servicio} />
-    </div>
+    </RaizDeLaPagina>
   )
 }

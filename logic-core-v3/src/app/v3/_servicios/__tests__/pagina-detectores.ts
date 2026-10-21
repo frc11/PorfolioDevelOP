@@ -54,18 +54,20 @@ export function valoresDe(html: string, atributo: string): string[] {
 }
 
 /**
- * [S3b] El marcado entero del `div` que lleva el atributo (la intro: `data-intro-de-servicio`), con sus `div` balanceados, o `null`
- * si no está. El marcado de `renderToStaticMarkup` está bien formado: alcanza con contar aperturas y cierres de `div`.
+ * [S3b · V1] El marcado entero del primer elemento que lleva el atributo, con sus etiquetas del mismo nombre balanceadas, o `null` si no
+ * está. [V1] De cualquier etiqueta: la intro es ahora la `<section data-intro-de-pagina>` del home (era un `div`). El marcado de
+ * `renderToStaticMarkup` está bien formado: alcanza con contar aperturas y cierres de esa etiqueta.
  */
 export function elementoConAtributo(html: string, atributo: string): string | null {
-  const inicio = html.search(new RegExp(`<div(?=\\s)[^>]*\\s${atributo}(?=[=\\s>])`))
-  if (inicio < 0) return null
-  const etiquetas = /<(\/?)div(?=[\s>])/g
-  etiquetas.lastIndex = inicio
+  const apertura = new RegExp(`<([a-z][a-z0-9]*)(?=\\s)[^>]*\\s${atributo}(?=[=\\s>])`).exec(html)
+  if (apertura === null) return null
+  const nombre = apertura[1] ?? 'div'
+  const etiquetas = new RegExp(`<(\\/?)${nombre}(?=[\\s>])`, 'g')
+  etiquetas.lastIndex = apertura.index
   let profundidad = 0
   for (let etiqueta = etiquetas.exec(html); etiqueta !== null; etiqueta = etiquetas.exec(html)) {
     profundidad += etiqueta[1] === '/' ? -1 : 1
-    if (profundidad === 0) return html.slice(inicio, etiqueta.index + '</div>'.length)
+    if (profundidad === 0) return html.slice(apertura.index, etiqueta.index + `</${nombre}>`.length)
   }
   return null
 }
@@ -144,8 +146,9 @@ export function hexSueltos(html: string): string[] {
 }
 
 /**
- * Lo reservado que aparece en el marcado, descrito. `[]` = limpio. `data-seccion` solo vale una vez, `invertida`, y [S3b] en la
- * apertura de la intro (el elemento con `atributoDeLaIntro`): ya no en la raíz.
+ * Lo reservado que aparece en el marcado, descrito. `[]` = limpio. `data-seccion` solo vale `invertida` y [S3b] no va en la raíz.
+ * [V1] Va en lo que está SOBRE LA ESCENA, una vez en cada uno: la apertura de la intro (el elemento con `atributoDeLaIntro`, la del home)
+ * y la del encabezado, que quedó fuera de ella; en el cuerpo, ninguno.
  */
 export function reservadosEnElMarcado(html: string, atributoDeLaIntro: string): string[] {
   const hallados: string[] = []
@@ -157,9 +160,10 @@ export function reservadosEnElMarcado(html: string, atributoDeLaIntro: string): 
   }
   const secciones = valoresDe(html, 'data-seccion')
   for (const valor of secciones) if (valor !== 'invertida') hallados.push(`data-seccion="${valor}"`)
-  if (secciones.length > 1) hallados.push('data-seccion repetido')
-  const enLaIntro = aperturaDe(elementoConAtributo(html, atributoDeLaIntro)).includes(' data-seccion="invertida"')
-  if (secciones.length === 1 && !enLaIntro) hallados.push('data-seccion fuera de la intro')
+  const sobreLaEscena = [aperturaDe(elementoConAtributo(html, atributoDeLaIntro)), /<header(?=[\s>])[^>]*>/.exec(html)?.[0] ?? '']
+  const enSuLugar = sobreLaEscena.filter((apertura) => apertura.includes(' data-seccion="invertida"')).length
+  if (enSuLugar < sobreLaEscena.length) hallados.push('data-seccion: falta en la intro o en el encabezado')
+  if (secciones.length > enSuLugar) hallados.push('data-seccion fuera de la intro y del encabezado')
   return hallados
 }
 
