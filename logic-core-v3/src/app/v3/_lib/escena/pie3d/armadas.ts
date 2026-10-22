@@ -405,8 +405,7 @@ export function prepararLasTransformaciones(s: EstadoDelPie, gl: THREE.WebGLRend
     if (x === null || x.lista || x.compilando) continue
     x.compilando = true
     const [grupo, viaje] = [a.grupo.visible, a.viaje.visible]
-    a.grupo.visible = true
-    a.viaje.visible = true
+    a.grupo.visible = a.viaje.visible = true
     const compilado = compilarConCuidado(gl, a.grupo, camara, escena) // [T0] sin `compileAsync` (`gpu/compilar.ts`)
     a.grupo.visible = grupo
     a.viaje.visible = viaje
