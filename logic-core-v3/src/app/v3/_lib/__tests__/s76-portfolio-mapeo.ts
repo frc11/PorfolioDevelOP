@@ -13,7 +13,7 @@ import { NOCHE_DISPARADA, nivelConLaNocheDisparada } from '../escena/nocheDispar
 import { sampleLightArc } from '../escena/choreographySampler'
 import type { MutableLightLevels } from '../escena/choreographyTypes'
 import { pantallaDeProgreso, progresoDePantalla } from '../escena/recorrido'
-import { TRAMO_ESTIRADO, medidaSinElEstiramiento, sinElEstiramiento, type TramoEstirado } from '../escena/tramoEstirado'
+import { TRAMO_ESTIRADO, anotarTramo, medidaSinElEstiramiento, sinElEstiramiento, type TramoEstirado } from '../escena/tramoEstirado'
 import { DISPARO_DE_LA_NOCHE, SOLAPE_DE_LA_SECCION } from '../../_secciones/trabajos/geometria'
 import { ARRANQUE_DEL_VACIO, LLEGADA_DE_LOS_DEMOS, PX_DEL_VACIO, PX_DE_LA_SECCION_DE_HOY, vacioSinTope } from '../../_secciones/trabajos/demos/relojDeDemos'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
@@ -86,6 +86,32 @@ export function afirmarLaBase(): void {
   afirmar(kDelAncho(1, 'movil') < 1, '  con el paso de control de 1 en el teléfono k queda por debajo de 1 (el selector comprime) y el descuento vale igual')
   controlPositivo('sin el descuento del selector, lo de después se corre', 'escritorio' as const, (a: AnchoDelPortfolio) => desvioAfuera(a, PANTALLAS_POR_PASO, 900, false) < 1e-6)
   afirmarIgual(PASOS.map((p) => Math.round((pxDeLaSeccion(p) / 9) * 100) / 100), [1025.67, 825.67, 1225.67], 'la sección mide 1025,67svh con la constante (1,5 pantallas por proyecto, cuatro pasos) y lo que da la derivación con 1 y con 2')
+
+  titulo('NOCTURNO · 3b · Varios tramos anotados (el Portfolio y otra sección): cada uno descuenta sólo lo suyo')
+
+  // El Portfolio (tope 5073) y otra sección más abajo (tope 12000, k 1,4 sobre 1800 de la regla), a 900 de alto.
+  const otro = { k: 1.4, arranque: 900, largo: 1800 }
+  const panelDe = (tope: number): Element => ({ isConnected: true, getBoundingClientRect: () => ({ top: tope }) }) as unknown as Element
+  const conDos = (y: number, soltar: boolean): number => {
+    const suelta = anotarTramo({ ...otro, panel: panelDe(12000) })
+    TRAMO_ESTIRADO.valor = { ...tramoNuevo('escritorio', PANTALLAS_POR_PASO), panel: panelDe(5073) }
+    if (soltar) suelta()
+    const r = medidaSinElEstiramiento(y, y, 0, 900, { y: 0, abajo: 0 }).y
+    TRAMO_ESTIRADO.valor = null
+    suelta()
+    return r
+  }
+  // Lo esperado, a mano: primero el de abajo (su `desde` en el documento) y después el del Portfolio.
+  const kP = kDelAncho(PANTALLAS_POR_PASO, 'escritorio')
+  const esperado = (y: number): number => {
+    const abajoDeTodo = sinElEstiramiento(y, 12000 - 900 + otro.arranque, otro.k * otro.largo, otro.k)
+    return sinElEstiramiento(abajoDeTodo, 5073 - 900 + PX_DE_LA_APROXIMACION, kP * PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.escritorio, kP)
+  }
+  let peor = 0
+  for (let y = 0; y <= 20000; y += 7) peor = Math.max(peor, Math.abs(conDos(y, false) - esperado(y)))
+  afirmar(peor < 1e-6, `con dos tramos, cada 7 px de 0 a 20.000: el desvío contra la cuenta a mano es ${peor.toExponential(1)} px`)
+  afirmar(Math.abs(conDos(4000, false) - 4000) < 1e-9, '  arriba de los dos, la escena ve el mismo píxel')
+  controlPositivo('  soltar el de abajo deja lo de abajo corrido (el detector ve la falta de un tramo)', 15000, (y: number) => Math.abs(conDos(y, true) - esperado(y)) < 1e-6)
 
   titulo('B1.1b · 4 · El tramo del Portfolio es de noche')
 
