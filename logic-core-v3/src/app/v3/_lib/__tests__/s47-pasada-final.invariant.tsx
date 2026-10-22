@@ -605,7 +605,9 @@ const bloqueRecortado = (c: string): boolean => {
 }
 afirmar(bloqueRecortado(trabajosD), 'Trabajos recorta en todos los anchos (no sólo abajo de 1024): el panel del Portfolio afuera del cuadro no ensancha la página (antes, el margen del túnel: 1446 a 1440)')
 afirmar(/overflowClipMargin: `\$\{MARGEN_DEL_RECORTE_PX\}px`/.test(sinComentarios(leer('_archivo/tunel-portfolio/CapaDelTunel.tsx'))), '  [archivo] y el túnel sigue pintando sus anillos de foco con su margen')
-controlPositivo('el detector VE el recorte sólo en el teléfono', trabajosD.replace('className="sticky top-0 h-svh w-full overflow-clip"', 'className="sticky top-0 h-svh w-full max-escritorio:overflow-clip"'), bloqueRecortado)
+// [NOCTURNO] Desde B1.2e la misma clase está también en el escenario de Demos (antes, en el archivo): el reemplazo va en el bloque del Portfolio.
+const desdeElPortfolio = trabajosD.indexOf('data-pieza="escenario-del-portfolio"')
+controlPositivo('el detector VE el recorte sólo en el teléfono', trabajosD.slice(0, desdeElPortfolio) + trabajosD.slice(desdeElPortfolio).replace('className="sticky top-0 h-svh w-full overflow-clip"', 'className="sticky top-0 h-svh w-full max-escritorio:overflow-clip"'), bloqueRecortado)
 
 
 // D2 · el tachado 3D de «lo mismo de siempre» se despinta como el del DOM (de la tinta a la tinta media), con su avance.
