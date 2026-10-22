@@ -13,6 +13,7 @@ import { viajeEnCurso } from '../viaje'
 import { contextoPerdido, useVersionDelContexto } from '../contextoDelLienzo'
 import { hayBanco } from '../entorno'
 import { crearElEstudio } from '../estudio'
+import { compilarConCuidado } from '../gpu/compilar'
 import { calentar } from '../gpu/Precompilar'
 import { EN_VIVO } from '../final/recorridoDelFinal'
 import { ONDA_PEDIDA } from '../interfaz/pedidos'
@@ -140,7 +141,7 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       anotarLasPiezas(s.armadas) // [CIERRE A-ter] A13 · el diagnóstico de la carga (`?diag=carga`).
       if (s.listo || s.compilando || s.armadas.length === 0) return
       s.compilando = true
-      void gl.compileAsync(escena, camara).then(() => {
+      void compilarConCuidado(gl, escena, camara).then(() => { // [T0] sin `compileAsync` (`gpu/compilar.ts`)
         s.compilando = false
         if (!s.montado) return
         calentar(gl, escena, camara)

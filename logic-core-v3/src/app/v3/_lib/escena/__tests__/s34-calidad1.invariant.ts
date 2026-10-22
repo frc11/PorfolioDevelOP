@@ -192,7 +192,7 @@ controlPositivo('el detector VE un objeto sin nombre', [...NOMBRES, ['piso/PisoV
 // ── B1 · precompilar ──────────────────────────────────────────────────────
 titulo('B1 · precompilar: nada se compila la primera vez que aparece')
 const precompilar = leer('gpu/Precompilar.tsx')
-afirmar(/<Precompilar logoMaterialRef=\{logoMaterialRef\} \/>/.test(leer('gpu/MotorDeLaEscena.tsx')) && /<MotorDeLaEscena logoMaterialRef=\{logoMaterialRef\} dpr=\{ajustes\.dpr\} \/>/.test(leer('ProbeStage.tsx')) && /gl\.compileAsync\(escena, camara\)/.test(precompilar), 'la escena entera se compila al arrancar, en paralelo (`compileAsync` recorre también lo invisible)')
+afirmar(/<Precompilar logoMaterialRef=\{logoMaterialRef\} \/>/.test(leer('gpu/MotorDeLaEscena.tsx')) && /<MotorDeLaEscena logoMaterialRef=\{logoMaterialRef\} dpr=\{ajustes\.dpr\} \/>/.test(leer('ProbeStage.tsx')) && /compilarConCuidado\(gl, escena, camara\)/.test(precompilar), 'la escena entera se compila al arrancar, en paralelo (`compile` recorre también lo invisible; [T0] con la espera de `gpu/compilar.ts`, que no tira si algo se libera mientras compila)')
 /** El calentamiento: un dibujo de UN píxel con todo prendido y sin descarte, y todo devuelto como estaba. */
 const calienta = (c: string): boolean => /gl\.setScissor\(0, 0, 1, 1\)/.test(c) && /o\.visible = true/.test(c) && /o\.frustumCulled = false/.test(c) && /t\.o\.visible = t\.visible/.test(c) && /t\.o\.frustumCulled = t\.descarte/.test(c) && /gl\.setScissorTest\(false\)/.test(c)
 afirmar(calienta(precompilar), '  y se calienta con un dibujo de un píxel (ANGLE arma el ejecutable en el primer dibujo), devolviendo visibilidad y descarte')
@@ -395,7 +395,7 @@ afirmar(aMediaResolucion(hacesB5) && HACES.resolucion === 0.5 && /<primitive obj
 controlPositivo('el detector VE los haces dibujados en la escena, a resolución completa (antes de B5)', hacesB5.replace('gl.setRenderTarget(h.bufer)', 'gl.setRenderTarget(null)'), aMediaResolucion)
 afirmar(/for \( int i = 0; i < uPasos; i\+\+ \)/.test(hacesB5) && /pasos: 20, luz: 0\.0035, alto: 10/.test(hacesB5), '  la misma cuenta: 20 tramos por píxel, la misma luz y el mismo aire (lo que se ve no cambia)')
 const precompilarB5 = leer('gpu/Precompilar.tsx')
-afirmar(/ESCENAS_APARTE\.add\(aparte\)/.test(amanecerB5) && /ESCENAS_APARTE\.delete\(aparte\)/.test(amanecerB5) && /\.\.\.\[\.\.\.ESCENAS_APARTE\]\.map\(\(a\) => gl\.compileAsync\(a\.escena, camara\)\)/.test(precompilarB5) && /for \(const a of ESCENAS_APARTE\) \{\s*const previo = gl\.getRenderTarget\(\)\s*gl\.setRenderTarget\(a\.bufer\)\s*calentar\(gl, a\.escena, camara\)/.test(precompilarB5), 'la escena aparte de los haces se precompila y se calienta al arrancar, en su búfer (nada se compila tarde: medido, 26 programas al cargar y 26 al final)')
+afirmar(/ESCENAS_APARTE\.add\(aparte\)/.test(amanecerB5) && /ESCENAS_APARTE\.delete\(aparte\)/.test(amanecerB5) && /\.\.\.\[\.\.\.ESCENAS_APARTE\]\.map\(\(a\) => compilarConCuidado\(gl, a\.escena, camara\)\)/.test(precompilarB5) && /for \(const a of ESCENAS_APARTE\) \{\s*const previo = gl\.getRenderTarget\(\)\s*gl\.setRenderTarget\(a\.bufer\)\s*calentar\(gl, a\.escena, camara\)/.test(precompilarB5), 'la escena aparte de los haces se precompila y se calienta al arrancar, en su búfer (nada se compila tarde: medido, 26 programas al cargar y 26 al final)')
 afirmar(/abrir\(s\.name !== '' \? s\.name : /.test(leer('gpu/PerfilDeLaGpu.tsx')), '  y el perfil de la GPU la mide con su nombre')
 
 // ── B6 · la nitidez del polvo ─────────────────────────────────────────────

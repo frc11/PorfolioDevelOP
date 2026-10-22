@@ -7,6 +7,8 @@ import type * as THREE from 'three'
 import { marcarElPrimerCuadro } from '../../carga'
 import { hayBanco } from '../entorno'
 
+import { compilarConCuidado } from './compilar'
+
 /**
  * [CALIDAD 1] B1 · PRECOMPILAR LOS SHADERS AL ARRANCAR — que nada tironee la primera vez que aparece.
  *
@@ -101,7 +103,8 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
     if (e.cuadros < CUADROS_DESPUES_DEL_LOGO) return
     e.compilado = true
     const t0 = performance.now()
-    void Promise.all([gl.compileAsync(escena, camara), ...[...ESCENAS_APARTE].map((a) => gl.compileAsync(a.escena, camara))]).then(() => {
+    // [T0] Sin `compileAsync`: lo que se libera mientras compila no tira en la página ni deja esto colgado (`compilar.ts`).
+    void Promise.all([compilarConCuidado(gl, escena, camara), ...[...ESCENAS_APARTE].map((a) => compilarConCuidado(gl, a.escena, camara))]).then(() => {
       e.compilarMs = Math.round(performance.now() - t0)
       e.calentar = true
     })
