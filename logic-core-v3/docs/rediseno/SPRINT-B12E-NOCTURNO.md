@@ -99,6 +99,7 @@ como bloque propio (el formulario que ya existe) y después Demos. El escritorio
 | s76 §43 (P-H31) | el Portfolio no pasa las dos props (leía `HistoriasDelPortfolio.tsx`) | sin las dos props, el marcado por defecto |
 | s76 b12c §19 | el pedido con `historias` y `pideElEncabezado` | `adentro && !carrusel ? ADENTRO : AFUERA` |
 | s76 b12d §33 | `ir` salía de las historias | `ir: (d) => ir(d, true)` |
+| s76 a2 §40 y b12c (la rueda que manda) | `return v.fase === 'adentro' && …` | con el guardia del carrusel delante (`!carrusel && …`); sus controles, iguales |
 | s76 escena (el vidrio) | el vidrio fuera de las historias | el vidrio siempre (debajo de 1024 no hay panel) |
 | `trabajos.invariant` §6 y §9 | los dos rótulos de las historias; 37 archivos | las dos flechas del carrusel; 40 archivos (las cinco del carrusel) |
 | `s5-compacto` | la excepción de las historias | la de las flechas del carrusel |
@@ -106,6 +107,14 @@ como bloque propio (el formulario que ya existe) y después Demos. El escritorio
 
 Nuevo: `s76-carrusel.invariant.tsx` (`test:s76-carrusel`, el componente común) y `s76-portfolio-carrusel.tsx` (§44 a §49, desde
 `s76-portfolio.invariant.tsx`).
+
+**Verificación (sin navegador, con el turno pesado)** — commit `5b93773b`:
+- `tsc --noEmit`: 0 errores. ESLint de los 36 archivos de TypeScript tocados: limpio.
+- s76: `s76-portfolio` 398 de 0 (125 controles), `s76-archivo-tunel` 320 de 0, `s76-carrusel` 29 de 0 (13 controles). `s5-trabajos` 244 de 0.
+- s49 54, s74 34, s75 55, s77 44, s78 160: ninguna falla. s5-compacto (1, `quienes-somos`) y s10-acceso (5, la navbar): las mismas de la base.
+- s5-peso, s3-peso y s7-compuerta no cierran en este worktree: piden `.next` (el build), que acá no existe; en la base fallaban igual.
+- Lo encontró s77 en el camino: las flechas importaban la clase del disco de `BotonPausa`, y la pausa la pueden importar sólo los videos en
+  bucle (P-H27). Las flechas llevan su propia constante con los mismos tokens (`CLASE_DE_LA_FLECHA`); s77 no cambió.
 
 **Decisiones sin preguntar** (una línea cada una):
 - El video de la tarjeta es el de escritorio (16:10): la tarjeta es apaisada en todo ancho; el del teléfono (vertical) ocupaba la pantalla.
