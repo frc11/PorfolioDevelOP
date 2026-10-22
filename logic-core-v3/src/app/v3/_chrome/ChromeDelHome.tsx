@@ -2,7 +2,6 @@ import { CompuertaDelCursor } from './cursor/CompuertaDelCursor'
 
 import { Contacto } from './contacto/Contacto'
 import { Ingreso } from './ingreso/Ingreso'
-import { OndaDeLasPortadas } from '../_secciones/trabajos/demos/OndaDeLasPortadas'
 import { AnticipacionDelMenu } from './escena/AnticipacionDelMenu'
 import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
 import { MenuMovil } from './menu/MenuMovil'
@@ -168,8 +167,6 @@ export function ChromeDelHome(): React.JSX.Element {
       <RespuestaDeLaEscena />
       {/* [INTERFAZ 2] T2: la vista previa del destino en el menú. */}
       <AnticipacionDelMenu />
-      {/* [INTERFAZ 2] T3: las portadas de las demos ondean al pasar. */}
-      <OndaDeLasPortadas />
       {/* [3D Y SONIDO] T2: el sonido; [RETOQUE 3D] el parlante, en el producto (apagado por defecto); `?sonidos=1`, la página de
           prueba. [CIERRE A] A6: el infinito del recorrido se sacó; el parlante, en su esquina (arriba a la izquierda). */}
       <EsquinaDelSonido />

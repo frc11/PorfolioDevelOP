@@ -137,11 +137,13 @@ afirmarIgual(OCULTAS, ['servicio', 'resultado'], 'dos filas de la ficha van al m
 afirmar(OCULTAS.every((f) => veces(quieto, `data-fila="${f}" hidden=""`) === PROYECTOS.length), '  en las tres fichas')
 afirmar(!quieto.includes(ROTULO_DE_SECCION_RETIRADO), `y el RÓTULO DE SECCIÓN («${ROTULO_DE_SECCION_RETIRADO}») ya NO se lee (B12: se da vuelta, no se borra)`)
 controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un texto', '<div>Portfolio</div>', (html: string) => TEXTOS.every((h) => html.includes(h.valor)))
-const DEL_CARRUSEL = 4 * DEMOS.length
+// [NOCTURNO B5] Reemplazada por la spec: abajo de 1024 las demos van en el carrusel común de B1.2e, que se monta en el cliente (como el
+// del Portfolio): el servidor ya no sirve los dos renglones de la cinta de antes (sus veinte portadas y sus veinte enlaces).
+const DEL_CARRUSEL = 0
 const DE_LA_CINTA = 4 * DEMOS.length
 // [B1] Nada del Portfolio se pide antes de que la sección esté cerca: en el servidor ni un póster, y los tres videos sin `src`.
-afirmarIgual(veces(quieto, '<img'), DE_LA_CINTA + DEL_CARRUSEL, 'en la rama quieta, sólo las imágenes de Demos (la cinta y el carrusel): ni un póster del Portfolio antes de estar cerca')
-afirmarIgual(veces(conMotion, '<img'), DEMOS.length + DEL_CARRUSEL, '  y con la coreografía, sólo las de Demos (el estante y el carrusel)')
+afirmarIgual(veces(quieto, '<img'), DE_LA_CINTA + DEL_CARRUSEL, 'en la rama quieta, sólo las imágenes de Demos (la cinta; [B5] el carrusel se monta en el cliente): ni un póster del Portfolio antes de estar cerca')
+afirmarIgual(veces(conMotion, '<img'), DEMOS.length + DEL_CARRUSEL, '  y con la coreografía, sólo las de Demos (el estante)')
 afirmarIgual(veces(quieto, '<video'), PROYECTOS.length, 'un video por proyecto en el acordeón, el de escritorio ([B1.2d B] el del teléfono lo pinta su historia, debajo de 1024)')
 afirmar(!/<video[^>]*\ssrc="/.test(quieto) && !/<video[^>]*\ssrc="/.test(conMotion), '  y ninguno con `src` en el servidor')
 afirmar(!quieto.includes('transform:') && !quieto.includes('will-change'), 'la rama quieta no escribe una transformada ni promueve una capa')
@@ -228,9 +230,10 @@ afirmarIgual([...PATRONES_DE_LA_SECCION].sort(), patronesDelFuente, '  y `PATRON
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('16 · Las paradas de teclado')
 
-const PARADAS_DE_DEMOS = 2 * DEMOS.length
+// [NOCTURNO B5] Reemplazada por la spec: una por demo en el estante (o la cinta); el carrusel de abajo de 1024 se monta en el cliente.
+const PARADAS_DE_DEMOS = DEMOS.length
 const PARADAS = paradasDeTabulacion(quieto)
-afirmarIgual(PARADAS.length, PROYECTOS.length + 1 + PROYECTOS.length + 5 + PARADAS_DE_DEMOS, 'DOCE paradas del Portfolio (cuatro cabeceras, tres «Visitar sitio» y [B1.2c] el formulario de la tuya: dos campos, [B1.2d B] el texto largo, «Enviar» y WhatsApp; los dos toques de la historia se fueron) más las de Demos (la cinta y el carrusel)')
+afirmarIgual(PARADAS.length, PROYECTOS.length + 1 + PROYECTOS.length + 5 + PARADAS_DE_DEMOS, 'DOCE paradas del Portfolio (cuatro cabeceras, tres «Visitar sitio» y [B1.2c] el formulario de la tuya: dos campos, [B1.2d B] el texto largo, «Enviar» y WhatsApp; los dos toques de la historia se fueron) más las de Demos (el estante o la cinta; [B5] el carrusel se monta en el cliente)')
 afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a' && p.etiqueta !== 'button' && p.etiqueta !== 'input' && p.etiqueta !== 'textarea').map((p) => p.etiqueta), [], '  todas son anclas, botones o [B1.2c] los campos del formulario ([B1.2d B] con el texto largo): ningún `tabindex` escrito')
 afirmarIgual(PARADAS.filter((p) => rotuloDeParada(quieto, p).rotulo.trim() === '').map((p) => p.destino ?? p.etiqueta), [], '  y todas se anuncian con algo (un campo, con su `<label for>`)')
 afirmarIgual(PARADAS.filter((p) => p.ocultoALectores).length, 0, '  ninguna cuelga de algo escondido a los lectores')

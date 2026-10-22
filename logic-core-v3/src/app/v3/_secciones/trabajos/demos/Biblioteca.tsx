@@ -4,26 +4,37 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { Imagen } from '../../../_componentes/medios/Imagen'
+import { giroDeLaPieza, suscribirALaMirada } from '../../../_lib/escena/miradaDeLaCamara'
+import { sonar } from '../../../_lib/sonido/bus'
 
 import { PRESENCIA_DEL_CURSOR } from '../../../_chrome/cursor/presencia'
 
 import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_PORTADA, TEXTO_DE_DEMOS, type Demo } from './catalogo'
 import { MS_DE_INTENCION, precargar } from './precarga'
 
+/** [NOCTURNO B5] Los cantos de cada placa (el dorso y los cuatro costados: `demos.css`). */
+export const LADOS_DE_LA_PLACA = ['atras', 'izquierda', 'derecha', 'arriba', 'abajo'] as const
+
 /**
- * LA BIBLIOTECA — las demos como libros en un estante. **[PORTFOLIO · DEMOS]**
+ * LA BIBLIOTECA — las demos en abanico, debajo del título. **[PORTFOLIO · DEMOS]**
  *
  * Cada pieza es un ANCLA al template, con su portada en la cara. Sin JavaScript,
  * o con un clic con modificador, abre el template en una pestaña nueva, que es
- * lo que hace la cinta de abajo de 1025: el marcado de las dos ramas es el mismo,
- * y `s10-acceso` lo exige. Con JavaScript, un clic o Enter abre la demo acá mismo.
+ * lo que hace el carrusel de abajo de 1024: el marcado de las dos ramas es el mismo,
+ * y `s10-acceso` lo exige. Con JavaScript, un clic o Enter abre la demo acá mismo (el Genie de siempre).
+ *
+ * [NOCTURNO B5] **Placas 3D, fijas en el mundo.** Cada pieza es una placa con espesor (la portada y sus cantos) en el abanico de
+ * siempre, vista por su propia cámara (`[data-parte="cara"]`), que gira con la MIRADA de la escena: lo que el mouse le suma a la
+ * cámara (`miradaDeLaCamara.ts`, la de los títulos y los valores: los mismos topes, el mismo suavizado y la misma exageración del
+ * CSS), al revés, así la placa queda quieta en el mundo y se le ven la perspectiva y los costados. Más grandes: el abanico llena su
+ * columna (`demos.css`).
  *
  * ── Qué mueve qué ────────────────────────────────────────────────────────
  *
- * El hover y el foco son CSS (`demos.css`): la cara sube con un resorte crítico,
+ * El hover y el foco son CSS (`demos.css`): la placa sube con un resorte crítico,
  * las vecinas se abren y la bajada es de 100 ms. El hueco de cada pieza queda
- * QUIETO —lo que se mueve es la cara—, así el puntero no pierde la pieza cuando
- * ésta se levanta. Acá sólo hay tres cosas: el cartel, las flechas y la precarga.
+ * QUIETO —lo que se mueve es la placa—, así el puntero no pierde la pieza cuando
+ * ésta se levanta. Acá: el cartel (su nombre), el tic de la barra, las flechas, la precarga y la mirada.
  *
  * ⚠️ **EL CARTEL VA EN UN PORTAL, afuera de la sección.** Tiene que ser la
  * pastilla del navbar, y el navbar vive afuera de la sala invertida: adentro, sus
@@ -42,6 +53,7 @@ export function Biblioteca({
   readonly alAbrir: (demo: Demo, pieza: HTMLAnchorElement) => void
   readonly alejada: boolean
 }): React.JSX.Element {
+  const estante = useRef<HTMLDivElement | null>(null)
   const cartel = useRef<HTMLSpanElement | null>(null)
   const intencion = useRef(0)
   // Esta rama no se sirve: se monta en el cliente cuando llegan las primitivas.
@@ -54,6 +66,17 @@ export function Biblioteca({
     return () => {
       window.removeEventListener('scroll', esconder)
       window.clearTimeout(intencion.current)
+    }
+  }, [])
+
+  // [NOCTURNO B5] La mirada de la escena, en el estante (una variable que leen las cinco cámaras): sólo cuando cambia.
+  useEffect(() => {
+    const el = estante.current
+    if (el === null) return undefined
+    const soltar = suscribirALaMirada((m) => el.style.setProperty('--mirada', giroDeLaPieza(m)))
+    return () => {
+      soltar()
+      el.style.removeProperty('--mirada')
     }
   }, [])
 
@@ -74,6 +97,8 @@ export function Biblioteca({
 
   const alEntrar = (e: React.PointerEvent<HTMLAnchorElement>, demo: Demo): void => {
     if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return
+    // [NOCTURNO B5] El hover de la barra: una placa nueva bajo el puntero, un tic (con el sonido apagado, nada).
+    sonar('tic')
     // [Cierre de INTERFAZ 2] Con el cursor de la sala, el cartel va pegado al cursor (`CursorDeLaSala.tsx`): uno solo.
     if (!PRESENCIA_DEL_CURSOR.montado) mostrarElCartel(e.currentTarget, demo)
     window.clearTimeout(intencion.current)
@@ -81,7 +106,9 @@ export function Biblioteca({
   }
 
   const alEnfocar = (e: React.FocusEvent<HTMLAnchorElement>, demo: Demo): void => {
-    if (e.currentTarget.matches(':focus-visible')) mostrarElCartel(e.currentTarget, demo)
+    if (!e.currentTarget.matches(':focus-visible')) return
+    sonar('tic')
+    mostrarElCartel(e.currentTarget, demo)
   }
 
   const alTeclear = (e: React.KeyboardEvent<HTMLAnchorElement>, i: number): void => {
@@ -103,7 +130,7 @@ export function Biblioteca({
   return (
     <>
       {/* `--libros`: el estante calcula con él cuánto se pisan para entrar en su columna. */}
-      <div data-pieza="estante" style={{ '--libros': CATALOGO_DE_DEMOS.length } as React.CSSProperties} {...(alejada ? { 'data-alejada': '' } : {})}>
+      <div ref={estante} data-pieza="estante" style={{ '--libros': CATALOGO_DE_DEMOS.length } as React.CSSProperties} {...(alejada ? { 'data-alejada': '' } : {})}>
         {CATALOGO_DE_DEMOS.map((demo, i) => (
           <a
             key={demo.slug}
@@ -121,8 +148,16 @@ export function Biblioteca({
             onKeyDown={(e) => alTeclear(e, i)}
             onClick={(e) => alHacerClic(e, demo)}
           >
+            {/* La cámara de la placa (la mirada), la placa (el abanico y el hover), su portada y sus cantos. */}
             <span data-parte="cara">
-              <Imagen src={demo.portada} alt="" ancho={MEDIDA_DE_LA_PORTADA.ancho} alto={MEDIDA_DE_LA_PORTADA.alto} sizes="160px" />
+              <span data-parte="placa">
+                <span data-parte="portada">
+                  <Imagen src={demo.portada} alt="" ancho={MEDIDA_DE_LA_PORTADA.ancho} alto={MEDIDA_DE_LA_PORTADA.alto} sizes="(min-width: 1024px) 17vw, 160px" />
+                </span>
+                {LADOS_DE_LA_PLACA.map((lado) => (
+                  <span key={lado} aria-hidden="true" data-parte="canto" data-lado={lado} />
+                ))}
+              </span>
             </span>
           </a>
         ))}

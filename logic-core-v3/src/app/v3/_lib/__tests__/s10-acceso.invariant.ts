@@ -69,8 +69,9 @@ const DELTA_DEL_FINAL = { paradas: 1 + 5, encabezados: 2 } as const
 /** CONTACTO · + «Hablemos» al lado del CTA del hero, que abre el formulario. */
 const DELTA_DEL_CONTACTO = { paradas: 1 } as const
 // [CIERRE A] A5 · con cinco demos el renglón de abajo del carrusel es decoración (las cinco ya son paradas arriba): una por demo en el
-// estante o la cinta y una en el carrusel.
-const DELTA_DE_DEMOS = { paradas: 2 * CATALOGO_DE_DEMOS.length, encabezados: 1 } as const
+// estante o la cinta y una en el carrusel. [NOCTURNO B5] Reemplazada por la spec: abajo de 1024 las demos van en el carrusel común de
+// B1.2e, que se monta en el cliente (como el del Portfolio): en el marcado servido queda una por demo, en el estante o la cinta.
+const DELTA_DE_DEMOS = { paradas: CATALOGO_DE_DEMOS.length, encabezados: 1 } as const
 // [Cierre de INTERFAZ 2] + la pausa del panel en vivo de Tu panel (se mueve solo más de cinco segundos: WCAG 2.2.2), en las dos ramas.
 const DELTA_DE_LA_VIDA = { paradas: 1 } as const
 // [NAVBAR] T1 · «Panel» es un ítem nuevo de la barra (lleva a Tu panel): una parada más, en las dos ramas.
