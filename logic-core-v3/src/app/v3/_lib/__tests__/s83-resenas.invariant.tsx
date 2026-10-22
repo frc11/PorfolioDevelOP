@@ -9,18 +9,31 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import React from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import * as THREE from 'three'
 
+import { LOGO_BOX_WORLD } from '@/lib/logo-footprint'
+
 import { NOMBRES_REALES, escanearContenido } from '../../_secciones/_contrato/escaneo'
+import { CapaDelAro } from '../../_secciones/por-que-develop/resenas/CapaDelAro'
 import { RESENAS, TEXTO_DE_LAS_RESENAS, TITULO_DE_LAS_RESENAS, enlaceDelTrabajo } from '../../_secciones/por-que-develop/resenas/contenido'
 import { DISOLUCION, estiloDeLaIda, idaDelValor } from '../../_secciones/por-que-develop/resenas/disolucion'
 import { ALTO_DEL_ESPACIADOR_SVH, INSERCION_DE_LAS_RESENAS, K_DE_LAS_RESENAS, LARGO_SIN_ESTIRAR_PX, PANTALLAS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera } from '../../_secciones/por-que-develop/resenas/tramo'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
+import { HACIA_EL_CTA, VUELTA_DEL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, progresoDelGatillo } from '../../_secciones/por-que-develop/resenas/haciaElCta'
+import { TRANSFORMACION, caraDelCta } from '../escena/ctaDelFinal/transformacion'
+import { ENGANCHE_DE_LAS_GRIETAS, avisarLaVueltaDelCta } from '../escena/resenas/enganches'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
-import { ARO, VELOCIDAD_DE_LECTURA, medidasDelAro, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
+import { CAPA_DEL_ARO } from '../escena/resenas/enVivo'
+import { llevarLaTarjeta, nuevaTarjeta, tamanoDeLasTarjetas } from '../escena/resenas/tarjetas'
+import { aplicar } from '../pie3d/homografia'
+import { ARO, VELOCIDAD_DE_LECTURA, medidasDeLaEscala, medidasDelAro, textoConLaEntrada, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
 import { seVeConElGiro } from '../escena/titulos3d/giro'
 import { medidaSinElEstiramiento, anotarTramo } from '../escena/tramoEstirado'
-import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
+
+;(globalThis as unknown as { React: typeof React }).React = React
 
 const RAIZ = process.cwd()
 const V3 = path.join(RAIZ, 'src/app/v3')
@@ -73,12 +86,12 @@ controlPositivo('sin anotar el tramo la escena llega 4 pantallas tarde al final 
 afirmarIgual(K_DE_LAS_RESENAS, (PANTALLAS_DE_LAS_RESENAS * 900 + LARGO_SIN_ESTIRAR_PX) / LARGO_SIN_ESTIRAR_PX, 'la k: (4 × 900 + 9) / 9 = 401, la misma en todo ancho de escritorio')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Los momentos del tramo, las dos variantes y el rebobinado sin B3')
+titulo('3 · Los momentos del tramo y las dos variantes (B3: sin rebobinado, la media pantalla del CTA sigue con todo puesto)')
 
 const e = (r: number, d: number | null = null): number[] => Object.values(estadoDelAvance(r, d)).map((x) => Math.round(x * 1000) / 1000)
 afirmarIgual([e(0), e(0.125), e(0.25), e(0.5), e(0.7)], [[0, 0, 0], [1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 1, 1]], 'scroll: el título (0 a 0,125), los valores (a 0,25), la entrada (a 0,5) y la lectura con todo puesto')
-afirmarIgual(e(1), [0, 0, 0], 'sin B3, al final del tramo todo volvió (el CTA de siempre arranca igual)')
-controlPositivo('el detector ve un tramo que termina con el aro armado', estadoDelAvance(1, null, true), (x) => x.entrada === 0)
+afirmarIgual(e(1), [1, 1, 1], '[B3] al final del tramo todo sigue puesto: lo toma la transformación al CTA (el título, el aro que baja)')
+controlPositivo('el detector ve un tramo que rebobina antes del CTA', { giro: 0, disolucion: 0, entrada: 0 }, (x) => x.entrada === 1 && x.giro === 1)
 afirmarIgual(e(0.6, 0), [0, 0, 0], 'gatillo: con la animación en 0, nada (aunque el scroll esté adentro)')
 afirmarIgual(e(0.6, 1), [1, 1, 1], '  y con la animación entera, todo')
 afirmar(objetivoDelGatillo(0.03, 0) === 1 && objetivoDelGatillo(0.01, 1) === 1 && objetivoDelGatillo(0.001, 1) === 0 && objetivoDelGatillo(0.01, 0) === 0, 'el gatillo: entra al pasar 0,02 del tramo, sale al volver arriba de 0,005 (sin titilar en el medio)')
@@ -208,5 +221,116 @@ afirmar(/ubicar\(a, d, deColocar\)\n.*\n\s*a\.malla\.visible = girarElTitulo\(a\
 const pruebas = leer('_lib/escena/PruebasDeLaEscena.tsx')
 afirmar(/\{escritorio && \(\s*<Suspense fallback=\{null\}>\s*<EscenaDeLasResenas \/>/.test(pruebas), 'el aro en su módulo, sólo desde 1024 (abajo ni se descarga)')
 afirmar(/espaciador-de-las-resenas[\s\S]*PANTALLAS_DE_LAS_RESENAS \* v/.test(leer('_componentes/destinosDelViaje.ts')), 'el viaje a «Por qué develOP» descuenta el tramo (cae donde caía)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('12 · [B3] Reseñas → CTA: el anillo y la bajada a la par del giro del cartel; el título de las reseñas es el origen; el enganche de B9')
+
+const GIRO_DEL_CARTEL = [TRANSFORMACION.giro.desde, TRANSFORMACION.giro.desde + TRANSFORMACION.giro.gira] as const
+const aLaPar = (baja: (p: number) => number): boolean => {
+  const empieza = muestras.find((p) => baja(p) > 0) ?? 1
+  const termina = muestras.find((p) => baja(p) >= 1) ?? 1
+  return empieza < GIRO_DEL_CARTEL[0] && termina <= GIRO_DEL_CARTEL[1] + 0.002 && termina > GIRO_DEL_CARTEL[0]
+}
+afirmar(aLaPar(bajadaDeLasResenas), `las reseñas bajan AL MISMO TIEMPO que el título se da vuelta: empiezan antes del giro del cartel (${String(GIRO_DEL_CARTEL[0])}) y terminan con él (${String(GIRO_DEL_CARTEL[1])})`)
+controlPositivo('el detector ve una bajada que termina después del giro', (p: number) => bajadaDeLasResenas(p - 0.3), aLaPar)
+afirmar(muestras.every((p) => bajadaDeLasResenas(p) <= 0 || aperturaDelHueco(p) > 0 || bajadaDeLasResenas(p) >= 1), 'mientras una placa baja, el anillo está abierto')
+afirmar(aperturaDelHueco(0) === 0 && aperturaDelHueco(1) < 1e-6 && Math.max(...muestras.map(aperturaDelHueco)) > 0.999, '  y el anillo se abre y se vuelve a cerrar (en 0 y en 1, cerrado)')
+afirmar(bajadaDeLasResenas(0) === 0 && bajadaDeLasResenas(1) === 1, '  función del progreso: al subir, todo vuelve (en 0, el aro en su lugar)')
+afirmar(objetivoDeLaBajada(0.05, 0) === 1 && objetivoDeLaBajada(0.02, 1) === 1 && objetivoDeLaBajada(0.005, 1) === 0, 'gatillo: la bajada se dispara al empezar la transformación y vuelve al subir')
+afirmar(bajadaDeLasResenas(progresoDelGatillo(1)) === 1 && aperturaDelHueco(progresoDelGatillo(1)) < 1e-6 && bajadaDeLasResenas(progresoDelGatillo(0)) === 0, '  y su animación recorre la ventana entera (abre, baja y cierra)')
+afirmar(Math.abs(caraDelCta(VUELTA_DEL_CTA)) < 0.02, `el momento del enganche (${VUELTA_DEL_CTA.toFixed(2)}) es el cartel de canto`)
+const cruces = muestras.map((p, k) => cruceDeLaVuelta(muestras[Math.max(0, k - 1)], p)).filter((c) => c !== null)
+afirmarIgual(cruces, ['ida'], 'bajando, el enganche se cruza una vez (ida)')
+afirmarIgual(cruceDeLaVuelta(0.9, 0.1), 'vuelta', '  y subiendo, vuelta')
+const antes = ENGANCHE_DE_LAS_GRIETAS.veces
+avisarLaVueltaDelCta('ida')
+afirmar(ENGANCHE_DE_LAS_GRIETAS.veces === antes + 1, 'el enganche de B9 existe y se llama (vacío: B9 instala su disparador)')
+const cta = leer('_secciones/por-que-develop/CtaTransformado.tsx')
+const origen = (f: string): boolean => /TITULOS_DE_VOLUMEN\.has\(TITULOS_DE_LAS_RESENAS\[0\]\) \? TITULOS_DE_LAS_RESENAS : FRASE_DE_VOLUMEN/.test(f)
+afirmar(origen(cta), 'con las reseñas, el cartel del CTA sale del título de las reseñas (lo que se da vuelta y se vuelve el CTA)')
+controlPositivo('el detector ve el origen de siempre', cta.replace(/const ids[^\n]*\n/, ''), origen)
+const delCta = leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx')
+afirmar(/CTA_EN_VIVO\.sinLosValores \? 0 : apareceDeLosValores\(p\)/.test(delCta), 'sin los valores (se fueron antes del aro): la transformación no los redibuja y la frase llega del otro lado de sus placas')
+afirmar(/abrirElHueco\(s\.hueco, v\.hueco\)/.test(leer('_lib/escena/resenas/EscenaDeLasResenas.tsx')), 'la escena abre el anillo con lo que dice el DOM')
+afirmar(Math.abs(HACIA_EL_CTA.baja[0] + HACIA_EL_CTA.baja[1] - GIRO_DEL_CARTEL[1]) < 1e-9, '  y la bajada termina exactamente con el giro del cartel')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('13 · [B2, después de verla] El texto de cada placa: encima del lienzo, visible, en tinta, en el frente de su placa; el aro, calmo')
+
+// a · Encima del lienzo: la sección (z-10) va arriba de la escena (fija, z-0); la capa de las tarjetas es hija directa de la caja clavada,
+// después de la levantada (que se apaga sin WebGL), y su envoltorio no tiene caja (`contents`).
+afirmar(/'relative z-10 /.test(leer('_componentes/Panel.tsx')) && /CLASES_FUERA_DE_FLUJO = 'fixed inset-0 z-0 pointer-events-none'/.test(leer('_lib/compuerta.ts')), 'la sección va arriba de la escena: el panel en z-10, el lienzo fijo en z-0')
+const hijaDeLaCaja = (f: string): boolean => /<\/motion\.div>\n(?:\s*<[A-Za-z][^\n]*\/>\n)*\s*<EscenarioDeLasResenas pin=\{pinDelBloque\} \/>\n {4}<\/div>/.test(f)
+afirmar(hijaDeLaCaja(porQue), 'la capa de las tarjetas es hija de la caja clavada, después de la levantada: ninguna opacidad de otra pieza le llega')
+controlPositivo('el detector ve la capa adentro de la levantada', '</motion.div>\n      <motion.div style={{ opacity }}>\n      <EscenarioDeLasResenas pin={pinDelBloque} />\n      </motion.div>\n    </div>', hijaDeLaCaja)
+afirmar(/className="contents"/.test(leer('_secciones/por-que-develop/resenas/EscenarioDeLasResenas.tsx')), '  y el envoltorio de las reseñas no tiene caja (`contents`): la capa se posiciona contra la caja clavada')
+const capa = renderToStaticMarkup(<CapaDelAro arrastre={false} />)
+const raizDeLaCapa = /^<div[^>]*>/.exec(capa)?.[0] ?? ''
+afirmar(/style="z-index:1"/.test(raizDeLaCapa) && /absolute inset-0/.test(raizDeLaCapa) && !/opacity/.test(raizDeLaCapa), 'la capa va arriba de sus hermanas de la caja clavada (z 1) y sin opacidad propia')
+// b · Visible y en tinta: cada tarjeta lleva la cara de papel con la tinta, y su texto está en el marcado.
+const tarjetas = [...capa.matchAll(/<a [^>]*data-pieza="resena-del-aro"[\s\S]*?<\/a>/g)].map((m) => m[0])
+afirmarIgual(tarjetas.length, ARO.placas, 'una tarjeta por placa en el marcado')
+// La cara (el span de papel) lleva la tinta en su propia clase: la cita, el nombre y el negocio la heredan de ahí.
+const enTinta = (html: string): boolean => /class="[^"]*bg-fondo[^"]*\stext-tinta(?:\s|")/.test(html) && RESENAS.some((r) => html.includes(`«${r.cita}»`))
+afirmar(tarjetas.every(enTinta), 'cada tarjeta: papel (bg-fondo) con la tinta (text-tinta) en la cara, y su cita escrita')
+controlPositivo('el detector ve una cara sin tinta', tarjetas[0].replace(/text-tinta(?!-)/g, 'text-fondo'), enTinta)
+const tema = readFileSync(path.join(RAIZ, 'src/app/theme-develop.css'), 'utf8')
+const token = (n: string): string => new RegExp(`--color-${n}:\\s*(#[0-9A-Fa-f]{6})`).exec(tema)?.[1] ?? '#000000'
+afirmar(razonDeContraste(token('tinta'), token('fondo')) >= 4.5 && razonDeContraste(token('tinta-media'), token('fondo')) >= 4.5, `la tinta y la tinta media sobre el papel: ${razonDeContraste(token('tinta'), token('fondo')).toFixed(2)}:1 y ${razonDeContraste(token('tinta-media'), token('fondo')).toFixed(2)}:1 (AA)`)
+// c · En el frente de su placa: lo que la escena le escribe a la tarjeta (la cuenta de `EscenaDeLasResenas.tsx`), con la cámara de los valores.
+const camaraB = new THREE.PerspectiveCamera(35, 1440 / 900, 0.1, 400)
+camaraB.position.set(0, -3.2, 16)
+camaraB.lookAt(0, 0, 0)
+camaraB.updateMatrixWorld()
+const MB = medidasDelAro(1440 / 900)
+const centroY = -LOGO_BOX_WORLD / 2 + ARO.sobreElPie + MB.alto / 2
+type Escrita = { style: { transform: string; opacity: string; visibility: string; setProperty: (k: string, v: string) => void } }
+const nuevaEscrita = (): Escrita => ({ style: { transform: '', opacity: '', visibility: '', setProperty: () => undefined } })
+CAPA_DEL_ARO.el = nuevaEscrita() as unknown as HTMLElement
+const anchoDeMaqueta = tamanoDeLasTarjetas(camaraB, 900, MB, centroY, { ancho: 0 })
+CAPA_DEL_ARO.el = null
+const llevada = (e: number): { readonly el: Escrita; readonly esquinas: number[][]; readonly placa: number[][] } => {
+  // La placa del aro más de frente con esa entrada, con la misma cuenta del texto que la escena.
+  const poses = Array.from({ length: ARO.placas }, (_, i) => poseDeLaPlaca(i, e, 0, MB, nuevaPose())).filter((p) => p.enElAro && p.z > 0)
+  const p = poses.sort((a, b) => Math.abs(a.x) - Math.abs(b.x))[0]
+  const el = nuevaEscrita()
+  const centro = new THREE.Vector3(p.x, centroY, p.z)
+  llevarLaTarjeta(el as unknown as HTMLElement, nuevaTarjeta(), centro, p.mira, MB, textoDeLaPlaca(p.angulo) * textoConLaEntrada(e), camaraB, { ancho: 1440, alto: 900 }, anchoDeMaqueta)
+  const alto = (anchoDeMaqueta * MB.alto) / MB.ancho
+  const m3 = /matrix3d\(([^)]*)\)/.exec(el.style.transform)?.[1]?.split(',').map(Number) ?? null
+  const m2 = /^matrix\(([^)]*)\)/.exec(el.style.transform)?.[1]?.split(',').map(Number) ?? null
+  const llevar = (x: number, y: number): number[] => (m3 !== null ? aplicar(m3, x, y) : m2 !== null ? [m2[0] * x + m2[2] * y + m2[4], m2[1] * x + m2[3] * y + m2[5]] : [Number.NaN, Number.NaN])
+  const derecha = new THREE.Vector3(Math.cos(p.mira), 0, -Math.sin(p.mira))
+  const frente = centro.clone().addScaledVector(new THREE.Vector3(Math.sin(p.mira), 0, Math.cos(p.mira)), MB.espesor / 2)
+  const placa = [[-1, 1], [1, 1], [1, -1], [-1, -1]].map(([sx, sy]) => {
+    const v = frente.clone().addScaledVector(derecha, (sx * MB.ancho) / 2).add(new THREE.Vector3(0, (sy * MB.alto) / 2, 0)).project(camaraB)
+    return [((v.x + 1) / 2) * 1440, ((1 - v.y) / 2) * 900]
+  })
+  return { el, esquinas: [llevar(0, 0), llevar(anchoDeMaqueta, 0), llevar(anchoDeMaqueta, alto), llevar(0, alto)], placa }
+}
+const armada = llevada(1)
+const sobreLaPlaca = (x: { readonly esquinas: number[][]; readonly placa: number[][] }): boolean => x.esquinas.every((q, k) => Math.hypot(q[0] - x.placa[k][0], q[1] - x.placa[k][1]) <= 2.5)
+afirmar(armada.el.style.visibility === 'visible' && armada.el.style.opacity === '1.000', `con el aro armado, la de frente: visible y entera (opacidad ${armada.el.style.opacity}; maqueta de ${String(anchoDeMaqueta)} px)`)
+afirmar(sobreLaPlaca(armada) && armada.esquinas.every(([x, y]) => x >= 0 && x <= 1440 && y >= 0 && y <= 900), `  y su caja cae en el frente de su placa (a menos de 2,5 px en las cuatro esquinas), adentro del cuadro: ${armada.esquinas.map((q) => q.map(Math.round).join(',')).join(' · ')}`)
+controlPositivo('el detector ve una tarjeta corrida de su placa', { ...armada, esquinas: armada.esquinas.map(([x, y]) => [x + 40, y]) }, sobreLaPlaca)
+const aMitad = llevada(0.68)
+afirmar(Number(aMitad.el.style.opacity) >= 0.8 && aMitad.el.style.visibility === 'visible' && sobreLaPlaca(aMitad), `a mitad de la entrada (0,68, ~38 % del alto de la sección) la que pasa por el frente ya se lee (opacidad ${aMitad.el.style.opacity}): antes, el texto recién desde 0,82`)
+controlPositivo('el detector ve la entrada de antes (el texto recién desde 0,82)', 0.68, (e) => (e < 0.82 ? 0 : 1) >= 0.8)
+// d · El aro, calmo: con la cámara de los valores a 1440 × 900, la de frente mide ~21 % del ancho y tapa poco del logo.
+const encuadre = (m: typeof MB): { readonly ancho: number; readonly tapa: number } => {
+  const yc = -LOGO_BOX_WORLD / 2 + m.alto / 2
+  const px = (x: number, y: number, z: number): number[] => {
+    const v = new THREE.Vector3(x, y, z).project(camaraB)
+    return [((v.x + 1) / 2) * 1440, ((1 - v.y) / 2) * 900]
+  }
+  const [a, b] = [px(-m.ancho / 2, yc + m.alto / 2, m.radio), px(m.ancho / 2, yc - m.alto / 2, m.radio)]
+  const [la, lb] = [px(-3.9, LOGO_BOX_WORLD / 2, 0), px(3.9, -LOGO_BOX_WORLD / 2, 0)]
+  const ix = Math.max(0, Math.min(b[0], lb[0]) - Math.max(a[0], la[0]))
+  const iy = Math.max(0, Math.min(b[1], lb[1]) - Math.max(a[1], la[1]))
+  return { ancho: (b[0] - a[0]) / 1440, tapa: (ix * iy) / ((lb[0] - la[0]) * (lb[1] - la[1])) }
+}
+const calmo = (m: typeof MB): boolean => encuadre(m).ancho <= 0.23 && encuadre(m).tapa <= 0.16
+afirmar(calmo(MB), `la de frente mide ${(encuadre(MB).ancho * 100).toFixed(0)} % del ancho y tapa ${(encuadre(MB).tapa * 100).toFixed(0)} % de la caja del logo (eran 33 % y 34 %)`)
+controlPositivo('el detector ve el aro de antes (radio 6,4, placas de 3,2 × 2,15)', { ...medidasDeLaEscala(1), radio: 6.4, ancho: 3.2, alto: 2.15 }, calmo)
 
 cerrar('s83-resenas')

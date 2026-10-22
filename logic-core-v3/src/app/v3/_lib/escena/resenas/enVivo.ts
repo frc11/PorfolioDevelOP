@@ -17,6 +17,8 @@ export const RESENAS_EN_VIVO = {
   entrada: 0,
   /** [B3] La bajada por el hueco del piso (0 a 1): las placas se hunden; con 1 no se dibujan. */
   bajada: 0,
+  /** [B3] Cuánto está abierto el anillo del piso bajo el aro (0 a 1). */
+  hueco: 0,
   /** La placa señalada (hover del mouse o foco del teclado), o −1. */
   senalada: -1,
   /** Con `?resenas-arrastre=si`: el arrastre del puntero (cuánto se corrió desde el último cuadro, px del cuadro). */

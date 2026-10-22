@@ -89,3 +89,51 @@ Rama `nocturno/2026-10-22-b2`. Tarea: `docs/cola/2026-10-22/60-B2B3-resenas-cta.
 - **Lo medido sin navegador (con B3 encima, en el mismo árbol):** lint limpio, tsc 0; s83, s10, s6, s18, s27, s37, s40, s41, s45, s47, s49,
   s52–s62, s74, s75, s76, s78 sin fallas; s3, s5, s7, s8, s4 con las fallas de la base (sin `.next` en el worktree: s3-peso, s5-peso,
   s7-compuerta, s8-tres, s8-peso, s4-heredado no cierran; s5-compacto y s8-montaje, las mismas listas que la base).
+
+### B3 · reseñas → CTA
+
+- **El título se da vuelta y se vuelve el CTA:** la transformación de siempre (`ctaDelFinal/`: el cartel se junta, gira sobre Y y del otro lado
+  está «HABLANOS») toma como origen el título de las reseñas (`CtaTransformado.tsx`, `origenDeLaFrase`); desde que arranca, el título de
+  volumen de las reseñas no se dibuja (lo dibuja el CTA, como hacía con la frase). Los valores ya se fueron: la transformación no los
+  redibuja (`CTA_EN_VIVO.sinLosValores`) y la frase del CTA llega del otro lado de sus placas, que giran sin su cara.
+- **El anillo y la bajada** (`resenas/haciaElCta.ts`, `_lib/escena/resenas/huecoDelAro.ts`): a la par del giro del cartel (las placas
+  empiezan a bajar antes del giro y terminan con él), en el piso se abre un anillo bajo el aro (una ranura oscura pegada al piso: el piso no
+  se corta, su sombreador es del final del pie) y las placas bajan por ahí (la cara del piso las tapa). Se cierra cuando ya no queda ninguna.
+- **La cámara:** sube a C como antes (la transformación de siempre). Decisión: el orden pedido era «se da vuelta y baja, después sube la
+  cámara»; la cámara de C llega a la vez que el cartel se arma (la transformación aprobada en PULIDO 3B–8). Correrla después del giro es
+  cambiar los tiempos de la escena (`TIEMPOS_DEL_FINAL`) y los planos del CTA (anclados para la cámara de C): fuera de esta entrega.
+- **Las variantes:** `?resenas=scroll`, todo función del progreso; `?resenas=gatillo`, la bajada (y su anillo) es una animación por tiempo
+  que se dispara al empezar la transformación y vuelve al subir. El cartel sigue al scroll en las dos (es el CTA de siempre).
+- **Sin rebobinado:** la media pantalla del CTA del tramo sigue con todo puesto (s83 §3 a la spec nueva, con su control).
+- **B9:** `_lib/escena/resenas/enganches.ts`, `ENGANCHE_DE_LAS_GRIETAS.alVolverseElCta(sentido)` (vacío): lo llama el tramo al cruzar el
+  momento en que el cartel está de canto (`VUELTA_DEL_CTA`, 0,48 del progreso de la transformación), `ida` bajando y `vuelta` subiendo.
+- **Lo medido sin navegador (B3):** lint limpio, tsc 0; s83 §12 (con sus controles: la bajada a la par del giro, el anillo abierto mientras
+  bajan, el gatillo, el momento del enganche de canto, el origen del cartel, sin los valores) y §3 a la spec nueva; s53–s62 (las suites del
+  CTA) sin fallas.
+
+### B2 · después de verla (el orquestador la integró y la revirtió: «las placas salen vacías» y «muy grandes»)
+
+- **Qué era, en el código.**
+  1. **El texto llegaba tarde, por diseño mal elegido.** A ~38 % del alto de la sección el avance del tramo es ~0,42 y la entrada del aro
+     ~0,68: el texto de las placas recién aparecía desde 0,82 (`ARO.textoDesde`) y las que venían por la recta de adelante no llevaban texto
+     nunca (`POSE.enElAro`). Ahí se ven placas de papel vacías. Ahora el texto entra desde 0,45 y está entero en 0,75 (a 0,68, 0,86), y la que
+     viene por la recta de adelante también se lee (la de atrás, de espaldas, no).
+  2. **El banco no podía ver el texto.** `aro-legibilidad.ts` informaba el percentil 5 de los píxeles que cambian: son los bordes
+     antialiaseados de una letra fina (cubiertos un 6 a 10 %), que dan ~1,2:1 aunque el texto esté entero; su control al 30 % daba 1,13 y no
+     separaba. Ahora el criterio es el NÚCLEO (el percentil 90, los píxeles enteros de la letra), informa también la mediana, y agrega el
+     diagnóstico de la de frente: el color de la cita y su fondo, la opacidad efectiva (el producto por todos los ancestros), la visibilidad,
+     el cuerpo, el texto, su caja, su transformada y si lo que hay en su centro es ella.
+  3. **Las placas, grandes.** Con radio 6,4 y placas de 3,2 × 2,15, la de frente medía un tercio del ancho y tapaba un tercio de la caja
+     del logo; en la entrada, dos de la recta de adelante juntas cubrían ~74 % del ancho. Ahora radio 5,6 y placas de 2,2 × 1,5 (la letra
+     de la cara, en proporción un poco más grande): la de frente mide 21 % del ancho y tapa 14 % de la caja del logo.
+- **Cómo se comprobó, sin navegador (s83 §13, con controles):** la sección va arriba del lienzo (el panel en z-10, el lienzo fijo en z-0); la
+  capa de las tarjetas es hija directa de la caja clavada, después de la levantada, con z 1 y sin opacidad propia; cada tarjeta lleva la
+  cara de papel con la tinta en su clase y su cita escrita (17,6:1 y 7,2:1 con los tokens); con la cámara de los valores a 1440 × 900, lo
+  que la escena le escribe a la de frente es visible, opacidad 1, y su caja cae en el frente de su placa a menos de 2,5 px en las cuatro
+  esquinas, adentro del cuadro; a mitad de la entrada (0,68) ya se lee (0,86); y el encuadre calmo.
+- **Si en el navegador siguieran vacías con el aro armado** (avance ≥ 0,5), el diagnóstico del banco dice cuál de las otras causas es
+  (debajo de algo, opacidad en un ancestro, color, fuera del cuadro): no se encontró ninguna en el código.
+
+## Qué mirar (el orquestador, en el navegador)
+
+Ver el reporte de la noche (los dos commits de B2 y el de B3): la lista numerada con URL, ancho, acción y lo que debería verse, y los bancos.

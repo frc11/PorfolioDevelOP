@@ -8,7 +8,8 @@
  *   · la escena: el tramo se anota con `anotarTramo` y la sala lo ve como `LARGO_SIN_ESTIRAR_PX` de la regla (la cámara queda en el sostén
  *     de B mientras se leen las reseñas).
  * Adentro, el avance `r` (0 a 1) reparte los momentos: el título se da vuelta, los valores se van, el aro entra, se lee, y la última media
- * pantalla es la del CTA (B3). Sin B3, en esa media pantalla todo se rebobina y el CTA de siempre sigue como estaba.
+ * pantalla es la del CTA. [B3] Después del tramo, la transformación al CTA de siempre toma el título de las reseñas y el aro baja por un
+ * anillo del piso (`haciaElCta.ts`).
  */
 
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../../_lib/navegacion'
@@ -52,9 +53,6 @@ export const MOMENTOS_DE_LAS_RESENAS = {
   cta: [0.875, 1],
 } as const
 
-/** Sin B3, el rebobinado en la media pantalla del CTA: el aro sale, los valores vuelven y el título se da vuelta al revés (en ese orden). */
-export const REBOBINADO = { entrada: [0.875, 0.055], disolucion: [0.93, 0.035], giro: [0.965, 0.035] } as const
-
 /** `?resenas=gatillo`: el título, los valores y la entrada son una animación por tiempo (s), con estos tramos de ella. */
 export const GATILLO = { duracionS: 2.8, giro: [0, 0.3], disolucion: [0.25, 0.3], entrada: [0.5, 0.5], entra: 0.02, sale: 0.005 } as const
 
@@ -67,23 +65,12 @@ export interface EstadoDeLasResenas {
   readonly entrada: number
 }
 
-/**
- * El estado con el avance `r` y, con el gatillo, su animación por tiempo `disparo` (0 a 1; `null`, atado al scroll). `conCta`: con B3 la
- * media pantalla del CTA no rebobina (la toma el CTA).
- */
-export function estadoDelAvance(r: number, disparo: number | null, conCta = false): EstadoDeLasResenas {
+/** El estado con el avance `r` y, con el gatillo, su animación por tiempo `disparo` (0 a 1; `null`, atado al scroll). */
+export function estadoDelAvance(r: number, disparo: number | null): EstadoDeLasResenas {
   const M = MOMENTOS_DE_LAS_RESENAS
-  const base =
-    disparo === null
+  return disparo === null
       ? { giro: tramo(r, M.giro[0], M.giro[1] - M.giro[0]), disolucion: tramo(r, M.disolucion[0], M.disolucion[1] - M.disolucion[0]), entrada: tramo(r, M.entrada[0], M.entrada[1] - M.entrada[0]) }
-      : { giro: tramo(disparo, GATILLO.giro[0], GATILLO.giro[1]), disolucion: tramo(disparo, GATILLO.disolucion[0], GATILLO.disolucion[1]), entrada: tramo(disparo, GATILLO.entrada[0], GATILLO.entrada[1]) }
-  if (conCta) return base
-  const R = REBOBINADO
-  return {
-    giro: base.giro * (1 - tramo(r, R.giro[0], R.giro[1])),
-    disolucion: base.disolucion * (1 - tramo(r, R.disolucion[0], R.disolucion[1])),
-    entrada: base.entrada * (1 - tramo(r, R.entrada[0], R.entrada[1])),
-  }
+    : { giro: tramo(disparo, GATILLO.giro[0], GATILLO.giro[1]), disolucion: tramo(disparo, GATILLO.disolucion[0], GATILLO.disolucion[1]), entrada: tramo(disparo, GATILLO.entrada[0], GATILLO.entrada[1]) }
 }
 
 /** El gatillo: adónde va la animación con el avance `r` (1, entró al tramo; 0, salió por arriba), con un margen para no titilar. */

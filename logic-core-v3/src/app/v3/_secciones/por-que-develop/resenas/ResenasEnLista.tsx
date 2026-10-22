@@ -80,7 +80,7 @@ export function ResenasEnLista(): React.JSX.Element {
         <ul ref={pista} className="flex snap-x snap-mandatory gap-[var(--spacing-6)] overflow-x-auto pb-[var(--spacing-3)] escritorio:overflow-x-hidden">
           {RESENAS.map((r) => (
             <li key={r.clave} className="shrink-0 snap-center [--ancho-de-la-tarjeta:min(86cqw,calc(var(--spacing-20)*5))] escritorio:[--ancho-de-la-tarjeta:calc((100cqw-2*var(--spacing-6))/3)]">
-              <div onClick={() => irAlTrabajo(enlaceDelTrabajo(r))} className="block h-[calc(var(--ancho-de-la-tarjeta)*0.672)] w-[var(--ancho-de-la-tarjeta)] cursor-pointer rounded-[calc(var(--ancho-de-la-tarjeta)*0.069)] shadow-flotante">
+              <div onClick={() => irAlTrabajo(enlaceDelTrabajo(r))} className="block h-[calc(var(--ancho-de-la-tarjeta)*0.682)] w-[var(--ancho-de-la-tarjeta)] cursor-pointer rounded-[calc(var(--ancho-de-la-tarjeta)*0.073)] shadow-flotante">
                 <CaraDeLaResena resena={r} />
               </div>
               <span className={`mt-[var(--spacing-2)] block text-cuerpo ${MEZCLA_SOBRE_LA_ESCENA}`}>{TEXTO_DE_LAS_RESENAS.verTrabajo}</span>
