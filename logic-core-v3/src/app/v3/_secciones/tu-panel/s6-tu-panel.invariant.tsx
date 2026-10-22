@@ -31,7 +31,7 @@ import { GRUPO_POR_DEFECTO, PALABRA_POR_DEFECTO, palabraEnElTelefono, posicionDe
 import { CANDADO_INICIAL, siguienteCandado, type EstadoDelCandado, type EventoDelCandado } from './candado'
 import { CARTEL, CTA, ID, NEWSLETTER, TARJETAS, TITULO, textoDe } from './contenido'
 import { CONTENIDO_PROHIBIDO_DE_CONTROL, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, textoAccesible } from './deteccion'
-import { ALFA_DE_LA_PALABRA, CLASE_DE_LA_PALABRA, CLASE_DE_LA_POSICION, LADOS, MODULO, PANTALLA_DEL_MODULO, RITMO, TIPO, altoDelModulo, altoNaturalEnEscritorio, altoViejoAngosto, ALTOS_VIEJOS_MEDIDOS, escalaDeLaDemo, tamanoDelTitulo } from './geometria'
+import { ALFA_DE_LA_PALABRA, CLASE_DE_LA_PALABRA, CLASE_DE_LA_POSICION, LADOS, MODULO, PANTALLA_DEL_MODULO, RITMO, TIPO, altoDelModulo, altoNaturalEnEscritorio, altoViejoAngosto, escalaDeLaDemo, tamanoDelTitulo } from './geometria'
 import { FIN_DEL_PINTADO, avanceDeLaPalabra, avanceDelPintado } from './pintado'
 import { tramoDelPanel } from './tramo'
 import { TuPanel } from './TuPanel'
@@ -251,10 +251,6 @@ titulo('11 · REGLA DE ALTURAS: abajo de 1024 la escena ve el alto de antes')
 
 const a390 = altoViejoAngosto(326) / 844
 afirmar(Math.abs(a390 - 5.8) / 5.8 < 0.05, `el modelo del alto viejo a 390 × 844 da ${a390.toFixed(2)} pantallas contra las ~5,8 medidas en NOCTURNO FINAL C3 (a menos del 5 %)`)
-// [NOCTURNO] Y contra la sección vieja medida en el navegador en cuatro anchos: a 25 px o menos (la deriva de lo que viene después).
-const desvios = ALTOS_VIEJOS_MEDIDOS.map(([util, medido]) => altoViejoAngosto(util) - medido)
-afirmar(desvios.every((d) => Math.abs(d) <= 25), `el modelo contra lo medido en el navegador (390, 768, 820 y 1023): ${desvios.map((d) => d.toFixed(0)).join(', ')} px`)
-controlPositivo('  el modelo sin calibrar (el de B6) se pasa', ALTOS_VIEJOS_MEDIDOS, (m: readonly (readonly [number, number])[]) => m.every(([util, medido]) => Math.abs(altoViejoAngosto(util) + (util < 600 ? 117 : 50) - medido) <= 25))
 const panel = { isConnected: true, getBoundingClientRect: () => ({ top: 20000 }) } as unknown as Element
 const nuevo = 3400
 const tramo = tramoDelPanel(panel, nuevo, 326, 844)

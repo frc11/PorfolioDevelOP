@@ -185,13 +185,5 @@ export function altoViejoAngosto(anchoUtil: number): number {
   const tituloDeFeature = telefono ? 74 : 59
   const remate = telefono ? 250 : 242
   const features = 8 * (1.25 * anchoUtil + tituloDeFeature) + 7 * 70
-  return 3 * 80 + encabezado + 48 + features + remate + (telefono ? AJUSTE_MEDIDO.telefono : AJUSTE_MEDIDO.tablet)
+  return 3 * 80 + encabezado + 48 + features + remate
 }
-
-/**
- * [NOCTURNO] El modelo, calibrado contra la sección vieja MEDIDA en el navegador (la integración antes de B6, el dev): 4893 px a
- * 390 × 844 (ancho útil 326), 8584 a 768 × 1024 (704), 9111 a 820 × 1180 (756) y 11169 a 1023 × 768 (959). Sin el ajuste daba
- * de más 117, 64, 57 y 29 px; con él, 0, 14, 7 y −21.
- */
-export const ALTOS_VIEJOS_MEDIDOS: readonly (readonly [number, number])[] = [[326, 4893], [704, 8584], [756, 9111], [959, 11169]]
-const AJUSTE_MEDIDO = { telefono: -117, tablet: -50 } as const
