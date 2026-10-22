@@ -131,8 +131,11 @@ async function alPrimerServicio(p: Page, movil: boolean): Promise<void> {
   await p.mouse.up()
   await dormir(4000)
   await p.mouse.move(400, 450)
-  await p.mouse.wheel(0, 120)
-  await dormir(3500)
+  // [NOCTURNO] El viaje de la barra puede dejar la sección antes de la entrada: de a una muesca (cada una es un paso), hasta web.
+  for (let i = 0; i < 3 && (await ctaALaVista(p)) === null; i++) {
+    await p.mouse.wheel(0, 120)
+    await dormir(3500)
+  }
 }
 
 async function main(): Promise<void> {
