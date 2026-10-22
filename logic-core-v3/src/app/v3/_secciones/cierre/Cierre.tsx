@@ -6,6 +6,7 @@ import { useRef } from 'react'
 import { cn } from '@/lib/utils'
 
 import { Pie } from '../../_componentes/chrome/Pie'
+import { FaqDelPie } from '../../_componentes/faq/FaqDelPie'
 import { Logotipo } from '../../_componentes/marca/Marca'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { POSES_DEL_FINAL, huecoDelLogo } from '../../_lib/escena/finalDelRecorrido'
@@ -19,6 +20,7 @@ import { useDisposicionDelPie } from '../../_lib/pie3d/disposicion'
 import { LlegadaDelPie, useModoDelPie, useProgresoDelPie } from '../../_lib/pie3d/registro'
 import { ColumnasDelPie } from './ColumnasDelPie'
 import { TITULAR_DE_CIERRE } from './contenido'
+import { PREGUNTAS_DEL_HOME } from './faq'
 import { ContactoDelPie, LineaLegal, RedesDelPie } from './PiezasDeContacto'
 import { RecorridoDelPie } from './RecorridoDelPie'
 import { useArribaFijo } from './useArribaFijo'
@@ -49,6 +51,8 @@ export function Cierre({ seccion }: PropsDeSeccion): React.JSX.Element {
           {(progreso: Progreso) => <PieDelFinal seccion={seccion} progreso={progreso} />}
         </Bloque>
       </CoreografiaEnTodoAncho>
+      {/* [B10] El FAQ, después del pie: en esta pantalla, con gatillo (desde 1024); abajo, en lista colgada después de la sección. */}
+      <FaqDelPie preguntas={PREGUNTAS_DEL_HOME} pie={`#${seccion.id}`} colgada />
     </Seccion>
   )
 }

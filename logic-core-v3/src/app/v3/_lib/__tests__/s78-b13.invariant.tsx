@@ -253,7 +253,8 @@ controlPositivo('  el detector ve el modo que ignora el pedido', (() => renderTo
 
 const base = leer('pagina-base/page.tsx')
 const cuerpo = leer('pagina-base/CuerpoDeLaBase.tsx')
-const baseBien = (p: string, cu: string): boolean => /<CuerpoDeLaBase \/>\n\s*\{\/\*[^\n]*\*\/\}\n\s*<CierreDeLaPagina preset=\{PRESET\} \/>\n\s*<\/main>/.test(p) && !cu.includes('data-pie-de-pagina') && PRESET_DE_LA_BASE.tramos?.pie === SELECTOR_DEL_CIERRE
+// [B10] cambió por diseño: el cierre recibe también las preguntas del FAQ de la página (`preguntas`); lo afirma s78-b10.
+const baseBien = (p: string, cu: string): boolean => /<CuerpoDeLaBase \/>\n\s*\{\/\*[^\n]*\*\/\}\n\s*<CierreDeLaPagina preset=\{PRESET\}(?: preguntas=\{[A-Z_]+\})? \/>\n\s*<\/main>/.test(p) && !cu.includes('data-pie-de-pagina') && PRESET_DE_LA_BASE.tramos?.pie === SELECTOR_DEL_CIERRE
 afirmar(baseBien(base, cuerpo), 'la página base monta el cierre después del cuerpo, su preset lo declara en `tramos.pie` y el pie provisorio se fue')
 controlPositivo('  el detector ve el pie provisorio de vuelta', [base, `${cuerpo}<section data-pie-de-pagina="provisorio" />`] as const, ([p, cu]) => baseBien(p, cu))
 

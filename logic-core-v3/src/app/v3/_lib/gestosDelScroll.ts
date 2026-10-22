@@ -61,6 +61,15 @@ export function sentidoDelDedo(dy: number): SentidoDelGesto | null {
 
 const retenedores = new Set<Retenedor>()
 
+/**
+ * [B10] UN DUEÑO PRIMERO: ve el gesto antes que los retenedores y puede quedárselo. `toma`: lo retiene y nadie más lo ve; `suelta`: no lo
+ * retiene y nadie más lo ve (la página lo mueve); `sigue`: no es suyo. Lo pide el FAQ después del pie: con el FAQ al frente, un gesto
+ * hacia arriba lo saca a él y no rebobina el final del pie (que lo vería si fuera un retenedor más).
+ */
+export type DecisionDelPrimero = 'toma' | 'suelta' | 'sigue'
+export type Primero = (g: GestoDeScroll) => DecisionDelPrimero
+const primeros = new Set<Primero>()
+
 /** El último evento visto (para saber si el siguiente empieza un gesto). */
 let ultimo: { origen: GestoDeScroll['origen']; sentido: SentidoDelGesto; t: number } | null = null
 
@@ -72,6 +81,10 @@ function decidir(sentido: SentidoDelGesto, origen: GestoDeScroll['origen'], t: n
     ultimo.origen = origen
     ultimo.sentido = sentido
     ultimo.t = t
+  }
+  for (const p of primeros) {
+    const d = p(g)
+    if (d !== 'sigue') return d === 'toma'
   }
   let retiene = false
   for (const r of retenedores) if (r(g)) retiene = true
@@ -114,23 +127,42 @@ const alApretar = (e: KeyboardEvent): void => {
   if (sentido !== null && decidir(sentido, 'tecla', e.timeStamp, !e.repeat, 0)) retener(e)
 }
 
+/** Los escuchas existen mientras haya alguien que los pida (un retenedor o un dueño primero). */
+const hayQuienLosPida = (): boolean => retenedores.size + primeros.size > 0
+
+function escuchar(): void {
+  if (hayQuienLosPida()) return
+  window.addEventListener('wheel', alRodar, { capture: true, passive: false })
+  window.addEventListener('touchstart', alTocar, { capture: true, passive: true })
+  window.addEventListener('touchmove', alArrastrar, { capture: true, passive: false })
+  window.addEventListener('keydown', alApretar, { capture: true })
+}
+
+function dejarDeEscuchar(): void {
+  if (hayQuienLosPida()) return
+  window.removeEventListener('wheel', alRodar, { capture: true })
+  window.removeEventListener('touchstart', alTocar, { capture: true })
+  window.removeEventListener('touchmove', alArrastrar, { capture: true })
+  window.removeEventListener('keydown', alApretar, { capture: true })
+  dedoY = null
+  dedoNuevo = false
+  ultimo = null
+}
+
 /** Suma un retenedor (y los escuchas, si es el primero). Devuelve cómo sacarlo (y los escuchas, si era el último). */
 export function retenerLosGestos(r: Retenedor): () => void {
-  if (retenedores.size === 0) {
-    window.addEventListener('wheel', alRodar, { capture: true, passive: false })
-    window.addEventListener('touchstart', alTocar, { capture: true, passive: true })
-    window.addEventListener('touchmove', alArrastrar, { capture: true, passive: false })
-    window.addEventListener('keydown', alApretar, { capture: true })
-  }
+  escuchar()
   retenedores.add(r)
   return () => {
-    if (!retenedores.delete(r) || retenedores.size > 0) return
-    window.removeEventListener('wheel', alRodar, { capture: true })
-    window.removeEventListener('touchstart', alTocar, { capture: true })
-    window.removeEventListener('touchmove', alArrastrar, { capture: true })
-    window.removeEventListener('keydown', alApretar, { capture: true })
-    dedoY = null
-    dedoNuevo = false
-    ultimo = null
+    if (retenedores.delete(r)) dejarDeEscuchar()
+  }
+}
+
+/** [B10] Suma un dueño primero (y los escuchas, si no había nadie). Devuelve cómo sacarlo. */
+export function tomarLosGestos(p: Primero): () => void {
+  escuchar()
+  primeros.add(p)
+  return () => {
+    if (primeros.delete(p)) dejarDeEscuchar()
   }
 }

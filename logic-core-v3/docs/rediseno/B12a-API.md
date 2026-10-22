@@ -452,7 +452,10 @@ export default function Pagina(): React.JSX.Element {
 
 ```tsx
 // _componentes/pagina/cierre/CierreDeLaPagina.tsx — 'use client'; la página lo monta al final de su <main>, después del cuerpo
-export function CierreDeLaPagina(props: { readonly preset: PresetDeLaEscena }): React.JSX.Element
+export function CierreDeLaPagina(props: { readonly preset: PresetDeLaEscena; readonly preguntas?: readonly PreguntaFrecuente[] }): React.JSX.Element
+
+// [B10] _componentes/faq/preguntas.ts — el FAQ después del pie (lo monta el cierre; en el home, su pie)
+export interface PreguntaFrecuente { readonly pregunta: string; readonly respuesta: string }   // 6 por página (MAXIMO_DE_PREGUNTAS)
 
 // esc/ruta/atributoDelCierre.ts — sólo cadenas (lo importa el preset de una página de servidor)
 export const SELECTOR_DEL_CIERRE = '[data-cierre-de-pagina]'                  // lo que va en tramos.pie
@@ -476,6 +479,13 @@ export const enUnaPagina: () => boolean                  // ahí el final del ho
    composición: el piso queda liso y calmo.
 3. **El pie** (`PieDelCierre`): el del home (el titular, el mail y WhatsApp, el formulario de contacto, las redes, la línea legal), plano
    en todo ancho; llega mientras su pantalla entra, con el piso ya calmo. El recorrido va a las secciones del home (`/v3#…`, con el velo).
+4. **[B10] El FAQ, después del pie** (`FaqDelPie`, `_componentes/faq/`), con las preguntas de la página (`preguntas`; sin preguntas, no
+   hay FAQ). **Desde 1024 y con movimiento**, en la pantalla del pie, con gatillo: seguir scrolleando al fondo hunde las columnas del pie
+   (el efecto del formulario del pie) y de esos lugares nacen dos bloques de vidrio: el título y las preguntas a la izquierda; a la derecha
+   «Tocá una pregunta y mirá lo que pasa.», que se hunde cuando tocás una y sube la respuesta en su lugar (con la primera, abajo, «¿Te
+   quedaron dudas? Escribinos», a WhatsApp con el número del repo). Subir lo saca y vuelve el pie. **Abajo de 1024 o con menos
+   movimiento**, una lista normal después del pie, sin efectos y sin WhatsApp. El texto entero va en el HTML y en los datos estructurados
+   (`FAQPage`); las preguntas son botones (Tab y las flechas).
 
 **El CTA abre el contacto con el servicio de la página:** `data-precarga` es el acento del preset (sin acento, sin precarga).
 
@@ -489,13 +499,17 @@ y el CTA (`ctaDeNoche`).
 **Para una página de servicio (P-S):**
 - `tramos.pie: SELECTOR_DEL_CIERRE` (importado de `esc/ruta/atributoDelCierre.ts`: desde un componente de cliente, una página de servidor
   recibiría una referencia y no la cadena) y `<CierreDeLaPagina preset={PRESET} />` al final del `<main>`. Reemplaza su cierre provisorio.
+- **[B10] Sus preguntas frecuentes** en su carpeta (como `pagina-base/faq.ts`: 6, sin cifras inventadas) y
+  `<CierreDeLaPagina preset={PRESET} preguntas={PREGUNTAS} />`. El FAQ que hoy está en el cuerpo de una página de servicio pasa acá (y sale
+  del cuerpo): un solo FAQ por página, después del pie.
 - **Su variante implementa la resolución** (§4): lo que movió vuelve a su reposo y su luz a la composición cuando `resolucion` llega a 1.
 - No le pongas alto, color ni fondo al cierre, ni nada entre el cierre y el fin del `<main>`.
 
 **Cómo se mide** (`scripts-carga/cierre-de-pagina.ts`, en el navegador, a 1440 y 390): el relevo de la pista, la transformación armada en
 la pose C, el CTA con su precarga (un clic abre el contacto), la resolución en 1 antes de que el pie asome (la luz de abajo prestada en la
 de la composición) y el pie llegado al fondo con el final del home quieto; `CONTROL=sin-resolucion` (la variante recibe siempre 0) tiene
-que fallar. Sin navegador, s78-b13.
+que fallar. Sin navegador, s78-b13. [B10] El FAQ: `scripts-carga/faq-del-pie.ts` (`CONTROL=sin-hundimiento` tiene que fallar la entrada);
+sin navegador, s78-b10.
 
 ## Qué P-H29 resolvió cada cosa
 
