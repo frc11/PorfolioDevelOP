@@ -27,6 +27,7 @@ import { LlegaEnElPie } from './LlegaDelCierre'
 const ID_DEL_TITULAR = 'titular-del-pie-del-cierre'
 const ROTULO = { recorrido: COLUMNAS.find((c) => c.clase === 'recorrido')?.titulo ?? '', contacto: COLUMNAS.find((c) => c.clase === 'contacto')?.titulo ?? '' }
 const HUECO = { ['--hueco-del-pie' as string]: `${huecoDelLogo(POSES_DEL_FINAL.pie.distance).toFixed(1)}svh` } as React.CSSProperties
+// [B10] Cada columna lleva `data-columna-del-pie`: con el FAQ, se hunde en su lugar (`_componentes/faq/`) y de ahí nacen sus bloques.
 const COLUMNA = 'escritorio:absolute escritorio:top-1/2 escritorio:-translate-y-1/2 escritorio:w-[calc(50%-var(--hueco-del-pie))]'
 
 export function PieDelCierre(): React.JSX.Element {
@@ -46,7 +47,7 @@ export function PieDelCierre(): React.JSX.Element {
 function ContenidoDelPie({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
   return (
     <Pie className="grid" claseDeEnvoltorio="grid" claseDeContenido="relative grid content-between gap-[var(--spacing-4)] max-tablet:gap-[var(--spacing-2)] tablet:grid-cols-2 tablet:gap-[var(--spacing-12)] escritorio:block">
-      <div className={`${COLUMNA} escritorio:left-0`}>
+      <div data-columna-del-pie="" className={`${COLUMNA} escritorio:left-0`}>
         <LlegaEnElPie progreso={progreso} ventana={LLEGADAS_DEL_PIE.izquierda} className="flex flex-col gap-[var(--spacing-3)] tablet:gap-[var(--spacing-6)]">
           <div className="max-escritorio:hidden">
             <Logotipo />
@@ -57,7 +58,7 @@ function ContenidoDelPie({ progreso }: { readonly progreso: Progreso }): React.J
           <ContactoDelPie />
         </LlegaEnElPie>
       </div>
-      <div className={`${COLUMNA} escritorio:right-0`}>
+      <div data-columna-del-pie="" className={`${COLUMNA} escritorio:right-0`}>
         <LlegaEnElPie progreso={progreso} ventana={LLEGADAS_DEL_PIE.derecha} className="grid grid-cols-1 gap-[var(--spacing-8)] movil:grid-cols-2 tablet:grid-cols-1 escritorio:grid-cols-2">
           <nav aria-label={ROTULO.recorrido} className="flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-4)]">
             <EtiquetaDeSeccion como="h3" sangria={false}>
@@ -81,7 +82,7 @@ function ContenidoDelPie({ progreso }: { readonly progreso: Progreso }): React.J
           </CajaDeVidrio>
         </LlegaEnElPie>
       </div>
-      <div className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
+      <div data-columna-del-pie="" className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
         <LlegaEnElPie progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
           <RedesDelPie />
           <LineaLegal />

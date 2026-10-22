@@ -6,6 +6,7 @@ import { Cuerpo, EtiquetaDeSeccion } from '../_componentes/tipografia/Textos'
 import { conLlave } from '../_secciones/_contrato/inventado'
 
 import { CuerpoDeLaBase } from './CuerpoDeLaBase'
+import { PREGUNTAS_DE_LA_BASE } from './faq'
 import { PRESET } from './preset'
 import { RELLENO_DE_LA_BASE } from './relleno'
 
@@ -39,8 +40,8 @@ export default function PaginaBase(): React.JSX.Element {
         }
       />
       <CuerpoDeLaBase />
-      {/* [B13] El cierre de la página: Seis razones → el CTA (con el servicio de la página) → la resolución → el pie, con la escena. */}
-      <CierreDeLaPagina preset={PRESET} />
+      {/* [B13] El cierre de la página: Seis razones → el CTA (con el servicio de la página) → la resolución → el pie, con la escena; [B10] y el FAQ, con las preguntas de la página. */}
+      <CierreDeLaPagina preset={PRESET} preguntas={PREGUNTAS_DE_LA_BASE} />
     </main>
   )
 }

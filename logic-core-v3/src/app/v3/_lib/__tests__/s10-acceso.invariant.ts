@@ -54,6 +54,7 @@ import { deberiaAnimar } from '../../_secciones/_contrato/motion'
 import { DESCUENTO_NACIMIENTO_PX } from '../navegacion'
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { RESENAS } from '../../_secciones/por-que-develop/resenas/contenido'
+import { PREGUNTAS_DEL_HOME } from '../../_secciones/cierre/faq'
 
 /**
  * SPRINT DEMOS · lo que suman las demos de Trabajos: una parada por demo y el `h3` de su título.
@@ -92,6 +93,9 @@ const DELTA_DE_B12A8 = { paradas: 1 + 1 } as const
 // [NOCTURNO B2] Las reseñas para el lector y el teclado (`ResenasParaElLector`, iguales en las dos ramas): un enlace por reseña (aparece
 // con el foco) y su `h3`. Las tarjetas que se ven (el aro, el carrusel plano) son del puntero: `aria-hidden` y fuera del orden del teclado.
 const DELTA_DE_LAS_RESENAS = { paradas: RESENAS.length, encabezados: 1 } as const
+// [B10] El FAQ después del pie (`FaqDelPie`, igual en las dos ramas: el servidor lo sirve cerrado en la pantalla del pie): una parada por
+// pregunta (son botones: se recorren con el teclado) y su título. El WhatsApp aparece recién con la primera respuesta (no está en lo servido).
+const DELTA_DEL_FAQ = { paradas: PREGUNTAS_DEL_HOME.length, encabezados: 1 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')
@@ -184,9 +188,10 @@ imprimirParadas(QUIETA, PARADAS)
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
 // SPRINT DEMOS · + las demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo), una parada cada una.
-afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas + DELTA_DE_LAS_RESENAS.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo, «Panel» en la barra y el formulario del pie; desde RETOQUE PANEL, sin las 8 tarjetas ni la pausa del panel en vivo; desde PULIDO 10, más Demos en el recorrido del pie; desde B1, el Portfolio con una parada más que el túnel; desde B12a.8, «Home» y la flechita de «Servicios»; desde B2, el enlace de cada reseña`)
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas + DELTA_DE_LAS_RESENAS.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas + DELTA_DE_LAS_RESENAS.paradas + DELTA_DEL_FAQ.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo, «Panel» en la barra y el formulario del pie; desde RETOQUE PANEL, sin las 8 tarjetas ni la pausa del panel en vivo; desde PULIDO 10, más Demos en el recorrido del pie; desde B1, el Portfolio con una parada más que el túnel; desde B12a.8, «Home» y la flechita de «Servicios»; desde B2, el enlace de cada reseña; desde B10, las preguntas del FAQ`)
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas + DELTA_DE_LAS_RESENAS.paradas + DELTA_DEL_FAQ.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
 controlPositivo('[B2] el censo sin las reseñas no cierra: las ramas suman cada una sus enlaces', PARADAS.length - DELTA_DE_LAS_RESENAS.paradas, (n: number) => n === PARADAS.length && paradasDeTabulacion(ANIMADA).length === n)
+controlPositivo('[B10] el censo sin el FAQ no cierra: las ramas suman cada una sus preguntas', PARADAS.length - DELTA_DEL_FAQ.paradas, (n: number) => n === PARADAS.length && paradasDeTabulacion(ANIMADA).length === n)
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),
@@ -295,7 +300,7 @@ const arbolDe = (html: string): string[] => {
 }
 // 28 desde que Quiénes somos ganó «El Equipo»: los dos nombres del equipo bajaron de
 // `h3` a `h4` —siguen contando— y el rótulo del bloque entró como el `h3` que los junta.
-afirmarIgual(encabezados(QUIETA).length, 29 + DELTA_DEL_PANEL.encabezados + DELTA_DE_DEMOS.encabezados + DELTA_DEL_FINAL.encabezados + DELTA_DEL_RETOQUE_PANEL.encabezados + DELTA_DEL_PORTFOLIO.encabezados + DELTA_DE_SERVICIOS_B4.encabezados + DELTA_DE_LAS_RESENAS.encabezados, '[RETOQUE PANEL] + los 8 títulos de las features · la rama quieta publica 29 encabezados —los 27 de S11, el rótulo del bloque del equipo y el título de la foto— menos los 4 del panel viejo, más el título de las demos y los dos valores más del final; [B1] y la cabecera de cada tira del Portfolio en lugar del nombre de cada trabajo (una más: la tuya); [B4] y el del recomendador de Servicios; [B2] y el de las reseñas para el lector')
+afirmarIgual(encabezados(QUIETA).length, 29 + DELTA_DEL_PANEL.encabezados + DELTA_DE_DEMOS.encabezados + DELTA_DEL_FINAL.encabezados + DELTA_DEL_RETOQUE_PANEL.encabezados + DELTA_DEL_PORTFOLIO.encabezados + DELTA_DE_SERVICIOS_B4.encabezados + DELTA_DE_LAS_RESENAS.encabezados + DELTA_DEL_FAQ.encabezados, '[RETOQUE PANEL] + los 8 títulos de las features · la rama quieta publica 29 encabezados —los 27 de S11, el rótulo del bloque del equipo y el título de la foto— menos los 4 del panel viejo, más el título de las demos y los dos valores más del final; [B1] y la cabecera de cada tira del Portfolio en lugar del nombre de cada trabajo (una más: la tuya); [B4] y el del recomendador de Servicios; [B2] y el de las reseñas para el lector; [B10] y el del FAQ')
 afirmarIgual(arbolDe(ANIMADA), arbolDe(QUIETA), '  y la animada publica EXACTAMENTE el mismo árbol: ya no pierde los dos `h2` de Servicios')
 console.log(
   '  ✅ HALLAZGOS 3 y 4 — CERRADOS en SITIO-S11 · `_secciones/servicios/` — `PanelDeSecuencia` monta las TRES capas y la secuencia apaga dos ' +
