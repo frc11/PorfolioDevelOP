@@ -20,6 +20,7 @@ import { ENCUADRE_EN_VIVO } from './encuadreDelPie'
 import { orbitaDelFinalAhora, quedaDelQuietoAhora } from './quietoEnElViaje'
 import { escribiendoEnUnCampo, pasoDelTeclado, sinTeclado, tecladoQuieto, type EstadoDelTeclado } from './teclado'
 import { fueraDeSuLugar, sinElRig } from './caidaAlHueco'
+import { enUnaPagina } from '../ruta/cierreDeLaPagina'
 import {
   ELEVACION_DEL_FINAL,
   EN_VIVO,
@@ -273,6 +274,8 @@ export function alCuadroDelFinal(s: EstadoDelFinal, state: CuadroDeLaEscena, del
   // [PULIDO 20] R1 · el fondo del LAYOUT (`offsetHeight`), no el desborde (`scrollHeight`): un DOM transformado (la homografía de una pieza
   // del pie que sigue a la cámara que sube) agrandaba el desborde, la página dejaba de estar «al fondo», el final volvía y se trababa.
   s.fondo = Math.max(0, document.documentElement.offsetHeight - window.innerHeight)
+  // [B13] En una página el final del home no corre (el gesto de su pie es la resolución): nunca está al fondo, y si venía armado, se deshace.
+  if (enUnaPagina()) s.fondo = Number.POSITIVE_INFINITY
   EN_VIVO.pegadoDesde = s.fondo
   const ahora = ahoraS()
   const haciaAbajo = s.gestos.abajo > s.gestos.leido
