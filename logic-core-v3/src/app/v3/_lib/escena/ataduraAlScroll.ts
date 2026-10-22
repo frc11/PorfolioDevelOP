@@ -17,6 +17,7 @@ import { progresoDelScroll } from './recorrido'
 import { aplicarRevelado } from './revelado'
 import { escenaRetenida } from './retencion'
 import { suscribirAlViaje, viajeEnCurso } from './viaje'
+import { escenaTapada, suscribirALaTapa } from './tapa'
 import {
   ESTADO_INICIAL,
   MARGEN_DE_REANUDACION,
@@ -129,6 +130,12 @@ export function useEscenaAtadaAlScroll(
       const ventana = window.innerHeight
       if (!(ventana > 0)) return
       const desplazamiento = window.scrollY
+      // [B7] Lo que cubre la pantalla entera (el login desplegado) la duerme: fuera de cuadro y nada más que leer (el scroll no se
+      // mueve detrás); al soltarla, otra lectura (`suscribirALaTapa`). Nunca antes de su primer cuadro: la carga lo espera.
+      if (escenaTapada() && hayPrimerCuadro()) {
+        if (siguiente(estadoRef.current, FUERA_DE_CUADRO) !== estadoRef.current) setEstado((previo) => siguiente(previo, FUERA_DE_CUADRO))
+        return
+      }
       const secciones = medirLasSeccionesEn(document, desplazamiento, extension)
       if (secciones === null) {
         // [B12a.1] Una página que no es el home: la despiertan sus bloques (su preset, D1); en el papel duerme (D8). Sin preset (las
@@ -207,6 +214,7 @@ export function useEscenaAtadaAlScroll(
     // [B12a.1] Cuando cambia el preset de la página y cuando la escena dibuja su primer cuadro, otra lectura.
     const desuscribirDelPreset = suscribirseAlPreset(pedir)
     const desuscribirDeLaCarga = suscribirALaCarga(pedir)
+    const desuscribirDeLaTapa = suscribirALaTapa(pedir)
 
     return () => {
       if (pedido !== 0) cancelAnimationFrame(pedido)
@@ -217,6 +225,7 @@ export function useEscenaAtadaAlScroll(
       desuscribirDelViaje()
       desuscribirDelPreset()
       desuscribirDeLaCarga()
+      desuscribirDeLaTapa()
     }
     // `retenida` entra en las dependencias para que soltar la escena vuelva a
     // leer el scroll de una vez, sin esperar al próximo evento.
