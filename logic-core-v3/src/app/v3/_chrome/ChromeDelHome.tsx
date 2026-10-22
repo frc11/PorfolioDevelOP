@@ -1,6 +1,7 @@
 import { CompuertaDelCursor } from './cursor/CompuertaDelCursor'
 
 import { Contacto } from './contacto/Contacto'
+import { Ingreso } from './ingreso/Ingreso'
 import { OndaDeLasPortadas } from '../_secciones/trabajos/demos/OndaDeLasPortadas'
 import { AnticipacionDelMenu } from './escena/AnticipacionDelMenu'
 import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
@@ -161,6 +162,8 @@ export function ChromeDelHome(): React.JSX.Element {
       <MenuMovil />
       {/* CONTACTO: el formulario, que abren todos los CTA de contacto y «Contacto» del navbar. */}
       <Contacto />
+      {/* [B7] EL LOGIN: «Login» de la barra (y `?ingresar` en la URL) lo despliega como una demo. Cerrado, no pinta nada. */}
+      <Ingreso />
       {/* [INTERFAZ 2] T1: la escena responde a la interfaz. */}
       <RespuestaDeLaEscena />
       {/* [INTERFAZ 2] T2: la vista previa del destino en el menú. */}
