@@ -17,11 +17,14 @@ const sinCambios = (): (() => void) => () => undefined
 const composicionDeLaUrl = (): IdDeComposicion => composicionDeLaBandera(new URLSearchParams(window.location.search).get('composicion'))
 const useComposicion = (): IdDeComposicion => useSyncExternalStore(sinCambios, composicionDeLaUrl, () => COMPOSICION_POR_DEFECTO)
 
-/** El marco: la columna arriba y el hueco debajo (la 1, y todas abajo de 1024); desde 1024, en la 2 y la 3, lado a lado. */
+/** El marco: la columna arriba y el hueco debajo (la 1, y todas abajo de 1024); desde 1024, en la 2 y la 3, lado a lado.
+ * [T0] Abajo de 1024 el aire de arriba es más alto (`--spacing-12` en vez de `--spacing-8`): el cartel del sonido, que aparece debajo del
+ * parlante al tocarlo, pisaba el título en las tres composiciones de 360 a 1023 (`scripts-carga/chrome-en-los-anchos.ts`).
+ */
 const MARCO: Readonly<Record<IdDeComposicion, string>> = {
-  '1': 'grid h-svh grid-rows-[auto_minmax(0,1fr)] justify-items-center gap-[var(--spacing-6)] pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-8))] pb-[var(--spacing-8)] text-center',
-  '2': 'grid h-svh grid-rows-[auto_minmax(0,1fr)] justify-items-center gap-[var(--spacing-6)] pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-8))] pb-[var(--spacing-8)] text-center escritorio:grid-cols-2 escritorio:grid-rows-1 escritorio:justify-items-start escritorio:gap-x-[var(--spacing-12)] escritorio:text-left',
-  '3': 'grid h-svh grid-rows-[auto_minmax(0,1fr)] justify-items-center gap-[var(--spacing-6)] pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-8))] pb-[var(--spacing-8)] text-center escritorio:grid-cols-2 escritorio:grid-rows-1 escritorio:justify-items-start escritorio:gap-x-[var(--spacing-12)] escritorio:text-left',
+  '1': 'grid h-svh grid-rows-[auto_minmax(0,1fr)] justify-items-center gap-[var(--spacing-6)] pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-12))] escritorio:pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-8))] pb-[var(--spacing-8)] text-center',
+  '2': 'grid h-svh grid-rows-[auto_minmax(0,1fr)] justify-items-center gap-[var(--spacing-6)] pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-12))] escritorio:pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-8))] pb-[var(--spacing-8)] text-center escritorio:grid-cols-2 escritorio:grid-rows-1 escritorio:justify-items-start escritorio:gap-x-[var(--spacing-12)] escritorio:text-left',
+  '3': 'grid h-svh grid-rows-[auto_minmax(0,1fr)] justify-items-center gap-[var(--spacing-6)] pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-12))] escritorio:pt-[calc(var(--zona-de-la-cabecera)+var(--spacing-8))] pb-[var(--spacing-8)] text-center escritorio:grid-cols-2 escritorio:grid-rows-1 escritorio:justify-items-start escritorio:gap-x-[var(--spacing-12)] escritorio:text-left',
 }
 
 /**
