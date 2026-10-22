@@ -40,6 +40,11 @@ export const CTA_EN_VIVO = {
   hover: false,
   /** [PULIDO 8] G2 · el foco del teclado sobre el CTA, visible (`:focus-visible`): dibuja el subrayado como el hover. */
   foco: false,
+  /**
+   * [NOCTURNO B3] Con las reseñas, los seis valores ya se fueron (en el aire, antes del aro): la transformación no los dibuja (la frase del
+   * CTA llega igual, del otro lado de sus placas, que giran sin su cara).
+   */
+  sinLosValores: false,
 }
 
 /** Los títulos de volumen que la transformación reemplaza desde que arranca: la frase. */

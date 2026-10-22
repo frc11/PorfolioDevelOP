@@ -13,6 +13,7 @@ import { viajeEnCurso } from '../viaje'
 import { ARO, HONDO_DE_LA_BAJADA, escalaDelAro, medidasDeLaEscala, medidasDelAro, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, pasoDelLevante, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoConLaEntrada, textoDeLaPlaca, type GiroDelAro, type MedidasDelAro } from './aro'
 import { RESENAS_EN_VIVO, TARJETAS_DEL_ARO, ponerLaResena } from './enVivo'
 import { armarLasPlacas, enLaNiebla, geometriaDeLaPlaca, soltarLasPlacas, type PlacaArmada } from './placas'
+import { abrirElHueco, armarElHueco, soltarElHueco, type HuecoArmado } from './huecoDelAro'
 import { esconderLasTarjetas, llevarLaTarjeta, nuevaTarjeta, tamanoDeLasTarjetas, type EstadoDeLaTarjeta } from './tarjetas'
 
 /**
@@ -28,6 +29,8 @@ type VentanaDelBanco = Window & { __aroDelBanco?: () => unknown }
 interface Estado {
   placas: PlacaArmada[]
   geometria: THREE.BufferGeometry | null
+  /** [B3] El anillo del piso bajo el aro. */
+  hueco: HuecoArmado | null
   readonly giro: GiroDelAro
   readonly levante: number[]
   readonly tarjetas: EstadoDeLaTarjeta[]
@@ -44,7 +47,7 @@ export default function EscenaDeLasResenas() {
   const escena = useThree((s) => s.scene)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
-  const m = useRef<Estado>({ placas: [], geometria: null, giro: { angulo: 0, velocidad: 0 }, levante: Array.from({ length: ARO.placas }, () => 0), tarjetas: Array.from({ length: ARO.placas }, nuevaTarjeta), tamano: { ancho: 0 }, costoMs: 0 })
+  const m = useRef<Estado>({ placas: [], geometria: null, hueco: null, giro: { angulo: 0, velocidad: 0 }, levante: Array.from({ length: ARO.placas }, () => 0), tarjetas: Array.from({ length: ARO.placas }, nuevaTarjeta), tamano: { ancho: 0 }, costoMs: 0 })
 
   // Las placas, con la medida de esta proporción (se rearman sólo si cambia la escala del aro).
   const escala = escalaDelAro(tam.width / Math.max(1, tam.height))
@@ -52,17 +55,24 @@ export default function EscenaDeLasResenas() {
     const g = raiz.current
     const s = m.current
     if (g === null) return undefined
-    const geometria = geometriaDeLaPlaca(medidasDeLaEscala(escala))
+    const medidas = medidasDeLaEscala(escala)
+    const geometria = geometriaDeLaPlaca(medidas)
     const placas = armarLasPlacas(geometria)
     for (const p of placas) g.add(p.malla)
+    const hueco = armarElHueco(medidas.radio, escala)
+    g.add(hueco.malla)
     s.placas = placas
     s.geometria = geometria
+    s.hueco = hueco
     void compilarConCuidado(gl, g, camara, escena)
     return () => {
       for (const p of placas) g.remove(p.malla)
       soltarLasPlacas(placas, geometria)
+      g.remove(hueco.malla)
+      soltarElHueco(hueco)
       s.placas = []
       s.geometria = null
+      s.hueco = null
       esconderLasTarjetas(TARJETAS_DEL_ARO, s.tarjetas)
     }
   }, [escala, gl, camara, escena])
@@ -74,6 +84,7 @@ export default function EscenaDeLasResenas() {
       activo: RESENAS_EN_VIVO.activo,
       entrada: RESENAS_EN_VIVO.entrada,
       bajada: RESENAS_EN_VIVO.bajada,
+      hueco: RESENAS_EN_VIVO.hueco,
       giro: RESENAS_EN_VIVO.giro,
       velocidad: RESENAS_EN_VIVO.velocidad,
       senalada: RESENAS_EN_VIVO.senalada,
@@ -100,7 +111,8 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
   if (grupo === null) return
   const v = RESENAS_EN_VIVO
   const e = v.entrada
-  const activo = v.activo && e > 0 && v.bajada < 1 && viajeEnCurso() === null && camara instanceof THREE.PerspectiveCamera && s.placas.length > 0
+  // [B3] Con el anillo del piso abierto el aro sigue (el anillo se cierra cuando ya no queda ninguna placa).
+  const activo = v.activo && (e > 0 || v.hueco > 0) && viajeEnCurso() === null && camara instanceof THREE.PerspectiveCamera && s.placas.length > 0
   grupo.visible = activo
   if (!activo || !(camara instanceof THREE.PerspectiveCamera)) {
     esconderLasTarjetas(TARJETAS_DEL_ARO, s.tarjetas)
@@ -108,6 +120,8 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
   }
   const medidas: MedidasDelAro = medidasDelAro(cuadro.ancho / Math.max(1, cuadro.alto))
   const armado = e >= 1 && v.bajada <= 0
+  const conPlacas = e > 0 && v.bajada < 1
+  if (s.hueco !== null) abrirElHueco(s.hueco, v.hueco)
   // El arrastre llega en px del cuadro: se pasa a giro con el ancho de referencia (1440).
   const dx = v.arrastre.dx * ARO.arrastrePorPx * (1440 / Math.max(1, cuadro.ancho))
   v.arrastre.dx = 0
@@ -128,9 +142,9 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
     p.malla.rotation.set(0, POSE.mira, 0)
     const enLaNieblaDeLaSala = POSE.enElAro ? nieblaDeLaPlaca(POSE.angulo) : POSE.cadena === 1 ? 0.35 : 0
     enLaNiebla(p, enLaNieblaDeLaSala, niebla)
-    p.malla.visible = enLaNieblaDeLaSala < 0.995
+    p.malla.visible = conPlacas && enLaNieblaDeLaSala < 0.995
     ponerLaResena(i, resenaDeLaPlaca(i, s.giro.angulo, RESENAS.length))
-    const texto = POSE.enElAro ? textoDeLaPlaca(POSE.angulo) * conTexto : 0
+    const texto = conPlacas && POSE.enElAro ? textoDeLaPlaca(POSE.angulo) * conTexto : 0
     llevarLaTarjeta(TARJETAS_DEL_ARO[i], s.tarjetas[i], CENTRO.set(POSE.x, y, POSE.z), POSE.mira, medidas, texto, camara, cuadro, ancho)
   }
 }

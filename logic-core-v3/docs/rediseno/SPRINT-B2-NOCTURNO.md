@@ -89,3 +89,28 @@ Rama `nocturno/2026-10-22-b2`. Tarea: `docs/cola/2026-10-22/60-B2B3-resenas-cta.
 - **Lo medido sin navegador (con B3 encima, en el mismo árbol):** lint limpio, tsc 0; s83, s10, s6, s18, s27, s37, s40, s41, s45, s47, s49,
   s52–s62, s74, s75, s76, s78 sin fallas; s3, s5, s7, s8, s4 con las fallas de la base (sin `.next` en el worktree: s3-peso, s5-peso,
   s7-compuerta, s8-tres, s8-peso, s4-heredado no cierran; s5-compacto y s8-montaje, las mismas listas que la base).
+
+### B3 · reseñas → CTA
+
+- **El título se da vuelta y se vuelve el CTA:** la transformación de siempre (`ctaDelFinal/`: el cartel se junta, gira sobre Y y del otro lado
+  está «HABLANOS») toma como origen el título de las reseñas (`CtaTransformado.tsx`, `origenDeLaFrase`); desde que arranca, el título de
+  volumen de las reseñas no se dibuja (lo dibuja el CTA, como hacía con la frase). Los valores ya se fueron: la transformación no los
+  redibuja (`CTA_EN_VIVO.sinLosValores`) y la frase del CTA llega del otro lado de sus placas, que giran sin su cara.
+- **El anillo y la bajada** (`resenas/haciaElCta.ts`, `_lib/escena/resenas/huecoDelAro.ts`): a la par del giro del cartel (las placas
+  empiezan a bajar antes del giro y terminan con él), en el piso se abre un anillo bajo el aro (una ranura oscura pegada al piso: el piso no
+  se corta, su sombreador es del final del pie) y las placas bajan por ahí (la cara del piso las tapa). Se cierra cuando ya no queda ninguna.
+- **La cámara:** sube a C como antes (la transformación de siempre). Decisión: el orden pedido era «se da vuelta y baja, después sube la
+  cámara»; la cámara de C llega a la vez que el cartel se arma (la transformación aprobada en PULIDO 3B–8). Correrla después del giro es
+  cambiar los tiempos de la escena (`TIEMPOS_DEL_FINAL`) y los planos del CTA (anclados para la cámara de C): fuera de esta entrega.
+- **Las variantes:** `?resenas=scroll`, todo función del progreso; `?resenas=gatillo`, la bajada (y su anillo) es una animación por tiempo
+  que se dispara al empezar la transformación y vuelve al subir. El cartel sigue al scroll en las dos (es el CTA de siempre).
+- **Sin rebobinado:** la media pantalla del CTA del tramo sigue con todo puesto (s83 §3 a la spec nueva, con su control).
+- **B9:** `_lib/escena/resenas/enganches.ts`, `ENGANCHE_DE_LAS_GRIETAS.alVolverseElCta(sentido)` (vacío): lo llama el tramo al cruzar el
+  momento en que el cartel está de canto (`VUELTA_DEL_CTA`, 0,48 del progreso de la transformación), `ida` bajando y `vuelta` subiendo.
+- **Lo medido sin navegador (B3):** lint limpio, tsc 0; s83 §12 (con sus controles: la bajada a la par del giro, el anillo abierto mientras
+  bajan, el gatillo, el momento del enganche de canto, el origen del cartel, sin los valores) y §3 a la spec nueva; s53–s62 (las suites del
+  CTA) sin fallas.
+
+## Qué mirar (el orquestador, en el navegador)
+
+Ver el reporte de la noche (los dos commits de B2 y el de B3): la lista numerada con URL, ancho, acción y lo que debería verse, y los bancos.

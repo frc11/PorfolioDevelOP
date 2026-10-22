@@ -358,7 +358,7 @@ function cuadroDeAhora(s: EstadoDeLaEscenaDelCta, medidas: Medidas, p: number): 
     if (el !== null && medido !== null) cajaDeAhora(el, medido, el.closest(ESCENARIO), valoresAPlano(p), c)
     return { x: c.x, y: c.y, escala: c.escala }
   })
-  return { items, progreso: p, apareceDeLosValores: CTA_EN_VIVO.donde === 'lista' ? CTA_EN_VIVO.entrada : apareceDeLosValores(p) }
+  return { items, progreso: p, apareceDeLosValores: CTA_EN_VIVO.donde === 'lista' ? CTA_EN_VIVO.entrada : CTA_EN_VIVO.sinLosValores ? 0 : apareceDeLosValores(p) }
 }
 
 /** Un cuadro: los planos del mundo, las letras, las poses del giro, la metamorfosis, el enlace, el hover y la luz. */

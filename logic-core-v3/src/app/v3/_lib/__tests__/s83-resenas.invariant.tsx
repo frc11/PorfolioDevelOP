@@ -16,6 +16,9 @@ import { RESENAS, TEXTO_DE_LAS_RESENAS, TITULO_DE_LAS_RESENAS, enlaceDelTrabajo 
 import { DISOLUCION, estiloDeLaIda, idaDelValor } from '../../_secciones/por-que-develop/resenas/disolucion'
 import { ALTO_DEL_ESPACIADOR_SVH, INSERCION_DE_LAS_RESENAS, K_DE_LAS_RESENAS, LARGO_SIN_ESTIRAR_PX, PANTALLAS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera } from '../../_secciones/por-que-develop/resenas/tramo'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
+import { HACIA_EL_CTA, VUELTA_DEL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, progresoDelGatillo } from '../../_secciones/por-que-develop/resenas/haciaElCta'
+import { TRANSFORMACION, caraDelCta } from '../escena/ctaDelFinal/transformacion'
+import { ENGANCHE_DE_LAS_GRIETAS, avisarLaVueltaDelCta } from '../escena/resenas/enganches'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { ARO, VELOCIDAD_DE_LECTURA, medidasDelAro, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
 import { seVeConElGiro } from '../escena/titulos3d/giro'
@@ -73,12 +76,12 @@ controlPositivo('sin anotar el tramo la escena llega 4 pantallas tarde al final 
 afirmarIgual(K_DE_LAS_RESENAS, (PANTALLAS_DE_LAS_RESENAS * 900 + LARGO_SIN_ESTIRAR_PX) / LARGO_SIN_ESTIRAR_PX, 'la k: (4 × 900 + 9) / 9 = 401, la misma en todo ancho de escritorio')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Los momentos del tramo, las dos variantes y el rebobinado sin B3')
+titulo('3 · Los momentos del tramo y las dos variantes (B3: sin rebobinado, la media pantalla del CTA sigue con todo puesto)')
 
 const e = (r: number, d: number | null = null): number[] => Object.values(estadoDelAvance(r, d)).map((x) => Math.round(x * 1000) / 1000)
 afirmarIgual([e(0), e(0.125), e(0.25), e(0.5), e(0.7)], [[0, 0, 0], [1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 1, 1]], 'scroll: el título (0 a 0,125), los valores (a 0,25), la entrada (a 0,5) y la lectura con todo puesto')
-afirmarIgual(e(1), [0, 0, 0], 'sin B3, al final del tramo todo volvió (el CTA de siempre arranca igual)')
-controlPositivo('el detector ve un tramo que termina con el aro armado', estadoDelAvance(1, null, true), (x) => x.entrada === 0)
+afirmarIgual(e(1), [1, 1, 1], '[B3] al final del tramo todo sigue puesto: lo toma la transformación al CTA (el título, el aro que baja)')
+controlPositivo('el detector ve un tramo que rebobina antes del CTA', { giro: 0, disolucion: 0, entrada: 0 }, (x) => x.entrada === 1 && x.giro === 1)
 afirmarIgual(e(0.6, 0), [0, 0, 0], 'gatillo: con la animación en 0, nada (aunque el scroll esté adentro)')
 afirmarIgual(e(0.6, 1), [1, 1, 1], '  y con la animación entera, todo')
 afirmar(objetivoDelGatillo(0.03, 0) === 1 && objetivoDelGatillo(0.01, 1) === 1 && objetivoDelGatillo(0.001, 1) === 0 && objetivoDelGatillo(0.01, 0) === 0, 'el gatillo: entra al pasar 0,02 del tramo, sale al volver arriba de 0,005 (sin titilar en el medio)')
@@ -208,5 +211,37 @@ afirmar(/ubicar\(a, d, deColocar\)\n.*\n\s*a\.malla\.visible = girarElTitulo\(a\
 const pruebas = leer('_lib/escena/PruebasDeLaEscena.tsx')
 afirmar(/\{escritorio && \(\s*<Suspense fallback=\{null\}>\s*<EscenaDeLasResenas \/>/.test(pruebas), 'el aro en su módulo, sólo desde 1024 (abajo ni se descarga)')
 afirmar(/espaciador-de-las-resenas[\s\S]*PANTALLAS_DE_LAS_RESENAS \* v/.test(leer('_componentes/destinosDelViaje.ts')), 'el viaje a «Por qué develOP» descuenta el tramo (cae donde caía)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('12 · [B3] Reseñas → CTA: el anillo y la bajada a la par del giro del cartel; el título de las reseñas es el origen; el enganche de B9')
+
+const GIRO_DEL_CARTEL = [TRANSFORMACION.giro.desde, TRANSFORMACION.giro.desde + TRANSFORMACION.giro.gira] as const
+const aLaPar = (baja: (p: number) => number): boolean => {
+  const empieza = muestras.find((p) => baja(p) > 0) ?? 1
+  const termina = muestras.find((p) => baja(p) >= 1) ?? 1
+  return empieza < GIRO_DEL_CARTEL[0] && termina <= GIRO_DEL_CARTEL[1] + 0.002 && termina > GIRO_DEL_CARTEL[0]
+}
+afirmar(aLaPar(bajadaDeLasResenas), `las reseñas bajan AL MISMO TIEMPO que el título se da vuelta: empiezan antes del giro del cartel (${String(GIRO_DEL_CARTEL[0])}) y terminan con él (${String(GIRO_DEL_CARTEL[1])})`)
+controlPositivo('el detector ve una bajada que termina después del giro', (p: number) => bajadaDeLasResenas(p - 0.3), aLaPar)
+afirmar(muestras.every((p) => bajadaDeLasResenas(p) <= 0 || aperturaDelHueco(p) > 0 || bajadaDeLasResenas(p) >= 1), 'mientras una placa baja, el anillo está abierto')
+afirmar(aperturaDelHueco(0) === 0 && aperturaDelHueco(1) < 1e-6 && Math.max(...muestras.map(aperturaDelHueco)) > 0.999, '  y el anillo se abre y se vuelve a cerrar (en 0 y en 1, cerrado)')
+afirmar(bajadaDeLasResenas(0) === 0 && bajadaDeLasResenas(1) === 1, '  función del progreso: al subir, todo vuelve (en 0, el aro en su lugar)')
+afirmar(objetivoDeLaBajada(0.05, 0) === 1 && objetivoDeLaBajada(0.02, 1) === 1 && objetivoDeLaBajada(0.005, 1) === 0, 'gatillo: la bajada se dispara al empezar la transformación y vuelve al subir')
+afirmar(bajadaDeLasResenas(progresoDelGatillo(1)) === 1 && aperturaDelHueco(progresoDelGatillo(1)) < 1e-6 && bajadaDeLasResenas(progresoDelGatillo(0)) === 0, '  y su animación recorre la ventana entera (abre, baja y cierra)')
+afirmar(Math.abs(caraDelCta(VUELTA_DEL_CTA)) < 0.02, `el momento del enganche (${VUELTA_DEL_CTA.toFixed(2)}) es el cartel de canto`)
+const cruces = muestras.map((p, k) => cruceDeLaVuelta(muestras[Math.max(0, k - 1)], p)).filter((c) => c !== null)
+afirmarIgual(cruces, ['ida'], 'bajando, el enganche se cruza una vez (ida)')
+afirmarIgual(cruceDeLaVuelta(0.9, 0.1), 'vuelta', '  y subiendo, vuelta')
+const antes = ENGANCHE_DE_LAS_GRIETAS.veces
+avisarLaVueltaDelCta('ida')
+afirmar(ENGANCHE_DE_LAS_GRIETAS.veces === antes + 1, 'el enganche de B9 existe y se llama (vacío: B9 instala su disparador)')
+const cta = leer('_secciones/por-que-develop/CtaTransformado.tsx')
+const origen = (f: string): boolean => /TITULOS_DE_VOLUMEN\.has\(TITULOS_DE_LAS_RESENAS\[0\]\) \? TITULOS_DE_LAS_RESENAS : FRASE_DE_VOLUMEN/.test(f)
+afirmar(origen(cta), 'con las reseñas, el cartel del CTA sale del título de las reseñas (lo que se da vuelta y se vuelve el CTA)')
+controlPositivo('el detector ve el origen de siempre', cta.replace(/const ids[^\n]*\n/, ''), origen)
+const delCta = leer('_lib/escena/ctaDelFinal/EscenaDelCta.tsx')
+afirmar(/CTA_EN_VIVO\.sinLosValores \? 0 : apareceDeLosValores\(p\)/.test(delCta), 'sin los valores (se fueron antes del aro): la transformación no los redibuja y la frase llega del otro lado de sus placas')
+afirmar(/abrirElHueco\(s\.hueco, v\.hueco\)/.test(leer('_lib/escena/resenas/EscenaDeLasResenas.tsx')), 'la escena abre el anillo con lo que dice el DOM')
+afirmar(Math.abs(HACIA_EL_CTA.baja[0] + HACIA_EL_CTA.baja[1] - GIRO_DEL_CARTEL[1]) < 1e-9, '  y la bajada termina exactamente con el giro del cartel')
 
 cerrar('s83-resenas')
