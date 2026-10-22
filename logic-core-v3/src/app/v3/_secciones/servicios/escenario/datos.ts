@@ -1,3 +1,5 @@
+import type { PresetDeLaEscena } from '../../../_lib/escena/ruta/preset'
+import { PRESET as PRESET_DE_LA_BASE } from '../../../pagina-base/preset'
 import type { IdDeServicio } from '../../_contrato/acento'
 
 /**
@@ -36,6 +38,17 @@ export const DESTINO_DEL_SERVICIO: Readonly<Record<IdDeServicio, string>> = {
   web: '/v3/pagina-base',
   software: '/v3/pagina-base',
   'ia-automatizacion': '/v3/pagina-base',
+}
+
+/**
+ * [B12b] EL PRESET DE LA PÁGINA DE DESTINO DE CADA SERVICIO — el viaje lo apila en el home antes de navegar: la escena va a la composición
+ * de ESA página (su noche, su acento y su variante, montada tapada). Tiene que ser el mismo que declara la página. Hoy los tres son el de
+ * la maqueta base; cuando existan las páginas de servicio, cada uno es el preset de la suya (exportado de un módulo sin JSX: P-S).
+ */
+export const PRESET_DEL_DESTINO: Readonly<Record<IdDeServicio, PresetDeLaEscena>> = {
+  web: PRESET_DE_LA_BASE,
+  software: PRESET_DE_LA_BASE,
+  'ia-automatizacion': PRESET_DE_LA_BASE,
 }
 
 /** Por dónde entra cada servicio (y por dónde sale al subir). */

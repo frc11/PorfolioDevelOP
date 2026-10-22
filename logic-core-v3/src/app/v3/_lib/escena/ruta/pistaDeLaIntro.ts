@@ -21,6 +21,7 @@ import { hayBanco } from '../entorno'
 import { NIVEL_DE_LA_NOCHE } from '../lightArc'
 
 import { presetActual, type PresetDeLaEscena } from './preset'
+import { nivelConLaNocheDelViaje, nocheDelViaje } from './viajeDelServicio'
 
 /**
  * Lo que dura la intro, en pantallas de scroll: el avance va de 0 a 1 en eso. [B12a.8] 2,5 (era 1,5: la parte 3D quedaba corta): el
@@ -92,5 +93,6 @@ export function pistaDeLaPagina(): { readonly track: ChoreoTrack; readonly noche
  */
 export function luzDeLaPagina(pagina: { readonly noche: boolean } | null, progreso: number, arc: MutableLightLevels): void {
   sampleLightArc(pagina === null ? progreso : 0, arc)
-  if (pagina?.noche === true) arc.level = Math.min(arc.level, NIVEL_DE_LA_NOCHE)
+  // [B12b] Con el viaje del CTA de un servicio la noche entra de a poco (fuera de un viaje, el mínimo de siempre, exacto).
+  if (pagina?.noche === true) arc.level = nivelConLaNocheDelViaje(arc.level, NIVEL_DE_LA_NOCHE, nocheDelViaje(performance.now()))
 }

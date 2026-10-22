@@ -4,11 +4,12 @@ import type { CSSProperties } from 'react'
 
 import { ContenidoDelCta } from '../../../_componentes/chrome/Cta'
 import { EnlaceDeRuta } from '../../../_componentes/navegacion/EnlaceDeRuta'
+import { pedirElViajeAlServicio } from '../../../_componentes/navegacion/viajeAlServicio'
 import { Titular } from '../../../_componentes/tipografia/Titular'
 import type { IdDeServicio, Servicio } from '../../_contrato/acento'
 import { ALTO_DEL_MEDIO, ANCHO_DEL_MEDIO, CONTENIDO, CTA_POR_SERVICIO, NOMBRE_CORTO, SIZES_DEL_MEDIO } from '../contenido'
 import { VideoDeServicio } from '../VideoDeServicio'
-import { DESCRIPCION_DEL_VIDEO_PROVISORIO, DESTINO_DEL_SERVICIO, DISTRIBUCION, VIDEO_DEL_SERVICIO, type Distribucion, type Entrada } from './datos'
+import { DESCRIPCION_DEL_VIDEO_PROVISORIO, DESTINO_DEL_SERVICIO, DISTRIBUCION, PRESET_DEL_DESTINO, VIDEO_DEL_SERVICIO, type Distribucion, type Entrada } from './datos'
 import { TextoEnDiagonal } from './TextoEnDiagonal'
 
 /**
@@ -18,7 +19,8 @@ import { TextoEnDiagonal } from './TextoEnDiagonal'
  * en el compositor); el estado inicial, afuera, sale del servidor.
  *
  * El CTA es el enganche del viaje (B12b): un `EnlaceDeRuta` a la página del servicio (`DESTINO_DEL_SERVICIO`), con
- * `data-viaje-del-servicio`. Hoy pasa el velo de B12a.
+ * `data-viaje-del-servicio`. [B12b] Su `onClick` pide el viaje al preset de esa página (`PRESET_DEL_DESTINO`,
+ * `_componentes/navegacion/viajeAlServicio.ts`): el papel se levanta, anochece y la cámara llega a su composición; sin escena, el velo.
  */
 
 export const nombreDelServicio = (s: Servicio): string => NOMBRE_CORTO[s.id] ?? s.nombre
@@ -43,7 +45,7 @@ function corteDelVideo(lado: 'izquierda' | 'derecha' | null): CSSProperties {
 export function EnlaceDelServicio({ id }: { readonly id: IdDeServicio }): React.JSX.Element {
   return (
     <div style={{ color: 'var(--color-acento)', ['--color-tinta' as string]: 'var(--color-acento)' }}>
-      <EnlaceDeRuta href={DESTINO_DEL_SERVICIO[id]} data-pieza="cta" data-variante="linea" data-registro="cuerpo" data-viaje-del-servicio={id} className="text-base no-underline">
+      <EnlaceDeRuta href={DESTINO_DEL_SERVICIO[id]} onClick={(e) => pedirElViajeAlServicio(e, PRESET_DEL_DESTINO[id])} data-pieza="cta" data-variante="linea" data-registro="cuerpo" data-viaje-del-servicio={id} className="text-base no-underline">
         <ContenidoDelCta rotulo={CTA_POR_SERVICIO[id]} />
       </EnlaceDeRuta>
     </div>

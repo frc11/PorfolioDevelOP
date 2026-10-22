@@ -4,15 +4,18 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 import { calentarElDestino } from '../../_componentes/navegacion/calentar'
+import { sonarElViaje } from '../../_componentes/navegacion/viajeAlServicio'
 import { hayBanco } from '../../_lib/escena/entorno'
+import { TIEMPOS_DEL_VIAJE } from '../../_lib/escena/ruta/viajeDelServicio'
 import { escenaDeLaRutaLista } from '../../_lib/escena/ruta/listaDeLaRuta'
 import { DIA_DEL_FINAL, NOCHE_DISPARADA } from '../../_lib/escena/nocheDisparada'
 import { VUELTA_AL_HOME, claveDeLaEntrada, devolverLosAlmacenes, posicionGuardadaDelHome, type PosicionDelHome } from '../../_lib/escena/ruta/posicionDelHome'
 import { sonar } from '../../_lib/sonido/bus'
-import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, atenderElVelo, conElMontajeLiviano, conLaBandaCorta, cubrirConElVelo, marcarLaBanda, viaDelVelo } from '../../_lib/veloDeNavegacion'
+import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, atenderElVelo, conElMontajeLiviano, conLaBandaCorta, cubrirConElVelo, marcarLaBanda, viaDelVelo, type PedidoDelVelo } from '../../_lib/veloDeNavegacion'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { llevarElScrollA, reponerLosAlmacenes, scrollDeLaRuta } from './alCambiarDeRuta'
+import { taparLaPaginaQueLlega, type PaginaTapada } from './paginaTapada'
 import { tonoDeLoQueTapa } from './tonoDeLoQueTapa'
 import { CURVA_DEL_VELO, CURVA_DEL_VELO_CSS, colorDelVelo, coberturaDelVelo, degradeDelVelo, frenteDelVelo, geometriaDeLaBanda, puedeDestapar, siguienteFaseDelVelo, tiemposDelVelo, transformadaDelVelo, type EventoDelVelo, type FaseDelVelo } from './velo'
 
@@ -50,6 +53,11 @@ const COLOR = { tinta: 'var(--color-tinta)', papel: 'var(--color-fondo)' } as co
  * · al volver una página del bfcache (P-H35, `pageshow` con `persisted`), el velo queda quieto: la navegación que lo puso ya terminó;
  * · pasa DEBAJO del chrome (la píldora, el parlante, Contacto y Login: el layout los deja en su lugar) y avisa cuándo cubre y cuándo la
  *   página nueva tiene su scroll (`EVENTOS_DEL_VELO`): la píldora se desliza a su lugar del destino mientras el velo pasa (T2).
+ *
+ * [B12b] EL VIAJE DEL CTA DE UN SERVICIO (`PedidoDelVelo.viaje`): en vez de la banda, cubre la ESCENA (el papel del home se levanta y la
+ * cámara llega a la composición de la página: `_componentes/navegacion/viajeAlServicio.ts`); la banda no se dibuja (`data-modo="viaje"`).
+ * La página nueva entra transparente y con su scroll (`paginaTapada.ts`) y, con su primer cuadro estable, aparece encima de la escena con
+ * el sonido de la llegada. Si la escena no llegó a tiempo, la banda de siempre.
  */
 export function VeloDeNavegacion(): React.JSX.Element {
   const capa = useRef<HTMLDivElement>(null)
@@ -77,6 +85,9 @@ export function VeloDeNavegacion(): React.JSX.Element {
     let vence = 0
     let esperando = 0
     let vuelta: PosicionDelHome | null = null
+    // [B12b] El viaje del CTA de un servicio: la escena cubre en vez de la banda (que no se dibuja) y la página nueva llega tapada.
+    let modo: 'banda' | 'viaje' = 'banda'
+    let tapada: PaginaTapada | null = null
     const medir = (): void => {
       geometria = geometriaDeLaBanda(window.innerWidth, window.innerHeight)
       b.style.width = `${geometria.largo.toFixed(1)}px`
@@ -91,6 +102,9 @@ export function VeloDeNavegacion(): React.JSX.Element {
     /** Lo que lee el banco, y si recibe el puntero (tapado no se toca la página de abajo). */
     const marcar = (f: FaseDelVelo, t: number): void => {
       el.setAttribute('data-fase', f)
+      el.setAttribute('data-modo', modo)
+      // [B12b] Durante el viaje, la rueda y el dedo sobre la capa no son de la página (ni de Lenis ni de los gatillos de Servicios).
+      el.toggleAttribute('data-lenis-prevent', modo === 'viaje' && f !== 'quieto')
       el.setAttribute('data-cobertura', coberturaDelVelo(f, t).toFixed(3))
       el.style.pointerEvents = f === 'quieto' ? 'none' : 'auto'
       // [B12a.8] (4) Las obras del home que no se ven esperan al velo quieto (`VELO_EN_CURSO`). [T0] La banda lo marca; el «quieto» se
@@ -102,7 +116,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
       animacion = null
       cancelAnimationFrame(siguiendo)
       b.style.transform = transformadaDelVelo(frenteDelVelo(f, t, geometria), geometria)
-      b.style.visibility = f === 'quieto' ? 'hidden' : 'visible'
+      b.style.visibility = f === 'quieto' || modo === 'viaje' ? 'hidden' : 'visible'
       // [T0] El `will-change` sólo mientras se mueve (s10-acceso: ninguno en reposo ni con movimiento reducido).
       b.style.willChange = ''
       marcar(f, t)
@@ -148,6 +162,21 @@ export function VeloDeNavegacion(): React.JSX.Element {
       VUELTA_AL_HOME.enCurso = false
       pasar('llego')
       window.dispatchEvent(new Event(EVENTOS_DEL_VELO.destapa))
+      // [B12b] Del viaje: sin banda; la página nueva aparece encima de la escena, que ya está en su composición, y suena la llegada.
+      if (modo === 'viaje') {
+        sonarElViaje('llega')
+        marcar('destapando', 0)
+        const llega = tapada
+        tapada = null
+        const quieto = (): void => {
+          pasar('destapo')
+          modo = 'banda'
+          pintar('quieto', 0)
+        }
+        if (llega === null) quieto()
+        else llega.mostrar(TIEMPOS_DEL_VIAJE.fundidoDeLaLlegadaMs, quieto)
+        return
+      }
       sonar('abre')
       animar('destapando', tiempos().destaparMs, () => {
         pasar('destapo')
@@ -162,21 +191,48 @@ export function VeloDeNavegacion(): React.JSX.Element {
       VUELTA_AL_HOME.enCurso = false
       vuelta = null
       fase = 'quieto'
+      modo = 'banda'
+      tapada?.soltar()
+      tapada = null
       pintar('quieto', 0)
     }
     medir()
     pintar('quieto', 0)
+    /** La pasada de siempre: la banda cubre y, cubierto, deja navegar. */
+    const cubrirConLaBanda = (p: PedidoDelVelo): void => {
+      modo = 'banda'
+      sonar('cierra')
+      animar('cubriendo', tiempos().cubrirMs, () => {
+        pasar('cubrio')
+        pintar('cubierto', 1)
+        p.cubierto()
+        vence = window.setTimeout(destapar, VENCE_MS)
+      })
+    }
     const soltarElPedido = atenderElVelo((p) => {
       if (fase === 'cubierto') {
         p.cubierto()
         return
       }
-      colorear()
+      if (p.viaje === null) colorear()
       rutaAlCubrir = window.location.pathname
       window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))
       pasar('cubrir')
-      sonar('cierra')
-      animar('cubriendo', tiempos().cubrirMs, () => {
+      if (p.viaje === null) {
+        cubrirConLaBanda(p)
+        return
+      }
+      // [B12b] El viaje: cubre la escena (el papel se levanta y la cámara llega). Sin la escena a tiempo, la banda de siempre.
+      modo = 'viaje'
+      pintar('cubriendo', 0)
+      void p.viaje().then((cubrio) => {
+        if (fase !== 'cubriendo') return
+        if (cubrio !== 'escena') {
+          colorear()
+          cubrirConLaBanda(p)
+          return
+        }
+        tapada = taparLaPaginaQueLlega()
         pasar('cubrio')
         pintar('cubierto', 1)
         p.cubierto()
@@ -188,6 +244,10 @@ export function VeloDeNavegacion(): React.JSX.Element {
       const destino = window.location.pathname
       if (destino === rutaDeAhora.current) return
       cancelAnimationFrame(esperando)
+      // [B12b] La flecha en medio de un viaje: corta con la banda.
+      modo = 'banda'
+      tapada?.soltar()
+      tapada = null
       colorear()
       window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))
       rutaAlCubrir = rutaDeAhora.current
@@ -248,6 +308,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
       delete ventana.__vueltaDelBanco
       delete ventana.__veloDelBanco
       VUELTA_AL_HOME.enCurso = false
+      tapada?.soltar()
       alCambiarLaRuta.current = () => undefined
       animacion?.cancel()
       cancelAnimationFrame(siguiendo)
@@ -275,7 +336,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
   }, [ruta])
 
   return (
-    <div ref={capa} aria-hidden="true" data-pieza="velo-de-navegacion" data-fase="quieto" data-cobertura="0" className="pointer-events-none fixed inset-0 z-[calc(var(--z-cabecera)-1)] overflow-hidden">
+    <div ref={capa} aria-hidden="true" data-pieza="velo-de-navegacion" data-fase="quieto" data-modo="banda" data-cobertura="0" className="pointer-events-none fixed inset-0 z-[calc(var(--z-cabecera)-1)] overflow-hidden">
       <div ref={banda} data-parte="banda" className="invisible absolute top-1/2 left-1/2" />
     </div>
   )

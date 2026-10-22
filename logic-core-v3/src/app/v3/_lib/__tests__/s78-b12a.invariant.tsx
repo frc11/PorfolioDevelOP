@@ -215,7 +215,8 @@ afirmar(bloqueBien(intro), 'la intro es un bloque con el atributo que mide la es
 controlPositivo('  el detector ve una intro de una pantalla', intro.replace(`--pantallas-de-la-intro:${String(PANTALLAS_DE_LA_INTRO)}`, '--pantallas-de-la-intro:1'), bloqueBien)
 afirmar(DE_PRUEBA.tramos?.intro === `[${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}]`, '  y el selector del preset es el de ese atributo')
 
-const ruta = sinComentarios(leer('pagina-base/page.tsx'))
+// [B12b] Por la spec: el preset de la base vive en `pagina-base/preset.ts` (lo lee también el viaje del CTA de un servicio); la ruta lo usa.
+const ruta = sinComentarios(leer('pagina-base/page.tsx')) + sinComentarios(leer('pagina-base/preset.ts'))
 const rutaBien = (r: string): boolean =>
   /const PRESET: PresetDeLaEscena = \{[\s\S]*?pista: PISTA_DE_LA_INTRO,[\s\S]*?noche: 'noche',/.test(r) && /preset=\{PRESET\}/.test(r) && /robots: \{ index: false, follow: false/.test(r)
 afirmar(rutaBien(ruta), 'la página base (`/v3/pagina-base`, sin indexar): un preset armado una vez (el mismo objeto en cada render), de noche, con la pista de la intro')

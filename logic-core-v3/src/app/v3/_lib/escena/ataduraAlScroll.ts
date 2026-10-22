@@ -17,6 +17,7 @@ import { progresoDelScroll } from './recorrido'
 import { aplicarRevelado } from './revelado'
 import { escenaRetenida } from './retencion'
 import { suscribirAlViaje, viajeEnCurso } from './viaje'
+import { suscribirAlViajeAlServicio, viajeAlServicioEnCurso } from './ruta/viajeDelServicio'
 import { escenaTapada, suscribirALaTapa } from './tapa'
 import {
   ESTADO_INICIAL,
@@ -163,7 +164,8 @@ export function useEscenaAtadaAlScroll(
       aplicarElDiaDelFinal(elBloque)
 
       // [VIAJES] Durante un viaje el `<main>` está apagado y se ve la sala entera: dibuja también en la banda opaca.
-      const viajando = viajeEnCurso() !== null
+      // [B12b] Y durante el viaje del CTA de un servicio a su página: el papel se levanta y se ve la sala.
+      const viajando = viajeEnCurso() !== null || viajeAlServicioEnCurso()
       const enCuadro =
         viajando ||
         escenaEnCuadro(
@@ -211,6 +213,7 @@ export function useEscenaAtadaAlScroll(
     const desuscribir = subscribeIntroStage(pedir)
     // [VIAJES] Al empezar y al terminar un viaje se vuelve a leer: la escena se enciende o se suspende en el acto.
     const desuscribirDelViaje = suscribirAlViaje(pedir)
+    const desuscribirDelViajeAlServicio = suscribirAlViajeAlServicio(pedir)
     // [B12a.1] Cuando cambia el preset de la página y cuando la escena dibuja su primer cuadro, otra lectura.
     const desuscribirDelPreset = suscribirseAlPreset(pedir)
     const desuscribirDeLaCarga = suscribirALaCarga(pedir)
@@ -223,6 +226,7 @@ export function useEscenaAtadaAlScroll(
       document.removeEventListener('visibilitychange', pedir)
       desuscribir()
       desuscribirDelViaje()
+      desuscribirDelViajeAlServicio()
       desuscribirDelPreset()
       desuscribirDeLaCarga()
       desuscribirDeLaTapa()

@@ -45,6 +45,12 @@
 - El título de una página va con la legibilidad `peso` por defecto (`LEGIBILIDAD_POR_DEFECTO`, §3); `?legibilidad=tamano`, con la bandera.
 - La escena compila con `compilarConCuidado` (`esc/gpu/compilar.ts`), no con `compileAsync`: una variante que compile algo, que use esa.
 
+**Después (2026-10-22, B12b nocturno; `docs/rediseno/SPRINT-B12B-NOCTURNO.md`):** el viaje desde el CTA de un servicio del home (§5, «El
+viaje»). Ninguna firma cambia: `EnlaceDeRuta` sigue igual. Llegan `pedirElViaje`, `ViajeDelVelo`, `PedidoDelVelo.viaje` y `hayVelo`
+(`_lib/veloDeNavegacion.ts`), y `esc/ruta/viajeDelServicio.ts`. El preset de la página base pasó a `pagina-base/preset.ts` (lo lee el viaje).
+**Para servicios (P-S):** cada página de servicio exporta su preset de un módulo SIN JSX (como `pagina-base/preset.ts`), para que el home
+lo apile antes de navegar (`PRESET_DEL_DESTINO`, `_secciones/servicios/escenario/datos.ts`); tiene que ser el mismo objeto que declara la página.
+
 ---
 
 ## 1. El preset de ruta (D1: lo declara la página)
@@ -287,6 +293,37 @@ export function cuandoElVeloQuede(f: () => void): () => void
   - **Hacia el home, devuelve la posición de ESA entrada del historial** (el scroll, la noche y el día del final): con dos entradas del home, cada una vuelve a la suya. No hace falta nada de la página.
   - **Del bfcache (P-H35):** una página que vuelve con `pageshow` `persisted` repone la variante a su avance y deja el velo quieto.
 - Los CTA que abren el contacto siguen siendo `data-abre-contacto="panel"` con su `data-precarga`, sin cambios.
+
+**El viaje (B12b, 2026-10-22): del CTA de un servicio del home a su página.**
+
+```ts
+// _lib/veloDeNavegacion.ts
+export type ViajeDelVelo = () => Promise<'escena' | 'banda'>       // cubre con la escena; 'banda' si no pudo (el velo cubre como siempre)
+export interface PedidoDelVelo { readonly cubierto: () => void; readonly viaje: ViajeDelVelo | null }
+export function pedirElViaje(v: ViajeDelVelo): void                 // para el PRÓXIMO cubrirConElVelo, en el mismo clic (se olvida al terminar la tarea)
+export const hayVelo: () => boolean
+
+// esc/ruta/viajeDelServicio.ts — puro: el reloj del viaje (lo leen el rig, la luz de la intro y la atadura)
+export const TIEMPOS_DEL_VIAJE, POSE_DE_PARTIDA, SONIDOS_DEL_VIAJE
+export function camaraDelViaje(ahora: number): number    // 0 la partida → 1 la composición; fuera de un viaje, 1
+export function nocheDelViaje(ahora: number): number     // 0 → 1; fuera de un viaje, 1 (la noche del preset, exacta)
+
+// _componentes/navegacion/viajeAlServicio.ts — el DOM del viaje
+export function pedirElViajeAlServicio(e: MouseEvent<HTMLAnchorElement>, destino: PresetDeLaEscena): void   // el onClick del CTA
+```
+
+- **Quién lo usa:** sólo el CTA de cada servicio de la sección Servicios del home (`EnlaceDelServicio`: los paneles, las pantallas sueltas y el
+  recomendador), con `onClick={(e) => pedirElViajeAlServicio(e, PRESET_DEL_DESTINO[id])}`. `EnlaceDeRuta` corre el `onClick` antes de cubrir:
+  el pedido viaja con su `cubrirConElVelo()`. Cualquier otra navegación sigue con la banda.
+- **Qué hace:** apila en el home el preset de la página de destino (la escena se entera de adónde va; la ranura monta la variante tapada),
+  despierta la escena detrás del papel (con la cámara en `POSE_DE_PARTIDA`, de día) y, cuando dibujó con la variante del destino: suena la
+  salida, el papel (lo que se ve del `<main>` del home) se levanta, los nanobots se apagan, anochece y la cámara baja a la composición
+  inicial de la página (con el logo en su hueco: `HuecoDelViaje` lo mide en el home con el mismo marco de la intro). Llegada la cámara, el
+  velo navega (sin banda: `data-modo="viaje"`); la página nueva entra transparente y con su scroll (`_chrome/velo/paginaTapada.ts`) y, con
+  su primer cuadro estable, aparece encima de la escena con el sonido de la llegada.
+- **Cuándo no:** con menos movimiento, sin la escena, fuera del home, con `?viaje=velo`, o si la escena no dibujó en 1,5 s: la banda.
+- **Para una página de servicio:** su preset en un módulo sin JSX, el mismo objeto en la página y en `PRESET_DEL_DESTINO` (P-S). Su variante
+  dibuja en la composición desde el avance 0 (T0): el viaje la monta tapada y la muestra al levantar el papel.
 
 ## 6. Las historias (P-H31, 2026-10-20)
 

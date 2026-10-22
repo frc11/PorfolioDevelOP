@@ -2,6 +2,7 @@
 
 import { useRef } from 'react'
 
+import { HuecoDelViaje } from '../../_componentes/navegacion/HuecoDelViaje'
 import { seccionDe, type PropsDeSeccion } from '../_contrato/forma'
 import { useCoreografiaActiva, useMovimientoEnTodoAncho } from '../_contrato/coreografia'
 import { Seccion } from '../_contrato/Seccion'
@@ -56,6 +57,8 @@ export function Servicios({ seccion }: PropsDeSeccion): React.JSX.Element {
       >
         <RamaDeServicios />
         <Recomendador />
+        {/* [B12b] Durante el viaje de un CTA a su página: el hueco del logo de la página de destino, medido acá (invisible). */}
+        <HuecoDelViaje />
       </div>
     </Seccion>
   )
