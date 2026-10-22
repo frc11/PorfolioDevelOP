@@ -28,10 +28,10 @@ import { GESTOS_POR_TIEMPO, USOS_DECLARADOS } from '../_contrato/motion'
 import { marcar } from '../_invariantes/render'
 import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { GRUPO_POR_DEFECTO, PALABRA_POR_DEFECTO, palabraEnElTelefono, posicionDelGrupo } from './banderas'
-import { CANDADO_INICIAL, siguienteCandado, type EstadoDelCandado, type EventoDelCandado } from './candado'
+import { CANDADO_INICIAL, laRuedaEsDeAdentro, siguienteCandado, type EstadoDelCandado, type EventoDelCandado } from './candado'
 import { CARTEL, CTA, ID, NEWSLETTER, TARJETAS, TITULO, textoDe } from './contenido'
 import { CONTENIDO_PROHIBIDO_DE_CONTROL, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, textoAccesible } from './deteccion'
-import { ALFA_DE_LA_PALABRA, CLASE_DE_LA_PALABRA, CLASE_DE_LA_POSICION, LADOS, MODULO, PANTALLA_DEL_MODULO, RITMO, TIPO, altoDelModulo, altoNaturalEnEscritorio, altoViejoAngosto, escalaDeLaDemo, tamanoDelTitulo } from './geometria'
+import { ALFA_DE_LA_PALABRA, CLASE_DE_LA_PALABRA, CLASE_DE_LA_POSICION, LADOS, MODULO, PANTALLA_DEL_MODULO, RITMO, TIPO, altoDelModulo, altoNaturalEnEscritorio, altoViejoAngosto, ALTOS_VIEJOS_MEDIDOS, escalaDeLaDemo, tamanoDelTitulo } from './geometria'
 import { FIN_DEL_PINTADO, avanceDeLaPalabra, avanceDelPintado } from './pintado'
 import { tramoDelPanel } from './tramo'
 import { TuPanel } from './TuPanel'
@@ -211,13 +211,22 @@ afirmarIgual(correr(siguienteCandado, ['rueda', 'clic', 'rueda']), { libre: true
 afirmarIgual(correr(siguienteCandado, ['clic', 'salida']), CANDADO_INICIAL, '  salir lo vuelve a bloquear')
 afirmarIgual(correr(siguienteCandado, ['arrastre']), { libre: false, cartel: 'tactil' }, '  en el teléfono, el dedo: «Tocá…»; un toque es el mismo clic')
 afirmarIgual(correr(siguienteCandado, ['rueda', 'olvido']), CANDADO_INICIAL, '  y el cartel se va solo')
+// [B6 navegador] La página que se mueve saca el módulo de abajo del ratón (un `pointerleave`): el cartel no se corta, se va con su tiempo.
+afirmarIgual(correr(siguienteCandado, ['rueda', 'salida']), { libre: false, cartel: 'raton' }, '  bloqueado, salir no corta el cartel (la página que se mueve saca el módulo de abajo del ratón): se va solo, con su fundido')
+controlPositivo('  el detector VE el cartel cortado por la salida (lo que midió el banco: el cartel no se veía)', ((e: EstadoDelCandado, ev: EventoDelCandado) => (ev.tipo === 'salida' ? CANDADO_INICIAL : siguienteCandado(e, ev))) as typeof siguienteCandado, (f: typeof siguienteCandado) => correr(f, ['rueda', 'salida']).cartel === 'raton')
+// [B6 navegador] Abierto, la rueda es del módulo: el contenido la absorbe si puede; si no, se frena (la página no se mueve).
+const recorrido = (scrollTop: number): { scrollTop: number; clientHeight: number; scrollHeight: number } => ({ scrollTop, clientHeight: 400, scrollHeight: 454 })
+const absorbeBien = (f: typeof laRuedaEsDeAdentro): boolean => f(recorrido(0), 100, true) && !f(recorrido(54), 100, true) && f(recorrido(54), -100, true) && !f(recorrido(0), -100, true) && !f(recorrido(0), 100, false) && !f(null, 100, true) && !f({ scrollTop: 0, clientHeight: 400, scrollHeight: 400 }, 100, true)
+afirmar(absorbeBien(laRuedaEsDeAdentro), '  abierto, el contenido absorbe la rueda mientras tiene recorrido hacia donde va; en su borde, sin recorrido o fuera de él, no (y el módulo la frena)')
+controlPositivo('  el detector VE la rueda de antes, que en el borde pasaba a la página', ((c: { scrollTop: number; clientHeight: number; scrollHeight: number } | null, d: number, a: boolean) => a && c !== null) as typeof laRuedaEsDeAdentro, absorbeBien)
 const conCartel = siguienteCandado(CANDADO_INICIAL, { tipo: 'rueda' })
 afirmar(siguienteCandado(conCartel, { tipo: 'rueda' }) === conCartel, '  cien ruedas de un gesto son el MISMO estado: nada se vuelve a dibujar')
 controlPositivo('  el detector VE un candado que se abre con la rueda', ((e: EstadoDelCandado, ev: EventoDelCandado) => (ev.tipo === 'rueda' ? { libre: true, cartel: null } : siguienteCandado(e, ev))) as typeof siguienteCandado, (f: typeof siguienteCandado) => !correr(f, ['rueda']).libre)
 afirmarIgual([CARTEL.raton, CARTEL.tactil], ['Hacé clic para scrollear acá', 'Tocá para scrollear acá'], 'el cartel dice lo que pidió Valentino (y su par del dedo)')
 const TARJETA = fuenteDe('Tarjeta.tsx')
-const conectado = (t: string): boolean => /onWheel=\{\(\) => avisar\('rueda'\)\}/.test(t) && /onTouchMove=\{\(\) => avisar\('arrastre'\)\}/.test(t) && /onClick=\{\(\) => cambiar\(\{ tipo: 'clic' \}\)\}/.test(t) && /if \(e\.pointerType !== 'touch'\) cambiar\(\{ tipo: 'salida' \}\)/.test(t) && /<RuedaDelModulo value=\{candado\.libre\}>/.test(t) && /document\.addEventListener\('pointerdown', afuera, true\)/.test(t)
-afirmar(conectado(TARJETA), '  el módulo conecta la rueda, el dedo, el clic, la salida del ratón y el toque de afuera, y le pasa el candado a la maqueta')
+const conectado = (t: string): boolean => /onWheel=\{\(\) => avisar\('rueda'\)\}/.test(t) && /onTouchMove=\{\(\) => avisar\('arrastre'\)\}/.test(t) && /onClick=\{\(\) => cambiar\(\{ tipo: 'clic' \}\)\}/.test(t) && /if \(e\.pointerType !== 'touch'\) cambiar\(\{ tipo: 'salida' \}\)/.test(t) && /<RuedaDelModulo value=\{candado\.libre\}>/.test(t) && /document\.addEventListener\('pointerdown', afuera, true\)/.test(t) && /data-lenis-prevent=\{candado\.libre \? '' : undefined\}/.test(t) && /el\.addEventListener\('wheel', rueda, \{ passive: false \}\)/.test(t) && /if \(!laRuedaEsDeAdentro\(contenido, e\.deltaY, adentro\)\) e\.preventDefault\(\)/.test(t) && /overscroll-contain/.test(t)
+afirmar(conectado(TARJETA), '  el módulo conecta la rueda, el dedo, el clic, la salida del ratón y el toque de afuera, y le pasa el candado a la maqueta; abierto, Lenis no toma la rueda (`data-lenis-prevent` en el marco), el módulo la frena donde el contenido no la absorbe y el dedo no arrastra la página desde el borde')
+controlPositivo('  el detector VE el módulo abierto que dejaba pasar la rueda a la página (lo que midió el banco)', TARJETA.replace("data-lenis-prevent={candado.libre ? '' : undefined}", ''), conectado)
 controlPositivo('  el detector VE un módulo sin la salida del ratón', TARJETA.replace("if (e.pointerType !== 'touch') cambiar({ tipo: 'salida' })", 'void e'), conectado)
 const RUEDA = delV3('_panel-vivo/rueda.ts')
 const MARCO = delV3('_panel-vivo/MarcoDelPanel.tsx')
@@ -251,6 +260,10 @@ titulo('11 · REGLA DE ALTURAS: abajo de 1024 la escena ve el alto de antes')
 
 const a390 = altoViejoAngosto(326) / 844
 afirmar(Math.abs(a390 - 5.8) / 5.8 < 0.05, `el modelo del alto viejo a 390 × 844 da ${a390.toFixed(2)} pantallas contra las ~5,8 medidas en NOCTURNO FINAL C3 (a menos del 5 %)`)
+// [NOCTURNO] Y contra la sección vieja medida en el navegador en cuatro anchos: a 25 px o menos (la deriva de lo que viene después).
+const desvios = ALTOS_VIEJOS_MEDIDOS.map(([util, medido]) => altoViejoAngosto(util) - medido)
+afirmar(desvios.every((d) => Math.abs(d) <= 25), `el modelo contra lo medido en el navegador (390, 768, 820 y 1023): ${desvios.map((d) => d.toFixed(0)).join(', ')} px`)
+controlPositivo('  el modelo sin calibrar (el de B6) se pasa', ALTOS_VIEJOS_MEDIDOS, (m: readonly (readonly [number, number])[]) => m.every(([util, medido]) => Math.abs(altoViejoAngosto(util) + (util < 600 ? 117 : 50) - medido) <= 25))
 const panel = { isConnected: true, getBoundingClientRect: () => ({ top: 20000 }) } as unknown as Element
 const nuevo = 3400
 const tramo = tramoDelPanel(panel, nuevo, 326, 844)

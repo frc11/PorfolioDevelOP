@@ -176,8 +176,8 @@ export const CLASE_DE_ENCUADRE: Readonly<Record<EncuadreDeCaptura, string>> = {
  * (`git show 492bd7d6:…/tu-panel/`): el relleno de arriba y de abajo y el hueco entre la galería y el remate (`--spacing-20`
  * tres veces), el encabezado («Tu Panel» en `titulo-xl` y su descripción), las ocho features en columna (el marco a 4:5 del
  * ancho, su título y su rótulo, con 70 px entre una y otra) y el remate («Y más…» y el newsletter). Es una estimación con
- * las cajas de texto modeladas (no medidas): a 390 × 844 da 5,94 pantallas contra las ~5,8 que midió NOCTURNO FINAL C3.
- * El orquestador la cambia por la medida del navegador si hace falta.
+ * las cajas de texto modeladas: sin calibrar daba 5,94 pantallas a 390 × 844; con el ajuste medido (`AJUSTE_MEDIDO`, abajo), 5,80.
+ * Lo calibró el orquestador contra la sección vieja medida en el navegador en cuatro anchos.
  */
 export function altoViejoAngosto(anchoUtil: number): number {
   const telefono = anchoUtil < 600
@@ -185,5 +185,13 @@ export function altoViejoAngosto(anchoUtil: number): number {
   const tituloDeFeature = telefono ? 74 : 59
   const remate = telefono ? 250 : 242
   const features = 8 * (1.25 * anchoUtil + tituloDeFeature) + 7 * 70
-  return 3 * 80 + encabezado + 48 + features + remate
+  return 3 * 80 + encabezado + 48 + features + remate + (telefono ? AJUSTE_MEDIDO.telefono : AJUSTE_MEDIDO.tablet)
 }
+
+/**
+ * [NOCTURNO] El modelo, calibrado contra la sección vieja MEDIDA en el navegador (la integración antes de B6, el dev): 4893 px a
+ * 390 × 844 (ancho útil 326), 8584 a 768 × 1024 (704), 9111 a 820 × 1180 (756) y 11169 a 1023 × 768 (959). Sin el ajuste daba
+ * de más 117, 64, 57 y 29 px; con él, 0, 14, 7 y −21.
+ */
+export const ALTOS_VIEJOS_MEDIDOS: readonly (readonly [number, number])[] = [[326, 4893], [704, 8584], [756, 9111], [959, 11169]]
+const AJUSTE_MEDIDO = { telefono: -117, tablet: -50 } as const
