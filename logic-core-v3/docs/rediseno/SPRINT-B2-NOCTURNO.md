@@ -111,6 +111,29 @@ Rama `nocturno/2026-10-22-b2`. Tarea: `docs/cola/2026-10-22/60-B2B3-resenas-cta.
   bajan, el gatillo, el momento del enganche de canto, el origen del cartel, sin los valores) y §3 a la spec nueva; s53–s62 (las suites del
   CTA) sin fallas.
 
+### B2 · después de verla (el orquestador la integró y la revirtió: «las placas salen vacías» y «muy grandes»)
+
+- **Qué era, en el código.**
+  1. **El texto llegaba tarde, por diseño mal elegido.** A ~38 % del alto de la sección el avance del tramo es ~0,42 y la entrada del aro
+     ~0,68: el texto de las placas recién aparecía desde 0,82 (`ARO.textoDesde`) y las que venían por la recta de adelante no llevaban texto
+     nunca (`POSE.enElAro`). Ahí se ven placas de papel vacías. Ahora el texto entra desde 0,45 y está entero en 0,75 (a 0,68, 0,86), y la que
+     viene por la recta de adelante también se lee (la de atrás, de espaldas, no).
+  2. **El banco no podía ver el texto.** `aro-legibilidad.ts` informaba el percentil 5 de los píxeles que cambian: son los bordes
+     antialiaseados de una letra fina (cubiertos un 6 a 10 %), que dan ~1,2:1 aunque el texto esté entero; su control al 30 % daba 1,13 y no
+     separaba. Ahora el criterio es el NÚCLEO (el percentil 90, los píxeles enteros de la letra), informa también la mediana, y agrega el
+     diagnóstico de la de frente: el color de la cita y su fondo, la opacidad efectiva (el producto por todos los ancestros), la visibilidad,
+     el cuerpo, el texto, su caja, su transformada y si lo que hay en su centro es ella.
+  3. **Las placas, grandes.** Con radio 6,4 y placas de 3,2 × 2,15, la de frente medía un tercio del ancho y tapaba un tercio de la caja
+     del logo; en la entrada, dos de la recta de adelante juntas cubrían ~74 % del ancho. Ahora radio 5,6 y placas de 2,2 × 1,5 (la letra
+     de la cara, en proporción un poco más grande): la de frente mide 21 % del ancho y tapa 14 % de la caja del logo.
+- **Cómo se comprobó, sin navegador (s83 §13, con controles):** la sección va arriba del lienzo (el panel en z-10, el lienzo fijo en z-0); la
+  capa de las tarjetas es hija directa de la caja clavada, después de la levantada, con z 1 y sin opacidad propia; cada tarjeta lleva la
+  cara de papel con la tinta en su clase y su cita escrita (17,6:1 y 7,2:1 con los tokens); con la cámara de los valores a 1440 × 900, lo
+  que la escena le escribe a la de frente es visible, opacidad 1, y su caja cae en el frente de su placa a menos de 2,5 px en las cuatro
+  esquinas, adentro del cuadro; a mitad de la entrada (0,68) ya se lee (0,86); y el encuadre calmo.
+- **Si en el navegador siguieran vacías con el aro armado** (avance ≥ 0,5), el diagnóstico del banco dice cuál de las otras causas es
+  (debajo de algo, opacidad en un ancestro, color, fuera del cuadro): no se encontró ninguna en el código.
+
 ## Qué mirar (el orquestador, en el navegador)
 
 Ver el reporte de la noche (los dos commits de B2 y el de B3): la lista numerada con URL, ancho, acción y lo que debería verse, y los bancos.

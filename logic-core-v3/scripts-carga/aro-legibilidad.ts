@@ -5,8 +5,10 @@
  *
  * LEGIBILIDAD (por defecto): en la lectura (avance 0,65), con el aro frenado por el banco (el mouse sobre la placa del frente, que además
  * la señala), cada tarjeta que se ve (`[data-pieza="resena-del-aro"]` visible): su caja en dos capturas, como se ve y con su texto
- * transparente; en los píxeles que cambian, la razón de contraste del texto contra lo de abajo (WCAG; el percentil 5). Criterio: ≥ 4,5:1 en
- * las de adelante (las que se leen enteras). Control: con el texto al 30 % de opacidad la misma cuenta da < 4,5.
+ * transparente; en los píxeles que cambian, la razón de contraste del texto contra lo de abajo (WCAG). Se informan el percentil 5, la mediana y
+ * el NÚCLEO (percentil 90: los píxeles enteros de la letra). [B2, después de verla] El criterio va sobre el núcleo: el percentil 5 son los
+ * bordes antialiaseados de una letra fina (cubiertos un 6 a 10 %) y da ~1,2:1 aunque el texto esté entero (con el 30 % daba 1,13: no
+ * separaba). Criterio: núcleo ≥ 4,5:1 en las de adelante. Control: con el texto al 30 % de opacidad el núcleo da < 4,5.
  *
  * INTERACCIÓN: el mouse entra a la placa del frente → `__aroDelBanco().senalada` es su índice, la velocidad cae a ~0 en 1 s y la pastilla
  * «Ver trabajo →» llega a opacidad 1; al salir, la velocidad vuelve. Clic → el hash es `#portfolio-…` y la página quedó en el Portfolio
@@ -35,7 +37,14 @@ const lineal = (c: number): number => {
 const luz = (d: Buffer, i: number): number => 0.2126 * lineal(d[i]) + 0.7152 * lineal(d[i + 1]) + 0.0722 * lineal(d[i + 2])
 const razon = (a: number, b: number): number => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
 
-async function contrasteDe(p: Page, indice: number, opacidadDelTexto: number | null): Promise<number | null> {
+interface Contraste {
+  readonly p5: number
+  readonly mediana: number
+  readonly nucleo: number
+  readonly pixeles: number
+}
+
+async function contrasteDe(p: Page, indice: number, opacidadDelTexto: number | null): Promise<Contraste | null> {
   const caja = (await p.evaluate(`(() => { const r = document.querySelectorAll('[data-pieza="resena-del-aro"]')[${String(indice)}].getBoundingClientRect(); return { x: Math.max(0, r.left), y: Math.max(0, r.top), width: Math.min(innerWidth, r.right) - Math.max(0, r.left), height: Math.min(innerHeight, r.bottom) - Math.max(0, r.top) } })()`)) as { x: number; y: number; width: number; height: number }
   if (caja.width < 4 || caja.height < 4) return null
   const marcar = (estilo: string): Promise<unknown> => p.evaluate(`(() => { let s = document.getElementById('aro-banco'); if (!s) { s = document.createElement('style'); s.id = 'aro-banco'; document.head.append(s) } s.textContent = ${JSON.stringify(estilo)} })()`)
@@ -49,7 +58,8 @@ async function contrasteDe(p: Page, indice: number, opacidadDelTexto: number | n
   for (let i = 0; i < Math.min(con.length, sin.length); i += 4) if (Math.abs(con[i] - sin[i]) + Math.abs(con[i + 1] - sin[i + 1]) + Math.abs(con[i + 2] - sin[i + 2]) > 40) razones.push(razon(luz(con, i), luz(sin, i)))
   if (razones.length < 20) return null
   razones.sort((a, b) => a - b)
-  return Math.round(razones[Math.floor(razones.length * 0.05)] * 100) / 100
+  const en = (q: number): number => Math.round(razones[Math.min(razones.length - 1, Math.floor(razones.length * q))] * 100) / 100
+  return { p5: en(0.05), mediana: en(0.5), nucleo: en(0.9), pixeles: razones.length }
 }
 
 async function main(): Promise<void> {
@@ -89,8 +99,11 @@ async function main(): Promise<void> {
     const medidas = []
     for (const [i, o] of visibles) medidas.push({ placa: i, opacidad: o, contraste: await contrasteDe(p, i, null) })
     const control = await contrasteDe(p, frente.indice, 0.3)
+    // [B2, después de verla] El diagnóstico de la de frente: el color de la cita y su fondo, la opacidad efectiva (el producto por todos los
+    // ancestros), la visibilidad, el cuerpo, el texto, su caja y si lo que hay en su centro es ella (nada del DOM la tapa).
+    const diagnostico = await p.evaluate(`(() => { const a = document.querySelectorAll('[data-pieza="resena-del-aro"]')[${String(frente.indice)}]; const cita = a.querySelector('span > span'); let o = 1; for (let e = cita; e; e = e.parentElement) o *= Number(getComputedStyle(e).opacity); const r = a.getBoundingClientRect(); const c = getComputedStyle(cita); const arriba = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { color: c.color, fondo: getComputedStyle(cita.parentElement).backgroundColor, opacidadEfectiva: Math.round(o * 1000) / 1000, visibilidad: c.visibility, cuerpo: c.fontSize, texto: (cita.textContent || '').slice(0, 40), caja: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)], encima: !!arriba && a.contains(arriba), transform: a.style.transform.slice(0, 60) } })()`)
     await p.screenshot({ path: path.join(SALIDA, `aro-${String(ANCHO)}.png`) })
-    console.log(JSON.stringify({ modo: MODO, cuadro: `${String(ANCHO)}x${String(ALTO)}`, enHover, pastilla, medidas, control: control !== null && control < 4.5 ? `ok (${String(control)}:1 con el texto al 30 %)` : `FALLA: el control dio ${String(control)}` }))
+    console.log(JSON.stringify({ modo: MODO, cuadro: `${String(ANCHO)}x${String(ALTO)}`, enHover, pastilla, diagnostico, medidas, criterio: medidas.every((x) => x.opacidad < 0.99 || (x.contraste !== null && x.contraste.nucleo >= 4.5)) ? 'ok: las de adelante, núcleo >= 4,5' : 'FALLA: una de adelante con el núcleo < 4,5 (o sin texto)', control: control !== null && control.nucleo < 4.5 ? `ok (núcleo ${String(control.nucleo)}:1 con el texto al 30 %)` : `FALLA: el control dio ${JSON.stringify(control)}` }))
   }
   await ctx.close()
 }

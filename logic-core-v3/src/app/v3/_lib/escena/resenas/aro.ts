@@ -16,12 +16,16 @@
 export const ARO = {
   /** Las placas físicas: en la nuca, cada una cambia a la reseña siguiente. */
   placas: 10,
-  /** Medidas en el mundo para un cuadro de 1,6 (1440 × 900); se escalan con la proporción (`escalaDelAro`). */
-  radio: 6.4,
-  ancho: 3.2,
-  alto: 2.15,
-  espesor: 0.16,
-  esquina: 0.22,
+  /**
+   * Medidas en el mundo para un cuadro de 1,6 (1440 × 900); se escalan con la proporción (`escalaDelAro`). [B2, después de verla] Más
+   * chicas y más cerca del logo (eran radio 6,4 y placas de 3,2 × 2,15: la de frente medía un tercio del ancho y tapaba un tercio del
+   * logo): con la cámara de los valores la de frente mide ~21 % del ancho y tapa ~14 % de la caja del logo (s83 §13).
+   */
+  radio: 5.6,
+  ancho: 2.2,
+  alto: 1.5,
+  espesor: 0.12,
+  esquina: 0.16,
   /** Lo que la placa queda por encima del pie del logo (mundo): el pie del aro, a la altura del pie del logo. */
   sobreElPie: 0,
   /** Una vuelta entera, en segundos: velocidad de lectura (cada placa pasa ~14 s por el frente). */
@@ -36,8 +40,13 @@ export const ARO = {
   texto: { lleno: 40, nada: 62 },
   /** La niebla de la sala: la placa se mete desde `desde` grados y desde `hasta` no se dibuja. */
   niebla: { desde: 95, hasta: 150 },
-  /** El texto aparece con el aro casi armado (fracción de la entrada). */
-  textoDesde: 0.82,
+  /**
+   * El texto aparece con la entrada (desde `textoDesde`, entero `textoEn` después): las placas que pasan por el frente ya se leen mientras
+   * el aro termina de armarse. [B2, después de verla] Era desde 0,82: a mitad de la entrada (un 38 % del alto de la sección) las placas
+   * pasaban vacías.
+   */
+  textoDesde: 0.45,
+  textoEn: 0.3,
   /** Lo que un px de arrastre gira el aro (rad por px de un cuadro de 1440 de ancho). */
   arrastrePorPx: 0.0042,
 } as const
@@ -147,7 +156,7 @@ export function nieblaDeLaPlaca(angulo: number): number {
 }
 
 /** El texto con la entrada: aparece con el aro casi armado. */
-export const textoConLaEntrada = (e: number): number => suave((e - ARO.textoDesde) / (1 - ARO.textoDesde))
+export const textoConLaEntrada = (e: number): number => suave((e - ARO.textoDesde) / ARO.textoEn)
 
 /**
  * La reseña que muestra la placa `i` con el giro `giro`: cambia a la siguiente (de a `placas`) cada vez que la placa cruza la NUCA del aro

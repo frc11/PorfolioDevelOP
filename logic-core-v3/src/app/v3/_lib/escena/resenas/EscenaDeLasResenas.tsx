@@ -144,7 +144,8 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
     enLaNiebla(p, enLaNieblaDeLaSala, niebla)
     p.malla.visible = conPlacas && enLaNieblaDeLaSala < 0.995
     ponerLaResena(i, resenaDeLaPlaca(i, s.giro.angulo, RESENAS.length))
-    const texto = conPlacas && POSE.enElAro ? textoDeLaPlaca(POSE.angulo) * conTexto : 0
+    // [B2, después de verla] También la que todavía viene por la recta de adelante (mira a la cámara): la de atrás, de espaldas, no.
+    const texto = conPlacas ? textoDeLaPlaca(POSE.angulo) * conTexto : 0
     llevarLaTarjeta(TARJETAS_DEL_ARO[i], s.tarjetas[i], CENTRO.set(POSE.x, y, POSE.z), POSE.mira, medidas, texto, camara, cuadro, ancho)
   }
 }
