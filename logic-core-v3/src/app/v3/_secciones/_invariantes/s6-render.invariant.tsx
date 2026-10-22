@@ -185,7 +185,11 @@ const servicios = valoresDeAtributo(ANIMADO, 'data-servicio')
  *  comprueba además que las tres piezas recorren los servicios en el MISMO
  *  orden, que es lo que un número solo no diría. */
 const TERNA = [...IDS_DE_SERVICIO]
-afirmarIgual(servicios, [...TERNA, ...TERNA, ...TERNA], 'con coreografía hay NUEVE `[data-servicio]`: el rodillo, la tira y la torta, cada uno con su terna en orden')
+// [B4] REEMPLAZADA POR LA SPEC: la sección se rehízo (CIERRE-HOME-V3, B4) y el rodillo, la tira y la torta se fueron con la de antes.
+// Con coreografía hay UN panel por servicio (el escenario entero cada uno: cierran uno sobre otro), con su terna en orden.
+afirmarIgual(servicios, TERNA, 'con coreografía hay TRES `[data-servicio]`: un panel por servicio, en el orden de la terna')
+afirmar(/data-pieza="panel-de-servicio" data-servicio="web"/.test(ANIMADO), '  y son los paneles del escenario (cada uno ocupa el escenario entero: nunca dos acentos posados en el mismo cuadro)')
+controlPositivo('  el detector ve la terna repetida (las tres piezas de antes)', [...TERNA, ...TERNA], (v: readonly string[]) => v.join() === TERNA.join())
 afirmarIgual(srOnlyQueTapanContenido(ANIMADO), [], '  y ningún `sr-only` envuelve contenido: la puerta por la que volvía el modelo de capas queda cerrada')
 controlPositivo('el detector vería un `sr-only` tapando un bloque de servicio', '<div class="sr-only"><div data-servicio="web"><p data-canal="parrafo">x</p></div></div>', (h: string) => srOnlyQueTapanContenido(h).length === 0)
 const serviciosQuietos = valoresDeAtributo(QUIETO, 'data-servicio')

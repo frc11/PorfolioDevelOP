@@ -264,12 +264,14 @@ for (const id of IDS_DE_SERVICIO) {
  * dos agujeros a la vista y fuera de la lista que se le manda a Franco.
  */
 export const PEDIDO: readonly EntradaDePedido[] = [
+  // [B4] El caso de referencia se fue con la sección de antes (la nueva no lo muestra); lo que falta ahora son las preguntas del
+  // recomendador (`recomendador/preguntas.ts`, con la llave del contenido inventado).
   {
-    ruta: 'CASO_DE_REFERENCIA',
-    clase: 'testimonio',
-    marcador: '[TESTIMONIO]',
-    quienLoTrae: 'franco',
-    que: 'El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.',
-    formato: 'Dos o tres renglones, con el nombre del cliente. Texto plano.',
+    ruta: 'PREGUNTAS_DEL_RECOMENDADOR',
+    clase: 'prosa',
+    marcador: '[TEXTO]',
+    quienLoTrae: 'valentino',
+    que: 'Las tres preguntas del recomendador sobre los problemas del cliente, y sus tres respuestas (una por servicio).',
+    formato: 'Una pregunta corta y tres respuestas de una línea cada una, en voseo. Texto plano.',
   },
 ]
