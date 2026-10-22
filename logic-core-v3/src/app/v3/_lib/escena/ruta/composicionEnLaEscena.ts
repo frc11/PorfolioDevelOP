@@ -5,6 +5,7 @@ import type { MutableChoreoPose } from '../choreographyTypes'
 import { armarLaCamara, cajaProyectada } from '../poseDelPortfolio'
 
 import { COMPOSICION_EN_LA_ESCENA, type HuecoDeLaIntro } from './composicion'
+import { camaraDelViaje, mezclarConLaPartida } from './viajeDelServicio'
 
 // El rig importa de acá lo de la intro en una sola línea (está en su techo de líneas: s8-montaje).
 export { AVANCE_DE_LA_INTRO, luzDeLaPagina, pistaDeLaPagina } from './pistaDeLaIntro'
@@ -59,6 +60,8 @@ export function encuadreDelHueco(pose: MutableChoreoPose, hueco: HuecoDeLaIntro,
 /** La pose de la intro en su avance y, con el hueco medido, su encuadre: lo llama el rig en su cuadro (una página con pista). */
 export function poseDeLaIntro(track: ChoreoTrack, avance: number, objetivo: MutableChoreoPose, aspecto: number, fov: number, logoW: number, logoH: number): void {
   sampleTrack(track, avance, objetivo)
+  // [B12b] El viaje desde el CTA de un servicio: la cámara baja de la partida a la composición (fuera de un viaje, nada).
+  mezclarConLaPartida(objetivo, camaraDelViaje(performance.now()))
   const hueco = COMPOSICION_EN_LA_ESCENA.hueco
   if (hueco === null || !(logoW > 0) || !(logoH > 0)) return
   const e = encuadreDelHueco(objetivo, hueco, aspecto, fov, logoW, logoH)

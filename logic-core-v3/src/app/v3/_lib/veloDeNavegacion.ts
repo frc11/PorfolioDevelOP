@@ -11,20 +11,46 @@
 /** El home (`/v3`; con D8, `/`). */
 export const RUTA_DEL_HOME = '/v3'
 
-/** Lo que pide quien navega: `cubierto` se llama con el cuadro cubierto entero. */
+/**
+ * [B12b] EL VIAJE: lo que cubre el cuadro con la ESCENA en vez de la banda (el papel se levanta y la cámara llega a la composición de la
+ * página: `_componentes/navegacion/viajeAlServicio.ts`). Resuelve `escena` con el cuadro ya cubierto por la escena, o `banda` si no
+ * pudo (sin escena a tiempo): entonces el velo cubre con la banda de siempre.
+ */
+export type ViajeDelVelo = () => Promise<'escena' | 'banda'>
+
+/** Lo que pide quien navega: `cubierto` se llama con el cuadro cubierto entero; [B12b] `viaje`, si cubre la escena en vez de la banda. */
 export interface PedidoDelVelo {
   readonly cubierto: () => void
+  readonly viaje: ViajeDelVelo | null
 }
 
 let atender: ((p: PedidoDelVelo) => void) | null = null
 
-/** Cubre el cuadro con el velo y resuelve cuando está cubierto entero; sin el velo montado, en el acto. Se resuelve siempre. */
-export function cubrirConElVelo(): Promise<void> {
-  return new Promise((resolver) => {
-    if (atender === null) resolver()
-    else atender({ cubierto: resolver })
+/**
+ * [B12b] El viaje pedido para el PRÓXIMO `cubrirConElVelo`, en el mismo clic: lo anota el `onClick` del enlace (que `EnlaceDeRuta` corre
+ * antes de cubrir) y lo consume el pedido. Se olvida al terminar la tarea del clic (una microtarea): nunca queda para otra navegación.
+ */
+let viajePedido: ViajeDelVelo | null = null
+
+export function pedirElViaje(v: ViajeDelVelo): void {
+  viajePedido = v
+  queueMicrotask(() => {
+    if (viajePedido === v) viajePedido = null
   })
 }
+
+/** Cubre el cuadro con el velo y resuelve cuando está cubierto entero; sin el velo montado, en el acto. Se resuelve siempre. */
+export function cubrirConElVelo(): Promise<void> {
+  const viaje = viajePedido
+  viajePedido = null
+  return new Promise((resolver) => {
+    if (atender === null) resolver()
+    else atender({ cubierto: resolver, viaje })
+  })
+}
+
+/** [B12b] ¿El velo está montado? (Sin él nadie repone la ruta: el viaje no se pide.) */
+export const hayVelo = (): boolean => atender !== null
 
 /** Sólo el velo del layout: atiende los pedidos mientras está montado. */
 export function atenderElVelo(a: (p: PedidoDelVelo) => void): () => void {
