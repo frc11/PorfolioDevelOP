@@ -67,8 +67,7 @@ INSTANCIAS_DE_PAGINA = [('125-800', 125, 800), ('125-300', 125, 300), ('75-800',
 
 PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
-     # [NOCTURNO B2] y el título de las reseñas, en el que se da vuelta «Seis razones para elegirnos»: «Lo que dicen» | «nuestros clientes».
-     'textos': ['Portfolio', 'Seis razones', 'para elegirnos', 'El equipo', 'Demos para abrir', 'acá mismo', 'Queremos hacer', 'no', 'Lo que dicen', 'nuestros clientes', 'Nosotros'], 'destino': 'chivo-400-titulos.json'},
+     'textos': ['Portfolio', 'Seis razones', 'para elegirnos', 'El equipo', 'Demos para abrir', 'acá mismo', 'Queremos hacer', 'no', 'Nosotros'], 'destino': 'chivo-400-titulos.json'},
     # [RETOQUE PANEL] T4 · el titular de Quiénes somos: lo marcado va en otro peso (`pesosDelTitular`: fuerte y liviano).
     {'origen': 'chivo-latin.woff2', 'peso': 700, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',
      'textos': ['algo distinto,'], 'destino': 'chivo-700-titulos.json'},

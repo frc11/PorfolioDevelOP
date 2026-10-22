@@ -23,7 +23,6 @@ import { llevarLosAcompanantes } from './acompanantes'
 import { sincronizar, soltarTodos } from './sincronia'
 import { SombraDeLosTitulos } from './SombraDeLosTitulos'
 import { cajaDelLogo, llegadaQueEsquiva, remedir, type Caja } from './esquivaDelLogo'
-import { girarElTitulo } from './giro'
 
 /**
  * [ESCENA 10] T3 · LOS TÍTULOS DE VOLUMEN EN LA ESCENA — [3D Y SONIDO] T1: en el producto, el negro (`titulos=blanco`
@@ -292,8 +291,6 @@ function alCuadro(s: { readonly armados: readonly Armado[]; readonly quieto: boo
       continue
     }
     ubicar(a, d, deColocar)
-    // [NOCTURNO B2] El giro en su lugar (el título de las reseñas, `giro.ts`): de canto o de espaldas, no se dibuja.
-    a.malla.visible = girarElTitulo(a)
     iluminar(a, logo, nivel)
   }
   TITULAR_EN_VIVO.armado = registrosDelTitular === IDS_DEL_TITULAR_DEL_HERO.length

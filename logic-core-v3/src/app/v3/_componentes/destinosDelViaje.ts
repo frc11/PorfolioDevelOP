@@ -8,7 +8,6 @@ import {
 } from '../_secciones/_contrato/bloqueAnimado'
 import { MARCA_COREOGRAFIA_DEL_HOME } from '../_secciones/_contrato/marcaCoreografia'
 import { VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../_secciones/por-que-develop/geometria'
-import { PANTALLAS_DE_LAS_RESENAS } from '../_secciones/por-que-develop/resenas/tramo'
 import { ANCLAS_DEL_PORTFOLIO } from '../_secciones/trabajos/portfolio/anclas'
 import { destinoDelAncla } from './viajeSinLenis'
 
@@ -160,9 +159,7 @@ const NUDOS: Readonly<Record<string, (panel: HTMLElement, v: number) => number |
   'por-que-develop': (panel, v) => {
     const escenario = panel.querySelector<HTMLElement>('[data-pieza="escenario-del-final"]')
     const pin = escenario?.closest<HTMLElement>(SELECTOR_DEL_BLOQUE_ANIMADO) ?? null
-    // [NOCTURNO B2] Con el tramo de las reseñas el pin mide cuatro pantallas más (después del destino): la ventana es del pin de siempre.
-    const resenas = pin?.querySelector('[data-pieza="espaciador-de-las-resenas"]') ? PANTALLAS_DE_LAS_RESENAS * v : 0
-    if (pin !== null) return Math.ceil(topeDe(pin) + VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.hasta * (pin.getBoundingClientRect().height - v - resenas))
+    if (pin !== null) return Math.ceil(topeDe(pin) + VENTANA_DE_LA_SUBIDA_DE_LA_FRASE.hasta * (pin.getBoundingClientRect().height - v))
     return Math.ceil(topeDe(panel))
   },
 }
