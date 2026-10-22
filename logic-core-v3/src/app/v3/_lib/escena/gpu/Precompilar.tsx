@@ -4,7 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useRef, type RefObject } from 'react'
 import type * as THREE from 'three'
 
-import { marcarElPrimerCuadro } from '../../carga'
+import { marcarElPrimerCuadro, marcarLaEscenaPreparada } from '../../carga'
 import { hayBanco } from '../entorno'
 
 import { compilarConCuidado } from './compilar'
@@ -91,6 +91,8 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
         calentar(gl, a.escena, camara)
         gl.setRenderTarget(previo)
       }
+      // [B12c] Compilada y calentada: el preloader del sitio lo espera (el tirón queda debajo de su blanco).
+      marcarLaEscenaPreparada()
       if (hayBanco()) {
         // Con banco, lo que tardó de verdad (esperando a la GPU): en frío es la compilación de Direct3D de lo invisible.
         gl.getContext().finish()

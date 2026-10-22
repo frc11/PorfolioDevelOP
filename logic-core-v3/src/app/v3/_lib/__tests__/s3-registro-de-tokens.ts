@@ -225,6 +225,8 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--zona-de-la-cabecera', valor: 'calc(max(var(--spacing-4), env(safe-area-inset-top)) + var(--spacing-12) + var(--spacing-4))', evidencia: 'derivado', procedencia: 'abajo de 1024, de arriba hasta el borde de abajo de los controles fijos (discos de 48 px a max(16 px, el inset seguro) del borde) más un aire: lo que se ve en el reposo de una sección arranca debajo' },
   // [PULIDO 13] K4 · el autocompletado del pie.
   { nombre: '--demora-del-autocompletado', valor: '100000s', evidencia: 'decidido', procedencia: 'la transición que demora para siempre el fondo celeste y el color del texto que el navegador le pone al campo autocompletado (con !important: no se pisan): así el campo se queda como estaba (en el pie de volumen, transparente sobre su placa)' },
+  // [B12c] el preloader del sitio.
+  { nombre: '--preloader-seguro', valor: '20000ms', evidencia: 'decidido', procedencia: 'el seguro sin hidratar: a los 20 s del arranque la cubierta se esconde sola si nadie la manejó; el mismo TOPE_MS de `_chrome/preloader/decision.ts` (s78-preloader los ata)' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

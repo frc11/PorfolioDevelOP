@@ -61,6 +61,8 @@ export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/resultado.css`,
   // [B12a.8 · P-H33] el texto de la intro de las páginas sobre la escena: su halo y su velo (la receta del Portfolio).
   `${V3}/_estilos/intro.css`,
+  // [B12c] la cubierta del preloader del sitio: se muestra sólo con la decisión del <head>, con su seguro sin JS.
+  `${V3}/_estilos/preloader.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

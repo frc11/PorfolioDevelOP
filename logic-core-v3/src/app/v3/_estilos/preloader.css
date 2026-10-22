@@ -1,0 +1,40 @@
+/* =========================================================================
+ * [B12c] EL PRELOADER DEL SITIO — la cubierta
+ * =========================================================================
+ * La cubierta viaja en el HTML del servidor (`_chrome/preloader/PreloaderDelSitio.tsx`)
+ * y no se ve: se muestra sólo si el script del `<head>` decidió que esta es la
+ * primera entrada del día (`decision.ts`), poniendo la custom property del
+ * `<html>` que lee esta regla. Así la visita repetida no ve ni un cuadro de la
+ * cubierta y la primera no ve ni un cuadro de la página.
+ *
+ * ⚠️ EL SEGURO SIN HIDRATAR: si la página nunca hidrata (el teléfono por la IP de
+ * la red contra el dev, la lección de [CIERRE] 1A del velo de carga), nadie
+ * sacaría la cubierta. La animación la esconde sola a `--preloader-seguro` del
+ * arranque; cuando la capa pinta su primer cuadro, el componente le pone
+ * `data-estado` y la apaga (la secuencia la maneja él). Si la capa arranca tarde
+ * (una pestaña de fondo), lo vuelve a mostrar. Con movimiento reducido la política del sitio le saca
+ * la espera a toda animación (`globals.css`): el `!important` se la devuelve,
+ * como `carga.css` al velo. El mismo tope suelta el bloqueo del scroll del script.
+ * ========================================================================= */
+
+[data-v3] [data-pieza='preloader'] {
+  --preloader-seguro: 20000ms;
+  display: var(--preloader-del-sitio, none);
+  animation: preloader-seguro var(--duracion-rapida) step-end var(--preloader-seguro) both;
+}
+
+[data-v3] [data-pieza='preloader'][data-estado] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-v3] [data-pieza='preloader'] {
+    animation-delay: var(--preloader-seguro) !important;
+  }
+}
+
+@keyframes preloader-seguro {
+  to {
+    visibility: hidden;
+  }
+}
