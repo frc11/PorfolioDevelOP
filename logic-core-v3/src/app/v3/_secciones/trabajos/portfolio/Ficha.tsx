@@ -52,10 +52,16 @@ export function piezasDeLaFicha(p: ProyectoDelPortfolio): number {
  *
  * [B1.2b] Siempre a la vista en la tira activa (no hay portada ni ficha): cada pieza entra escalonada en la secuencia de la tira,
  * desde la pieza `desde` (`secuencia.ts`).
+ *
+ * [B1.2e] `compacta`: la de la tarjeta del carrusel. En el teléfono los valores y la reseña van en `caption` (la ficha entera entra en la
+ * tarjeta sin que la tarjeta ocupe la pantalla); desde 768, como siempre. Sin la prop, el marcado de siempre.
  */
-export function Ficha({ proyecto, visible, reducido, desde }: { readonly proyecto: ProyectoDelPortfolio; readonly visible: boolean; readonly reducido: boolean; readonly desde: number }): React.JSX.Element {
+export const CLASE_DEL_VALOR_COMPACTO = 'max-tablet:text-caption'
+
+export function Ficha({ proyecto, visible, reducido, desde, compacta = false }: { readonly proyecto: ProyectoDelPortfolio; readonly visible: boolean; readonly reducido: boolean; readonly desde: number; readonly compacta?: boolean }): React.JSX.Element {
   const r = CONTENIDO.ficha
   const filas = filasDe(proyecto)
+  const valor = compacta ? CLASE_DEL_VALOR_COMPACTO : undefined
   // El orden de cada fila en la secuencia: las que se muestran, de a una; la reseña, después de todas.
   const ordenes = filas.map((_, i) => desde + filas.slice(0, i).filter((g) => !g.oculta).length)
   const ordenDeLaResena = desde + filas.filter((f) => !f.oculta).length
@@ -68,7 +74,7 @@ export function Ficha({ proyecto, visible, reducido, desde }: { readonly proyect
               <Rotulo>{f.rotulo}</Rotulo>
             </dt>
             <dd>
-              <Cuerpo como="span">{f.valor ?? ''}</Cuerpo>
+              <Cuerpo como="span" className={valor}>{f.valor ?? ''}</Cuerpo>
             </dd>
           </motion.div>
         ))}
@@ -77,7 +83,7 @@ export function Ficha({ proyecto, visible, reducido, desde }: { readonly proyect
         <motion.figure className="flex flex-col gap-2" {...enLaSecuencia(visible, ordenDeLaResena, reducido)}>
           <Rotulo>{r.resena}</Rotulo>
           <blockquote>
-            <Cuerpo>{proyecto.resena.texto}</Cuerpo>
+            <Cuerpo className={valor}>{proyecto.resena.texto}</Cuerpo>
           </blockquote>
           <figcaption>
             <Micro como="span">{proyecto.resena.autor}</Micro>

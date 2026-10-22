@@ -10,8 +10,10 @@
  *           los sonidos y las banderas.
  *   B1.2c · los ajustes del FRENO de B1.2b (`s76-portfolio-b12c.tsx`): el orden, los rótulos y los acentos claros, la transición, la
  *           rueda, el formulario corto, el «?», la tablet y el título (la cámara de frente, en la §9 de la escena).
- *   B1.3  · el teléfono (`s76-portfolio-historias.tsx`): las historias por CSS sobre el mismo marcado, los dos videos, la hoja, los
- *           toques, el deslizamiento de a un proyecto y el título de la aproximación.
+ *   B1.3  · el teléfono (`s76-portfolio-historias.tsx`): [B1.2e] queda lo del componente común de las historias (las usa el precio de
+ *           servicios); el Portfolio ya no las usa.
+ *   B1.2e · el carrusel debajo de 1024 (`s76-portfolio-carrusel.tsx`; el componente común, en `s76-carrusel.invariant.tsx`): el flujo, la
+ *           tarjeta entera, sin trampa de scroll, y la REGLA DE ALTURAS con el flujo medido.
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
@@ -30,6 +32,7 @@ import { afirmarB } from './s76-portfolio-b'
 import { afirmarB12c } from './s76-portfolio-b12c'
 import { afirmarB12d } from './s76-portfolio-b12d'
 import { afirmarElSelectorVivo } from './s76-portfolio-escena'
+import { afirmarElCarruselDelPortfolio } from './s76-portfolio-carrusel'
 import { afirmarLasHistorias } from './s76-portfolio-historias'
 
 const RAIZ = process.cwd()
@@ -162,5 +165,6 @@ afirmarLasHistorias()
 afirmarB12d()
 afirmarA2()
 afirmarB()
+afirmarElCarruselDelPortfolio()
 
 cerrar('s76-portfolio.invariant')

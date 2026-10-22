@@ -229,7 +229,7 @@ export function afirmarElSelectorVivo(): void {
   afirmar(OPACIDAD_DEL_VIDRIO === 0.04 && ESTILO_DEL_VIDRIO.backdropFilter === 'blur(20px) saturate(180%)' && ESTILO_DEL_VIDRIO.borderLeft === '1px solid color-mix(in srgb, var(--color-tinta) 8%, transparent)' && ESTILO_DEL_VIDRIO.background === 'color-mix(in srgb, var(--color-tinta) 4%, transparent)', 'el panel es de vidrio (el del sistema: blanco —la tinta de la sala de noche— al 4 %, desenfoque de 20 px, saturación del 180 %, borde al 8 %)')
   const panel = /'absolute inset-y-0 right-0 [^']*'/.exec(escenario)?.[0] ?? ''
   // [B1.3] Sin fondo propio desde 768: en el teléfono la hoja de la ficha sí lo lleva (`max-tablet:`), sobre el video.
-  afirmar(panel !== '' && !/(?<![:\w-])bg-fondo/.test(sinComentarios(leer('_secciones/trabajos/portfolio/Tira.tsx'))) && /style=\{vivo\.historias \? undefined : ESTILO_DEL_VIDRIO\}/.test(escenario), '  una sola estructura: el vidrio en el panel (del lado derecho) y las tiras de la tinta sin fondo propio (desde 1024; [B1.2d B] en las historias el fondo es el video de cada una)')
+  afirmar(panel !== '' && !/(?<![:\w-])bg-fondo/.test(sinComentarios(leer('_secciones/trabajos/portfolio/Tira.tsx'))) && /style=\{ESTILO_DEL_VIDRIO\}/.test(escenario), '  una sola estructura: el vidrio en el panel (del lado derecho) y las tiras de la tinta sin fondo propio (desde 1024; [B1.2e] debajo, el carrusel no tiene panel)')
 
   titulo('B1.2b · 12 · El panel entra y sale en horizontal: el gatillo espera al pin')
 

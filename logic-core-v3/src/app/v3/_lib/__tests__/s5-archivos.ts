@@ -106,9 +106,10 @@ export const ARCHIVOS_DE_PIEZA = [
   // [B1.2c] el formulario corto y el «?» que se arma de «la tuya» ([B1.2d B] las barras y la pista de la tablet se fueron con T2).
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/FormularioDeLaTuya.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/SignoDePregunta.tsx`,
-  // [B1.2d B] las historias del Portfolio (con el componente común de `_componentes/historias/`) y la de cada proyecto.
-  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/HistoriasDelPortfolio.tsx`,
-  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/HistoriaDelProyecto.tsx`,
+  // [B1.2e] debajo de 1024, el carrusel (con el componente común de `_componentes/carrusel/`): el flujo y la tarjeta de cada proyecto. Las
+  // historias del Portfolio se fueron.
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/FlujoDelPortfolio.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/TarjetaDelProyecto.tsx`,
 ]
 
 /**
@@ -259,6 +260,10 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useTransicionDeLasTiras.ts`,
   // [B1.3] el ancla al cargar (salió de `usePortfolio.ts`). [B1.2d B] El deslizamiento de las historias se fue: el scroll no las avanza (T8).
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useAnclaDeLaCarga.ts`,
+  // [B1.2e] el carrusel: su medio (puro), medido en el DOM, y el disparo por línea del título y de «la tuya».
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/medioDelCarrusel.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMedioDelCarrusel.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useDisparoPorLinea.ts`,
   // [B1.2d] los mandos (la rueda, sus salidas, los toques y el clic afuera, salieron de `usePortfolio.ts`) y el pedido a la barra.
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMandosDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useClicAfueraDelPanel.ts`,

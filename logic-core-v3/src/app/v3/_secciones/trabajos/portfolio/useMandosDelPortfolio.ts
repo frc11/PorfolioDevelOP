@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, type RefObject } from 'react'
 
-import type { SalidaDeLasHistorias } from '../../../_componentes/historias/maquinaDeLasHistorias'
 import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
 
 import { vistaDelPaso } from './estado'
@@ -25,7 +24,8 @@ export interface PiezasDeLosMandos {
   /** [F2] Si el panel ya terminó de entrar (su transición hecha): recién ahí la rueda da pasos. */
   readonly entradaLista: { readonly current: boolean }
   readonly paso: IndiceDePaso
-  readonly historias: boolean
+  /** [B1.2e] Debajo de 1024, el carrusel: la rueda y el clic afuera no son del Portfolio (el scroll es de la página). */
+  readonly carrusel: boolean
   /** Lo que tarda el título en llegar y en caer (s). */
   readonly tituloS: number
   /** Lleva la página a un píxel de la regla en `ms` (0: en silencio) y pone ya el paso de destino. */
@@ -36,12 +36,13 @@ export interface PiezasDeLosMandos {
 
 /**
  * [B1.2d] LOS MANDOS DEL PORTFOLIO — lo que mueve la página porque lo pidió el visitante, fuera del scroll: la rueda de a un proyecto
- * y sus salidas (a Demos y hacia arriba), la entrada que atrapa la inercia de un golpe fuerte, [B1.2d B] las salidas de las historias
- * (T2 a T8: la rueda y los deslices verticales SALEN; el scroll nunca avanza una historia) y el clic afuera (A11). Salió de `usePortfolio.ts` (la regla de las 300 líneas). Las salidas tardan lo del orden: el panel
- * se va y el título cae entero (`duracionDeLaSalida`).
+ * y sus salidas (a Demos y hacia arriba), la entrada que atrapa la inercia de un golpe fuerte y el clic afuera (A11). Salió de
+ * `usePortfolio.ts` (la regla de las 300 líneas). Las salidas tardan lo del orden: el panel se va y el título cae entero
+ * (`duracionDeLaSalida`). [B1.2e] Con el carrusel (debajo de 1024) no hay nada de esto: la rueda no manda, no atrapa ni se traga nada, y
+ * el clic afuera no sale. Las salidas de las historias se fueron con ellas.
  */
-export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly salirDeLasHistorias: (hacia: SalidaDeLasHistorias) => void } {
-  const { caja, actual, enVuelo, inerte, ultimaRueda, entradaLista, paso, historias, tituloS, irAlPx, saltar } = m
+export function useMandosDelPortfolio(m: PiezasDeLosMandos): void {
+  const { caja, actual, enVuelo, inerte, ultimaRueda, entradaLista, paso, carrusel, tituloS, irAlPx, saltar } = m
   const salidaMs = duracionDeLaSalida(tituloS) * 1000
 
   // [B1.2c] La rueda: de a un proyecto; después de «la tuya», a Demos (el final del pin, como el viaje del menú: dos píxeles antes);
@@ -54,15 +55,10 @@ export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly salirDeL
     },
     [irAlPx, saltar, salidaMs],
   )
-  // [B1.2d B] Las salidas de las historias: adelante, a Demos (como después de «la tuya»); atrás, al título (justo antes del pin).
-  const salir = useCallback(
-    (hacia: SalidaDeLasHistorias): void => (hacia === 'adelante' ? irAlPx(pxDeLaSeccion(PANTALLAS_POR_PASO), salidaMs, -2) : irAlPx(PX_JUSTO_ANTES_DEL_PIN, salidaMs)),
-    [irAlPx, salidaMs],
-  )
   const control = useRef<ControlDeLaRueda | null>(null)
   useEffect(() => {
     // [F1] El defecto, para el control positivo del arnés: la rueda de antes (sin trampa y con pasos mientras el panel entra).
-    const conLaTrampa = !historias && !conElDefecto('rueda-en-la-entrada')
+    const conLaTrampa = !carrusel && !conElDefecto('rueda-en-la-entrada')
     // [F2] La entrada atrapa la rueda: el evento que lleva la página adentro desde afuera (con el destino de Lenis y este evento, que Lenis
     // suma DESPUÉS: la rueda del Portfolio escucha en la captura) vuela al primero del sentido. Sin otro vuelo en curso ni un diálogo.
     const atrapa = (px: number): boolean => {
@@ -76,21 +72,20 @@ export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly salirDeL
       saltar(tira, false, true)
       return true
     }
-    const adentro = (): boolean => vistaDelPaso(actual.current).fase === 'adentro' && !conDialogo(caja.current)
+    const adentro = (): boolean => !carrusel && vistaDelPaso(actual.current).fase === 'adentro' && !conDialogo(caja.current)
     control.current = {
       manda: () => {
         const v = vistaDelPaso(actual.current)
-        return v.fase === 'adentro' && pegado(caja.current) && !conDialogo(caja.current) && (entradaLista.current || !conLaTrampa) ? v.tira : null
+        return !carrusel && v.fase === 'adentro' && pegado(caja.current) && !conDialogo(caja.current) && (entradaLista.current || !conLaTrampa) ? v.tira : null
       },
       ocupado: () => enVuelo.current !== null,
-      // [B1.2d B] T8 · en las historias la rueda no avanza: sale (abajo, a Demos; arriba, al título).
-      ir: (d) => (historias ? salir(d.tipo === 'demos' || (d.tipo === 'paso' && d.indice > vistaDelPaso(actual.current).tira) ? 'adelante' : 'atras') : ir(d, true)),
+      ir: (d) => ir(d, true),
       atrapa,
       entrando: () => conLaTrampa && adentro() && !entradaLista.current,
       inerte,
       ultimaRueda,
     }
-  }, [actual, caja, enVuelo, entradaLista, historias, inerte, ir, salir, saltar, ultimaRueda])
+  }, [actual, caja, carrusel, enVuelo, entradaLista, inerte, ir, saltar, ultimaRueda])
   useRuedaDelPortfolio(control)
 
   // [B1.2c] La entrada del panel ATRAPA la inercia de la rueda: un golpe fuerte que viene de afuera dejó a Lenis yendo más allá del
@@ -102,21 +97,19 @@ export function useMandosDelPortfolio(m: PiezasDeLosMandos): { readonly salirDeL
     faseAntes.current = fase
     const lenis = LENIS_DEL_SITIO.instancia
     const medida = medir(caja.current)
-    if (antes === 'adentro' || fase !== 'adentro' || lenis === null || medida === null || enVuelo.current !== null || performance.now() - ultimaRueda.current > RUEDA_RECIENTE_MS) return
+    if (carrusel || antes === 'adentro' || fase !== 'adentro' || lenis === null || medida === null || enVuelo.current !== null || performance.now() - ultimaRueda.current > RUEDA_RECIENTE_MS) return
     const { desde, hasta } = bordesDelPaso(paso, PANTALLAS_POR_PASO)
     const destino = lenis.targetScroll
     if (destino > scrollDelPx(hasta, medida.tope, medida.alto) || destino < scrollDelPx(desde, medida.tope, medida.alto)) saltar(vistaDelPaso(paso).tira, false, true)
-  }, [caja, enVuelo, fase, paso, saltar, ultimaRueda])
+  }, [caja, carrusel, enVuelo, fase, paso, saltar, ultimaRueda])
 
   // [B1.2d] A11, el clic afuera (justo antes del pin, con la salida normal). Leído en el evento: un `ref`, como la rueda.
   const mandos = useRef<ControlDelClicAfuera | null>(null)
   useEffect(() => {
     mandos.current = {
-      adentro: () => vistaDelPaso(actual.current).fase === 'adentro' && pegado(caja.current) && !conDialogo(caja.current),
+      adentro: () => !carrusel && vistaDelPaso(actual.current).fase === 'adentro' && pegado(caja.current) && !conDialogo(caja.current),
       salir: () => irAlPx(PX_JUSTO_ANTES_DEL_PIN, salidaMs),
     }
-  }, [actual, caja, irAlPx, salidaMs])
+  }, [actual, caja, carrusel, irAlPx, salidaMs])
   useClicAfueraDelPanel(caja, mandos)
-
-  return { salirDeLasHistorias: salir }
 }

@@ -73,7 +73,7 @@ export function afirmarB12d(): void {
   const cableadoA3 = (a: string, u: string, m: string): boolean =>
     /const deLaRueda = vivo\.deLaRueda\(\) && \(vivo\.enVuelo\(\) \|\| transicion\.fase !== 'quieta'\)/.test(a) &&
     /if \(transicion\.fase === 'quieta'\) activacion\.current = puntero\.current/.test(a) &&
-    /deLaRueda\.current = rueda/.test(u) && /saltar\(i, inmediato, false\)/.test(u) && /ir: \(d\) => \(historias \? salir\([\s\S]*?\) : ir\(d, true\)\)/.test(m)
+    /deLaRueda\.current = rueda/.test(u) && /saltar\(i, inmediato, false\)/.test(u) && /ir: \(d\) => ir\(d, true\),/.test(m)
   afirmar(cableadoA3(acordeon, usePortfolio, mandos), '  la transición de la rueda es su vuelo más el cambio de tiras; al terminar, la base del hover es el puntero de ese momento (hace falta un movimiento nuevo). El hover, el clic, las teclas y los toques no la marcan: ahí cruzar lomos sigue yendo al último')
   controlPositivo('  el detector ve el hover que no espera a que la transición termine', [acordeon.replace("(vivo.enVuelo() || transicion.fase !== 'quieta')", 'vivo.enVuelo()'), usePortfolio, mandos] as const, ([a, u, m]: readonly [string, string, string]) => cableadoA3(a, u, m))
 

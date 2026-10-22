@@ -31,6 +31,12 @@ export const ANCHO_DEL_MEDIO = 'min(100%, calc(var(--alto-del-medio) * 16 / 10))
 export const CLASE_DEL_ALTO_DEL_MEDIO = '[--alto-del-medio:38svh] max-escritorio:[--alto-del-medio:28svh]'
 
 /**
+ * [B1.2e] El alto del medio en la tarjeta del carrusel (debajo de 1024): en el teléfono, el 24 % del cuadro (a 390 lo pone el ancho, 16:10 en
+ * la tarjeta); desde 768, el 32 %. La tarjeta entera no ocupa la pantalla: el medio es lo único que cede.
+ */
+export const CLASE_DEL_ALTO_DEL_MEDIO_DEL_CARRUSEL = '[--alto-del-medio:24svh] tablet:[--alto-del-medio:32svh]'
+
+/**
  * [F4] Con el medio corrido por la píldora (`despejeDelMedio`, A2.1), el video queda del MISMO tamaño que a 1440, el de su columna (A2.1 lo
  * achicaba lo que bajaba: a 1024 quedaba en el 68 %). Lo que baja sale del aire de la ficha: el de antes de «Visitar sitio» (de
  * `--spacing-5` a `--spacing-2`: un margen negativo le saca la diferencia al `gap`) y el sobrante de abajo (de `--spacing-12` a `--spacing-4`).
