@@ -3,9 +3,12 @@
  * `_secciones/por-que-develop/resenas/haciaElCta.ts`, `VUELTA_DEL_CTA`) es donde se agrieta el cristal del home. B9 (las grietas) todavía
  * no existe: esto es el punto de enganche, vacío. Lo llama el tramo de las reseñas al cruzar ese momento (`ida` bajando, `vuelta` subiendo);
  * B9 instala acá su disparador (`ENGANCHE_DE_LAS_GRIETAS.alVolverseElCta = …`) sin tocar las reseñas.
+ * [NOCTURNO] Instalado al integrar B9: el disparador de las grietas del cristal (neutro en el home; `cristal/grietas.ts`).
  */
+import { grietasAlVolverseElCta } from '../cristal/grietas'
+
 export const ENGANCHE_DE_LAS_GRIETAS: { alVolverseElCta: (sentido: 'ida' | 'vuelta') => void; veces: number } = {
-  alVolverseElCta: () => undefined,
+  alVolverseElCta: grietasAlVolverseElCta,
   /** Cuántas veces se llamó (para el banco y la prueba). */
   veces: 0,
 }
