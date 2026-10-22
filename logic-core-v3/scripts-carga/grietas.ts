@@ -128,7 +128,7 @@ async function main(): Promise<void> {
         // ── La página: el título las dispara al terminar de entrar; se graba desde la carga.
         await p.goto(`${BASE}/v3/pagina-base?grietas=${pedida}`, { waitUntil: 'load', timeout: 240000 })
         if (!(await visible(p))) fallas.push(`${clave}: la pestaña no está a la vista (las mediciones dan cero)`)
-        const enLaPagina = await grabar(p, 9000)
+        const enLaPagina = await grabar(p, 16000) // [NOCTURNO] 16 s: en el dev, en la primera visita el título llega tarde (las grietas nacieron a los 11,3 s)
         const e = await estado(p)
         if (REDUCIDO) {
           if (e !== null) fallas.push(`${clave}: con movimiento reducido hay cristal (no se esperaba)`)
