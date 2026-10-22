@@ -5,6 +5,10 @@
  * la vista, si alguna se sale del cuadro (más de 0,5 px) y si dos se pisan. Fotos de los anchos con falla en `~/.cache/b4-medicion/chrome/`.
  * [B12a.8] T3 · Y la página: que no se desborde a lo ancho (`scrollWidth`), y la consola de toda la corrida (errores, avisos y cualquier
  * «NaN»), contada por mensaje al final.
+ * [B11] Y EL CHAT, abajo a la derecha (y su globo): el banco lo pide (`window.__chatDelBanco`; sin eso las pruebas no lo cargan) y le
+ * SIMULA la config del bot (`/api/chatbot/…/config`, con el orbe 3D y la esquina izquierda: /v3 tiene que fijar el avatar liviano y la
+ * derecha). Por carga: cuándo llegó (con la escena preparada y sin el velo de carga) y que no trae 3D (ningún canvas). `CHAT=no` lo
+ * saca; `CONTROL=chat-al-centro` lo corre abajo al centro (tiene que dar «chat pisa píldora» desde 860 en el home al cargar).
  *
  *   RUTAS=/v3/pagina-base?composicion=1,/v3 npx tsx scripts-carga/chrome-en-los-anchos.ts
  */
@@ -21,6 +25,46 @@ const ANCHOS = (process.env.ANCHOS ?? '360,390,430,600,768,820,860,900,960,1000,
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/chrome')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
+const CON_CHAT = process.env.CHAT !== 'no'
+const CONTROL = process.env.CONTROL ?? ''
+
+/**
+ * [B11] La config del bot, SIMULADA (nunca la API real): el orbe 3D y la esquina izquierda a propósito, para ver que /v3 fija el avatar
+ * liviano y la derecha. Los textos son del banco, no contenido del sitio.
+ */
+const CONFIG_DEL_BANCO = {
+  botName: 'Banco',
+  isActive: true,
+  accentColor: '#111111',
+  accentSecondary: null,
+  chatSurfaceTint: null,
+  avatarStyle: 'neuro',
+  avatarImageUrl: null,
+  avatarEmoji: null,
+  borderRadius: 'medium',
+  surfaceStyle: 'glass',
+  position: 'bottom_left',
+  fontStyle: 'sans',
+  bubbleStyle: 'rounded',
+  intensityLevel: 'medium',
+  welcomeMessage: 'Mensaje del banco.',
+  quickReplies: [],
+  routeColorMap: {},
+  proactivePrompts: { default: ['Globo del banco: una pregunta de largo normal para medir su caja.'] },
+  whatsappNumber: null,
+  paused: null,
+}
+
+/** Cuándo llegó el chat (lo anota la página al aparecer su botón): con la escena preparada y sin el velo de carga, sin canvas. */
+const ANOTAR_LA_LLEGADA = `(() => {
+  window.__chatDelBanco = true;
+  const mirar = () => {
+    const boton = document.querySelector('[data-chatbot-avatar]');
+    if (boton === null || window.__llegadaDelChat !== undefined) return;
+    window.__llegadaDelChat = { t: Math.round(performance.now()), escenaPreparada: window.__precompiladoDelBanco !== undefined, velo: document.querySelector('[data-pieza="velo-de-carga"]') !== null };
+  };
+  new MutationObserver(mirar).observe(document, { childList: true, subtree: true });
+})()`
 
 interface Caja {
   readonly pieza: string
@@ -37,6 +81,9 @@ const PIEZAS: readonly (readonly [string, string])[] = [
   ['contacto y login', '[data-pieza="barra"] [data-parte="esquina"]'],
   ['botón del menú', '[aria-controls="menu-movil"]'],
   ['título', '[data-intro-de-pagina] h1'],
+  // [B11] El chat (su botón) y su globo, que aparece a los 3 s del botón.
+  ['chat', '[data-chatbot-avatar]'],
+  ['globo del chat', '[data-chatbot-avatar] [class*="bottom-full"]'],
 ]
 
 const cajas = (p: Page): Promise<Caja[]> =>
@@ -69,8 +116,11 @@ async function main(): Promise<void> {
   const consola = new Map<string, number>()
   try {
     await ctx.addInitScript(`(() => { window.__name = window.__name || ((f) => f); window.__entornoDeLaEscena = 'producto'; try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
+    if (CON_CHAT) await ctx.addInitScript(ANOTAR_LA_LLEGADA)
     const p = ctx.pages()[0] ?? (await ctx.newPage())
     await p.route('**/api/**', (r) => r.abort())
+    // [B11] Registrada después, corre antes: la config del bot, simulada (el resto de `/api/` sigue cortado).
+    if (CON_CHAT) await p.route('**/api/chatbot/*/config', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CONFIG_DEL_BANCO) }))
     p.on('console', (m) => {
       const texto = m.text()
       if (m.type() === 'error' || m.type() === 'warning' || texto.includes('NaN')) consola.set(`${m.type()}: ${texto.slice(0, 160)}`, (consola.get(`${m.type()}: ${texto.slice(0, 160)}`) ?? 0) + 1)
@@ -79,6 +129,14 @@ async function main(): Promise<void> {
     for (const ruta of RUTAS) {
       await p.goto(`${BASE}${ruta}`, { waitUntil: 'load', timeout: 300000 })
       await dormir(5000)
+      if (CON_CHAT) {
+        const llego = await p.waitForSelector('[data-chatbot-avatar]', { timeout: 30000 }).then(() => true).catch(() => false)
+        const llegada = await p.evaluate(() => (window as unknown as { __llegadaDelChat?: unknown }).__llegadaDelChat ?? null)
+        if (!llego) fallas += 1
+        console.log(`${llego ? 'ok   ' : 'FALLA'} ${ruta} · el chat ${llego ? `llegó: ${JSON.stringify(llegada)}` : 'no llegó en 30 s'}`)
+        if (CONTROL === 'chat-al-centro') await p.addStyleTag({ content: '[data-chatbot-avatar] { left: calc(50% - 28px) !important; right: auto !important; }' })
+        await dormir(4000)
+      }
       for (const ancho of ANCHOS) {
         await p.setViewportSize({ width: ancho, height: ALTO })
         await dormir(ancho === 1024 || ancho === 1023 ? 2500 : 900)
@@ -96,6 +154,12 @@ async function main(): Promise<void> {
         const malas: string[] = []
         const desborde = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
         if (desborde > 0.5) malas.push(`la página se desborda ${desborde.toFixed(0)} px a lo ancho`)
+        // [B11] Sin 3D: ningún canvas en el chat (la config simulada pide el orbe), y su botón abajo a la derecha.
+        if (CON_CHAT) {
+          const chat = await p.evaluate(() => ({ canvas: document.querySelectorAll('[data-pieza="chat-del-sitio"] canvas').length, derecha: (document.querySelector('[data-chatbot-avatar]')?.getBoundingClientRect().right ?? 0) > window.innerWidth / 2 }))
+          if (chat.canvas > 0) malas.push(`el chat trae 3D (${String(chat.canvas)} canvas)`)
+          if (!chat.derecha && CONTROL !== 'chat-al-centro') malas.push('el chat no está a la derecha')
+        }
         for (const c of medidas) if (c.x0 < -0.5 || c.x1 > ancho + 0.5 || c.y0 < -0.5) malas.push(`${c.pieza} se sale (x ${c.x0.toFixed(1)}…${c.x1.toFixed(1)}, y ${c.y0.toFixed(1)})`)
         for (let i = 0; i < medidas.length; i += 1) {
           for (let j = i + 1; j < medidas.length; j += 1) {

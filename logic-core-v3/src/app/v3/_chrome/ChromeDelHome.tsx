@@ -6,6 +6,7 @@ import { AnticipacionDelMenu } from './escena/AnticipacionDelMenu'
 import { RespuestaDeLaEscena } from './escena/RespuestaDeLaEscena'
 import { MenuMovil } from './menu/MenuMovil'
 import { BarraDelHome } from './barra/BarraDelHome'
+import { ChatDelSitio } from './chat/ChatDelSitio'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
 import { EsquinaDelSonido } from './sonido/EsquinaDelSonido'
@@ -170,6 +171,8 @@ export function ChromeDelHome(): React.JSX.Element {
       {/* [3D Y SONIDO] T2: el sonido; [RETOQUE 3D] el parlante, en el producto (apagado por defecto); `?sonidos=1`, la página de
           prueba. [CIERRE A] A6: el infinito del recorrido se sacó; el parlante, en su esquina (arriba a la izquierda). */}
       <EsquinaDelSonido />
+      {/* [B11] El chat del sitio, abajo a la derecha (la esquina que A6 dejó libre): diferido, sin 3D y debajo de lo que tapa la página. */}
+      <ChatDelSitio />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

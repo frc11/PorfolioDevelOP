@@ -13,6 +13,7 @@ import { renderToolCall } from './tool-cards'
 import { useChatbot } from '../hooks/useChatbot'
 import { useChatbotSounds } from '../hooks/useChatbotSounds'
 import type { ToolCallInUIMessage } from './chat/types'
+import type { PublicBotConfig } from '../shared/publicConfig'
 import { parseAttribution } from '../shared/attribution'
 import {
   CHROME_REVEAL_OFFSET_PX,
@@ -33,11 +34,21 @@ import {
 // Framer `scale` (a `transform`) without the two fighting over one property.
 // Honors prefers-reduced-motion via `useReducedMotion()`.
 
+/**
+ * Host-side overrides applied over the fetched bot config, for the launcher AND
+ * the window (header, thinking avatar, teaser alignment). The /v3 site pins a
+ * light avatar (no 3D) and the bottom-right corner (B11, 2026-10-22). Omitted —
+ * the live site's `ChatWidgetMount` and every embed — the config renders
+ * exactly as before: `config` is the same object `useChatbot` returns.
+ */
+export type CompanionOverrides = Partial<Pick<PublicBotConfig, 'avatarStyle' | 'position'>>
+
 interface LogicCompanionProps {
   slug: string
+  overrides?: CompanionOverrides
 }
 
-export function LogicCompanion({ slug }: LogicCompanionProps) {
+export function LogicCompanion({ slug, overrides }: LogicCompanionProps) {
   const pathname = usePathname() ?? '/'
   // UTM.1 — same-origin (sin iframe de por medio): la URL real de esta carga
   // de página está disponible directo. Deps vacías a propósito — resuelto
@@ -92,6 +103,14 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
     ]
   }, [chatbot.config?.botName])
 
+  // The config every piece below renders from: the fetched one, with the host's
+  // overrides on top when there are any (memoized: the teaser's triggers and the
+  // window key effects on it). Without overrides it IS `chatbot.config`.
+  const config = useMemo(
+    () => (chatbot.config && overrides ? { ...chatbot.config, ...overrides } : chatbot.config),
+    [chatbot.config, overrides],
+  )
+
   if (chatbot.isLoading) return null
 
   // RE-2 — isLoading=false + config=null = /config agotó sus reintentos
@@ -100,7 +119,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
   // ahora un affordance mínimo con reintento manual, en la misma posición
   // fija donde iría el launcher. Sin `config`, no hay accentColor/avatarStyle/
   // position del bot disponibles — se usa el default (esquina inferior derecha).
-  if (!chatbot.config) {
+  if (!config) {
     return (
       <div
         style={{
@@ -125,7 +144,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
   // right-edge swipe area on a Pixel. `max(...)` keeps the desktop spacing
   // (24px) when there's no inset to worry about.
   const position =
-    chatbot.config.position === 'bottom_left'
+    config.position === 'bottom_left'
       ? {
           bottom: 'max(24px, env(safe-area-inset-bottom))',
           left: 'max(24px, env(safe-area-inset-left))',
@@ -138,14 +157,14 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
   // Per-avatar sizing: heavy 3D avatars frame their subject with margin, so we
   // render them in a larger box to match the light avatars' visible size. The
   // launcher button grows with the avatar (light avatars resolve to 56 → no-op).
-  const launcherSize = getAvatarRenderSize(chatbot.config.avatarStyle, 56)
+  const launcherSize = getAvatarRenderSize(config.avatarStyle, 56)
 
   return (
     <>
       <AnimatePresence>
         {chatbot.isOpen && (
           <ChatWindow
-            config={chatbot.config}
+            config={config}
             messages={chatbot.messages}
             isStreaming={chatbot.isStreaming}
             avatarState={chatbot.avatarState}
@@ -158,7 +177,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             renderToolCall={(tc: ToolCallInUIMessage, busy: boolean) =>
               renderToolCall(
                 tc,
-                chatbot.config!,
+                config,
                 {
                   onSelectWhatsapp: chatbot.triggerWhatsappHandoff,
                   onSelectCallback: chatbot.triggerCallbackHandoff,
@@ -221,13 +240,13 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
       >
         <div className="relative w-full h-full">
           <AvatarRenderer
-            style={chatbot.config.avatarStyle}
+            style={config.avatarStyle}
             state={chatbot.avatarState}
-            accentColor={chatbot.config.accentColor}
+            accentColor={config.accentColor}
             size={launcherSize}
-            avatarImageUrl={chatbot.config.avatarImageUrl}
-            avatarEmoji={chatbot.config.avatarEmoji}
-            businessInitials={deriveBusinessInitials(chatbot.config.botName)}
+            avatarImageUrl={config.avatarImageUrl}
+            avatarEmoji={config.avatarEmoji}
+            businessInitials={deriveBusinessInitials(config.botName)}
           />
           {/* Badge: punto discreto de "conversación activa". Color = accentColor
               configurado (fuente de verdad). Persiste mientras haya conversación,
@@ -244,9 +263,9 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
                 width: '13px',
                 height: '13px',
                 borderRadius: '50%',
-                background: chatbot.config.accentColor,
+                background: config.accentColor,
                 border: '2px solid rgba(6,8,18,0.92)',
-                boxShadow: `0 0 8px ${chatbot.config.accentColor}aa`,
+                boxShadow: `0 0 8px ${config.accentColor}aa`,
                 pointerEvents: 'none',
                 zIndex: 2,
               }}
@@ -265,7 +284,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             (chatbot.hasConversation ? (
               <ProactiveTooltip
                 key="resume"
-                config={chatbot.config}
+                config={config}
                 currentPath={pathname}
                 prompts={resumeMessages}
                 onAccept={() => chatbot.open()}
@@ -274,7 +293,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             ) : (
               <ProactiveTooltip
                 key="teaser"
-                config={chatbot.config}
+                config={config}
                 currentPath={pathname}
                 onAccept={chatbot.acceptProactivePrompt}
                 onDismiss={() => {}}
