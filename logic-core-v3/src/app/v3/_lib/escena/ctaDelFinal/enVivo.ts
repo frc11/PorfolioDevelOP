@@ -6,6 +6,7 @@
  */
 
 import { alCargarseLasFuentes, conReimpresion } from '../../fuentes'
+import { SELECTOR_DEL_CIERRE_DE_NOCHE } from '../ruta/atributoDelCierre'
 
 /**
  * Un renglón de texto del DOM que la escena reemplaza: su elemento y lo que sube su pieza en la lectura (fracción del cuadro).
@@ -49,6 +50,12 @@ export const CTA_EN_VIVO = {
 
 /** Los títulos de volumen que la transformación reemplaza desde que arranca: la frase. */
 export const FRASE_DE_VOLUMEN = ['frase-izquierda', 'frase-derecha'] as const
+
+/**
+ * [B13] ¿El CTA de ahora es el del cierre de una página de noche? Ahí la escena lo arma en papel (`blanco`), como el título de la página:
+ * en tinta no se leería sobre la sala de noche. Se lee del DOM (su destino adentro del cierre): el del home sigue en tinta.
+ */
+export const ctaDeNoche = (): boolean => (CTA_EN_VIVO.destino?.closest(SELECTOR_DEL_CIERRE_DE_NOCHE) ?? null) !== null
 
 /** La escena armó y compiló las letras del CTA: recién ahí el DOM esconde su texto (sin WebGL, se sigue leyendo el del DOM). */
 let listo = false

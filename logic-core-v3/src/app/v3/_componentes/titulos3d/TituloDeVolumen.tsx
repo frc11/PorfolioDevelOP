@@ -1,13 +1,14 @@
 'use client'
 
 import { motionValue, type MotionValue } from 'motion/react'
-import { useRef } from 'react'
+import { useContext, useRef } from 'react'
 
 import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { useTituloDeVolumen, useTituloListo, useTitulosDeVolumen, type TituloDeVolumen as Titulo } from '../../_lib/titulos3d/registro'
 import type { AsientoDeLaLlegada } from '../../_lib/titulos3d/repeticiones'
 import { useAnchoMinimo } from '../../_lib/useAnchoMinimo'
 import { useLlegadaDelTitulo } from '../llegadaDelTitulo'
+import { MaterialDeLosTitulos } from './materialDeLosTitulos'
 
 /** Para la rama quieta (sin progreso): el gancho de la llegada repetida no es condicional. */
 const LLEGADO = motionValue(1)
@@ -64,7 +65,9 @@ export function TituloDeVolumen({
   const listo = useTituloListo(id)
   const lugar = useRef<HTMLSpanElement | null>(null)
   const repetible = useLlegadaDelTitulo(llegadaDe, llegada ?? LLEGADO)
-  useTituloDeVolumen({ id, texto, lugar, lectura, subida, llegada: llegada === null ? null : repetible, salida, queda, corrida, minimoS, salidaMinimaS, asiento, saleCayendo, activo: material !== 'no' && escritorio })
+  // [B13] El material del tramo (el cierre de una página de noche, en papel); sin proveedor, el del entorno.
+  const delTramo = useContext(MaterialDeLosTitulos)
+  useTituloDeVolumen({ id, texto, lugar, lectura, subida, material: delTramo, llegada: llegada === null ? null : repetible, salida, queda, corrida, minimoS, salidaMinimaS, asiento, saleCayendo, activo: material !== 'no' && escritorio })
   return (
     <>
       {listo && <span className="sr-only hidden escritorio:block">{texto}</span>}
