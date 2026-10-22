@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 
 import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { entradaAbierta, retenerElScroll, suscribirALaEntrada } from '../../_lib/entrada'
+import { dispararLasGrietas } from '../../_lib/escena/cristal/grietas'
 import type { IdDePagina } from '../../_lib/escena/ruta/preset'
 import { useTituloDeVolumen, useTituloListo, useTitulosDeVolumen } from '../../_lib/titulos3d/registro'
 import { LLEGADA_DEL_TITULAR_S } from '../../_lib/titulos3d/titular'
@@ -137,6 +138,15 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
       r.current = null
     }
   }, [])
+
+  // [NOCTURNO B9] El cristal se agrieta cuando el título terminó de entrar: abierta la entrada y, con el título en volumen, armado, más
+  // lo que tarda su llegada (el mismo reloj que suelta el scroll). Sin volumen (abajo de 1024, sin WebGL), con el `h1` a la vista y el
+  // mismo reloj. Las grietas se quedan: la caída y la nueva llegada del título no las vuelven a pedir.
+  useEffect(() => {
+    if (!entrada || (activo && !listo)) return undefined
+    const reloj = window.setTimeout(() => dispararLasGrietas('avance', id), LLEGADA_DEL_TITULAR_S * 1000)
+    return () => window.clearTimeout(reloj)
+  }, [activo, entrada, listo, id])
 
   // La cara de cada parte sale de la combinación (que se elige en el cliente): en línea, con el peso exacto de su instancia.
   const cara = (i: 0 | 1): React.CSSProperties => ({ fontFamily: CARA_DEL_DOM[preset.fuentes[i]].familia, fontWeight: CARA_DEL_DOM[preset.fuentes[i]].peso })
