@@ -1,4 +1,5 @@
 import { anotar } from './diagnostico/anotar'
+import { entradaAbierta, suscribirALaEntrada } from './entrada'
 
 /**
  * [AJUSTES FINALES] A4 · LA CARGA DE LA PÁGINA (provisorio hasta el preloader) — hasta acá al cargar se veían primero piezas
@@ -56,11 +57,22 @@ export const estaTodo = (e: EstadoDeLaCarga): boolean => e.fuentes && (e.primerC
 
 let primerCuadro = false
 let lista = false
+/** [B12c] El fundido del velo terminó (la carga se pidió): se abre recién con la entrada abierta (el preloader del sitio, `entrada.ts`). */
+let pedida = false
+let preparada = false
 const oyentes = new Set<() => void>()
 
 function avisar(): void {
   for (const f of oyentes) f()
 }
+
+function abrirSiSePuede(): void {
+  if (lista || !pedida || !entradaAbierta()) return
+  lista = true
+  anotar('carga-abierta')
+  avisar()
+}
+suscribirALaEntrada(abrirSiSePuede)
 
 /** La escena dibujó su primer cuadro. Lo llama el motor de la escena, una vez. */
 export function marcarElPrimerCuadro(): void {
@@ -72,15 +84,29 @@ export function marcarElPrimerCuadro(): void {
 
 export const hayPrimerCuadro = (): boolean => primerCuadro
 
-/** El fundido terminó: lo que esperaba a la carga (la llegada del titular del hero) arranca. */
+/**
+ * El fundido terminó: lo que esperaba a la carga (la llegada del titular del hero) arranca. [B12c] Con el preloader del sitio puesto, recién
+ * cuando se va (`entrada.ts`): el titular y el logo que cae llegan a la vista, no debajo del blanco.
+ */
 export function abrirLaCarga(): void {
-  if (lista) return
-  lista = true
-  anotar('carga-abierta')
-  avisar()
+  if (pedida) return
+  pedida = true
+  abrirSiSePuede()
 }
 
 export const cargaLista = (): boolean => lista
+
+/**
+ * [B12c] La escena está preparada: compiló sus programas y los calentó (`escena/gpu/Precompilar.tsx`, una vez). El preloader del sitio
+ * lo espera: el tirón de la primera compilación queda debajo de su blanco y no en la entrada.
+ */
+export function marcarLaEscenaPreparada(): void {
+  if (preparada) return
+  preparada = true
+  avisar()
+}
+
+export const escenaPreparada = (): boolean => preparada
 
 export function suscribirALaCarga(f: () => void): () => void {
   oyentes.add(f)

@@ -6,6 +6,7 @@ import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { cn } from '@/lib/utils'
 
 import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
+import { entradaAbierta, retenerElScroll, suscribirALaEntrada } from '../../_lib/entrada'
 import type { IdDePagina } from '../../_lib/escena/ruta/preset'
 import { useTituloDeVolumen, useTituloListo, useTitulosDeVolumen } from '../../_lib/titulos3d/registro'
 import { LLEGADA_DEL_TITULAR_S } from '../../_lib/titulos3d/titular'
@@ -63,7 +64,9 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const reducido = usePrefiereMenosMovimiento()
   const activo = material !== 'no' && escritorio && !reducido
-  const presencia = useMotionValue(1)
+  // [B12c] Con el preloader del sitio puesto, el título espera tapado (presencia 0) y llega cuando la entrada se abre (`_lib/entrada.ts`).
+  const entrada = useSyncExternalStore(suscribirALaEntrada, entradaAbierta, () => true)
+  const presencia = useMotionValue(entradaAbierta() ? 1 : 0)
   const lugar1 = useRef<HTMLSpanElement | null>(null)
   const lugar2 = useRef<HTMLSpanElement | null>(null)
   const id1 = idDeLaParte(id, 1)
@@ -86,9 +89,11 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
     const tramo = lugar1.current?.closest(SELECTOR_DEL_TRAMO_DEL_TITULO) ?? null
     const fijo = tramo?.firstElementChild ?? null
     if (tramo === null || !(fijo instanceof HTMLElement) || !activo) return undefined
-    let adentro = true
+    // [B12c] Lo que la presencia ya dice (con la entrada cerrada, 0: abierta, vuelve a leer y llega si está arriba).
+    let adentro = presencia.get() >= 0.5
     let animacion: ReturnType<typeof animate> | null = null
     const leer = (): void => {
+      if (!entradaAbierta()) return
       const ahora = !caeElTitulo(tramo.getBoundingClientRect().bottom, fijo.offsetHeight, window.innerHeight, caidaTarde() ? -0.3 : undefined)
       if (ahora === adentro) return
       adentro = ahora
@@ -103,7 +108,35 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
       window.removeEventListener('resize', leer)
       animacion?.stop()
     }
-  }, [activo, presencia])
+  }, [activo, presencia, entrada])
+
+  // [B12c] El scroll espera a que el título entre: con la entrada cerrada lo retiene, y lo suelta cuando ya llegó (abierta la entrada y
+  // armado, lo que tarda su llegada: el reloj del titular del hero). Sin título en volumen, nada que esperar.
+  const retencion = useRef<(() => void) | null>(null)
+  useEffect(() => {
+    if (!activo) {
+      retencion.current?.()
+      retencion.current = null
+      return undefined
+    }
+    if (!entrada) {
+      retencion.current ??= retenerElScroll()
+      return undefined
+    }
+    if (retencion.current === null || !listo) return undefined
+    const reloj = window.setTimeout(() => {
+      retencion.current?.()
+      retencion.current = null
+    }, LLEGADA_DEL_TITULAR_S * 1000)
+    return () => window.clearTimeout(reloj)
+  }, [activo, entrada, listo])
+  useEffect(() => {
+    const r = retencion
+    return () => {
+      r.current?.()
+      r.current = null
+    }
+  }, [])
 
   // La cara de cada parte sale de la combinación (que se elige en el cliente): en línea, con el peso exacto de su instancia.
   const cara = (i: 0 | 1): React.CSSProperties => ({ fontFamily: CARA_DEL_DOM[preset.fuentes[i]].familia, fontWeight: CARA_DEL_DOM[preset.fuentes[i]].peso })
