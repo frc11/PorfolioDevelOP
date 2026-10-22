@@ -233,7 +233,8 @@ function portfolio(): EstadoDelDiag['portfolio'] {
 function estado(referencia?: ReferenciaDeLosBloques): EstadoCompleto {
   const foto = fotoDeLaEpocaActual()
   const { lista, rangos, delLayout } = bloques(referencia, foto.alto > 0 ? foto.alto : innerHeight)
-  const remate = document.querySelector<HTMLElement>('[data-pieza="remate-del-panel"]')
+  // [B6] El remate de Tu panel es su CTA, que entra con el gatillo común: dormido es «en pantalla y todavía en espera».
+  const remate = document.querySelector<HTMLElement>('[data-pieza="cta-del-panel"] [data-gatillo]')
   const lenis = VISTOS.lenis
   return {
     t: Math.round(performance.now()),
@@ -244,7 +245,7 @@ function estado(referencia?: ReferenciaDeLosBloques): EstadoCompleto {
     textos: textos(),
     bloques: lista,
     noche: { actual: NOCHE_DISPARADA.cantidad, esperada: nocheEsperada() },
-    remate: remate === null ? null : { enPantalla: enPantalla(remate), estado: remate.getAttribute('data-estado') },
+    remate: remate === null ? null : { enPantalla: enPantalla(remate), estado: remate.getAttribute('data-gatillo') },
     portfolio: portfolio(),
     fuentes: { estado: document.fonts.status, caras: [...document.fonts].map((f) => `${f.family} ${f.style} ${f.weight}: ${f.status}`) },
     escena: { lienzo: document.querySelector('[data-escena] canvas') !== null, contexto: contexto(), primerCuadro: hayPrimerCuadro(), caida: laEscenaCayo(), cargaLista: cargaLista() },

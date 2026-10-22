@@ -1,14 +1,9 @@
 /**
- * EL CONTENIDO DE «TU PANEL» — las features, como DATO.
+ * EL CONTENIDO DE «TU PANEL» — como DATO. [B6] La sección del Panel (craneada el 2026-10-21): el título que se pinta, tres
+ * módulos alternados con su palabra fundida y el CTA a pantalla completa. Ningún componente escribe una frase propia.
  *
- * SPRINT PANEL: la sección dejó de ser captura + tres bloques + lista y pasó a
- * ser una galería al estilo de nk/news. Todo lo que el usuario va a cambiar —la
- * imagen de cada tarjeta, su texto alternativo, el título o la etiqueta— está
- * acá, en `TARJETAS`, y ningún componente escribe una frase propia.
- *
- * **Ningún número y ninguna captura falsa.** Mientras no haya capturas reales,
- * cada tarjeta muestra el placeholder rayado del sitio y el marcador del pedido
- * encima: una pantalla de panel inventada, con datos, sería contenido inventado.
+ * **Ningún número y ninguna captura falsa.** Los módulos son las maquetas del panel (`_panel-vivo/`), con sus datos de
+ * ejemplo y el sello «Ejemplo»; debajo de cada una queda su captura real, de respaldo.
  */
 
 import { sizesPorViewport } from '../../_lib/imagen'
@@ -21,59 +16,90 @@ export const ID = 'tu-panel'
 /** El nombre visible del rótulo. Es contenido, no el id. */
 export const NOMBRE = 'Tu panel'
 
-/**
- * EL ENCABEZADO — SPRINT PANEL 2. Ocupa el 30 % izquierdo en escritorio; la
- * descripción entra en dos renglones como mucho a ese ancho.
- */
-export const TITULO = 'Tu Panel'
-export const DESCRIPCION = 'Tu acceso al proyecto. Ves cómo va y pedís lo que necesites, sin esperar un mail.'
-
-/** Dónde se ancla una captura en su marco. La clase vive en `geometria.ts`. */
-export type EncuadreDeCaptura = 'izquierda' | 'centro' | 'derecha'
-
-/** Una tarjeta de la galería. `imagen` y `alt` son lo que se cambia cuando lleguen las capturas. */
-export interface Tarjeta {
-  readonly titulo: string
-  /** Va donde nk pone la fecha: chica, en mayúsculas, debajo del título. */
-  readonly etiqueta: string
-  /** Ruta servida desde `public/`. Hoy, el placeholder rayado. */
-  readonly imagen: string
-  /** `''` mientras la imagen sea el placeholder: un rayado no se describe como una pantalla. */
-  readonly alt: string
-  /** RECURSOS: dónde se ancla la captura: el marco (con el 130 % del parallax) le recorta los costados. */
-  readonly encuadre: EncuadreDeCaptura
-  /** [NOCTURNO] B · la demo viva que reemplaza a la captura (`_panel-vivo/`); la captura queda debajo, de respaldo. */
-  readonly demo: IdDeDemo
+/** Un renglón de un título que se pinta: sus palabras y si va en cursiva y subrayado («TODO»). */
+export interface RenglonQueSePinta {
+  readonly palabras: readonly string[]
+  readonly destacado?: boolean
 }
 
-/** El placeholder rayado de B12 §4.3, con la medida de una captura real. */
-const PLACEHOLDER = '/placeholders/panel.png'
-
-/**
- * LAS OCHO, en el orden de la instrucción. Cada título arranca con un verbo en
- * voseo: es lo que la persona HACE en el panel, no lo que el panel «ofrece».
- */
-export const TARJETAS: readonly Tarjeta[] = [
-  // RECURSOS: las capturas reales del panel.
-  { titulo: 'Revisá cada conversación de tu chatbot', etiqueta: 'Chatbot', imagen: '/recursos/panel/conversaciones.webp', encuadre: 'izquierda', demo: 'conversaciones', alt: 'El panel con la lista de conversaciones del chatbot: fecha, mensajes y el lead que dejó cada una, con una conversación abierta.' },
-  { titulo: 'Recibí los leads ya calificados que consultaron tu página', etiqueta: 'Leads', imagen: '/recursos/panel/leads.webp', encuadre: 'derecha', demo: 'leads', alt: 'El panel de leads en tres columnas, calientes, tibios y fríos, con la ficha de un lead de prueba y sus datos de contacto.' },
-  { titulo: 'Creá tickets para que cambiemos lo que necesites', etiqueta: 'Soporte', imagen: '/recursos/panel/tickets.webp', encuadre: 'izquierda', demo: 'tickets', alt: 'El centro de soporte del panel con los tickets abiertos, en curso y resueltos, y el botón para abrir uno nuevo.' },
-  { titulo: 'Chateá con nosotros directo, por lo que sea', etiqueta: 'Soporte', imagen: '/recursos/panel/mensajes.webp', encuadre: 'centro', demo: 'mensajes', alt: 'El chat del panel con el equipo de develOP: una conversación con mensajes de ida y vuelta y el campo para escribir.' },
-  { titulo: 'Pedí servicios nuevos a medida que los sumamos', etiqueta: 'Servicios', imagen: '/recursos/panel/servicios-nuevos.webp', encuadre: 'izquierda', demo: 'servicios', alt: 'La vitrina de servicios del panel: un módulo disponible para desbloquear y los próximos, con el aviso para enterarse.' },
-  { titulo: 'Mirá el resumen de tu proyecto', etiqueta: 'Proyecto', imagen: '/recursos/panel/mi-proyecto.webp', encuadre: 'izquierda', demo: 'proyecto', alt: 'El resumen del proyecto en el panel: el avance en porcentaje, el tipo, las fechas y una entrega esperando aprobación.' },
-  { titulo: 'Seguí tus resultados', etiqueta: 'Resultados', imagen: '/recursos/panel/resultados.webp', encuadre: 'izquierda', demo: 'resultados', alt: 'La vista previa de resultados del panel: tráfico del sitio con sesiones, usuarios y un gráfico de los últimos 30 días.' },
-  { titulo: 'Configurá cómo responde tu chatbot', etiqueta: 'Chatbot', imagen: '/recursos/panel/modifica-chatbot.webp', encuadre: 'izquierda', demo: 'informacion', alt: 'La configuración del chatbot en el panel: lo que sabe el bot sobre el negocio, con la información cargada para responder.' },
+/** [B6] EL TÍTULO — «El panel donde controlás» y, en un segundo renglón, «TODO» en cursiva (se subraya mientras se pinta). */
+export const TITULO: readonly RenglonQueSePinta[] = [
+  { palabras: ['El', 'panel', 'donde', 'controlás'] },
+  { palabras: ['TODO'], destacado: true },
 ]
 
-/** El cierre de la galería, a tamaño de titular. Los puntos van aparte: entran uno por uno. */
-export const Y_MAS = 'Y más'
-export const PUNTOS_DE_Y_MAS = 3
+/** Un título como se anuncia: el texto entero, en una línea. */
+export const textoDe = (renglones: readonly RenglonQueSePinta[]): string => renglones.flatMap((r) => r.palabras).join(' ')
+
+/** Dónde se ancla una captura de respaldo en su marco. La clase vive en `geometria.ts`. */
+export type EncuadreDeCaptura = 'izquierda' | 'centro' | 'derecha'
+
+/** Un módulo del panel: su palabra fundida, su título y su descripción, y la maqueta que lo muestra. */
+export interface Tarjeta {
+  /** La palabra fundida, pálida, del lado opuesto del módulo. Decorativa: no se anuncia. */
+  readonly palabra: string
+  readonly titulo: string
+  readonly descripcion: string
+  /** La maqueta del panel (`_panel-vivo/`). */
+  readonly demo: IdDeDemo
+  /** La captura real de respaldo (lo que se ve sin JS y mientras la maqueta llega), servida desde `public/`. */
+  readonly imagen: string
+  readonly alt: string
+  readonly encuadre: EncuadreDeCaptura
+}
 
 /**
- * EL NEWSLETTER — se mudó del pie del Cierre (SPRINT PANEL 2).
- *
- * [RONDA 2] F1 · Ya envía: a `/api/newsletter` (`NewsletterDelPanel.tsx`), que hoy recibe y
- * valida; la conexión a la lista real es de la etapa siguiente.
+ * [B6] LOS TRES MÓDULOS, en orden: el 1 a la derecha, el 2 a la izquierda y el 3 a la derecha (`geometria.ts`). Las
+ * descripciones están escritas con lo que cada maqueta muestra de verdad (las columnas de los leads, las cuatro métricas y
+ * sus pestañas, los siete campos de lo que sabe el chatbot): nada que el panel no tenga.
+ */
+export const TARJETAS: readonly Tarjeta[] = [
+  {
+    palabra: 'Clientes',
+    titulo: 'Cada cliente, en un solo lugar',
+    descripcion: 'Cada persona que te deja sus datos en tu página o en el chatbot llega al panel con lo que le interesa, cómo llegó y la conversación entera. La ves ordenada entre calientes, tibios y fríos, y con un toque marcás a quién ya contactaste.',
+    demo: 'leads',
+    imagen: '/recursos/panel/leads.webp',
+    alt: 'El panel de leads en tres columnas, calientes, tibios y fríos, con la ficha de un lead de prueba y sus datos de contacto.',
+    encuadre: 'derecha',
+  },
+  {
+    palabra: 'Resultados',
+    titulo: 'Resumen del mes',
+    descripcion: 'Las visitas de tu sitio de un vistazo: sesiones, usuarios, rebote y tiempo promedio, con las páginas más vistas y los últimos treinta días, uno por uno. Al lado, cómo te encuentran en Google, tus reseñas y un resumen escrito de lo que pasó en el mes.',
+    demo: 'resultados',
+    imagen: '/recursos/panel/resultados.webp',
+    alt: 'La vista previa de resultados del panel: tráfico del sitio con sesiones, usuarios y un gráfico de los últimos 30 días.',
+    encuadre: 'izquierda',
+  },
+  {
+    palabra: 'Chatbot',
+    titulo: 'Enseñale a tu chatbot cómo responder',
+    descripcion: 'Todo lo que tu chatbot sabe de tu negocio, ordenado en un solo lugar: qué ofrecés, las preguntas frecuentes, tus políticas, cómo tiene que hablar y lo que nunca debe decir. Si algo cambia, nos pedís el ajuste desde el panel.',
+    demo: 'informacion',
+    imagen: '/recursos/panel/modifica-chatbot.webp',
+    alt: 'La configuración del chatbot en el panel: lo que sabe el bot sobre el negocio, con la información cargada para responder.',
+    encuadre: 'izquierda',
+  },
+]
+
+/** [B6] EL CARTEL DEL MÓDULO — con la rueda (o el dedo) encima, la página scrollea y el módulo lo dice. */
+export const CARTEL = {
+  raton: 'Hacé clic para scrollear acá',
+  tactil: 'Tocá para scrollear acá',
+} as const
+
+/** [B6] EL CTA, a pantalla completa: el titular se pinta como el título; el botón todavía no hace nada (C1 lo despliega). */
+export const CTA: { readonly titular: readonly RenglonQueSePinta[]; readonly bajada: string; readonly boton: string; readonly o: string } = {
+  titular: [{ palabras: ['Tu', 'panel', 'crece', 'con', 'vos.'] }],
+  bajada: 'Sumamos módulos nuevos todo el tiempo, a medida que tu negocio los necesita. Si querés indagar más:',
+  boton: 'Probar el panel',
+  o: 'o',
+}
+
+/**
+ * EL NEWSLETTER — a la derecha del CTA. [RONDA 2] F1 · Ya envía: a `/api/newsletter` (`NewsletterDelPanel.tsx`), que hoy
+ * recibe y valida; la conexión a la lista real es de la etapa siguiente. Las pruebas nunca lo llaman.
  */
 export const NEWSLETTER = {
   id: 'tu-panel-novedades',
@@ -85,28 +111,23 @@ export const NEWSLETTER = {
   listo: '¡Listo! Te avisamos de lo nuevo.',
 } as const
 
-/** Las palabras del fondo. Decorativas: no se anuncian. */
-export const PALABRAS_DEL_FONDO = ['Panel', 'Control', 'Resumen', 'Tickets', 'Leads', 'Resultados', 'Chatbot'] as const
+/** Las palabras fundidas de los módulos (decorativas: no se anuncian). */
+export const PALABRAS_DEL_FONDO: readonly string[] = TARJETAS.map((t) => t.palabra)
 
 /**
- * LA CAPTURA — la medida que se le pide a cada imagen, y el marcador que se lee
- * encima mientras falte. `s21-fotos` cruza `fuente`, `ancho` y `alto` contra el
- * archivo del disco.
+ * LA CAPTURA — la medida que se le pide a cada imagen de respaldo, y el marcador que se lee encima mientras falte.
+ * `s21-fotos` cruza `fuente`, `ancho` y `alto` contra el archivo del disco.
  */
 export const MARCADOR_DE_LA_CAPTURA: Marcador = '[CAPTURA DEL PANEL]'
 
 export const CAPTURA = {
   marcador: MARCADOR_DE_LA_CAPTURA,
-  fuente: PLACEHOLDER,
+  fuente: '/placeholders/panel.png',
   ancho: 1920,
   alto: 1080,
-  /** La feature más ancha ocupa el 45 % del ancho: es la que manda el candidato de la escalera. */
-  sizes: sizesPorViewport(45),
+  /** El módulo ocupa a lo sumo el 60 % del ancho (el escritorio angosto): es el que manda el candidato de la escalera. */
+  sizes: sizesPorViewport(60),
 } as const
 
-/**
- * EL PEDIDO — lo que falta en esta sección. `s7-pedido` cruza esta tabla contra
- * el texto renderizado en los dos sentidos.
- */
-export const PEDIDO: readonly EntradaDePedido[] = [
-]
+/** EL PEDIDO — lo que falta en esta sección. `s7-pedido` cruza esta tabla contra el texto renderizado en los dos sentidos. */
+export const PEDIDO: readonly EntradaDePedido[] = []
