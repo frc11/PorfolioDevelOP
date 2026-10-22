@@ -196,13 +196,18 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   // ── SPRINT DEMOS · el estante de la biblioteca (`demos.css`) ───────────
   { nombre: '--demos-bajada', valor: 'calc(var(--duracion-media) - var(--duracion-rapida))', evidencia: 'derivado', procedencia: 'la bajada casi instantánea del pedido (≤ 120 ms): 400 − 300 = 100 ms, el mismo desfase del subrayado del CTA' },
   { nombre: '--demos-resorte', valor: 'linear(0, 0.264 10%, 0.594 20%, 0.801 30%, 0.908 40%, 0.96 50%, 0.983 60%, 0.993 70%, 0.997 80%, 1)', evidencia: 'derivado', procedencia: 'resorte crítico sin rebote: x(t) = 1 − (1 + 10t)·e^(−10t), muestreado cada 10 %' },
-  { nombre: '--libro-ancho', valor: 'calc(var(--spacing-8) * 5)', evidencia: 'decidido', procedencia: 'seis piezas de 160 px con su solape entran en la columna derecha a 1440' },
+  // [NOCTURNO B5] Reemplazado por la spec («más grandes: el abanico ocupa al menos el 85 % del ancho de la columna»): era 160 px.
+  { nombre: '--libro-ancho', valor: '36%', evidencia: 'decidido', procedencia: '[NOCTURNO B5] la placa, un 36 % de su columna: el solape llena el estante (242 px a 1440 y 167 a 1024; el abanico se ve en el 95 % de la columna, s84)' },
   { nombre: '--libro-giro', valor: '30deg', evidencia: 'decidido', procedencia: 'el ángulo de un libro en el estante: la cara se lee y la vecina la tapa en parte' },
   { nombre: '--libro-alza', valor: 'var(--spacing-6)', evidencia: 'decidido', procedencia: 'cuánto sube la pieza levantada: un paso de 24 px del espaciado' },
   { nombre: '--libro-apertura', valor: 'var(--spacing-4)', evidencia: 'decidido', procedencia: 'cuánto se abren las vecinas para darle aire: un paso de 16 px' },
+  { nombre: '--libro-espesor', valor: 'var(--spacing-3)', evidencia: 'decidido', procedencia: '[NOCTURNO B5] el espesor de la placa 3D (sus cantos): un paso de 12 px, que con el giro del abanico y la mirada se lee de costado' },
+  { nombre: '--libro-canto', valor: '90deg', evidencia: 'derivado', procedencia: '[NOCTURNO B5] el giro de cada canto de la placa sobre su borde: un cuarto de vuelta lo pone de canto a la cara (el bloque de CSS 3D)' },
+  { nombre: '--libro-perspectiva', valor: 'calc(var(--spacing-8) * 40)', evidencia: 'decidido', procedencia: '[NOCTURNO B5] la cámara de cada placa: 1280 px, unos cinco anchos de la placa de 1440 (la de antes eran 960: seis de 160); decidida sin navegador, a calibrar en el sitio' },
+  { nombre: '--mirada', valor: 'rotateX(0deg)', evidencia: 'derivado', procedencia: '[NOCTURNO B5] la mirada de la escena quieta (de frente); la escribe la biblioteca con `giroDeLaPieza` cuando el mouse corre la cámara' },
 
   // ── MÓVIL-TRABAJOS · el carrusel de abajo de 1024 (`demos.css`) ───────
-  { nombre: '--carrusel-margen-del-recorte', valor: '6px', evidencia: 'derivado', procedencia: '[INTERFAZ 1] T3 · el anillo de foco de dos tonos (desplazamiento + dos grosores: el contorno y su borde de papel); `overflow-clip-margin` no acepta calc()' },
+  // [NOCTURNO B5] `--carrusel-margen-del-recorte` se fue con el carrusel de antes (el de las demos es el común de B1.2e).
   { nombre: '--cinta-margen-del-recorte', valor: '6px', evidencia: 'derivado', procedencia: '[INTERFAZ 1] T3 · el mismo margen que el carrusel: el anillo de dos tonos entero, en px porque no acepta calc()' },
 
   { nombre: '--cursor-velo-oscuro', valor: 'color-mix(in srgb, var(--color-fondo) 18%, transparent)', evidencia: 'decidido', procedencia: '[INTERFAZ 1] T2 · el halo del cursor sobre lo oscuro: el papel apenas, el par del gris claro del halo (nk: 0,1 de alfa)' },
@@ -225,6 +230,8 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--zona-de-la-cabecera', valor: 'calc(max(var(--spacing-4), env(safe-area-inset-top)) + var(--spacing-12) + var(--spacing-4))', evidencia: 'derivado', procedencia: 'abajo de 1024, de arriba hasta el borde de abajo de los controles fijos (discos de 48 px a max(16 px, el inset seguro) del borde) más un aire: lo que se ve en el reposo de una sección arranca debajo' },
   // [PULIDO 13] K4 · el autocompletado del pie.
   { nombre: '--demora-del-autocompletado', valor: '100000s', evidencia: 'decidido', procedencia: 'la transición que demora para siempre el fondo celeste y el color del texto que el navegador le pone al campo autocompletado (con !important: no se pisan): así el campo se queda como estaba (en el pie de volumen, transparente sobre su placa)' },
+  // [B12c] el preloader del sitio.
+  { nombre: '--preloader-seguro', valor: '20000ms', evidencia: 'decidido', procedencia: 'el seguro sin hidratar: a los 20 s del arranque la cubierta se esconde sola si nadie la manejó; el mismo TOPE_MS de `_chrome/preloader/decision.ts` (s78-preloader los ata)' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

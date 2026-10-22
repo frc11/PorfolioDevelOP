@@ -120,7 +120,8 @@ export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): r
   // tres veces, porque la tira los repite. Esa multiplicación no la mueve
   // ningún cierre y no se resta con la resta de arriba: se mide contra el
   // recorrido real, post-merge, y no se deriva por aritmética de casillas.
-  afirmarIgual(marcas.length, 26 + DELTA_DEL_PANEL.marcadores + DELTA_DEL_FINAL_EN_EL_CENSO.marcadores + DELTA_DEL_PORTFOLIO.marcadores, `son ${26 + DELTA_DEL_PANEL.marcadores + DELTA_DEL_FINAL_EN_EL_CENSO.marcadores + DELTA_DEL_PORTFOLIO.marcadores} marcadores ANUNCIADOS en la rama quieta (26 + el delta de SPRINT PANEL + el del FINAL + [B1] las ocho casillas del Portfolio)`)
+  const esperados = 26 + DELTA_DEL_PANEL.marcadores + DELTA_DEL_FINAL_EN_EL_CENSO.marcadores + DELTA_DEL_PORTFOLIO.marcadores + DELTA_DE_SERVICIOS_B4.marcadores
+  afirmarIgual(marcas.length, esperados, `son ${String(esperados)} marcadores ANUNCIADOS en la rama quieta (26 + el delta de SPRINT PANEL + el del FINAL + [B1] las ocho casillas del Portfolio + [B4] las del recomendador sin el caso de referencia)`)
   afirmarIgual(
     marcadoresAnunciadosSoloHojas(quieta).length, marcas.length,
     '  y el censo de ANTES da hoy la MISMA cifra sobre el home real: el arreglo de B7 no mueve el número, le saca la dependencia de la forma del marcado',
@@ -179,3 +180,13 @@ export const DELTA_DEL_FINAL_EN_EL_CENSO = { marcadores: -5 - 5 - 9 } as const
  * la misma parada.)
  */
 export const DELTA_DEL_PORTFOLIO = { paradas: 1 + 4, encabezados: 1, marcadores: 8 } as const
+
+/**
+ * [B4] SERVICIOS NUEVA (reemplazada por la spec: la sección se rehízo), lo que le cambia al censo del home:
+ *
+ *   encabezados   +1   el `h3` del recomendador («¿No sabés qué servicio elegir?»)
+ *   marcadores    +9   las doce casillas del recomendador (`[TEXTO]`, tres preguntas con sus tres respuestas, con la llave del
+ *                      contenido inventado) menos los tres `[TESTIMONIO]` del caso de referencia, que se fueron con la de antes
+ * (Las paradas van en `s10-acceso.invariant.ts`, `DELTA_DE_SERVICIOS`.)
+ */
+export const DELTA_DE_SERVICIOS_B4 = { encabezados: 1, marcadores: 12 - 3 } as const

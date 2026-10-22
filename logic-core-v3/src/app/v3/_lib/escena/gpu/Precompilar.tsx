@@ -4,8 +4,10 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useRef, type RefObject } from 'react'
 import type * as THREE from 'three'
 
-import { marcarElPrimerCuadro } from '../../carga'
+import { marcarElPrimerCuadro, marcarLaEscenaPreparada } from '../../carga'
 import { hayBanco } from '../entorno'
+
+import { compilarConCuidado } from './compilar'
 
 /**
  * [CALIDAD 1] B1 · PRECOMPILAR LOS SHADERS AL ARRANCAR — que nada tironee la primera vez que aparece.
@@ -89,6 +91,8 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
         calentar(gl, a.escena, camara)
         gl.setRenderTarget(previo)
       }
+      // [B12c] Compilada y calentada: el preloader del sitio lo espera (el tirón queda debajo de su blanco).
+      marcarLaEscenaPreparada()
       if (hayBanco()) {
         // Con banco, lo que tardó de verdad (esperando a la GPU): en frío es la compilación de Direct3D de lo invisible.
         gl.getContext().finish()
@@ -101,7 +105,8 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
     if (e.cuadros < CUADROS_DESPUES_DEL_LOGO) return
     e.compilado = true
     const t0 = performance.now()
-    void Promise.all([gl.compileAsync(escena, camara), ...[...ESCENAS_APARTE].map((a) => gl.compileAsync(a.escena, camara))]).then(() => {
+    // [T0] Sin `compileAsync`: lo que se libera mientras compila no tira en la página ni deja esto colgado (`compilar.ts`).
+    void Promise.all([compilarConCuidado(gl, escena, camara), ...[...ESCENAS_APARTE].map((a) => compilarConCuidado(gl, a.escena, camara))]).then(() => {
       e.compilarMs = Math.round(performance.now() - t0)
       e.calentar = true
     })

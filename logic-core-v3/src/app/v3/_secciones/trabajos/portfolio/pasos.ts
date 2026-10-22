@@ -80,7 +80,7 @@ export function anchoDelValor(valor: string): AnchoDelPortfolio {
 
 // ─── Los pasos ────────────────────────────────────────────────────────────
 
-/** −1 antes del pin (la aproximación), 0…3 los pasos (las tiras), 4 la cola (panel afuera). */
+/** −1 antes del pin (la aproximación), 0…3 los pasos (las tiras), 4 la cola (panel afuera). [B1.2e] Con el carrusel, −1, 0 y 4. */
 export type IndiceDePaso = -1 | 0 | 1 | 2 | 3 | 4
 export const ANTES_DEL_PIN = -1
 export const EN_LA_COLA = CANTIDAD_DE_PASOS
@@ -156,11 +156,21 @@ export const ADELANTO_DE_DEMOS = ARRANQUE_DEL_VACIO + LLEGADA_DE_LOS_DEMOS.desde
  * saturado (el vacío en 0). Ya no hay resorte del túnel: Demos llega con el scroll y su propia persecución (§11.4).
  */
 export function mostradoDeDemos(px: number, paso: number): number {
-  const deHoy = px - (pxDeLaSalida(paso) - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY) + ADELANTO_DE_DEMOS
+  return mostradoDeLaCola(px, pxDeLaSalida(paso))
+}
+
+/** [B1.2e] El mismo reloj con la cola en cualquier lugar (`salida`, px de la regla): con el carrusel, donde termina su flujo. */
+export function mostradoDeLaCola(px: number, salida: number): number {
+  const deHoy = px - (salida - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY) + ADELANTO_DE_DEMOS
   return Math.min(1, Math.max(0, deHoy / PX_DE_LA_SECCION_EN_LA_TABLA))
 }
 
 /** Al revés: el píxel de la sección nueva para un `mostrado` de hoy en la cola (el destino del foco de Demos). */
 export function pxDelMostradoDeDemos(mostrado: number, paso: number): number {
-  return mostrado * PX_DE_LA_SECCION_EN_LA_TABLA + pxDeLaSalida(paso) - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY - ADELANTO_DE_DEMOS
+  return pxDelMostradoDeLaCola(mostrado, pxDeLaSalida(paso))
+}
+
+/** [B1.2e] Al revés, con la cola en `salida` (px de la regla). */
+export function pxDelMostradoDeLaCola(mostrado: number, salida: number): number {
+  return mostrado * PX_DE_LA_SECCION_EN_LA_TABLA + salida - PX_DEL_ARRANQUE_DE_LA_SALIDA_DE_HOY - ADELANTO_DE_DEMOS
 }

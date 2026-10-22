@@ -11,20 +11,46 @@
 /** El home (`/v3`; con D8, `/`). */
 export const RUTA_DEL_HOME = '/v3'
 
-/** Lo que pide quien navega: `cubierto` se llama con el cuadro cubierto entero. */
+/**
+ * [B12b] EL VIAJE: lo que cubre el cuadro con la ESCENA en vez de la banda (el papel se levanta y la cámara llega a la composición de la
+ * página: `_componentes/navegacion/viajeAlServicio.ts`). Resuelve `escena` con el cuadro ya cubierto por la escena, o `banda` si no
+ * pudo (sin escena a tiempo): entonces el velo cubre con la banda de siempre.
+ */
+export type ViajeDelVelo = () => Promise<'escena' | 'banda'>
+
+/** Lo que pide quien navega: `cubierto` se llama con el cuadro cubierto entero; [B12b] `viaje`, si cubre la escena en vez de la banda. */
 export interface PedidoDelVelo {
   readonly cubierto: () => void
+  readonly viaje: ViajeDelVelo | null
 }
 
 let atender: ((p: PedidoDelVelo) => void) | null = null
 
-/** Cubre el cuadro con el velo y resuelve cuando está cubierto entero; sin el velo montado, en el acto. Se resuelve siempre. */
-export function cubrirConElVelo(): Promise<void> {
-  return new Promise((resolver) => {
-    if (atender === null) resolver()
-    else atender({ cubierto: resolver })
+/**
+ * [B12b] El viaje pedido para el PRÓXIMO `cubrirConElVelo`, en el mismo clic: lo anota el `onClick` del enlace (que `EnlaceDeRuta` corre
+ * antes de cubrir) y lo consume el pedido. Se olvida al terminar la tarea del clic (una microtarea): nunca queda para otra navegación.
+ */
+let viajePedido: ViajeDelVelo | null = null
+
+export function pedirElViaje(v: ViajeDelVelo): void {
+  viajePedido = v
+  queueMicrotask(() => {
+    if (viajePedido === v) viajePedido = null
   })
 }
+
+/** Cubre el cuadro con el velo y resuelve cuando está cubierto entero; sin el velo montado, en el acto. Se resuelve siempre. */
+export function cubrirConElVelo(): Promise<void> {
+  const viaje = viajePedido
+  viajePedido = null
+  return new Promise((resolver) => {
+    if (atender === null) resolver()
+    else atender({ cubierto: resolver, viaje })
+  })
+}
+
+/** [B12b] ¿El velo está montado? (Sin él nadie repone la ruta: el viaje no se pide.) */
+export const hayVelo = (): boolean => atender !== null
 
 /** Sólo el velo del layout: atiende los pedidos mientras está montado. */
 export function atenderElVelo(a: (p: PedidoDelVelo) => void): () => void {
@@ -49,6 +75,57 @@ export const EVENTOS_DEL_VELO = { cubre: 'v3:velo-cubre', repuso: 'v3:velo-repus
  * al pie con la flecha): eso se arma tapado, como antes.
  */
 export const VELO_EN_CURSO = { activo: false }
+
+/**
+ * [T0 · 2026-10-22] LO QUE RETIENE EL «QUIETO» — la banda marca si está en curso (`marcarLaBanda`) y el chrome que se mueve con el velo
+ * puede retener el aviso de quieto hasta terminar (`retenerElQuieto`): la píldora, que se desliza mientras destapa y puede terminar
+ * después que la banda. Así las obras pesadas del home (lo que espera a `quieto`: ~530 ms de hilo trabado en el dev) no caen en medio
+ * de su deslizamiento: con el hilo trabado, el compositor la sigue moviendo pero el hilo la lee con la hora vieja (un salto aparente).
+ * `VELO_EN_CURSO.activo` es la banda O alguna retención; `quieto` se avisa una vez, cuando las dos se terminan.
+ */
+const estadoDelQuieto = { banda: false, retenciones: 0 }
+
+function actualizarElQuieto(): void {
+  const antes = VELO_EN_CURSO.activo
+  VELO_EN_CURSO.activo = estadoDelQuieto.banda || estadoDelQuieto.retenciones > 0
+  if (antes && !VELO_EN_CURSO.activo && typeof window !== 'undefined') window.dispatchEvent(new Event(EVENTOS_DEL_VELO.quieto))
+}
+
+/** Sólo el velo del layout: si la banda está en curso (cubriendo, tapando o destapando). */
+export function marcarLaBanda(enCurso: boolean): void {
+  estadoDelQuieto.banda = enCurso
+  actualizarElQuieto()
+}
+
+/** Retiene el aviso de quieto hasta que se suelte (una vez: soltar de nuevo no hace nada). Devuelve cómo soltarlo. */
+export function retenerElQuieto(): () => void {
+  estadoDelQuieto.retenciones += 1
+  actualizarElQuieto()
+  let suelta = false
+  return () => {
+    if (suelta) return
+    suelta = true
+    estadoDelQuieto.retenciones -= 1
+    actualizarElQuieto()
+  }
+}
+
+/**
+ * [T0 · 2026-10-22] LAS DOS VÍAS PARA BAJAR EL TIEMPO DEL VELO HACIA EL HOME (11 · 3): `banda` (la banda más corta: `VELO_CORTO`,
+ * `_chrome/velo/velo.ts`) y `montaje` (el home se monta una sola vez: llegando por la navegación cliente, con la coreografía animada ya
+ * cargada, sin el árbol quieto que después se rehacía entero; `_secciones/_contrato/precargaDeLaCoreografia.ts`). `ambas`, las dos;
+ * `ninguna`, la de B12a.8 (la referencia del banco). La elige el banco con `window.__viaDelVelo` (`scripts-carga/velo.ts`, `VIA=…`), nunca la
+ * URL; sin él, `VIA_POR_DEFECTO`.
+ */
+export type ViaDelVelo = 'banda' | 'montaje' | 'ambas' | 'ninguna'
+export const VIA_POR_DEFECTO: ViaDelVelo = 'ambas'
+const esVia = (v: unknown): v is ViaDelVelo => v === 'banda' || v === 'montaje' || v === 'ambas' || v === 'ninguna'
+export function viaDelVelo(): ViaDelVelo {
+  const v = typeof window === 'undefined' ? undefined : (window as Window & { __viaDelVelo?: unknown }).__viaDelVelo
+  return esVia(v) ? v : VIA_POR_DEFECTO
+}
+export const conLaBandaCorta = (v: ViaDelVelo): boolean => v === 'banda' || v === 'ambas'
+export const conElMontajeLiviano = (v: ViaDelVelo): boolean => v === 'montaje' || v === 'ambas'
 
 /** Cerca del cuadro (media pantalla de margen): lo que se ve al destapar o apenas se scrollea. */
 const aLaVista = (el: Element | null): boolean => {

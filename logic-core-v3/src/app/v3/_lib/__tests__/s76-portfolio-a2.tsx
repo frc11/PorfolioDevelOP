@@ -69,7 +69,8 @@ export function afirmarA2(): void {
   const laEntrada = (r: string, m: string, u: string): boolean =>
     /if \(!enUnDialogo\(\) && \(c\.atrapa\(px\) \|\| c\.entrando\(\)\)\) \{\s*const deLaEntrada: EventoDeLenis = e\s*deLaEntrada\.lenisStopPropagation = true\s*if \(e\.cancelable\) e\.preventDefault\(\)\s*gesto = \{ acumulado: 0, ultimo: ahora, disparado: true \}\s*return\s*\}\s*const activa = c\.manda\(\)/.test(r) &&
     /const hacia = pxDelScroll\(lenis\.targetScroll \+ px \* lenis\.options\.wheelMultiplier, medida\.tope, medida\.alto\)\s*const tira = tiraDeLaEntrada\(vistaDelPaso\(actual\.current\)\.fase, hacia, px > 0 \? 1 : -1, PANTALLAS_POR_PASO\)\s*if \(tira === null\) return false\s*saltar\(tira, false, true\)/.test(m) &&
-    /return v\.fase === 'adentro' && pegado\(caja\.current\) && !conDialogo\(caja\.current\) && \(entradaLista\.current \|\| !conLaTrampa\) \? v\.tira : null/.test(m) &&
+    // [B1.2e] Con el guardia del carrusel (debajo de 1024 la rueda no manda: s76 §45, con su control).
+    /return !carrusel && v\.fase === 'adentro' && pegado\(caja\.current\) && !conDialogo\(caja\.current\) && \(entradaLista\.current \|\| !conLaTrampa\) \? v\.tira : null/.test(m) &&
     /entrando: \(\) => conLaTrampa && adentro\(\) && !entradaLista\.current/.test(m) &&
     /entradaLista\.current = false\s*if \(!orden\.panel\) return undefined[\s\S]*?entradaLista\.current = true\s*\}, reducido \? 0 : ORDEN\.panelS \* 1000\)/.test(u)
   afirmar(laEntrada(rueda, mandos, vivo), '  cableada antes que todo: el evento que entra se traga y vuela al primero del sentido (con el destino de Lenis MÁS este evento); mientras el panel no terminó de entrar (su transición de 700 ms) la rueda se traga entera y no da pasos; recién ahí, un gesto es un paso')

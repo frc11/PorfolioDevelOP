@@ -151,6 +151,21 @@ export const INVENTOS = {
     mentira: 'Texto de relleno de la reseña de Banú Scents: dos o tres renglones con el largo de una reseña de verdad, para ver la ficha completa.',
   },
   trabajosAutorDeBanu: { marcador: '[NOMBRE]', pedido: '[NOMBRE]', mentira: 'Nombre del cliente, Banú Scents' },
+  // ⚠️ [B4] · EL RECOMENDADOR DE SERVICIOS — las preguntas sobre los problemas del cliente y sus respuestas (una por servicio), a
+  // redactar. Con la llave prendida, un relleno que se lee como relleno; con la llave apagada, el marcador con qué va en la casilla.
+  // A qué servicio lleva cada respuesta NO es relleno: es la lógica (`servicios/recomendador/preguntas.ts`).
+  serviciosPregunta1: { marcador: '[TEXTO]', pedido: '[TEXTO] · la primera pregunta, sobre lo que hoy le cuesta al negocio', mentira: 'Texto de relleno: ¿qué es lo que más te cuesta hoy en tu negocio?' },
+  serviciosPregunta1Web: { marcador: '[TEXTO]', pedido: '[TEXTO] · la opción que lleva a desarrollo web', mentira: 'Texto de relleno: que me encuentren y me conozcan en internet.' },
+  serviciosPregunta1Software: { marcador: '[TEXTO]', pedido: '[TEXTO] · la opción que lleva a software a medida', mentira: 'Texto de relleno: ordenar lo que hoy hacemos a mano y en planillas.' },
+  serviciosPregunta1Ia: { marcador: '[TEXTO]', pedido: '[TEXTO] · la opción que lleva a IA y automatizaciones', mentira: 'Texto de relleno: responder a tiempo todas las consultas que llegan.' },
+  serviciosPregunta2: { marcador: '[TEXTO]', pedido: '[TEXTO] · la segunda pregunta, sobre dónde se pierde el tiempo', mentira: 'Texto de relleno: ¿dónde se te va la mayor parte del tiempo?' },
+  serviciosPregunta2Web: { marcador: '[TEXTO]', pedido: '[TEXTO] · la segunda opción que lleva a desarrollo web', mentira: 'Texto de relleno: en explicar una y otra vez qué ofrecemos.' },
+  serviciosPregunta2Software: { marcador: '[TEXTO]', pedido: '[TEXTO] · la segunda opción que lleva a software a medida', mentira: 'Texto de relleno: en cargar y controlar datos de la operación.' },
+  serviciosPregunta2Ia: { marcador: '[TEXTO]', pedido: '[TEXTO] · la segunda opción que lleva a IA y automatizaciones', mentira: 'Texto de relleno: en contestar mensajes repetidos.' },
+  serviciosPregunta3: { marcador: '[TEXTO]', pedido: '[TEXTO] · la tercera pregunta, sobre qué cambiaría primero', mentira: 'Texto de relleno: ¿qué te gustaría resolver primero?' },
+  serviciosPregunta3Web: { marcador: '[TEXTO]', pedido: '[TEXTO] · la tercera opción que lleva a desarrollo web', mentira: 'Texto de relleno: tener una presencia online que se vea profesional.' },
+  serviciosPregunta3Software: { marcador: '[TEXTO]', pedido: '[TEXTO] · la tercera opción que lleva a software a medida', mentira: 'Texto de relleno: tener una herramienta hecha para cómo trabajamos.' },
+  serviciosPregunta3Ia: { marcador: '[TEXTO]', pedido: '[TEXTO] · la tercera opción que lleva a IA y automatizaciones', mentira: 'Texto de relleno: que las tareas repetitivas se hagan solas.' },
 } as const satisfies Record<string, Invento>
 
 export const LISTA_DE_INVENTOS: readonly Invento[] = Object.values(INVENTOS)

@@ -5,7 +5,7 @@
  *   T1 · la escena responde a la interfaz: el pulso que pide un CTA, la onda del piso hacia un valor, la sala detrás del
  *        menú del teléfono.
  *   T2 · la vista previa del destino en la barra.
- *   T3 · la vida propia: la onda de las portadas y Tu panel (la barra, sin número); Servicios sin vida (cierre final).
+ *   T3 · la vida propia: Tu panel (la barra, sin número); Servicios sin vida (cierre final). [NOCTURNO B5] La onda de las portadas se fue.
  *   Cierre · el cartel de las demos pegado al cursor, el infinito del recorrido, la sombra de día (una sola).
  *
  * Lo que necesita navegador está en los bancos de `scripts-interfaz2/` y sus entregas en `~/.cache/b4-medicion/interfaz2/`.
@@ -16,7 +16,6 @@ import * as THREE from 'three'
 import { SELECTOR_DE_LOS_ITEMS } from '../../_chrome/escena/AnticipacionDelMenu'
 import { SELECTOR_DE_LOS_CTA, SELECTOR_DE_LOS_VALORES, centroNormalizado } from '../../_chrome/escena/RespuestaDeLaEscena'
 import { demoBajo, estadoBajo, nocheQueSeVe, tonoBajo } from '../../_chrome/cursor/estado'
-import { ONDA_DE_LA_PORTADA, colaDeLaOnda, frenteDeLaOnda, pixelDelMapa } from '../../_secciones/trabajos/demos/ondaDeLaPortada'
 import { ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { ENCENDIDO } from '../escena/entorno/encendido'
 import { ANILLOS_GLSL } from '../escena/entorno/Pulso'
@@ -197,15 +196,8 @@ controlPositivo('el chequeo del salto ve un viaje que suelta la anticipación de
 afirmar(/const giroDeLaVista = physics \? giroDeLaInterfaz\(\) : 0/.test(leer('_lib/escena/OrbitRig.tsx')) && /angleDeg \+= desplazamiento\.angleDeg \+ giroDeLaVista/.test(leer('_lib/escena/OrbitRig.tsx')) && SELECTOR_DE_LOS_ITEMS === '[data-pieza="barra"] a[data-pieza="barra-enlace"]' && leer('_chrome/escena/AnticipacionDelMenu.tsx').includes('const viaje = planDelViaje(seccion.id, y1)'), 'el giro sólo con la física; los ítems de la barra; la misma cuenta que el clic')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('T3 · La vida propia: la onda de las portadas y Tu panel (la barra, sin número)')
+titulo('T3 · La vida propia: Tu panel (la barra, sin número); [B5] la onda de las portadas, fuera')
 
-afirmar(ANILLOS_GLSL.includes('( 1.0 - pow( 1.0 - t, 2.2 ) )') && Math.abs(frenteDeLaOnda(0.5) - (1 - 0.5 ** 2.2)) < 1e-12 && colaDeLaOnda(0) === 0 && colaDeLaOnda(1) === 0, 'la onda de la portada tiene el frente y la cola de los anillos del piso')
-const [r0, g0] = pixelDelMapa(0, 0)
-afirmar(Math.abs(r0 - 0.5) < 1e-6 && Math.abs(g0 - 0.5) < 1e-6 && pixelDelMapa(ONDA_DE_LA_PORTADA.radioEnElMapa, 0)[2] > 0.99, '  su mapa es neutro lejos del frente y lleva la banda en el frente')
-afirmar(!/will-change|willChange/.test(sinComentarios(leer('_secciones/trabajos/demos/ondaDeLaPortada.ts'))) && leer('_chrome/ChromeDelHome.tsx').includes('<OndaDeLasPortadas />'), '  sin promover capas (la cara no puede llevar will-change), en el producto')
-// [RETOQUE PANEL] T1 · la tarjeta «En vivo · datos de ejemplo» se fue de Tu panel (y sus tres archivos, que nadie más usaba).
-const TU_PANEL = leer('_secciones/tu-panel/TuPanel.tsx')
-const sinElPanelEnVivo = (f: string): boolean => !/PanelEnVivo|_componentes\/vida\//.test(f)
 const borrado = (ruta: string): boolean => {
   try {
     leer(ruta)
@@ -214,6 +206,15 @@ const borrado = (ruta: string): boolean => {
     return true
   }
 }
+// [NOCTURNO B5] Reemplazada por la spec (decisión de Valentino, «el efecto de agua sale»): la onda de las portadas se fue entera
+// (su código, su escucha delegado y su banco); lo que se afirmaba de ella (el frente y la cola de los anillos, su mapa, sin capas) se
+// fue con ella. Lo que queda es que no vuelva: ni los archivos ni el montaje en el chrome.
+const sinLaOnda = (chrome: string): boolean => !/OndaDeLasPortadas|ondaDeLaPortada|onda-de-la-portada/.test(sinComentarios(chrome)) && borrado('_secciones/trabajos/demos/ondaDeLaPortada.ts') && borrado('_secciones/trabajos/demos/OndaDeLasPortadas.tsx')
+afirmar(sinLaOnda(leer('_chrome/ChromeDelHome.tsx')), '[B5] las portadas ya no ondean: sin el filtro del agua ni su escucha, y el chrome no la monta')
+controlPositivo('  el chequeo vería la onda montada otra vez', `${leer('_chrome/ChromeDelHome.tsx')}\n      <OndaDeLasPortadas />\n`, sinLaOnda)
+// [RETOQUE PANEL] T1 · la tarjeta «En vivo · datos de ejemplo» se fue de Tu panel (y sus tres archivos, que nadie más usaba).
+const TU_PANEL = leer('_secciones/tu-panel/TuPanel.tsx')
+const sinElPanelEnVivo = (f: string): boolean => !/PanelEnVivo|_componentes\/vida\//.test(f)
 afirmar(sinElPanelEnVivo(TU_PANEL) && borrado('_componentes/vida/PanelEnVivo.tsx'), 'Tu panel, sin el panel en vivo: lo vivo son las demos de cada feature')
 controlPositivo('  el chequeo vería el panel en vivo montado', '      <PanelEnVivo />', sinElPanelEnVivo)
 afirmar(!/ProcesoEnVivo|proceso-en-vivo/.test(leer('_secciones/servicios/ServiciosEnSecuencia.tsx')), 'Servicios, como antes de INTERFAZ 2: sin el recorrido del pedido de ejemplo (cierre final)')

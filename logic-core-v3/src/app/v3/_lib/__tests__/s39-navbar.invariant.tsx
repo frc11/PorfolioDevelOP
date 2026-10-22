@@ -38,7 +38,11 @@ const sinComentarios = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '')
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T1 · Los ítems: el orden pedido, una sola lista para la barra y el menú')
 
-afirmarIgual(ENLACES_DEL_HOME.map((e) => e.rotulo), ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto'], 'los seis, en el orden pedido: «Trabajos» pasa a «Portfolio» y «Panel» es nuevo')
+// [B12a.8 · T0] «Home» primero (CONTRATO §Navegación); los seis de antes, detrás, en su orden.
+const ROTULOS_DEL_HOME = ['Home', 'Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto'] as const
+const rotulosEnOrden = (xs: readonly string[]): boolean => xs.length === ROTULOS_DEL_HOME.length && xs.every((x, k) => x === ROTULOS_DEL_HOME[k])
+afirmar(rotulosEnOrden(ENLACES_DEL_HOME.map((e) => e.rotulo)), 'los siete, en el orden pedido: [B12a.8] «Home» primero; «Trabajos» pasa a «Portfolio» y «Panel» es nuevo', JSON.stringify(ENLACES_DEL_HOME.map((e) => e.rotulo)))
+controlPositivo('  el detector ve la lista sin «Home» (la de antes de B12a.8)', ENLACES_DEL_HOME.slice(1).map((e) => e.rotulo), rotulosEnOrden)
 const secciones = ENLACES_DEL_HOME.filter((e) => e.destino !== '#contacto')
 afirmar(secciones.every((e) => (IDS_DE_SECCION as readonly string[]).includes(e.destino.slice(1)) && e.destino === `#${e.id}`), '  cada uno lleva a una sección de la tabla («Portfolio» sigue siendo `#trabajos`, «Panel» es `#tu-panel`)')
 afirmarIgual(ENLACES_DEL_HOME[ENLACES_DEL_HOME.length - 1], { id: 'cierre', rotulo: 'Contacto', destino: '#contacto' }, '  y «Contacto» sigue siendo el de hoy: abre el formulario')
@@ -86,7 +90,16 @@ const BARRA_HTML = renderToStaticMarkup(<BarraDelHome />)
 // [B12a.5] Reemplazadas por la spec (D5): «Servicios» es el botón (cerrado) del desplegable de las páginas de servicio; los otros, enlaces.
 const enlaces = [...BARRA_HTML.matchAll(/<(a|button) [^>]*data-pieza="barra-enlace"[^>]*>([\s\S]*?)<\/(?:a|button)>/g)]
 const destinoDelItem = (m: RegExpMatchArray): string | undefined => (m[1] === 'button' ? (/aria-expanded="false" aria-controls="desplegable-de-servicios"/.test(m[0]) ? '<desplegable>' : '<button>') : /href="([^"]+)"/.exec(m[0])?.[1])
-afirmarIgual(enlaces.map(destinoDelItem), ENLACES_DEL_HOME.map((e) => (e.id === 'servicios' ? '<desplegable>' : e.destino)), 'seis ítems, los del home, en su orden ([B12a.5] «Servicios», el botón del desplegable, cerrado)')
+// [B12a.8 · T0] Reemplazada por la spec de B12a.8 (CONTRATO §Navegación): «Home» primero y «Servicios» es un ENLACE a su sección; la lista
+// abre aparte, con la flechita de al lado (un botón cerrado que no es un ítem de la barra), pegada al enlace.
+const itemsDeLaBarra = (html: string): boolean => {
+  const items = [...html.matchAll(/<(a|button) [^>]*data-pieza="barra-enlace"[^>]*>([\s\S]*?)<\/(?:a|button)>/g)].map(destinoDelItem)
+  const flechita = /<a [^>]*data-pieza="barra-enlace"[^>]*data-nav-id="servicios"[^>]*>[\s\S]*?<\/a><button [^>]*data-parte="abrir-servicios"[^>]*aria-expanded="false" aria-controls="desplegable-de-servicios"/.test(html)
+  return items.length === ENLACES_DEL_HOME.length && items.every((d, k) => d === ENLACES_DEL_HOME[k]?.destino) && ENLACES_DEL_HOME[0]?.id === 'hero' && flechita
+}
+afirmar(itemsDeLaBarra(BARRA_HTML), 'siete ítems, los del home, en su orden ([B12a.8] «Home» primero; «Servicios», el enlace a su sección, con la flechita de la lista cerrada al lado)', JSON.stringify(enlaces.map(destinoDelItem)))
+controlPositivo('  el detector ve la barra sin «Home» (la de antes de B12a.8)', BARRA_HTML.replace(/<li><a [^>]*data-nav-id="hero"[^>]*>[\s\S]*?<\/a><\/li>/, ''), itemsDeLaBarra)
+controlPositivo('  y «Servicios» sin su flechita (la lista no abriría con el teclado)', BARRA_HTML.replace(/<button [^>]*data-parte="abrir-servicios"/, '<button'), itemsDeLaBarra)
 const visible = (html: string): string => html.replace(/<span data-copia="b" aria-hidden="true">[^<]*<\/span>/g, '').replace(/<[^>]+>/g, '')
 afirmar(enlaces.every((m, i) => !m[2].includes('data-rollover') && visible(m[2]) === ENLACES_DEL_HOME[i].rotulo), '  [NAVBAR] Retoque 4: sin el rollover tipo botón (quedó en el CTA, el mail, WhatsApp y los proyectos), y el nombre accesible es el rótulo')
 controlPositivo('el chequeo del nombre vería una copia B que se anuncia', '<span data-rollover=""><span data-copia="a">Panel</span><span data-copia="b">Panel</span></span>', (h: string) => visible(h) === 'Panel')

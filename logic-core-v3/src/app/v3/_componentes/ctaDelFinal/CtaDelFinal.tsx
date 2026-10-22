@@ -1,13 +1,20 @@
 'use client'
 
 import { motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'motion/react'
-import { useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
+import { createContext, useContext, useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { CTA_EN_VIVO, avisarDelLugar, ctaListo, ctaVisibleEnElViaje, suscribirAlCta, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
 import { apareceDeLosValores, ctaTocable, deslizadoEnLaLista, entradaEnLaLista, llegadaDelTexto, progresoEnLaLista, tocableEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
 import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
+import type { IdDeServicio } from '../../_secciones/_contrato/acento'
+
+/**
+ * [B13] EL SERVICIO QUE EL CTA PRECARGA EN EL CONTACTO (`data-precarga`): el cierre de una página lo provee con el de la página; sin
+ * proveedor (el home), `null` y el marcado de siempre (sin el atributo).
+ */
+export const PrecargaDelCta = createContext<IdDeServicio | null>(null)
 
 /**
  * [PULIDO 2] 5 · EL CTA DEL FINAL CON SU TRANSFORMACIÓN, DEL LADO DEL DOM ([PULIDO 3B] B1: la del producto, sin bandera). El
@@ -172,11 +179,13 @@ export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista 
   const tocable = enLaLista ? tocableEnLaLista : ctaTocable
   const pointerEvents = useTransform(progreso, (p) => (tocable(p) ? 'auto' : 'none'))
   const llegada = useTransform(progreso, enLaLista ? deslizadoEnLaLista : llegadaDelTexto)
+  const precarga = useContext(PrecargaDelCta)
   return (
     <motion.a
       href={destino}
       data-pieza="cta-en-volumen"
       data-abre-contacto="panel"
+      data-precarga={precarga ?? undefined}
       aria-label={rotulo}
       style={{ pointerEvents }}
       className="inline-block cursor-pointer no-underline"

@@ -38,7 +38,21 @@ export function siguienteFaseDelVelo(fase: FaseDelVelo, evento: EventoDelVelo): 
  */
 export const VELO = { cubrirMs: 460, destaparMs: 560, cuadrosPintados: 2, esperaMaximaMs: 3500 } as const
 
-/** ¿Ya se puede destapar? La página nueva montada y sus cuadros pintados (con el scroll en su lugar), o la espera cumplida (el techo). */
+/**
+ * [T0 · 2026-10-22] 11 · 3 · la vía `banda` (`viaDelVelo`, `_lib/veloDeNavegacion.ts`): la misma pasada, un 22 % más corta (cubrir y
+ * destapar, en la misma proporción; la curva y la pluma, las mismas). Hacia el home ahorra ~220 ms de los 1,66–1,73 s medidos en el build.
+ */
+export const VELO_CORTO = { cubrirMs: 360, destaparMs: 440 } as const
+
+/** Lo que tardan cubrir y destapar con la vía del velo: con la banda corta, `VELO_CORTO`; si no, los de `VELO`. */
+export function tiemposDelVelo(bandaCorta: boolean): { readonly cubrirMs: number; readonly destaparMs: number } {
+  return bandaCorta ? VELO_CORTO : { cubrirMs: VELO.cubrirMs, destaparMs: VELO.destaparMs }
+}
+
+/**
+ * ¿Ya se puede destapar? La página nueva montada (y [T0] su escena lista: la variante de la página dibujada, `escenaDeLaRutaLista`) y sus
+ * cuadros pintados (con el scroll en su lugar), o la espera cumplida (el techo).
+ */
 export function puedeDestapar(cuadrosPintados: number, montada: boolean, esperandoMs: number): boolean {
   return (montada && cuadrosPintados >= VELO.cuadrosPintados) || esperandoMs >= VELO.esperaMaximaMs
 }

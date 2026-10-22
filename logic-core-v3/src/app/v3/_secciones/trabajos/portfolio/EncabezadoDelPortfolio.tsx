@@ -15,9 +15,6 @@ import type { PropsDeSeccion } from '../../_contrato/forma'
 
 import { CONTENIDO } from '../contenido'
 
-import { conElDefecto } from './medida'
-import { duracionDeLaSalida } from './orden'
-
 import { CLASE_DEL_CUERPO, CLASE_DEL_TITULAR, MEDIDA_DEL_CUERPO_CH, opacidadDeLaLlegada, recorteDeLaLlegada } from './tipografia'
 
 /**
@@ -26,12 +23,6 @@ import { CLASE_DEL_CUERPO, CLASE_DEL_TITULAR, MEDIDA_DEL_CUERPO_CH, opacidadDeLa
  * de las secciones (`CLAUDE.md`); el título 3D la persigue con su mínimo (`LENTOS.llegadaDePortfolioS`).
  */
 export const PRESENCIA_DEL_ENCABEZADO = { s: 0.6, curva: [0.25, 0.46, 0.45, 0.94] } as const
-
-/**
- * [B1.2d B] T3 · En las historias (debajo de 1024) el título viene desde abajo: sube pasando por delante del logo y termina arriba, con
- * el logo debajo (como la columna de PC). Lo que recorre, en `svh` del cuadro, con la misma presencia (por tiempo).
- */
-export const SUBIDA_DEL_ENCABEZADO_SVH = 55
 
 /**
  * [B1] EL ENCABEZADO DEL PORTFOLIO — «Portfolio» y su bajada, centrados en la mitad de arriba de la columna (plan §5.1; [B1.2b]
@@ -46,7 +37,7 @@ export const SUBIDA_DEL_ENCABEZADO_SVH = 55
  * (`useAcompananteDelTitulo`). Los nombres son los del cartel a propósito: los invariantes que fijan cómo se arma el título los
  * leen acá.
  */
-export function EncabezadoDelPortfolio({ seccion, adentro, reducido, subeDesdeAbajo = false, className }: PropsDeSeccion & { readonly adentro: boolean; readonly reducido: boolean; readonly subeDesdeAbajo?: boolean; readonly className?: string }): React.JSX.Element {
+export function EncabezadoDelPortfolio({ seccion, adentro, reducido, seFunde = false, className }: PropsDeSeccion & { readonly adentro: boolean; readonly reducido: boolean; readonly seFunde?: boolean; readonly className?: string }): React.JSX.Element {
   // [NOCTURNO] A1 · la bajada va en el plano del título de volumen (la cámara la corre con él).
   const bajada = useAcompananteDelTitulo<HTMLDivElement>('portfolio')
   const presencia = useMotionValue(adentro ? 1 : 0)
@@ -55,16 +46,13 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, subeDesdeAb
       presencia.set(adentro ? 1 : 0)
       return undefined
     }
-    // [F5] En las historias el título cae a la par de TODA la salida (el panel y la caída, `duracionDeLaSalida`): se va mientras llega Demos.
-    const duracion = subeDesdeAbajo && !adentro && !conElDefecto('historias-de-antes') ? duracionDeLaSalida(PRESENCIA_DEL_ENCABEZADO.s) : PRESENCIA_DEL_ENCABEZADO.s
-    const a = animate(presencia, adentro ? 1 : 0, { duration: duracion, ease: [...PRESENCIA_DEL_ENCABEZADO.curva] })
+    const a = animate(presencia, adentro ? 1 : 0, { duration: PRESENCIA_DEL_ENCABEZADO.s, ease: [...PRESENCIA_DEL_ENCABEZADO.curva] })
     return () => a.stop()
-  }, [adentro, reducido, presencia, subeDesdeAbajo])
+  }, [adentro, reducido, presencia])
   // [PULIDO 10] J7 · la llegada de un viaje: el titular entero o invisible (`opacidadDeLaLlegada`, `recorteDeLaLlegada`).
   const repeticion = useRepeticionDeLaLlegada(seccion.id)
   const opacidadDelTitular = useTransform(repeticion, opacidadDeLaLlegada)
   const recorteDelTitular = useTransform(repeticion, recorteDeLaLlegada)
-  const subida = useTransform(presencia, (p) => `${((1 - p) * SUBIDA_DEL_ENCABEZADO_SVH).toFixed(3)}svh`)
   const encabezado = (
     <div data-pieza="encabezado-del-portfolio" className={className}>
       <div id={idDelTitularDeSeccion(seccion.id)}>
@@ -95,7 +83,7 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, subeDesdeAb
       </div>
     </div>
   )
-  // [B1.2d B] T3 · sólo en las historias: en escritorio el marcado es el de siempre. [F5] Y con un fundido atado a la presencia: P2 sólo
-  // desplaza (medio alto propio) y no oculta, así que en 0 quedaba el 40 % del título huérfano sobre Demos (como el párrafo de Demos).
-  return subeDesdeAbajo ? <motion.div data-parte="subida-del-encabezado" style={conElDefecto('historias-de-antes') ? { y: subida } : { y: subida, opacity: presencia }}>{encabezado}</motion.div> : encabezado
+  // [B1.2e] En el flujo del carrusel (debajo de 1024), con un fundido atado a la presencia: P2 sólo desplaza (medio alto propio) y no oculta,
+  // así que en 0 asomaría el 40 % del título (la lección de F5). En escritorio, el marcado de siempre.
+  return seFunde ? <motion.div data-parte="fundido-del-encabezado" style={{ opacity: presencia }}>{encabezado}</motion.div> : encabezado
 }

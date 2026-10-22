@@ -12,6 +12,8 @@
  * casi todo), va detrás del vidrio, que lo deja ver desenfocado. Se mide al montarse, al asomarse el pie y al cambiar algo
  * de tamaño (no con el teclado abierto: `teclado.ts`), nunca por cuadro.
  */
+import { SELECTOR_DEL_FAQ } from '../../pie3d/faqDelPie'
+
 export interface Caja {
   readonly x: number
   readonly y: number
@@ -138,12 +140,15 @@ export function medirElEncuadreDelPie(huella: { readonly ancho: number; readonly
   const pie = document.getElementById('cierre')
   const vista = { ancho: window.innerWidth, alto: window.innerHeight }
   if (pie === null || vista.ancho <= 0 || vista.alto <= 0) return null
-  // Al fondo, todo lo del documento sube lo que falta para llegar: `maximo − scrollY`.
-  const corre = Math.max(0, document.documentElement.scrollHeight - vista.alto) - window.scrollY
+  // Al fondo, todo lo del documento sube lo que falta para llegar: `maximo − scrollY`. [B10] El fondo del LAYOUT (`offsetHeight`), el del
+  // final (`cuadroDelFinal.ts`): el FAQ en lista cuelga después del pie y agranda el desborde, no el layout.
+  const corre = Math.max(0, document.documentElement.offsetHeight - vista.alto) - window.scrollY
   const enElFondo = (r: DOMRect): Caja => ({ x: r.left, y: r.top - corre, ancho: r.width, alto: r.height })
   const ocupadas: Caja[] = []
   const pesadas: Caja[] = []
   for (const e of pie.querySelectorAll(LO_QUE_TAPA)) {
+    // [B10] Lo del FAQ (en lista, después del pie) no tapa el final.
+    if (e.closest(SELECTOR_DEL_FAQ) !== null) continue
     const r = e.getBoundingClientRect()
     if (r.width <= 1 || r.height <= 1) continue
     ocupadas.push(enElFondo(r))

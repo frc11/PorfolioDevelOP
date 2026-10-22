@@ -29,8 +29,6 @@ import { vigilarElReposo } from '../../_secciones/_contrato/reposo'
 import { sinLoInventado } from '../../_secciones/_contrato/restauracion'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { CONTENIDO_PROHIBIDO_DE_CONTROL } from '../../_secciones/_invariantes/soporte'
-import { DISPARO_DEL_REMATE, margenDelDisparo as margenDelRemate } from '../../_secciones/tu-panel/entrada'
-import { Remate } from '../../_secciones/tu-panel/Remate'
 import { TuPanel } from '../../_secciones/tu-panel/TuPanel'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { RAIZ, leer } from './s3-archivos'
@@ -118,24 +116,19 @@ const asomaBien = (f: Asoma): boolean => f({ top: 880, bottom: 1200 }, 900) && !
 afirmar(asomaBien(aLaVistaEn), '  «a la vista» es que la caja asome en el cuadro; con la pestaña oculta (alto 0) no asoma nada')
 controlPositivo('  el detector VE la medida sin el alto (dispararía a ciegas en una pestaña oculta)', (b, alto) => b.bottom > 0 && b.top < alto, asomaBien)
 
-// Una sola implementación: la línea y el margen del remate son los del contrato.
-afirmar(DISPARO_DEL_REMATE === LINEA_DEL_DISPARO && margenDelRemate === margenDelDisparo && margenDelDisparo(LINEA_DEL_DISPARO) === `0% 0% -${String(LINEA_DEL_DISPARO)}% 0%`, `  una sola implementación: la línea del remate (${String(DISPARO_DEL_REMATE)} %) y su margen son los del gatillo común`)
+// Una sola implementación: la línea y el margen del contrato. [B6] El remate de Tu panel se fue con la sección nueva; su CTA
+// entra con el gatillo común (no una copia): ni un observador ni un margen propios.
+const CTA_DEL_PANEL = sinComentarios(leer(`${V3}/_secciones/tu-panel/CtaDelPanel.tsx`))
+const usaElComun = (c: string): boolean => c.includes("import { Gatillo } from '../_contrato/Gatillo'") && /<Gatillo /.test(c) && !/IntersectionObserver|rootMargin|margenDelDisparo/.test(c)
+afirmar(usaElComun(CTA_DEL_PANEL) && margenDelDisparo(LINEA_DEL_DISPARO) === `0% 0% -${String(LINEA_DEL_DISPARO)}% 0%`, `  una sola implementación: el CTA de Tu panel dispara con el gatillo común, en su línea (${String(LINEA_DEL_DISPARO)} %) y con su margen`)
+controlPositivo('  el detector VE un CTA con su propio observador', `${CTA_DEL_PANEL}\nnew IntersectionObserver(() => undefined, { rootMargin: '0%' })`, usaElComun)
 const definiciones = (archivos: readonly string[], fuente: (a: string) => string): string[] => archivos.filter((a) => /export function (margenDelDisparo|siguienteEstado)\(/.test(fuente(a)))
 afirmarIgual(definiciones(PRODUCTO.filter((a) => a.startsWith(`${V3}/_secciones/`)), leer), [`${V3}/_secciones/_contrato/disparo.ts`], '  (en las secciones, la máquina y el margen se definen una vez: en el contrato)')
 controlPositivo('  el detector VE la copia de antes en tu-panel/entrada.ts', [`${V3}/_secciones/_contrato/disparo.ts`, `${V3}/_secciones/tu-panel/entrada.ts`], (l: readonly string[]) => definiciones(l, (a) => (a.endsWith('entrada.ts') ? 'export function margenDelDisparo(desdeAbajo: number): string {' : leer(a))).length === 1)
 
-// El remate (la sección del home que lo usa) trae la guarda.
-const REMATE = sinComentarios(leer(`${V3}/_secciones/tu-panel/Remate.tsx`))
-const remateConGuarda = (f: string): boolean =>
-  f.includes("import { vigilarElReposo } from '../_contrato/reposo'") &&
-  f.includes('soltarElReposo ??= vigilarElReposo(raiz, enReposo)') &&
-  f.includes("siguienteEstado(antes, { tipo: 'reposo', aLaVista })") &&
-  f.includes('soltarElReposo?.()')
-afirmar(remateConGuarda(REMATE), '  el remate de Tu panel arma la guarda con el primer aviso de su observador y la suelta al desmontarse')
-controlPositivo('  el detector VE el remate de antes (sin guarda)', REMATE.replace('soltarElReposo ??= vigilarElReposo(raiz, enReposo)', ''), remateConGuarda)
-const sinRebobinar = (f: string): boolean => /if \(a\.playbackRate === sentido && a\.playState === 'finished'\) continue/.test(f)
-afirmar(sinRebobinar(REMATE), '  y reproducir para un lado que ya llegó no la rebobina (no repite el gesto después de la guarda)')
-controlPositivo('  el detector VE el reproducir de antes', REMATE.replace("if (a.playbackRate === sentido && a.playState === 'finished') continue", ''), sinRebobinar)
+// [B6] La sección del home que usaba la guarda con su propia animación (el remate) se fue: lo que entra al final de Tu panel
+// es su CTA, con el gatillo común, que trae la guarda (abajo). El «no rebobinar» del remate lo cumple la máquina del contrato:
+// en reposo, lo que ya está puesto no vuelve a entrar (`guardaBien`, arriba).
 
 const GATILLO = sinComentarios(leer(`${V3}/_secciones/_contrato/Gatillo.tsx`))
 afirmar(GATILLO.includes('soltarElReposo ??= vigilarElReposo(el,') && GATILLO.includes('rootMargin: margenDelDisparo(LINEA_DEL_DISPARO)') && GATILLO.includes('soltarElReposo?.()'), '  el componente común observa la línea del contrato y trae la misma guarda')
@@ -144,17 +137,17 @@ afirmar([false, true].every((anima) => servido(marcar(<Gatillo>contenido</Gatill
 controlPositivo('  el detector VE un gatillo servido escondido', marcar(<Gatillo>contenido</Gatillo>, { anima: true }).replace('data-gatillo="quieto"', 'data-gatillo="espera"').replace('<div class="">', '<div class="translate-x-8 opacity-0">'), servido)
 
 // Tu panel, idéntica antes y después: las huellas del marcado servido, tomadas en f1cd4b4e (antes de P-H18). Si Tu panel cambia a
-// propósito, la huella se vuelve a tomar con su motivo en el commit.
+// propósito, la huella se vuelve a tomar con su motivo en el commit. [B6] Retomada: la sección del Panel nueva (el título que se
+// pinta, los tres módulos y el CTA); el remate solo ya no existe. Y otra vez en la ronda del navegador: el envoltorio de la maqueta.
 const huella = (m: string): string => createHash('sha256').update(m).digest('hex')
 const ANTES = {
-  quieta: '20407e7c3c8f947b3db36cb7c0987698295fb92ccb15c14337dd7cd0b0361d13',
-  animada: 'b89894e312aa33c89616d5e8c654740ec67edf2c4408ddd35433e5c93b24c143',
-  remate: 'f46d2a21e4cc447bb4ec6ccae793290305cf2906ce89f770159f4332f0173d4d',
+  quieta: '11f15c4b27811011cac29184cfbb96afb9432ef18271cc753adaf4cba545824d',
+  animada: 'f5bf3d51c0556f74f0988f6072a28457ecfe3c92bb53b4e7f08a3d5274e157c5',
 }
 const panel = <TuPanel seccion={seccionDe('tu-panel')} />
-const ahora = { quieta: marcar(panel, { anima: false }), animada: marcar(panel, { anima: true }), remate: marcar(<Remate />, { anima: true }) }
-afirmar(huella(ahora.quieta) === ANTES.quieta && huella(ahora.animada) === ANTES.animada && huella(ahora.remate) === ANTES.remate, '  Tu panel renderiza idéntico antes y después: el marcado quieto, el animado y el del remate solo')
-controlPositivo('  el detector VE un remate con un atributo de más', ahora.remate.replace('data-estado="quieto"', 'data-estado="quieto" data-guarda=""'), (m: string) => huella(m) === ANTES.remate)
+const ahora = { quieta: marcar(panel, { anima: false }), animada: marcar(panel, { anima: true }) }
+afirmar(huella(ahora.quieta) === ANTES.quieta && huella(ahora.animada) === ANTES.animada, '  Tu panel renderiza idéntico antes y después: el marcado quieto y el animado', `${huella(ahora.quieta).slice(0, 12)} · ${huella(ahora.animada).slice(0, 12)}`)
+controlPositivo('  el detector VE un CTA con un atributo de más', ahora.quieta.replace('data-gatillo="quieto"', 'data-gatillo="quieto" data-guarda=""'), (m: string) => huella(m) === ANTES.quieta)
 
 // La guarda en el tiempo, con una ventana de mentira: el primer reposo llega sin mover la página; después, uno por cada pausa.
 async function guardaEnElTiempo(): Promise<void> {

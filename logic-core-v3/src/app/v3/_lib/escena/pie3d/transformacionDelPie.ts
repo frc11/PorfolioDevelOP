@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 
-import { duracionDelCambioDelPie } from '../../formularios/volteo'
+import { HUNDIMIENTO_DEL_PIE, duracionDelCambioDelPie, pisoDelHundimiento } from '../../formularios/volteo'
+
+// [B10] La curva del hundimiento vive sin three (`formularios/volteo.ts`): la usa también el FAQ del pie, en el DOM.
+export { HUNDIMIENTO_DEL_PIE, pisoDelHundimiento }
 
 /**
  * [PULIDO 9] H2 · LA PLACA DEL FORMULARIO SE TRANSFORMA (en la tarjeta del resultado y de vuelta) — pura: la pose de las dos
@@ -20,9 +23,6 @@ import { duracionDelCambioDelPie } from '../../formularios/volteo'
  * y la plataforma sube con la otra hasta su lugar exacto. Las paredes, las de los bloques del borde y el pozo (`pozos.ts`). Sin tramado ni
  * geometría fantasma. El DOM de abajo de 1025 y el panel de Contacto siguen con el volteo (`formularios/volteo.ts`).
  */
-// [CIERRE A] A8 · la bajada y el cierre al mismo ritmo: medidos en el sitio la bajada de la placa duraba 2,3 veces el cierre del piso (0,84
-// y 0,36 s de los 2,4 del cambio, `baja` 0,35); los dos en el promedio, 0,6 s cada uno (y lo mismo a la vuelta: la apertura y la subida).
-export const HUNDIMIENTO_DEL_PIE = { espesores: 3, baja: 0.25 } as const
 export function duracionDeLaTransformacion(quieto: boolean): number {
   return duracionDelCambioDelPie(quieto)
 }
@@ -50,17 +50,6 @@ interface Desde extends Medidas {
 export interface VistaDeLaTransformacion {
   readonly visible: boolean
   readonly aparece: number
-}
-
-/**
- * [PULIDO 28] AA2 · el piso en `t` (0 a 1): cuánto bajó la placa (parte de lo hondo: bajando hasta `baja`, subiendo desde `1 − baja`) y
- * cuánto se cerró el piso sobre ella (en lo que queda hasta la mitad, entero en la mitad: ahí se cambian; y se abre igual).
- */
-export function pisoDelHundimiento(t: number): { readonly baja: number; readonly cerrado: number } {
-  const H = HUNDIMIENTO_DEL_PIE
-  const u = Math.min(1, Math.max(0, t))
-  const ida = u < 0.5 ? u : 1 - u
-  return { baja: suave(ida / H.baja), cerrado: suave((ida - H.baja) / (0.5 - H.baja)) }
 }
 
 const BAJA = new THREE.Matrix4()

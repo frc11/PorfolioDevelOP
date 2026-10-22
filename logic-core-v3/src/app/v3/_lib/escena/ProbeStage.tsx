@@ -23,7 +23,7 @@ import { Formacion, pisoConFormacion } from './formacion/Formacion'
 import { Estrellas } from './estrellas/Estrellas'
 import { Fugaz } from './estrellas/Fugaz'
 import { CieloDeDia } from './cieloDeDia/CieloDeDia'
-import { MoireVivo } from './moire/MoireVivo'
+import { MoireDelMouse } from './moire/MoireDelMouse'
 import { PisoVivo } from './piso/PisoVivo'
 import { Aire } from './polvo/Aire'
 import { Fisica } from './polvo/Fisica'
@@ -238,13 +238,12 @@ export default function ProbeStage({
         {/*
           LA ENVOLVENTE DE RENDIJAS (S10). Dos cilindros coaxiales alrededor de la
           escena, cada uno con una trama de cuadrados derivada del vocabulario del
-          sitio: la gruesa es la retícula del hero y BAJA como allá, la fina es la
-          misma a la mitad del paso con un punto en cada cruce.
+          sitio: la gruesa es la retícula del hero, la fina es la misma a la
+          mitad del paso con un punto en cada cruce.
 
-          **Separadas en profundidad**, que es el cambio respecto de S7: la
-          separación produce paralaje, así que al orbitar las dos capas se
-          desalinean solas y el moiré cambia con el movimiento además del batido
-          de la textura.
+          [B8] **Quietas y, las dos, en la pared**: separadas en profundidad (S10)
+          el paralaje movía el moiré con la cámara y mareaba. Qué capas se
+          dibujan lo elige `?moire=0|1|2|mouse` (`moire/fijo.ts`).
 
           Dos draw calls y dos superficies transparentes que cubren el 51% y el
           57% del cuadro en promedio. El aliasing está medido en las DOS
@@ -288,7 +287,6 @@ export default function ProbeStage({
           logoMaterialRef={logoMaterialRef}
           dustGroupRef={dustGroupRef}
           bokehGroupRef={bokehGroupRef}
-          moireRef={moireRef}
         />
         {/* [CIERRE] 3 · el final del pie, justo después del rig (le suma el final a su cámara y al logo): desde 1024 y con movimiento.
             [PULIDO 1] P22 · también abajo de 1024 (en su escenario); ahí, con movimiento reducido, el estado final quieto. */}
@@ -299,8 +297,8 @@ export default function ProbeStage({
         <RanuraDeLaVariante calidad={calidad} reducido={reducedMotion} />
         {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
         <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
-        {/* [ESCENA 5] El moiré vivo (encendido) y las pruebas, apagadas salvo en el banco (`entorno.ts`, `Pruebas`). */}
-        <MoireVivo rig={rig} moireRef={moireRef} quieto={reducedMotion} />
+        {/* [B8] El moiré no lee el rig: sólo la rendija de `?moire=mouse` se mueve, con el puntero. */}
+        <MoireDelMouse moireRef={moireRef} quieto={reducedMotion} />
         <Aire rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         {/* [PULIDO 19] Q0 · la física del polvo (su simulación en la GPU y el campo del logo) sólo si el polvo se dibuja: sin él corría igual. */}
         {conPolvo && <Fisica rig={rig} quieto={reducedMotion} dustGroupRef={dustGroupRef} logoGroupRef={logoGroupRef} />}

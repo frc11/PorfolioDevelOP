@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 
 import { VUELTA_AL_HOME } from '../../../_lib/escena/ruta/posicionDelHome'
 
@@ -20,18 +20,25 @@ export function anclaDelHash(hash: string): (typeof ANCLAS_DEL_PORTFOLIO)[number
 /**
  * [B1] El ancla al cargar (`#portfolio-el-garage`, …): el navegador ya saltó al elemento; el Portfolio lo lleva al píxel del paso.
  * [B1.3] Salió de `usePortfolio.ts` (la regla de las 300 líneas), sin cambios. [B1.2d] Y `#trabajos` entra al Portfolio
- * (`anclaDelHash`), también cuando el hash cambia sin recargar.
+ * (`anclaDelHash`), también cuando el hash cambia sin recargar. [B1.2e] Con el carrusel (debajo de 1024) las anclas viven en su flujo (los
+ * proyectos, en la pantalla del carrusel; «la tuya», en la suya): el ancla queda arriba del cuadro, que es lo que hace el salto nativo, y el
+ * carrusel va al proyecto del ancla (`FlujoDelPortfolio`). Vuelve a correr cuando el CSS decide el carrusel (el flujo se monta después).
  */
-export function useAnclaDeLaCarga(caja: RefObject<HTMLElement | null>): void {
+export function useAnclaDeLaCarga(caja: RefObject<HTMLElement | null>, carrusel: boolean): void {
+  const primera = useRef(true)
   useEffect(() => {
     const el = caja.current
+    // [B1.2e] Cuando el CSS cambia de modo, el ancla se vuelve a poner sólo si la carga sigue en su ancla (nadie movió la página).
+    const sigueEnElAncla = primera.current || el?.hasAttribute('data-ancla-de-la-carga') === true
+    primera.current = false
     const irAlAncla = (): (() => void) | null => {
       // [B12a.7] Volviendo con la flecha, manda la posición que el home dejó (el velo la devuelve), no el ancla que quedó en la URL.
       if (VUELTA_AL_HOME.enCurso) return null
       const ancla = anclaDelHash(window.location.hash)
       const m = ancla === undefined ? null : medir(caja.current)
       if (ancla === undefined || m === null) return null
-      const y = Math.round(scrollDelPx(centroDelPaso(ancla.paso, PANTALLAS_POR_PASO), m.tope, m.alto))
+      const delFlujo = carrusel ? (document.getElementById(ancla.id)?.getBoundingClientRect().top ?? null) : null
+      const y = delFlujo === null ? Math.round(scrollDelPx(centroDelPaso(ancla.paso, PANTALLAS_POR_PASO), m.tope, m.alto)) : Math.round(delFlujo + window.scrollY)
       // El ancla con la que cargó, para el diagnóstico de la carga, hasta que el visitante mueva la página por su cuenta. [B1.2b] Un clic
       // también (el menú lleva a otra sección: el arnés lo contaba como un ancla desfasada).
       el?.setAttribute('data-ancla-de-la-carga', ancla.id)
@@ -44,7 +51,7 @@ export function useAnclaDeLaCarga(caja: RefObject<HTMLElement | null>): void {
         for (const g of gestos) window.removeEventListener(g, soltar)
       }
     }
-    let soltarElAncla = irAlAncla()
+    let soltarElAncla = sigueEnElAncla ? irAlAncla() : null
     const alCambiarElHash = (): void => {
       soltarElAncla?.()
       soltarElAncla = irAlAncla()
@@ -54,5 +61,5 @@ export function useAnclaDeLaCarga(caja: RefObject<HTMLElement | null>): void {
       window.removeEventListener('hashchange', alCambiarElHash)
       soltarElAncla?.()
     }
-  }, [caja])
+  }, [caja, carrusel])
 }

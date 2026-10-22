@@ -6,6 +6,8 @@ import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { cn } from '@/lib/utils'
 
 import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
+import { entradaAbierta, retenerElScroll, suscribirALaEntrada } from '../../_lib/entrada'
+import { dispararLasGrietas } from '../../_lib/escena/cristal/grietas'
 import type { IdDePagina } from '../../_lib/escena/ruta/preset'
 import { useTituloDeVolumen, useTituloListo, useTitulosDeVolumen } from '../../_lib/titulos3d/registro'
 import { LLEGADA_DEL_TITULAR_S } from '../../_lib/titulos3d/titular'
@@ -14,7 +16,7 @@ import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimient
 import { SELECTOR_DEL_TRAMO_DEL_TITULO } from '../pagina/atributoDeLaIntro'
 import { Titular } from '../tipografia/Titular'
 import { anchoDelTitulo } from './anchoDelTitulo'
-import { MAS_PESADA, legibilidadDeLaUrl } from './legibilidad'
+import { LEGIBILIDAD_POR_DEFECTO, fuentesConLaLegibilidad, legibilidadDeLaUrl } from './legibilidad'
 import { CAIDA_DEL_TITULO, CARA_DEL_DOM, TITULOS_CON_LETRAS, TITULO_DE_PAGINA, caeElTitulo, combinacionDeLaBandera, partesDelTitulo, type PresetDelTitulo } from './presets'
 
 const sinCambios = (): (() => void) => () => undefined
@@ -55,14 +57,17 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
   const deLaBandera = useSyncExternalStore(sinCambios, nombreDeLaUrl, () => null)
   const partes = deLaBandera === null ? partesDelTitulo(titulo, dadas) : partesDelTitulo(deLaBandera)
   const familia = useSyncExternalStore(sinCambios, combinacionDeLaPagina, () => TITULO_DE_PAGINA)
-  // [B12a.8] T5 · `?legibilidad=peso`: la parte liviana un paso más pesada (`legibilidad.ts`); sin la bandera, la familia como es.
-  const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => null)
-  const preset = legibilidad === 'peso' ? { ...familia, fuentes: [familia.fuentes[0], MAS_PESADA[familia.fuentes[1]] ?? familia.fuentes[1]] as const } : familia
+  // [B12a.8] T5 · [T0] la legibilidad elegida, `peso` (la parte liviana un paso más pesada, `legibilidad.ts`), también en el servidor;
+  // `?legibilidad=tamano`, la otra (la familia como es, más grande).
+  const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => LEGIBILIDAD_POR_DEFECTO)
+  const preset = { ...familia, fuentes: fuentesConLaLegibilidad(familia.fuentes, legibilidad) }
   const material = useTitulosDeVolumen()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const reducido = usePrefiereMenosMovimiento()
   const activo = material !== 'no' && escritorio && !reducido
-  const presencia = useMotionValue(1)
+  // [B12c] Con el preloader del sitio puesto, el título espera tapado (presencia 0) y llega cuando la entrada se abre (`_lib/entrada.ts`).
+  const entrada = useSyncExternalStore(suscribirALaEntrada, entradaAbierta, () => true)
+  const presencia = useMotionValue(entradaAbierta() ? 1 : 0)
   const lugar1 = useRef<HTMLSpanElement | null>(null)
   const lugar2 = useRef<HTMLSpanElement | null>(null)
   const id1 = idDeLaParte(id, 1)
@@ -85,9 +90,11 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
     const tramo = lugar1.current?.closest(SELECTOR_DEL_TRAMO_DEL_TITULO) ?? null
     const fijo = tramo?.firstElementChild ?? null
     if (tramo === null || !(fijo instanceof HTMLElement) || !activo) return undefined
-    let adentro = true
+    // [B12c] Lo que la presencia ya dice (con la entrada cerrada, 0: abierta, vuelve a leer y llega si está arriba).
+    let adentro = presencia.get() >= 0.5
     let animacion: ReturnType<typeof animate> | null = null
     const leer = (): void => {
+      if (!entradaAbierta()) return
       const ahora = !caeElTitulo(tramo.getBoundingClientRect().bottom, fijo.offsetHeight, window.innerHeight, caidaTarde() ? -0.3 : undefined)
       if (ahora === adentro) return
       adentro = ahora
@@ -102,7 +109,44 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
       window.removeEventListener('resize', leer)
       animacion?.stop()
     }
-  }, [activo, presencia])
+  }, [activo, presencia, entrada])
+
+  // [B12c] El scroll espera a que el título entre: con la entrada cerrada lo retiene, y lo suelta cuando ya llegó (abierta la entrada y
+  // armado, lo que tarda su llegada: el reloj del titular del hero). Sin título en volumen, nada que esperar.
+  const retencion = useRef<(() => void) | null>(null)
+  useEffect(() => {
+    if (!activo) {
+      retencion.current?.()
+      retencion.current = null
+      return undefined
+    }
+    if (!entrada) {
+      retencion.current ??= retenerElScroll()
+      return undefined
+    }
+    if (retencion.current === null || !listo) return undefined
+    const reloj = window.setTimeout(() => {
+      retencion.current?.()
+      retencion.current = null
+    }, LLEGADA_DEL_TITULAR_S * 1000)
+    return () => window.clearTimeout(reloj)
+  }, [activo, entrada, listo])
+  useEffect(() => {
+    const r = retencion
+    return () => {
+      r.current?.()
+      r.current = null
+    }
+  }, [])
+
+  // [NOCTURNO B9] El cristal se agrieta cuando el título terminó de entrar: abierta la entrada y, con el título en volumen, armado, más
+  // lo que tarda su llegada (el mismo reloj que suelta el scroll). Sin volumen (abajo de 1024, sin WebGL), con el `h1` a la vista y el
+  // mismo reloj. Las grietas se quedan: la caída y la nueva llegada del título no las vuelven a pedir.
+  useEffect(() => {
+    if (!entrada || (activo && !listo)) return undefined
+    const reloj = window.setTimeout(() => dispararLasGrietas('avance', id), LLEGADA_DEL_TITULAR_S * 1000)
+    return () => window.clearTimeout(reloj)
+  }, [activo, entrada, listo, id])
 
   // La cara de cada parte sale de la combinación (que se elige en el cliente): en línea, con el peso exacto de su instancia.
   const cara = (i: 0 | 1): React.CSSProperties => ({ fontFamily: CARA_DEL_DOM[preset.fuentes[i]].familia, fontWeight: CARA_DEL_DOM[preset.fuentes[i]].peso })

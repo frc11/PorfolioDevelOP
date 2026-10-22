@@ -46,7 +46,6 @@ import { SEPARA_LOS_GESTOS_MS, empiezaUnGesto } from '../gestosDelScroll'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { ABRE_EL_PANEL } from '../../_chrome/contacto/apertura'
 import { ANCHO_CON_BARRA, DEMO_ANGOSTA, pantallaAngosta } from '../../_panel-vivo/DemoDelPanel'
-import { claseEnColumna } from '../../_secciones/tu-panel/geometria'
 import { INTERESES, PRECARGA_POR_SERVICIO } from '../../_chrome/contacto/contenido'
 import { Hero } from '../../_secciones/hero/Hero'
 import { Cierre } from '../../_secciones/cierre/Cierre'
@@ -622,11 +621,15 @@ afirmar(angostaBien(pantallaAngosta), 'abajo de 1024 la demo se dibuja a la pant
 controlPositivo('el detector VE la de escritorio en el teléfono (dibujada a 1000 px: al 35 %)', ((w: number) => ({ ancho: Math.max(1000, w), alto: 720 })) as typeof pantallaAngosta, angostaBien)
 const demoTsx = sinComentarios(leer('_panel-vivo/DemoDelPanel.tsx'))
 const tarjetaTsx = sinComentarios(leer('_secciones/tu-panel/Tarjeta.tsx'))
-const columnaBien = (d: string, t: string, clase: (i: number) => string): boolean =>
+// [B6] La especificación cambió: la sección del Panel tiene tres módulos alternados en dos columnas desde 1024 (la columna
+// escalonada del escritorio angosto se fue con el caos). Lo que C2 fijaba abajo de 1024 sigue: cada módulo a todo el ancho
+// (centrado, con un tope de alto que en la tablet lo deja entrar en la pantalla), sin escalonar, con el marco de la angosta.
+const filaTsx = sinComentarios(leer('_secciones/tu-panel/Fila.tsx'))
+const columnaBien = (d: string, t: string, fila: string): boolean =>
   d.includes('const enUso = escritorio ? pantalla : pantallaAngosta(el.clientWidth)') && t.includes('max-escritorio:aspect-4/5') && DEMO_ANGOSTA.proporcion === 5 / 4 &&
-  [0, 1, 2, 3].every((i) => clase(i).split(' ')[0] === 'w-full' && !/(^| )ml-auto/.test(clase(i)) && /escritorio:@max-6xl:w-(22|18)\/25/.test(clase(i)))
-afirmar(columnaBien(demoTsx, tarjetaTsx, claseEnColumna), '  cada bloque a todo el ancho abajo de 1024 (sin la columna escalonada), con el marco de la pantalla angosta; en escritorio, como estaba')
-controlPositivo('  el detector VE la columna escalonada de antes', [demoTsx, tarjetaTsx, ((i: number) => (i % 2 === 0 ? 'w-22/25 escritorio:@max-6xl:w-22/25' : 'ml-auto w-18/25 escritorio:@max-6xl:w-18/25')) as typeof claseEnColumna] as const, ([d, t, c]: readonly [string, string, typeof claseEnColumna]) => columnaBien(d, t, c))
+  /data-pieza="modulo-del-panel" className=\{`w-full max-escritorio:mx-auto /.test(fila) && !/(^|[\s'"`])ml-auto/.test(fila)
+afirmar(columnaBien(demoTsx, tarjetaTsx, filaTsx), '  cada módulo a todo el ancho abajo de 1024 (sin escalonar, centrado), con el marco de la pantalla angosta')
+controlPositivo('  el detector VE la columna escalonada de antes', [demoTsx, tarjetaTsx, filaTsx.replace('w-full max-escritorio:mx-auto', 'w-18/25 ml-auto')] as const, ([d, t, c]: readonly [string, string, string]) => columnaBien(d, t, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('C3 · Después de «Y más…»: en el teléfono y la tablet, Tu panel mide su contenido (sin el blanco)')
@@ -659,8 +662,15 @@ const tarjetaBien = (html: string): boolean => {
   const adentro = iTarjeta >= 0 && iForm > iTarjeta ? html.slice(iTarjeta, html.indexOf('</form>', iForm)) : ''
   return cajas.length === 1 && !cajas[0][0].includes('mix-blend-difference') && adentro.length > 0 && !adentro.includes('mix-blend-difference') && /<h3/.test(adentro) && clasesDe(html).filter((c) => c.includes('mix-blend-difference')).length === 3
 }
-afirmar(tarjetaBien(pieAngosto), 'abajo de 1024 el contacto va en UNA caja propia (desde PULIDO 1 P18, de vidrio) con su rótulo, sin nada que mezcle adentro; mezclan sólo la identidad, el recorrido y la fila de abajo')
-controlPositivo('el detector VE la caja mezclando (los campos de antes)', pieAngosto.replace('<form id="contacto"', '<form data-x="max-escritorio:mix-blend-difference" id="contacto"'), tarjetaBien)
+// [B10] cambió por diseño: después del pie va el FAQ (`FaqDelPie`, servido cerrado en la pantalla del pie) con sus bloques de vidrio; la
+// caja del contacto se cuenta en el pie, antes del FAQ.
+const delPie = (html: string): string => {
+  const i = html.indexOf('data-faq-del-pie')
+  return i < 0 ? html : html.slice(0, html.lastIndexOf('<', i))
+}
+afirmar(tarjetaBien(delPie(pieAngosto)), 'abajo de 1024 el contacto va en UNA caja propia (desde PULIDO 1 P18, de vidrio) con su rótulo, sin nada que mezcle adentro; mezclan sólo la identidad, el recorrido y la fila de abajo')
+controlPositivo('el detector VE la caja mezclando (los campos de antes)', delPie(pieAngosto).replace('<form id="contacto"', '<form data-x="max-escritorio:mix-blend-difference" id="contacto"'), tarjetaBien)
+controlPositivo('  [B10] y una segunda caja de vidrio en el pie (antes del FAQ)', delPie(pieAngosto.replace('<form id="contacto"', '<div data-material="vidrio"></div><form id="contacto"')), tarjetaBien)
 const formularioTsx = sinComentarios(leer('_secciones/cierre/FormularioDelPie.tsx'))
 // [PULIDO 3] A2 · cambió por pedido: en la tablet (768 a 1023) el formulario va en columna (un campo por renglón, el mensaje
 // con el alto que sobra); en el teléfono, igual que antes (lado a lado). Lo fija `s54-pulido-3` A2.

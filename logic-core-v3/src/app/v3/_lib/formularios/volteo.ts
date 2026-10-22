@@ -33,6 +33,30 @@ export function duracionDelCambioDelPie(reducido: boolean): number {
   return reducido ? VOLTEO.fundido.s : CAMBIO_DEL_PIE.s
 }
 
+/**
+ * [B10] EL HUNDIMIENTO DEL CAMBIO, sin three (vivía en `escena/pie3d/transformacionDelPie.ts`, que lo re-exporta): lo usan la placa 3D
+ * del formulario y el FAQ del pie en el DOM (`_componentes/faq/`). `espesores`: cuánto baja la placa; `baja`: la parte del tiempo bajando.
+ */
+// [CIERRE A] A8 · la bajada y el cierre al mismo ritmo: medidos en el sitio la bajada de la placa duraba 2,3 veces el cierre del piso (0,84
+// y 0,36 s de los 2,4 del cambio, `baja` 0,35); los dos en el promedio, 0,6 s cada uno (y lo mismo a la vuelta: la apertura y la subida).
+export const HUNDIMIENTO_DEL_PIE = { espesores: 3, baja: 0.25 } as const
+
+const suaveDelCambio = (x: number): number => {
+  const u = Math.min(1, Math.max(0, x))
+  return u * u * u * (u * (u * 6 - 15) + 10)
+}
+
+/**
+ * [PULIDO 28] AA2 · el piso en `t` (0 a 1): cuánto bajó la placa (parte de lo hondo: bajando hasta `baja`, subiendo desde `1 − baja`) y
+ * cuánto se cerró el piso sobre ella (en lo que queda hasta la mitad, entero en la mitad: ahí se cambian; y se abre igual).
+ */
+export function pisoDelHundimiento(t: number): { readonly baja: number; readonly cerrado: number } {
+  const H = HUNDIMIENTO_DEL_PIE
+  const u = Math.min(1, Math.max(0, t))
+  const ida = u < 0.5 ? u : 1 - u
+  return { baja: suaveDelCambio(ida / H.baja), cerrado: suaveDelCambio((ida - H.baja) / (0.5 - H.baja)) }
+}
+
 const CURVA: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
 
 /** Lo que Motion necesita para que un estado entre y salga (con `AnimatePresence` en `mode="wait"`). */

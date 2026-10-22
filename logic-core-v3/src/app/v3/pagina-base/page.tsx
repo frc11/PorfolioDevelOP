@@ -1,19 +1,20 @@
 import type { Metadata } from 'next'
 
-import { IntroDeLaPagina, ParrafoDeLaBajada, SELECTOR_DE_LA_INTRO } from '../_componentes/pagina/IntroDeLaPagina'
+import { CierreDeLaPagina } from '../_componentes/pagina/cierre/CierreDeLaPagina'
+import { IntroDeLaPagina, ParrafoDeLaBajada } from '../_componentes/pagina/IntroDeLaPagina'
 import { Cuerpo, EtiquetaDeSeccion } from '../_componentes/tipografia/Textos'
-import { PISTA_DE_LA_INTRO } from '../_lib/escena/ruta/pistaDeLaIntro'
-import type { PresetDeLaEscena } from '../_lib/escena/ruta/preset'
 import { conLlave } from '../_secciones/_contrato/inventado'
 
 import { CuerpoDeLaBase } from './CuerpoDeLaBase'
+import { PREGUNTAS_DE_LA_BASE } from './faq'
+import { PRESET } from './preset'
 import { RELLENO_DE_LA_BASE } from './relleno'
 
 /**
  * ⚠️ MAQUETA, NO PANTALLA DEL SITIO. [B12a.8] LA PÁGINA BASE — la maqueta de una página de `/v3` que se traspasa a servicios (era la ruta
  * de prueba de la intro, `/v3/prueba-de-pagina`, de B12a.2). Es lo mínimo que una página arma con las piezas del home: la intro sobre la
- * escena (el título 3D, la bajada y «de qué se trata»), el cuerpo en papel con tres secciones de ejemplo y el lugar del pie (`CuerpoDeLaBase`)
- * y la ranura con una variante de ejemplo. Cómo se arma, paso a paso: `docs/rediseno/B12a-API.md` §7. Sin indexar. Estática: sin leer la
+ * escena (el título 3D, la bajada y «de qué se trata»), el cuerpo en papel con tres secciones de ejemplo (`CuerpoDeLaBase`), [B13] el cierre
+ * (`CierreDeLaPagina`) y la ranura con una variante de ejemplo. Cómo se arma, paso a paso: `docs/rediseno/B12a-API.md` §7 y §8. Sin indexar. Estática: sin leer la
  * URL en el servidor (el bfcache la guarda, P-H35; `?nombre=`, `?titulo=`, `?composicion=` y `?navbar=` se leen en el cliente).
  */
 export const metadata: Metadata = {
@@ -22,16 +23,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 }
 
-/** El preset, armado una vez: el mismo objeto en cada render (la escena arma la pista una vez por preset). */
-const PRESET: PresetDeLaEscena = {
-  id: 'base',
-  tramos: { intro: SELECTOR_DE_LA_INTRO, pie: null },
-  pista: PISTA_DE_LA_INTRO,
-  noche: 'noche',
-  // El acento de web y la variante de ejemplo (el registro: `_variantes/registro.ts`), para ejercer la ranura.
-  acento: 'web',
-  variante: 'prueba',
-}
+// El preset, armado una vez (el mismo objeto en cada render), vive en `preset.ts`: [B12b] lo lee también el viaje del CTA de un servicio.
 
 export default function PaginaBase(): React.JSX.Element {
   return (
@@ -48,6 +40,8 @@ export default function PaginaBase(): React.JSX.Element {
         }
       />
       <CuerpoDeLaBase />
+      {/* [B13] El cierre de la página: Seis razones → el CTA (con el servicio de la página) → la resolución → el pie, con la escena; [B10] y el FAQ, con las preguntas de la página. */}
+      <CierreDeLaPagina preset={PRESET} preguntas={PREGUNTAS_DE_LA_BASE} />
     </main>
   )
 }

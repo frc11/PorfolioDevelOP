@@ -1,5 +1,5 @@
 /**
- * [F5] LOS GESTOS DEL DEDO, POR CDP — para el arnés de las historias (`historias.ts`) y las fotos (`fotos.ts`). Playwright no arrastra con
+ * [F5] LOS GESTOS DEL DEDO, POR CDP — para el arnés del carrusel ([B1.2e] `carrusel.ts`; era el de las historias) y las fotos (`fotos.ts`). Playwright no arrastra con
  * el dedo: el scroll táctil va con `Input.synthesizeScrollGesture` (el del navegador, con su inercia) y un deslice sobre una superficie
  * (las historias, que tienen `touch-action: none`) con `Input.dispatchTouchEvent` (`touchStart`, los `touchMove` y `touchEnd`: el
  * navegador los convierte en eventos de puntero táctiles).

@@ -24,7 +24,8 @@ import { NOCHE_QUE_OSCURECE, type Tono } from '../menu/tono'
  */
 export type EstadoDelCursor = 'texto' | 'enlace' | 'boton' | 'demo' | 'logo' | 'oculto'
 
-export const SELECTOR_DE_DEMOS = '[data-pieza="libro"], [data-pieza="cinta"] a, [data-pieza="carrusel"] a'
+// [NOCTURNO B5] El carrusel de abajo de 1024 es el común de B1.2e: su tarjeta (la cinta que se lanzaba con el dedo se fue).
+export const SELECTOR_DE_DEMOS = '[data-pieza="libro"], [data-pieza="cinta"] a, [data-parte="tarjeta-de-demo"]'
 export const SELECTOR_DE_CAMPOS = 'input, textarea, select, [contenteditable="true"]'
 export const SELECTOR_DE_BOTONES = 'button, [role="button"], [data-pieza="cta"], summary'
 export const SELECTOR_DE_ENLACES = 'a[href], [role="link"]'

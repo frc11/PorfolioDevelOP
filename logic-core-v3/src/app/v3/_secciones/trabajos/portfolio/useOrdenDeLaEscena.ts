@@ -10,7 +10,7 @@ import { AFUERA, NUNCA, siguienteCambio, type Cambios, type Orden } from './orde
  * pedido cambia en el medio, se vuelve a decidir desde lo que se muestra (con la misma regla y los mismos relojes de cada pieza). Con
  * movimiento reducido, de una. Un solo temporizador a la vez, y se borra con cada pedido nuevo y al desmontar.
  */
-export function useOrdenDeLaEscena(pedido: Orden, tituloS: number, reducido: boolean, historias = false): Orden {
+export function useOrdenDeLaEscena(pedido: Orden, tituloS: number, reducido: boolean): Orden {
   const [orden, setOrden] = useState<Orden>(AFUERA)
   const actual = useRef<Orden>(AFUERA)
   const cambios = useRef<Cambios>(NUNCA)
@@ -25,7 +25,7 @@ export function useOrdenDeLaEscena(pedido: Orden, tituloS: number, reducido: boo
     let reloj = 0
     const avanzar = (): void => {
       const ahora = performance.now() / 1000
-      const c = siguienteCambio(actual.current, cambios.current, pedidoDeAhora, ahora, titulo.current, reducido, { historias: historias && !conElDefecto('historias-de-antes'), pildoraConElPanel: conElDefecto('pildora-con-el-panel') })
+      const c = siguienteCambio(actual.current, cambios.current, pedidoDeAhora, ahora, titulo.current, reducido, { pildoraConElPanel: conElDefecto('pildora-con-el-panel') })
       if (c === null) return
       if (c.en > ahora) {
         reloj = window.setTimeout(avanzar, (c.en - ahora) * 1000)
@@ -38,6 +38,6 @@ export function useOrdenDeLaEscena(pedido: Orden, tituloS: number, reducido: boo
     }
     avanzar()
     return () => window.clearTimeout(reloj)
-  }, [camara, encabezado, barra, panel, reducido, historias])
+  }, [camara, encabezado, barra, panel, reducido])
   return orden
 }

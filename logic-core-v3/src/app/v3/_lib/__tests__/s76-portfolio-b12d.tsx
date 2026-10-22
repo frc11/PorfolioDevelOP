@@ -42,7 +42,8 @@ export function afirmarB12d(): void {
   controlPositivo('  el detector ve el vuelo de B1.3 (sólo lo soltaba su llegada)', (): boolean => false, pisado)
   const lenis = readFileSync(path.join(RAIZ, 'node_modules/lenis/dist/lenis.mjs'), 'utf8')
   afirmar(/this\.userData = userData \?\? \{\};/.test(lenis) && /onComplete\?\.\(this\);\s*this\.userData = \{\};/.test(lenis) && /if \(programmatic\) this\.targetScroll = value;/.test(lenis), '  el Lenis instalado pone la marca con cada `scrollTo` y la vacía al llegar; y en un viaje programado lleva el `targetScroll` con el valor animado (por eso la marca y no el destino)')
-  const saltar = sinComentarios(leer(`${PORTFOLIO}/saltar.ts`))
+  // [B4] El salto salió a la pieza común de los gatillos (el Portfolio lo re-exporta desde `saltar.ts`): se lee donde vive.
+  const saltar = sinComentarios(leer('_componentes/gatillos/salto.ts'))
   const medida = sinComentarios(leer(`${PORTFOLIO}/medida.ts`))
   const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
   const conDuenoYFin = (s: string, m: string, u: string): boolean =>
@@ -73,7 +74,7 @@ export function afirmarB12d(): void {
   const cableadoA3 = (a: string, u: string, m: string): boolean =>
     /const deLaRueda = vivo\.deLaRueda\(\) && \(vivo\.enVuelo\(\) \|\| transicion\.fase !== 'quieta'\)/.test(a) &&
     /if \(transicion\.fase === 'quieta'\) activacion\.current = puntero\.current/.test(a) &&
-    /deLaRueda\.current = rueda/.test(u) && /saltar\(i, inmediato, false\)/.test(u) && /ir: \(d\) => \(historias \? salir\([\s\S]*?\) : ir\(d, true\)\)/.test(m)
+    /deLaRueda\.current = rueda/.test(u) && /saltar\(i, inmediato, false\)/.test(u) && /ir: \(d\) => ir\(d, true\),/.test(m)
   afirmar(cableadoA3(acordeon, usePortfolio, mandos), '  la transición de la rueda es su vuelo más el cambio de tiras; al terminar, la base del hover es el puntero de ese momento (hace falta un movimiento nuevo). El hover, el clic, las teclas y los toques no la marcan: ahí cruzar lomos sigue yendo al último')
   controlPositivo('  el detector ve el hover que no espera a que la transición termine', [acordeon.replace("(vivo.enVuelo() || transicion.fase !== 'quieta')", 'vivo.enVuelo()'), usePortfolio, mandos] as const, ([a, u, m]: readonly [string, string, string]) => cableadoA3(a, u, m))
 

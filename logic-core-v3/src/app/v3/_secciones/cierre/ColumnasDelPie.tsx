@@ -116,7 +116,7 @@ const CAJA_DEL_CONTACTO = 'flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(
  * del vidrio (`vidrio.css`): con el logo negro detrás, los placeholders siguen en AA. El tono se lee sólo con la caja a la
  * vista. Con el pie de volumen (desde 1024) no hay caja: la placa 3D.
  */
-function CajaDeVidrio({ children }: { readonly children: ReactNode }): React.JSX.Element {
+export function CajaDeVidrio({ children }: { readonly children: ReactNode }): React.JSX.Element {
   // El pie plano es el de abajo de 1024 (desde ahí, el de volumen): la compuerta ya se resolvió arriba.
   const angosto = useModoDelPie() === 'plano'
   const caja = useRef<HTMLDivElement>(null)

@@ -10,6 +10,7 @@ import { hayPrimerCuadro, suscribirALaCarga } from '../carga'
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
 import { AVANCE_DE_LA_INTRO, avanceDeLaIntro } from './ruta/pistaDeLaIntro'
 import { bloquesDelPreset, despiertaEnLaPagina, presetActual, suscribirseAlPreset } from './ruta/preset'
+import { medirElCierre } from './ruta/cierreDeLaPagina'
 import { medidaSinElEstiramiento } from './tramoEstirado'
 import { avisarQueSeMovioLaPagina } from './paginaMovida'
 import { aplicarElDiaDelFinal, bloqueTapaElCuadro, bloqueVivo, medirElBloqueOpacoEn } from './nocheDisparada'
@@ -17,6 +18,8 @@ import { progresoDelScroll } from './recorrido'
 import { aplicarRevelado } from './revelado'
 import { escenaRetenida } from './retencion'
 import { suscribirAlViaje, viajeEnCurso } from './viaje'
+import { suscribirAlViajeAlServicio, viajeAlServicioEnCurso } from './ruta/viajeDelServicio'
+import { escenaTapada, suscribirALaTapa } from './tapa'
 import {
   ESTADO_INICIAL,
   MARGEN_DE_REANUDACION,
@@ -129,6 +132,12 @@ export function useEscenaAtadaAlScroll(
       const ventana = window.innerHeight
       if (!(ventana > 0)) return
       const desplazamiento = window.scrollY
+      // [B7] Lo que cubre la pantalla entera (el login desplegado) la duerme: fuera de cuadro y nada más que leer (el scroll no se
+      // mueve detrás); al soltarla, otra lectura (`suscribirALaTapa`). Nunca antes de su primer cuadro: la carga lo espera.
+      if (escenaTapada() && hayPrimerCuadro()) {
+        if (siguiente(estadoRef.current, FUERA_DE_CUADRO) !== estadoRef.current) setEstado((previo) => siguiente(previo, FUERA_DE_CUADRO))
+        return
+      }
       const secciones = medirLasSeccionesEn(document, desplazamiento, extension)
       if (secciones === null) {
         // [B12a.1] Una página que no es el home: la despiertan sus bloques (su preset, D1); en el papel duerme (D8). Sin preset (las
@@ -142,9 +151,13 @@ export function useEscenaAtadaAlScroll(
         const despierta = !hayPrimerCuadro() || despiertaEnLaPagina(preset, bloquesDelPreset(document, preset, desplazamiento), desplazamiento, ventana, MARGEN_DE_REANUDACION)
         const enLaPagina = despierta ? EN_CUADRO : FUERA_DE_CUADRO
         if (siguiente(estadoRef.current, enLaPagina) !== estadoRef.current) setEstado((previo) => siguiente(previo, enLaPagina))
+        // [B13] Y la pantalla de su cierre (`tramos.pie`: Seis razones, la resolución y el pie), en el layout: su pista y la resolución.
+        medirElCierre(document, preset === null || preset.pista === null || preset.tramos === null ? null : preset.tramos.pie, desplazamiento, ventana)
         return
       }
       const medida = medidaSinElEstiramiento(desplazamiento, secciones.abajo, desplazamiento, ventana, sinEstirar)
+      // [B13] En el home no hay cierre de página: su pantalla vuelve a −∞.
+      medirElCierre(document, null, desplazamiento, ventana)
 
       const quieta = escenaRetenida(getIntroStage(), introEnteredClean())
       const progreso = quieta
@@ -156,7 +169,8 @@ export function useEscenaAtadaAlScroll(
       aplicarElDiaDelFinal(elBloque)
 
       // [VIAJES] Durante un viaje el `<main>` está apagado y se ve la sala entera: dibuja también en la banda opaca.
-      const viajando = viajeEnCurso() !== null
+      // [B12b] Y durante el viaje del CTA de un servicio a su página: el papel se levanta y se ve la sala.
+      const viajando = viajeEnCurso() !== null || viajeAlServicioEnCurso()
       const enCuadro =
         viajando ||
         escenaEnCuadro(
@@ -204,9 +218,11 @@ export function useEscenaAtadaAlScroll(
     const desuscribir = subscribeIntroStage(pedir)
     // [VIAJES] Al empezar y al terminar un viaje se vuelve a leer: la escena se enciende o se suspende en el acto.
     const desuscribirDelViaje = suscribirAlViaje(pedir)
+    const desuscribirDelViajeAlServicio = suscribirAlViajeAlServicio(pedir)
     // [B12a.1] Cuando cambia el preset de la página y cuando la escena dibuja su primer cuadro, otra lectura.
     const desuscribirDelPreset = suscribirseAlPreset(pedir)
     const desuscribirDeLaCarga = suscribirALaCarga(pedir)
+    const desuscribirDeLaTapa = suscribirALaTapa(pedir)
 
     return () => {
       if (pedido !== 0) cancelAnimationFrame(pedido)
@@ -215,8 +231,10 @@ export function useEscenaAtadaAlScroll(
       document.removeEventListener('visibilitychange', pedir)
       desuscribir()
       desuscribirDelViaje()
+      desuscribirDelViajeAlServicio()
       desuscribirDelPreset()
       desuscribirDeLaCarga()
+      desuscribirDeLaTapa()
     }
     // `retenida` entra en las dependencias para que soltar la escena vuelva a
     // leer el scroll de una vez, sin esperar al próximo evento.

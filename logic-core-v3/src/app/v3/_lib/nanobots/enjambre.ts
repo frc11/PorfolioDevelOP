@@ -65,7 +65,7 @@ const P = PUNTERO_DEL_ENJAMBRE
  * con el suyo) se apartan del cursor —más los del centro—, se corren un poco de costado y tiemblan sueltos; con la fuerza
  * en cero no se toca nada. La fuerza de cada uno lleva la velocidad del resorte con su azar: no se mueven todos juntos.
  */
-const APARTADO_GLSL = /* glsl */ `
+export const APARTADO_GLSL = /* glsl */ `
 uniform vec4 uPuntero;
 uniform float uAspecto;
 vec2 apartadoPorElPuntero( vec2 q, float t ) {
@@ -191,7 +191,7 @@ export interface Enjambre {
 }
 
 /** Un acento en sRGB (lo que escribe el sombreador va derecho al lienzo, sin conversión). */
-function enSrgb(color: string): THREE.Vector3 {
+export function enSrgb(color: string): THREE.Vector3 {
   const c = new THREE.Color(color)
   const rgb = { r: 0, g: 0, b: 0 }
   c.getRGB(rgb, THREE.SRGBColorSpace)

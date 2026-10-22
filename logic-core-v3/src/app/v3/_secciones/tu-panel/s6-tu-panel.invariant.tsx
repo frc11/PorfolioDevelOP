@@ -1,312 +1,291 @@
 /**
- * INVARIANTE — SECCIÓN 06 · TU PANEL, el caos ordenado (SPRINT PANEL 2).
+ * INVARIANTE — SECCIÓN 06 · TU PANEL. [B6] La sección del Panel: el título que se pinta, tres módulos alternados con su
+ * palabra fundida y el candado de la rueda, y el CTA a pantalla completa.
  *
- * Renderiza la sección REAL a HTML en sus dos ramas —`anima={false}` y
- * `anima={true}`— y afirma sobre el marcado que sale; la geometría del caos, el
- * parallax, el vuelo de la ampliación y el cronograma del remate se afirman
- * contra las funciones puras que usan los componentes. Los barridos de
- * convivencia corren sobre el modelo de `geometria.ts`; el del navegador
- * (`scripts-panel/`) confirma que el DOM coincide.
- *
- * Cada detector corre además contra una entrada rota (control positivo).
+ * Renderiza la sección REAL a HTML en sus dos ramas —sin y con coreografía— y afirma sobre el marcado; el pintado, el
+ * candado, la geometría (el alto contra la tabla, la escala de las maquetas, la posición del grupo) y el tramo de la escena
+ * se afirman contra las funciones puras que usan los componentes. Lo que depende del navegador (dónde termina de pintarse
+ * en el píxel, el eje del grupo medido, la rueda de verdad sobre un módulo, el AA con los colores reales) lo mide el banco
+ * `scripts-carga/panel-b6.ts`. Cada detector corre además contra una entrada rota (control positivo).
  */
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
-import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
 import { RAIZ } from '../../_lib/__tests__/s3-archivos'
-import {
-  apagadosDeFoco,
-  arbitrariosSinVar,
-  funcionesDeColorEncontradas,
-  hexEncontrados,
-  literalesConUnidad,
-  quitarComentarios,
-} from '../../_lib/__tests__/s3-escaneo'
-import { INVENTOS } from '../_contrato/inventado'
-import { GESTOS_POR_TIEMPO, USOS_DECLARADOS } from '../_contrato/motion'
-import { seccionDe } from '../_contrato/forma'
+import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEncontrados, literalesConUnidad, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
+import { FUENTE_DISPLAY, anchoDeTexto, caracteresSinGlifo } from '../../_lib/__tests__/s10-avance'
+import { leerAvancesDe } from '../../_lib/__tests__/s10-woff2'
+import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
+import { centradoDebajoDeLaBarra } from '../../_componentes/destinosDelViaje'
+import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../_lib/navegacion'
+import { TRAMO_ESTIRADO, anotarTramo, medidaSinElEstiramiento } from '../../_lib/escena/tramoEstirado'
+import { ANCHO_CON_BARRA } from '../../_panel-vivo/DemoDelPanel'
 import { escanearLoReal, marcadoresRealesEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
+import { pantallasDe, seccionDe } from '../_contrato/forma'
+import { GESTOS_POR_TIEMPO, USOS_DECLARADOS } from '../_contrato/motion'
 import { marcar } from '../_invariantes/render'
 import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
-import { CONTENIDO_PROHIBIDO_DE_CONTROL, aperturasDe, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, textoAccesible } from './deteccion'
-import { CAPTURA, DESCRIPCION, ID, NEWSLETTER, NOMBRE, PALABRAS_DEL_FONDO, PUNTOS_DE_Y_MAS, TARJETAS, TITULO, Y_MAS } from './contenido'
-import { ALFA_DEL_FONDO, VELOCIDAD_DEL_FONDO } from './Fondo'
-import { ANCHO_CON_BARRA } from '../../_panel-vivo/DemoDelPanel'
-import { CONTENIDO_DEL_CAOS, TABLA_DEL_CAOS, TAMANOS, cajasDelCaos, cajasEn, convivenciaEn, escalaDeLaDemo, fueraDelCuadro, velocidadDe, type FilaDelCaos } from './geometria'
-import { DISPARO_DEL_REMATE, LENTITUD_DEL_REMATE, cronogramaDelRemate, curvaComoLinear, margenDelDisparo, salidaExponencial } from './entrada'
-import { ENTRADAS_AL_TRAMO, cruceDelTramo, gestoDelCruce, puestoTras } from '../_contrato/cruce'
-import { cruceDelTramo as cruceDeTrabajos, gestoDelCruce as gestoDeTrabajos } from '../trabajos/gota'
-import { PIEZAS_POR_PATRON, TuPanel } from './TuPanel'
+import { GRUPO_POR_DEFECTO, PALABRA_POR_DEFECTO, palabraEnElTelefono, posicionDelGrupo } from './banderas'
+import { CANDADO_INICIAL, laRuedaEsDeAdentro, siguienteCandado, type EstadoDelCandado, type EventoDelCandado } from './candado'
+import { CARTEL, CTA, ID, NEWSLETTER, TARJETAS, TITULO, textoDe } from './contenido'
+import { CONTENIDO_PROHIBIDO_DE_CONTROL, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, textoAccesible } from './deteccion'
+import { ALFA_DE_LA_PALABRA, CLASE_DE_LA_PALABRA, CLASE_DE_LA_POSICION, LADOS, MODULO, PANTALLA_DEL_MODULO, RITMO, TIPO, altoDelModulo, altoNaturalEnEscritorio, altoViejoAngosto, ALTOS_VIEJOS_MEDIDOS, escalaDeLaDemo, tamanoDelTitulo } from './geometria'
+import { FIN_DEL_PINTADO, avanceDeLaPalabra, avanceDelPintado } from './pintado'
+import { tramoDelPanel } from './tramo'
+import { TuPanel } from './TuPanel'
 
-const montada = <TuPanel seccion={seccionDe(ID)} />
-const QUIETO = marcar(montada, { anima: false })
-const ANIMADO = marcar(montada, { anima: true })
-
+const SECCION = seccionDe(ID)
+const QUIETO = marcar(<TuPanel seccion={SECCION} />, { anima: false })
+const ANIMADO = marcar(<TuPanel seccion={SECCION} />, { anima: true })
 const ARCHIVOS = codigoDeLaSeccion(ID)
 const CODIGO = ARCHIVOS.map((a) => leer(a)).join('\n')
 const fuenteDe = (nombre: string): string => quitarComentarios(leer(ARCHIVOS.find((a) => a.endsWith(`/${nombre}`)) ?? ''))
+const V3 = 'src/app/v3'
+const delV3 = (ruta: string): string => quitarComentarios(readFileSync(path.join(RAIZ, V3, ruta), 'utf8'))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El contenido, entero y en orden, en las dos ramas')
 
-const ORDEN = [
-  'Revisá cada conversación de tu chatbot',
-  'Recibí los leads ya calificados que consultaron tu página',
-  'Creá tickets para que cambiemos lo que necesites',
-  'Chateá con nosotros directo, por lo que sea',
-  'Pedí servicios nuevos a medida que los sumamos',
-  'Mirá el resumen de tu proyecto',
-  'Seguí tus resultados',
-  'Configurá cómo responde tu chatbot',
-]
-afirmarIgual(TARJETAS.map((t) => t.titulo), ORDEN, 'las ocho features, con el texto y el orden del sprint anterior')
-afirmarIgual(TITULO, 'Tu Panel', 'el título de la sección es «Tu Panel»')
-
-const TEXTOS = [TITULO, DESCRIPCION, ...TARJETAS.map((t) => t.titulo), ...TARJETAS.map((t) => t.etiqueta), Y_MAS, NEWSLETTER.titulo, NEWSLETTER.rotulo]
+afirmarIgual(textoDe(TITULO), 'El panel donde controlás TODO', 'el título: «El panel donde controlás» y, en su renglón, «TODO»')
+afirmar(TITULO.length === 2 && TITULO[1].destacado === true && TITULO[1].palabras.join() === 'TODO', '  «TODO» va solo en el segundo renglón, destacado (en cursiva y subrayado)')
+afirmarIgual(TARJETAS.map((t) => [t.palabra, t.titulo]), [['Clientes', 'Cada cliente, en un solo lugar'], ['Resultados', 'Resumen del mes'], ['Chatbot', 'Enseñale a tu chatbot cómo responder']], 'los tres módulos, en el orden pedido, con su palabra fundida y su título')
+afirmarIgual(TARJETAS.map((t) => t.demo), ['leads', 'resultados', 'informacion'], '  y cada uno es la maqueta que le corresponde (los leads, las métricas, lo que sabe el bot)')
+afirmar(TARJETAS.every((t) => t.descripcion.length >= 180), 'las descripciones son más largas que las de antes (los títulos de las features, de 20 a 57 caracteres)', TARJETAS.map((t) => String(t.descripcion.length)).join(' · '))
+const ORDEN = [textoDe(TITULO), ...TARJETAS.flatMap((t) => [t.titulo, t.descripcion]), textoDe(CTA.titular), CTA.bajada, CTA.boton, NEWSLETTER.titulo, NEWSLETTER.rotulo]
 for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
-  const visible = textoAccesible(html)
-  afirmarIgual(TEXTOS.filter((t) => !visible.includes(t)), [], `${rama}: los ${TEXTOS.length} textos se anuncian enteros`)
-  const desdeYMas = visible.slice(visible.indexOf(Y_MAS) + Y_MAS.length).trimStart()
-  afirmar(desdeYMas.replace(/\s/g, '').startsWith('.'.repeat(PUNTOS_DE_Y_MAS)), `${rama}:   «${Y_MAS}» con sus ${PUNTOS_DE_Y_MAS} puntos`)
+  const visible = textoAccesible(html).replace(/\s+/g, ' ')
+  afirmarIgual(ORDEN.filter((t) => !visible.includes(t)), [], `${rama}: los ${ORDEN.length} textos se anuncian enteros`)
   const posiciones = ORDEN.map((t) => visible.indexOf(t))
-  afirmar(posiciones.every((p, i) => i === 0 || p > posiciones[i - 1]), `${rama}: las features se leen en orden`)
+  afirmar(posiciones.every((p, i) => i === 0 || p > posiciones[i - 1]), `${rama}: se leen en orden — el título, los tres módulos y el CTA`)
 }
-afirmar(!textoVisible(QUIETO).includes(NOMBRE), `el rótulo de sección («${NOMBRE}») sigue sin leerse (B12)`)
-afirmarIgual(cuentaDe(QUIETO, /data-pieza="marca-de-seccion"/g), 0, 'SIN el puntito azul: la sección no monta `MarcaDeSeccion` (la pieza compartida no se toca)')
-controlPositivo('el comparador de orden ve dos features cambiadas', [5, 3], (p) => p.every((x, i) => i === 0 || x > p[i - 1]))
+afirmarIgual(cuentaDe(QUIETO, /data-pieza="marca-de-seccion"/g), 0, 'sin el puntito de la marca: la sección no monta `MarcaDeSeccion`')
+controlPositivo('el comparador de orden ve dos textos cambiados', [5, 3], (p: readonly number[]) => p.every((x, i) => i === 0 || x > p[i - 1]))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · Abajo de 1025 no se monta coreografía, y el texto es el mismo')
+titulo('2 · Sin coreografía no se escribe una transformada, y el texto es el mismo')
 
-afirmarIgual(cuentaDe(QUIETO, /transform:/g), 0, 'sin coreografía no se escribe una sola transformada en el marcado')
-// [INTERFAZ 1] T1: más la del titular, que lleva la inercia de los títulos (su envoltorio escribe su `skewY`).
-afirmarIgual(cuentaDe(ANIMADO, /data-inercia/g), 1, 'el titular lleva la inercia de los títulos')
-afirmarIgual(cuentaDe(ANIMADO, /transform:/g), PIEZAS_POR_PATRON.P2 + 1, `CONTROL: con coreografía las ${PIEZAS_POR_PATRON.P2} piezas de P2 sí escriben la suya (8 features + 12 del fondo), más la inclinación del titular`)
-afirmar(textoAccesible(QUIETO) === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico', `${textoAccesible(QUIETO).length} caracteres`)
+afirmarIgual(cuentaDe(QUIETO, /transform:/g), 0, 'sin coreografía, cero transformadas en el marcado')
+afirmar(cuentaDe(ANIMADO, /transform:/g) > 0, 'CONTROL: con coreografía las llegadas sí escriben la suya', `${String(cuentaDe(ANIMADO, /transform:/g))} transformadas`)
+afirmar(textoAccesible(QUIETO) === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico', `${String(textoAccesible(QUIETO).length)} caracteres`)
 const estilos = [...QUIETO.matchAll(/style="([^"]*)"/g)].map((m) => m[1])
-// [RETOQUE PANEL] T1 · + las medidas de cada demo (su proporción). [AJUSTES FINALES] A8: el alto angosto se fue.
-const DEL_DATO = /^(color:transparent|min-height:[^;]*|(--(x|y|w|proporcion|arranque-final):[^;]*;?)+(opacity:[\d.]+)?)$/
-// MÓVIL 2: la palabra quieta de abajo de 1024 lleva sólo el alfa del fondo, que es de la tabla.
-const ALFA_SOLO = `opacity:${String(ALFA_DEL_FONDO)}`
-afirmarIgual(estilos.filter((e) => !DEL_DATO.test(e) && e !== ALFA_SOLO), [], `los ${estilos.length} estilos inline salen del optimizador, de la tabla de la sección o de las tablas del caos: ninguno a mano`)
-controlPositivo('el filtro de estilos ve uno escrito a mano', ['margin-top:12px'], (l) => l.every((e) => DEL_DATO.test(e)))
+const DEL_DATO = /^(color:transparent|min-height:[^;]*|opacity:0\.0285|(--[a-z-]+:[^;]*;?)+)$/
+afirmarIgual(estilos.filter((e) => !DEL_DATO.test(e)), [], `los ${String(estilos.length)} estilos en línea salen del dato (variables de \`geometria.ts\`, el alto de la tabla, el alfa de la palabra): ninguno a mano`)
+controlPositivo('el filtro de estilos ve uno escrito a mano', ['margin-top:12px'], (l: readonly string[]) => l.every((e) => DEL_DATO.test(e)))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Cero cifras inventadas y cero capturas falsas')
+titulo('3 · Cero cifras inventadas, cero precios, ninguna captura falsa')
 
 const visible = textoVisible(ANIMADO)
-afirmarIgual(escanearLoReal(visible), [], `cero hallazgos sobre ${visible.length} caracteres de texto renderizado`)
+afirmarIgual(escanearLoReal(visible), [], `cero hallazgos sobre ${String(visible.length)} caracteres de texto renderizado`)
 afirmarIgual(preciosEncontrados(visible), [], '  y cero formas de precio')
-// RECURSOS: las ocho capturas llegaron. Ningún marcador en pantalla y cada tarjeta describe su pantalla.
-afirmarIgual(marcadoresRealesEn(visible), [], '  ni un marcador en pantalla: las ocho capturas son reales')
-afirmar(TARJETAS.every((t) => t.imagen !== CAPTURA.fuente && t.imagen.endsWith('.webp') && t.alt.length > 40), '  las ocho tarjetas usan su captura en webp y un alt que describe lo que se ve')
-afirmar(TARJETAS.every((t) => t.imagen !== CAPTURA.fuente || t.alt === ''), 'una feature con el placeholder no describe una pantalla que no existe: `alt` vacío')
-afirmar(!('panelFechas' in INVENTOS) && !('panelComparacion' in INVENTOS), 'INVENTOS sigue sin las casillas del panel viejo', `quedan ${Object.keys(INVENTOS).length}`)
-afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /conLlave\(/g), 0, '  y la sección no consume ninguna')
-controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearLoReal(t).length === 0)
+afirmarIgual(marcadoresRealesEn(visible), [], '  ni un marcador en pantalla')
+afirmar(TARJETAS.every((t) => t.imagen.endsWith('.webp') && t.alt.length > 40), '  cada módulo lleva de respaldo su captura real, con un alt que describe lo que se ve')
+controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t: string) => escanearLoReal(t).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · Cero valores fuera de los tokens, archivo por archivo')
 
-console.log(`  ${ARCHIVOS.length} archivos de producto: ${ARCHIVOS.map((a) => a.split('/').pop()).join(' · ')}`)
-for (const archivo of ARCHIVOS) {
+console.log(`  ${String(ARCHIVOS.length)} archivos de producto: ${ARCHIVOS.map((a) => a.split('/').pop()).join(' · ')}`)
+const COMPARTIDO = `${V3}/_secciones/_contrato/TituloQueSube.tsx`
+for (const archivo of [...ARCHIVOS, COMPARTIDO]) {
   const fuente = quitarComentarios(leer(archivo))
   const corto = archivo.split('/').pop() ?? archivo
-  afirmarIgual(hexEncontrados(fuente), [], `${corto}: cero colores a mano`)
-  afirmarIgual(funcionesDeColorEncontradas(fuente), [], `${corto}: cero funciones de color`)
-  afirmarIgual(literalesConUnidad(fuente), [], `${corto}: cero literales con unidad`)
-  afirmarIgual(arbitrariosSinVar(fuente), [], `${corto}: toda clase arbitraria consume var(--token)`)
-  afirmar(contarLineasDeCodigo(leer(archivo)) <= LIMITE_DE_LINEAS_DE_CODIGO, `${corto}: no pasa las 300 líneas de código`)
+  afirmar(hexEncontrados(fuente).length + funcionesDeColorEncontradas(fuente).length + literalesConUnidad(fuente).length + arbitrariosSinVar(fuente).length === 0, `${corto}: cero colores a mano, cero literales con unidad y toda clase arbitraria consume var(--token)`, [...hexEncontrados(fuente), ...literalesConUnidad(fuente), ...arbitrariosSinVar(fuente)].join(' ') || 'limpio')
+  afirmar(contarLineasDeCodigo(leer(archivo)) <= LIMITE_DE_LINEAS_DE_CODIGO && apagadosDeFoco(fuente).length === 0, `${corto}: no pasa las 300 líneas de código y no apaga el foco`)
 }
-controlPositivo('el detector de arbitrarios sin token no está ciego', 'className="gap-[16px]"', (t) => arbitrariosSinVar(t).length === 0)
+controlPositivo('el detector de arbitrarios sin token no está ciego', 'className="gap-[16px]"', (t: string) => arbitrariosSinVar(t).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · [RETOQUE PANEL] T1 · Cada feature es su demo, usable en su lugar: sin botón que abra, sin hover que agrande')
+titulo('5 · El título se pinta palabra por palabra y termina con su centro en la mitad de la pantalla')
 
-const TARJETA = fuenteDe('Tarjeta.tsx')
-for (const [rama, html] of [['sin coreografía', QUIETO], ['con coreografía', ANIMADO]] as const) {
-  // Lo enfocable de cada demo llega con la demo (en el navegador, al acercarse); en el HTML del servidor quedan el campo y
-  // el botón del newsletter. La tarjeta se enfoca sólo desde el código (`tabindex="-1"`: adonde lleva «Saltar la demo»).
-  afirmarIgual(focalizablesDe(html).length, 2, `${rama}: 2 focalizables en el HTML del servidor — el campo y el botón del newsletter`)
-  afirmarIgual(cuentaDe(html, /aria-haspopup="dialog"/g), 0, `${rama}: ninguna feature abre un diálogo (la demo grande se fue)`)
-  afirmarIgual(cuentaDe(html, /<li data-pieza="feature-del-panel"[^>]*tabindex="-1"[^>]*aria-labelledby=/g), TARJETAS.length, `${rama}: cada feature se puede enfocar desde el código y se nombra con su título`)
+/** El centro (fracción del alto, desde arriba) en el que el avance llega a 1, barriendo de abajo hacia arriba. */
+const finDelPintado = (avance: (c: number, a: number) => number, alto: number): number => {
+  for (let c = alto; c >= -alto; c -= 1) if (avance(c, alto) >= 1) return c / alto
+  return Number.NaN
 }
-afirmar(!/group-hover:|hover:scale/.test(TARJETA) && !/<button/.test(TARJETA), 'la tarjeta no es un botón y nada se agranda con el hover')
-afirmar(/<DemoEnSuLugar demo=\{tarjeta\.demo\} pantalla=\{fila\.pantalla\} respaldo=\{respaldo\} \/>/.test(TARJETA), '  la demo va en su lugar, con su pantalla y la captura de respaldo debajo')
-afirmar(ARCHIVOS.every((a) => !/Ampliacion\.tsx$|vuelo\.ts$|borde\.ts$/.test(a)) && !/Ampliacion|cajaAmpliada|useBordeDelPanel/.test(quitarComentarios(CODIGO)), '  la ampliación, su cuenta y la prueba de los bordes se borraron')
-afirmarIgual(ARCHIVOS.flatMap((a) => apagadosDeFoco(quitarComentarios(leer(a)))), [], 'ningún archivo apaga el anillo de foco')
+for (const alto of [900, 768, 1080, 844]) {
+  const fin = finDelPintado(avanceDelPintado, alto)
+  afirmar(fin >= 0.45 && fin <= 0.55, `a ${String(alto)} de alto termina de pintarse con el centro del título al ${(fin * 100).toFixed(1)} % (entre 45 y 55)`)
+}
+afirmar(FIN_DEL_PINTADO === 0.5 && avanceDelPintado(900, 900) === 0 && avanceDelPintado(1200, 900) === 0, '  y arranca recién con el centro asomando por abajo (a medias a la vista)')
+controlPositivo('  el detector VE un pintado que termina arriba (el centro al 15 %)', (c: number, a: number) => Math.min(1, Math.max(0, (a - c) / (a * 0.85))), (f: (c: number, a: number) => number) => {
+  const fin = finDelPintado(f, 900)
+  return fin >= 0.45 && fin <= 0.55
+})
+/**
+ * Llegando con «Panel» de la barra: el viaje centra la cabecera (el título solo) debajo de la barra (su despeje, el
+ * `scroll-padding-top`: 24 + 2 × 12 + 15 × 1,6 = 72 px), sin pasar del tope de la sección. ¿Dónde queda el centro del título?
+ */
+const DESPEJE = 24 + 2 * 12 + 15 * 1.6
+const centroAlViajar = (ancho: number, alto: number, aire: number): number => {
+  const h = 2 * TIPO.interlineado * tamanoDelTitulo(ancho, alto)
+  return aire + h / 2 - centradoDebajoDeLaBarra(0, aire, aire + h, alto, DESPEJE)
+}
+for (const [ancho, alto, aire] of [[1376, 900, 0.3 * 900], [960, 768, 0.3 * 768], [1856, 1080, 0.3 * 1080], [704, 1024, 80], [326, 844, 80]] as const) {
+  const c = centroAlViajar(ancho, alto, aire)
+  afirmar(avanceDelPintado(c, alto) === 1, `${String(ancho)} × ${String(alto)}: con el viaje del menú el título llega con su centro al ${((c / alto) * 100).toFixed(1)} %: pintado entero`)
+}
+controlPositivo('  el detector VE un título que llega por debajo de la mitad (sin el aire de arriba, centrado en todo el cuadro)', 0.62 * 900, (c: number) => avanceDelPintado(c, 900) === 1)
+const n = textoDe(TITULO).split(' ').length
+const enOrden = (f: typeof avanceDeLaPalabra): boolean => Array.from({ length: 1001 }, (_, k) => k / 1000).every((p) => Array.from({ length: n - 1 }, (_, i) => f(p, i + 1, n) === 0 || f(p, i, n) === 1).every(Boolean))
+afirmar(enOrden(avanceDeLaPalabra) && avanceDeLaPalabra(1, n - 1, n) === 1 && avanceDeLaPalabra(0, 0, n) === 0, `las ${String(n)} palabras se pintan en orden: ninguna arranca antes de que termine la anterior`)
+controlPositivo('  el detector VE todas a la vez', ((p: number) => p) as typeof avanceDeLaPalabra, enOrden)
+const H2 = /<h2[^>]*data-pieza="titulo-que-se-pinta"[^>]*>[\s\S]*?<\/h2>/.exec(QUIETO)?.[0] ?? ''
+afirmar(cuentaDe(H2, /data-palabra=""/g) === n && /id="titular-tu-panel"/.test(H2), `el h2 lleva sus ${String(n)} palabras como piezas y nombra la sección`)
+afirmar(/class="[^"]*\bitalic\b[^"]*"[^>]*>TODO<span aria-hidden="true" data-parte="subrayado"/.test(H2) && /data-parte="subrayado" class="[^"]*\borigin-left\b[^"]*\bscale-x-\[var\(--pintado,1\)\]/.test(H2), '  «TODO» en cursiva, con su subrayado que crece desde la izquierda con SU pintado (la misma variable)')
+afirmar(!/--pintado:/.test(QUIETO), '  el HTML servido no trae el pintado: sin JS y con movimiento reducido el título sale en tinta plena (AA)')
+afirmar(/font-display font-fuerte uppercase/.test(H2) && /text-\[length:min\(calc\(100cqw\/var\(--divisor-del-titulo\)\),var\(--tope-del-titulo\)\)\]/.test(H2), '  en la letra de las palabras fundidas (la cara de display, de mayúsculas) y del tamaño del ancho')
+const caraDisplay = leerAvancesDe(FUENTE_DISPLAY)
+const enMayusculas = [textoDe(TITULO), textoDe(CTA.titular), ...TARJETAS.map((t) => t.palabra)].map((t) => t.toUpperCase())
+afirmarIgual(enMayusculas.flatMap((t) => caracteresSinGlifo(caraDisplay, t)), [], 'la cara de display tiene todas sus letras (con la Á): nada cae a otra fuente')
+const RENGLON = TITULO[0].palabras.join(' ').toUpperCase()
+/** La razón del ancho en la 700 que se pinta contra la instancia por defecto: 8,19 contra lo que da el binario para «TU NEGOCIO VENDIENDO». */
+const A_LA_700 = 8.19 / anchoDeTexto(caraDisplay, 'TU NEGOCIO VENDIENDO', 1, -0.02)
+for (const [ancho, alto] of [[1376, 900], [960, 768], [1856, 1080], [704, 1024], [326, 844]] as const) {
+  const ocupa = (anchoDeTexto(caraDisplay, RENGLON, tamanoDelTitulo(ancho, alto), -0.02) * A_LA_700) / ancho
+  afirmar(ocupa > 0.85 && ocupa < 1, `${String(ancho)} de ancho útil: «${RENGLON}» ocupa el ${(ocupa * 100).toFixed(1)} % del ancho — de lado a lado, sin partirse`)
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · [PASADA FINAL] B1 · El caos: una TABLA fija, tres tamaños, nada aleatorio, y cada demo con su pantalla')
+titulo('6 · Tres módulos alternados, cada grupo en su eje, y la palabra fundida pálida')
 
-afirmarIgual(TABLA_DEL_CAOS.length, TARJETAS.length, 'una fila por feature')
-afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /Math\.random|crypto\.getRandomValues/g), 0, 'nada se sortea en tiempo de ejecución: la hidratación ve lo mismo que el servidor')
-afirmarIgual(Object.keys(TAMANOS).length, 3, 'tres clases de tamaño')
-afirmar(Object.values(TAMANOS).every((t) => t.ancho >= 42 && t.ancho <= 56), 'del 42 al 56 % del ancho: más grandes que las miniaturas del nocturno (22 a 42), más chicas que las demos a lo ancho del retoque (64 a 100); ninguna a lo ancho', Object.values(TAMANOS).map((t) => `${String(t.ancho)} %`).join(' · '))
-controlPositivo('  el chequeo vería una a lo ancho', [{ ancho: 100 }], (l: readonly { ancho: number }[]) => l.every((t) => t.ancho >= 42 && t.ancho <= 56))
-afirmar(new Set(TABLA_DEL_CAOS.map((f) => f.tamano)).size === 3, 'y las tres se usan: tamaños distintos, nada fijo')
-const ordenPorAncho = Object.values(TAMANOS).sort((a, b) => a.ancho - b.ancho)
-afirmar(ordenPorAncho.every((t, i) => i === 0 || t.velocidad > ordenPorAncho[i - 1].velocidad), 'las más grandes van un poco más rápido (profundidad)')
-afirmarIgual(velocidadDe(TABLA_DEL_CAOS.length - 1), 0, 'la última queda asentada: velocidad 0')
-afirmar(TABLA_DEL_CAOS[0].columna >= 40, 'la primera llega en el 60 % derecho, al lado del encabezado', `columna ${String(TABLA_DEL_CAOS[0].columna)} %`)
-afirmar(VELOCIDAD_DEL_FONDO < 0 && Object.values(TAMANOS).every((t) => t.velocidad > VELOCIDAD_DEL_FONDO), 'el fondo va más lento que cualquier feature: está más lejos')
-afirmar(TABLA_DEL_CAOS.every((f) => f.pantalla.ancho >= 760 && f.pantalla.alto >= 700), 'cada demo se dibuja a una pantalla de panel de verdad (ninguna de menos de 760 × 700: más alta que la del retoque, se ve más panel); abajo de 1024 la misma, a escala ([AJUSTES FINALES] A8)')
-afirmar(TABLA_DEL_CAOS.filter((f) => f.pantalla.ancho >= ANCHO_CON_BARRA).length >= 4, `  las anchas (desde ${String(ANCHO_CON_BARRA)} px) llevan la barra lateral del panel; las angostas la cierran`)
-afirmar(/data-profundidad=\{velocidadDe\(indice\)\}/.test(TARJETA) && /CLASE_DEL_LUGAR\.asentada : CLASE_DEL_LUGAR\.flota/.test(TARJETA), '  cada tarjeta lleva su profundidad y flota en su lugar; la última, asentada en el flujo')
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · BARRIDO de convivencia sobre el modelo, a tres pantallas; y la escala de cada demo')
-
-/** Barre el caos de a 5 px y devuelve el peor caso. */
-function barrer(tabla: readonly FilaDelCaos[], ancho: number, alto: number): { max: number; tapados: string[]; pisadas: string[]; altoMaximo: number } {
-  const cajas = cajasDelCaos(ancho, alto, tabla)
-  const fin = cajas[cajas.length - 1].titulo.arriba + alto
-  let max = 0
-  const tapados = new Set<string>()
-  const pisadas = new Set<string>()
-  for (let s = -alto; s <= fin; s += 5) {
-    const r = convivenciaEn(cajasEn(cajas, s, alto), alto)
-    max = Math.max(max, r.visibles)
-    r.tapados.forEach((t) => tapados.add(t))
-    r.pisadas.forEach((t) => pisadas.add(t))
-  }
-  return { max, tapados: [...tapados], pisadas: [...pisadas], altoMaximo: Math.max(...cajas.map((c) => (c.imagen.alto + c.titulo.alto) / alto)) }
-}
-for (const [ancho, alto] of [[1376, 900], [1856, 1080], [1216, 800]] as const) {
-  const r = barrer(TABLA_DEL_CAOS, ancho, alto)
-  afirmar(r.max <= 3, `${String(ancho)} × ${String(alto)}: nunca más de 3 features a la vez`, `máximo ${String(r.max)}`)
-  afirmarIgual(r.tapados, [], `${String(ancho)} × ${String(alto)}: ningún título queda bajo otra imagen`)
-  afirmarIgual(r.pisadas, [], `${String(ancho)} × ${String(alto)}: ninguna demo se pisa con otra`)
-  afirmar(r.altoMaximo <= 0.8, `${String(ancho)} × ${String(alto)}: ninguna pasa del 80 % del alto (se ve entera con su título)`, `${(r.altoMaximo * 100).toFixed(1)} %`)
-}
-afirmarIgual(fueraDelCuadro(), [], 'ninguna se sale por los costados')
-const apretada = TABLA_DEL_CAOS.map((f, i) => (i === 1 ? { ...f, separacion: 8 } : f))
-controlPositivo('el barrido ve dos demos que se pisan', apretada, (t: readonly FilaDelCaos[]) => barrer(t, 1376, 900).pisadas.length === 0)
-controlPositivo('y una que se sale', [{ ...TABLA_DEL_CAOS[0], columna: 70 }], (t: readonly FilaDelCaos[]) => fueraDelCuadro(t).length === 0)
-const escalas = (anchoUtil: number): number[] => TABLA_DEL_CAOS.map((_, i) => escalaDeLaDemo(i, anchoUtil))
-const fmt = (e: readonly number[]): string => e.map((x) => x.toFixed(2)).join(' · ')
-const a1440 = escalas(1376)
-afirmar(a1440.every((e) => e >= 0.65 && e <= 0.9), '1440: el panel entero a escala reducida, de 0,65 a 0,9 (se lee y se usa; antes, a tamaño casi real y a lo ancho)', fmt(a1440))
-controlPositivo('  el chequeo vería una miniatura del nocturno (22 % del ancho, dibujada a 1120)', [0.27], (e: readonly number[]) => e.every((x) => x >= 0.65 && x <= 0.9))
-const a1920 = escalas(1856)
-afirmar(a1920.every((e) => e >= 0.85 && e <= 1.15), '1920: de 0,85 a 1,15', fmt(a1920))
-const enColumna = escalas(960)
-afirmar(CONTENIDO_DEL_CAOS === 1152 && enColumna.every((e) => e >= 0.6 && e <= 1.1), '1024 (en columna, hasta 72rem de contenido): de 0,6 a 1,1', fmt(enColumna))
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · UNA suscripción de scroll: la profundidad de las features y del fondo, leyendo todo antes de escribir')
-
-const GALERIA = fuenteDe('Galeria.tsx')
-afirmarIgual(cuentaDe(quitarComentarios(CODIGO), /addEventListener\('scroll'/g), 1, 'UNA suscripción de scroll para la profundidad')
-afirmar(/if \(!anima \|\| raiz === null\) return/.test(GALERIA) && GALERIA.includes('p.el.offsetTop'), '  que sólo corre con la coreografía, y mide con `offsetTop` (no ve la transformada que escribe)')
-const leeAntesDeEscribir = (g: string): boolean => {
-  const lecturas = g.indexOf('bordes.set(p.padre, p.padre.getBoundingClientRect().top)')
-  const escrituras = g.indexOf('p.el.style.transform = ')
-  return lecturas > 0 && escrituras > lecturas && !/getBoundingClientRect\(\)[\s\S]{0,200}style\.transform[\s\S]{0,200}getBoundingClientRect\(\)/.test(g)
-}
-afirmar(leeAntesDeEscribir(GALERIA), '  [PASADA FINAL] B3 · por cuadro lee los bordes (uno por contenedor) y recién después escribe las transformadas: ninguna lectura entre escrituras')
-controlPositivo('  el detector VE el cuadro de antes (una lectura por pieza, intercalada con cada escritura)', GALERIA.replace('bordes.set(p.padre, p.padre.getBoundingClientRect().top)', 'bordes.set(p.padre, 0)').replace('p.el.style.transform = ', 'p.el.style.transform = String(p.padre.getBoundingClientRect().top) + '), leeAntesDeEscribir)
-afirmar(VELOCIDAD_DEL_FONDO < 0, '  y el fondo va más lento que el scroll: está más lejos', String(VELOCIDAD_DEL_FONDO))
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('9 · [PASADA FINAL] B2 · El marco es un módulo que flota: esquinas redondeadas y una sombra suave, sin halo ni filtros')
-
-const marco = /<div\s+data-parte="marco"[\s\S]*?className="([^"]*)"/.exec(TARJETA)?.[1] ?? ''
-const flota = (c: string): boolean => /\brounded-\[calc\(var\(--radius-fuerte\)\*1\.6\)\]/.test(c) && /\boverflow-hidden\b/.test(c) && /\bshadow-\[0_var\(--spacing-1\)_var\(--spacing-2\)_var\(--tw-shadow-color\),0_var\(--spacing-6\)_var\(--spacing-12\)_calc\(var\(--spacing-5\)\*-1\)_var\(--tw-shadow-color\)\]/.test(c) && /\bshadow-tinta\/25\b/.test(c) && /\bcontain-layout\b/.test(c) && /\bcontain-paint\b/.test(c)
-afirmar(flota(marco), 'esquinas redondeadas (el radio fuerte × 1,6), la demo recortada adentro, la sombra en dos capas (el contacto y la ambiental, tinta al 25 %) y `contain` para que lo que pasa adentro no le cueste a la página', marco)
-controlPositivo('  el detector VE el marco de antes (sin esquinas ni sombra)', 'relative w-full h-[var(--alto-angosto)]', flota)
-afirmar(!/mask-image|backdrop-|\bblur-|\[filter:|\bbrightness-|--sangrado|data-borde/.test(quitarComentarios(CODIGO)), '  sin máscaras, sin desenfoques, sin filtros de fondo y sin el sangrado fundido de antes')
-afirmar(!/panelBorde|panelborde/.test(quitarComentarios(readFileSync(path.join(RAIZ, 'src/app/v3/_lib/escena/entorno.ts'), 'utf8'))), '  la prueba `panelborde` ya no existe en el entorno')
-afirmar(!/data-borde=/.test(QUIETO) && /data-parte="marco"/.test(QUIETO), '  y el HTML del servidor trae el marco sin la pieza del borde')
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · El remate: llega, SE VA en espejo, y el newsletter no finge un éxito')
-
-const tramos = cronogramaDelRemate(700, 300, PUNTOS_DE_Y_MAS)
-const finales = tramos.map((t) => t.delay + t.duration + t.endDelay)
-afirmar(finales.every((f) => Math.abs(f - finales[0]) < 1e-9), 'todas las piezas terminan en el mismo instante: invertidas salen en espejo', `${finales[0]} ms`)
-afirmar(tramos.every((t) => t.endDelay >= 0), '  sin relleno negativo')
-controlPositivo('el control ve un cronograma sin relleno', tramos.map((t) => t.delay + t.duration), (l) => l.every((f) => Math.abs(f - l[0]) < 1e-9))
-afirmar(salidaExponencial(0.25) > 0.8 && curvaComoLinear(salidaExponencial).startsWith('linear(0.0000, '), 'la curva es expo.out, pasada como `linear(…)`')
-const REMATE = fuenteDe('Remate.tsx')
-afirmar(REMATE.includes('gestoDelCruce(cruce)') && !REMATE.includes('isIntersecting)') && !/entrada\.isIntersecting\)\s*\{/.test(REMATE), 'el remate decide por el DISPARO POR LÍNEA del contrato, no por visibilidad')
-afirmar(REMATE.includes('margenDelDisparo(DISPARO_DEL_REMATE)') && margenDelDisparo(DISPARO_DEL_REMATE) === `0% 0% -${DISPARO_DEL_REMATE}% 0%`, `  con la línea a ${DISPARO_DEL_REMATE} % del cuadro desde abajo (entra ni bien asoma y se va bien abajo)`, margenDelDisparo(DISPARO_DEL_REMATE))
-afirmar(LENTITUD_DEL_REMATE > 1, `  y ${LENTITUD_DEL_REMATE} veces más lento que los tokens`)
-
-// SPRINT PANEL 3 · las cuatro entradas, como §19 de Trabajos.
-const CASOS = {
-  'arriba-bajando': { cruza: true, tope: 300, pie: 700 },
-  'arriba-subiendo': { cruza: false, tope: 700, pie: 1100 },
-  'abajo-bajando': { cruza: false, tope: -900, pie: -500 },
-  'abajo-subiendo': { cruza: true, tope: -200, pie: 200 },
-} as const
-const GESTO_ESPERADO = { 'arriba-bajando': 'ida', 'arriba-subiendo': 'vuelta', 'abajo-bajando': 'nada', 'abajo-subiendo': 'nada' } as const
-for (const entrada of ENTRADAS_AL_TRAMO) {
-  const c = CASOS[entrada]
-  afirmarIgual(cruceDelTramo(c), entrada, `${entrada}: se reconoce`)
-  afirmarIgual(gestoDelCruce(cruceDelTramo(c)), GESTO_ESPERADO[entrada], `  y su gesto es «${GESTO_ESPERADO[entrada]}»${entrada === 'abajo-bajando' ? ' — pasarlo bajando NO lo saca' : ''}`)
-  afirmarIgual([cruceDelTramo(c), gestoDelCruce(cruceDelTramo(c))], [cruceDeTrabajos(c), gestoDeTrabajos(cruceDeTrabajos(c))], '  y es EXACTAMENTE lo que decide Trabajos (`trabajos/gota.ts`): es el mismo mecanismo, no uno propio')
-}
-afirmar(ENTRADAS_AL_TRAMO.every((e) => puestoTras(e) === (e !== 'arriba-subiendo')), 'al cargar se posa: puesto en todo cruce salvo debajo de la línea')
-controlPositivo('el control ve un disparo por visibilidad (salir por arriba lo sacaría)', (c: { cruza: boolean }): string => (c.cruza ? 'ida' : 'vuelta'), (f) => f(CASOS['abajo-bajando']) === 'nada')
-afirmar(GESTOS_POR_TIEMPO.some((g) => g.seccion === ID && g.curva === 'expo.out'), 'declarado en el contrato como gesto por tiempo')
-
-// [RONDA 2] F1: el newsletter ENVÍA (a `/api/newsletter`, `NewsletterDelPanel.tsx`): el envío habilitado y sin `action`
-// (lo manda el script, no el navegador a esta misma página); el resultado, en sus regiones vivas, sin un «listo» de entrada.
-const enviaDeVerdad = (html: string, fuente: string): boolean => {
-  const f = /<form[\s\S]*?<\/form>/.exec(html)?.[0] ?? ''
-  const envios = [...f.matchAll(/<button[^>]*type="submit"[^>]*>/g)].map((m) => m[0])
-  return f.length > 0 && envios.length > 0 && envios.every((b) => !/\bdisabled=""/.test(b)) && !/<form[^>]*\s(action|method)=/.test(f) && /enviarAlServidor\('\/api\/newsletter', \{ mail: mail\.trim\(\) \}\)/.test(fuente) && /role="status"/.test(f) && !f.includes(NEWSLETTER.listo)
-}
-const NEWSLETTER_FUENTE = fuenteDe('NewsletterDelPanel.tsx')
-afirmar(enviaDeVerdad(QUIETO, NEWSLETTER_FUENTE), 'el newsletter envía al endpoint propio: habilitado, sin `action`, y el «listo» sólo con la respuesta')
-controlPositivo('el predicado ve un envío deshabilitado', [QUIETO.replace('type="submit"', 'type="submit" disabled=""'), NEWSLETTER_FUENTE], ([h, f]: string[]) => enviaDeVerdad(h, f))
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo("11 · El fondo: el contraste del «What's new» de nk, y fuera del árbol de lectura")
-
+afirmarIgual(LADOS, ['derecha', 'izquierda', 'derecha'], 'el 1 a la derecha, el 2 a la izquierda, el 3 a la derecha')
+afirmarIgual([...QUIETO.matchAll(/data-pieza="fila-del-panel" data-lado="([a-z]+)"/g)].map((m) => m[1]), [...LADOS], '  y así salen en el marcado')
+const grupos = [...QUIETO.matchAll(/data-pieza="grupo-del-modulo" class="([^"]*)"/g)].map((m) => m[1])
+const enSuEje = (c: string): boolean => /\bitems-center\b/.test(c) && /\btext-center\b/.test(c) && /\bflex-col\b/.test(c)
+afirmar(grupos.length === 3 && grupos.every(enSuEje), 'cada grupo apila la palabra, el título y la descripción centrados en su columna: el mismo eje vertical (el ±1 % lo mide el banco)')
+controlPositivo('  el detector VE un grupo alineado a la izquierda', 'flex flex-col items-start', enSuEje)
+afirmar(grupos.every((c, i) => c.includes(LADOS[i] === 'derecha' ? 'escritorio:col-start-1' : 'escritorio:col-start-2')), '  cada grupo, del lado opuesto a su módulo')
 const TEMA = readFileSync(path.join(RAIZ, 'src/app/theme-develop.css'), 'utf8')
-const hex = (re: RegExp): number[] => {
-  const h = re.exec(TEMA)?.[1] ?? '#000000'
-  return [1, 3, 5].map((i) => Number.parseInt(h.slice(i, i + 2), 16))
-}
+const hex = (re: RegExp): number[] => [1, 3, 5].map((i) => Number.parseInt((re.exec(TEMA)?.[1] ?? '#000000').slice(i, i + 2), 16))
 const lineal = (c: number): number => (c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4)
 const luz = (rgb: readonly number[]): number => 0.2126 * lineal(rgb[0]) + 0.7152 * lineal(rgb[1]) + 0.0722 * lineal(rgb[2])
 const PAPEL = hex(/--color-fondo:\s*(#[0-9A-Fa-f]{6})/)
 const TINTA = hex(/--color-tinta:\s*(#[0-9A-Fa-f]{6})/)
-const mezcla = PAPEL.map((p, i) => ALFA_DEL_FONDO * TINTA[i] + (1 - ALFA_DEL_FONDO) * p)
-const contraste = (luz(PAPEL) + 0.05) / (luz(mezcla) + 0.05)
-afirmar(Math.abs(contraste - 1.0595) < 0.002, 'la tinta al alfa del fondo sobre el papel da el 1,0595:1 medido en nk', `${contraste.toFixed(4)}:1 · papel ${PAPEL.join(',')} · tinta ${TINTA.join(',')}`)
-afirmar(/<div aria-hidden="true" data-pieza="fondo-del-panel"/.test(QUIETO), 'la raíz del fondo lleva `aria-hidden`')
-const accesible = textoAccesible(QUIETO)
-afirmar(PALABRAS_DEL_FONDO.every((p) => !new RegExp(`(^|\\s)${p}(\\s|$)`).test(accesible) || TEXTOS.some((t) => t.includes(p))), 'ninguna palabra del fondo se anuncia por sí sola')
-const soloFondo = /<div aria-hidden="true" data-pieza="fondo-del-panel"[\s\S]*?(?=<div data-pieza="encabezado-del-panel")/.exec(QUIETO)?.[0] ?? ''
-afirmar(soloFondo.length > 0, 'el fondo va ANTES del encabezado en el árbol: detrás de todo', `${soloFondo.length} caracteres`)
-afirmarIgual(focalizablesDe(soloFondo).length, 0, 'no tiene nada focalizable')
-afirmar(/data-pieza="fondo-del-panel" class="[^"]*\bhidden\b[^"]*escritorio:block/.test(QUIETO), 'y sólo existe desde escritorio')
-afirmar(sinAriaHidden(QUIETO).length < QUIETO.length, 'CONTROL: la poda de aria-hidden sí saca el fondo del árbol')
+const contraste = (luz(PAPEL) + 0.05) / (luz(PAPEL.map((p, i) => ALFA_DE_LA_PALABRA * TINTA[i] + (1 - ALFA_DE_LA_PALABRA) * p)) + 0.05)
+afirmar(Math.abs(contraste - 1.0595) < 0.002, 'la palabra fundida queda pálida: la tinta a su alfa sobre el papel da el 1,0595:1 de las palabras del fondo de antes', `${contraste.toFixed(4)}:1`)
+const palabras = [...QUIETO.matchAll(/<span aria-hidden="true" data-pieza="palabra-fundida"[^>]*>([^<]*)<\/span>/g)].map((m) => m[1])
+afirmarIgual(palabras, TARJETAS.map((t) => t.palabra), '  las tres palabras van `aria-hidden`: no se anuncian')
+afirmar(TARJETAS.every((t) => !textoAccesible(QUIETO).split(/\s+/).includes(t.palabra) || ORDEN.some((o) => o.includes(t.palabra))) && sinAriaHidden(QUIETO).length < QUIETO.length, '  y ninguna se anuncia sola (CONTROL: la poda de aria-hidden saca algo)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('7 · `?grupo=final|union` y `?palabra-movil=union|debajo`')
+
+afirmar(posicionDelGrupo(null) === GRUPO_POR_DEFECTO && GRUPO_POR_DEFECTO === 'final' && posicionDelGrupo('union') === 'union' && posicionDelGrupo('otra') === 'final', '`?grupo=`: final por defecto, union a pedido, cualquier otra cosa cae al defecto')
+afirmar(palabraEnElTelefono(null) === PALABRA_POR_DEFECTO && PALABRA_POR_DEFECTO === 'union' && palabraEnElTelefono('debajo') === 'debajo', '`?palabra-movil=`: union por defecto, debajo a pedido')
+/** Dónde queda el centro del grupo con el pie de su módulo en `pie` y un grupo de `alto` (svh): la cuenta de las dos clases. */
+const centroDelGrupo = (clase: string, pie: number, alto: number): number => pie - alto / 2 + (/translate-y-\[calc\(50%\+var\(--medio-entre-filas\)\)\]/.test(clase) ? alto / 2 + RITMO.entreFilas / 2 : 0)
+afirmar(centroDelGrupo(CLASE_DE_LA_POSICION.final, 60, 30) === 45 && /\bescritorio:self-end\b/.test(CLASE_DE_LA_POSICION.final), '  final: el pie del grupo, al del módulo')
+afirmar(centroDelGrupo(CLASE_DE_LA_POSICION.union, 60, 30) === 60 + RITMO.entreFilas / 2, '  union: el centro del grupo, en la mitad del aire entre su módulo y el siguiente (el siguiente tramo mide lo mismo: también el del CTA)')
+afirmar(/max-escritorio:absolute/.test(CLASE_DE_LA_PALABRA.debajo) && /max-escritorio:-z-10/.test(CLASE_DE_LA_PALABRA.debajo) && !/absolute/.test(CLASE_DE_LA_PALABRA.union), '  en el teléfono, debajo va detrás del título; union, en el flujo arriba de él')
+afirmar(TIPO.divisorDeLaPalabraAngosta > TIPO.divisorDeLaPalabra, '  y en el teléfono la palabra es mucho más discreta (más chica)')
+const ordenEnLaFila = /data-pieza="grupo-del-modulo"[\s\S]*?data-pieza="modulo-del-panel"/.test(/<li data-pieza="fila-del-panel"[\s\S]*?<\/li>/.exec(QUIETO)?.[0] ?? '')
+afirmar(ordenEnLaFila, '  apilado, el grupo va antes que su módulo (la palabra, el título, la descripción y el módulo)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('8 · Las maquetas, un poco más chicas, y la sección llena los 700svh de la tabla en todo escritorio (k = 1)')
+
+const fmt = (x: number): string => x.toFixed(2)
+for (const [ancho, alto] of [[1376, 900], [960, 768], [1856, 1080], [1216, 720], [1376, 700]] as const) {
+  const e = escalaDeLaDemo(ancho, alto)
+  afirmar(e >= 0.6 && e <= 1.05 && altoDelModulo(ancho, alto) <= (MODULO.altoMaximo / 100) * alto + 1e-9, `${String(ancho)} × ${String(alto)}: la maqueta a ${fmt(e)} (se lee) y el módulo a ${((altoDelModulo(ancho, alto) / alto) * 100).toFixed(0)} % del alto`)
+}
+afirmar(MODULO.ancho < 56 && MODULO.anchoAngosto <= 60 && PANTALLA_DEL_MODULO.ancho >= ANCHO_CON_BARRA, 'más chicas que las demos de antes (52 % contra 56 %), y con la barra lateral del panel')
+const tabla = pantallasDe(SECCION)
+let peor = Number.POSITIVE_INFINITY
+for (let ancho = 1024; ancho <= 2560; ancho += 64) for (let alto = 600; alto <= 1440; alto += 40) peor = Math.min(peor, tabla - altoNaturalEnEscritorio(Math.min(ancho - 64, 1920), alto) / (alto / 100) / 100)
+afirmar(peor >= 0, `de 1024 a 2560 y de 600 a 1440 de alto, lo fijo entra en los ${String(tabla * 100)}svh: el respiro llena lo que sobra y la sección mide la tabla`, `margen mínimo ${(peor * 100).toFixed(1)}svh`)
+controlPositivo('  el chequeo VE módulos que no entran (al 80 % del ancho, sin tope)', 0.8, (f: number) => tabla - (3 * f * 1376 * 0.76 + 3 * 900 + 2 * 900) / 900 >= 0)
+afirmar(/escritorio:min-h-\[var\(--alto-de-la-tabla\)\]/.test(QUIETO) && /--alto-de-la-tabla:700svh/.test(QUIETO) && /escritorio:grow/.test(QUIETO), '  el contenido toma el alto de la tabla (del dato) y el respiro es el que crece')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('9 · El candado: la rueda scrollea la página, el clic habilita adentro y salir lo bloquea')
+
+const correr = (f: typeof siguienteCandado, eventos: readonly EventoDelCandado['tipo'][]): EstadoDelCandado => eventos.reduce((e, tipo) => f(e, { tipo } as EventoDelCandado), CANDADO_INICIAL)
+afirmar(!CANDADO_INICIAL.libre && CANDADO_INICIAL.cartel === null, 'arranca bloqueado y sin cartel')
+afirmarIgual(correr(siguienteCandado, ['rueda']), { libre: false, cartel: 'raton' }, '  la rueda encima: sigue bloqueado (scrollea la página) y aparece «Hacé clic…»')
+afirmarIgual(correr(siguienteCandado, ['rueda', 'clic']), { libre: true, cartel: null }, '  el clic lo habilita y saca el cartel')
+afirmarIgual(correr(siguienteCandado, ['rueda', 'clic', 'rueda']), { libre: true, cartel: null }, '  habilitado, la rueda es de adentro: sin cartel')
+afirmarIgual(correr(siguienteCandado, ['clic', 'salida']), CANDADO_INICIAL, '  salir lo vuelve a bloquear')
+afirmarIgual(correr(siguienteCandado, ['arrastre']), { libre: false, cartel: 'tactil' }, '  en el teléfono, el dedo: «Tocá…»; un toque es el mismo clic')
+afirmarIgual(correr(siguienteCandado, ['rueda', 'olvido']), CANDADO_INICIAL, '  y el cartel se va solo')
+// [B6 navegador] La página que se mueve saca el módulo de abajo del ratón (un `pointerleave`): el cartel no se corta, se va con su tiempo.
+afirmarIgual(correr(siguienteCandado, ['rueda', 'salida']), { libre: false, cartel: 'raton' }, '  bloqueado, salir no corta el cartel (la página que se mueve saca el módulo de abajo del ratón): se va solo, con su fundido')
+controlPositivo('  el detector VE el cartel cortado por la salida (lo que midió el banco: el cartel no se veía)', ((e: EstadoDelCandado, ev: EventoDelCandado) => (ev.tipo === 'salida' ? CANDADO_INICIAL : siguienteCandado(e, ev))) as typeof siguienteCandado, (f: typeof siguienteCandado) => correr(f, ['rueda', 'salida']).cartel === 'raton')
+// [B6 navegador] Abierto, la rueda es del módulo: el contenido la absorbe si puede; si no, se frena (la página no se mueve).
+const recorrido = (scrollTop: number): { scrollTop: number; clientHeight: number; scrollHeight: number } => ({ scrollTop, clientHeight: 400, scrollHeight: 454 })
+const absorbeBien = (f: typeof laRuedaEsDeAdentro): boolean => f(recorrido(0), 100, true) && !f(recorrido(54), 100, true) && f(recorrido(54), -100, true) && !f(recorrido(0), -100, true) && !f(recorrido(0), 100, false) && !f(null, 100, true) && !f({ scrollTop: 0, clientHeight: 400, scrollHeight: 400 }, 100, true)
+afirmar(absorbeBien(laRuedaEsDeAdentro), '  abierto, el contenido absorbe la rueda mientras tiene recorrido hacia donde va; en su borde, sin recorrido o fuera de él, no (y el módulo la frena)')
+controlPositivo('  el detector VE la rueda de antes, que en el borde pasaba a la página', ((c: { scrollTop: number; clientHeight: number; scrollHeight: number } | null, d: number, a: boolean) => a && c !== null) as typeof laRuedaEsDeAdentro, absorbeBien)
+const conCartel = siguienteCandado(CANDADO_INICIAL, { tipo: 'rueda' })
+afirmar(siguienteCandado(conCartel, { tipo: 'rueda' }) === conCartel, '  cien ruedas de un gesto son el MISMO estado: nada se vuelve a dibujar')
+controlPositivo('  el detector VE un candado que se abre con la rueda', ((e: EstadoDelCandado, ev: EventoDelCandado) => (ev.tipo === 'rueda' ? { libre: true, cartel: null } : siguienteCandado(e, ev))) as typeof siguienteCandado, (f: typeof siguienteCandado) => !correr(f, ['rueda']).libre)
+afirmarIgual([CARTEL.raton, CARTEL.tactil], ['Hacé clic para scrollear acá', 'Tocá para scrollear acá'], 'el cartel dice lo que pidió Valentino (y su par del dedo)')
+const TARJETA = fuenteDe('Tarjeta.tsx')
+const conectado = (t: string): boolean => /onWheel=\{\(\) => avisar\('rueda'\)\}/.test(t) && /onTouchMove=\{\(\) => avisar\('arrastre'\)\}/.test(t) && /onClick=\{\(\) => cambiar\(\{ tipo: 'clic' \}\)\}/.test(t) && /if \(e\.pointerType !== 'touch'\) cambiar\(\{ tipo: 'salida' \}\)/.test(t) && /<RuedaDelModulo value=\{candado\.libre\}>/.test(t) && /document\.addEventListener\('pointerdown', afuera, true\)/.test(t) && /data-lenis-prevent=\{candado\.libre \? '' : undefined\}/.test(t) && /el\.addEventListener\('wheel', rueda, \{ passive: false \}\)/.test(t) && /if \(!laRuedaEsDeAdentro\(contenido, e\.deltaY, adentro\)\) e\.preventDefault\(\)/.test(t) && /overscroll-contain/.test(t)
+afirmar(conectado(TARJETA), '  el módulo conecta la rueda, el dedo, el clic, la salida del ratón y el toque de afuera, y le pasa el candado a la maqueta; abierto, Lenis no toma la rueda (`data-lenis-prevent` en el marco), el módulo la frena donde el contenido no la absorbe y el dedo no arrastra la página desde el borde')
+controlPositivo('  el detector VE el módulo abierto que dejaba pasar la rueda a la página (lo que midió el banco)', TARJETA.replace("data-lenis-prevent={candado.libre ? '' : undefined}", ''), conectado)
+controlPositivo('  el detector VE un módulo sin la salida del ratón', TARJETA.replace("if (e.pointerType !== 'touch') cambiar({ tipo: 'salida' })", 'void e'), conectado)
+const RUEDA = delV3('_panel-vivo/rueda.ts')
+const MARCO = delV3('_panel-vivo/MarcoDelPanel.tsx')
+const DEMO = delV3('_panel-vivo/DemoDelPanel.tsx')
+const cumple = (r: string, m: string, d: string): boolean => /if \(!libreAhora\.current\) \{\s*el\.removeAttribute\('data-lenis-prevent'\)\s*return\s*\}\s*const puede/.test(r) && /libre \? 'overflow-y-auto' : 'overflow-hidden'/.test(m) && /\$\{libre \? '' : ' max-escritorio:pointer-events-none'\}/.test(d) && /createContext<boolean>\(true\)/.test(r)
+afirmar(cumple(RUEDA, MARCO, DEMO), '  la maqueta lo cumple: bloqueada, nunca `data-lenis-prevent` (la rueda la toma Lenis y mueve la página), el contenido sin scroll y, abajo de 1024, sin el dedo; fuera de un módulo, libre como antes')
+controlPositivo('  el detector VE la rueda de antes (adentro con recorrido, aunque el módulo esté bloqueado)', [RUEDA.replace(/if \(!libreAhora\.current\) \{[\s\S]*?return\s*\}\s*/, ''), MARCO, DEMO] as const, ([r, m, d]: readonly [string, string, string]) => cumple(r, m, d))
+afirmar(/data-parte="cartel"/.test(QUIETO) && /bg-tinta\/60/.test(TARJETA) && /visible \? 'opacity-100' : 'pointer-events-none opacity-0'/.test(TARJETA), '  el cartel va sobre el módulo con su fondo atenuado y, mientras se ve, toma el clic')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('10 · El CTA: una pantalla, «Probar el panel» que todavía no hace nada, la «o» y el newsletter')
+
+const CTA_HTML = /<div data-pieza="cta-del-panel"[\s\S]*?<\/form>/.exec(QUIETO)?.[0] ?? ''
+afirmar(/data-pieza="cta-del-panel" class="[^"]*\bmin-h-svh\b/.test(CTA_HTML) && /<h3[^>]*data-pieza="titulo-que-se-pinta"/.test(CTA_HTML), 'ocupa una pantalla, con el titular pintado como el título')
+const boton = /<div data-pieza="probar-el-panel"[^>]*><button([^>]*)>/.exec(CTA_HTML)?.[1] ?? ''
+const quieto = (b: string): boolean => /type="button"/.test(b) && !/href=|onclick|disabled/.test(b)
+afirmar(quieto(boton) && !/<a [^>]*>[^<]*Probar el panel/.test(QUIETO), '  el botón es un botón (visible y habilitado), sin enlace que se rompa: no hace nada hasta la prueba (C1)')
+controlPositivo('  el detector VE un enlace roto', ' href="#"', quieto)
+const iBoton = CTA_HTML.indexOf('probar-el-panel')
+const iO = CTA_HTML.indexOf('o-del-cta')
+const iForm = CTA_HTML.indexOf('<form')
+afirmar(iBoton > 0 && iO > iBoton && iForm > iO, '  en orden: el botón, la «o» y el formulario (en escritorio en fila, en el teléfono apilados)')
+afirmar(/escritorio:flex-row/.test(CTA_HTML) && /flex w-full flex-col items-center/.test(CTA_HTML), '  la fila se apila abajo de 1024')
+const NEWSLETTER_FUENTE = fuenteDe('NewsletterDelPanel.tsx')
+afirmar(/enviarAlServidor\('\/api\/newsletter', \{ mail: mail\.trim\(\) \}\)/.test(NEWSLETTER_FUENTE) && /data-pieza="novedades"/.test(CTA_HTML) && !CTA_HTML.includes(NEWSLETTER.listo), '  el newsletter es el que ya envía (redondeado: la pastilla de `pie.css`), sin un «listo» de entrada; esta prueba no lo llama')
+afirmar(GESTOS_POR_TIEMPO.some((g) => g.seccion === ID && g.id === 'cta-del-panel') && /<Gatillo className="w-full">/.test(fuenteDe('CtaDelPanel.tsx')), '  la bajada y la fila entran con el gatillo del contrato (declarado como gesto por tiempo)')
+afirmarIgual(focalizablesDe(QUIETO).length, 3, 'en el HTML servido, 3 focalizables: «Probar el panel», el campo y el envío del newsletter (lo de cada maqueta llega con ella)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('11 · REGLA DE ALTURAS: abajo de 1024 la escena ve el alto de antes')
+
+const a390 = altoViejoAngosto(326) / 844
+afirmar(Math.abs(a390 - 5.8) / 5.8 < 0.05, `el modelo del alto viejo a 390 × 844 da ${a390.toFixed(2)} pantallas contra las ~5,8 medidas en NOCTURNO FINAL C3 (a menos del 5 %)`)
+// [NOCTURNO] Y contra la sección vieja medida en el navegador en cuatro anchos: a 25 px o menos (la deriva de lo que viene después).
+const desvios = ALTOS_VIEJOS_MEDIDOS.map(([util, medido]) => altoViejoAngosto(util) - medido)
+afirmar(desvios.every((d) => Math.abs(d) <= 25), `el modelo contra lo medido en el navegador (390, 768, 820 y 1023): ${desvios.map((d) => d.toFixed(0)).join(', ')} px`)
+controlPositivo('  el modelo sin calibrar (el de B6) se pasa', ALTOS_VIEJOS_MEDIDOS, (m: readonly (readonly [number, number])[]) => m.every(([util, medido]) => Math.abs(altoViejoAngosto(util) + (util < 600 ? 117 : 50) - medido) <= 25))
+const panel = { isConnected: true, getBoundingClientRect: () => ({ top: 20000 }) } as unknown as Element
+const nuevo = 3400
+const tramo = tramoDelPanel(panel, nuevo, 326, 844)
+afirmar(tramo.arranque === ALTO_DE_VIEWPORT_DE_LA_REFERENCIA && Math.abs(tramo.k * tramo.largo * (844 / 900) - nuevo) < 1e-6, 'el tramo arranca en el tope del panel y mide lo medido (k × largo)', `k ${fmt(tramo.k)}`)
+TRAMO_ESTIRADO.valor = null
+/** El píxel que la escena ve 500 px después del panel, con el tramo anotado o sin él. */
+const despues = (conTramo: boolean): number => {
+  const soltar = conTramo ? anotarTramo(tramo) : (): void => undefined
+  const y = 20000 + nuevo + 500
+  const visto = medidaSinElEstiramiento(y, y, 0, 844, { y: 0, abajo: 0 }).y
+  soltar()
+  return visto
+}
+const comoAntes = 20000 + altoViejoAngosto(326) + 500
+afirmar(Math.abs(despues(true) - comoAntes) < 1e-6, '  500 px después del panel, la escena ve el píxel que veía con el alto viejo', despues(true).toFixed(1))
+controlPositivo('  sin el tramo, lo de después se corre', false, (c: boolean) => Math.abs(despues(c) - comoAntes) < 1e-6)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('12 · Los patrones que declaro son los que consumo')
 
-afirmarIgual(patronesNombrados(CODIGO), ['P1', 'P2'], 'la sección nombra P1 (el título) y P2 (la llegada de la casa)')
-afirmarIgual(Object.keys(PIEZAS_POR_PATRON), ['P1', 'P2'], '  la tabla de piezas declara los mismos')
-afirmarIgual(USOS_DECLARADOS.filter((u) => u.seccion === ID).map((u) => u.patron), ['P1', 'P2'], '  y el contrato también')
-afirmarIgual(aperturasDe(QUIETO, 'li'), TARJETAS.length, 'las features son una lista: un <li> por feature')
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('M2 · Abajo de 1024: «Y más...» y el formulario se ven, llegan y vuelven')
-
-const FUENTE_DEL_REMATE = quitarComentarios(fuenteDe('Remate.tsx'))
-const remateEnTodoAncho = (f: string): boolean =>
-  /const anima = useMovimientoEnTodoAncho\(\)/.test(f) && /if \(!anima \|\| raiz === null\) \{\s*setEstado\('quieto'\)\s*return\s*\}/.test(f)
-afirmar(remateEnTodoAncho(FUENTE_DEL_REMATE), 'el remate llega y vuelve con la política de movimiento EN TODO ANCHO, y sin movimiento vuelve a quedar a la vista')
-controlPositivo('  el chequeo vería el remate de antes, que abajo de 1024 no llegaba y al cruzar el umbral quedaba invisible', FUENTE_DEL_REMATE.replace('useMovimientoEnTodoAncho()', 'useCoreografiaActiva()'), remateEnTodoAncho)
-const enElPapel = /data-pieza="remate-del-panel" data-estado="([^"]*)"/.exec(QUIETO)?.[1]
-afirmarIgual(enElPapel, 'quieto', '  y en el papel (sin coreografía) está quieto y visible: ni «Y más...» ni el formulario llevan `invisible`')
-afirmarIgual(cuentaDe(/data-pieza="remate-del-panel"[\s\S]*?<\/form>/.exec(QUIETO)?.[0] ?? '', /\binvisible\b/g), 0, '  (el marcado del remate no trae la clase que lo esconde)')
+afirmarIgual(patronesNombrados(CODIGO), ['P2'], 'la sección nombra P2 (la llegada de los módulos y las palabras); P1 llega por `TituloQueSube` del contrato')
+afirmar(/patron="P1"/.test(leer(COMPARTIDO)) && fuenteDe('Fila.tsx').includes("from '../_contrato/TituloQueSube'"), '  los títulos que vienen desde abajo son la pieza del contrato (importable por otras secciones: B4)')
+afirmarIgual(USOS_DECLARADOS.filter((u) => u.seccion === ID).map((u) => u.patron), ['P1', 'P2'], '  y el contrato declara los dos')
 
 cerrar('s6-tu-panel.invariant')

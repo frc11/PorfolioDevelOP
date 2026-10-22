@@ -16,7 +16,7 @@ import { corrimiento, pinDelLugar } from '../titulos3d/colocacion'
 import { EN_VIVO as EN_VIVO_DEL_FINAL } from '../final/recorridoDelFinal'
 import { viajeEnCurso } from '../viaje'
 import { armarElCta, fuentesDeLaMetamorfosis, letrasEnLaPantalla, lineaDelCta, piezasDe, ponerElMarco, ponerLaPieza, soltarElCta, type ArmadoDelCta } from './armadoDelCta'
-import { CTA_EN_VIVO, FRASE_DE_VOLUMEN, ctaListo, ctaVisibleEnElViaje, marcarElCtaListo, suscribirAlLugarDelCta, versionDelLugarDelCta } from './enVivo'
+import { CTA_EN_VIVO, FRASE_DE_VOLUMEN, ctaDeNoche, ctaListo, ctaVisibleEnElViaje, marcarElCtaListo, suscribirAlLugarDelCta, versionDelLugarDelCta } from './enVivo'
 import { cajaDeAhora, medirElValor, renglonesDeLaFrase, type CajaDeAhora, type MetricasDeLaFuente, type RenglonDeLaFrase, type ValorMedido } from './medidaDeLosValores'
 import { letrasDeLaFrase, type LetraDeLaFrase } from './piezasDeLaMetamorfosis'
 import { ANCLAJE_DEL_CTA, camaraDelCta, correrElPlano, esquinasEnElGiro, homografiaDelCta, nuevosPlanosDelCta, ponerLosPlanos, type PlanosDelCta } from './planosDelCta'
@@ -112,7 +112,7 @@ function altoDelCartel(destino: ArmadoDelCta['letras']['destino'], frase: Medida
 const enlaceDelCta = (): HTMLElement | null => CTA_EN_VIVO.destino?.closest('a') ?? null
 
 export default function EscenaDelCta({ keyLightRef, logoMaterialRef, stats }: Props) {
-  const color: Variante = entornoDeLaEscena().titulos === 'blanco' ? 'blanco' : 'negro'
+  const color: Variante = entornoDeLaEscena().titulos === 'blanco' || ctaDeNoche() ? 'blanco' : 'negro'
   const gl = useThree((s) => s.gl)
   const camara = useThree((s) => s.camera)
   const tam = useThree((s) => s.size)
@@ -358,7 +358,7 @@ function cuadroDeAhora(s: EstadoDeLaEscenaDelCta, medidas: Medidas, p: number): 
     if (el !== null && medido !== null) cajaDeAhora(el, medido, el.closest(ESCENARIO), valoresAPlano(p), c)
     return { x: c.x, y: c.y, escala: c.escala }
   })
-  return { items, progreso: p, apareceDeLosValores: CTA_EN_VIVO.donde === 'lista' ? CTA_EN_VIVO.entrada : apareceDeLosValores(p) }
+  return { items, progreso: p, apareceDeLosValores: CTA_EN_VIVO.donde === 'lista' ? CTA_EN_VIVO.entrada : CTA_EN_VIVO.sinLosValores ? 0 : apareceDeLosValores(p) }
 }
 
 /** Un cuadro: los planos del mundo, las letras, las poses del giro, la metamorfosis, el enlace, el hover y la luz. */

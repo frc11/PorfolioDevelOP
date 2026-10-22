@@ -16,7 +16,6 @@ import { estadoBajo, fraccionDelPaso, tonoBajo } from '../../_chrome/cursor/esta
 import { DosCopias } from '../../_componentes/rollover/DosCopias'
 import { textoVisible } from '../../_secciones/_contrato/escaneo'
 import { quitarSubarbolesConAtributo } from '../../_secciones/_invariantes/marcado'
-import { FISICA_DEL_CARRUSEL, envolver, objetivoDelFoco } from '../../_secciones/trabajos/demos/fisicaDelCarrusel'
 import { ROLLOVER_MEDIDO } from '../cta'
 import { SEGUIMIENTO_DE_LA_REFERENCIA } from '../cursor'
 
@@ -125,7 +124,8 @@ const MIGRADAS = [
   ['_secciones/quienes-somos/QuienesSomos.tsx', 1, 1],
   ['_secciones/quienes-somos/equipo.tsx', 3, 0],
   ['_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx', 1, 1],
-  ['_secciones/tu-panel/TuPanel.tsx', 1, 0],
+  // [B6] La sección nueva del Panel: la descripción de cada módulo entra por el canal desde los títulos que suben del contrato.
+  ['_secciones/_contrato/TituloQueSube.tsx', 1, 0],
   ['_secciones/por-que-develop/PorQueDevelop.tsx', 0, 2],
   ['_secciones/cierre/Cierre.tsx', 1, 0],
   ['_secciones/cierre/ColumnasDelPie.tsx', 1, 0],
@@ -135,6 +135,7 @@ for (const [ruta, canales, inercias] of MIGRADAS) {
   afirmarIgual([veces(fuente, '<CanalDeTexto '), veces(fuente, '<ConInercia')], [canales, inercias], `${ruta}: ${String(canales)} textos por el canal y ${String(inercias)} títulos con la inercia sola`)
 }
 afirmar(leer('_secciones/_contrato/coreografia-animada.tsx').includes('<Inclinado>'), 'los titulares de `CanalDeTitular` (Tu panel, las demos) llevan la inercia')
+afirmar(!leer('_secciones/tu-panel/TituloQueSePinta.tsx').includes('CanalDeTexto'), '[B6] el título de Tu panel, NO (excepción declarada: su gesto es el pintado palabra por palabra, atado al scroll; no se parte en renglones)')
 afirmar(!leer('_secciones/hero/Hero.tsx').includes('CanalDeTexto'), 'el hero, NO (excepción declarada: su titular es el LCP y lo que se ve en el primer cuadro no se parte sin un cuadro de cambio)')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -386,7 +387,8 @@ afirmar(FOCO.includes('[data-v3] [data-pieza="chip-de-contacto"]:has(:focus-visi
 afirmar(/:is\(a\[href\], button:not\(:disabled\), \[role="button"\], summary\):active \{\s*opacity: var\(--opacity-casi\);\s*transition: none;/.test(FOCO), 'todo lo que se toca tiene estado apretado (en nk, ninguno): opacidad casi, sin transición')
 const MARGEN_DEL_ANILLO = '6px' // desplazamiento (2) + dos grosores (2 + 2): el contorno y su borde
 const DEMOS_CSS = leer('_estilos/demos.css')
-afirmar(DEMOS_CSS.includes(`--cinta-margen-del-recorte: ${MARGEN_DEL_ANILLO};`) && DEMOS_CSS.includes('overflow-clip-margin: var(--cinta-margen-del-recorte);') && DEMOS_CSS.includes(`--carrusel-margen-del-recorte: ${MARGEN_DEL_ANILLO};`), `la cinta y el carrusel recortan dejando ${MARGEN_DEL_ANILLO} afuera: el anillo entero (en px: overflow-clip-margin no acepta calc)`)
+// [NOCTURNO B5] Reemplazada por la spec: el carrusel de las demos es el común de B1.2e (su anillo va por dentro de la tarjeta, abajo).
+afirmar(DEMOS_CSS.includes(`--cinta-margen-del-recorte: ${MARGEN_DEL_ANILLO};`) && DEMOS_CSS.includes('overflow-clip-margin: var(--cinta-margen-del-recorte);'), `la cinta recorta dejando ${MARGEN_DEL_ANILLO} afuera: el anillo entero (en px: overflow-clip-margin no acepta calc)`)
 controlPositivo('el chequeo del anillo ve la regla del tema de antes (un solo tono, `--color-foco`)', 'outline: var(--foco-grosor) solid var(--color-foco);', (r: string) => r.includes('outline-color: var(--color-tinta)'))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -413,28 +415,21 @@ afirmar(/hover:-translate-y-0\.5 focus-visible:-translate-y-0\.5/.test(leer('_se
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('Cierre · los casos del foco que el pase de Tab había capturado mal, medidos con el control quieto y en pantalla')
 
-const LARGO = 498
-const visibleDe = (offsetLeft: number, objetivo: number): number => offsetLeft + envolver(objetivo, LARGO)
-afirmar(
-  [0, 125, 249, 374].every((ol) => { const x = visibleDe(ol, objetivoDelFoco(ol)); return x > -1 && x < 20 }),
-  'el carrusel trae la portada ENFOCADA al borde del renglón, la primera también (la pista vive en [−largo, 0))',
-)
-controlPositivo('el chequeo del carrusel ve el objetivo de antes: la primera portada iba al período de atrás (quedaba la copia)', 0, (ol: number) => {
-  const x = visibleDe(ol, -ol + FISICA_DEL_CARRUSEL.umbralDeIntencionPx)
-  return x > -1 && x < 20
-})
+// [NOCTURNO B5] La física de la cinta de abajo de 1024 (traer la portada enfocada al borde del renglón) se fue con ella: las demos van
+// en el carrusel común de B1.2e, una tarjeta a la vez (s76-carrusel afirma su teclado y su foco).
 const CAPA_DE_DEMOS = leer('_secciones/trabajos/demos/CapaDeDemos.tsx')
 afirmar(CAPA_DE_DEMOS.includes('cancelar = llevarALaLlegada(') && leer('_secciones/trabajos/demos/llevarALaLlegada.ts').includes('const falta = opciones.arranque - opciones.mostrado()'), 'con el teclado, la capa de demos termina de llegar (lo mostrado se asentaba detrás del salto: escala 0,76)')
-afirmar(DEMOS_CSS.includes('padding-inline: var(--carrusel-margen-del-recorte);') && DEMOS_CSS.includes('margin-inline: calc(-1 * var(--carrusel-margen-del-recorte));'), 'el renglón del carrusel lleva su holgura en la caja (aporte cero al layout): la capa compuesta no respetaba el margen del recorte')
-afirmar(FOCO.includes('[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible') && /z-index: var\(--z-elevado\)/.test(FOCO), 'la portada enfocada sube un piso: la vecina, pintada después, ya no le tapa el anillo')
-const anilloDeAdentro = (css: string): string => { const i = css.indexOf('[data-parte="portada"]:focus-visible::after'); return i < 0 ? '' : css.slice(i, css.indexOf('}', i)) }
+// [NOCTURNO B5] Reemplazadas por la spec: el anillo de adentro es el de la tarjeta de la demo en el carrusel común (su vista recorta:
+// el anillo de afuera no se vería), con los mismos dos tonos espejados; la holgura del renglón de la cinta de antes se fue con ella.
+afirmar(FOCO.includes('[data-v3] [data-parte="tarjeta-de-demo"]:focus-visible') && /z-index: var\(--z-elevado\)/.test(FOCO), 'la tarjeta de la demo enfocada sube un piso (y es la caja de su anillo de adentro)')
+const anilloDeAdentro = (css: string): string => { const i = css.indexOf('[data-parte="tarjeta-de-demo"]:focus-visible::after'); return i < 0 ? '' : css.slice(i, css.indexOf('}', i)) }
 const reglaDeAdentro = anilloDeAdentro(FOCO)
 afirmar(
-  reglaDeAdentro.includes('inset-inline-end: var(--portada-aire)') && veces(reglaDeAdentro, 'inset 0 0 0 ') === 3 && reglaDeAdentro.includes('var(--color-tinta)'),
-  'el carrusel lleva el anillo POR DENTRO de la portada (papel, tinta, papel sobre la caja de la imagen): la primera de cada fila va contra el borde de la pantalla',
+  reglaDeAdentro.includes('inset: 0') && veces(reglaDeAdentro, 'inset 0 0 0 ') === 3 && reglaDeAdentro.includes('var(--color-tinta)'),
+  'el carrusel de las demos lleva el anillo POR DENTRO de la tarjeta (papel, tinta, papel): la vista del carrusel recorta lo de afuera',
 )
-afirmar(/\[data-v3\]\[data-v3\] \[data-pieza="carrusel"\] \[data-parte="portada"\]:focus-visible \{\s*outline-color: transparent;/.test(FOCO), '  y el de afuera queda transparente, sólo en el carrusel (en colores forzados el sistema lo pinta)')
-controlPositivo('el chequeo del anillo de adentro ve el de antes (sólo afuera, sin pseudo-elemento)', '[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible { position: relative; }', (css: string) => anilloDeAdentro(css).includes('inset 0 0 0 '))
+afirmar(/\[data-v3\]\[data-v3\] \[data-parte="tarjeta-de-demo"\]:focus-visible \{\s*outline-color: transparent;/.test(FOCO), '  y el de afuera queda transparente, sólo en la tarjeta (en colores forzados el sistema lo pinta)')
+controlPositivo('el chequeo del anillo de adentro ve el de antes (sólo afuera, sin pseudo-elemento)', '[data-v3] [data-parte="tarjeta-de-demo"]:focus-visible { position: relative; }', (css: string) => anilloDeAdentro(css).includes('inset 0 0 0 '))
 afirmar(leer('_archivo/tunel-portfolio/CapaDelTunel.tsx').includes('const MARGEN_DEL_RECORTE_PX = 6'),'el túnel recorta dejando 6 px: el anillo de dos tonos entero (en el teléfono el borde se cortaba y el contorno solo daba 2,6:1)')
 
 cerrar('s37-interfaz1')

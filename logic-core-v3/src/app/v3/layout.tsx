@@ -1,6 +1,7 @@
 import localFont from 'next/font/local'
 
 import { ChromeDelHome } from './_chrome/ChromeDelHome'
+import { PreloaderDelSitio } from './_chrome/preloader/PreloaderDelSitio'
 import { VeloDeNavegacion } from './_chrome/velo/VeloDeNavegacion'
 import { CompuertaDelDeslizamiento } from './_componentes/CompuertaDelDeslizamiento'
 import { CompuertaDelScrollSuave } from './_componentes/CompuertaDelScrollSuave'
@@ -39,6 +40,7 @@ import './_estilos/titular.css' // [PASADA FINAL] A1 · el titular del hero sin 
 import './_estilos/carga.css' // [AJUSTES FINALES] A4 · el velo de carga (el seguro sin JS)
 import './_estilos/resultado.css' // [PULIDO 11] B2 · B3 · la tarjeta del resultado de los formularios
 import './_estilos/intro.css' // [B12a.8 · P-H33] el texto de la intro de las páginas sobre la escena (su halo y su velo)
+import './_estilos/preloader.css' // [B12c] la cubierta del preloader del sitio (se muestra sólo con la decisión del <head>; su seguro sin JS)
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.
@@ -338,6 +340,8 @@ export default function DisposicionV3({ children }: { children: React.ReactNode 
         <VeloDeNavegacion />
         {children}
         <MarcaDeLaLlave />
+        {/* [B12c] El preloader del sitio: la primera entrada del día, encima de todo (fijo: no suma alto). Sin la decisión, escondido. */}
+        <PreloaderDelSitio />
       </div>
     </ProveedorDeMovimiento>
   )

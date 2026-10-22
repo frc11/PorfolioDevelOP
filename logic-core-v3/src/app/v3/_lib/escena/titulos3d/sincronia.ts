@@ -4,6 +4,7 @@ import { anotarLaImpresion, anotarLosTitulos, conDiagnostico } from '../../diagn
 import { conReimpresion, esperarLaFuenteDe, fuenteCargadaPara, versionDeLasFuentes } from '../../fuentes'
 import { TITULOS_DE_VOLUMEN, TITULOS_EN_CAMINO, marcarListo, pedirOtraSincronia, tituloListo, type TituloDeVolumen } from '../../titulos3d/registro'
 import { contextoPerdido } from '../contextoDelLienzo'
+import { compilarConCuidado } from '../gpu/compilar'
 import { calentar } from '../gpu/Precompilar'
 import { armar, fuenteDelTitulo, ponerElEstudio, soltar, type Armado, type Variante } from './armado'
 import { letrasDelDom } from './colocacion'
@@ -121,7 +122,8 @@ function armarElLote(t: Taller, armados: Armado[], lote: readonly TituloDeVolume
     contarLosUrgentes()
     return
   }
-  void Promise.all(nuevos.map((a) => t.gl.compileAsync(a.grupo, t.camara, t.escena))).then(() => {
+  // [T0] Sin `compileAsync`: un título que se suelta mientras compila (abajo de 1024) tiraba en la página y dejaba esto colgado (`gpu/compilar.ts`).
+  void Promise.all(nuevos.map((a) => compilarConCuidado(t.gl, a.grupo, t.camara, t.escena))).then(() => {
     if (!vivo()) return
     calentar(t.gl, t.escena, t.camara)
     for (const a of nuevos) if (armados.includes(a)) marcarListo(a.titulo.id, true)

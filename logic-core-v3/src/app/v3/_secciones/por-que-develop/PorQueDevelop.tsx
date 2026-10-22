@@ -30,6 +30,10 @@ import {
 import { CtaTransformado, CtaTransformadoEnLaLista } from './CtaTransformado'
 import { ValorEnVolumen } from './valorEnVolumen'
 import { PiezaDeValor } from './Valores'
+// [NOCTURNO B2] Las reseñas: un tramo de cuatro pantallas en el sostén de B (el pin de siempre, traducido) y su carrusel en la lista.
+import { EscenarioDeLasResenas, EspaciadorDeLasResenas, usePinSinLasResenas } from './resenas/EscenarioDeLasResenas'
+import { ResenasEnLista } from './resenas/ResenasEnLista'
+import { ResenasParaElLector } from './resenas/ResenasParaElLector'
 
 /**
  * 07 · POR QUÉ develOP — la frase, los seis valores y el CTA, alrededor del logo.
@@ -65,10 +69,10 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
 }
 
 /** Una columna de valores; en una columna angosta (menos de 16rem) el aire entre valores se achica a la mitad. */
-const CLASE_DE_LA_COLUMNA = 'flex flex-col justify-start gap-[var(--spacing-6)] @max-3xs:gap-[var(--spacing-3)]'
+export const CLASE_DE_LA_COLUMNA = 'flex flex-col justify-start gap-[var(--spacing-6)] @max-3xs:gap-[var(--spacing-3)]'
 
 /** Una copia invisible y sin alto de la mitad del título: le da a la columna su mismo ancho. No se anuncia. */
-function AnchoDeLaFrase({ texto }: { readonly texto: string }): React.JSX.Element {
+export function AnchoDeLaFrase({ texto }: { readonly texto: string }): React.JSX.Element {
   return (
     <span aria-hidden="true" className="invisible block h-0">
       <FraseDelFinal texto={texto} />
@@ -91,7 +95,8 @@ function useLlegadaDeDia(pin: MotionValue<number>, v: Ventana, donde: keyof type
   return useTransform([tramo, DIA_DEL_TEXTO[donde]], ([t, d]: number[]) => Math.min(t, d))
 }
 
-function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValue<number> }): React.JSX.Element {
+function Escenario({ seccion, pin: pinDelBloque }: PropsDeSeccion & { readonly pin: MotionValue<number> }): React.JSX.Element {
+  const pin = usePinSinLasResenas(pinDelBloque)
   const frase = useLlegadaDeDia(pin, VENTANA_DE_LA_FRASE, 'frase')
   // La frase se queda mientras entran los valores, pero sube: el valor del medio de cada
   // columna le caía encima.
@@ -112,6 +117,7 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
   // [PULIDO 4] C1 · el cruce de `2411371a` y la metamorfosis de los valores en la frase del CTA.
   const transformacion = useTramo(pin, VENTANA_DE_LA_TRANSFORMACION)
   return (
+    <>
     <div data-pieza="escenario-del-final" className="sticky top-0 h-svh w-full overflow-hidden" style={ESTILO_DEL_ESCENARIO}>
       <h2 id={idDelTitularDeSeccion(seccion.id)} className="sr-only">
         {NOMBRE_DE_SECCION}
@@ -156,8 +162,12 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
           </div>
         </div>
       </motion.div>
+      <ResenasParaElLector />
       <CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />
+      <EscenarioDeLasResenas pin={pinDelBloque} />
     </div>
+    <EspaciadorDeLasResenas />
+    </>
   )
 }
 
@@ -168,7 +178,7 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
  *  llegada y la salida son función del scroll (con el asiento al frenar): ninguna velocidad la deja a medio armar.
  *  [NOCTURNO] A5: la salida, con un mínimo de tiempo (bastante más lenta: se iba volando). [PASADA FINAL] A3: y la llegada,
  *  con el mínimo de ESCENA 10 (1,4 s: se ve armarse a cualquier velocidad) y el asiento «armado» al frenar a mitad. */
-function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number> | null; readonly corrida: MotionValue<number> | null } }): React.JSX.Element {
+export function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly volumen?: { readonly id: string; readonly llegada: MotionValue<number>; readonly salida: MotionValue<number> | null; readonly corrida: MotionValue<number> | null } }): React.JSX.Element {
   return (
     <Titular
       nivel="titulo-xl"
@@ -180,7 +190,7 @@ function FraseDelFinal({ texto, volumen }: { readonly texto: string; readonly vo
   )
 }
 
-function ValorEnElEscenario({ valor, pin, indice, transformacion }: { readonly valor: Valor; readonly pin: MotionValue<number>; readonly indice: number; readonly transformacion: MotionValue<number> }): React.JSX.Element {
+export function ValorEnElEscenario({ valor, pin, indice, transformacion }: { readonly valor: Valor; readonly pin: MotionValue<number>; readonly indice: number; readonly transformacion: MotionValue<number> }): React.JSX.Element {
   const tramo = useLlegadaDeDia(pin, ventanaDelValor(indice), 'abajo')
   // [PULIDO 4] C1 · la escena lo mide y, desde que arranca la transformación, lo dibuja ella (la metamorfosis).
   const lugar = useValorDeLaEscena<HTMLLIElement>(indice, transformacion)
@@ -201,7 +211,7 @@ function ValorEnElEscenario({ valor, pin, indice, transformacion }: { readonly v
  */
 // [PULIDO 5] D1 · más grande: un tamaño de display (era el del título XL y un quinto del lugar), con el CTA en proporción.
 // [PULIDO 10] J1 · y nunca más ancha que la pantalla: la frase en volumen (Archivo 600) mide 14,93 em en un renglón.
-const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65),calc((100vw-2*var(--pad-lateral-compacto))/15.4))]'
+export const TAMANO_DEL_CTA = 'escritorio:text-[length:min(var(--text-fluido-display-xl),calc(var(--lugar-del-cta)/3.65),calc((100vw-2*var(--pad-lateral-compacto))/15.4))]'
 /**
  * [INTERFAZ 1] T3 · EL FOCO QUE LLEGA ANTES QUE EL CTA. Con Tab, el «Hablanos» toma el foco aunque todavía no llegó (espera
  * al final del recorrido del escenario y al día): medido, el anillo se dibujaba alrededor de nada (1,0:1, sólo el cielo).
@@ -266,6 +276,7 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
               </li>
             ))}
           </ul>
+          <ResenasEnLista />
           {/* [FINAL 3] Separado de los valores, en su propio espacio. [NOCTURNO FINAL] D3 · centrado en todos los anchos, en
               una pantalla entera. */}
           <MedirLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />

@@ -109,12 +109,12 @@ const angostaBien = (escala: (m: number) => number): boolean => {
 afirmar(angostaBien((m) => aparicionPedida(m, true)) && APARICION.escalaEnVacios === FIN_DE_LA_LLEGADA_EN_EL_VACIO, 'abajo de 1024 la capa rígida nace con el vacío y crece en 1,4 vacíos: con el vacío lleno va por el 71 % y termina donde se asienta el último libro de escritorio (el piso del regulador ya la espera); con la misma velocidad tope', `con el vacío lleno: ${(aparicionPedida(vacioLleno, true) * 100).toFixed(0)} %`)
 controlPositivo('el detector VE la capa rígida de CIERRE (crecía con el vacío: llena con el vacío lleno)', escalaDeDemos, angostaBien)
 
-// El cableado: la capa pide con el ancho que decidió el CSS y persigue; el carrusel y el teclado esperan lo mostrado.
+// El cableado: la capa pide con el ancho que decidió el CSS y persigue; [NOCTURNO B5] la parada y el teclado esperan lo mostrado.
 const capa = sinComentarios(leer('_secciones/trabajos/demos/CapaDeDemos.tsx'))
 const cableada = (c: string): boolean =>
   c.includes('p.pedida = aparicionPedida(valor, rigida.current)') && c.includes('perseguir(p, llegar)') && c.includes("capa.current?.style.setProperty('--demos-escala', a.toFixed(5))") &&
-  c.includes('const l = llegadaDeLaAparicion(a)') && c.includes('aparicion.current.mostrada >= 1') && c.includes('const llegaEntera = (): number => aparicion.current.mostrada') && c.includes('alcanzar(p)')
-afirmar(cableada(capa), '  el cableado: lo pedido sale del ancho que decidió el CSS; lo mostrado escribe la capa rígida o la llegada escalonada; el carrusel y el empujón del teclado esperan lo mostrado; al cambiar de ancho y al desmontarse se alcanza de una vez')
+  c.includes('const l = llegadaDeLaAparicion(a)') && c.includes('LLEGADA_DE_DEMOS.persecucion = p') && c.includes('const llegaEntera = (): number => aparicion.current.mostrada') && c.includes('alcanzar(p)')
+afirmar(cableada(capa), '  el cableado: lo pedido sale del ancho que decidió el CSS; lo mostrado escribe la capa rígida o la llegada escalonada; [NOCTURNO B5] la parada (en lugar del carrusel de antes, que arrancaba con lo mostrado: el común de B1.2e rota con su vista) y el empujón del teclado esperan lo mostrado; al cambiar de ancho y al desmontarse se alcanza de una vez')
 controlPositivo('el detector VE la capa rígida atada al vacío', capa.replace("setProperty('--demos-escala', a.toFixed(5))", "setProperty('--demos-escala', escalaDeDemos(mostrado.get()).toFixed(5))"), cableada)
 
 // El título: «Demos», como Portfolio (s42 D3 al día afirma el gesto, el nivel y las clases).
@@ -218,7 +218,8 @@ const seMuda = (css: string): boolean => {
   const dibuja = (r: string): boolean => r.includes('border-color: var(--color-tinta);') && r.includes('box-shadow: inset 0 0 0 var(--border-hairline) var(--color-tinta);')
   // Cada contorno transparente vive SÓLO adentro de una caja que dibuja el foco.
   const transparentes = [...css.matchAll(/([^{}]+)\{[^}]*outline-color: transparent;/g)].map((m) => m[1].trim())
-  const soloEnCajas = transparentes.every((s) => s.includes('[data-foco="pastilla"]') || s.includes('[data-foco="campo"]') || s.includes('[data-pieza="carrusel"]'))
+  // [NOCTURNO B5] La caja del carrusel de las demos es su tarjeta (el carrusel común de B1.2e): su anillo de adentro (`foco.css`).
+  const soloEnCajas = transparentes.every((s) => s.includes('[data-foco="pastilla"]') || s.includes('[data-foco="campo"]') || s.includes('[data-parte="tarjeta-de-demo"]'))
   return dibuja(pastilla) && dibuja(campo) && campo.includes('outline-color: transparent;') && adentro.includes('outline-color: transparent;') && soloEnCajas
 }
 afirmar(seMuda(foco), 'el foco de un campo lo dibuja su caja: el borde (con su redondeo) pasa a la tinta y al doble de grueso (una línea por dentro: nada se corre); el contorno del control queda transparente SÓLO adentro de esas cajas')

@@ -61,6 +61,7 @@ import { createElement } from 'react'
 import { ChromeDelHome } from '../../_chrome/ChromeDelHome'
 import { SaltarAlContenido } from '../../_chrome/SaltarAlContenido'
 import { VeloDeNavegacion } from '../../_chrome/velo/VeloDeNavegacion'
+import { PreloaderDelSitio } from '../../_chrome/preloader/PreloaderDelSitio'
 import { Navegacion } from '../../_componentes/chrome/Navegacion'
 import { MarcaDeLaLlave } from '../../_secciones/_contrato/MarcaDeLaLlave'
 import { marcar } from '../../_secciones/_invariantes/render'
@@ -209,6 +210,14 @@ export const PIEZAS_MONTABLES: ReadonlyMap<string, PiezaMontable> = new Map<stri
       emite: () => createElement(VeloDeNavegacion),
       porQue:
         '[B12a.6] el velo de la navegación entre páginas: una capa `aria-hidden`, fija y sin recibir el puntero en reposo (ni parada de tabulación ni landmark); el layout la monta para que el velo cubra el cambio de ruta',
+    },
+  ],
+  [
+    'PreloaderDelSitio',
+    {
+      emite: () => createElement(PreloaderDelSitio),
+      porQue:
+        '[B12c] la cubierta del preloader del sitio: una capa `aria-hidden`, fija, vacía y escondida en el servidor (la muestra sólo la decisión del script del <head>, en la primera entrada del día); ni parada de tabulación ni landmark. Lo que se ve lo monta el cliente',
     },
   ],
   [

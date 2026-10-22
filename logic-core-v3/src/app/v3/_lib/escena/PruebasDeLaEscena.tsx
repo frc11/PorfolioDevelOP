@@ -21,6 +21,8 @@ import type { ProbeRigStore, ProbeStatsStore } from './probeStore'
 const TitulosDeVolumen = lazy(() => import('./titulos3d/TitulosDeVolumen'))
 const PieDeVolumen = lazy(() => import('./pie3d/PieDeVolumen'))
 const EscenaDelCta = lazy(() => import('./ctaDelFinal/EscenaDelCta'))
+// [NOCTURNO B2] El aro de las reseñas, desde 1024 (abajo, la lista lleva un carrusel plano del DOM).
+const EscenaDeLasResenas = lazy(() => import('./resenas/EscenaDeLasResenas'))
 
 interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
@@ -46,6 +48,11 @@ export function PruebasDeLaEscena(props: Props) {
       {escritorio && conElPie && (
         <Suspense fallback={null}>
           <PieDeVolumen keyLightRef={props.keyLightRef} />
+        </Suspense>
+      )}
+      {escritorio && (
+        <Suspense fallback={null}>
+          <EscenaDeLasResenas />
         </Suspense>
       )}
       <Suspense fallback={null}>

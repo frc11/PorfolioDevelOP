@@ -165,11 +165,11 @@ titulo('3 · Abajo de 1025 el contenido está COMPLETO')
 const esReferencia = (t: string): boolean => /^[#/.]/.test(t)
 
 /**
- * [B1.2d B] Lo que se pinta SÓLO en el cliente, con su razón: los nombres de los dos controles del teclado de las historias del Portfolio.
- * Las historias se montan debajo de 1024 y con el panel adentro (el servidor sirve el acordeón). Las rutas tienen que existir: una
- * excepción vieja se ve.
+ * [B1.2d B] Lo que se pinta SÓLO en el cliente, con su razón: [B1.2e] los nombres de las dos flechas del carrusel del Portfolio (eran los dos
+ * controles del teclado de las historias). El carrusel se monta debajo de 1024, en el cliente (el servidor sirve el acordeón). Las rutas
+ * tienen que existir: una excepción vieja se ve.
  */
-const SOLO_EN_EL_CLIENTE: Readonly<Record<string, readonly string[]>> = { trabajos: ['historias.anterior', 'historias.siguiente'] }
+const SOLO_EN_EL_CLIENTE: Readonly<Record<string, readonly string[]>> = { trabajos: ['carrusel.anterior', 'carrusel.siguiente'] }
 
 for (let i = 0; i < REGISTRO.length; i++) {
   const { id, contenido } = REGISTRO[i]

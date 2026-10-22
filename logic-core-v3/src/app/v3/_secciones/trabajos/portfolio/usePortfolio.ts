@@ -4,7 +4,6 @@ import type Lenis from 'lenis'
 import { useMotionValue, type MotionValue } from 'motion/react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 
-import type { SalidaDeLasHistorias } from '../../../_componentes/historias/maquinaDeLasHistorias'
 import { PORTFOLIO_EN_LA_ESCENA } from '../../../_lib/escena/portfolioEnLaEscena'
 import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
 import { useTituloListo } from '../../../_lib/titulos3d/registro'
@@ -14,17 +13,19 @@ import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimi
 import { PRESENCIA_DEL_ENCABEZADO } from './EncabezadoDelPortfolio'
 import { distanciaEnPasos, seMovioDeVerdad, vistaDelPaso } from './estado'
 import { medirElHueco } from './hueco'
-import { conElDefecto, cortarElPanel, escenarioDe, medir, publicar, volarAlPx, vueloPisado, type Vuelo } from './medida'
-import { ORDEN, pideElEncabezado } from './orden'
+import { cortarElPanel, escenarioDe, medir, publicar, volarAlPx, vueloPisado, type Vuelo } from './medida'
+import { pasoDelCarrusel, pxDeLaSalidaDelCarrusel } from './medioDelCarrusel'
+import { ADENTRO, AFUERA, ORDEN } from './orden'
 import {
-  ANTES_DEL_PIN, PANTALLAS_POR_PASO, bordesDelPaso, centroDelPaso, mostradoDeDemos, pasoConHisteresis, pasoEn,
+  ANTES_DEL_PIN, PANTALLAS_POR_PASO, bordesDelPaso, centroDelPaso, mostradoDeDemos, mostradoDeLaCola, pasoConHisteresis, pasoEn, pxDeLaSalida,
   type AnchoDelPortfolio, type IndiceDePaso,
 } from './pasos'
 import { duracionDelSalto } from './saltar'
-import { anchoDe, anotarElSelector, historiasDe } from './tramoDelSelector'
+import { anchoDe, anotarElSelector, carruselDe } from './tramoDelSelector'
 import { useAnclaDeLaCarga } from './useAnclaDeLaCarga'
 import { useBarraDelPortfolio } from './useBarraDelPortfolio'
 import { useMandosDelPortfolio } from './useMandosDelPortfolio'
+import { useMedioDelCarrusel } from './useMedioDelCarrusel'
 import { useOrdenDeLaEscena } from './useOrdenDeLaEscena'
 
 export { RUEDA_RECIENTE_MS } from './useMandosDelPortfolio'
@@ -43,6 +44,11 @@ export { RUEDA_RECIENTE_MS } from './useMandosDelPortfolio'
  * [B1.2c] Lo que se muestra va en ORDEN (`orden.ts`; [B1.2d] cuatro piezas: la cámara, el título, la barra y el panel). El proyecto
  * activo manda: el hover, el clic y las teclas lo activan y el scroll se acomoda en silencio (`saltarAlPaso(i, true)`); la rueda avanza
  * de a un proyecto (`useMandosDelPortfolio`) y, mientras tiene el control, el hover queda inerte (`inerteDesde`).
+ *
+ * [B1.2e] Debajo de 1024 (lo decide el CSS, `--modo-del-portfolio: carrusel`) no hay selector: la sección es un flujo que se scrollea (el
+ * título, el carrusel y «la tuya», `FlujoDelPortfolio`) y después la cola de siempre. Nada se pide al orden (ni la cámara, ni el título del
+ * escenario, ni la barra, ni el panel: el flujo trae los suyos), la rueda no es del Portfolio y el paso es el del flujo
+ * (`pasoDelCarrusel`). El reloj de Demos arranca donde termina el flujo y el tramo de la escena es el del flujo medido (`useMedioDelCarrusel`).
  */
 export interface PortfolioVivo {
   readonly paso: IndiceDePaso
@@ -60,7 +66,7 @@ export interface PortfolioVivo {
   readonly panel: boolean
   /** [B1.2d] Si lo que se muestra ya es lo pedido (ningún cambio del orden pendiente). */
   readonly ordenQuieto: boolean
-  /** [B1.2c] Cuánto se recorrió del paso de ahora (0…1): las barras de la tablet y del teléfono. */
+  /** [B1.2c] Cuánto se recorrió del paso de ahora (0…1). */
   readonly avanceDelPaso: MotionValue<number>
   /** Lleva la página al centro de un paso del selector (0…3) y pone ese paso ya; `inmediato`, en silencio (sin viaje). */
   readonly saltarAlPaso: (i: number, inmediato?: boolean) => void
@@ -72,10 +78,10 @@ export interface PortfolioVivo {
   /** [B1.2d] A3 · si el último salto lo pidió la rueda, y si hay un vuelo en curso (leídos en el evento, no en el render). */
   readonly deLaRueda: () => boolean
   readonly enVuelo: () => boolean
-  /** [B1.3] Las historias (lo decide el CSS, `--modo-del-portfolio`: la sección no mide el ancho; [B1.2d B] debajo de 1024). */
-  readonly historias: boolean
-  /** [B1.2d B] Salir de las historias: adelante, a Demos; atrás, al título (justo antes del pin). */
-  readonly salirDeLasHistorias: (hacia: SalidaDeLasHistorias) => void
+  /** [B1.2e] El carrusel (debajo de 1024: lo decide el CSS, `--modo-del-portfolio`; la sección no mide el ancho). */
+  readonly carrusel: boolean
+  /** [B1.2e] Dónde arranca la cola ahora (px de la regla): la de los pasos, o con el carrusel donde termina su flujo (leído en el evento). */
+  readonly salidaDeLaCola: () => number
 }
 
 /** [B1.2b] La fracción del ancho que deja el panel en cada ancho (la escena centra el logo en su columna): su CSS. */
@@ -89,26 +95,19 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   const [cerca, setCerca] = useState(false)
   const [enCuadro, setEnCuadro] = useState(false)
   const [visible, setVisible] = useState(true)
-  const [historias, setHistorias] = useState(false)
+  const [carrusel, setCarrusel] = useState(false)
   const actual = useRef<IndiceDePaso>(ANTES_DEL_PIN)
   const enVuelo = useRef<Vuelo | null>(null)
   const inerte = useRef<{ readonly x: number; readonly y: number } | null>(null)
   const ultimaRueda = useRef(Number.NEGATIVE_INFINITY)
   const deLaRueda = useRef(false)
 
-  // [B1.2d] El orden: la cámara, el título, la barra y el panel (al irse, al revés). [B1.2d B] T3 · En las historias (debajo de 1024) el
-  // título llega en la aproximación y se QUEDA arriba: recién después entran las historias, y al volver (deslizar hacia abajo) está ahí.
-  // La barra no se corre: es el menú.
+  // [B1.2d] El orden: la cámara, el título, la barra y el panel (al irse, al revés). [B1.2e] Con el carrusel, nada: el flujo trae lo suyo.
   const fase = vistaDelPaso(paso).fase
   const adentro = fase === 'adentro'
   const tituloS = useTituloListo('portfolio') ? LENTOS.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO.s
-  // [F5b] De dónde se entró a las historias: desde Demos (la cola) hasta que se vuelve a la aproximación.
-  const [vieneDeDemos, setVieneDeDemos] = useState(false)
-  if (fase === 'despues' && !vieneDeDemos) setVieneDeDemos(true)
-  if (fase === 'antes' && vieneDeDemos) setVieneDeDemos(false)
-  const encabezado = pideElEncabezado(historias, fase, enCuadro, vieneDeDemos && !conElDefecto('titulo-desde-demos'))
-  const pedidoDelOrden = { camara: adentro, encabezado, barra: adentro && !historias, panel: adentro }
-  const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido, historias)
+  const pedidoDelOrden = adentro && !carrusel ? ADENTRO : AFUERA
+  const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido)
   // [B1.2d] El orden llegó a lo pedido (el diagnóstico y el arnés miran el panel sólo así: no en el medio de una entrada o una salida).
   const ordenQuieto = orden.camara === pedidoDelOrden.camara && orden.encabezado === pedidoDelOrden.encabezado && orden.barra === pedidoDelOrden.barra && orden.panel === pedidoDelOrden.panel
 
@@ -155,7 +154,16 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     return () => window.clearTimeout(reloj)
   }, [orden.panel, reducido])
 
-  // La anotación a la escena (la REGLA DE ALTURAS), la columna que deja el panel en este ancho y [B1.3] si son las historias (lo dice el
+  // [B1.2e] El medio del carrusel (el flujo, medido): cada medida vuelve a anotar el tramo y a leer el scroll.
+  const anotacion = useRef<{ readonly reanotar: () => void } | null>(null)
+  const releer = useRef<() => void>(() => undefined)
+  const alMedirElFlujo = useCallback((): void => {
+    anotacion.current?.reanotar()
+    releer.current()
+  }, [])
+  const medio = useMedioDelCarrusel(caja, carrusel, alMedirElFlujo)
+
+  // La anotación a la escena (la REGLA DE ALTURAS), la columna que deja el panel en este ancho y [B1.2e] si es el carrusel (lo dice el
   // CSS, no el JS), y [B1.2c] el hueco del logo, medido en el escenario (cambia con el ancho y con las fuentes: el bloque se centra).
   useEffect(() => {
     const el = caja.current
@@ -167,22 +175,26 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
     }
     const alCambiar = (): void => {
       medirLoDelAncho()
-      setHistorias(historiasDe(el))
+      setCarrusel(carruselDe(el))
     }
     medirLoDelAncho()
     window.addEventListener('resize', alCambiar)
     const columna = escenarioDe(el)?.querySelector('[data-pieza="columna-del-portfolio"]') ?? null
     const tamano = new ResizeObserver(alCambiar)
+    tamano.observe(el)
     if (columna !== null) for (const hijo of [columna, ...columna.children]) tamano.observe(hijo)
-    const soltar = anotarElSelector(el, panel, PANTALLAS_POR_PASO)
+    const anotada = anotarElSelector(el, panel, PANTALLAS_POR_PASO, () => medio.current)
+    anotacion.current = anotada
     return () => {
       window.removeEventListener('resize', alCambiar)
       tamano.disconnect()
-      soltar()
+      anotada.soltar()
+      anotacion.current = null
     }
-  }, [caja])
+  }, [caja, medio])
 
-  // El scroll: el paso con histéresis (o el destino del salto en vuelo), el reloj de Demos y lo recorrido del paso.
+  // El scroll: el paso con histéresis (o el destino del salto en vuelo), el reloj de Demos y lo recorrido del paso. [B1.2e] Con el carrusel,
+  // el paso del flujo y el reloj desde donde termina.
   useLayoutEffect(() => {
     let pedido = 0
     // El corte del panel, sincrónico con lo que mueve el scroll: el `scroll` nativo (antes de los cuadros) y el de Lenis (en su
@@ -202,6 +214,13 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
       cortar()
       const m = medir(caja.current)
       if (m === null) return
+      const delFlujo = medio.current
+      if (delFlujo !== null) {
+        mostrado.set(mostradoDeLaCola(m.px, pxDeLaSalidaDelCarrusel(delFlujo)))
+        publicar(caja.current, actual, setPaso, pasoDelCarrusel(m.px, delFlujo))
+        avance.set(0)
+        return
+      }
       mostrado.set(mostradoDeDemos(m.px, PANTALLAS_POR_PASO))
       // [B1.2d] Un vuelo al que le pisaron el viaje (la rueda, el menú, un ancla) se suelta acá: el paso vuelve a ser el del scroll.
       const pisado = enVuelo.current
@@ -219,15 +238,17 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
       pedir()
     }
     pedir()
+    releer.current = pedir
     window.addEventListener('scroll', alMoverse, { passive: true })
     window.addEventListener('resize', pedir)
     return () => {
+      releer.current = () => undefined
       window.removeEventListener('scroll', alMoverse)
       window.removeEventListener('resize', pedir)
       if (pedido !== 0) cancelAnimationFrame(pedido)
       lenis?.soltar()
     }
-  }, [caja, mostrado, avance])
+  }, [caja, mostrado, avance, medio])
   // [B1.2d] Al desmontar, el vuelo que esté (no el de cuando corrió el efecto): ningún vencimiento ni marca colgados.
   useEffect(() => {
     const vuelo = enVuelo
@@ -248,22 +269,25 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
   )
   const saltarAlPaso = useCallback((i: number, inmediato = false): void => saltar(i, inmediato, false), [saltar])
 
-  const { salirDeLasHistorias } = useMandosDelPortfolio({ caja, actual, enVuelo, inerte, ultimaRueda, entradaLista, paso, historias, tituloS, irAlPx, saltar })
-  // [P-H31b] El freno del arrastre mientras corren las historias pasó al componente común (`Historias`: montadas y presentes).
+  useMandosDelPortfolio({ caja, actual, enVuelo, inerte, ultimaRueda, entradaLista, paso, carrusel, tituloS, irAlPx, saltar })
   const inerteDesde = useCallback((x: number, y: number): { readonly x: number; readonly y: number } | null => {
     if (inerte.current !== null && seMovioDeVerdad(inerte.current, x, y)) inerte.current = null
     return inerte.current
   }, [])
   const deLaRuedaAhora = useCallback(() => deLaRueda.current, [])
   const enVueloAhora = useCallback(() => enVuelo.current !== null, [])
+  const salidaDeLaCola = useCallback((): number => {
+    const delFlujo = medio.current
+    return delFlujo === null ? pxDeLaSalida(PANTALLAS_POR_PASO) : pxDeLaSalidaDelCarrusel(delFlujo)
+  }, [medio])
 
-  useAnclaDeLaCarga(caja)
+  useAnclaDeLaCarga(caja, carrusel)
 
   return useMemo(
     () => ({
       paso, reducido, cerca, aLaVista: enCuadro && visible, mostradoDeDemos: mostrado, camara: orden.camara, encabezado: orden.encabezado, barra: orden.barra,
-      panel: orden.panel, ordenQuieto, avanceDelPaso: avance, saltarAlPaso, inerteDesde, deLaRueda: deLaRuedaAhora, enVuelo: enVueloAhora, historias, salirDeLasHistorias,
+      panel: orden.panel, ordenQuieto, avanceDelPaso: avance, saltarAlPaso, inerteDesde, deLaRueda: deLaRuedaAhora, enVuelo: enVueloAhora, carrusel, salidaDeLaCola,
     }),
-    [paso, reducido, cerca, enCuadro, visible, mostrado, orden, ordenQuieto, avance, saltarAlPaso, inerteDesde, deLaRuedaAhora, enVueloAhora, historias, salirDeLasHistorias],
+    [paso, reducido, cerca, enCuadro, visible, mostrado, orden, ordenQuieto, avance, saltarAlPaso, inerteDesde, deLaRuedaAhora, enVueloAhora, carrusel, salidaDeLaCola],
   )
 }

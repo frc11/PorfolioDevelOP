@@ -1,0 +1,139 @@
+# SPRINT B2 (y B3) · nocturno del 2026-10-22 — Seis razones → reseñas: el aro 3D (y reseñas → CTA)
+
+Rama `nocturno/2026-10-22-b2`. Tarea: `docs/cola/2026-10-22/60-B2B3-resenas-cta.md`. Sin navegador: lo que se ve lo mide el orquestador
+(abajo, «Qué mirar»). Las pruebas sin navegador: `s83-resenas` (`npm run test:s83-resenas`), cada una con su control positivo.
+
+## Plan
+
+### La forma (lectura del código)
+
+- «Por qué develOP» es un pin de 7 pantallas (`secciones.ts:340`, `PANTALLAS_DE_POR_QUE_DEVELOP`). Los tiempos de la cámara son de la escena
+  (`finalDelRecorrido.ts`, `TIEMPOS_DEL_FINAL`): A frase (-1 a 1,6), B valores (2,4 a 2,6, el sostén), C CTA (3,6), D, E pie. Las ventanas del
+  DOM salen de ahí (`geometria.ts`, `progresoDelPin`).
+- **El tramo de las reseñas se INSERTA en el sostén de B (pantalla 2,5 del pin viejo, con los seis valores ya llegados) y dura 4 pantallas.**
+  - El DOM: el pin crece 4 pantallas (un espaciador después del escenario clavado; `secciones.ts` no se toca) y el pin del bloque se traduce al
+    pin de siempre (`pinSinLasResenas`): antes del tramo igual, adentro quieto en 2,5, después corrido 4. Todo lo que ya existía (la frase, los
+    valores, la levantada, la transformación al CTA) ve el mismo pin de antes.
+  - La escena: el tramo se anota con `anotarTramo` (REGLA DE ALTURAS) con un largo sin estirar de una centésima de pantalla: la sala ve 4
+    pantallas como 9 px de la regla (la cámara queda en el sostén de B). La `k` = 3600 / 9 = 400, igual en todo ancho de escritorio.
+  - El viaje del menú a «Por qué develOP» (`destinosDelViaje.ts`) cae donde caía: descuenta las pantallas del tramo (un atributo del pin).
+- Adentro del tramo (avance `r` de 0 a 1, cuatro pantallas): el título se da vuelta (0 a 0,125), los valores se desvanecen (0,125 a 0,25), el
+  aro entra (0,25 a 0,5), se lee (0,5 a 0,875) y la última media pantalla es la del CTA (B3). Con `?resenas=gatillo`, el título, los valores y la
+  entrada son UNA animación por tiempo que se dispara al entrar al tramo y vuelve al salir por arriba.
+- **El título:** «Seis razones | para elegirnos» → «Lo que dicen | nuestros clientes», con la misma letra (los títulos de volumen, Chivo 400; la
+  fuente se regeneró con la L y la d) y el gesto del CTA: el giro sobre Y (de canto en la mitad). Cada mitad gira en su lugar (`titulos3d/giro.ts`:
+  la malla gira sobre el eje vertical de su centro; desde 90° no se dibuja). Sin WebGL, el DOM cruza los dos textos.
+- **Los valores:** se van en el aire, de a uno, de abajo hacia arriba como llegaron: suben un poco, se desenfocan y se apagan (sin partículas).
+- **El aro (la escena, `_lib/escena/resenas/`):** 10 placas de papel con espesor (redondeadas, como la del contacto pero más chicas) en un aro
+  centrado en el logo, mirando hacia afuera, con el pie a la altura del pie del logo. La entrada: dos cadenas, la de adelante desde la izquierda
+  (por la recta tangente al frente) y la de atrás desde la derecha (por la tangente de atrás); se unen alrededor del logo. Gira solo (una vuelta
+  en ~72 s) y sólo con el aro armado. El texto es del DOM (se lee, se enfoca y se toca) llevado al frente de su placa con una homografía en cada
+  cuadro (como el enlace del CTA). Se leen las de adelante (|ángulo| < 40°, se apaga hasta 62°); de 95° a 150° la placa se mete en la niebla y
+  desde 150° no se dibuja: el cambio a la reseña siguiente es en la nuca del aro (180°), donde no se ve.
+- **La interacción:** hover (mouse) → el aro frena, la placa sube, suena el `tic` de la barra y aparece «Ver trabajo →» (la pastilla de Demos);
+  clic → el `clic` de siempre (el escucha global) y el ancla del proyecto (`#portfolio-<slug>`, el escucha de B1). Con `?resenas-arrastre=si`,
+  arrastrar gira el aro con inercia.
+- **Abajo de 1024 y con movimiento reducido:** la lista (la rama sin escenario): el título y un carrusel plano con flechas (una de frente en el
+  teléfono y la tablet; tres quietas en escritorio con movimiento reducido). Su bloque se anota como tramo (la escena no lo ve).
+- **Las reseñas:** ficticias con aspecto final (decisión de Valentino), sin la llave; nombres y negocios ficticios; retratos ilustrados neutros
+  (`public/v3/resenas/*.svg`, la ruta en los datos para reemplazarlos antes de D8).
+
+### Archivos
+
+- Nuevos: `_secciones/por-que-develop/resenas/` (contenido, tramo, banderas, disolución, el escenario y la lista), `_lib/escena/resenas/` (el aro
+  puro, las placas, la escena y lo que se cruzan el DOM y la escena), `_lib/escena/titulos3d/giro.ts`, `public/v3/resenas/*.svg`,
+  `scripts-carga/aro-*.ts` (los bancos, sin correr), `s83-resenas.invariant.tsx`.
+- Tocados: `PorQueDevelop.tsx` (el pin traducido, el tramo y la lista), `TitulosDeVolumen.tsx` (el giro), `PruebasDeLaEscena.tsx` (el módulo del
+  aro), `destinosDelViaje.ts` (el viaje descuenta el tramo), `fuentes-3d.py` y `chivo-400-titulos.json` (L y d), `package.json` (la suite).
+
+### Riesgos
+
+- Sin navegador: el encuadre del aro (radio, altura, tamaño de la placa) es una cuenta con la pose B; lo mide el orquestador.
+- El texto del DOM sobre la placa: la homografía es la del CTA (probada); la nitidez, con la transformada 2D cuando la cara está casi de frente.
+- B2 solo (sin B3): la última media pantalla del tramo rebobina (el aro sale, los valores vuelven, el título se da vuelta al revés) y el CTA de
+  siempre sigue igual. B3 reemplaza ese rebobinado.
+
+## Log
+
+### B2 · Seis razones → reseñas
+
+- **La fuente.** `fuentes-3d.py` con «Lo que dicen» y «nuestros clientes» en la Chivo 400 de los títulos; regenerada sólo esa
+  (`python scripts-retoque/fuentes-3d.py chivo-400-titulos.json`): entraron la L y la d, ningún glifo de antes cambió (comparado contra
+  `HEAD`), 27 → 29 glifos.
+- **El tramo** (`resenas/tramo.ts`): 4 pantallas en la 2,5 del pin. `pinSinLasResenas` le da a lo de siempre su pin; `avanceDeLasResenas`,
+  el avance. La escena: `tramoDeLasResenas` con `k` = (4 × 900 + 9) / 9 = 401 (los 9 px de la regla estirados a 4 pantallas y 9 px: después
+  del tramo, la escena ve el scroll de siempre, deriva 0; s83 §2 con su control).
+- **El título** (`titulos3d/giro.ts`, `TitulosDeVolumen.tsx` una línea): la malla gira sobre el eje vertical de su centro; la frase de 0 a
+  180° y las mitades de las reseñas de −180° a 0 (con la curva de la casa); de canto, ninguna. Las mitades nuevas son títulos de volumen
+  anotados en el mismo lugar del DOM que la frase, con la misma lectura y la misma subida; arrancan de espaldas antes de anotarse.
+- **Los valores** (`disolucion.ts`): suben 3 svh, se desenfocan hasta 9 px y se apagan, de a pares y de abajo hacia arriba; en 0 no queda
+  nada escrito (la medida del CTA los lee planos).
+- **El aro** (`_lib/escena/resenas/`): `aro.ts` puro (las cadenas, el texto, la niebla, la reseña de cada placa, el giro), `placas.ts`
+  (papel con costados de la tinta del contacto, extruidas y redondeadas), `tarjetas.ts` (la homografía del texto del DOM al frente de cada
+  placa, nítida de frente) y `EscenaDeLasResenas.tsx` (perezoso, desde 1024).
+- **La lista** (`ResenasEnLista.tsx`): título con la mezcla de la lista, carrusel plano con encaje y flechas; su bloque se anota como tramo
+  abajo de 1024 (`k` = (alto del bloque en px de la regla + 9) / 9).
+- **El viaje del menú** (`destinosDelViaje.ts`): descuenta las 4 pantallas si el pin tiene el espaciador.
+- **Los bancos** (sin correr): `scripts-carga/aro-costo.ts` (con la referencia sin aro en la inserción) y `scripts-carga/aro-legibilidad.ts`
+  (el contraste de las tarjetas visibles con su control al 30 %; `MODO=interaccion`, el hover y el clic).
+
+- **El gate (el commit que sigue a `4ad48208`):** el `<EscenaDelCta` había perdido su espacio en `PruebasDeLaEscena.tsx` (no parseaba:
+  arreglado). Lo que pidieron las suites del lane, por diseño: (1) las dos ramas anuncian lo mismo y tienen las mismas paradas (s6-render,
+  s6-por-que-develop, s10-acceso): las reseñas para el lector y el teclado van en las dos ramas, iguales y antes del CTA
+  (`ResenasParaElLector.tsx`: el `h3`, cada reseña entera y su enlace, que aparece con el foco como la pastilla de la barra); las tarjetas
+  que se ven (el aro y el carrusel plano) son del puntero (`aria-hidden`, sin enlaces ni botones fuera del orden del teclado en el marcado
+  servido); s10-acceso suma `DELTA_DE_LAS_RESENAS` (12 paradas y un `h3`, en las dos ramas) con su control. (2) s6-tokens: sin
+  `bg-cover`/`bg-center` (el retrato, en el estilo) ni `border-hairline` (`border`). (3) s7-contrato: el tipo de los trabajos es local (una
+  sección no importa otra) y la lista no consulta la compuerta (decide el CSS: `--resenas-alargan`). (4) s52: el generador de la fuente
+  sigue terminando en «Nosotros». (5) s83 §2: al final del tramo la sala vio sus 4 pantallas a 1/k (8,98 px a 1440), no 9.
+- **Lo medido sin navegador (con B3 encima, en el mismo árbol):** lint limpio, tsc 0; s83, s10, s6, s18, s27, s37, s40, s41, s45, s47, s49,
+  s52–s62, s74, s75, s76, s78 sin fallas; s3, s5, s7, s8, s4 con las fallas de la base (sin `.next` en el worktree: s3-peso, s5-peso,
+  s7-compuerta, s8-tres, s8-peso, s4-heredado no cierran; s5-compacto y s8-montaje, las mismas listas que la base).
+
+### B3 · reseñas → CTA
+
+- **El título se da vuelta y se vuelve el CTA:** la transformación de siempre (`ctaDelFinal/`: el cartel se junta, gira sobre Y y del otro lado
+  está «HABLANOS») toma como origen el título de las reseñas (`CtaTransformado.tsx`, `origenDeLaFrase`); desde que arranca, el título de
+  volumen de las reseñas no se dibuja (lo dibuja el CTA, como hacía con la frase). Los valores ya se fueron: la transformación no los
+  redibuja (`CTA_EN_VIVO.sinLosValores`) y la frase del CTA llega del otro lado de sus placas, que giran sin su cara.
+- **El anillo y la bajada** (`resenas/haciaElCta.ts`, `_lib/escena/resenas/huecoDelAro.ts`): a la par del giro del cartel (las placas
+  empiezan a bajar antes del giro y terminan con él), en el piso se abre un anillo bajo el aro (una ranura oscura pegada al piso: el piso no
+  se corta, su sombreador es del final del pie) y las placas bajan por ahí (la cara del piso las tapa). Se cierra cuando ya no queda ninguna.
+- **La cámara:** sube a C como antes (la transformación de siempre). Decisión: el orden pedido era «se da vuelta y baja, después sube la
+  cámara»; la cámara de C llega a la vez que el cartel se arma (la transformación aprobada en PULIDO 3B–8). Correrla después del giro es
+  cambiar los tiempos de la escena (`TIEMPOS_DEL_FINAL`) y los planos del CTA (anclados para la cámara de C): fuera de esta entrega.
+- **Las variantes:** `?resenas=scroll`, todo función del progreso; `?resenas=gatillo`, la bajada (y su anillo) es una animación por tiempo
+  que se dispara al empezar la transformación y vuelve al subir. El cartel sigue al scroll en las dos (es el CTA de siempre).
+- **Sin rebobinado:** la media pantalla del CTA del tramo sigue con todo puesto (s83 §3 a la spec nueva, con su control).
+- **B9:** `_lib/escena/resenas/enganches.ts`, `ENGANCHE_DE_LAS_GRIETAS.alVolverseElCta(sentido)` (vacío): lo llama el tramo al cruzar el
+  momento en que el cartel está de canto (`VUELTA_DEL_CTA`, 0,48 del progreso de la transformación), `ida` bajando y `vuelta` subiendo.
+- **Lo medido sin navegador (B3):** lint limpio, tsc 0; s83 §12 (con sus controles: la bajada a la par del giro, el anillo abierto mientras
+  bajan, el gatillo, el momento del enganche de canto, el origen del cartel, sin los valores) y §3 a la spec nueva; s53–s62 (las suites del
+  CTA) sin fallas.
+
+### B2 · después de verla (el orquestador la integró y la revirtió: «las placas salen vacías» y «muy grandes»)
+
+- **Qué era, en el código.**
+  1. **El texto llegaba tarde, por diseño mal elegido.** A ~38 % del alto de la sección el avance del tramo es ~0,42 y la entrada del aro
+     ~0,68: el texto de las placas recién aparecía desde 0,82 (`ARO.textoDesde`) y las que venían por la recta de adelante no llevaban texto
+     nunca (`POSE.enElAro`). Ahí se ven placas de papel vacías. Ahora el texto entra desde 0,45 y está entero en 0,75 (a 0,68, 0,86), y la que
+     viene por la recta de adelante también se lee (la de atrás, de espaldas, no).
+  2. **El banco no podía ver el texto.** `aro-legibilidad.ts` informaba el percentil 5 de los píxeles que cambian: son los bordes
+     antialiaseados de una letra fina (cubiertos un 6 a 10 %), que dan ~1,2:1 aunque el texto esté entero; su control al 30 % daba 1,13 y no
+     separaba. Ahora el criterio es el NÚCLEO (el percentil 90, los píxeles enteros de la letra), informa también la mediana, y agrega el
+     diagnóstico de la de frente: el color de la cita y su fondo, la opacidad efectiva (el producto por todos los ancestros), la visibilidad,
+     el cuerpo, el texto, su caja, su transformada y si lo que hay en su centro es ella.
+  3. **Las placas, grandes.** Con radio 6,4 y placas de 3,2 × 2,15, la de frente medía un tercio del ancho y tapaba un tercio de la caja
+     del logo; en la entrada, dos de la recta de adelante juntas cubrían ~74 % del ancho. Ahora radio 5,6 y placas de 2,2 × 1,5 (la letra
+     de la cara, en proporción un poco más grande): la de frente mide 21 % del ancho y tapa 14 % de la caja del logo.
+- **Cómo se comprobó, sin navegador (s83 §13, con controles):** la sección va arriba del lienzo (el panel en z-10, el lienzo fijo en z-0); la
+  capa de las tarjetas es hija directa de la caja clavada, después de la levantada, con z 1 y sin opacidad propia; cada tarjeta lleva la
+  cara de papel con la tinta en su clase y su cita escrita (17,6:1 y 7,2:1 con los tokens); con la cámara de los valores a 1440 × 900, lo
+  que la escena le escribe a la de frente es visible, opacidad 1, y su caja cae en el frente de su placa a menos de 2,5 px en las cuatro
+  esquinas, adentro del cuadro; a mitad de la entrada (0,68) ya se lee (0,86); y el encuadre calmo.
+- **Si en el navegador siguieran vacías con el aro armado** (avance ≥ 0,5), el diagnóstico del banco dice cuál de las otras causas es
+  (debajo de algo, opacidad en un ancestro, color, fuera del cuadro): no se encontró ninguna en el código.
+
+## Qué mirar (el orquestador, en el navegador)
+
+Ver el reporte de la noche (los dos commits de B2 y el de B3): la lista numerada con URL, ancho, acción y lo que debería verse, y los bancos.

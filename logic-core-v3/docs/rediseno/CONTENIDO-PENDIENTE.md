@@ -56,16 +56,15 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 
 | quién | cuántas |
 |---|---:|
-| Franco (o un cliente) | 2 |
-| Valentino | 17 |
+| Franco (o un cliente) | 1 |
+| Valentino | 18 |
 | Una decisión, antes que un dato | 0 |
 
-### Franco (o un cliente) — 2
+### Franco (o un cliente) — 1
 
 - **02 · Quiénes somos** · `personas[0].descripcion` — Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto.
-- **05 · Servicios** · `CASO_DE_REFERENCIA` — El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.
 
-### Valentino — 17
+### Valentino — 18
 
 - **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
@@ -84,6 +83,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **04 · Trabajos** · `proyectos[1].resena.autor` — Quién firma la reseña de Esquina Estudio
 - **04 · Trabajos** · `proyectos[2].resena.texto` — La reseña de Banú Scents (la pide Valentino)
 - **04 · Trabajos** · `proyectos[2].resena.autor` — Quién firma la reseña de Banú Scents
+- **05 · Servicios** · `PREGUNTAS_DEL_RECOMENDADOR` — Las tres preguntas del recomendador sobre los problemas del cliente, y sus tres respuestas (una por servicio).
 
 ### Una decisión, antes que un dato — 0
 
@@ -91,7 +91,7 @@ Ninguna hoy.
 
 ## Lo que conviene pedir primero
 
-**Estas 7, y no porque sean más trabajo.** Son las únicas que no dependen de develOP: el dato vive en el negocio de un cliente y hay que ir a buscarlo afuera —el número que dice qué cambió en cada uno, y lo que dijo alguien con el permiso para publicarlo y con su nombre—. Una captura lleva diez minutos y se hace cuando haya un rato; esto puede tardar semanas y nadie de acá lo puede apurar. Por eso van primero, aunque en la pantalla se vean últimas.
+**Estas 6, y no porque sean más trabajo.** Son las únicas que no dependen de develOP: el dato vive en el negocio de un cliente y hay que ir a buscarlo afuera —el número que dice qué cambió en cada uno, y lo que dijo alguien con el permiso para publicarlo y con su nombre—. Una captura lleva diez minutos y se hace cuando haya un rato; esto puede tardar semanas y nadie de acá lo puede apurar. Por eso van primero, aunque en la pantalla se vean últimas.
 
 - **04 · Trabajos** · `proyectos[0].resena.texto` — La reseña de El Garage (la pide Valentino)
 - **04 · Trabajos** · `proyectos[0].resena.autor` — Quién firma la reseña de El Garage
@@ -99,7 +99,6 @@ Ninguna hoy.
 - **04 · Trabajos** · `proyectos[1].resena.autor` — Quién firma la reseña de Esquina Estudio
 - **04 · Trabajos** · `proyectos[2].resena.texto` — La reseña de Banú Scents (la pide Valentino)
 - **04 · Trabajos** · `proyectos[2].resena.autor` — Quién firma la reseña de Banú Scents
-- **05 · Servicios** · `CASO_DE_REFERENCIA` — El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.
 
 
 ## 01 · Hero
@@ -158,7 +157,7 @@ Se edita en `src/app/v3/_secciones/servicios/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| `[TESTIMONIO]` | `CASO_DE_REFERENCIA` | Franco (o un cliente) | El caso de referencia de cada frente, con el cliente que corresponda y qué cambió. | Dos o tres renglones, con el nombre del cliente. Texto plano. |
+| `[TEXTO]` | `PREGUNTAS_DEL_RECOMENDADOR` | Valentino | Las tres preguntas del recomendador sobre los problemas del cliente, y sus tres respuestas (una por servicio). | Una pregunta corta y tres respuestas de una línea cada una, en voseo. Texto plano. |
 
 
 ## 06 · Tu panel

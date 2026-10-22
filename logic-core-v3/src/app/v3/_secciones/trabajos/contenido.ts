@@ -88,9 +88,9 @@ export const CONTENIDO = {
     whatsapp: 'o escribinos por WhatsApp',
   },
 
-  /** [B1.3] Las historias (debajo de 1024): los dos controles del teclado (el nombre de cada uno, para los lectores). [B1.2d B] La pista
-   * de la tablet («Seguí bajando») se fue con las historias. */
-  historias: { anterior: 'Proyecto anterior', siguiente: 'Proyecto siguiente' },
+  /** [B1.2e] El carrusel (debajo de 1024): las dos flechas (el nombre de cada una, para los lectores). Eran los dos controles del teclado
+   * de las historias, que se fueron. */
+  carrusel: { anterior: 'Proyecto anterior', siguiente: 'Proyecto siguiente' },
 } as const
 
 /**

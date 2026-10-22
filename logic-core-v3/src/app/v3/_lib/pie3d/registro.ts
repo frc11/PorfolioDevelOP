@@ -107,9 +107,17 @@ function modoDelEntorno(): 'volumen' | 'antes' | 'no' {
   return e.titulos === 'no' ? 'no' : 'volumen'
 }
 
+/**
+ * [B13] El modo pedido por un tramo: el pie del cierre de una página va siempre plano (el de volumen se arma alrededor del logo que cae a su
+ * hueco, el final del home; el de una página es la resolución). Sin proveedor, `null`: el de la carga.
+ */
+export const ModoDelPieForzado = createContext<ModoDelPie | null>(null)
+
 export function useModoDelPie(): ModoDelPie {
+  const forzado = useContext(ModoDelPieForzado)
   const delEntorno = useSyncExternalStore(sinCambios, modoDelEntorno, () => 'no' as const)
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
+  if (forzado !== null) return forzado
   return escritorio && delEntorno !== 'no' ? delEntorno : 'plano'
 }
 

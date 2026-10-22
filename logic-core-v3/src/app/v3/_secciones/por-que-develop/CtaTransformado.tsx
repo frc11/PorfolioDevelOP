@@ -15,6 +15,7 @@ import { TITULOS_DE_VOLUMEN } from '../../_lib/titulos3d/registro'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import { CTA, FRASE, VALORES } from './contenido'
 import { ESTILO_DE_LA_LISTA } from './geometria'
+import { TITULOS_DE_LAS_RESENAS } from './resenas/tramo'
 
 /**
  * [PULIDO 2] 5 · EL CTA DEL FINAL CON SU TRANSFORMACIÓN, en las dos ramas de «Por qué develOP»: en el escenario y en la lista.
@@ -23,9 +24,13 @@ import { ESTILO_DE_LA_LISTA } from './geometria'
  * del menú no se muestra.
  */
 
-/** [PULIDO 2] 5 · de dónde sale el cruce en el escenario: los renglones de la frase de volumen (su lugar y su subida). */
+/**
+ * [PULIDO 2] 5 · de dónde sale el cruce en el escenario: los renglones de la frase de volumen (su lugar y su subida). [NOCTURNO B3] Con las
+ * reseñas, el título en que se dio vuelta la frase («Lo que dicen nuestros clientes»): ése es el que se da vuelta y se vuelve el CTA.
+ */
 function origenDeLaFrase(): readonly RenglonDelCta[] {
-  return FRASE_DE_VOLUMEN.flatMap((id) => {
+  const ids: readonly string[] = TITULOS_DE_VOLUMEN.has(TITULOS_DE_LAS_RESENAS[0]) ? TITULOS_DE_LAS_RESENAS : FRASE_DE_VOLUMEN
+  return ids.flatMap((id) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
     return t === undefined ? [] : [{ el: t.lugar, subida: t.subida }]
   })

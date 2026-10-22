@@ -5,11 +5,14 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import * as THREE from 'three'
 
 import { REGISTRO_DE_VARIANTES, type IdDeVariante } from '../../../_variantes/registro'
+import { hayPrimerCuadro } from '../../carga'
 import type { NivelDeCalidad } from '../calidad'
 import { ENERGIA_DE_LA_RUTA } from '../energia/energiaDeLaRuta'
 import { hayBanco } from '../entorno'
 import { LUZ_DE_ABAJO_EN_VIVO } from '../final/luzDeAbajo'
 
+import { RESOLUCION_DEL_CIERRE, cierreManda } from './cierreDeLaPagina'
+import { RANURA_EN_VIVO, VARIANTE_DIBUJADA, claveDeLaVariante, escenaLista } from './listaDeLaRuta'
 import { AVANCE_DE_LA_INTRO } from './pistaDeLaIntro'
 import { presetActual, suscribirseAlPreset } from './preset'
 import { atenderLaSalida, pedirLaSalidaDeLaVariante } from './salidaDeLaVariante'
@@ -18,8 +21,11 @@ import { COMPOSICION_DE_LA_LUZ, SALIDA_DE_LA_VARIANTE_MS, type ComponenteDeVaria
 /** Hasta dónde llega la luz de abajo prestada (u): más allá del piso (radio 45 en plena, 34 en compacta), así lo cubre entero. */
 const RADIO_DE_LA_LUZ_PRESTADA = 100
 
-/** El claro del acento de un servicio, leído de su token (`--color-acento-<id>-claro`); sin acento, blanco. Una vez por montaje. */
-function acentoDelToken(acento: string | null): THREE.Color {
+/**
+ * El claro del acento de un servicio, leído de su token (`--color-acento-<id>-claro`); sin acento, blanco. Una vez por montaje.
+ * [NOCTURNO B9] Exportado: lo usan también las grietas del cristal (la luz con el acento de la página).
+ */
+export function acentoDelToken(acento: string | null): THREE.Color {
   const color = new THREE.Color(1, 1, 1)
   if (acento === null || typeof document === 'undefined') return color
   const valor = getComputedStyle(document.documentElement).getPropertyValue(`--color-acento-${acento}-claro`).trim()
@@ -36,9 +42,30 @@ type EstadoDeLaRanura = { readonly id: string | null; readonly saliendo: boolean
 /**
  * Sólo con banco: el estado de la ranura; `__ranuraSinVariante` (la misma página sin montar la variante, para medir su costo) y
  * `__ranuraSinLaSenal` (el control de la salida: la señal se ignora y la variante sale recién cuando cambia la ruta, como antes) y
- * [B12a.8] `__ranuraSinBfcache` (el control de P-H35: al volver del bfcache la salida no se olvida).
+ * [B12a.8] `__ranuraSinBfcache` (el control de P-H35: al volver del bfcache la salida no se olvida) y [B13] `__cierreSinResolucion` (el
+ * control de la resolución: la variante recibe siempre 0 y el piso no se calma antes del pie).
  */
-type VentanaDelBanco = Window & { __ranuraDelBanco?: () => EstadoDeLaRanura; __pedirLaSalidaDelBanco?: () => Promise<void>; __ranuraSinVariante?: boolean; __ranuraSinLaSenal?: boolean; __ranuraSinBfcache?: boolean }
+type VentanaDelBanco = Window & { __ranuraDelBanco?: () => EstadoDeLaRanura; __pedirLaSalidaDelBanco?: () => Promise<void>; __ranuraSinVariante?: boolean; __ranuraSinLaSenal?: boolean; __ranuraSinBfcache?: boolean; __cierreSinResolucion?: boolean }
+
+/** [B13] La resolución del control del banco: siempre 0. */
+const SIN_RESOLUCION: Readonly<{ current: number }> = { current: 0 }
+
+/**
+ * [T0] La marca de que la variante DIBUJÓ: su cuadro corre después del de la variante (se suscribe después), así la clave queda anotada
+ * con la luz de la variante ya escrita en ese mismo cuadro. Al desmontarse, la borra si es la suya.
+ */
+function MarcaDeDibujo({ clave }: { readonly clave: string }): null {
+  useFrame(() => {
+    VARIANTE_DIBUJADA.clave = clave
+  })
+  useEffect(
+    () => () => {
+      if (VARIANTE_DIBUJADA.clave === clave) VARIANTE_DIBUJADA.clave = null
+    },
+    [clave],
+  )
+  return null
+}
 
 /**
  * [B12a.3] LA RANURA DE VARIANTES — adentro del lienzo: monta la variante del preset de la página (`preset.variante`, un id del registro,
@@ -48,7 +75,10 @@ type VentanaDelBanco = Window & { __ranuraDelBanco?: () => EstadoDeLaRanura; __p
  * · **Un dueño por tramo (P-H29a):** mientras la intro de la página está a la vista (el avance de la intro menor que 1), o la variante está
  *   saliendo, la luz de abajo y el color de la energía son de la ranura: los escribe en su cuadro, DESPUÉS del final del pie (está montada
  *   después de él), con la energía y el color que dejó la variante; fuera de la intro no escribe nada y manda el final. Sin variante, deja
- *   la luz de la composición (P-H29f). En el home (sin pista) no hace nada.
+ *   la luz de la composición (P-H29f). En el home (sin pista) no hace nada. [B13] En el cierre de la página (desde que manda su pista)
+ *   también es de la ranura: el final del home no corre en una página, y la variante se resuelve con la señal del tramo del pie.
+ * · **[B13] La resolución:** le pasa `resolucion` (`RESOLUCION_DEL_CIERRE`, 0 → 1 en la pantalla que sigue al CTA): en 1, la variante en
+ *   reposo y con la luz de la composición (el piso liso y calmo, antes del pie).
  * · **La salida (P-H29d):** la pide la navegación antes de irse (`pedirLaSalidaDeLaVariante`); `saliendo` pasa a `true` y la variante tiene
  *   `SALIDA_DE_LA_VARIANTE_MS` para volver a la composición, con la página quieta. Si la ruta cambia sin pedirla (la flecha del navegador),
  *   arranca ahí. Terminada y con la página ida, se desmonta (con movimiento reducido o la escena tapada, en el acto).
@@ -164,6 +194,16 @@ export function RanuraDeLaVariante({ calidad, reducido }: { readonly calidad: Ni
     return () => window.removeEventListener('pageshow', alVolver)
   }, [])
 
+  // [T0] 11 · 1 · El velo pregunta, antes de destapar, si la variante de ESTA página ya dibujó (`listaDeLaRuta.ts`): la página se destapa
+  // con su noche y su acento desde el primer cuadro. Sin el primer cuadro de la escena (sin WebGL), o con la variante apagada por el banco, lista.
+  useEffect(() => {
+    const lista = (): boolean => escenaLista(presetActual(), VARIANTE_DIBUJADA.clave, hayPrimerCuadro(), hayBanco() && (window as VentanaDelBanco).__ranuraSinVariante === true)
+    RANURA_EN_VIVO.lista = lista
+    return () => {
+      if (RANURA_EN_VIVO.lista === lista) RANURA_EN_VIVO.lista = null
+    }
+  }, [])
+
   // Al desmontar la ranura (el lienzo se rehace al cruzar 1024), la luz y la energía vuelven a ser del final.
   useEffect(
     () => () => {
@@ -191,7 +231,9 @@ export function RanuraDeLaVariante({ calidad, reducido }: { readonly calidad: Ni
     // La página que la pidió se fue y la variante sigue montada: la salida es de la ranura, aunque el efecto todavía no la haya arrancado.
     const yendose = m !== null && (deLaPagina === null || deLaPagina.id !== m.pagina || deLaPagina.variante !== m.id)
     const ahora = saliendo.current || yendose || (deLaPagina !== null && deLaPagina.pista !== null && AVANCE_DE_LA_INTRO.current < 1)
-    if (!ahora) {
+    // [B13] Y en el cierre de la página (desde que manda su pista): la variante se resuelve con la señal del tramo del pie.
+    const enElCierre = deLaPagina !== null && deLaPagina.pista !== null && cierreManda()
+    if (!ahora && !enElCierre) {
       if (duena.current) {
         ENERGIA_DE_LA_RUTA.pedido = false
         LUZ_DE_ABAJO_EN_VIVO.uColorDeLaLuz.value.setRGB(1, 1, 1)
@@ -208,5 +250,11 @@ export function RanuraDeLaVariante({ calidad, reducido }: { readonly calidad: Ni
 
   if (montada === null) return null
   const { Componente } = montada
-  return <Componente avance={AVANCE_DE_LA_INTRO} acento={montada.acento} calidad={calidad} reducido={reducido} luzDeAbajo={luzDeAbajo} energia={energia} saliendo={saliendo} />
+  const resolucion = hayBanco() && (window as VentanaDelBanco).__cierreSinResolucion === true ? SIN_RESOLUCION : RESOLUCION_DEL_CIERRE
+  return (
+    <>
+      <Componente avance={AVANCE_DE_LA_INTRO} acento={montada.acento} calidad={calidad} reducido={reducido} luzDeAbajo={luzDeAbajo} energia={energia} saliendo={saliendo} resolucion={resolucion} />
+      <MarcaDeDibujo clave={claveDeLaVariante(montada.pagina, montada.id)} />
+    </>
+  )
 }

@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 
 import type { PrimitivasDeCoreografia } from './_contrato/coreografia'
 import { PRIMITIVAS_ANIMADAS } from './_contrato/coreografia-animada'
+import { anotarLaCoreografia } from './_contrato/precargaDeLaCoreografia'
 
 /**
  * EL MÓDULO QUE VIAJA APARTE — lo único que la compuerta pide con `import()`.
@@ -47,6 +48,8 @@ export default function InstaladorDeCoreografia({
   readonly alInstalar: (primitivas: PrimitivasDeCoreografia) => void
 }): null {
   useEffect(() => {
+    // [T0] 11 · 3 · y quedan a mano para la próxima vuelta al home por la navegación cliente (la vía `montaje`).
+    anotarLaCoreografia(PRIMITIVAS_ANIMADAS)
     alInstalar(PRIMITIVAS_ANIMADAS)
   }, [alInstalar])
 

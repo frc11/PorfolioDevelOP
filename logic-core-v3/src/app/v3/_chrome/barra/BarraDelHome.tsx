@@ -239,7 +239,7 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
         >
           <span data-parte="rotulo">{ENLACE_DE_CONTACTO.rotulo}</span>
         </a>
-        <a href={ENLACE_DE_LOGIN.destino} data-pieza="barra-login" className="text-cuerpo tracking-texto leading-texto font-semi">
+        <a href={ENLACE_DE_LOGIN.destino} data-abre-ingreso="" aria-haspopup="dialog" data-pieza="barra-login" className="text-cuerpo tracking-texto leading-texto font-semi">
           {ENLACE_DE_LOGIN.rotulo}
         </a>
       </div>

@@ -34,6 +34,13 @@ export interface PropsDeLaVariante {
    * (la luz y el color de base); después la ranura la desmonta. Con movimiento reducido, la vuelta es inmediata.
    */
   readonly saliendo: Readonly<{ current: boolean }>
+  /**
+   * [B13] La resolución, 0 → 1: la señal del tramo del pie (el cierre de la página, `cierreDeLaPagina.ts`). 0 en la intro y en el cuerpo;
+   * de 0 a 1 en la pantalla que sigue al CTA (al subir, vuelve). En 1 la variante está RESUELTA: lo que movió, en reposo, y su luz de abajo y
+   * su energía, las de la composición (`COMPOSICION_DE_LA_LUZ`, blancas): el piso queda liso y calmo, y recién ahí entra el pie. En el cierre
+   * la luz y la energía siguen siendo de la ranura (un dueño por tramo); con movimiento reducido, sin el paso intermedio.
+   */
+  readonly resolucion: Readonly<{ current: number }>
 }
 
 export type ComponenteDeVariante = ComponentType<PropsDeLaVariante>

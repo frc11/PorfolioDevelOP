@@ -18,6 +18,7 @@
 | La navegación entre páginas | hecha (B12a.6 a B12a.8): `EnlaceDeRuta` con la precarga, y la salida de la variante y el velo juntos; el velo en el compositor y sin pantalla en blanco; la vuelta al home por entrada del historial; el bfcache (§5) |
 | Las historias | P-H31 (`4af1539c`): la transición propia, el freno en cualquier uso y las barras sobre el acento (§6) |
 | La página base | hecha (B12a.8): `/v3/pagina-base`, la maqueta que se copia; el paso a paso en §7 |
+| El cierre de una página | hecho (B13, 2026-10-22, sin ver): `CierreDeLaPagina`, Seis razones → el CTA (con el servicio de la página) → la resolución → el pie, con la escena de la página; la señal `resolucion` para la variante (§8) |
 
 **Los cambios de firma desde la primera versión (`8926656a`).** Todos son del 2026-10-20 y los pidió servicios como P-H29 (su `SPRINT-V0.md` §4):
 - `PresetDeLaEscena.variante` pasa de componente a id (e).
@@ -35,6 +36,32 @@
 - `PANTALLAS_DE_LA_INTRO` pasa de 1,5 a 2,5. Llegan `TRAMO_DEL_TITULO`, `TRAMOS_DE_LA_INTRO` y `PropsDeLaIntro.deQueSeTrata` (opcional) (§2).
 - `COMBINACIONES_DEL_TITULO` pasa a cuatro y llega `idDeLaParte` (§3).
 - `EnlaceDeRuta` acepta los atributos de un `<a>` y su `ref`. Llegan `EVENTOS_DEL_VELO.quieto`, `VELO_EN_CURSO`, `esperaAlVelo` y `cuandoElVeloQuede` (§5).
+
+**Después (2026-10-22, T0 nocturno; `docs/rediseno/SPRINT-T0-NOCTURNO.md`):**
+- **La variante, encendida desde el avance 0.** La noche y el acento de la página tienen que estar en el primer cuadro, en la composición
+  inicial (pedido de Valentino). La de la base lo está (`cuadroDeLaPrueba`); las de servicios se encienden con el scroll (P-S). El velo
+  destapa con la variante de la página ya dibujada (`esc/ruta/listaDeLaRuta.ts`, `escenaDeLaRutaLista`), con el techo de siempre.
+- `EVENTOS_DEL_VELO.destapa` (de B12a.8) y llegan `marcarLaBanda` y `retenerElQuieto`: el «quieto» se avisa cuando terminan la banda y lo
+  que la retiene (la píldora que se desliza). `viaDelVelo` y `VIA_POR_DEFECTO` son las vías del velo hacia el home (sólo el banco las elige).
+- El título de una página va con la legibilidad `peso` por defecto (`LEGIBILIDAD_POR_DEFECTO`, §3); `?legibilidad=tamano`, con la bandera.
+- La escena compila con `compilarConCuidado` (`esc/gpu/compilar.ts`), no con `compileAsync`: una variante que compile algo, que use esa.
+
+**Después (2026-10-22, B12b nocturno; `docs/rediseno/SPRINT-B12B-NOCTURNO.md`):** el viaje desde el CTA de un servicio del home (§5, «El
+viaje»). Ninguna firma cambia: `EnlaceDeRuta` sigue igual. Llegan `pedirElViaje`, `ViajeDelVelo`, `PedidoDelVelo.viaje` y `hayVelo`
+(`_lib/veloDeNavegacion.ts`), y `esc/ruta/viajeDelServicio.ts`. El preset de la página base pasó a `pagina-base/preset.ts` (lo lee el viaje).
+**Para servicios (P-S):** cada página de servicio exporta su preset de un módulo SIN JSX (como `pagina-base/preset.ts`), para que el home
+lo apile antes de navegar (`PRESET_DEL_DESTINO`, `_secciones/servicios/escenario/datos.ts`); tiene que ser el mismo objeto que declara la página.
+
+**Después (2026-10-22, B13 nocturno; `docs/rediseno/SPRINT-B13-NOCTURNO.md`):** el cierre de cada página (§8).
+- `PropsDeLaVariante` suma `resolucion` (§4): la señal del tramo del pie, 0 → 1. **Para servicios (P-S):** cada variante la implementa (en
+  1, lo que movió en reposo y su luz en la de la composición: el piso liso y calmo). Una variante que no la lee sigue andando (el piso no se
+  calma: se ve encendida debajo del pie).
+- `tramos.pie` deja de ser `null`: es `SELECTOR_DEL_CIERRE` (`esc/ruta/atributoDelCierre.ts`) y la página monta `<CierreDeLaPagina preset={PRESET} />`
+  al final de su `<main>` (§7 y §8).
+- Un dueño por tramo (P-H29a), al día: en el cierre de la página la luz de abajo y la energía son de la ranura (con la resolución); el final
+  del home (el encastre del logo en su hueco) no corre en una página (§4).
+- Llegan, del home y para el cierre: `PrecargaDelCta` (el servicio que el CTA del final precarga), `MaterialDeLosTitulos` (el material de los
+  títulos de volumen de un tramo) y `ModoDelPieForzado` (el pie plano en un tramo). Sin proveedor, el home no cambia.
 
 ---
 
@@ -75,7 +102,8 @@ export const AVANCE_DE_LA_INTRO: { current: number }  // 0 → 1; lo escribe la 
 
 **Cómo lo usa una página de servicio:**
 - Arma su preset como constante del módulo, una por servicio. Debe ser el mismo objeto en cada render: la escena arma la pista una vez por preset.
-  - `{ id, tramos: { intro: SELECTOR_DE_LA_INTRO, pie: null }, pista: PISTA_DE_LA_INTRO, noche: 'noche', acento: id, variante: '<su id del registro>' }`.
+  - `{ id, tramos: { intro: SELECTOR_DE_LA_INTRO, pie: SELECTOR_DEL_CIERRE }, pista: PISTA_DE_LA_INTRO, noche: 'noche', acento: id, variante: '<su id del registro>' }`.
+  - [B13] `pie: SELECTOR_DEL_CIERRE` (de `esc/ruta/atributoDelCierre.ts`, NO del componente de cliente) con el cierre montado (§8); `null` sólo en una página sin cierre.
 - Se lo pasa a `IntroDeLaPagina` (§2), que lo declara. Una página sin intro monta `<PresetDeLaPagina>` sola.
 - **La variante viaja por id (P-H29e).** Una página de servidor no puede pasarle una función a un componente de cliente. El preset lleva el id, y la ranura carga el componente del registro con un import dinámico (§4). Así cada variante queda en su propio pedazo.
 - `_lib/` nunca importa nada de `_servicios/`. El único lugar del home que nombra a las variantes es el registro (`_variantes/registro.ts`, fuera de `_lib/`).
@@ -185,6 +213,8 @@ export interface PropsDeLaVariante {
   readonly energia: (color: THREE.Color) => void
   /** [P-H29d] Pasa a `true` cuando la página se va: SALIDA_DE_LA_VARIANTE_MS para volver a la composición; sigue en `true` hasta el desmontaje. */
   readonly saliendo: Readonly<{ current: boolean }>
+  /** [B13] La resolución, 0 → 1: la señal del tramo del pie (el cierre, §8). En 1, resuelta: lo que movió en reposo y su luz en la de la composición. */
+  readonly resolucion: Readonly<{ current: number }>
 }
 export type ComponenteDeVariante = React.ComponentType<PropsDeLaVariante>
 export const PRESUPUESTO_DE_LA_VARIANTE = { cpuMsPorCuadro: 0.5 } as const
@@ -211,11 +241,15 @@ export function atenderLaSalida(a: () => Promise<void>): () => void   // sólo l
 - **Archivo:** un módulo `'use client'` que exporta el componente como `default` (el registro hace `import()` del módulo).
 - **Registro:** una línea en `_variantes/registro.ts`, con su id. El preset de la página lleva ese id.
 - **Lo que crea, en JSX** (`<mesh>`, `<ringGeometry>`…): R3F lo libera al desmontarse. Lo que cree a mano con `new THREE.*`, lo libera ella.
-- **La referencia** es `esc/ruta/VarianteDePrueba.tsx`, la de `/v3/pagina-base`: un anillo de luz en el piso, la luz de abajo de 0,12 a 1 en la primera mitad del avance y teñida, la energía teñida, y la salida con 1 − (1 − t)³.
+- **La referencia** es `esc/ruta/VarianteDePrueba.tsx`, la de `/v3/pagina-base`: un anillo de luz en el piso, la luz de abajo de 0,12 a 1 en la primera mitad del avance y teñida, la energía teñida, y la salida con 1 − (1 − t)³. [T0] Encendida desde el avance 0. [B13] Con la resolución, lo encendido se apaga (`1 − resolucion`): el anillo se cierra y se apaga, la luz de abajo vuelve a 0,12 y la energía al blanco; con movimiento reducido, de una a la mitad.
 
 **Lo que una variante puede hacer:**
 - Agregar objetos a la escena y animarlos con `useFrame`, sin prioridad: el render lo sigue haciendo la escena.
-- Leer `avance`, `acento`, `calidad`, `reducido` y `saliendo`.
+- Leer `avance`, `acento`, `calidad`, `reducido`, `saliendo` y [B13] `resolucion`.
+- [B13] **Resolverse con `resolucion`** (la tiene que implementar cada variante): de 0 a 1 en la pantalla que sigue al CTA del cierre, lo que
+  movió vuelve a su reposo (los bloques que subieron, abajo; lo que se abrió, cerrado) y su luz de abajo y su energía, a la composición
+  (`COMPOSICION_DE_LA_LUZ.brilloDelPiso`, blancas). En 1 el piso queda liso y calmo, y recién ahí entra el pie. Al subir, vuelve. Función del
+  valor, sin reloj (es scroll).
 - Encender y teñir la luz de abajo con `luzDeAbajo`, y teñir la energía con `energia`, en su `useFrame`, cada cuadro. Sin llamarlas queda la luz de la composición.
 
 **Lo que no puede hacer:**
@@ -226,9 +260,12 @@ export function atenderLaSalida(a: () => Promise<void>): () => void   // sólo l
 
 **Un dueño por tramo (P-H29a):**
 - **En la intro** la luz de abajo y el color de la energía son de la ranura, y con ella de la variante: mientras el avance es menor que 1, o mientras la variante sale.
-- **Fuera de la intro** son del final, el pie de B13.
-- **En el home** (sin pista) la ranura no toca nada.
-- La ranura escribe después del final del pie (está montada después de él), así que en la intro manda la suya.
+- **[B13] En el cierre** (desde que manda su pista, `cierreManda`, media pantalla antes de que asome) también son de la ranura, y con ella
+  de la variante, que se resuelve con `resolucion`. **El final del home (el encastre del logo en su hueco) no corre en una página**
+  (`enUnaPagina`, `esc/ruta/cierreDeLaPagina.ts`): el gesto del pie de una página es la resolución.
+- **En el cuerpo en papel** la escena duerme: nadie escribe.
+- **En el home** (sin pista) la ranura no toca nada, y el final es el de siempre.
+- La ranura escribe después del final del pie (está montada después de él), así que en la intro y en el cierre manda la suya.
 
 **La salida (P-H29d):**
 - **La pide la navegación antes de irse,** con `pedirLaSalidaDeLaVariante()`, y espera la promesa:
@@ -278,6 +315,37 @@ export function cuandoElVeloQuede(f: () => void): () => void
   - **Hacia el home, devuelve la posición de ESA entrada del historial** (el scroll, la noche y el día del final): con dos entradas del home, cada una vuelve a la suya. No hace falta nada de la página.
   - **Del bfcache (P-H35):** una página que vuelve con `pageshow` `persisted` repone la variante a su avance y deja el velo quieto.
 - Los CTA que abren el contacto siguen siendo `data-abre-contacto="panel"` con su `data-precarga`, sin cambios.
+
+**El viaje (B12b, 2026-10-22): del CTA de un servicio del home a su página.**
+
+```ts
+// _lib/veloDeNavegacion.ts
+export type ViajeDelVelo = () => Promise<'escena' | 'banda'>       // cubre con la escena; 'banda' si no pudo (el velo cubre como siempre)
+export interface PedidoDelVelo { readonly cubierto: () => void; readonly viaje: ViajeDelVelo | null }
+export function pedirElViaje(v: ViajeDelVelo): void                 // para el PRÓXIMO cubrirConElVelo, en el mismo clic (se olvida al terminar la tarea)
+export const hayVelo: () => boolean
+
+// esc/ruta/viajeDelServicio.ts — puro: el reloj del viaje (lo leen el rig, la luz de la intro y la atadura)
+export const TIEMPOS_DEL_VIAJE, POSE_DE_PARTIDA, SONIDOS_DEL_VIAJE
+export function camaraDelViaje(ahora: number): number    // 0 la partida → 1 la composición; fuera de un viaje, 1
+export function nocheDelViaje(ahora: number): number     // 0 → 1; fuera de un viaje, 1 (la noche del preset, exacta)
+
+// _componentes/navegacion/viajeAlServicio.ts — el DOM del viaje
+export function pedirElViajeAlServicio(e: MouseEvent<HTMLAnchorElement>, destino: PresetDeLaEscena): void   // el onClick del CTA
+```
+
+- **Quién lo usa:** sólo el CTA de cada servicio de la sección Servicios del home (`EnlaceDelServicio`: los paneles, las pantallas sueltas y el
+  recomendador), con `onClick={(e) => pedirElViajeAlServicio(e, PRESET_DEL_DESTINO[id])}`. `EnlaceDeRuta` corre el `onClick` antes de cubrir:
+  el pedido viaja con su `cubrirConElVelo()`. Cualquier otra navegación sigue con la banda.
+- **Qué hace:** apila en el home el preset de la página de destino (la escena se entera de adónde va; la ranura monta la variante tapada),
+  despierta la escena detrás del papel (con la cámara en `POSE_DE_PARTIDA`, de día) y, cuando dibujó con la variante del destino: suena la
+  salida, el papel (lo que se ve del `<main>` del home) se levanta, los nanobots se apagan, anochece y la cámara baja a la composición
+  inicial de la página (con el logo en su hueco: `HuecoDelViaje` lo mide en el home con el mismo marco de la intro). Llegada la cámara, el
+  velo navega (sin banda: `data-modo="viaje"`); la página nueva entra transparente y con su scroll (`_chrome/velo/paginaTapada.ts`) y, con
+  su primer cuadro estable, aparece encima de la escena con el sonido de la llegada.
+- **Cuándo no:** con menos movimiento, sin la escena, fuera del home, con `?viaje=velo`, o si la escena no dibujó en 1,5 s: la banda.
+- **Para una página de servicio:** su preset en un módulo sin JSX, el mismo objeto en la página y en `PRESET_DEL_DESTINO` (P-S). Su variante
+  dibuja en la composición desde el avance 0 (T0): el viaje la monta tapada y la muestra al levantar el papel.
 
 ## 6. Las historias (P-H31, 2026-10-20)
 
@@ -337,13 +405,14 @@ La maqueta que anda es `/v3/pagina-base` (`pagina-base/`): copiala y cambiá los
 
 ```tsx
 // src/app/v3/<ruta>/page.tsx
-const PRESET: PresetDeLaEscena = { id: '<id>', tramos: { intro: SELECTOR_DE_LA_INTRO, pie: null }, pista: PISTA_DE_LA_INTRO, noche: 'noche', acento: '<id>', variante: '<id del registro>' }
+const PRESET: PresetDeLaEscena = { id: '<id>', tramos: { intro: SELECTOR_DE_LA_INTRO, pie: SELECTOR_DEL_CIERRE }, pista: PISTA_DE_LA_INTRO, noche: 'noche', acento: '<id>', variante: '<id del registro>' }
 
 export default function Pagina(): React.JSX.Element {
   return (
     <main className="relative z-10">
       <IntroDeLaPagina titulo="<nombre>" preset={PRESET} bajada={<ParrafoDeLaBajada>…</ParrafoDeLaBajada>} deQueSeTrata={<>…</>} />
       <CuerpoDeLaPagina />   {/* 'use client', adentro de <CompuertaDelHome> */}
+      <CierreDeLaPagina preset={PRESET} />   {/* [B13] §8: Seis razones → el CTA → la resolución → el pie */}
     </main>
   )
 }
@@ -356,7 +425,7 @@ export default function Pagina(): React.JSX.Element {
 4. **Los CTA:** el contacto con `data-abre-contacto="panel"` y `data-precarga="<id>"`. Otra página de `/v3` con `EnlaceDeRuta`, nunca `<a>`, `<Link>` suelto ni `router.push`.
 5. **La variante** (si tiene): un módulo `'use client'` con `export default`, en `_servicios/escena/`, y su línea en `_variantes/registro.ts` (§4).
 6. **El título nuevo:** si el nombre no está en `TITULOS_CON_LETRAS`, pedilo como P-H (hay que regenerar las fuentes).
-7. **El pie:** el lugar de `data-pie-de-pagina` hasta B13.
+7. **El cierre** [B13]: `<CierreDeLaPagina preset={PRESET} />` al final del `<main>`, después del cuerpo, y `tramos.pie: SELECTOR_DEL_CIERRE` en el preset (§8). La página no le pone nada: es del home.
 
 **Las reglas:**
 - **`'use client'` sólo donde hay interactividad:** la página y la intro son de servidor; el cuerpo animado y la variante, de cliente.
@@ -375,8 +444,72 @@ export default function Pagina(): React.JSX.Element {
 - [ ] La ida y la vuelta con el velo sin cuadros en blanco (`scripts-carga/velo.ts`, en el build).
 - [ ] La variante cuesta ≤ 0,5 ms por cuadro y no pierde memoria (`scripts-carga/ranura.ts`).
 - [ ] A 390 y a 768: la intro, el cuerpo y el menú (el teléfono es otra experiencia).
+- [ ] [B13] El cierre montado (`tramos.pie`), su CTA con el `data-precarga` de la página y la variante resuelta antes del pie (`scripts-carga/cierre-de-pagina.ts`).
 
 ---
+
+## 8. El cierre de una página (B13, 2026-10-22)
+
+```tsx
+// _componentes/pagina/cierre/CierreDeLaPagina.tsx — 'use client'; la página lo monta al final de su <main>, después del cuerpo
+export function CierreDeLaPagina(props: { readonly preset: PresetDeLaEscena; readonly preguntas?: readonly PreguntaFrecuente[] }): React.JSX.Element
+
+// [B10] _componentes/faq/preguntas.ts — el FAQ después del pie (lo monta el cierre; en el home, su pie)
+export interface PreguntaFrecuente { readonly pregunta: string; readonly respuesta: string }   // 6 por página (MAXIMO_DE_PREGUNTAS)
+
+// esc/ruta/atributoDelCierre.ts — sólo cadenas (lo importa el preset de una página de servidor)
+export const SELECTOR_DEL_CIERRE = '[data-cierre-de-pagina]'                  // lo que va en tramos.pie
+export const PARTES_DEL_CIERRE = { seisRazones, resolucion, pie } as const     // sus tres partes (data-parte)
+
+// esc/ruta/cierreDeLaPagina.ts — puro: la pantalla del cierre, su pista y la resolución
+export const RESOLUCION_DEL_CIERRE: { current: number }   // la que la ranura le pasa a la variante (PropsDeLaVariante.resolucion)
+export function pantallaDelCierre(seis: CajaVertical, scrollY: number, alto: number): number
+export function resolucionDelCierre(pantalla: number): number
+export const enUnaPagina: () => boolean                  // ahí el final del home no corre
+```
+
+**Qué es:** la pieza común del home que cualquier página monta. Un bloque con tres partes, en orden:
+1. **Seis razones** (`SeisRazonesDelCierre`): las mismas seis de develOP con la misma entrada que en el home. **Desde 1024 y con
+   movimiento, el escenario del home**: 7 pantallas con el escenario clavado; la frase llega (la pose A), los valores entran de a pares (B),
+   se levantan y la frase **se da vuelta y se vuelve el CTA** (la transformación de B3, C). Sin el aro de las reseñas (el origen del
+   cartel es la frase). Las ventanas, la geometría y las piezas son las del home. **Abajo de 1024 o con menos movimiento, el modo plano**:
+   la lista (la frase, los valores y el CTA que la escena desliza en su bloque clavado), como el home a ese ancho.
+2. **La resolución:** una pantalla de la sala sola. La escena le pasa a la variante la señal del tramo del pie (`resolucion`, 0 → 1: §4) y
+   la cámara va a la pose del pie (E, el logo en el centro). Con la de ejemplo de la base, el anillo se apaga y la luz vuelve a la
+   composición: el piso queda liso y calmo.
+3. **El pie** (`PieDelCierre`): el del home (el titular, el mail y WhatsApp, el formulario de contacto, las redes, la línea legal), plano
+   en todo ancho; llega mientras su pantalla entra, con el piso ya calmo. El recorrido va a las secciones del home (`/v3#…`, con el velo).
+4. **[B10] El FAQ, después del pie** (`FaqDelPie`, `_componentes/faq/`), con las preguntas de la página (`preguntas`; sin preguntas, no
+   hay FAQ). **Desde 1024 y con movimiento**, en la pantalla del pie, con gatillo: seguir scrolleando al fondo hunde las columnas del pie
+   (el efecto del formulario del pie) y de esos lugares nacen dos bloques de vidrio: el título y las preguntas a la izquierda; a la derecha
+   «Tocá una pregunta y mirá lo que pasa.», que se hunde cuando tocás una y sube la respuesta en su lugar (con la primera, abajo, «¿Te
+   quedaron dudas? Escribinos», a WhatsApp con el número del repo). Subir lo saca y vuelve el pie. **Abajo de 1024 o con menos
+   movimiento**, una lista normal después del pie, sin efectos y sin WhatsApp. El texto entero va en el HTML y en los datos estructurados
+   (`FAQPage`); las preguntas son botones (Tab y las flechas).
+
+**El CTA abre el contacto con el servicio de la página:** `data-precarga` es el acento del preset (sin acento, sin precarga).
+
+**La escena es la de la página:** su preset (la noche y el acento) y su variante. Sobre el bloque, la escena hace el final del home: la
+pantalla del cierre (`pantallaDelCierre`) es la del pin del home (en el escenario, una por pantalla de scroll; en la lista, su recorrido
+repartido en las mismas seis; después, la resolución de 6 a 7 y el pie de 7 a 8) y la cámara sigue `PISTA_DEL_CIERRE` (las poses del final
+del home con sus curvas, con el ángulo en 0), que manda desde media pantalla antes de que el cierre asome. De noche, el texto del cierre va
+en los claros (la sección invertida, sin la mezcla del home) y lo que dibuja la escena, en papel: la frase en volumen (`MaterialDeLosTitulos`)
+y el CTA (`ctaDeNoche`).
+
+**Para una página de servicio (P-S):**
+- `tramos.pie: SELECTOR_DEL_CIERRE` (importado de `esc/ruta/atributoDelCierre.ts`: desde un componente de cliente, una página de servidor
+  recibiría una referencia y no la cadena) y `<CierreDeLaPagina preset={PRESET} />` al final del `<main>`. Reemplaza su cierre provisorio.
+- **[B10] Sus preguntas frecuentes** en su carpeta (como `pagina-base/faq.ts`: 6, sin cifras inventadas) y
+  `<CierreDeLaPagina preset={PRESET} preguntas={PREGUNTAS} />`. El FAQ que hoy está en el cuerpo de una página de servicio pasa acá (y sale
+  del cuerpo): un solo FAQ por página, después del pie.
+- **Su variante implementa la resolución** (§4): lo que movió vuelve a su reposo y su luz a la composición cuando `resolucion` llega a 1.
+- No le pongas alto, color ni fondo al cierre, ni nada entre el cierre y el fin del `<main>`.
+
+**Cómo se mide** (`scripts-carga/cierre-de-pagina.ts`, en el navegador, a 1440 y 390): el relevo de la pista, la transformación armada en
+la pose C, el CTA con su precarga (un clic abre el contacto), la resolución en 1 antes de que el pie asome (la luz de abajo prestada en la
+de la composición) y el pie llegado al fondo con el final del home quieto; `CONTROL=sin-resolucion` (la variante recibe siempre 0) tiene
+que fallar. Sin navegador, s78-b13. [B10] El FAQ: `scripts-carga/faq-del-pie.ts` (`CONTROL=sin-hundimiento` tiene que fallar la entrada);
+sin navegador, s78-b10.
 
 ## Qué P-H29 resolvió cada cosa
 

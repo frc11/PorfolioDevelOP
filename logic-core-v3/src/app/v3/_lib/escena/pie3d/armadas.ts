@@ -15,6 +15,7 @@ import { VOLTEO_TERMINADO } from '../../formularios/volteo'
 import { viajeEnCurso } from '../viaje'
 import { FUENTES_DEL_CTA } from '../ctaDelFinal/fuentesDelCta'
 import { cubicBezierEase } from '../bezier'
+import { compilarConCuidado } from '../gpu/compilar'
 import { colocarLaPieza, profundidadDeLaPieza } from './colocacion'
 import { capaPropia, seguirLaPieza } from './domQueSigue'
 import { colgarLasMallas } from './impresas'
@@ -404,9 +405,8 @@ export function prepararLasTransformaciones(s: EstadoDelPie, gl: THREE.WebGLRend
     if (x === null || x.lista || x.compilando) continue
     x.compilando = true
     const [grupo, viaje] = [a.grupo.visible, a.viaje.visible]
-    a.grupo.visible = true
-    a.viaje.visible = true
-    const compilado = gl.compileAsync(a.grupo, camara, escena)
+    a.grupo.visible = a.viaje.visible = true
+    const compilado = compilarConCuidado(gl, a.grupo, camara, escena) // [T0] sin `compileAsync` (`gpu/compilar.ts`)
     a.grupo.visible = grupo
     a.viaje.visible = viaje
     const listo = (): void => {

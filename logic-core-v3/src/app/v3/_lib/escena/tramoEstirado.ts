@@ -40,19 +40,57 @@ export function sinElEstiramiento(y: number, desde: number, largoEstirado: numbe
 }
 
 /**
+ * [NOCTURNO 2026-10-22] Los tramos de las OTRAS secciones que cambian de alto (el Panel, Servicios, las reseñas, Demos…). Cada
+ * una anota el suyo con `anotarTramo` y lo suelta con lo que devuelve (al desmontarse, o para volver a anotarlo en un `resize`).
+ * El del Portfolio sigue en `TRAMO_ESTIRADO`. Los tramos no se pisan entre sí: cada uno es su sección.
+ */
+const TRAMOS_ANOTADOS: TramoEstirado[] = []
+
+/** Anota un tramo más; devuelve cómo soltarlo. */
+export function anotarTramo(tramo: TramoEstirado): () => void {
+  TRAMOS_ANOTADOS.push(tramo)
+  return () => {
+    const i = TRAMOS_ANOTADOS.indexOf(tramo)
+    if (i >= 0) TRAMOS_ANOTADOS.splice(i, 1)
+  }
+}
+
+// Los tramos de esta lectura, en el documento: se reusan en cada cuadro (sin basura).
+const DESDE: number[] = []
+const LARGO: number[] = []
+const K: number[] = []
+
+function juntar(t: TramoEstirado, n: number, lectura: number, ventana: number, escala: number): number {
+  if (!t.panel.isConnected) return n
+  DESDE[n] = t.panel.getBoundingClientRect().top + lectura - ventana + t.arranque * escala
+  LARGO[n] = t.k * t.largo * escala
+  K[n] = t.k
+  return n + 1
+}
+
+/**
  * Lo que la escena mide, sin el estiramiento anotado: el scroll `y` y el pie de las secciones (`abajo`). `lectura` es el
  * `scrollY` de la misma lectura en que el llamador midió (el tope del panel se lee con él, como `medirLasSeccionesEn`).
  * Sin tramo anotado devuelve lo mismo que recibió. Escribe en `destino` (la escena lo llama en cada cuadro).
+ * [NOCTURNO] Con varios tramos, se descuentan de abajo hacia arriba: cada uno, en coordenadas del documento, sólo corre lo
+ * que tiene debajo, así que el de más abajo se descuenta primero y los de arriba ven su propio `desde` intacto.
  */
 export function medidaSinElEstiramiento(y: number, abajo: number, lectura: number, ventana: number, destino: { y: number; abajo: number }): { y: number; abajo: number } {
-  const t = TRAMO_ESTIRADO.valor
   destino.y = y
   destino.abajo = abajo
-  if (t === null || !t.panel.isConnected || !(ventana > 0)) return destino
+  if (!(ventana > 0)) return destino
   const escala = ventana / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
-  const desde = t.panel.getBoundingClientRect().top + lectura - ventana + t.arranque * escala
-  const largo = t.k * t.largo * escala
-  destino.y = sinElEstiramiento(y, desde, largo, t.k)
-  destino.abajo = sinElEstiramiento(abajo, desde, largo, t.k)
+  let n = 0
+  if (TRAMO_ESTIRADO.valor !== null) n = juntar(TRAMO_ESTIRADO.valor, n, lectura, ventana, escala)
+  for (let i = 0; i < TRAMOS_ANOTADOS.length; i++) n = juntar(TRAMOS_ANOTADOS[i], n, lectura, ventana, escala)
+  for (let hechos = 0; hechos < n; hechos++) {
+    // El de más abajo que falta (n es chico: a lo sumo uno por sección).
+    let j = -1
+    for (let i = 0; i < n; i++) if (K[i] === K[i] && (j < 0 || DESDE[i] > DESDE[j])) j = i
+    if (j < 0) break
+    destino.y = sinElEstiramiento(destino.y, DESDE[j], LARGO[j], K[j])
+    destino.abajo = sinElEstiramiento(destino.abajo, DESDE[j], LARGO[j], K[j])
+    K[j] = Number.NaN
+  }
   return destino
 }
