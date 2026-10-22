@@ -349,6 +349,7 @@
     "test:s78-preloader-entrada": "npx tsx src/app/v3/_chrome/preloader/s78-preloader-entrada.invariant.tsx",
     "test:s78-b12b": "npx tsx src/app/v3/_lib/__tests__/s78-b12b.invariant.tsx",
     "test:s78-b13": "npx tsx src/app/v3/_lib/__tests__/s78-b13.invariant.tsx",
+    "test:s78-b10": "npx tsx src/app/v3/_lib/__tests__/s78-b10.invariant.tsx",
     "test:s83-resenas": "npx tsx src/app/v3/_lib/__tests__/s83-resenas.invariant.tsx",
     "test:s83": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s83",
     "test:s78": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s78",
