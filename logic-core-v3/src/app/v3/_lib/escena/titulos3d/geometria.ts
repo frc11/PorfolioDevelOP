@@ -60,7 +60,9 @@ export const RAYAS_POR_TITULO = 4
  * La x (em) de cada carácter: la medida en el DOM o, sin ella, la suma de los avances de la fuente. [RETOQUE 3D] El DOM
  * puede medir sólo las letras (sin los espacios, que no tienen geometría): se reparten en orden entre las que no lo son.
  */
-function equisDe(fuente: Font, texto: string, posiciones: readonly number[] | null): number[] {
+function equisDe(fuente: Font, texto: string, dadas: readonly number[] | null): number[] {
+  // [T0] Una medida con un NaN o un infinito no se usa: con ella el título se armaba con todas sus letras en NaN (los avances de la fuente).
+  const posiciones = dadas !== null && dadas.every(Number.isFinite) ? dadas : null
   if (posiciones !== null && posiciones.length === texto.length) return [...posiciones]
   const letras = [...texto].filter((c) => c.trim() !== '').length
   if (posiciones !== null && posiciones.length === letras) {
@@ -103,7 +105,8 @@ export function armarElTitulo(fuente: Font, texto: string, posiciones: readonly 
     const formas = fuente.generateShapes(c, 1)
     const pieza = new THREE.ExtrudeGeometry(formas, { depth: profundidad, curveSegments: curvas, bevelEnabled: true, bevelThickness: bisel.grosor, bevelSize: bisel.tamano, bevelOffset: -bisel.tamano, bevelSegments: bisel.segmentos })
     // La extrusión crece hacia +z desde la cara de atrás: la de adelante, a z = 0. [PULIDO 10] J1 · y baja a su renglón (em).
-    const baja = bajadas?.[orden] ?? 0
+    const bajada = bajadas?.[orden] ?? 0
+    const baja = Number.isFinite(bajada) ? bajada : 0 // [T0] como la x: un renglón sin número, en el primero
     pieza.translate(equis[k], -baja, -profundidad)
     pieza.computeBoundingBox()
     const centro = (pieza.boundingBox ?? new THREE.Box3()).getCenter(new THREE.Vector3())
