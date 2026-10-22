@@ -10,6 +10,7 @@ import { Seccion } from '../_contrato/Seccion'
 import { CapaDeLaGota } from './CapaDeLaGota'
 import { CapaDeDemos } from './demos/CapaDeDemos'
 import { DemosQuietos } from './demos/DemosQuietos'
+import { ParadaDeDemos } from './demos/ParadaDeDemos'
 import { ANCLAS_DEL_PORTFOLIO } from './portfolio/anclas'
 import { EscenarioDelPortfolio } from './portfolio/EscenarioDelPortfolio'
 import { FlujoDelPortfolio } from './portfolio/FlujoDelPortfolio'
@@ -88,6 +89,8 @@ function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
         {vivo.carrusel ? null : ANCLAS_DEL_PORTFOLIO.map((a) => (
           <span key={a.id} id={a.id} aria-hidden="true" className="pointer-events-none absolute left-0 h-px w-px" style={{ top: `${(pantallasDelAncla(a.paso, PANTALLAS_POR_PASO) * 100).toFixed(4)}svh` }} />
         ))}
+        {/* [NOCTURNO B5] La parada de Demos: desde 1024, una pista invisible centrada en el fin del pin (`demos/parada.ts`). */}
+        {vivo.carrusel ? null : <ParadaDeDemos reducido={vivo.reducido} />}
         <Bloque patron="P7" anclaje="seccion" lente="escena" className="absolute inset-0">
           {(progreso: Progreso) =>
             progreso === null ? (

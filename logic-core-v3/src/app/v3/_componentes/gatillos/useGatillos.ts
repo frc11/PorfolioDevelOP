@@ -14,7 +14,7 @@ import {
 } from './maquina'
 import { GESTO_QUIETO, pxDeLaRueda } from './rueda'
 import { SALTO, duracionDelSalto } from './salto'
-import { volar, vueloDelGatilloPisado, type VueloDelGatillo } from './vuelo'
+import { volar, vueloAjeno, vueloDelGatilloPisado, type VueloDelGatillo } from './vuelo'
 
 /**
  * [B4] LA MÁQUINA DE GATILLOS, EN LA PÁGINA — la de Portfolio (B1.2c, F1, F2, A8) para cualquier sección anclada: la usa Servicios.
@@ -30,6 +30,10 @@ import { volar, vueloDelGatilloPisado, type VueloDelGatillo } from './vuelo'
  *   · **Afuera, la página es de la página**: antes y después del tramo nada se toma. La barra de desplazamiento y las anclas mueven el
  *     scroll y el paso lo sigue con histéresis (no se pueden retener).
  *   · Con un diálogo abierto (el contacto, el menú) o adentro de un `data-lenis-prevent`, nada.
+ *
+ * [NOCTURNO B5] La usa también la PARADA DE DEMOS (un solo paso entre el Portfolio y Servicios, `trabajos/demos/parada.ts`): con su
+ * transición propia (`ocupada`: la llegada de Demos), su salida de arriba (a «la tuya») y su nombre en el banco. Y ninguna sección lanza
+ * un vuelo encima del de otra (`vueloAjeno`): la rueda se traga y el que vuela llega.
  */
 
 export interface OpcionesDeLosGatillos {
@@ -42,6 +46,18 @@ export interface OpcionesDeLosGatillos {
   readonly reducido: boolean
   /** Lo que dura la transición de un paso al de al lado (ms). */
   readonly duracionMs: number
+  /**
+   * [NOCTURNO B5] La transición PROPIA de la sección, si no es un reloj fijo: mientras devuelva `true`, todo se traga como en F1 (la
+   * parada de Demos: su llegada, que persigue al scroll con su velocidad tope). Se lee en cada evento.
+   */
+  readonly ocupada?: () => boolean
+  /**
+   * [NOCTURNO B5] Adónde lleva la salida de arriba (el scroll, px de la página), si no es una pantalla antes de la pista: la parada de
+   * Demos sube a «la tuya» del Portfolio. `null`: la de siempre. Se lee en el gesto.
+   */
+  readonly salidaDeArriba?: () => number | null
+  /** [NOCTURNO B5] Con nombre, el banco la publica en `__gatillosDelBancoDe[nombre]` (sin nombre, `__gatillosDelBanco`: Servicios). */
+  readonly nombre?: string
 }
 
 export interface GatillosVivos {
@@ -72,7 +88,7 @@ function tragar(e: WheelEvent): void {
 }
 
 export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
-  const { pista, cantidad, activa, tactil, reducido, duracionMs } = o
+  const { pista, cantidad, activa, tactil, reducido, duracionMs, ocupada, salidaDeArriba, nombre } = o
   const [paso, setPaso] = useState(ANTES_DEL_ANCLA)
   const actual = useRef(ANTES_DEL_ANCLA)
   const regla = useRef<ReglaDeGatillos>({ cantidad, pasoPx: 1 })
@@ -80,11 +96,11 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
   const enVuelo = useRef<VueloDelGatillo | null>(null)
   const ocupadoHasta = useRef(0)
   const ultimoGesto = useRef(Number.NEGATIVE_INFINITY)
-  const ajustes = useRef({ activa, tactil, reducido, duracionMs })
+  const ajustes = useRef({ activa, tactil, reducido, duracionMs, ocupada, salidaDeArriba })
   const irAlPaso = useRef<(i: number) => void>(() => undefined)
   useEffect(() => {
-    ajustes.current = { activa, tactil, reducido, duracionMs }
-  }, [activa, tactil, reducido, duracionMs])
+    ajustes.current = { activa, tactil, reducido, duracionMs, ocupada, salidaDeArriba }
+  }, [activa, tactil, reducido, duracionMs, ocupada, salidaDeArriba])
 
   useLayoutEffect(() => {
     let pedido = 0
@@ -126,11 +142,13 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       const r = regla.current
       if (d.tipo === 'paso') alPaso(d.indice, duracionDelSalto(1))
       else if (d.tipo === 'despues') irA(inicio.current + r.cantidad * r.pasoPx + window.innerHeight, SALTO.topeMs, cantidad)
-      else irA(inicio.current - window.innerHeight, SALTO.topeMs, ANTES_DEL_ANCLA)
+      // [NOCTURNO B5] La de arriba, adonde diga la sección (Demos: «la tuya»); si no, una pantalla antes de la pista.
+      else irA(ajustes.current.salidaDeArriba?.() ?? inicio.current - window.innerHeight, SALTO.topeMs, ANTES_DEL_ANCLA)
     }
     // El defecto del banco (`sin-candado`): ni la transición ni el vuelo tragan los gestos que llegan en el medio.
     const sinCandado = conElDefectoDeLosGatillos('sin-candado')
-    const ocupado = (): boolean => !sinCandado && (enVuelo.current !== null || performance.now() < ocupadoHasta.current)
+    // [NOCTURNO B5] Y la transición propia de la sección (`ocupada`: la llegada de Demos), mientras corra.
+    const ocupado = (): boolean => !sinCandado && (enVuelo.current !== null || performance.now() < ocupadoHasta.current || ajustes.current.ocupada?.() === true)
     irAlPaso.current = (i) => {
       const destino = Math.min(cantidad - 1, Math.max(0, i))
       if (ajustes.current.activa && destino !== actual.current) alPaso(destino, duracionDelSalto(Math.abs(destino - vistaDelPasoEnElTramo(actual.current, cantidad))))
@@ -159,7 +177,8 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       const px = pxDeLaRueda(e.deltaY, e.deltaMode)
       const lenis = LENIS_DEL_SITIO.instancia
       const hacia = (lenis !== null ? lenis.targetScroll + px * lenis.options.wheelMultiplier : window.scrollY + px) - inicio.current
-      const vuela = enVuelo.current !== null && !sinCandado
+      // [NOCTURNO B5] El vuelo de otra sección cuenta como uno propio: se traga, sin lanzar otro encima (`vueloAjeno`).
+      const vuela = (enVuelo.current !== null || vueloAjeno(lenis, enVuelo.current)) && !sinCandado
       const { decision, gesto: siguiente } = decidirLaRueda({ paso: actual.current, enVuelo: vuela, ocupado: ocupado(), gesto, px, ahora, hacia }, regla.current)
       gesto = siguiente
       if (decision.tipo === 'pagina') return
@@ -202,14 +221,12 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
     window.addEventListener('keydown', alApretar, { capture: true })
     window.addEventListener('touchstart', alTocar, { passive: true, capture: true })
     window.addEventListener('touchmove', alArrastrar, { passive: false, capture: true })
-    const ventana = window as Window & { __gatillosDelBanco?: unknown }
-    if (hayBanco())
-      ventana.__gatillosDelBanco = {
-        paso: () => actual.current,
-        enVuelo: () => enVuelo.current !== null,
-        ocupado,
-        regla: () => ({ ...regla.current, inicio: inicio.current }),
-      }
+    const ventana = window as Window & { __gatillosDelBanco?: unknown; __gatillosDelBancoDe?: Record<string, unknown> }
+    const delBanco = { paso: () => actual.current, enVuelo: () => enVuelo.current !== null, ocupado, regla: () => ({ ...regla.current, inicio: inicio.current }) }
+    if (hayBanco()) {
+      if (nombre === undefined) ventana.__gatillosDelBanco = delBanco
+      else ventana.__gatillosDelBancoDe = { ...ventana.__gatillosDelBancoDe, [nombre]: delBanco }
+    }
     return () => {
       if (pedido !== 0) cancelAnimationFrame(pedido)
       elVuelo.current?.cancelar()
@@ -219,9 +236,10 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       window.removeEventListener('keydown', alApretar, { capture: true })
       window.removeEventListener('touchstart', alTocar, { capture: true })
       window.removeEventListener('touchmove', alArrastrar, { capture: true })
-      if (hayBanco()) delete ventana.__gatillosDelBanco
+      if (hayBanco() && nombre === undefined) delete ventana.__gatillosDelBanco
+      else if (hayBanco() && nombre !== undefined) delete ventana.__gatillosDelBancoDe?.[nombre]
     }
-  }, [pista, cantidad])
+  }, [pista, cantidad, nombre])
 
   const ir = useCallback((i: number) => irAlPaso.current(i), [])
   return { paso, vista: vistaDelPasoEnElTramo(paso, cantidad), ir }

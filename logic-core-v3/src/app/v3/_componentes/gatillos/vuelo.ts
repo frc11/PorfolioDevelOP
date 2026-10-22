@@ -60,3 +60,14 @@ export function vueloDelGatilloPisado(vuelo: VueloDelGatillo, lenis: { readonly 
   if (lenis === null || vuelo.marca === null) return false
   return lenis.userData[CLAVE_DEL_VUELO] !== vuelo.marca
 }
+
+/**
+ * [NOCTURNO B5] ¿VUELA OTRO? Con Lenis, un viaje con marca que no es el propio: el de otra sección de gatillos (el Portfolio, la
+ * parada de Demos, Servicios). Mientras vuela, la rueda se traga y el gesto queda dado, pero NO se lanza otro vuelo encima (A8: un
+ * vuelo con dueño termina; la entrada de la sección de al lado no se lo pisa a mitad de camino).
+ */
+export function vueloAjeno(lenis: { readonly userData: Readonly<Record<string, unknown>> } | null, propio: VueloDelGatillo | null): boolean {
+  if (lenis === null) return false
+  const marca = lenis.userData[CLAVE_DEL_VUELO]
+  return typeof marca === 'string' && marca !== '' && marca !== propio?.marca
+}
