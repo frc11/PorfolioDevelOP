@@ -23,7 +23,7 @@ import { DESTINO_DEL_SERVICIO, VIDEO_DEL_SERVICIO, DISTRIBUCION } from '../../_s
 import { DURACION_DE_LA_TRANSICION_MS, TIEMPOS, avanceDelPanel, avanceDelRenglon, capaDelEnjambre, desdeDelTexto, gDelAvance, inicioDelPanel, posicionDelEnjambre } from '../../_secciones/servicios/escenario/tiempos'
 import { servicioRecomendado } from '../../_secciones/servicios/recomendador/preguntas'
 import { Servicios } from '../../_secciones/servicios/Servicios'
-import { tramoDeServicios } from '../../_secciones/servicios/tramoDeServicios'
+import { altoViejoMedido, tramoDeServicios, type AltoViejo } from '../../_secciones/servicios/tramoDeServicios'
 import { cambioDeCapa, extensionDelSimbolo, type Caja, type Lugar } from '../nanobots/capa'
 import { ACENTOS_DE_SERVICIOS_EN_PAPEL, VERTICE_DE_SERVICIOS, simbolosDeServicios } from '../nanobots/enjambreDeServicios'
 import { RED_NEURONAL, conexionesDeLaRed, nodosDeLaRed } from '../nanobots/redNeuronal'
@@ -188,8 +188,13 @@ titulo('6 · El recomendador y la REGLA DE ALTURAS')
 const recomiendaBien = (f: typeof servicioRecomendado): boolean => f(['web', 'web', 'software']) === 'web' && f(['web', 'software', 'ia-automatizacion']) === 'ia-automatizacion' && f(['software', null, 'web']) === null && f(['ia-automatizacion', 'web', 'web']) === 'web'
 afirmar(recomiendaBien(servicioRecomendado), 'el más elegido; si empatan, el de la última respuesta; nada hasta que estén las tres')
 controlPositivo('  el detector ve el recomendador que responde con preguntas sin contestar', (r: readonly (string | null)[]) => (r.find((x) => x !== null) ?? null) as ReturnType<typeof servicioRecomendado>, recomiendaBien)
-const tramo = tramoDeServicios(390, 844, 5 * 844, { tablet: null, telefono: 4 })
-afirmar(tramoDeServicios(1440, 900, 7200) === null && tramoDeServicios(1024, 768, 6144, { tablet: 3, telefono: 3 }) === null && tramoDeServicios(390, 844, 4000) === null && tramo !== null && Math.abs(tramo.k - 1.25) < 1e-9 && tramo.arranque === 900 && Math.abs(tramo.largo - 3600) < 1e-9, 'desde 1024 no hay tramo (la sección llena los 800svh de la tabla: k = 1); abajo, k = alto nuevo / alto viejo sobre la sección entera, y sin el alto viejo medido no se anota nada')
+const tramo = tramoDeServicios(390, 844, 5 * 844, () => 4 * 844)
+// [NOCTURNO] El alto viejo medido por el orquestador en el navegador (px, `[data-panel="servicios"]` antes de B4), a 1 px o menos.
+const MEDIDOS = [[390, 844, 1661], [768, 1024, 1338], [820, 1180, 1382], [1023, 768, 1555]] as const
+const mideComoAntes = (modelo: AltoViejo): boolean => MEDIDOS.every(([w, h, px]) => Math.abs((modelo(w, h) ?? 0) - px) <= 1)
+afirmar(mideComoAntes(altoViejoMedido), 'la sección vieja medida a 390, 768, 820 y 1023 (1661, 1338, 1382 y 1555 px): el modelo la da a 1 px o menos')
+controlPositivo('  un modelo en pantallas (proporcional al alto del cuadro) no la da', ((w: number, h: number) => (w >= 768 ? 1.3065 : 1.9682) * h) as AltoViejo, mideComoAntes)
+afirmar(tramoDeServicios(1440, 900, 7200) === null && tramoDeServicios(1024, 768, 6144, () => 3 * 768) === null && tramoDeServicios(390, 844, 4000, () => null) === null && tramo !== null && Math.abs(tramo.k - 1.25) < 1e-9 && tramo.arranque === 900 && Math.abs(tramo.largo - 3600) < 1e-9, 'desde 1024 no hay tramo (la sección llena los 800svh de la tabla: k = 1); abajo, k = alto nuevo / alto viejo sobre la sección entera, y sin el alto viejo medido no se anota nada')
 afirmar(seccionDe('servicios').alto === '800svh', '  y la tabla sigue diciendo lo de siempre (secciones.ts sin tocar)')
 
 // ═══════════════════════════════════════════════════════════════════════════

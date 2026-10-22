@@ -13,22 +13,26 @@ import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../_lib/navegacion'
  *     bajar sin tocar la tabla o `Panel`), y la sección nueva lo llena exacto: la pista se estira (`flex-1`) hasta lo que deja el
  *     recomendador. Mide lo mismo que la de antes, y lo corto es la experiencia: cuatro gestos.
  *   · **Abajo de 1024, la sección mide su contenido** (la tabla: `altoAngosto: 'contenido'`), y el contenido cambió. El tramo cubre la
- *     sección entera: arranca en su tope y la escena lo ve medir lo que medía la de antes (`ALTO_VIEJO_EN_PANTALLAS`, en alturas de
- *     cuadro), con `k` = alto nuevo / alto viejo. ⚠️ MEDIR: el alto viejo no se puede leer acá (se fue con la sección vieja); mientras
- *     sea `null`, no se anota nada (la deriva queda como está). Se mide en la integración de antes de B4, una línea en la consola:
- *     `document.querySelector('[data-panel="servicios"]').getBoundingClientRect().height / innerHeight`, a 768×1024 y a 390×844.
+ *     sección entera: arranca en su tope y la escena lo ve medir lo que medía la de antes (`altoViejoMedido`), con `k` = alto nuevo /
+ *     alto viejo.
+ *   · [NOCTURNO] **El alto viejo, MEDIDO** por el orquestador en la integración de antes de B4 (el dev, `[data-panel="servicios"]`):
+ *     1661 px a 390×844; 1338 a 768×1024, 1382 a 820×1180 y 1555 a 1023×768. La sección vieja medía su contenido, así que su alto
+ *     sale del ancho, no del alto del cuadro (en pantallas daba 1,31, 1,17 y 2,03 en los tres de tablet): de 768 a 1023, la recta
+ *     entre 1338 y 1555 (820 cae a 1 px de la medida); abajo de 768, lo medido a 390.
  */
-export const ALTO_VIEJO_EN_PANTALLAS: { readonly tablet: number | null; readonly telefono: number | null } = { tablet: null, telefono: null }
+export type AltoViejo = (ancho: number, alto: number) => number | null
+
+/** La sección vieja, medida (px). */
+export const altoViejoMedido: AltoViejo = (ancho) => (ancho >= 768 ? 1338 + ((1555 - 1338) * (ancho - 768)) / (1023 - 768) : 1661)
 
 /** Desde acá rige la tabla (k = 1). */
 export const ANCHO_DE_LA_TABLA_PX = 1024
 
-/** El tramo de un ancho, o `null` si no hay (desde 1024, o sin el alto viejo medido). */
-export function tramoDeServicios(ancho: number, alto: number, altoNuevo: number, viejo = ALTO_VIEJO_EN_PANTALLAS): { readonly k: number; readonly arranque: number; readonly largo: number } | null {
+/** El tramo de un ancho, o `null` si no hay (desde 1024, o sin el alto viejo). */
+export function tramoDeServicios(ancho: number, alto: number, altoNuevo: number, viejo: AltoViejo = altoViejoMedido): { readonly k: number; readonly arranque: number; readonly largo: number } | null {
   if (ancho >= ANCHO_DE_LA_TABLA_PX || !(alto > 0) || !(altoNuevo > 0)) return null
-  const pantallas = ancho >= 768 ? viejo.tablet : viejo.telefono
-  if (pantallas === null || !(pantallas > 0)) return null
-  const altoViejo = pantallas * alto
+  const altoViejo = viejo(ancho, alto)
+  if (altoViejo === null || !(altoViejo > 0)) return null
   return { k: altoNuevo / altoViejo, arranque: ALTO_DE_VIEWPORT_DE_LA_REFERENCIA, largo: (altoViejo * ALTO_DE_VIEWPORT_DE_LA_REFERENCIA) / alto }
 }
 
