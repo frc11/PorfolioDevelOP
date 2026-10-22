@@ -212,7 +212,7 @@ export default function ControlDelSonido(): React.JSX.Element {
         aria-pressed={prendido}
         aria-label="Sonido"
         onClick={tocar}
-        className="flex cursor-pointer items-center justify-center rounded-full border-borde shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)] max-escritorio:size-[var(--spacing-12)] max-escritorio:border max-escritorio:bg-fondo escritorio:size-[calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))] escritorio:border-[length:var(--border-hairline)] escritorio:bg-[var(--color-superficie-translucida)] escritorio:backdrop-blur-[var(--blur-panel)]\"
+        className="flex cursor-pointer items-center justify-center rounded-full border-borde shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)] max-escritorio:size-[var(--spacing-12)] max-escritorio:border max-escritorio:bg-fondo escritorio:size-[calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))] escritorio:border-[length:var(--border-hairline)] escritorio:bg-[var(--color-superficie-translucida)] escritorio:backdrop-blur-[var(--blur-panel)]"
       >
         <IconoDelParlante prendido={prendido} suena={estadoReal === 'listo'} reducido={reducido} />
       </button>

@@ -67,10 +67,15 @@ const hrefsDe = (html: string, marca: string): string[] => [...html.matchAll(new
 const BARRA = hrefsDe(renderToStaticMarkup(<BarraDelHome />), 'data-pieza="(?:barra|desplegable)-enlace"')
 const MENU = hrefsDe(renderToStaticMarkup(<Menu abierto boton={{ current: null }} alCubrir={nada} alCerrado={nada} alSoltar={nada} alContacto={nada} />), 'data-parte="item-del-(?:menu|acordeon)"')
 const esSeccion = (href: string): boolean => (IDS_DE_SECCION as readonly string[]).includes(href.slice(1))
-afirmarIgual(BARRA.filter(esSeccion).sort(), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'].sort(), 'la barra lleva a cinco secciones de la tabla ([NAVBAR] «Panel» nuevo; [B12a.5] Servicios, por su desplegable)')
+// [B12a.8 · T0] «Home» primero (CONTRATO §Navegación): en el home es el viaje al hero (`#hero`, una sección de la tabla).
+const SECCIONES_DE_LA_BARRA = ['#hero', '#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'] as const
+const lasSeisEnOrden = (xs: readonly string[]): boolean => xs.length === SECCIONES_DE_LA_BARRA.length && xs.every((x, k) => x === SECCIONES_DE_LA_BARRA[k])
+afirmar(lasSeisEnOrden(BARRA.filter(esSeccion)), 'la barra lleva a seis secciones de la tabla, en su orden ([B12a.8] «Home» al hero, primero; [NAVBAR] «Panel» nuevo; [B12a.8] «Servicios» es un enlace a su sección)', JSON.stringify(BARRA.filter(esSeccion)))
+controlPositivo('  el detector ve la barra sin «Home» (la de antes de B12a.8)', BARRA.filter(esSeccion).filter((h) => h !== '#hero'), lasSeisEnOrden)
 // [RETOQUE 3D] N1: y al pie, Login (otra ruta: no viaja). [CIERRE RETOQUE 3D] N1: Contacto es un botón que abre el panel.
 // [NOCTURNO FINAL] C5 · cambió por pedido: sin Login en el menú del teléfono (por ahora).
-afirmarIgual(MENU.filter(esSeccion), ['#quienes-somos', '#trabajos', '#servicios', '#tu-panel', '#por-que-develop'], '  y el menú móvil a las mismas cinco (Contacto abre el panel: no es un enlace; sin Login; [B12a.5] Servicios, por su acordeón)')
+afirmar(lasSeisEnOrden(MENU.filter(esSeccion)), '  y el menú móvil a las mismas seis, en el mismo orden (Contacto abre el panel: no es un enlace; sin Login; [B12a.8] «Servicios» navega y su flechita abre el acordeón)', JSON.stringify(MENU.filter(esSeccion)))
+controlPositivo('  el detector ve el menú sin «Home»', MENU.filter(esSeccion).filter((h) => h !== '#hero'), lasSeisEnOrden)
 // [RETOQUE 3D] 3I: «Contacto» VIAJA: `#contacto` es el formulario del pie, y el efecto resuelve un ancla que no es sección a la suya.
 // [B12a.5] Las anclas que no son sección: sólo Contacto (las páginas de servicio del desplegable son rutas, no anclas).
 afirmarIgual(BARRA.filter((h) => h.startsWith('#') && !esSeccion(h)), ['#contacto'], '«Contacto» va a `#contacto`, el formulario del pie: no es una sección')

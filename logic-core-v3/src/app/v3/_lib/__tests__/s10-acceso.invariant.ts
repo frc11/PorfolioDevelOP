@@ -83,6 +83,9 @@ const DELTA_DEL_RETOQUE_PANEL = { paradas: -(8 + 1), encabezados: 8 } as const
 const DELTA_DE_LA_RONDA2 = { paradas: 1 + 2 - 1 } as const
 // [PULIDO 10] J8 · + Demos en el recorrido del pie (un destino nuevo, adentro de Trabajos).
 const DELTA_DEL_PULIDO_10 = { paradas: 1 } as const
+// [B12a.8 · T0] «Home» primero en la barra (+1, CONTRATO §Navegación) y «Servicios» pasa de botón a enlace a su sección con la flechita
+// de la lista al lado (+1: el enlace y el botón). Las dos ramas.
+const DELTA_DE_B12A8 = { paradas: 1 + 1 } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')
@@ -175,8 +178,8 @@ imprimirParadas(QUIETA, PARADAS)
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
 // SPRINT DEMOS · + las demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo), una parada cada una.
-afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo, «Panel» en la barra y el formulario del pie; desde RETOQUE PANEL, sin las 8 tarjetas ni la pausa del panel en vivo; desde PULIDO 10, más Demos en el recorrido del pie; desde B1, el Portfolio con una parada más que el túnel`)
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo, «Panel» en la barra y el formulario del pie; desde RETOQUE PANEL, sin las 8 tarjetas ni la pausa del panel en vivo; desde PULIDO 10, más Demos en el recorrido del pie; desde B1, el Portfolio con una parada más que el túnel; desde B12a.8, «Home» y la flechita de «Servicios»`)
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),
@@ -190,11 +193,19 @@ afirmar(
 )
 // [B12a.5] Reemplazada por la spec (D5): «Servicios» es el botón que abre el desplegable (sin destino propio: «Todos los servicios» va
 // adentro, con las páginas); cerrado, sus enlaces no son paradas.
-afirmarIgual(
-  PARADAS.slice(1, 7).map((p) => p.destino ?? `<${p.etiqueta}>`),
-  ['#quienes-somos', '#trabajos', '<button>', '#tu-panel', '#por-que-develop', '#contacto'],
-  '  y las SEIS siguientes son los ítems de la barra, en su orden ([NAVBAR] «Panel» nuevo; CONTACTO: el último abre el formulario; [B12a.5] «Servicios», el botón del desplegable)',
+// [B12a.8 · T0] Reemplazada por la spec de B12a.8 (CONTRATO §Navegación): «Home» primero y «Servicios» un enlace a su sección, con la
+// flechita de la lista (un botón) detrás.
+const ITEMS_DE_LA_BARRA = ['#hero', '#quienes-somos', '#trabajos', '#servicios', '<button>', '#tu-panel', '#por-que-develop', '#contacto'] as const
+const barraEnSuOrden = (ps: typeof PARADAS): boolean => {
+  const d = ps.slice(1, 1 + ITEMS_DE_LA_BARRA.length).map((p) => p.destino ?? `<${p.etiqueta}>`)
+  return d.length === ITEMS_DE_LA_BARRA.length && d.every((x, k) => x === ITEMS_DE_LA_BARRA[k])
+}
+afirmar(
+  barraEnSuOrden(PARADAS),
+  '  y las OCHO siguientes son los ítems de la barra, en su orden ([B12a.8] «Home» primero; «Servicios», el enlace y su flechita; [NAVBAR] «Panel» nuevo; CONTACTO: el último abre el formulario)',
+  JSON.stringify(PARADAS.slice(1, 1 + ITEMS_DE_LA_BARRA.length).map((p) => p.destino ?? `<${p.etiqueta}>`)),
 )
+controlPositivo('  el detector ve la barra sin «Home» (la de antes de B12a.8)', PARADAS.filter((p, k) => !(k === 1 && p.destino === '#hero')), barraEnSuOrden)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · La pastilla: primera al tabular, última de la primera pantalla')
@@ -215,8 +226,8 @@ afirmarIgual(DESCUENTO_NACIMIENTO_PX, 72, 'el nacimiento es `100svh − 72px`, d
  * donde está (`sticky` de alto cero con la pastilla `absolute` a `100svh − 72`),
  * y bajarla la haría nacer más abajo.
  */
-// [RETOQUE 3D] N1: + «Login» en la esquina: la 9ª.
-afirmar(PARADAS[8].seccion === 'hero', 'la primera parada que vive en el CONTENIDO es la 9ª ([NAVBAR] seis ítems y [RETOQUE 3D] Login) — y se llega a ella en UNA pulsación desde la 1ª', `${rotuloDeParada(QUIETA, PARADAS[7]).rotulo} → ${PARADAS[7].destino}`)
+// [RETOQUE 3D] N1: + «Login» en la esquina. [B12a.8 · T0] + «Home» y la flechita de «Servicios»: la 11ª.
+afirmar(PARADAS[10].seccion === 'hero' && PARADAS.slice(0, 10).every((p) => p.seccion !== 'hero' || p.destino === '#hero'), 'la primera parada que vive en el CONTENIDO es la 11ª ([B12a.8] ocho ítems de la barra y [RETOQUE 3D] Login) — y se llega a ella en UNA pulsación desde la 1ª', `${rotuloDeParada(QUIETA, PARADAS[9]).rotulo} → ${PARADAS[9].destino}`)
 afirmar(PARADAS[0].seccion === null || PARADAS[0].seccion === undefined || PARADAS[0].destino === '#hero', '  y la 1ª es el escape: el enlace de salto vive en el chrome y apunta al contenido')
 console.log(
   '  ✅ HALLAZGOS 1 y 2 — CERRADOS en SITIO-S11 · `_chrome/SaltarAlContenido.tsx` + `_estilos/foco.css` — el enlace de salto es la parada 1 ' +

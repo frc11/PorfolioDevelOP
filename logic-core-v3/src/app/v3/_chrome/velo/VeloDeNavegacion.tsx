@@ -3,16 +3,21 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
+import { calentarElDestino } from '../../_componentes/navegacion/calentar'
 import { hayBanco } from '../../_lib/escena/entorno'
+import { escenaDeLaRutaLista } from '../../_lib/escena/ruta/listaDeLaRuta'
 import { DIA_DEL_FINAL, NOCHE_DISPARADA } from '../../_lib/escena/nocheDisparada'
 import { VUELTA_AL_HOME, claveDeLaEntrada, devolverLosAlmacenes, posicionGuardadaDelHome, type PosicionDelHome } from '../../_lib/escena/ruta/posicionDelHome'
 import { sonar } from '../../_lib/sonido/bus'
-import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, VELO_EN_CURSO, atenderElVelo, cubrirConElVelo } from '../../_lib/veloDeNavegacion'
+import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, atenderElVelo, conElMontajeLiviano, conLaBandaCorta, cubrirConElVelo, marcarLaBanda, viaDelVelo } from '../../_lib/veloDeNavegacion'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { llevarElScrollA, reponerLosAlmacenes, scrollDeLaRuta } from './alCambiarDeRuta'
 import { tonoDeLoQueTapa } from './tonoDeLoQueTapa'
-import { CURVA_DEL_VELO, CURVA_DEL_VELO_CSS, VELO, colorDelVelo, coberturaDelVelo, degradeDelVelo, frenteDelVelo, geometriaDeLaBanda, puedeDestapar, siguienteFaseDelVelo, transformadaDelVelo, type EventoDelVelo, type FaseDelVelo } from './velo'
+import { CURVA_DEL_VELO, CURVA_DEL_VELO_CSS, colorDelVelo, coberturaDelVelo, degradeDelVelo, frenteDelVelo, geometriaDeLaBanda, puedeDestapar, siguienteFaseDelVelo, tiemposDelVelo, transformadaDelVelo, type EventoDelVelo, type FaseDelVelo } from './velo'
+
+/** [T0] Lo que tardan cubrir y destapar con la vía del velo de ahora (`viaDelVelo`: la banda corta o la de siempre). */
+const tiempos = (): ReturnType<typeof tiemposDelVelo> => tiemposDelVelo(conLaBandaCorta(viaDelVelo()))
 
 /** Si la ruta no cambia después de cubrir (un error, un enlace a la misma), se destapa igual a los `VENCE_MS`. */
 const VENCE_MS = 4000
@@ -88,10 +93,9 @@ export function VeloDeNavegacion(): React.JSX.Element {
       el.setAttribute('data-fase', f)
       el.setAttribute('data-cobertura', coberturaDelVelo(f, t).toFixed(3))
       el.style.pointerEvents = f === 'quieto' ? 'none' : 'auto'
-      // [B12a.8] (4) Las obras del home que no se ven esperan al velo quieto (`VELO_EN_CURSO`).
-      const enCurso = VELO_EN_CURSO.activo
-      VELO_EN_CURSO.activo = f !== 'quieto'
-      if (enCurso && f === 'quieto') window.dispatchEvent(new Event(EVENTOS_DEL_VELO.quieto))
+      // [B12a.8] (4) Las obras del home que no se ven esperan al velo quieto (`VELO_EN_CURSO`). [T0] La banda lo marca; el «quieto» se
+      // avisa cuando la banda y lo que la retiene (la píldora que se desliza) terminaron (`marcarLaBanda`, `retenerElQuieto`).
+      marcarLaBanda(f !== 'quieto')
     }
     const pintar = (f: FaseDelVelo, t: number): void => {
       animacion?.cancel()
@@ -99,6 +103,8 @@ export function VeloDeNavegacion(): React.JSX.Element {
       cancelAnimationFrame(siguiendo)
       b.style.transform = transformadaDelVelo(frenteDelVelo(f, t, geometria), geometria)
       b.style.visibility = f === 'quieto' ? 'hidden' : 'visible'
+      // [T0] El `will-change` sólo mientras se mueve (s10-acceso: ninguno en reposo ni con movimiento reducido).
+      b.style.willChange = ''
       marcar(f, t)
     }
     const pasar = (e: EventoDelVelo): void => {
@@ -114,6 +120,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
         return
       }
       b.style.visibility = 'visible'
+      b.style.willChange = 'transform'
       const desde = transformadaDelVelo(frenteDelVelo(f, 0, geometria), geometria)
       const hasta = transformadaDelVelo(frenteDelVelo(f, 1, geometria), geometria)
       b.style.transform = desde
@@ -129,6 +136,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
       a.onfinish = () => {
         if (animacion !== a) return
         b.style.transform = hasta
+        b.style.willChange = ''
         a.cancel()
         animacion = null
         alTerminar()
@@ -141,7 +149,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
       pasar('llego')
       window.dispatchEvent(new Event(EVENTOS_DEL_VELO.destapa))
       sonar('abre')
-      animar('destapando', VELO.destaparMs, () => {
+      animar('destapando', tiempos().destaparMs, () => {
         pasar('destapo')
         pintar('quieto', 0)
       })
@@ -168,7 +176,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
       window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))
       pasar('cubrir')
       sonar('cierra')
-      animar('cubriendo', VELO.cubrirMs, () => {
+      animar('cubriendo', tiempos().cubrirMs, () => {
         pasar('cubrio')
         pintar('cubierto', 1)
         p.cubierto()
@@ -225,7 +233,8 @@ export function VeloDeNavegacion(): React.JSX.Element {
             pintados = 0
           }
         }
-        if (puedeDestapar(pintados, true, ahora - t0)) destapar()
+        // [T0] 11 · 1 · y con la escena de la ruta lista: la variante de la página ya dibujó (su noche y su acento desde el primer cuadro destapado).
+        if (puedeDestapar(pintados, escenaDeLaRutaLista(), ahora - t0)) destapar()
         else esperando = requestAnimationFrame(esperar)
       }
       cancelAnimationFrame(esperando)
@@ -252,9 +261,22 @@ export function VeloDeNavegacion(): React.JSX.Element {
     rutaDeAhora.current = ruta
   }, [ruta])
 
+  // [T0] 11 · 3 · la vía `montaje`: en una página, con el hilo libre, se pide ya la coreografía animada del home (`calentarElDestino`):
+  // la vuelta (por un enlace o por la flecha) lo monta una sola vez, sin el árbol quieto que después se rehacía entero.
+  useEffect(() => {
+    if (ruta === RUTA_DEL_HOME || !conElMontajeLiviano(viaDelVelo())) return undefined
+    const pedir = (): void => calentarElDestino(RUTA_DEL_HOME)
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(pedir, { timeout: 4000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = window.setTimeout(pedir, 2000)
+    return () => window.clearTimeout(id)
+  }, [ruta])
+
   return (
     <div ref={capa} aria-hidden="true" data-pieza="velo-de-navegacion" data-fase="quieto" data-cobertura="0" className="pointer-events-none fixed inset-0 z-[calc(var(--z-cabecera)-1)] overflow-hidden">
-      <div ref={banda} data-parte="banda" className="invisible absolute top-1/2 left-1/2 will-change-transform" />
+      <div ref={banda} data-parte="banda" className="invisible absolute top-1/2 left-1/2" />
     </div>
   )
 }

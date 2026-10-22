@@ -270,7 +270,14 @@ export function letrasDelDom(el: HTMLElement): LetrasDelDom | null {
       renglon.push(arribas.length - 1)
     }
   }
-  if (x.length === 0) return null
+  // [T0] Con el cuerpo o la escala en cero (una caja aplastada, un tamaño que no resolvió al cruzar de ancho) la cuenta da NaN o
+  // infinito, y el título se armaba con todas sus letras en NaN (~60 avisos de `computeBoundingBox` al pasar a 360): sin medida.
+  if (x.length === 0 || !medidaDelDomFinita(cuerpo, escala, x, arribas)) return null
   const renglones = arribas.length
   return { x, renglon, renglones, paso: renglones > 1 ? (arribas[renglones - 1] - arribas[0]) / (renglones - 1) : 0 }
+}
+
+/** [T0] ¿La medida del DOM sirve? El cuerpo y la escala, positivos y finitos; cada x y cada renglón, finitos. Si no, el título va con los avances de su fuente. */
+export function medidaDelDomFinita(cuerpo: number, escala: number, x: readonly number[], arribas: readonly number[]): boolean {
+  return cuerpo > 0 && Number.isFinite(cuerpo) && escala > 0 && Number.isFinite(escala) && x.every(Number.isFinite) && arribas.every(Number.isFinite)
 }

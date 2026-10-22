@@ -97,7 +97,11 @@ titulo('3 · Los ítems, y Contacto abre el formulario')
 const items = [...MENU.matchAll(/data-parte="item-del-menu"[^>]*>([^<]+)</g)].map((m) => m[1])
 // [RETOQUE 3D] N1: las cinco secciones y, al pie del menú, separados, Contacto y Login. [NOCTURNO FINAL] C5 · cambió por
 // pedido: Contacto va como un ítem más, debajo de «Por qué develOP», y sin Login (por ahora).
-afirmarIgual(items, ['Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto'], '[NAVBAR] las cinco secciones, en el orden de la barra, y Contacto como una más; sin Login')
+// [B12a.8 · T0] «Home» primero (CONTRATO §Navegación: «Home» primero, después las secciones), también en el menú del teléfono.
+const ITEMS_DEL_MENU = ['Home', 'Quiénes somos', 'Portfolio', 'Servicios', 'Panel', 'Por qué develOP', 'Contacto'] as const
+const itemsEnSuOrden = (xs: readonly string[]): boolean => xs.length === ITEMS_DEL_MENU.length && xs.every((x, k) => x === ITEMS_DEL_MENU[k])
+afirmar(itemsEnSuOrden(items), '[NAVBAR] [B12a.8] «Home» primero, las cinco secciones en el orden de la barra, y Contacto como una más; sin Login', JSON.stringify(items))
+controlPositivo('  el detector ve el menú sin «Home» (el de antes de B12a.8)', items.filter((x) => x !== 'Home'), itemsEnSuOrden)
 afirmarIgual(items, ENLACES_DEL_HOME.map((e) => e.rotulo), '  y son los mismos de la barra: una sola lista (`ENLACES_DEL_HOME`)')
 // [RETOQUE 3D] 3I y N1: todo apunta a contacto: el del menú es un enlace del viaje (al formulario del pie), al pie del menú.
 // [CIERRE RETOQUE 3D] N1: Contacto vuelve a ser un botón que abre el panel de contacto (al cerrarse el menú).

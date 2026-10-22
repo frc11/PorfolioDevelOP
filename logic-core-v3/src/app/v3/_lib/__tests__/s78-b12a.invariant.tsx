@@ -19,7 +19,7 @@ import * as THREE from 'three'
 import { ATRIBUTO_DE_LA_INTRO_DE_PAGINA, IntroDeLaPagina, SELECTOR_DE_LA_INTRO, TRAMOS_DE_LA_INTRO } from '../../_componentes/pagina/IntroDeLaPagina'
 import { anchoDelTitulo, anchoEnEm } from '../../_componentes/titulos3d/anchoDelTitulo'
 import { CAIDA_DEL_TITULO, CARA_DEL_DOM, COMBINACIONES_DEL_TITULO, TITULOS_CON_LETRAS, TITULO_DE_PAGINA, caeElTitulo, combinacionDeLaBandera, partesDelTitulo } from '../../_componentes/titulos3d/presets'
-import { MAS_PESADA, legibilidadDeLaBandera } from '../../_componentes/titulos3d/legibilidad'
+import { LEGIBILIDAD_POR_DEFECTO, MAS_PESADA, fuentesConLaLegibilidad, legibilidadDeLaBandera } from '../../_componentes/titulos3d/legibilidad'
 import { SERVICIOS } from '../../_secciones/_contrato/acento'
 import { REGISTRO_DE_VARIANTES, esIdDeVariante } from '../../_variantes/registro'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
@@ -301,7 +301,7 @@ afirmar(COMPOSICION_DE_LA_LUZ.noche === 1 && COMPOSICION_DE_LA_LUZ.brilloDelPiso
 // La variante de prueba: sólo lo prestado, y libera lo suyo. `variante.ts`: sólo tipos y números.
 const deprueba = leerV3('_lib/escena/ruta/VarianteDePrueba.tsx')
 const soloLoPrestado = (v: string): boolean =>
-  !/camera|LUZ_DE_ABAJO_EN_VIVO|ENERGIA_DE_LA_RUTA|AVANCE_DE_LA_INTRO|rig\.|EffectComposer|_servicios|new THREE\.(Mesh|RingGeometry|MeshBasicMaterial)\(/.test(v) && /luzDeAbajo\(COMPOSICION_DE_LA_LUZ\.brilloDelPiso \+/.test(v) && /<mesh ref=\{anillo\}/.test(v) && /^export default function VarianteDePrueba/m.test(v) && /^'use client'/.test(leer('_lib/escena/ruta/VarianteDePrueba.tsx'))
+  !/camera|LUZ_DE_ABAJO_EN_VIVO|ENERGIA_DE_LA_RUTA|AVANCE_DE_LA_INTRO|rig\.|EffectComposer|_servicios|new THREE\.(Mesh|RingGeometry|MeshBasicMaterial)\(/.test(v) && /luzDeAbajo\(c\.brilloDelPiso, color\.current\)/.test(v) && /brilloDelPiso: COMPOSICION_DE_LA_LUZ\.brilloDelPiso \+/.test(v) && /<mesh ref=\{anillo\}/.test(v) && /^export default function VarianteDePrueba/m.test(v) && /^'use client'/.test(leer('_lib/escena/ruta/VarianteDePrueba.tsx'))
 afirmar(soloLoPrestado(deprueba), '  la variante de prueba toca sólo lo prestado (con las dos funciones que le presta la ranura: la luz de abajo y el color de la energía), lee el avance, arma lo suyo en JSX (R3F lo libera al desmontarse) y es el `default` de un módulo `use client`')
 controlPositivo('  el detector ve una variante que mueve la cámara', `${deprueba}\nstate.camera.position.y = 10`, soloLoPrestado)
 const tipos = leer('_lib/escena/ruta/variante.ts')
@@ -318,9 +318,11 @@ const h1Bien = (pintar: (t: string) => string): boolean => NOMBRES.every((n) => 
 afirmar(h1Bien((t) => conPartes(t)) && textoDelH1(conPartes('Desarrollo web', ['Desarrollo', 'web'])) === 'Desarrollo web' && partesDelTitulo('Software a medida').join(' ') === 'Software a medida', 'el `h1` dice el nombre entero de cada servicio, el MISMO texto que el título 3D: sus dos partes (las dadas, o la primera palabra y el resto) unidas con un espacio')
 controlPositivo('  el detector ve un `h1` con las partes pegadas (sin el espacio)', (t: string) => conPartes(t).replace('</span> <span', '</span><span'), h1Bien)
 const caraDe = (f: FuenteDePagina): string => `style="font-family:${CARA_DEL_DOM[f].familia};font-weight:${String(CARA_DEL_DOM[f].peso)}"`
-const partesBien = (html: string): boolean => html.includes(`data-parte="titulo-1" class="inline-block" ${caraDe(TITULO_DE_PAGINA.fuentes[0])}`) && html.includes(caraDe(TITULO_DE_PAGINA.fuentes[1]))
+// [T0] La segunda parte, con la legibilidad elegida (`peso`: la liviana un paso más pesada), también en el servidor.
+const FUENTES_CON_PESO = fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes, LEGIBILIDAD_POR_DEFECTO)
+const partesBien = (html: string): boolean => html.includes(`data-parte="titulo-1" class="inline-block" ${caraDe(FUENTES_CON_PESO[0])}`) && html.includes(caraDe(FUENTES_CON_PESO[1]))
 afirmar(partesBien(conPartes('Desarrollo web')) && TITULO_DE_PAGINA === COMBINACIONES_DEL_TITULO[0], '  cada parte va en la cara del DOM de su fuente (la de la combinación 1 sin la bandera), con el peso de su instancia: la escena mide sus letras con la métrica del 3D')
-controlPositivo('  el detector ve las dos partes en la misma cara', conPartes('Desarrollo web').replace(caraDe(TITULO_DE_PAGINA.fuentes[1]), caraDe(TITULO_DE_PAGINA.fuentes[0])), partesBien)
+controlPositivo('  el detector ve las dos partes en la misma cara', conPartes('Desarrollo web').replace(caraDe(FUENTES_CON_PESO[1]), caraDe(FUENTES_CON_PESO[0])), partesBien)
 const banderaBien = (f: (v: string | null) => unknown): boolean =>
   f('1') === COMBINACIONES_DEL_TITULO[0] && f('2') === COMBINACIONES_DEL_TITULO[1] && f('3') === COMBINACIONES_DEL_TITULO[2] && f('4') === COMBINACIONES_DEL_TITULO[3] && f(null) === TITULO_DE_PAGINA && f('5') === TITULO_DE_PAGINA && f('x') === TITULO_DE_PAGINA
 // [B12a.8] Reemplazada por la spec: cuatro combinaciones que se distinguen de verdad (las tres de B12a.4 no se distinguían).
@@ -528,7 +530,7 @@ controlPositivo('  el detector ve el ancla que pisa la vuelta', delAncla.replace
 // pintados), no 20 cuadros y todos los títulos (hasta 3,5 s tapado): con la banda en el compositor lo que la página arme después no la traba.
 type Destapa = typeof puedeDestapar
 const esperaBien = (d: Destapa, velo: string): boolean =>
-  !d(1, true, 100) && d(2, true, 100) && !d(5, false, 100) && !d(0, true, 3499) && d(0, false, 3500) && VELO.esperaMaximaMs === 3500 && VELO.cubrirMs + VELO.destaparMs <= 1100 && velo.includes('if (puedeDestapar(pintados, true, ahora - t0)) destapar()')
+  !d(1, true, 100) && d(2, true, 100) && !d(5, false, 100) && !d(0, true, 3499) && d(0, false, 3500) && VELO.esperaMaximaMs === 3500 && VELO.cubrirMs + VELO.destaparMs <= 1100 && velo.includes('if (puedeDestapar(pintados, escenaDeLaRutaLista(), ahora - t0)) destapar()') /* [T0] y la escena de la ruta lista: s78-t0 §1 */
 afirmar(esperaBien(puedeDestapar, delVelo), `el destape: la página nueva montada y ${String(VELO.cuadrosPintados)} cuadros pintados con su scroll (el primer cuadro estable), con 3,5 s de techo; cubrir y destapar, ${String(VELO.cubrirMs)} y ${String(VELO.destaparMs)} ms: una pasada de 1,2 s o menos con la página en su lugar`)
 controlPositivo('  el detector ve la espera de B12a.7 (20 cuadros y todos los títulos: hasta 3,5 s tapado)', ((p, m, ms) => (p >= 20 && m) || ms >= 3500) as Destapa, (d: Destapa) => esperaBien(d, delVelo))
 const deLaSincronia = leerV3('_lib/escena/titulos3d/sincronia.ts')
@@ -634,18 +636,21 @@ controlPositivo('  el detector ve el que se va con su lugar mientras cae (el de 
 controlPositivo('  y el que se apaga al irse su lugar', deLosTitulos.replace('const fuera = fueraDelCuadro(a, a.corrimientoDeLaCaida ?? d)', 'const fuera = fueraDelCuadro(a, d)'), caeEnSuLugar)
 controlPositivo('  y el título de la tinta del entorno', delTitulo.replace("material: deNoche && !tituloDeTinta() ? 'blanco' : undefined, ", ''), (t: string) => tituloDeNocheBien(t, leerV3('_lib/escena/titulos3d/sincronia.ts')))
 
-// T5 · Las dos opciones de legibilidad sin velo, sólo detrás de `?legibilidad=` (Valentino elige mirando; sin la bandera, ninguna): `peso`
-// (la parte liviana un paso más pesada: 125/400) y `tamano` (el título más grande en la 1 desde 1024). `luz` y `motas` se probaron y se
-// sacaron: medidas en el build, no movían el número (94,2 → 94,0 y 93,9 %).
+// T5 · Las dos opciones de legibilidad sin velo: `peso` (la parte liviana un paso más pesada: 125/400) y `tamano` (el título más grande en
+// la 1 desde 1024). `luz` y `motas` se probaron y se sacaron: medidas en el build, no movían el número (94,2 → 94,0 y 93,9 %).
+// [T0 · 2026-10-22] Valentino eligió `peso`: es el defecto (sin la bandera y en el servidor); `tamano` queda detrás de `?legibilidad=tamano`.
 type DeLaBandera = typeof legibilidadDeLaBandera
+const PARTES_DE_LA_1: readonly [FuenteDePagina, FuenteDePagina] = ['archivo-125-800', 'archivo-125-300']
 const legibilidadBien = (f: DeLaBandera, titulo: string, hoja: string, marco: string): boolean =>
-  f(null) === null && f('') === null && f('luz') === null && f('motas') === null && f('peso') === 'peso' && f('tamano') === 'tamano' && MAS_PESADA['archivo-125-300'] === 'archivo-125-400' &&
-  titulo.includes("const preset = legibilidad === 'peso' ? { ...familia, fuentes: [familia.fuentes[0], MAS_PESADA[familia.fuentes[1]] ?? familia.fuentes[1]] as const } : familia") &&
+  LEGIBILIDAD_POR_DEFECTO === 'peso' && f(null) === 'peso' && f('') === 'peso' && f('luz') === 'peso' && f('motas') === 'peso' && f('peso') === 'peso' && f('tamano') === 'tamano' && MAS_PESADA['archivo-125-300'] === 'archivo-125-400' &&
+  fuentesConLaLegibilidad(PARTES_DE_LA_1, f(null))[1] === 'archivo-125-400' && fuentesConLaLegibilidad(PARTES_DE_LA_1, f('tamano'))[1] === 'archivo-125-300' &&
+  titulo.includes('const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => LEGIBILIDAD_POR_DEFECTO)') && titulo.includes('const preset = { ...familia, fuentes: fuentesConLaLegibilidad(familia.fuentes, legibilidad) }') &&
   /'1': '[^']*escritorio:\[--ancho-del-titulo:74cqw\] escritorio:data-\[legibilidad=tamano\]:\[--ancho-del-titulo:80cqw\]'/.test(marco) && !/'[23]': '[^']*legibilidad/.test(marco) &&
-  marco.includes('data-legibilidad={legibilidad ?? undefined}') && !/legibilidad/.test(hoja)
-const conLasOpciones = (f: DeLaBandera): boolean => legibilidadBien(f, delTitulo, hojaDeLaIntro, leerV3('_componentes/pagina/ComposicionDeLaIntro.tsx'))
-afirmar(conLasOpciones(legibilidadDeLaBandera), '  T5 · las dos opciones sin velo (`?legibilidad=peso|tamano`) sólo con la bandera: sin ella, el título como es')
-controlPositivo('  el detector ve una opción prendida sin la bandera', ((v: string | null) => (v === null ? 'peso' : legibilidadDeLaBandera(v))) as DeLaBandera, conLasOpciones)
+  marco.includes('const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => LEGIBILIDAD_POR_DEFECTO)') && marco.includes('data-legibilidad={legibilidad}') && !/legibilidad/.test(hoja)
+const conLasOpciones = (f: DeLaBandera, titulo = delTitulo): boolean => legibilidadBien(f, titulo, hojaDeLaIntro, leerV3('_componentes/pagina/ComposicionDeLaIntro.tsx'))
+afirmar(conLasOpciones(legibilidadDeLaBandera), '  T5 · [T0] `peso` por defecto (sin la bandera y en el servidor: «web» en 125/400); `tamano` sólo con `?legibilidad=tamano`')
+controlPositivo('  el detector ve `tamano` prendida sin la bandera', ((v: string | null) => (v === 'peso' ? 'peso' : 'tamano')) as DeLaBandera, conLasOpciones)
+controlPositivo('  y el título que el servidor pinta sin `peso` (la de antes: ninguna)', delTitulo.replace('() => LEGIBILIDAD_POR_DEFECTO)', '() => null)'), (t: string) => conLasOpciones(legibilidadDeLaBandera, t))
 
 // T1 · El título protagonista: en UNA línea, del tamaño que le da la parte del ancho que pone la composición entre su ancho en em.
 type MetricasEnJson = Readonly<Record<string, { readonly avance: Readonly<Record<string, number>>; readonly kerning: Readonly<Record<string, number>> }>>
@@ -663,7 +668,7 @@ afirmar(metricasBien(anchoEnEm), `T1 · el ancho del título en em sale de las m
 controlPositivo('  el detector ve un ancho sin el kerning', ((texto: string, f: FuenteDePagina) => [...texto].reduce((s, c) => s + (metricas[f]?.avance[c] ?? 0), 0)) as typeof anchoEnEm, metricasBien)
 const unaLinea = (html: string): boolean => {
   const partes = partesDelTitulo('IA y automatizaciones')
-  return /<h1[^>]*class="[^"]*whitespace-nowrap/.test(html) && html.includes(`--em-del-titulo:${anchoDelTitulo(partes, TITULO_DE_PAGINA).toFixed(4)}`) && html.includes('font-size:calc(var(--ancho-del-titulo, 60vw) / var(--em-del-titulo))')
+  return /<h1[^>]*class="[^"]*whitespace-nowrap/.test(html) && html.includes(`--em-del-titulo:${anchoDelTitulo(partes, { ...TITULO_DE_PAGINA, fuentes: FUENTES_CON_PESO }).toFixed(4)}`) && html.includes('font-size:calc(var(--ancho-del-titulo, 60vw) / var(--em-del-titulo))')
 }
 afirmar(unaLinea(conPartes('IA y automatizaciones')), '  el `h1` va en una línea (nunca una palabra sola en un renglón) y su tamaño es la parte del ancho entre su ancho en em: el servidor ya lo pinta así (sin medir el DOM ni saltar al cargar)')
 controlPositivo('  el detector ve el título de B12a.4 (dos renglones, del tamaño del nivel)', conPartes('IA y automatizaciones').replace('whitespace-nowrap', 'flex flex-col'), unaLinea)
@@ -709,7 +714,7 @@ const delaBarra = leerV3('_chrome/barra/useDeslizDeLaPildora.ts')
 const deslizBien = (barra: string, velo: string): boolean =>
   velo.includes('window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))') && velo.includes('window.dispatchEvent(new Event(EVENTOS_DEL_VELO.repuso))') && /pasar\('llego'\)\s*window\.dispatchEvent\(new Event\(EVENTOS_DEL_VELO\.destapa\)\)/.test(velo) &&
   barra.includes('window.addEventListener(EVENTOS_DEL_VELO.cubre, alCubrir)') && barra.includes('window.addEventListener(EVENTOS_DEL_VELO.destapa, alDestapar)') && !barra.includes('EVENTOS_DEL_VELO.repuso,') &&
-  barra.includes("const a = el.animate([{ translate: `0 ${corrida.toFixed(1)}px` }, { translate: '0 0' }]") && /cuadro = requestAnimationFrame\(\(\) => \{[\s\S]*?a\.startTime = performance\.now\(\)/.test(barra) &&
+  barra.includes("const a = el.animate([{ translate: `0 ${corrida.toFixed(1)}px` }, { translate: '0 0' }]") && /const esperar = \(hora: number\): void => \{[\s\S]*?a\.startTime = performance\.now\(\)/.test(barra) && // [T0] con el hilo calmo (s78-t0 §4)
   barra.includes('retenida.current = el.animate(') && /useLayoutEffect\(\(\) => \{[\s\S]*?\}, \[pastilla, ruta\]\)/.test(barra) &&
   leerV3('_chrome/barra/BarraDelHome.tsx').includes('useDeslizDeLaPildora(pastillaRef, ruta)') && new Set(Object.values(EVENTOS_DEL_VELO)).size === 4
 afirmar(deslizBien(delaBarra, delVeloNuevo), '  y entre una ruta y otra se desliza: el velo avisa cuándo cubre (se toma dónde está); al cambiar la ruta se la retiene ahí, y al destapar se anima a su lugar')
@@ -756,8 +761,11 @@ const obrasBien = (cta: string, pie: string, ocio: string, velo: string): boolea
   /valores\.some\(\(el\) => el === null \|\| el\.offsetWidth === 0\) \|\| esperaAlVelo\(\[destino\]\)\) \{\s*espera = window\.setTimeout\(intentar, 250\)/.test(cta) &&
   /if \(esperaAlVelo\(\[\.\.\.PIEZAS_DEL_PIE\.values\(\)\]\.map\(\(p\) => p\.elemento\)\)\) \{\s*pedir\(\)\s*return\s*\}\s*rearmar\(s, g, s\.estudio\)/.test(pie) &&
   /const sinElVelo = cuandoElVeloQuede\(\(\) => \{[\s\S]*?requestIdleCallback\(f/.test(ocio) &&
-  /VELO_EN_CURSO\.activo = f !== 'quieto'\s*if \(enCurso && f === 'quieto'\) window\.dispatchEvent\(new Event\(EVENTOS_DEL_VELO\.quieto\)\)/.test(velo)
-afirmar(obrasBien(delCta, delPie, delOcio, delVeloNuevo), '  la frase del CTA del final, las piezas del pie y el ocio de los títulos esperan al velo; el velo marca cuándo está en curso y avisa al quedar quieto')
+  // [T0] La banda marca si está en curso y el «quieto» lo avisa `_lib/veloDeNavegacion.ts` cuando terminan la banda y lo que la retiene
+  // (la píldora que se desliza): s78-t0 §4 lo prueba con su control.
+  /marcarLaBanda\(f !== 'quieto'\)/.test(velo) && !/VELO_EN_CURSO\.activo = /.test(velo)
+afirmar(obrasBien(delCta, delPie, delOcio, delVeloNuevo), '  la frase del CTA del final, las piezas del pie y el ocio de los títulos esperan al velo; el velo marca cuándo está en curso y [T0] el «quieto» se avisa al terminar la banda y la píldora')
+controlPositivo('  el detector ve el velo que no marca la banda', delVeloNuevo.replace("marcarLaBanda(f !== 'quieto')", ''), (v: string) => obrasBien(delCta, delPie, delOcio, v))
 controlPositivo('  el detector ve el CTA del final que se arma con el velo encima', delCta.replace(' || esperaAlVelo([destino])', ''), (c: string) => obrasBien(c, delPie, delOcio, delVeloNuevo))
 // [B12a.8] (4) El papel de la carga del home, sólo en la carga del documento: llegando al home por la navegación cliente, el velo de la
 // carga (opaco, encima del chrome) se volvía a montar y tapaba todo hasta su seguro (16 cuadros en blanco a «Portfolio», en el build).

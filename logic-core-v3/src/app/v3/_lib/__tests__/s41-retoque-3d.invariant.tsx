@@ -238,7 +238,11 @@ afirmar(/const seccion = elAncla\?\.closest<HTMLElement>\(`\[\$\{ATRIBUTO_DE_PAN
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('N1 · Contacto y Login, en la esquina')
 
-afirmar(ENLACES_DE_SECCION.every((e) => e.destino.startsWith('#') && e.destino !== '#contacto') && ENLACES_DE_SECCION.length === 5 && ENLACE_DE_CONTACTO.destino === '#contacto' && ENLACE_DE_LOGIN.destino === '/login' && existsSync('src/app/login/page.tsx'), 'la pastilla lleva las cinco secciones; Contacto va al formulario del pie y Login al login que el sitio ya tiene (`/login`)')
+// [B12a.8 · T0] Con «Home» primero (CONTRATO §Navegación): «Home» (el hero) y las cinco secciones.
+const pastillaBien = (secciones: typeof ENLACES_DE_SECCION): boolean =>
+  secciones.every((e) => e.destino.startsWith('#') && e.destino !== '#contacto') && secciones.length === 6 && secciones[0]?.id === 'hero' && ENLACE_DE_CONTACTO.destino === '#contacto' && ENLACE_DE_LOGIN.destino === '/login' && existsSync('src/app/login/page.tsx')
+afirmar(pastillaBien(ENLACES_DE_SECCION), 'la pastilla lleva «Home» y las cinco secciones ([B12a.8] «Home» primero); Contacto va al formulario del pie y Login al login que el sitio ya tiene (`/login`)')
+controlPositivo('  el detector ve la pastilla sin «Home» (la de antes de B12a.8)', ENLACES_DE_SECCION.slice(1), pastillaBien)
 const barra = sinComentarios(leer('_chrome/barra/BarraDelHome.tsx'))
 // [B12a.5] Desde una página, el ancla de Contacto lleva al home (`destinoDesde`); en el home, la de siempre.
 const enLaEsquina = (c: string): boolean => /\{ENLACES_DE_SECCION\.map\(/.test(c) && /<div data-parte="esquina"[\s\S]*href=\{destinoDesde\(ruta, ENLACE_DE_CONTACTO\.destino\)\}[\s\S]*data-pieza="barra-login"/.test(c)

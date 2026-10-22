@@ -36,41 +36,8 @@ export function SombraDeLosTitulos({ armados, keyLightRef }: Props) {
   const mapa = useMemo(() => crearMapaDeLosTitulos(), [])
   const m = useRef({ copias: new Map<Armado, Copia>(), esfera: new THREE.Sphere(), caja: new THREE.Box3(), unaCaja: new THREE.Box3(), direccion: new THREE.Vector3(), apagada: false, fuerzas: { dia: 0, noche: 0 }, texel: 0 })
 
-  useEffect(() => {
-    const u = SOMBRA_DE_LOS_TITULOS_EN_VIVO
-    u.uMapaDeLosTitulos.value = mapa.bufer.texture
-    const aparte = { escena: mapa.escena, bufer: mapa.bufer }
-    ESCENAS_APARTE.add(aparte)
-    ESCENAS_APARTE.add(mapa.desenfoque)
-    const copias = m.current.copias
-    return () => {
-      ESCENAS_APARTE.delete(aparte)
-      ESCENAS_APARTE.delete(mapa.desenfoque)
-      for (const c of copias.values()) c.material.dispose()
-      copias.clear()
-      u.uMapaDeLosTitulos.value = null
-      u.uHayDeLosTitulos.value = 0
-      u.uFuerzaDeLosTitulos.value = 0
-      u.uNocheDeLosTitulos.value = 0
-      mapa.soltar()
-    }
-  }, [mapa])
-
-  // Con banco: prenderla y apagarla en la misma tarea (para compararla en el mismo cuadro) y lo que está pasando.
-  useEffect(() => {
-    if (!hayBanco()) return undefined
-    const ventana = window as VentanaDelBanco
-    ventana.__sombraDeLosTitulosDelBanco = {
-      poner: (prendida) => {
-        m.current.apagada = !prendida
-      },
-      estado: () => ({ dia: m.current.fuerzas.dia, noche: m.current.fuerzas.noche, copias: m.current.copias.size, radio: m.current.esfera.radius, texel: m.current.texel }),
-    }
-    return () => {
-      delete ventana.__sombraDeLosTitulosDelBanco
-    }
-  }, [])
-
+  // [T0] El cuadro va antes que los efectos (el compilador de React no deja modificar lo que un efecto ya usó: las copias del mapa);
+  // useFrame se suscribe en un efecto de layout, así que el orden de la llamada no cambia cuándo corre.
   useFrame(() => {
     const principal = keyLightRef.current
     const u = SOMBRA_DE_LOS_TITULOS_EN_VIVO
@@ -110,6 +77,42 @@ export function SombraDeLosTitulos({ armados, keyLightRef }: Props) {
     u.uLuzDeLosTitulos.value.multiplyMatrices(mapa.camara.projectionMatrix, mapa.camara.matrixWorldInverse)
     mapa.dibujar(gl)
   })
+
+  useEffect(() => {
+    const u = SOMBRA_DE_LOS_TITULOS_EN_VIVO
+    u.uMapaDeLosTitulos.value = mapa.bufer.texture
+    const aparte = { escena: mapa.escena, bufer: mapa.bufer }
+    ESCENAS_APARTE.add(aparte)
+    ESCENAS_APARTE.add(mapa.desenfoque)
+    const copias = m.current.copias
+    return () => {
+      ESCENAS_APARTE.delete(aparte)
+      ESCENAS_APARTE.delete(mapa.desenfoque)
+      for (const c of copias.values()) c.material.dispose()
+      copias.clear()
+      u.uMapaDeLosTitulos.value = null
+      u.uHayDeLosTitulos.value = 0
+      u.uFuerzaDeLosTitulos.value = 0
+      u.uNocheDeLosTitulos.value = 0
+      mapa.soltar()
+    }
+  }, [mapa])
+
+  // Con banco: prenderla y apagarla en la misma tarea (para compararla en el mismo cuadro) y lo que está pasando.
+  useEffect(() => {
+    if (!hayBanco()) return undefined
+    const ventana = window as VentanaDelBanco
+    ventana.__sombraDeLosTitulosDelBanco = {
+      poner: (prendida) => {
+        m.current.apagada = !prendida
+      },
+      estado: () => ({ dia: m.current.fuerzas.dia, noche: m.current.fuerzas.noche, copias: m.current.copias.size, radio: m.current.esfera.radius, texel: m.current.texel }),
+    }
+    return () => {
+      delete ventana.__sombraDeLosTitulosDelBanco
+    }
+  }, [])
+
   return null
 }
 

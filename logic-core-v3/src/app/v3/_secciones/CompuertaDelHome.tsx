@@ -3,11 +3,14 @@
 import dynamic from 'next/dynamic'
 import { useCallback, useState, type ReactNode } from 'react'
 
+import { hayPrimerCuadro } from '../_lib/carga'
 import { CONSULTA_ESCENARIO } from '../_lib/compuerta'
 import { politicaDeMovimiento, useMovimientoReducido } from '../_lib/motion/reducido'
 import { useAnchoMinimo } from '../_lib/useAnchoMinimo'
+import { conElMontajeLiviano, viaDelVelo } from '../_lib/veloDeNavegacion'
 import { ProveedorDeCoreografia, ProveedorSinUmbral, type PrimitivasDeCoreografia } from './_contrato/coreografia'
 import { deberiaAnimar } from './_contrato/motion'
+import { coreografiaPrecargada } from './_contrato/precargaDeLaCoreografia'
 
 /**
  * LA COMPUERTA DEL HOME — se resuelve UNA vez, arriba, para las ocho secciones.
@@ -67,7 +70,10 @@ export function CompuertaDelHome({ children }: { readonly children: ReactNode })
   // MÓVIL-TRABAJOS: la misma política sin el ancho, para la sección que corre en todo ancho.
   const animaSinUmbral = deberiaAnimar(true, !politica.montaElMotorDeProgreso)
 
-  const [primitivas, setPrimitivas] = useState<PrimitivasDeCoreografia | null>(null)
+  // [T0] 11 · 3 · la vía `montaje`: llegando por la navegación cliente (la escena ya pintó: no es la hidratación) con la coreografía
+  // animada ya en la mano, el primer render es el animado: el home se monta una vez, sin el árbol quieto que después se rehacía entero
+  // (`_contrato/precargaDeLaCoreografia.ts`). En la carga del documento, el quieto de siempre.
+  const [primitivas, setPrimitivas] = useState<PrimitivasDeCoreografia | null>(() => (conElMontajeLiviano(viaDelVelo()) && hayPrimerCuadro() ? coreografiaPrecargada() : null))
 
   // Estable entre renders: `InstaladorDeCoreografia` la tiene en las
   // dependencias de su efecto, y una función nueva por render lo volvería a
