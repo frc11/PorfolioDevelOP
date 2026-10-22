@@ -206,7 +206,7 @@ export function CtaEnlace({
  * JavaScript. El precio está declarado en `cta.css`: un pseudo-elemento no se
  * puede congelar para fotografiarlo.
  */
-function ContenidoDelCta({ rotulo }: { rotulo: string }) {
+export function ContenidoDelCta({ rotulo }: { rotulo: string }) {
   return (
     <>
       <span

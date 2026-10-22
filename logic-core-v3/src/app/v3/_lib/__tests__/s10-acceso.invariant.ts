@@ -44,7 +44,7 @@ import {
   ROTOS, documentoAnunciado, esRepeticionExacta, esRolDeLandmark, piezasDelDivisor,
   rotuloDeParada, textoAnunciado, transformadasDe, willChangeDe,
 } from './s10-acceso'
-import { DELTA_DEL_PANEL, DELTA_DEL_PORTFOLIO, afirmarElCenso, afirmarQueElCensoNoEstaCiego } from './s10-acceso-censo'
+import { DELTA_DEL_PANEL, DELTA_DEL_PORTFOLIO, DELTA_DE_SERVICIOS_B4, afirmarElCenso, afirmarQueElCensoNoEstaCiego } from './s10-acceso-censo'
 import { COLOR, razon } from './s10-acceso-color'
 import {
   imprimirArbol, imprimirInventario, imprimirParadas, publicados, publicar,
@@ -61,7 +61,8 @@ import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
  */
 // MÓVIL 2: el carrusel lleva en el marcado sus ocho de arriba y las cuatro de abajo; cada ancho muestra ocho.
 // MÓVIL 2: el CTA al terminar cada servicio (se ve abajo de 1024; en el marcado, en las dos ramas).
-const DELTA_DE_SERVICIOS = { paradas: 3 } as const
+// [B4] Reemplazada por la spec: la sección nueva lleva el CTA de cada servicio (su página) y el recomendador (nueve opciones y su botón).
+const DELTA_DE_SERVICIOS = { paradas: 3 + 9 + 1 } as const
 // SPRINT FINAL: «Por qué develOP» suma el botón «Hablanos» y pasa de 1 h2 + 4 h3 a 1 h2 + 6 h3; sus cinco marcadores se fueron con el contenido viejo.
 // FINAL 3 · el pie con datos reales: −1 (Números) +1 mail +1 WhatsApp +4 redes.
 const DELTA_DEL_FINAL = { paradas: 1 + 5, encabezados: 2 } as const
@@ -277,7 +278,7 @@ const arbolDe = (html: string): string[] => {
 }
 // 28 desde que Quiénes somos ganó «El Equipo»: los dos nombres del equipo bajaron de
 // `h3` a `h4` —siguen contando— y el rótulo del bloque entró como el `h3` que los junta.
-afirmarIgual(encabezados(QUIETA).length, 29 + DELTA_DEL_PANEL.encabezados + DELTA_DE_DEMOS.encabezados + DELTA_DEL_FINAL.encabezados + DELTA_DEL_RETOQUE_PANEL.encabezados + DELTA_DEL_PORTFOLIO.encabezados, '[RETOQUE PANEL] + los 8 títulos de las features · la rama quieta publica 29 encabezados —los 27 de S11, el rótulo del bloque del equipo y el título de la foto— menos los 4 del panel viejo, más el título de las demos y los dos valores más del final; [B1] y la cabecera de cada tira del Portfolio en lugar del nombre de cada trabajo (una más: la tuya)')
+afirmarIgual(encabezados(QUIETA).length, 29 + DELTA_DEL_PANEL.encabezados + DELTA_DE_DEMOS.encabezados + DELTA_DEL_FINAL.encabezados + DELTA_DEL_RETOQUE_PANEL.encabezados + DELTA_DEL_PORTFOLIO.encabezados + DELTA_DE_SERVICIOS_B4.encabezados, '[RETOQUE PANEL] + los 8 títulos de las features · la rama quieta publica 29 encabezados —los 27 de S11, el rótulo del bloque del equipo y el título de la foto— menos los 4 del panel viejo, más el título de las demos y los dos valores más del final; [B1] y la cabecera de cada tira del Portfolio en lugar del nombre de cada trabajo (una más: la tuya); [B4] y el del recomendador de Servicios')
 afirmarIgual(arbolDe(ANIMADA), arbolDe(QUIETA), '  y la animada publica EXACTAMENTE el mismo árbol: ya no pierde los dos `h2` de Servicios')
 console.log(
   '  ✅ HALLAZGOS 3 y 4 — CERRADOS en SITIO-S11 · `_secciones/servicios/` — `PanelDeSecuencia` monta las TRES capas y la secuencia apaga dos ' +
