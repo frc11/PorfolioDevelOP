@@ -1,4 +1,5 @@
 import { SELECTOR_DE_LA_INTRO } from '../_componentes/pagina/atributoDeLaIntro'
+import { SELECTOR_DEL_CIERRE } from '../_lib/escena/ruta/atributoDelCierre'
 import { PISTA_DE_LA_INTRO } from '../_lib/escena/ruta/pistaDeLaIntro'
 import type { PresetDeLaEscena } from '../_lib/escena/ruta/preset'
 
@@ -10,7 +11,8 @@ import type { PresetDeLaEscena } from '../_lib/escena/ruta/preset'
  */
 export const PRESET: PresetDeLaEscena = {
   id: 'base',
-  tramos: { intro: SELECTOR_DE_LA_INTRO, pie: null },
+  // [B13] El pie es el cierre de la página (`CierreDeLaPagina`): Seis razones, el CTA, la resolución y el pie, con la escena.
+  tramos: { intro: SELECTOR_DE_LA_INTRO, pie: SELECTOR_DEL_CIERRE },
   pista: PISTA_DE_LA_INTRO,
   noche: 'noche',
   // El acento de web y la variante de ejemplo (el registro: `_variantes/registro.ts`), para ejercer la ranura.
