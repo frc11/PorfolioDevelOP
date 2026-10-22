@@ -4,12 +4,17 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
+import { CONSULTA_ESCENARIO } from '../../compuerta'
+import { useAnchoMinimo } from '../../useAnchoMinimo'
+import { calidadPorAncho } from '../calidad'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { VIVO } from '../entorno/vivo'
 import { EN_VIVO } from '../final/recorridoDelFinal'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_FOLLOW_AZIMUTH_OFFSET_DEG } from '../probeLighting'
+import { acentoDelToken } from '../ruta/RanuraDeLaVariante'
 import { CRISTAL, amplitudDelCristal, modoDelBrilloDeNoche } from './cristal'
 import { crearElFondo, dibujarElFondo, soltarElFondo, type FondoDelCristal } from './fondo'
+import { crearLasGrietas, type GrietasEnVivo } from './grietasEnVivo'
 import { armarElMuro, celdasDelMuro } from './muro'
 import { armarElVidrio, uniformesDelVidrio } from './vidrio'
 
@@ -52,8 +57,10 @@ export function CristalDeLaEscena({ quieto }: Props): React.JSX.Element | null {
 function CristalPrendido(): React.JSX.Element {
   const grupo = useRef<THREE.Group>(null)
   const uniformes = useRef(uniformesDelVidrio())
-  const armado = useRef<{ readonly malla: THREE.Mesh; readonly fondo: FondoDelCristal } | null>(null)
+  const armado = useRef<{ readonly malla: THREE.Mesh; readonly fondo: FondoDelCristal; readonly grietas: GrietasEnVivo } | null>(null)
   const memoria = useRef<Memoria>({ apagado: false, aparece: 0 })
+  // [NOCTURNO B9] Las grietas, compactas abajo de 1024 (la misma lectura que decide la calidad de la escena: `EscenarioCompuerta`).
+  const compacta = calidadPorAncho(useAnchoMinimo(CONSULTA_ESCENARIO)) === 'compacta'
   useEffect(() => {
     const g = grupo.current
     if (g === null) return undefined
@@ -65,7 +72,9 @@ function CristalPrendido(): React.JSX.Element {
     u.uModoDelBrillo.value = modoDelBrilloDeNoche(consulta.get('cristal-brillo'))
     const malla = armarElVidrio(armarElMuro(CELDAS), u, CELDAS.length)
     const fondo = crearElFondo()
-    armado.current = { malla, fondo }
+    // [NOCTURNO B9] Las grietas (`grietasEnVivo.ts`): neutras en el home, con el acento claro de la página en las otras.
+    const grietas = crearLasGrietas(u, CELDAS, acentoDelToken)
+    armado.current = { malla, fondo, grietas }
     g.add(malla)
     const ventana = window as VentanaDelBanco
     if (hayBanco()) {
@@ -82,6 +91,7 @@ function CristalPrendido(): React.JSX.Element {
       malla.geometry.dispose()
       if (malla.material instanceof THREE.Material) malla.material.dispose()
       soltarElFondo(fondo)
+      grietas.soltar()
       delete ventana.__cristalDelBanco
     }
   }, [])
@@ -96,6 +106,8 @@ function CristalPrendido(): React.JSX.Element {
     const amplitud = m.apagado ? 0 : amplitudDelCristal(EN_VIVO.camara) * suave(m.aparece)
     u.uAmplitud.value = amplitud
     malla.visible = amplitud > 0.002
+    // [NOCTURNO B9] El reloj de las grietas sigue aunque el cristal no se vea.
+    a.grietas.cuadro(state.camera, delta, compacta)
     if (!malla.visible) return
     // La cámara de ESTE cuadro (su matriz, al día) y la luz principal de la sala (sigue el azimut de la cámara con su corrimiento).
     const cam = state.camera

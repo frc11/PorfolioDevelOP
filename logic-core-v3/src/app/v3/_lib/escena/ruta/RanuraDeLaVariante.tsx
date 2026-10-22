@@ -21,8 +21,11 @@ import { COMPOSICION_DE_LA_LUZ, SALIDA_DE_LA_VARIANTE_MS, type ComponenteDeVaria
 /** Hasta dónde llega la luz de abajo prestada (u): más allá del piso (radio 45 en plena, 34 en compacta), así lo cubre entero. */
 const RADIO_DE_LA_LUZ_PRESTADA = 100
 
-/** El claro del acento de un servicio, leído de su token (`--color-acento-<id>-claro`); sin acento, blanco. Una vez por montaje. */
-function acentoDelToken(acento: string | null): THREE.Color {
+/**
+ * El claro del acento de un servicio, leído de su token (`--color-acento-<id>-claro`); sin acento, blanco. Una vez por montaje.
+ * [NOCTURNO B9] Exportado: lo usan también las grietas del cristal (la luz con el acento de la página).
+ */
+export function acentoDelToken(acento: string | null): THREE.Color {
   const color = new THREE.Color(1, 1, 1)
   if (acento === null || typeof document === 'undefined') return color
   const valor = getComputedStyle(document.documentElement).getPropertyValue(`--color-acento-${acento}-claro`).trim()
