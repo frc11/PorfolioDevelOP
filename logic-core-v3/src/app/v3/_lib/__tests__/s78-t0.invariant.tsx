@@ -79,9 +79,11 @@ const laDeAntes: Cuadro = (avance) => {
 }
 controlPositivo('  el detector ve la de B12a.3 (se encendía con el scroll: en blanco en el avance 0)', laDeAntes, encendidaDesdeElArranque)
 const variante = leer('_lib/escena/ruta/VarianteDePrueba.tsx')
-const usaElCuadro = (v: string): boolean => /const c = cuadroDeLaPrueba\(avance\.current, reducido, saliendo\.current, performance\.now\(\), salida\.current\)/.test(v) && /luzDeAbajo\(c\.brilloDelPiso, color\.current\)/.test(v) && /energia\(color\.current\)/.test(v)
+// [B13] El cuadro lleva además la resolución del cierre (la señal del tramo del pie, s78-b13): la spec nueva, con su control.
+const usaElCuadro = (v: string): boolean => /const c = cuadroDeLaPrueba\(avance\.current, reducido, saliendo\.current, performance\.now\(\), salida\.current, resolucion\.current\)/.test(v) && /luzDeAbajo\(c\.brilloDelPiso, color\.current\)/.test(v) && /energia\(color\.current\)/.test(v)
 afirmar(usaElCuadro(variante), '  y el componente escribe lo que dice ese cuadro (la luz de abajo, la energía y el anillo)')
 controlPositivo('  el detector ve la variante que escribe otra luz', variante.replace('luzDeAbajo(c.brilloDelPiso, color.current)', 'luzDeAbajo(COMPOSICION_DE_LA_LUZ.brilloDelPiso, color.current)'), usaElCuadro)
+controlPositivo('  [B13] y la que arma el cuadro sin la resolución', variante.replace(', resolucion.current)', ')'), usaElCuadro)
 
 // El velo destapa con la variante de la página ya dibujada (entrando por un enlace o por la flecha): sin ella, el primer cuadro destapado
 // era la composición en blanco.

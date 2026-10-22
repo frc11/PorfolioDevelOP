@@ -10,6 +10,7 @@ import { hayPrimerCuadro, suscribirALaCarga } from '../carga'
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
 import { AVANCE_DE_LA_INTRO, avanceDeLaIntro } from './ruta/pistaDeLaIntro'
 import { bloquesDelPreset, despiertaEnLaPagina, presetActual, suscribirseAlPreset } from './ruta/preset'
+import { medirElCierre } from './ruta/cierreDeLaPagina'
 import { medidaSinElEstiramiento } from './tramoEstirado'
 import { avisarQueSeMovioLaPagina } from './paginaMovida'
 import { aplicarElDiaDelFinal, bloqueTapaElCuadro, bloqueVivo, medirElBloqueOpacoEn } from './nocheDisparada'
@@ -150,9 +151,13 @@ export function useEscenaAtadaAlScroll(
         const despierta = !hayPrimerCuadro() || despiertaEnLaPagina(preset, bloquesDelPreset(document, preset, desplazamiento), desplazamiento, ventana, MARGEN_DE_REANUDACION)
         const enLaPagina = despierta ? EN_CUADRO : FUERA_DE_CUADRO
         if (siguiente(estadoRef.current, enLaPagina) !== estadoRef.current) setEstado((previo) => siguiente(previo, enLaPagina))
+        // [B13] Y la pantalla de su cierre (`tramos.pie`: Seis razones, la resolución y el pie), en el layout: su pista y la resolución.
+        medirElCierre(document, preset === null || preset.pista === null || preset.tramos === null ? null : preset.tramos.pie, desplazamiento, ventana)
         return
       }
       const medida = medidaSinElEstiramiento(desplazamiento, secciones.abajo, desplazamiento, ventana, sinEstirar)
+      // [B13] En el home no hay cierre de página: su pantalla vuelve a −∞.
+      medirElCierre(document, null, desplazamiento, ventana)
 
       const quieta = escenaRetenida(getIntroStage(), introEnteredClean())
       const progreso = quieta

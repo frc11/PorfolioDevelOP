@@ -30,10 +30,15 @@ export interface CuadroDeLaPrueba {
  * intro: entrando, la página arrancaba en blanco y había que scrollear un poco para verla de noche y con su acento). El scroll mueve sólo el
  * gesto: el anillo se abre (del 85 al 100 % de su tamaño) hasta la mitad de la intro. Al irse, la salida de siempre: de lo encendido a la
  * composición en `SALIDA_DE_LA_VARIANTE_MS`, rápida y calma. Puro: lo prueba s78-t0.
+ *
+ * [B13] LA RESOLUCIÓN (`resolucion`, la señal del tramo del pie del cierre, 0 → 1): lo encendido se apaga con ella (el anillo se cierra y se
+ * apaga, la luz de abajo vuelve a la composición y la energía al blanco): en 1 el piso queda liso y calmo, antes del pie. Al subir, vuelve. Con
+ * movimiento reducido, sin el paso intermedio (de una, a la mitad). La salida arranca de lo que haya. Lo prueba s78-b13.
  */
-export function cuadroDeLaPrueba(avance: number, reducido: boolean, saliendo: boolean, ahora: number, salida: SalidaDeLaPrueba | null): CuadroDeLaPrueba {
+export function cuadroDeLaPrueba(avance: number, reducido: boolean, saliendo: boolean, ahora: number, salida: SalidaDeLaPrueba | null, resolucion = 0): CuadroDeLaPrueba {
   const apertura = 0.85 + 0.15 * (reducido ? 1 : suave(Math.min(1, Math.max(0, avance / ENCENDIDA_HASTA))))
-  let encendido = 1
+  const resuelta = Math.min(1, Math.max(0, reducido ? (resolucion >= 0.5 ? 1 : 0) : resolucion))
+  let encendido = 1 - resuelta
   let sigue: SalidaDeLaPrueba | null = null
   if (saliendo) {
     sigue = salida ?? { desde: encendido, t0: ahora }
@@ -50,16 +55,17 @@ export function cuadroDeLaPrueba(avance: number, reducido: boolean, saliendo: bo
  * · enciende la luz de abajo prestada (de la composición a la entera) y la tiñe del acento, y tiñe la energía (P-H29a, b y c); [T0] desde
  *   el primer cuadro (`cuadroDeLaPrueba`);
  * · al salir (P-H29d) vuelve a la composición en `SALIDA_DE_LA_VARIANTE_MS`, rápida y calma; con movimiento reducido, quieta y de una;
+ * · [B13] en el cierre de la página se resuelve con `resolucion`: el piso liso y calmo antes del pie;
  * · lo que crea lo crea R3F (el JSX), que lo libera al desmontarse.
  */
-export default function VarianteDePrueba({ avance, acento, calidad, reducido, luzDeAbajo, energia, saliendo }: PropsDeLaVariante): React.JSX.Element {
+export default function VarianteDePrueba({ avance, acento, calidad, reducido, luzDeAbajo, energia, saliendo, resolucion }: PropsDeLaVariante): React.JSX.Element {
   const anillo = useRef<THREE.Mesh>(null)
   const material = useRef<THREE.MeshBasicMaterial>(null)
   const color = useRef(new THREE.Color(1, 1, 1))
   const salida = useRef<SalidaDeLaPrueba | null>(null)
 
   useFrame(() => {
-    const c = cuadroDeLaPrueba(avance.current, reducido, saliendo.current, performance.now(), salida.current)
+    const c = cuadroDeLaPrueba(avance.current, reducido, saliendo.current, performance.now(), salida.current, resolucion.current)
     salida.current = c.salida
     color.current.copy(BLANCO).lerp(acento, c.encendido)
     luzDeAbajo(c.brilloDelPiso, color.current)
