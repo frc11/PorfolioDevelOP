@@ -36,6 +36,15 @@
 - `COMBINACIONES_DEL_TITULO` pasa a cuatro y llega `idDeLaParte` (§3).
 - `EnlaceDeRuta` acepta los atributos de un `<a>` y su `ref`. Llegan `EVENTOS_DEL_VELO.quieto`, `VELO_EN_CURSO`, `esperaAlVelo` y `cuandoElVeloQuede` (§5).
 
+**Después (2026-10-22, T0 nocturno; `docs/rediseno/SPRINT-T0-NOCTURNO.md`):**
+- **La variante, encendida desde el avance 0.** La noche y el acento de la página tienen que estar en el primer cuadro, en la composición
+  inicial (pedido de Valentino). La de la base lo está (`cuadroDeLaPrueba`); las de servicios se encienden con el scroll (P-S). El velo
+  destapa con la variante de la página ya dibujada (`esc/ruta/listaDeLaRuta.ts`, `escenaDeLaRutaLista`), con el techo de siempre.
+- `EVENTOS_DEL_VELO.destapa` (de B12a.8) y llegan `marcarLaBanda` y `retenerElQuieto`: el «quieto» se avisa cuando terminan la banda y lo
+  que la retiene (la píldora que se desliza). `viaDelVelo` y `VIA_POR_DEFECTO` son las vías del velo hacia el home (sólo el banco las elige).
+- El título de una página va con la legibilidad `peso` por defecto (`LEGIBILIDAD_POR_DEFECTO`, §3); `?legibilidad=tamano`, con la bandera.
+- La escena compila con `compilarConCuidado` (`esc/gpu/compilar.ts`), no con `compileAsync`: una variante que compile algo, que use esa.
+
 ---
 
 ## 1. El preset de ruta (D1: lo declara la página)

@@ -714,7 +714,7 @@ const delaBarra = leerV3('_chrome/barra/useDeslizDeLaPildora.ts')
 const deslizBien = (barra: string, velo: string): boolean =>
   velo.includes('window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))') && velo.includes('window.dispatchEvent(new Event(EVENTOS_DEL_VELO.repuso))') && /pasar\('llego'\)\s*window\.dispatchEvent\(new Event\(EVENTOS_DEL_VELO\.destapa\)\)/.test(velo) &&
   barra.includes('window.addEventListener(EVENTOS_DEL_VELO.cubre, alCubrir)') && barra.includes('window.addEventListener(EVENTOS_DEL_VELO.destapa, alDestapar)') && !barra.includes('EVENTOS_DEL_VELO.repuso,') &&
-  barra.includes("const a = el.animate([{ translate: `0 ${corrida.toFixed(1)}px` }, { translate: '0 0' }]") && /cuadro = requestAnimationFrame\(\(\) => \{[\s\S]*?a\.startTime = performance\.now\(\)/.test(barra) &&
+  barra.includes("const a = el.animate([{ translate: `0 ${corrida.toFixed(1)}px` }, { translate: '0 0' }]") && /const esperar = \(hora: number\): void => \{[\s\S]*?a\.startTime = performance\.now\(\)/.test(barra) && // [T0] con el hilo calmo (s78-t0 §4)
   barra.includes('retenida.current = el.animate(') && /useLayoutEffect\(\(\) => \{[\s\S]*?\}, \[pastilla, ruta\]\)/.test(barra) &&
   leerV3('_chrome/barra/BarraDelHome.tsx').includes('useDeslizDeLaPildora(pastillaRef, ruta)') && new Set(Object.values(EVENTOS_DEL_VELO)).size === 4
 afirmar(deslizBien(delaBarra, delVeloNuevo), '  y entre una ruta y otra se desliza: el velo avisa cuándo cubre (se toma dónde está); al cambiar la ruta se la retiene ahí, y al destapar se anima a su lugar')
@@ -761,8 +761,11 @@ const obrasBien = (cta: string, pie: string, ocio: string, velo: string): boolea
   /valores\.some\(\(el\) => el === null \|\| el\.offsetWidth === 0\) \|\| esperaAlVelo\(\[destino\]\)\) \{\s*espera = window\.setTimeout\(intentar, 250\)/.test(cta) &&
   /if \(esperaAlVelo\(\[\.\.\.PIEZAS_DEL_PIE\.values\(\)\]\.map\(\(p\) => p\.elemento\)\)\) \{\s*pedir\(\)\s*return\s*\}\s*rearmar\(s, g, s\.estudio\)/.test(pie) &&
   /const sinElVelo = cuandoElVeloQuede\(\(\) => \{[\s\S]*?requestIdleCallback\(f/.test(ocio) &&
-  /VELO_EN_CURSO\.activo = f !== 'quieto'\s*if \(enCurso && f === 'quieto'\) window\.dispatchEvent\(new Event\(EVENTOS_DEL_VELO\.quieto\)\)/.test(velo)
-afirmar(obrasBien(delCta, delPie, delOcio, delVeloNuevo), '  la frase del CTA del final, las piezas del pie y el ocio de los títulos esperan al velo; el velo marca cuándo está en curso y avisa al quedar quieto')
+  // [T0] La banda marca si está en curso y el «quieto» lo avisa `_lib/veloDeNavegacion.ts` cuando terminan la banda y lo que la retiene
+  // (la píldora que se desliza): s78-t0 §4 lo prueba con su control.
+  /marcarLaBanda\(f !== 'quieto'\)/.test(velo) && !/VELO_EN_CURSO\.activo = /.test(velo)
+afirmar(obrasBien(delCta, delPie, delOcio, delVeloNuevo), '  la frase del CTA del final, las piezas del pie y el ocio de los títulos esperan al velo; el velo marca cuándo está en curso y [T0] el «quieto» se avisa al terminar la banda y la píldora')
+controlPositivo('  el detector ve el velo que no marca la banda', delVeloNuevo.replace("marcarLaBanda(f !== 'quieto')", ''), (v: string) => obrasBien(delCta, delPie, delOcio, v))
 controlPositivo('  el detector ve el CTA del final que se arma con el velo encima', delCta.replace(' || esperaAlVelo([destino])', ''), (c: string) => obrasBien(c, delPie, delOcio, delVeloNuevo))
 // [B12a.8] (4) El papel de la carga del home, sólo en la carga del documento: llegando al home por la navegación cliente, el velo de la
 // carga (opaco, encima del chrome) se volvía a montar y tapaba todo hasta su seguro (16 cuadros en blanco a «Portfolio», en el build).

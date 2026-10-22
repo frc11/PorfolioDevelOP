@@ -9,7 +9,7 @@ import { escenaDeLaRutaLista } from '../../_lib/escena/ruta/listaDeLaRuta'
 import { DIA_DEL_FINAL, NOCHE_DISPARADA } from '../../_lib/escena/nocheDisparada'
 import { VUELTA_AL_HOME, claveDeLaEntrada, devolverLosAlmacenes, posicionGuardadaDelHome, type PosicionDelHome } from '../../_lib/escena/ruta/posicionDelHome'
 import { sonar } from '../../_lib/sonido/bus'
-import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, VELO_EN_CURSO, atenderElVelo, conElMontajeLiviano, conLaBandaCorta, cubrirConElVelo, viaDelVelo } from '../../_lib/veloDeNavegacion'
+import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, atenderElVelo, conElMontajeLiviano, conLaBandaCorta, cubrirConElVelo, marcarLaBanda, viaDelVelo } from '../../_lib/veloDeNavegacion'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { llevarElScrollA, reponerLosAlmacenes, scrollDeLaRuta } from './alCambiarDeRuta'
@@ -93,10 +93,9 @@ export function VeloDeNavegacion(): React.JSX.Element {
       el.setAttribute('data-fase', f)
       el.setAttribute('data-cobertura', coberturaDelVelo(f, t).toFixed(3))
       el.style.pointerEvents = f === 'quieto' ? 'none' : 'auto'
-      // [B12a.8] (4) Las obras del home que no se ven esperan al velo quieto (`VELO_EN_CURSO`).
-      const enCurso = VELO_EN_CURSO.activo
-      VELO_EN_CURSO.activo = f !== 'quieto'
-      if (enCurso && f === 'quieto') window.dispatchEvent(new Event(EVENTOS_DEL_VELO.quieto))
+      // [B12a.8] (4) Las obras del home que no se ven esperan al velo quieto (`VELO_EN_CURSO`). [T0] La banda lo marca; el «quieto» se
+      // avisa cuando la banda y lo que la retiene (la píldora que se desliza) terminaron (`marcarLaBanda`, `retenerElQuieto`).
+      marcarLaBanda(f !== 'quieto')
     }
     const pintar = (f: FaseDelVelo, t: number): void => {
       animacion?.cancel()
@@ -104,6 +103,8 @@ export function VeloDeNavegacion(): React.JSX.Element {
       cancelAnimationFrame(siguiendo)
       b.style.transform = transformadaDelVelo(frenteDelVelo(f, t, geometria), geometria)
       b.style.visibility = f === 'quieto' ? 'hidden' : 'visible'
+      // [T0] El `will-change` sólo mientras se mueve (s10-acceso: ninguno en reposo ni con movimiento reducido).
+      b.style.willChange = ''
       marcar(f, t)
     }
     const pasar = (e: EventoDelVelo): void => {
@@ -119,6 +120,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
         return
       }
       b.style.visibility = 'visible'
+      b.style.willChange = 'transform'
       const desde = transformadaDelVelo(frenteDelVelo(f, 0, geometria), geometria)
       const hasta = transformadaDelVelo(frenteDelVelo(f, 1, geometria), geometria)
       b.style.transform = desde
@@ -134,6 +136,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
       a.onfinish = () => {
         if (animacion !== a) return
         b.style.transform = hasta
+        b.style.willChange = ''
         a.cancel()
         animacion = null
         alTerminar()
@@ -273,7 +276,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
 
   return (
     <div ref={capa} aria-hidden="true" data-pieza="velo-de-navegacion" data-fase="quieto" data-cobertura="0" className="pointer-events-none fixed inset-0 z-[calc(var(--z-cabecera)-1)] overflow-hidden">
-      <div ref={banda} data-parte="banda" className="invisible absolute top-1/2 left-1/2 will-change-transform" />
+      <div ref={banda} data-parte="banda" className="invisible absolute top-1/2 left-1/2" />
     </div>
   )
 }
