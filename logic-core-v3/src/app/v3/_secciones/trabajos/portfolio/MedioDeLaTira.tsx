@@ -61,8 +61,8 @@ function Video({ proyecto, e }: { readonly proyecto: ProyectoDelPortfolio; reado
  *
  * El video es `muted playsInline loop` y SÓLO el de la tira activa tiene `src` (y con la sección cerca: nada se pide antes); los
  * demás no tienen nada y `preload="none"`. Con movimiento reducido no hay autoplay: queda el póster. Se pausa fuera de cuadro y con
- * la pestaña oculta (`aLaVista`, `usePortfolio`). [B1.2d B] Sólo el de escritorio: debajo de 1024 el video lo pinta la historia
- * (`HistoriaDelProyecto`). P-H21 · un video en bucle se puede pausar (WCAG 2.2.2): `BotonPausa`, en la esquina, mientras corre solo;
+ * la pestaña oculta (`aLaVista`, `usePortfolio`). [B1.2d B] Sólo el de escritorio: debajo de 1024 el video lo pinta la tarjeta
+ * del carrusel ([B1.2e] `TarjetaDelProyecto`, con `estadoDelVideo`). P-H21 · un video en bucle se puede pausar (WCAG 2.2.2): `BotonPausa`, en la esquina, mientras corre solo;
  * [F7] sólo para el teclado (`CLASE_DE_LA_PAUSA_DEL_PANEL`).
  */
 export function MedioDeLaTira({

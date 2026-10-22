@@ -94,9 +94,10 @@ export function afirmarB12c(): void {
   const escenario = sinComentarios(leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`))
   const cableado = (u: string, e: string): boolean =>
     /const tituloS = useTituloListo\('portfolio'\) \? LENTOS\.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO\.s/.test(u) &&
-    // [F5b] Reemplazada por la spec: el encabezado sale de `pideElEncabezado` (desde Demos, sin el título; s76 §31 lo afirma).
-    /const pedidoDelOrden = \{ camara: adentro, encabezado, barra: adentro && !historias, panel: adentro \}/.test(u) && /const encabezado = pideElEncabezado\(historias, fase, enCuadro, /.test(u) &&
-    /useOrdenDeLaEscena\(pedidoDelOrden, tituloS, reducido, historias\)/.test(u) && /PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.camara/.test(u) && /useBarraDelPortfolio\(caja, orden\.barra\)/.test(u) &&
+    // [B1.2e] Reemplazada por la spec: sin las historias en el Portfolio lo pedido es todo adentro o todo afuera, y con el carrusel (debajo
+    // de 1024) nada (s76 §45 lo afirma con su control).
+    /const pedidoDelOrden = adentro && !carrusel \? ADENTRO : AFUERA/.test(u) &&
+    /useOrdenDeLaEscena\(pedidoDelOrden, tituloS, reducido\)/.test(u) &&/PORTFOLIO_EN_LA_ESCENA\.adentro = orden\.camara/.test(u) && /useBarraDelPortfolio\(caja, orden\.barra\)/.test(u) &&
     /!vivo\.panel && 'translate-x-full'/.test(e) && /<EncabezadoDelPortfolio seccion=\{seccion\} adentro=\{vivo\.encabezado\}/.test(e)
   afirmar(cableado(usePortfolio, escenario), '  y así se cablea: la cámara (con el oscurecido de `PORTFOLIO_EN_LA_ESCENA`), el encabezado, la barra y el panel salen del orden, no del paso')
   controlPositivo('  el detector ve la cámara atada al panel (B1.2c)', usePortfolio.replace('PORTFOLIO_EN_LA_ESCENA.adentro = orden.camara', 'PORTFOLIO_EN_LA_ESCENA.adentro = orden.panel'), (u: string) => cableado(u, escenario))
@@ -209,7 +210,8 @@ export function afirmarB12c(): void {
   afirmar(vueloAntesDelSalto(sinComentarios(leer(`${PORTFOLIO}/medida.ts`))) && /volarAlPx\(\{ caja, enVuelo, actual, setPaso \}, px, reducido \? 0 : ms, scrollExtra\)/.test(usePortfolio), '  el salto en silencio (el hover, el clic, el tap) no pide su vuelo antes de que exista: el vuelo se arma y después se lanza el salto (el arnés: «Cannot access before initialization» en cada hover, y la marca de vuelo puesta para siempre)')
   controlPositivo('  el detector ve el vuelo armado adentro de su propio inicializador (B1.2b)', 'const vuelo = {\n  destino: px,\n  cancelar: saltarA(y, ms, () => { if (enVuelo.current !== vuelo) return }),\n}\nenVuelo.current = vuelo', vueloAntesDelSalto)
   // [F2] Reemplazada por la spec: además, con el panel ya entrado (`entradaLista`; su control está en §40 de `s76-portfolio-a2.tsx`).
-  afirmar(/return v\.fase === 'adentro' && pegado\(caja\.current\) && !conDialogo\(caja\.current\) && \(entradaLista\.current \|\| !conLaTrampa\) \? v\.tira : null/.test(mandos) && /else if \(d\.tipo === 'demos'\) irAlPx\(pxDeLaSeccion\(PANTALLAS_POR_PASO\), salidaMs, -2\)/.test(mandos) && /const salidaMs = duracionDeLaSalida\(tituloS\) \* 1000/.test(mandos), '  manda sólo con el panel adentro, pegado y sin un diálogo; a Demos va al final del pin (como el viaje del menú), con el tiempo de la salida en orden')
+  // [B1.2e] Y sin el carrusel (debajo de 1024 la rueda no manda: s76 §45, con su control).
+  afirmar(/return !carrusel && v\.fase === 'adentro' && pegado\(caja\.current\) && !conDialogo\(caja\.current\) && \(entradaLista\.current \|\| !conLaTrampa\) \? v\.tira : null/.test(mandos) && /else if \(d\.tipo === 'demos'\) irAlPx\(pxDeLaSeccion\(PANTALLAS_POR_PASO\), salidaMs, -2\)/.test(mandos) && /const salidaMs = duracionDeLaSalida\(tituloS\) \* 1000/.test(mandos), '  manda sólo con el panel adentro, pegado y sin un diálogo; a Demos va al final del pin (como el viaje del menú), con el tiempo de la salida en orden')
 
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('B1.2c · 23 · «La tuya»: el formulario corto (la validación, el envío y los textos del contacto) y WhatsApp')
@@ -246,10 +248,10 @@ export function afirmarB12c(): void {
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('B1.2c · 25 · [B1.2d B] Tablet (T2): ya no hay lomos, barras ni pista; el tap en un lomo queda para el escritorio')
 
-  // T2 · debajo de 1024 son las historias (s76 §27): las barras y la pista de la tablet se fueron con su archivo.
+  // T2 · debajo de 1024 no hay selector ([B1.2e] es el carrusel, s76 §44): las barras y la pista de la tablet se fueron con su archivo.
   const escenarioCompleto = leer(`${PORTFOLIO}/EscenarioDelPortfolio.tsx`)
   const sinLaTablet = (e: string): boolean => !/BarrasDelPortfolio|PistaDelPortfolio|max-tablet:/.test(e) && !existsSync(path.join(V3, `${PORTFOLIO}/BarrasDelPortfolio.tsx`))
-  afirmar(sinLaTablet(escenarioCompleto), 'debajo de 1024 no quedan las barras de progreso ni la pista de la tablet: son historias, con las barras del componente común')
+  afirmar(sinLaTablet(escenarioCompleto), 'debajo de 1024 no quedan las barras de progreso ni la pista de la tablet ([B1.2e] es el carrusel, con su línea por tarjeta)')
   controlPositivo('  el detector ve el escenario de B1.2c (las barras arriba del panel abajo de 1024)', `${escenarioCompleto}\n<BarrasDelPortfolio vivo={vivo} className="hidden shrink-0 px-8 pb-2 max-escritorio:flex" />`, sinLaTablet)
   afirmar(/alElegir=\{\(\) => vivo\.saltarAlPaso\(indice, true\)\}/.test(leer(`${PORTFOLIO}/Tira.tsx`)), '  tap en un lomo = saltar a ese proyecto con el modelo del hover: activo ya, el scroll en silencio')
 
@@ -264,7 +266,7 @@ export function afirmarB12c(): void {
   const tamanos = [
     { ancho: 1440, columna: 0.5, nivel: displayXl(1440) },
     { ancho: 1024, columna: 0.5, nivel: displayXl(1024) },
-    // [B1.2d B] T2 · en la tablet la columna es todo el ancho (las historias): el título entra con más aire.
+    // [B1.2d B] T2 · en la tablet el título va a todo el ancho ([B1.2e] el de la pantalla del título del carrusel, con el mismo aire).
     { ancho: 820, columna: 1, nivel: 56 },
     { ancho: 1023, columna: 1, nivel: 56 },
   ].map((q) => {

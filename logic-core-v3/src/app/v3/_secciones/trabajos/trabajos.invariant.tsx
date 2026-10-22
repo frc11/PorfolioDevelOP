@@ -61,9 +61,9 @@ const DEL_PORTFOLIO = [
   // proyectos, el hueco del logo, lo que se mide en el DOM y sus ganchos. [B1.2d B] Las barras de la tablet se fueron (T2).
   'FormularioDeLaTuya.tsx', 'SignoDePregunta.tsx', 'orden.ts', 'rueda.ts', 'transicion.ts', 'signo.ts', 'hueco.ts', 'medida.ts',
   'useOrdenDeLaEscena.ts', 'useRuedaDelPortfolio.ts', 'useTransicionDeLasTiras.ts',
-  // [B1.3] el ancla al cargar. [B1.2d B] Las historias (el deslizamiento de B1.3 se fue: el scroll no las avanza). [P-H31b] Su scroll quieto
-  // pasó al componente común.
-  'useAnclaDeLaCarga.ts', 'HistoriasDelPortfolio.tsx', 'HistoriaDelProyecto.tsx',
+  // [B1.3] el ancla al cargar. [B1.2e] Las historias se fueron (sus dos piezas): debajo de 1024, el carrusel —el flujo, la tarjeta, su medio
+  // medido y el disparo por línea—, con el componente común de `_componentes/carrusel/`.
+  'useAnclaDeLaCarga.ts', 'FlujoDelPortfolio.tsx', 'TarjetaDelProyecto.tsx', 'medioDelCarrusel.ts', 'useMedioDelCarrusel.ts', 'useDisparoPorLinea.ts',
 ].map((f) => `portfolio/${f}`)
 const ARCHIVOS = ['Trabajos.tsx', 'CapaDeLaGota.tsx', 'gota.ts', 'geometria.ts', 'contenido.ts', 'proyectos.ts', ...DEL_PORTFOLIO]
 const FUENTES = ARCHIVOS.map((archivo) => ({ archivo, texto: leer(archivo) }))
@@ -125,12 +125,12 @@ titulo('6 · El contenido llega COMPLETO a las dos ramas, y la quieta no se muev
 /** Las filas de la ficha que van al marcado OCULTAS, derivadas: el servicio mientras los tres digan lo mismo, el resultado si no hay. */
 const OCULTAS = [...(seMuestraElServicio(PROYECTOS) ? [] : ['servicio']), ...(PROYECTOS.some((p) => p.resultado !== null) ? [] : ['resultado'])]
 /**
- * [B1.2d B] Lo único del contenido que NO va al marcado servido, con su razón: los nombres de los dos controles del teclado de las
- * historias. Las historias se montan en el cliente, debajo de 1024 y con el panel adentro (el servidor sirve el acordeón).
+ * [B1.2d B] Lo único del contenido que NO va al marcado servido, con su razón: [B1.2e] los nombres de las dos flechas del carrusel (eran los
+ * dos controles del teclado de las historias). El carrusel se monta en el cliente, debajo de 1024 (el servidor sirve el acordeón).
  */
-const SOLO_EN_LAS_HISTORIAS = ['historias.anterior', 'historias.siguiente']
-const ENTEROS = TEXTOS.filter((h) => !SOLO_EN_LAS_HISTORIAS.includes(h.ruta))
-afirmarIgual(TEXTOS.filter((h) => SOLO_EN_LAS_HISTORIAS.includes(h.ruta)).length, SOLO_EN_LAS_HISTORIAS.length, 'lo que no va al marcado servido es sólo lo de las historias (las dos rutas existen)')
+const SOLO_EN_EL_CARRUSEL = ['carrusel.anterior', 'carrusel.siguiente']
+const ENTEROS = TEXTOS.filter((h) => !SOLO_EN_EL_CARRUSEL.includes(h.ruta))
+afirmarIgual(TEXTOS.filter((h) => SOLO_EN_EL_CARRUSEL.includes(h.ruta)).length, SOLO_EN_EL_CARRUSEL.length, 'lo que no va al marcado servido es sólo lo del carrusel (las dos rutas existen)')
 afirmarIgual(ENTEROS.filter((h) => !quieto.includes(h.valor)).map((h) => h.ruta), [], 'los textos del contenido llegan enteros a la rama quieta')
 afirmarIgual(ENTEROS.filter((h) => !conMotion.includes(h.valor)).map((h) => h.ruta), [], '  y a la animada')
 afirmarIgual(OCULTAS, ['servicio', 'resultado'], 'dos filas de la ficha van al marcado ocultas, derivadas: el servicio (los tres dicen lo mismo) y el resultado (ninguno tiene)')
@@ -157,8 +157,8 @@ const TRES = /from ['"](three|@react-three\/[a-z-]+|three\/[^'"]+)['"]/
 const CONTEXTO = /<Canvas\b|WebGLRenderer|getContext\(\s*['"]webgl/
 for (const { archivo, texto } of FUENTES) afirmar(!TRES.test(texto) && !CONTEXTO.test(texto), `${archivo}: ni three ni un contexto WebGL ([B1.2b] el «?» es un SVG en el DOM)`)
 // [F6] Reemplazada por la spec: el formulario en 3D (B7) salió; quedan los tres de las historias. [P-H31b] Y su scroll quieto pasó al
-// componente común: quedan dos.
-afirmarIgual(FUENTES.length, 23 + 11 + 1 + 2, 'se leyeron del disco los treinta y siete archivos de la sección y del Portfolio (los veintitrés de B1.2b, once de B1.2c, uno de B1.3 y [B1.2d B] los dos de las historias: las barras de la tablet, el deslizamiento, [F6] el formulario en 3D y [P-H31b] el freno del arrastre, que pasó al componente común, se fueron)')
+// componente común: quedan dos. [B1.2e] Reemplazada por la spec: las dos de las historias se fueron y entran las cinco del carrusel.
+afirmarIgual(FUENTES.length, 23 + 11 + 1 + 5, 'se leyeron del disco los cuarenta archivos de la sección y del Portfolio (los veintitrés de B1.2b, once de B1.2c, uno de B1.3 y [B1.2e] los cinco del carrusel: las barras de la tablet, el deslizamiento, [F6] el formulario en 3D, [P-H31b] el freno del arrastre y [B1.2e] las dos piezas de las historias se fueron)')
 controlPositivo('  el detector ve el padrón de B (con el formulario en 3D, que ya no está en el disco)', [...DEL_PORTFOLIO, 'portfolio/FormularioEnPerspectiva.tsx'], (lista: readonly string[]) => lista.every((a) => existsSync(path.join(AQUI, a))))
 controlPositivo('el detector ve un renderer propio', 'const r = new THREE.WebGLRenderer()', (t: string) => !CONTEXTO.test(t))
 
@@ -191,7 +191,7 @@ afirmar(!/-\[\d+(px|rem)\]/.test(quieto), 'cero px o rem suelto en un valor arbi
 controlPositivo('el chequeo del px suelto ve una clase con un valor en px', `<i class="${CLASE_DE_PRUEBA}">`, (html: string) => !/-\[\d+(px|rem)\]/.test(html))
 afirmarIgual(hoversSinFoco(quieto), [], `los ${veces(quieto, 'hover:')} \`hover:\` llevan su \`focus-visible:\` en la misma clase`)
 controlPositivo('  el detector ve un hover sin su gemela', '<a class="hover:underline">x</a>', (html: string) => hoversSinFoco(html).length === 0)
-afirmarIgual(veces(quieto, '<button'), CONTENIDO.proyectos.length + 1 + 1, 'CINCO botones: una cabecera por tira (las tres y la tuya) y [B1.2c] «Enviar» del formulario de la tuya ([B1.2d B] los toques de la historia se fueron: debajo de 1024 los da el componente común de las historias)')
+afirmarIgual(veces(quieto, '<button'), CONTENIDO.proyectos.length + 1 + 1, 'CINCO botones: una cabecera por tira (las tres y la tuya) y [B1.2c] «Enviar» del formulario de la tuya ([B1.2e] las flechas del carrusel, debajo de 1024, se montan en el cliente)')
 afirmarIgual(veces(quieto, '<a '), 2 * PROYECTOS.length + 1 + DE_LA_CINTA + DEL_CARRUSEL, 'SIETE enlaces del Portfolio (el medio de cada tira, sólo para el mouse, y su «Visitar sitio»; [B1.2c] y WhatsApp en la tuya) más los de Demos')
 afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), veces(quieto, '<a '), '  todos salen del sitio sin darle acceso a esta ventana ni el referente')
 afirmarIgual(veces(conMotion, '<a '), 2 * PROYECTOS.length + 1 + DEMOS.length + DEL_CARRUSEL, '  y los mismos siete con la coreografía puesta')

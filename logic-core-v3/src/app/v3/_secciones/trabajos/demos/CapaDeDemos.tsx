@@ -5,7 +5,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 
 import { Envoltorio } from '../../../_componentes/layout/Envoltorio'
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../../_lib/navegacion'
-import { PANTALLAS_POR_PASO, pxDelMostradoDeDemos, scrollDelPx } from '../portfolio/pasos'
+import { PANTALLAS_POR_PASO, pxDelMostradoDeDemos, pxDelMostradoDeLaCola, scrollDelPx } from '../portfolio/pasos'
 import { ARRANQUE_DEL_ESPACIO_DE_DEMOS, PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCION_DE_HOY } from './relojDeDemos'
 
 import { cn } from '@/lib/utils'
@@ -80,9 +80,12 @@ function alcanzar(p: Persecucion): void {
  */
 export function CapaDeDemos({
   mostrado,
+  salidaDeLaCola,
   className,
 }: {
   readonly mostrado: MotionValue<number>
+  /** [B1.2e] Dónde arranca la cola (px de la regla), si no es la de los pasos: con el carrusel, donde termina su flujo. */
+  readonly salidaDeLaCola?: () => number
   readonly className?: string
 }): React.JSX.Element {
   const capa = useRef<HTMLDivElement | null>(null)
@@ -203,7 +206,7 @@ export function CapaDeDemos({
       cancelar()
       // [INTERFAZ 1] Cierre: y si lo mostrado se asienta antes de que la capa llegue, la página sigue (`llevarALaLlegada`).
       cancelar = llevarALaLlegada({
-        destino: scrollDelPx(pxDelMostradoDeDemos(arranque, PANTALLAS_POR_PASO), tope, alto),
+        destino: scrollDelPx(salidaDeLaCola === undefined ? pxDelMostradoDeDemos(arranque, PANTALLAS_POR_PASO) : pxDelMostradoDeLaCola(arranque, salidaDeLaCola()), tope, alto),
         alto: (PX_DE_LA_SECCION_DE_HOY * alto) / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA,
         arranque,
         mostrado: () => mostrado.get(),
@@ -215,7 +218,7 @@ export function CapaDeDemos({
       cancelar()
       el.removeEventListener('focusin', alEntrarElFoco)
     }
-  }, [mostrado])
+  }, [mostrado, salidaDeLaCola])
 
   const alAbrir = useCallback((demo: Demo, pieza: HTMLAnchorElement): void => {
     setAbierta({ demo, pieza })
