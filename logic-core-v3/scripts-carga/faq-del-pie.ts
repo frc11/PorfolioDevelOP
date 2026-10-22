@@ -107,7 +107,7 @@ async function escenario(p: Page, ruta: string): Promise<{ readonly linea: strin
   await p.screenshot({ path: path.join(SALIDA, `${String(width)}${ruta.replaceAll('/', '-')}-adentro${CONTROL === '' ? '' : `-${CONTROL}`}.png`) })
   const ultimo = entrada[entrada.length - 1]?.faq ?? null
   const nuncaLosDos = entrada.every((m) => m.faq === null || Math.min(m.faq.niveles.pie, m.faq.niveles.faq) < 0.02)
-  const pieHundido = home ? entrada.some((m) => (m.faq?.hunde ?? 0) >= 0.99) && ((await p.evaluate('window.__pieDelBanco ? window.__pieDelBanco().piezas().every((a) => !a.visible) : null')) as boolean | null) !== false : adentro.columnas.length > 0 && adentro.columnas.every((c) => c.clip.startsWith('inset(50'))
+  const pieHundido = home ? entrada.some((m) => (m.faq?.hunde ?? 0) >= 0.99) && ((await p.evaluate('window.__pieDelBanco ? window.__pieDelBanco.piezas().every((a) => !a.visible) : null')) as boolean | null) !== false : adentro.columnas.length > 0 && adentro.columnas.every((c) => c.clip.startsWith('inset(50'))
   const entradaBien = ultimo !== null && ultimo.fase === 'adentro' && nuncaLosDos && pieHundido && enteros(adentro.bloques.slice(0, 2)) && entrada.every((m) => Math.abs(m.y - y0) <= 2)
 
   // 2 · La respuesta y el WhatsApp.
