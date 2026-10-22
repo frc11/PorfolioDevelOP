@@ -42,7 +42,8 @@ export function afirmarB12d(): void {
   controlPositivo('  el detector ve el vuelo de B1.3 (sólo lo soltaba su llegada)', (): boolean => false, pisado)
   const lenis = readFileSync(path.join(RAIZ, 'node_modules/lenis/dist/lenis.mjs'), 'utf8')
   afirmar(/this\.userData = userData \?\? \{\};/.test(lenis) && /onComplete\?\.\(this\);\s*this\.userData = \{\};/.test(lenis) && /if \(programmatic\) this\.targetScroll = value;/.test(lenis), '  el Lenis instalado pone la marca con cada `scrollTo` y la vacía al llegar; y en un viaje programado lleva el `targetScroll` con el valor animado (por eso la marca y no el destino)')
-  const saltar = sinComentarios(leer(`${PORTFOLIO}/saltar.ts`))
+  // [B4] El salto salió a la pieza común de los gatillos (el Portfolio lo re-exporta desde `saltar.ts`): se lee donde vive.
+  const saltar = sinComentarios(leer('_componentes/gatillos/salto.ts'))
   const medida = sinComentarios(leer(`${PORTFOLIO}/medida.ts`))
   const usePortfolio = sinComentarios(leer(`${PORTFOLIO}/usePortfolio.ts`))
   const conDuenoYFin = (s: string, m: string, u: string): boolean =>
