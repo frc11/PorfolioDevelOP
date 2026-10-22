@@ -178,10 +178,12 @@ controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un
 // MÓVIL 2: arriba las ocho (las 4–7 sólo en tablet) y abajo las 4–7 (sólo en el teléfono): 16 + 8.
 // [CIERRE A] A5 · con cinco demos: los dos renglones llevan las cinco (el de abajo corrido y de decoración), cada uno dos veces (20); la
 // cinta, la lista cuatro veces (con cinco, dos no llenaban 1024 al envolver); y paradas, sólo las cinco del de arriba.
-const DEL_CARRUSEL = 4 * DEMOS.length
+// [NOCTURNO B5] Reemplazada por la spec: el carrusel de abajo de 1024 es el común de B1.2e (con las demos) y se monta en el cliente,
+// como el del Portfolio: el marcado servido ya no lleva sus portadas, sus enlaces ni sus paradas. La cinta y el estante, igual.
+const DEL_CARRUSEL = 0
 const DE_LA_CINTA = 4 * DEMOS.length
-/** Paradas del carrusel EN EL MARCADO: las cinco de arriba (el de abajo es decoración). */
-const PARADAS_DEL_CARRUSEL = DEMOS.length
+/** Paradas del carrusel EN EL MARCADO: ninguna (se monta en el cliente). */
+const PARADAS_DEL_CARRUSEL = 0
 afirmarIgual(veces(quieto, '<img'), 3 + DE_LA_CINTA + DEL_CARRUSEL, `las TRES capturas reales llegan a la rama quieta: una por proyecto, y ninguna más — más las ${String(DE_LA_CINTA)} portadas de la cinta`)
 afirmarIgual(veces(conMotion, '<img'), 3 + DEMOS.length + DEL_CARRUSEL, '  y las mismas tres con la coreografía puesta: el túnel muestra la misma imagen que la lista, con otro gesto — y el estante, una portada por demo')
 afirmar(!quieto.includes('transform:'), 'la rama quieta no escribe una sola transformada')

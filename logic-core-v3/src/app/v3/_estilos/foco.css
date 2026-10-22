@@ -147,8 +147,9 @@
 }
 
 /* [INTERFAZ 1] Cierre · la portada enfocada del carrusel y de la cinta sube un piso: las vecinas van después en el orden
-   de pintado y le tapaban el anillo de ese lado (medido a 390: el borde de papel de la derecha, debajo de la vecina). */
-[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible,
+   de pintado y le tapaban el anillo de ese lado (medido a 390: el borde de papel de la derecha, debajo de la vecina).
+   [NOCTURNO B5] El carrusel de las demos es el común de B1.2e (una tarjeta a la vez): su tarjeta, para su anillo de adentro. */
+[data-v3] [data-parte="tarjeta-de-demo"]:focus-visible,
 [data-v3] [data-pieza="cinta"] a:focus-visible {
   position: relative;
   z-index: var(--z-elevado);
@@ -157,18 +158,17 @@
 /* [INTERFAZ 1] Cierre 2 · en el carrusel el anillo va POR DENTRO de la portada: el carrusel va a sangre y la primera de
    cada fila queda contra el borde de la pantalla, donde el anillo de afuera perdía su lado izquierdo. Los mismos dos
    tonos, espejados hacia adentro (papel, tinta, papel) sobre la caja de la imagen, sin el aire de la derecha. El
-   contorno del enlace queda transparente: en colores forzados el sistema lo pinta y es el anillo que se ve ahí. */
-[data-v3][data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible {
+   contorno del enlace queda transparente: en colores forzados el sistema lo pinta y es el anillo que se ve ahí.
+   [NOCTURNO B5] Ahora sobre la tarjeta de la demo del carrusel común: su vista recorta (el anillo de afuera no se vería). */
+[data-v3][data-v3] [data-parte="tarjeta-de-demo"]:focus-visible {
   outline-color: transparent;
   box-shadow: none;
 }
 
-[data-v3] [data-pieza="carrusel"] [data-parte="portada"]:focus-visible::after {
+[data-v3] [data-parte="tarjeta-de-demo"]:focus-visible::after {
   content: '';
   position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  inset-inline-end: var(--portada-aire);
+  inset: 0;
   border-radius: var(--radius-sutil);
   box-shadow:
     inset 0 0 0 var(--foco-desplazamiento) var(--color-fondo),

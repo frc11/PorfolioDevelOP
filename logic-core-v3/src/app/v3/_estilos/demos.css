@@ -2,7 +2,8 @@
  * LAS DEMOS — el estante, el cartel y la cinta. [PORTFOLIO · DEMOS]
  * =========================================================================
  * Todo lo que se mueve acá es CSS: el hover del estante, la apertura de las
- * vecinas y la cinta de abajo de 1025. Ni una línea de JS por cuadro.
+ * vecinas y la cinta de abajo de 1025. Ni una línea de JS por cuadro. [NOCTURNO B5]
+ * Salvo la mirada de la cámara (`--mirada`), que la biblioteca escribe cuando cambia.
  *
  * ── Los números, derivados de los tokens ─────────────────────────────────
  *
@@ -22,10 +23,21 @@
 }
 
 [data-v3] [data-pieza="estante"] {
-  --libro-ancho: calc(var(--spacing-8) * 5);
+  /* [NOCTURNO B5] Las placas, más grandes: cada una un 36 % del ancho de su columna, y el abanico la llena entera (el segundo
+   * término del solape, abajo). A 1440 son de 242 px y a 1024 de 167 (antes, 160 en los dos): el abanico se ve en el 95 % de la
+   * columna (s84 lo cuenta con la perspectiva). */
+  --libro-ancho: 36%;
   --libro-giro: 30deg;
   --libro-alza: var(--spacing-6);
   --libro-apertura: var(--spacing-4);
+  /* [NOCTURNO B5] La placa: su espesor y la distancia desde la que se la ve (la cámara de cada placa). */
+  --libro-espesor: var(--spacing-3);
+  /* [NOCTURNO B5] El giro de un canto sobre su borde: de canto a la cara, un cuarto de vuelta. */
+  --libro-canto: 90deg;
+  --libro-perspectiva: calc(var(--spacing-8) * 40);
+  /* [NOCTURNO B5] La mirada de la cámara (`giroDeLaPieza`, la de los valores de Por qué develOP): la escribe la biblioteca en cada
+   * cambio del mouse; quieta, de frente. */
+  --mirada: rotateX(0deg);
 
   display: flex;
   align-items: flex-end;
@@ -44,7 +56,7 @@
 }
 
 /* EL HUECO de cada pieza: plano y quieto, así el hover no cambia bajo el puntero
- * cuando la cara se levanta. Cada una tapa parte de la anterior. */
+ * cuando la placa se levanta. Cada una tapa parte de la anterior. */
 [data-v3] [data-pieza="libro"] {
   position: relative;
   flex: none;
@@ -67,52 +79,119 @@
   );
 }
 
-/* LA CARA: la portada, girada como un libro en el estante. */
+/* [NOCTURNO B5] LA CARA: la cámara de la placa. Su perspectiva y la mirada (fija en el mundo: gira al revés de lo que el mouse le
+ * suma a la cámara de la escena, como los títulos y los valores) y nada más: sin transición, sigue a la mirada cuadro a cuadro. Cada
+ * placa se ve con su propia cámara y se pinta en el orden del estante (la de la derecha tapa a la de la izquierda). */
 [data-v3] [data-pieza="libro"] > [data-parte="cara"] {
   display: block;
   block-size: 100%;
-  overflow: clip;
+  transform-style: preserve-3d;
+  transform: perspective(var(--libro-perspectiva)) var(--mirada);
+}
+
+/* [NOCTURNO B5] LA PLACA: girada como un libro en el estante (el abanico), con su espesor (los cantos). Lo que se mueve con el hover es
+ * esto: la cara (la cámara) queda quieta. */
+[data-v3] [data-pieza="libro"] [data-parte="placa"] {
+  position: relative;
+  display: block;
+  block-size: 100%;
   border-radius: var(--radius-sutil);
   box-shadow: var(--shadow-flotante);
-  transform: perspective(calc(var(--libro-ancho) * 6)) rotateY(var(--libro-giro));
+  transform-style: preserve-3d;
+  transform: rotateY(var(--libro-giro));
   transition:
     transform var(--demos-bajada) ease-out,
     box-shadow var(--demos-bajada) ease-out;
-  /* ⚠️ Sin `will-change`. Una cara promovida obligaba a componer el túnel, que se
-   * pinta encima, y el recorte del vacío dejaba de cortar el fondo de la ventana
-   * del CTA: el agujero se veía claro. Medido en la entrada, a 1440. */
+  /* ⚠️ Sin `will-change`: no hace falta (la placa es chica) y `s10-acceso` no lo quiere en el marcado. */
 }
 
-[data-v3] [data-pieza="libro"] > [data-parte="cara"] img {
+[data-v3] [data-pieza="libro"] [data-parte="portada"] {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: clip;
+  border-radius: var(--radius-sutil);
+}
+
+[data-v3] [data-pieza="libro"] [data-parte="portada"] img {
   block-size: 100%;
   object-fit: cover;
   object-position: top;
 }
 
+/* [NOCTURNO B5] LOS CANTOS de la placa (el bloque de CSS 3D de `BloqueSolido`, el de antes): el dorso y los cuatro costados, con las
+ * superficies de la sala; con el giro del abanico se le ve el costado izquierdo, y con la mirada, el de arriba o el de abajo. */
+[data-v3] [data-pieza="libro"] [data-parte="canto"] {
+  position: absolute;
+  pointer-events: none;
+  background-color: var(--color-superficie-3);
+}
+
+[data-v3] [data-pieza="libro"] [data-parte="canto"][data-lado="atras"] {
+  inset: 0;
+  border-radius: var(--radius-sutil);
+  background-color: var(--color-superficie-2);
+  transform: translateZ(calc(-1 * var(--libro-espesor)));
+}
+
+[data-v3] [data-pieza="libro"] [data-parte="canto"][data-lado="izquierda"] {
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--libro-espesor);
+  transform-origin: left center;
+  transform: rotateY(var(--libro-canto));
+}
+
+[data-v3] [data-pieza="libro"] [data-parte="canto"][data-lado="derecha"] {
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: var(--libro-espesor);
+  transform-origin: right center;
+  transform: rotateY(calc(-1 * var(--libro-canto)));
+}
+
+[data-v3] [data-pieza="libro"] [data-parte="canto"][data-lado="arriba"] {
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: var(--libro-espesor);
+  background-color: var(--color-superficie-2);
+  transform-origin: center top;
+  transform: rotateX(calc(-1 * var(--libro-canto)));
+}
+
+[data-v3] [data-pieza="libro"] [data-parte="canto"][data-lado="abajo"] {
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: var(--libro-espesor);
+  transform-origin: center bottom;
+  transform: rotateX(var(--libro-canto));
+}
+
 /* ── EL HOVER, sólo con puntero que pasa por encima; el foco hace lo mismo ── */
 /* [PASADA FINAL] D4 · adentro, el hover y el foco en la misma regla (la paridad de s3-foco, regla por regla); las de foco
-   de abajo siguen, para los dispositivos sin hover (un teclado en una tablet). */
+   de afuera siguen, para los dispositivos sin hover (un teclado en una tablet). [NOCTURNO B5] La gramática de las reseñas: la placa se
+   levanta un poco (y se pone de frente), suena el tic de la barra y aparece su nombre (el cartel: `Biblioteca.tsx`). */
 
 @media (hover: hover) {
   [data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) {
     z-index: var(--z-elevado);
   }
 
-  [data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) > [data-parte="cara"] {
-    transform: perspective(calc(var(--libro-ancho) * 6)) translateY(calc(-1 * var(--libro-alza))) rotateY(calc(var(--libro-giro) * 0.25));
+  [data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) > [data-parte="cara"] > [data-parte="placa"] {
+    transform: translateY(calc(-1 * var(--libro-alza))) rotateY(calc(var(--libro-giro) * 0.25));
     box-shadow: var(--shadow-flotante), var(--shadow-flotante);
     transition:
       transform var(--duracion-lenta) var(--demos-resorte),
       box-shadow var(--duracion-lenta) var(--demos-resorte);
   }
 
-  [data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) + [data-pieza="libro"] > [data-parte="cara"] {
-    transform: perspective(calc(var(--libro-ancho) * 6)) translateX(var(--libro-apertura)) rotateY(var(--libro-giro));
+  [data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) + [data-pieza="libro"] > [data-parte="cara"] > [data-parte="placa"] {
+    transform: translateX(var(--libro-apertura)) rotateY(var(--libro-giro));
     transition: transform var(--duracion-lenta) var(--demos-resorte);
   }
 
-  [data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:is(:hover, :focus-visible)) > [data-parte="cara"] {
-    transform: perspective(calc(var(--libro-ancho) * 6)) translateX(calc(-1 * var(--libro-apertura))) rotateY(var(--libro-giro));
+  [data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:is(:hover, :focus-visible)) > [data-parte="cara"] > [data-parte="placa"] {
+    transform: translateX(calc(-1 * var(--libro-apertura))) rotateY(var(--libro-giro));
     transition: transform var(--duracion-lenta) var(--demos-resorte);
   }
 }
@@ -121,21 +200,21 @@
   z-index: var(--z-elevado);
 }
 
-[data-v3] [data-pieza="libro"]:focus-visible > [data-parte="cara"] {
-  transform: perspective(calc(var(--libro-ancho) * 6)) translateY(calc(-1 * var(--libro-alza))) rotateY(calc(var(--libro-giro) * 0.25));
+[data-v3] [data-pieza="libro"]:focus-visible > [data-parte="cara"] > [data-parte="placa"] {
+  transform: translateY(calc(-1 * var(--libro-alza))) rotateY(calc(var(--libro-giro) * 0.25));
   box-shadow: var(--shadow-flotante), var(--shadow-flotante);
   transition:
     transform var(--duracion-lenta) var(--demos-resorte),
     box-shadow var(--duracion-lenta) var(--demos-resorte);
 }
 
-[data-v3] [data-pieza="libro"]:focus-visible + [data-pieza="libro"] > [data-parte="cara"] {
-  transform: perspective(calc(var(--libro-ancho) * 6)) translateX(var(--libro-apertura)) rotateY(var(--libro-giro));
+[data-v3] [data-pieza="libro"]:focus-visible + [data-pieza="libro"] > [data-parte="cara"] > [data-parte="placa"] {
+  transform: translateX(var(--libro-apertura)) rotateY(var(--libro-giro));
   transition: transform var(--duracion-lenta) var(--demos-resorte);
 }
 
-[data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:focus-visible) > [data-parte="cara"] {
-  transform: perspective(calc(var(--libro-ancho) * 6)) translateX(calc(-1 * var(--libro-apertura))) rotateY(var(--libro-giro));
+[data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:focus-visible) > [data-parte="cara"] > [data-parte="placa"] {
+  transform: translateX(calc(-1 * var(--libro-apertura))) rotateY(var(--libro-giro));
   transition: transform var(--duracion-lenta) var(--demos-resorte);
 }
 
@@ -208,7 +287,7 @@
 
 [data-v3] [data-pieza="cinta"] {
   /* [INTERFAZ 1] T3: el recorte deja afuera el anillo de foco: desplazamiento + dos grosores (el contorno y su borde de
-     papel, `foco.css`) = 6 px, en px a mano porque `overflow-clip-margin` no acepta calc() (como el carrusel, abajo). */
+     papel, `foco.css`) = 6 px, en px a mano porque `overflow-clip-margin` no acepta calc(). */
   --cinta-margen-del-recorte: 6px;
 
   overflow: clip;
@@ -260,54 +339,8 @@
   }
 }
 
-/* =========================================================================
- * EL CARRUSEL — abajo de 1024: la cinta que corre sola y se lanza con el dedo.
- * =========================================================================
- * MÓVIL-TRABAJOS. La física y los gestos son de `demos/Carrusel.tsx`; acá va la
- * caja. El renglón deja el scroll vertical al navegador (`pan-y`) y recorta con el
- * margen del anillo de foco. Tres portadas por renglón en el teléfono y cinco en
- * tablet; el aire va como relleno de cada una para que las dos copias midan igual.
- * ========================================================================= */
-
-[data-v3] [data-pieza="carrusel"] {
-  /* El anillo de foco: desplazamiento más grosor, que `overflow-clip-margin` no acepta en calc(). [INTERFAZ 1] T3: más
-     otro grosor, el borde de papel del anillo de dos tonos (`foco.css`): 6 px. Con 4, el recorte se comía el borde. */
-  --carrusel-margen-del-recorte: 6px;
-}
-
-[data-v3] [data-pieza="carrusel"] [data-parte="renglon"] {
-  overflow: clip;
-  overflow-clip-margin: var(--carrusel-margen-del-recorte);
-  /* [INTERFAZ 1] Cierre: la pista se mueve en una capa compuesta y ahí el margen del recorte no se respetó (medido a 390:
-     la primera portada enfocada, pegada al borde, sin anillo del lado izquierdo). La holgura va en la caja: relleno y
-     margen negativo del mismo tamaño, que aportan cero al layout (como las líneas de `LineasDeTexto`). */
-  padding-inline: var(--carrusel-margen-del-recorte);
-  margin-inline: calc(-1 * var(--carrusel-margen-del-recorte));
-  touch-action: pan-y;
-  cursor: grab;
-}
-
-[data-v3] [data-pieza="carrusel"] [data-parte="pista"] {
-  display: flex;
-  inline-size: max-content;
-}
-
-[data-v3] [data-pieza="carrusel"] [data-parte="portada"] {
-  display: block;
-  flex: none;
-  inline-size: var(--portada-ancho);
-  padding-inline-end: var(--portada-aire);
-  -webkit-user-drag: none;
-  user-select: none;
-}
-
-[data-v3] [data-pieza="carrusel"] [data-parte="portada"] img {
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  object-position: top;
-  border-radius: var(--radius-sutil);
-  pointer-events: none;
-}
+/* [NOCTURNO B5] EL CARRUSEL de abajo de 1024 (la cinta que se lanzaba con el dedo: `demos/Carrusel.tsx`) se fue: las demos van en el
+ * carrusel común de B1.2e (`_componentes/carrusel/`), que trae su caja. Su anillo de foco, por dentro de la tarjeta: `foco.css`. */
 
 /* [PULIDO 12] · mientras el scroll suave corre, los iframes no toman la rueda (era la regla de la hoja del motor de scroll
    sobre su clase de scroll suave, que en /v3 ya no se escribe: `_componentes/lenisSinClasesDeScroll.ts`). */

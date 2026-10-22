@@ -13,10 +13,11 @@ import { cn } from '@/lib/utils'
 import { viajeEnCurso } from '../../../_lib/escena/viaje'
 
 import { Biblioteca } from './Biblioteca'
-import { Carrusel } from './Carrusel'
+import { CarruselDeDemos } from './CarruselDeDemos'
 import type { Demo } from './catalogo'
 import { LLEGADA, aparicionPedida, enElTramo, llegadaDeLaAparicion, perseguirLaAparicion, poseDelLibro, tramoDelLibro } from './entrada'
 import { llevarALaLlegada } from './llevarALaLlegada'
+import { LLEGADA_DE_DEMOS } from './parada'
 import { TextoDeDemos } from './TextoDeDemos'
 import { VentanaDeDemo } from './VentanaDeDemo'
 
@@ -93,7 +94,10 @@ export function CapaDeDemos({
   const [inicial] = useState(() => aparicionPedida(mostrado.get(), false))
   const aparicion = useRef<Persecucion>({ pedida: inicial, mostrada: inicial, cuadro: 0, antes: 0 })
   const libros = useRef<HTMLElement[]>([])
-  /** [B1.2b] Los renglones del carrusel (el de 768 a 1023): llegan con el gesto de los libros. */
+  /**
+   * [B1.2b] Los renglones del carrusel (el de 768 a 1023): llegan con el gesto de los libros. [NOCTURNO B5] El carrusel es el común de
+   * B1.2e (`CarruselDeDemos`): llega entero, como un renglón.
+   */
   const renglones = useRef<HTMLElement[]>([])
   /**
    * [B1.2b] La ventana del título DOM: su P2 nace corrido sólo el 60 % de su alto, así que en 0 asoma la parte de arriba de las
@@ -151,10 +155,8 @@ export function CapaDeDemos({
 
   useLayoutEffect(() => {
     libros.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="libro"]') ?? [])]
-    renglones.current = [...(capa.current?.querySelectorAll<HTMLElement>('[data-pieza="carrusel"] [data-parte="renglon"]') ?? [])]
+    // [NOCTURNO B5] El carrusel se monta en el cliente, un render después: lo anota su caja (`alMontarElCarrusel`).
     titulo.current = capa.current?.querySelector<HTMLElement>('#demos > div:first-child') ?? null
-    // Se levantan sobre su base: el origen de los libros (`demos.css`).
-    for (const r of renglones.current) r.style.setProperty('transform-origin', '50% 100%')
     const p = aparicion.current
     // Al cambiar de ancho (o de lado de 1024) la aparición pedida es otra: se alcanza de una vez.
     const leerLaEntrada = (): void => {
@@ -172,8 +174,28 @@ export function CapaDeDemos({
     }
   }, [llegar, mostrado])
 
-  /** El carrusel arranca cuando todo llegó (la aparición mostrada entera). */
-  const carruselEnMarcha = useCallback((): boolean => aparicion.current.mostrada >= 1, [])
+  /**
+   * [NOCTURNO B5] La caja del carrusel (abajo de 1024), cuando se monta: es «el renglón» que llega con el gesto de los libros (se
+   * levanta sobre su base, el origen de los libros de `demos.css`), y toma ya la pose de lo que se muestra.
+   */
+  const alMontarElCarrusel = useCallback(
+    (caja: HTMLDivElement | null): void => {
+      renglones.current = caja === null ? [] : [caja]
+      if (caja === null) return
+      caja.style.setProperty('transform-origin', '50% 100%')
+      llegar(aparicion.current.mostrada)
+    },
+    [llegar],
+  )
+
+  // [NOCTURNO B5] La parada (`parada.ts`) lee esta persecución: mientras lo mostrado no alcanza a lo pedido, la rueda se traga.
+  useEffect(() => {
+    const p = aparicion.current
+    LLEGADA_DE_DEMOS.persecucion = p
+    return () => {
+      if (LLEGADA_DE_DEMOS.persecucion === p) LLEGADA_DE_DEMOS.persecucion = null
+    }
+  }, [])
 
   // [EL ENCASTRE] 1B · el scroll pide; lo mostrado lo persigue con la velocidad tope.
   useMotionValueEvent(mostrado, 'change', (valor) => {
@@ -244,7 +266,8 @@ export function CapaDeDemos({
           <div className="max-escritorio:hidden">
             <Biblioteca alAbrir={alAbrir} alejada={alejada} />
           </div>
-          <Carrusel enMarcha={carruselEnMarcha} />
+          {/* [NOCTURNO B5] Abajo de 1024, el carrusel del Portfolio (B1.2e) con las demos: rota cuando se ve (su propia vista). */}
+          <CarruselDeDemos className="escritorio:hidden" alMontarse={alMontarElCarrusel} />
         </div>
       </Envoltorio>
       {abierta === null ? null : (

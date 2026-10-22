@@ -224,13 +224,14 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/genie.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/GenieDeDemo.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CromoDeLaVentana.tsx`,
-  `${RAIZ_DE_SECCIONES}/trabajos/demos/Carrusel.tsx`,
-  `${RAIZ_DE_SECCIONES}/trabajos/demos/fisicaDelCarrusel.ts`,
+  // [NOCTURNO B5] la cinta de abajo de 1024 (`Carrusel.tsx` y su física) se fue: el carrusel común de B1.2e, con las demos.
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/CarruselDeDemos.tsx`,
   // INTERFAZ 1 · cierre: con el teclado, la página sigue hasta que la capa de demos llega (sólo mueve la página).
   `${RAIZ_DE_SECCIONES}/trabajos/demos/llevarALaLlegada.ts`,
-  // INTERFAZ 2 · T3: la onda que recorre la portada al pasar (con la bandera `vida=si`) y su escucha delegado.
-  `${RAIZ_DE_SECCIONES}/trabajos/demos/ondaDeLaPortada.ts`,
-  `${RAIZ_DE_SECCIONES}/trabajos/demos/OndaDeLasPortadas.tsx`,
+  // INTERFAZ 2 · T3: la onda de las portadas salió en [NOCTURNO B5] («el efecto de agua sale»): sus dos archivos, con ella.
+  // [NOCTURNO B5] la parada de Demos (la máquina de gatillos común con un paso): su geometría pura y su pista.
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/parada.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/ParadaDeDemos.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/movil-invariante.tsx`,
   // MÓVIL 2
   // [B1] el dato tipado del selector lateral del Portfolio: los proyectos, sus fichas y sus medios.

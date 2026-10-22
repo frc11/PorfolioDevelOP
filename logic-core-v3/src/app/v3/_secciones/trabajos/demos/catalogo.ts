@@ -65,4 +65,6 @@ export const TEXTO_DE_DEMOS = {
   cerrar: 'Cerrar la demo',
   /** [INTERFAZ 1] T3 · lo que anuncia la ventana mientras la demo carga (el esqueleto es sólo para la vista). */
   cargando: 'Cargando la demo…',
+  /** [NOCTURNO B5] El carrusel del teléfono y la tablet (el común de B1.2e): su nombre y sus dos flechas, como las del Portfolio. */
+  carrusel: { etiqueta: 'Las demos', rotulos: { anterior: 'Demo anterior', siguiente: 'Demo siguiente' } },
 } as const
