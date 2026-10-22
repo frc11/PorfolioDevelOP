@@ -1,4 +1,37 @@
-# REPORTE · noche del 2026-10-22 (actualizado 07:40; la noche sigue con 3 tareas en curso)
+# REPORTE · noche del 2026-10-22
+
+## Actualización 09:27 (corte por la cuota de uso): esto manda sobre el resumen de abajo
+- **Integradas y verificadas, 12 en total:**
+  - T0, B7, B1.2e, B4 y B12c;
+  - B12b (`48ba9510`);
+  - B5 (`219a693c`);
+  - B2 + B3 (reintegradas en `cd04d271` con el arreglo `436404fa`: las placas ya tienen texto);
+  - B6 (reintegrada en `728717d0` + `a7840f71`);
+  - B11 (`126c8a53`);
+  - B8 (`16e3781a`).
+- **Lo medido en cada una:**
+  - **B12b (el viaje):** `viaje.ts` 2 de 2, con 0 cuadros en blanco y el logo en su hueco a 0,28 %; los controles `velo` y `sin-hueco` dan rojo; `sin-tapar` es un control ciego. `velo.ts` 4 de 4.
+  - **B5 (Demos):** la parada 12 de 12, con sus dos controles en rojo.
+  - **B2 + B3 (las reseñas):** las tarjetas de adelante dan 8,95 y 10,28:1. El aro cuesta 0,1 ms por cuadro. B3 se ve: HABLANOS y el anillo en el piso.
+  - **B6 (el Panel):** `panel-b6` todo en verde. Las fallas eran del banco; el candado abierto se arregló.
+  - **B11 (el chat):** llega a los 11 s, sin pisar el chrome a 1440, 860 ni 390, y el control da rojo.
+    - **Ojo:** suma una prop opcional `overrides` a `src/modules/chatbot/components/LogicCompanion.tsx`, compartido con el sitio vivo. Es aditiva y `/` sigue cargando, pero hay que revisarla.
+    - En la consola aparece «`<circle>` attribute r» del `PulseAvatar` existente.
+  - **B8 (el moiré):** suites de la escena en verde. Costo del moiré: la trama gruesa ~0,05 ms y la fina ~0,06 ms por cuadro; el control del banco da verde. Banderas `?moire=0|1|2|mouse` (defecto 2).
+- **Arreglos del orquestador:**
+  - el control de s47, ciego desde B1.2e (`3209d764`);
+  - los bancos `viaje.ts` y `panel-b6.ts`;
+  - el alto viejo de Servicios.
+- **A medias, en sus worktrees (sin commitear, cortadas por la cuota):**
+  - B13 (`C:\nocturno\2026-10-22\b13`, 25 archivos): estaba sacando el pie provisorio de la página base.
+  - B9 (`C:\nocturno\2026-10-22\b9`, sobre la rama de B8, 3 archivos): estaba conectando las grietas al sombreador del vidrio.
+- **No empezada:** B10 (va después de B13).
+- **No corrieron:** el `verificar` completo final, las matrices completas y el `next build`. Lo último completo fue el `verificar` con T0. Después de cada merge corrí las suites del área: ninguna falla nueva.
+- **Antes de mergear a `rediseno/home`:** borrar o mover `docs/cola/2026-10-22/` del checkout principal. Está sin trackear y choca con esta rama.
+
+---
+
+# (Lo de abajo es la versión de las 07:40)
 
 ## Resumen
 1. **Integradas y verificadas en `nocturno/2026-10-22`:**
