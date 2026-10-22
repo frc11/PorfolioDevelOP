@@ -65,9 +65,8 @@ const deriva = (alto: number, conTramo: boolean): number[] => {
   return [enLaInsercion, alFinalDelTramo, alFinalDelPin].map((x) => Math.round(x * 1000) / 1000)
 }
 for (const a of ANCHOS) {
-  const escala = a.alto / 900
   const d = deriva(a.alto, true)
-  afirmar(d[0] === 0 && cerca(d[1], LARGO_SIN_ESTIRAR_PX * escala, 1e-3) && cerca(d[2], 0, 1e-3), `${a.nombre}: en la inserción 0 px, al final del tramo ${String(d[1])} px (los ${String(LARGO_SIN_ESTIRAR_PX)} de la regla), al final del pin ${String(d[2])} px de deriva`)
+  afirmar(d[0] === 0 && cerca(d[1], (PANTALLAS_DE_LAS_RESENAS * a.alto) / K_DE_LAS_RESENAS, 1e-3) && cerca(d[2], 0, 1e-3), `${a.nombre}: en la inserción 0 px, al final del tramo ${String(d[1])} px (sus cuatro pantallas, a 1/k: la sala casi quieta), al final del pin ${String(d[2])} px de deriva`)
   console.log(`      alto de la sección: ${String(PANTALLAS_DE_POR_QUE_DEVELOP * a.alto)} px → ${String((PANTALLAS_DE_POR_QUE_DEVELOP + PANTALLAS_DE_LAS_RESENAS) * a.alto)} px; k = ${String(K_DE_LAS_RESENAS)}`)
 }
 controlPositivo('sin anotar el tramo la escena llega 4 pantallas tarde al final del pin', false, (conTramo) => cerca(deriva(900, conTramo)[2], 0, 1e-3))

@@ -33,6 +33,7 @@ import { PiezaDeValor } from './Valores'
 // [NOCTURNO B2] Las reseñas: un tramo de cuatro pantallas en el sostén de B (el pin de siempre, traducido) y su carrusel en la lista.
 import { EscenarioDeLasResenas, EspaciadorDeLasResenas, usePinSinLasResenas } from './resenas/EscenarioDeLasResenas'
 import { ResenasEnLista } from './resenas/ResenasEnLista'
+import { ResenasParaElLector } from './resenas/ResenasParaElLector'
 
 /**
  * 07 · POR QUÉ develOP — la frase, los seis valores y el CTA, alrededor del logo.
@@ -161,6 +162,7 @@ function Escenario({ seccion, pin: pinDelBloque }: PropsDeSeccion & { readonly p
           </div>
         </div>
       </motion.div>
+      <ResenasParaElLector />
       <CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />
       <EscenarioDeLasResenas pin={pinDelBloque} />
     </div>

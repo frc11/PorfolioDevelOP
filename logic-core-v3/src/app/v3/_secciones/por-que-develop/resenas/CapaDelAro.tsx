@@ -5,7 +5,7 @@ import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { sonar } from '../../../_lib/sonido/bus'
 import { ARO } from '../../../_lib/escena/resenas/aro'
 import { CAPA_DEL_ARO, RESENAS_EN_VIVO, TARJETAS_DEL_ARO, resenaDeCadaPlaca, suscribirALasResenas, versionDeLasResenas } from '../../../_lib/escena/resenas/enVivo'
-import { RESENAS, TEXTO_DE_LAS_RESENAS, enlaceDelTrabajo } from './contenido'
+import { RESENAS, enlaceDelTrabajo } from './contenido'
 import { CaraDeLaResena, VerTrabajo } from './TarjetaDeResena'
 
 const PLACAS = Array.from({ length: ARO.placas }, (_, i) => i)
@@ -15,8 +15,8 @@ const UMBRAL_DEL_ARRASTRE = 6
 /**
  * [NOCTURNO B2] LAS TARJETAS DEL ARO, del lado del DOM — una por placa física: un enlace al trabajo de su reseña en el Portfolio (el deep
  * link de B1: el escucha del Portfolio lo lleva al paso). La escena las lleva al frente de su placa en cada cuadro y dice cuál se lee
- * (`_lib/escena/resenas/tarjetas.ts`): sólo esas se ven y entran en el orden del teclado. Qué reseña muestra cada una lo decide la escena
- * (cambia en la nuca del aro, donde no se ve).
+ * (`_lib/escena/resenas/tarjetas.ts`). Qué reseña muestra cada una lo decide la escena (cambia en la nuca del aro, donde no se ve). Son del
+ * puntero: para el lector y el teclado están las reseñas enteras, iguales en las dos ramas (`ResenasParaElLector.tsx`).
  *
  *   · hover (mouse): el aro frena, la placa sube, suena el `tic` de la barra y aparece «Ver trabajo →» (CSS);
  *   · clic: el `clic` de siempre (el escucha global del sonido) y el ancla del trabajo;
@@ -79,7 +79,9 @@ export function CapaDelAro({ arrastre }: { readonly arrastre: boolean }): React.
     <div
       ref={capa}
       data-pieza="capa-del-aro"
+      aria-hidden="true"
       className="pointer-events-none absolute inset-0"
+      style={{ zIndex: 1 }}
       onClickCapture={(e) => {
         if (!arrastrado.current) return
         arrastrado.current = false
@@ -98,7 +100,6 @@ export function CapaDelAro({ arrastre }: { readonly arrastre: boolean }): React.
             href={enlaceDelTrabajo(r)}
             draggable={false}
             tabIndex={-1}
-            aria-label={TEXTO_DE_LAS_RESENAS.enlace(r.nombre, r.negocio)}
             data-pieza="resena-del-aro"
             data-placa={i}
             className="group pointer-events-auto invisible absolute top-0 left-0 block h-[var(--alto-de-la-tarjeta)] w-[var(--ancho-de-la-tarjeta)] origin-top-left"
@@ -108,12 +109,6 @@ export function CapaDelAro({ arrastre }: { readonly arrastre: boolean }): React.
               sonar('tic')
             }}
             onPointerLeave={() => {
-              if (RESENAS_EN_VIVO.senalada === i) RESENAS_EN_VIVO.senalada = -1
-            }}
-            onFocus={() => {
-              RESENAS_EN_VIVO.senalada = i
-            }}
-            onBlur={() => {
               if (RESENAS_EN_VIVO.senalada === i) RESENAS_EN_VIVO.senalada = -1
             }}
           >

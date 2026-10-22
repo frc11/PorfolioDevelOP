@@ -76,3 +76,16 @@ Rama `nocturno/2026-10-22-b2`. Tarea: `docs/cola/2026-10-22/60-B2B3-resenas-cta.
 - **El viaje del menú** (`destinosDelViaje.ts`): descuenta las 4 pantallas si el pin tiene el espaciador.
 - **Los bancos** (sin correr): `scripts-carga/aro-costo.ts` (con la referencia sin aro en la inserción) y `scripts-carga/aro-legibilidad.ts`
   (el contraste de las tarjetas visibles con su control al 30 %; `MODO=interaccion`, el hover y el clic).
+
+- **El gate (el commit que sigue a `4ad48208`):** el `<EscenaDelCta` había perdido su espacio en `PruebasDeLaEscena.tsx` (no parseaba:
+  arreglado). Lo que pidieron las suites del lane, por diseño: (1) las dos ramas anuncian lo mismo y tienen las mismas paradas (s6-render,
+  s6-por-que-develop, s10-acceso): las reseñas para el lector y el teclado van en las dos ramas, iguales y antes del CTA
+  (`ResenasParaElLector.tsx`: el `h3`, cada reseña entera y su enlace, que aparece con el foco como la pastilla de la barra); las tarjetas
+  que se ven (el aro y el carrusel plano) son del puntero (`aria-hidden`, sin enlaces ni botones fuera del orden del teclado en el marcado
+  servido); s10-acceso suma `DELTA_DE_LAS_RESENAS` (12 paradas y un `h3`, en las dos ramas) con su control. (2) s6-tokens: sin
+  `bg-cover`/`bg-center` (el retrato, en el estilo) ni `border-hairline` (`border`). (3) s7-contrato: el tipo de los trabajos es local (una
+  sección no importa otra) y la lista no consulta la compuerta (decide el CSS: `--resenas-alargan`). (4) s52: el generador de la fuente
+  sigue terminando en «Nosotros». (5) s83 §2: al final del tramo la sala vio sus 4 pantallas a 1/k (8,98 px a 1440), no 9.
+- **Lo medido sin navegador (con B3 encima, en el mismo árbol):** lint limpio, tsc 0; s83, s10, s6, s18, s27, s37, s40, s41, s45, s47, s49,
+  s52–s62, s74, s75, s76, s78 sin fallas; s3, s5, s7, s8, s4 con las fallas de la base (sin `.next` en el worktree: s3-peso, s5-peso,
+  s7-compuerta, s8-tres, s8-peso, s4-heredado no cierran; s5-compacto y s8-montaje, las mismas listas que la base).

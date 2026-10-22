@@ -10,7 +10,8 @@ import { CAPA_DEL_ARO } from './enVivo'
  * del CTA (`pie3d/homografia.ts`), con la transformada 2D nítida cuando la cara está casi de frente (el texto se rasteriza a su escala). Su
  * tamaño de maqueta es el de la placa de frente (`--ancho-de-la-tarjeta`, sólo al cambiar): de frente, escala 1.
  *
- * Lo que se escribe, sólo si cambió: la transformada, la opacidad (cuánto se lee), la visibilidad y si entra en el orden del teclado.
+ * Lo que se escribe, sólo si cambió: la transformada, la opacidad (cuánto se lee) y la visibilidad. Son del puntero (el teclado y el lector tienen
+ * las reseñas enteras en el DOM de la sección).
  */
 
 export interface EstadoDeLaTarjeta {
@@ -89,9 +90,6 @@ export function llevarLaTarjeta(el: HTMLElement | null, s: EstadoDeLaTarjeta, ce
   if (visible !== s.visible) {
     s.visible = visible
     el.style.visibility = visible ? 'visible' : 'hidden'
-    // Se enfoca sólo la que se lee; la que se va, si tenía el foco, lo suelta.
-    el.tabIndex = visible ? 0 : -1
-    if (!visible && document.activeElement === el) el.blur()
   }
 }
 
@@ -104,6 +102,5 @@ export function esconderLasTarjetas(tarjetas: readonly (HTMLElement | null)[], e
     s.opacidad = '0'
     el.style.visibility = 'hidden'
     el.style.opacity = '0'
-    el.tabIndex = -1
   })
 }

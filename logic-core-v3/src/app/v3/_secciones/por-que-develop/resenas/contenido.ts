@@ -10,7 +10,8 @@
  * un reparto provisorio entre los tres trabajos reales: va con ellas cuando se reemplacen.
  */
 
-import type { SlugDelProyecto } from '../../trabajos/proyectos'
+/** Los trabajos del Portfolio (sus slugs: `trabajos/proyectos.ts`; una sección no importa otra, y s83 afirma que cada uno es un deep link de B1). */
+export type TrabajoDelPortfolio = 'el-garage' | 'esquina-estudio' | 'banu-scents'
 
 /** El título, partido a los dos lados del logo como la frase que reemplaza. */
 export const TITULO_DE_LAS_RESENAS = { izquierda: 'Lo que dicen', derecha: 'nuestros clientes' } as const
@@ -22,6 +23,8 @@ export const TEXTO_DE_LAS_RESENAS = {
   siguiente: 'Reseña siguiente',
   /** El nombre accesible de cada tarjeta (lleva al Portfolio). */
   enlace: (nombre: string, negocio: string): string => `Reseña de ${nombre}, ${negocio}. Ver el trabajo en el Portfolio`,
+  /** El enlace de cada reseña para el lector y el teclado (aparece con el foco). */
+  enlaceDelLector: (nombre: string, negocio: string): string => `Ver el trabajo que comenta ${nombre} (${negocio})`,
 } as const
 
 export interface Resena {
@@ -31,11 +34,11 @@ export interface Resena {
   readonly negocio: string
   /** El retrato (placeholder ilustrado): reemplazar el archivo o la ruta. */
   readonly foto: string
-  readonly proyecto: SlugDelProyecto
+  readonly proyecto: TrabajoDelPortfolio
 }
 
 const RETRATOS = ['/v3/resenas/retrato-a.svg', '/v3/resenas/retrato-b.svg', '/v3/resenas/retrato-c.svg', '/v3/resenas/retrato-d.svg'] as const
-const TRABAJOS: readonly SlugDelProyecto[] = ['el-garage', 'esquina-estudio', 'banu-scents']
+const TRABAJOS: readonly TrabajoDelPortfolio[] = ['el-garage', 'esquina-estudio', 'banu-scents']
 
 const CRUDAS: readonly (readonly [string, string, string, string])[] = [
   ['espiga', 'Nos entendieron desde la primera charla. El sitio se siente como nuestro local: cálido, ordenado y fácil de recorrer.', 'Mariela Ocampo', 'Panadería La Espiga'],

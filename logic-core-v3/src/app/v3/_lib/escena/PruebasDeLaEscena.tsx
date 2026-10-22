@@ -56,7 +56,7 @@ export function PruebasDeLaEscena(props: Props) {
         </Suspense>
       )}
       <Suspense fallback={null}>
-        <EscenaDelCtakeyLightRef={props.keyLightRef} logoMaterialRef={props.logoMaterialRef} stats={props.stats} />
+        <EscenaDelCta keyLightRef={props.keyLightRef} logoMaterialRef={props.logoMaterialRef} stats={props.stats} />
       </Suspense>
     </>
   )
