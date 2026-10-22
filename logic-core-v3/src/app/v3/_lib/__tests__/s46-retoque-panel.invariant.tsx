@@ -25,7 +25,8 @@ import { VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_L
 import { CORTE_DE_LA_VENTANA_DEL_TRAZO } from '../../_secciones/_contrato/bloqueAnimado'
 import { TRAMOS_DEL_TITULAR } from '../../_secciones/quienes-somos/contenido'
 import { avanceDelTrazo, avancesDelSigno, principal } from '../../_secciones/quienes-somos/trazos3d'
-import { TABLA_DEL_CAOS, escalaDeLaDemo } from '../../_secciones/tu-panel/geometria'
+import { TARJETAS } from '../../_secciones/tu-panel/contenido'
+import { escalaDeLaDemo } from '../../_secciones/tu-panel/geometria'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -42,7 +43,8 @@ afirmar(enSuLugar(TU_PANEL, TARJETA), 'sin la tarjeta «En vivo», sin la miniat
 controlPositivo('  el chequeo vería la tarjeta de antes (un botón con la miniatura)', [TU_PANEL, '<button><MiniaturaDeLaDemo demo={tarjeta.demo} /></button>'], ([a, b]: string[]) => enSuLugar(a, b))
 // [PASADA FINAL] B1/B2 · la especificación cambió: el panel entero a escala reducida (0,65 a 0,9 a 1440) en el caos del
 // nocturno, y el marco con esquinas y sombra (la prueba `panelborde` se borró). Lo fija `s6-tu-panel` §6-§9 y s47 (B).
-const a1440 = TABLA_DEL_CAOS.map((_, i) => escalaDeLaDemo(i, 1376))
+// [B6] Los tres módulos de la sección nueva comparten su pantalla: la escala es una (a 1440 × 900, 0,78).
+const a1440 = TARJETAS.map(() => escalaDeLaDemo(1376, 900))
 afirmar(a1440.every((e) => e >= 0.65 && e <= 0.9), 'a 1440 cada demo se ve entera a escala reducida (0,65 a 0,9): se lee y se usa en su lugar', a1440.map((e) => e.toFixed(2)).join(' · '))
 afirmar(!('panelBorde' in entornoPedido('producto').pruebas), 'la prueba `panelborde` ya no existe: el marco flota con esquinas y sombra (B2)')
 const tarjetaDeLead = sinComentarios(leer('_panel-vivo/demos/leads/TarjetaDeLead.tsx'))

@@ -50,7 +50,8 @@ import { estadoDelMotor } from '../../_chrome/sonido/motorCompartido'
 import { ENTRE_MONTAJES_MS, informarVisibilidad, laQueCorre } from '../../_panel-vivo/escenario'
 import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS, useTitular2D } from '../../_componentes/titulos3d/titular2d'
 import { seccionDe } from '../../_secciones/_contrato/forma'
-import { TABLA_DEL_CAOS, TAMANOS } from '../../_secciones/tu-panel/geometria'
+import { TARJETAS } from '../../_secciones/tu-panel/contenido'
+import { MODULO } from '../../_secciones/tu-panel/geometria'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { Hero } from '../../_secciones/hero/Hero'
 import { ALTO_DEL_CTA_EN_LISTA_SVH, VENTANA_DE_LA_FRASE, VENTANA_DE_LA_LEVANTADA, VENTANA_DE_LA_SUBIDA_DE_LA_FRASE } from '../../_secciones/por-que-develop/geometria'
@@ -530,7 +531,11 @@ const archivosDe = (dir: string): string[] => readdirSync(dir).flatMap((a) => (s
 titulo('B · Tu panel: el caos del nocturno con las demos usables, el marco que flota, y una sola demo corriendo')
 
 // B1 · la distribución (la tabla, los tamaños y el barrido los fija s6-tu-panel §6-§7); acá, lo que cruza carpetas.
-afirmar(Object.values(TAMANOS).every((t) => t.ancho >= 42 && t.ancho < 60) && TABLA_DEL_CAOS.length === 8, 'ningún módulo a lo ancho: las ocho features van del 42 al 56 % del ancho útil (más chicas que las del retoque, más grandes que las del nocturno)', Object.values(TAMANOS).map((t) => String(t.ancho)).join(' · '))
+// [B6] La especificación cambió: la sección del Panel tiene tres módulos alternados (no el caos de ocho), un poco más chicos
+// que las demos de antes. Lo que B1 fijaba sigue: ningún módulo a lo ancho.
+const sinNingunoALoAncho = (m: { readonly ancho: number; readonly anchoAngosto: number }, cuantos: number): boolean => m.ancho >= 42 && m.ancho < 56 && m.anchoAngosto <= 60 && cuantos === 3
+afirmar(sinNingunoALoAncho(MODULO, TARJETAS.length), 'ningún módulo a lo ancho: los tres módulos del Panel van al 52 % del ancho útil (al 60 en el escritorio angosto): un poco más chicos que las demos de antes (42 a 56)', `${String(MODULO.ancho)} · ${String(MODULO.anchoAngosto)}`)
+controlPositivo('el detector VE un módulo a lo ancho', { ancho: 100, anchoAngosto: 100 }, (m: { readonly ancho: number; readonly anchoAngosto: number }) => sinNingunoALoAncho(m, 3))
 const cargador = sinComentarios(leer('_panel-vivo/DemoDelPanel.tsx'))
 // [NOCTURNO FINAL] C2 · en escritorio, la pantalla natural (como antes); abajo de 1024, la angosta de su tarjeta (`pantallaAngosta`), también a escala.
 const escalada = (c: string): boolean => /style=\{escalada \? \{ width: dibujo\.pantalla\.ancho, height: dibujo\.pantalla\.alto, transform: `scale\(\$\{dibujo\.escala\.toFixed\(4\)\}\)` \} : undefined\}/.test(c) && /const enUso = escritorio \? pantalla : pantallaAngosta\(el\.clientWidth\)\s*setDibujo\(\{ pantalla: enUso, escala: el\.clientWidth \/ enUso\.ancho \}\)/.test(c)

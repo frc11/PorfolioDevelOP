@@ -100,8 +100,8 @@ export const USOS_DECLARADOS: readonly UsoDePatron[] = [
   { patron: 'P2', seccion: 'servicios', para: 'las filas de la secuencia — 60 de sus 77 instancias están en esta página' },
   { patron: 'P3', seccion: 'servicios', para: 'el resaltado progresivo del párrafo, palabra por palabra' },
   { patron: 'P4', seccion: 'servicios', para: 'la llegada del CTA — entra desde 100 px abajo y muy frenado, cuando el 01 toma el panel' },
-  { patron: 'P1', seccion: 'tu-panel', para: 'el titular, línea por línea' },
-  { patron: 'P2', seccion: 'tu-panel', para: 'la llegada de cada feature y de cada pieza del fondo, subiendo desde abajo' },
+  { patron: 'P1', seccion: 'tu-panel', para: '[B6] los títulos que vienen desde abajo: el título y la descripción de cada módulo, renglón por renglón (`_contrato/TituloQueSube.tsx`)' },
+  { patron: 'P2', seccion: 'tu-panel', para: '[B6] la llegada de cada módulo y de cada palabra fundida, subiendo desde abajo' },
   { patron: 'P1', seccion: 'por-que-develop', para: 'el titular, línea por línea' },
   { patron: 'P5', seccion: 'por-que-develop', para: 'las piezas que aparecen — uno de los pocos usos que el sistema tiene' },
   { patron: 'P1', seccion: 'cierre', para: 'el titular de cierre' },
@@ -127,10 +127,10 @@ export interface GestoPorTiempo {
 
 export const GESTOS_POR_TIEMPO: readonly GestoPorTiempo[] = [
   {
-    id: 'entrada-desde-la-derecha',
+    id: 'cta-del-panel',
     seccion: 'tu-panel',
-    para: '«Y más…» y el newsletter entran de derecha a izquierda y los tres puntos llegan después, uno detrás del otro',
-    curva: 'expo.out',
-    disparo: 'al entrar en vista, y en espejo al salir por abajo (SPRINT PANEL 2); quieta abajo de 1025 y con movimiento reducido',
+    para: '[B6] la bajada y la fila del CTA (el botón, la «o» y el formulario) entran en su lugar con el gatillo del contrato (`_contrato/Gatillo.tsx`); el «Y más…» y su entrada de derecha a izquierda se fueron con el remate',
+    curva: 'ease-salida',
+    disparo: 'al cruzar la línea de disparo, y en espejo al volver a subir por encima (P-H18); quieta con movimiento reducido',
   },
 ]

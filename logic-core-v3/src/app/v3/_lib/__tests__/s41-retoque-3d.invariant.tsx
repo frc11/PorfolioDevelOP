@@ -40,7 +40,6 @@ import { armarElTitulo } from '../escena/titulos3d/geometria'
 import { DISOLVER_GLSL, LLEGADA_NORMAL_GLSL, LLEGADA_POSICION_GLSL } from '../escena/titulos3d/llegada'
 import { CONTENIDO as CONTENIDO_DEL_HERO } from '../../_secciones/hero/contenido'
 import { CONTENIDO as CONTENIDO_DE_QUIENES } from '../../_secciones/quienes-somos/contenido'
-import { CORRIDAS_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { SUBIDA_DE_LA_FRASE_SVH } from '../../_secciones/por-que-develop/geometria'
 import { LIBRO_QUE_LLEGA, poseDelLibro } from '../../_secciones/trabajos/demos/entrada'
 import { DESDE_DONDE_LLEGAN, poseDelValor } from '../../_secciones/por-que-develop/valorEnVolumen'
@@ -109,10 +108,15 @@ afirmar(!delScroll.delCursor && delCursor.delCursor && avanzarElPolvo(delCursor,
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B4 · «Y más…»: aparece y se va en su lugar')
 
-const remate = sinComentarios(leer('_secciones/tu-panel/Remate.tsx'))
-const enSuLugar = (c: string): boolean => /const desde = t\.pieza === 'punto' \? corrida : corrida \* CORRIDAS_DEL_REMATE/.test(c) && !/window\.innerWidth/.test(c) && /\{ opacity: 0, transform: `translateX\(\$\{desde\}px\)` \}/.test(c)
-afirmar(enSuLugar(remate) && CORRIDAS_DEL_REMATE <= 4, 'la frase y el newsletter entran con una corrida corta desde la derecha y un fundido (y se van igual, en espejo): no salen del borde del cuadro', `${String(CORRIDAS_DEL_REMATE)} corridas de --spacing-8`)
-controlPositivo('el detector VE la entrada desde el borde del cuadro', remate.replace('corrida * CORRIDAS_DEL_REMATE', 'window.innerWidth - el.getBoundingClientRect().left'), enSuLugar)
+// [B6] La especificación cambió: el remate («Y más…» y el newsletter) se fue con la sección nueva del Panel, y lo que cierra
+// la sección es su CTA a pantalla completa. Lo que B4 fijaba sigue igual de fuerte sobre lo que entra ahí: la bajada y la fila
+// del CTA (el botón, la «o» y el newsletter) entran con el gatillo del contrato, EN SU LUGAR: una corrida corta desde la
+// derecha (la traslación de 8 del tema) con un fundido, y se van igual, en espejo; nada sale del borde del cuadro.
+const gatillo = sinComentarios(leer('_secciones/_contrato/Gatillo.tsx'))
+const ctaDelPanel = sinComentarios(leer('_secciones/tu-panel/CtaDelPanel.tsx'))
+const enSuLugar = (g: string, c: string): boolean => /espera: 'translate-x-8 opacity-0'/.test(g) && /ido: 'translate-x-8 opacity-0 /.test(g) && !/window\.innerWidth|getBoundingClientRect/.test(g) && /<Gatillo className="w-full">/.test(c)
+afirmar(enSuLugar(gatillo, ctaDelPanel), 'la bajada y la fila del CTA del Panel entran con una corrida corta desde la derecha y un fundido (y se van igual, en espejo): no salen del borde del cuadro', 'el gatillo del contrato: translate-x-8')
+controlPositivo('el detector VE la entrada desde el borde del cuadro', [gatillo.replace("espera: 'translate-x-8 opacity-0'", "espera: 'opacity-0', desde: window.innerWidth"), ctaDelPanel] as const, ([g, c]: readonly [string, string]) => enSuLugar(g, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B5 · «para elegirnos» y el primer valor, separados')
