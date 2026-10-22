@@ -251,7 +251,7 @@ const RESERVA = /\.clone\(\)|new THREE\.(Vector[234]|Matrix[34]|Quaternion|Euler
  */
 const PERMITIDA = /hayBanco\(\)|\/\/ banco|\/\/ una vez|\?\?=/
 const reservasEn = (fuente: string): string[] => cuerposDeUseFrame(fuente).flatMap((c) => c.split('\n')).filter((l) => RESERVA.test(l) && !PERMITIDA.test(l)).map((l) => l.trim())
-const CON_USE_FRAME = ['polvo/Fisica.tsx', 'polvo/Aire.tsx', 'piso/PisoVivo.tsx', 'amanecer/Amanecer.tsx', 'entorno/Entorno.tsx', 'entorno/Rebote.tsx', 'moire/MoireVivo.tsx', 'estrellas/Estrellas.tsx', 'estrellas/Fugaz.tsx', 'formacion/Formacion.tsx', 'cieloDeDia/CieloDeDia.tsx', 'ContactOcclusion.tsx', 'OrbitRig.tsx']
+const CON_USE_FRAME = ['polvo/Fisica.tsx', 'polvo/Aire.tsx', 'piso/PisoVivo.tsx', 'amanecer/Amanecer.tsx', 'entorno/Entorno.tsx', 'entorno/Rebote.tsx', 'moire/MoireDelMouse.tsx', 'estrellas/Estrellas.tsx', 'estrellas/Fugaz.tsx', 'formacion/Formacion.tsx', 'cieloDeDia/CieloDeDia.tsx', 'ContactOcclusion.tsx', 'OrbitRig.tsx']
 const sobran = CON_USE_FRAME.flatMap((a) => reservasEn(leer(a)).map((l) => `${a}: ${l.slice(0, 90)}`))
 afirmar(sobran.length === 0, 'ningún useFrame de la escena reserva en cada cuadro (salvo con banco o armando algo la primera vez)', sobran.length === 0 ? `${String(CON_USE_FRAME.length)} archivos` : sobran.join(' | '))
 controlPositivo('el detector VE un clon en un useFrame', "useFrame((state) => {\n    const antes = m.logoAntes.clone()\n  })", (c: string) => reservasEn(c).length === 0)
@@ -321,7 +321,7 @@ const exactos: readonly (readonly [string, RegExp, string])[] = [
   ['choreographySampler.ts', /current \+ diff \* \(1 - Math\.exp\(-dt \/ tau\)\)/, 'la cámara y el puntero persiguen con un amortiguador exponencial'],
   ['polvo/Aire.tsx', /m\.aire\.lerp\(m\.empuje, 1 - Math\.exp\(-dt \/ tau\)\)/, 'el aire toma y suelta la velocidad con un amortiguador exponencial'],
   ['entorno/Entorno.tsx', /1 - Math\.exp\(-dt \/ ESTELA_TAU_S\)/, 'la estela del polvo (E6) sigue a la cámara con un amortiguador exponencial'],
-  ['moire/MoireVivo.tsx', /1 - Math\.exp\(-dt \/ M2\.tauS\)/, 'el moiré acelera con el scroll con un amortiguador exponencial'],
+  ['moire/MoireDelMouse.tsx', /perseguirAlPuntero\(puntero\.current, p\.x, p\.y, Math\.min\(delta, 0\.1\)\)/, '[B8] la rendija del mouse persigue al puntero con el amortiguador exponencial de la cámara'],
   ['piso/PisoVivo.tsx', /while \(m\.reloj \+ paso <= t \+ 1e-9 && pasos < PASOS_POR_CUADRO\)/, 'el piso vivo avanza a pasos fijos del reloj de la escena'],
   ['amanecer/linea.ts', /const tope = dt \/ AMANECER\.minimoS/, 'el amanecer persigue al scroll con una velocidad tope en unidades por segundo'],
   ['derivaDelAire.ts', /shell\.rotation\.y = elapsed \* spin\[index\]/, 'las conchas del polvo giran con el reloj'],

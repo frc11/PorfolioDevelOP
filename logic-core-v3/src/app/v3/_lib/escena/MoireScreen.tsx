@@ -3,9 +3,9 @@
 import { forwardRef, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
-import { entornoDeLaEscena } from './entorno'
+import { entornoDeLaEscena, hayBanco } from './entorno'
 import { ANISOTROPIA_DE_LAS_TRAMAS } from './gpu/anisotropia'
-import { conDesajusteVivo } from './moire/parche'
+import { disposicionDelMoire, type VarianteDelMoire } from './moire/fijo'
 import { conElAmanecer } from './amanecer/luz'
 import { conPliegue } from './espejo/pliegue'
 import { bandEnvelope, createDottedGridCellData, createGridCellData } from './moireTextures'
@@ -21,7 +21,6 @@ import {
   MOIRE_HEIGHT_SEGMENTS,
   MOIRE_NEAR_BOTTOM,
   MOIRE_NEAR_ORDER,
-  MOIRE_NEAR_RADIUS,
   MOIRE_NEAR_TOP,
   MOIRE_OPACITY,
   MOIRE_SEGMENTS,
@@ -66,24 +65,31 @@ import { TRAMA_ANCLADA, ZOCALO, LIMITE } from './moire/limite'
  * vértice multiplica al del material. Con el RGB en 1, lo único que aporta es el
  * desvanecido de los bordes de la banda.
  *
- * **Y tiene que ser de la geometría y no de la textura**, porque la capa gruesa
- * desplaza su `offset.y` en cada frame: una envolvente horneada en la textura se
- * movería con la deriva y el borde de la pantalla subiría y bajaría.
+ * **Y tiene que ser de la geometría y no de la textura**, porque una capa
+ * puede correr su `offset` ([B8] sólo la rendija de `?moire=mouse`): una
+ * envolvente horneada en la textura se movería con ella.
+ *
+ * [B8] **Qué capas, dónde y quietas** lo dice la variante (`moire/fijo.ts`): `0`
+ * ninguna, `1` la gruesa, `2` (el defecto) las dos en la pared —coplanares: el
+ * batido no depende de la cámara— y `mouse` la gruesa corrida por el puntero.
  */
 
 export type MoireHandle = {
-  /** La capa gruesa. El loop le escribe `offset.y` para que baje. */
-  readonly drift: THREE.Texture
-  /** [ESCENA 5] La capa fina: el moiré vivo le corre la fase y le cambia el desajuste (`moire/MoireVivo.tsx`). */
+  /** La capa gruesa. [B8] Quieta; con `?moire=mouse`, `MoireDelMouse` le corre el `offset`. */
+  readonly gruesa: THREE.Texture
+  /** La capa fina. [B8] Quieta. */
   readonly fina: THREE.Texture
-  /** [ESCENA 5] El alto de la banda fina (con la formación llega hasta el piso): lo necesita M4. */
-  readonly altoDeLaFina: number
+  /** [B8] Qué capas se dibujan y en qué radio: lo que leen las estrellas, la fugaz y el amanecer (`estrellas/trama.ts`). */
+  readonly capas: { readonly gruesa: boolean; readonly fina: boolean }
+  readonly radios: { readonly gruesa: number; readonly fina: number }
   /**
    * [ESCENA 7] Dónde está cada capa (abajo, arriba, fundido de abajo y de arriba, fracción del alto):
    * el cielo de afuera lee la trama para quedar detrás (`estrellas/cielo.ts`).
    */
   readonly bandas: { readonly gruesa: readonly [number, number, number, number]; readonly fina: readonly [number, number, number, number] }
 }
+
+type VentanaDelBanco = Window & { __moireDelBanco?: { estado: () => { variante: VarianteDelMoire; capas: MoireHandle['capas']; gruesa: number[]; fina: number[] } } }
 
 type LayerSpec = {
   readonly radius: number
@@ -172,8 +178,11 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
 ) {
   // [ESCENA 8] T2: con la formación y la bandera, las dos capas bajan a pleno hasta debajo del piso.
   const anclada = hastaElPiso && entornoDeLaEscena().limite
-  // [PULIDO 20] R2 · `fondo=espejo`: el cristal solo, sin la trama (las capas y el zócalo no se dibujan; sus texturas siguen).
+  // [PULIDO 20] R2 · `fondo=espejo`: el cristal solo, sin la trama (las capas y el zócalo no se dibujan; [B8] y nada la lee).
   const conTrama = entornoDeLaEscena().pruebas['sin-moire'] !== 'si'
+  // [B8] Qué capas y dónde, por la variante de `?moire=` (`moire/fijo.ts`).
+  const variante = entornoDeLaEscena().moire
+  const disposicion = disposicionDelMoire(variante)
   const layers = useMemo(() => {
     const abajo = anclada ? TRAMA_ANCLADA.abajo : TRAMA_HASTA_EL_PISO.abajo
     const fundido = anclada ? 0 : TRAMA_HASTA_EL_PISO.fundido
@@ -185,12 +194,14 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
       cells: MOIRE_COARSE_CELLS,
       order: MOIRE_FAR_ORDER,
     }
+    // [B8] En la pared (`2`, coplanar con la gruesa) la fina toma la banda de la gruesa; si no, la suya.
+    const enLaPared = disposicion.fina.radio === MOIRE_FAR_RADIUS
     const fine: LayerSpec = {
-      radius: MOIRE_NEAR_RADIUS,
-      bottom: hastaElPiso ? abajo : MOIRE_NEAR_BOTTOM,
-      top: MOIRE_NEAR_TOP,
+      radius: disposicion.fina.radio,
+      bottom: hastaElPiso ? abajo : enLaPared ? MOIRE_FAR_BOTTOM : MOIRE_NEAR_BOTTOM,
+      top: enLaPared ? MOIRE_FAR_TOP : MOIRE_NEAR_TOP,
       fadeBottom: hastaElPiso ? fundido : undefined,
-      cells: fineCells(store.current.moireMismatch),
+      cells: fineCells(disposicion.desajuste ?? store.current.moireMismatch),
       order: MOIRE_NEAR_ORDER,
     }
 
@@ -209,9 +220,10 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
     )
     applyRepeat(fineTexture, fine)
 
-    const make = (spec: LayerSpec, texture: THREE.DataTexture) => ({
+    const make = (spec: LayerSpec, texture: THREE.DataTexture, dibuja: boolean) => ({
       spec,
       texture,
+      dibuja,
       geometry: buildLayerGeometry(spec),
       material: new THREE.MeshLambertMaterial({
         color: MOIRE_COLOR,
@@ -226,9 +238,7 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
       }),
     })
 
-    const capas = { coarse: make(coarse, coarseTexture), fine: make(fine, fineTexture) }
-    // [ESCENA 5] M4: la fina lee dos desajustes en las transiciones entre tramos (`moire/parche.ts`).
-    if (entornoDeLaEscena().moire) conDesajusteVivo(capas.fine.material)
+    const capas = { coarse: make(coarse, coarseTexture, disposicion.gruesa.dibuja), fine: make(fine, fineTexture, disposicion.fina.dibuja) }
     // [ESCENA 7] T11: con la bandera, el amanecer (no hace nada sin ella).
     conElAmanecer(capas.coarse.material)
     conElAmanecer(capas.fine.material)
@@ -238,17 +248,17 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
       conPliegue(capas.fine.material)
     }
     return capas
-  }, [store, hastaElPiso, anclada])
+  }, [store, hastaElPiso, anclada, disposicion])
 
-  // [ESCENA 8] T2: el zócalo de la pared (la capa gruesa), del color de la trama y más denso que sus líneas.
+  // [ESCENA 8] T2: el zócalo de la pared (la capa gruesa), del color de la trama y más denso que sus líneas. [B8] Sin la gruesa, no.
   const zocalo = useMemo(() => {
-    if (!anclada) return null
+    if (!anclada || !disposicion.gruesa.dibuja) return null
     const alto = ZOCALO.arriba - ZOCALO.abajo
     const geometry = new THREE.CylinderGeometry(ZOCALO.radio, ZOCALO.radio, alto, MOIRE_SEGMENTS, 1, true)
     const material = new THREE.MeshLambertMaterial({ color: MOIRE_COLOR, transparent: true, opacity: LIMITE.zocalo.opacidad, depthWrite: false, side: THREE.BackSide, dithering: true })
     conElAmanecer(material)
     return { geometry, material, y: ZOCALO.abajo + alto / 2 }
-  }, [anclada])
+  }, [anclada, disposicion])
   useEffect(
     () => () => {
       zocalo?.geometry.dispose()
@@ -260,12 +270,14 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
   /**
    * El desajuste se mueve con un slider, o sea por click y no por frame. Se
    * aplica MUTANDO la textura en vez de re-renderizando: la disciplina del
-   * módulo es que el store sea un canal al loop, no estado de React.
+   * módulo es que el store sea un canal al loop, no estado de React. [B8] Si la
+   * variante fija el desajuste (`2`), el slider no lo mueve.
    */
   useEffect(() => {
-    let applied = Math.round(store.current.moireMismatch)
+    const desajusteDe = (m: number): number => Math.round(disposicion.desajuste ?? m)
+    let applied = desajusteDe(store.current.moireMismatch)
     const apply = (values: { moireMismatch: number }) => {
-      const next = Math.round(values.moireMismatch)
+      const next = desajusteDe(values.moireMismatch)
       if (next === applied) return
       applied = next
       const spec = { ...layers.fine.spec, cells: fineCells(next) }
@@ -282,7 +294,7 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
 
     apply(store.current)
     return store.subscribe(apply)
-  }, [store, layers])
+  }, [store, layers, disposicion])
 
   // r3f solo libera lo que declara el JSX; éstas las creó `useMemo`.
   useEffect(
@@ -299,16 +311,19 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
   useEffect(() => {
     // [ESCENA 8] T2: sin fundido abajo, el cielo lee uno ínfimo (divide por él en el shader).
     const banda = (spec: LayerSpec): readonly [number, number, number, number] => [spec.bottom, spec.top, spec.fadeBottom === 0 ? 1e-4 : (spec.fadeBottom ?? MOIRE_FADE), MOIRE_FADE]
-    const handle: MoireHandle = { drift: layers.coarse.texture, fina: layers.fine.texture, altoDeLaFina: layers.fine.spec.top - layers.fine.spec.bottom, bandas: { gruesa: banda(layers.coarse.spec), fina: banda(layers.fine.spec) } }
+    const capas = { gruesa: conTrama && layers.coarse.dibuja, fina: conTrama && layers.fine.dibuja }
+    const handle: MoireHandle = { gruesa: layers.coarse.texture, fina: layers.fine.texture, capas, radios: { gruesa: layers.coarse.spec.radius, fina: layers.fine.spec.radius }, bandas: { gruesa: banda(layers.coarse.spec), fina: banda(layers.fine.spec) } }
     if (typeof ref === 'function') ref(handle)
     else if (ref) ref.current = handle
-  }, [ref, layers])
+    // [B8] Para el banco: la variante, las capas y el corrimiento de cada textura (sólo se mueve con `?moire=mouse`).
+    if (hayBanco()) (window as VentanaDelBanco).__moireDelBanco = { estado: () => ({ variante, capas, gruesa: layers.coarse.texture.offset.toArray(), fina: layers.fine.texture.offset.toArray() }) }
+  }, [ref, layers, conTrama, variante])
 
   return (
     <>
-      {[layers.coarse, layers.fine].map((layer) => (
+      {[layers.coarse, layers.fine].filter((layer) => layer.dibuja).map((layer) => (
         <mesh
-          key={layer.spec.radius}
+          key={layer === layers.coarse ? 'gruesa' : 'fina'}
           name={layer === layers.coarse ? 'trama gruesa' : 'trama fina'}
           geometry={layer.geometry}
           material={layer.material}

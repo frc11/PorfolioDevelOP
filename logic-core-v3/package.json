@@ -350,6 +350,7 @@
     "test:s78-b12b": "npx tsx src/app/v3/_lib/__tests__/s78-b12b.invariant.tsx",
     "test:s83-resenas": "npx tsx src/app/v3/_lib/__tests__/s83-resenas.invariant.tsx",
     "test:s83": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s83",
+    "test:s78-b8": "npx tsx src/app/v3/_lib/__tests__/s78-b8.invariant.ts",
     "test:s78": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s78",
     "test:s79-ingreso": "npx tsx src/app/v3/_chrome/ingreso/s79-ingreso.invariant.tsx",
     "test:s79-ingreso-url": "npx tsx src/app/v3/_chrome/ingreso/s79-ingreso-url.invariant.tsx",

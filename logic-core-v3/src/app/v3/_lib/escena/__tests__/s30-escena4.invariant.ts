@@ -4,9 +4,9 @@
  * [ESCENA 6] La formación, la cámara contra las copias y las estrellas se mudaron a
  * `s31-escena6.invariant.ts` (la formación cambió entera); acá queda lo de ESCENA 4 y 5 que sigue.
  *
- * §1 · las banderas: el moiré vivo y el polvo parejo prendidos en el producto, las pruebas apagadas,
- *      la base sin nada, y el pedido del banco se lee bien.
- * §4 · el moiré: M1a y M2 se suman con tope; M4 es entero en cada tramo y cambia suave; M3 corre una celda.
+ * §1 · las banderas: el moiré y el polvo parejo prendidos en el producto, las pruebas apagadas,
+ *      la base sin nada, y el pedido del banco se lee bien. [B8] `moire` es la variante del moiré quieto.
+ * §4 · el moiré: [B8] el vivo (M1a a M4) se borró —reaccionaba al scroll—; lo que lo reemplaza, en `s78-b8`.
  * §5 · el polvo: la caja se repite sin salto; la quietud y el despertar; la forma del logo lo saca.
  * §6 · la sombra según el haz (5c): sin haz no cambia nada; de noche más dura, de día más difusa.
  * §7 · el túnel: el número que la escena trae se re-deriva de la sección de Trabajos.
@@ -17,7 +17,7 @@ import path from 'node:path'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
-import { M1A, M2, M3, M4, PERIODO_DE_LA_BASE_S, corrimientoDelPulso, desajusteEn, velocidadDeLaGruesa } from '../moire/variantes'
+import { MOIRE_POR_DEFECTO } from '../moire/fijo'
 import { formaDelLogo } from '../polvo/formaDelLogo'
 import { NUNCA, POSARSE, avanzarElPolvo, polvoInicial } from '../polvo/posarse'
 import { POLVO_PAREJO, envolver } from '../polvo/volumen'
@@ -31,28 +31,24 @@ import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../navegacion'
 
 // ── §1 · las banderas ─────────────────────────────────────────────────────
 titulo('§1 · el moiré y el polvo prendidos, las pruebas apagadas, salvo en el banco')
-afirmar(ENTORNO.moire && ENTORNO.polvoParejo, 'el producto trae el moiré vivo (M1a + M2 + M3 + M4) y el polvo parejo')
-afirmar(!BASE_LIMPIA.moire && !BASE_LIMPIA.polvoParejo, 'la base, el moiré y el polvo de antes')
+afirmar(ENTORNO.moire === MOIRE_POR_DEFECTO && ENTORNO.polvoParejo, '[B8] el producto trae el moiré quieto en su defecto y el polvo parejo', `moire=${ENTORNO.moire}`)
+afirmar(BASE_LIMPIA.moire === MOIRE_POR_DEFECTO && !BASE_LIMPIA.polvoParejo, 'la base, el polvo de antes ([B8] el moiré de la base también es el quieto: el que se movía se borró)')
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, 'el producto no trae ninguna prueba (las de ESCENA 6, en s31)')
 afirmarIgual(BASE_LIMPIA.pruebas, PRUEBAS_APAGADAS, '  la base tampoco')
-const antes = entornoPedido('producto,moire=hoy,polvo=antes')
-afirmar(!antes.moire && !antes.polvoParejo && antes.E1, '`moire=hoy` y `polvo=antes` dan el producto con el moiré y el polvo de la base')
-afirmar(!entornoPedido('E1,E4,E6,E7').moire && entornoPedido('E1,moire').moire, 'sin `producto`, sólo lo que la lista nombra')
-controlPositivo('el detector VE un pedido que prende de más', 'E1,E4,amanecer', (p: string) => !entornoPedido(p).amanecer && !entornoPedido(p).moire)
+const antes = entornoPedido('producto,moire=1,polvo=antes')
+afirmar(antes.moire === '1' && !antes.polvoParejo && antes.E1, '`moire=1` y `polvo=antes` dan el producto con una rendija y el polvo de la base')
+afirmar(entornoPedido('E1,E4,E6,E7').moire === MOIRE_POR_DEFECTO && entornoPedido('E1,moire=mouse').moire === 'mouse' && entornoPedido('producto,moire=hoy').moire === MOIRE_POR_DEFECTO, 'sin `producto`, sólo lo que la lista nombra; el moiré, su defecto si no se nombra (`moire=hoy`, el de antes, ya no existe)')
+controlPositivo('el detector VE un pedido que prende de más', 'E1,E4,amanecer', (p: string) => !entornoPedido(p).amanecer && entornoPedido(p).moire === MOIRE_POR_DEFECTO)
 
 // ── §4 · el moiré ─────────────────────────────────────────────────────────
-titulo('§4 · el moiré vivo')
-const base1 = 1 / PERIODO_DE_LA_BASE_S
-afirmar(Math.abs(velocidadDeLaGruesa(0) - M1A * base1) < 1e-12, 'M1a · quieta, la gruesa baja 3 veces más rápido que en la base', `una celda cada ${(1 / velocidadDeLaGruesa(0)).toFixed(1)} s`)
-afirmar(velocidadDeLaGruesa(0.02) > velocidadDeLaGruesa(0) && Math.abs(velocidadDeLaGruesa(10) - M2.tope * base1) < 1e-12, 'M2 · el scroll se SUMA al piso de M1a y el tope es el de siempre (24 veces la base)')
-const enteros = M4.tramos.map((t, i) => desajusteEn(i + 1 < M4.tramos.length ? (t.desde + M4.tramos[i + 1].desde) / 2 : t.desde + M4.transicion + 0.005))
-afirmarIgual(enteros, M4.tramos.map((t) => t.desajuste), 'M4 · en el medio de cada tramo el desajuste es su entero (cierra alrededor del cilindro)')
-let salto = 0
-for (let q = 0; q < 1; q += 0.0005) salto = Math.max(salto, Math.abs(desajusteEn(q + 0.0005) - desajusteEn(q)))
-afirmar(salto < 0.2, 'M4 · y cambia suave: ningún salto entre dos progresos vecinos', `salto máximo ${salto.toFixed(3)}`)
-afirmar(corrimientoDelPulso(-1) === 0 && Math.abs(corrimientoDelPulso(M3.duraS * 2) - M3.celdas) < 1e-9, 'M3 · el principal corre la fase una celda, y ahí se queda')
+titulo('§4 · [B8] el moiré vivo se borró (reaccionaba al scroll); el quieto, en s78-b8')
+const MOIRE_DIR = path.join(process.cwd(), 'src/app/v3/_lib/escena/moire')
+const vivoBorrado = ['variantes.ts', 'parche.ts', 'MoireVivo.tsx'].filter((a) => existsSync(path.join(MOIRE_DIR, a)))
+afirmar(vivoBorrado.length === 0, 'M1a, M2, M3 y M4 no tienen código: ni sus números, ni el parche de la fina, ni el componente', vivoBorrado.join(', '))
 const escenario = readFileSync(path.join(process.cwd(), 'src/app/v3/_lib/escena/ProbeStage.tsx'), 'utf8')
-afirmar(/<MoireVivo rig=\{rig\} moireRef=\{moireRef\}/.test(escenario), 'el escenario monta el moiré vivo, después del rig')
+const montaElQuieto = (s: string): boolean => /<MoireDelMouse moireRef=\{moireRef\} quieto=\{reducedMotion\} \/>/.test(s) && !/<MoireVivo/.test(s)
+afirmar(montaElQuieto(escenario), 'el escenario monta sólo la rendija del mouse, sin el rig (no lee el progreso)')
+controlPositivo('el detector VE el escenario de ESCENA 5 (el moiré vivo con el rig)', escenario.replace('<MoireDelMouse moireRef={moireRef} quieto={reducedMotion} />', '<MoireVivo rig={rig} moireRef={moireRef} quieto={reducedMotion} />'), montaElQuieto)
 
 // ── §5 · el polvo ─────────────────────────────────────────────────────────
 titulo('§5 · el polvo parejo y las pruebas del polvo')
