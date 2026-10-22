@@ -3,17 +3,21 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
+import { calentarElDestino } from '../../_componentes/navegacion/calentar'
 import { hayBanco } from '../../_lib/escena/entorno'
 import { escenaDeLaRutaLista } from '../../_lib/escena/ruta/listaDeLaRuta'
 import { DIA_DEL_FINAL, NOCHE_DISPARADA } from '../../_lib/escena/nocheDisparada'
 import { VUELTA_AL_HOME, claveDeLaEntrada, devolverLosAlmacenes, posicionGuardadaDelHome, type PosicionDelHome } from '../../_lib/escena/ruta/posicionDelHome'
 import { sonar } from '../../_lib/sonido/bus'
-import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, VELO_EN_CURSO, atenderElVelo, cubrirConElVelo } from '../../_lib/veloDeNavegacion'
+import { EVENTOS_DEL_VELO, RUTA_DEL_HOME, VELO_EN_CURSO, atenderElVelo, conElMontajeLiviano, conLaBandaCorta, cubrirConElVelo, viaDelVelo } from '../../_lib/veloDeNavegacion'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
 import { llevarElScrollA, reponerLosAlmacenes, scrollDeLaRuta } from './alCambiarDeRuta'
 import { tonoDeLoQueTapa } from './tonoDeLoQueTapa'
-import { CURVA_DEL_VELO, CURVA_DEL_VELO_CSS, VELO, colorDelVelo, coberturaDelVelo, degradeDelVelo, frenteDelVelo, geometriaDeLaBanda, puedeDestapar, siguienteFaseDelVelo, transformadaDelVelo, type EventoDelVelo, type FaseDelVelo } from './velo'
+import { CURVA_DEL_VELO, CURVA_DEL_VELO_CSS, colorDelVelo, coberturaDelVelo, degradeDelVelo, frenteDelVelo, geometriaDeLaBanda, puedeDestapar, siguienteFaseDelVelo, tiemposDelVelo, transformadaDelVelo, type EventoDelVelo, type FaseDelVelo } from './velo'
+
+/** [T0] Lo que tardan cubrir y destapar con la vía del velo de ahora (`viaDelVelo`: la banda corta o la de siempre). */
+const tiempos = (): ReturnType<typeof tiemposDelVelo> => tiemposDelVelo(conLaBandaCorta(viaDelVelo()))
 
 /** Si la ruta no cambia después de cubrir (un error, un enlace a la misma), se destapa igual a los `VENCE_MS`. */
 const VENCE_MS = 4000
@@ -142,7 +146,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
       pasar('llego')
       window.dispatchEvent(new Event(EVENTOS_DEL_VELO.destapa))
       sonar('abre')
-      animar('destapando', VELO.destaparMs, () => {
+      animar('destapando', tiempos().destaparMs, () => {
         pasar('destapo')
         pintar('quieto', 0)
       })
@@ -169,7 +173,7 @@ export function VeloDeNavegacion(): React.JSX.Element {
       window.dispatchEvent(new Event(EVENTOS_DEL_VELO.cubre))
       pasar('cubrir')
       sonar('cierra')
-      animar('cubriendo', VELO.cubrirMs, () => {
+      animar('cubriendo', tiempos().cubrirMs, () => {
         pasar('cubrio')
         pintar('cubierto', 1)
         p.cubierto()
@@ -252,6 +256,19 @@ export function VeloDeNavegacion(): React.JSX.Element {
   useEffect(() => {
     alCambiarLaRuta.current(ruta)
     rutaDeAhora.current = ruta
+  }, [ruta])
+
+  // [T0] 11 · 3 · la vía `montaje`: en una página, con el hilo libre, se pide ya la coreografía animada del home (`calentarElDestino`):
+  // la vuelta (por un enlace o por la flecha) lo monta una sola vez, sin el árbol quieto que después se rehacía entero.
+  useEffect(() => {
+    if (ruta === RUTA_DEL_HOME || !conElMontajeLiviano(viaDelVelo())) return undefined
+    const pedir = (): void => calentarElDestino(RUTA_DEL_HOME)
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(pedir, { timeout: 4000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = window.setTimeout(pedir, 2000)
+    return () => window.clearTimeout(id)
   }, [ruta])
 
   return (

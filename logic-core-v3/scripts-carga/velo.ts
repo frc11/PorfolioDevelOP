@@ -18,6 +18,10 @@
  *
  *   BASE=http://localhost:3004 ANCHOS=1440,390 npx tsx scripts-carga/velo.ts
  *   CONTROL=sin-velo …   el control (navega sin cubrir): el cuadro del cambio sin cubrir
+ *   [T0 · 2026-10-22] VIA=banda|montaje|ambas|ninguna …   la vía para bajar el tiempo hacia el home (`viaDelVelo`, `_lib/veloDeNavegacion.ts`):
+ *         siembra `window.__viaDelVelo` antes de cargar; sin VIA, la del código (`VIA_POR_DEFECTO`). `ninguna` es la de B12a.8 (la referencia).
+ *   [T0] La píldora: además de la más rápida con la hora del banco (el criterio), la más rápida con la HORA DEL CUADRO (el sello del rAF,
+ *         con la que el navegador calcula las animaciones): un dato, para separar un salto de verdad de un cuadro largo del montaje.
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
@@ -30,6 +34,8 @@ const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
 const CONTROL = process.env.CONTROL ?? ''
 const VIEJO = process.env.VIEJO === '1'
+const VIA = process.env.VIA ?? ''
+if (VIA !== '' && !['banda', 'montaje', 'ambas', 'ninguna'].includes(VIA)) throw new Error(`VIA=${VIA}: banda, montaje, ambas o ninguna`)
 /** El build viejo (B12a.7) no tiene la página base ni «Home» en la píldora: su ruta de prueba y su enlace. */
 const PAGINA = VIEJO ? '/v3/prueba-de-pagina' : '/v3/pagina-base'
 const AL_HOME = VIEJO ? 'a[href="/v3"]' : '[data-pieza="barra"] [data-nav-id="hero"]'
@@ -44,16 +50,18 @@ interface Registro {
   readonly cobertura: number
   readonly color: string
   readonly pildora: number | null
+  /** [T0] La hora del cuadro (el sello del rAF, en el reloj de la máquina). */
+  readonly tc?: number
 }
 
 const GRABAR = `(() => {
   window.__name = window.__name || ((f) => f)
   const log = (window.__cuadrosDelVelo = [])
-  const cuadro = () => {
+  const cuadro = (ts) => {
     const v = document.querySelector('[data-pieza="velo-de-navegacion"]')
     const p = document.querySelector('[data-pieza="barra"] [data-parte="pastilla"]')
     const visible = p && p.checkVisibility({ visibilityProperty: true })
-    log.push({ t: performance.timeOrigin + performance.now(), ruta: location.pathname + location.hash, fase: v ? v.getAttribute('data-fase') : 'sin velo', cobertura: v ? Number(v.getAttribute('data-cobertura')) : 0, color: v ? v.getAttribute('data-color') || (() => { const c = (getComputedStyle(v).backgroundColor.match(/[d.]+/g) || []).map(Number); return c.length < 3 || (c[3] !== undefined && c[3] < 0.5) ? '' : c[0] > 128 ? 'papel' : 'tinta' })() : '', pildora: visible ? Math.round(p.getBoundingClientRect().top * 10) / 10 : null })
+    log.push({ t: performance.timeOrigin + performance.now(), tc: performance.timeOrigin + ts, ruta: location.pathname + location.hash, fase: v ? v.getAttribute('data-fase') : 'sin velo', cobertura: v ? Number(v.getAttribute('data-cobertura')) : 0, color: v ? v.getAttribute('data-color') || (() => { const c = (getComputedStyle(v).backgroundColor.match(/[d.]+/g) || []).map(Number); return c.length < 3 || (c[3] !== undefined && c[3] < 0.5) ? '' : c[0] > 128 ? 'papel' : 'tinta' })() : '', pildora: visible ? Math.round(p.getBoundingClientRect().top * 10) / 10 : null })
     if (log.length > 4000) log.splice(0, 2000)
     requestAnimationFrame(cuadro)
   }
@@ -203,7 +211,7 @@ function juzgar(nombre: string, ancho: number, colorEsperado: 'tinta' | 'papel',
   const inicioMs = g.alClic
   const r = g.registros.filter((x) => x.t >= inicioMs - 50)
   // Los registros crudos (el rAF y el compositor), para leer dónde se va el tiempo.
-  writeFileSync(path.join(SALIDA, `crudo-${String(ancho)}-${nombre.replace(/[^a-z]+/gi, '-')}.json`), JSON.stringify({ inicioMs, registros: r, compositor: g.compositor.filter((x) => x >= inicioMs - 50), largos: g.largos }))
+  writeFileSync(path.join(SALIDA, `crudo-${String(ancho)}-${nombre.replace(/[^a-z]+/gi, '-')}${VIA === '' ? '' : `via-${VIA}`}.json`), JSON.stringify({ inicioMs, registros: r, compositor: g.compositor.filter((x) => x >= inicioMs - 50), largos: g.largos }))
   const conVelo = r.filter((x) => x.fase !== 'quieto' && x.fase !== 'sin velo')
   const primero = conVelo[0]
   const ultimo = conVelo[conVelo.length - 1]
@@ -270,6 +278,13 @@ function juzgar(nombre: string, ancho: number, colorEsperado: 'tinta' | 'papel',
     const b = conPildora[k]
     if (a !== undefined && b !== undefined && b.t > a.t) rapidez = Math.max(rapidez, Math.abs(b.pildora - a.pildora) / (b.t - a.t))
   }
+  // [T0] La misma velocidad con la hora del cuadro (un dato: la del banco es el criterio).
+  let rapidezDelCuadro = 0
+  for (let k = 1; k < conPildora.length; k += 1) {
+    const a = conPildora[k - 1]
+    const b = conPildora[k]
+    if (a !== undefined && b !== undefined && a.tc !== undefined && b.tc !== undefined && b.tc > a.tc) rapidezDelCuadro = Math.max(rapidezDelCuadro, Math.abs(b.pildora - a.pildora) / (b.tc - a.tc))
+  }
   const tope = (1.5 * 1.84 * Math.abs(recorrido)) / 560
   const pildoraBien = pildora === 'no' || (pildora === 'queda' ? Math.abs(recorrido) < 2 : (pildora === 'sube' ? recorrido < -100 : recorrido > 100) && rapidez <= tope)
   const cubiertoAlCambiar = cambio !== null && cambio !== undefined && cambio.cobertura >= 0.999
@@ -278,7 +293,7 @@ function juzgar(nombre: string, ancho: number, colorEsperado: 'tinta' | 'papel',
     `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · ${nombre} · total ${total.toFixed(0)} ms (tapado entero ${tapadoMs.toFixed(0)} ms) · primer tramo al cubrir: cuadro máximo ${primerTramo.toFixed(1)} ms en el hilo, ${g.compositor.length === 0 ? 'sin traza' : `${compositor.toFixed(1)} ms en el compositor`}; con la banda moviéndose ${enMovimiento.toFixed(1)} ms` +
     ` · el cambio ${cubiertoAlCambiar ? 'cubierto entero' : `SIN CUBRIR (${cambio === null || cambio === undefined ? 'no se vio' : cambio.cobertura.toFixed(3)})`} · el velo ${color || '—'} (esperado ${colorEsperado})` +
     ` · screencast: ${String(fotos.length)} cuadros, ${String(enBlanco)} en blanco o vacíos, ${String(delVelo)} del velo entero` +
-    (pildora === 'no' ? '' : ` · la píldora de ${desdeP.toFixed(0)} a ${hastaP.toFixed(0)} px (salto máximo entre muestras ${salto.toFixed(1)} px; la más rápida ${rapidez.toFixed(2)} px/ms, su curva da a lo sumo ${(tope / 1.5).toFixed(2)})`)
+    (pildora === 'no' ? '' : ` · la píldora de ${desdeP.toFixed(0)} a ${hastaP.toFixed(0)} px (salto máximo entre muestras ${salto.toFixed(1)} px; la más rápida ${rapidez.toFixed(2)} px/ms, su curva da a lo sumo ${(tope / 1.5).toFixed(2)}; con la hora del cuadro, ${rapidezDelCuadro.toFixed(2)})`) + (VIA === '' ? '' : ` · VIA=${VIA}`)
   return { linea, bien }
 }
 
@@ -312,7 +327,7 @@ async function main(): Promise<void> {
       args: ['--force_high_performance_gpu', `--window-size=${String(ancho + 20)},${String(alto + 100)}`, '--window-position=0,0', '--no-first-run', '--no-default-browser-check', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion,Translate,MediaRouter'],
     })
     try {
-      await ctx.addInitScript(`(() => { window.__entornoDeLaEscena = 'producto'; window.__defectosDelVelo = ${JSON.stringify(CONTROL)}; try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
+      await ctx.addInitScript(`(() => { window.__entornoDeLaEscena = 'producto'; window.__defectosDelVelo = ${JSON.stringify(CONTROL)};${VIA === '' ? '' : ` window.__viaDelVelo = ${JSON.stringify(VIA)};`} try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
       const p = ctx.pages()[0] ?? (await ctx.newPage())
       await p.route('**/api/**', (r) => r.abort())
       const cdp = await ctx.newCDPSession(p)
@@ -390,7 +405,7 @@ async function main(): Promise<void> {
     }
   }
   for (const j of juicios) console.log(j.linea)
-  writeFileSync(path.join(SALIDA, `resultados${CONTROL === '' ? '' : `-${CONTROL}`}${VIEJO ? '-viejo' : ''}.txt`), juicios.map((j) => j.linea).join('\n'))
+  writeFileSync(path.join(SALIDA, `resultados${CONTROL === '' ? '' : `-${CONTROL}`}${VIEJO ? '-viejo' : ''}${VIA === '' ? '' : `-via-${VIA}`}.txt`), juicios.map((j) => j.linea).join('\n'))
   const recorridos = juicios.filter((j) => j.referencia !== true)
   console.log(`velo: ${String(recorridos.filter((j) => j.bien).length)} de ${String(recorridos.length)} recorridos dentro del criterio${CONTROL === '' ? '' : ` (CONTROL=${CONTROL})`}${VIEJO ? ' (el build viejo)' : ''}`)
 }

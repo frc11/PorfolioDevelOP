@@ -1,4 +1,5 @@
-import { RUTA_DEL_HOME } from '../../_lib/veloDeNavegacion'
+import { RUTA_DEL_HOME, conElMontajeLiviano, viaDelVelo } from '../../_lib/veloDeNavegacion'
+import { precargarLaCoreografia } from '../../_secciones/_contrato/precargaDeLaCoreografia'
 import { REGISTRO_DE_VARIANTES } from '../../_variantes/registro'
 import { LEGIBILIDAD_POR_DEFECTO, fuentesConLaLegibilidad } from '../titulos3d/legibilidad'
 import { CARA_DEL_DOM, TITULO_DE_PAGINA } from '../titulos3d/presets'
@@ -9,8 +10,10 @@ const FUENTES_DEL_DESTINO = fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes, LE
 /**
  * [B12a.8] CALENTAR EL DESTINO — mientras el puntero está encima del enlace (o tiene el foco) y mientras el velo cubre: lo que la página
  * nueva va a pedir apenas se monta y se puede pedir antes. Para una página: las dos fuentes de su título (las 3D, con un import dinámico:
- * el chrome no carga three, y las del DOM, con `document.fonts.load`), así el título se arma tapado. Para el home, nada: sus fuentes
- * vienen con el lienzo. Una sola vez por fuente; nunca falla.
+ * el chrome no carga three, y las del DOM, con `document.fonts.load`), así el título se arma tapado; [T0] y los trozos de las variantes del
+ * registro (la escena destapa con la variante de la página ya dibujada: `listaDeLaRuta.ts`). Para el home, [T0] con la vía `montaje`, la
+ * coreografía animada (`precargaDeLaCoreografia.ts`: el home se monta una sola vez); sus fuentes vienen con el lienzo. Una sola vez por
+ * destino; nunca falla.
  */
 const pedidas = new Set<string>()
 
@@ -18,9 +21,15 @@ const rutaDe = (href: string): string => href.split('#')[0]?.split('?')[0] ?? hr
 
 export function calentarElDestino(href: string): void {
   const ruta = rutaDe(href)
-  if (ruta === RUTA_DEL_HOME || ruta === '' || !ruta.startsWith(`${RUTA_DEL_HOME}/`) || pedidas.has(ruta)) return
+  if (ruta === RUTA_DEL_HOME) {
+    if (!pedidas.has(ruta) && conElMontajeLiviano(viaDelVelo())) {
+      pedidas.add(ruta)
+      void precargarLaCoreografia()
+    }
+    return
+  }
+  if (ruta === '' || !ruta.startsWith(`${RUTA_DEL_HOME}/`) || pedidas.has(ruta)) return
   pedidas.add(ruta)
-  // [T0] 11 · 1 · y los trozos de las variantes del registro: la escena destapa con la variante de la página ya dibujada (`listaDeLaRuta.ts`).
   for (const cargar of Object.values(REGISTRO_DE_VARIANTES)) void cargar().catch(() => undefined)
   void import('../../_lib/escena/titulos3d/fuentesDePagina')
     .then((m) => Promise.all(FUENTES_DEL_DESTINO.map((f) => m.cargarLaFuenteDePagina(f))))
