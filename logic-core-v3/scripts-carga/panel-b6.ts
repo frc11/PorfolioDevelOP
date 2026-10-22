@@ -181,15 +181,17 @@ async function rueda(p: Page): Promise<{ readonly puesto: { pagina: number; aden
   await p.mouse.click(q.x, q.y)
   await dormir(400)
   const c = await medir()
+  // [NOCTURNO] Hacia donde el contenido tiene recorrido: la maqueta puede estar ya en su fondo (scrollTop = recorrido) y ahí bajar no mueve nada.
+  const sentido = c.adentro >= c.recorrido - 1 ? -1 : 1
   for (let k = 0; k < 3; k += 1) {
-    await p.mouse.wheel(0, 100)
+    await p.mouse.wheel(0, 100 * sentido)
     await dormir(120)
   }
   await dormir(700)
   const d = await medir()
   // Y en el borde (si lo hay): tres muescas más, que el contenido ya no absorbe: la página sigue quieta.
   for (let k = 0; k < 3; k += 1) {
-    await p.mouse.wheel(0, 100)
+    await p.mouse.wheel(0, 100 * sentido)
     await dormir(120)
   }
   await dormir(700)
@@ -243,6 +245,8 @@ async function main(): Promise<void> {
       reducedMotion: 'no-preference',
       args: ['--no-first-run', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion'],
     })
+    // [NOCTURNO] El ayudante que esbuild (tsx) mete en las funciones que van a `page.evaluate`, como en los otros bancos.
+    await ctx.addInitScript('(() => { window.__name = window.__name || ((f) => f) })()')
     const p = ctx.pages()[0] ?? (await ctx.newPage())
     await p.route('**/api/**', (r) => r.abort())
     const tag = `${String(ancho)}×${String(alto)}`
@@ -257,7 +261,7 @@ async function main(): Promise<void> {
     anotar(final.vertical.filter((_, i) => i % 2 === 0).every((v) => Math.abs(v) <= 2), `${tag} b · ?grupo=final (defecto): el pie de cada grupo al del módulo, en su caja de layout (${final.vertical.filter((_, i) => i % 2 === 0).join(' · ')} px)`, `final-${tag}`)
     const r = await rueda(p)
     anotar(r.puesto.pagina > 50 && Math.abs(r.puesto.adentro) < 1 && r.puesto.cartel, `${tag} c · bloqueado, una muesca movió la página ${String(r.puesto.pagina)} px, el contenido ${String(r.puesto.adentro)} px y el cartel ${r.puesto.cartel ? 'se ve' : 'NO se ve'}`, `rueda-${tag}`)
-    anotar(r.libre.candado === 'libre' && Math.abs(r.libre.pagina) <= 2 && Math.abs(r.libre.pagina2) <= 2 && (r.libre.recorrido < 1 || r.libre.adentro > 0), `${tag} c · CONTROL: después del clic (candado ${r.libre.candado}) la rueda movió el contenido ${String(r.libre.adentro)} px (tenía ${String(r.libre.recorrido)} de recorrido) y la página ${String(r.libre.pagina)} px; en el borde, tres muescas más: la página ${String(r.libre.pagina2)} px`, `rueda-libre-${tag}`)
+    anotar(r.libre.candado === 'libre' && Math.abs(r.libre.pagina) <= 2 && Math.abs(r.libre.pagina2) <= 2 && (r.libre.recorrido < 1 || Math.abs(r.libre.adentro) > 0), `${tag} c · CONTROL: después del clic (candado ${r.libre.candado}) la rueda movió el contenido ${String(r.libre.adentro)} px (tenía ${String(r.libre.recorrido)} de recorrido) y la página ${String(r.libre.pagina)} px; en el borde, tres muescas más: la página ${String(r.libre.pagina2)} px`, `rueda-libre-${tag}`)
     anotar(r.alSalir === 'puesto', `${tag} c · al sacar el ratón, el candado: ${r.alSalir}`, `rueda-salida-${tag}`)
     const aa = await contraste(p)
     anotar(aa.peor >= 4.5, `${tag} d · el texto de la sección, pintado: el peor contraste ${aa.peor.toFixed(2)}:1 («${aa.donde}»)`, `aa-${tag}`)
