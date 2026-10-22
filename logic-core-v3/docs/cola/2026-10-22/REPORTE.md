@@ -1,50 +1,107 @@
-# REPORTE · noche del 2026-10-22 (corte por la cuota de uso)
+# REPORTE · noche del 2026-10-22 (actualizado 07:40; la noche sigue con 3 tareas en curso)
 
 ## Resumen
-1. **Integradas y verificadas en `nocturno/2026-10-22`:** T0 (los pendientes de B12a.8 y los agregados de Valentino) y B7 (el login que se despliega como una demo).
-2. **Revertida:** B6 (el Panel). El código está en su rama y compila, pero su banco en el navegador dio 10 fallas: el eje de los grupos, `?grupo=` y el candado de la rueda. Se revirtió con dos commits `revert`.
-3. **A medias, sin commitear, en su worktree (se cortaron por la cuota):** B4 (Servicios), B1.2e (el carrusel) y B2 (las reseñas).
-4. **No empezadas:** B3, B13, B12c, B12b, B5, B8, B9, B10 y B11.
-5. Con T0, `verificar` vuelve a la base histórica: 8 grupos con falla (s1, s2, s3, s4, s5, s7, s8 y s17). Antes eran 13: las 5 suites de la navbar quedaron resueltas. `tsc` da 0.
-6. **La vía del velo hacia el home** (`VIA_POR_DEFECTO = 'ambas'`) no se pudo decidir en el dev: los totales dan 2,5–2,7 s en las cuatro vías y el ruido manda. Falta medirla en un build.
-7. **Lo primero que tiene que mirar Valentino:** `/v3/pagina-base` a 1440, cargada directo sin scrollear. Ya en el primer cuadro tiene que verse la noche, la luz celeste y el anillo (T0 11·1). Después, «Login» en `/v3` (B7).
-8. **Antes de mergear a `rediseno/home`:** en el checkout principal existe `docs/cola/2026-10-22/` sin trackear, con los mismos archivos que esta rama. Hay que borrarlo o moverlo antes del merge; si no, git se niega a pisarlo.
+1. **Integradas y verificadas en `nocturno/2026-10-22`:**
+   - T0: los pendientes de B12a.8 y los agregados.
+   - B7: el login como demo.
+   - B1.2e: el carrusel del Portfolio de menos de 1024.
+   - B4: la sección Servicios.
+   - B12c: el preloader del sitio.
+2. **Revertidas, con su trabajo en su rama:**
+   - **B6 (el Panel):** el candado de la rueda no anda.
+   - **B2 (el aro de reseñas):** las tarjetas del aro salen vacías, sin cita, nombre ni retrato; el contraste da 1,19:1.
+3. **En curso a esta hora, en sus worktrees:** B6 (el arreglo), B5 (Demos) y B12b (el viaje). Las tres se cortaron dos veces por el límite de uso y se retomaron a las 07:21.
+4. **No empezadas:** B3 (está escrita en la rama de B2, sin integrar), B13, B8, B9, B10 y B11.
+5. **Verificar:** con T0, vuelve a la base histórica (s1, s2, s3, s4, s5, s7, s8 y s17). Después de cada merge corrí las suites del área: ninguna falla nueva. `tsc` da 0. El `verificar` completo del final todavía no corrió.
+6. **Corregido por el orquestador al integrar:**
+   - REGLA DE ALTURAS: el alto viejo de Servicios y el de Tu panel abajo de 1024, medidos en el navegador.
+   - Un choque de nombres entre el carrusel nuevo y el de Demos.
+   - Un banco que tomaba mal la hora.
+   - `armadas.ts`, que había vuelto a pasar las 300 líneas.
+7. **Lo primero que tiene que mirar Valentino:**
+   - `/v3?preloader=si` a 1440: la secuencia y la flecha al botón del sonido.
+   - `/v3/pagina-base`: la noche y el acento desde el primer cuadro.
+   - `/v3#servicios` a 1440: una muesca por servicio.
+8. **Antes de mergear a `rediseno/home`:** borrar o mover `docs/cola/2026-10-22/` del checkout principal. Está sin trackear y choca con esta rama.
 
 ## Por tarea
-- **T0: integrada y verificada.**
-  - Commits: 9, de `a13ac4ea` a `222656ff`. Merge `4332fcb9`, más el arreglo del orquestador `20c226f5` (`armadas.ts` volvía a pasar las 300 líneas de s8).
-  - Medido en el dev (:3000, NVIDIA):
-    - `velo.ts` a 1440, las cuatro vías: 3 de 3 recorridos, salvo una corrida de `ambas` que dio 2 de 3 por el techo de 3,5 s (3811 ms; repetida, 3 de 3). 0 cuadros en blanco. La píldora va a 2,8–3,9 px/ms (el WIP daba 6,51; el tope es 3,96). Control `CONTROL=sin-velo`: rojo.
-    - `chrome-en-los-anchos.ts` en las 4 rutas: 0 anchos con falla. El cartel del sonido ya no pisa el título. La consola sin «isReady», sin NaN y sin 404.
-    - El color desde el arranque, en carga directa y con la flecha atrás: capturas en `C:\nocturno\2026-10-22\diag\fotos`.
-    - El cuerpo de la página base, a 1440 y a 390: «Hablemos» abre el contacto con «Una página web» marcado, 0 pedidos a `/api/`; «Volver al home» vuelve a `/v3`.
-    - Humo de la matriz: 17 de 18. La falla (rueda desde arriba → Demos, sin hover, rápida) pasó al repetirla: intermitente en el dev. Historias a 390: 2 de 2.
-    - `verificar`: 8 grupos con falla, los mismos que la base.
-- **B7: integrada y verificada** (`decd55a0`, merge `20a9430c`).
-  - `ingreso.ts`: 24 de 25. La apertura dura 547 ms (la del Genie de las demos), |Δy| = 0, la flecha atrás, la de adelante y Esc andan, y la escena duerme (0 dibujos). Control `CONTROL=scroll`: rojo.
-  - **La falla:** a 390, entrando directo con `?ingresar`, el fundido dura 514–573 ms en vez de 200. La causa probable: arranca durante la carga del dev, con cuadros largos. Hay que confirmarlo en un build.
-  - Humo de la matriz: 7 de 7.
-- **B6: revertida** (`af4e53ca` en su rama; los reverts son `bbd70f71` y `50f7769c`).
-  - Lo que pasó en el navegador: el pintado del título (centro al 49,5 % del alto), AA (6,43:1), el CTA y el alto de 7,00 pantallas.
-  - Lo que falló: el eje de los grupos (49 % y 76 %); `?grupo=final` (el pie del grupo a −327 px del pie del módulo); `?grupo=union`; el candado de la rueda (el cartel no aparece y la página se mueve igual después del clic).
-  - El orquestador calibró el alto viejo abajo de 1024 contra lo medido (`cb25e1ea`, revertido junto con B6): sirve para reintegrarla.
-  - Altos viejos medidos (px): 390×844 4893 · 768×1024 8584 · 820×1180 9111 · 1023×768 11169 · 1024×768 6489 (8,45 pantallas: una deriva que ya estaba).
-- **B4, B1.2e y B2: a medias.** Sus worktrees en `C:\nocturno\2026-10-22\{b4,b12e,b2}` tienen trabajo sin commitear (25, 41 y 6 archivos). No los borré.
-- **El resto: no empezadas.**
 
-## Qué tiene que mirar Valentino
-1. `http://localhost:3000/v3/pagina-base` a 1440, carga directa sin scroll: la noche, el acento y el anillo desde el primer cuadro. Probá también `?legibilidad=tamano` (el defecto ahora es `peso`).
-2. `/v3` a 1440: scrolleá y hacé clic en «Login». Se despliega con el Genie y la URL pasa a `?ingresar`. «Volver al home», la flecha atrás y Esc lo cierran en el mismo scroll.
-3. Desde una página, «Home» a 1440: la píldora baja sin saltar.
-4. Banderas que siguen vivas: `?titulo=1…4`, `?composicion=1|2|3`, `?navbar=abajo` y `?legibilidad=tamano`.
+### T0 · integrada y verificada
+- **Commits:** de `a13ac4ea` a `222656ff`, merge `4332fcb9`, más `20c226f5` (`armadas.ts` vuelve a 333 líneas).
+- **Medido en el dev (:3000, NVIDIA):**
+  - `velo.ts` a 1440: las cuatro vías dan 3 de 3, con 0 cuadros en blanco.
+  - De la página al home, en el dev: ninguna 2,6 s, banda 2,7 s, montaje 2,7 s y ambas 2,5 s. Después de B12c, 2,3 s. El objetivo de 1,2 s es en el build, que no corrió.
+  - La píldora va a 2,8–3,9 px/ms (tope 3,96; el WIP daba 6,51). El control `sin-velo` da rojo.
+  - `chrome-en-los-anchos`, en 4 rutas: 0 anchos con falla. Sin «isReady», sin NaN y sin 404.
+  - El color desde el primer cuadro: carga directa y flecha atrás.
+  - El cuerpo de la página base, a 1440 y a 390.
+  - `verificar`: 8 grupos con falla, la base histórica.
 
-## Lo que no corrió
-- El build final (los 404 y la elección de `VIA`), las matrices completas, y todas las tareas que no empezaron. Motivo: se acabó la cuota de uso.
-- Notas para retomar: `C:\nocturno\2026-10-22\ESTADO.md`.
-- Pendientes de T0, del reporte de su subagente:
-  - P-S: las variantes de servicios, encendidas desde el avance 0.
-  - La píldora se queda 80 px corta y después salta.
-  - P-H: el aviso de WebGL «feedback loop».
+### B7 · integrada y verificada (`decd55a0`)
+- `ingreso.ts`: 24 de 25. La apertura dura 547 ms, |Δy| = 0, la flecha atrás, la de adelante y Esc andan, y la escena duerme. El control `scroll` da rojo.
+- **La falla:** a 390, entrando directo con `?ingresar`, el fundido dura 514–573 ms en vez de 200. Lo más probable es que sea la carga del dev; no se confirmó en el build.
+
+### B1.2e · integrada y verificada (`5b93773b`, `06b66881`, merge `53169678`, más `6ed4aa3f` del orquestador)
+- **Lo que arregló el orquestador:**
+  - La pieza nueva chocaba con el carrusel de Demos (los dos con `data-pieza="carrusel"`); pasó a `carrusel-de-tarjetas`.
+  - El caso `reinicio` del banco tomaba la hora después de una espera de 700 ms.
+- **Medido:** `carrusel.ts` a 390, 768, 820×1180 y 1023×768 da 43 de 44 (la que falta era esa hora del banco; repetida, ok). Los controles `trampa` y `sin-pausa-fuera` dan rojo. Humo: 7 de 7.
+- **Falta:** la matriz entera de escritorio.
+
+### B4 · integrada y verificada (`473d1016`, `cd787804`, `1cc74766`, merge `0958549f`, más `a897b02e`)
+- **El alto viejo abajo de 1024, medido por el orquestador antes del merge:** 1661 px a 390, 1338 a 768×1024, 1382 a 820×1180 y 1555 a 1023×768.
+- **Medido:**
+  - `servicios-gatillos`: 16 de 16 a 1440 y 1024. El control `sin-candado` da rojo.
+  - `servicios-capa`: 4 de 4. Un solo cambio de capa por sentido, con 0 px de nanobots sobre el título y sobre el panel. El control `capa-a-destiempo` da rojo.
+  - Humo: 7 de 7.
+- **Pendiente:** a 390 con `?servicios-movil=gatillo` (la variante alternativa), la rueda bajando saltea la entrada (−1 → 1).
+
+### B12c · integrada y verificada (`aa734fd4`, `e0fe86ca`, `b4c59ce1`, merge `99c2f6af`)
+- **`preloader.ts` a 1440 y 1024, todo ok:**
+  - dura 5,7 s;
+  - la punta de la flecha queda a 24,0 px del centro del botón (su radio);
+  - el scroll queda bloqueado y se suelta 2,5 s después de irse el blanco;
+  - no aparece en la recarga ni en otra entrada del mismo día;
+  - la consola sin errores;
+  - con la siembra de los bancos no aparece.
+- **A 390:** el banco da 4 fallas por cómo lee la `y`. A mano, la rueda y el dedo quedan bloqueados (scroll en 0).
+- **Controles:** `sin-bloqueo` da rojo. `en-recargas` NO da rojo: es un control ciego. Con `LENTO=6` la carga llega antes del freno, así que el freno y el pulso no se vieron en el navegador. Con movimiento reducido, 1,5 s.
+- Humo 7 de 7 y `velo.ts` 3 de 3: los bancos no ven el preloader.
+
+### B6 · revertida y en arreglo (`af4e53ca` más `fc916b7d` en su rama)
+- **Banco `panel-b6.ts`:**
+  - Pasan: el pintado del título (49,5 % del alto), AA 6,43:1, el alto de 7,00 pantallas y el CTA.
+  - Fallan: el eje de los grupos y `?grupo=` (las fotos sugieren que es el banco) y el candado de la rueda (sin cartel, y la página se mueve con el candado abierto).
+- Se le devolvió con esos números y con la calibración del alto viejo.
+
+### B2 · revertida (`4ad48208` más `2047e714` en su rama; B3 = `ba7039d2` encima, sin integrar)
+- `tsc` 0 y suites limpias, pero en el navegador las tarjetas del aro salen vacías (`aro-legibilidad`: 1,19:1; el control al 30 % anda). El título 3D «Lo que dicen / nuestros clientes» sí aparece.
+- Se le devuelve al subagente cuando haya lugar.
+
+### B5 y B12b · en curso, con worktrees en `C:\nocturno\2026-10-22\{b5,b12b}`
+
+### B3, B13, B8, B9, B10 y B11 · no empezadas
+- Por tiempo y por la cadena de dependencias (B13 necesita B3, que viene después de B2).
+
+## Qué tiene que mirar Valentino (todo en `http://localhost:3000`, desde la integración)
+1. `/v3?preloader=si` a 1440, 1024 y 390:
+   - el negro con «Bienvenido…», el blanco con «Recomendamos activar el sonido.»;
+   - la flecha punteada que termina en el botón del sonido;
+   - la página entra después. Tocar la frase prende el sonido.
+   - Banderas: `?preloader=si|no`.
+2. `/v3/pagina-base` a 1440, cargada directo: la noche, la luz celeste y el anillo desde el primer cuadro. `?legibilidad=tamano` (el defecto ya es `peso`).
+3. `/v3` a 1440, «Login»: el Genie, `?ingresar`; «Volver al home», la flecha atrás y Esc cierran en el mismo scroll.
+4. `/v3#servicios` a 1440 y 1024:
+   - una muesca por servicio: web desde la izquierda con el globo, software desde la derecha con los engranajes, IA desde arriba con la red;
+   - después, el recomendador.
+   - `?diagonal=30|20|12` (defecto 20) y, a 390, `?servicios-movil=deslizar|gatillo`.
+5. `/v3` a 390, 768 y 820×1180: el Portfolio es un carrusel de tarjetas que rota cada 10 s, con flechas, deslices y mantener apretado. Debajo, «la tuya» y Demos.
+6. Banderas de antes, sin cambios: `?titulo=1…4`, `?composicion=1|2|3`, `?navbar=abajo`.
+
+## Lo que no corrió todavía
+- El `next build` final: los 404, la vía del velo en números reales y el fundido de B7.
+- Las matrices completas y el `verificar` del final.
+- Se corre al cerrar la noche, con lo que esté integrado.
 
 ## Comandos para la mañana
 ```
@@ -53,10 +110,6 @@ git fetch origin
 git switch rediseno/home
 git merge --no-ff nocturno/2026-10-22
 ```
-Antes del merge, mover o borrar `logic-core-v3\docs\cola\2026-10-22\`, que en el checkout principal está sin trackear.
-
-Para borrar un worktree, primero va el junction de `node_modules` y después el worktree:
-```
-powershell -NoProfile -File C:\nocturno\2026-10-22\quitar.ps1 <id>
-```
-Los `<id>` son `b4`, `b12e` y `b2`; tienen trabajo sin commitear, así que mirá antes de borrar. Después, `git worktree remove C:\nocturno\2026-10-22\integracion`.
+- Antes del merge, mover o borrar `logic-core-v3\docs\cola\2026-10-22\` del checkout principal: está sin trackear.
+- Worktrees que quedan: `C:\nocturno\2026-10-22\{b5,b6,b12b}` (en curso) y la integración.
+- Para borrar un worktree sin tocar el `node_modules` del principal: `powershell -NoProfile -File C:\nocturno\2026-10-22\quitar.ps1 <id>`. Borra primero el junction y conserva la rama si no está mergeada.
