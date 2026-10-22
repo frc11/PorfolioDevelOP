@@ -344,6 +344,8 @@
     "test:s77": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s77",
     "test:s78-b12a": "npx tsx src/app/v3/_lib/__tests__/s78-b12a.invariant.tsx",
     "test:s78-t0": "npx tsx src/app/v3/_lib/__tests__/s78-t0.invariant.tsx",
+    "test:s83-resenas": "npx tsx src/app/v3/_lib/__tests__/s83-resenas.invariant.tsx",
+    "test:s83": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s83",
     "test:s78": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s78",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",

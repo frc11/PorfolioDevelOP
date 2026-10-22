@@ -30,6 +30,9 @@ import {
 import { CtaTransformado, CtaTransformadoEnLaLista } from './CtaTransformado'
 import { ValorEnVolumen } from './valorEnVolumen'
 import { PiezaDeValor } from './Valores'
+// [NOCTURNO B2] Las reseñas: un tramo de cuatro pantallas en el sostén de B (el pin de siempre, traducido) y su carrusel en la lista.
+import { EscenarioDeLasResenas, EspaciadorDeLasResenas, usePinSinLasResenas } from './resenas/EscenarioDeLasResenas'
+import { ResenasEnLista } from './resenas/ResenasEnLista'
 
 /**
  * 07 · POR QUÉ develOP — la frase, los seis valores y el CTA, alrededor del logo.
@@ -91,7 +94,8 @@ function useLlegadaDeDia(pin: MotionValue<number>, v: Ventana, donde: keyof type
   return useTransform([tramo, DIA_DEL_TEXTO[donde]], ([t, d]: number[]) => Math.min(t, d))
 }
 
-function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValue<number> }): React.JSX.Element {
+function Escenario({ seccion, pin: pinDelBloque }: PropsDeSeccion & { readonly pin: MotionValue<number> }): React.JSX.Element {
+  const pin = usePinSinLasResenas(pinDelBloque)
   const frase = useLlegadaDeDia(pin, VENTANA_DE_LA_FRASE, 'frase')
   // La frase se queda mientras entran los valores, pero sube: el valor del medio de cada
   // columna le caía encima.
@@ -112,6 +116,7 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
   // [PULIDO 4] C1 · el cruce de `2411371a` y la metamorfosis de los valores en la frase del CTA.
   const transformacion = useTramo(pin, VENTANA_DE_LA_TRANSFORMACION)
   return (
+    <>
     <div data-pieza="escenario-del-final" className="sticky top-0 h-svh w-full overflow-hidden" style={ESTILO_DEL_ESCENARIO}>
       <h2 id={idDelTitularDeSeccion(seccion.id)} className="sr-only">
         {NOMBRE_DE_SECCION}
@@ -157,7 +162,10 @@ function Escenario({ seccion, pin }: PropsDeSeccion & { readonly pin: MotionValu
         </div>
       </motion.div>
       <CtaTransformado progreso={transformacion} claseDelTexto={TAMANO_DEL_CTA} alEnfocar={llevarAlCta} />
+      <EscenarioDeLasResenas pin={pinDelBloque} />
     </div>
+    <EspaciadorDeLasResenas />
+    </>
   )
 }
 
@@ -266,6 +274,7 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
               </li>
             ))}
           </ul>
+          <ResenasEnLista />
           {/* [FINAL 3] Separado de los valores, en su propio espacio. [NOCTURNO FINAL] D3 · centrado en todos los anchos, en
               una pantalla entera. */}
           <MedirLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />
