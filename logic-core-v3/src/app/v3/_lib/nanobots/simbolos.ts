@@ -58,7 +58,7 @@ export const ENGRANAJES = (() => {
 
 type Azar = () => number
 
-function nube(n: number, azar: Azar): Punto[] {
+export function nube(n: number, azar: Azar): Punto[] {
   return Array.from({ length: n }, () => {
     // Una esfera blanda: más densa en el medio, con el borde que se deshace.
     const r = 0.82 * Math.cbrt(azar()) ** 1.4
@@ -73,7 +73,7 @@ function enLaEsfera(lat: number, lon: number, r: number): [number, number, numbe
   return [r * Math.cos(lat) * Math.sin(lon), r * Math.sin(lat), r * Math.cos(lat) * Math.cos(lon)]
 }
 
-function globo(n: number, azar: Azar): Punto[] {
+export function globo(n: number, azar: Azar): Punto[] {
   const { radio: R, lados } = GLOBO
   const trazos: Trazo[] = []
   // Los meridianos: círculos máximos por los polos (la latitud da la vuelta entera: pasa por el otro lado).
@@ -99,7 +99,7 @@ export function radioDelDiente(g: { readonly dientes: number; readonly pie: numb
   return g.pie + (g.punta - g.pie) * alto
 }
 
-function engranajes(n: number, azar: Azar): Punto[] {
+export function engranajes(n: number, azar: Azar): Punto[] {
   const trazos: Trazo[] = []
   for (const [g, w] of [[ENGRANAJES.a, 0], [ENGRANAJES.b, 1]] as const) {
     const [cx, cy] = g.centro
