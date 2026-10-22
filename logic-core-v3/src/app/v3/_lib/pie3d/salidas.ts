@@ -14,7 +14,10 @@
  *      inverso de sus llegadas (`salidaDelPie` en `coreografia.ts`).
  *   b) UN VIAJE DESDE EL PIE ACOSTADO (los enlaces del recorrido): todo desaparecía de golpe. Ahora las piezas se hunden en sus huecos y
  *      el piso se cierra (`hundeMs`) y recién ahí empieza el viaje, que dura eso menos: el mismo presupuesto del click a la llegada.
+ *   c) [B10] EL FAQ DESPUÉS DEL PIE (`faqDelPie.ts`): mientras está al frente, el pie queda hundido en sus huecos (el mismo hundimiento).
  */
+import { hundeDelFaq } from './faqDelPie'
+
 export const SALIDAS_DEL_PIE = { hundeMs: 400, hundeHasta: 0.6, cierraDesde: 0.4, hundeDeMas: 0.2, sinViajeMs: 1500, salidaS: 0.8 } as const
 
 /** [PULIDO 28] AA7 · a) presente (a la vista o llegando con el scroll), saliendo (un gesto hacia arriba al fondo) e ida (el scroll se soltó). */
@@ -51,8 +54,14 @@ const suave = (x: number): number => {
 /**
  * b) Un cuadro del hundimiento (`enViaje`: hay un viaje en curso): cuánto va (0 a 1; sin hundimiento, 0). Termina cuando el viaje que
  * siguió terminó (el pie ya quedó lejos): de ahí vuelve como siempre, con su llegada.
+ * c) [B10] Y el del FAQ después del pie: mientras el FAQ está al frente el pie queda hundido con el piso cerrado, y vuelve a subir cuando
+ * el FAQ se va (por el reloj del FAQ). Gana el más hundido de los dos.
  */
 export function pasoDelHundimiento(ahora: number, enViaje: boolean): number {
+  return Math.max(hundimientoDelViaje(ahora, enViaje), hundeDelFaq(ahora))
+}
+
+function hundimientoDelViaje(ahora: number, enViaje: boolean): number {
   const S = SALIDA_EN_VIVO
   if (S.hundeDesde === Number.NEGATIVE_INFINITY) return 0
   if (enViaje) S.viajo = true
