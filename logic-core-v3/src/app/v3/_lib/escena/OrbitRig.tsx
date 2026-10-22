@@ -66,12 +66,10 @@ import {
   type LightRigInput,
   type LightRigTargets,
 } from './lightRig'
-import type { MoireHandle } from './MoireScreen'
 import { BRILLO_DE_LA_NOCHE, brilloDeLaNocheEn } from './particleGlow'
 import { nivelConLaNocheDisparada } from './nocheDisparada'
 import { giroDeLaInterfaz, nivelConLaInterfaz } from './interfaz/respuesta'
 import { celosiaSkyFactor } from './probeCelosia'
-import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
 import { AUTO_ORBIT_DEG_PER_S, CAMERA_FOV, ORBIT_TARGET_Y } from './probeScene'
 import { fovDeLaBanda } from './banda'
@@ -223,8 +221,6 @@ type OrbitRigProps = {
   /** Los dos campos de partículas. Es lo que deriva (ver `choreographyPhysics.ts`). */
   dustGroupRef: RefObject<THREE.Group | null>
   bokehGroupRef: RefObject<THREE.Group | null>
-  /** La envolvente. El loop le desplaza la capa gruesa hacia abajo. */
-  moireRef: RefObject<MoireHandle | null>
 }
 
 export function OrbitRig({
@@ -247,7 +243,6 @@ export function OrbitRig({
   logoMaterialRef,
   dustGroupRef,
   bokehGroupRef,
-  moireRef,
 }: OrbitRigProps) {
   const modeRef = useRef<ProbeMode | null>(null)
   const framesRef = useRef(0)
@@ -549,10 +544,6 @@ export function OrbitRig({
     targets.fog = fogRef.current
     targets.background = backgroundRef.current
 
-    // LA DERIVA de la capa gruesa de la envolvente (la textura, paso 6b).
-    const elapsedNow = state.clock.elapsedTime
-    const drift = reducedMotion ? 0 : (elapsedNow / MOIRE_DRIFT_PERIOD_S) % 1
-
     const lightInput = scratch.lightInput
     lightInput.level = arc.level
     lightInput.kelvin = arc.kelvin
@@ -616,25 +607,7 @@ export function OrbitRig({
       )
     }
 
-    // 6b · LA CAPA GRUESA DE LA ENVOLVENTE, QUE BAJA. UNA escritura por frame
-    //      sobre el `offset` de una textura: el moiré no cuesta nada por píxel de
-    //      más que la propia superficie, porque lo que se mueve es la matriz de
-    //      UV.
-    //
-    //      Va sobre `offset.y` y no sobre `offset.x`, que es lo que cambió en
-    //      S10: la trama BAJA en vez de girar alrededor del cilindro, igual que
-    //      la retícula del hero del sitio, de donde sale. Como la V del cilindro
-    //      crece hacia arriba, subir el offset mueve el patrón hacia abajo.
-    //
-    //      Un período completo mueve la trama UNA celda. El módulo mantiene el
-    //      offset en [0,1): la textura repite, así que envolver es invisible y
-    //      evita que el número crezca sin techo durante una sesión larga.
-    //
-    //      Se apaga con movimiento reducido, igual que la deriva del aire y la
-    //      vira. NO se apaga con el toggle de física: apagar la física es para
-    //      juzgar el track crudo de la cámara y el fondo no interfiere con eso.
-    const moire = moireRef.current
-    if (moire) moire.drift.offset.y = drift
+    // 6b · [B8] La deriva de la capa gruesa de la envolvente se borró: el moiré no se mueve solo (`moire/fijo.ts`).
 
     // 7 · FPS promediado en ventanas de medio segundo. Sin promedio el número
     // titila tanto que no se puede leer mientras se juzga la escena.

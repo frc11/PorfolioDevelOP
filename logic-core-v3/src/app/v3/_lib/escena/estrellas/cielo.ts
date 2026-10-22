@@ -131,8 +131,8 @@ float viaLactea( vec3 d ) {
 /**
  * LO QUE TAPA LA TRAMA, en GLSL: `delanteDeLaTrama( o, d )` es qué parte de lo que está afuera, en la
  * dirección `d` desde `o`, se ve a través de las dos capas (0 detrás de una raya, 1 entre rayas). Lee la
- * textura de cada capa donde el rayo la cruza, con su transformación de hoy (la gruesa baja, la fina se
- * corre con el pulso y mezcla dos desajustes, M4) y la envolvente de su banda. Pide `textureLod` (sirve en
+ * textura de cada capa donde el rayo la cruza, con su transformación de hoy ([B8] quietas, salvo la rendija de
+ * `?moire=mouse`) y la envolvente de su banda; [B8] una capa que no se dibuja no tapa. Pide `textureLod` (sirve en
  * el vértice).
  */
 export const TRAMA_GLSL = /* glsl */ `
@@ -140,13 +140,12 @@ uniform sampler2D uTramaGruesa;
 uniform sampler2D uTramaFina;
 uniform mat3 uMatGruesa;
 uniform mat3 uMatFina;
-uniform vec2 uRepeticionB;
-uniform vec2 uCorrimientoB;
-uniform float uMezclaB;
 // Por capa: abajo, arriba, fundido de abajo y de arriba (fracción del alto), y el radio en uRadiosDeLaTrama.
 uniform vec4 uBandaGruesa;
 uniform vec4 uBandaFina;
 uniform vec2 uRadiosDeLaTrama;
+// [B8] Qué capas se dibujan (fina, gruesa): 1 sí, 0 no.
+uniform vec2 uCapasDeLaTrama;
 uniform float uHayTrama;
 float envolventeDeLaBanda( float v, vec4 b ) {
 	float r = min( clamp( v / b.z, 0.0, 1.0 ), clamp( ( 1.0 - v ) / b.w, 0.0, 1.0 ) );
@@ -169,13 +168,12 @@ float delanteDeLaTrama( vec3 o, vec3 d ) {
 	if ( uHayTrama < 0.5 ) return 1.0;
 	float pasa = 1.0;
 	vec2 uv = dondeCruza( o, d, uRadiosDeLaTrama.x, uBandaFina );
-	if ( uv.y >= 0.0 && uv.y <= 1.0 ) {
+	if ( uCapasDeLaTrama.x > 0.5 && uv.y >= 0.0 && uv.y <= 1.0 ) {
 		float a = textureLod( uTramaFina, ( uMatFina * vec3( uv, 1.0 ) ).xy, 0.0 ).g;
-		if ( uMezclaB > 0.0 ) a = mix( a, textureLod( uTramaFina, uv * uRepeticionB + uCorrimientoB, 0.0 ).g, uMezclaB );
 		pasa *= 1.0 - rayaDe( a ) * envolventeDeLaBanda( uv.y, uBandaFina );
 	}
 	uv = dondeCruza( o, d, uRadiosDeLaTrama.y, uBandaGruesa );
-	if ( uv.y >= 0.0 && uv.y <= 1.0 ) {
+	if ( uCapasDeLaTrama.y > 0.5 && uv.y >= 0.0 && uv.y <= 1.0 ) {
 		float a = textureLod( uTramaGruesa, ( uMatGruesa * vec3( uv, 1.0 ) ).xy, 0.0 ).g;
 		pasa *= 1.0 - rayaDe( a ) * envolventeDeLaBanda( uv.y, uBandaGruesa );
 	}
@@ -204,15 +202,14 @@ float delanteDeLaTramaFiltrada( vec3 o, vec3 d ) {
 	float pasa = 1.0;
 	vec2 uv = dondeCruza( o, d, uRadiosDeLaTrama.x, uBandaFina );
 	vec4 g = gradienteSinCostura( uv );
-	if ( uv.y >= 0.0 && uv.y <= 1.0 ) {
+	if ( uCapasDeLaTrama.x > 0.5 && uv.y >= 0.0 && uv.y <= 1.0 ) {
 		mat2 m = mat2( uMatFina );
 		float a = textureGrad( uTramaFina, ( uMatFina * vec3( uv, 1.0 ) ).xy, m * g.xy, m * g.zw ).g;
-		if ( uMezclaB > 0.0 ) a = mix( a, textureGrad( uTramaFina, uv * uRepeticionB + uCorrimientoB, g.xy * uRepeticionB, g.zw * uRepeticionB ).g, uMezclaB );
 		pasa *= 1.0 - rayaDe( a ) * envolventeDeLaBanda( uv.y, uBandaFina );
 	}
 	uv = dondeCruza( o, d, uRadiosDeLaTrama.y, uBandaGruesa );
 	g = gradienteSinCostura( uv );
-	if ( uv.y >= 0.0 && uv.y <= 1.0 ) {
+	if ( uCapasDeLaTrama.y > 0.5 && uv.y >= 0.0 && uv.y <= 1.0 ) {
 		mat2 m = mat2( uMatGruesa );
 		float a = textureGrad( uTramaGruesa, ( uMatGruesa * vec3( uv, 1.0 ) ).xy, m * g.xy, m * g.zw ).g;
 		pasa *= 1.0 - rayaDe( a ) * envolventeDeLaBanda( uv.y, uBandaGruesa );
