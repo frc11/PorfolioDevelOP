@@ -125,8 +125,7 @@ const MIGRADAS = [
   ['_secciones/quienes-somos/QuienesSomos.tsx', 1, 1],
   ['_secciones/quienes-somos/equipo.tsx', 3, 0],
   ['_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx', 1, 1],
-  // [B6] La sección nueva del Panel: la descripción de cada módulo entra por el canal desde los títulos que suben del contrato.
-  ['_secciones/_contrato/TituloQueSube.tsx', 1, 0],
+  ['_secciones/tu-panel/TuPanel.tsx', 1, 0],
   ['_secciones/por-que-develop/PorQueDevelop.tsx', 0, 2],
   ['_secciones/cierre/Cierre.tsx', 1, 0],
   ['_secciones/cierre/ColumnasDelPie.tsx', 1, 0],
@@ -136,7 +135,6 @@ for (const [ruta, canales, inercias] of MIGRADAS) {
   afirmarIgual([veces(fuente, '<CanalDeTexto '), veces(fuente, '<ConInercia')], [canales, inercias], `${ruta}: ${String(canales)} textos por el canal y ${String(inercias)} títulos con la inercia sola`)
 }
 afirmar(leer('_secciones/_contrato/coreografia-animada.tsx').includes('<Inclinado>'), 'los titulares de `CanalDeTitular` (Tu panel, las demos) llevan la inercia')
-afirmar(!leer('_secciones/tu-panel/TituloQueSePinta.tsx').includes('CanalDeTexto'), '[B6] el título de Tu panel, NO (excepción declarada: su gesto es el pintado palabra por palabra, atado al scroll; no se parte en renglones)')
 afirmar(!leer('_secciones/hero/Hero.tsx').includes('CanalDeTexto'), 'el hero, NO (excepción declarada: su titular es el LCP y lo que se ve en el primer cuadro no se parte sin un cuadro de cambio)')
 
 // ═══════════════════════════════════════════════════════════════════════════

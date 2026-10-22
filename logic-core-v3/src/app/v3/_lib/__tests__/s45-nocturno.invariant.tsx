@@ -230,11 +230,9 @@ afirmar(largos.length === 0, `  ningún archivo de las demos pasa las ${String(L
 // Cada feature con su demo; cada demo, en el marco del panel (con «Ejemplo») y con el ítem del panel que le toca.
 const cargador = sinComentarios(fuenteViva(`${CARPETA}/DemoDelPanel.tsx`))
 const conDemo = TARJETAS.filter((t) => new RegExp(`\\b${t.demo}: lazy\\(\\(\\) => import\\('\\./demos/`).test(cargador))
-// [B6] La sección nueva del Panel tiene tres módulos (no las ocho features): cada uno nombra su demo del catálogo, que sigue
-// entero (las otras cinco quedan para lo que venga: no se cargan si nadie las nombra).
-afirmar(TARJETAS.every((t) => t.demo in ITEM_DE_LA_DEMO) && new Set(TARJETAS.map((t) => t.demo)).size === TARJETAS.length && conDemo.length === TARJETAS.length, 'cada uno de los tres módulos nombra su demo (una distinta cada una) y el cargador la tiene', `con demo: ${conDemo.map((t) => t.demo).join(', ')}`)
+afirmar(TARJETAS.every((t) => t.demo in ITEM_DE_LA_DEMO) && new Set(TARJETAS.map((t) => t.demo)).size === TARJETAS.length, 'cada una de las ocho features nombra su demo (una distinta cada una)', `con demo: ${conDemo.map((t) => t.demo).join(', ')}`)
 const modulos = [...cargador.matchAll(/import\('(\.\/demos\/[^']+)'\)/g)].map((m) => `${CARPETA}/${m[1].slice(2)}.tsx`)
-afirmar(modulos.length >= conDemo.length && modulos.every((m) => /<MarcoDelPanel item="/.test(fuenteViva(m))), '  cada demo va en el marco del panel (que lleva siempre «Ejemplo»)', modulos.map((m) => path.basename(m)).join(' · '))
+afirmar(modulos.length === conDemo.length && modulos.every((m) => /<MarcoDelPanel item="/.test(fuenteViva(m))), '  cada demo va en el marco del panel (que lleva siempre «Ejemplo»)', modulos.map((m) => path.basename(m)).join(' · '))
 const marco = sinComentarios(fuenteViva(`${CARPETA}/MarcoDelPanel.tsx`))
 // [RETOQUE PANEL] T1 · la miniatura y la grande se fueron: cada demo se usa en su lugar (s6-tu-panel y s46 lo cuidan).
 afirmar(ROTULO_DE_EJEMPLO === 'Ejemplo' && /\{ROTULO_DE_EJEMPLO\}<\/span>/.test(marco), '  el rótulo «Ejemplo» va siempre en el marco')

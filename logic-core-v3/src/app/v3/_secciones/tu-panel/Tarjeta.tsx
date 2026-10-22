@@ -1,96 +1,91 @@
 'use client'
 
-import { Hand, MousePointerClick } from 'lucide-react'
-import { useEffect, useReducer, useRef } from 'react'
+import { useId, type CSSProperties } from 'react'
+
+import { cn } from '@/lib/utils'
 
 import { Imagen } from '../../_componentes/medios/Imagen'
+import { Micro } from '../../_componentes/tipografia/Textos'
+import { Titular } from '../../_componentes/tipografia/Titular'
 import { sizesPorViewport } from '../../_lib/imagen'
 import { DemoEnSuLugar } from '../../_panel-vivo/DemoDelPanel'
-import { RuedaDelModulo } from '../../_panel-vivo/rueda'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeUnaPieza } from '../_contrato/canales'
-import { CANDADO_INICIAL, CARTEL_MS, siguienteCandado } from './candado'
-import { CAPTURA, CARTEL, type Tarjeta as DatosDeTarjeta } from './contenido'
-import { CLASE_DE_ENCUADRE, MODULO, PANTALLA_DEL_MODULO } from './geometria'
+import { ALFA_DEL_FONDO } from './Fondo'
+import { CAPTURA, PALABRAS_DEL_FONDO, type Tarjeta as DatosDeTarjeta } from './contenido'
+import { CLASE_DEL_LUGAR, CLASE_DE_ENCUADRE, TABLA_DEL_CAOS, TAMANOS, arranques, claseEnColumna, velocidadDe, vwDe } from './geometria'
+
+const TOPES = arranques()
 
 /**
- * UN MÓDULO DE TU PANEL — [B6] la maqueta del panel (`_panel-vivo/`, con sus datos de ejemplo y el sello «Ejemplo»), un
- * poco más chica que las demos de antes, en su marco que flota (esquinas redondeadas y una sombra suave y física, `contain`
- * para que lo que pasa adentro no le cueste a la página). Llega con P2 y la ventana de la demo (termina de subir cuando su
- * pie cruza la mitad del cuadro, [AJUSTES FINALES] A7). Abajo de 1024, a la proporción de la pantalla angosta (4:5).
+ * UNA FEATURE DE TU PANEL — [PASADA FINAL] B1 · flota en su lugar de la tabla del caos (`geometria.ts`) y adentro se usa
+ * el panel ENTERO a escala: la demo se dibuja a su pantalla y se escala al ancho de la tarjeta (nada de abrir, nada que
+ * se agrande con el hover), con su título y su rótulo debajo. La tarjeta lleva su profundidad (`data-profundidad`, la
+ * misma suscripción de scroll del fondo) y la última queda asentada en el flujo.
  *
- * EL CANDADO (`candado.ts`): con la rueda encima, la página scrollea y el cartel aparece sobre el módulo con su fondo
- * atenuado; el clic (o el toque) habilita el scroll de adentro; salir del módulo, tocar afuera o que el módulo salga del
- * cuadro lo vuelve a bloquear. El cartel, mientras se ve, toma el clic: habilita sin apretar lo que haya debajo.
+ * B2 · El marco es un módulo que flota sobre la página: esquinas redondeadas y una sombra suave y física (dos capas: el
+ * contacto y la ambiental, con la tinta al 25 %), sin halo, sin degradé y sin filtros. `contain` aísla el layout y la
+ * pintura de la demo: lo que pasa adentro (una tabla que cambia, un chat que escribe) no le cuesta a la página.
+ *
+ * El `<li>` se puede enfocar desde el código: es adonde lleva «Saltar la demo» de la anterior.
+ *
+ * [AJUSTES FINALES] A7 · la feature llega con `ventana-de-la-demo`: termina de subir cuando su pie cruza la mitad del cuadro
+ * (más despacio que la ventana visible, que la dejaba llegada 240 px antes de salir). A8 · abajo de 1024 el marco ya no
+ * tiene un alto propio: es la misma caja a la proporción de su pantalla, y adentro el panel entero a escala, como un video.
  */
-export function Tarjeta({ tarjeta }: { readonly tarjeta: DatosDeTarjeta }): React.JSX.Element {
-  const [candado, cambiar] = useReducer(siguienteCandado, CANDADO_INICIAL)
-  const marco = useRef<HTMLDivElement>(null)
-  const reloj = useRef(0)
-
-  const avisar = (tipo: 'rueda' | 'arrastre'): void => {
-    if (candado.libre) return
-    cambiar({ tipo })
-    window.clearTimeout(reloj.current)
-    reloj.current = window.setTimeout(() => cambiar({ tipo: 'olvido' }), CARTEL_MS)
-  }
-  useEffect(() => () => window.clearTimeout(reloj.current), [])
-
-  // Habilitado: tocar afuera, o que el módulo salga del cuadro, lo vuelve a bloquear (el ratón sale con `pointerleave`).
-  useEffect(() => {
-    const el = marco.current
-    if (!candado.libre || el === null) return undefined
-    const afuera = (e: PointerEvent): void => {
-      if (e.target instanceof Node && !el.contains(e.target)) cambiar({ tipo: 'salida' })
-    }
-    const vista = new IntersectionObserver(([e]) => {
-      if (e !== undefined && !e.isIntersecting) cambiar({ tipo: 'salida' })
-    })
-    document.addEventListener('pointerdown', afuera, true)
-    vista.observe(el)
-    return () => {
-      document.removeEventListener('pointerdown', afuera, true)
-      vista.disconnect()
-    }
-  }, [candado.libre])
-
-  const respaldo = <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={sizesPorViewport(MODULO.anchoAngosto, 100)} className={`h-full object-cover ${CLASE_DE_ENCUADRE[tarjeta.encuadre]}`} />
-  const visible = candado.cartel !== null
-  const Icono = candado.cartel === 'tactil' ? Hand : MousePointerClick
+export function Tarjeta({ tarjeta, indice }: { readonly tarjeta: DatosDeTarjeta; readonly indice: number }): React.JSX.Element {
+  const fila = TABLA_DEL_CAOS[indice]
+  const tamano = TAMANOS[fila.tamano]
+  const esLaUltima = indice === TABLA_DEL_CAOS.length - 1
+  const idDelTitulo = useId()
+  const lugar = { '--x': `${String(fila.columna)}%`, '--w': `${String(tamano.ancho)}%`, '--y': `${String(TOPES[indice])}svh` } as CSSProperties
+  const medidas = { '--proporcion': `${String(fila.pantalla.ancho)} / ${String(fila.pantalla.alto)}` } as CSSProperties
+  const respaldo = <Imagen src={tarjeta.imagen} alt={tarjeta.alt} ancho={CAPTURA.ancho} alto={CAPTURA.alto} sizes={sizesPorViewport(vwDe(fila), 88)} className={`h-full object-cover ${CLASE_DE_ENCUADRE[tarjeta.encuadre]}`} />
 
   return (
-    <Bloque patron="P2" rango="ventana-de-la-demo" className="w-full">
-      {(progreso) => (
-        <CanalDeUnaPieza progreso={progreso} patron="P2">
-          <div
-            data-parte="marco"
-            ref={marco}
-            data-candado={candado.libre ? 'libre' : 'puesto'}
-            onWheel={() => avisar('rueda')}
-            onTouchMove={() => avisar('arrastre')}
-            onClick={() => cambiar({ tipo: 'clic' })}
-            onPointerLeave={(e) => {
-              if (e.pointerType !== 'touch') cambiar({ tipo: 'salida' })
-            }}
-            className="relative aspect-[var(--proporcion)] max-escritorio:aspect-4/5 w-full overflow-hidden rounded-[calc(var(--radius-fuerte)*1.6)] shadow-[0_var(--spacing-1)_var(--spacing-2)_var(--tw-shadow-color),0_var(--spacing-6)_var(--spacing-12)_calc(var(--spacing-5)*-1)_var(--tw-shadow-color)] shadow-tinta/25 contain-layout contain-paint"
-          >
-            <RuedaDelModulo value={candado.libre}>
-              <DemoEnSuLugar demo={tarjeta.demo} pantalla={PANTALLA_DEL_MODULO} respaldo={respaldo} />
-            </RuedaDelModulo>
+    <li
+      data-pieza="feature-del-panel"
+      data-tamano={fila.tamano}
+      data-profundidad={velocidadDe(indice)}
+      tabIndex={-1}
+      aria-labelledby={idDelTitulo}
+      style={lugar}
+      className={cn('relative focus-visible:outline-2 focus-visible:outline-offset-4 escritorio:z-[var(--z-elevado)]', claseEnColumna(indice), esLaUltima ? CLASE_DEL_LUGAR.asentada : CLASE_DEL_LUGAR.flota)}
+    >
+      <Bloque patron="P2" rango="ventana-de-la-demo" className="w-full">
+        {(progreso) => (
+          <CanalDeUnaPieza progreso={progreso} patron="P2" className="flex flex-col gap-[var(--spacing-3)]">
             <div
-              aria-hidden="true"
-              data-parte="cartel"
-              data-visible={visible ? '' : undefined}
-              className={`absolute inset-0 z-20 flex items-center justify-center bg-tinta/60 transition-opacity duration-[var(--duracion-rapida)] ease-[var(--ease-salida)] motion-reduce:transition-none ${visible ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+              data-parte="marco"
+              style={medidas}
+              // [NOCTURNO FINAL] C2 · abajo de 1024 el marco toma la proporción de la pantalla angosta de la demo (4:5, la de `DEMO_ANGOSTA`).
+              className="relative aspect-[var(--proporcion)] max-escritorio:aspect-4/5 w-full overflow-hidden rounded-[calc(var(--radius-fuerte)*1.6)] shadow-[0_var(--spacing-1)_var(--spacing-2)_var(--tw-shadow-color),0_var(--spacing-6)_var(--spacing-12)_calc(var(--spacing-5)*-1)_var(--tw-shadow-color)] shadow-tinta/25 contain-layout contain-paint"
             >
-              <span className="bg-fondo text-tinta text-caption leading-texto font-medio flex items-center gap-[var(--spacing-2)] rounded-full px-[var(--spacing-5)] py-[var(--spacing-3)]">
-                <Icono className="size-[var(--spacing-4)]" strokeWidth={1.5} aria-hidden="true" />
-                {candado.cartel === 'tactil' ? CARTEL.tactil : CARTEL.raton}
-              </span>
+              <DemoEnSuLugar demo={tarjeta.demo} pantalla={fila.pantalla} respaldo={respaldo} />
             </div>
-          </div>
-        </CanalDeUnaPieza>
-      )}
-    </Bloque>
+            <div className="flex flex-col items-start gap-[var(--spacing-2)]">
+              <Titular id={idDelTitulo} nivel={tamano.nivel} como="h3" className="block">
+                {tarjeta.titulo}
+              </Titular>
+              <Micro como="span" className="text-tinta-tenue uppercase">
+                {tarjeta.etiqueta}
+              </Micro>
+            </div>
+          </CanalDeUnaPieza>
+        )}
+      </Bloque>
+      {/* MÓVIL 2: abajo de 1024 las palabras del fondo van QUIETAS en el aire entre una feature y
+          la siguiente —nunca debajo de una—, con el mismo alfa (1,0595:1) y sin llegada ni parallax. */}
+      {indice < PALABRAS_DEL_FONDO.length ? (
+        <span
+          aria-hidden="true"
+          data-pieza="palabra-del-fondo"
+          className="font-display text-tinta leading-cartel pointer-events-none absolute top-[calc(100%+var(--spacing-20)*0.875/2)] left-0 -translate-y-1/2 whitespace-nowrap select-none text-[length:min(calc(var(--spacing-20)*0.7875),calc((100vw-2*var(--pad-lateral-compacto))/6))] escritorio:hidden"
+          style={{ opacity: ALFA_DEL_FONDO }}
+        >
+          {PALABRAS_DEL_FONDO[indice]}
+        </span>
+      ) : null}
+    </li>
   )
 }

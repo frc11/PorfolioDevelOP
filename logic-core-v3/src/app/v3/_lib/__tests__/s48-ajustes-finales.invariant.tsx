@@ -42,7 +42,7 @@ import { RESPALDO_2D_CON_ESCENA_MS, RESPALDO_2D_MS } from '../../_componentes/ti
 import { DEMO_ANGOSTA } from '../../_panel-vivo/DemoDelPanel'
 import { RESPIRO_DEL_BUCLE } from '../../_panel-vivo/reproduccion'
 import { ANCLA_DE_LA_DEMO, ANCLA_DE_LA_VENTANA_VISIBLE } from '../../_secciones/_contrato/bloqueAnimado'
-import { RITMO } from '../../_secciones/tu-panel/geometria'
+import { TABLA_DEL_CAOS, arranques } from '../../_secciones/tu-panel/geometria'
 import { CARGA, SEGURO_DEL_VELO_MS, abrirLaCarga, cargaLista, estaTodo, hayPrimerCuadro, marcarElPrimerCuadro, suscribirALaCarga } from '../carga'
 
 import { PARES_DE_LA_CAMARA, TRAMO_DE_LA_CAMARA, comoEntonces, progresoDeLaCamara } from '../escena/camaraDeEntonces'
@@ -469,17 +469,14 @@ afirmar(PUNTOS_DEL_ENJAMBRE.ancho === 3000 && PUNTOS_DEL_ENJAMBRE.angosto === 12
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A7 · Las demos de Tu panel llegan más despacio y la sección es un poco más larga (REGLA DE ALTURAS: la tabla declara lo real)')
 
-// [B6] La especificación cambió: el caos de ocho features se fue y quedan tres módulos alternados. Lo que A7 fijaba sigue: los
-// módulos no llegan uno detrás del otro. Entre uno y el siguiente hay una pantalla entera (más que los 87 a 92 svh del caos).
-const despacioA7 = (entreFilas: number): boolean => entreFilas >= 92
-afirmar(despacioA7(RITMO.entreFilas), 'entre un módulo y el siguiente hay una pantalla de aire (el caos los separaba de 87 a 92 svh): no llegan demasiado rápido uno tras otro', `${String(RITMO.entreFilas)} svh`)
-controlPositivo('el detector VE la separación corta (40 svh, la séptima del caos)', 40, despacioA7)
+const arranquesA7 = arranques()
+afirmar(arranquesA7[arranquesA7.length - 1] === 584 && TABLA_DEL_CAOS.map((f) => f.separacion).join() === '16,92,92,87,87,92,40,78', 'las separaciones del caos crecieron un 12 % (de 522 a 584 svh hasta la última feature): las demos llegaban demasiado rápido una tras otra', `${String(arranquesA7[arranquesA7.length - 1])} svh`)
 afirmar(seccionPorId('tu-panel').alto === '700svh', 'y la tabla de secciones declara el alto nuevo (700svh: medido 6,9–7,0 pantallas a 1440 × 900 con el banco; con 600 contra 6,33 medidas todo lo que venía después llegaba 0,0035 de progreso tarde)')
 const anclaDeLaDemo = (a: ParDeAnclas): boolean => a.inicio === ANCLA_DE_LA_VENTANA_VISIBLE.inicio && a.fin.declarado === 'bottom 50%' && a.fin.elemento.fraccion === 1 && a.fin.elemento.px === 0 && a.fin.viewport.fraccion === 0.5 && a.fin.viewport.px === 0
 const tarjetaA7 = leer('_secciones/tu-panel/Tarjeta.tsx')
 const animadaA7 = sinComentarios(leer('_secciones/_contrato/coreografia-animada.tsx'))
 const destinosA7 = sinComentarios(leer('_componentes/destinosDelViaje.ts'))
-afirmar(anclaDeLaDemo(ANCLA_DE_LA_DEMO) && /<Bloque patron="P2" rango="ventana-de-la-demo" className="w-full">/.test(tarjetaA7) && animadaA7.includes("if (props.rango === 'ventana-de-la-demo') return ANCLA_DE_LA_DEMO") && destinosA7.includes("'ventana-de-la-demo': ANCLA_DE_LA_DEMO,") && /rango="ventana-visible"/.test(leer('_secciones/tu-panel/Fila.tsx')), 'cada feature llega con `ventana-de-la-demo`: la misma entrada que la ventana visible (asoma y arranca) pero termina de subir cuando su pie cruza la MITAD del cuadro, no 240 px antes de salir (a 1440 × 900 y 600 px de demo, 970 px de recorrido en vez de 760: un 28 % más despacio, con P2 intacto); los viajes del menú la conocen; las palabras del fondo siguen con la ventana visible')
+afirmar(anclaDeLaDemo(ANCLA_DE_LA_DEMO) && /<Bloque patron="P2" rango="ventana-de-la-demo" className="w-full">/.test(tarjetaA7) && animadaA7.includes("if (props.rango === 'ventana-de-la-demo') return ANCLA_DE_LA_DEMO") && destinosA7.includes("'ventana-de-la-demo': ANCLA_DE_LA_DEMO,") && /rango="ventana-visible"/.test(leer('_secciones/tu-panel/Fondo.tsx')), 'cada feature llega con `ventana-de-la-demo`: la misma entrada que la ventana visible (asoma y arranca) pero termina de subir cuando su pie cruza la MITAD del cuadro, no 240 px antes de salir (a 1440 × 900 y 600 px de demo, 970 px de recorrido en vez de 760: un 28 % más despacio, con P2 intacto); los viajes del menú la conocen; las palabras del fondo siguen con la ventana visible')
 controlPositivo('el detector VE la ventana visible de antes (llegada 240 px antes de salir)', ANCLA_DE_LA_VENTANA_VISIBLE, anclaDeLaDemo)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -492,13 +489,10 @@ const geometriaA8 = sinComentarios(leer('_secciones/tu-panel/geometria.ts'))
 const comoVideo = (c: string): boolean =>
   c.includes('const escalada = dibujo.escala > 0') &&
   c.includes('bucle: !escritorio }') &&
-  // [B6] La especificación cambió: abajo de 1024 la demo no recibe el dedo HASTA que el módulo la habilita con un toque (su
-  // candado, `rueda.ts`); bloqueada, como antes: nada que tocar adentro.
-  /className=\{`\$\{escalada \? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'\}\$\{libre \? '' : ' max-escritorio:pointer-events-none'\}\$\{corre \? '' : ` \$\{CONGELADA\}`\}`\}/.test(c) &&
-  c.includes('const libre = useRuedaLibre()') &&
+  /className=\{`\$\{escalada \? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'\} max-escritorio:pointer-events-none\$\{corre \? '' : ` \$\{CONGELADA\}`\}`\}/.test(c) &&
   /data-parte="pausa-del-video"[\s\S]{0,400}aria-pressed=\{pausada\}[\s\S]{0,600}escritorio:hidden/.test(c) &&
   c.includes('const corre = laMasVisible && pestana && !pausada && !reducido')
-afirmar(comoVideo(cargadorA8), 'la demo se escala SIEMPRE a su caja (ya no sólo desde 1024: en el teléfono es el mismo panel a escala); abajo de 1024 no recibe el puntero hasta que un toque habilita su módulo ([B6]), va en bucle, y su pausa es un botón afuera de la escala (WCAG 2.2.2), sólo ahí; sigue corriendo sólo la más visible, con la pestaña visible y sin movimiento reducido')
+afirmar(comoVideo(cargadorA8), 'la demo se escala SIEMPRE a su caja (ya no sólo desde 1024: en el teléfono es el mismo panel a escala); abajo de 1024 no recibe el puntero (nada que tocar adentro), va en bucle, y su pausa es un botón afuera de la escala (WCAG 2.2.2), sólo ahí; sigue corriendo sólo la más visible, con la pestaña visible y sin movimiento reducido')
 controlPositivo('el detector VE la demo del teléfono de antes (a su alto, sin escala)', cargadorA8.replace('const escalada = dibujo.escala > 0', 'const escalada = escritorio && dibujo.escala > 0'), comoVideo)
 const enBucle = (r: string): boolean => /readonly bucle: boolean/.test(r) && r.includes('bucle: false })') && /if \(!\(r\.corre && r\.bucle\) \|\| paso < total\) return undefined\s*const reloj = window\.setTimeout\(\(\) => setTicks\(0\), cadaMs \* RESPIRO_DEL_BUCLE\)/.test(r) && RESPIRO_DEL_BUCLE >= 1
 afirmar(enBucle(reproduccionA8), 'el bucle: terminado el guion, un respiro (dos pasos) y arranca de nuevo — sólo mientras corre y sólo en bucle (el escritorio, donde la demo se usa, sigue parándose en el último paso)', `${String(RESPIRO_DEL_BUCLE)} pasos de respiro`)

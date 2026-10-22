@@ -29,7 +29,7 @@ import { CAPAS_DEL_TUNEL } from '../../_archivo/tunel-portfolio/tunel'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../escena/entorno'
 import { FACETAS_DEL_POLVO, FACETAS_VERTEX_GLSL } from '../escena/polvo/facetas'
 import { FIRME, GUION, repartoDelEncendido } from '../escena/entorno/encendido'
-import { LINEA_DEL_DISPARO, margenDelDisparo } from '../../_secciones/_contrato/disparo'
+import { DISPARO_DEL_REMATE, margenDelDisparo } from '../../_secciones/tu-panel/entrada'
 import { EXAGERACION_DEL_CSS, giroDeLaPieza } from '../escena/miradaDeLaCamara'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { ConEspesor } from '../../_componentes/volumen/ConEspesor'
@@ -91,12 +91,8 @@ afirmar(/vEnElHaz = uHaz \* uConoDelHaz \* uNocheDelLogo \* \(/.test(polvoVivo) 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B4 · «Y más…»: entra ni bien asoma, se va bien abajo')
 
-// [B6] La especificación cambió: el remate se fue con la sección nueva del Panel; lo que entra al final de la sección es su
-// CTA (la bajada y la fila), con el gatillo del contrato, que dispara en la MISMA línea que el remate (`DISPARO_DEL_REMATE`
-// era `LINEA_DEL_DISPARO`). Se afirma la línea y que el gatillo la usa.
 const bienAbajo = (desdeAbajo: number): boolean => desdeAbajo > 0 && desdeAbajo <= 8
-const DISPARO_DEL_REMATE = LINEA_DEL_DISPARO
-afirmar(bienAbajo(DISPARO_DEL_REMATE) && margenDelDisparo(DISPARO_DEL_REMATE) === `0% 0% -${String(DISPARO_DEL_REMATE)}% 0%` && /rootMargin: margenDelDisparo\(LINEA_DEL_DISPARO\)/.test(sinComentarios(leer('_secciones/_contrato/Gatillo.tsx'))) && /<Gatillo /.test(sinComentarios(leer('_secciones/tu-panel/CtaDelPanel.tsx'))), `la línea de disparo del CTA del Panel (el gatillo del contrato) a ${String(DISPARO_DEL_REMATE)} % del cuadro desde abajo: la misma línea para entrar (ni bien asoma) y para irse subiendo (cuando está por salir)`)
+afirmar(bienAbajo(DISPARO_DEL_REMATE) && margenDelDisparo(DISPARO_DEL_REMATE) === `0% 0% -${String(DISPARO_DEL_REMATE)}% 0%`, `la línea de disparo del remate a ${String(DISPARO_DEL_REMATE)} % del cuadro desde abajo: la misma línea para entrar (ni bien asoma) y para irse subiendo (cuando está por salir)`)
 controlPositivo('el detector VE la línea de antes (35 %: se iba en la mitad de abajo)', 35, bienAbajo)
 
 // ═══════════════════════════════════════════════════════════════════════════

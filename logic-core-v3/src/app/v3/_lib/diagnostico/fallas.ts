@@ -12,7 +12,7 @@
  *   · `animacion-desfasada` un bloque animado en pantalla cuyo progreso (con el rango que midió) no es el de su rango medido ahora;
  *   · `epoca-sin-medir`    la página visible con la época de medición en cero (ningún bloque resolvió su rango: todo quieto);
  *   · `noche-desfasada`    la noche de la sala distinta de la que deja el scroll (la regla de las cuatro entradas), fuera de un viaje;
- *   · `remate-dormido`     el remate de Tu panel ([B6] su CTA, con el gatillo común) en pantalla y todavía esperando su gesto;
+ *   · `remate-dormido`     el remate de Tu panel («Y más…») en pantalla y todavía esperando su gesto;
  *   · [B1] el túnel se fue al archivo y su falla (`tunel-desfasado`) con él; en su lugar, las del Portfolio:
  *   · `portfolio-desfasado` el selector en pantalla mostrando un paso que no es el que pide el scroll (con su histéresis), sin un salto en vuelo;
  *   · `portfolio-video`    más de un video reproduciéndose, o alguno con la sección fuera del cuadro;

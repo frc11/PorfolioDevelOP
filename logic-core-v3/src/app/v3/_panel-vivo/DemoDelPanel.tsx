@@ -9,7 +9,6 @@ import { usePrefiereMenosMovimiento } from '../_lib/usePrefiereMenosMovimiento'
 import { NOMBRE_DE_LA_DEMO, type IdDeDemo } from './catalogo'
 import { informarVisibilidad, laQueCorre, montarEnTurno, suscribirAlEscenario } from './escenario'
 import { ReproduccionDeLaDemo, usePestanaVisible, type Reproduccion } from './reproduccion'
-import { useRuedaLibre } from './rueda'
 
 /**
  * [NOCTURNO] B · LA DEMO DEL PANEL, EN LA PÁGINA — liviana: lo pesado (los componentes del dashboard, los datos de
@@ -86,8 +85,6 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
   const pestana = usePestanaVisible()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const laMasVisible = useSyncExternalStore(suscribirAlEscenario, () => laQueCorre() === demo, () => false)
-  // [B6] Abajo de 1024 la demo no recibe el dedo hasta que el módulo la habilita con un toque (su candado: `rueda.ts`).
-  const libre = useRuedaLibre()
   useEffect(() => {
     const el = caja.current
     if (el === null) return undefined
@@ -129,7 +126,7 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
           aria-label={`Demo de ${NOMBRE_DE_LA_DEMO[demo]}, con datos de ejemplo`}
           data-pieza="demo-del-panel"
           data-corre={corre ? '' : undefined}
-          className={`${escalada ? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'}${libre ? '' : ' max-escritorio:pointer-events-none'}${corre ? '' : ` ${CONGELADA}`}`}
+          className={`${escalada ? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'} max-escritorio:pointer-events-none${corre ? '' : ` ${CONGELADA}`}`}
           style={escalada ? { width: dibujo.pantalla.ancho, height: dibujo.pantalla.alto, transform: `scale(${dibujo.escala.toFixed(4)})` } : undefined}
         >
           <button type="button" data-parte="saltar-la-demo" onClick={(e) => saltarLaDemo(e.currentTarget)} className="sr-only z-30 rounded-full bg-zinc-900 px-4 py-2 text-sm text-zinc-100 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus-visible:outline-2 focus-visible:outline-cyan-400">

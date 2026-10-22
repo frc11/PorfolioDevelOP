@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 
 import { NEGOCIO_DE_EJEMPLO, ROTULO_DE_EJEMPLO, type ItemDelPanel } from './catalogo'
 import { useReproduccion } from './reproduccion'
-import { useRuedaAdentro, useRuedaLibre } from './rueda'
+import { useRuedaAdentro } from './rueda'
 
 /**
  * [NOCTURNO] B · EL MARCO QUE SE VE COMO EL PANEL — la carcasa del panel de clientes, copiada (no importada) de
@@ -78,7 +78,6 @@ const ITEM_QUIETO = 'text-zinc-400'
 export function MarcoDelPanel({ item, conPausa = false, encima, children }: { readonly item: ItemDelPanel; readonly conPausa?: boolean; readonly encima?: React.ReactNode; readonly children: React.ReactNode }): React.JSX.Element {
   const r = useReproduccion()
   const contenido = useRuedaAdentro<HTMLDivElement>()
-  const libre = useRuedaLibre()
   const iniciales = NEGOCIO_DE_EJEMPLO.split(/\s+/)
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase() ?? '')
@@ -129,8 +128,7 @@ export function MarcoDelPanel({ item, conPausa = false, encima, children }: { re
             <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-300">{ROTULO_DE_EJEMPLO}</span>
           </div>
         </header>
-        {/* [B6] Con el candado del módulo puesto, el contenido no scrollea: la rueda (y el dedo) son de la página. */}
-        <div ref={contenido} data-parte="contenido-del-panel" className={cn('mt-3 min-h-0 flex-1 rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:p-6', libre ? 'overflow-y-auto' : 'overflow-hidden')}>
+        <div ref={contenido} data-parte="contenido-del-panel" className="mt-3 min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-white/10 bg-white/[0.03] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.35)] sm:p-6">
           {children}
         </div>
       </div>

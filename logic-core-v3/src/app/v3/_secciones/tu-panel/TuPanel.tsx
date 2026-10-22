@@ -1,64 +1,74 @@
 'use client'
 
-import { useRef } from 'react'
-
+import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
+import { Bloque } from '../_contrato/coreografia'
+import { CanalDeTexto, CanalDeTitular } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { ContenidoDeSeccion, Seccion } from '../_contrato/Seccion'
-import { useBanderasDelPanel } from './banderas'
-import { TARJETAS, TITULO } from './contenido'
-import { CtaDelPanel } from './CtaDelPanel'
-import { Fila } from './Fila'
-import { LADOS, variablesDeLaSeccion } from './geometria'
-import { TituloQueSePinta } from './TituloQueSePinta'
-import { useTramoDelPanel } from './tramo'
+import { DESCRIPCION, TITULO } from './contenido'
+import { Galeria } from './Galeria'
+import { Remate } from './Remate'
 
 /**
- * SECCIÓN 06 — TU PANEL. [B6] La sección del Panel (craneada el 2026-10-21):
+ * SECCIÓN 06 — TU PANEL. Un caos ordenado de features (SPRINT PANEL 2).
  *
- *   1. el título «El panel donde controlás TODO», grande y de lado a lado, que se pinta de gris claro a tinta palabra por
- *      palabra con el scroll y termina con su centro en la mitad de la pantalla (`TituloQueSePinta`, `pintado.ts`);
- *   2. un respiro (el único tramo que crece: la sección llena los 700svh de la tabla en todo escritorio);
- *   3. los tres módulos alternados (derecha, izquierda, derecha), cada uno con su palabra fundida, su título y su
- *      descripción del lado opuesto (`Fila`), y el candado de la rueda (`Tarjeta`, `candado.ts`);
- *   4. el CTA a pantalla completa (`CtaDelPanel`).
+ * El encabezado ocupa el 30 % izquierdo y la primera feature llega a su lado;
+ * después, las demás, cada una con su demo usable en su lugar ([RETOQUE PANEL]
+ * T1, `geometria.ts`), con el fondo decorativo por detrás. Cierra el remate:
+ * «Y más…» y el newsletter.
  *
- * En el teléfono, todo apilado. Abajo de 1024 la sección mide su contenido y se anota a la escena (`tramo.ts`).
- *
- * ⚠ Sin `CabeceraDeSeccion`: lo único que montaba acá era `MarcaDeSeccion`, el cuadradito de acento. Es una pieza
- * compartida por todas las secciones (`_contrato/Rotulo.tsx`), así que no se toca: esta sección no la monta.
+ * ⚠ Sin `CabeceraDeSeccion`: lo único que montaba acá era `MarcaDeSeccion`, el
+ * cuadradito de acento arriba a la izquierda. Es una pieza compartida por todas
+ * las secciones (`_contrato/Rotulo.tsx`), así que no se toca: esta sección
+ * simplemente no la monta.
  */
 export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
-  const { grupo, palabra } = useBanderasDelPanel()
-  const raiz = useRef<HTMLOListElement>(null)
-  useTramoDelPanel(raiz)
   return (
-    <Seccion seccion={seccion} style={variablesDeLaSeccion(seccion.alto)}>
-      <ContenidoDeSeccion claseDeContenido="@container flex flex-col escritorio:min-h-[var(--alto-de-la-tabla)]">
-        {/* La cabecera (el título solo): adonde viaja «Panel» de la barra (`destinosDelViaje.ts`). Con el aire de arriba, el viaje
-            la deja con su centro arriba de la mitad: llega pintada. */}
-        <div className="shrink-0 pt-[var(--spacing-20)] escritorio:pt-[var(--aire-arriba)]">
-          <div data-pieza="encabezado-del-panel">
-            <TituloQueSePinta renglones={TITULO} como="h2" id={idDelTitularDeSeccion(seccion.id)} />
-          </div>
-        </div>
-        <div aria-hidden="true" data-pieza="respiro-del-panel" className="h-[var(--respiro-angosto)] shrink-0 escritorio:h-auto escritorio:min-h-[var(--respiro)] escritorio:grow" />
-        <ol ref={raiz} data-pieza="modulos-del-panel" className="@container flex shrink-0 flex-col gap-y-[var(--entre-filas-angosto)] escritorio:gap-y-[var(--entre-filas)]">
-          {TARJETAS.map((tarjeta, i) => (
-            <Fila key={tarjeta.palabra} tarjeta={tarjeta} lado={LADOS[i]} grupo={grupo} palabra={palabra} />
-          ))}
-        </ol>
-        <div aria-hidden="true" className="h-[var(--entre-filas-angosto)] shrink-0 escritorio:h-[var(--entre-filas)]" />
-        <CtaDelPanel />
+    <Seccion seccion={seccion}>
+      {/* `py-20` son los 80 px que la pastilla de navegación se lleva del pie y
+          de la cabeza de la pantalla (`_lib/navegacion.ts`). */}
+      <ContenidoDeSeccion
+        className="flex min-h-svh flex-col py-[var(--spacing-20)]"
+        claseDeContenido="flex flex-1 flex-col gap-[var(--spacing-20)]"
+      >
+        <Galeria encabezado={<Encabezado idDelTitular={idDelTitularDeSeccion(seccion.id)} />} />
+        <Remate />
       </ContenidoDeSeccion>
     </Seccion>
   )
 }
 
-/** Cuántas piezas anima cada patrón (con la coreografía). Es lo que el instrumento cuenta en el HTML. */
+/** «Tu Panel» y su descripción. En escritorio, el 30 % izquierdo arriba de la galería (en columna, encima). [RETOQUE PANEL] T1: sin el panel en vivo. */
+function Encabezado({ idDelTitular }: { readonly idDelTitular: string }): React.JSX.Element {
+  return (
+    // MÓVIL 2: a 1024 el titular sube a 1,3 `display` (de 48 a 65 px) y el cuerpo a `titulo-s`.
+    <div data-pieza="encabezado-del-panel" className="flex flex-col gap-[var(--spacing-6)] escritorio:[@media(width<=theme(--breakpoint-escritorio))]:[--text-fluido-titulo-xl:calc(var(--text-fluido-display)*1.3)] escritorio:[@media(width<=theme(--breakpoint-escritorio))]:[--text-cuerpo:var(--text-titulo-s)] escritorio:absolute escritorio:top-0 escritorio:left-0 escritorio:z-[var(--z-elevado)] escritorio:w-3/10 escritorio:@max-6xl:static escritorio:@max-6xl:mb-[var(--spacing-12)] escritorio:@max-6xl:w-full">
+      <Bloque patron="P1" rango="ventana-visible">
+        {(progreso) => (
+          /* El `id` con el que la `<section>` se nombra va en el envoltorio:
+             `CanalDeTitular` no acepta `id` (S11, defecto 10). */
+          <div id={idDelTitular}>
+            <CanalDeTitular progreso={progreso} patron="P1" texto={TITULO} nivel="titulo-xl" como="h2" />
+          </div>
+        )}
+      </Bloque>
+      {/* [INTERFAZ 1] T1 · la descripción, que entraba quieta, entra como párrafo (por línea, con máscara). */}
+      <Bloque patron="P1" rango="ventana-visible">
+        {(progreso) => (
+          <CanalDeTexto progreso={progreso} tipo="parrafo" texto={DESCRIPCION}>
+            {(contenido) => <Cuerpo className="text-tinta-media">{contenido}</Cuerpo>}
+          </CanalDeTexto>
+        )}
+      </Bloque>
+    </div>
+  )
+}
+
+/** Cuántas piezas anima cada patrón. Es lo que el instrumento cuenta en el HTML. */
 export const PIEZAS_POR_PATRON = {
-  /** Los títulos que suben: el título y la descripción de cada módulo. */
-  P1: 2 * TARJETAS.length,
-  /** La llegada de cada módulo y de cada palabra fundida. */
-  P2: 2 * TARJETAS.length,
+  /** El título: una instancia de P1. */
+  P1: 1,
+  /** Las 8 features y las 12 piezas del fondo (7 palabras y 5 objetos): un target cada una. */
+  P2: 8 + 12,
 } as const

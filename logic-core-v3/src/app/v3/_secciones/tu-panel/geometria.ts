@@ -1,189 +1,212 @@
 /**
- * LA GEOMETRÍA DE TU PANEL — [B6] el título, tres módulos alternados y el CTA, en números.
+ * LA GEOMETRÍA DE TU PANEL — [PASADA FINAL] B1 · el caos ordenado del sprint nocturno (una TABLA escrita a mano), con las
+ * demos USABLES en su lugar.
  *
- * Todo lo que mide va acá como DATO y entra a las clases por variables (`variablesDeLaSeccion`): las clases leen
- * `var(--…)` y ninguna lleva un valor a mano. Las alturas del escritorio van en `svh` y suman MENOS que los 700svh que la
- * tabla de secciones declara (`altoNaturalEnEscritorio`): el respiro después del título es el único tramo que crece, y
- * llena lo que falta. Así la sección mide 700svh en todo escritorio y la escena no se corre (REGLA DE ALTURAS: desde 1024,
- * `k = 1`). Abajo de 1024 la sección mide su contenido (`altoAngosto: 'contenido'`) y se anota su tramo (`tramo.ts`).
+ * Cada feature flota en la columna y el tamaño de su fila (SPRINT PANEL 2: nada se sortea, el desorden es el de la
+ * tabla) y adentro se ve el PANEL ENTERO a escala: la demo se dibuja a su pantalla (px) y se escala con `transform` al
+ * ancho de la tarjeta, así casi nunca hace falta scrollear adentro. Ningún módulo a lo ancho (la rueda quedaba atrapada
+ * y costaba scrollear la página); tarjetas más chicas que las de RETOQUE PANEL T1 (del 64 al 100 % del ancho) y más
+ * grandes que las del nocturno (miniaturas inertes, del 22 al 42 %): del 42 al 56 %. Las pantallas son más altas que las
+ * del retoque (de 700 a 800 px): se ve más panel; lo que es más largo que eso (un chat, una lista de tareas, un catálogo)
+ * scrollea adentro sólo con el puntero encima y mientras tenga recorrido (`_panel-vivo/rueda.ts`).
+ *
+ * Las columnas y los anchos van en % del ancho útil; la separación, en `svh`, para que la densidad —2 o 3 features en
+ * pantalla— se sostenga con cualquier alto. El modelo de abajo es el que `s6-tu-panel` barre (nunca más de tres a la
+ * vez, ningún título bajo otra imagen, ninguna fuera del cuadro). Hasta 72rem de contenido (un escritorio angosto) van
+ * en una columna, con el eco del caos en los anchos alternados; abajo de 1024, en columna y cada demo el panel entero a
+ * escala, como un video ([AJUSTES FINALES] A8: el alto propio de abajo de 1024 se fue).
  *
  * Clases escritas enteras: el escáner de Tailwind lee este archivo tal cual.
  */
 
-import type { CSSProperties } from 'react'
-
+import type { NivelDeTitular } from '../../_componentes/tipografia/Titular'
 import type { PantallaDeLaDemo } from '../../_panel-vivo/DemoDelPanel'
-import type { EncuadreDeCaptura } from './contenido'
 
-// ── Los módulos ────────────────────────────────────────────────────────────
+// ── Las clases de tamaño ───────────────────────────────────────────────────
 
-/** De qué lado va cada módulo, en el orden de `TARJETAS`: el 1 a la derecha, el 2 a la izquierda, el 3 a la derecha. */
-export type Lado = 'derecha' | 'izquierda'
-export const LADOS: readonly Lado[] = ['derecha', 'izquierda', 'derecha']
+export type ClaseDeTamano = 's' | 'm' | 'l'
 
-/** La pantalla de panel a la que se dibuja cada maqueta (px): con la barra lateral (desde 860 la lleva), a la proporción del marco. */
-export const PANTALLA_DEL_MODULO: PantallaDeLaDemo = { ancho: 920, alto: 700 }
-
-/**
- * EL ANCHO DEL MÓDULO, en % del ancho útil: un poco más chico que las demos de antes (del 42 al 56 %). En el escritorio
- * angosto (de 1024 a 72rem de contenido) un poco más ancho, para que la maqueta se siga leyendo (a 1024, a 0,63). Con
- * tope de alto en `svh`: en una pantalla baja el módulo no se come el cuadro.
- */
-export const MODULO = { ancho: 52, anchoAngosto: 60, altoMaximo: 64 } as const
-
-/** El contenido desde el que el módulo toma su ancho de escritorio ancho (px): `@6xl`, 72rem. */
-export const CONTENIDO_ANCHO = 1152
-
-/** Abajo de 1024 el módulo va a todo el ancho, con tope de alto (la tablet): `--modulo-maximo-angosto`, en svh. */
-export const ALTO_MAXIMO_ANGOSTO = 70
-
-/** El ancho del módulo (px) con un ancho útil y un alto de ventana dados (escritorio). */
-export function anchoDelModulo(anchoUtil: number, altoVentana: number): number {
-  const fraccion = anchoUtil >= CONTENIDO_ANCHO ? MODULO.ancho : MODULO.anchoAngosto
-  const porAlto = ((MODULO.altoMaximo / 100) * altoVentana * PANTALLA_DEL_MODULO.ancho) / PANTALLA_DEL_MODULO.alto
-  return Math.min((fraccion / 100) * anchoUtil, porAlto)
+export interface Tamano {
+  /** Ancho, en % del ancho útil. */
+  readonly ancho: number
+  readonly nivel: NivelDeTitular
+  /** Velocidad de profundidad: las más grandes, un poco más rápidas (más cerca). */
+  readonly velocidad: number
 }
 
-/** El alto del módulo (px): el marco tiene la proporción de su pantalla. */
-export const altoDelModulo = (anchoUtil: number, altoVentana: number): number => (anchoDelModulo(anchoUtil, altoVentana) * PANTALLA_DEL_MODULO.alto) / PANTALLA_DEL_MODULO.ancho
-
-/** Con qué escala se ve la maqueta: el ancho del módulo sobre el de su pantalla. */
-export const escalaDeLaDemo = (anchoUtil: number, altoVentana: number): number => anchoDelModulo(anchoUtil, altoVentana) / PANTALLA_DEL_MODULO.ancho
-
-// ── La tipografía ──────────────────────────────────────────────────────────
-
-/**
- * EL TÍTULO, de lado a lado: «EL PANEL DONDE CONTROLÁS» mide 9,69 em en la cara de display (el `hmtx` de la instancia por
- * defecto, con el interletrado) y ~9,83 en la 700 que se pinta (la razón medida de «TU NEGOCIO VENDIENDO»: 8,19 contra
- * 8,075). El tamaño es el ancho útil sobre 10,1 —un 2,8 % de margen— con tope en `svh`: dos renglones nunca pasan del
- * 27 % del alto. `s6-tu-panel` rehace la cuenta contra el binario.
- */
-export const TIPO = {
-  divisorDelTitulo: 10.1,
-  topeDelTitulo: 15,
-  interlineado: 0.9,
-  /** La palabra fundida: el ancho de su columna sobre esto («RESULTADOS», la más larga, mide 4,4 em). */
-  divisorDeLaPalabra: 4.8,
-  /** En el teléfono, mucho más discreta: el ancho útil sobre esto. */
-  divisorDeLaPalabraAngosta: 7,
-  /** El grosor del subrayado de «TODO», en em. */
-  grosorDelSubrayado: 0.055,
-} as const
-
-/** El tamaño del título (px). */
-export const tamanoDelTitulo = (anchoUtil: number, altoVentana: number): number => Math.min(anchoUtil / TIPO.divisorDelTitulo, (TIPO.topeDelTitulo / 100) * altoVentana)
-
-/** El alfa de la palabra fundida: la tinta sobre el papel al 1,0595:1 de las palabras del fondo de antes (el «What's new» de nk). */
-export const ALFA_DE_LA_PALABRA = 0.0285
-
-// ── El ritmo ───────────────────────────────────────────────────────────────
-
-/** Los tramos del escritorio, en svh. El respiro arranca en `respiroMinimo` y crece hasta llenar los 700svh. */
-export const RITMO = { aireArriba: 30, respiroMinimo: 40, entreFilas: 100, cta: 100 } as const
-
-/** Abajo de 1024, en svh: la sección mide lo que suma. */
-export const RITMO_ANGOSTO = { respiro: 16, entreFilas: 14 } as const
-
-/**
- * Lo que mide la sección en escritorio SIN el respiro que crece (px): el aire de arriba, los dos renglones del título, el
- * respiro mínimo, los tres módulos con sus dos uniones, la unión con el CTA y el CTA. Tiene que entrar en la tabla.
- */
-export function altoNaturalEnEscritorio(anchoUtil: number, altoVentana: number): number {
-  const svh = altoVentana / 100
-  const titulo = 2 * TIPO.interlineado * tamanoDelTitulo(anchoUtil, altoVentana)
-  const modulos = 3 * altoDelModulo(anchoUtil, altoVentana) + 3 * RITMO.entreFilas * svh
-  return (RITMO.aireArriba + RITMO.respiroMinimo + RITMO.cta) * svh + titulo + modulos
+export const TAMANOS: Readonly<Record<ClaseDeTamano, Tamano>> = {
+  s: { ancho: 42, nivel: 'titulo-s', velocidad: 0.05 },
+  m: { ancho: 48, nivel: 'titulo-m', velocidad: 0.08 },
+  l: { ancho: 56, nivel: 'titulo-m', velocidad: 0.11 },
 }
 
-/** Las variables que leen las clases de la sección, todas del dato. `alto` es el de la tabla (`secciones.ts`). */
-export function variablesDeLaSeccion(alto: string): CSSProperties {
-  const { ancho, alto: altoDeLaPantalla } = PANTALLA_DEL_MODULO
-  const tope = `calc(${MODULO.altoMaximo}svh * ${ancho} / ${altoDeLaPantalla})`
-  return {
-    '--alto-de-la-tabla': alto,
-    '--aire-arriba': `${RITMO.aireArriba}svh`,
-    '--respiro': `${RITMO.respiroMinimo}svh`,
-    '--entre-filas': `${RITMO.entreFilas}svh`,
-    '--medio-entre-filas': `${RITMO.entreFilas / 2}svh`,
-    '--respiro-angosto': `${RITMO_ANGOSTO.respiro}svh`,
-    '--entre-filas-angosto': `${RITMO_ANGOSTO.entreFilas}svh`,
-    '--modulo-ancho': `min(${MODULO.ancho}%, ${tope})`,
-    '--modulo-angosto': `min(${MODULO.anchoAngosto}%, ${tope})`,
-    '--modulo-maximo-angosto': `calc(${ALTO_MAXIMO_ANGOSTO}svh * 4 / 5)`,
-    '--proporcion': `${ancho} / ${altoDeLaPantalla}`,
-    '--divisor-del-titulo': String(TIPO.divisorDelTitulo),
-    '--tope-del-titulo': `${TIPO.topeDelTitulo}svh`,
-    '--divisor-de-la-palabra': String(TIPO.divisorDeLaPalabra),
-    '--divisor-de-la-palabra-angosta': String(TIPO.divisorDeLaPalabraAngosta),
-    '--grosor-del-subrayado': `${TIPO.grosorDelSubrayado}em`,
-    '--medida-de-la-bajada': `${40}rem`,
-    '--ancho-del-formulario': `${26}rem`,
-  } as CSSProperties
+// ── La tabla ───────────────────────────────────────────────────────────────
+
+export interface FilaDelCaos {
+  /** Dónde arranca, en % del ancho útil. */
+  readonly columna: number
+  readonly tamano: ClaseDeTamano
+  /** Cuánto más abajo que la ANTERIOR arranca, en svh. La primera, desde el tope. */
+  readonly separacion: number
+  /** La pantalla de panel a la que se dibuja la demo (px): la tarjeta tiene su proporción y la escala a su ancho. */
+  readonly pantalla: PantallaDeLaDemo
+}
+
+/**
+ * UNA FILA POR FEATURE, en el orden de `TARJETAS`. Retocala acá: el barrido de `s6-tu-panel` dice enseguida si una fila
+ * nueva rompe la convivencia (más de tres a la vez, un título tapado, algo fuera del cuadro).
+ *
+ * La primera llega en el 60 % derecho, al lado del encabezado (el 30 % izquierdo). La última queda asentada al final:
+ * velocidad 0, en el flujo, antes del cierre. Las pantallas (px) son más altas que las de RETOQUE PANEL T1: se ve más
+ * panel; los leads, con sus tres columnas, piden la más ancha.
+ *
+ * [AJUSTES FINALES] A7 · las separaciones crecieron un 12 % (de 522 a 584 svh hasta la última): las demos llegaban
+ * demasiado rápido una tras otra. REGLA DE ALTURAS: la tabla de secciones declara el alto nuevo (700svh, medido).
+ */
+export const TABLA_DEL_CAOS: readonly FilaDelCaos[] = [
+  { columna: 42, tamano: 'l', separacion: 16, pantalla: { ancho: 1000, alto: 720 } },
+  { columna: 4, tamano: 'l', separacion: 92, pantalla: { ancho: 1100, alto: 800 } },
+  { columna: 50, tamano: 'm', separacion: 92, pantalla: { ancho: 960, alto: 780 } },
+  { columna: 14, tamano: 's', separacion: 87, pantalla: { ancho: 760, alto: 720 } },
+  { columna: 42, tamano: 'l', separacion: 87, pantalla: { ancho: 1000, alto: 720 } },
+  { columna: 2, tamano: 'm', separacion: 92, pantalla: { ancho: 920, alto: 780 } },
+  { columna: 54, tamano: 's', separacion: 40, pantalla: { ancho: 820, alto: 700 } },
+  { columna: 6, tamano: 'l', separacion: 78, pantalla: { ancho: 1000, alto: 720 } },
+]
+
+/** El encabezado ocupa el 30 % izquierdo. */
+export const ANCHO_DEL_ENCABEZADO = 30
+
+/** El contenido desde el que el caos flota (px): `@6xl`, 72rem. Antes, una columna. */
+export const CONTENIDO_DEL_CAOS = 1152
+
+/** Dónde arranca cada feature, en svh desde el tope del caos. */
+export function arranques(tabla: readonly FilaDelCaos[] = TABLA_DEL_CAOS): number[] {
+  const tops: number[] = []
+  tabla.forEach((fila, i) => tops.push((i === 0 ? 0 : tops[i - 1]) + fila.separacion))
+  return tops
+}
+
+/** La velocidad de profundidad de cada fila. La última, asentada: 0. */
+export function velocidadDe(indice: number, tabla: readonly FilaDelCaos[] = TABLA_DEL_CAOS): number {
+  return indice === tabla.length - 1 ? 0 : TAMANOS[tabla[indice].tamano].velocidad
+}
+
+/** La proporción del marco de una fila: la de su pantalla (horizontal). */
+export const proporcionDe = (fila: FilaDelCaos): number => fila.pantalla.ancho / fila.pantalla.alto
+
+/** En la columna (el escritorio angosto y el teléfono): anchos que alternan 88 % y 72 %, pegados a izquierda y derecha. */
+export function anchoEnColumna(indice: number): number {
+  return indice % 2 === 0 ? 22 / 25 : 18 / 25
+}
+
+/** Con qué escala se ve la demo de una fila: en el caos, su ancho de tabla; en la columna, el ancho alternado. */
+export function escalaDeLaDemo(indice: number, anchoUtil: number, tabla: readonly FilaDelCaos[] = TABLA_DEL_CAOS): number {
+  const fila = tabla[indice]
+  const ancho = anchoUtil >= CONTENIDO_DEL_CAOS ? (TAMANOS[fila.tamano].ancho / 100) * anchoUtil : anchoEnColumna(indice) * anchoUtil
+  return ancho / fila.pantalla.ancho
+}
+
+// ── El modelo que barren los invariantes ───────────────────────────────────
+
+export interface Rect {
+  readonly izquierda: number
+  readonly arriba: number
+  readonly ancho: number
+  readonly alto: number
+}
+
+export interface CajaDeFeature {
+  readonly imagen: Rect
+  readonly titulo: Rect
+  readonly velocidad: number
+}
+
+/**
+ * Las cajas de cada feature en px, con el caos arrancando en y = 0. El título se modela con su alto de dos renglones más
+ * la etiqueta y los espacios (del DOM: `--spacing-3` + renglones + `--spacing-2` + `Micro`).
+ */
+export function cajasDelCaos(anchoUtil: number, altoDePantalla: number, tabla: readonly FilaDelCaos[] = TABLA_DEL_CAOS): CajaDeFeature[] {
+  const tops = arranques(tabla)
+  return tabla.map((fila, i) => {
+    const t = TAMANOS[fila.tamano]
+    const ancho = (t.ancho / 100) * anchoUtil
+    const altoImagen = ancho / proporcionDe(fila)
+    const arriba = (tops[i] / 100) * altoDePantalla
+    const renglon = t.nivel === 'titulo-m' ? 35 : 22
+    const imagen = { izquierda: (fila.columna / 100) * anchoUtil, arriba, ancho, alto: altoImagen }
+    const titulo = { izquierda: imagen.izquierda, arriba: arriba + altoImagen, ancho, alto: 12 + 2 * renglon + 8 + 11 }
+    return { imagen, titulo, velocidad: velocidadDe(i, tabla) }
+  })
+}
+
+/**
+ * El corrimiento de profundidad, en px: 0 con la pieza centrada en la pantalla; abajo del centro se la empuja más abajo
+ * y arriba, más arriba, así que las de velocidad mayor cruzan la pantalla más rápido (parecen más cerca). El fondo va
+ * negativo: más lento que el scroll, más lejos.
+ */
+export function corrimientoDeProfundidad(centroEnPantalla: number, altoDePantalla: number, velocidad: number): number {
+  return velocidad * (centroEnPantalla - altoDePantalla / 2)
+}
+
+/** Las cajas como se ven con el caos corrido `scroll` px hacia arriba. */
+export function cajasEn(cajas: readonly CajaDeFeature[], scroll: number, altoDePantalla: number): CajaDeFeature[] {
+  return cajas.map((c) => {
+    const centro = c.imagen.arriba + (c.imagen.alto + c.titulo.alto) / 2 - scroll
+    const d = corrimientoDeProfundidad(centro, altoDePantalla, c.velocidad) - scroll
+    return { ...c, imagen: { ...c.imagen, arriba: c.imagen.arriba + d }, titulo: { ...c.titulo, arriba: c.titulo.arriba + d } }
+  })
+}
+
+const seCruzan = (a: Rect, b: Rect): boolean =>
+  a.izquierda < b.izquierda + b.ancho && b.izquierda < a.izquierda + a.ancho && a.arriba < b.arriba + b.alto && b.arriba < a.arriba + a.alto
+
+/**
+ * Lo que mira el barrido en una posición: cuántas se ven, qué título tapa qué imagen y qué imágenes se pisan. Un cruce
+ * cuenta sólo si alguna de las dos cajas está en el cuadro: fuera de él la profundidad las corre distinto y nadie lo ve.
+ */
+export function convivenciaEn(cajas: readonly CajaDeFeature[], altoDePantalla: number): { visibles: number; tapados: string[]; pisadas: string[] } {
+  const enElCuadro = (r: Rect): boolean => r.arriba + r.alto > 0 && r.arriba < altoDePantalla
+  const visibles = cajas.filter((c) => c.titulo.arriba + c.titulo.alto > 0 && c.imagen.arriba < altoDePantalla).length
+  const tapados: string[] = []
+  const pisadas: string[] = []
+  cajas.forEach((a, i) =>
+    cajas.forEach((b, j) => {
+      if (i !== j && seCruzan(a.titulo, b.imagen) && (enElCuadro(a.titulo) || enElCuadro(b.imagen))) tapados.push(`título ${i + 1} bajo imagen ${j + 1}`)
+      if (i < j && seCruzan(a.imagen, b.imagen) && (enElCuadro(a.imagen) || enElCuadro(b.imagen))) pisadas.push(`imagen ${i + 1} con imagen ${j + 1}`)
+    }),
+  )
+  return { visibles, tapados, pisadas }
+}
+
+/** Ninguna feature se sale por los costados. */
+export function fueraDelCuadro(tabla: readonly FilaDelCaos[] = TABLA_DEL_CAOS): number[] {
+  return tabla.flatMap((f, i) => (f.columna < 0 || f.columna + TAMANOS[f.tamano].ancho > 98 ? [i + 1] : []))
 }
 
 // ── Las clases ─────────────────────────────────────────────────────────────
 
-/** La fila: abajo de 1024 en columna (el grupo y después el módulo); desde 1024, dos columnas con el módulo de su lado. */
-export const CLASE_DE_LA_FILA: Readonly<Record<Lado, string>> = {
-  derecha: 'flex flex-col gap-[var(--spacing-8)] escritorio:grid escritorio:grid-cols-[1fr_var(--modulo-angosto)] escritorio:gap-x-[var(--spacing-20)] escritorio:@6xl:grid-cols-[1fr_var(--modulo-ancho)]',
-  izquierda: 'flex flex-col gap-[var(--spacing-8)] escritorio:grid escritorio:grid-cols-[var(--modulo-angosto)_1fr] escritorio:gap-x-[var(--spacing-20)] escritorio:@6xl:grid-cols-[var(--modulo-ancho)_1fr]',
-}
-
-/** Dónde va el módulo en la fila (desde 1024). */
-export const CLASE_DEL_MODULO: Readonly<Record<Lado, string>> = {
-  derecha: 'escritorio:col-start-2 escritorio:row-start-1',
-  izquierda: 'escritorio:col-start-1 escritorio:row-start-1',
-}
-
-/** Dónde va el grupo (palabra, título y descripción): del lado opuesto. */
-export const CLASE_DEL_GRUPO: Readonly<Record<Lado, string>> = {
-  derecha: 'escritorio:col-start-1 escritorio:row-start-1',
-  izquierda: 'escritorio:col-start-2 escritorio:row-start-1',
-}
-
 /**
- * [B6] `?grupo=final|union` — la posición vertical del grupo, desde 1024: a la altura del FINAL de su módulo (su pie, al
- * del módulo) o en la UNIÓN con el siguiente (su centro, en la mitad del aire entre los dos). El defecto es `final`.
+ * El ancho de la columna de cada fila (en el caos lo pisa el de la tabla). Clases enteras. [NOCTURNO FINAL] C2 · abajo de
+ * 1024, cada bloque a todo el ancho (con los márgenes de la sección): una columna; la columna escalonada (22/25 y 18/25
+ * corrida a la derecha) queda para el escritorio angosto.
  */
-export type PosicionDelGrupo = 'final' | 'union'
-export const CLASE_DE_LA_POSICION: Readonly<Record<PosicionDelGrupo, string>> = {
-  final: 'escritorio:self-end',
-  union: 'escritorio:self-end escritorio:translate-y-[calc(50%+var(--medio-entre-filas))]',
+export function claseEnColumna(indice: number): string {
+  return indice % 2 === 0 ? 'w-full escritorio:@max-6xl:w-22/25' : 'w-full escritorio:@max-6xl:ml-auto escritorio:@max-6xl:w-18/25'
 }
 
-/**
- * [B6] `?palabra-movil=union|debajo` — la palabra fundida abajo de 1024, mucho más discreta: en la UNIÓN (en el aire de
- * arriba de su título, en el flujo) o DEBAJO del título (detrás, centrada en él). El defecto es `union`. Desde 1024, arriba
- * del título, en el flujo, en los dos casos.
- */
-export type PalabraEnElTelefono = 'union' | 'debajo'
-export const CLASE_DE_LA_PALABRA: Readonly<Record<PalabraEnElTelefono, string>> = {
-  union: 'text-[length:calc(100cqw/var(--divisor-de-la-palabra-angosta))] escritorio:text-[length:calc(100cqw/var(--divisor-de-la-palabra))]',
-  debajo: 'max-escritorio:absolute max-escritorio:inset-x-0 max-escritorio:top-0 max-escritorio:-z-10 text-[length:calc(100cqw/var(--divisor-de-la-palabra-angosta))] escritorio:text-[length:calc(100cqw/var(--divisor-de-la-palabra))]',
-}
+/** Dónde flota cada fila en el caos (desde 72rem de contenido); en la columna angosta, en el flujo. La última, en el flujo siempre. */
+export const CLASE_DEL_LUGAR = {
+  flota: 'escritorio:absolute escritorio:top-[var(--y)] escritorio:left-[var(--x)] escritorio:w-[var(--w)] escritorio:@max-6xl:static escritorio:@max-6xl:top-auto escritorio:@max-6xl:left-auto',
+  asentada: 'escritorio:ml-[var(--x)] escritorio:w-[var(--w)] escritorio:@max-6xl:ml-0',
+} as const
 
-/** El anclaje horizontal de cada captura de respaldo (el marco le recorta los costados). Clases enteras. */
-export const CLASE_DE_ENCUADRE: Readonly<Record<EncuadreDeCaptura, string>> = {
+/** El ancho de la imagen de respaldo en el cuadro (vw), para su `sizes`: el de su tamaño. */
+export const vwDe = (fila: FilaDelCaos): number => TAMANOS[fila.tamano].ancho
+
+/** RECURSOS · El anclaje horizontal de cada captura de respaldo (el marco le recorta los costados). Clases enteras. */
+export const CLASE_DE_ENCUADRE = {
   izquierda: 'object-left-top',
   centro: 'object-top',
   derecha: 'object-right-top',
-}
-
-// ── El alto de antes, abajo de 1024 (REGLA DE ALTURAS) ─────────────────────
-
-/**
- * EL MODELO DEL ALTO VIEJO, abajo de 1024 (px): la sección de antes en su columna, sumada pieza por pieza desde su código
- * (`git show 492bd7d6:…/tu-panel/`): el relleno de arriba y de abajo y el hueco entre la galería y el remate (`--spacing-20`
- * tres veces), el encabezado («Tu Panel» en `titulo-xl` y su descripción), las ocho features en columna (el marco a 4:5 del
- * ancho, su título y su rótulo, con 70 px entre una y otra) y el remate («Y más…» y el newsletter). Es una estimación con
- * las cajas de texto modeladas (no medidas): a 390 × 844 da 5,94 pantallas contra las ~5,8 que midió NOCTURNO FINAL C3.
- * El orquestador la cambia por la medida del navegador si hace falta.
- */
-export function altoViejoAngosto(anchoUtil: number): number {
-  const telefono = anchoUtil < 600
-  const encabezado = telefono ? 130 : 116
-  const tituloDeFeature = telefono ? 74 : 59
-  const remate = telefono ? 250 : 242
-  const features = 8 * (1.25 * anchoUtil + tituloDeFeature) + 7 * 70
-  return 3 * 80 + encabezado + 48 + features + remate
-}
+} as const

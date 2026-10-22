@@ -117,7 +117,6 @@ interface Fuentes {
   readonly viaje: string
   readonly gota: string
   readonly remate: string
-  readonly ctaDelPanel: string
 }
 const F: Fuentes = {
   esquiva: leer('../escena/titulos3d/esquivaDelLogo.ts'),
@@ -131,10 +130,7 @@ const F: Fuentes = {
   progreso: leer('../motion/useProgresoDePatron.ts'),
   viaje: leer('../../_componentes/useDeslizamientoDelCta.ts'),
   gota: leer('../../_secciones/trabajos/CapaDeLaGota.tsx'),
-  // [B6] El remate de Tu panel se fue con la sección nueva: lo que entra al final de la sección es su CTA, con el gatillo común
-  // (`_contrato/Gatillo.tsx`), y lo que se posa sin gesto después de un salto lo decide la máquina del contrato.
-  remate: leer('../../_secciones/_contrato/disparo.ts'),
-  ctaDelPanel: leer('../../_secciones/tu-panel/CtaDelPanel.tsx'),
+  remate: leer('../../_secciones/tu-panel/Remate.tsx'),
 }
 
 // H1 · LAS FUENTES. Cada título espera la cara de su DOM (no `fonts.ready`, que resuelve con nada cargando); lo armado con otra métrica (sus
@@ -213,16 +209,16 @@ controlPositivo('  el detector VE el cableado de antes (oculta y sin nada debido
 const saltoBien = (g: string, rm: string): boolean =>
   ['abajo-subiendo', 'abajo-bajando'].every((c) => gestoDelCruce(c as 'abajo-subiendo') === 'nada' && puestoTras(c as 'abajo-subiendo')) &&
   /else if \(gesto === 'nada' && sentido === null && viajeEnCurso\(\) === null && !DIA_DEL_FINAL\.activo\) NOCHE_DISPARADA\.cantidad = nocheDelScroll\(\)/.test(g) &&
-  /return !estaALaVista\(estado\) && puestoTras\(evento\.entrada\) \? 'quieto' : estado/.test(rm) && /<Gatillo /.test(F.ctaDelPanel)
+  /else if \(animaciones\.length === 0 && puestoTras\(cruce\)\) \{[\s\S]*?armar\(\)\s*\n\s*for \(const a of animaciones\) a\.finish\(\)/.test(rm)
 // Y el titular que esquiva el logo mientras su sección entra: con la página quieta `sueltaMs`, llega igual (el salto nativo del ancla deja
 // Quiénes somos «entrando» con el titular encima del logo: pedía 0 para siempre con su DOM apagado, y no se veía ninguno de los dos).
 const esquivaBien = (e: string, suelta: number): boolean => suelta >= 500 && suelta <= 2000 && e.includes('const entrando = enElCuadro !== null && enElCuadro.entrando && ahora - QUIETA.desde < ESQUIVA.sueltaMs')
 afirmar(esquivaBien(F.esquiva, ESQUIVA.sueltaMs), `  H4 · el titular que esquiva el logo llega igual con la página quieta ${String(ESQUIVA.sueltaMs)} ms (en una pausa corta sigue esquivando)`)
 controlPositivo('  el detector VE la esquiva de antes (para siempre mientras la sección «entra»)', F.esquiva.replace(' && ahora - QUIETA.desde < ESQUIVA.sueltaMs', ''), (e: string) => esquivaBien(e, ESQUIVA.sueltaMs))
 controlPositivo('  y una que se suelta en cualquier pausa del scroll (180 ms: aparecería sobre el logo al frenar)', 180, (x: number) => esquivaBien(F.esquiva, x))
-afirmar(saltoBien(F.gota, F.remate), '  H4 · después de un salto que pasó por encima del disparo, la noche es la que deja el scroll y el CTA de Tu panel (el gatillo común) queda puesto (sin gesto)')
+afirmar(saltoBien(F.gota, F.remate), '  H4 · después de un salto que pasó por encima del disparo, la noche es la que deja el scroll y el remate de Tu panel queda puesto (sin gesto)')
 controlPositivo('  el detector VE la noche de antes (sólo la ida)', { g: F.gota.replace(/\n\s*else if \(gesto === 'nada'[^\n]*/, ''), rm: F.remate }, (x: { g: string; rm: string }) => saltoBien(x.g, x.rm))
-controlPositivo('  y el remate de antes (dormido después del salto)', { g: F.gota, rm: F.remate.replace("return !estaALaVista(estado) && puestoTras(evento.entrada) ? 'quieto' : estado", 'return estado') }, (x: { g: string; rm: string }) => saltoBien(x.g, x.rm))
+controlPositivo('  y el remate de antes (dormido después del salto)', { g: F.gota, rm: F.remate.replace('} else if (animaciones.length === 0 && puestoTras(cruce)) {', '} else if (false) {') }, (x: { g: string; rm: string }) => saltoBien(x.g, x.rm))
 
 // H5 · EL CONTEXTO PERDIDO: el estado lo sigue (un lienzo de mentira con sus dos eventos); perdido, los títulos se sueltan (su DOM a la
 // vista) y al reponerse se rehacen el estudio y lo armado (el de los títulos y el del pie).
