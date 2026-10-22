@@ -176,8 +176,8 @@ export const CLASE_DE_ENCUADRE: Readonly<Record<EncuadreDeCaptura, string>> = {
  * (`git show 492bd7d6:…/tu-panel/`): el relleno de arriba y de abajo y el hueco entre la galería y el remate (`--spacing-20`
  * tres veces), el encabezado («Tu Panel» en `titulo-xl` y su descripción), las ocho features en columna (el marco a 4:5 del
  * ancho, su título y su rótulo, con 70 px entre una y otra) y el remate («Y más…» y el newsletter). Es una estimación con
- * las cajas de texto modeladas (no medidas): a 390 × 844 da 5,94 pantallas contra las ~5,8 que midió NOCTURNO FINAL C3.
- * El orquestador la cambia por la medida del navegador si hace falta.
+ * las cajas de texto modeladas: sin calibrar daba 5,94 pantallas a 390 × 844; con el ajuste medido (`AJUSTE_MEDIDO`, abajo), 5,80.
+ * Lo calibró el orquestador contra la sección vieja medida en el navegador en cuatro anchos.
  */
 export function altoViejoAngosto(anchoUtil: number): number {
   const telefono = anchoUtil < 600

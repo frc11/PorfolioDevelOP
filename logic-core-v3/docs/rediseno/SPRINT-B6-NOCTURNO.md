@@ -41,6 +41,28 @@ orquestador con `scripts-carga/panel-b6.ts` (abajo, «Qué mirar»).
   s52 C2 (cada módulo a todo el ancho abajo de 1024), s75 H4 (el salto lo posa la máquina del contrato), s77 §3 (el gatillo común; las
   huellas de Tu panel, retomadas).
 
+### Ronda del navegador (el banco en la integración, 2026-10-22)
+
+`panel-b6.ts` a 1440 × 900 y 1024 × 768: ok el alto (7,000 pantallas), el pintado (termina al 49,5 y 49,2 %), el AA (peor
+6,43:1), el CTA y la salida del candado. Lo que falló, y qué estaba mal:
+
+- **b · el eje (49,6 % y 76,3 %): el banco.** Medía el rango del texto entero, y con la coreografía el título y la descripción
+  llevan su texto completo en un `sr-only` de 1 px con `white-space: nowrap`, que desborda a la derecha. Ahora mide la tinta
+  visible (la unión de los rectángulos de los textos, sin lo visualmente oculto).
+- **b · `?grupo=final` (−327 y −263 px) y `?grupo=union` (123 contra 287): el banco.** Medía el marco, que lleva la llegada de P2
+  (sube desde el 60 % de su alto: 0,6 × 545 = 327 y 0,6 × 438 = 263) y todavía no había llegado. Con la caja de layout del módulo
+  (el `Bloque`, que nunca se transforma), final da el pie al del módulo y union cae en la mitad del aire (123 + 327 = 450, la mitad
+  de 100svh a 900).
+- **c · el cartel no se veía: el banco, con un retoque del producto.** El ratón al 60 % del módulo y tres muescas: la página sacaba
+  el módulo de abajo del ratón (un `pointerleave`) y la salida cortaba el cartel. El banco deja ahora el ratón encima (cerca del
+  tope de lo visible, una muesca). El producto: la salida ya no corta el cartel bloqueado; se va con su tiempo y su fundido.
+- **c · CONTROL, la página se movía 298 px con el candado abierto: el producto (y el banco).** Abierto, la rueda pasaba a la página
+  en el borde del contenido (la semántica vieja de `rueda.ts`: «en el borde, la rueda es de la página»). Ahora, abierto, el marco
+  lleva `data-lenis-prevent` (Lenis no toma la rueda) y frena (`preventDefault`) la que el contenido no absorbe
+  (`laRuedaEsDeAdentro`: en su borde, sin recorrido o fuera de él); el dedo, `overscroll-behavior: contain`. El banco además hacía
+  el clic con la caja vieja (después de scrollear): ahora relee la caja antes de cada paso y prueba también el borde.
+- El modelo del alto viejo, calibrado contra lo medido (reaplicado de `cb25e1ea` de la integración).
+
 ## Qué mirar (Valentino)
 
 1. `http://localhost:3000/v3` a 1440 × 900: scrolleá hasta Tu panel. El título se pinta palabra por palabra y termina con su centro en
