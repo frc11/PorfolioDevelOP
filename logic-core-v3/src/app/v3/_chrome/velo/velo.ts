@@ -38,7 +38,10 @@ export function siguienteFaseDelVelo(fase: FaseDelVelo, evento: EventoDelVelo): 
  */
 export const VELO = { cubrirMs: 460, destaparMs: 560, cuadrosPintados: 2, esperaMaximaMs: 3500 } as const
 
-/** ¿Ya se puede destapar? La página nueva montada y sus cuadros pintados (con el scroll en su lugar), o la espera cumplida (el techo). */
+/**
+ * ¿Ya se puede destapar? La página nueva montada (y [T0] su escena lista: la variante de la página dibujada, `escenaDeLaRutaLista`) y sus
+ * cuadros pintados (con el scroll en su lugar), o la espera cumplida (el techo).
+ */
 export function puedeDestapar(cuadrosPintados: number, montada: boolean, esperandoMs: number): boolean {
   return (montada && cuadrosPintados >= VELO.cuadrosPintados) || esperandoMs >= VELO.esperaMaximaMs
 }

@@ -301,7 +301,7 @@ afirmar(COMPOSICION_DE_LA_LUZ.noche === 1 && COMPOSICION_DE_LA_LUZ.brilloDelPiso
 // La variante de prueba: sólo lo prestado, y libera lo suyo. `variante.ts`: sólo tipos y números.
 const deprueba = leerV3('_lib/escena/ruta/VarianteDePrueba.tsx')
 const soloLoPrestado = (v: string): boolean =>
-  !/camera|LUZ_DE_ABAJO_EN_VIVO|ENERGIA_DE_LA_RUTA|AVANCE_DE_LA_INTRO|rig\.|EffectComposer|_servicios|new THREE\.(Mesh|RingGeometry|MeshBasicMaterial)\(/.test(v) && /luzDeAbajo\(COMPOSICION_DE_LA_LUZ\.brilloDelPiso \+/.test(v) && /<mesh ref=\{anillo\}/.test(v) && /^export default function VarianteDePrueba/m.test(v) && /^'use client'/.test(leer('_lib/escena/ruta/VarianteDePrueba.tsx'))
+  !/camera|LUZ_DE_ABAJO_EN_VIVO|ENERGIA_DE_LA_RUTA|AVANCE_DE_LA_INTRO|rig\.|EffectComposer|_servicios|new THREE\.(Mesh|RingGeometry|MeshBasicMaterial)\(/.test(v) && /luzDeAbajo\(c\.brilloDelPiso, color\.current\)/.test(v) && /brilloDelPiso: COMPOSICION_DE_LA_LUZ\.brilloDelPiso \+/.test(v) && /<mesh ref=\{anillo\}/.test(v) && /^export default function VarianteDePrueba/m.test(v) && /^'use client'/.test(leer('_lib/escena/ruta/VarianteDePrueba.tsx'))
 afirmar(soloLoPrestado(deprueba), '  la variante de prueba toca sólo lo prestado (con las dos funciones que le presta la ranura: la luz de abajo y el color de la energía), lee el avance, arma lo suyo en JSX (R3F lo libera al desmontarse) y es el `default` de un módulo `use client`')
 controlPositivo('  el detector ve una variante que mueve la cámara', `${deprueba}\nstate.camera.position.y = 10`, soloLoPrestado)
 const tipos = leer('_lib/escena/ruta/variante.ts')
@@ -530,7 +530,7 @@ controlPositivo('  el detector ve el ancla que pisa la vuelta', delAncla.replace
 // pintados), no 20 cuadros y todos los títulos (hasta 3,5 s tapado): con la banda en el compositor lo que la página arme después no la traba.
 type Destapa = typeof puedeDestapar
 const esperaBien = (d: Destapa, velo: string): boolean =>
-  !d(1, true, 100) && d(2, true, 100) && !d(5, false, 100) && !d(0, true, 3499) && d(0, false, 3500) && VELO.esperaMaximaMs === 3500 && VELO.cubrirMs + VELO.destaparMs <= 1100 && velo.includes('if (puedeDestapar(pintados, true, ahora - t0)) destapar()')
+  !d(1, true, 100) && d(2, true, 100) && !d(5, false, 100) && !d(0, true, 3499) && d(0, false, 3500) && VELO.esperaMaximaMs === 3500 && VELO.cubrirMs + VELO.destaparMs <= 1100 && velo.includes('if (puedeDestapar(pintados, escenaDeLaRutaLista(), ahora - t0)) destapar()') /* [T0] y la escena de la ruta lista: s78-t0 §1 */
 afirmar(esperaBien(puedeDestapar, delVelo), `el destape: la página nueva montada y ${String(VELO.cuadrosPintados)} cuadros pintados con su scroll (el primer cuadro estable), con 3,5 s de techo; cubrir y destapar, ${String(VELO.cubrirMs)} y ${String(VELO.destaparMs)} ms: una pasada de 1,2 s o menos con la página en su lugar`)
 controlPositivo('  el detector ve la espera de B12a.7 (20 cuadros y todos los títulos: hasta 3,5 s tapado)', ((p, m, ms) => (p >= 20 && m) || ms >= 3500) as Destapa, (d: Destapa) => esperaBien(d, delVelo))
 const deLaSincronia = leerV3('_lib/escena/titulos3d/sincronia.ts')

@@ -5,11 +5,13 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from '
 import * as THREE from 'three'
 
 import { REGISTRO_DE_VARIANTES, type IdDeVariante } from '../../../_variantes/registro'
+import { hayPrimerCuadro } from '../../carga'
 import type { NivelDeCalidad } from '../calidad'
 import { ENERGIA_DE_LA_RUTA } from '../energia/energiaDeLaRuta'
 import { hayBanco } from '../entorno'
 import { LUZ_DE_ABAJO_EN_VIVO } from '../final/luzDeAbajo'
 
+import { RANURA_EN_VIVO, VARIANTE_DIBUJADA, claveDeLaVariante, escenaLista } from './listaDeLaRuta'
 import { AVANCE_DE_LA_INTRO } from './pistaDeLaIntro'
 import { presetActual, suscribirseAlPreset } from './preset'
 import { atenderLaSalida, pedirLaSalidaDeLaVariante } from './salidaDeLaVariante'
@@ -39,6 +41,23 @@ type EstadoDeLaRanura = { readonly id: string | null; readonly saliendo: boolean
  * [B12a.8] `__ranuraSinBfcache` (el control de P-H35: al volver del bfcache la salida no se olvida).
  */
 type VentanaDelBanco = Window & { __ranuraDelBanco?: () => EstadoDeLaRanura; __pedirLaSalidaDelBanco?: () => Promise<void>; __ranuraSinVariante?: boolean; __ranuraSinLaSenal?: boolean; __ranuraSinBfcache?: boolean }
+
+/**
+ * [T0] La marca de que la variante DIBUJÓ: su cuadro corre después del de la variante (se suscribe después), así la clave queda anotada
+ * con la luz de la variante ya escrita en ese mismo cuadro. Al desmontarse, la borra si es la suya.
+ */
+function MarcaDeDibujo({ clave }: { readonly clave: string }): null {
+  useFrame(() => {
+    VARIANTE_DIBUJADA.clave = clave
+  })
+  useEffect(
+    () => () => {
+      if (VARIANTE_DIBUJADA.clave === clave) VARIANTE_DIBUJADA.clave = null
+    },
+    [clave],
+  )
+  return null
+}
 
 /**
  * [B12a.3] LA RANURA DE VARIANTES — adentro del lienzo: monta la variante del preset de la página (`preset.variante`, un id del registro,
@@ -164,6 +183,16 @@ export function RanuraDeLaVariante({ calidad, reducido }: { readonly calidad: Ni
     return () => window.removeEventListener('pageshow', alVolver)
   }, [])
 
+  // [T0] 11 · 1 · El velo pregunta, antes de destapar, si la variante de ESTA página ya dibujó (`listaDeLaRuta.ts`): la página se destapa
+  // con su noche y su acento desde el primer cuadro. Sin el primer cuadro de la escena (sin WebGL), o con la variante apagada por el banco, lista.
+  useEffect(() => {
+    const lista = (): boolean => escenaLista(presetActual(), VARIANTE_DIBUJADA.clave, hayPrimerCuadro(), hayBanco() && (window as VentanaDelBanco).__ranuraSinVariante === true)
+    RANURA_EN_VIVO.lista = lista
+    return () => {
+      if (RANURA_EN_VIVO.lista === lista) RANURA_EN_VIVO.lista = null
+    }
+  }, [])
+
   // Al desmontar la ranura (el lienzo se rehace al cruzar 1024), la luz y la energía vuelven a ser del final.
   useEffect(
     () => () => {
@@ -208,5 +237,10 @@ export function RanuraDeLaVariante({ calidad, reducido }: { readonly calidad: Ni
 
   if (montada === null) return null
   const { Componente } = montada
-  return <Componente avance={AVANCE_DE_LA_INTRO} acento={montada.acento} calidad={calidad} reducido={reducido} luzDeAbajo={luzDeAbajo} energia={energia} saliendo={saliendo} />
+  return (
+    <>
+      <Componente avance={AVANCE_DE_LA_INTRO} acento={montada.acento} calidad={calidad} reducido={reducido} luzDeAbajo={luzDeAbajo} energia={energia} saliendo={saliendo} />
+      <MarcaDeDibujo clave={claveDeLaVariante(montada.pagina, montada.id)} />
+    </>
+  )
 }

@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 
 import { hayBanco } from '../../_lib/escena/entorno'
+import { escenaDeLaRutaLista } from '../../_lib/escena/ruta/listaDeLaRuta'
 import { DIA_DEL_FINAL, NOCHE_DISPARADA } from '../../_lib/escena/nocheDisparada'
 import { VUELTA_AL_HOME, claveDeLaEntrada, devolverLosAlmacenes, posicionGuardadaDelHome, type PosicionDelHome } from '../../_lib/escena/ruta/posicionDelHome'
 import { sonar } from '../../_lib/sonido/bus'
@@ -225,7 +226,8 @@ export function VeloDeNavegacion(): React.JSX.Element {
             pintados = 0
           }
         }
-        if (puedeDestapar(pintados, true, ahora - t0)) destapar()
+        // [T0] 11 · 1 · y con la escena de la ruta lista: la variante de la página ya dibujó (su noche y su acento desde el primer cuadro destapado).
+        if (puedeDestapar(pintados, escenaDeLaRutaLista(), ahora - t0)) destapar()
         else esperando = requestAnimationFrame(esperar)
       }
       cancelAnimationFrame(esperando)

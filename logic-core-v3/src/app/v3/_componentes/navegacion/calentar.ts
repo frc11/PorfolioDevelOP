@@ -1,4 +1,5 @@
 import { RUTA_DEL_HOME } from '../../_lib/veloDeNavegacion'
+import { REGISTRO_DE_VARIANTES } from '../../_variantes/registro'
 import { LEGIBILIDAD_POR_DEFECTO, fuentesConLaLegibilidad } from '../titulos3d/legibilidad'
 import { CARA_DEL_DOM, TITULO_DE_PAGINA } from '../titulos3d/presets'
 
@@ -19,6 +20,8 @@ export function calentarElDestino(href: string): void {
   const ruta = rutaDe(href)
   if (ruta === RUTA_DEL_HOME || ruta === '' || !ruta.startsWith(`${RUTA_DEL_HOME}/`) || pedidas.has(ruta)) return
   pedidas.add(ruta)
+  // [T0] 11 · 1 · y los trozos de las variantes del registro: la escena destapa con la variante de la página ya dibujada (`listaDeLaRuta.ts`).
+  for (const cargar of Object.values(REGISTRO_DE_VARIANTES)) void cargar().catch(() => undefined)
   void import('../../_lib/escena/titulos3d/fuentesDePagina')
     .then((m) => Promise.all(FUENTES_DEL_DESTINO.map((f) => m.cargarLaFuenteDePagina(f))))
     .catch(() => undefined)
