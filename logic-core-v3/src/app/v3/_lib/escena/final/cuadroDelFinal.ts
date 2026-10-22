@@ -22,10 +22,7 @@ import { escribiendoEnUnCampo, pasoDelTeclado, sinTeclado, tecladoQuieto, type E
 import { fueraDeSuLugar, sinElRig } from './caidaAlHueco'
 import { enUnaPagina } from '../ruta/cierreDeLaPagina'
 import {
-  ELEVACION_DEL_FINAL,
-  EN_VIVO,
-  FINAL_DEL_PIE,
-  RELOJ_DEL_FINAL,
+  ELEVACION_DEL_FINAL, EN_VIVO, FINAL_DEL_PIE, RELOJ_DEL_FINAL,
   acercamiento,
   alturaDeLaCaida,
   apertura,
