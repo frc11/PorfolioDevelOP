@@ -14,7 +14,7 @@ import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimient
 import { SELECTOR_DEL_TRAMO_DEL_TITULO } from '../pagina/atributoDeLaIntro'
 import { Titular } from '../tipografia/Titular'
 import { anchoDelTitulo } from './anchoDelTitulo'
-import { MAS_PESADA, legibilidadDeLaUrl } from './legibilidad'
+import { LEGIBILIDAD_POR_DEFECTO, fuentesConLaLegibilidad, legibilidadDeLaUrl } from './legibilidad'
 import { CAIDA_DEL_TITULO, CARA_DEL_DOM, TITULOS_CON_LETRAS, TITULO_DE_PAGINA, caeElTitulo, combinacionDeLaBandera, partesDelTitulo, type PresetDelTitulo } from './presets'
 
 const sinCambios = (): (() => void) => () => undefined
@@ -55,9 +55,10 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
   const deLaBandera = useSyncExternalStore(sinCambios, nombreDeLaUrl, () => null)
   const partes = deLaBandera === null ? partesDelTitulo(titulo, dadas) : partesDelTitulo(deLaBandera)
   const familia = useSyncExternalStore(sinCambios, combinacionDeLaPagina, () => TITULO_DE_PAGINA)
-  // [B12a.8] T5 · `?legibilidad=peso`: la parte liviana un paso más pesada (`legibilidad.ts`); sin la bandera, la familia como es.
-  const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => null)
-  const preset = legibilidad === 'peso' ? { ...familia, fuentes: [familia.fuentes[0], MAS_PESADA[familia.fuentes[1]] ?? familia.fuentes[1]] as const } : familia
+  // [B12a.8] T5 · [T0] la legibilidad elegida, `peso` (la parte liviana un paso más pesada, `legibilidad.ts`), también en el servidor;
+  // `?legibilidad=tamano`, la otra (la familia como es, más grande).
+  const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => LEGIBILIDAD_POR_DEFECTO)
+  const preset = { ...familia, fuentes: fuentesConLaLegibilidad(familia.fuentes, legibilidad) }
   const material = useTitulosDeVolumen()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const reducido = usePrefiereMenosMovimiento()

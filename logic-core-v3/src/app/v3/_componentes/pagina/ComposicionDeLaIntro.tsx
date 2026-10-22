@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef, useSyncExternalStore } from 'react'
 
 import { COMPOSICION_EN_LA_ESCENA, COMPOSICION_POR_DEFECTO, composicionDeLaBandera, huecoEnElCuadro, type IdDeComposicion } from '../../_lib/escena/ruta/composicion'
-import { legibilidadDeLaUrl } from '../titulos3d/legibilidad'
+import { LEGIBILIDAD_POR_DEFECTO, legibilidadDeLaUrl } from '../titulos3d/legibilidad'
 
 /**
  * [B12a.8] LA COMPOSICIÓN DE LA INTRO, EN EL DOM (`_lib/escena/ruta/composicion.ts`) — el marco de la intro (una pantalla, fijo arriba
@@ -59,7 +59,8 @@ export const PARTES_DE_LA_COMPOSICION = { marco: 'marco-de-la-intro', columna: '
 export function MarcoDeLaIntro({ children }: { readonly children: React.ReactNode }): React.JSX.Element {
   const id = useComposicion()
   // [B12a.8] T5 · `?legibilidad=tamano`: el título más grande en la 1 desde 1024 (el 80 % en vez del 74: la variante de `COLUMNA['1']`).
-  const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => null)
+  // [T0] Sin la bandera, `peso` (la elegida): el servidor la pinta igual.
+  const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => LEGIBILIDAD_POR_DEFECTO)
   const marco = useRef<HTMLDivElement>(null)
   const hueco = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
@@ -85,7 +86,7 @@ export function MarcoDeLaIntro({ children }: { readonly children: React.ReactNod
   }, [id])
   return (
     <div ref={marco} data-parte={PARTES_DE_LA_COMPOSICION.marco} data-composicion={id} className={MARCO[id]}>
-      <div data-parte={PARTES_DE_LA_COMPOSICION.columna} data-legibilidad={legibilidad ?? undefined} className={COLUMNA[id]}>
+      <div data-parte={PARTES_DE_LA_COMPOSICION.columna} data-legibilidad={legibilidad} className={COLUMNA[id]}>
         {children}
       </div>
       <div ref={hueco} data-parte={PARTES_DE_LA_COMPOSICION.hueco} aria-hidden="true" className={HUECO[id]} />

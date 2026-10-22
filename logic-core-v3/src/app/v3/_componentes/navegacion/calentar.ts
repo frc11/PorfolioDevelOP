@@ -1,5 +1,9 @@
 import { RUTA_DEL_HOME } from '../../_lib/veloDeNavegacion'
+import { LEGIBILIDAD_POR_DEFECTO, fuentesConLaLegibilidad } from '../titulos3d/legibilidad'
 import { CARA_DEL_DOM, TITULO_DE_PAGINA } from '../titulos3d/presets'
+
+/** [T0] Las dos fuentes del título de una página, con la legibilidad elegida (`peso`: la liviana un paso más pesada). */
+const FUENTES_DEL_DESTINO = fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes, LEGIBILIDAD_POR_DEFECTO)
 
 /**
  * [B12a.8] CALENTAR EL DESTINO — mientras el puntero está encima del enlace (o tiene el foco) y mientras el velo cubre: lo que la página
@@ -16,12 +20,12 @@ export function calentarElDestino(href: string): void {
   if (ruta === RUTA_DEL_HOME || ruta === '' || !ruta.startsWith(`${RUTA_DEL_HOME}/`) || pedidas.has(ruta)) return
   pedidas.add(ruta)
   void import('../../_lib/escena/titulos3d/fuentesDePagina')
-    .then((m) => Promise.all(TITULO_DE_PAGINA.fuentes.map((f) => m.cargarLaFuenteDePagina(f))))
+    .then((m) => Promise.all(FUENTES_DEL_DESTINO.map((f) => m.cargarLaFuenteDePagina(f))))
     .catch(() => undefined)
   if (typeof document === 'undefined' || document.fonts === undefined) return
   // Las variables de las caras las declara el layout en su contenedor (`[data-v3]`).
   const raiz = getComputedStyle(document.querySelector('[data-v3]') ?? document.documentElement)
-  for (const f of TITULO_DE_PAGINA.fuentes) {
+  for (const f of FUENTES_DEL_DESTINO) {
     const familia = raiz.getPropertyValue(CARA_DEL_DOM[f].familia.slice(4, -1)).trim()
     if (familia !== '') void document.fonts.load(`${String(CARA_DEL_DOM[f].peso)} 1em ${familia}`).catch(() => undefined)
   }
