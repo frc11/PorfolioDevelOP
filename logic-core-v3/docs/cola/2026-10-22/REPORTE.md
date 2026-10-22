@@ -1,148 +1,101 @@
-# REPORTE · noche del 2026-10-22
-
-## Actualización 09:27 (corte por la cuota de uso): esto manda sobre el resumen de abajo
-- **Integradas y verificadas, 12 en total:**
-  - T0, B7, B1.2e, B4 y B12c;
-  - B12b (`48ba9510`);
-  - B5 (`219a693c`);
-  - B2 + B3 (reintegradas en `cd04d271` con el arreglo `436404fa`: las placas ya tienen texto);
-  - B6 (reintegrada en `728717d0` + `a7840f71`);
-  - B11 (`126c8a53`);
-  - B8 (`16e3781a`).
-- **Lo medido en cada una:**
-  - **B12b (el viaje):** `viaje.ts` 2 de 2, con 0 cuadros en blanco y el logo en su hueco a 0,28 %; los controles `velo` y `sin-hueco` dan rojo; `sin-tapar` es un control ciego. `velo.ts` 4 de 4.
-  - **B5 (Demos):** la parada 12 de 12, con sus dos controles en rojo.
-  - **B2 + B3 (las reseñas):** las tarjetas de adelante dan 8,95 y 10,28:1. El aro cuesta 0,1 ms por cuadro. B3 se ve: HABLANOS y el anillo en el piso.
-  - **B6 (el Panel):** `panel-b6` todo en verde. Las fallas eran del banco; el candado abierto se arregló.
-  - **B11 (el chat):** llega a los 11 s, sin pisar el chrome a 1440, 860 ni 390, y el control da rojo.
-    - **Ojo:** suma una prop opcional `overrides` a `src/modules/chatbot/components/LogicCompanion.tsx`, compartido con el sitio vivo. Es aditiva y `/` sigue cargando, pero hay que revisarla.
-    - En la consola aparece «`<circle>` attribute r» del `PulseAvatar` existente.
-  - **B8 (el moiré):** suites de la escena en verde. Costo del moiré: la trama gruesa ~0,05 ms y la fina ~0,06 ms por cuadro; el control del banco da verde. Banderas `?moire=0|1|2|mouse` (defecto 2).
-- **Arreglos del orquestador:**
-  - el control de s47, ciego desde B1.2e (`3209d764`);
-  - los bancos `viaje.ts` y `panel-b6.ts`;
-  - el alto viejo de Servicios.
-- **A medias, en sus worktrees (sin commitear, cortadas por la cuota):**
-  - B13 (`C:\nocturno\2026-10-22\b13`, 25 archivos): estaba sacando el pie provisorio de la página base.
-  - B9 (`C:\nocturno\2026-10-22\b9`, sobre la rama de B8, 3 archivos): estaba conectando las grietas al sombreador del vidrio.
-- **No empezada:** B10 (va después de B13).
-- **No corrieron:** el `verificar` completo final, las matrices completas y el `next build`. Lo último completo fue el `verificar` con T0. Después de cada merge corrí las suites del área: ninguna falla nueva.
-- **Antes de mergear a `rediseno/home`:** borrar o mover `docs/cola/2026-10-22/` del checkout principal. Está sin trackear y choca con esta rama.
-
----
-
-# (Lo de abajo es la versión de las 07:40)
+# REPORTE · noche del 2026-10-22 (cerrada al día siguiente, ~15:30, después de tres cortes por la cuota de uso)
 
 ## Resumen
-1. **Integradas y verificadas en `nocturno/2026-10-22`:**
-   - T0: los pendientes de B12a.8 y los agregados.
-   - B7: el login como demo.
-   - B1.2e: el carrusel del Portfolio de menos de 1024.
-   - B4: la sección Servicios.
-   - B12c: el preloader del sitio.
-2. **Revertidas, con su trabajo en su rama:**
-   - **B6 (el Panel):** el candado de la rueda no anda.
-   - **B2 (el aro de reseñas):** las tarjetas del aro salen vacías, sin cita, nombre ni retrato; el contraste da 1,19:1.
-3. **En curso a esta hora, en sus worktrees:** B6 (el arreglo), B5 (Demos) y B12b (el viaje). Las tres se cortaron dos veces por el límite de uso y se retomaron a las 07:21.
-4. **No empezadas:** B3 (está escrita en la rama de B2, sin integrar), B13, B8, B9, B10 y B11.
-5. **Verificar:** con T0, vuelve a la base histórica (s1, s2, s3, s4, s5, s7, s8 y s17). Después de cada merge corrí las suites del área: ninguna falla nueva. `tsc` da 0. El `verificar` completo del final todavía no corrió.
-6. **Corregido por el orquestador al integrar:**
-   - REGLA DE ALTURAS: el alto viejo de Servicios y el de Tu panel abajo de 1024, medidos en el navegador.
-   - Un choque de nombres entre el carrusel nuevo y el de Demos.
-   - Un banco que tomaba mal la hora.
-   - `armadas.ts`, que había vuelto a pasar las 300 líneas.
-7. **Lo primero que tiene que mirar Valentino:**
-   - `/v3?preloader=si` a 1440: la secuencia y la flecha al botón del sonido.
-   - `/v3/pagina-base`: la noche y el acento desde el primer cuadro.
-   - `/v3#servicios` a 1440: una muesca por servicio.
-8. **Antes de mergear a `rediseno/home`:** borrar o mover `docs/cola/2026-10-22/` del checkout principal. Está sin trackear y choca con esta rama.
+1. **Las 14 unidades de la cola están integradas en `nocturno/2026-10-22`**, cada una verificada en el navegador (dev :3000) con su banco y su control, más el humo del home. Son: T0, B7, B1.2e, B4, B12c, B12b, B5, B2, B3, B6, B11, B8, B13, B9 y B10.
+2. **`verificar` final:** 8 grupos con falla, la base histórica (s1, s2, s3, s4, s5, s7, s8 y s17). Comparado afirmación por afirmación contra el de T0: **0 fallas nuevas**. `tsc` da 0.
+   - La base al empezar la noche tenía 13 grupos: las 5 de la navbar (s10, s26, s27, s39 y s41) las resolvió T0.
+3. **El `next build` NO terminó:** Claude Code lo cortó por falta de memoria y no lo relancé, por indicación del sistema. Por eso no hay números del build:
+   - la vía del velo hacia el home;
+   - los 404 del barrido;
+   - el fundido de B7 a 390;
+   - los tiempos de las grietas en el home.
+4. **Dos tareas se revirtieron y volvieron arregladas:**
+   - **B2:** las tarjetas del aro salían vacías.
+   - **B6:** el candado de la rueda, y su banco medía mal.
+5. **Regresión abierta:** `velo.ts`, «el home → la página». La píldora va a 11,7–14,3 px/ms con la hora del banco, pero a 3,44 con la hora del cuadro (el tope es 3,96). Pasaba después de B13 y empezó a fallar después de B9 y B10. Hay que mirarla en un build.
+6. **Ojo, archivo compartido con el sitio vivo:** B11 suma una prop opcional, `overrides`, a `src/modules/chatbot/components/LogicCompanion.tsx` para el chat sin 3D. Es aditiva y `/` sigue cargando, pero hay que revisarla antes de mergear.
+7. **Controles de banco ciegos**, o sea comprobaciones que solo valen en verde:
+   - `preloader.ts` `CONTROL=en-recargas`;
+   - `viaje.ts` `CONTROL=sin-tapar`;
+   - `aro-legibilidad.ts`, el control al 30 % con la medida del núcleo.
+8. **Lo primero que tiene que mirar Valentino:** `/v3?preloader=si` (la entrada del día), `/v3` entero de arriba abajo a 1440 (Servicios, el Panel, las reseñas, el CTA, el FAQ al fondo) y `/v3/pagina-base` (el color desde el arranque, el cierre y las grietas).
+9. **Antes de mergear a `rediseno/home`:** borrar o mover `logic-core-v3/docs/cola/2026-10-22/` del checkout principal. Está sin trackear y choca con esta rama.
 
-## Por tarea
+## Por tarea: el estado, los commits y lo medido (todo en el dev, placa NVIDIA)
 
-### T0 · integrada y verificada
-- **Commits:** de `a13ac4ea` a `222656ff`, merge `4332fcb9`, más `20c226f5` (`armadas.ts` vuelve a 333 líneas).
-- **Medido en el dev (:3000, NVIDIA):**
-  - `velo.ts` a 1440: las cuatro vías dan 3 de 3, con 0 cuadros en blanco.
-  - De la página al home, en el dev: ninguna 2,6 s, banda 2,7 s, montaje 2,7 s y ambas 2,5 s. Después de B12c, 2,3 s. El objetivo de 1,2 s es en el build, que no corrió.
-  - La píldora va a 2,8–3,9 px/ms (tope 3,96; el WIP daba 6,51). El control `sin-velo` da rojo.
-  - `chrome-en-los-anchos`, en 4 rutas: 0 anchos con falla. Sin «isReady», sin NaN y sin 404.
-  - El color desde el primer cuadro: carga directa y flecha atrás.
-  - El cuerpo de la página base, a 1440 y a 390.
-  - `verificar`: 8 grupos con falla, la base histórica.
+| Tarea | Estado | Commits (merge) | Medido |
+|---|---|---|---|
+| **T0** (pendientes de B12a.8) | integrada y verificada | `a13ac4ea`…`222656ff` (`4332fcb9`) + `20c226f5` | `velo.ts` 3/3 en las 4 vías, 0 cuadros en blanco; píldora 2,8–3,9 px/ms; `chrome-en-los-anchos` 0 fallas, sin «isReady» ni NaN; color desde el primer cuadro; cuerpo de la base ok; `verificar` vuelve a la base |
+| **B7** (el login como demo) | integrada y verificada | `decd55a0` (`20a9430c`) | `ingreso.ts` 24/25 (547 ms del Genie, \|Δy\| = 0, flecha, Esc, escena dormida); control `scroll` rojo. Falla: a 390 entrando directo el fundido dura ~550 ms (objetivo 200) |
+| **B1.2e** (el carrusel abajo de 1024) | integrada y verificada | `5b93773b`, `06b66881` (`53169678`) + `6ed4aa3f` | `carrusel.ts` 43/44 (la que falta era el banco); controles `trampa` y `sin-pausa-fuera` rojos. Arreglos del orquestador: `data-pieza` chocaba con el carrusel de Demos y la hora del reinicio en el banco |
+| **B4** (Servicios) | integrada y verificada | `473d1016`, `cd787804`, `1cc74766` (`0958549f`) + `a897b02e` | `servicios-gatillos` 16/16 (control `sin-candado` rojo); `servicios-capa` 4/4, 0 px de nanobots sobre el título y el panel (control `capa-a-destiempo` rojo); alto viejo abajo de 1024 medido por el orquestador. Falla: a 390 con `?servicios-movil=gatillo` la rueda saltea la entrada |
+| **B12c** (el preloader) | integrada y verificada | `aa734fd4`, `e0fe86ca`, `b4c59ce1` (`99c2f6af`) | `preloader.ts` ok a 1440 y 1024 (5,7 s, la punta a 24,0 px = el radio, el bloqueo, no aparece en recargas ni el mismo día); a 390 el banco falla por cómo lee la `y`, pero a mano rueda y dedo quedan bloqueados; control `sin-bloqueo` rojo, `en-recargas` ciego; con `LENTO=6` no se llega al freno ni al pulso; los bancos de siempre no lo ven |
+| **B12b** (el viaje desde Servicios) | integrada y verificada | `6f355d92`, `7343ec6d` (`48ba9510`) + `23465d73` | `viaje.ts` 2/2 (1440 y 390): 0 cuadros en blanco, la cámara y la noche en 1, el logo en su hueco a 0,28 %, los sonidos sale → llega; controles `velo` y `sin-hueco` rojos, `sin-tapar` ciego |
+| **B5** (Demos) | integrada y verificada | `01964739`, `f40a554c`, `0d0e90d3` (`219a693c`) | `demos-parada` 12/12; controles `sin-parada` y `parada-sin-llegada` rojos; foto del abanico 3D y del hover |
+| **B2 + B3** (el aro de reseñas y el CTA) | revertidas, arregladas y reintegradas | `4ad48208`, `2047e714`, `ba7039d2`, `436404fa` (`cd04d271`) | `aro-legibilidad` 8,95 y 10,28:1 en las de adelante; `aro-costo` 0,1 ms de mediana y 0,2 p95, el p95 del cuadro igual (13,7 contra 13,6); fotos de las tarjetas con texto y de B3 (HABLANOS y el anillo en el piso) |
+| **B6** (el Panel) | revertida, arreglada y reintegrada | `af4e53ca`, `fc916b7d`, `5ed4a1ab` (`728717d0`) + `a7840f71` | `panel-b6` todo en verde a 1440 y 1024 (eje 0,00 %, `?grupo=` exacto, el cartel, el candado abierto); alto viejo abajo de 1024 calibrado contra lo medido |
+| **B11** (el chat) | integrada y verificada | `0fc98782` (`126c8a53`) | el chat llega a los 11 s, sin el velo y con la escena preparada; no pisa el chrome a 1440, 860 ni 390; control `chat-al-centro` rojo. En la consola sale «`<circle>` attribute r» del `PulseAvatar` del sitio vivo |
+| **B8** (el moiré) | integrada y verificada | `c6ef6348` (`16e3781a`) | suites de la escena en verde; `moire-costo`: la trama gruesa ~0,05 ms y la fina ~0,06 ms por cuadro, control verde |
+| **B13** (el cierre de cada página) | integrada y verificada | `06e365e9`…`491e5ab2` (`4d05835c`) + `cabd0ebd` | `cierre-de-pagina` 2/2 (1440 y 390); control `sin-resolucion` rojo; foto del pie calmo en la base |
+| **B9** (las grietas) | integrada y verificada | `31ca1a77`, `732e31cc` (`3d3da6c3`) + `582e3593` (el enganche del home) + `1fe72690` | la página las dispara en las 3 variantes con el acento; se forman en 1,5 s y quedan 1,0 s oscuras; costo del muro ≤ 0,06 ms. En el home a 1440 la formación dura 1,85–1,97 s en el dev (el reloj frena los cuadros largos): a confirmar en un build |
+| **B10** (el FAQ) | integrada y verificada | `3590a7d9`, `f5543e93`, `387536af` (`cfd56d41`) + `36a6b8b1` | `faq-del-pie` 4/4 (home y base, 1440 y 390); control `sin-hundimiento` rojo; 6 preguntas en el JSON-LD |
 
-### B7 · integrada y verificada (`decd55a0`)
-- `ingreso.ts`: 24 de 25. La apertura dura 547 ms, |Δy| = 0, la flecha atrás, la de adelante y Esc andan, y la escena duerme. El control `scroll` da rojo.
-- **La falla:** a 390, entrando directo con `?ingresar`, el fundido dura 514–573 ms en vez de 200. Lo más probable es que sea la carga del dev; no se confirmó en el build.
+**Arreglos del orquestador al integrar:**
+- la base de varios tramos (`492bd7d6`, `anotarTramo`);
+- `armadas.ts` y `cuadroDelFinal.ts` sin engordar (s8);
+- el control ciego de s47 (`3209d764`);
+- los bancos `viaje.ts`, `panel-b6.ts`, `grietas.ts`, `faq-del-pie.ts` y `carrusel.ts`;
+- los altos viejos de Tu panel y de Servicios, medidos en el navegador.
 
-### B1.2e · integrada y verificada (`5b93773b`, `06b66881`, merge `53169678`, más `6ed4aa3f` del orquestador)
-- **Lo que arregló el orquestador:**
-  - La pieza nueva chocaba con el carrusel de Demos (los dos con `data-pieza="carrusel"`); pasó a `carrusel-de-tarjetas`.
-  - El caso `reinicio` del banco tomaba la hora después de una espera de 700 ms.
-- **Medido:** `carrusel.ts` a 390, 768, 820×1180 y 1023×768 da 43 de 44 (la que falta era esa hora del banco; repetida, ok). Los controles `trampa` y `sin-pausa-fuera` dan rojo. Humo: 7 de 7.
-- **Falta:** la matriz entera de escritorio.
-
-### B4 · integrada y verificada (`473d1016`, `cd787804`, `1cc74766`, merge `0958549f`, más `a897b02e`)
-- **El alto viejo abajo de 1024, medido por el orquestador antes del merge:** 1661 px a 390, 1338 a 768×1024, 1382 a 820×1180 y 1555 a 1023×768.
-- **Medido:**
-  - `servicios-gatillos`: 16 de 16 a 1440 y 1024. El control `sin-candado` da rojo.
-  - `servicios-capa`: 4 de 4. Un solo cambio de capa por sentido, con 0 px de nanobots sobre el título y sobre el panel. El control `capa-a-destiempo` da rojo.
-  - Humo: 7 de 7.
-- **Pendiente:** a 390 con `?servicios-movil=gatillo` (la variante alternativa), la rueda bajando saltea la entrada (−1 → 1).
-
-### B12c · integrada y verificada (`aa734fd4`, `e0fe86ca`, `b4c59ce1`, merge `99c2f6af`)
-- **`preloader.ts` a 1440 y 1024, todo ok:**
-  - dura 5,7 s;
-  - la punta de la flecha queda a 24,0 px del centro del botón (su radio);
-  - el scroll queda bloqueado y se suelta 2,5 s después de irse el blanco;
-  - no aparece en la recarga ni en otra entrada del mismo día;
-  - la consola sin errores;
-  - con la siembra de los bancos no aparece.
-- **A 390:** el banco da 4 fallas por cómo lee la `y`. A mano, la rueda y el dedo quedan bloqueados (scroll en 0).
-- **Controles:** `sin-bloqueo` da rojo. `en-recargas` NO da rojo: es un control ciego. Con `LENTO=6` la carga llega antes del freno, así que el freno y el pulso no se vieron en el navegador. Con movimiento reducido, 1,5 s.
-- Humo 7 de 7 y `velo.ts` 3 de 3: los bancos no ven el preloader.
-
-### B6 · revertida y en arreglo (`af4e53ca` más `fc916b7d` en su rama)
-- **Banco `panel-b6.ts`:**
-  - Pasan: el pintado del título (49,5 % del alto), AA 6,43:1, el alto de 7,00 pantallas y el CTA.
-  - Fallan: el eje de los grupos y `?grupo=` (las fotos sugieren que es el banco) y el candado de la rueda (sin cartel, y la página se mueve con el candado abierto).
-- Se le devolvió con esos números y con la calibración del alto viejo.
-
-### B2 · revertida (`4ad48208` más `2047e714` en su rama; B3 = `ba7039d2` encima, sin integrar)
-- `tsc` 0 y suites limpias, pero en el navegador las tarjetas del aro salen vacías (`aro-legibilidad`: 1,19:1; el control al 30 % anda). El título 3D «Lo que dicen / nuestros clientes» sí aparece.
-- Se le devuelve al subagente cuando haya lugar.
-
-### B5 y B12b · en curso, con worktrees en `C:\nocturno\2026-10-22\{b5,b12b}`
-
-### B3, B13, B8, B9, B10 y B11 · no empezadas
-- Por tiempo y por la cadena de dependencias (B13 necesita B3, que viene después de B2).
-
-## Qué tiene que mirar Valentino (todo en `http://localhost:3000`, desde la integración)
-1. `/v3?preloader=si` a 1440, 1024 y 390:
-   - el negro con «Bienvenido…», el blanco con «Recomendamos activar el sonido.»;
-   - la flecha punteada que termina en el botón del sonido;
-   - la página entra después. Tocar la frase prende el sonido.
+## Qué tiene que mirar Valentino (el dev de la integración: `cd C:\nocturno\2026-10-22\integracion\logic-core-v3`, `npm run dev`, `http://localhost:3000`)
+1. **`/v3?preloader=si`, a 1440, 1024 y 390.**
+   - La secuencia de 5–6 s: el negro, el blanco, la flecha punteada que termina en el botón del sonido.
+   - Tocar «Recomendamos activar el sonido.» prende el sonido.
    - Banderas: `?preloader=si|no`.
-2. `/v3/pagina-base` a 1440, cargada directo: la noche, la luz celeste y el anillo desde el primer cuadro. `?legibilidad=tamano` (el defecto ya es `peso`).
-3. `/v3` a 1440, «Login»: el Genie, `?ingresar`; «Volver al home», la flecha atrás y Esc cierran en el mismo scroll.
-4. `/v3#servicios` a 1440 y 1024:
-   - una muesca por servicio: web desde la izquierda con el globo, software desde la derecha con los engranajes, IA desde arriba con la red;
-   - después, el recomendador.
-   - `?diagonal=30|20|12` (defecto 20) y, a 390, `?servicios-movil=deslizar|gatillo`.
-5. `/v3` a 390, 768 y 820×1180: el Portfolio es un carrusel de tarjetas que rota cada 10 s, con flechas, deslices y mantener apretado. Debajo, «la tuya» y Demos.
-6. Banderas de antes, sin cambios: `?titulo=1…4`, `?composicion=1|2|3`, `?navbar=abajo`.
+2. **`/v3/pagina-base` a 1440, cargada directo.**
+   - La noche y el acento desde el primer cuadro.
+   - Las grietas, unos 2,4 s después del título.
+   - Bajando: el cierre (Seis razones → HABLANOS → la resolución → el pie) y, al fondo, una rueda abre el FAQ.
+   - Banderas: `?grietas=1|2|3|no`, `?grietas-prueba=si` y `?legibilidad=tamano`.
+3. **`/v3` a 1440, de arriba abajo:**
+   - **Portfolio:** sin cambios.
+   - **Demos:** placas 3D, el hover y la parada.
+   - **Servicios:** una muesca por servicio, el recomendador, `?diagonal=30|20|12`; el CTA hace el viaje a la página.
+   - **El Panel:** el título se pinta, los módulos alternan, el candado de la rueda; `?grupo=final|union`.
+   - **Las reseñas:** el aro; `?resenas=scroll|gatillo`, `?resenas-arrastre=si`.
+   - **El CTA:** el cristal se agrieta.
+   - **El pie y el FAQ.**
+   - **El chat:** abajo a la derecha; `?chat=onda|monograma|geometrico`.
+   - **El moiré:** quieto; `?moire=0|1|2|mouse`.
+4. **«Login»:** el Genie y `?ingresar`.
+5. **`/v3` a 390, 768 y 820×1180:**
+   - el carrusel del Portfolio y el de Demos;
+   - Servicios con `?servicios-movil=deslizar|gatillo`;
+   - el Panel apilado, con `?palabra-movil=union|debajo`;
+   - las reseñas en carrusel plano;
+   - el FAQ en lista.
+6. **Banderas de antes:** `?titulo=1…4`, `?composicion=1|2|3`, `?navbar=abajo`.
 
-## Lo que no corrió todavía
-- El `next build` final: los 404, la vía del velo en números reales y el fundido de B7.
-- Las matrices completas y el `verificar` del final.
-- Se corre al cerrar la noche, con lo que esté integrado.
+## Lo que no corrió y por qué
+- **El `next build`:** lo cortó Claude Code por falta de memoria. Quedó un `.next-b12` a medias, ignorado por git; se puede borrar. Por eso no se midieron los números del build (la vía del velo, los 404, el fundido de B7, las grietas en el home).
+- **La matriz entera de escritorio y la del teléfono:** solo corrió el humo después de cada merge (rueda, ráfaga, Demos y el carrusel a 390).
+- **La regresión de la píldora hacia la página** (arriba) queda abierta.
+- **Lo que queda para servicios (P-S):** cada página de servicio exporta su preset para el viaje, implementa `resolucion` en su variante, enciende la variante desde el avance 0 y pasa su FAQ a `<CierreDeLaPagina preguntas={…} />`.
+- **La skill `pagina-home-based` quedó vieja.** `CONTRATO.md` todavía dice «el viaje todavía no construido» y «el pie provisorio». No la toqué.
 
 ## Comandos para la mañana
 ```
+# 1) Antes del merge: sacar del checkout principal la copia sin trackear de la cola
+#    (borrar o mover C:\rediseno-home\logic-core-v3\docs\cola\2026-10-22\)
 cd C:\rediseno-home
 git fetch origin
 git switch rediseno/home
 git merge --no-ff nocturno/2026-10-22
 ```
-- Antes del merge, mover o borrar `logic-core-v3\docs\cola\2026-10-22\` del checkout principal: está sin trackear.
-- Worktrees que quedan: `C:\nocturno\2026-10-22\{b5,b6,b12b}` (en curso) y la integración.
-- Para borrar un worktree sin tocar el `node_modules` del principal: `powershell -NoProfile -File C:\nocturno\2026-10-22\quitar.ps1 <id>`. Borra primero el junction y conserva la rama si no está mergeada.
+- Las ramas de tarea locales ya están borradas: estaban todas mergeadas.
+- Queda solo el worktree de la integración, `C:\nocturno\2026-10-22\integracion`, para mirar. Para borrarlo:
+  ```
+  git -C C:\rediseno-home worktree remove C:\nocturno\2026-10-22\integracion
+  ```
+  Tiene su propio `node_modules`, así que no hay junction que cuidar.
+- Las notas del orquestador y los diagnósticos están en `C:\nocturno\2026-10-22\` (`ESTADO.md`, `diag\`, los logs de `verificar`), fuera del repo.
