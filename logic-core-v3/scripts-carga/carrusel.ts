@@ -52,7 +52,7 @@ const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, m
 /** [CONTROL=trampa] La trampa de las historias, puesta sobre el carrusel: la vista no deja pasar el dedo vertical. */
 const TRAMPA = `(() => {
   const poner = () => {
-    const c = document.querySelector('[data-pieza="carrusel"]')
+    const c = document.querySelector('[data-pieza="carrusel-de-tarjetas"]')
     const v = c && c.querySelector('[data-parte="vista"]')
     if (!c || !v || c.__trampa) return
     c.__trampa = true
@@ -72,7 +72,7 @@ const SIN_PAUSA_FUERA = `(() => {
     }
     observe(el) {
       super.observe(el)
-      if (el && el.matches && el.matches('[data-pieza="carrusel"]')) {
+      if (el && el.matches && el.matches('[data-pieza="carrusel-de-tarjetas"]')) {
         const avisar = () => {
           const r = el.getBoundingClientRect()
           this.__cb([{ target: el, isIntersecting: true, intersectionRatio: 1, boundingClientRect: r, intersectionRect: r, rootBounds: null, time: performance.now() }], this)
@@ -117,7 +117,7 @@ const GRABAR = `(() => {
         y: Math.round(scrollY),
         enCuadro: b ? Math.min(b.bottom, innerHeight) - Math.max(b.top, 0) > innerHeight / 2 : false,
         titulo: visible(document.querySelector('[data-pantalla="titulo"] h2')),
-        carrusel: visible(document.querySelector('[data-pieza="carrusel"]')),
+        carrusel: visible(document.querySelector('[data-pieza="carrusel-de-tarjetas"]')),
         laTuya: visible(document.querySelector('[data-pieza="la-tuya-del-carrusel"]')),
         demos: Math.max(visible(document.querySelector('#demos > div:first-child')), visible(document.querySelector('#demos > div:nth-child(2) > div'))),
       })
@@ -195,8 +195,8 @@ async function alCentro(p: Page, selector: string): Promise<void> {
   await dormir(600)
 }
 
-const indice = (p: Page): Promise<number> => p.evaluate(() => Number(document.querySelector('[data-pieza="carrusel"]')?.getAttribute('data-indice') ?? Number.NaN))
-const pausa = (p: Page): Promise<string> => p.evaluate(() => document.querySelector('[data-pieza="carrusel"]')?.getAttribute('data-pausa') ?? '')
+const indice = (p: Page): Promise<number> => p.evaluate(() => Number(document.querySelector('[data-pieza="carrusel-de-tarjetas"]')?.getAttribute('data-indice') ?? Number.NaN))
+const pausa = (p: Page): Promise<string> => p.evaluate(() => document.querySelector('[data-pieza="carrusel-de-tarjetas"]')?.getAttribute('data-pausa') ?? '')
 const centroDe = (p: Page, selector: string): Promise<{ readonly x: number; readonly y: number } | null> =>
   p.evaluate((s) => {
     const r = document.querySelector(s)?.getBoundingClientRect()
@@ -225,7 +225,7 @@ async function proximoCambio(p: Page, ms: number): Promise<number | null> {
 }
 
 async function tocarLaFlecha(c: Contexto, cual: 'anterior' | 'siguiente'): Promise<void> {
-  const centro = await centroDe(c.p, `[data-pieza="carrusel"] [data-flecha="${cual}"]`)
+  const centro = await centroDe(c.p, `[data-pieza="carrusel-de-tarjetas"] [data-flecha="${cual}"]`)
   if (centro !== null) await tocar(c.cdp, centro.x, centro.y)
   await dormir(700)
 }
@@ -237,7 +237,7 @@ async function irA(c: Contexto, i: number): Promise<void> {
 
 const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
   async modo(c) {
-    await alCentro(c.p, '[data-pieza="carrusel"]')
+    await alCentro(c.p, '[data-pieza="carrusel-de-tarjetas"]')
     const m = await c.p.evaluate(() => {
       const q = (s: string): Element | null => document.querySelector(s)
       const alto = (s: string): number => q(s)?.getBoundingClientRect().height ?? 0
@@ -246,7 +246,7 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
         flujo: q('[data-pieza="flujo-del-portfolio"]') !== null,
         historias: q('[data-pieza="historias"]') !== null,
         demos: q('[data-pieza="escenario-de-demos"]') !== null && q('[data-pieza="escenario-del-portfolio"]') === null,
-        carrusel: alto('[data-pieza="carrusel"]'),
+        carrusel: alto('[data-pieza="carrusel-de-tarjetas"]'),
         tarjeta: alto('[data-pieza="tarjeta-del-proyecto"]'),
         laTuya: alto('[data-pieza="la-tuya-del-carrusel"]'),
         altoDelFlujo: alto('[data-pieza="flujo-del-portfolio"]'),
@@ -276,7 +276,7 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
       await desplazarConElDedo(c.cdp, c.ancho / 2, c.alto / 2, dy)
       await dormir(250)
       const despues = await c.p.evaluate(() => scrollY)
-      const sobreElCarrusel = await c.p.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('[data-pieza="carrusel"]') !== null, [c.ancho / 2, c.alto / 2] as const)
+      const sobreElCarrusel = await c.p.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('[data-pieza="carrusel-de-tarjetas"]') !== null, [c.ancho / 2, c.alto / 2] as const)
       if (!arrastreLibre(dy, despues - antes)) malos.push(`${sobreElCarrusel ? 'sobre el carrusel' : 'afuera'}: ${String(dy)} → ${String(despues - antes)}`)
     }
     const fin = await c.p.evaluate(() => {
@@ -303,12 +303,12 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
   },
 
   async rotacion(c) {
-    await alCentro(c.p, '[data-pieza="carrusel"]')
+    await alCentro(c.p, '[data-pieza="carrusel-de-tarjetas"]')
     const primero = await proximoCambio(c.p, CRITERIOS_DEL_CARRUSEL.duracionMs + 2000)
     if (primero === null) return { ok: false, detalle: `no cambió en ${String(CRITERIOS_DEL_CARRUSEL.duracionMs / 1000 + 2)} s (pausa: ${await pausa(c.p)})` }
     await dormir(5000 - (Date.now() - primero))
     const linea = await c.p.evaluate(() => {
-      const l = document.querySelector('[data-pieza="carrusel"] [data-linea="activa"] > span')
+      const l = document.querySelector('[data-pieza="carrusel-de-tarjetas"] [data-linea="activa"] > span')
       const m = l === null ? null : /matrix\(([^,]+)/.exec(getComputedStyle(l).transform)
       return m === null ? Number.NaN : Number(m[1])
     })
@@ -319,19 +319,20 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
   },
 
   async reinicio(c) {
-    await alCentro(c.p, '[data-pieza="carrusel"]')
+    await alCentro(c.p, '[data-pieza="carrusel-de-tarjetas"]')
     const primero = await proximoCambio(c.p, CRITERIOS_DEL_CARRUSEL.duracionMs + 2000)
     if (primero === null) return { ok: false, detalle: 'no rota' }
     await dormir(6000 - (Date.now() - primero))
-    await tocarLaFlecha(c, 'siguiente')
+    // [NOCTURNO] La hora del cambio a mano, ANTES del toque: `tocarLaFlecha` espera 700 ms después de tocar.
     const aMano = Date.now()
+    await tocarLaFlecha(c, 'siguiente')
     const s = await serie(c.p, CRITERIOS_DEL_CARRUSEL.duracionMs + 2000, aMano)
     const r = reinicioDelReloj(s, 0)
     return { ok: r.ok, detalle: `después del cambio a mano (a los 6 s), el siguiente solo a los ${r.despues === null ? '—' : String(r.despues)} ms (10.000 ± ${String(CRITERIOS_DEL_CARRUSEL.toleranciaMs)})` }
   },
 
   async flechas(c) {
-    await alCentro(c.p, '[data-pieza="carrusel"]')
+    await alCentro(c.p, '[data-pieza="carrusel-de-tarjetas"]')
     await irA(c, 0)
     const recorrido: number[] = [await indice(c.p)]
     for (let k = 0; k < CANTIDAD; k++) {
@@ -345,9 +346,9 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
   },
 
   async deslices(c) {
-    await alCentro(c.p, '[data-pieza="carrusel"]')
+    await alCentro(c.p, '[data-pieza="carrusel-de-tarjetas"]')
     await irA(c, 0)
-    const centro = await centroDe(c.p, '[data-pieza="carrusel"] [data-parte="vista"]')
+    const centro = await centroDe(c.p, '[data-pieza="carrusel-de-tarjetas"] [data-parte="vista"]')
     if (centro === null) return { ok: false, detalle: 'sin carrusel' }
     const recorrido: number[] = [await indice(c.p)]
     for (const dx of [-200, -200, -200, 200, 200]) {
@@ -366,15 +367,15 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
   },
 
   async mantener(c) {
-    await alCentro(c.p, '[data-pieza="carrusel"]')
+    await alCentro(c.p, '[data-pieza="carrusel-de-tarjetas"]')
     await tocarLaFlecha(c, 'siguiente')
-    const centro = await centroDe(c.p, '[data-pieza="carrusel"] [data-parte="ranura"][data-activa="si"] figure')
+    const centro = await centroDe(c.p, '[data-pieza="carrusel-de-tarjetas"] [data-parte="ranura"][data-activa="si"] figure')
     if (centro === null) return { ok: false, detalle: 'sin la tarjeta' }
     const desde = await indice(c.p)
     await c.cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: centro.x, y: centro.y, id: 1 }] })
     await dormir(1000)
     const enLaPausa = await pausa(c.p)
-    const video = await c.p.evaluate(() => document.querySelector<HTMLVideoElement>('[data-pieza="carrusel"] [data-activa="si"] video')?.paused ?? true)
+    const video = await c.p.evaluate(() => document.querySelector<HTMLVideoElement>('[data-pieza="carrusel-de-tarjetas"] [data-activa="si"] video')?.paused ?? true)
     await dormir(11_000)
     const seQuedo = (await indice(c.p)) === desde
     await c.cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
@@ -392,7 +393,7 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
     await dormir(800)
     const motivo = await pausa(c.p)
     const s = await serie(c.p, 12_000)
-    await alCentro(c.p, '[data-pieza="carrusel"]')
+    await alCentro(c.p, '[data-pieza="carrusel-de-tarjetas"]')
     await dormir(800)
     const vuelve = await pausa(c.p)
     return { ok: quieto(s) && motivo === 'fuera-de-vista' && vuelve === 'no', detalle: `afuera: pausa «${motivo}», ${quieto(s) ? 'no cambió en 12 s' : 'CAMBIÓ'}; de vuelta a la vista: pausa «${vuelve}»` }
@@ -436,13 +437,13 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
 async function anclas(ancho: number, alto: number): Promise<Resultado> {
   const partes: string[] = []
   let ok = true
-  for (const [hash, selector, indiceEsperado] of [['#portfolio-esquina-estudio', '[data-pieza="carrusel"]', 1], ['#portfolio-la-tuya', '[data-pieza="la-tuya-del-carrusel"]', null]] as const) {
+  for (const [hash, selector, indiceEsperado] of [['#portfolio-esquina-estudio', '[data-pieza="carrusel-de-tarjetas"]', 1], ['#portfolio-la-tuya', '[data-pieza="la-tuya-del-carrusel"]', null]] as const) {
     const { cerrar, c } = await abrir(ancho, alto, false, `/v3${hash}`)
     try {
       await dormir(2000)
       const r = await c.p.evaluate((s) => {
         const b = document.querySelector(s)?.getBoundingClientRect()
-        return { aLaVista: b !== undefined && b.top >= -2 && b.top < innerHeight * 0.6, indice: Number(document.querySelector('[data-pieza="carrusel"]')?.getAttribute('data-indice') ?? Number.NaN) }
+        return { aLaVista: b !== undefined && b.top >= -2 && b.top < innerHeight * 0.6, indice: Number(document.querySelector('[data-pieza="carrusel-de-tarjetas"]')?.getAttribute('data-indice') ?? Number.NaN) }
       }, selector)
       const bien = r.aLaVista && (indiceEsperado === null || r.indice === indiceEsperado)
       ok &&= bien
@@ -457,7 +458,7 @@ async function anclas(ancho: number, alto: number): Promise<Resultado> {
 async function conReducido(ancho: number, alto: number): Promise<Resultado> {
   const { cerrar, c } = await abrir(ancho, alto, true)
   try {
-    await alCentro(c.p, '[data-pieza="carrusel"]')
+    await alCentro(c.p, '[data-pieza="carrusel-de-tarjetas"]')
     const motivo = await pausa(c.p)
     const s = await serie(c.p, 12_000)
     const desde = await indice(c.p)

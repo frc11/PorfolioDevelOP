@@ -131,7 +131,7 @@ titulo('B1.2e · 5 · El componente: una tarjeta a la vez, todas en su lugar, la
 const ITEMS = [{ id: 'a' }, { id: 'b' }, { id: 'c' }] as const
 const montado = marcar(<CarruselDeTarjetas items={ITEMS} etiqueta="Las demos" nombreDe={(i) => `Demo ${i.id}`} rotulos={{ anterior: 'Anterior', siguiente: 'Siguiente' }} renderItem={(i, e) => <p data-item={i.id} data-activa={e.activa ? 'si' : 'no'} data-corre={e.corre ? 'si' : 'no'}>{i.id}</p>} />, { anima: true })
 const marcado = (m: string): boolean =>
-  /<div role="region" aria-roledescription="carrusel" aria-label="Las demos" data-pieza="carrusel" data-indice="0" data-pausa="fuera-de-vista"/.test(m) &&
+  /<div role="region" aria-roledescription="carrusel" aria-label="Las demos" data-pieza="carrusel-de-tarjetas" data-indice="0" data-pausa="fuera-de-vista"/.test(m) &&
   veces(m, 'data-parte="ranura"') === 3 && veces(m, 'data-activa="si"') === 2 && veces(m, 'inert=""') === 2 && veces(m, 'aria-hidden="true" inert=""') === 2 &&
   /aria-roledescription="tarjeta" aria-label="Demo a"/.test(m) && /data-item="a" data-activa="si" data-corre="no"/.test(m) && /data-item="b" data-activa="no"/.test(m) &&
   /<button type="button" data-flecha="anterior" aria-label="Anterior"/.test(m) && /<button type="button" data-flecha="siguiente" aria-label="Siguiente"/.test(m) &&

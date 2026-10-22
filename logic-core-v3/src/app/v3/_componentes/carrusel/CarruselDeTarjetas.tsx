@@ -249,7 +249,7 @@ export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderIte
       role="region"
       aria-roledescription="carrusel"
       aria-label={etiqueta}
-      data-pieza="carrusel"
+      data-pieza="carrusel-de-tarjetas"
       data-indice={estado.indice}
       data-pausa={motivo ?? 'no'}
       className={cn('flex flex-col gap-4', className)}
