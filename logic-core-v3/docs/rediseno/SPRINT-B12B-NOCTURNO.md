@@ -41,8 +41,8 @@ pesadas) sigue igual; cambia sólo qué tapa el cuadro mientras se navega.
 - `s78-b12a`: la ruta de la base lee también `pagina-base/preset.ts` (el preset se mudó ahí por la spec: lo lee el viaje); el regex y su
   control, iguales.
 - El gate (04:38–04:41, en el turno): ESLint de los 17 archivos tocados, limpio. tsc: 2 errores, los dos en la prueba nueva (tipos
-  literales de `TIEMPOS_DEL_VIAJE` y `SONIDOS_DEL_VIAJE` en los controles), corregidos ensanchando el tipo del detector; tsc otra vez en
-  una segunda pasada. Suites: s78 237 de 0 (s78-b12b 35 afirmaciones, 17 controles; s78-b12a y s78-t0 sin fallas), s81 43 de 0, s49,
+  literales de `TIEMPOS_DEL_VIAJE` y `SONIDOS_DEL_VIAJE` en los controles), corregidos ensanchando el tipo del detector. Segunda pasada
+  (07:24, en el turno, después de `6f355d92`): tsc 0 errores, ESLint de la prueba limpio, s78 237 de 0. Suites: s78 237 de 0 (s78-b12b 35 afirmaciones, 17 controles; s78-b12a y s78-t0 sin fallas), s81 43 de 0, s49,
   s74, s75, s76 (747), s77, s27, s10 (241), s19, s34, s42, s52, s6 (431), s79, s5-codigo y s11-frontera sin fallas. Fallan, ajenas a
   B12b: s17 (las familias de fuentes: 11 contra 7, de la base) y s47 (el control del recorte del escenario del Portfolio: su `className`
   cambió con el carrusel B1.2e; no lee nada de lo tocado acá).
