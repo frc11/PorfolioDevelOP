@@ -220,7 +220,8 @@ const ruta = sinComentarios(leer('pagina-base/page.tsx')) + sinComentarios(leer(
 const rutaBien = (r: string): boolean =>
   /const PRESET: PresetDeLaEscena = \{[\s\S]*?pista: PISTA_DE_LA_INTRO,[\s\S]*?noche: 'noche',/.test(r) && /preset=\{PRESET\}/.test(r) && /robots: \{ index: false, follow: false/.test(r)
 afirmar(rutaBien(ruta), 'la página base (`/v3/pagina-base`, sin indexar): un preset armado una vez (el mismo objeto en cada render), de noche, con la pista de la intro')
-controlPositivo('  el detector ve una ruta que arma el preset en cada render', ruta.replace('preset={PRESET}', 'preset={{ ...PRESET }}'), rutaBien)
+// [B13] La ruta pasa el preset dos veces (a la intro y al cierre): el control los arma a los dos en cada render (con uno solo, el otro lo tapaba).
+controlPositivo('  el detector ve una ruta que arma el preset en cada render', ruta.replaceAll('preset={PRESET}', 'preset={{ ...PRESET }}'), rutaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B12a.3 · 9 · La ranura de variantes y lo que le presta a la variante (P-H29 a a f)')

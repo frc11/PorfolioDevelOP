@@ -69,8 +69,11 @@ Rama `nocturno/2026-10-22-b13`. Tarea: `docs/cola/2026-10-22/61-B13-cierre.md`. 
 
 - `npx eslint` de los 25 archivos tocados: limpio. `tsc --noEmit` (4 GB): 0 errores.
 - `s78-b13` (nueva): 42 afirmaciones, 17 controles positivos, 0 fallas.
-- A la spec nueva, con su control: `s78-t0` (la variante arma su cuadro con `resolucion.current`; control nuevo: sin la resolución, rojo).
+- A la spec nueva, con su control: `s78-t0` (la variante arma su cuadro con `resolucion.current`; control nuevo: sin la resolución, rojo) y
+  el control de `s78-b12a` «una ruta que arma el preset en cada render» (la base pasa el preset dos veces, a la intro y al cierre: el
+  control reemplazaba sólo la primera y quedaba ciego; ahora las arma a las dos, `replaceAll`).
 - La medida del cierre en la atadura va después del despertar (la regla de s78-b12a sobre ese tramo del código queda como estaba).
+- s78 entero: 344 afirmaciones, 153 controles, 0 fallas.
 - Sin fallas nuevas: s49, s74, s75, s76, s83, s34, s36, s40, s41, s42, s44, s45, s50–s59, s61–s63, s71, s73, s6, s10. Con las fallas de la
   base y ninguna más: s3 (s3-peso), s5 (s5-compacto, la misma lista; s5-peso), s7 (s7-compuerta), s8 (s8-montaje: `cuadroDelFinal.ts` dice
   348 líneas de código donde decía 346, la misma afirmación; s8-tres, s8-peso), s17 (s17-revelado, s17-marca). s47: el control «el recorte
