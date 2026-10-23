@@ -17,7 +17,8 @@
  *     vuelve entero (`hunde` 0; en la página, sus columnas sin recorte); en el home, el encastre NO se rebobina (`__finalDelBanco().fin` ≥ 0,99
  *     durante la salida y medio segundo después);
  *   · EL FOCO: enfocar una pregunta lo trae; Mayús+Tab (al pie) lo saca.
- * Abajo de 1024 (táctil), la LISTA: después del pie, cada pregunta con su respuesta a la vista, sin botones y sin WhatsApp; con el pie al
+ * Abajo de 1024 (táctil), la LISTA: después del pie, cada pregunta con su respuesta en el DOM, sin WhatsApp ([C2 · 71t] un acordeón de
+ * vidrio: un botón por pregunta; el toque, el vidrio y el desborde los mide `faq-telefono.ts`); con el pie al
  * fondo el encastre corre como siempre (el fondo del layout no cambió) y, con la lista a la vista, un dedo hacia arriba no se retiene.
  * En todos: los datos estructurados (`FAQPage`) con seis preguntas.
  *
@@ -189,7 +190,7 @@ async function lista(p: Page, ruta: string): Promise<{ readonly linea: string; r
   })()`)) as { aLaVista: boolean; items: number; conRespuesta: boolean; botones: number; whatsapp: boolean; retenido: boolean } | null
   await p.screenshot({ path: path.join(SALIDA, `390${ruta.replaceAll('/', '-')}-lista.png`), fullPage: false })
   const datos = (await p.evaluate(DATOS)) as number
-  const listaBien = enLaLista !== null && enLaLista.aLaVista && enLaLista.items === 6 && enLaLista.conRespuesta && enLaLista.botones === 0 && !enLaLista.whatsapp && !enLaLista.retenido
+  const listaBien = enLaLista !== null && enLaLista.aLaVista && enLaLista.items === 6 && enLaLista.conRespuesta && enLaLista.botones === enLaLista.items && !enLaLista.whatsapp && !enLaLista.retenido
   const encastreBien = !home || finAlPie === null || finAlPie > 0
   const bien = listaBien && encastreBien && datos === 6
   const linea =
