@@ -151,7 +151,8 @@ const CASO: Record<Caso, (c: Contexto) => Promise<Resultado>> = {
         if (sube === null || ventana === null || bloque === null) return null
         const r = sube.getBoundingClientRect()
         const v = ventana.getBoundingClientRect()
-        return { corrido: r.top - v.top, alto: sube.offsetHeight, transformada: getComputedStyle(sube).transform, fundido: Number(getComputedStyle(bloque).opacity) }
+        // Desde el tope del CONTENIDO de la ventana: en reposo el titular queda sobre su padding (8 px), no sobre su borde.
+        return { corrido: r.top - v.top - Number.parseFloat(getComputedStyle(ventana).paddingTop), alto: sube.offsetHeight, transformada: getComputedStyle(sube).transform, fundido: Number(getComputedStyle(bloque).opacity) }
       }, PANTALLA)
     const antes = await medir()
     if (antes === null) return { ok: false, detalle: 'sin el titular de Demos' }
