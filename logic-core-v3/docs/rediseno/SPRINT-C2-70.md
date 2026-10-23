@@ -20,3 +20,10 @@ Fuera de esta corrida (pendiente): la curva de entrada del carrusel, la salida c
 - El mouse sobre el aro: el cartel «Mantené para arrastrar» siguiendo al puntero; arrastrar gira el aro (sin bandera).
 - `/v3?resenas=scroll`: la entrada atada al scroll, como antes.
 - HABLANOS: un reflejo cada 3,5 s y, con el mouse, en el acto.
+
+## Sesión 2 (2026-10-23, orquestador, directo en la integración)
+- **La curva de entrada (sin escalón).** La causa: con el gatillo la entrada era lineal en el tiempo (las placas viajaban a velocidad fija), se clavaban al armarse y el giro arrancaba de 0 (subía a la de lectura en 0,35 s). Ahora `curvaDeLaEntrada` (aro.ts, un Hermite): arranca al doble de la media, frena parejo y llega con la pendiente del giro de lectura (`finDeLaEntrada`, con las medidas del cuadro y `DURACION_DE_LA_ENTRADA_S`); `pasoDelGiro` sin armar queda en la velocidad de lectura (sin girar), así al armarse sigue. La escena aplica la curva a la entrada (también con `?resenas=scroll`).
+- **A la vez (ítem 16, en parte).** `GATILLO`: el volteo 0 → 0,35, los valores 0 → 0,35 (con el volteo, ya no después) y el aro desde 0,1 (entra mientras voltea), 2,52 s con su curva.
+- s83 §15 (nueva, con dos controles): la velocidad de la placa por cuadro a 60 fps, tabulada (22,77 · 18,87 · 15,05 · 11,30 · 7,64 · 4,06 · 0,56 → 0,489 el giro), ningún cuadro cambia más del 3 % de la máxima, y la pendiente final igual a la del giro (0,4887 contra 0,4887); a mitad del volteo, los valores yéndose y el aro entrando. Controles: la entrada de antes (lineal, el giro desde 0) y el gatillo de antes.
+- Medido (dev :3002): aro-legibilidad 1440 ok (control 4,23:1 en rojo), interacción ok (cartel, 10 placas, el clic a #portfolio-el-garage), aro-costo ok, humo 7/7; s83 104/0, s59 15/0, tsc 0, eslint limpio.
+- **Queda de la 70:** las dos mitades del título que se juntan en el medio mientras voltea (los títulos de volumen de la escena); la secuencia de cuadros del volteo en el sitio (la simultaneidad se afirmó en s83, no se grabó en pantalla); la salida con la cámara; todo el teléfono (Seis razones progresivo, carrusel continuo con «Deslizá para ver más», «Ver trabajo»).

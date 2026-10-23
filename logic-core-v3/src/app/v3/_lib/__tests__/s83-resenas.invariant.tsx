@@ -19,7 +19,7 @@ import { NOMBRES_REALES, escanearContenido } from '../../_secciones/_contrato/es
 import { CapaDelAro } from '../../_secciones/por-que-develop/resenas/CapaDelAro'
 import { RESENAS, TEXTO_DE_LAS_RESENAS, TITULO_DE_LAS_RESENAS, enlaceDelTrabajo } from '../../_secciones/por-que-develop/resenas/contenido'
 import { DISOLUCION, estiloDeLaIda, idaDelValor } from '../../_secciones/por-que-develop/resenas/disolucion'
-import { ALTO_DEL_ESPACIADOR_SVH, INSERCION_DE_LAS_RESENAS, K_DE_LAS_RESENAS, LARGO_SIN_ESTIRAR_PX, PANTALLAS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera } from '../../_secciones/por-que-develop/resenas/tramo'
+import { ALTO_DEL_ESPACIADOR_SVH, INSERCION_DE_LAS_RESENAS, DURACION_DE_LA_ENTRADA_S, GATILLO, K_DE_LAS_RESENAS, LARGO_SIN_ESTIRAR_PX, PANTALLAS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera } from '../../_secciones/por-que-develop/resenas/tramo'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
 import { HACIA_EL_CTA, VUELTA_DEL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, progresoDelGatillo } from '../../_secciones/por-que-develop/resenas/haciaElCta'
 import { TRANSFORMACION, caraDelCta } from '../escena/ctaDelFinal/transformacion'
@@ -29,7 +29,7 @@ import { CAPA_DEL_ARO } from '../escena/resenas/enVivo'
 import { OPACIDAD_DE_LA_TARJETA, cajaDelLogo, esconderLasTarjetas, llevarLaTarjeta, nuevaCaja, nuevaTarjeta, tamanoDeLasTarjetas } from '../escena/resenas/tarjetas'
 import { armarLasPlacas, enLaNiebla } from '../escena/resenas/placas'
 import { aplicar } from '../pie3d/homografia'
-import { ARO, VELOCIDAD_DE_LECTURA, medidasDeLaEscala, medidasDelAro, textoConLaEntrada, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
+import { ARO, VELOCIDAD_DE_LECTURA, curvaDeLaEntrada, finDeLaEntrada, medidasDeLaEscala, medidasDelAro, textoConLaEntrada, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
 import { seVeConElGiro } from '../escena/titulos3d/giro'
 import { medidaSinElEstiramiento, anotarTramo } from '../escena/tramoEstirado'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
@@ -383,5 +383,46 @@ const solidas = (u: readonly number[]): boolean =>
   })
 afirmar(solidas([0, 0.25, 0.5, 0.75, 1]), 'las placas: opacas en toda la niebla (sólo cambia el color), sin transparencia, escriben su profundidad')
 controlPositivo('el detector ve la placa de antes (la opacidad con la niebla)', [0, 0.5], (u) => u.every((n) => 1 - n === 1))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('15 · [C2-70] La entrada sin escalón (la velocidad por cuadro) y el volteo, los valores y el aro a la vez (el gatillo)')
+
+// La velocidad por cuadro (60 fps) de la placa 0 por su camino: la entrada del gatillo y después un segundo de giro armado.
+const MG = medidasDelAro(1440 / 900)
+const velocidadesPorCuadro = (curva: (s: number) => number, giroDesdeCero: boolean): number[] => {
+  const cuadros = Math.round(DURACION_DE_LA_ENTRADA_S * 60)
+  const g: GiroDelAro = { angulo: 0, velocidad: 0 }
+  const pos: { x: number; z: number }[] = []
+  for (let k = 0; k <= cuadros; k++) {
+    pasoDelGiro(g, 1 / 60, false, false, false, false, 0)
+    const p = poseDeLaPlaca(0, curva(k / cuadros), g.angulo, MG, nuevaPose())
+    pos.push({ x: p.x, z: p.z })
+  }
+  if (giroDesdeCero) g.velocidad = 0
+  for (let k = 0; k < 60; k++) {
+    pasoDelGiro(g, 1 / 60, true, false, false, false, 0)
+    const p = poseDeLaPlaca(0, 1, g.angulo, MG, nuevaPose())
+    pos.push({ x: p.x, z: p.z })
+  }
+  return pos.slice(1).map((b, k) => Math.hypot(b.x - pos[k].x, b.z - pos[k].z) * 60)
+}
+const sinEscalon = (v: readonly number[]): boolean => {
+  const tope = Math.max(...v)
+  return v.slice(1).every((x, k) => Math.abs(x - v[k]) <= tope * 0.03)
+}
+const conLaCurva = velocidadesPorCuadro((s) => curvaDeLaEntrada(s, finDeLaEntrada(MG, DURACION_DE_LA_ENTRADA_S)), false)
+const cuadrosDeLaEntrada = Math.round(DURACION_DE_LA_ENTRADA_S * 60)
+const tabla = conLaCurva.filter((_, k) => k % 25 === 0 || k === cuadrosDeLaEntrada - 1 || k === cuadrosDeLaEntrada).map((x) => x.toFixed(3)).join(' · ')
+afirmar(sinEscalon(conLaCurva), `la velocidad de la placa por cuadro (60 fps) baja pareja hasta la del giro y sigue: ningún cuadro cambia más del 3 % de la máxima (tabla, cada 25 cuadros y el empalme: ${tabla})`)
+controlPositivo('el detector ve la entrada de antes (lineal, el giro desde 0 al armarse)', velocidadesPorCuadro((s) => s, true), sinEscalon)
+const finG = finDeLaEntrada(MG, DURACION_DE_LA_ENTRADA_S)
+const pendienteFinal = (curvaDeLaEntrada(1, finG) - curvaDeLaEntrada(1 - 1e-6, finG)) / 1e-6
+const alEmpalmar = (pendienteFinal * MG.recorrido) / DURACION_DE_LA_ENTRADA_S
+afirmar(cerca(alEmpalmar, MG.radio * VELOCIDAD_DE_LECTURA, MG.radio * VELOCIDAD_DE_LECTURA * 0.01) && Math.abs(conLaCurva[cuadrosDeLaEntrada] - conLaCurva[cuadrosDeLaEntrada - 1]) < conLaCurva[cuadrosDeLaEntrada - 2] - conLaCurva[cuadrosDeLaEntrada - 1] + 1e-9 + Math.max(...conLaCurva) * 0.01, 'en el empalme la entrada llega con la velocidad del giro de lectura (' + alEmpalmar.toFixed(4) + ' contra ' + (MG.radio * VELOCIDAD_DE_LECTURA).toFixed(4) + ') y el cuadro del empalme no cambia más que los de antes')
+afirmar(curvaDeLaEntrada(0, 0.03) === 0 && curvaDeLaEntrada(1, 0.03) === 1 && Array.from({ length: 101 }, (_, k) => curvaDeLaEntrada(k / 100, 0.03)).every((x, k, a) => k === 0 || x >= a[k - 1]), 'la curva va de 0 a 1 sin volver para atrás')
+
+const aLaVez = (x: ReturnType<typeof estadoDelAvance>): boolean => x.giro > 0.3 && x.giro < 0.7 && x.disolucion > 0.3 && x.entrada > 0
+afirmar(aLaVez(estadoDelAvance(0.6, GATILLO.giro[0] + GATILLO.giro[1] / 2)), 'gatillo: a mitad del volteo del título los valores ya se están yendo y el aro ya entra (a la vez, no uno después del otro)')
+controlPositivo('el detector ve el gatillo de antes (primero el volteo, después los valores, después el aro)', { giro: 0.5, disolucion: 0, entrada: 0 }, aLaVez)
 
 cerrar('s83-resenas')

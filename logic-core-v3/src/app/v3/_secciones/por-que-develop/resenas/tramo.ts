@@ -54,7 +54,11 @@ export const MOMENTOS_DE_LAS_RESENAS = {
 } as const
 
 /** `?resenas=gatillo`: el título, los valores y la entrada son una animación por tiempo (s), con estos tramos de ella. */
-export const GATILLO = { duracionS: 2.8, giro: [0, 0.3], disolucion: [0.25, 0.3], entrada: [0.5, 0.5], entra: 0.02, sale: 0.005 } as const
+// [C2-70] A la vez: mientras el título se da vuelta se van los valores y ya entra el aro (antes: volteo, después disolución, después aro).
+export const GATILLO = { duracionS: 2.8, giro: [0, 0.35], disolucion: [0, 0.35], entrada: [0.1, 0.9], entra: 0.02, sale: 0.005 } as const
+
+/** Lo que dura la entrada del aro con el gatillo (s): la escena la usa para empalmar su curva con el giro de lectura. */
+export const DURACION_DE_LA_ENTRADA_S = GATILLO.entrada[1] * GATILLO.duracionS
 
 export interface EstadoDeLasResenas {
   /** El giro del título (0, «Seis razones»; 1, «Lo que dicen nuestros clientes»). */

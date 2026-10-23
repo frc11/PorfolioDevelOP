@@ -7,10 +7,11 @@ import * as THREE from 'three'
 import { LOGO_BOX_WORLD } from '@/lib/logo-footprint'
 
 import { RESENAS } from '../../../_secciones/por-que-develop/resenas/contenido'
+import { DURACION_DE_LA_ENTRADA_S } from '../../../_secciones/por-que-develop/resenas/tramo'
 import { hayBanco } from '../entorno'
 import { compilarConCuidado } from '../gpu/compilar'
 import { viajeEnCurso } from '../viaje'
-import { ARO, HONDO_DE_LA_BAJADA, escalaDelAro, medidasDeLaEscala, medidasDelAro, DESTACA, destaqueDeLaPlaca, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, pasoDelLevante, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoConLaEntrada, type GiroDelAro, type MedidasDelAro } from './aro'
+import { ARO, HONDO_DE_LA_BAJADA, curvaDeLaEntrada, escalaDelAro, finDeLaEntrada, medidasDeLaEscala, medidasDelAro, DESTACA, destaqueDeLaPlaca, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, pasoDelLevante, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoConLaEntrada, type GiroDelAro, type MedidasDelAro } from './aro'
 import { RESENAS_EN_VIVO, TARJETAS_DEL_ARO, ponerLaResena } from './enVivo'
 import { armarLasPlacas, enLaNiebla, geometriaDeLaPlaca, soltarLasPlacas, type PlacaArmada } from './placas'
 import { abrirElHueco, armarElHueco, soltarElHueco, type HuecoArmado } from './huecoDelAro'
@@ -112,7 +113,9 @@ export default function EscenaDeLasResenas() {
 function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, niebla: THREE.Color | null, cuadro: { readonly ancho: number; readonly alto: number }, dt: number): void {
   if (grupo === null) return
   const v = RESENAS_EN_VIVO
-  const e = v.entrada
+  const medidas: MedidasDelAro = medidasDelAro(cuadro.ancho / Math.max(1, cuadro.alto))
+  // [C2-70] La entrada frena con su curva hasta la velocidad del giro (sin escalón al armarse).
+  const e = curvaDeLaEntrada(v.entrada, finDeLaEntrada(medidas, DURACION_DE_LA_ENTRADA_S))
   // [B3] Con el anillo del piso abierto el aro sigue (el anillo se cierra cuando ya no queda ninguna placa).
   const activo = v.activo && (e > 0 || v.hueco > 0) && viajeEnCurso() === null && camara instanceof THREE.PerspectiveCamera && s.placas.length > 0
   grupo.visible = activo
@@ -120,7 +123,6 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
     esconderLasTarjetas(TARJETAS_DEL_ARO, s.tarjetas)
     return
   }
-  const medidas: MedidasDelAro = medidasDelAro(cuadro.ancho / Math.max(1, cuadro.alto))
   const armado = e >= 1 && v.bajada <= 0
   const conPlacas = e > 0 && v.bajada < 1
   if (s.hueco !== null) abrirElHueco(s.hueco, v.hueco)
