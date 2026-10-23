@@ -99,7 +99,8 @@ async function envio(p: Page, ancho: number, tipo: 'exito' | 'error', respuesta:
   await p.click(`[data-demo="${FORM}"] button[type="submit"]`)
   const serie: Foto[] = []
   // Hasta el mensaje (con el error, el banco del control borra los campos ahí) y después hasta la vuelta.
-  const fin = Date.now() + 7000
+  // La vuelta se cuenta desde la respuesta (el error llega a los 1200 ms): 6,5 s para el encastre, los ~3 s del mensaje y el fundido.
+  const fin = Date.now() + respuesta.ms + 7000
   let borrado = false
   while (Date.now() < fin) {
     const f = await foto(p)
@@ -120,10 +121,10 @@ async function envio(p: Page, ancho: number, tipo: 'exito' | 'error', respuesta:
     primeraCarga !== undefined && primeraCarga.t - t0 <= 400 && cargando.some((f) => f.form < 0.05 && f.inerte) && cargando.some((f) => f.carga >= 0.95) && giros.size >= 3 && aparece.size >= 2 && cargaMs >= 550
   const conMensaje = serie.filter((f) => f.vista === tipo)
   const textoEsperado = tipo === 'exito' ? '¡Recibido!' : 'Algo falló'
-  const mensajeBien = conMensaje.some((f) => f.mensaje >= 0.95 && f.texto.includes(textoEsperado)) && conMensaje.every((f) => f.encaje === (tipo === 'exito' ? 'encaja' : 'no-encaja'))
+  const mensajeBien = conMensaje.some((f) => f.mensaje >= 0.95 && f.texto.includes(textoEsperado)) && conMensaje.some((f) => f.encaje === (tipo === 'exito' ? 'encaja' : 'no-encaja')) && conMensaje.every((f) => f.encaje === '' || f.encaje === (tipo === 'exito' ? 'encaja' : 'no-encaja'))
   const ultima = serie[serie.length - 1]
   const datosBien = tipo === 'exito' ? ultima.nombre === '' && ultima.mail === '' && ultima.escrito === '' : ultima.nombre === ESCRITO.nombre && ultima.mail === ESCRITO.mail && ultima.escrito === ESCRITO.mensaje
-  const vueltaBien = ultima.vista === 'formulario' && ultima.form >= 0.95 && !ultima.inerte && ultima.t - t0 <= 7000 && datosBien
+  const vueltaBien = ultima.vista === 'formulario' && ultima.form >= 0.95 && !ultima.inerte && ultima.t - t0 <= respuesta.ms + 6500 && datosBien
   const bien = enviandoBien && mensajeBien && vueltaBien
   const linea =
     `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · ${tipo} (respuesta ${String(respuesta.estado)} a los ${String(respuesta.ms)} ms)` +

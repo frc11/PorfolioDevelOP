@@ -80,9 +80,19 @@ async function formulario(p: Page, cdp: CDPSession, ancho: number, form: string)
   const despues = await campos(p, form)
   const llenos = despues.filter((c) => c.autofill)
   if (fallo !== null || llenos.length < 2) return { linea: `NO CORRE ${String(ancho)} · ${form} · Chrome no autocompletó (${fallo ?? `${String(llenos.length)} campos`}): mirarlo a mano`, bien: null }
+  // Dos fondos transparentes (alfa 0) son el mismo fondo aunque el navegador deje su celeste con alfa 0 debajo; y la transición larga
+  // del arreglo mueve el alfa en el quinto decimal (0,1 → 0,100003): se comparan los números con tolerancia, no el texto.
+  const numeros = (x: string): number[] => (x.match(/-?[\d.]+(e-?\d+)?/g) ?? []).map(Number)
+  const transparente = (x: string): boolean => x === 'transparent' || (x.startsWith('rgba') && numeros(x)[3] === 0)
+  const parecidos = (x: string, y: string): boolean => {
+    const a = numeros(x)
+    const b = numeros(y)
+    return x.split('(')[0] === y.split('(')[0] && a.length === b.length && a.every((n, i) => Math.abs(n - b[i]) <= 0.01)
+  }
+  const mismoFondo = (x: string, y: string): boolean => x === y || (transparente(x) && transparente(y)) || parecidos(x, y)
   const mal = llenos.filter((c) => {
     const a = antes.get(c.id)
-    return a === undefined || c.fondo !== a.fondo || c.color !== a.color || c.relleno !== a.relleno || c.fondo === CELESTE
+    return a === undefined || !mismoFondo(c.fondo, a.fondo) || c.color !== a.color || c.relleno !== a.relleno || c.fondo === CELESTE
   })
   const bien = mal.length === 0
   const detalle = llenos.map((c) => `${c.id.replace(`${form}-`, '')}: fondo ${c.fondo}${antes.get(c.id)?.fondo === c.fondo ? '' : ` (antes ${antes.get(c.id)?.fondo ?? '—'})`}, texto ${c.relleno}${antes.get(c.id)?.relleno === c.relleno ? '' : ` (antes ${antes.get(c.id)?.relleno ?? '—'})`}`).join(' · ')
