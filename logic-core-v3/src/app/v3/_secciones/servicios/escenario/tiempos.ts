@@ -4,15 +4,19 @@
  * renglones que se levantan. Al subir, `g` vuelve de 1 a 0 por el mismo camino: cada servicio sale por donde entró, los renglones
  * bajan primero, el panel se va y los nanobots vuelven; el cambio de capa ocurre en el mismo `g` (la misma geometría).
  *
- *   0 ────── 0,5                el enjambre viaja (su traspaso con retraso, resorte y dispersión)
+ *   0 ────── 0,5                el enjambre viaja de la entrada a web (su traspaso con retraso, resorte y dispersión)
+ *    0,05 ──────────── 0,9      [C2-50] entre dos servicios viaja más lento, hecho una NUBE grande y volumétrica (el sombreador)
  *       0,15 ─────── 0,68       el panel entra, con una desaceleración final (en web, más tarde si hace falta: ver `inicioDelPanel`)
- *                     0,7 ── 1   los renglones se levantan en 2D, uno por uno, con el panel ya cerrado
+ *            0,415 ───── 1      [C2-50] los renglones se levantan en 2D, uno por uno, desde que el panel va por la MITAD (ítem 13)
+ *                  0,68 ─ 0,9   [C2-50] el título del servicio se subraya al terminar de llegar: rápido y después desacelera
  */
 
 export const DURACION_DE_LA_TRANSICION_MS = 2200
 
 export const TIEMPOS = {
   enjambre: { desde: 0, hasta: 0.5 },
+  nube: { desde: 0.05, hasta: 0.9 },
+  subrayado: { duracion: 0.22 },
   panel: { inicio: 0.15, duracion: 0.53 },
   texto: { desde: 0.7, porLinea: 0.045, duracion: 0.2 },
 } as const
@@ -35,8 +39,12 @@ export const gDelAvance = (avance: number): number => TIEMPOS.enjambre.desde + a
 /** La posición que lee el motor del enjambre: el estado de partida más el avance de su traspaso. */
 export function posicionDelEnjambre(posicion: number): number {
   const k = Math.min(3, Math.max(0, Math.floor(posicion)))
-  return k >= 3 ? 3 : k + avanceDelEnjambre(posicion - k)
+  if (k >= 3) return 3
+  return k + (k === 0 ? avanceDelEnjambre(posicion) : avanceDeLaNube(posicion - k))
 }
+
+/** [C2-50] El avance del viaje entre dos servicios: más largo (la nube se ve viajar). */
+export const avanceDeLaNube = (g: number): number => acotar((g - TIEMPOS.nube.desde) / (TIEMPOS.nube.hasta - TIEMPOS.nube.desde))
 
 /**
  * Cuánto se levantó el renglón `i` de `n` (0 abajo, 1 en su lugar): con el panel cerrado, uno detrás del otro. El escalonado se
@@ -62,8 +70,15 @@ export function inicioDelPanel(gDelCambio: number, borde: number, ancho: number)
   return Math.min(1 - TIEMPOS.panel.duracion, pedido)
 }
 
-/** Los renglones arrancan con el panel cerrado: si el panel arranca más tarde, ellos también. */
-export const desdeDelTexto = (inicio: number): number => Math.max(TIEMPOS.texto.desde, inicio + TIEMPOS.panel.duracion)
+/** [C2-50] Los renglones arrancan con el panel por la MITAD de su entrada (ítem 13: antes que el resto); si el panel arranca más tarde, ellos también. */
+export const desdeDelTexto = (inicio: number): number => inicio + TIEMPOS.panel.duracion / 2
+
+/** [C2-50] Cuánto se subrayó el título (0 → 1): desde que el panel cerró, rápido y después desacelera (easeOutQuart); llega antes del final. */
+export function avanceDelSubrayado(g: number, inicio: number = TIEMPOS.panel.inicio): number {
+  const desde = Math.min(inicio + TIEMPOS.panel.duracion, 1 - TIEMPOS.subrayado.duracion)
+  const t = acotar((g - desde) / TIEMPOS.subrayado.duracion)
+  return 1 - (1 - t) ** 4
+}
 
 /** La capa del lienzo de los nanobots: detrás del título hasta el cambio (en la transición de la entrada a web), delante desde ahí. */
 export function capaDelEnjambre(posicion: number, gDelCambio: number): 'detras' | 'delante' {

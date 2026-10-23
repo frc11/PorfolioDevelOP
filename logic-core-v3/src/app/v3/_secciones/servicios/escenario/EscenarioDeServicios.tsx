@@ -10,11 +10,12 @@ import { PUNTOS_DEL_ENJAMBRE } from '../../../_lib/nanobots/simbolos'
 import { SERVICIOS } from '../../_contrato/acento'
 import { Bloque } from '../../_contrato/coreografia'
 import { tangenteDe, useDiagonal } from './banderas'
-import { ESTADOS_DE_SERVICIOS } from './datos'
+import { AVISO_DE_LA_ENTRADA, AVISO_DEL_TELEFONO, ESTADOS_DE_SERVICIOS } from './datos'
 import { IntroDeServicios, PasarElProgreso } from './IntroDeServicios'
-import { LugarDeLosNanobots, PanelDeServicio } from './PanelDeServicio'
+import { PanelDeServicio } from './PanelDeServicio'
 import { DURACION_DE_LA_TRANSICION_MS } from './tiempos'
 import { SIN_CAMBIO, useCoreografiaDelEscenario, usePosicionDelEscenario, type CambioDeCapa } from './useCoreografiaDelEscenario'
+import { useFuentesDelServicio } from './useFuentesDelServicio'
 import { useNanobotsDelEscenario } from './useNanobotsDelEscenario'
 
 /**
@@ -26,7 +27,8 @@ import { useNanobotsDelEscenario } from './useNanobotsDelEscenario'
  * enjambre viaja de su lugar en un estado al del siguiente, y cambia de capa en el cuadro que calcula `capa.ts` (ninguno sobre el
  * título ni sobre el panel). El ángulo de la franja del texto, `?diagonal=` (`--tangente-de-la-diagonal`).
  *
- * `telefono`: abajo de 1024 con `?servicios-movil=gatillo`: lo mismo, con el dedo, los paneles apilados y los nanobots más chicos.
+ * `telefono`: abajo de 1024 (C2-50: siempre, con movimiento): lo mismo, con el dedo, los paneles apilados, los nanobots más chicos y
+ * el aviso del gesto. Las letras de cada servicio (`?titulo-servicio=`, `?fuente-servicio=`): `useFuentesDelServicio`.
  */
 /** La pista, como mínimo: el cuadro anclado y una pantalla por estado (desde 1024 se estira hasta llenar la tabla: `flex-1`). */
 export const ALTO_MINIMO_DE_LA_PISTA = altoDeSecuenciaPinneada(ESTADOS_DE_SERVICIOS + 1)
@@ -40,7 +42,8 @@ export function EscenarioDeServicios({ telefono }: { readonly telefono: boolean 
   const diagonal = useDiagonal()
   const { vista, ir } = useGatillos({ pista, cantidad: ESTADOS_DE_SERVICIOS, activa: true, tactil: telefono, reducido, duracionMs: DURACION_DE_LA_TRANSICION_MS })
   const posicion = usePosicionDelEscenario(vista, reducido)
-  useCoreografiaDelEscenario(escenario, lienzo, posicion, cambio)
+  const fuentes = useFuentesDelServicio()
+  useCoreografiaDelEscenario(escenario, lienzo, posicion, cambio, `${fuentes.claseDelTitulo}|${fuentes.claseDelTexto}|${fuentes.titulo}`)
   useNanobotsDelEscenario({ escenario, lienzo, posicion, reducido, puntos: telefono ? PUNTOS_DEL_ENJAMBRE.angosto : PUNTOS_DEL_ENJAMBRE.ancho, cambio })
   const [progresoDelTitulo, setProgresoDelTitulo] = useState<MotionValue<number> | null>(null)
   const pasar = useCallback((p: MotionValue<number> | null) => setProgresoDelTitulo(p), [])
@@ -62,10 +65,9 @@ export function EscenarioDeServicios({ telefono }: { readonly telefono: boolean 
         style={angulo}
         className="bg-fondo sticky top-0 h-svh w-full overflow-hidden max-escritorio:[--tangente-de-la-diagonal:0]!"
       >
-        <LugarDeLosNanobots estado={0} className="pointer-events-none absolute inset-x-1/3 inset-y-1/4" />
-        <IntroDeServicios progreso={progresoDelTitulo} className="absolute inset-0 z-10 flex items-center justify-center px-[var(--pad-lateral-compacto)]" />
+        <IntroDeServicios progreso={progresoDelTitulo} aviso={telefono ? AVISO_DEL_TELEFONO : AVISO_DE_LA_ENTRADA} className="absolute inset-0 z-10 flex items-center justify-center px-[var(--pad-lateral-compacto)]" />
         {SERVICIOS.map((s, i) => (
-          <PanelDeServicio key={s.id} servicio={s} estado={i + 1} foco={ir} />
+          <PanelDeServicio key={s.id} servicio={s} estado={i + 1} foco={ir} fuentes={fuentes} />
         ))}
         {/* La capa (`z-index`) la pone la coreografía en cada cuadro: detrás de la entrada, o delante de todo. */}
         <canvas ref={lienzo} aria-hidden="true" data-pieza="nanobots-de-servicios" data-capa="detras" className="pointer-events-none absolute inset-0 z-0 size-full" />

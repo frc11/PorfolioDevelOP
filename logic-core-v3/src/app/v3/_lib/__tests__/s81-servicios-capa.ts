@@ -8,17 +8,17 @@
 import { sembrar } from '../escena/titulos3d/llegada'
 import type { Caja, Lugar } from '../nanobots/capa'
 import { FISICA_DEL_ENJAMBRE, resorteDelEnjambre } from '../nanobots/enjambre'
-import { GLOBO } from '../nanobots/simbolos'
+import { GLOBO, ORBITA, unidadDelLugar } from '../nanobots/simbolos'
 
 const girar = (x: number, y: number, a: number): [number, number] => [Math.cos(a) * x - Math.sin(a) * y, Math.sin(a) * x + Math.cos(a) * y]
 
-/** `vivo()` del sombreador para la nube (0) y el globo (1). */
+/** `vivo()` del sombreador para la órbita (0, C2-50) y el globo (1). */
 function vivo(k: number, d: readonly number[], az: readonly number[], t: number): [number, number, number] {
   if (k === 0) {
-    const y = d[1] + 0.05 * Math.sin(t * 0.47 + az[1] * 2 * Math.PI)
-    const [x1, z1] = girar(d[0] + 0.05 * Math.sin(t * 0.6 + az[0] * 2 * Math.PI), d[2] + 0.05 * Math.sin(t * 0.53 + az[2] * 2 * Math.PI), t * 0.12)
-    const [x2, z2] = girar(x1, z1, 0.22 * Math.sin(t * 0.3))
-    return [x2, y, z2]
+    const [qx, qy] = [d[0] / ORBITA.rx, d[1] / ORBITA.ry]
+    const a = Math.atan2(qy, qx) + t * ORBITA.giro * (0.8 + 0.4 * az[3])
+    const r = Math.hypot(qx, qy)
+    return [ORBITA.rx * r * Math.cos(a), ORBITA.ry * r * Math.sin(a), d[2] + 0.04 * Math.sin(t * 0.7 + az[2] * 2 * Math.PI)]
   }
   if (d[3] >= 0.5) return [d[0], d[1], d[2]]
   const [x, z] = girar(d[0], d[2], t * 0.35)
@@ -65,26 +65,28 @@ export interface EscenarioDePrueba {
 }
 
 /**
- * Medidas de 1440×900 y 1024×768 derivadas de las clases del escenario (el título en `titulo-l`, la bajada en 26ch, el lugar de la nube
- * en el tercio del medio, la marca de web en su 32 % a la derecha). Son una ESTIMACIÓN del layout: la medición de verdad es del banco.
+ * Medidas de 1440×900 y 1024×768 derivadas de las clases del escenario. [C2-50] El título que se pinta (la display del Panel, en dos
+ * renglones, el ancho sobre 13,5 con tope en 11svh, a 0,62 em por letra) y la bajada en dos renglones (400 px de medida, adentro del ancho del título); la órbita en la caja de los dos,
+ * de 720 px de ancho; la marca de web en su columna (12 · 10 · 9). Son una ESTIMACIÓN del layout: la medición de verdad es del banco.
  */
 export const ESCENARIOS_DE_PRUEBA: readonly EscenarioDePrueba[] = [
   {
     nombre: '1440×900',
     ancho: 1440,
     alto: 900,
-    titulo: [{ izquierda: 502, arriba: 405, derecha: 938, abajo: 453 }, { izquierda: 618, arriba: 469, derecha: 822, abajo: 517 }],
-    nube: { izquierda: 461, arriba: 216, derecha: 979, abajo: 684 },
-    globo: { izquierda: 1048, arriba: 208, derecha: 1408, abajo: 772 },
+    titulo: [{ izquierda: 463, arriba: 261, derecha: 977, abajo: 350 }, { izquierda: 444, arriba: 350, derecha: 996, abajo: 439 }, { izquierda: 520, arriba: 455, derecha: 920, abajo: 503 }, { izquierda: 540, arriba: 503, derecha: 900, abajo: 551 }],
+    nube: { izquierda: 360, arriba: 229, derecha: 1080, abajo: 583 },
+    globo: { izquierda: 1036, arriba: 255, derecha: 1408, abajo: 804 },
   },
   {
     nombre: '1024×768',
     ancho: 1024,
     alto: 768,
-    titulo: [{ izquierda: 334, arriba: 346, derecha: 690, abajo: 386 }, { izquierda: 410, arriba: 402, derecha: 614, abajo: 450 }],
-    nube: { izquierda: 328, arriba: 184, derecha: 696, abajo: 584 },
-    globo: { izquierda: 715, arriba: 200, derecha: 992, abajo: 640 },
+    titulo: [{ izquierda: 324, arriba: 227, derecha: 700, abajo: 292 }, { izquierda: 310, arriba: 292, derecha: 714, abajo: 357 }, { izquierda: 312, arriba: 373, derecha: 712, abajo: 413 }, { izquierda: 330, arriba: 413, derecha: 694, abajo: 453 }],
+    nube: { izquierda: 152, arriba: 195, derecha: 872, abajo: 485 },
+    globo: { izquierda: 745, arriba: 221, derecha: 1000, abajo: 672 },
   },
 ]
 
-export const lugarDe = (c: Caja, extension: number): Lugar => ({ x: (c.izquierda + c.derecha) / 2, y: (c.arriba + c.abajo) / 2, unidad: Math.min(c.derecha - c.izquierda, c.abajo - c.arriba) / 2 / extension, extension })
+/** [C2-50] El lugar de un estado en su caja, con la unidad de la sección (`unidadDelLugar`: la órbita llena su caja con la elipse). */
+export const lugarDe = (c: Caja, extension: number, estado = 1): Lugar => ({ x: (c.izquierda + c.derecha) / 2, y: (c.arriba + c.abajo) / 2, unidad: unidadDelLugar(estado, c.derecha - c.izquierda, c.abajo - c.arriba, extension), extension })

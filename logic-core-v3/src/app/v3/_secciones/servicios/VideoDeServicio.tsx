@@ -30,6 +30,7 @@ export function VideoDeServicio({
   ancho,
   alto,
   sizes,
+  className,
 }: {
   readonly fuente: string
   readonly poster: string
@@ -37,6 +38,8 @@ export function VideoDeServicio({
   readonly ancho: number
   readonly alto: number
   readonly sizes: string
+  /** [C2-50] La caja del video (por defecto, en su proporción: 16:9 a lo ancho). Los paneles de B4 lo estiran a su caja. */
+  readonly className?: string
 }): React.JSX.Element {
   const reducido = useMovimientoReducido()
   const video = useRef<HTMLVideoElement | null>(null)
@@ -64,7 +67,7 @@ export function VideoDeServicio({
   }, [cerca, enPantalla])
 
   if (reducido) {
-    return <Imagen src={poster} alt={descripcion} ancho={ancho} alto={alto} sizes={sizes} className="aspect-video object-cover" />
+    return <Imagen src={poster} alt={descripcion} ancho={ancho} alto={alto} sizes={sizes} className={className ?? 'aspect-video object-cover'} />
   }
   return (
     <video
@@ -79,7 +82,7 @@ export function VideoDeServicio({
       aria-label={descripcion}
       width={ancho}
       height={alto}
-      className="aspect-video h-auto w-full object-cover"
+      className={className ?? 'aspect-video h-auto w-full object-cover'}
     />
   )
 }
