@@ -13,6 +13,20 @@ import type { Armado } from './armado'
  */
 export const GIROS_DE_LOS_TITULOS = new Map<string, number>()
 
+/**
+ * [C2-70e] CUÁNTO SE CORRE CADA TÍTULO A LO LARGO DE SU RENGLÓN (px del cuadro de su lectura; positivo, a la derecha), además del giro: las
+ * mitades del título de las reseñas (y de la frase, su otra cara) se juntan en el medio mientras se dan vuelta. Lo escribe la sección; sin
+ * entrada, 0. El grupo no se mueve (su sombra sigue a la malla); el CTA corre lo mismo su origen (`RenglonDelCta.corrido`).
+ */
+export const CORRIMIENTOS_DE_LOS_TITULOS = new Map<string, number>()
+
+/** El corrimiento del título en em de su grupo (el grupo mide un cuerpo por em en el cuadro de su lectura, por su alejamiento). */
+function corrimientoEnEm(a: Armado): number {
+  const px = CORRIMIENTOS_DE_LOS_TITULOS.get(a.titulo.id) ?? 0
+  const cuerpo = (a.lugar?.cuerpo ?? 0) * (a.titulo.alejamiento ?? 1)
+  return px === 0 || cuerpo <= 0 ? 0 : px / cuerpo
+}
+
 /** Si un título girado `angulo` se dibuja: sólo con la cara de adelante a la vista. */
 export const seVeConElGiro = (angulo: number): boolean => Math.cos(angulo) > 0.01
 
@@ -20,12 +34,13 @@ const EJE = new THREE.Vector3(0, 1, 0)
 const CENTRO = new THREE.Vector3()
 const GIRADO = new THREE.Vector3()
 
-/** Pone la malla del título con su giro (en em, en su grupo) y devuelve si se dibuja. */
+/** Pone la malla del título con su giro y su corrimiento (en em, en su grupo) y devuelve si se dibuja. */
 export function girarElTitulo(a: Armado): boolean {
   const angulo = GIROS_DE_LOS_TITULOS.get(a.titulo.id) ?? 0
+  const corrido = corrimientoEnEm(a)
   if (angulo === 0) {
-    if (a.malla.position.lengthSq() > 0 || a.malla.quaternion.w !== 1) {
-      a.malla.position.set(0, 0, 0)
+    if (a.malla.position.x !== corrido || a.malla.position.y !== 0 || a.malla.position.z !== 0 || a.malla.quaternion.w !== 1) {
+      a.malla.position.set(corrido, 0, 0)
       a.malla.quaternion.identity()
     }
     return true
@@ -38,5 +53,6 @@ export function girarElTitulo(a: Armado): boolean {
   a.malla.quaternion.setFromAxisAngle(EJE, angulo)
   GIRADO.copy(CENTRO).applyQuaternion(a.malla.quaternion)
   a.malla.position.copy(CENTRO).sub(GIRADO)
+  a.malla.position.x += corrido
   return seVeConElGiro(angulo)
 }

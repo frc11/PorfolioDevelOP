@@ -44,6 +44,23 @@ interface Estado {
 const POSE = nuevaPose()
 const CENTRO = new THREE.Vector3()
 
+const CAJA = new THREE.Box3() // banco
+const ESQUINA = new THREE.Vector3() // banco
+/** [C2-70e] Para el banco: la caja en el cuadro (px) de las placas que se dibujan, o `null` sin ninguna. */
+function cajaDeLasPlacas(placas: readonly PlacaArmada[], camara: THREE.Camera, ancho: number, alto: number): { readonly arriba: number; readonly abajo: number; readonly izquierda: number; readonly derecha: number } | null {
+  let [x0, y0, x1, y1] = [Infinity, Infinity, -Infinity, -Infinity]
+  for (const p of placas) {
+    if (!p.malla.visible) continue
+    CAJA.setFromObject(p.malla)
+    for (let k = 0; k < 8; k += 1) {
+      ESQUINA.set(k & 1 ? CAJA.max.x : CAJA.min.x, k & 2 ? CAJA.max.y : CAJA.min.y, k & 4 ? CAJA.max.z : CAJA.min.z).project(camara)
+      const [x, y] = [((ESQUINA.x + 1) / 2) * ancho, ((1 - ESQUINA.y) / 2) * alto]
+      ;[x0, y0, x1, y1] = [Math.min(x0, x), Math.min(y0, y), Math.max(x1, x), Math.max(y1, y)]
+    }
+  }
+  return x0 === Infinity ? null : { arriba: y0, abajo: y1, izquierda: x0, derecha: x1 }
+}
+
 export default function EscenaDeLasResenas() {
   const gl = useThree((s) => s.gl)
   const camara = useThree((s) => s.camera)
@@ -94,11 +111,14 @@ export default function EscenaDeLasResenas() {
       legibles: placasQueSeLeen(RESENAS_EN_VIVO.giro, medidasDelAro(tam.width / Math.max(1, tam.height))),
       placasVisibles: m.current.placas.filter((p) => p.malla.visible).length,
       costoMs: m.current.costoMs,
+      // [C2-70e] Dónde se ve el aro (px: sus placas dibujadas) y la caja del logo, para el banco del guardado (`resenas-volteo.ts`).
+      enElCuadro: raiz.current?.visible === true ? cajaDeLasPlacas(m.current.placas, camara, tam.width, tam.height) : null,
+      logo: { ...m.current.logo },
     })
     return () => {
       delete ventana.__aroDelBanco
     }
-  }, [tam.width, tam.height])
+  }, [camara, tam.width, tam.height])
 
   useFrame((state, delta) => {
     const desde = performance.now()

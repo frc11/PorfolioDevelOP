@@ -19,9 +19,12 @@ import { NOMBRES_REALES, escanearContenido } from '../../_secciones/_contrato/es
 import { CapaDelAro } from '../../_secciones/por-que-develop/resenas/CapaDelAro'
 import { RESENAS, TEXTO_DE_LAS_RESENAS, TITULO_DE_LAS_RESENAS, enlaceDelTrabajo } from '../../_secciones/por-que-develop/resenas/contenido'
 import { DISOLUCION, estiloDeLaIda, idaDelValor } from '../../_secciones/por-que-develop/resenas/disolucion'
-import { ALTO_DEL_ESPACIADOR_SVH, INSERCION_DE_LAS_RESENAS, DURACION_DE_LA_ENTRADA_S, GATILLO, K_DE_LAS_RESENAS, LARGO_SIN_ESTIRAR_PX, PANTALLAS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera } from '../../_secciones/por-que-develop/resenas/tramo'
+import { ALTO_DEL_ESPACIADOR_SVH, ESPACIO_ENTRE_LAS_MITADES_EM, INSERCION_DE_LAS_RESENAS, DURACION_DE_LA_ENTRADA_S, GATILLO, K_DE_LAS_RESENAS, LARGO_SIN_ESTIRAR_PX, PANTALLAS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, controlDeLaBandera, corrimientoConElGiro, corrimientosAlCentro, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera, vueltaDelGiro } from '../../_secciones/por-que-develop/resenas/tramo'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
-import { HACIA_EL_CTA, VUELTA_DEL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, progresoDelGatillo } from '../../_secciones/por-que-develop/resenas/haciaElCta'
+import { CAMARA_DEL_GUARDADO_EN_EL_GATILLO, HACIA_EL_CTA, VUELTA_DEL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, pesoDeLaCamara, progresoDelGatillo } from '../../_secciones/por-que-develop/resenas/haciaElCta'
+import { MIRA_AL_HUECO, desvioDelGuardado, type PoseDelGuardado } from '../escena/resenas/camaraDelGuardado'
+import { POSES_DEL_FINAL } from '../escena/finalDelRecorrido'
+import type { Armado } from '../escena/titulos3d/armado'
 import { TRANSFORMACION, caraDelCta } from '../escena/ctaDelFinal/transformacion'
 import { ENGANCHE_DE_LAS_GRIETAS, avisarLaVueltaDelCta } from '../escena/resenas/enganches'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
@@ -30,7 +33,7 @@ import { OPACIDAD_DE_LA_TARJETA, cajaDelLogo, esconderLasTarjetas, llevarLaTarje
 import { armarLasPlacas, enLaNiebla } from '../escena/resenas/placas'
 import { aplicar } from '../pie3d/homografia'
 import { ARO, VELOCIDAD_DE_LECTURA, curvaDeLaEntrada, finDeLaEntrada, medidasDeLaEscala, medidasDelAro, textoConLaEntrada, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
-import { seVeConElGiro } from '../escena/titulos3d/giro'
+import { CORRIMIENTOS_DE_LOS_TITULOS, GIROS_DE_LOS_TITULOS, girarElTitulo, seVeConElGiro } from '../escena/titulos3d/giro'
 import { medidaSinElEstiramiento, anotarTramo } from '../escena/tramoEstirado'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
@@ -424,5 +427,106 @@ afirmar(curvaDeLaEntrada(0, 0.03) === 0 && curvaDeLaEntrada(1, 0.03) === 1 && Ar
 const aLaVez = (x: ReturnType<typeof estadoDelAvance>): boolean => x.giro > 0.3 && x.giro < 0.7 && x.disolucion > 0.3 && x.entrada > 0
 afirmar(aLaVez(estadoDelAvance(0.6, GATILLO.giro[0] + GATILLO.giro[1] / 2)), 'gatillo: a mitad del volteo del título los valores ya se están yendo y el aro ya entra (a la vez, no uno después del otro)')
 controlPositivo('el detector ve el gatillo de antes (primero el volteo, después los valores, después el aro)', { giro: 0.5, disolucion: 0, entrada: 0 }, aLaVez)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('16 · [C2-70e] Las mitades se juntan en el medio mientras voltean; la cámara acompaña el guardado y vuelve antes de C')
+
+// Las mitades a 1440 × 900 (las de la sala: el cuerpo de la frase, 36,7 px, y su hueco, 376 px a cada lado del centro).
+const CUERPO = 36.7
+const [MI, MD] = [{ desde: 720 - 376 - 5.6 * CUERPO, hasta: 720 - 376 }, { desde: 720 + 376, hasta: 720 + 376 + 8.3 * CUERPO }]
+const ESPACIO = ESPACIO_ENTRE_LAS_MITADES_EM * CUERPO
+const ENTERO = corrimientosAlCentro(MI, MD, 720, ESPACIO)
+const GIROS = Array.from({ length: 41 }, (_, k) => k / 40)
+type Corrimiento = (entero: number, giro: number) => number
+type Mitad = { readonly desde: number; readonly hasta: number }
+const mitadesCon = (c: Corrimiento, g: number): { readonly i: Mitad; readonly d: Mitad } => {
+  const [ci, cd] = [c(ENTERO.izquierda, g), c(ENTERO.derecha, g)]
+  return { i: { desde: MI.desde + ci, hasta: MI.hasta + ci }, d: { desde: MD.desde + cd, hasta: MD.hasta + cd } }
+}
+const juntasAlCentro = (c: Corrimiento): boolean => {
+  const [fin, empieza] = [mitadesCon(c, 1), mitadesCon(c, 0)]
+  return cerca((fin.i.desde + fin.d.hasta) / 2, 720, 1e-6) && cerca(fin.d.desde - fin.i.hasta, ESPACIO, 1e-6) && cerca(empieza.i.hasta, MI.hasta) && cerca(empieza.d.desde, MD.desde)
+}
+afirmar(juntasAlCentro(corrimientoConElGiro), `al terminar el volteo «Lo que dicen nuestros clientes» queda en un renglón centrado (un espacio de ${ESPACIO.toFixed(1)} px); al empezar, cada mitad en su lugar (corren ${ENTERO.izquierda.toFixed(1)} y ${ENTERO.derecha.toFixed(1)} px)`)
+controlPositivo('el detector ve las mitades sin juntarse (la bandera de prueba sin-juntar)', () => 0, juntasAlCentro)
+const lejosDelCentro = (m: Mitad): number => Math.abs((m.desde + m.hasta) / 2 - 720)
+const monotono = (c: Corrimiento): boolean => GIROS.slice(1).every((g, k) => lejosDelCentro(mitadesCon(c, g).i) <= lejosDelCentro(mitadesCon(c, GIROS[k]).i) + 1e-9 && lejosDelCentro(mitadesCon(c, g).d) <= lejosDelCentro(mitadesCon(c, GIROS[k]).d) + 1e-9)
+afirmar(monotono(corrimientoConElGiro), 'cada mitad se acerca al centro sin volver para atrás (41 muestras del giro)')
+controlPositivo('el detector ve una mitad que se pasa y vuelve', (e: number, g: number) => (e * Math.sin(Math.PI * 0.75 * g)) / Math.sin(Math.PI * 0.75), monotono)
+const conLaCurvaDelAngulo = (c: Corrimiento): boolean => GIROS.every((g) => cerca(c(ENTERO.izquierda, g) / ENTERO.izquierda, angulosDelGiro(g).frase / Math.PI) && cerca(c(ENTERO.derecha, g) / ENTERO.derecha, angulosDelGiro(g).resenas / Math.PI + 1))
+afirmar(conLaCurvaDelAngulo(corrimientoConElGiro), 'el corrimiento va con la MISMA curva y el mismo tiempo que el ángulo del volteo (a la vez, no después)')
+controlPositivo('el detector ve unas mitades que se juntan después del volteo', (e: number, g: number) => e * vueltaDelGiro((g - 0.5) * 2), conLaCurvaDelAngulo)
+afirmar(controlDeLaBandera(null) === null && controlDeLaBandera('cualquiera') === null && controlDeLaBandera('sin-juntar') === 'sin-juntar' && controlDeLaBandera('sin-camara') === 'sin-camara', 'la bandera de prueba de los bancos: sin ella (el defecto), ningún control')
+
+// La malla del título: el corrimiento (px del cuadro de su lectura) en em de su grupo, en su lugar y girando (su centro, corrido).
+const mallaDePrueba = new THREE.Mesh(new THREE.BoxGeometry(5, 1, 0.3).translate(2.5, 0.5, 0))
+const armadoDePrueba = { titulo: { id: 's83-mitad', alejamiento: 1 }, lugar: { cuerpo: CUERPO }, malla: mallaDePrueba } as unknown as Armado
+const corridoEnLaMalla = (corrido: number, angulo: number): number => {
+  CORRIMIENTOS_DE_LOS_TITULOS.set('s83-mitad', corrido)
+  GIROS_DE_LOS_TITULOS.set('s83-mitad', angulo)
+  girarElTitulo(armadoDePrueba)
+  mallaDePrueba.updateMatrix()
+  return new THREE.Vector3(2.5, 0.5, 0).applyMatrix4(mallaDePrueba.matrix).x - 2.5
+}
+const enEm = (f: (corrido: number, angulo: number) => number): boolean => [0, Math.PI / 3, -Math.PI / 4].every((a) => cerca(f(ENTERO.izquierda, a), ENTERO.izquierda / CUERPO, 1e-9) && cerca(f(0, a), 0, 1e-9))
+afirmar(enEm(corridoEnLaMalla), `la malla se corre ${(ENTERO.izquierda / CUERPO).toFixed(2)} em (lo pedido en px por su cuerpo), en su lugar y girando sobre su centro`)
+controlPositivo('el detector ve la malla de antes (sólo el giro)', (_c: number, a: number) => corridoEnLaMalla(0, a), enEm)
+CORRIMIENTOS_DE_LOS_TITULOS.delete('s83-mitad')
+GIROS_DE_LOS_TITULOS.delete('s83-mitad')
+
+// El cableado: la sección corre las cuatro mitades con el giro; el CTA toma el título desde donde quedó.
+const gancho = leer('_secciones/por-que-develop/resenas/useTramoDeLasResenas.ts')
+const escribeLasCuatro = (f: string): boolean => f.includes('corrimientoConElGiro(entero.izquierda, e.giro)') && f.includes('CORRIMIENTOS_DE_LOS_TITULOS.set(TITULOS_DE_LAS_RESENAS[0], izquierda).set(FRASE_DE_VOLUMEN[0], izquierda)') && f.includes('CORRIMIENTOS_DE_LOS_TITULOS.set(TITULOS_DE_LAS_RESENAS[1], derecha).set(FRASE_DE_VOLUMEN[1], derecha)')
+afirmar(escribeLasCuatro(gancho), 'la sección corre cada lado con el giro: la mitad de las reseñas y la de la frase (su otra cara), lo mismo')
+controlPositivo('el detector ve una sección que sólo corre las reseñas', gancho.replace('.set(FRASE_DE_VOLUMEN[0], izquierda)', ''), escribeLasCuatro)
+const ctaTransformado = leer('_secciones/por-que-develop/CtaTransformado.tsx')
+const armadoDelCta = leer('_lib/escena/ctaDelFinal/armadoDelCta.ts')
+const ctaDesdeElCorrido = (armado: string): boolean => ctaTransformado.includes('corrido: () => CORRIMIENTOS_DE_LOS_TITULOS.get(id) ?? 0') && armado.includes('const dx = (b.fijo?.dx ?? 0) + (b.corrido?.() ?? 0)')
+afirmar(ctaDesdeElCorrido(armadoDelCta), 'el CTA arranca su cartel desde las mitades juntadas (su origen, corrido lo mismo en cada cuadro): sin salto al tomarlo')
+controlPositivo('el detector ve el origen del CTA sin el corrimiento', armadoDelCta.replace(' + (b.corrido?.() ?? 0)', ''), ctaDesdeElCorrido)
+
+// La cámara: el peso del desvío con la animación de la bajada (t, a 60 fps en sus 2,2 s) y el progreso de la transformación (p).
+const CG = CAMARA_DEL_GUARDADO_EN_EL_GATILLO
+const T = Array.from({ length: 133 }, (_, k) => k / 132)
+const bajadaEnT = (t: number): number => bajadaDeLasResenas(progresoDelGatillo(t))
+type Peso = (t: number, p: number) => number
+const acompana = (w: Peso): boolean => w(0, 0.35) === 0 && w(1, 0.35) === 0 && T.every((t) => w(t, 0.35) >= 0 && w(t, 0.35) <= 1) && T.filter((t) => bajadaEnT(t) > 0 && bajadaEnT(t) < 0.9).every((t) => cerca(w(t, 0.35), 1))
+afirmar(acompana(pesoDeLaCamara), `el peso: 0 antes y después de la animación, acotado, y entero mientras las placas bajan (llega en ${String(CG.llega)}, suelta en ${String(CG.suelta)}, con la bajada en ${bajadaEnT(CG.suelta).toFixed(3)})`)
+controlPositivo('el detector ve un desvío que no vuelve a 0', (t: number) => Math.min(1, t / CG.llega), acompana)
+const mayorPaso = (w: Peso): number => Math.max(...T.slice(1).map((t, k) => Math.abs(w(t, 0.35) - w(T[k], 0.35))))
+const sinSalto = (w: Peso): boolean => mayorPaso(w) <= 0.1
+afirmar(sinSalto(pesoDeLaCamara), `sin salto: el peso cambia a lo sumo 0,1 por cuadro (de 0 a 1 en no menos de diez; el mayor, ${mayorPaso(pesoDeLaCamara).toFixed(3)}); la inercia del rig lo suaviza encima`)
+controlPositivo('el detector ve una suelta de golpe', (t: number) => (t > CG.llega && t < 0.9 ? 1 : 0), sinSalto)
+afirmar(pesoDeLaCamara(0.5, 0.7) === 0 && pesoDeLaCamara(0.5, CG.margen[0]) === 1, 'con el scroll mucho más allá de C (la transformación pasó su margen) el CTA manda: sin desvío')
+
+const POSE_B = POSES_DEL_FINAL.valores
+const POSE_C = POSES_DEL_FINAL.cta
+const poseCon = (base: PoseDelGuardado, peso: number, bajada: number): PoseDelGuardado => {
+  const pose = { height: base.height, distance: base.distance, frameX: base.frameX, frameY: base.frameY }
+  desvioDelGuardado(pose, peso, bajada)
+  return pose
+}
+const igual = (a: PoseDelGuardado, b: PoseDelGuardado): boolean => cerca(a.height, b.height) && cerca(a.distance, b.distance) && cerca(a.frameX, b.frameX) && cerca(a.frameY, b.frameY)
+const entre = (x: number, a: number, c: number): boolean => x >= Math.min(a, c) - 1e-9 && x <= Math.max(a, c) + 1e-9
+const entreLaPoseYB = (desvio: typeof poseCon): boolean =>
+  igual(desvio(POSE_C, 0, 0.5), POSE_C) &&
+  igual(desvio(POSE_C, 0, 1), POSE_C) &&
+  T.every((t) => {
+    const d = desvio(POSE_C, pesoDeLaCamara(t, 0.35), bajadaEnT(t))
+    return entre(d.height, POSE_C.height, POSE_B.height) && entre(d.distance, POSE_C.distance, POSE_B.distance) && entre(d.frameY, POSE_C.frameY, POSE_B.frameY + MIRA_AL_HUECO)
+  })
+afirmar(entreLaPoseYB(poseCon), `el desvío: con peso 0 la pose del recorrido intacta (antes y después, C es C); en el medio, entre la pose y B, mirando al hueco a lo sumo ${String(MIRA_AL_HUECO)} de encuadre`)
+controlPositivo('el detector ve un desvío que se pasa de B', (base: PoseDelGuardado, peso: number, bajada: number) => ({ ...poseCon(base, peso, bajada), height: POSE_B.height - 2 * peso }), entreLaPoseYB)
+const conLaBajada = (desvio: typeof poseCon): boolean => desvio(POSE_B, 1, 0.8).frameY > desvio(POSE_B, 1, 0.2).frameY && cerca(desvio(POSE_B, 1, 0).frameY, POSE_B.frameY)
+afirmar(conLaBajada(poseCon), 'mientras bajan, la mirada las sigue (más bajada, más abajo mira)')
+controlPositivo('el detector ve una mirada quieta', (base: PoseDelGuardado, peso: number) => poseCon(base, peso, 0), conLaBajada)
+
+const rig = leer('_lib/escena/OrbitRig.tsx')
+const enElRig = (f: string): boolean => /arc\.level = nivelConLaInterfaz\([^\n]*\n\s*\/\/ \[C2-70e\][^\n]*\n\s*if \(isChoreo && viajeEnCurso\(\) === null\) acompanarElGuardado\(target\)\n[\s\S]*live\[channel\] = physics/.test(f)
+afirmar(enElRig(rig), 'el rig lo aplica sobre su objetivo (después de las mezclas, antes de la inercia: la vuelta es suave), fuera de un viaje del menú; el progreso no se toca')
+controlPositivo('el detector ve un rig sin el desvío', rig.replace('acompanarElGuardado(target)', ''), enElRig)
+const soloConElGatillo = (f: string): boolean => f.includes("CAMARA_DEL_GUARDADO.peso = variante === 'gatillo' && prueba !== 'sin-camara' ? pesoDeLaCamara(disparoDeLaBajada.get(), p) : 0")
+afirmar(soloConElGatillo(gancho), 'el peso sólo con el gatillo (con `?resenas=scroll` la bajada es del scroll y la cámara la de siempre) y sin la bandera de prueba sin-camara')
+controlPositivo('el detector ve el desvío también con el scroll', gancho.replace("variante === 'gatillo' && prueba", 'prueba'), soloConElGatillo)
 
 cerrar('s83-resenas')

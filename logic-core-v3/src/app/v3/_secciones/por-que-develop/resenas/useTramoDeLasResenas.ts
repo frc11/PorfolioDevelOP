@@ -5,14 +5,17 @@ import { useEffect, useLayoutEffect, useSyncExternalStore, type RefObject } from
 
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../../_lib/navegacion'
 import { CTA_EN_VIVO, FRASE_DE_VOLUMEN, ctaListo } from '../../../_lib/escena/ctaDelFinal/enVivo'
+import { hayBanco } from '../../../_lib/escena/entorno'
+import { CAMARA_DEL_GUARDADO } from '../../../_lib/escena/resenas/camaraDelGuardado'
 import { avisarLaVueltaDelCta } from '../../../_lib/escena/resenas/enganches'
 import { RESENAS_EN_VIVO } from '../../../_lib/escena/resenas/enVivo'
 import { anotarTramo } from '../../../_lib/escena/tramoEstirado'
-import { GIROS_DE_LOS_TITULOS } from '../../../_lib/escena/titulos3d/giro'
+import { CORRIMIENTOS_DE_LOS_TITULOS, GIROS_DE_LOS_TITULOS } from '../../../_lib/escena/titulos3d/giro'
+import { TITULOS_DE_VOLUMEN } from '../../../_lib/titulos3d/registro'
 import { VENTANA_DE_LA_TRANSFORMACION } from '../geometria'
 import { estiloDeLaIda, idaDelValor } from './disolucion'
-import { HACIA_EL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, progresoDelGatillo } from './haciaElCta'
-import { GATILLO, TITULOS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera, type VarianteDeLasResenas } from './tramo'
+import { HACIA_EL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, pesoDeLaCamara, progresoDelGatillo } from './haciaElCta'
+import { ESPACIO_ENTRE_LAS_MITADES_EM, GATILLO, TITULOS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, controlDeLaBandera, corrimientoConElGiro, corrimientosAlCentro, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera, type VarianteDeLasResenas } from './tramo'
 
 const sinCambios = (): (() => void) => () => undefined
 const deLaUrl = (): string => {
@@ -25,6 +28,23 @@ export function useBanderasDeLasResenas(): { readonly variante: VarianteDeLasRes
   const variante = useSyncExternalStore(sinCambios, deLaUrl, () => 'gatillo')
   return { variante: varianteDeLaBandera(variante) }
 }
+
+/**
+ * [C2-70e] Cuánto se corre cada lado (px) para juntar las mitades al centro: las cajas del DOM de las mitades de las reseñas (los lugares de
+ * sus títulos de volumen, sin transformar) y el centro de su capa. `null` si todavía no se pueden medir.
+ */
+function medirLasMitades(capa: HTMLElement | null): { readonly izquierda: number; readonly derecha: number } | null {
+  const i = TITULOS_DE_VOLUMEN.get(TITULOS_DE_LAS_RESENAS[0])?.lugar ?? null
+  const d = TITULOS_DE_VOLUMEN.get(TITULOS_DE_LAS_RESENAS[1])?.lugar ?? null
+  if (capa === null || i === null || d === null) return null
+  const [ri, rd, rc] = [i.getBoundingClientRect(), d.getBoundingClientRect(), capa.getBoundingClientRect()]
+  if (ri.width <= 0 || rd.width <= 0) return null
+  return corrimientosAlCentro({ desde: ri.left, hasta: ri.right }, { desde: rd.left, hasta: rd.right }, rc.left + rc.width / 2, parseFloat(getComputedStyle(i).fontSize) * ESPACIO_ENTRE_LAS_MITADES_EM)
+}
+
+/** [C2-70e] Lo último de cada cuadro, para el banco (`window.__resenasDelBanco`, sólo con un banco mirando). */
+const DEL_BANCO = { giro: 0, disolucion: 0, entrada: 0, corrimientos: [0, 0], bajada: 0, disparoDeLaBajada: 0, transformacion: 0, pesoDeLaCamara: 0 }
+type VentanaDelBanco = Window & { __resenasDelBanco?: () => typeof DEL_BANCO }
 
 /** Lo último que se le escribió a cada valor (para escribir sólo si cambió). */
 const IDAS = new WeakMap<HTMLElement, string>()
@@ -64,7 +84,12 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
       CTA_EN_VIVO.sinLosValores = false
       RESENAS_EN_VIVO.bajada = 0
       RESENAS_EN_VIVO.hueco = 0
-      for (const id of [...TITULOS_DE_LAS_RESENAS, ...FRASE_DE_VOLUMEN]) GIROS_DE_LOS_TITULOS.delete(id)
+      CAMARA_DEL_GUARDADO.peso = 0
+      CAMARA_DEL_GUARDADO.bajada = 0
+      for (const id of [...TITULOS_DE_LAS_RESENAS, ...FRASE_DE_VOLUMEN]) {
+        GIROS_DE_LOS_TITULOS.delete(id)
+        CORRIMIENTOS_DE_LOS_TITULOS.delete(id)
+      }
       RESENAS_EN_VIVO.activo = false
       RESENAS_EN_VIVO.entrada = 0
       RESENAS_EN_VIVO.senalada = -1
@@ -82,6 +107,10 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
     let controlDeLaBajada: ReturnType<typeof animate> | null = null
     // El progreso del cuadro anterior (al montarse, ninguno: cargar ya pasado el momento no es un cruce).
     let antes: number | null = null
+    // [C2-70e] La bandera de prueba de los bancos (sin ella, nada) y lo que se corre cada lado al juntarse (se mide al empezar el giro).
+    const prueba = controlDeLaBandera(new URLSearchParams(window.location.search).get('resenas-control'))
+    const capa = raiz.current?.querySelector<HTMLElement>('[data-pieza="titulo-de-las-resenas"]') ?? null
+    let lados: { readonly izquierda: number; readonly derecha: number } | null = null
     const aplicar = (): void => {
       const r = avance.get()
       if (variante === 'gatillo') {
@@ -108,6 +137,9 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
       const pb = variante === 'gatillo' ? progresoDelGatillo(disparoDeLaBajada.get()) : p
       RESENAS_EN_VIVO.bajada = bajadaDeLasResenas(pb)
       RESENAS_EN_VIVO.hueco = aperturaDelHueco(pb)
+      // [C2-70e] Con el gatillo, la cámara acompaña el guardado (se queda en B mirando al hueco) y suelta cuando ya no queda ninguna placa.
+      CAMARA_DEL_GUARDADO.peso = variante === 'gatillo' && prueba !== 'sin-camara' ? pesoDeLaCamara(disparoDeLaBajada.get(), p) : 0
+      CAMARA_DEL_GUARDADO.bajada = RESENAS_EN_VIVO.bajada
       const cruce = antes === null ? null : cruceDeLaVuelta(antes, p)
       antes = p
       if (cruce !== null) avisarLaVueltaDelCta(cruce)
@@ -116,6 +148,14 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
       const a = angulosDelGiro(e.giro)
       for (const id of FRASE_DE_VOLUMEN) GIROS_DE_LOS_TITULOS.set(id, a.frase)
       for (const id of TITULOS_DE_LAS_RESENAS) GIROS_DE_LOS_TITULOS.set(id, tomado ? -Math.PI : a.resenas)
+      // [C2-70e] Las mitades se juntan en el medio mientras se dan vuelta (la misma curva que el ángulo); la frase, su otra cara, con ellas.
+      if (e.giro <= 0) lados = null
+      else if (lados === null) lados = medirLasMitades(capa)
+      const entero = lados === null || prueba === 'sin-juntar' ? { izquierda: 0, derecha: 0 } : lados
+      const [izquierda, derecha] = [corrimientoConElGiro(entero.izquierda, e.giro), corrimientoConElGiro(entero.derecha, e.giro)]
+      CORRIMIENTOS_DE_LOS_TITULOS.set(TITULOS_DE_LAS_RESENAS[0], izquierda).set(FRASE_DE_VOLUMEN[0], izquierda)
+      CORRIMIENTOS_DE_LOS_TITULOS.set(TITULOS_DE_LAS_RESENAS[1], derecha).set(FRASE_DE_VOLUMEN[1], derecha)
+      Object.assign(DEL_BANCO, { giro: e.giro, disolucion: e.disolucion, entrada: e.entrada, corrimientos: [izquierda, derecha], bajada: RESENAS_EN_VIVO.bajada, disparoDeLaBajada: disparoDeLaBajada.get(), transformacion: p, pesoDeLaCamara: CAMARA_DEL_GUARDADO.peso })
       // Sin WebGL, el título de las reseñas del DOM se va al empezar la transformación (el CTA del DOM llega al final).
       giro.set(e.giro * (1 - Math.min(1, p * 3)))
       // Sin WebGL (o mientras el título no se armó) se lee el DOM: la frase se apaga en la primera mitad del giro.
@@ -124,13 +164,24 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
     }
     aplicar()
     const quitar = [avance.on('change', aplicar), disparo.on('change', aplicar), pin.on('change', aplicar), disparoDeLaBajada.on('change', aplicar)]
+    // [C2-70e] Con otro tamaño las mitades miden otra cosa: se vuelven a medir.
+    const alCambiarElTamano = (): void => {
+      lados = null
+      aplicar()
+    }
+    window.addEventListener('resize', alCambiarElTamano)
+    if (hayBanco()) (window as VentanaDelBanco).__resenasDelBanco = () => ({ ...DEL_BANCO })
     return () => {
       quitar.forEach((q) => q())
+      window.removeEventListener('resize', alCambiarElTamano)
+      delete (window as VentanaDelBanco).__resenasDelBanco
       control?.stop()
       controlDeLaBajada?.stop()
       if (frase !== null) frase.style.opacity = ''
       valores.forEach((el) => ponerLaIda(el, 0))
+      CAMARA_DEL_GUARDADO.peso = 0
       for (const id of FRASE_DE_VOLUMEN) GIROS_DE_LOS_TITULOS.delete(id)
+      for (const id of [...TITULOS_DE_LAS_RESENAS, ...FRASE_DE_VOLUMEN]) CORRIMIENTOS_DE_LOS_TITULOS.delete(id)
     }
   }, [avance, disparo, disparoDeLaBajada, giro, pin, raiz, variante])
 

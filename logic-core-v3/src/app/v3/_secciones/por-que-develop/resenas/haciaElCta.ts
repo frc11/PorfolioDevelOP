@@ -45,6 +45,23 @@ export function objetivoDeLaBajada(p: number, previo: 0 | 1): 0 | 1 {
 }
 
 /**
+ * [C2-70e] LA CÁMARA ACOMPAÑA EL GUARDADO (con el gatillo): cuánto se queda en la pose de las reseñas y mira al hueco (el peso del desvío,
+ * `_lib/escena/resenas/camaraDelGuardado.ts`), en fracciones de la animación de la bajada `t`: llega mientras se abre el anillo (antes de
+ * que la primera placa baje), se sostiene mientras bajan y suelta cuando ya se fueron (la bajada pasó `suelta`), hasta 0 al cerrarse el
+ * anillo: ahí la cámara pasa al CTA. `margen`: si el scroll ya pasó mucho de la llegada a C (el progreso de la transformación), el CTA
+ * manda y el desvío se apaga con el scroll. Fuera de la animación, 0: antes y después del guardado la cámara es la de siempre.
+ */
+export const CAMARA_DEL_GUARDADO_EN_EL_GATILLO = { llega: 0.13, suelta: 0.66, margen: [0.4, 0.2] } as const
+
+/** El peso del desvío de la cámara con la animación de la bajada `t` y el progreso de la transformación `p` (0 a 1). */
+export function pesoDeLaCamara(t: number, p: number): number {
+  const C = CAMARA_DEL_GUARDADO_EN_EL_GATILLO
+  const u = acotar01(t)
+  const enfoque = suave(tramo(u, 0, C.llega)) * (1 - suave(tramo(u, C.suelta, 1 - C.suelta)))
+  return enfoque * (1 - suave(tramo(p, C.margen[0], C.margen[1])))
+}
+
+/**
  * [B9] EL MOMENTO EN QUE EL TÍTULO SE VUELVE EL CTA: el cartel de canto (la mitad de su giro). B9 (las grietas del cristal) todavía no existe:
  * acá queda el punto de enganche (`_lib/escena/resenas/enganches.ts`), que se llama al cruzarlo para un lado o para el otro.
  */

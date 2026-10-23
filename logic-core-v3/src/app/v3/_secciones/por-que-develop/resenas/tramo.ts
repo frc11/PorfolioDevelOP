@@ -83,11 +83,37 @@ export function objetivoDelGatillo(r: number, previo: 0 | 1): 0 | 1 {
   return r < GATILLO.sale ? 0 : 1
 }
 
+/** [C2-70e] Cuánto se dio vuelta el título (0 a 1, con la curva de la casa): la comparten el ángulo y el corrimiento de las mitades. */
+export const vueltaDelGiro = (giro: number): number => suave(acotar01(giro))
+
 /** El ángulo del giro del título (rad, con la curva de la casa): la frase va de 0 a π; el título de las reseñas, de −π a 0. */
 export function angulosDelGiro(giro: number): { readonly frase: number; readonly resenas: number } {
-  const a = Math.PI * suave(acotar01(giro))
+  const a = Math.PI * vueltaDelGiro(giro)
   return { frase: a, resenas: a - Math.PI }
 }
+
+/** [C2-70e] Un tramo horizontal de la pantalla (px). */
+export interface TramoEnX {
+  readonly desde: number
+  readonly hasta: number
+}
+
+/** [C2-70e] El espacio entre «dicen» y «nuestros» cuando las mitades se juntan (em del cuerpo del título: el de la Chivo). */
+export const ESPACIO_ENTRE_LAS_MITADES_EM = 0.25
+
+/**
+ * [C2-70e] LAS MITADES SE JUNTAN EN EL MEDIO: cuánto se corre cada una (px; positivo, a la derecha) para que «Lo que dicen nuestros clientes»
+ * quede en UN renglón centrado en `centro` (el del escenario, donde está el logo), con `espacio` px entre las dos. `izquierda` y `derecha` son
+ * las cajas de las mitades del DOM (en su lugar, a cada lado del logo). La cara de atrás (la frase) se corre lo mismo que la suya.
+ */
+export function corrimientosAlCentro(izquierda: TramoEnX, derecha: TramoEnX, centro: number, espacio: number): { readonly izquierda: number; readonly derecha: number } {
+  const [anchoI, anchoD] = [izquierda.hasta - izquierda.desde, derecha.hasta - derecha.desde]
+  const desde = centro - (anchoI + espacio + anchoD) / 2
+  return { izquierda: desde - izquierda.desde, derecha: desde + anchoI + espacio - derecha.desde }
+}
+
+/** [C2-70e] El corrimiento de una mitad con el giro: el entero por la vuelta (la misma curva y el mismo tiempo que el ángulo). */
+export const corrimientoConElGiro = (entero: number, giro: number): number => entero * vueltaDelGiro(giro)
 
 /**
  * EL TRAMO PARA LA ESCENA (REGLA DE ALTURAS, `_lib/escena/tramoEstirado.ts`): arranca en la inserción —en px de la regla desde que asoma
@@ -106,3 +132,10 @@ export function tramoDeLasResenas(panel: Element, corrido = 0): TramoEstirado {
 /** La bandera de la entrada: `?resenas=gatillo` (por defecto desde C2-70: una animación por tiempo en la entrada y en la salida) o `?resenas=scroll` (todo atado al scroll). */
 export type VarianteDeLasResenas = 'scroll' | 'gatillo'
 export const varianteDeLaBandera = (valor: string | null): VarianteDeLasResenas => (valor === 'scroll' ? 'scroll' : 'gatillo')
+
+/**
+ * [C2-70e] La bandera de PRUEBA de los bancos (`scripts-carga/resenas-volteo.ts`), para su control positivo: `?resenas-control=sin-juntar` (las
+ * mitades no se corren) o `?resenas-control=sin-camara` (la cámara no acompaña el guardado). Sin ella (el defecto), ninguna.
+ */
+export type ControlDeLasResenas = 'sin-juntar' | 'sin-camara' | null
+export const controlDeLaBandera = (valor: string | null): ControlDeLasResenas => (valor === 'sin-juntar' || valor === 'sin-camara' ? valor : null)
