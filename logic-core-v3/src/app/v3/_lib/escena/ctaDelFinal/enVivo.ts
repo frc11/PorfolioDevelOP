@@ -14,6 +14,8 @@ import { SELECTOR_DEL_CIERRE_DE_NOCHE } from '../ruta/atributoDelCierre'
 export interface RenglonDelCta {
   readonly el: HTMLElement
   readonly subida: number
+  /** [C2-70e] Cuánto está corrido ahora a lo largo de su renglón (px; el título de las reseñas, juntado al centro): se lee en cada cuadro. */
+  readonly corrido?: () => number
 }
 
 export const CTA_EN_VIVO = {

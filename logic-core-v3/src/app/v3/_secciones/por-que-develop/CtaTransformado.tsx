@@ -11,6 +11,7 @@ import { DestinoDelCta, RenglonDeLaFraseDelCta, estiloEnElViaje, useProgresoDelC
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { FRASE_DE_VOLUMEN, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
 import { deslizadoEnLaLista, llegadaDelTexto } from '../../_lib/escena/ctaDelFinal/transformacion'
+import { CORRIMIENTOS_DE_LOS_TITULOS } from '../../_lib/escena/titulos3d/giro'
 import { TITULOS_DE_VOLUMEN } from '../../_lib/titulos3d/registro'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import { CTA, FRASE, VALORES } from './contenido'
@@ -32,7 +33,8 @@ function origenDeLaFrase(): readonly RenglonDelCta[] {
   const ids: readonly string[] = TITULOS_DE_VOLUMEN.has(TITULOS_DE_LAS_RESENAS[0]) ? TITULOS_DE_LAS_RESENAS : FRASE_DE_VOLUMEN
   return ids.flatMap((id) => {
     const t = TITULOS_DE_VOLUMEN.get(id)
-    return t === undefined ? [] : [{ el: t.lugar, subida: t.subida }]
+    // [C2-70e] Desde donde el título quedó: con las mitades juntadas al centro (`CORRIMIENTOS_DE_LOS_TITULOS`), el CTA las toma ahí, sin salto.
+    return t === undefined ? [] : [{ el: t.lugar, subida: t.subida, corrido: () => CORRIMIENTOS_DE_LOS_TITULOS.get(id) ?? 0 }]
   })
 }
 
