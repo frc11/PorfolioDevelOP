@@ -7,7 +7,40 @@ import type { IdDeServicio } from '../../_contrato/acento'
  * cada servicio, su párrafo y el rótulo de su CTA son los de siempre (`../contenido.ts`): no se reescriben acá.
  */
 
-export const SUBTITULO = 'Los trabajos de calidad que ofrecemos en develOP.'
+/** [C2-50] El subtítulo de «Nuestros servicios» (05-TEXTOS: «calidad» ya lo dice el Portfolio). */
+export const SUBTITULO = 'Los tipos de trabajos que hacemos en develOP.'
+
+/** [C2-50] Los dos renglones del título que se pinta (en mayúsculas por la hoja; el texto es «Nuestros servicios»). */
+export const RENGLONES_DEL_TITULO = [{ palabras: ['Nuestros'] }, { palabras: ['servicios'] }] as const
+
+/** [C2-50] Los avisos de scroll (05-TEXTOS): en escritorio, debajo de la entrada; en el teléfono y la tablet, con el gatillo. */
+export const AVISO_DE_LA_ENTRADA = 'Scrolleá para explorarlo'
+export const AVISO_DEL_TELEFONO = 'Deslizá para pasar de servicio'
+
+/**
+ * [C2-50] EL TEXTO DEL MEDIO DE CADA SERVICIO (05-TEXTOS, tal cual): cuatro párrafos. Lo usan las dos ramas (el escenario y las
+ * pantallas quietas), así anuncian lo mismo. El párrafo corto de siempre (`../contenido.ts`) queda para la sección de antes.
+ */
+export const TEXTO_DEL_MEDIO: Readonly<Record<IdDeServicio, readonly string[]>> = {
+  web: [
+    'Tu página es lo primero que ve un cliente antes de escribirte. Por eso no arrancamos de una plantilla: arrancamos de tu negocio, de lo que vendés y de cómo te buscan.',
+    'Pensamos cada pantalla para que se entienda sola, cargue rápido y se vea bien en el celular, que es donde te van a encontrar.',
+    'Y cuando está lista no te la tiramos por la cabeza: la manejás vos desde tu panel. Cambiás precios, fotos y textos sin depender de nadie.',
+    'Landing, sitio institucional, catálogo o tienda online: lo que tu negocio necesite, hecho a medida.',
+  ],
+  software: [
+    'Si hoy tu negocio funciona con planillas, cuadernos y mensajes sueltos, hay horas que se te van en cosas que una herramienta haría sola.',
+    'Primero nos sentamos a entender cómo trabajás: qué se carga, quién lo usa y dónde se traba. Después presupuestamos, no antes.',
+    'Armamos sistemas de gestión, turnos, stock, presupuestos y paneles internos: herramientas que se adaptan a tu operación, y no al revés.',
+    'Lo usás desde la compu o el celular, con tus datos guardados y seguros, y crece cuando crece tu negocio.',
+  ],
+  'ia-automatizacion': [
+    'Tus clientes escriben a cualquier hora y no siempre podés contestar. Un chatbot con IA atiende por vos: responde lo de siempre, toma pedidos y te pasa los datos de cada persona interesada.',
+    'Lo entrenamos con la información de tu negocio, así que habla como vos y no inventa.',
+    'También automatizamos lo repetitivo: mensajes, recordatorios, cargas de datos y avisos entre sistemas. Lo que hoy hacés a mano pasa solo.',
+    'Se paga la implementación una vez y un abono mensual, y desde tu panel ves cada conversación.',
+  ],
+}
 
 /**
  * EL VIDEO DE CADA SERVICIO — UNA constante por servicio: cambiarlo es cambiar su línea y nada más.
@@ -51,6 +84,9 @@ export const PRESET_DEL_DESTINO: Readonly<Record<IdDeServicio, PresetDeLaEscena>
   'ia-automatizacion': PRESET_DE_LA_BASE,
 }
 
+/** [C2-50] El corte de la diagonal: el alto del panel por la tangente (`100cqh`: el panel es el contenedor de tamaño). */
+export const CORTE_DE_LA_DIAGONAL = 'calc(100cqh * var(--tangente-de-la-diagonal, 0.114))'
+
 /** Por dónde entra cada servicio (y por dónde sale al subir). */
 export type Entrada = 'izquierda' | 'derecha' | 'arriba'
 
@@ -64,12 +100,14 @@ export interface Distribucion {
   readonly entrada: Entrada
   readonly orden: readonly ('video' | 'texto' | 'marca')[]
   readonly diagonal: 'izquierda' | 'derecha' | null
+  /** [C2-50] Lo que ocupa cada columna, en fracciones (en IA, simétricas: el título queda al centro de la pantalla). */
+  readonly fracciones: readonly number[]
 }
 
 export const DISTRIBUCION: Readonly<Record<IdDeServicio, Distribucion>> = {
-  web: { entrada: 'izquierda', orden: ['video', 'texto', 'marca'], diagonal: 'izquierda' },
-  software: { entrada: 'derecha', orden: ['marca', 'texto', 'video'], diagonal: 'derecha' },
-  'ia-automatizacion': { entrada: 'arriba', orden: ['video', 'marca', 'texto'], diagonal: null },
+  web: { entrada: 'izquierda', orden: ['video', 'texto', 'marca'], diagonal: 'izquierda', fracciones: [12, 10, 9] },
+  software: { entrada: 'derecha', orden: ['marca', 'texto', 'video'], diagonal: 'derecha', fracciones: [9, 10, 12] },
+  'ia-automatizacion': { entrada: 'arriba', orden: ['video', 'marca', 'texto'], diagonal: null, fracciones: [10, 9, 10] },
 }
 
 /** Los estados de la máquina: la entrada («Nuestros servicios») y los tres servicios. */

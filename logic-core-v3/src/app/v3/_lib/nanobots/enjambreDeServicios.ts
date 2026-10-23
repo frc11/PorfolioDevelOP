@@ -2,22 +2,26 @@ import * as THREE from 'three'
 
 import { sembrar } from '../escena/titulos3d/llegada'
 import { extensionDelSimbolo, type Caja } from './capa'
-import { APARTADO_GLSL, FISICA_DEL_ENJAMBRE, FRAGMENTO_DEL_ENJAMBRE, enSrgb, tramoDelEnjambre, type Enjambre } from './enjambre'
+import { APARTADO_GLSL, FISICA_DEL_ENJAMBRE, enSrgb, tramoDelEnjambre, type Enjambre } from './enjambre'
 import { PUNTERO_DEL_ENJAMBRE } from './puntero'
 import { VIDA_DE_LA_RED_GLSL, redNeuronal } from './redNeuronal'
-import { ENGRANAJES, GLOBO, engranajes, globo, nube } from './simbolos'
+import { ENGRANAJES, GLOBO, ORBITA, engranajes, globo, orbita } from './simbolos'
 
 /**
  * [B4] EL ENJAMBRE DE LA SECCIÓN SERVICIOS — el mismo motor de C4 (`enjambre.ts`: una llamada, los destinos como atributos, el
  * traspaso con su retraso, su resorte y su dispersión en la GPU, el desarme bajo el mouse) con las formas de B4 y un lienzo que cubre
  * el escenario entero, así el enjambre VIAJA por la pantalla de un lugar a otro:
  *
- *   0 · la nube gris, detrás de «Nuestros servicios»   1 · el globo de meridianos, con el acento oscuro de web
+ *   0 · [C2-50] la ÓRBITA alrededor de «Nuestros servicios», con los tres acentos mezclándose   1 · el globo de meridianos (web)
  *   2 · los dos engranajes encastrados que giran (violeta)   3 · la red neuronal, con nodos que se prenden y pulsos (verde)
  *
  * Cada estado tiene su LUGAR en el escenario (lo mide la sección en el DOM: `ubicar`), y cada nanobot viaja de su punto en el lugar de
  * antes a su punto en el de después. Los acentos son los OSCUROS del tema (sobre papel), copiados acá: `three` no lee el CSS y el
  * motor llega perezoso. El invariante de B4 los compara contra `theme-develop.css`.
+ *
+ * [C2-50] Entre dos servicios, el viaje es una NUBE grande y volumétrica (ítem 13): una bola 3D que gira, del doble del símbolo, con
+ * los nanobots más grandes, la profundidad en el alfa y un borde claro que la hace ver sobre el video y sobre el papel; casi sin el
+ * retraso de cada uno (una nube, no un rastro). El viaje de la entrada a web queda como era (el truco de profundidad lo cuenta).
  *
  * [B4] Diagnóstico del truco de profundidad: con `diagnostico.cajas` puestas, después de cada cuadro cuenta los píxeles con nanobots
  * adentro de cada caja (`readPixels`, en el mismo cuadro) y los pasa a `diagnostico.registrar`. Sólo lo prende el banco.
@@ -45,6 +49,9 @@ export interface EnjambreDeServicios extends Enjambre {
 }
 
 const f = (x: number): string => x.toFixed(5)
+
+/** [C2-50] La nube del viaje entre servicios: su radio (unidades del símbolo), cuánto agranda los nanobots, el borde claro y cuánto del retraso se va. */
+export const NUBE_DEL_VIAJE = { radio: 1.7, agrandar: 0.9, borde: 0.75, juntos: 0.85 } as const
 
 /**
  * El desarme bajo el mouse de C4, con el radio medido en el SÍMBOLO y no en el lienzo: el de C4 cubría un lienzo del tamaño del
@@ -77,6 +84,7 @@ uniform vec2 uCentroA;
 uniform vec2 uCentroB;
 varying vec3 vColor;
 varying float vAlfa;
+varying float vBorde;
 vec4 destino( float k ) { return k < 0.5 ? aS0 : ( k < 1.5 ? aS1 : ( k < 2.5 ? aS2 : aS3 ) ); }
 vec4 lugarDe( float k ) { return k < 0.5 ? uLugares[ 0 ] : ( k < 1.5 ? uLugares[ 1 ] : ( k < 2.5 ? uLugares[ 2 ] : uLugares[ 3 ] ) ); }
 vec3 colorDe( float k ) { return k < 0.5 ? uColores[ 0 ] : ( k < 1.5 ? uColores[ 1 ] : ( k < 2.5 ? uColores[ 2 ] : uColores[ 3 ] ) ); }
@@ -86,8 +94,12 @@ ${APARTADO_DE_SERVICIOS}
 vec3 vivo( float k, vec4 d, float t ) {
 	vec3 p = d.xyz;
 	if ( k < 0.5 ) {
-		p += 0.05 * vec3( sin( t * 0.6 + aAzar.x * 6.2832 ), sin( t * 0.47 + aAzar.y * 6.2832 ), sin( t * 0.53 + aAzar.z * 6.2832 ) );
-		p.xz = girar( p.xz, t * 0.12 );
+		// [C2-50] La órbita: cada nanobot corre sobre su elipse (a su velocidad), y flota apenas en profundidad.
+		vec2 eje = vec2( ${f(ORBITA.rx)}, ${f(ORBITA.ry)} );
+		vec2 q = p.xy / eje;
+		float a = atan( q.y, q.x ) + t * ${f(ORBITA.giro)} * ( 0.8 + 0.4 * aAzar.w );
+		p.xy = eje * length( q ) * vec2( cos( a ), sin( a ) );
+		p.z += 0.04 * sin( t * 0.7 + aAzar.z * 6.2832 );
 	} else if ( k < 1.5 ) {
 		if ( d.w < 0.5 ) {
 			p.xz = girar( p.xz, t * 0.35 );
@@ -98,9 +110,17 @@ vec3 vivo( float k, vec4 d, float t ) {
 		float a = d.w < 0.5 ? t * 0.6 : - t * 0.6 * ${f(ENGRANAJES.razon)};
 		p.xy = c + girar( p.xy - c, a );
 	}
-	if ( k < 0.5 || k > 1.5 ) p.xz = girar( p.xz, 0.22 * sin( t * 0.3 ) );
+	if ( k > 1.5 ) p.xz = girar( p.xz, 0.22 * sin( t * 0.3 ) );
 	return p;
 }
+// [C2-50] El color de la órbita: los tres acentos en un degradé que corre alrededor (la fase, del ángulo del nanobot y la hora).
+vec3 colorDeLaOrbita( vec4 d, float t ) {
+	float f = fract( atan( d.y / ${f(ORBITA.ry)}, d.x / ${f(ORBITA.rx)} ) / 6.2832 + t * 0.09 + aAzar.x * 0.12 ) * 3.0;
+	if ( f < 1.0 ) return mix( uColores[ 1 ], uColores[ 2 ], smoothstep( 0.0, 1.0, f ) );
+	if ( f < 2.0 ) return mix( uColores[ 2 ], uColores[ 3 ], smoothstep( 0.0, 1.0, f - 1.0 ) );
+	return mix( uColores[ 3 ], uColores[ 1 ], smoothstep( 0.0, 1.0, f - 2.0 ) );
+}
+vec3 colorEn( float k, vec4 d, float t ) { return k < 0.5 ? colorDeLaOrbita( d, t ) : colorDe( k ); }
 float cercaDe( vec3 p ) { return 3.0 / ( 3.0 - p.z ); }
 vec2 enPantalla( float k, vec3 p ) {
 	vec4 l = lugarDe( k );
@@ -117,29 +137,55 @@ void main() {
 	float t = uTiempo * ( 1.0 - uQuieto );
 	vec4 dA = destino( uDesde );
 	vec4 dB = destino( uHacia );
-	float u = clamp( ( uAvance - aAzar.x * ${f(FISICA_DEL_ENJAMBRE.retraso)} ) / ${f(1 - FISICA_DEL_ENJAMBRE.retraso)}, 0.0, 1.0 );
+	// [C2-50] Entre dos servicios, la nube: casi sin retraso (todos juntos) y una bola que se infla a mitad de camino.
+	float nube = uDesde > 0.5 && uHacia > uDesde ? 1.0 : 0.0;
+	float retraso = ${f(FISICA_DEL_ENJAMBRE.retraso)} * ( 1.0 - ${f(NUBE_DEL_VIAJE.juntos)} * nube );
+	float u = clamp( ( uAvance - aAzar.x * retraso ) / ( 1.0 - retraso ), 0.0, 1.0 );
 	float e = resorte( u );
 	float ec = clamp( e, 0.0, 1.0 );
 	vec3 pA = vivo( uDesde, dA, t );
 	vec3 pB = vivo( uHacia, dB, t );
 	vec2 s = mix( enPantalla( uDesde, pA ), enPantalla( uHacia, pB ), e );
 	float unidad = mix( lugarDe( uDesde ).z, lugarDe( uHacia ).z, ec );
-	s += ( aAzar.yz * 2.0 - 1.0 ) * ${f(FISICA_DEL_ENJAMBRE.dispersion)} * sin( 3.14159265 * u ) * vec2( unidad / uAspecto, unidad );
+	s += ( 1.0 - nube ) * ( aAzar.yz * 2.0 - 1.0 ) * ${f(FISICA_DEL_ENJAMBRE.dispersion)} * sin( 3.14159265 * u ) * vec2( unidad / uAspecto, unidad );
+	float inflado = nube * pow( sin( 3.14159265 * u ), 0.6 );
+	vec3 bola = normalize( aAzar.xyz * 2.0 - 1.0 + vec3( 0.0001 ) ) * pow( aAzar.w, 0.4 );
+	bola.xz = girar( bola.xz, t * 0.5 );
+	bola.xy = girar( bola.xy, 0.4 );
+	s += inflado * ${f(NUBE_DEL_VIAJE.radio)} * cercaDe( bola ) * vec2( bola.x / uAspecto, bola.y ) * unidad;
 	gl_Position = vec4( apartadoPorElPuntero( s, t ), 0.0, 1.0 );
 	vec2 vida = mix( vidaDe( uDesde, dA, t ), vidaDe( uHacia, dB, t ), ec );
 	float cerca = mix( cercaDe( pA ), cercaDe( pB ), ec );
 	float tam = clamp( unidad * uMedioAlto / 55.0, 1.6 * uDpr, 2.8 * uDpr );
-	gl_PointSize = tam * cerca * ( 1.0 + 0.6 * vida.y );
-	vColor = mix( colorDe( uDesde ), colorDe( uHacia ), ec );
+	gl_PointSize = tam * cerca * ( 1.0 + 0.6 * vida.y ) * ( 1.0 + ${f(NUBE_DEL_VIAJE.agrandar)} * inflado );
+	vColor = mix( colorEn( uDesde, dA, t ), colorEn( uHacia, dB, t ), ec );
 	float z = mix( pA.z, pB.z, ec );
-	vAlfa = mix( 0.4, 1.0, clamp( ( z + 1.0 ) * 0.5, 0.0, 1.0 ) ) * vida.x;
+	vAlfa = mix( mix( 0.4, 1.0, clamp( ( z + 1.0 ) * 0.5, 0.0, 1.0 ) ) * vida.x, mix( 0.45, 1.0, clamp( ( bola.z + 1.0 ) * 0.5, 0.0, 1.0 ) ), inflado );
+	vBorde = inflado;
+}
+`
+
+/**
+ * [C2-50] El fragmento de Servicios: el punto de C4 y, en la nube del viaje (`vBorde`), un borde claro que lo despega del video oscuro
+ * (el centro sigue en el acento: sobre el papel se lee igual).
+ */
+export const FRAGMENTO_DE_SERVICIOS = /* glsl */ `
+varying vec3 vColor;
+varying float vAlfa;
+varying float vBorde;
+void main() {
+	float r = length( gl_PointCoord - 0.5 );
+	float a = smoothstep( 0.5, 0.26, r ) * vAlfa;
+	if ( a < 0.01 ) discard;
+	vec3 color = mix( vColor, vec3( 1.0 ), vBorde * ${f(NUBE_DEL_VIAJE.borde)} * smoothstep( 0.18, 0.4, r ) );
+	gl_FragColor = vec4( color * a, a );
 }
 `
 
 /** Los cuatro símbolos de B4, `n` puntos cada uno (en el orden de los estados). Deterministas, como los de C4. */
 export function simbolosDeServicios(n: number, semilla = 0xb04): readonly Float32Array[] {
   const azar = sembrar(semilla)
-  return [nube, globo, engranajes, redNeuronal].map((forma) => {
+  return [orbita, globo, engranajes, redNeuronal].map((forma) => {
     const datos = new Float32Array(n * 4)
     forma(n, azar).forEach((p, i) => datos.set(p, i * 4))
     return datos
@@ -193,7 +239,7 @@ export function crearEnjambreDeServicios(lienzo: HTMLCanvasElement, puntos: numb
     uAspecto: { value: 1 },
     uRadioDelPuntero: { value: Number(PUNTERO_DEL_ENJAMBRE.radio) },
   }
-  const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTICE_DE_SERVICIOS, fragmentShader: FRAGMENTO_DEL_ENJAMBRE, transparent: true, depthTest: false, depthWrite: false, premultipliedAlpha: true })
+  const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTICE_DE_SERVICIOS, fragmentShader: FRAGMENTO_DE_SERVICIOS, transparent: true, depthTest: false, depthWrite: false, premultipliedAlpha: true })
   const nanobots = new THREE.Points(geometria, material)
   nanobots.frustumCulled = false
   const escena = new THREE.Scene()

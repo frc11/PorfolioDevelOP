@@ -1,37 +1,47 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, type CSSProperties } from 'react'
 import type { MotionValue } from 'motion/react'
 
-import { Cuerpo } from '../../../_componentes/tipografia/Textos'
-import { Titular, idDelTitularDeSeccion } from '../../../_componentes/tipografia/Titular'
+import { AvisoDeScroll } from '../../../_componentes/avisos/AvisoDeScroll'
+import { idDelTitularDeSeccion } from '../../../_componentes/tipografia/Titular'
 import { CanalDeUnaPieza } from '../../_contrato/canales'
 import type { Progreso } from '../../_contrato/coreografia'
-import { TITULAR } from '../contenido'
-import { SUBTITULO } from './datos'
+import { RENGLONES_DEL_TITULO, SUBTITULO } from './datos'
+import { TituloQueSePintaAlLlegar } from './TituloQueSePintaAlLlegar'
 
 /**
- * [B4] LA ENTRADA DE LA SECCIÓN — «Nuestros servicios» y su bajada, sobre el papel y delante de los nanobots grises. Entra con el
- * efecto de los títulos que vienen desde abajo, el de los módulos del Panel (P2 con la ventana de la demo: `Bloque` + `CanalDeUnaPieza`
- * del contrato, los mismos que usa `tu-panel/Tarjeta.tsx`). Como vive adentro del escenario pegado, el bloque que se MIDE está afuera,
- * en la pista (`MarcaDeLaEntrada`): una caja que no se pega, donde estaría el título con el escenario recién anclado; su progreso
- * llega acá por `progreso`.
+ * [B4 · C2-50] LA ENTRADA DE LA SECCIÓN — «Nuestros servicios» y su bajada, sobre el papel, con los nanobots girando alrededor (ítem 12).
+ * Entra con el efecto de los títulos que vienen desde abajo (P2 con la ventana de la demo: `Bloque` + `CanalDeUnaPieza`, como los
+ * módulos del Panel) y, al terminar de llegar, se PINTA rápido, con el pintado del título del Panel (`TituloQueSePintaAlLlegar`). El
+ * bloque que se MIDE está afuera, en la pista; su progreso llega por `progreso` (`null` sin coreografía: se pinta al verse).
  *
- * El `h2` es el encabezado de la sección (`aria-labelledby` de la `<section>`). `data-caja-del-titulo` marca lo que el truco de
- * profundidad tiene que esquivar: las cajas de sus renglones.
+ *   · El título, en la letra del Panel y grande, en dos renglones (el tamaño: `VARIABLES_DEL_TITULO`).
+ *   · La bajada, más grande y en tinta plena: contrasta contra los puntos.
+ *   · Debajo, el aviso de scroll (`aviso`, de 05-TEXTOS: en escritorio «Scrolleá…», en el teléfono el del gesto).
+ *   · El LUGAR de la órbita (`data-lugar-de-los-nanobots="0"`): la caja del título y la bajada, un poco más grande; el enjambre gira
+ *     alrededor y pasa por detrás de las letras (el lienzo está debajo de la entrada hasta el cambio de capa).
+ *
+ * `data-caja-del-titulo` marca lo que el truco de profundidad tiene que esquivar: las cajas de los renglones.
  */
-export function IntroDeServicios({ progreso, className }: { readonly progreso: Progreso; readonly className?: string }): React.JSX.Element {
+
+/** El título: el ancho de la entrada sobre `divisor`, con tope en `tope` svh (el Panel usa 10,1 y 15: éste queda en el tercio del medio). */
+export const TAMANO_DEL_TITULO = { divisor: 13.5, tope: 11 } as const
+
+const VARIABLES_DEL_TITULO = { '--divisor-del-titulo': String(TAMANO_DEL_TITULO.divisor), '--tope-del-titulo': `${String(TAMANO_DEL_TITULO.tope)}svh` } as CSSProperties
+
+export function IntroDeServicios({ progreso, aviso, className }: { readonly progreso: Progreso; readonly aviso: string | null; readonly className?: string }): React.JSX.Element {
   return (
-    <div data-pieza="entrada-de-servicios" className={className}>
-      <CanalDeUnaPieza progreso={progreso} patron="P2" className="flex flex-col items-center gap-[var(--spacing-4)] text-center">
-        {/* `titulo-l` (el nivel del titular de la sección de siempre) y la bajada en dos renglones: el título queda en el tercio
-            del medio, así el globo de web (a la derecha) se posa sin pisarlo y el cambio de capa tiene su cuadro limpio (`capa.ts`). */}
-        <Titular nivel="titulo-l" como="h2" id={idDelTitularDeSeccion('servicios')}>
-          <span data-caja-del-titulo="">{TITULAR}</span>
-        </Titular>
-        <Cuerpo className="max-w-[calc(var(--spacing-20)*3.2)] text-tinta-media">
-          <span data-caja-del-titulo="">{SUBTITULO}</span>
-        </Cuerpo>
+    <div data-pieza="entrada-de-servicios" className={className} style={VARIABLES_DEL_TITULO}>
+      <CanalDeUnaPieza progreso={progreso} patron="P2" className="@container flex w-full flex-col items-center gap-[var(--spacing-6)] text-center">
+        <div className="relative flex w-full flex-col items-center gap-[var(--spacing-4)]">
+          <div aria-hidden="true" data-lugar-de-los-nanobots={0} className="pointer-events-none absolute -inset-y-[var(--spacing-8)] inset-x-0 mx-auto w-[min(100%,calc(var(--spacing-20)*9))]" />
+          <TituloQueSePintaAlLlegar renglones={RENGLONES_DEL_TITULO} progreso={progreso} id={idDelTitularDeSeccion('servicios')} />
+          <p className="font-cuerpo text-fluido-titulo-m leading-texto text-tinta max-w-[calc(var(--spacing-20)*5)]">
+            <span data-caja-del-titulo="">{SUBTITULO}</span>
+          </p>
+        </div>
+        {aviso === null ? null : <AvisoDeScroll texto={aviso} />}
       </CanalDeUnaPieza>
     </div>
   )

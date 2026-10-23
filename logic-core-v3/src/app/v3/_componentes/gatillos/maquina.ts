@@ -78,6 +78,30 @@ export function entradaDelGesto(fase: FaseDelGatillo, hacia: number, sentido: 1 
   return null
 }
 
+/**
+ * [C2-50] EL OBJETIVO DEL SCROLL NATIVO (abajo de 1025 no hay Lenis) — la rueda nativa anima su scroll: `scrollY` llega TARDE a lo que
+ * ya pidieron las muescas anteriores. Con `scrollY + evento` la entrada no veía venir el gesto que la cruzaba, la página pasaba el
+ * ancla con la inercia nativa y aterrizaba en un servicio (el bug de 390: la rueda bajando salteaba la entrada). Como el `targetScroll`
+ * de Lenis, se lleva la cuenta de lo pedido: mientras las muescas lleguen seguidas (`OBJETIVO_NATIVO_MS`), el destino es lo pedido
+ * hasta acá más el evento; si no, el scroll de ahora.
+ */
+export interface ObjetivoNativo {
+  readonly y: number
+  /** Hasta cuándo vale (ms): después, manda el scroll. */
+  readonly hasta: number
+}
+
+export const OBJETIVO_NATIVO_MS = 450
+export const SIN_OBJETIVO: ObjetivoNativo = { y: 0, hasta: Number.NEGATIVE_INFINITY }
+
+/** Desde dónde suma un evento: lo pedido (si es reciente) o el scroll. */
+export const baseDelObjetivo = (o: ObjetivoNativo, scrollY: number, ahora: number): number => (ahora < o.hasta ? o.y : scrollY)
+
+/** Lo pedido después de un evento que la página deja pasar (acotado al documento). */
+export function seguirElObjetivo(o: ObjetivoNativo, scrollY: number, px: number, ahora: number, maximo: number): ObjetivoNativo {
+  return { y: Math.min(maximo, Math.max(0, baseDelObjetivo(o, scrollY, ahora) + px)), hasta: ahora + OBJETIVO_NATIVO_MS }
+}
+
 /** Lo que se MUESTRA en cada paso: antes del ancla, el primero; después, el último (el escenario se va con él). */
 export const vistaDelPasoEnElTramo = (paso: number, cantidad: number): number => Math.min(cantidad - 1, Math.max(0, paso))
 

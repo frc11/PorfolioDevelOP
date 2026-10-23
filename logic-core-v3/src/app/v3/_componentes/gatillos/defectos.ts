@@ -8,7 +8,7 @@
  *   `sin-parada`         [NOCTURNO B5] Demos sin su parada (la de antes: la ráfaga desde el Portfolio sigue de largo a Servicios).
  *   `parada-sin-llegada` [NOCTURNO B5] la parada sin esperar la llegada de Demos (un gesto nuevo la corta a la mitad).
  */
-export type DefectoDeLosGatillos = 'sin-candado' | 'capa-a-destiempo' | 'sin-parada' | 'parada-sin-llegada'
+export type DefectoDeLosGatillos = 'sin-candado' | 'capa-a-destiempo' | 'sin-parada' | 'parada-sin-llegada' | 'sin-objetivo-nativo'
 
 export function conElDefectoDeLosGatillos(d: DefectoDeLosGatillos): boolean {
   if (typeof window === 'undefined') return false

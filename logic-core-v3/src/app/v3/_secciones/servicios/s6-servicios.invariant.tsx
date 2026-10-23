@@ -21,7 +21,7 @@ import { marcar } from '../_invariantes/render'
 import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { CONTENIDO, CTA_POR_SERVICIO } from './contenido'
 import { cuenta, focalizablesDe } from './deteccion'
-import { SUBTITULO } from './escenario/datos'
+import { SUBTITULO, TEXTO_DEL_MEDIO } from './escenario/datos'
 import { nombreDelServicio } from './escenario/PanelDeServicio'
 import { TEXTO_DEL_RECOMENDADOR, TITULO_DEL_RECOMENDADOR } from './recomendador/Recomendador'
 import { Servicios } from './Servicios'
@@ -53,7 +53,8 @@ const visibleQuieto = textoVisible(quieto)
 const visibleAnimado = textoVisible(animado)
 const faltan = (t: string): string[] => textos.filter((x) => !t.includes(x))
 afirmarIgual([faltan(visibleQuieto), faltan(visibleAnimado)], [[], []], 'la bajada, el recomendador y cada servicio (su nombre y su CTA) están en las dos ramas')
-const palabrasDe = (t: string, id: keyof typeof CONTENIDO): boolean => CONTENIDO[id].parrafo.split(' ').every((p) => t.includes(p))
+// [C2-50] El texto del medio nuevo (05-TEXTOS: cuatro párrafos), el mismo en las dos ramas.
+const palabrasDe = (t: string, id: keyof typeof CONTENIDO): boolean => TEXTO_DEL_MEDIO[id].join(' ').split(' ').every((p) => t.includes(p))
 afirmar(SERVICIOS.every((s) => palabrasDe(visibleQuieto, s.id) && palabrasDe(visibleAnimado, s.id)), '  y el párrafo de cada servicio, palabra por palabra (en el escenario va partido para levantarse por renglón)')
 const encabezados = (h: string): string[] => [...h.matchAll(/<(h[1-6])\b/g)].map((m) => m[1])
 afirmarIgual([encabezados(quieto), encabezados(animado)], [['h2', 'h3', 'h3', 'h3', 'h3'], ['h2', 'h3', 'h3', 'h3', 'h3']], 'el árbol de encabezados es el mismo: el h2 de la sección y un h3 por servicio y el del recomendador')
