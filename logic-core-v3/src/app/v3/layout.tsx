@@ -41,6 +41,7 @@ import './_estilos/carga.css' // [AJUSTES FINALES] A4 · el velo de carga (el se
 import './_estilos/resultado.css' // [PULIDO 11] B2 · B3 · la tarjeta del resultado de los formularios
 import './_estilos/intro.css' // [B12a.8 · P-H33] el texto de la intro de las páginas sobre la escena (su halo y su velo)
 import './_estilos/preloader.css' // [B12c] la cubierta del preloader del sitio (se muestra sólo con la decisión del <head>; su seguro sin JS)
+import './_estilos/piezas.css' // [C2 · 20] las piezas compartidas: el autocompletado de /v3, EstadoDeEnvio, AvisoDeScroll y Reluciente
 
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.
