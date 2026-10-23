@@ -47,9 +47,19 @@ export const PORTFOLIO_EN_LA_ESCENA: {
   columna: number
   /** [B1.2c] El hueco medido en el DOM; `null` sin medir (vale el de la columna). */
   hueco: HuecoDelLogo | null
-  /** El peso mostrado (0…1): lo escribe el rig, lo lee el oscurecido. */
+  /** El peso mostrado de la pose (0…1): lo escribe el rig. */
   peso: number
-} = { adentro: false, reducido: false, columna: 0.5, hueco: null, peso: 0 }
+  /**
+   * [C2-41e] Demos a la vista (lo escribe la capa de Demos, `demos/enLaEscena.ts`): la cámara se queda en la pose del Portfolio (el
+   * logo en su hueco), así Demos es su espejo y abajo no asoma la franja clara del piso. El oscurecido no: es del panel.
+   */
+  demos: boolean
+  /** [C2-41e] El peso mostrado del oscurecido (0…1): persigue sólo al panel (`adentro`). Lo escribe el rig, lo lee el oscurecido. */
+  pesoDelOscurecido: number
+} = { adentro: false, reducido: false, columna: 0.5, hueco: null, peso: 0, demos: false, pesoDelOscurecido: 0 }
+
+/** [C2-41e] Adónde va el peso de la pose: 1 con el panel adentro o con Demos a la vista. */
+export const objetivoDeLaPose = (e: { readonly adentro: boolean; readonly demos: boolean }): 0 | 1 => (e.adentro || e.demos ? 1 : 0)
 
 /** [B1.2c] El hueco que vale: el medido o, sin medir, el de la columna. */
 export const huecoQueVale = (): HuecoDelLogo => PORTFOLIO_EN_LA_ESCENA.hueco ?? huecoDeLaColumna(PORTFOLIO_EN_LA_ESCENA.columna)

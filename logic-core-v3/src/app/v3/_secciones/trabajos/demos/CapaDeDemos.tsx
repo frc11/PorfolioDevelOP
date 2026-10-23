@@ -11,12 +11,15 @@ import { ARRANQUE_DEL_ESPACIO_DE_DEMOS, PX_DEL_FIN_DE_LA_LLEGADA, PX_DE_LA_SECCI
 import { cn } from '@/lib/utils'
 
 import { viajeEnCurso } from '../../../_lib/escena/viaje'
+import { useAcompananteDelTitulo } from '../../../_lib/titulos3d/acompanantes'
 
 import { Biblioteca } from './Biblioteca'
 import { CarruselDeDemos } from './CarruselDeDemos'
 import type { Demo } from './catalogo'
+import { anunciarDemos, olvidarDemos, useSeccionDeDemosEnElCuadro } from './enLaEscena'
 import { LLEGADA, aparicionPedida, enElTramo, llegadaDeLaAparicion, perseguirLaAparicion, poseDelLibro, tramoDelLibro } from './entrada'
 import { llevarALaLlegada } from './llevarALaLlegada'
+import { useEspejoDelPortfolio } from './espejo'
 import { LLEGADA_DE_DEMOS } from './parada'
 import { TextoDeDemos } from './TextoDeDemos'
 import { VentanaDeDemo } from './VentanaDeDemo'
@@ -119,6 +122,14 @@ export function CapaDeDemos({
    * escritorio: la misma persecución y el mismo gesto (los renglones del carrusel, como libros).
    */
   const rigida = useRef(false)
+  /** [C2-41e] Con el escenario pegado de escritorio (desde 1024): la escena y la red se enteran de Demos a la vista (`enLaEscena.ts`). */
+  const conEscenario = useRef(false)
+  /** [C2-41e] El abanico en el plano del título 3D (como su bajada): queda fijo debajo de él cuando la cámara se corre. */
+  const abanico = useAcompananteDelTitulo<HTMLDivElement>('demos')
+  // [C2-41e] El título y la bajada a la altura de los del Portfolio (su espejo).
+  useEspejoDelPortfolio(capa)
+  // [C2-41e] Y Demos a la vista sólo mientras la sección ocupa la mitad de arriba del cuadro (lo pedido se queda en 1 más abajo).
+  useSeccionDeDemosEnElCuadro(capa)
 
   /** Escribe la llegada entera para una aparición mostrada (`a`: abajo de 768, la escala de la capa). Subiendo se deshace. */
   const llegar = useCallback(
@@ -163,6 +174,8 @@ export function CapaDeDemos({
       const el = capa.current
       rigida.current = el !== null && getComputedStyle(el).getPropertyValue('--demos-entrada').trim() === 'rigida'
       p.pedida = aparicionPedida(mostrado.get(), rigida.current)
+      conEscenario.current = el !== null && el.closest('[data-pieza="escenario-del-portfolio"]') !== null
+      anunciarDemos(p.pedida, conEscenario.current)
       alcanzar(p)
       llegar(p.mostrada)
     }
@@ -171,6 +184,7 @@ export function CapaDeDemos({
     return () => {
       window.removeEventListener('resize', leerLaEntrada)
       alcanzar(p)
+      olvidarDemos()
     }
   }, [llegar, mostrado])
 
@@ -200,6 +214,8 @@ export function CapaDeDemos({
   // [EL ENCASTRE] 1B · el scroll pide; lo mostrado lo persigue con la velocidad tope.
   useMotionValueEvent(mostrado, 'change', (valor) => {
     const p = aparicion.current
+    // [C2-41e] Demos a la vista (o no): la escena y la red se enteran con lo pedido, también en un viaje.
+    anunciarDemos(aparicionPedida(valor, rigida.current), conEscenario.current)
     p.pedida = aparicionPedida(valor, rigida.current)
     // [NOCTURNO FINAL] A3 · en un viaje del menú (el `<main>` apagado), sin persecución: lo mostrado es lo pedido. Si no, al
     // llegar a Portfolio las Demos seguían a medio irse y su título entraba y salía apenas terminaba el viaje.
@@ -261,9 +277,11 @@ export function CapaDeDemos({
       <Envoltorio className="h-full" claseDeContenido="grid h-full grid-cols-2 items-center gap-8 max-escritorio:grid-cols-1 max-escritorio:content-center max-escritorio:pt-[var(--zona-de-la-cabecera)]">
         {/* La columna del logo: la escena lo pone ahí, y acá no se tapa. Abajo de 1024 no hay columna. */}
         <div aria-hidden="true" className="max-escritorio:hidden" />
-        <div className="flex flex-col gap-8 max-movil:gap-5">
+        {/* [C2-41e] Desde 1024, la columna del Portfolio dada vuelta (`espejo.ts`): el mismo ancho de contenido (el paso de la izquierda
+            completa el medio de la grilla), centrada, contenedor del título y arrancando a la altura del título del Portfolio. */}
+        <div data-parte="columna-de-demos" className="flex flex-col gap-8 max-movil:gap-5 escritorio:items-center escritorio:self-start escritorio:pt-[var(--demos-tope-del-titulo)] escritorio:pl-4 escritorio:text-center escritorio:[container-type:inline-size]">
           <TextoDeDemos progresoDelTitulo={progresoDelTitulo} progresoDelParrafo={progresoDelParrafo} refDelParrafo={parrafo} />
-          <div className="max-escritorio:hidden">
+          <div ref={abanico} data-parte="abanico" className="max-escritorio:hidden escritorio:self-stretch">
             <Biblioteca alAbrir={alAbrir} alejada={alejada} />
           </div>
           {/* [NOCTURNO B5] Abajo de 1024, el carrusel del Portfolio (B1.2e) con las demos: rota cuando se ve (su propia vista). */}

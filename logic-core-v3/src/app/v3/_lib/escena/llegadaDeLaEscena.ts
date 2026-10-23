@@ -1,7 +1,7 @@
 import { SECCIONES } from '../secciones'
 import { SUPERFICIES } from '../superficies'
 import { NOCHE_DISPARADA } from './nocheDisparada'
-import { PORTFOLIO_EN_LA_ESCENA } from './portfolioEnLaEscena'
+import { PORTFOLIO_EN_LA_ESCENA, objetivoDeLaPose } from './portfolioEnLaEscena'
 import { ORBIT_TARGET_Y } from './probeScene'
 import { CAMARA_DEL_CUADRO, conElDefectoDeLaLlegada, type PoseDeCinco } from './viaje'
 
@@ -73,7 +73,8 @@ const estadoDeAhora = (ahoraMs: number): EstadoDeLaLlegada => ({
   cuadroMs: CAMARA_DEL_CUADRO.cuando,
   ahoraMs,
   pesoDelPortfolio: PORTFOLIO_EN_LA_ESCENA.peso,
-  portfolioAdentro: PORTFOLIO_EN_LA_ESCENA.adentro,
+  // [C2-41e] Adónde va el peso de la pose: el panel adentro o Demos a la vista.
+  portfolioAdentro: objetivoDeLaPose(PORTFOLIO_EN_LA_ESCENA) === 1,
   noche: NOCHE_DISPARADA.cantidad,
 })
 

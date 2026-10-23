@@ -12,18 +12,26 @@ import { LENTOS } from '../../../_lib/titulos3d/repeticiones'
 import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../../_contrato/canales'
 import type { Progreso } from '../../_contrato/coreografia'
 
+import { CLASE_DEL_TITULAR, MEDIDA_DEL_CUERPO_CH } from '../portfolio/tipografia'
+
 import { CLASE_DEL_CUERPO_DE_DEMOS, CLASE_DEL_TITULAR_DEL_CARTEL } from './herencia'
 import { TEXTO_DE_DEMOS } from './catalogo'
 
-/** La medida del párrafo, en caracteres: la misma del cuerpo del cartel de Portfolio. */
-const MEDIDA_DEL_TEXTO_CH = 44
+/** La medida del párrafo, en caracteres. [C2-41e] La de la bajada del Portfolio (su espejo): era 44, la del cartel de antes. */
+const MEDIDA_DEL_TEXTO_CH = MEDIDA_DEL_CUERPO_CH
+
+/**
+ * [C2-41e] Desde 1024, Portfolio y Demos son espejos: el título con la medida del de Portfolio (su parte de escritorio: la columna es
+ * el contenedor, `CapaDeDemos`) y la bajada con su letra (`titulo-s`). Abajo de 1024, las clases angostas de siempre.
+ */
+const TITULAR_DEL_PORTFOLIO_EN_ESCRITORIO = CLASE_DEL_TITULAR.split(' ').filter((c) => c.startsWith('escritorio:')).join(' ')
+const CUERPO_DEL_PORTFOLIO_EN_ESCRITORIO = 'escritorio:text-[length:var(--text-titulo-s)]'
 
 /**
  * EL TÍTULO Y EL PÁRRAFO DE DEMOS — el mismo marcado en las dos ramas.
  *
- * ⚠️ Las dos frases finales van las dos, y el ancho muestra la que vale: arriba
- * de 1025 la demo se abre acá; abajo, en otra pestaña. `s10-acceso` compara el
- * texto anunciado de las dos ramas carácter por carácter, y así es el mismo.
+ * ⚠️ `s10-acceso` compara el texto anunciado de las dos ramas carácter por carácter:
+ * [C2-41e] la bajada nueva es UNA para los dos anchos (antes, una frase final por ancho).
  *
  * Arriba de 1025 llegan con los gestos de la casa y su progreso lo da el vacío
  * (`entrada.ts`): el título como el de Portfolio ([EL ENCASTRE] 1B) y el párrafo
@@ -47,15 +55,14 @@ export function TextoDeDemos({
   const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('demos')
   return (
     // [PULIDO 10] J8 · `#demos`: el destino del pie («Demos»), con el viaje de siempre (`destinosDelViaje.ts`); el foco llega acá.
-    <div id="demos" className="flex flex-col gap-4" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
+    // [C2-41e] La medida va en la bajada (como en el Portfolio), no en el bloque: el título del tamaño del de Portfolio no entra en ella.
+    // [C2-41e] Desde 1024, centrado y con la separación del Portfolio entre el título y la bajada (su `mt-6`).
+    <div id="demos" className="flex flex-col gap-4 escritorio:items-center escritorio:gap-6">
       <TituloDeDemos progreso={progresoDelTitulo} />
-      <div ref={enElPlano}>
+      <div ref={enElPlano} style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
         <div ref={refDelParrafo}>
           <CanalDeUnaPieza progreso={progresoDelParrafo} patron="P2">
-            <Cuerpo className={CLASE_DEL_CUERPO_DE_DEMOS}>
-              {TEXTO_DE_DEMOS.parrafo} <span className="max-escritorio:hidden">{TEXTO_DE_DEMOS.enEscritorio}</span>{' '}
-              <span className="escritorio:hidden">{TEXTO_DE_DEMOS.enMovil}</span>
-            </Cuerpo>
+            <Cuerpo className={cn(CLASE_DEL_CUERPO_DE_DEMOS, CUERPO_DEL_PORTFOLIO_EN_ESCRITORIO)}>{TEXTO_DE_DEMOS.parrafo}</Cuerpo>
           </CanalDeUnaPieza>
         </div>
       </div>
@@ -75,7 +82,7 @@ function TituloDeDemos({ progreso }: { readonly progreso: Progreso }): React.JSX
   return (
     <div className={VENTANA_QUE_RECORTA}>
       <CanalDeUnaPieza progreso={progreso} patron="P2">
-        <Titular nivel="display-xl" como="h3" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
+        <Titular nivel="display-xl" como="h3" className={cn(CLASE_DEL_TITULAR_DEL_CARTEL, TITULAR_DEL_PORTFOLIO_EN_ESCRITORIO)}>
           <span ref={lugar} className={cn('block', listo && TEXTO_REEMPLAZADO)}>
             {TEXTO_DE_DEMOS.titulo}
           </span>

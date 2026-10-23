@@ -27,7 +27,11 @@ export interface Demo {
   readonly url: string
   /** Captura real del template, 400 × 600 CSS a doble densidad: la cara del libro. */
   readonly portada: string
-  /** Captura real al tamaño de la demo en la ventana (1.152 × 654): la textura del Genie. */
+  /**
+   * Captura real al tamaño de la demo en la ventana (1.152 × 654): la textura del Genie y lo que la ventana muestra mientras el
+   * iframe carga. [C2-41e] En las que tienen pantalla de carga propia (todas menos Nexo) es el PRIMER CUADRO de esa pantalla
+   * (`scripts-carga/demos-portadas-de-carga.ts`): al abrir se entiende que carga, y la demo sigue donde la foto la dejó.
+   */
   readonly ventana: string
 }
 
@@ -50,16 +54,14 @@ export const CATALOGO_DE_DEMOS: readonly Demo[] = [
  * demo, que el cliente es ficticio y que se abre acá mismo.
  *
  * ⚠️ El párrafo es UNO para las dos ramas: `s10-acceso` exige que el texto
- * anunciado sea idéntico arriba y abajo de 1025. La frase que sólo vale arriba
- * —«se abre acá mismo»— y la que sólo vale abajo —«se abre en otra pestaña»— van
- * las dos en el marcado, y el ancho muestra la que corresponde.
+ * anunciado sea idéntico arriba y abajo de 1025. [C2-41e] La bajada nueva (`05-TEXTOS.md`, tal cual) vale en los dos anchos
+ * («Tocá una para explorarla»: arriba se abre acá, abajo en otra pestaña), así que ya no hay una frase por ancho.
  */
 export const TEXTO_DE_DEMOS = {
   /** [EL ENCASTRE] 1B · sólo «Demos» (el párrafo ya lo explica); era «Demos para abrir acá mismo», en dos renglones. */
   titulo: 'Demos',
-  parrafo: 'Son sitios de ejemplo hechos por develOP, con clientes ficticios. Muestran lo que se puede hacer y se adaptan a cualquier rubro.',
-  enEscritorio: 'Elegí uno y usalo sin salir de esta página.',
-  enMovil: 'Tocá uno y se abre en otra pestaña.',
+  /** [C2-41e] La bajada de Valentino (05-TEXTOS.md, «Demos»). Era «Son sitios de ejemplo hechos por develOP, con clientes ficticios…». */
+  parrafo: 'Una muestra de lo que somos capaces de hacer. Se adaptan a cualquier rubro: si te gusta alguna, la hacemos tuya. Tocá una para explorarla.',
   cartelDeLaPieza: (nombre: string): string => `Click para ver ${nombre}`,
   cartelDeLaVisita: 'Click para visitar demo',
   cerrar: 'Cerrar la demo',
