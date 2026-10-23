@@ -234,6 +234,11 @@ export const ARCHIVOS_DE_APOYO = [
   // [NOCTURNO B5] la parada de Demos (la máquina de gatillos común con un paso): su geometría pura y su pista.
   `${RAIZ_DE_SECCIONES}/trabajos/demos/parada.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/ParadaDeDemos.tsx`,
+  // [C2-41e] Demos en escritorio: el espejo del Portfolio (la columna a la altura de su título), Demos a la vista para la escena y la
+  // red, y los defectos que pide su banco (`scripts-carga/demos-escritorio.ts`).
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/espejo.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/enLaEscena.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/defectos.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/movil-invariante.tsx`,
   // MÓVIL 2
   // [B1] el dato tipado del selector lateral del Portfolio: los proyectos, sus fichas y sus medios.

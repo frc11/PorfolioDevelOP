@@ -120,9 +120,10 @@ controlPositivo('el detector VE la capa rígida atada al vacío', capa.replace("
 // El título: «Demos», como Portfolio (s42 D3 al día afirma el gesto, el nivel y las clases).
 const texto = sinComentarios(leer('_secciones/trabajos/demos/TextoDeDemos.tsx'))
 // [B1] el titular de Portfolio vive en el encabezado del selector (y abajo de 1024 va en su columna, con su clase); Demos sigue
-// de margen a margen con la del cartel de antes (`demos/herencia.ts`).
+// de margen a margen con la del cartel de antes (`demos/herencia.ts`). [C2-41e] Reemplazado por la spec: desde 1024, además, la medida del
+// titular de Portfolio (su espejo, s84 §9).
 const piezas = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
-const comoPortfolio = (t: string): boolean => /<Titular nivel="display-xl" como="h2" className=\{CLASE_DEL_TITULAR\}>/.test(piezas) && /minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(piezas) && /<Titular nivel="display-xl" como="h3" className=\{CLASE_DEL_TITULAR_DEL_CARTEL\}>/.test(t) && /gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS\.llegadaDePortfolioS/.test(t) && /useAcompananteDelTitulo<HTMLDivElement>\('demos'\)/.test(t)
+const comoPortfolio = (t: string): boolean => /<Titular nivel="display-xl" como="h2" className=\{CLASE_DEL_TITULAR\}>/.test(piezas) && /minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(piezas) && /<Titular nivel="display-xl" como="h3" className=\{cn\(CLASE_DEL_TITULAR_DEL_CARTEL, TITULAR_DEL_PORTFOLIO_EN_ESCRITORIO\)\}>/.test(t) && /gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS\.llegadaDePortfolioS/.test(t) && /useAcompananteDelTitulo<HTMLDivElement>\('demos'\)/.test(t)
 afirmar(comoPortfolio(texto), '«Demos» con el nivel, las clases angostas y la llegada del titular de Portfolio (las letras desde la profundidad, con su mínimo); el párrafo va en su plano')
 controlPositivo('el detector VE el título de antes (titulo-l, dos renglones)', texto.replace('nivel="display-xl" como="h3"', 'nivel="titulo-l" como="h3"'), comoPortfolio)
 

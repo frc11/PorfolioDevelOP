@@ -23,10 +23,10 @@
 }
 
 [data-v3] [data-pieza="estante"] {
-  /* [NOCTURNO B5] Las placas, más grandes: cada una un 36 % del ancho de su columna, y el abanico la llena entera (el segundo
-   * término del solape, abajo). A 1440 son de 242 px y a 1024 de 167 (antes, 160 en los dos): el abanico se ve en el 95 % de la
-   * columna (s84 lo cuenta con la perspectiva). */
-  --libro-ancho: 36%;
+  /* [C2-41e] Las placas, entre las de antes del agrandamiento (160 px) y las de B5 (242 a 1440, 167 a 1024): un 30 % de la
+   * columna (la del espejo del Portfolio: 656 px a 1440, 448 a 1024), nunca menos de 164 px. A 1440, 197 px; a 1024, 164. El abanico
+   * llena la columna entera (el segundo término del solape, abajo; s84 lo cuenta con la perspectiva). */
+  --libro-ancho: max(calc(var(--spacing-8) * 5.125), 30%);
   --libro-giro: 30deg;
   --libro-alza: var(--spacing-6);
   --libro-apertura: var(--spacing-4);
@@ -41,11 +41,18 @@
 
   display: flex;
   align-items: flex-end;
-  /* Aire arriba para la pieza levantada y su cartel: el alza más un renglón de la pastilla. */
-  padding-block-start: calc(var(--libro-alza) + var(--spacing-12));
+  /* Aire arriba para la pieza levantada: el alza y un paso. [C2-41e] Era el alza más un renglón de la pastilla (el cartel del puntero
+   * va pegado al cursor desde INTERFAZ 2): el abanico más chico y debajo del título entra en 1024 × 768. */
+  padding-block-start: calc(var(--libro-alza) + var(--spacing-3));
   transition:
     transform var(--duracion-lenta) var(--demos-resorte),
     opacity var(--duracion-lenta) var(--demos-resorte);
+}
+
+/* [C2-41e] DESDE 1024, DEMOS ES EL ESPEJO DEL PORTFOLIO (las clases de la columna, en `CapaDeDemos`): su columna arranca a la altura
+ * del título del Portfolio, que `demos/espejo.ts` mide y escribe en la capa. Hasta que mide (o sin JavaScript), este tope. */
+[data-v3] [data-capa="demos"] {
+  --demos-tope-del-titulo: 22svh;
 }
 
 /* La biblioteca RETROCEDE cuando una demo está abierta: se achica, baja un poco y
@@ -84,6 +91,9 @@
  * placa se ve con su propia cámara y se pinta en el orden del estante (la de la derecha tapa a la de la izquierda). */
 [data-v3] [data-pieza="libro"] > [data-parte="cara"] {
   display: block;
+  /* [C2-41e] El área que detecta el hover es el HUECO (el ancla, quieta); lo que se transforma no recibe el puntero. Antes la placa
+   * lo recibía y su perspectiva asomaba fuera del hueco: con el mouse quieto ahí, el hover se prendía y se apagaba solo. */
+  pointer-events: none;
   block-size: 100%;
   transform-style: preserve-3d;
   transform: perspective(var(--libro-perspectiva)) var(--mirada);

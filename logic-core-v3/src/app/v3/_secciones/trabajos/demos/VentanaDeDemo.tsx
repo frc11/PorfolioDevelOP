@@ -13,6 +13,7 @@ import { CromoDeLaVentana } from './CromoDeLaVentana'
 import { useDialogo } from './dialogo'
 import { MS_DEL_GENIE, correrPorTiempo as correr, type Caja } from './genie'
 import { GenieDeDemo, type ControlDelGenie } from './GenieDeDemo'
+import { conElDefectoDeDemos } from './defectos'
 
 /**
  * LA VENTANA DE UNA DEMO — sale de su libro con el Genie, se usa acá y vuelve.
@@ -27,8 +28,11 @@ import { GenieDeDemo, type ControlDelGenie } from './GenieDeDemo'
  * La ventana VIVA no se mueve nunca: está en su caja final desde el primer cuadro,
  * escondida mientras el Genie (`GenieDeDemo`) hace el viaje con la portada
  * horizontal del template. Al abrir, la última pose del Genie es la ventana plana
- * con esa misma portada, así que el relevo no se ve; recién ahí se monta el
- * iframe, que se funde encima de la portada cuando carga. Al cerrar, la ventana se
+ * con esa misma portada, así que el relevo no se ve. [C2-41e] El iframe se monta con
+ * el CLIC (escondido, con la ventana) y carga durante el Genie; se funde encima de la
+ * portada cuando carga. En las demos con pantalla de carga propia la portada es el
+ * primer cuadro de esa pantalla (`scripts-carga/demos-portadas-de-carga.ts`): se
+ * entiende que carga, y el iframe sigue donde la foto la dejó. Al cerrar, la ventana se
  * congela en la portada, el Genie toma su lugar y se va al libro, que la recibe.
  *
  * ── ⚠️ LA RUEDA Y EL CLIC, CON UN IFRAME DE OTRO ORIGEN ──────────────────
@@ -70,6 +74,8 @@ export function VentanaDeDemo({
   const [final] = useState<Caja>(() => cajaFinal(window.innerWidth, window.innerHeight))
   const [fase, setFase] = useState<Fase>('abriendo')
   const [cargada, setCargada] = useState(false)
+  // [C2-41e] El iframe, desde el clic (con `sin-precarga`, el banco pide el de antes: recién con la ventana abierta).
+  const [temprano] = useState(() => !conElDefectoDeDemos('sin-precarga'))
   const dialogo = useRef<HTMLDivElement | null>(null)
   const velo = useRef<HTMLDivElement | null>(null)
   const ventana = useRef<HTMLDivElement | null>(null)
@@ -219,8 +225,8 @@ export function VentanaDeDemo({
           {/* La portada horizontal: la misma imagen que curva el Genie. Mientras la
               demo carga se ve ésta, y la demo se funde encima. */}
           <div aria-hidden="true" data-pieza="portada-de-la-ventana" className="pointer-events-none absolute inset-0" style={portada} />
-          {/* La demo se monta con la ventana ya abierta: no viaja en el Genie. */}
-          {abierta ? (
+          {/* La demo no viaja en el Genie: carga escondida detrás de él ([C2-41e] desde el clic) y se funde al cargar. */}
+          {abierta || temprano ? (
             <iframe
               ref={marco}
               src={demo.url}

@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { aimWithFraming } from './cameraFraming'
 import type { MutableChoreoPose } from './choreographyTypes'
 import { recorridoDeEncuadre } from './encuadre'
-import { PORTFOLIO_EN_LA_ESCENA, avanzarElPeso, huecoQueVale, mezclarLaPose, type HuecoDelLogo, type PoseDelPortfolio } from './portfolioEnLaEscena'
+import { PORTFOLIO_EN_LA_ESCENA, avanzarElPeso, huecoQueVale, mezclarLaPose, objetivoDeLaPose, type HuecoDelLogo, type PoseDelPortfolio } from './portfolioEnLaEscena'
 import { CAMERA_FAR, CAMERA_NEAR, ORBIT_TARGET_Y } from './probeScene'
 
 /**
@@ -122,7 +122,9 @@ export function poseDelPortfolio(aspecto: number, fovDeg: number, logoW: number,
  */
 export function mezclarConElPortfolio(objetivo: MutableChoreoPose, dt: number, aspecto: number, fovDeg: number, logoW: number, logoH: number): number {
   const e = PORTFOLIO_EN_LA_ESCENA
-  e.peso = avanzarElPeso(e.peso, e.adentro ? 1 : 0, dt, e.reducido)
+  // [C2-41e] La pose también con Demos a la vista (su espejo); el oscurecido, sólo con el panel.
+  e.peso = avanzarElPeso(e.peso, objetivoDeLaPose(e), dt, e.reducido)
+  e.pesoDelOscurecido = avanzarElPeso(e.pesoDelOscurecido, e.adentro ? 1 : 0, dt, e.reducido)
   if (e.peso > 0) mezclarLaPose(objetivo, poseDelPortfolio(aspecto, fovDeg, logoW, logoH, huecoQueVale()), e.peso)
   return e.peso
 }

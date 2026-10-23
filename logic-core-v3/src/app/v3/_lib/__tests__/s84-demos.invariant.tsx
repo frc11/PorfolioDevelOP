@@ -11,6 +11,14 @@
  *   7 · el hover de las reseñas (se levanta, suena, su nombre) y el clic con el Genie;
  *   8 · las cinco demos y, abajo de 1024, el carrusel común (el agua que salió la afirma s38).
  *
+ * [C2-41e] (la cola 2 del 2026-10-23, Demos en escritorio): §5 el abanico del tamaño justo; §7 el hover en un área quieta;
+ *   9 · Demos es el espejo del Portfolio (el título y la bajada con su medida y a su altura);
+ *  10 · el abanico en el plano del título 3D;
+ *  11 · la primera pantalla de Demos: la cámara en la pose del Portfolio (sin la franja del piso), sin el oscurecido;
+ *  12 · la carga: preconexión con Demos a la vista, el iframe desde el clic y la pantalla de carga como portada;
+ *  13 · la bajada nueva.
+ * Lo que se ve (la franja, las alturas, el hover con el mouse quieto, el primer cuadro de cada demo) lo mide `scripts-carga/demos-escritorio.ts`.
+ *
  * Lo que se mide en el sitio (los gestos de verdad, Lenis, los tiempos) lo corre `scripts-carga/demos-parada.ts` (con su control).
  *
  *   npx tsx src/app/v3/_lib/__tests__/s84-demos.invariant.tsx   (`test:s84-demos`)
@@ -24,10 +32,14 @@ import { CLAVE_DEL_VUELO } from '../../_componentes/gatillos/salto'
 import { vueloAjeno, type VueloDelGatillo } from '../../_componentes/gatillos/vuelo'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { Biblioteca, LADOS_DE_LA_PLACA } from '../../_secciones/trabajos/demos/Biblioteca'
-import { CATALOGO_DE_DEMOS, TEXTO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
+import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_VENTANA, TEXTO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
+import { MARGEN_DE_LA_VISTA, anunciarDemos, olvidarDemos, seccionDeDemosEnElCuadro } from '../../_secciones/trabajos/demos/enLaEscena'
 import { aparicionPedida } from '../../_secciones/trabajos/demos/entrada'
 import { PARADA_DE_DEMOS, llegadaEnCurso, reglaDeLaParada } from '../../_secciones/trabajos/demos/parada'
+import { ORIGENES_DE_LAS_DEMOS } from '../../_secciones/trabajos/demos/precarga'
 import { PANTALLAS_POR_PASO, mostradoDeDemos, pxDeLaSeccion, pxDelScroll } from '../../_secciones/trabajos/portfolio/pasos'
+import { mezclarConElPortfolio } from '../escena/poseDelPortfolio'
+import { PORTFOLIO_EN_LA_ESCENA, objetivoDeLaPose } from '../escena/portfolioEnLaEscena'
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../navegacion'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -161,25 +173,31 @@ controlPositivo('  y una máquina que no espera la transición propia', GATILLOS
 afirmar(existsSync(path.join(process.cwd(), 'scripts-carga/demos-parada.ts')), '  y su banco en el sitio (la matriz: rueda, ráfaga, trackpad y teclado, bajando y subiendo, con `CONTROL=sin-parada` y `parada-sin-llegada`)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · El abanico, más grande: al menos el 85 % de la columna del título a 1440 y a 1024, sin salirse de ella')
+titulo('5 · [C2-41e] El abanico del tamaño justo: placas entre las de antes (160 px) y las de B5 (242 y 167), y llena la columna del espejo')
 
 const DEMOS_CSS = leer('_estilos/demos.css').replace(/\/\*[\s\S]*?\*\//g, '')
-/** Lo que el estante declara (los valores de la hoja, no copias). */
-function medidasDelEstante(css: string): { readonly ancho: number; readonly giro: number; readonly perspectiva: number; readonly solape: number } {
-  const ancho = Number(/--libro-ancho: ([\d.]+)%;/.exec(css)?.[1] ?? Number.NaN)
+/** Lo que el estante declara (los valores de la hoja, no copias). La placa es `max(piso, porcentaje)`; la de B5, sólo el porcentaje. */
+function medidasDelEstante(css: string): { readonly piso: number; readonly ancho: number; readonly giro: number; readonly perspectiva: number; readonly solape: number } {
+  const conPiso = /--libro-ancho: max\(calc\(var\(--spacing-8\) \* ([\d.]+)\), ([\d.]+)%\);/.exec(css)
+  const soloPorcentaje = /--libro-ancho: ([\d.]+)%;/.exec(css)
+  // `--spacing-8`: 2 rem, 32 px.
+  const piso = conPiso === null ? 0 : 32 * Number(conPiso[1])
+  const ancho = Number(conPiso?.[2] ?? soloPorcentaje?.[1] ?? Number.NaN)
   const giro = Number(/--libro-giro: ([\d.]+)deg;/.exec(css)?.[1] ?? Number.NaN)
-  // La perspectiva en pasos del espaciado (`--spacing-8`: 2 rem, 32 px).
   const perspectiva = 32 * Number(/--libro-perspectiva: calc\(var\(--spacing-8\) \* ([\d.]+)\);/.exec(css)?.[1] ?? Number.NaN)
   const solape = Number(/margin-inline-start: min\(\s*calc\(var\(--libro-ancho\) \* (-[\d.]+)\),\s*calc\(\(100% - var\(--libro-ancho\)\) \/ \(var\(--libros\) - 1\) - var\(--libro-ancho\)\)\s*\);/.exec(css)?.[1] ?? Number.NaN)
-  return { ancho, giro, perspectiva, solape }
+  return { piso, ancho, giro, perspectiva, solape }
 }
+type Estante = ReturnType<typeof medidasDelEstante>
+/** El ancho de una placa en una columna de `W` px. */
+const placaEn = (W: number, m: Estante): number => Math.max(m.piso, (W * m.ancho) / 100)
 /**
  * Lo que se VE del abanico en una columna de `W` px, sobre su ancho: cada placa girada `giro` sobre su centro y vista por su propia
  * cámara (la perspectiva desde su centro: `perspective()` en su transformada), en el lugar que le da el solape de la hoja. Sin la mirada
  * (el mouse quieto). Devuelve la fracción y si se sale de la columna.
  */
-function abanicoEn(W: number, m: { readonly ancho: number; readonly giro: number; readonly perspectiva: number; readonly solape: number }, n = 5): { readonly fraccion: number; readonly adentro: boolean } {
-  const w = (W * m.ancho) / 100
+function abanicoEn(W: number, m: Estante, n = 5): { readonly fraccion: number; readonly adentro: boolean } {
+  const w = placaEn(W, m)
   const paso = w + Math.min(w * m.solape, (W - w) / (n - 1) - w)
   const a = w / 2
   const t = (m.giro * Math.PI) / 180
@@ -188,19 +206,27 @@ function abanicoEn(W: number, m: { readonly ancho: number; readonly giro: number
   const derecha = a + (n - 1) * paso + (a * Math.cos(t) * d) / (d + a * Math.sin(t))
   return { fraccion: (derecha - izquierda) / W, adentro: izquierda >= 0 && derecha <= W + 0.5 }
 }
-/** La columna del título en cada ancho: el envoltorio (32 px de cada lado) y la grilla de dos columnas con 32 px en el medio. */
-const columnaEn = (ancho: number): number => (ancho - 2 * 32 - 32) / 2
+/** La columna de B5: el envoltorio (32 px de cada lado) y la grilla de dos columnas con 32 px en el medio. */
+const columnaDeB5 = (ancho: number): number => (ancho - 2 * 32 - 32) / 2
 const CAPA_TSX = sinComentarios(leer('_secciones/trabajos/demos/CapaDeDemos.tsx'))
 const grillaDeSiempre = /claseDeContenido="grid h-full grid-cols-2 items-center gap-8 /.test(CAPA_TSX) && /px-\[var\(--pad-lateral-compacto\)\]/.test(leer('_componentes/layout/Envoltorio.tsx')) && /--pad-lateral-compacto: 32px;/.test(readFileSync(path.join(process.cwd(), 'src/app/theme-develop.css'), 'utf8'))
-const masGrande = (css: string): boolean => [1440, 1024].every((ancho) => {
-  const r = abanicoEn(columnaEn(ancho), medidasDelEstante(css))
+/** [C2-41e] La columna del espejo (§9): la de la grilla menos el paso de 16 px de la izquierda (`--spacing-4`) = la mitad menos 64, la del Portfolio. */
+const pasoDelEspejo = /<div data-parte="columna-de-demos" className="[^"]* escritorio:pl-4 /.test(CAPA_TSX) ? 16 : 0
+const columnaDelEspejo = (ancho: number): number => columnaDeB5(ancho) - pasoDelEspejo
+const tamanoJusto = (css: string, columna: (ancho: number) => number): boolean => {
+  const m = medidasDelEstante(css)
+  const [a1440, a1024] = [placaEn(columna(1440), m), placaEn(columna(1024), m)]
+  return a1440 > 160 && a1440 < 242 && a1024 > 160 && a1024 < 167
+}
+const llena = (css: string, columna: (ancho: number) => number): boolean => [1440, 1024].every((ancho) => {
+  const r = abanicoEn(columna(ancho), medidasDelEstante(css))
   return r.fraccion >= 0.85 && r.adentro
 })
-const enCadaAncho = [1440, 1024].map((ancho) => `${String(ancho)}: ${(abanicoEn(columnaEn(ancho), medidasDelEstante(DEMOS_CSS)).fraccion * 100).toFixed(1)} % de ${String(columnaEn(ancho))} px`).join(' · ')
-afirmar(grillaDeSiempre && masGrande(DEMOS_CSS), `el abanico se ve en al menos el 85 % de la columna del título y no se sale de ella (${enCadaAncho}); la placa, un ${String(medidasDelEstante(DEMOS_CSS).ancho)} % de la columna`)
-const DE_ANTES = DEMOS_CSS.replace('--libro-ancho: 36%;', '--libro-ancho: 23.8095%;').replace('--libro-perspectiva: calc(var(--spacing-8) * 40);', '--libro-perspectiva: calc(var(--spacing-8) * 30);')
-const deAntesA1440 = (abanicoEn(columnaEn(1440), medidasDelEstante(DE_ANTES)).fraccion * 100).toFixed(1)
-controlPositivo(`  el detector ve el estante de antes (placas de 160 px: a 1440 se veía en el ${deAntesA1440} % de la columna)`, DE_ANTES, masGrande)
+const enCadaAncho = [1440, 1024].map((ancho) => `${String(ancho)}: placas de ${placaEn(columnaDelEspejo(ancho), medidasDelEstante(DEMOS_CSS)).toFixed(0)} px, el abanico en el ${(abanicoEn(columnaDelEspejo(ancho), medidasDelEstante(DEMOS_CSS)).fraccion * 100).toFixed(1)} % de ${String(columnaDelEspejo(ancho))} px`).join(' · ')
+afirmar(grillaDeSiempre && pasoDelEspejo === 16 && tamanoJusto(DEMOS_CSS, columnaDelEspejo) && llena(DEMOS_CSS, columnaDelEspejo), `las placas, más chicas que las de B5 y más grandes que las de antes del agrandamiento, y el abanico llena la columna del espejo sin salirse (${enCadaAncho})`)
+controlPositivo('  el detector ve las placas de B5 (el 36 % de la columna de entonces: 242 px a 1440 y 167 a 1024)', DEMOS_CSS.replace(/--libro-ancho: [^;]+;/, '--libro-ancho: 36%;'), (c: string) => tamanoJusto(c, columnaDeB5))
+controlPositivo('  y las de antes del agrandamiento (160 px a 1440)', DEMOS_CSS.replace(/--libro-ancho: [^;]+;/, '--libro-ancho: 23.8095%;'), (c: string) => tamanoJusto(c, columnaDeB5))
+controlPositivo('  y un abanico que no llena la columna (placas de 160 px con el solape fijo de antes)', DEMOS_CSS.replace(/--libro-ancho: [^;]+;/, '--libro-ancho: max(calc(var(--spacing-8) * 5.125), 20%);').replace(/margin-inline-start: min\(\s*calc\(var\(--libro-ancho\) \* -0\.42\),[^;]*;/, 'margin-inline-start: calc(var(--libro-ancho) * -0.42);'), (c: string) => llena(c, columnaDelEspejo))
 // Debajo del título: el estante va después del texto (título y párrafo) en la misma columna; nada lo pone encima.
 const debajo = (c: string): boolean => {
   const texto = c.indexOf('<TextoDeDemos ')
@@ -239,6 +265,16 @@ const hoverBien = (b: string, css: string): boolean =>
 afirmar(hoverBien(BIBLIOTECA, DEMOS_CSS) && TEXTO_DE_DEMOS.cartelDeLaPieza('Noir').includes('Noir'), 'el hover (y el foco del teclado): la placa se levanta un poco (el alza del estante, 24 px) y se pone de frente, suena el tic de la barra (con el sonido apagado, nada) y aparece su nombre en la pastilla de la barra')
 controlPositivo('  el detector ve un hover mudo', BIBLIOTECA.replace(/sonar\('tic'\)/g, 'void 0'), (b: string) => hoverBien(b, DEMOS_CSS))
 controlPositivo('  y una placa que no se levanta', DEMOS_CSS.replace(/(:is\(:hover, :focus-visible\) > \[data-parte="cara"\] > \[data-parte="placa"\] \{\s*)transform: translateY\(calc\(-1 \* var\(--libro-alza\)\)\)/, '$1transform: translateY(0)'), (css: string) => hoverBien(BIBLIOTECA, css))
+// [C2-41e] El área que detecta el hover es el hueco (el ancla, quieto): lo que se transforma (la cara, la placa, los cantos) va sin puntero,
+// y ninguna regla del hover o del foco mueve el ancla. Antes la placa recibía el puntero y asomaba fuera del hueco: vibraba (`lote1/14`).
+const areaQuieta = (css: string, b: string): boolean =>
+  /\[data-v3\] \[data-pieza="libro"\] > \[data-parte="cara"\] \{[^}]*pointer-events: none;/.test(css) &&
+  !/\[data-pieza="libro"\]:is\(:hover, :focus-visible\) \{[^}]*transform/.test(css) && !/\[data-pieza="libro"\]:focus-visible \{[^}]*transform/.test(css) &&
+  /<span data-parte="cara" style=\{areaMovil \? \{ pointerEvents: 'auto' \} : undefined\}>/.test(b) && /useState\(\(\) => conElDefectoDeDemos\('area-movil'\)\)/.test(b)
+afirmar(areaQuieta(DEMOS_CSS, BIBLIOTECA), '[C2-41e] el hover se detecta en el hueco quieto de cada pieza: la cara (cámara, placa y cantos) no recibe el puntero y el hover no mueve el ancla (sólo el banco, con `CONTROL=area-movil`, le devuelve el puntero a la placa)')
+controlPositivo('  el detector ve la placa que recibe el puntero (la de antes: vibraba)', DEMOS_CSS.replace(/(\[data-v3\] \[data-pieza="libro"\] > \[data-parte="cara"\] \{[^}]*)pointer-events: none;/, '$1'), (c: string) => areaQuieta(c, BIBLIOTECA))
+controlPositivo('  y un hover que levanta el ancla entera', DEMOS_CSS.replace('[data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) {', '[data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) {\n    transform: translateY(-24px);'), (c: string) => areaQuieta(c, BIBLIOTECA))
+afirmar(existsSync(path.join(process.cwd(), 'scripts-carga/demos-escritorio.ts')), '  y su banco en el sitio: el mouse quieto 3 s sobre el borde de cada placa, contando las entradas y salidas (`MODO=hover`, con `CONTROL=area-movil`)')
 const VENTANA = sinComentarios(leer('_secciones/trabajos/demos/VentanaDeDemo.tsx'))
 const elGenie = (b: string, v: string): boolean => /e\.preventDefault\(\)\s*esconderElCartel\(\)\s*alAbrir\(demo, e\.currentTarget\)/.test(b) && /cajaDe\(pieza\.querySelector\('\[data-parte="cara"\]'\) \?\? pieza\)/.test(v) && /<GenieDeDemo ref=\{pintor\}/.test(v)
 afirmar(elGenie(BIBLIOTECA, VENTANA), '  el clic abre la demo con el despliegue de siempre (el Genie sale de la placa entera: su cámara, `[data-parte="cara"]`, y vuelve a ella)')
@@ -252,5 +288,129 @@ const QUIETOS = sinComentarios(leer('_secciones/trabajos/demos/DemosQuietos.tsx'
 const enLasDosRamas = (capa: string, quietos: string): boolean => /<CarruselDeDemos className="escritorio:hidden" alMontarse=\{alMontarElCarrusel\} \/>/.test(capa) && /<CarruselDeDemos className="escritorio:hidden" \/>/.test(quietos) && !/<Carrusel\b/.test(capa + quietos)
 afirmar(enLasDosRamas(CAPA_TSX, QUIETOS), '  abajo de 1024, en las dos ramas, el carrusel común de B1.2e con las demos (s5-trabajos §27 afirma sus tarjetas); la cinta que corría sola se fue')
 controlPositivo('  el detector ve la cinta de antes', CAPA_TSX.replace('<CarruselDeDemos className="escritorio:hidden" alMontarse={alMontarElCarrusel} />', '<Carrusel enMarcha={carruselEnMarcha} />'), (c: string) => enLasDosRamas(c, QUIETOS))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('9 · [C2-41e] Desde 1024 Demos es el espejo del Portfolio: el título y la bajada con su medida y a su altura, y el abanico debajo')
+
+const TEXTO_TSX = sinComentarios(leer('_secciones/trabajos/demos/TextoDeDemos.tsx'))
+const ESPEJO_TS = sinComentarios(leer('_secciones/trabajos/demos/espejo.ts'))
+const ENCABEZADO_DEL_PORTFOLIO = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
+const ESCENARIO_DEL_PORTFOLIO = sinComentarios(leer('_secciones/trabajos/portfolio/EscenarioDelPortfolio.tsx'))
+const esEspejo = (css: string, texto: string, capa: string, hook: string): boolean => {
+  const columna = /<div data-parte="columna-de-demos" className="([^"]*)">/.exec(capa)?.[1].split(' ') ?? []
+  const bloque = /<div id="demos" className="([^"]*)">/.exec(texto)?.[1].split(' ') ?? []
+  const tiene = (clases: readonly string[], ...buscadas: readonly string[]): boolean => buscadas.every((b) => clases.includes(b))
+  return (
+    // La columna, desde 1024: contenedor del título, centrada, arranca donde el espejo mide el título del Portfolio (hasta medir, el tope
+    // de la hoja). Las dos clases con valor van armadas por partes (el escaneo de Tailwind lee los tests).
+    tiene(columna, 'flex', 'flex-col', 'gap-8', 'escritorio:items-center', 'escritorio:self-start', 'escritorio:pl-4', 'escritorio:text-center') &&
+    columna.includes('escritorio:pt-' + '[var(--demos-tope-del-titulo)]') && columna.includes('escritorio:' + '[container-type:inline-size]') &&
+    /\[data-v3\] \[data-capa="demos"\] \{\s*--demos-tope-del-titulo: 22svh;\s*\}/.test(css) &&
+    // Las separaciones del Portfolio: su bajada va a `mt-6` del título (24 px) y su hueco a `mt-8` (32 px: la columna de Demos, `gap-8`).
+    tiene(bloque, 'escritorio:items-center', 'escritorio:gap-6') && /className="mt-6"/.test(ENCABEZADO_DEL_PORTFOLIO) && /className="mt-8 shrink-0/.test(ESCENARIO_DEL_PORTFOLIO) &&
+    /useEspejoDelPortfolio\(capa\)/.test(capa) &&
+    // La medida del título y de la bajada: las del Portfolio, importadas (no copiadas).
+    /import \{ CLASE_DEL_TITULAR, MEDIDA_DEL_CUERPO_CH \} from '\.\.\/portfolio\/tipografia'/.test(texto) && /CLASE_DEL_TITULAR\.split\(' '\)\.filter\(\(c\) => c\.startsWith\('escritorio:'\)\)/.test(texto) &&
+    /const MEDIDA_DEL_TEXTO_CH = MEDIDA_DEL_CUERPO_CH/.test(texto) && /className=\{cn\(CLASE_DEL_TITULAR_DEL_CARTEL, TITULAR_DEL_PORTFOLIO_EN_ESCRITORIO\)\}/.test(texto) && /cn\(CLASE_DEL_CUERPO_DE_DEMOS, CUERPO_DEL_PORTFOLIO_EN_ESCRITORIO\)/.test(texto) &&
+    // El espejo mide el encabezado del Portfolio sin transformadas y lo vuelve a medir cuando cambia de tamaño.
+    /\[data-pieza="encabezado-del-portfolio"\]/.test(hook) && /y \+= e\.offsetTop/.test(hook) && /el\.style\.setProperty\(VARIABLE_DEL_TOPE, valor\)/.test(hook) && /new ResizeObserver\(medir\)/.test(hook) && /conElDefectoDeDemos\('sin-espejo'\)/.test(hook)
+  )
+}
+afirmar(esEspejo(DEMOS_CSS, TEXTO_TSX, CAPA_TSX, ESPEJO_TS), 'la columna de Demos es la del Portfolio dada vuelta: contenedor del título (que lleva la medida de escritorio del de Portfolio, importada), centrada, arranca a la altura del título del Portfolio (lo mide `espejo.ts` sin transformadas, con un `ResizeObserver`), la bajada a 24 px con la letra y la medida de la del Portfolio, y el abanico a 32 px (lo que se ve lo mide `scripts-carga/demos-escritorio.ts`, `MODO=espejo`: |Δy| ≤ 2 px)')
+controlPositivo('  el detector ve la columna centrada de antes (sin el tope del espejo)', CAPA_TSX.replace(' escritorio:pt-' + '[var(--demos-tope-del-titulo)]', ''), (c: string) => esEspejo(DEMOS_CSS, TEXTO_TSX, c, ESPEJO_TS))
+controlPositivo('  y la separación de antes entre el título y la bajada (16 px)', TEXTO_TSX.replace(' escritorio:gap-6', ''), (t: string) => esEspejo(DEMOS_CSS, t, CAPA_TSX, ESPEJO_TS))
+controlPositivo('  y el título de Demos con su medida de antes', TEXTO_TSX.replace('className={cn(CLASE_DEL_TITULAR_DEL_CARTEL, TITULAR_DEL_PORTFOLIO_EN_ESCRITORIO)}', 'className={CLASE_DEL_TITULAR_DEL_CARTEL}'), (t: string) => esEspejo(DEMOS_CSS, t, CAPA_TSX, ESPEJO_TS))
+controlPositivo('  y una capa que no mide al Portfolio', CAPA_TSX.replace('useEspejoDelPortfolio(capa)', 'void capa'), (c: string) => esEspejo(DEMOS_CSS, TEXTO_TSX, c, ESPEJO_TS))
+const medidaDeLaBajada = (texto: string): boolean => /<div id="demos" className="[^"]*">/.test(texto) && /<div ref=\{enElPlano\} style=\{\{ maxWidth: `\$\{MEDIDA_DEL_TEXTO_CH\}ch` \}\}>/.test(texto)
+afirmar(medidaDeLaBajada(TEXTO_TSX), '  la medida va en la bajada, como en el Portfolio (en el bloque, el título del tamaño del de Portfolio no entraba y su ventana lo recortaba)')
+controlPositivo('  el detector ve la medida en el bloque (la de antes)', TEXTO_TSX.replace(/<div id="demos" className="([^"]*)">/, '<div id="demos" className="$1" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>').replace('<div ref={enElPlano} style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>', '<div ref={enElPlano}>'), medidaDeLaBajada)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('10 · [C2-41e] El abanico, fijo debajo del título: en el plano del título 3D, como su bajada')
+
+const enElPlanoDelTitulo = (capa: string): boolean => /const abanico = useAcompananteDelTitulo<HTMLDivElement>\('demos'\)/.test(capa) && /<div ref=\{abanico\} data-parte="abanico" className="max-escritorio:hidden escritorio:self-stretch">\s*<Biblioteca /.test(capa) && /useAcompananteDelTitulo<HTMLDivElement>\('demos'\)/.test(TEXTO_TSX)
+afirmar(enElPlanoDelTitulo(CAPA_TSX), 'el abanico es un acompañante del título «Demos» (como la bajada): la escena lo lleva cada cuadro al plano del título, así queda debajo de él con el paralaje y la órbita, y la perspectiva de cada placa (la mirada) sigue encima')
+controlPositivo('  el detector ve el abanico en el plano de la pantalla (el de antes)', CAPA_TSX.replace('<div ref={abanico} data-parte="abanico"', '<div data-parte="abanico"'), enElPlanoDelTitulo)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('11 · [C2-41e] La primera pantalla de Demos: la cámara se queda en la pose del Portfolio (sin la franja del piso) y sin el oscurecido')
+
+afirmarIgual([objetivoDeLaPose({ adentro: false, demos: false }), objetivoDeLaPose({ adentro: true, demos: false }), objetivoDeLaPose({ adentro: false, demos: true }), objetivoDeLaPose({ adentro: true, demos: true })], [0, 1, 1, 1], 'el peso de la pose va a 1 con el panel adentro o con Demos a la vista')
+/** Del Portfolio a Demos: el panel sale y Demos queda a la vista (`demos`), un segundo de cuadros; devuelve los dos pesos. */
+function delPortfolioADemos(conDemos: boolean): { readonly pose: number; readonly oscurecido: number } {
+  const e = PORTFOLIO_EN_LA_ESCENA
+  Object.assign(e, { adentro: true, demos: false, reducido: false, peso: 1, pesoDelOscurecido: 1, hueco: null, columna: 0.5 })
+  e.adentro = false
+  e.demos = conDemos
+  for (let k = 0; k < 60; k++) mezclarConElPortfolio({ angleDeg: 555, height: 4.5, distance: 20, frameX: -0.85, frameY: 0 }, 1 / 60, 1.6, 50, 6.863, 4.779)
+  const r = { pose: e.peso, oscurecido: e.pesoDelOscurecido }
+  Object.assign(e, { adentro: false, demos: false, peso: 0, pesoDelOscurecido: 0 })
+  return r
+}
+const enDemosBien = (conDemos: boolean): boolean => {
+  const r = delPortfolioADemos(conDemos)
+  return r.pose === 1 && r.oscurecido === 0
+}
+afirmar(enDemosBien(true), 'del Portfolio a Demos la cámara NO se mueve (el peso de la pose queda en 1: el logo en su hueco, la primera pantalla es la sala como en el Portfolio) y el oscurecido del panel se va en su tiempo (0 al segundo)')
+controlPositivo('  el detector ve la cámara de antes (vuelve a la pose del scroll: la franja clara del piso abajo, `lote1/13`)', false, enDemosBien)
+/** Demos a la vista para una llegada pedida, con o sin escenario de escritorio, con la sección en la mitad de arriba del cuadro o no. */
+function aLaVista(pedida: number, escritorio: boolean, enElCuadro: boolean): boolean {
+  anunciarDemos(pedida, escritorio)
+  seccionDeDemosEnElCuadro(enElCuadro)
+  const r = PORTFOLIO_EN_LA_ESCENA.demos
+  olvidarDemos()
+  return r
+}
+const vistaBien = (f: typeof aLaVista): boolean => f(0.3, true, true) && f(1, true, true) && !f(0, true, true) && !f(0.3, false, true) && !f(1, true, false)
+afirmar(vistaBien(aLaVista), '  la capa lo avisa con la llegada pedida (Demos a la vista desde que el título arranca), sólo con el escenario pegado de escritorio y mientras la sección ocupa la mitad de arriba del cuadro: lo pedido se queda en 1 en Servicios y más abajo, y ahí la cámara vuelve a la del scroll')
+controlPositivo('  el detector ve una vista que sólo mira lo pedido (la cámara quedaría clavada en la pose del Portfolio el resto de la página)', (p: number, e: boolean): boolean => p > 0 && e, vistaBien)
+const EN_LA_ESCENA_TS = sinComentarios(leer('_secciones/trabajos/demos/enLaEscena.ts'))
+const avisa = (capa: string): boolean => /useSeccionDeDemosEnElCuadro\(capa\)/.test(capa) && /rootMargin: MARGEN_DE_LA_VISTA/.test(EN_LA_ESCENA_TS) && MARGEN_DE_LA_VISTA === '0px 0px -50% 0px' && /anunciarDemos\(p\.pedida, conEscenario\.current\)/.test(capa) && /anunciarDemos\(aparicionPedida\(valor, rigida\.current\), conEscenario\.current\)/.test(capa) && /olvidarDemos\(\)/.test(capa) && /conEscenario\.current = el !== null && el\.closest\('\[data-pieza="escenario-del-portfolio"\]'\) !== null/.test(capa)
+afirmar(avisa(CAPA_TSX), '  en cada cambio del scroll y al leer el ancho, y se olvida al desmontarse')
+controlPositivo('  el detector ve una capa que no avisa con el scroll', CAPA_TSX.replace('anunciarDemos(aparicionPedida(valor, rigida.current), conEscenario.current)', 'void 0'), avisa)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('12 · [C2-41e] La carga de cada demo: preconexión con Demos a la vista, el iframe desde el clic y la pantalla de carga como portada')
+
+afirmarIgual(ORIGENES_DE_LAS_DEMOS.length, CATALOGO_DE_DEMOS.length, `una preconexión por demo: ${String(ORIGENES_DE_LAS_DEMOS.length)} orígenes distintos (cada template es su sitio)`)
+const ESCENA_DE_DEMOS = EN_LA_ESCENA_TS
+const PRECARGA = sinComentarios(leer('_secciones/trabajos/demos/precarga.ts'))
+const precargaBien = (escena: string, precarga: string, ventana: string): boolean =>
+  /if \(aLaVista\) preconectarLasDemos\(\)/.test(escena) && /if \(preconectadas \|\| typeof document === 'undefined' \|\| conElDefectoDeDemos\('sin-precarga'\)\) return/.test(precarga) &&
+  /l\.rel = 'preconnect'/.test(precarga) && /export const MS_DE_INTENCION = 150/.test(precarga) &&
+  /\{abierta \|\| temprano \? \(\s*<iframe/.test(ventana) && /const \[temprano\] = useState\(\(\) => !conElDefectoDeDemos\('sin-precarga'\)\)/.test(ventana)
+afirmar(precargaBien(ESCENA_DE_DEMOS, PRECARGA, VENTANA), 'con Demos a la vista, una preconexión a cada demo (una vez); con el puntero quieto 150 ms, su documento; y el iframe se monta con el clic y carga escondido durante el Genie (antes, recién con la ventana abierta: 560 ms después)')
+controlPositivo('  el detector ve el iframe de antes (recién con la ventana abierta)', VENTANA.replace(/\{abierta \|\| temprano \? \(/, '{abierta ? ('), (v: string) => precargaBien(ESCENA_DE_DEMOS, PRECARGA, v))
+controlPositivo('  y una capa a la vista que no preconecta', ESCENA_DE_DEMOS.replace('if (aLaVista) preconectarLasDemos()', ''), (e: string) => precargaBien(e, PRECARGA, VENTANA))
+
+/** Las medidas de un .webp (VP8, VP8L o VP8X), leídas de su cabecera. */
+function medidasDelWebp(archivo: string): { readonly ancho: number; readonly alto: number } | null {
+  if (!existsSync(archivo)) return null
+  const b = readFileSync(archivo)
+  if (b.toString('ascii', 0, 4) !== 'RIFF' || b.toString('ascii', 8, 12) !== 'WEBP') return null
+  const tipo = b.toString('ascii', 12, 16)
+  if (tipo === 'VP8 ') return { ancho: b.readUInt16LE(26) & 0x3fff, alto: b.readUInt16LE(28) & 0x3fff }
+  if (tipo === 'VP8L') {
+    const bits = b.readUInt32LE(21)
+    return { ancho: (bits & 0x3fff) + 1, alto: ((bits >> 14) & 0x3fff) + 1 }
+  }
+  if (tipo === 'VP8X') return { ancho: b.readUIntLE(24, 3) + 1, alto: b.readUIntLE(27, 3) + 1 }
+  return null
+}
+const esDeLaVentana = (r: string): boolean => {
+  const m = medidasDelWebp(path.join(process.cwd(), 'public', r))
+  return m !== null && m.ancho === MEDIDA_DE_LA_VENTANA.ancho && m.alto === MEDIDA_DE_LA_VENTANA.alto
+}
+afirmar(CATALOGO_DE_DEMOS.every((d) => esDeLaVentana(d.ventana)) && existsSync(path.join(process.cwd(), 'scripts-carga/demos-portadas-de-carga.ts')), `la portada de cada ventana es una captura de ${String(MEDIDA_DE_LA_VENTANA.ancho)} × ${String(MEDIDA_DE_LA_VENTANA.alto)} (la textura del Genie y lo que se ve mientras carga): en Ethereal, Noir, Skyline y Niche, el primer cuadro de su pantalla de carga; Nexo, la de siempre (\`scripts-carga/demos-portadas-de-carga.ts\`)`)
+controlPositivo('  el detector ve una portada que no es de la ventana (la cara del libro, 800 × 1200)', '/demos/ethereal.webp', esDeLaVentana)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('13 · [C2-41e] La bajada nueva (05-TEXTOS.md, tal cual), una sola para los dos anchos')
+
+const BAJADA = 'Una muestra de lo que somos capaces de hacer. Se adaptan a cualquier rubro: si te gusta alguna, la hacemos tuya. Tocá una para explorarla.'
+const bajadaBien = (t: { readonly parrafo: string }, texto: string): boolean => t.parrafo === BAJADA && /\{TEXTO_DE_DEMOS\.parrafo\}<\/Cuerpo>/.test(texto) && !/enEscritorio|enMovil/.test(texto)
+afirmar(bajadaBien(TEXTO_DE_DEMOS, TEXTO_TSX), `la bajada de Demos es la de Valentino, sin frases por ancho: «${BAJADA}»`)
+controlPositivo('  el detector ve la bajada de antes', { parrafo: 'Son sitios de ejemplo hechos por develOP, con clientes ficticios. Muestran lo que se puede hacer y se adaptan a cualquier rubro.' }, (t: { readonly parrafo: string }) => bajadaBien(t, TEXTO_TSX))
+
 
 cerrar('s84 · Demos (B5)')

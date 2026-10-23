@@ -188,7 +188,8 @@ const textoDeDemos = sinComentarios(leer('_secciones/trabajos/demos/TextoDeDemos
 // sólo «Demos», en volumen, con el tamaño y la llegada de Portfolio (las letras desde la profundidad, con su mínimo).
 const comoPortfolio = (c: string): boolean =>
   /const \{ lugar, listo \} = useTextoDeVolumen<HTMLSpanElement>\(\{ id: 'demos', texto: TEXTO_DE_DEMOS\.titulo, fuente: 'chivo-400', gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS\.llegadaDePortfolioS \}\)/.test(c) &&
-  /<Titular nivel="display-xl" como="h3" className=\{CLASE_DEL_TITULAR_DEL_CARTEL\}>/.test(c)
+  // [C2-41e] Reemplazado por la spec (Portfolio y Demos son espejos): desde 1024 también la medida del titular de Portfolio (s84 §9).
+  /<Titular nivel="display-xl" como="h3" className=\{cn\(CLASE_DEL_TITULAR_DEL_CARTEL, TITULAR_DEL_PORTFOLIO_EN_ESCRITORIO\)\}>/.test(c)
 afirmar(comoPortfolio(textoDeDemos) && TEXTO_DE_DEMOS.titulo === 'Demos', '«Demos» (EL ENCASTRE 1B): en volumen, con el nivel y las clases del titular de Portfolio y su llegada (las letras desde la profundidad, girando, en no menos de su mínimo); al volver se va igual')
 controlPositivo('el detector VE el título de D3 (se levantaba de acostado, como «El equipo»)', textoDeDemos.replace("gesto: 'letras'", "gesto: 'levanta'"), comoPortfolio)
 const glifos = new Set(Object.keys((datosDeLaChivo as { glyphs: Record<string, unknown> }).glyphs))
