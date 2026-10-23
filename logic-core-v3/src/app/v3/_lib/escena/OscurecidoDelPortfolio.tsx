@@ -51,8 +51,7 @@ function armar(): Armado {
 
 /** El cuadro: el multiplicador de este momento (con el peso en 0 no se dibuja). */
 function aplicar(a: Armado): void {
-  // [C2-41e] El peso del oscurecido (sólo el panel): con Demos a la vista la pose se queda y el oscurecido se va.
-  const k = a.banco.apagado ? 1 : multiplicadorDelOscurecido(DIM_DEL_PORTFOLIO, PORTFOLIO_EN_LA_ESCENA.pesoDelOscurecido)
+  const k = a.banco.apagado ? 1 : multiplicadorDelOscurecido(DIM_DEL_PORTFOLIO, PORTFOLIO_EN_LA_ESCENA.peso)
   a.malla.visible = k < 0.999
   a.material.uniforms.uMultiplicador.value = k
 }

@@ -82,6 +82,24 @@ export const REVELADO_FRACCION = 0.125
 export const RAMPA_DE_LA_ENTRADA_PX = 0
 
 /**
+ * [C2-41e] **LA RAMPA DE LA SALIDA CRECE CON LO QUE LA COSTURA SUBIÓ.** La rampa de la salida (Trabajos → Servicios) se dibujaba
+ * ENTERA arriba de la costura apenas ésta tocaba el cuadro: con Demos quieta (su parada termina con el pie de Trabajos en el pie del
+ * cuadro) se veía un octavo de pantalla de papel abajo, la «franja blanca» (`lote1/13`; el piso de papel de atrás del lienzo). Ahora
+ * mide a lo sumo lo que la costura ya subió desde el pie del cuadro: con Servicios todavía afuera no hay rampa, y mientras entra se
+ * ablanda como siempre (a partir de un octavo arriba del pie, entera).
+ */
+export function rampaDeLaSalida(fila: number, ventana: number, rampaPx: number): number {
+  return Math.min(rampaPx, Math.max(0, ventana - fila))
+}
+
+/** [C2-41e] El control del banco (`scripts-carga/demos-escritorio.ts`, `CONTROL=franja`): la rampa de la salida de antes, entera. */
+export function conLaSalidaDeAntes(): boolean {
+  if (typeof window === 'undefined') return false
+  const pedido = (window as Window & { __defectosDelRevelado?: unknown }).__defectosDelRevelado
+  return typeof pedido === 'string' && pedido.split(',').includes('salida-de-antes')
+}
+
+/**
  * Un borde de una ventana transparente, en coordenadas de la VENTANA (viewport).
  *
  * - `entra` — panel opaco ARRIBA, sala ABAJO: bajando, la sala aparece. La rampa
@@ -118,6 +136,7 @@ export function maskDeRevelado(
   bordes: readonly BordeDeRevelado[],
   ventana: number,
   rampaPx: number,
+  salidaQueCrece = true,
 ): string | null {
   if (!(ventana > 0) || !(rampaPx > 0)) return null
 
@@ -150,7 +169,10 @@ export function maskDeRevelado(
       puntos.push({ fila: acotar(b.row + RAMPA_DE_LA_ENTRADA_PX, ventana), alpha: 1 })
       alphaArriba = 1
     } else {
-      puntos.push({ fila: acotar(b.row - rampaPx, ventana), alpha: 1 })
+      // [C2-41e] Con la costura en el pie del cuadro o más abajo, la salida no se ve todavía: ni rampa ni papel.
+      if (salidaQueCrece && b.row >= ventana) continue
+      const rampa = salidaQueCrece ? rampaDeLaSalida(b.row, ventana, rampaPx) : rampaPx
+      puntos.push({ fila: acotar(b.row - rampa, ventana), alpha: 1 })
       puntos.push({ fila: acotar(b.row, ventana), alpha: 0 })
       alphaArriba = 0
     }
@@ -244,6 +266,7 @@ export function aplicarRevelado(el: HTMLElement | null, ventana: number, activo:
         bordesDeRevelado(document, RECORRIDO, ATRIBUTO_DEL_PANEL),
         ventana,
         ventana * REVELADO_FRACCION,
+        !conLaSalidaDeAntes(),
       )
     : null
   const valor = mask ?? ''
