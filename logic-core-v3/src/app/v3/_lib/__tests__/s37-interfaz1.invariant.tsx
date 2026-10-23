@@ -407,7 +407,11 @@ afirmarIgual(veces(sinComentarios(CAMPOS_DEL_CONTACTO + FORMULARIO), 'role="aler
 afirmar(CAMPOS_DEL_CONTACTO.includes("aria-invalid={errores.intereses !== undefined || undefined}"), '  los intereses dicen que están mal (aria-invalid), no sólo el texto de abajo')
 afirmar(veces(CAMPOS_DEL_CONTACTO, "'border-tinta border-dashed'") === 2, '  el error con borde punteado: no se confunde con el foco (liso)')
 // [RONDA 2] F1: el «listo» del envío de verdad.
-afirmar(/<p role="status"[^>]*>\s*\{enviado \? DESPUES_DEL_ENVIO : ''\}/.test(FORMULARIO),'  la región de estado existe desde el principio (una que nace con su texto no siempre se anuncia)')
+// [C2 · 22] El envío es el estándar del sitio (`EstadoDeEnvio`): sus dos regiones vivas (status y alert) existen desde el principio y las pone él.
+const DEL_ENVIO = leer('_componentes/formularios/EstadoDeEnvio.tsx')
+const regionDeEstado = (formulario: string, envio: string): boolean => /<EstadoDeEnvio estado=\{estado\}/.test(formulario) && /<p role="status" className="sr-only">/.test(envio) && /<p role="alert" className="sr-only">/.test(envio)
+afirmar(regionDeEstado(FORMULARIO, DEL_ENVIO), '  la región de estado existe desde el principio (una que nace con su texto no siempre se anuncia): la pone `EstadoDeEnvio`, que el contacto monta')
+controlPositivo('  el detector VE un contacto que no monta el estado de envío', FORMULARIO.replace('<EstadoDeEnvio estado={estado}', '<div data-estado={estado}'), (f: string) => regionDeEstado(f, DEL_ENVIO))
 afirmar(leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('aria-busy={abierta && !cargada}'), 'la ventana de una demo dice que está cargando (aria-busy y una región de estado; el esqueleto es sólo para la vista)')
 afirmar(leer('_secciones/servicios/ContenidoDeServicio.tsx').includes('<CtaDelServicio servicio={servicio} enEscritorio />'), 'Servicios con menos movimiento en escritorio tiene sus CTA (antes, ninguno)')
 afirmar(/hover:-translate-y-0\.5 focus-visible:-translate-y-0\.5/.test(leer('_secciones/cierre/PiezasDeContacto.tsx')), 'las redes del pie responden al pasar y al enfocar')

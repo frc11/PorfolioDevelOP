@@ -300,7 +300,8 @@ afirmar(viajeCableado, '  y el viaje es ése: la fracción en recta y su escala 
 // La salida: primero la placa se acuesta hacia atrás sobre su base (como los títulos y los libros) y recién después se va el desenfoque.
 const sale = (placa: string, form: string, t: typeof TRANSICIONES): boolean =>
   placa.includes("transformOrigin: 'center bottom'") && placa.includes('exit={{ rotateX: 90, transition: TRANSICIONES.acostarse }}') &&
-  form.includes("exit={placa ? { opacity: 0, backdropFilter: 'blur(0px)', transition: TRANSICIONES.fondoAlCerrar } : { opacity: 0 }}") &&
+  // [C2 · 22] el fondo se va después de la hoja con movimiento (`viaja`), para la placa de escritorio y para el panel de abajo de escritorio.
+  form.includes("exit={viaja ? { opacity: 0, backdropFilter: 'blur(0px)', transition: TRANSICIONES.fondoAlCerrar } : { opacity: 0 }}") && form.includes('const viaja = !reducido') &&
   t.fondoAlCerrar.delay >= t.acostarse.duration && t.acostarse.duration === MS_DE_LA_SALIDA_DE_LA_PLACA / 1000
 afirmar(sale(placaDelContacto, formulario, TRANSICIONES), 'al cerrar (Esc, la cruz, el velo), primero la placa se acuesta hacia atrás sobre su base y RECIÉN DESPUÉS se va el desenfoque del fondo', `${String(MS_DE_LA_SALIDA_DE_LA_PLACA)} ms la placa, después ${String(TRANSICIONES.fondoAlCerrar.duration * 1000)} ms el fondo`)
 controlPositivo('el detector VE el fondo que se iba a la vez que la placa', { ...TRANSICIONES, fondoAlCerrar: { ...TRANSICIONES.fondoAlCerrar, delay: 0 } }, (t: typeof TRANSICIONES) => sale(placaDelContacto, formulario, t))

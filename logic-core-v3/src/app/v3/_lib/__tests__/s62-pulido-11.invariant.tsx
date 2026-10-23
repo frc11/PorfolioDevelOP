@@ -383,16 +383,17 @@ const ramaDelError = (f: string, desde: string, hasta: string): string => {
 const intactoBien = (pie: string, panel: string): boolean => {
   const errorDelPie = ramaDelError(pie, "// [PULIDO 11] B3 · el error: la tarjeta que no encaja", '\n  }\n')
   const reintentarDelPie = ramaDelError(pie, 'const reintentar = (): void => {', '\n  }\n')
-  const errorDelPanel = ramaDelError(panel, "if (r.estado === 'error') {", '\n    }\n')
-  const reintentarDelPanel = ramaDelError(panel, 'const reintentar = (): void => {', '\n  }\n')
+  // [C2 · 22] en el panel de Contacto el error es del estado de envío del sitio: el formulario nunca se desmonta y vuelve con lo escrito; el foco lo lleva EstadoDeEnvio (s85).
+  const vueltaDelPanel = ramaDelError(panel, 'const alVolver = (despuesDe: ResultadoDelEnvio): void => {', '\n  }\n')
   return (
-    [errorDelPie, reintentarDelPie, errorDelPanel, reintentarDelPanel].every((r) => r !== '' && !/setDatos|setVuelta|reset\(/.test(r)) &&
-    reintentarDelPie.includes("pedirFoco.current = 'enviar'") && reintentarDelPanel.includes("pedirFoco.current = 'enviar'") &&
+    [errorDelPie, reintentarDelPie, vueltaDelPanel].every((r) => r !== '' && !/setDatos|setVuelta|reset\(/.test(r)) &&
+    reintentarDelPie.includes("pedirFoco.current = 'enviar'") && vueltaDelPanel.includes("else setEstado('reposo')") &&
     pie.includes('key={`formulario-${String(vuelta)}`}')
   )
 }
 afirmar(intactoBien(PIE_B, PANEL_B), '  «Reintentar» vuelve al formulario con todo lo escrito (ni el error ni Reintentar vacían o remontan los campos); el foco, en Enviar')
 controlPositivo('  el detector VE un error que vacía el formulario del pie', PIE_B.replace("setEstado({ fase: 'error', mensaje: r.error })", "setEstado({ fase: 'error', mensaje: r.error })\n      setDatos(VACIO)"), (p: string) => intactoBien(p, PANEL_B))
+controlPositivo('  y un error que vacía el del panel de Contacto', PANEL_B.replace("else setEstado('reposo')", "else setDatos(VACIO)"), (p: string) => intactoBien(PIE_B, p))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B4 · Los rótulos del botón se suceden: la carga y «Reintentar» nunca a la vez')
@@ -410,6 +411,7 @@ const GEOM_B = leer('_lib/escena/pie3d/geometria.ts')
 const MEDIDA_B = leer('_lib/pie3d/medida.ts')
 // [PULIDO 28] AA1 · el sentido cambió por pedido: el rótulo de la tecla va impreso (`impresas.ts`), con la misma marca (w = −1).
 const IMPRESAS_B = leer('_lib/escena/pie3d/impresas.ts')
+const ESTADO_B = leer('_componentes/formularios/EstadoDeEnvio.tsx')
 const sucesivos = (pie: string, panel: string, a: string, c: string, g: string, m: string, html: string): boolean =>
   // DOM del pie: la carga con el botón ocupado; el rótulo, invisible y mudo; la tarjeta en la otra rama, en espera.
   pie.includes('{enviando && <Carga ') && pie.includes("aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}") &&
@@ -417,13 +419,14 @@ const sucesivos = (pie: string, panel: string, a: string, c: string, g: string, 
   // 3D: el relieve del rótulo marcado, descartado con el botón ocupado, leído cada cuadro; medido aunque esté mudo.
   g.includes('relieveDe(m, fuentes, true, v.tecla, false).map(deRotulo)') && IMPRESAS_B.includes('aLoAnchoDeLaTecla(deRotulo(pintado), m.tecla)') && c.includes('if ( vRotuloDelPie > 0.5 && uSinRotuloDelPie > 0.5 ) discard;') &&
   a.includes("a.uniformes.uSinRotuloDelPie.value = a.boton?.getAttribute('aria-busy') === 'true' ? 1 : 0") && m.includes("mudo.hasAttribute('data-rotulo-de-la-tecla')") &&
-  // El panel: la carga y la tarjeta son estados distintos de la misma presencia.
-  /\{enviando \? \([\s\S]*?<Carga [\s\S]*?\) : enviado \|\| fase === 'error' \? \([\s\S]*?<TarjetaDeResultado/.test(panel) &&
+  // [C2 · 22] El panel: lo monta EstadoDeEnvio, que separa la carga y el resultado en dos vistas de una presencia en espera.
+  panel.includes('<EstadoDeEnvio estado={estado} alVolver={alVolver}>') && ESTADO_B.includes("{vista === 'carga' && (") && ESTADO_B.includes('<AnimatePresence mode="wait" initial={false}>') && /\{resultado !== null && \(/.test(ESTADO_B) &&
   // La tarjeta del error: «Reintentar» y ninguna carga.
   html.includes(RESULTADO.reintentar) && !html.includes('data-pieza="carga"')
 afirmar(sucesivos(PIE_B, PANEL_B, ARMADAS_B, COREO_B, GEOM_B, MEDIDA_B, tarjeta('error', true, true)), 'B4 · la carga, el rótulo y «Reintentar» se suceden: en el DOM, en la tecla 3D (el relieve se apaga en el mismo cuadro) y en el panel')
 controlPositivo('B4 · el detector VE la tecla 3D de antes (el relieve dibujado con el botón ocupado)', COREO_B.replace('if ( vRotuloDelPie > 0.5 && uSinRotuloDelPie > 0.5 ) discard;', ''), (c: string) => sucesivos(PIE_B, PANEL_B, ARMADAS_B, c, GEOM_B, MEDIDA_B, tarjeta('error', true, true)))
 controlPositivo('  y el rótulo a la vista encima de la carga', PIE_B.replace("enviando && 'invisible')", "false && 'invisible')"), (p: string) => sucesivos(p, PANEL_B, ARMADAS_B, COREO_B, GEOM_B, MEDIDA_B, tarjeta('error', true, true)))
+controlPositivo('  y un panel que no monta el estado de envío', PANEL_B.replace('<EstadoDeEnvio estado={estado} alVolver={alVolver}>', '<div>'), (p: string) => sucesivos(PIE_B, p, ARMADAS_B, COREO_B, GEOM_B, MEDIDA_B, tarjeta('error', true, true)))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B5 · La carga gira sobre el palito de la P, con el palito en el medio')
@@ -483,10 +486,11 @@ titulo('B6 · Terminado el éxito, el formulario se limpia')
 // J6 (s61); su posición sobre la placa, en el banco.
 const limpioBien = (pie: string, panel: string): boolean => {
   const exito = ramaDelError(pie, '// [PULIDO 11] B6 · el éxito: lo escrito se va', '} else {')
-  return exito.includes('setDatos(VACIO)') && exito.includes('setIntento(false)') && exito.includes('setVuelta((n) => n + 1)') && pie.includes('key={`formulario-${String(vuelta)}`}') && /setFase\('exito'\)\n\s+setIntento\(false\)\n\s+setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/.test(panel)
+  return exito.includes('setDatos(VACIO)') && exito.includes('setIntento(false)') && exito.includes('setVuelta((n) => n + 1)') && pie.includes('key={`formulario-${String(vuelta)}`}') && /setEstado\('exito'\)\n\s+setIntento\(false\)\n\s+setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/.test(panel) && /if \(despuesDe === 'exito'\) cerrarContacto\(\)/.test(panel)
 }
 afirmar(limpioBien(PIE_B, PANEL_B), 'B6 · el éxito limpia el formulario: los valores se vacían y los campos se vuelven a montar (sin el autocompletado viejo)')
 controlPositivo('B6 · el detector VE campos que no se vuelven a montar (el autocompletado viejo se queda)', PIE_B.replace('setVuelta((n) => n + 1)', ''), (p: string) => limpioBien(p, PANEL_B))
+controlPositivo('  y un panel que no vacía lo escrito con el éxito', PANEL_B.replace('setDatos({ intereses: [], ...VACIO })', ''), (p: string) => limpioBien(PIE_B, p))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('C2 · La cabecera abajo de 1024: parlante y menú del mismo tamaño y en el mismo eje ([CIERRE A] A6 · el progreso se sacó)')

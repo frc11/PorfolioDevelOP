@@ -13,9 +13,13 @@ import { renderToStaticMarkup } from 'react-dom/server'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { RAIZ } from '../../_lib/__tests__/s3-archivos'
+import { ESCENARIO_MIN_ANCHO_PX } from '../../_lib/compuerta'
 import { quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { siguienteFoco } from '../../_secciones/trabajos/demos/dialogo'
 import { abrirContacto, cerrarContacto, devolverElFoco, focoDelOrigen, precargaDe, SELECTOR_DE_APERTURA } from './apertura'
+import { CamposDelContacto } from './CamposDelContacto'
+import { animacionDelPanel, CLASES_DEL_PANEL, curvaDelPanel, esElPanel, PANEL } from './panel'
+import { ESCALA_AL_NACER, escalaDelViaje, MS_DE_LA_SALIDA_DE_LA_PLACA, TRANSICIONES } from './placa'
 import { PlacaDelContacto } from './PlacaDelContacto'
 import { DESPUES_DEL_ENVIO, INTERESES, PRECARGA_POR_SERVICIO, ROTULO_DEL_ENVIO, TITULO } from './contenido'
 import { enviarContacto, validarContacto, type DatosDeContacto } from './enviarContacto'
@@ -112,6 +116,80 @@ afirmarIgual(Object.keys(validarContacto({ ...VALIDO, intereses: [], medio: 'ana
 afirmar(ROTULO_DEL_ENVIO === 'Enviar' && !/¡?[Ee]nviado!?/.test(DESPUES_DEL_ENVIO + ROTULO_DEL_ENVIO), 'el botón dice lo que pasa, y nada dice «enviado»')
 afirmar(INTERESES.length === 7 && !/newsletter|novedades/i.test(HOJA), 'siete opciones y sin casilla de newsletter')
 afirmar(!/whatsapp|wa\.me|mailto:/i.test(HOJA.replace(/<a href="mailto:[^"]*"[^>]*>[^<]*<\/a>/, '')), '  la hoja no nombra WhatsApp ni manda por `mailto` (el mail de la bajada es un enlace para escribir, no el envío)')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('5 · [C2 · 22] El panel de abajo de escritorio: ~70 %, centrado, desde el fondo; el envío del sitio; el autocompletado; los errores')
+
+// El panel (teléfono y tablet, y siempre con el menú del teléfono) es el mismo formulario en una hoja centrada que llega del fondo con
+// una escala y un fundido, sin 3D; en escritorio (1024 en adelante), la placa de siempre. El tamaño real se mide en
+// scripts-carga/contacto-general.ts (68 a 72 % del ancho y del alto visibles a 390 y 768; a 1024 ya es escritorio).
+const HOJA_PANEL = renderToStaticMarkup(<HojaParaElInvariante escritorio={false} />)
+const FUENTE_SIN = quitarComentarios(FUENTE)
+const clase = (...partes: string[]): string => partes.join('')
+const esPanel = (h: string): boolean =>
+  /data-forma="panel"/.test(h) && h.includes('data-parte="escenario-del-panel"') && !h.includes('data-cara=') && !/data-placa/.test(h) && h.includes(CLASES_DEL_PANEL) && /role="dialog"/.test(h) && h.includes('data-parte="velo"')
+afirmar(esPanel(HOJA_PANEL), 'abajo de escritorio la hoja es el PANEL: en su escenario centrado, con las clases del panel, sin placa ni caras 3D, y sigue siendo el diálogo con su velo')
+controlPositivo('  el detector VE la placa de escritorio (con sus caras 3D)', HOJA, esPanel)
+controlPositivo('  y una hoja que no es el panel', HOJA_PANEL.replace('data-forma="panel"', 'data-forma="hoja"'), esPanel)
+afirmar(/data-forma="placa"/.test(HOJA) && (HOJA.match(/data-cara=/g) ?? []).length === 5 && !HOJA.includes('escenario-del-panel'), '  y en escritorio sigue la placa (cinco caras y su escenario), sin el del panel')
+
+// El tamaño: ~70 % del ancho y del alto (el alto es un mínimo: si el contenido pide más, crece hasta el 90 % y recién ahí scrollea).
+const clasesDelTamano = (c: string, p: typeof PANEL): boolean =>
+  c.includes(clase('w-', '[', String(p.ancho * 100), '%]')) && c.includes(clase('min-h-', '[', String(p.alto * 100), 'svh]')) && c.includes(clase('max-h-', '[', String(p.altoMaximo * 100), 'svh]'))
+afirmar(PANEL.ancho === 0.7 && PANEL.alto === 0.7 && PANEL.altoMaximo > PANEL.alto && clasesDelTamano(CLASES_DEL_PANEL, PANEL), '  el panel mide ~70 % del ancho y del alto visibles (el alto es un mínimo, con tope al 90 %): sus clases están escritas enteras y atadas a esas fracciones')
+controlPositivo('  el detector VE un panel de todo el ancho (como la hoja de antes)', CLASES_DEL_PANEL.replace(clase('w-', '[70%]'), 'w-full'), (c: string) => clasesDelTamano(c, PANEL))
+
+// Dónde empieza el panel: 1024 es escritorio (decisión del dueño); abajo y con el menú del teléfono, el panel.
+afirmar(ESCENARIO_MIN_ANCHO_PX === 1024 && /useAnchoMinimo\(CONSULTA_ESCENARIO\)/.test(FUENTE_SIN) && esElPanel('menu', true) && esElPanel('barra', false) && !esElPanel('barra', true), '  el panel es de 1023 para abajo (y siempre con el menú del teléfono); desde 1024, escritorio con la placa: un solo 1024, el del escenario')
+controlPositivo('  el detector VE una tablet con la placa (la barra a 768 sin panel)', (m: 'barra' | 'menu', e: boolean): boolean => m === 'menu' && !e, (f: typeof esElPanel) => f('menu', true) && f('barra', false) && !f('barra', true))
+
+// La llegada: la misma curva de tamaño que la placa de escritorio, vista como avance de una escala que va de ESCALA_AL_NACER a 1.
+const igualALaPlaca = (curva: (t: number) => number): boolean =>
+  [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1].every((t) => Math.abs(ESCALA_AL_NACER + (1 - ESCALA_AL_NACER) * curva(t) - escalaDelViaje(t)) < 1e-9) && curva(0) === 0 && Math.abs(curva(1) - 1) < 1e-9
+afirmar(igualALaPlaca(curvaDelPanel), '  entra con la curva de tamaño de la placa de escritorio (a cada instante, el mismo tamaño aparente)')
+controlPositivo('  el detector VE una entrada en recta (otra curva)', (t: number) => t, igualALaPlaca)
+const objeto = (v: unknown): Readonly<Record<string, unknown>> => (typeof v === 'object' && v !== null ? (v as Record<string, unknown>) : {})
+const conMovimiento = animacionDelPanel(false)
+const llegaDelFondo = (a: ReturnType<typeof animacionDelPanel>): boolean => {
+  const ini = objeto(a.initial)
+  const ani = objeto(a.animate)
+  const sal = objeto(a.exit)
+  const viaje = objeto(objeto(objeto(ani.transition).scale))
+  const salida = objeto(objeto(objeto(sal.transition).scale))
+  return (
+    ini.scale === ESCALA_AL_NACER && ini.opacity === 0 && ani.scale === 1 && ani.opacity === 1 && sal.scale === ESCALA_AL_NACER && sal.opacity === 0 && !('y' in ini) && !('y' in sal) &&
+    viaje.delay === TRANSICIONES.viaje.delay && viaje.duration === TRANSICIONES.viaje.duration && salida.duration === MS_DE_LA_SALIDA_DE_LA_PLACA / 1000
+  )
+}
+afirmar(llegaDelFondo(conMovimiento), '  llega del fondo con una escala y un fundido (de un punto a su tamaño, con el retardo y la duración del viaje de la placa) y se va igual (vuelve al fondo y se desvanece); sin desplazarse desde abajo')
+controlPositivo('  el detector VE la hoja que sube desde abajo (la de antes)', { initial: { y: '100%' }, animate: { y: 0 }, exit: { y: '100%' } }, llegaDelFondo)
+const soloFundido = (a: ReturnType<typeof animacionDelPanel>): boolean => [a.initial, a.animate, a.exit].every((v) => !('scale' in objeto(v)) && !('y' in objeto(v)) && 'opacity' in objeto(v))
+afirmar(soloFundido(animacionDelPanel(true)), '  con movimiento reducido, sólo un fundido (sin escala ni desplazamiento)')
+controlPositivo('  el detector VE el movimiento completo con movimiento reducido', conMovimiento, soloFundido)
+
+// El envío: el estándar del sitio (EstadoDeEnvio), en todos los anchos; el éxito cierra el panel, el error vuelve con lo escrito.
+const delEnvio = (f: string): boolean =>
+  /<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\}>/.test(f) && /if \(despuesDe === 'exito'\) cerrarContacto\(\)\s*else setEstado\('reposo'\)/.test(f) &&
+  /if \(Object\.keys\(validarContacto\(datos\)\)\.length === 0\) setEstado\('enviando'\)/.test(f) && !/TarjetaDeResultado|<Carga |conDuracionMinima|CIERRE_MS|useAltoGuardado/.test(f)
+afirmar(delEnvio(FUENTE_SIN), 'el envío es el del sitio (EstadoDeEnvio): inválido responde al toque, válido pasa a la carga; con el éxito el panel se cierra, con el error vuelve el formulario con lo escrito; sin la tarjeta ni la carga de antes')
+controlPositivo('  el detector VE el envío de antes (la tarjeta de resultado)', FUENTE_SIN.replace('<EstadoDeEnvio estado={estado} alVolver={alVolver}>', '<TarjetaDeResultado>'), delEnvio)
+controlPositivo('  y el éxito que no cierra el panel', FUENTE_SIN.replace("if (despuesDe === 'exito') cerrarContacto()", "if (despuesDe === 'exito') setEstado('reposo')"), delEnvio)
+const conEstadoDeEnvio = (h: string): boolean => /data-pieza="estado-de-envio"[\s\S]*<form /.test(h)
+afirmar(conEstadoDeEnvio(HOJA_PANEL) && conEstadoDeEnvio(HOJA), '  y en el marcado el formulario vive adentro de su estado de envío (el mismo en el panel y en la placa)')
+controlPositivo('  el detector VE un marcado sin el estado de envío', HOJA_PANEL.replace('data-pieza="estado-de-envio"', 'data-pieza="otro"'), conEstadoDeEnvio)
+
+// El autocompletado: ningún campo del contacto es del pie (data-foco="campo"), así que toma la regla global de /v3 (piezas.css; s85 la ata).
+const sinCamposDelPie = (h: string): boolean => (h.match(/<input /g) ?? []).length >= 4 && !/data-foco="campo"/.test(h)
+afirmar(sinCamposDelPie(HOJA_PANEL), 'los campos del contacto toman el autocompletado global de /v3 (ninguno es de los del pie, que tienen el suyo)')
+controlPositivo('  el detector VE un campo marcado como del pie', HOJA_PANEL.replace('<input ', '<input data-foco="campo" '), sinCamposDelPie)
+
+// Los errores de validación: el formato de siempre del sitio (la píldora con borde punteado, el texto debajo y aria-invalid).
+const vacioDeDatos: DatosDeContacto = { intereses: [], presupuesto: '', nombre: '', medio: '', empresa: '', mensaje: '' }
+const sinAccion = (): void => undefined
+const conErrores = (errores: Parameters<typeof CamposDelContacto>[0]['errores']): string => renderToStaticMarkup(<CamposDelContacto datos={vacioDeDatos} errores={errores} alternarInteres={sinAccion} escribir={sinAccion} compacto />)
+const formatoDelSitio = (h: string): boolean => /aria-invalid="true"/.test(h) && /border-dashed/.test(h) && h.includes('id="contacto-error-medio"') && h.includes('Un email o un teléfono.')
+afirmar(formatoDelSitio(conErrores({ medio: 'Un email o un teléfono.' })), 'el error de validación va en el formato del sitio: la píldora con borde punteado, aria-invalid y el texto debajo')
+controlPositivo('  el detector VE los campos sin error', conErrores({}), formatoDelSitio)
 
 void (async (): Promise<void> => {
   const pedidos: { ruta: string; datos: Readonly<Record<string, unknown>> }[] = []

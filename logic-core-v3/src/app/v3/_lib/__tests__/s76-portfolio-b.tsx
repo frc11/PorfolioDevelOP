@@ -29,8 +29,9 @@ const huella = (m: string): string => createHash('sha256').update(m).digest('hex
  * de `5ef4ce83`): la hoja entera (con y sin el interés precargado) y los campos vacíos, llenos con errores y en el teléfono.
  */
 const ANTES = {
-  hoja: '3ef9ab30c8878d604d5b049c0273776f140938de93de0d42d5ebeef68339cbe2',
-  hojaWeb: '823b55724c4ab6f4fc346b4fbd94896167451225e9ae91bd710705d219a26d6d',
+  // [C2 · 22] la hoja entera cambió por diseño (el envío es EstadoDeEnvio, y lleva `data-forma`); sus CAMPOS (los tres de abajo) siguen idénticos.
+  hoja: 'c0f171481fd4484613656bcd61ee04cc56de13ce1f19f2fa8c63cd2c0aa56843',
+  hojaWeb: 'ee7df87c9ecd5aa5092658adaab9c5e188bc06d2b1c238c102bd5b754ad855d6',
   vacio: '9cb4ffa3551b99a079ae50df0e7093f6b559f11ffd438b7eea8ee4f4d4d341b8',
   llenoConErrores: '2a3d2d3f0eb59113f08524764f3ea1131b4969b3e03d3f79bd3049564c4d84e1',
   compacto: '44ccfd4f0a79b489a93ef7b4f0a28c89dcaf99d74c97566bf121b32fff67e8f9',
