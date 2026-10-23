@@ -85,7 +85,7 @@ export function TituloQueSePinta({ renglones, como: Etiqueta, id, className }: T
       {renglones.map((renglon, k) => (
         <span key={renglon.palabras.join(' ')} className="block whitespace-nowrap">
           {renglon.palabras.map((palabra, j) => (
-            <Palabra key={`${String(inicios[k] + j)}-${palabra}`} texto={palabra} conEspacio={k > 0 || j > 0} destacada={renglon.destacado === true} />
+            <Palabra key={`${String(inicios[k] + j)}-${palabra}`} texto={palabra} conEspacio={k > 0 || j > 0} destacada={renglon.destacado === true} corte={renglon.cortesEnElTelefono?.includes(j) === true} />
           ))}
         </span>
       ))}
@@ -93,10 +93,14 @@ export function TituloQueSePinta({ renglones, como: Etiqueta, id, className }: T
   )
 }
 
-/** Una palabra con su pintado. El espacio va ANTES y afuera de la pieza: se anuncia entre palabras y no se subraya. */
-function Palabra({ texto, conEspacio, destacada }: { readonly texto: string; readonly conEspacio: boolean; readonly destacada: boolean }): React.JSX.Element {
+/**
+ * Una palabra con su pintado. El espacio va ANTES y afuera de la pieza: se anuncia entre palabras y no se subraya. [C2 60b]
+ * Con `corte`, antes del espacio un salto que sólo existe abajo de 1024 (el espacio de después, al principio del renglón, no se ve).
+ */
+function Palabra({ texto, conEspacio, destacada, corte }: { readonly texto: string; readonly conEspacio: boolean; readonly destacada: boolean; readonly corte: boolean }): React.JSX.Element {
   return (
     <>
+      {corte ? <br data-corte="" className="escritorio:hidden" /> : null}
       {conEspacio ? ' ' : null}
       <span data-palabra="" className={cn(COLOR_DE_LA_PALABRA, destacada && 'relative inline-block italic')}>
         {texto}

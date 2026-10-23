@@ -470,11 +470,13 @@ afirmar(PUNTOS_DEL_ENJAMBRE.ancho === 3000 && PUNTOS_DEL_ENJAMBRE.angosto === 12
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A7 · Las demos de Tu panel llegan más despacio y la sección es un poco más larga (REGLA DE ALTURAS: la tabla declara lo real)')
 
-// [B6] La especificación cambió: el caos de ocho features se fue y quedan tres módulos alternados. Lo que A7 fijaba sigue: los
-// módulos no llegan uno detrás del otro. Entre uno y el siguiente hay una pantalla entera (más que los 87 a 92 svh del caos).
-const despacioA7 = (entreFilas: number): boolean => entreFilas >= 92
-afirmar(despacioA7(RITMO.entreFilas), 'entre un módulo y el siguiente hay una pantalla de aire (el caos los separaba de 87 a 92 svh): no llegan demasiado rápido uno tras otro', `${String(RITMO.entreFilas)} svh`)
-controlPositivo('el detector VE la separación corta (40 svh, la séptima del caos)', 40, despacioA7)
+// [B6] La especificación cambió: el caos de ocho features se fue y quedan tres módulos alternados. [C2 60b] Y otra vez (ítem 15:
+// «muchísimo espacio entre cada módulo»): la pantalla entera de aire se achicó. Lo que queda de A7: cada módulo llega con su
+// ventana (`ventana-de-la-demo`, abajo) y entre uno y el siguiente hay aire (no pegados), mucho menos que una pantalla.
+const despacioA7 = (entreFilas: number): boolean => entreFilas >= 10 && entreFilas <= 25
+afirmar(despacioA7(RITMO.entreFilas), 'entre un módulo y el siguiente, aire pero mucho menos que la pantalla de antes (de 10 a 25 svh)', `${String(RITMO.entreFilas)} svh`)
+controlPositivo('el detector VE la separación de antes (una pantalla entera, 100 svh)', 100, despacioA7)
+controlPositivo('el detector VE los módulos pegados (4 svh)', 4, despacioA7)
 afirmar(seccionPorId('tu-panel').alto === '700svh', 'y la tabla de secciones declara el alto nuevo (700svh: medido 6,9–7,0 pantallas a 1440 × 900 con el banco; con 600 contra 6,33 medidas todo lo que venía después llegaba 0,0035 de progreso tarde)')
 const anclaDeLaDemo = (a: ParDeAnclas): boolean => a.inicio === ANCLA_DE_LA_VENTANA_VISIBLE.inicio && a.fin.declarado === 'bottom 50%' && a.fin.elemento.fraccion === 1 && a.fin.elemento.px === 0 && a.fin.viewport.fraccion === 0.5 && a.fin.viewport.px === 0
 const tarjetaA7 = leer('_secciones/tu-panel/Tarjeta.tsx')
