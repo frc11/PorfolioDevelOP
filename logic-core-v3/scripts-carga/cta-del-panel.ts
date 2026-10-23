@@ -116,7 +116,8 @@ async function acaYColumnas(p: Page, tag: string, escritorio: boolean): Promise<
     return {
       delTexto: delTexto.map((r) => ({ top: r.top, bottom: r.bottom })), deAca: deAca.map((r) => ({ top: r.top, bottom: r.bottom })),
       probar: caja('[data-pieza="columna-probar"]'), boton: caja('[data-pieza="probar-ahora"]'), novedades: caja('[data-pieza="columna-novedades"]'),
-      bajada: caja('[data-pieza="bajada-del-cta"]'), aviso: caja('[data-pieza="aviso-de-scroll"]'), fila: caja('[data-pieza="fila-del-cta"]'),
+      // El aviso del CTA, no el primero del documento (abajo de 1024 Servicios tiene el suyo antes).
+      bajada: caja('[data-pieza="bajada-del-cta"]'), aviso: document.querySelector('[data-pieza="bajada-del-cta"]')?.closest('section')?.querySelector('[data-pieza="aviso-de-scroll"]')?.getBoundingClientRect() ?? null, fila: caja('[data-pieza="fila-del-cta"]'),
       tramos: tramos.map((r) => ({ top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width, height: r.height })),
       o: oCaja === null ? null : { top: oCaja.top, bottom: oCaja.bottom, left: oCaja.left, right: oCaja.right },
     }
@@ -274,7 +275,7 @@ async function main(): Promise<void> {
       args: [`--window-size=${String(ancho + 20)},${String(alto + 100)}`, '--window-position=0,0', '--no-first-run', '--no-default-browser-check', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion,Translate,MediaRouter'],
     })
     try {
-      await ctx.addInitScript(`(() => { try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
+      await ctx.addInitScript(`(() => { window.__name = window.__name || ((f) => f); try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
       if (CONTROL === 'con-nombre') {
         await ctx.addInitScript(`(() => { const f = window.fetch; window.fetch = (u, o) => String(u).includes('/api/newsletter') && o && o.body ? f(u, { ...o, body: JSON.stringify({ ...JSON.parse(o.body), nombre: 'Ana Prueba' }) }) : f(u, o) })()`)
       }
@@ -303,7 +304,7 @@ async function main(): Promise<void> {
       await foto(p, `${tag}-cta`, ancho, alto)
       await boton(p, cdp, tag, escritorio, ancho, alto)
       await newsletter(p, tag, pedido)
-      await llevar(p, '[data-pieza="aviso-de-scroll"]', 0.7)
+      await llevar(p, '[data-pieza="columna-novedades"]', 0.6)
       await foto(p, `${tag}-novedades-y-aviso`, ancho, alto)
     } finally {
       await ctx.close()
