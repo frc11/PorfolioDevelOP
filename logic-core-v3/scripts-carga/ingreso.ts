@@ -62,6 +62,19 @@ const INICIO = `(() => {
       if (typeof f === 'function') C.prototype[k] = function (...a) { window.__dibujos += 1; return f.apply(this, a) }
     }
   }
+  // [C2 · 80] Las animaciones nativas sobre el fondo del login: cuándo se crean (con una marca para el trace) y cuándo arrancan de
+  // verdad en el compositor (\`startTime\`, al resolverse \`ready\`).
+  const animar = Element.prototype.animate
+  Element.prototype.animate = function (...a) {
+    const anim = animar.apply(this, a)
+    if (this.getAttribute && this.getAttribute('data-parte') === 'fondo') {
+      const r = { creada: performance.now(), inicio: NaN, duracion: Number(a[1] && a[1].duration) }
+      ;(window.__fundidos = window.__fundidos || []).push(r)
+      performance.mark('fundido-creado-' + String(window.__fundidos.length))
+      anim.ready.then(() => { r.inicio = Number(anim.startTime) }).catch(() => {})
+    }
+    return anim
+  }
   const log = (window.__cuadrosDelIngreso = [])
   const cuadro = () => {
     const raiz = document.querySelector('[data-pieza="ingreso"]')
@@ -204,6 +217,73 @@ function meseta(cuadros: readonly Cuadro[], fase: 'abriendo' | 'cerrando'): { re
   return { hay: baja > 0.01 || hueco > 60, detalle: `el área baja hasta ${(baja * 100).toFixed(1)} % · el mayor hueco entre cuadros ${hueco.toFixed(0)} ms (${String(medio.length)} cuadros entre el 5 y el 95 %)` }
 }
 
+interface EventoDelTrace {
+  readonly name: string
+  readonly ph: string
+  readonly ts: number
+  readonly id?: string
+  readonly id2?: { readonly local?: string }
+  readonly args?: { readonly data?: { readonly displayName?: string; readonly compositeFailed?: number }; readonly hasPartialUpdate?: boolean }
+}
+
+/** Una animación nativa sobre el fondo del login, vista desde la página (ms de `performance.now`). */
+interface FundidoDeLaPagina {
+  readonly creada: number
+  readonly inicio: number
+  readonly duracion: number
+}
+
+/**
+ * [C2 · 80] EL FUNDIDO EN EL COMPOSITOR. En la entrada directa el hilo principal está ocupado (el home monta sus secciones) y sus
+ * cuadros no ven el fundido (ni el registro de `INICIO`, ni un screencast, que pasa por ese hilo). La página dice cuándo arrancó la
+ * animación nativa en el compositor (`startTime`) y cuánto dura; el trace de Chrome (alineado por la marca `fundido-creado-N`), si se
+ * pudo componer (`compositeFailed`) y los cuadros que el compositor presentó en esa ventana (un `DroppedFrame` con `hasPartialUpdate`
+ * es un cuadro presentado sin la parte del hilo principal: el fundido sí se ve; sin esa marca, el cuadro se perdió).
+ */
+async function grabarElTrace(p: Page): Promise<() => Promise<EventoDelTrace[]>> {
+  const s = await p.context().newCDPSession(p)
+  const eventos: EventoDelTrace[] = []
+  s.on('Tracing.dataCollected', (d: { value: Record<string, unknown>[] }) => {
+    for (const e of d.value) {
+      const name = String(e.name ?? '')
+      if (name === 'Animation' || name === 'PipelineReporter' || name === 'DroppedFrame' || name.startsWith('fundido-creado-')) eventos.push(e as unknown as EventoDelTrace)
+    }
+  })
+  await s.send('Tracing.start', { categories: 'blink.animations,devtools.timeline,cc,blink.user_timing,disabled-by-default-devtools.timeline.frame', transferMode: 'ReportEvents' })
+  return async () => {
+    const fin = new Promise<void>((r) => s.once('Tracing.tracingComplete', () => r()))
+    await s.send('Tracing.end')
+    await fin
+    return eventos
+  }
+}
+
+function fundidoEnElCompositor(eventos: readonly EventoDelTrace[], fundidos: readonly FundidoDeLaPagina[]): { readonly bien: boolean; readonly detalle: string } {
+  // El último que arrancó (en desarrollo, el modo estricto de React crea uno y lo cancela antes del de verdad).
+  const i = fundidos.findLastIndex((f) => Number.isFinite(f.inicio))
+  const f = fundidos[i]
+  if (f === undefined) return { bien: false, detalle: 'sin una animación nativa sobre el fondo (el fundido se pinta desde JS)' }
+  const marca = eventos.find((e) => e.name === `fundido-creado-${String(i + 1)}`)
+  if (marca === undefined) return { bien: false, detalle: 'sin la marca de la animación en el trace' }
+  const desde = marca.ts + (f.inicio - f.creada) * 1000
+  const hasta = desde + f.duracion * 1000
+  const clave = (e: EventoDelTrace): string => e.id2?.local ?? e.id ?? ''
+  const animacion = (e: EventoDelTrace): boolean => e.name === 'Animation'
+  // Las del fundido (la hoja y lo de adentro) nacen juntas con la marca y son nativas (sin `displayName`: una transición de CSS lleva
+  // su propiedad, como la del color del contorno de la flecha, que nace a la vez); un `compositeFailed` entre su principio y su fin es de ellas.
+  const propias = eventos.filter((e) => animacion(e) && e.ph === 'b' && Math.abs(e.ts - marca.ts) <= 5000 && e.args?.data?.displayName === '')
+  const fallo = propias.flatMap((b) => {
+    const fin = eventos.find((e) => animacion(e) && e.ph === 'e' && clave(e) === clave(b) && e.ts >= b.ts)?.ts ?? Number.POSITIVE_INFINITY
+    return eventos.filter((e) => animacion(e) && e.ph === 'n' && clave(e) === clave(b) && e.ts >= b.ts && e.ts <= fin && (e.args?.data?.compositeFailed ?? 0) !== 0)
+  })[0]
+  const enLaVentana = (e: EventoDelTrace): boolean => e.ts >= desde && e.ts <= hasta
+  const cuadros = eventos.filter((e) => e.name === 'PipelineReporter' && e.ph === 'b' && enLaVentana(e)).length
+  const perdidos = eventos.filter((e) => e.name === 'DroppedFrame' && enLaVentana(e) && e.args?.hasPartialUpdate !== true).length
+  const bien = propias.length > 0 && fallo === undefined && f.duracion <= MS_DEL_FUNDIDO + 2 * CUADRO && cuadros >= Math.floor(MS_DEL_FUNDIDO / 20) && perdidos <= 2
+  const compuesta = propias.length === 0 ? 'sin sus eventos en el trace' : fallo === undefined ? `compuesta (${String(propias.length)} animaciones)` : `NO compuesta (${String(fallo.args?.data?.compositeFailed)})`
+  return { bien, detalle: `${f.duracion.toFixed(0)} ms en el compositor, ${compuesta}, ${String(cuadros)} cuadros presentados y ${String(perdidos)} perdidos en esa ventana; arrancó ${(f.inicio - f.creada).toFixed(0)} ms después de crearse` }
+}
+
 async function esperarFase(p: Page, fase: string, ms = 4000): Promise<boolean> {
   const t0 = Date.now()
   while (Date.now() - t0 < ms) {
@@ -292,10 +372,16 @@ async function main(): Promise<void> {
   {
     const { p, errores, cerrar } = await abrir(390, 844, true)
     const i0 = 0
+    const parar = await grabarElTrace(p)
     await cargar(p, '/v3?ingresar')
     ver(await esperarFase(p, 'abierta', 8000), '390 · la entrada directa con ?ingresar lo abre')
     const ab = tramo(await desde(p, i0), 'abriendo')
-    ver(ab.visto && Math.abs(ab.ms - MS_DEL_FUNDIDO) <= 2 * CUADRO, '390 · sin un botón de dónde salir, el fundido de las demos', `${ab.ms.toFixed(0)} ms (objetivo ${String(MS_DEL_FUNDIDO)})`)
+    // [C2 · 80] El hilo principal (lo de siempre) queda como dato: en la entrada directa el home monta sus secciones y le quita los
+    // cuadros. Lo que manda es el compositor, donde corre el fundido.
+    console.log(`info  390 · el hilo principal ve el fundido en ${ab.ms.toFixed(0)} ms`)
+    const fundidos = await p.evaluate(() => (window as unknown as { __fundidos?: FundidoDeLaPagina[] }).__fundidos ?? [])
+    const compositor = fundidoEnElCompositor(await parar(), fundidos)
+    ver(compositor.bien, '390 · sin un botón de dónde salir, el fundido de las demos, en el compositor (C2 · 80; rojo: el fundido pintado desde JS, el código de antes)', `${compositor.detalle} (objetivo ${String(MS_DEL_FUNDIDO)} ± ${(2 * CUADRO).toFixed(0)}, ≥ ${String(Math.floor(MS_DEL_FUNDIDO / 20))} cuadros, ≤ 2 perdidos)`)
     const completa = await p.evaluate(() => {
       const d = document.querySelector('[data-pieza="ingreso"] [role="dialog"]')?.getBoundingClientRect()
       return d !== undefined && d.left <= 0 && d.top <= 0 && d.width >= innerWidth && d.height >= innerHeight
@@ -399,7 +485,9 @@ async function main(): Promise<void> {
     await tocar(p, '[data-pieza="ingreso"] [data-parte="flecha-de-salida"]')
     await dormir(MS_DEL_GENIE + 900)
     ver((await p.evaluate(() => document.querySelector('[data-pieza="ingreso"]') === null)) && !(await p.evaluate(() => location.search)).includes('ingresar'), 'C2 · 1440 · la flecha cierra el login (y la URL vuelve)')
-    ver(errores.length === 0, 'C2 · 1440 · la consola sin errores', errores.join(' | '))
+    // Las acciones que el banco aborta dejan su «Failed to load resource» en la consola: ésas son del banco, no del sitio.
+    const propios = errores.filter((e) => !(acciones.length > 0 && e === 'Failed to load resource: net::ERR_FAILED'))
+    ver(propios.length === 0, 'C2 · 1440 · la consola sin errores (salvo las acciones que aborta el banco)', propios.join(' | '))
     ver(posts.length === 0, `C2 · 1440 · ningún login de verdad (${String(acciones.length)} acciones sujetas y abortadas)`, posts.join(' · '))
     await cerrar()
   }

@@ -98,6 +98,59 @@ export function useDespliegue(capas: CapasDelDespliegue): ControlDelDespliegue {
     [reducido],
   )
 
+  /**
+   * [C2 · 80] EL FUNDIDO, EN EL COMPOSITOR: una animación nativa de opacidad y escala (lineal, como `pintar`). En la entrada directa
+   * el home todavía monta sus secciones y le quitaba los cuadros a un fundido pintado desde JS (los 200 ms se volvían ~630, sin un
+   * paso intermedio). El avance lo sigue leyendo el hilo principal (para `data-avance` y para cortar a mitad de camino).
+   */
+  const fundir = useCallback(
+    (desde: number, hasta: number, ms: number, alTerminar: () => void): (() => void) => {
+      const hoja = capas.hoja.current
+      const contenido = capas.contenido.current
+      if (hoja === null || contenido === null) {
+        pintar(hasta)
+        alTerminar()
+        return () => undefined
+      }
+      const [u0, u1] = [1 - desde, 1 - hasta]
+      const como: KeyframeAnimationOptions = { duration: ms, easing: 'linear', fill: 'forwards' }
+      const animaciones = [
+        hoja.animate([{ opacity: u0 }, { opacity: u1 }], como),
+        contenido.animate([{ opacity: u0, scale: String(escalaDelFundido(u0)) }, { opacity: u1, scale: String(escalaDelFundido(u1)) }], como),
+      ]
+      const enMedio = (): number => {
+        const t = animaciones[0].currentTime
+        return desde + (hasta - desde) * Math.min(1, typeof t === 'number' ? t / ms : 0)
+      }
+      let cuadro = 0
+      const seguir = (): void => {
+        const m = enMedio()
+        avance.current = m
+        hoja.setAttribute('data-avance', m.toFixed(3))
+        cuadro = requestAnimationFrame(seguir)
+      }
+      cuadro = requestAnimationFrame(seguir)
+      // Los estilos del final quedan escritos antes de soltar la animación (sin un cuadro con los de antes). Una sola vez: el
+      // próximo tramo llama al cancelador de éste, y ya terminado no tiene que repintar nada.
+      let vivo = true
+      const terminar = (m: number): boolean => {
+        if (!vivo) return false
+        vivo = false
+        cancelAnimationFrame(cuadro)
+        pintar(m)
+        animaciones.forEach((a) => a.cancel())
+        return true
+      }
+      animaciones[0].onfinish = () => {
+        if (terminar(hasta)) alTerminar()
+      }
+      return () => {
+        if (vivo) terminar(enMedio())
+      }
+    },
+    [capas, pintar],
+  )
+
   const correr = useCallback(
     (hasta: 0 | 1, alTerminar: () => void): void => {
       cancelador.current()
@@ -111,12 +164,16 @@ export function useDespliegue(capas: CapasDelDespliegue): ControlDelDespliegue {
         alTerminar()
         return
       }
+      if (geometria.current === null) {
+        cancelador.current = fundir(desde, hasta, ms, alTerminar)
+        return
+      }
       const espera = requestAnimationFrame(() => {
         cancelador.current = correrPorTiempo(ms, (t) => pintar(desde + (hasta - desde) * (t / ms)), alTerminar)
       })
       cancelador.current = () => cancelAnimationFrame(espera)
     },
-    [pintar, soltar],
+    [pintar, soltar, fundir],
   )
 
   const abrir = useCallback(
