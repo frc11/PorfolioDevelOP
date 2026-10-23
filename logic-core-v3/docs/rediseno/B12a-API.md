@@ -511,6 +511,68 @@ de la composición) y el pie llegado al fondo con el final del home quieto; `CON
 que fallar. Sin navegador, s78-b13. [B10] El FAQ: `scripts-carga/faq-del-pie.ts` (`CONTROL=sin-hundimiento` tiene que fallar la entrada);
 sin navegador, s78-b10.
 
+## 9. Piezas compartidas de la cola 2 (C2 · 20, 2026-10-23)
+
+Cuatro piezas para todo /v3; se importan, no se copian. Se ven juntas en `/v3/piezas` (instrumento, `noindex`): cada una sobre el papel y
+en una sección invertida. Las reglas viven en `_estilos/piezas.css` (entra por el layout). Los colores salen de la sección (la tinta y el
+fondo del contexto), así que andan igual sobre el papel y en una sección `data-seccion="invertida"`. Sin navegador: `npm run test:s85-piezas`.
+
+**`EstadoDeEnvio`** — `src/app/v3/_componentes/formularios/EstadoDeEnvio.tsx` (lo puro y los textos: `_lib/formularios/estadoDeEnvio.ts`).
+El estándar de envío de los formularios (no el del pie). Envuelve al formulario y recibe el estado; el formulario nunca se desmonta.
+
+```tsx
+import { EstadoDeEnvio } from '../../_componentes/formularios/EstadoDeEnvio'
+import { MENSAJES_DEL_ENVIO, type EstadoDelEnvio } from '../../_lib/formularios/estadoDeEnvio'
+
+const [estado, setEstado] = useState<EstadoDelEnvio>('reposo') // 'reposo' | 'enviando' | 'exito' | 'error'
+// al enviar: setEstado('enviando'); con la respuesta: setEstado('exito') o setEstado('error')
+const alVolver = (despuesDe: 'exito' | 'error') => { if (despuesDe === 'exito') vaciar(); setEstado('reposo') }
+<EstadoDeEnvio estado={estado} alVolver={alVolver} mensajes={MENSAJES_DEL_ENVIO.newsletter} compacto>
+  <form onSubmit={alEnviar}>…</form>
+</EstadoDeEnvio>
+```
+
+- Props: `estado` (obligatorio), `alVolver(despuesDe)` (obligatorio: el mensaje terminó; volvé a `reposo` y, si `despuesDe` es `'exito'`,
+  vaciá el formulario: todavía no se ve), `mensajes` (por defecto
+  `MENSAJES_DEL_ENVIO.contacto`; también `.newsletter`), `etiquetaDeCarga` (por defecto «Enviando…»), `textosDeCarga` (líneas que se suceden
+  debajo de la carga), `compacto` (formularios chicos), `className`.
+- Qué hace: enviando → el formulario se desvanece y aparece la carga de develOP (`Carga`) ya girando, por lo menos 600 ms; éxito o error → el
+  encastre del logo (`EncajeDelLogo`, con su sonido) y el mensaje; a los 3 s de que aterrizó, `alVolver`. Después del éxito, el formulario
+  vuelve vacío (lo vacía quien lo monta, en `alVolver`); después del error, con lo escrito. Una respuesta `invalido` (errores de campos) se resuelve con
+  `setEstado('reposo')` y los errores en el formato de siempre (`ErrorDelCampo`).
+- Banco: `scripts-carga/estado-de-envio.ts` (`CONTROL=sin-carga`, `CONTROL=sin-datos`).
+
+**`AvisoDeScroll`** — `src/app/v3/_componentes/avisos/AvisoDeScroll.tsx`.
+
+```tsx
+import { AvisoDeScroll } from '../../_componentes/avisos/AvisoDeScroll'
+
+<AvisoDeScroll texto="Scrolleá para explorarlo" />
+<AvisoDeScroll texto="Scrolleá una vez más para ver las preguntas frecuentes" tono="escena" alTocar={unGestoDeScroll} />
+```
+
+- Props: `texto` (de `05-TEXTOS.md`), `tono` (`'papel'` por defecto | `'escena'`: con la sombra pegada del texto de la intro), `alTocar`
+  (si está, es un `<button>`; si no, decorativo con `aria-hidden`), `className`. Centrado con `mx-auto`; quien lo monta lo ubica debajo
+  del contenido. Titila con la opacidad (1,6 s); quieto con movimiento reducido o fuera de la pantalla.
+
+**`Reluciente`** — `src/app/v3/_componentes/efectos/Reluciente.tsx` (y `RELUCIENTE`, el ritmo, para un brillo en la escena 3D).
+
+```tsx
+import { Reluciente } from '../../_componentes/efectos/Reluciente'
+
+<button className="relative overflow-hidden rounded-full …">Probar ahora<Reluciente /></button>  // en una caja
+<Reluciente como="texto">HABLANOS</Reluciente>                                                   // en un texto
+```
+
+- Props: `como` (`'caja'` por defecto: una capa encima, que necesita una caja con `relative` y `overflow-hidden`, y hereda su redondeo |
+  `'texto'`: el reflejo pasa por adentro de las letras), `children` (sólo en `texto`), `className`. Una pasada cada 3,5 s; con el mouse o
+  el foco encima (de la caja, o del `a`/`button` que contiene al texto), una en el acto y cada 1,4 s. El reflejo es blanco: se ve sobre
+  letras y rellenos oscuros. Sin barrido con movimiento reducido.
+
+**El autocompletado** — global: `piezas.css` le aplica a TODO `input`, `textarea` y `select` de /v3 el arreglo del pie (el fondo y la tinta
+de cada formulario se quedan cuando el navegador autocompleta). No hay que importar nada: un formulario nuevo lo toma solo. Los campos del
+pie (`data-foco="campo"`) siguen con el suyo. Banco: `scripts-carga/autocompletado.ts` (`CONTROL=sin-arreglo`).
+
 ## Qué P-H29 resolvió cada cosa
 
 | P-H29 | Qué pidió servicios | Dónde está |

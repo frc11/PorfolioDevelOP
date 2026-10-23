@@ -362,6 +362,8 @@
     "test:s81": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s81",
     "test:s84-demos": "npx tsx src/app/v3/_lib/__tests__/s84-demos.invariant.tsx",
     "test:s84": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s84",
+    "test:s85-piezas": "npx tsx src/app/v3/_lib/__tests__/s85-piezas.invariant.tsx",
+    "test:s85": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s85",
     "test:s87-chat": "npx tsx src/app/v3/_chrome/chat/s87-chat.invariant.tsx",
     "test:s87": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s87",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",

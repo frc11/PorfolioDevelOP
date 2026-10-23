@@ -1,0 +1,199 @@
+/* =========================================================================
+ * [C2 · 20] LAS PIEZAS COMPARTIDAS DE LA COLA 2
+ * =========================================================================
+ * Cuatro bloques, uno por pieza:
+ *
+ *   1. el autocompletado de todos los campos de /v3 (menos los del pie, que
+ *      tienen el suyo: la utilidad de `FormularioDelPie.tsx` y la demora de
+ *      `foco.css`, intactas);
+ *   2. las tintas del encastre de `EstadoDeEnvio`, atadas a la sección;
+ *   3. el titilar de `AvisoDeScroll`;
+ *   4. el barrido de `Reluciente`.
+ *
+ * Cada propiedad tiene UN valor (`s3-tokens`): las que ya existían
+ * (`--demora-del-autocompletado`, `--resultado-*-invertido`) se repiten con
+ * el mismo; las nuevas están registradas en `s3-registro-de-tokens.ts`.
+ * Con movimiento reducido, la política del sitio (`globals.css`) deja cada
+ * animación en su último fotograma: el aviso a la vista, el reflejo afuera.
+ * Además las piezas se quedan quietas con `data-quieto` (la preferencia
+ * del árbol, o fuera de la pantalla).
+ * ========================================================================= */
+
+/* 1 · EL AUTOCOMPLETADO NO CAMBIA EL CAMPO, EN TODO /v3. El navegador le
+ * pone al campo autocompletado su fondo celeste y su color de texto con
+ * `!important` (no se pisan): el arreglo del pie (PULIDO 10 J6, PULIDO 13
+ * K4) demora ese cambio para siempre con una transición, y el texto y el
+ * cursor quedan en la tinta del formulario. Acá, para cualquier campo de
+ * /v3: el fondo y la tinta de cada formulario, claro u oscuro, se quedan.
+ * Los del pie (`data-foco="campo"`) se excluyen: los cuida su propia regla,
+ * que además demora el borde y el anillo del foco. */
+[data-v3] :is(input, textarea, select):not([data-foco='campo']):autofill {
+  --demora-del-autocompletado: 100000s;
+  transition-property: background-color, color;
+  transition-duration: var(--demora-del-autocompletado);
+  transition-delay: 0s;
+  -webkit-text-fill-color: currentColor;
+  caret-color: currentColor;
+}
+
+/* 2 · EL ENCASTRE DE `EstadoDeEnvio`, CON LAS TINTAS DE LA SECCIÓN. La
+ * tarjeta del resultado (`resultado.css`) es siempre oscura y su encastre
+ * pinta la pieza clara; acá no hay tarjeta: el encastre va directo sobre el
+ * fondo del formulario. Lo oscuro es el fondo de la sección y lo claro su
+ * tinta (lo mismo que la tarjeta hace en la sección invertida): sobre el
+ * papel cae una pieza de tinta en una ranura gris; en una sección invertida,
+ * una pieza clara en una ranura más honda que el negro. */
+[data-v3] [data-envio='resultado'] {
+  --resultado-oscuro-invertido: var(--color-fondo);
+  --resultado-claro-invertido: var(--color-tinta);
+}
+
+/* 3 · EL AVISO DE SCROLL TITILA: sólo la opacidad, suave. Sobre la escena,
+ * la sombra pegada a las letras (como el texto de la intro) en el color del
+ * fondo. Si es un botón, con el mouse o el foco deja de titilar y toma la
+ * tinta entera (el hover se ve en el acto). */
+[data-v3] [data-pieza='aviso-de-scroll'] {
+  --aviso-ciclo: 1600ms;
+  animation: aviso-de-scroll-titila var(--aviso-ciclo) ease-in-out infinite;
+}
+
+[data-v3] [data-pieza='aviso-de-scroll'][data-tono='escena'] {
+  --sombra-del-aviso: 0 0 0.08em var(--color-fondo), 0 0 0.16em var(--color-fondo);
+  text-shadow: var(--sombra-del-aviso);
+}
+
+[data-v3] [data-pieza='aviso-de-scroll'][data-tono='escena'] [data-parte='chevrones'] {
+  --sombra-de-los-chevrones: drop-shadow(0 0 0.08em var(--color-fondo));
+  filter: var(--sombra-de-los-chevrones);
+}
+
+[data-v3] button[data-pieza='aviso-de-scroll']:is(:hover, :focus-visible) {
+  color: var(--color-tinta);
+  animation: none;
+}
+
+[data-v3] [data-pieza='aviso-de-scroll'][data-quieto] {
+  animation: none;
+}
+
+@keyframes aviso-de-scroll-titila {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* 4 · RELUCIENTE: un reflejo blanco que barre en diagonal una vez por
+ * ciclo (el resto del ciclo queda afuera, quieto) y, con el mouse o el foco
+ * encima, arranca una pasada en el acto y repite más seguido y más claro.
+ *   · en una caja: una capa encima (con el redondeo de la caja) y una franja
+ *     que viaja con `transform`;
+ *   · en un texto: las letras se pintan con un degradé recortado a ellas (la
+ *     tinta, con la franja clara en el medio) que viaja con
+ *     `background-position`. */
+[data-v3] [data-reluciente] {
+  --reluciente-ciclo: 3500ms;
+  --reluciente-ciclo-vivo: 1400ms;
+  --reluciente-desde: -100%;
+  --reluciente-hasta: 100%;
+}
+
+[data-v3] [data-reluciente='caja'] {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+[data-v3] [data-reluciente='caja']::before {
+  --reluciente-franja: linear-gradient(105deg, transparent 35%, white 50%, transparent 65%);
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--reluciente-franja);
+  opacity: 0.3;
+  transform: translateX(var(--reluciente-desde));
+  will-change: transform;
+  animation: reluciente-caja var(--reluciente-ciclo) ease-in-out infinite;
+}
+
+[data-v3] :is(:hover, :focus-visible) > [data-reluciente='caja']::before {
+  opacity: 0.55;
+  animation-name: reluciente-caja-viva;
+  animation-duration: var(--reluciente-ciclo-vivo);
+}
+
+[data-v3] [data-reluciente='texto'] {
+  --reluciente-luz: color-mix(in srgb, white 70%, currentColor);
+  --reluciente-franja-del-texto: linear-gradient(105deg, currentColor 42%, var(--reluciente-luz) 50%, currentColor 58%);
+  --reluciente-franja-viva-del-texto: linear-gradient(105deg, currentColor 38%, white 50%, currentColor 62%);
+  --reluciente-tamano: 300% 100%;
+  background-image: var(--reluciente-franja-del-texto);
+  background-size: var(--reluciente-tamano);
+  background-position: right center;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: reluciente-texto var(--reluciente-ciclo) ease-in-out infinite;
+}
+
+[data-v3] [data-reluciente='texto']:hover,
+[data-v3] :is(a, button):is(:hover, :focus-visible) [data-reluciente='texto'] {
+  background-image: var(--reluciente-franja-viva-del-texto);
+  animation-name: reluciente-texto-vivo;
+  animation-duration: var(--reluciente-ciclo-vivo);
+}
+
+/* Quieto (movimiento reducido o fuera de la pantalla): sin barrido, el
+ * reflejo afuera y el texto en su tinta. Va después del hover: le gana. */
+[data-v3] [data-reluciente][data-quieto],
+[data-v3] :is(a, button):is(:hover, :focus-visible) [data-reluciente][data-quieto],
+[data-v3] [data-reluciente][data-quieto]::before,
+[data-v3] :is(:hover, :focus-visible) > [data-reluciente][data-quieto]::before {
+  animation: none;
+}
+
+@keyframes reluciente-caja {
+  0% {
+    transform: translateX(var(--reluciente-desde));
+  }
+  30%,
+  100% {
+    transform: translateX(var(--reluciente-hasta));
+  }
+}
+
+@keyframes reluciente-caja-viva {
+  0% {
+    transform: translateX(var(--reluciente-desde));
+  }
+  55%,
+  100% {
+    transform: translateX(var(--reluciente-hasta));
+  }
+}
+
+@keyframes reluciente-texto {
+  0% {
+    background-position: right center;
+  }
+  30%,
+  100% {
+    background-position: left center;
+  }
+}
+
+@keyframes reluciente-texto-vivo {
+  0% {
+    background-position: right center;
+  }
+  55%,
+  100% {
+    background-position: left center;
+  }
+}

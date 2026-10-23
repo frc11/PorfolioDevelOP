@@ -232,6 +232,19 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--demora-del-autocompletado', valor: '100000s', evidencia: 'decidido', procedencia: 'la transición que demora para siempre el fondo celeste y el color del texto que el navegador le pone al campo autocompletado (con !important: no se pisan): así el campo se queda como estaba (en el pie de volumen, transparente sobre su placa)' },
   // [B12c] el preloader del sitio.
   { nombre: '--preloader-seguro', valor: '20000ms', evidencia: 'decidido', procedencia: 'el seguro sin hidratar: a los 20 s del arranque la cubierta se esconde sola si nadie la manejó; el mismo TOPE_MS de `_chrome/preloader/decision.ts` (s78-preloader los ata)' },
+  // [C2 · 20] las piezas compartidas de la cola 2 (`piezas.css`). `--demora-del-autocompletado` y `--resultado-*-invertido` se repiten allá con su valor de acá.
+  { nombre: '--aviso-ciclo', valor: '1600ms', evidencia: 'decidido', procedencia: 'el titilar del aviso de scroll: un ciclo de opacidad de ~1,6 s (pedido en la tarea 20 de la cola 2)' },
+  { nombre: '--sombra-del-aviso', valor: '0 0 0.08em var(--color-fondo), 0 0 0.16em var(--color-fondo)', evidencia: 'decidido', procedencia: 'el aviso sobre la escena: una sombra pegada a las letras en el color del fondo, corta y densa (la receta del texto de la intro, `intro.css`)' },
+  { nombre: '--sombra-de-los-chevrones', valor: 'drop-shadow(0 0 0.08em var(--color-fondo))', evidencia: 'decidido', procedencia: 'la misma sombra pegada del aviso sobre la escena, para los dos chevrones (un trazo SVG: no toman text-shadow)' },
+  { nombre: '--reluciente-ciclo', valor: '3500ms', evidencia: 'decidido', procedencia: 'una pasada del reflejo cada 3,5 s (pedido: una vez cada 3 a 4 s); el mismo RELUCIENTE.cicloMs de `Reluciente.tsx` (s85-piezas los ata)' },
+  { nombre: '--reluciente-ciclo-vivo', valor: '1400ms', evidencia: 'decidido', procedencia: 'con el mouse o el foco encima, una pasada cada 1,4 s (se intensifica); el mismo RELUCIENTE.cicloVivoMs (s85-piezas los ata)' },
+  { nombre: '--reluciente-desde', valor: '-100%', evidencia: 'derivado', procedencia: 'la franja de la caja arranca entera afuera, a la izquierda: corrida su propio ancho' },
+  { nombre: '--reluciente-hasta', valor: '100%', evidencia: 'derivado', procedencia: 'la franja de la caja termina entera afuera, a la derecha: corrida su propio ancho' },
+  { nombre: '--reluciente-franja', valor: 'linear-gradient(105deg, transparent 35%, white 50%, transparent 65%)', evidencia: 'decidido', procedencia: 'el reflejo de la caja: una franja blanca diagonal de un 30 % del ancho, con los bordes desvanecidos (su intensidad la da la opacidad de la capa)' },
+  { nombre: '--reluciente-luz', valor: 'color-mix(in srgb, white 70%, currentColor)', evidencia: 'decidido', procedencia: 'el reflejo de un texto en reposo: la tinta llevada al 70 % hacia el blanco (con el mouse encima, el blanco entero)' },
+  { nombre: '--reluciente-franja-del-texto', valor: 'linear-gradient(105deg, currentColor 42%, var(--reluciente-luz) 50%, currentColor 58%)', evidencia: 'decidido', procedencia: 'las letras pintadas con su tinta y la franja clara en el medio del degradé (que mide tres veces el texto: en los extremos, sólo tinta)' },
+  { nombre: '--reluciente-franja-viva-del-texto', valor: 'linear-gradient(105deg, currentColor 38%, white 50%, currentColor 62%)', evidencia: 'decidido', procedencia: 'con el mouse o el foco encima: la franja más ancha y blanca entera (se intensifica)' },
+  { nombre: '--reluciente-tamano', valor: '300% 100%', evidencia: 'derivado', procedencia: 'el degradé del texto mide tres veces su caja: con la posición en un extremo se ve sólo tinta y en el medio, la franja' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */
