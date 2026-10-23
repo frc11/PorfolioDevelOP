@@ -141,7 +141,8 @@ const cambiosOcultos = (f: (i: number, g: number, n: number) => number): boolean
   return true
 }
 afirmar(cambiosOcultos(resenaDeLaPlaca), 'cada placa cambia de reseña sólo en la nuca (sin texto y fuera de la niebla), en dos vueltas, para los dos lados')
-controlPositivo('el detector ve un cambio en el frente', (i: number, g: number, n: number) => (i + ARO.placas * Math.floor((g + (i * 2 * Math.PI) / ARO.placas) / (2 * Math.PI)) + n * 4) % n, cambiosOcultos)
+// [C2-70] Con diez reseñas para diez placas cada placa muestra siempre la suya (no hay cambio); el error del control cambia de a una en el frente, ve igual con cualquier cantidad.
+controlPositivo('el detector ve un cambio en el frente', (i: number, g: number, n: number) => (i + Math.floor((g + (i * 2 * Math.PI) / ARO.placas) / (2 * Math.PI)) + n * 4) % n, cambiosOcultos)
 const sinRepetir = (n: number): boolean => giros.every((g) => {
   const vistas = placasQueSeLeen(g, M).map((i) => resenaDeLaPlaca(i, g, n))
   return new Set(vistas).size === vistas.length

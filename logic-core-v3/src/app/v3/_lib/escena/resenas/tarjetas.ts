@@ -133,7 +133,7 @@ export function llevarLaTarjeta(el: HTMLElement | null, s: EstadoDeLaTarjeta, ce
       CUADRILATERO[2 * k] = ((p.x + 1) / 2) * cuadro.ancho
       CUADRILATERO[2 * k + 1] = ((1 - p.y) / 2) * cuadro.alto
     }
-    if (visible && deEspaldas && extras.logo != null && tocaLaCaja(CUADRILATERO, extras.logo)) visible = false
+    if (visible && deEspaldas && extras.logo !== undefined && extras.logo !== null && tocaLaCaja(CUADRILATERO, extras.logo)) visible = false
   }
   let css = ''
   if (visible) {
