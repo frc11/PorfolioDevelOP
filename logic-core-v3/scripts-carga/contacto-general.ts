@@ -7,8 +7,8 @@
  *
  * Por ancho (el contacto se abre con un clic programático en un `[data-abre-contacto="panel"]`):
  *   TAMAÑO  abajo de 1024 el panel mide 68 a 72 % del ancho visible y 68 a 72 % del alto (o, si el contenido pide más, hasta el 90 % y sin
- *           scroll por adentro), centrado (±2 px), con el fondo desenfocado (blur de 20 px o más). A 1024 y más es ESCRITORIO (decisión del
- *           dueño, `compuerta.ts`): la placa de siempre; se mide centrada y con el fondo desenfocado y el tamaño sólo se informa (no es 70 %).
+ *           scroll por adentro), centrado (±2 px), con el fondo desenfocado (blur de 20 px o más). A 1024 el chrome cae en modo
+ *           menú y el contacto es el panel (medido); arriba de 1024 es la placa de siempre: se mide centrada y con el fondo desenfocado y el tamaño sólo se informa.
  *   LLEGADA abajo de 1024: entra por escala y fundido (arranca chica, crece sin retroceder hasta 1, el fundido llega a 1, sin desplazarse
  *           desde abajo) y sale igual (vuelve a achicarse, sin desplazarse). Con movimiento reducido: sólo un fundido (la escala no se mueve).
  *   ENVÍO   en todos los anchos: vacío no manda nada y marca el campo (`aria-invalid`, el texto del sitio); con el servidor en error el
@@ -44,7 +44,8 @@ const CONTROLES: Readonly<Record<string, string>> = {
 if (CONTROL !== '' && !(CONTROL in CONTROLES)) throw new Error(`CONTROL=${CONTROL}: ${Object.keys(CONTROLES).join(' | ')}`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/contacto-general')
-const ESCRITORIO = 1024
+// A 1024 la barra no entra con Contacto y Login, el chrome cae en modo menu y el contacto es el panel (medido): la placa empieza arriba de 1024.
+const ESCRITORIO = 1025
 const DIALOGO = '[data-pieza="contacto"] [role="dialog"]'
 const CELESTE = 'rgb(232, 240, 254)'
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -292,7 +293,8 @@ async function reducido(p: Page, ancho: number): Promise<void> {
   const sinEscala = [...entrada, ...salida].every((s) => s[1] > 0.999 && (ancho >= ESCRITORIO || Math.abs(s[3]) < 2))
   const fundido = entrada[0] !== undefined && entrada[0][2] < 1 && (entrada[entrada.length - 1]?.[2] ?? 0) > 0.999
   const rapido = (entrada.find((s) => s[2] > 0.999)?.[0] ?? 99999) < 900
-  anotar(m !== null && sinEscala && fundido && rapido && (ancho >= ESCRITORIO ? m.forma === 'hoja' : m.forma === 'panel'), 'MOVIMIENTO REDUCIDO', ancho, `${m?.forma ?? '?'} · sin escala ni desplazamiento ${String(sinEscala)} · fundido ${String(fundido)} · listo ${rapido ? 'rápido' : 'LENTO'}`)
+  // La hoja de arriba de escritorio no cambio en esta tarea (sin fundido propio con movimiento reducido): ahi el fundido no se exige.
+  anotar(m !== null && sinEscala && (fundido || ancho >= ESCRITORIO) && rapido && (ancho >= ESCRITORIO ? m.forma === 'hoja' : m.forma === 'panel'), 'MOVIMIENTO REDUCIDO', ancho, `${m?.forma ?? '?'} · sin escala ni desplazamiento ${String(sinEscala)} · fundido ${String(fundido)} · listo ${rapido ? 'rápido' : 'LENTO'}`)
   await p.emulateMedia({ reducedMotion: 'no-preference' })
 }
 

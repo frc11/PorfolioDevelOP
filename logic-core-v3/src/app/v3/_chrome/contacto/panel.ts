@@ -11,8 +11,8 @@ import { ESCALA_AL_NACER, MS_DE_LA_SALIDA_DE_LA_PLACA, TRANSICIONES, escalaDelVi
  *   · Tamaño: `ancho` y `alto` son fracciones de la pantalla visible (~70 %). El alto es un mínimo: si el contenido pide más (el teléfono
  *     angosto), la hoja crece hasta `altoMaximo` y recién ahí se scrollea por adentro. Las clases van escritas enteras en `CLASES_DEL_PANEL`
  *     (Tailwind no ve las que se arman con texto); `s25` las ata a estas fracciones.
- *   · 1024 es ESCRITORIO (`COMPOSICION_MIN_ANCHO_PX`, decisión del dueño: «a 1024 la página se compone y se monta como escritorio»): ahí
- *     sigue la placa 3D. El panel es de 1023 para abajo, y siempre con el menú del teléfono.
+ *   · La placa 3D es de escritorio con la barra. El panel es de abajo del ancho del escenario y siempre con el menú del teléfono (a 1024 la
+ *     barra no entra con Contacto y Login, el chrome cae en modo menú y sale el panel: medido en el navegador).
  */
 export const PANEL = { ancho: 0.7, alto: 0.7, altoMaximo: 0.9 } as const
 

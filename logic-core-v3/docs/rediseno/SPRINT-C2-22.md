@@ -20,7 +20,7 @@ Rama `nocturno/2026-10-23-22`. Tarea: `docs/cola/2026-10-23/22-contacto-general.
 
 ### Decisiones
 
-- **1024 es escritorio.** La spec pide el panel a 68–72 % «a 390, 768 y 1024», pero `compuerta.ts` fija (decisión del dueño) que «a 1024 la página se compone y se monta como escritorio» y la tarea pide escritorio sin cambios de diseño. El panel es de 1023 para abajo; a 1024×768 sigue la placa (centrada, con el fondo difuminado). El banco mide el tamaño del panel a 390 y 768, y a 1024 sólo informa el de la placa. Si Valentino quiere el panel a 1024, es mover el umbral (un solo valor: `CONSULTA_ESCENARIO` en `Hoja`).
+- **1024 es el panel (corregido por el orquestador tras medir).** La hoja decide con `esElPanel(modo, escritorio)`: el panel con el menú del teléfono o abajo de `CONSULTA_ESCENARIO` (1024). A 1024×768 la barra no entra con Contacto y Login, el chrome cae en modo menú y el contacto sale como panel a 70,0 % × 70,0 %, centrado y con el fondo desenfocado: es lo que pide la spec. Arriba de 1024 (1440) sigue la placa 3D sin cambios de diseño. El banco trata 1024 como panel (`ESCRITORIO` = 1025).
 - **El alto es un mínimo.** Ancho 70 %; alto mínimo 70 % y, si el contenido pide más (el teléfono angosto: a 390 el panel mide 273 px de ancho), crece hasta 90 % y recién ahí scrollea por adentro («o lo que permita el contenido sin scroll interno feo»). El banco acepta 68–72 % o, si pasa de 72 %, hasta 90,5 % sin scroll por adentro.
 - **Éxito = el panel se cierra.** Antes cerraba a los 3 s del texto; ahora a los 3 s del aterrizaje del encastre (`EstadoDeEnvio`), y los datos se vacían.
 - **Tablet con barra (628 a 1023)**: antes tenía la placa 3D; ahora el panel (tablet hace lo mismo que el teléfono).
