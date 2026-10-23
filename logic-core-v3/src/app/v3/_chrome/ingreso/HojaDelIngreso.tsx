@@ -8,6 +8,7 @@ import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { useDespliegue } from '../despliegue/useDespliegue'
 import { botonDelIngreso, cerrarIngreso, soltarIngreso } from './apertura'
 import { ROTULOS_DEL_INGRESO, TITULO_DEL_INGRESO } from './contenido'
+import { FlechaDeSalida } from './FlechaDeSalida'
 
 /**
  * [B7] LA HOJA DEL LOGIN — se despliega como una demo: un fondo negro tapa la página y, al mismo tiempo, el formulario aparece en el
@@ -22,13 +23,21 @@ import { ROTULOS_DEL_INGRESO, TITULO_DEL_INGRESO } from './contenido'
  *   · **La escena duerme detrás del negro** (`_lib/escena/tapa.ts`): desde que terminó de cubrir hasta que empieza a irse.
  *   · **En el teléfono, pantalla completa**: la hoja es la pantalla entera en todos los anchos; lo de adentro se desplaza adentro si
  *     no entra (el teclado del teléfono incluido).
- *   · **El contenido**: el título, el formulario (`children`), «Probá el panel» (C1: todavía no hace nada; está y no lleva a ningún
- *     lado) y, debajo, «Volver al home», que cierra como la flecha atrás (`cerrarIngreso`).
+ *   · **El contenido**: el título (centrado), el formulario (`children`) y, abajo, «Volver al home» a la izquierda (cierra como la flecha
+ *     atrás, `cerrarIngreso`) y «Probá el panel» a la derecha (C1: todavía no hace nada; está y no lleva a ningún lado). Arriba, en el
+ *     lugar de «Login», una flecha que cierra igual (`FlechaDeSalida`).
  *
  * La fase queda en `data-fase` de la raíz y el avance del despliegue en `data-avance` del fondo: el banco los lee.
  */
 
 const TAPA = 'ingreso'
+/**
+ * [C2 · 80] BANDERA (por defecto `true`): en la entrada directa (sin botón de dónde salir: el teléfono, la URL con `?ingresar`) la
+ * escena duerme desde que ARRANCA el fundido, no desde que termina. El fundido de 200 ms tardaba ~550 ms por la carga de la
+ * página: la placa dibujando la sala por detrás se llevaba los cuadros (la sala, tapada por el negro, no se ve cambiar). Con el Genie
+ * (hay botón) sigue igual: la sala se ve a los costados mientras sale. `false` lo devuelve a «recién al terminar de cubrir».
+ */
+const TAPAR_AL_EMPEZAR_EL_FUNDIDO = true
 const SALA = { 'data-seccion': 'invertida' } as const
 
 export function HojaDelIngreso({
@@ -65,6 +74,7 @@ export function HojaDelIngreso({
     const fase = (f: 'abriendo' | 'abierta' | 'cerrando'): void => raiz.current?.setAttribute('data-fase', f)
     if (abierto) {
       fase('abriendo')
+      if (TAPAR_AL_EMPEZAR_EL_FUNDIDO && desde === null) taparLaEscena(TAPA, true)
       control.abrir(desde, () => {
         fase('abierta')
         taparLaEscena(TAPA, true)
@@ -98,24 +108,25 @@ export function HojaDelIngreso({
         className="text-tinta absolute inset-0 overflow-y-auto overscroll-contain"
         style={{ opacity: 0 }}
       >
+        <FlechaDeSalida origen={origen} alTocar={alPedirElCierre} />
         <div className="mx-auto flex min-h-full w-full max-w-[calc(var(--spacing-20)*6)] flex-col justify-center gap-[var(--spacing-8)] px-[var(--spacing-5)] py-[var(--spacing-12)]">
-          <h2 id="ingreso-titulo" className="font-titulo text-fluido-titulo-m leading-titulo tracking-titulo text-balance">
+          <h2 id="ingreso-titulo" className="font-titulo text-fluido-titulo-m leading-titulo tracking-titulo text-center text-balance">
             {TITULO_DEL_INGRESO}
           </h2>
           {children}
-          <div className="border-borde flex flex-col items-center gap-[var(--spacing-3)] border-t pt-[var(--spacing-6)]">
-            {/* [C1] La prueba del panel se desarrolla más adelante (se va a desplegar igual que este login): hoy no hace nada. */}
-            <span data-parte="probar-el-panel">
-              <Cta rotulo={ROTULOS_DEL_INGRESO.probar} variante="linea" />
-            </span>
+          <div className="border-borde flex flex-wrap items-center justify-between gap-[var(--spacing-3)] border-t pt-[var(--spacing-6)]">
             <button
               type="button"
               data-parte="volver"
               onClick={alPedirElCierre}
-              className="text-caption text-tinta-media hover:text-tinta min-h-[var(--spacing-12)] px-[var(--spacing-3)] underline decoration-1 underline-offset-4 transition-colors hover:decoration-2 focus-visible:decoration-2"
+              className="text-caption text-tinta-media hover:text-tinta min-h-[var(--spacing-12)] pr-[var(--spacing-3)] underline decoration-1 underline-offset-4 transition-colors hover:decoration-2 focus-visible:decoration-2"
             >
               {ROTULOS_DEL_INGRESO.volver}
             </button>
+            {/* [C1] La prueba del panel se desarrolla más adelante (se va a desplegar igual que este login): hoy no hace nada. */}
+            <span data-parte="probar-el-panel">
+              <Cta rotulo={ROTULOS_DEL_INGRESO.probar} variante="linea" />
+            </span>
           </div>
         </div>
       </div>

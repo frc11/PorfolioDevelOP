@@ -358,6 +358,7 @@
     "test:s78": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s78",
     "test:s79-ingreso": "npx tsx src/app/v3/_chrome/ingreso/s79-ingreso.invariant.tsx",
     "test:s79-ingreso-url": "npx tsx src/app/v3/_chrome/ingreso/s79-ingreso-url.invariant.tsx",
+    "test:s79-ingreso-c2": "npx tsx src/app/v3/_chrome/ingreso/s79-ingreso-c2.invariant.tsx",
     "test:s79": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s79",
     "test:s81-servicios": "npx tsx src/app/v3/_lib/__tests__/s81-servicios.invariant.tsx",
     "test:s81": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s81",

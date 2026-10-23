@@ -1,5 +1,5 @@
 import { ESCALA_DEL_FUNDIDO, MS_DEL_FUNDIDO } from '../../_secciones/trabajos/demos/apertura'
-import { MS_DEL_GENIE, correrPorTiempo, liderDelGenie, type Caja } from '../../_secciones/trabajos/demos/genie'
+import { MS_DEL_GENIE, correrPorTiempo, liderDelGenie, type Caja, type FasesDelGenie } from '../../_secciones/trabajos/demos/genie'
 import { caminoDeLaSilueta, radioDeLaSilueta, siluetaDelGenie } from '../menu/silueta'
 
 /**
@@ -34,6 +34,14 @@ export const DESPLIEGUE = {
   escalaDelFundido: ESCALA_DEL_FUNDIDO,
 } as const
 
+/**
+ * [C2 · 80] Las fases del despliegue: las del Genie de las demos hacen que el AREA cubierta suba hasta ~0,67, BAJE hasta ~0,58 y recién
+ * ahí siga (el embudo se cierra antes de que la ventana se deslice): en pantalla completa se ve como una expansión que se traba a
+ * mitad de camino. Acá el embudo y el deslizamiento corren a la vez (desde 0) y el embudo se estira (hasta 0,8): el área sube siempre
+ * y sin meseta. La curva de cada fila es la misma de las demos; sólo cambian las fases (las de las demos y el menú no se tocan).
+ */
+export const FASES_DEL_DESPLIEGUE: FasesDelGenie = { embudo: { desde: 0, hasta: 0.8 }, deslizamiento: { desde: 0, hasta: 1 } }
+
 /** La pantalla entera, que es la «ventana» del Genie. */
 export const cajaDeLaPantalla = (ancho: number, alto: number): Caja => ({ x: 0, y: 0, ancho, alto })
 
@@ -61,7 +69,7 @@ export function cajaDelOrigen(r: Rectangulo | null, ancho: number, alto: number)
  * una píldora es su propia forma al final).
  */
 export function formaDelDespliegue(m: number, pantalla: Caja, origen: Caja): string {
-  const silueta = siluetaDelGenie(m, pantalla, origen, liderDelGenie(pantalla, origen))
+  const silueta = siluetaDelGenie(m, pantalla, origen, liderDelGenie(pantalla, origen), undefined, FASES_DEL_DESPLIEGUE)
   return caminoDeLaSilueta(silueta, radioDeLaSilueta(m, 0, Math.min(origen.ancho, origen.alto) / 2))
 }
 

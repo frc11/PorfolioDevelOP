@@ -1,4 +1,4 @@
-import { filaDelGenie, type Caja, type Lider, type Punto } from '../../_secciones/trabajos/demos/genie'
+import { filaDelGenie, type Caja, type FasesDelGenie, type Lider, type Punto } from '../../_secciones/trabajos/demos/genie'
 
 /**
  * [NAVBAR] RETOQUE 1 Y 2 · LA SILUETA DEL GENIE — la forma del menú mientras sale del botón y vuelve a él.
@@ -23,11 +23,11 @@ export interface Silueta {
 }
 
 /** El contorno del Genie en el progreso `m` (0 = abierto, 1 = adentro del botón), en coordenadas de la pantalla. */
-export function siluetaDelGenie(m: number, ventana: Caja, destino: Caja, lider: Lider, filas = FILAS_DE_LA_SILUETA): Silueta {
+export function siluetaDelGenie(m: number, ventana: Caja, destino: Caja, lider: Lider, filas = FILAS_DE_LA_SILUETA, fases?: FasesDelGenie): Silueta {
   const izquierda: Punto[] = []
   const derecha: Punto[] = []
   for (let k = 0; k <= filas; k += 1) {
-    const f = filaDelGenie(k / filas, m, ventana, destino, lider)
+    const f = filaDelGenie(k / filas, m, ventana, destino, lider, fases)
     izquierda.push({ x: f.izquierda, y: f.y })
     derecha.push({ x: f.derecha, y: f.y })
   }

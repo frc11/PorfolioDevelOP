@@ -38,25 +38,44 @@ import { TELON } from './telon'
 const ENLACE = 'underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:decoration-2'
 const sinEntrar = (): void => undefined
 
-/** El error del servidor, a la vista y anunciado (la región existe desde el principio). */
-function ErrorDelServidor({ texto }: { readonly texto: string }): React.JSX.Element {
+/**
+ * El error del servidor, a la vista y anunciado (la región existe desde el principio). [C2 · 80] Con el formato de siempre del sitio:
+ * el texto del error de un campo (ErrorDelCampo), sin un rojo propio.
+ */
+function ErrorDelServidor({ id, texto }: { readonly id: string; readonly texto: string }): React.JSX.Element {
   return (
-    <p role="alert" data-parte="error-del-ingreso" className={cn('text-caption text-error-texto leading-texto', texto === '' && 'sr-only')}>
-      {texto}
-    </p>
+    <div role="alert" data-parte="error-del-ingreso" className={cn(texto === '' && 'sr-only')}>
+      <ErrorDelCampo id={id} texto={texto} />
+    </div>
   )
+}
+
+/** Le avisa al formulario si este envío está viajando (con el envío en curso no se cambia de manera de entrar), y lo suelta al irse. */
+function useAvisarOcupado(ocupado: boolean, alOcupar: ((ocupado: boolean) => void) | undefined): void {
+  useEffect(() => {
+    alOcupar?.(ocupado)
+    return () => alOcupar?.(false)
+  }, [ocupado, alOcupar])
 }
 
 /** Mientras viaja: la carga de develOP, encima del formulario escondido (del mismo alto). */
 function CargaDelIngreso({ refDeLaCarga }: { readonly refDeLaCarga: React.Ref<HTMLDivElement> }): React.JSX.Element {
   return (
-    <div ref={refDeLaCarga} tabIndex={-1} data-parte="carga" className="absolute inset-0 flex items-center justify-center outline-none">
+    <div ref={refDeLaCarga} tabIndex={-1} data-parte="carga" className="absolute inset-0 flex items-center justify-center">
       <Carga tamano="medio" etiqueta={ROTULOS_DEL_INGRESO.ingresando} />
     </div>
   )
 }
 
-export function ConClave({ acciones, alEntrar }: { readonly acciones: AccionesDelIngreso; readonly alEntrar: () => void }): React.JSX.Element {
+export function ConClave({
+  acciones,
+  alEntrar,
+  alOcupar,
+}: {
+  readonly acciones: AccionesDelIngreso
+  readonly alEntrar: () => void
+  readonly alOcupar?: (ocupado: boolean) => void
+}): React.JSX.Element {
   const [datos, setDatos] = useState<DatosDelIngreso>({ email: '', clave: '' })
   const [errores, setErrores] = useState<ErroresDelIngreso>({})
   const [intento, setIntento] = useState(false)
@@ -71,6 +90,7 @@ export function ConClave({ acciones, alEntrar }: { readonly acciones: AccionesDe
   )
   const ocupado = enviando || (resultado.estado === 'entrando' && !vencido)
   const errorDelServidor = vencido ? ERROR_INESPERADO : resultado.estado === 'error' ? resultado.mensaje : ''
+  useAvisarOcupado(ocupado, alOcupar)
 
   useEffect(() => {
     // Con el error del servidor, el foco vuelve al email (lo escrito sigue ahí) y el error se anuncia.
@@ -141,12 +161,12 @@ export function ConClave({ acciones, alEntrar }: { readonly acciones: AccionesDe
           <CampoDeClave id="ingreso-clave" valor={datos.clave} alEscribir={(v) => escribir('clave', v)} idDelError="ingreso-error-clave" conError={errores.clave !== undefined} />
           <ErrorDelCampo id="ingreso-error-clave" texto={errores.clave} />
         </div>
-        <ErrorDelServidor texto={errorDelServidor} />
+        <ErrorDelServidor id="ingreso-error-servidor" texto={errorDelServidor} />
         <div className="flex flex-wrap items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-2)]">
           <a href={RUTA_DEL_OLVIDO} className={cn('text-caption text-tinta-media inline-block py-[var(--spacing-2)]', ENLACE)}>
             {ROTULOS_DEL_INGRESO.olvido}
           </a>
-          <Cta type="submit" variante="bloque" rotulo={enviando ? ROTULOS_DEL_INGRESO.ingresando : ROTULOS_DEL_INGRESO.ingresar} deshabilitado={ocupado} />
+          <Cta type="submit" rotulo={enviando ? ROTULOS_DEL_INGRESO.ingresando : ROTULOS_DEL_INGRESO.ingresar} deshabilitado={ocupado} className="shrink-0" />
         </div>
       </form>
       {ocupado && <CargaDelIngreso refDeLaCarga={carga} />}
@@ -157,7 +177,7 @@ export function ConClave({ acciones, alEntrar }: { readonly acciones: AccionesDe
   )
 }
 
-export function ConLink({ acciones }: { readonly acciones: AccionesDelIngreso }): React.JSX.Element {
+export function ConLink({ acciones, alOcupar }: { readonly acciones: AccionesDelIngreso; readonly alOcupar?: (ocupado: boolean) => void }): React.JSX.Element {
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | undefined>(undefined)
   const [intento, setIntento] = useState(false)
@@ -166,6 +186,7 @@ export function ConLink({ acciones }: { readonly acciones: AccionesDelIngreso })
     async (_previo: Resultado, envio: FormData): Promise<Resultado> => resolverElIngreso(() => conDuracionMinima(acciones.conLink(null, envio)), sinEntrar),
     REPOSO,
   )
+  useAvisarOcupado(enviando, alOcupar)
 
   if (resultado.estado === 'link-enviado') {
     return (
@@ -222,9 +243,9 @@ export function ConLink({ acciones }: { readonly acciones: AccionesDelIngreso })
           />
           <ErrorDelCampo id="ingreso-error-link" texto={error} />
         </div>
-        <ErrorDelServidor texto={resultado.estado === 'error' ? resultado.mensaje : ''} />
+        <ErrorDelServidor id="ingreso-error-servidor-link" texto={resultado.estado === 'error' ? resultado.mensaje : ''} />
         <div className="flex justify-end pt-[var(--spacing-2)]">
-          <Cta type="submit" variante="bloque" rotulo={enviando ? ROTULOS_DEL_INGRESO.generandoLink : ROTULOS_DEL_INGRESO.enviarLink} deshabilitado={enviando} />
+          <Cta type="submit" rotulo={enviando ? ROTULOS_DEL_INGRESO.generandoLink : ROTULOS_DEL_INGRESO.enviarLink} deshabilitado={enviando} className="shrink-0" />
         </div>
       </form>
       {enviando && <CargaDelIngreso refDeLaCarga={carga} />}
