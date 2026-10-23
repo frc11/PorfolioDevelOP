@@ -186,6 +186,17 @@
     mix-blend-mode: normal;
   }
 
+  /* [C2-70] Mientras amanece, el color y los halos cruzan de un modo al otro con una transición (antes la letra saltaba).
+     Sólo con `data-amanecer`: el paso a la mezcla no se interpola y sigue seco. */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-v3] [data-parte='lista-del-final'][data-amanecer] .max-escritorio\:mix-blend-difference,
+    [data-v3] [data-parte='lista-del-final'][data-amanecer] .max-escritorio\:mix-blend-difference svg {
+      transition-property: color, text-shadow, filter;
+      transition-duration: var(--duracion-lenta);
+      transition-timing-function: var(--ease-principal);
+    }
+  }
+
   [data-v3] [data-parte='lista-del-final'][data-amanecer='noche'] .max-escritorio\:mix-blend-difference {
     text-shadow: var(--halo-del-amanecer);
   }
