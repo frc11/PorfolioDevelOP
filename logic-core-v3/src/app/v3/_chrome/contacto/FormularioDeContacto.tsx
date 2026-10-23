@@ -1,73 +1,59 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, type MotionProps } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { Cta } from '../../_componentes/chrome/Cta'
-import { PrecalentarElResultado } from '../../_componentes/formularios/PrecalentarElResultado'
-import { TarjetaDeResultado } from '../../_componentes/formularios/TarjetaDeResultado'
-import { useAltoGuardado } from '../../_lib/formularios/altoGuardado'
-import { TEXTOS_DE_ENVIO } from '../../_lib/formularios/enviar'
-import { transicionDelVolteo } from '../../_lib/formularios/volteo'
+import { EstadoDeEnvio } from '../../_componentes/formularios/EstadoDeEnvio'
+import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
+import type { EstadoDelEnvio, ResultadoDelEnvio } from '../../_lib/formularios/estadoDeEnvio'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
+import { useAnchoMinimo } from '../../_lib/useAnchoMinimo'
 import { useDialogo } from '../../_secciones/trabajos/demos/dialogo'
 import { cerrarContacto, devolverElFoco, useContacto, type ModoDelChrome } from './apertura'
 import { CamposDelContacto } from './CamposDelContacto'
-import { BAJADA, DESPUES_DEL_ENVIO, PIE, ROTULO_DE_CERRAR, ROTULO_DEL_ENVIO, ROTULO_ENVIANDO, TITULO, avisoDeErrores, type Interes } from './contenido'
+import { BAJADA, PIE, ROTULO_DE_CERRAR, ROTULO_DEL_ENVIO, ROTULO_ENVIANDO, TITULO, avisoDeErrores, type Interes } from './contenido'
 import { enviarContacto, validarContacto, type DatosDeContacto, type ErroresDeContacto } from './enviarContacto'
-import { DESENFOQUE_DEL_FONDO_PX, ENTRADA_DEL_PARALAJE, TRANSICIONES } from './placa'
+import { EscenarioDelPanel } from './EscenarioDelPanel'
+import { animacionDelPanel, CLASES_DEL_PANEL, esElPanel } from './panel'
+import { DESENFOQUE_DEL_FONDO_PX, TRANSICIONES } from './placa'
 import { PlacaDelContacto } from './PlacaDelContacto'
 
 /**
  * EL FORMULARIO DE CONTACTO — la hoja y su velo. **[CONTACTO]**
  *
- * Con la barra de escritorio la hoja BAJA desde arriba, a todo el ancho con el contenido
- * centrado y los bordes de abajo redondeados; con el menú móvil SUBE desde abajo y ocupa la
- * pantalla (en `dvh`, para que el teclado no la tape). El velo oscurece y desenfoca el sitio.
- * Es un diálogo: foco atrapado, Esc, overflow en `<html>` y `data-lenis-prevent` —el mismo
- * `useDialogo` de las demos—, y al cerrar el foco vuelve a quien lo abrió.
+ * Con la barra de escritorio la hoja es una PLACA con espesor que llega desde un punto del fondo y gira con el puntero
+ * (`PlacaDelContacto.tsx`); [C2 · 22] abajo de escritorio (el teléfono y la tablet, y siempre con el menú del teléfono) es el PANEL:
+ * el mismo formulario en una hoja centrada de ~70 % de la pantalla que llega del fondo con una escala y un fundido, sin 3D
+ * (`panel.ts`). Con movimiento reducido, el panel es sólo un fundido y la de escritorio es la hoja de arriba, sin viaje. El velo
+ * oscurece y desenfoca el sitio (24 px, primero; al cerrar, después). Es un diálogo: foco atrapado, Esc, overflow en `<html>` y
+ * `data-lenis-prevent` —el mismo `useDialogo` de las demos—, y al cerrar el foco vuelve a quien lo abrió.
  *
- * La curva es la medida en nk: `cubic-bezier(.77,0,.175,1)`, 0,7 s la hoja y 0,4 s el velo.
- *
- * [CIERRE] 2B · desde la barra y con movimiento el contacto es una TRANSICIÓN (era la prueba B2 de AJUSTES FINALES): el
- * fondo se desenfoca primero (0,5 s) y la hoja llega como una PLACA con espesor desde un punto del fondo, y gira con el
- * puntero hasta mostrar sus costados (`PlacaDelContacto.tsx`); al cerrar se acuesta y recién después se va el desenfoque.
- * En el teléfono (el modo del menú) y con movimiento reducido, la hoja de siempre. Los números y el porqué, en `placa.ts`.
+ * [C2 · 22] El ENVÍO es el estándar del sitio (`EstadoDeEnvio`): el formulario se desvanece en la carga de develOP, después el encastre
+ * con «¡Recibido!» o el error; con el éxito, a los 3 s el panel se cierra solo; con el error vuelve el formulario con todo lo escrito.
+ * Un formulario inválido responde al toque (sin carga). Esc y la X siguen cerrando en cualquier momento.
  */
 
 const CURVA = [0.77, 0, 0.175, 1] as const
 export const MS_DE_LA_HOJA = 700
 export const MS_DEL_VELO = 400
 
-/**
- * [PULIDO 9] H3 · ENVIANDO Y GRACIAS. Al enviar, el formulario se transforma en la carga ([PULIDO 10] J3 · la de develOP,
- * `Carga`: el trazo del logo en SVG, sin lienzo; era un anillo 3D en su propio lienzo) y, al llegar, la carga en la tarjeta de gracias (la
- * del pie, con la misma familia de transformación: `transicionDeGracias`). A los `CIERRE_MS` el panel se cierra solo, con
- * su salida de siempre; mientras, una línea fina se consume. Esc y la X siguen cerrando; al cerrarse, el foco vuelve a quien
- * lo abrió. Con error, el formulario vuelve con todo lo escrito y el error a la vista. Lo escrito vive en la hoja: la carga
- * y la tarjeta no lo tocan.
- *
- * [PULIDO 11] B · el panel también VOLTEA (el hundido se borró; [PULIDO 13] · sobre el eje del medio): el formulario, la carga y la
- * tarjeta del resultado (`TarjetaDeResultado`, del alto del formulario: comparten el eje). Con el error, la tarjeta que no encaja
- * y «Reintentar», que vuelve al formulario con todo lo escrito; con el éxito, la que encaja, y la cuenta del cierre arranca
- * cuando su texto ya está.
- */
-export const CIERRE_MS = 3000
-
 const VACIO: Omit<DatosDeContacto, 'intereses'> = { presupuesto: '', nombre: '', medio: '', empresa: '', mensaje: '' }
+
+/** Lo que anima la hoja: la de arriba (movimiento reducido en escritorio), la placa (la anima su escenario) o el panel (`panel.ts`). */
+type Movimiento = Pick<MotionProps, 'initial' | 'animate' | 'exit' | 'transition'>
 
 export function FormularioDeContacto(): React.JSX.Element {
   const { abierto, precarga, modo } = useContacto()
   return <AnimatePresence onExitComplete={devolverElFoco}>{abierto && <Hoja key="contacto" precarga={precarga} modo={modo} />}</AnimatePresence>
 }
 
-/** La hoja sola, sin el estado del chrome: para el invariante, que la renderiza en el servidor. */
-export function HojaParaElInvariante({ precarga = [] }: { readonly precarga?: readonly Interes[] }): React.JSX.Element {
-  return <Hoja precarga={precarga} modo="barra" />
+/** La hoja sola, sin el estado del chrome: para el invariante, que la renderiza en el servidor (`escritorio`: el ancho que se supone; sin decir, el de escritorio). */
+export function HojaParaElInvariante({ precarga = [], escritorio = true }: { readonly precarga?: readonly Interes[]; readonly escritorio?: boolean }): React.JSX.Element {
+  return <Hoja precarga={precarga} modo="barra" escritorio={escritorio} />
 }
 
 /**
@@ -78,7 +64,7 @@ export function HojaParaElInvariante({ precarga = [] }: { readonly precarga?: re
  */
 export const MARCA_DEL_CONTACTO_ABIERTO = 'data-contacto-abierto'
 
-function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; readonly modo: ModoDelChrome }): React.JSX.Element {
+function Hoja({ precarga, modo, escritorio: supuesto }: { readonly precarga: readonly Interes[]; readonly modo: ModoDelChrome; readonly escritorio?: boolean }): React.JSX.Element {
   const caja = useRef<HTMLDivElement>(null)
   const raiz = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -87,32 +73,17 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     return () => v3?.removeAttribute(MARCA_DEL_CONTACTO_ABIERTO)
   }, [])
   const reducido = useMovimientoReducido()
+  // [C2 · 22] el ancho de escritorio (1024, el del escenario): la hoja se monta al abrir, ya en el cliente, así que el primer render es el real.
+  const escritorioMedido = useAnchoMinimo(CONSULTA_ESCENARIO)
+  const escritorio = supuesto ?? escritorioMedido
   useDialogo(caja, cerrarContacto)
   const [datos, setDatos] = useState<DatosDeContacto>({ intereses: precarga, ...VACIO })
   const [errores, setErrores] = useState<ErroresDeContacto>({})
   const [intento, setIntento] = useState(false)
-  // [RONDA 2] F1: mientras viaja, y si llegó. [PULIDO 9] H3 · cada una con su contenido en la placa. [PULIDO 11] B3 · y el error.
-  const [fase, setFase] = useState<'formulario' | 'enviando' | 'exito' | 'error'>('formulario')
-  const [mensajeDelError, setMensajeDelError] = useState('')
-  const enviando = fase === 'enviando'
-  const enviado = fase === 'exito'
-  // [PULIDO 11] B1 · el volteo, como el pie; y la tarjeta ya se ve (terminó de entrar): arranca el encastre.
-  const [seVe, setSeVe] = useState(false)
-  // [PULIDO 11] B2 · con el éxito, el panel se cierra solo `CIERRE_MS` después de que su texto está.
-  const [textoListo, setTextoListo] = useState(false)
-  // El alto del formulario al enviar: la carga y la tarjeta lo guardan (la placa no se achica de golpe). [PULIDO 12] 3 · si el
-  // teléfono rota, se suelta (`altoGuardado.ts`).
-  const [alto, setAlto] = useAltoGuardado()
-  const pedirFoco = useRef<'carga' | 'tarjeta' | 'enviar' | null>(null)
-  // UNA región de alerta: el resumen de los datos o el error del servidor (para el lector: el error se ve en su tarjeta).
+  // [C2 · 22] el estado del envío lo muestra `EstadoDeEnvio` (la carga, el encastre y su mensaje, y los anuncios para el lector).
+  const [estado, setEstado] = useState<EstadoDelEnvio>('reposo')
+  // La región de alerta de los errores de los campos (el resultado del envío lo anuncia `EstadoDeEnvio`).
   const [aviso, setAviso] = useState('')
-  // [PULIDO 13] K2 · con la placa ya llegada y el paralaje ya entrado (quieta), se precalienta la tarjeta del resultado: la primera
-  // vez no traba (el GPU compila sus sombreadores ahora, no cuando aparece).
-  const [precalentar, setPrecalentar] = useState(false)
-  useEffect(() => {
-    const llega = window.setTimeout(() => setPrecalentar(true), (TRANSICIONES.viaje.delay + TRANSICIONES.viaje.duration + ENTRADA_DEL_PARALAJE.duration) * 1000 + 100)
-    return () => window.clearTimeout(llega)
-  }, [])
 
   const actualizar = useCallback(
     (siguiente: DatosDeContacto) => {
@@ -128,20 +99,14 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
 
   const alEnviar = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
-    if (enviando) return
+    if (estado !== 'reposo') return
     setIntento(true)
     const form = e.currentTarget
-    const errores = validarContacto(datos)
-    const valido = Object.keys(errores).length === 0
-    if (valido) {
-      setAlto(form.offsetHeight)
-      pedirFoco.current = 'carga'
-      setFase('enviando')
-    }
-    // [PULIDO 10] J3 · lo que viaja, con la espera mínima de la carga (no parpadea); un formulario inválido responde al toque.
-    const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)
-    setFase('formulario')
+    // Un formulario inválido responde al toque (sin la carga); uno válido se desvanece en la carga mientras viaja.
+    if (Object.keys(validarContacto(datos)).length === 0) setEstado('enviando')
+    const r = await enviarContacto(datos)
     if (r.estado === 'invalido') {
+      setEstado('reposo')
       setErrores(r.errores)
       // [INTERFAZ 1] T3: un aviso, vaciado y vuelto a escribir para que un segundo intento también se anuncie.
       setAviso('')
@@ -154,73 +119,56 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
     }
     setErrores({})
     setAviso('')
-    setSeVe(false)
-    setTextoListo(false)
-    pedirFoco.current = 'tarjeta'
     if (r.estado === 'error') {
-      // [PULIDO 11] B3 · la tarjeta que no encaja: el error a la vista en ella (y en la región viva); lo escrito se queda.
-      setMensajeDelError(r.mensaje)
-      setFase('error')
-      requestAnimationFrame(() => setAviso(r.mensaje))
+      // El error: el encastre que no entra y su mensaje; después vuelve el formulario con todo lo escrito.
+      setEstado('error')
       return
     }
-    setFase('exito')
+    // El éxito vacía lo escrito (el formulario todavía no se ve): al terminar el mensaje el panel se cierra.
+    setEstado('exito')
     setIntento(false)
     setDatos({ intereses: [], ...VACIO })
   }
 
-  // [PULIDO 11] B3 · Reintentar: de vuelta al formulario con todo lo escrito; el foco, en Enviar.
-  const reintentar = (): void => {
-    pedirFoco.current = 'enviar'
-    setAviso('')
-    setFase('formulario')
+  // El mensaje terminó: con el éxito el panel se cierra (con su salida de siempre; el mensaje se queda hasta que se va); con el error vuelve el formulario con lo escrito.
+  const alVolver = (despuesDe: ResultadoDelEnvio): void => {
+    if (despuesDe === 'exito') cerrarContacto()
+    else setEstado('reposo')
   }
+  const rotuloDelEnvio = estado === 'enviando' ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO
 
-  // [PULIDO 9] H3 · con la tarjeta a la vista, se cierra solo (si antes no lo cerró Esc o la X). [PULIDO 11] B2 · desde que su texto está.
-  useEffect(() => {
-    if (!enviado || !textoListo) return undefined
-    const reloj = window.setTimeout(cerrarContacto, CIERRE_MS)
-    return () => window.clearTimeout(reloj)
-  }, [enviado, textoListo])
-  const alLlegar = (el: HTMLElement | null): void => {
-    if (el === null || pedirFoco.current === null) return
-    const destino = pedirFoco.current === 'enviar' ? el.querySelector<HTMLElement>('button[type="submit"]') : el
-    pedirFoco.current = null
-    destino?.focus({ preventScroll: true })
-  }
-  const cambio = transicionDelVolteo(reducido)
-  // [PULIDO 11] B4 · Enviar (el error vive en su tarjeta); mientras viaja el formulario ya se fue volteando.
-  const rotuloDelEnvio = enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO
-
-  const desdeArriba = modo === 'barra'
+  // [C2 · 22] la hoja es el panel abajo de escritorio (o con el menú del teléfono); la placa y la hoja de arriba, sólo en escritorio.
+  const panel = esElPanel(modo, escritorio)
+  const desdeArriba = !panel
   /**
-   * [NAVBAR] T4 · EN EL TELÉFONO, ENTERO EN UNA PANTALLA. La hoja de abajo (el modo del menú) entra en `100svh` a 390 × 844
-   * y a 375 × 667 con el botón de enviar a la vista, sin sacar un campo: menos aire, las preguntas y la bajada en
-   * `caption`, los chips más bajos, el mensaje en dos renglones y el pie al lado del botón. La de arriba (escritorio)
-   * no cambia. Medido en `navbar/t4-contacto/`.
+   * [NAVBAR] T4 · EL PANEL, COMPACTO. Menos aire, las preguntas y la bajada en `caption`, los chips más bajos, el mensaje en dos
+   * renglones y el pie al lado del botón (debajo, si no entra). La de arriba y la placa (escritorio) no cambian.
    */
   const compacto = !desdeArriba
-  const fuera = desdeArriba ? '-100%' : '100%'
   const hoja = reducido ? { duration: 0 } : { duration: MS_DE_LA_HOJA / 1000, ease: CURVA }
   const velo = reducido ? { duration: 0 } : { duration: MS_DEL_VELO / 1000, ease: CURVA }
-  // [CIERRE] 2B · desde la barra y con movimiento: el fondo se desenfoca en 0,5 s y la hoja llega como una placa (`placa.ts`).
+  // [CIERRE] 2B · desde la barra y con movimiento: la hoja llega como una placa con espesor (`placa.ts`).
   const placa = desdeArriba && !reducido
+  // El fondo se desenfoca primero y se va después de la hoja: con movimiento, para la placa y para el panel.
+  const viaja = !reducido
+  const movimiento: Movimiento = panel ? animacionDelPanel(reducido) : placa ? { initial: false } : { initial: { y: '-100%' }, animate: { y: 0 }, exit: { y: '-100%' }, transition: hoja }
 
   return (
-    <div ref={raiz} data-pieza="contacto" data-modo={modo} data-placa={placa ? '' : undefined} className="fixed inset-0 z-[var(--z-overlay)]">
+    <div ref={raiz} data-pieza="contacto" data-modo={modo} data-forma={panel ? 'panel' : placa ? 'placa' : 'hoja'} data-placa={placa ? '' : undefined} className="fixed inset-0 z-[var(--z-overlay)]">
       {/* El velo: oscurece y desenfoca. Un click afuera cierra. */}
       <motion.div
         data-parte="velo"
         aria-hidden="true"
         onClick={cerrarContacto}
         className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-tinta)_35%,transparent)] backdrop-blur-[var(--blur-panel)]"
-        initial={placa ? { opacity: 0, backdropFilter: 'blur(0px)' } : { opacity: 0 }}
-        animate={placa ? { opacity: 1, backdropFilter: `blur(${String(DESENFOQUE_DEL_FONDO_PX)}px)` } : { opacity: 1 }}
-        exit={placa ? { opacity: 0, backdropFilter: 'blur(0px)', transition: TRANSICIONES.fondoAlCerrar } : { opacity: 0 }}
-        transition={placa ? TRANSICIONES.fondo : velo}
+        initial={viaja ? { opacity: 0, backdropFilter: 'blur(0px)' } : { opacity: 0 }}
+        animate={viaja ? { opacity: 1, backdropFilter: `blur(${String(DESENFOQUE_DEL_FONDO_PX)}px)` } : { opacity: 1 }}
+        exit={viaja ? { opacity: 0, backdropFilter: 'blur(0px)', transition: TRANSICIONES.fondoAlCerrar } : { opacity: 0 }}
+        transition={viaja ? TRANSICIONES.fondo : velo}
       />
-      {/* [CIERRE] 2B · desde la barra la hoja es el frente de una PLACA con espesor (`PlacaDelContacto.tsx`). */}
+      {/* [CIERRE] 2B · desde la barra la hoja es el frente de una PLACA con espesor (`PlacaDelContacto.tsx`); [C2 · 22] abajo de escritorio, el PANEL. */}
       <PlacaDelContacto activa={placa}>
+      <EscenarioDelPanel activo={panel}>
       <motion.div
         ref={caja}
         role="dialog"
@@ -230,19 +178,19 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
         data-lenis-prevent=""
         className={cn(
           'bg-fondo text-tinta overflow-y-auto overscroll-contain will-change-transform',
-          placa
-            ? 'relative max-h-[86svh] w-full rounded-[var(--radius-medio)]'
-            : cn('absolute inset-x-0 shadow-[var(--shadow-flotante)]', desdeArriba ? 'top-0 max-h-[90svh] rounded-b-[calc(var(--radius-fuerte)*2)]' : 'bottom-0 h-[100dvh]'),
+          panel
+            ? CLASES_DEL_PANEL
+            : placa
+              ? 'relative max-h-[86svh] w-full rounded-[var(--radius-medio)]'
+              : 'absolute inset-x-0 top-0 max-h-[90svh] rounded-b-[calc(var(--radius-fuerte)*2)] shadow-[var(--shadow-flotante)]',
         )}
-        initial={placa ? false : { y: fuera }}
-        animate={placa ? undefined : { y: 0 }}
-        exit={placa ? undefined : { y: fuera }}
-        transition={placa ? undefined : hoja}
+        {...movimiento}
       >
         <div
           className={cn(
-            'mx-auto flex w-full max-w-[min(100%,calc(var(--spacing-20)*14))] flex-col',
-            // [PULIDO 10] J9 · en la hoja del teléfono, el contenido centrado en el alto (si no entra, se scrollea como siempre).
+            // [C2 · 22] `my-auto`: en la hoja del panel (una columna) el contenido queda centrado en el alto y, si no entra, se scrollea como siempre.
+            'mx-auto my-auto flex w-full max-w-[min(100%,calc(var(--spacing-20)*14))] flex-col',
+            // [PULIDO 10] J9 · en el panel, el contenido centrado en el alto (si no entra, se scrollea como siempre).
             compacto ? 'min-h-full justify-center gap-[var(--spacing-4)] px-[var(--spacing-5)] py-[var(--spacing-5)]' : 'gap-[var(--spacing-8)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]',
           )}
         >
@@ -269,51 +217,28 @@ function Hoja({ precarga, modo }: { readonly precarga: readonly Interes[]; reado
             </button>
           </div>
 
-          <div className="perspective-midrange">
-          <PrecalentarElResultado activo={precalentar && fase === 'formulario'} compacto={compacto} />
-          <AnimatePresence mode="wait" initial={false}>
-          {enviando ? (
-            // [PULIDO 10] J3 · la carga de develOP (el trazo del logo, o el giro con `?carga=giro`) y su estado; reemplaza al anillo.
-            <motion.div key="carga" ref={alLlegar} tabIndex={-1} {...cambio} data-parte="carga" className="flex flex-col items-center justify-center outline-none" style={{ ...cambio.style, minHeight: alto }}>
-              <Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />
-            </motion.div>
-          ) : enviado || fase === 'error' ? (
-            <motion.div key="resultado" {...cambio} data-parte="resultado" className="flex flex-col justify-center gap-[var(--spacing-4)]" onAnimationComplete={() => setSeVe(true)}>
-              <TarjetaDeResultado tipo={enviado ? 'exito' : 'error'} mensaje={mensajeDelError} alto={alto} empieza={seVe} compacto={compacto} foco={alLlegar} alReintentar={reintentar} alTerminar={() => setTextoListo(true)} />
-              {/* La cuenta del cierre: una línea fina que se consume (en ancho: con movimiento reducido también corre). */}
-              {enviado && (
-                <div aria-hidden="true" className="bg-borde h-px w-full">
-                  <motion.div className="bg-tinta h-px" initial={{ width: '100%' }} animate={{ width: textoListo ? '0%' : '100%' }} transition={{ duration: textoListo ? CIERRE_MS / 1000 : 0, ease: 'linear' }} />
-                </div>
-              )}
-            </motion.div>
-          ) : (
-          <motion.form key="formulario" ref={alLlegar} {...cambio} noValidate onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-8)]')}>
-            <CamposDelContacto datos={datos} errores={errores} alternarInteres={alternarInteres} escribir={escribir} compacto={compacto} />
-            <div
-              className={cn(
-                'border-borde flex border-t perspective-midrange',
-                compacto ? 'flex-row items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-3)]' : 'flex-col gap-[var(--spacing-4)] pt-[var(--spacing-6)] tablet:flex-row tablet:items-center tablet:justify-between',
-              )}
-            >
-              <p className="text-caption leading-texto">{PIE}</p>
-              <Cta type="submit" rotulo={rotuloDelEnvio} deshabilitado={enviando} className={compacto ? 'shrink-0' : undefined} />
-            </div>
-          </motion.form>
-          )}
-          </AnimatePresence>
-          </div>
-          {/* [INTERFAZ 1] T3: las dos regiones vivas existen desde el principio (una región que nace con su texto no
-              siempre se anuncia); lo que cambia es lo de adentro. [PULIDO 9] H3 · fuera de lo que se transforma. */}
-          {/* [PULIDO 11] B3 · el error se ve en su tarjeta; acá, para el lector (con el resumen de los datos). */}
+          {/* [C2 · 22] el estándar de envío del sitio: el formulario se desvanece en la carga, luego el encastre con su mensaje (y sus anuncios). */}
+          <EstadoDeEnvio estado={estado} alVolver={alVolver}>
+            <form noValidate onSubmit={(e) => void alEnviar(e)} className={cn('flex flex-col', compacto ? 'gap-[var(--spacing-4)]' : 'gap-[var(--spacing-8)]')}>
+              <CamposDelContacto datos={datos} errores={errores} alternarInteres={alternarInteres} escribir={escribir} compacto={compacto} />
+              <div
+                className={cn(
+                  'border-borde flex border-t perspective-midrange',
+                  compacto ? 'flex-row flex-wrap items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-3)]' : 'flex-col gap-[var(--spacing-4)] pt-[var(--spacing-6)] tablet:flex-row tablet:items-center tablet:justify-between',
+                )}
+              >
+                <p className="text-caption leading-texto">{PIE}</p>
+                <Cta type="submit" rotulo={rotuloDelEnvio} deshabilitado={estado === 'enviando'} className={compacto ? 'shrink-0' : undefined} />
+              </div>
+            </form>
+          </EstadoDeEnvio>
+          {/* [INTERFAZ 1] T3: la región viva existe desde el principio (una región que nace con su texto no siempre se anuncia). */}
           <p role="alert" className="sr-only">
             {aviso}
           </p>
-          <p role="status" className="sr-only">
-            {enviado ? DESPUES_DEL_ENVIO : ''}
-          </p>
         </div>
       </motion.div>
+      </EscenarioDelPanel>
       </PlacaDelContacto>
     </div>
   )

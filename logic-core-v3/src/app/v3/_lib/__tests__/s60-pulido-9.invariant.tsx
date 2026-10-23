@@ -14,8 +14,8 @@ import { readFileSync } from 'node:fs'
 import * as THREE from 'three'
 
 import { DESPUES_DEL_ENVIO } from '../../_chrome/contacto/contenido'
-import { CIERRE_MS } from '../../_chrome/contacto/FormularioDeContacto'
 import { ENVIO_SIMULADO, envioSimulado } from '../formularios/enviar'
+import { ENVIO } from '../formularios/estadoDeEnvio'
 import { ANUNCIO_DE_EXITO, RESULTADO } from '../formularios/gracias'
 import { CAMBIO_DEL_PIE } from '../formularios/volteo'
 import { HUNDIMIENTO_DEL_PIE, pisoDelHundimiento, poseDeLaTransformacion } from '../escena/pie3d/transformacionDelPie'
@@ -186,21 +186,19 @@ controlPositivo('4 · el detector VE las banderas en producción', ((c: string) 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('H3 · Contacto: la carga 3D y la tarjeta de gracias')
 
-// 1 · Los estados del panel: el formulario se transforma en la carga (el anillo), la carga en la tarjeta (la misma del pie, la
-// misma familia de transformación), y a los 3 s se cierra solo con una línea que se consume; con error, vuelve con todo.
+// 1 · [C2 · 22] Los estados del panel: el envío es el estándar del sitio (`EstadoDeEnvio`: el formulario se desvanece en la carga de
+// develOP y ésta en el encastre con su mensaje); con el éxito, a los 3 s (`ENVIO.mensajeMs`) el panel se cierra solo con su salida; con
+// el error vuelve el formulario con todo lo escrito. (Era la carga y la tarjeta de gracias con el volteo, y una línea que se consumía.)
 const panel = sinComentarios(leer('_chrome/contacto/FormularioDeContacto.tsx'))
 const panelBien = (c: string): boolean =>
-  // [PULIDO 10] J3 · la carga es la de develOP (el anillo se fue); su estado lo anuncia ella (`role="status"`).
-  /<motion\.div key="carga" ref=\{alLlegar\} tabIndex=\{-1\} \{\.\.\.cambio\} data-parte="carga"/.test(c) && c.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
-  // [PULIDO 11] B · la tarjeta del resultado (éxito o error), con el volteo; la cuenta del cierre, desde que su texto está.
-  /<motion\.div key="resultado" \{\.\.\.cambio\}[\s\S]{0,200}?<TarjetaDeResultado tipo=\{enviado \? 'exito' : 'error'\}/.test(c) && /const cambio = transicionDelVolteo\(reducido\)/.test(c) &&
-  /const reloj = window\.setTimeout\(cerrarContacto, CIERRE_MS\)\s*return \(\) => window\.clearTimeout\(reloj\)/.test(c) &&
-  /animate=\{\{ width: textoListo \? '0%' : '100%' \}\} transition=\{\{ duration: textoListo \? CIERRE_MS \/ 1000 : 0, ease: 'linear' \}\}/.test(c) &&
-  /if \(r\.estado === 'error'\) \{[\s\S]{0,240}?setFase\('error'\)/.test(c) && (c.match(/setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/g) ?? []).length === 1 &&
-  /<AnimatePresence onExitComplete=\{devolverElFoco\}>/.test(c) && /<p role="status" className="sr-only">\s*\{enviado \? DESPUES_DEL_ENVIO : ''\}/.test(c)
-afirmar(panelBien(panel) && CIERRE_MS === 3000 && DESPUES_DEL_ENVIO === ANUNCIO_DE_EXITO, '1 · enviar transforma el formulario en la carga y la carga en la tarjeta de gracias (anunciada, con el foco); a los 3 s se cierra solo con su salida, el foco vuelve a quien lo abrió y una línea se consume; con error, todo lo escrito y el error', 'medido a 1440 y a 390: la línea de 766 a 291 px en 1,5 s; cerrado a los 3 s con el foco en quien lo abrió; Esc y la X cierran')
-controlPositivo('1 · el detector VE un panel que no se cierra solo', panel.replace('const reloj = window.setTimeout(cerrarContacto, CIERRE_MS)', 'const reloj = 0'), panelBien)
-controlPositivo('  y el «¡Gracias!» de texto suelto de antes', panel.replace(/<TarjetaDeResultado [^\n]*\/>/, '<p>¡Gracias! Te escribimos pronto.</p>'), panelBien)
+  /<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\}>/.test(c) &&
+  /const alVolver = \(despuesDe: ResultadoDelEnvio\): void => \{\s*if \(despuesDe === 'exito'\) cerrarContacto\(\)\s*else setEstado\('reposo'\)/.test(c) &&
+  /if \(r\.estado === 'error'\) \{\s*setEstado\('error'\)\s*return\s*\}\s*setEstado\('exito'\)/.test(c) && /if \(Object\.keys\(validarContacto\(datos\)\)\.length === 0\) setEstado\('enviando'\)/.test(c) &&
+  !/TarjetaDeResultado|<Carga |CIERRE_MS|conDuracionMinima/.test(c) &&
+  /<AnimatePresence onExitComplete=\{devolverElFoco\}>/.test(c)
+afirmar(panelBien(panel) && ENVIO.mensajeMs === 3000 && DESPUES_DEL_ENVIO === ANUNCIO_DE_EXITO, '1 · enviar transforma el formulario en la carga y la carga en el encastre con su mensaje (`EstadoDeEnvio`, anunciado); a los 3 s el éxito cierra el panel con su salida y el foco vuelve a quien lo abrió; con error, todo lo escrito y el error', 'el banco `scripts-carga/contacto-general.ts` lo mide en el navegador')
+controlPositivo('1 · el detector VE un panel que no se cierra solo', panel.replace("if (despuesDe === 'exito') cerrarContacto()", "if (despuesDe === 'exito') setEstado('reposo')"), panelBien)
+controlPositivo('  y el «¡Gracias!» de texto suelto de antes', panel.replace(/<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\}>/, '<p>¡Gracias! Te escribimos pronto.</p>'), panelBien)
 
 // 2 · [PULIDO 10] J3 · El anillo se fue (lo reemplazó la carga de develOP, como pidió J3): el panel ya no carga un lienzo aparte
 // ni un componente de three, y la carga tampoco (es SVG). Antes: el anillo 3D en su propio lienzo, con el material de la escena.

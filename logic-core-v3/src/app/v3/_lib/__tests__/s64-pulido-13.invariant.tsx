@@ -144,10 +144,12 @@ const FRIO = recibo<{ antes: { error: Cuadros; exito: Cuadros }; despues: { erro
 const fluido = (r: { error: Cuadros; exito: Cuadros }): boolean => [...r.error, ...r.exito].every(([, ms]) => ms <= 20)
 // El precalentado: las dos tarjetas, del tamaño de la de verdad, con la placa ya quieta (llegó y entró el paralaje).
 const FORM_TSX = leer('_chrome/contacto/FormularioDeContacto.tsx')
+// [C2 · 22] el panel de Contacto ya no monta la tarjeta (su envío es el estado de envío del sitio) y no precalienta lo que no muestra; el recibo es el de la tarjeta de antes.
 const precalienta = (f: string): boolean =>
-  f.includes('(TRANSICIONES.viaje.delay + TRANSICIONES.viaje.duration + ENTRADA_DEL_PARALAJE.duration) * 1000 + 100') && f.includes("<PrecalentarElResultado activo={precalentar && fase === 'formulario'} compacto={compacto} />") &&
+  !f.includes('PrecalentarElResultado') && !f.includes('precalentar') &&
   PRECALENTAR.opacidad > 0 && PRECALENTAR.opacidad <= 0.02 && PRECALENTAR.ms >= 1000 && ENTRADA_DEL_PARALAJE.duration > 0
-afirmar(fluido(FRIO.despues) && precalienta(FORM_TSX), 'K2 d e · medido en frío (sin la caché de sombreadores): el error y el éxito del panel sin un cuadro de más de 20 ms; la tarjeta se precalienta con la placa quieta')
+afirmar(fluido(FRIO.despues) && precalienta(FORM_TSX), 'K2 d e · medido en frío (sin la caché de sombreadores), con la tarjeta de antes: el error y el éxito sin un cuadro de más de 20 ms; [C2 · 22] el panel de Contacto ya no la monta (envía por EstadoDeEnvio) y no precalienta nada')
+controlPositivo('  y el detector VE un panel que precalienta una tarjeta que no se ve', FORM_TSX + '\n<PrecalentarElResultado activo />', (f: string) => fluido(FRIO.despues) && precalienta(f))
 controlPositivo('K2 d e · el detector VE el frío de antes (67, 213 y 107 ms con el error)', FRIO.antes, fluido)
 afirmar(FRIO.precalentadoDelPanel.apertura.every(([t, ms]) => ms <= 20 || t < TRANSICIONES.viaje.delay * 1000 + 150 || t > (TRANSICIONES.viaje.delay + TRANSICIONES.viaje.duration + ENTRADA_DEL_PARALAJE.duration) * 1000), '  y lo que cuesta precalentar cae con la placa quieta (no en su viaje ni en la entrada del paralaje)')
 

@@ -196,10 +196,10 @@ const lugaresBien = (p: string, m: string): boolean =>
   // [PULIDO 11] B4 · el rótulo, uno (Enviar) y medido para la tecla 3D aunque esté mudo (`data-rotulo-de-la-tecla`).
   p.includes(`<span data-rotulo-de-la-tecla="" aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>`) &&
   p.includes('llego(await anotarElPedido(MEMORIA, conDuracionMinima(enviarAlServidor(') && !p.includes('Loader2') &&
-  m.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
-  m.includes('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)') && !m.includes('AnilloDeCarga')
-afirmar(lugaresBien(PIE_FORM, PANEL), 'C · la carga en el botón del pie (chica, encima del rótulo invisible: nada se mueve) y en el panel de Contacto (grande, en lugar del anillo), con la espera mínima')
-controlPositivo('C · el detector VE el panel esperando 1,4 s también con el formulario inválido', PANEL.replace('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)', 'const r = await conDuracionMinima(enviarContacto(datos))'), (m: string) => lugaresBien(PIE_FORM, m))
+  // [C2 · 22] el panel de Contacto monta el estado de envío del sitio (la carga de develOP, grande, con su mínimo): sólo si de verdad viaja (un inválido responde al toque).
+  m.includes('<EstadoDeEnvio estado={estado} alVolver={alVolver}>') && m.includes("if (Object.keys(validarContacto(datos)).length === 0) setEstado('enviando')") && m.includes('const r = await enviarContacto(datos)') && !m.includes('AnilloDeCarga')
+afirmar(lugaresBien(PIE_FORM, PANEL), 'C · la carga en el botón del pie (chica, encima del rótulo invisible: nada se mueve) y en el panel de Contacto (grande, por el estado de envío del sitio), con la espera mínima')
+controlPositivo('C · el detector VE el panel en la carga también con el formulario inválido', PANEL.replace("if (Object.keys(validarContacto(datos)).length === 0) setEstado('enviando')", "setEstado('enviando')"), (m: string) => lugaresBien(PIE_FORM, m))
 
 // D · Con movimiento reducido, el logo quieto (relleno, sin trazo ni giro) y el texto.
 // [PULIDO 11] B5 · con movimiento reducido el giro no se monta: el logo quieto (relleno) en su lugar. [PULIDO 13] · sin el trazo.
@@ -218,10 +218,12 @@ const PIE_J4 = leer('_secciones/cierre/FormularioDelPie.tsx')
 const ARMADAS_J4 = leer('_lib/escena/pie3d/armadas.ts')
 const TARJETA_J4 = leer('_componentes/formularios/TarjetaDeResultado.tsx')
 // A · Los dos voltean (el mismo volteo; [PULIDO 13] · sin variantes: el columpio se borró); ninguno pide el hundido.
+// [C2 · 22] el panel de Contacto ya no voltea: su envío es el estado de envío del sitio (`EstadoDeEnvio`); el volteo es del pie.
+const sinComentariosJ4 = (f: string): string => f.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
 const losDosVoltean = (panel: string, pie: string): boolean =>
-  [panel, pie].every((f) => f.includes('transicionDelVolteo(reducido') && !/hundido|gracias=|variante/.test(f.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')))
-afirmar(losDosVoltean(PANEL_J4, PIE_J4), 'A · los dos formularios voltean; el hundido y `?gracias=` se borraron')
-controlPositivo('A · el detector VE el panel de antes (con el hundido)', [PANEL_J4.replace('transicionDelVolteo(reducido)', "transicionDelVolteo(reducido)\n  const hundido = 'hundido'"), PIE_J4] as const, ([a, b]: readonly [string, string]) => losDosVoltean(a, b))
+  pie.includes('transicionDelVolteo(reducido') && panel.includes('<EstadoDeEnvio estado={estado}') && [panel, pie].every((f) => !/hundido|gracias=|variante/.test(sinComentariosJ4(f)))
+afirmar(losDosVoltean(PANEL_J4, PIE_J4), 'A · el pie voltea y el panel de Contacto usa el estado de envío del sitio; el hundido y `?gracias=` se borraron')
+controlPositivo('A · el detector VE el panel de antes (con el hundido)', [PANEL_J4 + "\nconst hundido = 'hundido'", PIE_J4] as const, ([a, b]: readonly [string, string]) => losDosVoltean(a, b))
 // B · La tarjeta no se mide para la placa 3D (ni su texto ni su encastre: la placa es lisa y se arma al toque) y su texto se lee en
 // el DOM (ya no hay un título de relieve en Archivo: ni el de gracias, ni sus letras en la fuente).
 const tarjetaLisa = (t: string): boolean => t.includes('data-sin-volumen=""') && !t.includes('data-relieve') && RESULTADO.exito.titulo === 'Recibido.'
@@ -243,8 +245,8 @@ const enSuLugar = (dy: number): boolean => {
 afirmar(enSuLugar(0), 'D · con la caja del formulario, el volteo termina con la tarjeta en su lugar exacto')
 controlPositivo('D · el detector VE una tarjeta corrida 63 px (la columna recentrada de antes)', 63, (dy: number) => enSuLugar(dy))
 // E · El rechazo de J5 se fue: ni `data-rechazo`, ni el resorte de la placa, ni Reintentar en el botón (vive en la tarjeta del error).
-const sinRechazo = (pie: string, panel: string, a: string): boolean => [pie, panel, a].every((f) => !/data-rechazo|cuadrosDelRechazo|hundidoDelRechazo|girarLaTecla|REINTENTAR/.test(f)) && pie.includes('alReintentar={reintentar}') && panel.includes('alReintentar={reintentar}')
-afirmar(sinRechazo(PIE_J4, PANEL_J4, ARMADAS_J4), 'E · el rechazo de J5 se fue: el error es la tarjeta que no encaja, con «Reintentar», en los dos formularios')
+const sinRechazo = (pie: string, panel: string, a: string): boolean => [pie, panel, a].every((f) => !/data-rechazo|cuadrosDelRechazo|hundidoDelRechazo|girarLaTecla|REINTENTAR/.test(f)) && pie.includes('alReintentar={reintentar}') && panel.includes("else setEstado('reposo')")
+afirmar(sinRechazo(PIE_J4, PANEL_J4, ARMADAS_J4), 'E · el rechazo de J5 se fue: el error es la tarjeta que no encaja, con «Reintentar», en el pie; en el panel de Contacto, el estado de envío del sitio y el formulario que vuelve con lo escrito')
 controlPositivo('E · el detector VE el pie de antes (el rechazo en el formulario)', [PIE_J4 + '\ndata-rechazo={rechazos}', PANEL_J4, ARMADAS_J4] as const, ([a, b, c]: readonly [string, string, string]) => sinRechazo(a, b, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
