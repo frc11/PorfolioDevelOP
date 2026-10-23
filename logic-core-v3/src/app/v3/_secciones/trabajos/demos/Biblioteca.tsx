@@ -63,7 +63,8 @@ export function Biblioteca({
   const estante = useRef<HTMLDivElement | null>(null)
   const cartel = useRef<HTMLSpanElement | null>(null)
   const intencion = useRef(0)
-  // [C2-41e] El control del banco (`CONTROL=area-movil`): la placa vuelve a recibir el puntero, como antes.
+  // [C2-41e] El control del banco (`CONTROL=area-movil`): el estante lleva `data-area-movil` y la placa vuelve a recibir el puntero,
+  // como antes (`demos.css`: la regla del control).
   const [areaMovil] = useState(() => conElDefectoDeDemos('area-movil'))
   // [C2-41e] Y `CONTROL=area-solapada`: el ancla entera vuelve a recibir el puntero, como antes.
   const [areaSolapada] = useState(() => conElDefectoDeDemos('area-solapada'))
@@ -141,7 +142,7 @@ export function Biblioteca({
   return (
     <>
       {/* `--libros`: el estante calcula con él cuánto se pisan para entrar en su columna. */}
-      <div ref={estante} data-pieza="estante" style={{ '--libros': CATALOGO_DE_DEMOS.length } as React.CSSProperties} {...(alejada ? { 'data-alejada': '' } : {})}>
+      <div ref={estante} data-pieza="estante" style={{ '--libros': CATALOGO_DE_DEMOS.length } as React.CSSProperties} {...(alejada ? { 'data-alejada': '' } : {})} {...(areaMovil ? { 'data-area-movil': '' } : {})}>
         {CATALOGO_DE_DEMOS.map((demo, i) => (
           <a
             key={demo.slug}
@@ -161,7 +162,7 @@ export function Biblioteca({
             style={areaSolapada ? { pointerEvents: 'auto' } : undefined}
           >
             {/* La cámara de la placa (la mirada), la placa (el abanico y el hover), su portada y sus cantos. */}
-            <span data-parte="cara" style={areaMovil ? { pointerEvents: 'auto' } : undefined}>
+            <span data-parte="cara">
               <span data-parte="placa">
                 <span data-parte="portada">
                   <Imagen src={demo.portada} alt="" ancho={MEDIDA_DE_LA_PORTADA.ancho} alto={MEDIDA_DE_LA_PORTADA.alto} sizes="(min-width: 1024px) 17vw, 160px" />
