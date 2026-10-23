@@ -1,5 +1,6 @@
 'use client'
 
+import type { MotionValue } from 'motion/react'
 import type { Ref } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -11,6 +12,7 @@ import { useAcompananteDelTitulo } from '../../../_lib/titulos3d/acompanantes'
 import { LENTOS } from '../../../_lib/titulos3d/repeticiones'
 import { CanalDeUnaPieza, VENTANA_QUE_RECORTA } from '../../_contrato/canales'
 import type { Progreso } from '../../_contrato/coreografia'
+import { TitularQueSeLevanta } from '../portfolio/levantarse'
 
 import { CLASE_DEL_CUERPO_DE_DEMOS, CLASE_DEL_TITULAR_DEL_CARTEL } from './herencia'
 import { TEXTO_DE_DEMOS } from './catalogo'
@@ -38,17 +40,20 @@ export function TextoDeDemos({
   progresoDelTitulo = null,
   progresoDelParrafo = null,
   refDelParrafo,
+  levantarse,
 }: {
   readonly progresoDelTitulo?: Progreso
   readonly progresoDelParrafo?: Progreso
   readonly refDelParrafo?: Ref<HTMLDivElement>
+  /** [C2-41t] Abajo de 1024: la presencia con la que el titular se levanta (`DemosDelFlujo`). */
+  readonly levantarse?: MotionValue<number>
 }): React.JSX.Element {
   // [NOCTURNO] A1 · el párrafo va en el plano del título de volumen (la cámara lo corre con él).
   const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('demos')
   return (
     // [PULIDO 10] J8 · `#demos`: el destino del pie («Demos»), con el viaje de siempre (`destinosDelViaje.ts`); el foco llega acá.
     <div id="demos" className="flex flex-col gap-4" style={{ maxWidth: `${MEDIDA_DEL_TEXTO_CH}ch` }}>
-      <TituloDeDemos progreso={progresoDelTitulo} />
+      <TituloDeDemos progreso={progresoDelTitulo} levantarse={levantarse} />
       <div ref={enElPlano}>
         <div ref={refDelParrafo}>
           <CanalDeUnaPieza progreso={progresoDelParrafo} patron="P2">
@@ -70,16 +75,20 @@ export function TextoDeDemos({
  * (la capa está pineada); desde 1024 el DOM se apaga con el título armado y sigue siendo el encabezado para el lector.
  * El DOM llega como el de Portfolio (P2 en su ventana). [CIERRE RETOQUE 3D] D3: antes, dos renglones que se levantaban.
  */
-function TituloDeDemos({ progreso }: { readonly progreso: Progreso }): React.JSX.Element {
+function TituloDeDemos({ progreso, levantarse }: { readonly progreso: Progreso; readonly levantarse?: MotionValue<number> }): React.JSX.Element {
   const { lugar, listo } = useTextoDeVolumen<HTMLSpanElement>({ id: 'demos', texto: TEXTO_DE_DEMOS.titulo, fuente: 'chivo-400', gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS.llegadaDePortfolioS })
+  const titular = (
+    <Titular nivel="display-xl" como="h3" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
+      <span ref={lugar} className={cn('block', listo && TEXTO_REEMPLAZADO)}>
+        {TEXTO_DE_DEMOS.titulo}
+      </span>
+    </Titular>
+  )
   return (
     <div className={VENTANA_QUE_RECORTA}>
       <CanalDeUnaPieza progreso={progreso} patron="P2">
-        <Titular nivel="display-xl" como="h3" className={CLASE_DEL_TITULAR_DEL_CARTEL}>
-          <span ref={lugar} className={cn('block', listo && TEXTO_REEMPLAZADO)}>
-            {TEXTO_DE_DEMOS.titulo}
-          </span>
-        </Titular>
+        {/* [C2-41t] Abajo de 1024 (`DemosDelFlujo`) se levanta desde abajo de su ventana, como «Portfolio» en el flujo. */}
+        {levantarse === undefined ? titular : <TitularQueSeLevanta presencia={levantarse}>{titular}</TitularQueSeLevanta>}
       </CanalDeUnaPieza>
     </div>
   )

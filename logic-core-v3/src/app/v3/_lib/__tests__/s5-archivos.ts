@@ -226,6 +226,8 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CromoDeLaVentana.tsx`,
   // [NOCTURNO B5] la cinta de abajo de 1024 (`Carrusel.tsx` y su física) se fue: el carrusel común de B1.2e, con las demos.
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CarruselDeDemos.tsx`,
+  // [C2-41t] Demos abajo de 1024, una sección más en lo que sigue al flujo del Portfolio (entra deslizándose, el título se levanta).
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/DemosDelFlujo.tsx`,
   // INTERFAZ 1 · cierre: con el teclado, la página sigue hasta que la capa de demos llega (sólo mueve la página).
   `${RAIZ_DE_SECCIONES}/trabajos/demos/llevarALaLlegada.ts`,
   // INTERFAZ 2 · T3: la onda de las portadas salió en [NOCTURNO B5] («el efecto de agua sale»): sus dos archivos, con ella.
@@ -265,6 +267,8 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/medioDelCarrusel.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMedioDelCarrusel.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useDisparoPorLinea.ts`,
+  // [C2-41t] el titular que se levanta en el flujo (la presencia de los títulos y su estilo): lo usan «Portfolio» y «Demos».
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/levantarse.tsx`,
   // [B1.2d] los mandos (la rueda, sus salidas, los toques y el clic afuera, salieron de `usePortfolio.ts`) y el pedido a la barra.
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMandosDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useClicAfueraDelPanel.ts`,

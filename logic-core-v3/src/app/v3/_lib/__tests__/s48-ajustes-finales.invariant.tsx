@@ -122,9 +122,10 @@ afirmar(JSON.stringify(LECTURA.portfolio) === '{"portfolio":true}' && aprobada.a
 controlPositivo('el detector VE la colocación encima de la llegada (0,4426: de frente, cortas)', 0.4426, relacion)
 controlPositivo('  y la lectura de antes (la cámara de 0,4718, no la pose del Portfolio)', 0.4718 as unknown, (l: unknown) => JSON.stringify(l) === '{"portfolio":true}')
 
-// El título: `queda` y nada más (sin huida ni salida propia): la huida del cartel es del DOM.
+// El título: `queda` y nada más (sin huida ni salida propia): la huida del cartel es del DOM. [C2-41t] La presencia por tiempo la da
+// `usePresencia` (`levantarse.tsx`, la comparte «Demos» en el teléfono; s76 B1.2b 16 afirma su tiempo).
 const piezasA1 = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
-const soloQueda = (c: string): boolean => /<ConInercia>\s*<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara === null \? null : presencia\} salida=\{null\} llegadaDe=\{seccion\.id\} minimoS=\{LENTOS\.llegadaDePortfolioS\} saleCayendo queda \/>\s*<\/ConInercia>/.test(c) && !/PortfolioDePrueba|useVarianteDePortfolio|huidaDelTitulo/.test(c) && /animate\(presencia, adentro \? 1 : 0/.test(c)
+const soloQueda = (c: string): boolean => /<ConInercia>\s*<TituloDeVolumen id="portfolio" texto=\{CONTENIDO\.titular\} lectura=\{LECTURA\.portfolio\} llegada=\{progresoDeLaMascara === null \? null : presencia\} salida=\{null\} llegadaDe=\{seccion\.id\} minimoS=\{LENTOS\.llegadaDePortfolioS\} saleCayendo queda \/>\s*<\/ConInercia>/.test(c) && !/PortfolioDePrueba|useVarianteDePortfolio|huidaDelTitulo/.test(c) && /const presencia = usePresencia\(adentro, reducido, PRESENCIA_DEL_ENCABEZADO\)/.test(c)
 // [B1] el túnel se fue. [B1.2b] Y el título ya no se esconde de golpe con la cola: llega y se va con la PRESENCIA del encabezado (el
 // panel adentro, por tiempo) y se va cayendo; sin salida propia ni huida.
 afirmar(soloQueda(piezasA1), 'Portfolio es UN título de volumen, que se queda: llega y se va con la presencia del encabezado (el panel adentro), sin salida propia ni huida')

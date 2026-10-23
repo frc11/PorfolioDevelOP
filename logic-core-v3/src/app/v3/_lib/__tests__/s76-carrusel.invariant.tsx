@@ -145,8 +145,9 @@ titulo('B1.2e · 6 · No es una trampa de scroll, y no depende de quien lo usa')
 
 const fuente = sinComentarios(leer('_componentes/carrusel/CarruselDeTarjetas.tsx'))
 const maquina = sinComentarios(leer('_componentes/carrusel/maquinaDelCarrusel.ts'))
+// [C2-41t] La vista suma la clase de quien la usa (`claseDeLaVista`: Demos le da su alto y la sangre), sobre la misma base.
 const libre = (c: string): boolean =>
-  /className="relative grid touch-pan-y select-none overflow-clip"/.test(c) && !/touch-none|preventDefault|stopPropagation|'wheel'|onWheel|touchmove|onTouchMove|h-svh|min-h-svh|h-screen/.test(c)
+  /className=\{cn\('relative grid touch-pan-y select-none overflow-clip', claseDeLaVista\)\}/.test(c) && !/touch-none|preventDefault|stopPropagation|'wheel'|onWheel|touchmove|onTouchMove|h-svh|min-h-svh|h-screen/.test(c)
 afirmar(libre(fuente), 'la vista es `touch-action: pan-y` (el dedo vertical lo hace el navegador), no cancela ni frena ningún evento, no escucha la rueda ni el `touchmove`, y no tiene el alto de la pantalla: mide lo que su tarjeta')
 controlPositivo('  el detector ve la trampa de las historias (`touch-none` y el freno del arrastre)', sinComentarios(leer('_componentes/historias/Historias.tsx')), libre)
 controlPositivo('  y un carrusel que cancela el dedo', fuente.replace('const alMoverse = (e: React.PointerEvent<HTMLDivElement>): void => {', 'const alMoverse = (e: React.PointerEvent<HTMLDivElement>): void => {\n    e.preventDefault()'), libre)

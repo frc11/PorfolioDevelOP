@@ -1,7 +1,6 @@
 'use client'
 
-import { animate, motion, useMotionValue, useTransform } from 'motion/react'
-import { useEffect } from 'react'
+import { motion, useTransform } from 'motion/react'
 
 import { useRepeticionDeLaLlegada } from '../../../_componentes/llegadaDelTitulo'
 import { TituloDeVolumen } from '../../../_componentes/titulos3d/TituloDeVolumen'
@@ -15,6 +14,7 @@ import type { PropsDeSeccion } from '../../_contrato/forma'
 
 import { CONTENIDO } from '../contenido'
 
+import { usePresencia, useEstiloQueSeLevanta } from './levantarse'
 import { CLASE_DEL_CUERPO, CLASE_DEL_TITULAR, MEDIDA_DEL_CUERPO_CH, opacidadDeLaLlegada, recorteDeLaLlegada } from './tipografia'
 
 /**
@@ -40,23 +40,14 @@ export const PRESENCIA_DEL_ENCABEZADO = { s: 0.6, curva: [0.25, 0.46, 0.45, 0.94
 export function EncabezadoDelPortfolio({ seccion, adentro, reducido, seFunde = false, className }: PropsDeSeccion & { readonly adentro: boolean; readonly reducido: boolean; readonly seFunde?: boolean; readonly className?: string }): React.JSX.Element {
   // [NOCTURNO] A1 · la bajada va en el plano del título de volumen (la cámara la corre con él).
   const bajada = useAcompananteDelTitulo<HTMLDivElement>('portfolio')
-  const presencia = useMotionValue(adentro ? 1 : 0)
-  useEffect(() => {
-    if (reducido) {
-      presencia.set(adentro ? 1 : 0)
-      return undefined
-    }
-    const a = animate(presencia, adentro ? 1 : 0, { duration: PRESENCIA_DEL_ENCABEZADO.s, ease: [...PRESENCIA_DEL_ENCABEZADO.curva] })
-    return () => a.stop()
-  }, [adentro, reducido, presencia])
+  const presencia = usePresencia(adentro, reducido, PRESENCIA_DEL_ENCABEZADO)
   // [PULIDO 10] J7 · la llegada de un viaje: el titular entero o invisible (`opacidadDeLaLlegada`, `recorteDeLaLlegada`).
   const repeticion = useRepeticionDeLaLlegada(seccion.id)
   const opacidadDelTitular = useTransform(repeticion, opacidadDeLaLlegada)
   const recorteDelTitular = useTransform(repeticion, recorteDeLaLlegada)
-  // [C2-40] En el flujo (sin títulos 3D) el titular se levanta desde abajo de su ventana, de acostado a parado: el efecto de los títulos.
-  const subida = useTransform(presencia, [0, 1], ['110%', '0%'])
-  const giro = useTransform(presencia, [0, 1], [70, 0])
-  const estiloDelTitular = seFunde ? { opacity: opacidadDelTitular, y: subida, rotateX: giro, transformPerspective: 600, transformOrigin: '50% 100%' } : { opacity: opacidadDelTitular }
+  // [C2-40] En el flujo (sin títulos 3D) el titular se levanta desde abajo de su ventana, de acostado a parado (`levantarse.tsx`).
+  const levantarse = useEstiloQueSeLevanta(presencia)
+  const estiloDelTitular = seFunde ? { opacity: opacidadDelTitular, ...levantarse } : { opacity: opacidadDelTitular }
   const encabezado = (
     <div data-pieza="encabezado-del-portfolio" className={className}>
       <div id={idDelTitularDeSeccion(seccion.id)}>
