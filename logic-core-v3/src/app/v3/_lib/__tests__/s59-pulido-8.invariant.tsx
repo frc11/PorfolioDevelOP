@@ -207,12 +207,12 @@ function dondeBien(f: Fuentes): boolean {
   const [enElGiro, ref] = [enLaPantalla(u.grupo.position.x, -u.grupo.position.y, u.grupo.position.z), letraDeReferencia(0.6, { x: LINEA.izquierda, y, cuerpo: LINEA.cuerpo, ancho: 0, alto: 0, renglon: 0, letra: '' })]
   const conLaCara = Math.hypot(enElGiro[0] - ref[0], enElGiro[1] - ref[1]) < 0.5
   const material = subrayadoFuente.includes('const material = materialDelCta(color, contorno)') && subrayadoFuente.includes('bevelEnabled: true, bevelThickness: bisel.grosor') && f.escena.includes('a.marco.add(subrayado.grupo)')
-  const sinCss = f.dom.includes('className="inline-block cursor-pointer no-underline"') && !/text-decoration|decoration-|\bunderline\b(?!-)/.test(f.dom.replace('no-underline', '')) && f.dom.includes('data-abre-contacto="panel"') && sonido.includes('[data-abre-contacto]')
+  const sinCss = f.dom.includes('className="relative inline-block cursor-pointer overflow-hidden no-underline"') && !/text-decoration|decoration-|\bunderline\b(?!-)/.test(f.dom.replace('no-underline', '')) && f.dom.includes('data-abre-contacto="panel"') && sonido.includes('[data-abre-contacto]')
   const quieto = f.escena.includes('const quieto = usePrefiereMenosMovimiento()') && f.escena.includes('s.quieto, dt)')
   return deIzquierdaADerecha && debajo && conLaCara && material && sinCss && quieto
 }
 afirmar(dondeBien({ escena: escenaG2, dom: domDelCta }), '3 · el subrayado es 3D, en el marco del CTA con el material y el filo de las letras: debajo de la base, de izquierda a derecha, con el giro; cursor de enlace y el tic de los CTA')
 controlPositivo('3 · el detector VE el subrayado fuera del marco (no se dibuja en el mundo)', { escena: escenaG2.replace('a.marco.add(subrayado.grupo)', 'void subrayado.grupo'), dom: domDelCta }, dondeBien)
-controlPositivo('  y una línea del CSS en el enlace (sin cursor de enlace)', { escena: escenaG2, dom: domDelCta.replace('className="inline-block cursor-pointer no-underline"', 'className="inline-block underline"') }, dondeBien)
+controlPositivo('  y una línea del CSS en el enlace (sin cursor de enlace)', { escena: escenaG2, dom: domDelCta.replace('className="relative inline-block cursor-pointer overflow-hidden no-underline"', 'className="inline-block underline"') }, dondeBien)
 
 cerrar('s59-pulido-8')
