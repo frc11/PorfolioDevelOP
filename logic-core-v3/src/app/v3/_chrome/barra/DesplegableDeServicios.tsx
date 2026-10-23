@@ -6,6 +6,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObje
 import { cn } from '@/lib/utils'
 
 import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
+import { sonar } from '../../_lib/sonido/bus'
 import { PAGINAS_DE_SERVICIO, SERVICIOS_DEL_HOME, destinoDesde } from '../paginas'
 
 /**
@@ -144,7 +145,7 @@ export function useDesplegable(): Desplegable {
     [cerrar],
   )
 
-  // Abierto: la lista debajo de «Servicios» (su centro, medido contra la cabecera), el foco adentro si se abrió con el teclado, y lo que
+  // Abierto: la lista debajo de «Servicios» ([C2-21] su borde izquierdo, medido contra la cabecera), el foco adentro si se abrió con el teclado, y lo que
   // lo cierra (Esc, un clic afuera, el foco afuera).
   useLayoutEffect(() => {
     const a = enlace.current
@@ -156,10 +157,8 @@ export function useDesplegable(): Desplegable {
     const ubicar = (): void => {
       if (cabecera === null) return
       const ra = a.getBoundingClientRect()
-      const rb = b.getBoundingClientRect()
-      const izquierda = Math.min(ra.left, rb.left)
-      const derecha = Math.max(ra.right, rb.right)
-      p.style.setProperty('--desplegable-x', `${String((izquierda + derecha) / 2 - cabecera.getBoundingClientRect().left)}px`)
+      // [C2-21] El borde izquierdo de la lista en el de «Servicios» (la hoja ya no la centra: `barra.css`).
+      p.style.setProperty('--desplegable-x', `${String(Math.min(ra.left, b.getBoundingClientRect().left) - cabecera.getBoundingClientRect().left)}px`)
       p.setAttribute('data-hacia', ra.bottom + p.offsetHeight + ra.height > window.innerHeight ? 'arriba' : 'abajo')
     }
     ubicar()
@@ -252,7 +251,8 @@ export function ListaDeServicios({ ref, abierto, alEntrar, alSalir, alTeclear, c
         {ITEMS_DEL_DESPLEGABLE.map((p) => (
           <li key={p.id}>
             {/* Cerrada, fuera del recorrido del teclado también en el marcado (la hoja ya la esconde con `visibility`). */}
-            <EnlaceDeRuta href={destinoDesde(ruta, p.destino)} data-pieza="desplegable-enlace" tabIndex={abierto ? undefined : -1} onClick={() => cerrar(false)} className={CLASE_DEL_TEXTO}>
+            {/* [C2-21] El mismo tic de hover que los ítems de la barra (con el sonido apagado, nada). */}
+            <EnlaceDeRuta href={destinoDesde(ruta, p.destino)} data-pieza="desplegable-enlace" tabIndex={abierto ? undefined : -1} onClick={() => cerrar(false)} onPointerEnter={() => sonar('tic')} onFocus={() => sonar('tic')} className={CLASE_DEL_TEXTO}>
               {p.rotulo}
             </EnlaceDeRuta>
           </li>

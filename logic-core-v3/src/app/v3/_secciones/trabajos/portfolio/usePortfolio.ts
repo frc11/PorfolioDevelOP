@@ -26,7 +26,7 @@ import { useAnclaDeLaCarga } from './useAnclaDeLaCarga'
 import { useBarraDelPortfolio } from './useBarraDelPortfolio'
 import { useMandosDelPortfolio } from './useMandosDelPortfolio'
 import { useMedioDelCarrusel } from './useMedioDelCarrusel'
-import { useOrdenDeLaEscena } from './useOrdenDeLaEscena'
+import { useOrdenDeLaEscena, useViajeQueSale } from './useOrdenDeLaEscena'
 
 export { RUEDA_RECIENTE_MS } from './useMandosDelPortfolio'
 
@@ -104,7 +104,9 @@ export function usePortfolio(caja: RefObject<HTMLElement | null>): PortfolioVivo
 
   // [B1.2d] El orden: la cámara, el título, la barra y el panel (al irse, al revés). [B1.2e] Con el carrusel, nada: el flujo trae lo suyo.
   const fase = vistaDelPaso(paso).fase
-  const adentro = fase === 'adentro'
+  // [C2-21] Un viaje del menú que sale del Portfolio lo suelta desde el clic (`useViajeQueSale`).
+  const sale = useViajeQueSale(caja)
+  const adentro = fase === 'adentro' && !sale
   const tituloS = useTituloListo('portfolio') ? LENTOS.llegadaDePortfolioS : PRESENCIA_DEL_ENCABEZADO.s
   const pedidoDelOrden = adentro && !carrusel ? ADENTRO : AFUERA
   const orden = useOrdenDeLaEscena(pedidoDelOrden, tituloS, reducido)

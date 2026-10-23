@@ -52,7 +52,7 @@ import { escribirEmisionDelLogo } from './logoEmision'
 import { publicarLaMirada } from './miradaDeLaCamara'
 import { INCLINACION_DEL_TELEFONO } from './giroscopio'
 import { escalaDeLaOrbita, perseguirElPunteroDeLaOrbita } from './punteroDeLaOrbita'
-import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, viajeEnCurso } from './viaje'
+import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, anotarLaCamara, viajeEnCurso } from './viaje'
 
 /** [PULIDO 2] 2 · un cuadro que llega después de esto (s) viene de la escena suspendida (no de un tirón: esos duran décimas). */
 const REANUDA_S = 0.5
@@ -384,6 +384,8 @@ export function OrbitRig({
             )
           : target[channel]
       }
+      // [C2-21] La cámara de este cuadro, para la llegada de un viaje del menú (`llegadaDeLaEscena.ts`): el título espera a que llegue.
+      anotarLaCamara(live, target)
 
       // 1d · Publicar al panel. UNA notificación para todos los canales, no una
       //      por canal: con `set` esto serían decenas de llamadas de listener

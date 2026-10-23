@@ -165,21 +165,38 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
       ubicarElResaltado.current()
     }
     const alEntrar = (e: Event): void => senalar(e.target instanceof Element ? e.target.closest<HTMLElement>('[data-pieza="barra-enlace"]') : null)
-    const alSalir = (): void => senalar(null)
+    // [C2-21] Con el mouse (o el foco) en el desplegable de Servicios, el resaltado se queda en «Servicios», no vuelve al activo.
+    const lista = listaDeServicios.current
+    const enLaLista = (n: EventTarget | null): boolean => n instanceof Node && lista !== null && lista.contains(n)
+    const deServicios = (): HTMLElement | null => barra.querySelector<HTMLElement>(`[data-nav-id="${SERVICIOS_DEL_HOME.id}"]`)
+    const alSalir = (e: PointerEvent): void => senalar(enLaLista(e.relatedTarget) ? deServicios() : null)
     const alPerderElFoco = (e: FocusEvent): void => {
-      if (!(e.relatedTarget instanceof Node && barra.contains(e.relatedTarget))) senalar(null)
+      if (enLaLista(e.relatedTarget)) senalar(deServicios())
+      else if (!(e.relatedTarget instanceof Node && barra.contains(e.relatedTarget))) senalar(null)
+    }
+    const alEntrarALaLista = (): void => senalar(deServicios())
+    const alSalirDeLaLista = (e: PointerEvent | FocusEvent): void => {
+      if (!(e.relatedTarget instanceof Node && (barra.contains(e.relatedTarget) || enLaLista(e.relatedTarget)))) senalar(null)
     }
     barra.addEventListener('pointerover', alEntrar)
     barra.addEventListener('pointerleave', alSalir)
     barra.addEventListener('focusin', alEntrar)
     barra.addEventListener('focusout', alPerderElFoco)
+    lista?.addEventListener('pointerenter', alEntrarALaLista)
+    lista?.addEventListener('pointerleave', alSalirDeLaLista)
+    lista?.addEventListener('focusin', alEntrarALaLista)
+    lista?.addEventListener('focusout', alSalirDeLaLista)
     return () => {
       barra.removeEventListener('pointerover', alEntrar)
       barra.removeEventListener('pointerleave', alSalir)
       barra.removeEventListener('focusin', alEntrar)
       barra.removeEventListener('focusout', alPerderElFoco)
+      lista?.removeEventListener('pointerenter', alEntrarALaLista)
+      lista?.removeEventListener('pointerleave', alSalirDeLaLista)
+      lista?.removeEventListener('focusin', alEntrarALaLista)
+      lista?.removeEventListener('focusout', alSalirDeLaLista)
     }
-  }, [])
+  }, [listaDeServicios])
 
   return (
     <header data-pieza="barra" data-nacimiento={nacimiento} className={className}>
