@@ -178,6 +178,10 @@ async function principal(): Promise<void> {
     '--color-semaforo-rojo: #FF5F57;',
     '--color-semaforo-amarillo: #FEBC2E;',
     '--color-semaforo-verde: #28C840;',
+    // ⚠ AGREGADOS POR C2 · 40: el color de cada marca para su «Visitar sitio» (su motivo, en `padron-de-tokens.AGREGADOS`).
+    '--color-marca-el-garage: #FA9408;',
+    '--color-marca-esquina-estudio: #FFFFFF;',
+    '--color-marca-banu-scents: #BB9473;',
     // ⚠ AGREGADOS POR PULIDO 11 (B3): el rojo del error, el primer color fuera del monocromo, y su versión clara para el texto.
     // Su motivo entero está en `padron-de-tokens.AGREGADOS`; su contraste, en el comentario del tema.
     '--color-error: #E5484D;',

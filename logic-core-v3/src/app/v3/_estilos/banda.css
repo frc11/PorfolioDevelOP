@@ -110,16 +110,19 @@
     --degrade-del-velo: radial-gradient(closest-side, var(--velo-sobre-la-escena) 55%, transparent);
   }
 
+  [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'],
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'],
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] {
     text-shadow: var(--halo-sobre-la-escena);
   }
 
+  [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'] p,
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p,
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto'] {
     position: relative;
   }
 
+  [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'] p::before,
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p::before,
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto']::before {
     content: '';

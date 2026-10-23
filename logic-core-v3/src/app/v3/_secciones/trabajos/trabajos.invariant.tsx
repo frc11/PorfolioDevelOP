@@ -150,7 +150,7 @@ afirmar(!quieto.includes('transform:') && !quieto.includes('will-change'), 'la r
 afirmar(!conPreferencia.includes('transform:'), '  y con `prefers-reduced-motion` tampoco')
 controlPositivo('el chequeo de "no hay transformada" ve un style con transform', '<div style="transform:translateY(10%)"></div>', (html: string) => !html.includes('transform:'))
 const soloParaLectores = [...quieto.matchAll(/<(\w+)([^>]*)class="sr-only"/g)].map((m) => (/role="(alert|status)"/.exec(m[2])?.[1] ?? m[1]))
-afirmarIgual(soloParaLectores, ['alert', 'status'], 'ningún `sr-only` de nombre: el del «Visitar sitio» va en su `aria-label`; [B1.2c] los dos que hay son las regiones vivas del formulario de la tuya (el aviso y el gracias, como en el contacto)')
+afirmarIgual(soloParaLectores, ['status', 'alert', 'alert'], 'ningún `sr-only` de nombre: el del «Visitar sitio» va en su `aria-label`; los que hay son regiones vivas del formulario de la tuya ([C2 · 40] el gracias y el error de `EstadoDeEnvio`, y el aviso de los errores de los campos)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('9 · Cero `three` y cero contextos: el Portfolio no abre un lienzo')
@@ -186,7 +186,7 @@ afirmarIgual(clase(quieto, 'text-acento-claro'), ROTULOS_DE_LA_FICHA, `  y el ac
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · Higiene: color, foco, interactividad y puertas')
 
-afirmarIgual(veces(quieto, 'outline-none'), 0, 'cero `outline-none`: el anillo de foco lo pone el tema')
+afirmarIgual(veces(quieto, 'outline-none') - 2 * veces(quieto, 'data-pieza="estado-de-envio"'), 0, 'cero `outline-none`: el anillo de foco lo pone el tema ([C2 · 40] salvo las dos capas de `EstadoDeEnvio`, que reciben el foco con `tabIndex` -1 y no son controles)')
 afirmar(!/#[0-9a-fA-F]{3,8}\b/.test(quieto), 'cero color fuera de los tokens: ni un hex suelto')
 const CLASE_DE_PRUEBA = 'p-' + '[' + '7px' + ']'
 afirmar(!/-\[\d+(px|rem)\]/.test(quieto), 'cero px o rem suelto en un valor arbitrario de clase')

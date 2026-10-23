@@ -82,6 +82,7 @@ function PantallaDelCarrusel({ vivo }: { readonly vivo: PortfolioVivo }): React.
             nombreDe={(t) => t.proyecto.nombre}
             rotulos={CONTENIDO.carrusel}
             indicePedido={indiceDelAncla(hash)}
+            vistasLlenas
             renderItem={(t, e) => <TarjetaDelProyecto proyecto={t.proyecto} activa={e.activa} corre={e.corre} reinicio={e.reinicio} cerca={vivo.cerca} reducido={vivo.reducido} />}
           />
         </Gatillo>
@@ -108,7 +109,6 @@ function PantallaDeLaTuya({ reducido }: { readonly reducido: boolean }): React.J
             <SignoDePregunta visible={puesta} reducido={reducido} />
             <div className="relative flex flex-col gap-3">
               <Titular nivel={NIVEL_DEL_TITULO_DE_LA_TUYA} como="h3">{c.nombre}</Titular>
-              <Titular nivel="titulo-m" como="p">{c.frase}</Titular>
               <Cuerpo className="text-tinta/70">{c.bajada}</Cuerpo>
             </div>
             <div className="relative">

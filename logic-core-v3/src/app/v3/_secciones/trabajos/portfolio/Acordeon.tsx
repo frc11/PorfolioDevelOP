@@ -11,7 +11,7 @@ import { PROYECTOS } from '../proyectos'
 import { CONSULTA_DEL_PUNTERO_FINO, TIRA_DE_LA_TUYA, accionDeLaTecla, esTeclaDelSelector, seMovioDeVerdad, suenaElCambio, vistaDelPaso } from './estado'
 import { LaTuya } from './LaTuya'
 import { Tira, idsDeLaTira } from './Tira'
-import { muestraSuContenido } from './transicion'
+import { muestraElPoster, muestraSuContenido } from './transicion'
 import type { PortfolioVivo } from './usePortfolio'
 import { useTransicionDeLasTiras } from './useTransicionDeLasTiras'
 
@@ -126,7 +126,7 @@ export function Acordeon({ vivo }: { readonly vivo: PortfolioVivo }): React.JSX.
       onPointerMove={alPasar}
     >
       {PROYECTOS.map((proyecto, i) => (
-        <Tira key={proyecto.slug} proyecto={proyecto} indice={i} activa={transicion.ancha === i} visible={visibleLa(i)} vivo={vivo} />
+        <Tira key={proyecto.slug} proyecto={proyecto} indice={i} activa={transicion.ancha === i} visible={visibleLa(i)} poster={muestraElPoster(transicion, i)} vivo={vivo} />
       ))}
       <LaTuya activa={transicion.ancha === TIRA_DE_LA_TUYA} visible={visibleLa(TIRA_DE_LA_TUYA)} vivo={vivo} />
     </div>

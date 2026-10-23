@@ -12,8 +12,8 @@ export const SECUENCIA = { entraS: 0.5, fichaTrasS: 0.4, escalonS: 0.08, seVaS: 
 /** Cuándo arranca la pieza `orden` (0: el video y el nombre; 1, 2…: la ficha, de arriba abajo), en segundos. */
 export const demoraDe = (orden: number): number => (orden <= 0 ? 0 : SECUENCIA.fichaTrasS + (orden - 1) * SECUENCIA.escalonS)
 
-/** Las props de Motion de una pieza de la secuencia: visible (su tira activa con el panel adentro) o no. */
-export function enLaSecuencia(visible: boolean, orden: number, reducido: boolean): {
+/** Las props de Motion de una pieza de la secuencia: visible (su tira activa con el panel adentro) o no. [C2 · 40] `opacidad`: a cuánto llega. */
+export function enLaSecuencia(visible: boolean, orden: number, reducido: boolean, opacidad = 1): {
   readonly initial: false
   readonly animate: { readonly opacity: number }
   readonly transition: Transition
@@ -23,5 +23,5 @@ export function enLaSecuencia(visible: boolean, orden: number, reducido: boolean
     : visible
       ? { duration: SECUENCIA.entraS, delay: demoraDe(orden), ease: [...SECUENCIA.curva] }
       : { duration: SECUENCIA.seVaS }
-  return { initial: false, animate: { opacity: visible ? 1 : 0 }, transition }
+  return { initial: false, animate: { opacity: visible ? opacidad : 0 }, transition }
 }

@@ -221,12 +221,14 @@ export function afirmarB12c(): void {
   afirmar(validarContacto(datosDelFormulario({ nombre: '', medio: '', mensaje: '' })).medio !== undefined && Object.keys(validarContacto(datosDelFormulario({ nombre: '', medio: '+54 9 381 415 4708', mensaje: '' }))).length === 0, '  y con su validación: el único obligatorio es el WhatsApp o el email')
   const formulario = sinComentarios(leer(`${PORTFOLIO}/FormularioDeLaTuya.tsx`))
   const importaDelContacto = (c: string): boolean =>
-    /from '\.\.\/\.\.\/\.\.\/_chrome\/contacto\/enviarContacto'/.test(c) && /from '\.\.\/\.\.\/\.\.\/_chrome\/contacto\/contenido'/.test(c) && /RESULTADO\.exito\.titulo/.test(c) && /RESULTADO\.error\.titulo/.test(c) &&
-    !new RegExp(`'(${[RESULTADO.exito.titulo, RESULTADO.error.titulo, 'Enviar', 'Enviando…'].join('|')})'`).test(c)
-  afirmar(importaDelContacto(formulario), '  la validación, el envío y los textos de gracias y de error se IMPORTAN del contacto: ni uno escrito de nuevo')
+    /from '\.\.\/\.\.\/\.\.\/_chrome\/contacto\/enviarContacto'/.test(c) && /from '\.\.\/\.\.\/\.\.\/_chrome\/contacto\/contenido'/.test(c) && /from '\.\.\/\.\.\/\.\.\/_componentes\/formularios\/EstadoDeEnvio'/.test(c) &&
+    !new RegExp(`'(${[RESULTADO.exito.titulo, RESULTADO.error.titulo, '¡Recibido!', 'Algo falló', 'Enviar', 'Enviando…'].join('|')})'`).test(c)
+  afirmar(importaDelContacto(formulario), '  la validación y el envío se IMPORTAN del contacto, y [C2 · 40] el gracias y el error son los de `EstadoDeEnvio`: ni uno escrito de nuevo')
   controlPositivo('  el detector ve un texto duplicado', `${formulario}\nconst x = 'Recibido.'`, importaDelContacto)
-  afirmar(/<a\s+href=\{WHATSAPP\.href\}/.test(formulario) && WHATSAPP.href.startsWith('https://wa.me/5493814154708?text='), '  «o escribinos por WhatsApp»: el enlace `wa.me` del pie (el número que ya estaba en el repo) con su mensaje precargado')
-  afirmar(/fase === 'exito' \|\| fase === 'error'/.test(formulario) && /<p role="alert" className="sr-only">/.test(formulario), '  el gracias y el error, adentro de la tira (y anunciados por las regiones vivas, como en el contacto)')
+  afirmar(/<CtaEnlace href=\{WHATSAPP\.href\}/.test(formulario) && WHATSAPP.href.startsWith('https://wa.me/5493814154708?text='), '  «O escribinos por WhatsApp»: el enlace `wa.me` del pie (el número que ya estaba en el repo) con su mensaje precargado, [C2 · 40] con el efecto de los botones del sitio (`CtaEnlace`)')
+  controlPositivo('  el detector ve el enlace subrayado de antes (sin efecto de botón)', formulario.replace('<CtaEnlace href={WHATSAPP.href}', '<a href={WHATSAPP.href}'), (c: string) => /<CtaEnlace href=\{WHATSAPP\.href\}/.test(c))
+  afirmar(/<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\}>/.test(formulario) && /setEstado\('enviando'\)/.test(formulario) && /<p role="alert" className="sr-only">/.test(formulario), '  [C2 · 40] el envío es el estándar (`EstadoDeEnvio`: la carga, el encastre y el mensaje, y vuelve el formulario), adentro de la tira; el aviso de los errores de los campos, en su región viva')
+  controlPositivo('  el detector ve el cambio seco de antes', formulario.replace('<EstadoDeEnvio estado={estado} alVolver={alVolver}>', '<div>'), (c: string) => /<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\}>/.test(c))
 
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('B1.2c · 24 · El «?»: centrado, se arma en el lenguaje del preloader y el punto cae como las piezas del pie')

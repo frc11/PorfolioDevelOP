@@ -1,6 +1,10 @@
 'use client'
 
+import { motion } from 'motion/react'
+
 import type { ProyectoDelPortfolio } from '../proyectos'
+
+import { enLaSecuencia } from './secuencia'
 
 /**
  * [B1.2b] LAS MARCAS DE AGUA DE LAS TIRAS (plan §12, puntos 4 y 5) — un tratamiento para las cuatro: monocromas (la tinta), grandes,
@@ -15,17 +19,18 @@ export const OPACIDAD_DE_LA_MARCA = 0.08
 
 const CLASE_DE_LA_MARCA = 'pointer-events-none absolute inset-x-8 bottom-12 h-2/5 bg-tinta'
 
-export function MarcaDeAgua({ proyecto, cerca }: { readonly proyecto: ProyectoDelPortfolio; readonly cerca: boolean }): React.JSX.Element | null {
+/** [C2 · 40] La marca entra con un fundido (con la secuencia de su tira, hasta su opacidad) y no de la nada; sin `visible`, quieta a la vista. */
+export function MarcaDeAgua({ proyecto, cerca, visible = true, reducido = false }: { readonly proyecto: ProyectoDelPortfolio; readonly cerca: boolean; readonly visible?: boolean; readonly reducido?: boolean }): React.JSX.Element | null {
   if (!cerca) return null
-  if (proyecto.logo === null) return <MarcaDeAguaTipografica nombre={proyecto.nombre} />
+  if (proyecto.logo === null) return <MarcaDeAguaTipografica nombre={proyecto.nombre} visible={visible} reducido={reducido} />
   const mascara = `url(${proyecto.logo})`
   return (
-    <div
+    <motion.div
       aria-hidden="true"
       data-marca-de-agua={proyecto.slug}
       className={CLASE_DE_LA_MARCA}
+      {...enLaSecuencia(visible, 0, reducido, OPACIDAD_DE_LA_MARCA)}
       style={{
-        opacity: OPACIDAD_DE_LA_MARCA,
         maskImage: mascara,
         WebkitMaskImage: mascara,
         maskSize: 'contain',
@@ -40,15 +45,15 @@ export function MarcaDeAgua({ proyecto, cerca }: { readonly proyecto: ProyectoDe
 }
 
 /** Sin un logo limpio, el nombre del cliente como marca de agua (hasta que Valentino pase el archivo). */
-export function MarcaDeAguaTipografica({ nombre }: { readonly nombre: string }): React.JSX.Element {
+export function MarcaDeAguaTipografica({ nombre, visible = true, reducido = false }: { readonly nombre: string; readonly visible?: boolean; readonly reducido?: boolean }): React.JSX.Element {
   return (
-    <span
+    <motion.span
       aria-hidden="true"
       data-marca-de-agua="nombre"
       className="pointer-events-none absolute inset-x-8 bottom-12 flex h-2/5 items-center justify-center text-center font-titulo text-[length:var(--text-display-xl)] leading-none text-tinta"
-      style={{ opacity: OPACIDAD_DE_LA_MARCA }}
+      {...enLaSecuencia(visible, 0, reducido, OPACIDAD_DE_LA_MARCA)}
     >
       {nombre}
-    </span>
+    </motion.span>
   )
 }

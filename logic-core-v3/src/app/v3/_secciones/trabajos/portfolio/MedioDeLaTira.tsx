@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { BotonPausa } from '../../../_componentes/medios/BotonPausa'
@@ -8,6 +9,8 @@ import { Imagen } from '../../../_componentes/medios/Imagen'
 import type { ProyectoDelPortfolio } from '../proyectos'
 
 import { ANCHO_DEL_MEDIO, MEDIDAS_DE_LOS_MEDIOS, PROPORCION_DEL_MEDIO, SIZES_DEL_LOMO } from './medios'
+import { SECUENCIA } from './secuencia'
+import { TRANSICION } from './transicion'
 
 /**
  * [F7] La pausa del panel, sólo para el teclado: en escala 0 y sin puntero (el mouse nunca la ve ni la toca; sigue en el orden del Tab),
@@ -89,12 +92,23 @@ export function MedioDeLaTira({
   )
 }
 
-/** El lomo de una tira inactiva: el póster del teléfono, en grises, detrás del nombre girado. Decorativo; sólo con la sección cerca. */
-export function PosterDelLomo({ proyecto, cerca }: { readonly proyecto: ProyectoDelPortfolio; readonly cerca: boolean }): React.JSX.Element {
+/**
+ * El lomo de una tira inactiva: el póster del teléfono, en grises, detrás del nombre girado. Decorativo; sólo con la sección cerca.
+ * [C2 · 40] Ya no aparece de golpe: con `visible` entra en la salida del contenido (la tira todavía ancha: el contenido se desvanece hacia
+ * su póster y después se comprime) y se va mientras la tira se abre. Con movimiento reducido, de una.
+ */
+export function PosterDelLomo({ proyecto, cerca, visible = true, reducido = false }: { readonly proyecto: ProyectoDelPortfolio; readonly cerca: boolean; readonly visible?: boolean; readonly reducido?: boolean }): React.JSX.Element {
   const medida = MEDIDAS_DE_LOS_MEDIOS[proyecto.slug].movil
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+    <motion.div
+      aria-hidden="true"
+      data-parte="poster-del-lomo"
+      className="pointer-events-none absolute inset-0"
+      initial={false}
+      animate={{ opacity: visible ? 1 : 0 }}
+      transition={reducido ? { duration: 0 } : { duration: visible ? TRANSICION.salidaS : TRANSICION.aperturaS, ease: [...SECUENCIA.curva] }}
+    >
       {cerca ? <Imagen src={proyecto.medios.poster.movil} alt="" ancho={medida.ancho} alto={medida.alto} sizes={SIZES_DEL_LOMO} className="h-full w-full object-cover opacity-tenue grayscale" /> : null}
-    </div>
+    </motion.div>
   )
 }

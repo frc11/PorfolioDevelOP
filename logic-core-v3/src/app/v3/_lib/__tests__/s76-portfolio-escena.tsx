@@ -309,7 +309,7 @@ export function afirmarElSelectorVivo(): void {
   const anchoDeProxima = (cuerpo: number): number => 3.95 * cuerpo
   afirmar(NIVEL_DEL_TITULO_DE_LA_TUYA === 'titulo-xl' && anchoDeProxima(28.96 + 0.018779 * 1024) <= 280 && anchoDeProxima(28.96 + 0.018779 * 1440) <= 488 && anchoDeProxima(53.97 + 0.034742 * 1024) > 280, 'el título de «la tuya», el más grande de los titulares que entra sin cortar «próxima» a 1024 y a 1440 (`display-xl` la parte a 1024)')
   const laTuya = sinComentarios(leer('_secciones/trabajos/portfolio/LaTuya.tsx'))
-  afirmar(/<FormularioDeLaTuya visible=\{visible\} reducido=\{vivo\.reducido\} desde=\{3\} \/>/.test(laTuya) && !/data-abre-contacto/.test(laTuya), '  y [B1.2c] en lugar del CTA, el formulario corto (B1.2c · 23)')
+  afirmar(/<FormularioDeLaTuya visible=\{visible\} reducido=\{vivo\.reducido\} desde=\{2\} \/>/.test(laTuya) && !/data-abre-contacto/.test(laTuya), '  y [B1.2c] en lugar del CTA, el formulario corto (B1.2c · 23)')
   const expresion = (s: string): string => s.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').trim()
   const despejeDeLasAnclas = expresion(/html:has\(\[data-v3\]\) \{\s*scroll-padding-top: (calc\([\s\S]*?\));\s*\}/.exec(leer('_estilos/navegacion.css'))?.[1] ?? '?')
   const despejaLaBarra = (e: string): boolean => despejeDeLasAnclas.startsWith('calc(var(--spacing-6)') && expresion(e) === despejeDeLasAnclas

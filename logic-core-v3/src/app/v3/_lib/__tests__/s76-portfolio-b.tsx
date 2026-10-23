@@ -58,7 +58,7 @@ export function afirmarB(): void {
   const comparte = (f: string): boolean =>
     /from '\.\.\/\.\.\/\.\.\/_componentes\/formularios\/Campos'/.test(f) && /<CampoDeTextoLargo \{\.\.\.comun\} renglones=\{4\} \/>/.test(f) && /<CampoDePildora \{\.\.\.comun\}/.test(f) &&
     /<Cta type="submit" rotulo=\{enviando \? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO\} deshabilitado=\{enviando\}/.test(f) &&
-    /<div data-parte="fila-del-envio" className="mt-1 flex items-center justify-between gap-4">\s*<Cta[^>]*\/>\s*<EnlaceDeWhatsApp className="text-right" \/>/.test(f) && !/rounded-sutil border border-tinta\/30/.test(f)
+    /<div data-parte="fila-del-envio" className="mt-1 flex flex-wrap items-center justify-between gap-4">\s*<Cta[^>]*\/>\s*<EnlaceDeWhatsApp \/>/.test(f) && !/rounded-sutil border border-tinta\/30/.test(f)
   afirmar(comparte(formulario), '  «la tuya» usa los campos del modal (la píldora, el padding, los rótulos, el foco, el error y el ejemplo), «¿Qué necesitás?» es un texto largo de cuatro renglones, «Enviar» es el botón simple del sitio y WhatsApp va a su derecha, centrado, en la misma fila')
   controlPositivo('  el detector ve el formulario de B1.2c (sus campos propios)', `${formulario}\nconst x = 'rounded-sutil border border-tinta/30'`, comparte)
   const campos = sinComentarios(leer('_componentes/formularios/Campos.tsx'))
@@ -84,7 +84,7 @@ export function afirmarB(): void {
   controlPositivo('  el detector ve la tira de antes (el contenido arriba, el hueco abajo)', laTuya.replace("activa && 'justify-center'", 'false'), centrada)
   // [F6] La prueba del formulario en 3D (B7, `?form=3d`) salió entera: el código, la bandera y sus afirmaciones (las de la bandera, el
   // giro con el mouse y el plano en el servidor). Queda la que dice que salió.
-  const sinVariante = (t: string, archivos: readonly string[]): boolean => !archivos.includes('FormularioEnPerspectiva.tsx') && !/FormularioEnPerspectiva|form=3d|data-forma/.test(t) && /<FormularioDeLaTuya visible=\{visible\} reducido=\{vivo\.reducido\} desde=\{3\} \/>/.test(t)
+  const sinVariante = (t: string, archivos: readonly string[]): boolean => !archivos.includes('FormularioEnPerspectiva.tsx') && !/FormularioEnPerspectiva|form=3d|data-forma/.test(t) && /<FormularioDeLaTuya visible=\{visible\} reducido=\{vivo\.reducido\} desde=\{2\} \/>/.test(t)
   const delPortfolio = readdirSync(path.join(V3, PORTFOLIO))
   afirmar(sinVariante(laTuya, delPortfolio), '  [F6] la prueba del formulario en 3D (`?form=3d`) salió entera: sin el archivo, sin la bandera, y «la tuya» con su formulario plano')
   controlPositivo('  el detector ve la tira con la prueba de B7', [laTuya.replace('<FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} />', '<FormularioEnPerspectiva><FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} /></FormularioEnPerspectiva>'), [...delPortfolio, 'FormularioEnPerspectiva.tsx']] as const, ([t, a]: readonly [string, readonly string[]]) => sinVariante(t, a))

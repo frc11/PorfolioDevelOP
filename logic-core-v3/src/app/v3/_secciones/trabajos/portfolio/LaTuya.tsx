@@ -4,15 +4,13 @@ import { motion } from 'motion/react'
 
 import { cn } from '@/lib/utils'
 
-import { Cuerpo } from '../../../_componentes/tipografia/Textos'
-import { Titular } from '../../../_componentes/tipografia/Titular'
-
 import { CONTENIDO } from '../contenido'
 
 import { TIRA_DE_LA_TUYA } from './estado'
 import { FormularioDeLaTuya } from './FormularioDeLaTuya'
 import { enLaSecuencia } from './secuencia'
 import { SignoDePregunta } from './SignoDePregunta'
+import { CLASE_DEL_CUERPO } from './tipografia'
 import { CLASES_DE_LA_TIRA, CabeceraDeLaTira, idsDeLaTira } from './Tira'
 import type { PortfolioVivo } from './usePortfolio'
 
@@ -47,13 +45,11 @@ export function LaTuya({ activa, visible, vivo }: { readonly activa: boolean; re
       {activa ? <SignoDePregunta visible={visible} reducido={vivo.reducido} /> : null}
       <CabeceraDeLaTira id={ids.cabecera} indice={TIRA_DE_LA_TUYA} activa={activa} nombre={c.nombre} controla={ids.region} nivel={NIVEL_DEL_TITULO_DE_LA_TUYA} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(TIRA_DE_LA_TUYA, true)} />
       <div id={ids.region} hidden={!activa} className="relative flex min-h-0 flex-col gap-5 px-8 pt-4">
+        {/* [C2 · 40] Un solo título (la cabecera) y la bajada nueva, con la letra de la bajada del Portfolio. */}
         <motion.div {...enLaSecuencia(visible, 1, vivo.reducido)}>
-          <Titular nivel="titulo-m" como="p">{c.frase}</Titular>
+          <p className={cn(CLASE_DEL_CUERPO, 'text-tinta/70')}>{c.bajada}</p>
         </motion.div>
-        <motion.div {...enLaSecuencia(visible, 2, vivo.reducido)}>
-          <Cuerpo className="text-tinta/70">{c.bajada}</Cuerpo>
-        </motion.div>
-        <FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={3} />
+        <FormularioDeLaTuya visible={visible} reducido={vivo.reducido} desde={2} />
       </div>
     </div>
   )
