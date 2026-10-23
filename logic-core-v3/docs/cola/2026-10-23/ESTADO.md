@@ -15,13 +15,13 @@
 | 20 | **integrada y verificada** | quitar | 5d688d62 · merge 6745764a · e8910ec5 (bancos) | — (control `sin-datos` ciego, anotado) |
 | 21 | **integrada (798bc079), verificada con un criterio sin alcanzar** | quitar | 39df0e85 | navegación: la cámara llega al 98 % antes del título (criterio ±1 % no alcanzado); píldora sin confirmar (velo 1/3 en el dev) |
 | 50 | **integrada (ae272b67) y verificada** (36adcc5d) | quitado | b6fdbc7d, efe04c99, 36adcc5d | demos-parada a 1024 intermitente (9/12 una vez, 6/6 dos veces) |
-| 40 | **integrada (15d750fd), verificada en lo hecho** (humo 7/7, carrusel 390 y 768, demos-parada 1440 6/6) | quitado | db0f6ec8 | teléfono: título+carrusel en una pantalla y el título que se levanta; el banco de navegador |
-| 70 | **integrada (c1803c9d) y verificada** (sesión 2: verif-70b) | quitado | a27d35d5, d16ae8e3, 7e0b7f72, e34f1924, b124b22a | la transición simultánea de Seis razones, la curva de entrada del carrusel, la salida con la cámara, el teléfono/tablet |
+| 40 | **integrada (15d750fd) y verificada**; sesión 2: el teléfono integrado y verificado (d5f8f299) | quitado | db0f6ec8, d5f8f299 | a 390×844 las barras y flechas del carrusel quedan ~100 px abajo con el título encima (a 768 entra todo); el levantarse del título sin grabar en cuadros; el banco de la ficha a 1440 (secuencia, AA, envío con `page.route`) |
+| 70 | **integrada (c1803c9d) y verificada** (sesión 2: verif-70b) | quitado | a27d35d5, d16ae8e3, 7e0b7f72, e34f1924, b124b22a; sesión 2: 296cfd2f (curva de entrada sin escalón + volteo, valores y aro a la vez; verificada) | las dos mitades del título que se juntan en el medio al voltear; la secuencia de cuadros del volteo en el sitio; la salida con la cámara; el teléfono/tablet |
 | 22, 30, 31, 41, 51, 60, 71, 80, 81 | no empezadas (presupuesto) | | | |
 | 90 | no empezada (presupuesto: el build y las matrices quedan para la próxima sesión) | | | |
 
 ## En curso
-- Sesión 2 (retomada 08:10 con la suscripción, presupuesto chico): consistencia hecha; sigue cerrar lo empezado de la 40 y la 70 directo en la integración (sin subagentes, sin tareas nuevas).
+- Sesión 2 (retomada 08:10 con la suscripción, presupuesto chico de 21 USD): consistencia hecha (3d048281); el teléfono de la 40 (d5f8f299) y la curva + el gatillo a la vez de la 70 (296cfd2f), los dos integrados y verificados en el dev :3002 (verif-40b*.log, verif-70c*.log; fotos en `fotos\40\`). Sin subagentes, sin tareas nuevas. Nada en curso.
 
 ## Worktrees vivos y qué hacer con cada uno
 - `integracion`: la rama `nocturno/2026-10-23`; no se borra. Ningún worktree de tarea vivo (20, 21, 40, 50 y 70 quitados; sus ramas mergeadas, borradas).
@@ -35,7 +35,11 @@
 - **40** (merge 15d750fd, verif-50b-40.log): humo 7/7; carrusel 390 y 768 2/2; demos-parada 1440 6/6.
 - **70** (merge c1803c9d): la primera verificación (verif-70.log) murió a las 03:29 en el carrusel 390 por un reinicio de Windows Update, con el turno tomado. Sesión 2 (verif-70b.log, verif-70b-b.log): turno roto (dueño muerto, 4 h 50 min); aro-legibilidad 1440 ok (todas las visibles con opacidad 1, núcleo ≥ 4,5) con el control en rojo (3,84:1 al 30 %); MODO=interaccion: cartel (pastilla 1), 10 placas visibles, clic lleva a #portfolio-el-garage; aro-costo con su control ok; humo 7/7 (carrusel 390 incluido); s83 98/0, s59 15/0; tsc 0.
 
+- **40 (sesión 2, d5f8f299)**: título + carrusel en una pantalla y el título que se levanta. carrusel.ts 390 y 768 modo/recorrido/fuera 6/6 (juntos 0,97 y 1,00; tarjetas 592/592/592 y 695/695/695); CONTROL=separados (juntos 0,00) y alto-propio (Δ 48 px) en rojo; humo 7/7; s76 750/0, trabajos 222/0, tsc 0. El banco agarraba el carrusel de Demos (selectores sin acotar al flujo): corregido.
+- **70 (sesión 2, 296cfd2f)**: curva de entrada + gatillo a la vez. s83 104/0 (15 nueva: velocidad por cuadro tabulada, dos controles); aro-legibilidad, interacción y costo ok; humo 7/7; tsc 0.
+
 ## Notas
+- Sesión 2: cada espera larga del banco enfría la caché del contexto (~1 USD por vuelta): las verificaciones se agruparon en dos tandas de primer plano.
 - **03:29 reinicio de Windows Update** a mitad de verif-70: el turno quedó tomado y el ESTADO desactualizado (decía 40 y 70 sin integrar). Retomado a las 08:10.
 - La primera verificación de la 20 (verif-20.log) pegó contra el dev de Valentino en :3000: no vale.
 - Memoria: con 3 subagentes y el dev, la memoria libre bajó a 0,73 GB.
