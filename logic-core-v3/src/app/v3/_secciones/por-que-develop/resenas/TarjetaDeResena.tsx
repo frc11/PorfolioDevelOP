@@ -7,7 +7,7 @@ import { TEXTO_DE_LAS_RESENAS, type Resena } from './contenido'
  * de la tarjeta (`--ancho-de-la-tarjeta`, que escribe la escena con el tamaño de la placa de frente, o la lista con el suyo): la cara se ve
  * igual a cualquier tamaño y, de frente, el texto se rasteriza a su escala. La tinta y la tinta media sobre el papel: 17,6:1 y 7,4:1 (AA).
  *
- * El retrato es decorativo (`aria-hidden`: el nombre está escrito al lado) y va como fondo: es un placeholder ilustrado que se reemplaza.
+ * El retrato es decorativo (`aria-hidden`: el nombre está escrito al lado) y va como fondo (una persona generada, C2-70).
  */
 export function CaraDeLaResena({ resena, className }: { readonly resena: Resena; readonly className?: string }): React.JSX.Element {
   return (

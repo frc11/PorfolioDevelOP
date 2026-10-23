@@ -6,7 +6,7 @@
  * Corre con `npm run test:s83-resenas`.
  */
 
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 import React from 'react'
@@ -198,7 +198,11 @@ const texto = RESENAS.flatMap((r) => [r.cita, r.nombre, r.negocio]).join(' ') + 
 afirmarIgual(escanearContenido(texto), [], 'el escáner de contenido no encuentra cifras ni precios')
 controlPositivo('el escáner ve una cita con una cifra', `${texto} Vendimos un 40% más.`, (t) => escanearContenido(t).length === 0)
 afirmar(!NOMBRES_REALES.some((n) => texto.includes(n)), 'ninguna reseña nombra a un cliente real')
-afirmar(RESENAS.every((r) => existsSync(path.join(RAIZ, 'public', r.foto))), 'cada retrato existe (los placeholders ilustrados de public/v3/resenas)')
+afirmar(RESENAS.every((r) => existsSync(path.join(RAIZ, 'public', r.foto))), 'cada retrato existe (public/v3/resenas)')
+// [C2-70] Diez personas generadas, una por reseña (cinco y cinco): ninguna foto repetida, webp chicas (el avatar mide ~40 px).
+const fotosUnicas = (fotos: readonly string[]): boolean => new Set(fotos).size === fotos.length && fotos.every((x) => /^\/v3\/resenas\/[a-z]+\.webp$/.test(x))
+afirmar(fotosUnicas(RESENAS.map((r) => r.foto)) && RESENAS.every((r) => statSync(path.join(RAIZ, 'public', r.foto)).size <= 8000), `cada reseña con su retrato propio en webp chico (${String(RESENAS.length)} fotos)`)
+controlPositivo('el detector ve un retrato repetido (las siluetas de antes, de a cuatro)', ['/v3/resenas/a.webp', '/v3/resenas/a.webp'], fotosUnicas)
 afirmar(RESENAS.every((r) => ANCLAS_DEL_PORTFOLIO.some((a) => `#${a.id}` === enlaceDelTrabajo(r))), 'cada «Ver trabajo →» va a un deep link del Portfolio (B1)')
 afirmar(!/llave|conLlave|CONTENIDO_INVENTADO/.test(leer('_secciones/por-que-develop/resenas/contenido.ts').replace(/\/\*[\s\S]*?\*\//g, '')), 'sin la llave de contenido falso (decisión de Valentino)')
 
