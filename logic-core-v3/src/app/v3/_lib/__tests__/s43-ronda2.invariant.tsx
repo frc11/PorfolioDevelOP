@@ -92,7 +92,12 @@ afirmar(envian(pie, panel, novedades), 'el contacto del pie, el del panel y el n
 controlPositivo('el detector VE un botón deshabilitado para siempre', [pie.replace('disabled={enviando}', 'disabled'), panel, novedades], ([p, h, n]: string[]) => envian(p, h, n))
 const textos = [leer('_secciones/cierre/contenido.ts'), leer('_secciones/tu-panel/contenido.ts'), leer('_chrome/contacto/contenido.ts'), pie, novedades].join('\n')
 afirmar(!/Todavía no (envía|hay a dónde)|Enviar por mail|abrimos tu correo|lo conectamos en la próxima etapa/i.test(sinComentarios(textos)) && !/mailto:\$\{MAIL\}\?subject=/.test(panel), '  sin carteles de «todavía no envía» y sin el `mailto` del panel')
-afirmar(/role="alert"/.test(pie) && /role="status"/.test(pie) && /role="alert"/.test(novedades) && /role="status"/.test(novedades), '  el resultado, en sus regiones vivas: el error normal del formulario y el «listo»')
+// [C2 · 60c] El newsletter del Panel envía con el estándar (`EstadoDeEnvio`): sus regiones vivas (el éxito y el error) son las del
+// componente compartido; el form conserva la suya para el error del campo.
+const estadoDeEnvio = sinComentarios(leer('_componentes/formularios/EstadoDeEnvio.tsx'))
+const conRegiones = (n: string): boolean => /role="alert"/.test(n) && (/role="status"/.test(n) || (/<EstadoDeEnvio\b/.test(n) && /role="status"/.test(estadoDeEnvio) && /role="alert"/.test(estadoDeEnvio)))
+afirmar(/role="alert"/.test(pie) && /role="status"/.test(pie) && conRegiones(novedades), '  el resultado, en sus regiones vivas: el error normal del formulario y el «listo» (en el newsletter, las de `EstadoDeEnvio`)')
+controlPositivo('  el detector VE un newsletter sin la región del «listo»', novedades.replace(/<EstadoDeEnvio\b/g, '<div'), conRegiones)
 // [EL ENCASTRE] 1E · cambió por pedido: en el pie el único obligatorio es el mail (el nombre y el mensaje, opcionales).
 const errores = validarElPie({ nombre: 'A', mail: 'no-es-un-mail', mensaje: '' })
 afirmar(Object.keys(errores).join() === 'mail' && Object.keys(validarElPie({ nombre: '', mail: 'ana@empresa.com', mensaje: '' })).length === 0 && Object.keys(validarElPie({ nombre: 'Ana', mail: 'ana@empresa.com', mensaje: 'Hola' })).length === 0 && validarElMail('ana@empresa.com') === null && validarElMail('ana') !== null, '  la validación del navegador (la misma regla que el servidor): el mail es obligatorio y lo demás no (EL ENCASTRE 1E)')

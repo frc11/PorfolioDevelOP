@@ -30,7 +30,7 @@ import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { GRUPO_POR_DEFECTO, PALABRA_POR_DEFECTO, palabraEnElTelefono, posicionDelGrupo } from './banderas'
 import { CANDADO_INICIAL, laRuedaEsDeAdentro, siguienteCandado, type EstadoDelCandado, type EventoDelCandado } from './candado'
 import { CARTEL, CTA, ID, NEWSLETTER, TARJETAS, TITULO, textoDe } from './contenido'
-import { CONTENIDO_PROHIBIDO_DE_CONTROL, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, textoAccesible } from './deteccion'
+import { CONTENIDO_PROHIBIDO_DE_CONTROL, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, sinLaOpacidadDelEnvio, textoAccesible } from './deteccion'
 import { ALFA_DE_LA_PALABRA, CLASE_DE_LA_PALABRA, CLASE_DE_LA_POSICION, LADOS, MODULO, PANTALLA_DEL_MODULO, RITMO, TIPO, altoDelModulo, altoNaturalEnEscritorio, altoViejoAngosto, ALTOS_VIEJOS_MEDIDOS, escalaDeLaDemo, tamanoDelTitulo } from './geometria'
 import { FIN_DEL_PINTADO, avanceDeLaPalabra, avanceDelPintado } from './pintado'
 import { tramoDelPanel } from './tramo'
@@ -69,7 +69,7 @@ titulo('2 · Sin coreografía no se escribe una transformada, y el texto es el m
 afirmarIgual(cuentaDe(QUIETO, /transform:/g), 0, 'sin coreografía, cero transformadas en el marcado')
 afirmar(cuentaDe(ANIMADO, /transform:/g) > 0, 'CONTROL: con coreografía las llegadas sí escriben la suya', `${String(cuentaDe(ANIMADO, /transform:/g))} transformadas`)
 afirmar(textoAccesible(QUIETO) === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico', `${String(textoAccesible(QUIETO).length)} caracteres`)
-const estilos = [...QUIETO.matchAll(/style="([^"]*)"/g)].map((m) => m[1])
+const estilos = [...sinLaOpacidadDelEnvio(QUIETO).matchAll(/style="([^"]*)"/g)].map((m) => m[1]) // [C2 · 60c] menos la de `EstadoDeEnvio` (`deteccion.ts`)
 const DEL_DATO = /^(color:transparent|min-height:[^;]*|opacity:0\.0285|(--[a-z-]+:[^;]*;?)+)$/
 afirmarIgual(estilos.filter((e) => !DEL_DATO.test(e)), [], `los ${String(estilos.length)} estilos en línea salen del dato (variables de \`geometria.ts\`, el alto de la tabla, el alfa de la palabra): ninguno a mano`)
 controlPositivo('el filtro de estilos ve uno escrito a mano', ['margin-top:12px'], (l: readonly string[]) => l.every((e) => DEL_DATO.test(e)))
@@ -237,23 +237,25 @@ controlPositivo('  el detector VE la rueda de antes (adentro con recorrido, aunq
 afirmar(/data-parte="cartel"/.test(QUIETO) && /bg-tinta\/60/.test(TARJETA) && /visible \? 'opacity-100' : 'pointer-events-none opacity-0'/.test(TARJETA), '  el cartel va sobre el módulo con su fondo atenuado y, mientras se ve, toma el clic')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · El CTA: una pantalla, «Probar el panel» que todavía no hace nada, la «o» y el newsletter')
+titulo('10 · El CTA: una pantalla, «Probar ahora» que todavía no hace nada, el divisor «o si no» y las novedades')
 
+// [C2 · 60c] El CTA se rehízo («El CTA del Panel» de la tarea 60): lo fino (los textos, «acá.», el divisor, el botón, el form) lo afirma
+// `s6-cta-del-panel`; acá queda lo que la sección promete, a la spec nueva (el form suma «Nombre»: 4 focalizables; entra desde abajo).
 const CTA_HTML = /<div data-pieza="cta-del-panel"[\s\S]*?<\/form>/.exec(QUIETO)?.[0] ?? ''
 afirmar(/data-pieza="cta-del-panel" class="[^"]*\bmin-h-svh\b/.test(CTA_HTML) && /<h3[^>]*data-pieza="titulo-que-se-pinta"/.test(CTA_HTML), 'ocupa una pantalla, con el titular pintado como el título')
 const boton = /<div data-pieza="probar-el-panel"[^>]*><button([^>]*)>/.exec(CTA_HTML)?.[1] ?? ''
 const quieto = (b: string): boolean => /type="button"/.test(b) && !/href=|onclick|disabled/.test(b)
-afirmar(quieto(boton) && !/<a [^>]*>[^<]*Probar el panel/.test(QUIETO), '  el botón es un botón (visible y habilitado), sin enlace que se rompa: no hace nada hasta la prueba (C1)')
+afirmar(quieto(boton) && !/<a [^>]*>[^<]*Probar ahora/.test(QUIETO), '  el botón es un botón (visible y habilitado), sin enlace que se rompa: no hace nada hasta la prueba (C1)')
 controlPositivo('  el detector VE un enlace roto', ' href="#"', quieto)
 const iBoton = CTA_HTML.indexOf('probar-el-panel')
 const iO = CTA_HTML.indexOf('o-del-cta')
 const iForm = CTA_HTML.indexOf('<form')
-afirmar(iBoton > 0 && iO > iBoton && iForm > iO, '  en orden: el botón, la «o» y el formulario (en escritorio en fila, en el teléfono apilados)')
+afirmar(iBoton > 0 && iO > iBoton && iForm > iO, '  en orden: el botón, el divisor y el formulario (en escritorio en fila, en el teléfono apilados)')
 afirmar(/escritorio:flex-row/.test(CTA_HTML) && /flex w-full flex-col items-center/.test(CTA_HTML), '  la fila se apila abajo de 1024')
 const NEWSLETTER_FUENTE = fuenteDe('NewsletterDelPanel.tsx')
-afirmar(/enviarAlServidor\('\/api\/newsletter', \{ mail: mail\.trim\(\) \}\)/.test(NEWSLETTER_FUENTE) && /data-pieza="novedades"/.test(CTA_HTML) && !CTA_HTML.includes(NEWSLETTER.listo), '  el newsletter es el que ya envía (redondeado: la pastilla de `pie.css`), sin un «listo» de entrada; esta prueba no lo llama')
-afirmar(GESTOS_POR_TIEMPO.some((g) => g.seccion === ID && g.id === 'cta-del-panel') && /<Gatillo className="w-full">/.test(fuenteDe('CtaDelPanel.tsx')), '  la bajada y la fila entran con el gatillo del contrato (declarado como gesto por tiempo)')
-afirmarIgual(focalizablesDe(QUIETO).length, 3, 'en el HTML servido, 3 focalizables: «Probar el panel», el campo y el envío del newsletter (lo de cada maqueta llega con ella)')
+afirmar(/enviarAlServidor\('\/api\/newsletter', cuerpoDelNewsletter\(datos\)\)/.test(NEWSLETTER_FUENTE) && /data-pieza="estado-de-envio"/.test(CTA_HTML), '  el newsletter envía con el estándar del sitio (`EstadoDeEnvio`); esta prueba no lo llama')
+afirmar(GESTOS_POR_TIEMPO.some((g) => g.seccion === ID && g.id === 'cta-del-panel') && /<Gatillo desde="abajo" className="w-full">/.test(fuenteDe('CtaDelPanel.tsx')), '  la bajada y las columnas entran con el gatillo del contrato, desde abajo (declarado como gesto por tiempo)')
+afirmarIgual(focalizablesDe(QUIETO).length, 4, 'en el HTML servido, 4 focalizables: «Probar ahora», el nombre, el mail y «Suscribirme» (lo de cada maqueta llega con ella)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · REGLA DE ALTURAS: abajo de 1024 la escena ve el alto de antes')

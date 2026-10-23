@@ -112,11 +112,14 @@ titulo('B4 · «Y más…»: aparece y se va en su lugar')
 // la sección es su CTA a pantalla completa. Lo que B4 fijaba sigue igual de fuerte sobre lo que entra ahí: la bajada y la fila
 // del CTA (el botón, la «o» y el newsletter) entran con el gatillo del contrato, EN SU LUGAR: una corrida corta desde la
 // derecha (la traslación de 8 del tema) con un fundido, y se van igual, en espejo; nada sale del borde del cuadro.
+// [C2 · 60c] La especificación cambió otra vez (ítem 15 de la revisión): la corrida corta llega DESDE ABAJO, como el resto del sitio
+// (`desde="abajo"`, la misma traslación de 8 en el eje vertical). Lo fuerte sigue igual: en su lugar, nada sale del borde del cuadro.
 const gatillo = sinComentarios(leer('_secciones/_contrato/Gatillo.tsx'))
 const ctaDelPanel = sinComentarios(leer('_secciones/tu-panel/CtaDelPanel.tsx'))
-const enSuLugar = (g: string, c: string): boolean => /espera: 'translate-x-8 opacity-0'/.test(g) && /ido: 'translate-x-8 opacity-0 /.test(g) && !/window\.innerWidth|getBoundingClientRect/.test(g) && /<Gatillo className="w-full">/.test(c)
-afirmar(enSuLugar(gatillo, ctaDelPanel), 'la bajada y la fila del CTA del Panel entran con una corrida corta desde la derecha y un fundido (y se van igual, en espejo): no salen del borde del cuadro', 'el gatillo del contrato: translate-x-8')
-controlPositivo('el detector VE la entrada desde el borde del cuadro', [gatillo.replace("espera: 'translate-x-8 opacity-0'", "espera: 'opacity-0', desde: window.innerWidth"), ctaDelPanel] as const, ([g, c]: readonly [string, string]) => enSuLugar(g, c))
+const enSuLugar = (g: string, c: string): boolean => /espera: 'translate-y-8 opacity-0'/.test(g) && /ido: 'translate-y-8 opacity-0 /.test(g) && !/window\.innerWidth|getBoundingClientRect/.test(g) && /<Gatillo desde="abajo" className="w-full">/.test(c) && !/<Gatillo className/.test(c)
+afirmar(enSuLugar(gatillo, ctaDelPanel), 'la bajada y las columnas del CTA del Panel entran con una corrida corta desde abajo y un fundido (y se van igual, en espejo): no salen del borde del cuadro', 'el gatillo del contrato: translate-y-8')
+controlPositivo('el detector VE la entrada desde el borde del cuadro', [gatillo.replace("espera: 'translate-y-8 opacity-0'", "espera: 'opacity-0', desde: window.innerWidth"), ctaDelPanel] as const, ([g, c]: readonly [string, string]) => enSuLugar(g, c))
+controlPositivo('el detector VE una pieza del CTA que todavía entra de costado', [gatillo, ctaDelPanel.replace('<Gatillo desde="abajo" className="w-full">', '<Gatillo className="w-full">')] as const, ([g, c]: readonly [string, string]) => enSuLugar(g, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B5 · «para elegirnos» y el primer valor, separados')
