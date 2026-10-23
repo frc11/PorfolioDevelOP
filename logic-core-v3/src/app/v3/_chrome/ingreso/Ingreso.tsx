@@ -19,11 +19,11 @@ const precargar = (): void => {
 
 export function Ingreso(): React.JSX.Element | null {
   useAperturaDelIngreso(precargar)
-  const { abierto, montado, origen } = useIngreso()
+  const { abierto, montado, origen, vuelta } = useIngreso()
   if (!montado) return null
   return (
     <Suspense fallback={null}>
-      <IngresoAbierto abierto={abierto} origen={origen} />
+      <IngresoAbierto abierto={abierto} origen={origen} vuelta={vuelta} />
     </Suspense>
   )
 }

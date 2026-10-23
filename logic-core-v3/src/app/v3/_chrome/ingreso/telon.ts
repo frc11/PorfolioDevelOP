@@ -27,6 +27,12 @@ export function colorDelTelon(): string {
   return color === '' || color === 'rgba(0, 0, 0, 0)' ? 'black' : color
 }
 
+/** [C2 · 80] Si la página vuelve de la caché de ida y vuelta (de Google), el telón de la ida no se queda tapándola. */
+export function quitarElTelon(): void {
+  if (typeof document === 'undefined') return
+  document.querySelectorAll(SELECTOR_DEL_TELON).forEach((t) => t.remove())
+}
+
 export function bajarElTelon(): void {
   if (typeof document === 'undefined' || document.querySelector(SELECTOR_DEL_TELON) !== null) return
   const telon = document.createElement('div')

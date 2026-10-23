@@ -44,7 +44,11 @@ export const TIRAS_DEL_GENIE = 60
 /** Cuánto dura, de punta a punta. El pedido: 500–600 ms. */
 export const MS_DEL_GENIE = 560
 /** Las dos fases, solapadas: el embudo se forma primero y la ventana se desliza después. */
-export const FASES_DEL_GENIE = { embudo: { desde: 0, hasta: 0.55 }, deslizamiento: { desde: 0.25, hasta: 1 } } as const
+export interface FasesDelGenie {
+  readonly embudo: { readonly desde: number; readonly hasta: number }
+  readonly deslizamiento: { readonly desde: number; readonly hasta: number }
+}
+export const FASES_DEL_GENIE: FasesDelGenie = { embudo: { desde: 0, hasta: 0.55 }, deslizamiento: { desde: 0.25, hasta: 1 } }
 /** Cuánto de su camino vertical hace la fila líder mientras se forma el embudo: el cuello apunta al destino. */
 const TIRON_VERTICAL_DEL_EMBUDO = 0.3
 /** Qué tan escalonado es el deslizamiento: con 1, la fila líder llega a mitad de tiempo y la última al final. */
@@ -70,10 +74,10 @@ export interface FilaDelGenie {
 }
 
 /** La fila `v` del contenido en el progreso `m` de minimizar. */
-export function filaDelGenie(v: number, m: number, ventana: Caja, destino: Caja, lider: Lider): FilaDelGenie {
+export function filaDelGenie(v: number, m: number, ventana: Caja, destino: Caja, lider: Lider, fases: FasesDelGenie = FASES_DEL_GENIE): FilaDelGenie {
   const w = lider === 'abajo' ? v : 1 - v
-  const c = entre(FASES_DEL_GENIE.embudo.desde, FASES_DEL_GENIE.embudo.hasta, m)
-  const s = entre(FASES_DEL_GENIE.deslizamiento.desde, FASES_DEL_GENIE.deslizamiento.hasta, m)
+  const c = entre(fases.embudo.desde, fases.embudo.hasta, m)
+  const s = entre(fases.deslizamiento.desde, fases.deslizamiento.hasta, m)
   // El embudo: el perfil arranca pegado al borde líder y sube hasta cubrir el alto.
   const embudo = c * (c <= 0 ? 0 : entre(1 - c, 1, w))
   // El deslizamiento: las filas líderes salen primero.

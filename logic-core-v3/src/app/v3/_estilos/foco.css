@@ -224,6 +224,12 @@
   box-shadow: none;
 }
 
+/* [C2 · 80] La carga del login recibe el foco por código (para anunciarla), no es un control: el anillo, que se veía como un
+ * rectángulo alrededor del logo, no corresponde. Sólo el color, como la píldora: la regla de `foco.css` sigue sin un `outline: none`. */
+[data-v3][data-v3] [data-parte="carga"]:focus-visible {
+  outline-color: transparent;
+}
+
 [data-v3][data-v3] [data-foco="campo"]:focus-visible {
   outline-color: transparent;
   border-color: var(--color-tinta);
