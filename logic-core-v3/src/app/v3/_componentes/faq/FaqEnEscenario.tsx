@@ -6,18 +6,20 @@ import { cn } from '@/lib/utils'
 
 import { hayBanco } from '../../_lib/escena/entorno'
 import { POSES_DEL_FINAL, huecoDelLogo } from '../../_lib/escena/finalDelRecorrido'
-import { ATRIBUTO_DEL_FAQ, FAQ_EN_VIVO, asentar, avisarAlFaq, faseDelFaq, faseEn, nivelesDelFaq, suscribirAlFaq, type FaseDelFaq } from '../../_lib/pie3d/faqDelPie'
+import { ATRIBUTO_DEL_FAQ, BLOQUES_DEL_FAQ, BOTON_EN_VIVO, FAQ_EN_VIVO, asentar, avisarAlFaq, faseDelFaq, faseEn, nivelesDelFaq, rearmarElBotonDelFaq, suscribirAlFaq, type FaseDelFaq, type IdDelBloqueDelFaq } from '../../_lib/pie3d/faqDelPie'
 import { SALIDA_EN_VIVO } from '../../_lib/pie3d/salidas'
 import { IconoDeMarca } from '../../_secciones/cierre/IconosDeMarca'
 import { Envoltorio } from '../layout/Envoltorio'
 import { DosCopias } from '../rollover/DosCopias'
 import { Cuerpo, EtiquetaDeSeccion } from '../tipografia/Textos'
 import { Titular } from '../tipografia/Titular'
+import { BloqueDelFaq } from './BloqueDelFaq'
+import { BotonDelFaq } from './BotonDelFaq'
 import { aplicarElNivel, estiloDelNivel } from './hundimientoEnElDom'
+import { useMedidasDelForm } from './useMedidasDelForm'
 import { IDS_DEL_FAQ, TEXTOS_DEL_FAQ, WHATSAPP_DEL_FAQ, type PreguntaFrecuente } from './preguntas'
 import { nivelDelWhatsApp, pasoDeLaRespuesta, pedirLaRespuesta, relojDeLaRespuestaQuieto, type ContenidoDeLaRespuesta } from './relojDeLaRespuesta'
-import { useGatilloDelFaq } from './useGatilloDelFaq'
-import { VidrioDelFaq } from './VidrioDelFaq'
+import { pedirElFaqSinGesto, useGatilloDelFaq } from './useGatilloDelFaq'
 
 /**
  * [B10] EL FAQ DESPUÉS DEL PIE, EN ESCRITORIO — en la misma pantalla que el pie (no le suma alto a la página): seguir scrolleando después
@@ -30,6 +32,11 @@ import { VidrioDelFaq } from './VidrioDelFaq'
  *
  * Subir lo saca: el FAQ se hunde y vuelve el pie. Las respuestas están TODAS en el HTML (las que no se ven, `hidden`); el bloque de la
  * derecha anuncia la que sube. Los bloques se hunden con `hundimientoEnElDom.ts`, en un cuadro propio que corre sólo mientras algo cambia.
+ *
+ * [C2-71] CON EL PIE DE VOLUMEN (desde 1025, armado), los bloques son PLACAS DE LA ESCENA como la del formulario del pie (`BloqueDelFaq`,
+ * `escena/pie3d/faqDeVolumen.ts`): la de la derecha del tamaño del formulario (entran respuestas largas: crece hacia abajo), la de la
+ * izquierda de su ancho y más alta (`useMedidasDelForm`). Este cuadro les pasa su nivel a la escena (en vez de hundirlas en el DOM) y
+ * abajo, después de que el pie se acostó, sale el botón que avisa que hay un FAQ (`BotonDelFaq`: tocarlo es el gesto; una vez por carga).
  */
 interface Props {
   readonly preguntas: readonly PreguntaFrecuente[]
@@ -63,9 +70,17 @@ function columnasDelPie(selector: string): HTMLElement[] {
 
 const sinCambios = (): (() => void) => () => undefined
 
+/** [C2-71] El nivel de un bloque de volumen para la escena (sin el bloque anotado, nada). */
+function nivelDelBloque(id: IdDelBloqueDelFaq, nivel: number): void {
+  const b = BLOQUES_DEL_FAQ.get(id)
+  if (b !== undefined) b.nivel = nivel
+}
+
 type VentanaDelBanco = Window & {
-  __faqDelBanco?: () => { readonly fase: FaseDelFaq; readonly niveles: { readonly pie: number; readonly faq: number }; readonly mostrado: ContenidoDeLaRespuesta; readonly pedido: ContenidoDeLaRespuesta; readonly whatsapp: number; readonly hunde: number; readonly acostado: boolean; readonly volumen: boolean }
+  __faqDelBanco?: () => { readonly fase: FaseDelFaq; readonly niveles: { readonly pie: number; readonly faq: number }; readonly mostrado: ContenidoDeLaRespuesta; readonly pedido: ContenidoDeLaRespuesta; readonly whatsapp: number; readonly hunde: number; readonly acostado: boolean; readonly volumen: boolean; readonly boton: { readonly usado: boolean; readonly nivel: number }; readonly bloques: Readonly<Record<string, number>> }
   __faqSinHundimiento?: boolean
+  /** [C2-71] Control del banco: el botón no trae el FAQ. */
+  __botonDelFaqSinGesto?: boolean
 }
 
 export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): React.JSX.Element {
@@ -86,7 +101,14 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
   const deVolumen = useRef(volumen)
   useEffect(() => {
     deVolumen.current = volumen
+    // [C2-71] Los bloques cambiaron de forma (vidrio o placa): el cuadro les vuelve a poner su nivel.
+    despertar.current()
   }, [volumen])
+  // [C2-71] Una vez por carga (o por entrada al home): al montar el FAQ, el botón vuelve a estar disponible.
+  useEffect(() => {
+    rearmarElBotonDelFaq()
+  }, [])
+  const medidas = useMedidasDelForm(pie, volumen)
 
   // El cuadro del FAQ: corre sólo mientras algo cambia (la entrada, la salida, una respuesta, el WhatsApp que sube) y le escribe el
   // hundimiento a cada bloque (y al pie plano). Se despierta con cada aviso del reloj y con cada pregunta tocada.
@@ -120,9 +142,16 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
       if (paso.cambioLoMostrado) setMostrado(reloj.current.mostrado)
       if (reloj.current.primeraEn !== Number.NEGATIVE_INFINITY) setConWhatsApp(true)
       const delWhatsApp = nivelDelWhatsApp(reloj.current, ahora)
-      aplicarElNivel(izquierda.current, niveles.faq)
-      aplicarElNivel(derecha.current, Math.min(niveles.faq, paso.nivel))
-      aplicarElNivel(whatsapp.current, Math.min(niveles.faq, delWhatsApp))
+      if (deVolumen.current) {
+        // [C2-71] Las placas las mueve la escena: sólo su nivel.
+        nivelDelBloque('preguntas', niveles.faq)
+        nivelDelBloque('respuesta', Math.min(niveles.faq, paso.nivel))
+        nivelDelBloque('whatsapp', Math.min(niveles.faq, delWhatsApp))
+      } else {
+        aplicarElNivel(izquierda.current, niveles.faq)
+        aplicarElNivel(derecha.current, Math.min(niveles.faq, paso.nivel))
+        aplicarElNivel(whatsapp.current, Math.min(niveles.faq, delWhatsApp))
+      }
       const sigue = enCambio || paso.enCurso || (delWhatsApp > 0 && delWhatsApp < 1)
       if (sigue && cuadro === 0) cuadro = requestAnimationFrame(correr)
     }
@@ -147,7 +176,7 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
     FAQ_EN_VIVO.sinHundirElPie = ventana.__faqSinHundimiento === true
     ventana.__faqDelBanco = () => {
       const ahora = performance.now()
-      return { fase: faseEn(FAQ_EN_VIVO, ahora), niveles: nivelesDelFaq(FAQ_EN_VIVO, ahora), mostrado: reloj.current.mostrado, pedido: reloj.current.pedido, whatsapp: nivelDelWhatsApp(reloj.current, ahora), hunde: SALIDA_EN_VIVO.hunde, acostado: SALIDA_EN_VIVO.acostado, volumen }
+      return { fase: faseEn(FAQ_EN_VIVO, ahora), niveles: nivelesDelFaq(FAQ_EN_VIVO, ahora), mostrado: reloj.current.mostrado, pedido: reloj.current.pedido, whatsapp: nivelDelWhatsApp(reloj.current, ahora), hunde: SALIDA_EN_VIVO.hunde, acostado: SALIDA_EN_VIVO.acostado, volumen, boton: { usado: BOTON_EN_VIVO.usado, nivel: BLOQUES_DEL_FAQ.get('boton')?.nivel ?? 0 }, bloques: Object.fromEntries([...BLOQUES_DEL_FAQ.values()].map((b) => [b.id, b.nivel])) }
     }
     return () => {
       delete ventana.__faqDelBanco
@@ -167,75 +196,83 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
     e.preventDefault()
     botones.current[(i + paso + preguntas.length) % preguntas.length]?.focus()
   }
+  // [C2-71] El botón del FAQ: el gesto que lo trae; el foco pasa a la primera pregunta (el lector sigue por ahí).
+  const tocarElBoton = (): void => {
+    if (hayBanco() && (window as VentanaDelBanco).__botonDelFaqSinGesto === true) return
+    if (pedirElFaqSinGesto(true)) botones.current[0]?.focus({ preventScroll: true })
+  }
 
   return (
-    <div
-      ref={raiz}
-      {...{ [ATRIBUTO_DEL_FAQ]: 'escenario' }}
-      data-fase={fase}
-      style={HUECO}
-      className={cn('absolute inset-x-0 bottom-0 z-10 h-svh', fase === 'fuera' ? 'pointer-events-none' : 'pointer-events-auto')}
-    >
-      <Envoltorio className="h-full" claseDeContenido="grid h-full content-center">
-        <div className="grid grid-cols-[1fr_var(--hueco-del-faq)_1fr] items-stretch">
-          <div className="col-start-1 flex justify-end">
-            <VidrioDelFaq caja={izquierda} estilo={CERRADO} className="w-full max-w-[calc(var(--spacing-20)*5)]">
-              <div className="flex flex-col gap-[var(--spacing-4)] p-[var(--spacing-6)]">
-                <Titular nivel="titulo-m" como="h2" id={IDS_DEL_FAQ.titulo} className="text-balance">
-                  {TEXTOS_DEL_FAQ.titulo}
-                </Titular>
-                <ul role="list" className="flex flex-col">
-                  {preguntas.map((p, i) => (
-                    <li key={p.pregunta} className="border-t border-current/15 first:border-t-0">
-                      <button
-                        type="button"
-                        ref={(el) => {
-                          botones.current[i] = el
-                        }}
-                        id={IDS_DEL_FAQ.pregunta(i)}
-                        aria-expanded={pedido === i}
-                        aria-controls={IDS_DEL_FAQ.respuesta(i)}
-                        onClick={() => tocar(i)}
-                        onKeyDown={(e) => alApretar(e, i)}
-                        className={cn('block w-full py-[var(--spacing-3)] text-left text-cuerpo leading-texto underline-offset-4 hover:underline focus-visible:underline', pedido === i ? 'font-semi' : 'font-normal')}
-                      >
-                        {p.pregunta}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </VidrioDelFaq>
-          </div>
-          <div className="col-start-3 flex max-w-[calc(var(--spacing-20)*5)] flex-col justify-between gap-[var(--spacing-4)]">
-            <VidrioDelFaq caja={derecha} estilo={CERRADO}>
-              {/* Lo que sube se anuncia (el aviso, o la respuesta que tocaste). */}
-              <div aria-live="polite" className="p-[var(--spacing-6)]">
-                <div hidden={mostrado !== 'aviso'}>
-                  <Titular nivel="titulo-m" como="p" peso="liviano" className="text-balance">
-                    {TEXTOS_DEL_FAQ.aviso}
+    <>
+      <div
+        ref={raiz}
+        {...{ [ATRIBUTO_DEL_FAQ]: 'escenario' }}
+        data-fase={fase}
+        style={HUECO}
+        className={cn('absolute inset-x-0 bottom-0 z-10 h-svh', volumen && 'overflow-clip', fase === 'fuera' ? 'pointer-events-none' : 'pointer-events-auto')}
+      >
+        <Envoltorio className="h-full" claseDeContenido="grid h-full content-center">
+          <div className="grid grid-cols-[1fr_var(--hueco-del-faq)_1fr] items-stretch">
+            <div className={cn('col-start-1 flex justify-end', volumen && 'items-start')}>
+              <BloqueDelFaq id="preguntas" caja={izquierda} volumen={volumen} estilo={CERRADO} medidas={medidas.preguntas} className={volumen ? undefined : 'w-full max-w-[calc(var(--spacing-20)*5)]'}>
+                <div className="flex flex-col gap-[var(--spacing-4)] p-[var(--spacing-6)]">
+                  <Titular nivel="titulo-m" como="h2" id={IDS_DEL_FAQ.titulo} className="text-balance">
+                    {TEXTOS_DEL_FAQ.titulo}
                   </Titular>
+                  <ul role="list" className="flex flex-col">
+                    {preguntas.map((p, i) => (
+                      <li key={p.pregunta} className="border-t border-current/15 first:border-t-0">
+                        <button
+                          type="button"
+                          ref={(el) => {
+                            botones.current[i] = el
+                          }}
+                          id={IDS_DEL_FAQ.pregunta(i)}
+                          aria-expanded={pedido === i}
+                          aria-controls={IDS_DEL_FAQ.respuesta(i)}
+                          onClick={() => tocar(i)}
+                          onKeyDown={(e) => alApretar(e, i)}
+                          className={cn('block w-full py-[var(--spacing-3)] text-left text-cuerpo leading-texto underline-offset-4 hover:underline focus-visible:underline', pedido === i ? 'font-semi' : 'font-normal')}
+                        >
+                          {p.pregunta}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                {preguntas.map((p, i) => (
-                  <div key={p.pregunta} id={IDS_DEL_FAQ.respuesta(i)} hidden={mostrado !== i} className="flex flex-col gap-[var(--spacing-3)]">
-                    <EtiquetaDeSeccion sangria={false}>{p.pregunta}</EtiquetaDeSeccion>
-                    <Cuerpo>{p.respuesta}</Cuerpo>
+              </BloqueDelFaq>
+            </div>
+            <div className={cn('col-start-3 flex flex-col justify-between gap-[var(--spacing-4)]', !volumen && 'max-w-[calc(var(--spacing-20)*5)]')}>
+              <BloqueDelFaq id="respuesta" caja={derecha} volumen={volumen} estilo={CERRADO} medidas={medidas.respuesta}>
+                {/* Lo que sube se anuncia (el aviso, o la respuesta que tocaste). */}
+                <div aria-live="polite" className="p-[var(--spacing-6)]">
+                  <div hidden={mostrado !== 'aviso'}>
+                    <Titular nivel="titulo-m" como="p" peso="liviano" className="text-balance">
+                      {TEXTOS_DEL_FAQ.aviso}
+                    </Titular>
                   </div>
-                ))}
-              </div>
-            </VidrioDelFaq>
-            <VidrioDelFaq caja={whatsapp} estilo={CERRADO} className="self-start">
-              {/* Recién con la primera respuesta (antes no existe: ni se ve ni es una parada del teclado). */}
-              {conWhatsApp && (
-                <a href={WHATSAPP_DEL_FAQ} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-[var(--spacing-2)] px-[var(--spacing-5)] py-[var(--spacing-3)] text-cuerpo font-semi">
-                  <IconoDeMarca marca="whatsapp" className="size-[var(--spacing-5)] shrink-0" />
-                  <DosCopias>{TEXTOS_DEL_FAQ.dudas}</DosCopias>
-                </a>
-              )}
-            </VidrioDelFaq>
+                  {preguntas.map((p, i) => (
+                    <div key={p.pregunta} id={IDS_DEL_FAQ.respuesta(i)} hidden={mostrado !== i} className="flex flex-col gap-[var(--spacing-3)]">
+                      <EtiquetaDeSeccion sangria={false}>{p.pregunta}</EtiquetaDeSeccion>
+                      <Cuerpo>{p.respuesta}</Cuerpo>
+                    </div>
+                  ))}
+                </div>
+              </BloqueDelFaq>
+              <BloqueDelFaq id="whatsapp" caja={whatsapp} volumen={volumen} estilo={CERRADO} className={cn('self-start', volumen && 'rounded-[var(--radius-pastilla-s)]')}>
+                {/* Recién con la primera respuesta (antes no existe: ni se ve ni es una parada del teclado). */}
+                {conWhatsApp && (
+                  <a href={WHATSAPP_DEL_FAQ} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-[var(--spacing-2)] px-[var(--spacing-5)] py-[var(--spacing-3)] text-cuerpo font-semi">
+                    <IconoDeMarca marca="whatsapp" className="size-[var(--spacing-5)] shrink-0" />
+                    <DosCopias>{TEXTOS_DEL_FAQ.dudas}</DosCopias>
+                  </a>
+                )}
+              </BloqueDelFaq>
+            </div>
           </div>
-        </div>
-      </Envoltorio>
-    </div>
+        </Envoltorio>
+      </div>
+      {volumen && <BotonDelFaq alTocar={tocarElBoton} />}
+    </>
   )
 }

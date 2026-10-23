@@ -3,7 +3,7 @@
 import { useEffect, useRef, type RefObject } from 'react'
 
 import { tomarLosGestos, type DecisionDelPrimero, type GestoDeScroll } from '../../_lib/gestosDelScroll'
-import { COLA_DEL_GESTO_MS, FAQ_EN_VIVO, avisarAlFaq, decidirElGestoDelFaq, entrar, faseEn, salir, soltarElFaq } from '../../_lib/pie3d/faqDelPie'
+import { COLA_DEL_GESTO_MS, FAQ_EN_VIVO, avisarAlFaq, decidirElGestoDelFaq, entrar, entrarSinGesto, faseEn, salir, soltarElFaq } from '../../_lib/pie3d/faqDelPie'
 import { SALIDA_EN_VIVO } from '../../_lib/pie3d/salidas'
 
 /**
@@ -53,6 +53,19 @@ export function primeroDelFaq(puedeEntrar: () => boolean, focoAdentro: () => boo
   }
 }
 
+/** El pie entero, donde el FAQ puede entrar: el de volumen, acostado al final del encastre (y presente); el plano, la página al fondo. */
+export function puedeEntrarElFaq(volumen: boolean): boolean {
+  return volumen ? SALIDA_EN_VIVO.acostado && SALIDA_EN_VIVO.fase === 'presente' : window.scrollY >= fondoDelLayout() - 2
+}
+
+/**
+ * [C2-71] El botón del FAQ (`BotonDelFaq`): tocarlo es el gesto que trae el FAQ, con la misma condición que un gesto nuevo hacia abajo
+ * (`entra` en `decidirElGestoDelFaq`: desde fuera y con el pie entero). Devuelve si entró.
+ */
+export function pedirElFaqSinGesto(volumen: boolean): boolean {
+  return entrarSinGesto(puedeEntrarElFaq(volumen), performance.now())
+}
+
 export function useGatilloDelFaq({ raiz, pie, volumen, activo }: OpcionesDelGatillo): void {
   // El pie de volumen se arma después de montar: se lee al decidir (cambiarlo no suelta un FAQ que está adentro).
   const deVolumen = useRef(volumen)
@@ -61,8 +74,7 @@ export function useGatilloDelFaq({ raiz, pie, volumen, activo }: OpcionesDelGati
   }, [volumen])
   useEffect(() => {
     if (!activo) return undefined
-    const alFondo = (): boolean => window.scrollY >= fondoDelLayout() - 2
-    const puedeEntrar = (): boolean => (deVolumen.current ? SALIDA_EN_VIVO.acostado && SALIDA_EN_VIVO.fase === 'presente' : alFondo())
+    const puedeEntrar = (): boolean => puedeEntrarElFaq(deVolumen.current)
     const focoAdentro = (): boolean => raiz.current?.contains(document.activeElement) === true
 
     const soltarLosGestos = tomarLosGestos(primeroDelFaq(puedeEntrar, focoAdentro))

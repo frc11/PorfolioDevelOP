@@ -8,6 +8,8 @@ import { anotarLasPiezas } from '../../diagnostico/anotar'
 import { alCargarseLasFuentes, conReimpresion } from '../../fuentes'
 import { PIEZAS_DEL_PIE, PROGRESO_DEL_PIE, marcarElPieListo, suscribirALasPiezas, versionDeLasPiezas } from '../../pie3d/registro'
 import { SALIDA_EN_VIVO, pasoDelHundimiento } from '../../pie3d/salidas'
+import { BOTON_EN_VIVO } from '../../pie3d/faqDelPie'
+import { KEY_INTENSITY } from '../probeLighting'
 import { esperaAlVelo } from '../../veloDeNavegacion'
 import { viajeEnCurso } from '../viaje'
 import { contextoPerdido, useVersionDelContexto } from '../contextoDelLienzo'
@@ -20,6 +22,8 @@ import { ONDA_PEDIDA } from '../interfaz/pedidos'
 import { alCuadro, prepararLasTransformaciones, rearmar, soltar, type EstadoDelPie } from './armadas'
 import { crearLaCaidaDelPie } from './caida'
 import { CAJAS_DEL_PIE } from './cajasDelPolvo'
+import { crearElFaqDeVolumen } from './faqDeVolumen'
+import { COLUMNAS_EN_VIVO } from './huecosDeLaCaida'
 import { HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
 import { crearLosPozosDelPie } from './pozos'
 import { SOMBRAS_DEL_PIE } from './sombras'
@@ -50,7 +54,7 @@ interface Props {
   readonly keyLightRef: RefObject<THREE.DirectionalLight | null>
 }
 
-type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number; coreografia: () => { readonly mostrado: number; readonly pedido: number | null }; enPantalla: () => unknown; punto: (x: number, y: number, z: number) => number[]; plataforma: () => { readonly hundido: number; readonly cerrado: number } } }
+type VentanaDelBanco = Window & { __pieDelBanco?: { piezas: () => unknown; ondas: () => number; coreografia: () => { readonly mostrado: number; readonly pedido: number | null }; enPantalla: () => unknown; punto: (x: number, y: number, z: number) => number[]; plataforma: () => { readonly hundido: number; readonly cerrado: number }; faq: () => unknown; columnas: () => unknown; boton: () => unknown } }
 
 /** [PULIDO 26] X1 · para el banco: un punto del mundo en la pantalla (px de CSS) con la cámara de este cuadro. */
 const EN_PANTALLA = new THREE.Vector3()
@@ -73,6 +77,8 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
   const vivaDelBanco = useRef<THREE.Camera | null>(null)
   // [PULIDO 27] Y2 a · el pozo liso de cada hueco del final (`pozos.ts`).
   const pozos = useRef<ReturnType<typeof crearLosPozosDelPie> | null>(null)
+  // [C2-71] Los bloques del FAQ de volumen (`faqDeVolumen.ts`): placas como la del formulario, en el piso del pie acostado.
+  const faq = useRef<ReturnType<typeof crearElFaqDeVolumen> | null>(null)
   const m = useRef<EstadoDelPie>({ armadas: [], estudio: null, quieto: false, fuentes: false, compilando: false, listo: false, montado: false, cuadrilatero: [], matriz: [], coreografia: { mostrado: 0, y: -1, cuando: 0 }, caida: crearLaCaidaDelPie() })
 
   useEffect(() => {
@@ -94,10 +100,16 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     const losPozos = crearLosPozosDelPie()
     pozos.current = losPozos
     raiz.current?.add(losPozos.grupo)
+    const elFaq = crearElFaqDeVolumen()
+    faq.current = elFaq
+    raiz.current?.add(elFaq.grupo)
     return () => {
       losPozos.grupo.removeFromParent()
       losPozos.soltar()
       pozos.current = null
+      elFaq.grupo.removeFromParent()
+      elFaq.soltar()
+      faq.current = null
       s.montado = false
       s.listo = false
       // [PULIDO 28] AA7 · sin el pie de volumen no hay pie a la vista (la salida vuelve a la de siempre).
@@ -141,13 +153,32 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       anotarLasPiezas(s.armadas) // [CIERRE A-ter] A13 · el diagnóstico de la carga (`?diag=carga`).
       if (s.listo || s.compilando || s.armadas.length === 0) return
       s.compilando = true
-      void compilarConCuidado(gl, escena, camara).then(() => { // [T0] sin `compileAsync` (`gpu/compilar.ts`)
-        s.compilando = false
-        if (!s.montado) return
-        calentar(gl, escena, camara)
-        s.listo = true
-        marcarElPieListo(true)
-      })
+      // [C2-71] Pase lo que pase con la compilación (un material que tira, el contexto que se pierde), `compilando` se suelta y, si el pie
+      // no quedó listo, se vuelve a pedir: un `compilando` colgado dejaba el pie sin armar para siempre (el DOM suelto de `lote2/19`).
+      // [T0] sin `compileAsync` (`gpu/compilar.ts`).
+      let compilado: Promise<void>
+      try {
+        compilado = compilarConCuidado(gl, escena, camara)
+      } catch {
+        compilado = Promise.reject(new Error('[C2-71] la compilación del pie tiró'))
+      }
+      void compilado.then(
+        () => {
+          s.compilando = false
+          if (!s.montado) return
+          try {
+            calentar(gl, escena, camara)
+          } catch {
+            // Calentar es un adelanto (el primer cuadro compila lo que falte): sin él, el pie igual queda listo.
+          }
+          s.listo = true
+          marcarElPieListo(true)
+        },
+        () => {
+          s.compilando = false
+          if (vivo) pedir()
+        },
+      )
     }
     const pedir = (): void => {
       window.clearTimeout(reloj)
@@ -202,6 +233,10 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
       punto: (x, y, z) => alCuadroDelBanco(vivaDelBanco.current, x, y, z),
       // [CIERRE A] A8 · la plataforma del cambio de gracias o error: cuánto bajó la placa y cuánto cerró el piso.
       plataforma: () => ({ ...PLATAFORMA_EN_VIVO }),
+      // [C2-71] Los bloques del FAQ de volumen, la base de las columnas para el FAQ y el botón.
+      faq: () => faq.current?.banco() ?? [],
+      columnas: () => ({ ...COLUMNAS_EN_VIVO }),
+      boton: () => ({ ...BOTON_EN_VIVO }),
     }
     return () => {
       delete ventana.__pieDelBanco
@@ -213,7 +248,12 @@ export default function PieDeVolumen({ keyLightRef }: Props) {
     // [PULIDO 27] Y4 b · el hundimiento antes de un viaje desde el pie acostado (lo leen la caída y los huecos); acostado, lo escribe la caída.
     SALIDA_EN_VIVO.hunde = pasoDelHundimiento(performance.now(), viajeEnCurso() !== null)
     SALIDA_EN_VIVO.acostado = false
-    alCuadro(m.current, state.camera, keyLightRef.current, { ancho: tam.width, alto: tam.height }, Math.min(delta, 0.1))
+    const dt = Math.min(delta, 0.1)
+    alCuadro(m.current, state.camera, keyLightRef.current, { ancho: tam.width, alto: tam.height }, dt)
+    // [C2-71] Después del pie (sus huecos y su quietud ya escritos): los bloques del FAQ, en el piso del pie acostado.
+    const s = m.current
+    const luz = keyLightRef.current === null ? 1 : Math.min(1, keyLightRef.current.intensity / KEY_INTENSITY)
+    faq.current?.alCuadro({ caida: s.caida, viva: state.camera, cuadro: { ancho: tam.width, alto: tam.height }, estudio: s.estudio, luz, enElFinal: s.listo && s.armadas.length > 0 && EN_VIVO.fin > 0, quieto: s.quieto, ahora: performance.now(), dt })
     imprimirLasTarjetas(m.current.armadas)
     pozos.current?.alCuadro()
   })

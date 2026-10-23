@@ -36,7 +36,40 @@ export const SALIDA_EN_VIVO = {
   viajo: false,
   /** b) cuánto va el hundimiento de este cuadro (0 a 1; lo escribe el pie de volumen con `pasoDelHundimiento`). */
   hunde: 0,
+  /** [C2-71] sus dos partes en este cuadro: la del viaje (b) y la del FAQ (c); `hunde` es la mayor. */
+  delViaje: 0,
+  delFaq: 0,
 }
+
+/**
+ * [C2-71] c) EL PIE SE GUARDA PARA EL FAQ, POR COLUMNAS (ítem 22): cada columna del pie acostado (la izquierda entera, con sus textos; la
+ * derecha, el rótulo y el formulario) tiene su BASE: el piso debajo de ella se abre (el hueco de la columna, desde su centro: `abre`) y
+ * queda una plataforma al ras; la plataforma baja con todo lo de la columna tal como es (`baja`, de 0 a `hondo` de la columna: nada
+ * atraviesa su fondo, ni los pozos de los campos, que era la «piel» de los inputs), y el piso se cierra encima. Con `h` (0 a 1: lo hundido
+ * por el FAQ). Al volver, al revés. El viaje (b) sigue con su hundimiento de siempre.
+ */
+export const HUNDIMIENTO_EN_COLUMNAS = { abreHasta: 0.25, bajaDesde: 0.22, bajaHasta: 0.7, cierraDesde: 0.72, margen: 0.18, radio: 0.3, deMas: 0.35 } as const
+
+const suaveEnColumnas = (x: number): number => {
+  const u = Math.min(1, Math.max(0, x))
+  return u * u * u * (u * (u * 6 - 15) + 10)
+}
+
+const COLUMNA = { abre: 0, baja: 0 }
+
+/**
+ * La columna en `h`: cuánto está abierta la silueta de su hueco (0 a 1) y cuánto bajó su plataforma (0 a 1 de su `hondo`). Sin reservas
+ * por cuadro: el mismo registro (leerlo antes de volver a pedirlo).
+ */
+export function columnaDelHundimiento(h: number): { readonly abre: number; readonly baja: number } {
+  const C = HUNDIMIENTO_EN_COLUMNAS
+  COLUMNA.abre = suaveEnColumnas(h / C.abreHasta) * (1 - suaveEnColumnas((h - C.cierraDesde) / (1 - C.cierraDesde)))
+  COLUMNA.baja = suaveEnColumnas((h - C.bajaDesde) / (C.bajaHasta - C.bajaDesde))
+  return COLUMNA
+}
+
+/** [C2-71] ¿El hundimiento de este cuadro es el del FAQ (por columnas)? El del viaje, si es el mayor, sigue como siempre. */
+export const hundePorColumnas = (): boolean => SALIDA_EN_VIVO.delFaq > 0 && SALIDA_EN_VIVO.delFaq >= SALIDA_EN_VIVO.delViaje
 
 /** b) Si el enlace es del pie acostado: marca el hundimiento y devuelve cuánto esperar antes de viajar (ms); si no, 0. */
 export function demoraDelViaje(enlace: Element): number {
@@ -58,7 +91,10 @@ const suave = (x: number): number => {
  * el FAQ se va (por el reloj del FAQ). Gana el más hundido de los dos.
  */
 export function pasoDelHundimiento(ahora: number, enViaje: boolean): number {
-  return Math.max(hundimientoDelViaje(ahora, enViaje), hundeDelFaq(ahora))
+  const S = SALIDA_EN_VIVO
+  S.delViaje = hundimientoDelViaje(ahora, enViaje)
+  S.delFaq = hundeDelFaq(ahora)
+  return Math.max(S.delViaje, S.delFaq)
 }
 
 function hundimientoDelViaje(ahora: number, enViaje: boolean): number {
