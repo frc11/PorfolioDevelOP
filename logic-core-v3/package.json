@@ -351,6 +351,7 @@
     "test:s78-b13": "npx tsx src/app/v3/_lib/__tests__/s78-b13.invariant.tsx",
     "test:s78-b10": "npx tsx src/app/v3/_lib/__tests__/s78-b10.invariant.tsx",
     "test:s83-resenas": "npx tsx src/app/v3/_lib/__tests__/s83-resenas.invariant.tsx",
+    "test:s83-resenas-telefono": "npx tsx src/app/v3/_lib/__tests__/s83-resenas-telefono.invariant.tsx",
     "test:s83": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s83",
     "test:s78-b8": "npx tsx src/app/v3/_lib/__tests__/s78-b8.invariant.ts",
     "test:s78-b9": "npx tsx src/app/v3/_lib/__tests__/s78-b9.invariant.ts",

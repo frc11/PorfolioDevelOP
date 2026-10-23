@@ -159,6 +159,8 @@ export interface CtaEnlaceProps extends CtaComun {
   readonly externo?: boolean
   /** [B1.2d] El nombre accesible, cuando el rótulo solo no alcanza (de quién es el sitio, que se abre aparte). */
   readonly etiqueta?: string
+  /** [C2-70t] Una copia visual (la segunda vuelta del carrusel de reseñas): se toca con el puntero, pero no es una parada del teclado. */
+  readonly fueraDelTeclado?: boolean
 }
 
 export function CtaEnlace({
@@ -172,12 +174,14 @@ export function CtaEnlace({
   abreElContacto,
   externo = false,
   etiqueta,
+  fueraDelTeclado = false,
 }: CtaEnlaceProps) {
   return (
     <a
       href={href}
       {...(externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       {...(etiqueta === undefined ? {} : { 'aria-label': etiqueta })}
+      {...(fueraDelTeclado ? { tabIndex: -1 } : {})}
       data-pieza="cta"
       data-variante={variante}
       data-registro={registro}

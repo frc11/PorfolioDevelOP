@@ -17,10 +17,10 @@ export type TrabajoDelPortfolio = 'el-garage' | 'esquina-estudio' | 'banu-scents
 export const TITULO_DE_LAS_RESENAS = { izquierda: 'Lo que dicen', derecha: 'nuestros clientes' } as const
 
 export const TEXTO_DE_LAS_RESENAS = {
-  /** La pastilla del hover (la de Demos). */
+  /** La pastilla del hover (la de Demos) y, en el carrusel del teléfono, el rótulo de su botón (05-TEXTOS: «Ver trabajo», con flecha). */
   verTrabajo: 'Ver trabajo →',
-  anterior: 'Reseña anterior',
-  siguiente: 'Reseña siguiente',
+  /** [C2-70t] El aviso del carrusel en el teléfono y la tablet (05-TEXTOS, tal cual). */
+  deslizar: 'Deslizá para ver más',
   /** [C2-70] El cartel que sale desde el mouse sobre el aro (05-TEXTOS, Reseñas). */
   arrastrar: 'Mantené para arrastrar',
   /** El nombre accesible de cada tarjeta (lleva al Portfolio). */
@@ -36,7 +36,8 @@ export interface Resena {
   readonly negocio: string
   /** El retrato (una persona generada, C2-70): `public/v3/resenas/<clave>.webp`. */
   readonly foto: string
-  readonly proyecto: TrabajoDelPortfolio
+  /** [C2-70t] Sin trabajo en el Portfolio, la reseña no lleva «Ver trabajo» (hoy todas tienen uno). */
+  readonly proyecto?: TrabajoDelPortfolio
 }
 
 const TRABAJOS: readonly TrabajoDelPortfolio[] = ['el-garage', 'esquina-estudio', 'banu-scents']
@@ -64,5 +65,5 @@ export const RESENAS: readonly Resena[] = CRUDAS.map(([clave, cita, nombre, nego
   proyecto: TRABAJOS[i % TRABAJOS.length],
 }))
 
-/** El deep link de B1 al trabajo de una reseña. */
-export const enlaceDelTrabajo = (r: Resena): string => `#portfolio-${r.proyecto}`
+/** El deep link de B1 al trabajo de una reseña; `undefined` si no tiene trabajo (entonces no hay enlace). */
+export const enlaceDelTrabajo = (r: Resena): string | undefined => (r.proyecto === undefined ? undefined : `#portfolio-${r.proyecto}`)
