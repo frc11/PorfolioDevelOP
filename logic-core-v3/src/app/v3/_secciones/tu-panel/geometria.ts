@@ -207,8 +207,7 @@ export const CLASE_DEL_TITULO_ANGOSTO =
  * [C2 60b] Los títulos de los módulos abajo de 1024: distintos del cuerpo (que es Chivo, 15 px, en tinta media) y del título
  * general (Archivo en mayúsculas, a 700): la cara de display del sitio en minúsculas, a 600 y más grandes (`titulo-l` fluido).
  */
-// [C2-60, orquestador] El espacio de la cara de display, a 600 y 24 px, casi no separa las palabras: se abre.
-export const CLASE_DEL_TITULO_DEL_MODULO = 'max-escritorio:font-display max-escritorio:font-semi max-escritorio:text-fluido-titulo-l max-escritorio:leading-titulo max-escritorio:tracking-display max-escritorio:[word-spacing:0.2em]'
+export const CLASE_DEL_TITULO_DEL_MODULO = 'max-escritorio:font-display max-escritorio:font-semi max-escritorio:text-fluido-titulo-l max-escritorio:leading-titulo max-escritorio:tracking-display'
 
 /** El anclaje horizontal de cada captura de respaldo (el marco le recorta los costados). Clases enteras. */
 export const CLASE_DE_ENCUADRE: Readonly<Record<EncuadreDeCaptura, string>> = {
