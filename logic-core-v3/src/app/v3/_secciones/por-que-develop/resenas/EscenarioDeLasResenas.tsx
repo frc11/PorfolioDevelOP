@@ -19,12 +19,12 @@ import { useBanderasDeLasResenas, useTramoDeLasResenas } from './useTramoDeLasRe
  */
 export function EscenarioDeLasResenas({ pin }: { readonly pin: MotionValue<number> }): React.JSX.Element {
   const raiz = useRef<HTMLDivElement>(null)
-  const { variante, arrastre } = useBanderasDeLasResenas()
+  const { variante } = useBanderasDeLasResenas()
   const giro = useTramoDeLasResenas(pin, raiz, variante)
   return (
     <div ref={raiz} data-pieza="resenas-del-final" data-resenas={variante} className="contents">
       <TituloDeLasResenas giro={giro} />
-      <CapaDelAro arrastre={arrastre} />
+      <CapaDelAro />
     </div>
   )
 }

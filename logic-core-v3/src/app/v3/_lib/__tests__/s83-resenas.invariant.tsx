@@ -6,7 +6,7 @@
  * Corre con `npm run test:s83-resenas`.
  */
 
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 import React from 'react'
@@ -26,7 +26,8 @@ import { TRANSFORMACION, caraDelCta } from '../escena/ctaDelFinal/transformacion
 import { ENGANCHE_DE_LAS_GRIETAS, avisarLaVueltaDelCta } from '../escena/resenas/enganches'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { CAPA_DEL_ARO } from '../escena/resenas/enVivo'
-import { llevarLaTarjeta, nuevaTarjeta, tamanoDeLasTarjetas } from '../escena/resenas/tarjetas'
+import { OPACIDAD_DE_LA_TARJETA, cajaDelLogo, esconderLasTarjetas, llevarLaTarjeta, nuevaCaja, nuevaTarjeta, tamanoDeLasTarjetas } from '../escena/resenas/tarjetas'
+import { armarLasPlacas, enLaNiebla } from '../escena/resenas/placas'
 import { aplicar } from '../pie3d/homografia'
 import { ARO, VELOCIDAD_DE_LECTURA, medidasDeLaEscala, medidasDelAro, textoConLaEntrada, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
 import { seVeConElGiro } from '../escena/titulos3d/giro'
@@ -95,7 +96,9 @@ controlPositivo('el detector ve un tramo que rebobina antes del CTA', { giro: 0,
 afirmarIgual(e(0.6, 0), [0, 0, 0], 'gatillo: con la animación en 0, nada (aunque el scroll esté adentro)')
 afirmarIgual(e(0.6, 1), [1, 1, 1], '  y con la animación entera, todo')
 afirmar(objetivoDelGatillo(0.03, 0) === 1 && objetivoDelGatillo(0.01, 1) === 1 && objetivoDelGatillo(0.001, 1) === 0 && objetivoDelGatillo(0.01, 0) === 0, 'el gatillo: entra al pasar 0,02 del tramo, sale al volver arriba de 0,005 (sin titilar en el medio)')
-afirmar(varianteDeLaBandera(null) === 'scroll' && varianteDeLaBandera('gatillo') === 'gatillo' && varianteDeLaBandera('x') === 'scroll', '?resenas=: scroll por defecto, gatillo con la bandera')
+const gatilloPorDefecto = (f: (v: string | null) => string): boolean => f(null) === 'gatillo' && f('scroll') === 'scroll' && f('gatillo') === 'gatillo' && f('x') === 'gatillo'
+afirmar(gatilloPorDefecto(varianteDeLaBandera), '?resenas=: [C2-70] gatillo por defecto, scroll con la bandera (se conserva)')
+controlPositivo('el detector ve la bandera de antes (scroll por defecto)', (v: string | null) => (v === 'gatillo' ? 'gatillo' : 'scroll'), gatilloPorDefecto)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El giro del título: una sola cara a la vista, de canto en la mitad')
@@ -138,7 +141,8 @@ const cambiosOcultos = (f: (i: number, g: number, n: number) => number): boolean
   return true
 }
 afirmar(cambiosOcultos(resenaDeLaPlaca), 'cada placa cambia de reseña sólo en la nuca (sin texto y fuera de la niebla), en dos vueltas, para los dos lados')
-controlPositivo('el detector ve un cambio en el frente', (i: number, g: number, n: number) => (i + ARO.placas * Math.floor((g + (i * 2 * Math.PI) / ARO.placas) / (2 * Math.PI)) + n * 4) % n, cambiosOcultos)
+// [C2-70] Con diez reseñas para diez placas cada placa muestra siempre la suya (no hay cambio); el error del control cambia de a una en el frente, ve igual con cualquier cantidad.
+controlPositivo('el detector ve un cambio en el frente', (i: number, g: number, n: number) => (i + Math.floor((g + (i * 2 * Math.PI) / ARO.placas) / (2 * Math.PI)) + n * 4) % n, cambiosOcultos)
 const sinRepetir = (n: number): boolean => giros.every((g) => {
   const vistas = placasQueSeLeen(g, M).map((i) => resenaDeLaPlaca(i, g, n))
   return new Set(vistas).size === vistas.length
@@ -197,7 +201,11 @@ const texto = RESENAS.flatMap((r) => [r.cita, r.nombre, r.negocio]).join(' ') + 
 afirmarIgual(escanearContenido(texto), [], 'el escáner de contenido no encuentra cifras ni precios')
 controlPositivo('el escáner ve una cita con una cifra', `${texto} Vendimos un 40% más.`, (t) => escanearContenido(t).length === 0)
 afirmar(!NOMBRES_REALES.some((n) => texto.includes(n)), 'ninguna reseña nombra a un cliente real')
-afirmar(RESENAS.every((r) => existsSync(path.join(RAIZ, 'public', r.foto))), 'cada retrato existe (los placeholders ilustrados de public/v3/resenas)')
+afirmar(RESENAS.every((r) => existsSync(path.join(RAIZ, 'public', r.foto))), 'cada retrato existe (public/v3/resenas)')
+// [C2-70] Diez personas generadas, una por reseña (cinco y cinco): ninguna foto repetida, webp chicas (el avatar mide ~40 px).
+const fotosUnicas = (fotos: readonly string[]): boolean => new Set(fotos).size === fotos.length && fotos.every((x) => /^\/v3\/resenas\/[a-z]+\.webp$/.test(x))
+afirmar(fotosUnicas(RESENAS.map((r) => r.foto)) && RESENAS.every((r) => statSync(path.join(RAIZ, 'public', r.foto)).size <= 8000), `cada reseña con su retrato propio en webp chico (${String(RESENAS.length)} fotos)`)
+controlPositivo('el detector ve un retrato repetido (las siluetas de antes, de a cuatro)', ['/v3/resenas/a.webp', '/v3/resenas/a.webp'], fotosUnicas)
 afirmar(RESENAS.every((r) => ANCLAS_DEL_PORTFOLIO.some((a) => `#${a.id}` === enlaceDelTrabajo(r))), 'cada «Ver trabajo →» va a un deep link del Portfolio (B1)')
 afirmar(!/llave|conLlave|CONTENIDO_INVENTADO/.test(leer('_secciones/por-que-develop/resenas/contenido.ts').replace(/\/\*[\s\S]*?\*\//g, '')), 'sin la llave de contenido falso (decisión de Valentino)')
 
@@ -264,9 +272,12 @@ const hijaDeLaCaja = (f: string): boolean => /<\/motion\.div>\n(?:\s*<[A-Za-z][^
 afirmar(hijaDeLaCaja(porQue), 'la capa de las tarjetas es hija de la caja clavada, después de la levantada: ninguna opacidad de otra pieza le llega')
 controlPositivo('el detector ve la capa adentro de la levantada', '</motion.div>\n      <motion.div style={{ opacity }}>\n      <EscenarioDeLasResenas pin={pinDelBloque} />\n      </motion.div>\n    </div>', hijaDeLaCaja)
 afirmar(/className="contents"/.test(leer('_secciones/por-que-develop/resenas/EscenarioDeLasResenas.tsx')), '  y el envoltorio de las reseñas no tiene caja (`contents`): la capa se posiciona contra la caja clavada')
-const capa = renderToStaticMarkup(<CapaDelAro arrastre={false} />)
+const capa = renderToStaticMarkup(<CapaDelAro />)
 const raizDeLaCapa = /^<div[^>]*>/.exec(capa)?.[0] ?? ''
 afirmar(/style="z-index:1"/.test(raizDeLaCapa) && /absolute inset-0/.test(raizDeLaCapa) && !/opacity/.test(raizDeLaCapa), 'la capa va arriba de sus hermanas de la caja clavada (z 1) y sin opacidad propia')
+const conCartel = (marcado: string): boolean => marcado.includes('data-pieza="cartel-del-arrastre"') && marcado.includes(TEXTO_DE_LAS_RESENAS.arrastrar) && !/resenas-arrastre/.test((leer('_secciones/por-que-develop/resenas/useTramoDeLasResenas.ts') + leer('_secciones/por-que-develop/resenas/tramo.ts')).replace(/\/\*[\s\S]*?\*\//g, ''))
+afirmar(conCartel(capa), '[C2-70] el arrastre sin bandera y el cartel «Mantené para arrastrar» en la capa del aro')
+controlPositivo('el detector ve la capa sin el cartel', capa.replace('cartel-del-arrastre', 'otra'), conCartel)
 // b · Visible y en tinta: cada tarjeta lleva la cara de papel con la tinta, y su texto está en el marcado.
 const tarjetas = [...capa.matchAll(/<a [^>]*data-pieza="resena-del-aro"[\s\S]*?<\/a>/g)].map((m) => m[0])
 afirmarIgual(tarjetas.length, ARO.placas, 'una tarjeta por placa en el marcado')
@@ -310,7 +321,7 @@ const llevada = (e: number): { readonly el: Escrita; readonly esquinas: number[]
 }
 const armada = llevada(1)
 const sobreLaPlaca = (x: { readonly esquinas: number[][]; readonly placa: number[][] }): boolean => x.esquinas.every((q, k) => Math.hypot(q[0] - x.placa[k][0], q[1] - x.placa[k][1]) <= 2.5)
-afirmar(armada.el.style.visibility === 'visible' && armada.el.style.opacity === '1.000', `con el aro armado, la de frente: visible y entera (opacidad ${armada.el.style.opacity}; maqueta de ${String(anchoDeMaqueta)} px)`)
+afirmar(armada.el.style.visibility === 'visible' && armada.el.style.opacity === OPACIDAD_DE_LA_TARJETA, `con el aro armado, la de frente: visible y entera (opacidad ${armada.el.style.opacity}; maqueta de ${String(anchoDeMaqueta)} px)`)
 afirmar(sobreLaPlaca(armada) && armada.esquinas.every(([x, y]) => x >= 0 && x <= 1440 && y >= 0 && y <= 900), `  y su caja cae en el frente de su placa (a menos de 2,5 px en las cuatro esquinas), adentro del cuadro: ${armada.esquinas.map((q) => q.map(Math.round).join(',')).join(' · ')}`)
 controlPositivo('el detector ve una tarjeta corrida de su placa', { ...armada, esquinas: armada.esquinas.map(([x, y]) => [x + 40, y]) }, sobreLaPlaca)
 const aMitad = llevada(0.68)
@@ -332,5 +343,45 @@ const encuadre = (m: typeof MB): { readonly ancho: number; readonly tapa: number
 const calmo = (m: typeof MB): boolean => encuadre(m).ancho <= 0.23 && encuadre(m).tapa <= 0.16
 afirmar(calmo(MB), `la de frente mide ${(encuadre(MB).ancho * 100).toFixed(0)} % del ancho y tapa ${(encuadre(MB).tapa * 100).toFixed(0)} % de la caja del logo (eran 33 % y 34 %)`)
 controlPositivo('el detector ve el aro de antes (radio 6,4, placas de 3,2 × 2,15)', { ...medidasDeLaEscala(1), radio: 6.4, ancho: 3.2, alto: 2.15 }, calmo)
+
+// e · [C2-70] Sólidas: ninguna tarjeta ni placa con opacidad < 1, en toda una vuelta; las de los costados y alguna de atrás, con su texto.
+titulo('14 · [C2-70] Las tarjetas sólidas: opacidad 1 siempre (las de atrás también), escondidas sólo con visibility')
+const logoB = cajaDelLogo(camaraB, { ancho: 1440, alto: 900 }, nuevaCaja())
+const unaVuelta = (): { readonly opacidades: string[]; readonly conTexto: number; readonly deEspaldas: number } => {
+  const opacidades: string[] = []
+  let conTexto = 0
+  let deEspaldas = 0
+  const estados = Array.from({ length: ARO.placas }, nuevaTarjeta)
+  const els = Array.from({ length: ARO.placas }, nuevaEscrita)
+  for (let paso = 0; paso < 72; paso += 1) {
+    const giro = (paso * 2 * Math.PI) / 72
+    for (let i = 0; i < ARO.placas; i += 1) {
+      const p = poseDeLaPlaca(i, 1, giro, MB, nuevaPose())
+      const texto = nieblaDeLaPlaca(p.angulo) < 0.995 ? 1 : 0
+      llevarLaTarjeta(els[i] as unknown as HTMLElement, estados[i], new THREE.Vector3(p.x, centroY, p.z), p.mira, MB, texto, camaraB, { ancho: 1440, alto: 900 }, anchoDeMaqueta, { logo: logoB })
+      opacidades.push(els[i].style.opacity)
+      if (els[i].style.visibility === 'visible') {
+        conTexto += 1
+        if (Math.cos(p.angulo) < 0) deEspaldas += 1
+      }
+    }
+  }
+  esconderLasTarjetas(els as unknown as HTMLElement[], estados)
+  for (const el of els) opacidades.push(el.style.opacity)
+  return { opacidades, conTexto, deEspaldas }
+}
+const enteras = (x: { readonly opacidades: readonly string[] }): boolean => x.opacidades.every((o) => Number(o) >= 1)
+const vuelta = unaVuelta()
+afirmar(enteras(vuelta), `ninguna tarjeta con opacidad < 1 en una vuelta entera (${String(vuelta.opacidades.length)} escrituras; las escondidas, con visibility)`)
+controlPositivo('el detector ve una tarjeta a medias (la de antes: la opacidad con el ángulo)', { opacidades: [...vuelta.opacidades, '0.500'] }, enteras)
+afirmar(vuelta.conTexto / 72 >= 4 && vuelta.deEspaldas > 0, `con su texto: ${(vuelta.conTexto / 72).toFixed(1)} por cuadro (eran 2 o 3, las de adelante) y ${String(vuelta.deEspaldas)} en la nuca de una de atrás (fuera del logo)`)
+const placaDePrueba = armarLasPlacas(new THREE.BufferGeometry())[0]
+const solidas = (u: readonly number[]): boolean =>
+  u.every((n) => {
+    enLaNiebla(placaDePrueba, n, new THREE.Color(0x000000))
+    return placaDePrueba.cara.opacity === 1 && placaDePrueba.costado.opacity === 1 && !placaDePrueba.cara.transparent && placaDePrueba.cara.depthWrite
+  })
+afirmar(solidas([0, 0.25, 0.5, 0.75, 1]), 'las placas: opacas en toda la niebla (sólo cambia el color), sin transparencia, escriben su profundidad')
+controlPositivo('el detector ve la placa de antes (la opacidad con la niebla)', [0, 0.5], (u) => u.every((n) => 1 - n === 1))
 
 cerrar('s83-resenas')

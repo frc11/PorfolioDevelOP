@@ -12,18 +12,18 @@ import { GIROS_DE_LOS_TITULOS } from '../../../_lib/escena/titulos3d/giro'
 import { VENTANA_DE_LA_TRANSFORMACION } from '../geometria'
 import { estiloDeLaIda, idaDelValor } from './disolucion'
 import { HACIA_EL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, progresoDelGatillo } from './haciaElCta'
-import { GATILLO, TITULOS_DE_LAS_RESENAS, angulosDelGiro, arrastreDeLaBandera, avanceDeLasResenas, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera, type VarianteDeLasResenas } from './tramo'
+import { GATILLO, TITULOS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera, type VarianteDeLasResenas } from './tramo'
 
 const sinCambios = (): (() => void) => () => undefined
 const deLaUrl = (): string => {
   const q = new URLSearchParams(window.location.search)
-  return `${varianteDeLaBandera(q.get('resenas'))}|${String(arrastreDeLaBandera(q.get('resenas-arrastre')))}`
+  return varianteDeLaBandera(q.get('resenas'))
 }
 
 /** Las banderas de las reseñas, leídas después de hidratar (el servidor pinta la de por defecto). */
-export function useBanderasDeLasResenas(): { readonly variante: VarianteDeLasResenas; readonly arrastre: boolean } {
-  const [variante, arrastre] = useSyncExternalStore(sinCambios, deLaUrl, () => 'scroll|false').split('|')
-  return { variante: varianteDeLaBandera(variante), arrastre: arrastre === 'true' }
+export function useBanderasDeLasResenas(): { readonly variante: VarianteDeLasResenas } {
+  const variante = useSyncExternalStore(sinCambios, deLaUrl, () => 'gatillo')
+  return { variante: varianteDeLaBandera(variante) }
 }
 
 /** Lo último que se le escribió a cada valor (para escribir sólo si cambió). */

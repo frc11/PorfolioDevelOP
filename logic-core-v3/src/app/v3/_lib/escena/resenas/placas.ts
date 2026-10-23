@@ -41,8 +41,9 @@ export function geometriaDeLaPlaca(m: MedidasDelAro): THREE.ExtrudeGeometry {
 
 export function armarLasPlacas(geometria: THREE.BufferGeometry): PlacaArmada[] {
   return Array.from({ length: ARO.placas }, (_, i) => {
-    const cara = new THREE.MeshStandardMaterial({ color: PAPEL, roughness: 0.62, metalness: 0, transparent: true, dithering: true })
-    const costado = new THREE.MeshStandardMaterial({ color: COSTADO, roughness: 0.55, metalness: 0, transparent: true, dithering: true })
+    // [C2-70] Sólidas: opacas siempre (las de atrás ya no se transparentan).
+    const cara = new THREE.MeshStandardMaterial({ color: PAPEL, roughness: 0.62, metalness: 0, transparent: false, dithering: true })
+    const costado = new THREE.MeshStandardMaterial({ color: COSTADO, roughness: 0.55, metalness: 0, transparent: false, dithering: true })
     const malla = new THREE.Mesh(geometria, [cara, costado])
     malla.name = `resenas · la placa ${String(i)}`
     malla.visible = false
@@ -53,18 +54,21 @@ export function armarLasPlacas(geometria: THREE.BufferGeometry): PlacaArmada[] {
 /** La placa metida `niebla` (0 a 1) en la niebla de la sala, de color `fondo`. */
 export function enLaNiebla(p: PlacaArmada, niebla: number, fondo: THREE.Color | null): void {
   const u = Math.min(1, Math.max(0, niebla))
-  p.cara.opacity = 1 - u
-  p.costado.opacity = 1 - u
+  // [C2-70] Sólo el color hacia el de la sala (era también la opacidad): la placa sigue opaca y escribe su profundidad.
+  p.cara.opacity = 1
+  p.costado.opacity = 1
   p.cara.color.copy(PAPEL)
   p.costado.color.copy(COSTADO)
   if (fondo !== null && u > 0) {
-    p.cara.color.lerp(fondo, u * 0.7)
-    p.costado.color.lerp(fondo, u * 0.7)
+    p.cara.color.lerp(fondo, u * NIEBLA_SOLIDA)
+    p.costado.color.lerp(fondo, u * NIEBLA_SOLIDA)
   }
-  // Opaca, escribe la profundidad (el logo y las otras placas la tapan bien); metiéndose en la niebla, no.
-  p.cara.depthWrite = u < 0.02
-  p.costado.depthWrite = u < 0.02
+  p.cara.depthWrite = true
+  p.costado.depthWrite = true
 }
+
+/** [C2-70] Cuánto del color de la sala toma la placa más metida en la niebla (era 0,7 con la opacidad): se aleja sin borrarse. */
+export const NIEBLA_SOLIDA = 0.35
 
 export function soltarLasPlacas(placas: readonly PlacaArmada[], geometria: THREE.BufferGeometry | null): void {
   for (const p of placas) {

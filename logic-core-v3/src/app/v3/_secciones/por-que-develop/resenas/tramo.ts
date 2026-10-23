@@ -99,8 +99,6 @@ export function tramoDeLasResenas(panel: Element, corrido = 0): TramoEstirado {
   return { panel, k: K_DE_LAS_RESENAS, arranque: R + corrido + INSERCION_DE_LAS_RESENAS * R, largo: LARGO_SIN_ESTIRAR_PX }
 }
 
-/** La bandera de la entrada: `?resenas=scroll` (por defecto: todo atado al scroll) o `?resenas=gatillo`. */
+/** La bandera de la entrada: `?resenas=gatillo` (por defecto desde C2-70: una animación por tiempo en la entrada y en la salida) o `?resenas=scroll` (todo atado al scroll). */
 export type VarianteDeLasResenas = 'scroll' | 'gatillo'
-export const varianteDeLaBandera = (valor: string | null): VarianteDeLasResenas => (valor === 'gatillo' ? 'gatillo' : 'scroll')
-/** `?resenas-arrastre=si`: arrastrar con el mouse gira el aro con inercia. */
-export const arrastreDeLaBandera = (valor: string | null): boolean => valor === 'si'
+export const varianteDeLaBandera = (valor: string | null): VarianteDeLasResenas => (valor === 'scroll' ? 'scroll' : 'gatillo')

@@ -38,7 +38,7 @@ export const ARO = {
   levantaS: 0.12,
   /** El texto: entero hasta `lleno` grados del frente, nada desde `nada`. */
   texto: { lleno: 40, nada: 62 },
-  /** La niebla de la sala: la placa se mete desde `desde` grados y desde `hasta` no se dibuja. */
+  /** La niebla de la sala: desde `desde` grados la placa toma algo del color de la sala (siempre opaca, C2-70); desde `hasta`, su cara no lleva texto. */
   niebla: { desde: 95, hasta: 150 },
   /**
    * El texto aparece con la entrada (desde `textoDesde`, entero `textoEn` después): las placas que pasan por el frente ya se leen mientras
@@ -154,6 +154,10 @@ export function nieblaDeLaPlaca(angulo: number): number {
   const g = grados(angulo)
   return suave((g - ARO.niebla.desde) / (ARO.niebla.hasta - ARO.niebla.desde))
 }
+
+/** [C2-70] Cuánto se destaca la placa de adelante (1 de frente, 0 a medio paso de placa): un poco más grande y con su cara marcada. */
+export const DESTACA = { escala: 0.08, grados: 360 / 10 / 2 } as const
+export const destaqueDeLaPlaca = (angulo: number): number => 1 - suave(grados(angulo) / DESTACA.grados)
 
 /** El texto con la entrada: aparece con el aro casi armado. */
 export const textoConLaEntrada = (e: number): number => suave((e - ARO.textoDesde) / ARO.textoEn)
