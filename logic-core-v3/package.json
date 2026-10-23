@@ -364,6 +364,7 @@
     "test:s81-servicios": "npx tsx src/app/v3/_lib/__tests__/s81-servicios.invariant.tsx",
     "test:s81": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s81",
     "test:s84-demos": "npx tsx src/app/v3/_lib/__tests__/s84-demos.invariant.tsx",
+    "test:s84-demos-telefono": "npx tsx src/app/v3/_lib/__tests__/s84-demos-telefono.invariant.tsx",
     "test:s84": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s84",
     "test:s85-piezas": "npx tsx src/app/v3/_lib/__tests__/s85-piezas.invariant.tsx",
     "test:s85": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s85",

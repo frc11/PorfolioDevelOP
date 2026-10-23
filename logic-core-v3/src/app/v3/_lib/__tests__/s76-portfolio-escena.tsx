@@ -347,7 +347,12 @@ export function afirmarElSelectorVivo(): void {
   titulo('B1.2b · 16 · El título entra en su lugar y se va cayendo')
 
   const encabezado = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
-  afirmar(/animate\(presencia, adentro \? 1 : 0/.test(encabezado) && /llegada=\{progresoDeLaMascara === null \? null : presencia\}/.test(encabezado) && /saleCayendo queda/.test(encabezado), 'la presencia del encabezado va por tiempo con el panel adentro (ya pegado: no viaja con la sección) y el título sale cayendo')
+  // [C2-41t] La presencia por tiempo salió a `levantarse.tsx` (la usa también «Demos» en el teléfono): el encabezado la pide con su tiempo.
+  const porTiempo = (e: string, l: string): boolean =>
+    /const presencia = usePresencia\(adentro, reducido, PRESENCIA_DEL_ENCABEZADO\)/.test(e) && /animate\(presencia, adentro \? 1 : 0, \{ duration: s, ease: \[\.\.\.curva\] \}\)/.test(l)
+  const levantarse = sinComentarios(leer('_secciones/trabajos/portfolio/levantarse.tsx'))
+  afirmar(porTiempo(encabezado, levantarse) && /llegada=\{progresoDeLaMascara === null \? null : presencia\}/.test(encabezado) && /saleCayendo queda/.test(encabezado), 'la presencia del encabezado va por tiempo con el panel adentro (ya pegado: no viaja con la sección) y el título sale cayendo')
+  controlPositivo('  el detector ve una presencia atada al scroll (sin su tiempo)', [encabezado, levantarse.replace('animate(presencia, adentro ? 1 : 0, { duration: s, ease: [...curva] })', 'presencia.set(adentro ? 1 : 0)')] as const, ([e, l]: readonly [string, string]) => porTiempo(e, l))
   const titulos = leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
   afirmar(/if \(m\.llegada >= 1\) a\.cayendo = true/.test(titulos) && /else if \(m\.llegada <= 0\) a\.cayendo = false/.test(titulos) && /a\.uniforms\.uLevanta\.value = a\.cayendo \|\| a\.titulo\.gesto === 'levanta' \? 1 : 0/.test(titulos), '  llegado entero, lo que baja es la caída de `levanta` (se acuesta y su línea lo tapa); de vuelta en 0, su próxima llegada es la de siempre')
 }

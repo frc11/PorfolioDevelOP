@@ -9,6 +9,7 @@ import { Seccion } from '../_contrato/Seccion'
 
 import { CapaDeLaGota } from './CapaDeLaGota'
 import { CapaDeDemos } from './demos/CapaDeDemos'
+import { DemosDelFlujo } from './demos/DemosDelFlujo'
 import { DemosQuietos } from './demos/DemosQuietos'
 import { ParadaDeDemos } from './demos/ParadaDeDemos'
 import { ANCLAS_DEL_PORTFOLIO } from './portfolio/anclas'
@@ -48,7 +49,8 @@ import { usePortfolio } from './portfolio/usePortfolio'
  *
  * El CSS decide el carrusel (`--modo-del-portfolio: carrusel`) y el cliente lo lee: la sección deja de ser un pin de pasos y pasa a ser un
  * FLUJO que se scrollea (`FlujoDelPortfolio`: el título, el carrusel y «la tuya»), hermano de la caja, seguido por lo que la cola necesita
- * (`PANTALLAS_DESPUES_DEL_FLUJO`). El escenario pegado queda sólo para Demos. El alto sale del contenido (la variable de los pasos va en
+ * (`PANTALLAS_DESPUES_DEL_FLUJO`). [C2-41t] Demos va ahí, en las dos ramas (`DemosDelFlujo`: entra deslizándose y se queda pegado); el
+ * escenario pegado queda vacío (el diagnóstico de la carga lo lee). El alto sale del contenido (la variable de los pasos va en
  * cero: el flujo en su mínimo y la cola suman la tabla) y la escena lo descuenta con el flujo medido (`medioDelCarrusel.ts`).
  */
 export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
@@ -94,15 +96,8 @@ function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
         <Bloque patron="P7" anclaje="seccion" lente="escena" className="absolute inset-0">
           {(progreso: Progreso) =>
             progreso === null ? (
-              vivo.carrusel ? (
-                // [B1.2e] Sin coreografía, con el carrusel: Demos quieto al final, en lo que sigue al flujo (el flujo va arriba, encima).
-                <div className="flex h-full flex-col">
-                  <div className="flex-1" />
-                  <Envoltorio className="shrink-0" style={ESTILO_DE_LO_QUE_SIGUE_AL_FLUJO} claseDeContenido="flex h-full flex-col justify-end">
-                    <DemosQuietos />
-                  </Envoltorio>
-                </div>
-              ) : (
+              // [C2-41t] Con el carrusel, Demos va en lo que sigue al flujo en las dos ramas (`DemosDelFlujo`, abajo): acá no va nada.
+              vivo.carrusel ? null : (
                 <div className="flex h-full flex-col">
                   <div className="relative h-[calc(var(--pantallas-de-la-pista)*100svh)] shrink-0">
                     <EscenarioDelPortfolio seccion={seccion} vivo={vivo} />
@@ -114,17 +109,21 @@ function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
               )
             ) : (
               <EscenarioDelPortfolio seccion={seccion} vivo={vivo}>
-                {/* Demos va DESPUÉS del panel porque se lee después, y se pinta debajo por su `z-index` negativo. */}
-                <CapaDeDemos mostrado={vivo.mostradoDeDemos} salidaDeLaCola={vivo.salidaDeLaCola} className="absolute inset-0 -z-[var(--z-elevado)]" />
+                {/* Demos va DESPUÉS del panel porque se lee después, y se pinta debajo por su `z-index` negativo. [C2-41t] Con el carrusel, no. */}
+                {vivo.carrusel ? null : <CapaDeDemos mostrado={vivo.mostradoDeDemos} salidaDeLaCola={vivo.salidaDeLaCola} className="absolute inset-0 -z-[var(--z-elevado)]" />}
               </EscenarioDelPortfolio>
             )
           }
         </Bloque>
       </div>
 
-      {/* [B1.2e] El flujo del carrusel y lo que lo sigue (la cola: Demos, pegado en la caja). */}
+      {/* [B1.2e] El flujo del carrusel y lo que lo sigue: [C2-41t] Demos, una sección más (entra deslizándose y se queda pegado la cola). */}
       {vivo.carrusel ? <FlujoDelPortfolio seccion={seccion} vivo={vivo} /> : null}
-      {vivo.carrusel ? <div aria-hidden="true" data-pieza="despues-del-flujo" style={ESTILO_DE_LO_QUE_SIGUE_AL_FLUJO} /> : null}
+      {vivo.carrusel ? (
+        <div data-pieza="despues-del-flujo" style={ESTILO_DE_LO_QUE_SIGUE_AL_FLUJO}>
+          <DemosDelFlujo reducido={vivo.reducido} />
+        </div>
+      ) : null}
 
       {/* Hermano del bloque, no descendiente: vale en las dos ramas. */}
       <CapaDeLaGota className="bg-fondo pointer-events-none fixed inset-0 z-50" />

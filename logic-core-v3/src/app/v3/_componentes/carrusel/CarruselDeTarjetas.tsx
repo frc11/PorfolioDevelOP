@@ -1,7 +1,7 @@
 'use client'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { motion, useMotionValue, type MotionValue, type TargetAndTransition } from 'motion/react'
+import { useMotionValue } from 'motion/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -9,10 +9,15 @@ import { cn } from '@/lib/utils'
 import { sonar } from '../../_lib/sonido/bus'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
 
+import type { FormaDeLaTarjeta } from './asoma'
 import {
   CARRUSEL, avanceDelCarrusel, estadoInicialDelCarrusel, intencionDelDedo, motivoDeLaPausa, siguienteDelCarrusel,
   type EstadoDelCarrusel, type EventoDelCarrusel, type PasoDelCarrusel,
 } from './maquinaDelCarrusel'
+import { LineaDeAhora, Ranura, RanuraQueAsoma } from './Ranuras'
+import { useAsoma } from './useAsoma'
+
+export { TRANSICION_DEL_CARRUSEL } from './Ranuras'
 
 export interface ItemDelCarrusel {
   readonly id: string
@@ -45,14 +50,14 @@ export interface PropsDelCarrusel<T extends ItemDelCarrusel> {
   readonly alCambiar?: (indice: number) => void
   /** [C2 · 40] Las líneas de las tarjetas ya vistas, llenas (como las historias de Instagram). Por defecto, vacías. */
   readonly vistasLlenas?: boolean
+  /**
+   * [C2-41t] La tarjeta grande con la siguiente asomada y el dedo que las arrastra (`asoma.ts`), con su forma; sin esto, una a la vez con el
+   * fundido (el Portfolio). La vista tiene que tener su alto (`claseDeLaVista`, por ejemplo `flex-1`): la tarjeta lo llena.
+   */
+  readonly asoma?: FormaDeLaTarjeta | null
+  readonly claseDeLaVista?: string
   readonly className?: string
 }
-
-/**
- * La transición entre tarjetas: la que se va se funde corriéndose hacia su lado y, terminada (el respiro), entra la nueva desde el otro.
- * Corta: un cambio no es un show. La curva de la casa. Con movimiento reducido, el corte.
- */
-export const TRANSICION_DEL_CARRUSEL = { saleS: 0.18, entraS: 0.32, corridaPx: 16, curva: [0.25, 0.46, 0.45, 0.94] } as const
 
 /**
  * Las flechas: el disco del botón de sonido de escritorio (el mismo que la pausa del panel, `BotonPausa`: 48 px, la superficie translúcida, el
@@ -63,52 +68,19 @@ export const CLASE_DE_LA_FLECHA =
 
 /** Lo que se usa normal adentro de una tarjeta (un enlace, un botón, un campo): no arranca ni un deslice ni la pausa. */
 const SE_USA_NORMAL = 'input, textarea, select, button, a[href], label, summary, [contenteditable="true"]'
+/** [C2-41t] Con `asoma` la tarjeta entera es un enlace (Demos): el dedo la arrastra igual, y un toque sin arrastre la abre. */
+const SE_USA_NORMAL_SI_ASOMA = 'input, textarea, select, button, label, summary, [contenteditable="true"]'
 const esDe = (el: EventTarget | null, selector: string): boolean => el instanceof Element && el.closest(selector) !== null
+
+/** [C2-41t] Si un toque cayó a la derecha de la tarjeta de ahora (en la que asoma). */
+const enLaQueAsoma = (vista: Element, x: number): boolean => {
+  const r = vista.querySelector('[data-parte="ranura"][data-activa="si"]')?.getBoundingClientRect()
+  return r !== undefined && x > r.right
+}
 
 /** Si dos estados se ven distinto (todo menos el reloj, que va en un valor de Motion sin renders por cuadro). */
 const seVenDistinto = (a: EstadoDelCarrusel, b: EstadoDelCarrusel): boolean =>
   a.indice !== b.indice || a.reinicio !== b.reinicio || a.mantenido !== b.mantenido || a.enVista !== b.enVista || a.reducido !== b.reducido || a.enfocado !== b.enfocado
-
-/** La línea de la tarjeta de ahora: se llena con el reloj (un valor de Motion: sin renders por cuadro). Quieta y llena si no rota. */
-function LineaDeAhora({ avance, quieta }: { readonly avance: MotionValue<number>; readonly quieta: boolean }): React.JSX.Element {
-  return (
-    <span data-parte="linea" data-linea="activa" className="relative h-0.5 flex-1 overflow-hidden rounded-full bg-tinta/25">
-      {quieta ? <span className="absolute inset-0 bg-tinta" /> : <motion.span className="absolute inset-0 origin-left bg-tinta" style={{ scaleX: avance }} />}
-    </span>
-  )
-}
-
-/** Una tarjeta en su lugar: todas en la misma celda (el alto es el de la más alta); la activa encima, las otras invisibles e inertes. */
-function Ranura({ activa, sentido, reducido, nombre, children }: {
-  readonly activa: boolean
-  readonly sentido: 1 | -1
-  readonly reducido: boolean
-  readonly nombre: string
-  readonly children: ReactNode
-}): React.JSX.Element {
-  const { saleS, entraS, corridaPx, curva } = TRANSICION_DEL_CARRUSEL
-  const destino: TargetAndTransition = reducido
-    ? { opacity: activa ? 1 : 0, x: 0, transition: { duration: 0 } }
-    : activa
-      ? { opacity: [0, 1], x: [corridaPx * sentido, 0], transition: { delay: saleS, duration: entraS, ease: curva } }
-      : { opacity: 0, x: -corridaPx * sentido, transition: { duration: saleS, ease: curva } }
-  return (
-    <motion.div
-      role="group"
-      aria-roledescription="tarjeta"
-      aria-label={nombre}
-      aria-hidden={activa ? undefined : true}
-      inert={!activa}
-      data-parte="ranura"
-      data-activa={activa ? 'si' : 'no'}
-      className={cn('col-start-1 row-start-1 min-w-0', activa ? 'relative z-[var(--z-elevado)]' : 'pointer-events-none')}
-      initial={false}
-      animate={destino}
-    >
-      {children}
-    </motion.div>
-  )
-}
 
 /**
  * [B1.2e] EL CARRUSEL DE TARJETAS — el componente común (`maquinaDelCarrusel.ts` es la máquina): una tarjeta a la vez, las flechas y una
@@ -122,14 +94,18 @@ function Ranura({ activa, sentido, reducido, nombre, children }: {
  * El reloj corre con `requestAnimationFrame` sólo mientras rota (a la vista, sin pausa: fuera de la vista no hay cuadros) y la línea se llena
  * con un valor de Motion, sin renders por cuadro. Las flechas son botones (el teclado y el sonido de la casa); con el foco del teclado adentro
  * el reloj no corre (WCAG 2.2.2), y ← → cambian de tarjeta. Mientras rota, el lector no anuncia los cambios (`aria-live` en `off`).
+ *
+ * [C2-41t] Con `asoma` (Demos): la tarjeta grande, la siguiente asomada y el dedo que las arrastra (`useAsoma`); la misma máquina decide.
  */
-export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderItem, etiqueta, nombreDe, rotulos, duracionMs = CARRUSEL.duracionMs, indicePedido = null, alCambiar, vistasLlenas = false, className }: PropsDelCarrusel<T>): React.JSX.Element {
+export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderItem, etiqueta, nombreDe, rotulos, duracionMs = CARRUSEL.duracionMs, indicePedido = null, alCambiar, vistasLlenas = false, asoma = null, claseDeLaVista, className }: PropsDelCarrusel<T>): React.JSX.Element {
   const [estado, setEstado] = useState<EstadoDelCarrusel>(() => estadoInicialDelCarrusel(0, items.length))
   const vivo = useRef<EstadoDelCarrusel>(estado)
   const avance = useMotionValue(0)
   const raiz = useRef<HTMLDivElement | null>(null)
+  const vista = useRef<HTMLDivElement | null>(null)
   const dedo = useRef<{ readonly id: number; readonly x: number; readonly y: number; readonly reloj: number; mantenido: boolean; intencion: 'costado' | 'vertical' | null } | null>(null)
   const reducido = usePrefiereMenosMovimiento()
+  const deslice = useAsoma(asoma, vista, estado.indice, items.length, reducido)
   // Lo último de las props, para los escuchas (se leen en el evento, no en el render).
   const props = useRef({ cantidad: items.length, duracionMs, alCambiar })
   useEffect(() => {
@@ -204,10 +180,12 @@ export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderIte
   }
   useEffect(() => () => window.clearTimeout(dedo.current?.reloj), [])
   const alBajar = (e: React.PointerEvent<HTMLDivElement>): void => {
-    if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || esDe(e.target, SE_USA_NORMAL)) return
+    if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || esDe(e.target, asoma === null ? SE_USA_NORMAL : SE_USA_NORMAL_SI_ASOMA)) return
     soltarElDedo()
-    // Con el mouse, el arrastre sigue aunque salga de la tarjeta (el dedo ya lo tiene: la captura implícita del táctil).
-    if (e.pointerType === 'mouse') e.currentTarget.setPointerCapture(e.pointerId)
+    deslice.empezar()
+    // Con el mouse, el arrastre sigue aunque salga de la tarjeta (el dedo ya lo tiene: la captura implícita del táctil). [C2-41t] Con `asoma`,
+    // recién cuando va de costado: capturado desde el principio, el clic en la tarjeta (un enlace) no la abriría.
+    if (e.pointerType === 'mouse' && asoma === null) e.currentTarget.setPointerCapture(e.pointerId)
     const reloj = window.setTimeout(() => {
       const d = dedo.current
       if (d === null || d.intencion !== null) return
@@ -218,9 +196,15 @@ export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderIte
   }
   const alMoverse = (e: React.PointerEvent<HTMLDivElement>): void => {
     const d = dedo.current
-    if (d === null || d.id !== e.pointerId || d.mantenido || d.intencion !== null) return
-    d.intencion = intencionDelDedo(e.clientX - d.x, e.clientY - d.y)
-    if (d.intencion !== null) window.clearTimeout(d.reloj)
+    if (d === null || d.id !== e.pointerId || d.mantenido) return
+    if (d.intencion === null) {
+      d.intencion = intencionDelDedo(e.clientX - d.x, e.clientY - d.y)
+      if (d.intencion !== null) window.clearTimeout(d.reloj)
+    }
+    // [C2-41t] Con `asoma`, las tarjetas siguen al dedo de costado (y el mouse que arrastra ya no suelta un clic en el enlace).
+    if (asoma === null || d.intencion !== 'costado') return
+    if (e.pointerType === 'mouse' && !e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.setPointerCapture(e.pointerId)
+    deslice.arrastrar(e.clientX - d.x)
   }
   const alSubir = (e: React.PointerEvent<HTMLDivElement>): void => {
     const d = dedo.current
@@ -228,9 +212,17 @@ export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderIte
     const dx = e.clientX - d.x
     const dy = e.clientY - d.y
     const deCostado = !d.mantenido && (d.intencion ?? intencionDelDedo(dx, dy)) === 'costado'
+    const antes = vivo.current.indice
     soltarElDedo()
+    // [C2-41t] Un toque (sin arrastre ni pausa) en la que asoma la trae.
+    if (asoma !== null && d.intencion === null && !d.mantenido && enLaQueAsoma(e.currentTarget, e.clientX)) aplicar.current({ tipo: 'siguiente' })
     // Un tic por deslice que cambia de tarjeta (las flechas son botones: suenan solas).
     if (deCostado && aplicar.current({ tipo: 'deslice', dx, dy }).porElUsuario) sonar('tic')
+    if (vivo.current.indice === antes) deslice.colocar()
+  }
+  const alCancelar = (): void => {
+    soltarElDedo()
+    deslice.colocar()
   }
 
   const alTeclear = (e: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -262,19 +254,25 @@ export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderIte
       <div
         data-parte="vista"
         aria-live={rota ? 'off' : 'polite'}
-        className="relative grid touch-pan-y select-none overflow-clip"
+        ref={vista}
+        className={cn('relative grid touch-pan-y select-none overflow-clip', claseDeLaVista)}
         style={{ WebkitTouchCallout: 'none' }}
         onPointerDown={alBajar}
         onPointerMove={alMoverse}
         onPointerUp={alSubir}
-        onPointerCancel={soltarElDedo}
+        onPointerCancel={alCancelar}
       >
         {items.map((item, i) => {
           const activa = i === estado.indice
-          return (
+          const tarjeta = renderItem(item, { indice: i, activa, corre: activa && rota, reinicio: estado.reinicio })
+          return asoma === null ? (
             <Ranura key={item.id} activa={activa} sentido={estado.sentido} reducido={reducido} nombre={nombreDe(item)}>
-              {renderItem(item, { indice: i, activa, corre: activa && rota, reinicio: estado.reinicio })}
+              {tarjeta}
             </Ranura>
+          ) : (
+            <RanuraQueAsoma key={item.id} activa={activa} nombre={nombreDe(item)} indice={i} cantidad={items.length} posicion={deslice.posicion} ancho={deslice.ancho} fraccion={asoma.fraccion}>
+              {tarjeta}
+            </RanuraQueAsoma>
           )
         })}
       </div>
