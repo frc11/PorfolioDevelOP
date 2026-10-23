@@ -1,6 +1,6 @@
 'use client'
 
-import { animate, useMotionValue, useTransform, type MotionValue } from 'motion/react'
+import { animate, motionValue, useMotionValue, useTransform, type MotionValue } from 'motion/react'
 import { useEffect, useLayoutEffect, useSyncExternalStore, type RefObject } from 'react'
 
 import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../../_lib/navegacion'
@@ -14,7 +14,7 @@ import { CORRIMIENTOS_DE_LOS_TITULOS, GIROS_DE_LOS_TITULOS } from '../../../_lib
 import { TITULOS_DE_VOLUMEN } from '../../../_lib/titulos3d/registro'
 import { VENTANA_DE_LA_TRANSFORMACION } from '../geometria'
 import { estiloDeLaIda, idaDelValor } from './disolucion'
-import { HACIA_EL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, pesoDeLaCamara, progresoDelGatillo } from './haciaElCta'
+import { HACIA_EL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, esperaDelCta, objetivoDeLaBajada, pesoDeLaCamara, progresoDelGatillo } from './haciaElCta'
 import { ESPACIO_ENTRE_LAS_MITADES_EM, GATILLO, TITULOS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, controlDeLaBandera, corrimientoConElGiro, corrimientosAlCentro, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera, type VarianteDeLasResenas } from './tramo'
 
 const sinCambios = (): (() => void) => () => undefined
@@ -43,7 +43,18 @@ function medirLasMitades(capa: HTMLElement | null): { readonly izquierda: number
 }
 
 /** [C2-70e] Lo último de cada cuadro, para el banco (`window.__resenasDelBanco`, sólo con un banco mirando). */
-const DEL_BANCO = { giro: 0, disolucion: 0, entrada: 0, corrimientos: [0, 0], bajada: 0, disparoDeLaBajada: 0, transformacion: 0, pesoDeLaCamara: 0 }
+const DEL_BANCO = { giro: 0, disolucion: 0, entrada: 0, corrimientos: [0, 0], bajada: 0, disparoDeLaBajada: 0, transformacion: 0, pesoDeLaCamara: 0, esperaDelCta: 0, delCta: 0 }
+
+/**
+ * [C2-70e] CUÁNTO ESPERA EL CTA a la cámara que enfoca el guardado (0 a 1, `esperaDelCta`): lo escribe el tramo y lo lee el CTA del escenario
+ * (`CtaTransformado`), que avanza con `useProgresoQueEspera`. Sin las reseñas (o con `?resenas=scroll`), 0: el progreso de siempre.
+ */
+export const ESPERA_DEL_CTA = motionValue(0)
+
+/** El progreso de la transformación al CTA con la espera del guardado: `p · (1 − espera)`. */
+export function useProgresoQueEspera(progreso: MotionValue<number>): MotionValue<number> {
+  return useTransform(() => progreso.get() * (1 - ESPERA_DEL_CTA.get()))
+}
 type VentanaDelBanco = Window & { __resenasDelBanco?: () => typeof DEL_BANCO }
 
 /** Lo último que se le escribió a cada valor (para escribir sólo si cambió). */
@@ -140,11 +151,15 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
       // [C2-70e] Con el gatillo, la cámara acompaña el guardado (se queda en B mirando al hueco) y suelta cuando ya no queda ninguna placa.
       CAMARA_DEL_GUARDADO.peso = variante === 'gatillo' && prueba !== 'sin-camara' ? pesoDeLaCamara(disparoDeLaBajada.get(), p) : 0
       CAMARA_DEL_GUARDADO.bajada = RESENAS_EN_VIVO.bajada
-      const cruce = antes === null ? null : cruceDeLaVuelta(antes, p)
-      antes = p
+      // [C2-70e] Y el CTA espera a la cámara (con su misma curva): su progreso es el del scroll por lo que no espera (`useProgresoQueEspera`).
+      const espera = variante === 'gatillo' && prueba !== 'sin-camara' && prueba !== 'sin-espera' ? esperaDelCta(disparoDeLaBajada.get(), p, objetivoDeLaBajadaActual === 1) : 0
+      ESPERA_DEL_CTA.set(espera)
+      const delCta = p * (1 - espera)
+      const cruce = antes === null ? null : cruceDeLaVuelta(antes, delCta)
+      antes = delCta
       if (cruce !== null) avisarLaVueltaDelCta(cruce)
       // Desde que la transformación arranca, el título de las reseñas lo dibuja el CTA (lo junta en su cartel y lo da vuelta).
-      const tomado = p > 0 && ctaListo()
+      const tomado = delCta > 0 && ctaListo()
       const a = angulosDelGiro(e.giro)
       for (const id of FRASE_DE_VOLUMEN) GIROS_DE_LOS_TITULOS.set(id, a.frase)
       for (const id of TITULOS_DE_LAS_RESENAS) GIROS_DE_LOS_TITULOS.set(id, tomado ? -Math.PI : a.resenas)
@@ -155,9 +170,9 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
       const [izquierda, derecha] = [corrimientoConElGiro(entero.izquierda, e.giro), corrimientoConElGiro(entero.derecha, e.giro)]
       CORRIMIENTOS_DE_LOS_TITULOS.set(TITULOS_DE_LAS_RESENAS[0], izquierda).set(FRASE_DE_VOLUMEN[0], izquierda)
       CORRIMIENTOS_DE_LOS_TITULOS.set(TITULOS_DE_LAS_RESENAS[1], derecha).set(FRASE_DE_VOLUMEN[1], derecha)
-      Object.assign(DEL_BANCO, { giro: e.giro, disolucion: e.disolucion, entrada: e.entrada, corrimientos: [izquierda, derecha], bajada: RESENAS_EN_VIVO.bajada, disparoDeLaBajada: disparoDeLaBajada.get(), transformacion: p, pesoDeLaCamara: CAMARA_DEL_GUARDADO.peso })
+      Object.assign(DEL_BANCO, { giro: e.giro, disolucion: e.disolucion, entrada: e.entrada, corrimientos: [izquierda, derecha], bajada: RESENAS_EN_VIVO.bajada, disparoDeLaBajada: disparoDeLaBajada.get(), transformacion: p, pesoDeLaCamara: CAMARA_DEL_GUARDADO.peso, esperaDelCta: espera, delCta })
       // Sin WebGL, el título de las reseñas del DOM se va al empezar la transformación (el CTA del DOM llega al final).
-      giro.set(e.giro * (1 - Math.min(1, p * 3)))
+      giro.set(e.giro * (1 - Math.min(1, delCta * 3)))
       // Sin WebGL (o mientras el título no se armó) se lee el DOM: la frase se apaga en la primera mitad del giro.
       if (frase !== null) frase.style.opacity = e.giro <= 0 ? '' : Math.max(0, 1 - e.giro * 2).toFixed(3)
       valores.forEach((el, k) => ponerLaIda(el, idaDelValor(e.disolucion, k)))
@@ -180,6 +195,7 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
       if (frase !== null) frase.style.opacity = ''
       valores.forEach((el) => ponerLaIda(el, 0))
       CAMARA_DEL_GUARDADO.peso = 0
+      ESPERA_DEL_CTA.set(0)
       for (const id of FRASE_DE_VOLUMEN) GIROS_DE_LOS_TITULOS.delete(id)
       for (const id of [...TITULOS_DE_LAS_RESENAS, ...FRASE_DE_VOLUMEN]) CORRIMIENTOS_DE_LOS_TITULOS.delete(id)
     }

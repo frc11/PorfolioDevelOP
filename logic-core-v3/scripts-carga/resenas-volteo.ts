@@ -1,9 +1,11 @@
 /**
- * [C2-70e] EL VOLTEO DE «SEIS RAZONES» Y LA SALIDA DEL ARO, contra el dev server (Chrome del sistema, a la vista, `/api/` bloqueado), a 1440 × 900.
+ * [C2-70e] EL VOLTEO DE «SEIS RAZONES» Y LA SALIDA DEL ARO, contra el dev server (Chrome del sistema, a la vista, `/api/` bloqueado), a 1440 × 900
+ * (`TAMANO=1024x768` para otro).
  *   BASE=http://localhost:3000 npx tsx scripts-carga/resenas-volteo.ts                     (MODO=volteo, por defecto)
  *   MODO=salida npx tsx scripts-carga/resenas-volteo.ts
  *   CONTROL=sin-juntar npx tsx scripts-carga/resenas-volteo.ts                            (tiene que FALLAR: las mitades no se corren)
- *   MODO=salida CONTROL=sin-camara npx tsx scripts-carga/resenas-volteo.ts                (tiene que FALLAR: la cámara no acompaña)
+ *   MODO=salida CONTROL=sin-camara npx tsx scripts-carga/resenas-volteo.ts                (tiene que FALLAR el aro; el cartel, en verde)
+ *   MODO=salida CONTROL=sin-espera npx tsx scripts-carga/resenas-volteo.ts                (tiene que FALLAR el cartel: el sostén sin la espera)
  * Los controles van por la bandera de prueba `?resenas-control=` (sin ella, el sitio de siempre).
  *
  * VOLTEO: con el gatillo (el defecto), entra al tramo de las reseñas con la rueda y registra cada cuadro (requestAnimationFrame) del volteo: el
@@ -17,7 +19,9 @@
  * 6 s: la bajada, la caja en pantalla de las placas dibujadas y la cámara viva. Criterio: mientras quedan placas (bajada de 0,02 a 0,9) el
  * aro no pasa el borde de abajo (su arriba < alto − 8 px); la cámara deja B (pasa 22 de distancia) recién con el aro guardado (bajada ≥ 0,85); llega a C (altura
  * 4,5 ± 0,8 y distancia 30,75 ± 1,2, quieta el último medio segundo) sin salto (ningún cuadro mueve la cámara más de 3 veces lo de sus
- * vecinos y más de 0,3). Y ~6 fotos en otra pasada (`~/.cache/b4-medicion/resenas-salida/`).
+ * vecinos y más de 0,3). [C2-70e, verificación] Y EL CARTEL ENTERO: en todos los cuadros (uno de cada tres), las letras del cartel (las del
+ * CTA en la escena y el título de volumen de las reseñas, mientras se ve) quedan debajo del borde de abajo de la barra y adentro del cuadro.
+ * Y ~6 fotos en otra pasada (`~/.cache/b4-medicion/resenas-salida/`).
  */
 import { mkdirSync } from 'node:fs'
 import os from 'node:os'
@@ -28,7 +32,7 @@ import { chromium, type CDPSession, type Page } from '@playwright/test'
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'volteo'
 const CONTROL = process.env.CONTROL ?? ''
-const [ANCHO, ALTO] = [1440, 900]
+const [ANCHO, ALTO] = (process.env.TAMANO ?? '1440x900').split('x').map(Number)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const PERFIL = `C:/Users/Valentino/.cache/b4-medicion/resenas-volteo-${String(Date.now())}`
 const SALIDA = path.join(os.homedir(), `.cache/b4-medicion/resenas-${MODO === 'salida' ? 'salida' : 'volteo'}`)
@@ -46,21 +50,30 @@ interface Caja {
 }
 interface Cuadro {
   readonly t: number
-  readonly r: { giro: number; disolucion: number; entrada: number; corrimientos: number[]; bajada: number; transformacion: number; pesoDeLaCamara: number } | null
+  readonly r: { giro: number; disolucion: number; entrada: number; corrimientos: number[]; bajada: number; transformacion: number; pesoDeLaCamara: number; esperaDelCta: number; delCta: number } | null
   readonly aro: { entrada: number; bajada: number; placasVisibles: number; enElCuadro: { arriba: number; abajo: number } | null; logo: { y0: number } } | null
   readonly titulos: { id: string; visible: boolean; caja: Caja }[]
   readonly camara: number[] | null
   readonly valores: number[]
+  /** Las cajas (px) de lo que dibuja el CTA en su marco (el cartel y HABLANOS), uno de cada tres cuadros en la salida; `null` en los otros. */
+  readonly cartel: { x: number; y: number; ancho: number; alto: number }[] | null
 }
 
-/** El registrador: cada cuadro durante `ms`, en `window.__registro` (lee los bancos que publica el sitio con `__entornoDeLaEscena`). */
-const REGISTRAR = (ms: number, conTitulos: boolean): string => `(() => {
+/**
+ * El registrador: cada cuadro durante `ms`, en `window.__registro` (lee los bancos que publica el sitio con `__entornoDeLaEscena`). En la
+ * salida, los títulos y el cartel del CTA uno de cada tres cuadros (medir sus cajas cuesta).
+ */
+const REGISTRAR = (ms: number, salida: boolean): string => `(() => {
   window.__registro = []
   const t0 = performance.now()
   const ids = ['frase-izquierda', 'frase-derecha', 'resenas-izquierda', 'resenas-derecha']
+  let n = 0
   const paso = () => {
     const tb = window.__titulosDelBanco
-    const titulos = ${String(conTitulos)} && tb ? tb.titulos().filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, visible: x.visible, caja: x.enElCuadro })) : []
+    const medir = !${String(salida)} || n % 3 === 0
+    n += 1
+    const titulos = medir && tb ? tb.titulos().filter((x) => ids.includes(x.id)).map((x) => ({ id: x.id, visible: x.visible, caja: x.enElCuadro })) : []
+    const cta = ${String(salida)} && medir && window.__ctaDelBanco ? window.__ctaDelBanco() : null
     window.__registro.push({
       t: performance.now() - t0,
       r: window.__resenasDelBanco ? window.__resenasDelBanco() : null,
@@ -68,6 +81,7 @@ const REGISTRAR = (ms: number, conTitulos: boolean): string => `(() => {
       titulos,
       camara: tb ? tb.camara().viva : null,
       valores: [...document.querySelectorAll('[data-pieza="valor-en-volumen"]')].map((e) => Number(getComputedStyle(e).opacity)),
+      cartel: cta ? cta.cajas().filter((c) => c.grupo === 'cta3d:cta del final' && c.ancho > 0) : null,
     })
     if (performance.now() - t0 < ${String(ms)}) requestAnimationFrame(paso)
   }
@@ -90,7 +104,7 @@ async function rueda(p: Page, muescas: number): Promise<void> {
 async function fotos(p: Page, cdp: CDPSession, n: number, cadaMs: number, nombre: string): Promise<unknown[]> {
   const estados: unknown[] = []
   for (let k = 0; k < n; k += 1) {
-    const archivo = path.join(SALIDA, `${nombre}-${String(k).padStart(2, '0')}${CONTROL === '' ? '' : `-${CONTROL}`}.jpg`)
+    const archivo = path.join(SALIDA, `${nombre}-${String(ANCHO)}-${String(k).padStart(2, '0')}${CONTROL === '' ? '' : `-${CONTROL}`}.jpg`)
     await p.screenshot({ path: archivo, type: 'jpeg', quality: 80 })
     await cdp.send('Emulation.setDeviceMetricsOverride', { width: ANCHO, height: ALTO, deviceScaleFactor: 1, mobile: false })
     estados.push({ archivo: path.basename(archivo), estado: await p.evaluate('window.__resenasDelBanco ? window.__resenasDelBanco() : null') })
@@ -132,7 +146,21 @@ function criteriosDelVolteo(cuadros: readonly Cuadro[]): Record<string, unknown>
   }
 }
 
-function criteriosDeLaSalida(cuadros: readonly Cuadro[]): Record<string, unknown> {
+/** [C2-70e, verificación] Las letras del cartel en cada cuadro medido: debajo de la barra (`barra`, su borde de abajo) y adentro del cuadro. */
+function cartelEntero(cuadros: readonly Cuadro[], barra: number): { readonly ok: boolean; readonly medidos: number; readonly cortados: { t: number; arriba: number; abajo: number; izquierda: number; derecha: number }[] } {
+  const medidos = cuadros.filter((q) => q.cartel !== null)
+  const cortados = medidos.flatMap((q) => {
+    const titulo = q.titulos.filter((x) => x.visible && x.id.startsWith('resenas-')).map((x) => ({ x: x.caja.izquierda, y: x.caja.arriba, ancho: x.caja.derecha - x.caja.izquierda, alto: x.caja.abajo - x.caja.arriba }))
+    const cajas = [...(q.cartel ?? []), ...titulo]
+    if (cajas.length === 0) return []
+    const [arriba, abajo] = [Math.min(...cajas.map((c) => c.y)), Math.max(...cajas.map((c) => c.y + c.alto))]
+    const [izquierda, derecha] = [Math.min(...cajas.map((c) => c.x)), Math.max(...cajas.map((c) => c.x + c.ancho))]
+    return arriba < barra - 1 || abajo > ALTO + 1 || izquierda < -1 || derecha > ANCHO + 1 ? [{ t: Math.round(q.t), arriba: Math.round(arriba), abajo: Math.round(abajo), izquierda: Math.round(izquierda), derecha: Math.round(derecha) }] : []
+  })
+  return { ok: medidos.length > 0 && cortados.length === 0, medidos: medidos.length, cortados: cortados.slice(0, 8) }
+}
+
+function criteriosDeLaSalida(cuadros: readonly Cuadro[], barra: number): Record<string, unknown> {
   const conAro = cuadros.filter((q) => q.aro !== null && q.aro.enElCuadro !== null && q.aro.bajada > 0.02 && q.aro.bajada < 0.9)
   const abajoDelBorde = conAro.filter((q) => (q.aro?.enElCuadro?.arriba ?? 0) >= ALTO - 8)
   const cam = cuadros.filter((q) => q.camara !== null).map((q) => ({ t: q.t, x: q.camara?.[0] ?? 0, y: q.camara?.[1] ?? 0, z: q.camara?.[2] ?? 0, bajada: q.aro?.bajada ?? 0 }))
@@ -144,10 +172,13 @@ function criteriosDeLaSalida(cuadros: readonly Cuadro[]): Record<string, unknown
   const fin = cam[cam.length - 1]
   const quieta = cam.filter((c) => fin !== undefined && fin.t - c.t <= 500)
   const enC = fin !== undefined && Math.abs(fin.y - 4.5) <= 0.8 && Math.abs(Math.hypot(fin.x, fin.z) - 30.75) <= 1.2 && quieta.every((c) => Math.hypot(c.x - fin.x, c.y - fin.y, c.z - fin.z) < 0.05)
-  const ok = conAro.length > 0 && abajoDelBorde.length === 0 && despues && enC && saltos.length === 0
-  const tabla = cuadros.filter((_, k) => k % 15 === 0).map((q) => ({ t: Math.round(q.t), bajada: Number((q.aro?.bajada ?? 0).toFixed(3)), arribaDelAro: q.aro?.enElCuadro ? Math.round(q.aro.enElCuadro.arriba) : null, peso: Number((q.r?.pesoDeLaCamara ?? 0).toFixed(3)), transformacion: Number((q.r?.transformacion ?? 0).toFixed(3)), camara: q.camara === null ? null : q.camara.slice(0, 3).map((v) => Number(v.toFixed(2))) }))
+  const aroYCamara = conAro.length > 0 && abajoDelBorde.length === 0 && despues && enC && saltos.length === 0
+  const cartel = cartelEntero(cuadros, barra)
+  const tabla = cuadros.filter((_, k) => k % 15 === 0).map((q) => ({ t: Math.round(q.t), bajada: Number((q.aro?.bajada ?? 0).toFixed(3)), arribaDelAro: q.aro?.enElCuadro ? Math.round(q.aro.enElCuadro.arriba) : null, peso: Number((q.r?.pesoDeLaCamara ?? 0).toFixed(3)), transformacion: Number((q.r?.transformacion ?? 0).toFixed(3)), espera: Number((q.r?.esperaDelCta ?? 0).toFixed(3)), delCta: Number((q.r?.delCta ?? 0).toFixed(3)), camara: q.camara === null ? null : q.camara.slice(0, 3).map((v) => Number(v.toFixed(2))) }))
   return {
-    criterio: ok ? 'ok: el aro en el cuadro hasta guardarse, la cámara sale de B después y llega a C sin salto' : 'FALLA',
+    criterio: aroYCamara && cartel.ok ? 'ok: el aro en el cuadro hasta guardarse, la cámara sale de B después y llega a C sin salto, el cartel entero' : 'FALLA',
+    aroYCamara: aroYCamara ? 'ok' : 'FALLA',
+    cartelEntero: { criterio: cartel.ok ? 'ok' : 'FALLA', barra: Math.round(barra), medidos: cartel.medidos, cortados: cartel.cortados },
     cuadrosConAro: conAro.length,
     abajoDelBorde: abajoDelBorde.length,
     camaraSaleDeB: sale === undefined ? null : { t: Math.round(sale.t), conLaBajada: Number(sale.bajada.toFixed(3)), despues },
@@ -175,10 +206,12 @@ async function main(): Promise<void> {
   }
   await p.mouse.move(ANCHO / 2, ALTO / 2)
   if (MODO === 'salida') {
+    // El borde de abajo de la barra (lo visible de su arriba: la pastilla, las esquinas o el botón del menú).
+    const barra = (await p.evaluate(`Math.max(0, ...[...document.querySelectorAll('[data-pieza="barra"] *')].map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0 && r.top < innerHeight / 3 && r.height < innerHeight / 4).map((r) => r.bottom))`)) as number
     // El aro leyéndose al final del tramo (el pin con las reseñas: 2,5 + 4 pantallas), con la entrada ya terminada.
     await irA(p, 6.45)
     await dormir(5000)
-    await p.evaluate(REGISTRAR(6000, false))
+    await p.evaluate(REGISTRAR(6000, true))
     await rueda(p, 11)
     await dormir(6400)
     const cuadros = (await p.evaluate('window.__registro')) as Cuadro[]
@@ -187,12 +220,12 @@ async function main(): Promise<void> {
     await dormir(5000)
     await rueda(p, 11)
     const estados = await fotos(p, cdp, 6, 250, 'salida')
-    console.log(JSON.stringify({ modo: MODO, control: CONTROL || null, cuadro: `${String(ANCHO)}x${String(ALTO)}`, ...criteriosDeLaSalida(cuadros), fotos: { carpeta: SALIDA, estados } }))
+    console.log(JSON.stringify({ modo: MODO, control: CONTROL || null, cuadro: `${String(ANCHO)}x${String(ALTO)}`, ...criteriosDeLaSalida(cuadros, barra), fotos: { carpeta: SALIDA, estados } }))
   } else {
     // Justo antes del tramo (la inserción, 2,5 pantallas del pin): la rueda entra y dispara el gatillo.
     await irA(p, 2.4)
     await dormir(4000)
-    await p.evaluate(REGISTRAR(3500, true))
+    await p.evaluate(REGISTRAR(3500, false))
     await rueda(p, 3)
     await dormir(3800)
     const cuadros = (await p.evaluate('window.__registro')) as Cuadro[]

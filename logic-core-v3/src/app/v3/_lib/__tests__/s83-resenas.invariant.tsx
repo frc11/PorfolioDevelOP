@@ -21,7 +21,9 @@ import { RESENAS, TEXTO_DE_LAS_RESENAS, TITULO_DE_LAS_RESENAS, enlaceDelTrabajo 
 import { DISOLUCION, estiloDeLaIda, idaDelValor } from '../../_secciones/por-que-develop/resenas/disolucion'
 import { ALTO_DEL_ESPACIADOR_SVH, ESPACIO_ENTRE_LAS_MITADES_EM, INSERCION_DE_LAS_RESENAS, DURACION_DE_LA_ENTRADA_S, GATILLO, K_DE_LAS_RESENAS, LARGO_SIN_ESTIRAR_PX, PANTALLAS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, controlDeLaBandera, corrimientoConElGiro, corrimientosAlCentro, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera, vueltaDelGiro } from '../../_secciones/por-que-develop/resenas/tramo'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
-import { CAMARA_DEL_GUARDADO_EN_EL_GATILLO, HACIA_EL_CTA, VUELTA_DEL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, objetivoDeLaBajada, pesoDeLaCamara, progresoDelGatillo } from '../../_secciones/por-que-develop/resenas/haciaElCta'
+import { CAMARA_DEL_GUARDADO_EN_EL_GATILLO, HACIA_EL_CTA, VUELTA_DEL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, esperaDelCta, objetivoDeLaBajada, pesoDeLaCamara, progresoDelGatillo } from '../../_secciones/por-que-develop/resenas/haciaElCta'
+import { SETTLE_TAU } from '../escena/choreographyPhysics'
+import { dampTowards } from '../escena/choreographySampler'
 import { MIRA_AL_HUECO, desvioDelGuardado, type PoseDelGuardado } from '../escena/resenas/camaraDelGuardado'
 import { POSES_DEL_FINAL } from '../escena/finalDelRecorrido'
 import type { Armado } from '../escena/titulos3d/armado'
@@ -528,5 +530,39 @@ controlPositivo('el detector ve un rig sin el desvío', rig.replace('acompanarEl
 const soloConElGatillo = (f: string): boolean => f.includes("CAMARA_DEL_GUARDADO.peso = variante === 'gatillo' && prueba !== 'sin-camara' ? pesoDeLaCamara(disparoDeLaBajada.get(), p) : 0")
 afirmar(soloConElGatillo(gancho), 'el peso sólo con el gatillo (con `?resenas=scroll` la bajada es del scroll y la cámara la de siempre) y sin la bandera de prueba sin-camara')
 controlPositivo('el detector ve el desvío también con el scroll', gancho.replace("variante === 'gatillo' && prueba", 'prueba'), soloConElGatillo)
+
+// [C2-70e, verificación] El CTA espera a la cámara: con la cámara en B, el cartel anclado en el plano de C se veía grande y cortado arriba.
+type Espera = (t: number, p: number, disparada: boolean) => number
+const esperaBien = (e: Espera): boolean =>
+  e(0, 0.02, false) === 1 && e(0, 0.05, true) === 1 && e(1, 0.35, true) === 0 && e(0.5, 0.7, true) === 0 && T.filter((t) => bajadaEnT(t) < 0.9).every((t) => e(t, 0.35, true) === 1)
+afirmar(esperaBien(esperaDelCta), 'el CTA espera entero desde antes del disparo y mientras las placas bajan; nada al cerrarse el anillo ni con el scroll más allá de C')
+controlPositivo('el detector ve el sostén de antes (el CTA sin esperar)', () => 0, esperaBien)
+// Cuadro a cuadro (60 fps), la cámara viva con la inercia del rig (su distancia, de B a C) y el CTA: cuánto se adelanta el cartel a la cámara.
+const adelantoDelCartel = (esperaDe: (t: number) => number, pesoDe: (t: number) => number, segundos = 2.2): number => {
+  let [vivo, mayor] = [0, 0]
+  for (let k = 0; k <= 240; k += 1) {
+    const t = k / 60 / segundos
+    vivo = dampTowards(vivo, 1 - pesoDe(t), SETTLE_TAU.distance, 0, 1 / 60)
+    mayor = Math.max(mayor, 1 - esperaDe(t) - vivo)
+  }
+  return mayor
+}
+const conElScroll = adelantoDelCartel((t) => 1 - vueltaDelGiro(t), (t) => 1 - vueltaDelGiro(t), 0.6)
+const nuestro = adelantoDelCartel((t) => esperaDelCta(t, 0.35, true), (t) => pesoDeLaCamara(t, 0.35))
+const cartelDetras = (adelanto: number): boolean => adelanto <= 0.25 && adelanto < conElScroll
+afirmar(cartelDetras(nuestro), `el cartel no se adelanta a la cámara: a lo sumo ${nuestro.toFixed(3)} del camino (con una rueda que la lleva a C en 0,6 s, ${conElScroll.toFixed(3)}): suelta en ${String(CG.ctaSuelta)}, la cámara en ${String(CG.suelta)}`)
+controlPositivo('el detector ve el sostén sin la espera (el cartel entero con la cámara en B)', adelantoDelCartel(() => 0, (t) => pesoDeLaCamara(t, 0.35)), cartelDetras)
+const esperaCableada = (f: string, cta: string): boolean =>
+  f.includes("const espera = variante === 'gatillo' && prueba !== 'sin-camara' && prueba !== 'sin-espera' ? esperaDelCta(disparoDeLaBajada.get(), p, objetivoDeLaBajadaActual === 1) : 0") && f.includes('const tomado = delCta > 0 && ctaListo()') && f.includes('ESPERA_DEL_CTA.set(espera)') && cta.includes('const progreso = useProgresoQueEspera(delScroll)')
+afirmar(esperaCableada(gancho, ctaTransformado), 'el tramo escribe la espera y el título lo toma el CTA con su progreso que espera; el CTA del escenario avanza con él')
+controlPositivo('el detector ve el CTA con el progreso del scroll', [gancho, ctaTransformado.replace('useProgresoQueEspera(delScroll)', 'delScroll')] as const, ([f, c]: readonly [string, string]) => esperaCableada(f, c))
+
+// El espacio entre las mitades: el de un renglón de la Chivo de los títulos (el avance del espacio y el tracking del título).
+const fuenteDelTitulo = JSON.parse(readFileSync(path.join(V3, '_fuentes/chivo-400-titulos.json'), 'utf8')) as { readonly resolution: number; readonly glyphs: Record<string, { readonly ha: number }> }
+const tracking = Number(/--tracking-titulo:\s*(-?[\d.]+)em/.exec(readFileSync(path.join(RAIZ, 'src/app/theme-develop.css'), 'utf8'))?.[1] ?? NaN)
+const espacioDeLaFuente = (fuenteDelTitulo.glyphs[' ']?.ha ?? NaN) / fuenteDelTitulo.resolution + tracking
+const comoUnEspacio = (em: number): boolean => cerca(em, espacioDeLaFuente, 1e-3)
+afirmar(comoUnEspacio(ESPACIO_ENTRE_LAS_MITADES_EM), `el espacio al juntarse es el de la fuente: ${String(ESPACIO_ENTRE_LAS_MITADES_EM)} em (el avance del espacio, ${String(fuenteDelTitulo.glyphs[' ']?.ha)} de ${String(fuenteDelTitulo.resolution)}, y el tracking, ${String(tracking)} em)`)
+controlPositivo('el detector ve el espacio de antes (0,25 em, a ojo)', 0.25, comoUnEspacio)
 
 cerrar('s83-resenas')

@@ -98,8 +98,11 @@ export interface TramoEnX {
   readonly hasta: number
 }
 
-/** [C2-70e] El espacio entre «dicen» y «nuestros» cuando las mitades se juntan (em del cuerpo del título: el de la Chivo). */
-export const ESPACIO_ENTRE_LAS_MITADES_EM = 0.25
+/**
+ * [C2-70e] El espacio entre «dicen» y «nuestros» cuando las mitades se juntan (em del cuerpo del título): el de un renglón de verdad, el
+ * avance del espacio de la Chivo de los títulos (227 de 1000) más el tracking del título (−0,03 em, `--tracking-titulo`). Era 0,25 (a ojo).
+ */
+export const ESPACIO_ENTRE_LAS_MITADES_EM = 0.197
 
 /**
  * [C2-70e] LAS MITADES SE JUNTAN EN EL MEDIO: cuánto se corre cada una (px; positivo, a la derecha) para que «Lo que dicen nuestros clientes»
@@ -135,7 +138,8 @@ export const varianteDeLaBandera = (valor: string | null): VarianteDeLasResenas 
 
 /**
  * [C2-70e] La bandera de PRUEBA de los bancos (`scripts-carga/resenas-volteo.ts`), para su control positivo: `?resenas-control=sin-juntar` (las
- * mitades no se corren) o `?resenas-control=sin-camara` (la cámara no acompaña el guardado). Sin ella (el defecto), ninguna.
+ * mitades no se corren), `?resenas-control=sin-camara` (la cámara no acompaña el guardado ni el CTA la espera: lo de antes) o
+ * `?resenas-control=sin-espera` (la cámara se queda en B y el CTA no la espera: el cartel cortado arriba). Sin ella (el defecto), ninguna.
  */
-export type ControlDeLasResenas = 'sin-juntar' | 'sin-camara' | null
-export const controlDeLaBandera = (valor: string | null): ControlDeLasResenas => (valor === 'sin-juntar' || valor === 'sin-camara' ? valor : null)
+export type ControlDeLasResenas = 'sin-juntar' | 'sin-camara' | 'sin-espera' | null
+export const controlDeLaBandera = (valor: string | null): ControlDeLasResenas => (valor === 'sin-juntar' || valor === 'sin-camara' || valor === 'sin-espera' ? valor : null)

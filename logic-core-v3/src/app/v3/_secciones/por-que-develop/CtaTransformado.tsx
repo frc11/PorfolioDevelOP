@@ -17,6 +17,7 @@ import { CanalDeUnaPieza } from '../_contrato/canales'
 import { CTA, FRASE, VALORES } from './contenido'
 import { ESTILO_DE_LA_LISTA } from './geometria'
 import { TITULOS_DE_LAS_RESENAS } from './resenas/tramo'
+import { useProgresoQueEspera } from './resenas/useTramoDeLasResenas'
 
 /**
  * [PULIDO 2] 5 · EL CTA DEL FINAL CON SU TRANSFORMACIÓN, en las dos ramas de «Por qué develOP»: en el escenario y en la lista.
@@ -69,7 +70,9 @@ const TAMANO_DEL_CTA_EN_VOLUMEN = 'escritorio:text-[length:min(var(--text-fluido
  * (desde «Seis razones»); sin la escena, llegan al final. El foco del teclado lleva al final ([PULIDO 8] G2 · sólo el del teclado: el
  * clic, que ya puede caer a mitad del giro, no mueve la página).
  */
-export function CtaTransformado({ progreso, claseDelTexto, alEnfocar }: { readonly progreso: MotionValue<number>; readonly claseDelTexto: string; readonly alEnfocar: (cta: HTMLElement, llegada: number) => void }): React.JSX.Element {
+export function CtaTransformado({ progreso: delScroll, claseDelTexto, alEnfocar }: { readonly progreso: MotionValue<number>; readonly claseDelTexto: string; readonly alEnfocar: (cta: HTMLElement, llegada: number) => void }): React.JSX.Element {
+  // [C2-70e] Con las reseñas, el CTA espera a la cámara que enfoca el guardado del aro (sin ellas, el del scroll).
+  const progreso = useProgresoQueEspera(delScroll)
   useProgresoDelCta(progreso, 'escenario', origenDeLaFrase)
   const texto = useTransform(progreso, llegadaDelTexto)
   const enViaje = useViajando()
