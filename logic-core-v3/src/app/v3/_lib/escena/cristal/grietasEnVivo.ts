@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 import type { Pedido } from '../../sonido/catalogo'
 import { sonar } from '../../sonido/bus'
+import { VELO_EN_CURSO } from '../../veloDeNavegacion'
 import { hayBanco } from '../entorno'
 import { FLOOR_Y } from '../probeScene'
 import { presetActual, type IdDePagina } from '../ruta/preset'
@@ -57,6 +58,9 @@ const RAYO = new THREE.Vector3()
 const OJO = new THREE.Vector3()
 
 const paginaDeAhora = (): IdDePagina => presetActual()?.id ?? 'home'
+/** [C2-21] El defecto del control de `velo.ts` (`CONTROL=grietas-sin-esperar`, por `window.__defectosDelVelo`; nunca la URL). */
+const sinEsperarAlVelo = (): boolean => typeof window !== 'undefined' && (window as Window & { __defectosDelVelo?: unknown }).__defectosDelVelo === 'grietas-sin-esperar'
+
 const consulta = (nombre: string): string | null => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get(nombre))
 
 /** Donde la cámara mira el muro, con su matriz al día. */
@@ -112,7 +116,9 @@ export function crearLasGrietas(u: UniformesDeLasGrietas, celdas: readonly Celda
       m.estado = grietasCerradas()
       m.duena = null
     }
-    if (vivo.vez !== m.vista) {
+    // [C2-21] Armarlas (el trazado y las dos texturas) es una obra pesada: espera al velo quieto, como las del home (`veloDeNavegacion.ts`).
+    // Llegando a una página, caía en medio del deslizamiento de la píldora (la regresión de `velo.ts`, «el home → la página»).
+    if (vivo.vez !== m.vista && !(VELO_EN_CURSO.activo && !sinEsperarAlVelo())) {
       m.vista = vivo.vez
       if (vivo.donde === aqui) {
         if (vivo.sentido === 'avance' && m.estado.formacion <= 0) armar(camara, compacta, aqui)

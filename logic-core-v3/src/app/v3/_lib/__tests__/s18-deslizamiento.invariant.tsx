@@ -538,8 +538,9 @@ afirmarIgual(veces(EFECTO_LIMPIO, 'const terminar ='), 1, 'hay UNA sola función
  */
 // [RETOQUE DEL ENCASTRE] 2C · cambió por pedido: la salida 2 (la rueda que cancelaba) y su gemela se fueron: mientras
 // viaja, el scroll se ignora y el viaje termina en su destino. Quedan seis llamadas: cuatro salidas, la gemela de la
-// llegada (el motor de abajo) y la llegada del salto.
-afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 6, '  y exactamente SEIS sitios la llaman: cuatro salidas (sin la de la rueda: RETOQUE DEL ENCASTRE 2C), la gemela de la llegada por el segundo motor y la llegada del salto')
+// llegada (el motor de abajo) y la llegada del salto. [C2-21] Y una más por pedido: la llegada de la escena (el scroll llegó, el título
+// espera a la cámara: `llegadaDeLaEscena.ts`), que vuelve a llamar a la misma función cuando la escena llegó.
+afirmarIgual(veces(EFECTO_LIMPIO, 'terminar('), 7, '  y exactamente SIETE sitios la llaman: cuatro salidas (sin la de la rueda: RETOQUE DEL ENCASTRE 2C), la gemela de la llegada por el segundo motor, la llegada del salto y [C2-21] la llegada de la escena')
 afirmar(EFECTO_LIMPIO.includes('if (!enVuelo) return'), '  y es IDEMPOTENTE: la segunda llamada no hace nada')
 afirmar(EFECTO_LIMPIO.includes('onComplete: () => terminar(true)'), '  salida 1 — llegó')
 const sinFreno = (f: string): boolean => f.includes('soltarLaRueda = retenerLosGestos(() => true)') && !f.includes("lenis.on('virtual-scroll'") && !/addEventListener\('(wheel|touchstart|keydown)', alGesto/.test(f)

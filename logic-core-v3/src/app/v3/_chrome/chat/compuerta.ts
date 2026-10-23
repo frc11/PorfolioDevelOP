@@ -4,40 +4,62 @@ import { SEGURO_DEL_VELO_MS } from '../../_lib/carga'
  * [B11] EL CHAT DEL SITIO — qué bot, con qué cara, dónde no va y cuándo entra. Sin React ni three: lo leen `ChatDelSitio.tsx` y s87.
  *
  * Es el widget del sitio vivo (`LogicCompanion`, el que monta `components/layout/ChatWidgetMount.tsx` fuera de /v3), tal cual: la
- * misma ventana, el mismo globo, la misma animación de aparición. /v3 le fija dos cosas sobre la config del bot (`overrides`): un avatar
+ * misma ventana, el mismo globo, la misma animación de aparición. /v3 le fija cosas sobre la config del bot (`overrides`): un avatar
  * sin 3D (decisión de Valentino: «sin 3D por ahora») y la esquina de abajo a la derecha, donde estaba (y la que [CIERRE A] A6 dejó libre
- * para él). El resto sale de la config, como en el sitio vivo.
+ * para él). [C2-21] Y los colores del home. El resto sale de la config, como en el sitio vivo.
  */
 
 /** El bot del sitio: el mismo slug que el sitio vivo. */
 export const SLUG_DEL_CHAT = 'develop'
 
-/** Los avatares livianos del registro del chat (SVG: sin three ni canvas). `?chat=` elige entre los tres para mirarlos. */
-export const AVATARES_SIN_3D = ['onda', 'monograma', 'geometrico'] as const
+/** [C2-21] El avatar liviano del registro del chat (SVG: sin three ni canvas): el geométrico. La onda, el monograma y `?chat=` se fueron. */
+export const AVATARES_SIN_3D = ['geometrico'] as const
 export type AvatarSin3d = (typeof AVATARES_SIN_3D)[number]
+export const AVATAR_POR_DEFECTO: AvatarSin3d = 'geometrico'
 
-/** Sin bandera, la onda: el pariente plano del orbe 3D de siempre (un punto con anillos), hasta que Valentino elija. */
-export const AVATAR_POR_DEFECTO: AvatarSin3d = 'onda'
+/**
+ * [C2-21] LOS COLORES DEL HOME SOBRE LOS DE LA CONFIG. Los de la captura (el panel turquesa, los chips con letra roja) no son de fábrica:
+ * son de la config del bot `develop`, que el cliente cambia desde su panel (`chatSurfaceTint` el fondo del panel, `accentSecondary` los
+ * chips, que se pintan con ese color en la letra, `accentColor` el botón, la burbuja propia y el envío). De fábrica (sin tinte) el panel
+ * es un degradé oscuro. Acá van sólo para /v3: el panel en la tinta (`--color-tinta`), casi opaco, y lo demás en el papel
+ * (`--color-fondo`): los chips con letra papel sobre la tinta. La tipografía, los botones y los textos de la ventana son de fábrica: no
+ * se tocan. s87 afirma que los dos valores son los de los tokens del tema.
+ */
+export const COLORES_DEL_CHAT = { tinta: '#111111', papel: '#F7F7F5' } as const
 
-/** La bandera de la URL que elige el avatar (`?chat=onda|monograma|geometrico`); cualquier otra cosa, el de por defecto. */
-export const BANDERA_DEL_CHAT = 'chat'
-
-export function avatarDeLaBandera(valor: string | null): AvatarSin3d {
-  return AVATARES_SIN_3D.find((a) => a === valor) ?? AVATAR_POR_DEFECTO
-}
-
-/** Lo que /v3 fija sobre la config del bot (para el botón Y la ventana): el avatar sin 3D y la esquina de abajo a la derecha. */
+/**
+ * Lo que /v3 fija sobre la config del bot (para el botón Y la ventana). La prop `overrides` del widget declara `avatarStyle` y `position`;
+ * los colores viajan en el mismo objeto y el widget los aplica igual (`{ ...config, ...overrides }`): un objeto con claves de más es
+ * asignable a su tipo (no es un literal). Si el widget dejara de esparcir el objeto entero, los colores vuelven a los de la config.
+ */
 export interface AparienciaDelChat {
   readonly avatarStyle: AvatarSin3d
   readonly position: 'bottom_right'
+  readonly chatSurfaceTint: string
+  readonly intensityLevel: 'HIGH'
+  readonly accentColor: string
+  readonly accentSecondary: string
 }
 
-const APARIENCIAS = new Map<AvatarSin3d, AparienciaDelChat>(AVATARES_SIN_3D.map((a) => [a, { avatarStyle: a, position: 'bottom_right' }]))
-
-/** Una por avatar, siempre el mismo objeto: el widget memoriza su config sobre él. */
-export function aparienciaDelChat(avatar: AvatarSin3d): AparienciaDelChat {
-  return APARIENCIAS.get(avatar) ?? { avatarStyle: avatar, position: 'bottom_right' }
+/** Siempre el mismo objeto: el widget memoriza su config sobre él. */
+export const APARIENCIA_DEL_CHAT: AparienciaDelChat = {
+  avatarStyle: AVATAR_POR_DEFECTO,
+  position: 'bottom_right',
+  chatSurfaceTint: COLORES_DEL_CHAT.tinta,
+  intensityLevel: 'HIGH',
+  accentColor: COLORES_DEL_CHAT.papel,
+  accentSecondary: COLORES_DEL_CHAT.papel,
 }
+
+/**
+ * [C2-21] LAS ZONAS CRUCIALES (ítem 24): ahí el chat cerrado (la burbuja y el globo de las preguntas) se desvanece, y vuelve al salir.
+ * Abierto, se queda (no se cierra solo). Por ahora el Portfolio (la sección entera: el selector y Demos) y Servicios (con su recomendador).
+ * Una zona «está» cuando cruza la línea del chat: la franja de 1 % de la ventana a la altura de la burbuja y su globo.
+ */
+export const ZONAS_SIN_CHAT = ['trabajos', 'servicios'] as const
+export const LINEA_DEL_CHAT = '-85% 0px -14% 0px'
+
+export const chatDesvanecido = (enZona: boolean, abierto: boolean): boolean => enZona && !abierto
 
 /**
  * Los laboratorios de /v3 (instrumentos, no páginas): sin chat. `/v3/motion` tiene sus controles en la misma esquina. El home y las

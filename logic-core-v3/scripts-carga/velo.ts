@@ -18,6 +18,8 @@
  *
  *   BASE=http://localhost:3004 ANCHOS=1440,390 npx tsx scripts-carga/velo.ts
  *   CONTROL=sin-velo …   el control (navega sin cubrir): el cuadro del cambio sin cubrir
+ *   [C2-21] CONTROL=grietas-sin-esperar …   las grietas de la página se arman sin esperar al velo quieto (como antes): «el home → la
+ *         página» vuelve a mostrar cuadros largos mientras la píldora se desliza (la línea los nombra con sus scripts).
  *   [T0 · 2026-10-22] VIA=banda|montaje|ambas|ninguna …   la vía para bajar el tiempo hacia el home (`viaDelVelo`, `_lib/veloDeNavegacion.ts`):
  *         siembra `window.__viaDelVelo` antes de cargar; sin VIA, la del código (`VIA_POR_DEFECTO`). `ninguna` es la de B12a.8 (la referencia).
  *   [T0] La píldora: además de la más rápida con la hora del banco (el criterio), la más rápida con la HORA DEL CUADRO (el sello del rAF,
@@ -286,6 +288,13 @@ function juzgar(nombre: string, ancho: number, colorEsperado: 'tinta' | 'papel',
     if (a !== undefined && b !== undefined && a.tc !== undefined && b.tc !== undefined && b.tc > a.tc) rapidezDelCuadro = Math.max(rapidezDelCuadro, Math.abs(b.pildora - a.pildora) / (b.tc - a.tc))
   }
   const tope = (1.5 * 1.84 * Math.abs(recorrido)) / 560
+  // [C2-21] Lo que trabó el hilo MIENTRAS se deslizaba (de la primera muestra que dejó su lugar a la que llegó): los cuadros largos
+  // (`long-animation-frame`) y sus scripts más pesados. La velocidad con la hora del banco sube justo por esos cuadros: acá se ve quién.
+  const enCamino = conPildora.filter((x) => Math.abs(x.pildora - desdeP) > 0.5 && Math.abs(x.pildora - hastaP) > 0.5)
+  const [d0, d1] = [enCamino[0]?.t ?? Number.NaN, enCamino[enCamino.length - 1]?.t ?? Number.NaN]
+  type Largo = { readonly t: number; readonly ms: number; readonly scripts?: readonly { readonly ms: number; readonly invocador: string; readonly fuente: string }[] }
+  const largosDelDesliz = (g.largos as Largo[]).filter((l) => l.t + l.ms >= d0 - 20 && l.t <= d1 + 20).sort((a, b) => b.ms - a.ms)
+  const quienTrabo = largosDelDesliz.slice(0, 3).map((l) => `${l.ms.toFixed(0)} ms (${(l.scripts ?? []).slice().sort((a, b) => b.ms - a.ms).slice(0, 2).map((s) => `${s.fuente} ${String(s.ms)} ms, ${s.invocador}`).join('; ') || 'sin scripts: estilo, layout o pintura'})`).join(' · ')
   const pildoraBien = pildora === 'no' || (pildora === 'queda' ? Math.abs(recorrido) < 2 : (pildora === 'sube' ? recorrido < -100 : recorrido > 100) && rapidez <= tope)
   const cubiertoAlCambiar = cambio !== null && cambio !== undefined && cambio.cobertura >= 0.999
   const bien = cubiertoAlCambiar && enBlanco === 0 && color === colorEsperado && pildoraBien && (CONTROL !== '' || total <= 3600)
@@ -293,7 +302,7 @@ function juzgar(nombre: string, ancho: number, colorEsperado: 'tinta' | 'papel',
     `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · ${nombre} · total ${total.toFixed(0)} ms (tapado entero ${tapadoMs.toFixed(0)} ms) · primer tramo al cubrir: cuadro máximo ${primerTramo.toFixed(1)} ms en el hilo, ${g.compositor.length === 0 ? 'sin traza' : `${compositor.toFixed(1)} ms en el compositor`}; con la banda moviéndose ${enMovimiento.toFixed(1)} ms` +
     ` · el cambio ${cubiertoAlCambiar ? 'cubierto entero' : `SIN CUBRIR (${cambio === null || cambio === undefined ? 'no se vio' : cambio.cobertura.toFixed(3)})`} · el velo ${color || '—'} (esperado ${colorEsperado})` +
     ` · screencast: ${String(fotos.length)} cuadros, ${String(enBlanco)} en blanco o vacíos, ${String(delVelo)} del velo entero` +
-    (pildora === 'no' ? '' : ` · la píldora de ${desdeP.toFixed(0)} a ${hastaP.toFixed(0)} px (salto máximo entre muestras ${salto.toFixed(1)} px; la más rápida ${rapidez.toFixed(2)} px/ms, su curva da a lo sumo ${(tope / 1.5).toFixed(2)}; con la hora del cuadro, ${rapidezDelCuadro.toFixed(2)})`) + (VIA === '' ? '' : ` · VIA=${VIA}`)
+    (pildora === 'no' ? '' : ` · la píldora de ${desdeP.toFixed(0)} a ${hastaP.toFixed(0)} px (salto máximo entre muestras ${salto.toFixed(1)} px; la más rápida ${rapidez.toFixed(2)} px/ms, su curva da a lo sumo ${(tope / 1.5).toFixed(2)}; con la hora del cuadro, ${rapidezDelCuadro.toFixed(2)}; cuadros largos mientras se deslizaba: ${String(largosDelDesliz.length)}${quienTrabo === '' ? '' : `, los peores: ${quienTrabo}`})`) + (VIA === '' ? '' : ` · VIA=${VIA}`)
   return { linea, bien }
 }
 

@@ -10,6 +10,7 @@ import { pantallasDelViaje, planDelViaje } from '../_lib/escena/planDelViaje'
 import { curvaDelViaje } from '../_lib/escena/repartoDelViaje'
 import { retenerLosGestos } from '../_lib/gestosDelScroll'
 import { empezarElViaje, terminarElViaje } from '../_lib/escena/viaje'
+import { esperarLaLlegada } from '../_lib/escena/llegadaDeLaEscena'
 import { demoraDelViaje } from '../_lib/pie3d/salidas'
 
 import {
@@ -176,6 +177,9 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
     let relojDeLaEscena: number | undefined
     /** [PULIDO 27] Y4 b · el que empieza el viaje de la escena después del hundimiento del pie. */
     let relojDeLaDemora: number | undefined
+    /** [C2-21] La escena del destino: en viaje, esperando su llegada (el scroll ya llegó) o llegada; y cómo cortar la espera. */
+    let laEscena: 'viajando' | 'esperando' | 'llegada' = 'llegada'
+    let cancelarLaEspera: (() => void) | null = null
 
     /**
      * APAGA EL VELO. Idempotente, y la llaman las cinco salidas.
@@ -187,6 +191,18 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
      */
     const terminar = (llego: boolean): void => {
       if (!enVuelo) return
+      // [C2-21] Llegó el scroll: el velo y el título esperan a que la escena llegue (la cámara en su pose, el Portfolio y la noche en su
+      // punta: `llegadaDeLaEscena.ts`, con su techo). Mientras, el reloj de seguridad no corre (la espera tiene el suyo).
+      if (llego && laEscena === 'viajando' && destino !== null) {
+        laEscena = 'esperando'
+        window.clearTimeout(reloj)
+        reloj = undefined
+        cancelarLaEspera = esperarLaLlegada(destino.id, () => terminar(true))
+        return
+      }
+      laEscena = 'llegada'
+      cancelarLaEspera?.()
+      cancelarLaEspera = null
       enVuelo = false
       if (relojDelVelo !== undefined) {
         window.clearTimeout(relojDelVelo)
@@ -320,6 +336,7 @@ export function useDeslizamientoDelCta(instancia: RefObject<Lenis | null>, modo:
       const curva = curvaDelViaje(destinoEnPx, CURVA_DEL_VIAJE)
       // [CIERRE A-ter] A13 · en vuelo recién con el destino calculado: si la cuenta fallara, el próximo clic no queda ignorado para siempre.
       enVuelo = true
+      laEscena = modo === 'salto' ? 'llegada' : 'viajando'
       window.clearTimeout(relojDeLaEscena)
       // [PULIDO 1] P5 · y cuánto dura, del click al frenazo: el final del pie vuelve a cero adentro de esto, en paralelo.
       const empezar = (): void => empezarElViaje({ ...planDelViaje(seccion.id, destinoEnPx), duracionMs: PRELUDIO_MS + duracionMs })
