@@ -290,7 +290,12 @@ titulo('7 · El foco: todo lo interactivo lo conserva')
 const interactivos = [...QUIETO.matchAll(/<(?:a\b[^>]*\bhref=|button\b|input\b|textarea\b|select\b)[^>]*>/g)].map((m) => m[0])
 const deshabilitados = interactivos.filter((t) => /\bdisabled\b/.test(t)).length
 afirmar(interactivos.length > 0, `el recorrido expone ${interactivos.length} elementos interactivos`, `${deshabilitados} deshabilitados a propósito`)
-afirmarIgual(apagadosDeFoco(QUIETO), [], 'ninguno apaga el anillo de foco en el marcado servido')
+// [C2 · 60c] Las dos capas de `EstadoDeEnvio` (el estándar de envío de la cola 2, que ahora monta el CTA del Panel): reciben el foco
+// desde el código (`tabindex="-1"`, fuera del recorrido) y no son controles, así que no dibujan anillo. Sólo ellas: lo interactivo de
+// adentro (los campos, el botón) conserva el suyo, y el detector lo sigue viendo (control de abajo).
+const sinCapasDelEnvio = (html: string): string => html.replace(/(<div data-parte="(?:formulario|estado)" tabindex="-1" class="[^"]*?)\s*\boutline-none\b/g, '$1')
+afirmarIgual(apagadosDeFoco(sinCapasDelEnvio(QUIETO)), [], 'ninguno apaga el anillo de foco en el marcado servido (salvo las capas de `EstadoDeEnvio`, que no son controles)')
+controlPositivo('  la excepción no tapa un control apagado adentro del envío', '<div data-parte="formulario" tabindex="-1" class="outline-none"><button class="outline-none">x</button></div>', (html) => apagadosDeFoco(sinCapasDelEnvio(html)).length === 0)
 afirmarIgual(
   interactivos.filter((t) => /\btabindex="-1"/.test(t)),
   [],

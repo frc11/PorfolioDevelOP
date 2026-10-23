@@ -102,26 +102,54 @@ export const CARTEL = {
   tactil: 'Tocá para scrollear acá',
 } as const
 
-/** [B6] EL CTA, a pantalla completa: el titular se pinta como el título; el botón todavía no hace nada (C1 lo despliega). */
-export const CTA: { readonly titular: readonly RenglonQueSePinta[]; readonly bajada: string; readonly boton: string; readonly o: string } = {
-  titular: [{ palabras: ['Tu', 'panel', 'crece', 'con', 'vos.'] }],
-  bajada: 'Sumamos módulos nuevos todo el tiempo, a medida que tu negocio los necesita. Si querés indagar más:',
-  boton: 'Probar el panel',
-  o: 'o',
+/** «Probar el panel», la columna de la izquierda del CTA: el texto termina en «acá.», que va SOLO en el último renglón. */
+export interface ProbarElPanel {
+  readonly titulo: string
+  /** El texto hasta «Probala». */
+  readonly texto: string
+  /** «acá.»: un bloque propio, así cae solo en su renglón en cualquier ancho (lo fuerza la estructura, no el ancho). */
+  readonly remate: string
 }
 
 /**
- * EL NEWSLETTER — a la derecha del CTA. [RONDA 2] F1 · Ya envía: a `/api/newsletter` (`NewsletterDelPanel.tsx`), que hoy
- * recibe y valida; la conexión a la lista real es de la etapa siguiente. Las pruebas nunca lo llaman.
+ * [B6] EL CTA, a pantalla completa: el titular se pinta como el título. [C2 · 60c] Los textos de `05-TEXTOS.md` («El CTA del
+ * Panel»), tal cual: la bajada, «Probar el panel» con su botón grande («Probar ahora», que por ahora no hace nada: decisión de
+ * Valentino), el divisor «o si no» y el aviso de scroll de abajo de todo.
+ */
+export const CTA: {
+  readonly titular: readonly RenglonQueSePinta[]
+  readonly bajada: string
+  readonly probar: ProbarElPanel
+  readonly boton: string
+  readonly o: string
+  readonly aviso: string
+} = {
+  titular: [{ palabras: ['Tu', 'panel', 'crece', 'con', 'vos.'] }],
+  bajada: 'Sumamos módulos nuevos y creamos cosas todo el tiempo. Si tu negocio los necesita, no dudes en sumarlos. Si te interesa ver más, podés:',
+  probar: {
+    titulo: 'Probar el panel',
+    texto: 'Armamos una versión de prueba para que no tengas que crearte un usuario. Probala',
+    remate: 'acá.',
+  },
+  boton: 'Probar ahora',
+  o: 'o si no',
+  aviso: 'Seguí bajando, que todavía hay más',
+}
+
+/**
+ * EL NEWSLETTER — a la derecha del CTA. [RONDA 2] F1 · Envía a `/api/newsletter` (`NewsletterDelPanel.tsx`), que hoy recibe y
+ * valida un mail; la conexión a la lista real es de la etapa siguiente. Las pruebas nunca lo llaman. [C2 · 60c] El form chico del
+ * estándar del sitio: «Nombre», «Mail» y «Suscribirme». La ruta NO acepta el nombre (su esquema es sólo el mail): viaja el mail
+ * solo y el campo queda en el form (anotado para Franco). `rotulo` es el del mail; el ejemplo del nombre es el del contacto.
  */
 export const NEWSLETTER = {
   id: 'tu-panel-novedades',
-  titulo: 'Sé el primero en enterarte de las nuevas features',
-  rotulo: 'Tu correo',
+  titulo: 'Suscribite a las novedades',
+  texto: 'Te avisamos cuando sumemos algo nuevo. Nada de spam.',
+  rotuloDelNombre: 'Nombre',
+  rotulo: 'Mail',
   placeholder: 'nombre@dominio',
   rotuloDeEnvio: 'Suscribirme',
-  /** [RONDA 2] F1: envía (`/api/newsletter`); lo que dice cuando llegó. */
-  listo: '¡Listo! Te avisamos de lo nuevo.',
 } as const
 
 /** Las palabras fundidas de los módulos (decorativas: no se anuncian). */
