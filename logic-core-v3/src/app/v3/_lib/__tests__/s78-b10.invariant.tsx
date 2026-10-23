@@ -290,10 +290,14 @@ afirmar(sinMarcasBien(html), '  sin regiones propias (el home sigue con una por 
 controlPositivo('  el detector ve una región de más', html.replace('<div data-faq-del-pie', '<section data-faq-del-pie'), sinMarcasBien)
 
 const listaHtml = renderToStaticMarkup(<FaqEnLista preguntas={PREGUNTAS_DEL_HOME} colgada />)
-const listaBien = (h: string): boolean => !h.includes('wa.me') && !h.includes('<button') && !h.includes('clip-path') && veces(h, '<h3') === PREGUNTAS_DEL_HOME.length && PREGUNTAS_DEL_HOME.every((p) => h.includes(p.respuesta)) && /data-faq-del-pie="lista"[^>]*class="bg-fondo text-tinta absolute inset-x-0 top-full"/.test(h)
-afirmar(listaBien(listaHtml), 'en el teléfono (y con menos movimiento), una lista normal: cada pregunta (un título) con su respuesta a la vista, sin efectos y sin el bloque de WhatsApp')
+// [C2 · 71t] cambió por diseño (la 71 §6): la lista es un acordeón de vidrio, sin el fondo liso del papel; cada pregunta es un botón que
+// abre su respuesta (lo del acordeón y el vidrio, con sus controles, en `s71-faq-telefono`). Lo de B10 sigue: sin hundimiento ni WhatsApp.
+const listaBien = (h: string): boolean => !h.includes('wa.me') && !h.includes('clip-path') && veces(h, '<h3') === PREGUNTAS_DEL_HOME.length && veces(h, '<button type="button"') === PREGUNTAS_DEL_HOME.length && PREGUNTAS_DEL_HOME.every((p) => h.includes(p.respuesta)) && /data-faq-del-pie="lista"[^>]*class="text-tinta absolute inset-x-0 top-full"/.test(h)
+afirmar(listaBien(listaHtml), 'en el teléfono (y con menos movimiento), la lista: cada pregunta (un título con su botón) con su respuesta en el HTML, sin el hundimiento del escenario y sin el bloque de WhatsApp')
 controlPositivo('  el detector ve el escenario (con efectos y WhatsApp) en el teléfono', html, listaBien)
-afirmar(!renderToStaticMarkup(<FaqEnLista preguntas={PREGUNTAS_DEL_HOME} colgada={false} />).includes('absolute'), '  en una página la lista va en el flujo (después del pie del cierre); en el home, colgada')
+const enElFlujo = (h: string): boolean => /data-faq-del-pie="lista"[^>]*class="text-tinta relative"/.test(h)
+afirmar(enElFlujo(renderToStaticMarkup(<FaqEnLista preguntas={PREGUNTAS_DEL_HOME} colgada={false} />)), '  en una página la lista va en el flujo (después del pie del cierre); en el home, colgada')
+controlPositivo('  el detector ve la lista colgada en una página', listaHtml, enElFlujo)
 
 const whatsappBien = (url: string, fuente: string): boolean =>
   url.startsWith(`https://wa.me/${NUMERO_DE_WHATSAPP}?text=`) && /\{conWhatsApp && \(\s*<a href=\{WHATSAPP_DEL_FAQ\}/.test(fuente) && fuente.includes('<DosCopias>{TEXTOS_DEL_FAQ.dudas}</DosCopias>') && TEXTOS_DEL_FAQ.dudas === '¿Te quedaron dudas? Escribinos'
@@ -332,7 +336,7 @@ controlPositivo('  el detector ve el home sin el FAQ', [base, cierre.replace(/<F
 const final = sinComentarios(leer('_lib/escena/final/cuadroDelFinal.ts'))
 const encuadre = sinComentarios(leer('_lib/escena/final/encuadreDelPie.ts'))
 const alturasBien = (h: string, l: string, f: string, e: string): boolean =>
-  /class="absolute inset-x-0 bottom-0 z-10 h-svh/.test(h) && /class="bg-fondo text-tinta absolute inset-x-0 top-full"/.test(l) &&
+  /class="absolute inset-x-0 bottom-0 z-10 h-svh/.test(h) && /data-faq-del-pie="lista" class="text-tinta absolute inset-x-0 top-full"/.test(l) &&
   f.includes('s.fondo = Math.max(0, document.documentElement.offsetHeight - window.innerHeight)') && e.includes('const corre = Math.max(0, document.documentElement.offsetHeight - vista.alto) - window.scrollY') && !/scrollHeight/.test(e)
 afirmar(alturasBien(html, listaHtml, final, encuadre), 'el FAQ no le suma alto al layout: el escenario va en la pantalla del pie y la lista cuelga después (desborde, no alto): el final del pie y su encuadre miden el layout (el encastre corre al fondo del pie) y la escena (las secciones) no se corre')
 controlPositivo('  el detector ve la lista en el flujo del home', [html, listaHtml.replace(' absolute inset-x-0 top-full', ''), final, encuadre] as const, ([h, l, f, e]) => alturasBien(h, l, f, e))
