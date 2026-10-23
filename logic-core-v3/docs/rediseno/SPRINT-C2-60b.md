@@ -19,7 +19,7 @@ Teléfono y tablet
 - El título más grande en tres renglones («El panel donde» / «controlás» / «TODO»): un salto que sólo existe abajo de 1024
   (`cortesEnElTelefono` en el renglón; `TituloQueSePinta` lo dibuja), con su divisor (5,74) y su tope (10svh), nunca menos que antes.
 - `?palabra-movil=debajo` es el producto (bandera borrada): cada palabra fundida del ancho de la sección (su ancho en em, medido contra el
-  binario, por 1,03) y más notoria (alfa 0,06: 1,13:1). Subida un cuarto de su alto, para quedar sobre el título.
+  binario, por 1,015: la caja al 98,5 %, la tinta del 94 al 98 %) y más notoria (alfa 0,06: 1,13:1). Subida un cuarto de su alto, para quedar sobre el título.
 - Los títulos de los módulos en Archivo (la cara de display del sitio) a 600, en minúsculas y en el tamaño `titulo-l` fluido (24 px a 390):
   distintos del cuerpo (Chivo 15) y del título general (Archivo 700 en mayúsculas).
 - «Lo que nos distingue» abajo de 1024 en dos renglones, de lado a lado.
@@ -50,3 +50,14 @@ Teléfono y tablet
   del CTA. La escena después del Panel (Por qué develOP) llega como antes.
 - 768 y 390: el título en tres renglones y grande; cada palabra fundida de lado a lado y un poco más notoria, detrás del título del módulo;
   los títulos de los módulos en Archivo, distintos del texto.
+
+## Ronda 2 (después de la medición del orquestador en la integración)
+
+- Las 5 fallas de ancho eran del BANCO: `tinta` restaba `Math.min(…lefts, 0)`, o sea 0, y daba el BORDE DERECHO de la palabra en la
+  ventana, no su ancho. El margen fijo de 32 px de la sección pesaba más cuanto más angosta la pantalla (101,6 % a 1024, 107,8 % a 390); en
+  las fotos la tinta estaba adentro (≈ 93–96 %).
+- El banco mide ahora las dos cosas, contra el ancho de lo que contiene la palabra: la CAJA (la unión de los rectángulos, que no tiene que
+  pasar el 100 %) y la TINTA (el renglón más ancho en un lienzo con la fuente, el tamaño y el interletrado computados; del 94 al 100 %).
+  Controles: `CONTROL=palabras-chicas` (el tamaño de antes) y `CONTROL=palabras-desbordadas` (más grandes que la sección).
+- El margen de las palabras pálidas bajó de 3 % a 1,5 % (`MARGEN_DE_LA_PALABRA` 1,015; los divisores del título 7,79 y 4): la caja al
+  98,5 % y la tinta, sin el aire lateral de la primera y la última letra, del ~95 al ~97 %. `s6-tu-panel` pide la caja del 97 al 100 %.

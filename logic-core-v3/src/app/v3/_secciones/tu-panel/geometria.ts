@@ -68,10 +68,10 @@ export const TIPO = {
   interlineado: 0.9,
   /** La palabra fundida de los módulos desde 1024: el ancho de su columna sobre esto («RESULTADOS», la más larga, mide 4,4 em). */
   divisorDeLaPalabra: 4.8,
-  /** [C2 60b] La palabra pálida del título: desde 1024 «LO QUE NOS DISTINGUE» en un renglón (7,67 em) de lado a lado. */
-  divisorDeLaPalabraDelTitulo: 7.9,
+  /** [C2 60b] La palabra pálida del título: desde 1024 «LO QUE NOS DISTINGUE» en un renglón (7,67 em) de lado a lado, con el 1,5 % de margen de `MARGEN_DE_LA_PALABRA`. */
+  divisorDeLaPalabraDelTitulo: 7.79,
   /** [C2 60b] Abajo de 1024, en dos renglones: lo manda «LO QUE NOS» (3,94 em). */
-  divisorDeLaPalabraDelTituloAngosta: 4.06,
+  divisorDeLaPalabraDelTituloAngosta: 4,
   /** El grosor del subrayado de «TODO», en em. */
   grosorDelSubrayado: 0.055,
 } as const
@@ -87,10 +87,11 @@ export const tamanoDelTituloAngosto = (anchoUtil: number, altoVentana: number): 
 
 /**
  * [C2 60b] ABAJO DE 1024 CADA PALABRA FUNDIDA OCUPA EL ANCHO DE LA SECCIÓN (`?palabra-movil=debajo`, ahora el producto): su
- * ancho en em en la 700 (medido contra el binario por `s6-tu-panel`) por un 3 % de margen es el divisor de su tamaño.
+ * ancho en em en la 700 (medido contra el binario por `s6-tu-panel`) por un 1,5 % de margen es el divisor de su tamaño: la caja (el avance) queda en el 98,5 % y la TINTA,
+ * sin el aire lateral de la primera y la última letra, entre el 94 y el 98 % (lo mide `panel-b6`, `MODO=espacios`).
  */
 export const EM_DE_LA_PALABRA: Readonly<Record<string, number>> = { Clientes: 3.24, Resultados: 4.46, Chatbot: 3.23 }
-export const MARGEN_DE_LA_PALABRA = 1.03
+export const MARGEN_DE_LA_PALABRA = 1.015
 export const divisorDeLaPalabraAngosta = (palabra: string): number => Number(((EM_DE_LA_PALABRA[palabra] ?? EM_DE_LA_PALABRA.Resultados) * MARGEN_DE_LA_PALABRA).toFixed(3))
 
 /** El alfa de la palabra fundida: la tinta sobre el papel al 1,0595:1 de las palabras del fondo de antes (el «What's new» de nk). */

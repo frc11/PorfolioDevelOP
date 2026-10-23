@@ -89,7 +89,7 @@ export function afirmacionesDeC2({ quieto, codigo, tabla, fuenteDe }: EntradaDeC
   const ocupa = (texto: string, divisor: number): number => emDe(texto) / divisor
   const desde1024 = ocupa(palabra, TIPO.divisorDeLaPalabraDelTitulo)
   const abajo = Math.max(ocupa(PALABRA_DEL_TITULO[0], TIPO.divisorDeLaPalabraDelTituloAngosta), ocupa(PALABRA_DEL_TITULO[1], TIPO.divisorDeLaPalabraDelTituloAngosta))
-  const deLadoALado = (o: number): boolean => o >= 0.9 && o < 1
+  const deLadoALado = (o: number): boolean => o >= 0.97 && o < 1
   afirmar(deLadoALado(desde1024) && deLadoALado(abajo), `  de lado a lado: desde 1024 en un renglón (el ${(desde1024 * 100).toFixed(1)} % del ancho), abajo en dos (el más ancho, el ${(abajo * 100).toFixed(1)} %)`)
   controlPositivo('  el detector VE una palabra que no llega a los bordes (con el divisor del título)', ocupa(palabra, TIPO.divisorDelTitulo), deLadoALado)
   afirmar(/<span aria-hidden="true" data-pieza="palabra-del-titulo"[^>]*>Lo que nos <br data-corte="" class="escritorio:hidden"\/>distingue<\/span>/.test(quieto), '  el corte de los dos renglones existe sólo abajo de 1024')

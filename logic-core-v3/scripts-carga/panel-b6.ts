@@ -21,11 +21,15 @@
  * LAYOUT: la cabecera, las filas, el CTA), contra lo que declara `geometria.ts` (a ±2 px) y, desde 1024, contra los topes del ítem 15
  * (título → primer módulo ≤ 20svh, entre módulos ≤ 25svh, último módulo → CTA ≤ 10svh). Imprime también el aire VISIBLE hasta el
  * titular del CTA (con el de adentro del CTA, de la 60c), el alto de la sección y su `k`, y lo que sólo se ve en el sitio: los
- * renglones del título (2 desde 1024, 3 abajo), «Lo que nos distingue» (1 renglón desde 1024, 2 abajo, de lado a lado), abajo de
- * 1024 cada palabra fundida del ancho de la sección y los títulos de los módulos en Archivo a 600.
+ * renglones del título (2 desde 1024, 3 abajo), «Lo que nos distingue» (1 renglón desde 1024, 2 abajo) y, abajo de 1024, cada
+ * palabra fundida: de lado a lado y adentro (la TINTA del 94 al 100 % del ancho, medida en un lienzo con la fuente computada; la CAJA,
+ * sin pasarse), y los títulos de los módulos en Archivo a 600.
  *   MODO=espacios npx tsx scripts-carga/panel-b6.ts
- *   MODO=espacios CONTROL=espacios-de-antes …   le devuelve a la sección los espacios de antes (una hoja con `!important` sobre sus
- *                                               variables): los espacios tienen que dar FALLA en los cuatro anchos.
+ *   MODO=espacios CONTROL=espacios-de-antes …    le devuelve a la sección los espacios de antes (una hoja con `!important` sobre sus
+ *                                                variables): los espacios tienen que dar FALLA en los cuatro anchos.
+ *   MODO=espacios CONTROL=palabras-chicas …      las palabras pálidas al tamaño de antes: FALLA «Lo que nos distingue» en los cuatro
+ *                                                anchos y las palabras fundidas a 768 y 390 (la tinta no llega a los bordes).
+ *   MODO=espacios CONTROL=palabras-desbordadas … más grandes que la sección: las mismas FALLAN (la caja se pasa).
  */
 import { rmSync } from 'node:fs'
 import os from 'node:os'
@@ -39,7 +43,7 @@ const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? ''
 const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'espacios'].includes(MODO)) throw new Error(`MODO=${MODO}: espacios`)
-if (!['', 'espacios-de-antes'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: espacios-de-antes`)
+if (!['', 'espacios-de-antes', 'palabras-chicas', 'palabras-desbordadas'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: espacios-de-antes | palabras-chicas | palabras-desbordadas`)
 const ANCHOS = (process.env.ANCHOS ?? (MODO === 'espacios' ? '1440x900,1024x768,768x1024,390x844' : '1440x900,1024x768')).split(',').map((a) => a.split('x').map(Number) as [number, number])
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -254,8 +258,8 @@ interface MedidaDelCuerpo {
   readonly hastaElTitularDelCta: number
   readonly seccion: number
   readonly renglonesDelTitulo: number
-  readonly palabraDelTitulo: { readonly renglones: number; readonly ocupa: number }
-  readonly palabras: readonly number[]
+  readonly palabraDelTitulo: Ocupacion
+  readonly palabras: readonly Ocupacion[]
   readonly titulos: readonly { readonly familia: string; readonly peso: string; readonly mayusculas: boolean }[]
 }
 
@@ -265,14 +269,38 @@ async function cuerpo(p: Page): Promise<MedidaDelCuerpo> {
   return p.evaluate(() => {
     const raiz = document.querySelector('[data-panel="tu-panel"]')
     const caja = (s: string): DOMRect | null => raiz?.querySelector(s)?.getBoundingClientRect() ?? null
-    /** La tinta de un elemento: la unión de las cajas de sus renglones de texto (sin la caja del elemento, que es de lado a lado). */
-    const tinta = (el: Element | null): { readonly ancho: number; readonly renglones: number } => {
-      if (el === null) return { ancho: 0, renglones: 0 }
+    /**
+     * [C2 60b, corregido] CUÁNTO OCUPA UNA PALABRA PÁLIDA de un ancho dado, en dos medidas: la CAJA (la unión de los rectángulos de
+     * sus renglones: el avance de las letras, lo que podría desbordar) y la TINTA (lo que se ve: el renglón más ancho medido en un
+     * lienzo con la fuente, el tamaño y el interletrado computados, de su borde izquierdo de tinta al derecho, sin el aire lateral de la
+     * primera y la última letra). La primera versión restaba `min(…, 0)`: daba el BORDE DERECHO en la ventana, no el ancho (el
+     * margen fijo de 32 px de la sección pesaba más cuanto más angosto: 101,6 % a 1024, 107,8 % a 390).
+     */
+    const lienzo = document.createElement('canvas').getContext('2d') as (CanvasRenderingContext2D & { letterSpacing: string }) | null
+    const ocupacion = (el: Element | null, ancho: number): Ocupacion => {
+      if (el === null || lienzo === null || !(ancho > 0)) return { renglones: 0, caja: 0, tinta: 0 }
       const rango = document.createRange()
       rango.selectNodeContents(el)
       const cajas = [...rango.getClientRects()].filter((r) => r.width > 0 && r.height > 0)
       const tops = new Set(cajas.map((r) => Math.round(r.top / 4)))
-      return { ancho: Math.max(...cajas.map((r) => r.right), 0) - Math.min(...cajas.map((r) => r.left), 0), renglones: tops.size }
+      const caja = cajas.length === 0 ? 0 : Math.max(...cajas.map((r) => r.right)) - Math.min(...cajas.map((r) => r.left))
+      const s = getComputedStyle(el)
+      lienzo.font = `${s.fontStyle} ${s.fontWeight} ${s.fontSize} ${s.fontFamily}`
+      lienzo.letterSpacing = s.letterSpacing === 'normal' ? '0px' : s.letterSpacing
+      // Los renglones como se dibujan: el texto partido en cada salto que se ve (el del título, sólo abajo de 1024).
+      const renglones: string[] = ['']
+      for (const n of Array.from(el.childNodes)) {
+        if (n instanceof HTMLBRElement && getComputedStyle(n).display !== 'none') renglones.push('')
+        else renglones[renglones.length - 1] += n.textContent ?? ''
+      }
+      const tintas = renglones
+        .map((t) => t.replace(/\s+/g, ' ').trim())
+        .filter((t) => t !== '')
+        .map((t) => {
+          const m = lienzo.measureText(s.textTransform === 'uppercase' ? t.toUpperCase() : t)
+          return m.actualBoundingBoxLeft + m.actualBoundingBoxRight
+        })
+      return { renglones: tops.size, caja: caja / ancho, tinta: Math.max(...tintas, 0) / ancho }
     }
     const encabezado = caja('[data-pieza="encabezado-del-panel"]')
     const lista = caja('[data-pieza="modulos-del-panel"]')
@@ -291,11 +319,8 @@ async function cuerpo(p: Page): Promise<MedidaDelCuerpo> {
       hastaElTitularDelCta: (titularDelCta?.top ?? 0) - (ultimo?.bottom ?? 0),
       seccion: raiz?.getBoundingClientRect().height ?? 0,
       renglonesDelTitulo: new Set(palabrasDelTitulo).size,
-      palabraDelTitulo: (() => {
-        const t = tinta(raiz?.querySelector('[data-pieza="palabra-del-titulo"]') ?? null)
-        return { renglones: t.renglones, ocupa: t.ancho / (encabezado?.width ?? 1) }
-      })(),
-      palabras: grupos.map((g) => tinta(g.querySelector('[data-pieza="palabra-fundida"]')).ancho / g.getBoundingClientRect().width),
+      palabraDelTitulo: ocupacion(raiz?.querySelector('[data-pieza="palabra-del-titulo"]') ?? null, encabezado?.width ?? 0),
+      palabras: grupos.map((g) => ocupacion(g.querySelector('[data-pieza="palabra-fundida"]'), g.getBoundingClientRect().width)),
       titulos: grupos.map((g) => {
         const s = getComputedStyle(g.querySelector('h3') ?? g)
         return { familia: s.fontFamily, peso: s.fontWeight, mayusculas: s.textTransform === 'uppercase' }
@@ -304,8 +329,29 @@ async function cuerpo(p: Page): Promise<MedidaDelCuerpo> {
   })
 }
 
-/** [C2 60b] `CONTROL=espacios-de-antes`: la sección con los espacios de B6 (la hoja le gana a las variables en línea). */
-const ESPACIOS_DE_ANTES = '[data-panel="tu-panel"] > div { --respiro: 61svh !important; --entre-filas: 100svh !important; --antes-del-cta: 100svh !important; --respiro-angosto: 30svh !important; --entre-filas-angosto: 30svh !important; }'
+/** [C2 60b] Lo que ocupa una palabra pálida, en fracción del ancho de lo que la contiene: sus renglones, su caja y su tinta. */
+interface Ocupacion {
+  readonly renglones: number
+  readonly caja: number
+  readonly tinta: number
+}
+
+/** [C2 60b] De lado a lado y adentro: la tinta del 94 al 100 % del ancho y la caja que no lo pasa. */
+const deLadoALado = (o: Ocupacion): boolean => o.tinta >= 0.94 && o.tinta <= 1 && o.caja <= 1
+const enPorciento = (o: Ocupacion): string => `tinta ${(o.tinta * 100).toFixed(1)} %, caja ${(o.caja * 100).toFixed(1)} %`
+
+/**
+ * [C2 60b] LOS CONTROLES de `MODO=espacios` (una hoja que le gana a las variables en línea):
+ *   `espacios-de-antes`      la sección con los espacios de B6: los espacios tienen que dar FALLA;
+ *   `palabras-chicas`        las palabras pálidas al tamaño de antes (la del título con el divisor del título, las de los módulos sobre 7):
+ *                            la tinta no llega a los bordes y tienen que dar FALLA;
+ *   `palabras-desbordadas`   las palabras más grandes que la sección: la caja la pasa y tienen que dar FALLA.
+ */
+const HOJA_DEL_CONTROL: Readonly<Record<string, string>> = {
+  'espacios-de-antes': '[data-panel="tu-panel"] > div { --respiro: 61svh !important; --entre-filas: 100svh !important; --antes-del-cta: 100svh !important; --respiro-angosto: 30svh !important; --entre-filas-angosto: 30svh !important; }',
+  'palabras-chicas': '[data-panel="tu-panel"] > div { --divisor-de-la-palabra-del-titulo: 10.1 !important; --divisor-de-la-palabra-del-titulo-angosta: 7 !important; } [data-panel="tu-panel"] [data-pieza="grupo-del-modulo"] { --divisor-de-esta-palabra: 7 !important; }',
+  'palabras-desbordadas': '[data-panel="tu-panel"] > div { --divisor-de-la-palabra-del-titulo: 7.3 !important; --divisor-de-la-palabra-del-titulo-angosta: 3.7 !important; } [data-panel="tu-panel"] [data-pieza="grupo-del-modulo"] { --divisor-de-esta-palabra: 3 !important; }',
+}
 
 async function main(): Promise<void> {
   const fallas: string[] = []
@@ -332,7 +378,8 @@ async function main(): Promise<void> {
 
     await irA(p, '')
     if (MODO === 'espacios') {
-      if (CONTROL === 'espacios-de-antes') await p.addStyleTag({ content: ESPACIOS_DE_ANTES })
+      const hoja = HOJA_DEL_CONTROL[CONTROL]
+      if (hoja !== undefined) await p.addStyleTag({ content: hoja })
       const m = await cuerpo(p)
       const escritorio = m.ventana.ancho >= 1024
       const svh = m.ventana.alto / 100
@@ -345,9 +392,9 @@ async function main(): Promise<void> {
       anotar(cerca(m.antesDelCta, esperado.antes) && topes, `${tag} espacios · último módulo → CTA ${px(m.antesDelCta)} (declarado ${String(esperado.antes)}svh${escritorio ? '; tope 10' : ''}); hasta el titular del CTA, con su aire de adentro: ${px(m.hastaElTitularDelCta)}`, `espacio-cta-${tag}`)
       console.log(`      ${tag} la sección mide ${m.seccion.toFixed(0)} px = ${(m.seccion / m.ventana.alto).toFixed(3)} pantallas${escritorio ? ` (antes 7; k = ${(m.seccion / (7 * m.ventana.alto)).toFixed(4)})` : ' (el alto de antes es el modelo de `altoViejoAngosto`)'}`)
       anotar(m.renglonesDelTitulo === (escritorio ? 2 : 3), `${tag} el título en ${String(m.renglonesDelTitulo)} renglones (${escritorio ? '2' : '3'})`, `renglones-${tag}`)
-      anotar(m.palabraDelTitulo.renglones === (escritorio ? 1 : 2) && m.palabraDelTitulo.ocupa >= 0.85 && m.palabraDelTitulo.ocupa <= 1.01, `${tag} «Lo que nos distingue» en ${String(m.palabraDelTitulo.renglones)} renglón(es), ocupa el ${(m.palabraDelTitulo.ocupa * 100).toFixed(1)} % del ancho`, `palabra-del-titulo-${tag}`)
+      anotar(m.palabraDelTitulo.renglones === (escritorio ? 1 : 2) && deLadoALado(m.palabraDelTitulo), `${tag} «Lo que nos distingue» en ${String(m.palabraDelTitulo.renglones)} renglón(es), de lado a lado y adentro (${enPorciento(m.palabraDelTitulo)} del ancho)`, `palabra-del-titulo-${tag}`)
       if (!escritorio) {
-        anotar(m.palabras.length === 3 && m.palabras.every((o) => o >= 0.85 && o <= 1.01), `${tag} cada palabra fundida del ancho de la sección: ${m.palabras.map((o) => `${(o * 100).toFixed(0)} %`).join(' · ')}`, `palabras-${tag}`)
+        anotar(m.palabras.length === 3 && m.palabras.every(deLadoALado), `${tag} cada palabra fundida del ancho de la sección y adentro: ${m.palabras.map(enPorciento).join(' · ')}`, `palabras-${tag}`)
         anotar(m.titulos.length === 3 && m.titulos.every((t) => /archivo/i.test(t.familia) && t.peso === '600' && !t.mayusculas), `${tag} los títulos de los módulos en Archivo a 600, en minúsculas (${m.titulos.map((t) => `${t.familia.split(',')[0]} ${t.peso}`).join(' · ')})`, `titulos-${tag}`)
       }
       await ctx.close()
