@@ -95,7 +95,7 @@ async function main(): Promise<void> {
     const destino = await p.evaluate(`(() => { const t = document.querySelector('[data-panel="trabajos"]')?.getBoundingClientRect(); return { hash: location.hash, trabajosEnElCuadro: !!t && t.top < innerHeight && t.bottom > 0 } })()`)
     console.log(JSON.stringify({ modo: MODO, frente, enHover, pastilla, alSalir: fuera, destino }))
   } else {
-    const visibles = (await p.evaluate(`[...document.querySelectorAll('[data-pieza="resena-del-aro"]')].map((a, i) => [i, Number(a.style.opacity || 0)]).filter(([, o]) => o > 0.02)`)) as [number, number][]
+    const visibles = (await p.evaluate(`[...document.querySelectorAll('[data-pieza="resena-del-aro"]')].map((a, i) => [i, a.style.visibility === 'visible' ? Number(a.style.opacity || 1) : 0]).filter(([, o]) => o > 0.02)`)) as [number, number][]
     const medidas = []
     for (const [i, o] of visibles) medidas.push({ placa: i, opacidad: o, contraste: await contrasteDe(p, i, null) })
     const control = await contrasteDe(p, frente.indice, 0.3)
@@ -103,7 +103,7 @@ async function main(): Promise<void> {
     // ancestros), la visibilidad, el cuerpo, el texto, su caja y si lo que hay en su centro es ella (nada del DOM la tapa).
     const diagnostico = await p.evaluate(`(() => { const a = document.querySelectorAll('[data-pieza="resena-del-aro"]')[${String(frente.indice)}]; const cita = a.querySelector('span > span'); let o = 1; for (let e = cita; e; e = e.parentElement) o *= Number(getComputedStyle(e).opacity); const r = a.getBoundingClientRect(); const c = getComputedStyle(cita); const arriba = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { color: c.color, fondo: getComputedStyle(cita.parentElement).backgroundColor, opacidadEfectiva: Math.round(o * 1000) / 1000, visibilidad: c.visibility, cuerpo: c.fontSize, texto: (cita.textContent || '').slice(0, 40), caja: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)], encima: !!arriba && a.contains(arriba), transform: a.style.transform.slice(0, 60) } })()`)
     await p.screenshot({ path: path.join(SALIDA, `aro-${String(ANCHO)}.png`) })
-    console.log(JSON.stringify({ modo: MODO, cuadro: `${String(ANCHO)}x${String(ALTO)}`, enHover, pastilla, diagnostico, medidas, criterio: medidas.every((x) => x.opacidad < 0.99 || (x.contraste !== null && x.contraste.nucleo >= 4.5)) ? 'ok: las de adelante, núcleo >= 4,5' : 'FALLA: una de adelante con el núcleo < 4,5 (o sin texto)', control: control !== null && control.nucleo < 4.5 ? `ok (núcleo ${String(control.nucleo)}:1 con el texto al 30 %)` : `FALLA: el control dio ${JSON.stringify(control)}` }))
+    console.log(JSON.stringify({ modo: MODO, cuadro: `${String(ANCHO)}x${String(ALTO)}`, enHover, pastilla, diagnostico, medidas, criterio: medidas.every((x) => x.opacidad >= 1 && x.contraste !== null && x.contraste.nucleo >= 4.5) ? 'ok: [C2-70] todas las visibles enteras (opacidad 1), nucleo >= 4,5' : 'FALLA: una visible a medias (opacidad < 1) o con el nucleo < 4,5', control: control !== null && control.nucleo < 4.5 ? `ok (núcleo ${String(control.nucleo)}:1 con el texto al 30 %)` : `FALLA: el control dio ${JSON.stringify(control)}` }))
   }
   await ctx.close()
 }

@@ -26,7 +26,8 @@ import { TRANSFORMACION, caraDelCta } from '../escena/ctaDelFinal/transformacion
 import { ENGANCHE_DE_LAS_GRIETAS, avisarLaVueltaDelCta } from '../escena/resenas/enganches'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { CAPA_DEL_ARO } from '../escena/resenas/enVivo'
-import { llevarLaTarjeta, nuevaTarjeta, tamanoDeLasTarjetas } from '../escena/resenas/tarjetas'
+import { OPACIDAD_DE_LA_TARJETA, cajaDelLogo, esconderLasTarjetas, llevarLaTarjeta, nuevaCaja, nuevaTarjeta, tamanoDeLasTarjetas } from '../escena/resenas/tarjetas'
+import { armarLasPlacas, enLaNiebla } from '../escena/resenas/placas'
 import { aplicar } from '../pie3d/homografia'
 import { ARO, VELOCIDAD_DE_LECTURA, medidasDeLaEscala, medidasDelAro, textoConLaEntrada, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
 import { seVeConElGiro } from '../escena/titulos3d/giro'
@@ -310,7 +311,7 @@ const llevada = (e: number): { readonly el: Escrita; readonly esquinas: number[]
 }
 const armada = llevada(1)
 const sobreLaPlaca = (x: { readonly esquinas: number[][]; readonly placa: number[][] }): boolean => x.esquinas.every((q, k) => Math.hypot(q[0] - x.placa[k][0], q[1] - x.placa[k][1]) <= 2.5)
-afirmar(armada.el.style.visibility === 'visible' && armada.el.style.opacity === '1.000', `con el aro armado, la de frente: visible y entera (opacidad ${armada.el.style.opacity}; maqueta de ${String(anchoDeMaqueta)} px)`)
+afirmar(armada.el.style.visibility === 'visible' && armada.el.style.opacity === OPACIDAD_DE_LA_TARJETA, `con el aro armado, la de frente: visible y entera (opacidad ${armada.el.style.opacity}; maqueta de ${String(anchoDeMaqueta)} px)`)
 afirmar(sobreLaPlaca(armada) && armada.esquinas.every(([x, y]) => x >= 0 && x <= 1440 && y >= 0 && y <= 900), `  y su caja cae en el frente de su placa (a menos de 2,5 px en las cuatro esquinas), adentro del cuadro: ${armada.esquinas.map((q) => q.map(Math.round).join(',')).join(' · ')}`)
 controlPositivo('el detector ve una tarjeta corrida de su placa', { ...armada, esquinas: armada.esquinas.map(([x, y]) => [x + 40, y]) }, sobreLaPlaca)
 const aMitad = llevada(0.68)
@@ -332,5 +333,45 @@ const encuadre = (m: typeof MB): { readonly ancho: number; readonly tapa: number
 const calmo = (m: typeof MB): boolean => encuadre(m).ancho <= 0.23 && encuadre(m).tapa <= 0.16
 afirmar(calmo(MB), `la de frente mide ${(encuadre(MB).ancho * 100).toFixed(0)} % del ancho y tapa ${(encuadre(MB).tapa * 100).toFixed(0)} % de la caja del logo (eran 33 % y 34 %)`)
 controlPositivo('el detector ve el aro de antes (radio 6,4, placas de 3,2 × 2,15)', { ...medidasDeLaEscala(1), radio: 6.4, ancho: 3.2, alto: 2.15 }, calmo)
+
+// e · [C2-70] Sólidas: ninguna tarjeta ni placa con opacidad < 1, en toda una vuelta; las de los costados y alguna de atrás, con su texto.
+titulo('14 · [C2-70] Las tarjetas sólidas: opacidad 1 siempre (las de atrás también), escondidas sólo con visibility')
+const logoB = cajaDelLogo(camaraB, { ancho: 1440, alto: 900 }, nuevaCaja())
+const unaVuelta = (): { readonly opacidades: string[]; readonly conTexto: number; readonly deEspaldas: number } => {
+  const opacidades: string[] = []
+  let conTexto = 0
+  let deEspaldas = 0
+  const estados = Array.from({ length: ARO.placas }, nuevaTarjeta)
+  const els = Array.from({ length: ARO.placas }, nuevaEscrita)
+  for (let paso = 0; paso < 72; paso += 1) {
+    const giro = (paso * 2 * Math.PI) / 72
+    for (let i = 0; i < ARO.placas; i += 1) {
+      const p = poseDeLaPlaca(i, 1, giro, MB, nuevaPose())
+      const texto = nieblaDeLaPlaca(p.angulo) < 0.995 ? 1 : 0
+      llevarLaTarjeta(els[i] as unknown as HTMLElement, estados[i], new THREE.Vector3(p.x, centroY, p.z), p.mira, MB, texto, camaraB, { ancho: 1440, alto: 900 }, anchoDeMaqueta, { logo: logoB })
+      opacidades.push(els[i].style.opacity)
+      if (els[i].style.visibility === 'visible') {
+        conTexto += 1
+        if (Math.cos(p.angulo) < 0) deEspaldas += 1
+      }
+    }
+  }
+  esconderLasTarjetas(els as unknown as HTMLElement[], estados)
+  for (const el of els) opacidades.push(el.style.opacity)
+  return { opacidades, conTexto, deEspaldas }
+}
+const enteras = (x: { readonly opacidades: readonly string[] }): boolean => x.opacidades.every((o) => Number(o) >= 1)
+const vuelta = unaVuelta()
+afirmar(enteras(vuelta), `ninguna tarjeta con opacidad < 1 en una vuelta entera (${String(vuelta.opacidades.length)} escrituras; las escondidas, con visibility)`)
+controlPositivo('el detector ve una tarjeta a medias (la de antes: la opacidad con el ángulo)', { opacidades: [...vuelta.opacidades, '0.500'] }, enteras)
+afirmar(vuelta.conTexto / 72 >= 4 && vuelta.deEspaldas > 0, `con su texto: ${(vuelta.conTexto / 72).toFixed(1)} por cuadro (eran 2 o 3, las de adelante) y ${String(vuelta.deEspaldas)} en la nuca de una de atrás (fuera del logo)`)
+const placaDePrueba = armarLasPlacas(new THREE.BufferGeometry())[0]
+const solidas = (u: readonly number[]): boolean =>
+  u.every((n) => {
+    enLaNiebla(placaDePrueba, n, new THREE.Color(0x000000))
+    return placaDePrueba.cara.opacity === 1 && placaDePrueba.costado.opacity === 1 && !placaDePrueba.cara.transparent && placaDePrueba.cara.depthWrite
+  })
+afirmar(solidas([0, 0.25, 0.5, 0.75, 1]), 'las placas: opacas en toda la niebla (sólo cambia el color), sin transparencia, escriben su profundidad')
+controlPositivo('el detector ve la placa de antes (la opacidad con la niebla)', [0, 0.5], (u) => u.every((n) => 1 - n === 1))
 
 cerrar('s83-resenas')

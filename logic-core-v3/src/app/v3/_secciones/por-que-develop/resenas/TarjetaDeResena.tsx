@@ -11,10 +11,10 @@ import { TEXTO_DE_LAS_RESENAS, type Resena } from './contenido'
  */
 export function CaraDeLaResena({ resena, className }: { readonly resena: Resena; readonly className?: string }): React.JSX.Element {
   return (
-    <span className={cn('flex h-full w-full flex-col justify-between overflow-hidden rounded-[calc(var(--ancho-de-la-tarjeta)*0.073)] bg-fondo p-[calc(var(--ancho-de-la-tarjeta)*0.07)] text-left text-tinta', className)}>
+    <span className={cn('flex h-full w-full flex-col justify-between overflow-hidden rounded-[calc(var(--ancho-de-la-tarjeta)*0.073)] bg-fondo p-[calc(var(--ancho-de-la-tarjeta)*0.07)] text-left text-tinta group-data-[al-frente=si]:shadow-flotante', className)}>
       <span className="block text-[length:calc(var(--ancho-de-la-tarjeta)/19)] leading-texto">«{resena.cita}»</span>
       <span className="flex items-center gap-[calc(var(--ancho-de-la-tarjeta)*0.04)]">
-        <span aria-hidden="true" className="block size-[calc(var(--ancho-de-la-tarjeta)*0.13)] shrink-0 rounded-circulo" style={{ backgroundImage: `url(${resena.foto})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        <span aria-hidden="true" className="block size-[calc(var(--ancho-de-la-tarjeta)*0.13)] shrink-0 rounded-circulo group-data-[al-frente=si]:ring-2 group-data-[al-frente=si]:ring-tinta" style={{ backgroundImage: `url(${resena.foto})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-[length:calc(var(--ancho-de-la-tarjeta)/22)] font-semi">{resena.nombre}</span>
           <span className="truncate text-[length:calc(var(--ancho-de-la-tarjeta)/26)] text-tinta-media">{resena.negocio}</span>

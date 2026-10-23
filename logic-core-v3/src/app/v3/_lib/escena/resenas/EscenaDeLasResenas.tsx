@@ -10,11 +10,11 @@ import { RESENAS } from '../../../_secciones/por-que-develop/resenas/contenido'
 import { hayBanco } from '../entorno'
 import { compilarConCuidado } from '../gpu/compilar'
 import { viajeEnCurso } from '../viaje'
-import { ARO, HONDO_DE_LA_BAJADA, escalaDelAro, medidasDeLaEscala, medidasDelAro, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, pasoDelLevante, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoConLaEntrada, textoDeLaPlaca, type GiroDelAro, type MedidasDelAro } from './aro'
+import { ARO, HONDO_DE_LA_BAJADA, escalaDelAro, medidasDeLaEscala, medidasDelAro, DESTACA, destaqueDeLaPlaca, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, pasoDelLevante, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoConLaEntrada, type GiroDelAro, type MedidasDelAro } from './aro'
 import { RESENAS_EN_VIVO, TARJETAS_DEL_ARO, ponerLaResena } from './enVivo'
 import { armarLasPlacas, enLaNiebla, geometriaDeLaPlaca, soltarLasPlacas, type PlacaArmada } from './placas'
 import { abrirElHueco, armarElHueco, soltarElHueco, type HuecoArmado } from './huecoDelAro'
-import { esconderLasTarjetas, llevarLaTarjeta, nuevaTarjeta, tamanoDeLasTarjetas, type EstadoDeLaTarjeta } from './tarjetas'
+import { cajaDelLogo, esconderLasTarjetas, llevarLaTarjeta, nuevaCaja, nuevaTarjeta, tamanoDeLasTarjetas, type CajaEnElCuadro, type EstadoDeLaTarjeta } from './tarjetas'
 
 /**
  * [NOCTURNO B2] EL ARO DE LAS RESEÑAS EN LA ESCENA (en su módulo, que se descarga aparte y sólo desde 1024) — diez placas de papel con
@@ -35,6 +35,8 @@ interface Estado {
   readonly levante: number[]
   readonly tarjetas: EstadoDeLaTarjeta[]
   readonly tamano: { ancho: number }
+  /** [C2-70] La caja del logo en el cuadro (px), en cada cuadro: el texto de la nuca de una placa de atrás no se pinta encima del logo. */
+  readonly logo: CajaEnElCuadro
   costoMs: number
 }
 
@@ -47,7 +49,7 @@ export default function EscenaDeLasResenas() {
   const escena = useThree((s) => s.scene)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
-  const m = useRef<Estado>({ placas: [], geometria: null, hueco: null, giro: { angulo: 0, velocidad: 0 }, levante: Array.from({ length: ARO.placas }, () => 0), tarjetas: Array.from({ length: ARO.placas }, nuevaTarjeta), tamano: { ancho: 0 }, costoMs: 0 })
+  const m = useRef<Estado>({ placas: [], geometria: null, hueco: null, giro: { angulo: 0, velocidad: 0 }, levante: Array.from({ length: ARO.placas }, () => 0), tarjetas: Array.from({ length: ARO.placas }, nuevaTarjeta), tamano: { ancho: 0 }, logo: nuevaCaja(), costoMs: 0 })
 
   // Las placas, con la medida de esta proporción (se rearman sólo si cambia la escala del aro).
   const escala = escalaDelAro(tam.width / Math.max(1, tam.height))
@@ -133,19 +135,25 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
   camara.updateMatrixWorld()
   const ancho = tamanoDeLasTarjetas(camara, cuadro.alto, medidas, centroY, s.tamano)
   const conTexto = textoConLaEntrada(e) * (1 - Math.min(1, v.bajada * 4))
+  cajaDelLogo(camara, cuadro, s.logo)
   for (let i = 0; i < s.placas.length; i += 1) {
     const p = s.placas[i]
     poseDeLaPlaca(i, e, s.giro.angulo, medidas, POSE)
     s.levante[i] = pasoDelLevante(s.levante[i], armado && v.senalada === i ? 1 : 0, dt)
     const y = centroY + s.levante[i] * ARO.levanta * k - v.bajada * HONDO_DE_LA_BAJADA
+    // [C2-70] La de adelante se destaca: un poco más grande (la placa y su tarjeta) y con la cara marcada.
+    const destaque = POSE.enElAro && armado ? destaqueDeLaPlaca(POSE.angulo) : 0
+    const escala = 1 + DESTACA.escala * destaque
     p.malla.position.set(POSE.x, y, POSE.z)
     p.malla.rotation.set(0, POSE.mira, 0)
+    p.malla.scale.setScalar(escala)
     const enLaNieblaDeLaSala = POSE.enElAro ? nieblaDeLaPlaca(POSE.angulo) : POSE.cadena === 1 ? 0.35 : 0
     enLaNiebla(p, enLaNieblaDeLaSala, niebla)
-    p.malla.visible = conPlacas && enLaNieblaDeLaSala < 0.995
+    // [C2-70] Sólidas y siempre visibles: la niebla ya no esconde ninguna (sólo las tiñe).
+    p.malla.visible = conPlacas
     ponerLaResena(i, resenaDeLaPlaca(i, s.giro.angulo, RESENAS.length))
-    // [B2, después de verla] También la que todavía viene por la recta de adelante (mira a la cámara): la de atrás, de espaldas, no.
-    const texto = conPlacas ? textoDeLaPlaca(POSE.angulo) * conTexto : 0
-    llevarLaTarjeta(TARJETAS_DEL_ARO[i], s.tarjetas[i], CENTRO.set(POSE.x, y, POSE.z), POSE.mira, medidas, texto, camara, cuadro, ancho)
+    // [C2-70] El texto en la cara que mira a la cámara (también la nuca de las de atrás), salvo en el fondo del aro, donde cambia de reseña.
+    const texto = conPlacas && nieblaDeLaPlaca(POSE.angulo) < 0.995 ? conTexto : 0
+    llevarLaTarjeta(TARJETAS_DEL_ARO[i], s.tarjetas[i], CENTRO.set(POSE.x, y, POSE.z), POSE.mira, medidas, texto, camara, cuadro, ancho, { escala, destacada: destaque > 0.5, logo: s.logo })
   }
 }
