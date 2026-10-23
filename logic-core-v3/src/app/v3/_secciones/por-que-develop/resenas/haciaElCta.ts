@@ -50,15 +50,33 @@ export function objetivoDeLaBajada(p: number, previo: 0 | 1): 0 | 1 {
  * que la primera placa baje), se sostiene mientras bajan y suelta cuando ya se fueron (la bajada pasó `suelta`), hasta 0 al cerrarse el
  * anillo: ahí la cámara pasa al CTA. `margen`: si el scroll ya pasó mucho de la llegada a C (el progreso de la transformación), el CTA
  * manda y el desvío se apaga con el scroll. Fuera de la animación, 0: antes y después del guardado la cámara es la de siempre.
+ * [C2-70e, verificación] Y EL CTA ESPERA A LA CÁMARA (`esperaDelCta`): con la cámara en B, el cartel del CTA (anclado en el plano de C) se
+ * veía grande y cortado arriba. Mientras dura el guardado la transformación no arranca (el título queda centrado, en su lugar) y suelta
+ * un poco DESPUÉS que la cámara (`ctaSuelta`; la cámara suelta de `suelta` a `soltada`): con la inercia del rig la cámara llega detrás de
+ * su objetivo, y así el cartel nunca se adelanta a ella (s83 §16 lo simula cuadro a cuadro). Primero se enfoca el guardado, después se
+ * pasa al CTA.
  */
-export const CAMARA_DEL_GUARDADO_EN_EL_GATILLO = { llega: 0.13, suelta: 0.66, margen: [0.4, 0.2] } as const
+export const CAMARA_DEL_GUARDADO_EN_EL_GATILLO = { llega: 0.13, suelta: 0.66, soltada: 0.9, ctaSuelta: 0.72, margen: [0.4, 0.2] } as const
+
+const C_G = CAMARA_DEL_GUARDADO_EN_EL_GATILLO
+/** Con el scroll `p`: 1 hasta el margen (después de la llegada a C), 0 pasado. */
+const enElMargen = (p: number): number => 1 - suave(tramo(p, C_G.margen[0], C_G.margen[1]))
 
 /** El peso del desvío de la cámara con la animación de la bajada `t` y el progreso de la transformación `p` (0 a 1). */
 export function pesoDeLaCamara(t: number, p: number): number {
-  const C = CAMARA_DEL_GUARDADO_EN_EL_GATILLO
   const u = acotar01(t)
-  const enfoque = suave(tramo(u, 0, C.llega)) * (1 - suave(tramo(u, C.suelta, 1 - C.suelta)))
-  return enfoque * (1 - suave(tramo(p, C.margen[0], C.margen[1])))
+  return suave(tramo(u, 0, C_G.llega)) * (1 - suave(tramo(u, C_G.suelta, C_G.soltada - C_G.suelta))) * enElMargen(p)
+}
+
+/**
+ * [C2-70e] Cuánto espera el CTA (0 a 1; su progreso es `p · (1 − espera)`): entero desde antes del disparo (`disparada`: la bajada va hacia
+ * 1) y mientras dura el guardado; suelta detrás de la cámara (de `ctaSuelta` al cierre del anillo) y con el mismo margen. Sin disparar y con
+ * la animación en 0, sólo antes del gatillo (el CTA todavía no arrancó); pasado el gatillo sin disparo (no ocurre: se decide antes), nada.
+ */
+export function esperaDelCta(t: number, p: number, disparada: boolean): number {
+  const u = acotar01(t)
+  if (!disparada && u <= 0 && p > HACIA_EL_CTA.gatillo.entra) return 0
+  return (1 - suave(tramo(u, C_G.ctaSuelta, 1 - C_G.ctaSuelta))) * enElMargen(p)
 }
 
 /**
