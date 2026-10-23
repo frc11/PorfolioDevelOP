@@ -5,7 +5,7 @@ import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { sonar } from '../../../_lib/sonido/bus'
 import { ARO } from '../../../_lib/escena/resenas/aro'
 import { CAPA_DEL_ARO, RESENAS_EN_VIVO, TARJETAS_DEL_ARO, resenaDeCadaPlaca, suscribirALasResenas, versionDeLasResenas } from '../../../_lib/escena/resenas/enVivo'
-import { RESENAS, enlaceDelTrabajo } from './contenido'
+import { RESENAS, TEXTO_DE_LAS_RESENAS, enlaceDelTrabajo } from './contenido'
 import { CaraDeLaResena, VerTrabajo } from './TarjetaDeResena'
 
 const PLACAS = Array.from({ length: ARO.placas }, (_, i) => i)
@@ -20,12 +20,14 @@ const UMBRAL_DEL_ARRASTRE = 6
  *
  *   · hover (mouse): el aro frena, la placa sube, suena el `tic` de la barra y aparece «Ver trabajo →» (CSS);
  *   · clic: el `clic` de siempre (el escucha global del sonido) y el ancla del trabajo;
- *   · con `?resenas-arrastre=si`, arrastrar gira el aro (con inercia al soltar); el clic de un arrastre no navega.
+ *   · arrastrar gira el aro (con inercia al soltar; por defecto desde C2-70, sin bandera); el clic de un arrastre no navega;
+ *   · [C2-70] con el mouse sobre el aro, el cartel «Mantené para arrastrar» sale desde el puntero y lo sigue (arrastrando, se va).
  */
-export function CapaDelAro({ arrastre }: { readonly arrastre: boolean }): React.JSX.Element {
+export function CapaDelAro(): React.JSX.Element {
   useSyncExternalStore(suscribirALasResenas, versionDeLasResenas, versionDeLasResenas)
   const indices = resenaDeCadaPlaca()
   const capa = useRef<HTMLDivElement>(null)
+  const cartel = useRef<HTMLSpanElement>(null)
   const arrastrado = useRef(false)
 
   useEffect(() => {
@@ -39,9 +41,21 @@ export function CapaDelAro({ arrastre }: { readonly arrastre: boolean }): React.
     const el = capa.current
     const v = RESENAS_EN_VIVO.arrastre
     v.activo = false
-    if (!arrastre || el === null) return undefined
+    if (el === null) return undefined
     let x: number | null = null
     let id = -1
+    // El cartel: sigue al mouse sobre una tarjeta del aro; se va al salir de todas o arrastrando.
+    const mostrarElCartel = (e: PointerEvent): void => {
+      const c = cartel.current
+      if (c === null || e.pointerType !== 'mouse') return
+      const sobreElAro = e.target instanceof Element && e.target.closest('[data-pieza="resena-del-aro"]') !== null && el.contains(e.target)
+      const visible = sobreElAro && !arrastrado.current
+      if (visible) {
+        const caja = el.getBoundingClientRect()
+        c.style.transform = `translate3d(${String(Math.round(e.clientX - caja.left + 14))}px, ${String(Math.round(e.clientY - caja.top + 18))}px, 0)`
+      }
+      if ((c.dataset.visible === 'si') !== visible) c.dataset.visible = visible ? 'si' : 'no'
+    }
     const abajo = (e: PointerEvent): void => {
       if (e.pointerType === 'touch' || e.button !== 0) return
       x = e.clientX
@@ -49,6 +63,7 @@ export function CapaDelAro({ arrastre }: { readonly arrastre: boolean }): React.
       arrastrado.current = false
     }
     const mover = (e: PointerEvent): void => {
+      mostrarElCartel(e)
       if (x === null || e.pointerId !== id) return
       const dx = e.clientX - x
       if (!arrastrado.current && Math.abs(dx) < UMBRAL_DEL_ARRASTRE) return
@@ -73,7 +88,7 @@ export function CapaDelAro({ arrastre }: { readonly arrastre: boolean }): React.
       window.removeEventListener('pointercancel', arriba)
       v.activo = false
     }
-  }, [arrastre])
+  }, [])
 
   return (
     <div
@@ -117,6 +132,15 @@ export function CapaDelAro({ arrastre }: { readonly arrastre: boolean }): React.
           </a>
         )
       })}
+      <span
+        ref={cartel}
+        data-pieza="cartel-del-arrastre"
+        data-visible="no"
+        className="pointer-events-none absolute top-0 left-0 origin-top-left scale-75 whitespace-nowrap rounded-[var(--radius-fuerte)] bg-tinta px-[var(--spacing-4)] py-[var(--spacing-2)] text-cuerpo text-fondo opacity-0 shadow-flotante transition-[opacity,scale] duration-media data-[visible=si]:scale-100 data-[visible=si]:opacity-100"
+        style={{ zIndex: 2000 }}
+      >
+        {TEXTO_DE_LAS_RESENAS.arrastrar}
+      </span>
     </div>
   )
 }

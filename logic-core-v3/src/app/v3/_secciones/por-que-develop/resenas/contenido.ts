@@ -21,6 +21,8 @@ export const TEXTO_DE_LAS_RESENAS = {
   verTrabajo: 'Ver trabajo →',
   anterior: 'Reseña anterior',
   siguiente: 'Reseña siguiente',
+  /** [C2-70] El cartel que sale desde el mouse sobre el aro (05-TEXTOS, Reseñas). */
+  arrastrar: 'Mantené para arrastrar',
   /** El nombre accesible de cada tarjeta (lleva al Portfolio). */
   enlace: (nombre: string, negocio: string): string => `Reseña de ${nombre}, ${negocio}. Ver el trabajo en el Portfolio`,
   /** El enlace de cada reseña para el lector y el teclado (aparece con el foco). */

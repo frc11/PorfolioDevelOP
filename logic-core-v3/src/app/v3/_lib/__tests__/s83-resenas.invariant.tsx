@@ -96,7 +96,9 @@ controlPositivo('el detector ve un tramo que rebobina antes del CTA', { giro: 0,
 afirmarIgual(e(0.6, 0), [0, 0, 0], 'gatillo: con la animación en 0, nada (aunque el scroll esté adentro)')
 afirmarIgual(e(0.6, 1), [1, 1, 1], '  y con la animación entera, todo')
 afirmar(objetivoDelGatillo(0.03, 0) === 1 && objetivoDelGatillo(0.01, 1) === 1 && objetivoDelGatillo(0.001, 1) === 0 && objetivoDelGatillo(0.01, 0) === 0, 'el gatillo: entra al pasar 0,02 del tramo, sale al volver arriba de 0,005 (sin titilar en el medio)')
-afirmar(varianteDeLaBandera(null) === 'scroll' && varianteDeLaBandera('gatillo') === 'gatillo' && varianteDeLaBandera('x') === 'scroll', '?resenas=: scroll por defecto, gatillo con la bandera')
+const gatilloPorDefecto = (f: (v: string | null) => string): boolean => f(null) === 'gatillo' && f('scroll') === 'scroll' && f('gatillo') === 'gatillo' && f('x') === 'gatillo'
+afirmar(gatilloPorDefecto(varianteDeLaBandera), '?resenas=: [C2-70] gatillo por defecto, scroll con la bandera (se conserva)')
+controlPositivo('el detector ve la bandera de antes (scroll por defecto)', (v: string | null) => (v === 'gatillo' ? 'gatillo' : 'scroll'), gatilloPorDefecto)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El giro del título: una sola cara a la vista, de canto en la mitad')
@@ -269,9 +271,12 @@ const hijaDeLaCaja = (f: string): boolean => /<\/motion\.div>\n(?:\s*<[A-Za-z][^
 afirmar(hijaDeLaCaja(porQue), 'la capa de las tarjetas es hija de la caja clavada, después de la levantada: ninguna opacidad de otra pieza le llega')
 controlPositivo('el detector ve la capa adentro de la levantada', '</motion.div>\n      <motion.div style={{ opacity }}>\n      <EscenarioDeLasResenas pin={pinDelBloque} />\n      </motion.div>\n    </div>', hijaDeLaCaja)
 afirmar(/className="contents"/.test(leer('_secciones/por-que-develop/resenas/EscenarioDeLasResenas.tsx')), '  y el envoltorio de las reseñas no tiene caja (`contents`): la capa se posiciona contra la caja clavada')
-const capa = renderToStaticMarkup(<CapaDelAro arrastre={false} />)
+const capa = renderToStaticMarkup(<CapaDelAro />)
 const raizDeLaCapa = /^<div[^>]*>/.exec(capa)?.[0] ?? ''
 afirmar(/style="z-index:1"/.test(raizDeLaCapa) && /absolute inset-0/.test(raizDeLaCapa) && !/opacity/.test(raizDeLaCapa), 'la capa va arriba de sus hermanas de la caja clavada (z 1) y sin opacidad propia')
+const conCartel = (marcado: string): boolean => marcado.includes('data-pieza="cartel-del-arrastre"') && marcado.includes(TEXTO_DE_LAS_RESENAS.arrastrar) && !/resenas-arrastre/.test((leer('_secciones/por-que-develop/resenas/useTramoDeLasResenas.ts') + leer('_secciones/por-que-develop/resenas/tramo.ts')).replace(/\/\*[\s\S]*?\*\//g, ''))
+afirmar(conCartel(capa), '[C2-70] el arrastre sin bandera y el cartel «Mantené para arrastrar» en la capa del aro')
+controlPositivo('el detector ve la capa sin el cartel', capa.replace('cartel-del-arrastre', 'otra'), conCartel)
 // b · Visible y en tinta: cada tarjeta lleva la cara de papel con la tinta, y su texto está en el marcado.
 const tarjetas = [...capa.matchAll(/<a [^>]*data-pieza="resena-del-aro"[\s\S]*?<\/a>/g)].map((m) => m[0])
 afirmarIgual(tarjetas.length, ARO.placas, 'una tarjeta por placa en el marcado')
