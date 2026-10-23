@@ -53,6 +53,10 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, seFunde = f
   const repeticion = useRepeticionDeLaLlegada(seccion.id)
   const opacidadDelTitular = useTransform(repeticion, opacidadDeLaLlegada)
   const recorteDelTitular = useTransform(repeticion, recorteDeLaLlegada)
+  // [C2-40] En el flujo (sin títulos 3D) el titular se levanta desde abajo de su ventana, de acostado a parado: el efecto de los títulos.
+  const subida = useTransform(presencia, [0, 1], ['110%', '0%'])
+  const giro = useTransform(presencia, [0, 1], [70, 0])
+  const estiloDelTitular = seFunde ? { opacity: opacidadDelTitular, y: subida, rotateX: giro, transformPerspective: 600, transformOrigin: '50% 100%' } : { opacity: opacidadDelTitular }
   const encabezado = (
     <div data-pieza="encabezado-del-portfolio" className={className}>
       <div id={idDelTitularDeSeccion(seccion.id)}>
@@ -60,7 +64,7 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, seFunde = f
           {(progresoDeLaMascara) => (
             <motion.span className={VENTANA_QUE_RECORTA} style={{ overflow: recorteDelTitular }}>
               <CanalDeUnaPieza progreso={progresoDeLaMascara === null ? null : presencia} patron="P2" como="span" className="block" llegadaDe={seccion.id}>
-                <motion.span className="block" style={{ opacity: opacidadDelTitular }}>
+                <motion.span className="block" style={estiloDelTitular}>
                   <Titular nivel="display-xl" como="h2" className={CLASE_DEL_TITULAR}>
                     <ConInercia>
                       <TituloDeVolumen id="portfolio" texto={CONTENIDO.titular} lectura={LECTURA.portfolio} llegada={progresoDeLaMascara === null ? null : presencia} salida={null} llegadaDe={seccion.id} minimoS={LENTOS.llegadaDePortfolioS} saleCayendo queda />

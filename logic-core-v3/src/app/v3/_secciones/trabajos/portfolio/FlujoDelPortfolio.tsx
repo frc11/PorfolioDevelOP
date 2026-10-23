@@ -38,8 +38,9 @@ export const ESTILO_DEL_FLUJO: React.CSSProperties = { minHeight: `${(PANTALLAS_
 /**
  * Cada pieza del flujo va en su pantalla, centrada en el alto debajo de la barra (el mismo despeje que el título del escenario): se lee de a
  * una, con la escena alrededor. Si una pieza no entra, su pantalla crece (y el medio con ella: la escena lo sabe por la medida).
+ * [C2-40] Son dos (el título con el carrusel, y «la tuya») y se reparten el alto mínimo del flujo (`grow`): no queda pantalla vacía al final.
  */
-const CLASE_DE_LA_PANTALLA = 'relative flex min-h-svh flex-col justify-center pb-12'
+const CLASE_DE_LA_PANTALLA = 'relative flex min-h-svh grow flex-col justify-center pb-12'
 const ESTILO_DE_LA_PANTALLA: React.CSSProperties = { paddingTop: DESPEJE_DE_LA_BARRA }
 const CLASE_DEL_ANCLA = 'pointer-events-none absolute top-0 left-0 h-px w-px'
 
@@ -55,38 +56,37 @@ export function indiceDelAncla(hash: string): number | null {
   return ancla !== undefined && ancla.paso < TARJETAS_DEL_CARRUSEL.length ? ancla.paso : null
 }
 
-function PantallaDelTitulo({ seccion, reducido }: PropsDeSeccion & { readonly reducido: boolean }): React.JSX.Element {
+/**
+ * [C2-40] «Portfolio» con su bajada DIRECTAMENTE ARRIBA del carrusel, en la misma pantalla: entran juntos (antes el título tenía la suya y el
+ * carrusel quedaba abajo, fuera de cuadro). El título se levanta desde abajo al cruzar la línea (`EncabezadoDelPortfolio` con `seFunde`).
+ */
+function PantallaDelPortfolio({ seccion, vivo }: PropsDeSeccion & { readonly vivo: PortfolioVivo }): React.JSX.Element {
   const titulo = useRef<HTMLDivElement | null>(null)
   const adentro = useDisparoPorLinea(titulo)
-  return (
-    <div data-pantalla="titulo" className={cn(CLASE_DE_LA_PANTALLA, '@container items-center px-8 text-center')} style={ESTILO_DE_LA_PANTALLA}>
-      <div ref={titulo} className="flex w-full flex-col items-center">
-        <EncabezadoDelPortfolio seccion={seccion} adentro={adentro} reducido={reducido} seFunde />
-      </div>
-    </div>
-  )
-}
-
-function PantallaDelCarrusel({ vivo }: { readonly vivo: PortfolioVivo }): React.JSX.Element {
   const hash = useSyncExternalStore(suscribirAlHash, () => window.location.hash, () => '')
   return (
-    <div data-pantalla="carrusel" className={CLASE_DE_LA_PANTALLA} style={ESTILO_DE_LA_PANTALLA}>
+    <div data-pantalla="portfolio" className={cn(CLASE_DE_LA_PANTALLA, 'gap-8')} style={ESTILO_DE_LA_PANTALLA}>
       {ANCLAS_DEL_PORTFOLIO.filter((a) => a.id !== ANCLA_DE_LA_TUYA).map((a) => (
         <span key={a.id} id={a.id} aria-hidden="true" className={CLASE_DEL_ANCLA} />
       ))}
-      <Envoltorio>
-        <Gatillo>
-          <CarruselDeTarjetas
-            items={TARJETAS_DEL_CARRUSEL}
-            etiqueta={CONTENIDO.acordeon}
-            nombreDe={(t) => t.proyecto.nombre}
-            rotulos={CONTENIDO.carrusel}
-            indicePedido={indiceDelAncla(hash)}
-            vistasLlenas
-            renderItem={(t, e) => <TarjetaDelProyecto proyecto={t.proyecto} activa={e.activa} corre={e.corre} reinicio={e.reinicio} cerca={vivo.cerca} reducido={vivo.reducido} />}
-          />
-        </Gatillo>
-      </Envoltorio>
+      <div data-parte="titulo" ref={titulo} className="@container flex w-full flex-col items-center px-8 text-center">
+        <EncabezadoDelPortfolio seccion={seccion} adentro={adentro} reducido={vivo.reducido} seFunde />
+      </div>
+      <div data-parte="carrusel">
+        <Envoltorio>
+          <Gatillo>
+            <CarruselDeTarjetas
+              items={TARJETAS_DEL_CARRUSEL}
+              etiqueta={CONTENIDO.acordeon}
+              nombreDe={(t) => t.proyecto.nombre}
+              rotulos={CONTENIDO.carrusel}
+              indicePedido={indiceDelAncla(hash)}
+              vistasLlenas
+              renderItem={(t, e) => <TarjetaDelProyecto proyecto={t.proyecto} activa={e.activa} corre={e.corre} reinicio={e.reinicio} cerca={vivo.cerca} reducido={vivo.reducido} />}
+            />
+          </Gatillo>
+        </Envoltorio>
+      </div>
     </div>
   )
 }
@@ -123,7 +123,7 @@ function PantallaDeLaTuya({ reducido }: { readonly reducido: boolean }): React.J
 
 /**
  * [B1.2e] EL FLUJO DEL PORTFOLIO (debajo de 1024, incluido 768) — lo que reemplaza a las historias: SIN TRAMPA DE SCROLL. Primero el título
- * «Portfolio» con su bajada (llega con su P2 al cruzar la línea, y se funde: nunca asoma cortado), después el carrusel de los tres proyectos
+ * «Portfolio» con su bajada (se levanta al cruzar la línea, y se funde: nunca asoma cortado) y en la misma pantalla el carrusel de los tres proyectos
  * (`CarruselDeTarjetas`, el común: rota cada 10 s, flechas, deslices, mantener apretado; no ocupa la pantalla) y debajo «la tuya». La página
  * se scrollea de punta a punta: nada se pega ni se traga el dedo o la rueda. Después del flujo sigue la cola de siempre (Demos, pegado).
  *
@@ -133,8 +133,7 @@ function PantallaDeLaTuya({ reducido }: { readonly reducido: boolean }): React.J
 export function FlujoDelPortfolio({ seccion, vivo }: PropsDeSeccion & { readonly vivo: PortfolioVivo }): React.JSX.Element {
   return (
     <div data-pieza="flujo-del-portfolio" className="relative z-[var(--z-elevado)] flex flex-col overflow-x-clip" style={ESTILO_DEL_FLUJO}>
-      <PantallaDelTitulo seccion={seccion} reducido={vivo.reducido} />
-      <PantallaDelCarrusel vivo={vivo} />
+      <PantallaDelPortfolio seccion={seccion} vivo={vivo} />
       <PantallaDeLaTuya reducido={vivo.reducido} />
     </div>
   )

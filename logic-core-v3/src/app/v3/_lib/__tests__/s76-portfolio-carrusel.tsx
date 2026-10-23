@@ -167,16 +167,19 @@ export function afirmarElCarruselDelPortfolio(): void {
   titulo('B1.2e · 47 · El flujo: el título, el carrusel y «la tuya», en ese orden, con sus anclas')
 
   const flujo = marcar(<FlujoDelPortfolio seccion={seccion} vivo={vivoDeMentira(true)} />, { anima: true })
+  // [C2-40] El título y el carrusel en la MISMA pantalla (`data-pantalla="portfolio"`): entre ella y «la tuya» no empieza otra.
   const enOrden = (m: string): boolean => {
-    const t = m.indexOf('data-pantalla="titulo"')
-    const c = m.indexOf('data-pantalla="carrusel"')
+    const p = m.indexOf('data-pantalla="portfolio"')
+    const t = m.indexOf('data-parte="titulo"')
+    const c = m.indexOf('data-parte="carrusel"')
     const l = m.indexOf('data-pantalla="la-tuya"')
-    return t >= 0 && c > t && l > c && /<h2[^>]*>[\s\S]*Portfolio/.test(m.slice(t, c)) && /aria-roledescription="carrusel"/.test(m.slice(c, l)) &&
+    return p >= 0 && t > p && c > t && l > c && veces(m.slice(p, l), 'data-pantalla=') === 1 && /<h2[^>]*>[\s\S]*Portfolio/.test(m.slice(t, c)) && /aria-roledescription="carrusel"/.test(m.slice(c, l)) &&
       veces(m.slice(c, l), 'data-pieza="tarjeta-del-proyecto"') === PROYECTOS.length && m.slice(l).includes(CONTENIDO.laTuya.nombre) && /data-pieza="formulario-de-la-tuya"/.test(m.slice(l)) &&
       ANCLAS_DEL_PORTFOLIO.every((a) => veces(m, `id="${a.id}"`) === 1) && m.includes(`min-height:${(PANTALLAS_MINIMAS_DEL_FLUJO * 100).toFixed(4)}svh`) && m.includes('data-parte="fundido-del-encabezado"')
   }
-  afirmar(enOrden(flujo), 'primero «Portfolio» (con su fundido: nunca asoma cortado), después el carrusel con las tres tarjetas y debajo «la tuya» con el formulario que ya existe; las cuatro anclas una vez cada una (los proyectos en la pantalla del carrusel, «la tuya» en la suya) y el flujo con su alto mínimo')
-  controlPositivo('  el detector ve «la tuya» arriba del carrusel', flujo.replace('data-pantalla="carrusel"', 'data-pantalla="x"').replace('data-pantalla="la-tuya"', 'data-pantalla="carrusel"').replace('data-pantalla="x"', 'data-pantalla="la-tuya"'), enOrden)
+  afirmar(enOrden(flujo), 'primero «Portfolio» (con su fundido: nunca asoma cortado) y, en la misma pantalla, el carrusel con las tres tarjetas; debajo «la tuya» con el formulario que ya existe; las cuatro anclas una vez cada una (los proyectos en la pantalla del carrusel, «la tuya» en la suya) y el flujo con su alto mínimo')
+  controlPositivo('  el detector ve «la tuya» arriba del carrusel', flujo.replace('data-parte="carrusel"', 'data-x="x"').replace('data-pantalla="la-tuya"', 'data-parte="carrusel"').replace('data-x="x"', 'data-pantalla="la-tuya"'), enOrden)
+  controlPositivo('  el detector ve el carrusel en otra pantalla que el título', flujo.replace('data-parte="carrusel"', 'data-pantalla="carrusel" data-parte="carrusel"'), enOrden)
   afirmarIgual(TARJETAS_DEL_CARRUSEL.map((t) => t.id), PROYECTOS.map((p) => p.slug), '  las tarjetas son los tres proyectos, en el orden de la spec (la vuelta es infinita)')
   const anclas = (f: (h: string) => number | null): boolean => f('#portfolio-esquina-estudio') === 1 && f('#portfolio-banu-scents') === 2 && f('#trabajos') === 0 && f('#portfolio-la-tuya') === null && f('') === null
   afirmar(anclas(indiceDelAncla), '  el ancla de un proyecto lleva el carrusel a ese proyecto (y `#trabajos`, a El Garage); «la tuya» no es una tarjeta')

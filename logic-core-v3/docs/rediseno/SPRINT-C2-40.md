@@ -39,3 +39,10 @@ del mismo alto, las barras como Instagram y el título legible sobre el logo. Re
 - 1440 y 1024×768 «la tuya»: un título, la bajada, campos grandes, «O escribinos por WhatsApp» con el rollover; enviar (con `/api/` interceptado):
   carga → encastre → mensaje → vuelve el form. A 1024×768 mirar que el bloque entre en el panel (los campos crecieron).
 - 390 y 768: las tres tarjetas del mismo alto; tras pasar una, su barra queda llena; «Portfolio» y su bajada con halo sobre el logo.
+
+## Sesión 2 (2026-10-23, orquestador, directo en la integración)
+- Teléfono y tablet: «Portfolio» y su bajada en la MISMA pantalla que el carrusel (`PantallaDelPortfolio`, `data-pantalla="portfolio"` con `data-parte="titulo"` y `data-parte="carrusel"`). Las dos pantallas del flujo crecen (`grow`) y se reparten el alto mínimo: el flujo mide lo mismo que antes (390: 2.796 px; 768: 3.393 px), así que la k de la escena no cambia y la regla de alturas queda como estaba.
+- El título del DOM se levanta desde abajo de su ventana, de acostado a parado (`seFunde`: `y` 110 % → 0 y `rotateX` 70° → 0 con la presencia), además del fundido.
+- s76 §47 a la spec nueva, con un control nuevo (el carrusel en otra pantalla que el título). `carrusel.ts`: los selectores dentro del flujo (agarraban el carrusel de Demos: el de Portfolio daba 0 px en `modo`); `recorrido` pide «Portfolio» y el carrusel enteros a la vez (≥ 95 %) y las tres tarjetas del mismo alto (|Δ| ≤ 1 px), con `CONTROL=separados` y `CONTROL=alto-propio`; `fuera` se aleja del carrusel 1,2 pantallas (la pantalla del título ya no existe).
+- Medido (dev :3002): 390 y 768 modo, recorrido y fuera 6/6 (juntos 0,97 y 1,00; altos 592/592/592 y 695/695/695); los dos controles fallan en su criterio (juntos 0,00; Δ 48 px). Humo 7/7. s76 750/0, trabajos 222/0, tsc 0.
+- Queda: a 390×844 la tarjeta (592 px) con el título encima no entra entera con las barras y las flechas (~100 px abajo); a 768 entra todo. El levantarse del título no se grabó en cuadros (a confirmar en pantalla).
