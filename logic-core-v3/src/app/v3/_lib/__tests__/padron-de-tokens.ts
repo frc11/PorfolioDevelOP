@@ -257,6 +257,21 @@ export const AGREGADOS: readonly Agregado[] = [
     motivo: 'El tercero de los tres del semáforo. Mismo motivo y mismas condiciones que `--color-semaforo-rojo`.',
   },
   {
+    token: '--color-marca-el-garage',
+    sprint: 'C2 · 40',
+    motivo: 'El naranja de El Garage para su «Visitar sitio» en el Portfolio (lo pidió Valentino: «interioriza más con la marca»). Sólo ese enlace, sobre la sala de noche; AA medido en el tema. Lo consume `PROYECTOS[].colorDeMarca`.',
+  },
+  {
+    token: '--color-marca-esquina-estudio',
+    sprint: 'C2 · 40',
+    motivo: 'El blanco de Esquina Estudio para su «Visitar sitio». Mismo motivo y condiciones que `--color-marca-el-garage`.',
+  },
+  {
+    token: '--color-marca-banu-scents',
+    sprint: 'C2 · 40',
+    motivo: 'El marrón de Banú Scents, aclarado con su tono y su croma hasta AA sobre la noche, para su «Visitar sitio». Mismo motivo que `--color-marca-el-garage`.',
+  },
+  {
     token: '--color-error',
     sprint: 'PULIDO 11',
     motivo:

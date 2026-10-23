@@ -373,6 +373,19 @@
   --color-semaforo-amarillo: #FEBC2E;
   --color-semaforo-verde: #28C840;
 
+  /* --- [C2 · 40] EL COLOR DE CADA MARCA DEL PORTFOLIO («Visitar sitio») ---
+   * Sólo para el enlace de cada proyecto, sobre la sala de noche (la sección
+   * invertida, #0E0E0E, y el vidrio del panel: lo más claro medido detrás del
+   * enlace, #2B2B2B en la captura de la revisión). Sacados de sus sitios:
+   *   El Garage: el naranja de su botón (el promedio del degradé del póster).
+   *     8,55:1 sobre #0E0E0E · 6,27:1 sobre #2B2B2B.
+   *   Esquina Estudio: el blanco. 19,8:1 · 14,5:1.
+   *   Banú Scents: su marrón (#654324 en el póster) aclarado en OKLCH con el
+   *     mismo tono y croma hasta pasar AA: 6,98:1 · 5,12:1 (el original da 1,6). */
+  --color-marca-el-garage: #FA9408;
+  --color-marca-esquina-estudio: #FFFFFF;
+  --color-marca-banu-scents: #BB9473;
+
   /* =====================================================================
    * TIPOGRAFÍA — familia y pesos
    *

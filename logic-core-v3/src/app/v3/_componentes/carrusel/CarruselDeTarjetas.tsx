@@ -43,6 +43,8 @@ export interface PropsDelCarrusel<T extends ItemDelCarrusel> {
   /** Un salto pedido desde afuera (un ancla): cuando cambia, va a esa tarjeta (con el reloj en cero). */
   readonly indicePedido?: number | null
   readonly alCambiar?: (indice: number) => void
+  /** [C2 · 40] Las líneas de las tarjetas ya vistas, llenas (como las historias de Instagram). Por defecto, vacías. */
+  readonly vistasLlenas?: boolean
   readonly className?: string
 }
 
@@ -121,7 +123,7 @@ function Ranura({ activa, sentido, reducido, nombre, children }: {
  * con un valor de Motion, sin renders por cuadro. Las flechas son botones (el teclado y el sonido de la casa); con el foco del teclado adentro
  * el reloj no corre (WCAG 2.2.2), y ← → cambian de tarjeta. Mientras rota, el lector no anuncia los cambios (`aria-live` en `off`).
  */
-export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderItem, etiqueta, nombreDe, rotulos, duracionMs = CARRUSEL.duracionMs, indicePedido = null, alCambiar, className }: PropsDelCarrusel<T>): React.JSX.Element {
+export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderItem, etiqueta, nombreDe, rotulos, duracionMs = CARRUSEL.duracionMs, indicePedido = null, alCambiar, vistasLlenas = false, className }: PropsDelCarrusel<T>): React.JSX.Element {
   const [estado, setEstado] = useState<EstadoDelCarrusel>(() => estadoInicialDelCarrusel(0, items.length))
   const vivo = useRef<EstadoDelCarrusel>(estado)
   const avance = useMotionValue(0)
@@ -285,7 +287,7 @@ export function CarruselDeTarjetas<T extends ItemDelCarrusel>({ items, renderIte
             i === estado.indice ? (
               <LineaDeAhora key={item.id} avance={avance} quieta={reducido} />
             ) : (
-              <span key={item.id} data-parte="linea" className="h-0.5 flex-1 rounded-full bg-tinta/25" />
+              <span key={item.id} data-parte="linea" data-linea={vistasLlenas && i < estado.indice ? 'vista' : undefined} className={cn('h-0.5 flex-1 rounded-full', vistasLlenas && i < estado.indice ? 'bg-tinta' : 'bg-tinta/25')} />
             ),
           )}
         </div>

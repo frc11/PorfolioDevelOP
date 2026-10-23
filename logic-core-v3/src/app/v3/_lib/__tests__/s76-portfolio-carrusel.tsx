@@ -17,6 +17,7 @@ import { motionValue } from 'motion/react'
 import { TRAMO_ESTIRADO, medidaSinElEstiramiento, type TramoEstirado } from '../escena/tramoEstirado'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
+import { CONTENIDO } from '../../_secciones/trabajos/contenido'
 import { PROYECTOS, type ProyectoDelPortfolio } from '../../_secciones/trabajos/proyectos'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
 import { EscenarioDelPortfolio } from '../../_secciones/trabajos/portfolio/EscenarioDelPortfolio'
@@ -171,7 +172,7 @@ export function afirmarElCarruselDelPortfolio(): void {
     const c = m.indexOf('data-pantalla="carrusel"')
     const l = m.indexOf('data-pantalla="la-tuya"')
     return t >= 0 && c > t && l > c && /<h2[^>]*>[\s\S]*Portfolio/.test(m.slice(t, c)) && /aria-roledescription="carrusel"/.test(m.slice(c, l)) &&
-      veces(m.slice(c, l), 'data-pieza="tarjeta-del-proyecto"') === PROYECTOS.length && /La próxima es la tuya/.test(m.slice(l)) && /data-pieza="formulario-de-la-tuya"/.test(m.slice(l)) &&
+      veces(m.slice(c, l), 'data-pieza="tarjeta-del-proyecto"') === PROYECTOS.length && m.slice(l).includes(CONTENIDO.laTuya.nombre) && /data-pieza="formulario-de-la-tuya"/.test(m.slice(l)) &&
       ANCLAS_DEL_PORTFOLIO.every((a) => veces(m, `id="${a.id}"`) === 1) && m.includes(`min-height:${(PANTALLAS_MINIMAS_DEL_FLUJO * 100).toFixed(4)}svh`) && m.includes('data-parte="fundido-del-encabezado"')
   }
   afirmar(enOrden(flujo), 'primero «Portfolio» (con su fundido: nunca asoma cortado), después el carrusel con las tres tarjetas y debajo «la tuya» con el formulario que ya existe; las cuatro anclas una vez cada una (los proyectos en la pantalla del carrusel, «la tuya» en la suya) y el flujo con su alto mínimo')

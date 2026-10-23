@@ -13,6 +13,7 @@ import type { ProyectoDelPortfolio } from '../proyectos'
 
 import { Ficha } from './Ficha'
 import { MarcaDeAgua } from './MarcaDeAgua'
+import { estiloDeLaMarca } from './Tira'
 import { estadoDelVideo, type EstadoDelVideo } from './MedioDeLaTira'
 import { ANCHO_DEL_MEDIO, CLASE_DEL_ALTO_DEL_MEDIO_DEL_CARRUSEL, PROPORCION_DEL_MEDIO } from './medios'
 
@@ -81,7 +82,7 @@ export function TarjetaDelProyecto({ proyecto, activa, corre, reinicio, cerca, r
     <article
       data-pieza="tarjeta-del-proyecto"
       data-proyecto={proyecto.slug}
-      className={cn(SUPERFICIE_DEL_CARRUSEL, CLASE_DEL_ALTO_DEL_MEDIO_DEL_CARRUSEL, 'relative grid gap-4 overflow-clip p-4 tablet:gap-5 tablet:p-6 medio:grid-cols-2 medio:items-center medio:gap-8')}
+      className={cn(SUPERFICIE_DEL_CARRUSEL, CLASE_DEL_ALTO_DEL_MEDIO_DEL_CARRUSEL, 'relative grid h-full content-start gap-4 overflow-clip p-4 tablet:gap-5 tablet:p-6 medio:grid-cols-2 medio:content-center medio:items-center medio:gap-8')}
     >
       <MarcaDeAgua proyecto={proyecto} cerca={cerca} />
       <MedioDeLaTarjeta proyecto={proyecto} e={video} cerca={cerca} reinicio={reinicio} />
@@ -91,13 +92,9 @@ export function TarjetaDelProyecto({ proyecto, activa, corre, reinicio, cerca, r
             <Titular nivel="titulo-m" como="h3">{proyecto.nombre}</Titular>
             {proyecto.rubro === null ? null : <Caption className="text-tinta/70">{proyecto.rubro}</Caption>}
           </div>
-          <CtaEnlace
-            href={proyecto.url}
-            rotulo={`${CONTENIDO.ficha.visitar} ↗`}
-            etiqueta={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`}
-            externo
-            className="shrink-0"
-          />
+          <span className="shrink-0" style={estiloDeLaMarca(proyecto)}>
+            <CtaEnlace href={proyecto.url} rotulo={`${CONTENIDO.ficha.visitar} ↗`} etiqueta={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`} externo />
+          </span>
         </div>
         <Ficha proyecto={proyecto} visible={activa} reducido={reducido} desde={1} compacta />
       </div>

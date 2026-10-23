@@ -50,7 +50,7 @@ export function afirmarElSelector(quieto: string, conMotion: string): void {
   const formularioCorto = (f: string): boolean =>
     [...f.matchAll(/<(input|textarea) [^>]*name="(nombre|medio|mensaje)"/g)].map((m) => `${m[2]}:${m[1]}`).join(',') === 'nombre:input,medio:input,mensaje:textarea' && /<button type="submit" data-pieza="cta"/.test(f) &&
     /<div data-parte="fila-del-envio"[^>]*>[\s\S]*?<button type="submit"[\s\S]*?<a href=/.test(f) &&
-    f.includes(whatsapp) && /target="_blank" rel="noopener noreferrer" aria-label="o escribinos por WhatsApp, se abre en una pestaña nueva"/.test(f) && /<form noValidate="" class=/.test(f)
+    f.includes(whatsapp) && /target="_blank" rel="noopener noreferrer" aria-label="O escribinos por WhatsApp, se abre en una pestaña nueva"/.test(f) && /<form noValidate="" class=/.test(f)
   afirmar(formularioCorto(formulario) && veces(quieto, 'data-abre-contacto="panel"') === 0, '[B1.2c] «la tuya» lleva el formulario corto en lugar del botón: el nombre, «WhatsApp o email» y [B1.2d B] «¿Qué necesitás?» (un texto largo), «Enviar» (el botón simple del sitio) y, en su fila, «o escribinos por WhatsApp» (el número del pie, en una pestaña nueva); el formulario, sin nombre propio: no suma un punto de referencia')
   controlPositivo('  el detector ve el formulario de B1.2c (tres campos de una línea y un botón propio)', formulario.replace(/<textarea /, '<input ').replace(/<button type="submit" data-pieza="cta"/, '<button type="submit" class="x"'), formularioCorto)
   controlPositivo('  el detector ve el botón de antes (sin el formulario)', '<div data-pieza="formulario-de-la-tuya"><button type="button" data-abre-contacto="panel">Clickeá</button><p role="status">', formularioCorto)
