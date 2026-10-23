@@ -27,12 +27,12 @@ import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { GESTOS_POR_TIEMPO, USOS_DECLARADOS } from '../_contrato/motion'
 import { marcar } from '../_invariantes/render'
 import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
-import { GRUPO_POR_DEFECTO, PALABRA_POR_DEFECTO, palabraEnElTelefono, posicionDelGrupo } from './banderas'
 import { CANDADO_INICIAL, laRuedaEsDeAdentro, siguienteCandado, type EstadoDelCandado, type EventoDelCandado } from './candado'
 import { CARTEL, CTA, ID, NEWSLETTER, TARJETAS, TITULO, textoDe } from './contenido'
 import { CONTENIDO_PROHIBIDO_DE_CONTROL, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, textoAccesible } from './deteccion'
-import { ALFA_DE_LA_PALABRA, CLASE_DE_LA_PALABRA, CLASE_DE_LA_POSICION, LADOS, MODULO, PANTALLA_DEL_MODULO, RITMO, TIPO, altoDelModulo, altoNaturalEnEscritorio, altoViejoAngosto, ALTOS_VIEJOS_MEDIDOS, escalaDeLaDemo, tamanoDelTitulo } from './geometria'
+import { ALFA_DE_LA_PALABRA, LADOS, MODULO, PANTALLA_DEL_MODULO, TIPO, altoDelModulo, altoViejoAngosto, ALTOS_VIEJOS_MEDIDOS, escalaDeLaDemo, tamanoDelTitulo, tamanoDelTituloAngosto } from './geometria'
 import { FIN_DEL_PINTADO, avanceDeLaPalabra, avanceDelPintado } from './pintado'
+import { afirmacionesDeC2 } from '../../_lib/__tests__/s6-tu-panel-c2'
 import { tramoDelPanel } from './tramo'
 import { TuPanel } from './TuPanel'
 
@@ -50,7 +50,8 @@ titulo('1 · El contenido, entero y en orden, en las dos ramas')
 
 afirmarIgual(textoDe(TITULO), 'El panel donde controlás TODO', 'el título: «El panel donde controlás» y, en su renglón, «TODO»')
 afirmar(TITULO.length === 2 && TITULO[1].destacado === true && TITULO[1].palabras.join() === 'TODO', '  «TODO» va solo en el segundo renglón, destacado (en cursiva y subrayado)')
-afirmarIgual(TARJETAS.map((t) => [t.palabra, t.titulo]), [['Clientes', 'Cada cliente, en un solo lugar'], ['Resultados', 'Resumen del mes'], ['Chatbot', 'Enseñale a tu chatbot cómo responder']], 'los tres módulos, en el orden pedido, con su palabra fundida y su título')
+// [C2 60b] Los títulos de `05-TEXTOS.md` (ítem 15): «Cada posible cliente…» y «El resumen del mes»; el del chatbot queda.
+afirmarIgual(TARJETAS.map((t) => [t.palabra, t.titulo]), [['Clientes', 'Cada posible cliente, en un solo lugar'], ['Resultados', 'El resumen del mes'], ['Chatbot', 'Enseñale a tu chatbot cómo responder']], 'los tres módulos, en el orden pedido, con su palabra fundida y su título')
 afirmarIgual(TARJETAS.map((t) => t.demo), ['leads', 'resultados', 'informacion'], '  y cada uno es la maqueta que le corresponde (los leads, las métricas, lo que sabe el bot)')
 afirmar(TARJETAS.every((t) => t.descripcion.length >= 180), 'las descripciones son más largas que las de antes (los títulos de las features, de 20 a 57 caracteres)', TARJETAS.map((t) => String(t.descripcion.length)).join(' · '))
 const ORDEN = [textoDe(TITULO), ...TARJETAS.flatMap((t) => [t.titulo, t.descripcion]), textoDe(CTA.titular), CTA.bajada, CTA.boton, NEWSLETTER.titulo, NEWSLETTER.rotulo]
@@ -119,8 +120,10 @@ controlPositivo('  el detector VE un pintado que termina arriba (el centro al 15
  * `scroll-padding-top`: 24 + 2 × 12 + 15 × 1,6 = 72 px), sin pasar del tope de la sección. ¿Dónde queda el centro del título?
  */
 const DESPEJE = 24 + 2 * 12 + 15 * 1.6
+/** [C2 60b] Abajo de 1024 (un ancho útil menor que el de 1024, 960) el título va en tres renglones, con su tamaño angosto. */
+const altoDelTitulo = (ancho: number, alto: number): number => (ancho < 960 ? 3 * TIPO.interlineado * tamanoDelTituloAngosto(ancho, alto) : 2 * TIPO.interlineado * tamanoDelTitulo(ancho, alto))
 const centroAlViajar = (ancho: number, alto: number, aire: number): number => {
-  const h = 2 * TIPO.interlineado * tamanoDelTitulo(ancho, alto)
+  const h = altoDelTitulo(ancho, alto)
   return aire + h / 2 - centradoDebajoDeLaBarra(0, aire, aire + h, alto, DESPEJE)
 }
 for (const [ancho, alto, aire] of [[1376, 900, 0.3 * 900], [960, 768, 0.3 * 768], [1856, 1080, 0.3 * 1080], [704, 1024, 80], [326, 844, 80]] as const) {
@@ -143,9 +146,15 @@ afirmarIgual(enMayusculas.flatMap((t) => caracteresSinGlifo(caraDisplay, t)), []
 const RENGLON = TITULO[0].palabras.join(' ').toUpperCase()
 /** La razón del ancho en la 700 que se pinta contra la instancia por defecto: 8,19 contra lo que da el binario para «TU NEGOCIO VENDIENDO». */
 const A_LA_700 = 8.19 / anchoDeTexto(caraDisplay, 'TU NEGOCIO VENDIENDO', 1, -0.02)
-for (const [ancho, alto] of [[1376, 900], [960, 768], [1856, 1080], [704, 1024], [326, 844]] as const) {
+for (const [ancho, alto] of [[1376, 900], [960, 768], [1856, 1080]] as const) {
   const ocupa = (anchoDeTexto(caraDisplay, RENGLON, tamanoDelTitulo(ancho, alto), -0.02) * A_LA_700) / ancho
   afirmar(ocupa > 0.85 && ocupa < 1, `${String(ancho)} de ancho útil: «${RENGLON}» ocupa el ${(ocupa * 100).toFixed(1)} % del ancho — de lado a lado, sin partirse`)
+}
+// [C2 60b] Abajo de 1024 el renglón más ancho es «EL PANEL DONDE» (los tres renglones y su tamaño los afirma `afirmacionesDeC2`).
+const RENGLON_ANGOSTO = TITULO[0].palabras.slice(0, TITULO[0].cortesEnElTelefono?.[0] ?? 0).join(' ').toUpperCase()
+for (const [ancho, alto] of [[704, 1024], [326, 844]] as const) {
+  const ocupa = (anchoDeTexto(caraDisplay, RENGLON_ANGOSTO, tamanoDelTituloAngosto(ancho, alto), -0.02) * A_LA_700) / ancho
+  afirmar(ocupa > 0.75 && ocupa < 1, `${String(ancho)} de ancho útil: «${RENGLON_ANGOSTO}» ocupa el ${(ocupa * 100).toFixed(1)} % del ancho — sin partirse (con el tope de alto en la tablet)`)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -171,21 +180,14 @@ afirmarIgual(palabras, TARJETAS.map((t) => t.palabra), '  las tres palabras van 
 afirmar(TARJETAS.every((t) => !textoAccesible(QUIETO).split(/\s+/).includes(t.palabra) || ORDEN.some((o) => o.includes(t.palabra))) && sinAriaHidden(QUIETO).length < QUIETO.length, '  y ninguna se anuncia sola (CONTROL: la poda de aria-hidden saca algo)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · `?grupo=final|union` y `?palabra-movil=union|debajo`')
+titulo('7 · [C2 60b] Sin banderas: el grupo al final de su módulo y la palabra debajo del título en el teléfono')
 
-afirmar(posicionDelGrupo(null) === GRUPO_POR_DEFECTO && GRUPO_POR_DEFECTO === 'final' && posicionDelGrupo('union') === 'union' && posicionDelGrupo('otra') === 'final', '`?grupo=`: final por defecto, union a pedido, cualquier otra cosa cae al defecto')
-afirmar(palabraEnElTelefono(null) === PALABRA_POR_DEFECTO && PALABRA_POR_DEFECTO === 'union' && palabraEnElTelefono('debajo') === 'debajo', '`?palabra-movil=`: union por defecto, debajo a pedido')
-/** Dónde queda el centro del grupo con el pie de su módulo en `pie` y un grupo de `alto` (svh): la cuenta de las dos clases. */
-const centroDelGrupo = (clase: string, pie: number, alto: number): number => pie - alto / 2 + (/translate-y-\[calc\(50%\+var\(--medio-entre-filas\)\)\]/.test(clase) ? alto / 2 + RITMO.entreFilas / 2 : 0)
-afirmar(centroDelGrupo(CLASE_DE_LA_POSICION.final, 60, 30) === 45 && /\bescritorio:self-end\b/.test(CLASE_DE_LA_POSICION.final), '  final: el pie del grupo, al del módulo')
-afirmar(centroDelGrupo(CLASE_DE_LA_POSICION.union, 60, 30) === 60 + RITMO.entreFilas / 2, '  union: el centro del grupo, en la mitad del aire entre su módulo y el siguiente (el siguiente tramo mide lo mismo: también el del CTA)')
-afirmar(/max-escritorio:absolute/.test(CLASE_DE_LA_PALABRA.debajo) && /max-escritorio:-z-10/.test(CLASE_DE_LA_PALABRA.debajo) && !/absolute/.test(CLASE_DE_LA_PALABRA.union), '  en el teléfono, debajo va detrás del título; union, en el flujo arriba de él')
-afirmar(TIPO.divisorDeLaPalabraAngosta > TIPO.divisorDeLaPalabra, '  y en el teléfono la palabra es mucho más discreta (más chica)')
+// Las dos banderas de calibración quedaron en un valor (`final` y `debajo`): lo que se afirma de ellas está en `afirmacionesDeC2`.
 const ordenEnLaFila = /data-pieza="grupo-del-modulo"[\s\S]*?data-pieza="modulo-del-panel"/.test(/<li data-pieza="fila-del-panel"[\s\S]*?<\/li>/.exec(QUIETO)?.[0] ?? '')
 afirmar(ordenEnLaFila, '  apilado, el grupo va antes que su módulo (la palabra, el título, la descripción y el módulo)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · Las maquetas, un poco más chicas, y la sección llena los 700svh de la tabla en todo escritorio (k = 1)')
+titulo('8 · Las maquetas, un poco más chicas ([C2 60b] el alto de la sección y sus espacios, en `afirmacionesDeC2`)')
 
 const fmt = (x: number): string => x.toFixed(2)
 for (const [ancho, alto] of [[1376, 900], [960, 768], [1856, 1080], [1216, 720], [1376, 700]] as const) {
@@ -193,12 +195,7 @@ for (const [ancho, alto] of [[1376, 900], [960, 768], [1856, 1080], [1216, 720],
   afirmar(e >= 0.6 && e <= 1.05 && altoDelModulo(ancho, alto) <= (MODULO.altoMaximo / 100) * alto + 1e-9, `${String(ancho)} × ${String(alto)}: la maqueta a ${fmt(e)} (se lee) y el módulo a ${((altoDelModulo(ancho, alto) / alto) * 100).toFixed(0)} % del alto`)
 }
 afirmar(MODULO.ancho < 56 && MODULO.anchoAngosto <= 60 && PANTALLA_DEL_MODULO.ancho >= ANCHO_CON_BARRA, 'más chicas que las demos de antes (52 % contra 56 %), y con la barra lateral del panel')
-const tabla = pantallasDe(SECCION)
-let peor = Number.POSITIVE_INFINITY
-for (let ancho = 1024; ancho <= 2560; ancho += 64) for (let alto = 600; alto <= 1440; alto += 40) peor = Math.min(peor, tabla - altoNaturalEnEscritorio(Math.min(ancho - 64, 1920), alto) / (alto / 100) / 100)
-afirmar(peor >= 0, `de 1024 a 2560 y de 600 a 1440 de alto, lo fijo entra en los ${String(tabla * 100)}svh: el respiro llena lo que sobra y la sección mide la tabla`, `margen mínimo ${(peor * 100).toFixed(1)}svh`)
-controlPositivo('  el chequeo VE módulos que no entran (al 80 % del ancho, sin tope)', 0.8, (f: number) => tabla - (3 * f * 1376 * 0.76 + 3 * 900 + 2 * 900) / 900 >= 0)
-afirmar(/escritorio:min-h-\[var\(--alto-de-la-tabla\)\]/.test(QUIETO) && /--alto-de-la-tabla:700svh/.test(QUIETO) && /escritorio:grow/.test(QUIETO), '  el contenido toma el alto de la tabla (del dato) y el respiro es el que crece')
+afirmacionesDeC2({ quieto: QUIETO, codigo: CODIGO, tabla: pantallasDe(SECCION), fuenteDe })
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('9 · El candado: la rueda scrollea la página, el clic habilita adentro y salir lo bloquea')
@@ -256,7 +253,7 @@ afirmar(GESTOS_POR_TIEMPO.some((g) => g.seccion === ID && g.id === 'cta-del-pane
 afirmarIgual(focalizablesDe(QUIETO).length, 3, 'en el HTML servido, 3 focalizables: «Probar el panel», el campo y el envío del newsletter (lo de cada maqueta llega con ella)')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('11 · REGLA DE ALTURAS: abajo de 1024 la escena ve el alto de antes')
+titulo('11 · REGLA DE ALTURAS: la escena ve el alto de antes ([C2 60b] en todo ancho)')
 
 const a390 = altoViejoAngosto(326) / 844
 afirmar(Math.abs(a390 - 5.8) / 5.8 < 0.05, `el modelo del alto viejo a 390 × 844 da ${a390.toFixed(2)} pantallas contra las ~5,8 medidas en NOCTURNO FINAL C3 (a menos del 5 %)`)
@@ -265,21 +262,23 @@ const desvios = ALTOS_VIEJOS_MEDIDOS.map(([util, medido]) => altoViejoAngosto(ut
 afirmar(desvios.every((d) => Math.abs(d) <= 25), `el modelo contra lo medido en el navegador (390, 768, 820 y 1023): ${desvios.map((d) => d.toFixed(0)).join(', ')} px`)
 controlPositivo('  el modelo sin calibrar (el de B6) se pasa', ALTOS_VIEJOS_MEDIDOS, (m: readonly (readonly [number, number])[]) => m.every(([util, medido]) => Math.abs(altoViejoAngosto(util) + (util < 600 ? 117 : 50) - medido) <= 25))
 const panel = { isConnected: true, getBoundingClientRect: () => ({ top: 20000 }) } as unknown as Element
-const nuevo = 3400
-const tramo = tramoDelPanel(panel, nuevo, 326, 844)
-afirmar(tramo.arranque === ALTO_DE_VIEWPORT_DE_LA_REFERENCIA && Math.abs(tramo.k * tramo.largo * (844 / 900) - nuevo) < 1e-6, 'el tramo arranca en el tope del panel y mide lo medido (k × largo)', `k ${fmt(tramo.k)}`)
 TRAMO_ESTIRADO.valor = null
-/** El píxel que la escena ve 500 px después del panel, con el tramo anotado o sin él. */
-const despues = (conTramo: boolean): number => {
-  const soltar = conTramo ? anotarTramo(tramo) : (): void => undefined
-  const y = 20000 + nuevo + 500
-  const visto = medidaSinElEstiramiento(y, y, 0, 844, { y: 0, abajo: 0 }).y
-  soltar()
-  return visto
+// [C2 60b] En todo ancho: abajo de 1024 contra el modelo de antes de B6; desde 1024 contra las 7 pantallas de la tabla.
+for (const [util, alto, escritorio, nuevo, viejo] of [[326, 844, false, 3400, altoViejoAngosto(326)], [1376, 900, true, 3600, 7 * 900], [960, 768, true, 2950, 7 * 768]] as const) {
+  const tramo = tramoDelPanel(panel, nuevo, util, alto, escritorio, pantallasDe(SECCION))
+  afirmar(tramo.arranque === ALTO_DE_VIEWPORT_DE_LA_REFERENCIA && Math.abs(tramo.k * tramo.largo * (alto / 900) - nuevo) < 1e-6 && Math.abs(tramo.k - nuevo / viejo) < 1e-9, `${String(util)} × ${String(alto)}: el tramo arranca en el tope del panel, mide lo medido (k × largo) y la escena ve el alto de antes`, `k ${fmt(tramo.k)}`)
+  /** El píxel que la escena ve 500 px después del panel, con el tramo anotado o sin él. */
+  const despues = (conTramo: boolean): number => {
+    const soltar = conTramo ? anotarTramo(tramo) : (): void => undefined
+    const y = 20000 + nuevo + 500
+    const visto = medidaSinElEstiramiento(y, y, 0, alto, { y: 0, abajo: 0 }).y
+    soltar()
+    return visto
+  }
+  const comoAntes = 20000 + viejo + 500
+  afirmar(Math.abs(despues(true) - comoAntes) < 1e-6, '  500 px después del panel, la escena ve el píxel que veía con el alto viejo', despues(true).toFixed(1))
+  controlPositivo('  sin el tramo, lo de después se corre', false, (c: boolean) => Math.abs(despues(c) - comoAntes) < 1e-6)
 }
-const comoAntes = 20000 + altoViejoAngosto(326) + 500
-afirmar(Math.abs(despues(true) - comoAntes) < 1e-6, '  500 px después del panel, la escena ve el píxel que veía con el alto viejo', despues(true).toFixed(1))
-controlPositivo('  sin el tramo, lo de después se corre', false, (c: boolean) => Math.abs(despues(c) - comoAntes) < 1e-6)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('12 · Los patrones que declaro son los que consumo')

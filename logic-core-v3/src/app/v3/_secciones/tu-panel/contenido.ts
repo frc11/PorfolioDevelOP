@@ -16,17 +16,30 @@ export const ID = 'tu-panel'
 /** El nombre visible del rótulo. Es contenido, no el id. */
 export const NOMBRE = 'Tu panel'
 
-/** Un renglón de un título que se pinta: sus palabras y si va en cursiva y subrayado («TODO»). */
+/**
+ * Un renglón de un título que se pinta: sus palabras y si va en cursiva y subrayado («TODO»). [C2 60b] `cortesEnElTelefono`:
+ * antes de qué palabras (su índice) el renglón se parte abajo de 1024 (un salto que desde 1024 no existe).
+ */
 export interface RenglonQueSePinta {
   readonly palabras: readonly string[]
   readonly destacado?: boolean
+  readonly cortesEnElTelefono?: readonly number[]
 }
 
-/** [B6] EL TÍTULO — «El panel donde controlás» y, en un segundo renglón, «TODO» en cursiva (se subraya mientras se pinta). */
+/**
+ * [B6] EL TÍTULO — «El panel donde controlás» y, en un segundo renglón, «TODO» en cursiva (se subraya mientras se pinta).
+ * [C2 60b] En el teléfono y la tablet, más grande y en tres renglones: «El panel donde», «controlás» y «TODO».
+ */
 export const TITULO: readonly RenglonQueSePinta[] = [
-  { palabras: ['El', 'panel', 'donde', 'controlás'] },
+  { palabras: ['El', 'panel', 'donde', 'controlás'], cortesEnElTelefono: [3] },
   { palabras: ['TODO'], destacado: true },
 ]
+
+/**
+ * [C2 60b] LA PALABRA PÁLIDA DETRÁS DEL TÍTULO (ítem 15) — disimulada, como las palabras fundidas de los módulos: lo que
+ * sólo tenés con develOP. Decorativa: no se anuncia. Desde 1024 en un renglón; abajo, en estos dos.
+ */
+export const PALABRA_DEL_TITULO: readonly [string, string] = ['Lo que nos', 'distingue']
 
 /** Un título como se anuncia: el texto entero, en una línea. */
 export const textoDe = (renglones: readonly RenglonQueSePinta[]): string => renglones.flatMap((r) => r.palabras).join(' ')
@@ -56,7 +69,7 @@ export interface Tarjeta {
 export const TARJETAS: readonly Tarjeta[] = [
   {
     palabra: 'Clientes',
-    titulo: 'Cada cliente, en un solo lugar',
+    titulo: 'Cada posible cliente, en un solo lugar',
     descripcion: 'Cada persona que te deja sus datos en tu página o en el chatbot llega al panel con lo que le interesa, cómo llegó y la conversación entera. La ves ordenada entre calientes, tibios y fríos, y con un toque marcás a quién ya contactaste.',
     demo: 'leads',
     imagen: '/recursos/panel/leads.webp',
@@ -65,8 +78,8 @@ export const TARJETAS: readonly Tarjeta[] = [
   },
   {
     palabra: 'Resultados',
-    titulo: 'Resumen del mes',
-    descripcion: 'Las visitas de tu sitio de un vistazo: sesiones, usuarios, rebote y tiempo promedio, con las páginas más vistas y los últimos treinta días, uno por uno. Al lado, cómo te encuentran en Google, tus reseñas y un resumen escrito de lo que pasó en el mes.',
+    titulo: 'El resumen del mes',
+    descripcion: 'Las estadísticas de tu sitio a mano: sesiones, usuarios, rebote y tiempo promedio, con las páginas más vistas y los últimos treinta días, uno por uno. Al lado, cómo te encuentran en Google, tus reseñas y un resumen escrito de lo que pasó en el mes.',
     demo: 'resultados',
     imagen: '/recursos/panel/resultados.webp',
     alt: 'La vista previa de resultados del panel: tráfico del sitio con sesiones, usuarios y un gráfico de los últimos 30 días.',
@@ -75,7 +88,7 @@ export const TARJETAS: readonly Tarjeta[] = [
   {
     palabra: 'Chatbot',
     titulo: 'Enseñale a tu chatbot cómo responder',
-    descripcion: 'Todo lo que tu chatbot sabe de tu negocio, ordenado en un solo lugar: qué ofrecés, las preguntas frecuentes, tus políticas, cómo tiene que hablar y lo que nunca debe decir. Si algo cambia, nos pedís el ajuste desde el panel.',
+    descripcion: 'Toda la información que tu chatbot necesita saber de tu negocio, guardada en tu base de datos. Todo lo que ofrecés, las preguntas frecuentes, tus políticas, cómo tiene que hablar y lo que nunca debe decir. Si algo cambia, nos pedís el ajuste desde el panel.',
     demo: 'informacion',
     imagen: '/recursos/panel/modifica-chatbot.webp',
     alt: 'La configuración del chatbot en el panel: lo que sabe el bot sobre el negocio, con la información cargada para responder.',
