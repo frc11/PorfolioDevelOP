@@ -100,3 +100,5 @@ pantalla, y la pista de la parada no se toca. Sin `anotarTramo`; la k de cada an
   lado; el banco viene con el puntero desde la de antes. Ahora el puntero lo recibe el ÁREA de cada pieza (su franja a la vista, un
   paso en `cqw` del estante; la última, entera): las áreas no se pisan. `CONTROL=area-solapada` vuelve al ancla entera. El banco anota
   qué demo abrió el clic y lee la portada de ESA ventana; también el arreglo de `__name` del orquestador (línea del `addInitScript`).
+
+- **Verificación 2 (control `area-movil` ciego).** Con el puntero quieto de Playwright el navegador no volvía a mirar qué había debajo después de la subida (una transformada con transición en el compositor): el control va ahora por `data-area-movil` en el estante y sus reglas en `demos.css` (el hueco y la placa con puntero, sin el área, y la subida sin transición moviendo también su caja). Sin el atributo, el producto no cambia.

@@ -273,7 +273,10 @@ controlPositivo('  y una placa que no se levanta', DEMOS_CSS.replace(/(:is\(:hov
 const areaQuieta = (css: string, b: string): boolean =>
   /\[data-v3\] \[data-pieza="libro"\] > \[data-parte="cara"\] \{[^}]*pointer-events: none;/.test(css) &&
   !/\[data-pieza="libro"\]:is\(:hover, :focus-visible\) \{[^}]*transform/.test(css) && !/\[data-pieza="libro"\]:focus-visible \{[^}]*transform/.test(css) &&
-  /<span data-parte="cara" style=\{areaMovil \? \{ pointerEvents: 'auto' \} : undefined\}>/.test(b) && /useState\(\(\) => conElDefectoDeDemos\('area-movil'\)\)/.test(b)
+  // [C2-41e] (verificación 2) El control del banco va por un atributo del estante y sus reglas (la placa con puntero y la subida sin
+  // transición, moviendo su caja: así un puntero quieto vuelve a mirarse); sin el atributo, nada de eso existe.
+  /<span data-parte="cara">/.test(b) && /\{\.\.\.\(areaMovil \? \{ 'data-area-movil': '' \} : \{\}\)\}/.test(b) && /useState\(\(\) => conElDefectoDeDemos\('area-movil'\)\)/.test(b) &&
+  /\[data-pieza="estante"\]\[data-area-movil\] \[data-parte="cara"\] \{\s*pointer-events: auto;/.test(css) && /\[data-pieza="estante"\]\[data-area-movil\] \[data-pieza="libro"\]:is\(:hover, :focus-visible\) > \[data-parte="cara"\] > \[data-parte="placa"\] \{\s*inset-block-start: calc\(-1 \* var\(--libro-alza\)\);\s*transition: none;/.test(css)
 afirmar(areaQuieta(DEMOS_CSS, BIBLIOTECA), '[C2-41e] el hover se detecta en el hueco quieto de cada pieza: la cara (cámara, placa y cantos) no recibe el puntero y el hover no mueve el ancla (sólo el banco, con `CONTROL=area-movil`, le devuelve el puntero a la placa)')
 controlPositivo('  el detector ve la placa que recibe el puntero (la de antes: vibraba)', DEMOS_CSS.replace(/(\[data-v3\] \[data-pieza="libro"\] > \[data-parte="cara"\] \{[^}]*)pointer-events: none;/, '$1'), (c: string) => areaQuieta(c, BIBLIOTECA))
 controlPositivo('  y un hover que levanta el ancla entera', DEMOS_CSS.replace('[data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) {', '[data-v3] [data-pieza="libro"]:is(:hover, :focus-visible) {\n    transform: translateY(-24px);'), (c: string) => areaQuieta(c, BIBLIOTECA))

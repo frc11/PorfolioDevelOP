@@ -246,6 +246,30 @@
   transition: transform var(--duracion-lenta) var(--demos-resorte);
 }
 
+/* [C2-41e] EL CONTROL DEL BANCO (`CONTROL=area-movil`, `demos/defectos.ts`; el atributo sólo existe con él): el puntero como antes
+ * del arreglo —el hueco y la placa que se levanta lo reciben, sin el área— y la subida sin transición y moviendo también su caja, así
+ * el navegador vuelve a mirar qué hay bajo un puntero QUIETO (lo hace cuando cambia la caja; con un mouse de verdad, cualquier temblor
+ * alcanza). Con el puntero en el borde pintado de la placa, el hover se prende y se apaga solo: lo que el banco tiene que ver. */
+[data-v3] [data-pieza="estante"][data-area-movil] [data-pieza="libro"],
+[data-v3] [data-pieza="estante"][data-area-movil] [data-parte="cara"] {
+  pointer-events: auto;
+}
+
+[data-v3] [data-pieza="estante"][data-area-movil] [data-parte="area"] {
+  pointer-events: none;
+}
+
+[data-v3] [data-pieza="estante"][data-area-movil] [data-parte="placa"] {
+  transition: none;
+}
+
+@media (hover: hover) {
+  [data-v3] [data-pieza="estante"][data-area-movil] [data-pieza="libro"]:is(:hover, :focus-visible) > [data-parte="cara"] > [data-parte="placa"] {
+    inset-block-start: calc(-1 * var(--libro-alza));
+    transition: none;
+  }
+}
+
 /* =========================================================================
  * EL CARTEL — la pastilla del navbar, token por token.
  * =========================================================================
