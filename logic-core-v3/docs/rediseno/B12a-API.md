@@ -511,6 +511,13 @@ de la composición) y el pie llegado al fondo con el final del home quieto; `CON
 que fallar. Sin navegador, s78-b13. [B10] El FAQ: `scripts-carga/faq-del-pie.ts` (`CONTROL=sin-hundimiento` tiene que fallar la entrada);
 sin navegador, s78-b10.
 
+**[C2-71] En el home (desde 1025, con el pie de volumen armado)** el FAQ es de volumen: sus bloques son placas de la escena como la del
+formulario del pie (`escena/pie3d/faqDeVolumen.ts`; el DOM de cada bloque, anotado con `useBloqueDelFaq`, queda sobre su cara), el pie se
+guarda por columnas (cada columna con su base: abrir, hundir tal como es, cerrar; `HUNDIMIENTO_EN_COLUMNAS` en `pie3d/salidas.ts`) y
+abajo sale el botón «Scrolleá una vez más…» (`BotonDelFaq`, una vez por carga). **En una página no cambia nada**: el pie es plano y el FAQ
+sigue con los bloques de vidrio de B10, sin botón. Sin navegador, s78-c2-71; en el navegador, el mismo banco (sus controles nuevos, en
+`docs/rediseno/SPRINT-C2-71.md`).
+
 ## 9. Piezas compartidas de la cola 2 (C2 · 20, 2026-10-23)
 
 Cuatro piezas para todo /v3; se importan, no se copian. Se ven juntas en `/v3/piezas` (instrumento, `noindex`): cada una sobre el papel y
