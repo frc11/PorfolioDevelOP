@@ -5,7 +5,8 @@
  *
  *   MODO=primera   la primera pantalla de Demos, sin la franja clara abajo: una foto a cada ancho y la luz de la banda de abajo de la
  *                  columna del logo (debajo del hueco). Pasa si la banda es oscura (media < 0,4 y ningún renglón > 0,55).
- *                  CONTROL=franja: la cámara vuelve a la pose del scroll (la de antes) y tiene que FALLAR.
+ *                  CONTROL=franja: la rampa de la salida del revelado de antes (un octavo de pantalla de papel arriba de la costura
+ *                  de Trabajos con Servicios, que la parada deja en el pie del cuadro) y tiene que FALLAR.
  *   MODO=espejo    los títulos y las bajadas de Portfolio y Demos a la misma altura: |Δy| ≤ 2 px entre los dos títulos y entre las dos
  *                  bajadas (en el escenario pegado, sin transformadas), y el abanico entero en el cuadro.
  *                  CONTROL=sin-espejo: la columna de Demos sin el tope del espejo; tiene que FALLAR.
@@ -14,13 +15,15 @@
  *                  CONTROL=area-movil: la placa vuelve a recibir el puntero (la de antes); tiene que FALLAR (≥ 2 cambios en algún punto).
  *   MODO=carga     cada demo abierta desde el sitio (el puntero quieto 300 ms sobre su placa y el clic): cuándo se monta el iframe, cuándo
  *                  carga y cuándo se ve (ms desde el clic), qué portada mostró la ventana mientras tanto, y las preconexiones de Demos a
- *                  la vista. Pasa si las cinco preconexiones están, el iframe se monta antes de 200 ms (durante el Genie) y la portada
- *                  es la de la ventana del catálogo. CONTROL=sin-precarga: sin preconexión, iframe con la ventana abierta; FALLA.
+ *                  la vista. Pasa si las cinco preconexiones están, el clic abre ESA demo (el puntero viene de la de antes), el iframe
+ *                  se monta antes de 200 ms (durante el Genie) y la portada es la de su ventana del catálogo. CONTROL=sin-precarga: sin
+ *                  preconexión, iframe con la ventana abierta; FALLA. CONTROL=area-solapada: el ancla entera recibe el puntero (la de
+ *                  antes): el clic en la franja de una abre la de antes; FALLA.
  *                  El número de antes (contra la URL de cada demo, en frío) está en `docs/rediseno/SPRINT-C2-41.md`.
  *
  *   BASE=http://localhost:3000 MODO=primera ANCHOS=1440,1024 npx tsx scripts-carga/demos-escritorio.ts
  *   CONTROL=franja MODO=primera …        CONTROL=sin-espejo MODO=espejo …
- *   CONTROL=area-movil MODO=hover …      CONTROL=sin-precarga MODO=carga …
+ *   CONTROL=area-movil MODO=hover …      CONTROL=sin-precarga MODO=carga …      CONTROL=area-solapada MODO=carga …
  *
  * Escribe `~/.cache/b4-medicion/demos-41e/<modo>-<producto|control>.json` y las fotos de `primera`.
  */
@@ -170,29 +173,51 @@ async function hover(p: Page, ancho: number): Promise<Fila[]> {
 }
 
 // ─── carga: cada demo abierta desde el sitio ───────────────────────────────
-const VIGILAR = `(() => {
+/**
+ * [C2-41e] (verificación 1) Lo que se mide es la ventana de ESA demo: el diálogo con su `data-demo`, montado después del clic. Antes se
+ * tomaba el primer diálogo que hubiera desde que arrancaba la vigilancia; y el clic en la franja de una demo podía abrir la de antes (la
+ * levantada tapaba la franja de la siguiente: el área de cada pieza, `demos.css`). Ahora se anota también qué demo abrió el clic.
+ */
+const vigilar = (slug: string): string => `(() => {
   const w = window
-  const t = (w.__cargaDeDemo = { clic: 0, montado: -1, cargado: -1, visible: -1, portada: '' })
+  const t = (w.__cargaDeDemo = { clic: 0, abrio: '', montado: -1, cargado: -1, visible: -1, portada: '' })
   document.addEventListener('click', () => { if (t.clic === 0) t.clic = performance.now() }, true)
   const mirar = () => {
     if (w.__cargaDeDemo !== t) return
-    const f = document.querySelector('[data-pieza="dialogo-de-demo"] iframe')
-    if (f && t.montado < 0 && t.clic > 0) {
-      t.montado = performance.now() - t.clic
-      f.addEventListener('load', () => { t.cargado = performance.now() - t.clic })
+    if (t.clic > 0) {
+      const d = document.querySelector('[data-pieza="dialogo-de-demo"] [role="dialog"]')
+      if (d && t.abrio === '') t.abrio = d.getAttribute('data-demo') || '?'
+      const propio = document.querySelector('[data-pieza="dialogo-de-demo"] [role="dialog"][data-demo="${slug}"]')
+      const f = propio && propio.querySelector('iframe')
+      if (f && t.montado < 0) {
+        t.montado = performance.now() - t.clic
+        f.addEventListener('load', () => { t.cargado = performance.now() - t.clic })
+      }
+      const portada = propio && propio.querySelector('[data-pieza="portada-de-la-ventana"]')
+      if (portada && t.portada === '') t.portada = portada.style.backgroundImage
+      if (f && t.visible < 0 && Number(getComputedStyle(f).opacity) > 0.5 && getComputedStyle(propio).visibility === 'visible') t.visible = performance.now() - t.clic
     }
-    const portada = document.querySelector('[data-pieza="portada-de-la-ventana"]')
-    if (portada && t.portada === '') t.portada = portada.style.backgroundImage
-    if (f && t.visible < 0 && Number(getComputedStyle(f).opacity) > 0.5 && getComputedStyle(f.closest('[role="dialog"]')).visibility === 'visible') t.visible = performance.now() - t.clic
     requestAnimationFrame(mirar)
   }
   requestAnimationFrame(mirar)
 })()`
 
+/** Espera a que no quede ninguna ventana de demo abierta (a lo sumo `ms`); devuelve la que quedó, o `null`. */
+async function sinVentana(p: Page, ms: number): Promise<string | null> {
+  const fin = Date.now() + ms
+  for (;;) {
+    const queda = await p.evaluate(() => document.querySelector('[data-pieza="dialogo-de-demo"] [role="dialog"]')?.getAttribute('data-demo') ?? null)
+    if (queda === null || Date.now() > fin) return queda
+    await dormir(100)
+  }
+}
+
 async function carga(p: Page, ancho: number): Promise<Fila[]> {
   const preconexiones = await p.evaluate(() => document.querySelectorAll('link[data-demos-preconexion]').length)
   const filas: Fila[] = [{ ancho, caso: 'carga · preconexiones con Demos a la vista', bien: preconexiones === CATALOGO_DE_DEMOS.length, detalle: `${String(preconexiones)} de ${String(CATALOGO_DE_DEMOS.length)}` }]
   for (const demo of CATALOGO_DE_DEMOS) {
+    const quedo = await sinVentana(p, 4000)
+    // Como el visitante: el puntero viene de la demo de antes y se queda un rato en la franja de ésta (su borde izquierdo).
     const c = await p.evaluate((slug) => {
       const r = document.querySelector<HTMLElement>(`[data-capa="demos"] [data-pieza="libro"][data-demo="${slug}"]`)?.getBoundingClientRect()
       return r === undefined ? null : { x: r.left + Math.min(40, r.width / 4), y: r.top + r.height / 2 }
@@ -203,18 +228,23 @@ async function carga(p: Page, ancho: number): Promise<Fila[]> {
     }
     await p.mouse.move(c.x, c.y, { steps: 6 })
     await dormir(300)
-    await p.evaluate(VIGILAR)
+    await p.evaluate(vigilar(demo.slug))
     await p.mouse.click(c.x, c.y)
     await dormir(9000)
-    const t = await p.evaluate(() => (window as Window & { __cargaDeDemo?: { montado: number; cargado: number; visible: number; portada: string } }).__cargaDeDemo ?? null)
+    const t = await p.evaluate(() => (window as Window & { __cargaDeDemo?: { abrio: string; montado: number; cargado: number; visible: number; portada: string } }).__cargaDeDemo ?? null)
     await p.keyboard.press('Escape')
-    await dormir(1500)
     if (t === null) {
       filas.push({ ancho, caso: `carga · ${demo.slug}`, bien: false, detalle: 'sin medir' })
       continue
     }
     const portadaBien = t.portada.includes(demo.ventana)
-    filas.push({ ancho, caso: `carga · ${demo.slug}`, bien: t.montado >= 0 && t.montado < 200 && t.cargado >= 0 && portadaBien, detalle: `iframe montado a ${t.montado.toFixed(0)} ms del clic, cargado a ${t.cargado.toFixed(0)}, visible a ${t.visible.toFixed(0)}; portada ${portadaBien ? 'la de la ventana' : `OTRA (${t.portada})`}` })
+    const abrioBien = t.abrio === demo.slug
+    filas.push({
+      ancho,
+      caso: `carga · ${demo.slug}`,
+      bien: abrioBien && t.montado >= 0 && t.montado < 200 && t.cargado >= 0 && portadaBien && quedo === null,
+      detalle: `${quedo === null ? '' : `ANTES DEL CLIC SEGUÍA ABIERTA ${quedo}; `}el clic abrió ${abrioBien ? 'ésta' : `OTRA (${t.abrio || 'ninguna'})`}; iframe montado a ${t.montado.toFixed(0)} ms del clic, cargado a ${t.cargado.toFixed(0)}, visible a ${t.visible.toFixed(0)}; portada ${portadaBien ? 'la de su ventana' : `OTRA (${t.portada || 'ninguna'})`}`,
+    })
   }
   return filas
 }
@@ -234,6 +264,8 @@ async function main(): Promise<void> {
       reducedMotion: 'no-preference',
       args: ['--force_high_performance_gpu', `--window-size=${String(ancho + 20)},${String(alto + 100)}`, '--window-position=0,0', '--no-first-run', '--no-default-browser-check', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', '--disable-features=CalculateNativeWinOcclusion,Translate,MediaRouter'],
     })
+    // [C2-41e] (verificación 1) `CONTROL=franja`: la rampa de la salida del revelado de antes (`_lib/escena/revelado.ts`).
+    await ctx.addInitScript(`window.__defectosDelRevelado = ${JSON.stringify(CONTROL === 'franja' ? 'salida-de-antes' : '')}`)
     try {
       await ctx.addInitScript(`(() => { window.__name = window.__name || ((f) => f); window.__entornoDeLaEscena = 'producto'; window.__defectosDeDemos = ${JSON.stringify(CONTROL)}; try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
       const p = ctx.pages()[0] ?? (await ctx.newPage())

@@ -28,6 +28,7 @@ import {
   type PanelDelRecorrido,
   bordesDeRevelado,
   maskDeRevelado,
+  rampaDeLaSalida,
 } from '../revelado'
 import { MARGEN_DE_REANUDACION } from '../visibilidad'
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../../secciones'
@@ -180,10 +181,17 @@ afirmar(
   '  y la máscara no tiene un stop en 540: la escena cruza la frontera plena',
   maskContiguas ?? 'null',
 )
+// [C2-41e] Reemplazado por la spec: la costura de abajo está en el pie del cuadro (1080), así que su salida todavía no tiene rampa (§6;
+// era la franja de papel de la primera pantalla de Demos). Con la salida más arriba, la rampa de siempre: §6.
 afirmar(
-  maskContiguas !== null && maskContiguas.includes('#000 0px') && maskContiguas.includes(`#000 ${VENTANA - RAMPA}px`),
-  '  con el corte recto de entrada arriba y la rampa de salida abajo, donde SÍ hay opaco',
+  maskContiguas !== null && maskContiguas.includes('#000 0px') && maskContiguas.endsWith(`#000 ${VENTANA}px)`) && !maskContiguas.includes(`#000 ${VENTANA - RAMPA}px`),
+  '  con el corte recto de entrada arriba; la salida de abajo, con la costura en el pie del cuadro, todavía sin rampa',
   maskContiguas ?? 'null',
+)
+controlPositivo(
+  '  el chequeo vería la rampa de salida de antes en el pie (la franja)',
+  maskDeRevelado(bordesContiguas, VENTANA, RAMPA, false),
+  (m: string | null) => m !== null && m.includes('#000 0px') && m.endsWith(`#000 ${VENTANA}px)`) && !m.includes(`#000 ${VENTANA - RAMPA}px`),
 )
 
 const bordesConOpaco = bordesDeRevelado(docApilado, conOpacoEntreMedio, ATRIBUTO_DEL_PANEL)
@@ -263,5 +271,26 @@ controlPositivo(
   "import * as THREE from 'three'\n",
   (fuente: string) => !fuente.includes("from 'three'"),
 )
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('6 · [C2-41e] LA SALIDA CRECE CON LA COSTURA — con Demos quieta (el pie de Trabajos en el pie del cuadro) no asoma papel abajo')
+
+/** Lo que se ve de papel en el cuadro (px desde el pie, donde α deja de ser 1) para una salida en `fila`. */
+function papelAbajo(m: string | null): number {
+  if (m === null) return 0
+  const plena = [...m.matchAll(/#000 ([\d.]+)px/g)].map((x) => Number(x[1]))
+  const ultimaPlena = plena.length === 0 ? 0 : Math.max(...plena)
+  return Math.max(0, VENTANA - ultimaPlena)
+}
+const salidaEn = (fila: number, crece: boolean): string | null => maskDeRevelado([{ row: fila, tipo: 'sale' }], VENTANA, RAMPA, crece)
+const saleBien = (crece: boolean): boolean =>
+  // En el pie del cuadro (la parada de Demos) y un poco más abajo: nada de papel.
+  papelAbajo(salidaEn(VENTANA, crece)) === 0 && papelAbajo(salidaEn(VENTANA + 40, crece)) === 0 &&
+  // Subiendo: la rampa mide lo que la costura subió (40 px arriba del pie: 40 de rampa), y desde un octavo, la de siempre.
+  papelAbajo(salidaEn(VENTANA - 40, crece)) === 80 && salidaEn(VENTANA - 40, crece)?.includes(`#000 ${VENTANA - 80}px`) === true &&
+  salidaEn(540, crece) === maskDeRevelado([{ row: 540, tipo: 'sale' }], VENTANA, RAMPA, false)
+afirmar(saleBien(true) && rampaDeLaSalida(VENTANA, VENTANA, RAMPA) === 0 && rampaDeLaSalida(0, VENTANA, RAMPA) === RAMPA, 'la salida (Trabajos → Servicios): con la costura en el pie del cuadro o más abajo no hay rampa ni papel; mientras sube, la rampa es lo que subió; desde un octavo de pantalla arriba del pie, la de siempre')
+controlPositivo('  el detector ve la rampa de antes (entera arriba de la costura apenas toca el cuadro: la franja de `lote1/13`)', false, saleBien)
+afirmar(/ventana \* REVELADO_FRACCION,\s*!conLaSalidaDeAntes\(\),/.test(leer('src/app/v3/_lib/escena/revelado.ts')), '  y el pegamento la usa (sólo el banco, con `CONTROL=franja`, pide la de antes)')
 
 cerrar('s17-revelado')

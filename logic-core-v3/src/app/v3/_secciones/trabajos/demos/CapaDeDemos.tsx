@@ -16,7 +16,7 @@ import { useAcompananteDelTitulo } from '../../../_lib/titulos3d/acompanantes'
 import { Biblioteca } from './Biblioteca'
 import { CarruselDeDemos } from './CarruselDeDemos'
 import type { Demo } from './catalogo'
-import { anunciarDemos, olvidarDemos, useSeccionDeDemosEnElCuadro } from './enLaEscena'
+import { anunciarDemos } from './enLaEscena'
 import { LLEGADA, aparicionPedida, enElTramo, llegadaDeLaAparicion, perseguirLaAparicion, poseDelLibro, tramoDelLibro } from './entrada'
 import { llevarALaLlegada } from './llevarALaLlegada'
 import { useEspejoDelPortfolio } from './espejo'
@@ -122,14 +122,12 @@ export function CapaDeDemos({
    * escritorio: la misma persecución y el mismo gesto (los renglones del carrusel, como libros).
    */
   const rigida = useRef(false)
-  /** [C2-41e] Con el escenario pegado de escritorio (desde 1024): la escena y la red se enteran de Demos a la vista (`enLaEscena.ts`). */
+  /** [C2-41e] Con el escenario pegado de escritorio (desde 1024): con Demos a la vista, las demos se preconectan (`enLaEscena.ts`). */
   const conEscenario = useRef(false)
   /** [C2-41e] El abanico en el plano del título 3D (como su bajada): queda fijo debajo de él cuando la cámara se corre. */
   const abanico = useAcompananteDelTitulo<HTMLDivElement>('demos')
   // [C2-41e] El título y la bajada a la altura de los del Portfolio (su espejo).
   useEspejoDelPortfolio(capa)
-  // [C2-41e] Y Demos a la vista sólo mientras la sección ocupa la mitad de arriba del cuadro (lo pedido se queda en 1 más abajo).
-  useSeccionDeDemosEnElCuadro(capa)
 
   /** Escribe la llegada entera para una aparición mostrada (`a`: abajo de 768, la escala de la capa). Subiendo se deshace. */
   const llegar = useCallback(
@@ -184,7 +182,6 @@ export function CapaDeDemos({
     return () => {
       window.removeEventListener('resize', leerLaEntrada)
       alcanzar(p)
-      olvidarDemos()
     }
   }, [llegar, mostrado])
 
@@ -214,7 +211,7 @@ export function CapaDeDemos({
   // [EL ENCASTRE] 1B · el scroll pide; lo mostrado lo persigue con la velocidad tope.
   useMotionValueEvent(mostrado, 'change', (valor) => {
     const p = aparicion.current
-    // [C2-41e] Demos a la vista (o no): la escena y la red se enteran con lo pedido, también en un viaje.
+    // [C2-41e] Demos a la vista: las demos se preconectan con lo pedido, también en un viaje.
     anunciarDemos(aparicionPedida(valor, rigida.current), conEscenario.current)
     p.pedida = aparicionPedida(valor, rigida.current)
     // [NOCTURNO FINAL] A3 · en un viaje del menú (el `<main>` apagado), sin persecución: lo mostrado es lo pedido. Si no, al

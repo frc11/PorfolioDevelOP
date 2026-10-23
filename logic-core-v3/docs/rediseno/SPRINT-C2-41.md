@@ -77,8 +77,8 @@ Bancos (`scripts-carga/demos-escritorio.ts`, contra el dev, `ANCHOS=1440,1024`):
 - `MODO=carga` (y `CONTROL=sin-precarga` en rojo): el iframe desde el clic, la portada de la ventana y los tiempos.
 - `demos-parada.ts` y `matriz.ts` (MODO=a9 incluido) siguen en verde.
 
-A ojo, `http://localhost:3000/v3#trabajos`, 1440 × 900 y 1024 × 768, desde «la tuya» una muesca: Demos llega con la cámara quieta (el
-logo donde estaba en el Portfolio), sin franja clara abajo; «Demos» y su bajada a la altura de «Portfolio» y la suya, centrados en la
+A ojo, `http://localhost:3000/v3#trabajos`, 1440 × 900 y 1024 × 768, desde «la tuya» una muesca: Demos llega (la cámara de siempre)
+sin franja clara abajo; «Demos» y su bajada a la altura de «Portfolio» y la suya, centrados en la
 columna derecha; el abanico debajo, más chico, y al mover el mouse se queda debajo del título (no flota delante). El mouse quieto en el
 borde de abajo de una placa: no vibra. Abrir una demo: la ventana muestra su pantalla de carga (Ethereal, Noir, Skyline, Niche) y la
 demo sigue desde ahí; Nexo, su portada.
@@ -87,3 +87,16 @@ demo sigue desde ahí; Nexo, su portada.
 
 No cambia ningún alto: la capa de Demos vive en el escenario pegado (absoluta), la columna y el abanico se acomodan adentro de la
 pantalla, y la pista de la parada no se toca. Sin `anotarTramo`; la k de cada ancho queda como estaba.
+
+## Verificación 1 (orquestador: franja ✗, portada de la anterior ✗) — lo que cambió
+
+- **La franja** no era la cámara: era la rampa del revelado de la salida (`_lib/escena/revelado.ts`), un octavo de pantalla de papel
+  (112 px a 900) arriba de la costura Trabajos → Servicios apenas ésta tocaba el cuadro; la parada de Demos la deja justo en el pie (la
+  foto: rampa lineal de ~105 px que termina en blanco). Ahora la rampa de la salida mide lo que la costura ya subió desde el pie (0 con
+  Demos quieta, la de siempre desde un octavo arriba). `CONTROL=franja` pide la de antes (`window.__defectosDelRevelado`). La cámara
+  en la pose del Portfolio y el peso del oscurecido se revirtieron (archivos de la escena como en la base: el motivo era falso).
+- **La portada de la anterior** no era la ventana: el clic abría la demo de antes. Las anclas se pisan (cada una tapa la franja de la
+  siguiente salvo un paso), y la levantada por el hover (más arriba que las otras) recibía el clic en casi toda la franja de la de al
+  lado; el banco viene con el puntero desde la de antes. Ahora el puntero lo recibe el ÁREA de cada pieza (su franja a la vista, un
+  paso en `cqw` del estante; la última, entera): las áreas no se pisan. `CONTROL=area-solapada` vuelve al ancla entera. El banco anota
+  qué demo abrió el clic y lee la portada de ESA ventana; también el arreglo de `__name` del orquestador (línea del `addInitScript`).
