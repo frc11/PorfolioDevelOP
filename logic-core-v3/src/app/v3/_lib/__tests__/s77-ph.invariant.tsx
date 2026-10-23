@@ -140,10 +140,11 @@ controlPositivo('  el detector VE un gatillo servido escondido', marcar(<Gatillo
 // propósito, la huella se vuelve a tomar con su motivo en el commit. [B6] Retomada: la sección del Panel nueva (el título que se
 // pinta, los tres módulos y el CTA); el remate solo ya no existe. Y otra vez en la ronda del navegador: el envoltorio de la maqueta.
 // [C2 · 60c] Retomada: el CTA del Panel rehecho (la tarea 60, «El CTA del Panel»). Si se integra con el cuerpo nuevo (60b), retomarla.
+// [C2 · 60, orquestador] Retomada al integrar las dos: el cuerpo de la 60b (la palabra pálida, los espacios, los módulos) y el CTA de la 60c.
 const huella = (m: string): string => createHash('sha256').update(m).digest('hex')
 const ANTES = {
-  quieta: 'e62db8d447dcc88f8c9412d914f1012d901daf6030b800aeebee9880020b86f0',
-  animada: '449148755a0c66c5714e26c82d64d473dac948eb602d6291a85093d5ba8782aa',
+  quieta: 'd32ca1b0041f8e3652927d3b07198442b067be445c9e2b74e255ae627b024c07',
+  animada: 'bced0840df78979f0c5c65709a424310dabce2205a822024bafc4a6fad35f804',
 }
 const panel = <TuPanel seccion={seccionDe('tu-panel')} />
 const ahora = { quieta: marcar(panel, { anima: false }), animada: marcar(panel, { anima: true }) }
