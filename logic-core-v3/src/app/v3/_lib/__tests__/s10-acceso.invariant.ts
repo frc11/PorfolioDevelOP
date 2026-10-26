@@ -64,7 +64,8 @@ import { PREGUNTAS_DEL_HOME } from '../../_secciones/cierre/faq'
 // MÓVIL 2: el carrusel lleva en el marcado sus ocho de arriba y las cuatro de abajo; cada ancho muestra ocho.
 // MÓVIL 2: el CTA al terminar cada servicio (se ve abajo de 1024; en el marcado, en las dos ramas).
 // [B4] Reemplazada por la spec: la sección nueva lleva el CTA de cada servicio (su página) y el recomendador (nueve opciones y su botón).
-const DELTA_DE_SERVICIOS = { paradas: 3 + 9 + 1 } as const
+// [C2-51] Reemplazada por la spec: el recomendador va por etapas; el marcado publica la primera (cinco opciones y «Siguiente»).
+const DELTA_DE_SERVICIOS = { paradas: 3 + 5 + 1 } as const
 // SPRINT FINAL: «Por qué develOP» suma el botón «Hablanos» y pasa de 1 h2 + 4 h3 a 1 h2 + 6 h3; sus cinco marcadores se fueron con el contenido viejo.
 // FINAL 3 · el pie con datos reales: −1 (Números) +1 mail +1 WhatsApp +4 redes.
 const DELTA_DEL_FINAL = { paradas: 1 + 5, encabezados: 2 } as const

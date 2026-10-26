@@ -61,7 +61,8 @@ interface Props {
   readonly children: React.ReactNode
 }
 
-const CURVA = [0.25, 0.46, 0.45, 0.94] as const
+/** La curva de los fundidos del envío ([C2-51] la usan también las transiciones del recomendador). */
+export const CURVA = [0.25, 0.46, 0.45, 0.94] as const
 
 export function EstadoDeEnvio({ estado, alVolver, mensajes = MENSAJES_DEL_ENVIO.contacto, etiquetaDeCarga = ROTULO_ENVIANDO, textosDeCarga, compacto = false, className, children }: Props): React.JSX.Element {
   const reducido = useMovimientoReducido()
