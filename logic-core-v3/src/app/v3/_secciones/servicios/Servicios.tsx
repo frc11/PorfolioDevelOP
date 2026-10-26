@@ -20,7 +20,8 @@ import { useTramoDeServicios } from './tramoDeServicios'
  *      `_componentes/gatillos/`): Desarrollo web desde la izquierda, Software desde la derecha, IA desde arriba; al subir, cada uno sale
  *      por donde entró y los nanobots vuelven. El truco de profundidad: los nanobots pasan de detrás del título a delante del panel en
  *      un cuadro sin ninguno sobre los dos (`escenario/`).
- *   3. **El recomendador**, sin gatillo y con scroll normal. Después, el Panel.
+ *   3. **El recomendador**, sin gatillo y con scroll normal ([C2-51] el último servicio ya no lo atrapa: `salidaDeAbajoLibre`), por
+ *      etapas (`recomendador/`). Después, el Panel.
  *
  * Las ramas: con coreografía (desde el umbral, con movimiento), el escenario; abajo de 1024 con movimiento, [C2-50] siempre el escenario
  * con gatillos (el dedo y la rueda; `?servicios-movil=deslizar` se borró); sin coreografía (el servidor, o menos movimiento), las
@@ -30,7 +31,7 @@ import { useTramoDeServicios } from './tramoDeServicios'
  * por ruta. Se borra con ellos en un sprint de limpieza.
  */
 
-/** El alto declarado de la sección: desde 1024 la sección lo llena exacto (k = 1). */
+/** El alto declarado de la sección, como piso: [C2-51] desde 1024 la sección lo pasa con el recomendador (el tramo lo descuenta). */
 const ALTO_DECLARADO = seccionDe('servicios').alto
 
 function RamaDeServicios(): React.JSX.Element {

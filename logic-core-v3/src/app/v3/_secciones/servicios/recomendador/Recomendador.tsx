@@ -1,90 +1,78 @@
 'use client'
 
-import { useId, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
-import { Cta } from '../../../_componentes/chrome/Cta'
-import { CLASE_DE_LA_PILDORA, ErrorDelCampo } from '../../../_componentes/formularios/Campos'
-import { Cuerpo } from '../../../_componentes/tipografia/Textos'
-import { Titular } from '../../../_componentes/tipografia/Titular'
-import { servicioDe, type IdDeServicio } from '../../_contrato/acento'
-import { EnlaceDelServicio, nombreDelServicio } from '../escenario/PanelDeServicio'
-import { PREGUNTAS_DEL_RECOMENDADOR, servicioRecomendado } from './preguntas'
+import { useMovimientoReducido } from '../../../_lib/motion/reducido'
+import { Gatillo } from '../../_contrato/Gatillo'
+import { EncabezadoDelRecomendador } from './EncabezadoDelRecomendador'
+import { EtapaDelRecomendador } from './EtapaDelRecomendador'
+import { INICIO_DEL_RECOMENDADOR, avanzar, respuestasCompletas, type AccionDelRecomendador } from './flujo'
+import { TEXTOS_DEL_RECOMENDADOR } from './logica'
+import { fundidoQueSube, llevarALaVista } from './movimiento'
+import { Procesando } from './Procesando'
+import { ResultadoDelRecomendador } from './ResultadoDelRecomendador'
 
 /**
- * [B4] EL RECOMENDADOR — después de los tres servicios, sin gatillo y con scroll normal. A la izquierda, «¿No sabés qué servicio
- * elegir?» y su texto; a la derecha, unas preguntas sobre los problemas del cliente (a redactar: van con la llave del contenido
- * inventado) y el servicio recomendado, con el CTA a su página (el viaje: `EnlaceDelServicio`) o el contacto con el servicio
- * precargado (`data-abre-contacto="panel"` + `data-precarga`). No manda nada a ningún lado: se resuelve en la página.
+ * [B4 · C2-51] EL RECOMENDADOR — después de los tres servicios, con scroll normal: el último tramo de Servicios ya no es gatillo
+ * (`salidaDeAbajoLibre` de la máquina, `EscenarioDeServicios`). Adentro de la sección de Servicios: la zona donde el chat se
+ * desvanece (C2-21, `ZONAS_SIN_CHAT`) lo incluye.
+ *
+ *   1. El encabezado, arriba a la izquierda (`EncabezadoDelRecomendador`).
+ *   2. El cuerpo, que se levanta al cruzar la línea de disparo (`Gatillo`) y cambia EN EL MISMO LUGAR con un fundido
+ *      (`AnimatePresence` en `wait`): las tres etapas (`EtapaDelRecomendador`), el procesando (`Procesando`) y el resultado con el
+ *      contacto precargado (`ResultadoDelRecomendador`). El flujo es puro (`flujo.ts`) y la cuenta también (`logica.ts`).
+ *
+ * Abajo de 1024 (teléfono y tablet) el mismo flujo en una columna. Cuando el cambio deja el cuerpo fuera de la vista (el teléfono, al
+ * llegar el resultado, al empezar de nuevo), se lo trae (`llevarALaVista`). El alto cambia con lo que muestra: la REGLA DE ALTURAS la
+ * sigue `tramoDeServicios.ts` (mide la sección con un `ResizeObserver`).
  */
 
-export const TITULO_DEL_RECOMENDADOR = '¿No sabés qué servicio elegir?'
-export const TEXTO_DEL_RECOMENDADOR = 'No te preocupes: preparamos un formulario que, a partir de tus problemas, nos deja ofrecerte la mejor solución.'
-export const FALTAN_RESPUESTAS = 'Contestá las tres preguntas para ver qué te recomendamos.'
+/** El título, como lo leen las pruebas de la sección. */
+export const TITULO_DEL_RECOMENDADOR = TEXTOS_DEL_RECOMENDADOR.titulo
+
+const ID_DEL_TITULO_DEL_RESULTADO = 'titulo-del-resultado-del-recomendador'
+// (El foco del resultado lo toma el resultado al montarse: `AnimatePresence` lo monta después del fundido del procesando.)
 
 export function Recomendador(): React.JSX.Element {
-  const id = useId()
-  const [respuestas, setRespuestas] = useState<readonly (IdDeServicio | null)[]>(PREGUNTAS_DEL_RECOMENDADOR.map(() => null))
-  const [pedido, setPedido] = useState(false)
-  const recomendado = servicioRecomendado(respuestas)
-  const faltan = pedido && recomendado === null
-  const elegir = (i: number, servicio: IdDeServicio): void => setRespuestas((antes) => antes.map((r, k) => (k === i ? servicio : r)))
+  const reducido = useMovimientoReducido()
+  const [estado, despacharSinMarcar] = useReducer(avanzar, INICIO_DEL_RECOMENDADOR)
+  // Ya hubo un gesto: lo que se monte de ahora en más toma el foco (la carga de la página, no).
+  const [tocado, setTocado] = useState(false)
+  const cuerpo = useRef<HTMLDivElement>(null)
+  const despachar = useCallback((a: AccionDelRecomendador) => {
+    setTocado(true)
+    despacharSinMarcar(a)
+  }, [])
+  const terminarElProcesando = useCallback(() => despacharSinMarcar({ tipo: 'procesado' }), [])
+  const respuestas = respuestasCompletas(estado.respuestas)
+
+  // Cada cambio de etapa o de fase (no el primer toque): si el tope del cuerpo quedó arriba, fuera de la vista, se lo trae.
+  const antes = useRef(`${estado.fase}|${String(estado.etapa)}`)
+  useEffect(() => {
+    const ahora = `${estado.fase}|${String(estado.etapa)}`
+    if (ahora === antes.current) return
+    antes.current = ahora
+    llevarALaVista(cuerpo.current, reducido)
+  }, [estado.etapa, estado.fase, reducido])
 
   return (
-    <div data-pieza="recomendador" className="mx-auto grid w-full max-w-[var(--container-tope)] grid-cols-1 items-start gap-[var(--spacing-12)] px-[var(--pad-lateral-compacto)] py-[var(--spacing-20)] escritorio:min-h-svh escritorio:grid-cols-2 escritorio:items-center">
-      <div className="flex flex-col gap-[var(--spacing-4)]">
-        <Titular nivel="titulo-l" como="h3">
-          {TITULO_DEL_RECOMENDADOR}
-        </Titular>
-        <Cuerpo className="text-tinta-media">{TEXTO_DEL_RECOMENDADOR}</Cuerpo>
-      </div>
-      {/* Sin nombre propio: no es una región (el documento ya tiene sus landmarks); cada pregunta se nombra por su `legend`. */}
-      <form
-        noValidate
-        className="flex flex-col gap-[var(--spacing-6)]"
-        onSubmit={(e) => {
-          e.preventDefault()
-          setPedido(true)
-        }}
-      >
-        {PREGUNTAS_DEL_RECOMENDADOR.map((pregunta, i) => (
-          <fieldset key={`pregunta-${String(i)}`} className="flex flex-col gap-[var(--spacing-2)]" aria-describedby={faltan && respuestas[i] === null ? `${id}-falta` : undefined}>
-            <legend className="font-cuerpo text-cuerpo leading-texto font-semi mb-[var(--spacing-2)]">{pregunta.texto}</legend>
-            {pregunta.opciones.map((opcion) => {
-              const campo = `${id}-pregunta-${String(i)}-${opcion.servicio}`
-              return (
-                // Con `id` y `for`: el nombre accesible sale del rótulo (lo leen los instrumentos de s10), como en los campos del sitio.
-                <label key={opcion.servicio} htmlFor={campo} data-foco="pastilla" className={`${CLASE_DE_LA_PILDORA} text-cuerpo cursor-pointer`}>
-                  <input id={campo} type="radio" name={`${id}-pregunta-${String(i)}`} value={opcion.servicio} checked={respuestas[i] === opcion.servicio} onChange={() => elegir(i, opcion.servicio)} />
-                  <span>{opcion.texto}</span>
-                </label>
-              )
-            })}
-          </fieldset>
-        ))}
-        <div className="flex flex-col items-start gap-[var(--spacing-2)]">
-          <Cta rotulo="Ver qué me recomiendan" type="submit" />
-          <ErrorDelCampo id={`${id}-falta`} texto={faltan ? FALTAN_RESPUESTAS : undefined} />
+    <div data-pieza="recomendador" data-fase={estado.fase} className="mx-auto flex w-full max-w-[var(--container-tope)] flex-col gap-[var(--spacing-12)] px-[var(--pad-lateral-compacto)] pt-[var(--spacing-20)] pb-[var(--spacing-24)] escritorio:gap-[var(--spacing-16)]">
+      <EncabezadoDelRecomendador />
+      <Gatillo desde="abajo">
+        <div ref={cuerpo} data-parte="cuerpo-del-recomendador" className="rounded-[var(--radius-fuerte)] border border-borde bg-superficie-1 p-[var(--spacing-5)] escritorio:p-[var(--spacing-10)]">
+          <AnimatePresence mode="wait" initial={false}>
+            {/* Sin las props de Motion hasta el primer gesto: el árbol servido no escribe una transformada (s10). */}
+            <motion.div key={estado.fase} {...(tocado ? fundidoQueSube(reducido) : {})}>
+              {estado.fase === 'preguntas' && <EtapaDelRecomendador estado={estado} despachar={despachar} reducido={reducido} enfocarAlMontar={tocado} />}
+              {estado.fase === 'procesando' && <Procesando reducido={reducido} alTerminar={terminarElProcesando} />}
+              {estado.fase === 'resultado' && respuestas !== null && (
+                <ResultadoDelRecomendador respuestas={respuestas} elegida={estado.elegida} despachar={despachar} reducido={reducido} idDelTitulo={ID_DEL_TITULO_DEL_RESULTADO} />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
-        <div role="status" aria-live="polite">
-          {pedido && recomendado !== null ? <Resultado servicio={recomendado} /> : null}
-        </div>
-      </form>
-    </div>
-  )
-}
-
-function Resultado({ servicio }: { readonly servicio: IdDeServicio }): React.JSX.Element {
-  return (
-    <div data-pieza="resultado-del-recomendador" data-servicio={servicio} className="flex flex-col gap-[var(--spacing-4)] border-t border-borde pt-[var(--spacing-6)]">
-      <Cuerpo>
-        Te recomendamos <strong className="text-acento font-semi">{nombreDelServicio(servicioDe(servicio))}</strong>.
-      </Cuerpo>
-      <div className="flex flex-wrap items-center gap-[var(--spacing-6)]">
-        <EnlaceDelServicio id={servicio} />
-        <div data-abre-contacto="panel" data-precarga={servicio}>
-          <Cta rotulo="Prefiero contarles mi caso" />
-        </div>
-      </div>
+      </Gatillo>
     </div>
   )
 }

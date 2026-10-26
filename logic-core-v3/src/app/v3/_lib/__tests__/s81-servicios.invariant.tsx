@@ -24,7 +24,7 @@ import { SIN_OBJETIVO, baseDelObjetivo, seguirElObjetivo } from '../../_componen
 import { EXTENSION_DE_LA_ORBITA } from '../nanobots/simbolos'
 import { DESTINO_DEL_SERVICIO, VIDEO_DEL_SERVICIO, DISTRIBUCION } from '../../_secciones/servicios/escenario/datos'
 import { DURACION_DE_LA_TRANSICION_MS, TIEMPOS, avanceDelPanel, avanceDelRenglon, avanceDelSubrayado, capaDelEnjambre, desdeDelTexto, gDelAvance, inicioDelPanel, posicionDelEnjambre } from '../../_secciones/servicios/escenario/tiempos'
-import { servicioRecomendado } from '../../_secciones/servicios/recomendador/preguntas'
+import { recomendar, todasLasRespuestas } from '../../_secciones/servicios/recomendador/logica'
 import { Servicios } from '../../_secciones/servicios/Servicios'
 import { altoViejoMedido, tramoDeServicios, type AltoViejo } from '../../_secciones/servicios/tramoDeServicios'
 import { cambioDeCapa, extensionDelSimbolo, type Caja, type Lugar } from '../nanobots/capa'
@@ -65,7 +65,8 @@ controlPositivo('  el detector ve la entrada que no atrapa', () => null, entrada
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Un gesto, un paso; la transición se ve entera; la ráfaga se descarta (con un reloj de mentira)')
 
-const REGLA: ReglaDeGatillos = { cantidad: 4, pasoPx: 1350 }
+// [C2-51] La regla de Servicios: el último tramo (de IA al recomendador) sin gatillo. La salida libre la afirma s78-c2-51 entera.
+const REGLA: ReglaDeGatillos = { cantidad: 4, pasoPx: 1350, salidaDeAbajoLibre: true }
 type Evento = readonly [number, number]
 /** Corre la máquina: los eventos (ms, px), el vuelo de un paso y la transición; devuelve los pasos por los que pasó. */
 function recorrido(eventos: readonly Evento[], desde: number, decidir: typeof decidirLaRueda = decidirLaRueda, transicionMs = DURACION_DE_LA_TRANSICION_MS): number[] {
@@ -103,7 +104,8 @@ const CASOS: readonly { readonly nombre: string; readonly eventos: readonly Even
   { nombre: 'dos muescas a 1 s (la transición corriendo): un paso', eventos: [muesca(1000), muesca(2000)], desde: 0, espera: [1] },
   { nombre: 'dos muescas a 3 s: dos pasos, de a uno', eventos: [muesca(1000), muesca(4000)], desde: 0, espera: [1, 2] },
   { nombre: 'subiendo desde IA: sale por donde entró, de a uno', eventos: [muesca(1000, -100), muesca(4000, -100), muesca(7000, -100), muesca(10000, -100)], desde: 3, espera: [2, 1, 0, -1] },
-  { nombre: 'después del último, la salida de abajo (el recomendador)', eventos: [muesca(1000)], desde: 3, espera: [4] },
+  // [C2-51] Reemplazada por la spec (ítem 14: «que el último scroll no sea gatillo»): de IA al recomendador la rueda es de la página.
+  { nombre: 'después del último, la salida de abajo es scroll normal (C2-51: ningún gatillo la toma)', eventos: [muesca(1000)], desde: 3, espera: [] },
   { nombre: 'entrando con una ráfaga larga: aterriza en la entrada, no más allá', eventos: rafaga(1000), desde: -1, espera: [0] },
   { nombre: 'subiendo desde el recomendador con el trackpad: aterriza en IA', eventos: trackpad(1000, -1), desde: 4, espera: [3] },
 ]
@@ -213,16 +215,20 @@ controlPositivo('  el detector ve el ajuste que se queda en el piso', ((p: numbe
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · El recomendador y la REGLA DE ALTURAS')
 
-const recomiendaBien = (f: typeof servicioRecomendado): boolean => f(['web', 'web', 'software']) === 'web' && f(['web', 'software', 'ia-automatizacion']) === 'ia-automatizacion' && f(['software', null, 'web']) === null && f(['ia-automatizacion', 'web', 'web']) === 'web'
-afirmar(recomiendaBien(servicioRecomendado), 'el más elegido; si empatan, el de la última respuesta; nada hasta que estén las tres')
-controlPositivo('  el detector ve el recomendador que responde con preguntas sin contestar', (r: readonly (string | null)[]) => (r.find((x) => x !== null) ?? null) as ReturnType<typeof servicioRecomendado>, recomiendaBien)
+// [C2-51] Reemplazada por la spec: el recomendador de B4 (el servicio más votado) pasó a recomendar DOS soluciones con los puntos de
+// 05-TEXTOS. Acá, lo mínimo; las 125 combinaciones, el desempate y los textos, en s78-c2-51.
+const recomiendaBien = (f: typeof recomendar): boolean => todasLasRespuestas().every((r) => f(r).a !== f(r).b) && f([0, 0, 0]).a === 'pagina' && f([4, 3, 0]).a === 'automatizacion'
+afirmar(recomiendaBien(recomendar), 'C2-51: dos soluciones distintas en las 125 combinaciones; «la gente no me encuentra» lleva a la página, y el empate se lo lleva la pregunta 1')
+controlPositivo('  el detector ve una recomendación que repite la solución', ((r: Parameters<typeof recomendar>[0]) => ({ a: recomendar(r).a, b: recomendar(r).a })) as typeof recomendar, recomiendaBien)
 const tramo = tramoDeServicios(390, 844, 5 * 844, () => 4 * 844)
 // [NOCTURNO] El alto viejo medido por el orquestador en el navegador (px, `[data-panel="servicios"]` antes de B4), a 1 px o menos.
 const MEDIDOS = [[390, 844, 1661], [768, 1024, 1338], [820, 1180, 1382], [1023, 768, 1555]] as const
 const mideComoAntes = (modelo: AltoViejo): boolean => MEDIDOS.every(([w, h, px]) => Math.abs((modelo(w, h) ?? 0) - px) <= 1)
 afirmar(mideComoAntes(altoViejoMedido), 'la sección vieja medida a 390, 768, 820 y 1023 (1661, 1338, 1382 y 1555 px): el modelo la da a 1 px o menos')
 controlPositivo('  un modelo en pantallas (proporcional al alto del cuadro) no la da', ((w: number, h: number) => (w >= 768 ? 1.3065 : 1.9682) * h) as AltoViejo, mideComoAntes)
-afirmar(tramoDeServicios(1440, 900, 7200) === null && tramoDeServicios(1024, 768, 6144, () => 3 * 768) === null && tramoDeServicios(390, 844, 4000, () => null) === null && tramo !== null && Math.abs(tramo.k - 1.25) < 1e-9 && tramo.arranque === 900 && Math.abs(tramo.largo - 3600) < 1e-9, 'desde 1024 no hay tramo (la sección llena los 800svh de la tabla: k = 1); abajo, k = alto nuevo / alto viejo sobre la sección entera, y sin el alto viejo medido no se anota nada')
+// [C2-51] Reemplazada por la spec: desde 1024 la pista es fija y el recomendador crece; el alto viejo es la tabla (8 pantallas).
+const ancho = tramoDeServicios(1440, 900, 7470)
+afirmar(tramoDeServicios(1440, 900, 7200) === null && tramoDeServicios(1024, 768, 6144) === null && ancho !== null && Math.abs(ancho.k - 7470 / 7200) < 1e-9 && tramoDeServicios(390, 844, 4000, () => null) === null && tramo !== null && Math.abs(tramo.k - 1.25) < 1e-9 && tramo.arranque === 900 && Math.abs(tramo.largo - 3600) < 1e-9, 'desde 1024 el alto viejo es la tabla (800svh): igual, sin tramo; con el recomendador más alto, k = alto nuevo / tabla (C2-51); abajo, k = alto nuevo / alto viejo sobre la sección entera, y sin el alto viejo medido no se anota nada')
 afirmar(seccionDe('servicios').alto === '800svh', '  y la tabla sigue diciendo lo de siempre (secciones.ts sin tocar)')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -231,7 +237,8 @@ titulo('7 · Lo que se renderiza sin coreografía (el servidor y menos movimient
 const html = renderToStaticMarkup(<Servicios seccion={seccionDe('servicios')} />)
 const veces = (aguja: string): number => html.split(aguja).length - 1
 afirmar(html.includes('id="titular-servicios"') && veces('<h3') === SERVICIOS.length + 1 && veces('data-viaje-del-servicio=') === SERVICIOS.length && veces('href="/v3/pagina-base"') === SERVICIOS.length, 'el `h2` de la sección, un `h3` por servicio y el del recomendador, y un CTA por servicio a su página (el viaje)')
-afirmar(veces('type="radio"') === 9 && html.includes('[TEXTO]') && !/desde \$|PRECIOS_DESDE/.test(html), 'el recomendador con sus tres preguntas de tres opciones (marcadas: `[TEXTO]`), y ningún precio «desde» en el home (P-H8 sin efecto)')
+// [C2-51] Reemplazada por la spec: el recomendador va por etapas (el servidor publica la primera: cinco opciones) y con sus textos reales.
+afirmar(veces('type="radio"') === 5 && !html.includes('[TEXTO]') && !/desde \$|PRECIOS_DESDE/.test(html), 'el recomendador por etapas (la primera: cinco opciones, con los textos de 05-TEXTOS, sin marcadores), y ningún precio «desde» en el home (P-H8 sin efecto)')
 // [C2-50] El orden del teléfono (las pantallas quietas, en el marcado): el título (con sus nanobots), el video, el texto y el CTA.
 const ordenBien = (h: string): boolean => {
   const pantallas = h.split('data-pieza="pantalla-de-servicio"').slice(1)

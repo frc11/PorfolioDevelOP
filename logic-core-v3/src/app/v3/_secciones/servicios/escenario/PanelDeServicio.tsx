@@ -51,11 +51,12 @@ function corteDelVideo(lado: 'izquierda' | 'derecha' | null): CSSProperties {
   return {}
 }
 
-export function EnlaceDelServicio({ id }: { readonly id: IdDeServicio }): React.JSX.Element {
+/** [C2-51] `rotulo` y `enTinta`: el link chico del recomendador («Ver la página de…»), con el mismo viaje y en la tinta del papel. */
+export function EnlaceDelServicio({ id, rotulo = CTA_POR_SERVICIO[id], enTinta = false }: { readonly id: IdDeServicio; readonly rotulo?: string; readonly enTinta?: boolean }): React.JSX.Element {
   return (
-    <div style={{ color: 'var(--color-acento)', ['--color-tinta' as string]: 'var(--color-acento)' }}>
-      <EnlaceDeRuta href={DESTINO_DEL_SERVICIO[id]} onClick={(e) => pedirElViajeAlServicio(e, PRESET_DEL_DESTINO[id])} data-pieza="cta" data-variante="linea" data-registro="cuerpo" data-viaje-del-servicio={id} className="text-base no-underline">
-        <ContenidoDelCta rotulo={CTA_POR_SERVICIO[id]} />
+    <div style={enTinta ? undefined : { color: 'var(--color-acento)', ['--color-tinta' as string]: 'var(--color-acento)' }}>
+      <EnlaceDeRuta href={DESTINO_DEL_SERVICIO[id]} onClick={(e) => pedirElViajeAlServicio(e, PRESET_DEL_DESTINO[id])} data-pieza="cta" data-variante="linea" data-registro="cuerpo" data-viaje-del-servicio={id} className={enTinta ? 'text-cuerpo no-underline' : 'text-base no-underline'}>
+        <ContenidoDelCta rotulo={rotulo} />
       </EnlaceDeRuta>
     </div>
   )

@@ -1,7 +1,9 @@
 'use client'
 
 import type { MotionValue } from 'motion/react'
-import { useEffect, useRef, type CSSProperties } from 'react'
+import { useEffect, useRef, type CSSProperties, type RefObject } from 'react'
+
+import { cn } from '@/lib/utils'
 
 import { useMovimientoReducido } from '../../../_lib/motion/reducido'
 import { TIPOGRAFIA_QUE_SE_PINTA } from '../../tu-panel/TituloQueSePinta'
@@ -16,21 +18,32 @@ import { avanceDeLaPalabra, grisSinPintar } from '../../tu-panel/pintado'
  *
  * El tamaño lo dicen `--divisor-del-titulo` y `--tope-del-titulo` (los mismos nombres del Panel), puestos por quien lo monta: más
  * chico que el del Panel, para que el título quede en el tercio del medio y el globo de web se pose sin pisarlo (`capa.ts`).
+ *
+ * [C2-51] El recomendador lo reusa: `como` (el nivel del encabezado; por defecto `h2`), `className` (se mezcla con la tipografía: la
+ * alineación, otro tamaño) y `envolver` (los renglones parten donde no entran, para un título largo). El pintado salió a
+ * `usePintadoAlLlegar` para que lo use también un párrafo (el análisis del resultado) con otra duración. Sin esas props, lo de siempre.
  */
 export const PINTADO_MS = 650
 
-const COLOR_DE_LA_PALABRA = '[color:color-mix(in_oklab,var(--color-tinta)_calc(var(--pintado,1)*100%),var(--gris-del-pintado))]'
+/** El color de una palabra: la tinta en la proporción de su pintado (`--pintado`), el resto el gris claro (`--gris-del-pintado`). */
+export const COLOR_DE_LA_PALABRA = '[color:color-mix(in_oklab,var(--color-tinta)_calc(var(--pintado,1)*100%),var(--gris-del-pintado))]'
+
+/** El gris de lo que todavía no se pintó, para el `style` de quien contiene las palabras. */
+export const ESTILO_DEL_PINTADO = { '--gris-del-pintado': grisSinPintar() } as CSSProperties
 
 export interface Renglon {
   readonly palabras: readonly string[]
 }
 
-export function TituloQueSePintaAlLlegar({ renglones, progreso, id }: { readonly renglones: readonly Renglon[]; readonly progreso: MotionValue<number> | null; readonly id: string }): React.JSX.Element {
-  const titulo = useRef<HTMLHeadingElement>(null)
+/**
+ * El pintado por tiempo de las `[data-palabra]` de `ref`: con `progreso`, al llegar a 1 (y se despinta si baja de la mitad); sin él,
+ * al quedar a la vista (el 60 %). Recorre las palabras en `duracionMs`. Con movimiento reducido no hace nada (pintado entero).
+ */
+export function usePintadoAlLlegar(ref: RefObject<HTMLElement | null>, progreso: MotionValue<number> | null, duracionMs: number = PINTADO_MS): void {
   const reducido = useMovimientoReducido()
 
   useEffect(() => {
-    const el = titulo.current
+    const el = ref.current
     if (reducido || el === null) return undefined
     const palabras = [...el.querySelectorAll<HTMLElement>('[data-palabra]')]
     let avance = 0
@@ -41,7 +54,7 @@ export function TituloQueSePintaAlLlegar({ renglones, progreso, id }: { readonly
     const cuadro = (t: number): void => {
       const dt = antes === 0 ? 16 : t - antes
       antes = t
-      avance = objetivo > avance ? Math.min(objetivo, avance + dt / PINTADO_MS) : objetivo
+      avance = objetivo > avance ? Math.min(objetivo, avance + dt / duracionMs) : objetivo
       escribir()
       pedido = avance === objetivo ? 0 : requestAnimationFrame(cuadro)
     }
@@ -67,14 +80,28 @@ export function TituloQueSePintaAlLlegar({ renglones, progreso, id }: { readonly
       if (pedido !== 0) cancelAnimationFrame(pedido)
       for (const p of palabras) p.style.removeProperty('--pintado')
     }
-  }, [progreso, reducido])
+  }, [ref, progreso, reducido, duracionMs])
+}
+
+interface Props {
+  readonly renglones: readonly Renglon[]
+  readonly progreso: MotionValue<number> | null
+  readonly id: string
+  readonly como?: 'h2' | 'h3' | 'h4'
+  readonly className?: string
+  readonly envolver?: boolean
+}
+
+export function TituloQueSePintaAlLlegar({ renglones, progreso, id, como: Etiqueta = 'h2', className, envolver = false }: Props): React.JSX.Element {
+  const titulo = useRef<HTMLHeadingElement>(null)
+  usePintadoAlLlegar(titulo, progreso)
 
   return (
-    <h2 ref={titulo} id={id} data-pieza="titulo-que-se-pinta" className={TIPOGRAFIA_QUE_SE_PINTA} style={{ '--gris-del-pintado': grisSinPintar() } as CSSProperties}>
+    <Etiqueta ref={titulo} id={id} data-pieza="titulo-que-se-pinta" className={className === undefined ? TIPOGRAFIA_QUE_SE_PINTA : cn(TIPOGRAFIA_QUE_SE_PINTA, className)} style={ESTILO_DEL_PINTADO}>
       {renglones.map((renglon, k) => (
-        <span key={renglon.palabras.join(' ')} data-caja-del-titulo="" className="block whitespace-nowrap">
+        <span key={renglon.palabras.join(' ')} data-caja-del-titulo="" className={envolver ? 'inline' : 'block whitespace-nowrap'}>
           {renglon.palabras.map((palabra, j) => (
-            <span key={palabra}>
+            <span key={`${String(j)}-${palabra}`}>
               {k > 0 || j > 0 ? ' ' : null}
               <span data-palabra="" className={COLOR_DE_LA_PALABRA}>
                 {palabra}
@@ -83,6 +110,6 @@ export function TituloQueSePintaAlLlegar({ renglones, progreso, id }: { readonly
           ))}
         </span>
       ))}
-    </h2>
+    </Etiqueta>
   )
 }

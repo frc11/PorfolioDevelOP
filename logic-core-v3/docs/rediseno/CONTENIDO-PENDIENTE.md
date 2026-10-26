@@ -35,7 +35,7 @@ el archivo que la fila nombra.
 
 ## Resumen
 
-**19 cosas pendientes** en las ocho secciones, de las cuales **9** se ven hoy en la pantalla como un marcador y 10 son prosa de relleno que no se ve como agujero.
+**18 cosas pendientes** en las ocho secciones, de las cuales **8** se ven hoy en la pantalla como un marcador y 10 son prosa de relleno que no se ve como agujero.
 
 
 | sección | pendientes |
@@ -44,7 +44,7 @@ el archivo que la fila nombra.
 | 02 · Quiénes somos | 6 |
 | 03 · Números | 0 |
 | 04 · Trabajos | 10 |
-| 05 · Servicios | 1 |
+| 05 · Servicios | 0 |
 | 06 · Tu panel | 0 |
 | 07 · Por qué develOP | 0 |
 | 08 · Cierre | 0 |
@@ -57,14 +57,14 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 | quién | cuántas |
 |---|---:|
 | Franco (o un cliente) | 1 |
-| Valentino | 18 |
+| Valentino | 17 |
 | Una decisión, antes que un dato | 0 |
 
 ### Franco (o un cliente) — 1
 
 - **02 · Quiénes somos** · `personas[0].descripcion` — Cómo es Franco y de qué se ocupa. Se lee sobre la foto, así que corto.
 
-### Valentino — 18
+### Valentino — 17
 
 - **01 · Hero** · `bajada` — El renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Es UNA frase y se pinta en UN renglón en los ocho anchos — COMPO-2 revocó el quiebre en dos filas que COMPO-1 había declarado, así que ya no hay que escribirla pensando dónde corta.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
@@ -83,7 +83,6 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 - **04 · Trabajos** · `proyectos[1].resena.autor` — Quién firma la reseña de Esquina Estudio
 - **04 · Trabajos** · `proyectos[2].resena.texto` — La reseña de Banú Scents (la pide Valentino)
 - **04 · Trabajos** · `proyectos[2].resena.autor` — Quién firma la reseña de Banú Scents
-- **05 · Servicios** · `PREGUNTAS_DEL_RECOMENDADOR` — Las tres preguntas del recomendador sobre los problemas del cliente, y sus tres respuestas (una por servicio).
 
 ### Una decisión, antes que un dato — 0
 
@@ -157,7 +156,6 @@ Se edita en `src/app/v3/_secciones/servicios/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| `[TEXTO]` | `PREGUNTAS_DEL_RECOMENDADOR` | Valentino | Las tres preguntas del recomendador sobre los problemas del cliente, y sus tres respuestas (una por servicio). | Una pregunta corta y tres respuestas de una línea cada una, en voseo. Texto plano. |
 
 
 ## 06 · Tu panel

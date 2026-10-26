@@ -30,8 +30,16 @@ import { useNanobotsDelEscenario } from './useNanobotsDelEscenario'
  * `telefono`: abajo de 1024 (C2-50: siempre, con movimiento): lo mismo, con el dedo, los paneles apilados, los nanobots más chicos y
  * el aviso del gesto. Las letras de cada servicio (`?titulo-servicio=`, `?fuente-servicio=`): `useFuentesDelServicio`.
  */
-/** La pista, como mínimo: el cuadro anclado y una pantalla por estado (desde 1024 se estira hasta llenar la tabla: `flex-1`). */
+/** La pista, como mínimo: el cuadro anclado y una pantalla por estado (abajo de 1024). */
 export const ALTO_MINIMO_DE_LA_PISTA = altoDeSecuenciaPinneada(ESTADOS_DE_SERVICIOS + 1)
+
+/**
+ * [C2-51] Desde 1024, la pista FIJA en lo que medía estirada (800svh de la tabla menos la pantalla del recomendador de antes: 700svh,
+ * el mismo paso de cada gatillo). Ya no se estira (`flex-1`): el recomendador cambia de alto con lo que muestra (las etapas, el
+ * resultado, el contacto) y, estirada, la pista se achicaba arriba y el recomendador saltaba en la pantalla. Ahora crece hacia
+ * abajo y la sección mide más que la tabla: la REGLA DE ALTURAS la sigue `tramoDeServicios.ts`.
+ */
+export const ALTO_DE_LA_PISTA_ANCHA = altoDeSecuenciaPinneada(ESTADOS_DE_SERVICIOS + 3)
 
 export function EscenarioDeServicios({ telefono }: { readonly telefono: boolean }): React.JSX.Element {
   const pista = useRef<HTMLDivElement>(null)
@@ -40,7 +48,8 @@ export function EscenarioDeServicios({ telefono }: { readonly telefono: boolean 
   const cambio = useRef<CambioDeCapa>(SIN_CAMBIO)
   const reducido = useMovimientoReducido()
   const diagonal = useDiagonal()
-  const { vista, ir } = useGatillos({ pista, cantidad: ESTADOS_DE_SERVICIOS, activa: true, tactil: telefono, reducido, duracionMs: DURACION_DE_LA_TRANSICION_MS })
+  // [C2-51] El último tramo (del último servicio al recomendador) ya no es gatillo: scroll normal (`salidaDeAbajoLibre`).
+  const { vista, ir } = useGatillos({ pista, cantidad: ESTADOS_DE_SERVICIOS, activa: true, tactil: telefono, reducido, duracionMs: DURACION_DE_LA_TRANSICION_MS, salidaDeAbajoLibre: true })
   const posicion = usePosicionDelEscenario(vista, reducido)
   const fuentes = useFuentesDelServicio()
   useCoreografiaDelEscenario(escenario, lienzo, posicion, cambio, `${fuentes.claseDelTitulo}|${fuentes.claseDelTexto}|${fuentes.titulo}`)
@@ -50,7 +59,7 @@ export function EscenarioDeServicios({ telefono }: { readonly telefono: boolean 
   const angulo = { '--tangente-de-la-diagonal': tangenteDe(diagonal).toFixed(4) } as CSSProperties
 
   return (
-    <div ref={pista} data-pieza="pista-de-servicios" data-paso="-1" className="relative w-full flex-1" style={{ minHeight: ALTO_MINIMO_DE_LA_PISTA }}>
+    <div ref={pista} data-pieza="pista-de-servicios" data-paso="-1" className="relative w-full shrink-0" style={{ minHeight: telefono ? ALTO_MINIMO_DE_LA_PISTA : ALTO_DE_LA_PISTA_ANCHA }}>
       {/* Lo que MIDE la entrada del título (P2): la mitad de arriba del primer cuadro de la pista, que no se pega. La ventana de la demo
           termina con su pie en la mitad del cuadro: justo cuando el escenario se ancla, con el título en el medio. */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-svh">

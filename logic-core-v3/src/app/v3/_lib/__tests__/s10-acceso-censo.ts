@@ -188,5 +188,8 @@ export const DELTA_DEL_PORTFOLIO = { paradas: 1 + 4, encabezados: 1, marcadores:
  *   marcadores    +9   las doce casillas del recomendador (`[TEXTO]`, tres preguntas con sus tres respuestas, con la llave del
  *                      contenido inventado) menos los tres `[TESTIMONIO]` del caso de referencia, que se fueron con la de antes
  * (Las paradas van en `s10-acceso.invariant.ts`, `DELTA_DE_SERVICIOS`.)
+ *
+ * [C2-51] Reemplazada por la spec: las preguntas del recomendador ya están escritas (05-TEXTOS): sus doce casillas se cerraron. El
+ * `h3` sigue (el título nuevo, «¿No sabés qué necesita tu negocio?»).
  */
-export const DELTA_DE_SERVICIOS_B4 = { encabezados: 1, marcadores: 12 - 3 } as const
+export const DELTA_DE_SERVICIOS_B4 = { encabezados: 1, marcadores: 0 - 3 } as const
