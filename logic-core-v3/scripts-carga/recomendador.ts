@@ -120,8 +120,16 @@ async function tramo(p: Page, ancho: number, alto: number, movil: boolean): Prom
   let llego = false
   for (let k = 0; k < 80 && !llego; k++) {
     const antes = await p.evaluate(() => window.scrollY)
-    if (cdp !== null) await cdp.send('Input.synthesizeScrollGesture', { x: ancho / 2, y: alto * 0.6, yDistance: -240, gestureSourceType: 'touch', speed: 1200 })
-    else await p.mouse.wheel(0, 100)
+    // El dedo con eventos táctiles reales: `Input.synthesizeScrollGesture` no desplaza la página en este entorno (medido: 0 px también
+    // arriba del home, sin gatillos), y daba el tramo por trabado sin estarlo.
+    if (cdp !== null) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: ancho / 2, y: alto * 0.7, id: 1 }] })
+      for (let i = 1; i <= 12; i++) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: ancho / 2, y: alto * 0.7 - i * 20, id: 1 }] })
+        await dormir(16)
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    } else await p.mouse.wheel(0, 100)
     await dormir(cdp !== null ? 500 : 260)
     const ahora = await p.evaluate(() => ({ y: window.scrollY, escenario: document.querySelector('[data-pieza="escenario-de-servicios"]')?.getBoundingClientRect().top ?? 0, panel: document.querySelector('[data-panel="tu-panel"]')?.getBoundingClientRect().top ?? 1e9 }))
     deltas.push(ahora.y - antes)
