@@ -25,7 +25,7 @@ const DEL_TEXTO: Readonly<Record<FuenteDelServicio, () => Modulo>> = {
 export const CLASE_DEL_TITULO: Readonly<Record<TituloDelServicio, string>> = {
   '1': 'font-display font-fuerte uppercase tracking-display leading-cartel',
   '2': 'leading-cartel',
-  '3': 'font-titulo tracking-tight leading-cartel',
+  '3': 'font-titulo tracking-titulo leading-cartel', // [C2-90v] el interletrado de los titulos del sistema (era el de Tailwind, un pelo mas abierto)
 }
 
 /** El peso de la grotesca: 900, más que el `fuerte` del sistema (700); Chivo es variable y lo tiene. */

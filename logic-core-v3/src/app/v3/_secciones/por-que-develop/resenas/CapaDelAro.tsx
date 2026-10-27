@@ -54,7 +54,7 @@ export function CapaDelAro(): React.JSX.Element {
         const caja = el.getBoundingClientRect()
         c.style.transform = `translate3d(${String(Math.round(e.clientX - caja.left + 14))}px, ${String(Math.round(e.clientY - caja.top + 18))}px, 0)`
       }
-      if ((c.dataset.visible === 'si') !== visible) c.dataset.visible = visible ? 'si' : 'no'
+      if (c.hasAttribute('data-visible') !== visible) c.toggleAttribute('data-visible', visible)
     }
     const abajo = (e: PointerEvent): void => {
       if (e.pointerType === 'touch' || e.button !== 0) return
@@ -132,11 +132,11 @@ export function CapaDelAro(): React.JSX.Element {
           </a>
         )
       })}
+      {/* [C2-90v] `data-visible` de presencia; la escala transiciona con el fundido por `banda.css` (sin el `transform` que sigue al mouse). */}
       <span
         ref={cartel}
         data-pieza="cartel-del-arrastre"
-        data-visible="no"
-        className="pointer-events-none absolute top-0 left-0 origin-top-left scale-75 whitespace-nowrap rounded-[var(--radius-fuerte)] bg-tinta px-[var(--spacing-4)] py-[var(--spacing-2)] text-cuerpo text-fondo opacity-0 shadow-flotante transition-[opacity,scale] duration-media data-[visible=si]:scale-100 data-[visible=si]:opacity-100"
+        className="pointer-events-none absolute top-0 left-0 origin-top-left scale-75 whitespace-nowrap rounded-[var(--radius-fuerte)] bg-tinta px-[var(--spacing-4)] py-[var(--spacing-2)] text-cuerpo text-fondo opacity-0 shadow-flotante transition-opacity duration-media data-visible:scale-100 data-visible:opacity-100"
         style={{ zIndex: 2000 }}
       >
         {TEXTO_DE_LAS_RESENAS.arrastrar}

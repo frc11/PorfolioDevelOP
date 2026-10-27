@@ -362,3 +362,11 @@
   --halo-del-final: 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.45em color-mix(in srgb, var(--color-fondo) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-fondo) 50%, transparent);
   --halo-del-amanecer: 0 0 0.1em var(--color-tinta), 0 0 0.1em var(--color-tinta), 0 0 0.1em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.45em color-mix(in srgb, var(--color-tinta) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-tinta) 50%, transparent);
 }
+
+/* ── [C2-90v] EL CARTEL DEL ARRASTRE DE LAS RESEÑAS («Por qué develOP», `CapaDelAro.tsx`) ──────────────────────────────
+ * Aparece con un fundido y una escala (su estado es `data-visible`, en las clases). La lista de propiedades va acá: en una
+ * clase sería un valor arbitrario sin token. Deja AFUERA el `transform` con el que el cartel sigue al mouse (si no, se
+ * arrastraría detrás del puntero); la duración y la curva siguen siendo las de sus clases. */
+[data-v3] [data-pieza='cartel-del-arrastre'] {
+  transition-property: opacity, scale;
+}

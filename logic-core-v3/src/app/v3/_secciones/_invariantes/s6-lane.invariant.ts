@@ -141,11 +141,31 @@ const IMPORTS_PERMITIDOS = [
  * escrito para probarse. Es la misma excepción declarada que S3 dejó escrita, y
  * acá se acota a la única familia donde vaciar las cadenas no funciona.
  */
+/**
+ * [C2-90v] LAS EXCEPCIONES, ARCHIVO POR ARCHIVO Y CON SU MOTIVO. Las letras que Servicios prueba con `?titulo-servicio=` y
+ * `?fuente-servicio=` (C2-50) son de Google: cada una vive en su módulo de `servicios/escenario/fuentes/` y llega perezosa,
+ * sólo con su bandera. Son provisorias hasta que se elija la fuente; se borran con la elección, y con ellas su renglón de acá
+ * (un renglón cuyo archivo ya no existe falla). La excepción es ESE módulo en ESE archivo: ningún otro archivo la hereda.
+ */
+const MOTIVO_DE_LAS_FUENTES = 'provisorio hasta que se elija la fuente de Servicios (C2-50); se borra con la elección'
+const EXCEPCIONES_DE_IMPORT: Readonly<Record<string, { readonly modulo: string; readonly motivo: string }>> = {
+  [`${LANE}/servicios/escenario/fuentes/tituloSerif.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
+  [`${LANE}/servicios/escenario/fuentes/textoInstrument.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
+  [`${LANE}/servicios/escenario/fuentes/textoFraunces.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
+  [`${LANE}/servicios/escenario/fuentes/textoCormorant.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
+  [`${LANE}/servicios/escenario/fuentes/textoPlayfair.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
+}
+
+/** Los imports de `codigo` (del archivo `archivo`) que no están en la lista blanca ni en la excepción de ESE archivo. */
+const externosDe = (archivo: string, codigo: string): string[] =>
+  importsDe(codigo).filter(
+    (m) =>
+      !m.startsWith('.') && !m.startsWith('node:') && !IMPORTS_PERMITIDOS.includes(m) && EXCEPCIONES_DE_IMPORT[archivo]?.modulo !== m,
+  )
+
 const externosPorArchivo = CODIGO.map((archivo) => ({
   archivo,
-  externos: importsDe(leer(archivo)).filter(
-    (m) => !m.startsWith('.') && !m.startsWith('node:') && !IMPORTS_PERMITIDOS.includes(m),
-  ),
+  externos: externosDe(archivo, leer(archivo)),
 })).filter((r) => r.externos.length > 0)
 
 afirmarIgual(externosPorArchivo, [], 'ningún archivo de PRODUCTO importa fuera de la lista blanca')
@@ -153,8 +173,24 @@ const importsDeProducto = CODIGO.flatMap((a) => importsDe(leer(a)))
 afirmar(importsDeProducto.length > 0, `el escáner miró ${importsDeProducto.length} imports de producto`)
 
 controlPositivo('el escáner ve un import fuera de la lista', "import { PrismaClient } from '@prisma/client'", (codigo) =>
-  importsDe(codigo).filter((m) => !m.startsWith('.') && !m.startsWith('node:') && !IMPORTS_PERMITIDOS.includes(m))
-    .length === 0,
+  externosDe(`${LANE}/servicios/x.ts`, codigo).length === 0,
+)
+
+const exceptuados = Object.keys(EXCEPCIONES_DE_IMPORT)
+afirmarIgual(exceptuados.filter((a) => !CODIGO.includes(a)), [], `  las ${String(exceptuados.length)} excepciones nombran archivos de producto que existen (al elegir la fuente, se borran juntas)`)
+afirmar(
+  exceptuados.every((a) => importsDe(leer(a)).includes(EXCEPCIONES_DE_IMPORT[a].modulo) && EXCEPCIONES_DE_IMPORT[a].motivo.length > 0),
+  '  y cada una usa el módulo que la excepción le permite, con su motivo escrito',
+)
+controlPositivo(
+  '  el escáner VE la misma importación de Google en un archivo que no está en la lista',
+  "import { Fraunces } from 'next/font/google'",
+  (codigo) => externosDe(`${LANE}/servicios/escenario/OtraLetra.ts`, codigo).length === 0,
+)
+controlPositivo(
+  '  y VE otro módulo de afuera en un archivo exceptuado: la excepción es de un módulo, no del archivo',
+  "import { Fraunces } from 'next/font/google'\nimport { PrismaClient } from '@prisma/client'",
+  (codigo) => externosDe(`${LANE}/servicios/escenario/fuentes/textoFraunces.ts`, codigo).length === 0,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
