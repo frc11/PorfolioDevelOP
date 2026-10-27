@@ -23,22 +23,21 @@ export const GRIETAS = {
   origenes: ['centro', 'borde'],
   porDefecto: 'centro',
   /**
-   * [C2-31g] LA TELARAÑA DE CADA CELDA (en el sombreador; el azar, por la semilla de la celda): de 7 a 11 rayos desde su centro, corridos
-   * hasta `desorden` de su sector, con un zigzag (u) de dos ondas (por u) que nace en el centro; `cortos` de ellos no llegan al borde
+   * [C2-31g] LA TELARAÑA DE CADA CELDA (en el sombreador): de 7 a 11 rayos desde su centro (cuántos y su giro vienen con la celda, `muro.ts`),
+   * corridos hasta `desorden` de su sector, con un zigzag (u, a `zigzagPorU`) que nace en el centro; `cortos` de ellos no llegan al borde
    * (paran entre esas partes del camino). Los anillos, a esas partes del camino del centro al borde (la forma de la celda, a escala), cada
    * tramo entre dos rayos corrido hasta `corre` y alguno falta; cada tramo se cierra desde los dos rayos hacia el medio en `barre` de la
    * formación después de que pasó el frente.
    */
-  telarana: { rayos: [7, 11], desorden: 0.35, zigzag: 0.06, ondas: [2.3, 5.1], cortos: 0.25, corto: [0.45, 0.9], anillos: [0.08, 0.23, 0.41, 0.6, 0.8], corre: 0.035, falta: 0.2, barre: 0.12 },
+  telarana: { rayos: [7, 11], desorden: 0.35, zigzag: 0.06, zigzagPorU: 2.3, cortos: 0.25, corto: [0.45, 0.9], anillos: [0.08, 0.23, 0.41, 0.6, 0.8], corre: 0.035, falta: 0.2, barre: 0.12 },
   /** El grosor de cada línea (veces el del rayo). */
   grosor: { rayo: 1, anillo: 0.65 },
   /**
    * El dibujo (px, medio ancho): el núcleo de la luz, la banda oscura y el halo; cuánto oscurece la banda de día y el gris de la grieta
    * oscura de noche (sobre el negro una grieta oscura no se vería); el brillo del núcleo y del halo; la onda de la luz (corre desde donde
-   * nace la grieta: el ancho de su frente, en partes de la formación) y la FACETA (cada trozo entre rayos y anillos, apenas más claro u
-   * oscuro que el de al lado: el aristado; no es luz).
+   * nace la grieta: el ancho de su frente, en partes de la formación). [C2-31g intento 2] Sin la faceta (el costo: cada trozo con su azar).
    */
-  dibujo: { nucleoPx: 0.55, bandaPx: 1.25, haloPx: 2.4, oscurece: 0.5, grisDeNoche: 0.13, brillo: 1.35, halo: 0.22, onda: 0.3, faceta: 0.04 },
+  dibujo: { nucleoPx: 0.55, bandaPx: 1.25, haloPx: 2.4, oscurece: 0.5, grisDeNoche: 0.13, brillo: 1.35, halo: 0.22, onda: 0.3 },
   /** `?grietas-prueba=si`: un ciclo para verlas solas (s): arranca, encendidas, cerradas. */
   prueba: { arrancaS: 1.5, encendidasS: 3, cerradasS: 2.5 },
   /** [C2-31g] El control del banco `CONTROL=general` (una sola telaraña para todo el muro, centrada donde mira la cámara): su radio (u). */

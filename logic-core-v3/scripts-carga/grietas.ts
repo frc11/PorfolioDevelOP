@@ -79,15 +79,16 @@ const dispararYGrabar = (p: Page, duena: string, ms: number): Promise<MuestraDel
   p.evaluate(
     ({ duena, ms }) =>
       new Promise<MuestraDelCiclo[] | null>((resolver) => {
-        const b = (window as unknown as Banco).__grietasDelBanco
+        // [C2-31g intento 2] El banco del cristal se lee en CADA cuadro: en la página la escena se monta después del `load` (leído una vez
+        // al empezar quedaba `undefined` para siempre y el disparo de la página nunca se veía: «no se dispararon (dueña base)»).
         const lista: MuestraDelCiclo[] = []
         const t0 = performance.now()
         let desde = -1
         const paso = (t: number): void => {
-          const e = b?.estado()
+          const e = (window as unknown as Banco).__grietasDelBanco?.estado()
           if (desde < 0 && e !== undefined && e.duena === duena && e.fase !== 'cerradas') desde = t
           if (desde >= 0 && e !== undefined) lista.push({ t: (t - desde) / 1000, fase: e.fase, x: e.uniformes[0], y: e.uniformes[1] })
-          if (desde < 0 && t - t0 > 30000) resolver(null)
+          if (desde < 0 && t - t0 > 40000) resolver(null)
           else if (desde >= 0 && t - desde > ms) resolver(lista)
           else requestAnimationFrame(paso)
         }
@@ -252,7 +253,7 @@ async function principal(): Promise<void> {
         const ciclo = await dispararYGrabar(p, lugar === 'home' ? 'home' : 'base', 4200)
         const e = await estado(p)
         if (ciclo === null || e === null) {
-          fallas.push(`${clave}: no se dispararon (${e === null ? 'sin __grietasDelBanco' : `dueña ${String(e.duena)}`})`)
+          fallas.push(`${clave}: no se dispararon (${e === null ? 'sin __grietasDelBanco' : `dueña ${String(e.duena)}, fase ${e.fase}`})`)
           continue
         }
         if (e.origen !== origen) fallas.push(`${clave}: el origen es ${e.origen}`)
