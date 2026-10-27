@@ -14,7 +14,7 @@ export const PISO_DEL_TEXTO = 14
 export const PISO_DEL_TITULO = 20
 
 const tamanoDeLaHoja = (el: HTMLElement): number => {
-  el.style.removeProperty('font-size')
+  el.style.fontSize = '' // [C2-90v] lo mismo que quitar la propiedad (sin deletrear su nombre de CSS: s6-tokens lo leia como clase)
   return Number.parseFloat(getComputedStyle(el).fontSize) || PISO_DEL_TEXTO
 }
 

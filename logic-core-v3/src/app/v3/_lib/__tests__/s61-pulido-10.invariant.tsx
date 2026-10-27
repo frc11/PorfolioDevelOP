@@ -270,13 +270,19 @@ titulo('J7 · El cartel de Portfolio llega entero (o invisible) después de un v
 // su alto adentro de la ventana que recorta: el primer cuadro a la vista era el titular cortado. Mientras se repite, la ventana no
 // recorta y el titular arranca invisible: el primer cuadro visible tiene las letras enteras o la opacidad en 0.
 const PIEZAS_J7 = leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx') // [B1] el titular, en el encabezado del selector
+// [C2-90v] Desde la C2-40 el estilo del titular es una variable (en el flujo además se levanta: `levantarse.tsx`, sin opacidad propia):
+// lo que se protege es que en las DOS ramas su opacidad sigue siendo la de la llegada.
+const conLaOpacidadDeLaLlegada = (c: string): boolean =>
+  c.includes('<motion.span className="block" style={{ opacity: opacidadDelTitular }}>') ||
+  (c.includes('<motion.span className="block" style={estiloDelTitular}>') && /const estiloDelTitular = seFunde \? \{ opacity: opacidadDelTitular, \.\.\.levantarse \} : \{ opacity: opacidadDelTitular \}/.test(c))
 const llegadaBien = (opacidad: (r: number) => number, recorte: (r: number) => string, c: string): boolean =>
   opacidad(0) === 0 && recorte(0) === 'visible' && recorte(0.5) === 'visible' && opacidad(1) === 1 && opacidad(-1) === 1 && recorte(-1) === 'hidden' &&
   [0, 0.05, 0.2, 0.5].every((r) => opacidad(r) === 0 || recorte(r) === 'visible') &&
   c.includes('const repeticion = useRepeticionDeLaLlegada(seccion.id)') && c.includes('<motion.span className={VENTANA_QUE_RECORTA} style={{ overflow: recorteDelTitular }}>') &&
-  c.includes('<motion.span className="block" style={{ opacity: opacidadDelTitular }}>')
+  conLaOpacidadDeLaLlegada(c)
 afirmar(llegadaBien(opacidadDeLaLlegada, recorteDeLaLlegada, PIEZAS_J7), 'J7 · en la llegada de un viaje el titular de Portfolio arranca invisible y sube sin recortarse: el primer cuadro visible, entero')
 controlPositivo('J7 · el detector VE la llegada de antes (entera de entrada y recortada por la ventana)', [() => 1, () => 'hidden'] as const, ([o, r]: readonly [(r: number) => number, (r: number) => string]) => llegadaBien(o, r, PIEZAS_J7))
+controlPositivo('J7 · y VE el titular que se levanta sin la opacidad de la llegada', PIEZAS_J7.replace('{ opacity: opacidadDelTitular, ...levantarse }', '{ ...levantarse }'), (c: string) => llegadaBien(opacidadDeLaLlegada, recorteDeLaLlegada, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J8 · El pie nuevo: 25/50/25, el recorrido en texto con el subrayado del sitio, Demos y las dos disposiciones')

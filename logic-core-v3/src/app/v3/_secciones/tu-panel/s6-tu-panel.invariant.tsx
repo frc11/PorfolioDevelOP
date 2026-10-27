@@ -31,7 +31,7 @@ import { CANDADO_INICIAL, laRuedaEsDeAdentro, siguienteCandado, type EstadoDelCa
 import { CARTEL, CTA, ID, NEWSLETTER, TARJETAS, TITULO, textoDe } from './contenido'
 import { CONTENIDO_PROHIBIDO_DE_CONTROL, cuentaDe, focalizablesDe, patronesNombrados, sinAriaHidden, sinLaOpacidadDelEnvio, textoAccesible } from './deteccion'
 import { ALFA_DE_LA_PALABRA, LADOS, MODULO, PANTALLA_DEL_MODULO, TIPO, altoDelModulo, altoViejoAngosto, ALTOS_VIEJOS_MEDIDOS, escalaDeLaDemo, tamanoDelTitulo, tamanoDelTituloAngosto } from './geometria'
-import { FIN_DEL_PINTADO, avanceDeLaPalabra, avanceDelPintado } from './pintado'
+import { FIN_DEL_PINTADO, avanceDeLaPalabra, avanceDelPintado } from '../../_componentes/pintado/pintado'
 import { afirmacionesDeC2 } from '../../_lib/__tests__/s6-tu-panel-c2'
 import { tramoDelPanel } from './tramo'
 import { TuPanel } from './TuPanel'

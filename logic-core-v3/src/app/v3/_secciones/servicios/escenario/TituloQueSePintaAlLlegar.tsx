@@ -5,9 +5,8 @@ import { useEffect, useRef, type CSSProperties, type RefObject } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { TIPOGRAFIA_QUE_SE_PINTA, avanceDeLaPalabra, grisSinPintar } from '../../../_componentes/pintado/pintado'
 import { useMovimientoReducido } from '../../../_lib/motion/reducido'
-import { TIPOGRAFIA_QUE_SE_PINTA } from '../../tu-panel/TituloQueSePinta'
-import { avanceDeLaPalabra, grisSinPintar } from '../../tu-panel/pintado'
 
 /**
  * [C2-50] «NUESTROS SERVICIOS», EL TÍTULO QUE SE PINTA AL LLEGAR (ítem 12) — en la letra del título del Panel (la display de

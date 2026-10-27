@@ -157,7 +157,7 @@ export function llevarLaTarjeta(el: HTMLElement | null, s: EstadoDeLaTarjeta, ce
   const frente = visible && extras.destacada === true
   if (frente !== s.frente) {
     s.frente = frente
-    if (frente) el.setAttribute('data-al-frente', 'si')
+    if (frente) el.setAttribute('data-al-frente', '') // [C2-90v] de presencia: la tarjeta lo lee con la variante data sin valor
     else el.removeAttribute('data-al-frente')
   }
   if (visible !== s.visible) {
