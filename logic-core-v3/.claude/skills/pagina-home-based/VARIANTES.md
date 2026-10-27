@@ -14,14 +14,15 @@ La variante es el cambio mínimo que hace que la escena sea "de esa página" sin
    Nada literal: ni íconos ni pantallas de mentira.
 4. **Ideas de partida de Valentino:**
    - **web:** el piso brilloso;
-   - **software:** el logo con grietas y luz que sale de adentro;
+   - **software:** el logo con grietas y luz que sale de adentro (no confundir con las grietas del cristal del home, por celda, que son del muro y no de una variante: `CONTRATO.md`);
    - **IA:** un laboratorio liviano.
 
    Se cranean con él antes de construir.
 5. **El acento es luz:** brillos, filos, juntas y haces. Nunca pinta superficies.
 6. **Atada al scroll de la intro.** Arranca casi quieta y se completa con el avance (de 0 a 1). Al subir, vuelve.
 7. **Calma.** Nada gira sin razón, nada parpadea y nada compite con el título 3D. La cámara la pone el home: la variante no la mueve.
-8. **Compatible con el velo.** En el avance 0 tiene que verse bien, porque ahí se aplica el velo (la composición inicial).
+8. **Compatible con el velo y con el viaje.** En el avance 0 tiene que verse bien, porque ahí se aplica el velo (la composición inicial) y ahí llega el viaje del CTA del home, que espera a que la variante esté dibujada antes de navegar.
+9. **Vuelve a su reposo en el cierre (B13).** Cuando la señal `resolucion` llega a 1, lo que movió vuelve a su reposo y su luz a la composición (el piso liso y calmo): el pie va debajo. Una variante que no la lee sigue andando, pero se ve encendida debajo del pie. La firma, en `docs/rediseno/B12a-API.md` §4 y §8.
 
 ## Cómo se construye
 
