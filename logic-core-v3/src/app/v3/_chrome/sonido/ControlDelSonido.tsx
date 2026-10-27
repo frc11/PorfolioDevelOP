@@ -10,7 +10,6 @@ import type { MotorDelSonido } from '../../_lib/sonido/motor'
 import { guardarPrendido, leerPrendido, suscribirAlPrendido } from '../../_lib/sonido/preferencia'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { SELECTOR_DE_LOS_CTA } from '../escena/RespuestaDeLaEscena'
-import { apagarElGiroscopio, giroscopioPedido, prenderElGiroscopio } from '../../_lib/escena/giroscopio'
 import { IconoDelParlante } from './IconoDelParlante'
 import { estadoDelMotor, pedirElMotor, soltarElMotor, suscribirAlMotor } from './motorCompartido'
 
@@ -155,19 +154,8 @@ export default function ControlDelSonido(): React.JSX.Element {
     return () => window.clearTimeout(reloj)
   }, [cartel, prendido])
 
-  // [PULIDO 11] F · el prototipo del giroscopio (`?giroscopio=si`): el mismo toque prende el sonido Y el movimiento; apagado, los
-  // dos. Va en el clic del documento (corre después del de React, con el estado nuevo, y todavía adentro del gesto: iOS pide el
-  // permiso desde un gesto).
-  useEffect(() => {
-    if (!giroscopioPedido(window.location.search)) return undefined
-    const alTocar = (e: MouseEvent): void => {
-      if (!(e.target instanceof Element) || e.target.closest('[data-pieza="control-del-sonido"]') === null) return
-      if (leerPrendido()) prenderElGiroscopio()
-      else apagarElGiroscopio()
-    }
-    document.addEventListener('click', alTocar)
-    return () => document.removeEventListener('click', alTocar)
-  }, [])
+  // [C2-81] El prototipo del giroscopio (`?giroscopio=si`: este toque prendía también el movimiento) se fue: el movimiento tiene su
+  // botón (`_chrome/movimiento/`) y la frase del preloader prende los dos.
 
   const tocar = (): void => {
     guardarPrendido(!prendido)

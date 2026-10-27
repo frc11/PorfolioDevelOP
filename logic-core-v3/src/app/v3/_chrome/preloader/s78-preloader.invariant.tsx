@@ -5,7 +5,8 @@
  *       volviendo con las flechas, sin almacenamiento se muestra igual, las salidas de las pruebas y el bloqueo del scroll que instala;
  *   2 · la línea de tiempo: 5,7 s en el caso normal, la flecha en 1,5 s, el freno en su último 20 % si falta la carga, quieta y con
  *       pulso desde los 6 s, el ícono desde los 12, el tope de 20 y la versión reducida de ~1 s;
- *   3 · el trazado de la flecha: la punta en el borde del botón del sonido, apuntando a su centro, a 1440, 1024 y 390 (cajas de los
+ *   3 · el trazado de la flecha ([C2-81] a trazos, con tres bucles): la punta en el borde de su botón, apuntando a su centro, a 1440,
+ *       1024, 768 y 390 (cajas de los
  *       tokens; las reales las mide `scripts-carga/preloader.ts`);
  *
  * La entrada (4), el cableado y el arnés de los bancos (5), en `s78-preloader-entrada.invariant.tsx`: aparte, porque pone una ventana
@@ -17,7 +18,7 @@
 import { afirmar, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { CLAVE_DEL_DIA, PROPIEDAD_DE_LA_CUBIERTA, SCRIPT_DE_LA_DECISION, TOPE_MS } from './decision'
 import { DURACION_NORMAL_MS, DURACION_REDUCIDA_MS, INICIO_DE_LA_FLECHA_MS, LINEA, LINEA_REDUCIDA, entradaLista, lineaNueva, pasoDeLaLinea, velocidadDeLaFlecha, vistaDeLaLinea, type EstadoDeLaLinea } from './linea'
-import { TRAZADO, trazarLaFlecha, type Caja, type Trazado } from './trazado'
+import { TRAZADO, cajaDeLosRenglones, crucesDelCamino, muestrearElCamino, rayasDeLaFlecha, renglonesDe, trazarLaFlecha, type Caja, type Lado, type Raya, type Renglon, type Trazado } from './trazado'
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · La decisión, antes del primer pintado: una vez por día, nunca en una recarga, y las salidas de las pruebas')
@@ -256,43 +257,98 @@ afirmar(esperaBien(entradaLista), 'la entrada espera las fuentes, el primer cuad
 controlPositivo('  el detector ve una entrada que no espera a la escena preparada', ((e: Parameters<typeof entradaLista>[0]) => entradaLista({ ...e, preparada: true })) as typeof entradaLista, esperaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · La flecha termina exactamente donde está el botón del sonido (a 1440, 1024 y 390)')
+titulo('3 · La flecha [C2-81]: a trazos, con tres bucles grandes, y la punta exactamente en su botón (1440, 1024, 768 y 390)')
 
 /**
- * Las cajas, de los tokens: el botón en escritorio en su disco de 48 px (2 × `--spacing-3` + `--text-cuerpo` × `--leading-texto`) a
- * `--spacing-6` de arriba y `--pad-lateral-compacto` del costado; abajo de 1024, el disco de `--spacing-12` a `--spacing-4`. La frase en
- * `titulo-m` (unos 0,53 em por letra). Las reales las mide el banco.
+ * Los renglones y los botones, de los tokens: el botón en escritorio en su disco de 48 px (2 × `--spacing-3` + `--text-cuerpo` ×
+ * `--leading-texto`) a `--spacing-6` de arriba y `--pad-lateral-compacto` del costado; abajo de 1024, los discos de `--spacing-12` a
+ * `--spacing-4` (el del sonido a la izquierda, el del movimiento a la derecha). La frase en `titulo-m` (unos 0,53 em por letra): en
+ * escritorio la del sonido, en un renglón; en el teléfono, la del movimiento, en uno (768) o dos (390). Las reales las mide el banco.
  */
-const ANCHOS: readonly { readonly ancho: number; readonly alto: number; readonly boton: Caja; readonly frase: Caja }[] = [
-  { ancho: 1440, alto: 900, boton: { x: 32, y: 24, ancho: 48, alto: 48 }, frase: { x: 457, y: 434, ancho: 526, alto: 38 } },
-  { ancho: 1024, alto: 768, boton: { x: 32, y: 24, ancho: 48, alto: 48 }, frase: { x: 294, y: 368, ancho: 435, alto: 32 } },
-  { ancho: 390, alto: 844, boton: { x: 16, y: 16, ancho: 48, alto: 48 }, frase: { x: 45, y: 410, ancho: 300, alto: 23 } },
+interface CasoDeLaFlecha {
+  readonly ancho: number
+  readonly alto: number
+  readonly renglones: readonly Caja[]
+  readonly flechas: readonly { readonly boton: Caja; readonly lado: Lado; readonly renglon: Renglon }[]
+}
+const CASOS_DE_LA_FLECHA: readonly CasoDeLaFlecha[] = [
+  { ancho: 1440, alto: 900, renglones: [{ x: 457, y: 434, ancho: 526, alto: 38 }], flechas: [{ boton: { x: 32, y: 24, ancho: 48, alto: 48 }, lado: 'derecha', renglon: 'ultimo' }] },
+  { ancho: 1024, alto: 768, renglones: [{ x: 294, y: 368, ancho: 435, alto: 32 }], flechas: [{ boton: { x: 32, y: 24, ancho: 48, alto: 48 }, lado: 'derecha', renglon: 'ultimo' }] },
+  {
+    ancho: 768,
+    alto: 1024,
+    renglones: [{ x: 109, y: 497, ancho: 550, alto: 30 }],
+    flechas: [
+      { boton: { x: 16, y: 16, ancho: 48, alto: 48 }, lado: 'izquierda', renglon: 'primero' },
+      { boton: { x: 704, y: 16, ancho: 48, alto: 48 }, lado: 'derecha', renglon: 'primero' },
+    ],
+  },
+  {
+    ancho: 390,
+    alto: 844,
+    renglones: [
+      { x: 80, y: 400, ancho: 230, alto: 23 },
+      { x: 85, y: 425, ancho: 220, alto: 23 },
+    ],
+    flechas: [
+      { boton: { x: 16, y: 16, ancho: 48, alto: 48 }, lado: 'izquierda', renglon: 'primero' },
+      { boton: { x: 326, y: 16, ancho: 48, alto: 48 }, lado: 'derecha', renglon: 'primero' },
+    ],
+  },
 ]
-const termina = (t: Trazado, a: (typeof ANCHOS)[number]): boolean => {
-  const { punta, centro, radio, direccion, puntos, d } = t
+const corto = (c: CasoDeLaFlecha): number => Math.min(c.ancho, c.alto)
+const bienTrazada = (t: Trazado, c: CasoDeLaFlecha, f: CasoDeLaFlecha['flechas'][number]): boolean => {
+  const { punta, centro, radio, direccion, puntos, camino } = t
   const enElBorde = Math.abs(Math.hypot(punta.x - centro.x, punta.y - centro.y) - radio) < 0.01
   const alCentro = Math.abs(direccion.x * (centro.x - punta.x) + direccion.y * (centro.y - punta.y) - radio) < 0.01
   const ultimo = puntos[puntos.length - 2]
   const derecho = Math.abs((punta.x - ultimo.x) * direccion.y - (punta.y - ultimo.y) * direccion.x) < 0.01
-  const fin = /([\d.-]+) ([\d.-]+)$/.exec(d)
-  const terminaElCamino = fin !== null && Math.abs(Number(fin[1]) - punta.x) <= 0.05 && Math.abs(Number(fin[2]) - punta.y) <= 0.05
+  const fin = camino.puntos[camino.puntos.length - 1]
+  const terminaElCamino = Math.hypot(fin.x - punta.x, fin.y - punta.y) < 0.01
   const m = TRAZADO.margen
-  const adentro = puntos.every((p) => p.x >= m - 0.01 && p.x <= a.ancho - m + 0.01 && p.y >= m - 0.01 && p.y <= a.alto - m + 0.01)
-  const f = a.frase
-  const fueraDeLaFrase = puntos.every((p) => p.x < f.x - 4 || p.x > f.x + f.ancho + 4 || p.y < f.y - 4 || p.y > f.y + f.alto + 4)
-  const rodea = puntos[0].y > f.y + f.alto && puntos[1].y > f.y + f.alto && puntos[2].x < f.x
-  const segmentos = (d.match(/ C /g) ?? []).length === puntos.length - 1
-  return enElBorde && alCentro && derecho && terminaElCamino && adentro && fueraDeLaFrase && rodea && segmentos
+  const adentro = camino.puntos.every((p) => p.x >= m - 1 && p.x <= c.ancho - m + 1 && p.y >= m - 1 && p.y <= c.alto - m + 1)
+  const b = cajaDeLosRenglones(c.renglones)
+  const fueraDelTexto = camino.puntos.every((p) => p.x < b.x - 4 || p.x > b.x + b.ancho + 4 || p.y < b.y - 4 || p.y > b.y + b.alto + 4)
+  // Sale del costado pedido del renglón pedido (escritorio: a la derecha de «sonido.»).
+  const r = f.renglon === 'primero' ? c.renglones[0] : c.renglones[c.renglones.length - 1]
+  const sale = puntos[0]
+  const delCostado = (f.lado === 'derecha' ? sale.x > r.x + r.ancho : sale.x < r.x) && sale.y >= r.y && sale.y <= r.y + r.alto
+  const tresBucles = crucesDelCamino(camino) === 3
+  const grandes = t.bucle >= Math.max(TRAZADO.bucle.min, 0.05 * corto(c))
+  return enElBorde && alCentro && derecho && terminaElCamino && adentro && fueraDelTexto && delCostado && tresBucles && grandes
 }
-for (const a of ANCHOS) {
-  const t = trazarLaFlecha(a.frase, a.boton, a)
-  afirmar(termina(t, a), `${String(a.ancho)}: la punta en el borde del disco del botón (a su radio del centro, ${String(t.radio)} px) apuntando al centro, el último tramo derecho, el camino adentro de la ventana, rodeando la frase por abajo sin pisarla`, `punta (${t.punta.x.toFixed(1)}, ${t.punta.y.toFixed(1)}) · ${String(t.puntos.length)} puntos`)
+const aTrazos = (rayas: readonly Raya[], t: Trazado): boolean =>
+  rayas.length >= 20 &&
+  rayas.every((r) => r.largo >= 3 * TRAZADO.raya.grosor) &&
+  rayas.every((r, i) => i === 0 || r.desde - rayas[i - 1].desde > r.largo + 1) &&
+  Math.abs(rayas[rayas.length - 1].desde + rayas[rayas.length - 1].largo - (t.camino.largo - TRAZADO.raya.antesDeLaPunta)) < 1
+for (const c of CASOS_DE_LA_FLECHA) {
+  for (const f of c.flechas) {
+    const t = trazarLaFlecha(c.renglones, f.boton, c, f.lado, f.renglon)
+    const rayas = rayasDeLaFlecha(t, c)
+    const boton = f.boton.x < c.ancho / 2 ? 'sonido (arriba a la izquierda)' : 'movimiento (arriba a la derecha)'
+    afirmar(
+      bienTrazada(t, c, f) && aTrazos(rayas, t),
+      `${String(c.ancho)} · la del ${boton}: sale de la ${f.lado} del ${f.renglon === 'primero' ? 'primer' : 'último'} renglón, sube por encima del texto sin pisarlo, hace 3 bucles grandes encadenados y termina con la punta en el borde del disco (a su radio del centro, ${String(t.radio)} px) apuntando al centro; a trazos (rayas, no puntos)`,
+      `${String(crucesDelCamino(t.camino))} cruces · bucles de ${t.bucle.toFixed(1)} px · ${String(rayas.length)} rayas de ${rayas[0]?.largo.toFixed(1) ?? '?'} px · ${t.camino.largo.toFixed(0)} px de camino`,
+    )
+  }
 }
-const a1440 = ANCHOS[0]
-const bien1440 = trazarLaFlecha(a1440.frase, a1440.boton, a1440)
-controlPositivo('  el detector ve una flecha que termina en el centro del botón (lo taparía)', { ...bien1440, punta: bien1440.centro }, (t) => termina(t, a1440))
-controlPositivo('  y una que termina 20 px antes', { ...bien1440, punta: { x: bien1440.punta.x - 20 * bien1440.direccion.x, y: bien1440.punta.y - 20 * bien1440.direccion.y } }, (t) => termina(t, a1440))
-const movido = trazarLaFlecha(a1440.frase, { ...a1440.boton, x: 300, y: 200 }, a1440)
+const c1440 = CASOS_DE_LA_FLECHA[0]
+const f1440 = c1440.flechas[0]
+const bien1440 = trazarLaFlecha(c1440.renglones, f1440.boton, c1440, f1440.lado, f1440.renglon)
+controlPositivo('  el detector ve una flecha que termina en el centro del botón (lo taparía)', { ...bien1440, punta: bien1440.centro }, (t) => bienTrazada(t, c1440, f1440))
+controlPositivo('  y una que termina 20 px antes', { ...bien1440, punta: { x: bien1440.punta.x - 20 * bien1440.direccion.x, y: bien1440.punta.y - 20 * bien1440.direccion.y } }, (t) => bienTrazada(t, c1440, f1440))
+controlPositivo('  y una con un solo bucle (como la de antes)', { ...bien1440, camino: muestrearElCamino([...bien1440.puntos.slice(0, 7), ...bien1440.puntos.slice(-2)]) }, (t) => bienTrazada(t, c1440, f1440))
+controlPositivo('  y una que sale de abajo de la frase (la de antes la rodeaba por abajo)', { ...bien1440, puntos: [{ x: 720, y: 500 }, ...bien1440.puntos.slice(1)] }, (t) => bienTrazada(t, c1440, f1440))
+controlPositivo('  y una de puntos (la de antes)', rayasDeLaFlecha(bien1440, c1440).map((r) => ({ ...r, largo: TRAZADO.raya.grosor })), (r) => aTrazos(r, bien1440))
+const movido = trazarLaFlecha(c1440.renglones, { ...f1440.boton, x: 300, y: 200 }, c1440, 'derecha', 'ultimo')
 afirmar(Math.abs(Math.hypot(movido.punta.x - 324, movido.punta.y - 224) - 24) < 0.01, '  y sigue al botón donde esté (la caja real, no un número fijo)')
+const juntos = renglonesDe([
+  { x: 80, y: 400, ancho: 120, alto: 23 },
+  { x: 200, y: 401, ancho: 110, alto: 22 },
+  { x: 85, y: 425, ancho: 220, alto: 23 },
+])
+afirmar(juntos.length === 2 && juntos[0].ancho === 230 && juntos[1].y === 425, '  los rectángulos del texto se juntan por renglón (los que se pisan en altura)')
 
 cerrar('s78-preloader')

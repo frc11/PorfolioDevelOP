@@ -284,3 +284,16 @@
   opacity: 0;
   pointer-events: none;
 }
+
+/* [C2-81] El botón del movimiento (arriba a la derecha, en el teléfono) se retira con el menú y el parlante. */
+[data-v3] [data-parte="lugar-del-movimiento"] {
+  transition-property: translate, opacity;
+  transition-duration: var(--duracion-media);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3][data-cabecera-retirada] [data-parte="lugar-del-movimiento"] {
+  translate: 0 calc(-1 * var(--zona-de-la-cabecera));
+  opacity: 0;
+  pointer-events: none;
+}

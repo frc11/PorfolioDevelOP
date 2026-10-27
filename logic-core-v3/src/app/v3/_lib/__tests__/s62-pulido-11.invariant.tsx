@@ -23,7 +23,7 @@
  *   D · el logo del final se CAE y encastra: física de cuerpo rígido (θ'' = κ·sen(θ − α)), el hueco que se abre con la caída,
  *       el contacto en el cuadro del golpe, un rebote chico que se asienta, sin saltos ni atravesar el piso ([PULIDO 13] · sin variantes).
  *   E · [PULIDO 14] L3 · los hilos de energía se borraron (los reemplazan los destellos: s65).
- *   F · el giroscopio (`?giroscopio=si`, prototipo; `docs/rediseno/GIROSCOPIO.md`): la inclinación del teléfono como el puntero.
+ *   F · el giroscopio (`docs/rediseno/GIROSCOPIO.md`; [C2-81] con su botón, sin la bandera): la inclinación del teléfono como el puntero.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -52,7 +52,7 @@ import { CAIDA_DEL_PIE } from '../escena/final/caidaDelPie'
 import { FINAL_DEL_PIE, calma as calmaDelFinal, golpeDelFinal, segundosDelFinal } from '../escena/final/recorridoDelFinal'
 import { PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
 import { FLOOR_Y } from '../escena/probeScene'
-import { GIROSCOPIO, giroscopioPedido, punteroDeLaInclinacion } from '../escena/giroscopio'
+import { GIROSCOPIO, punteroDeLaInclinacion } from '../escena/giroscopio'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -721,10 +721,10 @@ controlPositivo('  el detector VE la sombra de la primera versión (ninguna, par
 // [PULIDO 14] L3 · los hilos de energía (`?hilos=`) se borraron con su código (no gustaron): los reemplazan los destellos (s65).
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('F · El giroscopio (`?giroscopio=si`): la inclinación del teléfono es el puntero de la cámara')
+titulo('F · El giroscopio ([C2-81] con su botón; era `?giroscopio=si`): la inclinación del teléfono es el puntero de la cámara')
 
-// Prototipo, apagado por defecto: sin la bandera no se escucha ni se pide nada. Con ella, el toque del parlante prende el sonido Y
-// el movimiento (iOS pide el permiso desde un gesto). La inclinación entra por el MISMO caño que el mouse (`OrbitRig`): su
+// [C2-81] Ya no es un prototipo: apagado por defecto, lo prende su botón o la frase del preloader (iOS pide el permiso desde ese gesto;
+// `s78-c2-81` lo prueba con un teléfono de mentira) y el parlante sólo prende el sonido. La inclinación entra por el MISMO caño que el mouse (`OrbitRig`): su
 // suavizado, su rango de −1 a 1 (sus topes: el techo del domo no entra) y su apagado con movimiento reducido.
 const cero = { beta: 70, gamma: 3 }
 const inclinacionBien = (f: typeof punteroDeLaInclinacion): boolean => {
@@ -741,12 +741,12 @@ const SONIDO_F = leer('_chrome/sonido/ControlDelSonido.tsx')
 const GIRO_F = leer('_lib/escena/giroscopio.ts')
 // [CIERRE A] A1 · el caño del mouse pasa por la persecución de la órbita (el puntero sin los controles fijos); el giroscopio, igual.
 const MODULACION_F = leer('_lib/escena/punteroDeLaOrbita.ts')
+const MOVIMIENTO_F = leer('_lib/escena/movimiento.ts')
 const cableadoBien = (rig: string, son: string, g: string): boolean =>
   rig.includes('perseguirElPunteroDeLaOrbita(mouse, inclinado, state.pointer, delta)') && MODULACION_F.includes('const p = inclinado ? INCLINACION_DEL_TELEFONO : punteroDeLaOrbita(puntero.x, puntero.y)') &&
-  son.includes('if (!giroscopioPedido(window.location.search)) return undefined') && son.includes('if (leerPrendido()) prenderElGiroscopio()') && son.includes("document.addEventListener('click', alTocar)") &&
-  g.includes("window.matchMedia('(prefers-reduced-motion: reduce)').matches") && g.includes("document.addEventListener('visibilitychange', alCambiarLaVisibilidad)") && g.includes('conPermiso.requestPermission()') &&
-  !giroscopioPedido('') && giroscopioPedido('?giroscopio=si') && !giroscopioPedido('?giroscopio=1')
-afirmar(cableadoBien(RIG_F, SONIDO_F, GIRO_F), 'F2 · apagado por defecto; con la bandera, el toque del parlante lo prende (el permiso de iOS desde el gesto), nunca con movimiento reducido, en pausa con la pestaña oculta, y entra por el caño del mouse')
-controlPositivo('F2 · el detector VE el giroscopio prendido sin la bandera', SONIDO_F.replace('if (!giroscopioPedido(window.location.search)) return undefined', 'if (false) return undefined'), (so: string) => cableadoBien(RIG_F, so, GIRO_F))
+  !/prenderElGiroscopio|giroscopioPedido/.test(son) && MOVIMIENTO_F.includes("export const arrancaPrendido = (guardado: MovimientoGuardado): boolean => guardado === 'si'") &&
+  g.includes("document.addEventListener('visibilitychange', alCambiarLaVisibilidad)") && g.includes('.requestPermission().then(') && !g.includes('giroscopioPedido')
+afirmar(cableadoBien(RIG_F, SONIDO_F, GIRO_F), 'F2 · apagado por defecto (lo prende su botón, con el permiso de iOS desde el gesto; el parlante ya no), en pausa con la pestaña oculta, y entra por el caño del mouse')
+controlPositivo('F2 · el detector VE el parlante que prende también el movimiento (el prototipo)', `${SONIDO_F}\nif (leerPrendido()) prenderElGiroscopio()`, (so: string) => cableadoBien(RIG_F, so, GIRO_F))
 
 cerrar('s62-pulido-11')

@@ -10,6 +10,7 @@ import { ChatDelSitio } from './chat/ChatDelSitio'
 import { CLASE_DE_LA_PASTILLA_APAGADA, CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 import { SaltarAlContenido } from './SaltarAlContenido'
 import { EsquinaDelSonido } from './sonido/EsquinaDelSonido'
+import { EsquinaDelMovimiento } from './movimiento/EsquinaDelMovimiento'
 
 /**
  * EL CHROME DEL HOME — la pastilla que viaja, y el cursor detrás de su decisión.
@@ -170,6 +171,8 @@ export function ChromeDelHome(): React.JSX.Element {
       <AnticipacionDelMenu />
       {/* [3D Y SONIDO] T2: el sonido; [RETOQUE 3D] el parlante, en el producto (apagado por defecto); `?sonidos=1`, la página de
           prueba. [CIERRE A] A6: el infinito del recorrido se sacó; el parlante, en su esquina (arriba a la izquierda). */}
+      {/* [C2-81] El movimiento del teléfono: su botón arriba a la derecha (táctil, abajo de 1024 y con el sensor; en escritorio, nada). */}
+      <EsquinaDelMovimiento />
       <EsquinaDelSonido />
       {/* [B11] El chat del sitio, abajo a la derecha (la esquina que A6 dejó libre): diferido, sin 3D y debajo de lo que tapa la página. */}
       <ChatDelSitio />

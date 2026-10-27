@@ -121,7 +121,8 @@ afirmar(mismoCorrimiento(deAfuera) && Math.abs(corre(deAfuera({ x: 1, y: 1 }))[0
 controlPositivo('  el detector VE una entrada con otro rango (de 0 a 1, como una fracción de la pantalla)', (q: PosicionDeLaEntrada) => ({ x: (q.x + 1) / 2, y: (q.y + 1) / 2 }), mismoCorrimiento)
 const ENTRADA = sinComentarios(leer('moire/entrada.ts'))
 const pura = (c: string): boolean => !/\bwindow\b|deviceorientation|DeviceOrientationEvent|giroscopio|INCLINACION_DEL_TELEFONO|addEventListener/.test(c)
-afirmar(pura(ENTRADA) && !/fijarLaEntradaDelMoire/.test(sinComentarios(leer('giroscopio.ts'))), '  preparada, sin conectar: la entrada no escucha el sensor y el giroscopio todavía no la llama (lo conecta la 81)')
+// [C2-81] La 81 la conectó: el giroscopio la fija con cada lectura y la suelta al callar (lo prueba en el tiempo `s78-c2-81`).
+afirmar(pura(ENTRADA) && sinComentarios(leer('giroscopio.ts')).includes('fijarLaEntradaDelMoire(INCLINACION_DEL_TELEFONO)') && /fijarLaEntradaDelMoire\(null\)/.test(sinComentarios(leer('giroscopio.ts'))), '  la entrada no escucha el sensor por su cuenta: la fija el giroscopio (conectada por la 81)')
 controlPositivo('  el detector VE una entrada que escucha el sensor por su cuenta', `${ENTRADA}\nwindow.addEventListener('deviceorientation', () => undefined)`, pura)
 
 // ── 3 · las líneas negras ───────────────────────────────────────────────────
