@@ -164,6 +164,15 @@ export const GEOMETRIA = {
   /** La misma medida cómoda para la descripción de cada persona: mismo registro, mismo renglón. */
   medidaMovilDelCuerpo: 'max-escritorio:max-w-[var(--medida-movil)]',
   /**
+   * [C2-30f] LA DESCRIPCIÓN DE CADA PERSONA, MÁS GRANDE: el nombre grande de afuera se fue (va en la etiqueta de la foto) y le deja
+   * el lugar. Era `cuerpo` (15 px en todos los anchos); ahora `--persona-cuerpo-tamano` (`estilos.seccion`). No pasa por `<Cuerpo>`
+   * por lo mismo que la bajada (pisarle el tamaño le saca su clase de escala).
+   */
+  descripcionDeLaPersona: cn(
+    'font-cuerpo tracking-texto leading-texto text-[length:var(--persona-cuerpo-tamano)] max-escritorio:text-[length:var(--persona-cuerpo-movil)] max-escritorio:max-w-[var(--medida-movil)]',
+    MEZCLA_SOBRE_LA_ESCENA,
+  ),
+  /**
    * LOS VALORES A MEDIDA, COMO PROPIEDADES Y NO COMO LITERALES.
    *
    * `s5-tokens` §T4 admite UNA sola forma de valor arbitrario: `var(--token)`. Lo que
@@ -207,7 +216,14 @@ export const GEOMETRIA = {
      * Va en la raíz de la sección y no en cada consumidor: dos declaraciones del
      * mismo 65 se desincronizan el día que una se toque.
      */
-    seccion: { '--medida-movil': '65ch', '--nombre-piso': '120px' } as React.CSSProperties,
+    /**
+     * [C2-30f] `--persona-cuerpo-tamano`: la descripción de cada persona desde 1024, 16 px hasta 1120 y de ahí a 20 px en 1440
+     * (quieta arriba). [derivado] Su palabra más larga, «perfeccionista.», mide 7,04 em (los avances de la Chivo 400 menos el
+     * interletrado del texto) y su columna es `--nombre-piso` (120 px) hasta 1120 y `0,125·w − 20` después: la recta le deja de 6 a
+     * 14 px de sobra (16 px a 1024: 112,6 contra 120). Así la columna no cambia y el alto de la fila (lo manda la foto) tampoco.
+     * Abajo de 1024 la columna es el ancho entero: el cuerpo de la bajada (17 px), `--persona-cuerpo-movil`.
+     */
+    seccion: { '--medida-movil': '65ch', '--nombre-piso': '120px', '--persona-cuerpo-tamano': 'clamp(16px, calc(2px + 1.25vw), 20px)', '--persona-cuerpo-movil': '1.0625rem' } as React.CSSProperties,
     /** `--foto-ancho` sólo gobierna abajo de 1025: de ahí para arriba la foto pasa a
      *  `escritorio:w-full` (de la calle), una utilidad del sistema y no un valor a medida. */
     fotoDelEquipo: { '--foto-ancho': '65%' } as React.CSSProperties,
@@ -364,6 +380,15 @@ export const CLASE_DE_RELACION = { retrato: 'aspect-4/3', foto: 'aspect-3/2' } a
  * (`?nosotros=fijo`, fijo en el mundo y 0,57) se borró: «está re alejado».
  */
 export const PLANO_DE_NOSOTROS = { alejamiento: 0.8, parteDelMouse: 0.7 } as const
+
+/**
+ * [C2-30f] LAS FOTOS DEL EQUIPO, QUIETAS EN LA ESCENA: el plano de las personas no mira a la cámara; tiene la orientación de la
+ * cámara del recorrido en su lectura, fija en el mundo (`escena/titulos3d/orientacionPropia.ts`). `lectura`: el progreso en que el
+ * bloque de las dos personas está en el medio del cuadro (del recibo de PULIDO 16: 0,215 a 1440 y 0,200 a 1024). `tope`: el ángulo
+ * máximo con la cámara viva; con 18° la foto más torcida se ve a 0,87 de su proporción (el piso legible, 0,85) y nada sale del
+ * cuadro (36 px de margen en el peor caso del mouse, a 1024). Lo afirma s85 con el modelo de s67.
+ */
+export const ORIENTACION_DE_LAS_PERSONAS = { lectura: 0.21, tope: 18 } as const
 
 /**
  * [PULIDO 11] A2 · EL CUERPO DE LA AGENCIA LLEGA ENTERO AL REPOSO. Su bloque usa la ventana visible (arranca cuando asoma

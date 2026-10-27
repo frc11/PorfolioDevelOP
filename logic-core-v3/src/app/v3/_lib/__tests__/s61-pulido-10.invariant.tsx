@@ -396,13 +396,14 @@ titulo('J9 · Móvil y tablet: las leyendas de Quiénes somos, el panel de Conta
 // a · Abajo de 1024 la leyenda de cada persona es sólo su rol (el nombre ya está arriba, en el título) y la foto de las dos
 // personas dice «El equipo detrás de develOP» (dictado por el humano).
 const MARCO_J9 = leer('_secciones/quienes-somos/marco.tsx')
+// [C2-30f] Y desde la cola 2 en todos los anchos: adentro de la foto, abajo, sólo el rol; el nombre va en su etiqueta (s78-c30f).
 const leyendasBien = (m: string, e: string, c: string): boolean =>
-  m.includes("<p className={cn(REVELADO.ventana, 'max-escritorio:hidden')} data-parte=\"revelado-nombre\">") &&
+  !m.includes('data-parte="revelado-nombre"') &&
   m.includes("<p className={cn(REVELADO.ventana, textoEnMovil !== undefined && 'max-escritorio:hidden')} data-parte=\"revelado-texto\">") &&
   m.includes("<p className={cn(REVELADO.ventana, 'escritorio:hidden')} data-parte=\"revelado-texto-movil\">") &&
   e.includes('textoEnMovil={CONTENIDO.equipo.leyendaEnMovil}') && c.includes("leyendaEnMovil: 'El equipo detrás de develOP',")
 afirmar(leyendasBien(MARCO_J9, leer('_secciones/quienes-somos/equipo.tsx'), leer('_secciones/quienes-somos/contenido.ts')), 'a · abajo de 1024: el rol solo en la leyenda de cada persona y «El equipo detrás de develOP» en la foto del equipo')
-controlPositivo('a · el detector VE el nombre repetido en la leyenda del teléfono', MARCO_J9.replace("<p className={cn(REVELADO.ventana, 'max-escritorio:hidden')} data-parte=\"revelado-nombre\">", '<p className={REVELADO.ventana} data-parte="revelado-nombre">'), (m: string) => leyendasBien(m, leer('_secciones/quienes-somos/equipo.tsx'), leer('_secciones/quienes-somos/contenido.ts')))
+controlPositivo('a · el detector VE el nombre repetido en la leyenda', MARCO_J9.replace("<p className={cn(REVELADO.ventana, textoEnMovil !== undefined && 'max-escritorio:hidden')} data-parte=\"revelado-texto\">", '<p className={REVELADO.ventana} data-parte="revelado-nombre"></p>\n            <p className={cn(REVELADO.ventana, textoEnMovil !== undefined && \'max-escritorio:hidden\')} data-parte="revelado-texto">'),(m: string) => leyendasBien(m, leer('_secciones/quienes-somos/equipo.tsx'), leer('_secciones/quienes-somos/contenido.ts')))
 
 // c · El panel de Contacto en el teléfono: el contenido centrado en el alto de la hoja; el mensaje crece con lo que se escribe (de
 // dos a ocho renglones, `field-sizing`) y en el angosto su rótulo va en su renglón.
