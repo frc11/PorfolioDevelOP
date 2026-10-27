@@ -86,8 +86,9 @@ const sinPartir = (h: string, c: string, q: string): boolean =>
 afirmar(sinPartir(hero, cta, quienes), '  donde el diseño es UN renglón (el registro 1 del hero, la frase del CTA) el DOM no se parte desde 1024 y la letra no pasa de su caja; el titular de Quiénes somos, de su columna')
 controlPositivo('  el detector VE el registro 1 que se parte (el fluido sin tope)', hero.replace('escritorio:text-[length:min(var(--text-fluido-display),calc(100cqw/8.4))] escritorio:whitespace-nowrap', 'escritorio:text-fluido-display'), (h: string) => sinPartir(h, cta, quienes))
 
-// A3 · Quiénes somos desde 1024: el ≠ pegado al margen (como en la tablet angosta; centrado caía sobre el arco del logo) y
-// la fila del ≠ es la que crece: el titular arriba, el cuerpo abajo y el logo entre los dos (con el hueco parejo no entraba).
+// A3 · Quiénes somos desde 1024: la fila del ≠ es la que crece: el titular arriba, el cuerpo abajo y el logo entre los dos (con
+// el hueco parejo no entraba). [C2-30s] El ≠ ya no va pegado al margen: su Bloque llena esa fila y es el espacio libre, con el ≠
+// grande y centrado en él (`signo.ts`, s78-c2-30s); la regla del margen de `banda.css` queda (sin efecto: su lugar mide lo que él).
 // Los bordes, 13 y 12 svh: los del banco a 1440 × 900 en el reposo del viaje (el titular despejado de la barra y del logo, el
 // cuerpo entero debajo del logo).
 const CORTE = Number(valorDeToken('--breakpoint-escritorio').replace('px', ''))
@@ -95,11 +96,13 @@ const quienesEnEscritorio = (banda: string, geometria: string, seccion: string):
   banda.includes(`@media (width >= 426px) and (width < 769px), (width >= ${String(CORTE)}px) {`) &&
   geometria.includes("repartoDeLaAgencia: 'escritorio:content-stretch escritorio:grid-rows-[0_auto_1fr_auto] escritorio:pt-[var(--agencia-arriba)] escritorio:pb-[var(--agencia-abajo)]'") &&
   geometria.includes("agencia: { '--agencia-arriba': '13svh', '--agencia-abajo': '12svh' } as React.CSSProperties,") &&
-  geometria.includes("signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3 escritorio:self-center'") &&
+  geometria.includes("signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',") &&
+  seccion.includes('className={cn(GEOMETRIA.reparto.signo, CLASES_DEL_SIGNO.libre, GEOMETRIA.tipografiaDelTitular)}') &&
   seccion.includes('className={cn(CLASES_DEL_REPARTO, GEOMETRIA.repartoDeLaAgencia)} style={GEOMETRIA.estilos.agencia}')
 const BANDA_CSS = leer('_estilos/banda.css')
 const SECCION_QUIENES = leer('_secciones/quienes-somos/QuienesSomos.tsx')
-afirmar(quienesEnEscritorio(BANDA_CSS, quienes, SECCION_QUIENES), 'A3 · Quiénes somos desde 1024: el ≠ al margen (el corte, el de `--breakpoint-escritorio`) y su fila la que crece, con el titular arriba y el cuerpo abajo')
+afirmar(quienesEnEscritorio(BANDA_CSS, quienes, SECCION_QUIENES), 'A3 · Quiénes somos desde 1024: la fila del ≠ la que crece, con el titular arriba y el cuerpo abajo, y el ≠ en el espacio libre de esa fila (C2-30s)')
+controlPositivo('A3 · el detector VE el ≠ de antes (sin el espacio libre)', SECCION_QUIENES.replace('CLASES_DEL_SIGNO.libre, ', ''), (q: string) => quienesEnEscritorio(BANDA_CSS, quienes, q))
 controlPositivo('A3 · el detector VE la primera pantalla de antes (el reparto parejo)', SECCION_QUIENES.replace('cn(CLASES_DEL_REPARTO, GEOMETRIA.repartoDeLaAgencia)', 'CLASES_DEL_REPARTO'), (q: string) => quienesEnEscritorio(BANDA_CSS, quienes, q))
 controlPositivo('A3 · el detector VE el ≠ centrado desde 1024 (la regla sólo en la tablet angosta)', BANDA_CSS.replace(`, (width >= ${String(CORTE)}px) {`, ' {'), (b: string) => quienesEnEscritorio(b, quienes, SECCION_QUIENES))
 
