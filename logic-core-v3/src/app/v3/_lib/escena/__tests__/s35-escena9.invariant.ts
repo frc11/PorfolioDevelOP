@@ -106,10 +106,10 @@ const entornoFuente = leer('entorno.ts')
 // fija lo mismo que antes (lee `?pruebas=`, el pedido va sobre el producto y de él se toman sólo las pruebas y el material
 // de los títulos) contra esa estructura, y además por comportamiento.
 const urlDelEntorno = entornoFuente.slice(entornoFuente.indexOf('export function pedidoDeLaUrl('), entornoFuente.indexOf('/** ¿Hay un banco mirando?'))
-// [B8] La URL también lleva la variante del moiré (`?moire=`): se suma a lo que toma del pedido; el resto, intacto.
-const urlBienDe = (u: string): boolean => /consulta\.get\('pruebas'\)/.test(u) && /return lista === '' \? null : `producto,\$\{lista\}`/.test(u) && /const lista = pedidoDeLaUrl\(window\.location\.search\)/.test(u) && /const pedido = lista === null \? null : entornoPedido\(lista\)/.test(u) && /\{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas, moire: pedido\.moire \}/.test(u) && pedidoDeLaUrl('?pruebas=pie=antes') === 'producto,pie=antes' && pedidoDeLaUrl('') === null
-afirmar(urlBienDe(urlDelEntorno), 'sin banco, las pruebas se piden en la URL (`/v3?pruebas=…`): sólo las pruebas (y, desde 3D Y SONIDO, el material de los títulos; desde B8, la variante del moiré), el resto del producto intacto y sin los ganchos del banco')
-controlPositivo('  el detector VE una URL que pisa el producto entero con el pedido', urlDelEntorno.replace('{ ...ENTORNO, titulos: pedido.titulos, pruebas: pedido.pruebas, moire: pedido.moire }', '{ ...ENTORNO, ...pedido }'), urlBienDe)
+// [B8] La URL llevó la variante del moiré (`?moire=`); [C2-31m] se borró con las variantes: toma las pruebas y el material, el resto, intacto.
+const urlBienDe = (u: string): boolean => /consulta\.get\('pruebas'\)/.test(u) && /return lista === '' \? null : `producto,\$\{lista\}`/.test(u) && /const lista = pedidoDeLaUrl\(window\.location\.search\)/.test(u) && /const pedido = lista === null \? null : entornoPedido\(lista\)/.test(u) && /\{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas \}/.test(u) && pedidoDeLaUrl('?pruebas=pie=antes') === 'producto,pie=antes' && pedidoDeLaUrl('') === null
+afirmar(urlBienDe(urlDelEntorno), 'sin banco, las pruebas se piden en la URL (`/v3?pruebas=…`): sólo las pruebas (y, desde 3D Y SONIDO, el material de los títulos), el resto del producto intacto y sin los ganchos del banco')
+controlPositivo('  el detector VE una URL que pisa el producto entero con el pedido', urlDelEntorno.replace('{ ...ENTORNO, titulos: pedido.titulos, pruebas: pedido.pruebas }', '{ ...ENTORNO, ...pedido }'), urlBienDe)
 // Qué cara es cuál: en una extrusión como la del logo (bisel 1/1/5 y los costados suaves de B7), las tapas tienen la
 // normal ±z exacta y los costados nunca llegan al corte del shader.
 const formaDePrueba = new THREE.Shape()

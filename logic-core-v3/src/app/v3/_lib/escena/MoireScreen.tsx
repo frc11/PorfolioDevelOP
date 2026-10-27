@@ -5,10 +5,10 @@ import * as THREE from 'three'
 
 import { entornoDeLaEscena, hayBanco } from './entorno'
 import { ANISOTROPIA_DE_LAS_TRAMAS } from './gpu/anisotropia'
-import { disposicionDelMoire, type VarianteDelMoire } from './moire/fijo'
+import { fijarLaEntradaDelMoire, hayEntradaDeAfuera, laEntradaDelMoire, type PosicionDeLaEntrada } from './moire/entrada'
 import { conElAmanecer } from './amanecer/luz'
 import { conPliegue } from './espejo/pliegue'
-import { bandEnvelope, createDottedGridCellData, createGridCellData } from './moireTextures'
+import { bandEnvelope, createGridCellData } from './moireTextures'
 import {
   MOIRE_BASE_ALPHA,
   MOIRE_COARSE_CELLS,
@@ -19,33 +19,30 @@ import {
   MOIRE_FAR_RADIUS,
   MOIRE_FAR_TOP,
   MOIRE_HEIGHT_SEGMENTS,
-  MOIRE_NEAR_BOTTOM,
-  MOIRE_NEAR_ORDER,
-  MOIRE_NEAR_TOP,
   MOIRE_OPACITY,
   MOIRE_SEGMENTS,
   MOIRE_TILE_SIZE,
-  dotDiameter,
-  fineCells,
   lineDuty,
   verticalRepeat,
 } from './probeMoire'
-import type { ProbeParamsStore } from './probeStore'
 import { FLOOR_Y } from './probeScene'
 import { TRAMA_ANCLADA, ZOCALO, LIMITE } from './moire/limite'
 
 /**
- * LA ENVOLVENTE DE RENDIJAS — dos cilindros coaxiales, la cámara adentro.
+ * LA ENVOLVENTE DE RENDIJAS — un cilindro, la cámara adentro.
  *
  * Los números y el porqué de cada uno están en `probeMoire.ts`; acá está el
- * cableado. **Dos draw calls, dos superficies transparentes.**
+ * cableado. **Un draw call, una superficie transparente.** [C2-31m] Era la
+ * variante `?moire=mouse` y es la única: la capa gruesa (la retícula del hero) en
+ * la pared, corrida por el puntero (`moire/MoireDelMouse.tsx`). La capa fina y el
+ * desajuste que la redefinía (las variantes `0`, `1` y `2`) se borraron.
  *
  * ── `MeshLambertMaterial`, la excepción heredada de S7 ─────────────────────
  *
  * La regla de la escena es que todo sea `meshStandardMaterial` para que la sala
- * entera se apague con el arco. Éstas son las dos únicas piezas con Lambert, y la
- * razón es de costo: son las superficies que más área de pantalla cubren con
- * mezcla encendida (51% y 57% del cuadro en promedio, 100% en el pico), así que
+ * entera se apague con el arco. Ésta es una de las piezas con Lambert, y la
+ * razón es de costo: es una de las superficies que más área de pantalla cubren con
+ * mezcla encendida (57% del cuadro en promedio, 100% en el pico), así que
  * su shader se paga sobre medio cuadro y encima con blending. Lo que la regla
  * protege se conserva entero: Lambert responde a las mismas tres luces, al mismo
  * hemisférico y a la misma niebla, así que se apaga con el arco igual. Lo único
@@ -53,7 +50,7 @@ import { TRAMA_ANCLADA, ZOCALO, LIMITE } from './moire/limite'
  *
  * ── `BackSide` ─────────────────────────────────────────────────────────────
  *
- * La cámara está siempre adentro de los dos cilindros. Con `BackSide` three
+ * La cámara está siempre adentro del cilindro. Con `BackSide` three
  * dibuja las caras internas y además **invierte la normal** al sombrear
  * (`FLIP_SIDED`), o sea que la superficie se ilumina como lo que es: una pared
  * mirando hacia adentro.
@@ -65,31 +62,31 @@ import { TRAMA_ANCLADA, ZOCALO, LIMITE } from './moire/limite'
  * vértice multiplica al del material. Con el RGB en 1, lo único que aporta es el
  * desvanecido de los bordes de la banda.
  *
- * **Y tiene que ser de la geometría y no de la textura**, porque una capa
- * puede correr su `offset` ([B8] sólo la rendija de `?moire=mouse`): una
- * envolvente horneada en la textura se movería con ella.
- *
- * [B8] **Qué capas, dónde y quietas** lo dice la variante (`moire/fijo.ts`): `0`
- * ninguna, `1` la gruesa, `2` (el defecto) las dos en la pared —coplanares: el
- * batido no depende de la cámara— y `mouse` la gruesa corrida por el puntero.
+ * **Y tiene que ser de la geometría y no de la textura**, porque la capa
+ * corre su `offset` con el puntero: una envolvente horneada en la textura se
+ * movería con ella.
  */
 
 export type MoireHandle = {
-  /** La capa gruesa. [B8] Quieta; con `?moire=mouse`, `MoireDelMouse` le corre el `offset`. */
+  /** La capa (la gruesa, en la pared). [B8] Quieta salvo el corrimiento que le escribe `MoireDelMouse`. */
   readonly gruesa: THREE.Texture
-  /** La capa fina. [B8] Quieta. */
-  readonly fina: THREE.Texture
-  /** [B8] Qué capas se dibujan y en qué radio: lo que leen las estrellas, la fugaz y el amanecer (`estrellas/trama.ts`). */
-  readonly capas: { readonly gruesa: boolean; readonly fina: boolean }
-  readonly radios: { readonly gruesa: number; readonly fina: number }
+  /** [B8] Si se dibuja (no con `fondo=cristal`): lo que leen las estrellas, la fugaz y el amanecer (`estrellas/trama.ts`). */
+  readonly dibuja: boolean
+  readonly radio: number
   /**
-   * [ESCENA 7] Dónde está cada capa (abajo, arriba, fundido de abajo y de arriba, fracción del alto):
+   * [ESCENA 7] Dónde está la capa (abajo, arriba, fundido de abajo y de arriba, fracción del alto):
    * el cielo de afuera lee la trama para quedar detrás (`estrellas/cielo.ts`).
    */
-  readonly bandas: { readonly gruesa: readonly [number, number, number, number]; readonly fina: readonly [number, number, number, number] }
+  readonly banda: readonly [number, number, number, number]
 }
 
-type VentanaDelBanco = Window & { __moireDelBanco?: { estado: () => { variante: VarianteDelMoire; capas: MoireHandle['capas']; gruesa: number[]; fina: number[] } } }
+/** [C2-31m] Lo que lee y escribe el banco (`scripts-carga/moire.ts`): el corrimiento de la capa, la entrada, y fijar una de afuera. */
+interface MoireDelBanco {
+  /** `entrada`: la de afuera (0, 0 si no hay: manda el mouse). */
+  readonly estado: () => { readonly dibuja: boolean; readonly gruesa: number[]; readonly entrada: { readonly x: number; readonly y: number; readonly deAfuera: boolean } }
+  readonly fijarLaEntrada: (p: PosicionDeLaEntrada | null) => void
+}
+type VentanaDelBanco = Window & { __moireDelBanco?: MoireDelBanco }
 
 type LayerSpec = {
   readonly radius: number
@@ -103,7 +100,7 @@ type LayerSpec = {
 
 /**
  * [ESCENA 5] CON LA FORMACIÓN, LA TRAMA LLEGA AL PISO — el cilindro se para sobre el escenario, como
- * en el dibujo: las dos capas bajan hasta el piso y el desvanecido de abajo se acorta. Sin esto las
+ * en el dibujo: la capa baja hasta el piso y el desvanecido de abajo se acorta. Sin esto las
  * copias (paradas un piso más abajo, a 60 o más de la cámara) quedan justo debajo de la banda y la
  * trama no las tapa. Arriba no cambia nada.
  */
@@ -166,27 +163,22 @@ function applyRepeat(texture: THREE.Texture, spec: LayerSpec): void {
 }
 
 type MoireScreenProps = {
-  /** De acá sale `moireMismatch`, que redefine la trama fina. */
-  store: ProbeParamsStore
   /** [ESCENA 5] Con la formación, la trama baja hasta el escenario (`TRAMA_HASTA_EL_PISO`). */
   hastaElPiso?: boolean
 }
 
 export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function MoireScreen(
-  { store, hastaElPiso = false },
+  { hastaElPiso = false },
   ref
 ) {
-  // [ESCENA 8] T2: con la formación y la bandera, las dos capas bajan a pleno hasta debajo del piso.
+  // [ESCENA 8] T2: con la formación y la bandera, la capa baja a pleno hasta debajo del piso.
   const anclada = hastaElPiso && entornoDeLaEscena().limite
-  // [PULIDO 20] R2 · `fondo=espejo`: el cristal solo, sin la trama (las capas y el zócalo no se dibujan; [B8] y nada la lee).
+  // [PULIDO 20] R2 · `fondo=espejo`: el cristal solo, sin la trama (la capa y el zócalo no se dibujan; [B8] y nada la lee).
   const conTrama = entornoDeLaEscena().pruebas['sin-moire'] !== 'si'
-  // [B8] Qué capas y dónde, por la variante de `?moire=` (`moire/fijo.ts`).
-  const variante = entornoDeLaEscena().moire
-  const disposicion = disposicionDelMoire(variante)
-  const layers = useMemo(() => {
+  const capa = useMemo(() => {
     const abajo = anclada ? TRAMA_ANCLADA.abajo : TRAMA_HASTA_EL_PISO.abajo
     const fundido = anclada ? 0 : TRAMA_HASTA_EL_PISO.fundido
-    const coarse: LayerSpec = {
+    const spec: LayerSpec = {
       radius: MOIRE_FAR_RADIUS,
       bottom: hastaElPiso ? abajo : MOIRE_FAR_BOTTOM,
       top: MOIRE_FAR_TOP,
@@ -194,71 +186,37 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
       cells: MOIRE_COARSE_CELLS,
       order: MOIRE_FAR_ORDER,
     }
-    // [B8] En la pared (`2`, coplanar con la gruesa) la fina toma la banda de la gruesa; si no, la suya.
-    const enLaPared = disposicion.fina.radio === MOIRE_FAR_RADIUS
-    const fine: LayerSpec = {
-      radius: disposicion.fina.radio,
-      bottom: hastaElPiso ? abajo : enLaPared ? MOIRE_FAR_BOTTOM : MOIRE_NEAR_BOTTOM,
-      top: enLaPared ? MOIRE_FAR_TOP : MOIRE_NEAR_TOP,
-      fadeBottom: hastaElPiso ? fundido : undefined,
-      cells: fineCells(disposicion.desajuste ?? store.current.moireMismatch),
-      order: MOIRE_NEAR_ORDER,
-    }
-
-    const coarseTexture = buildTexture(
-      createGridCellData(MOIRE_TILE_SIZE, lineDuty(coarse.cells), MOIRE_BASE_ALPHA)
-    )
-    applyRepeat(coarseTexture, coarse)
-
-    const fineTexture = buildTexture(
-      createDottedGridCellData(
-        MOIRE_TILE_SIZE,
-        lineDuty(fine.cells),
-        dotDiameter(fine.cells),
-        MOIRE_BASE_ALPHA
-      )
-    )
-    applyRepeat(fineTexture, fine)
-
-    const make = (spec: LayerSpec, texture: THREE.DataTexture, dibuja: boolean) => ({
-      spec,
-      texture,
-      dibuja,
-      geometry: buildLayerGeometry(spec),
-      material: new THREE.MeshLambertMaterial({
-        color: MOIRE_COLOR,
-        // [CALIDAD 1] B8: con dithering (ruido azul).
-        dithering: true,
-        alphaMap: texture,
-        transparent: true,
-        opacity: MOIRE_OPACITY,
-        depthWrite: false,
-        side: THREE.BackSide,
-        vertexColors: true,
-      }),
+    const texture = buildTexture(createGridCellData(MOIRE_TILE_SIZE, lineDuty(spec.cells), MOIRE_BASE_ALPHA))
+    applyRepeat(texture, spec)
+    const material = new THREE.MeshLambertMaterial({
+      color: MOIRE_COLOR,
+      // [CALIDAD 1] B8: con dithering (ruido azul).
+      dithering: true,
+      alphaMap: texture,
+      transparent: true,
+      opacity: MOIRE_OPACITY,
+      depthWrite: false,
+      side: THREE.BackSide,
+      vertexColors: true,
     })
-
-    const capas = { coarse: make(coarse, coarseTexture, disposicion.gruesa.dibuja), fine: make(fine, fineTexture, disposicion.fina.dibuja) }
     // [ESCENA 7] T11: con la bandera, el amanecer (no hace nada sin ella).
-    conElAmanecer(capas.coarse.material)
-    conElAmanecer(capas.fine.material)
+    conElAmanecer(material)
     // [PULIDO 18] P2 · el pliegue de la cúpula (la dimensión espejo), sólo con `?espejo=pliegue`.
     if (entornoDeLaEscena().pruebas.espejo === 'pliegue') {
-      conPliegue(capas.coarse.material)
-      conPliegue(capas.fine.material)
+      conPliegue(material)
     }
-    return capas
-  }, [store, hastaElPiso, anclada, disposicion])
+    return { spec, texture, material, geometry: buildLayerGeometry(spec) }
+  }, [hastaElPiso, anclada])
 
-  // [ESCENA 8] T2: el zócalo de la pared (la capa gruesa), del color de la trama y más denso que sus líneas. [B8] Sin la gruesa, no.
+  // [ESCENA 8] T2: el zócalo de la pared, del color de la trama y más denso que sus líneas.
   const zocalo = useMemo(() => {
-    if (!anclada || !disposicion.gruesa.dibuja) return null
+    if (!anclada) return null
     const alto = ZOCALO.arriba - ZOCALO.abajo
     const geometry = new THREE.CylinderGeometry(ZOCALO.radio, ZOCALO.radio, alto, MOIRE_SEGMENTS, 1, true)
     const material = new THREE.MeshLambertMaterial({ color: MOIRE_COLOR, transparent: true, opacity: LIMITE.zocalo.opacidad, depthWrite: false, side: THREE.BackSide, dithering: true })
     conElAmanecer(material)
     return { geometry, material, y: ZOCALO.abajo + alto / 2 }
-  }, [anclada, disposicion])
+  }, [anclada])
   useEffect(
     () => () => {
       zocalo?.geometry.dispose()
@@ -267,71 +225,46 @@ export const MoireScreen = forwardRef<MoireHandle, MoireScreenProps>(function Mo
     [zocalo]
   )
 
-  /**
-   * El desajuste se mueve con un slider, o sea por click y no por frame. Se
-   * aplica MUTANDO la textura en vez de re-renderizando: la disciplina del
-   * módulo es que el store sea un canal al loop, no estado de React. [B8] Si la
-   * variante fija el desajuste (`2`), el slider no lo mueve.
-   */
-  useEffect(() => {
-    const desajusteDe = (m: number): number => Math.round(disposicion.desajuste ?? m)
-    let applied = desajusteDe(store.current.moireMismatch)
-    const apply = (values: { moireMismatch: number }) => {
-      const next = desajusteDe(values.moireMismatch)
-      if (next === applied) return
-      applied = next
-      const spec = { ...layers.fine.spec, cells: fineCells(next) }
-      const data = createDottedGridCellData(
-        MOIRE_TILE_SIZE,
-        lineDuty(spec.cells),
-        dotDiameter(spec.cells),
-        MOIRE_BASE_ALPHA
-      )
-      ;(layers.fine.texture.image.data as Uint8Array).set(data)
-      layers.fine.texture.needsUpdate = true
-      applyRepeat(layers.fine.texture, spec)
-    }
-
-    apply(store.current)
-    return store.subscribe(apply)
-  }, [store, layers, disposicion])
-
   // r3f solo libera lo que declara el JSX; éstas las creó `useMemo`.
   useEffect(
     () => () => {
-      for (const layer of [layers.coarse, layers.fine]) {
-        layer.geometry.dispose()
-        layer.material.dispose()
-        layer.texture.dispose()
-      }
+      capa.geometry.dispose()
+      capa.material.dispose()
+      capa.texture.dispose()
     },
-    [layers]
+    [capa]
   )
 
   useEffect(() => {
     // [ESCENA 8] T2: sin fundido abajo, el cielo lee uno ínfimo (divide por él en el shader).
-    const banda = (spec: LayerSpec): readonly [number, number, number, number] => [spec.bottom, spec.top, spec.fadeBottom === 0 ? 1e-4 : (spec.fadeBottom ?? MOIRE_FADE), MOIRE_FADE]
-    const capas = { gruesa: conTrama && layers.coarse.dibuja, fina: conTrama && layers.fine.dibuja }
-    const handle: MoireHandle = { gruesa: layers.coarse.texture, fina: layers.fine.texture, capas, radios: { gruesa: layers.coarse.spec.radius, fina: layers.fine.spec.radius }, bandas: { gruesa: banda(layers.coarse.spec), fina: banda(layers.fine.spec) } }
+    const { spec } = capa
+    const banda: readonly [number, number, number, number] = [spec.bottom, spec.top, spec.fadeBottom === 0 ? 1e-4 : (spec.fadeBottom ?? MOIRE_FADE), MOIRE_FADE]
+    const handle: MoireHandle = { gruesa: capa.texture, dibuja: conTrama, radio: spec.radius, banda }
     if (typeof ref === 'function') ref(handle)
     else if (ref) ref.current = handle
-    // [B8] Para el banco: la variante, las capas y el corrimiento de cada textura (sólo se mueve con `?moire=mouse`).
-    if (hayBanco()) (window as VentanaDelBanco).__moireDelBanco = { estado: () => ({ variante, capas, gruesa: layers.coarse.texture.offset.toArray(), fina: layers.fine.texture.offset.toArray() }) }
-  }, [ref, layers, conTrama, variante])
+    // [C2-31m] Para el banco: el corrimiento de la capa y la entrada (el mouse o la de afuera), y fijar una de afuera.
+    if (hayBanco()) {
+      const sinAfuera = { x: 0, y: 0 }
+      ;(window as VentanaDelBanco).__moireDelBanco = {
+        estado: () => {
+          const e = laEntradaDelMoire(sinAfuera)
+          return { dibuja: conTrama, gruesa: capa.texture.offset.toArray(), entrada: { x: e.x, y: e.y, deAfuera: hayEntradaDeAfuera() } }
+        },
+        fijarLaEntrada: fijarLaEntradaDelMoire,
+      }
+    }
+  }, [ref, capa, conTrama])
 
   return (
     <>
-      {[layers.coarse, layers.fine].filter((layer) => layer.dibuja).map((layer) => (
-        <mesh
-          key={layer === layers.coarse ? 'gruesa' : 'fina'}
-          name={layer === layers.coarse ? 'trama gruesa' : 'trama fina'}
-          geometry={layer.geometry}
-          material={layer.material}
-          renderOrder={layer.spec.order}
-          position={[0, layer.spec.bottom + (layer.spec.top - layer.spec.bottom) / 2, 0]}
-          visible={conTrama}
-        />
-      ))}
+      <mesh
+        name="trama gruesa"
+        geometry={capa.geometry}
+        material={capa.material}
+        renderOrder={capa.spec.order}
+        position={[0, capa.spec.bottom + (capa.spec.top - capa.spec.bottom) / 2, 0]}
+        visible={conTrama}
+      />
       {zocalo !== null && <mesh name="zócalo" geometry={zocalo.geometry} material={zocalo.material} renderOrder={MOIRE_FAR_ORDER} position={[0, zocalo.y, 0]} visible={conTrama} />}
     </>
   )

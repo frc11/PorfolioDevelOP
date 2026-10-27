@@ -310,7 +310,8 @@ const banderasDelEspejo = (f: Traductor, stage: string, moire: string, component
   (['ambiente', 'scroll', 'mantener'] as const).every((d) => f(`producto,espejo-disparo=${d}`).pruebas['espejo-disparo'] === d) && f('producto,espejo-prisma=si').pruebas['espejo-prisma'] === 'si' &&
   ENTORNO.pruebas.espejo === 'no' && ENTORNO.pruebas['espejo-prisma'] === 'no' && PRUEBAS_SUELTAS.includes('espejo') &&
   stage.includes('<EspejoDeLaEscena logoGroupRef={logoGroupRef} quieto={reducedMotion} />') && componente.includes("if (espejo === 'no' || quieto) return null") &&
-  /if \(entornoDeLaEscena\(\)\.pruebas\.espejo === 'pliegue'\) \{\n\s*conPliegue\(capas\.coarse\.material\)\n\s*conPliegue\(capas\.fine\.material\)/.test(moire)
+  // [C2-31m] La trama es una sola capa (la gruesa): el pliegue parchea su material.
+  /if \(entornoDeLaEscena\(\)\.pruebas\.espejo === 'pliegue'\) \{\n\s*conPliegue\(material\)\n\s*\}/.test(moire)
 const MOIRE = leer('_lib/escena/MoireScreen.tsx')
 const COMPONENTE = leer('_lib/escena/espejo/EspejoDeLaEscena.tsx')
 afirmar(banderasDelEspejo(entornoPedido, STAGE, MOIRE, COMPONENTE), `  \`?espejo=${EFECTOS_DEL_ESPEJO.join('|')}\`, \`?espejo-disparo=ambiente|scroll|mantener\`, \`?espejo-prisma=si\`; en el producto, apagado; con movimiento reducido, nada; el pliegue sólo parchea la trama con su bandera`)
