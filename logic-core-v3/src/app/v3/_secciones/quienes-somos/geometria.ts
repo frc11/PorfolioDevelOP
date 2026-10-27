@@ -385,10 +385,12 @@ export const PLANO_DE_NOSOTROS = { alejamiento: 0.8, parteDelMouse: 0.7 } as con
  * [C2-30f] LAS FOTOS DEL EQUIPO, QUIETAS EN LA ESCENA: el plano de las personas no mira a la cámara; tiene la orientación de la
  * cámara del recorrido en su lectura, fija en el mundo (`escena/titulos3d/orientacionPropia.ts`). `lectura`: el progreso en que el
  * bloque de las dos personas está en el medio del cuadro (del recibo de PULIDO 16: 0,215 a 1440 y 0,200 a 1024). `tope`: el ángulo
- * máximo con la cámara viva; con 18° la foto más torcida se ve a 0,87 de su proporción (el piso legible, 0,85) y nada sale del
- * cuadro (36 px de margen en el peor caso del mouse, a 1024). Lo afirma s85 con el modelo de s67.
+ * máximo con la cámara viva. Era 18° y medido en el sitio (`scripts-carga/equipo.ts`, el mouse a un costado) la pieza más torcida
+ * quedaba en 0,846 a 1024 y 0,859 a 1440: el modelo, con las piezas de texto además de las fotos, da lo mismo (0,845 y 0,858). Con
+ * 12° el modelo da 0,900 a 1024 y 0,913 a 1440 (el piso pedido, 0,87, con margen) y nada sale del cuadro (47 px en el peor caso, a
+ * 1024). Lo afirma s78-c30f con el modelo de s67.
  */
-export const ORIENTACION_DE_LAS_PERSONAS = { lectura: 0.21, tope: 18 } as const
+export const ORIENTACION_DE_LAS_PERSONAS = { lectura: 0.21, tope: 12 } as const
 
 /**
  * [PULIDO 11] A2 · EL CUERPO DE LA AGENCIA LLEGA ENTERO AL REPOSO. Su bloque usa la ventana visible (arranca cuando asoma

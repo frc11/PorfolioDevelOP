@@ -8,9 +8,7 @@ import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
 import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza, CanalDeTexto, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
-import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
-import { useAnchoMinimo } from '../../_lib/useAnchoMinimo'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 
 import { CONTENIDO } from './contenido'
@@ -88,12 +86,12 @@ export function ElEquipo(): React.JSX.Element {
   // [RETOQUE PANEL] T4 · las personas (sus textos y sus fotos, con su hover y su toque) van en el plano de «El equipo» (como A1).
   // [C2-30f] Con su orientación propia: las fotos quedan quietas en la escena (no miran a la cámara), acotadas para leerse.
   const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('equipo', ORIENTACION_DE_LAS_PERSONAS)
-  // [C2-30f] REGLA DE ALTURAS: abajo de 1024 la pantalla se acortó (sin el nombre de afuera): su tramo, para la escena.
+  // [C2-30f] REGLA DE ALTURAS: abajo de 1024 la pantalla se acortó (sin el nombre de afuera): su tramo, para la escena. Quién
+  // decide si anota es el CSS (`--equipo-apila`, 1 abajo de 1024 y 0 desde ahí), no una consulta de JS (s7-contrato).
   const pantalla = useRef<HTMLDivElement>(null)
-  const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
-  useTramoDelEquipo(pantalla, escritorio, CONTENIDO.personas)
+  useTramoDelEquipo(pantalla, CONTENIDO.personas)
   return (
-    <div ref={pantalla} data-pantalla="equipo" className="flex min-h-svh w-full flex-col justify-start py-12 escritorio:py-0">
+    <div ref={pantalla} data-pantalla="equipo" className="flex min-h-svh w-full flex-col justify-start py-12 [--equipo-apila:1] escritorio:py-0 escritorio:[--equipo-apila:0]">
       <CalleDerecha className="grow">
         <div data-composicion="equipo" className="flex w-full flex-col gap-[var(--spacing-12)]">
           <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="@container w-full" style={GEOMETRIA.estilos.tituloDelEquipo}>

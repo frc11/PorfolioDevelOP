@@ -76,7 +76,8 @@ const ANCHOS = ['1024x768', '1280x800', '1366x768', '1440x900', '1920x1080', '25
 const PERSONAS = ['franco-nombre', 'franco-bio', 'franco-foto', 'valentino-nombre', 'valentino-bio', 'valentino-foto'] as const
 const PUNTEROS: readonly (readonly [number, number])[] = [[0, 0], [1, 1], [1, -1], [-1, 1], [-1, -1], [1, 0], [-1, 0], [0, 1], [0, -1]]
 const MARGEN = 24
-const PISO_LEGIBLE = 0.85
+// [C2-30f · 2] El piso que pide el orquestador, con las piezas de texto además de las fotos (medido en el sitio con 18°: 0,846 a 1024).
+const PISO_LEGIBLE = 0.87
 const TOPE_LEGIBLE = 20
 const FUENTE = { ascender: 900, descender: -250, resolution: 1000 }
 
@@ -143,7 +144,7 @@ function recorrer(modo: Modo, anchos: readonly string[] = ANCHOS): Recorrido {
           const seLee = pz.dom[0] >= 0 && pz.dom[1] >= 0 && pz.dom[2] <= W && pz.dom[3] <= H
           const mg = Math.min(Math.min(...xs), W - Math.max(...xs), ...(seLee ? [Math.min(...ys), H - Math.max(...ys)] : []))
           if (mg < margen) [margen, donde] = [mg, `${w} ${pz.id} p${m.progreso.toFixed(3)} (${String(px)}, ${String(py)})`]
-          if (pz.id.endsWith('-foto')) legible = Math.min(legible, legibilidad(q, pz.dom))
+          legible = Math.min(legible, legibilidad(q, pz.dom))
         }
         if (px === 0 && py === 0 && modo.tipo === 'propia') {
           const propia = orientacionDeLaLectura(ORIENTACION_DE_LAS_PERSONAS, W / H, a.logo[0], a.logo[1], new THREE.Quaternion())
@@ -174,6 +175,8 @@ controlPositivo(`  el detector VE la orientación propia sin acotar (${sinTope.a
 const seLeen = (r: Recorrido): boolean => r.legible >= PISO_LEGIBLE
 afirmar(seLeen(conLaEscena), `las fotos (y su texto) se leen: la proporción vista contra la real y sus lados opuestos, a ${conLaEscena.legible.toFixed(3)} o más (el piso, ${String(PISO_LEGIBLE)})`)
 controlPositivo(`  el detector VE una foto torcida de más (sin tope: ${sinTope.legible.toFixed(3)})`, sinTope, seLeen)
+const deAntes = recorrer({ tipo: 'propia', tope: 18 }, ['1024x768', '1440x900'])
+controlPositivo(`  y el tope de antes (18°: medido en el sitio, 0,846 a 1024; el modelo, ${deAntes.legible.toFixed(3)})`, deAntes, seLeen)
 const enteras = (r: Recorrido): boolean => r.margen >= MARGEN
 afirmar(enteras(conLaEscena), `y nada sale del cuadro: la foto, el nombre y la bio de cada uno, con ${String(MARGEN)} px de margen en el peor caso (${conLaEscena.margen.toFixed(0)} px: ${conLaEscena.donde})`)
 const conTreinta = recorrer({ tipo: 'propia', tope: 45 }, ['1024x768'])
@@ -304,12 +307,14 @@ const delModelo = [[390, 844], [768, 1024]].map(([w, h]) => {
 afirmar(delModelo.every((m) => m.acortado > 0 && m.ahora < m.antes), `  abajo de 1024 la pantalla del equipo se acorta (el modelo): ${delModelo.map((m) => `${String(m.w)}: ${m.antes.toFixed(0)} → ${m.ahora.toFixed(0)} px (k ${(m.ahora / m.antes).toFixed(4)})`).join(' · ')}`)
 const TRAMO = sinComentarios(leer('_secciones/quienes-somos/tramoDelEquipo.ts'))
 const tramoBien = (equipo: string, tramo: string): boolean =>
-  equipo.includes('useTramoDelEquipo(pantalla, escritorio, CONTENIDO.personas)') && equipo.includes('<div ref={pantalla} data-pantalla="equipo"') &&
-  /if \(escritorio \|\| el === null \|\| panel === null\) return undefined/.test(tramo) && tramo.includes('soltar = anotarTramo({ panel, k: alto / viejo, arranque, largo: viejo / escala })') &&
+  equipo.includes('useTramoDelEquipo(pantalla, CONTENIDO.personas)') && equipo.includes('<div ref={pantalla} data-pantalla="equipo"') &&
+  equipo.includes('[--equipo-apila:1]') && equipo.includes('escritorio:[--equipo-apila:0]') && !/useAnchoMinimo|CONSULTA_ESCENARIO/.test(equipo) &&
+  tramo.includes("if (getComputedStyle(el).getPropertyValue('--equipo-apila').trim() !== '1') return") && !/useAnchoMinimo|CONSULTA_ESCENARIO|matchMedia/.test(tramo) && tramo.includes('soltar = anotarTramo({ panel, k: alto / viejo, arranque, largo: viejo / escala })') &&
   tramo.includes("nombre: 'font-titulo text-fluido-titulo-l leading-titulo tracking-texto font-normal'") && tramo.includes("descripcion: 'font-cuerpo text-cuerpo leading-texto tracking-texto max-w-[var(--medida-movil)]'") &&
   tramo.includes('const observador = new ResizeObserver(anotar)') && !tramo.includes('secciones.ts')
 afirmar(tramoBien(EQUIPO, TRAMO), '  y la sección anota su tramo abajo de 1024 (k = nuevo / viejo, el viejo medido con el fantasma de la columna de antes: el nombre en su escalón y el cuerpo de 15 px), sin tocar `secciones.ts`; desde 1024, ninguno')
-controlPositivo('  el detector VE la sección sin su tramo', EQUIPO.replace('useTramoDelEquipo(pantalla, escritorio, CONTENIDO.personas)', ''), (e: string) => tramoBien(e, TRAMO))
+controlPositivo('  el detector VE la sección sin su tramo', EQUIPO.replace('useTramoDelEquipo(pantalla, CONTENIDO.personas)', ''), (e: string) => tramoBien(e, TRAMO))
+controlPositivo('  y la sección que consulta la compuerta (s7-contrato)', `${EQUIPO}\nconst escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)`, (e: string) => tramoBien(e, TRAMO))
 const pisoBien = (f: typeof altoDeAntes): boolean => f(844, 800, 50) === 850 && f(844, 700, 50) === 844
 afirmar(pisoBien(altoDeAntes), '  el alto de antes respeta el piso de la pantalla (`min-h-svh`): contenido más lo que se fue, o el piso')
 controlPositivo('  el detector VE el alto sin el piso', ((_m: number, c: number, a: number) => c + a) as typeof altoDeAntes, pisoBien)

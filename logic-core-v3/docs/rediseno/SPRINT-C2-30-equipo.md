@@ -38,6 +38,15 @@ Cola 2 (2026-10-23), tarea 30, la parte de las fotos (ítem 4 de la revisión; c
   peso del nombre que se fue), `s5-archivos` (el padrón suma `tramoDelEquipo.ts`).
 - Fallas de antes, no mías: `s61` J7 (el titular de Portfolio) y `s4-cobertura` (s23–s39 sin su `test:`).
 
+### Intento 2 (lo medido en la integración)
+
+- **Legibilidad:** con 18° el sitio dio 0,846 a 1024 y 0,859 a 1440 (el mouse a un costado, en el medio). El modelo sólo miraba las
+  fotos; con las piezas de texto (nombres y bios del recibo) da lo mismo que el sitio (0,845 y 0,858). Con las piezas de texto: 16°
+  0,866 · 14° 0,885 · 13° 0,895 · **12° 0,900 a 1024 y 0,913 a 1440** (margen 47 px a 1024). El tope pasa a **12°** y el piso del
+  invariante y del banco, a 0,87 (con el tope de antes, 18°, como control en rojo).
+- **s7-contrato:** la sección ya no consulta la compuerta. Como las reseñas, la pantalla del equipo declara `--equipo-apila` (1 abajo
+  de 1024, 0 desde ahí) y el tramo lo lee con `getComputedStyle` en cada medida (el `ResizeObserver` y el `resize`).
+
 ## REGLA DE ALTURAS
 
 Desde 1024 la sección **no cambia**: la fila de cada persona la manda la foto (4:3), más alta que la columna de texto de antes y de
@@ -51,7 +60,8 @@ texto va sobre la foto y la pantalla del equipo se acorta (modelo, el alto de la
 | 768×1024  | 1484 px | 1398 px | 0,9420  |
 | 390×844   | 941 px  | 932 px  | 0,9897  |
 
-La `k` no es una constante: `tramoDelEquipo.ts` la mide en el navegador abajo de 1024 (y de nuevo con cada cambio de tamaño). Un
+La `k` no es una constante: `tramoDelEquipo.ts` la mide en el navegador abajo de 1024 (lo decide el CSS, `--equipo-apila`) y de
+nuevo con cada cambio de tamaño. Un
 fantasma de la columna de texto de antes (el nombre en su escalón, la juntura y el cuerpo de 15 px), del mismo ancho e invisible,
 da lo que cada fila se acortó; el alto viejo es `max(min-h-svh, contenido + acortado)` y la `k` nuevo / viejo, anotada con
 `anotarTramo` sobre la pantalla del equipo (`secciones.ts` sin tocar). La deriva la mide el orquestador.

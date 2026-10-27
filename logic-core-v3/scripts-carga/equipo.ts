@@ -9,8 +9,8 @@
  *       - ORIENTACIÓN PROPIA: entre el medio y la salida el plano gira mucho menos que la cámara (a lo sumo la mitad, con la cámara
  *         girando 5° o más) y en algún momento el plano y la cámara difieren 3° o más (un cartel los tiene iguales siempre);
  *       - ACOTADA: el ángulo plano-cámara nunca pasa del tope (+0,5°), tampoco con el mouse en los costados (en el medio);
- *       - LEGIBLE: cada foto, etiqueta y descripción se ve con su proporción a 0,85 o más de la real (ancho proyectado / alto
- *         proyectado contra el del DOM) y sus lados opuestos parejos a 0,85 o más;
+ *       - LEGIBLE: cada foto, etiqueta y descripción se ve con su proporción a 0,87 o más de la real (ancho proyectado / alto
+ *         proyectado contra el del DOM) y sus lados opuestos parejos a 0,87 o más;
  *     y saca una foto de cada momento;
  *   · en todos los anchos: la etiqueta del nombre adentro de la foto (Franco arriba a la izquierda, Valentino arriba a la derecha; el
  *     papel y la tinta), el nombre grande de afuera oculto (el `h4` del lector), el tamaño de letra de la descripción (antes, 15 px; el
@@ -29,7 +29,7 @@ const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,1024x768,768x1024,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
 const CONTROL = process.env.CONTROL ?? ''
 const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/equipo')
-const PISO_LEGIBLE = 0.85
+const PISO_LEGIBLE = 0.87
 const ANTES_PX = 15
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const sufijo = CONTROL === '' ? '' : `-${CONTROL}`
