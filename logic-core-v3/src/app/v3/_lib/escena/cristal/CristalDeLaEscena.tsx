@@ -4,9 +4,6 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
-import { CONSULTA_ESCENARIO } from '../../compuerta'
-import { useAnchoMinimo } from '../../useAnchoMinimo'
-import { calidadPorAncho } from '../calidad'
 import { entornoDeLaEscena, hayBanco } from '../entorno'
 import { VIVO } from '../entorno/vivo'
 import { EN_VIVO } from '../final/recorridoDelFinal'
@@ -59,8 +56,6 @@ function CristalPrendido(): React.JSX.Element {
   const uniformes = useRef(uniformesDelVidrio())
   const armado = useRef<{ readonly malla: THREE.Mesh; readonly fondo: FondoDelCristal; readonly grietas: GrietasEnVivo } | null>(null)
   const memoria = useRef<Memoria>({ apagado: false, aparece: 0 })
-  // [NOCTURNO B9] Las grietas, compactas abajo de 1024 (la misma lectura que decide la calidad de la escena: `EscenarioCompuerta`).
-  const compacta = calidadPorAncho(useAnchoMinimo(CONSULTA_ESCENARIO)) === 'compacta'
   useEffect(() => {
     const g = grupo.current
     if (g === null) return undefined
@@ -72,8 +67,8 @@ function CristalPrendido(): React.JSX.Element {
     u.uModoDelBrillo.value = modoDelBrilloDeNoche(consulta.get('cristal-brillo'))
     const malla = armarElVidrio(armarElMuro(CELDAS), u, CELDAS.length)
     const fondo = crearElFondo()
-    // [NOCTURNO B9] Las grietas (`grietasEnVivo.ts`): neutras en el home, con el acento claro de la página en las otras.
-    const grietas = crearLasGrietas(u, CELDAS, acentoDelToken)
+    // [NOCTURNO B9] Las grietas (`grietasEnVivo.ts`): [C2-31g] sin brillo en el home; con el acento claro en las páginas de servicio.
+    const grietas = crearLasGrietas(u, acentoDelToken)
     armado.current = { malla, fondo, grietas }
     g.add(malla)
     const ventana = window as VentanaDelBanco
@@ -107,7 +102,7 @@ function CristalPrendido(): React.JSX.Element {
     u.uAmplitud.value = amplitud
     malla.visible = amplitud > 0.002
     // [NOCTURNO B9] El reloj de las grietas sigue aunque el cristal no se vea.
-    a.grietas.cuadro(state.camera, delta, compacta)
+    a.grietas.cuadro(state.camera, delta)
     if (!malla.visible) return
     // La cámara de ESTE cuadro (su matriz, al día) y la luz principal de la sala (sigue el azimut de la cámara con su corrimiento).
     const cam = state.camera
