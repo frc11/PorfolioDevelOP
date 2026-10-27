@@ -57,12 +57,24 @@ web). En el home la luz de la uniforme queda en 0 todo el ciclo y el color en ne
   dos senos del zigzag) y cinco anillos, todo con un azar de un seno; sin texturas. B9 leía hasta 28 tramos con dos lecturas de textura
   cada uno. Lo mide el banco (abajo).
 
+**Intento 2** (la integración `e299519a`: el home en verde y los dos controles fallando como deben; la página sin disparar y el costo):
+- **«no se dispararon (dueña base)» en la página era el BANCO**: `dispararYGrabar` leía `__grietasDelBanco` una sola vez, al empezar,
+  justo después del `load`; en la página la escena se monta después, así que quedaba `undefined` y nunca veía el disparo. El estado leído
+  al final lo prueba: la dueña era `base` (sólo la toma el pedido del título de ESA página). En el home no pasaba porque antes baja hasta
+  el CTA (la escena ya estaba). Ahora se lee en cada cuadro, la falla imprime también la fase y la espera es de 40 s.
+- **El costo (0,118 ms de más en el home)**: un solo azar por rayo (su corrimiento, su zigzag y su largo salen de él; antes, cuatro), la
+  distancia al rayo por el arco (sin seno ni coseno de su ángulo), un zigzag de una onda, sólo el anillo más cercano (antes los cinco,
+  con dos azares cada uno), cuántos rayos y su giro calculados una vez por celda en la geometría (`rayosDeLaCelda`, en `aGrieta.w`), nada
+  detrás del frente, la luz sólo si hay luz (en el home ni se calcula) y sin la faceta. De ~40 operaciones trascendentes por píxel a ~8:
+  lo esperado, ~0,04 ms. La semilla se redondea en el sombreador (que la interpolación no la corra).
+- s78-b9 49/0 (el espejo en la CPU sigue al sombreador nuevo), s78-c21 31/0, s71 56/0, s70 77/0, tsc 0, eslint limpio.
+
 **Decisiones sin preguntar** (una línea cada una):
 - El centro de cada celda es el de su abanico (el promedio de sus vértices): el mismo del que sale `vInterior`.
 - Los anillos tienen la forma de la celda (camino constante), escalonados por tramo: siguen el bloque y se leen como la telaraña.
 - «Las páginas de servicio» = una página con acento (`presetActual().acento`); la página base (acento de web) brilla, el home nunca.
 - `?grietas=` viejos (`1`, `2`, `3`, `no`) caen al por defecto (`centro`); el banco ya no usa `no`: compara contra las grietas cerradas.
-- La faceta (±4 %) es el «aristado» de la referencia; no es luz. Si molesta, `GRIETAS.dibujo.faceta` en 0.
+- La faceta (±4 %, el «aristado») se sacó en el intento 2 por el costo.
 - Los controles del banco entran por `window.__defectosDeLasGrietas` (como `__defectosDelVelo`), nunca por la URL: `general` (una sola
   telaraña para todo el muro, centrada donde mira la cámara: `uGrietasGeneral`) y `brillo-en-el-home`.
 

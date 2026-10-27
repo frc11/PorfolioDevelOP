@@ -23,7 +23,7 @@ import { CRISTAL } from '../escena/cristal/cristal'
 import { GRIETAS, GRIETAS_EN_VIVO, avanzarLasGrietas, brillanLasGrietas, dispararLasGrietas, faseDeLasGrietas, grietasAlVolverseElCta, grietasCerradas, origenDeLasGrietas, type EstadoDeLasGrietas, type FaseDeLasGrietas } from '../escena/cristal/grietas'
 import { GRIETAS_EN_EL_MAIN, GRIETAS_GLSL, uniformesDeLasGrietas } from '../escena/cristal/grietasDelVidrio'
 import { crearLasGrietas } from '../escena/cristal/grietasEnVivo'
-import { armarElMuro, celdasDelMuro, type Celda } from '../escena/cristal/muro'
+import { armarElMuro, celdasDelMuro, rayosDeLaCelda, type Celda } from '../escena/cristal/muro'
 import { FRAGMENTOS_DEL_VIDRIO, VERTICES_DEL_VIDRIO, uniformesDelVidrio } from '../escena/cristal/vidrio'
 import { COMPOSICION_INICIAL } from '../escena/ruta/pistaDeLaIntro'
 import { PRESET_DEL_HOME, apilarElPreset, type PresetDeLaEscena } from '../escena/ruta/preset'
@@ -203,10 +203,10 @@ function porCeldaBien(g: DeLaGeometria): boolean {
     celdas += 1
     const [cu, cv] = centroDe(c)
     for (let k = 0; k < n * 3; k += 1, vertice += 1) {
-      const [gx, gy, semilla] = [g.grieta[vertice * 3], g.grieta[vertice * 3 + 1], g.grieta[vertice * 3 + 2]]
+      const [gx, gy, semilla, rayos] = [g.grieta[vertice * 4], g.grieta[vertice * 4 + 1], g.grieta[vertice * 4 + 2], g.grieta[vertice * 4 + 3]]
       const [x, y, z] = [g.pos[vertice * 3], g.pos[vertice * 3 + 1], g.pos[vertice * 3 + 2]]
       semillas.add(semilla)
-      if (semilla !== i || Math.hypot(gx, gy) > 12) return false
+      if (semilla !== i || Math.hypot(gx, gy) > 12 || Math.abs(rayos - rayosDeLaCelda(i)) > 1e-6) return false
       if (g.interior[vertice] === 1 && Math.hypot(gx, gy) > 1e-6) return false
       // El punto en el muro desenrollado es el centro de su celda más lo que dice su `aGrieta`.
       if (Math.abs(alrededor(Math.atan2(x, z) * R - (cu + gx))) > 5e-3 || Math.abs(y - FLOOR_Y - (cv + gy)) > 5e-3) return false
@@ -218,10 +218,13 @@ afirmar(porCeldaBien(GEOMETRIA), `en las ${String(CELDAS.length)} celdas: cada v
 /** Una grieta general: las coordenadas del muro entero, no las de la celda. */
 const GENERAL_EN_LA_GEOMETRIA: DeLaGeometria = {
   ...GEOMETRIA,
-  grieta: Float32Array.from(GEOMETRIA.grieta, (x, k) => (k % 3 === 0 ? Math.atan2(GEOMETRIA.pos[k], GEOMETRIA.pos[k + 2]) * R : k % 3 === 1 ? GEOMETRIA.pos[k] - FLOOR_Y : x)),
+  grieta: Float32Array.from(GEOMETRIA.grieta, (x, k) => {
+    const v = Math.floor(k / 4) * 3
+    return k % 4 === 0 ? Math.atan2(GEOMETRIA.pos[v], GEOMETRIA.pos[v + 2]) * R : k % 4 === 1 ? GEOMETRIA.pos[v + 1] - FLOOR_Y : x
+  }),
 }
 controlPositivo('  el detector VE una grieta general (las coordenadas del muro entero)', GENERAL_EN_LA_GEOMETRIA, porCeldaBien)
-controlPositivo('  y una sola semilla para todas', { ...GEOMETRIA, grieta: Float32Array.from(GEOMETRIA.grieta, (x, k) => (k % 3 === 2 ? 0 : x)) }, porCeldaBien)
+controlPositivo('  y una sola semilla para todas', { ...GEOMETRIA, grieta: Float32Array.from(GEOMETRIA.grieta, (x, k) => (k % 4 === 2 ? 0 : x)) }, porCeldaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · La telaraña (el espejo en la CPU del sombreador): cada celda con la suya, todas a la vez; el sentido según la bandera, progresiva')
@@ -236,42 +239,46 @@ const suave = (a: number, b: number, x: number): number => {
   return t * t * (3 - 2 * t)
 }
 const azar = (a: number, b: number): number => fract(Math.sin(a * 12.9898 + b * 78.233) * 43758.5453)
-const rayoDeLaCelda = (j: number, n: number, s: number): number => j + (azar(s, modulo(j, n)) - 0.5) * 2 * TL.desorden
-const alcanceDelRayo = (j: number, s: number): number => (azar(s + 0.25, j) < TL.cortos ? TL.corto[0] + (TL.corto[1] - TL.corto[0]) * azar(s + 0.75, j) : 2)
-function alRayo(d: P, a: number, j: number, s: number, porPx: number): number {
-  const e: P = [Math.cos(a), Math.sin(a)]
-  const largo = d[0] * e[0] + d[1] * e[1]
-  if (largo <= 0) return 1e9
-  const fase = azar(s + 0.5, j) * 2 * Math.PI
-  const zig = TL.zigzag * suave(0, 0.6, largo) * (Math.sin(largo * TL.ondas[0] + fase) + 0.5 * Math.sin(largo * TL.ondas[1] + 1.7 * fase))
-  return Math.abs(e[0] * d[1] - e[1] * d[0] - zig) / porPx
-}
+const alcanceDelRayo = (h: number): number => (fract(h * 31.7) < TL.cortos ? TL.corto[0] + (TL.corto[1] - TL.corto[0]) * fract(h * 57.1) : 2)
+const alRayo = (arco: number, r: number, h: number, porPx: number): number => Math.abs(arco - TL.zigzag * suave(0, 0.6, r) * Math.sin(r * TL.zigzagPorU + fract(h * 17.31) * 2 * Math.PI)) / porPx
 const banda = (dPx: number, grosor: number, ve: number): number => entre01(DB.bandaPx * grosor + 0.5 - dPx) * ve
 /** `lasGrietas` del sombreador, sólo la banda oscura: `d` (u) desde el centro, `s` el camino del centro al borde, `forma` la formación. */
-type Oscura = (d: P, s: number, semilla: number, porPx: number, porPxDelCamino: number, forma: number, borde: boolean) => number
-const oscuraEnCpu: Oscura = (d, s, semilla, porPx, porPxS, forma, borde) => {
-  // Sin formación no hay grietas (`uGrietas.z` en 0: el sombreador ni entra).
-  if (forma <= 0) return 0
-  const n =Math.floor(TL.rayos[0] + azar(semilla, 101) * (TL.rayos[1] - TL.rayos[0] + 1))
-  const giro = azar(semilla, 102)
-  const x = fract(Math.atan2(d[1], d[0] + 1e-7) / (2 * Math.PI) - giro) * n
-  const i = Math.floor(x)
-  const j = rayoDeLaCelda(i, n, semilla) > x ? i - 1 : rayoDeLaCelda(i + 1, n, semilla) <= x ? i + 1 : i
-  const [j0, j1] = [modulo(j, n), modulo(j + 1, n)]
-  const d0 = alRayo(d, (rayoDeLaCelda(j, n, semilla) / n + giro) * 2 * Math.PI, j0, semilla, porPx)
-  const d1 = alRayo(d, (rayoDeLaCelda(j + 1, n, semilla) / n + giro) * 2 * Math.PI, j1, semilla, porPx)
+type Oscura = (d: P, s: number, semilla: number, rayos: number, porPx: number, porPxDelCamino: number, forma: number, borde: boolean) => number
+const oscuraEnCpu: Oscura = (d, s, semilla, rayos, porPx, porPxS, forma, borde) => {
+  // Sin formación no hay grietas (`uGrietas.z` en 0: el sombreador ni entra); detrás del frente, tampoco.
   const camino = borde ? 1 - s : s
-  const frente = entre01((forma - camino) / porPxS + 0.5)
-  const r0 = camino <= alcanceDelRayo(j0, semilla) ? d0 : 1e9
-  const r1 = camino <= alcanceDelRayo(j1, semilla) ? d1 : 1e9
-  let g = banda(Math.min(r0, r1), GRIETAS.grosor.rayo, frente)
-  TL.anillos.forEach((base, k) => {
-    const rho = base + (azar(semilla + k, j0 + 7) - 0.5) * 2 * TL.corre
-    if (azar(semilla + 3.1 * k, j0 + 13) < TL.falta) return
-    const nace = borde ? 1 - rho : rho
+  if (forma <= 0 || camino > forma + 3 * porPxS) return 0
+  const n = Math.floor(rayos)
+  const r = Math.hypot(d[0], d[1])
+  const x = fract(Math.atan2(d[1], d[0] + 1e-7) / (2 * Math.PI) - fract(rayos)) * n
+  const i = Math.floor(x)
+  const corrido = (j: number, h: number): number => j + (h - 0.5) * 2 * TL.desorden
+  const [ha, hb] = [azar(semilla, i), azar(semilla, modulo(i + 1, n))]
+  let [j0, x0, h0, x1, h1] = [i, corrido(i, ha), ha, corrido(i + 1, hb), hb]
+  if (corrido(i, ha) > x) {
+    j0 = modulo(i - 1, n)
+    h0 = azar(semilla, j0)
+    ;[x0, x1, h1] = [corrido(i - 1, h0), corrido(i, ha), ha]
+  } else if (corrido(i + 1, hb) <= x) {
+    j0 = modulo(i + 1, n)
+    h1 = azar(semilla, modulo(i + 2, n))
+    ;[x0, h0, x1] = [corrido(i + 1, hb), hb, corrido(i + 2, h1)]
+  }
+  const alArco = (r * 2 * Math.PI) / n
+  const d0 = alRayo((x - x0) * alArco, r, h0, porPx)
+  const d1 = alRayo((x - x1) * alArco, r, h1, porPx)
+  const r0 = camino <= alcanceDelRayo(h0) ? d0 : 1e9
+  const r1 = camino <= alcanceDelRayo(h1) ? d1 : 1e9
+  let g = banda(Math.min(r0, r1), GRIETAS.grosor.rayo, entre01((forma - camino) / porPxS + 0.5))
+  // El anillo más cercano (los otros están a más de medio espacio).
+  const k = TL.anillos.reduce((m, a, q) => (Math.abs(s - a) < Math.abs(s - TL.anillos[m]) ? q : m), 0)
+  const hk = azar(semilla + k, j0 + 7)
+  const rho = TL.anillos[k] + (hk - 0.5) * 2 * TL.corre
+  const nace = borde ? 1 - rho : rho
+  if (fract(hk * 7.31) >= TL.falta && forma > nace) {
     const ve = entre01(entre01((forma - nace) / TL.barre) * 0.5 * (d0 + d1) - Math.min(d0, d1) + 0.5)
     g = Math.max(g, banda(Math.abs(s - rho) / porPxS, GRIETAS.grosor.anillo, ve))
-  })
+  }
   return g
 }
 /** u por px (a 1440, la franja del muro que se ve mide ~55 u: ~0,04 u por px). */
@@ -342,12 +349,12 @@ function medir(evaluar: (m: Muestra, semilla: number) => number, forma: number, 
     return { oscuras, total: puntos.length, enElCentro, centro, sMin, sMax, fuera }
   })
 }
-const deLaCelda = (forma: number, borde: boolean): ((m: Muestra, semilla: number) => number) => (m, semilla) => oscuraEnCpu(m.d, m.s, semilla, PX, m.porPxS, forma, borde)
+const deLaCelda = (forma: number, borde: boolean): ((m: Muestra, semilla: number) => number) => (m, semilla) => oscuraEnCpu(m.d, m.s, semilla, rayosDeLaCelda(semilla), PX, m.porPxS, forma, borde)
 /** EL CONTROL: una grieta general (como en el sombreador con `CONTROL=general`): un centro para todo el muro, a la altura de la vista. */
 const CENTRO_GENERAL: P = [centroDe(CELDAS[ALGUNAS[2].i])[0], 4]
 const general = (forma: number, borde: boolean): ((m: Muestra) => number) => (m) => {
   const d: P = [alrededor(m.abs[0] - CENTRO_GENERAL[0]), m.abs[1] - CENTRO_GENERAL[1]]
-  return oscuraEnCpu(d, Math.min(1, Math.hypot(d[0], d[1]) / GRIETAS.general.radio), 0, PX, PX / GRIETAS.general.radio, forma, borde)
+  return oscuraEnCpu(d, Math.min(1, Math.hypot(d[0], d[1]) / GRIETAS.general.radio), 0, 9.5, PX, PX / GRIETAS.general.radio, forma, borde)
 }
 /** La densidad de grieta en el centro de la celda contra la de toda la celda: los rayos de SU telaraña se juntan en SU centro. */
 const juntaEnElCentro = (c: DeLaCelda): number => (c.enElCentro / Math.max(1, c.centro)) / Math.max(1e-9, c.oscuras / c.total)
@@ -492,10 +499,10 @@ const sombreadorBien = (frag: string, vert: string, uniformes: Record<string, un
   const [antes, conGeneral = ''] = GRIETAS_EN_EL_MAIN.split('if ( uGrietasGeneral.x > 0.5 ) {')
   const despues = conGeneral.slice(conGeneral.indexOf('\n\t\t}') + 4)
   return frag.includes(GRIETAS_GLSL) && main.includes(GRIETAS_EN_EL_MAIN) && main.indexOf(GRIETAS_EN_EL_MAIN) < main.indexOf('gl_FragColor') &&
-    /if \( uGrietas\.z > 0\.5 \) \{\s*vec2 dGrieta = vGrieta\.xy;\s*float sGrieta = 1\.0 - vInterior;\s*float semillaGrieta = vGrieta\.z;/.test(main) &&
+    /if \( uGrietas\.z > 0\.5 \) \{\s*vec2 dGrieta = vGrieta\.xy;\s*float sGrieta = 1\.0 - vInterior;\s*float semillaGrieta = floor\( vGrieta\.z \+ 0\.5 \);\s*float rayosGrieta = vGrieta\.w;/.test(main) &&
     // Sólo el control del banco mira el muro entero; la telaraña, nunca.
     !antes.includes('vMundo') && !despues.includes('vMundo') && !GRIETAS_GLSL.includes('vMundo') &&
-    vert.includes('attribute vec3 aGrieta;') && vert.includes('vGrieta = aGrieta;') && !/sampler2D uGrietas|texelFetch\( uGrietas/.test(frag) &&
+    vert.includes('attribute vec4 aGrieta;') && vert.includes('vGrieta = aGrieta;') && !/sampler2D uGrietas|texelFetch\( uGrietas/.test(frag) &&
     ['uGrietas', 'uGrietasColor', 'uGrietasGeneral'].every((k) => k in uniformes) && !['uGrietasCeldas', 'uGrietasTramos', 'uGrietasMarco', 'uGrietasRejilla'].some((k) => k in uniformes)
 }
 const VERT = VERTICES_DEL_VIDRIO(CELDAS.length)

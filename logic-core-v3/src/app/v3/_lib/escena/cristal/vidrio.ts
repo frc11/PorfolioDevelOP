@@ -29,9 +29,9 @@ attribute float aInterior;
 attribute float aHondura;
 attribute vec4 aBorde;
 attribute vec2 aCelda;
-// [C2-31g] Dónde está en su celda (u desde su centro) y la semilla de la celda: la telaraña de cada una (\`grietasDelVidrio.ts\`).
-attribute vec3 aGrieta;
-varying vec3 vGrieta;
+// [C2-31g] Dónde está en su celda (u desde su centro), la semilla y los rayos de la celda: la telaraña de cada una (\`grietasDelVidrio.ts\`).
+attribute vec4 aGrieta;
+varying vec4 vGrieta;
 varying vec3 vMundo;
 varying vec3 vNormal;
 varying float vInterior;
