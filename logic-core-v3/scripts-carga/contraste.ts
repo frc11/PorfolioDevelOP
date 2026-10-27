@@ -17,10 +17,11 @@ import { chromium, type CDPSession, type Page } from '@playwright/test'
 import sharp from 'sharp'
 
 import { deslizar, desplazarConElDedo } from './tactil'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/contraste')
+const SALIDA = salidaDelBanco('contraste')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 export const TRANSPARENTE = `[data-contraste-objetivo], [data-contraste-objetivo] * { color: transparent !important; -webkit-text-fill-color: transparent !important; text-decoration-color: transparent !important; }
@@ -88,7 +89,7 @@ export async function medirLaPieza(p: Page, el: import('@playwright/test').Eleme
 }
 
 async function abrir(ancho: number, alto: number, movil: boolean): Promise<{ readonly p: Page; readonly cdp: CDPSession; readonly cerrar: () => Promise<void> }> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/contraste-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('contraste')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

@@ -28,6 +28,7 @@ import path from 'node:path'
 
 import { chromium, type CDPSession, type Page } from '@playwright/test'
 import sharp from 'sharp'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
@@ -35,7 +36,7 @@ const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'velo', 'sin-tapar', 'sin-hueco'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: velo, sin-tapar o sin-hueco`)
 const DESTINO = '/v3/pagina-base'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/viaje')
+const SALIDA = salidaDelBanco('viaje')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 interface Registro {
@@ -144,7 +145,7 @@ async function main(): Promise<void> {
   for (const ancho of ANCHOS) {
     const alto = ancho < 1024 ? 844 : 900
     const movil = ancho < 1024
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/viaje-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('viaje')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

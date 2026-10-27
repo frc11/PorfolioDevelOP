@@ -32,12 +32,13 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type BrowserContext, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const CONTROL = process.env.CONTROL ?? ''
 const LENTO = Number(process.env.LENTO ?? '1')
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,1024x768,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/preloader')
+const SALIDA = salidaDelBanco('preloader')
 const CLAVE_DEL_DIA = 'develop-v3-preloader'
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const fallas: string[] = []
@@ -97,7 +98,7 @@ interface Medido {
 }
 
 async function abrir(ancho: number, alto: number, conPreloader: boolean, reducido = false): Promise<{ readonly ctx: BrowserContext; readonly p: Page; readonly errores: string[] }> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/preloader-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('preloader')
   rmSync(perfil, { recursive: true, force: true })
   const movil = ancho < 768
   const ctx = await chromium.launchPersistentContext(perfil, {

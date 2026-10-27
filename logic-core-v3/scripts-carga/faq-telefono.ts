@@ -26,6 +26,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '390,768').split(',').map(Number)
@@ -34,7 +35,7 @@ const CONTROL = process.env.CONTROL ?? ''
 const CONTROLES = ['', 'sin-toque', 'sin-vidrio', 'desborde', 'foto-fuera'] as const
 if (!(CONTROLES as readonly string[]).includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: ${CONTROLES.filter(Boolean).join(' | ')}`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/faq-telefono')
+const SALIDA = salidaDelBanco('faq-telefono')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const LISTA = '[data-faq-del-pie="lista"]'
 const ALTOS: Readonly<Record<number, number>> = { 390: 844, 768: 1024 }
@@ -245,7 +246,7 @@ async function main(): Promise<void> {
   for (const ancho of ANCHOS) {
     const alto = ALTOS[ancho] ?? 844
     for (const ruta of RUTAS) {
-      const perfil = path.join(os.homedir(), `.cache/b4-medicion/faq-telefono-perfil-${String(Date.now())}`)
+      const perfil = perfilDelBanco('faq-telefono')
       rmSync(perfil, { recursive: true, force: true })
       const ctx = await chromium.launchPersistentContext(perfil, {
         executablePath: CHROME,

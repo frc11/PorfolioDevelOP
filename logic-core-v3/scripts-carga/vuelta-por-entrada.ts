@@ -15,6 +15,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHO = Number(process.env.ANCHO ?? '1440')
@@ -76,7 +77,7 @@ async function alHome(p: Page): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/vuelta-entrada-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('vuelta-entrada')
   rmSync(perfil, { recursive: true, force: true })
   const alto = MOVIL ? 844 : 900
   const ctx = await chromium.launchPersistentContext(perfil, {

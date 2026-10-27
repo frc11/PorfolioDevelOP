@@ -18,6 +18,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type BrowserContext, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,1024,390').split(',').map(Number)
@@ -25,7 +26,7 @@ const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'sin-desvanecer'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: sin-desvanecer`)
 const SOLO_VIVO = process.env.SOLO_VIVO === '1'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/chat-zonas')
+const SALIDA = salidaDelBanco('chat-zonas')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 /** La config del bot, simulada: los colores de la prueba vieja del panel (los textos son del banco, no contenido del sitio). */
@@ -60,7 +61,7 @@ const CAPA = '[data-pieza="chat-del-sitio"] [data-parte="desvanecido"]'
 async function abrir(ancho: number, ruta: string): Promise<{ readonly ctx: BrowserContext; readonly p: Page; readonly errores: string[] }> {
   const alto = ancho < 1024 ? 844 : 900
   const movil = ancho < 1024
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/chat-zonas-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('chat-zonas')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

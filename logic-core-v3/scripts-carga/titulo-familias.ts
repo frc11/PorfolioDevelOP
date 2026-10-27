@@ -10,17 +10,18 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const NOMBRE = process.env.NOMBRE ?? '6'
 const RUTA = process.env.RUTA ?? '/v3/pagina-base'
 const COMBOS = (process.env.COMBOS ?? '1,2,3').split(',')
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/titulo-familias')
+const SALIDA = salidaDelBanco('titulo-familias')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/titulo-familias-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('titulo-familias')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',

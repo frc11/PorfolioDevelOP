@@ -19,6 +19,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHO = Number(process.env.ANCHO ?? '1440')
@@ -100,7 +101,7 @@ async function grabarUnaNavegacion(p: Page, nombre: string, hacer: () => Promise
 }
 
 async function main(): Promise<void> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/navegacion-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('navegacion')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',

@@ -48,6 +48,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
@@ -57,7 +58,7 @@ const CONTROLES = ['', 'sin-hundimiento', 'boton-siempre', 'boton-temprano', 'bo
 if (!CONTROLES.includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: ${CONTROLES.slice(1).join(', ')}`)
 const BANDERAS: Record<string, string> = { 'sin-hundimiento': '__faqSinHundimiento', 'boton-siempre': '__botonDelFaqSiempre', 'boton-temprano': '__botonDelFaqTemprano', 'boton-sin-gesto': '__botonDelFaqSinGesto', 'contexto-global': '__contextoDelLienzoGlobal' }
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/faq-del-pie')
+const SALIDA = salidaDelBanco('faq-del-pie')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 interface DelFaq {
@@ -403,7 +404,7 @@ async function main(): Promise<void> {
     const movil = ancho < 1024
     const alto = movil ? 844 : 900
     for (const ruta of RUTAS) {
-      const perfil = path.join(os.homedir(), `.cache/b4-medicion/faq-perfil-${String(Date.now())}`)
+      const perfil = perfilDelBanco('faq')
       rmSync(perfil, { recursive: true, force: true })
       const ctx = await chromium.launchPersistentContext(perfil, {
         executablePath: CHROME,

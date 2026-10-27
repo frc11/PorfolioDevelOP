@@ -18,6 +18,7 @@ import path from 'node:path'
 
 import { chromium, type BrowserContext, type Page } from '@playwright/test'
 import sharp from 'sharp'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,1024x768,768x1024,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
@@ -29,7 +30,7 @@ const COMPOSICION = process.env.COMPOSICION ?? ''
 /** [B12a.8] T5 · una de las opciones sin velo (`?legibilidad=luz|motas`), o ninguna. */
 const LEGIBILIDAD = process.env.LEGIBILIDAD ?? ''
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/contraste-de-la-intro')
+const SALIDA = salidaDelBanco('contraste-de-la-intro')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 const OBJETIVOS = [
@@ -61,7 +62,7 @@ async function crudo(png: Buffer): Promise<{ readonly datos: Buffer; readonly an
 }
 
 async function contexto(ancho: number, alto: number, entorno: string): Promise<{ readonly ctx: BrowserContext; readonly p: Page }> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/contraste-intro-perfil-${String(Date.now())}-${Math.random().toString(36).slice(2, 8)}`)
+  const perfil = perfilDelBanco('contraste-intro')
   rmSync(perfil, { recursive: true, force: true })
   const movil = ancho < 1024
   const ctx = await chromium.launchPersistentContext(perfil, {

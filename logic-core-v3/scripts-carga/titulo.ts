@@ -11,9 +11,10 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/titulo')
+const SALIDA = salidaDelBanco('titulo')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 /** Lo que dice el DOM del título: su texto, la opacidad de cada parte (0: la escena lo armó) y la familia que pinta. */
@@ -27,7 +28,7 @@ const delTitulo = (p: Page): Promise<{ texto: string; opacidad: string[]; famili
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
   for (const [ancho, alto, movil] of [[1440, 900, false], [390, 844, true]] as const) {
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/titulo-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('titulo')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',

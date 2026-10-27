@@ -14,13 +14,14 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
 const PANTALLAS = Number(process.env.PANTALLAS ?? '2.5')
 const CONTROL = process.env.CONTROL ?? ''
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/intro-larga')
+const SALIDA = salidaDelBanco('intro-larga')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 interface Paso {
@@ -48,7 +49,7 @@ async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
   let malas = 0
   for (const [ancho, alto] of ANCHOS) {
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/intro-larga-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('intro-larga')
     rmSync(perfil, { recursive: true, force: true })
     const movil = ancho < 1024
     const ctx = await chromium.launchPersistentContext(perfil, {

@@ -26,13 +26,14 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
 const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'sin-carga', 'sin-datos'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: sin-carga | sin-datos`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/estado-de-envio')
+const SALIDA = salidaDelBanco('estado-de-envio')
 const RUTA = '/v3/piezas?preloader=no'
 const FORM = 'envio-papel'
 const ESCRITO = { nombre: 'Ana Prueba', mail: 'ana@ejemplo.com', mensaje: 'Una prueba del banco.' } as const
@@ -137,7 +138,7 @@ async function envio(p: Page, ancho: number, tipo: 'exito' | 'error', respuesta:
 async function contexto(ancho: number, reducido: boolean): Promise<{ readonly p: Page; readonly cerrar: () => Promise<void>; readonly pedida: { estado: number; ms: number } }> {
   const movil = ancho < 1024
   const alto = movil ? 844 : 900
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/envio-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('envio')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

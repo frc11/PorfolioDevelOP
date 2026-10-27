@@ -30,13 +30,14 @@ import path from 'node:path'
 import { chromium, type CDPSession, type Page } from '@playwright/test'
 
 import { deslizar } from './tactil'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '390x844,768x1024').split(',').map((a) => a.split('x').map(Number) as [number, number])
 const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'quieto', 'con-flechas'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: quieto | con-flechas`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/resenas-telefono')
+const SALIDA = salidaDelBanco('resenas-telefono')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 const BLOQUE = '[data-pieza="resenas-en-lista"]'
@@ -288,7 +289,7 @@ async function main(): Promise<void> {
   const lineas: string[] = []
   let fallas = 0
   for (const [ancho, alto] of ANCHOS) {
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/resenas-telefono-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('resenas-telefono')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

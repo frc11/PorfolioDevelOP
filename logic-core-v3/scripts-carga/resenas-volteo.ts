@@ -28,14 +28,15 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type CDPSession, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'volteo'
 const CONTROL = process.env.CONTROL ?? ''
 const [ANCHO, ALTO] = (process.env.TAMANO ?? '1440x900').split('x').map(Number)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const PERFIL = `C:/Users/Valentino/.cache/b4-medicion/resenas-volteo-${String(Date.now())}`
-const SALIDA = path.join(os.homedir(), `.cache/b4-medicion/resenas-${MODO === 'salida' ? 'salida' : 'volteo'}`)
+const PERFIL = perfilDelBanco('resenas-volteo')
+const SALIDA = salidaDelBanco(`resenas-${MODO === 'salida' ? 'salida' : 'volteo'}`)
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const vuelta = (g: number): number => {
   const u = Math.min(1, Math.max(0, g))

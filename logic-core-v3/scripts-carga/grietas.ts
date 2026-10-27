@@ -27,6 +27,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
@@ -39,7 +40,7 @@ const ROTULO = process.env.ROTULO ?? 'despues'
 /** En la integración sin B9: sólo el costo del muro (no hay grietas que medir). */
 const ANTES = ROTULO === 'antes'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/b9-grietas')
+const SALIDA = salidaDelBanco('b9-grietas')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const TOL = 0.12
 
@@ -93,7 +94,7 @@ const ESPERADO: Record<string, number> = { formandose: 1.5, oscuras: 1, encendie
 const tiemposMal = (d: Record<string, number>): string[] => Object.entries(d).filter(([f, s]) => !(Math.abs(s - (ESPERADO[f] ?? Number.NaN)) <= TOL)).map(([f, s]) => `${f}=${s.toFixed(3)}`)
 
 async function abrir(ancho: number, alto: number): Promise<{ readonly p: Page; readonly cerrar: () => Promise<void> }> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/b9-grietas-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('b9-grietas')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

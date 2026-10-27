@@ -17,6 +17,7 @@ import path from 'node:path'
 import { chromium, type CDPSession, type Page } from '@playwright/test'
 
 import { desplazarConElDedo } from './tactil'
+import { perfilDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const CONTROL = process.env.CONTROL ?? null
@@ -70,7 +71,7 @@ const razon = (a: readonly [number, number, number], b: readonly [number, number
 const sobre = (x: { readonly c: readonly [number, number, number]; readonly a: number }, fondo: readonly [number, number, number]): [number, number, number] => [0, 1, 2].map((i) => (x.c[i] ?? 0) * x.a + (fondo[i] ?? 0) * (1 - x.a)) as [number, number, number]
 
 async function main(): Promise<void> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/historias-prueba-${String(Date.now())}`)
+  const perfil = perfilDelBanco('historias-prueba')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',

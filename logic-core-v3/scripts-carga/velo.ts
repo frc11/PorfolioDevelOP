@@ -31,6 +31,7 @@ import path from 'node:path'
 
 import { chromium, type CDPSession, type Page } from '@playwright/test'
 import sharp from 'sharp'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
@@ -42,7 +43,7 @@ if (VIA !== '' && !['banda', 'montaje', 'ambas', 'ninguna'].includes(VIA)) throw
 const PAGINA = VIEJO ? '/v3/prueba-de-pagina' : '/v3/pagina-base'
 const AL_HOME = VIEJO ? 'a[href="/v3"]' : '[data-pieza="barra"] [data-nav-id="hero"]'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/velo')
+const SALIDA = salidaDelBanco('velo')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 interface Registro {
@@ -323,7 +324,7 @@ async function main(): Promise<void> {
   for (const ancho of ANCHOS) {
     const alto = ancho < 1024 ? 844 : 900
     const movil = ancho < 1024
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/velo-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('velo')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

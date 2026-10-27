@@ -20,14 +20,15 @@ import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
 import sharp from 'sharp'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'legibilidad'
 const ANCHO = Number(process.env.ANCHO ?? 1440)
 const ALTO = Number(process.env.ALTO ?? 900)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const PERFIL = `C:/Users/Valentino/.cache/b4-medicion/aro-legibilidad-${String(Date.now())}`
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/aro-legibilidad')
+const PERFIL = perfilDelBanco('aro-legibilidad')
+const SALIDA = salidaDelBanco('aro-legibilidad')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 const lineal = (c: number): number => {

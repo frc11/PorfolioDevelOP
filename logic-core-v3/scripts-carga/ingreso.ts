@@ -34,11 +34,12 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const SIMULAR = process.env.SIMULAR === '1'
 const CONTROL = process.env.CONTROL ?? ''
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/ingreso')
+const SALIDA = salidaDelBanco('ingreso')
 const MS_DEL_GENIE = 560
 const MS_DEL_FUNDIDO = 200
 const CUADRO = 1000 / 60
@@ -115,7 +116,7 @@ interface Cuadro {
 }
 
 async function abrir(ancho: number, alto: number, movil: boolean): Promise<{ readonly p: Page; readonly errores: string[]; readonly posts: string[]; readonly cerrar: () => Promise<void> }> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/ingreso-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('ingreso')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',

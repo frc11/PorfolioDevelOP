@@ -35,13 +35,14 @@ import { chromium, type Page } from '@playwright/test'
 import sharp from 'sharp'
 
 import { CATALOGO_DE_DEMOS } from '../src/app/v3/_secciones/trabajos/demos/catalogo'
+import { salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'primera'
 const ANCHOS = (process.env.ANCHOS ?? '1440,1024').split(',').map(Number)
 const CONTROL = process.env.CONTROL ?? ''
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/demos-41e')
+const SALIDA = salidaDelBanco('demos-41e')
 const REPOSO_MS = 3500
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const etiqueta = CONTROL === '' ? 'producto' : CONTROL

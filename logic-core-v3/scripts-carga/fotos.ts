@@ -15,6 +15,7 @@ import path from 'node:path'
 import { chromium } from '@playwright/test'
 
 import { deslizar, desplazarConElDedo, tocar } from './tactil'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const RUTA = process.env.RUTA ?? '/v3'
@@ -25,12 +26,12 @@ const MOVIL = process.env.MOVIL === '1'
 const REDUCIDO = process.env.REDUCIDO === '1'
 const PASOS = (process.env.PASOS ?? 'foto:inicio').split(',').map((p) => p.trim()).filter((p) => p !== '')
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/fotos')
+const SALIDA = salidaDelBanco('fotos')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/fotos-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('fotos')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

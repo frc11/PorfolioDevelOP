@@ -20,13 +20,14 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type CDPSession, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
 const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'sin-arreglo'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: sin-arreglo`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/autocompletado')
+const SALIDA = salidaDelBanco('autocompletado')
 const RUTA = '/v3/piezas?preloader=no'
 const FORMULARIOS = ['auto-papel', 'auto-invertida', 'envio-papel', 'envio-invertida'] as const
 const CELESTE = 'rgb(232, 240, 254)'
@@ -105,7 +106,7 @@ async function main(): Promise<void> {
   for (const ancho of ANCHOS) {
     const movil = ancho < 1024
     const alto = movil ? 844 : 900
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/autocompletado-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('autocompletado')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

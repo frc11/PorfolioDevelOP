@@ -22,12 +22,13 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,1024,768,390').split(',').map(Number)
 const CONTROL = process.env.CONTROL ?? ''
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/c2-50/servicios')
+const SALIDA = salidaDelBanco('c2-50-servicios')
 const TRANSICION_MS = 2200
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -88,7 +89,7 @@ async function main(): Promise<void> {
   for (const ancho of ANCHOS) {
     const alto = ancho >= 1440 ? 900 : ancho >= 1024 ? 768 : ancho >= 768 ? 1024 : 844
     const telefono = ancho < 1024
-    const ctx = await chromium.launchPersistentContext(path.join(SALIDA, `perfil-${String(ancho)}-${String(Date.now())}`), {
+    const ctx = await chromium.launchPersistentContext(perfilDelBanco(`servicios-c2-${String(ancho)}`), {
       executablePath: CHROME,
       headless: false,
       viewport: { width: ancho, height: alto },

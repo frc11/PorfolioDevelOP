@@ -30,6 +30,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type BrowserContext, type CDPSession, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '390,768,1024,1440').split(',').map(Number)
@@ -43,7 +44,7 @@ const CONTROLES: Readonly<Record<string, string>> = {
 }
 if (CONTROL !== '' && !(CONTROL in CONTROLES)) throw new Error(`CONTROL=${CONTROL}: ${Object.keys(CONTROLES).join(' | ')}`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/contacto-general')
+const SALIDA = salidaDelBanco('contacto-general')
 // A 1024 la barra no entra con Contacto y Login, el chrome cae en modo menu y el contacto es el panel (medido): la placa empieza arriba de 1024.
 const ESCRITORIO = 1025
 const DIALOGO = '[data-pieza="contacto"] [role="dialog"]'
@@ -301,7 +302,7 @@ async function reducido(p: Page, ancho: number): Promise<void> {
 async function porAncho(ancho: number): Promise<void> {
   const movil = ancho < ESCRITORIO
   const alto = ancho === 1024 ? 768 : ancho === 768 ? 1024 : movil ? 844 : 900
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/contacto-general-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('contacto-general')
   rmSync(perfil, { recursive: true, force: true })
   const ctx: BrowserContext = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

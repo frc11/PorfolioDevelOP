@@ -27,6 +27,7 @@ import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
 import sharp from 'sharp'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
@@ -34,7 +35,7 @@ const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'sin-resolucion'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: sin-resolucion`)
 const RUTA = '/v3/pagina-base'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/cierre-de-pagina')
+const SALIDA = salidaDelBanco('cierre-de-pagina')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 interface DelCierre {
@@ -99,7 +100,7 @@ async function main(): Promise<void> {
   for (const ancho of ANCHOS) {
     const movil = ancho < 1024
     const alto = movil ? 844 : 900
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/cierre-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('cierre')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

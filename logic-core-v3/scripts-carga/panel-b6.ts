@@ -38,6 +38,7 @@ import path from 'node:path'
 import { chromium, type Page } from '@playwright/test'
 
 import { RITMO, RITMO_ANGOSTO } from '../src/app/v3/_secciones/tu-panel/geometria'
+import { perfilDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? ''
@@ -360,7 +361,7 @@ async function main(): Promise<void> {
     if (!bien) fallas.push(nombre)
   }
   for (const [ancho, alto] of ANCHOS) {
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/panel-b6-${String(Date.now())}`)
+    const perfil = perfilDelBanco('panel-b6')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',

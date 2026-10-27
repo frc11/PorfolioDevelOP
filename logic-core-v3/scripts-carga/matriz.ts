@@ -19,6 +19,7 @@ import path from 'node:path'
 import { chromium, type BrowserContext, type Page } from '@playwright/test'
 
 import { IDAS_Y_VUELTAS, combinaciones, combinacionesDeRafaga, desdeDemos, violaciones, violacionesDeLaRafaga, type Combinacion, type CombinacionDeRafaga, type FotoDelPortfolio, type GestoDeRafaga, type Violacion } from './a8'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'matriz'
@@ -28,7 +29,7 @@ const SOLO = process.env.SOLO?.split(',') ?? null
 /** `RANGO=3-10`: las combinaciones por su índice en `combinaciones()` (las tandas). */
 const RANGO: readonly [number, number] | null = /^\d+-\d+$/.test(process.env.RANGO ?? '') ? ((process.env.RANGO ?? '').split('-').map(Number) as [number, number]) : null
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/b12d')
+const SALIDA = salidaDelBanco('b12d')
 const ESPERA_MS = 9000
 /** [F1] Los defectos que el arnés reintroduce antes de cargar (`medida.ts`, `DefectoDelPortfolio`): `true` es el de A8.1. */
 type DefectoDelArnes = 'vuelo-sin-dueno' | 'rueda-en-la-entrada'
@@ -44,7 +45,7 @@ const ARRANQUE = `(() => {
 })()`
 
 async function abrir(defecto: boolean | DefectoDelArnes, ancho = 1440, alto = 900): Promise<{ readonly ctx: BrowserContext; readonly p: Page }> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/b12d-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('b12d')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

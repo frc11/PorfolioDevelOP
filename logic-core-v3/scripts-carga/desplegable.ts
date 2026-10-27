@@ -16,13 +16,14 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type BrowserContext, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,1024').split(',').map(Number)
 const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'corrido', 'sin-resaltado'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: corrido o sin-resaltado`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/desplegable')
+const SALIDA = salidaDelBanco('desplegable')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 const ESPIA = `(() => {
@@ -35,7 +36,7 @@ const ESPIA = `(() => {
 
 async function abrir(ancho: number, sonido: boolean): Promise<{ readonly ctx: BrowserContext; readonly p: Page }> {
   const alto = 900
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/desplegable-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('desplegable')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

@@ -35,6 +35,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type CDPSession, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,1024x768,768x1024,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
@@ -42,7 +43,7 @@ const CONTROLES = ['', 'aca-en-linea', 'sin-hueco', 'de-costado', 'sin-reposo', 
 const CONTROL = process.env.CONTROL ?? ''
 if (!CONTROLES.includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: ${CONTROLES.filter(Boolean).join(' | ')}`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/cta-del-panel')
+const SALIDA = salidaDelBanco('cta-del-panel')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const CTA = '[data-pieza="cta-del-panel"]'
 const HOJAS: Readonly<Record<string, string>> = {
@@ -262,7 +263,7 @@ async function main(): Promise<void> {
   for (const [ancho, alto] of ANCHOS) {
     const escritorio = ancho >= 1024
     const tag = `${String(ancho)}x${String(alto)}`
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/cta-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('cta')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

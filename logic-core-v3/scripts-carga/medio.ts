@@ -15,11 +15,12 @@ import path from 'node:path'
 import { chromium } from '@playwright/test'
 
 import { violacionesDelMedio, type MedidaDelMedio } from './a8'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440,1280,1180,1024').split(',').map(Number)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/f4')
+const SALIDA = salidaDelBanco('f4')
 const ALTOS: Readonly<Record<number, number>> = { 1440: 900, 1280: 800, 1180: 800, 1024: 768 }
 const ANCLAS = ['portfolio-el-garage', 'portfolio-esquina-estudio', 'portfolio-banu-scents'] as const
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -54,7 +55,7 @@ async function main(): Promise<void> {
   const medidas: MedidaDelMedio[] = []
   for (const ancho of ANCHOS) {
     const alto = ALTOS[ancho] ?? 900
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/f4-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('f4')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

@@ -24,9 +24,10 @@ import path from 'node:path'
 import { chromium, type Page } from '@playwright/test'
 
 import { TRANSPARENTE, medirLaPieza, type Medida } from './contraste'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/barra')
+const SALIDA = salidaDelBanco('barra')
 const PAGINA = '/v3/pagina-base'
 const PAGINAS = ['Páginas web', 'Software a medida', 'IA y automatizaciones']
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -37,7 +38,7 @@ const ver = (bien: boolean, que: string, detalle = ''): void => {
 }
 
 async function abrir(ancho: number, alto: number, movil: boolean): Promise<{ readonly p: Page; readonly cerrar: () => Promise<void> }> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/barra-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('barra')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',

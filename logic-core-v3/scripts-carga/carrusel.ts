@@ -40,6 +40,7 @@ import {
   type MuestraDelRecorrido, type MuestraDelReloj,
 } from './carrusel-cuenta'
 import { deslizar, desplazarConElDedo, tocar } from './tactil'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '390x844,768x1024,820x1180,1023x768').split(',').map((a) => a.split('x').map(Number) as [number, number])
@@ -48,7 +49,7 @@ type Caso = (typeof TODOS)[number]
 const CASOS = (process.env.CASOS ?? TODOS.join(',')).split(',').filter((c): c is Caso => (TODOS as readonly string[]).includes(c))
 const CONTROL = process.env.CONTROL ?? null
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/b12e')
+const SALIDA = salidaDelBanco('b12e')
 const CANTIDAD = 3
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -152,7 +153,7 @@ interface Contexto {
 type Resultado = { readonly ok: boolean; readonly detalle: string }
 
 async function abrir(ancho: number, alto: number, reducido: boolean, ruta = '/v3?diag=carga'): Promise<{ readonly cerrar: () => Promise<void>; readonly c: Contexto }> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/b12e-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('b12e')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

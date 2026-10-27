@@ -8,13 +8,14 @@
  */
 import { execFileSync } from 'node:child_process'
 import { chromium, type CDPSession, type Page } from '@playwright/test'
+import { perfilDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const RUTA = `/${(process.env.RUTA ?? 'v3/tipografia').replace(/^\/+/, '')}`
 const VARIANTE = process.env.VARIANTE ?? 'escena'
 const CORRIDA = process.env.CORRIDA ?? '1'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const PERFIL = `C:/Users/Valentino/.cache/b4-medicion/b12a-perfil-${VARIANTE}-${CORRIDA}-${String(Date.now())}`
+const PERFIL = perfilDelBanco('b12a')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 type Metricas = Record<string, number>

@@ -26,9 +26,10 @@ import { chromium } from '@playwright/test'
 import sharp from 'sharp'
 
 import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_VENTANA } from '../src/app/v3/_secciones/trabajos/demos/catalogo'
+import { salidaDelBanco } from './limpieza-del-banco'
 
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/demos-carga')
+const SALIDA = salidaDelBanco('demos-carga')
 const SOLO = (process.env.SOLO ?? '').split(',').filter((s) => s !== '')
 const VUELTAS = Number(process.env.VUELTAS ?? '3')
 const ESCRIBIR = process.env.ESCRIBIR !== 'no'

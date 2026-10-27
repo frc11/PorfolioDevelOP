@@ -38,6 +38,7 @@ import { chromium, type Page } from '@playwright/test'
 
 import { PRECARGA_POR_SERVICIO } from '../src/app/v3/_chrome/contacto/contenido'
 import { PREGUNTAS, TEXTOS_DEL_RECOMENDADOR, analisis, mensajeDelContacto, recomendar, solucion, type Respuestas } from '../src/app/v3/_secciones/servicios/recomendador/logica'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
@@ -56,7 +57,7 @@ const CONTROLES: Readonly<Record<string, { readonly css?: string; readonly scrip
 }
 if (CONTROL !== '' && !(CONTROL in CONTROLES)) throw new Error(`CONTROL=${CONTROL}: ${Object.keys(CONTROLES).join(' | ')}`)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/recomendador')
+const SALIDA = salidaDelBanco('recomendador')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 /** Las respuestas que toca el banco (la segunda opción de cada pregunta): A tienda, B chatbot; elige B. */
@@ -285,7 +286,7 @@ async function main(): Promise<void> {
   for (const ancho of ANCHOS) {
     const alto = ancho < 1024 ? 844 : ancho <= 1024 ? 768 : 900
     const movil = ancho < 1024
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/recomendador-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('recomendador')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

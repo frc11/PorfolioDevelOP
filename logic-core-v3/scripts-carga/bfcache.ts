@@ -16,6 +16,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium } from '@playwright/test'
+import { perfilDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3004'
 const CONTROL = process.env.CONTROL ?? ''
@@ -24,7 +25,7 @@ const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, m
 type EstadoDeLaRanura = { readonly id: string | null; readonly saliendo: boolean; readonly energia: number } | null
 
 async function main(): Promise<void> {
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/bfcache-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('bfcache')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',

@@ -17,12 +17,13 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3004'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,1280x800,1024x768,768x1024,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
 const COMPOSICIONES = (process.env.COMPOSICIONES ?? '1,2,3').split(',')
 const CONTROL = process.env.CONTROL ?? ''
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/titulo-3d')
+const SALIDA = salidaDelBanco('titulo-3d')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 interface DelBanco {
@@ -82,7 +83,7 @@ async function main(): Promise<void> {
   const fallas: string[] = []
   for (const [ancho, alto] of ANCHOS) {
     const movil = ancho < 1024
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/titulo-3d-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('titulo-3d')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
