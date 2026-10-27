@@ -4,9 +4,9 @@ import { useEffect, useRef, type CSSProperties } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { TIPOGRAFIA_QUE_SE_PINTA, avanceDeLaPalabra, avanceDelPintado, grisSinPintar } from '../../_componentes/pintado/pintado'
 import { useMovimientoEnTodoAncho } from '../_contrato/coreografia'
 import type { RenglonQueSePinta } from './contenido'
-import { avanceDeLaPalabra, avanceDelPintado, grisSinPintar } from './pintado'
 
 /**
  * [B6] EL TÍTULO QUE SE PINTA — «El panel donde controlás TODO» y el titular del CTA: en la letra de las palabras fundidas
@@ -16,10 +16,8 @@ import { avanceDeLaPalabra, avanceDelPintado, grisSinPintar } from './pintado'
  * Una sola suscripción de scroll por título, y sólo mientras está cerca del cuadro: por cuadro LEE la caja del título una
  * vez y después ESCRIBE una variable por palabra (`--pintado`, 0 → 1). El color y el subrayado los resuelve la hoja con esa
  * variable; React no vuelve a dibujar nada. En todo ancho; con movimiento reducido (o sin JS) queda pintado entero: el
- * defecto de la variable es 1.
+ * defecto de la variable es 1. La letra (`TIPOGRAFIA_QUE_SE_PINTA`) y el pintado viven en `_componentes/pintado/` [C2-90v].
  */
-export const TIPOGRAFIA_QUE_SE_PINTA =
-  'font-display font-fuerte uppercase tracking-display leading-cartel text-center text-[length:min(calc(100cqw/var(--divisor-del-titulo)),var(--tope-del-titulo))]'
 
 /** El color de una palabra: la tinta en la proporción de su pintado, el resto el gris claro. */
 const COLOR_DE_LA_PALABRA = '[color:color-mix(in_oklab,var(--color-tinta)_calc(var(--pintado,1)*100%),var(--gris-del-pintado))]'

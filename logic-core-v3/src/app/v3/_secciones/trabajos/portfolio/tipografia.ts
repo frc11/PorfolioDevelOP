@@ -29,8 +29,7 @@ export const CLASE_DEL_CUERPO = [
   'max-escritorio:text-[length:var(--text-cuerpo)]',
 ].join(' ')
 
-/** [C2 · 40] Los rótulos, los ejemplos y la letra de los campos de «la tuya»: el tamaño de la bajada (sin su interlineado de párrafo). */
-export const CLASE_DEL_TEXTO_DEL_FORMULARIO = [NIVELES_TIPOGRAFICOS['titulo-s'].claseFija, 'max-escritorio:text-[length:var(--text-cuerpo)]'].join(' ')
+/** [C2 · 40] La letra de los campos de «la tuya» se fue a `_componentes/formularios/letraDelFormulario.ts` [C2-90v]: la comparte el recomendador. */
 
 /**
  * [PULIDO 10] J7 · LA LLEGADA DE UN VIAJE, SIN RECORTE. P2 sube el titular adentro de la ventana que recorta: con el scroll se lee

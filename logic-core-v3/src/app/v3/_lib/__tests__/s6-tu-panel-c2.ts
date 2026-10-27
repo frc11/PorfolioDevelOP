@@ -34,7 +34,7 @@ import {
   tamanoDelTitulo,
   tamanoDelTituloAngosto,
 } from '../../_secciones/tu-panel/geometria'
-import { TIPOGRAFIA_QUE_SE_PINTA } from '../../_secciones/tu-panel/TituloQueSePinta'
+import { TIPOGRAFIA_QUE_SE_PINTA } from '../../_componentes/pintado/pintado'
 
 export interface EntradaDeC2 {
   /** El marcado servido, sin coreografía. */

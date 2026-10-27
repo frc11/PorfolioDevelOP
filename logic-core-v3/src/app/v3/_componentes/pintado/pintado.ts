@@ -5,7 +5,13 @@
  * El avance sale de DÓNDE está el centro del título en la pantalla, no de un ancla del sistema de motion: arranca cuando el
  * centro asoma por abajo (el título, a medias a la vista) y termina con el centro en la MITAD de la pantalla, no arriba.
  * Cada palabra tiene su tramo del avance (`[i/n, (i+1)/n]`): ninguna empieza antes de que termine la anterior.
+ *
+ * [C2-90v] Pieza común (vivía en `tu-panel/`): la letra y el pintado los usan Tu panel y el título de Servicios que se pinta al llegar.
  */
+
+/** La letra del título que se pinta: la display de mayúsculas, centrada, con el tamaño que le dan `--divisor-del-titulo` y `--tope-del-titulo`. */
+export const TIPOGRAFIA_QUE_SE_PINTA =
+  'font-display font-fuerte uppercase tracking-display leading-cartel text-center text-[length:min(calc(100cqw/var(--divisor-del-titulo)),var(--tope-del-titulo))]'
 
 /** Dónde termina de pintarse: el centro del título, en fracción del alto de la pantalla desde arriba. */
 export const FIN_DEL_PINTADO = 0.5

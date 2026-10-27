@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Cta, CtaEnlace } from '../../../_componentes/chrome/Cta'
 import { CampoDePildora, CampoDeTextoLargo, ErrorDelCampo } from '../../../_componentes/formularios/Campos'
 import { EstadoDeEnvio } from '../../../_componentes/formularios/EstadoDeEnvio'
+import { CLASE_DEL_TEXTO_DEL_FORMULARIO } from '../../../_componentes/formularios/letraDelFormulario'
 
 import { CAMPOS, ROTULO_DEL_ENVIO, ROTULO_ENVIANDO, avisoDeErrores } from '../../../_chrome/contacto/contenido'
 import { WHATSAPP } from '../../../_chrome/enlaces'
@@ -16,7 +17,6 @@ import { MAXIMOS } from '../../../_lib/formularios/validar'
 import { CONTENIDO } from '../contenido'
 
 import { enLaSecuencia } from './secuencia'
-import { CLASE_DEL_TEXTO_DEL_FORMULARIO } from './tipografia'
 
 /** Lo que el formulario corto no pregunta: va vacío al mismo envío del contacto (el servidor lo acepta igual). */
 const SIN_PREGUNTAR: Pick<DatosDeContacto, 'intereses' | 'presupuesto' | 'empresa'> = { intereses: [], presupuesto: '', empresa: '' }
