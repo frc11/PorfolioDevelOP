@@ -50,18 +50,23 @@ function acortadoDe(columna: HTMLElement, nombre: string, descripcion: string): 
   return antes - columna.offsetHeight
 }
 
-/** Abajo de 1024 (`escritorio` en falso), anota el tramo de la pantalla del equipo; lo vuelve a medir con cada cambio de tamaño. */
-export function useTramoDelEquipo(pantalla: RefObject<HTMLElement | null>, escritorio: boolean, personas: readonly { readonly nombre: string; readonly descripcion: string }[]): void {
+/**
+ * Abajo de 1024 anota el tramo de la pantalla del equipo; lo vuelve a medir con cada cambio de tamaño. Quién decide si anota es el CSS
+ * de la pantalla (`--equipo-apila`: 1 abajo de 1024, donde el texto va sobre la foto; 0 desde ahí), leído en cada medida, como las
+ * reseñas: la sección no consulta la compuerta (s7-contrato).
+ */
+export function useTramoDelEquipo(pantalla: RefObject<HTMLElement | null>, personas: readonly { readonly nombre: string; readonly descripcion: string }[]): void {
   useEffect(() => {
     const el = pantalla.current
     const panel = el?.closest('[data-panel]') ?? null
-    if (escritorio || el === null || panel === null) return undefined
+    if (el === null || panel === null) return undefined
     let soltar: (() => void) | null = null
     const anotar = (): void => {
       soltar?.()
       soltar = null
       const escala = window.innerHeight / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
       const alto = el.offsetHeight
+      if (getComputedStyle(el).getPropertyValue('--equipo-apila').trim() !== '1') return
       const columnas = [...el.querySelectorAll<HTMLElement>('[data-pieza-a="persona"] > [data-velo-de-noche]')]
       if (!(escala > 0) || alto <= 0 || columnas.length !== personas.length) return
       const acortado = columnas.reduce((s, c, i) => s + acortadoDe(c, personas[i].nombre, personas[i].descripcion), 0)
@@ -77,9 +82,11 @@ export function useTramoDelEquipo(pantalla: RefObject<HTMLElement | null>, escri
     anotar()
     const observador = new ResizeObserver(anotar)
     observador.observe(el)
+    window.addEventListener('resize', anotar)
     return () => {
       observador.disconnect()
+      window.removeEventListener('resize', anotar)
       soltar?.()
     }
-  }, [pantalla, escritorio, personas])
+  }, [pantalla, personas])
 }
