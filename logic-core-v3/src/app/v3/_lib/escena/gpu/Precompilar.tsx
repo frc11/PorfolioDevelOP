@@ -88,6 +88,8 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
     }
     if (e.hecho) return
     if (e.calentar) {
+      // [C2-81] Cada parte, sólo en un rato quieto del preloader (sin él, siempre).
+      if (!laPreparacionPuede()) return
       const t0 = performance.now()
       // [C2-81] Una parte por cuadro; con la última, las escenas aparte.
       e.partes ??= partesParaCalentar(escena)

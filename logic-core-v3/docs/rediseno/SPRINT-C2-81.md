@@ -85,3 +85,32 @@ s87-chat, s34, s40, s42, s44, s46, s47, s48, s59, s64, s73, s76-portfolio, s78-t
   de las tareas largas y del hilo principal). `BASE=http://localhost:3000 npx tsx scripts-carga/movimiento.ts`, con `CONTROL=sin-camara`,
   `sin-moire`, `sin-permiso`, `prendido-por-defecto`.
 - A ojo: `http://localhost:3000/v3?preloader=si` a 1440, 1024, 768 (táctil) y 390 (táctil).
+
+## Intento 2 (lo que midió el orquestador en 7fa2f564)
+
+1. **El scroll se soltaba a los 1600–1668 ms a 1440 y 1024 (piso 2000): demasiado TEMPRANO, no tarde.** Esa cifra era la vuelta del banco a
+   la rueda (con el trace, ~1,5 s de detener la grabación y medir), no el momento del suelto: el scroll se soltó en el acto porque el logo
+   no retuvo. `CaidaDelLogo` decide al montarse «sin velo, sin caída» (`!cargaLista() && sin el velo de carga`): con el preloader, si la
+   escena se monta después de que el velo se fue (una carga lenta: el velo se va a su plazo; el trace la hace más lenta), la carga está
+   pedida pero cerrada hasta que entra la página y eso se leía como «sin velo» → el logo quieto, sin retención. Arreglo: «sin velo»
+   también exige que la carga no esté pedida (`cargaPedida`, `carga.ts`). El banco ahora lee el suelto del registro por cuadro (el
+   `bloqueado` del preloader) y dice si el logo estaba cayendo al irse el blanco.
+2. **La bienvenida «arrancó 258–299 ms tarde» en el teléfono.** Ese dato no era parte del criterio (es informativo): la falla tenía que
+   venir de la salida de la bienvenida o de los cuadros perdidos (la línea citada cortaba esos números). Lo probable: el calentado en partes
+   seguía en la salida (2,0–2,6 s) y la frenaba. Ahora la preparación va sólo en los ratos quietos (`ratoQuieto`, `linea.ts`: la bienvenida
+   aparecida, hasta 200 ms antes de que se vaya, y desde la flecha), la capa los abre y cierra cada cuadro y `Precompilar` pregunta antes
+   de compilar y antes de cada parte. Además el reloj y las animaciones se crean en un efecto de layout (arrancan con el primer pintado de la
+   capa, no en el cuadro siguiente detrás de lo que el hilo tenga en cola).
+3. y 4. **«Prendido y recargado» y «apagado, el moiré vuelve al mouse» (768).** El banco miraba el botón a los 3 s del `load`, antes de que
+   la página hidratara en el dev; y el apagado tocaba el botón sin saber si había vuelto prendido (si no, lo PRENDÍA y el moiré quedaba de
+   afuera: la 4 era consecuencia de la 3). En el código, apagar llama `fijarLaEntradaDelMoire(null)` (lo prueba `s78-c2-81` en el tiempo).
+   El banco ahora espera al botón y al estado (hasta 15 s), dice lo guardado en la sesión antes y después, y mide el apagado sólo desde
+   prendido.
+5. **«iOS negado: la cámara se movió 0,532».** Es el banco: el umbral de 0,02 no separaba la deriva propia de la cámara (0,14–0,31 en
+   1,5 s; la ventana negada era de 2,3 s). El código nunca escuchó: el estado quedó `negado` y el moiré sin entrada de afuera (las dos lo
+   confirman). Para demostrarlo, la esquina publica con el banco `__movimientoDelBanco` (lo que la cámara recibe del sensor): negado,
+   `activa` falso y 0; y la cámara se compara contra su deriva en una ventana igual y seguida (inclinada < 2 × quieta + 0,1). Con
+   `CONTROL=sin-permiso` la cámara recibe la inclinación y falla.
+
+Pruebas: `s78-c2-81` 43/0 (los ratos quietos con dos controles, la pausa de la capa, la caída del logo con la carga pedida), s78-preloader,
+s78-preloader-entrada, s52 (las dos), s75-carga, s41, s47, s48, s84, s62, s78-c2-31m, s39, s3-tokens, s87, s34 verdes; tsc 0; eslint limpio.

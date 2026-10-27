@@ -135,21 +135,52 @@ async function tocarElBoton(a: Abierto): Promise<void> {
   await dormir(150)
 }
 
-/** Prendido: inclinar mueve la cámara (más que su deriva quieta en el mismo tiempo) y el moiré. */
+/** Lo que la cámara recibe del sensor (`__movimientoDelBanco`, de la esquina del movimiento) y lo guardado en la sesión. */
+interface EntradaDeLaCamara {
+  readonly x: number
+  readonly y: number
+  readonly activa: boolean
+  readonly estado: string
+  readonly guardado: string | null
+}
+const entradaDeLaCamara = (p: Page): Promise<EntradaDeLaCamara | null> => p.evaluate(() => (window as unknown as { __movimientoDelBanco?: () => EntradaDeLaCamara }).__movimientoDelBanco?.() ?? null)
+
+/** Espera a que el botón esté (la página hidratada) y llegue a `quiero` (o `ms`): lo último que vio. */
+async function esperarEstado(p: Page, quiero: string, ms = 15000): Promise<{ readonly estado: string | null; readonly etiqueta: string | null } | null> {
+  await p.waitForSelector(BOTON, { timeout: 60000 }).catch(() => undefined)
+  const t0 = Date.now()
+  let e = await estado(p)
+  while (e?.estado !== quiero && Date.now() - t0 < ms) {
+    await dormir(200)
+    e = await estado(p)
+  }
+  return e
+}
+
+/**
+ * La deriva propia de la cámara (la coreografía la mueve sola: medido en el sitio, 0,14 a 0,31 en 1,5 s) contra lo que se mueve con la
+ * inclinación, en ventanas del MISMO largo y seguidas: primero quieto, después inclinado a 16° del costado.
+ */
+const VENTANA_MS = 2300
+async function derivaYMovimiento(p: Page): Promise<{ readonly deriva: number; readonly mueve: number }> {
+  await inclinar(p, 60, 0, 0, 600)
+  const c0 = await camara(p)
+  await inclinar(p, 60, 0, 0, VENTANA_MS)
+  const c1 = await camara(p)
+  await inclinar(p, 60, 0, 16, 1500)
+  await inclinar(p, 60, 16, 16, VENTANA_MS - 1500)
+  const c2 = await camara(p)
+  return { deriva: distancia(c0, c1), mueve: distancia(c1, c2) }
+}
+
+/** Prendido: inclinar mueve la cámara (lo que recibe, y bastante más que su deriva propia en el mismo tiempo) y el moiré. */
 async function mueveLaCamaraYElMoire(a: Abierto, tag: string): Promise<void> {
   const { p } = a
-  await inclinar(p, 60, 0, 0, 600)
-  const quieta0 = await camara(p)
   const moire0 = await moire(p)
-  await inclinar(p, 60, 0, 0, 1500)
-  const quieta1 = await camara(p)
-  await inclinar(p, 60, 0, 16, 1500)
-  await inclinar(p, 60, 16, 16, 800)
-  const movida = await camara(p)
+  const { deriva, mueve } = await derivaYMovimiento(p)
+  const recibe = await entradaDeLaCamara(p)
   const moire1 = await moire(p)
-  const deriva = distancia(quieta0, quieta1)
-  const mueve = distancia(quieta1, movida)
-  ver(Number.isFinite(mueve) && mueve > Math.max(0.02, 4 * deriva), `${tag} · inclinar el teléfono mueve la cámara (como el mouse; rojo: CONTROL=sin-camara)`, `${mueve.toFixed(3)} con la inclinación · ${deriva.toFixed(3)} quieta en el mismo tiempo`)
+  ver(recibe !== null && recibe.activa && recibe.x > 0.5 && Number.isFinite(mueve) && mueve > Math.max(0.05, 2.5 * deriva), `${tag} · inclinar el teléfono mueve la cámara (como el mouse; rojo: CONTROL=sin-camara)`, `recibe ${recibe === null ? 'nada' : `${recibe.x.toFixed(2)} (activa: ${String(recibe.activa)})`} · se mueve ${mueve.toFixed(3)} inclinada contra ${deriva.toFixed(3)} quieta, en ${String(VENTANA_MS)} ms cada una`)
   const corre = moire0 !== null && moire1 !== null && (!moire1.dibuja || Math.abs(moire1.gruesa[0] - moire0.gruesa[0]) + Math.abs(moire1.gruesa[1] - moire0.gruesa[1]) > 1e-4)
   ver(moire1 !== null && moire1.entrada.deAfuera && moire1.entrada.x > 0.5 && corre, `${tag} · y maneja el moiré (su entrada sigue a la inclinación; rojo: CONTROL=sin-moire)`, moire1 === null ? 'sin el banco del moiré' : `entrada ${moire1.entrada.x.toFixed(2)}, ${moire1.entrada.y.toFixed(2)} (de afuera: ${String(moire1.entrada.deAfuera)}) · la trama ${moire1.dibuja ? 'se corrió' : 'no se dibuja en este ancho'}`)
   await p.screenshot({ path: path.join(SALIDA, `${tag.replace(/\W+/g, '-')}-inclinado.png`) })
@@ -168,19 +199,25 @@ async function android(ancho: number, alto: number): Promise<void> {
     }, BOTON)
     ver(caja !== undefined && caja.left + caja.width > ancho - 40 && caja.top < 40, `${tag} · arriba a la derecha`, JSON.stringify(caja))
     await tocarElBoton(a)
-    const prendido = await estado(a.p)
+    const prendido = await esperarEstado(a.p, 'prendido', 3000)
     ver(prendido?.estado === 'prendido' && prendido.etiqueta === 'Desactivar movimiento', `${tag} · tocarlo lo prende (en Android sin permiso): «Desactivar movimiento»`, JSON.stringify(prendido))
     await mueveLaCamaraYElMoire(a, tag)
-    // Dura la sesión: recargado, vuelve prendido (en Android, sin otro toque).
+    // Dura la sesión: recargado, vuelve prendido (en Android, sin otro toque). La página tiene que hidratar antes de mirar el botón.
+    const antes = await entradaDeLaCamara(a.p)
     await a.p.reload({ waitUntil: 'load' })
-    await dormir(3000)
-    await inclinar(a.p, 60, 0, 0, 300)
-    ver((await estado(a.p))?.estado === 'prendido', `${tag} · prendido y recargado, vuelve prendido (dura la sesión)`)
-    // Apagarlo suelta los dos.
-    await tocarElBoton(a)
-    await inclinar(a.p, 60, 0, 12, 600)
-    const m = await moire(a.p)
-    ver((await estado(a.p))?.estado === 'apagado' && m !== null && !m.entrada.deAfuera, `${tag} · apagado, el moiré vuelve al mouse (sin entrada de afuera)`)
+    const vuelve = await esperarEstado(a.p, 'prendido')
+    const despues = await entradaDeLaCamara(a.p)
+    ver(vuelve?.estado === 'prendido', `${tag} · prendido y recargado, vuelve prendido (dura la sesión)`, `${JSON.stringify(vuelve)} · guardado antes ${String(antes?.guardado)}, después ${String(despues?.guardado)}`)
+    // Apagarlo suelta los dos (desde prendido: si no volvió prendido, esto no se mide).
+    if (vuelve?.estado === 'prendido') {
+      await inclinar(a.p, 60, 0, 12, 600)
+      await tocarElBoton(a)
+      const apagado = await esperarEstado(a.p, 'apagado', 3000)
+      await inclinar(a.p, 60, 12, 12, 600)
+      const m = await moire(a.p)
+      const recibe = await entradaDeLaCamara(a.p)
+      ver(apagado?.estado === 'apagado' && m !== null && !m.entrada.deAfuera && recibe !== null && !recibe.activa, `${tag} · apagado, la cámara y el moiré vuelven al mouse (sin entrada de afuera)`, `${JSON.stringify(apagado)} · moiré de afuera ${String(m?.entrada.deAfuera)} · la cámara recibe ${String(recibe?.activa)}`)
+    }
     ver(a.errores.length === 0, `${tag} · sin errores en la página`, a.errores.slice(0, 3).join(' | '))
   } finally {
     await a.ctx.close()
@@ -193,20 +230,18 @@ async function ios(permiso: 'concedido' | 'negado'): Promise<void> {
   try {
     await cargar(a.p)
     await tocarElBoton(a)
-    await dormir(200)
+    const e = await esperarEstado(a.p, permiso === 'concedido' ? 'prendido' : 'negado', 3000)
     const pedidos = await a.p.evaluate(() => (window as unknown as { __permisosPedidos?: number }).__permisosPedidos ?? 0)
-    const e = await estado(a.p)
     if (permiso === 'concedido') {
       ver(pedidos === 1 && e?.estado === 'prendido', `${tag} · el permiso se pide en el toque y, concedido, lo prende`, `${String(pedidos)} pedidos · ${JSON.stringify(e)}`)
       await mueveLaCamaraYElMoire(a, tag)
     } else {
-      await inclinar(a.p, 60, 0, 0, 600)
-      const c0 = await camara(a.p)
-      await inclinar(a.p, 60, 0, 16, 1500)
-      await inclinar(a.p, 60, 16, 16, 800)
-      const c1 = await camara(a.p)
+      // Negado: la cámara no recibe nada del sensor (lo directo) y se mueve lo mismo que sola (su deriva, en una ventana igual).
+      const { deriva, mueve } = await derivaYMovimiento(a.p)
+      const recibe = await entradaDeLaCamara(a.p)
       const m = await moire(a.p)
-      ver(pedidos === 1 && e?.estado === 'negado' && e.etiqueta === 'Activar movimiento' && m !== null && !m.entrada.deAfuera && distancia(c0, c1) < 0.02, `${tag} · con el permiso negado no pasa nada: el botón queda apagado, ni la cámara ni el moiré se mueven (rojo: CONTROL=sin-permiso)`, `${JSON.stringify(e)} · la cámara ${distancia(c0, c1).toFixed(3)} · moiré de afuera ${String(m?.entrada.deAfuera)}`)
+      const nada = recibe !== null && !recibe.activa && recibe.x === 0 && recibe.y === 0 && mueve < 2 * deriva + 0.1
+      ver(pedidos === 1 && e?.estado === 'negado' && e.etiqueta === 'Activar movimiento' && m !== null && !m.entrada.deAfuera && nada, `${tag} · con el permiso negado no pasa nada: el botón queda apagado, la cámara no recibe nada del sensor (se mueve lo de siempre) y el moiré tampoco (rojo: CONTROL=sin-permiso)`, `${JSON.stringify(e)} · la cámara recibe ${recibe === null ? 'nada' : `${recibe.x.toFixed(2)} (activa: ${String(recibe.activa)})`}, se mueve ${mueve.toFixed(3)} inclinada contra ${deriva.toFixed(3)} quieta · moiré de afuera ${String(m?.entrada.deAfuera)}`)
       await tocarElBoton(a)
       const otra = await a.p.evaluate(() => (window as unknown as { __permisosPedidos?: number }).__permisosPedidos ?? 0)
       ver(otra === 1, `${tag} · otro toque no lo vuelve a pedir`, `${String(otra)} pedidos`)
@@ -215,6 +250,7 @@ async function ios(permiso: 'concedido' | 'negado'): Promise<void> {
     await a.ctx.close()
   }
 }
+
 
 async function reducido(): Promise<void> {
   const tag = '390 movimiento reducido'

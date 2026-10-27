@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
 import type * as THREE from 'three'
 
-import { cargaLista } from '../../carga'
+import { cargaLista, cargaPedida } from '../../carga'
 import { retenerElScroll } from '../../entrada'
 import { TITULOS_DE_VOLUMEN } from '../../titulos3d/registro'
 import { IDS_DEL_TITULAR_DEL_HERO, TITULAR_EN_VIVO } from '../../titulos3d/titular'
@@ -39,7 +39,10 @@ export function CaidaDelLogo({ logoGroupRef }: { readonly logoGroupRef: RefObjec
     const estado = m.current
     // [B12a.2] La caída es la del intro del home: sin el velo de carga (una página, sin el hero) la carga no se abre nunca y el logo quedaba
     // arriba para siempre (lo encontró la medición del sitio). Ahí el logo ya está en su lugar.
-    const sinVelo = !cargaLista() && document.querySelector('[data-pieza="velo-de-carga"]') === null
+    // [C2-81] Con el preloader del sitio, el velo puede irse ANTES de que la escena se monte (una carga lenta: el velo se va a su plazo) y
+    // la carga queda pedida pero cerrada hasta que entra la página: eso NO es «sin velo». Sin esto el logo no caía al entrar y el scroll se
+    // soltaba en el acto.
+    const sinVelo = !cargaLista() && !cargaPedida() && document.querySelector('[data-pieza="velo-de-carga"]') === null
     if (logo === null || window.scrollY >= window.innerHeight * CAIDA_DEL_LOGO.arriba || sinVelo) return undefined
     estado.u = 0
     estado.propio = false
