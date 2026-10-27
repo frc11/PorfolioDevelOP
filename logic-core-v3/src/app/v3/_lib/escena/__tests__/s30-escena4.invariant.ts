@@ -17,7 +17,6 @@ import path from 'node:path'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
-import { MOIRE_POR_DEFECTO } from '../moire/fijo'
 import { formaDelLogo } from '../polvo/formaDelLogo'
 import { NUNCA, POSARSE, avanzarElPolvo, polvoInicial } from '../polvo/posarse'
 import { POLVO_PAREJO, envolver } from '../polvo/volumen'
@@ -31,14 +30,17 @@ import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../navegacion'
 
 // ── §1 · las banderas ─────────────────────────────────────────────────────
 titulo('§1 · el moiré y el polvo prendidos, las pruebas apagadas, salvo en el banco')
-afirmar(ENTORNO.moire === MOIRE_POR_DEFECTO && ENTORNO.polvoParejo, '[B8] el producto trae el moiré quieto en su defecto y el polvo parejo', `moire=${ENTORNO.moire}`)
-afirmar(BASE_LIMPIA.moire === MOIRE_POR_DEFECTO && !BASE_LIMPIA.polvoParejo, 'la base, el polvo de antes ([B8] el moiré de la base también es el quieto: el que se movía se borró)')
+// [C2-31m] El moiré ya no es una bandera del entorno: queda uno solo (el que seguía al mouse), sin variantes (`moire/fijo.ts`).
+const sinMoireEnElEntorno = (e: object): boolean => !('moire' in e)
+afirmar(sinMoireEnElEntorno(ENTORNO) && ENTORNO.polvoParejo, '[C2-31m] el producto trae el polvo parejo, y el moiré ya no es una bandera (uno solo, el del mouse)')
+controlPositivo('  el detector VE el entorno de B8 (con la variante del moiré)', { ...ENTORNO, moire: '2' }, sinMoireEnElEntorno)
+afirmar(sinMoireEnElEntorno(BASE_LIMPIA) && !BASE_LIMPIA.polvoParejo, 'la base, el polvo de antes (y tampoco tiene la bandera del moiré)')
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, 'el producto no trae ninguna prueba (las de ESCENA 6, en s31)')
 afirmarIgual(BASE_LIMPIA.pruebas, PRUEBAS_APAGADAS, '  la base tampoco')
 const antes = entornoPedido('producto,moire=1,polvo=antes')
-afirmar(antes.moire === '1' && !antes.polvoParejo && antes.E1, '`moire=1` y `polvo=antes` dan el producto con una rendija y el polvo de la base')
-afirmar(entornoPedido('E1,E4,E6,E7').moire === MOIRE_POR_DEFECTO && entornoPedido('E1,moire=mouse').moire === 'mouse' && entornoPedido('producto,moire=hoy').moire === MOIRE_POR_DEFECTO, 'sin `producto`, sólo lo que la lista nombra; el moiré, su defecto si no se nombra (`moire=hoy`, el de antes, ya no existe)')
-controlPositivo('el detector VE un pedido que prende de más', 'E1,E4,amanecer', (p: string) => !entornoPedido(p).amanecer && entornoPedido(p).moire === MOIRE_POR_DEFECTO)
+afirmar(sinMoireEnElEntorno(antes) && !antes.polvoParejo && antes.E1, '`polvo=antes` da el producto con el polvo de la base (`moire=1` ya no pide nada)')
+afirmar(!entornoPedido('E1,E4,E6,E7').amanecer && entornoPedido('E1,E4,E6,E7').E4 && sinMoireEnElEntorno(entornoPedido('E1,moire=mouse')), 'sin `producto`, sólo lo que la lista nombra')
+controlPositivo('el detector VE un pedido que prende de más', 'E1,E4,amanecer', (p: string) => !entornoPedido(p).amanecer && entornoPedido(p).E4)
 
 // ── §4 · el moiré ─────────────────────────────────────────────────────────
 titulo('§4 · [B8] el moiré vivo se borró (reaccionaba al scroll); el quieto, en s78-b8')

@@ -15,8 +15,8 @@
  *
  * **[ESCENA 5] Encendidos**, además: el moiré con sus cuatro variantes juntas (`moire`, en
  * `moire/`) y el polvo con la misma densidad en todo el interior (`polvoParejo`, en `polvo/`).
- * [B8] El moiré vivo se borró (reaccionaba al scroll y, por el paralaje, a la cámara): `moire` es ahora la variante
- * del moiré quieto, `0|1|2|mouse` (`moire/fijo.ts`; el defecto, `2`), también suelta en la URL (`/v3?moire=1`).
+ * [B8] El moiré vivo se borró (reaccionaba al scroll y, por el paralaje, a la cámara). [C2-31m] Y las variantes del moiré
+ * quieto también: queda la que seguía al puntero (`moire/fijo.ts`), sin bandera (`?moire=` ya no pide nada).
  *
  * **[ESCENA 6] Pasan al producto** tres pruebas de ESCENA 5: el logo como obstáculo del polvo y del
  * bokeh (5a; [ESCENA 9] T1: borrado, código y bandera), la mancha de contacto según el haz (5c, `sombraHaz`)
@@ -59,12 +59,10 @@
  *     window.__entornoDeLaEscena = 'producto'                       → estas banderas, y la escena publica su estado
  *     window.__entornoDeLaEscena = 'base'                           → la escena de `escena-base-limpia`
  *     window.__entornoDeLaEscena = 'producto,cielo-dia=no'          → el producto sin el cielo de día
- *     window.__entornoDeLaEscena = 'producto,moire=1,polvo=antes'   → el producto con una rendija y el polvo de antes
+ *     window.__entornoDeLaEscena = 'producto,polvo=antes'           → el producto con el polvo de antes
  *     window.__entornoDeLaEscena = 'producto,sombra=blanda,motas=no'  → sin 5c ni 5d
  *     window.__entornoDeLaEscena = 'E1,E6,haz=sutil'                → sólo esas, con esos niveles
  */
-
-import { MOIRE_POR_DEFECTO, varianteDelMoire, type VarianteDelMoire } from './moire/fijo'
 
 export const IDEAS_DEL_ENTORNO = ['E1', 'E4', 'E6', 'E7'] as const
 
@@ -171,8 +169,6 @@ export const PEDIDOS_DEL_FONDO = ['cristal', 'fondo'] as const
 /** [CIERRE A-ter] A10b · y lo que pide el pie, suelto en la URL: `?rebote=no` (pide `sin-rebote`). */
 export const PEDIDOS_DEL_PIE = ['rebote'] as const
 
-/** [B8] · y la variante del moiré, suelta en la URL: `?moire=0|1|2|mouse` (`moire/fijo.ts`). */
-export const PEDIDOS_DEL_MOIRE = ['moire'] as const
 
 /** Lo que vale de una lista, o `no`. */
 function unoDe<T extends string>(opciones: readonly T[], v: string | undefined): T | 'no' {
@@ -208,8 +204,6 @@ export interface Entorno {
   readonly haz: NivelDelHaz
   /** La sombra de contacto sigue la altura del logo y responde al pulso (`entorno/sombra.ts`). */
   readonly sombraViva: boolean
-  /** [B8] El moiré quieto: `0` sin trama, `1` una rendija, `2` las dos (el defecto), `mouse` una que sigue al puntero (`moire/fijo.ts`). */
-  readonly moire: VarianteDelMoire
   /** [ESCENA 5] El polvo con la misma densidad en todo el interior (`polvo/`). Sin él, el de la base. */
   readonly polvoParejo: boolean
   /** [ESCENA 6] 5c · la mancha de contacto según el haz (`sombra/sombraDelHaz.ts`). */
@@ -273,7 +267,6 @@ export const ENTORNO: Entorno = {
   E7: true,
   haz: 'sutil',
   sombraViva: true,
-  moire: MOIRE_POR_DEFECTO,
   polvoParejo: true,
   sombraHaz: true,
   motas: true,
@@ -307,7 +300,6 @@ export const BASE_LIMPIA: Entorno = {
   E7: false,
   haz: 'sutil',
   sombraViva: false,
-  moire: MOIRE_POR_DEFECTO,
   polvoParejo: false,
   sombraHaz: false,
   motas: false,
@@ -356,7 +348,6 @@ export function entornoPedido(pedido: string): Entorno {
     E7: tiene('E7'),
     haz: haz === 'sutil' || haz === 'medio' ? haz : ENTORNO.haz,
     sombraViva: !partes.has('sombra=quieta'),
-    moire: varianteDelMoire(valor('moire')),
     polvoParejo: valor('polvo') !== 'antes' && (producto || partes.has('parejo')),
     sombraHaz: producto ? !partes.has('sombra=blanda') : partes.has('sombra=haz'),
     motas: producto ? valor('motas') !== 'no' : partes.has('motas'),
@@ -391,7 +382,7 @@ let resuelto: Entorno | null = null
  */
 export function pedidoDeLaUrl(busqueda: string): string | null {
   const consulta = new URLSearchParams(busqueda)
-  const sueltas = [...PRUEBAS_SUELTAS, ...PEDIDOS_DEL_FONDO, ...PEDIDOS_DEL_PIE, ...PEDIDOS_DEL_MOIRE].map((k) => {
+  const sueltas = [...PRUEBAS_SUELTAS, ...PEDIDOS_DEL_FONDO, ...PEDIDOS_DEL_PIE].map((k) => {
     const v = consulta.get(k)
     return v === null ? null : `${k}=${v}`
   })
@@ -411,10 +402,10 @@ export function entornoDeLaEscena(): Entorno {
   else {
     // [ESCENA 9] Sin banco, las pruebas (y sólo ellas) se piden en la URL para mirarlas en vivo: `/v3?pruebas=pie=antes`.
     // [3D Y SONIDO] T1: y el material de los títulos (`titulos=blanco`, o `titulos=no`), que pasaron al producto.
-    // [PULIDO 1] y las del sprint, también sueltas: `/v3?cta=a`, `/v3?brillo=fuerte` (`pedidoDeLaUrl`). [B8] Y el moiré (`/v3?moire=1`).
+    // [PULIDO 1] y las del sprint, también sueltas: `/v3?cta=a`, `/v3?brillo=fuerte` (`pedidoDeLaUrl`). [C2-31m] El moiré ya no tiene variantes.
     const lista = pedidoDeLaUrl(window.location.search)
     const pedido = lista === null ? null : entornoPedido(lista)
-    resuelto = pedido === null ? ENTORNO : { ...ENTORNO, titulos: pedido.titulos, pruebas: pedido.pruebas, moire: pedido.moire }
+    resuelto = pedido === null ? ENTORNO : { ...ENTORNO, titulos: pedido.titulos, pruebas: pedido.pruebas }
   }
   return resuelto
 }

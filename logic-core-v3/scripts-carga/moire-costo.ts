@@ -12,6 +12,10 @@
  * El criterio: con cada variante, la trama cuesta lo mismo o menos que antes y el total no sube más que el ruido entre corridas.
  * EL CONTROL: con `moire=0` el perfil no tiene ni la trama ni el zócalo; con `2`, las dos capas. Si no, el instrumento no ve la trama
  * y la corrida se marca `controlRojo`. Sale a `C:/Users/Valentino/.cache/b4-medicion/b8-moire/costo-<rotulo>-<ancho>.json`.
+ *
+ * [C2-31m] Las variantes se borraron (queda la de `mouse`, sin bandera): por defecto mide el producto y `fondo=cristal` (sin la trama),
+ * y el control pasa a ser ése (sin la trama, ningún objeto de la trama; con ella, la gruesa y nunca la fina). El banco del moiré de
+ * ahora (las líneas, las fotos, la entrada y el costo) es `scripts-carga/moire.ts`.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 
@@ -22,7 +26,7 @@ import { esperar, scrollHasta, topeDe } from '../scripts-viajes/banco'
 const ANCHO = Number(process.env.ANCHO ?? 1440)
 const ALTO = Number(process.env.ALTO ?? 900)
 const ROTULO = process.env.ROTULO ?? 'despues'
-const PEDIDOS = (process.env.PEDIDOS ?? 'producto;producto,moire=0;producto,moire=1;producto,moire=2;producto,moire=mouse').split(';').map((p) => p.trim()).filter(Boolean)
+const PEDIDOS = (process.env.PEDIDOS ?? 'producto;producto,fondo=cristal').split(';').map((p) => p.trim()).filter(Boolean)
 const DIR = 'C:/Users/Valentino/.cache/b4-medicion/b8-moire'
 const TRAMA = ['trama gruesa', 'trama fina', 'zócalo']
 
@@ -75,8 +79,9 @@ async function principal(): Promise<void> {
         // El control: sin trama no hay objetos de la trama; con las dos, las dos.
         const t = m.trama ?? {}
         const hay = (n: string): boolean => t[n] !== null && t[n] !== undefined
-        if (pedido.includes('moire=0') && TRAMA.some(hay)) controlRojo = true
+        if ((pedido.includes('moire=0') || pedido.includes('fondo=cristal')) && TRAMA.some(hay)) controlRojo = true
         if (pedido.includes('moire=2') && m.sinExtension !== true && !(hay('trama gruesa') && hay('trama fina'))) controlRojo = true
+        if (pedido === 'producto' && ROTULO !== 'antes' && m.sinExtension !== true && !(hay('trama gruesa') && !hay('trama fina'))) controlRojo = true
       }
     } finally {
       await b.cerrar()

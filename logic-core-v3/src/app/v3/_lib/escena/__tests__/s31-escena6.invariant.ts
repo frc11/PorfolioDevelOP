@@ -22,7 +22,6 @@ import { CHOREO_KEYFRAMES } from '../choreography'
 import { MOUSE_HEIGHT_FACTOR } from '../choreographyPhysics'
 import { BASE_LIMPIA, ENTORNO, PRUEBAS_APAGADAS, entornoPedido } from '../entorno'
 import { ESTRELLAS } from '../estrellas/Estrellas'
-import { MOIRE_POR_DEFECTO } from '../moire/fijo'
 import { FORMACION } from '../formacion/enFormacion'
 import { FISICA } from '../polvo/simulacion'
 import { POSARSE, avanzarElPolvo, polvoInicial, NUNCA } from '../polvo/posarse'
@@ -35,15 +34,15 @@ const leer = (rel: string): string => readFileSync(path.join(ESCENA, rel), 'utf8
 titulo('§1 · 5c y 5d en el producto; lo nuevo apagado')
 // [ESCENA 9] T1: el obstáculo (5a) se borró, código y bandera (s35).
 afirmar(ENTORNO.sombraHaz && ENTORNO.motas && !('obstaculo' in ENTORNO), 'el producto trae la sombra según el haz (5c) y las motas (5d); el obstáculo (5a) ya no existe')
-afirmar(ENTORNO.moire === MOIRE_POR_DEFECTO && ENTORNO.polvoParejo, '  y sigue con el moiré ([B8] el quieto, en su defecto) y el polvo parejo')
+afirmar(!('moire' in ENTORNO) && ENTORNO.polvoParejo, '  y sigue con el polvo parejo ([C2-31m] el moiré ya no es una bandera: uno solo, el del mouse)')
 afirmar(!BASE_LIMPIA.sombraHaz && !BASE_LIMPIA.motas, '  la base, sin ninguno')
 afirmar(Object.values(PRUEBAS_APAGADAS).every((v) => v === false || v === 'no'), 'todas las pruebas de ESCENA 6 van apagadas', JSON.stringify(PRUEBAS_APAGADAS))
 afirmarIgual(ENTORNO.pruebas, PRUEBAS_APAGADAS, '  y el producto no trae ninguna')
 // [ESCENA 8] El amanecer (6g) dejó de ser una prueba: el pedido lo nombra como a cualquier bandera del producto.
 const pedido = entornoPedido('E1,amanecer')
-afirmar(pedido.amanecer && !entornoPedido('E1').amanecer && entornoPedido('E1,amanecer').moire === MOIRE_POR_DEFECTO, 'el pedido del banco prende lo nombrado (y sólo eso; [B8] el moiré, su defecto)')
+afirmar(pedido.amanecer && !entornoPedido('E1').amanecer && !entornoPedido('E1,amanecer').E4, 'el pedido del banco prende lo nombrado (y sólo eso)')
 const sin = entornoPedido('producto,sombra=blanda,motas=no')
-afirmar(!sin.sombraHaz && !sin.motas && sin.E1 && sin.moire === MOIRE_POR_DEFECTO, 'el banco puede apagar 5c y 5d para comparar, y el resto sigue')
+afirmar(!sin.sombraHaz && !sin.motas && sin.E1 && sin.polvoParejo, 'el banco puede apagar 5c y 5d para comparar, y el resto sigue')
 controlPositivo('el detector VE un producto sin 5c', 'producto,sombra=blanda', (p: string) => entornoPedido(p).sombraHaz)
 
 // ── §2 · los fondos del texto ─────────────────────────────────────────────

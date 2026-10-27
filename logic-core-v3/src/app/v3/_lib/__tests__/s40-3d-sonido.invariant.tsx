@@ -78,10 +78,10 @@ titulo('T1 · Los títulos de volumen en el producto: el negro; el blanco para c
 afirmar(ENTORNO.titulos === 'negro' && entornoPedido('producto').titulos === 'negro', 'en el producto, el negro satinado del logo')
 afirmar(entornoPedido('producto,titulos=blanco').titulos === 'blanco' && entornoPedido('producto,titulos=no').titulos === 'no' && BASE_LIMPIA.titulos === 'no', '  `titulos=blanco` (con banco o en la URL) los pide blancos y `titulos=no` los apaga; la base no los tiene')
 const entorno = leer('_lib/escena/entorno.ts')
-// [B8] La URL también lleva la variante del moiré (`?moire=`): se suma al material y a las pruebas; el resto del producto, intacto.
-const soloLoPedido = (c: string): boolean => /resuelto = pedido === null \? ENTORNO : \{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas, moire: pedido\.moire \}/.test(c)
-afirmar(soloLoPedido(entorno), '  la URL (`?pruebas=titulos=blanco`) cambia el material (y, desde B8, `?moire=` la variante del moiré) y nada más del producto')
-controlPositivo('  el detector VE una URL que pisa el producto entero con el pedido', entorno.replace('{ ...ENTORNO, titulos: pedido.titulos, pruebas: pedido.pruebas, moire: pedido.moire }', '{ ...ENTORNO, ...pedido }'), soloLoPedido)
+// [B8] La URL llevó la variante del moiré; [C2-31m] se borró con las variantes: sólo el material y las pruebas; el resto del producto, intacto.
+const soloLoPedido = (c: string): boolean => /resuelto = pedido === null \? ENTORNO : \{ \.\.\.ENTORNO, titulos: pedido\.titulos, pruebas: pedido\.pruebas \}/.test(c)
+afirmar(soloLoPedido(entorno), '  la URL (`?pruebas=titulos=blanco`) cambia el material y nada más del producto')
+controlPositivo('  el detector VE una URL que pisa el producto entero con el pedido', entorno.replace('{ ...ENTORNO, titulos: pedido.titulos, pruebas: pedido.pruebas }', '{ ...ENTORNO, ...pedido }'), soloLoPedido)
 
 titulo('T1 · Con los viajes del menú: durante el viaje no llegan; al terminar, la llegada repetida')
 const escena3d = sinComentarios((leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx') + leer('_lib/escena/titulos3d/armado.ts') + leer('_lib/escena/titulos3d/sincronia.ts')))
