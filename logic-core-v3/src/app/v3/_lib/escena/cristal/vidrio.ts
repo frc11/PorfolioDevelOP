@@ -29,6 +29,9 @@ attribute float aInterior;
 attribute float aHondura;
 attribute vec4 aBorde;
 attribute vec2 aCelda;
+// [C2-31g] Dónde está en su celda (u desde su centro) y la semilla de la celda: la telaraña de cada una (\`grietasDelVidrio.ts\`).
+attribute vec3 aGrieta;
+varying vec3 vGrieta;
 varying vec3 vMundo;
 varying vec3 vNormal;
 varying float vInterior;
@@ -43,6 +46,7 @@ void main() {
 	vInterior = aInterior;
 	vBorde = vec4( mat3( modelMatrix ) * aBorde.xyz, aBorde.w );
 	vCelda = aCelda;
+	vGrieta = aGrieta;
 	gl_Position = projectionMatrix * viewMatrix * p;
 }
 `
@@ -212,7 +216,7 @@ export function uniformesDelVidrio() {
     uDeNoche: { value: new THREE.Vector4(0, C.noche.radioDelHaz, C.noche.luces, C.noche.dureza) },
     uLucesVivas: LUCES_VIVAS.uLuces,
     uCuantasLucesVivas: LUCES_VIVAS.uCuantas,
-    // [NOCTURNO B9] Las grietas: su rejilla, dónde van, cuánto se formaron y se encendieron, y su color.
+    // [NOCTURNO B9] Las grietas: cuánto se formaron y se encendieron, desde dónde, y su color ([C2-31g] la telaraña de cada celda).
     ...uniformesDeLasGrietas(),
   }
 }

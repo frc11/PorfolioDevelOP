@@ -1,10 +1,15 @@
 import type { IdDePagina } from '../ruta/preset'
 
 /**
- * [NOCTURNO B9] EL CRISTAL QUE SE AGRIETA, LO PURO (`docs/rediseno/SPRINT-B9-NOCTURNO.md`). La firma del sitio: las grietas nacen en
- * varios puntos del muro de cristal y se forman a la vista (~1,5 s), quedan oscuras (~1 s) y después se iluminan con una luz fina (neutra
- * en el home, con el acento en las páginas). Al pasar el punto hacia arriba se cierran en reversa, también a la vista. Se dibujan en el
- * material del cristal (`grietasDelVidrio.ts`), sin partir la geometría; su trazado, en `trazado.ts`; el cuadro, en `grietasEnVivo.ts`.
+ * [NOCTURNO B9] EL CRISTAL QUE SE AGRIETA, LO PURO (`docs/rediseno/SPRINT-B9-NOCTURNO.md`). La firma del sitio: se forma a la vista
+ * (~1,5 s), queda oscuro (~1 s) y en las páginas de servicio se ilumina con una luz fina del acento. Al pasar el punto hacia arriba se
+ * cierra en reversa, también a la vista. Se dibuja en el material del cristal (`grietasDelVidrio.ts`); el cuadro, en `grietasEnVivo.ts`.
+ *
+ * [C2-31g] CADA CELDA SE AGRIETA POR DENTRO (`docs/rediseno/SPRINT-C2-31-grietas.md`; la referencia: el vidrio aristado). Ya no hay una
+ * grieta general que cruza el muro (las variantes 1, 2 y 3 de B9 se borraron con su trazado): cada celda tiene su telaraña, con su centro
+ * (el de su abanico), sus rayos hasta el borde y sus anillos concéntricos (con la forma de la celda), todas a la vez y al mismo ritmo.
+ * `?grietas=centro` (por defecto) la forma de adentro hacia los bordes de cada celda; `?grietas=borde`, de los bordes hacia el centro. Sin
+ * brillo en el home: la luz con el acento queda para las páginas de servicio.
  *
  * Sin `three` ni nada del lienzo: lo importa el título de una página (`TituloDePagina.tsx`), que viaja con la página.
  */
@@ -14,58 +19,43 @@ export const GRIETAS = {
    * (la escena dormida, la pestaña oculta) avanza a lo sumo `pasoMaximoS`.
    */
   tiempos: { formarseS: 1.5, oscurasS: 1, encenderseS: 0.7, apagarseS: 0.5, cerrarseS: 1.5, pasoMaximoS: 0.1 },
-  /** `?grietas=1|2|3` (telaraña, fractura larga, por las juntas) y `no` (sin dibujarlas: la base del banco). */
-  variantes: ['1', '2', '3', 'no'],
-  porDefecto: '1',
+  /** [C2-31g] `?grietas=centro|borde`: de dónde arranca la telaraña de cada celda (el centro, por defecto, o el borde). */
+  origenes: ['centro', 'borde'],
+  porDefecto: 'centro',
   /**
-   * El tamaño de las formas, en partes de la ventana: su alto o, si es una franja baja (la cámara del home y de las páginas ve sólo el
-   * pie del muro, ~55 × 8 u a 1440), esta parte de su ancho.
+   * [C2-31g] LA TELARAÑA DE CADA CELDA (en el sombreador; el azar, por la semilla de la celda): de 7 a 11 rayos desde su centro, corridos
+   * hasta `desorden` de su sector, con un zigzag (u) de dos ondas (por u) que nace en el centro; `cortos` de ellos no llegan al borde
+   * (paran entre esas partes del camino). Los anillos, a esas partes del camino del centro al borde (la forma de la celda, a escala), cada
+   * tramo entre dos rayos corrido hasta `corre` y alguno falta; cada tramo se cierra desde los dos rayos hacia el medio en `barre` de la
+   * formación después de que pasó el frente.
    */
-  tamanoPorElAncho: 0.3,
-  /**
-   * 1 · TELARAÑA: de 3 a 5 impactos (2 o 3 en el teléfono), separados; de cada uno, rayos en estrella (su largo en partes del tamaño,
-   * en pasos que se quiebran apenas), algunos con su rama, y los anillos de la telaraña (a esas partes del largo medio, con algún tramo
-   * que falta). Los impactos nacen escalonados (hasta `nacenHasta` de la formación).
-   */
-  telarana: { impactos: [3, 5], impactosCompacta: [2, 3], rayos: [7, 10], rayosCompacta: [5, 7], largo: [0.16, 0.32], pasos: [4, 6], zigzagGrados: 11, ramas: 0.45, ramaGrados: [20, 40], anillos: [0.28, 0.58], anilloFalta: 0.25, nacenHasta: 0.3, separacion: 0.24 },
-  /**
-   * 2 · FRACTURA LARGA: pocas líneas (2 o 3; 1 o 2 en el teléfono) que entran por un borde de la ventana y la cruzan hasta el de enfrente,
-   * a pasos (u) que se quiebran apenas y vuelven a su rumbo, y se bifurcan (ramas de parte de su largo; alguna con su subrama).
-   */
-  fractura: { lineas: [2, 3], lineasCompacta: [1, 2], paso: [1.2, 2.2], zigzagGrados: 12, rumbo: 0.3, ramas: [2, 4], ramasCompacta: [1, 2], ramaGrados: [18, 38], ramaLargo: [0.22, 0.5], subrama: 0.35, nacenHasta: 0.25 },
-  /**
-   * 3 · POR LAS JUNTAS: siguen los bordes de las celdas del cristal (`muro.ts`) y se propagan de celda en celda desde 2 o 3 semillas (1 o
-   * 2 en el teléfono): el árbol más corto por las juntas (con su largo un poco al azar, así se ramifica) hasta `alcance` del tamaño, y
-   * alguna junta más que cierra una celda.
-   */
-  juntas: { semillas: [2, 3], semillasCompacta: [1, 2], alcance: 1, alcanceCompacta: 1, azarDelPeso: [0.6, 1.8], cierres: 0.15, nacenHasta: 0.2 },
-  /** El grosor de cada tramo (veces el del tronco). */
-  grosor: { tronco: 1, rama: 0.7, anillo: 0.6, junta: 0.9 },
+  telarana: { rayos: [7, 11], desorden: 0.35, zigzag: 0.06, ondas: [2.3, 5.1], cortos: 0.25, corto: [0.45, 0.9], anillos: [0.08, 0.23, 0.41, 0.6, 0.8], corre: 0.035, falta: 0.2, barre: 0.12 },
+  /** El grosor de cada línea (veces el del rayo). */
+  grosor: { rayo: 1, anillo: 0.65 },
   /**
    * El dibujo (px, medio ancho): el núcleo de la luz, la banda oscura y el halo; cuánto oscurece la banda de día y el gris de la grieta
-   * oscura de noche (sobre el negro una grieta oscura no se vería); el brillo del núcleo y del halo; la onda de la luz (corre del impacto
-   * a las puntas: el ancho de su frente, en partes de la formación) y el margen de la rejilla (u: lo más lejos que pinta una grieta).
+   * oscura de noche (sobre el negro una grieta oscura no se vería); el brillo del núcleo y del halo; la onda de la luz (corre desde donde
+   * nace la grieta: el ancho de su frente, en partes de la formación) y la FACETA (cada trozo entre rayos y anillos, apenas más claro u
+   * oscuro que el de al lado: el aristado; no es luz).
    */
-  dibujo: { nucleoPx: 0.55, bandaPx: 1.25, haloPx: 2.4, oscurece: 0.5, grisDeNoche: 0.13, brillo: 1.35, halo: 0.22, onda: 0.3, margen: 0.35 },
-  /**
-   * La rejilla que ve el sombreador (`trazado.ts`): hasta `celdas` celdas casi cuadradas sobre la caja de las grietas (nx × ny según su
-   * forma), cada una con la lista de los tramos que pasan cerca, en una textura de `porFila` téxeles de ancho; la tabla de los tramos
-   * (ancho × filas téxeles: dos por tramo) y el tope del lazo por celda.
-   */
-  rejilla: { celdas: 1536, porFila: 64, ancho: 512, filas: 32, lazo: 64 },
-  /** La ventana, como mucho (partes de la vuelta del muro). */
-  ventanaMaxima: 0.4,
-  semilla: 2210,
+  dibujo: { nucleoPx: 0.55, bandaPx: 1.25, haloPx: 2.4, oscurece: 0.5, grisDeNoche: 0.13, brillo: 1.35, halo: 0.22, onda: 0.3, faceta: 0.04 },
   /** `?grietas-prueba=si`: un ciclo para verlas solas (s): arranca, encendidas, cerradas. */
   prueba: { arrancaS: 1.5, encendidasS: 3, cerradasS: 2.5 },
+  /** [C2-31g] El control del banco `CONTROL=general` (una sola telaraña para todo el muro, centrada donde mira la cámara): su radio (u). */
+  general: { radio: 30 },
 } as const
 
-export type VarianteDeLasGrietas = '1' | '2' | '3' | 'no'
+export type OrigenDeLasGrietas = 'centro' | 'borde'
 
-/** La variante de la consulta (`?grietas=`); si no es una de las cuatro, la por defecto. */
-export function varianteDeLasGrietas(valor: string | null): VarianteDeLasGrietas {
-  const v = (GRIETAS.variantes as readonly string[]).find((x) => x === valor)
-  return (v ?? GRIETAS.porDefecto) as VarianteDeLasGrietas
+/** [C2-31g] El origen de la consulta (`?grietas=`); si no es uno de los dos (también los viejos `1`, `2`, `3` y `no`), el por defecto. */
+export function origenDeLasGrietas(valor: string | null): OrigenDeLasGrietas {
+  const o = (GRIETAS.origenes as readonly string[]).find((x) => x === valor)
+  return (o ?? GRIETAS.porDefecto) as OrigenDeLasGrietas
+}
+
+/** [C2-31g] Si se iluminan: sólo en una página con acento (las de servicio); en el home, nunca. */
+export function brillanLasGrietas(donde: IdDePagina, acento: string | null): boolean {
+  return donde !== 'home' && acento !== null
 }
 
 export type SentidoDeLasGrietas = 'avance' | 'reversa'

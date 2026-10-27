@@ -24,7 +24,6 @@ import { PANTALLAS_POR_PASO, centroDelPaso, pxDeLaSalida, scrollDelPx } from '..
 import { dispararLasGrietas } from '../escena/cristal/grietas'
 import { uniformesDeLasGrietas } from '../escena/cristal/grietasDelVidrio'
 import { crearLasGrietas } from '../escena/cristal/grietasEnVivo'
-import { celdasDelMuro } from '../escena/cristal/muro'
 import { ESPERA_MAXIMA_DE_LA_LLEGADA_MS, SIN_CUADROS_MS, TOLERANCIA_DE_LA_LLEGADA, desvioDeLaPose, escenaLlegada, seVeLaSalaEn, type EstadoDeLaLlegada } from '../escena/llegadaDeLaEscena'
 import { CAMERA_FOV, ORBIT_TARGET_Y } from '../escena/probeScene'
 import { COMPOSICION_INICIAL } from '../escena/ruta/pistaDeLaIntro'
@@ -141,19 +140,19 @@ const camaraDe = (pose: { readonly angleDeg: number; readonly height: number; re
 const BASE: PresetDeLaEscena = { id: 'base', tramos: { intro: '[data-x]', pie: null }, pista: null, noche: 'noche', acento: 'web', variante: null }
 const sacar = apilarElPreset(BASE)
 const u = uniformesDeLasGrietas()
-const g = crearLasGrietas(u, celdasDelMuro(), () => new THREE.Color(1, 1, 1))
+const g = crearLasGrietas(u, () => new THREE.Color(1, 1, 1))
 const CAM = camaraDe(COMPOSICION_INICIAL)
 const soltarElQuieto = retenerElQuieto()
 dispararLasGrietas('avance', 'base')
-for (let k = 0; k < 10; k += 1) g.cuadro(CAM, 1 / 60, false)
-const conVelo = { tramos: g.estado().tramos, formacion: u.uGrietas.value.x }
+for (let k = 0; k < 10; k += 1) g.cuadro(CAM, 1 / 60)
+const conVelo = { duena: g.estado().duena, formacion: u.uGrietas.value.x }
 soltarElQuieto()
-for (let k = 0; k < 10; k += 1) g.cuadro(CAM, 1 / 60, false)
-const sinVelo = { tramos: g.estado().tramos, formacion: u.uGrietas.value.x }
+for (let k = 0; k < 10; k += 1) g.cuadro(CAM, 1 / 60)
+const sinVelo = { duena: g.estado().duena, formacion: u.uGrietas.value.x }
 g.soltar()
 sacar()
-const grietasBien = (a: typeof conVelo, b: typeof sinVelo): boolean => a.tramos === 0 && a.formacion === 0 && b.tramos > 0 && b.formacion > 0
-afirmar(grietasBien(conVelo, sinVelo), `con el velo en curso (la píldora retiene el quieto) el pedido espera: ${String(conVelo.tramos)} tramos; con el velo quieto se arman (${String(sinVelo.tramos)} tramos) y se forman`)
+const grietasBien = (a: typeof conVelo, b: typeof sinVelo): boolean => a.duena === null && a.formacion === 0 && b.duena === 'base' && b.formacion > 0
+afirmar(grietasBien(conVelo, sinVelo), `con el velo en curso (la píldora retiene el quieto) el pedido espera (dueña: ${String(conVelo.duena)}); con el velo quieto se toma (${String(sinVelo.duena)}) y se forman`)
 controlPositivo('  el detector VE unas grietas armadas con el velo en curso', [sinVelo, sinVelo] as const, ([a, b]) => grietasBien(a, b))
 
 // ═══════════════════════════════════════════════════════════════════════════
