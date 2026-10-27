@@ -441,8 +441,11 @@ const CASO: Readonly<Record<Caso, (c: Contexto) => Promise<Resultado>>> = {
     await c.p.locator('#la-tuya-medio').fill('banco@ejemplo.com')
     await c.p.locator('#la-tuya-mensaje').fill('Un mensaje del banco: nunca llega (la API está bloqueada).')
     await c.p.locator('[data-pieza="la-tuya-del-carrusel"] button[type="submit"]').click()
-    await dormir(2500)
-    const resultado = await c.p.locator('[data-pieza="la-tuya-del-carrusel"] [data-parte="resultado"]').count()
+    // [C2-90] Desde la 40 el resultado es el de `EstadoDeEnvio` (la carga, el encastre con el error y, a los 3 s, el formulario de vuelta).
+    const resultado = await c.p
+      .waitForSelector('[data-pieza="la-tuya-del-carrusel"] [data-envio="resultado"][data-resultado="error"]', { timeout: 8000 })
+      .then(() => 1)
+      .catch(() => 0)
     const ok = vista && campos === 3 && escrito === 'Prueba del banco' && errorVacio && sinPedido && resultado === 1
     return { ok, detalle: `a la vista ${vista ? 'sí' : 'NO'}; ${String(campos)} campos; vacío: ${errorVacio ? 'marca el error' : 'NO marca'} y ${sinPedido ? 'no pide nada' : 'PIDIÓ'}; lleno: ${resultado === 1 ? 'el resultado (bloqueado: el error con WhatsApp)' : 'sin resultado'}; pedidos a /api/ (todos bloqueados): ${String(c.api.length)}` }
   },
@@ -462,11 +465,11 @@ async function anclas(ancho: number, alto: number): Promise<Resultado> {
       await dormir(2000)
       const r = await c.p.evaluate((s) => {
         const b = document.querySelector(s)?.getBoundingClientRect()
-        return { aLaVista: b !== undefined && b.top >= -2 && b.top < innerHeight * 0.6, indice: Number(document.querySelector('[data-pieza="flujo-del-portfolio"] [data-pieza="carrusel-de-tarjetas"]')?.getAttribute('data-indice') ?? Number.NaN) }
+        return { aLaVista: b !== undefined && b.top >= -2 && b.top < innerHeight * 0.6, arriba: b === undefined ? Number.NaN : b.top / innerHeight, abajo: b === undefined ? Number.NaN : b.bottom / innerHeight, scrollY: Math.round(scrollY), indice: Number(document.querySelector('[data-pieza="flujo-del-portfolio"] [data-pieza="carrusel-de-tarjetas"]')?.getAttribute('data-indice') ?? Number.NaN) }
       }, selector)
       const bien = r.aLaVista && (indiceEsperado === null || r.indice === indiceEsperado)
       ok &&= bien
-      partes.push(`${hash}: ${r.aLaVista ? 'a la vista' : 'NO a la vista'}${indiceEsperado === null ? '' : `, la tarjeta ${String(r.indice)}`}`)
+      partes.push(`${hash}: ${r.aLaVista ? 'a la vista' : 'NO a la vista'} (de ${r.arriba.toFixed(2)} a ${r.abajo.toFixed(2)} del alto, scroll ${String(r.scrollY)})${indiceEsperado === null ? '' : `, la tarjeta ${String(r.indice)}`}`)
     } finally {
       await cerrar()
     }

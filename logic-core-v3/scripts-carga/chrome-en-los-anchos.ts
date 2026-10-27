@@ -127,6 +127,10 @@ async function main(): Promise<void> {
       if (m.type() === 'error' || m.type() === 'warning' || texto.includes('NaN')) consola.set(`${m.type()}: ${texto.slice(0, 160)}`, (consola.get(`${m.type()}: ${texto.slice(0, 160)}`) ?? 0) + 1)
     })
     p.on('pageerror', (e) => consola.set(`pageerror: ${e.message.slice(0, 160)}`, (consola.get(`pageerror: ${e.message.slice(0, 160)}`) ?? 0) + 1))
+    // [C2-90] Qué recurso da 404 (la consola dice «Failed to load resource» sin la URL).
+    p.on('response', (r) => {
+      if (r.status() >= 400) consola.set(`respuesta ${String(r.status())}: ${r.url().replace(BASE, '').slice(0, 160)}`, (consola.get(`respuesta ${String(r.status())}: ${r.url().replace(BASE, '').slice(0, 160)}`) ?? 0) + 1)
+    })
     for (const ruta of RUTAS) {
       await p.goto(`${BASE}${ruta}`, { waitUntil: 'load', timeout: 300000 })
       await dormir(5000)
