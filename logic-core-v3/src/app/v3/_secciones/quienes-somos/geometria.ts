@@ -224,8 +224,8 @@ export const GEOMETRIA = {
   /**
    * Los `23ch` no acotan abajo del corte: el titular es display y la medida larga
    * no molesta. La variante es `max-escritorio:` y no `max-tablet:` —que excluía
-   * justamente 768, donde el pedido lo quiere a ancho completo—. Lo comparte el
-   * signo, que se alinea a la izquierda de su caja y no se mueve.
+   * justamente 768, donde el pedido lo quiere a ancho completo—. [C2-30s] El ≠ ya no
+   * la lleva: desde 1024 su caja es el espacio libre (`signo.ts`).
    */
   medidaDelTitular: 'max-w-[var(--titular-medida)] max-escritorio:max-w-none',
   /** 38px fijo de escritorio para arriba (ningún escalón de la escala cae ahí), fluido abajo. Interlineado 1,25 y no `--leading-titulo` (1,09): apretado, el subrayado del primer renglón se apoyaba sobre las mayúsculas del segundo. */
@@ -271,8 +271,8 @@ export const GEOMETRIA = {
     // La fila 4 se fue con «Tucumán, Argentina»: el bloque del equipo arranca antes.
     titular: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-2',
     /** El ≠ en su PROPIA fila: `content-evenly` le da el mismo aire arriba y abajo, que es el centrado vertical pedido. */
-    // [PULIDO 10] J1 · desde 1024 su fila es la que crece (`repartoDeLaAgencia`) y el ≠ va centrado en ella.
-    signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3 escritorio:self-center',
+    // [PULIDO 10] J1 · desde 1024 su fila es la que crece (`repartoDeLaAgencia`). [C2-30s] y el Bloque la llena entera: es el espacio libre (`signo.ts`).
+    signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',
     // [PULIDO 15] M1 · a la izquierda (la columna de siempre; la de la derecha de PULIDO 14 se borró): al salir el logo le pasa por
     // detrás y el cuerpo se lee por su halo (`banda.css`).
     bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-4',

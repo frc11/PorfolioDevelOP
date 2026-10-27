@@ -168,6 +168,8 @@ export const ARCHIVOS_DE_APOYO = [
   // [RETOQUE PANEL] T4 · el titular y el ≠ en volumen (`titular3d.tsx`) y la cuenta y la medida de sus rayas (`trazos3d.ts`).
   `${RAIZ_DE_SECCIONES}/quienes-somos/titular3d.tsx`,
   `${RAIZ_DE_SECCIONES}/quienes-somos/trazos3d.ts`,
+  // [C2-30s] el ≠ en el espacio libre: la cuenta de su tamaño y su centro, y su CSS (`signo.ts`).
+  `${RAIZ_DE_SECCIONES}/quienes-somos/signo.ts`,
   // ── B1 · los dos que salieron de Trabajos cuando pasó las 300 líneas ──────
   // `geometria.ts` son los números de la sección —el mismo corte que Servicios
   // ya tenía— y `soporte.ts` el arnés del invariante, el mismo que Cierre.

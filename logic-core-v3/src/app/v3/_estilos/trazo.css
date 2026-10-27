@@ -74,9 +74,10 @@
 /* `non-scaling-stroke`: el grosor queda quieto mientras el grupo escala. Y el
    remate va a ras y no redondeado: con escala cero un remate redondo deja un
    punto pintado justo donde el trazo todavía no nació. */
+/* [C2-30s] Quiénes somos, desde 1024, le pasa su raya proporcional a su tamaño (`--signo-grosor`, `signo.ts`). */
 [data-v3] [data-signo="distinto"] line {
   fill: none;
-  stroke-width: calc(var(--border-hairline) * 4.5);
+  stroke-width: var(--signo-grosor, calc(var(--border-hairline) * 4.5));
   stroke-linecap: butt;
   vector-effect: non-scaling-stroke;
 }
