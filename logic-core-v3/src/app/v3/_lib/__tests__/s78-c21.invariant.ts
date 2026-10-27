@@ -115,6 +115,10 @@ const alineadoBien = (d: string, h: string): boolean => {
 }
 afirmar(alineadoBien(desplegable, hoja), 'el borde izquierdo de la lista en el de «Servicios» (abajo y arriba, abierta y cerrada): sin correrse a la mitad')
 controlPositivo('  el detector VE la lista centrada de antes', hoja.replace(/translate: 0 0;/, 'translate: -50% 0;'), (h: string) => alineadoBien(desplegable, h))
+// [C2-90] Cerrado y nunca abierto la x del desplegable no está medida: el respaldo no puede ser la mitad de la cabecera (su caja pasaba el borde derecho del teléfono y agrandaba el documento a lo ancho).
+const respaldoDeLaX = (h: string): boolean => reglasDelDesplegable(h).some((r) => /\bleft: var\(--desplegable-x, 0(px)?\);/.test(r)) && !/--desplegable-x, *-?\d+(\.\d+)?%/.test(h)
+afirmar(respaldoDeLaX(hoja), 'el respaldo de la x de la lista cerrada es 0, no una fracción de la cabecera: sin medir, su caja no pasa el borde derecho (no agranda el documento a lo ancho en el teléfono)')
+controlPositivo('  el detector VE el respaldo a la mitad de antes', hoja.replace('--desplegable-x, 0)', '--desplegable-x, 50%)'), (h: string) => respaldoDeLaX(h))
 const barra = sinComentarios(leer(`${V3}/_chrome/barra/BarraDelHome.tsx`))
 const resaltadoBien = (b: string): boolean =>
   /const alSalir = \(e: PointerEvent\): void => senalar\(enLaLista\(e\.relatedTarget\) \? deServicios\(\) : null\)/.test(b) && /lista\?\.addEventListener\('pointerenter', alEntrarALaLista\)/.test(b) &&
