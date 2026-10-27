@@ -107,7 +107,8 @@
 [data-v3] [data-pieza="barra"] > [data-parte="desplegable"] {
   position: absolute;
   top: calc(var(--barra-nacimiento) + var(--barra-alto) + var(--spacing-2));
-  left: var(--desplegable-x, 50%);
+  /* [C2-90] Respaldo en 0 (no 50%): cerrado y nunca abierto la x no está medida, y a mitad de la cabecera su caja pasaba el borde derecho del teléfono. */
+  left: var(--desplegable-x, 0);
   translate: 0 calc(var(--spacing-2) * -1);
   padding: var(--spacing-2);
   border: var(--border-hairline) solid var(--color-borde);
