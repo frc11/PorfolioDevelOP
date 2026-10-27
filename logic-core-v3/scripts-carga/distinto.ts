@@ -24,12 +24,13 @@ import path from 'node:path'
 import { chromium, type Page } from '@playwright/test'
 
 import { BANDA } from '../src/app/v3/_lib/escena/banda'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,1024x768,768x1024').split(',').map((a) => a.split('x').map(Number) as [number, number])
 const CONTROL = process.env.CONTROL ?? ''
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/distinto')
+const SALIDA = salidaDelBanco('distinto')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 /** El aire del logo y su medio ancho supuesto (`signo.ts`), en `svh` de la banda. */
@@ -162,7 +163,7 @@ async function main(): Promise<void> {
   const fallas: string[] = []
   for (const [ancho, alto] of ANCHOS) {
     const escritorio = ancho >= 1024
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/distinto-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('distinto')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,
