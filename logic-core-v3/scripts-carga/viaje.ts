@@ -133,13 +133,17 @@ async function alPrimerServicio(p: Page, movil: boolean): Promise<void> {
     // web por el scroll, como `servicios-gatillos.ts` (`ponerEn`), y que se asiente. Antes, cerca de la sección (que monte).
     await p.evaluate(() => document.getElementById('servicios')?.scrollIntoView({ block: 'start', behavior: 'instant' }))
     await dormir(1500)
-    await p.evaluate(() => {
-      const g = (window as Window & { __gatillosDelBanco?: { regla: () => { pasoPx: number; inicio: number } } }).__gatillosDelBanco
-      if (!g) throw new Error('sin __gatillosDelBanco (¿el banco prendido? ¿la coreografía?)')
-      const r = g.regla()
-      window.scrollTo({ top: r.inicio + 0.5 * r.pasoPx, behavior: 'instant' })
-    })
-    await dormir(2800)
+    // Paso por paso hasta que el CTA de web esté a la vista (el panel de web entra desde la izquierda en el suyo).
+    for (let paso = 0; paso < 4; paso++) {
+      await p.evaluate((k) => {
+        const g = (window as Window & { __gatillosDelBanco?: { regla: () => { pasoPx: number; inicio: number } } }).__gatillosDelBanco
+        if (!g) throw new Error('sin __gatillosDelBanco (¿el banco prendido? ¿la coreografía?)')
+        const r = g.regla()
+        window.scrollTo({ top: r.inicio + (k + 0.5) * r.pasoPx, behavior: 'instant' })
+      }, paso)
+      await dormir(2800)
+      if ((await ctaALaVista(p)) !== null) return
+    }
     return
   }
   const caja = await p.locator('[data-pieza="barra"] [data-nav-id="servicios"]').first().boundingBox()
