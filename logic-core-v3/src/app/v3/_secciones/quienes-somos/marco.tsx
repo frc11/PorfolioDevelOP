@@ -171,7 +171,6 @@ const REVELADO = {
     // Con movimiento reducido el texto está en su lugar y lo trae el fundido del velo.
     'motion-reduce:translate-y-0!',
   ),
-  nombre: 'text-titulo-s font-semi',
   rotulo: 'font-codigo text-caption uppercase',
   /** Un escalón más abajo que antes (`titulo-s`): el pedido es que se aprecie más la foto y menos el texto encima. */
   cuerpo: 'text-cuerpo leading-[var(--revelado-interlineado)]',
@@ -198,17 +197,32 @@ const ACERCAMIENTO = cn(
   'group-data-[abierto=true]:scale-[var(--marco-acercamiento)] group-data-[abierto=true]:duration-[var(--duracion-lenta)]',
 )
 
-/** Las demoras de cada renglón: entra el nombre y después el rol; sale el rol y después el nombre. */
-const ESCALON: Record<'solo' | 'primero' | 'segundo', React.CSSProperties> = {
+/** Las demoras del renglón del revelado ([C2-30f] uno solo: el nombre salió del revelado a la etiqueta). */
+const ESCALON: Record<'solo', React.CSSProperties> = {
   solo: { '--linea-entra': 'var(--revelado-entra-demora)', '--linea-sale': '0s' } as React.CSSProperties,
-  primero: { '--linea-entra': 'var(--revelado-entra-demora)', '--linea-sale': 'var(--revelado-escalon)' } as React.CSSProperties,
-  segundo: { '--linea-entra': 'calc(var(--revelado-entra-demora) + var(--revelado-escalon))', '--linea-sale': '0s' } as React.CSSProperties,
+}
+
+/**
+ * [C2-30f] LA ETIQUETA DEL NOMBRE — adentro de la foto, siempre (no con el hover): un rectángulo del papel con la tinta encima,
+ * arriba a la izquierda (Franco) o arriba a la derecha (Valentino). Va sobre las dos tomas y el velo, sin mezcla (su fondo es la
+ * foto, no la escena) y sin el puntero (el toque es del botón). El nombre que se lee es el `h4` de la fila; ésta es su imagen.
+ */
+const ETIQUETA = {
+  caja: 'pointer-events-none absolute top-[var(--spacing-3)] bg-fondo px-[var(--spacing-3)] py-[var(--spacing-1)] font-titulo text-fluido-titulo-s font-semi leading-titulo text-tinta escritorio:top-[var(--spacing-4)]',
+  izquierda: 'left-[var(--spacing-3)] escritorio:left-[var(--spacing-4)]',
+  derecha: 'right-[var(--spacing-3)] escritorio:right-[var(--spacing-4)]',
+} as const
+
+/** [C2-30f] El nombre adentro de la foto y de qué lado arriba. */
+export interface EtiquetaDelNombre {
+  readonly texto: string
+  readonly lado: 'izquierda' | 'derecha'
 }
 
 export function MarcoDeDosTomas({
   seria,
   suelta,
-  nombre,
+  etiqueta,
   texto,
   registro,
   ancho,
@@ -221,8 +235,8 @@ export function MarcoDeDosTomas({
 }: {
   readonly seria: Toma
   readonly suelta: Toma
-  /** [NAVBAR] En los retratos: el nombre, que sube primero sobre la foto (el rol, después). */
-  readonly nombre?: string
+  /** [C2-30f] En los retratos: el nombre, en su etiqueta arriba (siempre); en el revelado, sólo el rol. */
+  readonly etiqueta?: EtiquetaDelNombre
   /** Lo que aparece en el hover. En los retratos es el puesto; en la foto del equipo, su frase. */
   readonly texto: string
   /** [PULIDO 10] J9 · abajo de 1024, en lugar de `texto` (la foto del equipo: su leyenda corta; la frase ya se lee arriba). */
@@ -343,18 +357,11 @@ export function MarcoDeDosTomas({
             {/* `data-parte="revelado-texto"` es lo que `banda.css` apaga en la banda
                 móvil cuando la descripción YA está afuera de la foto (§2 del pedido):
                 el intercambio de imagen y el velo se quedan, sale sólo el texto. */}
-            {/* [PULIDO 10] J9 · abajo de 1024 el nombre ya está arriba, en el título: la leyenda es sólo el rol. */}
-            {nombre !== undefined && (
-              <p className={cn(REVELADO.ventana, 'max-escritorio:hidden')} data-parte="revelado-nombre">
-                <span className={cn(REVELADO.texto, REVELADO.nombre)} style={ESCALON.primero}>
-                  {nombre}
-                </span>
-              </p>
-            )}
+            {/* [C2-30f] Adentro de la foto, abajo, sólo el rol en todos los anchos: el nombre va en su etiqueta, arriba. */}
             <p className={cn(REVELADO.ventana, textoEnMovil !== undefined && 'max-escritorio:hidden')} data-parte="revelado-texto">
               <span
                 className={cn(REVELADO.texto, registro === 'rotulo' ? REVELADO.rotulo : REVELADO.cuerpo)}
-                style={nombre === undefined ? ESCALON.solo : ESCALON.segundo}
+                style={ESCALON.solo}
               >
                 {texto}
               </span>
@@ -368,6 +375,12 @@ export function MarcoDeDosTomas({
             )}
           </div>
         </div>
+
+        {etiqueta !== undefined && (
+          <span aria-hidden="true" data-parte="etiqueta" data-lado={etiqueta.lado} className={cn(ETIQUETA.caja, ETIQUETA[etiqueta.lado])}>
+            {etiqueta.texto}
+          </span>
+        )}
 
         {/* ⚠️ **EL CONTROL EXISTE EN TODOS LOS ANCHOS, y el hover se fue.** Era hover
             arriba de 1025 y toque abajo: dos disparadores para un gesto, y el de arriba

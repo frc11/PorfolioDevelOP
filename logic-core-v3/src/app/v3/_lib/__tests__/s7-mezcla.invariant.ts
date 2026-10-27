@@ -392,10 +392,11 @@ afirmar(EN_EL_HERO.some((q) => q.startsWith('h1')), '  entre ellas el titular')
 const EN_QUIENES_SOMOS = CON_MEZCLA(quieto)
 afirmar(
   EN_QUIENES_SOMOS.length >= 8,
-  `quiénes somos mezcla ${EN_QUIENES_SOMOS.length} piezas: titular, bajada, ≠, «El equipo», dos nombres, dos descripciones, el pie y los rótulos del toque`,
+  `quiénes somos mezcla ${EN_QUIENES_SOMOS.length} piezas: titular, bajada, ≠, «El equipo», dos descripciones, el pie y los rótulos del toque`,
   EN_QUIENES_SOMOS.join(' · '),
 )
-for (const etiqueta of ['h3', 'h4', 'svg', 'p']) {
+// [C2-30f] Los nombres (`h4`) ya no se ven afuera: van en la etiqueta de la foto, que no mezcla (su fondo es la foto); su `h4` es del lector.
+for (const etiqueta of ['h3', 'svg', 'p']) {
   afirmar(EN_QUIENES_SOMOS.some((q) => q.startsWith(etiqueta)), `  y hay al menos un \`${etiqueta}\` adentro`)
 }
 // [FINAL 2] El final: la frase, los seis valores, el CTA y su botón; en el pie, el isotipo, la identidad y las columnas.

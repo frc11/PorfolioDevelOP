@@ -1,19 +1,23 @@
 'use client'
 
+import { useRef } from 'react'
+
 import { cn } from '@/lib/utils'
 
 import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
-import { Titular } from '../../_componentes/tipografia/Titular'
 import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza, CanalDeTexto, LlegadaEnCurva, ProgresoAmortiguado } from '../_contrato/canales'
+import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
+import { useAnchoMinimo } from '../../_lib/useAnchoMinimo'
 import { useAcompananteDelTitulo } from '../../_lib/titulos3d/acompanantes'
 
 import { CONTENIDO } from './contenido'
-import { CLASES_DEL_REPARTO, CLASE_DE_RELACION, GEOMETRIA, PLANO_DE_NOSOTROS, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
+import { CLASES_DEL_REPARTO, CLASE_DE_RELACION, GEOMETRIA, ORIENTACION_DE_LAS_PERSONAS, PLANO_DE_NOSOTROS, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from './geometria'
 import { MarcoDeDosTomas } from './marco'
 import { CalleDerecha, Pantalla } from './pantalla'
+import { useTramoDelEquipo } from './tramoDelEquipo'
 
 /**
  * LAS DOS PANTALLAS DE LAS PERSONAS — el bloque del equipo y la foto.
@@ -82,9 +86,14 @@ function TituloDeLaFoto({ progreso }: { readonly progreso: Progreso }): React.JS
 
 export function ElEquipo(): React.JSX.Element {
   // [RETOQUE PANEL] T4 · las personas (sus textos y sus fotos, con su hover y su toque) van en el plano de «El equipo» (como A1).
-  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('equipo')
+  // [C2-30f] Con su orientación propia: las fotos quedan quietas en la escena (no miran a la cámara), acotadas para leerse.
+  const enElPlano = useAcompananteDelTitulo<HTMLDivElement>('equipo', ORIENTACION_DE_LAS_PERSONAS)
+  // [C2-30f] REGLA DE ALTURAS: abajo de 1024 la pantalla se acortó (sin el nombre de afuera): su tramo, para la escena.
+  const pantalla = useRef<HTMLDivElement>(null)
+  const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
+  useTramoDelEquipo(pantalla, escritorio, CONTENIDO.personas)
   return (
-    <div data-pantalla="equipo" className="flex min-h-svh w-full flex-col justify-start py-12 escritorio:py-0">
+    <div ref={pantalla} data-pantalla="equipo" className="flex min-h-svh w-full flex-col justify-start py-12 escritorio:py-0">
       <CalleDerecha className="grow">
         <div data-composicion="equipo" className="flex w-full flex-col gap-[var(--spacing-12)]">
           <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="@container w-full" style={GEOMETRIA.estilos.tituloDelEquipo}>
@@ -92,7 +101,7 @@ export function ElEquipo(): React.JSX.Element {
             {(progreso) => <TituloDelEquipo progreso={progreso} />}
           </Bloque>
 
-          <div ref={enElPlano} className="flex w-full flex-col gap-[var(--spacing-12)]">
+          <div ref={enElPlano} data-plano="personas" className="flex w-full flex-col gap-[var(--spacing-12)]">
           {CONTENIDO.personas.map((persona, indice) => {
             const aLaDerecha = indice === 1
             return (
@@ -105,35 +114,19 @@ export function ElEquipo(): React.JSX.Element {
                     aLaDerecha ? GEOMETRIA.fila.textoADerecha : GEOMETRIA.fila.textoAIzquierda,
                   )}
                 >
-                  <Bloque patron="P2" rango={GEOMETRIA.rangoDeLaMascara} className="w-full">
-                    {(progreso) => (
-                      <CanalDeTexto progreso={progreso} tipo="titulo" texto={persona.nombre}>
-                        {/* Hasta tablet los nombres suben al escalón que tenía «El equipo»
-                            (`titulo-l`), que a su vez subió al del titular: la sección
-                            corre su escalera completa un paso. Arriba del corte queda
-                            `titulo-m`, el nivel que el componente declara. */}
-                        {(contenido) => (
-                          <Titular
-                            nivel="titulo-m"
-                            como="h4"
-                            className={cn('max-escritorio:text-fluido-titulo-l', MEZCLA_SOBRE_LA_ESCENA)}
-                          >
-                            {contenido}
-                          </Titular>
-                        )}
-                      </CanalDeTexto>
-                    )}
-                  </Bloque>
+                  {/* [C2-30f] El nombre grande de afuera se fue: se ve en la etiqueta de la foto (arriba, del lado de
+                      la persona). Queda su `h4` para el árbol de encabezados y el lector (nombre, descripción, foto). */}
+                  <h4 className="sr-only">{persona.nombre}</h4>
 
-                  {/* La descripción usa la llegada del cuerpo de arriba —P2 sin máscara—
-                      y no la del nombre: son dos registros distintos, y el pedido lo dice. */}
+                  {/* La descripción usa la llegada del cuerpo de arriba —P2 sin máscara—. [C2-30f] Más grande: le
+                      quedó el lugar del nombre (`descripcionDeLaPersona`). */}
                   <Bloque patron="P2" rango="ventana-visible" className="w-full">
                     {(progreso) => (
                       <CanalDeTexto progreso={progreso} tipo="parrafo" texto={persona.descripcion}>
                         {(contenido) => (
-                          <Cuerpo como="p" className={cn(GEOMETRIA.medidaMovilDelCuerpo, MEZCLA_SOBRE_LA_ESCENA)}>
+                          <p data-parte="descripcion" className={GEOMETRIA.descripcionDeLaPersona}>
                             {contenido}
-                          </Cuerpo>
+                          </p>
                         )}
                       </CanalDeTexto>
                     )}
@@ -165,7 +158,7 @@ export function ElEquipo(): React.JSX.Element {
                         <MarcoDeDosTomas
                           seria={persona.seria}
                           suelta={persona.suelta}
-                          nombre={persona.nombre}
+                          etiqueta={{ texto: persona.nombre, lado: aLaDerecha ? 'derecha' : 'izquierda' }}
                           texto={persona.rol}
                           registro="rotulo"
                           relacion={CLASE_DE_RELACION.retrato}

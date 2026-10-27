@@ -70,7 +70,7 @@ afirmar(nueva !== null && salida !== null && nueva[2] === salida[2] && nueva[3] 
 const rapido = (b: [number, number, number, number] | null): boolean => b !== null && msHastaElRectanguloDeAntes(curva(...b)) <= 50
 afirmar(rapido(nueva), '  y desde el punto llega al tamaño del rectángulo de antes (17 %) en 50 ms o menos: no queda un punto casi invisible', `${String(nueva === null ? '?' : msHastaElRectanguloDeAntes(curva(...nueva)))} ms`)
 controlPositivo('el detector VE la curva de siempre desde el punto (~109 ms de punto)', salida, rapido)
-afirmar(/motion-reduce:\[--marco-cerrado:var\(--marco-abierto\)\]!/.test(marco) && (marco.match(/data-parte="revelado-nombre"/g) ?? []).length === 1, '  lo demás no cambia: con movimiento reducido un fundido; el nombre y el rol, escalonados')
+afirmar(/motion-reduce:\[--marco-cerrado:var\(--marco-abierto\)\]!/.test(marco) && (marco.match(/data-parte="revelado-nombre"/g) ?? []).length === 0 && marco.includes('data-parte="etiqueta"'), '  lo demás no cambia: con movimiento reducido un fundido; [C2-30f] en el revelado, sólo el rol (el nombre va en su etiqueta, arriba)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('T1 · Los títulos de volumen en el producto: el negro; el blanco para comparar')

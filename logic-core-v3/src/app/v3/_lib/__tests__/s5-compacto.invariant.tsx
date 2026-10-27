@@ -163,6 +163,12 @@ titulo('3 · Abajo de 1025 el contenido está COMPLETO')
  * referencia y puede aparecer en un atributo con otra forma.
  */
 const esReferencia = (t: string): boolean => /^[#/.]/.test(t)
+/**
+ * [C2-30f] Y los ENCUADRES de las fotos de Quiénes somos (`arriba`, `medio`): son la clave de una clase de posición del objeto, no
+ * texto de pantalla (el invariante de la sección ya los exime: `TEXTOS_DE_PANTALLA`). Se «encontraban» por casualidad en el marcado
+ * (`medio`, en la clase de peso del nombre de afuera, que se fue a la etiqueta de la foto).
+ */
+const noEsTextoDePantalla = (ruta: string): boolean => /\.encuadre$/.test(ruta)
 
 /**
  * [B1.2d B] Lo que se pinta SÓLO en el cliente, con su razón: [B1.2e] los nombres de las dos flechas del carrusel del Portfolio (eran los dos
@@ -174,7 +180,7 @@ const SOLO_EN_EL_CLIENTE: Readonly<Record<string, readonly string[]>> = { trabaj
 for (let i = 0; i < REGISTRO.length; i++) {
   const { id, contenido } = REGISTRO[i]
   const html = marcar(i, false)
-  const deLaSeccion = textosDe(contenido).filter((h) => !esReferencia(h.valor))
+  const deLaSeccion = textosDe(contenido).filter((h) => !esReferencia(h.valor) && !noEsTextoDePantalla(h.ruta))
   const enElCliente = SOLO_EN_EL_CLIENTE[id] ?? []
   afirmar(enElCliente.every((r) => deLaSeccion.some((h) => h.ruta === r)), `  \`${id}\`: cada excepción del cliente (${String(enElCliente.length)}) es una ruta del contenido`)
   const textos = deLaSeccion.filter((h) => !enElCliente.includes(h.ruta))

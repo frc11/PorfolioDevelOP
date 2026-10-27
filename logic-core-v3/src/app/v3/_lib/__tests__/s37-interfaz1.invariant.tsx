@@ -122,7 +122,8 @@ titulo('T1 · 3 · Dónde entra el sistema: las secciones migradas, y las excepc
 
 const MIGRADAS = [
   ['_secciones/quienes-somos/QuienesSomos.tsx', 1, 1],
-  ['_secciones/quienes-somos/equipo.tsx', 3, 0],
+  // [C2-30f] Dos: el rótulo del equipo y las descripciones (los nombres se fueron a la etiqueta de la foto).
+  ['_secciones/quienes-somos/equipo.tsx', 2, 0],
   ['_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx', 1, 1],
   // [B6] La sección nueva del Panel: la descripción de cada módulo entra por el canal desde los títulos que suben del contrato.
   ['_secciones/_contrato/TituloQueSube.tsx', 1, 0],
