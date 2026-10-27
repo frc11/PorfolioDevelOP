@@ -22,7 +22,7 @@ import * as THREE from 'three'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { RAIZ } from './s3-archivos'
 import { PULSO_DE_LA_PUNTA, TAU_DEL_FRENO, apareceLaRaya, fundidosDelTexto, inicioDeLaFlecha, recorridosDeLaPunta, salidaDeLaCapa, tauDelTrazo, type Animacion, type CuadroClave } from '../../_chrome/preloader/animaciones'
-import { LINEA, lineaNueva, pasoDeLaLinea, trazoDeLaFlecha, vistaDeLaLinea, type EstadoDeLaLinea } from '../../_chrome/preloader/linea'
+import { INICIO_DE_LA_FLECHA_MS, LINEA, MARGEN_DEL_RATO_QUIETO_MS, lineaNueva, pasoDeLaLinea, ratoQuieto, trazoDeLaFlecha, vistaDeLaLinea, type EstadoDeLaLinea } from '../../_chrome/preloader/linea'
 import { rayasDeLaFlecha, trazarLaFlecha } from '../../_chrome/preloader/trazado'
 import { laPreparacionPuede, permitirLaPreparacion, SEGURO_DE_LA_PREPARACION_MS } from '../entrada'
 import { calentarUnaParte, partesParaCalentar } from '../escena/gpu/partes'
@@ -138,22 +138,43 @@ const sinEstilosPorCuadro = (fuentes: readonly string[]): boolean =>
 afirmar(sinEstilosPorCuadro([CAPA, FLECHA]), 'la capa y la flecha no escriben `opacity`, `transform` ni el trazo por cuadro: el texto, la salida y cada raya van con `animar` (alineadas con el reloj, en el compositor)')
 controlPositivo('  el detector ve la capa de antes (las opacidades escritas por cuadro desde el rAF)', [`${CAPA}\nif (bienvenida.current !== null) bienvenida.current.style.opacity = String(v.bienvenida)`, FLECHA], sinEstilosPorCuadro)
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · La preparación de la escena, repartida: después de que la bienvenida apareció, y en partes')
+titulo('2 · La preparación de la escena, repartida: sólo en los ratos quietos del preloader, y en partes')
+
+// Los ratos quietos: la bienvenida aparecida y quieta (con margen antes de irse) y desde la flecha; nunca en un fundido.
+const FUNDIDOS: readonly (readonly [number, number])[] = [
+  [0, LINEA.bienvenidaEntraMs],
+  [LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs, INICIO_DE_LA_FLECHA_MS],
+]
+const quietosBien = (f: typeof ratoQuieto): boolean => {
+  for (let t = 0; t <= 9000; t += 10) {
+    const enFundido = FUNDIDOS.some(([a, b]) => t >= a && t < b)
+    if (enFundido && f(t, false)) return false
+    if (!f(t, true)) return false
+  }
+  return f(LINEA.bienvenidaEntraMs + 10, false) && f(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS - 10, false) && !f(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS + 10, false) && f(INICIO_DE_LA_FLECHA_MS + 10, false)
+}
+afirmar(quietosBien(ratoQuieto), `la escena se prepara sólo en los ratos quietos: con la bienvenida aparecida (de ${String(LINEA.bienvenidaEntraMs)} ms a ${String(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS)}, ${String(MARGEN_DEL_RATO_QUIETO_MS)} ms antes de que se vaya) y desde la flecha; nunca en el fundido de entrada, el de salida, el blanco ni la frase; con movimiento reducido, siempre`)
+controlPositivo('  el detector ve una preparación que sigue durante la salida de la bienvenida (lo que medía el teléfono)', ((t: number, r: boolean) => r || t >= LINEA.bienvenidaEntraMs) as typeof ratoQuieto, quietosBien)
+controlPositivo('  y una que arranca en pleno fundido de entrada (la de antes de C2-81)', ((t: number, r: boolean) => r || t >= 0) as typeof ratoQuieto, quietosBien)
 
 ;(globalThis as unknown as { window: unknown }).window = { __preloaderDelSitio: { activo: true, desde: 100 }, location: { search: '' } }
-const antesDePermitir = laPreparacionPuede(100 + LINEA.bienvenidaEntraMs)
-const conElSeguro = laPreparacionPuede(100 + SEGURO_DE_LA_PREPARACION_MS)
-permitirLaPreparacion()
-const despues = laPreparacionPuede(100 + LINEA.bienvenidaEntraMs)
-afirmar(!antesDePermitir && conElSeguro && despues, `con el preloader, la escena no se prepara hasta que la capa lo dice (la bienvenida terminó de aparecer); si la capa nunca llega, a los ${String(SEGURO_DE_LA_PREPARACION_MS / 1000)} s igual`)
+const sinCapa = { antes: laPreparacionPuede(100 + LINEA.bienvenidaEntraMs), seguro: laPreparacionPuede(100 + SEGURO_DE_LA_PREPARACION_MS) }
+permitirLaPreparacion(false)
+const enPausa = laPreparacionPuede(100 + SEGURO_DE_LA_PREPARACION_MS + 1000)
+permitirLaPreparacion(true)
+const abierta = laPreparacionPuede(100 + LINEA.bienvenidaEntraMs)
+afirmar(!sinCapa.antes && sinCapa.seguro && !enPausa && abierta, `con el preloader, la capa abre y cierra la preparación cuadro a cuadro (en pausa, ni al seguro); si la capa nunca llega, a los ${String(SEGURO_DE_LA_PREPARACION_MS / 1000)} s igual`)
 const PRECOMPILAR = sinComentarios(leer(`${V3}/_lib/escena/gpu/Precompilar.tsx`))
 const ENTRADA = sinComentarios(leer(`${V3}/_lib/entrada.ts`))
 const esperaBien = (p: string, en: string, c: string): boolean =>
-  /if \(e\.cuadros < CUADROS_DESPUES_DEL_LOGO\) return\s*if \(!laPreparacionPuede\(\)\) return\s*e\.compilado = true/.test(p) && /if \(preparacionPermitida \|\| entradaAbierta\(\)\) return true/.test(en) && /e\.t >= LINEA\.bienvenidaEntraMs\)\) \{\s*preparacion = true\s*permitirLaPreparacion\(\)/.test(c) && /calentarUnaParte\(gl, escena, camara, e\.partes\[e\.parte\]\)\s*e\.parte \+= 1[\s\S]*?return/.test(p)
-afirmar(esperaBien(PRECOMPILAR, ENTRADA, CAPA), '  en las fuentes: la compilación espera el permiso (sin preloader, siempre); la capa lo da cuando la bienvenida llegó a 1; el calentado, una parte por cuadro')
-controlPositivo('  el detector ve la compilación que no espera', [PRECOMPILAR.replace(/if \(!laPreparacionPuede\(\)\) return\s*/, ''), ENTRADA, CAPA] as const, ([p, en, c]) => esperaBien(p, en, c))
-controlPositivo('  y la capa que la suelta desde el arranque (en pleno fundido)', [PRECOMPILAR, ENTRADA, CAPA.replace('e.t >= LINEA.bienvenidaEntraMs', 'e.t >= 0')] as const, ([p, en, c]) => esperaBien(p, en, c))
+  /if \(e\.cuadros < CUADROS_DESPUES_DEL_LOGO\) return\s*if \(!laPreparacionPuede\(\)\) return\s*e\.compilado = true/.test(p) &&
+  /if \(e\.calentar\) \{\s*if \(!laPreparacionPuede\(\)\) return/.test(p) &&
+  /if \(preparacion === 'abierta' \|\| entradaAbierta\(\)\) return true\s*if \(preparacion === 'en-pausa'\) return false/.test(en) &&
+  /permitirLaPreparacion\(ratoQuieto\(e\.t, decision\.reducido\)\)/.test(c) &&
+  /calentarUnaParte\(gl, escena, camara, e\.partes\[e\.parte\]\)\s*e\.parte \+= 1[\s\S]*?return/.test(p)
+afirmar(esperaBien(PRECOMPILAR, ENTRADA, CAPA), '  en las fuentes: la compilación y CADA parte del calentado preguntan (sin preloader, siempre); la capa responde en cada cuadro con los ratos quietos')
+controlPositivo('  el detector ve la compilación que no espera', [PRECOMPILAR.replace(/if \(e\.cuadros < CUADROS_DESPUES_DEL_LOGO\) return\s*if \(!laPreparacionPuede\(\)\) return/, 'if (e.cuadros < CUADROS_DESPUES_DEL_LOGO) return'), ENTRADA, CAPA] as const, ([p, en, c]) => esperaBien(p, en, c))
+controlPositivo('  y un calentado que no para en los fundidos', [PRECOMPILAR.replace(/if \(e\.calentar\) \{\s*if \(!laPreparacionPuede\(\)\) return/, 'if (e.calentar) {'), ENTRADA, CAPA] as const, ([p, en, c]) => esperaBien(p, en, c))
 
 // El calentado en partes: cada malla en una sola parte; en el dibujo de una, sólo las suyas (y los grupos prendidos); después, todo como estaba.
 const escena = new THREE.Scene()
@@ -321,6 +342,15 @@ async function cableado(): Promise<void> {
   const separadosBien = (s: string, g: string): boolean => !/giroscopio|Giroscopio/.test(s) && !/giroscopio=si|prefers-reduced-motion/.test(g) && /fijarLaEntradaDelMoire\(INCLINACION_DEL_TELEFONO\)/.test(g) && /fijarLaEntradaDelMoire\(null\)/.test(g)
   afirmar(separadosBien(SONIDO, GIRO), 'el parlante ya no prende el movimiento (el prototipo `?giroscopio=si` se fue); el giroscopio no se niega con movimiento reducido (se prende a mano) y conecta la entrada del moiré (la suelta al callar)')
   controlPositivo('  el detector ve el prototipo en el parlante', [`${SONIDO}\nprenderElGiroscopio()`, GIRO] as const, ([s, g]) => separadosBien(s, g))
+
+  // [C2-81, intento 2] El logo del home cae al entrar aunque el velo de carga se haya ido antes de que la escena se monte (con el preloader, la
+  // carga queda pedida y cerrada hasta que entra la página): si no, no cae, no retiene el scroll y el scroll se suelta en el acto.
+  const CAIDA = sinComentarios(leer(`${V3}/_lib/escena/intro/CaidaDelLogo.tsx`))
+  const CARGA = sinComentarios(leer(`${V3}/_lib/carga.ts`))
+  const caeBien = (c: string, k: string): boolean =>
+    c.includes(`const sinVelo = !cargaLista() && !cargaPedida() && document.querySelector('[data-pieza="velo-de-carga"]') === null`) && /estado\.soltar = retenerElScroll\(\)/.test(c) && k.includes('export const cargaPedida = (): boolean => pedida')
+  afirmar(caeBien(CAIDA, CARGA), 'el logo del home cae al entrar (y retiene el scroll hasta llegar) también si el velo se fue antes de que la escena se monte: la carga pedida y cerrada por el preloader no es «sin velo»')
+  controlPositivo('  el detector ve la de antes (con la carga sólo pedida, el logo quieto y el scroll suelto)', [CAIDA.replace(' && !cargaPedida()', ''), CARGA] as const, ([c, k]) => caeBien(c, k))
   cerrar('s78-c2-81')
 }
 

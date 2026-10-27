@@ -1,7 +1,7 @@
 'use client'
 
 import { LoaderCircle } from 'lucide-react'
-import { useEffect, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
 
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
@@ -18,7 +18,7 @@ import { IDS_DEL_TITULAR_DEL_HERO } from '../../_lib/titulos3d/titular'
 import { fundidosDelTexto, salidaDeLaCapa } from './animaciones'
 import { defectoDelPreloader, type EnLaVentana, type VentanaConElPreloader } from './decision'
 import { FlechaDelSonido, type ManijaDeLaFlecha, type Objetivo } from './FlechaDelSonido'
-import { LINEA, entradaLista, lineaNueva, pasoDeLaLinea, type Etapa, type EstadoDeLaLinea } from './linea'
+import { entradaLista, lineaNueva, pasoDeLaLinea, ratoQuieto, type Etapa, type EstadoDeLaLinea } from './linea'
 import { animar, crearElReloj, pausarConLaPestana, tiempoDelReloj } from './reloj'
 import type { Lado, Punto, Renglon } from './trazado'
 
@@ -101,7 +101,9 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
   const corta = defectoDelPreloader() === 'punta-corta'
 
   // El reloj y lo que se ve (en el compositor), y cada cuadro un paso de la línea (lo que se decide). Al terminar, la entrada se abre.
-  useEffect(() => {
+  // [C2-81] En el efecto de layout: las animaciones se crean antes del primer pintado de la capa y arrancan con él (en uno pasivo esperaban
+  // al cuadro siguiente, detrás de lo que el hilo tuviera en cola: medido en el teléfono, 258 a 299 ms).
+  useLayoutEffect(() => {
     const ventana = window as VentanaDelBanco
     const banco = ventana.__preloaderDelBanco !== undefined
     if (banco) ventana.__preloaderMedido = { muestras: [], final: null }
@@ -129,7 +131,6 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
     let antes: number | null = null
     let etapaAntes: Etapa = e.etapa
     let iconoAntes = false
-    let preparacion = false
     let salida: Animation | null = null
     let rafId = 0
     const cuadro = (marca: number): void => {
@@ -138,11 +139,8 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
       const listo = todoListo(fuentes, escritorio)
       pasoDeLaLinea(e, antes === null ? 0 : ahora - antes, listo, decision.reducido, sinFreno)
       antes = ahora
-      // La bienvenida terminó de aparecer: la escena se puede preparar (mientras el texto está quieto).
-      if (!preparacion && (decision.reducido || e.t >= LINEA.bienvenidaEntraMs)) {
-        preparacion = true
-        permitirLaPreparacion()
-      }
+      // La escena se prepara sólo en los ratos quietos (la bienvenida aparecida y quieta; desde la flecha): ningún fundido se traba.
+      permitirLaPreparacion(ratoQuieto(e.t, decision.reducido))
       if (enElHilo) for (const a of textos) a.currentTime = e.t
       for (const m of manijas.current) {
         m?.medir()

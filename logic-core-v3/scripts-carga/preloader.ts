@@ -95,7 +95,7 @@ const inicio = (conPreloader: boolean): string => `(() => {
     const cubierta = document.querySelector('[data-pieza="preloader"]')
     const velo = document.querySelector('[data-pieza="velo-de-carga"]')
     const bienvenida = document.querySelector('[data-pieza="preloader"] p')
-    log.push({ t: ahora, dt: antes === null ? 0 : ahora - antes, y: window.scrollY, cubierta: cubierta !== null && getComputedStyle(cubierta).display !== 'none' && getComputedStyle(cubierta).visibility !== 'hidden' && Number(getComputedStyle(cubierta).opacity) > 0, velo: velo !== null, v3: document.querySelector('[data-v3]') !== null, bienvenida: bienvenida && bienvenida.parentElement ? Number(getComputedStyle(bienvenida.parentElement).opacity) : NaN })
+    log.push({ t: ahora, dt: antes === null ? 0 : ahora - antes, y: window.scrollY, cubierta: cubierta !== null && getComputedStyle(cubierta).display !== 'none' && getComputedStyle(cubierta).visibility !== 'hidden' && Number(getComputedStyle(cubierta).opacity) > 0, velo: velo !== null, v3: document.querySelector('[data-v3]') !== null, bienvenida: bienvenida && bienvenida.parentElement ? Number(getComputedStyle(bienvenida.parentElement).opacity) : NaN, bloqueado: window.__preloaderDelSitio ? window.__preloaderDelSitio.bloqueado : null })
     antes = ahora
     if (log.length > 4000) log.splice(0, 2000)
     requestAnimationFrame(cuadro)
@@ -113,6 +113,8 @@ interface CuadroDelBanco {
   readonly v3: boolean
   /** La opacidad de la bienvenida que ve el hilo principal. */
   readonly bienvenida: number
+  /** [C2-81] El bloqueo del scroll del preloader (`null`: sin preloader en este documento). */
+  readonly bloqueado: boolean | null
 }
 interface MuestraDelPreloader {
   readonly t: number
@@ -311,6 +313,8 @@ async function unaEntrada(ancho: number, alto: number, ruta: string): Promise<vo
     // La frase, mientras está (después se desmonta).
     const frase = await p.waitForSelector('[data-pieza="preloader"] button', { timeout: 30000, state: 'attached' }).then((h) => h.textContent()).catch(() => null)
     const m = await esperarElFinal(a, ancho, alto)
+    // [C2-81] El logo del home apenas se fue el blanco: tiene que estar cayendo (si está quieto en su lugar, no retiene el scroll).
+    const caida = ruta === '/v3' ? await p.evaluate(() => (window as unknown as { __caidaDelBanco?: () => { u: number } }).__caidaDelBanco?.() ?? null) : null
     const c = await cuadros(p)
     ver(c.find((x) => x.v3)?.cubierta === true, `${tag} · la primera entrada del día lo muestra desde el primer cuadro (el primero con la página en el documento ya está tapado)`, `${String(c.filter((x) => x.cubierta).length)} cuadros con la cubierta`)
     if (m === null || m.final === null) {
@@ -358,9 +362,12 @@ async function unaEntrada(ancho: number, alto: number, ruta: string): Promise<vo
     const movidoAntes = (await cuadros(p)).filter((x) => x.t < finEnLaPagina).some((x) => x.y > 0)
     ver(!movidoAntes, `${tag} · ${movil ? 'el dedo' : 'la rueda'} no mueve la página mientras está el preloader`)
     const seMovio = await esperarElScroll(a, ancho, alto)
-    const despues = seMovio - finEnLaPagina
+    // [C2-81] Cuándo se soltó, del registro por cuadro (el bloqueo del preloader), no de cuándo el banco volvió a empujar: con el trace,
+    // el banco tarda ~1,5 s en volver a la rueda, y un scroll que se soltó en el acto se leía como «a los 1600 ms».
+    const soltado = (await cuadros(p)).find((x) => x.t >= finEnLaPagina && x.bloqueado === false)?.t ?? Number.NaN
+    const despues = soltado - finEnLaPagina
     const minimo = ancho >= 1024 ? 2000 : 0
-    ver(Number.isFinite(despues) && despues >= minimo && despues <= 6800, `${tag} · el scroll se suelta cuando entra lo que llega con la entrada (${ancho >= 1024 ? 'el logo que cae o el título' : 'abajo de 1024, enseguida'})`, `${despues.toFixed(0)} ms después de irse el blanco`)
+    ver(Number.isFinite(despues) && Number.isFinite(seMovio) && seMovio >= soltado && despues >= minimo && despues <= 6800, `${tag} · el scroll se suelta cuando entra lo que llega con la entrada (${ancho >= 1024 ? 'el logo que cae o el título' : 'abajo de 1024, enseguida'})`, `se soltó ${despues.toFixed(0)} ms después de irse el blanco; la rueda movió la página a los ${(seMovio - finEnLaPagina).toFixed(0)} ms${caida === null ? '' : ` · el logo al irse el blanco: ${caida.u < 0 ? 'quieto en su lugar (no cae)' : `cayendo (u ${caida.u.toFixed(2)})`}`}`)
     const t = tirones(await cuadros(p), finEnLaPagina)
     console.log(`       ${tag} · tirones con el preloader: ${String(t.largos)} cuadros de más de 50 ms en los 3 s de la entrada (el peor, ${t.peor.toFixed(0)} ms)`)
     await p.screenshot({ path: path.join(SALIDA, `${String(ancho)}${ruta.replace(/\//g, '-')}-despues.png`) })

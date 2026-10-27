@@ -2,8 +2,12 @@
 
 import { useEffect, useSyncExternalStore } from 'react'
 
-import { hayMovimiento, retomarElMovimiento } from '../../_lib/escena/movimiento'
+import { INCLINACION_DEL_TELEFONO } from '../../_lib/escena/giroscopio'
+import { hayMovimiento, movimientoGuardado, retomarElMovimiento } from '../../_lib/escena/movimiento'
 import { ControlDelMovimiento } from './ControlDelMovimiento'
+
+/** Lo que lee el banco (`scripts-carga/movimiento.ts`): lo que la cámara recibe del sensor y lo guardado en la sesión. */
+type VentanaDelBanco = Window & { __entornoDeLaEscena?: string; __movimientoDelBanco?: () => { readonly x: number; readonly y: number; readonly activa: boolean; readonly estado: string; readonly guardado: string | null } }
 
 /**
  * [C2-81] LA ESQUINA DEL MOVIMIENTO — arriba a la derecha, enfrente del parlante (`EsquinaDelSonido`), sólo donde va el movimiento
@@ -16,6 +20,15 @@ const sinCambios = (): (() => void) => () => undefined
 export function EsquinaDelMovimiento(): React.JSX.Element | null {
   const hay = useSyncExternalStore(sinCambios, hayMovimiento, () => false)
   useEffect(() => (hay ? retomarElMovimiento() : undefined), [hay])
+  // Sólo con el banco de la escena puesto.
+  useEffect(() => {
+    const w = window as VentanaDelBanco
+    if (typeof w.__entornoDeLaEscena !== 'string') return undefined
+    w.__movimientoDelBanco = () => ({ x: INCLINACION_DEL_TELEFONO.x, y: INCLINACION_DEL_TELEFONO.y, activa: INCLINACION_DEL_TELEFONO.activa, estado: INCLINACION_DEL_TELEFONO.estado, guardado: movimientoGuardado() })
+    return () => {
+      delete w.__movimientoDelBanco
+    }
+  }, [])
   if (!hay) return null
   return (
     <div data-pieza="esquina-del-movimiento" className="pointer-events-none fixed top-[max(var(--spacing-4),env(safe-area-inset-top))] right-[max(var(--spacing-4),env(safe-area-inset-right))] z-[var(--z-cabecera)] escritorio:hidden">

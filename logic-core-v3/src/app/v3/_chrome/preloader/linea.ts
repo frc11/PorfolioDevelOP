@@ -53,6 +53,15 @@ export const LINEA_REDUCIDA = { bienvenidaMs: 350, fraseMs: 650, salidaMs: 150 }
 export const INICIO_DE_LA_FLECHA_MS = LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs + LINEA.bienvenidaSaleMs + LINEA.blancoMs + LINEA.fraseEntraMs
 export const FIN_DE_LA_BIENVENIDA_MS = LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs + LINEA.bienvenidaSaleMs
 
+/**
+ * [C2-81] LOS RATOS QUIETOS: cuándo la escena se puede preparar (`entrada.ts`, `Precompilar`) sin trabar un fundido. La bienvenida ya
+ * aparecida y quieta (con un margen antes de que se vaya: una parte del calentado puede tardar) y, desde que arranca la flecha, siempre (la
+ * flecha es la espera: frena si falta la carga). Con movimiento reducido no hay fundidos largos: siempre.
+ */
+export const MARGEN_DEL_RATO_QUIETO_MS = 200
+export const ratoQuieto = (t: number, reducido: boolean): boolean =>
+  reducido || (t >= LINEA.bienvenidaEntraMs && t < LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS) || t >= INICIO_DE_LA_FLECHA_MS
+
 /** El caso normal entero, con la carga lista desde el principio. */
 export const DURACION_NORMAL_MS = INICIO_DE_LA_FLECHA_MS + LINEA.flechaMs + LINEA.salidaMs
 export const DURACION_REDUCIDA_MS = LINEA_REDUCIDA.bienvenidaMs + LINEA_REDUCIDA.fraseMs + LINEA_REDUCIDA.salidaMs
