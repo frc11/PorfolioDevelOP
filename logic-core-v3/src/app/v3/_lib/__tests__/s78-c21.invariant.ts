@@ -7,13 +7,12 @@
  *       viaje la espera antes del velo y del título);
  *   2 · el Portfolio se suelta desde el clic de un viaje que sale de él: el destino fuera del pin y la salida de una;
  *   3 · el desplegable de Servicios: el borde izquierdo, el resaltado que se queda en «Servicios» y el tic de cada ítem;
- *   4 · las grietas de la página esperan al velo quieto (la causa probable de la regresión de la píldora);
+ *   4 · (las grietas de la página se sacaron en L1: el efecto se rediseña más adelante);
  *   5 · el chat: el geométrico, los colores del home (los de los tokens), las zonas cruciales y el widget del sitio vivo sin tocar.
  */
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import * as THREE from 'three'
 
 import type { CompanionOverrides } from '@/modules/chatbot/components/LogicCompanion'
 
@@ -21,15 +20,8 @@ import { APARIENCIA_DEL_CHAT, COLORES_DEL_CHAT, LINEA_DEL_CHAT, ZONAS_SIN_CHAT, 
 import { destinoFueraDelPortfolio } from '../../_secciones/trabajos/portfolio/useOrdenDeLaEscena'
 import { ADENTRO, AFUERA, recorridoDelOrden } from '../../_secciones/trabajos/portfolio/orden'
 import { PANTALLAS_POR_PASO, centroDelPaso, pxDeLaSalida, scrollDelPx } from '../../_secciones/trabajos/portfolio/pasos'
-import { dispararLasGrietas } from '../escena/cristal/grietas'
-import { uniformesDeLasGrietas } from '../escena/cristal/grietasDelVidrio'
-import { crearLasGrietas } from '../escena/cristal/grietasEnVivo'
 import { ESPERA_MAXIMA_DE_LA_LLEGADA_MS, SIN_CUADROS_MS, TOLERANCIA_DE_LA_LLEGADA, desvioDeLaPose, escenaLlegada, seVeLaSalaEn, type EstadoDeLaLlegada } from '../escena/llegadaDeLaEscena'
-import { CAMERA_FOV, ORBIT_TARGET_Y } from '../escena/probeScene'
-import { COMPOSICION_INICIAL } from '../escena/ruta/pistaDeLaIntro'
-import { apilarElPreset, type PresetDeLaEscena } from '../escena/ruta/preset'
 import type { PoseDeCinco } from '../escena/viaje'
-import { retenerElQuieto } from '../veloDeNavegacion'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const RAIZ = process.cwd()
@@ -128,36 +120,6 @@ controlPositivo('  el detector VE el resaltado que volvía al activo', barra.rep
 const ticBien = (d: string): boolean => /data-pieza="desplegable-enlace".*onPointerEnter=\{\(\) => sonar\('tic'\)\} onFocus=\{\(\) => sonar\('tic'\)\}/.test(d) && /import \{ sonar \} from '\.\.\/\.\.\/_lib\/sonido\/bus'/.test(d)
 afirmar(ticBien(desplegable), 'cada ítem de la lista hace el tic de la barra (el bus: con el sonido apagado no suena nada)')
 controlPositivo('  el detector VE la lista muda', desplegable.replace(" onPointerEnter={() => sonar('tic')}", ''), ticBien)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · La píldora: las grietas de la página no se arman en medio del velo (esperan al quieto)')
-
-const camaraDe = (pose: { readonly angleDeg: number; readonly height: number; readonly distance: number }): THREE.PerspectiveCamera => {
-  const cam = new THREE.PerspectiveCamera(CAMERA_FOV, 1440 / 900, 0.1, 500)
-  const a = (pose.angleDeg * Math.PI) / 180
-  cam.position.set(Math.sin(a) * pose.distance, pose.height, Math.cos(a) * pose.distance)
-  cam.lookAt(0, ORBIT_TARGET_Y, 0)
-  cam.updateMatrixWorld()
-  cam.updateProjectionMatrix()
-  return cam
-}
-const BASE: PresetDeLaEscena = { id: 'base', tramos: { intro: '[data-x]', pie: null }, pista: null, noche: 'noche', acento: 'web', variante: null }
-const sacar = apilarElPreset(BASE)
-const u = uniformesDeLasGrietas()
-const g = crearLasGrietas(u, () => new THREE.Color(1, 1, 1))
-const CAM = camaraDe(COMPOSICION_INICIAL)
-const soltarElQuieto = retenerElQuieto()
-dispararLasGrietas('avance', 'base')
-for (let k = 0; k < 10; k += 1) g.cuadro(CAM, 1 / 60)
-const conVelo = { duena: g.estado().duena, formacion: u.uGrietas.value.x }
-soltarElQuieto()
-for (let k = 0; k < 10; k += 1) g.cuadro(CAM, 1 / 60)
-const sinVelo = { duena: g.estado().duena, formacion: u.uGrietas.value.x }
-g.soltar()
-sacar()
-const grietasBien = (a: typeof conVelo, b: typeof sinVelo): boolean => a.duena === null && a.formacion === 0 && b.duena === 'base' && b.formacion > 0
-afirmar(grietasBien(conVelo, sinVelo), `con el velo en curso (la píldora retiene el quieto) el pedido espera (dueña: ${String(conVelo.duena)}); con el velo quieto se toma (${String(sinVelo.duena)}) y se forman`)
-controlPositivo('  el detector VE unas grietas armadas con el velo en curso', [sinVelo, sinVelo] as const, ([a, b]) => grietasBien(a, b))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · El chat: el geométrico, los colores del home, las zonas cruciales y el sitio vivo sin tocar')
