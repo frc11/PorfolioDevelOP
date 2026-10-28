@@ -28,11 +28,6 @@ export const TITULO_DE_PAGINA: PresetDelTitulo = { fuentes: ['archivo-125-800', 
 export const CARA_DEL_DOM: Readonly<Record<FuenteDePagina, { readonly familia: string; readonly peso: number }>> = {
   'archivo-125-800': { familia: 'var(--font-v3-pagina-125-800)', peso: 800 },
   'archivo-125-300': { familia: 'var(--font-v3-pagina-125-300)', peso: 300 },
-  'archivo-75-800': { familia: 'var(--font-v3-pagina-75-800)', peso: 800 },
-  'archivo-75-900': { familia: 'var(--font-v3-pagina-75-900)', peso: 900 },
-  'archivo-75-500': { familia: 'var(--font-v3-pagina-75-500)', peso: 500 },
-  'archivo-125-200': { familia: 'var(--font-v3-pagina-125-200)', peso: 200 },
-  'archivo-125-500': { familia: 'var(--font-v3-pagina-125-500)', peso: 500 },
   'archivo-125-400': { familia: 'var(--font-v3-pagina-125-400)', peso: 400 },
 }
 

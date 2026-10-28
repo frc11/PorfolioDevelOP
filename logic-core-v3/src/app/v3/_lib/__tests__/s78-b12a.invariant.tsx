@@ -643,7 +643,6 @@ controlPositivo('  y el título de la tinta del entorno', delTitulo.replace("mat
 // T5 · La legibilidad sin velo: `peso` (la parte liviana un paso más pesada: 125/400). `luz`, `motas` y `tamano` se probaron y se sacaron.
 // [L6] Fija: no hay `?legibilidad=` ni `data-legibilidad` ni la otra opción.
 const PARTES_DE_LA_1: readonly [FuenteDePagina, FuenteDePagina] = ['archivo-125-800', 'archivo-125-300']
-const sinComentarios = (c: string): string => c.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
 const legibilidadBien = (titulo: string, hoja: string, marco: string, fuentes: readonly [FuenteDePagina, FuenteDePagina]): boolean =>
   MAS_PESADA['archivo-125-300'] === 'archivo-125-400' && fuentes[1] === 'archivo-125-400' && fuentes[0] === 'archivo-125-800' &&
   titulo.includes('const PRESET = { ...TITULO_DE_PAGINA, fuentes: fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes) }') && !/legibilidad(DeLaUrl|DeLaBandera)|LEGIBILIDAD_POR_DEFECTO|get\('legibilidad'\)/.test(titulo + marco) &&
@@ -674,8 +673,8 @@ const unaLinea = (html: string): boolean => {
 afirmar(unaLinea(conPartes('IA y automatizaciones')), '  el `h1` va en una línea (nunca una palabra sola en un renglón) y su tamaño es la parte del ancho entre su ancho en em: el servidor ya lo pinta así (sin medir el DOM ni saltar al cargar)')
 controlPositivo('  el detector ve el título de B12a.4 (dos renglones, del tamaño del nivel)', conPartes('IA y automatizaciones').replace('whitespace-nowrap', 'flex flex-col'), unaLinea)
 const partesDelAncho = (c: string): boolean =>
-  (c.match(/'@container flex w-full flex-col items-center gap-\[var\(--spacing-4\)\] \[--ancho-del-titulo:97cqw\]/g) ?? []).length === 3 && c.includes('escritorio:[--ancho-del-titulo:74cqw]')
-afirmar(partesDelAncho(composicion), '  la parte del ancho, de la columna (el contenedor del título): el 74 % en la 1 desde 1024 (del cuadro, pedido de 60 a 75 %), el 97 % de una columna de costado y del ancho útil abajo de 1024 (pedido: al menos 85); medido en el sitio con los tres nombres (`scripts-carga/composicion.ts`)')
+  (c.match(/const COLUMNA = '@container flex w-full flex-col items-center gap-\[var\(--spacing-4\)\] \[--ancho-del-titulo:97cqw\]/g) ?? []).length === 1 && !c.includes('--ancho-del-titulo:74cqw') && !c.includes('--ancho-del-titulo:80cqw')
+afirmar(partesDelAncho(composicion), '  la parte del ancho, de la columna (el contenedor del título): el 97 % de una columna de costado y del ancho útil abajo de 1024 (pedido: al menos 85); la única composición (L6), sin el 74 y el 80 % de las otras')
 controlPositivo('  el detector ve la columna sin contenedor (el título del tamaño del cuadro entero)', composicion.split('@container ').join(''), partesDelAncho)
 
 // ═══════════════════════════════════════════════════════════════════════════
