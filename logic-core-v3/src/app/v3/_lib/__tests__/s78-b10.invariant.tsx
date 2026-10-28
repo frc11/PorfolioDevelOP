@@ -328,8 +328,8 @@ controlPositivo('  el detector ve el FAQ antes del pie', cierreHtml.replace('dat
 afirmar(!renderToStaticMarkup(<CierreDeLaPagina preset={PRESET_DE_LA_BASE} />).includes('data-faq-del-pie'), '  sin preguntas, no hay FAQ')
 const base = leer('pagina-base/page.tsx')
 const cierre = sinComentarios(leer('_secciones/cierre/Cierre.tsx'))
-const montadoBien = (b: string, c: string): boolean => b.includes('<CierreDeLaPagina preset={PRESET} preguntas={PREGUNTAS_DE_LA_BASE} />') && /<\/CoreografiaEnTodoAncho>\s*(\{\}\s*)?<FaqDelPie preguntas=\{PREGUNTAS_DEL_HOME\} pie=\{`#\$\{seccion\.id\}`\} colgada \/>\s*<\/Seccion>/.test(c)
-afirmar(montadoBien(base, cierre), 'la página base le pasa sus preguntas al cierre; el home monta el FAQ en su pie, después del pie, con las suyas')
+const montadoBien = (b: string, c: string): boolean => b.includes('<CierreDeLaPagina preset={PRESET} preguntas={PREGUNTAS_DE_LA_BASE} />') && /<FaqDelPie preguntas=\{PREGUNTAS_DEL_HOME\} pie=\{`#\$\{seccion\.id\}`\} lugar="antes" \/>\s*(\{\}\s*)?<CoreografiaEnTodoAncho>/.test(c) && /<\/CoreografiaEnTodoAncho>\s*(\{\}\s*)?<FaqDelPie preguntas=\{PREGUNTAS_DEL_HOME\} pie=\{`#\$\{seccion\.id\}`\} colgada lugar="despues" \/>\s*<\/Seccion>/.test(c)
+afirmar(montadoBien(base, cierre), 'la página base le pasa sus preguntas al cierre; el home monta el FAQ en su pie, después del pie, con las suyas ([L5] y en el teléfono, antes del pie)')
 controlPositivo('  el detector ve el home sin el FAQ', [base, cierre.replace(/<FaqDelPie[^>]*\/>/, '')] as const, ([b, c]) => montadoBien(b, c))
 
 // La REGLA DE ALTURAS: el escenario va dentro de la pantalla del pie y la lista cuelga fuera del layout; el final mide el LAYOUT.

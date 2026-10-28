@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { hayBanco } from '../../_lib/escena/entorno'
 import { POSES_DEL_FINAL, huecoDelLogo } from '../../_lib/escena/finalDelRecorrido'
 import { ATRIBUTO_DEL_FAQ, BLOQUES_DEL_FAQ, BOTON_EN_VIVO, FAQ_EN_VIVO, asentar, avisarAlFaq, faseDelFaq, faseEn, nivelesDelFaq, rearmarElBotonDelFaq, suscribirAlFaq, type FaseDelFaq, type IdDelBloqueDelFaq } from '../../_lib/pie3d/faqDelPie'
+import { useHundido } from '../../_lib/pie3d/registro'
 import { SALIDA_EN_VIVO } from '../../_lib/pie3d/salidas'
 import { IconoDeMarca } from '../../_secciones/cierre/IconosDeMarca'
 import { Envoltorio } from '../layout/Envoltorio'
@@ -71,9 +72,11 @@ function columnasDelPie(selector: string): HTMLElement[] {
 const sinCambios = (): (() => void) => () => undefined
 
 /** [C2-71] El nivel de un bloque de volumen para la escena (sin el bloque anotado, nada). */
-function nivelDelBloque(id: IdDelBloqueDelFaq, nivel: number): void {
+function nivelDelBloque(id: IdDelBloqueDelFaq, nivel: number, cambio: number | null = null): void {
   const b = BLOQUES_DEL_FAQ.get(id)
-  if (b !== undefined) b.nivel = nivel
+  if (b === undefined) return
+  b.nivel = nivel
+  b.cambio = cambio
 }
 
 type VentanaDelBanco = Window & {
@@ -109,6 +112,8 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
     rearmarElBotonDelFaq()
   }, [])
   const medidas = useMedidasDelForm(pie, volumen)
+  // [L5] El WhatsApp de volumen se hunde con el mouse, el foco y al apretar, como el del pie (la escena lo lee: `faqDeVolumen.ts`).
+  useHundido(whatsapp, volumen)
 
   // El cuadro del FAQ: corre sólo mientras algo cambia (la entrada, la salida, una respuesta, el WhatsApp que sube) y le escribe el
   // hundimiento a cada bloque (y al pie plano). Se despierta con cada aviso del reloj y con cada pregunta tocada.
@@ -145,7 +150,9 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
       if (deVolumen.current) {
         // [C2-71] Las placas las mueve la escena: sólo su nivel.
         nivelDelBloque('preguntas', niveles.faq)
-        nivelDelBloque('respuesta', Math.min(niveles.faq, paso.nivel))
+        // [L5] Con el FAQ arriba, el cambio de la respuesta es el del formulario (la escena lo hace con su tiempo).
+        const enElCambio = niveles.faq >= 1 && paso.cambio !== null
+        nivelDelBloque('respuesta', enElCambio ? niveles.faq : Math.min(niveles.faq, paso.nivel), enElCambio ? paso.cambio : null)
         nivelDelBloque('whatsapp', Math.min(niveles.faq, delWhatsApp))
       } else {
         aplicarElNivel(izquierda.current, niveles.faq)
@@ -219,6 +226,8 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
                   <Titular nivel="titulo-m" como="h2" id={IDS_DEL_FAQ.titulo} className="text-balance">
                     {TEXTOS_DEL_FAQ.titulo}
                   </Titular>
+                  {/* [L5] La introducción, entre el título y las preguntas (el bloque ya no queda vacío abajo: lote2/17). */}
+                  <Cuerpo className="text-pretty">{TEXTOS_DEL_FAQ.intro}</Cuerpo>
                   <ul role="list" className="flex flex-col">
                     {preguntas.map((p, i) => (
                       <li key={p.pregunta} className="border-t border-current/15 first:border-t-0">
@@ -245,7 +254,8 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
             <div className={cn('col-start-3 flex flex-col justify-between gap-[var(--spacing-4)]', !volumen && 'max-w-[calc(var(--spacing-20)*5)]')}>
               <BloqueDelFaq id="respuesta" caja={derecha} volumen={volumen} estilo={CERRADO} medidas={medidas.respuesta}>
                 {/* Lo que sube se anuncia (el aviso, o la respuesta que tocaste). */}
-                <div aria-live="polite" className="p-[var(--spacing-6)]">
+                {/* [L5] El aviso, centrado en su bloque (alto y ancho: lote2/18); las respuestas, desde arriba. */}
+                <div aria-live="polite" className={cn('p-[var(--spacing-6)]', mostrado === 'aviso' && 'flex min-h-[inherit] flex-col justify-center text-center')}>
                   <div hidden={mostrado !== 'aviso'}>
                     <Titular nivel="titulo-m" como="p" peso="liviano" className="text-balance">
                       {TEXTOS_DEL_FAQ.aviso}

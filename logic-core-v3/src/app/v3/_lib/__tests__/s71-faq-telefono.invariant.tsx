@@ -77,7 +77,8 @@ const faqDelPie = sinComentarios(leer('_componentes/faq/FaqDelPie.tsx'))
 const datosEnLosDos = (f: string): boolean => {
   const i = f.indexOf('application/ld+json')
   const j = f.indexOf('{escenario ?')
-  return i > 0 && j > i && f.indexOf('<FaqEnLista') > j
+  // [L5] La lista de después del pie (la última) se elige con los datos ya escritos; la de antes del pie (el teléfono del home) no los lleva.
+  return i > 0 && j > i && f.lastIndexOf('<FaqEnLista') > j
 }
 afirmar(datosEnLosDos(faqDelPie), '  los datos se escriben antes de elegir el modo (los lleva también la lista)')
 controlPositivo('  el detector ve los datos sólo en el escenario', faqDelPie.replace('application/ld+json', 'x').replace('{escenario ?', '{escenario ? application/ld+json'), datosEnLosDos)

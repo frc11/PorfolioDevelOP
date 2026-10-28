@@ -139,7 +139,9 @@ export function huecosDeLaCaida(c: CaidaDelPie, s: number): number {
     }
     if (!p.conSombra || baja <= 0 || abre <= 0) continue
     // [C2-71] Adentro de la silueta abierta de su columna: la plataforma la lleva (sin su hueco).
-    if (porColumnas && enColumnas.abre > 0 && adentroDeSuColumna(c, i, enColumnas.abre)) continue
+    // [L5] Y con la columna ya hundida y su piso cerrado, ninguna: el hueco de cada pieza se volvía a abrir sobre la pieza hundida y sus
+    // paredes quedaban paradas en el piso, encima del FAQ («los recuadros hundidos quedan en el aire», lote2/15 y 16).
+    if (porColumnas && (enColumnas.abre > 0 ? adentroDeSuColumna(c, i, enColumnas.abre) : enColumnas.baja > 0)) continue
     huecos[k].set(hx, hz, hma * sobra, hmf * sobra)
     // (la silueta, el radio, lo hondo ahora y la franja debajo de la pieza: de su borde cercano al canto, la parte de su largo que ya tapa).
     const lejos = ((col.y1 - col.y0) - p.dy) * col.mpp

@@ -46,13 +46,15 @@ export function Cierre({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     // El hueco del logo en E, para las dos columnas del pie: sale de la pose, como en «Por qué develOP».
     <Seccion seccion={seccion} className="grid min-h-svh" style={{ ['--hueco-del-pie' as string]: `${huecoDelLogo(POSES_DEL_FINAL.pie.distance).toFixed(1)}svh`, ['--aire-del-pie' as string]: 'var(--spacing-6)', ['--arriba-del-pie' as string]: 'var(--spacing-2)' }}>
+      {/* [L5] En el teléfono y la tablet, el FAQ primero y después el pie (en su pantalla entera). */}
+      <FaqDelPie preguntas={PREGUNTAS_DEL_HOME} pie={`#${seccion.id}`} lugar="antes" />
       <CoreografiaEnTodoAncho>
-        <Bloque patron="P2" anclaje="seccion" className="grid">
+        <Bloque patron="P2" anclaje="seccion" className="grid max-escritorio:min-h-svh">
           {(progreso: Progreso) => <PieDelFinal seccion={seccion} progreso={progreso} />}
         </Bloque>
       </CoreografiaEnTodoAncho>
-      {/* [B10] El FAQ, después del pie: en esta pantalla, con gatillo (desde 1024); abajo, en lista colgada después de la sección. */}
-      <FaqDelPie preguntas={PREGUNTAS_DEL_HOME} pie={`#${seccion.id}`} colgada />
+      {/* [B10] El FAQ, después del pie: en esta pantalla, con gatillo (desde 1024); con menos movimiento, en lista colgada después de la sección. */}
+      <FaqDelPie preguntas={PREGUNTAS_DEL_HOME} pie={`#${seccion.id}`} colgada lugar="despues" />
     </Seccion>
   )
 }
