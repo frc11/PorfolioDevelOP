@@ -10,6 +10,8 @@
  *     · apagarlo suelta los dos (el moiré vuelve al mouse);
  *     · dura la sesión: prendido y recargado, vuelve prendido;
  *   390, iOS con el permiso concedido (`requestPermission` de mentira): lo pide en el toque y mueve;
+ *   [L6] 390, recargado con el movimiento prendido y `requestPermission` que concede sin gesto (Chrome): vuelve prendido SIN otro toque
+ *     (se pide una vez, sin gesto); y con uno que lo exige desde un gesto (iOS): queda apagado esperando el toque, y el toque lo prende;
  *   390, iOS con el permiso NEGADO: el botón queda apagado y nada se mueve (ni la cámara ni el moiré);
  *   390, con movimiento reducido: arranca apagado; a mano se prende (el moiré lo sigue; la cámara, con la física de la escena apagada,
  *     no: como el mouse);
@@ -20,6 +22,7 @@
  *   CONTROL=sin-moire …            el moiré no sigue a la inclinación (TIENE que dar FALLA en el moiré)
  *   CONTROL=sin-permiso …          escucha aunque nieguen el permiso (TIENE que dar FALLA en el permiso negado)
  *   CONTROL=prendido-por-defecto … arranca prendido (TIENE que dar FALLA en el apagado por defecto)
+ *   CONTROL=sin-reintento …        al recargar no intenta sin gesto (TIENE que dar FALLA en «recargado vuelve prendido» con el permiso concedido)
  *
  * Los defectos van en `window.__defectosDelMovimiento` (nunca la URL; `_lib/escena/giroscopio.ts`). Sin correr al escribirse: lo corre el
  * orquestador. Fotos en la salida del banco (`salidaDelBanco('movimiento')`).
@@ -44,14 +47,14 @@ const ver = (bien: boolean, que: string, detalle = ''): void => {
   if (!bien) fallas.push(que)
 }
 
-type Permiso = 'android' | 'concedido' | 'negado'
+type Permiso = 'android' | 'concedido' | 'negado' | 'con-gesto'
 
 const inicio = (permiso: Permiso): string => `(() => {
   window.__name = window.__name || ((f) => f)
   window.__entornoDeLaEscena = 'producto'
   try { sessionStorage.setItem('home:intro', '1') } catch (e) {}
   ${CONTROL === '' ? '' : `window.__defectosDelMovimiento = ${JSON.stringify(CONTROL)}`}
-  ${permiso === 'android' ? '' : `window.__permisosPedidos = 0; DeviceOrientationEvent.requestPermission = () => { window.__permisosPedidos += 1; return Promise.resolve(${JSON.stringify(permiso === 'concedido' ? 'granted' : 'denied')}) }`}
+  ${permiso === 'android' ? '' : permiso === 'con-gesto' ? `window.__permisosPedidos = 0; window.__pedidosSinGesto = 0; DeviceOrientationEvent.requestPermission = () => { window.__permisosPedidos += 1; if (navigator.userActivation && navigator.userActivation.isActive) return Promise.resolve('granted'); window.__pedidosSinGesto += 1; return Promise.reject(new DOMException('hace falta un gesto', 'NotAllowedError')) }` : `window.__permisosPedidos = 0; DeviceOrientationEvent.requestPermission = () => { window.__permisosPedidos += 1; return Promise.resolve(${JSON.stringify(permiso === 'concedido' ? 'granted' : 'denied')}) }`}
   // El sensor de mentira: una lectura cada 16 ms, siempre (como uno de verdad); \`inclinar\` mueve lo que lee.
   window.__lectura = { beta: 60, gamma: 0 }
   setInterval(() => {
@@ -252,6 +255,36 @@ async function ios(permiso: 'concedido' | 'negado'): Promise<void> {
 }
 
 
+/**
+ * [L6] El movimiento prendido y la página recargada, donde hay que pedir permiso: Chrome lo concede sin gesto (vuelve prendido sin otro
+ * toque: se pide UNA vez, sin gesto); iOS lo exige desde un gesto (queda apagado esperando el toque, y el toque lo prende).
+ */
+async function recargado(permiso: 'concedido' | 'con-gesto'): Promise<void> {
+  const tag = `390 recargado (${permiso === 'concedido' ? 'permiso sin gesto, como Chrome' : 'permiso desde un gesto, como iOS'})`
+  const a = await abrir(390, 844, permiso)
+  try {
+    await cargar(a.p)
+    await tocarElBoton(a)
+    const antes = await esperarEstado(a.p, 'prendido', 3000)
+    ver(antes?.estado === 'prendido', `${tag} · el toque lo prende (con el gesto, en los dos)`, JSON.stringify(antes))
+    await a.p.reload({ waitUntil: 'load' })
+    const vuelve = await esperarEstado(a.p, 'prendido', permiso === 'concedido' ? 8000 : 3000)
+    const pedidos = await a.p.evaluate(() => (window as unknown as { __permisosPedidos?: number }).__permisosPedidos ?? 0)
+    if (permiso === 'concedido') {
+      ver(vuelve?.estado === 'prendido' && pedidos === 1, `${tag} · vuelve prendido SIN otro toque (se pide una vez, sin gesto; rojo: CONTROL=sin-reintento)`, `${JSON.stringify(vuelve)} · ${String(pedidos)} pedidos`)
+      await mueveLaCamaraYElMoire(a, tag)
+    } else {
+      const sinGesto = await a.p.evaluate(() => (window as unknown as { __pedidosSinGesto?: number }).__pedidosSinGesto ?? 0)
+      ver(vuelve?.estado === 'apagado' && sinGesto >= 1, `${tag} · lo intenta sin gesto, el aparato lo rechaza y queda apagado esperando el toque`, `${JSON.stringify(vuelve)} · ${String(sinGesto)} pedidos sin gesto`)
+      await tocarElBoton(a)
+      const luego = await esperarEstado(a.p, 'prendido', 3000)
+      ver(luego?.estado === 'prendido', `${tag} · y el primer toque lo prende`, JSON.stringify(luego))
+    }
+  } finally {
+    await a.ctx.close()
+  }
+}
+
 async function reducido(): Promise<void> {
   const tag = '390 movimiento reducido'
   const a = await abrir(390, 844, 'android', true)
@@ -284,6 +317,8 @@ async function main(): Promise<void> {
   for (const [ancho, alto] of ANCHOS) await android(ancho, alto)
   await ios('concedido')
   await ios('negado')
+  await recargado('concedido')
+  await recargado('con-gesto')
   await reducido()
   await escritorio()
   console.log(`\n${fallas.length === 0 ? 'BIEN' : `FALLAS (${String(fallas.length)})`}${CONTROL === '' ? '' : ` · con el control ${CONTROL} (tiene que FALLAR)`}`)

@@ -1,5 +1,5 @@
 import { CONSULTA_ESCENARIO } from '../compuerta'
-import { apagarElGiroscopio, defectoDelMovimiento, estadoDelGiroscopio, pidePermiso, prenderElGiroscopio, suscribirAlGiroscopio } from './giroscopio'
+import { apagarElGiroscopio, defectoDelMovimiento, estadoDelGiroscopio, pidePermiso, prenderElGiroscopio, prenderSinGesto, suscribirAlGiroscopio } from './giroscopio'
 
 /**
  * [C2-81] EL MOVIMIENTO DEL TELÉFONO — así como se recomienda el sonido, se puede prender el giroscopio: inclinar el teléfono mueve la
@@ -11,6 +11,8 @@ import { apagarElGiroscopio, defectoDelMovimiento, estadoDelGiroscopio, pidePerm
  *     (`_chrome/movimiento/`) o tocando la frase del preloader, dentro del gesto (iOS pide el permiso ahí).
  *   · **Dura la sesión** (`sessionStorage`, con try/catch): si se prendió, al recargar vuelve prendido (en Android en el acto; en iOS, con
  *     el primer toque, que es el gesto que el permiso necesita). Negado o sin sensor, queda apagado y se guarda apagado.
+ *   · [L6] Donde hay que pedir permiso, primero se intenta SIN gesto (`prenderSinGesto`): Chrome expone la API y la concede sin toque, así
+ *     que vuelve prendido en el acto; si el aparato la rechaza (iOS), se espera el primer toque como siempre.
  */
 export const CLAVE_DEL_MOVIMIENTO = 'develop-v3-movimiento'
 
@@ -90,7 +92,9 @@ export function retomarElMovimiento(): () => void {
     recordarSiNoSePudo()
     return nada
   }
+  let esperando = true
   function quitar(): void {
+    esperando = false
     window.removeEventListener('touchend', alTocar, true)
     window.removeEventListener('click', alTocar, true)
   }
@@ -99,7 +103,14 @@ export function retomarElMovimiento(): () => void {
     prenderElGiroscopio()
     recordarSiNoSePudo()
   }
-  window.addEventListener('touchend', alTocar, true)
-  window.addEventListener('click', alTocar, true)
+  void prenderSinGesto().then((prendido) => {
+    if (!esperando) return
+    if (prendido) {
+      recordarSiNoSePudo()
+      return
+    }
+    window.addEventListener('touchend', alTocar, true)
+    window.addEventListener('click', alTocar, true)
+  })
   return quitar
 }
