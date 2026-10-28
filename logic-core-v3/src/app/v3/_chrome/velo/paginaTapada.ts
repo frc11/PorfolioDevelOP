@@ -26,6 +26,8 @@ export function taparLaPaginaQueLlega(): PaginaTapada {
     if (sinTapar()) return
     for (const m of document.querySelectorAll<HTMLElement>('main')) {
       if (viejas.has(m) || tapadas.has(m)) continue
+      // Sin transición: la de `deslizamiento.css` la dejaría aparecer a la vista antes del destape.
+      m.style.transition = 'none'
       m.style.opacity = '0'
       tapadas.add(m)
       if (!reubicada) {
@@ -50,6 +52,7 @@ export function taparLaPaginaQueLlega(): PaginaTapada {
         m.style.opacity = ''
         const a = m.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' })
         a.onfinish = a.oncancel = () => {
+          m.style.transition = ''
           faltan -= 1
           if (faltan === 0) alTerminar()
         }
@@ -57,7 +60,11 @@ export function taparLaPaginaQueLlega(): PaginaTapada {
     },
     soltar: () => {
       observador.disconnect()
-      for (const m of tapadas) m.style.opacity = ''
+      for (const m of tapadas) {
+        m.style.opacity = ''
+        void m.offsetWidth // la transición se devuelve después del valor: no se dispara un fundido
+        m.style.transition = ''
+      }
       tapadas.clear()
     },
   }
