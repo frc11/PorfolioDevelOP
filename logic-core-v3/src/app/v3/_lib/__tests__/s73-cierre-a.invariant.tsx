@@ -344,12 +344,12 @@ const MENU_A6 = leer('../../_chrome/menu/MenuMovil.tsx')
 const ARRIBA_A6 = 'top-[max(var(--spacing-4),env(safe-area-inset-top))]'
 const lugaresBien = (esquina: string, sonido: string, menu: string): boolean => {
   const delMenu = /data-parte="boton-del-menu"[\s\S]*?className="([^"]*)"/.exec(menu)?.[1] ?? ''
-  return esquina.includes(`fixed ${ARRIBA_A6} left-[max(var(--spacing-4),env(safe-area-inset-left))]`) && esquina.includes('escritorio:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]') &&
+  return esquina.includes(`fixed ${ARRIBA_A6} left-[max(var(--spacing-4),env(safe-area-inset-left))]`) && esquina.includes('hasta-tablet:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]') &&
     delMenu.split(' ').includes(ARRIBA_A6) && delMenu.includes('inset-x-0') && delMenu.includes('mx-auto') &&
-    sonido.includes('escritorio:size-[calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))]') && sonido.includes('escritorio:bg-[var(--color-superficie-translucida)] escritorio:backdrop-blur-[var(--blur-panel)]')
+    sonido.includes('hasta-tablet:size-[calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))]') && sonido.includes('hasta-tablet:bg-[var(--color-superficie-translucida)] hasta-tablet:backdrop-blur-[var(--blur-panel)]')
 }
 afirmar(lugaresBien(ESQUINA_A6, SONIDO_A6, MENU_A6), '  el teléfono: el parlante arriba a la izquierda y el menú al centro (el mismo eje, la zona segura); escritorio: el parlante arriba a la izquierda, del alto de la barra y en su vidrio, enfrente de Contacto y Login')
-controlPositivo('  el detector VE el parlante de escritorio abajo a la derecha (el de antes)', ESQUINA_A6.replace('escritorio:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]', 'escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)]'), (e: string) => lugaresBien(e, SONIDO_A6, MENU_A6))
+controlPositivo('  el detector VE el parlante de escritorio abajo a la derecha (el de antes)', ESQUINA_A6.replace('hasta-tablet:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]', 'escritorio:right-[var(--spacing-6)] escritorio:bottom-[var(--spacing-6)]'), (e: string) => lugaresBien(e, SONIDO_A6, MENU_A6))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('A7 · La caída del pie, un 35 % más corta: el reloj del final más rápido, con la física y las sincronías; el rebobinado acompaña')

@@ -70,7 +70,7 @@ export function CampoDePildora({
         placeholder={ejemplo}
         aria-invalid={conError || undefined}
         aria-describedby={conError && idDelError !== null ? idDelError : undefined}
-        className={cn(claseDelTexto, 'placeholder:text-tinta-tenue min-w-0 flex-1 bg-transparent')}
+        className={cn(claseDelTexto, 'placeholder:text-tinta-tenue min-w-0 flex-1 text-ellipsis bg-transparent')}
       />
     </label>
   )

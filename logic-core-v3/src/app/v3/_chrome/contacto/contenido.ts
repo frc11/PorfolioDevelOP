@@ -39,12 +39,12 @@ export const PREGUNTAS = {
 
 /** Los campos: el rótulo que va adentro de la píldora y su ejemplo. */
 export const CAMPOS = {
-  presupuesto: { rotulo: 'Presupuesto', ejemplo: 'Un número, un rango o «todavía no sé»' },
-  nombre: { rotulo: 'Nombre', ejemplo: 'ej.: Ana Pérez' },
-  medio: { rotulo: 'Email o teléfono', ejemplo: 'ej.: ana@tuempresa.com' },
+  presupuesto: { rotulo: 'Presupuesto', ejemplo: 'Un rango' },
+  nombre: { rotulo: 'Nombre', ejemplo: 'Ana Pérez' },
+  medio: { rotulo: 'Email o teléfono', ejemplo: 'ana@tuempresa.com' },
   // [EL ENCASTRE] 1E · sin «(opcional)»: ahora todo lo es, salvo el email o el teléfono (lo dice la nota de abajo).
-  empresa: { rotulo: 'Empresa', ejemplo: 'ej.: Tu Empresa' },
-  mensaje: { rotulo: '¿Qué tenés en mente?', ejemplo: 'ej.: Que la gente nos encuentre y nos escriba' },
+  empresa: { rotulo: 'Empresa', ejemplo: 'Tu Empresa' },
+  mensaje: { rotulo: '¿Qué tenés en mente?', ejemplo: 'Que la gente nos encuentre' },
 } as const
 
 /** [EL ENCASTRE] 1E · la nota: sólo el email o el teléfono es obligatorio. */

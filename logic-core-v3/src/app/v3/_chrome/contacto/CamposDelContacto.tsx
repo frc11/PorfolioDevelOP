@@ -46,9 +46,9 @@ function Error({ campo, errores }: { readonly campo: CampoConError; readonly err
   return <ErrorDelCampo id={idDelError(campo)} texto={errores[campo]} />
 }
 
-const FILA = 'grid gap-[var(--spacing-4)] tablet:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] tablet:gap-[var(--spacing-8)]'
+const FILA = 'grid grid-cols-1 gap-[var(--spacing-4)] tablet:grid-cols-[minmax(0,1fr)_minmax(0,2.4fr)] tablet:gap-[var(--spacing-8)]'
 /** [NAVBAR] T4 · en el teléfono la pregunta va pegada a sus campos. */
-const FILA_COMPACTA = 'grid gap-[var(--spacing-2)]'
+const FILA_COMPACTA = 'grid grid-cols-1 gap-[var(--spacing-2)]'
 /** [EL ENCASTRE] 1E · lo máximo de cada campo (lo mismo exige el servidor): con todo opcional, el largo lo frena el campo. */
 const MAXIMO_DE: Record<Exclude<CampoDeTexto, 'mensaje'>, number> = { presupuesto: MAXIMOS.presupuesto, nombre: MAXIMOS.nombre, medio: MAXIMOS.contacto, empresa: MAXIMOS.empresa }
 
@@ -69,7 +69,7 @@ function Pildora({
 }): React.JSX.Element {
   const conError = campo !== 'empresa' && errores[campo] !== undefined
   return (
-    <div className="flex flex-col gap-[var(--spacing-1)]">
+    <div className="flex min-w-0 flex-col gap-[var(--spacing-1)]">
       {/* [B1.2d B] B4/B5 · la píldora es la común de los formularios (`_componentes/formularios/Campos.tsx`): la usa también «la tuya». */}
       <CampoDePildora
         rotulo={CAMPOS[campo].rotulo}
@@ -143,7 +143,7 @@ export function CamposDelContacto({ datos, errores, alternarInteres, escribir, c
       <div className={fila}>
         <Pregunta numero={3} texto={PREGUNTAS.persona} compacto={compacto} />
         <div className="flex flex-col gap-[var(--spacing-2)]">
-          <div className="grid gap-[var(--spacing-2)] escritorio:grid-cols-3">
+          <div className="grid grid-cols-1 gap-[var(--spacing-2)] escritorio:grid-cols-3">
             <Pildora campo="nombre" datos={datos} errores={errores} escribir={escribir} compacto={compacto} />
             {/* [EL ENCASTRE] 1E · el único obligatorio: el email o el teléfono. */}
             <Pildora campo="medio" datos={datos} errores={errores} escribir={escribir} requerido compacto={compacto} />

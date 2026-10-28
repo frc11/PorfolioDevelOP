@@ -324,11 +324,11 @@ async function cableado(): Promise<void> {
   const botonBien = (m: string, c: string, e: string, ch: string): boolean =>
     /aria-label="Activar movimiento"/.test(m) && /data-estado="apagado"/.test(m) && /data-control-fijo=""/.test(m) && /stroke-width="1\.5"/.test(m) && /lucide-smartphone/.test(m) &&
     c.includes("aria-label={prendido ? 'Desactivar movimiento' : 'Activar movimiento'}") &&
-    e.includes('escritorio:hidden') && e.includes(['right', '[max(var(--spacing-4),env(safe-area-inset-right))]'].join('-')) && e.includes('data-parte="lugar-del-movimiento"') && /useSyncExternalStore\(sinCambios, hayMovimiento, \(\) => false\)/.test(e) &&
+    e.includes('hasta-tablet:hidden') && e.includes(['right', '[max(var(--spacing-4),env(safe-area-inset-right))]'].join('-')) && e.includes('data-parte="lugar-del-movimiento"') && /useSyncExternalStore\(sinCambios, hayMovimiento, \(\) => false\)/.test(e) &&
     /<EsquinaDelMovimiento \/>\s*<EsquinaDelSonido \/>\s*\{\/\*[^]*?\*\/\}\s*<ChatDelSitio \/>/.test(ch)
   afirmar(botonBien(boton, CONTROL, ESQUINA, CHROME), 'el botón: «Activar movimiento» / «Desactivar movimiento» (05-TEXTOS), su estado en `data-estado`, el teléfono de lucide con trazo 1,5, un control fijo (la órbita no lo sigue), arriba a la derecha y escondido desde 1024; montado en el chrome junto al parlante', boton.slice(0, 160))
   controlPositivo('  el detector ve un botón sin su `aria-label`', [boton.replace('aria-label="Activar movimiento"', ''), CONTROL, ESQUINA, CHROME] as const, ([m, c, e, ch]) => botonBien(m, c, e, ch))
-  controlPositivo('  y uno que se ve también en escritorio', [boton, CONTROL, ESQUINA.replace('escritorio:hidden', ''), CHROME] as const, ([m, c, e, ch]) => botonBien(m, c, e, ch))
+  controlPositivo('  y uno que se ve también en escritorio', [boton, CONTROL, ESQUINA.replace('hasta-tablet:hidden', ''), CHROME] as const, ([m, c, e, ch]) => botonBien(m, c, e, ch))
 
   const TEXTOS = leer('docs/cola/2026-10-23/05-TEXTOS.md')
   const { FRASE, FLECHAS } = await import('../../_chrome/preloader/CapaDelPreloader')

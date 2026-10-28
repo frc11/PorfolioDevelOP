@@ -14,7 +14,7 @@ export function EsquinaDelSonido(): React.JSX.Element {
   const conLaBarra = useLaBarraSeVe()
   useCabeceraAlFondo(!conLaBarra)
   return (
-    <div data-pieza="esquina-del-sonido" className="pointer-events-none fixed top-[max(var(--spacing-4),env(safe-area-inset-top))] left-[max(var(--spacing-4),env(safe-area-inset-left))] z-[var(--z-cabecera)] escritorio:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]">
+    <div data-pieza="esquina-del-sonido" className="pointer-events-none fixed top-[max(var(--spacing-4),env(safe-area-inset-top))] left-[max(var(--spacing-4),env(safe-area-inset-left))] z-[var(--z-cabecera)] hasta-tablet:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]">
       <div data-parte="lugar-del-parlante">
         <SonidoDelHome />
       </div>

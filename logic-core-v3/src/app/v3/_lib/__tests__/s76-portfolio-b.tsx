@@ -28,13 +28,14 @@ const huella = (m: string): string => createHash('sha256').update(m).digest('hex
  * Las huellas del marcado del modal de contacto, tomadas ANTES de sacar sus campos a `_componentes/formularios/Campos.tsx` (en el árbol
  * de `5ef4ce83`): la hoja entera (con y sin el interés precargado) y los campos vacíos, llenos con errores y en el teléfono.
  */
+// [L1] Huellas retomadas a propósito: los placeholders más cortos, el `grid-cols-1`, el `min-w-0` y la elipsis de los campos del contacto (ítem 2).
 const ANTES = {
   // [C2 · 22] la hoja entera cambió por diseño (el envío es EstadoDeEnvio, y lleva `data-forma`); sus CAMPOS (los tres de abajo) siguen idénticos.
-  hoja: 'c0f171481fd4484613656bcd61ee04cc56de13ce1f19f2fa8c63cd2c0aa56843',
-  hojaWeb: 'ee7df87c9ecd5aa5092658adaab9c5e188bc06d2b1c238c102bd5b754ad855d6',
-  vacio: '9cb4ffa3551b99a079ae50df0e7093f6b559f11ffd438b7eea8ee4f4d4d341b8',
-  llenoConErrores: '2a3d2d3f0eb59113f08524764f3ea1131b4969b3e03d3f79bd3049564c4d84e1',
-  compacto: '44ccfd4f0a79b489a93ef7b4f0a28c89dcaf99d74c97566bf121b32fff67e8f9',
+  hoja: '52e3824bee2f79ad625db6146cfb663174766f99bb9e3fc9ea1f9c89b24a108c',
+  hojaWeb: '39f10784f6030c13770d074af572565d65b395392c3c89e31c82b32096f4934b',
+  vacio: '83a549497c7bbfa1aeab83498a1dbe3aeb17a63a94deb34ec956237fa801f18b',
+  llenoConErrores: 'd1b82f415dcf56655cf2ed2b05d272abc88d86e15ed8d211d93acdd17ca30f9c',
+  compacto: 'f90c3bb29b0daab51c9e19fd3a849f8dd437b0f23792ef6e2be7176064ea5d0e',
 } as const
 
 export function afirmarB(): void {
