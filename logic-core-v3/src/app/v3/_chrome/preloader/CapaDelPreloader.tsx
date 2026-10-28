@@ -17,37 +17,36 @@ import { TITULOS_DE_VOLUMEN, TITULOS_EN_CAMINO, tituloListo } from '../../_lib/t
 import { IDS_DEL_TITULAR_DEL_HERO } from '../../_lib/titulos3d/titular'
 import { fundidosDelTexto, salidaDeLaCapa } from './animaciones'
 import { defectoDelPreloader, type EnLaVentana, type VentanaConElPreloader } from './decision'
-import { FlechaDelSonido, type ManijaDeLaFlecha, type Objetivo } from './FlechaDelSonido'
-import { entradaLista, lineaNueva, pasoDeLaLinea, ratoQuieto, type Etapa, type EstadoDeLaLinea } from './linea'
+import { BotonQueVibra, type ManijaDelBoton, type Objetivo } from './BotonQueVibra'
+import { entradaLista, latidosEn, lineaNueva, pasoDeLaLinea, ratoQuieto, type Etapa, type EstadoDeLaLinea } from './linea'
 import { animar, crearElReloj, pausarConLaPestana, tiempoDelReloj } from './reloj'
-import type { Lado, Punto, Renglon } from './trazado'
 
 /**
  * [B12c] LA CAPA DEL PRELOADER — la secuencia (`linea.ts`) sobre la cubierta del layout (`PreloaderDelSitio`): el negro con la
- * bienvenida, el blanco con la frase del sonido, la flecha hasta el botón del sonido y la salida.
+ * bienvenida, el blanco con la frase del sonido, el botón del sonido que aparece y vibra (`BotonQueVibra`) y la salida.
  *
  * [C2-81] **Continua (ítem 18):** lo que se ve son animaciones nativas en el compositor, sólo `opacity` y `transform` (`animaciones.ts`),
  * alineadas con un reloj maestro (`reloj.ts`); el texto ya no se traba aunque el hilo principal esté ocupado. El rAF sólo DECIDE (la etapa,
- * el freno de la flecha, la salida) leyendo ese reloj, y suelta la preparación de la escena cuando la bienvenida terminó de aparecer
- * (`permitirLaPreparacion`). La frase y la flecha se montan desde el principio (invisibles e inertes hasta su momento), así sus animaciones
+ * la salida) leyendo ese reloj, y suelta la preparación de la escena cuando la bienvenida terminó de aparecer
+ * (`permitirLaPreparacion`). La frase y el botón se montan desde el principio (invisibles e inertes hasta su momento), así sus animaciones
  * ya están en el compositor cuando les toca. **El teléfono con movimiento** (`hayMovimiento`): la frase dice «… el sonido y el movimiento.»,
- * dos flechas (una a cada botón) y tocarla prende los dos.
+ * vibran los dos botones (sin flechas) y tocarla prende los dos. [L6 · ítem 81] La flecha se fue: el botón aparece en su lugar y manda una
+ * onda fina que cruza el fondo, con el ritmo de un corazón; si la carga tarda, el latido se repite.
  *
  *   · **Lo que espera** (`entradaLista`): las fuentes, el primer cuadro de la escena, la escena preparada (compilada y calentada) y los
  *     títulos urgentes armados (el titular del hero, el título de una página). Mientras, la escena trabaja detrás.
  *   · **La frase**, opcional: tocarla prende el sonido (la preferencia de siempre; el toque es la acción que el navegador pide para que
  *     suene) y, en el teléfono, el movimiento (el permiso de iOS se pide en ese toque). Sin subrayado: un botón con el texto; tocado, la
- *     confirmación arriba (sin correr la frase, de donde salen las flechas).
+ *     confirmación arriba (sin correr la frase).
  *   · **No se saltea:** nada más recibe el clic, Esc no hace nada, y el Tab no sale de la capa (la frase es lo único que se toca).
- *   · Con un banco (`__preloaderDelBanco`), cada cuadro queda en `window.__preloaderMedido` (el reloj, la etapa, el trazo, el pulso, si
- *     estaba listo y la opacidad de la bienvenida que ve el hilo principal) y, al final, las puntas de las flechas (lo que se ve) y los botones.
+ *   · Con un banco (`__preloaderDelBanco`), cada cuadro queda en `window.__preloaderMedido` (el reloj, la etapa, los latidos que empezaron, si
+ *     estaba listo y la opacidad de la bienvenida que ve el hilo principal) y, al final, el estado del toque.
  */
 interface MuestraDelPreloader {
   readonly t: number
   readonly ahora: number
   readonly etapa: Etapa
-  readonly trazo: number
-  readonly pulsa: boolean
+  readonly latidos: number
   readonly listo: boolean
   readonly bienvenida: number
 }
@@ -55,20 +54,14 @@ type VentanaDelBanco = VentanaConElPreloader & {
   __preloaderMedido?: { muestras: MuestraDelPreloader[]; final: unknown }
 }
 
-const ORDEN: readonly Etapa[] = ['bienvenida', 'blanco', 'frase', 'flecha', 'salida', 'fuera']
+const ORDEN: readonly Etapa[] = ['bienvenida', 'blanco', 'frase', 'boton', 'salida', 'fuera']
 const desde = (etapa: Etapa, minima: Etapa): boolean => ORDEN.indexOf(etapa) >= ORDEN.indexOf(minima)
 
 /** La frase (05-TEXTOS): la de escritorio y la del teléfono con movimiento. */
 export const FRASE = { escritorio: 'Recomendamos activar el sonido.', conMovimiento: 'Recomendamos activar el sonido y el movimiento.' } as const
 
-/** Las flechas: en escritorio, una al sonido desde el final del texto; con movimiento, dos desde las puntas del primer renglón. */
-export const FLECHAS: Readonly<Record<'escritorio' | 'conMovimiento', readonly { readonly objetivo: Objetivo; readonly lado: Lado; readonly renglon: Renglon }[]>> = {
-  escritorio: [{ objetivo: 'sonido', lado: 'derecha', renglon: 'ultimo' }],
-  conMovimiento: [
-    { objetivo: 'sonido', lado: 'izquierda', renglon: 'primero' },
-    { objetivo: 'movimiento', lado: 'derecha', renglon: 'primero' },
-  ],
-}
+/** Los botones que vibran: en escritorio el del sonido; en el teléfono con movimiento, también el del movimiento. */
+export const BOTONES: Readonly<Record<'escritorio' | 'conMovimiento', readonly Objetivo[]>> = { escritorio: ['sonido'], conMovimiento: ['sonido', 'movimiento'] }
 
 /** ¿Está todo para entrar? Se pregunta en cada cuadro. */
 function todoListo(fuentes: boolean, escritorio: boolean): boolean {
@@ -94,11 +87,11 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
   const bienvenida = useRef<HTMLDivElement>(null)
   const frase = useRef<HTMLButtonElement>(null)
   const reloj = useRef<Animation | null>(null)
-  const manijas = useRef<(ManijaDeLaFlecha | null)[]>([])
+  const manijas = useRef<(ManijaDelBoton | null)[]>([])
   const etapaAhora = useRef<Etapa>('bienvenida')
   const activadoAhora = useRef(false)
-  const flechas = FLECHAS[conMovimiento ? 'conMovimiento' : 'escritorio']
-  const corta = defectoDelPreloader() === 'punta-corta'
+  const botones = BOTONES[conMovimiento ? 'conMovimiento' : 'escritorio']
+  const defecto = defectoDelPreloader()
 
   // El reloj y lo que se ve (en el compositor), y cada cuadro un paso de la línea (lo que se decide). Al terminar, la entrada se abre.
   // [C2-81] En el efecto de layout: las animaciones se crean antes del primer pintado de la capa y arrancan con él (en uno pasivo esperaban
@@ -107,8 +100,6 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
     const ventana = window as VentanaDelBanco
     const banco = ventana.__preloaderDelBanco !== undefined
     if (banco) ventana.__preloaderMedido = { muestras: [], final: null }
-    const defecto = defectoDelPreloader()
-    const sinFreno = defecto === 'sin-freno'
     // El control `en-el-hilo`: las animaciones del texto en pausa, empujadas desde el hilo principal (cada tarea larga las congela).
     const enElHilo = defecto === 'en-el-hilo'
     const escritorio = window.matchMedia(CONSULTA_ESCENARIO).matches
@@ -137,15 +128,12 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
       if (antes === null) alArrancar()
       const ahora = tiempoDelReloj(r)
       const listo = todoListo(fuentes, escritorio)
-      pasoDeLaLinea(e, antes === null ? 0 : ahora - antes, listo, decision.reducido, sinFreno)
+      pasoDeLaLinea(e, antes === null ? 0 : ahora - antes, listo, decision.reducido)
       antes = ahora
-      // La escena se prepara sólo en los ratos quietos (la bienvenida aparecida y quieta; desde la flecha): ningún fundido se traba.
+      // La escena se prepara sólo en los ratos quietos (la bienvenida aparecida y quieta; desde el botón): ningún fundido se traba.
       permitirLaPreparacion(ratoQuieto(e.t, decision.reducido))
       if (enElHilo) for (const a of textos) a.currentTime = e.t
-      for (const m of manijas.current) {
-        m?.medir()
-        m?.seguir(e.tau, e.libre || sinFreno, e.pulsa)
-      }
+      for (const m of manijas.current) m?.medir()
       const capa = cubierta.current
       if (e.salidaDesde !== null && salida === null && capa !== null) {
         salida = animar(capa, salidaDeLaCapa(decision.reducido), r, e.salidaDesde)
@@ -153,7 +141,7 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
       }
       if (banco) {
         const b = bienvenida.current === null ? Number.NaN : Number(getComputedStyle(bienvenida.current).opacity)
-        ventana.__preloaderMedido?.muestras.push({ t: Math.round(e.t), ahora: Math.round(marca), etapa: e.etapa, trazo: Number(e.trazo.toFixed(4)), pulsa: e.pulsa, listo, bienvenida: Number(b.toFixed(4)) })
+        ventana.__preloaderMedido?.muestras.push({ t: Math.round(e.t), ahora: Math.round(marca), etapa: e.etapa, latidos: latidosEn(e.t, decision.reducido), listo, bienvenida: Number(b.toFixed(4)) })
       }
       if (e.etapa !== etapaAntes) {
         // La llegada suave, con la página apareciendo (suena sólo con el sonido prendido y su motor listo).
@@ -168,8 +156,7 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
       }
       if (e.etapa === 'fuera') {
         if (banco && ventana.__preloaderMedido !== undefined) {
-          const puntas = manijas.current.map((m, i): { readonly objetivo: Objetivo; readonly punta: Punto | null; readonly trazada: Punto | null } => ({ objetivo: flechas[i].objetivo, punta: m?.punta() ?? null, trazada: m?.medida()?.trazado.punta ?? null }))
-          ventana.__preloaderMedido.final = { puntas, activado: activadoAhora.current, conMovimiento, t: e.t }
+          ventana.__preloaderMedido.final = { activado: activadoAhora.current, conMovimiento, t: e.t }
         }
         alTerminar()
         return
@@ -185,7 +172,7 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
       r.cancel()
       reloj.current = null
     }
-  }, [decision, cubierta, alArrancar, alTerminar, flechas, conMovimiento])
+  }, [decision, cubierta, alArrancar, alTerminar, conMovimiento, defecto])
 
   // No se saltea: el Tab queda en la capa (la frase, si está); nada más se toca.
   useEffect(() => {
@@ -226,7 +213,7 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
               {conMovimiento ? FRASE.conMovimiento : FRASE.escritorio}
             </Titular>
           </button>
-          {/* Arriba (las flechas salen de los costados), sin correr la frase: la confirmación del toque y, sólo si la espera se hizo muy larga, el ícono. */}
+          {/* Arriba, sin correr la frase: la confirmación del toque y, sólo si la espera se hizo muy larga, el ícono. */}
           <div aria-hidden="true" className="absolute bottom-full left-0 flex w-full flex-col-reverse items-center gap-[var(--spacing-2)] pb-[var(--spacing-3)]">
             {activado && (
               <Micro como="span" className="text-tinta-tenue">
@@ -237,19 +224,16 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
           </div>
         </div>
       </div>
-      {flechas.map((f, i) => (
-        <FlechaDelSonido
-          key={f.objetivo}
+      {botones.map((objetivo, i) => (
+        <BotonQueVibra
+          key={objetivo}
           ref={(m) => {
             manijas.current[i] = m
           }}
-          frase={frase}
-          objetivo={f.objetivo}
-          lado={f.lado}
-          renglon={f.renglon}
+          objetivo={objetivo}
           reloj={reloj}
           reducido={decision.reducido}
-          corta={corta}
+          defecto={defecto === 'sin-onda' || defecto === 'onda-corrida' ? defecto : null}
         />
       ))}
       <span role="status" className="sr-only">

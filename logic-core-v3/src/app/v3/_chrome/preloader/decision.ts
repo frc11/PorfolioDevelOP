@@ -50,8 +50,8 @@ export const TOPE_MS = 20000
 export type PedidoDelBanco = 'normal' | 'mostrar'
 
 /** Los defectos para los controles del banco (`window.__defectosDelPreloader`, nunca la URL). */
-/** [C2-81] `en-el-hilo`: el texto lo mueve el hilo principal (sus animaciones en pausa, empujadas cuadro a cuadro); `punta-corta`: la flecha termina 20 px antes del botón. */
-export type DefectoDelPreloader = 'sin-freno' | 'en-recargas' | 'sin-bloqueo' | 'en-el-hilo' | 'punta-corta'
+/** [C2-81] `en-el-hilo`: el texto lo mueve el hilo principal (sus animaciones en pausa, empujadas cuadro a cuadro); `sin-onda`: el botón no manda su onda; `onda-corrida`: la onda nace 120 px a un costado del botón. */
+export type DefectoDelPreloader = 'en-recargas' | 'sin-bloqueo' | 'en-el-hilo' | 'sin-onda' | 'onda-corrida'
 
 /** Lo que el script deja en la ventana si el preloader se ve. */
 export interface EnLaVentana {
