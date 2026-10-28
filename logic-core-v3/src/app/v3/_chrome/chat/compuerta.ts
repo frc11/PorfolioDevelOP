@@ -65,7 +65,7 @@ export const chatDesvanecido = (enZona: boolean, abierto: boolean): boolean => e
  * Los laboratorios de /v3 (instrumentos, no páginas): sin chat. `/v3/motion` tiene sus controles en la misma esquina. El home y las
  * páginas (la base, las de servicio y las que vengan) lo llevan sin anotarse.
  */
-export const RUTAS_SIN_CHAT = ['/v3/componentes', '/v3/tipografia', '/v3/motion', '/v3/control-estatico', '/v3/titulos-de-pagina'] as const
+export const RUTAS_SIN_CHAT = ['/v3/componentes', '/v3/tipografia', '/v3/motion', '/v3/control-estatico'] as const
 
 export function rutaConChat(ruta: string | null): boolean {
   if (ruta === null || !(ruta === '/v3' || ruta.startsWith('/v3/'))) return false
