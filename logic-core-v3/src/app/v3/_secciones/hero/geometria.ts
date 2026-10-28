@@ -648,7 +648,7 @@ export const GEOMETRIA = {
    * o sea tres composiciones distintas en la misma banda. Con la clase en la banda de
    * su propio motivo, los cuatro anchos de abajo del corte apoyan igual.
    */
-  claseDelPieSinPastilla: 'max-medio:pb-2',
+  claseDelPieSinPastilla: 'max-hasta-tablet:pb-2',
   /**
    * ── COMPO-2 · §1 · EL BLOQUE CENTRADO EN LA BANDA DE PAPEL. [pedido] ─────
    *

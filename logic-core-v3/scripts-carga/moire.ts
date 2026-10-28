@@ -23,7 +23,7 @@
  * Diagnóstico (no falla): las líneas con y sin la trama (si las dos tomas dan lo mismo, la trama no es la causa).
  *
  *   BASE=http://localhost:3000 npx tsx scripts-carga/moire.ts                  (ROTULO=despues; BANCO_FOTOS=<carpeta>)
- *   CONTROL=con-lineas npx tsx scripts-carga/moire.ts                          el piso de antes (`__defectosDeLaIntro`): tiene que fallar SIN LÍNEAS
+ *   CONTROL=sin-loma npx tsx scripts-carga/moire.ts                           [L1] la loma vuelve por defecto: este control la apaga (`__defectosDeLaIntro`)
  *   ANTES=1 ROTULO=antes npx tsx scripts-carga/moire.ts                         contra la integración sin la 31m (pide `moire=mouse`): las fotos de antes
  */
 import { writeFileSync } from 'node:fs'
