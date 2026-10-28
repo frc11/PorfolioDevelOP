@@ -29,6 +29,9 @@ export function avancesDelSigno(p: number): readonly [number, number, number] {
   return [principal(acotar01(p / tramo)), principal(acotar01((p - CORTE * DESFASE_DE_LAS_BARRAS) / tramo)), principal(acotar01((p - CORTE) / (1 - CORTE)))]
 }
 
+/** Cuánto se pasa del centro cada mitad de la diagonal del ≠, en grosores de la raya. */
+export const SOLAPE_DE_LA_DIAGONAL_EN_GROSORES = 1.5
+
 /** La escala con que se ve un elemento (una transformación de más arriba): las medidas en pantalla, a px de su caja. */
 function escalaDe(el: HTMLElement, caja: DOMRect): number {
   return el.offsetWidth > 0 && caja.width > 0 ? caja.width / el.offsetWidth : 1
@@ -60,5 +63,11 @@ export function trazosDelSigno(lugar: HTMLElement | null): readonly (SegmentoDel
   const y0 = (s.top - c.top) / k
   const grosor = parseFloat(getComputedStyle(linea).strokeWidth) || 0
   const segmento = (t: { readonly x1: number; readonly y1: number; readonly x2: number; readonly y2: number }): SegmentoDelTrazo => ({ x1: x0 + t.x1 * lado, y1: y0 + t.y1 * lado, x2: x0 + t.x2 * lado, y2: y0 + t.y2 * lado, grosor })
-  return [...TRAZOS_DEL_SIGNO.barras.map(segmento), ...TRAZOS_DEL_SIGNO.mitadesDeLaDiagonal.map(segmento)]
+  // [L1] Las dos mitades de la diagonal se pasan del centro un grosor y medio: con las puntas justas el bisel de cada una dejaba una muesca visible donde se encuentran.
+  const sobreElCentro = (t: SegmentoDelTrazo): SegmentoDelTrazo => {
+    const largo = Math.hypot(t.x2 - t.x1, t.y2 - t.y1) || 1
+    const extra = grosor * SOLAPE_DE_LA_DIAGONAL_EN_GROSORES
+    return { ...t, x2: t.x2 + ((t.x2 - t.x1) / largo) * extra, y2: t.y2 + ((t.y2 - t.y1) / largo) * extra }
+  }
+  return [...TRAZOS_DEL_SIGNO.barras.map(segmento), ...TRAZOS_DEL_SIGNO.mitadesDeLaDiagonal.map((t) => sobreElCentro(segmento(t)))]
 }
