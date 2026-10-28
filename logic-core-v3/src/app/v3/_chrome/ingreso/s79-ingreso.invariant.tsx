@@ -187,7 +187,7 @@ const fuente = (r: string): string => quitarComentarios(leer(r))
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('4 · El formulario de siempre (cliente y admin), con la arquitectura de los formularios del sitio')
 
-  const DE_MENTIRA: AccionesDelIngreso = { conClave: async () => null, conLink: async () => null, conGoogle: async () => undefined }
+  const DE_MENTIRA: AccionesDelIngreso = { conClave: async () => null, conLink: async () => null, conOlvido: async () => null, conGoogle: async () => undefined }
   const CON_CLAVE = renderToStaticMarkup(<FormularioDelIngreso acciones={DE_MENTIRA} alEntrar={() => undefined} />)
   const CON_LINK = renderToStaticMarkup(<FormularioDelIngreso acciones={DE_MENTIRA} alEntrar={() => undefined} modoInicial="link" />)
   const ACCIONES_DEL_LOGIN = leer('src/app/login/actions.ts')

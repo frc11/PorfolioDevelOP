@@ -18,6 +18,10 @@ export const ROTULOS_DEL_INGRESO = {
   enviarLink: 'Enviar Magic Link',
   generandoLink: 'Generando link…',
   olvido: '¿Olvidaste tu contraseña?',
+  /** [L6 · 80] La vista de recuperar la contraseña, dentro de la hoja. */
+  enviarOlvido: 'Enviar instrucciones',
+  enviandoOlvido: 'Enviando…',
+  volverAlIngreso: 'Volver a iniciar sesión',
   mostrarClave: 'Mostrar contraseña',
   ocultarClave: 'Ocultar contraseña',
   /** [C1] La prueba del panel todavía no existe: el botón está y no lleva a ningún lado. */
@@ -40,5 +44,11 @@ export const ERROR_INESPERADO = 'Ocurrió un error inesperado. Intentá de nuevo
 /** Lo que devuelve el servidor cuando el Magic Link salió (`magicLinkAction`). */
 export const LINK_ENVIADO = 'SUCCESS'
 
-/** «¿Olvidaste tu contraseña?», la ruta de siempre (fuera de /v3). */
-export const RUTA_DEL_OLVIDO = '/forgot-password'
+/** [L6 · 80] «¿Olvidaste tu contraseña?» ya no sale a `/forgot-password` (el login viejo): es otra vista de la hoja. */
+export const EXPLICACION_DEL_OLVIDO = 'Ingresá tu email y te mandamos instrucciones para elegir una contraseña nueva.'
+
+/** El aviso del envío: el mismo sea cual sea la respuesta (`forgotPasswordAction` no revela si la cuenta existe). */
+export const OLVIDO_ENVIADO = {
+  titulo: 'Revisá tu email',
+  texto: 'Si la cuenta existe, te mandamos un mail con instrucciones en los próximos minutos.',
+} as const

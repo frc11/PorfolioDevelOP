@@ -9,7 +9,7 @@ import { Carga, conDuracionMinima } from '../../_componentes/carga/Carga'
 import { CampoDePildora, ErrorDelCampo } from '../../_componentes/formularios/Campos'
 import { avisoDeErrores } from '../contacto/contenido'
 import { CampoDeClave } from './CamposDelIngreso'
-import { ERROR_INESPERADO, EXPLICACION_DEL_LINK, LINK_GENERADO, ROTULOS_DEL_INGRESO, RUTA_DEL_OLVIDO } from './contenido'
+import { ERROR_INESPERADO, EXPLICACION_DEL_LINK, LINK_GENERADO, ROTULOS_DEL_INGRESO } from './contenido'
 import {
   LARGOS_DEL_INGRESO,
   REPOSO,
@@ -71,10 +71,13 @@ export function ConClave({
   acciones,
   alEntrar,
   alOcupar,
+  alOlvidar,
 }: {
   readonly acciones: AccionesDelIngreso
   readonly alEntrar: () => void
   readonly alOcupar?: (ocupado: boolean) => void
+  /** [L6 · 80] «¿Olvidaste tu contraseña?»: la hoja cambia a su vista de recuperar (no sale a otra página). */
+  readonly alOlvidar: () => void
 }): React.JSX.Element {
   const [datos, setDatos] = useState<DatosDelIngreso>({ email: '', clave: '' })
   const [errores, setErrores] = useState<ErroresDelIngreso>({})
@@ -163,9 +166,9 @@ export function ConClave({
         </div>
         <ErrorDelServidor id="ingreso-error-servidor" texto={errorDelServidor} />
         <div className="flex flex-wrap items-center justify-between gap-[var(--spacing-3)] pt-[var(--spacing-2)]">
-          <a href={RUTA_DEL_OLVIDO} className={cn('text-caption text-tinta-media inline-block py-[var(--spacing-2)]', ENLACE)}>
+          <button type="button" data-parte="olvido" onClick={alOlvidar} className={cn('text-caption text-tinta-media inline-block py-[var(--spacing-2)]', ENLACE)}>
             {ROTULOS_DEL_INGRESO.olvido}
-          </a>
+          </button>
           <Cta type="submit" rotulo={enviando ? ROTULOS_DEL_INGRESO.ingresando : ROTULOS_DEL_INGRESO.ingresar} deshabilitado={ocupado} className="shrink-0" />
         </div>
       </form>

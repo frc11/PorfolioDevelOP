@@ -1,3 +1,4 @@
+import { forgotPasswordAction } from '@/app/forgot-password/actions'
 import { googleSignInAction, loginAction, magicLinkAction } from '@/app/login/actions'
 
 import { ENVIO_SIMULADO, envioSimulado } from '../../_lib/formularios/enviar'
@@ -18,6 +19,8 @@ import { entrarAlPanelSimulado } from './simulacion'
 const ERROR_SIMULADO = 'Email o contraseña incorrectos.'
 /** El de `magicLinkAction`. */
 const ERROR_SIMULADO_DEL_LINK = 'No se pudo generar el Magic Link. Intentá de nuevo.'
+/** El de `forgotPasswordAction` para un email que no pasa su validación. */
+const ERROR_SIMULADO_DEL_OLVIDO = 'Email inválido.'
 
 const simulado = (): 'lento' | 'error' | null => envioSimulado(window.location.search)
 const esperar = (): Promise<void> => new Promise((listo) => window.setTimeout(listo, ENVIO_SIMULADO.demoraMs))
@@ -37,6 +40,15 @@ export const ACCIONES_DEL_INGRESO: AccionesDelIngreso = {
     if (modo === null) return magicLinkAction(previo, datos)
     await esperar()
     return modo === 'error' ? ERROR_SIMULADO_DEL_LINK : LINK_ENVIADO
+  },
+  conOlvido: async (_previo, datos) => {
+    const modo = simulado()
+    if (modo === null) {
+      const r = await forgotPasswordAction(null, datos)
+      return r === null ? null : r.type === 'success' ? LINK_ENVIADO : r.message
+    }
+    await esperar()
+    return modo === 'error' ? ERROR_SIMULADO_DEL_OLVIDO : LINK_ENVIADO
   },
   conGoogle: async () => {
     const modo = simulado()
