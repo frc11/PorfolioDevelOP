@@ -122,7 +122,8 @@ titulo('T1 · 3 · Dónde entra el sistema: las secciones migradas, y las excepc
 
 const MIGRADAS = [
   ['_secciones/quienes-somos/QuienesSomos.tsx', 1, 1],
-  ['_secciones/quienes-somos/equipo.tsx', 3, 0],
+  // [C2-30f] Dos: el rótulo del equipo y las descripciones (los nombres se fueron a la etiqueta de la foto).
+  ['_secciones/quienes-somos/equipo.tsx', 2, 0],
   ['_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx', 1, 1],
   // [B6] La sección nueva del Panel: la descripción de cada módulo entra por el canal desde los títulos que suben del contrato.
   ['_secciones/_contrato/TituloQueSube.tsx', 1, 0],
@@ -407,7 +408,11 @@ afirmarIgual(veces(sinComentarios(CAMPOS_DEL_CONTACTO + FORMULARIO), 'role="aler
 afirmar(CAMPOS_DEL_CONTACTO.includes("aria-invalid={errores.intereses !== undefined || undefined}"), '  los intereses dicen que están mal (aria-invalid), no sólo el texto de abajo')
 afirmar(veces(CAMPOS_DEL_CONTACTO, "'border-tinta border-dashed'") === 2, '  el error con borde punteado: no se confunde con el foco (liso)')
 // [RONDA 2] F1: el «listo» del envío de verdad.
-afirmar(/<p role="status"[^>]*>\s*\{enviado \? DESPUES_DEL_ENVIO : ''\}/.test(FORMULARIO),'  la región de estado existe desde el principio (una que nace con su texto no siempre se anuncia)')
+// [C2 · 22] El envío es el estándar del sitio (`EstadoDeEnvio`): sus dos regiones vivas (status y alert) existen desde el principio y las pone él.
+const DEL_ENVIO = leer('_componentes/formularios/EstadoDeEnvio.tsx')
+const regionDeEstado = (formulario: string, envio: string): boolean => /<EstadoDeEnvio estado=\{estado\}/.test(formulario) && /<p role="status" className="sr-only">/.test(envio) && /<p role="alert" className="sr-only">/.test(envio)
+afirmar(regionDeEstado(FORMULARIO, DEL_ENVIO), '  la región de estado existe desde el principio (una que nace con su texto no siempre se anuncia): la pone `EstadoDeEnvio`, que el contacto monta')
+controlPositivo('  el detector VE un contacto que no monta el estado de envío', FORMULARIO.replace('<EstadoDeEnvio estado={estado}', '<div data-estado={estado}'), (f: string) => regionDeEstado(f, DEL_ENVIO))
 afirmar(leer('_secciones/trabajos/demos/VentanaDeDemo.tsx').includes('aria-busy={abierta && !cargada}'), 'la ventana de una demo dice que está cargando (aria-busy y una región de estado; el esqueleto es sólo para la vista)')
 afirmar(leer('_secciones/servicios/ContenidoDeServicio.tsx').includes('<CtaDelServicio servicio={servicio} enEscritorio />'), 'Servicios con menos movimiento en escritorio tiene sus CTA (antes, ninguno)')
 afirmar(/hover:-translate-y-0\.5 focus-visible:-translate-y-0\.5/.test(leer('_secciones/cierre/PiezasDeContacto.tsx')), 'las redes del pie responden al pasar y al enfocar')

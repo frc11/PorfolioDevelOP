@@ -110,16 +110,19 @@
     --degrade-del-velo: radial-gradient(closest-side, var(--velo-sobre-la-escena) 55%, transparent);
   }
 
+  [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'],
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'],
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] {
     text-shadow: var(--halo-sobre-la-escena);
   }
 
+  [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'] p,
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p,
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto'] {
     position: relative;
   }
 
+  [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'] p::before,
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p::before,
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto']::before {
     content: '';
@@ -181,6 +184,17 @@
    * (`pared`), la tinta con un halo denso del papel. Con el día vuelve la mezcla. */
   [data-v3] [data-parte='lista-del-final'][data-amanecer] .max-escritorio\:mix-blend-difference {
     mix-blend-mode: normal;
+  }
+
+  /* [C2-70] Mientras amanece, el color y los halos cruzan de un modo al otro con una transición (antes la letra saltaba).
+     Sólo con `data-amanecer`: el paso a la mezcla no se interpola y sigue seco. */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-v3] [data-parte='lista-del-final'][data-amanecer] .max-escritorio\:mix-blend-difference,
+    [data-v3] [data-parte='lista-del-final'][data-amanecer] .max-escritorio\:mix-blend-difference svg {
+      transition-property: color, text-shadow, filter;
+      transition-duration: var(--duracion-lenta);
+      transition-timing-function: var(--ease-principal);
+    }
   }
 
   [data-v3] [data-parte='lista-del-final'][data-amanecer='noche'] .max-escritorio\:mix-blend-difference {
@@ -347,4 +361,12 @@
 [data-v3] [data-panel='por-que-develop'] {
   --halo-del-final: 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.1em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.2em var(--color-fondo), 0 0 0.45em color-mix(in srgb, var(--color-fondo) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-fondo) 50%, transparent);
   --halo-del-amanecer: 0 0 0.1em var(--color-tinta), 0 0 0.1em var(--color-tinta), 0 0 0.1em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.2em var(--color-tinta), 0 0 0.45em color-mix(in srgb, var(--color-tinta) 80%, transparent), 0 0 0.9em color-mix(in srgb, var(--color-tinta) 50%, transparent);
+}
+
+/* ── [C2-90v] EL CARTEL DEL ARRASTRE DE LAS RESEÑAS («Por qué develOP», `CapaDelAro.tsx`) ──────────────────────────────
+ * Aparece con un fundido y una escala (su estado es `data-visible`, en las clases). La lista de propiedades va acá: en una
+ * clase sería un valor arbitrario sin token. Deja AFUERA el `transform` con el que el cartel sigue al mouse (si no, se
+ * arrastraría detrás del puntero); la duración y la curva siguen siendo las de sus clases. */
+[data-v3] [data-pieza='cartel-del-arrastre'] {
+  transition-property: opacity, scale;
 }

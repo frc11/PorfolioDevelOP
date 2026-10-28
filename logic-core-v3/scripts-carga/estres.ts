@@ -32,6 +32,7 @@ import path from 'node:path'
 
 import { enHorizontal, tramosDelPanel, type MuestraDelPanel } from './panel'
 import { ANCLAS_DE_LOS_PASOS, CASOS_DE_LA_RUEDA, NOMBRES_DE_LOS_PASOS, laRuedaAnduvo, recorridoDeLosPasos } from './rueda'
+import { exigirDiscoLibre } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'build'
@@ -43,6 +44,7 @@ const RUEDA = process.env.RUEDA ?? 'si'
 const PILAS = process.env.PILAS === '1'
 const SALIDA = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'carga')
 const PERFIL = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'perfil')
+exigirDiscoLibre()
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const MEMORIA_MINIMA_MB = Number(process.env.PORTERO_MB ?? 1500)
 

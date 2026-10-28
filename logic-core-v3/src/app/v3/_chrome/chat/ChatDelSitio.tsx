@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { Suspense, lazy, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { prefetchBotConfig } from '@/modules/chatbot/shared/configCache'
 
@@ -9,20 +9,8 @@ import { cargaLista, escenaPreparada, suscribirALaCarga } from '../../_lib/carga
 import { entradaAbierta, suscribirALaEntrada } from '../../_lib/entrada'
 import { laEscenaCayo, suscribirALaCaida } from '../../_lib/escena/caida'
 import { CLAVE_DE_LOS_BANCOS } from '../preloader/decision'
-import {
-  AVATAR_POR_DEFECTO,
-  BANDERA_DEL_CHAT,
-  ESPERA_OCIOSA_MS,
-  PLAZO_DEL_CHAT_MS,
-  SLUG_DEL_CHAT,
-  aparienciaDelChat,
-  avatarDeLaBandera,
-  chatPermitido,
-  montarElChat,
-  puedeEntrarElChat,
-  rutaConChat,
-  type AvatarSin3d,
-} from './compuerta'
+import { APARIENCIA_DEL_CHAT, ESPERA_OCIOSA_MS, PLAZO_DEL_CHAT_MS, SLUG_DEL_CHAT, chatPermitido, montarElChat, puedeEntrarElChat, rutaConChat } from './compuerta'
+import { useDesvanecidoDelChat } from './useDesvanecidoDelChat'
 
 /**
  * [B11] EL CHAT DEL SITIO — el widget del sitio vivo, abajo a la derecha, en el home y en las páginas de /v3 (lo monta el chrome del
@@ -52,8 +40,6 @@ function permitidoEnLaVentana(): boolean {
   }
   return chatPermitido({ automatizado: window.navigator.webdriver === true, siembra, pedidoPorElBanco: (window as VentanaDelChat).__chatDelBanco === true })
 }
-
-const avatarDeLaUrl = (): AvatarSin3d => avatarDeLaBandera(new URLSearchParams(window.location.search).get(BANDERA_DEL_CHAT))
 
 /** El plazo de la escena se cumplió (lo marca el reloj de la suscripción: así la lectura no cambia sin aviso). */
 let plazoCumplido = false
@@ -93,8 +79,6 @@ export function ChatDelSitio(): React.JSX.Element | null {
   const ruta = usePathname()
   const permitido = useSyncExternalStore(sinCambios, permitidoEnLaVentana, () => false)
   const compuerta = useSyncExternalStore(suscribirALaCompuerta, compuertaAbierta, () => false)
-  const avatar = useSyncExternalStore(sinCambios, avatarDeLaUrl, (): AvatarSin3d => AVATAR_POR_DEFECTO)
-  const overrides = useMemo(() => aparienciaDelChat(avatar), [avatar])
   const [config, setConfig] = useState<'esperando' | 'lista' | 'sin'>('esperando')
   const conChat = rutaConChat(ruta)
 
@@ -117,12 +101,25 @@ export function ChatDelSitio(): React.JSX.Element | null {
     }
   }, [permitido, conChat, compuerta, config])
 
-  if (!montarElChat({ permitido, ruta, compuerta, config })) return null
+  const montado = montarElChat({ permitido, ruta, compuerta, config })
+  // [C2-21] En las zonas cruciales (el Portfolio, Servicios), cerrado, se desvanece y no se alcanza (`inert`); abierto, se queda.
+  const capa = useRef<HTMLDivElement | null>(null)
+  const desvanecido = useDesvanecidoDelChat(capa, ruta, montado)
+
+  if (!montado) return null
   return (
     <div data-pieza="chat-del-sitio" className="fixed z-[var(--z-cabecera)]">
-      <Suspense fallback={null}>
-        <LogicCompanion slug={SLUG_DEL_CHAT} overrides={overrides} />
-      </Suspense>
+      <div
+        ref={capa}
+        data-parte="desvanecido"
+        data-desvanecido={desvanecido ? '' : undefined}
+        inert={desvanecido}
+        className="transition-opacity duration-[var(--duracion-lenta)] ease-[var(--ease-principal)] motion-reduce:transition-none data-desvanecido:opacity-0"
+      >
+        <Suspense fallback={null}>
+          <LogicCompanion slug={SLUG_DEL_CHAT} overrides={APARIENCIA_DEL_CHAT} />
+        </Suspense>
+      </div>
     </div>
   )
 }

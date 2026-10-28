@@ -52,7 +52,7 @@ import { escribirEmisionDelLogo } from './logoEmision'
 import { publicarLaMirada } from './miradaDeLaCamara'
 import { INCLINACION_DEL_TELEFONO } from './giroscopio'
 import { escalaDeLaOrbita, perseguirElPunteroDeLaOrbita } from './punteroDeLaOrbita'
-import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, viajeEnCurso } from './viaje'
+import { TOPE_DEL_CUADRO_DEL_VIAJE_MS, anotarLaCamara, viajeEnCurso } from './viaje'
 
 /** [PULIDO 2] 2 · un cuadro que llega después de esto (s) viene de la escena suspendida (no de un tirón: esos duran décimas). */
 const REANUDA_S = 0.5
@@ -75,6 +75,7 @@ import { AUTO_ORBIT_DEG_PER_S, CAMERA_FOV, ORBIT_TARGET_Y } from './probeScene'
 import { fovDeLaBanda } from './banda'
 import { mezclarConElPortfolio } from './poseDelPortfolio'
 import { AVANCE_DE_LA_INTRO, luzDeLaPagina, pistaDeLaPagina, poseDeLaIntro } from './ruta/composicionEnLaEscena'
+import { acompanarElGuardado } from './resenas/camaraDelGuardado'
 import type {
   ProbeMode,
   ProbeParamsStore,
@@ -337,6 +338,8 @@ export function OrbitRig({
       arc.level = nivelConLaNocheDisparada(arc.level)
       // [INTERFAZ 2] La sala responde a la interfaz (con su bandera; sin ella, el mismo nivel) — `interfaz/respuesta.ts`.
       arc.level = nivelConLaInterfaz(arc.level, Math.min(delta, 0.1))
+      // [C2-70e] Con el guardado de las reseñas (el gatillo) la cámara se queda en B mirando al hueco; con su peso en 0, nada (`resenas/camaraDelGuardado.ts`).
+      if (isChoreo && viajeEnCurso() === null) acompanarElGuardado(target)
       // [NOCTURNO FINAL] B2 · acá el final oscurecía y entibiaba la sala entera (el atardecer). [PULIDO 1] P1 · se fue: con el
       // tono de ACES la luz más baja casi no movía el blanco del piso y oscurecía el logo y el pie; lo que se oscurece es el
       // piso, en el color que se ve (`final/enElPiso.ts`, `uOscuroDelBrillo`).
@@ -384,6 +387,8 @@ export function OrbitRig({
             )
           : target[channel]
       }
+      // [C2-21] La cámara de este cuadro, para la llegada de un viaje del menú (`llegadaDeLaEscena.ts`): el título espera a que llegue.
+      anotarLaCamara(live, target)
 
       // 1d · Publicar al panel. UNA notificación para todos los canales, no una
       //      por canal: con `set` esto serían decenas de llamadas de listener

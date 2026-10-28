@@ -25,8 +25,7 @@ import { ChatDelSitio } from './ChatDelSitio'
 import {
   AVATARES_SIN_3D,
   AVATAR_POR_DEFECTO,
-  aparienciaDelChat,
-  avatarDeLaBandera,
+  APARIENCIA_DEL_CHAT,
   chatPermitido,
   montarElChat,
   puedeEntrarElChat,
@@ -132,8 +131,11 @@ const entradas = new Map([...registro.matchAll(/\{\s*id: '([^']+)'[\s\S]*?weight
 const livianos = (ids: readonly string[]): boolean => ids.length > 0 && ids.every((id) => entradas.get(id)?.peso === 'light' && entradas.get(id)?.escala === false)
 afirmar(livianos(AVATARES_SIN_3D) && entradas.get('neuro')?.peso === 'heavy' && /from '\.\/HeavyAvatarsLazy'/.test(registro), `los avatares de /v3 (${AVATARES_SIN_3D.join(', ')}) son los livianos del registro (SVG, sin escala: botón de 56 px); los 3D, perezosos y aparte`)
 controlPositivo('  el detector ve el orbe 3D', ['neuro'], livianos)
-afirmar(avatarDeLaBandera('neuro') === AVATAR_POR_DEFECTO && avatarDeLaBandera('monograma') === 'monograma' && avatarDeLaBandera(null) === 'onda', '  `?chat=` elige entre los tres; un 3D por la URL cae al de por defecto (la onda)')
-afirmar(aparienciaDelChat('onda') === aparienciaDelChat('onda') && aparienciaDelChat('geometrico').position === 'bottom_right', '  lo que /v3 fija: el avatar y la esquina de abajo a la derecha, el mismo objeto por avatar (el widget memoriza sobre él)')
+// [C2-21] A la spec nueva: el geométrico es el único (la onda, el monograma y la bandera `?chat=` se borraron).
+const unoSolo = (f: string): boolean => AVATARES_SIN_3D.length === 1 && AVATAR_POR_DEFECTO === 'geometrico' && !/URLSearchParams|BANDERA_DEL_CHAT/.test(f)
+afirmar(unoSolo(fuenteDelChat), '  [C2-21] el avatar es el geométrico, el único: la onda, el monograma y `?chat=` se fueron')
+controlPositivo('  el detector ve la bandera de antes', `${fuenteDelChat}\nconst avatar = new URLSearchParams(window.location.search).get(BANDERA_DEL_CHAT)`, unoSolo)
+afirmar(APARIENCIA_DEL_CHAT.avatarStyle === 'geometrico' && APARIENCIA_DEL_CHAT.position === 'bottom_right', '  lo que /v3 fija: el avatar, la esquina de abajo a la derecha y [C2-21] los colores del home, en un solo objeto (el widget memoriza sobre él)')
 
 const companion = sinComentarios(leer(COMPANION))
 const usaLaApariencia = (c: string): boolean =>
@@ -144,7 +146,7 @@ controlPositivo('  el detector ve la ventana con la config sin lo fijado (la cab
 const vivoIgual = (m: string): boolean => /<LogicCompanion slug=\{WIDGET_SLUG\} \/>/.test(m) && !/overrides/.test(m)
 afirmar(vivoIgual(montajeVivo) && /: chatbot\.config\)/.test(companion), '  el sitio vivo no pasa nada: sin `overrides` la config ES la del bot (mismo objeto), y el widget se ve como siempre')
 controlPositivo('  el detector ve el sitio vivo con algo fijado', montajeVivo.replace('<LogicCompanion slug={WIDGET_SLUG} />', '<LogicCompanion slug={WIDGET_SLUG} overrides={{ avatarStyle: "onda" }} />'), vivoIgual)
-afirmar(/<LogicCompanion slug=\{SLUG_DEL_CHAT\} overrides=\{overrides\} \/>/.test(fuenteDelChat) && /useMemo\(\(\) => aparienciaDelChat\(avatar\), \[avatar\]\)/.test(fuenteDelChat), '  /v3 se lo pasa: el bot del sitio con su apariencia')
+afirmar(/<LogicCompanion slug=\{SLUG_DEL_CHAT\} overrides=\{APARIENCIA_DEL_CHAT\} \/>/.test(fuenteDelChat), '  /v3 se lo pasa: el bot del sitio con su apariencia ([C2-21] una constante, sin bandera)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El lugar: abajo a la derecha, sin pisar el chrome en ningún ancho (los tokens)')

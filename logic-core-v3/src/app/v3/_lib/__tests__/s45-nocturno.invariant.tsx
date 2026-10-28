@@ -185,7 +185,8 @@ const PEGADOS: readonly (readonly [string, RegExp])[] = [
   ['_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx', /const bajada = useAcompananteDelTitulo<HTMLDivElement>\('portfolio'\)[\s\S]*<div ref=\{bajada\} style=\{\{ maxWidth/],
   ['_secciones/por-que-develop/PorQueDevelop.tsx', /useAcompananteDelTitulo<HTMLDivElement>\('frase-izquierda'\)[\s\S]*useAcompananteDelTitulo<HTMLDivElement>\('frase-derecha'\)[\s\S]*<div ref=\{valoresDeLaIzquierda\}[\s\S]*<div ref=\{valoresDeLaDerecha\}/],
   // [EL ENCASTRE] 1B · el título de Demos es uno solo («Demos», id `demos`): el párrafo va en su plano.
-  ['_secciones/trabajos/demos/TextoDeDemos.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('demos'\)[\s\S]*<div ref=\{enElPlano\}>\s*<div ref=\{refDelParrafo\}>/],
+  // [C2-41e] El párrafo lleva su medida (la de la bajada del Portfolio) en el elemento que va en el plano.
+  ['_secciones/trabajos/demos/TextoDeDemos.tsx', /const enElPlano = useAcompananteDelTitulo<HTMLDivElement>\('demos'\)[\s\S]*<div ref=\{enElPlano\} style=\{\{ maxWidth: `\$\{MEDIDA_DEL_TEXTO_CH\}ch` \}\}>\s*<div ref=\{refDelParrafo\}>/],
 ]
 const pegados = PEGADOS.map(([ruta, patron]) => patron.test(sinComentarios(leer(ruta))))
 afirmar(pegados.every(Boolean), '  en el hero (la bajada y los CTA), en Portfolio (su bajada), en Por qué develOP (cada columna de valores con su mitad de la frase) y en Demos (el párrafo)', pegados.map((v, k) => `${PEGADOS[k][0].split('/').pop() ?? ''}: ${v ? 'sí' : 'NO'}`).join(' · '))

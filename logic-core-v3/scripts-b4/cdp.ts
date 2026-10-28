@@ -40,6 +40,7 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { existsSync, readFileSync, rmSync } from 'node:fs'
 import path from 'node:path'
+import { exigirDiscoLibre } from '../scripts-carga/limpieza-del-banco'
 
 export const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 
@@ -184,6 +185,8 @@ export async function lanzarChrome(opciones: {
   readonly banderasExtra?: readonly string[]
 }): Promise<ChromeLanzado> {
   const { perfil } = opciones
+  // [cola 2] Sin 5 GB libres el banco no arranca (`scripts-carga/limpieza-del-banco.ts`).
+  exigirDiscoLibre()
   if (opciones.limpiarPerfil === true && existsSync(perfil)) rmSync(perfil, { recursive: true, force: true })
   const marca = path.join(perfil, 'DevToolsActivePort')
   if (existsSync(marca)) rmSync(marca, { force: true })

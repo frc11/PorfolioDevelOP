@@ -5,9 +5,11 @@ import { useRef, type RefObject } from 'react'
 import type * as THREE from 'three'
 
 import { marcarElPrimerCuadro, marcarLaEscenaPreparada } from '../../carga'
+import { laPreparacionPuede } from '../../entrada'
 import { hayBanco } from '../entorno'
 
 import { compilarConCuidado } from './compilar'
+import { calentarUnaParte, partesParaCalentar } from './partes'
 
 /**
  * [CALIDAD 1] B1 · PRECOMPILAR LOS SHADERS AL ARRANCAR — que nada tironee la primera vez que aparece.
@@ -30,8 +32,13 @@ import { compilarConCuidado } from './compilar'
  *
  * El costo no desaparece en la PRIMERA visita (Chrome guarda lo compilado en disco para las siguientes): se muda de
  * la mitad del recorrido a la carga (medido en frío: 1,1 s al arrancar, ninguno después). Con la caché, 15 ms.
+ *
+ * [C2-81] REPARTIDO, para que no trabe la bienvenida del preloader (ítem 18): con el preloader, la compilación espera a que el texto
+ * terminó de aparecer (`laPreparacionPuede`, `entrada.ts`), y el calentado va EN PARTES (`PARTES_DEL_CALENTADO` grupos de mallas, uno por
+ * cuadro: `partesParaCalentar`, `calentarUnaParte`), así el armado de los ejecutables de Direct3D se reparte en varios tirones chicos.
  */
 const CUADROS_DESPUES_DEL_LOGO = 8
+
 
 /**
  * [CALIDAD 1] B5 · lo que se dibuja en una escena aparte, en su propio búfer (los haces del amanecer, a media
@@ -71,7 +78,7 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
   const gl = useThree((s) => s.gl)
   const escena = useThree((s) => s.scene)
   const camara = useThree((s) => s.camera)
-  const estado = useRef({ cuadros: 0, compilado: false, calentar: false, hecho: false, compilarMs: 0, primerCuadro: false })
+  const estado = useRef({ cuadros: 0, compilado: false, calentar: false, hecho: false, compilarMs: 0, primerCuadro: false, partes: null as THREE.Object3D[][] | null, parte: 0, calentarMs: 0 })
   useFrame(() => {
     const e = estado.current
     // [AJUSTES FINALES] A4 · el primer cuadro de la escena, cuando ya se pintó (el cuadro siguiente): el velo de carga lo espera.
@@ -81,10 +88,19 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
     }
     if (e.hecho) return
     if (e.calentar) {
+      // [C2-81] Cada parte, sólo en un rato quieto del preloader (sin él, siempre).
+      if (!laPreparacionPuede()) return
+      const t0 = performance.now()
+      // [C2-81] Una parte por cuadro; con la última, las escenas aparte.
+      e.partes ??= partesParaCalentar(escena)
+      if (e.parte < e.partes.length) {
+        calentarUnaParte(gl, escena, camara, e.partes[e.parte])
+        e.parte += 1
+        e.calentarMs += performance.now() - t0
+        return
+      }
       e.calentar = false
       e.hecho = true
-      const t0 = performance.now()
-      calentar(gl, escena, camara)
       for (const a of ESCENAS_APARTE) {
         const previo = gl.getRenderTarget()
         gl.setRenderTarget(a.bufer)
@@ -96,13 +112,15 @@ export function Precompilar({ logoMaterialRef }: { readonly logoMaterialRef: Ref
       if (hayBanco()) {
         // Con banco, lo que tardó de verdad (esperando a la GPU): en frío es la compilación de Direct3D de lo invisible.
         gl.getContext().finish()
-        ;(window as VentanaDelBanco).__precompiladoDelBanco = { compilarMs: e.compilarMs, calentarMs: Math.round(performance.now() - t0) }
+        ;(window as VentanaDelBanco).__precompiladoDelBanco = { compilarMs: e.compilarMs, calentarMs: Math.round(e.calentarMs + performance.now() - t0) }
       }
       return
     }
     if (e.compilado || logoMaterialRef.current === null) return
     e.cuadros += 1
     if (e.cuadros < CUADROS_DESPUES_DEL_LOGO) return
+    // [C2-81] Con el preloader, recién cuando la bienvenida terminó de aparecer (`entrada.ts`).
+    if (!laPreparacionPuede()) return
     e.compilado = true
     const t0 = performance.now()
     // [T0] Sin `compileAsync`: lo que se libera mientras compila no tira en la página ni deja esto colgado (`compilar.ts`).

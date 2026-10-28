@@ -309,7 +309,7 @@ export function afirmarElSelectorVivo(): void {
   const anchoDeProxima = (cuerpo: number): number => 3.95 * cuerpo
   afirmar(NIVEL_DEL_TITULO_DE_LA_TUYA === 'titulo-xl' && anchoDeProxima(28.96 + 0.018779 * 1024) <= 280 && anchoDeProxima(28.96 + 0.018779 * 1440) <= 488 && anchoDeProxima(53.97 + 0.034742 * 1024) > 280, 'el título de «la tuya», el más grande de los titulares que entra sin cortar «próxima» a 1024 y a 1440 (`display-xl` la parte a 1024)')
   const laTuya = sinComentarios(leer('_secciones/trabajos/portfolio/LaTuya.tsx'))
-  afirmar(/<FormularioDeLaTuya visible=\{visible\} reducido=\{vivo\.reducido\} desde=\{3\} \/>/.test(laTuya) && !/data-abre-contacto/.test(laTuya), '  y [B1.2c] en lugar del CTA, el formulario corto (B1.2c · 23)')
+  afirmar(/<FormularioDeLaTuya visible=\{visible\} reducido=\{vivo\.reducido\} desde=\{2\} \/>/.test(laTuya) && !/data-abre-contacto/.test(laTuya), '  y [B1.2c] en lugar del CTA, el formulario corto (B1.2c · 23)')
   const expresion = (s: string): string => s.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')').trim()
   const despejeDeLasAnclas = expresion(/html:has\(\[data-v3\]\) \{\s*scroll-padding-top: (calc\([\s\S]*?\));\s*\}/.exec(leer('_estilos/navegacion.css'))?.[1] ?? '?')
   const despejaLaBarra = (e: string): boolean => despejeDeLasAnclas.startsWith('calc(var(--spacing-6)') && expresion(e) === despejeDeLasAnclas
@@ -347,7 +347,12 @@ export function afirmarElSelectorVivo(): void {
   titulo('B1.2b · 16 · El título entra en su lugar y se va cayendo')
 
   const encabezado = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
-  afirmar(/animate\(presencia, adentro \? 1 : 0/.test(encabezado) && /llegada=\{progresoDeLaMascara === null \? null : presencia\}/.test(encabezado) && /saleCayendo queda/.test(encabezado), 'la presencia del encabezado va por tiempo con el panel adentro (ya pegado: no viaja con la sección) y el título sale cayendo')
+  // [C2-41t] La presencia por tiempo salió a `levantarse.tsx` (la usa también «Demos» en el teléfono): el encabezado la pide con su tiempo.
+  const porTiempo = (e: string, l: string): boolean =>
+    /const presencia = usePresencia\(adentro, reducido, PRESENCIA_DEL_ENCABEZADO\)/.test(e) && /animate\(presencia, adentro \? 1 : 0, \{ duration: s, ease: \[\.\.\.curva\] \}\)/.test(l)
+  const levantarse = sinComentarios(leer('_secciones/trabajos/portfolio/levantarse.tsx'))
+  afirmar(porTiempo(encabezado, levantarse) && /llegada=\{progresoDeLaMascara === null \? null : presencia\}/.test(encabezado) && /saleCayendo queda/.test(encabezado), 'la presencia del encabezado va por tiempo con el panel adentro (ya pegado: no viaja con la sección) y el título sale cayendo')
+  controlPositivo('  el detector ve una presencia atada al scroll (sin su tiempo)', [encabezado, levantarse.replace('animate(presencia, adentro ? 1 : 0, { duration: s, ease: [...curva] })', 'presencia.set(adentro ? 1 : 0)')] as const, ([e, l]: readonly [string, string]) => porTiempo(e, l))
   const titulos = leer('_lib/escena/titulos3d/TitulosDeVolumen.tsx')
   afirmar(/if \(m\.llegada >= 1\) a\.cayendo = true/.test(titulos) && /else if \(m\.llegada <= 0\) a\.cayendo = false/.test(titulos) && /a\.uniforms\.uLevanta\.value = a\.cayendo \|\| a\.titulo\.gesto === 'levanta' \? 1 : 0/.test(titulos), '  llegado entero, lo que baja es la caída de `levanta` (se acuesta y su línea lo tapa); de vuelta en 0, su próxima llegada es la de siempre')
 }

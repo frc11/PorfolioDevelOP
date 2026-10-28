@@ -7,12 +7,17 @@ import { viajeEnCurso } from '../../../_lib/escena/viaje'
 import { SERVICIOS } from '../../_contrato/acento'
 import { DISTRIBUCION } from './datos'
 import { traslacionDelPanel } from './PanelDeServicio'
-import { DURACION_DE_LA_TRANSICION_MS, G_DEL_CAMBIO_SIN_MEDIR, TIEMPOS, avanceDelPanel, avanceDelRenglon, capaDelEnjambre, desdeDelTexto } from './tiempos'
+import { ajustarElTexto, ajustarElTitulo } from './ajuste'
+import { DURACION_DE_LA_TRANSICION_MS, G_DEL_CAMBIO_SIN_MEDIR, TIEMPOS, avanceDelPanel, avanceDelRenglon, avanceDelSubrayado, capaDelEnjambre, desdeDelTexto } from './tiempos'
 
 /**
  * [B4] LA COREOGRAFÍA DEL ESCENARIO — UN valor (`posicion`, de 0 a 3) y todo lo demás colgando de él, sin re-renderizar: cuando la
  * máquina de gatillos cambia de estado, `posicion` corre por tiempo hasta el nuevo (una transición, `DURACION_DE_LA_TRANSICION_MS`) y
  * cada cuadro mueve los paneles, los renglones y la capa del lienzo (`tiempos.ts`). Al subir, el mismo camino al revés.
+ *
+ * [C2-50] Además, al medir, ajusta las letras de cada panel (`ajuste.ts`: el texto de techo a pie, el título a su columna) ANTES de
+ * agrupar los renglones, y vuelve a medir cuando llega una letra (`clave`, y los `loadingdone` del documento); y en cada cuadro
+ * escribe el subrayado del título (`avanceDelSubrayado`).
  *
  * Un salto de más de un estado (la barra de desplazamiento, un ancla), un viaje del menú o el movimiento reducido: de golpe.
  */
@@ -54,6 +59,7 @@ interface Piezas {
   readonly paneles: readonly HTMLElement[]
   readonly palabras: readonly (readonly Palabra[])[]
   readonly renglones: readonly number[]
+  readonly subrayados: readonly (HTMLElement | null)[]
 }
 
 /** Las palabras de un panel, agrupadas en renglones por su tope en el layout (las transformadas no cuentan). */
@@ -82,6 +88,8 @@ export function aplicarLaPosicion(p: number, piezas: Piezas, lienzo: HTMLElement
     const n = piezas.renglones[i] ?? 1
     const desde = desdeDelTexto(inicio)
     for (const { el, renglon } of piezas.palabras[i] ?? []) el.style.translate = `0 ${((1 - avanceDelRenglon(g, renglon, n, desde)) * 120).toFixed(2)}%`
+    const subrayado = piezas.subrayados[i]
+    if (subrayado) subrayado.style.scale = `${avanceDelSubrayado(g, inicio).toFixed(4)} 1`
   })
   const capa = capaDelEnjambre(p, cambio.g)
   if (lienzo === null || lienzo.getAttribute('data-capa') === capa) return
@@ -89,22 +97,33 @@ export function aplicarLaPosicion(p: number, piezas: Piezas, lienzo: HTMLElement
   lienzo.style.zIndex = String(CAPA_DEL_LIENZO[capa])
 }
 
-export function useCoreografiaDelEscenario(escenario: RefObject<HTMLElement | null>, lienzo: RefObject<HTMLElement | null>, posicion: MotionValue<number>, cambio: RefObject<CambioDeCapa>): void {
-  const piezas = useRef<Piezas>({ paneles: [], palabras: [], renglones: [] })
+export function useCoreografiaDelEscenario(escenario: RefObject<HTMLElement | null>, lienzo: RefObject<HTMLElement | null>, posicion: MotionValue<number>, cambio: RefObject<CambioDeCapa>, clave = ''): void {
+  const piezas = useRef<Piezas>({ paneles: [], palabras: [], renglones: [], subrayados: [] })
   useLayoutEffect(() => {
     const el = escenario.current
     if (el === null) return undefined
     const medir = (): void => {
       const paneles = [...el.querySelectorAll<HTMLElement>('[data-pieza="panel-de-servicio"]')]
+      for (const panel of paneles) {
+        const titulo = panel.querySelector<HTMLElement>('[data-parte="titulo-del-servicio"]')
+        const texto = panel.querySelector<HTMLElement>('[data-pieza="texto-del-servicio"]')
+        if (titulo !== null) ajustarElTitulo(titulo)
+        if (texto !== null) ajustarElTexto(texto)
+      }
       const grupos = paneles.map(renglonesDe)
-      piezas.current = { paneles, palabras: grupos.map((g) => g.palabras), renglones: grupos.map((g) => g.cuantos) }
+      const subrayados = paneles.map((p) => p.querySelector<HTMLElement>('[data-parte="subrayado-del-servicio"]'))
+      piezas.current = { paneles, palabras: grupos.map((g) => g.palabras), renglones: grupos.map((g) => g.cuantos), subrayados }
       aplicarLaPosicion(posicion.get(), piezas.current, lienzo.current, cambio.current)
     }
     medir()
     const observador = new ResizeObserver(medir)
     observador.observe(el)
     void document.fonts.ready.then(medir)
-    return () => observador.disconnect()
-  }, [escenario, lienzo, posicion, cambio])
+    document.fonts.addEventListener('loadingdone', medir)
+    return () => {
+      observador.disconnect()
+      document.fonts.removeEventListener('loadingdone', medir)
+    }
+  }, [escenario, lienzo, posicion, cambio, clave])
   useMotionValueEvent(posicion, 'change', (p) => aplicarLaPosicion(p, piezas.current, lienzo.current, cambio.current))
 }

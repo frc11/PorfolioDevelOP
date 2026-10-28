@@ -7,6 +7,7 @@ import { conElDefectoDeLosGatillos } from '../../../_componentes/gatillos/defect
 import { hayBanco } from '../../../_lib/escena/entorno'
 import type { Caja } from '../../../_lib/nanobots/capa'
 import { montarElEnjambre } from '../../../_lib/nanobots/montaje'
+import { EXTENSION_DE_LA_ORBITA, unidadDelLugar } from '../../../_lib/nanobots/simbolos'
 import type { CambioDeCapa } from './useCoreografiaDelEscenario'
 import { avanceDelPanel, gDelAvance, inicioDelPanel, posicionDelEnjambre } from './tiempos'
 
@@ -84,7 +85,8 @@ export function useNanobotsDelEscenario(o: {
           })
         const ubicar = (): ReturnType<typeof capa.cambioDeCapa> => {
           const ex = enjambre.extensiones
-          const ls = lugares().map((b, k) => ({ x: (b.izquierda + b.derecha) / 2, y: (b.arriba + b.abajo) / 2, unidad: Math.min(b.derecha - b.izquierda, b.abajo - b.arriba) / 2 / (ex[k] ?? 1), extension: ex[k] ?? 1 }))
+          // [C2-50] La órbita (0) llena su caja con la elipse; su cota para el truco de profundidad es la de su ancho.
+          const ls = lugares().map((b, k) => ({ x: (b.izquierda + b.derecha) / 2, y: (b.arriba + b.abajo) / 2, unidad: unidadDelLugar(k, b.derecha - b.izquierda, b.abajo - b.arriba, ex[k] ?? 1), extension: k === 0 ? EXTENSION_DE_LA_ORBITA : (ex[k] ?? 1) }))
           enjambre.ubicar(ls)
           const [desde, hacia] = [ls[0], ls[1]]
           if (desde === undefined || hacia === undefined) return null

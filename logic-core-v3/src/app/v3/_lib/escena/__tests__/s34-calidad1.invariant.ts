@@ -181,7 +181,7 @@ afirmar(/if \(!hayBanco\(\)\) return undefined/.test(perfilGpu) && /<PerfilDeLaG
 /** Lo que se dibuja, por archivo, y el nombre con que el perfil lo agrupa. */
 const NOMBRES: readonly (readonly [string, string])[] = [
   ['ProbeStage.tsx', 'name="logo"'], ['ProbeStage.tsx', 'name="polvo"'], ['ProbeStage.tsx', 'name="bokeh"'], ['StudioFloor.tsx', 'name="piso"'],
-  ['ContactOcclusion.tsx', 'name="contacto"'], ['MoireScreen.tsx', "'trama gruesa' : 'trama fina'"], ['MoireScreen.tsx', 'name="zócalo"'], ['entorno/Haz.tsx', 'name="haz"'],
+  ['ContactOcclusion.tsx', 'name="contacto"'], ['MoireScreen.tsx', 'name="trama gruesa"'], ['MoireScreen.tsx', 'name="zócalo"'], ['entorno/Haz.tsx', 'name="haz"'],
   ['entorno/Pulso.tsx', 'name="pulso"'], ['estrellas/Estrellas.tsx', "puntos.name = 'estrellas'"], ['estrellas/Estrellas.tsx', "cupula.name = 'vía láctea'"], ['estrellas/Fugaz.tsx', "linea.name = 'fugaz'"],
   ['formacion/armado.ts', "'formación · primeras filas' : 'formación · siluetas'"], ['cieloDeDia/CieloDeDia.tsx', "cupula.name = 'cielo de día'"], ['piso/PisoVivo.tsx', "bloques.name = 'piso vivo'"], ['amanecer/haces.ts', "malla.name = 'rayos del amanecer'"], ['amanecer/haces.ts', "composicion.name = 'rayos del amanecer · composición'"],
 ]

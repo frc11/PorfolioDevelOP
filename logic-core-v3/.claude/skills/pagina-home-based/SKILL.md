@@ -16,14 +16,14 @@ Esta skill es la copia para Claude Code del criterio del chat que planifica el h
 | Cualquier cosa visible | `GUSTO.md` (qué le gusta y qué no a Valentino) |
 | Un sprint, un plan o un FRENO | `METODO.md` |
 | Algo que cruza la frontera home ↔ páginas, la escena por ruta, la navbar o las transiciones | `CONTRATO.md` |
-| Una página nueva (de servicio, nosotros, blog) | `docs/rediseno/B12a-API.md` §7 (el paso a paso y la lista para cerrar) y la maqueta que anda, `/v3/pagina-base` (`src/app/v3/pagina-base/`) |
+| Una página nueva (de servicio, nosotros, blog) | `docs/rediseno/B12a-API.md` §7 (el paso a paso y la lista para cerrar), §8 (el cierre y el FAQ), §9 (las piezas compartidas) y la maqueta que anda, `/v3/pagina-base` (`src/app/v3/pagina-base/`) |
 | Una variante de escena de una página | `VARIANTES.md` y `CONTRATO.md` §Ranura |
 
 Y siempre, antes de tocar código: el log del sprint en curso de tu línea (`docs/rediseno/SPRINT-*.md` en el home, `docs/servicios/SPRINT-*.md` en servicios). Leé lo que existe antes de crear; no dupliques lógica.
 
 ## El ADN, en orden de importancia
 
-1. **La escena viva.** La sala, el logo en el centro, el piso de bloques con energía en las juntas, el domo, el cristal, el ciclo de día y noche, y de noche el plasma y la red. Es la protagonista. En las páginas aparece en la intro y en el pie, con su variante.
+1. **La escena viva.** La sala, el logo en el centro, el piso de bloques con energía en las juntas, el domo, el cristal, el ciclo de día y noche, y de noche el plasma y la red. Es la protagonista. En las páginas aparece en la intro y en el cierre (Seis razones, el CTA, la resolución y el pie), con su variante.
 2. **Los títulos 3D impresos** (`TituloDeVolumen`). Aparecen en su lugar con su animación y se van con una caída; nunca suben desde abajo ni desaparecen de golpe.
 3. **El movimiento atado al scroll**, con los revelados de `_secciones/_contrato/`. Hay dos tipos y se eligen a propósito:
    - **progresivos:** siguen al scroll;
@@ -32,7 +32,7 @@ Y siempre, antes de tocar código: el log del sprint en curso de tu línea (`doc
 5. **Una sola voz de acento por página.** Web celeste, software violeta, IA verde. En la escena, el acento es luz (plasma, haz, filo, brillos), nunca superficie. Sobre papel van los oscuros; sobre la escena, los claros.
 6. **El vidrio** para lo que flota sobre la escena: blanco al 4 %, `blur` de 20 px, saturación 180 %, borde blanco al 8 %.
 7. **El sonido, sutil:** un tic al cambiar, un pestillo al confirmar. Siempre respeta el mute.
-8. **La continuidad.** Entre páginas, la escena no se corta: viaja o pasa el velo (ver `CONTRATO.md`).
+8. **La continuidad.** Entre páginas, la escena no se corta: viaja (del CTA de un servicio a su página) o pasa el velo (ver `CONTRATO.md`).
 9. **El celular es otra experiencia**, no la de escritorio apretada; el ejemplo es el Portfolio en historias. Por debajo de 1024, la escena va en calidad compacta.
 
 ## Qué tipo de trabajo es
@@ -43,9 +43,10 @@ Y siempre, antes de tocar código: el log del sprint en curso de tu línea (`doc
 
 **Una página** (`src/app/v3/[servicio]/`, nosotros, blog):
 - se arma copiando `/v3/pagina-base` y siguiendo `B12a-API.md` §7: las firmas de la API mandan sobre esta skill;
-- tiene tres tramos: la intro con escena (2,5 pantallas: el título en volumen con su bajada y «de qué se trata», en una de las composiciones de `?composicion=`), el cuerpo en papel y el pie genérico;
+- tiene tres tramos: la intro con escena (2,5 pantallas: el título en volumen con su bajada y «de qué se trata», en una de las composiciones de `?composicion=`), el cuerpo en papel y el cierre genérico (`CierreDeLaPagina`, B13: Seis razones, el CTA, la resolución, el pie plano y el FAQ con las 6 preguntas de la página);
 - la escena, la cámara, el título 3D, la navbar y el velo son del home; la página pone el contenido, el cuerpo y su variante;
-- la navegación entre páginas va con `EnlaceDeRuta` (precarga, salida de la variante y velo); el texto sobre la escena no lleva velo ni mancha (sombra pegada a las letras), y se mide su contraste;
+- la navegación entre páginas va con `EnlaceDeRuta` (precarga, salida de la variante y velo); del CTA de un servicio del home a su página, el viaje (la escena en vez de la banda); el texto sobre la escena no lleva velo ni mancha (sombra pegada a las letras), y se mide su contraste;
+- las piezas compartidas se importan (`EstadoDeEnvio`, `AvisoDeScroll`, `Reluciente`, `CarruselDeTarjetas`, `TitularQueSeLevanta`: tabla de `CONTRATO.md`), no se copian;
 - una sola maqueta se aprueba y se replica por la plantilla: lo propio de cada servicio sale de los datos, no de componentes distintos.
 
 **Una variante de escena** (`src/app/v3/_servicios/escena/`):

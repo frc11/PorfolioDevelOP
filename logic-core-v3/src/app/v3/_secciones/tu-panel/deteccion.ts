@@ -68,6 +68,12 @@ export function sinAriaHidden(html: string): string {
 /** El texto que la persona recibe: el visible, menos lo que está fuera del árbol. */
 export const textoAccesible = (html: string): string => textoVisible(sinAriaHidden(html))
 
+/**
+ * [C2 · 60c] El marcado sin la opacidad que escribe la capa del formulario de `EstadoDeEnvio` (el estándar de envío de la cola 2: su
+ * fundido de Motion, servido en 1). Es de la pieza compartida, no un estilo a mano de la sección; sólo esa capa, nada más.
+ */
+export const sinLaOpacidadDelEnvio = (html: string): string => html.replace(/(<div data-parte="formulario" tabindex="-1" class="[^"]*") style="opacity:1"/g, '$1')
+
 export const cuentaDe = (texto: string, aguja: RegExp): number => (texto.match(aguja) ?? []).length
 
 export const aperturasDe = (html: string, etiqueta: string): number =>

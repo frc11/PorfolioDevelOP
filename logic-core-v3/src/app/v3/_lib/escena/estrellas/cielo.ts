@@ -131,8 +131,8 @@ float viaLactea( vec3 d ) {
 /**
  * LO QUE TAPA LA TRAMA, en GLSL: `delanteDeLaTrama( o, d )` es qué parte de lo que está afuera, en la
  * dirección `d` desde `o`, se ve a través de las dos capas (0 detrás de una raya, 1 entre rayas). Lee la
- * textura de cada capa donde el rayo la cruza, con su transformación de hoy ([B8] quietas, salvo la rendija de
- * `?moire=mouse`) y la envolvente de su banda; [B8] una capa que no se dibuja no tapa. Pide `textureLod` (sirve en
+ * textura de cada capa donde el rayo la cruza, con su transformación de hoy ([B8] quietas, salvo la rendija que sigue al
+ * puntero) y la envolvente de su banda; [B8] una capa que no se dibuja no tapa. Pide `textureLod` (sirve en
  * el vértice).
  */
 export const TRAMA_GLSL = /* glsl */ `

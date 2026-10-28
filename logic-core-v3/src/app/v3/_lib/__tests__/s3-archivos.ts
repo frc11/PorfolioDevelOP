@@ -63,6 +63,8 @@ export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/intro.css`,
   // [B12c] la cubierta del preloader del sitio: se muestra sólo con la decisión del <head>, con su seguro sin JS.
   `${V3}/_estilos/preloader.css`,
+  // [C2 · 20] las piezas compartidas de la cola 2: el autocompletado de /v3, el encastre de EstadoDeEnvio, AvisoDeScroll y Reluciente.
+  `${V3}/_estilos/piezas.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

@@ -20,7 +20,7 @@ import { RAIZ } from '../../_lib/__tests__/s3-archivos'
 import { quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { ESCALA_DEL_FUNDIDO, MS_DEL_FUNDIDO } from '../../_secciones/trabajos/demos/apertura'
 import { FASES_DEL_GENIE, MS_DEL_GENIE, correrPorTiempo, filaDelGenie, liderDelGenie, type Caja } from '../../_secciones/trabajos/demos/genie'
-import { DESPLIEGUE, cajaDeLaPantalla, cajaDelOrigen, formaDelDespliegue, msDelTramo, opacidadDelContenido } from '../despliegue/despliegue'
+import { DESPLIEGUE, FASES_DEL_DESPLIEGUE, cajaDeLaPantalla, cajaDelOrigen, formaDelDespliegue, msDelTramo, opacidadDelContenido } from '../despliegue/despliegue'
 import { ROTULOS_DEL_INGRESO, TITULO_DEL_INGRESO } from './contenido'
 import { MENSAJES_DEL_INGRESO, validarIngreso, type AccionesDelIngreso } from './envio'
 import { FormularioDelIngreso } from './FormularioDelIngreso'
@@ -64,7 +64,7 @@ const fuente = (r: string): string => quitarComentarios(leer(r))
     return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy))
   }
   const contornoDeLasDemos = (m: number): (readonly [P, P])[] => {
-    const filas = Array.from({ length: 41 }, (_, k) => filaDelGenie(k / 40, m, pantalla, login, lider))
+    const filas = Array.from({ length: 41 }, (_, k) => filaDelGenie(k / 40, m, pantalla, login, lider, FASES_DEL_DESPLIEGUE))
     const iz = filas.map((f) => ({ x: f.izquierda, y: f.y }))
     const de = filas.map((f) => ({ x: f.derecha, y: f.y }))
     const tramos = (l: P[]): (readonly [P, P])[] => l.slice(1).map((p, i) => [l[i], p] as const)
@@ -100,6 +100,44 @@ const fuente = (r: string): string => quitarComentarios(leer(r))
   }
   afirmar(puntas((m) => formaDelDespliegue(m, pantalla, login)), '  sale del botón (m = 1: su caja) y termina en la pantalla entera (m = 0): «un fondo negro tapa la página»')
   controlPositivo('  el detector VE una forma que no llega a la pantalla entera', (m: number) => formaDelDespliegue(Math.max(m, 0.2), pantalla, login), puntas)
+
+  // [C2 · 80] UNA SOLA EXPANSIÓN, sin meseta: el área cubierta por cuadro (a 60 Hz, de cerrada a abierta) sube siempre y ningún paso se
+  // queda por debajo de la mitad del paso parejo mientras cubre entre el 4 y el 96 %. Con las fases de las demos el área sube, baja y
+  // sigue: ésa era la traba a mitad de camino. Se prueba en los cuatro anchos, con el botón arriba a la derecha y abajo a la izquierda.
+  const areaCubierta = (m: number, v: Caja, d: Caja, fases?: typeof FASES_DEL_DESPLIEGUE): number => {
+    const l = liderDelGenie(v, d)
+    const filas = 200
+    let a = 0
+    let previa = filaDelGenie(0, m, v, d, l, fases)
+    for (let k = 1; k <= filas; k += 1) {
+      const f = filaDelGenie(k / filas, m, v, d, l, fases)
+      a += ((previa.derecha - previa.izquierda + (f.derecha - f.izquierda)) / 2) * Math.abs(f.y - previa.y)
+      previa = f
+    }
+    return a / (v.ancho * v.alto)
+  }
+  const GEOMETRIAS: readonly (readonly [Caja, Caja])[] = [
+    [cajaDeLaPantalla(1440, 900), { x: 1318, y: 22, ancho: 74, alto: 30 }],
+    [cajaDeLaPantalla(1440, 900), { x: 100, y: 800, ancho: 80, alto: 40 }],
+    [cajaDeLaPantalla(1024, 768), { x: 900, y: 20, ancho: 48, alto: 48 }],
+    [cajaDeLaPantalla(768, 1024), { x: 650, y: 20, ancho: 48, alto: 48 }],
+    [cajaDeLaPantalla(390, 844), { x: 320, y: 16, ancho: 48, alto: 48 }],
+  ]
+  const sinMeseta = (fases: typeof FASES_DEL_DESPLIEGUE): boolean =>
+    GEOMETRIAS.every(([v, d]) => {
+      const cuadros = Math.round((DESPLIEGUE.ms / 1000) * 60)
+      let previa = areaCubierta(1, v, d, fases)
+      for (let i = 1; i <= cuadros; i += 1) {
+        const a = areaCubierta(1 - i / cuadros, v, d, fases)
+        if (a < previa - 1e-9) return false
+        if (previa > 0.04 && a < 0.96 && (a - previa) * cuadros < 0.5) return false
+        previa = a
+      }
+      return true
+    })
+  afirmar(sinMeseta(FASES_DEL_DESPLIEGUE), '  una sola expansión continua: el área cubierta por cuadro sube siempre y sin meseta (1440, 1024, 768 y 390; botón arriba o abajo)')
+  controlPositivo('  el detector VE la traba de las fases de las demos (el área sube, baja y sigue)', FASES_DEL_GENIE, sinMeseta)
+  controlPositivo('  y una pausa a mitad (el área quieta unos cuadros)', { embudo: { desde: 0, hasta: 0.2 }, deslizamiento: { desde: 0.8, hasta: 1 } }, sinMeseta)
 
   // El reloj: el de las demos, lineal en el tiempo y de punta a punta en sus 560 ms.
   const cuadros: FrameRequestCallback[] = []
@@ -139,8 +177,9 @@ const fuente = (r: string): string => quitarComentarios(leer(r))
   const sinEnlace = (h: string): boolean => probar.test(h) && !/data-parte="probar-el-panel"><a /.test(h) && h.includes(ROTULOS_DEL_INGRESO.probar)
   afirmar(sinEnlace(HOJA), '  «Probá el panel» (C1) está: un botón visible que todavía no hace nada, sin enlace roto')
   controlPositivo('  el detector VE un «Probá el panel» que es un enlace', HOJA.replace(probar, '<span data-parte="probar-el-panel"><a href="#">'), sinEnlace)
-  const volver = (h: string): boolean => new RegExp(`<button type="button" data-parte="volver"[^>]*>${ROTULOS_DEL_INGRESO.volver}</button>`).test(h) && h.indexOf('probar-el-panel') < h.indexOf('data-parte="volver"')
-  afirmar(volver(HOJA), '  y debajo, «Volver al home»')
+  const volver = (h: string): boolean => new RegExp(`<button type="button" data-parte="volver"[^>]*>${ROTULOS_DEL_INGRESO.volver}</button>`).test(h) && h.indexOf('data-parte="volver"') < h.indexOf('probar-el-panel')
+  afirmar(volver(HOJA), '  y abajo, «Volver al home» a la izquierda de «Probá el panel» [C2 · 80]')
+  controlPositivo('  el detector VE «Volver al home» a la derecha', HOJA.replace(/(<button type="button" data-parte="volver"[\s\S]*?<\/button>)([\s\S]*?)(<span data-parte="probar-el-panel">[\s\S]*?<\/span>)/, '$3$2$1'), volver)
   const HOJA_FUENTE = fuente(`${CARPETA}/HojaDelIngreso.tsx`)
   afirmar(/useDialogo\(contenido, alPedirElCierre\)/.test(HOJA_FUENTE) && /alPedirElCierre = cerrarIngreso/.test(HOJA_FUENTE) && /onClick=\{alPedirElCierre\}/.test(HOJA_FUENTE), '  Esc y «Volver al home» cierran como la flecha (`cerrarIngreso`); el foco atrapado y la página quieta: el `useDialogo` de las demos')
   afirmar(/data-lenis-prevent=""/.test(HOJA) && /overflow-y-auto overscroll-contain/.test(HOJA), '  la rueda no llega a la página (Lenis la ignora) y lo de adentro se desplaza adentro si no entra')

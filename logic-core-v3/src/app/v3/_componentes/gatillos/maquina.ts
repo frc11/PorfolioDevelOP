@@ -12,12 +12,31 @@
  * Todo en px del tramo: 0 es donde arranca el ancla (el tope de la pista en el tope del cuadro) y cada paso mide `pasoPx`.
  */
 
-import { gestoDeLaRueda, gestoDisparado, type GestoDeLaRueda } from './rueda'
+import { RUEDA, gestoDeLaRueda, gestoDisparado, type GestoDeLaRueda } from './rueda'
 
 /** La regla de un tramo de gatillos: cuántos pasos y cuánto mide cada uno (px del documento). */
 export interface ReglaDeGatillos {
   readonly cantidad: number
   readonly pasoPx: number
+  /**
+   * [C2-51] La salida de abajo SIN gatillo (Servicios: del último servicio al recomendador, ítem 14). En el último paso, un gesto
+   * NUEVO hacia abajo es de la página (scroll normal, no un vuelo); y ese paso se aterriza al PIE de su tramo
+   * (`aterrizajeDelPasoEnElTramo`), donde el escenario está por soltarse: bajar ya mueve la página. La entrada desde abajo sigue
+   * atrapando (subiendo, el gesto que entra se planta en el último). Sin la bandera (el Portfolio, Demos), lo de siempre.
+   */
+  readonly salidaDeAbajoLibre?: boolean
+}
+
+/** [C2-51] Lo que queda el aterrizaje del último paso antes del pie de su tramo (px): adentro del paso, sin soltar el escenario. */
+export const PIE_DEL_ULTIMO_PX = 2
+
+/** [C2-51] Si este gesto, desde este paso, sale por abajo sin gatillo. */
+export const salidaLibre = (paso: number, sentido: 1 | -1, r: ReglaDeGatillos): boolean => r.salidaDeAbajoLibre === true && sentido > 0 && paso === r.cantidad - 1
+
+/** [C2-51] Adónde aterriza un paso (px del tramo): su centro; con la salida libre, el último al pie de su tramo. */
+export function aterrizajeDelPasoEnElTramo(i: number, r: ReglaDeGatillos): number {
+  if (r.salidaDeAbajoLibre === true && i === r.cantidad - 1) return Math.max((i + 0.5) * r.pasoPx, r.cantidad * r.pasoPx - PIE_DEL_ULTIMO_PX)
+  return (i + 0.5) * r.pasoPx
 }
 
 /** −1 antes del ancla, 0…cantidad−1 los pasos, `cantidad` después. */
@@ -78,6 +97,30 @@ export function entradaDelGesto(fase: FaseDelGatillo, hacia: number, sentido: 1 
   return null
 }
 
+/**
+ * [C2-50] EL OBJETIVO DEL SCROLL NATIVO (abajo de 1025 no hay Lenis) — la rueda nativa anima su scroll: `scrollY` llega TARDE a lo que
+ * ya pidieron las muescas anteriores. Con `scrollY + evento` la entrada no veía venir el gesto que la cruzaba, la página pasaba el
+ * ancla con la inercia nativa y aterrizaba en un servicio (el bug de 390: la rueda bajando salteaba la entrada). Como el `targetScroll`
+ * de Lenis, se lleva la cuenta de lo pedido: mientras las muescas lleguen seguidas (`OBJETIVO_NATIVO_MS`), el destino es lo pedido
+ * hasta acá más el evento; si no, el scroll de ahora.
+ */
+export interface ObjetivoNativo {
+  readonly y: number
+  /** Hasta cuándo vale (ms): después, manda el scroll. */
+  readonly hasta: number
+}
+
+export const OBJETIVO_NATIVO_MS = 450
+export const SIN_OBJETIVO: ObjetivoNativo = { y: 0, hasta: Number.NEGATIVE_INFINITY }
+
+/** Desde dónde suma un evento: lo pedido (si es reciente) o el scroll. */
+export const baseDelObjetivo = (o: ObjetivoNativo, scrollY: number, ahora: number): number => (ahora < o.hasta ? o.y : scrollY)
+
+/** Lo pedido después de un evento que la página deja pasar (acotado al documento). */
+export function seguirElObjetivo(o: ObjetivoNativo, scrollY: number, px: number, ahora: number, maximo: number): ObjetivoNativo {
+  return { y: Math.min(maximo, Math.max(0, baseDelObjetivo(o, scrollY, ahora) + px)), hasta: ahora + OBJETIVO_NATIVO_MS }
+}
+
 /** Lo que se MUESTRA en cada paso: antes del ancla, el primero; después, el último (el escenario se va con él). */
 export const vistaDelPasoEnElTramo = (paso: number, cantidad: number): number => Math.min(cantidad - 1, Math.max(0, paso))
 
@@ -116,12 +159,20 @@ export function decidirLaRueda(m: MomentoDeLaRueda, r: ReglaDeGatillos): { reado
     return { decision: paso === null ? { tipo: 'pagina' } : { tipo: 'entrada', paso }, gesto: gestoDisparado(m.ahora) }
   }
   if (m.enVuelo || m.ocupado) return { decision: { tipo: 'tragar' }, gesto: gestoDisparado(m.ahora) }
+  // [C2-51] La salida de abajo libre: un gesto NUEVO hacia abajo desde el último (o uno de la página que sigue) es de la página. Lo que
+  // queda del gesto que trajo hasta el último (ya dio su paso) se sigue tragando: la inercia no se lleva el servicio recién llegado.
+  if (salidaLibre(m.paso, m.px > 0 ? 1 : -1, r) && (m.ahora - m.gesto.ultimo > RUEDA.quietoMs || !m.gesto.disparado))
+    return { decision: { tipo: 'pagina' }, gesto: { acumulado: 0, ultimo: m.ahora, disparado: false } }
   const g = gestoDeLaRueda(m.gesto, m.px, m.ahora)
   return { decision: { tipo: 'paso', sentido: g.sentido }, gesto: g.gesto }
 }
 
-/** Una tecla que scrollea (no Inicio ni Fin): adentro, un paso por tecla apretada (su repetición no); afuera, la de la página. */
-export function decidirLaTecla(paso: number, cantidad: number, enVuelo: boolean, ocupado: boolean, repetida: boolean): 'pagina' | 'tragar' | 'paso' {
+/**
+ * Una tecla que scrollea (no Inicio ni Fin): adentro, un paso por tecla apretada (su repetición no); afuera, la de la página.
+ * [C2-51] `libre`: la tecla baja desde el último con la salida libre (`salidaLibre`): es de la página, salvo con la transición corriendo.
+ */
+export function decidirLaTecla(paso: number, cantidad: number, enVuelo: boolean, ocupado: boolean, repetida: boolean, libre = false): 'pagina' | 'tragar' | 'paso' {
   if (!enVuelo && faseDe(paso, cantidad) !== 'adentro') return 'pagina'
+  if (libre && !enVuelo && !ocupado) return 'pagina'
   return repetida || enVuelo || ocupado ? 'tragar' : 'paso'
 }

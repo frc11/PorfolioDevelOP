@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { CTA_EN_VIVO, avisarDelLugar, ctaListo, ctaVisibleEnElViaje, suscribirAlCta, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
 import { apareceDeLosValores, ctaTocable, deslizadoEnLaLista, entradaEnLaLista, llegadaDelTexto, progresoEnLaLista, tocableEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
 import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
+import { Reluciente } from '../efectos/Reluciente'
 import type { IdDeServicio } from '../../_secciones/_contrato/acento'
 
 /**
@@ -188,7 +189,7 @@ export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista 
       data-precarga={precarga ?? undefined}
       aria-label={rotulo}
       style={{ pointerEvents }}
-      className="inline-block cursor-pointer no-underline"
+      className="relative inline-block cursor-pointer overflow-hidden no-underline"
       onPointerEnter={(e) => {
         if (e.pointerType === 'mouse') CTA_EN_VIVO.hover = true
       }}
@@ -226,6 +227,8 @@ export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista 
       <motion.span ref={texto} aria-hidden="true" style={{ opacity: listo ? 0 : llegada }} className={cn('block', FUENTE_DEL_CTA, className)}>
         {rotulo.toUpperCase()}
       </motion.span>
+      {/* [C2-70] «HABLANOS» se toca: el reflejo de Reluciente pasa por la caja del enlace (sigue a las letras de la escena, A1). */}
+      <Reluciente />
     </motion.a>
   )
 }

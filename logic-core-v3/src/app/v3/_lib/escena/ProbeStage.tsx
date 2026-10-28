@@ -241,16 +241,16 @@ export default function ProbeStage({
           sitio: la gruesa es la retícula del hero, la fina es la misma a la
           mitad del paso con un punto en cada cruce.
 
-          [B8] **Quietas y, las dos, en la pared**: separadas en profundidad (S10)
-          el paralaje movía el moiré con la cámara y mareaba. Qué capas se
-          dibujan lo elige `?moire=0|1|2|mouse` (`moire/fijo.ts`).
+          [B8] **Quietas y en la pared**: separadas en profundidad (S10) el
+          paralaje movía el moiré con la cámara y mareaba. [C2-31m] Queda una
+          sola capa, la gruesa, corrida por el puntero (`moire/fijo.ts`).
 
-          Dos draw calls y dos superficies transparentes que cubren el 51% y el
-          57% del cuadro en promedio. El aliasing está medido en las DOS
-          direcciones contra los cinco recorridos: 26 veces de margen. Los números
-          están en `probeMoire.ts`.
+          Un draw call y una superficie transparente que cubre el 57% del cuadro
+          en promedio. El aliasing está medido en las DOS direcciones contra los
+          cinco recorridos: 26 veces de margen. Los números están en
+          `probeMoire.ts`.
         */}
-        <MoireScreen ref={moireRef} store={store} hastaElPiso={pisoConFormacion(calidad) !== undefined} />
+        <MoireScreen ref={moireRef} hastaElPiso={pisoConFormacion(calidad) !== undefined} />
 
         {/*
           Los dos campos van en grupos propios porque el rig los hace DERIVAR.
@@ -297,7 +297,7 @@ export default function ProbeStage({
         <RanuraDeLaVariante calidad={calidad} reducido={reducedMotion} />
         {/* [ESCENA 3] El entorno (haz, pulso, polvo que responde, cursor): después del rig, para leer su cuadro. */}
         <Entorno rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
-        {/* [B8] El moiré no lee el rig: sólo la rendija de `?moire=mouse` se mueve, con el puntero. */}
+        {/* [B8] El moiré no lee el rig: sólo la rendija se mueve, con el puntero ([C2-31m] o con una entrada de afuera: `moire/entrada.ts`). */}
         <MoireDelMouse moireRef={moireRef} quieto={reducedMotion} />
         <Aire rig={rig} quieto={reducedMotion} logoGroupRef={logoGroupRef} />
         {/* [PULIDO 19] Q0 · la física del polvo (su simulación en la GPU y el campo del logo) sólo si el polvo se dibuja: sin él corría igual. */}

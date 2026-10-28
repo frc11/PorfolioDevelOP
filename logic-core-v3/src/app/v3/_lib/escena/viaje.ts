@@ -142,3 +142,46 @@ export function relojDelCuadro(tiempoMs: number): number {
 export function segundosDelViaje(): number {
   return actual === null ? 0 : Math.max(0, RELOJ.suave - RELOJ.alEmpezar) / 1000
 }
+
+/** [C2-21] Los cinco números de una pose de la cámara (los del rig). */
+export interface PoseDeCinco {
+  angleDeg: number
+  height: number
+  distance: number
+  frameX: number
+  frameY: number
+}
+
+const poseEnCero = (): PoseDeCinco => ({ angleDeg: 0, height: 0, distance: 0, frameX: 0, frameY: 0 })
+
+/**
+ * [C2-21] LA CÁMARA DE ESTE CUADRO, para la llegada de un viaje (`llegadaDeLaEscena.ts`): la viva (la que se ve, con su inercia) y la que
+ * persigue (la del recorrido con lo que la mezcla: el Portfolio, la intro de una página). La anota el rig una vez por cuadro copiando
+ * números (sin reservar nada); `cuando` es la hora de ese cuadro: sin cuadros (la escena suspendida o caída) la llegada no espera.
+ */
+export const CAMARA_DEL_CUADRO = { viva: poseEnCero(), objetivo: poseEnCero(), cuando: Number.NEGATIVE_INFINITY }
+
+const copiarLaPose = (a: PoseDeCinco, de: Readonly<PoseDeCinco>): void => {
+  a.angleDeg = de.angleDeg
+  a.height = de.height
+  a.distance = de.distance
+  a.frameX = de.frameX
+  a.frameY = de.frameY
+}
+
+/**
+ * [C2-21] Los defectos de la llegada, para el control positivo del banco (`window.__defectosDeLaLlegada`, nunca la URL), separados por
+ * comas: `sin-espera` (el título en el acto, como antes) y `sin-soltar` (el Portfolio suelta su pose recién cuando el scroll sale de él).
+ */
+export type DefectoDeLaLlegada = 'sin-espera' | 'sin-soltar'
+export function conElDefectoDeLaLlegada(d: DefectoDeLaLlegada): boolean {
+  if (typeof window === 'undefined') return false
+  const pedido = (window as Window & { __defectosDeLaLlegada?: unknown }).__defectosDeLaLlegada
+  return typeof pedido === 'string' && pedido.split(',').includes(d)
+}
+
+export function anotarLaCamara(viva: Readonly<PoseDeCinco>, objetivo: Readonly<PoseDeCinco>): void {
+  copiarLaPose(CAMARA_DEL_CUADRO.viva, viva)
+  copiarLaPose(CAMARA_DEL_CUADRO.objetivo, objetivo)
+  CAMARA_DEL_CUADRO.cuando = performance.now()
+}

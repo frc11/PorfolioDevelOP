@@ -128,13 +128,19 @@ const hallazgos = escanearLoReal(textoQuieto)
 afirmarIgual(hallazgos, [], `cero cifras, cero precios y cero números sin declarar en ${textoQuieto.length} caracteres`)
 afirmarIgual(preciosEncontrados(textoQuieto), [], 'cero precios, mirado aparte: no están cerrados y no se inventan')
 
+/**
+ * [C2-90v] El contrapeso era «hay marcadores en pantalla»: el último de las cuatro (el `[TEXTO]` de las preguntas del recomendador)
+ * se fue con la C2-51, que trajo su texto de 05-TEXTOS. Que no quede ninguno es el pedido cerrado, no un escáner ciego: lo que se
+ * afirma ahora es que el contador mira el texto del recorrido y VE un marcador cuando lo hay (control de abajo).
+ */
 const marcadores = marcadoresRealesEn(textoQuieto)
 afirmar(
-  marcadores.length > 0,
-  `el contrapeso: ${marcadores.length} marcadores distintos en pantalla`,
-  marcadores.join(' · '),
+  textoQuieto.length > 0,
+  `el contrapeso: el contador de marcadores mira los ${textoQuieto.length} caracteres del recorrido: ${marcadores.length} marcadores distintos en pantalla`,
+  marcadores.join(' · ') || 'ninguno: el pedido de las cuatro secciones está cerrado',
 )
-console.log(`  el pedido a Franco, tal como se lee: ${marcadores.join(' · ')}`)
+controlPositivo('  y el contador NO está ciego: ve un marcador que llega a la pantalla', `${textoQuieto} [TEXTO]`, (texto: string) => marcadoresRealesEn(texto).length === 0)
+console.log(`  el pedido a Franco, tal como se lee: ${marcadores.join(' · ') || '(nada pendiente)'}`)
 
 const hallazgosDelControl = escanearLoReal(CONTENIDO_PROHIBIDO_DE_CONTROL)
 afirmar(
@@ -287,15 +293,43 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · El foco: todo lo interactivo lo conserva')
 
-const interactivos = [...QUIETO.matchAll(/<(?:a\b[^>]*\bhref=|button\b|input\b|textarea\b|select\b)[^>]*>/g)].map((m) => m[0])
+const interactivosDe = (html: string): string[] =>
+  [...html.matchAll(/<(?:a\b[^>]*\bhref=|button\b|input\b|textarea\b|select\b)[^>]*>/g)].map((m) => m[0])
+const interactivos = interactivosDe(QUIETO)
 const deshabilitados = interactivos.filter((t) => /\bdisabled\b/.test(t)).length
 afirmar(interactivos.length > 0, `el recorrido expone ${interactivos.length} elementos interactivos`, `${deshabilitados} deshabilitados a propósito`)
-afirmarIgual(apagadosDeFoco(QUIETO), [], 'ninguno apaga el anillo de foco en el marcado servido')
+// [C2 · 60c] Las dos capas de `EstadoDeEnvio` (el estándar de envío de la cola 2, que ahora monta el CTA del Panel): reciben el foco
+// desde el código (`tabindex="-1"`, fuera del recorrido) y no son controles, así que no dibujan anillo. Sólo ellas: lo interactivo de
+// adentro (los campos, el botón) conserva el suyo, y el detector lo sigue viendo (control de abajo).
+const sinCapasDelEnvio = (html: string): string => html.replace(/(<div data-parte="(?:formulario|estado)" tabindex="-1" class="[^"]*?)\s*\boutline-none\b/g, '$1')
+afirmarIgual(apagadosDeFoco(sinCapasDelEnvio(QUIETO)), [], 'ninguno apaga el anillo de foco en el marcado servido (salvo las capas de `EstadoDeEnvio`, que no son controles)')
+controlPositivo('  la excepción no tapa un control apagado adentro del envío', '<div data-parte="formulario" tabindex="-1" class="outline-none"><button class="outline-none">x</button></div>', (html) => apagadosDeFoco(sinCapasDelEnvio(html)).length === 0)
+/**
+ * [C2-90v] Lo que el lector anuncia conserva su parada; lo que va adentro de un `aria-hidden` es una COPIA VISUAL (las tarjetas del
+ * carrusel de reseñas del teléfono y sus «Ver trabajo», C2-70t: la parada de cada reseña es su enlace de `ResenasParaElLector`) y
+ * tiene que salir del teclado: un foco que entra a lo que el lector no anuncia es el defecto. Se parten por subárbol, como el texto.
+ */
+const fueraDelTeclado = (t: string): boolean => /\btabindex="-1"/.test(t)
+/** Los interactivos adentro de un `aria-hidden`: los de todo el marcado menos los del marcado sin esos subárboles (como multiconjunto). */
+const interactivosTapados = (html: string): string[] => {
+  const quedan = interactivosDe(quitarSubarbolesConAtributo(html, 'aria-hidden'))
+  return interactivosDe(html).filter((t) => {
+    const i = quedan.indexOf(t)
+    if (i === -1) return true
+    quedan.splice(i, 1)
+    return false
+  })
+}
+const anunciadosSinParada = (html: string): string[] => interactivosDe(quitarSubarbolesConAtributo(html, 'aria-hidden')).filter(fueraDelTeclado)
+const tapadosConParada = (html: string): string[] => interactivosTapados(html).filter((t) => !fueraDelTeclado(t))
+afirmarIgual(anunciadosSinParada(QUIETO), [], 'y ninguno de los que se anuncian se saca del orden de tabulación')
 afirmarIgual(
-  interactivos.filter((t) => /\btabindex="-1"/.test(t)),
+  tapadosConParada(QUIETO),
   [],
-  'y ninguno se saca del orden de tabulación',
+  `  y los ${String(interactivosTapados(QUIETO).length)} de las copias visuales (adentro de un aria-hidden) salen del teclado: el foco no entra a lo que el lector no anuncia`,
 )
+controlPositivo('  el detector VE un control anunciado sacado del teclado', '<p><a href="#x" tabindex="-1">x</a></p>', (html) => anunciadosSinParada(html).length === 0)
+controlPositivo('  y una copia visual que el teclado recorre', '<div aria-hidden="true"><a href="#x">x</a></div>', (html) => tapadosConParada(html).length === 0)
 
 controlPositivo('el detector de apagados lo vería en el marcado', '<a href="#x" class="outline-none">x</a>', (html) =>
   apagadosDeFoco(html).length === 0,

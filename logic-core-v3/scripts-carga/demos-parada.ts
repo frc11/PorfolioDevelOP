@@ -27,12 +27,13 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHOS = (process.env.ANCHOS ?? '1440,1024').split(',').map(Number)
 const CONTROL = process.env.CONTROL ?? ''
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/demos')
+const SALIDA = salidaDelBanco('demos')
 /** Lo que se espera el reposo después de un gesto (el vuelo del Portfolio, la llegada de 1,8 s y la inercia que sobra). */
 const REPOSO_MS = 3500
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -132,7 +133,7 @@ async function main(): Promise<void> {
   const filas: { ancho: number; caso: string; bien: boolean; motivo: string }[] = []
   for (const ancho of ANCHOS) {
     const alto = ancho <= 1024 ? 768 : 900
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/demos-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('demos')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

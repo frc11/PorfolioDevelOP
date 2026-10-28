@@ -86,8 +86,9 @@ const sinPartir = (h: string, c: string, q: string): boolean =>
 afirmar(sinPartir(hero, cta, quienes), '  donde el diseño es UN renglón (el registro 1 del hero, la frase del CTA) el DOM no se parte desde 1024 y la letra no pasa de su caja; el titular de Quiénes somos, de su columna')
 controlPositivo('  el detector VE el registro 1 que se parte (el fluido sin tope)', hero.replace('escritorio:text-[length:min(var(--text-fluido-display),calc(100cqw/8.4))] escritorio:whitespace-nowrap', 'escritorio:text-fluido-display'), (h: string) => sinPartir(h, cta, quienes))
 
-// A3 · Quiénes somos desde 1024: el ≠ pegado al margen (como en la tablet angosta; centrado caía sobre el arco del logo) y
-// la fila del ≠ es la que crece: el titular arriba, el cuerpo abajo y el logo entre los dos (con el hueco parejo no entraba).
+// A3 · Quiénes somos desde 1024: la fila del ≠ es la que crece: el titular arriba, el cuerpo abajo y el logo entre los dos (con
+// el hueco parejo no entraba). [C2-30s] El ≠ ya no va pegado al margen: su Bloque llena esa fila y es el espacio libre, con el ≠
+// grande y centrado en él (`signo.ts`, s78-c2-30s); la regla del margen de `banda.css` queda (sin efecto: su lugar mide lo que él).
 // Los bordes, 13 y 12 svh: los del banco a 1440 × 900 en el reposo del viaje (el titular despejado de la barra y del logo, el
 // cuerpo entero debajo del logo).
 const CORTE = Number(valorDeToken('--breakpoint-escritorio').replace('px', ''))
@@ -95,11 +96,13 @@ const quienesEnEscritorio = (banda: string, geometria: string, seccion: string):
   banda.includes(`@media (width >= 426px) and (width < 769px), (width >= ${String(CORTE)}px) {`) &&
   geometria.includes("repartoDeLaAgencia: 'escritorio:content-stretch escritorio:grid-rows-[0_auto_1fr_auto] escritorio:pt-[var(--agencia-arriba)] escritorio:pb-[var(--agencia-abajo)]'") &&
   geometria.includes("agencia: { '--agencia-arriba': '13svh', '--agencia-abajo': '12svh' } as React.CSSProperties,") &&
-  geometria.includes("signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3 escritorio:self-center'") &&
+  geometria.includes("signo: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',") &&
+  seccion.includes('className={cn(GEOMETRIA.reparto.signo, CLASES_DEL_SIGNO.libre, GEOMETRIA.tipografiaDelTitular)}') &&
   seccion.includes('className={cn(CLASES_DEL_REPARTO, GEOMETRIA.repartoDeLaAgencia)} style={GEOMETRIA.estilos.agencia}')
 const BANDA_CSS = leer('_estilos/banda.css')
 const SECCION_QUIENES = leer('_secciones/quienes-somos/QuienesSomos.tsx')
-afirmar(quienesEnEscritorio(BANDA_CSS, quienes, SECCION_QUIENES), 'A3 · Quiénes somos desde 1024: el ≠ al margen (el corte, el de `--breakpoint-escritorio`) y su fila la que crece, con el titular arriba y el cuerpo abajo')
+afirmar(quienesEnEscritorio(BANDA_CSS, quienes, SECCION_QUIENES), 'A3 · Quiénes somos desde 1024: la fila del ≠ la que crece, con el titular arriba y el cuerpo abajo, y el ≠ en el espacio libre de esa fila (C2-30s)')
+controlPositivo('A3 · el detector VE el ≠ de antes (sin el espacio libre)', SECCION_QUIENES.replace('CLASES_DEL_SIGNO.libre, ', ''), (q: string) => quienesEnEscritorio(BANDA_CSS, quienes, q))
 controlPositivo('A3 · el detector VE la primera pantalla de antes (el reparto parejo)', SECCION_QUIENES.replace('cn(CLASES_DEL_REPARTO, GEOMETRIA.repartoDeLaAgencia)', 'CLASES_DEL_REPARTO'), (q: string) => quienesEnEscritorio(BANDA_CSS, quienes, q))
 controlPositivo('A3 · el detector VE el ≠ centrado desde 1024 (la regla sólo en la tablet angosta)', BANDA_CSS.replace(`, (width >= ${String(CORTE)}px) {`, ' {'), (b: string) => quienesEnEscritorio(b, quienes, SECCION_QUIENES))
 
@@ -196,10 +199,10 @@ const lugaresBien = (p: string, m: string): boolean =>
   // [PULIDO 11] B4 · el rótulo, uno (Enviar) y medido para la tecla 3D aunque esté mudo (`data-rotulo-de-la-tecla`).
   p.includes(`<span data-rotulo-de-la-tecla="" aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}>`) &&
   p.includes('llego(await anotarElPedido(MEMORIA, conDuracionMinima(enviarAlServidor(') && !p.includes('Loader2') &&
-  m.includes('<Carga tamano="grande" textos={TEXTOS_DE_ENVIO} etiqueta={ROTULO_ENVIANDO} />') &&
-  m.includes('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)') && !m.includes('AnilloDeCarga')
-afirmar(lugaresBien(PIE_FORM, PANEL), 'C · la carga en el botón del pie (chica, encima del rótulo invisible: nada se mueve) y en el panel de Contacto (grande, en lugar del anillo), con la espera mínima')
-controlPositivo('C · el detector VE el panel esperando 1,4 s también con el formulario inválido', PANEL.replace('const r = valido ? await conDuracionMinima(enviarContacto(datos)) : await enviarContacto(datos)', 'const r = await conDuracionMinima(enviarContacto(datos))'), (m: string) => lugaresBien(PIE_FORM, m))
+  // [C2 · 22] el panel de Contacto monta el estado de envío del sitio (la carga de develOP, grande, con su mínimo): sólo si de verdad viaja (un inválido responde al toque).
+  m.includes('<EstadoDeEnvio estado={estado} alVolver={alVolver}>') && m.includes("if (Object.keys(validarContacto(datos)).length === 0) setEstado('enviando')") && m.includes('const r = await enviarContacto(datos)') && !m.includes('AnilloDeCarga')
+afirmar(lugaresBien(PIE_FORM, PANEL), 'C · la carga en el botón del pie (chica, encima del rótulo invisible: nada se mueve) y en el panel de Contacto (grande, por el estado de envío del sitio), con la espera mínima')
+controlPositivo('C · el detector VE el panel en la carga también con el formulario inválido', PANEL.replace("if (Object.keys(validarContacto(datos)).length === 0) setEstado('enviando')", "setEstado('enviando')"), (m: string) => lugaresBien(PIE_FORM, m))
 
 // D · Con movimiento reducido, el logo quieto (relleno, sin trazo ni giro) y el texto.
 // [PULIDO 11] B5 · con movimiento reducido el giro no se monta: el logo quieto (relleno) en su lugar. [PULIDO 13] · sin el trazo.
@@ -218,10 +221,12 @@ const PIE_J4 = leer('_secciones/cierre/FormularioDelPie.tsx')
 const ARMADAS_J4 = leer('_lib/escena/pie3d/armadas.ts')
 const TARJETA_J4 = leer('_componentes/formularios/TarjetaDeResultado.tsx')
 // A · Los dos voltean (el mismo volteo; [PULIDO 13] · sin variantes: el columpio se borró); ninguno pide el hundido.
+// [C2 · 22] el panel de Contacto ya no voltea: su envío es el estado de envío del sitio (`EstadoDeEnvio`); el volteo es del pie.
+const sinComentariosJ4 = (f: string): string => f.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
 const losDosVoltean = (panel: string, pie: string): boolean =>
-  [panel, pie].every((f) => f.includes('transicionDelVolteo(reducido') && !/hundido|gracias=|variante/.test(f.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')))
-afirmar(losDosVoltean(PANEL_J4, PIE_J4), 'A · los dos formularios voltean; el hundido y `?gracias=` se borraron')
-controlPositivo('A · el detector VE el panel de antes (con el hundido)', [PANEL_J4.replace('transicionDelVolteo(reducido)', "transicionDelVolteo(reducido)\n  const hundido = 'hundido'"), PIE_J4] as const, ([a, b]: readonly [string, string]) => losDosVoltean(a, b))
+  pie.includes('transicionDelVolteo(reducido') && panel.includes('<EstadoDeEnvio estado={estado}') && [panel, pie].every((f) => !/hundido|gracias=|variante/.test(sinComentariosJ4(f)))
+afirmar(losDosVoltean(PANEL_J4, PIE_J4), 'A · el pie voltea y el panel de Contacto usa el estado de envío del sitio; el hundido y `?gracias=` se borraron')
+controlPositivo('A · el detector VE el panel de antes (con el hundido)', [PANEL_J4 + "\nconst hundido = 'hundido'", PIE_J4] as const, ([a, b]: readonly [string, string]) => losDosVoltean(a, b))
 // B · La tarjeta no se mide para la placa 3D (ni su texto ni su encastre: la placa es lisa y se arma al toque) y su texto se lee en
 // el DOM (ya no hay un título de relieve en Archivo: ni el de gracias, ni sus letras en la fuente).
 const tarjetaLisa = (t: string): boolean => t.includes('data-sin-volumen=""') && !t.includes('data-relieve') && RESULTADO.exito.titulo === 'Recibido.'
@@ -243,8 +248,8 @@ const enSuLugar = (dy: number): boolean => {
 afirmar(enSuLugar(0), 'D · con la caja del formulario, el volteo termina con la tarjeta en su lugar exacto')
 controlPositivo('D · el detector VE una tarjeta corrida 63 px (la columna recentrada de antes)', 63, (dy: number) => enSuLugar(dy))
 // E · El rechazo de J5 se fue: ni `data-rechazo`, ni el resorte de la placa, ni Reintentar en el botón (vive en la tarjeta del error).
-const sinRechazo = (pie: string, panel: string, a: string): boolean => [pie, panel, a].every((f) => !/data-rechazo|cuadrosDelRechazo|hundidoDelRechazo|girarLaTecla|REINTENTAR/.test(f)) && pie.includes('alReintentar={reintentar}') && panel.includes('alReintentar={reintentar}')
-afirmar(sinRechazo(PIE_J4, PANEL_J4, ARMADAS_J4), 'E · el rechazo de J5 se fue: el error es la tarjeta que no encaja, con «Reintentar», en los dos formularios')
+const sinRechazo = (pie: string, panel: string, a: string): boolean => [pie, panel, a].every((f) => !/data-rechazo|cuadrosDelRechazo|hundidoDelRechazo|girarLaTecla|REINTENTAR/.test(f)) && pie.includes('alReintentar={reintentar}') && panel.includes("else setEstado('reposo')")
+afirmar(sinRechazo(PIE_J4, PANEL_J4, ARMADAS_J4), 'E · el rechazo de J5 se fue: el error es la tarjeta que no encaja, con «Reintentar», en el pie; en el panel de Contacto, el estado de envío del sitio y el formulario que vuelve con lo escrito')
 controlPositivo('E · el detector VE el pie de antes (el rechazo en el formulario)', [PIE_J4 + '\ndata-rechazo={rechazos}', PANEL_J4, ARMADAS_J4] as const, ([a, b, c]: readonly [string, string, string]) => sinRechazo(a, b, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -265,13 +270,19 @@ titulo('J7 · El cartel de Portfolio llega entero (o invisible) después de un v
 // su alto adentro de la ventana que recorta: el primer cuadro a la vista era el titular cortado. Mientras se repite, la ventana no
 // recorta y el titular arranca invisible: el primer cuadro visible tiene las letras enteras o la opacidad en 0.
 const PIEZAS_J7 = leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx') // [B1] el titular, en el encabezado del selector
+// [C2-90v] Desde la C2-40 el estilo del titular es una variable (en el flujo además se levanta: `levantarse.tsx`, sin opacidad propia):
+// lo que se protege es que en las DOS ramas su opacidad sigue siendo la de la llegada.
+const conLaOpacidadDeLaLlegada = (c: string): boolean =>
+  c.includes('<motion.span className="block" style={{ opacity: opacidadDelTitular }}>') ||
+  (c.includes('<motion.span className="block" style={estiloDelTitular}>') && /const estiloDelTitular = seFunde \? \{ opacity: opacidadDelTitular, \.\.\.levantarse \} : \{ opacity: opacidadDelTitular \}/.test(c))
 const llegadaBien = (opacidad: (r: number) => number, recorte: (r: number) => string, c: string): boolean =>
   opacidad(0) === 0 && recorte(0) === 'visible' && recorte(0.5) === 'visible' && opacidad(1) === 1 && opacidad(-1) === 1 && recorte(-1) === 'hidden' &&
   [0, 0.05, 0.2, 0.5].every((r) => opacidad(r) === 0 || recorte(r) === 'visible') &&
   c.includes('const repeticion = useRepeticionDeLaLlegada(seccion.id)') && c.includes('<motion.span className={VENTANA_QUE_RECORTA} style={{ overflow: recorteDelTitular }}>') &&
-  c.includes('<motion.span className="block" style={{ opacity: opacidadDelTitular }}>')
+  conLaOpacidadDeLaLlegada(c)
 afirmar(llegadaBien(opacidadDeLaLlegada, recorteDeLaLlegada, PIEZAS_J7), 'J7 · en la llegada de un viaje el titular de Portfolio arranca invisible y sube sin recortarse: el primer cuadro visible, entero')
 controlPositivo('J7 · el detector VE la llegada de antes (entera de entrada y recortada por la ventana)', [() => 1, () => 'hidden'] as const, ([o, r]: readonly [(r: number) => number, (r: number) => string]) => llegadaBien(o, r, PIEZAS_J7))
+controlPositivo('J7 · y VE el titular que se levanta sin la opacidad de la llegada', PIEZAS_J7.replace('{ opacity: opacidadDelTitular, ...levantarse }', '{ ...levantarse }'), (c: string) => llegadaBien(opacidadDeLaLlegada, recorteDeLaLlegada, c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('J8 · El pie nuevo: 25/50/25, el recorrido en texto con el subrayado del sitio, Demos y las dos disposiciones')
@@ -391,13 +402,14 @@ titulo('J9 · Móvil y tablet: las leyendas de Quiénes somos, el panel de Conta
 // a · Abajo de 1024 la leyenda de cada persona es sólo su rol (el nombre ya está arriba, en el título) y la foto de las dos
 // personas dice «El equipo detrás de develOP» (dictado por el humano).
 const MARCO_J9 = leer('_secciones/quienes-somos/marco.tsx')
+// [C2-30f] Y desde la cola 2 en todos los anchos: adentro de la foto, abajo, sólo el rol; el nombre va en su etiqueta (s78-c30f).
 const leyendasBien = (m: string, e: string, c: string): boolean =>
-  m.includes("<p className={cn(REVELADO.ventana, 'max-escritorio:hidden')} data-parte=\"revelado-nombre\">") &&
+  !m.includes('data-parte="revelado-nombre"') &&
   m.includes("<p className={cn(REVELADO.ventana, textoEnMovil !== undefined && 'max-escritorio:hidden')} data-parte=\"revelado-texto\">") &&
   m.includes("<p className={cn(REVELADO.ventana, 'escritorio:hidden')} data-parte=\"revelado-texto-movil\">") &&
   e.includes('textoEnMovil={CONTENIDO.equipo.leyendaEnMovil}') && c.includes("leyendaEnMovil: 'El equipo detrás de develOP',")
 afirmar(leyendasBien(MARCO_J9, leer('_secciones/quienes-somos/equipo.tsx'), leer('_secciones/quienes-somos/contenido.ts')), 'a · abajo de 1024: el rol solo en la leyenda de cada persona y «El equipo detrás de develOP» en la foto del equipo')
-controlPositivo('a · el detector VE el nombre repetido en la leyenda del teléfono', MARCO_J9.replace("<p className={cn(REVELADO.ventana, 'max-escritorio:hidden')} data-parte=\"revelado-nombre\">", '<p className={REVELADO.ventana} data-parte="revelado-nombre">'), (m: string) => leyendasBien(m, leer('_secciones/quienes-somos/equipo.tsx'), leer('_secciones/quienes-somos/contenido.ts')))
+controlPositivo('a · el detector VE el nombre repetido en la leyenda', MARCO_J9.replace("<p className={cn(REVELADO.ventana, textoEnMovil !== undefined && 'max-escritorio:hidden')} data-parte=\"revelado-texto\">", '<p className={REVELADO.ventana} data-parte="revelado-nombre"></p>\n            <p className={cn(REVELADO.ventana, textoEnMovil !== undefined && \'max-escritorio:hidden\')} data-parte="revelado-texto">'),(m: string) => leyendasBien(m, leer('_secciones/quienes-somos/equipo.tsx'), leer('_secciones/quienes-somos/contenido.ts')))
 
 // c · El panel de Contacto en el teléfono: el contenido centrado en el alto de la hoja; el mensaje crece con lo que se escribe (de
 // dos a ocho renglones, `field-sizing`) y en el angosto su rótulo va en su renglón.

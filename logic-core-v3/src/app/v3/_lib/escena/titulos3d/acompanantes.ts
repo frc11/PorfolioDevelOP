@@ -1,10 +1,12 @@
 import * as THREE from 'three'
 
 import { homografia, matrix3dCss } from '../../pie3d/homografia'
-import { ACOMPANANTES, type Acompanante } from '../../titulos3d/acompanantes'
+import { ACOMPANANTES, type Acompanante, type OrientacionPropia } from '../../titulos3d/acompanantes'
 import type { TituloDeVolumen } from '../../titulos3d/registro'
+import { hayBanco } from '../entorno'
 import { camaraConParteDelMouse } from '../sinElMouse'
 import { alturaAlejada, camaraDeLaLectura, colocar, corrimiento, lineaDeBase, lugarDeLectura, pinDelLugar, type LugarEnElCuadro, type MedidasDeLaFuente, type PinDelLugar } from './colocacion'
+import { anguloEntre, girarSobreElPivote, orientacionAcotada, orientacionDeLaLectura, pivoteDeLaCaja } from './orientacionPropia'
 
 /**
  * [NOCTURNO] A1 · EL TEXTO 2D EN EL PLANO DE SU TÍTULO, en la escena — cada acompañante (`titulos3d/acompanantes.ts`, del
@@ -55,6 +57,8 @@ interface Plano {
   readonly escala: number
   readonly arriba: THREE.Vector3
   readonly mpp: number
+  /** [C2-30f] Su orientación propia en el mundo (la de su lectura), si la pide (`null`: mira a la cámara, como siempre). */
+  readonly propia: THREE.Quaternion | null
   /** Con qué se midió: el lugar que el título tenía y el cuadro. */
   readonly delArmado: LugarEnElCuadro | null
   readonly cuadro: string
@@ -115,8 +119,44 @@ function enSuPlano(el: HTMLElement, ac: Acompanante, a: TituloConPlano, viva: TH
   }
   // El comienzo de la línea de base del título (px, ahora): el origen del plano.
   const ancla = { x: p.lugar.izquierda, y: lineaDeBase(p.lugar, a.fuente.data) + d }
+  // [C2-30f] Las fotos del equipo: su orientación propia en la escena, acotada para que se lean (no miran a la cámara).
+  if (t.colocacion === 'pantalla' && ac.orientacion !== undefined && p.propia !== null) orientar(ac, ac.orientacion, p.propia, viva, { x, y, ancho, alto }, ancla, p.lugar.cuerpo, cuadro.alto)
   if (!cuadrilateroEnElPlano(PLANO, ancla, p.lugar.cuerpo, { x, y, ancho, alto }, viva, cuadro, CUADRILATERO)) return ''
   return homografia(ancho, alto, CUADRILATERO, MATRIZ) ? matrix3dCss(MATRIZ) : ''
+}
+
+/** [C2-30f] El control positivo del banco (`window.__defectosDeLaIntro = 'mira-camara'`, nunca la URL): el plano mira a la cámara, como antes. */
+const miraLaCamara = (): boolean => (window as Window & { __defectosDeLaIntro?: unknown }).__defectosDeLaIntro === 'mira-camara'
+
+const ACOTADA = new THREE.Quaternion()
+const DE_LA_VIVA = new THREE.Quaternion()
+const PIVOTE = new THREE.Vector3()
+
+/** [C2-30f] Lo que el banco lee de cada plano con orientación propia (sólo con el banco prendido): las orientaciones en el mundo y los ángulos. */
+interface OrientacionDelBanco {
+  readonly plano: readonly number[]
+  readonly camara: readonly number[]
+  readonly propia: readonly number[]
+  readonly angulo: number
+  readonly libre: number
+  readonly tope: number
+  readonly miraLaCamara: boolean
+}
+const ORIENTACIONES_DEL_BANCO = new Map<string, OrientacionDelBanco>()
+type VentanaDelBanco = Window & { __acompanantesDelBanco?: { orientaciones: () => Record<string, OrientacionDelBanco> } }
+
+/** [C2-30f] El plano con su orientación propia, acotada a `tope` grados de la cámara viva, girado sobre lo que se ve en el medio del cuadro. */
+function orientar(ac: Acompanante, o: OrientacionPropia, propia: THREE.Quaternion, viva: THREE.Camera, caja: { readonly x: number; readonly y: number; readonly ancho: number; readonly alto: number }, ancla: { readonly x: number; readonly y: number }, cuerpo: number, altoDelCuadro: number): void {
+  viva.getWorldQuaternion(DE_LA_VIVA)
+  const mira = miraLaCamara()
+  if (!mira) {
+    pivoteDeLaCaja(caja, ancla, cuerpo, altoDelCuadro, PIVOTE)
+    girarSobreElPivote(PLANO, PIVOTE, orientacionAcotada(propia, DE_LA_VIVA, o.tope, ACOTADA))
+  }
+  if (!hayBanco()) return
+  const v = window as VentanaDelBanco
+  v.__acompanantesDelBanco ??= { orientaciones: () => Object.fromEntries(ORIENTACIONES_DEL_BANCO) }
+  ORIENTACIONES_DEL_BANCO.set(ac.titulo, { plano: PLANO.quaternion.toArray(), camara: DE_LA_VIVA.toArray(), propia: propia.toArray(), angulo: anguloEntre(PLANO.quaternion, DE_LA_VIVA), libre: anguloEntre(propia, DE_LA_VIVA), tope: o.tope, miraLaCamara: mira })
 }
 
 /**
@@ -160,7 +200,8 @@ function planoDe(el: HTMLElement, ac: Acompanante, a: TituloConPlano, cuadro: { 
     escala = PLANO.scale.x
     arriba.applyQuaternion(camara.quaternion)
   }
-  const p: Plano = { lugar, pin, caja, base: PLANO.position.clone(), giro: PLANO.quaternion.clone(), escala, arriba, mpp, delArmado: a.lugar, cuadro: firma }
+  const propia = ac.orientacion === undefined ? null : orientacionDeLaLectura(ac.orientacion, cuadro.ancho / Math.max(1, cuadro.alto), logo.logoW, logo.logoH, new THREE.Quaternion())
+  const p: Plano = { lugar, pin, caja, base: PLANO.position.clone(), giro: PLANO.quaternion.clone(), escala, arriba, mpp, propia, delArmado: a.lugar, cuadro: firma }
   PLANOS.set(ac, p)
   return p
 }

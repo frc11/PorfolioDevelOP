@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'motion/react'
-import { startTransition, useActionState, useState } from 'react'
+import { startTransition, useActionState, useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -20,6 +20,9 @@ import { bajarElTelon } from './telon'
  *
  * Las dos maneras con email se eligen con dos chips (los del contacto: el marcado lleno), y se cambian con un fundido corto
  * (`AnimatePresence` en `wait`). Las acciones llegan por prop: el invariante lo renderiza con unas de mentira.
+ *
+ * [C2 · 80] Mientras algo viaja (Google, la contraseña o el Magic Link) los chips y Google esperan, deshabilitados: cambiar de
+ * pestaña con un envío en curso desmontaba el formulario que lo esperaba y dejaba la pantalla vacía.
  */
 
 type Modo = 'clave' | 'link'
@@ -38,9 +41,10 @@ export function FormularioDelIngreso({
   readonly modoInicial?: Modo
 }): React.JSX.Element {
   const [modo, setModo] = useState<Modo>(modoInicial)
+  const [ocupado, setOcupado] = useState(false)
   return (
     <div className="flex flex-col gap-[var(--spacing-5)]">
-      <ConGoogle acciones={acciones} alEntrar={alEntrar} />
+      <ConGoogle acciones={acciones} alEntrar={alEntrar} bloqueado={ocupado} alOcupar={setOcupado} />
       <div aria-hidden="true" className="flex items-center gap-[var(--spacing-3)]">
         <span className="bg-borde h-px flex-1" />
         <span className="text-micro text-tinta-tenue leading-texto">{ROTULOS_DEL_INGRESO.separador}</span>
@@ -53,9 +57,12 @@ export function FormularioDelIngreso({
             type="button"
             data-pieza="modo-del-ingreso"
             aria-pressed={modo === m}
-            onClick={() => setModo(m)}
+            disabled={ocupado}
+            onClick={() => {
+              if (!ocupado) setModo(m)
+            }}
             className={cn(
-              'text-caption min-h-[var(--spacing-12)] flex-1 rounded-[var(--radius-pastilla-s)] border px-[var(--spacing-4)] transition-colors',
+              'text-caption min-h-[var(--spacing-12)] flex-1 rounded-[var(--radius-pastilla-s)] border px-[var(--spacing-4)] transition-colors disabled:opacity-casi',
               modo === m ? 'border-tinta bg-tinta text-fondo' : 'border-borde-fuerte hover:border-tinta',
             )}
           >
@@ -65,7 +72,7 @@ export function FormularioDelIngreso({
       </div>
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={modo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18, ease: CURVA }}>
-          {modo === 'clave' ? <ConClave acciones={acciones} alEntrar={alEntrar} /> : <ConLink acciones={acciones} />}
+          {modo === 'clave' ? <ConClave acciones={acciones} alEntrar={alEntrar} alOcupar={setOcupado} /> : <ConLink acciones={acciones} alOcupar={setOcupado} />}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -73,16 +80,31 @@ export function FormularioDelIngreso({
 }
 
 /** «Continuar con Google»: la acción de siempre (la redirección afuera, a Google). Mientras sale, la carga en el botón. */
-function ConGoogle({ acciones, alEntrar }: { readonly acciones: AccionesDelIngreso; readonly alEntrar: () => void }): React.JSX.Element {
+function ConGoogle({
+  acciones,
+  alEntrar,
+  bloqueado,
+  alOcupar,
+}: {
+  readonly acciones: AccionesDelIngreso
+  readonly alEntrar: () => void
+  /** Otro envío viaja: Google espera. */
+  readonly bloqueado: boolean
+  readonly alOcupar: (ocupado: boolean) => void
+}): React.JSX.Element {
   const [resultado, entrar, entrando] = useActionState(async (): Promise<Resultado> => resolverElIngreso(acciones.conGoogle, alEntrar), REPOSO)
   const ocupado = entrando || resultado.estado === 'entrando'
   const error = resultado.estado === 'error' ? resultado.mensaje : ''
+  useEffect(() => {
+    alOcupar(ocupado)
+    return () => alOcupar(false)
+  }, [ocupado, alOcupar])
   return (
     <div className="flex flex-col">
       <button
         type="button"
         data-pieza="ingreso-google"
-        disabled={ocupado}
+        disabled={ocupado || bloqueado}
         aria-busy={ocupado}
         onClick={() => startTransition(() => entrar())}
         className="text-caption font-medio border-borde-fuerte hover:border-tinta flex min-h-[var(--spacing-12)] w-full items-center justify-center gap-[var(--spacing-3)] rounded-[var(--radius-pastilla-s)] border px-[var(--spacing-4)] transition-colors disabled:opacity-casi"
@@ -91,7 +113,7 @@ function ConGoogle({ acciones, alEntrar }: { readonly acciones: AccionesDelIngre
         {ROTULOS_DEL_INGRESO.google}
       </button>
       {/* La región existe desde el principio (una región que nace con su texto no siempre se anuncia). */}
-      <p role="alert" className={cn('text-caption text-error-texto leading-texto', error !== '' && 'mt-[var(--spacing-2)]')}>
+      <p role="alert" className={cn('text-micro leading-texto', error !== '' && 'mt-[var(--spacing-2)]')}>
         {error}
       </p>
     </div>

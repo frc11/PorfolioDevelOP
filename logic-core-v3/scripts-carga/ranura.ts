@@ -22,6 +22,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type CDPSession, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
@@ -29,7 +30,7 @@ const COSTO = process.env.COSTO === '1'
 /** Dónde se mide el costo: en 0,25 la variante corre con la luz subiendo; en 0, con la luz en la composición (separa su código de la luz). */
 const COSTO_EN = Number(process.env.COSTO_EN ?? '0.25')
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/ranura')
+const SALIDA = salidaDelBanco('ranura')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 interface Estado {
@@ -146,7 +147,7 @@ async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
   let malas = 0
   for (const [ancho, alto] of ANCHOS) {
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/ranura-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('ranura')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,

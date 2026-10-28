@@ -73,6 +73,37 @@ function enLaEsfera(lat: number, lon: number, r: number): [number, number, numbe
   return [r * Math.cos(lat) * Math.sin(lon), r * Math.sin(lat), r * Math.cos(lat) * Math.cos(lon)]
 }
 
+/**
+ * [C2-50] LA ÓRBITA (el estado 0 de Servicios, ítem 12) — el enjambre GIRA alrededor de «Nuestros servicios»: una banda elíptica en el
+ * plano de la pantalla (`rx` × `ry` unidades, con su espesor `banda` y una profundidad chica), que el sombreador hace correr sobre su
+ * elipse (`giro`, rad/s) y pinta con los tres acentos mezclándose. w: 0.
+ */
+export const ORBITA = { rx: 1, ry: 0.5, banda: 0.1, profundidad: 0.22, giro: 0.32 } as const
+
+export function orbita(n: number, azar: Azar): Punto[] {
+  return Array.from({ length: n }, () => {
+    const t = azar() * 2 * Math.PI
+    // El espesor de la banda, más denso en su centro (la suma de dos azares).
+    const r = 1 + ORBITA.banda * (azar() + azar() - 1)
+    return [ORBITA.rx * r * Math.cos(t), ORBITA.ry * r * Math.sin(t), ORBITA.profundidad * (azar() * 2 - 1), 0]
+  })
+}
+
+/** [C2-50] El radio en pantalla de la órbita en x (unidades), con su banda, su profundidad y el flotar: la cota de `capa.ts` (en y sobra). */
+export const EXTENSION_DE_LA_ORBITA = (ORBITA.rx * (1 + ORBITA.banda) * 0.82 * 3) / (3 - ORBITA.profundidad - 0.04) + 0.06
+
+/** La perspectiva del sombreador con z = 0 (`cerca` × 0,82): cuánto mide en pantalla una unidad del símbolo. */
+export const ESCALA_EN_PANTALLA = 0.82
+
+/**
+ * [C2-50] Cuántos px mide una unidad del símbolo de un estado en su caja (`ancho` × `alto`, px). La órbita (estado 0) llena la caja
+ * con su elipse (ancho y alto por separado); los demás, el círculo de su `extension` en el lado corto (como siempre).
+ */
+export function unidadDelLugar(estado: number, ancho: number, alto: number, extension: number): number {
+  if (estado === 0) return Math.min(ancho / 2 / (ORBITA.rx * ESCALA_EN_PANTALLA), alto / 2 / (ORBITA.ry * ESCALA_EN_PANTALLA))
+  return Math.min(ancho, alto) / 2 / extension
+}
+
 export function globo(n: number, azar: Azar): Punto[] {
   const { radio: R, lados } = GLOBO
   const trazos: Trazo[] = []

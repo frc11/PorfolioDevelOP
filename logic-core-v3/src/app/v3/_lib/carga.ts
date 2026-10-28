@@ -96,6 +96,9 @@ export function abrirLaCarga(): void {
 
 export const cargaLista = (): boolean => lista
 
+/** [C2-81] El velo ya terminó y pidió la carga (con el preloader, se abre recién con la entrada). */
+export const cargaPedida = (): boolean => pedida
+
 /**
  * [B12c] La escena está preparada: compiló sus programas y los calentó (`escena/gpu/Precompilar.tsx`, una vez). El preloader del sitio
  * lo espera: el tirón de la primera compilación queda debajo de su blanco y no en la entrada.

@@ -9,10 +9,12 @@ import { chromium, type Page } from '@playwright/test'
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
+import { exigirDiscoLibre } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const SALIDA = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'red')
 const PERFIL = path.join(homedir(), '.cache', 'b4-medicion', 'cierre-a-ter', 'perfil-red')
+exigirDiscoLibre()
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 

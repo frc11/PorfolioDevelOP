@@ -29,6 +29,8 @@ export const CLASE_DEL_CUERPO = [
   'max-escritorio:text-[length:var(--text-cuerpo)]',
 ].join(' ')
 
+/** [C2 · 40] La letra de los campos de «la tuya» se fue a `_componentes/formularios/letraDelFormulario.ts` [C2-90v]: la comparte el recomendador. */
+
 /**
  * [PULIDO 10] J7 · LA LLEGADA DE UN VIAJE, SIN RECORTE. P2 sube el titular adentro de la ventana que recorta: con el scroll se lee
  * como una aparición, pero en la llegada repetida de un viaje el primer cuadro a la vista era el titular cortado. Mientras se

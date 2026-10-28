@@ -6,7 +6,6 @@ import { HuecoDelViaje } from '../../_componentes/navegacion/HuecoDelViaje'
 import { seccionDe, type PropsDeSeccion } from '../_contrato/forma'
 import { useCoreografiaActiva, useMovimientoEnTodoAncho } from '../_contrato/coreografia'
 import { Seccion } from '../_contrato/Seccion'
-import { useModoEnElTelefono } from './escenario/banderas'
 import { EscenarioDeServicios } from './escenario/EscenarioDeServicios'
 import { ServiciosDeslizar } from './movil/ServiciosDeslizar'
 import { Recomendador } from './recomendador/Recomendador'
@@ -21,25 +20,25 @@ import { useTramoDeServicios } from './tramoDeServicios'
  *      `_componentes/gatillos/`): Desarrollo web desde la izquierda, Software desde la derecha, IA desde arriba; al subir, cada uno sale
  *      por donde entró y los nanobots vuelven. El truco de profundidad: los nanobots pasan de detrás del título a delante del panel en
  *      un cuadro sin ninguno sobre los dos (`escenario/`).
- *   3. **El recomendador**, sin gatillo y con scroll normal. Después, el Panel.
+ *   3. **El recomendador**, sin gatillo y con scroll normal ([C2-51] el último servicio ya no lo atrapa: `salidaDeAbajoLibre`), por
+ *      etapas (`recomendador/`). Después, el Panel.
  *
- * Las ramas: con coreografía (desde el umbral, con movimiento), el escenario; abajo de 1024 con movimiento, `?servicios-movil=`
- * (`deslizar`, el defecto: cada servicio una pantalla; `gatillo`: de a uno, como en escritorio); sin coreografía (el servidor, o menos
- * movimiento), las pantallas quietas. El alto: `tramoDeServicios.ts` (REGLA DE ALTURAS).
+ * Las ramas: con coreografía (desde el umbral, con movimiento), el escenario; abajo de 1024 con movimiento, [C2-50] siempre el escenario
+ * con gatillos (el dedo y la rueda; `?servicios-movil=deslizar` se borró); sin coreografía (el servidor, o menos movimiento), las
+ * pantallas quietas (`ServiciosDeslizar`). El alto: `tramoDeServicios.ts` (REGLA DE ALTURAS).
  *
  * La sección de antes (el rodillo, la tira, la torta y el CTA que rota) quedó en esta carpeta SIN MONTAR: varios invariantes la leen
  * por ruta. Se borra con ellos en un sprint de limpieza.
  */
 
-/** El alto declarado de la sección: desde 1024 la sección lo llena exacto (k = 1). */
+/** El alto declarado de la sección, como piso: [C2-51] desde 1024 la sección lo pasa con el recomendador (el tramo lo descuenta). */
 const ALTO_DECLARADO = seccionDe('servicios').alto
 
 function RamaDeServicios(): React.JSX.Element {
   const conCoreografia = useCoreografiaActiva()
   const conMovimiento = useMovimientoEnTodoAncho()
-  const modo = useModoEnElTelefono()
   if (conCoreografia) return <EscenarioDeServicios telefono={false} />
-  if (conMovimiento && modo === 'gatillo') return <EscenarioDeServicios telefono />
+  if (conMovimiento) return <EscenarioDeServicios telefono />
   return <ServiciosDeslizar />
 }
 

@@ -21,12 +21,23 @@ export interface Acompanante {
   css: string
   /** [AJUSTES FINALES] A4 · y su opacidad (`''`: la suya): el del titular del hero aparece con las letras que caen. */
   opacidad: string
+  /** [C2-30f] Su plano con orientación propia (las fotos del equipo): no mira a la cámara (`escena/titulos3d/orientacionPropia.ts`). */
+  readonly orientacion?: OrientacionPropia
+}
+
+/**
+ * [C2-30f] LA ORIENTACIÓN PROPIA: la de la cámara del recorrido en `lectura` (un progreso de la coreografía), fija en el mundo; el
+ * ángulo con la cámara viva, a lo sumo `tope` grados (que se lea).
+ */
+export interface OrientacionPropia {
+  readonly lectura: number
+  readonly tope: number
 }
 
 export const ACOMPANANTES = new Map<HTMLElement, Acompanante>()
 
 /** El elemento que va en el plano del título `titulo`: se le pasa la `ref` que devuelve. */
-export function useAcompananteDelTitulo<T extends HTMLElement>(titulo: string): RefObject<T | null> {
+export function useAcompananteDelTitulo<T extends HTMLElement>(titulo: string, orientacion?: OrientacionPropia): RefObject<T | null> {
   const ref = useRef<T | null>(null)
   const material = useTitulosDeVolumen()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
@@ -35,13 +46,13 @@ export function useAcompananteDelTitulo<T extends HTMLElement>(titulo: string): 
   useEffect(() => {
     const el = ref.current
     if (!activo || el === null) return undefined
-    ACOMPANANTES.set(el, { titulo, css: '', opacidad: '' })
+    ACOMPANANTES.set(el, { titulo, css: '', opacidad: '', orientacion })
     return () => {
       ACOMPANANTES.delete(el)
       el.style.transform = ''
       el.style.transformOrigin = ''
       el.style.opacity = ''
     }
-  }, [titulo, activo])
+  }, [titulo, activo, orientacion])
   return ref
 }

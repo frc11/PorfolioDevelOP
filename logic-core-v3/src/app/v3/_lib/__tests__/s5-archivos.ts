@@ -168,6 +168,10 @@ export const ARCHIVOS_DE_APOYO = [
   // [RETOQUE PANEL] T4 · el titular y el ≠ en volumen (`titular3d.tsx`) y la cuenta y la medida de sus rayas (`trazos3d.ts`).
   `${RAIZ_DE_SECCIONES}/quienes-somos/titular3d.tsx`,
   `${RAIZ_DE_SECCIONES}/quienes-somos/trazos3d.ts`,
+  // [C2-30s] el ≠ en el espacio libre: la cuenta de su tamaño y su centro, y su CSS (`signo.ts`).
+  `${RAIZ_DE_SECCIONES}/quienes-somos/signo.ts`,
+  // [C2-30f] El tramo de la pantalla del equipo abajo de 1024 (la REGLA DE ALTURAS, con su medida): una pieza de la sección.
+  `${RAIZ_DE_SECCIONES}/quienes-somos/tramoDelEquipo.ts`,
   // ── B1 · los dos que salieron de Trabajos cuando pasó las 300 líneas ──────
   // `geometria.ts` son los números de la sección —el mismo corte que Servicios
   // ya tenía— y `soporte.ts` el arnés del invariante, el mismo que Cierre.
@@ -226,12 +230,19 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CromoDeLaVentana.tsx`,
   // [NOCTURNO B5] la cinta de abajo de 1024 (`Carrusel.tsx` y su física) se fue: el carrusel común de B1.2e, con las demos.
   `${RAIZ_DE_SECCIONES}/trabajos/demos/CarruselDeDemos.tsx`,
+  // [C2-41t] Demos abajo de 1024, una sección más en lo que sigue al flujo del Portfolio (entra deslizándose, el título se levanta).
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/DemosDelFlujo.tsx`,
   // INTERFAZ 1 · cierre: con el teclado, la página sigue hasta que la capa de demos llega (sólo mueve la página).
   `${RAIZ_DE_SECCIONES}/trabajos/demos/llevarALaLlegada.ts`,
   // INTERFAZ 2 · T3: la onda de las portadas salió en [NOCTURNO B5] («el efecto de agua sale»): sus dos archivos, con ella.
   // [NOCTURNO B5] la parada de Demos (la máquina de gatillos común con un paso): su geometría pura y su pista.
   `${RAIZ_DE_SECCIONES}/trabajos/demos/parada.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/demos/ParadaDeDemos.tsx`,
+  // [C2-41e] Demos en escritorio: el espejo del Portfolio (la columna a la altura de su título), Demos a la vista para la escena y la
+  // red, y los defectos que pide su banco (`scripts-carga/demos-escritorio.ts`).
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/espejo.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/enLaEscena.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/demos/defectos.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/movil-invariante.tsx`,
   // MÓVIL 2
   // [B1] el dato tipado del selector lateral del Portfolio: los proyectos, sus fichas y sus medios.
@@ -265,6 +276,8 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/medioDelCarrusel.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMedioDelCarrusel.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useDisparoPorLinea.ts`,
+  // [C2-41t] el titular que se levanta en el flujo (la presencia de los títulos y su estilo): lo usan «Portfolio» y «Demos».
+  `${RAIZ_DE_SECCIONES}/trabajos/portfolio/levantarse.tsx`,
   // [B1.2d] los mandos (la rueda, sus salidas, los toques y el clic afuera, salieron de `usePortfolio.ts`) y el pedido a la barra.
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useMandosDelPortfolio.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/portfolio/useClicAfueraDelPanel.ts`,

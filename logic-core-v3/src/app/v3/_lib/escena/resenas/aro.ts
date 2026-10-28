@@ -38,7 +38,7 @@ export const ARO = {
   levantaS: 0.12,
   /** El texto: entero hasta `lleno` grados del frente, nada desde `nada`. */
   texto: { lleno: 40, nada: 62 },
-  /** La niebla de la sala: la placa se mete desde `desde` grados y desde `hasta` no se dibuja. */
+  /** La niebla de la sala: desde `desde` grados la placa toma algo del color de la sala (siempre opaca, C2-70); desde `hasta`, su cara no lleva texto. */
   niebla: { desde: 95, hasta: 150 },
   /**
    * El texto aparece con la entrada (desde `textoDesde`, entero `textoEn` después): las placas que pasan por el frente ya se leen mientras
@@ -155,6 +155,10 @@ export function nieblaDeLaPlaca(angulo: number): number {
   return suave((g - ARO.niebla.desde) / (ARO.niebla.hasta - ARO.niebla.desde))
 }
 
+/** [C2-70] Cuánto se destaca la placa de adelante (1 de frente, 0 a medio paso de placa): un poco más grande y con su cara marcada. */
+export const DESTACA = { escala: 0.08, grados: 360 / 10 / 2 } as const
+export const destaqueDeLaPlaca = (angulo: number): number => 1 - suave(grados(angulo) / DESTACA.grados)
+
 /** El texto con la entrada: aparece con el aro casi armado. */
 export const textoConLaEntrada = (e: number): number => suave((e - ARO.textoDesde) / ARO.textoEn)
 
@@ -178,14 +182,29 @@ export interface GiroDelAro {
 export const VELOCIDAD_DE_LECTURA = (2 * Math.PI) / ARO.vueltaS
 
 /**
+ * [C2-70] LA CURVA DE LA ENTRADA: antes era lineal (las placas viajaban a velocidad fija y se clavaban al armarse, y el giro arrancaba de 0:
+ * el escalón). Ahora un Hermite: arranca al doble de la media (`ARRANQUE_DE_LA_ENTRADA`), frena parejo y llega con la pendiente `fin`, la del
+ * giro de lectura, así el aro sigue girando sin corte. `s` es el avance lineal (0 a 1).
+ */
+export const ARRANQUE_DE_LA_ENTRADA = 2
+export function curvaDeLaEntrada(s: number, fin: number): number {
+  const u = acotar01(s)
+  return (u ** 3 - 2 * u ** 2 + u) * ARRANQUE_DE_LA_ENTRADA + (3 * u ** 2 - 2 * u ** 3) + (u ** 3 - u ** 2) * fin
+}
+
+/** La pendiente final de la entrada que empalma con el giro: la velocidad del aro en su borde, sobre el recorrido, en los `durS` de la entrada. */
+export const finDeLaEntrada = (m: MedidasDelAro, durS: number): number => (m.radio * VELOCIDAD_DE_LECTURA * durS) / m.recorrido
+
+/**
  * Un paso del giro (`dt` en s). Gira sólo con el aro armado; señalada una placa (hover o foco), frena hasta parar; con movimiento reducido,
  * quieto. Arrastrando, el ángulo sigue al puntero (`dx` ya en rad) y la velocidad es la del arrastre; al soltar, esa velocidad vuelve a la de
- * lectura con la inercia (un arrastre rápido sigue girando y se calma).
+ * lectura con la inercia (un arrastre rápido sigue girando y se calma). [C2-70] Sin armar no gira, pero queda en la de lectura: al armarse
+ * sigue a la velocidad con la que llegó la entrada (no arranca de 0).
  */
 export function pasoDelGiro(g: GiroDelAro, dt: number, armado: boolean, senalada: boolean, quieto: boolean, arrastrando: boolean, dx: number): GiroDelAro {
   const paso = Math.max(0, Math.min(dt, 0.1))
   if (!armado || quieto) {
-    g.velocidad = 0
+    g.velocidad = quieto ? 0 : VELOCIDAD_DE_LECTURA
     return g
   }
   if (arrastrando) {

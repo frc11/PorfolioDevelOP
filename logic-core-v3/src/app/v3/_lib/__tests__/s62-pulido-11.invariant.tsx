@@ -23,7 +23,7 @@
  *   D · el logo del final se CAE y encastra: física de cuerpo rígido (θ'' = κ·sen(θ − α)), el hueco que se abre con la caída,
  *       el contacto en el cuadro del golpe, un rebote chico que se asienta, sin saltos ni atravesar el piso ([PULIDO 13] · sin variantes).
  *   E · [PULIDO 14] L3 · los hilos de energía se borraron (los reemplazan los destellos: s65).
- *   F · el giroscopio (`?giroscopio=si`, prototipo; `docs/rediseno/GIROSCOPIO.md`): la inclinación del teléfono como el puntero.
+ *   F · el giroscopio (`docs/rediseno/GIROSCOPIO.md`; [C2-81] con su botón, sin la bandera): la inclinación del teléfono como el puntero.
  * El plan y el log: `docs/rediseno/SPRINT-PULIDO-11.md`.
  */
 import { existsSync, readFileSync } from 'node:fs'
@@ -52,7 +52,7 @@ import { CAIDA_DEL_PIE } from '../escena/final/caidaDelPie'
 import { FINAL_DEL_PIE, calma as calmaDelFinal, golpeDelFinal, segundosDelFinal } from '../escena/final/recorridoDelFinal'
 import { PRUEBAS_SUELTAS, entornoPedido } from '../escena/entorno'
 import { FLOOR_Y } from '../escena/probeScene'
-import { GIROSCOPIO, giroscopioPedido, punteroDeLaInclinacion } from '../escena/giroscopio'
+import { GIROSCOPIO, punteroDeLaInclinacion } from '../escena/giroscopio'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
 const V3 = 'src/app/v3'
@@ -383,16 +383,17 @@ const ramaDelError = (f: string, desde: string, hasta: string): string => {
 const intactoBien = (pie: string, panel: string): boolean => {
   const errorDelPie = ramaDelError(pie, "// [PULIDO 11] B3 · el error: la tarjeta que no encaja", '\n  }\n')
   const reintentarDelPie = ramaDelError(pie, 'const reintentar = (): void => {', '\n  }\n')
-  const errorDelPanel = ramaDelError(panel, "if (r.estado === 'error') {", '\n    }\n')
-  const reintentarDelPanel = ramaDelError(panel, 'const reintentar = (): void => {', '\n  }\n')
+  // [C2 · 22] en el panel de Contacto el error es del estado de envío del sitio: el formulario nunca se desmonta y vuelve con lo escrito; el foco lo lleva EstadoDeEnvio (s85).
+  const vueltaDelPanel = ramaDelError(panel, 'const alVolver = (despuesDe: ResultadoDelEnvio): void => {', '\n  }\n')
   return (
-    [errorDelPie, reintentarDelPie, errorDelPanel, reintentarDelPanel].every((r) => r !== '' && !/setDatos|setVuelta|reset\(/.test(r)) &&
-    reintentarDelPie.includes("pedirFoco.current = 'enviar'") && reintentarDelPanel.includes("pedirFoco.current = 'enviar'") &&
+    [errorDelPie, reintentarDelPie, vueltaDelPanel].every((r) => r !== '' && !/setDatos|setVuelta|reset\(/.test(r)) &&
+    reintentarDelPie.includes("pedirFoco.current = 'enviar'") && vueltaDelPanel.includes("else setEstado('reposo')") &&
     pie.includes('key={`formulario-${String(vuelta)}`}')
   )
 }
 afirmar(intactoBien(PIE_B, PANEL_B), '  «Reintentar» vuelve al formulario con todo lo escrito (ni el error ni Reintentar vacían o remontan los campos); el foco, en Enviar')
 controlPositivo('  el detector VE un error que vacía el formulario del pie', PIE_B.replace("setEstado({ fase: 'error', mensaje: r.error })", "setEstado({ fase: 'error', mensaje: r.error })\n      setDatos(VACIO)"), (p: string) => intactoBien(p, PANEL_B))
+controlPositivo('  y un error que vacía el del panel de Contacto', PANEL_B.replace("else setEstado('reposo')", "else setDatos(VACIO)"), (p: string) => intactoBien(PIE_B, p))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B4 · Los rótulos del botón se suceden: la carga y «Reintentar» nunca a la vez')
@@ -410,6 +411,7 @@ const GEOM_B = leer('_lib/escena/pie3d/geometria.ts')
 const MEDIDA_B = leer('_lib/pie3d/medida.ts')
 // [PULIDO 28] AA1 · el sentido cambió por pedido: el rótulo de la tecla va impreso (`impresas.ts`), con la misma marca (w = −1).
 const IMPRESAS_B = leer('_lib/escena/pie3d/impresas.ts')
+const ESTADO_B = leer('_componentes/formularios/EstadoDeEnvio.tsx')
 const sucesivos = (pie: string, panel: string, a: string, c: string, g: string, m: string, html: string): boolean =>
   // DOM del pie: la carga con el botón ocupado; el rótulo, invisible y mudo; la tarjeta en la otra rama, en espera.
   pie.includes('{enviando && <Carga ') && pie.includes("aria-hidden={enviando || undefined} className={cn('grid justify-items-center', enviando && 'invisible')}") &&
@@ -417,13 +419,14 @@ const sucesivos = (pie: string, panel: string, a: string, c: string, g: string, 
   // 3D: el relieve del rótulo marcado, descartado con el botón ocupado, leído cada cuadro; medido aunque esté mudo.
   g.includes('relieveDe(m, fuentes, true, v.tecla, false).map(deRotulo)') && IMPRESAS_B.includes('aLoAnchoDeLaTecla(deRotulo(pintado), m.tecla)') && c.includes('if ( vRotuloDelPie > 0.5 && uSinRotuloDelPie > 0.5 ) discard;') &&
   a.includes("a.uniformes.uSinRotuloDelPie.value = a.boton?.getAttribute('aria-busy') === 'true' ? 1 : 0") && m.includes("mudo.hasAttribute('data-rotulo-de-la-tecla')") &&
-  // El panel: la carga y la tarjeta son estados distintos de la misma presencia.
-  /\{enviando \? \([\s\S]*?<Carga [\s\S]*?\) : enviado \|\| fase === 'error' \? \([\s\S]*?<TarjetaDeResultado/.test(panel) &&
+  // [C2 · 22] El panel: lo monta EstadoDeEnvio, que separa la carga y el resultado en dos vistas de una presencia en espera.
+  panel.includes('<EstadoDeEnvio estado={estado} alVolver={alVolver}>') && ESTADO_B.includes("{vista === 'carga' && (") && ESTADO_B.includes('<AnimatePresence mode="wait" initial={false}>') && /\{resultado !== null && \(/.test(ESTADO_B) &&
   // La tarjeta del error: «Reintentar» y ninguna carga.
   html.includes(RESULTADO.reintentar) && !html.includes('data-pieza="carga"')
 afirmar(sucesivos(PIE_B, PANEL_B, ARMADAS_B, COREO_B, GEOM_B, MEDIDA_B, tarjeta('error', true, true)), 'B4 · la carga, el rótulo y «Reintentar» se suceden: en el DOM, en la tecla 3D (el relieve se apaga en el mismo cuadro) y en el panel')
 controlPositivo('B4 · el detector VE la tecla 3D de antes (el relieve dibujado con el botón ocupado)', COREO_B.replace('if ( vRotuloDelPie > 0.5 && uSinRotuloDelPie > 0.5 ) discard;', ''), (c: string) => sucesivos(PIE_B, PANEL_B, ARMADAS_B, c, GEOM_B, MEDIDA_B, tarjeta('error', true, true)))
 controlPositivo('  y el rótulo a la vista encima de la carga', PIE_B.replace("enviando && 'invisible')", "false && 'invisible')"), (p: string) => sucesivos(p, PANEL_B, ARMADAS_B, COREO_B, GEOM_B, MEDIDA_B, tarjeta('error', true, true)))
+controlPositivo('  y un panel que no monta el estado de envío', PANEL_B.replace('<EstadoDeEnvio estado={estado} alVolver={alVolver}>', '<div>'), (p: string) => sucesivos(PIE_B, p, ARMADAS_B, COREO_B, GEOM_B, MEDIDA_B, tarjeta('error', true, true)))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('B5 · La carga gira sobre el palito de la P, con el palito en el medio')
@@ -483,10 +486,11 @@ titulo('B6 · Terminado el éxito, el formulario se limpia')
 // J6 (s61); su posición sobre la placa, en el banco.
 const limpioBien = (pie: string, panel: string): boolean => {
   const exito = ramaDelError(pie, '// [PULIDO 11] B6 · el éxito: lo escrito se va', '} else {')
-  return exito.includes('setDatos(VACIO)') && exito.includes('setIntento(false)') && exito.includes('setVuelta((n) => n + 1)') && pie.includes('key={`formulario-${String(vuelta)}`}') && /setFase\('exito'\)\n\s+setIntento\(false\)\n\s+setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/.test(panel)
+  return exito.includes('setDatos(VACIO)') && exito.includes('setIntento(false)') && exito.includes('setVuelta((n) => n + 1)') && pie.includes('key={`formulario-${String(vuelta)}`}') && /setEstado\('exito'\)\n\s+setIntento\(false\)\n\s+setDatos\(\{ intereses: \[\], \.\.\.VACIO \}\)/.test(panel) && /if \(despuesDe === 'exito'\) cerrarContacto\(\)/.test(panel)
 }
 afirmar(limpioBien(PIE_B, PANEL_B), 'B6 · el éxito limpia el formulario: los valores se vacían y los campos se vuelven a montar (sin el autocompletado viejo)')
 controlPositivo('B6 · el detector VE campos que no se vuelven a montar (el autocompletado viejo se queda)', PIE_B.replace('setVuelta((n) => n + 1)', ''), (p: string) => limpioBien(p, PANEL_B))
+controlPositivo('  y un panel que no vacía lo escrito con el éxito', PANEL_B.replace('setDatos({ intereses: [], ...VACIO })', ''), (p: string) => limpioBien(PIE_B, p))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('C2 · La cabecera abajo de 1024: parlante y menú del mismo tamaño y en el mismo eje ([CIERRE A] A6 · el progreso se sacó)')
@@ -717,10 +721,10 @@ controlPositivo('  el detector VE la sombra de la primera versión (ninguna, par
 // [PULIDO 14] L3 · los hilos de energía (`?hilos=`) se borraron con su código (no gustaron): los reemplazan los destellos (s65).
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('F · El giroscopio (`?giroscopio=si`): la inclinación del teléfono es el puntero de la cámara')
+titulo('F · El giroscopio ([C2-81] con su botón; era `?giroscopio=si`): la inclinación del teléfono es el puntero de la cámara')
 
-// Prototipo, apagado por defecto: sin la bandera no se escucha ni se pide nada. Con ella, el toque del parlante prende el sonido Y
-// el movimiento (iOS pide el permiso desde un gesto). La inclinación entra por el MISMO caño que el mouse (`OrbitRig`): su
+// [C2-81] Ya no es un prototipo: apagado por defecto, lo prende su botón o la frase del preloader (iOS pide el permiso desde ese gesto;
+// `s78-c2-81` lo prueba con un teléfono de mentira) y el parlante sólo prende el sonido. La inclinación entra por el MISMO caño que el mouse (`OrbitRig`): su
 // suavizado, su rango de −1 a 1 (sus topes: el techo del domo no entra) y su apagado con movimiento reducido.
 const cero = { beta: 70, gamma: 3 }
 const inclinacionBien = (f: typeof punteroDeLaInclinacion): boolean => {
@@ -737,12 +741,12 @@ const SONIDO_F = leer('_chrome/sonido/ControlDelSonido.tsx')
 const GIRO_F = leer('_lib/escena/giroscopio.ts')
 // [CIERRE A] A1 · el caño del mouse pasa por la persecución de la órbita (el puntero sin los controles fijos); el giroscopio, igual.
 const MODULACION_F = leer('_lib/escena/punteroDeLaOrbita.ts')
+const MOVIMIENTO_F = leer('_lib/escena/movimiento.ts')
 const cableadoBien = (rig: string, son: string, g: string): boolean =>
   rig.includes('perseguirElPunteroDeLaOrbita(mouse, inclinado, state.pointer, delta)') && MODULACION_F.includes('const p = inclinado ? INCLINACION_DEL_TELEFONO : punteroDeLaOrbita(puntero.x, puntero.y)') &&
-  son.includes('if (!giroscopioPedido(window.location.search)) return undefined') && son.includes('if (leerPrendido()) prenderElGiroscopio()') && son.includes("document.addEventListener('click', alTocar)") &&
-  g.includes("window.matchMedia('(prefers-reduced-motion: reduce)').matches") && g.includes("document.addEventListener('visibilitychange', alCambiarLaVisibilidad)") && g.includes('conPermiso.requestPermission()') &&
-  !giroscopioPedido('') && giroscopioPedido('?giroscopio=si') && !giroscopioPedido('?giroscopio=1')
-afirmar(cableadoBien(RIG_F, SONIDO_F, GIRO_F), 'F2 · apagado por defecto; con la bandera, el toque del parlante lo prende (el permiso de iOS desde el gesto), nunca con movimiento reducido, en pausa con la pestaña oculta, y entra por el caño del mouse')
-controlPositivo('F2 · el detector VE el giroscopio prendido sin la bandera', SONIDO_F.replace('if (!giroscopioPedido(window.location.search)) return undefined', 'if (false) return undefined'), (so: string) => cableadoBien(RIG_F, so, GIRO_F))
+  !/prenderElGiroscopio|giroscopioPedido/.test(son) && MOVIMIENTO_F.includes("export const arrancaPrendido = (guardado: MovimientoGuardado): boolean => guardado === 'si'") &&
+  g.includes("document.addEventListener('visibilitychange', alCambiarLaVisibilidad)") && g.includes('.requestPermission().then(') && !g.includes('giroscopioPedido')
+afirmar(cableadoBien(RIG_F, SONIDO_F, GIRO_F), 'F2 · apagado por defecto (lo prende su botón, con el permiso de iOS desde el gesto; el parlante ya no), en pausa con la pestaña oculta, y entra por el caño del mouse')
+controlPositivo('F2 · el detector VE el parlante que prende también el movimiento (el prototipo)', `${SONIDO_F}\nif (leerPrendido()) prenderElGiroscopio()`, (so: string) => cableadoBien(RIG_F, so, GIRO_F))
 
 cerrar('s62-pulido-11')

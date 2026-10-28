@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 import { FLOOR_Y } from '../probeScene'
 import { CRISTAL, azarDelCristal } from './cristal'
+import { GRIETAS } from './grietas'
 
 /**
  * [PULIDO 23] U1 · EL MURO DE CRISTAL: UN VITRAL ROTO (el humano lo dibujó: un parabrisas astillado). Una sola malla continua que envuelve
@@ -111,13 +112,15 @@ export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
   const hondura: number[] = []
   const borde: number[] = []
   const deLaCelda: number[] = []
+  const grieta: number[] = []
   const c = new THREE.Vector3()
   const a = new THREE.Vector3()
   const b = new THREE.Vector3()
-  for (const celda of celdas) {
+  for (const [semilla, celda] of celdas.entries()) {
     const p = celda.poligono
     const n = p.length / 2
     if (n < 3) continue
+    const rayos = rayosDeLaCelda(semilla)
     let cu = 0
     let cv = 0
     for (let k = 0; k < n; k += 1) {
@@ -136,6 +139,11 @@ export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
       const hacia = new THREE.Vector3().subVectors(a, c).cross(new THREE.Vector3().subVectors(b, c)).dot(c) < 0
       const [x, y] = hacia ? [a, b] : [b, a]
       posicion.push(c.x, c.y, c.z, x.x, x.y, x.z, y.x, y.y, y.z)
+      // [C2-31g] `aGrieta`: el punto desde el centro de su celda (u, en el muro desenrollado), la semilla y los rayos de la celda.
+      const enA = [p[k * 2] - cu, p[k * 2 + 1] - cv]
+      const enB = [p[((k + 1) % n) * 2] - cu, p[((k + 1) % n) * 2 + 1] - cv]
+      const [gx, gy] = hacia ? [enA, enB] : [enB, enA]
+      grieta.push(0, 0, semilla, rayos, gx[0], gx[1], semilla, rayos, gy[0], gy[1], semilla, rayos)
       for (let q = 0; q < 3; q += 1) normal.push(N.x, N.y, N.z)
       interior.push(1, 0, 0)
       hondura.push(celda.hondura, celda.hondura, celda.hondura)
@@ -156,5 +164,18 @@ export function armarElMuro(celdas: readonly Celda[]): THREE.BufferGeometry {
   g.setAttribute('aHondura', new THREE.Float32BufferAttribute(hondura, 1))
   g.setAttribute('aBorde', new THREE.Float32BufferAttribute(borde, 4))
   g.setAttribute('aCelda', new THREE.Float32BufferAttribute(deLaCelda, 2))
+  g.setAttribute('aGrieta', new THREE.Float32BufferAttribute(grieta, 4))
   return g
+}
+
+/**
+ * [C2-31g] Los rayos de la telaraña de la celda `indice`: cuántos (la parte entera, de `GRIETAS.telarana.rayos`) y su giro (la parte
+ * decimal, entre 0,02 y 0,98: la parte entera no se corre aunque el sombreador la interpole). Calculado acá, una vez por celda: el
+ * fragmento no gasta un azar en eso.
+ */
+export function rayosDeLaCelda(indice: number): number {
+  const [desde, hasta] = GRIETAS.telarana.rayos
+  const azar = azarDelCristal(CRISTAL.muro.semilla * 7919 + indice)
+  const n = desde + Math.min(hasta - desde, Math.floor(azar() * (hasta - desde + 1)))
+  return n + 0.02 + 0.96 * azar()
 }

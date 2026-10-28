@@ -24,6 +24,7 @@ import { CONTENIDO, TRAMOS_DEL_TITULAR, TRAMOS_DEL_TITULAR_EN_LA_BANDA } from '.
 import { ElEquipo, LaFoto } from './equipo'
 import { Pantalla } from './pantalla'
 import { CLASES_DEL_REPARTO, GEOMETRIA, llegadaHastaElPie } from './geometria'
+import { CLASES_DEL_SIGNO, ESTILO_DEL_SIGNO } from './signo'
 import { RenglonDeVolumen, SignoDeVolumen } from './titular3d'
 
 /** Se re-exportan para que quien ya las importaba de acá —los instrumentos— no cambie de puerta. */
@@ -153,15 +154,12 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
           {/* El ≠ lleva la tipografía del titular sin escribir texto: de ahí salen su `em` y su medida, y con ellas el alto y el centrado. */}
           {/* [PULIDO 2] 2f · y llega con la MISMA función que el titular (su entrada: P1 con el rango de la máscara, pura del
               scroll); antes no tenía llegada y, desde el menú, aparecía en el viaje, antes que todo lo demás. */}
+          {/* [C2-30s] desde 1024 el Bloque es el espacio libre (su fila, del margen al logo) y el ≠ va grande y centrado en él (`signo.ts`). */}
           <Bloque
             patron="P1"
             rango={GEOMETRIA.rangoDeLaMascara}
-            className={cn(
-              GEOMETRIA.reparto.signo,
-              GEOMETRIA.tipografiaDelTitular,
-              GEOMETRIA.medidaDelTitular,
-            )}
-            style={GEOMETRIA.estilos.titular}
+            className={cn(GEOMETRIA.reparto.signo, CLASES_DEL_SIGNO.libre, GEOMETRIA.tipografiaDelTitular)}
+            style={ESTILO_DEL_SIGNO}
           >
             {(entradaDelSigno) => (
               <Bloque patron="P1" rango="ventana-del-trazo">

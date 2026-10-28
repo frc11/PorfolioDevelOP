@@ -113,10 +113,11 @@ afirmarIgual(
   6,
   'y son seis piezas: los SEIS renglones de los dos repartos del titular (P1); la foto llega en curva, como las de las personas',
 )
+// [C2-30f] CUATRO: los dos nombres dejaron el canal del texto (el nombre grande de afuera se fue: se ve en la etiqueta de la foto).
 afirmarIgual(
   veces(conMotion, 'data-lineas-piezas'),
-  6,
-  '  y seis textos por el canal del texto: el rótulo del equipo, los dos nombres, sus dos descripciones y la bajada',
+  4,
+  '  y cuatro textos por el canal del texto: el rótulo del equipo, las dos descripciones y la bajada (los nombres van en la etiqueta de la foto)',
 )
 // Modo pulido: el handle ya no puede ser `data-texto-por-lineas` —el titular no usa ese
 // primitivo—, así que las dos afirmaciones se aflojan a la propiedad que seguían cuidando.
@@ -215,10 +216,11 @@ afirmarIgual(hovers, veces(quieto, 'focus-visible:'), 'toda `hover:` tiene su ge
 // Ocho por marco: acercamiento 2, suelta 2, velo 1, texto 3. 8 × 3 marcos.
 // [NAVBAR] La máscara recuperada (opacidad, recorte y transición) y el nombre de los retratos como renglón propio.
 // [PULIDO 10] J9 · y la leyenda corta de la foto del equipo abajo de 1024 (su texto, como el de todo revelado: 3).
+// [C2-30f] 30: el nombre de cada retrato salió del revelado (adentro de la foto, abajo, sólo el rol): su etiqueta está siempre, sin hover.
 afirmarIgual(
   hovers,
-  36,
-  '  y en esta sección son 36: nueve por marco —acercamiento 2, suelta 3 (la máscara), velo 1, texto 3— por los tres, 3 por el nombre de cada retrato y 3 por la leyenda corta de la foto del equipo',
+  30,
+  '  y en esta sección son 30: nueve por marco —acercamiento 2, suelta 3 (la máscara), velo 1, texto 3— por los tres y 3 por la leyenda corta de la foto del equipo',
 )
 // Modo pulido: TRES botones, uno por marco. Son el control del toque de abajo de
 // 1025. Están en el marcado en los dos lados —el corte es `escritorio:hidden` y no

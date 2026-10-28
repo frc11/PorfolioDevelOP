@@ -102,12 +102,14 @@
  * [B12a.5] EL DESPLEGABLE DE SERVICIOS (D5) — la lista de las páginas de servicio, debajo de «Servicios» y fuera de la píldora (la
  * píldora recorta lo que se le sale). El mismo vidrio que la píldora; nace con ella y se pega con ella (la misma coordenada: la
  * cabecera). Cerrado no se ve ni se alcanza con el Tab (`visibility`); abre bajando un poco, como el resto de lo que aparece.
+ * [C2-21] Su borde izquierdo en el de «Servicios» (`--desplegable-x`, medido en `DesplegableDeServicios.tsx`): sin correrse a la mitad.
  */
 [data-v3] [data-pieza="barra"] > [data-parte="desplegable"] {
   position: absolute;
   top: calc(var(--barra-nacimiento) + var(--barra-alto) + var(--spacing-2));
-  left: var(--desplegable-x, 50%);
-  translate: -50% calc(var(--spacing-2) * -1);
+  /* [C2-90] Respaldo en 0 (no 50%): cerrado y nunca abierto la x no está medida, y a mitad de la cabecera su caja pasaba el borde derecho del teléfono. */
+  left: var(--desplegable-x, 0);
+  translate: 0 calc(var(--spacing-2) * -1);
   padding: var(--spacing-2);
   border: var(--border-hairline) solid var(--color-borde);
   border-radius: var(--radius-fuerte);
@@ -122,7 +124,7 @@
 }
 
 [data-v3] [data-pieza="barra"] > [data-parte="desplegable"][data-abierto] {
-  translate: -50% 0;
+  translate: 0 0;
   opacity: 1;
   visibility: visible;
   /* [B12a.8] Al abrir, visible en el acto (sólo al cerrar se anima): con el teclado el foco entra en el mismo cuadro, y una lista que
@@ -133,11 +135,11 @@
 /* Con la píldora al pie de la primera pantalla, abajo no entra: abre hacia arriba (y sube un poco al aparecer, al revés). */
 [data-v3] [data-pieza="barra"] > [data-parte="desplegable"][data-hacia="arriba"] {
   top: calc(var(--barra-nacimiento) - var(--spacing-2));
-  translate: -50% calc(100% * -1 + var(--spacing-2));
+  translate: 0 calc(100% * -1 + var(--spacing-2));
 }
 
 [data-v3] [data-pieza="barra"] > [data-parte="desplegable"][data-hacia="arriba"][data-abierto] {
-  translate: -50% calc(100% * -1);
+  translate: 0 calc(100% * -1);
 }
 
 [data-v3] [data-pieza="barra"] > [data-parte="desplegable"] > ul {
@@ -279,6 +281,19 @@
 }
 
 [data-v3][data-cabecera-retirada] :is([aria-controls="menu-movil"], [data-parte="lugar-del-parlante"]) {
+  translate: 0 calc(-1 * var(--zona-de-la-cabecera));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* [C2-81] El botón del movimiento (arriba a la derecha, en el teléfono) se retira con el menú y el parlante. */
+[data-v3] [data-parte="lugar-del-movimiento"] {
+  transition-property: translate, opacity;
+  transition-duration: var(--duracion-media);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3][data-cabecera-retirada] [data-parte="lugar-del-movimiento"] {
   translate: 0 calc(-1 * var(--zona-de-la-cabecera));
   opacity: 0;
   pointer-events: none;

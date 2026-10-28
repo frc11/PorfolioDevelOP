@@ -49,10 +49,10 @@ export const CONTENIDO = {
   /** El h2. Una palabra: la sección se nombra a sí misma. */
   titular: 'Portfolio',
 
-  /** Qué se está mirando. Relleno: lo reescribe C2 (`PEDIDO`). */
+  /** [C2 · 40] Qué se está mirando: el texto de `05-TEXTOS.md`, en lugar del slogan entero. */
   bajada:
-    'Cada uno de estos proyectos se pensó desde cero para el negocio que lo ' +
-    'iba a usar. Acá abajo no hay plantillas.',
+    'Cada uno de estos proyectos se pensó desde cero para resolver un problema real ' +
+    'del cliente, con nuestro estándar de calidad.',
 
   /** El nombre del grupo de tiras, para los lectores de pantalla. */
   acordeon: 'Los proyectos',
@@ -80,12 +80,12 @@ export const CONTENIDO = {
    * Valentino; el nombre es el del contacto.
    */
   laTuya: {
-    nombre: 'La próxima es la tuya',
-    frase: '¿El próximo proyecto sos vos?',
-    bajada: 'Contanos qué tenés en mente y lo pensamos desde cero para tu negocio.',
+    /** [C2 · 40] Un solo título (reemplaza a «La próxima es la tuya» y a la frase), del tamaño del de antes. */
+    nombre: '¿El próximo sos vos?',
+    bajada: 'Contanos qué problema tenés y pensamos la solución que encaje con tu negocio.',
     medio: 'WhatsApp o email',
     necesitas: '¿Qué necesitás?',
-    whatsapp: 'o escribinos por WhatsApp',
+    whatsapp: 'O escribinos por WhatsApp',
   },
 
   /** [B1.2e] El carrusel (debajo de 1024): las dos flechas (el nombre de cada una, para los lectores). Eran los dos controles del teclado

@@ -16,6 +16,9 @@ import { vigilarElReposo } from './reposo'
  * curva de los tokens del tema. Nada entra desde abajo. Corre en todo ancho, como el remate (`useMovimientoEnTodoAncho`); con movimiento
  * reducido o sin la coreografía instalada (el HTML servido y el primer render) está QUIETO: a la vista y sin transición. El elemento que
  * se observa nunca se mueve: lo que se corre es su hijo. La guarda en reposo (P-H25) es `reposo.ts`.
+ *
+ * [C2 · 60c] `desde="abajo"`: la misma máquina, la misma línea y la misma duración, pero la corrida corta llega desde abajo (y se va
+ * hacia abajo, en espejo). Es la entrada del CTA del Panel. Sin la prop, desde la derecha: los demás usos no cambian.
  */
 const CLASES_DEL_ESTADO: Readonly<Record<EstadoDelGatillo, string>> = {
   quieto: '',
@@ -24,7 +27,18 @@ const CLASES_DEL_ESTADO: Readonly<Record<EstadoDelGatillo, string>> = {
   ido: 'translate-x-8 opacity-0 transition duration-[var(--duracion-muy-lenta)] ease-[var(--ease-salida)] motion-reduce:transition-none',
 }
 
-export function Gatillo({ children, className }: { readonly children: ReactNode; readonly className?: string }): React.JSX.Element {
+/** [C2 · 60c] La misma entrada, desde abajo: la traslación de 8 del tema, en el eje vertical. */
+const CLASES_DESDE_ABAJO: Readonly<Record<EstadoDelGatillo, string>> = {
+  quieto: '',
+  espera: 'translate-y-8 opacity-0',
+  puesto: 'transition duration-[var(--duracion-muy-lenta)] ease-[var(--ease-salida)] motion-reduce:transition-none',
+  ido: 'translate-y-8 opacity-0 transition duration-[var(--duracion-muy-lenta)] ease-[var(--ease-salida)] motion-reduce:transition-none',
+}
+
+/** De dónde llega la pieza: del costado (el defecto, el gesto del remate del home) o desde abajo. */
+export type DesdeDelGatillo = 'costado' | 'abajo'
+
+export function Gatillo({ children, className, desde = 'costado' }: { readonly children: ReactNode; readonly className?: string; readonly desde?: DesdeDelGatillo }): React.JSX.Element {
   const anima = useMovimientoEnTodoAncho()
   const [estado, setEstado] = useState<EstadoDelGatillo>('quieto')
   const caja = useRef<HTMLDivElement>(null)
@@ -56,7 +70,7 @@ export function Gatillo({ children, className }: { readonly children: ReactNode;
   const efectivo = anima ? estado : siguienteEstado(estado, { tipo: 'sin-movimiento' })
   return (
     <div ref={caja} data-gatillo={efectivo} className={className}>
-      <div className={CLASES_DEL_ESTADO[efectivo]}>{children}</div>
+      <div className={(desde === 'abajo' ? CLASES_DESDE_ABAJO : CLASES_DEL_ESTADO)[efectivo]}>{children}</div>
     </div>
   )
 }

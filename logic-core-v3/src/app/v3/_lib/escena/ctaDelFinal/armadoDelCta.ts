@@ -65,6 +65,8 @@ interface Bloque {
    * para quedar centradas en él (px): el CTA queda en el mundo, no sigue a su caja del DOM (que va con la página al soltarse).
    */
   readonly fijo: { readonly lugar: LugarEnElCuadro; readonly dx: number; readonly ancho: number; readonly pin: PinDelLugar } | null
+  /** [C2-70e] El corrimiento de ahora a lo largo del renglón (px), el de su título de volumen (`RenglonDelCta.corrido`): sin él, 0. */
+  readonly corrido?: () => number
 }
 
 type LetraViva = { -readonly [K in keyof LetraEnPantalla]: LetraEnPantalla[K] }
@@ -130,7 +132,7 @@ export function armarElCta(origen: readonly RenglonDelCta[], destino: HTMLElemen
   marco.name = 'cta del final'
   const lienzo = new THREE.Group()
   lienzo.name = 'cta del final · la metamorfosis'
-  const bloquesDelOrigen = origen.map((r, k) => armarElBloque(letrasDelRenglon(CHIVO, textoVisible(r.el), posicionesDelDom(r.el)), CHIVO, r.el, r.subida, k, color, marco, origenVivo))
+  const bloquesDelOrigen = origen.map((r, k): Bloque => ({ ...armarElBloque(letrasDelRenglon(CHIVO, textoVisible(r.el), posicionesDelDom(r.el)), CHIVO, r.el, r.subida, k, color, marco, origenVivo), corrido: r.corrido }))
   const texto = textoVisible(destino)
   const avances = avancesDe(fuerte, texto, TRACKING_DEL_CTA.fuerte)
   const bloqueDelDestino = armarElBloque(letrasDelRenglon(fuerte.fuente, texto, avances.x), fuerte.fuente, destino, 0, 0, color, marco, false, lugarDelCta(destino, avances.ancho, anchoMaximo))
@@ -163,7 +165,7 @@ export function letrasEnLaPantalla(a: ArmadoDelCta, y: number): void {
       const lugar = b.fijo !== null ? b.fijo.lugar : caja === null ? { ...b.lugar, arriba: b.lugar.arriba + corrimiento(b.pin, y) } : { ...b.lugar, izquierda: caja.left, arriba: caja.top }
       const base = lineaDeBase(lugar, b.fuente.data)
       const c = lugar.cuerpo
-      const dx = b.fijo?.dx ?? 0
+      const dx = (b.fijo?.dx ?? 0) + (b.corrido?.() ?? 0)
       for (const p of b.piezas) {
         const l = salida[i]
         i += 1

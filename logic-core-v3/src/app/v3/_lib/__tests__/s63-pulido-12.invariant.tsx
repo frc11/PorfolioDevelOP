@@ -94,9 +94,11 @@ const enLaPantalla = (t: Tarjeta | null): boolean => entera(t) && t !== null && 
 const rotaBien = (r: Record<string, Rotacion>): boolean =>
   ['390 844 pie', '390 844 modal', '768 1024 pie', '768 1024 modal'].every((k) => r[k] !== undefined && entera(r[k].rotado) && entera(r[k].deVuelta)) &&
   ['390 844 modal', '768 1024 modal'].every((k) => enLaPantalla(r[k].rotado) && enLaPantalla(r[k].deVuelta))
-const FORMS = [leer('_secciones/cierre/FormularioDelPie.tsx'), leer('_chrome/contacto/FormularioDeContacto.tsx')]
-const sueltaAlRotar = (f: typeof sigueValiendo): boolean => f(390, 390) && !f(390, 844) && !f(844, 390) && FORMS.every((x) => x.includes('const [alto, setAlto] = useAltoGuardado()'))
-afirmar(sueltaAlRotar(sigueValiendo), '3 · el alto guardado al enviar se suelta si cambia el ancho de la ventana (no con un cambio sólo de alto), en los dos formularios')
+// [C2 · 22] el panel de Contacto ya no guarda un alto: su estado de envío (EstadoDeEnvio) ocupa la misma celda que el formulario.
+const FORMS = [leer('_secciones/cierre/FormularioDelPie.tsx')]
+const PANEL_SIN_ALTO = leer('_chrome/contacto/FormularioDeContacto.tsx')
+const sueltaAlRotar = (f: typeof sigueValiendo): boolean => f(390, 390) && !f(390, 844) && !f(844, 390) && FORMS.every((x) => x.includes('const [alto, setAlto] = useAltoGuardado()')) && !PANEL_SIN_ALTO.includes('useAltoGuardado') && PANEL_SIN_ALTO.includes('<EstadoDeEnvio estado={estado}')
+afirmar(sueltaAlRotar(sigueValiendo), '3 · el alto guardado al enviar se suelta si cambia el ancho de la ventana (no con un cambio sólo de alto), en el pie (y el panel de Contacto ya no lo guarda)')
 controlPositivo('3 · el detector VE el alto que nunca se suelta', (() => true) as typeof sigueValiendo, sueltaAlRotar)
 // La memoria del formulario del pie: lo anotado vale mientras el dueño sigue montado (el nuevo se dibuja antes de que el viejo se
 // desmonte) y `VIGENCIA_MS` después de irse; un envío en viaje se recupera como tal sólo si su pedido sigue en viaje (si no, en

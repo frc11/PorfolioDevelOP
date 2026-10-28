@@ -57,3 +57,31 @@ export function suscribirALaEntrada(f: () => void): () => void {
     oyentes.delete(f)
   }
 }
+
+/**
+ * [C2-81] LA PREPARACIÓN DE LA ESCENA, REPARTIDA — compilar y calentar los programas (`escena/gpu/Precompilar.tsx`) frena el hilo y, en
+ * Direct3D, también el de la GPU (el que compone los cuadros): si cae en un fundido del preloader, el fundido se traba (ítem 18). Con el
+ * preloader, la capa abre y cierra la preparación cuadro a cuadro (`permitirLaPreparacion`): sólo en los ratos quietos (la bienvenida ya
+ * aparecida y todavía sin irse; desde que arranca la flecha), y `Precompilar` pregunta antes de compilar y antes de cada parte del
+ * calentado. Sin preloader, siempre. El seguro: si la capa nunca arranca, pasado `SEGURO_DE_LA_PREPARACION_MS` desde la decisión se
+ * prepara igual.
+ */
+export const SEGURO_DE_LA_PREPARACION_MS = 4000
+
+/** `sin-capa`: la capa todavía no dijo nada (manda el seguro). */
+let preparacion: 'sin-capa' | 'abierta' | 'en-pausa' = 'sin-capa'
+
+/** La capa del preloader: si la escena se puede preparar en este cuadro (un rato quieto) o no. */
+export function permitirLaPreparacion(si = true): void {
+  preparacion = si ? 'abierta' : 'en-pausa'
+}
+
+type VentanaConElArranque = Window & { __preloaderDelSitio?: { readonly activo?: unknown; readonly desde?: number } }
+
+/** ¿Se puede preparar la escena ahora? Sin preloader (o con la entrada abierta), siempre; con él, lo que diga la capa, o al seguro. */
+export function laPreparacionPuede(ahora: number = typeof performance === 'undefined' ? 0 : performance.now()): boolean {
+  if (preparacion === 'abierta' || entradaAbierta()) return true
+  if (preparacion === 'en-pausa') return false
+  const desde = (window as VentanaConElArranque).__preloaderDelSitio?.desde ?? 0
+  return ahora - desde >= SEGURO_DE_LA_PREPARACION_MS
+}

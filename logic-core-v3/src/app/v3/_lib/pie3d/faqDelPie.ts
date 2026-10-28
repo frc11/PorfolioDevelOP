@@ -154,3 +154,101 @@ export function decidirElGestoDelFaq(fase: FaseDelFaq, g: GestoAnteElFaq, enLaGu
   if (g.sentido > 0) return fase === 'saliendo' && g.nuevo ? 'entra' : 'toma'
   return (fase === 'adentro' || fase === 'entrando') && g.nuevo ? 'sale' : 'toma'
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// [C2-71] EL FAQ EN 3D (desde 1025, con el pie de volumen): sus bloques son placas de la escena, como la del formulario del pie.
+
+/**
+ * Los bloques del FAQ de volumen: el de las preguntas (izquierda), el de la respuesta (derecha), el de WhatsApp (con la primera respuesta)
+ * y el botón que avisa que hay un FAQ (abajo, después de que el pie se acostó). Su DOM se anota acá (`useBloqueDelFaq`) y la escena
+ * (`escena/pie3d/faqDeVolumen.ts`) le arma su placa, la pone en el piso y le escribe la transformada que lo deja sobre su cara.
+ */
+export type IdDelBloqueDelFaq = 'preguntas' | 'respuesta' | 'whatsapp' | 'boton'
+
+export interface BloqueDelFaq {
+  readonly id: IdDelBloqueDelFaq
+  readonly elemento: HTMLElement
+  /** Cuánto está arriba (0: hundido y el piso cerrado; 1: en su lugar). Lo escribe el cuadro del FAQ; el del botón, la escena. */
+  nivel: number
+}
+
+export const BLOQUES_DEL_FAQ = new Map<IdDelBloqueDelFaq, BloqueDelFaq>()
+let versionDeLosBloques = 0
+/** Cambia cada vez que un bloque se anota o se va (la escena rearma lo que cambió). */
+export const versionDelFaqDeVolumen = (): number => versionDeLosBloques
+
+export function anotarElBloqueDelFaq(id: IdDelBloqueDelFaq, elemento: HTMLElement): () => void {
+  BLOQUES_DEL_FAQ.set(id, { id, elemento, nivel: 0 })
+  versionDeLosBloques += 1
+  return () => {
+    if (BLOQUES_DEL_FAQ.get(id)?.elemento === elemento) BLOQUES_DEL_FAQ.delete(id)
+    versionDeLosBloques += 1
+  }
+}
+
+/**
+ * Cómo sube un bloque del FAQ con su nivel `v` (0 a 1): el mismo efecto que el cambio del formulario del pie, al revés. Primero se ABRE
+ * el piso (la silueta del bloque, desde su centro: `abre`) con el bloque esperando abajo; recién abierto, SUBE sobre su plataforma hasta
+ * su lugar (`sube`); y al final, con el bloque quieto, aparece su texto (`texto`: el DOM). Bajando, al revés: el texto se va, baja y el
+ * piso se cierra. Pura.
+ */
+export const SUBIDA_DEL_BLOQUE = { abreHasta: 0.35, subeDesde: 0.3, textoDesde: 0.92 } as const
+
+const suaveDelBloque = (x: number): number => {
+  const u = Math.min(1, Math.max(0, x))
+  return u * u * u * (u * (u * 6 - 15) + 10)
+}
+
+export function subidaDelBloque(v: number): { readonly abre: number; readonly sube: number; readonly texto: number } {
+  const S = SUBIDA_DEL_BLOQUE
+  return { abre: suaveDelBloque(v / S.abreHasta), sube: suaveDelBloque((v - S.subeDesde) / (1 - S.subeDesde)), texto: entre((v - S.textoDesde) / (1 - S.textoDesde)) }
+}
+
+/**
+ * EL BOTÓN DEL FAQ («Scrolleá una vez más…»): sale después de que el pie se acostó entero (`esperaS` más tarde), con la apertura del piso;
+ * tocarlo es el gesto que trae el FAQ; con el FAQ se hunde con el pie y no vuelve en esta carga (`usado`: en memoria, no en el
+ * almacenamiento; se vuelve a armar al montar el FAQ: recargar o entrar de nuevo al home). Sube en la mitad del cambio del pie y, si el
+ * pie se va (la página sube), baja en `bajaS`.
+ */
+export const BOTON_DEL_FAQ = { esperaS: 0.8, subeS: MITAD_DEL_CAMBIO_MS / 1000, bajaS: 0.5 } as const
+
+export const BOTON_EN_VIVO = {
+  /** Ya se fue al FAQ en esta carga: no vuelve. */
+  usado: false,
+  /** Lo que subió (0 a 1, sin el pie: el nivel a la vista es el menor de los dos). */
+  nivel: 0,
+  /** Desde cuándo el pie está acostado entero (ms; sin acostar, +∞). */
+  acostadoDesde: Number.POSITIVE_INFINITY,
+}
+
+/** Al montar el FAQ (una carga o una entrada nueva al home): el botón vuelve a estar disponible. */
+export function rearmarElBotonDelFaq(): void {
+  BOTON_EN_VIVO.usado = false
+  BOTON_EN_VIVO.nivel = 0
+  BOTON_EN_VIVO.acostadoDesde = Number.POSITIVE_INFINITY
+}
+
+/**
+ * Un cuadro del botón (`ahora` en ms, `dt` en s): con el FAQ fuera de su lugar ya está usado; pide subir con el pie acostado entero desde
+ * hace `esperaS` (y presente: sin la salida del pie) y sin usar. Devuelve el nivel a la vista (el menor entre lo subido y el pie: entrando
+ * al FAQ se hunde con el pie, con su curva).
+ */
+export function pasoDelBoton(b: typeof BOTON_EN_VIVO, e: { readonly ahora: number; readonly dt: number; readonly acostado: boolean; readonly presente: boolean; readonly fase: FaseDelFaq; readonly pie: number; readonly quieto: boolean }): number {
+  if (e.fase !== 'fuera') b.usado = true
+  if (!e.acostado) b.acostadoDesde = Number.POSITIVE_INFINITY
+  else if (b.acostadoDesde === Number.POSITIVE_INFINITY) b.acostadoDesde = e.ahora
+  const pide = !b.usado && e.acostado && e.presente && e.ahora - b.acostadoDesde >= BOTON_DEL_FAQ.esperaS * 1000
+  const paso = e.quieto ? 1 : e.dt / (pide ? BOTON_DEL_FAQ.subeS : BOTON_DEL_FAQ.bajaS)
+  b.nivel = pide ? Math.min(1, b.nivel + paso) : Math.max(0, b.nivel - paso)
+  return Math.min(b.nivel, e.pie)
+}
+
+/**
+ * Tocar el botón (o cualquier pedido que no sea un gesto) es el gesto que trae el FAQ: entra con la misma condición (`puedeEntrar`: el pie
+ * entero) y desde `fuera`. Devuelve si entró.
+ */
+export function entrarSinGesto(puedeEntrar: boolean, ahora: number): boolean {
+  if (!puedeEntrar || faseEn(FAQ_EN_VIVO, ahora) !== 'fuera' || !entrar(FAQ_EN_VIVO, ahora)) return false
+  avisarAlFaq()
+  return true
+}

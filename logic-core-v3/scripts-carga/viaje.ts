@@ -19,7 +19,8 @@
  *   · el total, del clic a la página quieta (un dato: ~1,5 s de viaje + la espera a la escena + el montaje).
  *
  *   CONTROL=velo …       `?viaje=velo`: el velo de siempre (la banda): «la escena cubrió» tiene que dar FALLA;
- *   CONTROL=sin-tapar …  la página nueva entra a la vista con el scroll del home (`paginaTapada.ts`): cuadros en blanco (el papel del fondo);
+ *   CONTROL=sin-tapar …  la página nueva entra a la vista con el scroll del home (`paginaTapada.ts`): [C2-90] su `<main>` opaco antes del destape (no da
+ *                        cuadros en blanco: entra con su contenido, por eso el control era ciego);
  *   CONTROL=sin-hueco …  sin el marco del viaje (`HuecoDelViaje`): la cámara llega con el logo centrado y se corre después; la llegada, FALLA.
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -28,6 +29,7 @@ import path from 'node:path'
 
 import { chromium, type CDPSession, type Page } from '@playwright/test'
 import sharp from 'sharp'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
@@ -35,7 +37,7 @@ const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'velo', 'sin-tapar', 'sin-hueco'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: velo, sin-tapar o sin-hueco`)
 const DESTINO = '/v3/pagina-base'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/viaje')
+const SALIDA = salidaDelBanco('viaje')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 interface Registro {
@@ -46,6 +48,9 @@ interface Registro {
   readonly viaje: string
   readonly camara: number
   readonly noche: number
+  /** [C2-90] La opacidad del `<main>` de la página que llega (el de su intro; −1 si todavía no está) y si ya destapó. */
+  readonly nueva: number
+  readonly destapado: boolean
 }
 
 interface Llegada {
@@ -60,10 +65,14 @@ interface Llegada {
 const GRABAR = `(() => {
   window.__name = window.__name || ((f) => f)
   const log = (window.__cuadrosDelViaje = [])
+  let destapado = false
+  addEventListener('v3:velo-destapa', () => { destapado = true })
+  // La que llega es el <main> con la intro de la página (el del home puede rearmarse en el camino y no es la página).
+  const nueva = () => { const m = document.querySelector('[data-intro-de-pagina]')?.closest('main'); return m ? Number(getComputedStyle(m).opacity) : -1 }
   const cuadro = () => {
     const v = document.querySelector('[data-pieza="velo-de-navegacion"]')
     const b = window.__viajeDelBanco ? window.__viajeDelBanco() : null
-    log.push({ t: performance.timeOrigin + performance.now(), ruta: location.pathname, fase: v ? v.getAttribute('data-fase') : 'sin velo', modo: v ? v.getAttribute('data-modo') || '' : '', viaje: b ? b.fase : '', camara: b ? b.camara : -1, noche: b ? b.noche : -1 })
+    log.push({ t: performance.timeOrigin + performance.now(), ruta: location.pathname, fase: v ? v.getAttribute('data-fase') : 'sin velo', modo: v ? v.getAttribute('data-modo') || '' : '', viaje: b ? b.fase : '', camara: b ? b.camara : -1, noche: b ? b.noche : -1, nueva: nueva(), destapado })
     if (log.length > 4000) log.splice(0, 2000)
     requestAnimationFrame(cuadro)
   }
@@ -120,8 +129,21 @@ async function ctaALaVista(p: Page): Promise<{ readonly x: number; readonly y: n
 /** Al primer servicio: desde 1024 la barra viaja a Servicios y una muesca entra Desarrollo web; abajo, su pantalla suelta (sin Lenis). */
 async function alPrimerServicio(p: Page, movil: boolean): Promise<void> {
   if (movil) {
-    await p.evaluate(() => document.querySelector('[data-pieza="pantalla-de-servicio"]')?.scrollIntoView({ block: 'center', behavior: 'instant' }))
-    await dormir(2500)
+    // [C2-90] Desde la 50 el teléfono con movimiento también es el escenario con gatillos (ya no hay pantallas sueltas): al paso de
+    // web por el scroll, como `servicios-gatillos.ts` (`ponerEn`), y que se asiente. Antes, cerca de la sección (que monte).
+    await p.evaluate(() => document.getElementById('servicios')?.scrollIntoView({ block: 'start', behavior: 'instant' }))
+    await dormir(1500)
+    // Paso por paso hasta que el CTA de web esté a la vista (el panel de web entra desde la izquierda en el suyo).
+    for (let paso = 0; paso < 4; paso++) {
+      await p.evaluate((k) => {
+        const g = (window as Window & { __gatillosDelBanco?: { regla: () => { pasoPx: number; inicio: number } } }).__gatillosDelBanco
+        if (!g) throw new Error('sin __gatillosDelBanco (¿el banco prendido? ¿la coreografía?)')
+        const r = g.regla()
+        window.scrollTo({ top: r.inicio + (k + 0.5) * r.pasoPx, behavior: 'instant' })
+      }, paso)
+      await dormir(2800)
+      if ((await ctaALaVista(p)) !== null) return
+    }
     return
   }
   const caja = await p.locator('[data-pieza="barra"] [data-nav-id="servicios"]').first().boundingBox()
@@ -144,7 +166,7 @@ async function main(): Promise<void> {
   for (const ancho of ANCHOS) {
     const alto = ancho < 1024 ? 844 : 900
     const movil = ancho < 1024
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/viaje-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('viaje')
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
       executablePath: CHROME,
@@ -222,6 +244,10 @@ async function main(): Promise<void> {
       const iCambio = r.findIndex((x, k) => k > 0 && x.ruta === DESTINO && (r[k - 1]?.ruta ?? '') !== DESTINO)
       const cambio = iCambio < 0 ? undefined : r[iCambio - 1]
       const cambioLlegado = cambio !== undefined && cambio.camara >= 0.999 && cambio.noche >= 0.999
+      // [C2-90] La página que llega no se ve antes del destape (con el defecto entra entera, con contenido: no hay cuadro en blanco que contar).
+      const vistos = r.filter((x) => x.ruta === DESTINO && !x.destapado && x.nueva > 0.05)
+      const vistaAntes = vistos.length
+      if (vistaAntes > 0) console.log(`·     ${String(ancho)} · la página a la vista antes del destape: ${vistos.slice(0, 6).map((x) => `${(x.t - alClic).toFixed(0)} ms opacidad ${x.nueva.toFixed(2)} (${x.fase}/${x.viaje})`).join(' · ')}`)
       let enBlanco = 0
       let oscurosPlanos = 0
       for (const f of fotos.filter((x) => x.t >= alClic - 50 && x.t <= (quieto?.t ?? Infinity) + 450)) {
@@ -245,11 +271,12 @@ async function main(): Promise<void> {
       const llega = sonidos.filter((s) => s.cual === 'llega')
       const sonidosBien = sale.length === 1 && llega.length === 1 && (sale[0]?.t ?? 0) < (llega[0]?.t ?? 0)
       // Abajo de 1024 la llegada se informa (el reencuadre corto del hueco de la 1, declarado): no entra en el criterio.
-      const bien = conViaje && cambioLlegado && enBlanco === 0 && (movil || llegadaBien) && sonidosBien
+      const bien = conViaje && cambioLlegado && vistaAntes === 0 && enBlanco === 0 && (movil || llegadaBien) && sonidosBien
       const pct = (v: number): string => `${(v * 100).toFixed(2)} %`
       const linea =
         `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · el CTA de web → ${DESTINO} · total ${total.toFixed(0)} ms` +
         ` · ${conViaje ? 'cubrió la escena (data-modo=viaje)' : 'NO cubrió la escena (la banda)'} · el cambio de ruta ${cambio === undefined ? 'no se vio' : `con la cámara en ${cambio.camara.toFixed(3)} y la noche en ${cambio.noche.toFixed(3)}`}` +
+        ` · la página nueva ${vistaAntes === 0 ? 'tapada hasta el destape' : `A LA VISTA antes del destape en ${String(vistaAntes)} cuadros`}` +
         ` · screencast: ${String(fotos.length)} cuadros, ${String(enBlanco)} en blanco (${String(oscurosPlanos)} oscuros planos, un dato)` +
         ` · el logo en su hueco al aparecer la página: ${enDestape === null ? 'sin medir' : `${enDestape.desborda ? 'x sin medir (más ancho que el cuadro)' : pct(enDestape.dx)} en x, ${pct(enDestape.dy)} en y`}; asentada: ${asentada === null ? 'sin medir' : `${pct(asentada.dx)} en x, ${pct(asentada.dy)} en y`}${movil ? ' (abajo de 1024, un dato)' : ''}` +
         ` · los sonidos: ${sonidos.map((s) => s.cual).join(' → ') || 'ninguno'}`

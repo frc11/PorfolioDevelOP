@@ -17,13 +17,14 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium, type Page } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const RUTAS = (process.env.RUTAS ?? '/v3/pagina-base?composicion=1').split(',')
 const ALTO = Number(process.env.ALTO ?? '800')
 const ANCHOS = (process.env.ANCHOS ?? '360,390,430,600,768,820,860,900,960,1000,1010,1020,1023,1024,1030,1040,1050,1060,1070,1080,1090,1100,1120,1200,1280,1366,1440,1600,1920').split(',').map(Number)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/chrome')
+const SALIDA = salidaDelBanco('chrome')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const CON_CHAT = process.env.CHAT !== 'no'
 const CONTROL = process.env.CONTROL ?? ''
@@ -102,7 +103,7 @@ const cajas = (p: Page): Promise<Caja[]> =>
 
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/chrome-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('chrome')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,
@@ -126,6 +127,10 @@ async function main(): Promise<void> {
       if (m.type() === 'error' || m.type() === 'warning' || texto.includes('NaN')) consola.set(`${m.type()}: ${texto.slice(0, 160)}`, (consola.get(`${m.type()}: ${texto.slice(0, 160)}`) ?? 0) + 1)
     })
     p.on('pageerror', (e) => consola.set(`pageerror: ${e.message.slice(0, 160)}`, (consola.get(`pageerror: ${e.message.slice(0, 160)}`) ?? 0) + 1))
+    // [C2-90] Qué recurso da 404 (la consola dice «Failed to load resource» sin la URL).
+    p.on('response', (r) => {
+      if (r.status() >= 400) consola.set(`respuesta ${String(r.status())}: ${r.url().replace(BASE, '').slice(0, 160)}`, (consola.get(`respuesta ${String(r.status())}: ${r.url().replace(BASE, '').slice(0, 160)}`) ?? 0) + 1)
+    })
     for (const ruta of RUTAS) {
       await p.goto(`${BASE}${ruta}`, { waitUntil: 'load', timeout: 300000 })
       await dormir(5000)

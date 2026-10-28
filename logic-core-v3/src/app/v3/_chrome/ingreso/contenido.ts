@@ -23,6 +23,8 @@ export const ROTULOS_DEL_INGRESO = {
   /** [C1] La prueba del panel todavía no existe: el botón está y no lleva a ningún lado. */
   probar: 'Probá el panel',
   volver: 'Volver al home',
+  /** [C2 · 80] La flecha de arriba (icono solo): su nombre accesible. */
+  cerrar: 'Cerrar',
 } as const
 
 export const EXPLICACION_DEL_LINK = 'Ingresá tu email y te enviamos un link de acceso de un solo uso. No necesitás contraseña.'

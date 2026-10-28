@@ -5,109 +5,152 @@ import { CRISTAL } from './cristal'
 import { GRIETAS } from './grietas'
 
 /**
- * [NOCTURNO B9] LAS GRIETAS EN EL MATERIAL DEL CRISTAL (sin partir la geometría). Cada fragmento del muro se lleva al muro desenrollado
- * alrededor del centro de las grietas; ahí busca su celda de la rejilla (`trazado.ts`, `empaquetar`) y mide la distancia (en px, con la
- * derivada de la posición) al tramo más cercano, sólo hasta donde llegó el frente de la formación (la punta, redonda). De eso salen:
+ * [NOCTURNO B9] LAS GRIETAS EN EL MATERIAL DEL CRISTAL (sin partir la geometría). [C2-31g] CADA CELDA, POR DENTRO: cada fragmento sabe
+ * dónde está en su celda (`vGrieta`: a cuántos u del centro de su abanico, la semilla de la celda y sus rayos; `muro.ts`) y cuánto camino
+ * hay de ese centro al borde (`vInterior`: 1 en el centro, 0 en el borde; los anillos tienen la forma de la celda). Con eso, sin texturas
+ * ni listas: los dos rayos que lo encierran (de 7 a 11 por celda, corridos, con su zigzag) y el anillo más cercano de su tramo, hasta
+ * donde llegó el frente (`uGrietas.w`: desde el centro o desde el borde). De la distancia en px a la línea más cercana salen:
  *
  *   · la banda OSCURA: de día oscurece el vidrio; de noche es un gris tenue (una grieta oscura sobre el negro no se vería);
- *   · la LUZ FINA: un núcleo de 1 px con un halo corto, en el color de las grietas (neutro en el home, el acento claro en las páginas), que
- *     corre de los impactos a las puntas al encenderse y vuelve al apagarse.
+ *   · la LUZ FINA (sólo en las páginas de servicio: en el home `uGrietas.y` queda en 0 y ni se calcula): un núcleo de 1 px con un halo
+ *     corto, en el acento, que corre desde donde nace la grieta al encenderse y vuelve al apagarse.
+ *
+ * [C2-31g intento 2] EL COSTO (medía 0,118 ms por cuadro de más en el home): un solo azar por rayo (su corrimiento, su zigzag y su largo
+ * salen de él), la distancia al rayo por el arco (sin seno ni coseno de su ángulo), un solo anillo (el más cercano: los otros están a más
+ * de medio espacio), los rayos de la celda calculados una vez en la geometría, nada detrás del frente y la luz sólo si hay luz.
  *
  * Sin grietas (`uGrietas.z` 0, una uniforme: la rama es pareja en todo el cuadro) no cuesta nada más que esa comparación.
  */
 const D = GRIETAS.dibujo
-const R = GRIETAS.rejilla
+const T = GRIETAS.telarana
 const f = (x: number): string => (Number.isInteger(x) ? `${String(x)}.0` : String(x))
+const DOS_PI = f(2 * Math.PI)
+const VUELTA = f(2 * Math.PI * CRISTAL.muro.radio)
+const DESORDEN = f(2 * T.desorden)
 
 export const GRIETAS_GLSL = /* glsl */ `
-uniform sampler2D uGrietasCeldas;
-uniform sampler2D uGrietasTramos;
-uniform vec4 uGrietasMarco;
-uniform vec4 uGrietasRejilla;
 uniform vec4 uGrietas;
 uniform vec3 uGrietasColor;
-// [NOCTURNO B9] El punto en el muro desenrollado, alrededor del centro de las grietas (\`uGrietasMarco.x\`): a lo largo (u, con signo) y la altura.
-vec2 enLasGrietas( vec3 p ) {
-	float vuelta = ${f(2 * Math.PI * CRISTAL.muro.radio)};
-	float u = atan( p.x, p.z ) * ${f(CRISTAL.muro.radio)} - uGrietasMarco.x;
-	return vec2( mod( u + 0.5 * vuelta, vuelta ) - 0.5 * vuelta, p.y - ${f(FLOOR_Y)} );
+uniform vec4 uGrietasGeneral;
+varying vec4 vGrieta;
+const float ANILLOS_DE_LA_GRIETA[ ${String(T.anillos.length)} ] = float[ ${String(T.anillos.length)} ]( ${T.anillos.map(f).join(', ')} );
+// [C2-31g] El azar de una celda (su semilla, entera) para cada cosa suya (\`b\`, entera), de 0 a 1.
+float azarDeLaGrieta( float a, float b ) {
+	return fract( sin( a * 12.9898 + b * 78.233 ) * 43758.5453 );
 }
-// Lo de las grietas en \`q\` (\`porPx\`: u por píxel): el núcleo, la banda oscura, el halo y cuánto de su luz llegó.
-vec4 lasGrietas( vec2 q, float porPx ) {
-	vec2 c = ( q - uGrietasMarco.yz ) / uGrietasRejilla.xy;
-	if ( c.x < 0.0 || c.y < 0.0 || c.x >= uGrietasRejilla.z || c.y >= uGrietasRejilla.w ) return vec4( 0.0 );
-	int ci = int( c.y ) * int( uGrietasRejilla.z + 0.5 ) + int( c.x );
-	vec4 celda = texelFetch( uGrietasCeldas, ivec2( ci % ${String(R.porFila)}, ci / ${String(R.porFila)} ), 0 );
-	int inicio = int( celda.x + 0.5 );
-	int cuantos = int( celda.y + 0.5 );
-	float dPx = 1e9;
-	float dU = 1e9;
-	float llega = 1.0;
-	for ( int k = 0; k < ${String(R.lazo)}; k ++ ) {
-		if ( k >= cuantos ) break;
-		int i = 2 * ( inicio + k );
-		ivec2 t = ivec2( i % ${String(R.ancho)}, i / ${String(R.ancho)} );
-		vec4 ab = texelFetch( uGrietasTramos, t, 0 );
-		vec4 tt = texelFetch( uGrietasTramos, t + ivec2( 1, 0 ), 0 );
-		if ( uGrietas.x <= tt.x ) continue;
-		float s = clamp( ( uGrietas.x - tt.x ) / max( 1e-5, tt.y - tt.x ), 0.0, 1.0 );
-		vec2 ba = ab.zw - ab.xy;
-		float h = clamp( dot( q - ab.xy, ba ) / max( 1e-8, dot( ba, ba ) ), 0.0, s );
-		float du = length( q - ab.xy - ba * h );
-		float d = du / ( porPx * tt.z );
-		if ( d < dPx ) {
-			dPx = d;
-			dU = du;
-			llega = mix( tt.x, tt.y, h );
+// Hasta dónde llega un rayo (por su azar), en partes del camino desde donde nace: casi todos, al otro extremo; algunos, cortos.
+float alcanceDelRayo( float h ) {
+	return fract( h * 31.7 ) < ${f(T.cortos)} ? mix( ${f(T.corto[0])}, ${f(T.corto[1])}, fract( h * 57.1 ) ) : 2.0;
+}
+// La distancia (px) a un rayo a \`arco\` u del fragmento (por el arco), con su zigzag (\`h\`, su azar) que nace en el centro.
+float alRayo( float arco, float r, float h, float porPx ) {
+	float zig = ${f(T.zigzag)} * smoothstep( 0.0, 0.6, r ) * sin( r * ${f(T.zigzagPorU)} + fract( h * 17.31 ) * ${DOS_PI} );
+	return abs( arco - zig ) / porPx;
+}
+// Una línea a \`dPx\` px, de \`grosor\`, formada hasta \`ve\` (0 a 1) y a la que el frente llegó en \`llega\`: (la banda oscura, la luz).
+vec2 laLineaDeLaGrieta( float dPx, float grosor, float ve, float llega ) {
+	float banda = clamp( ${f(D.bandaPx)} * grosor + 0.5 - dPx, 0.0, 1.0 ) * ve;
+	if ( uGrietas.y <= 0.0 ) return vec2( banda, 0.0 );
+	float nucleo = clamp( ${f(D.nucleoPx)} * grosor + 0.5 - dPx, 0.0, 1.0 );
+	float halo = exp( - dPx * dPx / ${f(D.haloPx * D.haloPx)} );
+	float luz = smoothstep( llega, llega + ${f(D.onda)}, uGrietas.y * ${f(1 + D.onda)} );
+	return vec2( banda, ve * luz * ( nucleo * ${f(D.brillo)} + halo * ${f(D.halo)} ) );
+}
+// [C2-31g] La telaraña de la celda en \`d\` (u desde su centro), \`s\` el camino del centro al borde (0 a 1), \`rayos\` cuántos (la parte
+// entera) y su giro (la decimal): (oscura, luz).
+vec2 lasGrietas( vec2 d, float s, float semilla, float rayos, float porPx, float porPxDelCamino ) {
+	float forma = uGrietas.x;
+	float camino = mix( s, 1.0 - s, uGrietas.w );
+	// Detrás del frente (mientras se forma) no hay nada: ni rayos ni anillos.
+	if ( camino > forma + 3.0 * porPxDelCamino ) return vec2( 0.0 );
+	float n = floor( rayos );
+	float r = length( d );
+	float x = fract( atan( d.y, d.x + 1e-7 ) / ${DOS_PI} - fract( rayos ) ) * n;
+	float i = floor( x );
+	// Los dos rayos que encierran al fragmento (corridos: el de al lado puede quedar del otro lado), \`j0\` el primero; cada uno con su azar.
+	float ha = azarDeLaGrieta( semilla, i );
+	float hb = azarDeLaGrieta( semilla, mod( i + 1.0, n ) );
+	float xa = i + ( ha - 0.5 ) * ${DESORDEN};
+	float xb = i + 1.0 + ( hb - 0.5 ) * ${DESORDEN};
+	float j0 = i;
+	float x0 = xa;
+	float h0 = ha;
+	float x1 = xb;
+	float h1 = hb;
+	if ( xa > x ) {
+		j0 = mod( i - 1.0 + n, n );
+		h0 = azarDeLaGrieta( semilla, j0 );
+		x0 = i - 1.0 + ( h0 - 0.5 ) * ${DESORDEN};
+		x1 = xa;
+		h1 = ha;
+	} else if ( xb <= x ) {
+		j0 = mod( i + 1.0, n );
+		x0 = xb;
+		h0 = hb;
+		h1 = azarDeLaGrieta( semilla, mod( i + 2.0, n ) );
+		x1 = i + 2.0 + ( h1 - 0.5 ) * ${DESORDEN};
+	}
+	float alArco = r * ${DOS_PI} / n;
+	float d0 = alRayo( ( x - x0 ) * alArco, r, h0, porPx );
+	float d1 = alRayo( ( x - x1 ) * alArco, r, h1, porPx );
+	float r0 = camino <= alcanceDelRayo( h0 ) ? d0 : 1e9;
+	float r1 = camino <= alcanceDelRayo( h1 ) ? d1 : 1e9;
+	// El frente, con la punta suave (1 px).
+	vec2 g = laLineaDeLaGrieta( min( r0, r1 ), ${f(GRIETAS.grosor.rayo)}, clamp( ( forma - camino ) / porPxDelCamino + 0.5, 0.0, 1.0 ), camino );
+	// El anillo más cercano: el tramo entre los dos rayos, a su parte del camino (corrida en cada tramo), si no falta; se cierra desde
+	// los rayos hacia el medio después de que pasó el frente.
+	float base = ANILLOS_DE_LA_GRIETA[ 0 ];
+	float k = 0.0;
+	for ( int q = 1; q < ${String(T.anillos.length)}; q ++ ) {
+		if ( abs( s - ANILLOS_DE_LA_GRIETA[ q ] ) < abs( s - base ) ) {
+			base = ANILLOS_DE_LA_GRIETA[ q ];
+			k = float( q );
 		}
 	}
-	if ( dPx > 1e8 ) return vec4( 0.0 );
-	float nucleo = clamp( ${f(D.nucleoPx)} + 0.5 - dPx, 0.0, 1.0 );
-	float banda = clamp( ${f(D.bandaPx)} + 0.5 - dPx, 0.0, 1.0 );
-	float halo = exp( - dPx * dPx / ${f(D.haloPx * D.haloPx)} ) * ( 1.0 - smoothstep( ${f(0.6 * D.margen)}, ${f(D.margen)}, dU ) );
-	float luz = smoothstep( llega, llega + ${f(D.onda)}, uGrietas.y * ${f(1 + D.onda)} );
-	return vec4( nucleo, banda, halo, luz );
+	float hk = azarDeLaGrieta( semilla + k, j0 + 7.0 );
+	float rho = base + ( hk - 0.5 ) * ${f(2 * T.corre)};
+	float nace = mix( rho, 1.0 - rho, uGrietas.w );
+	if ( fract( hk * 7.31 ) >= ${f(T.falta)} && forma > nace ) {
+		float ve = clamp( clamp( ( forma - nace ) / ${f(T.barre)}, 0.0, 1.0 ) * 0.5 * ( d0 + d1 ) - min( d0, d1 ) + 0.5, 0.0, 1.0 );
+		g = max( g, laLineaDeLaGrieta( abs( s - rho ) / porPxDelCamino, ${f(GRIETAS.grosor.anillo)}, ve, nace ) );
+	}
+	return g;
 }
 `
 
 /**
- * Lo que va al final del \`main\` del vidrio, con \`color\` y \`uNoche\` ya calculados: la banda oscura y, encima, la luz. La derivada se
- * toma adentro de una rama de uniforme (pareja en todo el cuadro): bien definida.
+ * Lo que va al final del \`main\` del vidrio, con \`color\` y \`uNoche\` ya calculados: la banda oscura y, encima, la luz. Las derivadas
+ * se toman adentro de ramas de uniformes (parejas en todo el cuadro): bien definidas.
  */
 export const GRIETAS_EN_EL_MAIN = /* glsl */ `
 	if ( uGrietas.z > 0.5 ) {
-		vec2 qGrietas = enLasGrietas( vMundo );
-		float porPxGrietas = max( 1e-5, 0.5 * ( fwidth( qGrietas.x ) + fwidth( qGrietas.y ) ) );
-		vec4 g = lasGrietas( qGrietas, porPxGrietas );
-		color = mix( color, mix( color * ${f(1 - D.oscurece)}, max( color, vec3( ${f(D.grisDeNoche)} ) ), uNoche ), g.y );
-		color += uGrietasColor * g.w * ( g.x * ${f(D.brillo)} + g.z * ${f(D.halo)} );
+		vec2 dGrieta = vGrieta.xy;
+		float sGrieta = 1.0 - vInterior;
+		float semillaGrieta = floor( vGrieta.z + 0.5 );
+		float rayosGrieta = vGrieta.w;
+		// [C2-31g] El control del banco (\`CONTROL=general\`): una sola telaraña para todo el muro, centrada donde mira la cámara.
+		if ( uGrietasGeneral.x > 0.5 ) {
+			float uGeneral = atan( vMundo.x, vMundo.z ) * ${f(CRISTAL.muro.radio)} - uGrietasGeneral.y;
+			dGrieta = vec2( mod( uGeneral + 0.5 * ${VUELTA}, ${VUELTA} ) - 0.5 * ${VUELTA}, vMundo.y - ${f(FLOOR_Y)} - uGrietasGeneral.z );
+			sGrieta = clamp( length( dGrieta ) / uGrietasGeneral.w, 0.0, 1.0 );
+			semillaGrieta = 0.0;
+			rayosGrieta = 9.5;
+		}
+		float porPxGrieta = max( 1e-5, 0.5 * ( fwidth( dGrieta.x ) + fwidth( dGrieta.y ) ) );
+		float porPxDelCamino = max( 1e-5, length( vec2( dFdx( sGrieta ), dFdy( sGrieta ) ) ) );
+		vec2 g = lasGrietas( dGrieta, sGrieta, semillaGrieta, rayosGrieta, porPxGrieta, porPxDelCamino );
+		color = mix( color, mix( color * ${f(1 - D.oscurece)}, max( color, vec3( ${f(D.grisDeNoche)} ) ), uNoche ), g.x );
+		color += uGrietasColor * g.y;
 	}
 `
 
-/** Las uniformes de las grietas (las texturas las pone `grietasEnVivo.ts` al montarse: sin grietas, el sombreador no las lee). */
+/** Las uniformes de las grietas. */
 export function uniformesDeLasGrietas() {
   return {
-    uGrietasCeldas: { value: null as THREE.Texture | null },
-    uGrietasTramos: { value: null as THREE.Texture | null },
-    /** El centro (u del muro), la esquina de la rejilla (x, y) y nada. */
-    uGrietasMarco: { value: new THREE.Vector4() },
-    /** El lado de cada celda (x, y) y cuántas a lo ancho y a lo alto. */
-    uGrietasRejilla: { value: new THREE.Vector4(1, 1, 0, 0) },
-    /** La formación que se ve (0 a 1), la luz (0 a 1), si hay grietas (0 o 1) y nada. */
+    /** La formación que se ve (0 a 1), la luz (0 a 1; siempre 0 en el home), si hay grietas (0 o 1) y desde dónde (0 el centro, 1 el borde). */
     uGrietas: { value: new THREE.Vector4() },
-    uGrietasColor: { value: new THREE.Color(1, 1, 1) },
+    uGrietasColor: { value: new THREE.Color(0, 0, 0) },
+    /** [C2-31g] El control del banco `CONTROL=general`: si va (0 o 1), su centro (u del muro, altura desde el piso) y su radio (u). */
+    uGrietasGeneral: { value: new THREE.Vector4() },
   }
-}
-
-/** Las dos texturas de la rejilla (flotantes, sin filtrar: se leen por téxel), sobre los arreglos que llena `empaquetar`. */
-export function texturasDeLasGrietas(celdas: Float32Array, tabla: Float32Array): { readonly celdas: THREE.DataTexture; readonly tramos: THREE.DataTexture } {
-  const crear = (datos: Float32Array, ancho: number, alto: number): THREE.DataTexture => {
-    const t = new THREE.DataTexture(datos, ancho, alto, THREE.RGBAFormat, THREE.FloatType)
-    t.minFilter = THREE.NearestFilter
-    t.magFilter = THREE.NearestFilter
-    t.generateMipmaps = false
-    t.needsUpdate = true
-    return t
-  }
-  return { celdas: crear(celdas, R.porFila, R.celdas / R.porFila), tramos: crear(tabla, R.ancho, R.filas) }
 }

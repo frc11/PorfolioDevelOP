@@ -54,6 +54,8 @@ export interface ProyectoDelPortfolio {
   readonly resultado: string | null
   readonly resena: ResenaDelProyecto | null
   readonly medios: MediosDelProyecto
+  /** [C2 · 40] El color de su «Visitar sitio»: el token de su marca en el tema (AA sobre la noche, medido allá). */
+  readonly colorDeMarca: string
   /** [B1.2b] La marca de agua: el logo del cliente (sin fondo), o `null` (va el nombre). */
   readonly logo: string | null
   /** Lo que se ve en el video, para quien no lo ve. */
@@ -85,6 +87,7 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     resultado: null,
     resena: { texto: conLlave(INVENTOS.trabajosResenaDeElGarage), autor: conLlave(INVENTOS.trabajosAutorDeElGarage) },
     medios: mediosDe('el-garage'),
+    colorDeMarca: 'var(--color-marca-el-garage)',
     logo: '/portfolio/el-garage/logo.png',
     alt: 'Recorrido por la página de El Garage: la portada, los últimos ingresos y el catálogo con sus filtros.',
   },
@@ -101,6 +104,7 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     resultado: null,
     resena: { texto: conLlave(INVENTOS.trabajosResenaDeEsquina), autor: conLlave(INVENTOS.trabajosAutorDeEsquina) },
     medios: mediosDe('esquina-estudio'),
+    colorDeMarca: 'var(--color-marca-esquina-estudio)',
     logo: '/portfolio/esquina-estudio/logo.png',
     alt: 'Recorrido por la página de Esquina Estudio: la portada, los proyectos y los servicios.',
   },
@@ -117,6 +121,7 @@ export const PROYECTOS: readonly ProyectoDelPortfolio[] = [
     resultado: null,
     resena: { texto: conLlave(INVENTOS.trabajosResenaDeBanu), autor: conLlave(INVENTOS.trabajosAutorDeBanu) },
     medios: mediosDe('banu-scents'),
+    colorDeMarca: 'var(--color-marca-banu-scents)',
     logo: '/portfolio/banu-scents/logo.svg',
     alt: 'Recorrido por la página de Banú Scents: la portada, la selección de casas y los perfumes.',
   },
@@ -127,8 +132,8 @@ export function seMuestraElServicio(proyectos: readonly ProyectoDelPortfolio[]):
   return new Set(proyectos.map((p) => p.servicio).filter((s) => s !== null)).size > 1
 }
 
-/** La vista de CONTENIDO de un proyecto: sus textos, sin los medios ni el logo (rutas de archivos, no texto). */
-export function textosDelProyecto(p: ProyectoDelPortfolio): Omit<ProyectoDelPortfolio, 'medios' | 'logo'> {
+/** La vista de CONTENIDO de un proyecto: sus textos, sin los medios, el logo ni el color (rutas y tokens, no texto). */
+export function textosDelProyecto(p: ProyectoDelPortfolio): Omit<ProyectoDelPortfolio, 'medios' | 'logo' | 'colorDeMarca'> {
   return {
     slug: p.slug, nombre: p.nombre, url: p.url, rubro: p.rubro, fecha: p.fecha, servicio: p.servicio, queHicimos: p.queHicimos,
     problemaCliente: p.problemaCliente, problemaResuelto: p.problemaResuelto, resultado: p.resultado, resena: p.resena, alt: p.alt,

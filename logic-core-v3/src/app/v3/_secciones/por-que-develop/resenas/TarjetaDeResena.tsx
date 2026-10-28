@@ -7,14 +7,14 @@ import { TEXTO_DE_LAS_RESENAS, type Resena } from './contenido'
  * de la tarjeta (`--ancho-de-la-tarjeta`, que escribe la escena con el tamaño de la placa de frente, o la lista con el suyo): la cara se ve
  * igual a cualquier tamaño y, de frente, el texto se rasteriza a su escala. La tinta y la tinta media sobre el papel: 17,6:1 y 7,4:1 (AA).
  *
- * El retrato es decorativo (`aria-hidden`: el nombre está escrito al lado) y va como fondo: es un placeholder ilustrado que se reemplaza.
+ * El retrato es decorativo (`aria-hidden`: el nombre está escrito al lado) y va como fondo (una persona generada, C2-70).
  */
 export function CaraDeLaResena({ resena, className }: { readonly resena: Resena; readonly className?: string }): React.JSX.Element {
   return (
-    <span className={cn('flex h-full w-full flex-col justify-between overflow-hidden rounded-[calc(var(--ancho-de-la-tarjeta)*0.073)] bg-fondo p-[calc(var(--ancho-de-la-tarjeta)*0.07)] text-left text-tinta', className)}>
+    <span className={cn('flex h-full w-full flex-col justify-between overflow-hidden rounded-[calc(var(--ancho-de-la-tarjeta)*0.073)] bg-fondo p-[calc(var(--ancho-de-la-tarjeta)*0.07)] text-left text-tinta group-data-al-frente:shadow-flotante', className)}>
       <span className="block text-[length:calc(var(--ancho-de-la-tarjeta)/19)] leading-texto">«{resena.cita}»</span>
       <span className="flex items-center gap-[calc(var(--ancho-de-la-tarjeta)*0.04)]">
-        <span aria-hidden="true" className="block size-[calc(var(--ancho-de-la-tarjeta)*0.13)] shrink-0 rounded-circulo" style={{ backgroundImage: `url(${resena.foto})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        <span aria-hidden="true" className="block size-[calc(var(--ancho-de-la-tarjeta)*0.13)] shrink-0 rounded-circulo group-data-al-frente:ring-2 group-data-al-frente:ring-tinta" style={{ backgroundImage: `url(${resena.foto})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-[length:calc(var(--ancho-de-la-tarjeta)/22)] font-semi">{resena.nombre}</span>
           <span className="truncate text-[length:calc(var(--ancho-de-la-tarjeta)/26)] text-tinta-media">{resena.negocio}</span>

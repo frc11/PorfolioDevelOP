@@ -322,6 +322,15 @@ export function armarLaPieza(forma: FormaDeLaPieza, m: MedidaDeLaPieza, fuentes:
   return { fija, hundible: aLoAnchoDeLaTecla(unir([sinLetra(tecla), ...relieveDe(m, fuentes, true, v.tecla, false).map(deRotulo)]), m.tecla), espesor: v.formulario }
 }
 
+/**
+ * [C2-71] UN BLOQUE DEL FAQ DE VOLUMEN: la placa del formulario sin pozos ni tecla (el mismo volumen, el mismo canto con su bisel y el
+ * mismo negro satinado), del tamaño de su caja del DOM (px). Sin radio en el DOM, el de la placa del formulario.
+ */
+export function armarElBloque(caja: { readonly ancho: number; readonly alto: number; readonly radio: number }, espesor: number): THREE.BufferGeometry {
+  const contorno = rectanguloRedondeado(new THREE.Shape(), { x: 0, y: 0, ancho: caja.ancho, alto: caja.alto }, caja.radio > 0 ? caja.radio : 2 * VOLUMEN_DEL_PIE.radio)
+  return sinLetra(unir([pintar(solido(contorno, espesor, VOLUMEN_DEL_PIE.bisel), COLORES_DEL_PIE.negro)]))
+}
+
 /** La caja de lo que se ve de una pieza (px, y hacia abajo, relativa a su caja): para el texto suelto, sus letras. */
 export function contenidoDe(forma: FormaDeLaPieza, m: MedidaDeLaPieza): { readonly izquierda: number; readonly derecha: number; readonly arriba: number; readonly abajo: number } {
   if ((forma !== 'texto' && forma !== 'enlace') || m.letras.length === 0) return { izquierda: 0, derecha: m.caja.ancho, arriba: 0, abajo: m.caja.alto }

@@ -54,7 +54,11 @@ export const MOMENTOS_DE_LAS_RESENAS = {
 } as const
 
 /** `?resenas=gatillo`: el título, los valores y la entrada son una animación por tiempo (s), con estos tramos de ella. */
-export const GATILLO = { duracionS: 2.8, giro: [0, 0.3], disolucion: [0.25, 0.3], entrada: [0.5, 0.5], entra: 0.02, sale: 0.005 } as const
+// [C2-70] A la vez: mientras el título se da vuelta se van los valores y ya entra el aro (antes: volteo, después disolución, después aro).
+export const GATILLO = { duracionS: 2.8, giro: [0, 0.35], disolucion: [0, 0.35], entrada: [0.1, 0.9], entra: 0.02, sale: 0.005 } as const
+
+/** Lo que dura la entrada del aro con el gatillo (s): la escena la usa para empalmar su curva con el giro de lectura. */
+export const DURACION_DE_LA_ENTRADA_S = GATILLO.entrada[1] * GATILLO.duracionS
 
 export interface EstadoDeLasResenas {
   /** El giro del título (0, «Seis razones»; 1, «Lo que dicen nuestros clientes»). */
@@ -79,11 +83,40 @@ export function objetivoDelGatillo(r: number, previo: 0 | 1): 0 | 1 {
   return r < GATILLO.sale ? 0 : 1
 }
 
+/** [C2-70e] Cuánto se dio vuelta el título (0 a 1, con la curva de la casa): la comparten el ángulo y el corrimiento de las mitades. */
+export const vueltaDelGiro = (giro: number): number => suave(acotar01(giro))
+
 /** El ángulo del giro del título (rad, con la curva de la casa): la frase va de 0 a π; el título de las reseñas, de −π a 0. */
 export function angulosDelGiro(giro: number): { readonly frase: number; readonly resenas: number } {
-  const a = Math.PI * suave(acotar01(giro))
+  const a = Math.PI * vueltaDelGiro(giro)
   return { frase: a, resenas: a - Math.PI }
 }
+
+/** [C2-70e] Un tramo horizontal de la pantalla (px). */
+export interface TramoEnX {
+  readonly desde: number
+  readonly hasta: number
+}
+
+/**
+ * [C2-70e] El espacio entre «dicen» y «nuestros» cuando las mitades se juntan (em del cuerpo del título): el de un renglón de verdad, el
+ * avance del espacio de la Chivo de los títulos (227 de 1000) más el tracking del título (−0,03 em, `--tracking-titulo`). Era 0,25 (a ojo).
+ */
+export const ESPACIO_ENTRE_LAS_MITADES_EM = 0.197
+
+/**
+ * [C2-70e] LAS MITADES SE JUNTAN EN EL MEDIO: cuánto se corre cada una (px; positivo, a la derecha) para que «Lo que dicen nuestros clientes»
+ * quede en UN renglón centrado en `centro` (el del escenario, donde está el logo), con `espacio` px entre las dos. `izquierda` y `derecha` son
+ * las cajas de las mitades del DOM (en su lugar, a cada lado del logo). La cara de atrás (la frase) se corre lo mismo que la suya.
+ */
+export function corrimientosAlCentro(izquierda: TramoEnX, derecha: TramoEnX, centro: number, espacio: number): { readonly izquierda: number; readonly derecha: number } {
+  const [anchoI, anchoD] = [izquierda.hasta - izquierda.desde, derecha.hasta - derecha.desde]
+  const desde = centro - (anchoI + espacio + anchoD) / 2
+  return { izquierda: desde - izquierda.desde, derecha: desde + anchoI + espacio - derecha.desde }
+}
+
+/** [C2-70e] El corrimiento de una mitad con el giro: el entero por la vuelta (la misma curva y el mismo tiempo que el ángulo). */
+export const corrimientoConElGiro = (entero: number, giro: number): number => entero * vueltaDelGiro(giro)
 
 /**
  * EL TRAMO PARA LA ESCENA (REGLA DE ALTURAS, `_lib/escena/tramoEstirado.ts`): arranca en la inserción —en px de la regla desde que asoma
@@ -99,8 +132,14 @@ export function tramoDeLasResenas(panel: Element, corrido = 0): TramoEstirado {
   return { panel, k: K_DE_LAS_RESENAS, arranque: R + corrido + INSERCION_DE_LAS_RESENAS * R, largo: LARGO_SIN_ESTIRAR_PX }
 }
 
-/** La bandera de la entrada: `?resenas=scroll` (por defecto: todo atado al scroll) o `?resenas=gatillo`. */
+/** La bandera de la entrada: `?resenas=gatillo` (por defecto desde C2-70: una animación por tiempo en la entrada y en la salida) o `?resenas=scroll` (todo atado al scroll). */
 export type VarianteDeLasResenas = 'scroll' | 'gatillo'
-export const varianteDeLaBandera = (valor: string | null): VarianteDeLasResenas => (valor === 'gatillo' ? 'gatillo' : 'scroll')
-/** `?resenas-arrastre=si`: arrastrar con el mouse gira el aro con inercia. */
-export const arrastreDeLaBandera = (valor: string | null): boolean => valor === 'si'
+export const varianteDeLaBandera = (valor: string | null): VarianteDeLasResenas => (valor === 'scroll' ? 'scroll' : 'gatillo')
+
+/**
+ * [C2-70e] La bandera de PRUEBA de los bancos (`scripts-carga/resenas-volteo.ts`), para su control positivo: `?resenas-control=sin-juntar` (las
+ * mitades no se corren), `?resenas-control=sin-camara` (la cámara no acompaña el guardado ni el CTA la espera: lo de antes) o
+ * `?resenas-control=sin-espera` (la cámara se queda en B y el CTA no la espera: el cartel cortado arriba). Sin ella (el defecto), ninguna.
+ */
+export type ControlDeLasResenas = 'sin-juntar' | 'sin-camara' | 'sin-espera' | null
+export const controlDeLaBandera = (valor: string | null): ControlDeLasResenas => (valor === 'sin-juntar' || valor === 'sin-camara' || valor === 'sin-espera' ? valor : null)

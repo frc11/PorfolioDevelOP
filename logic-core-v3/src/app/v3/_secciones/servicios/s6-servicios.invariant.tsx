@@ -21,9 +21,10 @@ import { marcar } from '../_invariantes/render'
 import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { CONTENIDO, CTA_POR_SERVICIO } from './contenido'
 import { cuenta, focalizablesDe } from './deteccion'
-import { SUBTITULO } from './escenario/datos'
+import { SUBTITULO, TEXTO_DEL_MEDIO } from './escenario/datos'
 import { nombreDelServicio } from './escenario/PanelDeServicio'
-import { TEXTO_DEL_RECOMENDADOR, TITULO_DEL_RECOMENDADOR } from './recomendador/Recomendador'
+import { TEXTOS_DEL_RECOMENDADOR } from './recomendador/logica'
+import { TITULO_DEL_RECOMENDADOR } from './recomendador/Recomendador'
 import { Servicios } from './Servicios'
 
 const CONTENIDO_PROHIBIDO_DE_CONTROL = 'Crecimos +340% en 3 meses, con planes desde $99.000 por mes y ×2 de leads.'
@@ -48,12 +49,14 @@ afirmar(animado.includes(`min-height:${seccionDe('servicios').alto}`) && quieto.
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El mismo texto en las dos ramas, y los encabezados')
 
-const textos = [SUBTITULO, TITULO_DEL_RECOMENDADOR, TEXTO_DEL_RECOMENDADOR, ...SERVICIOS.flatMap((s) => [nombreDelServicio(s), CTA_POR_SERVICIO[s.id]])]
+// [C2-51] El texto del recomendador son dos párrafos (05-TEXTOS): cada uno, entero.
+const textos = [SUBTITULO, TITULO_DEL_RECOMENDADOR, ...TEXTOS_DEL_RECOMENDADOR.parrafos, ...SERVICIOS.flatMap((s) => [nombreDelServicio(s), CTA_POR_SERVICIO[s.id]])]
 const visibleQuieto = textoVisible(quieto)
 const visibleAnimado = textoVisible(animado)
 const faltan = (t: string): string[] => textos.filter((x) => !t.includes(x))
 afirmarIgual([faltan(visibleQuieto), faltan(visibleAnimado)], [[], []], 'la bajada, el recomendador y cada servicio (su nombre y su CTA) están en las dos ramas')
-const palabrasDe = (t: string, id: keyof typeof CONTENIDO): boolean => CONTENIDO[id].parrafo.split(' ').every((p) => t.includes(p))
+// [C2-50] El texto del medio nuevo (05-TEXTOS: cuatro párrafos), el mismo en las dos ramas.
+const palabrasDe = (t: string, id: keyof typeof CONTENIDO): boolean => TEXTO_DEL_MEDIO[id].join(' ').split(' ').every((p) => t.includes(p))
 afirmar(SERVICIOS.every((s) => palabrasDe(visibleQuieto, s.id) && palabrasDe(visibleAnimado, s.id)), '  y el párrafo de cada servicio, palabra por palabra (en el escenario va partido para levantarse por renglón)')
 const encabezados = (h: string): string[] => [...h.matchAll(/<(h[1-6])\b/g)].map((m) => m[1])
 afirmarIgual([encabezados(quieto), encabezados(animado)], [['h2', 'h3', 'h3', 'h3', 'h3'], ['h2', 'h3', 'h3', 'h3', 'h3']], 'el árbol de encabezados es el mismo: el h2 de la sección y un h3 por servicio y el del recomendador')
@@ -84,8 +87,9 @@ titulo('5 · El foco y el teclado')
 
 afirmarIgual(fuentes.flatMap((f) => apagadosDeFoco(f.texto)), [], 'ningún archivo apaga el anillo de foco')
 const recorrido = (h: string): string => focalizablesDe(h).join(' ')
-const esperado = [...SERVICIOS.map(() => '<a'), ...Array.from({ length: 9 }, () => '<input'), '<button'].join(' ')
-afirmarIgual([recorrido(quieto), recorrido(animado)], [esperado, esperado], 'el recorrido del teclado: el CTA de cada servicio (su página), las nueve opciones del recomendador y su botón; el mismo en las dos ramas')
+// [C2-51] Reemplazada por la spec: el recomendador va por etapas; el servidor publica la primera (cinco opciones y «Siguiente»).
+const esperado = [...SERVICIOS.map(() => '<a'), ...Array.from({ length: 5 }, () => '<input'), '<button'].join(' ')
+afirmarIgual([recorrido(quieto), recorrido(animado)], [esperado, esperado], 'el recorrido del teclado: el CTA de cada servicio (su página), las cinco opciones de la primera etapa del recomendador y «Siguiente»; el mismo en las dos ramas')
 afirmar(/onFocus|data-pieza="panel-de-servicio"/.test(leer('src/app/v3/_secciones/servicios/escenario/PanelDeServicio.tsx')) && /onFocus=\{\(\) => foco\(estado\)\}/.test(leer('src/app/v3/_secciones/servicios/escenario/PanelDeServicio.tsx')), 'con el escenario, el foco que entra en un panel que no se ve lleva la página a ese servicio (el teclado ve lo que enfoca)')
 controlPositivo('el buscador de focalizables no está ciego', '<button>x</button><a href="#y">y</a>', (h) => focalizablesDe(h).length === 0)
 

@@ -2,6 +2,8 @@
 
 import { useEffect, useSyncExternalStore } from 'react'
 
+import { quitarElTelon } from './telon'
+
 /**
  * [B7] QUIÉN ABRE EL LOGIN Y QUÉ DICE LA URL — un estado chico del chrome, la delegación de clics y el historial.
  *
@@ -15,6 +17,10 @@ import { useEffect, useSyncExternalStore } from 'react'
  *     entrada muerta); si se entró directo con `?ingresar` (no hay a dónde volver adentro del sitio), se reemplaza la URL sin él.
  *   · **La entrada directa** con `?ingresar` lo abre al montar (sin clic: con el fundido).
  *   · El scroll no se toca en ningún paso: la hoja es fija y la página queda donde estaba (|Δy| = 0, lo mide el banco).
+ *
+ *   · **La vuelta de la caché** (`pageshow` con `persisted`, p. ej. al volver de Google con la flecha del navegador): la página vuelve con
+ *     lo que tenía en memoria, es decir el envío «cargando». Se quita el telón de la ida, el login sigue a la URL (`?ingresar`: queda
+ *     abierto) y `vuelta` sube, para que el formulario se arme de nuevo y el «cargando» se limpie.
  *
  * `montado` sigue en `true` mientras la hoja se va (la animación inversa); la hoja avisa al terminar (`soltarIngreso`).
  */
@@ -31,6 +37,8 @@ export interface EstadoDelIngreso {
   readonly montado: boolean
   /** El botón del que sale y al que vuelve (y el foco, al cerrar); `null`: el fundido. */
   readonly origen: HTMLElement | null
+  /** Cuántas veces volvió la página de la caché de ida y vuelta: la `key` del formulario (limpia el «cargando»). */
+  readonly vuelta: number
 }
 
 /** Lo que el login usa del historial y de la ubicación: los del navegador, o los de la prueba. */
@@ -77,7 +85,7 @@ export function usarEntorno(historial?: () => Historial, ubicacion?: () => Ubica
   entorno = historial === undefined || ubicacion === undefined ? { historial: () => window.history, ubicacion: () => window.location } : { historial, ubicacion }
 }
 
-const CERRADO: EstadoDelIngreso = { abierto: false, montado: false, origen: null }
+const CERRADO: EstadoDelIngreso = { abierto: false, montado: false, origen: null, vuelta: 0 }
 let estado: EstadoDelIngreso = CERRADO
 const oyentes = new Set<() => void>()
 const avisar = (): void => oyentes.forEach((f) => f())
@@ -89,7 +97,7 @@ export function abrirIngreso(origen: HTMLElement | null): void {
   if (estado.abierto) return
   const u = entorno.ubicacion()
   if (!pideIngreso(u.search)) entorno.historial().pushState({ [MARCA_DE_LA_ENTRADA]: true }, '', conIngreso(u))
-  estado = { abierto: true, montado: true, origen }
+  estado = { ...estado, abierto: true, montado: true, origen }
   avisar()
 }
 
@@ -109,12 +117,20 @@ export function cerrarIngreso(): void {
 export function seguirALaUrl(origen: () => HTMLElement | null): void {
   const pide = pideIngreso(entorno.ubicacion().search)
   if (pide && !estado.abierto) {
-    estado = { abierto: true, montado: true, origen: origen() }
+    estado = { ...estado, abierto: true, montado: true, origen: origen() }
     avisar()
   } else if (!pide && estado.abierto) {
     estado = { ...estado, abierto: false }
     avisar()
   }
+}
+
+/** La página volvió de la caché de ida y vuelta: sin telón, el formulario armado de nuevo y el login como dice la URL. */
+export function volverDeLaCache(origen: () => HTMLElement | null): void {
+  quitarElTelon()
+  estado = { ...estado, vuelta: estado.vuelta + 1 }
+  avisar()
+  seguirALaUrl(origen)
 }
 
 /** La hoja terminó de volver al botón: se desmonta. Si mientras tanto se pidió de nuevo, sigue. */
@@ -126,7 +142,7 @@ export function soltarIngreso(): void {
 
 /** Para el invariante: de vuelta al principio. */
 export function reiniciarIngreso(): void {
-  estado = CERRADO
+  estado = { ...CERRADO }
   avisar()
 }
 
@@ -168,10 +184,14 @@ export function useAperturaDelIngreso(precargar: () => void): void {
       if (e.target instanceof Element && e.target.closest(SELECTOR_DEL_INGRESO) !== null) precargar()
     }
     const alUsarLaFlecha = (): void => seguirALaUrl(botonDelIngreso)
+    const alVolverDeLaCache = (e: PageTransitionEvent): void => {
+      if (e.persisted) volverDeLaCache(botonDelIngreso)
+    }
     document.addEventListener('click', alTocar, { capture: true })
     document.addEventListener('pointerover', alAcercarse)
     document.addEventListener('focusin', alAcercarse)
     window.addEventListener('popstate', alUsarLaFlecha)
+    window.addEventListener('pageshow', alVolverDeLaCache)
     // La entrada directa con `?ingresar` (o la vuelta a una entrada que lo tenía): sin clic, con el fundido.
     seguirALaUrl(() => null)
     return () => {
@@ -179,6 +199,7 @@ export function useAperturaDelIngreso(precargar: () => void): void {
       document.removeEventListener('pointerover', alAcercarse)
       document.removeEventListener('focusin', alAcercarse)
       window.removeEventListener('popstate', alUsarLaFlecha)
+      window.removeEventListener('pageshow', alVolverDeLaCache)
     }
   }, [precargar])
 }

@@ -18,10 +18,13 @@ import * as DEL_PORTFOLIO from '../../_secciones/trabajos/portfolio/rueda'
 import * as SALTAR_DEL_PORTFOLIO from '../../_secciones/trabajos/portfolio/saltar'
 import { SERVICIOS, IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import { seccionDe } from '../../_secciones/_contrato/forma'
-import { diagonalDeLaBandera, modoDeLaBandera, tangenteDe } from '../../_secciones/servicios/escenario/banderas'
+import { diagonalDeLaBandera, fuenteDeLaBandera, tangenteDe, tituloDeLaBandera } from '../../_secciones/servicios/escenario/banderas'
+import { tamanoQueEntra } from '../../_secciones/servicios/escenario/ajuste'
+import { SIN_OBJETIVO, baseDelObjetivo, seguirElObjetivo } from '../../_componentes/gatillos/maquina'
+import { EXTENSION_DE_LA_ORBITA } from '../nanobots/simbolos'
 import { DESTINO_DEL_SERVICIO, VIDEO_DEL_SERVICIO, DISTRIBUCION } from '../../_secciones/servicios/escenario/datos'
-import { DURACION_DE_LA_TRANSICION_MS, TIEMPOS, avanceDelPanel, avanceDelRenglon, capaDelEnjambre, desdeDelTexto, gDelAvance, inicioDelPanel, posicionDelEnjambre } from '../../_secciones/servicios/escenario/tiempos'
-import { servicioRecomendado } from '../../_secciones/servicios/recomendador/preguntas'
+import { DURACION_DE_LA_TRANSICION_MS, TIEMPOS, avanceDelPanel, avanceDelRenglon, avanceDelSubrayado, capaDelEnjambre, desdeDelTexto, gDelAvance, inicioDelPanel, posicionDelEnjambre } from '../../_secciones/servicios/escenario/tiempos'
+import { recomendar, todasLasRespuestas } from '../../_secciones/servicios/recomendador/logica'
 import { Servicios } from '../../_secciones/servicios/Servicios'
 import { altoViejoMedido, tramoDeServicios, type AltoViejo } from '../../_secciones/servicios/tramoDeServicios'
 import { cambioDeCapa, extensionDelSimbolo, type Caja, type Lugar } from '../nanobots/capa'
@@ -62,7 +65,8 @@ controlPositivo('  el detector ve la entrada que no atrapa', () => null, entrada
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Un gesto, un paso; la transición se ve entera; la ráfaga se descarta (con un reloj de mentira)')
 
-const REGLA: ReglaDeGatillos = { cantidad: 4, pasoPx: 1350 }
+// [C2-51] La regla de Servicios: el último tramo (de IA al recomendador) sin gatillo. La salida libre la afirma s78-c2-51 entera.
+const REGLA: ReglaDeGatillos = { cantidad: 4, pasoPx: 1350, salidaDeAbajoLibre: true }
 type Evento = readonly [number, number]
 /** Corre la máquina: los eventos (ms, px), el vuelo de un paso y la transición; devuelve los pasos por los que pasó. */
 function recorrido(eventos: readonly Evento[], desde: number, decidir: typeof decidirLaRueda = decidirLaRueda, transicionMs = DURACION_DE_LA_TRANSICION_MS): number[] {
@@ -100,7 +104,8 @@ const CASOS: readonly { readonly nombre: string; readonly eventos: readonly Even
   { nombre: 'dos muescas a 1 s (la transición corriendo): un paso', eventos: [muesca(1000), muesca(2000)], desde: 0, espera: [1] },
   { nombre: 'dos muescas a 3 s: dos pasos, de a uno', eventos: [muesca(1000), muesca(4000)], desde: 0, espera: [1, 2] },
   { nombre: 'subiendo desde IA: sale por donde entró, de a uno', eventos: [muesca(1000, -100), muesca(4000, -100), muesca(7000, -100), muesca(10000, -100)], desde: 3, espera: [2, 1, 0, -1] },
-  { nombre: 'después del último, la salida de abajo (el recomendador)', eventos: [muesca(1000)], desde: 3, espera: [4] },
+  // [C2-51] Reemplazada por la spec (ítem 14: «que el último scroll no sea gatillo»): de IA al recomendador la rueda es de la página.
+  { nombre: 'después del último, la salida de abajo es scroll normal (C2-51: ningún gatillo la toma)', eventos: [muesca(1000)], desde: 3, espera: [] },
   { nombre: 'entrando con una ráfaga larga: aterriza en la entrada, no más allá', eventos: rafaga(1000), desde: -1, espera: [0] },
   { nombre: 'subiendo desde el recomendador con el trackpad: aterriza en IA', eventos: trackpad(1000, -1), desde: 4, espera: [3] },
 ]
@@ -118,7 +123,14 @@ afirmar(pasoConHisteresisEnElTramo(1, 2 * 1350 + 20, REGLA) === 1 && pasoConHist
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Los tiempos de una transición (puros)')
 
-afirmar(avanceDelPanel(TIEMPOS.panel.inicio) === 0 && avanceDelPanel(1) === 1 && posicionDelEnjambre(1) === 1 && posicionDelEnjambre(TIEMPOS.enjambre.hasta) === 1 && posicionDelEnjambre(2.25) === 2.5, 'el panel entra entre su inicio y su cierre; el enjambre llega a mitad de la transición')
+afirmar(avanceDelPanel(TIEMPOS.panel.inicio) === 0 && avanceDelPanel(1) === 1 && posicionDelEnjambre(1) === 1 && posicionDelEnjambre(TIEMPOS.enjambre.hasta) === 1 && posicionDelEnjambre(2 + TIEMPOS.nube.desde) === 2 && posicionDelEnjambre(2 + TIEMPOS.nube.hasta) === 3 && posicionDelEnjambre(2.25) < 2.5, 'el panel entra entre su inicio y su cierre; el enjambre llega a mitad de la transición de la entrada, y entre servicios viaja más lento (C2-50: la nube, de 0,05 a 0,9)')
+// [C2-50] El cuerpo aparece antes (con el panel por la mitad) y el título se subraya al terminar de llegar: rápido y después desacelera.
+const textoTemprano = (f: typeof desdeDelTexto): boolean => [0.15, 0.3].every((i) => Math.abs(avanceDelPanel(f(i), i) - 0.5) < 0.4 && f(i) < i + TIEMPOS.panel.duracion)
+afirmar(textoTemprano(desdeDelTexto), 'C2-50: los renglones arrancan con la entrada del panel por la mitad, no con el panel cerrado')
+controlPositivo('  el detector ve los renglones que esperan al panel cerrado (B4)', (i: number) => Math.max(0.7, i + TIEMPOS.panel.duracion), textoTemprano)
+const subrayaBien = (f: typeof avanceDelSubrayado): boolean => f(TIEMPOS.panel.inicio + TIEMPOS.panel.duracion - 0.01) === 0 && f(1) === 1 && f(TIEMPOS.panel.inicio + TIEMPOS.panel.duracion + TIEMPOS.subrayado.duracion / 4) > 0.5
+afirmar(subrayaBien(avanceDelSubrayado), 'C2-50: el subrayado arranca con el panel cerrado, llega en g = 1 y va rápido primero (más de la mitad en el primer cuarto)')
+controlPositivo('  el detector ve un subrayado lineal', (g: number) => Math.min(1, Math.max(0, (g - 0.68) / 0.22)), subrayaBien)
 const renglonesEnOrden = (f: typeof avanceDelRenglon): boolean => [1, 4, 8, 12].every((n) => Array.from({ length: n }, (_, i) => f(1, i, n)).every((a) => a === 1) && Array.from({ length: n - 1 }, (_, i) => f(0.8, i, n) >= f(0.8, i + 1, n)).every(Boolean) && f(desdeDelTexto(TIEMPOS.panel.inicio) - 0.001, 0, n) === 0)
 afirmar(renglonesEnOrden(avanceDelRenglon), 'los renglones se levantan después de que el panel cerró, uno detrás del otro, y en g = 1 están todos en su lugar (con 1 a 12 renglones)')
 controlPositivo('  el detector ve el escalonado que no llega (el último a medias al terminar)', (g: number, i: number) => Math.min(1, Math.max(0, (g - 0.7 - i * 0.045) / 0.2)), renglonesEnOrden)
@@ -131,7 +143,7 @@ const SIMBOLOS = simbolosDeServicios(3000)
 const EXT = SIMBOLOS.map(extensionDelSimbolo)
 const CUADRO = (1000 / 60 / (DURACION_DE_LA_TRANSICION_MS * (TIEMPOS.enjambre.hasta - TIEMPOS.enjambre.desde)))
 for (const e of ESCENARIOS_DE_PRUEBA) {
-  const [desde, hacia]: [Lugar, Lugar] = [lugarDe(e.nube, EXT[0] ?? 1), lugarDe(e.globo, EXT[1] ?? 1)]
+  const [desde, hacia]: [Lugar, Lugar] = [lugarDe(e.nube, EXTENSION_DE_LA_ORBITA, 0), lugarDe(e.globo, EXT[1] ?? 1)]
   const cambio = cambioDeCapa(desde, hacia, e.titulo)
   afirmar(cambio !== null, `${e.nombre}: hay un cuadro limpio para el cambio`, cambio === null ? 'el globo pisa el título' : `avance ${cambio.avance.toFixed(3)}, el panel hasta ${cambio.bordeDelPanel.toFixed(0)} px`)
   if (cambio === null) continue
@@ -180,21 +192,43 @@ const decodificaBien = (datos: Float32Array): boolean => {
 afirmar(decodificaBien(SIMBOLOS[3] ?? new Float32Array()), '  y cada nanobot de la red se decodifica en el sombreador como un nodo o una conexión válida (su capa, sus dos nodos y su fracción)')
 controlPositivo('  el decodificador ve un `w` fuera de la red', Float32Array.from([0, 0, 0, 20 + 3 * 100]), decodificaBien)
 afirmar(VERTICE_DE_SERVICIOS.includes('uniform float uRadioDelPuntero;') && VERTICE_DE_SERVICIOS.includes('float radio = uRadioDelPuntero *'), 'el desarme bajo el mouse de C4, con su radio medido en el símbolo (el lienzo cubre el escenario)')
-afirmar(diagonalDeLaBandera('30') === 30 && diagonalDeLaBandera('12') === 12 && diagonalDeLaBandera(null) === 20 && diagonalDeLaBandera('45') === 20 && modoDeLaBandera('gatillo') === 'gatillo' && modoDeLaBandera(null) === 'deslizar' && Math.abs(tangenteDe(20) - 0.364) < 0.001, '`?diagonal=30|20|12` (20 por defecto) y `?servicios-movil=deslizar|gatillo` (deslizar por defecto)')
+const banderasBien = (d: typeof diagonalDeLaBandera): boolean => d(null) === 6.5 && d('12') === 12 && d('7') === 7 && d('6.5') === 6.5 && d('50') === 6.5 && d('x') === 6.5 && tituloDeLaBandera(null) === '1' && tituloDeLaBandera('3') === '3' && tituloDeLaBandera('4') === '1' && fuenteDeLaBandera(null) === '1' && fuenteDeLaBandera('4') === '4' && Math.abs(tangenteDe(6.5) - 0.114) < 0.001
+afirmar(banderasBien(diagonalDeLaBandera), 'C2-50: `?diagonal=` numérica (6,5 por defecto, de 0 a 45), `?titulo-servicio=1|2|3` y `?fuente-servicio=1|2|3|4` (1 por defecto); `?servicios-movil` se fue')
+controlPositivo('  el detector ve la diagonal de B4 (20 por defecto)', (v: string | null) => (v === null ? 20 : Number(v)), banderasBien)
+// [C2-50] El bug de 390: sin Lenis la rueda nativa llega tarde. Tres muescas de 100 px desde 250 px antes del ancla, con el scroll quieto.
+const entraALaTercera = (base: typeof baseDelObjetivo): boolean => {
+  const r: ReglaDeGatillos = { cantidad: 4, pasoPx: 844 }
+  let o = SIN_OBJETIVO
+  const d = [0, 1, 2].map((k) => {
+    const entra = entradaDelGesto('antes', base(o, 750, k * 16) + 100 - 1000, 1, r)
+    if (entra === null) o = seguirElObjetivo(o, 750, 100, k * 16, 99999)
+    return entra
+  })
+  return d[0] === null && d[1] === null && d[2] === 0
+}
+afirmar(entraALaTercera(baseDelObjetivo), 'C2-50: sin Lenis, la muesca que CRUZA el ancla (la tercera) la atrapa la entrada aunque el scroll nativo no se haya movido')
+controlPositivo('  el detector ve la cuenta de B4 (el scroll de ahora más el evento: no entra y la inercia pasa el ancla)', ((_o: unknown, y: number) => y) as typeof baseDelObjetivo, entraALaTercera)
+const ajustaBien = (f: typeof tamanoQueEntra): boolean => Math.abs(f(14, 60, (t) => t <= 37.3) - 37.3) < 0.3 && f(14, 60, () => true) === 60 && f(14, 60, () => false) === 14
+afirmar(ajustaBien(tamanoQueEntra), 'C2-50: el texto del medio toma el cuerpo más grande que entra (de techo a pie), entre el piso y el tope de la hoja')
+controlPositivo('  el detector ve el ajuste que se queda en el piso', ((p: number) => p) as typeof tamanoQueEntra, ajustaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · El recomendador y la REGLA DE ALTURAS')
 
-const recomiendaBien = (f: typeof servicioRecomendado): boolean => f(['web', 'web', 'software']) === 'web' && f(['web', 'software', 'ia-automatizacion']) === 'ia-automatizacion' && f(['software', null, 'web']) === null && f(['ia-automatizacion', 'web', 'web']) === 'web'
-afirmar(recomiendaBien(servicioRecomendado), 'el más elegido; si empatan, el de la última respuesta; nada hasta que estén las tres')
-controlPositivo('  el detector ve el recomendador que responde con preguntas sin contestar', (r: readonly (string | null)[]) => (r.find((x) => x !== null) ?? null) as ReturnType<typeof servicioRecomendado>, recomiendaBien)
+// [C2-51] Reemplazada por la spec: el recomendador de B4 (el servicio más votado) pasó a recomendar DOS soluciones con los puntos de
+// 05-TEXTOS. Acá, lo mínimo; las 125 combinaciones, el desempate y los textos, en s78-c2-51.
+const recomiendaBien = (f: typeof recomendar): boolean => todasLasRespuestas().every((r) => f(r).a !== f(r).b) && f([0, 0, 0]).a === 'pagina' && f([4, 3, 0]).a === 'automatizacion'
+afirmar(recomiendaBien(recomendar), 'C2-51: dos soluciones distintas en las 125 combinaciones; «la gente no me encuentra» lleva a la página, y el empate se lo lleva la pregunta 1')
+controlPositivo('  el detector ve una recomendación que repite la solución', ((r: Parameters<typeof recomendar>[0]) => ({ a: recomendar(r).a, b: recomendar(r).a })) as typeof recomendar, recomiendaBien)
 const tramo = tramoDeServicios(390, 844, 5 * 844, () => 4 * 844)
 // [NOCTURNO] El alto viejo medido por el orquestador en el navegador (px, `[data-panel="servicios"]` antes de B4), a 1 px o menos.
 const MEDIDOS = [[390, 844, 1661], [768, 1024, 1338], [820, 1180, 1382], [1023, 768, 1555]] as const
 const mideComoAntes = (modelo: AltoViejo): boolean => MEDIDOS.every(([w, h, px]) => Math.abs((modelo(w, h) ?? 0) - px) <= 1)
 afirmar(mideComoAntes(altoViejoMedido), 'la sección vieja medida a 390, 768, 820 y 1023 (1661, 1338, 1382 y 1555 px): el modelo la da a 1 px o menos')
 controlPositivo('  un modelo en pantallas (proporcional al alto del cuadro) no la da', ((w: number, h: number) => (w >= 768 ? 1.3065 : 1.9682) * h) as AltoViejo, mideComoAntes)
-afirmar(tramoDeServicios(1440, 900, 7200) === null && tramoDeServicios(1024, 768, 6144, () => 3 * 768) === null && tramoDeServicios(390, 844, 4000, () => null) === null && tramo !== null && Math.abs(tramo.k - 1.25) < 1e-9 && tramo.arranque === 900 && Math.abs(tramo.largo - 3600) < 1e-9, 'desde 1024 no hay tramo (la sección llena los 800svh de la tabla: k = 1); abajo, k = alto nuevo / alto viejo sobre la sección entera, y sin el alto viejo medido no se anota nada')
+// [C2-51] Reemplazada por la spec: desde 1024 la pista es fija y el recomendador crece; el alto viejo es la tabla (8 pantallas).
+const ancho = tramoDeServicios(1440, 900, 7470)
+afirmar(tramoDeServicios(1440, 900, 7200) === null && tramoDeServicios(1024, 768, 6144) === null && ancho !== null && Math.abs(ancho.k - 7470 / 7200) < 1e-9 && tramoDeServicios(390, 844, 4000, () => null) === null && tramo !== null && Math.abs(tramo.k - 1.25) < 1e-9 && tramo.arranque === 900 && Math.abs(tramo.largo - 3600) < 1e-9, 'desde 1024 el alto viejo es la tabla (800svh): igual, sin tramo; con el recomendador más alto, k = alto nuevo / tabla (C2-51); abajo, k = alto nuevo / alto viejo sobre la sección entera, y sin el alto viejo medido no se anota nada')
 afirmar(seccionDe('servicios').alto === '800svh', '  y la tabla sigue diciendo lo de siempre (secciones.ts sin tocar)')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -203,7 +237,16 @@ titulo('7 · Lo que se renderiza sin coreografía (el servidor y menos movimient
 const html = renderToStaticMarkup(<Servicios seccion={seccionDe('servicios')} />)
 const veces = (aguja: string): number => html.split(aguja).length - 1
 afirmar(html.includes('id="titular-servicios"') && veces('<h3') === SERVICIOS.length + 1 && veces('data-viaje-del-servicio=') === SERVICIOS.length && veces('href="/v3/pagina-base"') === SERVICIOS.length, 'el `h2` de la sección, un `h3` por servicio y el del recomendador, y un CTA por servicio a su página (el viaje)')
-afirmar(veces('type="radio"') === 9 && html.includes('[TEXTO]') && !/desde \$|PRECIOS_DESDE/.test(html), 'el recomendador con sus tres preguntas de tres opciones (marcadas: `[TEXTO]`), y ningún precio «desde» en el home (P-H8 sin efecto)')
+// [C2-51] Reemplazada por la spec: el recomendador va por etapas (el servidor publica la primera: cinco opciones) y con sus textos reales.
+afirmar(veces('type="radio"') === 5 && !html.includes('[TEXTO]') && !/desde \$|PRECIOS_DESDE/.test(html), 'el recomendador por etapas (la primera: cinco opciones, con los textos de 05-TEXTOS, sin marcadores), y ningún precio «desde» en el home (P-H8 sin efecto)')
+// [C2-50] El orden del teléfono (las pantallas quietas, en el marcado): el título (con sus nanobots), el video, el texto y el CTA.
+const ordenBien = (h: string): boolean => {
+  const pantallas = h.split('data-pieza="pantalla-de-servicio"').slice(1)
+  return pantallas.length === 3 && pantallas.every((a) => { const i = [a.indexOf('<h3'), a.indexOf('data-pieza="video-del-servicio"'), a.indexOf('<p'), a.indexOf('data-viaje-del-servicio')]; return i.every((x, k) => x >= 0 && (k === 0 || x > (i[k - 1] ?? 0))) })
+}
+afirmar(ordenBien(html), 'C2-50: cada servicio en el orden del teléfono: el título, el video, el texto del medio y el CTA')
+controlPositivo('  el detector ve el video arriba del título (B4)', html.split('<h3').join('<h3 data-x=""').replace(/data-pieza="pantalla-de-servicio"/g, 'data-pieza="pantalla-de-servicio"><div data-pieza="video-del-servicio"></div'), ordenBien)
+afirmar(html.includes('Los tipos de trabajos que hacemos en develOP.') && html.includes('Landing, sitio institucional, catálogo o tienda online') && html.includes('Se paga la implementación una vez'), 'C2-50: el subtítulo y el texto del medio nuevos (05-TEXTOS, tal cual)')
 const fuenteDeLaSeccion = ['escenario/EscenarioDeServicios.tsx', 'escenario/useNanobotsDelEscenario.ts', 'movil/NanobotsQuietos.tsx'].map((r) => leer(`_secciones/servicios/${r}`)).join('\n')
 const perezoso = (f: string): boolean => !/^import (?!type)[^\n]*nanobots\/(enjambreDeServicios|capa|enjambre)'/m.test(f) && /import\('\.\.\/\.\.\/\.\.\/_lib\/nanobots\/enjambreDeServicios'\)/.test(f)
 afirmar(perezoso(fuenteDeLaSeccion), 'three no entra al paquete de la página: el motor y la cuenta de la capa llegan perezosos')

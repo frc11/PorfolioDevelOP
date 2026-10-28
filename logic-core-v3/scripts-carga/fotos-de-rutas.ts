@@ -10,6 +10,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium } from '@playwright/test'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const RUTAS = (process.env.RUTAS ?? '/v3/pagina-base').split(',')
@@ -17,14 +18,14 @@ const ANCHOS = (process.env.ANCHOS ?? '1440x900,390x844').split(',').map((a) => 
 const SCROLLS = (process.env.SCROLLS ?? '0').split(',').map(Number)
 const ESPERA = Number(process.env.ESPERA ?? '5000')
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/fotos-de-rutas')
+const SALIDA = salidaDelBanco('fotos-de-rutas')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 const nombreDe = (ruta: string): string => ruta.replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '') || 'raiz'
 
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
   for (const [ancho, alto] of ANCHOS) {
-    const perfil = path.join(os.homedir(), `.cache/b4-medicion/fotos-perfil-${String(Date.now())}`)
+    const perfil = perfilDelBanco('fotos')
     rmSync(perfil, { recursive: true, force: true })
     const movil = ancho < 1024
     const ctx = await chromium.launchPersistentContext(perfil, {

@@ -13,6 +13,7 @@ import { MEZCLA_SOBRE_LA_ESCENA } from '../../_lib/superficies'
 
 import { TRAMOS_DEL_TITULAR } from './contenido'
 import { GEOMETRIA } from './geometria'
+import { CLASES_DEL_SIGNO } from './signo'
 import { avanceDelTrazo, avancesDelSigno, rayaDelTrazo, trazosDelSigno } from './trazos3d'
 
 /**
@@ -73,8 +74,9 @@ export function SignoDeVolumen({ progreso, entrada }: { readonly progreso: Progr
     [arriba, abajo, diagonal],
   )
   const { lugar, listo } = useTextoDeVolumen<HTMLDivElement>({ id: 'agencia-signo', texto: '', fuente: 'chivo-400', gesto: 'letras', llegada: entrada, queda: false, trazos })
+  // [C2-30s] desde 1024 el lugar mide lo que el ≠ en el espacio libre, con su cuerpo y su raya (`signo.ts`).
   return (
-    <div ref={lugar} className={cn(listo && TEXTO_REEMPLAZADO)}>
+    <div ref={lugar} data-pieza="signo-distinto" className={cn(CLASES_DEL_SIGNO.lugar, listo && TEXTO_REEMPLAZADO)}>
       <SignoDistinto progreso={progreso} className={MEZCLA_SOBRE_LA_ESCENA} />
     </div>
   )

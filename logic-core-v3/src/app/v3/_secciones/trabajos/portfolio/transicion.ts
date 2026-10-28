@@ -64,3 +64,9 @@ export function avanzarTransicion(t: TransicionDeLasTiras): TransicionDeLasTiras
 
 /** Si el contenido de la tira `i` se muestra (su secuencia entra): sólo la ancha, quieta. */
 export const muestraSuContenido = (t: TransicionDeLasTiras, i: number): boolean => t.fase === 'quieta' && t.ancha === i
+
+/**
+ * [C2 · 40] Si se ve el póster chico de la tira i (el del lomo): en los lomos y, en la tira que se va, YA durante la salida (el contenido
+ * se desvanece hacia su póster y recién después se comprime). La ancha que se abre lo apaga mientras se abre; quieta, no lo tiene.
+ */
+export const muestraElPoster = (t: TransicionDeLasTiras, i: number): boolean => t.ancha !== i || t.fase === 'saliendo'

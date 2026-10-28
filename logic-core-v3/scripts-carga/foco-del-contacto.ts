@@ -17,6 +17,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 import { chromium } from '@playwright/test'
+import { perfilDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3002'
 const [anchoTxt = '1440', vueltasTxt = '12', busqueda = ''] = process.argv.slice(2)
@@ -44,7 +45,7 @@ async function main(): Promise<void> {
   if (ventana === undefined) throw new Error(`ancho sin ventana: ${anchoTxt}`)
   const [ancho, alto, movil] = ventana
   // El Chrome del sistema a la vista, como los demás arneses: el Chromium sin cabeza y sin GPU se caía a 390 («Page crashed», dos veces).
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/foco-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('foco')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',

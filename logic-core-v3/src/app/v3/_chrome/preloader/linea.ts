@@ -5,7 +5,14 @@ import { TOPE_MS } from './decision'
 
 /**
  * [B12c] LA LÍNEA DE TIEMPO DEL PRELOADER — pura (sin React ni DOM): `s78-preloader` la recorre cuadro a cuadro. El reloj es el de los
- * cuadros que se ven (la suma de los `dt` del rAF): con la pestaña oculta no corre, y quien vuelve ve la secuencia entera.
+ * cuadros que se ven: con la pestaña oculta no corre, y quien vuelve ve la secuencia entera.
+ *
+ * [C2-81] Lo que se ve ya no lo pinta el hilo principal: son animaciones nativas en el compositor (`animaciones.ts`), y el reloj de la
+ * capa es el `currentTime` de una animación maestra (se pausa con la pestaña oculta). Por eso el paso ya no acota el `dt` a 100 ms: con
+ * el hilo ocupado el compositor sigue, y la línea tiene que seguir al mismo tiempo que lo que se ve. La flecha se integra en pasos de un
+ * cuadro (`PASO_DE_LA_FLECHA_MS`): un cuadro largo no la pasa del freno. Y `libre`: desde que la carga estuvo lista, la parte frenable de
+ * la flecha corre sola en el compositor, así que la línea la deja seguir a su ritmo aunque la carga vuelva a faltar (la salida igual la
+ * espera).
  *
  * El caso normal, 5,7 s (Valentino: de 5 a 6):
  *
@@ -44,7 +51,16 @@ export const LINEA_REDUCIDA = { bienvenidaMs: 350, fraseMs: 650, salidaMs: 150 }
 
 /** Cuándo arranca la flecha (el fin de la frase). */
 export const INICIO_DE_LA_FLECHA_MS = LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs + LINEA.bienvenidaSaleMs + LINEA.blancoMs + LINEA.fraseEntraMs
-const FIN_DE_LA_BIENVENIDA_MS = LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs + LINEA.bienvenidaSaleMs
+export const FIN_DE_LA_BIENVENIDA_MS = LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs + LINEA.bienvenidaSaleMs
+
+/**
+ * [C2-81] LOS RATOS QUIETOS: cuándo la escena se puede preparar (`entrada.ts`, `Precompilar`) sin trabar un fundido. La bienvenida ya
+ * aparecida y quieta (con un margen antes de que se vaya: una parte del calentado puede tardar) y, desde que arranca la flecha, siempre (la
+ * flecha es la espera: frena si falta la carga). Con movimiento reducido no hay fundidos largos: siempre.
+ */
+export const MARGEN_DEL_RATO_QUIETO_MS = 200
+export const ratoQuieto = (t: number, reducido: boolean): boolean =>
+  reducido || (t >= LINEA.bienvenidaEntraMs && t < LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS) || t >= INICIO_DE_LA_FLECHA_MS
 
 /** El caso normal entero, con la carga lista desde el principio. */
 export const DURACION_NORMAL_MS = INICIO_DE_LA_FLECHA_MS + LINEA.flechaMs + LINEA.salidaMs
@@ -61,12 +77,17 @@ export interface EstadoDeLaLinea {
   trazo: number
   pulsa: boolean
   icono: boolean
+  /** [C2-81] La carga estuvo lista alguna vez: la flecha ya no frena (su último tramo corre en el compositor). */
+  libre: boolean
   /** Cuándo arrancó la salida (`t`), o `null`. */
   salidaDesde: number | null
   etapa: Etapa
 }
 
-export const lineaNueva = (): EstadoDeLaLinea => ({ t: 0, tau: 0, trazo: 0, pulsa: false, icono: false, salidaDesde: null, etapa: 'bienvenida' })
+export const lineaNueva = (): EstadoDeLaLinea => ({ t: 0, tau: 0, trazo: 0, pulsa: false, icono: false, libre: false, salidaDesde: null, etapa: 'bienvenida' })
+
+/** [C2-81] El paso de la integración de la flecha (un cuadro): con un `dt` largo, la flecha avanza de a uno y frena donde tiene que frenar. */
+export const PASO_DE_LA_FLECHA_MS = 1000 / 60
 
 /** El dibujo de la flecha en el tiempo (de 0 a 1 en `flechaMs`): arranca y termina suave. */
 export const trazoDeLaFlecha = (tau: number): number => CURVAS.simetrica(Math.min(1, Math.max(0, tau / LINEA.flechaMs)))
@@ -91,12 +112,13 @@ const etapaDe = (e: EstadoDeLaLinea, reducido: boolean): Etapa => {
   return 'flecha'
 }
 
-/** Un cuadro (escribe en `e`). `dt` en ms (se acota a 100: un cuadro largo no se come la secuencia). */
+/** Un cuadro (escribe en `e`). `dt` en ms: el tiempo visto desde el cuadro anterior (el reloj maestro de la capa, sin acotar). */
 export function pasoDeLaLinea(e: EstadoDeLaLinea, dt: number, listo: boolean, reducido: boolean, sinFreno = false): void {
-  const paso = Math.min(Math.max(dt, 0), 100)
+  const paso = Math.max(dt, 0)
   const antes = e.t
   e.t += paso
   const listoYa = listo || e.t >= LINEA.topeMs
+  if (listoYa) e.libre = true
   if (e.salidaDesde === null) {
     if (reducido) {
       e.trazo = e.t >= LINEA_REDUCIDA.bienvenidaMs ? 1 : 0
@@ -104,9 +126,16 @@ export function pasoDeLaLinea(e: EstadoDeLaLinea, dt: number, listo: boolean, re
       e.icono = !listoYa && e.t >= LINEA.iconoDesdeMs
       if (listoYa && e.t >= LINEA_REDUCIDA.bienvenidaMs + LINEA_REDUCIDA.fraseMs) e.salidaDesde = e.t
     } else if (e.t > INICIO_DE_LA_FLECHA_MS) {
-      const deLaFlecha = Math.min(paso, e.t - Math.max(antes, INICIO_DE_LA_FLECHA_MS))
-      e.tau = Math.min(LINEA.flechaMs, e.tau + deLaFlecha * velocidadDeLaFlecha(e.trazo, listoYa, e.t, sinFreno))
-      e.trazo = trazoDeLaFlecha(e.tau)
+      // De a un cuadro, cada uno con la velocidad de su momento (el freno depende de lo dibujado y del reloj).
+      let resta = Math.min(paso, e.t - Math.max(antes, INICIO_DE_LA_FLECHA_MS))
+      let reloj = e.t - resta
+      while (resta > 1e-9 && e.tau < LINEA.flechaMs) {
+        const d = Math.min(resta, PASO_DE_LA_FLECHA_MS)
+        reloj += d
+        e.tau = Math.min(LINEA.flechaMs, e.tau + d * velocidadDeLaFlecha(e.trazo, e.libre, reloj, sinFreno))
+        e.trazo = trazoDeLaFlecha(e.tau)
+        resta -= d
+      }
       e.pulsa = !listoYa && e.t >= LINEA.pulsoDesdeMs
       e.icono = !listoYa && e.t >= LINEA.iconoDesdeMs
       if (listoYa && e.trazo >= 1) e.salidaDesde = e.t

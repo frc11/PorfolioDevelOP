@@ -23,10 +23,15 @@
 }
 
 [data-v3] [data-pieza="estante"] {
-  /* [NOCTURNO B5] Las placas, más grandes: cada una un 36 % del ancho de su columna, y el abanico la llena entera (el segundo
-   * término del solape, abajo). A 1440 son de 242 px y a 1024 de 167 (antes, 160 en los dos): el abanico se ve en el 95 % de la
-   * columna (s84 lo cuenta con la perspectiva). */
-  --libro-ancho: 36%;
+  /* [C2-41e] Las placas, entre las de antes del agrandamiento (160 px) y las de B5 (242 a 1440, 167 a 1024): un 30 % de la
+   * columna (la del espejo del Portfolio: 656 px a 1440, 448 a 1024), nunca menos de 164 px. A 1440, 197 px; a 1024, 164. El abanico
+   * llena la columna entera (el segundo término del paso; s84 lo cuenta con la perspectiva). En `cqw` del estante (su contenedor)
+   * y no en %: así el área de cada pieza (abajo) mide el paso con la misma cuenta, aunque esté adentro de la pieza. */
+  --libro-ancho: max(calc(var(--spacing-8) * 5.125), 30cqw);
+  /* [C2-41e] EL PASO: de una pieza a la siguiente (lo que se ve de cada una). Cada una tapa parte de la anterior, y si no entran en su
+   * columna se pisan MÁS (las portadas no se achican nunca): el segundo término es el paso que llena el estante exacto con
+   * `--libros` piezas (lo pone `Biblioteca`), y `min()` elige el menor. Era el solape del margen; ahora lo leen el margen y el área. */
+  --libro-paso: min(calc(var(--libro-ancho) * 0.58), calc((100cqw - var(--libro-ancho)) / (var(--libros) - 1)));
   --libro-giro: 30deg;
   --libro-alza: var(--spacing-6);
   --libro-apertura: var(--spacing-4);
@@ -39,13 +44,22 @@
    * cambio del mouse; quieta, de frente. */
   --mirada: rotateX(0deg);
 
+  /* [C2-41e] El contenedor de las medidas de las piezas (`cqw`). */
+  container-type: inline-size;
   display: flex;
   align-items: flex-end;
-  /* Aire arriba para la pieza levantada y su cartel: el alza más un renglón de la pastilla. */
-  padding-block-start: calc(var(--libro-alza) + var(--spacing-12));
+  /* Aire arriba para la pieza levantada: el alza y un paso. [C2-41e] Era el alza más un renglón de la pastilla (el cartel del puntero
+   * va pegado al cursor desde INTERFAZ 2): el abanico más chico y debajo del título entra en 1024 × 768. */
+  padding-block-start: calc(var(--libro-alza) + var(--spacing-3));
   transition:
     transform var(--duracion-lenta) var(--demos-resorte),
     opacity var(--duracion-lenta) var(--demos-resorte);
+}
+
+/* [C2-41e] DESDE 1024, DEMOS ES EL ESPEJO DEL PORTFOLIO (las clases de la columna, en `CapaDeDemos`): su columna arranca a la altura
+ * del título del Portfolio, que `demos/espejo.ts` mide y escribe en la capa. Hasta que mide (o sin JavaScript), este tope. */
+[data-v3] [data-capa="demos"] {
+  --demos-tope-del-titulo: 22svh;
 }
 
 /* La biblioteca RETROCEDE cuando una demo está abierta: se achica, baja un poco y
@@ -56,9 +70,10 @@
 }
 
 /* EL HUECO de cada pieza: plano y quieto, así el hover no cambia bajo el puntero
- * cuando la placa se levanta. Cada una tapa parte de la anterior. */
+ * cuando la placa se levanta. Cada una tapa parte de la anterior. [C2-41e] Sin puntero: lo recibe su área (abajo). */
 [data-v3] [data-pieza="libro"] {
   position: relative;
+  pointer-events: none;
   flex: none;
   display: block;
   inline-size: var(--libro-ancho);
@@ -68,15 +83,25 @@
   transform-origin: 50% 100%;
 }
 
-/* Cada una tapa parte de la anterior, y si no entran en su columna se pisan MÁS:
- * las portadas no se achican nunca. El `100 %` de un margen es el ancho del
- * estante, así que el segundo término es el solape que lo llena exacto con
- * `--libros` piezas (lo pone `Biblioteca`), y `min()` elige el mayor de los dos. */
+/* Cada una arranca un paso después de la anterior (el paso, en el estante). */
 [data-v3] [data-pieza="libro"] + [data-pieza="libro"] {
-  margin-inline-start: min(
-    calc(var(--libro-ancho) * -0.42),
-    calc((100% - var(--libro-ancho)) / (var(--libros) - 1) - var(--libro-ancho))
-  );
+  margin-inline-start: calc(var(--libro-paso) - var(--libro-ancho));
+}
+
+/* [C2-41e] EL ÁREA de cada pieza: lo único que recibe el puntero. Su franja a la vista —del borde izquierdo de su hueco al de la
+ * siguiente, un paso; la última, entera—, a toda la altura. Las áreas no se pisan y no se mueven con el hover ni con la llegada de la
+ * levantada: el hueco entero de la levantada (más arriba que las otras) tapaba casi toda la franja de la siguiente, y un clic ahí
+ * abría la de antes; y la placa, que asomaba fuera del hueco, hacía vibrar el hover. */
+[data-v3] [data-pieza="libro"] > [data-parte="area"] {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--libro-paso);
+  pointer-events: auto;
+}
+
+[data-v3] [data-pieza="libro"]:last-child > [data-parte="area"] {
+  inline-size: 100%;
 }
 
 /* [NOCTURNO B5] LA CARA: la cámara de la placa. Su perspectiva y la mirada (fija en el mundo: gira al revés de lo que el mouse le
@@ -84,6 +109,9 @@
  * placa se ve con su propia cámara y se pinta en el orden del estante (la de la derecha tapa a la de la izquierda). */
 [data-v3] [data-pieza="libro"] > [data-parte="cara"] {
   display: block;
+  /* [C2-41e] Lo que se transforma no recibe el puntero (lo recibe el área). Antes la placa lo recibía y su perspectiva asomaba
+   * fuera del hueco: con el mouse quieto ahí, el hover se prendía y se apagaba solo. */
+  pointer-events: none;
   block-size: 100%;
   transform-style: preserve-3d;
   transform: perspective(var(--libro-perspectiva)) var(--mirada);
@@ -216,6 +244,30 @@
 [data-v3] [data-pieza="libro"]:has(+ [data-pieza="libro"]:focus-visible) > [data-parte="cara"] > [data-parte="placa"] {
   transform: translateX(calc(-1 * var(--libro-apertura))) rotateY(var(--libro-giro));
   transition: transform var(--duracion-lenta) var(--demos-resorte);
+}
+
+/* [C2-41e] EL CONTROL DEL BANCO (`CONTROL=area-movil`, `demos/defectos.ts`; el atributo sólo existe con él): el puntero como antes
+ * del arreglo —el hueco y la placa que se levanta lo reciben, sin el área— y la subida sin transición y moviendo también su caja, así
+ * el navegador vuelve a mirar qué hay bajo un puntero QUIETO (lo hace cuando cambia la caja; con un mouse de verdad, cualquier temblor
+ * alcanza). Con el puntero en el borde pintado de la placa, el hover se prende y se apaga solo: lo que el banco tiene que ver. */
+[data-v3] [data-pieza="estante"][data-area-movil] [data-pieza="libro"],
+[data-v3] [data-pieza="estante"][data-area-movil] [data-parte="cara"] {
+  pointer-events: auto;
+}
+
+[data-v3] [data-pieza="estante"][data-area-movil] [data-parte="area"] {
+  pointer-events: none;
+}
+
+[data-v3] [data-pieza="estante"][data-area-movil] [data-parte="placa"] {
+  transition: none;
+}
+
+@media (hover: hover) {
+  [data-v3] [data-pieza="estante"][data-area-movil] [data-pieza="libro"]:is(:hover, :focus-visible) > [data-parte="cara"] > [data-parte="placa"] {
+    inset-block-start: calc(-1 * var(--libro-alza));
+    transition: none;
+  }
 }
 
 /* =========================================================================

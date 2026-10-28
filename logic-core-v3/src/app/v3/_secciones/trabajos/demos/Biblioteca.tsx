@@ -10,6 +10,7 @@ import { sonar } from '../../../_lib/sonido/bus'
 import { PRESENCIA_DEL_CURSOR } from '../../../_chrome/cursor/presencia'
 
 import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_PORTADA, TEXTO_DE_DEMOS, type Demo } from './catalogo'
+import { conElDefectoDeDemos } from './defectos'
 import { MS_DE_INTENCION, precargar } from './precarga'
 
 /** [NOCTURNO B5] Los cantos de cada placa (el dorso y los cuatro costados: `demos.css`). */
@@ -34,7 +35,13 @@ export const LADOS_DE_LA_PLACA = ['atras', 'izquierda', 'derecha', 'arriba', 'ab
  * El hover y el foco son CSS (`demos.css`): la placa sube con un resorte crítico,
  * las vecinas se abren y la bajada es de 100 ms. El hueco de cada pieza queda
  * QUIETO —lo que se mueve es la placa—, así el puntero no pierde la pieza cuando
- * ésta se levanta. Acá: el cartel (su nombre), el tic de la barra, las flechas, la precarga y la mirada.
+ * ésta se levanta. [C2-41e] Y lo ÚNICO que recibe el puntero es el ÁREA de cada pieza (`[data-parte="area"]`): su franja a la
+ * vista, del borde izquierdo de su hueco al de la siguiente (la última, entera). Las áreas no se pisan y no se mueven con nada:
+ *   · la cara (su cámara, la placa y los cantos) va sin puntero: antes la placa lo recibía y con su perspectiva asomaba unos
+ *     píxeles fuera del hueco; con el mouse quieto ahí se levantaba, dejaba de estar bajo el puntero, bajaba y volvía a tocarlo
+ *     (el hover que vibraba, `lote1/14`);
+ *   · el ancla tampoco: el hueco entero de la levantada (más arriba que las otras) tapaba casi toda la franja de la siguiente, y un
+ *     clic ahí abría la de antes (la verificación del orquestador: «la portada de la demo anterior»). Acá: el cartel (su nombre), el tic de la barra, las flechas, la precarga y la mirada.
  *
  * ⚠️ **EL CARTEL VA EN UN PORTAL, afuera de la sección.** Tiene que ser la
  * pastilla del navbar, y el navbar vive afuera de la sala invertida: adentro, sus
@@ -56,6 +63,11 @@ export function Biblioteca({
   const estante = useRef<HTMLDivElement | null>(null)
   const cartel = useRef<HTMLSpanElement | null>(null)
   const intencion = useRef(0)
+  // [C2-41e] El control del banco (`CONTROL=area-movil`): el estante lleva `data-area-movil` y la placa vuelve a recibir el puntero,
+  // como antes (`demos.css`: la regla del control).
+  const [areaMovil] = useState(() => conElDefectoDeDemos('area-movil'))
+  // [C2-41e] Y `CONTROL=area-solapada`: el ancla entera vuelve a recibir el puntero, como antes.
+  const [areaSolapada] = useState(() => conElDefectoDeDemos('area-solapada'))
   // Esta rama no se sirve: se monta en el cliente cuando llegan las primitivas.
   const [raiz] = useState<HTMLElement | null>(() => (typeof document === 'undefined' ? null : document.querySelector<HTMLElement>('[data-v3]')))
 
@@ -130,7 +142,7 @@ export function Biblioteca({
   return (
     <>
       {/* `--libros`: el estante calcula con él cuánto se pisan para entrar en su columna. */}
-      <div ref={estante} data-pieza="estante" style={{ '--libros': CATALOGO_DE_DEMOS.length } as React.CSSProperties} {...(alejada ? { 'data-alejada': '' } : {})}>
+      <div ref={estante} data-pieza="estante" style={{ '--libros': CATALOGO_DE_DEMOS.length } as React.CSSProperties} {...(alejada ? { 'data-alejada': '' } : {})} {...(areaMovil ? { 'data-area-movil': '' } : {})}>
         {CATALOGO_DE_DEMOS.map((demo, i) => (
           <a
             key={demo.slug}
@@ -147,6 +159,7 @@ export function Biblioteca({
             onBlur={esconderElCartel}
             onKeyDown={(e) => alTeclear(e, i)}
             onClick={(e) => alHacerClic(e, demo)}
+            style={areaSolapada ? { pointerEvents: 'auto' } : undefined}
           >
             {/* La cámara de la placa (la mirada), la placa (el abanico y el hover), su portada y sus cantos. */}
             <span data-parte="cara">
@@ -159,6 +172,8 @@ export function Biblioteca({
                 ))}
               </span>
             </span>
+            {/* [C2-41e] El área que recibe el puntero: la franja a la vista de la pieza, quieta (`demos.css`). */}
+            <span aria-hidden="true" data-parte="area" />
           </a>
         ))}
       </div>

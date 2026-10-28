@@ -39,11 +39,13 @@ interface CampoComun {
   readonly conError: boolean
   readonly id?: string
   readonly alEnfocar?: (e: React.FocusEvent<HTMLElement>) => void
+  /** [C2 · 40] La letra del rótulo y del campo. Por defecto `text-caption` (el modal, igual que siempre). */
+  readonly claseDelTexto?: string
 }
 
 /** La píldora de una línea: el rótulo y el campo, adentro. */
 export function CampoDePildora({
-  rotulo, nombre, valor, alEscribir, ejemplo, maximo, idDelError, conError, id, alEnfocar,
+  rotulo, nombre, valor, alEscribir, ejemplo, maximo, idDelError, conError, id, alEnfocar, claseDelTexto = 'text-caption',
   requerido = false, compacto = false, autocompletar, modoDeEntrada,
 }: CampoComun & {
   readonly requerido?: boolean
@@ -53,7 +55,7 @@ export function CampoDePildora({
 }): React.JSX.Element {
   return (
     <label data-foco="pastilla" htmlFor={id} className={cn(CLASE_DE_LA_PILDORA, compacto && 'py-[var(--spacing-1)]', conError && 'border-tinta border-dashed')}>
-      <span className="text-caption shrink-0 font-medio">{rotulo}</span>
+      <span className={cn(claseDelTexto, 'shrink-0 font-medio')}>{rotulo}</span>
       <input
         id={id}
         name={nombre}
@@ -68,7 +70,7 @@ export function CampoDePildora({
         placeholder={ejemplo}
         aria-invalid={conError || undefined}
         aria-describedby={conError && idDelError !== null ? idDelError : undefined}
-        className="text-caption placeholder:text-tinta-tenue min-w-0 flex-1 bg-transparent"
+        className={cn(claseDelTexto, 'placeholder:text-tinta-tenue min-w-0 flex-1 bg-transparent')}
       />
     </label>
   )
@@ -79,12 +81,12 @@ export function CampoDePildora({
  * (`field-sizing`) desde lo mínimo hasta ocho renglones.
  */
 export function CampoDeTextoLargo({
-  rotulo, nombre, valor, alEscribir, ejemplo, maximo, idDelError, conError, id, alEnfocar,
+  rotulo, nombre, valor, alEscribir, ejemplo, maximo, idDelError, conError, id, alEnfocar, claseDelTexto = 'text-caption',
   compacto = false, renglones = 2,
 }: CampoComun & { readonly compacto?: boolean; readonly renglones?: 2 | 4 }): React.JSX.Element {
   return (
     <label data-foco="pastilla" htmlFor={id} className={cn(CLASE_DE_LA_PILDORA, 'items-start rounded-[var(--radius-fuerte)] max-movil:flex-col max-movil:items-stretch', compacto ? 'py-[var(--spacing-2)]' : 'py-[var(--spacing-3)]', conError && 'border-tinta border-dashed')}>
-      <span className="text-caption shrink-0 font-medio">{rotulo}</span>
+      <span className={cn(claseDelTexto, 'shrink-0 font-medio')}>{rotulo}</span>
       <textarea
         id={id}
         name={nombre}
@@ -96,7 +98,7 @@ export function CampoDeTextoLargo({
         placeholder={ejemplo}
         aria-invalid={conError || undefined}
         aria-describedby={conError && idDelError !== null ? idDelError : undefined}
-        className={`text-caption placeholder:text-tinta-tenue min-w-0 flex-1 resize-none bg-transparent ${CRECE_DESDE[renglones]}`}
+        className={cn(claseDelTexto, `placeholder:text-tinta-tenue min-w-0 flex-1 resize-none bg-transparent ${CRECE_DESDE[renglones]}`)}
       />
     </label>
   )

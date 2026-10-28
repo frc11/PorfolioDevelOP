@@ -139,10 +139,12 @@ controlPositivo('  el detector VE un gatillo servido escondido', marcar(<Gatillo
 // Tu panel, idéntica antes y después: las huellas del marcado servido, tomadas en f1cd4b4e (antes de P-H18). Si Tu panel cambia a
 // propósito, la huella se vuelve a tomar con su motivo en el commit. [B6] Retomada: la sección del Panel nueva (el título que se
 // pinta, los tres módulos y el CTA); el remate solo ya no existe. Y otra vez en la ronda del navegador: el envoltorio de la maqueta.
+// [C2 · 60c] Retomada: el CTA del Panel rehecho (la tarea 60, «El CTA del Panel»). Si se integra con el cuerpo nuevo (60b), retomarla.
+// [C2 · 60, orquestador] Retomada al integrar las dos: el cuerpo de la 60b (la palabra pálida, los espacios, los módulos) y el CTA de la 60c.
 const huella = (m: string): string => createHash('sha256').update(m).digest('hex')
 const ANTES = {
-  quieta: '11f15c4b27811011cac29184cfbb96afb9432ef18271cc753adaf4cba545824d',
-  animada: 'f5bf3d51c0556f74f0988f6072a28457ecfe3c92bb53b4e7f08a3d5274e157c5',
+  quieta: 'd32ca1b0041f8e3652927d3b07198442b067be445c9e2b74e255ae627b024c07',
+  animada: 'bced0840df78979f0c5c65709a424310dabce2205a822024bafc4a6fad35f804',
 }
 const panel = <TuPanel seccion={seccionDe('tu-panel')} />
 const ahora = { quieta: marcar(panel, { anima: false }), animada: marcar(panel, { anima: true }) }

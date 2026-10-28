@@ -64,12 +64,30 @@ export function PisoVivo(props: PropsDelPiso) {
 /** Como mucho, cuántos pasos fijos se corren en un cuadro (un cuadro muy largo no se recupera entero). */
 const PASOS_POR_CUADRO = 8
 
+/**
+ * [C2-31m] SIN LOMA BAJO EL CURSOR — de acá salían las «líneas negras horizontales» en el piso junto al cursor (con `?moire=mouse`,
+ * captura `lote3/01`). No era el moiré (salen igual sin la trama): era la loma que la simulación levantaba bajo el puntero
+ * (`PISO_VIVO.cursor`, 0,6 u en un radio de 2 u). En el escenario de la formación el bloque mide 1,06 u y la loma quieta sube
+ * 0,31 u en unas cuatro filas: cada fila queda hasta 0,08 a 0,1 u por encima de la de adelante (`s78-c2-31m`), lo que llega al
+ * escalón con el que el costado se sombrea entero como costado (`luz.escalon`, 0,1), y el costado que mira a la cámara queda al pie
+ * a 0,61 a 0,64 de la tapa (`luz.costado` y la rendija): una raya oscura por fila. El piso sigue con el mar, el pulso y la onda de la
+ * interfaz; el cursor ya no lo empuja. La loma queda SÓLO como el
+ * defecto del banco, para su control positivo (`window.__defectosDeLaIntro = 'con-lineas'`, nunca la URL; `scripts-carga/moire.ts`).
+ */
+export const LOMA_DEL_CURSOR = { defecto: 'con-lineas' } as const
+
+/** ¿Levanta el cursor una loma en esta carga? Sólo con el defecto del banco. */
+function lomaDelCursorPedida(): boolean {
+  return typeof window !== 'undefined' && (window as Window & { __defectosDeLaIntro?: unknown }).__defectosDeLaIntro === LOMA_DEL_CURSOR.defecto
+}
+
 function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
   const radio = pisoConFormacion(calidad)?.radio ?? FLOOR_RADIUS
   // [ESCENA 8] T2: con la trama anclada al piso, el piso junto a la pared junta menos luz (el contacto).
   const conContacto = pisoConFormacion(calidad) !== undefined && entornoDeLaEscena().limite
   const armado = useMemo(() => armar(grillaDelPiso(radio), conContacto), [radio, conContacto])
   useEffect(() => () => armado.soltar(), [armado])
+  const conLoma = useMemo(() => lomaDelCursorPedida(), [])
   const memoria = useRef({
     inicio: true,
     puntero: new THREE.Vector2(9, 9),
@@ -143,15 +161,18 @@ function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
     const g = armado.grilla
     const dt = Math.min(Math.max(delta, 0), 0.1)
 
-    // El cursor: el punto del piso bajo el puntero; la presencia sube al moverlo y se apaga quieto.
-    const movio = m.puntero.x < 5 && m.puntero.distanceToSquared(state.pointer) > 1e-8
-    m.puntero.copy(state.pointer)
-    if (movio) m.ultimoCursor = t
-    m.rayo.setFromCamera(state.pointer, state.camera)
-    const toca = m.rayo.ray.intersectPlane(m.plano, m.punto)
-    if (toca !== null) m.cursor.set(toca.x / g.lado, toca.z / g.lado)
-    const presente = !quieto && toca !== null && t - m.ultimoCursor < PISO_VIVO.cursor.quietoS
-    m.presencia += ((presente ? 1 : 0) - m.presencia) * (1 - Math.exp(-dt / (presente ? 0.15 : 0.8)))
+    // El cursor: el punto del piso bajo el puntero; la presencia sube al moverlo y se apaga quieto. [C2-31m] Sólo con el defecto
+    // del banco (`LOMA_DEL_CURSOR`): en el producto la presencia queda en cero y la simulación no levanta nada bajo el puntero.
+    if (conLoma) {
+      const movio = m.puntero.x < 5 && m.puntero.distanceToSquared(state.pointer) > 1e-8
+      m.puntero.copy(state.pointer)
+      if (movio) m.ultimoCursor = t
+      m.rayo.setFromCamera(state.pointer, state.camera)
+      const toca = m.rayo.ray.intersectPlane(m.plano, m.punto)
+      if (toca !== null) m.cursor.set(toca.x / g.lado, toca.z / g.lado)
+      const presente = !quieto && toca !== null && t - m.ultimoCursor < PISO_VIVO.cursor.quietoS
+      m.presencia += ((presente ? 1 : 0) - m.presencia) * (1 - Math.exp(-dt / (presente ? 0.15 : 0.8)))
+    }
 
     // [INTERFAZ 2] T1 · la onda que pide la interfaz (sin movimiento reducido, como el pulso).
     if (!quieto) atenderLaOnda(state.camera, t, performance.now())

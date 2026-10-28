@@ -21,7 +21,7 @@ export const RESENAS_EN_VIVO = {
   hueco: 0,
   /** La placa señalada (hover del mouse o foco del teclado), o −1. */
   senalada: -1,
-  /** Con `?resenas-arrastre=si`: el arrastre del puntero (cuánto se corrió desde el último cuadro, px del cuadro). */
+  /** El arrastre del puntero (por defecto desde C2-70) (cuánto se corrió desde el último cuadro, px del cuadro). */
   arrastre: { activo: false, dx: 0 },
   /** Con movimiento reducido el aro no gira (la rama del DOM no lo monta, pero por las dudas). */
   quieto: false,

@@ -19,6 +19,9 @@ import { AIRE_CON_DESPEJE } from './medios'
 import { enLaSecuencia } from './secuencia'
 import type { PortfolioVivo } from './usePortfolio'
 
+/** [C2 · 40] «Visitar sitio» en el color de su marca: la tinta de su caja es el token del proyecto (el CTA sigue siendo «tinta»). */
+export const estiloDeLaMarca = (p: ProyectoDelPortfolio): React.CSSProperties => ({ '--color-tinta': p.colorDeMarca }) as React.CSSProperties
+
 /** Los ids de una tira: su cabecera, su medio y su contenido. */
 export const idsDeLaTira = (slug: string): { readonly cabecera: string; readonly medio: string; readonly region: string } => ({
   cabecera: `portfolio-cabecera-${slug}`,
@@ -92,10 +95,13 @@ export function Tira({
   indice,
   activa,
   visible,
+  poster,
   vivo,
 }: {
   readonly proyecto: ProyectoDelPortfolio
   readonly indice: number
+  /** [C2 · 40] Su póster chico se ve (muestraElPoster): entra con la salida del contenido, antes de comprimirse. */
+  readonly poster: boolean
   /** La tira abierta (la ancha). */
   readonly activa: boolean
   /** [B1.2c] Su contenido se muestra: la ancha, quieta (`transicion.ts`), con la escena adentro. */
@@ -109,14 +115,14 @@ export function Tira({
   const despeje = useDespejeDelMedio()
   return (
     <div data-tira={proyecto.slug} data-activa={activa} className={cn(CLASES_DE_LA_TIRA.base, activa ? CLASES_DE_LA_TIRA.activa : CLASES_DE_LA_TIRA.lomo)}>
-      {activa ? null : <PosterDelLomo proyecto={proyecto} cerca={vivo.cerca} />}
+      <PosterDelLomo proyecto={proyecto} cerca={vivo.cerca} visible={poster} reducido={vivo.reducido} />
       {/* [F4] El medio es lo único que cede alto (`min-h-0` y la región que no se encoge): si la ficha no entra, el video se achica lo justo. */}
       <div id={ids.medio} hidden={!activa} className="relative flex min-h-0 flex-col px-8 pt-8" style={despeje === null ? undefined : { paddingTop: despeje }}>
         <motion.div className="min-h-0" {...enLaSecuencia(visible, 0, vivo.reducido)}>
           <MedioDeLaTira proyecto={proyecto} activa={activa} cerca={vivo.cerca} aLaVista={vivo.aLaVista} reducido={vivo.reducido} />
         </motion.div>
       </div>
-      {activa ? <MarcaDeAgua proyecto={proyecto} cerca={vivo.cerca} /> : null}
+      {activa ? <MarcaDeAgua proyecto={proyecto} cerca={vivo.cerca} visible={visible} reducido={vivo.reducido} /> : null}
       <CabeceraDeLaTira id={ids.cabecera} indice={indice} activa={activa} nombre={proyecto.nombre} controla={`${ids.medio} ${ids.region}`} visible={visible} reducido={vivo.reducido} alElegir={() => vivo.saltarAlPaso(indice, true)} />
       <div id={ids.region} hidden={!activa} className="relative flex shrink-0 grow flex-col gap-5 px-8 pb-12 pt-2" style={despeje === null ? undefined : { paddingBottom: AIRE_CON_DESPEJE.debajo }}>
         {proyecto.rubro === null ? null : (
@@ -127,7 +133,7 @@ export function Tira({
         <Ficha proyecto={proyecto} visible={visible} reducido={vivo.reducido} desde={2} />
         {/* [B1.2d] A2 · el botón simple del sitio (el rollover de dos copias y su subrayado), importado: no una copia. */}
         <div className="mt-auto self-start">
-          <motion.div style={despeje === null ? undefined : { marginTop: AIRE_CON_DESPEJE.antesDeVisitar }} {...enLaSecuencia(visible, 2 + piezas, vivo.reducido)}>
+          <motion.div style={despeje === null ? estiloDeLaMarca(proyecto) : { ...estiloDeLaMarca(proyecto), marginTop: AIRE_CON_DESPEJE.antesDeVisitar }} {...enLaSecuencia(visible, 2 + piezas, vivo.reducido)}>
             <CtaEnlace
               href={proyecto.url}
               rotulo={`${CONTENIDO.ficha.visitar} ↗`}

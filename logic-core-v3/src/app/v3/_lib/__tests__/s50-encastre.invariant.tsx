@@ -120,9 +120,10 @@ controlPositivo('el detector VE la capa rígida atada al vacío', capa.replace("
 // El título: «Demos», como Portfolio (s42 D3 al día afirma el gesto, el nivel y las clases).
 const texto = sinComentarios(leer('_secciones/trabajos/demos/TextoDeDemos.tsx'))
 // [B1] el titular de Portfolio vive en el encabezado del selector (y abajo de 1024 va en su columna, con su clase); Demos sigue
-// de margen a margen con la del cartel de antes (`demos/herencia.ts`).
+// de margen a margen con la del cartel de antes (`demos/herencia.ts`). [C2-41e] Reemplazado por la spec: desde 1024, además, la medida del
+// titular de Portfolio (su espejo, s84 §9).
 const piezas = sinComentarios(leer('_secciones/trabajos/portfolio/EncabezadoDelPortfolio.tsx'))
-const comoPortfolio = (t: string): boolean => /<Titular nivel="display-xl" como="h2" className=\{CLASE_DEL_TITULAR\}>/.test(piezas) && /minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(piezas) && /<Titular nivel="display-xl" como="h3" className=\{CLASE_DEL_TITULAR_DEL_CARTEL\}>/.test(t) && /gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS\.llegadaDePortfolioS/.test(t) && /useAcompananteDelTitulo<HTMLDivElement>\('demos'\)/.test(t)
+const comoPortfolio = (t: string): boolean => /<Titular nivel="display-xl" como="h2" className=\{CLASE_DEL_TITULAR\}>/.test(piezas) && /minimoS=\{LENTOS\.llegadaDePortfolioS\}/.test(piezas) && /<Titular nivel="display-xl" como="h3" className=\{cn\(CLASE_DEL_TITULAR_DEL_CARTEL, TITULAR_DEL_PORTFOLIO_EN_ESCRITORIO\)\}>/.test(t) && /gesto: 'letras', llegada: progreso, queda: false, minimoS: LENTOS\.llegadaDePortfolioS/.test(t) && /useAcompananteDelTitulo<HTMLDivElement>\('demos'\)/.test(t)
 afirmar(comoPortfolio(texto), '«Demos» con el nivel, las clases angostas y la llegada del titular de Portfolio (las letras desde la profundidad, con su mínimo); el párrafo va en su plano')
 controlPositivo('el detector VE el título de antes (titulo-l, dos renglones)', texto.replace('nivel="display-xl" como="h3"', 'nivel="titulo-l" como="h3"'), comoPortfolio)
 
@@ -207,7 +208,8 @@ titulo('1E · Los formularios del contacto: el foco en la pastilla, el Tab en lo
 
 // El foco: el anillo del control se MUDA a la caja que se ve (su borde, más oscuro y más grueso); nunca transparente solo.
 const foco = leer('_estilos/foco.css').replace(/\/\*[\s\S]*?\*\//g, '')
-const reglaDe = (css: string, selector: string): string => {
+const NO_CONTROLES_ENFOCADOS_POR_CODIGO: readonly string[] = ['[data-v3][data-v3] [data-parte="carga"]:focus-visible']
+const reglaDe =(css: string, selector: string): string => {
   const i = css.indexOf(`${selector} {`)
   return i < 0 ? '' : css.slice(i, css.indexOf('}', i))
 }
@@ -219,11 +221,18 @@ const seMuda = (css: string): boolean => {
   // Cada contorno transparente vive SÓLO adentro de una caja que dibuja el foco.
   const transparentes = [...css.matchAll(/([^{}]+)\{[^}]*outline-color: transparent;/g)].map((m) => m[1].trim())
   // [NOCTURNO B5] La caja del carrusel de las demos es su tarjeta (el carrusel común de B1.2e): su anillo de adentro (`foco.css`).
-  const soloEnCajas = transparentes.every((s) => s.includes('[data-foco="pastilla"]') || s.includes('[data-foco="campo"]') || s.includes('[data-parte="tarjeta-de-demo"]'))
+  // [C2-90v] La otra excepción, por selector exacto: lo que recibe el foco POR CÓDIGO y no es un control (la carga del login, C2-80:
+  // se enfoca para anunciarla; abajo se afirma que es un `div` fuera del Tab). No es un control, así que no tiene anillo que mudar.
+  const soloEnCajas = transparentes.every((s) => s.includes('[data-foco="pastilla"]') || s.includes('[data-foco="campo"]') || s.includes('[data-parte="tarjeta-de-demo"]') || NO_CONTROLES_ENFOCADOS_POR_CODIGO.includes(s))
   return dibuja(pastilla) && dibuja(campo) && campo.includes('outline-color: transparent;') && adentro.includes('outline-color: transparent;') && soloEnCajas
 }
-afirmar(seMuda(foco), 'el foco de un campo lo dibuja su caja: el borde (con su redondeo) pasa a la tinta y al doble de grueso (una línea por dentro: nada se corre); el contorno del control queda transparente SÓLO adentro de esas cajas')
+afirmar(seMuda(foco), 'el foco de un campo lo dibuja su caja: el borde (con su redondeo) pasa a la tinta y al doble de grueso (una línea por dentro: nada se corre); el contorno del control queda transparente SÓLO adentro de esas cajas (y en la carga del login, que no es un control)')
 controlPositivo('el detector VE un contorno apagado sin caja que lo reemplace', `${foco}\n[data-v3][data-v3] input:focus-visible { outline-color: transparent; }`, seMuda)
+const cargaDelLogin = leer('_chrome/ingreso/FormulariosConEmail.tsx')
+const cargaSinControl = (c: string): boolean => /<div ref=\{refDeLaCarga\} tabIndex=\{-1\} data-parte="carga"/.test(c) && (c.match(/data-parte="carga"/g) ?? []).length === 1
+afirmar(cargaSinControl(cargaDelLogin), '  [C2-80] la carga del login es un `div` que sólo se enfoca por código (`tabIndex={-1}`), no un control: por eso su contorno puede apagarse')
+controlPositivo('  el detector VE la carga convertida en un control', cargaDelLogin.replace('<div ref={refDeLaCarga} tabIndex={-1} data-parte="carga"', '<button ref={refDeLaCarga} data-parte="carga"'), cargaSinControl)
+controlPositivo('  y la excepción no tapa un contorno apagado con otro selector', `${foco}\n[data-v3][data-v3] [data-parte="carga"] button:focus-visible { outline-color: transparent; }`, seMuda)
 controlPositivo('  y una pastilla que no dibuja nada', foco.replace('[data-v3] [data-foco="pastilla"]:has(:focus-visible) {\n  border-color: var(--color-tinta);', '[data-v3] [data-foco="pastilla"]:has(:focus-visible) {\n  border-color: var(--color-borde-fuerte);'), seMuda)
 // En el marcado: cada campo de texto del panel, en su pastilla; los del pie, su propia caja; sin «/»; un solo obligatorio.
 const hoja = renderToStaticMarkup(<HojaParaElInvariante />)

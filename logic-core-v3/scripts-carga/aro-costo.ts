@@ -9,13 +9,14 @@
  * WEBGL_debug_renderer_info en la misma página. Criterio propuesto: el aro suma ≤ 0,5 ms de CPU por cuadro y no baja el p95.
  */
 import { chromium, type CDPSession, type Page } from '@playwright/test'
+import { perfilDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const CORRIDA = process.env.CORRIDA ?? '1'
 const ANCHO = Number(process.env.ANCHO ?? 1440)
 const ALTO = Number(process.env.ALTO ?? 900)
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const PERFIL = `C:/Users/Valentino/.cache/b4-medicion/aro-costo-${CORRIDA}-${String(Date.now())}`
+const PERFIL = perfilDelBanco('aro-costo')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 /** Dónde está el avance `r` del tramo de las reseñas (px de scroll): el pin de la sección + (2,5 + 4 r) pantallas (`resenas/tramo.ts`). */

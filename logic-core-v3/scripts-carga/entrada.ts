@@ -16,6 +16,7 @@ import path from 'node:path'
 import { chromium } from '@playwright/test'
 
 import { resumenDeLaEntrada, violacionesDeLaEntrada, type CuadroDeLaEntrada, type GestoDeLaEntrada } from './a8'
+import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const ANCHO = Number(process.env.ANCHO ?? '1440')
@@ -27,7 +28,7 @@ const VUELTAS = Number(process.env.VUELTAS ?? '1')
 /** El control positivo: `DEFECTO=rueda-en-la-entrada` reintroduce la rueda de antes (sin la trampa), antes de cargar. */
 const DEFECTO = process.env.DEFECTO ?? null
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const SALIDA = path.join(os.homedir(), '.cache/b4-medicion/f1')
+const SALIDA = salidaDelBanco('f1')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
 const GRABAR = `(() => {
@@ -77,7 +78,7 @@ async function gesto(p: import('@playwright/test').Page, sentido: 1 | -1): Promi
 
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
-  const perfil = path.join(os.homedir(), `.cache/b4-medicion/f1-perfil-${String(Date.now())}`)
+  const perfil = perfilDelBanco('f1')
   rmSync(perfil, { recursive: true, force: true })
   const ctx = await chromium.launchPersistentContext(perfil, {
     executablePath: CHROME,

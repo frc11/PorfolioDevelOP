@@ -10,7 +10,8 @@ import { colocarLaPieza } from './colocacion'
 import { cajaDelPieAcostado, distanciaDeLaVista } from './encuadre'
 import { VOLUMEN_DEL_PIE } from './geometria'
 import { TECHO_DE_LOS_TEXTOS } from './huecos'
-import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, hundidaParaElViaje } from '../../pie3d/salidas'
+import { SALIDAS_DEL_PIE, SALIDA_EN_VIVO, hundePorColumnas, hundidaParaElViaje } from '../../pie3d/salidas'
+import { hundirConSuColumna } from './huecosDeLaCaida'
 import { MAXIMO_DE_SOMBRAS_DEL_PIE, SOMBRAS_DEL_PIE } from './sombras'
 
 /**
@@ -110,6 +111,12 @@ export interface CaidaDelPie {
   mundoPorPx: number
   /** [PULIDO 28] AC1 · la profundidad de la pared con alguna pieza a la vista (sin ninguna nunca, NaN). */
   pared: number
+  /**
+   * [C2-71] Lo que el FAQ de volumen necesita del pie acostado (lo escribe `huecosDeLaCaida` en cada cuadro, en la base del pie: `d` a lo
+   * largo de `derecha` y `a` a lo largo de `atras`, desde el logo): la huella final de cada columna (d0, d1, a0, a1) y la del formulario
+   * (su centro y sus medias extensiones; `conForm`: hay formulario).
+   */
+  readonly faq: { readonly huellas: Float64Array; readonly form: Float64Array; conForm: boolean }
 }
 
 const CAIDA_NULA = caidaIntegrada({ alto: 1, espesor: 0.1 })
@@ -125,7 +132,7 @@ export function crearLaCaidaDelPie(): CaidaDelPie {
     lugares.push(crearLugar())
     caidas.push(CAIDA_NULA)
   }
-  return { piezas, columnas, lugares, caidas, base: { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: 6.9, logoFondo: 4.78 }, huella: new Float64Array(2), n: 0, m: 0, primeraS: Number.POSITIVE_INFINITY, ultimaS: 0, mundoPorPx: 1, pared: Number.NaN }
+  return { piezas, columnas, lugares, caidas, base: { derechaX: 1, derechaZ: 0, atrasX: 0, atrasZ: -1, logoX: 0, logoZ: 0, logoAncho: 6.9, logoFondo: 4.78 }, huella: new Float64Array(2), n: 0, m: 0, primeraS: Number.POSITIVE_INFINITY, ultimaS: 0, mundoPorPx: 1, pared: Number.NaN, faq: { huellas: new Float64Array(COLUMNAS * 4), form: new Float64Array(4), conForm: false } }
 }
 
 const TEMP = new THREE.Object3D()
@@ -341,6 +348,8 @@ export function aplicarLaCaida(c: CaidaDelPie, i: number, a: Armada, s: number):
   // [PULIDO 27] Y4 b · antes de un viaje desde el pie acostado se hunde en su hueco; hundida, no se dibuja hasta que el viaje termina.
   const h = SALIDA_EN_VIVO.hunde
   if (h <= 0) return
+  // [C2-71] Para el FAQ, la columna entera sobre su plataforma (`huecosDeLaCaida.ts` abre y cierra su hueco); cerrado, no se dibuja.
+  if (hundePorColumnas()) return hundirConSuColumna(grupo, col)
   grupo.position.y -= (p.espesor + SALIDAS_DEL_PIE.hundeDeMas + (p.esTexto ? TECHO_DE_LOS_TEXTOS.sube : 0)) * hundidaParaElViaje(h)
   if (h >= 1) grupo.visible = false
 }

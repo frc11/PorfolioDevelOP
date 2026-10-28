@@ -12,7 +12,7 @@ import { hayBanco } from './entorno'
  * `celda` px: devuelve las celdas cuyo centro cae adentro de algún triángulo. Se calcula al pedirla (nunca por cuadro).
  */
 type Silueta = { readonly celda: number; readonly cols: number; readonly filas: number; readonly ocupadas: number[] }
-type VentanaDelBanco = Window & { __siluetaDelBanco?: (celda?: number) => Silueta | null; __crucesDelBanco?: (muestras?: number) => Cruce[] }
+type VentanaDelBanco = Window & { __siluetaDelBanco?: (celda?: number) => Silueta | null; __crucesDelBanco?: (muestras?: number) => Cruce[]; __camaraDelBanco?: () => { readonly p: readonly number[]; readonly d: readonly number[] } }
 /** [PULIDO 12] 1 · cuántos puntos de la superficie del logo caen adentro de la caja de una pieza del pie de volumen. */
 type Cruce = { readonly pieza: string; readonly dentro: number; readonly total: number; readonly cerca: number }
 
@@ -114,9 +114,17 @@ export function SiluetaDelBanco({ logoGroupRef }: { readonly logoGroupRef: RefOb
       })
       return cruces
     }
+    // [C2-21] La cámara de ahora en el mundo (posición y hacia dónde mira): el banco de la navegación compara la del título con la asentada.
+    ventana.__camaraDelBanco = () => {
+      camara.updateMatrixWorld()
+      const p = camara.getWorldPosition(A)
+      const d = camara.getWorldDirection(B)
+      return { p: [p.x, p.y, p.z], d: [d.x, d.y, d.z] }
+    }
     return () => {
       delete ventana.__siluetaDelBanco
       delete ventana.__crucesDelBanco
+      delete ventana.__camaraDelBanco
     }
   }, [camara, escena, tam.width, tam.height, logoGroupRef])
   return null
