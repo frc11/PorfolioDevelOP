@@ -224,18 +224,20 @@ export default function CapaDelPreloader({ decision, cubierta, alArrancar, alTer
           </div>
         </div>
       </div>
-      {botones.map((objetivo, i) => (
-        <BotonQueVibra
-          key={objetivo}
-          ref={(m) => {
-            manijas.current[i] = m
-          }}
-          objetivo={objetivo}
-          reloj={reloj}
-          reducido={decision.reducido}
-          defecto={defecto === 'sin-onda' || defecto === 'onda-corrida' ? defecto : null}
-        />
-      ))}
+      {/* Desde el blanco (no desde el primer cuadro): lo que hidrata al arrancar no compite con el fundido de la bienvenida. */}
+      {desde(etapa, 'blanco') &&
+        botones.map((objetivo, i) => (
+          <BotonQueVibra
+            key={objetivo}
+            ref={(m) => {
+              manijas.current[i] = m
+            }}
+            objetivo={objetivo}
+            reloj={reloj}
+            reducido={decision.reducido}
+            defecto={defecto === 'sin-onda' || defecto === 'onda-corrida' ? defecto : null}
+          />
+        ))}
       <span role="status" className="sr-only">
         {activado ? confirmacion : icono ? 'Cargando' : ''}
       </span>

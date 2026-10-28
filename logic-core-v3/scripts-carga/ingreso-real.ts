@@ -20,7 +20,7 @@
 import { mkdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import { chromium, type Page } from '@playwright/test'
+import { chromium, type BrowserContext, type Page } from '@playwright/test'
 
 import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
@@ -47,16 +47,28 @@ function cuenta(): { readonly email: string; readonly clave: string } {
 }
 
 /** La fase y el avance de la hoja por cuadro (lo que publica en `data-fase` y `data-avance`), desde el principio de cada documento. */
-const INICIO = `(() => {
+const inicio = (conPreloader: boolean): string => `(() => {
   window.__name = window.__name || ((f) => f)
   window.__entornoDeLaEscena = 'producto'
-  try { sessionStorage.setItem('home:intro', '1') } catch (e) {}
+  ${conPreloader ? `window.__preloaderDelBanco = 'normal'` : `try { sessionStorage.setItem('home:intro', '1') } catch (e) {}`}
   window.__hoja = []
+  // Las animaciones nativas del fondo de la hoja (el fundido de la entrada directa): cuándo se crean y cómo terminan.
+  window.__fundidos = []
+  const animar = Element.prototype.animate
+  Element.prototype.animate = function (...a) {
+    const anim = animar.apply(this, a)
+    if (this.getAttribute && this.getAttribute('data-parte') === 'fondo') {
+      const r = { creada: performance.now(), duracion: Number(a[1] && a[1].duration), fin: null, estado: 'corre' }
+      window.__fundidos.push(r)
+      anim.finished.then(() => { r.fin = performance.now(); r.estado = 'termino' }, () => { r.fin = performance.now(); r.estado = 'cancelada' })
+    }
+    return anim
+  }
   const cuadro = () => {
     const raiz = document.querySelector('[data-pieza="ingreso"]')
     if (raiz) {
       const fondo = raiz.querySelector('[data-parte="fondo"]')
-      window.__hoja.push({ t: performance.now(), fase: raiz.getAttribute('data-fase'), avance: fondo ? Number(fondo.getAttribute('data-avance')) : NaN })
+      window.__hoja.push({ t: performance.now(), fase: raiz.getAttribute('data-fase'), avance: fondo ? Number(fondo.getAttribute('data-avance')) : NaN, cubierta: !!document.querySelector('[data-pieza="preloader"]:not([data-estado="fuera"]):not([aria-hidden="true"])') })
       if (window.__hoja.length > 6000) window.__hoja.splice(0, 3000)
     }
     requestAnimationFrame(cuadro)
@@ -68,34 +80,70 @@ interface CuadroDeLaHoja {
   readonly t: number
   readonly fase: string | null
   readonly avance: number
+  /** El preloader del sitio sigue tapando. */
+  readonly cubierta: boolean
 }
+interface FundidoDeLaHoja {
+  readonly creada: number
+  readonly duracion: number
+  readonly fin: number | null
+  readonly estado: 'corre' | 'termino' | 'cancelada'
+}
+const fundidos = (p: Page): Promise<FundidoDeLaHoja[]> => p.evaluate(() => [...((window as unknown as { __fundidos?: FundidoDeLaHoja[] }).__fundidos ?? [])])
 const hoja = (p: Page): Promise<CuadroDeLaHoja[]> => p.evaluate(() => [...((window as unknown as { __hoja?: CuadroDeLaHoja[] }).__hoja ?? [])])
 const vaciar = (p: Page): Promise<void> => p.evaluate(() => void ((window as unknown as { __hoja?: CuadroDeLaHoja[] }).__hoja = []))
 
-/** ¿La apertura animó? Pasó por `abriendo` con varios avances intermedios, distintos y que bajan, y terminó en `abierta`. */
-function animoLaApertura(c: readonly CuadroDeLaHoja[]): { readonly bien: boolean; readonly detalle: string } {
+/**
+ * ¿La apertura animó? Con el Genie (desde el botón): pasó por `abriendo` con varios avances intermedios, distintos y que bajan. Con el
+ * fundido (la entrada directa: sin botón): el fundido nativo de 200 ms existe, TERMINÓ (no se canceló) y ocurrió con la página a la vista
+ * (sin el preloader tapando). En los dos, terminó en `abierta`.
+ */
+function animoLaApertura(c: readonly CuadroDeLaHoja[], f: readonly FundidoDeLaHoja[], conGenie: boolean): { readonly bien: boolean; readonly detalle: string } {
   const abriendo = c.filter((x) => x.fase === 'abriendo')
   const medios = new Set(abriendo.map((x) => x.avance.toFixed(2)).filter((v) => v !== '1.00' && v !== '0.00' && v !== 'NaN'))
   const termina = c.some((x) => x.fase === 'abierta')
   const dura = abriendo.length === 0 ? 0 : abriendo[abriendo.length - 1].t - abriendo[0].t
-  return { bien: abriendo.length > 3 && medios.size >= 4 && termina && dura >= 120, detalle: `${String(abriendo.length)} cuadros en «abriendo» (${dura.toFixed(0)} ms), ${String(medios.size)} avances intermedios, abierta ${String(termina)}` }
+  if (conGenie) return { bien: abriendo.length > 3 && medios.size >= 4 && termina && dura >= 120, detalle: `${String(abriendo.length)} cuadros en «abriendo» (${dura.toFixed(0)} ms), ${String(medios.size)} avances intermedios, abierta ${String(termina)}` }
+  const ultimo = f[f.length - 1]
+  const tapado = ultimo === undefined ? true : c.some((x) => x.fase === 'abriendo' && x.cubierta)
+  const termino = ultimo !== undefined && ultimo.estado === 'termino' && ultimo.duracion >= 150
+  return { bien: termino && termina && !tapado, detalle: `${String(f.length)} fundidos, el último ${ultimo?.estado ?? 'ninguno'} (${String(ultimo?.duracion ?? 0)} ms), abierta ${String(termina)}, con el preloader tapando ${String(tapado)}` }
 }
 
 async function esperarAbierta(p: Page): Promise<void> {
   await p.waitForSelector('[data-pieza="ingreso"][data-fase="abierta"]', { timeout: 20000 })
 }
 
-async function main(): Promise<void> {
-  mkdirSync(SALIDA, { recursive: true })
-  const { email, clave } = cuenta()
-  const ctx = await chromium.launchPersistentContext(perfilDelBanco('ingreso-real'), {
+async function lanzar(conPreloader: boolean): Promise<BrowserContext> {
+  const ctx = await chromium.launchPersistentContext(perfilDelBanco(`ingreso-real${conPreloader ? '-preloader' : ''}`), {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     headless: false,
     viewport: { width: 1440, height: 900 },
     deviceScaleFactor: 1,
     args: ['--no-first-run', '--mute-audio', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'],
   })
-  await ctx.addInitScript(INICIO)
+  await ctx.addInitScript(inicio(conPreloader))
+  return ctx
+}
+
+/** La primera entrada del día con `?ingresar`: el login no se abre debajo del preloader, espera a que se vaya y entonces anima. */
+async function entradaDirectaConPreloader(): Promise<void> {
+  const ctx = await lanzar(true)
+  const p = ctx.pages()[0] ?? (await ctx.newPage())
+  try {
+    await p.goto(`${BASE}/v3?ingresar`, { waitUntil: 'commit', timeout: 300000 })
+    await esperarAbierta(p)
+    const r = animoLaApertura(await hoja(p), await fundidos(p), false)
+    ver(r.bien, '1440 · la primera entrada del día con ?ingresar: el login anima DESPUÉS del preloader (no debajo)', r.detalle)
+  } finally {
+    await ctx.close()
+  }
+}
+
+async function main(): Promise<void> {
+  mkdirSync(SALIDA, { recursive: true })
+  const { email, clave } = cuenta()
+  const ctx = await lanzar(false)
   const p = ctx.pages()[0] ?? (await ctx.newPage())
   const errores: string[] = []
   p.on('pageerror', (e) => errores.push(e.message.slice(0, 200)))
@@ -103,7 +151,7 @@ async function main(): Promise<void> {
     // 1 · la entrada directa.
     await p.goto(`${BASE}/v3?ingresar`, { waitUntil: 'load', timeout: 300000 })
     await esperarAbierta(p)
-    const directa = animoLaApertura(await hoja(p))
+    const directa = animoLaApertura(await hoja(p), await fundidos(p), false)
     ver(directa.bien, '1440 · la entrada directa (?ingresar) anima la apertura', directa.detalle)
 
     // Cerrar con «Volver al home» y abrir desde la barra.
@@ -112,7 +160,7 @@ async function main(): Promise<void> {
     await vaciar(p)
     await p.click('[data-abre-ingreso]')
     await esperarAbierta(p)
-    const delBoton = animoLaApertura(await hoja(p))
+    const delBoton = animoLaApertura(await hoja(p), await fundidos(p), true)
     ver(delBoton.bien, '1440 · «Login» de la barra, después de cerrar, anima la apertura', delBoton.detalle)
 
     // 2 · el intento fallido: se queda en el login nuevo, con el error del formulario.
@@ -133,7 +181,7 @@ async function main(): Promise<void> {
       await vaciar(p)
       await p.click('[data-abre-ingreso]')
       await esperarAbierta(p)
-      const luego = animoLaApertura(await hoja(p))
+      const luego = animoLaApertura(await hoja(p), await fundidos(p), true)
       ver(luego.bien, '1440 · después de un intento fallido, abrir de nuevo anima la apertura', luego.detalle)
 
       // 3 · «¿Olvidaste tu contraseña?»: otra vista de la hoja, sin salir de /v3 (con el envío simulado: no se manda ningún mail).
@@ -161,14 +209,21 @@ async function main(): Promise<void> {
     await esperarAbierta(p)
     await p.fill('input[name="email"]', email)
     await p.fill('input[name="password"]', clave)
+    const pedidos: string[] = []
+    p.on('response', (r) => {
+      const u = new URL(r.url())
+      if (u.origin === new URL(BASE).origin && !u.pathname.startsWith('/_next')) pedidos.push(`${r.request().method()} ${u.pathname} ${String(r.status())}`)
+    })
     await p.click('[data-pieza="ingreso-con-clave"] button[type="submit"]')
-    await p.waitForURL((u) => !u.pathname.startsWith('/v3'), { timeout: 90000 }).catch(() => undefined)
+    await p.waitForURL((u) => !u.pathname.startsWith('/v3'), { timeout: 150000 }).catch(() => undefined)
+    if (process.env.DIAGNOSTICO === '1') console.log(`info  pedidos al ingresar: ${pedidos.slice(0, 12).join(' · ')}`)
     const destino = new URL(p.url()).pathname
     ver(/^\/(admin|dashboard|setter|bienvenida)/.test(destino), '1440 · el ingreso con la cuenta de prueba lleva al panel', destino)
     ver(errores.length === 0, '1440 · sin errores en la página', errores.slice(0, 3).join(' | '))
   } finally {
     await ctx.close()
   }
+  await entradaDirectaConPreloader()
   console.log(`\n${fallas.length === 0 ? 'BIEN' : `FALLAS (${String(fallas.length)})`}`)
   process.exit(fallas.length === 0 ? 0 : 1)
 }

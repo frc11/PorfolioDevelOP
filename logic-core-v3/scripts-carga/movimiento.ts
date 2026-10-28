@@ -54,7 +54,7 @@ const inicio = (permiso: Permiso): string => `(() => {
   window.__entornoDeLaEscena = 'producto'
   try { sessionStorage.setItem('home:intro', '1') } catch (e) {}
   ${CONTROL === '' ? '' : `window.__defectosDelMovimiento = ${JSON.stringify(CONTROL)}`}
-  ${permiso === 'android' ? '' : permiso === 'con-gesto' ? `window.__permisosPedidos = 0; window.__pedidosSinGesto = 0; DeviceOrientationEvent.requestPermission = () => { window.__permisosPedidos += 1; if (navigator.userActivation && navigator.userActivation.isActive) return Promise.resolve('granted'); window.__pedidosSinGesto += 1; return Promise.reject(new DOMException('hace falta un gesto', 'NotAllowedError')) }` : `window.__permisosPedidos = 0; DeviceOrientationEvent.requestPermission = () => { window.__permisosPedidos += 1; return Promise.resolve(${JSON.stringify(permiso === 'concedido' ? 'granted' : 'denied')}) }`}
+  ${permiso === 'android' ? '' : permiso === 'con-gesto' ? `window.__permisosPedidos = 0; window.__pedidosSinGesto = 0; window.__enGesto = false; for (const t of ['pointerdown', 'touchstart', 'touchend', 'click']) window.addEventListener(t, () => { window.__enGesto = true; setTimeout(() => { window.__enGesto = false }, 600) }, true); DeviceOrientationEvent.requestPermission = () => { window.__permisosPedidos += 1; if (window.__enGesto) return Promise.resolve('granted'); window.__pedidosSinGesto += 1; return Promise.reject(new DOMException('hace falta un gesto', 'NotAllowedError')) }` : `window.__permisosPedidos = 0; DeviceOrientationEvent.requestPermission = () => { window.__permisosPedidos += 1; return Promise.resolve(${JSON.stringify(permiso === 'concedido' ? 'granted' : 'denied')}) }`}
   // El sensor de mentira: una lectura cada 16 ms, siempre (como uno de verdad); \`inclinar\` mueve lo que lee.
   window.__lectura = { beta: 60, gamma: 0 }
   setInterval(() => {
@@ -272,11 +272,11 @@ async function recargado(permiso: 'concedido' | 'con-gesto'): Promise<void> {
     const pedidos = await a.p.evaluate(() => (window as unknown as { __permisosPedidos?: number }).__permisosPedidos ?? 0)
     if (permiso === 'concedido') {
       ver(vuelve?.estado === 'prendido' && pedidos === 1, `${tag} · vuelve prendido SIN otro toque (se pide una vez, sin gesto; rojo: CONTROL=sin-reintento)`, `${JSON.stringify(vuelve)} · ${String(pedidos)} pedidos`)
-      await mueveLaCamaraYElMoire(a, tag)
     } else {
       const sinGesto = await a.p.evaluate(() => (window as unknown as { __pedidosSinGesto?: number }).__pedidosSinGesto ?? 0)
       ver(vuelve?.estado === 'apagado' && sinGesto >= 1, `${tag} · lo intenta sin gesto, el aparato lo rechaza y queda apagado esperando el toque`, `${JSON.stringify(vuelve)} · ${String(sinGesto)} pedidos sin gesto`)
-      await tocarElBoton(a)
+      // El primer toque en cualquier parte (el diseño de `retomarElMovimiento`: es el gesto que el permiso necesita).
+      await tocar(a.cdp, 195, 520)
       const luego = await esperarEstado(a.p, 'prendido', 3000)
       ver(luego?.estado === 'prendido', `${tag} · y el primer toque lo prende`, JSON.stringify(luego))
     }

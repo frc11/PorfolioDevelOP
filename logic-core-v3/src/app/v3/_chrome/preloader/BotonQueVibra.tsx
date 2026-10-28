@@ -119,7 +119,7 @@ export function BotonQueVibra({ objetivo, reloj, reducido, defecto, ref }: Props
             ref={(el) => {
               ondas.current[i].opacidad = el
             }}
-            data-parte="onda"
+            data-parte="onda-del-pulso"
             className="absolute opacity-0"
             style={{ left: x + lado / 2 - radio + (defecto === 'onda-corrida' ? 120 : 0), top: y + lado / 2 - radio, width: 2 * radio, height: 2 * radio }}
           >

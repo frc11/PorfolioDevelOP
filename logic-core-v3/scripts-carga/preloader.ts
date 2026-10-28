@@ -102,9 +102,21 @@ const inicio = (conPreloader: boolean): string => `(() => {
           flechas: raiz.querySelectorAll('[data-parte="flecha"], [data-parte="raya"], [data-parte="punta"]').length,
           botones: bs.map((b) => {
             const caja = b.querySelector('[data-parte="boton"]').getBoundingClientRect()
-            const ondas = Array.from(b.querySelectorAll('[data-parte="onda"]')).map((o) => {
+            const ondas = Array.from(b.querySelectorAll('[data-parte="onda-del-pulso"]')).map((o) => {
               const c = o.firstElementChild.getBoundingClientRect()
-              return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, w: c.width, op: Number(getComputedStyle(o).opacity) }
+              const op = o.getAnimations()[0]
+              const esc = o.firstElementChild.getAnimations()[0]
+              const claves = esc && esc.effect ? esc.effect.getKeyframes() : []
+              const inicio = /scale\\(([\\d.]+)\\)/.exec(String(claves[0] && claves[0].transform))
+              const fin = /scale\\(([\\d.]+)\\)/.exec(String(claves[1] && claves[1].transform))
+              return {
+                cx: c.left + c.width / 2, cy: c.top + c.height / 2, w: c.width, op: Number(getComputedStyle(o).opacity),
+                completa: o.getBoundingClientRect().width,
+                iter: op && op.effect ? op.effect.getComputedTiming().currentIteration : -1,
+                demora: op && op.effect ? op.effect.getTiming().delay : NaN,
+                escalaDeInicio: inicio ? Number(inicio[1]) : NaN,
+                escalaFinal: fin ? Number(fin[1]) : NaN,
+              }
             })
             return { objetivo: b.getAttribute('data-objetivo'), bx: caja.left + caja.width / 2, by: caja.top + caja.height / 2, bw: caja.width, ondas }
           }),
@@ -154,6 +166,12 @@ interface OndaDelBanco {
   readonly cy: number
   readonly w: number
   readonly op: number
+  /** El ancho de la onda entera (a escala 1) y lo que dicen sus animaciones: la iteración, la demora y la escala de inicio y de fin. */
+  readonly completa: number
+  readonly iter: number
+  readonly demora: number
+  readonly escalaDeInicio: number
+  readonly escalaFinal: number
 }
 interface MuestraDeLasOndas {
   readonly t: number
@@ -370,13 +388,14 @@ async function unaEntrada(ancho: number, alto: number, ruta: string): Promise<vo
     verNuevo(frase?.trim() === esperada && m.final.conMovimiento === conMovimiento && objetivos.join() === (conMovimiento ? 'movimiento,sonido' : 'sonido'), `${tag} · la frase y los botones que vibran (${conMovimiento ? 'táctil: el sonido y el movimiento, los dos' : 'escritorio: el sonido'})`, `«${String(frase)}» · ${String(m.final.conMovimiento)} · botones ${objetivos.join('+')}`)
     verNuevo(ondas.length > 0 && ondas.every((x) => x.flechas === 0), `${tag} · sin flechas: ninguna flecha, raya ni punta en toda la entrada`, `${String(ondas.length)} cuadros con el botón, ${String(Math.max(0, ...ondas.map((x) => x.flechas)))} piezas de flecha`)
     const listo = m.muestras.find((x) => x.listo)
-    const latidos = Math.max(0, ...m.muestras.map((x) => x.latidos))
+    const latidos = Math.max(0, ...m.muestras.filter((x) => x.etapa === 'boton').map((x) => x.latidos))
     if (listo !== undefined && listo.t <= INICIO_DEL_BOTON_MS) {
       ver(fuera.t >= 5000 && fuera.t <= 6000, `${tag} · con la carga lista antes del primer latido, dura de 5 a 6 s`, `${String(fuera.t)} ms (lista a los ${String(listo.t)})`)
       verNuevo(latidos === 1, `${tag} · y el botón late una sola vez`, `${String(latidos)} latidos`)
     } else {
-      const esperados = 1 + Math.floor((Math.max(fuera.t - LINEA.salidaMs, INICIO_DEL_BOTON_MS + LINEA.ondaMs) - INICIO_DEL_BOTON_MS) / LINEA.latidoPeriodoMs)
-      verNuevo(latidos >= 2 && latidos === esperados, `${tag} · con la carga tarde, el latido se repite cada ${String(LINEA.latidoPeriodoMs / 1000)} s`, `${String(latidos)} latidos (esperados ${String(esperados)}) · lista a los ${String(listo?.t ?? -1)} ms`)
+      const esperados = 1 + Math.floor(((m.muestras.filter((x) => x.etapa === 'boton').pop()?.t ?? fuera.t) - INICIO_DEL_BOTON_MS) / LINEA.latidoPeriodoMs)
+      // Con la carga a menos de un período del primer latido (lista antes de los 6,3 s) no alcanza a repetirse: sólo cuenta.
+      verNuevo(latidos === esperados && (latidos >= 2 || (listo?.t ?? 0) < INICIO_DEL_BOTON_MS + LINEA.latidoPeriodoMs), `${tag} · con la carga tarde, el latido se repite cada ${String(LINEA.latidoPeriodoMs / 1000)} s`, `${String(latidos)} latidos (esperados ${String(esperados)}) · lista a los ${String(listo?.t ?? -1)} ms`)
     }
     // La onda: nace en el botón, crece hasta cubrir el fondo y se desvanece; dos pulsos por latido, a 300 ms uno del otro.
     for (const objetivo of conMovimiento ? (['sonido', 'movimiento'] as const) : (['sonido'] as const)) {
@@ -391,14 +410,19 @@ async function unaEntrada(ancho: number, alto: number, ruta: string): Promise<vo
       const centroX = f0?.b.bx ?? 0
       const centroY = f0?.b.by ?? 0
       const lejos = Math.max(Math.hypot(centroX, centroY), Math.hypot(ancho - centroX, centroY), Math.hypot(centroX, alto - centroY), Math.hypot(ancho - centroX, alto - centroY))
-      const ancha = Math.max(0, ...visibles.map((f) => f.o0.w))
-      verNuevo(visibles.length > 0 && ancha >= 1.8 * lejos, `${tag} · y cruza todo el fondo: su ancho llega a ${(ancha / 2).toFixed(0)} px de radio contra los ${lejos.toFixed(0)} px a la esquina más lejana (rojo: CONTROL=sin-onda)`, `radio visto ${(ancha / 2).toFixed(0)} · hace falta ≥ ${(0.9 * lejos).toFixed(0)}`)
-      const arranca = f0 === undefined ? Number.NaN : f0.o0.w / f0.b.bw
-      verNuevo(f0 !== undefined && arranca < 12, `${tag} · y arranca del tamaño del botón (a lo sumo 12 veces su ancho en el primer cuadro visible)`, `${arranca.toFixed(1)} veces`)
-      // El primer latido: cuándo cada onda pasa por la mitad de su opacidad máxima, hacia arriba.
-      const primera = (k: 'o0' | 'o1'): number => filas.find((f) => f[k] !== undefined && f[k].op >= 0.25)?.t ?? Number.NaN
-      const entre = primera('o1') - primera('o0')
-      verNuevo(Math.abs(entre - 300) <= 60, `${tag} · los dos pulsos del ${objetivo} a 300 ms uno del otro (±60, tu-tu)`, `${entre.toFixed(0)} ms`)
+      // Lo que dicen las animaciones (no depende de cuántos cuadros alcanzó a ver el hilo principal): la onda termina a escala 1 y su
+      // tamaño entero cubre el fondo hasta la esquina más lejana.
+      const dato = [...filas].reverse().find((f) => f.o0 !== undefined && Number.isFinite(f.o0.escalaFinal))
+      const cubre = dato !== undefined && dato.o0.escalaFinal === 1 && dato.o0.completa / 2 >= lejos - 1
+      verNuevo(cubre, `${tag} · y cruza todo el fondo: termina a escala 1 con ${((dato?.o0.completa ?? 0) / 2).toFixed(0)} px de radio contra los ${lejos.toFixed(0)} px a la esquina más lejana (rojo: CONTROL=sin-onda)`, `escala final ${String(dato?.o0.escalaFinal)} · radio ${((dato?.o0.completa ?? 0) / 2).toFixed(0)}`)
+      const arranca = dato === undefined ? Number.NaN : (dato.o0.completa * dato.o0.escalaDeInicio) / dato.b.bw
+      verNuevo(Math.abs(arranca - 1) <= 0.1, `${tag} · y arranca del tamaño del botón (la escala de inicio por el ancho entero, contra el del botón: 1 ± 0,1)`, `${arranca.toFixed(2)} veces el botón`)
+      // Los dos pulsos del latido: la segunda onda va 300 ms después de la primera (sus demoras), y el latido se repite como dice la línea.
+      const d1 = filas.find((f) => f.o1 !== undefined && Number.isFinite(f.o1.demora))
+      const entre = (d1?.o1.demora ?? Number.NaN) - (d1?.o0.demora ?? Number.NaN)
+      verNuevo(entre === 300, `${tag} · los dos pulsos del ${objetivo} a 300 ms uno del otro (tu-tu)`, `${String(entre)} ms`)
+      const iteraciones = Math.max(-1, ...filas.map((f) => f.o0?.iter ?? -1)) + 1
+      verNuevo(iteraciones >= latidos && iteraciones <= latidos + 1, `${tag} · y los latidos que la animación hizo (${String(iteraciones)}) son los de la línea (${String(latidos)}, a lo sumo uno más durante la salida)`)
     }
     // El botón dibujado, contra el real (ya sin la cubierta).
     await dormir(400)
