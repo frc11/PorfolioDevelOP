@@ -1,19 +1,24 @@
 import * as THREE from 'three'
 
+import { FINAL_EN_EL_PISO } from '../final/enElPiso'
 import { FLOOR_Y, INK_COLOR } from '../probeScene'
 
 /**
  * [NOCTURNO B3] EL HUECO ANULAR EN EL PISO, BAJO EL ARO — mientras el título se da vuelta y se vuelve el CTA, en el piso se abre un anillo
- * justo debajo del camino de las placas y las reseñas bajan por ahí. El piso no se corta (su sombreador es del final del pie, `final/
- * hueco.ts`, y no se toca): el anillo es una ranura oscura pegada al piso (un degradé de la tinta, más oscuro en el medio, que se abre desde
- * la línea del aro hacia sus bordes) y las placas, al bajar, pasan por debajo de la cara del piso, que las tapa (la profundidad): se las ve
- * hundirse en la ranura. Función pura del avance de la apertura (`abre`, 0 a 1): para atrás, se cierra.
+ * justo debajo del camino de las placas y las reseñas bajan por ahí. Función pura del avance de la apertura (`abre`, 0 a 1): para atrás, se
+ * cierra.
+ * [L5] UN HUECO DE VERDAD («el piso no moleste ahí, se abra, se escondan las reseñas, y se cierre»: lote2/12). Era una ranura oscura pegada al
+ * piso: las placas se hundían en el piso entero (su cara las cortaba) y los bloques que el mouse levantaba las atravesaban. Ahora el piso
+ * no se dibuja en la corona abierta y alrededor queda al ras (`uAnilloDelAro`, `final/enElPiso.ts`), y debajo hay un pozo de tinta: dos
+ * paredes (la de adentro y la de afuera de la corona) y el fondo. Las placas caben en la corona (su huella sale 0,11 del radio contra
+ * 0,31 de medio ancho): bajan sin tocar el piso.
  */
 export const HUECO_DEL_ARO = {
-  /** El ancho de la ranura abierta (mundo, a escala 1) y cuánto sobre el piso va (para no pelearse con él). */
+  /** El ancho de la ranura abierta (mundo, a escala 1). */
   ancho: 0.62,
-  sobreElPiso: 0.004,
-  /** Lo oscuro del medio (alfa de la tinta). */
+  /** [L5] Lo hondo del pozo (mundo, a escala 1): más que lo que bajan las placas (`HONDO_DE_LA_BAJADA`). */
+  hondo: 3.6,
+  /** Lo oscuro del fondo (alfa de la tinta). */
   fondo: 0.92,
 } as const
 
@@ -36,39 +41,65 @@ varying vec2 vXZ;
 void main() {
   float d = abs(length(vXZ) - uRadio);
   float medio = max(1e-4, 0.5 * uAncho * uAbre);
-  float adentro = 1.0 - smoothstep(medio * 0.55, medio, d);
-  if (adentro <= 0.0) discard;
-  gl_FragColor = vec4(uColor, adentro * uFondo * smoothstep(0.0, 0.15, uAbre));
+  if (d > medio) discard;
+  gl_FragColor = vec4(uColor, uFondo);
 }
 `
 
 export interface HuecoArmado {
-  readonly malla: THREE.Mesh<THREE.RingGeometry, THREE.ShaderMaterial>
+  readonly grupo: THREE.Group
+  readonly fondo: THREE.Mesh<THREE.RingGeometry, THREE.ShaderMaterial>
+  readonly adentro: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshBasicMaterial>
+  readonly afuera: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshBasicMaterial>
   readonly uniforms: { readonly uRadio: { value: number }; readonly uAncho: { value: number }; readonly uAbre: { value: number }; readonly uFondo: { value: number }; readonly uColor: { value: THREE.Color } }
+  readonly radio: number
+  readonly medio: number
 }
 
-/** El anillo para un aro de radio `radio` y su escala `k` (la geometría cubre la ranura abierta entera). */
+/** El pozo para un aro de radio `radio` y su escala `k`: el fondo (cubre la ranura abierta entera) y las dos paredes (de radio 1, se escalan). */
 export function armarElHueco(radio: number, k: number): HuecoArmado {
   const ancho = HUECO_DEL_ARO.ancho * k
+  const hondo = HUECO_DEL_ARO.hondo * k
   const uniforms = { uRadio: { value: radio }, uAncho: { value: ancho }, uAbre: { value: 0 }, uFondo: { value: HUECO_DEL_ARO.fondo }, uColor: { value: new THREE.Color(INK_COLOR) } }
-  const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTICE, fragmentShader: FRAGMENTO, transparent: true, depthWrite: false })
-  const malla = new THREE.Mesh(new THREE.RingGeometry(Math.max(0.01, radio - ancho), radio + ancho, 128, 1), material)
-  malla.rotation.x = -Math.PI / 2
-  malla.position.y = FLOOR_Y + HUECO_DEL_ARO.sobreElPiso
-  malla.renderOrder = -1
-  malla.name = 'resenas · el hueco del aro'
-  malla.visible = false
-  return { malla, uniforms }
+  const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTICE, fragmentShader: FRAGMENTO })
+  const fondo = new THREE.Mesh(new THREE.RingGeometry(Math.max(0.01, radio - ancho), radio + ancho, 128, 1), material)
+  fondo.rotation.x = -Math.PI / 2
+  fondo.position.y = FLOOR_Y - hondo
+  fondo.name = 'resenas · el fondo del pozo'
+  const pared = (lado: THREE.Side, nombre: string): THREE.Mesh<THREE.CylinderGeometry, THREE.MeshBasicMaterial> => {
+    const geometria = new THREE.CylinderGeometry(1, 1, hondo, 128, 1, true)
+    const malla = new THREE.Mesh(geometria, new THREE.MeshBasicMaterial({ color: INK_COLOR, side: lado }))
+    malla.position.y = FLOOR_Y - hondo / 2
+    malla.name = nombre
+    return malla
+  }
+  // La de adentro se ve desde afuera (su cara de siempre); la de afuera, desde adentro.
+  const adentro = pared(THREE.FrontSide, 'resenas · la pared de adentro del pozo')
+  const afuera = pared(THREE.BackSide, 'resenas · la pared de afuera del pozo')
+  const grupo = new THREE.Group()
+  grupo.name = 'resenas · el hueco del aro'
+  grupo.add(fondo, adentro, afuera)
+  grupo.visible = false
+  return { grupo, fondo, adentro, afuera, uniforms, radio, medio: ancho / 2 }
 }
 
-/** El hueco abierto `abre` (0 a 1): sin abrir no se dibuja. */
+/** El hueco abierto `abre` (0 a 1): el pozo y el anillo del piso. Sin abrir no se dibuja y el piso queda entero. */
 export function abrirElHueco(h: HuecoArmado, abre: number): void {
   const u = Math.min(1, Math.max(0, abre))
   h.uniforms.uAbre.value = u
-  h.malla.visible = u > 0.001
+  h.grupo.visible = u > 0.001
+  const medio = Math.max(1e-3, h.medio * u)
+  h.adentro.scale.set(Math.max(0.01, h.radio - medio), 1, Math.max(0.01, h.radio - medio))
+  h.afuera.scale.set(h.radio + medio, 1, h.radio + medio)
+  FINAL_EN_EL_PISO.uAnilloDelAro.value.set(h.radio, h.medio, h.grupo.visible ? u : 0)
 }
 
 export function soltarElHueco(h: HuecoArmado): void {
-  h.malla.geometry.dispose()
-  h.malla.material.dispose()
+  h.fondo.geometry.dispose()
+  h.fondo.material.dispose()
+  for (const p of [h.adentro, h.afuera]) {
+    p.geometry.dispose()
+    p.material.dispose()
+  }
+  FINAL_EN_EL_PISO.uAnilloDelAro.value.set(0, 0, 0)
 }

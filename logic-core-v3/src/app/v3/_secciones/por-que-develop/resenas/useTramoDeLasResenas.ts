@@ -25,7 +25,7 @@ const deLaUrl = (): string => {
 
 /** Las banderas de las reseñas, leídas después de hidratar (el servidor pinta la de por defecto). */
 export function useBanderasDeLasResenas(): { readonly variante: VarianteDeLasResenas } {
-  const variante = useSyncExternalStore(sinCambios, deLaUrl, () => 'gatillo')
+  const variante = useSyncExternalStore(sinCambios, deLaUrl, () => 'scroll')
   return { variante: varianteDeLaBandera(variante) }
 }
 
@@ -137,22 +137,21 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
       // [B3] La transformación al CTA (su progreso, con el pin de siempre): la bajada por el anillo, a la par del giro del cartel.
       const V = VENTANA_DE_LA_TRANSFORMACION
       const p = Math.min(1, Math.max(0, (pinSinLasResenas(pin.get()) - V.desde) / (V.hasta - V.desde)))
-      if (variante === 'gatillo') {
-        const siguiente = objetivoDeLaBajada(p, objetivoDeLaBajadaActual)
-        if (siguiente !== objetivoDeLaBajadaActual) {
-          objetivoDeLaBajadaActual = siguiente
-          controlDeLaBajada?.stop()
-          controlDeLaBajada = animate(disparoDeLaBajada, siguiente, { duration: HACIA_EL_CTA.gatillo.duracionS * Math.abs(siguiente - disparoDeLaBajada.get()), ease: 'linear' })
-        }
+      // [L5] La salida es SIEMPRE un gatillo (con las dos variantes de la entrada): el guardado se dispara y corre por tiempo.
+      const siguiente = objetivoDeLaBajada(p, objetivoDeLaBajadaActual)
+      if (siguiente !== objetivoDeLaBajadaActual) {
+        objetivoDeLaBajadaActual = siguiente
+        controlDeLaBajada?.stop()
+        controlDeLaBajada = animate(disparoDeLaBajada, siguiente, { duration: HACIA_EL_CTA.gatillo.duracionS * Math.abs(siguiente - disparoDeLaBajada.get()), ease: 'linear' })
       }
-      const pb = variante === 'gatillo' ? progresoDelGatillo(disparoDeLaBajada.get()) : p
+      const pb = progresoDelGatillo(disparoDeLaBajada.get())
       RESENAS_EN_VIVO.bajada = bajadaDeLasResenas(pb)
       RESENAS_EN_VIVO.hueco = aperturaDelHueco(pb)
-      // [C2-70e] Con el gatillo, la cámara acompaña el guardado (se queda en B mirando al hueco) y suelta cuando ya no queda ninguna placa.
-      CAMARA_DEL_GUARDADO.peso = variante === 'gatillo' && prueba !== 'sin-camara' ? pesoDeLaCamara(disparoDeLaBajada.get(), p) : 0
+      // [C2-70e] La cámara acompaña el guardado ([L5] desde arriba, en diagonal) y suelta recién con el piso cerrado.
+      CAMARA_DEL_GUARDADO.peso = prueba !== 'sin-camara' ? pesoDeLaCamara(disparoDeLaBajada.get(), p) : 0
       CAMARA_DEL_GUARDADO.bajada = RESENAS_EN_VIVO.bajada
       // [C2-70e] Y el CTA espera a la cámara (con su misma curva): su progreso es el del scroll por lo que no espera (`useProgresoQueEspera`).
-      const espera = variante === 'gatillo' && prueba !== 'sin-camara' && prueba !== 'sin-espera' ? esperaDelCta(disparoDeLaBajada.get(), p, objetivoDeLaBajadaActual === 1) : 0
+      const espera = prueba !== 'sin-camara' && prueba !== 'sin-espera' ? esperaDelCta(disparoDeLaBajada.get(), p, objetivoDeLaBajadaActual === 1) : 0
       ESPERA_DEL_CTA.set(espera)
       const delCta = p * (1 - espera)
       const cruce = antes === null ? null : cruceDeLaVuelta(antes, delCta)

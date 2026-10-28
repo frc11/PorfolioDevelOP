@@ -36,11 +36,41 @@ export interface CajaEnElCuadro {
 }
 export const nuevaCaja = (): CajaEnElCuadro => ({ x0: 0, y0: 0, x1: 0, y1: 0 })
 
-/** [C2-70] Lo opcional de una tarjeta: su escala (la de adelante, más grande), si es la de adelante y la caja del logo en el cuadro. */
+/**
+ * [C2-70] Lo opcional de una tarjeta: su escala (la de adelante, más grande) y si es la de adelante. [L5] Y las cajas en el cuadro de las
+ * placas que están más cerca de la cámara (`delante`): la tarjeta no se pinta si toca alguna (el DOM no lo tapa el 3D: lote2/09).
+ */
 export interface ExtrasDeLaTarjeta {
   readonly escala?: number
   readonly destacada?: boolean
-  readonly logo?: CajaEnElCuadro | null
+  readonly delante?: readonly CajaEnElCuadro[]
+}
+
+const ESQUINA_DE_LA_PLACA = new THREE.Vector3()
+const NORMAL_DE_LA_PLACA = new THREE.Vector3()
+const DERECHA_DE_LA_PLACA = new THREE.Vector3()
+/** [L5] La caja en el cuadro (px) de una placa entera, con su espesor: centro `centro`, mirando hacia `mira` rad, a escala `escala`. */
+export function cajaDeLaPlaca(centro: THREE.Vector3, mira: number, m: MedidasDelAro, escala: number, camara: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }, salida: CajaEnElCuadro): CajaEnElCuadro {
+  NORMAL_DE_LA_PLACA.set(Math.sin(mira), 0, Math.cos(mira))
+  DERECHA_DE_LA_PLACA.set(Math.cos(mira), 0, -Math.sin(mira))
+  salida.x0 = Infinity
+  salida.y0 = Infinity
+  salida.x1 = -Infinity
+  salida.y1 = -Infinity
+  for (let k = 0; k < 8; k += 1) {
+    ESQUINA_DE_LA_PLACA.copy(centro)
+      .addScaledVector(DERECHA_DE_LA_PLACA, ((k & 1 ? 1 : -1) * m.ancho * escala) / 2)
+      .addScaledVector(ARRIBA, ((k & 2 ? 1 : -1) * m.alto * escala) / 2)
+      .addScaledVector(NORMAL_DE_LA_PLACA, ((k & 4 ? 1 : -1) * m.espesor * escala) / 2)
+      .project(camara)
+    const px = ((ESQUINA_DE_LA_PLACA.x + 1) / 2) * cuadro.ancho
+    const py = ((1 - ESQUINA_DE_LA_PLACA.y) / 2) * cuadro.alto
+    salida.x0 = Math.min(salida.x0, px)
+    salida.x1 = Math.max(salida.x1, px)
+    salida.y0 = Math.min(salida.y0, py)
+    salida.y1 = Math.max(salida.y1, py)
+  }
+  return salida
 }
 
 const PUNTO = new THREE.Vector3()
@@ -102,8 +132,8 @@ export const OPACIDAD_DE_LA_TARJETA = '1'
 
 /**
  * Lleva la tarjeta `el` a la cara de la placa que mira a la cámara (su centro `centro`, el frente mirando hacia `mira` rad) si `texto` > 0
- * (se lee o no: sin medias tintas, C2-70). De espaldas va en la nuca, con la derecha dada vuelta (no sale espejada), salvo que la nuca caiga
- * sobre la caja del logo (el DOM no lo tapa: el logo está adelante). `ancho` es su tamaño de maqueta. Fuera del cuadro o detrás de la
+ * (se lee o no: sin medias tintas, C2-70). [L5] De espaldas, escondida: la nuca es papel liso (era la reseña en la nuca, que se leía al
+ * revés: lote2/09). Y escondida si toca una placa más cerca (`delante`). `ancho` es su tamaño de maqueta. Fuera del cuadro o detrás de la
  * cámara, escondida.
  */
 export function llevarLaTarjeta(el: HTMLElement | null, s: EstadoDeLaTarjeta, centro: THREE.Vector3, mira: number, m: MedidasDelAro, texto: number, camara: THREE.Camera, cuadro: { readonly ancho: number; readonly alto: number }, ancho: number, extras: ExtrasDeLaTarjeta = {}): void {
@@ -111,19 +141,15 @@ export function llevarLaTarjeta(el: HTMLElement | null, s: EstadoDeLaTarjeta, ce
   const alto = (ancho * m.alto) / m.ancho
   const escala = extras.escala ?? 1
   let visible = texto > 0.02 && ancho > 0
-  let deEspaldas = false
   if (visible) {
     NORMAL.set(Math.sin(mira), 0, Math.cos(mira))
     DERECHA.set(Math.cos(mira), 0, -Math.sin(mira))
     camara.getWorldPosition(DESDE)
     camara.getWorldDirection(ADELANTE)
     FRENTE.copy(centro).addScaledVector(NORMAL, (m.espesor * escala) / 2 + 0.002)
-    if (HACIA.copy(DESDE).sub(FRENTE).dot(NORMAL) < 0) {
-      deEspaldas = true
-      NORMAL.negate()
-      DERECHA.negate()
-      FRENTE.copy(centro).addScaledVector(NORMAL, (m.espesor * escala) / 2 + 0.002)
-    }
+    if (HACIA.copy(DESDE).sub(FRENTE).dot(NORMAL) < 0) visible = false
+  }
+  if (visible) {
     // Arriba a la izquierda, arriba a la derecha, abajo a la derecha, abajo a la izquierda (el orden de `homografia`).
     const signos = [[-1, 1], [1, 1], [1, -1], [-1, -1]] as const
     for (let k = 0; k < 4 && visible; k += 1) {
@@ -133,7 +159,7 @@ export function llevarLaTarjeta(el: HTMLElement | null, s: EstadoDeLaTarjeta, ce
       CUADRILATERO[2 * k] = ((p.x + 1) / 2) * cuadro.ancho
       CUADRILATERO[2 * k + 1] = ((1 - p.y) / 2) * cuadro.alto
     }
-    if (visible && deEspaldas && extras.logo !== undefined && extras.logo !== null && tocaLaCaja(CUADRILATERO, extras.logo)) visible = false
+    if (visible && extras.delante !== undefined) for (const caja of extras.delante) if (tocaLaCaja(CUADRILATERO, caja)) visible = false
   }
   let css = ''
   if (visible) {

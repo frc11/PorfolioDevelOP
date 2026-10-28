@@ -256,6 +256,8 @@ function armar(grilla: Grilla, conContacto: boolean) {
     uCalmaDelPie: FINAL_EN_EL_PISO.uCalmaDelPie,
     uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie,
     uCalmaDelPieFuerza: FINAL_EN_EL_PISO.uCalmaDelPieFuerza,
+    // [L5] el anillo del aro de las reseñas abierto: los bloques de alrededor al ras.
+    uAnilloDelAro: FINAL_EN_EL_PISO.uAnilloDelAro,
     // [PULIDO 25] W2 a · la quietud de la energía debajo de las piezas acostadas (`pie3d/huecos.ts`). [PULIDO 27] Y2 b · c · y los huecos.
     ...QUIETUD_DEL_PIE,
     ...HUECOS_DEL_PIE,

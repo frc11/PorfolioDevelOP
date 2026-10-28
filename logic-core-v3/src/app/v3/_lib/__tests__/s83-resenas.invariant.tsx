@@ -24,14 +24,14 @@ import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas
 import { CAMARA_DEL_GUARDADO_EN_EL_GATILLO, HACIA_EL_CTA, VUELTA_DEL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, esperaDelCta, objetivoDeLaBajada, pesoDeLaCamara, progresoDelGatillo } from '../../_secciones/por-que-develop/resenas/haciaElCta'
 import { SETTLE_TAU } from '../escena/choreographyPhysics'
 import { dampTowards } from '../escena/choreographySampler'
-import { MIRA_AL_HUECO, desvioDelGuardado, type PoseDelGuardado } from '../escena/resenas/camaraDelGuardado'
+import { MIRA_AL_HUECO, POSE_DEL_GUARDADO, desvioDelGuardado, type PoseDelGuardado } from '../escena/resenas/camaraDelGuardado'
 import { POSES_DEL_FINAL } from '../escena/finalDelRecorrido'
 import type { Armado } from '../escena/titulos3d/armado'
 import { TRANSFORMACION, caraDelCta } from '../escena/ctaDelFinal/transformacion'
 import { ENGANCHE_DE_LAS_GRIETAS, avisarLaVueltaDelCta } from '../escena/resenas/enganches'
 import { PANTALLAS_DE_POR_QUE_DEVELOP } from '../secciones'
 import { CAPA_DEL_ARO } from '../escena/resenas/enVivo'
-import { OPACIDAD_DE_LA_TARJETA, cajaDelLogo, esconderLasTarjetas, llevarLaTarjeta, nuevaCaja, nuevaTarjeta, tamanoDeLasTarjetas } from '../escena/resenas/tarjetas'
+import { OPACIDAD_DE_LA_TARJETA, cajaDeLaPlaca, cajaDelLogo, esconderLasTarjetas, llevarLaTarjeta, nuevaCaja, nuevaTarjeta, tamanoDeLasTarjetas } from '../escena/resenas/tarjetas'
 import { armarLasPlacas, enLaNiebla } from '../escena/resenas/placas'
 import { aplicar } from '../pie3d/homografia'
 import { ARO, VELOCIDAD_DE_LECTURA, curvaDeLaEntrada, finDeLaEntrada, medidasDeLaEscala, medidasDelAro, textoConLaEntrada, nieblaDeLaPlaca, nuevaPose, pasoDelGiro, placasQueSeLeen, poseDeLaPlaca, resenaDeLaPlaca, textoDeLaPlaca, type GiroDelAro } from '../escena/resenas/aro'
@@ -101,9 +101,10 @@ controlPositivo('el detector ve un tramo que rebobina antes del CTA', { giro: 0,
 afirmarIgual(e(0.6, 0), [0, 0, 0], 'gatillo: con la animación en 0, nada (aunque el scroll esté adentro)')
 afirmarIgual(e(0.6, 1), [1, 1, 1], '  y con la animación entera, todo')
 afirmar(objetivoDelGatillo(0.03, 0) === 1 && objetivoDelGatillo(0.01, 1) === 1 && objetivoDelGatillo(0.001, 1) === 0 && objetivoDelGatillo(0.01, 0) === 0, 'el gatillo: entra al pasar 0,02 del tramo, sale al volver arriba de 0,005 (sin titilar en el medio)')
-const gatilloPorDefecto = (f: (v: string | null) => string): boolean => f(null) === 'gatillo' && f('scroll') === 'scroll' && f('gatillo') === 'gatillo' && f('x') === 'gatillo'
-afirmar(gatilloPorDefecto(varianteDeLaBandera), '?resenas=: [C2-70] gatillo por defecto, scroll con la bandera (se conserva)')
-controlPositivo('el detector ve la bandera de antes (scroll por defecto)', (v: string | null) => (v === 'gatillo' ? 'gatillo' : 'scroll'), gatilloPorDefecto)
+// [L5] La spec cambió (70 de la revisión 3: «con scroll mejor»): scroll por defecto, el gatillo de la entrada queda con la bandera.
+const scrollPorDefecto = (f: (v: string | null) => string): boolean => f(null) === 'scroll' && f('scroll') === 'scroll' && f('gatillo') === 'gatillo' && f('x') === 'scroll'
+afirmar(scrollPorDefecto(varianteDeLaBandera), '?resenas=: [L5] scroll por defecto, gatillo con la bandera (se conserva)')
+controlPositivo('el detector ve la bandera de antes (gatillo por defecto, C2-70)', (v: string | null) => (v === 'scroll' ? 'scroll' : 'gatillo'), scrollPorDefecto)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El giro del título: una sola cara a la vista, de canto en la mitad')
@@ -351,7 +352,8 @@ controlPositivo('el detector ve el aro de antes (radio 6,4, placas de 3,2 × 2,1
 
 // e · [C2-70] Sólidas: ninguna tarjeta ni placa con opacidad < 1, en toda una vuelta; las de los costados y alguna de atrás, con su texto.
 titulo('14 · [C2-70] Las tarjetas sólidas: opacidad 1 siempre (las de atrás también), escondidas sólo con visibility')
-const logoB = cajaDelLogo(camaraB, { ancho: 1440, alto: 900 }, nuevaCaja())
+// [L5] La caja del logo ya no decide (la nuca no lleva texto): se mide igual, la usa el banco del guardado.
+void cajaDelLogo(camaraB, { ancho: 1440, alto: 900 }, nuevaCaja())
 const unaVuelta = (): { readonly opacidades: string[]; readonly conTexto: number; readonly deEspaldas: number } => {
   const opacidades: string[] = []
   let conTexto = 0
@@ -363,7 +365,7 @@ const unaVuelta = (): { readonly opacidades: string[]; readonly conTexto: number
     for (let i = 0; i < ARO.placas; i += 1) {
       const p = poseDeLaPlaca(i, 1, giro, MB, nuevaPose())
       const texto = nieblaDeLaPlaca(p.angulo) < 0.995 ? 1 : 0
-      llevarLaTarjeta(els[i] as unknown as HTMLElement, estados[i], new THREE.Vector3(p.x, centroY, p.z), p.mira, MB, texto, camaraB, { ancho: 1440, alto: 900 }, anchoDeMaqueta, { logo: logoB })
+      llevarLaTarjeta(els[i] as unknown as HTMLElement, estados[i], new THREE.Vector3(p.x, centroY, p.z), p.mira, MB, texto, camaraB, { ancho: 1440, alto: 900 }, anchoDeMaqueta)
       opacidades.push(els[i].style.opacity)
       if (els[i].style.visibility === 'visible') {
         conTexto += 1
@@ -379,7 +381,53 @@ const enteras = (x: { readonly opacidades: readonly string[] }): boolean => x.op
 const vuelta = unaVuelta()
 afirmar(enteras(vuelta), `ninguna tarjeta con opacidad < 1 en una vuelta entera (${String(vuelta.opacidades.length)} escrituras; las escondidas, con visibility)`)
 controlPositivo('el detector ve una tarjeta a medias (la de antes: la opacidad con el ángulo)', { opacidades: [...vuelta.opacidades, '0.500'] }, enteras)
-afirmar(vuelta.conTexto / 72 >= 4 && vuelta.deEspaldas > 0, `con su texto: ${(vuelta.conTexto / 72).toFixed(1)} por cuadro (eran 2 o 3, las de adelante) y ${String(vuelta.deEspaldas)} en la nuca de una de atrás (fuera del logo)`)
+// [L5] La spec cambió (70: «se ve al revés la reseña cuando está pasando por atrás, en ese punto debe ser blanco nomás»): ninguna en la nuca.
+const sinNuca = (x: { readonly conTexto: number; readonly deEspaldas: number }): boolean => x.conTexto / 72 >= 2 && x.deEspaldas === 0
+afirmar(sinNuca(vuelta), `con su texto: ${(vuelta.conTexto / 72).toFixed(1)} por cuadro, todas de frente; de espaldas, ${String(vuelta.deEspaldas)} (la nuca es papel liso)`)
+controlPositivo('el detector ve la nuca de antes (la reseña de una de atrás, C2-70)', { conTexto: vuelta.conTexto, deEspaldas: 3 }, sinNuca)
+// [L5] Ninguna tarjeta encima de una placa más cerca (lote2/09): en una vuelta, cada tarjeta visible no toca la caja de las de adelante.
+const cajasSeTocan = (a: { x0: number; y0: number; x1: number; y1: number }, b: { x0: number; y0: number; x1: number; y1: number }): boolean => a.x1 > b.x0 && a.x0 < b.x1 && a.y1 > b.y0 && a.y0 < b.y1
+// Con la cámara de la lectura (B) y con una de costado y más cerca (el mouse gira la órbita), donde las de un costado se cruzan.
+const camaraCerca = new THREE.PerspectiveCamera(35, 1440 / 900, 0.1, 400)
+camaraCerca.position.set(7, 1.6, 9)
+camaraCerca.lookAt(0, 0, 0)
+camaraCerca.updateMatrixWorld()
+const pisadas = (conDelante: boolean, camara: THREE.PerspectiveCamera): { readonly pisadas: number; readonly visibles: number } => {
+  const ojo = camara.getWorldPosition(new THREE.Vector3())
+  let [n, visibles] = [0, 0]
+  const estados = Array.from({ length: ARO.placas }, nuevaTarjeta)
+  const els = Array.from({ length: ARO.placas }, nuevaEscrita)
+  for (let paso = 0; paso < 72; paso += 1) {
+    const giro = (paso * 2 * Math.PI) / 72
+    const placas = Array.from({ length: ARO.placas }, (_, i) => {
+      const p = poseDeLaPlaca(i, 1, giro, MB, nuevaPose())
+      const centro = new THREE.Vector3(p.x, centroY, p.z)
+      return { p, centro, distancia: centro.distanceTo(ojo), caja: cajaDeLaPlaca(centro, p.mira, MB, 1, camara, { ancho: 1440, alto: 900 }, nuevaCaja()), cara: cajaDeLaPlaca(centro, p.mira, { ...MB, espesor: 0 }, 1, camara, { ancho: 1440, alto: 900 }, nuevaCaja()) }
+    })
+    placas.forEach((a, i) => {
+      const delante = placas.filter((b) => b !== a && b.distancia < a.distancia).map((b) => b.caja)
+      const texto = nieblaDeLaPlaca(a.p.angulo) < 0.995 ? 1 : 0
+      llevarLaTarjeta(els[i] as unknown as HTMLElement, estados[i], a.centro, a.p.mira, MB, texto, camara, { ancho: 1440, alto: 900 }, anchoDeMaqueta, conDelante ? { delante } : {})
+      if (els[i].style.visibility !== 'visible') return
+      visibles += 1
+      if (delante.some((c) => cajasSeTocan(a.cara, c))) n += 1
+    })
+  }
+  return { pisadas: n, visibles }
+}
+const [enB, cerca2] = [pisadas(true, camaraB), pisadas(true, camaraCerca)]
+afirmar(enB.pisadas === 0 && cerca2.pisadas === 0 && enB.visibles / 72 >= 2, `ninguna tarjeta pisa una placa más cerca (en una vuelta, con B: ${String(enB.pisadas)}, visibles ${(enB.visibles / 72).toFixed(1)} por cuadro; con la cámara cerca: ${String(cerca2.pisadas)})`)
+// El resguardo en sí (`delante`), con un caso armado: la de frente con una placa más cerca cruzada delante de su borde.
+const frenteDePrueba = new THREE.Vector3(0, centroY, MB.radio)
+const cajaDeLaQueTapa = cajaDeLaPlaca(new THREE.Vector3(MB.ancho / 2, centroY, MB.radio + 2), 0, MB, 1, camaraB, { ancho: 1440, alto: 900 }, nuevaCaja())
+const seVeCon = (delante: readonly ReturnType<typeof nuevaCaja>[] | undefined): boolean => {
+  const el = nuevaEscrita()
+  llevarLaTarjeta(el as unknown as HTMLElement, nuevaTarjeta(), frenteDePrueba, 0, MB, 1, camaraB, { ancho: 1440, alto: 900 }, anchoDeMaqueta, delante === undefined ? {} : { delante })
+  return el.style.visibility === 'visible'
+}
+const resguarda = (conElResguardo: boolean): boolean => seVeCon([]) && !seVeCon(conElResguardo ? [cajaDeLaQueTapa] : undefined)
+afirmar(resguarda(true), 'con una placa más cerca cruzada delante de su borde, la tarjeta se esconde (sin ninguna delante, se ve)')
+controlPositivo('el detector ve la tarjeta de antes (sin mirar las de adelante: se pintaba encima)', false, resguarda)
 const placaDePrueba = armarLasPlacas(new THREE.BufferGeometry())[0]
 const solidas = (u: readonly number[]): boolean =>
   u.every((n) => {
@@ -487,10 +535,20 @@ const ctaDesdeElCorrido = (armado: string): boolean => ctaTransformado.includes(
 afirmar(ctaDesdeElCorrido(armadoDelCta), 'el CTA arranca su cartel desde las mitades juntadas (su origen, corrido lo mismo en cada cuadro): sin salto al tomarlo')
 controlPositivo('el detector ve el origen del CTA sin el corrimiento', armadoDelCta.replace(' + (b.corrido?.() ?? 0)', ''), ctaDesdeElCorrido)
 
-// La cámara: el peso del desvío con la animación de la bajada (t, a 60 fps en sus 2,2 s) y el progreso de la transformación (p).
+// La cámara: el peso del desvío con la animación de la bajada (t, a 60 fps en sus [L5] 3,6 s) y el progreso de la transformación (p).
 const CG = CAMARA_DEL_GUARDADO_EN_EL_GATILLO
-const T = Array.from({ length: 133 }, (_, k) => k / 132)
+const CUADROS_DEL_GATILLO = Math.round(HACIA_EL_CTA.gatillo.duracionS * 60)
+const T = Array.from({ length: CUADROS_DEL_GATILLO + 1 }, (_, k) => k / CUADROS_DEL_GATILLO)
 const bajadaEnT = (t: number): number => bajadaDeLasResenas(progresoDelGatillo(t))
+const huecoEnT = (t: number): number => aperturaDelHueco(progresoDelGatillo(t))
+// [L5] EL ORDEN EN EL TIEMPO (70: «se abra, se escondan las reseñas, y se cierre»; «se sigan viendo hasta que se guarden bien, y luego alejarse»).
+type Orden = { readonly bajada: (t: number) => number; readonly hueco: (t: number) => number; readonly peso: (t: number) => number }
+const enOrden = (o: Orden): boolean =>
+  T.filter((t) => o.bajada(t) > 0 && o.bajada(t) < 1).every((t) => o.hueco(t) >= 0.999) && T.filter((t) => o.hueco(t) > 1e-6).every((t) => cerca(o.peso(t), 1)) && o.hueco(1) < 1e-6 && o.bajada(1) === 1
+const nuestroOrden: Orden = { bajada: bajadaEnT, hueco: huecoEnT, peso: (t) => pesoDeLaCamara(t, 0.35) }
+afirmar(enOrden(nuestroOrden), `[L5] el piso se abre entero antes de que se mueva la primera placa, se cierra después de la última, y la cámara está arriba todo el tiempo que el piso está abierto (suelta en ${String(CG.suelta)})`)
+controlPositivo('el detector ve la cámara de antes (soltaba en 0,66, con placas bajando)', { ...nuestroOrden, peso: (t: number) => (t < 0.66 ? 1 : 0) }, enOrden)
+controlPositivo('el detector ve el anillo de antes (las placas bajaban con el anillo a medio abrir)', { ...nuestroOrden, hueco: (t: number) => aperturaDelHueco(progresoDelGatillo(t) - 0.04) }, enOrden)
 type Peso = (t: number, p: number) => number
 const acompana = (w: Peso): boolean => w(0, 0.35) === 0 && w(1, 0.35) === 0 && T.every((t) => w(t, 0.35) >= 0 && w(t, 0.35) <= 1) && T.filter((t) => bajadaEnT(t) > 0 && bajadaEnT(t) < 0.9).every((t) => cerca(w(t, 0.35), 1))
 afirmar(acompana(pesoDeLaCamara), `el peso: 0 antes y después de la animación, acotado, y entero mientras las placas bajan (llega en ${String(CG.llega)}, suelta en ${String(CG.suelta)}, con la bajada en ${bajadaEnT(CG.suelta).toFixed(3)})`)
@@ -501,8 +559,10 @@ afirmar(sinSalto(pesoDeLaCamara), `sin salto: el peso cambia a lo sumo 0,1 por c
 controlPositivo('el detector ve una suelta de golpe', (t: number) => (t > CG.llega && t < 0.9 ? 1 : 0), sinSalto)
 afirmar(pesoDeLaCamara(0.5, 0.7) === 0 && pesoDeLaCamara(0.5, CG.margen[0]) === 1, 'con el scroll mucho más allá de C (la transformación pasó su margen) el CTA manda: sin desvío')
 
-const POSE_B = POSES_DEL_FINAL.valores
+// [L5] La pose del guardado ya no es B (contrapicado): es desde arriba, en diagonal. El detector mira entre la pose del recorrido y ella.
+const POSE_B = POSE_DEL_GUARDADO
 const POSE_C = POSES_DEL_FINAL.cta
+afirmar(POSE_DEL_GUARDADO.height > POSES_DEL_FINAL.valores.height && POSE_DEL_GUARDADO.height > 0 && POSE_DEL_GUARDADO.height < 16, `[L5] la pose del guardado mira desde arriba (altura ${String(POSE_DEL_GUARDADO.height)}, sobre el piso y bajo el techo de la cámara; B, ${String(POSES_DEL_FINAL.valores.height)})`)
 const poseCon = (base: PoseDelGuardado, peso: number, bajada: number): PoseDelGuardado => {
   const pose = { height: base.height, distance: base.distance, frameX: base.frameX, frameY: base.frameY }
   desvioDelGuardado(pose, peso, bajada)
@@ -527,9 +587,10 @@ const rig = leer('_lib/escena/OrbitRig.tsx')
 const enElRig = (f: string): boolean => /arc\.level = nivelConLaInterfaz\([^\n]*\n\s*\/\/ \[C2-70e\][^\n]*\n\s*if \(isChoreo && viajeEnCurso\(\) === null\) acompanarElGuardado\(target\)\n[\s\S]*live\[channel\] = physics/.test(f)
 afirmar(enElRig(rig), 'el rig lo aplica sobre su objetivo (después de las mezclas, antes de la inercia: la vuelta es suave), fuera de un viaje del menú; el progreso no se toca')
 controlPositivo('el detector ve un rig sin el desvío', rig.replace('acompanarElGuardado(target)', ''), enElRig)
-const soloConElGatillo = (f: string): boolean => f.includes("CAMARA_DEL_GUARDADO.peso = variante === 'gatillo' && prueba !== 'sin-camara' ? pesoDeLaCamara(disparoDeLaBajada.get(), p) : 0")
-afirmar(soloConElGatillo(gancho), 'el peso sólo con el gatillo (con `?resenas=scroll` la bajada es del scroll y la cámara la de siempre) y sin la bandera de prueba sin-camara')
-controlPositivo('el detector ve el desvío también con el scroll', gancho.replace("variante === 'gatillo' && prueba", 'prueba'), soloConElGatillo)
+// [L5] La spec cambió: la salida es un gatillo con las DOS variantes (era sólo con `gatillo`); sin la bandera de prueba sin-camara.
+const siempreGatillo = (f: string): boolean => f.includes("CAMARA_DEL_GUARDADO.peso = prueba !== 'sin-camara' ? pesoDeLaCamara(disparoDeLaBajada.get(), p) : 0") && f.includes('const pb = progresoDelGatillo(disparoDeLaBajada.get())') && !f.includes("const pb = variante === 'gatillo'")
+afirmar(siempreGatillo(gancho), '[L5] la salida (la bajada, la cámara y la espera) es un gatillo con las dos variantes de la entrada')
+controlPositivo('el detector ve la salida de antes (del scroll con `?resenas=scroll`)', gancho.replace('const pb = progresoDelGatillo(disparoDeLaBajada.get())', "const pb = variante === 'gatillo' ? progresoDelGatillo(disparoDeLaBajada.get()) : p"), siempreGatillo)
 
 // [C2-70e, verificación] El CTA espera a la cámara: con la cámara en B, el cartel anclado en el plano de C se veía grande y cortado arriba.
 type Espera = (t: number, p: number, disparada: boolean) => number
@@ -538,7 +599,7 @@ const esperaBien = (e: Espera): boolean =>
 afirmar(esperaBien(esperaDelCta), 'el CTA espera entero desde antes del disparo y mientras las placas bajan; nada al cerrarse el anillo ni con el scroll más allá de C')
 controlPositivo('el detector ve el sostén de antes (el CTA sin esperar)', () => 0, esperaBien)
 // Cuadro a cuadro (60 fps), la cámara viva con la inercia del rig (su distancia, de B a C) y el CTA: cuánto se adelanta el cartel a la cámara.
-const adelantoDelCartel = (esperaDe: (t: number) => number, pesoDe: (t: number) => number, segundos = 2.2): number => {
+const adelantoDelCartel = (esperaDe: (t: number) => number, pesoDe: (t: number) => number, segundos: number = HACIA_EL_CTA.gatillo.duracionS): number => {
   let [vivo, mayor] = [0, 0]
   for (let k = 0; k <= 240; k += 1) {
     const t = k / 60 / segundos
@@ -553,7 +614,7 @@ const cartelDetras = (adelanto: number): boolean => adelanto <= 0.25 && adelanto
 afirmar(cartelDetras(nuestro), `el cartel no se adelanta a la cámara: a lo sumo ${nuestro.toFixed(3)} del camino (con una rueda que la lleva a C en 0,6 s, ${conElScroll.toFixed(3)}): suelta en ${String(CG.ctaSuelta)}, la cámara en ${String(CG.suelta)}`)
 controlPositivo('el detector ve el sostén sin la espera (el cartel entero con la cámara en B)', adelantoDelCartel(() => 0, (t) => pesoDeLaCamara(t, 0.35)), cartelDetras)
 const esperaCableada = (f: string, cta: string): boolean =>
-  f.includes("const espera = variante === 'gatillo' && prueba !== 'sin-camara' && prueba !== 'sin-espera' ? esperaDelCta(disparoDeLaBajada.get(), p, objetivoDeLaBajadaActual === 1) : 0") && f.includes('const tomado = delCta > 0 && ctaListo()') && f.includes('ESPERA_DEL_CTA.set(espera)') && cta.includes('const progreso = useProgresoQueEspera(delScroll)')
+  f.includes("const espera = prueba !== 'sin-camara' && prueba !== 'sin-espera' ? esperaDelCta(disparoDeLaBajada.get(), p, objetivoDeLaBajadaActual === 1) : 0") && f.includes('const tomado = delCta > 0 && ctaListo()') && f.includes('ESPERA_DEL_CTA.set(espera)') && cta.includes('const progreso = useProgresoQueEspera(delScroll)')
 afirmar(esperaCableada(gancho, ctaTransformado), 'el tramo escribe la espera y el título lo toma el CTA con su progreso que espera; el CTA del escenario avanza con él')
 controlPositivo('el detector ve el CTA con el progreso del scroll', [gancho, ctaTransformado.replace('useProgresoQueEspera(delScroll)', 'delScroll')] as const, ([f, c]: readonly [string, string]) => esperaCableada(f, c))
 

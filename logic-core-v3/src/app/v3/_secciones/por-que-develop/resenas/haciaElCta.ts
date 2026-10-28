@@ -18,11 +18,16 @@ const GIRO = { desde: TRANSFORMACION.giro.desde, hasta: TRANSFORMACION.giro.desd
 
 export const HACIA_EL_CTA = {
   /** El anillo se abre un poco antes de que las placas empiecen a bajar, y se cierra cuando ya no queda ninguna. */
-  abre: [GIRO.desde - 0.16, 0.12],
+  // [L5] Abierto entero ANTES de que la primera placa se mueva (era desde 0,12: bajaban con el anillo a medio abrir).
+  abre: [GIRO.desde - 0.2, 0.12],
   baja: [GIRO.desde - 0.06, GIRO.hasta - (GIRO.desde - 0.06)],
   cierra: [GIRO.hasta + 0.02, 0.14],
-  /** Con el gatillo: la animación (s) y dónde se dispara (p). */
-  gatillo: { duracionS: 2.2, entra: 0.04, sale: 0.01 },
+  /**
+   * Con el gatillo: la animación (s) y dónde se dispara (p). [L5] Siempre (las dos variantes) y más lenta (era 2,2 s): primero la cámara
+   * llega arriba, después el piso se abre, bajan, se cierra, y recién ahí la cámara suelta. `guardado`: la parte de la animación en que
+   * corre la ventana del piso (abre, baja y cierra); antes, la cámara llega; después, suelta.
+   */
+  gatillo: { duracionS: 3.6, entra: 0.04, sale: 0.01, guardado: [0.12, 0.82] as const },
 } as const
 
 /** La bajada de las placas (0, en el aro; 1, se fueron por el hueco) con el progreso de la transformación (o la animación del gatillo). */
@@ -36,7 +41,11 @@ export function aperturaDelHueco(p: number): number {
 }
 
 /** Con el gatillo, la animación por tiempo (0 a 1) lleva a `p` por la ventana entera de la bajada (abre, baja y cierra). */
-export const progresoDelGatillo = (t: number): number => HACIA_EL_CTA.abre[0] + acotar01(t) * (HACIA_EL_CTA.cierra[0] + HACIA_EL_CTA.cierra[1] - HACIA_EL_CTA.abre[0])
+// [L5] Sólo en su parte `guardado` (antes y después, la cámara llega y suelta con el piso quieto).
+export const progresoDelGatillo = (t: number): number => {
+  const [desde, hasta] = HACIA_EL_CTA.gatillo.guardado
+  return HACIA_EL_CTA.abre[0] + tramo(t, desde, hasta - desde) * (HACIA_EL_CTA.cierra[0] + HACIA_EL_CTA.cierra[1] - HACIA_EL_CTA.abre[0])
+}
 
 /** El gatillo de la bajada: adónde va (1, la transformación empezó; 0, volvió a su arranque), con margen para no titilar. */
 export function objetivoDeLaBajada(p: number, previo: 0 | 1): 0 | 1 {
@@ -56,7 +65,8 @@ export function objetivoDeLaBajada(p: number, previo: 0 | 1): 0 | 1 {
  * su objetivo, y así el cartel nunca se adelanta a ella (s83 §16 lo simula cuadro a cuadro). Primero se enfoca el guardado, después se
  * pasa al CTA.
  */
-export const CAMARA_DEL_GUARDADO_EN_EL_GATILLO = { llega: 0.13, suelta: 0.66, soltada: 0.9, ctaSuelta: 0.72, margen: [0.4, 0.2] } as const
+// [L5] Llega antes de que el piso se abra y suelta después de que se cerró (era suelta 0,66: las últimas placas bajaban con la cámara yéndose).
+export const CAMARA_DEL_GUARDADO_EN_EL_GATILLO = { llega: 0.12, suelta: 0.83, soltada: 0.93, ctaSuelta: 0.88, margen: [0.4, 0.2] } as const
 
 const C_G = CAMARA_DEL_GUARDADO_EN_EL_GATILLO
 /** Con el scroll `p`: 1 hasta el margen (después de la llegada a C), 0 pasado. */
