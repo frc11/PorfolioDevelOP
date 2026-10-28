@@ -262,16 +262,15 @@
 
 /* =========================================================================
  * [L1] LA BARRA DE ESCRITORIO DESDE 769 — de 769 a 1279 la pastilla y la esquina se compactan (texto, aire) para que entren al lado
- * del parlante; de 769 a 839 además la pastilla se ancla a la izquierda (pegada al parlante) en vez de centrarse, porque centrada no
- * deja lugar a la esquina. Desde 1280 es la de siempre. El modo (barra o menú) lo sigue midiendo `BarraDelHome`.
+ * del parlante. Desde 1280 es la de siempre. El modo (barra o menú) lo sigue midiendo `BarraDelHome`.
  * ========================================================================= */
 @media (min-width: 769px) and (max-width: 1279px) {
   [data-v3] [data-pieza="barra"] > [data-parte="pastilla"] {
-    padding-inline: var(--spacing-2);
+    padding-inline: var(--spacing-1);
   }
 
   [data-v3] [data-pieza="barra"] [data-parte="lista"] {
-    gap: 0;
+    gap: var(--spacing-1);
   }
 
   [data-v3] :is([data-pieza="barra-enlace"], [data-pieza="barra-login"]) {
@@ -285,13 +284,6 @@
   [data-v3] [data-pieza="barra"] > [data-parte="esquina"] {
     gap: var(--spacing-1);
     padding-inline: var(--spacing-1) var(--spacing-1);
-  }
-}
-
-@media (min-width: 769px) and (max-width: 839px) {
-  [data-v3] [data-pieza="barra"] > [data-parte="pastilla"] {
-    left: calc(var(--spacing-4) + var(--barra-alto) + var(--spacing-4));
-    transform: none;
   }
 }
 

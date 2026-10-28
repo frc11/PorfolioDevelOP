@@ -117,9 +117,7 @@ export function BarraDelHome({ className }: { readonly className?: string }): Re
     const esquina = cabecera.querySelector<HTMLElement>('[data-parte="esquina"]')
     const medir = (): void => {
       // [RETOQUE 3D] N1 · y la esquina (Contacto y Login) tiene que entrar al lado de la pastilla centrada.
-      // [L1] Anclada a la izquierda (769–1023, sin transform) el borde derecho es el de su caja; centrada, el del medio más media pastilla.
-      const derecha = getComputedStyle(pastilla).transform === 'none' ? pastilla.offsetLeft + pastilla.offsetWidth : (cabecera.clientWidth + pastilla.offsetWidth) / 2
-      const cabe = esquina === null || cabecera.clientWidth - (parseFloat(getComputedStyle(esquina).right) || 0) - esquina.offsetWidth - derecha >= AIRE_DE_LA_ESQUINA
+      const cabe = esquina === null || cabecera.clientWidth - (parseFloat(getComputedStyle(esquina).right) || 0) - esquina.offsetWidth - (cabecera.clientWidth + pastilla.offsetWidth) / 2 >= AIRE_DE_LA_ESQUINA
       const modo = modoDelChrome(pastilla.scrollWidth, pastilla.clientWidth, getComputedStyle(cabecera).visibility === 'hidden' || !cabe)
       cabecera.setAttribute('data-modo', modo)
       fijarModoDelChrome(modo)
