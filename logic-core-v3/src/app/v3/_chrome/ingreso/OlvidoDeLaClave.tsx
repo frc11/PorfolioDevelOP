@@ -36,6 +36,11 @@ export function OlvidoDeLaClave({
     async (_previo: Resultado, envio: FormData): Promise<Resultado> => resolverElIngreso(() => conDuracionMinima(acciones.conOlvido(null, envio)), () => undefined),
     REPOSO,
   )
+  const raiz = useRef<HTMLDivElement>(null)
+  // Al abrir la vista el foco va al email (con mouse; en un táctil abriría el teclado encima de todo).
+  useEffect(() => {
+    if (window.matchMedia('(pointer: fine)').matches) raiz.current?.querySelector<HTMLElement>('input[name="email"]')?.focus({ preventScroll: true })
+  }, [])
   useEffect(() => {
     alOcupar?.(enviando)
     return () => alOcupar?.(false)
@@ -82,7 +87,7 @@ export function OlvidoDeLaClave({
   }
 
   return (
-    <div className="relative">
+    <div ref={raiz} className="relative">
       <form noValidate onSubmit={alEnviar} inert={enviando} data-pieza="ingreso-olvido" className={cn('flex flex-col gap-[var(--spacing-3)]', enviando && 'invisible')}>
         <p className="text-caption text-tinta-media leading-texto">{EXPLICACION_DEL_OLVIDO}</p>
         <div className="flex flex-col gap-[var(--spacing-1)]">

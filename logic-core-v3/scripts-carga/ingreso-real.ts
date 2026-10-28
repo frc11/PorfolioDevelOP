@@ -13,7 +13,6 @@
  *   4. EL INGRESO con la cuenta: la ruta sale de /v3 hacia el panel (`/admin`, `/dashboard`, `/setter` o `/bienvenida`), con sesión.
  *
  *   BASE=http://localhost:3003 npx tsx scripts-carga/ingreso-real.ts
- *   CONTROL=sin-reintento-de-la-entrada …  (reservado) el defecto que hace que la hoja no anime la segunda vez
  *
  * Sin correr al escribirse: lo corre el orquestador. Fotos en la salida del banco (`salidaDelBanco('ingreso-real')`).
  */
