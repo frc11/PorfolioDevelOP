@@ -214,6 +214,17 @@ export const LISTA_DEL_CTA = { aparece: [0.12, 0.08] as const, desde: 0.2 } as c
 /** La transformación con el recorrido `r` de la lista. */
 export const progresoEnLaLista = (r: number): number => tramo(r, LISTA_DEL_CTA.desde, 1 - LISTA_DEL_CTA.desde)
 
+/**
+ * [L5] EL CTA DE LA LISTA COMO GATILLO (el home, abajo de 1024: «la gente no va a entender cómo arrastrar la animación, pero que no vaya
+ * ultrarrápido sino que se lea bien»): pasado `entra` del recorrido del bloque clavado, la transformación corre sola por tiempo (de 0 a 1 en
+ * `duracionS`, lineal: el deslizamiento, la mitad, ~1,4 s); subiendo antes de `sale`, vuelve. Con margen para no titilar.
+ */
+export const GATILLO_EN_LA_LISTA = { duracionS: 2.8, entra: LISTA_DEL_CTA.desde, sale: LISTA_DEL_CTA.aparece[0] } as const
+export function objetivoEnLaLista(r: number, previo: 0 | 1): 0 | 1 {
+  if (previo === 0) return r > GATILLO_EN_LA_LISTA.entra ? 1 : 0
+  return r < GATILLO_EN_LA_LISTA.sale ? 0 : 1
+}
+
 /** Cuánto se ve el origen antes de transformarse con el recorrido `r` de la lista. */
 export const entradaEnLaLista = (r: number): number => suave(tramo(r, LISTA_DEL_CTA.aparece[0], LISTA_DEL_CTA.aparece[1]))
 
