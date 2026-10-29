@@ -279,16 +279,17 @@ const MICRO = 10
 const DEBAJO_DEL_PARLANTE = ['className="pointer-events-none absolute top-full left-0 mt-', '[var(--spacing-2)]"'].join('')
 const AIRE_DE_ANTES = [' pt-', '[calc(var(--zona-de-la-cabecera)+var(--spacing-8))] escritorio:pt-'].join('')
 const cuentaBien = (m: string, c: string): boolean => {
-  const aire = /'1': '[^']* pt-\[calc\(var\(--zona-de-la-cabecera\)\+var\(--spacing-(\d+)\)\)\] escritorio:pt-/.exec(m)?.[1]
-  const tresIguales = ['1', '2', '3'].every((k) => new RegExp(`'${k}': '[^']* pt-\\[calc\\(var\\(--zona-de-la-cabecera\\)\\+var\\(--spacing-${String(aire)}\\)\\)\\] escritorio:pt-`).test(m))
-  if (aire === undefined || !tresIguales || !c.includes(DEBAJO_DEL_PARLANTE)) return false
+  // [INT] Desde L6 la composición es una sola (la 3, fija): el aire se lee en su única clase, sin el mapa de las tres.
+  const aires = [...m.matchAll(/ pt-\[calc\(var\(--zona-de-la-cabecera\)\+var\(--spacing-(\d+)\)\)\] escritorio:pt-/g)].map((x) => x[1])
+  const aire = aires[0]
+  if (aire === undefined || aires.some((a) => a !== aire) || !c.includes(DEBAJO_DEL_PARLANTE)) return false
   const zona = SP[4] + SP[12] + SP[4]
   const tituloArriba = zona + (SP[aire] ?? 0)
   // El cartel: 16 + 48 del parlante, su margen de 8, el relleno de 8 + 8, dos renglones de Micro (interlineado 1) con 4 entre ellos y su borde.
   const cartelAbajo = SP[4] + SP[12] + SP[2] + 2 * SP[2] + 2 * MICRO + SP[1] + 2
   return tituloArriba - cartelAbajo >= SP[2]
 }
-afirmar(cuentaBien(marco, control), 'abajo de 1024 el título de la intro arranca debajo del cartel del sonido (con 8 px de aire, en las tres composiciones): el aire de arriba es `--spacing-12` (era 8)')
+afirmar(cuentaBien(marco, control), 'abajo de 1024 el título de la intro arranca debajo del cartel del sonido (con 8 px de aire; [INT] la composición fija de L6): el aire de arriba es `--spacing-12` (era 8)')
 controlPositivo('  el detector ve el aire de B12a.8 (el cartel pisaba el título 2 px)', marco.replace(/ pt-\[calc\(var\(--zona-de-la-cabecera\)\+var\(--spacing-12\)\)\] escritorio:pt-/g, AIRE_DE_ANTES), (m: string) => cuentaBien(m, control))
 afirmar(!control.includes('blur-panel)]\\"'), '  y el disco de escritorio con su vidrio entero (una barra invertida de más dejaba la clase del desenfoque sin aplicar)')
 

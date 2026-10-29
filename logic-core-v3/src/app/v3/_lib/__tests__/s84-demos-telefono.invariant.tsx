@@ -196,12 +196,13 @@ titulo('7 · REGLA DE ALTURAS: [L2] Demos mide una pantalla y el tramo del carru
 
 // [L2] La spec cambió (Valentino, 41: «tengo que scrollear bastante en demos para pasar a servicios»): la caja de después del flujo es la
 // pantalla de Demos y nada más. La escena no se corre: el tramo del carrusel llega al final de la sección (s76 §48 lo mide con el flujo que sea).
+// [INT] El tramo arranca cuando la sección asoma: su largo suma la aproximación (s76 §48 mide la rampa y lo de afuera).
 const unaPantalla = (despues: number, t: string, tramo: string): boolean =>
   despues === 1 && /style=\{ESTILO_DE_LO_QUE_SIGUE_AL_FLUJO\}>\s*<DemosDelFlujo/.test(t) && /height: `\$\{\(PANTALLAS_DESPUES_DEL_FLUJO \* 100\)\.toFixed\(4\)\}svh`/.test(t) &&
-  /largo: pxQueVeLaEscenaDespuesDelPin\(ancho\)/.test(tramo) && PX_DE_LA_COLA === 2931 && PX_DE_LA_SECCION_EN_LA_TABLA === 6813
+  /const largo = PX_DE_LA_APROXIMACION \+ pxQueVeLaEscenaDespuesDelPin\(ancho\)/.test(tramo) && PX_DE_LA_COLA === 2931 && PX_DE_LA_SECCION_EN_LA_TABLA === 6813
 const tramo = sinComentarios(leer('_secciones/trabajos/portfolio/tramoDelSelector.ts'))
 afirmar(unaPantalla(PANTALLAS_DESPUES_DEL_FLUJO, trabajos, tramo), `Demos va adentro de la caja de lo que sigue al flujo, que mide una pantalla (${(PANTALLAS_DESPUES_DEL_FLUJO * 100).toFixed(0)}svh): ni scroll quieto antes de Servicios ni empujón; el tramo anotado le cuenta a la escena la cola de siempre (${String(PX_DE_LA_COLA)} px de la regla)`)
 controlPositivo('  el detector ve la cola de antes (Demos pegado 4,26 pantallas)', 1 + PX_DE_LA_COLA / 900, (d: number) => unaPantalla(d, trabajos, tramo))
-controlPositivo('  y el tramo de antes (la escena sin la cola: todo lo de después llegaría antes)', tramo.replace('largo: pxQueVeLaEscenaDespuesDelPin(ancho)', 'largo: PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho]'), (s: string) => unaPantalla(PANTALLAS_DESPUES_DEL_FLUJO, trabajos, s))
+controlPositivo('  y el tramo de antes (la escena sin la cola: todo lo de después llegaría antes)', tramo.replace('const largo = PX_DE_LA_APROXIMACION + pxQueVeLaEscenaDespuesDelPin(ancho)', 'const largo = PX_DE_LA_APROXIMACION + PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho]'), (s: string) => unaPantalla(PANTALLAS_DESPUES_DEL_FLUJO, trabajos, s))
 
 cerrar('s84-demos-telefono.invariant')

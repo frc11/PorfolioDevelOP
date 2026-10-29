@@ -142,10 +142,12 @@ controlPositivo('  el detector VE un gatillo servido escondido', marcar(<Gatillo
 // [C2 · 60c] Retomada: el CTA del Panel rehecho (la tarea 60, «El CTA del Panel»). Si se integra con el cuerpo nuevo (60b), retomarla.
 // [L1] Retomada: la elipsis del placeholder de los campos compartidos (`Campos.tsx`).
 // [C2 · 60, orquestador] Retomada al integrar las dos: el cuerpo de la 60b (la palabra pálida, los espacios, los módulos) y el CTA de la 60c.
+// [INT] Retomada: el Panel de L4 (las palabras de fondo legibles y ancladas al título, la muestra sin pausa, las tarjetas que envuelven,
+// la newsletter y la flecha del CTA). L4 no corrió esta suite.
 const huella = (m: string): string => createHash('sha256').update(m).digest('hex')
 const ANTES = {
-  quieta: '6483e9997746c6c6ab1a467b2efbfa9294416902d5a44d28dab97bb312cfdc8d',
-  animada: '39d76ac4d15685ce4cc75b365a11827484e65975d0f50c34c2cf690b55ce5dfa',
+  quieta: '03a3e15a678652dae0cad10c3188e320d49ef4e072cc3859a78f590e17910eee',
+  animada: '4402e7ccaf182e9952a397a6714c8f12cc0590cc742ffb62e94c938d7d83202b',
 }
 const panel = <TuPanel seccion={seccionDe('tu-panel')} />
 const ahora = { quieta: marcar(panel, { anima: false }), animada: marcar(panel, { anima: true }) }
