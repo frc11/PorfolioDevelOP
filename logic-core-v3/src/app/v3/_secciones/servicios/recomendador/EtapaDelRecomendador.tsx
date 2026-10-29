@@ -129,7 +129,7 @@ function IndicadorDePasos({ etapa, reducido, animar }: { readonly etapa: number;
   const ahora = PREGUNTAS[etapa] ?? PREGUNTAS[0]
   return (
     <>
-      <div data-parte="paso-actual" role="group" aria-label={`Paso ${String(etapa + 1)} de ${String(PREGUNTAS.length)}`} className="flex justify-center escritorio:hidden">
+      <div data-parte="paso-actual" aria-hidden="true" className="flex justify-center escritorio:hidden">
         <AnimatePresence mode="wait" initial={false}>
           <motion.span key={etapa} data-parte="paso-actual-contenido" className="flex items-center gap-[var(--spacing-3)] font-cuerpo text-cuerpo leading-texto font-medio text-tinta" {...(animar ? fundidoQueSube(reducido) : {})}>
             {/* El número, como en la lista: lo dibuja el CSS (`content`). */}

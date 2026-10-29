@@ -7,7 +7,7 @@ Rama `cola3/2026-10-28`, worktree `C:\nocturno\cola3`, nacida de `rediseno/home`
 | L1 | Sonnet medio | cerrado | 2da961f0..452e5ef8 | L1-resultado.md |
 | L2 | Opus alto | cerrado | 88756153..5d050269 | L2-resultado.md |
 | L3 | Opus alto | cerrado | 0372a9e7 | L3-resultado.md |
-| L4 | Sonnet medio | no empezado | | |
+| L4 | Sonnet medio | cerrado | 2084d961..HEAD | L4-resultado.md |
 | L5 | Opus alto | no empezado | | |
 | L6 | Sonnet medio | no empezado | | |
 
@@ -26,3 +26,6 @@ Portfolio del teléfono en una pantalla (sin testimonio, el video cede), «la tu
 
 ## L3 (cerrado)
 Servicios: entrada en un renglón con el aro que llena su caja (3:1 en escritorio, vertical en el teléfono, sin tocar el aviso) y `?aro-color=` (ola por defecto, color por el ángulo actual); títulos en dos renglones (display + cursiva `?titulo-cursiva=`) subrayados y por la diagonal; cuerpo en la letra de los cuerpos (más corto y grande en el teléfono); título, video y «Leer más…» a la página (sin CTA); pasar rápido con gatillo sin teletransporte (`candadoMs`, `retomarHacia`, `dioPaso`); diagonal 7. Resultado: `L3-resultado.md`. Pendiente: 320 px roza el aviso; la pausa de ~370 ms del primer paso en dev (precarga) sin medir en build; el renombre fuera de la sección (barra, recomendador) a confirmar.
+
+## L4 (cerrado)
+Recomendador a 1/3 + 2/3, contacto en el lugar de las tarjetas con vuelta a resultados (`volver`), indicador del teléfono de un solo paso; palabras de fondo del Panel legibles con el tope del título a su mitad; muestra sin pausa y sin tarjetas que se pisan; CTA con newsletter y flecha nuevas y títulos grandes en el teléfono. Resultado: `L4-resultado.md`. Pendiente: el salto al Portfolio al enviar no se reprodujo (ratón); el envío por Enter y 768/1024 sin verificar.

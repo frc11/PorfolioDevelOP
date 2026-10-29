@@ -304,7 +304,7 @@ controlPositivo('  y las dos columnas iguales (el de antes: todo el ancho)', htm
 
 // Abajo de 1024, SÓLO el paso de ahora, centrado (número y nombre); la lista de los tres queda en el DOM para el lector, sin verse.
 const pasoActualBien = (h: string): boolean =>
-  /data-parte="paso-actual" role="group" aria-label="Paso 1 de 3" class="flex justify-center escritorio:hidden"/.test(h) && h.includes(`<span>${PREGUNTAS[0].paso}</span>`) &&
+  /data-parte="paso-actual" aria-hidden="true" class="flex justify-center escritorio:hidden"/.test(h) && h.includes(`<span>${PREGUNTAS[0].paso}</span>`) &&
   /data-parte="indicador-de-pasos" class="max-escritorio:sr-only escritorio:grid/.test(h) && veces(h, 'aria-current="step"') === 1
 afirmar(pasoActualBien(html), 'abajo de 1024 el indicador muestra sólo el paso de ahora, centrado (el número y el nombre); la lista de los tres sigue en el DOM, oculta (un solo aria-current)')
 controlPositivo('  el detector ve el indicador de tres a la vista abajo de 1024 (el de antes)', html.replace('max-escritorio:sr-only escritorio:grid', 'grid'), pasoActualBien)
@@ -327,7 +327,7 @@ titulo('7 · Las piezas del sitio, importadas (no copias), y la estética del ho
 // Sin comentarios: la prosa puede nombrar lo que el código no hace («sin violeta», «`/api/` interceptado»).
 const todo = FUENTES.map((f) => f.texto.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')).join('\n')
 const piezasBien = (t: string): boolean =>
-  /from '\.\.\/escenario\/TituloQueSePintaAlLlegar'/.test(t) && /from '\.\.\/\.\.\/_contrato\/Gatillo'/.test(t) && /\{ CARGA, Carga \} from '\.\.\/\.\.\/\.\.\/_componentes\/carga\/Carga'/.test(t) && /<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\}>/.test(t) &&
+  /from '\.\.\/escenario\/TituloQueSePintaAlLlegar'/.test(t) && /from '\.\.\/\.\.\/_contrato\/Gatillo'/.test(t) && /\{ CARGA, Carga \} from '\.\.\/\.\.\/\.\.\/_componentes\/carga\/Carga'/.test(t) && /<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\}[^>]*>/.test(t) &&
   /enviarContacto\(completos\(datos\)\)/.test(t) && /fundidoDelEnvio/.test(t) && /<AnimatePresence mode="wait"/.test(t) && !/\bfetch\(|\/api\//.test(t)
 afirmar(piezasBien(todo), 'el título que se pinta, el gatillo que levanta, la carga y el estado de envío de develOP, el envío del contacto general y sus fundidos; ningún `fetch` ni ruta de `/api/` propios')
 controlPositivo('  el detector ve un envío propio', `${todo}\nfetch('/api/contacto')`, piezasBien)

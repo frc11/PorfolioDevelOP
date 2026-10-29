@@ -5,6 +5,7 @@ import { useEffect, useRef, type Dispatch } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { fundidoDelEnvio } from '../../../_lib/formularios/estadoDeEnvio'
 import { COLOR_DE_LA_PALABRA, ESTILO_DEL_PINTADO, TituloQueSePintaAlLlegar, usePintadoAlLlegar } from '../escenario/TituloQueSePintaAlLlegar'
 import { BotonDelRecomendador } from './BotonDelRecomendador'
 import { ContactoDelRecomendador } from './ContactoDelRecomendador'
@@ -41,6 +42,17 @@ export function ResultadoDelRecomendador({ respuestas, elegida, despachar, reduc
   const caja = useRef<HTMLDivElement>(null)
   // Llega por un gesto (Ver mi recomendación): el foco al resultado, que el lector anuncia por su título. Sin mover la página.
   useEffect(() => caja.current?.focus({ preventScroll: true }), [])
+  // [L4] Al cambiar entre las soluciones y el contacto (elegir, o volver tras el envío) la tarjeta o el formulario que tenía el foco se
+  // desmontan: el foco vuelve al resultado, cuando termina el fundido.
+  const cambio = useRef(false)
+  useEffect(() => {
+    if (!cambio.current) {
+      cambio.current = true
+      return undefined
+    }
+    const espera = window.setTimeout(() => caja.current?.focus({ preventScroll: true }), fundidoDelEnvio(reducido) * 1000 + 60)
+    return () => window.clearTimeout(espera)
+  }, [elegida, reducido])
   return (
     <div ref={caja} tabIndex={-1} role="group" aria-labelledby={idDelTitulo} data-pieza="resultado-del-recomendador" data-a={rec.a} data-b={rec.b} data-elegida={elegida ?? ''} className="flex flex-col gap-[var(--spacing-8)]">
       <div className="@container flex flex-col gap-[var(--spacing-5)]">
