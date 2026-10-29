@@ -33,7 +33,7 @@ import {
   pxDeLaSalida, pxDelMostradoDeLaCola, type AnchoDelPortfolio,
 } from '../../_secciones/trabajos/portfolio/pasos'
 import { TarjetaDelProyecto } from '../../_secciones/trabajos/portfolio/TarjetaDelProyecto'
-import { tramoDelCarrusel } from '../../_secciones/trabajos/portfolio/tramoDelSelector'
+import { RAMPA_DEL_CARRUSEL, tramoDelCarrusel } from '../../_secciones/trabajos/portfolio/tramoDelSelector'
 import type { PortfolioVivo } from '../../_secciones/trabajos/portfolio/usePortfolio'
 import {
   CRITERIOS_DEL_CARRUSEL, arrastreLibre, cambiosDelIndice, noOcupaLaPantalla, quieto, reinicioDelReloj, rotaSola, vacioMaximo,
@@ -81,10 +81,11 @@ function desvioAfueraDelFlujo(ancho: AnchoDelPortfolio, medio: number, h: number
   const nuevo = pxDeLaSeccionConElCarrusel(medio)
   const antes = PX_DE_LA_APROXIMACION + PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho] + PX_DE_LA_COLA
   const anotado = tramoDelCarrusel({} as Element, ancho, medio)
-  const tramo = { k: anotado.k, arranque: anotado.arranque, largo: anotado.largo }
+  const tramo = { k: anotado.k, arranque: anotado.arranque, largo: anotado.largo, rampa: anotado.rampa }
   let peor = 0
   for (let p = -900; p <= nuevo + 900; p += 10) {
-    if (p >= PX_DE_LA_APROXIMACION && p < pxDeLaSalidaDelCarrusel(medio)) continue
+    // [INT] La aproximación entró al tramo (la escena recupera desde que la sección asoma): afuera es antes de la sección y después del flujo.
+    if (p >= 0 && p < pxDeLaSalidaDelCarrusel(medio)) continue
     const pAntes = p < PX_DE_LA_APROXIMACION ? p : p - (nuevo - antes)
     const n = medida(descontar ? tramo : null, tope, cero + p * escala, tope + nuevo * escala + resto, h)
     const a = medida(null, tope, cero + pAntes * escala, tope + antes * escala + resto, h)
@@ -220,12 +221,32 @@ export function afirmarElCarruselDelPortfolio(): void {
   }
   controlPositivo('sin el descuento del flujo, lo de después se corre', 'movil' as const, (a: AnchoDelPortfolio) => desvioAfueraDelFlujo(a, 1700, 844, false) < 1e-6)
   // [L2] El tramo de antes (sólo el medio, sin la cola): con Demos de una pantalla, todo lo de después llegaría 2.931 px antes.
-  const sinLaCola = (ancho: AnchoDelPortfolio, medio: number): number => {
-    const anotado = tramoDelCarrusel({} as Element, ancho, medio)
-    return anotado.largo === PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho] + PX_DE_LA_COLA && Math.abs(anotado.k * anotado.largo - medio) < 1e-9 ? 0 : 1
+  // [INT] Y desde que la sección asoma: la escena lo ve medir la aproximación, el medio que veía y la cola; él mide la aproximación y el flujo.
+  const conLaCola = (t: { readonly k: number; readonly largo: number; readonly arranque: number }, ancho: AnchoDelPortfolio, medio: number): boolean =>
+    t.arranque === 0 && t.largo === PX_DE_LA_APROXIMACION + PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho] + PX_DE_LA_COLA && Math.abs(t.k * t.largo - (PX_DE_LA_APROXIMACION + medio)) < 1e-9
+  afirmar(conLaCola(tramoDelCarrusel({} as Element, 'movil', 1700), 'movil', 1700) && conLaCola(tramoDelCarrusel({} as Element, 'tablet', 1700), 'tablet', 1700), '[L2] el tramo del carrusel llega al final de la sección: la escena lo ve medir el medio que veía y la cola (2.931), y él mide el flujo; [INT] desde que la sección asoma')
+  controlPositivo('  el detector ve el tramo de antes (la escena vería sólo el medio)', { k: 1700 / PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil, largo: PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil, arranque: PX_DE_LA_APROXIMACION }, (t) => conLaCola(t, 'movil', 1700))
+  controlPositivo('  el detector ve el tramo de L2 (desde el pin: la escena saltaba a ~4,5 veces de golpe)', { k: 1700 / (PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil + PX_DE_LA_COLA), largo: PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil + PX_DE_LA_COLA, arranque: PX_DE_LA_APROXIMACION }, (t) => conLaCola(t, 'movil', 1700))
+
+  // [INT] Sin escalones: la velocidad de la escena (lo que avanza por px de scroll) entra y sale del tramo en rampa. Cada 10 px de la regla, el
+  // mayor cambio de velocidad entre dos muestras seguidas, a 844 de alto, con un flujo de 1.700 (el del teléfono).
+  const mayorEscalon = (tramo: Omit<TramoEstirado, 'panel'>): number => {
+    const [tope, h] = [5073, 844]
+    const escala = h / 900
+    const largo = (PX_DE_LA_APROXIMACION + 1700) * escala
+    const enY = (p: number): number => medida(tramo, tope, tope - h + p * escala, tope + largo + 30000, h).y
+    let [peor, antes] = [0, Number.NaN]
+    for (let p = -300; p <= PX_DE_LA_APROXIMACION + 1700 + 300; p += 10) {
+      const v = (enY(p + 10) - enY(p)) / (10 * escala)
+      if (antes === antes) peor = Math.max(peor, Math.abs(v - antes))
+      antes = v
+    }
+    return peor
   }
-  afirmar(sinLaCola('movil', 1700) === 0 && sinLaCola('tablet', 1700) === 0, '[L2] el tramo del carrusel llega al final de la sección: la escena lo ve medir el medio que veía y la cola (2.931), y él mide el flujo')
-  controlPositivo('  el detector ve el tramo de antes (la escena vería sólo el medio)', { k: 1700 / PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil, largo: PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil }, (t: { readonly k: number; readonly largo: number }) => t.largo === PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil + PX_DE_LA_COLA && Math.abs(t.k * t.largo - 1700) < 1e-9)
+  const delTelefono = tramoDelCarrusel({} as Element, 'movil', 1700)
+  const escalon = mayorEscalon(delTelefono)
+  afirmar(RAMPA_DEL_CARRUSEL > 0 && escalon < 0.25, `[INT] la escena acelera y frena en rampa en el tramo del carrusel: el mayor cambio de velocidad cada 10 px es ${escalon.toFixed(3)} (la de adentro llega a ${(1 / delTelefono.k).toFixed(2)} de media)`)
+  controlPositivo('  el detector ve el tramo sin rampa (de golpe)', { ...delTelefono, rampa: 0 }, (t: Omit<TramoEstirado, 'panel'>) => mayorEscalon(t) < 0.25)
   afirmar(
     PANTALLAS_DESPUES_DEL_FLUJO === 1 && pxDeLaSeccionConElCarrusel(1700) === PX_DE_LA_APROXIMACION + 1700 && PX_DE_LA_SECCION_EN_LA_TABLA === 6813 && /'--alto-minimo-del-panel': '0px'/.test(trabajos) &&
       /panel\?\.style\.setProperty\('min-height', '0px'\)/.test(sinComentarios(leer(`${PORTFOLIO}/useMedioDelCarrusel.ts`))) && /panel\?\.style\.setProperty\('min-height', pisoDeLaTabla\)/.test(sinComentarios(leer(`${PORTFOLIO}/useMedioDelCarrusel.ts`))),

@@ -127,7 +127,8 @@ export function TituloDelServicio({ servicio, fuentes, alineacion, className }: 
   const { id } = servicio
   const t = TITULO_DEL_SERVICIO[id]
   const a = ALINEACION[alineacion]
-  const cursiva = fuentes.claseDeLaCursiva === '' ? 'font-serif' : fuentes.claseDeLaCursiva
+  // [INT] Mientras llega la cursiva (perezosa), la familia de los títulos: `font-serif` no es un token (s6-tokens).
+  const cursiva = fuentes.claseDeLaCursiva === '' ? 'font-titulo' : fuentes.claseDeLaCursiva
   return (
     <h3 id={idDelTituloDelServicio(id)} data-parte="titulo-del-servicio" data-titulo-cursiva={fuentes.cursiva} className={`text-acento text-fluido-display escritorio:text-fluido-display-xl leading-cartel relative w-full max-w-full ${className ?? ''}`}>
       <EnlaceAlServicio id={id} className={`flex flex-col gap-[var(--spacing-2)] no-underline ${a.bloque}`}>

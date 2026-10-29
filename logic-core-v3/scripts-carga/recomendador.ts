@@ -19,6 +19,7 @@
  *               servicio y el mensaje con las respuestas.
  *   ENVIO       con el mensaje editado: éxito (carga → «¡Recibido!» → el formulario vuelve, vacío y precargado de nuevo) y error (carga →
  *               «Algo falló» → vuelve con lo escrito); un pedido por intento, con el mensaje editado, el medio y los intereses del servicio.
+ *               [INT] Y con Enter desde el campo del medio: éxito, vuelven los resultados y la página no salta (≤ 40 px).
  *   REINICIO    «Empezar de nuevo»: la primera etapa, sin nada elegido.
  * Fotos de cada etapa en ~/.cache/b4-medicion/recomendador.
  *
@@ -288,7 +289,7 @@ const MENSAJE_VISTO = `(() => { const m = document.querySelector('${R} [data-par
 /** [L4] El scroll durante el envío: el desvío máximo de la página respecto de donde estaba al tocar «Enviar» (el salto al Portfolio). */
 const SEGUIR_EL_SCROLL = `(() => { const w = window; w.__y0 = w.scrollY; w.__desvio = 0; const mirar = () => { w.__desvio = Math.max(w.__desvio, Math.abs(w.scrollY - w.__y0)); w.__mirando = requestAnimationFrame(mirar) }; cancelAnimationFrame(w.__mirando || 0); mirar() })()`
 
-async function unEnvio(p: Page, modo: 'exito' | 'error', esperado: string): Promise<{ vistas: string[]; visto: boolean; pedidos: number; desvio: number }> {
+async function unEnvio(p: Page, modo: 'exito' | 'error', esperado: string, como: 'clic' | 'enter' = 'clic'): Promise<{ vistas: string[]; visto: boolean; pedidos: number; desvio: number }> {
   servidor.modo = modo
   const antes = servidor.pedidos.length
   await p.evaluate(VISTAS)
@@ -296,8 +297,12 @@ async function unEnvio(p: Page, modo: 'exito' | 'error', esperado: string): Prom
   // El botón a la vista ANTES de seguir el scroll: el desplazamiento que hace Playwright para alcanzarlo no es de la página.
   await enviar.scrollIntoViewIfNeeded()
   await dormir(900)
+  // [INT] Con el teclado: el foco en el campo del medio (a la vista, arriba del botón) antes de seguir el scroll, y Enter.
+  if (como === 'enter') await p.locator('#recomendador-medio').focus()
+  await dormir(como === 'enter' ? 300 : 0)
   await p.evaluate(SEGUIR_EL_SCROLL)
-  await enviar.click()
+  if (como === 'enter') await p.keyboard.press('Enter')
+  else await enviar.click()
   const visto = await esperar(p, `${MENSAJE_VISTO}.includes(${JSON.stringify(esperado)})`, 6000)
   // [L4] Éxito: el contacto se va y vuelven las dos soluciones; error: vuelve el formulario.
   await esperar(p, modo === 'exito' ? `document.querySelector('${R} [data-parte="soluciones"]') !== null` : `document.querySelector('${R} [data-pieza="estado-de-envio"]')?.getAttribute('data-vista') === 'formulario'`, 7000)
@@ -329,6 +334,15 @@ async function envio(p: Page, ancho: number, alto: number, servicio: string): Pr
   const conLoEscrito = await p.evaluate(() => (document.querySelector('#recomendador-nombre') as HTMLInputElement | null)?.value === 'Banco de prueba')
   anotar(error.visto && error.pedidos === 1 && error.vistas.join(',').includes('carga,error') && conLoEscrito, 'ENVIO (error)', ancho, `vistas ${error.vistas.join(' → ')} · «Algo falló» ${error.visto ? 'sí' : 'NO'} · ${String(error.pedidos)} pedido · vuelve ${conLoEscrito ? 'con lo escrito' : 'SIN LO ESCRITO'}`)
   anotar(error.desvio <= SALTO_MAXIMO_PX, 'ENVIO sin salto (error)', ancho, `desvío máximo ${error.desvio.toFixed(0)} px`)
+  // [INT] El mismo envío con Enter desde el campo del medio (lo que L4 no probó): éxito, vuelven los resultados y la página no salta.
+  const conEnter = await unEnvio(p, 'exito', '¡Recibido!', 'enter')
+  const resultadosConEnter = await p.evaluate((r) => document.querySelectorAll(`${r} [data-pieza="tarjeta-de-solucion"]`).length === 2, R)
+  anotar(conEnter.visto && conEnter.pedidos === 1 && resultadosConEnter, 'ENVIO con Enter', ancho, `«¡Recibido!» ${conEnter.visto ? 'sí' : 'NO'} · ${String(conEnter.pedidos)} pedido · ${resultadosConEnter ? 'vuelven los resultados' : 'NO volvieron los resultados'}`)
+  anotar(conEnter.desvio <= SALTO_MAXIMO_PX, 'ENVIO con Enter sin salto', ancho, `desvío máximo ${conEnter.desvio.toFixed(0)} px (tope ${String(SALTO_MAXIMO_PX)})`)
+  // De vuelta al contacto, para que «Empezar de nuevo» esté en su fila.
+  await p.locator(`${R} [data-solucion="${ELEGIDA}"]`).first().click()
+  await esperar(p, "document.querySelector('#recomendador-nombre') !== null", 4000)
+  await dormir(900)
   await foto(p, ancho, alto, '8-despues-del-envio')
 }
 
