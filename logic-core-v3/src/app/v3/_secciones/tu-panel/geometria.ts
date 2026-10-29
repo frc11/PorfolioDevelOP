@@ -71,7 +71,7 @@ export const TIPO = {
   /** [C2 60b] La palabra pálida del título: desde 1024 «LO QUE NOS DISTINGUE» en un renglón (7,67 em) de lado a lado, con el 1,5 % de margen de `MARGEN_DE_LA_PALABRA`. */
   divisorDeLaPalabraDelTitulo: 7.79,
   /** [C2 60b] Abajo de 1024, en dos renglones: lo manda «LO QUE NOS» (3,94 em). */
-  divisorDeLaPalabraDelTituloAngosta: 4,
+  divisorDeLaPalabraDelTituloAngosta: 3.8,
   /** El grosor del subrayado de «TODO», en em. */
   grosorDelSubrayado: 0.055,
 } as const
@@ -94,11 +94,14 @@ export const EM_DE_LA_PALABRA: Readonly<Record<string, number>> = { Clientes: 3.
 export const MARGEN_DE_LA_PALABRA = 1.015
 export const divisorDeLaPalabraAngosta = (palabra: string): number => Number(((EM_DE_LA_PALABRA[palabra] ?? EM_DE_LA_PALABRA.Resultados) * MARGEN_DE_LA_PALABRA).toFixed(3))
 
-/** El alfa de la palabra fundida: la tinta sobre el papel al 1,0595:1 de las palabras del fondo de antes (el «What's new» de nk). */
-export const ALFA_DE_LA_PALABRA = 0.0285
+/** El alfa de la palabra fundida. [L4] Subida de 0,0285 (1,06:1, «casi invisible») a 0,09: la tinta sobre el papel a ~1,2:1, todavía bien por debajo del título. */
+export const ALFA_DE_LA_PALABRA = 0.09
 
-/** [C2 60b] Abajo de 1024, más notoria («en el móvil no se ve mucho»): al 1,13:1, sin dejar de ser pálida. */
-export const ALFA_DE_LA_PALABRA_ANGOSTA = 0.06
+/** [C2 60b] Abajo de 1024, más notoria («en el móvil no se ve mucho»). [L4] Subida de 0,06 a 0,12 (~1,27:1), sin dejar de ser pálida. */
+export const ALFA_DE_LA_PALABRA_ANGOSTA = 0.12
+
+/** [L4] El título de cada columna del CTA abajo de 1024 («Probar el panel», «Suscribite a las novedades»): fluido, de 36 a 52 px. */
+export const TITULO_DE_LA_COLUMNA = { minimoRem: 2.25, vw: 10.5, maximoRem: 3.25 } as const
 
 // ── El ritmo ───────────────────────────────────────────────────────────────
 
@@ -156,7 +159,11 @@ export function variablesDeLaSeccion(): CSSProperties {
     '--alfa-de-la-palabra-angosta': String(ALFA_DE_LA_PALABRA_ANGOSTA),
     '--grosor-del-subrayado': `${TIPO.grosorDelSubrayado}em`,
     '--medida-de-la-bajada': `${40}rem`,
-    '--ancho-del-formulario': `${26}rem`,
+    '--ancho-del-formulario': `${32}rem`,
+    // [L4] La palabra fundida del flujo se mete media vez su alto sobre el título (`lh`: el interlineado de la propia palabra).
+    '--sube-la-palabra': `calc(${0.5}lh * -1)`,
+    // [L4] Los títulos de las dos columnas del CTA abajo de 1024.
+    '--titulo-de-la-columna-angosto': `clamp(${TITULO_DE_LA_COLUMNA.minimoRem}rem,${TITULO_DE_LA_COLUMNA.vw}vw,${TITULO_DE_LA_COLUMNA.maximoRem}rem)`,
   } as CSSProperties
 }
 
@@ -186,18 +193,18 @@ export const CLASE_DEL_GRUPO: Readonly<Record<Lado, string>> = {
 /**
  * LA PALABRA FUNDIDA. Desde 1024, arriba del título, en el flujo, al ancho de su columna sobre `divisorDeLaPalabra`. [C2 60b]
  * Abajo de 1024 DEBAJO del título (detrás, era `?palabra-movil=debajo`: ahora el producto, `union` se borró con la bandera),
- * del ancho de la sección (su divisor, `--divisor-de-esta-palabra`, lo pone la fila) y más notoria; subida un cuarto de su
- * alto para quedar centrada en el título y no en la descripción.
+ * del ancho de la sección (su divisor, `--divisor-de-esta-palabra`, lo pone la fila) y más notoria; subida media vez su
+ * alto [L4]: el tope del título queda en la mitad de la palabra (desde 1024, la del flujo se mete media vez su alto sobre el título).
  */
 export const CLASE_DE_LA_PALABRA =
-  'max-escritorio:absolute max-escritorio:inset-x-0 max-escritorio:top-0 max-escritorio:-z-10 max-escritorio:-translate-y-1/4 text-[length:calc(100cqw/var(--divisor-de-esta-palabra))] escritorio:text-[length:calc(100cqw/var(--divisor-de-la-palabra))] opacity-[var(--alfa-de-la-palabra-angosta)] escritorio:opacity-[var(--alfa-de-la-palabra)]'
+  'max-escritorio:absolute max-escritorio:inset-x-0 max-escritorio:top-0 max-escritorio:-z-10 max-escritorio:-translate-y-1/2 escritorio:mb-[var(--sube-la-palabra)] text-[length:calc(100cqw/var(--divisor-de-esta-palabra))] escritorio:text-[length:calc(100cqw/var(--divisor-de-la-palabra))] opacity-[var(--alfa-de-la-palabra-angosta)] escritorio:opacity-[var(--alfa-de-la-palabra)]'
 
 /**
  * [C2 60b] LA PALABRA PÁLIDA DEL TÍTULO: detrás de él, centrada en su caja, de lado a lado (un renglón desde 1024, dos abajo),
  * con el alfa de las palabras fundidas.
  */
 export const CLASE_DE_LA_PALABRA_DEL_TITULO =
-  'pointer-events-none absolute inset-x-0 top-1/2 -z-10 -translate-y-1/2 select-none whitespace-nowrap text-center font-display font-fuerte uppercase leading-cartel tracking-display text-tinta text-[length:calc(100cqw/var(--divisor-de-la-palabra-del-titulo-angosta))] escritorio:text-[length:calc(100cqw/var(--divisor-de-la-palabra-del-titulo))] opacity-[var(--alfa-de-la-palabra-angosta)] escritorio:opacity-[var(--alfa-de-la-palabra)]'
+  'pointer-events-none absolute inset-x-0 top-0 -z-10 -translate-y-1/2 select-none whitespace-nowrap text-center font-display font-fuerte uppercase leading-cartel tracking-display text-tinta text-[length:calc(100cqw/var(--divisor-de-la-palabra-del-titulo-angosta))] escritorio:text-[length:calc(100cqw/var(--divisor-de-la-palabra-del-titulo))] opacity-[var(--alfa-de-la-palabra-angosta)] escritorio:opacity-[var(--alfa-de-la-palabra)]'
 
 /** [C2 60b] El título abajo de 1024: más grande (su divisor y su tope, nunca menos que el de antes), en sus tres renglones. */
 export const CLASE_DEL_TITULO_ANGOSTO =

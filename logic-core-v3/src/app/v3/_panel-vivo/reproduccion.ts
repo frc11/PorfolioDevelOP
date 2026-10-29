@@ -7,24 +7,20 @@ import { paginaEnMovimiento } from './escenario'
 /**
  * [NOCTURNO] B · CÓMO CORRE UNA DEMO DEL PANEL — el contexto que la demo lee para saber si se mueve sola, y los pasos de
  * su guion. [RETOQUE PANEL] T1 · un solo modo: la demo en su lugar, en la tarjeta, usable (la miniatura y la grande se
- * fueron). Se mueve sola sólo a la vista y con la pestaña visible, con su botón de pausa (WCAG 2.2.2); fuera de cuadro,
+ * fueron). Se mueve sola sólo a la vista y con la pestaña visible, sin botón de pausa [L4]; fuera de cuadro,
  * quieta. Con movimiento reducido no se mueve sola nunca: se avanza a mano.
  */
 export interface Reproduccion {
-  /** Se mueve sola ahora (a la vista, sin pausa, sin movimiento reducido). */
+  /** Se mueve sola ahora (a la vista, sin movimiento reducido). */
   readonly corre: boolean
   readonly reducido: boolean
-  readonly pausada: boolean
-  readonly alternarPausa: () => void
   /** Con la barra lateral del panel: sólo si la pantalla de la demo es ancha (en una angosta se cierra, como en el panel). */
   readonly conBarra: boolean
   /** [AJUSTES FINALES] A8 · en bucle (el teléfono, donde la demo es un video): terminado el guion, un respiro y de nuevo. */
   readonly bucle: boolean
 }
 
-const NADA = (): void => undefined
-
-export const ReproduccionDeLaDemo = createContext<Reproduccion>({ corre: false, reducido: true, pausada: false, alternarPausa: NADA, conBarra: true, bucle: false })
+export const ReproduccionDeLaDemo = createContext<Reproduccion>({ corre: false, reducido: true, conBarra: true, bucle: false })
 
 export function useReproduccion(): Reproduccion {
   return useContext(ReproduccionDeLaDemo)

@@ -64,8 +64,8 @@ export function TarjetaDeLead({ lead, estado, alCambiarEstado, alAbrir, nuevo = 
       <Card variant={alAbrir ? 'interactive' : 'default'} padding="lg">
         {alAbrir && <button type="button" onClick={() => alAbrir(lead.id)} aria-label={`Ver detalle de ${lead.name ?? 'contacto'}`} className="absolute inset-0 z-10 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400" />}
         <div className="pointer-events-none relative z-20">
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <div className="min-w-0">
+          <div className="mb-3 flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+            <div className="min-w-0 max-w-full">
               {/* [RETOQUE PANEL] T1 · el nombre entero (el panel lo cortaba, «Sofí…»): baja de renglón y el «Nuevo» va atrás. */}
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <h3 className="break-words text-base font-semibold text-zinc-100">{lead.name ?? 'Sin nombre'}</h3>
@@ -87,13 +87,13 @@ export function TarjetaDeLead({ lead, estado, alCambiarEstado, alAbrir, nuevo = 
             {!isDq && <Badge variant={ESTADO_DEL_LEAD[estado].variant}>{ESTADO_DEL_LEAD[estado].label}</Badge>}
           </div>
           {clase ? (
-            <div className={`mb-4 flex items-center gap-3 rounded-xl border px-3 py-2.5 ${clase.containerClass}`} aria-label={`Nivel de interés: ${clase.label}${lead.effectiveScore != null ? `, ${String(lead.effectiveScore)} de 100` : ''}`}>
+            <div className={`mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border px-3 py-2.5 ${clase.containerClass}`} aria-label={`Nivel de interés: ${clase.label}${lead.effectiveScore != null ? `, ${String(lead.effectiveScore)} de 100` : ''}`}>
               <clase.icon className={`h-7 w-7 shrink-0 ${clase.iconClass}`} strokeWidth={1.5} aria-hidden />
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 basis-24">
                 <p className={`text-base font-semibold leading-tight ${clase.textClass}`}>{clase.label}</p>
                 <p className="text-[11px] text-zinc-400">{clase.sublabel}</p>
               </div>
-              {lead.effectiveScore != null && <span className="shrink-0 rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-zinc-500" aria-hidden>{lead.effectiveScore}/100</span>}
+              {lead.effectiveScore != null && <span className="ml-auto shrink-0 rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-zinc-500" aria-hidden>{lead.effectiveScore}/100</span>}
             </div>
           ) : isDq ? (
             <div className="mb-4 flex items-center gap-3 rounded-xl border border-zinc-700/50 bg-zinc-800/40 px-3 py-2.5" aria-label="Descartado por el bot">

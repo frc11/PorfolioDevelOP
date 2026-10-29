@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, FolderKanban, Gauge, Gift, Home, LifeBuoy, MessageSquare, Pause, Play, Settings, TrendingUp, Zap, type LucideIcon } from 'lucide-react'
+import { Bot, FolderKanban, Gauge, Gift, Home, LifeBuoy, MessageSquare, Settings, TrendingUp, Zap, type LucideIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -13,7 +13,7 @@ import { useRuedaAdentro, useRuedaLibre } from './rueda'
  * `components/dashboard/DashboardLayoutClient.tsx` (el fondo, los brillos de ambiente, la barra de arriba de vidrio y la
  * superficie del contenido) y `components/dashboard/SidebarNav.tsx` (las secciones de la barra lateral, sus íconos y el
  * ítem activo): la de verdad cierra sesión, lee las notificaciones y navega a `/dashboard/*` (server actions, `<Link>`).
- * Lleva siempre el rótulo «Ejemplo» y, si la demo se mueve sola, la barra de arriba tiene su botón de pausa (WCAG 2.2.2).
+ * Lleva siempre el rótulo «Ejemplo» y, [L4] sin botón de pausa: es el panel de verdad, no una animación.
  * [RETOQUE PANEL] T1 · en su lugar: la barra lateral sólo marca dónde está (sin saltos entre demos) y el contenido scrollea
  * con la rueda. [PASADA FINAL] B1: sólo cuando tiene recorrido hacia donde va la rueda (`rueda.ts` decide `data-lenis-prevent`
  * en cada rueda); en el borde, o sin recorrido, la rueda es de la página, que sigue suave.
@@ -75,7 +75,7 @@ const CLASE_DEL_ITEM = 'relative flex w-full items-center gap-3 rounded-md px-3 
 const ITEM_ACTIVO = 'bg-cyan-500/10 text-cyan-400 shadow-[inset_2px_0_0_0_rgba(6,182,212,1)]'
 const ITEM_QUIETO = 'text-zinc-400'
 
-export function MarcoDelPanel({ item, conPausa = false, encima, children }: { readonly item: ItemDelPanel; readonly conPausa?: boolean; readonly encima?: React.ReactNode; readonly children: React.ReactNode }): React.JSX.Element {
+export function MarcoDelPanel({ item, encima, children }: { readonly item: ItemDelPanel; readonly encima?: React.ReactNode; readonly children: React.ReactNode }): React.JSX.Element {
   const r = useReproduccion()
   const contenido = useRuedaAdentro<HTMLDivElement>()
   const libre = useRuedaLibre()
@@ -115,17 +115,6 @@ export function MarcoDelPanel({ item, conPausa = false, encima, children }: { re
             <p className="truncate text-sm font-semibold text-zinc-200">{NEGOCIO_DE_EJEMPLO}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {conPausa && !r.reducido && (
-              <button
-                type="button"
-                onClick={r.alternarPausa}
-                aria-pressed={r.pausada}
-                className="flex h-9 items-center gap-1.5 rounded-full border border-white/[0.07] bg-zinc-800/40 px-3 text-xs text-zinc-300 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-cyan-400"
-              >
-                {r.pausada ? <Play className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" /> : <Pause className="h-3.5 w-3.5" strokeWidth={1.5} aria-hidden="true" />}
-                <span className="sr-only sm:not-sr-only">{r.pausada ? 'Seguir' : 'Pausar'}</span>
-              </button>
-            )}
             <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-300">{ROTULO_DE_EJEMPLO}</span>
           </div>
         </header>

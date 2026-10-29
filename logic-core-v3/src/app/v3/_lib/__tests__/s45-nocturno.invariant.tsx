@@ -240,11 +240,12 @@ const marco = sinComentarios(fuenteViva(`${CARPETA}/MarcoDelPanel.tsx`))
 // [RETOQUE PANEL] T1 · la miniatura y la grande se fueron: cada demo se usa en su lugar (s6-tu-panel y s46 lo cuidan).
 afirmar(ROTULO_DE_EJEMPLO === 'Ejemplo' && /\{ROTULO_DE_EJEMPLO\}<\/span>/.test(marco), '  el rótulo «Ejemplo» va siempre en el marco')
 // Diferida, pausada fuera de cuadro y accesible.
-const demoEnSuLugar = (c: string): boolean => (c.match(/new IntersectionObserver\(/g) ?? []).length === 2 && /rootMargin: ANTES_DE_ENTRAR/.test(c) && /\{montada && \(/.test(c) && /const corre = laMasVisible && pestana && !pausada && !reducido/.test(c)
-afirmar(demoEnSuLugar(cargador), '  la demo se monta recién al acercarse a la pantalla y corre sólo si es la más visible ([PASADA FINAL] B3), con la pestaña visible, sin pausa y sin movimiento reducido')
+const demoEnSuLugar = (c: string): boolean => (c.match(/new IntersectionObserver\(/g) ?? []).length === 2 && /rootMargin: ANTES_DE_ENTRAR/.test(c) && /\{montada && \(/.test(c) && /const corre = laMasVisible && pestana && !reducido/.test(c)
+afirmar(demoEnSuLugar(cargador), '  la demo se monta recién al acercarse a la pantalla y corre sólo si es la más visible ([PASADA FINAL] B3), con la pestaña visible y sin movimiento reducido (sin botón de pausa: [L4] es el panel de verdad)')
 controlPositivo('el detector VE una demo que se monta siempre', cargador.replace('{montada && (', '{('), demoEnSuLugar)
 const reproduccion = sinComentarios(fuenteViva(`${CARPETA}/reproduccion.ts`))
 afirmar(/if \(!r\.corre \|\| paso >= total\) return undefined/.test(reproduccion), '  los pasos avanzan solos sólo mientras corre (con movimiento reducido, a mano)')
-afirmar(/role="region"\s+aria-label=\{`Demo de \$\{NOMBRE_DE_LA_DEMO\[demo\]\}, con datos de ejemplo`\}/.test(cargador) && /aria-pressed=\{r\.pausada\}/.test(marco) && /data-parte="saltar-la-demo"/.test(cargador), '  es una región con nombre, la que se mueve sola tiene su botón de pausa, y el teclado la puede saltar entera')
+afirmar(/role="region"\s+aria-label=\{`Demo de \$\{NOMBRE_DE_LA_DEMO\[demo\]\}, con datos de ejemplo`\}/.test(cargador) && !/Pausar|pausada|alternarPausa/.test(marco) && !/pausa-del-video|pausada|Pausar la demo/.test(cargador) && /data-parte="saltar-la-demo"/.test(cargador), '  es una región con nombre, sin botón de pausa ([L4]: es el panel de verdad, no una animación), y el teclado la puede saltar entera')
+controlPositivo('  el detector VE el botón de pausa del marco', marco + ' aria-pressed={r.pausada}', (m: string) => !/Pausar|pausada|alternarPausa/.test(m))
 
 cerrar('s45-nocturno')

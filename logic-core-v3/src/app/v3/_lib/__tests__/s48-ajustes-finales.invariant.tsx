@@ -499,9 +499,11 @@ const comoVideo = (c: string): boolean =>
   // candado, `rueda.ts`); bloqueada, como antes: nada que tocar adentro.
   /className=\{`\$\{escalada \? 'absolute top-0 left-0 origin-top-left' : 'absolute inset-0'\}\$\{libre \? '' : ' max-escritorio:pointer-events-none'\}\$\{corre \? '' : ` \$\{CONGELADA\}`\}`\}/.test(c) &&
   c.includes('const libre = useRuedaLibre()') &&
-  /data-parte="pausa-del-video"[\s\S]{0,400}aria-pressed=\{pausada\}[\s\S]{0,600}escritorio:hidden/.test(c) &&
-  c.includes('const corre = laMasVisible && pestana && !pausada && !reducido')
-afirmar(comoVideo(cargadorA8), 'la demo se escala SIEMPRE a su caja (ya no sólo desde 1024: en el teléfono es el mismo panel a escala); abajo de 1024 no recibe el puntero hasta que un toque habilita su módulo ([B6]), va en bucle, y su pausa es un botón afuera de la escala (WCAG 2.2.2), sólo ahí; sigue corriendo sólo la más visible, con la pestaña visible y sin movimiento reducido')
+  // [L4] Sin botón de pausa (el panel de verdad, no una animación): ni el del video ni su estado.
+  !c.includes('pausa-del-video') && !/pausada|Pausar la demo/.test(c) &&
+  c.includes('const corre = laMasVisible && pestana && !reducido')
+afirmar(comoVideo(cargadorA8), 'la demo se escala SIEMPRE a su caja (ya no sólo desde 1024: en el teléfono es el mismo panel a escala); abajo de 1024 no recibe el puntero hasta que un toque habilita su módulo ([B6]), va en bucle, y ya no tiene botón de pausa ([L4]); sigue corriendo sólo la más visible, con la pestaña visible y sin movimiento reducido')
+controlPositivo('  [L4] el detector VE el botón de pausa del video de antes', cargadorA8 + ' data-parte="pausa-del-video"', comoVideo)
 controlPositivo('el detector VE la demo del teléfono de antes (a su alto, sin escala)', cargadorA8.replace('const escalada = dibujo.escala > 0', 'const escalada = escritorio && dibujo.escala > 0'), comoVideo)
 const enBucle = (r: string): boolean => /readonly bucle: boolean/.test(r) && r.includes('bucle: false })') && /if \(!\(r\.corre && r\.bucle\) \|\| paso < total\) return undefined\s*const reloj = window\.setTimeout\(\(\) => setTicks\(0\), cadaMs \* RESPIRO_DEL_BUCLE\)/.test(r) && RESPIRO_DEL_BUCLE >= 1
 afirmar(enBucle(reproduccionA8), 'el bucle: terminado el guion, un respiro (dos pasos) y arranca de nuevo — sólo mientras corre y sólo en bucle (el escritorio, donde la demo se usa, sigue parándose en el último paso)', `${String(RESPIRO_DEL_BUCLE)} pasos de respiro`)

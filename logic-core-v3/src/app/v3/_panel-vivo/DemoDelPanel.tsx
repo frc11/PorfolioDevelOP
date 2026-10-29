@@ -1,6 +1,5 @@
 'use client'
 
-import { Pause, Play } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ComponentType, type LazyExoticComponent, type ReactNode } from 'react'
 
 import { CONSULTA_ESCENARIO } from '../_lib/compuerta'
@@ -20,8 +19,8 @@ import { useRuedaLibre } from './rueda'
  *     tiene su misma proporción ([PASADA FINAL] B1: el panel entero a escala reducida, sin scroll adentro casi nunca).
  *   · Abajo de 1024 ([AJUSTES FINALES] A8): el MISMO panel de escritorio a escala, como un video: sin puntero (nada que
  *     tocar adentro), el guion en bucle (termina, respira y vuelve a empezar: `reproduccion.ts`) y sólo la que está en
- *     pantalla se mueve; su botón de pausa va afuera de la escala, donde se puede tocar (WCAG 2.2.2).
- *   · Se mueve sola sólo a la vista y con la pestaña visible, con su «Pausar» (WCAG 2.2.2); con movimiento reducido, a mano.
+ *     pantalla se mueve.
+ *   · Se mueve sola sólo a la vista y con la pestaña visible, con movimiento reducido, a mano. [L4] Sin botón de pausa (ni en el marco ni en el video del teléfono): es el panel de verdad, no una animación.
  *     [PASADA FINAL] B3: y sólo LA MÁS VISIBLE de las que están en cuadro (`escenario.ts`); las demás, congeladas (sus
  *     pasos no avanzan y sus animaciones de CSS quedan pausadas).
  *   · Debajo queda la captura (`respaldo`): el HTML del servidor, lo que se ve sin JS y mientras la demo llega. B3: el
@@ -81,7 +80,6 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
   const [montada, setMontada] = useState(false)
   // La pantalla a la que se dibuja (la de escritorio, o abajo de 1024 la angosta de su tarjeta) y su escala.
   const [dibujo, setDibujo] = useState<{ readonly pantalla: PantallaDeLaDemo; readonly escala: number }>({ pantalla, escala: 0 })
-  const [pausada, setPausada] = useState(false)
   const reducido = usePrefiereMenosMovimiento()
   const pestana = usePestanaVisible()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
@@ -117,8 +115,8 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
     }
   }, [demo, pantalla, escritorio])
   const Demo = DEMOS[demo]
-  const corre = laMasVisible && pestana && !pausada && !reducido
-  const reproduccion: Reproduccion = { corre, reducido, pausada, alternarPausa: () => setPausada((p) => !p), conBarra: dibujo.pantalla.ancho >= ANCHO_CON_BARRA, bucle: !escritorio }
+  const corre = laMasVisible && pestana && !reducido
+  const reproduccion: Reproduccion = { corre, reducido, conBarra: dibujo.pantalla.ancho >= ANCHO_CON_BARRA, bucle: !escritorio }
   const escalada = dibujo.escala > 0
   return (
     <div ref={caja} className="absolute inset-0 overflow-hidden">
@@ -141,19 +139,6 @@ export function DemoEnSuLugar({ demo, pantalla, respaldo }: { readonly demo: IdD
             </Suspense>
           </ReproduccionDeLaDemo.Provider>
         </div>
-      )}
-      {/* [AJUSTES FINALES] A8 · en el teléfono la demo es un video: su pausa va afuera de la escala, donde se puede tocar. */}
-      {montada && !reducido && (
-        <button
-          type="button"
-          data-parte="pausa-del-video"
-          onClick={() => setPausada((p) => !p)}
-          aria-pressed={pausada}
-          className="absolute right-[var(--spacing-3)] bottom-[var(--spacing-3)] z-30 flex size-[calc(var(--spacing-6)*1.5)] items-center justify-center rounded-full border border-white/10 bg-zinc-900/70 text-zinc-100 focus-visible:outline-2 focus-visible:outline-cyan-400 escritorio:hidden"
-        >
-          {pausada ? <Play className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> : <Pause className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />}
-          <span className="sr-only">{pausada ? 'Seguir la demo' : 'Pausar la demo'}</span>
-        </button>
       )}
     </div>
   )

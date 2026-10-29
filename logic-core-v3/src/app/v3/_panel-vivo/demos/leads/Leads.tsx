@@ -89,7 +89,7 @@ export default function Leads(): React.JSX.Element {
   )
 
   return (
-    <MarcoDelPanel item="chatbot" conPausa>
+    <MarcoDelPanel item="chatbot">
       <div ref={raiz} className="flex flex-col gap-6">
         <EncabezadoDelChatbot activa="leads" />
         {elAbierto !== undefined ? (
