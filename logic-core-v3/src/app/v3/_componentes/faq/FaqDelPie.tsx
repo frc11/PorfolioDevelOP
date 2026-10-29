@@ -26,11 +26,17 @@ export interface PropsDelFaq {
   readonly preguntas: readonly PreguntaFrecuente[]
   readonly pie: string
   readonly colgada?: boolean
+  /**
+   * [L5] En el teléfono y la tablet (abajo de 1024), el FAQ ANTES del pie (71 de la revisión 3: «ahí es más intuitivo»). Quien lo pide monta
+   * dos: `'antes'` (sólo esa lista, en el flujo, arriba del pie; la escena no la ve) y `'despues'` (lo de siempre, salvo esa lista). Sin
+   * `lugar`, lo de siempre en todo ancho (las páginas).
+   */
+  readonly lugar?: 'antes' | 'despues'
 }
 
 const sinCambios = (): (() => void) => () => undefined
 
-export function FaqDelPie({ preguntas, pie, colgada = false }: PropsDelFaq): React.JSX.Element | null {
+export function FaqDelPie({ preguntas, pie, colgada = false, lugar }: PropsDelFaq): React.JSX.Element | null {
   const hidratado = useSyncExternalStore(sinCambios, () => true, () => false)
   const ancho = useAnchoMinimo(CONSULTA_ESCENARIO)
   const reducido = useMovimientoReducido()
@@ -39,6 +45,14 @@ export function FaqDelPie({ preguntas, pie, colgada = false }: PropsDelFaq): Rea
   const pieListo = usePieListo()
   const lista = preguntasDelFaq(preguntas)
   if (lista.length === 0) return null
+  const enElTelefono = hidratado && !ancho
+  if (lugar === 'antes') {
+    return enElTelefono ? (
+      <ModoDelPieForzado.Provider value="plano">
+        <FaqEnLista preguntas={lista} colgada={false} sinEscena />
+      </ModoDelPieForzado.Provider>
+    ) : null
+  }
   const escenario = !hidratado || (ancho && !reducido)
   return (
     <>
@@ -47,7 +61,7 @@ export function FaqDelPie({ preguntas, pie, colgada = false }: PropsDelFaq): Rea
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonParaElScript(datosEstructuradosDelFaq(lista)) }} />
       </div>
       <ModoDelPieForzado.Provider value="plano">
-        {escenario ? <FaqEnEscenario preguntas={lista} pie={pie} volumen={volumen && pieListo} activo={hidratado} /> : <FaqEnLista preguntas={lista} colgada={colgada} />}
+        {escenario ? <FaqEnEscenario preguntas={lista} pie={pie} volumen={volumen && pieListo} activo={hidratado} /> : lugar === 'despues' && enElTelefono ? null : <FaqEnLista preguntas={lista} colgada={colgada} />}
       </ModoDelPieForzado.Provider>
     </>
   )

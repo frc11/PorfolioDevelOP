@@ -290,13 +290,8 @@ const archivo = localFont({
  */
 const pagina125800 = localFont({ src: './_fuentes/archivo-125-800-pagina.woff', variable: '--font-v3-pagina-125-800', weight: '800', style: 'normal', display: 'swap', preload: false })
 const pagina125300 = localFont({ src: './_fuentes/archivo-125-300-pagina.woff', variable: '--font-v3-pagina-125-300', weight: '300', style: 'normal', display: 'swap', preload: false })
-const pagina75800 = localFont({ src: './_fuentes/archivo-75-800-pagina.woff', variable: '--font-v3-pagina-75-800', weight: '800', style: 'normal', display: 'swap', preload: false })
-const pagina75900 = localFont({ src: './_fuentes/archivo-75-900-pagina.woff', variable: '--font-v3-pagina-75-900', weight: '900', style: 'normal', display: 'swap', preload: false })
-const pagina75500 = localFont({ src: './_fuentes/archivo-75-500-pagina.woff', variable: '--font-v3-pagina-75-500', weight: '500', style: 'normal', display: 'swap', preload: false })
-const pagina125200 = localFont({ src: './_fuentes/archivo-125-200-pagina.woff', variable: '--font-v3-pagina-125-200', weight: '200', style: 'normal', display: 'swap', preload: false })
-const pagina125500 = localFont({ src: './_fuentes/archivo-125-500-pagina.woff', variable: '--font-v3-pagina-125-500', weight: '500', style: 'normal', display: 'swap', preload: false })
 const pagina125400 = localFont({ src: './_fuentes/archivo-125-400-pagina.woff', variable: '--font-v3-pagina-125-400', weight: '400', style: 'normal', display: 'swap', preload: false })
-const CARAS_DE_PAGINA = [pagina125800, pagina125300, pagina75800, pagina75900, pagina75500, pagina125200, pagina125500, pagina125400].map((c) => c.variable).join(' ')
+const CARAS_DE_PAGINA = [pagina125800, pagina125300, pagina125400].map((c) => c.variable).join(' ')
 
 export default function DisposicionV3({ children }: { children: React.ReactNode }) {
   return (

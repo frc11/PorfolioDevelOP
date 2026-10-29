@@ -63,7 +63,7 @@ const fuente = (r: string): string => quitarComentarios(leer(r))
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('12 · Los botones del formulario son los del sitio; los errores, en el formato del sitio')
 
-  const DE_MENTIRA: AccionesDelIngreso = { conClave: async () => null, conLink: async () => null, conGoogle: async () => undefined }
+  const DE_MENTIRA: AccionesDelIngreso = { conClave: async () => null, conLink: async () => null, conOlvido: async () => null, conGoogle: async () => undefined }
   const CON_CLAVE = renderToStaticMarkup(<FormularioDelIngreso acciones={DE_MENTIRA} alEntrar={() => undefined} />)
   const CON_LINK = renderToStaticMarkup(<FormularioDelIngreso acciones={DE_MENTIRA} alEntrar={() => undefined} modoInicial="link" />)
   const sinBarra = (h: string): boolean => /data-pieza="cta" data-variante="linea"/.test(h) && !/data-variante="bloque"/.test(h)
@@ -75,7 +75,7 @@ const fuente = (r: string): string => quitarComentarios(leer(r))
     return fila !== null && fila[1].indexOf(ROTULOS_DEL_INGRESO.olvido) >= 0 && fila[1].indexOf(ROTULOS_DEL_INGRESO.olvido) < fila[1].indexOf('data-pieza="cta"')
   }
   afirmar(aLaDerechaDelOlvido(CON_CLAVE), '  «Ingresar» va a la derecha de «¿Olvidaste tu contraseña?», en el mismo renglón')
-  controlPositivo('  el detector VE el botón antes del enlace', CON_CLAVE.replace(/(<a href="[^"]*forgot-password"[\s\S]*?<\/a>)(<button[\s\S]*?<\/button>)/, '$2$1'), aLaDerechaDelOlvido)
+  controlPositivo('  el detector VE el botón antes del enlace', CON_CLAVE.replace(/(<button type="button" data-parte="olvido"[\s\S]*?<\/button>)(<button type="submit"[\s\S]*?<\/button>)/, '$2$1'), aLaDerechaDelOlvido)
   const abajoALaDerecha = (h: string): boolean => /<div class="flex justify-end[^"]*"><button type="submit" data-pieza="cta"/.test(h)
   afirmar(abajoALaDerecha(CON_LINK), '  y «Enviar Magic Link», abajo a la derecha')
   controlPositivo('  el detector VE el botón a la izquierda', CON_LINK.replace('flex justify-end', 'flex justify-start'), abajoALaDerecha)

@@ -23,9 +23,10 @@ export function BotonDelFaq({ alTocar }: { readonly alTocar: () => void }): Reac
   // En la pantalla del pie y recortado a ella (como el FAQ): su DOM, llevado sobre la placa, no le suma desborde al documento.
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-svh overflow-clip">
-      <div className="absolute inset-x-0 bottom-[var(--spacing-10)] flex justify-center">
-        <div ref={placa} data-bloque-del-faq="boton" data-seccion="invertida" style={OCULTO} inert className="pointer-events-auto relative overflow-hidden rounded-[var(--radius-pastilla-s)] px-[var(--spacing-4)] py-[var(--spacing-2)]">
-          <AvisoDeScroll texto={TEXTO_DEL_BOTON_DEL_FAQ} alTocar={alTocar} className="max-w-[calc(var(--spacing-20)*3.5)] text-balance" />
+      {/* [L5] Más abajo y la frase en un renglón (lote2/14). */}
+      <div className="absolute inset-x-0 bottom-[var(--spacing-4)] flex justify-center">
+        <div ref={placa} data-bloque-del-faq="boton" data-seccion="invertida" style={OCULTO} inert className="pointer-events-auto relative overflow-hidden rounded-[var(--radius-pastilla-s)] px-[var(--spacing-6)] py-[var(--spacing-2)]">
+          <AvisoDeScroll texto={TEXTO_DEL_BOTON_DEL_FAQ} alTocar={alTocar} className="whitespace-nowrap" />
           <Reluciente />
         </div>
       </div>

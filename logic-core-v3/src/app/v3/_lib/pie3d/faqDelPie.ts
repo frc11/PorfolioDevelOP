@@ -170,6 +170,12 @@ export interface BloqueDelFaq {
   readonly elemento: HTMLElement
   /** Cuánto está arriba (0: hundido y el piso cerrado; 1: en su lugar). Lo escribe el cuadro del FAQ; el del botón, la escena. */
   nivel: number
+  /**
+   * [L5] El cambio de lo que muestra (la respuesta): su tiempo (0 a 1) mientras corre, o `null`. Con él, el bloque hace EXACTAMENTE el cambio
+   * del formulario del pie (`pisoDelHundimiento`: la placa baja entera por su hueco abierto, el piso se cierra encima y vuelve), no la
+   * subida de la entrada (lote2/19: «no se guarda todo el coso negro»).
+   */
+  cambio: number | null
 }
 
 export const BLOQUES_DEL_FAQ = new Map<IdDelBloqueDelFaq, BloqueDelFaq>()
@@ -178,7 +184,7 @@ let versionDeLosBloques = 0
 export const versionDelFaqDeVolumen = (): number => versionDeLosBloques
 
 export function anotarElBloqueDelFaq(id: IdDelBloqueDelFaq, elemento: HTMLElement): () => void {
-  BLOQUES_DEL_FAQ.set(id, { id, elemento, nivel: 0 })
+  BLOQUES_DEL_FAQ.set(id, { id, elemento, nivel: 0, cambio: null })
   versionDeLosBloques += 1
   return () => {
     if (BLOQUES_DEL_FAQ.get(id)?.elemento === elemento) BLOQUES_DEL_FAQ.delete(id)

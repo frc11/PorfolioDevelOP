@@ -132,9 +132,9 @@ export function tramoDeLasResenas(panel: Element, corrido = 0): TramoEstirado {
   return { panel, k: K_DE_LAS_RESENAS, arranque: R + corrido + INSERCION_DE_LAS_RESENAS * R, largo: LARGO_SIN_ESTIRAR_PX }
 }
 
-/** La bandera de la entrada: `?resenas=gatillo` (por defecto desde C2-70: una animación por tiempo en la entrada y en la salida) o `?resenas=scroll` (todo atado al scroll). */
+/** La bandera de la entrada: `?resenas=scroll` (por defecto desde L5: la entrada atada al scroll) o `?resenas=gatillo` (la entrada por tiempo). La salida es siempre un gatillo (L5). */
 export type VarianteDeLasResenas = 'scroll' | 'gatillo'
-export const varianteDeLaBandera = (valor: string | null): VarianteDeLasResenas => (valor === 'scroll' ? 'scroll' : 'gatillo')
+export const varianteDeLaBandera = (valor: string | null): VarianteDeLasResenas => (valor === 'gatillo' ? 'gatillo' : 'scroll')
 
 /**
  * [C2-70e] La bandera de PRUEBA de los bancos (`scripts-carga/resenas-volteo.ts`), para su control positivo: `?resenas-control=sin-juntar` (las

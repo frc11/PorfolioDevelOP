@@ -1,12 +1,12 @@
 'use client'
 
-import { motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'motion/react'
-import { createContext, useContext, useEffect, useRef, useSyncExternalStore, type RefObject } from 'react'
+import { animate, motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'motion/react'
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { CTA_EN_VIVO, avisarDelLugar, ctaListo, ctaVisibleEnElViaje, suscribirAlCta, type RenglonDelCta } from '../../_lib/escena/ctaDelFinal/enVivo'
-import { apareceDeLosValores, ctaTocable, deslizadoEnLaLista, entradaEnLaLista, llegadaDelTexto, progresoEnLaLista, tocableEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
+import { GATILLO_EN_LA_LISTA, apareceDeLosValores, ctaTocable, deslizadoEnLaLista, entradaEnLaLista, llegadaDelTexto, objetivoEnLaLista, progresoEnLaLista, tocableEnLaLista } from '../../_lib/escena/ctaDelFinal/transformacion'
 import { suscribirAlViaje, viajeEnCurso } from '../../_lib/escena/viaje'
 import { Reluciente } from '../efectos/Reluciente'
 import type { IdDeServicio } from '../../_secciones/_contrato/acento'
@@ -52,13 +52,24 @@ export function useProgresoDelCta(progreso: MotionValue<number>, donde: 'escenar
  * contenido clavado): 0 con su borde de arriba en el de la pantalla, 1 con su borde de abajo en el de la pantalla. Con
  * movimiento reducido, 1: el estado final directo.
  */
-export function MedirLaLista({ caja, progreso, entrada }: { readonly caja: RefObject<HTMLElement | null>; readonly progreso: MotionValue<number>; readonly entrada: MotionValue<number> }): null {
+export function MedirLaLista({ caja, progreso, entrada, gatillo = false }: { readonly caja: RefObject<HTMLElement | null>; readonly progreso: MotionValue<number>; readonly entrada: MotionValue<number>; readonly gatillo?: boolean }): null {
   const quieto = useReducedMotion() === true
   const { scrollYProgress } = useScroll({ target: caja, offset: ['start start', 'end end'] })
+  // [L5] Con `gatillo`, la transformación se dispara y corre por tiempo (`GATILLO_EN_LA_LISTA`); la entrada sigue al scroll.
+  const objetivo = useRef<0 | 1>(0)
+  const animacion = useRef<ReturnType<typeof animate> | null>(null)
   const poner = (r: number): void => {
-    progreso.set(quieto ? 1 : progresoEnLaLista(r))
     entrada.set(quieto ? 1 : entradaEnLaLista(r))
     CTA_EN_VIVO.entrada = entrada.get()
+    if (!gatillo || quieto) {
+      progreso.set(quieto ? 1 : progresoEnLaLista(r))
+      return
+    }
+    const siguiente = objetivoEnLaLista(r, objetivo.current)
+    if (siguiente === objetivo.current) return
+    objetivo.current = siguiente
+    animacion.current?.stop()
+    animacion.current = animate(progreso, siguiente, { duration: GATILLO_EN_LA_LISTA.duracionS * Math.abs(siguiente - progreso.get()), ease: 'linear' })
   }
   useMotionValueEvent(scrollYProgress, 'change', poner)
   useEffect(() => {
@@ -67,6 +78,7 @@ export function MedirLaLista({ caja, progreso, entrada }: { readonly caja: RefOb
       CTA_EN_VIVO.entrada = 1
     }
   })
+  useEffect(() => () => animacion.current?.stop(), [])
   return null
 }
 
@@ -179,6 +191,9 @@ export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista 
   }, [])
   const tocable = enLaLista ? tocableEnLaLista : ctaTocable
   const pointerEvents = useTransform(progreso, (p) => (tocable(p) ? 'auto' : 'none'))
+  // [L5] El reflejo, sólo con el CTA llegado: escondido, su franja (con la mezcla del texto) se veía delante del logo (lote2/10).
+  const [llego, setLlego] = useState(() => tocable(progreso.get()))
+  useMotionValueEvent(progreso, 'change', (p) => setLlego(tocable(p)))
   const llegada = useTransform(progreso, enLaLista ? deslizadoEnLaLista : llegadaDelTexto)
   const precarga = useContext(PrecargaDelCta)
   return (
@@ -228,7 +243,7 @@ export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista 
         {rotulo.toUpperCase()}
       </motion.span>
       {/* [C2-70] «HABLANOS» se toca: el reflejo de Reluciente pasa por la caja del enlace (sigue a las letras de la escena, A1). */}
-      <Reluciente />
+      {llego && <Reluciente />}
     </motion.a>
   )
 }

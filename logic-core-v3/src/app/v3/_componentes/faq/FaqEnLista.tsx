@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 import { useTonoDebajo } from '../../_chrome/menu/useTonoDebajo'
+import { useTramoDelBloque } from '../../_lib/escena/useTramoDelBloque'
 import { tomarLosGestos } from '../../_lib/gestosDelScroll'
 import { useMovimientoReducido } from '../../_lib/motion/reducido'
 import { ATRIBUTO_DEL_FAQ } from '../../_lib/pie3d/faqDelPie'
@@ -30,8 +31,10 @@ import { IDS_DEL_FAQ, TEXTOS_DEL_FAQ, type PreguntaFrecuente } from './preguntas
  * fondo del pie, como siempre) y la escena (las secciones) no se corre. Mientras se ve, los gestos de scroll son de la página: el final no
  * los retiene para rebobinar el encastre que la lista tapa.
  */
-export function FaqEnLista({ preguntas, colgada }: { readonly preguntas: readonly PreguntaFrecuente[]; readonly colgada: boolean }): React.JSX.Element {
+// [L5] `sinEscena`: en el flujo antes del pie (el home en el teléfono), un tramo que la escena no ve (REGLA DE ALTURAS: el final no se corre).
+export function FaqEnLista({ preguntas, colgada, sinEscena = false }: { readonly preguntas: readonly PreguntaFrecuente[]; readonly colgada: boolean; readonly sinEscena?: boolean }): React.JSX.Element {
   const raiz = useRef<HTMLDivElement | null>(null)
+  useTramoDelBloque(raiz, () => sinEscena)
   const sonda = useRef<HTMLSpanElement | null>(null)
   const botones = useRef<(HTMLButtonElement | null)[]>([])
   const [abierta, setAbierta] = useState<number | null>(null)
@@ -86,6 +89,8 @@ export function FaqEnLista({ preguntas, colgada }: { readonly preguntas: readonl
           <Titular nivel="titulo-m" como="h2" id={IDS_DEL_FAQ.titulo} className="text-balance">
             {TEXTOS_DEL_FAQ.titulo}
           </Titular>
+          {/* [L5] La introducción, como en escritorio. */}
+          <Cuerpo className="text-pretty">{TEXTOS_DEL_FAQ.intro}</Cuerpo>
           <ul role="list" className="flex flex-col">
             {preguntas.map((p, i) => (
               <FilaDelFaq

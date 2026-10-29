@@ -92,10 +92,12 @@ const juntos = (c: string, h: string): boolean =>
   c.includes('if (hundePorColumnas()) return hundirConSuColumna(grupo, col)') &&
   /const k = columnaDelHundimiento\(SALIDA_EN_VIVO\.delFaq\)\s*grupo\.position\.y -= hondoDeLaColumna\(col\) \* k\.baja/.test(h) &&
   h.includes('formas[k].set(enColumnas.abre, C.radio, hondoDeLaColumna(c.columnas[j]) * enColumnas.baja, 1)') &&
-  h.includes('if (porColumnas && enColumnas.abre > 0 && adentroDeSuColumna(c, i, enColumnas.abre)) continue')
+  // [L5] y ninguno con la columna ya hundida y su piso cerrado (se volvían a abrir sobre las piezas hundidas: lote2/15).
+  h.includes('if (porColumnas && (enColumnas.abre > 0 ? adentroDeSuColumna(c, i, enColumnas.abre) : enColumnas.baja > 0)) continue')
 afirmar(juntos(caida, huecos), 'en la escena, cada pieza de la columna y el fondo de su hueco bajan lo mismo; los huecos de las placas que ya quedaron adentro de la silueta abierta no se escriben (sus paredes no quedan paradas sobre la plataforma)')
 controlPositivo('  el detector ve un fondo que no acompaña a la columna', huecos.replace('hondoDeLaColumna(c.columnas[j]) * enColumnas.baja', 'hondoDeLaColumna(c.columnas[j])'), (h) => juntos(caida, h))
-controlPositivo('  y los huecos de las placas que siguen parados', huecos.replace('if (porColumnas && enColumnas.abre > 0 && adentroDeSuColumna(c, i, enColumnas.abre)) continue', ''), (h) => juntos(caida, h))
+controlPositivo('  y los huecos de las placas que siguen parados', huecos.replace('if (porColumnas && (enColumnas.abre > 0 ? adentroDeSuColumna(c, i, enColumnas.abre) : enColumnas.baja > 0)) continue', ''), (h) => juntos(caida, h))
+controlPositivo('  [L5] y los que se volvían a abrir con la columna ya hundida (la condición de antes)', huecos.replace('if (porColumnas && (enColumnas.abre > 0 ? adentroDeSuColumna(c, i, enColumnas.abre) : enColumnas.baja > 0)) continue', 'if (porColumnas && enColumnas.abre > 0 && adentroDeSuColumna(c, i, enColumnas.abre)) continue'), (h) => juntos(caida, h))
 const todasLasPiezas = (h: string): boolean => /for \(let i = 0; i < n; i \+= 1\) \{\s*const p = c\.piezas\[i\]\s*const h = huellaFinal\(c, i\)/.test(h) && !/if \(!p\.conSombra\) continue[\s\S]*H\[j\] = Math\.min/.test(h)
 afirmar(todasLasPiezas(huecos), 'la base de cada columna es la huella de TODAS sus piezas (los textos también: la izquierda ya no se hunde atravesando el piso)')
 controlPositivo('  el detector ve una base sólo de las placas (la izquierda, sin base)', huecos.replace('    const h = huellaFinal(c, i)', '    if (!p.conSombra) continue\n    const h = huellaFinal(c, i)'), todasLasPiezas)
@@ -144,9 +146,10 @@ controlPositivo('  el detector ve un bloque plano (el vidrio de antes, sin volum
 const medidasBien = (f: (ancho: number, alto: number) => MedidasDelFaq): boolean => {
   const m = f(480, 450)
   const alto = (x: React.CSSProperties | undefined): number => Number(x?.minHeight ?? 0)
-  return m.respuesta?.width === 480 && alto(m.respuesta) === 450 && m.preguntas?.width === 480 && alto(m.preguntas) > 450 && alto(m.preguntas) !== Number(m.preguntas?.width) && Object.keys(f(0, 0)).length === 0
+  return m.respuesta?.width === 480 && alto(m.respuesta) === 450 && m.preguntas?.width === 480 && alto(m.preguntas) >= 450 && alto(m.preguntas) !== Number(m.preguntas?.width) && Object.keys(f(0, 0)).length === 0
 }
-afirmar(medidasBien(medidasDelFaq), 'la derecha, del tamaño del formulario (crece si una respuesta no entra); la izquierda, de su ancho y más alta (no cuadrada)', `×${String(MEDIDAS_DEL_FAQ.masAlto)}`)
+afirmar(medidasBien(medidasDelFaq), 'la derecha, del tamaño del formulario (crece si una respuesta no entra); la izquierda, de su ancho y [L5] por lo menos de su alto (era más alta: el espacio vacío abajo, lote2/17; no cuadrada)', `×${String(MEDIDAS_DEL_FAQ.masAlto)}`)
+controlPositivo('  el detector ve la izquierda más baja que el formulario', (a: number, h: number) => ({ respuesta: { width: a, minHeight: h }, preguntas: { width: a, minHeight: h - 40 } }), medidasBien)
 controlPositivo('  el detector ve la izquierda cuadrada', (a: number, h: number) => ({ respuesta: { width: a, minHeight: h }, preguntas: { width: a, minHeight: a } }), medidasBien)
 
 const enVolumen = renderToStaticMarkup(<FaqEnEscenario preguntas={PREGUNTAS_DEL_HOME} pie="#cierre" volumen activo={false} />)

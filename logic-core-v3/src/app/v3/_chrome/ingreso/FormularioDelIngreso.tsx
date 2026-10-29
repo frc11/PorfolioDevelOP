@@ -10,6 +10,7 @@ import { MarcaDeGoogle } from './CamposDelIngreso'
 import { ROTULOS_DEL_INGRESO } from './contenido'
 import { REPOSO, resolverElIngreso, type AccionesDelIngreso, type Resultado } from './envio'
 import { ConClave, ConLink } from './FormulariosConEmail'
+import { OlvidoDeLaClave } from './OlvidoDeLaClave'
 import { bajarElTelon } from './telon'
 
 /**
@@ -42,6 +43,9 @@ export function FormularioDelIngreso({
 }): React.JSX.Element {
   const [modo, setModo] = useState<Modo>(modoInicial)
   const [ocupado, setOcupado] = useState(false)
+  // [L6 · 80] «¿Olvidaste tu contraseña?»: otra vista de la misma hoja (el aviso y el error, con la estética de hoy), sin salir del login nuevo.
+  const [olvido, setOlvido] = useState(false)
+  if (olvido) return <OlvidoDeLaClave acciones={acciones} alVolver={() => setOlvido(false)} alOcupar={setOcupado} />
   return (
     <div className="flex flex-col gap-[var(--spacing-5)]">
       <ConGoogle acciones={acciones} alEntrar={alEntrar} bloqueado={ocupado} alOcupar={setOcupado} />
@@ -72,7 +76,7 @@ export function FormularioDelIngreso({
       </div>
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={modo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18, ease: CURVA }}>
-          {modo === 'clave' ? <ConClave acciones={acciones} alEntrar={alEntrar} alOcupar={setOcupado} /> : <ConLink acciones={acciones} alOcupar={setOcupado} />}
+          {modo === 'clave' ? <ConClave acciones={acciones} alEntrar={alEntrar} alOcupar={setOcupado} alOlvidar={() => setOlvido(true)} /> : <ConLink acciones={acciones} alOcupar={setOcupado} />}
         </motion.div>
       </AnimatePresence>
     </div>

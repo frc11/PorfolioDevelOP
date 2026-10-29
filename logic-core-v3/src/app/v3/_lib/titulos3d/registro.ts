@@ -13,7 +13,7 @@ import { alCargarseLasFuentes, conReimpresion } from '../fuentes'
 /** [RETOQUE 3D] Con qué fuente se extruye (la que el DOM pinta: `scripts-retoque/fuentes-3d.py`). */
 export type FuenteDelHome = 'chivo-400' | 'archivo-700' | 'chivo-300-italica' | 'chivo-700' | 'chivo-300'
 /** [B12a.4] Las del título de las páginas: instancias de Archivo (ancho/peso) que se cargan sólo en una página (`fuentesDePagina.ts`). */
-export type FuenteDePagina = 'archivo-125-800' | 'archivo-125-300' | 'archivo-75-800' | 'archivo-75-900' | 'archivo-75-500' | 'archivo-125-200' | 'archivo-125-500' | 'archivo-125-400'
+export type FuenteDePagina = 'archivo-125-800' | 'archivo-125-300' | 'archivo-125-400'
 export type FuenteDelTitulo = FuenteDelHome | FuenteDePagina
 
 /**

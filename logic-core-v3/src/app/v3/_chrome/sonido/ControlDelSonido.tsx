@@ -40,7 +40,8 @@ const ENLACES_Y_BOTONES = 'a[href], button, [role="button"], summary'
 /** [RETOQUE 3D] La barra (la pastilla, la esquina y el menú del teléfono) y los CTA: [CIERRE RETOQUE 3D] S1 · su clic, el pestillo. */
 const DE_LA_BARRA = '[data-pieza="barra"] a, [data-pieza="menu-movil"] [data-parte="item-del-menu"]'
 // [RONDA 2] F5 · y las piezas del pie (desde 1025): el hover, el tic; el clic, el pestillo, como una tecla.
-const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto], [data-pieza="bloque-solido"][data-solido]`
+// [L5] Y el WhatsApp del FAQ de volumen, que suena como el del pie.
+const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto], [data-pieza="bloque-solido"][data-solido], [data-bloque-del-faq="whatsapp"]`
 /** [RETOQUE PANEL] T2 · las demos de Tu panel: sin clic propio; lo que se toca adentro suena el pestillo de la barra y los CTA. */
 const DE_LAS_DEMOS_DEL_PANEL = '[data-pieza="demo-del-panel"]'
 

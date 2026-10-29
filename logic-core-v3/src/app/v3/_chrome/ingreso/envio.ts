@@ -62,6 +62,8 @@ export function validarIngreso(d: DatosDelIngreso): ErroresDelIngreso {
 export interface AccionesDelIngreso {
   readonly conClave: (previo: string | null, datos: FormData) => Promise<string | null>
   readonly conLink: (previo: string | null, datos: FormData) => Promise<string | null>
+  /** [L6 · 80] Recuperar la contraseña: `LINK_ENVIADO` si salió, un texto si es un error ya escrito. */
+  readonly conOlvido: (previo: string | null, datos: FormData) => Promise<string | null>
   readonly conGoogle: () => Promise<void>
 }
 

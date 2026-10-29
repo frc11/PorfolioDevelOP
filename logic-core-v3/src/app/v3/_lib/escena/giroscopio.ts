@@ -33,7 +33,7 @@ export type EstadoDelGiroscopio = 'apagado' | 'pidiendo' | 'prendido' | 'negado'
 export const INCLINACION_DEL_TELEFONO = { x: 0, y: 0, activa: false, estado: 'apagado' as EstadoDelGiroscopio }
 
 /** [C2-81] Los defectos para los controles de los bancos (`window.__defectosDelMovimiento`, nunca la URL). */
-export type DefectoDelMovimiento = 'sin-camara' | 'sin-moire' | 'sin-permiso' | 'prendido-por-defecto' | 'sin-movimiento'
+export type DefectoDelMovimiento = 'sin-camara' | 'sin-moire' | 'sin-permiso' | 'prendido-por-defecto' | 'sin-movimiento' | 'sin-reintento'
 
 export function defectoDelMovimiento(): DefectoDelMovimiento | null {
   if (typeof window === 'undefined') return null
@@ -132,6 +132,20 @@ const soltar = (): void => {
   document.removeEventListener('visibilitychange', alCambiarLaVisibilidad)
 }
 
+/** Con el permiso ya resuelto: el estado `prendido`, el oyente del sensor y el vigía (sin lecturas en `sinSensorMs`, queda `sin-sensor`). */
+function encender(): void {
+  cambiar('prendido')
+  conLectura = false
+  escuchar()
+  document.addEventListener('visibilitychange', alCambiarLaVisibilidad)
+  window.clearTimeout(vigia)
+  vigia = window.setTimeout(() => {
+    if (conLectura || INCLINACION_DEL_TELEFONO.estado !== 'prendido' || document.visibilityState !== 'visible') return
+    soltar()
+    cambiar('sin-sensor')
+  }, GIROSCOPIO.sinSensorMs)
+}
+
 /**
  * Prende el giroscopio: se llama DESDE el gesto (iOS lo exige para el permiso). Sin sensor o negado, queda apagado y no se vuelve a
  * pedir. [C2-81] Con movimiento reducido también se puede (a mano).
@@ -142,25 +156,30 @@ export function prenderElGiroscopio(): void {
     cambiar('sin-sensor')
     return
   }
-  const prender = (): void => {
-    cambiar('prendido')
-    conLectura = false
-    escuchar()
-    document.addEventListener('visibilitychange', alCambiarLaVisibilidad)
-    window.clearTimeout(vigia)
-    vigia = window.setTimeout(() => {
-      if (conLectura || INCLINACION_DEL_TELEFONO.estado !== 'prendido' || document.visibilityState !== 'visible') return
-      soltar()
-      cambiar('sin-sensor')
-    }, GIROSCOPIO.sinSensorMs)
-  }
   if (!pidePermiso()) {
-    prender()
+    encender()
     return
   }
   cambiar('pidiendo')
-  const negado = (): void => (defectoDelMovimiento() === 'sin-permiso' ? prender() : cambiar('negado'))
-  ;(DeviceOrientationEvent as unknown as Required<ConPermiso>).requestPermission().then((r) => (r === 'granted' ? prender() : negado()), negado)
+  const negado = (): void => (defectoDelMovimiento() === 'sin-permiso' ? encender() : cambiar('negado'))
+  ;(DeviceOrientationEvent as unknown as Required<ConPermiso>).requestPermission().then((r) => (r === 'granted' ? encender() : negado()), negado)
+}
+
+/**
+ * [L6] Prende el giroscopio SIN gesto, para retomar lo de la sesión al recargar: pide el permiso y, si el aparato lo concede sin toque (Chrome
+ * lo hace), queda prendido y devuelve `true`. Si lo rechaza (iOS lo exige desde un gesto) o no hay nada que pedir, no toca el estado (sigue
+ * `apagado`: el primer toque lo prende como siempre) y devuelve `false`.
+ */
+export async function prenderSinGesto(): Promise<boolean> {
+  if (INCLINACION_DEL_TELEFONO.estado !== 'apagado' || typeof window === 'undefined' || !pidePermiso() || defectoDelMovimiento() === 'sin-reintento') return false
+  try {
+    const r = await (DeviceOrientationEvent as unknown as Required<ConPermiso>).requestPermission()
+    if (r !== 'granted' || INCLINACION_DEL_TELEFONO.estado !== 'apagado') return false
+    encender()
+    return true
+  } catch {
+    return false
+  }
 }
 
 /** Lo apaga (el botón del movimiento). */

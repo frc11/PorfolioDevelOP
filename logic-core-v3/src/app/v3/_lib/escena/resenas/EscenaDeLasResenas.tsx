@@ -15,7 +15,7 @@ import { ARO, HONDO_DE_LA_BAJADA, curvaDeLaEntrada, escalaDelAro, finDeLaEntrada
 import { RESENAS_EN_VIVO, TARJETAS_DEL_ARO, ponerLaResena } from './enVivo'
 import { armarLasPlacas, enLaNiebla, geometriaDeLaPlaca, soltarLasPlacas, type PlacaArmada } from './placas'
 import { abrirElHueco, armarElHueco, soltarElHueco, type HuecoArmado } from './huecoDelAro'
-import { cajaDelLogo, esconderLasTarjetas, llevarLaTarjeta, nuevaCaja, nuevaTarjeta, tamanoDeLasTarjetas, type CajaEnElCuadro, type EstadoDeLaTarjeta } from './tarjetas'
+import { cajaDeLaPlaca, cajaDelLogo, esconderLasTarjetas, llevarLaTarjeta, nuevaCaja, nuevaTarjeta, tamanoDeLasTarjetas, type CajaEnElCuadro, type EstadoDeLaTarjeta } from './tarjetas'
 
 /**
  * [NOCTURNO B2] EL ARO DE LAS RESEÑAS EN LA ESCENA (en su módulo, que se descarga aparte y sólo desde 1024) — diez placas de papel con
@@ -38,11 +38,13 @@ interface Estado {
   readonly tamano: { ancho: number }
   /** [C2-70] La caja del logo en el cuadro (px), en cada cuadro: el texto de la nuca de una placa de atrás no se pinta encima del logo. */
   readonly logo: CajaEnElCuadro
+  /** [L5] Cada placa en este cuadro y las cajas de las que están delante de la que se lleva (reusadas: sin basura). */
+  readonly cuadros: PlacaEnElCuadro[]
+  readonly delante: CajaEnElCuadro[]
   costoMs: number
 }
 
 const POSE = nuevaPose()
-const CENTRO = new THREE.Vector3()
 
 const CAJA = new THREE.Box3() // banco
 const ESQUINA = new THREE.Vector3() // banco
@@ -67,7 +69,7 @@ export default function EscenaDeLasResenas() {
   const escena = useThree((s) => s.scene)
   const tam = useThree((s) => s.size)
   const raiz = useRef<THREE.Group>(null)
-  const m = useRef<Estado>({ placas: [], geometria: null, hueco: null, giro: { angulo: 0, velocidad: 0 }, levante: Array.from({ length: ARO.placas }, () => 0), tarjetas: Array.from({ length: ARO.placas }, nuevaTarjeta), tamano: { ancho: 0 }, logo: nuevaCaja(), costoMs: 0 })
+  const m = useRef<Estado>({ placas: [], geometria: null, hueco: null, giro: { angulo: 0, velocidad: 0 }, levante: Array.from({ length: ARO.placas }, () => 0), tarjetas: Array.from({ length: ARO.placas }, nuevaTarjeta), tamano: { ancho: 0 }, logo: nuevaCaja(), cuadros: Array.from({ length: ARO.placas }, nuevaPlacaEnElCuadro), delante: [], costoMs: 0 })
 
   // Las placas, con la medida de esta proporción (se rearman sólo si cambia la escala del aro).
   const escala = escalaDelAro(tam.width / Math.max(1, tam.height))
@@ -80,7 +82,7 @@ export default function EscenaDeLasResenas() {
     const placas = armarLasPlacas(geometria)
     for (const p of placas) g.add(p.malla)
     const hueco = armarElHueco(medidas.radio, escala)
-    g.add(hueco.malla)
+    g.add(hueco.grupo)
     s.placas = placas
     s.geometria = geometria
     s.hueco = hueco
@@ -88,7 +90,7 @@ export default function EscenaDeLasResenas() {
     return () => {
       for (const p of placas) g.remove(p.malla)
       soltarLasPlacas(placas, geometria)
-      g.remove(hueco.malla)
+      g.remove(hueco.grupo)
       soltarElHueco(hueco)
       s.placas = []
       s.geometria = null
@@ -141,6 +143,8 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
   grupo.visible = activo
   if (!activo || !(camara instanceof THREE.PerspectiveCamera)) {
     esconderLasTarjetas(TARJETAS_DEL_ARO, s.tarjetas)
+    // [L5] Sin el aro, el piso entero (el anillo cerrado).
+    if (s.hueco !== null) abrirElHueco(s.hueco, 0)
     return
   }
   const armado = e >= 1 && v.bajada <= 0
@@ -158,6 +162,7 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
   const ancho = tamanoDeLasTarjetas(camara, cuadro.alto, medidas, centroY, s.tamano)
   const conTexto = textoConLaEntrada(e) * (1 - Math.min(1, v.bajada * 4))
   cajaDelLogo(camara, cuadro, s.logo)
+  camara.getWorldPosition(OJO)
   for (let i = 0; i < s.placas.length; i += 1) {
     const p = s.placas[i]
     poseDeLaPlaca(i, e, s.giro.angulo, medidas, POSE)
@@ -174,8 +179,34 @@ function alCuadro(s: Estado, grupo: THREE.Group | null, camara: THREE.Camera, ni
     // [C2-70] Sólidas y siempre visibles: la niebla ya no esconde ninguna (sólo las tiñe).
     p.malla.visible = conPlacas
     ponerLaResena(i, resenaDeLaPlaca(i, s.giro.angulo, RESENAS.length))
-    // [C2-70] El texto en la cara que mira a la cámara (también la nuca de las de atrás), salvo en el fondo del aro, donde cambia de reseña.
-    const texto = conPlacas && nieblaDeLaPlaca(POSE.angulo) < 0.995 ? conTexto : 0
-    llevarLaTarjeta(TARJETAS_DEL_ARO[i], s.tarjetas[i], CENTRO.set(POSE.x, y, POSE.z), POSE.mira, medidas, texto, camara, cuadro, ancho, { escala, destacada: destaque > 0.5, logo: s.logo })
+    // [L5] Cada placa, para el segundo paso: su lugar, su texto, su caja en el cuadro y su distancia a la cámara.
+    const c = s.cuadros[i]
+    c.centro.set(POSE.x, y, POSE.z)
+    c.mira = POSE.mira
+    c.escala = escala
+    c.destacada = destaque > 0.5
+    c.texto = conPlacas && nieblaDeLaPlaca(POSE.angulo) < 0.995 ? conTexto : 0
+    c.distancia = c.centro.distanceTo(OJO)
+    cajaDeLaPlaca(c.centro, c.mira, medidas, escala, camara, cuadro, c.caja)
+  }
+  // [L5] Las tarjetas: ninguna encima de una placa más cerca de la cámara (el DOM queda arriba del 3D: se pisaban los bordes, lote2/09).
+  for (let i = 0; i < s.placas.length; i += 1) {
+    const c = s.cuadros[i]
+    s.delante.length = 0
+    if (conPlacas) for (const otra of s.cuadros) if (otra !== c && otra.distancia < c.distancia) s.delante.push(otra.caja)
+    llevarLaTarjeta(TARJETAS_DEL_ARO[i], s.tarjetas[i], c.centro, c.mira, medidas, c.texto, camara, cuadro, ancho, { escala: c.escala, destacada: c.destacada, delante: s.delante })
   }
 }
+
+/** [L5] Lo de una placa en este cuadro (el segundo paso lo usa para las tarjetas). */
+interface PlacaEnElCuadro {
+  readonly centro: THREE.Vector3
+  mira: number
+  escala: number
+  destacada: boolean
+  texto: number
+  distancia: number
+  readonly caja: CajaEnElCuadro
+}
+const nuevaPlacaEnElCuadro = (): PlacaEnElCuadro => ({ centro: new THREE.Vector3(), mira: 0, escala: 1, destacada: false, texto: 0, distancia: 0, caja: nuevaCaja() })
+const OJO = new THREE.Vector3()

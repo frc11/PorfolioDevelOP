@@ -279,7 +279,8 @@ function PorQueEnLista({ seccion }: PropsDeSeccion): React.JSX.Element {
           <ResenasEnLista />
           {/* [FINAL 3] Separado de los valores, en su propio espacio. [NOCTURNO FINAL] D3 · centrado en todos los anchos, en
               una pantalla entera. */}
-          <MedirLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} />
+          {/* [L5] En el home, el CTA de la lista es un gatillo (se dispara y se lee solo). */}
+          <MedirLaLista caja={cajaDelCta} progreso={transformacion} entrada={entrada} gatillo />
           <CtaTransformadoEnLaLista caja={cajaDelCta} progreso={transformacion} />
         </CoreografiaEnTodoAncho>
       </div>

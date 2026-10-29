@@ -18,8 +18,8 @@ import * as THREE from 'three'
 
 import { ATRIBUTO_DE_LA_INTRO_DE_PAGINA, IntroDeLaPagina, SELECTOR_DE_LA_INTRO, TRAMOS_DE_LA_INTRO } from '../../_componentes/pagina/IntroDeLaPagina'
 import { anchoDelTitulo, anchoEnEm } from '../../_componentes/titulos3d/anchoDelTitulo'
-import { CAIDA_DEL_TITULO, CARA_DEL_DOM, COMBINACIONES_DEL_TITULO, TITULOS_CON_LETRAS, TITULO_DE_PAGINA, caeElTitulo, combinacionDeLaBandera, partesDelTitulo } from '../../_componentes/titulos3d/presets'
-import { LEGIBILIDAD_POR_DEFECTO, MAS_PESADA, fuentesConLaLegibilidad, legibilidadDeLaBandera } from '../../_componentes/titulos3d/legibilidad'
+import { CAIDA_DEL_TITULO, CARA_DEL_DOM, TITULOS_CON_LETRAS, TITULO_DE_PAGINA, caeElTitulo, partesDelTitulo } from '../../_componentes/titulos3d/presets'
+import { MAS_PESADA, fuentesConLaLegibilidad } from '../../_componentes/titulos3d/legibilidad'
 import { SERVICIOS } from '../../_secciones/_contrato/acento'
 import { REGISTRO_DE_VARIANTES, esIdDeVariante } from '../../_variantes/registro'
 import { CHOREO_KEYFRAMES } from '../escena/choreography'
@@ -35,7 +35,7 @@ import { PresetDeLaPagina } from '../escena/ruta/PresetDeLaPagina'
 import { ENTRADAS_GUARDADAS, guardarLaPosicionDelHome, posicionGuardadaDelHome } from '../escena/ruta/posicionDelHome'
 // prettier-ignore
 import { AVANCE_DE_LA_INTRO, COMPOSICION_INICIAL, PANTALLAS_DE_LA_INTRO, PISTA_DE_LA_INTRO, POSE_DE_LA_INTRO, TRAMO_DEL_TITULO, avanceDeLaIntro, luzDeLaPagina, pistaDeLaPagina } from '../escena/ruta/pistaDeLaIntro'
-import { COMPOSICIONES, COMPOSICION_EN_LA_ESCENA, COMPOSICION_POR_DEFECTO, composicionDeLaBandera, huecoEnElCuadro } from '../escena/ruta/composicion'
+import { COMPOSICION_EN_LA_ESCENA, huecoEnElCuadro } from '../escena/ruta/composicion'
 import { encuadreDelHueco, poseDeLaIntro } from '../escena/ruta/composicionEnLaEscena'
 import { armarLaCamara, cajaProyectada } from '../escena/poseDelPortfolio'
 import { CAMERA_FOV } from '../escena/probeScene'
@@ -321,15 +321,17 @@ afirmar(h1Bien((t) => conPartes(t)) && textoDelH1(conPartes('Desarrollo web', ['
 controlPositivo('  el detector ve un `h1` con las partes pegadas (sin el espacio)', (t: string) => conPartes(t).replace('</span> <span', '</span><span'), h1Bien)
 const caraDe = (f: FuenteDePagina): string => `style="font-family:${CARA_DEL_DOM[f].familia};font-weight:${String(CARA_DEL_DOM[f].peso)}"`
 // [T0] La segunda parte, con la legibilidad elegida (`peso`: la liviana un paso más pesada), también en el servidor.
-const FUENTES_CON_PESO = fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes, LEGIBILIDAD_POR_DEFECTO)
+const FUENTES_CON_PESO = fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes)
 const partesBien = (html: string): boolean => html.includes(`data-parte="titulo-1" class="inline-block" ${caraDe(FUENTES_CON_PESO[0])}`) && html.includes(caraDe(FUENTES_CON_PESO[1]))
-afirmar(partesBien(conPartes('Desarrollo web')) && TITULO_DE_PAGINA === COMBINACIONES_DEL_TITULO[0], '  cada parte va en la cara del DOM de su fuente (la de la combinación 1 sin la bandera), con el peso de su instancia: la escena mide sus letras con la métrica del 3D')
+afirmar(partesBien(conPartes('Desarrollo web')) && TITULO_DE_PAGINA.fuentes[0] === 'archivo-125-800' && TITULO_DE_PAGINA.fuentes[1] === 'archivo-125-300', '  cada parte va en la cara del DOM de su fuente (la familia fija, la del «6»), con el peso de su instancia: la escena mide sus letras con la métrica del 3D')
 controlPositivo('  el detector ve las dos partes en la misma cara', conPartes('Desarrollo web').replace(caraDe(FUENTES_CON_PESO[1]), caraDe(FUENTES_CON_PESO[0])), partesBien)
-const banderaBien = (f: (v: string | null) => unknown): boolean =>
-  f('1') === COMBINACIONES_DEL_TITULO[0] && f('2') === COMBINACIONES_DEL_TITULO[1] && f('3') === COMBINACIONES_DEL_TITULO[2] && f('4') === COMBINACIONES_DEL_TITULO[3] && f(null) === TITULO_DE_PAGINA && f('5') === TITULO_DE_PAGINA && f('x') === TITULO_DE_PAGINA
-// [B12a.8] Reemplazada por la spec: cuatro combinaciones que se distinguen de verdad (las tres de B12a.4 no se distinguían).
-afirmar(banderaBien(combinacionDeLaBandera) && COMBINACIONES_DEL_TITULO.length === 4, '  `?titulo=1|2|3|4` elige la combinación; sin ella o con otra cosa, la 1 (`TITULO_DE_PAGINA`, la del «6»)')
-controlPositivo('  el detector ve una bandera que no se lee', () => TITULO_DE_PAGINA, banderaBien)
+// [L6] La familia quedó fija: ni la bandera `?titulo=` ni la página de comparación ni las otras tres combinaciones.
+const presetsDelTitulo = leerV3('_componentes/titulos3d/presets.ts')
+const familiaFijaBien = (titulo: string, presets: string): boolean =>
+  !/get\('titulo'\)/.test(titulo) && !/combinacionDeLaBandera|COMBINACIONES_DEL_TITULO|NOMBRES_DE_LAS_COMBINACIONES/.test(titulo + presets) && !existsSync(path.join(V3, 'titulos-de-pagina')) &&
+  titulo.includes('const PRESET = { ...TITULO_DE_PAGINA, fuentes: fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes) }')
+afirmar(familiaFijaBien(leerV3('_componentes/titulos3d/TituloDePagina.tsx'), presetsDelTitulo), '  L6 · la familia del título es fija (la del «6»): no hay `?titulo=` ni combinaciones ni página de comparación')
+controlPositivo('  el detector ve la bandera `?titulo=` leída de nuevo', `${leerV3('_componentes/titulos3d/TituloDePagina.tsx')}\nconst x = new URLSearchParams(window.location.search).get('titulo')`, (t: string) => familiaFijaBien(t, presetsDelTitulo))
 
 // D3: dos variantes de Archivo por combinación, ninguna de las del home (la 62 del hero, la 100/600 y la 100/900 del CTA del final).
 type Instancia = { readonly wght: number; readonly wdth: number; readonly fuente: string }
@@ -341,10 +343,10 @@ const instanciaDe = (f: FuenteDePagina): Instancia => {
   return { wght: Number(m?.[1]), wdth: Number(m?.[2]), fuente: delJson(f).original_font_information.source }
 }
 // [B12a.8] T5 · y la de la opción `?legibilidad=peso` (la parte liviana un paso más pesada): también es de página, en 3D y en el DOM.
-const USADAS = [...new Set([...COMBINACIONES_DEL_TITULO.flatMap((c) => c.fuentes), ...Object.values(MAS_PESADA).flatMap((f) => (f === undefined ? [] : [f]))])]
+const USADAS = [...new Set([...TITULO_DE_PAGINA.fuentes, ...Object.values(MAS_PESADA).flatMap((f) => (f === undefined ? [] : [f]))])]
 const delHome = (i: Instancia): boolean => i.wdth === 62 || (i.wdth === 100 && (i.wght === 600 || i.wght === 900))
 const ningunaDelHome = (instancias: readonly Instancia[]): boolean =>
-  instancias.length === USADAS.length && instancias.every((i) => Number.isFinite(i.wght) && Number.isFinite(i.wdth) && i.fuente === 'Archivo[wdth,wght].ttf' && !delHome(i)) && COMBINACIONES_DEL_TITULO.every((c) => c.fuentes[0] !== c.fuentes[1])
+  instancias.length === USADAS.length && instancias.every((i) => Number.isFinite(i.wght) && Number.isFinite(i.wdth) && i.fuente === 'Archivo[wdth,wght].ttf' && !delHome(i)) && TITULO_DE_PAGINA.fuentes[0] !== TITULO_DE_PAGINA.fuentes[1]
 const instancias = USADAS.map(instanciaDe)
 afirmar(USADAS.every(esFuenteDePagina) && ningunaDelHome(instancias), `  D3 · dos variantes de Archivo por combinación, ninguna del home: ${instancias.map((i) => `${String(i.wdth)}/${String(i.wght)}`).join(', ')}`)
 controlPositivo('  el detector ve la del CTA del final (100/600)', [...instancias.slice(1), { wght: 600, wdth: 100, fuente: 'Archivo[wdth,wght].ttf' }], ningunaDelHome)
@@ -408,7 +410,7 @@ const tituloCableado = (c: string): boolean =>
   // [B12a.8] Reemplazada por la spec: cae antes de que su tramo se suelte (antes, con el avance 0,5).
   /const activo = material !== 'no' && escritorio && !reducido/.test(c) && /const ahora = !caeElTitulo\(tramo\.getBoundingClientRect\(\)\.bottom, fijo\.offsetHeight, window\.innerHeight, caidaTarde\(\) \? -0\.3 : undefined\)/.test(c) &&
   /animate\(presencia, ahora \? 1 : 0, \{ duration: CAIDA_DEL_TITULO\.s,/.test(c) && /const APAGADO = 'escritorio:opacity-0'/.test(c) && /className=\{cn\('inline-block', listo && APAGADO\)\}/.test(c)
-afirmar(tituloCableado(delTitulo) && COMBINACIONES_DEL_TITULO.every((c) => c.saleCayendo) && CAIDA_DEL_TITULO.antes > 0 && CAIDA_DEL_TITULO.antes < 1, `  el título en volumen va en la pantalla, llega con el gesto y el reloj del titular del hero y cae (nunca de golpe) cuando a su tramo le falta ${String(CAIDA_DEL_TITULO.antes)} pantalla para soltarse; con las dos partes armadas el DOM se apaga sólo desde 1024 (sigue en el árbol accesible); sin WebGL, con movimiento reducido o abajo de 1024, el \`h1\` es el visible`)
+afirmar(tituloCableado(delTitulo) && TITULO_DE_PAGINA.saleCayendo && CAIDA_DEL_TITULO.antes > 0 && CAIDA_DEL_TITULO.antes < 1, `  el título en volumen va en la pantalla, llega con el gesto y el reloj del titular del hero y cae (nunca de golpe) cuando a su tramo le falta ${String(CAIDA_DEL_TITULO.antes)} pantalla para soltarse; con las dos partes armadas el DOM se apaga sólo desde 1024 (sigue en el árbol accesible); sin WebGL, con movimiento reducido o abajo de 1024, el \`h1\` es el visible`)
 controlPositivo('  el detector ve el título en volumen con movimiento reducido', delTitulo.replace("material !== 'no' && escritorio && !reducido", "material !== 'no' && escritorio"), tituloCableado)
 controlPositivo('  y el `h1` apagado en todos los anchos', delTitulo.replace("const APAGADO = 'escritorio:opacity-0'", "const APAGADO = 'opacity-0'"), tituloCableado)
 
@@ -556,11 +558,11 @@ const caidaBien = (f: Cae): boolean => !f(900 + 400, 900, 900) && !f(900 + 181, 
 afirmar(caidaBien(caeElTitulo) && CAIDA_DEL_TITULO.antes === 0.2, `  el título cae cuando al tramo le falta ${String(CAIDA_DEL_TITULO.antes)} pantalla para soltarse: el título en volumen nunca sube con el \`h1\` (medido en el sitio: \`scripts-carga/intro-larga.ts\`)`)
 controlPositivo('  el detector ve la caída con el `h1` ya subiendo', ((fondo, fijo, alto) => fondo - fijo < -0.3 * alto) as Cae, caidaBien)
 
-// La bandera de la composición, después de hidratar (el servidor pinta la de por defecto, la 3: la del hero del home).
-type Bandera = typeof composicionDeLaBandera
-const composicionBien = (f: Bandera): boolean => f('1') === '1' && f('2') === '2' && f('3') === '3' && f(null) === COMPOSICION_POR_DEFECTO && f('4') === COMPOSICION_POR_DEFECTO && COMPOSICION_POR_DEFECTO === '3'
-afirmar(Object.keys(COMPOSICIONES).join() === '1,2,3' && composicionBien(composicionDeLaBandera), 'tres composiciones detrás de `?composicion=1|2|3` (1: el título centrado arriba del logo; 2: a la derecha; 3: a la izquierda, como el hero del home, la de por defecto); cualquier otra cosa, la de por defecto')
-controlPositivo('  el detector ve una bandera que no cae en la de por defecto', ((v) => (v === '2' ? '2' : v === '3' ? '3' : '1')) as Bandera, composicionBien)
+// [L6] La composición quedó fija (la 3: el título a la izquierda, como el hero del home): ni `?composicion=` ni las otras dos.
+const composicionFijaBien = (c: string, hoja: string): boolean =>
+  !/composicionDeLaBandera|COMPOSICIONES|COMPOSICION_POR_DEFECTO|useComposicion|data-composicion/.test(c + hoja) && !/get\('composicion'\)/.test(c) && !/IdDeComposicion/.test(c + hoja)
+afirmar(composicionFijaBien(leerV3('_componentes/pagina/ComposicionDeLaIntro.tsx'), leerV3('_lib/escena/ruta/composicion.ts')), 'L6 · la composición de la intro es una sola (el título a la izquierda, como el hero del home): no hay `?composicion=` ni las otras dos')
+controlPositivo('  el detector ve la bandera `?composicion=` leída de nuevo', `${leerV3('_componentes/pagina/ComposicionDeLaIntro.tsx')}\nconst x = new URLSearchParams(window.location.search).get('composicion')`, (c: string) => composicionFijaBien(c, leerV3('_lib/escena/ruta/composicion.ts')))
 
 // El encuadre: el logo no se mueve en la escena; la cámara corre el blanco para que el centro del logo caiga en el del hueco, en cada pose
 // de la pista (la pose 2 se estira entera) y a cualquier aspecto. Con la cámara del rig (`armarLaCamara`) y la caja proyectada del logo.
@@ -590,20 +592,20 @@ afirmar(conHueco(null).frameX === 0 && conHueco({ x: 0.5, y: 0 }).frameX > 0.1 &
 // El DOM: la columna (el título y la bajada) y el hueco, y la fila de «de qué se trata» con la MISMA columna (el mismo eje por construcción).
 const composicion = leerV3('_componentes/pagina/ComposicionDeLaIntro.tsx')
 const columnaBien = (c: string): boolean =>
-  /'2': '[^']*escritorio:col-start-2 escritorio:row-start-1 escritorio:items-start escritorio:self-center/.test(c) && /'3': '[^']*escritorio:col-start-1 escritorio:row-start-1 escritorio:items-start escritorio:self-center/.test(c) &&
-  /'1': '@container flex w-full flex-col items-center/.test(c) && c.includes('<div className="flex max-w-[42ch] flex-col gap-[var(--spacing-3)]">{children}</div>') && (c.match(/className=\{COLUMNA\[id\]\}/g) ?? []).length === 2 && /'2': 'h-full min-h-0 w-full escritorio:col-start-1/.test(c) && /'3': 'h-full min-h-0 w-full escritorio:col-start-2/.test(c)
-afirmar(columnaBien(composicion), '  el marco: en la 1 (y abajo de 1024 en las tres) la columna centrada arriba y el hueco debajo; desde 1024, en la 2 la columna a la derecha y el hueco a la izquierda, en la 3 al revés; «de qué se trata» con la misma columna (el mismo borde; medido: 0,00 % de desvío)')
+  /const COLUMNA = '@container flex w-full flex-col items-center[^']*escritorio:col-start-1 escritorio:row-start-1 escritorio:items-start escritorio:self-center/.test(c) && c.includes('<div className="flex max-w-[42ch] flex-col gap-[var(--spacing-3)]">{children}</div>') &&
+  (c.match(/className=\{COLUMNA\}/g) ?? []).length === 2 && /const HUECO = 'h-full min-h-0 w-full escritorio:col-start-2/.test(c)
+afirmar(columnaBien(composicion), '  el marco: abajo de 1024 la columna centrada arriba y el hueco debajo; desde 1024, la columna a la izquierda y el hueco a la derecha; «de qué se trata» con la misma columna (el mismo borde; medido: 0,00 % de desvío)')
 // [B12a.8] T4 · De costado, 8 vw de aire del lado de afuera (el título fijo en el mundo crece hacia ese borde con el mouse en el extremo:
 // sin el aire se salía hasta 100 px a 1280; medido con `scripts-carga/titulo-3d.ts`); y la bajada en el plano de su título, como el hero.
-const aireBien = (c: string): boolean => /'2': '[^']*escritorio:self-center escritorio:pr-\[8vw\]'/.test(c) && /'3': '[^']*escritorio:self-center escritorio:pl-\[8vw\]'/.test(c) && !/'1': '[^']*escritorio:p[lr]-/.test(c)
-afirmar(aireBien(composicion), '  T4 · las de costado dejan 8 vw de aire afuera (el título en perspectiva no se sale del cuadro con el mouse en el extremo); la 1, no')
-controlPositivo('  el detector ve la 3 sin el aire (se salía 98 px a 1280)', composicion.replace(' escritorio:pl-[8vw]', ''), aireBien)
+const aireBien = (c: string): boolean => /const COLUMNA = '[^']*escritorio:self-center escritorio:pl-\[8vw\]'/.test(c)
+afirmar(aireBien(composicion), '  T4 · la de costado deja 8 vw de aire afuera (el título en perspectiva no se sale del cuadro con el mouse en el extremo)')
+controlPositivo('  el detector ve la columna sin el aire (se salía 98 px a 1280)', composicion.replace(' escritorio:pl-[8vw]', ''), aireBien)
 const deLaBajada = leerV3('_componentes/pagina/BajadaDeLaIntro.tsx')
 const bajadaBien = (b: string, intro: string): boolean => /const ref = useAcompananteDelTitulo<HTMLDivElement>\(idDeLaParte\(id, 1\)\)/.test(b) && /<div ref=\{ref\} data-parte="bajada"/.test(b) && intro.includes('<BajadaDeLaIntro id={preset.id}>{bajada}</BajadaDeLaIntro>')
 afirmar(bajadaBien(deLaBajada, leerV3('_componentes/pagina/IntroDeLaPagina.tsx')), '  T4 · la bajada va en el plano de su título (`useAcompananteDelTitulo`, el de la bajada del hero): con el mouse en un costado el título no la pisa')
 controlPositivo('  el detector ve la bajada quieta en el DOM (la pisaba hasta 120 px)', deLaBajada.replace('<div ref={ref} data-parte="bajada"', '<div data-parte="bajada"'), (b: string) => bajadaBien(b, leerV3('_componentes/pagina/IntroDeLaPagina.tsx')))
-const ultima = composicion.lastIndexOf('className={COLUMNA[id]}')
-controlPositivo('  el detector ve «de qué se trata» con otra columna', `${composicion.slice(0, ultima)}className="flex flex-col"${composicion.slice(ultima + 'className={COLUMNA[id]}'.length)}`, columnaBien)
+const ultima = composicion.lastIndexOf('className={COLUMNA}')
+controlPositivo('  el detector ve «de qué se trata» con otra columna', `${composicion.slice(0, ultima)}className="flex flex-col"${composicion.slice(ultima + 'className={COLUMNA}'.length)}`, columnaBien)
 
 // [B12a.8] Reemplazada por la spec (T5): sin el velo radial detrás del texto (formaba una mancha; no se pidió). P-H33 · el texto del DOM
 // sobre la escena lleva sólo una sombra PEGADA a las letras (corta y densa, sin colas), en la bajada, «de qué se trata» y las partes del
@@ -638,21 +640,17 @@ controlPositivo('  el detector ve el que se va con su lugar mientras cae (el de 
 controlPositivo('  y el que se apaga al irse su lugar', deLosTitulos.replace('const fuera = fueraDelCuadro(a, a.corrimientoDeLaCaida ?? d)', 'const fuera = fueraDelCuadro(a, d)'), caeEnSuLugar)
 controlPositivo('  y el título de la tinta del entorno', delTitulo.replace("material: deNoche && !tituloDeTinta() ? 'blanco' : undefined, ", ''), (t: string) => tituloDeNocheBien(t, leerV3('_lib/escena/titulos3d/sincronia.ts')))
 
-// T5 · Las dos opciones de legibilidad sin velo: `peso` (la parte liviana un paso más pesada: 125/400) y `tamano` (el título más grande en
-// la 1 desde 1024). `luz` y `motas` se probaron y se sacaron: medidas en el build, no movían el número (94,2 → 94,0 y 93,9 %).
-// [T0 · 2026-10-22] Valentino eligió `peso`: es el defecto (sin la bandera y en el servidor); `tamano` queda detrás de `?legibilidad=tamano`.
-type DeLaBandera = typeof legibilidadDeLaBandera
+// T5 · La legibilidad sin velo: `peso` (la parte liviana un paso más pesada: 125/400). `luz`, `motas` y `tamano` se probaron y se sacaron.
+// [L6] Fija: no hay `?legibilidad=` ni `data-legibilidad` ni la otra opción.
 const PARTES_DE_LA_1: readonly [FuenteDePagina, FuenteDePagina] = ['archivo-125-800', 'archivo-125-300']
-const legibilidadBien = (f: DeLaBandera, titulo: string, hoja: string, marco: string): boolean =>
-  LEGIBILIDAD_POR_DEFECTO === 'peso' && f(null) === 'peso' && f('') === 'peso' && f('luz') === 'peso' && f('motas') === 'peso' && f('peso') === 'peso' && f('tamano') === 'tamano' && MAS_PESADA['archivo-125-300'] === 'archivo-125-400' &&
-  fuentesConLaLegibilidad(PARTES_DE_LA_1, f(null))[1] === 'archivo-125-400' && fuentesConLaLegibilidad(PARTES_DE_LA_1, f('tamano'))[1] === 'archivo-125-300' &&
-  titulo.includes('const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => LEGIBILIDAD_POR_DEFECTO)') && titulo.includes('const preset = { ...familia, fuentes: fuentesConLaLegibilidad(familia.fuentes, legibilidad) }') &&
-  /'1': '[^']*escritorio:\[--ancho-del-titulo:74cqw\] escritorio:data-\[legibilidad=tamano\]:\[--ancho-del-titulo:80cqw\]'/.test(marco) && !/'[23]': '[^']*legibilidad/.test(marco) &&
-  marco.includes('const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => LEGIBILIDAD_POR_DEFECTO)') && marco.includes('data-legibilidad={legibilidad}') && !/legibilidad/.test(hoja)
-const conLasOpciones = (f: DeLaBandera, titulo = delTitulo): boolean => legibilidadBien(f, titulo, hojaDeLaIntro, leerV3('_componentes/pagina/ComposicionDeLaIntro.tsx'))
-afirmar(conLasOpciones(legibilidadDeLaBandera), '  T5 · [T0] `peso` por defecto (sin la bandera y en el servidor: «web» en 125/400); `tamano` sólo con `?legibilidad=tamano`')
-controlPositivo('  el detector ve `tamano` prendida sin la bandera', ((v: string | null) => (v === 'peso' ? 'peso' : 'tamano')) as DeLaBandera, conLasOpciones)
-controlPositivo('  y el título que el servidor pinta sin `peso` (la de antes: ninguna)', delTitulo.replace('() => LEGIBILIDAD_POR_DEFECTO)', '() => null)'), (t: string) => conLasOpciones(legibilidadDeLaBandera, t))
+const legibilidadBien = (titulo: string, hoja: string, marco: string, fuentes: readonly [FuenteDePagina, FuenteDePagina]): boolean =>
+  MAS_PESADA['archivo-125-300'] === 'archivo-125-400' && fuentes[1] === 'archivo-125-400' && fuentes[0] === 'archivo-125-800' &&
+  titulo.includes('const PRESET = { ...TITULO_DE_PAGINA, fuentes: fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes) }') && !/legibilidad(DeLaUrl|DeLaBandera)|LEGIBILIDAD_POR_DEFECTO|get\('legibilidad'\)/.test(titulo + marco) &&
+  !/legibilidad/.test(sinComentarios(marco)) && !/legibilidad/.test(hoja)
+const conElPeso = (titulo = delTitulo, fuentes: readonly [FuenteDePagina, FuenteDePagina] = fuentesConLaLegibilidad(PARTES_DE_LA_1)): boolean => legibilidadBien(titulo, hojaDeLaIntro, leerV3('_componentes/pagina/ComposicionDeLaIntro.tsx'), fuentes)
+afirmar(conElPeso(), '  T5 · [L6] `peso` fijo (el servidor y el cliente pintan «web» en 125/400): ninguna bandera, ninguna otra opción')
+controlPositivo('  el detector ve la bandera `?legibilidad=` leída de nuevo', `${delTitulo}\nconst x = new URLSearchParams(window.location.search).get('legibilidad')`, (t: string) => conElPeso(t))
+controlPositivo('  y las fuentes sin el peso (la liviana como es)', PARTES_DE_LA_1, (f: readonly [FuenteDePagina, FuenteDePagina]) => conElPeso(delTitulo, f))
 
 // T1 · El título protagonista: en UNA línea, del tamaño que le da la parte del ancho que pone la composición entre su ancho en em.
 type MetricasEnJson = Readonly<Record<string, { readonly avance: Readonly<Record<string, number>>; readonly kerning: Readonly<Record<string, number>> }>>
@@ -675,8 +673,8 @@ const unaLinea = (html: string): boolean => {
 afirmar(unaLinea(conPartes('IA y automatizaciones')), '  el `h1` va en una línea (nunca una palabra sola en un renglón) y su tamaño es la parte del ancho entre su ancho en em: el servidor ya lo pinta así (sin medir el DOM ni saltar al cargar)')
 controlPositivo('  el detector ve el título de B12a.4 (dos renglones, del tamaño del nivel)', conPartes('IA y automatizaciones').replace('whitespace-nowrap', 'flex flex-col'), unaLinea)
 const partesDelAncho = (c: string): boolean =>
-  (c.match(/'@container flex w-full flex-col items-center gap-\[var\(--spacing-4\)\] \[--ancho-del-titulo:97cqw\]/g) ?? []).length === 3 && c.includes('escritorio:[--ancho-del-titulo:74cqw]')
-afirmar(partesDelAncho(composicion), '  la parte del ancho, de la columna (el contenedor del título): el 74 % en la 1 desde 1024 (del cuadro, pedido de 60 a 75 %), el 97 % de una columna de costado y del ancho útil abajo de 1024 (pedido: al menos 85); medido en el sitio con los tres nombres (`scripts-carga/composicion.ts`)')
+  (c.match(/const COLUMNA = '@container flex w-full flex-col items-center gap-\[var\(--spacing-4\)\] \[--ancho-del-titulo:97cqw\]/g) ?? []).length === 1 && !c.includes('--ancho-del-titulo:74cqw') && !c.includes('--ancho-del-titulo:80cqw')
+afirmar(partesDelAncho(composicion), '  la parte del ancho, de la columna (el contenedor del título): el 97 % de una columna de costado y del ancho útil abajo de 1024 (pedido: al menos 85); la única composición (L6), sin el 74 y el 80 % de las otras')
 controlPositivo('  el detector ve la columna sin contenedor (el título del tamaño del cuadro entero)', composicion.split('@container ').join(''), partesDelAncho)
 
 // ═══════════════════════════════════════════════════════════════════════════
