@@ -42,9 +42,11 @@ export function sinElEstiramiento(y: number, desde: number, largoEstirado: numbe
   if (!(k > 0) || k === 1 || y <= desde) return y
   if (y > desde + largoEstirado) return y - largoEstirado * (1 - 1 / k)
   const t = y - desde
-  const r = Math.min(Math.max(rampa, 0), 0.5) * largoEstirado
   const recorre = largoEstirado / k
-  if (!(r > 0) || !(recorre > r)) return desde + t / k
+  // La rampa nunca más larga que la mitad de lo que recorre: así la velocidad del medio es siempre positiva (un tramo que estira mucho
+  // tendría que frenar más de lo que recorre) y no se vuelve al escalón.
+  const r = Math.min(Math.min(Math.max(rampa, 0), 0.5) * largoEstirado, recorre / 2)
+  if (!(r > 0)) return desde + t / k
   // [INT] La velocidad en trapecio: de 1 a `v` en `r`, pareja, y de vuelta a 1 en los últimos `r`; recorre lo mismo que el `k` parejo.
   const v = (recorre - r) / (largoEstirado - r)
   const enRampa = (s: number): number => s + ((v - 1) * s * s) / (2 * r)

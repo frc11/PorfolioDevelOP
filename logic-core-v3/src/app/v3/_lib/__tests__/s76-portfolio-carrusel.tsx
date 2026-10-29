@@ -14,7 +14,7 @@ import path from 'node:path'
 
 import { motionValue } from 'motion/react'
 
-import { TRAMO_ESTIRADO, medidaSinElEstiramiento, type TramoEstirado } from '../escena/tramoEstirado'
+import { TRAMO_ESTIRADO, medidaSinElEstiramiento, sinElEstiramiento, type TramoEstirado } from '../escena/tramoEstirado'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { CONTENIDO } from '../../_secciones/trabajos/contenido'
@@ -243,10 +243,32 @@ export function afirmarElCarruselDelPortfolio(): void {
     }
     return peor
   }
+  // El tope distingue la rampa de 0,3 (≈ 0,04) de una de 0,1 (≈ 0,12) y del escalón (≈ 3).
+  const TOPE_DEL_ESCALON = 0.06
+  for (const ancho of ['movil', 'tablet'] as const) {
+    const tramo = tramoDelCarrusel({} as Element, ancho, 1700)
+    const escalon = mayorEscalon(tramo)
+    afirmar(RAMPA_DEL_CARRUSEL > 0 && escalon < TOPE_DEL_ESCALON, `[INT] ${ancho}: la escena acelera y frena en rampa en el tramo del carrusel: el mayor cambio de velocidad cada 10 px es ${escalon.toFixed(3)} (la de adentro llega a ${(1 / tramo.k).toFixed(2)} de media)`)
+  }
   const delTelefono = tramoDelCarrusel({} as Element, 'movil', 1700)
-  const escalon = mayorEscalon(delTelefono)
-  afirmar(RAMPA_DEL_CARRUSEL > 0 && escalon < 0.25, `[INT] la escena acelera y frena en rampa en el tramo del carrusel: el mayor cambio de velocidad cada 10 px es ${escalon.toFixed(3)} (la de adentro llega a ${(1 / delTelefono.k).toFixed(2)} de media)`)
-  controlPositivo('  el detector ve el tramo sin rampa (de golpe)', { ...delTelefono, rampa: 0 }, (t: Omit<TramoEstirado, 'panel'>) => mayorEscalon(t) < 0.25)
+  controlPositivo('  el detector ve el tramo sin rampa (de golpe)', { ...delTelefono, rampa: 0 }, (t: Omit<TramoEstirado, 'panel'>) => mayorEscalon(t) < TOPE_DEL_ESCALON)
+  controlPositivo('  y una rampa corta (0,1)', { ...delTelefono, rampa: 0.1 }, (t: Omit<TramoEstirado, 'panel'>) => mayorEscalon(t) < TOPE_DEL_ESCALON)
+  // [INT] Un tramo que ESTIRA mucho (k = 4 con rampa 0,3: la rampa pedida es más larga que lo que recorre) sigue en rampa: avanza siempre,
+  // llega a lo mismo que el `k` parejo y no salta (antes de la revisión volvía al escalón).
+  const estirado = (rampa: number): { readonly avanza: boolean; readonly llega: boolean; readonly salto: number } => {
+    const f = (y: number): number => sinElEstiramiento(y, 0, 1000, 4, rampa)
+    let [avanza, salto, antes] = [true, 0, Number.NaN]
+    for (let y = -100; y < 1100; y += 5) {
+      const v = (f(y + 5) - f(y)) / 5
+      avanza &&= v > 0
+      if (antes === antes) salto = Math.max(salto, Math.abs(v - antes))
+      antes = v
+    }
+    return { avanza, llega: Math.abs(f(1000) - 250) < 1e-9 && Math.abs(f(1500) - 750) < 1e-9, salto }
+  }
+  const conRampa = estirado(0.3)
+  afirmar(conRampa.avanza && conRampa.llega && conRampa.salto < 0.05, `[INT] la rampa también en un tramo que estira (k = 4): avanza siempre, llega a lo mismo y el mayor cambio de velocidad cada 5 px es ${conRampa.salto.toFixed(3)}`)
+  controlPositivo('  el detector ve el escalón del k parejo', 0, (r: number) => { const e = estirado(r); return e.avanza && e.llega && e.salto < 0.05 })
   afirmar(
     PANTALLAS_DESPUES_DEL_FLUJO === 1 && pxDeLaSeccionConElCarrusel(1700) === PX_DE_LA_APROXIMACION + 1700 && PX_DE_LA_SECCION_EN_LA_TABLA === 6813 && /'--alto-minimo-del-panel': '0px'/.test(trabajos) &&
       /panel\?\.style\.setProperty\('min-height', '0px'\)/.test(sinComentarios(leer(`${PORTFOLIO}/useMedioDelCarrusel.ts`))) && /panel\?\.style\.setProperty\('min-height', pisoDeLaTabla\)/.test(sinComentarios(leer(`${PORTFOLIO}/useMedioDelCarrusel.ts`))),

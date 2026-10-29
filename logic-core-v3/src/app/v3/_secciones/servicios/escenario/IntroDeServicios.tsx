@@ -32,7 +32,7 @@ import { TituloQueSePintaAlLlegar } from './TituloQueSePintaAlLlegar'
 export const TAMANO_DEL_TITULO = { escritorio: { divisor: 11, tope: 12.5 }, telefono: { divisor: 5.2, tope: 9 } } as const
 
 /** [L3] El aro de escritorio: su ancho sobre el del título y su proporción (ancho / alto); el del teléfono, vertical. */
-export const ARO_DE_LA_ENTRADA = { escritorio: { ancho: 1.12, proporcion: 3 }, telefono: { ancho: 1.08, proporcion: 0.7, enTitulos: 5.4, minimoRem: 20 } } as const
+export const ARO_DE_LA_ENTRADA = { escritorio: { ancho: 1.12, proporcion: 3 }, telefono: { ancho: 1.08, proporcion: 0.7, enTitulos: 5.4, minimoRem: 20, minimoTopeVw: 100 } } as const
 
 /** [L3] Lo que mide la mitad de la bajada en la letra de los cuerpos (em, medido a 390 con margen): su tamaño en el teléfono la deja en dos renglones. */
 export const EM_DE_MEDIA_BAJADA = 15
@@ -51,7 +51,7 @@ const VARIABLES = {
   '--proporcion-del-aro-telefono': String(A.telefono.proporcion),
   '--em-de-media-bajada': String(EM_DE_MEDIA_BAJADA),
   '--aro-en-titulos': String(A.telefono.enTitulos),
-  '--minimo-del-aro-telefono': `${String(A.telefono.minimoRem)}rem`,
+  '--minimo-del-aro-telefono': `min(${String(A.telefono.minimoRem)}rem, ${String(A.telefono.minimoTopeVw)}vw)`,
 } as CSSProperties
 /**
  * [L3] El aro del teléfono: el menor entre su parte del ancho y `enTitulos` veces el título (la tablet no lo saca de cuadro), centrado en
@@ -59,7 +59,7 @@ const VARIABLES = {
  * márgenes en % son del ancho del bloque, como el ancho: el corrimiento al centro es la mitad del ancho y la mitad del alto (ancho sobre
  * la proporción).
  * [INT] Con un piso (`minimoRem`, en la unidad del aviso) por encima de los dos topes: a 320 el título y el bloque lo dejaban más angosto
- * que el aviso y el arco lo tocaba (a 360, al límite).
+ * que el aviso y el arco lo tocaba (a 360, al límite). Nunca más ancho que la pantalla (un plegable de 280).
  */
 const ARO_DEL_TELEFONO = [
   'max-escritorio:left-1/2 max-escritorio:top-1/2 max-escritorio:aspect-[var(--proporcion-del-aro-telefono)]',
