@@ -97,9 +97,11 @@ afirmar(avisoCentrado(escenario), '«Tocá una pregunta y mirá lo que pasa.» c
 controlPositivo('  el detector ve el aviso arriba a la izquierda', escenario.replace(`mostrado === 'aviso' && '${centrado}'`, "false && ''"), avisoCentrado)
 
 const volumen = leer('_lib/escena/pie3d/faqDeVolumen.ts')
+// [INT] El hundido vive en su archivo (s8-montaje: `faqDeVolumen.ts` pasaba las 300 líneas de código).
+const hundido = leer('_lib/escena/pie3d/hundidoDelFaq.ts')
 const sonido = leer('_chrome/sonido/ControlDelSonido.tsx')
 const comoElDelPie = (v: string, e: string, s: string): boolean =>
-  v.includes("if (b.id === 'whatsapp') hundirComoElPie(b, e.quieto, e.dt)") && v.includes('const caraY = s.caraY - b.hundido * mpp') && v.includes('cuantoSeHunde(h, HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada') && e.includes('useHundido(whatsapp, volumen)') && s.includes('[data-bloque-del-faq="whatsapp"]')
+  v.includes("if (b.id === 'whatsapp') hundirComoElPie(b, e.quieto, e.dt)") && v.includes('const caraY = s.caraY - b.hundido * mpp') && hundido.includes('cuantoSeHunde(h, HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada') && e.includes('useHundido(whatsapp, volumen)') && s.includes('[data-bloque-del-faq="whatsapp"]')
 afirmar(comoElDelPie(volumen, escenario, sonido), 'el WhatsApp del FAQ hace lo del pie: se hunde con el mouse, el foco y al apretar (el mismo hundido), se aclara y suena')
 controlPositivo('  el detector ve el WhatsApp de antes (una placa quieta)', [volumen.replace("if (b.id === 'whatsapp') hundirComoElPie(b, e.quieto, e.dt)", ''), escenario, sonido] as const, ([v, e, s]) => comoElDelPie(v, e, s))
 

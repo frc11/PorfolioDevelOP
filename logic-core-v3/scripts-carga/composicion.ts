@@ -1,19 +1,19 @@
 /**
- * [B12a.8] LAS TRES COMPOSICIONES DE LA INTRO Y EL TÍTULO PROTAGONISTA (T1), EN EL SITIO — `/v3/pagina-base?composicion=1|2|3&nombre=N` con
- * el Chrome del sistema a la vista, el banco de la escena (la silueta del logo, `__siluetaDelBanco`; los títulos en volumen,
- * `__titulosDelBanco`) y `/api/` bloqueado, el mouse quieto en el medio. Por ancho y composición: fotos en los avances 0, 0,5 y 1 y lo
- * medido en el avance 0 (la composición inicial) y en el 0,5.
+ * [B12a.8] LA COMPOSICIÓN DE LA INTRO Y EL TÍTULO PROTAGONISTA (T1), EN EL SITIO — `/v3/pagina-base?nombre=N` con el Chrome del sistema a
+ * la vista, el banco de la escena (la silueta del logo, `__siluetaDelBanco`; los títulos en volumen, `__titulosDelBanco`) y `/api/`
+ * bloqueado, el mouse quieto en el medio. Por ancho: fotos en los avances 0, 0,5 y 1 y lo medido en el avance 0 y en el 0,5.
+ * [INT] La composición es fija desde L6 (la 3: el texto a la izquierda del logo); el banco ya no barre `?composicion=`.
  *
- *   ANCHOS=1440x900,1280x800,1024x768,768x1024,390x844 COMPOSICIONES=1,2,3 NOMBRE=3 npx tsx scripts-carga/composicion.ts
+ *   ANCHOS=1440x900,1280x800,1024x768,768x1024,390x844 NOMBRE=3 npx tsx scripts-carga/composicion.ts
  *
  * El criterio:
  * · el logo en su hueco: su centro (la silueta) a ± 1 % del centro del hueco que deja el DOM, en el avance 0 y en el 0,5 (la pose 2 gira
  *   con el logo en su lugar); si el logo es más ancho que el cuadro (el teléfono, como el hero del home) su centro en x no se mide;
- * · T1, el título: en UNA línea; en la 1 desde 1024, del 60 al 75 % del ancho del cuadro; de costado (la 2 y la 3), al menos el 85 % de su
- *   columna; abajo de 1024, al menos el 85 % del ancho útil (la columna), arriba del logo; sin pisar la píldora ni el logo (se informa la
- *   distancia a cada uno). Desde 1024 se mide el título en volumen (el `h1` del DOM está apagado);
- * · el texto en un eje: el título, la bajada y «de qué se trata» con el mismo eje a ± 1 % del ancho (el borde izquierdo en la 2 y la 3
- *   desde 1024; el centro en la 1 y abajo de 1024).
+ * · T1, el título: en UNA línea; desde 1024, de costado y a la izquierda del logo, al menos el 85 % de su columna; abajo de 1024, al menos
+ *   el 85 % del ancho útil (la columna), arriba del logo; sin pisar la píldora ni el logo (se informa la distancia a cada uno). Desde 1024
+ *   se mide el título en volumen (el `h1` del DOM está apagado);
+ * · el texto en un eje: el título, la bajada y «de qué se trata» con el mismo eje a ± 1 % del ancho (el borde izquierdo desde 1024; el
+ *   centro abajo de 1024).
  * Fotos en `~/.cache/b4-medicion/composicion/`.
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -25,7 +25,6 @@ import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,1280x800,1024x768,768x1024,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
-const COMPOSICIONES = (process.env.COMPOSICIONES ?? '1,2,3').split(',')
 const NOMBRE = process.env.NOMBRE ?? '3'
 const RUTA = process.env.RUTA ?? '/v3/pagina-base'
 const EXTRA = process.env.EXTRA ?? ''
@@ -66,7 +65,6 @@ interface Medido {
   readonly hueco: Caja | null
   readonly columna: Caja | null
   readonly pildora: Caja | null
-  readonly composicion: string
   readonly texto: string
 }
 
@@ -122,7 +120,6 @@ const medir = (p: Page): Promise<Medido> =>
         return { ...c, izq: c.izq + parseFloat(cs.paddingLeft), der: c.der - parseFloat(cs.paddingRight) }
       })(),
       pildora: caja('[data-pieza="barra"] [data-parte="pastilla"]') ?? caja('[aria-controls="menu-movil"]'),
-      composicion: document.querySelector('[data-parte="marco-de-la-intro"]')?.getAttribute('data-composicion') ?? '',
       texto: h1?.textContent ?? '',
     }
   })
@@ -159,8 +156,8 @@ async function main(): Promise<void> {
       await ctx.addInitScript(`(() => { window.__name = window.__name || ((f) => f); window.__entornoDeLaEscena = 'producto'; try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
       const p = ctx.pages()[0] ?? (await ctx.newPage())
       await p.route('**/api/**', (r) => r.abort())
-      for (const c of COMPOSICIONES) {
-        await p.goto(`${BASE}${RUTA}?composicion=${c}&nombre=${NOMBRE}${EXTRA}`, { waitUntil: 'load', timeout: 300000 })
+      {
+        await p.goto(`${BASE}${RUTA}?nombre=${NOMBRE}${EXTRA}`, { waitUntil: 'load', timeout: 300000 })
         await p.mouse.move(ancho / 2, alto / 2)
         const t0 = Date.now()
         while (Date.now() - t0 < 60000) {
@@ -190,7 +187,7 @@ async function main(): Promise<void> {
           }
           await dormir(2200)
           medido[String(f)] = { logo: await cajaDelLogo(p), m: await medir(p) }
-          await p.screenshot({ path: path.join(SALIDA, `c${c}-n${NOMBRE}-${String(ancho)}-avance-${String(f)}.png`) })
+          await p.screenshot({ path: path.join(SALIDA, `n${NOMBRE}-${String(ancho)}-avance-${String(f)}.png`) })
         }
         await p.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
         await dormir(400)
@@ -205,24 +202,24 @@ async function main(): Promise<void> {
         const enHueco = (k: Caja | null): { readonly dx: number; readonly dy: number } => ({ dx: desborda(k) ? 0 : Math.abs(cx(k) - cx(hueco)) / ancho, dy: Math.abs(cy(k) - cy(hueco)) / alto })
         const h0 = enHueco(a0.logo)
         const h5 = enHueco(a5.logo)
-        const deCostado = !movil && c !== '1'
+        const deCostado = !movil
         // T1 · el título que se ve: desde 1024 el de volumen; abajo, el del DOM.
         const titulo = !movil && a0.m.titulo3d !== null ? a0.m.titulo3d : a0.m.tituloDom
         const anchoDelTitulo = titulo === null ? Number.NaN : titulo.der - titulo.izq
-        const referencia = !movil && c === '1' ? ancho : a0.m.columna === null ? Number.NaN : a0.m.columna.der - a0.m.columna.izq
+        const referencia = a0.m.columna === null ? Number.NaN : a0.m.columna.der - a0.m.columna.izq
         const parte = anchoDelTitulo / referencia
-        const parteBien = !movil && c === '1' ? parte >= 0.6 && parte <= 0.75 : parte >= 0.85 && parte <= 1.0001
+        const parteBien = parte >= 0.85 && parte <= 1.0001
         const aLaPildora = distancia(titulo, a0.m.pildora)
         const alLogo = distancia(titulo, a0.logo)
         const arribaDelLogo = !movil || (titulo !== null && a0.logo !== null && titulo.abajo <= a0.logo.arriba)
         const eje = (k: Caja | null): number => (k === null ? Number.NaN : deCostado ? k.izq : (k.izq + k.der) / 2)
         const ejes = [eje(a0.m.tituloDom), eje(a0.m.bajada), eje(a5.m.deQue)]
         const desvioDelEje = (Math.max(...ejes) - Math.min(...ejes)) / ancho
-        const lado = !deCostado || (c === '2' ? cx(titulo) > cx(a0.logo) : cx(titulo) < cx(a0.logo))
-        const bien = h0.dx <= 0.01 && h0.dy <= 0.01 && h5.dx <= 0.01 && h5.dy <= 0.01 && desvioDelEje <= 0.01 && lado && a0.m.composicion === c && a0.m.renglones === 1 && parteBien && aLaPildora > 0 && alLogo > 0 && arribaDelLogo
+        const lado = !deCostado || cx(titulo) < cx(a0.logo)
+        const bien = h0.dx <= 0.01 && h0.dy <= 0.01 && h5.dx <= 0.01 && h5.dy <= 0.01 && desvioDelEje <= 0.01 && lado && a0.m.renglones === 1 && parteBien && aLaPildora > 0 && alLogo > 0 && arribaDelLogo
         if (!bien) malas += 1
         const linea =
-          `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)}×${String(alto)} · ?composicion=${c} · «${a0.m.texto}» en ${String(a0.m.renglones)} renglón(es), ${(parte * 100).toFixed(1)} % ${!movil && c === '1' ? 'del cuadro' : movil ? 'del ancho útil' : 'de su columna'}${!movil && a0.m.titulo3d !== null ? ' (en volumen)' : ''}` +
+          `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)}×${String(alto)} · «${a0.m.texto}» en ${String(a0.m.renglones)} renglón(es), ${(parte * 100).toFixed(1)} % ${movil ? 'del ancho útil' : 'de su columna'}${!movil && a0.m.titulo3d !== null ? ' (en volumen)' : ''}` +
           ` · a la píldora ${aLaPildora.toFixed(0)} px, al logo ${alLogo.toFixed(0)} px${movil ? (arribaDelLogo ? ', arriba del logo' : ', NO arriba del logo') : ''}` +
           ` · el logo en su hueco: ${desborda(a0.logo) ? 'más ancho que el cuadro (x sin medir)' : `${(h0.dx * 100).toFixed(2)} %`} en x y ${(h0.dy * 100).toFixed(2)} % en y (avance 0,5: ${(h5.dx * 100).toFixed(2)} y ${(h5.dy * 100).toFixed(2)} %)` +
           ` · el eje (${deCostado ? 'el borde izquierdo' : 'el centro'}): ${(desvioDelEje * 100).toFixed(2)} %${lado ? '' : ' · DEL LADO EQUIVOCADO'}`

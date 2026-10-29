@@ -3,7 +3,7 @@ import type * as THREE from 'three'
 /**
  * [T0 · 2026-10-22] COMPILAR SIN QUE UN MATERIAL LIBERADO TIRE LA PÁGINA — el reemplazo de `WebGLRenderer.compileAsync` en la escena.
  *
- * El defecto (medido en el dev: `/v3/pagina-base?composicion=1` a 1440 y la ventana a 360 enseguida, 2 `pageerror` «Cannot read
+ * El defecto (medido en el dev: `/v3/pagina-base` con la composición 1 de entonces (la bandera se fue en L6) a 1440 y la ventana a 360 enseguida, 2 `pageerror` «Cannot read
  * properties of undefined (reading 'isReady')»): `compileAsync` (three 0.182, `checkMaterialsReady`) guarda los materiales que compila y,
  * cada 10 ms, le pregunta al programa de cada uno si está listo (`properties.get(material).currentProgram.isReady()`). Si en el medio el
  * material se libera (`dispose`: el título de la página se suelta al cruzar abajo de 1024, el pie se rearma, el lienzo se rehace), sus

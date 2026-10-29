@@ -26,9 +26,6 @@ const AVANCES = (process.env.AVANCES ?? '0,0.5,1').split(',').map(Number)
 const PANTALLAS = Number(process.env.PANTALLAS ?? '2.5')
 const CAPTURAS = Number(process.env.CAPTURAS ?? '6')
 const CONTROL = process.env.CONTROL ?? ''
-const COMPOSICION = process.env.COMPOSICION ?? ''
-/** [B12a.8] T5 · una de las opciones sin velo (`?legibilidad=luz|motas`), o ninguna. */
-const LEGIBILIDAD = process.env.LEGIBILIDAD ?? ''
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const SALIDA = salidaDelBanco('contraste-de-la-intro')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -78,8 +75,8 @@ async function contexto(ancho: number, alto: number, entorno: string): Promise<{
   await ctx.addInitScript(`(() => { window.__entornoDeLaEscena = ${JSON.stringify(entorno)}; window.__defectosDeLaIntro = ${JSON.stringify(CONTROL)}; try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
   const p = ctx.pages()[0] ?? (await ctx.newPage())
   await p.route('**/api/**', (r) => r.abort())
-  const busqueda = new URLSearchParams({ ...(COMPOSICION === '' ? {} : { composicion: COMPOSICION }), ...(LEGIBILIDAD === '' ? {} : { legibilidad: LEGIBILIDAD }) }).toString()
-  await p.goto(`${BASE}/v3/pagina-base${busqueda === '' ? '' : `?${busqueda}`}`, { waitUntil: 'load', timeout: 300000 })
+  // [INT] La composición y la legibilidad son fijas desde L6: la página sin banderas.
+  await p.goto(`${BASE}/v3/pagina-base`, { waitUntil: 'load', timeout: 300000 })
   await p.mouse.move(ancho / 2, alto / 2)
   // [B12a.8] T5 · Para explorar una opción (`ESTILO`): una hoja de más, antes de medir (no es parte del criterio).
   if (process.env.ESTILO !== undefined) await p.addStyleTag({ content: process.env.ESTILO })
@@ -240,7 +237,7 @@ async function main(): Promise<void> {
     try {
       for (const f of AVANCES) {
         await irAlAvance(p, f, alto)
-        await p.screenshot({ path: path.join(SALIDA, `c${COMPOSICION || 'x'}${LEGIBILIDAD === '' ? '' : `-${LEGIBILIDAD}`}-${String(ancho)}-avance-${String(f)}${CONTROL === '' ? '' : `-${CONTROL}`}.png`) })
+        await p.screenshot({ path: path.join(SALIDA, `${String(ancho)}-avance-${String(f)}${CONTROL === '' ? '' : `-${CONTROL}`}.png`) })
         for (const o of OBJETIVOS) {
           const m = await mascara(p, o.sel, o.nombre === 'h1 (1)' ? 2 : o.grande ? 1 : 0)
           if (m.indices.length === 0 || m.color === null) continue
@@ -305,7 +302,7 @@ async function main(): Promise<void> {
     if (!r.bien && r.informativo !== true) malas += 1
     console.log(`${r.informativo === true ? 'dato ' : r.bien ? 'ok   ' : 'FALLA'} ${String(r.ancho).padStart(4)} · avance ${r.avance.toFixed(1)} · ${r.nombre.padEnd(22)} · ${String(r.pixeles).padStart(7)} px · AA ${(r.aa * 100).toFixed(1)} % (≥4,5: ${(r.sobre45 * 100).toFixed(1)} %, ≥3: ${(r.sobre3 * 100).toFixed(1)} %) · p5 ${r.p5.toFixed(2)} · peor ${r.peor.toFixed(2)}`)
   }
-  writeFileSync(path.join(SALIDA, `resultados-c${COMPOSICION || 'x'}${CONTROL === '' ? '' : `-${CONTROL}`}.json`), JSON.stringify(resultados, null, 1))
+  writeFileSync(path.join(SALIDA, `resultados${CONTROL === '' ? '' : `-${CONTROL}`}.json`), JSON.stringify(resultados, null, 1))
   console.log(`contraste-de-la-intro: ${String(contados.length - malas)} de ${String(contados.length)} textos con AA en el 95 % de sus píxeles${CONTROL === '' ? '' : ` (CONTROL=${CONTROL})`}`)
 }
 

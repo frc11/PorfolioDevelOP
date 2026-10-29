@@ -3,19 +3,18 @@ import * as THREE from 'three'
 import { BLOQUES_DEL_FAQ, BOTON_EN_VIVO, FAQ_EN_VIVO, faseEn, nivelesDelFaq, pasoDelBoton, subidaDelBloque, versionDelFaqDeVolumen, type IdDelBloqueDelFaq } from '../../pie3d/faqDelPie'
 import { homografia, matrix3dCss, nitidaEn } from '../../pie3d/homografia'
 import { HUNDIMIENTO_DEL_PIE, pisoDelHundimiento } from '../../formularios/volteo'
-import { HUNDIDOS, cuantoSeHunde } from '../../pie3d/registro'
 import { SALIDA_EN_VIVO } from '../../pie3d/salidas'
 import { hayBanco } from '../entorno'
 import { CAIDA_DEL_PIE } from '../final/caidaDelPie'
 import { FLOOR_Y } from '../probeScene'
 import { luzAcostada } from './acostado'
-import { HUNDIDA_DEL_PIE } from './armadas'
 import type { CaidaDelPie } from './caida'
 import { caraEnElCuadro } from './colocacion'
 import { uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { capaPropia, fijarLaFase } from './domQueSigue'
 import { VOLUMEN_DEL_PIE, armarElBloque } from './geometria'
 import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
+import { hundirComoElPie } from './hundidoDelFaq'
 import { materialDelPie } from './material'
 
 /**
@@ -352,16 +351,6 @@ function controlDelBanco(): { readonly siempre: boolean; readonly temprano: bool
   return { siempre: v.__botonDelFaqSiempre === true, temprano: v.__botonDelFaqTemprano === true }
 }
 const SIN_CONTROL = { siempre: false, temprano: false } as const
-
-/** [L5] El hover del WhatsApp del FAQ: el hundido y la cara que se aclara de las placas del pie (`armadas.ts`, `encimaDelPie.ts`). */
-function hundirComoElPie(b: Bloque, quieto: boolean, dt: number): void {
-  const h = HUNDIDOS.get(b.elemento)
-  const pedido = cuantoSeHunde(h, HUNDIDA_DEL_PIE.encima / HUNDIDA_DEL_PIE.apretada) * HUNDIDA_DEL_PIE.apretada
-  const k = Math.exp(-dt / HUNDIDA_DEL_PIE.tau)
-  b.hundido = quieto ? pedido : pedido + (b.hundido - pedido) * k
-  const encima = h !== undefined && (h.encima || h.foco || h.apretada) ? 1 : 0
-  b.uniformes.uEncimaDelPie.value = quieto ? encima : encima + (b.uniformes.uEncimaDelPie.value - encima) * k
-}
 
 /** La columna del pie de ese lado del logo (−1 izquierda, 1 derecha); sin ella, −1. */
 function columnaDelLado(c: CaidaDelPie, lado: number): number {
