@@ -42,6 +42,8 @@
   /* [NOCTURNO B5] El giro de un canto sobre su borde: de canto a la cara, un cuarto de vuelta. */
   --libro-canto: 90deg;
   --libro-perspectiva: calc(var(--spacing-8) * 40);
+  /* [L8a] El abanico no llena el estante (queda arrimado a la izquierda) y el giro de las placas le come la derecha: se lo centra, medio sobrante más lo que el giro le saca. */
+  --libro-corrimiento: max(0px, calc((100cqw - var(--libro-ancho) - (var(--libros) - 1) * var(--libro-paso)) / 2 + var(--libro-ancho) * 0.015));
   /* [NOCTURNO B5] La mirada de la cámara (`giroDeLaPieza`, la de los valores de Por qué develOP): la escribe la biblioteca en cada
    * cambio del mouse; quieta, de frente. */
   --mirada: rotateX(0deg);

@@ -208,9 +208,10 @@ const ESCALON: Record<'solo', React.CSSProperties> = {
  * foto, no la escena) y sin el puntero (el toque es del botón). El nombre que se lee es el `h4` de la fila; ésta es su imagen.
  */
 const ETIQUETA = {
-  caja: 'pointer-events-none absolute top-[var(--spacing-3)] bg-fondo px-[var(--spacing-3)] py-[var(--spacing-1)] font-titulo text-fluido-titulo-s font-semi leading-titulo text-tinta escritorio:top-[var(--spacing-4)]',
-  izquierda: 'left-[var(--spacing-3)] escritorio:left-[var(--spacing-4)]',
-  derecha: 'right-[var(--spacing-3)] escritorio:right-[var(--spacing-4)]',
+  caja: 'pointer-events-none absolute top-[var(--spacing-3)] bg-fondo px-[var(--spacing-3)] py-[var(--spacing-1)] font-titulo text-fluido-titulo-s font-semi leading-titulo text-tinta escritorio:top-0',
+  // [L8a] En escritorio la esquina de la etiqueta es la esquina de la foto: sin margen.
+  izquierda: 'left-[var(--spacing-3)] escritorio:left-0',
+  derecha: 'right-[var(--spacing-3)] escritorio:right-0',
 } as const
 
 /** [C2-30f] El nombre adentro de la foto y de qué lado arriba. */

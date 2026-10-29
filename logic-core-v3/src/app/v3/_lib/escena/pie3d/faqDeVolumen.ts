@@ -14,7 +14,7 @@ import { uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { capaPropia, fijarLaFase } from './domQueSigue'
 import { VOLUMEN_DEL_PIE, armarElBloque } from './geometria'
 import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
-import { hundirComoElPie } from './hundidoDelFaq'
+import { fundirLaPlaca, hundirComoElPie } from './hundidoDelFaq'
 import { materialDelPie } from './material'
 
 /**
@@ -292,7 +292,9 @@ export function crearElFaqDeVolumen(): { readonly grupo: THREE.Group; readonly a
       // [L5] El botón, más abajo (lote2/14): `bajaElBoton` alturas suyas más lejos del logo (pegado, pisaba las columnas del pie).
       else [d, a] = [0, -(base.logoFondo / 2 + A + mAlto * (1 + 2 * BLOQUES_DE_VOLUMEN.bajaElBoton))]
       const cambio = BLOQUES_DEL_FAQ.get(b.id)?.cambio ?? null
-      const s = cambio !== null ? poseDelCambio(cambio, mpp) : poseDelBloque(v, mpp)
+      // [L8a] El WhatsApp no sube del piso: aparece en su lugar con un fundido (la placa, su hueco y el texto con el nivel).
+      const s = b.id === 'whatsapp' ? { ...poseDelBloque(1, mpp), abre: v, texto: v } : cambio !== null ? poseDelCambio(cambio, mpp) : poseDelBloque(v, mpp)
+      if (b.id === 'whatsapp') fundirLaPlaca(b.material, v)
       // [L5] El WhatsApp del FAQ, como el del pie: con el mouse encima o el foco se hunde y su cara se aclara; al apretar, más (lote2/19).
       if (b.id === 'whatsapp') hundirComoElPie(b, e.quieto, e.dt)
       const caraY = s.caraY - b.hundido * mpp

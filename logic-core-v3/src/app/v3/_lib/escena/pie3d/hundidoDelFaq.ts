@@ -1,3 +1,5 @@
+import type * as THREE from 'three'
+
 import { HUNDIDOS, cuantoSeHunde } from '../../pie3d/registro'
 import { HUNDIDA_DEL_PIE } from './armadas'
 import type { UniformesDelPie } from './coreografia'
@@ -7,6 +9,16 @@ interface BloqueQueSeHunde {
   readonly elemento: HTMLElement
   hundido: number
   readonly uniformes: Pick<UniformesDelPie, 'uEncimaDelPie'>
+}
+
+/** [L8a] La placa que aparece en su lugar: su opacidad es el nivel (1 = opaca, sin mezcla). */
+export function fundirLaPlaca(material: THREE.Material, nivel: number): void {
+  const mezcla = nivel < 0.999
+  if (material.transparent !== mezcla) {
+    material.transparent = mezcla
+    material.needsUpdate = true
+  }
+  material.opacity = mezcla ? nivel : 1
 }
 
 /**

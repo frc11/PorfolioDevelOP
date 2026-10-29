@@ -378,6 +378,7 @@
     "test:s87-chat": "npx tsx src/app/v3/_chrome/chat/s87-chat.invariant.tsx",
     "test:s87": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s87",
     "test:s88-l5": "npx tsx src/app/v3/_lib/__tests__/s88-l5.invariant.tsx",
+    "test:s89-l8a": "npx tsx src/app/v3/_lib/__tests__/s89-l8a.invariant.tsx",
     "test:s88": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s88",
     "test:s38": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s38",
     "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",

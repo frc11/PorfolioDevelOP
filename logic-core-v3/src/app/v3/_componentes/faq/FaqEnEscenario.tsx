@@ -12,10 +12,11 @@ import { SALIDA_EN_VIVO } from '../../_lib/pie3d/salidas'
 import { IconoDeMarca } from '../../_secciones/cierre/IconosDeMarca'
 import { Envoltorio } from '../layout/Envoltorio'
 import { DosCopias } from '../rollover/DosCopias'
-import { Cuerpo, EtiquetaDeSeccion } from '../tipografia/Textos'
+import { Cuerpo } from '../tipografia/Textos'
 import { Titular } from '../tipografia/Titular'
 import { BloqueDelFaq } from './BloqueDelFaq'
 import { BotonDelFaq } from './BotonDelFaq'
+import { RespuestaDelFaq } from './RespuestaDelFaq'
 import { aplicarElNivel, estiloDelNivel } from './hundimientoEnElDom'
 import { useMedidasDelForm } from './useMedidasDelForm'
 import { IDS_DEL_FAQ, TEXTOS_DEL_FAQ, WHATSAPP_DEL_FAQ, type PreguntaFrecuente } from './preguntas'
@@ -112,6 +113,7 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
     rearmarElBotonDelFaq()
   }, [])
   const medidas = useMedidasDelForm(pie, volumen)
+  const altoDelBloque = typeof medidas.respuesta?.minHeight === 'number' ? medidas.respuesta.minHeight : undefined
   // [L5] El WhatsApp de volumen se hunde con el mouse, el foco y al apretar, como el del pie (la escena lo lee: `faqDeVolumen.ts`).
   useHundido(whatsapp, volumen)
 
@@ -255,17 +257,14 @@ export function FaqEnEscenario({ preguntas, pie, volumen, activo }: Props): Reac
               <BloqueDelFaq id="respuesta" caja={derecha} volumen={volumen} estilo={CERRADO} medidas={medidas.respuesta}>
                 {/* Lo que sube se anuncia (el aviso, o la respuesta que tocaste). */}
                 {/* [L5] El aviso, centrado en su bloque (alto y ancho: lote2/18); las respuestas, desde arriba. */}
-                <div aria-live="polite" className={cn('p-[var(--spacing-6)]', mostrado === 'aviso' && 'flex min-h-[inherit] flex-col justify-center text-center')}>
+                <div aria-live="polite" className={cn('flex min-h-[inherit] flex-col justify-center p-[var(--spacing-6)] text-center')}>
                   <div hidden={mostrado !== 'aviso'}>
                     <Titular nivel="titulo-m" como="p" peso="liviano" className="text-balance">
                       {TEXTOS_DEL_FAQ.aviso}
                     </Titular>
                   </div>
                   {preguntas.map((p, i) => (
-                    <div key={p.pregunta} id={IDS_DEL_FAQ.respuesta(i)} hidden={mostrado !== i} className="flex flex-col gap-[var(--spacing-3)]">
-                      <EtiquetaDeSeccion sangria={false}>{p.pregunta}</EtiquetaDeSeccion>
-                      <Cuerpo>{p.respuesta}</Cuerpo>
-                    </div>
+                    <RespuestaDelFaq key={p.pregunta} id={IDS_DEL_FAQ.respuesta(i)} pregunta={p.pregunta} respuesta={p.respuesta} visible={mostrado === i} altoDelBloque={volumen ? altoDelBloque : undefined} />
                   ))}
                 </div>
               </BloqueDelFaq>

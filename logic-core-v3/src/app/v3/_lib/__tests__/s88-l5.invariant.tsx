@@ -91,10 +91,11 @@ const conIntro = (f: string): boolean => f.indexOf('{TEXTOS_DEL_FAQ.titulo}') < 
 afirmar(TEXTOS_DEL_FAQ.intro === 'Lo que más nos preguntan antes de arrancar. Si no está acá, escribinos.' && conIntro(escenario) && conIntro(lista), 'el bloque: «Preguntas frecuentes», la introducción y las preguntas (en escritorio y en la lista)')
 controlPositivo('  el detector ve el bloque sin la introducción', escenario.replace('{TEXTOS_DEL_FAQ.intro}', ''), conIntro)
 
-const centrado = ['flex min-h-[', 'inherit] flex-col justify-center text-center'].join('')
-const avisoCentrado = (f: string): boolean => f.includes(`mostrado === 'aviso' && '${centrado}'`)
-afirmar(avisoCentrado(escenario), '«Tocá una pregunta y mirá lo que pasa.» centrado en su bloque (lote2/18); las respuestas, desde arriba')
-controlPositivo('  el detector ve el aviso arriba a la izquierda', escenario.replace(`mostrado === 'aviso' && '${centrado}'`, "false && ''"), avisoCentrado)
+// [L8a] El aviso y las respuestas, todos centrados en su bloque (lote3/08-09); la letra de la respuesta la ajusta `RespuestaDelFaq`.
+const centrado = ['flex min-h-[', 'inherit] flex-col justify-center p-[var(--spacing-6)] text-center'].join('')
+const avisoCentrado = (f: string): boolean => f.includes(`'${centrado}'`)
+afirmar(avisoCentrado(escenario), '«Tocá una pregunta y mirá lo que pasa.» y las respuestas, centrados en su bloque (lote2/18, lote3/09)')
+controlPositivo('  el detector ve el aviso arriba a la izquierda', escenario.replace(`'${centrado}'`, "''"), avisoCentrado)
 
 const volumen = leer('_lib/escena/pie3d/faqDeVolumen.ts')
 // [INT] El hundido vive en su archivo (s8-montaje: `faqDeVolumen.ts` pasaba las 300 líneas de código).
@@ -115,7 +116,7 @@ const comoElFormulario = (f: (t: number) => Pose): boolean => {
 const MPP = 0.02
 afirmar(comoElFormulario((t) => poseDelCambio(t, MPP)), `[L5] la respuesta cambia como el formulario: baja ${String(HUNDIMIENTO_DEL_PIE.espesores)} espesores con el hueco abierto, el piso se cierra encima a la mitad y vuelve (lote2/19)`)
 controlPositivo('  el detector ve el cambio de antes (la subida de la entrada: casi no bajaba y el piso se cerraba en seguida)', (t: number) => poseDelBloque(Math.abs(1 - 2 * t), MPP), comoElFormulario)
-const cableadoDelCambio = (v: string, e: string): boolean => v.includes('const s = cambio !== null ? poseDelCambio(cambio, mpp) : poseDelBloque(v, mpp)') && e.includes("nivelDelBloque('respuesta', enElCambio ? niveles.faq : Math.min(niveles.faq, paso.nivel), enElCambio ? paso.cambio : null)")
+const cableadoDelCambio = (v: string, e: string): boolean => v.includes('cambio !== null ? poseDelCambio(cambio, mpp) : poseDelBloque(v, mpp)') && e.includes("nivelDelBloque('respuesta', enElCambio ? niveles.faq : Math.min(niveles.faq, paso.nivel), enElCambio ? paso.cambio : null)")
 afirmar(cableadoDelCambio(volumen, escenario), '  el cuadro del FAQ le pasa el tiempo del cambio y la escena lo usa')
 controlPositivo('  el detector ve la escena sin el cambio', [volumen.replace('cambio !== null ? poseDelCambio(cambio, mpp) : poseDelBloque(v, mpp)', 'poseDelBloque(v, mpp)'), escenario] as const, ([v, e]) => cableadoDelCambio(v, e))
 

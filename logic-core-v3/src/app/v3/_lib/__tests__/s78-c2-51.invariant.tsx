@@ -279,7 +279,8 @@ const partesDelContacto = (h: string): string[] =>
   Object.entries({
     // [L4] El contacto aparece EN EL LUGAR de las tarjetas: ni una tarjeta, ni «Elegí…», y las tres acciones juntas en la fila del envío.
     'sin tarjetas': veces(h, 'data-pieza="tarjeta-de-solucion"') === 0 && !h.includes(TEXTOS_DEL_RECOMENDADOR.elegi),
-    'las tres acciones': /data-parte="fila-del-envio"[\s\S]*?type="submit"[\s\S]*?data-viaje-del-servicio="ia-automatizacion"[\s\S]*?data-parte="empezar-de-nuevo"/.test(h),
+    // [L8a] La página del servicio arriba (a la derecha del título); abajo, «Empezar de nuevo» a la izquierda y «Enviar» a la derecha.
+    'las tres acciones': /data-parte="cabecera-del-contacto"[\s\S]*?data-viaje-del-servicio="ia-automatizacion"[\s\S]*?data-parte="fila-del-envio"[\s\S]*?data-parte="empezar-de-nuevo"[\s\S]*?type="submit"/.test(h),
     'la precarga': /<form[^>]*data-precarga="ia-automatizacion"/.test(h),
     'el mensaje': h.includes(mensajeDelContacto([0, 0, 0], 'chatbot')),
     'el título': textoDe(h).includes('Hablemos de un chatbot con IA que atienda por vos'),

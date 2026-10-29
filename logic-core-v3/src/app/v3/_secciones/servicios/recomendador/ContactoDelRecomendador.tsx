@@ -96,9 +96,13 @@ export function ContactoDelRecomendador({ respuestas, elegida, alEnviado, alEmpe
   })
   return (
     <div data-pieza="contacto-del-recomendador" data-solucion={elegida} className="flex flex-col gap-[var(--spacing-5)]">
-      <Titular nivel="titulo-m" como="h4">
-        {tituloDelContacto(elegida)}
-      </Titular>
+      {/* [L8a] El título a la izquierda y, a su derecha, el botón a la página del servicio (abajo de 1024 se apilan). */}
+      <div data-parte="cabecera-del-contacto" className="flex flex-col items-start gap-[var(--spacing-2)] escritorio:flex-row escritorio:items-center escritorio:justify-between escritorio:gap-[var(--spacing-6)]">
+        <Titular nivel="titulo-m" como="h4">
+          {tituloDelContacto(elegida)}
+        </Titular>
+        <EnlaceDelServicio id={servicio} rotulo={rotuloDeLaPagina(servicio)} enTinta />
+      </div>
       {/* `grid-cols-1`: la columna del envío no crece con su contenido (a 390 las píldoras se salían 6 px del recuadro). */}
       <EstadoDeEnvio estado={estado} alVolver={alVolver} className="grid-cols-1">
         <form noValidate data-precarga={servicio} onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-[var(--spacing-3)]">
@@ -112,11 +116,10 @@ export function ContactoDelRecomendador({ respuestas, elegida, alEnviado, alEmpe
             </div>
           </div>
           <CampoDeTextoLargo {...comun('mensaje', TEXTOS_DEL_RECOMENDADOR.mensaje, CAMPOS.mensaje.ejemplo, MAXIMOS.mensaje)} renglones={4} />
-          {/* [L4] Las tres acciones juntas: «Enviar» (el botón del sitio) y, al lado, los dos links del recomendador. */}
-          <div data-parte="fila-del-envio" className="mt-[var(--spacing-2)] flex flex-col items-start gap-[var(--spacing-5)] escritorio:flex-row escritorio:flex-wrap escritorio:items-center escritorio:gap-x-[var(--spacing-8)]">
-            <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className="shrink-0" />
-            <EnlaceDelServicio id={servicio} rotulo={rotuloDeLaPagina(servicio)} enTinta />
+          {/* [L8a] Abajo, como los pasos: «Empezar de nuevo» a la izquierda y «Enviar» (el principal) a la derecha. */}
+          <div data-parte="fila-del-envio" className="mt-[var(--spacing-2)] flex flex-col-reverse items-start gap-[var(--spacing-5)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
             <BotonDelRecomendador parte="empezar-de-nuevo" rotulo={TEXTOS_DEL_RECOMENDADOR.empezarDeNuevo} alTocar={alEmpezar} />
+            <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className="shrink-0" />
           </div>
         </form>
       </EstadoDeEnvio>

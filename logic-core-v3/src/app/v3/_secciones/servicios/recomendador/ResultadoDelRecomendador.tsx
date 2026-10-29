@@ -71,7 +71,7 @@ export function ResultadoDelRecomendador({ respuestas, elegida, despachar, reduc
                 ))}
               </div>
             </div>
-            <div className="flex">
+            <div className="flex justify-start">
               <BotonDelRecomendador parte="empezar-de-nuevo" rotulo={TEXTOS_DEL_RECOMENDADOR.empezarDeNuevo} alTocar={() => despachar({ tipo: 'reiniciar' })} />
             </div>
           </motion.div>
