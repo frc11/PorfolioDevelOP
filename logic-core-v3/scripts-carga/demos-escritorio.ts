@@ -21,6 +21,10 @@
  *                  antes): el clic en la franja de una abre la de antes; FALLA.
  *                  El número de antes (contra la URL de cada demo, en frío) está en `docs/rediseno/SPRINT-C2-41.md`.
  *
+ *   MODO=entera    [L2] cada placa del abanico adentro del cuadro (8 px de margen abajo), debajo de la bajada y de no menos de 160 px, a
+ *                  1440×900, 1366×768, 1280×720 y 1024×768 (`ANCHOS=1280x720,…`), con foto. CONTROL=sin-alto: sin el tope del alto
+ *                  (`espejo.ts`); tiene que FALLAR en los cuadros bajos.
+ *
  *   BASE=http://localhost:3000 MODO=primera ANCHOS=1440,1024 npx tsx scripts-carga/demos-escritorio.ts
  *   CONTROL=franja MODO=primera …        CONTROL=sin-espejo MODO=espejo …
  *   CONTROL=area-movil MODO=hover …      CONTROL=sin-precarga MODO=carga …      CONTROL=area-solapada MODO=carga …
@@ -39,7 +43,11 @@ import { salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3000'
 const MODO = process.env.MODO ?? 'primera'
-const ANCHOS = (process.env.ANCHOS ?? '1440,1024').split(',').map(Number)
+/** [L2] Cada ancho puede llevar su alto (`1280x720`); sin alto, 900 desde 1025 y 768 abajo (lo de siempre). */
+const CUADROS = (process.env.ANCHOS ?? (MODO === 'entera' ? '1440x900,1366x768,1280x720,1024x768' : '1440,1024')).split(',').map((a) => {
+  const [w, h] = a.split('x').map(Number)
+  return { ancho: w ?? Number.NaN, alto: h ?? ((w ?? 0) <= 1024 ? 768 : 900) }
+})
 const CONTROL = process.env.CONTROL ?? ''
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const SALIDA = salidaDelBanco('demos-41e')
@@ -118,7 +126,35 @@ async function espejo(p: Page, ancho: number): Promise<Fila> {
   const dT = Math.abs(m.tituloP - m.tituloD)
   const dB = Math.abs(m.bajadaP - m.bajadaD)
   const entra = m.abajoDelAbanico <= m.alto
-  return { ancho, caso: 'alturas espejo', bien: dT <= 2 && dB <= 2 && entra, detalle: `títulos ${m.tituloP.toFixed(1)} / ${m.tituloD.toFixed(1)} (Δ ${dT.toFixed(1)}), bajadas ${m.bajadaP.toFixed(1)} / ${m.bajadaD.toFixed(1)} (Δ ${dB.toFixed(1)}); placa ${m.placa.toFixed(0)} px; el abanico termina en ${m.abajoDelAbanico.toFixed(0)} de ${String(m.alto)}` }
+  // [L2] La spec cambió (Valentino, 41: subir el cartel de Demos «solo si es necesario»): en los cuadros bajos la columna sube lo que falta
+  // para que entre el abanico (`espejo.ts`), así que el título de Demos puede ir MÁS ARRIBA que el del Portfolio, nunca más abajo, y las dos
+  // bajadas se corren lo mismo que los títulos.
+  // Y sólo si hizo falta: el abanico queda pegado a su margen de abajo (40 px, `MARGEN_DE_ABAJO_PX`, con 20 de tolerancia).
+  const subio = m.tituloD < m.tituloP - 2 && Math.abs(m.tituloP - m.tituloD - (m.bajadaP - m.bajadaD)) <= 2 && m.abajoDelAbanico >= m.alto - 60
+  return { ancho, caso: 'alturas espejo', bien: ((dT <= 2 && dB <= 2) || subio) && entra, detalle: `títulos ${m.tituloP.toFixed(1)} / ${m.tituloD.toFixed(1)} (Δ ${dT.toFixed(1)}), bajadas ${m.bajadaP.toFixed(1)} / ${m.bajadaD.toFixed(1)} (Δ ${dB.toFixed(1)}); placa ${m.placa.toFixed(0)} px; el abanico termina en ${m.abajoDelAbanico.toFixed(0)} de ${String(m.alto)}` }
+}
+
+// ─── [L2] entera: cada placa adentro del cuadro, y de qué tamaño ─────────────
+async function entera(p: Page, ancho: number, alto: number): Promise<Fila> {
+  await dormir(1500)
+  const m = await p.evaluate(() => {
+    const placas = [...document.querySelectorAll<HTMLElement>('[data-capa="demos"] [data-pieza="libro"] [data-parte="placa"]')].map((e) => e.getBoundingClientRect())
+    const libro = document.querySelector<HTMLElement>('[data-capa="demos"] [data-pieza="libro"]')?.getBoundingClientRect()
+    const bajada = document.querySelector<HTMLElement>('#demos p')?.getBoundingClientRect()
+    const titulo = document.querySelector<HTMLElement>('#demos h3')?.getBoundingClientRect()
+    return {
+      abajo: Math.max(...placas.map((r) => r.bottom)),
+      derecha: Math.max(...placas.map((r) => r.right)),
+      arriba: Math.min(...placas.map((r) => r.top)),
+      placa: libro?.width ?? Number.NaN,
+      cantidad: placas.length,
+      bajada: bajada?.bottom ?? Number.NaN,
+      titulo: titulo?.top ?? Number.NaN,
+    }
+  })
+  writeFileSync(path.join(SALIDA, `entera-${String(ancho)}x${String(alto)}-${etiqueta}.png`), await p.screenshot({ type: 'png' }))
+  const bien = m.cantidad === CATALOGO_DE_DEMOS.length && m.abajo <= alto - 8 && m.derecha <= ancho && m.arriba >= m.bajada && m.placa >= 160
+  return { ancho, caso: `el abanico entero a ${String(ancho)}×${String(alto)}`, bien, detalle: `placa ${m.placa.toFixed(0)} px; el abanico de ${m.arriba.toFixed(0)} a ${m.abajo.toFixed(0)} (cuadro ${String(alto)}), derecha ${m.derecha.toFixed(0)} de ${String(ancho)}; título en ${m.titulo.toFixed(0)}, bajada hasta ${m.bajada.toFixed(0)}` }
 }
 
 // ─── hover: el mouse quieto 3 s ─────────────────────────────────────────────
@@ -253,8 +289,7 @@ async function carga(p: Page, ancho: number): Promise<Fila[]> {
 async function main(): Promise<void> {
   mkdirSync(SALIDA, { recursive: true })
   const filas: Fila[] = []
-  for (const ancho of MODO === 'carga' ? [ANCHOS[0] ?? 1440] : ANCHOS) {
-    const alto = ancho <= 1024 ? 768 : 900
+  for (const { ancho, alto } of MODO === 'carga' ? CUADROS.slice(0, 1) : CUADROS) {
     const perfil = path.join(SALIDA, `perfil-${String(Date.now())}`)
     rmSync(perfil, { recursive: true, force: true })
     const ctx = await chromium.launchPersistentContext(perfil, {
@@ -281,6 +316,7 @@ async function main(): Promise<void> {
       }
       if (MODO === 'primera') filas.push(await primera(p, ancho, alto))
       else if (MODO === 'espejo') filas.push(await espejo(p, ancho))
+      else if (MODO === 'entera') filas.push(await entera(p, ancho, alto))
       else if (MODO === 'hover') filas.push(...(await hover(p, ancho)))
       else if (MODO === 'carga') filas.push(...(await carga(p, ancho)))
     } finally {

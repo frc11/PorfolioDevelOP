@@ -7,10 +7,11 @@
  *   · `area-solapada`  el ancla entera vuelve a recibir el puntero: la levantada tapa casi toda la franja de la de al lado, y el clic
  *                      ahí abre la de antes;
  *   · `sin-espejo`     el título y la bajada de Demos sin alinear con los del Portfolio;
- *   · `sin-precarga`   sin preconexión, sin documento precargado y el iframe recién con la ventana abierta.
+ *   · `sin-precarga`   sin preconexión, sin documento precargado y el iframe recién con la ventana abierta;
+ *   · `sin-alto`       [L2] el abanico sin el tope del alto (sólo el del ancho): no entra en los cuadros bajos.
  * (La franja de abajo, `CONTROL=franja`, es del revelado de la escena: `window.__defectosDelRevelado`, `_lib/escena/revelado.ts`.)
  */
-export type DefectoDeDemos = 'area-movil' | 'area-solapada' | 'sin-espejo' | 'sin-precarga'
+export type DefectoDeDemos = 'area-movil' | 'area-solapada' | 'sin-espejo' | 'sin-precarga' | 'sin-alto'
 
 export function conElDefectoDeDemos(d: DefectoDeDemos): boolean {
   if (typeof window === 'undefined') return false
