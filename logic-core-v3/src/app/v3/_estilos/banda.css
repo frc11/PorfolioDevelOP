@@ -110,18 +110,22 @@
     --degrade-del-velo: radial-gradient(closest-side, var(--velo-sobre-la-escena) 55%, transparent);
   }
 
+  /* [L2] 4 · Y Demos en el flujo del teléfono (`data-pantalla='demos'`, desde C2-41t ya no es la capa): el mismo halo y el mismo velo. */
+  [data-v3] [data-panel='trabajos'] [data-pantalla='demos'] [data-parte='titulo'],
   [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'],
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'],
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] {
     text-shadow: var(--halo-sobre-la-escena);
   }
 
+  [data-v3] [data-panel='trabajos'] [data-pantalla='demos'] [data-parte='titulo'] p,
   [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'] p,
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p,
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto'] {
     position: relative;
   }
 
+  [data-v3] [data-panel='trabajos'] [data-pantalla='demos'] [data-parte='titulo'] p::before,
   [data-v3] [data-panel='trabajos'] [data-pieza='encabezado-del-portfolio'] p::before,
   [data-v3] [data-panel='trabajos'] [data-pieza='cartel'] p::before,
   [data-v3] [data-panel='trabajos'] [data-capa='demos'] [data-pieza='texto']::before {
@@ -131,6 +135,35 @@
     z-index: -1;
     pointer-events: none;
     background: var(--degrade-del-velo);
+  }
+
+  /* ── 4a · [L2] 1 · EL PORTFOLIO ENTRA EN UNA PANTALLA CORTA ──
+   * En el teléfono la pantalla del Portfolio es una sola (el título, la bajada, la tarjeta, las flechas y las barras) y lo que cede es el
+   * video de la tarjeta. En los cuadros bajos (375 × 667) el video quedaba en 16 px: ahí el título va sin el aire de su interlineado y la
+   * bajada, más pegada y un paso más chica. Sólo en el flujo (`data-pantalla='portfolio'`): el escritorio no tiene esta pantalla. */
+  @media (height < 740px) {
+    [data-v3] [data-panel='trabajos'] [data-pantalla='portfolio'] [data-pieza='encabezado-del-portfolio'] h2 {
+      line-height: 1.05;
+    }
+
+    [data-v3] [data-panel='trabajos'] [data-pantalla='portfolio'] [data-pieza='encabezado-del-portfolio'] > div:last-child {
+      margin-top: var(--spacing-2);
+    }
+
+    [data-v3] [data-panel='trabajos'] [data-pantalla='portfolio'] [data-pieza='encabezado-del-portfolio'] p {
+      font-size: var(--text-caption);
+    }
+
+    /* Y la ficha de la tarjeta, más junta: las filas y sus renglones (el texto no se acorta). */
+    [data-v3] [data-panel='trabajos'] [data-pantalla='portfolio'] [data-pieza='ficha'] dl {
+      row-gap: var(--spacing-2);
+    }
+
+    [data-v3] [data-panel='trabajos'] [data-pantalla='portfolio'] [data-pieza='ficha'] dd,
+    [data-v3] [data-panel='trabajos'] [data-pantalla='portfolio'] [data-pieza='ficha'] dd > * {
+      font-size: var(--text-caption);
+      line-height: 1.4;
+    }
   }
 
   /* ── 4b · [PULIDO 11] A4 · J9 b · QUIÉNES SOMOS DE NOCHE ──

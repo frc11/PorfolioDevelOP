@@ -14,7 +14,7 @@
  * Los casos:
  *   entrada     se scrollea de a 4 % del cuadro desde que el pie del flujo asoma hasta pasar el tope de la caja de Demos: la pantalla de Demos
  *               (`data-pantalla="demos"`) entra pegada al pie del flujo (su tope es el de la caja, ±2 px: se mueve con el scroll), a su ancho
- *               (≥ 98 % del cuadro: sin escala) y, ya arriba, queda pegada (tope 0 ± 2); la capa vieja (`data-capa="demos"`) no está
+ *               (≥ 98 % del cuadro: sin escala) y [L2] sigue con el scroll (ya no se pega); la capa vieja (`data-capa="demos"`) no está
  *   titulo      con la pantalla debajo del cuadro, el titular está acostado y corrido debajo de su ventana (≥ 0,9 de su alto, con transformada);
  *               al llevarla arriba sube a su lugar (± 2 px) en menos de 1,2 s, con el bloque que se funde a 1
  *   muestrario  pegado: la tarjeta de ahora grande y entera en el cuadro (≥ 40 % del alto) con las flechas; la siguiente asoma (≥ 24 px a la
@@ -130,12 +130,13 @@ const CASO: Record<Caso, (c: Contexto) => Promise<Resultado>> = {
       if (m.vieja) malos.push('la capa vieja está montada')
       if (m.top >= m.vh) continue
       muestras += 1
-      const esperado = Math.max(0, m.cajaTop)
+      // [L2] Ya no se pega: el tope de la pantalla es el de la caja también arriba (pasa con el scroll, como cualquier sección).
+      const esperado = m.cajaTop
       if (Math.abs(m.top - esperado) > 2) malos.push(`y ${String(Math.round(y))}: tope ${m.top.toFixed(0)} (la caja en ${m.cajaTop.toFixed(0)})`)
       if (m.ancho < 0.98 * m.vw) malos.push(`y ${String(Math.round(y))}: ancho ${m.ancho.toFixed(0)} de ${String(m.vw)} (escalada)`)
     }
     const ok = muestras >= 10 && malos.length === 0
-    return { ok, detalle: `${String(muestras)} cuadros con Demos a la vista; ${malos.length === 0 ? 'entra pegada al pie del flujo, a su ancho, y queda arriba' : malos.slice(0, 4).join(' · ')}` }
+    return { ok, detalle: `${String(muestras)} cuadros con Demos a la vista; ${malos.length === 0 ? 'entra pegada al pie del flujo, a su ancho, y sigue con el scroll' : malos.slice(0, 4).join(' · ')}` }
   },
 
   async titulo(c) {

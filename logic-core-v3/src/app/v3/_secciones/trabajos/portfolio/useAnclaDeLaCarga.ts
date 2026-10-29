@@ -17,6 +17,9 @@ export function anclaDelHash(hash: string): (typeof ANCLAS_DEL_PORTFOLIO)[number
   return ANCLAS_DEL_PORTFOLIO.find((a) => `#${a.id}` === hash)
 }
 
+/** [L2] Cuánto se vuelve a poner el ancla de la carga si el documento cambia de alto (ms): lo que tarda en asentarse lo de arriba. */
+export const REASIENTO_MS = 4000
+
 /**
  * [B1] El ancla al cargar (`#portfolio-el-garage`, …): el navegador ya saltó al elemento; el Portfolio lo lleva al píxel del paso.
  * [B1.3] Salió de `usePortfolio.ts` (la regla de las 300 líneas), sin cambios. [B1.2d] Y `#trabajos` entra al Portfolio
@@ -35,19 +38,34 @@ export function useAnclaDeLaCarga(caja: RefObject<HTMLElement | null>, carrusel:
       // [B12a.7] Volviendo con la flecha, manda la posición que el home dejó (el velo la devuelve), no el ancla que quedó en la URL.
       if (VUELTA_AL_HOME.enCurso) return null
       const ancla = anclaDelHash(window.location.hash)
-      const m = ancla === undefined ? null : medir(caja.current)
-      if (ancla === undefined || m === null) return null
-      const delFlujo = carrusel ? (document.getElementById(ancla.id)?.getBoundingClientRect().top ?? null) : null
-      const y = delFlujo === null ? Math.round(scrollDelPx(centroDelPaso(ancla.paso, PANTALLAS_POR_PASO), m.tope, m.alto)) : Math.round(delFlujo + window.scrollY)
+      if (ancla === undefined || medir(caja.current) === null) return null
+      // [L2] El destino se lee al saltar (no antes): con el carrusel, lo de arriba del flujo puede haber cambiado de alto en el medio.
+      const destino = (): number | null => {
+        const m = medir(caja.current)
+        if (m === null) return null
+        const delFlujo = carrusel ? (document.getElementById(ancla.id)?.getBoundingClientRect().top ?? null) : null
+        return delFlujo === null ? Math.round(scrollDelPx(centroDelPaso(ancla.paso, PANTALLAS_POR_PASO), m.tope, m.alto)) : Math.round(delFlujo + window.scrollY)
+      }
+      const ir = (): void => {
+        const y = destino()
+        if (y !== null && Math.abs(window.scrollY - y) > 1) window.scrollTo({ top: y, behavior: 'instant' })
+      }
       // El ancla con la que cargó, para el diagnóstico de la carga, hasta que el visitante mueva la página por su cuenta. [B1.2b] Un clic
       // también (el menú lleva a otra sección: el arnés lo contaba como un ancla desfasada).
       el?.setAttribute('data-ancla-de-la-carga', ancla.id)
       const soltar = (): void => el?.removeAttribute('data-ancla-de-la-carga')
       const gestos = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const
       for (const g of gestos) window.addEventListener(g, soltar, { once: true, passive: true })
-      const reloj = window.setTimeout(() => window.scrollTo({ top: y, behavior: 'instant' }), 0)
+      const reloj = window.setTimeout(ir, 0)
+      // [L2] Con el carrusel, si el documento cambia de alto mientras nadie tocó la página (las fuentes, los medios, lo de arriba que se mide),
+      // el ancla se vuelve a poner: el reporte lo encontró entre el 66 y el 143 % del cuadro. Hasta un gesto, o `REASIENTO_MS`.
+      const reasentar = carrusel ? new ResizeObserver(() => (el?.hasAttribute('data-ancla-de-la-carga') === true ? ir() : undefined)) : null
+      reasentar?.observe(document.body)
+      const fin = window.setTimeout(() => reasentar?.disconnect(), REASIENTO_MS)
       return () => {
         window.clearTimeout(reloj)
+        window.clearTimeout(fin)
+        reasentar?.disconnect()
         for (const g of gestos) window.removeEventListener(g, soltar)
       }
     }

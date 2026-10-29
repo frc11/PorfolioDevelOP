@@ -6,8 +6,8 @@
  *
  *   · el modo lo decide el CSS; el escenario queda sólo para Demos; nada se pide al orden; la rueda y el clic afuera no son del Portfolio;
  *   · la tarjeta trae el video y TODA la información de la tira (de `PROYECTOS`, nada inventado); el flujo, en su orden, con sus anclas;
- *   · la REGLA DE ALTURAS: afuera del flujo la escena ve lo de hoy con el medio que sea, el mínimo es la tabla, y el reloj de Demos arranca
- *     donde termina el flujo.
+ *   · la REGLA DE ALTURAS: afuera del flujo la escena ve lo de hoy con el medio que sea, y el reloj de Demos arranca donde termina el flujo.
+ *     [L2] Sin mínimo: Demos es una pantalla y el tramo del carrusel llega al final de la sección (la escena ve el medio y la cola).
  */
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
@@ -24,7 +24,7 @@ import { EscenarioDelPortfolio } from '../../_secciones/trabajos/portfolio/Escen
 import { CLASE_DEL_VALOR_COMPACTO, Ficha } from '../../_secciones/trabajos/portfolio/Ficha'
 import { FlujoDelPortfolio, TARJETAS_DEL_CARRUSEL, indiceDelAncla } from '../../_secciones/trabajos/portfolio/FlujoDelPortfolio'
 import {
-  PANTALLAS_DESPUES_DEL_FLUJO, PANTALLAS_EXTRA_CON_EL_CARRUSEL, PANTALLAS_MINIMAS_DEL_FLUJO, kDelCarrusel, medioDelFlujo, pasoDelCarrusel,
+  PANTALLAS_DESPUES_DEL_FLUJO, kDelCarrusel, medioDelFlujo, pasoDelCarrusel,
   pxDeLaSalidaDelCarrusel, pxDeLaSeccionConElCarrusel,
 } from '../../_secciones/trabajos/portfolio/medioDelCarrusel'
 import { ADENTRO, AFUERA, recorridoDelOrden } from '../../_secciones/trabajos/portfolio/orden'
@@ -152,6 +152,14 @@ export function afirmarElCarruselDelPortfolio(): void {
     m.includes(`data-marca-de-agua="${p.slug}"`) && veces(m, 'data-fila="') >= 6 && m.includes('Lo que dice el cliente')
   afirmar(PROYECTOS.every((p) => entera(tarjeta(p, true, true), p)), 'cada tarjeta trae todo lo de su tira: el nombre (h3), el rubro, la fecha, qué hicimos, el problema, lo que resolvimos, la reseña y su firma, el servicio (oculto como siempre), «Visitar sitio ↗» con su sitio (aparte, sin referente) y la marca de agua; los textos salen de `PROYECTOS`: ninguno se acortó ni se inventó')
   controlPositivo('  el detector ve la ficha corta de las historias (sin la fecha ni la reseña)', tarjeta(PROYECTOS[0], true, true).replace('Marzo 2026', '').replaceAll('Lo que dice el cliente', ''), (m: string) => entera(m, PROYECTOS[0]))
+  // [L2] La reseña se sacrifica en la tarjeta (Valentino: «sacrifiquemos el testimonio»): queda en el marcado, oculta, como las filas que no se muestran.
+  const sinResena = (m: string): boolean => /<figure data-parte="resena" hidden=""/.test(m) && veces(m, 'data-parte="resena"') === 1
+  afirmar(PROYECTOS.every((p) => sinResena(tarjeta(p, true, true))), '  [L2] la reseña va oculta en las tres tarjetas (`hidden`): la tarjeta entra en la pantalla')
+  controlPositivo('  el detector ve la reseña a la vista (la ficha de la tira)', marcar(<Ficha proyecto={PROYECTOS[0]} visible reducido={false} desde={1} compacta />, { anima: true }), sinResena)
+  // [L2] El video cede: su caja se queda con el alto que deja la ficha y el video la llena en 16:10 (por contenedor, sin deformarse).
+  const cede = (m: string): boolean => /data-parte="caja-del-medio" class="[^"]*\bflex-1\b[^"]*\[container-type:size\]/.test(m) && /<figure [^>]*style="aspect-ratio:16 \/ 10;width:min\(100cqw, 100cqh \* 16 \/ 10\)"/.test(m)
+  afirmar(cede(tarjeta(PROYECTOS[0], true, true)), '  [L2] el video está en una caja que cede (`flex-1`, contenedor de tamaño) y mide lo que entre en ella en 16:10')
+  controlPositivo('  el detector ve el video del 24 % del cuadro (el de antes)', tarjeta(PROYECTOS[0], true, true).replace('width:min(100cqw, 100cqh * 16 / 10)', 'max-width:min(100%, calc(var(--alto-del-medio) * 16 / 10))'), cede)
   const video = (m: string, p: ProyectoDelPortfolio): { readonly src: boolean; readonly poster: boolean } => ({ src: m.includes(`src="${p.medios.video.escritorio}"`), poster: m.includes(`poster="${p.medios.poster.escritorio}"`) })
   const p0 = PROYECTOS[0]
   afirmarIgual([video(tarjeta(p0, true, true), p0), video(tarjeta(p0, false, true), p0), video(tarjeta(p0, true, false), p0)], [{ src: true, poster: true }, { src: false, poster: true }, { src: false, poster: false }], '  el video del recorrido (16:10): sólo la tarjeta activa lo pide, las de al lado tienen su póster listo, y sin la sección cerca nada')
@@ -175,9 +183,18 @@ export function afirmarElCarruselDelPortfolio(): void {
     const l = m.indexOf('data-pantalla="la-tuya"')
     return p >= 0 && t > p && c > t && l > c && veces(m.slice(p, l), 'data-pantalla=') === 1 && /<h2[^>]*>[\s\S]*Portfolio/.test(m.slice(t, c)) && /aria-roledescription="carrusel"/.test(m.slice(c, l)) &&
       veces(m.slice(c, l), 'data-pieza="tarjeta-del-proyecto"') === PROYECTOS.length && m.slice(l).includes(CONTENIDO.laTuya.nombre) && /data-pieza="formulario-de-la-tuya"/.test(m.slice(l)) &&
-      ANCLAS_DEL_PORTFOLIO.every((a) => veces(m, `id="${a.id}"`) === 1) && m.includes(`min-height:${(PANTALLAS_MINIMAS_DEL_FLUJO * 100).toFixed(4)}svh`) && m.includes('data-parte="fundido-del-encabezado"')
+      ANCLAS_DEL_PORTFOLIO.every((a) => veces(m, `id="${a.id}"`) === 1) && m.includes('data-parte="fundido-del-encabezado"') &&
+      // [L2] El flujo sin alto mínimo; la pantalla del Portfolio, una pantalla con el carrusel llenando lo que queda; «la tuya», sin pantalla propia.
+      !/data-pieza="flujo-del-portfolio"[^>]*style=/.test(m) && /data-pantalla="portfolio" class="relative flex min-h-svh flex-col pb-4"/.test(m) && /data-parte="carrusel" class="flex flex-1 flex-col"/.test(m) &&
+      /data-pantalla="la-tuya" class="relative pb-12"/.test(m)
   }
-  afirmar(enOrden(flujo), 'primero «Portfolio» (con su fundido: nunca asoma cortado) y, en la misma pantalla, el carrusel con las tres tarjetas; debajo «la tuya» con el formulario que ya existe; las cuatro anclas una vez cada una (los proyectos en la pantalla del carrusel, «la tuya» en la suya) y el flujo con su alto mínimo')
+  afirmar(enOrden(flujo), 'primero «Portfolio» (con su fundido: nunca asoma cortado) y, en la misma pantalla, el carrusel con las tres tarjetas; debajo «la tuya» con el formulario que ya existe; las cuatro anclas una vez cada una (los proyectos en la pantalla del carrusel, «la tuya» en la suya); [L2] el flujo sin alto mínimo, el carrusel llenando su pantalla y «la tuya» pegada debajo')
+  controlPositivo('  [L2] el detector ve el flujo con el alto mínimo de antes (3,31 pantallas)', flujo.replace('data-pieza="flujo-del-portfolio"', 'data-pieza="flujo-del-portfolio" style="min-height:331.3333svh"'), enOrden)
+  controlPositivo('  [L2] el detector ve «la tuya» en su propia pantalla centrada (la de antes)', flujo.replace('data-pantalla="la-tuya" class="relative pb-12"', 'data-pantalla="la-tuya" class="relative flex min-h-svh grow flex-col justify-center pb-12"'), enOrden)
+  // [L2] El ancla de «la tuya» sube el despeje de la barra menos el respiro: el salto la deja debajo de la barra.
+  const anclaDeLaTuya = (m: string): boolean => new RegExp(`id="portfolio-la-tuya"[^>]*style="top:calc\\(var\\(--spacing-6\\) - calc\\(`).test(m)
+  afirmar(anclaDeLaTuya(flujo), '  [L2] el ancla de «la tuya» va arriba de su bloque lo que ocupa la barra (menos el respiro)')
+  controlPositivo('  el detector ve el ancla en el tope del bloque', flujo.replace(/(id="portfolio-la-tuya"[^>]*) style="[^"]*"/, '$1'), anclaDeLaTuya)
   controlPositivo('  el detector ve «la tuya» arriba del carrusel', flujo.replace('data-parte="carrusel"', 'data-x="x"').replace('data-pantalla="la-tuya"', 'data-parte="carrusel"').replace('data-x="x"', 'data-pantalla="la-tuya"'), enOrden)
   controlPositivo('  el detector ve el carrusel en otra pantalla que el título', flujo.replace('data-parte="carrusel"', 'data-pantalla="carrusel" data-parte="carrusel"'), enOrden)
   afirmarIgual(TARJETAS_DEL_CARRUSEL.map((t) => t.id), PROYECTOS.map((p) => p.slug), '  las tarjetas son los tres proyectos, en el orden de la spec (la vuelta es infinita)')
@@ -193,20 +210,28 @@ export function afirmarElCarruselDelPortfolio(): void {
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('B1.2e · 48 · La REGLA DE ALTURAS con el carrusel: afuera del flujo la escena ve lo de hoy, con el medio que sea')
 
-  const MEDIOS = [PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.escritorio, 3400, 4462, 5600]
+  // [L2] El flujo mide lo que mide (sin mínimo): de 1,3 pantallas (un teléfono chico) a más de lo que veía la escena.
+  const MEDIOS = [1200, 1700, PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.escritorio, 4462, 9000]
   for (const ancho of ['tablet', 'movil'] as const) {
     for (const medio of MEDIOS) {
-      const peor = Math.max(...[844, 1024, 768, 1180].map((h) => desvioAfueraDelFlujo(ancho, medio, h, true)))
-      afirmar(peor < 1e-6, `${ancho}, el flujo de ${String(medio)} px de la regla: k = ${kDelCarrusel(medio, ancho).toFixed(5)}, desvío máximo afuera del flujo ${peor.toExponential(1)} px (a 844, 1024, 768 y 1180 de alto)`)
+      const peor = Math.max(...[667, 844, 1024, 768, 1180].map((h) => desvioAfueraDelFlujo(ancho, medio, h, true)))
+      afirmar(peor < 1e-6, `${ancho}, el flujo de ${String(medio)} px de la regla: k = ${kDelCarrusel(medio, ancho).toFixed(5)}, desvío máximo afuera de la sección ${peor.toExponential(1)} px (a 667, 844, 1024, 768 y 1180 de alto)`)
     }
   }
-  controlPositivo('sin el descuento del flujo, lo de después se corre', 'movil' as const, (a: AnchoDelPortfolio) => desvioAfueraDelFlujo(a, PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.escritorio, 844, false) < 1e-6)
+  controlPositivo('sin el descuento del flujo, lo de después se corre', 'movil' as const, (a: AnchoDelPortfolio) => desvioAfueraDelFlujo(a, 1700, 844, false) < 1e-6)
+  // [L2] El tramo de antes (sólo el medio, sin la cola): con Demos de una pantalla, todo lo de después llegaría 2.931 px antes.
+  const sinLaCola = (ancho: AnchoDelPortfolio, medio: number): number => {
+    const anotado = tramoDelCarrusel({} as Element, ancho, medio)
+    return anotado.largo === PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho] + PX_DE_LA_COLA && Math.abs(anotado.k * anotado.largo - medio) < 1e-9 ? 0 : 1
+  }
+  afirmar(sinLaCola('movil', 1700) === 0 && sinLaCola('tablet', 1700) === 0, '[L2] el tramo del carrusel llega al final de la sección: la escena lo ve medir el medio que veía y la cola (2.931), y él mide el flujo')
+  controlPositivo('  el detector ve el tramo de antes (la escena vería sólo el medio)', { k: 1700 / PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil, largo: PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil }, (t: { readonly k: number; readonly largo: number }) => t.largo === PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA.movil + PX_DE_LA_COLA && Math.abs(t.k * t.largo - 1700) < 1e-9)
   afirmar(
-    Math.abs(PANTALLAS_MINIMAS_DEL_FLUJO * 900 - 2982) < 1e-9 && pxDeLaSeccionConElCarrusel(PANTALLAS_MINIMAS_DEL_FLUJO * 900) === PX_DE_LA_SECCION_EN_LA_TABLA && PANTALLAS_EXTRA_CON_EL_CARRUSEL === 0 &&
-      Math.abs(PANTALLAS_DESPUES_DEL_FLUJO - (1 + PX_DE_LA_COLA / 900)) < 1e-12,
-    `el flujo mide como mínimo ${(PANTALLAS_MINIMAS_DEL_FLUJO * 100).toFixed(2)}svh (el medio de la tabla): la sección mínima es la tabla (6.813 px de la regla, 757svh), así que el alto mínimo del panel nunca la estira por el final; la variable de los pasos va en cero y después del flujo siguen ${(PANTALLAS_DESPUES_DEL_FLUJO * 100).toFixed(2)}svh (la pantalla de la cola y la cola)`,
+    PANTALLAS_DESPUES_DEL_FLUJO === 1 && pxDeLaSeccionConElCarrusel(1700) === PX_DE_LA_APROXIMACION + 1700 && PX_DE_LA_SECCION_EN_LA_TABLA === 6813 && /'--alto-minimo-del-panel': '0px'/.test(trabajos) &&
+      /panel\?\.style\.setProperty\('min-height', '0px'\)/.test(sinComentarios(leer(`${PORTFOLIO}/useMedioDelCarrusel.ts`))) && /panel\?\.style\.setProperty\('min-height', pisoDeLaTabla\)/.test(sinComentarios(leer(`${PORTFOLIO}/useMedioDelCarrusel.ts`))),
+    '[L2] después del flujo sigue una pantalla (Demos) y la sección mide su contenido: sin el piso de la tabla (lo suelta el carrusel ya decidido, en el cliente, y lo devuelve al irse) ni el de la variable de los pasos',
   )
-  afirmarIgual([kDelCarrusel(2982, 'tablet').toFixed(5), kDelCarrusel(2982, 'movil').toFixed(5)], ['0.80118', '0.66831'], '  con el flujo en su mínimo, k = 2.982 / 3.722 en tablet y 2.982 / 4.462 en el teléfono (la escena recorre el medio que veía, más rápido)')
+  afirmarIgual([kDelCarrusel(2982, 'tablet').toFixed(5), kDelCarrusel(2982, 'movil').toFixed(5)], ['0.44822', '0.40335'], '  con un flujo de 2.982, k = 2.982 / (3.722 + 2.931) en tablet y 2.982 / (4.462 + 2.931) en el teléfono (la escena recorre lo que veía, más rápido)')
   afirmar(medioDelFlujo(1688, 844) === 1800 && medioDelFlujo(0, 844) === null && medioDelFlujo(500, 0) === null, '  el medio se mide en el DOM: lo que mide el flujo, en px de la regla de esa ventana (sin medir, nada)')
   afirmarIgual([pasoDelCarrusel(899, 3000), pasoDelCarrusel(900, 3000), pasoDelCarrusel(3899, 3000), pasoDelCarrusel(3900, 3000)], [-1, 0, 0, 4], '  el paso con el carrusel: la aproximación, el flujo (sin pasos: el carrusel rota solo) y la cola cuando el pie del flujo llega arriba del cuadro')
 

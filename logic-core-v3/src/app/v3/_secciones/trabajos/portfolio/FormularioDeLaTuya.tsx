@@ -103,7 +103,8 @@ export function FormularioDeLaTuya({ visible, reducido, desde }: { readonly visi
   const enviando = estado === 'enviando'
   return (
     <motion.div data-pieza="formulario-de-la-tuya" className="flex flex-col gap-4" {...enLaSecuencia(visible, desde, reducido)}>
-      <EstadoDeEnvio estado={estado} alVolver={alVolver}>
+      {/* [L2] Su columna cede al ancho del bloque (`minmax(0, 1fr)`): con la de contenido, el texto largo ensanchaba el formulario a 320–375. */}
+      <EstadoDeEnvio estado={estado} alVolver={alVolver} className="grid-cols-1">
         <form noValidate onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-3">
           {CAMPOS_DE_LA_TUYA.map((c) => {
             const error = c.campo === 'mensaje' ? undefined : errores[c.campo]
@@ -125,6 +126,7 @@ export function FormularioDeLaTuya({ visible, reducido, desde }: { readonly visi
             )
           })}
           {/* [B1.2d B] «Enviar» es el botón simple del sitio (el del contacto), y WhatsApp va a su derecha, en la misma fila. */}
+          {/* [L2] Si no entran en una fila, WhatsApp baja y queda a la izquierda, debajo de «Enviar» (sola en su renglón, `justify-between` la deja al principio). */}
           <div data-parte="fila-del-envio" className="mt-1 flex flex-wrap items-center justify-between gap-4">
             <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className="shrink-0" />
             <EnlaceDeWhatsApp />
