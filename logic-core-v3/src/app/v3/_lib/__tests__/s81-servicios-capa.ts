@@ -8,17 +8,18 @@
 import { sembrar } from '../escena/titulos3d/llegada'
 import type { Caja, Lugar } from '../nanobots/capa'
 import { FISICA_DEL_ENJAMBRE, resorteDelEnjambre } from '../nanobots/enjambre'
-import { GLOBO, ORBITA, unidadDelLugar } from '../nanobots/simbolos'
+import { GLOBO, ORBITA, PROPORCION_DE_LA_ORBITA, bandaDeLaOrbita, extensionDeLaOrbita, proporcionDeLaCaja, unidadDelLugar } from '../nanobots/simbolos'
 
 const girar = (x: number, y: number, a: number): [number, number] => [Math.cos(a) * x - Math.sin(a) * y, Math.sin(a) * x + Math.cos(a) * y]
 
-/** `vivo()` del sombreador para la órbita (0, C2-50) y el globo (1). */
-function vivo(k: number, d: readonly number[], az: readonly number[], t: number): [number, number, number] {
+/** `vivo()` del sombreador para la órbita (0, C2-50; [L3] en la elipse de su caja, `proporcion`) y el globo (1). */
+function vivo(k: number, d: readonly number[], az: readonly number[], t: number, proporcion = PROPORCION_DE_LA_ORBITA): [number, number, number] {
   if (k === 0) {
     const [qx, qy] = [d[0] / ORBITA.rx, d[1] / ORBITA.ry]
     const a = Math.atan2(qy, qx) + t * ORBITA.giro * (0.8 + 0.4 * az[3])
     const r = Math.hypot(qx, qy)
-    return [ORBITA.rx * r * Math.cos(a), ORBITA.ry * r * Math.sin(a), d[2] + 0.04 * Math.sin(t * 0.7 + az[2] * 2 * Math.PI)]
+    const radio = (eje: number): number => eje + (r - 1) * bandaDeLaOrbita(proporcion)
+    return [radio(1) * Math.cos(a), radio(proporcion) * Math.sin(a), d[2] + 0.04 * Math.sin(t * 0.7 + az[2] * 2 * Math.PI)]
   }
   if (d[3] >= 0.5) return [d[0], d[1], d[2]]
   const [x, z] = girar(d[0], d[2], t * 0.35)
@@ -33,7 +34,7 @@ function enPantalla(p: readonly [number, number, number], l: Lugar): [number, nu
 }
 
 /** Las posiciones de todos los nanobots en un avance del traspaso de la nube (en `desde`) al globo (en `hacia`), a la hora `t`. */
-export function nanobotsEn(avance: number, t: number, simbolos: readonly Float32Array[], desde: Lugar, hacia: Lugar): [number, number][] {
+export function nanobotsEn(avance: number, t: number, simbolos: readonly Float32Array[], desde: LugarConProporcion, hacia: Lugar): [number, number][] {
   const [nube, globo] = [simbolos[0], simbolos[1]]
   const n = nube.length / 4
   const azar = sembrar(0x9e3779b9)
@@ -43,7 +44,7 @@ export function nanobotsEn(avance: number, t: number, simbolos: readonly Float32
     const az = [azar(), azar(), azar(), azar()]
     const u = Math.min(1, Math.max(0, (avance - az[0] * R) / (1 - R)))
     const e = resorteDelEnjambre(u)
-    const a = enPantalla(vivo(0, [...nube.subarray(i * 4, i * 4 + 4)], az, t), desde)
+    const a = enPantalla(vivo(0, [...nube.subarray(i * 4, i * 4 + 4)], az, t, desde.proporcion), desde)
     const b = enPantalla(vivo(1, [...globo.subarray(i * 4, i * 4 + 4)], az, t), hacia)
     const unidad = desde.unidad + (hacia.unidad - desde.unidad) * Math.min(1, Math.max(0, e))
     const disp = FISICA_DEL_ENJAMBRE.dispersion * Math.sin(Math.PI * u) * unidad
@@ -65,28 +66,38 @@ export interface EscenarioDePrueba {
 }
 
 /**
- * Medidas de 1440×900 y 1024×768 derivadas de las clases del escenario. [C2-50] El título que se pinta (la display del Panel, en dos
- * renglones, el ancho sobre 13,5 con tope en 11svh, a 0,62 em por letra) y la bajada en dos renglones (400 px de medida, adentro del ancho del título); la órbita en la caja de los dos,
- * de 720 px de ancho; la marca de web en su columna (12 · 10 · 9). Son una ESTIMACIÓN del layout: la medición de verdad es del banco.
+ * [L3] Medidas de 1440×900 y 1024×768 MEDIDAS en el sitio (`scripts-carga/l3-servicios.ts MODO=cajas`, dev, 2026-10-29): el título de un
+ * renglón (sus dos palabras y el espacio, cada uno su caja) y la bajada; el aro, más ancho que el título y achatado (3:1), que sube a la
+ * mitad del título; el lugar del globo en la columna de la marca (sin el CTA, hasta el pie). Antes eran una estimación del layout de C2-50.
  */
 export const ESCENARIOS_DE_PRUEBA: readonly EscenarioDePrueba[] = [
   {
     nombre: '1440×900',
     ancho: 1440,
     alto: 900,
-    titulo: [{ izquierda: 463, arriba: 261, derecha: 977, abajo: 350 }, { izquierda: 444, arriba: 350, derecha: 996, abajo: 439 }, { izquierda: 520, arriba: 455, derecha: 920, abajo: 503 }, { izquierda: 540, arriba: 503, derecha: 900, abajo: 551 }],
-    nube: { izquierda: 360, arriba: 229, derecha: 1080, abajo: 583 },
-    globo: { izquierda: 1036, arriba: 255, derecha: 1408, abajo: 804 },
+    titulo: [{ izquierda: 308, arriba: 210, derecha: 717, abajo: 333 }, { izquierda: 717, arriba: 210, derecha: 728, abajo: 333 }, { izquierda: 728, arriba: 210, derecha: 1132, abajo: 333 }, { izquierda: 444, arriba: 410, derecha: 996, abajo: 439 }],
+    nube: { izquierda: 259, arriba: 272, derecha: 1181, abajo: 579 },
+    globo: { izquierda: 1036, arriba: 308, derecha: 1408, abajo: 900 },
   },
   {
     nombre: '1024×768',
     ancho: 1024,
     alto: 768,
-    titulo: [{ izquierda: 324, arriba: 227, derecha: 700, abajo: 292 }, { izquierda: 310, arriba: 292, derecha: 714, abajo: 357 }, { izquierda: 312, arriba: 373, derecha: 712, abajo: 413 }, { izquierda: 330, arriba: 413, derecha: 694, abajo: 453 }],
-    nube: { izquierda: 152, arriba: 195, derecha: 872, abajo: 485 },
-    globo: { izquierda: 745, arriba: 221, derecha: 1000, abajo: 672 },
+    titulo: [{ izquierda: 193, arriba: 186, derecha: 509, abajo: 281 }, { izquierda: 509, arriba: 186, derecha: 518, abajo: 281 }, { izquierda: 518, arriba: 186, derecha: 831, abajo: 281 }, { izquierda: 283, arriba: 341, derecha: 741, abajo: 365 }],
+    nube: { izquierda: 155, arriba: 234, derecha: 871, abajo: 473 },
+    globo: { izquierda: 741, arriba: 260, derecha: 992, abajo: 768 },
   },
 ]
 
-/** [C2-50] El lugar de un estado en su caja, con la unidad de la sección (`unidadDelLugar`: la órbita llena su caja con la elipse). */
-export const lugarDe = (c: Caja, extension: number, estado = 1): Lugar => ({ x: (c.izquierda + c.derecha) / 2, y: (c.arriba + c.abajo) / 2, unidad: unidadDelLugar(estado, c.derecha - c.izquierda, c.abajo - c.arriba, extension), extension })
+/** Un lugar con la proporción de su caja (la órbita, L3). */
+export type LugarConProporcion = Lugar & { readonly proporcion?: number }
+
+/**
+ * [C2-50] El lugar de un estado en su caja, con la unidad de la sección (`unidadDelLugar`: la órbita llena su caja con la elipse). [L3] La
+ * órbita lleva la proporción de su caja y su extensión sale de ella (como en `useNanobotsDelEscenario`); `extension` vale para los demás.
+ */
+export function lugarDe(c: Caja, extension: number, estado = 1): LugarConProporcion {
+  const [ancho, alto] = [c.derecha - c.izquierda, c.abajo - c.arriba]
+  const proporcion = estado === 0 ? proporcionDeLaCaja(ancho, alto) : undefined
+  return { x: (c.izquierda + c.derecha) / 2, y: (c.arriba + c.abajo) / 2, unidad: unidadDelLugar(estado, ancho, alto, extension), extension: proporcion === undefined ? extension : extensionDeLaOrbita(proporcion), proporcion }
+}

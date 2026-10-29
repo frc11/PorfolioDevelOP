@@ -7,7 +7,8 @@ import { conElDefectoDeLosGatillos } from '../../../_componentes/gatillos/defect
 import { hayBanco } from '../../../_lib/escena/entorno'
 import type { Caja } from '../../../_lib/nanobots/capa'
 import { montarElEnjambre } from '../../../_lib/nanobots/montaje'
-import { EXTENSION_DE_LA_ORBITA, unidadDelLugar } from '../../../_lib/nanobots/simbolos'
+import { extensionDeLaOrbita, proporcionDeLaCaja, unidadDelLugar } from '../../../_lib/nanobots/simbolos'
+import type { ColorDelAro } from './banderas'
 import type { CambioDeCapa } from './useCoreografiaDelEscenario'
 import { avanceDelPanel, gDelAvance, inicioDelPanel, posicionDelEnjambre } from './tiempos'
 
@@ -61,8 +62,10 @@ export function useNanobotsDelEscenario(o: {
   readonly reducido: boolean
   readonly puntos: number
   readonly cambio: { current: CambioDeCapa }
+  /** [L3] `?aro-color=`. */
+  readonly colorDelAro: ColorDelAro
 }): void {
-  const { escenario, lienzo, posicion, reducido, puntos, cambio } = o
+  const { escenario, lienzo, posicion, reducido, puntos, cambio, colorDelAro } = o
   const quieto = useRef(reducido)
   useEffect(() => {
     quieto.current = reducido
@@ -77,7 +80,7 @@ export function useNanobotsDelEscenario(o: {
     void Promise.all([import('../../../_lib/nanobots/enjambreDeServicios'), import('../../../_lib/nanobots/capa')])
       .then(([motor, capa]) => {
         if (!vivo) return
-        const enjambre = motor.crearEnjambreDeServicios(c, puntos)
+        const enjambre = motor.crearEnjambreDeServicios(c, puntos, colorDelAro)
         const lugares = (): Caja[] =>
           [0, 1, 2, 3].map((k) => {
             const el = esc.querySelector<HTMLElement>(`[data-lugar-de-los-nanobots="${String(k)}"]`)
@@ -86,7 +89,11 @@ export function useNanobotsDelEscenario(o: {
         const ubicar = (): ReturnType<typeof capa.cambioDeCapa> => {
           const ex = enjambre.extensiones
           // [C2-50] La órbita (0) llena su caja con la elipse; su cota para el truco de profundidad es la de su ancho.
-          const ls = lugares().map((b, k) => ({ x: (b.izquierda + b.derecha) / 2, y: (b.arriba + b.abajo) / 2, unidad: unidadDelLugar(k, b.derecha - b.izquierda, b.abajo - b.arriba, ex[k] ?? 1), extension: k === 0 ? EXTENSION_DE_LA_ORBITA : (ex[k] ?? 1) }))
+          // [L3] La elipse llena su caja: su proporción (alto / ancho) es la de la caja (horizontal en escritorio, vertical en el teléfono).
+          const ls = lugares().map((b, k) => {
+            const [ancho, alto] = [b.derecha - b.izquierda, b.abajo - b.arriba]
+            return { x: (b.izquierda + b.derecha) / 2, y: (b.arriba + b.abajo) / 2, unidad: unidadDelLugar(k, ancho, alto, ex[k] ?? 1), extension: k === 0 ? extensionDeLaOrbita(proporcionDeLaCaja(ancho, alto)) : (ex[k] ?? 1), proporcion: k === 0 ? proporcionDeLaCaja(ancho, alto) : undefined }
+          })
           enjambre.ubicar(ls)
           const [desde, hacia] = [ls[0], ls[1]]
           if (desde === undefined || hacia === undefined) return null
@@ -112,7 +119,7 @@ export function useNanobotsDelEscenario(o: {
           antes = p
           if (banco) enjambre.diagnostico.cajas = p > 0 && p < 1 ? [...cajasDelTitulo(esc), cajaDelPanel(p)] : null
         })
-        const ventana = window as Window & { __capaDeLosNanobots?: unknown }
+        const ventana = window as Window & { __capaDeLosNanobots?: unknown; __escenarioDeServicios?: unknown }
         if (banco) {
           enjambre.diagnostico.registrar = (pixeles) => {
             const p = posicion.get()
@@ -120,13 +127,19 @@ export function useNanobotsDelEscenario(o: {
             registros.push({ t: performance.now(), p, capa: c.getAttribute('data-capa'), titulo: pixeles.slice(0, -1).reduce((s, n) => s + n, 0), panel: pixeles[pixeles.length - 1] ?? 0 })
           }
           ventana.__capaDeLosNanobots = { cambio: () => ({ ...cambio.current, calculado }), registros, vaciar: () => registros.splice(0) }
+          // [L3] El banco del gesto rápido (`l3-servicios.ts`): la posición, la del enjambre y el centroide de sus píxeles, cuadro a cuadro.
+          enjambre.diagnostico.medirElCentroide = true
+          ventana.__escenarioDeServicios = { posicion: () => posicion.get(), posicionDelEnjambre: () => posicionDelEnjambre(posicion.get()), centroide: () => enjambre.diagnostico.centroide }
         }
         const desmontar = montarElEnjambre(c, enjambre, { get: () => posicionDelEnjambre(posicion.get()) }, quieto, { listo: () => undefined, perdido: () => undefined })
         soltar = () => {
           observador.disconnect()
           dejarDeEscuchar()
           desmontar()
-          if (banco) delete ventana.__capaDeLosNanobots
+          if (banco) {
+            delete ventana.__capaDeLosNanobots
+            delete ventana.__escenarioDeServicios
+          }
         }
       })
       // Sin WebGL (o sin el módulo): la sección sigue, sin nanobots.
@@ -135,5 +148,5 @@ export function useNanobotsDelEscenario(o: {
       vivo = false
       soltar?.()
     }
-  }, [escenario, lienzo, posicion, puntos, cambio])
+  }, [escenario, lienzo, posicion, puntos, cambio, colorDelAro])
 }

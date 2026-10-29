@@ -8,7 +8,8 @@ import { SERVICIOS } from '../../_contrato/acento'
 import { DISTRIBUCION } from './datos'
 import { traslacionDelPanel } from './PanelDeServicio'
 import { ajustarElTexto, ajustarElTitulo } from './ajuste'
-import { DURACION_DE_LA_TRANSICION_MS, G_DEL_CAMBIO_SIN_MEDIR, TIEMPOS, avanceDelPanel, avanceDelRenglon, avanceDelSubrayado, capaDelEnjambre, desdeDelTexto } from './tiempos'
+import { conElDefectoDeLosGatillos } from '../../../_componentes/gatillos/defectos'
+import { G_DEL_CAMBIO_SIN_MEDIR, TIEMPOS, avanceDelPanel, avanceDelRenglon, avanceDelSubrayado, capaDelEnjambre, desdeDelTexto, retomarHacia } from './tiempos'
 
 /**
  * [B4] LA COREOGRAFÍA DEL ESCENARIO — UN valor (`posicion`, de 0 a 3) y todo lo demás colgando de él, sin re-renderizar: cuando la
@@ -33,18 +34,22 @@ export const SIN_CAMBIO: CambioDeCapa = { g: G_DEL_CAMBIO_SIN_MEDIR, inicioDelPa
 export function usePosicionDelEscenario(vista: number, reducido: boolean): MotionValue<number> {
   const posicion = useMotionValue(vista)
   const primera = useRef(true)
+  const vistaAntes = useRef(vista)
   useEffect(() => {
+    const antes = vistaAntes.current
+    vistaAntes.current = vista
     if (primera.current) {
       primera.current = false
       posicion.jump(vista)
       return undefined
     }
-    const desde = posicion.get()
-    if (reducido || Math.abs(vista - desde) > 1.001 || viajeEnCurso() !== null) {
+    // [L3] Desde donde está: un gesto en medio de la transición la retoma (ver `retomarHacia`).
+    const { salta, ms } = retomarHacia(posicion.get(), antes, vista, conElDefectoDeLosGatillos('con-salto'))
+    if (reducido || salta || viajeEnCurso() !== null) {
       posicion.jump(vista)
       return undefined
     }
-    const control = animate(posicion, vista, { duration: (Math.abs(vista - desde) * DURACION_DE_LA_TRANSICION_MS) / 1000, ease: 'linear' })
+    const control = animate(posicion, vista, { duration: ms / 1000, ease: 'linear' })
     return () => control.stop()
   }, [vista, reducido, posicion])
   return posicion
@@ -59,12 +64,15 @@ interface Piezas {
   readonly paneles: readonly HTMLElement[]
   readonly palabras: readonly (readonly Palabra[])[]
   readonly renglones: readonly number[]
-  readonly subrayados: readonly (HTMLElement | null)[]
+  readonly subrayados: readonly (readonly HTMLElement[])[]
 }
 
-/** Las palabras de un panel, agrupadas en renglones por su tope en el layout (las transformadas no cuentan). */
+/**
+ * Las palabras de un panel, agrupadas en renglones por su tope en el layout (las transformadas no cuentan). [L3] Las de un párrafo
+ * oculto (el teléfono muestra dos) no cuentan: sin caja, caerían en un renglón de mentira.
+ */
 function renglonesDe(panel: HTMLElement): { readonly palabras: readonly Palabra[]; readonly cuantos: number } {
-  const els = [...panel.querySelectorAll<HTMLElement>('[data-palabra]')]
+  const els = [...panel.querySelectorAll<HTMLElement>('[data-palabra]')].filter((el) => el.getClientRects().length > 0)
   const topes: number[] = []
   const palabras = els.map((el) => {
     const tope = el.parentElement?.offsetTop ?? el.offsetTop
@@ -88,8 +96,7 @@ export function aplicarLaPosicion(p: number, piezas: Piezas, lienzo: HTMLElement
     const n = piezas.renglones[i] ?? 1
     const desde = desdeDelTexto(inicio)
     for (const { el, renglon } of piezas.palabras[i] ?? []) el.style.translate = `0 ${((1 - avanceDelRenglon(g, renglon, n, desde)) * 120).toFixed(2)}%`
-    const subrayado = piezas.subrayados[i]
-    if (subrayado) subrayado.style.scale = `${avanceDelSubrayado(g, inicio).toFixed(4)} 1`
+    piezas.subrayados[i]?.forEach((s, k) => (s.style.scale = `${avanceDelSubrayado(g, inicio, k).toFixed(4)} 1`))
   })
   const capa = capaDelEnjambre(p, cambio.g)
   if (lienzo === null || lienzo.getAttribute('data-capa') === capa) return
@@ -111,7 +118,7 @@ export function useCoreografiaDelEscenario(escenario: RefObject<HTMLElement | nu
         if (texto !== null) ajustarElTexto(texto)
       }
       const grupos = paneles.map(renglonesDe)
-      const subrayados = paneles.map((p) => p.querySelector<HTMLElement>('[data-parte="subrayado-del-servicio"]'))
+      const subrayados = paneles.map((p) => [...p.querySelectorAll<HTMLElement>('[data-parte="subrayado-del-servicio"]')])
       piezas.current = { paneles, palabras: grupos.map((g) => g.palabras), renglones: grupos.map((g) => g.cuantos), subrayados }
       aplicarLaPosicion(posicion.get(), piezas.current, lienzo.current, cambio.current)
     }

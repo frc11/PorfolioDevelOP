@@ -5,7 +5,7 @@ import { extensionDelSimbolo, type Caja } from './capa'
 import { APARTADO_GLSL, FISICA_DEL_ENJAMBRE, enSrgb, tramoDelEnjambre, type Enjambre } from './enjambre'
 import { PUNTERO_DEL_ENJAMBRE } from './puntero'
 import { VIDA_DE_LA_RED_GLSL, redNeuronal } from './redNeuronal'
-import { ENGRANAJES, GLOBO, ORBITA, engranajes, globo, orbita } from './simbolos'
+import { ACENTOS_DEL_ARO, ENGRANAJES, GLOBO, MEZCLA_DEL_ARO, MODOS_DEL_ARO, OLA_DEL_ARO, ORBITA, PROPORCION_DE_LA_ORBITA, engranajes, globo, orbita, type ModoDelAro } from './simbolos'
 
 /**
  * [B4] EL ENJAMBRE DE LA SECCIÓN SERVICIOS — el mismo motor de C4 (`enjambre.ts`: una llamada, los destinos como atributos, el
@@ -34,11 +34,16 @@ export interface LugarDelEnjambre {
   readonly x: number
   readonly y: number
   readonly unidad: number
+  /** [L3] Sólo la órbita (estado 0): la proporción de su caja (alto / ancho). Sin ella, 2:1. */
+  readonly proporcion?: number
 }
 
 export interface DiagnosticoDelEnjambre {
   cajas: readonly Caja[] | null
   registrar: ((pixeles: readonly number[]) => void) | null
+  /** [L3] Con el banco: después de cada cuadro, el centroide de los píxeles con nanobots (px CSS del lienzo) y cuántos. */
+  medirElCentroide: boolean
+  centroide: { readonly x: number; readonly y: number; readonly n: number } | null
 }
 
 export interface EnjambreDeServicios extends Enjambre {
@@ -82,6 +87,9 @@ uniform vec3 uColores[ 4 ];
 uniform vec4 uLugares[ 4 ];
 uniform vec2 uCentroA;
 uniform vec2 uCentroB;
+uniform float uProporcion;
+uniform float uModoDelAro;
+uniform vec3 uColoresDelAro[ 3 ];
 varying vec3 vColor;
 varying float vAlfa;
 varying float vBorde;
@@ -91,14 +99,20 @@ vec3 colorDe( float k ) { return k < 0.5 ? uColores[ 0 ] : ( k < 1.5 ? uColores[
 vec2 girar( vec2 p, float a ) { float c = cos( a ); float s = sin( a ); return vec2( c * p.x - s * p.y, s * p.x + c * p.y ); }
 ${VIDA_DE_LA_RED_GLSL}
 ${APARTADO_DE_SERVICIOS}
+// [C2-50 · L3] El ángulo de un nanobot de la órbita AHORA (el de su semilla más lo que giró, a su velocidad).
+float anguloDeLaOrbita( vec4 d, float t ) {
+	vec2 q = d.xy / vec2( ${f(ORBITA.rx)}, ${f(ORBITA.ry)} );
+	return atan( q.y, q.x ) + t * ${f(ORBITA.giro)} * ( 0.8 + 0.4 * aAzar.w );
+}
 vec3 vivo( float k, vec4 d, float t ) {
 	vec3 p = d.xyz;
 	if ( k < 0.5 ) {
-		// [C2-50] La órbita: cada nanobot corre sobre su elipse (a su velocidad), y flota apenas en profundidad.
-		vec2 eje = vec2( ${f(ORBITA.rx)}, ${f(ORBITA.ry)} );
-		vec2 q = p.xy / eje;
-		float a = atan( q.y, q.x ) + t * ${f(ORBITA.giro)} * ( 0.8 + 0.4 * aAzar.w );
-		p.xy = eje * length( q ) * vec2( cos( a ), sin( a ) );
+		// [C2-50] La órbita: cada nanobot corre sobre su elipse (a su velocidad), y flota apenas en profundidad. [L3] La elipse es la de
+		// su caja (x = 1, y = uProporcion), con la banda del mismo grosor alrededor.
+		float r = length( d.xy / vec2( ${f(ORBITA.rx)}, ${f(ORBITA.ry)} ) );
+		float a = anguloDeLaOrbita( d, t );
+		vec2 dir = vec2( cos( a ), sin( a ) );
+		p.xy = vec2( 1.0, uProporcion ) * dir + ( r - 1.0 ) * min( 1.0, uProporcion ) * dir;
 		p.z += 0.04 * sin( t * 0.7 + aAzar.z * 6.2832 );
 	} else if ( k < 1.5 ) {
 		if ( d.w < 0.5 ) {
@@ -113,12 +127,33 @@ vec3 vivo( float k, vec4 d, float t ) {
 	if ( k > 1.5 ) p.xz = girar( p.xz, 0.22 * sin( t * 0.3 ) );
 	return p;
 }
-// [C2-50] El color de la órbita: los tres acentos en un degradé que corre alrededor (la fase, del ángulo del nanobot y la hora).
+// [L3] El color del aro, del ÁNGULO ACTUAL de cada nanobot (antes, del de su semilla: como cada uno gira a su velocidad, al minuto los
+// colores quedaban mezclados punto por punto). \`i\` es un índice continuo: entre dos acentos vecinos, su mezcla.
+vec3 acentoDelAro( float i ) {
+	float k = mod( floor( i ), 3.0 );
+	vec3 a = k < 0.5 ? uColoresDelAro[ 0 ] : ( k < 1.5 ? uColoresDelAro[ 1 ] : uColoresDelAro[ 2 ] );
+	vec3 b = k < 0.5 ? uColoresDelAro[ 1 ] : ( k < 1.5 ? uColoresDelAro[ 2 ] : uColoresDelAro[ 0 ] );
+	return mix( a, b, fract( i ) );
+}
 vec3 colorDeLaOrbita( vec4 d, float t ) {
-	float f = fract( atan( d.y / ${f(ORBITA.ry)}, d.x / ${f(ORBITA.rx)} ) / 6.2832 + t * 0.09 + aAzar.x * 0.12 ) * 3.0;
-	if ( f < 1.0 ) return mix( uColores[ 1 ], uColores[ 2 ], smoothstep( 0.0, 1.0, f ) );
-	if ( f < 2.0 ) return mix( uColores[ 2 ], uColores[ 3 ], smoothstep( 0.0, 1.0, f - 1.0 ) );
-	return mix( uColores[ 3 ], uColores[ 1 ], smoothstep( 0.0, 1.0, f - 2.0 ) );
+	float a = anguloDeLaOrbita( d, t );
+	// La vuelta, en el marco que gira con el aro (el de un nanobot de velocidad media): las manchas y los arcos viajan con los puntos.
+	float s = fract( ( a - t * ${f(ORBITA.giro)} ) / 6.2832 );
+	if ( uModoDelAro < 0.5 ) {
+		// mezcla: manchas grandes (el borde de cada nanobot corrido por su azar) y algunos sueltos de otro color.
+		if ( aAzar.y < ${f(MEZCLA_DEL_ARO.sueltos)} ) return acentoDelAro( floor( aAzar.x * 3.0 ) );
+		float m = s * ${f(MEZCLA_DEL_ARO.manchas)} + ( aAzar.z - 0.5 ) * ${f(MEZCLA_DEL_ARO.borde)};
+		return acentoDelAro( floor( m ) + smoothstep( 0.8, 1.0, fract( m ) ) );
+	}
+	if ( uModoDelAro < 1.5 ) {
+		// tercios: un arco de cada acento, con el borde corto.
+		float m = s * 3.0;
+		return acentoDelAro( floor( m ) + smoothstep( 0.94, 1.0, fract( m ) ) );
+	}
+	// ola: todo el aro de un color; el siguiente nace arriba (detrás del título) y baja por los dos lados hasta encontrarse al pie.
+	float desdeArriba = abs( mod( a - 1.5708 + 3.14159265, 6.2832 ) - 3.14159265 ) / 3.14159265;
+	float c = t * ${f(OLA_DEL_ARO.vueltasPorSegundo)} - ${f(OLA_DEL_ARO.recorrido)} * desdeArriba;
+	return acentoDelAro( floor( c ) + smoothstep( 0.0, ${f(OLA_DEL_ARO.frente)}, fract( c ) ) );
 }
 vec3 colorEn( float k, vec4 d, float t ) { return k < 0.5 ? colorDeLaOrbita( d, t ) : colorDe( k ); }
 float cercaDe( vec3 p ) { return 3.0 / ( 3.0 - p.z ); }
@@ -208,8 +243,29 @@ function contar(gl: WebGLRenderingContext | WebGL2RenderingContext, cajas: reado
   })
 }
 
-/** El enjambre de B4 sobre su lienzo: si el navegador no da WebGL, tira (y la sección sigue sin nanobots). */
-export function crearEnjambreDeServicios(lienzo: HTMLCanvasElement, puntos: number): EnjambreDeServicios {
+/** [L3] El centroide de los píxeles con nanobots del cuadro recién dibujado (de a `paso` píxeles: es del banco, no del producto). */
+let bufferDelCentroide = new Uint8Array(0)
+function centrar(gl: WebGLRenderingContext | WebGL2RenderingContext, dpr: number, ancho: number, alto: number, paso = 3): { readonly x: number; readonly y: number; readonly n: number } {
+  // Un búfer reusado: uno nuevo por cuadro (11 MB a 1440) le daba al recolector pausas de medio segundo que el banco leía como saltos.
+  if (bufferDelCentroide.length !== ancho * alto * 4) bufferDelCentroide = new Uint8Array(ancho * alto * 4)
+  const pixeles = bufferDelCentroide
+  gl.readPixels(0, 0, ancho, alto, gl.RGBA, gl.UNSIGNED_BYTE, pixeles)
+  let [sx, sy, n] = [0, 0, 0]
+  for (let y = 0; y < alto; y += paso)
+    for (let x = 0; x < ancho; x += paso) {
+      if (pixeles[(y * ancho + x) * 4 + 3] <= 8) continue
+      sx += x
+      sy += alto - 1 - y
+      n += 1
+    }
+  return n === 0 ? { x: 0, y: 0, n } : { x: sx / n / dpr, y: sy / n / dpr, n }
+}
+
+/** El índice del modo del aro en el sombreador (`uModoDelAro`). */
+export const indiceDelModoDelAro = (modo: ModoDelAro): number => MODOS_DEL_ARO.indexOf(modo)
+
+/** El enjambre de B4 sobre su lienzo: si el navegador no da WebGL, tira (y la sección sigue sin nanobots). [L3] `modoDelAro`: `?aro-color=`. */
+export function crearEnjambreDeServicios(lienzo: HTMLCanvasElement, puntos: number, modoDelAro: ModoDelAro = 'ola'): EnjambreDeServicios {
   const renderer = new THREE.WebGLRenderer({ canvas: lienzo, alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'default' })
   renderer.setClearColor(0x000000, 0)
   const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
@@ -238,6 +294,9 @@ export function crearEnjambreDeServicios(lienzo: HTMLCanvasElement, puntos: numb
     uPuntero: { value: new THREE.Vector4(0, 0, 0, 0) },
     uAspecto: { value: 1 },
     uRadioDelPuntero: { value: Number(PUNTERO_DEL_ENJAMBRE.radio) },
+    uProporcion: { value: Number(PROPORCION_DE_LA_ORBITA) },
+    uModoDelAro: { value: indiceDelModoDelAro(modoDelAro) },
+    uColoresDelAro: { value: [ACENTOS_DEL_ARO.web, ACENTOS_DEL_ARO.software, ACENTOS_DEL_ARO.ia].map(enSrgb) },
   }
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTICE_DE_SERVICIOS, fragmentShader: FRAGMENTO_DE_SERVICIOS, transparent: true, depthTest: false, depthWrite: false, premultipliedAlpha: true })
   const nanobots = new THREE.Points(geometria, material)
@@ -249,8 +308,9 @@ export function crearEnjambreDeServicios(lienzo: HTMLCanvasElement, puntos: numb
   let lugares: readonly LugarDelEnjambre[] = []
   const reubicar = (): void => {
     lugares.forEach((l, k) => uniforms.uLugares.value[k]?.set((l.x / tamano.ancho) * 2 - 1, 1 - (l.y / tamano.alto) * 2, (l.unidad / tamano.alto) * 2, 0))
+    uniforms.uProporcion.value = lugares[0]?.proporcion ?? PROPORCION_DE_LA_ORBITA
   }
-  const diagnostico: DiagnosticoDelEnjambre = { cajas: null, registrar: null }
+  const diagnostico: DiagnosticoDelEnjambre = { cajas: null, registrar: null, medirElCentroide: false, centroide: null }
   return {
     dibujar: (segundos, posicion, quieto) => {
       const { desde, hacia, avance } = tramoDelEnjambre(posicion, quieto)
@@ -263,6 +323,7 @@ export function crearEnjambreDeServicios(lienzo: HTMLCanvasElement, puntos: numb
       renderer.render(escena, camara)
       if (diagnostico.cajas !== null && diagnostico.registrar !== null)
         diagnostico.registrar(contar(renderer.getContext(), diagnostico.cajas, renderer.getPixelRatio(), lienzo.height))
+      if (diagnostico.medirElCentroide) diagnostico.centroide = centrar(renderer.getContext(), renderer.getPixelRatio(), lienzo.width, lienzo.height)
     },
     medir: (ancho, alto) => {
       if (ancho <= 0 || alto <= 0) return

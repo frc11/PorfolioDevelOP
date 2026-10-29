@@ -89,16 +89,18 @@ interface Props {
   readonly como?: 'h2' | 'h3' | 'h4'
   readonly className?: string
   readonly envolver?: boolean
+  /** [L3] La clase de cada renglón, si no es la de siempre (la entrada de Servicios: un renglón en escritorio, dos en el teléfono). */
+  readonly claseDelRenglon?: string
 }
 
-export function TituloQueSePintaAlLlegar({ renglones, progreso, id, como: Etiqueta = 'h2', className, envolver = false }: Props): React.JSX.Element {
+export function TituloQueSePintaAlLlegar({ renglones, progreso, id, como: Etiqueta = 'h2', className, envolver = false, claseDelRenglon }: Props): React.JSX.Element {
   const titulo = useRef<HTMLHeadingElement>(null)
   usePintadoAlLlegar(titulo, progreso)
 
   return (
     <Etiqueta ref={titulo} id={id} data-pieza="titulo-que-se-pinta" className={className === undefined ? TIPOGRAFIA_QUE_SE_PINTA : cn(TIPOGRAFIA_QUE_SE_PINTA, className)} style={ESTILO_DEL_PINTADO}>
       {renglones.map((renglon, k) => (
-        <span key={renglon.palabras.join(' ')} data-caja-del-titulo="" className={envolver ? 'inline' : 'block whitespace-nowrap'}>
+        <span key={renglon.palabras.join(' ')} data-caja-del-titulo="" className={claseDelRenglon ?? (envolver ? 'inline' : 'block whitespace-nowrap')}>
           {renglon.palabras.map((palabra, j) => (
             <span key={`${String(j)}-${palabra}`}>
               {k > 0 || j > 0 ? ' ' : null}

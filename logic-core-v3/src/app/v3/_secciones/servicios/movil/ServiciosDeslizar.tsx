@@ -2,9 +2,9 @@
 
 import { SERVICIOS, type Servicio } from '../../_contrato/acento'
 import { Gatillo } from '../../_contrato/Gatillo'
-import { TEXTO_DEL_MEDIO } from '../escenario/datos'
+import { DISTRIBUCION, PARRAFOS_DEL_TELEFONO, TEXTO_DEL_MEDIO } from '../escenario/datos'
 import { IntroDeServicios } from '../escenario/IntroDeServicios'
-import { EnlaceDelServicio, TituloDelServicio, VideoDelServicio, idDelTituloDelServicio } from '../escenario/PanelDeServicio'
+import { LeerMas, TituloDelServicio, VideoDelServicio, alineacionDelTitulo, idDelTituloDelServicio } from '../escenario/PanelDeServicio'
 import { useFuentesDelServicio } from '../escenario/useFuentesDelServicio'
 import { NanobotsQuietos } from './NanobotsQuietos'
 
@@ -12,7 +12,7 @@ import { NanobotsQuietos } from './NanobotsQuietos'
  * [B4 · C2-50] SERVICIOS CON SCROLL NORMAL — la sección sin coreografía en cualquier ancho (sin JavaScript todavía, o con menos
  * movimiento; `?servicios-movil=deslizar` se borró: con movimiento, el teléfono va con gatillos). La entrada con los nanobots detrás
  * del título, y cada servicio una pantalla, en el orden del teléfono (`lote3/02`): el título con sus nanobots a la derecha, el video,
- * el texto del medio y el CTA. Cada pantalla entra con el gatillo del
+ * el texto del medio y «Leer más…» (L3: el CTA se fue). Cada pantalla entra con el gatillo del
  * contrato (`Gatillo`: una vez al cruzar la línea, y vuelve al subir); con menos movimiento, quieta.
  */
 export function ServiciosDeslizar(): React.JSX.Element {
@@ -36,18 +36,21 @@ function PantallaDeServicio({ servicio, estado }: { readonly servicio: Servicio;
     <article data-pieza="pantalla-de-servicio" data-servicio={id} aria-labelledby={idDelTituloDelServicio(id)} className="flex min-h-svh flex-col justify-center px-[var(--pad-lateral-compacto)] py-[var(--spacing-12)]">
       <Gatillo className="mx-auto flex w-full max-w-[calc(var(--spacing-20)*8)] flex-col gap-[var(--spacing-6)]">
         <div className="flex items-center justify-between gap-[var(--spacing-4)]">
-          <TituloDelServicio servicio={servicio} fuentes={fuentes} />
+          <TituloDelServicio servicio={servicio} fuentes={fuentes} alineacion={alineacionDelTitulo(DISTRIBUCION[id])} className="min-w-0 flex-1" />
           <NanobotsQuietos estado={estado} className="aspect-square h-[calc(var(--spacing-20)*1.25)] shrink-0" />
         </div>
         <VideoDelServicio id={id} corte={null} />
-        <div className={`${fuentes.claseDelTexto === '' ? 'font-cuerpo' : fuentes.claseDelTexto} text-fluido-titulo-m leading-texto text-tinta italic`}>
+        {/* [L3] La letra de los cuerpos; abajo de 1024, los dos primeros párrafos; al final, «Leer más…». */}
+        <div className="font-cuerpo text-fluido-titulo-m leading-texto text-tinta">
           {TEXTO_DEL_MEDIO[id].map((parrafo, k) => (
-            <p key={parrafo} className={k > 0 ? 'mt-[var(--spacing-4)]' : undefined}>
+            <p key={parrafo} className={`${k > 0 ? 'mt-[var(--spacing-4)]' : ''} ${k >= PARRAFOS_DEL_TELEFONO ? 'max-escritorio:hidden' : ''}`}>
               {parrafo}
             </p>
           ))}
+          <p data-parte="final-del-cuerpo" className="mt-[var(--spacing-4)]">
+            <LeerMas id={id} />
+          </p>
         </div>
-        <EnlaceDelServicio id={id} />
       </Gatillo>
     </article>
   )

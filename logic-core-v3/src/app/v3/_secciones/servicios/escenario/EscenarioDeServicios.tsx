@@ -9,11 +9,11 @@ import { altoDeSecuenciaPinneada } from '../../../_lib/secciones'
 import { PUNTOS_DEL_ENJAMBRE } from '../../../_lib/nanobots/simbolos'
 import { SERVICIOS } from '../../_contrato/acento'
 import { Bloque } from '../../_contrato/coreografia'
-import { tangenteDe, useDiagonal } from './banderas'
+import { tangenteDe, useColorDelAro, useDiagonal } from './banderas'
 import { AVISO_DE_LA_ENTRADA, AVISO_DEL_TELEFONO, ESTADOS_DE_SERVICIOS } from './datos'
 import { IntroDeServicios, PasarElProgreso } from './IntroDeServicios'
 import { PanelDeServicio } from './PanelDeServicio'
-import { DURACION_DE_LA_TRANSICION_MS } from './tiempos'
+import { CANDADO_DE_SERVICIOS_MS, DURACION_DE_LA_TRANSICION_MS } from './tiempos'
 import { SIN_CAMBIO, useCoreografiaDelEscenario, usePosicionDelEscenario, type CambioDeCapa } from './useCoreografiaDelEscenario'
 import { useFuentesDelServicio } from './useFuentesDelServicio'
 import { useNanobotsDelEscenario } from './useNanobotsDelEscenario'
@@ -28,7 +28,8 @@ import { useNanobotsDelEscenario } from './useNanobotsDelEscenario'
  * título ni sobre el panel). El ángulo de la franja del texto, `?diagonal=` (`--tangente-de-la-diagonal`).
  *
  * `telefono`: abajo de 1024 (C2-50: siempre, con movimiento): lo mismo, con el dedo, los paneles apilados, los nanobots más chicos y
- * el aviso del gesto. Las letras de cada servicio (`?titulo-servicio=`, `?fuente-servicio=`): `useFuentesDelServicio`.
+ * el aviso del gesto (sólo en la entrada, L3). La cursiva del título de cada servicio (`?titulo-cursiva=`): `useFuentesDelServicio`; el
+ * color del aro (`?aro-color=`): el sombreador.
  */
 /** La pista, como mínimo: el cuadro anclado y una pantalla por estado (abajo de 1024). */
 export const ALTO_MINIMO_DE_LA_PISTA = altoDeSecuenciaPinneada(ESTADOS_DE_SERVICIOS + 1)
@@ -50,11 +51,13 @@ export function EscenarioDeServicios({ telefono }: { readonly telefono: boolean 
   const diagonal = useDiagonal()
   // [C2-51] El último tramo (del último servicio al recomendador) ya no es gatillo: scroll normal (`salidaDeAbajoLibre`). [L2] En el teléfono
   // tampoco el primero (el cruce con Demos, en los dos sentidos: `salidaDeArribaLibre`).
-  const { vista, ir } = useGatillos({ pista, cantidad: ESTADOS_DE_SERVICIOS, activa: true, tactil: telefono, reducido, duracionMs: DURACION_DE_LA_TRANSICION_MS, salidaDeArribaLibre: telefono, salidaDeAbajoLibre: true })
+  // [L3] Pasar rápido: el gesto siguiente cuenta apenas termina el vuelo del salto (`candadoMs`), y la posición lo retoma desde donde está.
+  const { vista, ir } = useGatillos({ pista, cantidad: ESTADOS_DE_SERVICIOS, activa: true, tactil: telefono, reducido, duracionMs: DURACION_DE_LA_TRANSICION_MS, candadoMs: CANDADO_DE_SERVICIOS_MS, salidaDeArribaLibre: telefono, salidaDeAbajoLibre: true })
   const posicion = usePosicionDelEscenario(vista, reducido)
   const fuentes = useFuentesDelServicio()
-  useCoreografiaDelEscenario(escenario, lienzo, posicion, cambio, `${fuentes.claseDelTitulo}|${fuentes.claseDelTexto}|${fuentes.titulo}`)
-  useNanobotsDelEscenario({ escenario, lienzo, posicion, reducido, puntos: telefono ? PUNTOS_DEL_ENJAMBRE.angosto : PUNTOS_DEL_ENJAMBRE.ancho, cambio })
+  const colorDelAro = useColorDelAro()
+  useCoreografiaDelEscenario(escenario, lienzo, posicion, cambio, `${fuentes.claseDeLaCursiva}|${fuentes.cursiva}`)
+  useNanobotsDelEscenario({ escenario, lienzo, posicion, reducido, puntos: telefono ? PUNTOS_DEL_ENJAMBRE.angosto : PUNTOS_DEL_ENJAMBRE.ancho, cambio, colorDelAro })
   const [progresoDelTitulo, setProgresoDelTitulo] = useState<MotionValue<number> | null>(null)
   const pasar = useCallback((p: MotionValue<number> | null) => setProgresoDelTitulo(p), [])
   const angulo = { '--tangente-de-la-diagonal': tangenteDe(diagonal).toFixed(4) } as CSSProperties

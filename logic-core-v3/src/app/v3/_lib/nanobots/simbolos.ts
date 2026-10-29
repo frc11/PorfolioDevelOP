@@ -89,20 +89,58 @@ export function orbita(n: number, azar: Azar): Punto[] {
   })
 }
 
-/** [C2-50] El radio en pantalla de la órbita en x (unidades), con su banda, su profundidad y el flotar: la cota de `capa.ts` (en y sobra). */
-export const EXTENSION_DE_LA_ORBITA = (ORBITA.rx * (1 + ORBITA.banda) * 0.82 * 3) / (3 - ORBITA.profundidad - 0.04) + 0.06
+/**
+ * [L3] LA PROPORCIÓN DE LA ÓRBITA (alto / ancho): la elipse llena SU caja, así sigue al bloque (horizontal en escritorio, vertical en el
+ * teléfono). Las semillas siguen en `ORBITA` (2:1); el sombreador toma de cada nanobot su ángulo y su lugar en la banda, y lo pone en la
+ * elipse de `uProporcion` (x = 1, y = proporción), con la banda del mismo grosor en px alrededor (`bandaDeLaOrbita`). Sin caja medida, 2:1.
+ */
+export const PROPORCION_DE_LA_ORBITA = ORBITA.ry / ORBITA.rx
+
+/** La proporción de una caja (alto / ancho), o la de siempre si no tiene tamaño. */
+export const proporcionDeLaCaja = (ancho: number, alto: number): number => (ancho > 0 && alto > 0 ? alto / ancho : PROPORCION_DE_LA_ORBITA)
+
+/** [L3] Cuánto de la banda (±`ORBITA.banda`, en el radio) llega a cada eje: el radio corto manda, así el grosor es parejo. */
+export const bandaDeLaOrbita = (proporcion: number): number => Math.min(1, proporcion)
+
+/**
+ * [C2-50 · L3] El radio en pantalla de la órbita (unidades), con su banda, su profundidad y el flotar: la cota de `capa.ts`, una sola
+ * para los dos ejes, así que toma el semieje más largo (x en escritorio, y en el teléfono).
+ */
+export function extensionDeLaOrbita(proporcion: number = PROPORCION_DE_LA_ORBITA): number {
+  const semieje = Math.max(1, proporcion) + ORBITA.banda * bandaDeLaOrbita(proporcion)
+  return (semieje * 0.82 * 3) / (3 - ORBITA.profundidad - 0.04) + 0.06
+}
+
+/** La de la órbita de 2:1 (sin caja medida). */
+export const EXTENSION_DE_LA_ORBITA = extensionDeLaOrbita()
 
 /** La perspectiva del sombreador con z = 0 (`cerca` × 0,82): cuánto mide en pantalla una unidad del símbolo. */
 export const ESCALA_EN_PANTALLA = 0.82
 
 /**
- * [C2-50] Cuántos px mide una unidad del símbolo de un estado en su caja (`ancho` × `alto`, px). La órbita (estado 0) llena la caja
- * con su elipse (ancho y alto por separado); los demás, el círculo de su `extension` en el lado corto (como siempre).
+ * [C2-50 · L3] Cuántos px mide una unidad del símbolo de un estado en su caja (`ancho` × `alto`, px). La órbita (estado 0) llena la caja
+ * con su elipse: la unidad sale del ancho (x = 1) y el alto lo da la proporción. Los demás, el círculo de su `extension` en el lado
+ * corto (como siempre).
  */
 export function unidadDelLugar(estado: number, ancho: number, alto: number, extension: number): number {
-  if (estado === 0) return Math.min(ancho / 2 / (ORBITA.rx * ESCALA_EN_PANTALLA), alto / 2 / (ORBITA.ry * ESCALA_EN_PANTALLA))
+  if (estado === 0) return ancho / 2 / ESCALA_EN_PANTALLA
   return Math.min(ancho, alto) / 2 / extension
 }
+
+/** [L3] Los colores del aro (`?aro-color=`): `mezcla` (manchas), `tercios` (un arco por acento) y `ola` (todo de un color que cambia por partes). */
+export const MODOS_DEL_ARO = ['mezcla', 'tercios', 'ola'] as const
+export type ModoDelAro = (typeof MODOS_DEL_ARO)[number]
+
+/**
+ * [L3] Los acentos del ARO, más vivos que los oscuros de los símbolos (que siguen los del tema): en un punto de 2 px los tres oscuros
+ * se confunden (ítem 50: «casi ni se nota»). Cian, violeta y esmeralda de la marca, un paso más oscuros para el papel.
+ */
+export const ACENTOS_DEL_ARO = { web: '#0891B2', software: '#7C3AED', ia: '#059669' } as const
+
+/** [L3] La ola: vueltas por segundo, qué parte de la vuelta tarda el frente en bajar de arriba al pie, y lo blando del frente. */
+export const OLA_DEL_ARO = { vueltasPorSegundo: 1 / 4.5, recorrido: 0.75, frente: 0.12 } as const
+/** [L3] La mezcla: cuántas manchas, cuánto se corre el borde de cada nanobot y qué parte de ellos va suelta (de otro color). */
+export const MEZCLA_DEL_ARO = { manchas: 6, borde: 0.5, sueltos: 0.25 } as const
 
 export function globo(n: number, azar: Azar): Punto[] {
   const { radio: R, lados } = GLOBO

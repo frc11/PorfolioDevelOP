@@ -3,14 +3,15 @@
  * el banco prendido (`__gatillosDelBanco`). Por ancho:
  *
  *   escritorio (1440, 1024), en cada servicio en reposo (el paso por el scroll, sin gesto):
- *     eje          el centro del título del servicio y el del lugar de los nanobots en el mismo eje: |Δx| ≤ 4 px
+ *     eje          [L3] sólo IA (centrado): el centro del título y el del lugar de los nanobots en el mismo eje, |Δx| ≤ 4 px; web y
+ *                  software se alinean por la diagonal (lo mide `l3-servicios.ts`)
  *     video        el video de arriba a abajo del panel (±2 px)
  *     texto        la caja del texto del medio sin intersección con el lugar de los nanobots
  *     reposo       ningún renglón del título ni del texto pisa el lugar de los nanobots (la cota geométrica de «0 px en reposo»;
  *                  los píxeles del cambio de capa los mide `servicios-capa.ts`)
- *     fotos        cada servicio con `?titulo-servicio=1|2|3` y `?fuente-servicio=1|2|3|4`, y la nube a mitad del viaje de web a software
+ *     fotos        [L3] cada servicio con `?titulo-cursiva=1|2|3`, y la nube a mitad del viaje de web a software
  *   teléfono (390, 768):
- *     orden        en cada panel: el título (con los nanobots a su derecha), el video, el texto y el CTA, de arriba a abajo
+ *     orden        en cada panel: el título (con los nanobots a su derecha), el video, el texto y [L3] «Leer más…», de arriba a abajo
  *     rueda        a 390, tres muescas desde 250 px antes del ancla: el paso va −1 → 0 y nunca pasa por 1 (el bug de la deuda)
  *
  *   BASE=http://localhost:3000 ANCHOS=1440,1024,768,390 npx tsx scripts-carga/servicios-c2.ts
@@ -68,7 +69,7 @@ async function medidas(p: Page, servicio: string): Promise<{ eje: number; video:
     const lado = Math.min(lugar.width, lugar.height)
     const simbolo = new DOMRect(lugar.x + (lugar.width - lado) / 2, lugar.y + (lugar.height - lado) / 2, lado, lado)
     const renglones = [...panel.querySelectorAll<HTMLElement>('[data-parte="titulo-del-servicio"], [data-parte="parrafos"] p')].flatMap((el) => [...el.getClientRects()])
-    const ys = [titulo.top, video.top, texto.top, caja('[data-viaje-del-servicio]').top]
+    const ys = [titulo.top, video.top, texto.top, caja('[data-parte="leer-mas"]').top]
     return {
       eje: Math.abs(titulo.left + titulo.width / 2 - (lugar.left + lugar.width / 2)),
       video: Math.max(Math.abs(video.top - p0.top), Math.abs(video.bottom - p0.bottom)),
@@ -113,10 +114,10 @@ async function main(): Promise<void> {
         await ponerEn(p, i + 1)
         const m = await medidas(p, id)
         if (telefono) {
-          anotar({ ancho, caso: `orden ${id}`, bien: m.orden, dato: m.orden ? 'título y nanobots, video, texto, CTA' : 'otro orden' })
+          anotar({ ancho, caso: `orden ${id}`, bien: m.orden, dato: m.orden ? 'título y nanobots, video, texto, «Leer más…»' : 'otro orden' })
           continue
         }
-        anotar({ ancho, caso: `eje ${id}`, bien: m.eje <= 4, dato: `|Δx| ${m.eje.toFixed(1)} px` })
+        if (id === 'ia-automatizacion') anotar({ ancho, caso: `eje ${id}`, bien: m.eje <= 4, dato: `|Δx| ${m.eje.toFixed(1)} px` })
         anotar({ ancho, caso: `video ${id}`, bien: m.video <= 2, dato: `${m.video.toFixed(1)} px del borde` })
         anotar({ ancho, caso: `texto ${id}`, bien: !m.textoPisa, dato: m.textoPisa ? 'pisa a los nanobots' : 'sin intersección' })
         anotar({ ancho, caso: `reposo ${id}`, bien: !m.reposoPisa, dato: m.reposoPisa ? 'un renglón pisa el símbolo' : 'ningún renglón sobre el símbolo' })
@@ -128,14 +129,13 @@ async function main(): Promise<void> {
         await p.mouse.wheel(0, 100)
         await dormir(TRANSICION_MS * 0.45)
         await p.screenshot({ path: path.join(SALIDA, `${String(ancho)}-nube-en-viaje.png`) })
-        for (const t of ['1', '2', '3'])
-          for (const f of ['1', '2', '3', '4']) {
-            await abrir(`?titulo-servicio=${t}&fuente-servicio=${f}`)
-            for (const [i, id] of servicios.entries()) {
-              await ponerEn(p, i + 1)
-              await p.screenshot({ path: path.join(SALIDA, `${String(ancho)}-${id}-titulo${t}-fuente${f}.png`) })
-            }
+        for (const t of ['1', '2', '3']) {
+          await abrir(`?titulo-cursiva=${t}`)
+          for (const [i, id] of servicios.entries()) {
+            await ponerEn(p, i + 1)
+            await p.screenshot({ path: path.join(SALIDA, `${String(ancho)}-${id}-cursiva${t}.png`) })
           }
+        }
       }
       if (ancho === 390) {
         await ponerEn(p, -1)

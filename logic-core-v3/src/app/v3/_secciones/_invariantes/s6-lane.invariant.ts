@@ -142,18 +142,17 @@ const IMPORTS_PERMITIDOS = [
  * acá se acota a la única familia donde vaciar las cadenas no funciona.
  */
 /**
- * [C2-90v] LAS EXCEPCIONES, ARCHIVO POR ARCHIVO Y CON SU MOTIVO. Las letras que Servicios prueba con `?titulo-servicio=` y
- * `?fuente-servicio=` (C2-50) son de Google: cada una vive en su módulo de `servicios/escenario/fuentes/` y llega perezosa,
- * sólo con su bandera. Son provisorias hasta que se elija la fuente; se borran con la elección, y con ellas su renglón de acá
- * (un renglón cuyo archivo ya no existe falla). La excepción es ESE módulo en ESE archivo: ningún otro archivo la hereda.
+ * [C2-90v · L3] LAS EXCEPCIONES, ARCHIVO POR ARCHIVO Y CON SU MOTIVO. Las cursivas que Servicios prueba con `?titulo-cursiva=` (L3; antes,
+ * las letras de `?titulo-servicio=` y `?fuente-servicio=`, C2-50, que se fueron con sus renglones) son de Google: cada una vive en su
+ * módulo de `servicios/escenario/fuentes/` y llega perezosa, sólo con su bandera. Son provisorias hasta que se elija la cursiva; se
+ * borran con la elección, y con ellas su renglón de acá (un renglón cuyo archivo ya no existe falla). La excepción es ESE módulo en ESE
+ * archivo: ningún otro archivo la hereda.
  */
-const MOTIVO_DE_LAS_FUENTES = 'provisorio hasta que se elija la fuente de Servicios (C2-50); se borra con la elección'
+const MOTIVO_DE_LAS_FUENTES = 'provisorio hasta que se elija la cursiva del título de Servicios (L3); se borra con la elección'
 const EXCEPCIONES_DE_IMPORT: Readonly<Record<string, { readonly modulo: string; readonly motivo: string }>> = {
-  [`${LANE}/servicios/escenario/fuentes/tituloSerif.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
-  [`${LANE}/servicios/escenario/fuentes/textoInstrument.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
-  [`${LANE}/servicios/escenario/fuentes/textoFraunces.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
-  [`${LANE}/servicios/escenario/fuentes/textoCormorant.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
-  [`${LANE}/servicios/escenario/fuentes/textoPlayfair.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
+  [`${LANE}/servicios/escenario/fuentes/cursivaInstrument.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
+  [`${LANE}/servicios/escenario/fuentes/cursivaFraunces.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
+  [`${LANE}/servicios/escenario/fuentes/cursivaPlayfair.ts`]: { modulo: 'next/font/google', motivo: MOTIVO_DE_LAS_FUENTES },
 }
 
 /** Los imports de `codigo` (del archivo `archivo`) que no están en la lista blanca ni en la excepción de ESE archivo. */
@@ -190,7 +189,9 @@ controlPositivo(
 controlPositivo(
   '  y VE otro módulo de afuera en un archivo exceptuado: la excepción es de un módulo, no del archivo',
   "import { Fraunces } from 'next/font/google'\nimport { PrismaClient } from '@prisma/client'",
-  (codigo) => externosDe(`${LANE}/servicios/escenario/fuentes/textoFraunces.ts`, codigo).length === 0,
+  // [L3] El archivo renombrado (cursivaFraunces.ts), y el detector tiene que ver SÓLO el módulo ajeno: si la excepción del archivo
+  // no existiera, vería los dos y este control quedaría ciego.
+  (codigo) => externosDe(`${LANE}/servicios/escenario/fuentes/cursivaFraunces.ts`, codigo).join() !== '@prisma/client',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

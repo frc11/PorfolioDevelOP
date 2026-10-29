@@ -226,7 +226,9 @@ afirmar(topeBien(ARRIBA), `[L2] la entrada aterriza en el tope de su tramo (a ${
 controlPositivo('  el detector ve la entrada en el centro de su tramo', LIBRE, topeBien)
 const arribaCableado = (g: string, e: string): boolean =>
   /const arriba = salidaDeArribaLibre && !conElDefectoDeLosGatillos\('con-gatillo-arriba'\)/.test(g) && /salidaDeArribaLibre: arriba, salidaDeAbajoLibre: libre \}/.test(g) &&
-  /if \(dy > 0 && enVuelo\.current === null && !ocupado\(\) && salidaLibre\(actual\.current, -1, regla\.current\)\) return/.test(g) && /if \(dedo\.desdeArriba && regla\.current\.salidaDeArribaLibre === true\) dedo\.disparado = true/.test(g) &&
+  // [L3] Reemplazada por la spec: el dedo que ya dio su paso (`dioPaso`) no sale libre (con el candado corto de Servicios, seguía de largo).
+  /if \(dy > 0 && enVuelo\.current === null && !ocupado\(\) && !dedo\.dioPaso && salidaLibre\(actual\.current, -1, regla\.current\)\) return/.test(g) && /if \(dedo\.desdeArriba && regla\.current\.salidaDeArribaLibre === true\) dedo\.disparado = true/.test(g) &&
+  /if \(dy <= 0 && enVuelo\.current === null && !ocupado\(\) && !dedo\.dioPaso && salidaLibre\(actual\.current, 1, regla\.current\)\) return/.test(g) && /dedo\.disparado = true\n\s*dedo\.dioPaso = true/.test(g) &&
   /useGatillos\(\{[^}]*salidaDeArribaLibre: telefono, salidaDeAbajoLibre: true \}\)/.test(e)
 afirmar(arribaCableado(gatillos, escenario), '[L2] el gancho lo cumple (la regla con su defecto del banco; el dedo que sube desde la entrada es de la página y el que llega desde arriba se queda en ella) y Servicios lo pide sólo en el teléfono')
 controlPositivo('  el detector ve Servicios pidiéndolo en todo ancho', escenario.replace('salidaDeArribaLibre: telefono', 'salidaDeArribaLibre: true'), (e) => arribaCableado(gatillos, e))

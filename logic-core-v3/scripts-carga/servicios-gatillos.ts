@@ -6,7 +6,9 @@
  *   rueda-lenta     una muesca cada 3 s bajando desde arriba hasta el recomendador, y de vuelta: −1 0 1 2 3 4 y 4 3 2 1 0 −1, de a uno
  *   rafaga          doce muescas en 360 ms adentro: UN paso
  *   trackpad        un deslizamiento con su inercia (45 eventos que se apagan, 16 ms): UN paso
- *   teclado         ↓ una vez: un paso; ↓ seis veces seguidas (en la transición): un paso; ↑ una vez: vuelve uno
+ *   teclado         ↓ una vez: un paso; [L3] ↓ seis veces cada 120 ms: dos pasos (el vuelo traga, la transición ya no); ↑ una vez: vuelve uno
+ *   [L3] doble      dos muescas a 600 ms: dos pasos (pasar rápido); dos a 250 ms (el salto en vuelo): uno
+ *   CONTROL=con-candado …   la transición entera traga: «doble muesca» y «teclado» tienen que FALLAR
  *   entrada         una ráfaga larga desde arriba: aterriza en la entrada (el paso nunca pasa por 1)
  *   recomendador    el trackpad subiendo desde el recomendador: aterriza en IA (3)
  *
@@ -150,12 +152,25 @@ async function main(): Promise<void> {
         await caso('rafaga', 1, () => rafaga(p, 1), [2])
         await caso('trackpad', 2, () => trackpad(p, -1), [1])
         await caso('teclado una vez', 0, () => p.keyboard.press('ArrowDown'), [1])
+        // [L3] Reemplazado por la spec (ítem 50, «pasar más rápido»): la transición ya no traga; el vuelo del salto (420 ms) sí. Seis teclas
+        // cada 120 ms: la primera da un paso, las del vuelo se tragan y la que llega después da el siguiente (de a uno).
         await caso('teclado seis seguidas', 1, async () => {
           for (let k = 0; k < 6; k++) {
             await p.keyboard.press('PageDown')
             await dormir(120)
           }
-        }, [2])
+        }, [2, 3])
+        // [L3] Dos muescas a 600 ms (la transición del primero corriendo): dos pasos, de a uno.
+        await caso('doble muesca a 600 ms', 0, async () => {
+          await muesca(p, 1)
+          await dormir(600)
+          await muesca(p, 1)
+        }, [1, 2])
+        await caso('dos muescas a 250 ms (el salto vuela)', 0, async () => {
+          await muesca(p, 1)
+          await dormir(250)
+          await muesca(p, 1)
+        }, [1])
         await caso('entrada con una rafaga larga', -1, async () => {
           for (let k = 0; k < 30; k++) {
             await p.mouse.wheel(0, 300)
