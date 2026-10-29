@@ -48,8 +48,9 @@ export function EscenarioDeServicios({ telefono }: { readonly telefono: boolean 
   const cambio = useRef<CambioDeCapa>(SIN_CAMBIO)
   const reducido = useMovimientoReducido()
   const diagonal = useDiagonal()
-  // [C2-51] El último tramo (del último servicio al recomendador) ya no es gatillo: scroll normal (`salidaDeAbajoLibre`).
-  const { vista, ir } = useGatillos({ pista, cantidad: ESTADOS_DE_SERVICIOS, activa: true, tactil: telefono, reducido, duracionMs: DURACION_DE_LA_TRANSICION_MS, salidaDeAbajoLibre: true })
+  // [C2-51] El último tramo (del último servicio al recomendador) ya no es gatillo: scroll normal (`salidaDeAbajoLibre`). [L2] En el teléfono
+  // tampoco el primero (el cruce con Demos, en los dos sentidos: `salidaDeArribaLibre`).
+  const { vista, ir } = useGatillos({ pista, cantidad: ESTADOS_DE_SERVICIOS, activa: true, tactil: telefono, reducido, duracionMs: DURACION_DE_LA_TRANSICION_MS, salidaDeArribaLibre: telefono, salidaDeAbajoLibre: true })
   const posicion = usePosicionDelEscenario(vista, reducido)
   const fuentes = useFuentesDelServicio()
   useCoreografiaDelEscenario(escenario, lienzo, posicion, cambio, `${fuentes.claseDelTitulo}|${fuentes.claseDelTexto}|${fuentes.titulo}`)

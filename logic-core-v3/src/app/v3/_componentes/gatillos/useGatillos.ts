@@ -65,6 +65,8 @@ export interface OpcionesDeLosGatillos {
    * (la rueda, las teclas y el dedo), y el último aterriza al pie de su tramo. Ver `ReglaDeGatillos.salidaDeAbajoLibre`.
    */
   readonly salidaDeAbajoLibre?: boolean
+  /** [L2] La entrada y la salida de arriba sin gatillo (Servicios en el teléfono: el cruce con Demos). Ver `ReglaDeGatillos.salidaDeArribaLibre`. */
+  readonly salidaDeArribaLibre?: boolean
 }
 
 export interface GatillosVivos {
@@ -95,7 +97,7 @@ function tragar(e: WheelEvent): void {
 }
 
 export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
-  const { pista, cantidad, activa, tactil, reducido, duracionMs, ocupada, salidaDeArriba, nombre, salidaDeAbajoLibre = false } = o
+  const { pista, cantidad, activa, tactil, reducido, duracionMs, ocupada, salidaDeArriba, nombre, salidaDeAbajoLibre = false, salidaDeArribaLibre = false } = o
   const [paso, setPaso] = useState(ANTES_DEL_ANCLA)
   const actual = useRef(ANTES_DEL_ANCLA)
   const regla = useRef<ReglaDeGatillos>({ cantidad, pasoPx: 1 })
@@ -115,12 +117,14 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
     const elVuelo = enVuelo
     // [C2-51] El defecto del banco (`con-gatillo-al-final`): la salida de abajo de B4, con su vuelo.
     const libre = salidaDeAbajoLibre && !conElDefectoDeLosGatillos('con-gatillo-al-final')
+    // [L2] El defecto del banco (`con-gatillo-arriba`): la entrada y la salida de arriba de antes.
+    const arriba = salidaDeArribaLibre && !conElDefectoDeLosGatillos('con-gatillo-arriba')
     const medir = (): boolean => {
       const el = pista.current
       const alto = window.innerHeight
       if (el === null || !(alto > 0)) return false
       inicio.current = el.getBoundingClientRect().top + window.scrollY
-      regla.current = { cantidad, pasoPx: Math.max(1, (el.offsetHeight - alto) / cantidad), salidaDeAbajoLibre: libre }
+      regla.current = { cantidad, pasoPx: Math.max(1, (el.offsetHeight - alto) / cantidad), salidaDeArribaLibre: arriba, salidaDeAbajoLibre: libre }
       return true
     }
     const publicar = (siguiente: number): void => {
@@ -219,10 +223,11 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       ultimoGesto.current = performance.now()
       if (decision === 'paso') porGesto(sentido)
     }
-    const dedo = { y: 0, disparado: false }
+    const dedo = { y: 0, disparado: false, desdeArriba: false }
     const alTocar = (e: TouchEvent): void => {
       dedo.y = e.touches[0]?.clientY ?? 0
       dedo.disparado = false
+      dedo.desdeArriba = faseDe(actual.current, cantidad) === 'antes'
       ultimoGesto.current = performance.now()
     }
     const alArrastrar = (e: TouchEvent): void => {
@@ -231,6 +236,11 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       ultimoGesto.current = performance.now()
       if (enVuelo.current === null && faseDe(actual.current, cantidad) !== 'adentro') return
       const dy = y - dedo.y
+      // [L2] La salida de arriba libre: el dedo que sube la página desde la entrada (contado desde que tocó, como la de abajo) es de la página.
+      // Y el que la trajo desde arriba no da el paso de al lado (ése es del gesto siguiente); si el navegador ya no deja frenar ese scroll, sigue
+      // con el scroll y los servicios pasan por la histéresis, sin vuelo.
+      if (dy > 0 && enVuelo.current === null && !ocupado() && salidaLibre(actual.current, -1, regla.current)) return
+      if (dedo.desdeArriba && regla.current.salidaDeArribaLibre === true) dedo.disparado = true
       // [C2-51] La salida libre: el dedo que baja la página desde el último es de la página (ni se traga ni dispara).
       if (dy <= 0 && enVuelo.current === null && !ocupado() && salidaLibre(actual.current, 1, regla.current)) return
       if (e.cancelable) e.preventDefault()
@@ -264,7 +274,7 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       if (hayBanco() && nombre === undefined) delete ventana.__gatillosDelBanco
       else if (hayBanco() && nombre !== undefined) delete ventana.__gatillosDelBancoDe?.[nombre]
     }
-  }, [pista, cantidad, nombre, salidaDeAbajoLibre])
+  }, [pista, cantidad, nombre, salidaDeAbajoLibre, salidaDeArribaLibre])
 
   const ir = useCallback((i: number) => irAlPaso.current(i), [])
   return { paso, vista: vistaDelPasoEnElTramo(paso, cantidad), ir }

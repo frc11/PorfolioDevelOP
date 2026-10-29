@@ -199,6 +199,38 @@ const cableadoBien = (g: string, e: string): boolean =>
 afirmar(cableadoBien(gatillos, escenario), 'el gancho lo cumple (la regla, el aterrizaje, la tecla y el dedo sin `preventDefault`) y Servicios lo pide')
 controlPositivo('  el detector ve Servicios sin pedirlo', escenario.replace('salidaDeAbajoLibre: true', 'salidaDeAbajoLibre: false'), (e) => cableadoBien(gatillos, e))
 
+// [L2] La salida de arriba libre (Servicios en el teléfono: el cruce con Demos, sin gatillo en los dos sentidos).
+const ARRIBA: ReglaDeGatillos = { cantidad: 4, pasoPx: 844, salidaDeArribaLibre: true, salidaDeAbajoLibre: true }
+const momentoEn = (paso: number, px: number, ahora: number, hacia: number, gesto = GESTO_QUIETO) => ({ paso, enVuelo: false, ocupado: false, gesto, px, ahora, hacia })
+const arribaBien = (r: ReglaDeGatillos): boolean => {
+  // Desde la entrada (0), un trackpad entero hacia arriba es de la página.
+  let gesto = GESTO_QUIETO
+  const trackpad = Array.from({ length: 40 }, (_, k) => {
+    const x = decidirLaRueda(momentoEn(0, -Math.max(2, 40 - k), 10000 + k * 16, 0.5 * 844 - 100, gesto), r)
+    gesto = x.gesto
+    return x.decision.tipo
+  })
+  // Desde arriba (Demos, −1), el gesto que entra no se atrapa: es de la página.
+  const entra = decidirLaRueda(momentoEn(-1, 120, 20000, 60), r).decision.tipo
+  // Desde la entrada, bajar sigue siendo un paso (el primer servicio, L3); desde Desarrollo web (1), subir también.
+  const baja = decidirLaRueda(momentoEn(0, 100, 30000, 300), r).decision
+  const sube = decidirLaRueda(momentoEn(1, -100, 40000, 1200), r).decision
+  return trackpad.every((t) => t === 'pagina') && entra === 'pagina' && baja.tipo === 'paso' && baja.sentido === 1 && sube.tipo === 'paso' && sube.sentido === -1
+}
+afirmar(arribaBien(ARRIBA), '[L2] con la salida de arriba libre: desde la entrada la rueda que sube es de la página, la que llega desde Demos no se atrapa, y bajar desde la entrada (o subir desde web) sigue siendo un paso')
+controlPositivo('  el detector ve la máquina de antes (la entrada atrapa y la salida de arriba vuela)', LIBRE, arribaBien)
+afirmar(decidirLaTecla(0, 4, false, false, false, salidaLibre(0, -1, ARRIBA)) === 'pagina' && decidirLaTecla(0, 4, false, false, false, salidaLibre(0, 1, ARRIBA)) === 'paso' && !salidaLibre(0, -1, LIBRE), '[L2] el teclado: subir desde la entrada es de la página; bajar, un paso; sin la opción, como siempre')
+controlPositivo('  el detector ve el teclado sin la salida de arriba', LIBRE, (r) => decidirLaTecla(0, 4, false, false, false, salidaLibre(0, -1, r)) === 'pagina')
+const topeBien = (r: ReglaDeGatillos): boolean => aterrizajeDelPasoEnElTramo(0, r) <= PIE_DEL_ULTIMO_PX && aterrizajeDelPasoEnElTramo(0, r) >= 0 && aterrizajeDelPasoEnElTramo(1, r) === 1.5 * r.pasoPx
+afirmar(topeBien(ARRIBA), `[L2] la entrada aterriza en el tope de su tramo (a ${String(PIE_DEL_ULTIMO_PX)} px de soltarse): subir ya mueve la página; los demás, en su centro`)
+controlPositivo('  el detector ve la entrada en el centro de su tramo', LIBRE, topeBien)
+const arribaCableado = (g: string, e: string): boolean =>
+  /const arriba = salidaDeArribaLibre && !conElDefectoDeLosGatillos\('con-gatillo-arriba'\)/.test(g) && /salidaDeArribaLibre: arriba, salidaDeAbajoLibre: libre \}/.test(g) &&
+  /if \(dy > 0 && enVuelo\.current === null && !ocupado\(\) && salidaLibre\(actual\.current, -1, regla\.current\)\) return/.test(g) && /if \(dedo\.desdeArriba && regla\.current\.salidaDeArribaLibre === true\) dedo\.disparado = true/.test(g) &&
+  /useGatillos\(\{[^}]*salidaDeArribaLibre: telefono, salidaDeAbajoLibre: true \}\)/.test(e)
+afirmar(arribaCableado(gatillos, escenario), '[L2] el gancho lo cumple (la regla con su defecto del banco; el dedo que sube desde la entrada es de la página y el que llega desde arriba se queda en ella) y Servicios lo pide sólo en el teléfono')
+controlPositivo('  el detector ve Servicios pidiéndolo en todo ancho', escenario.replace('salidaDeArribaLibre: telefono', 'salidaDeArribaLibre: true'), (e) => arribaCableado(gatillos, e))
+
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · La REGLA DE ALTURAS desde 1024')
 

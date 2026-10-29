@@ -25,17 +25,26 @@ export interface ReglaDeGatillos {
    * atrapando (subiendo, el gesto que entra se planta en el último). Sin la bandera (el Portfolio, Demos), lo de siempre.
    */
   readonly salidaDeAbajoLibre?: boolean
+  /**
+   * [L2] La salida de arriba SIN gatillo (Servicios en el teléfono: de la entrada a Demos y de Demos a la entrada). En el primer paso, un
+   * gesto NUEVO hacia arriba es de la página, y ese paso se aterriza en el TOPE de su tramo (subir ya mueve la página). Desde arriba, el
+   * gesto que llega no se atrapa: la página entra scrolleando; lo que queda de ese gesto se traga y el siguiente da el paso de al lado.
+   */
+  readonly salidaDeArribaLibre?: boolean
 }
 
 /** [C2-51] Lo que queda el aterrizaje del último paso antes del pie de su tramo (px): adentro del paso, sin soltar el escenario. */
 export const PIE_DEL_ULTIMO_PX = 2
 
-/** [C2-51] Si este gesto, desde este paso, sale por abajo sin gatillo. */
-export const salidaLibre = (paso: number, sentido: 1 | -1, r: ReglaDeGatillos): boolean => r.salidaDeAbajoLibre === true && sentido > 0 && paso === r.cantidad - 1
+/** [C2-51] Si este gesto, desde este paso, sale por abajo sin gatillo. [L2] O por arriba, desde el primero. */
+export const salidaLibre = (paso: number, sentido: 1 | -1, r: ReglaDeGatillos): boolean =>
+  (r.salidaDeAbajoLibre === true && sentido > 0 && paso === r.cantidad - 1) || (r.salidaDeArribaLibre === true && sentido < 0 && paso === 0)
 
 /** [C2-51] Adónde aterriza un paso (px del tramo): su centro; con la salida libre, el último al pie de su tramo. */
 export function aterrizajeDelPasoEnElTramo(i: number, r: ReglaDeGatillos): number {
   if (r.salidaDeAbajoLibre === true && i === r.cantidad - 1) return Math.max((i + 0.5) * r.pasoPx, r.cantidad * r.pasoPx - PIE_DEL_ULTIMO_PX)
+  // [L2] Con la salida de arriba libre, el primero en el tope de su tramo (lo mismo de soltarse que el último).
+  if (r.salidaDeArribaLibre === true && i === 0) return Math.min(0.5 * r.pasoPx, PIE_DEL_ULTIMO_PX)
   return (i + 0.5) * r.pasoPx
 }
 
@@ -92,7 +101,8 @@ export function destinoDelGesto(activo: number, sentido: 1 | -1, cantidad: numbe
  * tramo) aterriza en el primero del sentido. Devuelve el paso de aterrizaje, o `null` si no entra.
  */
 export function entradaDelGesto(fase: FaseDelGatillo, hacia: number, sentido: 1 | -1, r: ReglaDeGatillos): number | null {
-  if (fase === 'antes' && sentido > 0 && hacia >= 0) return 0
+  // [L2] Con la salida de arriba libre, la entrada de arriba tampoco atrapa: es de la página.
+  if (fase === 'antes' && sentido > 0 && hacia >= 0) return r.salidaDeArribaLibre === true ? null : 0
   if (fase === 'despues' && sentido < 0 && hacia < r.cantidad * r.pasoPx) return r.cantidad - 1
   return null
 }
