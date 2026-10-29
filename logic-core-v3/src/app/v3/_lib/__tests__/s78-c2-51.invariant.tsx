@@ -137,6 +137,11 @@ titulo('3 · El flujo por etapas (puro)')
 
 const correr = (acciones: readonly AccionDelRecomendador[], desde: EstadoDelRecomendador = INICIO_DEL_RECOMENDADOR): EstadoDelRecomendador => acciones.reduce(avanzar, desde)
 type Avanzar = typeof avanzar
+// [L4] `volver` (lo que pasa después de un envío con éxito): del contacto a las dos soluciones, con las respuestas intactas y sin reiniciar; sin elegida, no hace nada.
+const volvioBien = (f: Avanzar, resultado: EstadoDelRecomendador, elegida: EstadoDelRecomendador): boolean => {
+  const vuelta = f(elegida, { tipo: 'volver' })
+  return vuelta.fase === 'resultado' && vuelta.elegida === null && vuelta.respuestas.join() === elegida.respuestas.join() && f(resultado, { tipo: 'volver' }) === resultado && f(INICIO_DEL_RECOMENDADOR, { tipo: 'volver' }) === INICIO_DEL_RECOMENDADOR && f(vuelta, { tipo: 'elegir', solucion: 'gestion' }).elegida === 'gestion'
+}
 const flujoBien = (f: Avanzar): boolean => {
   const c = (a: readonly AccionDelRecomendador[]): EstadoDelRecomendador => a.reduce(f, INICIO_DEL_RECOMENDADOR)
   const sinElegir = c([{ tipo: 'siguiente' }])
@@ -152,10 +157,13 @@ const flujoBien = (f: Avanzar): boolean => {
     atras.etapa === 0 && atras.respuestas.join() === '2,4,' && !atras.falta &&
     alFinal.fase === 'procesando' && f(alFinal, { tipo: 'atras' }).fase === 'procesando' &&
     resultado.fase === 'resultado' && elegida.elegida === 'gestion' && ajena.elegida === null && otraVez.elegida === 'gestion' &&
-    fuera === INICIO_DEL_RECOMENDADOR && f(elegida, { tipo: 'reiniciar' }) === INICIO_DEL_RECOMENDADOR
+    fuera === INICIO_DEL_RECOMENDADOR && f(elegida, { tipo: 'reiniciar' }) === INICIO_DEL_RECOMENDADOR &&
+    volvioBien(f, resultado, elegida)
   )
 }
 afirmar(flujoBien(avanzar), 'sin elegir no avanza (y avisa hasta que elija); Atrás vuelve y conserva lo respondido; la tercera pasa al procesando, que termina en el resultado; se elige A o B (una sola vez); Empezar de nuevo vuelve al principio')
+controlPositivo('  [L4] el detector ve un «volver» que reinicia todo (el envío borraría el resultado)', ((e: EstadoDelRecomendador, a: AccionDelRecomendador) => (a.tipo === 'volver' ? INICIO_DEL_RECOMENDADOR : avanzar(e, a))) as Avanzar, flujoBien)
+controlPositivo('  [L4] y un «volver» que deja el contacto abierto', ((e: EstadoDelRecomendador, a: AccionDelRecomendador) => (a.tipo === 'volver' ? e : avanzar(e, a))) as Avanzar, flujoBien)
 controlPositivo('  el detector ve un «Siguiente» que avanza sin respuesta', ((e: EstadoDelRecomendador, a: AccionDelRecomendador) => (a.tipo === 'siguiente' && e.fase === 'preguntas' && e.etapa < 2 ? { ...e, etapa: e.etapa + 1 } : avanzar(e, a))) as Avanzar, flujoBien)
 controlPositivo('  y un «Atrás» que borra lo respondido', ((e: EstadoDelRecomendador, a: AccionDelRecomendador) => (a.tipo === 'atras' && e.etapa > 0 ? { ...e, etapa: e.etapa - 1, respuestas: [null, null, null] } : avanzar(e, a))) as Avanzar, flujoBien)
 afirmar(correr([{ tipo: 'responder', opcion: 0 }, { tipo: 'siguiente' }, { tipo: 'siguiente' }]).falta, '  y en la segunda etapa también')
@@ -269,8 +277,9 @@ controlPositivo('  el detector ve el resultado con una sola tarjeta', resultado.
 const conContacto = renderToStaticMarkup(<ResultadoDelRecomendador respuestas={[0, 0, 0]} elegida="chatbot" despachar={nada} reducido idDelTitulo="r" />)
 const partesDelContacto = (h: string): string[] =>
   Object.entries({
-    'una tarjeta': veces(h, 'data-pieza="tarjeta-de-solucion"') === 1,
-    'la elegida': /data-solucion="chatbot"[^>]*aria-pressed="true"/.test(h),
+    // [L4] El contacto aparece EN EL LUGAR de las tarjetas: ni una tarjeta, ni «Elegí…», y las tres acciones juntas en la fila del envío.
+    'sin tarjetas': veces(h, 'data-pieza="tarjeta-de-solucion"') === 0 && !h.includes(TEXTOS_DEL_RECOMENDADOR.elegi),
+    'las tres acciones': /data-parte="fila-del-envio"[\s\S]*?type="submit"[\s\S]*?data-viaje-del-servicio="ia-automatizacion"[\s\S]*?data-parte="empezar-de-nuevo"/.test(h),
     'la precarga': /<form[^>]*data-precarga="ia-automatizacion"/.test(h),
     'el mensaje': h.includes(mensajeDelContacto([0, 0, 0], 'chatbot')),
     'el título': textoDe(h).includes('Hablemos de un chatbot con IA que atienda por vos'),
@@ -280,8 +289,37 @@ const partesDelContacto = (h: string): string[] =>
     'el link': textoDe(h).includes('Ver la página de IA y automatizaciones'),
   }).filter(([, bien]) => !bien).map(([parte]) => parte)
 const contactoBien = (h: string): boolean => partesDelContacto(h).length === 0
-afirmar(contactoBien(conContacto), 'elegida una: la otra se fue, y debajo el contacto precargado (`data-precarga` del servicio, el mensaje con las respuestas, `EstadoDeEnvio`, el autocompletado) y el link chico a la página (el viaje)', `faltan: ${partesDelContacto(conContacto).join(', ') || 'nada'}`)
+afirmar(contactoBien(conContacto), 'elegida una: [L4] las tarjetas se cambian en el mismo lugar por el contacto precargado, con «Enviar», «Ver la página de…» y «Empezar de nuevo» en una fila, y (`data-precarga` del servicio, el mensaje con las respuestas, `EstadoDeEnvio`, el autocompletado) y el link chico a la página (el viaje)', `faltan: ${partesDelContacto(conContacto).join(', ') || 'nada'}`)
 controlPositivo('  el detector ve el contacto sin la precarga', conContacto.replace('data-precarga="ia-automatizacion"', ''), contactoBien)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('6b · [L4] La distribución de escritorio, el indicador del teléfono y que enviar no mueva la página')
+
+// El encabezado a un tercio y el recomendador a dos, centrados en alto entre sí; abajo de 1024, la columna.
+const distribucionBien = (h: string): boolean =>
+  h.includes('--columnas-del-recomendador:minmax(0,1fr) minmax(0,2fr)') && /escritorio:grid-cols-\[var\(--columnas-del-recomendador\)\]/.test(h) && /data-pieza="recomendador"[^>]*class="[^"]*\bescritorio:items-center\b/.test(h) && /data-pieza="recomendador"[^>]*class="[^"]*\bflex-col\b/.test(h)
+afirmar(distribucionBien(html), 'desde 1024, el encabezado a un tercio y el recomendador a dos tercios, centrados en alto entre sí; abajo de 1024, una columna')
+controlPositivo('  el detector ve el recomendador sin centrar en alto', html.replace('escritorio:items-center', 'escritorio:items-start'), distribucionBien)
+controlPositivo('  y las dos columnas iguales (el de antes: todo el ancho)', html.replace('minmax(0,1fr) minmax(0,2fr)', 'minmax(0,1fr) minmax(0,1fr)'), distribucionBien)
+
+// Abajo de 1024, SÓLO el paso de ahora, centrado (número y nombre); la lista de los tres queda en el DOM para el lector, sin verse.
+const pasoActualBien = (h: string): boolean =>
+  /data-parte="paso-actual" role="group" aria-label="Paso 1 de 3" class="flex justify-center escritorio:hidden"/.test(h) && h.includes(`<span>${PREGUNTAS[0].paso}</span>`) &&
+  /data-parte="indicador-de-pasos" class="max-escritorio:sr-only escritorio:grid/.test(h) && veces(h, 'aria-current="step"') === 1
+afirmar(pasoActualBien(html), 'abajo de 1024 el indicador muestra sólo el paso de ahora, centrado (el número y el nombre); la lista de los tres sigue en el DOM, oculta (un solo aria-current)')
+controlPositivo('  el detector ve el indicador de tres a la vista abajo de 1024 (el de antes)', html.replace('max-escritorio:sr-only escritorio:grid', 'grid'), pasoActualBien)
+controlPositivo('  y el paso de ahora a la izquierda (sin centrar)', html.replace('flex justify-center escritorio:hidden', 'flex escritorio:hidden'), pasoActualBien)
+
+// Enviar no mueve la página: ninguna pieza del recomendador (salvo `movimiento.ts`, que sólo corre al cambiar de etapa o de fase) hace un scroll ni cambia el hash.
+const sinScroll = (texto: string): boolean => !/scrollIntoView|scrollTo\(|location\.hash|history\.(push|replace)State|useRouter|router\./.test(texto)
+const sinCodigo = (f: { a: string; texto: string }): string => f.texto.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+const sinMovimiento = FUENTES.filter((x) => x.a !== 'movimiento.ts').map(sinCodigo)
+afirmar(sinMovimiento.every(sinScroll), 'el recomendador no mueve la página por su cuenta: sin scroll, sin hash, sin router (sólo `movimiento.ts`, al cambiar de etapa o de fase)')
+controlPositivo('  el detector ve un scrollIntoView en el contacto', [...sinMovimiento, 'ref.current?.scrollIntoView()'].join('\n'), sinScroll)
+const recomendador = leer(`${CARPETA}/Recomendador.tsx`)
+const CLAVE = 'const ahora = `${estado.fase}|${String(estado.etapa)}`'
+afirmar(recomendador.includes(CLAVE) && recomendador.includes('llevarALaVista(cuerpo.current, reducido)') && (recomendador.match(/llevarALaVista\(/g) ?? []).length === 1, 'y `llevarALaVista` sólo corre cuando cambia la etapa o la fase (no al elegir ni al enviar: `elegida` no es parte de la clave)')
+controlPositivo('  el detector ve la clave con la solución elegida (cada elección o envío traería la página)', recomendador.replace(CLAVE, 'const ahora = `${estado.fase}|${String(estado.etapa)}|${String(estado.elegida)}`'), (t: string) => t.includes(CLAVE))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · Las piezas del sitio, importadas (no copias), y la estética del home')

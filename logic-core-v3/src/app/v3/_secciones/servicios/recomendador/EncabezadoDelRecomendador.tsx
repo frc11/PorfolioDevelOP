@@ -7,7 +7,7 @@ import { TituloQueSePintaAlLlegar, type Renglon } from '../escenario/TituloQueSe
 import { TEXTOS_DEL_RECOMENDADOR } from './logica'
 
 /**
- * [C2-51] EL ENCABEZADO DEL RECOMENDADOR (ítem 14) — arriba a la izquierda, no centrado en el alto:
+ * [C2-51] EL ENCABEZADO DEL RECOMENDADOR (ítem 14) — [L4] a la izquierda (un tercio del ancho desde 1024), centrado en alto contra el recomendador:
  *   · el título con la presencia de los títulos grandes del sitio: la letra y el pintado de «Nuestros servicios» y del Panel
  *     (`TituloQueSePintaAlLlegar`, la display en mayúsculas que se pinta de gris a tinta al quedar a la vista), en tres renglones;
  *   · debajo, el texto que explica para qué sirve, más grande que un párrafo (el registro de la bajada de Servicios, un escalón abajo),

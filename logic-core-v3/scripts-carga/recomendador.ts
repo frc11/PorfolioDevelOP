@@ -15,7 +15,7 @@
  *               no avanza; elegir lo saca.
  *   PROCESANDO  «Ver mi recomendación»: la carga de develOP y las tres líneas en orden, visibles; el resultado a los 2,5–4,2 s.
  *   RESULTADO   A y B las de la lógica (`logica.ts`) para las respuestas tocadas, y el análisis armado, letra por letra.
- *   ELEGIR      tocar B: A se desvanece (opacidad entre 0 y 1 antes de irse) y se va; aparece el contacto con su título, la precarga del
+ *   ELEGIR      tocar B: las tarjetas se desvanecen y el contacto aparece EN SU LUGAR (mismo tope); aparece el contacto con su título, la precarga del
  *               servicio y el mensaje con las respuestas.
  *   ENVIO       con el mensaje editado: éxito (carga → «¡Recibido!» → el formulario vuelve, vacío y precargado de nuevo) y error (carga →
  *               «Algo falló» → vuelve con lo escrito); un pedido por intento, con el mensaje editado, el medio y los intereses del servicio.
@@ -28,6 +28,7 @@
  *   CONTROL=sin-desvanecer   la otra tarjeta no se desvanece (opacidad fija): ELEGIR tiene que dar FALLA.
  *   CONTROL=sin-precarga     vacía el mensaje precargado al aparecer: ELEGIR tiene que dar FALLA.
  *   CONTROL=envio-ciego      esconde el mensaje del envío: ENVIO tiene que dar FALLA.
+ *   CONTROL=salto-al-enviar  [L4] la página salta 4000 px al enviar: ENVIO sin salto tiene que dar FALLA.
  *   CONTROL=sin-reinicio     «Empezar de nuevo» no llega a la página: REINICIO tiene que dar FALLA.
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
@@ -48,10 +49,12 @@ const CONTROLES: Readonly<Record<string, { readonly css?: string; readonly scrip
   'con-gatillo': { defecto: 'con-gatillo-al-final' },
   'sin-falta': { css: `${R} [data-pieza="etapa-del-recomendador"] p[id$="-falta"] { display: none !important; }` },
   'sin-procesando': { css: `${R} [data-parte="linea-del-procesando"] { display: none !important; }` },
-  'sin-desvanecer': { css: `${R} div:has(> [data-pieza="tarjeta-de-solucion"]) { opacity: 1 !important; }` },
+  'sin-desvanecer': { css: `${R} [data-parte="soluciones"] { opacity: 1 !important; }` },
   'sin-precarga': {
     script: `new MutationObserver(() => { const t = document.querySelector('#recomendador-mensaje'); if (t && !t.dataset.vaciado) { t.dataset.vaciado = '1'; Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(t, ''); t.dispatchEvent(new Event('input', { bubbles: true })) } }).observe(document, { childList: true, subtree: true })`,
   },
+  // [L4] El salto al enviar de antes: la página se va miles de px (al Portfolio) pocos instantes después del toque en «Enviar».
+  'salto-al-enviar': { script: `window.addEventListener('submit', () => setTimeout(() => window.scrollBy(0, -4000), 250), true)` },
   'envio-ciego': { css: `${R} [data-parte="mensaje-del-envio"] { display: none !important; }` },
   'sin-reinicio': { script: `window.addEventListener('click', (e) => { if (e.target instanceof Element && e.target.closest('[data-parte="empezar-de-nuevo"]')) e.stopPropagation() }, true)` },
 }
@@ -155,6 +158,20 @@ async function flujo(p: Page, ancho: number, alto: number): Promise<void> {
     if (c) window.scrollTo({ top: c.getBoundingClientRect().top + window.scrollY - 80, behavior: 'instant' })
   }, R)
   await dormir(1500)
+  // ── DISTRIBUCIÓN [L4]: desde 1024 el encabezado a un tercio y el recomendador a dos, centrados en alto entre sí; abajo, una columna
+  const caja = await p.evaluate((r) => {
+    const rect = (s: string): { x: number; y: number; w: number; h: number } | null => {
+      const b = document.querySelector(`${r} ${s}`)?.getBoundingClientRect()
+      return b === undefined ? null : { x: b.left, y: b.top, w: b.width, h: b.height }
+    }
+    return { enc: rect('[data-parte="encabezado-del-recomendador"]'), cuerpo: rect('[data-parte="cuerpo-del-recomendador"]') }
+  }, R)
+  if (caja.enc === null || caja.cuerpo === null) anotar(false, 'DISTRIBUCIÓN', ancho, 'no están el encabezado o el cuerpo')
+  else if (ancho >= 1024) {
+    const razon = caja.enc.w / (caja.enc.w + caja.cuerpo.w)
+    const dy = Math.abs(caja.enc.y + caja.enc.h / 2 - (caja.cuerpo.y + caja.cuerpo.h / 2))
+    anotar(razon >= 0.28 && razon <= 0.38 && caja.cuerpo.x > caja.enc.x + caja.enc.w - 1 && dy <= 6, 'DISTRIBUCIÓN', ancho, `el encabezado es el ${(razon * 100).toFixed(0)} % de lo que suman las dos cajas (a un tercio: 28–38) · el recomendador a su derecha ${caja.cuerpo.x > caja.enc.x + caja.enc.w - 1 ? 'sí' : 'NO'} · centros a ${dy.toFixed(1)} px en alto (tope 6)`)
+  } else anotar(caja.cuerpo.y >= caja.enc.y + caja.enc.h - 1 && caja.enc.w > ancho * 0.8, 'DISTRIBUCIÓN', ancho, `columna: el encabezado ${caja.enc.w.toFixed(0)} px de ancho arriba del cuerpo ${caja.cuerpo.y >= caja.enc.y + caja.enc.h - 1 ? 'sí' : 'NO'}`)
   // ── ETAPAS
   const e: string[] = []
   const indicador = (): Promise<number> => p.evaluate((r) => [...document.querySelectorAll(`${r} [data-parte="indicador-de-pasos"] li`)].findIndex((x) => x.getAttribute('aria-current') === 'step'), R)
@@ -164,6 +181,19 @@ async function flujo(p: Page, ancho: number, alto: number): Promise<void> {
   await opcion(p, RESPUESTAS[0])
   await p.locator(SIGUIENTE).click()
   if (!(await esperar(p, etapaEs(1, PREGUNTAS[1].texto), 3000)) || (await indicador()) !== 1) e.push('la segunda etapa')
+  // [L4] Abajo de 1024 el indicador muestra SÓLO el paso de ahora (el número y el nombre), centrado; y los otros dos no se ven.
+  if (ancho < 1024) {
+    await dormir(700)
+    const paso = await p.evaluate((r) => {
+      const c = document.querySelector(`${r} [data-parte="paso-actual-contenido"]`)
+      const g = document.querySelector(`${r} [data-parte="paso-actual"]`)?.getBoundingClientRect()
+      const b = c?.getBoundingClientRect()
+      const lista = document.querySelector(`${r} [data-parte="indicador-de-pasos"]`)?.getBoundingClientRect()
+      return { texto: (c?.textContent ?? '').trim(), centro: b === undefined || g === undefined ? 1e6 : Math.abs(b.left + b.width / 2 - (g.left + g.width / 2)), n: document.querySelectorAll(`${r} [data-parte="paso-actual-contenido"]`).length, lista: lista === undefined ? 0 : lista.width * lista.height }
+    }, R)
+    if (paso.n !== 1 || paso.texto !== PREGUNTAS[1].paso || paso.centro > 4 || paso.lista > 4) e.push(`el paso de ahora solo y centrado (${JSON.stringify(paso)})`)
+    await foto(p, ancho, alto, '2b-paso-actual')
+  }
   await opcion(p, RESPUESTAS[1])
   await foto(p, ancho, alto, '3-etapa-2')
   await p.locator(`${R} [data-parte="atras"]`).click()
@@ -221,12 +251,13 @@ async function flujo(p: Page, ancho: number, alto: number): Promise<void> {
     const w = window as Window & { __opacidadDeA?: number[] }
     w.__opacidadDeA = []
     const mirar = (): void => {
-      const a = document.querySelector(`${r} [data-destacada="si"]`)?.parentElement
+      const a = document.querySelector(`${r} [data-parte="soluciones"]`)
       w.__opacidadDeA?.push(a ? Number(getComputedStyle(a).opacity) : -1)
       if (a) requestAnimationFrame(mirar)
     }
     requestAnimationFrame(mirar)
   }, R)
+  const topeDeLasTarjetas = await p.evaluate((r) => (document.querySelector(`${r} [data-parte="soluciones"]`)?.getBoundingClientRect().top ?? -1) + window.scrollY, R)
   await p.locator(`${R} [data-solucion="${ELEGIDA}"]`).first().click()
   await dormir(1800)
   const opacidades = await p.evaluate(() => (window as Window & { __opacidadDeA?: number[] }).__opacidadDeA ?? [])
@@ -234,8 +265,10 @@ async function flujo(p: Page, ancho: number, alto: number): Promise<void> {
   const mensaje = await p.evaluate(() => (document.querySelector('#recomendador-mensaje') as HTMLTextAreaElement | null)?.value ?? '')
   const precarga = await p.evaluate((r) => document.querySelector(`${r} [data-pieza="contacto-del-recomendador"] form`)?.getAttribute('data-precarga') ?? '', R)
   const servicio = solucion(ELEGIDA).servicio
-  const elegirBien = sedesvanecio && (await p.locator(`${R} [data-pieza="tarjeta-de-solucion"]`).count()) === 1 && mensaje === mensajeDelContacto(RESPUESTAS, ELEGIDA) && precarga === servicio
-  anotar(elegirBien, 'ELEGIR', ancho, `A se desvanece ${sedesvanecio ? 'sí' : 'NO'} (${String(opacidades.length)} cuadros) · precarga ${precarga} · mensaje ${mensaje === mensajeDelContacto(RESPUESTAS, ELEGIDA) ? 'el de las respuestas' : `DISTINTO: «${mensaje.slice(0, 60)}»`}`)
+  const topeDelContacto = await p.evaluate((r) => (document.querySelector(`${r} [data-parte="contacto-en-su-lugar"]`)?.getBoundingClientRect().top ?? -1e6) + window.scrollY, R)
+  const enSuLugar = Math.abs(topeDelContacto - topeDeLasTarjetas) <= 8
+  const elegirBien = sedesvanecio && enSuLugar && (await p.locator(`${R} [data-pieza="tarjeta-de-solucion"]`).count()) === 0 && mensaje === mensajeDelContacto(RESPUESTAS, ELEGIDA) && precarga === servicio
+  anotar(elegirBien, 'ELEGIR', ancho, `las tarjetas se desvanecen ${sedesvanecio ? 'sí' : 'NO'} (${String(opacidades.length)} cuadros) · el contacto en su lugar ${enSuLugar ? 'sí' : `NO (tope ${topeDelContacto.toFixed(0)} contra ${topeDeLasTarjetas.toFixed(0)})`} · precarga ${precarga} · mensaje ${mensaje === mensajeDelContacto(RESPUESTAS, ELEGIDA) ? 'el de las respuestas' : `DISTINTO: «${mensaje.slice(0, 60)}»`}`)
   await foto(p, ancho, alto, '7-contacto')
   // ── ENVIO (éxito y error; el servidor lo pone `main` con `modo`)
   await envio(p, ancho, alto, servicio)
@@ -246,19 +279,31 @@ async function flujo(p: Page, ancho: number, alto: number): Promise<void> {
   await foto(p, ancho, alto, '9-de-nuevo')
 }
 
+/** [L4] Lo que puede moverse la página al enviar (px): un salto al Portfolio son miles. */
+const SALTO_MAXIMO_PX = 40
 const servidor = { modo: 'exito' as 'exito' | 'error', pedidos: [] as Record<string, unknown>[] }
 const VISTAS = `(() => { window.__vistas = []; const el = document.querySelector('${R} [data-pieza="estado-de-envio"]'); if (!el) return; window.__vistas.push(el.getAttribute('data-vista')); new MutationObserver(() => window.__vistas.push(el.getAttribute('data-vista'))).observe(el, { attributes: true, attributeFilter: ['data-vista'] }) })()`
 const MENSAJE_VISTO = `(() => { const m = document.querySelector('${R} [data-parte="mensaje-del-envio"]'); if (!m) return ''; const c = getComputedStyle(m); return m.getClientRects().length > 0 && c.display !== 'none' && Number(c.opacity) > 0.9 ? (m.textContent || '') : '' })()`
 
-async function unEnvio(p: Page, modo: 'exito' | 'error', esperado: string): Promise<{ vistas: string[]; visto: boolean; pedidos: number }> {
+/** [L4] El scroll durante el envío: el desvío máximo de la página respecto de donde estaba al tocar «Enviar» (el salto al Portfolio). */
+const SEGUIR_EL_SCROLL = `(() => { const w = window; w.__y0 = w.scrollY; w.__desvio = 0; const mirar = () => { w.__desvio = Math.max(w.__desvio, Math.abs(w.scrollY - w.__y0)); w.__mirando = requestAnimationFrame(mirar) }; cancelAnimationFrame(w.__mirando || 0); mirar() })()`
+
+async function unEnvio(p: Page, modo: 'exito' | 'error', esperado: string): Promise<{ vistas: string[]; visto: boolean; pedidos: number; desvio: number }> {
   servidor.modo = modo
   const antes = servidor.pedidos.length
   await p.evaluate(VISTAS)
-  await p.locator(`${R} [data-pieza="contacto-del-recomendador"] button[type="submit"]`).click()
+  const enviar = p.locator(`${R} [data-pieza="contacto-del-recomendador"] button[type="submit"]`)
+  // El botón a la vista ANTES de seguir el scroll: el desplazamiento que hace Playwright para alcanzarlo no es de la página.
+  await enviar.scrollIntoViewIfNeeded()
+  await dormir(900)
+  await p.evaluate(SEGUIR_EL_SCROLL)
+  await enviar.click()
   const visto = await esperar(p, `${MENSAJE_VISTO}.includes(${JSON.stringify(esperado)})`, 6000)
-  await esperar(p, `document.querySelector('${R} [data-pieza="estado-de-envio"]')?.getAttribute('data-vista') === 'formulario'`, 7000)
-  await dormir(600)
-  return { vistas: await p.evaluate('window.__vistas') as string[], visto, pedidos: servidor.pedidos.length - antes }
+  // [L4] Éxito: el contacto se va y vuelven las dos soluciones; error: vuelve el formulario.
+  await esperar(p, modo === 'exito' ? `document.querySelector('${R} [data-parte="soluciones"]') !== null` : `document.querySelector('${R} [data-pieza="estado-de-envio"]')?.getAttribute('data-vista') === 'formulario'`, 7000)
+  await dormir(1200)
+  const desvio = await p.evaluate('window.__desvio') as number
+  return { vistas: await p.evaluate('window.__vistas') as string[], visto, pedidos: servidor.pedidos.length - antes, desvio }
 }
 
 async function envio(p: Page, ancho: number, alto: number, servicio: string): Promise<void> {
@@ -268,15 +313,22 @@ async function envio(p: Page, ancho: number, alto: number, servicio: string): Pr
   await p.locator('#recomendador-mensaje').fill(editado)
   const exito = await unEnvio(p, 'exito', '¡Recibido!')
   const cuerpo = servidor.pedidos[servidor.pedidos.length - 1] ?? {}
-  const despues = await p.evaluate(() => [(document.querySelector('#recomendador-nombre') as HTMLInputElement | null)?.value ?? '?', (document.querySelector('#recomendador-mensaje') as HTMLTextAreaElement | null)?.value ?? '?'])
+  // [L4] Después del éxito, la pantalla de los resultados (las dos soluciones, sin contacto), no el principio.
+  const volvio = await p.evaluate((r) => ({ fase: document.querySelector(r)?.getAttribute('data-fase') ?? '', elegida: document.querySelector(`${r} [data-pieza="resultado-del-recomendador"]`)?.getAttribute('data-elegida') ?? 'x', tarjetas: document.querySelectorAll(`${r} [data-pieza="tarjeta-de-solucion"]`).length, contacto: document.querySelector(`${r} [data-pieza="contacto-del-recomendador"]`) !== null }), R)
+  const enLosResultados = volvio.fase === 'resultado' && volvio.elegida === '' && volvio.tarjetas === 2 && !volvio.contacto
   const cuerpoBien = cuerpo.mensaje === editado && cuerpo.medio === 'banco@ejemplo.com' && JSON.stringify(cuerpo.intereses) === JSON.stringify(PRECARGA_POR_SERVICIO[servicio] ?? [])
-  const exitoBien = exito.visto && exito.pedidos === 1 && exito.vistas.join(',').includes('carga,exito') && cuerpoBien && despues[0] === '' && despues[1] === mensajeDelContacto(RESPUESTAS, ELEGIDA)
-  anotar(exitoBien, 'ENVIO (éxito)', ancho, `vistas ${exito.vistas.join(' → ')} · «¡Recibido!» ${exito.visto ? 'sí' : 'NO'} · ${String(exito.pedidos)} pedido · cuerpo ${cuerpoBien ? 'el editado, con el medio y los intereses del servicio' : JSON.stringify(cuerpo).slice(0, 120)} · vuelve ${despues[0] === '' ? 'vacío y precargado' : 'CON LO DE ANTES'}`)
+  const exitoBien = exito.visto && exito.pedidos === 1 && exito.vistas.join(',').includes('carga,exito') && cuerpoBien && enLosResultados
+  anotar(exitoBien, 'ENVIO (éxito)', ancho, `vistas ${exito.vistas.join(' → ')} · «¡Recibido!» ${exito.visto ? 'sí' : 'NO'} · ${String(exito.pedidos)} pedido · cuerpo ${cuerpoBien ? 'el editado, con el medio y los intereses del servicio' : JSON.stringify(cuerpo).slice(0, 120)} · después del envío ${enLosResultados ? 'vuelven los resultados (las dos soluciones)' : `NO volvió a los resultados (${JSON.stringify(volvio)})`}`)
+  await p.locator(`${R} [data-solucion="${ELEGIDA}"]`).first().click()
+  await esperar(p, "document.querySelector('#recomendador-nombre') !== null", 4000)
+  await dormir(900)
   await p.locator('#recomendador-nombre').fill('Banco de prueba')
   await p.locator('#recomendador-medio').fill('banco@ejemplo.com')
+  anotar(exito.desvio <= SALTO_MAXIMO_PX, 'ENVIO sin salto (éxito)', ancho, `la página se movió como mucho ${exito.desvio.toFixed(0)} px mientras se enviaba y volvía (tope ${String(SALTO_MAXIMO_PX)})`)
   const error = await unEnvio(p, 'error', 'Algo falló')
   const conLoEscrito = await p.evaluate(() => (document.querySelector('#recomendador-nombre') as HTMLInputElement | null)?.value === 'Banco de prueba')
   anotar(error.visto && error.pedidos === 1 && error.vistas.join(',').includes('carga,error') && conLoEscrito, 'ENVIO (error)', ancho, `vistas ${error.vistas.join(' → ')} · «Algo falló» ${error.visto ? 'sí' : 'NO'} · ${String(error.pedidos)} pedido · vuelve ${conLoEscrito ? 'con lo escrito' : 'SIN LO ESCRITO'}`)
+  anotar(error.desvio <= SALTO_MAXIMO_PX, 'ENVIO sin salto (error)', ancho, `desvío máximo ${error.desvio.toFixed(0)} px`)
   await foto(p, ancho, alto, '8-despues-del-envio')
 }
 

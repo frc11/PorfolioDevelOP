@@ -7,7 +7,8 @@ import { PREGUNTAS, recomendar, type IdDeSolucion, type Respuestas } from './log
  *   preguntas   tres etapas, una pregunta cada una. «Siguiente» sin respuesta marca la falta (y no avanza); «Atrás» vuelve una
  *               etapa y conserva lo respondido. En la última, «Siguiente» es «Ver mi recomendación» y pasa al procesando.
  *   procesando  el loader con sus tres líneas; al terminar (`procesado`), el resultado.
- *   resultado   las dos soluciones; `elegir` una (sólo A o B, y una sola vez) deja la otra afuera y abre el contacto.
+ *   resultado   las dos soluciones; `elegir` una (sólo A o B, y una sola vez) las cambia, en el mismo lugar, por el contacto; `volver` (lo
+ *               que pasa después de un envío) trae las dos soluciones de nuevo.
  *   `reiniciar` («Empezar de nuevo») vuelve al principio, vacío.
  */
 
@@ -30,6 +31,7 @@ export type AccionDelRecomendador =
   | { readonly tipo: 'atras' }
   | { readonly tipo: 'procesado' }
   | { readonly tipo: 'elegir'; readonly solucion: IdDeSolucion }
+  | { readonly tipo: 'volver' }
   | { readonly tipo: 'reiniciar' }
 
 /** Las tres respuestas, si están todas. */
@@ -61,6 +63,9 @@ export function avanzar(e: EstadoDelRecomendador, accion: AccionDelRecomendador)
       const { a, b } = recomendar(r)
       return accion.solucion === a || accion.solucion === b ? { ...e, elegida: accion.solucion } : e
     }
+    // [L4] Después de enviar: el contacto se va y vuelven las dos soluciones (las respuestas se conservan).
+    case 'volver':
+      return e.fase === 'resultado' && e.elegida !== null ? { ...e, elegida: null } : e
     case 'reiniciar':
       return INICIO_DEL_RECOMENDADOR
   }
