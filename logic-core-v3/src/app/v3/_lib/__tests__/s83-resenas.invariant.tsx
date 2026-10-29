@@ -382,7 +382,8 @@ const vuelta = unaVuelta()
 afirmar(enteras(vuelta), `ninguna tarjeta con opacidad < 1 en una vuelta entera (${String(vuelta.opacidades.length)} escrituras; las escondidas, con visibility)`)
 controlPositivo('el detector ve una tarjeta a medias (la de antes: la opacidad con el ángulo)', { opacidades: [...vuelta.opacidades, '0.500'] }, enteras)
 // [L5] La spec cambió (70: «se ve al revés la reseña cuando está pasando por atrás, en ese punto debe ser blanco nomás»): ninguna en la nuca.
-const sinNuca = (x: { readonly conTexto: number; readonly deEspaldas: number }): boolean => x.conTexto / 72 >= 2 && x.deEspaldas === 0
+// (Medido: 3,86 con texto por cuadro; el piso, cerca de eso.)
+const sinNuca = (x: { readonly conTexto: number; readonly deEspaldas: number }): boolean => x.conTexto / 72 >= 3.5 && x.deEspaldas === 0
 afirmar(sinNuca(vuelta), `con su texto: ${(vuelta.conTexto / 72).toFixed(1)} por cuadro, todas de frente; de espaldas, ${String(vuelta.deEspaldas)} (la nuca es papel liso)`)
 controlPositivo('el detector ve la nuca de antes (la reseña de una de atrás, C2-70)', { conTexto: vuelta.conTexto, deEspaldas: 3 }, sinNuca)
 // [L5] Ninguna tarjeta encima de una placa más cerca (lote2/09): en una vuelta, cada tarjeta visible no toca la caja de las de adelante.
@@ -428,6 +429,12 @@ const seVeCon = (delante: readonly ReturnType<typeof nuevaCaja>[] | undefined): 
 const resguarda = (conElResguardo: boolean): boolean => seVeCon([]) && !seVeCon(conElResguardo ? [cajaDeLaQueTapa] : undefined)
 afirmar(resguarda(true), 'con una placa más cerca cruzada delante de su borde, la tarjeta se esconde (sin ninguna delante, se ve)')
 controlPositivo('el detector ve la tarjeta de antes (sin mirar las de adelante: se pintaba encima)', false, resguarda)
+// [L5, revisión] La escena le pasa a cada tarjeta las cajas de las placas MÁS CERCA de la cámara (el segundo paso de `alCuadro`).
+const escenaDelAro = leer('_lib/escena/resenas/EscenaDeLasResenas.tsx')
+const pasaLasDeAdelante = (f: string): boolean => f.includes('if (conPlacas) for (const otra of s.cuadros) if (otra !== c && otra.distancia < c.distancia) s.delante.push(otra.caja)') && f.includes('delante: s.delante })')
+afirmar(pasaLasDeAdelante(escenaDelAro), '  la escena le pasa a cada tarjeta las cajas de las placas más cerca de la cámara')
+controlPositivo('  el detector ve la escena sin pasarlas', escenaDelAro.replace(', delante: s.delante })', ' })'), pasaLasDeAdelante)
+controlPositivo('  y la que pasa las de más lejos', escenaDelAro.replace('otra.distancia < c.distancia', 'otra.distancia > c.distancia'), pasaLasDeAdelante)
 const placaDePrueba = armarLasPlacas(new THREE.BufferGeometry())[0]
 const solidas = (u: readonly number[]): boolean =>
   u.every((n) => {

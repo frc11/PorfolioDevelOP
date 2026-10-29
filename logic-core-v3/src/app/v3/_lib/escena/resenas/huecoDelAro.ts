@@ -18,8 +18,6 @@ export const HUECO_DEL_ARO = {
   ancho: 0.62,
   /** [L5] Lo hondo del pozo (mundo, a escala 1): más que lo que bajan las placas (`HONDO_DE_LA_BAJADA`). */
   hondo: 3.6,
-  /** Lo oscuro del fondo (alfa de la tinta). */
-  fondo: 0.92,
 } as const
 
 const VERTICE = /* glsl */ `
@@ -35,14 +33,13 @@ const FRAGMENTO = /* glsl */ `
 uniform float uRadio;
 uniform float uAncho;
 uniform float uAbre;
-uniform float uFondo;
 uniform vec3 uColor;
 varying vec2 vXZ;
 void main() {
   float d = abs(length(vXZ) - uRadio);
   float medio = max(1e-4, 0.5 * uAncho * uAbre);
   if (d > medio) discard;
-  gl_FragColor = vec4(uColor, uFondo);
+  gl_FragColor = vec4(uColor, 1.0);
 }
 `
 
@@ -51,7 +48,7 @@ export interface HuecoArmado {
   readonly fondo: THREE.Mesh<THREE.RingGeometry, THREE.ShaderMaterial>
   readonly adentro: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshBasicMaterial>
   readonly afuera: THREE.Mesh<THREE.CylinderGeometry, THREE.MeshBasicMaterial>
-  readonly uniforms: { readonly uRadio: { value: number }; readonly uAncho: { value: number }; readonly uAbre: { value: number }; readonly uFondo: { value: number }; readonly uColor: { value: THREE.Color } }
+  readonly uniforms: { readonly uRadio: { value: number }; readonly uAncho: { value: number }; readonly uAbre: { value: number }; readonly uColor: { value: THREE.Color } }
   readonly radio: number
   readonly medio: number
 }
@@ -60,7 +57,7 @@ export interface HuecoArmado {
 export function armarElHueco(radio: number, k: number): HuecoArmado {
   const ancho = HUECO_DEL_ARO.ancho * k
   const hondo = HUECO_DEL_ARO.hondo * k
-  const uniforms = { uRadio: { value: radio }, uAncho: { value: ancho }, uAbre: { value: 0 }, uFondo: { value: HUECO_DEL_ARO.fondo }, uColor: { value: new THREE.Color(INK_COLOR) } }
+  const uniforms = { uRadio: { value: radio }, uAncho: { value: ancho }, uAbre: { value: 0 }, uColor: { value: new THREE.Color(INK_COLOR) } }
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTICE, fragmentShader: FRAGMENTO })
   const fondo = new THREE.Mesh(new THREE.RingGeometry(Math.max(0.01, radio - ancho), radio + ancho, 128, 1), material)
   fondo.rotation.x = -Math.PI / 2
