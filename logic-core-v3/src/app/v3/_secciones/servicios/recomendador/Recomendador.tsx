@@ -73,7 +73,7 @@ export function Recomendador(): React.JSX.Element {
         <EncabezadoDelRecomendador />
       </div>
       <Gatillo desde="abajo" className="min-w-0 escritorio:mt-[var(--tope-de-la-caja,0)] escritorio:self-start">
-        <div ref={cuerpo} data-parte="cuerpo-del-recomendador" className="rounded-[calc(var(--radius-fuerte)*1.6)] border border-borde bg-superficie-1 p-[var(--spacing-5)] escritorio:h-[var(--alto-del-recomendador,auto)] escritorio:p-[var(--spacing-12)] escritorio:transition-all escritorio:duration-[var(--duracion-media)] escritorio:ease-[var(--ease-salida)] motion-reduce:transition-none">
+        <div ref={cuerpo} data-parte="cuerpo-del-recomendador" className="rounded-[calc(var(--radius-fuerte)*1.6)] border border-borde bg-superficie-1 p-[var(--spacing-5)] escritorio:h-[var(--alto-del-recomendador,auto)] escritorio:p-[var(--spacing-12)] escritorio:overflow-clip escritorio:transition-all escritorio:duration-[var(--duracion-media)] escritorio:ease-[var(--ease-salida)] motion-reduce:transition-none">
           <div ref={interior}>
             <AnimatePresence mode="wait" initial={false}>
               {/* Sin las props de Motion hasta el primer gesto: el árbol servido no escribe una transformada (s10). */}

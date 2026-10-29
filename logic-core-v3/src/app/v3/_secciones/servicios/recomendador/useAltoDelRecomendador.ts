@@ -49,7 +49,8 @@ export function useAltoDelRecomendador(raiz: RefObject<HTMLElement | null>, caja
       // Sin contenido (el hueco entre el que se va y el que llega): se queda como está.
       if (!(contenido > 0)) return
       const total = contenido + alrededor()
-      if (enElPrimero.current) {
+      // Sólo el primer paso ya montado (con el resultado o el paso anterior saliendo, no se toma la base).
+      if (enElPrimero.current && i.querySelector('[data-etapa="0"]') !== null) {
         window.clearTimeout(espera)
         base = total
         poner(total)
