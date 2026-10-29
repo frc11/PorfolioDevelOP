@@ -139,3 +139,9 @@ export function cruceDelGatillo(antes: number, ahora: number): 'ida' | 'vuelta' 
 /** Cuándo sigue la ida (la cámara soltó el guardado: la animación de la bajada `t` pasó su `suelta`) y cuándo termina la vuelta (volvió a 0). */
 export const guardadoSuelto = (t: number): boolean => t >= C_G.suelta
 export const guardadoDeVuelta = (t: number): boolean => t <= 0.001
+
+/**
+ * [L8b · revisión] La secuencia se suelta si otro se lleva la página: un viaje del navbar, un vuelo pisado (Lenis con otra marca) o el scroll
+ * afuera del tramo (más de media pantalla antes de la lectura o después del CTA). Si no, una espera que vence la volvería a arrastrar.
+ */
+export const debeAbortar = (pantalla: number, conViaje: boolean, pisado: boolean): boolean => conViaje || pisado || pantalla < LUGARES_DEL_GATILLO.lectura - 0.5 || pantalla > LUGARES_DEL_GATILLO.cta + 0.5

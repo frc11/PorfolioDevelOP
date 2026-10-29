@@ -3,12 +3,12 @@
 import type { MotionValue } from 'motion/react'
 import { useEffect, type RefObject } from 'react'
 
-import { volar, vueloAjeno, type VueloDelGatillo } from '../../../_componentes/gatillos/vuelo'
+import { volar, vueloAjeno, vueloDelGatilloPisado, type VueloDelGatillo } from '../../../_componentes/gatillos/vuelo'
 import { hayBanco } from '../../../_lib/escena/entorno'
 import { viajeEnCurso } from '../../../_lib/escena/viaje'
 import { retenerLosGestos } from '../../../_lib/gestosDelScroll'
 import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
-import { GATILLO_HACIA_EL_CTA, LUGARES_DEL_GATILLO, cruceDelGatillo, guardadoDeVuelta, guardadoSuelto } from './haciaElCta'
+import { GATILLO_HACIA_EL_CTA, LUGARES_DEL_GATILLO, cruceDelGatillo, debeAbortar, guardadoDeVuelta, guardadoSuelto } from './haciaElCta'
 import { PIN_CON_LAS_RESENAS } from './tramo'
 
 /** Por dónde va la secuencia: quieta, volando o esperando al guardado. */
@@ -33,6 +33,8 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
     let soltarLosGestos: (() => void) | null = null
     let cola = false
     let vence = 0
+    let vivo = true
+    let dejarDeEsperar: (() => void) | null = null
     const pantalla = (): number => pin.get() * PIN_CON_LAS_RESENAS
     // El scroll de una pantalla del pin: el bloque se clava de su tope a su pie (`top top` → `bottom bottom`).
     const scrollDe = (s: number): number => {
@@ -52,33 +54,45 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
     }
     const terminar = (): void => {
       window.clearTimeout(vence)
+      dejarDeEsperar?.()
+      dejarDeEsperar = null
       etapa = 'quieta'
       antes = pantalla()
       cola = true
     }
+    // [revisión] Otro se llevó la página (un viaje del navbar, un ancla, la barra): la secuencia se suelta donde está, sin volver.
+    const abortar = (): void => {
+      const vuelo = enVuelo.current
+      enVuelo.current = null
+      vuelo?.cancelar()
+      terminar()
+      cola = false
+      soltarLosGestos?.()
+      soltarLosGestos = null
+    }
     const esperar = (listo: (t: number) => boolean, luego: () => void): void => {
-      const mirar = (): void => {
-        if (!listo(disparoDeLaBajada.get())) return
-        quitar()
+      const seguir = (): void => {
+        dejarDeEsperar?.()
+        dejarDeEsperar = null
         window.clearTimeout(vence)
-        luego()
+        if (vivo && etapa !== 'quieta') luego()
       }
-      const quitar = disparoDeLaBajada.on('change', mirar)
-      vence = window.setTimeout(() => {
-        quitar()
-        luego()
-      }, GATILLO_HACIA_EL_CTA.esperaMaximaMs)
+      const mirar = (): void => {
+        if (listo(disparoDeLaBajada.get())) seguir()
+      }
+      dejarDeEsperar = disparoDeLaBajada.on('change', mirar)
+      vence = window.setTimeout(seguir, GATILLO_HACIA_EL_CTA.esperaMaximaMs)
       mirar()
     }
     const ida = (): void => {
       etapa = 'al-guardado'
       retener()
       volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.guardado), GATILLO_HACIA_EL_CTA.vueloAlGuardadoMs, () => {
-        if (etapa !== 'al-guardado') return
+        if (!vivo || etapa !== 'al-guardado') return
         etapa = 'esperando-el-guardado'
         esperar(guardadoSuelto, () => {
           etapa = 'al-cta'
-          volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.cta), GATILLO_HACIA_EL_CTA.vueloAlCtaMs, terminar)
+          volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.cta), GATILLO_HACIA_EL_CTA.vueloAlCtaMs, () => vivo && etapa === 'al-cta' && terminar())
         })
       })
     }
@@ -86,7 +100,7 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
       etapa = 'de-vuelta'
       retener()
       volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.lectura), GATILLO_HACIA_EL_CTA.vueloDeVueltaMs, () => {
-        if (etapa !== 'de-vuelta') return
+        if (!vivo || etapa !== 'de-vuelta') return
         etapa = 'esperando-la-vuelta'
         esperar(guardadoDeVuelta, terminar)
       })
@@ -95,7 +109,12 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
       const ahora = pantalla()
       const previa = antes
       antes = ahora
-      if (etapa !== 'quieta' || previa === null) return
+      if (etapa !== 'quieta') {
+        const pisado = enVuelo.current !== null && vueloDelGatilloPisado(enVuelo.current, LENIS_DEL_SITIO.instancia)
+        if (debeAbortar(ahora, viajeEnCurso() !== null, pisado)) abortar()
+        return
+      }
+      if (previa === null) return
       const cruce = cruceDelGatillo(previa, ahora)
       if (cruce === null || viajeEnCurso() !== null || vueloAjeno(LENIS_DEL_SITIO.instancia, null)) return
       if (cruce === 'ida') ida()
@@ -105,10 +124,9 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
     const quitar = pin.on('change', alMoverse)
     if (hayBanco()) (window as VentanaDelBanco).__gatilloHaciaElCtaDelBanco = () => ({ etapa, pantalla: pantalla() })
     return () => {
+      vivo = false
       quitar()
-      window.clearTimeout(vence)
-      enVuelo.current?.cancelar()
-      soltarLosGestos?.()
+      abortar()
       delete (window as VentanaDelBanco).__gatilloHaciaElCtaDelBanco
     }
   }, [pin, raiz, disparoDeLaBajada])

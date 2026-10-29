@@ -51,33 +51,40 @@ interface Latido {
 /** Con el preloader en esta carga, su latido fue el de la primera entrada. */
 const conPreloader = (): boolean => decisionDeLaVentana() !== null
 
+/** La ruta de la carga y si ya hubo otra: la primera entrada es la de esa ruta antes de cualquier cambio (igual si el efecto corre dos veces). */
+const CARGA: { ruta: string | null; otra: boolean } = { ruta: null, otra: false }
+export function esLaPrimeraEntrada(ruta: string): boolean {
+  CARGA.ruta ??= ruta
+  if (ruta !== CARGA.ruta) CARGA.otra = true
+  return !CARGA.otra
+}
+
 const animar = (el: Element, a: Animacion): Animation => el.animate(a.cuadros as Keyframe[], { duration: a.duracion, delay: a.demora, fill: a.relleno, iterations: a.iteraciones ?? 1 })
 
 export function LatidoDeLaEntrada(): React.JSX.Element | null {
   const ruta = usePathname()
   const reducido = useMovimientoReducido()
   const [latido, setLatido] = useState<Latido | null>(null)
-  const primera = useRef(true)
   const ondas = useRef<{ escala: HTMLSpanElement | null; opacidad: HTMLSpanElement | null }[]>([{ escala: null, opacidad: null }, { escala: null, opacidad: null }])
 
   // Cuándo late: en cada entrada (la carga y cada ruta nueva), con el botón, la entrada abierta y la pestaña a la vista.
   useEffect(() => {
-    const esPrimera = primera.current
-    primera.current = false
+    const esPrimera = esLaPrimeraEntrada(ruta)
     if ((esPrimera && conPreloader()) || !window.matchMedia(`(min-width: ${String(LATIDO_DE_LA_ENTRADA.desdePx)}px)`).matches) return undefined
     const desde = performance.now()
     let reloj = 0
     let quitar: (() => void) | null = null
     const probar = (): void => {
-      quitar?.()
-      quitar = null
       const boton = document.querySelector(BOTON)
       const caja = boton?.getBoundingClientRect()
       if (performance.now() - desde > LATIDO_DE_LA_ENTRADA.esperaMaximaMs) return
+      // Una sola suscripción mientras la entrada está cerrada (sacarse y volver a sumarse adentro del aviso lo recorre sin fin).
       if (!entradaAbierta()) {
-        quitar = suscribirALaEntrada(probar)
+        quitar ??= suscribirALaEntrada(probar)
         return
       }
+      quitar?.()
+      quitar = null
       if (document.visibilityState !== 'visible' || caja === undefined || !(caja.width >= 1) || !(window.innerWidth > 0)) {
         reloj = window.setTimeout(probar, 200)
         return

@@ -12,9 +12,9 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import { animacionesDeLaEntrada, radioHastaLaEsquina } from '../../_chrome/sonido/LatidoDeLaEntrada'
+import { animacionesDeLaEntrada, esLaPrimeraEntrada, radioHastaLaEsquina } from '../../_chrome/sonido/LatidoDeLaEntrada'
 import { latidoDelBoton } from '../../_chrome/preloader/animaciones'
-import { LUGARES_DEL_GATILLO, cruceDelGatillo, guardadoDeVuelta, guardadoSuelto, pantallaDelCta } from '../../_secciones/por-que-develop/resenas/haciaElCta'
+import { LUGARES_DEL_GATILLO, cruceDelGatillo, debeAbortar, guardadoDeVuelta, guardadoSuelto, pantallaDelCta } from '../../_secciones/por-que-develop/resenas/haciaElCta'
 import { TAMANO_DEL_TITULO, TITULO_DE_ANTES_EM } from '../../_secciones/servicios/escenario/IntroDeServicios'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -38,6 +38,11 @@ const reducidoSutil = (f: DeLaEntrada): boolean => {
 afirmar(reducidoSutil(animacionesDeLaEntrada), 'con movimiento reducido: un solo pulso de opacidad, sin escala y sin onda')
 controlPositivo('  el detector ve la onda con movimiento reducido', ((r: boolean, e: number) => animacionesDeLaEntrada(false, e)) as DeLaEntrada, reducidoSutil)
 afirmar(Math.abs(radioHastaLaEsquina(56, 48, 1440, 900) - Math.hypot(1384, 852)) < 1e-9, 'la onda cubre el fondo: su radio llega a la esquina más lejana de la pantalla')
+// [revisión] La primera entrada no depende de cuántas veces corre el efecto (StrictMode lo corre dos veces con la misma ruta).
+const primeraEstable = (f: (r: string) => boolean): boolean => f('/v3') && f('/v3') && !f('/v3/pagina-base') && !f('/v3')
+afirmar(primeraEstable(esLaPrimeraEntrada), 'la primera entrada es la ruta de la carga aunque el efecto corra dos veces; después de otra ruta, ninguna lo es')
+let vecesDeLaRef = 0
+controlPositivo('  el detector ve la marca por efecto (la de antes: la segunda corrida perdía la guarda del preloader)', (): boolean => (vecesDeLaRef += 1) === 1, primeraEstable)
 const esquina = leer('_chrome/sonido/EsquinaDelSonido.tsx')
 const latido = leer('_chrome/sonido/LatidoDeLaEntrada.tsx')
 const cableado = (e: string, l: string): boolean => e.includes('<LatidoDeLaEntrada />') && l.includes('(esPrimera && conPreloader())') && l.includes('LATIDO_DE_LA_ENTRADA.desdePx') && l.includes('}, [ruta])') && l.includes("document.visibilityState !== 'visible'")
@@ -78,10 +83,14 @@ controlPositivo('  el detector ve un gatillo sin vuelta (la de antes: sigue al s
 const cerca = (a: number, b: number): boolean => Math.abs(a - b) < 1e-9
 afirmar(cerca(LUGARES_DEL_GATILLO.lectura, 6) && cerca(pantallaDelCta(0), 6.6) && cerca(pantallaDelCta(1), 9.6) && cerca(LUGARES_DEL_GATILLO.guardado, 6.78) && cerca(LUGARES_DEL_GATILLO.cta, 9.63), 'los lugares en pantallas del pin: la lectura termina en 6, la transformación va de 6,6 a 9,6; la ida se para en 6,78 (pasado el disparo) y termina en 9,63')
 afirmar(guardadoSuelto(0.83) && !guardadoSuelto(0.8) && guardadoDeVuelta(0) && !guardadoDeVuelta(0.2), 'la ida sigue cuando la cámara soltó el guardado; la vuelta termina con el guardado en 0')
+type Abortar = typeof debeAbortar
+const aborta = (f: Abortar): boolean => f(7, true, false) && f(7, false, true) && f(5, false, false) && f(10.5, false, false) && !f(6, false, false) && !f(9.63, false, false) && !f(7.5, false, false)
+afirmar(aborta(debeAbortar), '[revisión] la secuencia se suelta con un viaje del navbar, con su vuelo pisado o con el scroll afuera del tramo; adentro, sigue')
+controlPositivo('  el detector ve una secuencia que nunca se suelta (la de antes)', ((): boolean => false) as Abortar, aborta)
 const tramo = leer('_secciones/por-que-develop/resenas/useTramoDeLasResenas.ts')
 const gatillo = leer('_secciones/por-que-develop/resenas/useGatilloHaciaElCta.ts')
 const cableadoDelGatillo = (t: string, g: string): boolean =>
-  t.includes('useGatilloHaciaElCta(pin, raiz, disparoDeLaBajada)') && g.includes('viajeEnCurso() !== null') && g.includes('retenerLosGestos(') && g.includes('esperar(guardadoSuelto') && g.includes('esperar(guardadoDeVuelta') && g.includes('if (cola && !g.nuevo) return true')
+  t.includes('useGatilloHaciaElCta(pin, raiz, disparoDeLaBajada)') && g.includes('viajeEnCurso() !== null') && g.includes('retenerLosGestos(') && g.includes('esperar(guardadoSuelto') && g.includes('esperar(guardadoDeVuelta') && g.includes('if (cola && !g.nuevo) return true') && g.includes('if (debeAbortar(ahora, viajeEnCurso() !== null, pisado)) abortar()') && g.includes('vivo = false')
 afirmar(cableadoDelGatillo(tramo, gatillo), 'el tramo lo usa; no arranca con un viaje del navbar; retiene los gestos y la cola del que disparó; espera al guardado en la ida y en la vuelta')
 controlPositivo('  el detector ve el tramo sin el gatillo', [tramo.replace('useGatilloHaciaElCta(pin, raiz, disparoDeLaBajada)', ''), gatillo] as const, ([t, g]) => cableadoDelGatillo(t, g))
 controlPositivo('  el detector ve la cola del gesto suelta', [tramo, gatillo.replace('if (cola && !g.nuevo) return true', '')] as const, ([t, g]) => cableadoDelGatillo(t, g))
