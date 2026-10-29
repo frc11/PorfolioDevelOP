@@ -25,11 +25,18 @@ import { TituloQueSePintaAlLlegar } from './TituloQueSePintaAlLlegar'
  *     (más alto que ancho), centrado en el bloque.
  * El tamaño del título: `--divisor-del-titulo` y `--tope-del-titulo` (los nombres del Panel), uno por rama.
  *
+ * [L8b · 2] Escritorio: el título baja y se apoya justo arriba de la bajada, más grande (`escritorioGrande`). El aro, la bajada y el aviso
+ * quedan donde estaban: la caja del aro ya no se mide contra el título sino contra el tamaño de antes (`TITULO_DE_ANTES_EM`: lo que medía el
+ * título en em, a 1440/1366/1280/1024), y el título va afuera del flujo, colgado del tope de la bajada.
+ *
  * `data-caja-del-titulo` marca lo que el truco de profundidad tiene que esquivar: las cajas de los renglones y de la bajada.
  */
 
 /** [L3] El título por rama: el ancho de la entrada sobre `divisor`, con tope en `tope` svh. */
-export const TAMANO_DEL_TITULO = { escritorio: { divisor: 11, tope: 12.5 }, telefono: { divisor: 5.2, tope: 9 } } as const
+export const TAMANO_DEL_TITULO = { escritorio: { divisor: 11, tope: 12.5 }, escritorioGrande: { divisor: 8.2, tope: 16 }, telefono: { divisor: 5.2, tope: 9 } } as const
+
+/** [L8b] El título de antes (el de `escritorio`), en em de su letra: su ancho y su alto (medidos en el build). Arman la caja del aro sin él. */
+export const TITULO_DE_ANTES_EM = { ancho: 7.32, alto: 0.9, subidaDelAro: 0.45 } as const
 
 /** [L3] El aro de escritorio: su ancho sobre el del título y su proporción (ancho / alto); el del teléfono, vertical. */
 export const ARO_DE_LA_ENTRADA = { escritorio: { ancho: 1.12, proporcion: 3 }, telefono: { ancho: 1.08, proporcion: 0.7, enTitulos: 5.4, minimoRem: 20, minimoTopeVw: 100 } } as const
@@ -45,6 +52,10 @@ const VARIABLES = {
   '--tope-del-titulo-telefono': `${String(T.telefono.tope)}svh`,
   '--divisor-del-titulo-escritorio': String(T.escritorio.divisor),
   '--tope-del-titulo-escritorio': `${String(T.escritorio.tope)}svh`,
+  '--divisor-del-titulo-grande': String(T.escritorioGrande.divisor),
+  '--tope-del-titulo-grande': `${String(T.escritorioGrande.tope)}svh`,
+  '--titulo-de-antes-em': String(TITULO_DE_ANTES_EM.ancho),
+  '--bajada-del-aro-em': String(TITULO_DE_ANTES_EM.alto - TITULO_DE_ANTES_EM.subidaDelAro),
   '--ancho-del-aro': String(A.escritorio.ancho),
   '--proporcion-del-aro': String(A.escritorio.proporcion),
   '--ancho-del-aro-telefono': String(A.telefono.ancho),
@@ -74,16 +85,22 @@ export function IntroDeServicios({ progreso, aviso, className }: { readonly prog
     <div data-pieza="entrada-de-servicios" className={`${TAMANO} ${className ?? ''}`} style={VARIABLES}>
       <CanalDeUnaPieza progreso={progreso} patron="P2" className="@container relative flex w-full flex-col items-center gap-[var(--spacing-6)] text-center">
         <div className="flex w-full flex-col items-center gap-[var(--spacing-4)] escritorio:relative escritorio:mb-[var(--spacing-4)] escritorio:w-fit escritorio:max-w-full escritorio:gap-0">
-          <TituloQueSePintaAlLlegar renglones={RENGLONES_DEL_TITULO} progreso={progreso} id={idDelTitularDeSeccion('servicios')} className="relative z-10 escritorio:whitespace-nowrap" claseDelRenglon="block whitespace-nowrap escritorio:inline" />
-          {/* El aro: en escritorio, una caja en el flujo (sube hasta la mitad del título y centra la bajada); en el teléfono no arma caja y el
-              lugar se mide contra el bloque entero (centrado, vertical). */}
-          <div className="max-escritorio:contents escritorio:relative escritorio:-mt-[calc(min(100cqw/var(--divisor-del-titulo),var(--tope-del-titulo))*0.45)] escritorio:flex escritorio:aspect-[var(--proporcion-del-aro)] escritorio:w-[calc(var(--ancho-del-aro)*100%)] escritorio:shrink-0 escritorio:items-center escritorio:justify-center">
+          {/* El aro: en escritorio, una caja en el flujo (del tamaño y en el lugar de antes: el título de antes en em) que centra la bajada; en el
+              teléfono no arma caja y el lugar se mide contra el bloque entero (centrado, vertical). */}
+          <div className="max-escritorio:contents escritorio:relative escritorio:mt-[calc(min(100cqw/var(--divisor-del-titulo),var(--tope-del-titulo))*var(--bajada-del-aro-em))] escritorio:flex escritorio:aspect-[var(--proporcion-del-aro)] escritorio:w-[calc(min(100cqw/var(--divisor-del-titulo),var(--tope-del-titulo))*var(--titulo-de-antes-em)*var(--ancho-del-aro))] escritorio:shrink-0 escritorio:items-center escritorio:justify-center">
             {/* En el teléfono el aro se centra en todo el bloque (título, bajada y aviso): el aviso queda adentro, sin tocarlo. */}
             <div aria-hidden="true" data-lugar-de-los-nanobots={0} className={`pointer-events-none absolute escritorio:inset-0 ${ARO_DEL_TELEFONO}`} />
-            {/* La bajada del teléfono: lo más grande que entra en dos renglones (el ancho sobre el largo de medio texto, en em), con tope. */}
-            <p className="font-cuerpo leading-texto text-tinta max-escritorio:text-balance max-escritorio:text-[length:max(var(--text-fluido-titulo-m),min(100cqw/var(--em-de-media-bajada),calc(var(--text-fluido-titulo-l)*1.15)))] escritorio:whitespace-nowrap escritorio:text-[length:calc(var(--text-fluido-titulo-m)*0.78)]">
-              <span data-caja-del-titulo="">{SUBTITULO}</span>
-            </p>
+            {/* [L8b] En escritorio el título cuelga del tope de la bajada (afuera del flujo, centrado aunque pase el ancho del aro); en el teléfono
+                las dos cajas son `contents` y el orden es el de antes (el título, la bajada). */}
+            <div className="max-escritorio:contents escritorio:relative">
+              <div className="max-escritorio:contents escritorio:absolute escritorio:inset-x-0 escritorio:bottom-full escritorio:mb-[var(--spacing-2)] escritorio:flex escritorio:justify-center escritorio:[--divisor-del-titulo:var(--divisor-del-titulo-grande)] escritorio:[--tope-del-titulo:var(--tope-del-titulo-grande)]">
+                <TituloQueSePintaAlLlegar renglones={RENGLONES_DEL_TITULO} progreso={progreso} id={idDelTitularDeSeccion('servicios')} className="relative z-10 escritorio:whitespace-nowrap" claseDelRenglon="block whitespace-nowrap escritorio:inline" />
+              </div>
+              {/* La bajada del teléfono: lo más grande que entra en dos renglones (el ancho sobre el largo de medio texto, en em), con tope. */}
+              <p className="font-cuerpo leading-texto text-tinta max-escritorio:text-balance max-escritorio:text-[length:max(var(--text-fluido-titulo-m),min(100cqw/var(--em-de-media-bajada),calc(var(--text-fluido-titulo-l)*1.15)))] escritorio:whitespace-nowrap escritorio:text-[length:calc(var(--text-fluido-titulo-m)*0.78)]">
+                <span data-caja-del-titulo="">{SUBTITULO}</span>
+              </p>
+            </div>
           </div>
         </div>
         {aviso === null ? null : <AvisoDeScroll texto={aviso} />}

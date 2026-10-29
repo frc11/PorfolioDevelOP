@@ -15,6 +15,7 @@ import { TITULOS_DE_VOLUMEN } from '../../../_lib/titulos3d/registro'
 import { VENTANA_DE_LA_TRANSFORMACION } from '../geometria'
 import { estiloDeLaIda, idaDelValor } from './disolucion'
 import { HACIA_EL_CTA, aperturaDelHueco, bajadaDeLasResenas, cruceDeLaVuelta, esperaDelCta, objetivoDeLaBajada, pesoDeLaCamara, progresoDelGatillo } from './haciaElCta'
+import { useGatilloHaciaElCta } from './useGatilloHaciaElCta'
 import { ESPACIO_ENTRE_LAS_MITADES_EM, GATILLO, TITULOS_DE_LAS_RESENAS, angulosDelGiro, avanceDeLasResenas, controlDeLaBandera, corrimientoConElGiro, corrimientosAlCentro, estadoDelAvance, objetivoDelGatillo, pinSinLasResenas, tramoDeLasResenas, varianteDeLaBandera, type VarianteDeLasResenas } from './tramo'
 
 const sinCambios = (): (() => void) => () => undefined
@@ -199,6 +200,9 @@ export function useTramoDeLasResenas(pin: MotionValue<number>, raiz: RefObject<H
       for (const id of [...TITULOS_DE_LAS_RESENAS, ...FRASE_DE_VOLUMEN]) CORRIMIENTOS_DE_LOS_TITULOS.delete(id)
     }
   }, [avance, disparo, disparoDeLaBajada, giro, pin, raiz, variante])
+
+  // [L8b · 3] Y el paso al CTA es UN gatillo entero (ida y vuelta), con la página que vuela sola.
+  useGatilloHaciaElCta(pin, raiz, disparoDeLaBajada)
 
   // REGLA DE ALTURAS: la escena no ve el tramo (lo ve como `LARGO_SIN_ESTIRAR_PX` de la regla).
   useEffect(() => {

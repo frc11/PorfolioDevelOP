@@ -15,6 +15,7 @@ import { IntroDeServicios, PasarElProgreso } from './IntroDeServicios'
 import { PanelDeServicio } from './PanelDeServicio'
 import { CANDADO_DE_SERVICIOS_MS, DURACION_DE_LA_TRANSICION_MS } from './tiempos'
 import { SIN_CAMBIO, useCoreografiaDelEscenario, usePosicionDelEscenario, type CambioDeCapa } from './useCoreografiaDelEscenario'
+import { useCalentarLosDestinos } from './useCalentarLosDestinos'
 import { useFuentesDelServicio } from './useFuentesDelServicio'
 import { useNanobotsDelEscenario } from './useNanobotsDelEscenario'
 
@@ -58,6 +59,8 @@ export function EscenarioDeServicios({ telefono }: { readonly telefono: boolean 
   const colorDelAro = useColorDelAro()
   useCoreografiaDelEscenario(escenario, lienzo, posicion, cambio, `${fuentes.claseDeLaCursiva}|${fuentes.cursiva}`)
   useNanobotsDelEscenario({ escenario, lienzo, posicion, reducido, puntos: telefono ? PUNTOS_DEL_ENJAMBRE.angosto : PUNTOS_DEL_ENJAMBRE.ancho, cambio, colorDelAro })
+  // [L8b · 4] Las páginas de los servicios, calentadas con la entrada a la vista (no en el cuadro del primer paso). El teléfono no cambia.
+  useCalentarLosDestinos(escenario, !telefono)
   const [progresoDelTitulo, setProgresoDelTitulo] = useState<MotionValue<number> | null>(null)
   const pasar = useCallback((p: MotionValue<number> | null) => setProgresoDelTitulo(p), [])
   const angulo = { '--tangente-de-la-diagonal': tangenteDe(diagonal).toFixed(4) } as CSSProperties

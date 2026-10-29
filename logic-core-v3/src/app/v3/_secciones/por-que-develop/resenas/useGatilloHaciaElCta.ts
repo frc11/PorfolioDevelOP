@@ -1,0 +1,115 @@
+'use client'
+
+import type { MotionValue } from 'motion/react'
+import { useEffect, type RefObject } from 'react'
+
+import { volar, vueloAjeno, type VueloDelGatillo } from '../../../_componentes/gatillos/vuelo'
+import { hayBanco } from '../../../_lib/escena/entorno'
+import { viajeEnCurso } from '../../../_lib/escena/viaje'
+import { retenerLosGestos } from '../../../_lib/gestosDelScroll'
+import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
+import { GATILLO_HACIA_EL_CTA, LUGARES_DEL_GATILLO, cruceDelGatillo, guardadoDeVuelta, guardadoSuelto } from './haciaElCta'
+import { PIN_CON_LAS_RESENAS } from './tramo'
+
+/** Por dónde va la secuencia: quieta, volando o esperando al guardado. */
+type Etapa = 'quieta' | 'al-guardado' | 'esperando-el-guardado' | 'al-cta' | 'de-vuelta' | 'esperando-la-vuelta'
+
+/** Con banco, `__defectoDelGatilloHaciaElCta = 'apagado'` lo apaga (el control: el paso de antes, que sigue al scroll). */
+type VentanaDelBanco = Window & { __gatilloHaciaElCtaDelBanco?: () => { readonly etapa: Etapa; readonly pantalla: number }; __defectoDelGatilloHaciaElCta?: string }
+
+/**
+ * [L8b · 3] EL GATILLO ENTERO DE LAS RESEÑAS AL CTA, del lado del DOM (la parte pura y sus lugares, `haciaElCta.ts`): mira el pin del bloque
+ * y, cuando el scroll cruza un borde del tramo, lleva la página sola de un lado al otro (`volar`, con Lenis), esperando al guardado donde
+ * corresponde (`disparoDeLaBajada`, la animación por tiempo del guardado). Mientras dura retiene todos los gestos, y al terminar retiene el
+ * resto del gesto que la disparó (la inercia) hasta que empieza otro. No arranca con un viaje del navbar ni con el vuelo de otra sección.
+ */
+export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<HTMLElement | null>, disparoDeLaBajada: MotionValue<number>): void {
+  useEffect(() => {
+    const bloque = raiz.current?.closest('[data-pieza="escenario-del-final"]')?.parentElement ?? null
+    if (bloque === null || (hayBanco() && (window as VentanaDelBanco).__defectoDelGatilloHaciaElCta === 'apagado')) return undefined
+    let etapa: Etapa = 'quieta'
+    let antes: number | null = null
+    const enVuelo: { current: VueloDelGatillo | null } = { current: null }
+    let soltarLosGestos: (() => void) | null = null
+    let cola = false
+    let vence = 0
+    const pantalla = (): number => pin.get() * PIN_CON_LAS_RESENAS
+    // El scroll de una pantalla del pin: el bloque se clava de su tope a su pie (`top top` → `bottom bottom`).
+    const scrollDe = (s: number): number => {
+      const tope = bloque.getBoundingClientRect().top + window.scrollY
+      return tope + (s / PIN_CON_LAS_RESENAS) * (bloque.offsetHeight - window.innerHeight)
+    }
+    const retener = (): void => {
+      soltarLosGestos ??= retenerLosGestos((g) => {
+        if (etapa !== 'quieta') return true
+        // La cola del gesto que disparó (la inercia del trackpad, la rueda que sigue): hasta que empieza otro.
+        if (cola && !g.nuevo) return true
+        cola = false
+        soltarLosGestos?.()
+        soltarLosGestos = null
+        return false
+      })
+    }
+    const terminar = (): void => {
+      window.clearTimeout(vence)
+      etapa = 'quieta'
+      antes = pantalla()
+      cola = true
+    }
+    const esperar = (listo: (t: number) => boolean, luego: () => void): void => {
+      const mirar = (): void => {
+        if (!listo(disparoDeLaBajada.get())) return
+        quitar()
+        window.clearTimeout(vence)
+        luego()
+      }
+      const quitar = disparoDeLaBajada.on('change', mirar)
+      vence = window.setTimeout(() => {
+        quitar()
+        luego()
+      }, GATILLO_HACIA_EL_CTA.esperaMaximaMs)
+      mirar()
+    }
+    const ida = (): void => {
+      etapa = 'al-guardado'
+      retener()
+      volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.guardado), GATILLO_HACIA_EL_CTA.vueloAlGuardadoMs, () => {
+        if (etapa !== 'al-guardado') return
+        etapa = 'esperando-el-guardado'
+        esperar(guardadoSuelto, () => {
+          etapa = 'al-cta'
+          volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.cta), GATILLO_HACIA_EL_CTA.vueloAlCtaMs, terminar)
+        })
+      })
+    }
+    const vuelta = (): void => {
+      etapa = 'de-vuelta'
+      retener()
+      volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.lectura), GATILLO_HACIA_EL_CTA.vueloDeVueltaMs, () => {
+        if (etapa !== 'de-vuelta') return
+        etapa = 'esperando-la-vuelta'
+        esperar(guardadoDeVuelta, terminar)
+      })
+    }
+    const alMoverse = (): void => {
+      const ahora = pantalla()
+      const previa = antes
+      antes = ahora
+      if (etapa !== 'quieta' || previa === null) return
+      const cruce = cruceDelGatillo(previa, ahora)
+      if (cruce === null || viajeEnCurso() !== null || vueloAjeno(LENIS_DEL_SITIO.instancia, null)) return
+      if (cruce === 'ida') ida()
+      else vuelta()
+    }
+    antes = pantalla()
+    const quitar = pin.on('change', alMoverse)
+    if (hayBanco()) (window as VentanaDelBanco).__gatilloHaciaElCtaDelBanco = () => ({ etapa, pantalla: pantalla() })
+    return () => {
+      quitar()
+      window.clearTimeout(vence)
+      enVuelo.current?.cancelar()
+      soltarLosGestos?.()
+      delete (window as VentanaDelBanco).__gatilloHaciaElCtaDelBanco
+    }
+  }, [pin, raiz, disparoDeLaBajada])
+}

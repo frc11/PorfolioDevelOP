@@ -22,7 +22,8 @@ export const TITULOS_DE_LAS_RESENAS = ['resenas-izquierda', 'resenas-derecha'] a
 export const INSERCION_DE_LAS_RESENAS = 2.5
 
 const PIN_DE_SIEMPRE = PANTALLAS_DE_POR_QUE_DEVELOP - 1
-const PIN_CON_LAS_RESENAS = PIN_DE_SIEMPRE + PANTALLAS_DE_LAS_RESENAS
+/** Las pantallas del pin del bloque con el tramo adentro ([L8b] el gatillo hacia el CTA mide en ellas). */
+export const PIN_CON_LAS_RESENAS = PIN_DE_SIEMPRE + PANTALLAS_DE_LAS_RESENAS
 
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
 const tramo = (x: number, desde: number, dura: number): number => acotar01((x - desde) / dura)

@@ -8,6 +8,8 @@
  */
 
 import { TRANSFORMACION } from '../../../_lib/escena/ctaDelFinal/transformacion'
+import { TIEMPOS_DEL_FINAL } from '../../../_lib/escena/finalDelRecorrido'
+import { INSERCION_DE_LAS_RESENAS, MOMENTOS_DE_LAS_RESENAS, PANTALLAS_DE_LAS_RESENAS } from './tramo'
 
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
 const tramo = (x: number, desde: number, dura: number): number => acotar01((x - desde) / dura)
@@ -101,3 +103,39 @@ export function cruceDeLaVuelta(antes: number, ahora: number): 'ida' | 'vuelta' 
   if (antes >= VUELTA_DEL_CTA && ahora < VUELTA_DEL_CTA) return 'vuelta'
   return null
 }
+
+/**
+ * [L8b · 3] RESEÑAS → CTA, UN SOLO GATILLO — hasta acá el guardado era un gatillo pero la transformación al CTA seguía al scroll: un gesto
+ * corto dejaba el CTA a medio camino. Ahora el paso entero es UN gatillo, en pantallas del pin del bloque (`PIN_CON_LAS_RESENAS`):
+ *   · **ida:** el scroll cruza el fin de la lectura bajando (`lectura` + `umbral`) → un vuelo corto hasta `guardado` (la transformación en
+ *     `previo`, pasado el disparo del guardado), espera a que la cámara suelte el guardado (`C_G.suelta`) y vuela al CTA armado (`cta`);
+ *   · **vuelta:** el scroll cruza el CTA armado subiendo → vuela al fin de la lectura y espera a que las reseñas vuelvan a subir (el guardado
+ *     al revés, que se dispara en el camino).
+ * Mientras dura, los gestos se retienen (`useGatilloHaciaElCta`). Un salto que cruza el tramo entero (el foco que lleva al CTA, la barra) no
+ * es un cruce: el gatillo sólo mira lo que entra en el tramo desde su borde.
+ */
+export const GATILLO_HACIA_EL_CTA = { umbral: 0.02, previo: 0.06, llegada: 0.03, vueloAlGuardadoMs: 700, vueloAlCtaMs: 2400, vueloDeVueltaMs: 2600, esperaMaximaMs: 6000 } as const
+
+/** Las pantallas del pin (con el tramo) en que la transformación al CTA vale `p` (0 a 1): el tramo de las reseñas va antes. */
+export const pantallaDelCta = (p: number): number => TIEMPOS_DEL_FINAL.valores.hasta + p * (TIEMPOS_DEL_FINAL.cta.armado - TIEMPOS_DEL_FINAL.valores.hasta) + PANTALLAS_DE_LAS_RESENAS
+
+/** Los tres lugares del gatillo, en pantallas del pin: el fin de la lectura, el guardado disparado y el CTA armado (con su margen). */
+export const LUGARES_DEL_GATILLO = {
+  lectura: INSERCION_DE_LAS_RESENAS + MOMENTOS_DE_LAS_RESENAS.lectura[1] * PANTALLAS_DE_LAS_RESENAS,
+  guardado: pantallaDelCta(GATILLO_HACIA_EL_CTA.previo),
+  cta: pantallaDelCta(1) + GATILLO_HACIA_EL_CTA.llegada,
+} as const
+
+/** El cruce de un borde del tramo entre dos lecturas del scroll (pantallas del pin): `ida` (entró bajando por la lectura), `vuelta` (entró subiendo por el CTA) o `null`. */
+export function cruceDelGatillo(antes: number, ahora: number): 'ida' | 'vuelta' | null {
+  const { umbral } = GATILLO_HACIA_EL_CTA
+  const desde = LUGARES_DEL_GATILLO.lectura + umbral
+  const hasta = pantallaDelCta(1) - umbral
+  if (antes <= desde && ahora > desde && ahora < hasta) return 'ida'
+  if (antes >= hasta && ahora < hasta && ahora > desde) return 'vuelta'
+  return null
+}
+
+/** Cuándo sigue la ida (la cámara soltó el guardado: la animación de la bajada `t` pasó su `suelta`) y cuándo termina la vuelta (volvió a 0). */
+export const guardadoSuelto = (t: number): boolean => t >= C_G.suelta
+export const guardadoDeVuelta = (t: number): boolean => t <= 0.001
