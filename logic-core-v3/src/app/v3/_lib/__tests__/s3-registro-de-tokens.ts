@@ -249,6 +249,7 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
   { nombre: '--reluciente-franja-del-texto', valor: 'linear-gradient(105deg, currentColor 42%, var(--reluciente-luz) 50%, currentColor 58%)', evidencia: 'decidido', procedencia: 'las letras pintadas con su tinta y la franja clara en el medio del degradé (que mide tres veces el texto: en los extremos, sólo tinta)' },
   { nombre: '--reluciente-franja-viva-del-texto', valor: 'linear-gradient(105deg, currentColor 38%, white 50%, currentColor 62%)', evidencia: 'decidido', procedencia: 'con el mouse o el foco encima: la franja más ancha y blanca entera (se intensifica)' },
   { nombre: '--reluciente-tamano', valor: '300% 100%', evidencia: 'derivado', procedencia: 'el degradé del texto mide tres veces su caja: con la posición en un extremo se ve sólo tinta y en el medio, la franja' },
+  { nombre: '--reluciente-franja-del-texto-solo', valor: 'linear-gradient(105deg, transparent 40%, white 50%, transparent 60%)', evidencia: 'decidido', procedencia: '[L9a] la luz de HABLANOS sola, recortada a sus letras: transparente salvo la franja blanca (el texto de abajo, o sus letras 3D, no se pintan)' },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

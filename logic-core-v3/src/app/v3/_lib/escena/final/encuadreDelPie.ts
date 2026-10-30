@@ -27,7 +27,7 @@ export interface EncuadreEnPantalla {
   readonly cy: number
   readonly ancho: number
   /** Dónde quedó: en un hueco entre los elementos, detrás del texto chico, o detrás del vidrio. */
-  readonly donde: 'hueco' | 'texto' | 'vidrio' | 'centro'
+  readonly donde: 'hueco' | 'texto' | 'vidrio' | 'centro' | 'arriba'
 }
 
 export const ENCUADRE_DEL_PIE = {
@@ -127,6 +127,21 @@ export function encuadreEntreLasCajas(vista: { readonly ancho: number; readonly 
   return { cx: vista.ancho / 2, cy: vista.alto / 2, ancho: enElVidrio, donde: 'centro' }
 }
 
+/**
+ * [L9a] EN EL TELÉFONO (< 768), EL LOGO ARRIBA AL CENTRO: el pie deja arriba una reserva (`Cierre.tsx`) y el logo va centrado en la franja entre lo fijo de
+ * arriba (la barra y los controles) y el primer elemento del pie, del tamaño que esa franja deja (con tope de la mitad del ancho).
+ */
+export const ANCHO_DEL_TELEFONO = 768
+export function encuadreArribaAlCentro(vista: { readonly ancho: number; readonly alto: number }, contenido: readonly Caja[], fijas: readonly Caja[], huella: { readonly ancho: number; readonly fondo: number }): EncuadreEnPantalla | null {
+  const E = ENCUADRE_DEL_PIE
+  const techo = Math.max(0, ...fijas.filter((c) => c.y < vista.alto / 4).map((c) => c.y + c.alto)) + E.aire
+  const piso = Math.min(...contenido.map((c) => c.y)) - E.borde
+  const alto = piso - techo
+  if (!Number.isFinite(alto) || alto <= 0) return null
+  const ancho = Math.min(alto * (huella.ancho / huella.fondo), vista.ancho * E.maximo * 0.8)
+  return { cx: vista.ancho / 2, cy: techo + alto / 2, ancho, donde: 'arriba' }
+}
+
 /** Lo que el pie tiene encima de la escena (el texto, los enlaces, los campos, los íconos) y lo pesado (el titular). */
 const LO_QUE_TAPA = 'h2, p, a, label, input, textarea, button, select'
 const LO_PESADO = 'h2'
@@ -165,7 +180,13 @@ export function medirElEncuadreDelPie(huella: { readonly ancho: number; readonly
     ocupadas.push({ x: r.left, y: r.top, ancho: r.width, alto: r.height })
     pesadas.push({ x: r.left, y: r.top, ancho: r.width, alto: r.height })
   }
-  const valor = encuadreEntreLasCajas(vista, ocupadas, pesadas, vidrio, huella)
+  const fijas: Caja[] = []
+  for (const e of document.querySelectorAll(LO_FIJO)) {
+    const r = e.getBoundingClientRect()
+    if (r.width > 1 && r.height > 1) fijas.push({ x: r.left, y: r.top, ancho: r.width, alto: r.height })
+  }
+  const contenido = ocupadas.filter((c) => !fijas.some((f) => f.x === c.x && f.y === c.y && f.ancho === c.ancho && f.alto === c.alto))
+  const valor = (vista.ancho < ANCHO_DEL_TELEFONO ? encuadreArribaAlCentro(vista, contenido, fijas, huella) : null) ?? encuadreEntreLasCajas(vista, ocupadas, pesadas, vidrio, huella)
   ENCUADRE_EN_VIVO.valor = valor
   ENCUADRE_EN_VIVO.vista = vista
   return valor

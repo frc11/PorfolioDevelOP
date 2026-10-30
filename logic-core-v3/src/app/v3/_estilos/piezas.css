@@ -99,6 +99,8 @@
   --reluciente-ciclo-vivo: 1400ms;
   --reluciente-desde: -100%;
   --reluciente-hasta: 100%;
+  --reluciente-tamano: 300% 100%;
+  --reluciente-franja-del-texto-solo: linear-gradient(105deg, transparent 40%, white 50%, transparent 60%);
 }
 
 [data-v3] [data-reluciente='caja'] {
@@ -131,7 +133,6 @@
   --reluciente-luz: color-mix(in srgb, white 70%, currentColor);
   --reluciente-franja-del-texto: linear-gradient(105deg, currentColor 42%, var(--reluciente-luz) 50%, currentColor 58%);
   --reluciente-franja-viva-del-texto: linear-gradient(105deg, currentColor 38%, white 50%, currentColor 62%);
-  --reluciente-tamano: 300% 100%;
   background-image: var(--reluciente-franja-del-texto);
   background-size: var(--reluciente-tamano);
   background-position: right center;
@@ -145,6 +146,28 @@
 [data-v3] [data-reluciente='texto']:hover,
 [data-v3] :is(a, button):is(:hover, :focus-visible) [data-reluciente='texto'] {
   background-image: var(--reluciente-franja-viva-del-texto);
+  animation-name: reluciente-texto-vivo;
+  animation-duration: var(--reluciente-ciclo-vivo);
+}
+
+/* [L9a] La luz sola, recortada a las letras: el degradé es transparente salvo la franja, y el texto no se pinta (`transparent`): sobre el
+ * texto de abajo (o sobre sus letras 3D) sólo brilla lo que cae dentro de los glifos. La capa va encima del texto, de su mismo tamaño. */
+[data-v3] [data-reluciente='letras'] {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--reluciente-franja-del-texto-solo);
+  background-size: var(--reluciente-tamano);
+  background-position: right center;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: reluciente-texto var(--reluciente-ciclo) ease-in-out infinite;
+}
+
+[data-v3] :is(a, button):is(:hover, :focus-visible) [data-reluciente='letras'] {
   animation-name: reluciente-texto-vivo;
   animation-duration: var(--reluciente-ciclo-vivo);
 }
@@ -196,4 +219,16 @@
   100% {
     background-position: left center;
   }
+}
+
+/* 5 · [L9a] EL AVATAR DEL CHAT SEGÚN LO QUE TIENE ABAJO. El widget lo pinta en
+ * el papel con ojos oscuros; sobre el papel del día se da vuelta (negro con
+ * ojos blancos) y sobre la noche queda como viene (blanco con ojos negros).
+ * `ChatDelSitio` marca el tono; el cambio es una transición del filtro. */
+[data-v3] [data-pieza='chat-del-sitio'] [data-chatbot-avatar] {
+  transition: filter var(--duracion-lenta) var(--ease-principal);
+}
+
+[data-v3] [data-pieza='chat-del-sitio'][data-tono='claro'] [data-chatbot-avatar] {
+  filter: invert(1);
 }

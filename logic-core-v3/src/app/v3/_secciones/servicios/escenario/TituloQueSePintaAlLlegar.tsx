@@ -36,7 +36,7 @@ export interface Renglon {
 
 /**
  * El pintado por tiempo de las `[data-palabra]` de `ref`: con `progreso`, al llegar a 1 (y se despinta si baja de la mitad); sin él,
- * al quedar a la vista (el 60 %). Recorre las palabras en `duracionMs`. Con movimiento reducido no hace nada (pintado entero).
+ * al quedar a la vista (el 60 %, sobre el 70 % de arriba de la pantalla: [L9a] al volver a subir se despinta cuando baja de esa línea, no recién al salir). Recorre las palabras en `duracionMs`. Con movimiento reducido no hace nada (pintado entero).
  */
 export function usePintadoAlLlegar(ref: RefObject<HTMLElement | null>, progreso: MotionValue<number> | null, duracionMs: number = PINTADO_MS): void {
   const reducido = useMovimientoReducido()
@@ -70,7 +70,7 @@ export function usePintadoAlLlegar(ref: RefObject<HTMLElement | null>, progreso:
       mirar(progreso.get())
       soltar = progreso.on('change', mirar)
     } else {
-      const mirador = new IntersectionObserver(([e]) => ir(e?.isIntersecting === true ? 1 : 0), { threshold: 0.6 })
+      const mirador = new IntersectionObserver(([e]) => ir(e?.isIntersecting === true ? 1 : 0), { threshold: 0.6, rootMargin: '0px 0px -30% 0px' })
       mirador.observe(el)
       soltar = () => mirador.disconnect()
     }

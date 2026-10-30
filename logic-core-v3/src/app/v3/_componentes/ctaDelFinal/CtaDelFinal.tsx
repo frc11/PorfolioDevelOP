@@ -242,8 +242,12 @@ export function DestinoDelCta({ rotulo, destino, progreso, className, enLaLista 
       <motion.span ref={texto} aria-hidden="true" style={{ opacity: listo ? 0 : llegada }} className={cn('block', FUENTE_DEL_CTA, className)}>
         {rotulo.toUpperCase()}
       </motion.span>
-      {/* [C2-70] «HABLANOS» se toca: el reflejo de Reluciente pasa por la caja del enlace (sigue a las letras de la escena, A1). */}
-      {llego && <Reluciente />}
+      {/* [C2-70] «HABLANOS» se toca: el reflejo de Reluciente pasa sólo por las letras (una capa del mismo texto, recortada a sus glifos; sigue a las de la escena, A1). */}
+      {llego && (
+        <Reluciente como="letras" className={cn('block', FUENTE_DEL_CTA, className)}>
+          {rotulo.toUpperCase()}
+        </Reluciente>
+      )}
     </motion.a>
   )
 }

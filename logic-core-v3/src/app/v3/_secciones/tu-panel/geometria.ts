@@ -113,7 +113,7 @@ export const TITULO_DE_LA_COLUMNA = { minimoRem: 2.25, vw: 10.5, maximoRem: 3.25
 export const RITMO = { aireArriba: 30, respiro: 16, entreFilas: 18, antesDelCta: 6 } as const
 
 /** Abajo de 1024, en svh: la sección mide lo que suma. */
-export const RITMO_ANGOSTO = { respiro: 16, entreFilas: 14 } as const
+export const RITMO_ANGOSTO = { respiro: 22, entreFilas: 14 } as const
 
 /**
  * [C2 60b] LO QUE MIDE LA SECCIÓN EN ESCRITORIO (px), sumada: el aire de arriba, los dos renglones del título, el respiro, los
@@ -162,6 +162,8 @@ export function variablesDeLaSeccion(): CSSProperties {
     '--ancho-del-formulario': `${32}rem`,
     // [L4] La palabra fundida del flujo se mete media vez su alto sobre el título (`lh`: el interlineado de la propia palabra).
     '--sube-la-palabra': `calc(${0.5}lh * -1)`,
+    // [L9a] Dos renglones del propio título (`lh`): el alto que reservan las dos columnas del CTA desde 1024.
+    '--dos-renglones': `${2}lh`,
     // [L4] Los títulos de las dos columnas del CTA abajo de 1024.
     '--titulo-de-la-columna-angosto': `clamp(${TITULO_DE_LA_COLUMNA.minimoRem}rem,${TITULO_DE_LA_COLUMNA.vw}vw,${TITULO_DE_LA_COLUMNA.maximoRem}rem)`,
   } as CSSProperties
@@ -201,10 +203,10 @@ export const CLASE_DE_LA_PALABRA =
 
 /**
  * [C2 60b] LA PALABRA PÁLIDA DEL TÍTULO: detrás de él, centrada en su caja, de lado a lado (un renglón desde 1024, dos abajo),
- * con el alfa de las palabras fundidas.
+ * con el alfa de las palabras fundidas. [L9a] Abajo de 1024 no va (quedaba muy apretado).
  */
 export const CLASE_DE_LA_PALABRA_DEL_TITULO =
-  'pointer-events-none absolute inset-x-0 top-0 -z-10 -translate-y-1/2 select-none whitespace-nowrap text-center font-display font-fuerte uppercase leading-cartel tracking-display text-tinta text-[length:calc(100cqw/var(--divisor-de-la-palabra-del-titulo-angosta))] escritorio:text-[length:calc(100cqw/var(--divisor-de-la-palabra-del-titulo))] opacity-[var(--alfa-de-la-palabra-angosta)] escritorio:opacity-[var(--alfa-de-la-palabra)]'
+  'max-escritorio:hidden pointer-events-none absolute inset-x-0 top-0 -z-10 -translate-y-1/2 select-none whitespace-nowrap text-center font-display font-fuerte uppercase leading-cartel tracking-display text-tinta text-[length:calc(100cqw/var(--divisor-de-la-palabra-del-titulo-angosta))] escritorio:text-[length:calc(100cqw/var(--divisor-de-la-palabra-del-titulo))] opacity-[var(--alfa-de-la-palabra-angosta)] escritorio:opacity-[var(--alfa-de-la-palabra)]'
 
 /** [C2 60b] El título abajo de 1024: más grande (su divisor y su tope, nunca menos que el de antes), en sus tres renglones. */
 export const CLASE_DEL_TITULO_ANGOSTO =

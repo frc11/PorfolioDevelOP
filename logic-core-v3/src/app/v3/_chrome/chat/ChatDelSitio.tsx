@@ -10,6 +10,7 @@ import { entradaAbierta, suscribirALaEntrada } from '../../_lib/entrada'
 import { laEscenaCayo, suscribirALaCaida } from '../../_lib/escena/caida'
 import { CLAVE_DE_LOS_BANCOS } from '../preloader/decision'
 import { APARIENCIA_DEL_CHAT, ESPERA_OCIOSA_MS, PLAZO_DEL_CHAT_MS, SLUG_DEL_CHAT, chatPermitido, montarElChat, puedeEntrarElChat, rutaConChat } from './compuerta'
+import { useTonoDebajo } from '../menu/useTonoDebajo'
 import { useDesvanecidoDelChat } from './useDesvanecidoDelChat'
 
 /**
@@ -105,10 +106,15 @@ export function ChatDelSitio(): React.JSX.Element | null {
   // [C2-21] En las zonas cruciales (el Portfolio, Servicios), cerrado, se desvanece y no se alcanza (`inert`); abierto, se queda.
   const capa = useRef<HTMLDivElement | null>(null)
   const desvanecido = useDesvanecidoDelChat(capa, ruta, montado)
+  // [L9a] El avatar se da vuelta según lo que tiene abajo (blanco sobre la noche, negro sobre el papel): `piezas.css` bloque 5.
+  const sonda = useRef<HTMLSpanElement | null>(null)
+  const tono = useTonoDebajo(sonda, montado)
 
   if (!montado) return null
   return (
-    <div data-pieza="chat-del-sitio" className="fixed z-[var(--z-cabecera)]">
+    <div data-pieza="chat-del-sitio" className="fixed z-[var(--z-cabecera)]" data-tono={tono}>
+      {/* La sonda marca dónde está la burbuja (abajo a la derecha, 56 px a 24 px de los bordes): el tono se lee bajo su centro. */}
+      <span ref={sonda} aria-hidden="true" className="pointer-events-none fixed right-6 bottom-6 size-14" />
       <div
         ref={capa}
         data-parte="desvanecido"

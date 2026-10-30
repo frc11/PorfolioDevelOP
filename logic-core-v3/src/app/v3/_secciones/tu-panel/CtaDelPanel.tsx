@@ -25,7 +25,7 @@ import { TituloQueSePinta } from './TituloQueSePinta'
  * en su lugar; se van en espejo al volver a subir), como el resto del sitio: el deslizamiento lateral se fue.
  */
 /** [L4] Abajo de 1024 los títulos de las dos columnas («Probar el panel», «Suscribite a las novedades») más grandes: de ~32 px a un fluido de 36 a 52. */
-const TITULO_DE_LA_COLUMNA_EN_EL_TELEFONO = 'max-escritorio:text-[length:var(--titulo-de-la-columna-angosto)]'
+const TITULO_DE_LA_COLUMNA_EN_EL_TELEFONO = 'max-escritorio:text-[length:var(--titulo-de-la-columna-angosto)] escritorio:flex escritorio:[min-block-size:var(--dos-renglones)] escritorio:items-end escritorio:justify-center' // [L9a] y desde 1024 las dos columnas reservan dos renglones: el texto de cada una arranca a la misma altura
 
 export function CtaDelPanel(): React.JSX.Element {
   return (
@@ -58,7 +58,7 @@ export function CtaDelPanel(): React.JSX.Element {
         </Gatillo>
         <Gatillo desde="abajo" className="w-full escritorio:flex-1">
           <div data-pieza="columna-novedades" className="mx-auto flex max-w-[var(--ancho-del-formulario)] flex-col items-center gap-[var(--spacing-4)] text-center">
-            <Titular nivel="titulo-m" como="h4" className={TITULO_DE_LA_COLUMNA_EN_EL_TELEFONO}>
+            <Titular nivel="titulo-l" como="h4" className={TITULO_DE_LA_COLUMNA_EN_EL_TELEFONO}>
               {NEWSLETTER.titulo}
             </Titular>
             <Cuerpo className="text-tinta-media">{NEWSLETTER.texto}</Cuerpo>

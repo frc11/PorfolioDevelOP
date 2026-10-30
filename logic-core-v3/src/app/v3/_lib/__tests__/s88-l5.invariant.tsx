@@ -60,9 +60,9 @@ afirmar(FINAL_EN_EL_PISO.uAnilloDelAro.value.z === 0, '  al soltarse, el piso qu
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · [L5] El reflejo del CTA, sólo con el CTA llegado (lote2/10)')
 const cta = leer('_componentes/ctaDelFinal/CtaDelFinal.tsx')
-const reflejoConElCta = (f: string): boolean => f.includes('{llego && <Reluciente />}') && f.includes("useMotionValueEvent(progreso, 'change', (p) => setLlego(tocable(p)))") && !/\n\s*<Reluciente \/>\n\s*<\/motion\.a>/.test(f)
-afirmar(reflejoConElCta(cta), 'el reflejo de «HABLANOS» se monta sólo cuando el CTA se puede tocar (antes, escondido, su franja pasaba delante del logo)')
-controlPositivo('  el detector ve el reflejo de siempre', cta.replace('{llego && <Reluciente />}', '<Reluciente />'), reflejoConElCta)
+const reflejoConElCta = (f: string): boolean => f.includes('{llego && (') && f.includes('<Reluciente como="letras"') && f.includes("useMotionValueEvent(progreso, 'change', (p) => setLlego(tocable(p)))") && !/\n\s*<Reluciente \/>\n\s*<\/motion\.a>/.test(f)
+afirmar(reflejoConElCta(cta), 'el reflejo de «HABLANOS» se monta sólo cuando el CTA se puede tocar (antes, escondido, su franja pasaba delante del logo); [L9a] y es la luz recortada a las letras (`como="letras"`)')
+controlPositivo('  el detector ve el reflejo de siempre', cta.replace('{llego && (', '{('), reflejoConElCta)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · [L5] El CTA de la lista del home es un gatillo (se lee solo)')
