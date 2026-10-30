@@ -160,10 +160,11 @@ export function reservadosEnElMarcado(html: string, atributoDeLaIntro: string): 
   }
   const secciones = valoresDe(html, 'data-seccion')
   for (const valor of secciones) if (valor !== 'invertida') hallados.push(`data-seccion="${valor}"`)
-  const sobreLaEscena = [aperturaDe(elementoConAtributo(html, atributoDeLaIntro)), /<header(?=[\s>])[^>]*>/.exec(html)?.[0] ?? '']
+  // [L7a] Lo único sobre la escena es la intro: el encabezado del V1 se fue (la navbar es del layout).
+  const sobreLaEscena = [aperturaDe(elementoConAtributo(html, atributoDeLaIntro))]
   const enSuLugar = sobreLaEscena.filter((apertura) => apertura.includes(' data-seccion="invertida"')).length
-  if (enSuLugar < sobreLaEscena.length) hallados.push('data-seccion: falta en la intro o en el encabezado')
-  if (secciones.length > enSuLugar) hallados.push('data-seccion fuera de la intro y del encabezado')
+  if (enSuLugar < sobreLaEscena.length) hallados.push('data-seccion: falta en la intro')
+  if (secciones.length > enSuLugar) hallados.push('data-seccion fuera de la intro')
   return hallados
 }
 

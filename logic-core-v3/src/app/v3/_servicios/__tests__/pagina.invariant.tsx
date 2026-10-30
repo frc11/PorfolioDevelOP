@@ -130,8 +130,10 @@ const parrafos = (marcado: string): string[] => [...marcado.matchAll(/<p(?=[\s>]
 /** Los textos de los encabezados (h1 a h6) de un marcado. */
 const encabezados = (marcado: string): string[] => [...marcado.matchAll(/<h([1-6])(?=[\s>])[^>]*>([\s\S]*?)<\/h\1>/g)].map((m) => textoVisible(m[2] ?? ''))
 // [M1] La bajada sale del problema: dos párrafos, la entrada (su título) y su texto, literales y en ese orden. Ningún heading los lleva.
+// [L7a] Más «de qué se trata» (B12a.8): su párrafo es lo que hacemos (`queHacemos.texto`), después de la bajada.
 const bajadaEnDosParrafos = (servicio: Servicio) => (marcado: string): boolean =>
-  JSON.stringify(parrafos(marcado)) === JSON.stringify([servicio.problema.titulo, servicio.problema.texto]) &&
+  JSON.stringify(parrafos(marcado).slice(0, 2)) === JSON.stringify([servicio.problema.titulo, servicio.problema.texto]) &&
+  parrafos(marcado).slice(2).every((t) => t === servicio.queHacemos.texto || t === 'De qué se trata') &&
   !encabezados(marcado).some((t) => t === servicio.problema.titulo || t === servicio.problema.texto)
 /**
  * [L7a] Lo que va antes de la intro: sólo los documentos JSON-LD (no se ven). El encabezado del V1 se fue (la navbar es del layout).
@@ -271,11 +273,11 @@ titulo('5 · Nada del home: ni ids, ni atributos de la escena; data-seccion sól
 const limpio = (html: string): boolean => reservadosEnElMarcado(html, ATRIBUTO_DE_LA_INTRO).length === 0
 afirmarIgual(fallan((p) => limpio(p.html)), [], 'ninguna página emite un id que el home busque, ni portfolio-…, ni data-panel, data-seccion-id o data-signo-de-la-tuya; data-seccion solo es «invertida» y [V1] va en lo que está sobre la escena, una vez en cada uno: la intro y el encabezado (S3b: no en la raíz; ninguno en el cuerpo)')
 controlPositivo('un id="cierre" se detecta', `${WEB_PROD}<i id="cierre"></i>`, limpio)
+controlPositivo('  un encabezado propio en claro (el del V1) se detecta', `<header data-seccion="invertida"></header>${WEB_PROD}`, limpio)
 controlPositivo('un id portfolio-la-tuya se detecta', `${WEB_PROD}<i id="portfolio-la-tuya"></i>`, limpio)
 controlPositivo('un data-panel se detecta', `${WEB_PROD}<i data-panel="x"></i>`, limpio)
 controlPositivo('un data-seccion que no es «invertida» se detecta', `${WEB_PROD}<i data-seccion="claro"></i>`, limpio)
-controlPositivo('un tercer data-seccion «invertida», en el cuerpo, se detecta', WEB_PROD.replace('<main>', '<main><i data-seccion="invertida"></i>'), limpio)
-controlPositivo('el data-seccion en la raíz y no en el encabezado se detecta', WEB_PROD.replace(' data-seccion="invertida"', '').replace(/^<div /, '<div data-seccion="invertida" '), limpio)
+controlPositivo('un segundo data-seccion «invertida», en el cuerpo, se detecta', enElCuerpo(WEB_PROD, '<i data-seccion="invertida"></i>'), limpio)
 controlPositivo('  y una intro sin el suyo', WEB_PROD.replace(/(<section [^>]*?) data-seccion="invertida"/, '$1'), limpio)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -306,8 +308,10 @@ controlPositivo('  un servicio sin claro en el tema se detecta', 'otro', (id: st
 // de ese id pone el claro, el token de arriba), ya no por un `style` propio. Ni la intro ni el encabezado fijan el acento a mano.
 const acentoDeLaIntro = (servicio: Servicio) => (html: string): boolean => {
   const apertura = aperturaDe(intro(html))
+  // [L7a] El style de la intro es el de los altos del home (`--pantallas-de-la-intro`, `--tramo-del-titulo`): nunca el acento.
+  const estilo = /\sstyle="([^"]*)"/.exec(apertura)?.[1] ?? ''
   return apertura.includes(` data-servicio="${servicio.idEnElHome}"`) && claroSegunElTema(servicio.idEnElHome) === tokenDelAcentoClaro(servicio.idEnElHome) &&
-    !/\sstyle="/.test(apertura) && !/\sstyle="/.test(antesDeLaIntro(html) ?? ' style="')
+    !/acento/.test(estilo) && estilo.split(';').every((d) => d === '' || /^--(pantallas-de-la-intro|tramo-del-titulo):/.test(d))
 }
 afirmarIgual(fallan((p) => acentoDeLaIntro(p.servicio)(p.html)), [], '  y la intro lleva el claro de SU servicio por data-servicio (la regla del tema de ese id), derivado de idEnElHome; ni ella ni el encabezado lo fijan con un style')
 controlPositivo('  el acento de otro servicio en la intro se detecta', WEB_PROD.replace(' data-servicio="web"', ' data-servicio="software"'), acentoDeLaIntro(PAGINAS_WEB))
@@ -473,7 +477,9 @@ controlPositivo('una grilla de tres columnas sin prefijo se detecta', '<div clas
 const CON_TOKEN = valoresDe(WEB_PROD, 'class').flatMap((c) => c.split(/\s+/)).filter((c) => c.includes('[')).length
 // [V1] REEMPLAZADO por la spec: la regla es de NUESTRO marcado (todo lo que no es la intro). La intro es la del home (`IntroDeLaPagina`): sus
 // clases arbitrarias son las de su fuente (el alto de 1,5 pantallas que fija s78 y el ancho de la bajada) y ninguna más.
-const FUENTE_DE_LA_INTRO_DEL_HOME = readFileSync(path.join(AQUI, '../../_componentes/pagina/IntroDeLaPagina.tsx'), 'utf8')
+// [L7a] La intro del home son sus piezas: el bloque, la composición, la bajada y el título de la página.
+const FUENTE_DE_LA_INTRO_DEL_HOME = ['pagina/IntroDeLaPagina.tsx', 'pagina/ComposicionDeLaIntro.tsx', 'pagina/BajadaDeLaIntro.tsx', 'titulos3d/TituloDePagina.tsx']
+  .map((f) => readFileSync(path.join(AQUI, '../../_componentes', f), 'utf8')).join('\n')
 const arbitrariasEnSuLugar = (html: string): boolean => arbitrariasSinToken(cuerpo(html)).length === 0 && arbitrariasSinToken(intro(html) ?? '').every((c) => FUENTE_DE_LA_INTRO_DEL_HOME.includes(c))
 afirmar(CON_TOKEN > 0 && fallan((p) => arbitrariasEnSuLugar(p.html)).length === 0, `toda clase arbitraria de nuestro marcado lee un token con var() (${CON_TOKEN} en la página, ninguna suelta); las de la intro son las del componente del home, tal cual`)
 controlPositivo('una clase arbitraria sin var() se detecta', `<div class="${['w-', '[', '37px', ']'].join('')}">`, (h: string) => arbitrariasSinToken(h).length === 0)

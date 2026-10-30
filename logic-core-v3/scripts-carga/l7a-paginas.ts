@@ -78,13 +78,24 @@ async function unaPagina(p: Page, slug: string, h1: string, ancho: number, alto:
     }
   }
   await dormir(2500)
-  // El FAQ, al fondo: la primera pregunta a la vista abre su respuesta.
-  const pregunta = p.locator('button[aria-expanded]').filter({ visible: true }).first()
+  // El FAQ: desde 1024 nace al fondo, en la pantalla del pie; en el teléfono va antes del pie (B10, `lugar="antes"`). La primera
+  // pregunta que esté visible (las del FAQ, por su id: `IDS_DEL_FAQ`), llevada a la vista, abre su respuesta.
+  // Desde 1024 el FAQ nace con un gesto más al fondo (el gatillo del pie hunde las columnas): dos muescas de la rueda.
+  if (ancho >= 1024) {
+    await p.mouse.move(ancho / 2, alto / 2)
+    for (let i = 0; i < 2; i++) {
+      await p.mouse.wheel(0, 240)
+      await dormir(1600)
+    }
+  }
+  const pregunta = p.locator('button[id^="faq-del-pie-pregunta-"]').filter({ visible: true }).first()
   let faq = false
   if ((await pregunta.count()) > 0) {
+    await pregunta.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(() => undefined)
+    await dormir(800)
     await pregunta.click({ timeout: 5000 }).catch(() => undefined)
     await dormir(1500)
-    faq = (await p.locator('button[aria-expanded="true"]').count()) > 0
+    faq = (await p.locator('button[id^="faq-del-pie-pregunta-"][aria-expanded="true"]').count()) > 0
   }
   await p.screenshot({ path: path.join(carpeta, `${String(ancho)}-3-cierre.png`) })
   const subiendo: Tramo[] = []
