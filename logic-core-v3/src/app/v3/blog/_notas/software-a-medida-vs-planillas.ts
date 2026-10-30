@@ -5,7 +5,8 @@ export const NOTA: Nota = {
   titulo: 'Software a medida vs. planillas: cuándo dar el salto',
   resumen: 'Las planillas te sacan del apuro, pero llega un punto en que frenan tu negocio. Las señales que indican que es momento de pensar en un software propio.',
   fecha: '2026-10-12',
-  portada: { palabra: 'A medida', tono: 'software' },
+  foto: '/v3/blog/software-a-medida-vs-planillas-cuando-dar-el-salto.webp',
+  destacado: 'Una buena señal de honestidad en cualquier proveedor: que te diga cuándo no necesitás lo que te está ofreciendo.',
   introduccion: [
     'Casi todos los negocios arrancan con una planilla. Es rápida, gratis y cada uno la arma como quiere: el stock, los clientes, los pedidos, las cuentas. Y funciona, hasta que deja de funcionar.',
     'Esta nota no es para decirte que tires tus planillas. Es para ayudarte a notar cuándo empiezan a costarte más de lo que te ahorran, y qué opciones tenés.',

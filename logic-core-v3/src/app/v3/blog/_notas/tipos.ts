@@ -2,14 +2,6 @@
  * [L7c] UNA NOTA DEL BLOG — dato tipado, sin base de datos: cada nota es un archivo de esta carpeta (`_notas/<slug>.ts`) y `indice.ts` las
  * junta. Las escribió la IA para que Valentino las vaya moldeando con su voz: sin estadísticas, encuestas ni historias de clientes inventadas.
  */
-export type TonoDePortada = 'tinta' | 'papel' | 'web' | 'ia' | 'software' | 'automatizacion'
-
-export interface PortadaDeNota {
-  /** La palabra grande de la portada tipográfica (una o dos, cortas). */
-  readonly palabra: string
-  readonly tono: TonoDePortada
-}
-
 export interface SeccionDeNota {
   readonly subtitulo: string
   readonly parrafos: readonly string[]
@@ -22,7 +14,10 @@ export interface Nota {
   readonly resumen: string
   /** ISO `AAAA-MM-DD`. */
   readonly fecha: string
-  readonly portada: PortadaDeNota
+  /** [M2] La foto de tapa, en `public/v3/blog/` (webp, 4:3, 1600 × 1200). Cambiarla es reemplazar el archivo o esta línea. */
+  readonly foto: string
+  /** [M2] La frase destacada que se pinta: una frase LITERAL de un párrafo de la nota (no texto nuevo), que se repite grande debajo de él. */
+  readonly destacado: string
   readonly introduccion: readonly string[]
   readonly secciones: readonly SeccionDeNota[]
   /** El cierre: una invitación suave a hablar con develOP. */

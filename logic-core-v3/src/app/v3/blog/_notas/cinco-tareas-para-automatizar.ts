@@ -5,7 +5,8 @@ export const NOTA: Nota = {
   titulo: '5 tareas que tu negocio puede automatizar hoy',
   resumen: 'Cinco tareas repetitivas que se pueden dejar en manos de una automatización, sin cambiar todo tu negocio ni ser una persona técnica.',
   fecha: '2026-10-16',
-  portada: { palabra: 'Automatizá', tono: 'automatizacion' },
+  foto: '/v3/blog/5-tareas-que-tu-negocio-puede-automatizar-hoy.webp',
+  destacado: 'La idea no es alejarte de tus clientes, sino tener más tiempo para dedicarles.',
   introduccion: [
     'Automatizar suena a algo reservado para empresas grandes, pero en realidad es más simple de lo que parece: se trata de dejar que una herramienta haga sola las tareas repetitivas que hoy hacés a mano. Esas que te roban tiempo todos los días y que, además, es fácil que salgan mal cuando hay apuro.',
     'Estas son cinco tareas que casi cualquier negocio puede automatizar, sin cambiar todo lo que hace.',

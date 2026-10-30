@@ -1,121 +1,106 @@
 'use client'
 
-import { ArrowLeft, ArrowRight, Pause, Play } from 'lucide-react'
+import { animate, useMotionValue } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { cn } from '@/lib/utils'
-
+import { CarruselDeTarjetas, type EstadoDeLaTarjeta } from '../_componentes/carrusel/CarruselDeTarjetas'
+import { ASOMA, relativoEnLaVuelta } from '../_componentes/carrusel/asoma'
 import { EnlaceDeRuta } from '../_componentes/navegacion/EnlaceDeRuta'
 import { Caption, Cuerpo } from '../_componentes/tipografia/Textos'
 import { Titular } from '../_componentes/tipografia/Titular'
+import { sizesPorViewport } from '../_lib/imagen'
 import { usePrefiereMenosMovimiento } from '../_lib/usePrefiereMenosMovimiento'
+import { PRESENCIA_DEL_ENCABEZADO } from '../_secciones/trabajos/portfolio/EncabezadoDelPortfolio'
+import { TitularQueSeLevanta, usePresencia } from '../_secciones/trabajos/portfolio/levantarse'
 
 import { NOTAS_DESTACADAS, fechaLarga, minutosDeLectura, rutaDeLaNota } from './_notas/indice'
-import { PortadaDeNota } from './PortadaDeNota'
+import type { Nota } from './_notas/tipos'
+import { FORMA_DE_LA_DESTACADA, MS_POR_DESTACADA, bloqueaElClic, corridaDeLaFoto, type ApoyoDelPuntero } from './_movimiento/carrusel'
+import { FotoDeNota } from './FotoDeNota'
 
 /**
- * [L7c] EL CARRUSEL DE NOTAS DESTACADAS — a todo el ancho: la nota ocupa la sección (la portada, el título y su bajada) y tocarla entra a la
- * nota. Cambia sola cada `MS_POR_NOTA`; se detiene con el puntero o el foco encima, y con movimiento reducido no avanza sola. Dos flechas
- * para pasarlo a mano y, abajo, una barra de progreso por nota (la de ahora se llena con el tiempo que le queda).
+ * [M2] EL CARRUSEL DE LAS DESTACADAS — el carrusel común del Portfolio y de Demos (`CarruselDeTarjetas`, importado: su máquina, la pausa al
+ * mantener apretado, las flechas, el dedo, el teclado, las líneas llenas de las ya vistas y `prefers-reduced-motion`), en su modo `asoma`: la
+ * tarjeta grande y la siguiente asomada. Es el modo en el que la tarjeta ENTERA puede ser el enlace y el dedo igual la arrastra (en el modo de a
+ * una, apoyar el dedo en un enlace no mantiene ni desliza). Valentino: «lo quiero más rápido, con efecto parallax en la foto para dar
+ * profundidad, y que con apretar en toda la imagen puedas entrar».
+ *
+ * Lo propio (el reloj, la forma y la corrida de la foto) está en `_movimiento/carrusel.ts`. Mantener apretado pausa y, al soltar, no abre la nota.
  */
-const MS_POR_NOTA = 6500
+const ITEMS = NOTAS_DESTACADAS.map((nota) => ({ id: nota.slug, nota }))
 
 export function CarruselDeDestacadas(): React.JSX.Element {
-  const reducido = usePrefiereMenosMovimiento()
   const [actual, setActual] = useState(0)
-  const [encima, setEncima] = useState(false)
-  const [conFoco, setConFoco] = useState(false)
-  const [pausado, setPausado] = useState(false)
-  const detenido = encima || conFoco || pausado
-  const total = NOTAS_DESTACADAS.length
-  const ir = (delta: number): void => setActual((a) => (a + delta + total) % total)
+  return (
+    <div data-pieza="carrusel-de-notas" data-destacada={actual}>
+      <CarruselDeTarjetas
+        items={ITEMS}
+        etiqueta="Notas destacadas"
+        nombreDe={(t) => t.nota.titulo}
+        rotulos={{ anterior: 'Nota anterior', siguiente: 'Nota siguiente' }}
+        duracionMs={MS_POR_DESTACADA}
+        vistasLlenas
+        asoma={FORMA_DE_LA_DESTACADA}
+        alCambiar={setActual}
+        claseDeLaVista="h-[min(72svh,34rem)] grid-rows-1 px-1 py-3 escritorio:h-[min(78svh,52rem)]"
+        renderItem={(t, estado) => <TarjetaDestacada nota={t.nota} estado={estado} relativo={relativoEnLaVuelta(estado.indice, actual, ITEMS.length)} />}
+      />
+    </div>
+  )
+}
 
-  // El reloj: un cuadro a la vez, sólo mientras corre (sin puntero ni foco encima y con movimiento). Escribe el relleno de la barra de la nota de ahora
-  // directo en el DOM (sin renderizar por cuadro) y, al llegar al tiempo de la nota, pasa a la que sigue. Al detenerse conserva lo transcurrido.
-  const barra = useRef<HTMLSpanElement>(null)
-  const transcurrido = useRef(0)
+function TarjetaDestacada({ nota, estado, relativo }: { readonly nota: Nota; readonly estado: EstadoDeLaTarjeta; readonly relativo: number }): React.JSX.Element {
+  const reducido = usePrefiereMenosMovimiento()
+  const presencia = usePresencia(estado.activa, reducido, PRESENCIA_DEL_ENCABEZADO)
+  const corrida = corridaDeLaFoto(relativo)
+  const x = useMotionValue(`${String(corrida)}%`)
   useEffect(() => {
-    transcurrido.current = 0
-    const mia = barra.current
-    return () => {
-      if (mia !== null) mia.style.transform = ''
+    const destino = `${String(corrida)}%`
+    if (reducido) {
+      x.set(destino)
+      return undefined
     }
-  }, [actual])
-  useEffect(() => {
-    const el = barra.current
-    if (el !== null) el.style.transform = `scaleX(${reducido ? 1 : transcurrido.current / MS_POR_NOTA})`
-    if (detenido || reducido) return undefined
-    let cuadro = 0
-    let antes = performance.now()
-    const paso = (ahora: number): void => {
-      transcurrido.current += ahora - antes
-      antes = ahora
-      if (transcurrido.current >= MS_POR_NOTA) {
-        setActual((a) => (a + 1) % total)
-        return
-      }
-      if (barra.current !== null) barra.current.style.transform = `scaleX(${transcurrido.current / MS_POR_NOTA})`
-      cuadro = window.requestAnimationFrame(paso)
-    }
-    cuadro = window.requestAnimationFrame(paso)
-    return () => window.cancelAnimationFrame(cuadro)
-  }, [actual, detenido, reducido, total])
+    const a = animate(x, destino, ASOMA.resorte)
+    return () => a.stop()
+  }, [corrida, reducido, x])
+
+  // Un apoyo largo pausa el carrusel (lo decide él) y al soltar no abre la nota; un toque (aun lento), un clic, Enter o un lector, sí.
+  const apoyo = useRef<ApoyoDelPuntero | null>(null)
+  const alHacerClic = (e: React.MouseEvent<HTMLAnchorElement>): void => {
+    const a = apoyo.current
+    apoyo.current = null
+    if (bloqueaElClic(a, performance.now(), e.detail)) e.preventDefault()
+  }
 
   return (
-    <section
-      aria-roledescription="carrusel"
-      aria-label="Notas destacadas"
-      data-pieza="carrusel-de-notas"
-      onPointerEnter={() => setEncima(true)}
-      onPointerLeave={() => setEncima(false)}
-      onFocusCapture={() => setConFoco(true)}
-      onBlurCapture={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) setConFoco(false)
+    <EnlaceDeRuta
+      href={rutaDeLaNota(nota)}
+      data-parte="tarjeta-destacada"
+      draggable={false}
+      tabIndex={estado.activa ? 0 : -1}
+      onPointerDown={(e) => {
+        apoyo.current = { desde: performance.now(), tipo: e.pointerType }
       }}
-      className="flex flex-col gap-[var(--spacing-4)]"
+      onPointerCancel={() => {
+        apoyo.current = null
+      }}
+      onClick={alHacerClic}
+      // El menú del toque largo (Android) taparía la pausa; el clic derecho del mouse sigue.
+      onContextMenu={(e) => {
+        if (apoyo.current?.tipo === 'touch') e.preventDefault()
+      }}
+      className="group flex h-full w-full flex-col gap-[var(--spacing-4)]"
     >
-      <div className="relative overflow-hidden">
-        <ul className="flex transition-transform duration-[var(--duracion-muy-lenta)] ease-[var(--ease-salida)] motion-reduce:transition-none" style={{ transform: `translateX(-${actual * 100}%)` }}>
-          {NOTAS_DESTACADAS.map((nota, i) => (
-            <li key={nota.slug} aria-roledescription="diapositiva" aria-label={`${i + 1} de ${total}`} aria-hidden={i !== actual} className="w-full shrink-0">
-              <EnlaceDeRuta href={rutaDeLaNota(nota)} tabIndex={i === actual ? 0 : -1} className="group grid grid-cols-1 gap-[var(--spacing-6)] escritorio:grid-cols-[3fr_2fr] escritorio:items-center">
-                <PortadaDeNota nota={nota} className="rounded-[var(--radius-fuerte)]" />
-                <span className="flex min-w-0 flex-col gap-[var(--spacing-3)]">
-                  <Caption como="span" interletrado="micro" className="font-codigo uppercase text-tinta-media">
-                    {fechaLarga(nota.fecha)} · {minutosDeLectura(nota)} min de lectura
-                  </Caption>
-                  <Titular nivel="titulo-m" como="h3" className="group-hover:underline group-focus-visible:underline">
-                    {nota.titulo}
-                  </Titular>
-                  <Cuerpo className="max-w-[48ch]">{nota.resumen}</Cuerpo>
-                  <span className="font-semi underline underline-offset-4">Leer la nota</span>
-                </span>
-              </EnlaceDeRuta>
-            </li>
-          ))}
-        </ul>
+      <FotoDeNota nota={nota} sizes={sizesPorViewport(80, 86)} corrimientoX={x} className="min-h-0 w-full flex-1" />
+      <div className="flex flex-col gap-[var(--spacing-2)] px-[var(--spacing-1)]">
+        <Caption como="span" interletrado="micro" className="font-codigo uppercase text-tinta-media">
+          {fechaLarga(nota.fecha)} · {minutosDeLectura(nota)} min de lectura
+        </Caption>
+        <Titular nivel="titulo-m" como="h3" className="-mb-[0.15em] overflow-hidden pb-[0.15em] group-hover:underline group-focus-visible:underline">
+          <TitularQueSeLevanta presencia={presencia}>{nota.titulo}</TitularQueSeLevanta>
+        </Titular>
+        <Cuerpo className="line-clamp-2 max-w-[60ch] text-tinta-media max-tablet:hidden">{nota.resumen}</Cuerpo>
       </div>
-
-      <div className="flex items-center gap-[var(--spacing-4)]">
-        <button type="button" aria-label="Nota anterior" onClick={() => ir(-1)} className="inline-flex size-11 items-center justify-center rounded-circulo border border-borde text-tinta hover:bg-tinta/5">
-          <ArrowLeft aria-hidden="true" strokeWidth={1.5} className="size-5" />
-        </button>
-        <button type="button" aria-label="Nota siguiente" onClick={() => ir(1)} className="inline-flex size-11 items-center justify-center rounded-circulo border border-borde text-tinta hover:bg-tinta/5">
-          <ArrowRight aria-hidden="true" strokeWidth={1.5} className="size-5" />
-        </button>
-        <button type="button" aria-label={pausado ? 'Reanudar el carrusel' : 'Pausar el carrusel'} aria-pressed={pausado} onClick={() => setPausado((p) => !p)} className="inline-flex size-11 items-center justify-center rounded-circulo border border-borde text-tinta hover:bg-tinta/5">
-          {pausado ? <Play aria-hidden="true" strokeWidth={1.5} className="size-5" /> : <Pause aria-hidden="true" strokeWidth={1.5} className="size-5" />}
-        </button>
-        <ol className="flex flex-1 gap-[var(--spacing-2)]" aria-label="Progreso">
-          {NOTAS_DESTACADAS.map((nota, i) => (
-            <li key={nota.slug} className="h-1 flex-1 overflow-visible">
-              <button type="button" aria-label={`Ir a la nota ${i + 1}`} aria-current={i === actual} onClick={() => setActual(i)} className="relative -my-3 block h-7 w-full">
-                <span ref={i === actual ? barra : undefined} className={cn('absolute inset-x-0 top-3 h-1 origin-left rounded-circulo bg-tinta', i < actual ? 'scale-x-100' : i > actual && 'scale-x-0')} />
-              </button>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+    </EnlaceDeRuta>
   )
 }

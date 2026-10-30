@@ -5,7 +5,8 @@ export const NOTA: Nota = {
   titulo: 'Por qué tu página tarda en cargar y cuánto te cuesta',
   resumen: 'Una página lenta hace que la gente se vaya antes de ver lo que ofrecés. Las causas más comunes y qué se puede hacer para arreglarlas.',
   fecha: '2026-10-14',
-  portada: { palabra: 'Rápida', tono: 'tinta' },
+  foto: '/v3/blog/por-que-tu-pagina-tarda-en-cargar-y-cuanto-te-cuesta.webp',
+  destacado: 'Es una puerta que se cierra antes de que alguien vea lo que ofrecés.',
   introduccion: [
     'Entrás a una página, esperás, no pasa nada, y volvés atrás. Seguro te pasó. Ahora imaginá que le pasa lo mismo a quien quería contratarte o comprarte: se va, y vos ni te enterás.',
     'Una página lenta no es solo una molestia. Es una puerta que se cierra antes de que alguien vea lo que ofrecés. Acá te contamos por qué pasa y qué se puede hacer.',
