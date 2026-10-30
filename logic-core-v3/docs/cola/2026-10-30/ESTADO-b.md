@@ -5,7 +5,7 @@ Orden: L7b (Nosotros + Portfolio) → L7c (Blog) → L7d (legales, 404, enlaces,
 | Lote | Estado | Commits | Resultado |
 |---|---|---|---|
 | L7b | terminado (commit de cierre abajo) | ver git log | `L7b-resultado.md` |
-| L7c | pendiente | — | — |
+| L7c | terminado | ver git log | `L7c-resultado.md` |
 | L7d | pendiente | — | — |
 
 ## Notas para retomar
