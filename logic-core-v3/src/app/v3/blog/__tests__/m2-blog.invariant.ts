@@ -2,7 +2,8 @@
  * INVARIANTE M2 — el blog, la nota y la 404 con lo que Valentino eligió del laboratorio (`docs/cola/2026-10-30/M2.md`). Sin navegador: las
  * cuentas puras y el marcado leído del disco. Cada regla con su control positivo (una entrada rota que la tiene que hacer fallar).
  *
- * Corre con `npm run test:m2-blog`.
+ * Corre con `npx tsx src/app/v3/blog/__tests__/m2-blog.invariant.ts` (el script `test:m2-blog` de `package.json` queda propuesto: está fuera del
+ * carril M2).
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -12,7 +13,7 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_l
 import { ARRANQUE, esperaDelIntento, puedeArrancar, type CondicionesDelArranque } from '../../_no-encontrada/arranque'
 import { NOTAS, lugarDelDestacado } from '../_notas/indice'
 import type { Nota } from '../_notas/tipos'
-import { CORRIDA_DE_LA_FOTO, FORMA_DE_LA_DESTACADA, MS_POR_DESTACADA, corridaDeLaFoto } from '../_movimiento/carrusel'
+import { APOYO_LARGO_MS, CORRIDA_DE_LA_FOTO, FORMA_DE_LA_DESTACADA, MS_POR_DESTACADA, bloqueaElClic, corridaDeLaFoto } from '../_movimiento/carrusel'
 import { LINEA_DE_LECTURA, avanceDelHilo, formaDelHiloPedida, posicionDeLaAguja } from '../_movimiento/hilo'
 import { SOBRA, corrimientoDeLaFoto } from '../_movimiento/parallax'
 import { avanceDelBloque } from '../_movimiento/pintado'
@@ -49,14 +50,27 @@ const tarjetaEsElEnlace = (f: string): boolean => {
   return abre !== -1 && abre < foto && foto < tituloDeLaNota && tituloDeLaNota < cierra
 }
 afirmar(tarjetaEsElEnlace(carrusel), 'la tarjeta entera (la foto y el título) es el enlace a la nota')
-controlPositivo('con el enlace sólo en el título, la foto no entra', carrusel.replace(/<EnlaceDeRuta([\s\S]*?)<FotoDeNota/, '<span$1<FotoDeNota'), tarjetaEsElEnlace)
-const guardaDelMantener = (f: string): boolean => /performance\.now\(\) - a\.desde >= CARRUSEL\.mantenerMs\) e\.preventDefault\(\)/.test(f)
-afirmar(guardaDelMantener(carrusel), 'mantener apretado (lo que pausa) no abre la nota al soltar')
-controlPositivo('sin la guarda, el clic de soltar abre', carrusel.replace('e.preventDefault()', 'void e'), guardaDelMantener)
+// El control mueve el enlace entre la foto y el título: existe, pero la foto queda afuera.
+const conElEnlaceDespuesDeLaFoto = carrusel.replace(/<EnlaceDeRuta([\s\S]*?)>\s*(<FotoDeNota[^>]*\/>)/, '<span>$2<EnlaceDeRuta$1>')
+controlPositivo('con el enlace sólo en el título, la foto no entra', conElEnlaceDespuesDeLaFoto, (f) => conElEnlaceDespuesDeLaFoto !== carrusel && tarjetaEsElEnlace(f))
+
+/** La guarda del clic, por comportamiento: un apoyo largo no abre; un toque (aun lento), el teclado y un lector, sí. */
+type Guarda = typeof bloqueaElClic
+const guardaBien = (g: Guarda): boolean =>
+  g({ desde: 0, tipo: 'mouse' }, 1500, 1) && // apoyo largo con el mouse: pausó, soltar no abre
+  !g({ desde: 0, tipo: 'touch' }, 220, 1) && // un toque lento (pasó la pausa de 200 ms): entra
+  !g({ desde: 0, tipo: 'mouse' }, 90, 1) && // un clic: entra
+  !g({ desde: 0, tipo: 'mouse' }, 60_000, 0) && // Enter o un lector, con un apoyo viejo de un arrastre: entra
+  !g(null, 60_000, 1) &&
+  APOYO_LARGO_MS > CARRUSEL.mantenerMs
+afirmar(guardaBien(bloqueaElClic), `un apoyo de ${APOYO_LARGO_MS} ms o más no abre la nota; un toque lento, un clic, Enter y un lector sí`)
+controlPositivo('la guarda vieja (por los 200 ms del carrusel, sin mirar el teclado)', (a, ahora) => a !== null && ahora - a.desde >= CARRUSEL.mantenerMs, guardaBien)
+afirmar(/if \(bloqueaElClic\(a, performance\.now\(\), e\.detail\)\) e\.preventDefault\(\)/.test(carrusel), 'la tarjeta usa esa guarda con el `detail` del clic')
 
 afirmarIgual(corridaDeLaFoto(0), 0, 'la foto de la tarjeta de ahora está en su lugar')
 afirmar(corridaDeLaFoto(1) === -CORRIDA_DE_LA_FOTO && corridaDeLaFoto(-1) === CORRIDA_DE_LA_FOTO, 'la de la vecina, corrida al revés de su lado')
-afirmar(corridaDeLaFoto(7) === -CORRIDA_DE_LA_FOTO && CORRIDA_DE_LA_FOTO < SOBRA * 100, 'acotada, y menos que lo que sobra la capa (no se ve el borde)')
+// La corrida va en % de la CAPA (que mide 1 + 2·SOBRA del marco); la sobra, en % del marco.
+afirmar(corridaDeLaFoto(7) === -CORRIDA_DE_LA_FOTO && CORRIDA_DE_LA_FOTO * (1 + 2 * SOBRA) < SOBRA * 100, 'acotada, y menos que lo que sobra la capa medido en el marco (no se ve el borde)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El parallax de las fotos')

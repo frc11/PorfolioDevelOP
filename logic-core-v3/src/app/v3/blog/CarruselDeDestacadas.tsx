@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react'
 
 import { CarruselDeTarjetas, type EstadoDeLaTarjeta } from '../_componentes/carrusel/CarruselDeTarjetas'
 import { ASOMA, relativoEnLaVuelta } from '../_componentes/carrusel/asoma'
-import { CARRUSEL } from '../_componentes/carrusel/maquinaDelCarrusel'
 import { EnlaceDeRuta } from '../_componentes/navegacion/EnlaceDeRuta'
 import { Caption, Cuerpo } from '../_componentes/tipografia/Textos'
 import { Titular } from '../_componentes/tipografia/Titular'
@@ -16,7 +15,7 @@ import { TitularQueSeLevanta, usePresencia } from '../_secciones/trabajos/portfo
 
 import { NOTAS_DESTACADAS, fechaLarga, minutosDeLectura, rutaDeLaNota } from './_notas/indice'
 import type { Nota } from './_notas/tipos'
-import { FORMA_DE_LA_DESTACADA, MS_POR_DESTACADA, corridaDeLaFoto } from './_movimiento/carrusel'
+import { FORMA_DE_LA_DESTACADA, MS_POR_DESTACADA, bloqueaElClic, corridaDeLaFoto, type ApoyoDelPuntero } from './_movimiento/carrusel'
 import { FotoDeNota } from './FotoDeNota'
 
 /**
@@ -43,7 +42,7 @@ export function CarruselDeDestacadas(): React.JSX.Element {
         vistasLlenas
         asoma={FORMA_DE_LA_DESTACADA}
         alCambiar={setActual}
-        claseDeLaVista="h-[min(72svh,34rem)] grid-rows-1 py-3 escritorio:h-[min(78svh,52rem)]"
+        claseDeLaVista="h-[min(72svh,34rem)] grid-rows-1 px-1 py-3 escritorio:h-[min(78svh,52rem)]"
         renderItem={(t, estado) => <TarjetaDestacada nota={t.nota} estado={estado} relativo={relativoEnLaVuelta(estado.indice, actual, ITEMS.length)} />}
       />
     </div>
@@ -65,12 +64,12 @@ function TarjetaDestacada({ nota, estado, relativo }: { readonly nota: Nota; rea
     return () => a.stop()
   }, [corrida, reducido, x])
 
-  // Mantener apretado pausa el carrusel (lo decide él): al soltar, ese clic no abre la nota. Un toque, un clic o Enter, sí.
-  const apoyo = useRef<{ desde: number; tipo: string } | null>(null)
+  // Un apoyo largo pausa el carrusel (lo decide él) y al soltar no abre la nota; un toque (aun lento), un clic, Enter o un lector, sí.
+  const apoyo = useRef<ApoyoDelPuntero | null>(null)
   const alHacerClic = (e: React.MouseEvent<HTMLAnchorElement>): void => {
     const a = apoyo.current
     apoyo.current = null
-    if (a !== null && performance.now() - a.desde >= CARRUSEL.mantenerMs) e.preventDefault()
+    if (bloqueaElClic(a, performance.now(), e.detail)) e.preventDefault()
   }
 
   return (
@@ -82,6 +81,9 @@ function TarjetaDestacada({ nota, estado, relativo }: { readonly nota: Nota; rea
       onPointerDown={(e) => {
         apoyo.current = { desde: performance.now(), tipo: e.pointerType }
       }}
+      onPointerCancel={() => {
+        apoyo.current = null
+      }}
       onClick={alHacerClic}
       // El menú del toque largo (Android) taparía la pausa; el clic derecho del mouse sigue.
       onContextMenu={(e) => {
@@ -90,7 +92,7 @@ function TarjetaDestacada({ nota, estado, relativo }: { readonly nota: Nota; rea
       className="group flex h-full w-full flex-col gap-[var(--spacing-4)]"
     >
       <FotoDeNota nota={nota} sizes={sizesPorViewport(80, 86)} corrimientoX={x} className="min-h-0 w-full flex-1" />
-      <span className="flex flex-col gap-[var(--spacing-2)] px-[var(--spacing-1)]">
+      <div className="flex flex-col gap-[var(--spacing-2)] px-[var(--spacing-1)]">
         <Caption como="span" interletrado="micro" className="font-codigo uppercase text-tinta-media">
           {fechaLarga(nota.fecha)} · {minutosDeLectura(nota)} min de lectura
         </Caption>
@@ -98,7 +100,7 @@ function TarjetaDestacada({ nota, estado, relativo }: { readonly nota: Nota; rea
           <TitularQueSeLevanta presencia={presencia}>{nota.titulo}</TitularQueSeLevanta>
         </Titular>
         <Cuerpo className="line-clamp-2 max-w-[60ch] text-tinta-media max-tablet:hidden">{nota.resumen}</Cuerpo>
-      </span>
+      </div>
     </EnlaceDeRuta>
   )
 }

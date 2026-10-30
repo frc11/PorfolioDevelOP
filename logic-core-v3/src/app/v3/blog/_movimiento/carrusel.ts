@@ -19,3 +19,22 @@ export function corridaDeLaFoto(relativo: number): number {
   const r = relativo < -1 ? -1 : relativo > 1 ? 1 : relativo
   return r === 0 ? 0 : -r * CORRIDA_DE_LA_FOTO
 }
+
+/**
+ * Cuánto tiene que durar un apoyo para que, al soltar, el clic NO abra la nota (ms). Más que el `mantenerMs` del carrusel (200, lo que pausa):
+ * un toque lento (200–450 ms) igual entra; un apoyo largo pausó para mirar y soltar no navega.
+ */
+export const APOYO_LARGO_MS = 450
+
+/** Un apoyo del puntero sobre la tarjeta: cuándo y con qué. */
+export interface ApoyoDelPuntero {
+  readonly desde: number
+  readonly tipo: string
+}
+
+/**
+ * Si el clic que llega tiene que cancelarse: sólo el que cierra un apoyo LARGO de ese mismo puntero. El clic del teclado o de un lector de
+ * pantalla (`detalle` 0) nunca, aunque haya quedado un apoyo viejo de un arrastre.
+ */
+export const bloqueaElClic = (apoyo: ApoyoDelPuntero | null, ahora: number, detalle: number): boolean =>
+  detalle !== 0 && apoyo !== null && ahora - apoyo.desde >= APOYO_LARGO_MS
