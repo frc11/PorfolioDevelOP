@@ -129,6 +129,14 @@ const TODOS: readonly Prototipo[] = [
     mirar: 'Los papeles sueltos de un negocio están tirados y torcidos; con el scroll, cada uno viaja a su columna de un tablero y se endereza. Subí: se desordenan.',
     sale: 'La llegada en curva de las fotos del equipo (cada foto viaja a su marco), con papeles en vez de fotos.',
   },
+  {
+    slug: 'pasa-solo',
+    codigo: 'I3',
+    titulo: 'Pasa solo',
+    pagina: 'Integraciones con IA',
+    mirar: 'Las tareas repetitivas se tildan solas al cruzar la mitad de la pantalla: el tilde se dibuja, la tarea se apaga y aparece «pasa solo». Con el sonido prendido, cada una hace el tic del sitio.',
+    sale: 'El trazo que se dibuja del signo ≠ de Quiénes somos, el despinte de lo tachado y el tic del sonido del sitio.',
+  },
 ]
 
 /** El orden del índice: el de `docs/ideas/COMO-MIRAR.md`, los que más creo primero. */
@@ -139,6 +147,7 @@ const ORDEN = [
   'lo-de-siempre-tachado',
   'el-sistema-que-se-ordena',
   'conversacion-en-vivo',
+  'pasa-solo',
   'historia-que-se-pinta',
   'como-trabajamos',
   'pantalla-que-se-dibuja',
