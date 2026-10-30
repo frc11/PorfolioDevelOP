@@ -12,7 +12,7 @@ import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_PORTADA, type Demo } from '../_seccione
 import { VentanaDeDemo } from '../_secciones/trabajos/demos/VentanaDeDemo'
 
 import { DEMOS } from './contenido'
-import { ALZA, PISADA, POSE_DE_LAS_TAPAS, corrimiento, papelDeLaTapa, transicionDelAlza, transicionDelCorrimiento } from './estante'
+import { ALZA, ESTANTE_EN_REPOSO, PISADA, POSE_DE_LAS_TAPAS, corrimiento, elegirLaTapa, papelDeLaTapa, soltarLaTapa, transicionDelAlza, transicionDelCorrimiento, type EstadoDelEstante } from './estante'
 
 /** El ancho de una tapa: un quinto largo del ancho en el teléfono, hasta 15rem. Todo el estante se mide en esta unidad. */
 const ANCHO_DE_LA_TAPA = { '--ancho-de-la-tapa': 'min(19vw, 15rem)' } as React.CSSProperties
@@ -27,14 +27,16 @@ const ANCHO_DE_LA_TAPA = { '--ancho-de-la-tapa': 'min(19vw, 15rem)' } as React.C
  */
 export function DemosEnConjunto(): React.JSX.Element {
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
-  const [activa, setActiva] = useState<number | null>(null)
-  const [ultima, setUltima] = useState<number | null>(null)
+  const [estante, setEstante] = useState<EstadoDelEstante>(ESTANTE_EN_REPOSO)
   const [abierta, setAbierta] = useState<{ readonly demo: Demo; readonly pieza: HTMLAnchorElement } | null>(null)
   const elegir = useCallback((i: number) => {
-    setActiva(i)
-    setUltima(i)
+    const ahora = performance.now()
+    setEstante((e) => elegirLaTapa(e, i, ahora))
   }, [])
-  const soltar = useCallback((i: number) => setActiva((a) => (a === i ? null : a)), [])
+  const soltar = useCallback((i: number) => {
+    const ahora = performance.now()
+    setEstante((e) => soltarLaTapa(e, i, ahora))
+  }, [])
   const alCerrar = useCallback((): void => setAbierta(null), [])
 
   const alHacerClic = (e: React.MouseEvent<HTMLAnchorElement>, demo: Demo): void => {
@@ -55,7 +57,7 @@ export function DemosEnConjunto(): React.JSX.Element {
         <ul data-pieza="estante-de-demos" aria-label="Las demos" style={ANCHO_DE_LA_TAPA} className="flex items-end justify-center pt-[var(--spacing-12)] pb-[var(--spacing-8)]">
           {CATALOGO_DE_DEMOS.map((demo, i) => {
             const pose = POSE_DE_LAS_TAPAS[i % POSE_DE_LAS_TAPAS.length]
-            const papel = papelDeLaTapa(i, activa, ultima)
+            const papel = papelDeLaTapa(i, estante.activa, estante.ultima)
             const elegida = papel === 'elegida'
             return (
               <li
@@ -66,7 +68,7 @@ export function DemosEnConjunto(): React.JSX.Element {
                 style={{
                   marginInline: `calc(var(--ancho-de-la-tapa) * ${String(-PISADA / 2)})`,
                   transform: `translateX(calc(var(--ancho-de-la-tapa) * ${corrimiento(papel).toFixed(4)}))`,
-                  transition: transicionDelCorrimiento(papel),
+                  transition: transicionDelCorrimiento(papel, estante),
                 }}
               >
                 <a
@@ -94,7 +96,7 @@ export function DemosEnConjunto(): React.JSX.Element {
                       transform: elegida
                         ? `translateY(calc(var(--ancho-de-la-tapa) * ${String(-ALZA)})) rotate(0deg)`
                         : `translateY(${String(pose.baja)}%) rotate(${String(pose.giro)}deg)`,
-                      transition: transicionDelAlza(papel),
+                      transition: transicionDelAlza(papel, estante),
                     }}
                   >
                     <Imagen src={demo.portada} alt="" ancho={MEDIDA_DE_LA_PORTADA.ancho} alto={MEDIDA_DE_LA_PORTADA.alto} sizes="(min-width: 1024px) 15rem, 19vw" className="block aspect-[2/3] w-full rounded-medio object-cover shadow-flotante" />
