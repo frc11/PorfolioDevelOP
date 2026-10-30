@@ -72,6 +72,49 @@ export function MarcoDeLaIntro({ children }: { readonly children: React.ReactNod
   )
 }
 
+/**
+ * [M1] EL MARCO DEL GIRO (la intro de día) — una pantalla fija arriba mientras la cámara hace el giro del home hacia Quiénes somos: el bloque
+ * de la página del lado contrario al logo, en el lugar que el home le da a esa sección. Desde 1024, el hueco a la izquierda y el bloque a
+ * la derecha (el espejo del marco del título); abajo de 1024, el hueco arriba y el bloque debajo. Mide su hueco igual que el del título.
+ */
+const MARCO_DEL_GIRO =
+  'grid h-svh grid-rows-[minmax(0,1fr)_auto] justify-items-center gap-[var(--spacing-6)] pt-[var(--zona-de-la-cabecera)] pb-[var(--spacing-12)] text-center escritorio:grid-cols-2 escritorio:grid-rows-1 escritorio:justify-items-start escritorio:gap-x-[var(--spacing-12)] escritorio:py-[var(--spacing-8)] escritorio:text-left'
+const COLUMNA_DEL_GIRO = 'flex w-full flex-col items-center escritorio:col-start-2 escritorio:row-start-1 escritorio:items-start escritorio:self-center escritorio:pr-[8vw]'
+const HUECO_DEL_GIRO = 'h-full min-h-0 w-full row-start-1 escritorio:col-start-1'
+
+export function MarcoDelGiro({ children }: { readonly children?: React.ReactNode }): React.JSX.Element {
+  const marco = useRef<HTMLDivElement>(null)
+  const hueco = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const m = marco.current
+    const h = hueco.current
+    if (m === null || h === null) return undefined
+    const medir = (): void => {
+      const rm = m.getBoundingClientRect()
+      const rh = h.getBoundingClientRect()
+      COMPOSICION_EN_LA_ESCENA.giro = rh.width > 0 && rh.height > 0 ? huecoEnElCuadro({ izquierda: rh.left, arriba: rh.top - rm.top, ancho: rh.width, alto: rh.height }, window.innerWidth, window.innerHeight) : null
+    }
+    medir()
+    const observador = new ResizeObserver(medir)
+    observador.observe(m)
+    observador.observe(h)
+    window.addEventListener('resize', medir)
+    return () => {
+      observador.disconnect()
+      window.removeEventListener('resize', medir)
+      COMPOSICION_EN_LA_ESCENA.giro = null
+    }
+  }, [])
+  return (
+    <div ref={marco} data-parte="marco-del-giro" className={MARCO_DEL_GIRO}>
+      <div ref={hueco} data-parte="hueco-del-giro" aria-hidden="true" className={HUECO_DEL_GIRO} />
+      <div data-parte={PARTES_DE_LA_COMPOSICION.columna} className={COLUMNA_DEL_GIRO}>
+        <div className="flex max-w-[46ch] flex-col gap-[var(--spacing-3)]">{children}</div>
+      </div>
+    </div>
+  )
+}
+
 /** La fila de «de qué se trata»: la columna en el mismo lugar que en el marco (el mismo eje). */
 export function FilaDeQueSeTrata({ children }: { readonly children: React.ReactNode }): React.JSX.Element {
   return (
