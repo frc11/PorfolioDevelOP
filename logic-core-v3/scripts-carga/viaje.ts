@@ -1,7 +1,8 @@
 /**
  * [B12b] EL VIAJE DESDE EL CTA DE UN SERVICIO DEL HOME HASTA SU PÁGINA — el Chrome del sistema a la vista contra el dev o el build (`BASE`),
  * `/api/` bloqueado, el patrón de `velo.ts`. Por ancho: el home, la sección Servicios en el primer servicio (Desarrollo web), el puntero
- * encima de su CTA (la precarga) y un clic; el viaje hasta `/v3/pagina-base` (hoy, el destino de los tres).
+ * encima de su CTA (la precarga) y un clic; el viaje hasta su página. [L7a] `SERVICIO=web|software|ia-automatizacion` (web por defecto):
+ * cada uno va a la suya (`/v3/paginas-web`, `/v3/software-a-medida`, `/v3/ia-y-automatizaciones`).
  *
  *   BASE=http://localhost:3004 ANCHOS=1440,390 npx tsx scripts-carga/viaje.ts
  *
@@ -35,7 +36,10 @@ const BASE = process.env.BASE ?? 'http://localhost:3002'
 const ANCHOS = (process.env.ANCHOS ?? '1440,390').split(',').map(Number)
 const CONTROL = process.env.CONTROL ?? ''
 if (!['', 'velo', 'sin-tapar', 'sin-hueco'].includes(CONTROL)) throw new Error(`CONTROL=${CONTROL}: velo, sin-tapar o sin-hueco`)
-const DESTINO = '/v3/pagina-base'
+const DESTINOS = { web: '/v3/paginas-web', software: '/v3/software-a-medida', 'ia-automatizacion': '/v3/ia-y-automatizaciones' } as const
+const SERVICIO = (process.env.SERVICIO ?? 'web') as keyof typeof DESTINOS
+if (!(SERVICIO in DESTINOS)) throw new Error(`SERVICIO=${SERVICIO}: web, software o ia-automatizacion`)
+const DESTINO = DESTINOS[SERVICIO]
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 const SALIDA = salidaDelBanco('viaje')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -117,13 +121,13 @@ const esClaro = (c: readonly [number, number, number]): boolean => c.every((v) =
 
 /** El CTA del primer servicio que está a la vista (hay uno por panel, por pantalla suelta y en el recomendador). */
 async function ctaALaVista(p: Page): Promise<{ readonly x: number; readonly y: number } | null> {
-  return p.evaluate(() => {
-    for (const el of document.querySelectorAll('[data-viaje-del-servicio="web"]')) {
+  return p.evaluate((servicio) => {
+    for (const el of document.querySelectorAll(`[data-viaje-del-servicio="${servicio}"]`)) {
       const r = el.getBoundingClientRect()
       if (r.width > 0 && r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth && el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) return { x: r.left + r.width / 2, y: r.top + r.height / 2 }
     }
     return null
-  })
+  }, SERVICIO)
 }
 
 /** Al primer servicio: desde 1024 la barra viaja a Servicios y una muesca entra Desarrollo web; abajo, su pantalla suelta (sin Lenis). */
@@ -134,7 +138,7 @@ async function alPrimerServicio(p: Page, movil: boolean): Promise<void> {
     await p.evaluate(() => document.getElementById('servicios')?.scrollIntoView({ block: 'start', behavior: 'instant' }))
     await dormir(1500)
     // Paso por paso hasta que el CTA de web esté a la vista (el panel de web entra desde la izquierda en el suyo).
-    for (let paso = 0; paso < 4; paso++) {
+    for (let paso = 0; paso < 6; paso++) {
       await p.evaluate((k) => {
         const g = (window as Window & { __gatillosDelBanco?: { regla: () => { pasoPx: number; inicio: number } } }).__gatillosDelBanco
         if (!g) throw new Error('sin __gatillosDelBanco (¿el banco prendido? ¿la coreografía?)')
@@ -154,7 +158,7 @@ async function alPrimerServicio(p: Page, movil: boolean): Promise<void> {
   await dormir(4000)
   await p.mouse.move(400, 450)
   // [NOCTURNO] El viaje de la barra puede dejar la sección antes de la entrada: de a una muesca (cada una es un paso), hasta web.
-  for (let i = 0; i < 3 && (await ctaALaVista(p)) === null; i++) {
+  for (let i = 0; i < 6 && (await ctaALaVista(p)) === null; i++) {
     await p.mouse.wheel(0, 120)
     await dormir(3500)
   }
@@ -274,7 +278,7 @@ async function main(): Promise<void> {
       const bien = conViaje && cambioLlegado && vistaAntes === 0 && enBlanco === 0 && (movil || llegadaBien) && sonidosBien
       const pct = (v: number): string => `${(v * 100).toFixed(2)} %`
       const linea =
-        `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · el CTA de web → ${DESTINO} · total ${total.toFixed(0)} ms` +
+        `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · el CTA de ${SERVICIO} → ${DESTINO} · total ${total.toFixed(0)} ms` +
         ` · ${conViaje ? 'cubrió la escena (data-modo=viaje)' : 'NO cubrió la escena (la banda)'} · el cambio de ruta ${cambio === undefined ? 'no se vio' : `con la cámara en ${cambio.camara.toFixed(3)} y la noche en ${cambio.noche.toFixed(3)}`}` +
         ` · la página nueva ${vistaAntes === 0 ? 'tapada hasta el destape' : `A LA VISTA antes del destape en ${String(vistaAntes)} cuadros`}` +
         ` · screencast: ${String(fotos.length)} cuadros, ${String(enBlanco)} en blanco (${String(oscurosPlanos)} oscuros planos, un dato)` +
