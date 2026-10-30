@@ -48,7 +48,7 @@ export function caeElTitulo(fondo: number, fijo: number, alto: number, antes: nu
  * los nombres de las páginas de servicio (su `NOMBRE`, `_servicios/datos/*.ts` de paginas/servicios), los tres de `acento.ts` (los de la
  * ruta de prueba, `?nombre=`) y el de la prueba. s78 exige cada letra en cada instancia; un título nuevo obliga a regenerar.
  */
-export const TITULOS_CON_LETRAS = ['Páginas web', 'Software a medida', 'IA y automatizaciones', 'Desarrollo web', 'Integraciones de IA y Automatizaciones', 'Integraciones con IA', 'Prueba de la intro'] as const
+export const TITULOS_CON_LETRAS = ['Páginas web', 'Software a medida', 'IA y automatizaciones', 'Desarrollo web', 'Integraciones de IA y Automatizaciones', 'Integraciones con IA', 'Prueba de la intro', 'Nosotros', 'Portfolio', 'Blog'] as const
 
 /** Las dos partes del título: las dadas, o la primera palabra y el resto (unidas con un espacio dan el título). */
 export function partesDelTitulo(titulo: string, partes?: readonly [string, string]): readonly [string, string] {

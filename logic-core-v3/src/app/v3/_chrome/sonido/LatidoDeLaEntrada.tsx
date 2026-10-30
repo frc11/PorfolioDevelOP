@@ -23,7 +23,7 @@ import { decisionDeLaVentana } from '../preloader/decision'
  * efecto vuelva a correr o la pieza se vuelva a montar (`tomarElLatido`, un registro de la carga), y recién con la página lista
  * (`paginaLista`): una carga lenta espera, no apila latidos.
  */
-export const LATIDO_DE_LA_ENTRADA = { desdePx: 1024, demoraMs: 250, demoraDeLaRutaMs: 900, esperaMaximaMs: 20000, grosorPx: 2, ondaMs: 2500 } as const
+export const LATIDO_DE_LA_ENTRADA = { desdePx: 1024, demoraMs: 250, demoraDeLaRutaMs: 900, esperaMaximaMs: 20000, grosorPx: 2, ondaMs: 2500, fueraDelPreloader: false } as const
 
 const BOTON = '[data-pieza="control-del-sonido"]'
 const VELO = '[data-pieza="velo-de-carga"]'
@@ -103,6 +103,8 @@ export function LatidoDeLaEntrada(): React.JSX.Element | null {
 
   // Cuándo late: en cada entrada (la carga y cada ruta nueva), con el botón, la página lista y la pestaña a la vista.
   useEffect(() => {
+    // [L7d · 7] Las ondas son sólo del preloader (el suyo): fuera de él no se dispara ninguna. Con `true` vuelve el latido de cada entrada de L8b/L9b.
+    if (!LATIDO_DE_LA_ENTRADA.fueraDelPreloader) return undefined
     const entrada = numeroDeLaEntrada(ruta)
     const esPrimera = entrada === 1
     if ((esPrimera && conPreloader()) || !window.matchMedia(`(min-width: ${String(LATIDO_DE_LA_ENTRADA.desdePx)}px)`).matches) return undefined

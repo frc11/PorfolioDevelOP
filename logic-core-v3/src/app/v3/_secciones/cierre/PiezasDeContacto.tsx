@@ -1,8 +1,9 @@
 import { DosCopias } from '../../_componentes/rollover/DosCopias'
+import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { BloqueSolido } from '../../_componentes/volumen/BloqueSolido'
 import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
-import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, REDES, WHATSAPP } from './contacto'
+import { HREF_DEL_MAIL, LINEA_LEGAL, MAIL, PAGINAS_DEL_PIE, PAGINAS_LEGALES, REDES, WHATSAPP } from './contacto'
 import { IconoDeMarca } from './IconosDeMarca'
 
 /**
@@ -65,11 +66,42 @@ export function RedesDelPie(): React.JSX.Element {
   )
 }
 
-/** La línea legal, chica. Sin enlaces: todavía no hay páginas de privacidad ni de términos. */
-export function LineaLegal(): React.JSX.Element {
+const CLASE_DEL_ENLACE = 'text-caption font-semi underline-offset-4 hover:underline focus-visible:underline'
+
+/**
+ * [L7d · 3] LA LÍNEA LEGAL Y LAS PÁGINAS — lo de abajo del pie, en el home y en cada página: el grupo «Páginas» (Nosotros, Portfolio, Blog y las tres de
+ * servicio) y, debajo, la línea legal con Privacidad y Términos. Los enlaces son `EnlaceDeRuta` (el velo) y van en el DOM plano, sin 3D (como el resto
+ * de los enlaces de abajo). `alineado="fin"`: a la derecha desde 1024 (la fila de abajo del pie plano). Sin `alineado` (el pie 3D del home, desde 1025) queda la línea de siempre, sin enlaces: la escena mide ese DOM para colocar sus bloques y un renglón más lo desacomoda (medido: los enlaces quedaban sobre el recorrido y las redes). Dónde van Privacidad y Términos en el pie 3D lo decide Valentino.
+ */
+/** El renglón legal (3D desde 1025): el único `TextoDelPie` de la línea, en las dos formas de `LineaLegal`. */
+function RenglonLegal(): React.JSX.Element {
   return (
     <TextoDelPie>
       <Micro como="p">{LINEA_LEGAL}</Micro>
     </TextoDelPie>
+  )
+}
+
+export function LineaLegal({ alineado }: { readonly alineado?: 'fin' }): React.JSX.Element {
+  if (alineado === undefined) return <RenglonLegal />
+  return (
+    <div data-pieza="paginas-y-legal-del-pie" className="flex flex-col gap-[var(--spacing-2)] escritorio:items-end">
+      <nav aria-label="Páginas" className="flex flex-wrap items-center gap-x-[var(--spacing-4)] gap-y-[var(--spacing-1)] escritorio:justify-end">
+        <Micro como="span">Páginas</Micro>
+        {PAGINAS_DEL_PIE.map((p) => (
+          <EnlaceDeRuta key={p.destino} href={p.destino} className={CLASE_DEL_ENLACE}>
+            {p.rotulo}
+          </EnlaceDeRuta>
+        ))}
+      </nav>
+      <div className="flex flex-wrap items-center gap-x-[var(--spacing-4)] gap-y-[var(--spacing-1)]">
+        <RenglonLegal />
+        {PAGINAS_LEGALES.map((p) => (
+          <EnlaceDeRuta key={p.destino} href={p.destino} className={CLASE_DEL_ENLACE}>
+            {p.rotulo}
+          </EnlaceDeRuta>
+        ))}
+      </div>
+    </div>
   )
 }

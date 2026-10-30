@@ -31,3 +31,19 @@ export const REDES: readonly { readonly red: RedDelPie; readonly rotulo: string;
 
 /** Sin páginas de privacidad ni de términos todavía: la línea legal va sin enlaces. */
 export const LINEA_LEGAL = '© 2026 develOP. Todos los derechos reservados.'
+
+/** [L7d · 3] Las páginas del sitio que el pie enlaza (el grupo «Páginas»): las nuevas y las tres de servicio (sus rutas son las de la barra). */
+export const PAGINAS_DEL_PIE: readonly { readonly rotulo: string; readonly destino: string }[] = [
+  { rotulo: 'Nosotros', destino: '/v3/nosotros' },
+  { rotulo: 'Portfolio', destino: '/v3/portfolio' },
+  { rotulo: 'Blog', destino: '/v3/blog' },
+  { rotulo: 'Páginas web', destino: '/v3/paginas-web' },
+  { rotulo: 'Software a medida', destino: '/v3/software-a-medida' },
+  { rotulo: 'IA y automatizaciones', destino: '/v3/ia-y-automatizaciones' },
+]
+
+/** [L7d · 1] Los enlaces legales de la línea de abajo. */
+export const PAGINAS_LEGALES: readonly { readonly rotulo: string; readonly destino: string }[] = [
+  { rotulo: 'Privacidad', destino: '/v3/privacidad' },
+  { rotulo: 'Términos', destino: '/v3/terminos' },
+]

@@ -59,11 +59,11 @@ VALORES = [
 # [B12a.4] Los títulos de las páginas (`TITULOS_CON_LETRAS`, `_componentes/titulos3d/presets.ts`): los nombres de las páginas de servicio
 # (su `NOMBRE`, en `_servicios/datos/*.ts` de paginas/servicios), los tres de `acento.ts` (la ruta de prueba, `?nombre=`) y el de la
 # prueba. Un nombre nuevo obliga a volver a correr (s78 exige cada letra en cada instancia).
-TEXTOS_DE_PAGINA = ['Páginas web', 'Software a medida', 'IA y automatizaciones', 'Desarrollo web', 'Integraciones de IA y Automatizaciones', 'Integraciones con IA', 'Prueba de la intro']
+TEXTOS_DE_PAGINA = ['Páginas web', 'Software a medida', 'IA y automatizaciones', 'Desarrollo web', 'Integraciones de IA y Automatizaciones', 'Integraciones con IA', 'Prueba de la intro', 'Nosotros', 'Portfolio', 'Blog']
 # [B12a.4] Las instancias (nombre, wdth, wght). [B12a.8] Las de las cuatro familias que se comparan (`COMBINACIONES_DEL_TITULO`): 125/800 y
 # 125/300 (la 1, la del «6»), 75/900 y 75/500 (la 2), 125/200 y 125/500 (la 3), 75/800 y 125/300 (la 4); la 112,5/300 salió con la 2 vieja.
 # 125/400: la opción `?legibilidad=peso` (la parte liviana de la 1, un paso más pesada).
-INSTANCIAS_DE_PAGINA = [('125-800', 125, 800), ('125-300', 125, 300), ('75-800', 75, 800), ('75-900', 75, 900), ('75-500', 75, 500), ('125-200', 125, 200), ('125-500', 125, 500), ('125-400', 125, 400)]
+INSTANCIAS_DE_PAGINA = [('125-800', 125, 800), ('125-300', 125, 300), ('125-400', 125, 400)]
 
 PEDIDOS = [
     {'origen': 'chivo-latin.woff2', 'peso': 400, 'familia': 'Chivo', 'licencia': 'OFL-chivo.txt',

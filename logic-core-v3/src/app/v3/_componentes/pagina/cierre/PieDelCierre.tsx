@@ -85,7 +85,7 @@ function ContenidoDelPie({ progreso }: { readonly progreso: Progreso }): React.J
       <div data-columna-del-pie="" className="tablet:col-span-2 escritorio:absolute escritorio:inset-x-0 escritorio:bottom-0">
         <LlegaEnElPie progreso={progreso} ventana={LLEGADAS_DEL_PIE.abajo} className="flex flex-col gap-[var(--spacing-2)] tablet:gap-[var(--spacing-6)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
           <RedesDelPie />
-          <LineaLegal />
+          <LineaLegal alineado="fin" />
         </LlegaEnElPie>
       </div>
     </Pie>
