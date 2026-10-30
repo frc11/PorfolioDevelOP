@@ -31,8 +31,10 @@ import {
   TRAMO_DEL_TITULO,
   avanceDeLaIntro,
   avanceDelGiro,
+  INTRO_LARGA_MONTADA,
   esIntroDeDia,
   pantallasDeLaIntro,
+  tieneIntroLarga,
 } from '../escena/ruta/pistaDeLaIntro'
 import type { PresetDeLaEscena } from '../escena/ruta/preset'
 import { HISTORIA } from '../../nosotros/contenido'
@@ -71,10 +73,24 @@ const DIA: PresetDeLaEscena = { id: 'nosotros', tramos: { intro: SELECTOR_DE_LA_
 const NOCHE: PresetDeLaEscena = { ...DIA, id: 'base', noche: 'noche' }
 const SIN_PISTA: PresetDeLaEscena = { ...DIA, pista: null }
 
+type Larga = typeof tieneIntroLarga
+const largaBien = (f: Larga): boolean => f(DIA, true) && !f(DIA, false) && !f(NOCHE, true) && !f(SIN_PISTA, true) && !f(null, true)
+afirmar(largaBien(tieneIntroLarga), 'la intro larga es la de una página de día con pista Y con su bloque (Nosotros, Portfolio, el índice del blog); una nota sin bloque, las de noche (servicios) y las sin pista quedan con la corta')
+controlPositivo('  el detector ve una que la monta sin bloque (dos pantallas vacías en una nota)', ((p) => p !== null && p.pista !== null && p.noche === 'dia') as Larga, largaBien)
+
+// La escena la toma recién con el marco del giro montado (lo cuenta el marco: con la navegación cliente puede haber dos un instante).
 type EsDeDia = typeof esIntroDeDia
-const deDiaBien = (f: EsDeDia): boolean => f(DIA) && !f(NOCHE) && !f(SIN_PISTA) && !f(null)
-afirmar(deDiaBien(esIntroDeDia), 'la intro de día es la de una página de día con pista (Nosotros, Portfolio, el blog); las de noche (servicios) y las sin pista, no')
-controlPositivo('  el detector ve una que toma también la noche', ((p) => p !== null && p.pista !== null) as EsDeDia, deDiaBien)
+const escenaBien = (f: EsDeDia): boolean => {
+  INTRO_LARGA_MONTADA.montados = 0
+  const sinMarco = !f(DIA)
+  INTRO_LARGA_MONTADA.montados = 1
+  const conMarco = f(DIA) && !f(NOCHE) && !f(SIN_PISTA) && !f(null)
+  INTRO_LARGA_MONTADA.montados = 0
+  return sinMarco && conMarco
+}
+afirmar(escenaBien(esIntroDeDia), 'la escena toma la pista larga sólo de día y con el marco del giro montado')
+controlPositivo('  el detector ve una escena que la toma sin el marco', ((p) => p !== null && p.pista !== null && p.noche === 'dia') as EsDeDia, escenaBien)
+INTRO_LARGA_MONTADA.montados = 1
 
 const largosBien = (f: typeof pantallasDeLaIntro): boolean => f(DIA) === TRAMO_DEL_TITULO + 2 && f(NOCHE) === PANTALLAS_DE_LA_INTRO && PANTALLAS_DE_LA_INTRO === 1.8
 afirmar(largosBien(pantallasDeLaIntro) && PANTALLAS_DE_LA_INTRO_DE_DIA === 3.4, `la de día mide ${String(PANTALLAS_DE_LA_INTRO_DE_DIA)} pantallas (el título, ${String(TRAMO_DEL_TITULO)}, y dos del giro: el hero y Quiénes somos del home); la de noche sigue en 1,8`)
@@ -138,6 +154,10 @@ const marcadoBien = (dia: string, noche: string): boolean =>
   noche.includes(`--pantallas-de-la-intro:${String(PANTALLAS_DE_LA_INTRO)}`) && !noche.includes('marco-del-giro')
 afirmar(marcadoBien(htmlDia, htmlNoche), 'de día, el bloque de la página va en el marco del giro (fijo, una pantalla, con su hueco del logo); de noche, la fila corta de siempre')
 controlPositivo('  el detector ve la intro de día con la fila corta', htmlNoche.replace('1.8', String(PANTALLAS_DE_LA_INTRO_DE_DIA)), (d: string) => marcadoBien(d, htmlNoche))
+const htmlNota = renderToStaticMarkup(<IntroDeLaPagina titulo="Blog" bajada={<p>La bajada.</p>} preset={DIA} />)
+const notaBien = (h: string): boolean => h.includes(`--pantallas-de-la-intro:${String(PANTALLAS_DE_LA_INTRO)}`) && !h.includes('marco-del-giro')
+afirmar(notaBien(htmlNota), 'de día sin bloque (una nota del blog), la intro corta: sin dos pantallas de giro vacías')
+controlPositivo('  el detector ve la nota con el giro vacío', htmlDia, notaBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · [M1] La historia: sube entera y se pintan sólo tres frases')
@@ -167,9 +187,11 @@ controlPositivo('  el detector ve una línea que no se acota', ((t: number, l: n
 titulo('2 · [M1] El equipo: la segunda toma por scroll en el teléfono y la facultad a su tamaño')
 
 const equipo = leer('nosotros/Equipo.tsx')
-const equipoBien = (s: string): boolean => s.includes('porScroll={!escritorio}') && s.includes("querySelector<HTMLButtonElement>('[data-toque=\"marco\"]')") && s.includes('useAlCruzar(caja, alCambiar, porScroll)') && s.includes('max-w-[500px]')
+// La clase del tope de la foto, partida (Tailwind lee este archivo: entera, la emitiría).
+const TOPE_DE_LA_FOTO = ['max-w-', '[500', 'px]'].join('')
+const equipoBien = (s: string): boolean => s.includes('porScroll={!escritorio}') && s.includes("querySelector<HTMLButtonElement>('[data-toque=\"marco\"]')") && s.includes('useAlCruzar(caja, alCambiar, porScroll)') && s.includes(TOPE_DE_LA_FOTO)
 afirmar(equipoBien(equipo) && FACULTAD.ancho === 500 && FACULTAD.leyenda === 'FACET · Universidad Nacional de Tucumán' && existsSync(path.join(RAIZ, 'public/v3/nosotros/facultad.webp')), 'abajo de 1024 la foto aprieta el botón del marco al cruzar la mitad (y al volver); la facultad, en webp, a 500 px como mucho, con su leyenda')
-controlPositivo('  el detector ve la foto estirada a todo el ancho', equipo.replace('max-w-[500px]', 'max-w-none'), equipoBien)
+controlPositivo('  el detector ve la foto estirada a todo el ancho', equipo.replace(TOPE_DE_LA_FOTO, 'max-w-none'), equipoBien)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · [M1] Los casos: alternados, escritos y en papel')
@@ -206,8 +228,8 @@ const contraste = (a: string, b: string): number => {
 }
 const PAPEL = '#F7F7F5'
 type Marcas = typeof MARCA_SOBRE_EL_PAPEL
-const marcasBien = (m: Marcas): boolean => Object.values(m).every((c) => (c.startsWith('#') ? contraste(c, PAPEL) >= 4.5 : c === 'var(--color-tinta)'))
-afirmar(marcasBien(MARCA_SOBRE_EL_PAPEL), `«Visitar sitio» en el color de cada marca pasado a AA sobre el papel (${Object.entries(MARCA_SOBRE_EL_PAPEL).map(([k, c]) => `${k} ${c.startsWith('#') ? contraste(c, PAPEL).toFixed(2) : 'tinta'}`).join(', ')})`)
+const marcasBien = (m: Marcas): boolean => Object.values(m).every((c) => (c === null || contraste(c, PAPEL) >= 4.5))
+afirmar(marcasBien(MARCA_SOBRE_EL_PAPEL), `«Visitar sitio» en el color de cada marca pasado a AA sobre el papel (${Object.entries(MARCA_SOBRE_EL_PAPEL).map(([k, c]) => `${k} ${c === null ? 'la tinta' : contraste(c, PAPEL).toFixed(2)}`).join(', ')})`)
 controlPositivo('  el detector ve el naranja de la noche sobre el papel', { ...MARCA_SOBRE_EL_PAPEL, 'el-garage': '#FA9408' }, marcasBien)
 
 // ═══════════════════════════════════════════════════════════════════════════

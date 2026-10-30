@@ -20,6 +20,9 @@ const ALTO_DEL_POSTER = 1000
 const ANCHO_DEL_POSTER = 1600
 const SIZES_DEL_CASO = '(min-width: 1024px) 55vw, 100vw'
 
+/** Dónde cruza el encabezado de un caso para que entre su texto (y dónde, al volver a bajar, se va), en fracción del alto. */
+const LINEA_DEL_CASO = { entra: 0.85, sale: 0.97 } as const
+
 /** [M1] De qué lado va el medio: el primer caso a la izquierda, el segundo a la derecha, el tercero a la izquierda (Valentino). */
 export const ladoDelMedio = (indice: number): 'izquierda' | 'derecha' => (indice % 2 === 0 ? 'izquierda' : 'derecha')
 
@@ -62,11 +65,17 @@ function RecorridoDelCaso({ proyecto }: { readonly proyecto: ProyectoDelPortfoli
 export function CasoDelPortfolio({ proyecto, indice, total }: { readonly proyecto: ProyectoDelPortfolio; readonly indice: number; readonly total: number }): React.JSX.Element {
   const reducido = usePrefiereMenosMovimiento()
   const encabezado = useRef<HTMLElement>(null)
-  const [visible, setVisible] = useState(false)
+  // A la vista en el HTML servido (sin JS se lee); al montar, se esconde si todavía no cruzó la línea, para entrar con su ritmo.
+  const [visible, setVisible] = useState(true)
   const alCambiar = useCallback((adentro: boolean) => setVisible(adentro), [])
-  useAlCruzar(encabezado, alCambiar, true, 0.85, 0.97)
+  useEffect(() => {
+    const r = encabezado.current?.getBoundingClientRect()
+    if (r !== undefined && (r.top + r.height / 2) / window.innerHeight >= LINEA_DEL_CASO.entra) setVisible(false)
+  }, [])
+  useAlCruzar(encabezado, alCambiar, true, LINEA_DEL_CASO.entra, LINEA_DEL_CASO.sale)
   const relato = RELATOS[proyecto.slug]
-  const marca = { '--color-tinta': MARCA_SOBRE_EL_PAPEL[proyecto.slug] } as React.CSSProperties
+  const colorDeLaMarca = MARCA_SOBRE_EL_PAPEL[proyecto.slug]
+  const marca = colorDeLaMarca === null ? undefined : ({ '--color-tinta': colorDeLaMarca } as React.CSSProperties)
   const aLaDerecha = ladoDelMedio(indice) === 'derecha'
   const detalles = [proyecto.rubro, proyecto.fecha].filter((d): d is string => d !== null)
   // El orden de la secuencia: 0 el encabezado, después los párrafos, la reseña (si hay) y los detalles con el enlace.

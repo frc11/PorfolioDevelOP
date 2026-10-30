@@ -50,18 +50,20 @@ export function ComoTrabajamos(): React.JSX.Element {
     <SeccionDePapel dato="proceso" claseDeContenido="gap-[var(--spacing-16)]">
       <TituloQueSube titulo={PROCESO.titulo} como="h2" nivel="titulo-l" />
       <CoreografiaEnTodoAncho>
-        <ol data-pieza="como-trabajamos" className="relative pb-[30svh]">
-          {/* La línea: de punta a punta de la columna, del grosor del trazo, dibujada de arriba hacia abajo. */}
+        <div data-pieza="como-trabajamos" className="relative pb-[30svh]">
+          {/* La línea: de punta a punta de la columna, del grosor del trazo, dibujada de arriba hacia abajo (afuera de la lista: una lista sólo lleva sus pasos). */}
           <span ref={fondo} data-linea="fondo" aria-hidden="true" className="absolute top-0 bottom-[30svh] left-0 w-[calc(var(--border-hairline)*3)] bg-borde" />
           <span ref={linea} data-linea="tinta" aria-hidden="true" className="absolute top-0 bottom-[30svh] left-0 w-[calc(var(--border-hairline)*3)] origin-top bg-tinta will-change-transform" style={{ transform: 'scaleY(0)' }} />
-          {PROCESO.pasos.map((p, i) => (
-            <li key={p.titulo} className="relative pb-[16svh] pl-[var(--spacing-8)] last:pb-0 tablet:pl-[var(--spacing-16)]">
-              <Bloque patron="P1" rango="ventana-del-trazo">
-                {(progreso) => <Paso progreso={progreso} numero={i + 1} titulo={p.titulo} texto={p.texto} />}
-              </Bloque>
-            </li>
-          ))}
-        </ol>
+          <ol>
+            {PROCESO.pasos.map((p, i) => (
+              <li key={p.titulo} className="relative pb-[16svh] pl-[var(--spacing-8)] last:pb-0 tablet:pl-[var(--spacing-16)]">
+                <Bloque patron="P1" rango="ventana-del-trazo">
+                  {(progreso) => <Paso progreso={progreso} numero={i + 1} titulo={p.titulo} texto={p.texto} />}
+                </Bloque>
+              </li>
+            ))}
+          </ol>
+        </div>
       </CoreografiaEnTodoAncho>
     </SeccionDePapel>
   )

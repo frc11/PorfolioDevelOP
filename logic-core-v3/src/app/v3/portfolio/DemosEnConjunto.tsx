@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { Imagen } from '../_componentes/medios/Imagen'
 import { Cuerpo } from '../_componentes/tipografia/Textos'
@@ -33,15 +33,25 @@ export function DemosEnConjunto(): React.JSX.Element {
     const ahora = performance.now()
     setEstante((e) => elegirLaTapa(e, i, ahora))
   }, [])
-  const soltar = useCallback((i: number) => {
+  // Con una demo abierta la tapa no se suelta: el velo de la ventana le saca el puntero, y el Genie vuelve a la caja de la tapa levantada.
+  const conLaVentana = useRef(false)
+  const lista = useRef<HTMLUListElement>(null)
+  const soltar = useCallback((i: number | null) => {
+    if (conLaVentana.current) return
     const ahora = performance.now()
-    setEstante((e) => soltarLaTapa(e, i, ahora))
+    setEstante((e) => (i === null ? (e.activa === null ? e : soltarLaTapa(e, e.activa, ahora)) : soltarLaTapa(e, i, ahora)))
   }, [])
-  const alCerrar = useCallback((): void => setAbierta(null), [])
+  const alCerrar = useCallback((): void => {
+    setAbierta(null)
+    conLaVentana.current = false
+    // Al volver el Genie, si el mouse ya no está sobre el estante, la tapa baja.
+    if (lista.current?.matches(':hover') !== true) soltar(null)
+  }, [soltar])
 
   const alHacerClic = (e: React.MouseEvent<HTMLAnchorElement>, demo: Demo): void => {
     if (!escritorio || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
     e.preventDefault()
+    conLaVentana.current = true
     setAbierta({ demo, pieza: e.currentTarget })
   }
 
@@ -54,7 +64,9 @@ export function DemosEnConjunto(): React.JSX.Element {
         </Gatillo>
       </div>
       <div className="overflow-x-clip">
-        <ul data-pieza="estante-de-demos" aria-label="Las demos" style={ANCHO_DE_LA_TAPA} className="flex items-end justify-center pt-[var(--spacing-12)] pb-[var(--spacing-8)]">
+        {/* El mouse suelta la tapa al salir del ESTANTE, no de cada tapa: al abrirse, las vecinas dejan un hueco bajo el borde de la elegida
+            y soltarla ahí la hacía titilar. Entre tapas, la elegida cambia al entrar a otra. */}
+        <ul ref={lista} data-pieza="estante-de-demos" aria-label="Las demos" style={ANCHO_DE_LA_TAPA} onPointerLeave={() => soltar(null)} className="flex items-end justify-center pt-[var(--spacing-12)] pb-[var(--spacing-8)]">
           {CATALOGO_DE_DEMOS.map((demo, i) => {
             const pose = POSE_DE_LAS_TAPAS[i % POSE_DE_LAS_TAPAS.length]
             const papel = papelDeLaTapa(i, estante.activa, estante.ultima)
@@ -82,7 +94,6 @@ export function DemosEnConjunto(): React.JSX.Element {
                   onPointerEnter={(e) => {
                     if (e.pointerType === 'mouse' || e.pointerType === 'pen') elegir(i)
                   }}
-                  onPointerLeave={() => soltar(i)}
                   onFocus={(e) => {
                     if (e.currentTarget.matches(':focus-visible')) elegir(i)
                   }}

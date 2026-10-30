@@ -1,5 +1,5 @@
 import { PresetDeLaPagina } from '../../_lib/escena/ruta/PresetDeLaPagina'
-import { PANTALLAS_DE_LA_INTRO, PANTALLAS_DE_LA_INTRO_DE_DIA, TRAMO_DEL_TITULO, esIntroDeDia } from '../../_lib/escena/ruta/pistaDeLaIntro'
+import { PANTALLAS_DE_LA_INTRO, PANTALLAS_DE_LA_INTRO_DE_DIA, TRAMO_DEL_TITULO, tieneIntroLarga } from '../../_lib/escena/ruta/pistaDeLaIntro'
 import { ATRIBUTO_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import type { PresetDeLaEscena } from '../../_lib/escena/ruta/preset'
 import { Envoltorio } from '../layout/Envoltorio'
@@ -47,6 +47,8 @@ const ALTOS = altosDe(PANTALLAS_DE_LA_INTRO)
 const ALTOS_DE_DIA = altosDe(PANTALLAS_DE_LA_INTRO_DE_DIA)
 
 export function IntroDeLaPagina({ titulo, partes, bajada, deQueSeTrata, preset }: PropsDeLaIntro): React.JSX.Element {
+  // [M1] La intro larga de día necesita su bloque: sin él (una nota del blog) queda la corta.
+  const larga = tieneIntroLarga(preset, deQueSeTrata !== undefined)
   return (
     <section
       // [B12a.3] El atributo lleva el id de la página y, con acento, el bloque es del servicio (`[data-servicio]` pone su claro).
@@ -55,7 +57,7 @@ export function IntroDeLaPagina({ titulo, partes, bajada, deQueSeTrata, preset }
       aria-label={titulo}
       // De noche, sobre la escena, los claros (los tokens de la sección invertida).
       data-seccion={preset.noche === 'noche' ? 'invertida' : undefined}
-      style={esIntroDeDia(preset) ? ALTOS_DE_DIA : ALTOS}
+      style={larga ? ALTOS_DE_DIA : ALTOS}
       className="relative h-[calc(var(--pantallas-de-la-intro)*100svh)] text-tinta"
     >
       <PresetDeLaPagina preset={preset} />
@@ -68,7 +70,7 @@ export function IntroDeLaPagina({ titulo, partes, bajada, deQueSeTrata, preset }
           </MarcoDeLaIntro>
         </Envoltorio>
       </div>
-      {esIntroDeDia(preset) ? (
+      {larga ? (
         // [M1] De día: el giro del home hacia Quiénes somos, con el bloque de la página fijo del lado contrario al logo.
         <div data-parte={TRAMOS_DE_LA_INTRO.deQueSeTrata} className="h-[calc((var(--pantallas-de-la-intro)-var(--tramo-del-titulo))*100svh)]">
           <Envoltorio className="sticky top-0">

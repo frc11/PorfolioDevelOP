@@ -28,7 +28,7 @@ export const RELATOS: Readonly<Record<SlugDelProyecto, { readonly titulo: string
   'el-garage': {
     titulo: 'Un catálogo para que ningún auto se pierda',
     parrafos: [
-      'El Garage es una concesionaria, y antes de la página no tenía un catálogo. Cada auto que entraba se publicaba en Facebook y, con el correr de las semanas, se perdía entre las publicaciones. Para quien buscaba un auto puntual, encontrarlo dependía de la suerte; para la concesionaria, cada ingreso nuevo tapaba al anterior.',
+      'El Garage es una concesionaria, y antes de la página no tenía un catálogo. Cada auto que entraba se publicaba en Facebook y, con el correr de las semanas, se perdía entre las publicaciones. Quien buscaba un auto puntual tenía que bajar entre publicaciones; para la concesionaria, cada ingreso nuevo tapaba al anterior.',
       'Lo que hicimos fue un catálogo de muchos filtros. Cada auto tiene su lugar y se busca con los filtros, en vez de bajar por un muro de publicaciones. En la portada aparecen los últimos ingresos, así lo nuevo se ve apenas llega, y todo lo demás queda a mano en el catálogo, tanto en el teléfono como en la computadora.',
       'Como todo lo que hacemos, se pensó desde cero para este negocio y para el problema que tenía, con nuestro estándar de calidad. Hoy, con la página, tienen todo ordenado: los autos dejaron de depender de una publicación que se hunde y pasaron a tener un lugar propio.',
     ],
@@ -46,7 +46,7 @@ export const RELATOS: Readonly<Record<SlugDelProyecto, { readonly titulo: string
     parrafos: [
       'Banú Scents vende perfumes árabes. Igual que le pasaba a Esquina Estudio, no tenía presencia digital: no había un lugar propio donde mostrar lo que ofrece y donde alguien que los conoce pudiera volver a encontrarlos.',
       'Hicimos una página simple pero bonita. Simple, porque quien entra quiere ver perfumes y no perderse en menús; bonita, porque un perfume también se elige por cómo se presenta. La portada abre con la marca, sigue con la selección de casas y termina en los perfumes, en ese orden, sin vueltas. Cada perfume se muestra como lo que es: algo que se elige con los ojos antes de probarlo.',
-      'Se pensó desde cero para este negocio, con nuestro estándar de calidad, y se ve tan bien en el teléfono como en la computadora. Hoy Banú Scents tiene su propio lugar en internet para mostrar sus perfumes, con su estética y sin depender de nada más: cuando alguien pregunta por uno, hay un lugar al que mandarlo.',
+      'Se pensó desde cero para este negocio, con nuestro estándar de calidad, y se ve tan bien en el teléfono como en la computadora. Hoy Banú Scents tiene su propio lugar en internet para mostrar sus perfumes, con su estética y en un lugar que es suyo, no prestado.',
     ],
   },
 }
@@ -57,9 +57,10 @@ export const RELATOS: Readonly<Record<SlugDelProyecto, { readonly titulo: string
  * sobre el papel: el naranja de El Garage oscurecido en su tono (5,38:1), el marrón original de Banú (#654324, el de su póster: 8,22:1) y,
  * para Esquina, cuya marca es blanco sobre negro, la tinta (17,6:1).
  */
-export const MARCA_SOBRE_EL_PAPEL: Readonly<Record<SlugDelProyecto, string>> = {
+export const MARCA_SOBRE_EL_PAPEL: Readonly<Record<SlugDelProyecto, string | null>> = {
   'el-garage': '#9A5400',
-  'esquina-estudio': 'var(--color-tinta)',
+  // `null`: la tinta de la página, sin pisar la variable (pisarla con ella misma la dejaba inválida y el relleno del rollover, transparente).
+  'esquina-estudio': null,
   'banu-scents': '#654324',
 }
 

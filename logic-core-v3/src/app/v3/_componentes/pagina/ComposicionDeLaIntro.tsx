@@ -2,7 +2,8 @@
 
 import { useLayoutEffect, useRef } from 'react'
 
-import { COMPOSICION_EN_LA_ESCENA, huecoEnElCuadro } from '../../_lib/escena/ruta/composicion'
+import { COMPOSICION_EN_LA_ESCENA, huecoEnElCuadro, type HuecoDeLaIntro } from '../../_lib/escena/ruta/composicion'
+import { INTRO_LARGA_MONTADA } from '../../_lib/escena/ruta/pistaDeLaIntro'
 
 /**
  * [B12a.8] LA COMPOSICIÓN DE LA INTRO, EN EL DOM (`_lib/escena/ruta/composicion.ts`) — el marco de la intro (una pantalla, fijo arriba
@@ -89,10 +90,14 @@ export function MarcoDelGiro({ children }: { readonly children?: React.ReactNode
     const m = marco.current
     const h = hueco.current
     if (m === null || h === null) return undefined
+    // La escena toma la pista larga mientras este marco está montado.
+    INTRO_LARGA_MONTADA.montados += 1
+    let mio: HuecoDeLaIntro | null = null
     const medir = (): void => {
       const rm = m.getBoundingClientRect()
       const rh = h.getBoundingClientRect()
-      COMPOSICION_EN_LA_ESCENA.giro = rh.width > 0 && rh.height > 0 ? huecoEnElCuadro({ izquierda: rh.left, arriba: rh.top - rm.top, ancho: rh.width, alto: rh.height }, window.innerWidth, window.innerHeight) : null
+      mio = rh.width > 0 && rh.height > 0 ? huecoEnElCuadro({ izquierda: rh.left, arriba: rh.top - rm.top, ancho: rh.width, alto: rh.height }, window.innerWidth, window.innerHeight) : null
+      COMPOSICION_EN_LA_ESCENA.giro = mio
     }
     medir()
     const observador = new ResizeObserver(medir)
@@ -102,7 +107,9 @@ export function MarcoDelGiro({ children }: { readonly children?: React.ReactNode
     return () => {
       observador.disconnect()
       window.removeEventListener('resize', medir)
-      COMPOSICION_EN_LA_ESCENA.giro = null
+      // Sólo lo suyo: con la navegación cliente el marco de la página nueva ya escribió el suyo.
+      if (COMPOSICION_EN_LA_ESCENA.giro === mio) COMPOSICION_EN_LA_ESCENA.giro = null
+      INTRO_LARGA_MONTADA.montados -= 1
     }
   }, [])
   return (

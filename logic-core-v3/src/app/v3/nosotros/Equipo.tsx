@@ -74,7 +74,7 @@ function Persona({ persona, parrafos, lado, porScroll }: { readonly persona: Per
 /**
  * [M1] LA FOTO QUE SE ABRE — la de la facultad, cerrada a una rendija en el centro, que se abre con el scroll hasta mostrarse entera (el
  * `clip-path` de la segunda toma, atado al scroll en vez de al toque). La foto es chica (500 × 298): se muestra a su ancho como mucho, para
- * que no se vea borrosa. Escribe el recorte por cuadro (React no vuelve a dibujar). Con movimiento reducido, abierta.
+ * que no se vea borrosa. Escribe el recorte por cuadro (React no vuelve a dibujar). Con movimiento reducido (y sin JS), abierta: el recorte lo pone el efecto.
  */
 function FotoQueSeAbre(): React.JSX.Element {
   const foto = useRef<HTMLDivElement>(null)
@@ -94,7 +94,7 @@ function FotoQueSeAbre(): React.JSX.Element {
   }, [reducido])
   return (
     <figure data-pieza="foto-de-la-facultad" className="flex flex-col gap-[var(--spacing-4)] escritorio:items-center">
-      <div ref={foto} className="w-full max-w-[500px] overflow-hidden rounded-[var(--radius-fuerte)] will-change-[clip-path]" style={{ clipPath: 'inset(49.5% 35%)' }}>
+      <div ref={foto} className="w-full max-w-[500px] overflow-hidden rounded-[var(--radius-fuerte)] will-change-[clip-path]">
         <Imagen src={FACULTAD.src} alt={FACULTAD.alt} ancho={FACULTAD.ancho} alto={FACULTAD.alto} sizes="(min-width: 540px) 500px, 100vw" />
       </div>
       <figcaption>

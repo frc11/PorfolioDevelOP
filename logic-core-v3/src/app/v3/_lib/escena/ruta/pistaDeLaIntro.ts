@@ -75,8 +75,21 @@ export const PISTA_DE_LA_INTRO_DE_DIA: readonly ChoreoKeyframe[] = [
   { at: 1, name: 'sosten', ease: 'linear', pose: POSE_DE_QUIENES_SOMOS },
 ]
 
-/** Si la página tiene la intro de día (la apertura larga): de día y con pista. */
-export const esIntroDeDia = (preset: PresetDeLaEscena | null): boolean => preset !== null && preset.pista !== null && preset.noche === 'dia'
+/**
+ * Si la página PUEDE llevar la intro de día (de día y con pista). La lleva si además tiene su bloque («de qué se trata»): sin bloque (una
+ * nota del blog) quedaría un giro de dos pantallas vacías, y se queda con la intro corta. El DOM lo decide (`tieneIntroLarga`) y avisa a la
+ * escena montando el marco del giro (`INTRO_LARGA_MONTADA`).
+ */
+export const esDeDiaConPista = (preset: PresetDeLaEscena | null): boolean => preset !== null && preset.pista !== null && preset.noche === 'dia'
+
+/** Lo que decide el DOM de la intro: de día, con pista y con su bloque. */
+export const tieneIntroLarga = (preset: PresetDeLaEscena | null, hayBloque: boolean): boolean => esDeDiaConPista(preset) && hayBloque
+
+/** Cuántos marcos del giro hay montados (con la navegación cliente la página nueva se monta antes de que se vaya la vieja): la escena sabe así que la intro de esta página es la larga. */
+export const INTRO_LARGA_MONTADA: { montados: number } = { montados: 0 }
+
+/** Lo que lee la escena: la intro de esta página es la de día (la página lo permite y el DOM montó el giro). */
+export const esIntroDeDia = (preset: PresetDeLaEscena | null): boolean => esDeDiaConPista(preset) && INTRO_LARGA_MONTADA.montados > 0
 
 /** Lo que dura la intro de una página, en pantallas: la de día o la de noche. */
 export const pantallasDeLaIntro = (preset: PresetDeLaEscena | null): number => (esIntroDeDia(preset) ? PANTALLAS_DE_LA_INTRO_DE_DIA : PANTALLAS_DE_LA_INTRO)
@@ -110,6 +123,7 @@ export const AVANCE_DE_LA_INTRO: { current: number } = { current: 0 }
 if (hayBanco()) (window as Window & { __avanceDeLaIntro?: () => number }).__avanceDeLaIntro = () => AVANCE_DE_LA_INTRO.current
 
 const pistas = new WeakMap<PresetDeLaEscena, { readonly track: ChoreoTrack; readonly noche: boolean }>()
+const pistasLargas = new WeakMap<PresetDeLaEscena, { readonly track: ChoreoTrack; readonly noche: boolean }>()
 
 /**
  * La pista de la página de ahora (y si es de noche), o `null`: el home (su pista es `CHOREO_KEYFRAMES`) o una página sin pista. La lee
@@ -118,11 +132,13 @@ const pistas = new WeakMap<PresetDeLaEscena, { readonly track: ChoreoTrack; read
 export function pistaDeLaPagina(): { readonly track: ChoreoTrack; readonly noche: boolean } | null {
   const preset = presetActual()
   if (preset === null || preset.pista === null) return null
-  let pagina = pistas.get(preset)
+  // [M1] Con la intro larga, la apertura de día (el giro de Quiénes somos); si no, la pista que declara la página. Una caché por cada una.
+  const larga = esIntroDeDia(preset)
+  const cache = larga ? pistasLargas : pistas
+  let pagina = cache.get(preset)
   if (pagina === undefined) {
-    // [M1] De día, la apertura larga (el giro de Quiénes somos); de noche, la pista que declara la página.
-    pagina = { track: buildTrack(esIntroDeDia(preset) ? PISTA_DE_LA_INTRO_DE_DIA : preset.pista), noche: preset.noche === 'noche' }
-    pistas.set(preset, pagina)
+    pagina = { track: buildTrack(larga ? PISTA_DE_LA_INTRO_DE_DIA : preset.pista), noche: preset.noche === 'noche' }
+    cache.set(preset, pagina)
   }
   return pagina
 }
