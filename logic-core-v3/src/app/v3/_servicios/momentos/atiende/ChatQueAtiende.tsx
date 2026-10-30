@@ -88,7 +88,7 @@ function Ventana({
             {escribe ? 'escribiendo…' : 'en línea'}
           </span>
         </span>
-        <span className="ml-auto shrink-0 font-codigo text-micro tracking-wide uppercase">{AVISO_DEL_EJEMPLO}</span>
+        <span className="ml-auto hidden shrink-0 font-codigo text-micro tracking-wide uppercase tablet:inline">{AVISO_DEL_EJEMPLO}</span>
       </div>
       <div ref={lista} role="log" aria-live={tuyos.length > 0 ? 'polite' : 'off'} aria-label={`Conversación con ${NOMBRE_DEL_ASISTENTE}`} className="flex h-88 flex-col gap-2.5 overflow-y-auto overscroll-contain bg-superficie-1 px-4 py-4 escritorio:h-104">
         {[...llegaron, ...tuyos].map((m, i) => (
@@ -102,7 +102,10 @@ function Ventana({
         )}
       </div>
       <div className="flex flex-col gap-2 border-t border-tinta/10 px-4 py-3">
-        <p className="font-codigo text-micro tracking-wide text-tinta-media uppercase">{ROTULO_DE_PROBALO}</p>
+        <p className="font-codigo text-micro tracking-wide text-tinta-media uppercase">
+          {ROTULO_DE_PROBALO}
+          <span className="tablet:hidden"> · {AVISO_DEL_EJEMPLO}</span>
+        </p>
         <div className="flex flex-wrap gap-2">
           {PREGUNTAS_SUGERIDAS.map((s) => (
             <button

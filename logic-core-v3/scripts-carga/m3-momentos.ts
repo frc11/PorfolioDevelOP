@@ -103,8 +103,11 @@ async function software(p: Page, ancho: number, alto: number, carpeta: string): 
     const despinte = Number(tramo?.style.getPropertyValue('--trazo-despinte') ?? 'NaN')
     const escala = Number(/scaleX\(([\d.]+)\)/.exec(raya?.style.transform ?? '')?.[1] ?? 'NaN')
     const recorte = Number(/inset\([^ ]+ ([\d.]+)%/.exec(nuevo?.style.clipPath ?? '')?.[1] ?? 'NaN')
-    return { despinte, escala, descubierto: 1 - recorte / 100 }
+    const papel = getComputedStyle(li?.closest('section') ?? document.body).backgroundColor
+    const visibles = tramo !== undefined && tramo !== null && raya !== undefined && raya !== null && getComputedStyle(tramo).color !== papel && getComputedStyle(raya).backgroundColor !== papel
+    return { despinte, escala, descubierto: 1 - recorte / 100, visibles }
   })
+  salida.push(res(paso.visibles, `software · ${String(ancho)}: lo de siempre y su raya se ven (no son del color del papel)`))
   const simultaneo = paso.escala > 0.05 && paso.escala < 0.98 && Math.abs(paso.escala - paso.despinte) < 0.01 && Math.abs(paso.escala - paso.descubierto) < 0.01
   salida.push(res(simultaneo, `software · ${String(ancho)}: a mitad del cruce, la raya ${paso.escala.toFixed(3)}, el despinte ${paso.despinte.toFixed(3)} y lo nuevo ${paso.descubierto.toFixed(3)} van juntos`))
   await p.screenshot({ path: path.join(carpeta, `${String(ancho)}-tachado.png`) })
@@ -150,10 +153,14 @@ async function ia(p: Page, ancho: number, alto: number, carpeta: string): Promis
   if (chat === null) return [res(false, `ia · ${String(ancho)}: no está el chat`)]
   await ir(p, chat.top - Math.max(80, (alto - chat.alto) / 2), 500)
   const y0 = await p.evaluate(() => scrollY)
-  await dormir(9000)
-  const burbujas = await p.evaluate(() => document.querySelectorAll('[data-chat-que-atiende] [role="log"] > p').length)
+  const linea: number[] = []
+  for (let s = 0; s < 14; s++) {
+    await dormir(1000)
+    linea.push(await p.evaluate(() => document.querySelectorAll('[data-chat-que-atiende] [role="log"] > p').length))
+  }
+  const burbujas = linea[linea.length - 1] ?? 0
   const y1 = await p.evaluate(() => scrollY)
-  salida.push(res(burbujas >= 3 && Math.abs(y1 - y0) < 1, `ia · ${String(ancho)}: el chat contestó solo (${String(burbujas)} mensajes en 9 s) y la página no se movió (${String(y0)} → ${String(y1)})`))
+  salida.push(res(burbujas >= 4 && Math.abs(y1 - y0) < 1, `ia · ${String(ancho)}: el chat contestó solo (mensajes por segundo: ${linea.join(' ')}) y la página no se movió (${String(y0)} → ${String(y1)})`))
   await p.screenshot({ path: path.join(carpeta, `${String(ancho)}-chat.png`) })
   await p.locator('[data-chat-que-atiende] button').first().click({ timeout: 5000 })
   await dormir(2200)
@@ -162,7 +169,13 @@ async function ia(p: Page, ancho: number, alto: number, carpeta: string): Promis
   salida.push(res(tuya.length === 2 && /horarios/.test(tuya[0]) && Math.abs(y2 - y1) < 1, `ia · ${String(ancho)}: la pregunta sugerida y su respuesta llegaron al final, sin mover la página («${tuya[0] ?? ''}»)`))
   const lista = await medida(p, '[data-bloque="automatizaciones"] ul')
   if (lista === null) return [...salida, res(false, `ia · ${String(ancho)}: no está la lista`)]
-  for (let y = lista.top - alto; y <= lista.top + lista.alto; y += alto / 6) await ir(p, y, 250)
+  for (let y = lista.top - alto; y <= lista.top + lista.alto; y += alto / 6) {
+    await ir(p, y, 250)
+    if (Math.abs(y - (lista.top - alto * 0.35)) < alto / 12) {
+      await dormir(1400)
+      await p.screenshot({ path: path.join(carpeta, `${String(ancho)}-pasa-solo-medio.png`) })
+    }
+  }
   await dormir(1200)
   const hechas = await p.evaluate(() => document.querySelectorAll('[data-tarea][data-hecha]').length)
   await p.screenshot({ path: path.join(carpeta, `${String(ancho)}-pasa-solo.png`) })

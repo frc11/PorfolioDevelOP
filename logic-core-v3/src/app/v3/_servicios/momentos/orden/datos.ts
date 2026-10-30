@@ -56,7 +56,7 @@ export const LUGARES = PAPELES.map((p, i) => {
 })
 
 /** Cuándo viaja cada papel (sobre el avance del recorrido): escalonados en el orden de la lista, cada uno con su tramo. */
-export const VIAJE = { arranque: 0.12, escalon: 0.065, duracion: 0.34 } as const
+export const VIAJE = { arranque: 0.12, escalon: 0.07, duracion: 0.24 } as const
 
 export interface PapelEnElTablero {
   readonly x: number
