@@ -4,8 +4,10 @@
  * Corre a mano (P-H7): `npx tsx src/app/v3/_servicios/__tests__/seo.invariant.ts`.
  *
  * Sin navegador y sin renderizar: `seo.ts` son funciones puras de los datos. Cada comprobación lleva su control positivo (el mismo
- * detector, contra una entrada armada para fallar). Que el JSON-LD llegue al HTML y que coincida con lo que se lee en la página
- * (el FAQ) lo afirma `pagina.invariant.tsx`.
+ * detector, contra una entrada armada para fallar). Que el JSON-LD llegue al HTML lo afirma `pagina.invariant.tsx`.
+ *
+ * [L7a] REEMPLAZADA POR LA SPEC (no aflojada): el FAQ pasó al cierre común (`CierreDeLaPagina` → `FaqDelPie`), que publica su `FAQPage`
+ * con las 6 preguntas de la página; `jsonLdDe` ya no lo repite (§2: un solo `FAQPage` por página).
  */
 
 import { readFileSync } from 'node:fs'
@@ -43,7 +45,7 @@ const parseaIgual = (documento: DocumentoJsonLd): boolean => {
 }
 for (const servicio of SERVICIOS) {
   const docs = jsonLdDe(servicio)
-  afirmarIgual(docs.map((d) => d['@type']), ['Service', 'FAQPage', 'BreadcrumbList'], `${servicio.slug}: Service, FAQPage y BreadcrumbList, en ese orden`)
+  afirmarIgual(docs.map((d) => d['@type']), ['Service', 'BreadcrumbList'], `${servicio.slug}: Service y BreadcrumbList, en ese orden`)
   afirmar(docs.every((d) => d['@context'] === 'https://schema.org' && parseaIgual(d)), '  todos con su @context, y serializados y vueltos a leer dan lo mismo')
 }
 const parseaYTipo = (texto: string): boolean => {
@@ -57,20 +59,14 @@ controlPositivo('un JSON roto se detecta', '{"@type":"Service"', parseaYTipo)
 controlPositivo('un JSON sin @type se detecta', '{"name":"x"}', parseaYTipo)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · FAQPage solo con las preguntas que tienen respuesta')
+titulo('2 · [L7a] Un solo FAQPage por página: lo publica el cierre común, no seo.ts')
 
-const NOMBRES_DE_LAS_PREGUNTAS = (servicio: Servicio, conRespuesta: boolean): string[] => servicio.faq.filter((f) => (f.respuesta !== null) === conRespuesta).map((f) => f.pregunta)
-const preguntasDelDocumento = (servicio: Servicio): string[] => lista(documentoDe(servicio, 'FAQPage')?.mainEntity).map((p) => String(objeto(p)?.name))
-for (const servicio of SERVICIOS) {
-  afirmarIgual(preguntasDelDocumento(servicio), NOMBRES_DE_LAS_PREGUNTAS(servicio, true), `${servicio.slug}: ${NOMBRES_DE_LAS_PREGUNTAS(servicio, true).length} preguntas, las que tienen respuesta; las ${NOMBRES_DE_LAS_PREGUNTAS(servicio, false).length} sin respuesta no salen`)
-}
-const SIN_RESPUESTAS: Servicio = { ...PRIMERO, faq: PRIMERO.faq.map((f) => ({ pregunta: f.pregunta, respuesta: null })) }
-afirmar(documentoDe(SIN_RESPUESTAS, 'FAQPage') === undefined, 'si ninguna pregunta tiene respuesta no hay FAQPage (uno vacío no es válido)')
-afirmarIgual(jsonLdDe(SIN_RESPUESTAS).map((d) => d['@type']), ['Service', 'BreadcrumbList'], '  y los otros dos documentos siguen')
-const sinNulos = (servicio: Servicio, preguntas: string[]): boolean => preguntas.every((p) => !NOMBRES_DE_LAS_PREGUNTAS(servicio, false).includes(p))
-const CON_NULOS = SERVICIOS.find((s) => NOMBRES_DE_LAS_PREGUNTAS(s, false).length > 0)
-afirmar(CON_NULOS !== undefined, 'hay un servicio con preguntas sin respuesta para probar (software e IA)')
-if (CON_NULOS !== undefined) controlPositivo('un FAQPage que incluye una pregunta sin respuesta se detecta', CON_NULOS.faq.map((f) => f.pregunta), (preguntas: string[]) => sinNulos(CON_NULOS, preguntas))
+const conFaqPage = (docs: readonly DocumentoJsonLd[]): boolean => docs.some((d) => d['@type'] === 'FAQPage')
+afirmar(SERVICIOS.every((s) => !conFaqPage(jsonLdDe(s))), 'ningún servicio repite el FAQPage en su JSON-LD (lo pone FaqDelPie, con las mismas preguntas que se leen)')
+controlPositivo('un JSON-LD con su propio FAQPage se detecta', [...jsonLdDe(PRIMERO), { '@context': 'https://schema.org', '@type': 'FAQPage' }], (d: readonly DocumentoJsonLd[]) => !conFaqPage(d))
+const seisConRespuesta = (s: Servicio): boolean => s.faq.length === 6 && s.faq.every((f) => f.pregunta.trim() !== '' && f.respuesta.trim() !== '')
+afirmar(SERVICIOS.every(seisConRespuesta), '  y cada servicio trae sus 6 preguntas con respuesta (las del FAQ del cierre)')
+controlPositivo('  uno con cinco se detecta', { ...PRIMERO, faq: PRIMERO.faq.slice(0, 5) }, seisConRespuesta)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El escape: un texto no puede cerrar el script')

@@ -127,7 +127,7 @@ export const CTA_POR_SERVICIO: Readonly<Record<IdDeServicio, string>> = {
  * lo muestra escritorio. Sólo lo lleva el que no entra.
  */
 export const NOMBRE_CORTO: Readonly<Partial<Record<IdDeServicio, string>>> = {
-  'ia-automatizacion': 'IA y Automatizaciones',
+  // [L7a] Vacío: con el renombre («Integraciones con IA») el nombre de IA ya entra en dos renglones.
 }
 
 export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = {

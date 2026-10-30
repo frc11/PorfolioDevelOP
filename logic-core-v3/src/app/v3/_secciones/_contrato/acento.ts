@@ -122,7 +122,8 @@ export interface Servicio {
 export const SERVICIOS: readonly Servicio[] = [
   { id: 'web', nombre: 'Desarrollo web' },
   { id: 'software', nombre: 'Software a medida' },
-  { id: 'ia-automatizacion', nombre: 'Integraciones de IA y Automatizaciones' },
+  // [L7a] El renombre de Valentino: «Integraciones con IA» en todos lados (la sección Servicios del home conserva su título largo de dos renglones).
+  { id: 'ia-automatizacion', nombre: 'Integraciones con IA' },
 ]
 
 /** Los ids, DERIVADOS del orden de arriba: dos listas a mano se desvían solas. */

@@ -17,6 +17,8 @@ import React from 'react'
 
 import { modoDelViaje, VIAJE_POR_DEFECTO } from '../../_componentes/navegacion/viajeAlServicio'
 import { PRESET as PRESET_DE_LA_BASE } from '../../pagina-base/preset'
+import { HREF_DEL_SERVICIO } from '../../_servicios/direcciones'
+import { PRESETS_DE_LAS_PAGINAS } from '../../_servicios/escena/presets'
 import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import { DESTINO_DEL_SERVICIO, PRESET_DEL_DESTINO } from '../../_secciones/servicios/escenario/datos'
 import { SELECTOR_DE_LA_INTRO } from '../../_componentes/pagina/atributoDeLaIntro'
@@ -220,11 +222,13 @@ async function principal(): Promise<void> {
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('5 · El CTA de cada servicio, su destino y los sonidos')
 
+  // [L7a] Reemplazada por la spec: las páginas de servicio existen; cada CTA va a la suya con SU preset (no a la base).
   const destinoBien = (presets: typeof PRESET_DEL_DESTINO): boolean =>
-    IDS_DE_SERVICIO.every((id) => presets[id] === PRESET_DE_LA_BASE && DESTINO_DEL_SERVICIO[id] === '/v3/pagina-base') &&
-    PRESET_DE_LA_BASE.noche === 'noche' && PRESET_DE_LA_BASE.pista === PISTA_DE_LA_INTRO && PRESET_DE_LA_BASE.tramos?.intro === SELECTOR_DE_LA_INTRO && PRESET_DE_LA_BASE.variante !== null
-  afirmar(destinoBien(PRESET_DEL_DESTINO), 'cada servicio viaja con el preset de su página de destino, el MISMO objeto que declara la página (hoy, la base: de noche, con la pista de la intro y su variante)')
-  controlPositivo('  el detector ve una copia del preset (la escena armaría la pista dos veces y la ranura no sabría que es la misma)', { ...PRESET_DEL_DESTINO, web: { ...PRESET_DE_LA_BASE } }, destinoBien)
+    IDS_DE_SERVICIO.every((id) => presets[id] === PRESETS_DE_LAS_PAGINAS[id] && DESTINO_DEL_SERVICIO[id] === HREF_DEL_SERVICIO[id] && presets[id].noche === 'noche' && presets[id].pista === PISTA_DE_LA_INTRO && presets[id].tramos?.intro === SELECTOR_DE_LA_INTRO && presets[id].variante !== null && presets[id].acento === id) &&
+    JSON.stringify(IDS_DE_SERVICIO.map((id) => DESTINO_DEL_SERVICIO[id])) === JSON.stringify(['/v3/paginas-web', '/v3/software-a-medida', '/v3/ia-y-automatizaciones'])
+  afirmar(destinoBien(PRESET_DEL_DESTINO), 'cada servicio viaja con el preset de su página de destino, el MISMO objeto que declara la página (de noche, con la pista de la intro, su variante y su acento), a su ruta')
+  controlPositivo('  el detector ve una copia del preset (la escena armaría la pista dos veces y la ranura no sabría que es la misma)', { ...PRESET_DEL_DESTINO, web: { ...PRESETS_DE_LAS_PAGINAS.web } }, destinoBien)
+  controlPositivo('  y el destino de antes (la base)', { ...PRESET_DEL_DESTINO, web: PRESET_DE_LA_BASE }, destinoBien)
   const panel = sinComentarios(leer('_secciones/servicios/escenario/PanelDeServicio.tsx'))
   // [L3] Reemplazada por la spec (ítem 50): los paneles ya no tienen el CTA; el título, el video y «Leer más…» son `EnlaceAlServicio` (en
   // varios renglones), y el link del recomendador sigue siendo `EnlaceDelServicio`. Los DOS enlaces del archivo piden el viaje.

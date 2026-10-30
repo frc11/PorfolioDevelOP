@@ -1,5 +1,6 @@
 import type { PresetDeLaEscena } from '../../../_lib/escena/ruta/preset'
-import { PRESET as PRESET_DE_LA_BASE } from '../../../pagina-base/preset'
+import { HREF_DEL_SERVICIO } from '../../../_servicios/direcciones'
+import { PRESETS_DE_LAS_PAGINAS } from '../../../_servicios/escena/presets'
 import type { IdDeServicio } from '../../_contrato/acento'
 
 /**
@@ -82,26 +83,17 @@ export const VIDEO_DEL_SERVICIO: Readonly<Record<IdDeServicio, { readonly fuente
 export const DESCRIPCION_DEL_VIDEO_PROVISORIO = 'Recorrido de un sitio hecho por develOP (video provisorio)'
 
 /**
- * EL DESTINO DEL CTA DE CADA SERVICIO — el enganche del viaje (B12b). Las páginas de servicio no existen en esta rama: los tres van a
- * la maqueta base de B12a (`/v3/pagina-base`), con `EnlaceDeRuta` (el velo, la salida de la variante). Cuando existan, cada uno va a
- * su ruta (`PAGINAS_DE_SERVICIO`, `_chrome/paginas.ts`) y B12b cambia el velo por el viaje desde acá.
+ * EL DESTINO DEL CTA DE CADA SERVICIO — el enganche del viaje (B12b). [L7a] Cada uno va a la página de su servicio (`/v3/paginas-web`,
+ * `/v3/software-a-medida`, `/v3/ia-y-automatizaciones`: `_servicios/direcciones.ts`), con el viaje desde acá o el velo.
  */
-export const DESTINO_DEL_SERVICIO: Readonly<Record<IdDeServicio, string>> = {
-  web: '/v3/pagina-base',
-  software: '/v3/pagina-base',
-  'ia-automatizacion': '/v3/pagina-base',
-}
+export const DESTINO_DEL_SERVICIO: Readonly<Record<IdDeServicio, string>> = HREF_DEL_SERVICIO
 
 /**
  * [B12b] EL PRESET DE LA PÁGINA DE DESTINO DE CADA SERVICIO — el viaje lo apila en el home antes de navegar: la escena va a la composición
- * de ESA página (su noche, su acento y su variante, montada tapada). Tiene que ser el mismo que declara la página. Hoy los tres son el de
- * la maqueta base; cuando existan las páginas de servicio, cada uno es el preset de la suya (exportado de un módulo sin JSX: P-S).
+ * de ESA página (su noche, su acento y su variante, montada tapada). [L7a] Es el MISMO objeto que declara la página (`_servicios/escena/presets.ts`,
+ * un módulo sin JSX: P-S).
  */
-export const PRESET_DEL_DESTINO: Readonly<Record<IdDeServicio, PresetDeLaEscena>> = {
-  web: PRESET_DE_LA_BASE,
-  software: PRESET_DE_LA_BASE,
-  'ia-automatizacion': PRESET_DE_LA_BASE,
-}
+export const PRESET_DEL_DESTINO: Readonly<Record<IdDeServicio, PresetDeLaEscena>> = PRESETS_DE_LAS_PAGINAS
 
 /** [C2-50] El corte de la diagonal: el alto del panel por la tangente (`100cqh`: el panel es el contenedor de tamaño). */
 export const CORTE_DE_LA_DIAGONAL = 'calc(100cqh * var(--tangente-de-la-diagonal, 0.1228))'

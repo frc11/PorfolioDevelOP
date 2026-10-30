@@ -5,9 +5,8 @@ import type { PresetDeLaEscena } from '../_lib/escena/ruta/preset'
 
 /**
  * El preset de la página base, armado una vez: el mismo objeto en cada render (la escena arma la pista una vez por preset). [B12b] Aparte
- * de `page.tsx` (que no puede exportar nada más que lo de una página) porque lo lee también el viaje del CTA de un servicio del home
- * (`DESTINO_DEL_SERVICIO`, `_secciones/servicios/escenario/datos.ts`): la escena se entera de adónde va antes de navegar. Sin JSX: lo
- * importa un componente de cliente.
+ * de `page.tsx` (que no puede exportar nada más que lo de una página), sin JSX. [L7a] El viaje del CTA de un servicio del home ya no
+ * viene acá: va a la página de su servicio (`PRESET_DEL_DESTINO`, con los presets de `_servicios/escena/presets.ts`).
  */
 export const PRESET: PresetDeLaEscena = {
   id: 'base',

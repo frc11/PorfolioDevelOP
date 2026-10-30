@@ -12,11 +12,9 @@ import { ANCLAS_DEL_PORTFOLIO } from '../_secciones/trabajos/portfolio/anclas'
 import { FUENTE_DE_PROYECTOS } from './datos/fuenteDeProyectos'
 import type { ProyectoSlug, ServicioSlug } from './tipos'
 
-/** El prefijo de las páginas mientras vivan en `/v3`. */
-export const RAIZ_DE_LAS_PAGINAS = '/v3'
-
-/** El home. Hoy coincide con el prefijo de las páginas; con D8 deja de coincidir (las páginas a `/x`, el home a `/`). */
-export const HREF_DEL_HOME = '/v3'
+// [L7a] Las direcciones viven en `direcciones.ts` (puro, lo importa el home); acá se reexportan.
+import { HREF_DEL_HOME } from './direcciones'
+export { HREF_DEL_HOME, HREF_DEL_SERVICIO, RAIZ_DE_LAS_PAGINAS, SLUG_DEL_SERVICIO, hrefDe } from './direcciones'
 
 /**
  * El origen del sitio, para las URLs absolutas del JSON-LD (las migas y la dirección del servicio). Es el `metadataBase` del layout
@@ -34,11 +32,6 @@ export function urlAbsolutaDe(ruta: string): string {
  * acá lo devuelve a 404 y lo saca del cierre de las otras páginas, sin tocar nada más.
  */
 export const PUBLICADOS: readonly ServicioSlug[] = ['paginas-web', 'software-a-medida', 'ia-y-automatizaciones']
-
-/** `/v3/paginas-web`. Se navega con `<a href>` y recarga completa, nunca con `router.push`. */
-export function hrefDe(slug: ServicioSlug): string {
-  return `${RAIZ_DE_LAS_PAGINAS}/${slug}`
-}
 
 /**
  * [M1] El deep link de un caso en el Portfolio del home: `/v3#portfolio-el-garage`. Es el formato de B1

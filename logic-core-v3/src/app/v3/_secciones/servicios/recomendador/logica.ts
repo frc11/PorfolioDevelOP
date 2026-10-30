@@ -157,7 +157,7 @@ export function mensajeDelContacto(r: Respuestas, elegida: IdDeSolucion): string
 export const tituloDelContacto = (id: IdDeSolucion): string => `Hablemos de ${enMinuscula(solucion(id).nombre)}`
 
 /** El servicio, como va en la frase del link (la tabla de soluciones de 05-TEXTOS). */
-export const SERVICIO_EN_LA_FRASE: Readonly<Record<IdDeServicio, string>> = { web: 'desarrollo web', software: 'software a medida', 'ia-automatizacion': 'IA y automatizaciones' }
+export const SERVICIO_EN_LA_FRASE: Readonly<Record<IdDeServicio, string>> = { web: 'desarrollo web', software: 'software a medida', 'ia-automatizacion': 'Integraciones con IA' }
 
 export const rotuloDeLaPagina = (servicio: IdDeServicio): string => `Ver la página de ${SERVICIO_EN_LA_FRASE[servicio]}`
 

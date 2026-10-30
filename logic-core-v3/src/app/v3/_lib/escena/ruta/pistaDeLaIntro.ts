@@ -26,15 +26,17 @@ import { nivelConLaNocheDelViaje, nocheDelViaje } from './viajeDelServicio'
 /**
  * Lo que dura la intro, en pantallas de scroll: el avance va de 0 a 1 en eso. [B12a.8] 2,5 (era 1,5: la parte 3D quedaba corta): el
  * título con su bajada, «de qué se trata» sobre la escena y, en la última pantalla, el papel. Calibrable: el bloque lo lee (su alto es
- * una variable de CSS con este número).
+ * una variable de CSS con este número). [L7a] 1,8: «poca animación al principio y pasa rápido al fondo» (Valentino, ESTRUCTURA-PAGINAS):
+ * el papel asoma pasada una pantalla escasa de scroll.
  */
-export const PANTALLAS_DE_LA_INTRO = 2.5
+export const PANTALLAS_DE_LA_INTRO = 1.8
 
 /**
  * [B12a.8] El tramo del título, en pantallas del alto de la intro: el `h1` y la bajada van fijos arriba mientras dura; después pasa «de
- * qué se trata» (el resto de la intro, sobre la escena todavía) y entra el papel.
+ * qué se trata» (el resto de la intro, sobre la escena todavía) y entra el papel. [L7a] 1,4: tiene que pasar de 1 + la anticipación de la
+ * caída (`CAIDA_DEL_TITULO.antes`, 0,2) o el título caería sin scroll; con 1,4 cae a las 0,2 pantallas.
  */
-export const TRAMO_DEL_TITULO = 1.6
+export const TRAMO_DEL_TITULO = 1.4
 
 /** La composición inicial: la pose del hero del home con el logo centrado (`frameX` 0). */
 export const COMPOSICION_INICIAL: ChoreoPose = { angleDeg: 0, height: 6.4, distance: 19, frameX: 0, frameY: 0 }

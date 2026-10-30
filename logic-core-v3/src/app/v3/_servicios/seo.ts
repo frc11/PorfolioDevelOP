@@ -10,8 +10,8 @@
  * `openGraph` se reemplaza entero, así que se rearma completo y con las imágenes del padre (las recibe, no las escribe).
  *
  * ── El JSON-LD ────────────────────────────────────────────────────────────
- * Tres documentos: `Service` (con el proveedor y el «desde» como `priceSpecification` mínima, mensual en IA), `FAQPage` (SOLO con las
- * preguntas que tienen respuesta: una respuesta `null` no sale) y `BreadcrumbList` (Inicio › Servicio). Las URLs son absolutas y se
+ * Dos documentos: `Service` (con el proveedor y el «desde» como `priceSpecification` mínima, mensual en IA) y `BreadcrumbList` (Inicio ›
+ * Servicio). [L7a] El `FAQPage` lo publica el FAQ del cierre común (`FaqDelPie`), con las 6 de la página. Las URLs son absolutas y se
  * arman con `rutas.ts`. El «desde» sale de `precioDesde`, la misma fuente que le da los números a la sección Servicios del home.
  */
 
@@ -82,16 +82,6 @@ function documentoDelServicio(servicio: Servicio): DocumentoJsonLd {
   }
 }
 
-/** `FAQPage` con las preguntas que tienen respuesta, o `null` si no hay ninguna (un `FAQPage` vacío no es válido). */
-function documentoDeLasPreguntas(servicio: Servicio): DocumentoJsonLd | null {
-  const preguntas = servicio.faq.flatMap((item) =>
-    item.respuesta === null
-      ? []
-      : [{ '@type': 'Question', name: item.pregunta, acceptedAnswer: { '@type': 'Answer', text: item.respuesta } }],
-  )
-  return preguntas.length === 0 ? null : { '@context': CONTEXTO, '@type': 'FAQPage', mainEntity: preguntas }
-}
-
 function documentoDeLasMigas(servicio: Servicio): DocumentoJsonLd {
   return {
     '@context': CONTEXTO,
@@ -103,10 +93,9 @@ function documentoDeLasMigas(servicio: Servicio): DocumentoJsonLd {
   }
 }
 
-/** Los documentos de la página, en este orden: el servicio, sus preguntas (si hay) y las migas. */
+/** Los documentos de la página, en este orden: el servicio y las migas. [L7a] El `FAQPage` lo publica el FAQ del cierre común: acá no se repite. */
 export function jsonLdDe(servicio: Servicio): readonly DocumentoJsonLd[] {
-  const preguntas = documentoDeLasPreguntas(servicio)
-  return [documentoDelServicio(servicio), ...(preguntas === null ? [] : [preguntas]), documentoDeLasMigas(servicio)]
+  return [documentoDelServicio(servicio), documentoDeLasMigas(servicio)]
 }
 
 /**

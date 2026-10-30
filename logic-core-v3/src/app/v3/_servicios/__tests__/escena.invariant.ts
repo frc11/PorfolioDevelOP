@@ -15,13 +15,20 @@
  *     compacta es la del home, y la luz es la misma en las dos;
  *   · «las 5 firmas llevan la nota B12a-API» → las firmas se importan del home (`firmas.ts` se fue);
  *   · «sin montar: nada de la página importa escena/» → montada: la intro importa los presets, y la variante entra SOLO por el registro.
+ *
+ * [L7a] REEMPLAZADAS POR LA SPEC de L7a (`docs/cola/2026-10-30/L7a.md`) y la API al día (B12a-API §4, T0 y B13), no aflojadas:
+ *   · «en el avance 0, la composición» → T0: en el avance 0 la variante ya está encendida (`ARRANQUE`: el acento entero, el piso a media luz);
+ *   · «Software e IA, ninguna variante» → una página, tres colores: las tres usan la de web, con su acento;
+ *   · «el pie del preset es null» → el cierre común (`SELECTOR_DEL_CIERRE`), y la variante se resuelve con `resolucion` (§11 nueva);
+ *   · «la raíz frena cada enlace y pide la salida» → la raíz se fue: los enlaces a otra página van con `EnlaceDeRuta`, que la pide (§10).
  */
 
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { SELECTOR_DE_LA_INTRO } from '../../_componentes/pagina/IntroDeLaPagina'
+import { SELECTOR_DE_LA_INTRO } from '../../_componentes/pagina/atributoDeLaIntro'
+import { SELECTOR_DEL_CIERRE } from '../../_lib/escena/ruta/atributoDelCierre'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { PISTA_DE_LA_INTRO } from '../../_lib/escena/ruta/pistaDeLaIntro'
 import type { PresetDeLaEscena } from '../../_lib/escena/ruta/preset'
@@ -29,12 +36,11 @@ import { COMPOSICION_DE_LA_LUZ, PRESUPUESTO_DE_LA_VARIANTE, SALIDA_DE_LA_VARIANT
 import { IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import { REGISTRO_DE_VARIANTES, esIdDeVariante } from '../../_variantes/registro'
 import {
-  CANALES, COMPOSICION_COMPARTIDA, DESTINO_DE_CADA_CANAL, ENCENDIDO_HASTA, cuadroDeLaVariante, parametrosDeLaSalida, type Canal,
+  ARRANQUE, CANALES, COMPOSICION_COMPARTIDA, DESTINO_DE_CADA_CANAL, ENCENDIDO_HASTA, cuadroDeLaVariante, parametrosDeLaSalida, parametrosResueltos, type Canal,
   type ParametrosDeLaEscena, type SalidaDeLaVariante,
 } from '../escena/estructura'
 import { TOKEN_DE_LA_LUZ, WEB_ENCENDIDA, parametrosDeWeb } from '../escena/luzDeWeb'
-import { PRESETS_DE_LAS_PAGINAS, VARIANTE_DE_CADA_PAGINA } from '../escena/presets'
-import { manejadorDeLaSalida, esUnaSalida, type Clic, type ClicEnUnEnlace, type DondeEsta, type Enlace } from '../movimiento/salidaDeLaPagina'
+import { PRESETS_DE_LAS_PAGINAS, VARIANTE_DE_LAS_PAGINAS } from '../escena/presets'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 const SERVICIOS = path.join(AQUI, '..')
@@ -50,11 +56,11 @@ const enTexto = (p: ParametrosDeLaEscena): string => CANALES.map((c) => `${c} ${
 const sinComentarios = (codigo: string): string => codigo.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · En el avance 0, la composición compartida: la del home, de noche, con el piso apenas encendido y sin teñir')
+titulo('1 · [L7a · T0] En el avance 0, ya encendida: el acento entero en la luz y el piso a media luz')
 
-const arrancaEnLaComposicion = (curva: Curva): boolean => igual(curva(0, false), COMPOSICION_COMPARTIDA)
-afirmar(arrancaEnLaComposicion(parametrosDeWeb), `en el avance 0 la luz es exactamente la de la composición compartida (${enTexto(COMPOSICION_COMPARTIDA)})`)
-controlPositivo('  una curva que arranca encendida se detecta', ((a, r) => parametrosDeWeb(Math.max(a, 0.2), r)) as Curva, arrancaEnLaComposicion)
+const arrancaEncendida = (curva: Curva): boolean => igual(curva(0, false), ARRANQUE) && ARRANQUE.tinteDelPiso === 1 && ARRANQUE.tinteDeLaEnergia === 1 && ARRANQUE.brilloDelPiso > COMPOSICION_COMPARTIDA.brilloDelPiso
+afirmar(arrancaEncendida(parametrosDeWeb), `en el avance 0 la luz es la del arranque (${enTexto(ARRANQUE)}): la noche y el acento de la página en el primer cuadro (T0), donde destapa el velo y llega el viaje`)
+controlPositivo('  una curva que arranca en la composición (la de V1) se detecta', ((a, r) => (a === 0 ? COMPOSICION_COMPARTIDA : parametrosDeWeb(a, r))) as Curva, arrancaEncendida)
 // [V1] P-H29f · la composición la define el home: el brillo del piso es el suyo (no una copia), sin teñir; la noche, la del preset.
 const composicionDelHome = (p: ParametrosDeLaEscena): boolean => p.brilloDelPiso === COMPOSICION_DE_LA_LUZ.brilloDelPiso && p.tinteDelPiso === 0 && p.tinteDeLaEnergia === 0
 afirmar(composicionDelHome(COMPOSICION_COMPARTIDA) && COMPOSICION_DE_LA_LUZ.noche === 1, `  y es la del home (COMPOSICION_DE_LA_LUZ, P-H29f): el piso en ${String(COMPOSICION_DE_LA_LUZ.brilloDelPiso)}, la luz blanca, de noche entera`)
@@ -72,7 +78,7 @@ afirmar(soloSube(parametrosDeWeb), '  y en la primera mitad cada canal solo sube
 controlPositivo('  una que baja y vuelve a subir se detecta', ((a, r) => parametrosDeWeb(a > 0.2 && a < 0.3 ? 0.1 : a, r)) as Curva, soloSube)
 /** Suave en las dos puntas: en el primer y en el último centésimo del encendido se mueve menos del 1 % del camino (sin saltos). */
 const suaveEnLasPuntas = (curva: Curva): boolean => CANALES.every((c) => {
-  const camino = WEB_ENCENDIDA[c] - COMPOSICION_COMPARTIDA[c]
+  const camino = WEB_ENCENDIDA[c] - ARRANQUE[c]
   if (camino === 0) return true
   const paso = (a: number, b: number): number => Math.abs(curva(b, false)[c] - curva(a, false)[c]) / Math.abs(camino)
   return paso(0, 0.01) < 0.01 && paso(ENCENDIDO_HASTA - 0.01, ENCENDIDO_HASTA) < 0.01
@@ -80,7 +86,7 @@ const suaveEnLasPuntas = (curva: Curva): boolean => CANALES.every((c) => {
 afirmar(suaveEnLasPuntas(parametrosDeWeb), '  suave en las puntas: arranca y llega sin un salto (menos del 1 % del camino en el primer y en el último centésimo)')
 controlPositivo('  un encendido lineal (arranca de golpe) se detecta', ((a, r) => {
   const t = Math.min(1, a / ENCENDIDO_HASTA)
-  return r ? WEB_ENCENDIDA : armar((c) => COMPOSICION_COMPARTIDA[c] * (1 - t) + WEB_ENCENDIDA[c] * t)
+  return r ? WEB_ENCENDIDA : armar((c) => ARRANQUE[c] * (1 - t) + WEB_ENCENDIDA[c] * t)
 }) as Curva, suaveEnLasPuntas)
 const encendidaComoDice = (p: ParametrosDeLaEscena): boolean => p.brilloDelPiso === 1 && p.tinteDelPiso === 1 && p.tinteDeLaEnergia === 1
 afirmar(encendidaComoDice(WEB_ENCENDIDA), '  la encendida de web (lo que decidió Valentino): la luz de abajo del piso con todo su poder, y el celeste en ella y en la energía (brasas, arcos y red)')
@@ -119,11 +125,11 @@ type Cuadro = typeof cuadroDeLaVariante
 const recorrido = (cuadro: Cuadro): ParametrosDeLaEscena[] => {
   let s: SalidaDeLaVariante | null = null
   const momentos = [
-    { avance: 0.5, saliendo: false, ahora: 1000 },
-    { avance: 0.5, saliendo: true, ahora: 1016 },
-    { avance: 0.5, saliendo: true, ahora: 1016 + SALIDA_DE_LA_VARIANTE_MS / 2 },
-    { avance: 0.5, saliendo: true, ahora: 1016 + SALIDA_DE_LA_VARIANTE_MS },
-    { avance: 0.25, saliendo: false, ahora: 2000 },
+    { resolucion: 0, avance: 0.5, saliendo: false, ahora: 1000 },
+    { resolucion: 0, avance: 0.5, saliendo: true, ahora: 1016 },
+    { resolucion: 0, avance: 0.5, saliendo: true, ahora: 1016 + SALIDA_DE_LA_VARIANTE_MS / 2 },
+    { resolucion: 0, avance: 0.5, saliendo: true, ahora: 1016 + SALIDA_DE_LA_VARIANTE_MS },
+    { resolucion: 0, avance: 0.25, saliendo: false, ahora: 2000 },
   ]
   return momentos.map((m) => {
     const r = cuadro(WEB_ENCENDIDA, { ...m, reducido: false }, s)
@@ -185,8 +191,8 @@ titulo('6 · Con movimiento reducido, el estado final quieto')
 const quietaConReducido = (curva: Curva): boolean => AVANCES.every((a) => igual(curva(a, true), WEB_ENCENDIDA))
 afirmar(quietaConReducido(parametrosDeWeb), 'con movimiento reducido, en los 101 avances, la variante está en su estado final y no se mueve')
 controlPositivo('  una que con reducido sigue el avance se detecta', ((a) => parametrosDeWeb(a, false)) as Curva, quietaConReducido)
-const reducidoQuietoEnElCuadro = (cuadro: Cuadro): boolean => AVANCES.every((a) => igual(cuadro(WEB_ENCENDIDA, { avance: a, reducido: true, saliendo: false, ahora: 0 }, null).parametros, WEB_ENCENDIDA)) &&
-  igual(cuadro(WEB_ENCENDIDA, { avance: 0.7, reducido: true, saliendo: true, ahora: 5 }, null).parametros, COMPOSICION_COMPARTIDA)
+const reducidoQuietoEnElCuadro = (cuadro: Cuadro): boolean => AVANCES.every((a) => igual(cuadro(WEB_ENCENDIDA, { resolucion: 0, avance: a, reducido: true, saliendo: false, ahora: 0 }, null).parametros, WEB_ENCENDIDA)) &&
+  igual(cuadro(WEB_ENCENDIDA, { resolucion: 0, avance: 0.7, reducido: true, saliendo: true, ahora: 5 }, null).parametros, COMPOSICION_COMPARTIDA)
 afirmar(reducidoQuietoEnElCuadro(cuadroDeLaVariante), '  y en el cuadro: quieta en el final en cualquier avance, y al salir, en la composición en el primer cuadro')
 controlPositivo('  un cuadro que con reducido anima la salida se detecta', ((e, m, s) => cuadroDeLaVariante(e, { ...m, reducido: m.saliendo ? false : m.reducido }, s)) as Cuadro, reducidoQuietoEnElCuadro)
 
@@ -203,10 +209,12 @@ const MODULO_DE_LA_VARIANTE = readFileSync(path.join(ESCENA, 'VarianteDeWeb.tsx'
 afirmar(/^'use client'/.test(MODULO_DE_LA_VARIANTE) && /^export default function VarianteDeWeb\(/m.test(MODULO_DE_LA_VARIANTE) && /: PropsDeLaVariante\): null/.test(MODULO_DE_LA_VARIANTE), "  y su módulo es 'use client' y exporta el componente como default, con las props de la ranura (PropsDeLaVariante, del home)")
 /** El preset de una página, como dice la API (§1): una constante, de noche, con la intro compartida, el acento y la variante de su servicio. */
 const presetComoDice = (id: (typeof IDS_DE_SERVICIO)[number], p: PresetDeLaEscena): boolean =>
-  p.id === id && p.acento === id && p.noche === 'noche' && p.tramos?.intro === SELECTOR_DE_LA_INTRO && p.tramos.pie === null && p.pista === PISTA_DE_LA_INTRO &&
-  p.variante === VARIANTE_DE_CADA_PAGINA[id] && p === PRESETS_DE_LAS_PAGINAS[id]
-afirmar(IDS_DE_SERVICIO.every((id) => presetComoDice(id, PRESETS_DE_LAS_PAGINAS[id])), `los presets de las tres páginas: de noche, con la intro compartida (PISTA_DE_LA_INTRO, la misma), el tramo de la intro (${SELECTOR_DE_LA_INTRO}) y el acento de su servicio; una constante cada uno (el mismo objeto siempre)`)
-afirmarIgual(VARIANTE_DE_CADA_PAGINA, { web: 'web', software: null, 'ia-automatizacion': null }, '  la variante: Páginas web la suya; Software e IA, ninguna todavía (la ranura deja la composición)')
+  p.id === id && p.acento === id && p.noche === 'noche' && p.tramos?.intro === SELECTOR_DE_LA_INTRO && p.tramos.pie === SELECTOR_DEL_CIERRE && p.pista === PISTA_DE_LA_INTRO &&
+  p.variante === VARIANTE_DE_LAS_PAGINAS && p === PRESETS_DE_LAS_PAGINAS[id]
+afirmar(IDS_DE_SERVICIO.every((id) => presetComoDice(id, PRESETS_DE_LAS_PAGINAS[id])), `los presets de las tres páginas: de noche, con la intro compartida (PISTA_DE_LA_INTRO, la misma), el tramo de la intro (${SELECTOR_DE_LA_INTRO}), el del cierre (${SELECTOR_DEL_CIERRE}) y el acento de su servicio; una constante cada uno (el mismo objeto siempre)`)
+afirmarIgual(VARIANTE_DE_LAS_PAGINAS, 'web', '  [L7a] la variante: la misma en las tres (una página, tres colores), teñida por el acento de cada preset')
+controlPositivo('  un preset de software sin la variante se detecta', { ...PRESETS_DE_LAS_PAGINAS.software, variante: null }, (p: PresetDeLaEscena) => presetComoDice('software', p))
+controlPositivo('  y uno sin el cierre (el pie de V1, null)', { ...PRESETS_DE_LAS_PAGINAS.web, tramos: { intro: SELECTOR_DE_LA_INTRO, pie: null } }, (p: PresetDeLaEscena) => presetComoDice('web', p))
 controlPositivo('  un preset de web con la variante de prueba se detecta', { ...PRESETS_DE_LAS_PAGINAS.web, variante: 'prueba' as const }, (p: PresetDeLaEscena) => presetComoDice('web', p))
 controlPositivo('  uno de día', { ...PRESETS_DE_LAS_PAGINAS.web, noche: 'dia' as const }, (p: PresetDeLaEscena) => presetComoDice('web', p))
 controlPositivo('  y uno armado de nuevo en cada render (otro objeto)', { ...PRESETS_DE_LAS_PAGINAS.web }, (p: PresetDeLaEscena) => presetComoDice('web', p))
@@ -219,7 +227,7 @@ const cuestaPorCuadro = (f: () => unknown, vueltas: number): number => {
   for (let i = 0; i < vueltas; i += 1) f()
   return (performance.now() - t0) / vueltas
 }
-const unCuadro = (): unknown => cuadroDeLaVariante(WEB_ENCENDIDA, { avance: 0.37, reducido: false, saliendo: false, ahora: 0 }, null)
+const unCuadro = (): unknown => cuadroDeLaVariante(WEB_ENCENDIDA, { resolucion: 0, avance: 0.37, reducido: false, saliendo: false, ahora: 0 }, null)
 const muyPorDebajo = (f: () => unknown, vueltas: number): boolean => cuestaPorCuadro(f, vueltas) < PRESUPUESTO_DE_LA_VARIANTE.cpuMsPorCuadro / 10
 afirmar(muyPorDebajo(unCuadro, 2000), `calcular la luz de un cuadro cuesta menos de un décimo del presupuesto (PRESUPUESTO_DE_LA_VARIANTE, ${String(PRESUPUESTO_DE_LA_VARIANTE.cpuMsPorCuadro)} ms de CPU por cuadro): ${cuestaPorCuadro(unCuadro, 2000).toFixed(4)} ms. El costo en el sitio lo mide scripts-servicios/escena.ts`)
 controlPositivo('  un cálculo de 1 ms por cuadro se detecta', () => {
@@ -241,9 +249,11 @@ const DE_LA_PAGINA: readonly Fuente[] = [
   ...recorrer(path.join(SERVICIOS, '../[servicio]'), () => false).map(leer),
 ]
 const deEscena = (lista: readonly Fuente[]): string[] => lista.filter((x) => /from '(?:\.\.?\/)+(?:_servicios\/)?escena\//.test(x.codigo)).map((x) => x.f)
-const entraComoDice = (lista: readonly Fuente[]): boolean => JSON.stringify(deEscena(lista)) === JSON.stringify(['Intro.tsx']) &&
-  lista.every((x) => x.f !== 'Intro.tsx' || /from '\.\/escena\/presets'/.test(x.codigo)) && lista.every((x) => !/escena\/VarianteDeWeb/.test(x.codigo))
-afirmar(entraComoDice(DE_LA_PAGINA), `de los ${String(DE_LA_PAGINA.length)} fuentes de _servicios (fuera de escena/) y de [servicio]/, sólo la intro importa algo de escena/: los presets. La variante no la importa nadie (la carga la ranura, por el registro)`)
+// [L7a] La página también lee los presets (el cierre común lleva el preset de la página).
+const LECTORES = ['Intro.tsx', 'PaginaDeServicio.tsx']
+const entraComoDice = (lista: readonly Fuente[]): boolean => JSON.stringify(deEscena(lista).sort()) === JSON.stringify(LECTORES) &&
+  lista.every((x) => !LECTORES.includes(x.f) || /from '\.\/escena\/presets'/.test(x.codigo)) && lista.every((x) => !/escena\/VarianteDeWeb/.test(x.codigo))
+afirmar(entraComoDice(DE_LA_PAGINA), `de los ${String(DE_LA_PAGINA.length)} fuentes de _servicios (fuera de escena/) y de [servicio]/, sólo la intro y la página importan algo de escena/: los presets. La variante no la importa nadie (la carga la ranura, por el registro)`)
 controlPositivo('  un bloque que importa la variante se detecta', [...DE_LA_PAGINA, { f: 'bloques/Precio.tsx', codigo: "import VarianteDeWeb from '../escena/VarianteDeWeb'" }], entraComoDice)
 const DE_LA_ESCENA: readonly Fuente[] = readdirSync(ESCENA).map((n) => leer(path.join(ESCENA, n)))
 const conValoresDeCliente = (lista: readonly Fuente[]): string[] => lista.filter((x) =>
@@ -252,72 +262,27 @@ afirmarIgual({ archivos: DE_LA_ESCENA.map((x) => x.f).sort(), deCliente: conValo
 controlPositivo('  un módulo puro que importa un valor de three se detecta', [...DE_LA_ESCENA.filter((x) => x.f !== 'escena/estructura.ts'), { f: 'escena/estructura.ts', codigo: "import * as THREE from 'three'" }], (l: readonly Fuente[]) => JSON.stringify(conValoresDeCliente(l)) === JSON.stringify(['escena/VarianteDeWeb.tsx']))
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · Cada enlace que se va de la página pide la salida de la variante ANTES de navegar (P-H29d)')
+titulo('10 · [L7a] Cada enlace a otra página de /v3 va con EnlaceDeRuta, que pide la salida de la variante antes del velo (P-H29d)')
 
-const AQUI_EN_WEB: DondeEsta = { origin: 'http://localhost:3001', pathname: '/v3/paginas-web', search: '' }
-const clic = (href: string, cambios: Partial<ClicEnUnEnlace> = {}): ClicEnUnEnlace => ({ boton: 0, conTeclas: false, atendido: false, href: new URL(href, AQUI_EN_WEB.origin).href, target: '', descarga: false, abreElContacto: false, ...cambios })
-/** Los enlaces de la página que se van: el logo y el cierre al home, el Portfolio (el deep link) y las tres páginas del cierre (también esta). */
-const SE_VAN = ['/v3', '/v3#portfolio-el-garage', '/v3/paginas-web', '/v3/software-a-medida', '/v3/ia-y-automatizaciones']
-const NO_SE_VAN: readonly (readonly [string, ClicEnUnEnlace])[] = [
-  ['un ancla de la misma página', clic('/v3/paginas-web#precio')],
-  ['un CTA que abre el contacto', clic('/v3/paginas-web#contacto', { abreElContacto: true })],
-  ['un clic con Control (otra pestaña)', clic('/v3', { conTeclas: true })],
-  ['el botón del medio', clic('/v3', { boton: 1 })],
-  ['un enlace con target', clic('/v3', { target: '_blank' })],
-  ['uno de afuera', clic('https://example.com/')],
-  ['una descarga', clic('/v3', { descarga: true })],
-  ['uno que otro ya atendió', clic('/v3', { atendido: true })],
-]
-const decideBien = (decide: typeof esUnaSalida): boolean => SE_VAN.every((h) => decide(clic(h), AQUI_EN_WEB)) && NO_SE_VAN.every(([, c]) => !decide(c, AQUI_EN_WEB))
-afirmar(decideBien(esUnaSalida), `se van (y piden la salida): ${SE_VAN.join(', ')}; no se van: ${NO_SE_VAN.map(([n]) => n).join(', ')}`)
-controlPositivo('  una decisión que deja ir sin salida al deep link del Portfolio se detecta', ((c: ClicEnUnEnlace, a: DondeEsta) => !(c.href ?? '').includes('#') && esUnaSalida(c, a)) as typeof esUnaSalida, decideBien)
-controlPositivo('  y una que frena también el clic con Control', ((c: ClicEnUnEnlace, a: DondeEsta) => esUnaSalida({ ...c, conTeclas: false }, a)) as typeof esUnaSalida, decideBien)
-/**
- * El manejador, en el tiempo, con un enlace y una señal de mentira: el clic que se va se frena, pide la salida UNA vez y NO navega hasta que
- * la salida se resuelve; resuelta, vuelve a apretar el mismo enlace, y ese segundo clic pasa sin frenarse ni volver a pedir.
- */
-async function navegaDespues(manejador: typeof manejadorDeLaSalida): Promise<boolean> {
-  const registro: string[] = []
-  let resolver: () => void = () => undefined
-  const senal = new Promise<void>((r) => {
-    resolver = r
-  })
-  const enlace: Enlace = {
-    href: new URL('/v3', AQUI_EN_WEB.origin).href,
-    target: '',
-    hasAttribute: () => false,
-    closest: () => null,
-    click: () => {
-      registro.push('navega')
-      alClic(evento('re-clic'))
-    },
-  }
-  const evento = (nombre: string): Clic => ({ button: 0, metaKey: false, ctrlKey: false, shiftKey: false, altKey: false, defaultPrevented: false, enlace, preventDefault: () => registro.push(`frena ${nombre}`) })
-  const alClic = manejador(() => {
-    registro.push('pide')
-    return senal
-  }, () => AQUI_EN_WEB)
-  alClic(evento('clic'))
-  await Promise.resolve()
-  const antes = [...registro]
-  resolver()
-  await senal
-  await Promise.resolve()
-  return JSON.stringify(antes) === JSON.stringify(['frena clic', 'pide']) && JSON.stringify(registro) === JSON.stringify(['frena clic', 'pide', 'navega'])
-}
-const manejadorSinEspera: typeof manejadorDeLaSalida = (pedir, aqui) => {
-  const real = manejadorDeLaSalida(() => Promise.resolve(), aqui)
-  return (c) => {
-    void pedir()
-    real(c)
-  }
-}
-const manejadorQueNoPide: typeof manejadorDeLaSalida = (_pedir, aqui) => manejadorDeLaSalida(() => Promise.resolve(), aqui)
+// La raíz que frenaba los clics se fue con el V1: la navbar, el contacto y el pie son del home, y adentro de la página los enlaces a otra
+// ruta van con `EnlaceDeRuta` (B12a-API §5). Ninguna fuente de la página arma un `<a href>` suelto ni navega a mano.
+const anclasSueltas = (lista: readonly Fuente[]): string[] => lista.filter((x) => /<a\s[^>]*href=|router\.push|window\.location(?:\.href)?\s*=/.test(x.codigo)).map((x) => x.f)
+afirmar(anclasSueltas(DE_LA_PAGINA).length === 0 && DE_LA_PAGINA.some((x) => x.f === 'bloques/Proceso.tsx' && /<EnlaceDeRuta href=\{alPortfolio\}/.test(x.codigo)), '  ninguna fuente de la página tiene un `<a href>` suelto ni navega a mano; el enlace al Portfolio (Cómo trabajamos) es `EnlaceDeRuta`')
+controlPositivo('  un enlace suelto al home se detecta', [...DE_LA_PAGINA, { f: 'bloques/Otro.tsx', codigo: '<a href="/v3">Inicio</a>' }], (l: readonly Fuente[]) => anclasSueltas(l).length === 0)
+afirmar(!DE_LA_PAGINA.some((x) => /RaizDeLaPagina|salidaDeLaPagina|from '\.\/Encabezado'|<Encabezado[\s/>]/.test(x.codigo)), '  y la raíz con la salida y el encabezado del V1 no quedan (los pone el home)')
 
-async function laSalidaEnElTiempo(): Promise<void> {
-  afirmar(await navegaDespues(manejadorDeLaSalida), '  el manejador frena el clic, pide la salida una vez y navega recién cuando se resuelve: vuelve a apretar el MISMO enlace, que pasa (nunca router.push)')
-  controlPositivo('  uno que navega sin esperar la salida se detecta', await navegaDespues(manejadorSinEspera), (b: boolean) => b)
-  controlPositivo('  y uno que no la pide', await navegaDespues(manejadorQueNoPide), (b: boolean) => b)
-  cerrar('escena.invariant')
-}
-void laSalidaEnElTiempo()
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('11 · [L7a · B13] En el cierre, la resolución lleva la luz a la composición: el piso liso y calmo debajo del pie')
+
+type Resolver = typeof parametrosResueltos
+const RESOLUCIONES = Array.from({ length: 101 }, (_, i) => i / 100)
+const resuelveBien = (r: Resolver): boolean => igual(r(WEB_ENCENDIDA, 0, false), WEB_ENCENDIDA) && igual(r(WEB_ENCENDIDA, 1, false), COMPOSICION_COMPARTIDA) &&
+  RESOLUCIONES.every((x, i) => i === 0 || r(WEB_ENCENDIDA, x, false).brilloDelPiso <= r(WEB_ENCENDIDA, RESOLUCIONES[i - 1] ?? 0, false).brilloDelPiso) &&
+  igual(r(WEB_ENCENDIDA, 0.4, true), WEB_ENCENDIDA) && igual(r(WEB_ENCENDIDA, 0.6, true), COMPOSICION_COMPARTIDA)
+afirmar(resuelveBien(parametrosResueltos), 'en 0, la luz de la intro; en 1, exacta en la composición; en el medio sólo baja (función del valor, sin reloj); con reducido, de una a la mitad')
+controlPositivo('  una que no se resuelve (la variante de V1) se detecta', ((luz) => luz) as Resolver, resuelveBien)
+const resueltaEnElCuadro = (cuadro: Cuadro): boolean => igual(cuadro(WEB_ENCENDIDA, { avance: 1, resolucion: 1, reducido: false, saliendo: false, ahora: 0 }, null).parametros, COMPOSICION_COMPARTIDA)
+afirmar(resueltaEnElCuadro(cuadroDeLaVariante) && /resolucion: resolucion\.current/.test(VARIANTE), '  y el cuadro la usa: la variante le pasa `resolucion.current` (la señal de la ranura) en cada cuadro')
+controlPositivo('  un cuadro que ignora la resolución se detecta', ((e, m, s) => cuadroDeLaVariante(e, { ...m, resolucion: 0 }, s)) as Cuadro, resueltaEnElCuadro)
+
+cerrar('escena.invariant')

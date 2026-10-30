@@ -14,8 +14,8 @@
  *   · `gatillo`: entero al cruzar la línea de disparo y en espejo al volver a subir (el gatillo común del home, `_contrato/Gatillo`): los CTA;
  *   · `quieto`: en su lugar, sin revelado (el FAQ: cambia de alto al abrir una pregunta y un revelado atado al scroll lo correría).
  *
- * `data-bloque` es el gancho de los tests (nunca `data-seccion`, `data-panel` ni ids del home). `Problema` (el `h1`, en la intro),
- * el CTA del precio (solo el botón), [M3] `Trabajos` (el video de fondo) y `Cierre` arman su propia caja.
+ * `data-bloque` es el gancho de los tests (nunca `data-seccion`, `data-panel` ni ids del home). El CTA del precio (solo el botón) y
+ * [M3] `Trabajos` (el video de fondo) arman su propia caja.
  */
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
@@ -29,19 +29,19 @@ import { TitularQueEntra } from '../movimiento/TitularQueEntra'
 /** La superficie de las secciones opacas del home (`papel-opaco`: el fondo y la tinta del papel). Se lee del home, no se escribe. */
 export const CLASES_DEL_PAPEL = SUPERFICIES['papel-opaco'].clases
 
-/** [M1] Los bloques, en el orden de la maqueta (M0 §1.3): la intro y los diez del cuerpo. */
+/** [M1 · L7a] Los bloques del cuerpo, en su orden. La intro es la del home y el cierre (con el FAQ) es el común (`CierreDeLaPagina`). */
 export type NombreDeBloque =
-  | 'problema'
   | 'que-hacemos'
+  | 'ejemplos'
   | 'que-incluye'
   | 'precio'
   | 'llamado-del-precio'
   | 'extra'
   | 'trabajos'
+  | 'posibles'
   | 'proceso'
-  | 'faq'
-  | 'llamado'
-  | 'cierre'
+  | 'entrega'
+  | 'despues'
 
 /** Cómo entra el panel de un bloque. */
 export type ReveladoDelPanel = 'progresivo' | 'gatillo' | 'quieto'

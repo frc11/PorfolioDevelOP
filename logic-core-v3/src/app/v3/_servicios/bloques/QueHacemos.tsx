@@ -1,15 +1,25 @@
 /**
- * [SERVICIOS S1b] 2 · QUÉ HACEMOS — el título es del servicio (viene de los datos) y debajo va el párrafo (SPEC §5).
+ * [SERVICIOS S1b · L7a] QUÉ HACEMOS — el título es del servicio (viene de los datos) y debajo van sus párrafos. [L7a] El texto corto
+ * (`queHacemos.texto`) va en la intro, en «de qué se trata»; acá, el servicio contado con más detalle (`detalle`).
  */
 
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import type { Servicio } from '../tipos'
 import { Bloque } from './Bloque'
 
-export function QueHacemos({ queHacemos }: { readonly queHacemos: Servicio['queHacemos'] }): React.JSX.Element {
+interface QueHacemosProps {
+  readonly queHacemos: Servicio['queHacemos']
+  readonly detalle: Servicio['detalle']
+}
+
+export function QueHacemos({ queHacemos, detalle }: QueHacemosProps): React.JSX.Element {
   return (
     <Bloque nombre="que-hacemos" titulo={queHacemos.titulo}>
-      <Cuerpo className="max-w-[var(--breakpoint-tablet)]">{queHacemos.texto}</Cuerpo>
+      <div className="flex max-w-[var(--breakpoint-tablet)] flex-col gap-4">
+        {detalle.map((parrafo) => (
+          <Cuerpo key={parrafo}>{parrafo}</Cuerpo>
+        ))}
+      </div>
     </Bloque>
   )
 }

@@ -107,7 +107,7 @@ const pieza = sinComentarios(leer('_lib/escena/ruta/PresetDeLaPagina.tsx'))
 afirmar(renderToStaticMarkup(<PresetDeLaPagina preset={PRESET_DEL_HOME} />) === '' && /useLayoutEffect\(\(\) => apilarElPreset\(preset\), \[preset\]\)/.test(pieza), '  y no pinta nada: apila al montarse (antes del primer cuadro) y saca al desmontarse; el marcado del home no cambia')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('B12a.2 · 4 · El avance de la intro: 0 arriba, 1 a las `PANTALLAS_DE_LA_INTRO` pantallas (± 1 %); [B12a.8] 2,5')
+titulo('B12a.2 · 4 · El avance de la intro: 0 arriba, 1 a las `PANTALLAS_DE_LA_INTRO` pantallas (± 1 %); [B12a.8] 2,5; [L7a] 1,8')
 
 type Avance = (arriba: number, y: number, alto: number) => number
 // A 1440 × 900 con la intro en el tope, y a 390 × 844 con algo de 120 px arriba de ella.
@@ -117,7 +117,8 @@ const avanceBien = (f: Avance): boolean =>
     return Math.abs(en(0)) <= 0.01 && Math.abs(en(PANTALLAS_DE_LA_INTRO / 2) - 0.5) <= 0.01 && Math.abs(en(PANTALLAS_DE_LA_INTRO) - 1) <= 0.01 && en(3) === 1 && f(arriba, arriba - 200, alto) === 0
   }) && f(0, 500, 0) === 0
 // [B12a.8] Reemplazada por la spec: la intro pasa de 1,5 a 2,5 pantallas (la parte 3D quedaba corta).
-afirmar(PANTALLAS_DE_LA_INTRO === 2.5 && avanceBien(avanceDeLaIntro), 'el avance va de 0 (el tope de la intro en el tope del cuadro) a 1 (2,5 pantallas después), lineal, acotado de los dos lados; con el alto en cero, 0')
+// [L7a] Reemplazada por la spec: la intro es de ~1 pantalla (1,8; era 2,5).
+afirmar(PANTALLAS_DE_LA_INTRO === 1.8 && avanceBien(avanceDeLaIntro), 'el avance va de 0 (el tope de la intro en el tope del cuadro) a 1 (1,8 pantallas después), lineal, acotado de los dos lados; con el alto en cero, 0')
 controlPositivo('  el detector ve un avance de una sola pantalla', ((a, y, alto) => Math.min(1, Math.max(0, (y - a) / alto))) as Avance, avanceBien)
 controlPositivo('  y uno sin acotar (pasada la intro seguiría girando)', ((a, y, alto) => (alto > 0 ? (y - a) / (PANTALLAS_DE_LA_INTRO * alto) : 0)) as Avance, avanceBien)
 
@@ -541,7 +542,7 @@ const deLaSincronia = leerV3('_lib/escena/titulos3d/sincronia.ts')
 afirmar(deLaSincronia.includes('TITULOS_EN_CAMINO.todos = new Set([...ESPERANDO, ...COMPILANDO]).size'), '  la sincronía publica todos los títulos en camino: los que esperan (su fuente, el ocio) y los que compilan')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('B12a.8 · 13 · La intro de 2,5 pantallas, su composición (`?composicion=1|2|3`) y el texto sobre la escena (P-H33)')
+titulo('B12a.8 · 13 · La intro de 1,8 pantallas ([L7a]; era 2,5), su composición (`?composicion=1|2|3`) y el texto sobre la escena (P-H33)')
 
 // Los tramos: el del título (el marco fijo arriba, con la columna y el hueco del logo) y el de «de qué se trata»; los altos salen de las dos
 // constantes (variables de CSS): calibrar la intro es cambiar el número.
@@ -550,7 +551,9 @@ const tramosBien = (html: string): boolean =>
   html.includes(`--pantallas-de-la-intro:${String(PANTALLAS_DE_LA_INTRO)}`) && html.includes(`--tramo-del-titulo:${String(TRAMO_DEL_TITULO)}`) &&
   html.indexOf(`data-parte="${TRAMOS_DE_LA_INTRO.titulo}"`) < html.indexOf('<h1') && html.indexOf('<h1') < html.indexOf('data-parte="hueco-del-logo"') &&
   html.indexOf('data-parte="hueco-del-logo"') < html.indexOf(`data-parte="${TRAMOS_DE_LA_INTRO.deQueSeTrata}"`) && html.indexOf(`data-parte="${TRAMOS_DE_LA_INTRO.deQueSeTrata}"`) < html.indexOf('De qué se trata.') && html.includes('data-parte="bajada"')
-afirmar(PANTALLAS_DE_LA_INTRO === 2.5 && TRAMO_DEL_TITULO > 1 && TRAMO_DEL_TITULO <= PANTALLAS_DE_LA_INTRO - 0.8 && tramosBien(introLarga), `la intro: ${String(PANTALLAS_DE_LA_INTRO)} pantallas, en orden el tramo del título (${String(TRAMO_DEL_TITULO)}: el marco de una pantalla fijo arriba, con la columna y el hueco del logo) y «de qué se trata» (el slot de la página, sobre la escena); el papel entra en la última pantalla`)
+// [L7a] Reemplazada por la spec: 1,8 pantallas; el tramo del título pasa de 1 + la anticipación de la caída (si no, cae sin scroll) y deja
+// por lo menos 0,4 pantallas para «de qué se trata».
+afirmar(PANTALLAS_DE_LA_INTRO === 1.8 && TRAMO_DEL_TITULO > 1 + CAIDA_DEL_TITULO.antes && TRAMO_DEL_TITULO <= PANTALLAS_DE_LA_INTRO - 0.4 && tramosBien(introLarga), `la intro: ${String(PANTALLAS_DE_LA_INTRO)} pantallas, en orden el tramo del título (${String(TRAMO_DEL_TITULO)}: el marco de una pantalla fijo arriba, con la columna y el hueco del logo) y «de qué se trata» (el slot de la página, sobre la escena); el papel entra en la última pantalla`)
 controlPositivo('  el detector ve la intro sin «de qué se trata» (la de B12a.2)', renderToStaticMarkup(<IntroDeLaPagina titulo="Una página" bajada={<p>La bajada.</p>} preset={DE_PRUEBA} />), tramosBien)
 // La caída: antes de que el tramo del título se suelte (el `h1` todavía quieto): el título en volumen nunca sube con el scroll.
 type Cae = typeof caeElTitulo

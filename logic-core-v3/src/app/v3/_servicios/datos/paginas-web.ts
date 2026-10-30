@@ -1,23 +1,20 @@
 /**
- * [SERVICIOS S1a] PÁGINAS WEB — los datos de SPEC §7.1, tal cual.
+ * [SERVICIOS S1a · L7a] DESARROLLO WEB — los datos de SPEC §7.1, expandidos en L7a.
  *
- * Textos y números literales del SPEC: nada inventado. Lo que el SPEC deja en [a definir] va en `null` (plan §8.6).
- * Las marcas de este archivo:
- *   · `// SPEC §7.x` — de qué parte del SPEC sale una respuesta del FAQ. Regla D9: se escribe solo si CADA afirmación
- *     sale del SPEC; si alguna parte no sale, es `null`.
- *   · `// C2: provisorio` — copy que el SPEC no da (D10); lo reemplaza la pasada de textos del final.
- *   · `// M0 §8 (dictado)` — texto que dictó Valentino en el plan M0, literal (en los otros dos servicios).
- * La marca se importa de `LOGOTIPO`: no se escribe suelta en los datos. [M1] El acento no se guarda acá: sale del tema por
- * `idEnElHome` (P-H2 cerrado), así que los datos no tienen ningún color.
+ * Los números y los hechos son los del SPEC (los calibres, el plazo, el mantenimiento) y los textos del home (`05-TEXTOS.md` de la cola 2,
+ * la sección Servicios): nada inventado, ni clientes, ni cifras, ni garantías. [L7a] El nombre es el del servicio en el home
+ * («Desarrollo web», `SERVICIOS` de `acento.ts`); el slug sigue siendo `paginas-web` para no romper los enlaces. Sin `null`: la página no
+ * muestra marcadores (L7: el texto es genérico pero real).
+ * La marca se importa de `LOGOTIPO`: no se escribe suelta en los datos. El acento no se guarda acá: sale del tema por `idEnElHome`.
  */
 
 import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { usd } from '../formato'
 import type { Caso, Servicio } from '../tipos'
 
-const NOMBRE = 'Páginas web'
+const NOMBRE = 'Desarrollo web'
 
-/** Los trabajos de Páginas web: las frases de Cómo trabajamos y, por su nombre, la línea del video. */
+/** Los trabajos de Desarrollo web: las frases de Cómo trabajamos y, por su nombre, la línea del video. */
 const CASOS: readonly Caso[] = [
   {
     tipo: 'proyecto',
@@ -31,12 +28,7 @@ const CASOS: readonly Caso[] = [
 /** [M3] Las demos del video de trabajos (D1), por su slug en el catálogo del home. */
 const DEMOS_DEL_VIDEO = ['ethereal', 'noir', 'skyline'] as const
 
-/**
- * [M3] La línea del video, dictada por Valentino, con la marca de LOGOTIPO. Los nombres se verificaron contra PROYECTOS (los casos) y
- * contra la sección Demos del home (las demos), y `pagina.invariant` §12 los vuelve a comparar con las dos fuentes: el dictado decía
- * «Ethernal, Noir y Skyline» y ganan los nombres del home (anotado en SPRINT-M3). Van escritos y no leídos de las fuentes porque
- * PROYECTOS no entra al runtime de los datos (`precios.invariant`).
- */
+/** [M3] La línea del video, dictada por Valentino, con la marca de LOGOTIPO (los nombres, contra PROYECTOS y Demos del home). */
 const LINEA_DEL_VIDEO = `Sitios para clientes (El Garage, Esquina Estudio y Banú Scents) y demos propias de ${LOGOTIPO} (The Ethereal Resort, Noir Dining in the Void y Skyline Estates).` // M3 (dictado)
 
 const QUE_HACEMOS = {
@@ -44,28 +36,47 @@ const QUE_HACEMOS = {
   texto: 'Diseñamos y desarrollamos la web de tu negocio para que te encuentren, te entiendan y te escriban.',
 }
 
-/** Lo que cuestan los cambios del mantenimiento: lo usan el extra y la respuesta del FAQ, así no se desfasan. */
+/** Lo que cuestan los cambios del mantenimiento: lo usan el extra, «después de la entrega» y el FAQ, así no se desfasan. */
 const CAMBIO_MEDIANO_DESDE = 50
 const CAMBIO_GRANDE_DESDE = 100
+
+/** El plazo de referencia (SPEC §7.1): una referencia, nunca una promesa. Lo usan el proceso y el FAQ. */
+const PLAZO = 'De 2–3 semanas a 2–3 meses según el calibre'
 
 export const PAGINAS_WEB: Servicio = {
   slug: 'paginas-web',
   idEnElHome: 'web',
   nombre: NOMBRE,
   seo: {
-    title: `${NOMBRE} · ${LOGOTIPO}`, // C2: provisorio
-    description: QUE_HACEMOS.texto, // C2: provisorio
+    title: `${NOMBRE} · ${LOGOTIPO}`, // C2: provisorio (L7a)
+    description: // C2: provisorio (L7a)
+      'Páginas web a medida para tu negocio: que te encuentren, te entiendan y te escriban. Se ven bien en el celular y las manejás vos desde tu panel.',
   },
   problema: {
     titulo: '¿Te buscan y no te encuentran?',
     texto: 'Si tu negocio no tiene web, o tiene una vieja que no vende, perdés clientes que ya te estaban buscando.',
   },
   queHacemos: QUE_HACEMOS,
+  // 05-TEXTOS (Servicios · Desarrollo web), tal cual.
+  detalle: [
+    'Tu página es lo primero que ve un cliente antes de escribirte. Por eso no arrancamos de una plantilla: arrancamos de tu negocio, de lo que vendés y de cómo te buscan.',
+    'Pensamos cada pantalla para que se entienda sola, cargue rápido y se vea bien en el celular, que es donde te van a encontrar.',
+    'Y cuando está lista no te la tiramos por la cabeza: la manejás vos desde tu panel. Cambiás precios, fotos y textos sin depender de nadie.',
+  ],
+  ejemplos: [
+    { nombre: 'Una landing', texto: 'Una sola página que cuenta qué hacés y lleva a escribirte. Para arrancar, para un producto o para una campaña.' },
+    { nombre: 'Un sitio institucional', texto: 'Varias páginas para mostrar tu negocio, tus servicios y cómo contactarte, con la información ordenada.' },
+    { nombre: 'Un catálogo', texto: 'Tus productos con fotos, precios y un buscador, sin compras: el cliente elige y te escribe.' },
+    { nombre: 'Una tienda online', texto: 'El catálogo con carrito y pago, para que te compren sin que tengas que contestar uno por uno.' },
+  ],
+  posibles: [],
   incluye: [
     'Diseño a medida de tu marca',
     'Adaptada a celular y tablet',
     'Formulario de contacto conectado',
     'Portal del cliente (métricas, tickets y acceso a más servicios)',
+    'Imágenes y fuentes optimizadas para que cargue rápido',
+    'Metadatos y datos estructurados para los buscadores',
   ],
   aparte: ['Chatbot con IA', 'Extras'],
   precio: {
@@ -115,14 +126,30 @@ export const PAGINAS_WEB: Servicio = {
         precio: `Desde ${usd(CAMBIO_GRANDE_DESDE)}`,
       },
       { nombre: 'Arreglos', detalle: 'De algo roto', precio: 'Siempre incluidos' },
-      { nombre: 'Plan mensual', detalle: 'Solo web', precio: null }, // SPEC §7.1: «Plan mensual solo web: USD [a definir]»
+      { nombre: 'Plan mensual', detalle: 'Solo web', precio: null }, // SPEC §7.1: «Plan mensual solo web: USD [a definir]» (no se monta)
     ],
     nota: 'Todo extra se presupuesta antes.',
   },
   proceso: {
-    pasos: ['Charla', 'Propuesta', 'Diseño', 'Desarrollo', 'Entrega'],
-    plazo: 'De 2–3 semanas a 2–3 meses según el calibre',
+    pasos: [
+      { nombre: 'Charla', texto: 'Nos contás de tu negocio, qué vendés, a quién y cómo te buscan. De ahí sale qué página te conviene.' },
+      { nombre: 'Propuesta', texto: 'Te pasamos por escrito qué incluye, el calibre, el precio y los tiempos. Arrancamos cuando estás de acuerdo.' },
+      { nombre: 'Diseño', texto: 'Armamos cómo se va a ver cada pantalla, en el celular y en la computadora, y lo ajustamos con vos.' },
+      { nombre: 'Desarrollo', texto: 'La construimos y vas viendo el avance. Cargamos tus textos y fotos, y conectamos el formulario.' },
+      { nombre: 'Entrega', texto: 'La dejamos publicada y funcionando, y te mostramos cómo manejarla desde tu panel.' },
+    ],
+    plazo: PLAZO,
   },
+  entrega: [
+    'Tu página publicada y funcionando',
+    'El formulario de contacto conectado: cada consulta te llega',
+    'Acceso a tu portal del cliente, con las métricas y los tickets',
+    'En las webs Mediana y Premium, el panel para editar textos, precios, fotos y horarios',
+  ],
+  despues: [
+    `Si algo se rompe, lo arreglamos: los arreglos siempre están incluidos. Las ediciones chicas las hacés vos desde el panel.`,
+    `Si querés sumar algo, se presupuesta antes: los cambios medianos (una sección, un formulario, colores o tipografía) salen desde ${usd(CAMBIO_MEDIANO_DESDE)} y los grandes (una página nueva, una integración, un módulo), desde ${usd(CAMBIO_GRANDE_DESDE)}.`,
+  ],
   prueba: {
     casos: CASOS,
     nota: null,
@@ -139,35 +166,38 @@ export const PAGINAS_WEB: Servicio = {
     {
       pregunta: '¿Cuánto tarda una web?',
       // SPEC §7.1: el proceso y el plazo de referencia, que es una referencia y nunca una promesa
-      respuesta:
-        'Como referencia, de 2–3 semanas a 2–3 meses según el calibre. El proceso va de la charla a la propuesta, el diseño, el desarrollo y la entrega.',
+      respuesta: `Como referencia, ${PLAZO.charAt(0).toLowerCase()}${PLAZO.slice(1)}. Va de la charla a la propuesta, el diseño, el desarrollo y la entrega, y vas viendo el avance mientras se construye.`,
     },
     {
       pregunta: '¿Puedo editarla yo después?',
-      // SPEC §7.1: Mediana y Premium son autogestionables; las ediciones chicas se hacen desde el panel. Nada de la Simple.
-      respuesta:
-        'Las webs Mediana y Premium son autogestionables: las ediciones chicas (textos, precios, fotos, horarios) se hacen desde el panel.',
+      // SPEC §7.1: Mediana y Premium son autogestionables; las ediciones chicas se hacen desde el panel
+      respuesta: 'Las webs Mediana y Premium son autogestionables: las ediciones chicas (textos, precios, fotos, horarios) las hacés vos desde el panel, sin depender de nadie.',
+    },
+    {
+      pregunta: '¿Se va a ver bien en el celular?',
+      // L7a: SPEC §7.1 (adaptada a celular y tablet) y 05-TEXTOS (se vea bien en el celular)
+      respuesta: 'Sí. Cada pantalla se piensa para el celular, la tablet y la computadora: no es la versión de escritorio apretada.',
+    },
+    {
+      pregunta: '¿Me ayudan con el dominio y la publicación?',
+      // L7a: la sección Servicios del home (hosting, dominio y certificado) y la base (`pagina-base/faq.ts`)
+      respuesta: 'Sí. Te acompañamos con el dominio y dejamos la página publicada y funcionando antes de darla por terminada.',
     },
     {
       pregunta: '¿Qué pasa después de la entrega?',
-      // SPEC §7.1: el mantenimiento. Quedan afuera el plan mensual y las ediciones desde el panel, que dependen de un [a definir]
-      respuesta: `Los arreglos de algo roto siempre están incluidos. Los cambios medianos (sumar sección o formulario, cambiar colores o tipografía) salen desde ${usd(CAMBIO_MEDIANO_DESDE)} y los grandes (página nueva, integración, módulo), desde ${usd(CAMBIO_GRANDE_DESDE)}. Todo extra se presupuesta antes.`,
-    },
-    {
-      pregunta: '¿Qué incluye el portal del cliente?',
-      // SPEC §7.1: lo que incluye la web
-      respuesta: 'El portal del cliente incluye métricas, tickets y acceso a más servicios.',
+      // SPEC §7.1: el mantenimiento
+      respuesta: `Los arreglos de algo roto siempre están incluidos. Los cambios medianos salen desde ${usd(CAMBIO_MEDIANO_DESDE)} y los grandes desde ${usd(CAMBIO_GRANDE_DESDE)}. Todo extra se presupuesta antes.`,
     },
     {
       pregunta: '¿El chatbot viene incluido?',
-      // SPEC §7.1: el SPEC trae la respuesta («No, va aparte») y lo lista en «Aparte»
-      respuesta: 'No, el chatbot con IA va aparte.',
+      // SPEC §7.1: «No, va aparte»; dónde sumarlo, el tercer servicio
+      respuesta: 'No, el chatbot con IA va aparte. Lo podés sumar cuando quieras: está en Integraciones con IA.',
     },
   ],
   cta: {
     titulo: '¿Arrancamos con tu web?',
     texto: 'Contanos de tu negocio y te respondemos con una propuesta.',
-    boton: 'Quiero mi página web', // C2: provisorio
+    boton: 'Quiero mi desarrollo web', // C2: 05-TEXTOS, el CTA del servicio en el home
   },
   articulos: [
     { titulo: 'Cuánto cuesta una página web', href: null },

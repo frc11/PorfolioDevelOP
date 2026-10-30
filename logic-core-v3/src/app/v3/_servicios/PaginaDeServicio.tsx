@@ -1,77 +1,80 @@
 /**
- * [SERVICIOS S1b · S3b · M1 · V1] LA PÁGINA DE UN SERVICIO — el template (plan §7): una página, tres juegos de datos (SPEC §5).
+ * [SERVICIOS S1b · V1 · L7a] LA PÁGINA DE UN SERVICIO — el template: una página, tres juegos de datos. [L7a] Armada con las piezas de la
+ * página base (`/v3/pagina-base`, B12a-API §7 y §8), como cualquier página de `/v3`:
+ *   · la INTRO del home (`Intro` → `IntroDeLaPagina`): sobre la escena, de noche, con la variante y el acento del servicio;
+ *   · el CUERPO en papel (`CuerpoDelServicio`), adentro de la compuerta de la coreografía del home; el acento del papel entra por
+ *     `--color-acento` con el token oscuro del servicio (`estiloDelAcentoSobrePapel`): ningún hex;
+ *   · el CIERRE común (`CierreDeLaPagina`): Seis razones → el CTA (con el servicio de la página) → la resolución → el pie, y el FAQ de la
+ *     página con sus 6 preguntas.
+ * Lo que el V1 ponía y ahora pone el home se fue: el encabezado (la navbar la monta el layout), el contacto en la ruta (`ChromeDelHome`),
+ * la salida de la variante en la raíz (`EnlaceDeRuta` la pide), el FAQ del cuerpo y el cierre provisorio (el cierre común).
  *
- * Server, salvo la raíz (`movimiento/RaizDeLaPagina`, [V1]) y lo que vive en `movimiento/`. El modal de contacto NO está acá: la ruta lo
- * monta como hermano, fuera de esta raíz, para que conserve sus tokens de papel y su acento por defecto (plan §4.2).
- *
- * ── Las partes (S3b, contrato v4 §0; [V1] la intro con la escena) ─────────
- *   · El ENCABEZADO (`Encabezado`): el enlace al home, sobre la escena, en claro.
- *   · La INTRO (`Intro`, [V1] la del home: `IntroDeLaPagina`): 1,5 pantallas transparentes sobre la escena, de noche, con su variante, el
- *     `h1` (el nombre) y la bajada. Junto con el encabezado, lo único invertido de la página.
- *   · El CUERPO, del Qué hacemos al cierre provisorio: secciones opacas en papel, con tinta y el acento oscuro. Tapan la escena.
- *
- * ── [M1] El orden de la maqueta (M0 §1.3), con cómo entra cada uno ────────
- *     1 Qué hacemos · progresivo        6 Trabajos (el video, M3) · gatillo; solo en Páginas web
- *     2 Qué incluye · progresivo        7 Cómo trabajamos · progresivo
- *     3 Precio · progresivo             8 FAQ · el panel quieto
- *     4 El CTA del precio · gatillo     9 El llamado · gatillo
- *     5 Extra · progresivo (si hay)    10 El cierre provisorio · sin revelado
- *   «Del blog» salió del orden hasta que exista el blog (los artículos siguen en los datos).
- *
- * ── La raíz ────────────────────────────────────────────────────────────────
- *   · `relative z-10`: el contenido queda por encima del lienzo de la escena, que el layout de /v3 monta debajo de todo (P-H4). [V1] La
- *     tapa interina se fue: la escena se ve a través del encabezado y de la intro, y el papel del cuerpo la tapa.
- *   · El acento del cuerpo entra por la custom property `--color-acento`, con el token oscuro del servicio
- *     (`estiloDelAcentoSobrePapel`): ningún hex. La intro lleva el de su servicio por `data-servicio` (lo pone el home).
- *   · [V1] Atiende el clic en cualquier enlace que se va de la página: antes de navegar, la salida de la variante (P-H29d).
- *   · Los documentos JSON-LD van al final: no se ven.
- *
- * El modo (desarrollo o producción) se calcula UNA vez, acá, y baja a los bloques que tienen datos que pueden faltar.
+ * Server, salvo lo que vive en `movimiento/` y la compuerta. Los documentos JSON-LD van primero: no se ven.
  */
 
-import { Encabezado } from './Encabezado'
+import { CierreDeLaPagina } from '../_componentes/pagina/cierre/CierreDeLaPagina'
+import { CompuertaDelHome } from '../_secciones/CompuertaDelHome'
+
 import { Intro } from './Intro'
 import { JsonLd } from './JsonLd'
-import { Cierre } from './bloques/Cierre'
+import { Despues, Entrega } from './bloques/AlFinal'
 import { Extra } from './bloques/Extra'
-import { Faq } from './bloques/Faq'
-import { Llamado, LlamadoDelPrecio } from './bloques/Llamado'
+import { LlamadoDelPrecio } from './bloques/Llamado'
+import { Ejemplos, LoQuePodemosConstruir } from './bloques/Piezas'
 import { Precio } from './bloques/Precio'
 import { Proceso } from './bloques/Proceso'
 import { QueHacemos } from './bloques/QueHacemos'
 import { QueIncluye } from './bloques/QueIncluye'
 import { Trabajos } from './bloques/Trabajos'
+import { PRESETS_DE_LAS_PAGINAS } from './escena/presets'
 import { estiloDelAcentoSobrePapel } from './estiloDelAcento'
-import { RaizDeLaPagina } from './movimiento/RaizDeLaPagina'
 import type { Servicio } from './tipos'
 
-/** En producción `[a definir]` no se ve nunca y el ítem que depende del dato no se monta (plan §8.4). */
-const EN_DESARROLLO = process.env.NODE_ENV !== 'production'
+/**
+ * [L7a] Sin marcadores en ningún modo (L7: el texto es genérico pero real, sin corchetes): un dato que todavía no existe no se monta,
+ * también en desarrollo. Los bloques siguen recibiendo el modo para que sus tests prueben las dos ramas.
+ */
+const EN_DESARROLLO = false
 
 interface PaginaDeServicioProps {
   readonly servicio: Servicio
-  /** Solo para los tests, que renderizan los dos modos. En la ruta no se pasa: manda `NODE_ENV`. */
+  /** Solo para los tests, que renderizan los dos modos. En la ruta no se pasa. */
   readonly enDesarrollo?: boolean
 }
 
-export function PaginaDeServicio({ servicio, enDesarrollo = EN_DESARROLLO }: PaginaDeServicioProps): React.JSX.Element {
+/**
+ * El cuerpo en papel, en el orden de la página: qué es, para qué sirve, qué incluye, cuánto cuesta, lo hecho o lo posible, cómo, y el final.
+ * Exportado para los tests: la página entera suma el cierre del home, que tiene los suyos.
+ */
+export function CuerpoDelServicio({ servicio, enDesarrollo }: { readonly servicio: Servicio; readonly enDesarrollo: boolean }): React.JSX.Element {
   return (
-    <RaizDeLaPagina estilo={estiloDelAcentoSobrePapel(servicio.idEnElHome)} className="relative z-10 text-tinta">
-      <Encabezado />
-      <Intro servicio={servicio} />
-      <main>
-        <QueHacemos queHacemos={servicio.queHacemos} />
-        <QueIncluye incluye={servicio.incluye} aparte={servicio.aparte} />
-        <Precio precio={servicio.precio} enDesarrollo={enDesarrollo} />
-        <LlamadoDelPrecio servicio={servicio} />
-        <Extra extra={servicio.extra} enDesarrollo={enDesarrollo} />
-        <Trabajos prueba={servicio.prueba} />
-        <Proceso proceso={servicio.proceso} prueba={servicio.prueba} enDesarrollo={enDesarrollo} />
-        <Faq faq={servicio.faq} enDesarrollo={enDesarrollo} />
-        <Llamado servicio={servicio} />
-      </main>
-      <Cierre servicio={servicio} />
+    <div style={estiloDelAcentoSobrePapel(servicio.idEnElHome)} className="text-tinta">
+      <QueHacemos queHacemos={servicio.queHacemos} detalle={servicio.detalle} />
+      <Ejemplos ejemplos={servicio.ejemplos} />
+      <QueIncluye incluye={servicio.incluye} aparte={servicio.aparte} />
+      <Precio precio={servicio.precio} enDesarrollo={enDesarrollo} />
+      <LlamadoDelPrecio servicio={servicio} />
+      <Extra extra={servicio.extra} enDesarrollo={enDesarrollo} />
+      <Trabajos prueba={servicio.prueba} />
+      <LoQuePodemosConstruir posibles={servicio.posibles} />
+      <Proceso proceso={servicio.proceso} prueba={servicio.prueba} enDesarrollo={enDesarrollo} />
+      <Entrega entrega={servicio.entrega} />
+      <Despues despues={servicio.despues} />
+    </div>
+  )
+}
+
+export function PaginaDeServicio({ servicio, enDesarrollo = EN_DESARROLLO }: PaginaDeServicioProps): React.JSX.Element {
+  const preset = PRESETS_DE_LAS_PAGINAS[servicio.idEnElHome]
+  return (
+    <main className="relative z-10">
+      {/* Antes de la intro: nada entre la intro y el cuerpo, ni entre el cierre y el fin del `<main>` (B12a-API §7 y §8). */}
       <JsonLd servicio={servicio} />
-    </RaizDeLaPagina>
+      <Intro servicio={servicio} />
+      <CompuertaDelHome>
+        <CuerpoDelServicio servicio={servicio} enDesarrollo={enDesarrollo} />
+      </CompuertaDelHome>
+      <CierreDeLaPagina preset={preset} preguntas={servicio.faq} />
+    </main>
   )
 }

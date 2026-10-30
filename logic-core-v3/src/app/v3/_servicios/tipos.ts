@@ -9,6 +9,7 @@
  */
 
 import type { IdDeServicio } from '../_secciones/_contrato/acento'
+import type { PreguntaFrecuente } from '../_componentes/faq/preguntas'
 import type { FUENTE_DE_PROYECTOS } from './datos/fuenteDeProyectos'
 
 /** Los tres servicios, en el orden del SPEC (§4). El tipo se deriva de la lista: una sola fuente. */
@@ -122,13 +123,16 @@ export interface Prueba {
   readonly video: VideoDeTrabajos | null
 }
 
-export interface PreguntaFrecuente {
-  readonly pregunta: string
-  /**
-   * `null` = alguna parte no sale de una línea del SPEC: no se muestra en producción ni entra al JSON-LD.
-   * Escrita = cada afirmación sale del SPEC, con `// SPEC §7.x` al lado. Regla y clasificación: D9 en §12.2.
-   */
-  readonly respuesta: string | null
+/** [L7a] Un paso de Cómo trabajamos: su nombre y qué pasa en él. */
+export interface PasoDelProceso {
+  readonly nombre: string
+  readonly texto: string
+}
+
+/** [L7a] Una pieza con nombre y una frase: los ejemplos para un negocio y «Lo que podemos construir». */
+export interface PiezaConTexto {
+  readonly nombre: string
+  readonly texto: string
 }
 
 export interface Articulo {
@@ -150,13 +154,24 @@ export interface Servicio {
   readonly seo: { readonly title: string; readonly description: string }
   readonly problema: { readonly titulo: string; readonly texto: string }
   readonly queHacemos: { readonly titulo: string; readonly texto: string }
+  /** [L7a] Los párrafos de Qué hacemos, debajo del texto: el servicio contado con más detalle. */
+  readonly detalle: readonly string[]
+  /** [L7a] Ejemplos típicos para un negocio chico: qué se arma y para quién. */
+  readonly ejemplos: readonly PiezaConTexto[]
+  /** [L7a] «Lo que podemos construir»: lo honesto en lugar de casos cuando el servicio no tiene trabajos propios publicados. Vacío = no se muestra. */
+  readonly posibles: readonly PiezaConTexto[]
+  /** [L7a] Lo que el cliente tiene en la mano al terminar. */
+  readonly entrega: readonly string[]
+  /** [L7a] Lo que pasa después de la entrega, en párrafos. */
+  readonly despues: readonly string[]
   readonly incluye: readonly string[]
   /** Vacío = no se muestra. */
   readonly aparte: readonly string[]
   readonly precio: Precio
   readonly extra: Extra | null
-  readonly proceso: { readonly pasos: readonly string[]; readonly plazo: string }
+  readonly proceso: { readonly pasos: readonly PasoDelProceso[]; readonly plazo: string }
   readonly prueba: Prueba
+  /** [L7a] Las 6 preguntas de la página: van al FAQ del cierre (`CierreDeLaPagina`), no al cuerpo. */
   readonly faq: readonly PreguntaFrecuente[]
   /**
    * El SPEC no da el rótulo del botón (D10). `texto` es `null` cuando no hay un párrafo dicho por el SPEC o dictado: el bloque se

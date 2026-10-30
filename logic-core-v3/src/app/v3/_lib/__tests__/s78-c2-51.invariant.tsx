@@ -128,7 +128,8 @@ controlPositivo('  el detector ve el análisis con A y B al revés', ((r: Respue
 afirmar(enMinuscula(solucion('chatbot').nombre) === 'un chatbot con IA que atienda por vos' && enMinuscula('Automatizaciones') === 'automatizaciones', '«en minúscula» es la primera letra: «IA» sigue en mayúsculas')
 const MENSAJE_000 = 'Hice el recomendador y me salió una página web. Me cuesta: la gente no me encuentra en internet. Me vendría bien: verse más profesional y tener más visibilidad. Mi objetivo: llegar a más clientes.'
 afirmarIgual(mensajeDelContacto([0, 0, 0], 'pagina'), MENSAJE_000, 'el mensaje precargado del contacto, con las tres respuestas')
-afirmar(rotuloDeLaPagina('ia-automatizacion') === 'Ver la página de IA y automatizaciones' && rotuloDeLaPagina('web') === 'Ver la página de desarrollo web', 'el link chico: «Ver la página de {servicio}»')
+// [L7a] Reemplazada por la spec: el tercer servicio se llama «Integraciones con IA» en todos lados.
+afirmar(rotuloDeLaPagina('ia-automatizacion') === 'Ver la página de Integraciones con IA' && rotuloDeLaPagina('web') === 'Ver la página de desarrollo web', 'el link chico: «Ver la página de {servicio}»')
 afirmar(PROCESANDO_MS >= 2200 && PROCESANDO_MS <= 3000 && TEXTOS_DEL_RECOMENDADOR.procesando.length === 3, `el procesando: tres líneas en ${String(PROCESANDO_MS)} ms (≈ 2,5 s)`)
 afirmarIgual(RENGLONES_DEL_TITULO_DEL_RECOMENDADOR.flatMap((r) => r.palabras).join(' '), TEXTOS_DEL_RECOMENDADOR.titulo, 'los renglones del título dicen el título, tal cual')
 
@@ -287,7 +288,7 @@ const partesDelContacto = (h: string): string[] =>
     'el envío': h.includes('data-pieza="estado-de-envio"'),
     'el autocompletado': /autocomplete="email"/i.test(h),
     'el viaje': /data-viaje-del-servicio="ia-automatizacion"/.test(h),
-    'el link': textoDe(h).includes('Ver la página de IA y automatizaciones'),
+    'el link': textoDe(h).includes('Ver la página de Integraciones con IA'),
   }).filter(([, bien]) => !bien).map(([parte]) => parte)
 const contactoBien = (h: string): boolean => partesDelContacto(h).length === 0
 afirmar(contactoBien(conContacto), 'elegida una: [L4] las tarjetas se cambian en el mismo lugar por el contacto precargado, con «Enviar», «Ver la página de…» y «Empezar de nuevo» en una fila, y (`data-precarga` del servicio, el mensaje con las respuestas, `EstadoDeEnvio`, el autocompletado) y el link chico a la página (el viaje)', `faltan: ${partesDelContacto(conContacto).join(', ') || 'nada'}`)

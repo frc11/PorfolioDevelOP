@@ -16,7 +16,7 @@ import { FilaDeQueSeTrata, MarcoDeLaIntro } from './ComposicionDeLaIntro'
  * (`ATRIBUTO_DE_LA_INTRO_DE_PAGINA`, el selector de `preset.tramos.intro`). [B12a.4] El título es `TituloDePagina`: el `h1` con el título
  * entero y, desde 1024 con la escena, sus dos partes en volumen (el `h1` apagado sólo a la vista).
  *
- * [B12a.8] Dos tramos en `PANTALLAS_DE_LA_INTRO` pantallas (2,5), en orden: el del título (`TRAMO_DEL_TITULO`: el `h1` y la bajada fijos
+ * [B12a.8] Dos tramos en `PANTALLAS_DE_LA_INTRO` pantallas ([L7a] 1,8; era 2,5), en orden: el del título (`TRAMO_DEL_TITULO`: el `h1` y la bajada fijos
  * arriba; el título cae antes de que el tramo se suelte) y el de «de qué se trata» (`deQueSeTrata`, un bloque corto de la página, todavía
  * sobre la escena). El papel de la página entra en la última pantalla. Los altos salen de las dos constantes (una variable de CSS cada
  * una): calibrar la intro es cambiar el número.

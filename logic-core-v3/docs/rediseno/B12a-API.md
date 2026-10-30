@@ -63,6 +63,13 @@ lo apile antes de navegar (`PRESET_DEL_DESTINO`, `_secciones/servicios/escenario
 - Llegan, del home y para el cierre: `PrecargaDelCta` (el servicio que el CTA del final precarga), `MaterialDeLosTitulos` (el material de los
   títulos de volumen de un tramo) y `ModoDelPieForzado` (el pie plano en un tramo). Sin proveedor, el home no cambia.
 
+**Después (2026-10-30, L7a; `docs/cola/2026-10-30/L7a-resultado.md`):** ninguna firma cambia; cambian dos números y llegan las páginas.
+- `PANTALLAS_DE_LA_INTRO` pasa de 2,5 a 1,8 y `TRAMO_DEL_TITULO` de 1,6 a 1,4 (la intro de ~1 pantalla de Valentino: «poca animación al
+  principio y pasa rápido al fondo»). El tramo del título tiene que pasar de 1 + `CAIDA_DEL_TITULO.antes` o el título cae sin scroll.
+- Las tres páginas de servicio existen (`/v3/paginas-web`, `/v3/software-a-medida`, `/v3/ia-y-automatizaciones`): `PRESET_DEL_DESTINO`
+  es `PRESETS_DE_LAS_PAGINAS` (`_servicios/escena/presets.ts`) y `DESTINO_DEL_SERVICIO` es `HREF_DEL_SERVICIO` (`_servicios/direcciones.ts`).
+- Las tres usan la variante `web`, teñida por el acento de cada preset (una página, tres colores).
+
 ---
 
 ## 1. El preset de ruta (D1: lo declara la página)

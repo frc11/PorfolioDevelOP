@@ -8,12 +8,13 @@
  *   · un proyecto del Portfolio pone su NOMBRE (de `PROYECTOS`, la fuente única) y servicios su frase. De la fuente no se lee nada
  *     más: ni la reseña ni lo resuelto, que pasan por la llave del contenido inventado (plan §8.3);
  *   · un caso propio pone su nombre y su texto; sin texto es [a definir] (el marcador en desarrollo y, en producción, no se monta).
- * El enlace lleva al Portfolio en el PRIMER proyecto de los casos (en Páginas web, El Garage), con el deep link de B1
+ * El enlace lleva al Portfolio en el PRIMER proyecto de los casos (en Desarrollo web, El Garage), con el deep link de B1
  * (`hrefDelCasoEnElPortfolio`). Sin un proyecto del Portfolio entre los casos (Software, IA) no hay enlace: un caso de web no se
  * muestra como si fuera de otro servicio.
  */
 
-import { CtaEnlace } from '../../_componentes/chrome/Cta'
+import { ContenidoDelCta } from '../../_componentes/chrome/Cta'
+import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
 import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
 import { numeroEnLaSecuencia } from '../../_secciones/_contrato/acento'
 import { FUENTE_DE_PROYECTOS } from '../datos/fuenteDeProyectos'
@@ -59,11 +60,19 @@ export function Proceso({ proceso, prueba, enDesarrollo }: ProcesoProps): React.
     <Bloque nombre="proceso" titulo={TITULO}>
       <ol role="list" className="flex flex-col">
         {proceso.pasos.map((paso, indice) => (
-          <li key={paso} className="flex items-baseline gap-6 border-b border-borde py-4">
+          <li key={paso.nombre} className="flex items-baseline gap-6 border-b border-borde py-4">
             <span aria-hidden="true" className="font-codigo text-caption tracking-micro text-acento">
               {numeroEnLaSecuencia(indice + 1)}
             </span>
-            <Cuerpo como="span">{paso}</Cuerpo>
+            {/* [L7a] Cada paso con su nombre y qué pasa en él. */}
+            <span className="flex flex-col gap-1">
+              <Cuerpo como="span" peso="semi">
+                {paso.nombre}
+              </Cuerpo>
+              <Cuerpo como="span" className="text-tinta-media">
+                {paso.texto}
+              </Cuerpo>
+            </span>
           </li>
         ))}
       </ol>
@@ -89,7 +98,10 @@ export function Proceso({ proceso, prueba, enDesarrollo }: ProcesoProps): React.
       )}
       {alPortfolio === null ? null : (
         <div className="mt-8">
-          <CtaEnlace href={alPortfolio} rotulo={ROTULO_DEL_PORTFOLIO} />
+          {/* [L7a] Al home con el velo y la salida de la variante (`EnlaceDeRuta`), con la cara del CTA del sitio. */}
+          <EnlaceDeRuta href={alPortfolio} data-pieza="cta" data-variante="linea" data-registro="cuerpo" className="text-base no-underline">
+            <ContenidoDelCta rotulo={ROTULO_DEL_PORTFOLIO} />
+          </EnlaceDeRuta>
         </div>
       )}
     </Bloque>

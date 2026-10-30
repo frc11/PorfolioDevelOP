@@ -63,8 +63,9 @@ export function afirmarServiciosAngostos(): void {
   afirmar(!/enEscritorio/.test(TIRA), '  (la tira no lo pide: sólo la rama apilada, que en escritorio existe únicamente con menos movimiento, lo muestra)')
 
   // ── EL NOMBRE CORTO ES SÓLO DE LA CABEZA ───────────────────────────────
-  afirmarIgual(Object.keys(NOMBRE_CORTO), ['ia-automatizacion'], 'el único nombre corto es el de IA y Automatizaciones')
-  afirmar(SERVICIOS.find((s) => s.id === 'ia-automatizacion')?.nombre === 'Integraciones de IA y Automatizaciones', '  y el nombre del servicio sigue siendo el completo')
+  // [L7a] El renombre («Integraciones con IA») entra en dos renglones: ya no hay nombre corto (spec nueva, L7a ítem 4).
+  afirmarIgual(Object.keys(NOMBRE_CORTO), [], 'ningún nombre corto: con el renombre, el de IA ya entra')
+  afirmar(SERVICIOS.find((s) => s.id === 'ia-automatizacion')?.nombre === 'Integraciones con IA', '  y el nombre del servicio es «Integraciones con IA»')
   const ROTULO = leer('RotuloDeServicio.tsx')
   const soloDecorativo = (f: string): boolean => /nombreCorto: decorativo \? NOMBRE_CORTO\[servicio\.id\] : undefined/.test(f)
   afirmar(soloDecorativo(ROTULO), '  y lo lleva sólo el rótulo decorativo: el anunciado y el de la lista dicen el completo')

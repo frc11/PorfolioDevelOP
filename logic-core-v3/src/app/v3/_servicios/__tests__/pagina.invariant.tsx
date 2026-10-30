@@ -62,7 +62,6 @@ import { ESTADOS_DEL_GATILLO, LINEA_DEL_DISPARO, estaALaVista, siguienteEstado, 
 import { MARCA_HOME_QUIETO } from '../../_secciones/_contrato/marcaHomeQuieto'
 import { ANCLAS_DEL_PORTFOLIO } from '../../_secciones/trabajos/portfolio/anclas'
 import { CLASE_DE_LA_PAUSA_DEL_PANEL } from '../../_secciones/trabajos/portfolio/MedioDeLaTira'
-import { DISPARO_DEL_REMATE } from '../../_secciones/tu-panel/entrada'
 import { CLASES_DEL_PAPEL } from '../bloques/Bloque'
 import { CLASES_DEL_VELO, VELO_DEL_VIDEO } from '../bloques/veloDelVideo'
 import { Precio } from '../bloques/Precio'
@@ -76,7 +75,9 @@ import { tokenDelAcento, tokenDelAcentoClaro } from '../estiloDelAcento'
 import { MARCADOR_A_DEFINIR, numero, usd } from '../formato'
 import { DE_LA_PAUSA, debeReproducirse, type MomentoDelVideo } from '../movimiento/reproduccion'
 import { CLASE_DE_LA_PAUSA_DEL_VIDEO, CapaDelVideo, PausaDelVideo } from '../movimiento/VideoDeFondo'
-import { PaginaDeServicio } from '../PaginaDeServicio'
+import { Intro } from '../Intro'
+import { JsonLd } from '../JsonLd'
+import { CuerpoDelServicio } from '../PaginaDeServicio'
 import { PRECIOS_DESDE } from '../precios'
 import { HREF_DEL_HOME, PUBLICADOS, hrefDe } from '../rutas'
 import { jsonLdDe } from '../seo'
@@ -89,8 +90,11 @@ import {
 } from './pagina-detectores'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
+// [L7a] Lo que la página arma ella misma: el JSON-LD, la intro y el cuerpo, en el orden de `PaginaDeServicio`. El cierre (Seis razones, el
+// CTA, el pie y el FAQ) es el común del home (`CierreDeLaPagina`) y lo prueban sus invariantes (s78-b13, s78-b10); que la página lo monte
+// con su preset y sus preguntas lo afirma §12.
 const pagina = (servicio: Servicio, enDesarrollo: boolean): string =>
-  renderToStaticMarkup(<PaginaDeServicio servicio={servicio} enDesarrollo={enDesarrollo} />)
+  renderToStaticMarkup(<><JsonLd servicio={servicio} /><Intro servicio={servicio} /><CuerpoDelServicio servicio={servicio} enDesarrollo={enDesarrollo} /></>)
 
 interface Pagina { readonly servicio: Servicio; readonly enDesarrollo: boolean; readonly html: string; readonly nombre: string }
 const PAGINAS: readonly Pagina[] = SERVICIOS.flatMap((servicio) =>
@@ -106,6 +110,9 @@ const cuerpo = (html: string): string => {
   const marcado = intro(html)
   return marcado === null ? html : html.replace(marcado, '')
 }
+/** [L7a] La apertura del cuerpo (el div que fija el acento del papel): el ancla de los controles que meten algo en el cuerpo. */
+const APERTURA_DEL_CUERPO = /<div style="--color-acento:[^"]*"[^>]*>/.exec(pagina(PAGINAS_WEB, false))?.[0] ?? '<div style="--color-acento:'
+const enElCuerpo = (html: string, extra: string): string => html.replace(APERTURA_DEL_CUERPO, `${APERTURA_DEL_CUERPO}${extra}`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · La intro es lo primero: su atributo con el IdDeServicio, el único h1 (el nombre) y la bajada en dos párrafos')
@@ -127,24 +134,24 @@ const bajadaEnDosParrafos = (servicio: Servicio) => (marcado: string): boolean =
   JSON.stringify(parrafos(marcado)) === JSON.stringify([servicio.problema.titulo, servicio.problema.texto]) &&
   !encabezados(marcado).some((t) => t === servicio.problema.titulo || t === servicio.problema.texto)
 /**
- * [V1] Lo que va antes de la intro, adentro de la raíz: el encabezado, entero, y nada más (el encabezado quedó fuera de la intro, que es la
- * del home). `null` si la raíz no empieza con él.
+ * [L7a] Lo que va antes de la intro: sólo los documentos JSON-LD (no se ven). El encabezado del V1 se fue (la navbar es del layout).
+ * `null` si antes de la intro hay otra cosa.
  */
-const antesDeLaIntro = (html: string): string | null => /^<div[^>]*>(<header(?=[\s>])[\s\S]*?<\/header>)/.exec(html)?.[1] ?? null
+const antesDeLaIntro = (html: string): string | null => /^((?:<script type="application\/ld\+json">[\s\S]*?<\/script>)*)<section /.exec(html)?.[1] ?? null
 const laIntro = (servicio: Servicio) => (html: string): boolean => {
   const marcado = intro(html)
   const encabezado = antesDeLaIntro(html)
   if (marcado === null || encabezado === null) return false
-  return html.indexOf(`${encabezado}${aperturaDe(marcado)}`) > 0 && aperturaDe(marcado).startsWith('<section ') && aperturaDe(marcado).includes(` ${ATRIBUTO_DE_LA_INTRO}="${servicio.idEnElHome}"`) &&
+  return html.indexOf(`${encabezado}${aperturaDe(marcado)}`) === 0 && aperturaDe(marcado).startsWith('<section ') && aperturaDe(marcado).includes(` ${ATRIBUTO_DE_LA_INTRO}="${servicio.idEnElHome}"`) &&
     h1Dice(servicio)(marcado) && aperturas(cuerpo(html), 'h1').length === 0 && bajadaEnDosParrafos(servicio)(marcado) &&
     !textoVisible(cuerpo(html)).includes(servicio.problema.texto)
 }
-afirmarIgual(fallan((p) => laIntro(p.servicio)(p.html)), [], `y ese h1 va en la intro: [V1] la del home (una <section> con ${ATRIBUTO_DE_LA_INTRO} y el IdDeServicio, P-H20), justo después del encabezado; el h1 y la bajada en dos párrafos; el cuerpo no lleva ninguno de los dos`)
+afirmarIgual(fallan((p) => laIntro(p.servicio)(p.html)), [], `y ese h1 va en la intro: [V1] la del home (una <section> con ${ATRIBUTO_DE_LA_INTRO} y el IdDeServicio, P-H20), [L7a] lo primero que se ve (antes, sólo el JSON-LD); el h1 y la bajada en dos párrafos; el cuerpo no lleva ninguno de los dos`)
 controlPositivo('una intro sin su atributo se detecta', WEB_PROD.replace(` ${ATRIBUTO_DE_LA_INTRO}="${PAGINAS_WEB.idEnElHome}"`, ''), laIntro(PAGINAS_WEB))
 controlPositivo('  y una con el slug en vez del IdDeServicio', WEB_PROD.replace(` ${ATRIBUTO_DE_LA_INTRO}="${PAGINAS_WEB.idEnElHome}"`, ` ${ATRIBUTO_DE_LA_INTRO}="${PAGINAS_WEB.slug}"`), laIntro(PAGINAS_WEB))
-controlPositivo('un h1 que se va al cuerpo se detecta', WEB_PROD.replace(/<h1(?=[\s>])/, '<h2').replace('</h1>', '</h2>').replace('<main>', `<main><h1>${PAGINAS_WEB.nombre}</h1>`), laIntro(PAGINAS_WEB))
-controlPositivo('algo antes del encabezado se detecta', WEB_PROD.replace(/^(<div[^>]*>)/, '$1<p>antes</p>'), laIntro(PAGINAS_WEB))
-controlPositivo('  y algo entre el encabezado y la intro', WEB_PROD.replace('</header>', '</header><p>en el medio</p>'), laIntro(PAGINAS_WEB))
+controlPositivo('un h1 que se va al cuerpo se detecta', enElCuerpo(WEB_PROD.replace(/<h1(?=[\s>])/, '<h2').replace('</h1>', '</h2>'), `<h1>${PAGINAS_WEB.nombre}</h1>`), laIntro(PAGINAS_WEB))
+controlPositivo('algo visible antes de la intro se detecta', `<p>antes</p>${WEB_PROD}`, laIntro(PAGINAS_WEB))
+controlPositivo('  y algo entre el JSON-LD y la intro', WEB_PROD.replace('</script><section ', '</script><p>en el medio</p><section '), laIntro(PAGINAS_WEB))
 // [V1] El h1 siempre en el DOM y, sin el preset del título 3D (P-H14, B12a.4), A LA VISTA: ni él ni nada que lo contenga en la intro lo
 // esconde (ni sr-only, ni hidden, ni invisible, ni opacidad cero, ni aria-hidden).
 const ESCONDE = /\s(aria-hidden="true"|hidden(?:="")?)(?=[\s>])|\sclass="[^"]*(?<![\w:-])(sr-only|hidden|invisible|opacity-0)(?![\w-])[^"]*"/
@@ -176,11 +183,13 @@ titulo('2 · Los bloques, en el orden de la maqueta (M0 §1.3)')
 
 // [M1] El orden de la maqueta: los diez del cuerpo. «Prueba» y «Del blog» salieron (funcionalidad quitada). [V1] El problema ya no es un
 // bloque: es la bajada de la intro del home (REEMPLAZADO por la spec: la intro no lleva bloques).
-const ORDEN_DE_LA_MAQUETA = ['que-hacemos', 'que-incluye', 'precio', 'llamado-del-precio', 'extra', 'trabajos', 'proceso', 'faq', 'llamado', 'cierre']
+// [L7a] REEMPLAZADO por la spec (L7a ítem 3): se suman «Para qué te sirve», «Lo que podemos construir» (software e IA, en el lugar de los
+// trabajos), «Qué recibís al final» y «Después de la entrega»; el FAQ, el llamado y el cierre provisorio salen (el cierre común del home).
+const ORDEN_DE_LA_MAQUETA = ['que-hacemos', 'ejemplos', 'que-incluye', 'precio', 'llamado-del-precio', 'extra', 'trabajos', 'posibles', 'proceso', 'entrega', 'despues']
 const sin = (...fuera: string[]): string[] => ORDEN_DE_LA_MAQUETA.filter((b) => !fuera.includes(b))
 /** Lo que lleva cada página: Extra y [M3] el video de trabajos solo existen en web, en los dos modos. */
 const ESPERADO: Readonly<Record<string, { readonly dev: readonly string[]; readonly prod: readonly string[] }>> = {
-  'paginas-web': { dev: ORDEN_DE_LA_MAQUETA, prod: ORDEN_DE_LA_MAQUETA },
+  'paginas-web': { dev: sin('posibles'), prod: sin('posibles') },
   'software-a-medida': { dev: sin('extra', 'trabajos'), prod: sin('extra', 'trabajos') },
   'ia-y-automatizaciones': { dev: sin('extra', 'trabajos'), prod: sin('extra', 'trabajos') },
 }
@@ -189,7 +198,8 @@ afirmarIgual(fallan((p) => respetaElOrden(bloquesEnOrden(p.html), ORDEN_DE_LA_MA
 controlPositivo('dos bloques cambiados de lugar se detectan', ['que-incluye', 'que-hacemos', 'precio'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
 controlPositivo('un bloque que no es de la maqueta se detecta', ['que-hacemos', 'inventado'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
 controlPositivo('  y el problema de antes, como bloque', ['problema', 'que-hacemos'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
-controlPositivo('  y la sección de casos de antes, «prueba», también', [...sin('trabajos', 'proceso', 'faq', 'llamado', 'cierre'), 'prueba'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
+controlPositivo('  y la sección de casos de antes, «prueba», también', [...sin('trabajos', 'posibles', 'proceso', 'entrega', 'despues'), 'prueba'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
+controlPositivo('  y el FAQ de antes, en el cuerpo (L7a: va en el cierre común)', [...sin('posibles', 'entrega', 'despues'), 'faq'], (s: string[]) => respetaElOrden(s, ORDEN_DE_LA_MAQUETA))
 // Del blog salió del orden: ni con un artículo que sí tenga href se monta.
 const conBlog = pagina({ ...PAGINAS_WEB, articulos: [{ titulo: 'Una nota', href: '/v3/blog/una-nota' }] }, false)
 const sinDelBlog = (html: string): boolean => !bloquesEnOrden(html).includes('del-blog') && !textoVisible(html).includes('Del blog')
@@ -208,8 +218,8 @@ titulo('3 · El CTA abre el contacto y precarga el servicio — [V1] data-servic
 const envoltorios = (html: string): string[] => aperturas(html, 'div').filter((d) => d.includes('data-abre-contacto'))
 const lleva = (idEnElHome: string) => (apertura: string): boolean =>
   apertura.includes('data-abre-contacto="panel"') && apertura.includes(`data-precarga="${idEnElHome}"`)
-afirmarIgual(envoltorios(WEB_PROD).length, 3, 'Páginas web: tres envoltorios de apertura — el CTA del precio, el llamado y el cierre')
-afirmar(envoltorios(bloqueDe(WEB_PROD, 'llamado') ?? '').length === 1, '  y el bloque del llamado tiene uno')
+// [L7a] REEMPLAZADO por la spec: el llamado y el cierre provisorio salieron; el CTA del final es el del cierre común (con la precarga del preset).
+afirmarIgual(envoltorios(WEB_PROD).length, 1, 'Desarrollo web: un envoltorio de apertura en lo que arma la página, el CTA del precio (el del final es el del cierre común)')
 // [M1] El CTA de debajo del precio (D3): el bloque que sigue al precio, con un solo envoltorio y SOLO el botón (ni título ni texto).
 const ctaDelPrecio = (servicio: Servicio) => (html: string): boolean => {
   const orden = bloquesEnOrden(html)
@@ -249,7 +259,9 @@ afirmar(!(bloqueDe(WEB_DEV, 'trabajos') ?? MARCADOR_A_DEFINIR).includes(MARCADOR
 afirmar(textoVisible(WEB_DEV).includes('Plan mensual') && !textoVisible(WEB_PROD).includes('Plan mensual'), '  la fila «Plan mensual» solo existe en desarrollo')
 afirmarIgual((['historias', 'diagonales'] as const).map((cual) => [cuenta(versionDelPrecio(WEB_DEV, cual), 'Autogestionable'), cuenta(versionDelPrecio(WEB_PROD, cual), 'Autogestionable')]), [[3, 2], [3, 2]], '  «Autogestionable», en cada versión del precio: tres veces en desarrollo, dos en producción (la Simple no lo dice mientras esté en [a definir])')
 afirmarIgual(fallan((p) => p.enDesarrollo || !hayMarcador(p.html)), [], 'en producción no sale ningún marcador, en ninguna de las tres páginas')
-afirmarIgual(fallan((p) => !p.enDesarrollo || hayMarcador(p.html)), [], 'y en desarrollo las tres lo muestran (web: la Simple y el plan mensual; software: los casos y las respuestas sin dato; IA: funcionalidades e implementación)')
+// [L7a] REEMPLAZADO por la spec: software ya no tiene casos ni respuestas sin dato (L7a: sin marcadores), así que en desarrollo no muestra ninguno.
+// La página usa el modo de producción siempre (`EN_DESARROLLO = false` en `PaginaDeServicio`): esto prueba la rama de los bloques.
+afirmarIgual(fallan((p) => !p.enDesarrollo || hayMarcador(p.html) === (p.servicio.slug !== 'software-a-medida')), [], 'y en desarrollo, web e IA lo muestran (web: la Simple y el plan mensual; IA: funcionalidades e implementación); software no tiene datos pendientes')
 controlPositivo('los modos cruzados: producción no puede mostrar el marcador', WEB_DEV, (h: string) => !hayMarcador(h))
 controlPositivo('los modos cruzados: desarrollo tiene que mostrarlo', WEB_PROD, hayMarcador)
 
@@ -272,7 +284,7 @@ titulo('6 · Ningún hex: la intro lleva el claro de SU servicio y el cuerpo el 
 // [M1] P-H2 cerrado: el claro dejó de ser un hex en los datos y es el token del tema. Ningún hex en ninguna parte del marcado.
 const sinHex = (html: string): boolean => hexSueltos(html).length === 0
 afirmarIgual(fallan((p) => sinHex(p.html)), [], 'ninguna página tiene un hex en el marcado, ni en el cuerpo ni en la intro')
-controlPositivo('un hex en el cuerpo se detecta', WEB_PROD.replace('<main>', '<main><p style="color:#1D5B8F">x</p>'), sinHex)
+controlPositivo('un hex en el cuerpo se detecta', enElCuerpo(WEB_PROD, '<p style="color:#1D5B8F">x</p>'), sinHex)
 controlPositivo('  y uno escrito en el style de la raíz', WEB_PROD.replace('--color-acento:var(--color-acento-web)', '--color-acento:#1D5B8F'), sinHex)
 // Lo esperado sale del TEMA (sus reglas de contexto por servicio), no de `tokenDelAcento`: si la derivación se rompe, esto lo ve.
 const TEMA = readFileSync(path.join(AQUI, '../../../theme-develop.css'), 'utf8')
@@ -304,8 +316,8 @@ afirmarIgual(IDS_DE_SERVICIO.filter((id) => !TOKENS_DEL_TEMA.has(tokenSegunElTem
 controlPositivo('un token que el tema no declara se detecta', '--color-acento-otro', (token: string) => TOKENS_DEL_TEMA.has(token))
 controlPositivo('un servicio que el tema no conoce se detecta', 'otro', (id: string) => ACENTO_DEL_TEMA.has(id))
 const acentoDelCuerpo = (servicio: Servicio) => (html: string): boolean =>
-  (/^<div style="([^"]*)"/.exec(html)?.[1] ?? '') === `--color-acento:var(${tokenSegunElTema(servicio.idEnElHome)})`
-afirmarIgual(fallan((p) => acentoDelCuerpo(p.servicio)(p.html)), [], '  y la raíz fija el acento del cuerpo con el token de SU servicio, derivado de idEnElHome, por var(): ningún hex')
+  (/^<div style="([^"]*)"/.exec(cuerpo(html).replace(antesDeLaIntro(html) ?? '', ''))?.[1] ?? '') === `--color-acento:var(${tokenSegunElTema(servicio.idEnElHome)})`
+afirmarIgual(fallan((p) => acentoDelCuerpo(p.servicio)(p.html)), [], '  y el cuerpo fija el acento del papel con el token de SU servicio, derivado de idEnElHome, por var(): ningún hex')
 controlPositivo('el token de otro servicio se detecta', WEB_PROD.replace(`var(${tokenSegunElTema('web')})`, `var(${tokenSegunElTema('software')})`), acentoDelCuerpo(PAGINAS_WEB))
 controlPositivo('el claro en la raíz se detecta', WEB_PROD.replace(`var(${tokenSegunElTema('web')})`, `var(${claroSegunElTema('web')})`), acentoDelCuerpo(PAGINAS_WEB))
 
@@ -475,28 +487,21 @@ const enlacesBien = (html: string): boolean => aperturas(html, 'a').every((a) =>
 afirmarIgual(fallan((p) => enlacesBien(p.html)), [], 'todo <a> tiene href, y los internos solo llevan al home, a una página de PUBLICADOS, a /login o a un ancla del Portfolio del home')
 controlPositivo('un enlace a una página que no es de PUBLICADOS se detecta', '<a href="/v3/otra-pagina">x</a>', enlacesBien)
 controlPositivo('  y uno a un ancla del Portfolio que no existe', `<a href="${HREF_DEL_HOME}#portfolio-otro">x</a>`, enlacesBien)
-afirmarIgual(fallan((p) => valoresDe(bloqueDe(p.html, 'cierre') ?? '', 'href').join() === [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)].join()), [], 'el cierre de cada página enlaza al home y a las páginas de PUBLICADOS, nada más: con las tres publicadas, las tres')
-controlPositivo('un cierre que no enlaza a todas se detecta', '<footer data-bloque="cierre"><a href="/v3">a</a><a href="/v3/paginas-web">b</a></footer>', (h: string) => valoresDe(bloqueDe(h, 'cierre') ?? '', 'href').join() === [HREF_DEL_HOME, ...PUBLICADOS.map(hrefDe)].join())
 afirmarIgual(PUBLICADOS, SERVICIOS.map((s) => s.slug), 'PUBLICADOS tiene los tres servicios, en el orden del SPEC (S2b)')
 controlPositivo('un PUBLICADOS al que le falta uno se detecta', ['paginas-web', 'software-a-medida'], (l: readonly string[]) => JSON.stringify(l) === JSON.stringify(SERVICIOS.map((s) => s.slug)))
-// [V1] El encabezado quedó ANTES de la intro y fuera de ella (la intro es la del home y no tiene lugar para él), en claro sobre la escena:
-// su propio data-seccion="invertida" (§5). REEMPLAZADO por la spec: era «adentro de la intro».
-const conCabecera = (html: string): boolean => new RegExp(`^<div[^>]*><header data-seccion="invertida"[^>]*>[\\s\\S]*?<a href="${HREF_DEL_HOME}"[^>]*>[\\s\\S]*?${LOGOTIPO}[\\s\\S]*?</a>[\\s\\S]*?</header><section [^>]*${ATRIBUTO_DE_LA_INTRO}=`).test(html) &&
-  !(intro(html) ?? '<header').includes('<header')
-afirmar(conCabecera(WEB_PROD), `el encabezado es un enlace a ${HREF_DEL_HOME} con el logotipo, lo primero de la raíz, en claro (data-seccion="invertida") y justo antes de la intro, fuera de ella`)
-controlPositivo('una página sin el enlace del encabezado se detecta', '<div><header data-seccion="invertida"></header><main></main></div>', conCabecera)
-const HEADER_DE_LA_WEB = /<header(?=[\s>])[\s\S]*?<\/header>/.exec(WEB_PROD)?.[0] ?? ''
-controlPositivo('un encabezado adentro de la intro (el de antes) se detecta', WEB_PROD.replace(HEADER_DE_LA_WEB, '').replace(/(<section [^>]*data-intro-de-pagina[^>]*>)/, `$1${HEADER_DE_LA_WEB}`), conCabecera)
-controlPositivo('  y uno sin el claro', WEB_PROD.replace('<header data-seccion="invertida"', '<header'), conCabecera)
-const preguntas = PAGINAS_WEB.faq.filter((f) => f.respuesta !== null).length
-afirmar(aperturas(WEB_PROD, 'details').length === preguntas && aperturas(WEB_PROD, 'summary').length === preguntas, `el FAQ es un <details> con su <summary> por pregunta: ${preguntas}, con la respuesta en el HTML`)
+// [L7a] REEMPLAZADO por la spec: el encabezado del V1 se fue (la navbar la monta el layout de /v3) y el FAQ pasó al cierre común. La página
+// monta `CierreDeLaPagina` con su preset (el mismo objeto que declara la intro) y sus 6 preguntas, al final de su <main>, y nada después.
+const FUENTE_DE_LA_PAGINA = sinComentarios(readFileSync(path.join(AQUI, '../PaginaDeServicio.tsx'), 'utf8'))
+const montaElCierre = (f: string): boolean => /<CierreDeLaPagina preset=\{preset\} preguntas=\{servicio\.faq\} \/>\s*<\/main>/.test(f) && /const preset = PRESETS_DE_LAS_PAGINAS\[servicio\.idEnElHome\]/.test(f) && !/<header|Encabezado|<details/.test(f)
+afirmar(montaElCierre(FUENTE_DE_LA_PAGINA) && aperturas(WEB_PROD, 'details').length === 0 && aperturas(WEB_PROD, 'header').length === 0, 'la página monta el cierre común con su preset y sus 6 preguntas, al final del <main>; ni encabezado propio ni FAQ en el cuerpo')
+controlPositivo('  un cierre sin las preguntas de la página se detecta', FUENTE_DE_LA_PAGINA.replace(' preguntas={servicio.faq}', ''), montaElCierre)
 
 const raiz = path.join(AQUI, '..')
 const fuentes = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
   e.isDirectory() ? (e.name === '__tests__' ? [] : fuentes(path.join(dir, e.name))) : /\.tsx?$/.test(e.name) ? [path.join(dir, e.name)] : [])
 const FUENTES = fuentes(raiz).map((f) => ({ f: path.relative(raiz, f), codigo: sinComentarios(readFileSync(f, 'utf8')) }))
 const navegaConElRouter = (codigo: string): boolean => /next\/link|next\/navigation|useRouter|router\.push|triggerTransition/.test(codigo)
-afirmarIgual(FUENTES.filter((x) => navegaConElRouter(x.codigo)).map((x) => x.f), [], `ninguno de los ${FUENTES.length} fuentes de _servicios usa next/link, el router ni triggerTransition: navegan con <a href>`)
+afirmarIgual(FUENTES.filter((x) => navegaConElRouter(x.codigo)).map((x) => x.f), [], `ninguno de los ${FUENTES.length} fuentes de _servicios usa next/link, el router ni triggerTransition: [L7a] navegan con EnlaceDeRuta (el velo y la salida de la variante)`)
 controlPositivo('un fuente con next/link se detecta', "import Link from 'next/link'", (c: string) => !navegaConElRouter(c))
 controlPositivo('un fuente con router.push se detecta', 'router.push(href)', (c: string) => !navegaConElRouter(c))
 const nombresQueChocan = (archivos: readonly string[]): string[] => {
@@ -508,7 +513,7 @@ afirmarIgual(nombresQueChocan(FUENTES.map((x) => x.f.replace(/\\/g, '/'))), [], 
 controlPositivo('Planes.tsx y planes.ts juntos se detectan', ['bloques/precio/Planes.tsx', 'bloques/precio/planes.ts'], (l: string[]) => nombresQueChocan(l).length === 0)
 const deCliente = (codigo: string): boolean => /^\s*['"]use client['"]/.test(codigo)
 const dondeEsDeCliente = (lista: readonly { f: string; codigo: string }[]): string[] => lista.filter((x) => deCliente(x.codigo)).map((x) => x.f.replace(/\\/g, '/')).sort()
-afirmarIgual(dondeEsDeCliente(FUENTES), ['escena/VarianteDeWeb.tsx', 'movimiento/PrecioEnHistorias.tsx', 'movimiento/RaizDeLaPagina.tsx', 'movimiento/RepartoDelPrecio.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el código de cliente son los seis de movimiento/ (los dos envoltorios del revelado, [M2a] el reparto del precio en diagonales, [M3] el video de trabajos, [M2b] el precio en historias y [V1] la raíz de la página, que pide la salida de la variante) y [V1] la variante de la escena, que carga la ranura del home por el registro: todo lo demás es de servidor. [R1] El gatillo ya no es nuestro: es el del contrato del home')
+afirmarIgual(dondeEsDeCliente(FUENTES), ['escena/VarianteDeWeb.tsx', 'movimiento/PrecioEnHistorias.tsx', 'movimiento/RepartoDelPrecio.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el código de cliente son los cinco de movimiento/ (los dos envoltorios del revelado, [M2a] el reparto del precio en diagonales, [M3] el video de trabajos y [M2b] el precio en historias; [L7a] la raíz con la salida se fue: la pide EnlaceDeRuta) y [V1] la variante de la escena, que carga la ranura del home por el registro: todo lo demás es de servidor. [R1] El gatillo ya no es nuestro: es el del contrato del home')
 controlPositivo('un bloque de cliente fuera de movimiento/ se detecta', ["'use client'", 'export const x = 1'].join('\n'), (c: string) => !deCliente(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -522,13 +527,11 @@ afirmarIgual(fallan((p) => tapas(p.html).length === 0), [], 'no queda la tapa in
 controlPositivo('  la tapa de antes, en la intro, se detecta', WEB_PROD.replace(/(<section [^>]*data-intro-de-pagina[^>]*>)/, '$1<div aria-hidden="true" class="fixed inset-0 -z-10 bg-fondo"></div>'), (h: string) => tapas(h).length === 0)
 const sobreLaEscenaSinFondo = (html: string): boolean => {
   const marcado = intro(html) ?? ''
-  const encabezado = antesDeLaIntro(html) ?? ''
-  return marcado !== '' && encabezado !== '' && [marcado, encabezado].every((m) => fondosOpacos(m).length === 0 && !aperturas(m, '[a-z]+').some((a) => clasesDe(a).some((c) => c.startsWith('bg-'))))
+  return marcado !== '' && fondosOpacos(marcado).length === 0 && !aperturas(marcado, '[a-z]+').some((a) => clasesDe(a).some((c) => c.startsWith('bg-')))
 }
-afirmarIgual(fallan((p) => sobreLaEscenaSinFondo(p.html)), [], '  y ni la intro ni el encabezado pintan fondo: nada adentro de ellos lleva un bg- (se ve la escena)')
+afirmarIgual(fallan((p) => sobreLaEscenaSinFondo(p.html)), [], '  y la intro no pinta fondo: nada adentro de ella lleva un bg- (se ve la escena)')
 const APERTURA_DE_LA_INTRO = aperturaDe(intro(WEB_PROD))
 controlPositivo('una intro con fondo propio se detecta', WEB_PROD.replace(APERTURA_DE_LA_INTRO, APERTURA_DE_LA_INTRO.replace(' class="', ' class="bg-fondo ')), sobreLaEscenaSinFondo)
-controlPositivo('  y un encabezado con fondo', WEB_PROD.replace('<header data-seccion="invertida" class="', '<header data-seccion="invertida" class="bg-fondo '), sobreLaEscenaSinFondo)
 const bloquesDelCuerpo = (html: string): string[] => [...aperturas(cuerpo(html), 'section'), ...aperturas(cuerpo(html), 'footer')].filter((a) => a.includes(' data-bloque="'))
 const cuerpoEnPapel = (html: string): boolean => {
   const bloques = bloquesDelCuerpo(html)
@@ -548,15 +551,16 @@ controlPositivo('un style con un fondo opaco se detecta', '<div style="backgroun
  */
 const REVELADO_ESPERADO: Readonly<Record<string, { readonly arbol: number; readonly gatillo: number }>> = {
   'que-hacemos': { arbol: 2, gatillo: 0 },
+  ejemplos: { arbol: 2, gatillo: 0 },
   'que-incluye': { arbol: 2, gatillo: 0 },
   precio: { arbol: 2, gatillo: 0 },
   'llamado-del-precio': { arbol: 0, gatillo: 1 },
   extra: { arbol: 2, gatillo: 0 },
   trabajos: { arbol: 0, gatillo: 1 }, // [M3] el texto entero con el gatillo: el título vive al pie de un cuadro de una pantalla
+  posibles: { arbol: 2, gatillo: 0 },
   proceso: { arbol: 2, gatillo: 0 },
-  faq: { arbol: 1, gatillo: 0 },
-  llamado: { arbol: 1, gatillo: 1 },
-  cierre: { arbol: 0, gatillo: 0 },
+  entrega: { arbol: 2, gatillo: 0 },
+  despues: { arbol: 2, gatillo: 0 },
 }
 const cuentaEnElBloque = (html: string, nombre: string, aguja: string): number => (bloqueDe(html, nombre) ?? '').split(aguja).length - 1
 // [M2a] El precio en diagonales (web) suma el Bloque del contrato que reparte el progreso a los tres paneles: una marca más.
@@ -567,10 +571,8 @@ const entraComoDice = (html: string): boolean => bloquesEnOrden(html).every((b) 
   const esperado = b === 'precio' && (bloqueDe(html, 'precio') ?? '').includes('data-precio="diagonales"') ? ESPERADO_DE_LAS_DIAGONALES : REVELADO_ESPERADO[b]
   return esperado !== undefined && cuentaEnElBloque(html, b, `data-arbol="${MARCA_HOME_QUIETO}"`) === esperado.arbol && cuentaEnElBloque(html, b, ' data-gatillo="') === esperado.gatillo
 })
-afirmarIgual(fallan((p) => entraComoDice(p.html)), [], 'cada bloque entra como dice la tabla del M0: progresivo (título y panel), el panel del FAQ quieto, los dos CTA y el slot del video con el gatillo y el cierre sin revelado')
-controlPositivo('un cierre con revelado se detecta', `<footer data-bloque="cierre"><div data-arbol="${MARCA_HOME_QUIETO}"></div></footer>`, entraComoDice)
-controlPositivo('un FAQ con el panel revelado se detecta', `<section data-bloque="faq"><div data-arbol="${MARCA_HOME_QUIETO}"></div><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, entraComoDice)
-controlPositivo('un llamado con el panel progresivo en vez del gatillo se detecta', `<section data-bloque="llamado"><div data-arbol="${MARCA_HOME_QUIETO}"></div><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, entraComoDice)
+afirmarIgual(fallan((p) => entraComoDice(p.html)), [], 'cada bloque entra como dice la tabla: progresivo (título y panel) y [L7a] los bloques nuevos igual; el CTA del precio y el slot del video con el gatillo')
+controlPositivo('un CTA del precio con el panel progresivo en vez del gatillo se detecta', `<section data-bloque="llamado-del-precio"><div data-arbol="${MARCA_HOME_QUIETO}"></div><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, entraComoDice)
 controlPositivo('un bloque con el panel sin revelar se detecta', `<section data-bloque="precio"><div data-arbol="${MARCA_HOME_QUIETO}"></div></section>`, entraComoDice)
 // [M1] El gatillo en reposo: en el HTML servido (sin la coreografía instalada, que es lo mismo que con movimiento reducido) cada uno está
 // QUIETO, a la vista y sin transformada. Nada invisible en reposo.
@@ -594,9 +596,10 @@ afirmarIgual([cruces(siguienteEstado, 'espera'), cruces(siguienteEstado, 'puesto
 const maquinaQueLaSacaArriba: typeof siguienteEstado = (estado, evento) => (evento.tipo === 'cruce' && evento.entrada === 'abajo-bajando' ? 'ido' : siguienteEstado(estado, evento))
 controlPositivo('  una máquina que la saca cuando se va por arriba, bajando, se detecta', maquinaQueLaSacaArriba, (m: typeof siguienteEstado) => JSON.stringify(cruces(m, 'puesto')) === JSON.stringify(['puesto', 'ido', 'puesto', 'puesto']))
 // [M1] La línea vuelve a la del remate del home, para que la salida al subir pase a la vista; la franja de debajo la cubre la guarda.
-// [R1] Desde P-H18 el remate toma la línea del contrato (`DISPARO_DEL_REMATE` es `LINEA_DEL_DISPARO`): es una sola constante.
-const lineaDelRemate = (linea: number): boolean => linea === DISPARO_DEL_REMATE
-afirmar(lineaDelRemate(LINEA_DEL_DISPARO), `la línea de disparo es la del remate del home: ${String(DISPARO_DEL_REMATE)} % desde abajo (tu-panel/entrada.ts, una sola constante con _contrato/disparo.ts)`)
+// [R1] Desde P-H18 el remate toma la línea del contrato. [L7a] `tu-panel/entrada.ts` ya no existe en el home: la línea es la del contrato
+// (`_contrato/disparo.ts`), la única; se afirma que queda dentro de la vista.
+const lineaDelRemate = (linea: number): boolean => linea > 0 && linea < 100
+afirmar(lineaDelRemate(LINEA_DEL_DISPARO), `la línea de disparo es la del contrato: ${String(LINEA_DEL_DISPARO)} % desde abajo, dentro de la vista (_contrato/disparo.ts)`)
 controlPositivo('  la línea en el borde (la salida pasaría fuera de la vista) se detecta', 0, lineaDelRemate)
 // [M1] LA GUARDA EN REPOSO (P-H25): con el scroll quieto, lo que está a la vista y no se disparó se dispara; lejos de la vista, nada.
 const reposos = (maquina: typeof siguienteEstado, aLaVista: boolean): EstadoDelGatillo[] => ESTADOS_DEL_GATILLO.map((e) => maquina(e, { tipo: 'reposo', aLaVista }))
@@ -624,7 +627,7 @@ interface Fuente { readonly f: string; readonly codigo: string }
 const usaElGatillo = (x: Fuente): boolean => /<Gatillo[\s>]/.test(x.codigo)
 const delContrato = (x: Fuente): boolean => /from '(?:\.\.\/)+_secciones\/_contrato\/Gatillo'/.test(x.codigo)
 const gatillosAjenos = (lista: readonly Fuente[]): string[] => lista.filter((x) => usaElGatillo(x) && !delContrato(x)).map((x) => enBarras(x.f))
-afirmarIgual(FUENTES.filter(usaElGatillo).map((x) => enBarras(x.f)).sort(), ['bloques/Bloque.tsx', 'bloques/Llamado.tsx', 'bloques/Trabajos.tsx'], '  lo usan tres bloques: el panel con gatillo del Bloque (los CTA), el CTA del precio y el texto del video de trabajos')
+afirmarIgual(FUENTES.filter(usaElGatillo).map((x) => enBarras(x.f)).sort(), ['bloques/Bloque.tsx', 'bloques/Llamado.tsx', 'bloques/Trabajos.tsx'], '  lo usan tres bloques: el panel con gatillo del Bloque, el CTA del precio y el texto del video de trabajos')
 afirmarIgual(gatillosAjenos(FUENTES), [], '  y los tres lo importan del contrato (_secciones/_contrato/Gatillo): ninguno de uno propio')
 controlPositivo('  un bloque que lo importa de movimiento/ se detecta', [{ f: 'bloques/Llamado.tsx', codigo: "import { Gatillo } from '../movimiento/Gatillo'\n<Gatillo>x</Gatillo>" }], (l: readonly Fuente[]) => gatillosAjenos(l).length === 0)
 const DEFINE_LA_MAQUINA = /export (?:function|const) (?:siguienteEstado|margenDelDisparo|LINEA_DEL_DISPARO|aLaVistaEn|vigilarElReposo)\b/
@@ -658,22 +661,11 @@ const cuerposParseables = (html: string): boolean => {
 }
 controlPositivo('un script con JSON roto se detecta', '<script type="application/ld+json">{"@type":</script>', cuerposParseables)
 
-const detalles = (html: string): { pregunta: string; respuesta: string }[] =>
-  [...html.matchAll(/<details>\s*<summary[^>]*>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/g)].map((m) => ({ pregunta: textoVisible(m[1] ?? ''), respuesta: textoVisible(m[2] ?? '') }))
-const esperadas = (s: Servicio, enDesarrollo: boolean): { pregunta: string; respuesta: string }[] =>
-  s.faq.flatMap((f) => (f.respuesta !== null ? [{ pregunta: f.pregunta, respuesta: f.respuesta }] : enDesarrollo ? [{ pregunta: f.pregunta, respuesta: MARCADOR_A_DEFINIR }] : []))
-const faqLegible = (html: string, s: Servicio, enDesarrollo: boolean): boolean => JSON.stringify(detalles(html)) === JSON.stringify(esperadas(s, enDesarrollo))
-afirmarIgual(fallan((p) => faqLegible(p.html, p.servicio, p.enDesarrollo)), [], 'el FAQ de cada página: un <details> por pregunta con su <summary> primero, la pregunta y la respuesta de los datos y en orden; en producción solo las que tienen respuesta')
-controlPositivo('un details con la respuesta antes del summary se detecta', '<details><p>r</p><summary>q</summary></details>', (h: string) => detalles(h).length === 1)
-const faqSinAtributosPropios = (html: string): boolean => aperturas(html, 'details').every((a) => a === '<details>') && aperturas(html, 'summary').every((a) => !/\s(aria-[a-z]+|tabindex|role|on[a-z]+)=/.test(a))
-afirmarIgual(fallan((p) => faqSinAtributosPropios(p.html)), [], '  sin aria-expanded, tabindex, role ni manejadores propios: el elemento nativo ya resuelve el teclado y el estado')
-controlPositivo('un summary con tabindex se detecta', '<details><summary tabindex="0">q</summary><p>r</p></details>', faqSinAtributosPropios)
-const faqEnLista = (html: string): boolean => {
-  const faq = bloqueDe(html, 'faq') ?? ''
-  return faq.includes('<ul role="list"') && aperturas(faq, 'details').length === (faq.match(/<li[^>]*><details>/g) ?? []).length
-}
-afirmarIgual(fallan((p) => faqEnLista(p.html)), [], '  las preguntas son una lista (ul con role="list") y cada li lleva un solo details')
-controlPositivo('un FAQ sin lista se detecta', '<section data-bloque="faq"><details><summary>q</summary><p>r</p></details></section>', faqEnLista)
+// [L7a] REEMPLAZADO por la spec: el FAQ lo renderiza el cierre común (`FaqDelPie`, con su `FAQPage`; s78-b10 lo prueba). Acá, que cada
+// servicio le pase sus 6 preguntas, sin repetirse y con respuesta.
+const seisParaElCierre = (s: Servicio): boolean => s.faq.length === 6 && s.faq.every((f) => f.respuesta.trim() !== '')
+afirmarIgual(fallan((p) => seisParaElCierre(p.servicio)), [], 'cada página le pasa al cierre común sus 6 preguntas, todas con respuesta')
+controlPositivo('  una con cinco se detecta', { ...PAGINAS_WEB, faq: PAGINAS_WEB.faq.slice(1) }, seisParaElCierre)
 const preguntasUnicas = (s: Servicio): boolean => new Set(s.faq.map((f) => f.pregunta)).size === s.faq.length
 afirmarIgual(fallan((p) => preguntasUnicas(p.servicio)), [], '  y ninguna pregunta se repite (son la clave de cada ítem)')
 

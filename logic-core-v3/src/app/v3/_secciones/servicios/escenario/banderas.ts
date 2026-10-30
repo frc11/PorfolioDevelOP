@@ -10,11 +10,11 @@ import { MODOS_DEL_ARO, type ModoDelAro } from '../../../_lib/nanobots/simbolos'
  *   `?diagonal=<grados>`              el ángulo de la franja del texto, en grados desde la vertical (numérica, de 0 a 45). [L3] Por
  *                                     defecto, 7 (ítem 50: «Diagonal en 7»).
  *   `?titulo-cursiva=1|2|3`           [L3] la cursiva del SEGUNDO renglón del título de cada servicio («Desarrollo / web»): 1,
- *                                     Instrument Serif (por defecto); 2, Fraunces; 3, Playfair Display. El primer renglón es siempre la
- *                                     display condensada (la que era `?titulo-servicio=1`).
+ *                                     Instrument Serif; 2, Fraunces; 3, Playfair Display ([L7a] por defecto: la eligió Valentino el
+ *                                     2026-10-29). El primer renglón es siempre la display condensada (la que era `?titulo-servicio=1`).
  *   `?aro-color=mezcla|tercios|ola`   [L3] el color de la órbita de la entrada: `mezcla`, los tres acentos en manchas grandes con puntos
- *                                     sueltos de los otros; `tercios`, un arco de cada uno; `ola`, todo el aro de un color que cambia por
- *                                     partes, como una ola que lo recorre (por defecto).
+ *                                     sueltos de los otros; `tercios`, un arco de cada uno ([L7a] por defecto: la eligió Valentino el
+ *                                     2026-10-29); `ola`, todo el aro de un color que cambia por partes, como una ola que lo recorre.
  *
  * [L3] `?titulo-servicio=` y `?fuente-servicio=` se fueron: el título es la display arriba y la cursiva abajo, y el cuerpo es la letra
  * de los cuerpos del sitio.
@@ -32,11 +32,11 @@ export function diagonalDeLaBandera(valor: string | null): number {
 
 export const CURSIVAS_DEL_TITULO = ['1', '2', '3'] as const
 export type CursivaDelTitulo = (typeof CURSIVAS_DEL_TITULO)[number]
-export const CURSIVA_POR_DEFECTO: CursivaDelTitulo = '1'
+export const CURSIVA_POR_DEFECTO: CursivaDelTitulo = '3'
 
 export const COLORES_DEL_ARO = MODOS_DEL_ARO
 export type ColorDelAro = ModoDelAro
-export const COLOR_DEL_ARO_POR_DEFECTO: ColorDelAro = 'ola'
+export const COLOR_DEL_ARO_POR_DEFECTO: ColorDelAro = 'tercios'
 
 export const cursivaDeLaBandera = (valor: string | null): CursivaDelTitulo => CURSIVAS_DEL_TITULO.find((c) => c === valor) ?? CURSIVA_POR_DEFECTO
 export const colorDelAroDeLaBandera = (valor: string | null): ColorDelAro => COLORES_DEL_ARO.find((c) => c === valor) ?? COLOR_DEL_ARO_POR_DEFECTO

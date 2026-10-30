@@ -50,7 +50,8 @@ function conImplementacion(s: Servicio, valor: number | null): Servicio {
   const p = s.precio
   return p.tipo === 'planes' ? { ...s, precio: { ...p, implementacionDesde: valor } } : s
 }
-const conPasos = (s: Servicio, pasos: readonly string[]): Servicio => ({ ...s, proceso: { ...s.proceso, pasos } })
+// [L7a] Cada paso lleva su nombre y qué pasa en él.
+const conPasos = (s: Servicio, nombres: readonly string[]): Servicio => ({ ...s, proceso: { ...s.proceso, pasos: nombres.map((nombre) => ({ nombre, texto: nombre })) } })
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · los números publicados son los del SPEC §7')
@@ -145,25 +146,20 @@ afirmarIgual(PENDIENTES.length, 6, '  y son seis (la Simple, el plan mensual, la
 controlPositivo('el detector VE un 0 en implementacionDesde', pendientesDe(conImplementacion(IA_Y_AUTOMATIZACIONES, 0)), todoNull)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · el FAQ: las preguntas del SPEC, y respuesta solo si sale del SPEC (D9)')
+titulo('5 · el FAQ: 6 por página, cada respuesta con su fuente (D9); [L7a] reemplazada por la spec')
 
-const PREGUNTAS_DEL_SPEC: Readonly<Record<string, readonly string[]>> = {
-  'paginas-web': ['¿Cuánto tarda una web?', '¿Puedo editarla yo después?', '¿Qué pasa después de la entrega?', '¿Qué incluye el portal del cliente?', '¿El chatbot viene incluido?'],
-  'software-a-medida': ['¿Cómo sé si necesito un sistema propio?', '¿Qué pasa si después necesito cambios?', '¿El sistema es mío?', '¿Cuánto soporte incluye?'],
+// [L7a] Reemplazada por la spec (L7a ítem 3: «cada página tiene su FAQ de 6 preguntas en el cierre», sin marcadores): las preguntas del SPEC
+// que tienen respuesta siguen; se suman las de L7a, cada una con su fuente (§ siguiente). La del SPEC sin respuesta («¿El sistema es mío?»,
+// [a definir]) no se pregunta: una pregunta sin respuesta no se muestra.
+const PREGUNTAS_DE_LA_PAGINA: Readonly<Record<string, readonly string[]>> = {
+  'paginas-web': ['¿Cuánto tarda una web?', '¿Puedo editarla yo después?', '¿Se va a ver bien en el celular?', '¿Me ayudan con el dominio y la publicación?', '¿Qué pasa después de la entrega?', '¿El chatbot viene incluido?'],
+  'software-a-medida': ['¿Cómo sé si necesito un sistema propio?', '¿Cuánto cuesta?', '¿Cuánto tarda?', '¿Qué pasa con mis planillas?', '¿Qué pasa si después necesito cambios?', '¿Lo puedo usar desde el celular?'],
   'ia-y-automatizaciones': ['¿El bot reemplaza a mi equipo?', '¿Puedo ver las conversaciones?', '¿Qué pasa si no sabe responder?', '¿Qué cuenta como una conversación?', '¿Qué pasa si se agota la cuota del mes?', '¿Qué pasa con los datos de mis visitantes?'],
 }
-const preguntasIguales = (s: Servicio): boolean => JSON.stringify(s.faq.map((f) => f.pregunta)) === JSON.stringify(PREGUNTAS_DEL_SPEC[s.slug])
-afirmar(SERVICIOS.every(preguntasIguales), 'cada servicio trae las preguntas del SPEC, en su orden')
+const preguntasIguales = (s: Servicio): boolean => JSON.stringify(s.faq.map((f) => f.pregunta)) === JSON.stringify(PREGUNTAS_DE_LA_PAGINA[s.slug])
+afirmar(SERVICIOS.every(preguntasIguales), 'cada servicio trae sus 6 preguntas, en su orden')
 controlPositivo('el detector VE una pregunta que falta', { ...SOFTWARE_A_MEDIDA, faq: SOFTWARE_A_MEDIDA.faq.slice(1) }, preguntasIguales)
-
-// [M1] Dos de las tres respuestas que faltaban las dictó Valentino (M0 §8): queda sin respuesta solo la que el SPEC deja [a definir].
-const SIN_RESPUESTA = ['¿El sistema es mío?']
-afirmarIgual(
-  SERVICIOS.flatMap((s) => s.faq.filter((f) => f.respuesta === null).map((f) => f.pregunta)),
-  SIN_RESPUESTA,
-  'sin respuesta (null): solo «¿El sistema es mío?» (SPEC §7.2: «respuesta [a definir]»)',
-)
-afirmar(SERVICIOS.every((s) => s.faq.every((f) => f.respuesta === null || f.respuesta.trim().length > 0)), '  y ninguna respuesta es un texto vacío')
+afirmar(SERVICIOS.every((s) => s.faq.every((f) => f.respuesta.trim().length > 0 && !f.respuesta.includes('[a definir]'))), '  y ninguna respuesta es un texto vacío ni un marcador')
 
 /**
  * [M1] LOS TEXTOS DICTADOS (M0 §8), literales: la otra fuente admitida, además del SPEC. La tabla vive acá, en el test, y no se arma
@@ -182,7 +178,9 @@ controlPositivo('  un texto dictado con una letra cambiada se detecta', { dato: 
 
 const COMENTARIO_DEL_SPEC = /\/\/\s*SPEC §7\.\d/
 const COMENTARIO_DEL_DICTADO = /\/\/\s*M0 §8 \(dictado\)/
-const conFuente = (linea: string): boolean => COMENTARIO_DEL_SPEC.test(linea) || COMENTARIO_DEL_DICTADO.test(linea)
+// [L7a] La otra fuente admitida: una respuesta de L7a dice de dónde sale (el SPEC, 05-TEXTOS, la sección Servicios del home o la base).
+const COMENTARIO_DE_L7A = /\/\/\s*L7a: .*(SPEC §7\.\d|05-TEXTOS|del home|la base)/
+const conFuente = (linea: string): boolean => COMENTARIO_DEL_SPEC.test(linea) || COMENTARIO_DEL_DICTADO.test(linea) || COMENTARIO_DE_L7A.test(linea)
 /** Las líneas de un `respuesta:` que no es null y no tiene `// SPEC §7.x` ni `// M0 §8 (dictado)` en su línea ni en la de arriba. */
 function respuestasSinFuente(texto: string): number[] {
   const lineas = texto.split('\n')
@@ -195,7 +193,8 @@ function respuestasSinFuente(texto: string): number[] {
 }
 const todasConFuente = (texto: string): boolean => respuestasSinFuente(texto).length === 0
 const FUENTES_DE_DATOS = ARCHIVOS_DE_DATOS.map((f) => leer(`${CARPETA}/datos/${f}`))
-afirmar(FUENTES_DE_DATOS.every(todasConFuente), 'cada respuesta escrita lleva `// SPEC §7.x` o `// M0 §8 (dictado)` en su línea o en la de arriba')
+afirmar(FUENTES_DE_DATOS.every(todasConFuente), 'cada respuesta escrita lleva `// SPEC §7.x`, `// M0 §8 (dictado)` o [L7a] `// L7a: <su fuente>` en su línea o en la de arriba')
+controlPositivo('  una de L7a sin fuente nombrada se detecta', "{ pregunta: 'x',\n  // L7a: se me ocurrió\n  respuesta: 'algo',\n}", todasConFuente)
 afirmar(FUENTES_DE_DATOS.some((t) => /^\s*respuesta:\s*[^n\s]/m.test(t)), '  y hay respuestas escritas: el barrido mira algo')
 controlPositivo('el detector VE una respuesta sin su línea del SPEC', "{ pregunta: 'x',\n  respuesta: 'algo',\n}", todasConFuente)
 // La marca del dictado vale solo para lo que dictó Valentino: tres marcas, las de la tabla. Una cuarta sería un texto sin fuente con otro nombre.
@@ -300,7 +299,10 @@ afirmar(SERVICIOS.every((s) => s.idEnElHome === IDS_EN_EL_HOME[s.slug]), 'idEnEl
 const cincoPasos = (s: Servicio): boolean => s.proceso.pasos.length === 5
 afirmar(SERVICIOS.every(cincoPasos), 'cada proceso tiene 5 pasos (SPEC §5)')
 controlPositivo('el detector VE un proceso de 4 pasos', conPasos(PAGINAS_WEB, ['Charla', 'Propuesta', 'Diseño', 'Entrega']), cincoPasos)
-afirmar(SERVICIOS.every((s) => s.seo.description === s.queHacemos.texto), 'seo.description = queHacemos.texto (D10)')
+// [L7a] Reemplazada por la spec (L7: metadata real por página): la description es propia, corta y distinta en cada servicio.
+const descripcionesBien = (lista: readonly Servicio[]): boolean => lista.every((s) => s.seo.description.length >= 60 && s.seo.description.length <= 170) && new Set(lista.map((s) => s.seo.description)).size === lista.length
+afirmar(descripcionesBien(SERVICIOS), 'seo.description: propia de cada servicio, entre 60 y 170 caracteres')
+controlPositivo('  dos servicios con la misma description se detectan', [PAGINAS_WEB, { ...SOFTWARE_A_MEDIDA, seo: PAGINAS_WEB.seo }], descripcionesBien)
 afirmar(IA_Y_AUTOMATIZACIONES.prueba.ctaPanel?.href === '/login' && PAGINAS_WEB.prueba.ctaPanel === null && SOFTWARE_A_MEDIDA.prueba.ctaPanel === null, '«Probá el panel» lleva a /login (D11) y solo está en IA')
 
 cerrar('servicios-datos')

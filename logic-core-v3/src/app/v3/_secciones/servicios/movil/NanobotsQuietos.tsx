@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useMovimientoReducido } from '../../../_lib/motion/reducido'
 import { montarElEnjambre } from '../../../_lib/nanobots/montaje'
 import { PUNTOS_DEL_ENJAMBRE, proporcionDeLaCaja, unidadDelLugar } from '../../../_lib/nanobots/simbolos'
+import { useColorDelAro } from '../escenario/banderas'
 
 /**
  * [B4] LOS NANOBOTS DE UN SERVICIO, EN SU LUGAR — para las pantallas sueltas (el teléfono con `?servicios-movil=deslizar`, y la
@@ -20,6 +21,8 @@ export function NanobotsQuietos({ estado, className }: { readonly estado: number
   const lienzo = useRef<HTMLCanvasElement>(null)
   const [cerca, setCerca] = useState(false)
   const reducido = useMovimientoReducido()
+  // [L7a] El color del aro de la bandera (por defecto `tercios`), como en el escenario.
+  const colorDelAro = useColorDelAro()
   const quieto = useRef(reducido)
   useEffect(() => {
     quieto.current = reducido
@@ -41,7 +44,7 @@ export function NanobotsQuietos({ estado, className }: { readonly estado: number
     void import('../../../_lib/nanobots/enjambreDeServicios')
       .then(({ crearEnjambreDeServicios }) => {
         if (!vivo) return
-        const enjambre = crearEnjambreDeServicios(c, PUNTOS_DEL_ENJAMBRE.angosto)
+        const enjambre = crearEnjambreDeServicios(c, PUNTOS_DEL_ENJAMBRE.angosto, colorDelAro)
         const ubicar = (): void => {
           const [w, h] = [c.clientWidth, c.clientHeight]
           // [L3] La órbita llena su caja (su proporción).
@@ -61,7 +64,7 @@ export function NanobotsQuietos({ estado, className }: { readonly estado: number
       vivo = false
       soltar?.()
     }
-  }, [cerca, estado])
+  }, [cerca, estado, colorDelAro])
 
   return (
     <div ref={caja} aria-hidden="true" data-pieza="nanobots-quietos" data-estado={estado} className={className}>
