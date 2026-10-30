@@ -25,6 +25,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'El logo cae a su hueco, choca, rebota y queda torcido. Tocalo para que vuelva a intentar.',
     sale: 'EncajeDelLogo con el resultado de error (el de EstadoDeEnvio).',
   },
+  {
+    slug: 'dos-tomas',
+    codigo: 'N1 + N4',
+    titulo: 'Dos tomas, dos personas',
+    pagina: 'Nosotros',
+    mirar: 'En 1440, el hover de la foto como en el home. En 390, cada foto se abre sola al cruzar la mitad de la pantalla y se cierra al volver. Al final, la foto de la facultad se abre desde una rendija.',
+    sale: 'MarcoDeDosTomas de Quiénes somos, importado; el disparo del gatillo; el clip-path desde el centro de la segunda toma.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
