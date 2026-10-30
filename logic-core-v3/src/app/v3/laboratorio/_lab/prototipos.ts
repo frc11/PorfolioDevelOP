@@ -145,6 +145,14 @@ const TODOS: readonly Prototipo[] = [
     mirar: 'Una pantalla de escena de día con el título en el DOM (el 3D no sabe escribir estos nombres todavía) que se levanta al llegar; después, el papel. Probá los tres nombres con los botones y mové el mouse.',
     sale: 'La escena del home en la pose del hero, con su preset; los dos registros del titular; TitularQueSeLevanta; AvisoDeScroll.',
   },
+  {
+    slug: 'demos-en-conjunto',
+    codigo: 'P2',
+    titulo: 'Las demos, en conjunto',
+    pagina: 'Portfolio',
+    mirar: 'Las cinco tapas de la Biblioteca apoyadas en un estante; con el mouse una se levanta, se endereza y dice su rubro; un clic la abre aparte. Debajo, qué son en tres pasos.',
+    sale: 'Las tapas y el texto del catálogo de Demos del home, importados; los lomos del Portfolio; el gatillo.',
+  },
 ]
 
 /** El orden del índice: el de `docs/ideas/COMO-MIRAR.md`, los que más creo primero. */
@@ -162,6 +170,7 @@ const ORDEN = [
   'pantalla-que-se-dibuja',
   'mismo-sitio-en-el-celular',
   'carrusel-del-blog',
+  'demos-en-conjunto',
   'notas-irregulares',
   'nota',
   'indice-legal',
