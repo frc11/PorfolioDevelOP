@@ -5,14 +5,27 @@ The home is closed (cola 3 merged into `rediseno/home`). L7 builds the BASE of e
 ## Read first
 1. `docs/cola/2026-10-28/00-COMMON.md`: every hard rule, the Windows safety rules and the lot workflow apply as written there, with the overrides below.
 2. `docs/cola/2026-10-30/ESTRUCTURA-PAGINAS.md`: what each page contains, in Valentino's words (Spanish). **His words win** over the lot files if they ever disagree.
-3. Your lot file (`L7a.md` … `L7d.md`).
+3. Your lot file (`L7a.md` … `L7f.md`).
 4. `/v3/pagina-base` and its code, `docs/rediseno/B12a-API.md` (how a page mounts the intro, the scene preset, the closing and its FAQ), `.claude/skills/pagina-home-based/`.
 
 ## Overrides to 00-COMMON
-- **Lanes:** lane A is `C:\nocturno\cola3` on branch `l7/a` (lot L7a, dev port 3002). Lane B is `C:\nocturno\cola3b` on branch `l7/b` (lots L7b → L7c → L7d, in that order, dev port 3003). Push only your own lane's branch. Never touch the other lane's folder.
-- **The shared lock** between lanes: before any heavy step (tsc, big lint, test suites, dev server, Chrome, verificar, build) run `mkdir C:\nocturno\.turno-cola3` (if it fails, wait 30 s and retry), write who and when in a `dueno.txt` inside, and remove the folder when the heavy step ends.
-- **State:** lane A writes `docs/cola/2026-10-30/ESTADO-a.md`, lane B writes `ESTADO-b.md`. Each lot writes `L7x-plan.md` (short, 15–30 lines) and `L7x-resultado.md`, plus the marker `L7x-TERMINADO`.
-- **Independent review** only at the end of each lane: L7a, and L7d (which reviews L7b–L7d together).
+- **Four lanes run tonight, in parallel.** Each one is a worktree of its own, on a branch of its own, with a dev port of its own. **Never touch another lane's folder, branch or port.** Push only your own branch.
+
+| lane / session | worktree | branch | port | lots | model |
+|---|---|---|---|---|---|
+| ~~A~~ | `C:\nocturno\cola3` | `l7/a` | 3002 | L7a — **done** | Opus high |
+| ~~B~~ | `C:\nocturno\cola3b` | `l7/b` | 3003 | L7b, L7c, L7d — **done, with gaps** | Sonnet medium |
+| INT | `C:\nocturno\cola3` | `l7/a` | 3002 | L7-INT, then L7g | Opus high / Sonnet high |
+| C | `C:\nocturno\cola3c` | `l7/lab` | 3004 | L7e | Opus high |
+| D | `C:\nocturno\cola3d` | `l7/aud` | 3005 | L7f (after INT, off the integrated branch) | Sonnet high |
+
+- **Write boundaries.** Lane C writes only under `src/app/v3/laboratorio/**`, `docs/ideas/**` and `public/v3/laboratorio/**`. Lane D writes only `docs/cola/2026-10-30/AUDITORIA-D.md` and `docs/cola/2026-10-30/auditoria/**`. Lanes A and B own the real pages: A owns the service pages and the home's Servicios section, B owns Nosotros, Portfolio, the blog, the legal pages, the 404 and the footer. If your lot sends you outside your own boundary, write the proposal down and don't make the change.
+- **The shared lock**, now between four lanes: before any heavy step (tsc, a big lint, test suites, a dev server, Chrome, `verificar`, a build) run `mkdir C:\nocturno\.turno-cola3`. If it fails, wait 30 s and retry. Write who you are and the time into `dueno.txt` inside it, and remove the folder the moment the heavy step ends. **Hold it for as little as possible** — with four lanes waiting, a lock held through a long stretch of work blocks the whole night. Batch your heavy steps instead of taking the lock over and over.
+- **A stale lock.** If `dueno.txt` says the lock was taken more than 45 minutes ago, the lane that took it probably died. Check whether its dev port answers; if it doesn't, delete the folder, take the lock yourself, and log that you stole it and from whom.
+- **Memory.** The machine is dedicated to these four lanes tonight, with no other dev server and no other browser. Close Chrome when a verification burst ends instead of leaving it open — the WebGL leak accumulates all night and four lanes fill the nonpaged pool much faster than one. If Chrome gets slow or a launch fails for memory, close it and reopen it rather than pushing on. **Never kill a process by name**; only by the PID you started. Stop your dev server by PID before you finish.
+- **State:** lane A writes `docs/cola/2026-10-30/ESTADO-a.md`, lane B `ESTADO-b.md`, lane C `ESTADO-c.md`, lane D `ESTADO-d.md`. Each lot writes `L7x-plan.md` (short, 15–30 lines) and `L7x-resultado.md`, plus the marker `L7x-TERMINADO`. **Commit often** — the night may be cut off at any point, and anything uncommitted is lost.
+- **Independent review** only at the end of lanes A and B (L7a, and L7d which reviews L7b–L7d together). Lanes C and D don't need it.
+- **Nobody is awake.** Do not ask questions: take the most reasonable reading, write the decision down in your result file, and carry on. The one exception is a decision that can't be undone and could sensibly go either way — do the work around it, write it up, and leave it for Valentino.
 - **Assets:** Valentino's files are in `C:\nocturno\l7-assets\`. Copy what you use into `public/v3/<page>/`, optimized as webp. Never reference that folder from code.
 
 ## What every page shares
