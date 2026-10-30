@@ -14,6 +14,8 @@
  * entrada fabricada.
  */
 
+import { existsSync } from 'node:fs'
+import path from 'node:path'
 import { createElement } from 'react'
 
 import { CURSOR_MIN_ANCHO_PX, deberiaMontarseElCursor } from '../../_lib/cursor'
@@ -26,6 +28,8 @@ import { SUBDESTINOS } from '../../_componentes/destinosDelViaje'
 import { Cierre } from '../../_secciones/cierre/Cierre'
 import { Trabajos } from '../../_secciones/trabajos/Trabajos'
 import { ANCLAS_QUE_EXISTEN, CONTACTO_DEL_PIE, DESTINOS_DE_LA_RUTA } from '../../_secciones/cierre/contenido'
+import { PAGINAS_DEL_PIE, PAGINAS_LEGALES } from '../../_secciones/cierre/contacto'
+import { PUBLICADOS } from '../../_servicios/rutas'
 import { seccionDe } from '../../_secciones/_contrato/forma'
 import { marcar } from '../../_secciones/_invariantes/render'
 import {
@@ -69,7 +73,16 @@ const esExterno = (h: string): boolean => /^(mailto:|https:\/\/)/.test(h)
 const HREFS_INTERNOS = HREFS_DEL_PIE.filter((h) => !esExterno(h) && h !== CONTACTO_DEL_PIE.destino)
 // [RETOQUE 3D] 3I: el pie ya no ENLAZA al contacto: lo ES (el formulario `#contacto`, destino de todo lo que lleva a contacto).
 afirmarIgual(HREFS_DEL_PIE.filter((h) => h === CONTACTO_DEL_PIE.destino).length, 0, 'el pie no enlaza al contacto: el formulario de contacto está en el pie')
-afirmarIgual(S.aLaNada(HREFS_INTERNOS, [...ANCLAS_QUE_EXISTEN, ...SUBANCLAS_QUE_EXISTEN]), [], `los ${HREFS_INTERNOS.length} enlaces internos del pie apuntan a un ancla que existe (los otros son el mail, WhatsApp y las redes)`)
+// [L7-INT] Reemplazada por la spec de L7d: el pie también enlaza las páginas y las legales, que son rutas y no anclas; cada una tiene que
+// existir (su `page.tsx`, o un slug publicado de `[servicio]`). L7d no corrió esta suite.
+const esRuta = (h: string): boolean => h.startsWith('/v3/')
+const rutaQueExiste = (h: string): boolean => existsSync(path.join(S.RAIZ, 'src', 'app', h, 'page.tsx')) || PUBLICADOS.some((slug) => h === `/v3/${slug}`)
+const RUTAS_DEL_PIE = HREFS_INTERNOS.filter(esRuta)
+const ANCLAS_DEL_PIE = HREFS_INTERNOS.filter((h) => !esRuta(h))
+afirmarIgual(S.aLaNada(ANCLAS_DEL_PIE, [...ANCLAS_QUE_EXISTEN, ...SUBANCLAS_QUE_EXISTEN]), [], `los ${ANCLAS_DEL_PIE.length} enlaces a anclas del pie apuntan a un ancla que existe (los otros son el mail, WhatsApp, las redes y las páginas)`)
+afirmarIgual(RUTAS_DEL_PIE, [...PAGINAS_DEL_PIE, ...PAGINAS_LEGALES].map((p) => p.destino), `  y sus ${RUTAS_DEL_PIE.length} rutas son las páginas y las legales, en ese orden`)
+afirmarIgual(RUTAS_DEL_PIE.filter((h) => !rutaQueExiste(h)), [], '  y cada ruta existe: su `page.tsx` o un servicio publicado')
+controlPositivo('  el chequeo ve una ruta que no existe', '/v3/inventada', (h: string) => rutaQueExiste(h))
 afirmarIgual(S.aLaNada(ENLACES_DE_MUESTRA.map((e) => e.destino).filter((d) => d !== '#contacto'), ANCLAS_QUE_EXISTEN), [], `y los de la pastilla también; «Contacto» abre el formulario`)
 afirmar(ENLACES_DE_MUESTRA.at(-1)?.destino === '#contacto' && ENLACES_DE_MUESTRA.at(-1)?.rotulo === 'Contacto', '  «Contacto» de la pastilla va a `#contacto`, que el chrome intercepta para abrir el formulario')
 controlPositivo('el detector ve un href a la nada', S.HREFS_A_LA_NADA, (l: readonly string[]) => S.aLaNada(l, ANCLAS_QUE_EXISTEN).length === 0)

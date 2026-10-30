@@ -86,14 +86,15 @@ export function LineaLegal({ alineado }: { readonly alineado?: 'fin' }): React.J
   if (alineado === undefined) return <RenglonLegal />
   return (
     <div data-pieza="paginas-y-legal-del-pie" className="flex flex-col gap-[var(--spacing-2)] escritorio:items-end">
-      <nav aria-label="Páginas" className="flex flex-wrap items-center gap-x-[var(--spacing-4)] gap-y-[var(--spacing-1)] escritorio:justify-end">
+      {/* [L7-INT] Un grupo y no un `nav`: el pie del home va adentro del `main` (s10-acceso: ningún `navigation` anidado ahí). */}
+      <div role="group" aria-label="Páginas" className="flex flex-wrap items-center gap-x-[var(--spacing-4)] gap-y-[var(--spacing-1)] escritorio:justify-end">
         <Micro como="span">Páginas</Micro>
         {PAGINAS_DEL_PIE.map((p) => (
           <EnlaceDeRuta key={p.destino} href={p.destino} className={CLASE_DEL_ENLACE}>
             {p.rotulo}
           </EnlaceDeRuta>
         ))}
-      </nav>
+      </div>
       <div className="flex flex-wrap items-center gap-x-[var(--spacing-4)] gap-y-[var(--spacing-1)]">
         <RenglonLegal />
         {PAGINAS_LEGALES.map((p) => (

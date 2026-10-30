@@ -55,6 +55,7 @@ import { DESCUENTO_NACIMIENTO_PX } from '../navegacion'
 import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { RESENAS } from '../../_secciones/por-que-develop/resenas/contenido'
 import { PREGUNTAS_DEL_HOME } from '../../_secciones/cierre/faq'
+import { PAGINAS_DEL_PIE, PAGINAS_LEGALES } from '../../_secciones/cierre/contacto'
 
 /**
  * SPRINT DEMOS · lo que suman las demos de Trabajos: una parada por demo y el `h3` de su título.
@@ -106,6 +107,8 @@ const DELTA_DEL_FAQ = { paradas: PREGUNTAS_DEL_HOME.length, encabezados: 1 } as 
 // [C2 · 60c] El CTA del Panel rehecho: el form de las novedades suma «Nombre» (una parada; «Probar ahora» reemplaza a «Probar el
 // panel») y las dos columnas llevan su subtítulo como `h4` («Probar el panel» y «Suscribite a las novedades»), iguales en las dos ramas.
 const DELTA_DEL_CTA_DEL_PANEL = { paradas: 1, encabezados: 2 } as const
+// [L7-INT] Reemplazada por la spec de L7d: el pie plano enlaza las páginas («Páginas») y las legales, un enlace cada una. L7d no corrió esta suite.
+const DELTA_DE_LAS_PAGINAS = { paradas: PAGINAS_DEL_PIE.length + PAGINAS_LEGALES.length } as const
 
 const QUIETA = marcadoDelDocumento('quieta')
 const ANIMADA = marcadoDelDocumento('animada')
@@ -198,10 +201,11 @@ imprimirParadas(QUIETA, PARADAS)
  * que hacen falta, y la de la imagen declara su `aria-label`.
  */
 // SPRINT DEMOS · + las demos del tramo de Trabajos (el estante arriba de 1025, la cinta abajo), una parada cada una.
-afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas + DELTA_DE_LAS_RESENAS.paradas + DELTA_DEL_PANEL_B6.paradas + DELTA_DEL_FAQ.paradas + DELTA_DEL_CTA_DEL_PANEL.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo, «Panel» en la barra y el formulario del pie; desde RETOQUE PANEL, sin las 8 tarjetas ni la pausa del panel en vivo; desde PULIDO 10, más Demos en el recorrido del pie; desde B1, el Portfolio con una parada más que el túnel; desde B12a.8, «Home» y la flechita de «Servicios»; desde B2, el enlace de cada reseña`)
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas + DELTA_DE_LAS_RESENAS.paradas + DELTA_DEL_PANEL_B6.paradas + DELTA_DEL_FAQ.paradas + DELTA_DEL_CTA_DEL_PANEL.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
+afirmarIgual(PARADAS.length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas + DELTA_DE_LAS_RESENAS.paradas + DELTA_DEL_PANEL_B6.paradas + DELTA_DEL_FAQ.paradas + DELTA_DEL_CTA_DEL_PANEL.paradas + DELTA_DE_LAS_PAGINAS.paradas, `el home entero tiene 26 paradas —las 22 de antes, la captura de cada trabajo y el CTA del final del túnel— más las 8 tarjetas del panel, las ${String(DELTA_DE_DEMOS.paradas)} demos y el CTA de cada servicio, «Hablemos» en el hero, la pausa del panel en vivo, «Panel» en la barra y el formulario del pie; desde RETOQUE PANEL, sin las 8 tarjetas ni la pausa del panel en vivo; desde PULIDO 10, más Demos en el recorrido del pie; desde B1, el Portfolio con una parada más que el túnel; desde B12a.8, «Home» y la flechita de «Servicios»; desde B2, el enlace de cada reseña; desde L7d, las páginas y las legales del pie`)
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 26 + DELTA_DEL_PANEL.paradas + DELTA_DE_DEMOS.paradas + DELTA_DE_SERVICIOS.paradas + DELTA_DEL_FINAL.paradas + DELTA_DEL_CONTACTO.paradas + DELTA_DE_LA_VIDA.paradas + DELTA_DEL_NAVBAR.paradas + DELTA_DEL_RETOQUE.paradas + DELTA_DE_LA_RONDA2.paradas + DELTA_DEL_RETOQUE_PANEL.paradas + DELTA_DEL_PULIDO_10.paradas + DELTA_DEL_PORTFOLIO.paradas + DELTA_DE_B12A8.paradas + DELTA_DE_LAS_RESENAS.paradas + DELTA_DEL_PANEL_B6.paradas + DELTA_DEL_FAQ.paradas + DELTA_DEL_CTA_DEL_PANEL.paradas + DELTA_DE_LAS_PAGINAS.paradas, '  y la rama animada tiene las mismas: el recorrido de teclado no cambia con el ancho')
 controlPositivo('[B2] el censo sin las reseñas no cierra: las ramas suman cada una sus enlaces', PARADAS.length - DELTA_DE_LAS_RESENAS.paradas, (n: number) => n === PARADAS.length && paradasDeTabulacion(ANIMADA).length === n)
 controlPositivo('[B10] el censo sin el FAQ no cierra: las ramas suman cada una sus preguntas', PARADAS.length - DELTA_DEL_FAQ.paradas, (n: number) => n === PARADAS.length && paradasDeTabulacion(ANIMADA).length === n)
+controlPositivo('[L7-INT] el censo sin las páginas del pie no cierra: las ramas suman cada una sus enlaces', PARADAS.length - DELTA_DE_LAS_PAGINAS.paradas, (n: number) => n === PARADAS.length && paradasDeTabulacion(ANIMADA).length === n)
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),

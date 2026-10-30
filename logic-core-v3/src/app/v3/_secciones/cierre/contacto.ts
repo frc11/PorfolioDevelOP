@@ -4,6 +4,8 @@
  * lleva su TODO acá y figura como pendiente en el reporte del sprint.
  */
 
+import { PAGINAS_DE_SERVICIO } from '../../_chrome/paginas'
+
 export const MAIL = 'contacto@develop.com.ar'
 export const HREF_DEL_MAIL = `mailto:${MAIL}`
 
@@ -37,9 +39,8 @@ export const PAGINAS_DEL_PIE: readonly { readonly rotulo: string; readonly desti
   { rotulo: 'Nosotros', destino: '/v3/nosotros' },
   { rotulo: 'Portfolio', destino: '/v3/portfolio' },
   { rotulo: 'Blog', destino: '/v3/blog' },
-  { rotulo: 'Páginas web', destino: '/v3/paginas-web' },
-  { rotulo: 'Software a medida', destino: '/v3/software-a-medida' },
-  { rotulo: 'IA y automatizaciones', destino: '/v3/ia-y-automatizaciones' },
+  // [L7-INT] Los servicios, de la misma lista que el desplegable de la navbar (el renombre de L7a no llegaba al pie del carril B).
+  ...PAGINAS_DE_SERVICIO.map((p) => ({ rotulo: p.rotulo, destino: p.destino })),
 ]
 
 /** [L7d · 1] Los enlaces legales de la línea de abajo. */
