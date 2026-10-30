@@ -42,3 +42,18 @@ export function notasRelacionadas(n: Nota, cuantas = 3): readonly Nota[] {
   const resto = NOTAS.filter((x) => x.slug !== n.slug)
   return [...resto.slice(i), ...resto.slice(0, i)].slice(0, cuantas)
 }
+
+/** Dónde va la frase destacada: después del párrafo que la contiene (`seccion` −1 es la introducción). `null` si no está en ningún párrafo. */
+export interface LugarDelDestacado {
+  readonly seccion: number
+  readonly parrafo: number
+}
+
+export function lugarDelDestacado(n: Nota): LugarDelDestacado | null {
+  const grupos = [n.introduccion, ...n.secciones.map((s) => s.parrafos)]
+  for (const [g, parrafos] of grupos.entries()) {
+    const p = parrafos.findIndex((t) => t.includes(n.destacado))
+    if (p !== -1) return { seccion: g - 1, parrafo: p }
+  }
+  return null
+}

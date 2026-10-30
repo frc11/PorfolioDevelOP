@@ -5,7 +5,8 @@ export const NOTA: Nota = {
   titulo: '¿Necesito página web o me alcanza con Instagram?',
   resumen: 'Instagram sirve para mostrarte, pero no es tuyo. Qué puede hacer cada uno por tu negocio y cuándo conviene tener los dos.',
   fecha: '2026-10-22',
-  portada: { palabra: 'Web o Insta', tono: 'web' },
+  foto: '/v3/blog/necesito-pagina-web-o-me-alcanza-con-instagram.webp',
+  destacado: 'Una te acerca gente, la otra la convence y la ayuda a decidir.',
   introduccion: [
     'Es una de las preguntas que más escuchamos de dueños de negocios chicos: «Tengo Instagram y me escriben por mensaje, ¿para qué quiero una página?». La respuesta honesta es que depende. Hay negocios que arrancan muy bien solo con redes y otros que sin una página pierden clientes todos los días sin enterarse.',
     'En esta nota te contamos qué hace bien cada herramienta, dónde se queda corta y cómo decidir sin gastar plata de más.',

@@ -5,7 +5,8 @@ export const NOTA: Nota = {
   titulo: 'Qué es un chatbot con IA y cuándo le conviene a una pyme',
   resumen: 'Un chatbot con inteligencia artificial puede atender consultas todo el día. Cómo funciona, qué puede y qué no puede hacer, y cuándo vale la pena.',
   fecha: '2026-10-20',
-  portada: { palabra: 'Chatbot', tono: 'ia' },
+  foto: '/v3/blog/que-es-un-chatbot-con-ia-y-cuando-le-conviene-a-una-pyme.webp',
+  destacado: 'Un chatbot que responde bien cinco cosas sirve más que uno que promete mil y falla en la mitad.',
   introduccion: [
     'Seguro viste esos chats que aparecen en las páginas y te saludan antes de que escribas nada. Hasta hace poco eran bastante torpes: respondían solo a palabras exactas y se perdían ante cualquier pregunta distinta. Con la inteligencia artificial eso cambió mucho.',
     'Pero que la tecnología exista no significa que a todos los negocios les convenga. Acá te explicamos qué es, qué puede hacer por una pyme y cómo darte cuenta de si es tu caso.',

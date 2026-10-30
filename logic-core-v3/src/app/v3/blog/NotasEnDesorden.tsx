@@ -1,46 +1,45 @@
 'use client'
 
-import { EnlaceDeRuta } from '../_componentes/navegacion/EnlaceDeRuta'
-import { Caption, Cuerpo } from '../_componentes/tipografia/Textos'
-import { Titular } from '../_componentes/tipografia/Titular'
+import type { CSSProperties } from 'react'
+
+import { cn } from '@/lib/utils'
+
+import { sizesPorViewport } from '../_lib/imagen'
 import { Gatillo } from '../_secciones/_contrato/Gatillo'
 
-import { NOTAS, fechaLarga, minutosDeLectura, rutaDeLaNota } from './_notas/indice'
-import { PortadaDeNota } from './PortadaDeNota'
+import { NOTAS } from './_notas/indice'
+import { LUGARES } from './lugares'
+import { TarjetaDeNota } from './TarjetaDeNota'
 
 /**
- * [L7c] TODAS LAS NOTAS, en lugares irregulares — la idea de la galería vieja de «Tu panel» (tarjetas de distinto ancho y a distinta altura, no una
- * grilla rígida), sin su código: doce columnas desde 1024 con un ancho y un corrimiento por tarjeta; de a dos con la segunda corrida en la tablet;
- * una sola columna en el teléfono. Los lugares se repiten de a seis.
+ * [M2] TODAS LAS NOTAS, DISPERSAS — la galería del Panel viejo (`af4e53ca^:…/tu-panel/geometria.ts`: una TABLA escrita a mano, nada se sortea;
+ * tarjetas de distinto ancho, proporción y altura, con mucho aire) con las notas. Valentino: «necesito más dispersión, más espacio».
+ *
+ *   · Desde 1024, dos columnas ESCALONADAS en una grilla de doce: cada tarjeta ocupa dos filas y la siguiente arranca en la segunda (la de la
+ *     derecha empieza a mitad de la de la izquierda), así nunca se pisan y el orden del documento es el de la lectura. Cada una con su columna,
+ *     su ancho, su proporción y un corrimiento propio hacia abajo.
+ *   · Abajo de 1024 (la tablet como el teléfono), una columna que alterna los costados, con anchos y proporciones distintos.
+ *
+ * Llegan con el gatillo de siempre, desde abajo (sin el giro del prototipo); el título, después, se levanta (`TarjetaDeNota`). Los lugares
+ * se repiten de a seis.
  */
-const LUGARES: readonly string[] = [
-  'escritorio:col-span-5',
-  'escritorio:col-span-4 escritorio:mt-[var(--spacing-12)]',
-  'escritorio:col-span-3',
-  'escritorio:col-span-4 escritorio:col-start-2',
-  'escritorio:col-span-3 escritorio:mt-[var(--spacing-20)]',
-  'escritorio:col-span-4 escritorio:mt-[var(--spacing-8)]',
-]
+/** La fila de cada tarjeta desde 1024: arranca en la suya y ocupa dos (la clase lee la variable). */
+const CLASE_DE_LA_FILA = 'escritorio:[grid-row:var(--fila)/span_2]'
 
 export function NotasEnDesorden(): React.JSX.Element {
   return (
-    <ul data-pieza="notas-en-desorden" className="grid grid-cols-1 gap-x-[var(--spacing-8)] gap-y-[var(--spacing-12)] tablet:grid-cols-2 escritorio:grid-cols-12">
-      {NOTAS.map((nota, i) => (
-        <li key={nota.slug} className={`min-w-0 ${LUGARES[i % LUGARES.length] ?? ''} ${i % 2 === 1 ? 'tablet:mt-[var(--spacing-12)] escritorio:mt-0' : ''}`}>
-          <Gatillo desde="abajo" claseDelContenido="h-full">
-            <EnlaceDeRuta href={rutaDeLaNota(nota)} className="group flex h-full flex-col gap-[var(--spacing-3)]">
-              <PortadaDeNota nota={nota} className="rounded-[var(--radius-fuerte)] transition-transform duration-media ease-salida group-hover:-translate-y-1 motion-reduce:transition-none" />
-              <Caption como="span" interletrado="micro" className="font-codigo uppercase text-tinta-media">
-                {fechaLarga(nota.fecha)} · {minutosDeLectura(nota)} min
-              </Caption>
-              <Titular nivel="titulo-s" como="h3" className="group-hover:underline group-focus-visible:underline">
-                {nota.titulo}
-              </Titular>
-              <Cuerpo>{nota.resumen}</Cuerpo>
-            </EnlaceDeRuta>
-          </Gatillo>
-        </li>
-      ))}
+    <ul data-pieza="notas-en-desorden" className="flex flex-col gap-y-[var(--spacing-20)] pt-[var(--spacing-8)] escritorio:grid escritorio:grid-cols-12 escritorio:gap-x-[var(--spacing-12)] escritorio:gap-y-[var(--spacing-16)]">
+      {NOTAS.map((nota, i) => {
+        const lugar = LUGARES[i % LUGARES.length] ?? LUGARES[0]
+        if (lugar === undefined) return null
+        return (
+          <li key={nota.slug} data-lugar={i % LUGARES.length} className={cn('min-w-0 escritorio:w-auto escritorio:self-start', lugar.angosto, lugar.escritorio, CLASE_DE_LA_FILA)} style={{ '--fila': String(i + 1) } as CSSProperties}>
+            <Gatillo desde="abajo">
+              <TarjetaDeNota nota={nota} forma={lugar.forma} nivel={lugar.nivel} sizes={sizesPorViewport(lugar.vw, 92)} />
+            </Gatillo>
+          </li>
+        )
+      })}
     </ul>
   )
 }

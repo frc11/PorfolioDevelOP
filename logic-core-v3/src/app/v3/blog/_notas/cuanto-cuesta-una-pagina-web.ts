@@ -5,7 +5,8 @@ export const NOTA: Nota = {
   titulo: 'Cuánto cuesta una página web en Argentina y de qué depende',
   resumen: 'No hay un precio único: depende de lo que necesites. Los factores que hacen que una página cueste más o menos, para que pidas presupuestos con criterio.',
   fecha: '2026-10-18',
-  portada: { palabra: 'Cuánto cuesta', tono: 'papel' },
+  foto: '/v3/blog/cuanto-cuesta-una-pagina-web-en-argentina.webp',
+  destacado: 'Una buena propuesta empieza por escucharte.',
   introduccion: [
     '«¿Cuánto sale una página?» es la primera pregunta de casi todos, y la respuesta menos satisfactoria es «depende». Pero es verdad: dos páginas que a simple vista parecen parecidas pueden tener costos muy distintos, porque lo que se paga es el trabajo que hay detrás, no la cantidad de pantallas.',
     'En esta nota no te damos un número de memoria, porque cambia y porque sería engañarte. Te explicamos de qué depende, para que puedas pedir presupuestos, comparar y entender qué estás pagando.',
