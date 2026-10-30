@@ -1,0 +1,18 @@
+import type { Metadata } from 'next'
+
+import { Papel } from '../_lab/Papel'
+import { PantallaQueSeDibuja } from './PantallaQueSeDibuja'
+
+export const metadata: Metadata = {
+  title: 'Laboratorio · la pantalla que se dibuja',
+  description: 'Prototipo para la página de Desarrollo web. No forma parte del sitio público.',
+  robots: { index: false, follow: false, nocache: true },
+}
+
+export default function Pagina(): React.JSX.Element {
+  return (
+    <Papel slug="pantalla-que-se-dibuja">
+      <PantallaQueSeDibuja />
+    </Papel>
+  )
+}

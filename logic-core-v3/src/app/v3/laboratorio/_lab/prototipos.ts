@@ -105,6 +105,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'Una línea se dibuja hacia abajo con el scroll y une los pasos; cada paso se subraya y pasa a tinta cuando la línea lo alcanza. Los pasos salen de frases que el home ya dice.',
     sale: 'El Trazo del titular de Quiénes somos (subrayado) y su raya, de pie; los pasos, de los textos de Servicios, Seis razones y el Panel.',
   },
+  {
+    slug: 'pantalla-que-se-dibuja',
+    codigo: 'W1',
+    titulo: 'La pantalla que se dibuja',
+    pagina: 'Desarrollo web',
+    mirar: 'Al lado del texto de Web, el alambre de una página se dibuja trazo por trazo con el scroll y, al terminar, la pantalla de un trabajo real se abre adentro desde el centro. ¿Se ve develOP o se ve wireframe de plantilla?',
+    sale: 'El globo de alambre de Servicios (el trazo fino, el celeste), el clip-path desde el centro de la segunda toma y el póster de El Garage.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
