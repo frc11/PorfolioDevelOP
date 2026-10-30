@@ -90,7 +90,7 @@ function Ventana({
         </span>
         <span className="ml-auto shrink-0 font-codigo text-micro tracking-wide uppercase">{AVISO_DEL_EJEMPLO}</span>
       </div>
-      <div ref={lista} role="log" aria-live={tuyos.length > 0 ? 'polite' : 'off'} aria-label={`Conversación con ${NOMBRE_DEL_ASISTENTE}`} className="flex h-[22rem] flex-col gap-2.5 overflow-y-auto overscroll-contain bg-superficie-1 px-4 py-4 escritorio:h-[26rem]">
+      <div ref={lista} role="log" aria-live={tuyos.length > 0 ? 'polite' : 'off'} aria-label={`Conversación con ${NOMBRE_DEL_ASISTENTE}`} className="flex h-88 flex-col gap-2.5 overflow-y-auto overscroll-contain bg-superficie-1 px-4 py-4 escritorio:h-104">
         {[...llegaron, ...tuyos].map((m, i) => (
           <Burbuja key={i} mensaje={m} />
         ))}
@@ -124,7 +124,7 @@ function Ventana({
 function Burbuja({ mensaje }: { readonly mensaje: MensajeDeEjemplo }): React.JSX.Element {
   const delCliente = mensaje.rol === 'USER'
   return (
-    <p className={`max-w-[85%] rounded-medio px-3.5 py-2 text-cuerpo leading-texto ${delCliente ? 'self-end rounded-br-sutil bg-acento text-fondo' : 'self-start rounded-bl-sutil border border-tinta/10 bg-fondo text-tinta'}`}>
+    <p style={{ maxWidth: '85%' }} className={`rounded-medio px-3.5 py-2 text-cuerpo leading-texto ${delCliente ? 'self-end rounded-br-sutil bg-acento text-fondo' : 'self-start rounded-bl-sutil border border-tinta/10 bg-fondo text-tinta'}`}>
       <span className="sr-only">{delCliente ? 'Cliente: ' : 'Asistente: '}</span>
       {mensaje.texto}
     </p>

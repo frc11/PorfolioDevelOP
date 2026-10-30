@@ -32,7 +32,7 @@ export function PantallaQuieta({
           </div>
         </div>
         <div className="flex items-end gap-4 escritorio:col-span-8">
-          <div className="min-w-0 flex-[4] overflow-hidden rounded-sutil ring-1 ring-borde">
+          <div className="min-w-0 flex-4 overflow-hidden rounded-sutil ring-1 ring-borde">
             <Imagen key={`e-${trabajo.slug}`} src={trabajo.medios.poster.escritorio} alt={`La página de ${trabajo.nombre}, en la compu`} ancho={medidas.escritorio[0]} alto={medidas.escritorio[1]} sizes="(min-width: 1024px) 50vw, 70vw" className="block h-auto w-full" />
           </div>
           <div className="min-w-0 flex-1 overflow-hidden rounded-medio border-4 border-tinta">

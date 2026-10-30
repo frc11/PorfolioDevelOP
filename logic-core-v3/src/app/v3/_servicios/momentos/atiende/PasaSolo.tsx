@@ -16,7 +16,7 @@ import { PASA_SOLO, TAREAS, debeSonar, tildeSiguiente } from './datos'
 export function PasaSolo(): React.JSX.Element {
   const reducido = useMovimientoReducido()
   return (
-    <ul className="border-t border-borde">
+    <ul role="list" className="border-t border-borde">
       {TAREAS.map((t) => (
         <Tarea key={t.texto} texto={t.texto} tipo={t.tipo} reducido={reducido} />
       ))}
@@ -50,7 +50,7 @@ function Tarea({ texto, tipo, reducido }: { readonly texto: string; readonly tip
           strokeWidth={2.5}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-acento transition-[stroke-dashoffset] duration-[var(--duracion-lenta)] ease-[var(--ease-salida)] motion-reduce:transition-none"
+          className="text-acento transition-all duration-[var(--duracion-lenta)] ease-[var(--ease-salida)] motion-reduce:transition-none"
           style={{ strokeDasharray: 1, strokeDashoffset: hecha ? 0 : 1 }}
         />
       </svg>
@@ -60,7 +60,7 @@ function Tarea({ texto, tipo, reducido }: { readonly texto: string; readonly tip
       </span>
       <span
         aria-hidden="true"
-        className="hidden shrink-0 font-codigo text-caption tracking-wide text-acento uppercase transition-[opacity,translate] duration-[var(--duracion-muy-lenta)] ease-[var(--ease-salida)] tablet:block motion-reduce:transition-none"
+        className="hidden shrink-0 font-codigo text-caption tracking-wide text-acento uppercase transition duration-[var(--duracion-muy-lenta)] ease-[var(--ease-salida)] tablet:block motion-reduce:transition-none"
         style={{ opacity: hecha ? 1 : 0, translate: hecha ? '0 0' : '0 0.75rem' }}
       >
         {PASA_SOLO}

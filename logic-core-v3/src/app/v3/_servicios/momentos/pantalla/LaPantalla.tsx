@@ -98,7 +98,7 @@ function Secuencia({ trabajos, trabajo, alElegir }: PropsDeLaSecuencia): React.J
     m.style.width = `${medidas.ancho.toFixed(1)}px`
     m.style.height = `${medidas.alto.toFixed(1)}px`
     real.current.style.borderRadius = `${medidas.radio.toFixed(1)}px`
-    bisel.current.style.borderRadius = `${(medidas.radio + 6).toFixed(1)}px`
+    bisel.current.style.borderRadius = `${(medidas.radio + 4).toFixed(1)}px`
     bisel.current.style.opacity = f.abierto.toFixed(3)
     // El plano: cada traza en su tramo; se va cuando el marco empieza a angostarse (se deformaría).
     const trazas = s.querySelectorAll<SVGGeometryElement>('[data-traza]')
@@ -134,10 +134,10 @@ function Secuencia({ trabajos, trabajo, alElegir }: PropsDeLaSecuencia): React.J
   useAvanceDelRecorrido(recorrido, alAvanzar, { modo: 'clavado' }, true)
 
   // La repetición al cambiar de trabajo (sólo con el trabajo, nunca al montar): corre en tiempo hasta el avance del scroll, que no se mueve.
-  const primerTrabajo = useRef(trabajo.slug)
+  const primerTrabajo = useRef<SlugDelProyecto | null>(trabajo.slug)
   useEffect(() => {
     if (primerTrabajo.current === trabajo.slug && cambio.current === null) return undefined
-    primerTrabajo.current = ''
+    primerTrabajo.current = null
     cambio.current = performance.now()
     let pedido = 0
     const cuadro = (): void => {
@@ -156,16 +156,16 @@ function Secuencia({ trabajos, trabajo, alElegir }: PropsDeLaSecuencia): React.J
   }, [trabajo.slug])
 
   return (
-    <div ref={recorrido} data-recorrido-de-la-pantalla="" className="relative h-[400svh] escritorio:h-[440svh]">
+    <div ref={recorrido} data-recorrido-de-la-pantalla="" className="relative" style={{ height: '420svh' }}>
       <div className="sticky top-0 h-svh">
         <Envoltorio className="h-full" claseDeContenido="h-full">
-          <div className="grid h-full grid-rows-[auto_minmax(0,1fr)_auto] gap-4 pt-24 pb-6 escritorio:grid-cols-12 escritorio:grid-rows-[auto_minmax(0,1fr)] escritorio:gap-x-[var(--grilla-canal-amplio)] escritorio:gap-y-8 escritorio:pt-28 escritorio:pb-12">
+          <div className="flex h-full flex-col gap-4 pt-24 pb-6 escritorio:grid escritorio:grid-cols-12 escritorio:grid-rows-2 escritorio:gap-x-[var(--grilla-canal-amplio)] escritorio:gap-y-8 escritorio:pt-28 escritorio:pb-12">
             <div className="min-w-0 escritorio:col-span-4 escritorio:row-start-1">
               <MenuDeTrabajos trabajos={trabajos} elegido={trabajo.slug} alElegir={alElegir} />
             </div>
-            <div ref={caja} className="relative flex min-h-0 items-center justify-center escritorio:col-span-8 escritorio:col-start-5 escritorio:row-span-2 escritorio:row-start-1">
+            <div ref={caja} className="relative flex min-h-0 flex-1 items-center justify-center escritorio:col-span-8 escritorio:col-start-5 escritorio:row-span-2 escritorio:row-start-1">
               <div ref={marco} data-marco-de-la-pantalla="" className="relative" style={{ width: 0, height: 0, willChange: 'width, height' }}>
-                <div ref={bisel} aria-hidden="true" className="pointer-events-none absolute -inset-1.5 border-[6px] border-tinta" style={{ opacity: 0 }} />
+                <div ref={bisel} aria-hidden="true" className="pointer-events-none absolute -inset-1 border-4 border-tinta" style={{ opacity: 0 }} />
                 <Plano key={trabajo.slug} plano={plano} svg={svg} />
                 <div ref={real} className="absolute inset-0 overflow-hidden bg-tinta" style={{ clipPath: 'inset(50%)', willChange: 'clip-path' }}>
                   <video key={`e-${trabajo.slug}`} ref={videoDeEscritorio} data-video-de-la-pantalla="escritorio" muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 size-full object-cover object-top" />
@@ -179,7 +179,7 @@ function Secuencia({ trabajos, trabajo, alElegir }: PropsDeLaSecuencia): React.J
               </div>
               <BotonPausa pausado={videos.pausado} alCambiar={videos.setPausado} de={DE_LA_PAUSA_DE_LA_PANTALLA} className={CLASE_DE_LA_PAUSA_DEL_VIDEO} />
             </div>
-            <ol ref={textos} className="flex min-w-0 flex-col gap-3 escritorio:col-span-4 escritorio:row-start-2 escritorio:self-end">
+            <ol ref={textos} role="list" className="flex min-w-0 flex-col gap-3 escritorio:col-span-4 escritorio:row-start-2 escritorio:self-end">
               <TextoDeFase fase={0}>{TEXTOS_DE_LAS_FASES.plano}</TextoDeFase>
               <TextoDeFase fase={1}>{TEXTOS_DE_LAS_FASES.real(trabajo.nombre)}</TextoDeFase>
               <TextoDeFase fase={2}>{TEXTOS_DE_LAS_FASES.celular}</TextoDeFase>

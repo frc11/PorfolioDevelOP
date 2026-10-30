@@ -19,11 +19,11 @@ export function RenglonesTachados(): React.JSX.Element {
   const reducido = useMovimientoReducido()
   return (
     <div className="flex flex-col">
-      <div aria-hidden="true" className="hidden grid-cols-2 gap-8 border-b border-borde pb-3 tablet:grid">
+      <div aria-hidden="true" className="hidden gap-8 border-b border-borde pb-3 tablet:grid tablet:grid-cols-2">
         <p className="font-codigo text-micro tracking-wide text-tinta-media uppercase">{COLUMNAS_DE_LO_DE_SIEMPRE.hoy}</p>
         <p className="font-codigo text-micro tracking-wide text-acento uppercase">{COLUMNAS_DE_LO_DE_SIEMPRE.despues}</p>
       </div>
-      <ul>
+      <ul role="list">
         {RENGLONES.map((r) => (
           <Renglon key={r.antes} antes={r.antes} despues={r.despues} conMovimiento={!reducido} />
         ))}

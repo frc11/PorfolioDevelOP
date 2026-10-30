@@ -67,7 +67,7 @@ function Recorrido(): React.JSX.Element {
   }, [])
   useAvanceDelRecorrido(recorrido, pintar, { modo: 'clavado' }, true)
   return (
-    <div ref={recorrido} data-recorrido-del-orden="" className="relative h-[300svh]">
+    <div ref={recorrido} data-recorrido-del-orden="" className="relative" style={{ height: '300svh' }}>
       <div className="sticky top-0 flex h-svh items-center">
         <Envoltorio className="pt-20 pb-6 escritorio:pt-24">
           <Mesa mesa={mesa} animada />
@@ -82,16 +82,17 @@ function Mesa({ mesa, animada = false }: { readonly mesa?: React.Ref<HTMLDivElem
   return (
     <div
       ref={mesa}
-      className="mx-auto flex w-full max-w-[calc((100svh-15rem)*0.75)] flex-col gap-4 tablet:max-w-[calc((100svh-12rem)*1.6)]"
-      style={{ '--tablero': animada ? '0' : '1', '--cierre': animada ? '0' : '1' } as React.CSSProperties}
+      className="mx-auto flex w-full flex-col gap-4"
+      style={{ '--tablero': animada ? '0' : '1', '--cierre': animada ? '0' : '1', maxWidth: 'min(100%, calc((100svh - 15rem) * 1.6))' } as React.CSSProperties}
     >
-      <div className="relative aspect-[3/4] w-full tablet:aspect-[16/10]">
-        <div aria-hidden="true" className="absolute inset-0 grid grid-cols-3">
+      <div className="relative aspect-3/4 w-full tablet:aspect-16/10">
+        <div aria-hidden="true" className="absolute inset-0">
+          {/* Las columnas, a mano (un dibujo, no una grilla de layout): un tercio cada una, en todos los anchos. */}
           {COLUMNAS.map((c, i) => (
-            <div key={c} className="relative">
+            <div key={c} className="absolute inset-y-0" style={{ left: `${((i * 100) / 3).toFixed(3)}%`, width: `${(100 / 3).toFixed(3)}%` }}>
               {/* La raya de la grilla: se dibuja de arriba hacia abajo (la primera columna no lleva). */}
               {i > 0 ? <span className="absolute inset-y-0 left-0 w-px origin-top bg-borde-fuerte" style={{ scale: '1 var(--tablero)' }} /> : null}
-              <div className="flex items-baseline justify-between gap-2 border-b border-borde px-[6%] pt-2 pb-2" style={{ opacity: 'var(--tablero)' }}>
+              <div className="flex items-baseline justify-between gap-2 border-b border-borde px-3 pt-2 pb-2" style={{ opacity: 'var(--tablero)' }}>
                 <span className="font-codigo text-micro tracking-wide text-tinta uppercase">{c}</span>
                 <span data-cuenta="" className="font-codigo text-micro tracking-wide text-acento tabular-nums">
                   {animada ? '00' : String(PAPELES.filter((p) => p.columna === i).length).padStart(2, '0')}
@@ -100,7 +101,7 @@ function Mesa({ mesa, animada = false }: { readonly mesa?: React.Ref<HTMLDivElem
             </div>
           ))}
         </div>
-        <ul aria-label="Lo que anda suelto en un negocio, ordenado en tres columnas">
+        <ul role="list" aria-label="Lo que anda suelto en un negocio, ordenado en tres columnas">
           {PAPELES.map((p, i) => {
             const lugar = animada ? { left: p.x, top: p.y, giro: p.giro } : { left: LUGARES[i].x, top: LUGARES[i].y, giro: 0 }
             return (

@@ -34,7 +34,7 @@ export const COLUMNAS = ['Para hacer', 'En curso', 'Listo'] as const
 
 /** Los papeles sueltos: qué son (el rótulo), qué dicen, en qué columna terminan y dónde están tirados (en % de la mesa, con su giro). */
 export const PAPELES = [
-  { rotulo: 'Pedido', texto: 'Pedido por WhatsApp', columna: 0, x: 4, y: 6, giro: -7 },
+  { rotulo: 'Pedido', texto: 'Pedido por mensaje', columna: 0, x: 4, y: 6, giro: -7 },
   { rotulo: 'Turno', texto: 'Turno del sábado', columna: 1, x: 37, y: 3, giro: 5 },
   { rotulo: 'Presupuesto', texto: 'Presupuesto para mandar', columna: 0, x: 69, y: 9, giro: -4 },
   { rotulo: 'Stock', texto: 'Stock por reponer', columna: 0, x: 66, y: 38, giro: 8 },

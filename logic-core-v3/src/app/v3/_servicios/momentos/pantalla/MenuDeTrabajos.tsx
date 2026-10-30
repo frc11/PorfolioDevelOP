@@ -26,7 +26,7 @@ export function MenuDeTrabajos({
       <p aria-hidden="true" className="font-codigo text-micro tracking-wide text-tinta-media uppercase">
         {ROTULO_DEL_MENU}
       </p>
-      <ul className="flex gap-2 escritorio:flex-col escritorio:gap-1">
+      <ul role="list" className="flex gap-2 escritorio:flex-col escritorio:gap-1">
         {trabajos.map((t) => {
           const activo = t.slug === elegido
           return (

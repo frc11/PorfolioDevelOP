@@ -524,7 +524,8 @@ afirmarIgual(nombresQueChocan(FUENTES.map((x) => x.f.replace(/\\/g, '/'))), [], 
 controlPositivo('Planes.tsx y planes.ts juntos se detectan', ['bloques/precio/Planes.tsx', 'bloques/precio/planes.ts'], (l: string[]) => nombresQueChocan(l).length === 0)
 const deCliente = (codigo: string): boolean => /^\s*['"]use client['"]/.test(codigo)
 const dondeEsDeCliente = (lista: readonly { f: string; codigo: string }[]): string[] => lista.filter((x) => deCliente(x.codigo)).map((x) => x.f.replace(/\\/g, '/')).sort()
-afirmarIgual(dondeEsDeCliente(FUENTES), ['escena/VarianteDeWeb.tsx', 'movimiento/PrecioEnHistorias.tsx', 'movimiento/RepartoDelPrecio.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el código de cliente son los cinco de movimiento/ (los dos envoltorios del revelado, [M2a] el reparto del precio en diagonales, [M3] el video de trabajos y [M2b] el precio en historias; [L7a] la raíz con la salida se fue: la pide EnlaceDeRuta) y [V1] la variante de la escena, que carga la ranura del home por el registro: todo lo demás es de servidor. [R1] El gatillo ya no es nuestro: es el del contrato del home')
+// [M3 · 2026-10-30] REEMPLAZADO por la spec (M3): se suman los momentos de cada página, que se mueven con el scroll o solos (`momentos/`).
+afirmarIgual(dondeEsDeCliente(FUENTES), ['escena/VarianteDeWeb.tsx', 'momentos/atiende/ChatQueAtiende.tsx', 'momentos/atiende/PasaSolo.tsx', 'momentos/orden/ElOrden.tsx', 'momentos/orden/RenglonesTachados.tsx', 'momentos/pantalla/LaPantalla.tsx', 'momentos/pantalla/useVideosDeLaPantalla.ts', 'momentos/useAvanceDelRecorrido.ts', 'movimiento/PrecioEnHistorias.tsx', 'movimiento/RepartoDelPrecio.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el código de cliente son los cinco de movimiento/ (los dos envoltorios del revelado, [M2a] el reparto del precio en diagonales, [M3] el video de trabajos y [M2b] el precio en historias; [L7a] la raíz con la salida se fue: la pide EnlaceDeRuta) y [V1] la variante de la escena, que carga la ranura del home por el registro: todo lo demás es de servidor. [R1] El gatillo ya no es nuestro: es el del contrato del home')
 controlPositivo('un bloque de cliente fuera de movimiento/ se detecta', ["'use client'", 'export const x = 1'].join('\n'), (c: string) => !deCliente(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -572,6 +573,12 @@ const REVELADO_ESPERADO: Readonly<Record<string, { readonly arbol: number; reado
   proceso: { arbol: 2, gatillo: 0 },
   entrega: { arbol: 2, gatillo: 0 },
   despues: { arbol: 2, gatillo: 0 },
+  // [M3] Los momentos: el título entra por línea como en todos; lo de adentro se mueve por su cuenta (con el scroll o solo), sin revelado.
+  'la-pantalla': { arbol: 1, gatillo: 0 },
+  'lo-de-siempre': { arbol: 1, gatillo: 0 },
+  'el-orden': { arbol: 1, gatillo: 0 },
+  'el-chat': { arbol: 1, gatillo: 0 },
+  automatizaciones: { arbol: 1, gatillo: 0 },
 }
 const cuentaEnElBloque = (html: string, nombre: string, aguja: string): number => (bloqueDe(html, nombre) ?? '').split(aguja).length - 1
 // [M2a] El precio en diagonales (web) suma el Bloque del contrato que reparte el progreso a los tres paneles: una marca más.
@@ -702,7 +709,10 @@ const videoServido = (html: string): boolean => {
   return lista.length === 1 && [' muted=""', ' loop=""', ' playsinline=""', ' preload="none"', ' data-video-de-trabajos=""'].every((a) => v.toLowerCase().includes(a)) &&
     !/\s(autoplay|src)=/i.test(v)
 }
-afirmar(videoServido(bloqueDe(WEB_PROD, 'trabajos') ?? '') && videoServido(bloqueDe(WEB_DEV, 'trabajos') ?? '') && videoServido(WEB_PROD), 'Páginas web, en los dos modos, sin movimiento reducido: un solo <video> —muted, loop, playsInline, preload="none", data-video-de-trabajos—, en el slot de trabajos, sin autoplay ni src (la fuente se pide al acercarse)')
+// [M3 · 2026-10-30] La pantalla que se dibuja trae sus dos videos (escritorio y celular, con las mismas reglas: los afirma momentos.invariant §1):
+// el «uno solo en la página» pasa a «uno solo fuera de la pantalla».
+const SIN_LA_PANTALLA = WEB_PROD.replace(bloqueDe(WEB_PROD, 'la-pantalla') ?? '', '')
+afirmar(videoServido(bloqueDe(WEB_PROD, 'trabajos') ?? '') && videoServido(bloqueDe(WEB_DEV, 'trabajos') ?? '') && videoServido(SIN_LA_PANTALLA), 'Páginas web, en los dos modos, sin movimiento reducido: un solo <video> —muted, loop, playsInline, preload="none", data-video-de-trabajos—, en el slot de trabajos, sin autoplay ni src (la fuente se pide al acercarse)')
 const BLOQUE_DEL_VIDEO = bloqueDe(WEB_PROD, 'trabajos') ?? ''
 controlPositivo('  un <video> con autoplay se detecta', BLOQUE_DEL_VIDEO.replace('<video ', '<video autoplay="" '), videoServido)
 controlPositivo('  uno con la fuente en el HTML servido', BLOQUE_DEL_VIDEO.replace('<video ', `<video src="${VIDEO.horizontal.video}" `), videoServido)
@@ -731,7 +741,7 @@ const laPausaDelHome = (html: string): boolean => {
 afirmar(laPausaDelHome(BLOQUE_DEL_VIDEO), `la pausa del slot es la del home (BotonPausa): type="button", nombre fijo «${NOMBRE_DE_LA_PAUSA}», aria-pressed="false" con el ícono de pausa; la nuestra ya no está`)
 controlPositivo('  la nuestra de antes se detecta', BLOQUE_DEL_VIDEO.replace('data-pieza="boton-pausa"', 'data-pieza="pausa-del-video"'), laPausaDelHome)
 controlPositivo('  una con otro nombre', BLOQUE_DEL_VIDEO.replace(NOMBRE_DE_LA_PAUSA, 'Pausar el video'), laPausaDelHome)
-controlPositivo('  y una página sin el botón', WEB_PROD.replace(botonDeLaPausa(WEB_PROD), ''), laPausaDelHome)
+controlPositivo('  y una página sin el botón', SIN_LA_PANTALLA.replace(botonDeLaPausa(SIN_LA_PANTALLA), ''), laPausaDelHome)
 const clasesDeLaPausa = (html: string): string[] => (/\sclass="([^"]*)"/.exec(/<button[^>]*>/.exec(botonDeLaPausa(html))?.[0] ?? '')?.[1] ?? '').split(/\s+/)
 // [V1] Sólo para el teclado, como el panel después de su F7: el botón lleva TODAS las clases de comportamiento de la pausa del panel
 // (`CLASE_DE_LA_PAUSA_DEL_PANEL`: en escala 0 y sin puntero, entera con :focus-visible); el lugar es el nuestro.
