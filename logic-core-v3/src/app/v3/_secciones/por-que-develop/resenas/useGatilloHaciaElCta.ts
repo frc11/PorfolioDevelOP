@@ -8,11 +8,11 @@ import { hayBanco } from '../../../_lib/escena/entorno'
 import { viajeEnCurso } from '../../../_lib/escena/viaje'
 import { retenerLosGestos } from '../../../_lib/gestosDelScroll'
 import { LENIS_DEL_SITIO } from '../../../_lib/lenisDelSitio'
-import { GATILLO_HACIA_EL_CTA, LUGARES_DEL_GATILLO, cruceDelGatillo, debeAbortar, guardadoDeVuelta, guardadoSuelto } from './haciaElCta'
+import { GATILLO_HACIA_EL_CTA, LUGARES_DEL_GATILLO, cruceDelGatillo, debeAbortar, gestoAsentado, guardadoDeVuelta, guardadoSuelto, seFueDelAsiento } from './haciaElCta'
 import { PIN_CON_LAS_RESENAS } from './tramo'
 
-/** Por dónde va la secuencia: quieta, volando o esperando al guardado. */
-type Etapa = 'quieta' | 'al-guardado' | 'esperando-el-guardado' | 'al-cta' | 'de-vuelta' | 'esperando-la-vuelta'
+/** Por dónde va la secuencia: quieta, asentándose o asentada en las reseñas, volando o esperando al guardado. */
+type Etapa = 'quieta' | 'al-asiento' | 'asentada' | 'al-guardado' | 'esperando-el-guardado' | 'al-cta' | 'de-vuelta' | 'esperando-la-vuelta'
 
 /** Con banco, `__defectoDelGatilloHaciaElCta = 'apagado'` lo apaga (el control: el paso de antes, que sigue al scroll). */
 type VentanaDelBanco = Window & { __gatilloHaciaElCtaDelBanco?: () => { readonly etapa: Etapa; readonly pantalla: number }; __defectoDelGatilloHaciaElCta?: string }
@@ -22,6 +22,8 @@ type VentanaDelBanco = Window & { __gatilloHaciaElCtaDelBanco?: () => { readonly
  * y, cuando el scroll cruza un borde del tramo, lleva la página sola de un lado al otro (`volar`, con Lenis), esperando al guardado donde
  * corresponde (`disparoDeLaBajada`, la animación por tiempo del guardado). Mientras dura retiene todos los gestos, y al terminar retiene el
  * resto del gesto que la disparó (la inercia) hasta que empieza otro. No arranca con un viaje del navbar ni con el vuelo de otra sección.
+ * [L9b · 3] Llegar bajando a las reseñas armadas las ASIENTA (un vuelo corto al asiento y el resto del gesto retenido); asentada, UN gesto
+ * hacia abajo es la ida entera y uno hacia arriba suelta la página. La vuelta desde el CTA termina asentada.
  */
 export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<HTMLElement | null>, disparoDeLaBajada: MotionValue<number>): void {
   useEffect(() => {
@@ -41,22 +43,38 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
       const tope = bloque.getBoundingClientRect().top + window.scrollY
       return tope + (s / PIN_CON_LAS_RESENAS) * (bloque.offsetHeight - window.innerHeight)
     }
+    const soltar = (): void => {
+      soltarLosGestos?.()
+      soltarLosGestos = null
+    }
     const retener = (): void => {
       soltarLosGestos ??= retenerLosGestos((g) => {
+        // [L9b] Asentada: la cola se retiene; un gesto nuevo hacia abajo es la ida, hacia arriba suelta la página.
+        if (etapa === 'asentada') {
+          const que = gestoAsentado(g.sentido, g.nuevo, cola)
+          if (que === 'retener') return true
+          cola = false
+          if (que === 'ida') {
+            ida()
+            return true
+          }
+          etapa = 'quieta'
+          soltar()
+          return false
+        }
         if (etapa !== 'quieta') return true
         // La cola del gesto que disparó (la inercia del trackpad, la rueda que sigue): hasta que empieza otro.
         if (cola && !g.nuevo) return true
         cola = false
-        soltarLosGestos?.()
-        soltarLosGestos = null
+        soltar()
         return false
       })
     }
-    const terminar = (): void => {
+    const terminar = (destino: 'quieta' | 'asentada' = 'quieta'): void => {
       window.clearTimeout(vence)
       dejarDeEsperar?.()
       dejarDeEsperar = null
-      etapa = 'quieta'
+      etapa = destino
       antes = pantalla()
       cola = true
     }
@@ -67,8 +85,7 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
       vuelo?.cancelar()
       terminar()
       cola = false
-      soltarLosGestos?.()
-      soltarLosGestos = null
+      soltar()
     }
     const esperar = (listo: (t: number) => boolean, luego: () => void): void => {
       const seguir = (): void => {
@@ -96,19 +113,29 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
         })
       })
     }
+    // [L9b] La vuelta termina asentada en las reseñas (antes: en el fin de la lectura, libre).
     const vuelta = (): void => {
       etapa = 'de-vuelta'
       retener()
-      volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.lectura), GATILLO_HACIA_EL_CTA.vueloDeVueltaMs, () => {
+      volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.asiento), GATILLO_HACIA_EL_CTA.vueloDeVueltaMs, () => {
         if (!vivo || etapa !== 'de-vuelta') return
         etapa = 'esperando-la-vuelta'
-        esperar(guardadoDeVuelta, terminar)
+        esperar(guardadoDeVuelta, () => terminar('asentada'))
       })
+    }
+    const asentarse = (): void => {
+      etapa = 'al-asiento'
+      retener()
+      volar(enVuelo, scrollDe(LUGARES_DEL_GATILLO.asiento), GATILLO_HACIA_EL_CTA.vueloAlAsientoMs, () => vivo && etapa === 'al-asiento' && terminar('asentada'))
     }
     const alMoverse = (): void => {
       const ahora = pantalla()
       const previa = antes
       antes = ahora
+      if (etapa === 'asentada') {
+        if (seFueDelAsiento(ahora) || viajeEnCurso() !== null) abortar()
+        return
+      }
       if (etapa !== 'quieta') {
         const pisado = enVuelo.current !== null && vueloDelGatilloPisado(enVuelo.current, LENIS_DEL_SITIO.instancia)
         if (debeAbortar(ahora, viajeEnCurso() !== null, pisado)) abortar()
@@ -117,7 +144,8 @@ export function useGatilloHaciaElCta(pin: MotionValue<number>, raiz: RefObject<H
       if (previa === null) return
       const cruce = cruceDelGatillo(previa, ahora)
       if (cruce === null || viajeEnCurso() !== null || vueloAjeno(LENIS_DEL_SITIO.instancia, null)) return
-      if (cruce === 'ida') ida()
+      if (cruce === 'asiento') asentarse()
+      else if (cruce === 'ida') ida()
       else vuelta()
     }
     antes = pantalla()

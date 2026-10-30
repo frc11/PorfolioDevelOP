@@ -114,26 +114,46 @@ export function cruceDeLaVuelta(antes: number, ahora: number): 'ida' | 'vuelta' 
  * Mientras dura, los gestos se retienen (`useGatilloHaciaElCta`). Un salto que cruza el tramo entero (el foco que lleva al CTA, la barra) no
  * es un cruce: el gatillo sólo mira lo que entra en el tramo desde su borde.
  */
-export const GATILLO_HACIA_EL_CTA = { umbral: 0.02, previo: 0.06, llegada: 0.03, vueloAlGuardadoMs: 700, vueloAlCtaMs: 2400, vueloDeVueltaMs: 2600, esperaMaximaMs: 6000 } as const
+export const GATILLO_HACIA_EL_CTA = { umbral: 0.02, previo: 0.06, llegada: 0.03, vueloAlAsientoMs: 450, vueloAlGuardadoMs: 900, vueloAlCtaMs: 2400, vueloDeVueltaMs: 3000, esperaMaximaMs: 6000 } as const
 
 /** Las pantallas del pin (con el tramo) en que la transformación al CTA vale `p` (0 a 1): el tramo de las reseñas va antes. */
 export const pantallaDelCta = (p: number): number => TIEMPOS_DEL_FINAL.valores.hasta + p * (TIEMPOS_DEL_FINAL.cta.armado - TIEMPOS_DEL_FINAL.valores.hasta) + PANTALLAS_DE_LAS_RESENAS
 
-/** Los tres lugares del gatillo, en pantallas del pin: el fin de la lectura, el guardado disparado y el CTA armado (con su margen). */
+/**
+ * Los lugares del gatillo, en pantallas del pin: el asiento (el aro armado), el fin de la lectura, el guardado disparado y el CTA armado (con
+ * su margen). [L9b · 3] El asiento es donde las reseñas se quedan: llegar bajando las asienta ahí, y desde ahí UN gesto hacia abajo es la ida
+ * entera (antes había que scrollear la lectura entera, una pantalla y media, hasta su fin); la vuelta termina ahí, asentada.
+ */
 export const LUGARES_DEL_GATILLO = {
+  asiento: INSERCION_DE_LAS_RESENAS + MOMENTOS_DE_LAS_RESENAS.entrada[1] * PANTALLAS_DE_LAS_RESENAS,
   lectura: INSERCION_DE_LAS_RESENAS + MOMENTOS_DE_LAS_RESENAS.lectura[1] * PANTALLAS_DE_LAS_RESENAS,
   guardado: pantallaDelCta(GATILLO_HACIA_EL_CTA.previo),
   cta: pantallaDelCta(1) + GATILLO_HACIA_EL_CTA.llegada,
 } as const
 
-/** El cruce de un borde del tramo entre dos lecturas del scroll (pantallas del pin): `ida` (entró bajando por la lectura), `vuelta` (entró subiendo por el CTA) o `null`. */
-export function cruceDelGatillo(antes: number, ahora: number): 'ida' | 'vuelta' | null {
+/**
+ * El cruce de un borde del tramo entre dos lecturas del scroll (pantallas del pin): `asiento` (llegó bajando a las reseñas armadas), `ida`
+ * (bajó por el fin de la lectura: el respaldo si la página quedó adentro de la lectura sin asentarse, una recarga o la barra), `vuelta` (entró
+ * subiendo por el CTA) o `null`.
+ */
+export function cruceDelGatillo(antes: number, ahora: number): 'asiento' | 'ida' | 'vuelta' | null {
   const { umbral } = GATILLO_HACIA_EL_CTA
   const desde = LUGARES_DEL_GATILLO.lectura + umbral
   const hasta = pantallaDelCta(1) - umbral
-  if (antes <= desde && ahora > desde && ahora < hasta) return 'ida'
+  const asiento = LUGARES_DEL_GATILLO.asiento
+  if (antes < asiento && ahora >= asiento && ahora < LUGARES_DEL_GATILLO.guardado) return 'asiento'
+  if (antes <= desde && antes >= asiento && ahora > desde && ahora < hasta) return 'ida'
   if (antes >= hasta && ahora < hasta && ahora > desde) return 'vuelta'
   return null
+}
+
+/**
+ * [L9b · 3] Asentada, qué hace un gesto que EMPIEZA: hacia abajo, la ida entera; hacia arriba, suelta (la página sube libre). Lo que sigue de
+ * un gesto ya visto (la cola de la inercia, la rueda que sigue) se retiene sin decidir nada.
+ */
+export function gestoAsentado(sentido: -1 | 1, nuevo: boolean, cola: boolean): 'retener' | 'ida' | 'soltar' {
+  if (cola && !nuevo) return 'retener'
+  return sentido === 1 ? 'ida' : 'soltar'
 }
 
 /** Cuándo sigue la ida (la cámara soltó el guardado: la animación de la bajada `t` pasó su `suelta`) y cuándo termina la vuelta (volvió a 0). */
@@ -142,6 +162,9 @@ export const guardadoDeVuelta = (t: number): boolean => t <= 0.001
 
 /**
  * [L8b · revisión] La secuencia se suelta si otro se lleva la página: un viaje del navbar, un vuelo pisado (Lenis con otra marca) o el scroll
- * afuera del tramo (más de media pantalla antes de la lectura o después del CTA). Si no, una espera que vence la volvería a arrastrar.
+ * afuera del tramo (más de media pantalla antes del asiento o después del CTA). Si no, una espera que vence la volvería a arrastrar.
  */
-export const debeAbortar = (pantalla: number, conViaje: boolean, pisado: boolean): boolean => conViaje || pisado || pantalla < LUGARES_DEL_GATILLO.lectura - 0.5 || pantalla > LUGARES_DEL_GATILLO.cta + 0.5
+export const debeAbortar = (pantalla: number, conViaje: boolean, pisado: boolean): boolean => conViaje || pisado || pantalla < LUGARES_DEL_GATILLO.asiento - 0.5 || pantalla > LUGARES_DEL_GATILLO.cta + 0.5
+
+/** [L9b · 3] Asentada, la página se movió sin un gesto (la barra, el foco que salta, un ancla): se suelta. */
+export const seFueDelAsiento = (pantalla: number): boolean => Math.abs(pantalla - LUGARES_DEL_GATILLO.asiento) > 0.1

@@ -89,6 +89,9 @@ export const MARGEN_DEL_TITULO_PX = 12
  * El primer avance (0…1) en que el enjambre ya salió del título, y hasta dónde puede haber llegado el borde del panel (px desde la
  * izquierda del escenario) en ese avance sin tocarlo. `null` si el enjambre no sale nunca del título (el destino lo pisa): la
  * composición está mal y el banco lo marca.
+ * [L9b · 2] Si en el camino nunca queda libre CON el margen (el título de L8b es más grande y baja hasta rozar el globo de web), el cambio
+ * va en la llegada (avance 1, lo más lejos del título), con el título sin margen, y el panel espera afuera del globo. Antes daba `null`: el
+ * cambio caía a la mitad sin medir y el panel cerraba encima del enjambre todavía detrás (el salto al frente que vio Valentino).
  */
 export function cambioDeCapa(desde: Lugar, hacia: Lugar, titulo: readonly Caja[]): { readonly avance: number; readonly bordeDelPanel: number } | null {
   const cajas = titulo.map((c) => conMargen(c, MARGEN_DEL_TITULO_PX))
@@ -101,5 +104,7 @@ export function cambioDeCapa(desde: Lugar, hacia: Lugar, titulo: readonly Caja[]
     for (let j = i; j <= 400 && libre; j += 8) libre = !cajas.some((c) => seTocan(cajaDelEnjambre(j / 400, desde, hacia), c))
     if (libre) return { avance, bordeDelPanel: caja.izquierda - MARGEN_DEL_TITULO_PX }
   }
-  return null
+  const llegada = cajaDelEnjambre(1, desde, hacia)
+  if (titulo.some((c) => seTocan(llegada, c))) return null
+  return { avance: 1, bordeDelPanel: llegada.izquierda - MARGEN_DEL_TITULO_PX }
 }
