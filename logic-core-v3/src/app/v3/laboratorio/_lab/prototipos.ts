@@ -41,6 +41,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'Cada trabajo es una franja de noche sobre el papel: el video clavado a la izquierda y la ficha que entra fila por fila. ¿La noche por caso suma o corta la página?',
     sale: 'La tira activa del acordeón del Portfolio: Ficha, PROYECTOS y el «Visitar sitio» con el color de la marca, importados.',
   },
+  {
+    slug: 'conversacion-en-vivo',
+    codigo: 'I1',
+    titulo: 'La conversación que pasa sola',
+    pagina: 'Integraciones con IA',
+    mirar: 'El chatbot del panel contesta solo al lado del párrafo que lo promete; abajo, lo que sabe de tu negocio. Corre sólo la que más se ve.',
+    sale: 'Las demos del Panel (DemoEnSuLugar): «conversaciones» e «informacion», hoy sin usar en el home. El texto es el de Servicios, tal cual.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
