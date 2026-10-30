@@ -49,6 +49,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'El chatbot del panel contesta solo al lado del párrafo que lo promete; abajo, lo que sabe de tu negocio. Corre sólo la que más se ve.',
     sale: 'Las demos del Panel (DemoEnSuLugar): «conversaciones» e «informacion», hoy sin usar en el home. El texto es el de Servicios, tal cual.',
   },
+  {
+    slug: 'lo-de-siempre-tachado',
+    codigo: 'S1',
+    titulo: 'Lo de siempre, tachado',
+    pagina: 'Software a medida',
+    mirar: 'Scrolleá despacio: cada forma de trabajar de hoy se tacha y se despinta, y recién después se escribe, subrayado, lo que la reemplaza. Subí: se destacha.',
+    sale: 'El titular de Quiénes somos («algo distinto, no lo mismo de siempre»): el Trazo del home, tachado y subrayado, atado al scroll.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
