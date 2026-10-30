@@ -57,6 +57,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'Scrolleá despacio: cada forma de trabajar de hoy se tacha y se despinta, y recién después se escribe, subrayado, lo que la reemplaza. Subí: se destacha.',
     sale: 'El titular de Quiénes somos («algo distinto, no lo mismo de siempre»): el Trazo del home, tachado y subrayado, atado al scroll.',
   },
+  {
+    slug: 'historia-que-se-pinta',
+    codigo: 'N2',
+    titulo: 'La historia que se pinta',
+    pagina: 'Nosotros',
+    mirar: 'La historia de develOP entera, palabra por palabra: lo leído queda en tinta, lo que viene en gris. ¿Se lee bien a este ritmo o cansa?',
+    sale: 'El título del Panel que se pinta (el cálculo de _componentes/pintado, importado), estirado a un texto largo.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
