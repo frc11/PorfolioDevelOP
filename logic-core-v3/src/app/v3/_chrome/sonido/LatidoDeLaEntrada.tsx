@@ -103,6 +103,8 @@ export function LatidoDeLaEntrada(): React.JSX.Element | null {
 
   // Cuándo late: en cada entrada (la carga y cada ruta nueva), con el botón, la página lista y la pestaña a la vista.
   useEffect(() => {
+    // [L7d · 7] Las ondas son sólo del preloader (el suyo): fuera de él no se dispara ninguna. Con `true` vuelve el latido de cada entrada de L8b/L9b.
+    if (!LATIDO_DE_LA_ENTRADA.fueraDelPreloader) return undefined
     const entrada = numeroDeLaEntrada(ruta)
     const esPrimera = entrada === 1
     if ((esPrimera && conPreloader()) || !window.matchMedia(`(min-width: ${String(LATIDO_DE_LA_ENTRADA.desdePx)}px)`).matches) return undefined

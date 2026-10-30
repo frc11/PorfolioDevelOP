@@ -55,7 +55,7 @@ export const TEXTO_DE_TERMINOS: TextoLegal = {
     {
       id: 'cambios',
       titulo: 'Cambios en estos términos',
-      parrafos: ['Podemos actualizar estos términos. Cuando lo hagamos, cambiamos la fecha de arriba. Se van a actualizar cuando formalicemos la empresa.'],
+      parrafos: ['Podemos actualizar estos términos. Cuando lo hagamos, cambiamos la fecha de arriba.'],
     },
     {
       id: 'ley-aplicable',

@@ -1,4 +1,5 @@
 import type { TextoLegal } from '../_componentes/pagina/PaginaLegal'
+import { MAIL } from '../_secciones/cierre/contacto'
 
 /**
  * [L7d · 1] POLÍTICA DE PRIVACIDAD — texto genérico, armado con lo que el sitio recolecta hoy (los formularios de contacto y de novedades, el
@@ -8,7 +9,7 @@ import type { TextoLegal } from '../_componentes/pagina/PaginaLegal'
  * ⚠️ TIENE QUE REVISARLO UN ABOGADO O UNA ABOGADA ANTES DEL LANZAMIENTO. Describe lo que el sitio hace y menciona la Ley 25.326 de forma general;
  * no afirma obligaciones ni registros que no verificamos.
  */
-export const MAIL_LEGAL = 'contacto@develop.com.ar'
+export const MAIL_LEGAL = MAIL
 
 export const TEXTO_DE_PRIVACIDAD: TextoLegal = {
   titulo: 'Privacidad',
@@ -43,7 +44,7 @@ export const TEXTO_DE_PRIVACIDAD: TextoLegal = {
     {
       id: 'con-quien',
       titulo: 'Con quién los compartimos',
-      parrafos: ['Para que el sitio funcione usamos proveedores técnicos, por ejemplo de alojamiento, base de datos, envío de correos y monitoreo de errores. Esos proveedores acceden a los datos solo para prestarnos su servicio. Fuera de eso, no compartimos tus datos con terceros, salvo que una norma o una autoridad competente nos lo exija.'],
+      parrafos: ['Para que el sitio funcione usamos proveedores técnicos, por ejemplo de alojamiento, base de datos, envío de correos, monitoreo de errores y modelos de lenguaje que procesan los mensajes del chat (el chat usa inteligencia artificial). Esos proveedores acceden a los datos solo para prestarnos su servicio. Fuera de eso, no compartimos tus datos con terceros, salvo que una norma o una autoridad competente nos lo exija.'],
     },
     {
       id: 'cuanto-tiempo',
@@ -74,7 +75,7 @@ export const TEXTO_DE_PRIVACIDAD: TextoLegal = {
     {
       id: 'cambios',
       titulo: 'Cambios en esta política',
-      parrafos: ['Cuando cambie algo importante, actualizamos esta página y la fecha de arriba. Esta política se va a actualizar cuando formalicemos la empresa.'],
+      parrafos: ['Cuando cambie algo importante, actualizamos esta página y la fecha de arriba.'],
     },
   ],
 }

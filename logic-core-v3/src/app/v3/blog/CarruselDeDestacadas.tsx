@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Pause, Play } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -23,7 +23,10 @@ const MS_POR_NOTA = 6500
 export function CarruselDeDestacadas(): React.JSX.Element {
   const reducido = usePrefiereMenosMovimiento()
   const [actual, setActual] = useState(0)
-  const [detenido, setDetenido] = useState(false)
+  const [encima, setEncima] = useState(false)
+  const [conFoco, setConFoco] = useState(false)
+  const [pausado, setPausado] = useState(false)
+  const detenido = encima || conFoco || pausado
   const total = NOTAS_DESTACADAS.length
   const ir = (delta: number): void => setActual((a) => (a + delta + total) % total)
 
@@ -63,10 +66,12 @@ export function CarruselDeDestacadas(): React.JSX.Element {
       aria-roledescription="carrusel"
       aria-label="Notas destacadas"
       data-pieza="carrusel-de-notas"
-      onPointerEnter={() => setDetenido(true)}
-      onPointerLeave={() => setDetenido(false)}
-      onFocusCapture={() => setDetenido(true)}
-      onBlurCapture={() => setDetenido(false)}
+      onPointerEnter={() => setEncima(true)}
+      onPointerLeave={() => setEncima(false)}
+      onFocusCapture={() => setConFoco(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setConFoco(false)
+      }}
       className="flex flex-col gap-[var(--spacing-4)]"
     >
       <div className="relative overflow-hidden">
@@ -98,11 +103,14 @@ export function CarruselDeDestacadas(): React.JSX.Element {
         <button type="button" aria-label="Nota siguiente" onClick={() => ir(1)} className="inline-flex size-11 items-center justify-center rounded-circulo border border-borde text-tinta hover:bg-tinta/5">
           <ArrowRight aria-hidden="true" strokeWidth={1.5} className="size-5" />
         </button>
+        <button type="button" aria-label={pausado ? 'Reanudar el carrusel' : 'Pausar el carrusel'} aria-pressed={pausado} onClick={() => setPausado((p) => !p)} className="inline-flex size-11 items-center justify-center rounded-circulo border border-borde text-tinta hover:bg-tinta/5">
+          {pausado ? <Play aria-hidden="true" strokeWidth={1.5} className="size-5" /> : <Pause aria-hidden="true" strokeWidth={1.5} className="size-5" />}
+        </button>
         <ol className="flex flex-1 gap-[var(--spacing-2)]" aria-label="Progreso">
           {NOTAS_DESTACADAS.map((nota, i) => (
-            <li key={nota.slug} className="h-1 flex-1 overflow-hidden rounded-circulo bg-tinta/15">
-              <button type="button" aria-label={`Ir a la nota ${i + 1}`} aria-current={i === actual} onClick={() => setActual(i)} className="relative block h-full w-full">
-                <span ref={i === actual ? barra : undefined} className={cn('absolute inset-y-0 left-0 w-full origin-left bg-tinta', i < actual ? 'scale-x-100' : i > actual && 'scale-x-0')} />
+            <li key={nota.slug} className="h-1 flex-1 overflow-visible">
+              <button type="button" aria-label={`Ir a la nota ${i + 1}`} aria-current={i === actual} onClick={() => setActual(i)} className="relative -my-3 block h-7 w-full">
+                <span ref={i === actual ? barra : undefined} className={cn('absolute inset-x-0 top-3 h-1 origin-left rounded-circulo bg-tinta', i < actual ? 'scale-x-100' : i > actual && 'scale-x-0')} />
               </button>
             </li>
           ))}

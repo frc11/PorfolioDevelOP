@@ -8,7 +8,7 @@ import type { ProyectoDelPortfolio } from '../_secciones/trabajos/proyectos'
 export const INTRO_DEL_PORTFOLIO = {
   bajada: 'Los sitios que ya hicimos, con lo que le pasaba a cada negocio y lo que hicimos para resolverlo.',
   etiqueta: 'De qué se trata',
-  deQueSeTrata: 'Tres trabajos reales, explicados de principio a fin; después, las demos que armamos de ejemplo y lo que dicen quienes trabajaron con nosotros.',
+  deQueSeTrata: 'Trabajos reales, explicados de principio a fin; después, las demos que armamos de ejemplo y lo que dicen quienes trabajaron con nosotros.',
 } as const
 
 export const CASOS = {
@@ -57,7 +57,7 @@ export function proyectoMostrable(p: ProyectoDelPortfolio): ProyectoDelPortfolio
 }
 
 export const PREGUNTAS_DEL_PORTFOLIO: readonly PreguntaFrecuente[] = [
-  { pregunta: '¿Los trabajos que muestran son reales?', respuesta: 'Sí. Los tres casos son sitios que hicimos para negocios reales y podés visitarlos desde acá. Las demos, en cambio, son ejemplos que armamos para negocios ficticios.' },
+  { pregunta: '¿Los trabajos que muestran son reales?', respuesta: 'Sí. Los casos son sitios que hicimos para negocios reales y podés visitarlos desde acá. Las demos, en cambio, son ejemplos que armamos para negocios ficticios.' },
   { pregunta: '¿Qué diferencia hay entre un trabajo y una demo?', respuesta: 'Un trabajo es un proyecto que hicimos para un cliente. Una demo es una muestra de lo que podemos hacer en un rubro, para que puedas ver cómo quedaría algo parecido para vos.' },
   { pregunta: '¿Pueden hacer algo parecido para mi rubro?', respuesta: 'Sí. Las demos se adaptan a cualquier rubro: partimos de lo que te gusta, y cambiamos contenido, colores y secciones para que sea de tu negocio.' },
   { pregunta: '¿Cómo sé si mi proyecto es para ustedes?', respuesta: 'Contanos qué necesitás. Si podemos ayudarte, te lo decimos y te hacemos una propuesta. Y si no te conviene, también te lo decimos de frente.' },
