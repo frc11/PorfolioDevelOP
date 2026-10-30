@@ -25,10 +25,10 @@ const PROYECTOS_MOSTRABLES = PROYECTOS.map(proyectoMostrable)
 export function CuerpoDelPortfolio(): React.JSX.Element {
   return (
     <CompuertaDelHome>
-      <SeccionDePapel dato="casos" claseDeContenido="gap-[var(--spacing-20)]">
+      <SeccionDePapel dato="casos" claseDeContenido="gap-[var(--spacing-24)]">
         <TituloQueSube titulo={CASOS.titulo} como="h2" nivel="titulo-l" bajada={CASOS.bajada} />
         {PROYECTOS_MOSTRABLES.map((proyecto, indice) => (
-          <CasoDelPortfolio key={proyecto.slug} proyecto={proyecto} indice={indice} />
+          <CasoDelPortfolio key={proyecto.slug} proyecto={proyecto} indice={indice} total={PROYECTOS_MOSTRABLES.length} />
         ))}
       </SeccionDePapel>
 
