@@ -16,7 +16,7 @@ export interface Prototipo {
   readonly sale: string
 }
 
-export const PROTOTIPOS: readonly Prototipo[] = [
+const TODOS: readonly Prototipo[] = [
   {
     slug: 'no-encaja',
     codigo: 'E1',
@@ -113,6 +113,27 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'Al lado del texto de Web, el alambre de una página se dibuja trazo por trazo con el scroll y, al terminar, la pantalla de un trabajo real se abre adentro desde el centro. ¿Se ve develOP o se ve wireframe de plantilla?',
     sale: 'El globo de alambre de Servicios (el trazo fino, el celeste), el clip-path desde el centro de la segunda toma y el póster de El Garage.',
   },
+]
+
+/** El orden del índice: el de `docs/ideas/COMO-MIRAR.md`, los que más creo primero. */
+const ORDEN = [
+  'no-encaja',
+  'dos-tomas',
+  'fichas-abiertas',
+  'lo-de-siempre-tachado',
+  'conversacion-en-vivo',
+  'historia-que-se-pinta',
+  'como-trabajamos',
+  'pantalla-que-se-dibuja',
+  'carrusel-del-blog',
+  'notas-irregulares',
+  'nota',
+  'indice-legal',
+] as const
+
+export const PROTOTIPOS: readonly Prototipo[] = [
+  ...ORDEN.flatMap((slug) => TODOS.filter((p) => p.slug === slug)),
+  ...TODOS.filter((p) => !(ORDEN as readonly string[]).includes(p.slug)),
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
