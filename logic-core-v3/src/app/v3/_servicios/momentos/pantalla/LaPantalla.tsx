@@ -11,7 +11,7 @@ import { CLASE_DE_LA_PAUSA_DEL_VIDEO } from '../../movimiento/VideoDeFondo'
 import { useAvanceDelRecorrido } from '../useAvanceDelRecorrido'
 import { MenuDeTrabajos, type TrabajoDelMenu } from './MenuDeTrabajos'
 import { PantallaQuieta } from './PantallaQuieta'
-import { Plano, RotulosDelPlano, trazasDe } from './Plano'
+import { Plano, RotulosDelPlano } from './Plano'
 import { LIENZO, PLANOS, avanceDeLaTraza, avanceMostrado, fasesDe, medidasDelMarco, repeticionTerminada } from './planos'
 import { TEXTOS_DE_LAS_FASES, TITULO_DE_LA_PANTALLA, DE_LA_PAUSA_DE_LA_PANTALLA } from './textos'
 import { useVideosDeLaPantalla } from './useVideosDeLaPantalla'
@@ -73,7 +73,9 @@ function Secuencia({ trabajos, trabajo, alElegir }: PropsDeLaSecuencia): React.J
   const cambio = useRef<number | null>(null)
   const largos = useRef<number[]>([])
   const plano = PLANOS[trabajo.slug]
-  const videos = useVideosDeLaPantalla(caja, trabajo.medios)
+  const videoDeEscritorio = useRef<HTMLVideoElement>(null)
+  const videoDelCelular = useRef<HTMLVideoElement>(null)
+  const videos = useVideosDeLaPantalla(caja, videoDeEscritorio, videoDelCelular, trabajo.medios)
 
   // Los largos de las trazas del plano de este trabajo (cambian con el trabajo).
   useEffect(() => {
@@ -166,9 +168,9 @@ function Secuencia({ trabajos, trabajo, alElegir }: PropsDeLaSecuencia): React.J
                 <div ref={bisel} aria-hidden="true" className="absolute -inset-1.5 bg-tinta" style={{ opacity: 0 }} />
                 <Plano key={trabajo.slug} plano={plano} svg={svg} />
                 <div ref={real} className="absolute inset-0 overflow-hidden bg-tinta" style={{ clipPath: 'inset(50%)', willChange: 'clip-path' }}>
-                  <video key={`e-${trabajo.slug}`} ref={videos.escritorio} data-video-de-la-pantalla="escritorio" muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 size-full object-cover object-top" />
+                  <video key={`e-${trabajo.slug}`} ref={videoDeEscritorio} data-video-de-la-pantalla="escritorio" muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 size-full object-cover object-top" />
                   <div ref={delCelular} className="absolute inset-0" style={{ opacity: 0 }}>
-                    <video key={`m-${trabajo.slug}`} ref={videos.movil} data-video-de-la-pantalla="movil" muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 size-full object-cover object-top" />
+                    <video key={`m-${trabajo.slug}`} ref={videoDelCelular} data-video-de-la-pantalla="movil" muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 size-full object-cover object-top" />
                   </div>
                 </div>
                 <div ref={rotulos} className="contents">

@@ -9,8 +9,6 @@ import type { MediosDelProyecto } from '../../../_secciones/trabajos/proyectos'
 import { debeReproducirse } from '../../movimiento/reproduccion'
 
 export interface VideosDeLaPantalla {
-  readonly escritorio: RefObject<HTMLVideoElement | null>
-  readonly movil: RefObject<HTMLVideoElement | null>
   readonly pausado: boolean
   readonly setPausado: (pausado: boolean) => void
   /** Qué video se ve ahora (lo dice la secuencia en cada cuadro): sólo ése anda. */
@@ -25,9 +23,12 @@ type Cual = 'escritorio' | 'movil'
  * antes), y cada uno anda sólo si se ve en la fase en curso, con el escenario en pantalla, sin la pausa de quien mira y con el scroll
  * quieto (`seguirElScroll` del home). Al cambiar de trabajo, React monta videos nuevos (con `key`) y la fuente se vuelve a poner.
  */
-export function useVideosDeLaPantalla(caja: RefObject<HTMLElement | null>, medios: MediosDelProyecto): VideosDeLaPantalla {
-  const escritorio = useRef<HTMLVideoElement>(null)
-  const movil = useRef<HTMLVideoElement>(null)
+export function useVideosDeLaPantalla(
+  caja: RefObject<HTMLElement | null>,
+  escritorio: RefObject<HTMLVideoElement | null>,
+  movil: RefObject<HTMLVideoElement | null>,
+  medios: MediosDelProyecto,
+): VideosDeLaPantalla {
   const cerca = useInView(caja, { margin: '50% 0px', once: true })
   const enPantalla = useInView(caja)
   const [pausado, setPausado] = useState(false)
@@ -43,7 +44,7 @@ export function useVideosDeLaPantalla(caja: RefObject<HTMLElement | null>, medio
       if (anda) void el.play().catch(() => undefined)
       else if (!el.paused) el.pause()
     }
-  }, [])
+  }, [escritorio, movil])
 
   // La fuente y el póster, al acercarse (y otra vez con cada trabajo nuevo: sus videos son otros elementos).
   useEffect(() => {
@@ -56,13 +57,14 @@ export function useVideosDeLaPantalla(caja: RefObject<HTMLElement | null>, medio
       el.src = medios.video[cual]
     }
     aplicar()
-  }, [cerca, medios, aplicar])
+  }, [cerca, medios, aplicar, escritorio, movil])
 
   useEffect(() => {
     estado.current.enPantalla = enPantalla
     estado.current.pausado = pausado
     aplicar()
     if (!enPantalla || pausado) return undefined
+    const videos = [escritorio.current, movil.current]
     const soltar = seguirElScroll(
       ASIENTO.quietoMs,
       () => {
@@ -76,10 +78,9 @@ export function useVideosDeLaPantalla(caja: RefObject<HTMLElement | null>, medio
     )
     return () => {
       soltar()
-      escritorio.current?.pause()
-      movil.current?.pause()
+      for (const v of videos) v?.pause()
     }
-  }, [enPantalla, pausado, aplicar])
+  }, [enPantalla, pausado, aplicar, escritorio, movil])
 
   const alCambiarDeFase = useCallback(
     (enEscritorio: boolean, enMovil: boolean) => {
@@ -91,5 +92,5 @@ export function useVideosDeLaPantalla(caja: RefObject<HTMLElement | null>, medio
     [aplicar],
   )
 
-  return useMemo(() => ({ escritorio, movil, pausado, setPausado, alCambiarDeFase }), [pausado, alCambiarDeFase])
+  return useMemo(() => ({ pausado, setPausado, alCambiarDeFase }), [pausado, alCambiarDeFase])
 }
