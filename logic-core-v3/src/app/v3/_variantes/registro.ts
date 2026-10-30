@@ -17,6 +17,8 @@ type CargaDeLaVariante = () => Promise<{ readonly default: ComponenteDeVariante 
 export const REGISTRO_DE_VARIANTES = {
   /** La de ejemplo, la de la página base (`/v3/pagina-base`): ejerce la ranura entera (la luz de abajo, la energía, la salida). */
   prueba: () => import('../_lib/escena/ruta/VarianteDePrueba'),
+  /** [SERVICIOS V1 · L7a] La de las tres páginas de servicio: la luz de abajo del piso y la energía, teñidas del acento de cada página. */
+  web: () => import('../_servicios/escena/VarianteDeWeb'),
 } as const satisfies Readonly<Record<string, CargaDeLaVariante>>
 
 export type IdDeVariante = keyof typeof REGISTRO_DE_VARIANTES

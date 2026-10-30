@@ -1,0 +1,17 @@
+# L7a · plan (carril A, `l7/a`, dev :3002)
+
+1. **Traer el V1** (hecho al empezar): `git checkout paginas/servicios -- [servicio]/ _servicios/ public/servicios/ docs/servicios/ scripts-servicios/` + la línea `web` del registro a mano. Adaptar a la base: la página = `IntroDeLaPagina` → cuerpo en papel (en `CompuertaDelHome`) → `CierreDeLaPagina` con su FAQ. Salen lo que hoy pone el home: `Encabezado` (navbar del layout), `Contacto` en la ruta (lo monta `ChromeDelHome`), `RaizDeLaPagina`/`salidaDeLaPagina` (`EnlaceDeRuta` pide la salida), `Cierre` y `Faq` del cuerpo (el cierre común). Hecho = las tres rutas responden 200 con intro → cuerpo → cierre. Verifica: navegador a 1440/1024/768/390.
+2. **Una página, tres colores:** los tres presets usan la variante `web` (ya lee `acento` del token: violeta y verde salen del tema). Implementa `resolucion` (B13) y arranca encendida en el avance 0 (T0). Sin variantes nuevas. Hecho = foto de las tres intros a 1440 lado a lado.
+3. **Contenido expandido:** tipos nuevos (`detalle`, `ejemplos`, `posibles`, pasos con texto, `entrega`, `despues`, `preguntas` de 6). Software e IA: «Lo que podemos construir» en vez de casos. Hechos sólo de V1 (SPEC), `05-TEXTOS` y el home. Hecho = cada página con sus bloques y 6 preguntas.
+4. **Renombre «Integraciones con IA»:** página/h1/title/metadata, desplegable, recomendador («Ver la página de…»), `SERVICIOS` de `acento.ts` (lo leen el rodillo y la ficha), `TITULOS_CON_LETRAS`. El título largo de la sección del home queda. Slug igual. Tests que fijan el nombre viejo → a la spec nueva, anotados.
+5. **Viaje y enlaces:** `DESTINO_DEL_SERVICIO` → `hrefDe(slug)`; `PRESET_DEL_DESTINO` → el preset de cada página (módulo sin JSX). Desplegable a «Desarrollo web». Verifica: clic en «Leer más…» y desplegable en el navegador; `viaje.ts` si corre.
+6. **Defaults de Servicios:** `?aro-color` → `tercios`, `?titulo-cursiva` → `3`; tests/registros que los afirman, a la spec. `?titulo-servicio`/`?fuente-servicio`: si existen, se borran. Foto de Servicios a 1440.
+7. **Nanobots, primer slide:** `C:\nocturno\l7-assets\` no existe → no se toca.
+
+**Implicaciones:** la intro de ~1 pantalla es de la base (todas las páginas): `PANTALLAS_DE_LA_INTRO` 2,5 → 1,5 y `TRAMO_DEL_TITULO` 1,6 → 1 (s78-b12a a la spec). Choca con el carril B si cambia lo mismo distinto (anotado en ESTADO-a). Los invariantes del V1 no están en `package.json`: se corren a mano, se adaptan o se retiran por la spec nueva, con su lista en el resultado. El nombre «Integraciones con IA» usa letras que ya están en las fuentes 3D (sale de «Integraciones de IA y Automatizaciones»): no hace falta regenerar.
+
+**Fuera de scope:** el pie con links (L7d), Nosotros/Portfolio/Blog, `not-found`, el build de producción (O-10).
+
+**Gate:** lint de lo tocado; `tsc --noEmit` sin errores nuevos; s78-b12a, s78-c2-51, angosto, los de L3 (aro/cursiva) y los del V1 que queden; navegador :3002 a 1440/1024/768/390 por página (fotos en `C:\nocturno\cola3-fotos\L7\<pagina>\`); smoke del home; revisión independiente (Sonnet) al final.
+
+**Premortem:** (a) el V1 arrastra APIs viejas y tsc explota en cascada → arreglar por archivo, borrar lo que el home ya pone; (b) acortar la intro rompe la caída del título 3D o la pose → mirar en el navegador a 1440 antes de cerrar; (c) el viaje apila un preset distinto del de la página → importar el MISMO objeto de `escena/presets.ts`; (d) el renombre deja un «IA y automatizaciones» suelto → grep final; (e) la memoria corta el dev → candado, uno a la vez, un reintento.
