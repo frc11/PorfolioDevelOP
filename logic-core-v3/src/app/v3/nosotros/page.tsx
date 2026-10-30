@@ -18,7 +18,8 @@ export const metadata: Metadata = {
 
 export default function Nosotros(): React.JSX.Element {
   return (
-    <main className="relative z-10">
+    // [M1] Como el home: lo que entra de costado o un carrusel a medio pasar no ensancha el documento (390: +32 px).
+    <main className="relative z-10 overflow-x-clip">
       <IntroDeLaPagina
         titulo="Nosotros"
         preset={PRESET}
