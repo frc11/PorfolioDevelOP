@@ -4,19 +4,20 @@ import { cn } from '@/lib/utils'
 
 import { SeccionDePapel } from '../_componentes/pagina/SeccionDePapel'
 import { Cuerpo } from '../_componentes/tipografia/Textos'
-import { CLASE_DE_RELACION, GEOMETRIA, SIZES_DEL_RETRATO, SIZES_DE_LA_FOTO } from '../_secciones/quienes-somos/geometria'
+import { CLASE_DE_RELACION, GEOMETRIA, SIZES_DEL_RETRATO } from '../_secciones/quienes-somos/geometria'
 import { MarcoDeDosTomas } from '../_secciones/quienes-somos/marco'
 import { CONTENIDO as PERSONAS } from '../_secciones/quienes-somos/contenido'
 import { TituloQueSube } from '../_secciones/_contrato/TituloQueSube'
 import { Gatillo } from '../_secciones/_contrato/Gatillo'
 
+import { FotoDeLaFacultad } from './FotoDeLaFacultad'
 import { EQUIPO, HISTORIA } from './contenido'
 
 /**
  * [L7b] LA HISTORIA Y EL EQUIPO de Nosotros, con las piezas del home: el título que sube (`TituloQueSube`), el cuerpo que entra desde
  * abajo (`Gatillo`) y el marco de dos tomas de «Quiénes somos» (`MarcoDeDosTomas`: la foto seria en reposo, la suelta en el hover). El
  * equipo NO va en 3D: un párrafo largo por persona, con su foto al costado, alternando los lados.
- * La foto de la facultad no estaba en `l7-assets`: el marco de la historia lleva la foto del equipo del home hasta que Valentino pase la real.
+ * [L7g] La foto de la historia es la de la facultad (`FotoDeLaFacultad`), con su epígrafe; ya no la del equipo del home.
  */
 const FILA = 'grid grid-cols-1 items-center gap-[var(--spacing-8)] escritorio:grid-cols-2 escritorio:gap-[var(--spacing-12)]'
 
@@ -37,16 +38,7 @@ export function HistoriaYEquipo(): React.JSX.Element {
             </Gatillo>
           </div>
           <Gatillo desde="abajo" className="min-w-0">
-            <MarcoDeDosTomas
-              seria={PERSONAS.equipo.seria}
-              suelta={PERSONAS.equipo.suelta}
-              texto={PERSONAS.equipo.leyendaEnMovil}
-              registro="cuerpo"
-              relacion={CLASE_DE_RELACION.foto}
-              ancho={GEOMETRIA.foto.ancho}
-              alto={GEOMETRIA.foto.alto}
-              sizes={SIZES_DE_LA_FOTO}
-            />
+            <FotoDeLaFacultad />
           </Gatillo>
         </div>
       </SeccionDePapel>

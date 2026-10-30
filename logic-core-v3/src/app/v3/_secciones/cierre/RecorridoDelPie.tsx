@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
 import { EnlaceDeTexto } from '../../_componentes/volumen/EnlaceDeTexto'
 import { TextoDelPie } from '../../_componentes/volumen/TextoDelPie'
+import { PAGINAS_LEGALES } from './contacto'
 import { COLUMNAS, DESTINOS_DE_LA_RUTA } from './contenido'
 
 /** El rótulo de la columna del recorrido (la misma fila de `COLUMNAS` que usa el pie apilado). */
@@ -23,23 +24,35 @@ export function RecorridoDelPie({ enFila = false, repartido = false, className }
           {ROTULO_DEL_RECORRIDO}
         </EtiquetaDeSeccion>
       </TextoDelPie>
-      <ul
-        data-pieza="destinos-del-pie"
-        className={cn(
-          'text-cuerpo leading-texto tracking-texto font-semi',
-          enFila ? 'flex flex-wrap justify-center gap-x-[var(--spacing-8)] gap-y-[var(--spacing-2)]' : 'grid grid-flow-col auto-cols-max grid-rows-4 justify-start gap-x-[var(--spacing-6)] gap-y-[var(--spacing-1)]',
-          // [PULIDO 12] C1 · en la columna izquierda, las dos columnas a lo ancho: la segunda termina en el borde (el pie simétrico).
-          !enFila && repartido && 'justify-between gap-x-[var(--spacing-3)]',
+      <div className="relative">
+        <ul
+          data-pieza="destinos-del-pie"
+          className={cn(
+            'text-cuerpo leading-texto tracking-texto font-semi',
+            enFila ? 'flex flex-wrap justify-center gap-x-[var(--spacing-8)] gap-y-[var(--spacing-2)]' : 'grid grid-flow-col auto-cols-max grid-rows-4 justify-start gap-x-[var(--spacing-6)] gap-y-[var(--spacing-1)]',
+            // [PULIDO 12] C1 · en la columna izquierda, las dos columnas a lo ancho: la segunda termina en el borde (el pie simétrico).
+            !enFila && repartido && 'justify-between gap-x-[var(--spacing-3)]',
+          )}
+        >
+          {DESTINOS_DE_LA_RUTA.map((destino) => (
+            <li key={destino.ancla}>
+              <EnlaceDeTexto href={destino.ancla} className="whitespace-nowrap">
+                {destino.rotulo}
+              </EnlaceDeTexto>
+            </li>
+          ))}
+        </ul>
+        {/* [L7g] Privacidad y Términos en el pie 3D sin mover su geometría: en la celda que la lista deja libre (abajo a la derecha: las dos columnas son cuatro y tres), así quedan adentro de lo que la escena ya mide. Piezas del pie como los destinos, pero fuera de `destinos-del-pie` (no viajan: son páginas). */}
+        {!enFila && repartido && (
+          <div role="group" aria-label="Legales" data-pieza="legales-del-pie" className="absolute right-0 bottom-0 z-[var(--z-elevado)] flex items-baseline gap-[var(--spacing-4)] text-caption font-semi">
+            {PAGINAS_LEGALES.map((p) => (
+              <EnlaceDeTexto key={p.destino} href={p.destino} className="whitespace-nowrap">
+                {p.rotulo}
+              </EnlaceDeTexto>
+            ))}
+          </div>
         )}
-      >
-        {DESTINOS_DE_LA_RUTA.map((destino) => (
-          <li key={destino.ancla}>
-            <EnlaceDeTexto href={destino.ancla} className="whitespace-nowrap">
-              {destino.rotulo}
-            </EnlaceDeTexto>
-          </li>
-        ))}
-      </ul>
+      </div>
     </div>
   )
 }

@@ -15,3 +15,6 @@ Rama `l7/a`, worktree `C:\nocturno\cola3`, dev :3002. Un lote: L7a (las tres pá
 
 ## L7-INT (2026-10-30, sobre el merge de l7/b, aa6be5b0)
 - Cerrado: fuentes 3D con la unión de títulos (sin cambios de bytes), IdDePagina coherente, intro de 1,8 bien en las páginas de B. Arreglados: el pie con los nombres viejos de los servicios (INT-1), el `nav` del pie adentro del `main` (INT-2), s10-acceso y s8-chrome a la spec de L7d (INT-3). s6/s76/s77 ya estaban rojos en `rediseno/home`. Build de producción limpio. Ver `L7-INT-resultado.md`.
+
+## L7g (2026-10-30, sobre la rama integrada)
+- Hecho: enlaces de Quiénes somos y Portfolio a sus páginas, Privacidad y Términos en el pie 3D (geometría medida igual), foto de la facultad, la 404 sin pisar el logo (43 px de holgura a 1440 y 1920), el desborde del CTA del cierre a 320/390, ondas del sonido verificadas en el navegador, matriz de 10 páginas × 5 anchos (49/50; la falla no se repite). **Pendiente:** el logo del pie arriba en las páginas (plan en `L7g-resultado.md`, L7g-1) y los nanobots (falta el archivo). Ver `L7g-resultado.md`.

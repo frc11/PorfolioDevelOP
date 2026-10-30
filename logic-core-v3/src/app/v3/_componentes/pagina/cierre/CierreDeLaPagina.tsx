@@ -40,7 +40,8 @@ export function CierreDeLaPagina({ preset, preguntas = [] }: { readonly preset: 
       {...(deNoche ? { [ATRIBUTO_DEL_CIERRE_DE_NOCHE]: '' } : {})}
       {...(preset.acento === null ? {} : { [ATRIBUTO_DE_SERVICIO]: preset.acento })}
       data-seccion={deNoche ? 'invertida' : undefined}
-      className="relative text-tinta"
+      // [L7g] `overflow-x-clip` como el `main` del home: el enlace del CTA lo lleva a su pose una matriz 3D y, de paso, pasa del ancho (15 px a 390, 11 a 320); `clip` no abre un scroll y no rompe el `sticky`.
+      className="relative overflow-x-clip text-tinta"
     >
       <CompuertaDelHome>
         <PrecargaDelCta.Provider value={preset.acento}>

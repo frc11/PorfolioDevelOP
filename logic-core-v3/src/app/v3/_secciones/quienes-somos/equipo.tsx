@@ -4,6 +4,7 @@ import { useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { EnlaceDiscreto } from '../../_componentes/navegacion/EnlaceDiscreto'
 import { Caption, Cuerpo } from '../../_componentes/tipografia/Textos'
 import { TEXTO_REEMPLAZADO, useTextoDeVolumen } from '../../_componentes/titulos3d/useTextoDeVolumen'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
@@ -278,6 +279,10 @@ export function LaFoto(): React.JSX.Element {
             </Bloque>
           </div>
         </figure>
+        {/* [L7g] El enlace de la sección a su página: al final de la última pantalla, en el aire que queda abajo de la foto (no suma alto: la pantalla ya es `min-h-svh`). */}
+        <div data-halo-del-cuerpo="" className="mt-[var(--spacing-6)] flex justify-start escritorio:justify-end">
+          <EnlaceDiscreto href="/v3/nosotros">Conocé más sobre nosotros</EnlaceDiscreto>
+        </div>
       </CalleDerecha>
     </div>
   )

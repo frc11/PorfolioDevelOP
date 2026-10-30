@@ -332,7 +332,9 @@
     --halo-del-cuerpo: 0 0 0.1em var(--borde-del-cuerpo), 0 0 0.1em var(--borde-del-cuerpo), 0 0 0.1em var(--borde-del-cuerpo), 0 0 0.2em var(--borde-del-cuerpo), 0 0 0.2em var(--borde-del-cuerpo), 0 0 0.2em var(--borde-del-cuerpo);
   }
 
-  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo] p {
+  /* [L7g] y el enlace de la última pantalla («Conocé más sobre nosotros»): la misma letra y el mismo halo que el cuerpo. */
+  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo] p,
+  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo] a {
     color: var(--letra-del-cuerpo);
     text-shadow: var(--halo-del-cuerpo);
   }

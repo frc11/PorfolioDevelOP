@@ -114,14 +114,18 @@ async function unaPagina(p: Page, pagina: (typeof PAGINAS)[number], ancho: numbe
   await p.mouse.move(ancho / 2, alto / 2)
   await dormir(ESPERA)
   const visible = await p.evaluate(() => document.visibilityState === 'visible' && innerWidth > 0)
+  // [L7g] El ancho que mide la página, no el pedido: una ventana que no baja del mínimo del navegador daría un verde falso.
+  const anchoReal = await p.evaluate(() => innerWidth)
+  const anchoBien = anchoReal === ancho
   const h1s = await p.evaluate(() => [...document.querySelectorAll('h1')].map((h) => (h.textContent ?? '').trim()))
   const h1Bien = h1s.length === 1 && (pagina.h1 === '' ? h1s[0].length > 0 : h1s[0] === pagina.h1)
   await p.screenshot({ path: path.join(carpeta, `${String(ancho)}-1-intro.png`) })
   const errores = (): string[] => consola.filter((c) => !/Failed to load resource|ERR_FAILED|net::/.test(c))
   if (pagina.tipo === 'no-encontrada') {
     const inicio = await p.evaluate(() => [...document.querySelectorAll('a')].some((a) => a.getAttribute('href') === '/v3' && /inicio/i.test(a.textContent ?? '')))
-    const bien = visible && estado === 404 && h1Bien && inicio && errores().length === 0
-    return { bien, linea: `${bien ? 'ok   ' : 'FALLA'} ${pagina.carpeta} · ${String(ancho)} · estado ${String(estado)} · h1 ${JSON.stringify(h1s)} · al inicio ${inicio ? 'sí' : 'NO'} · consola ${errores().length === 0 ? 'limpia' : JSON.stringify(errores())}` }
+    const desborde404 = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    const bien = visible && anchoBien && estado === 404 && h1Bien && inicio && desborde404 <= 0 && errores().length === 0
+    return { bien, linea: `${bien ? 'ok   ' : 'FALLA'} ${pagina.carpeta} · ${String(ancho)}${anchoBien ? '' : ` (¡la página mide ${String(anchoReal)}!)`} · desborde ${String(desborde404)} px · estado ${String(estado)} · h1 ${JSON.stringify(h1s)} · al inicio ${inicio ? 'sí' : 'NO'} · consola ${errores().length === 0 ? 'limpia' : JSON.stringify(errores())}` }
   }
   const intro = pagina.tipo === 'escena' && ancho === 1440 ? ` · ${await laIntro(p, carpeta, ancho, alto)}` : ''
   const fondo = await p.evaluate(() => document.documentElement.offsetHeight - innerHeight)
@@ -172,10 +176,25 @@ async function unaPagina(p: Page, pagina: (typeof PAGINAS)[number], ancho: numbe
   }
   const abajo = comprimida(bajando).join('>')
   const arriba = comprimida(subiendo).join('>')
-  const bien = visible && estado === 200 && h1Bien && desborde <= 0 && abajo === 'intro>cuerpo>cierre' && arriba === 'cierre>cuerpo>intro' && faq && pie && rotulosBien && errores().length === 0
+  // [L7g] Las legales: su cabecera y su pie miden menos de media pantalla y la línea del centro no cae en ellos. El orden se afirma por los extremos:
+  // arriba del todo se ve la cabecera, al fondo se ve el pie y entre los dos el texto.
+  let ordenLegal = true
+  if (pagina.tipo === 'legal') {
+    await p.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+    await dormir(400)
+    const arribaDelTodo = await p.evaluate(() => { const r = document.querySelector('[data-pagina-legal] > header')?.getBoundingClientRect(); return r !== undefined && r.bottom > 0 && r.top < innerHeight })
+    await p.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), fondo)
+    await dormir(400)
+    const alFondo = await p.evaluate(() => { const r = document.querySelector('[data-pagina-legal] > footer')?.getBoundingClientRect(); return r !== undefined && r.bottom > 0 && r.top < innerHeight })
+    // Con la ventana muy angosta la cabecera y el pie sí cruzan el centro: las dos formas valen.
+    const ordenes: readonly string[] = ['cuerpo', 'intro>cuerpo>cierre']
+    ordenLegal = arribaDelTodo && alFondo && ordenes.includes(abajo) && (arriba === 'cuerpo' || arriba === 'cierre>cuerpo>intro')
+  }
+  const ordenBien = pagina.tipo === 'legal' ? ordenLegal : abajo === 'intro>cuerpo>cierre' && arriba === 'cierre>cuerpo>intro'
+  const bien = visible && anchoBien && estado === 200 && h1Bien && desborde <= 0 && ordenBien && faq && pie && rotulosBien && errores().length === 0
   return {
     bien,
-    linea: `${bien ? 'ok   ' : 'FALLA'} ${pagina.carpeta} · ${String(ancho)}×${String(alto)} · estado ${String(estado)} · h1 ${JSON.stringify(h1s)} · desborde ${String(desborde)} px · bajando ${abajo} · subiendo ${arriba} · FAQ ${pagina.tipo === 'legal' ? 'no lleva' : faq ? 'abre' : 'NO abre'} · pie ${pie ? 'sí' : 'NO'} · «Páginas» ${rotulosBien ? 'bien' : JSON.stringify(rotulos)} · consola ${errores().length === 0 ? 'limpia' : JSON.stringify(errores())}${visible ? '' : ' · PESTAÑA OCULTA'}${intro}`,
+    linea: `${bien ? 'ok   ' : 'FALLA'} ${pagina.carpeta} · ${String(ancho)}×${String(alto)} ${anchoBien ? '' : ` (¡la página mide ${String(anchoReal)}!)`} · estado ${String(estado)} · h1 ${JSON.stringify(h1s)} · desborde ${String(desborde)} px · bajando ${abajo} · subiendo ${arriba} · FAQ ${pagina.tipo === 'legal' ? 'no lleva' : faq ? 'abre' : 'NO abre'} · pie ${pie ? 'sí' : 'NO'} · «Páginas» ${rotulosBien ? 'bien' : JSON.stringify(rotulos)} · consola ${errores().length === 0 ? 'limpia' : JSON.stringify(errores())}${visible ? '' : ' · PESTAÑA OCULTA'}${intro}`,
   }
 }
 
@@ -200,8 +219,9 @@ async function main(): Promise<void> {
       p.on('console', (m) => {
         if (m.type() === 'error' || /NaN/.test(m.text())) consola.push(`${m.type()}: ${m.text().slice(0, 240)}`)
       })
-      p.on('pageerror', (e) => consola.push(`pageerror: ${e.message.slice(0, 240)}`))
-      for (const pagina of PAGINAS) {
+      p.on('pageerror', (e) => consola.push(`pageerror: ${e.message.slice(0, 240)}${process.env.PILA === undefined ? '' : ` @ ${String(e.stack).replace(/\s+/g, ' ').slice(0, 420)}`}`))
+      const solo = (process.env.PAGINAS ?? '').split(',').filter((x) => x !== '')
+      for (const pagina of PAGINAS.filter((x) => solo.length === 0 || solo.includes(x.carpeta))) {
         const r = await unaPagina(p, pagina, ancho, alto, consola).catch((e: unknown) => ({ bien: false, linea: `FALLA ${pagina.carpeta} · ${String(ancho)} · se cayó: ${String(e).slice(0, 240)}` }))
         console.log(r.linea)
         lineas.push(r)

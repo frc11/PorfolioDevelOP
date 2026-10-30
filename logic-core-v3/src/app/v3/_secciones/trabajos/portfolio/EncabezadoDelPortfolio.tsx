@@ -3,6 +3,7 @@
 import { motion, useTransform } from 'motion/react'
 
 import { useRepeticionDeLaLlegada } from '../../../_componentes/llegadaDelTitulo'
+import { EnlaceDiscreto } from '../../../_componentes/navegacion/EnlaceDiscreto'
 import { TituloDeVolumen } from '../../../_componentes/titulos3d/TituloDeVolumen'
 import { Titular, idDelTitularDeSeccion } from '../../../_componentes/tipografia/Titular'
 import { useAcompananteDelTitulo } from '../../../_lib/titulos3d/acompanantes'
@@ -47,6 +48,8 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, seFunde = f
   const recorteDelTitular = useTransform(repeticion, recorteDeLaLlegada)
   // [C2-40] En el flujo (sin títulos 3D) el titular se levanta desde abajo de su ventana, de acostado a parado (`levantarse.tsx`).
   const levantarse = useEstiloQueSeLevanta(presencia)
+  // [L7g] El enlace a la página va con la presencia del encabezado: sin ella ni se ve ni se enfoca.
+  const visibilidadDelEnlace = useTransform(presencia, (p) => (p > 0.05 ? 'visible' : 'hidden'))
   const estiloDelTitular = seFunde ? { opacity: opacidadDelTitular, ...levantarse } : { opacity: opacidadDelTitular }
   const encabezado = (
     <div data-pieza="encabezado-del-portfolio" className={className}>
@@ -75,6 +78,9 @@ export function EncabezadoDelPortfolio({ seccion, adentro, reducido, seFunde = f
             </CanalDeTexto>
           )}
         </Bloque>
+        <motion.div data-parte="enlace-del-portfolio" style={{ opacity: presencia, visibility: visibilidadDelEnlace }} className="mt-5">
+          <EnlaceDiscreto href="/v3/portfolio">Ver todos los trabajos</EnlaceDiscreto>
+        </motion.div>
       </div>
     </div>
   )

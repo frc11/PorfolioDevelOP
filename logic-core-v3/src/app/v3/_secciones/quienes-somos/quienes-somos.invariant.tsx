@@ -217,17 +217,20 @@ afirmarIgual(hovers, veces(quieto, 'focus-visible:'), 'toda `hover:` tiene su ge
 // [NAVBAR] La máscara recuperada (opacidad, recorte y transición) y el nombre de los retratos como renglón propio.
 // [PULIDO 10] J9 · y la leyenda corta de la foto del equipo abajo de 1024 (su texto, como el de todo revelado: 3).
 // [C2-30f] 30: el nombre de cada retrato salió del revelado (adentro de la foto, abajo, sólo el rol): su etiqueta está siempre, sin hover.
+// [L7g] 31: y el subrayado del enlace a Nosotros (el del sitio: `hover:` con su `focus-visible:`).
 afirmarIgual(
   hovers,
-  30,
-  '  y en esta sección son 30: nueve por marco —acercamiento 2, suelta 3 (la máscara), velo 1, texto 3— por los tres y 3 por la leyenda corta de la foto del equipo',
+  31,
+  '  y en esta sección son 31: nueve por marco —acercamiento 2, suelta 3 (la máscara), velo 1, texto 3— por los tres, 3 por la leyenda corta de la foto del equipo y 1 por el subrayado del enlace a Nosotros',
 )
 // Modo pulido: TRES botones, uno por marco. Son el control del toque de abajo de
 // 1025. Están en el marcado en los dos lados —el corte es `escritorio:hidden` y no
 // una rama de JS, porque la compuerta se resuelve una vez arriba (`s7-contrato` §5)—
 // y arriba del umbral el `display: none` los saca del orden de tabulación.
 afirmarIgual(veces(quieto, '<button'), 3, 'tres botones: el control del toque, uno por marco')
-afirmarIgual(veces(quieto, '<a '), 0, 'cero enlaces')
+// [L7g] Un solo enlace, al final de la sección: «Conocé más sobre nosotros», a `/v3/nosotros` (antes: cero).
+afirmarIgual(veces(quieto, '<a '), 1, 'un enlace: el de la página de Nosotros')
+afirmarIgual(veces(quieto, 'href="/v3/nosotros"'), 1, '  y es el de `/v3/nosotros`')
 afirmarIgual(veces(FUENTE, 'onClick'), 0, 'y cero `onClick` en la fuente: ningún div haciendo de botón')
 controlPositivo(
   'el chequeo de `hover:` sin gemela ve un marcado desparejo',

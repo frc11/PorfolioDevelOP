@@ -34,7 +34,8 @@ export default function NoEncontrada(): React.JSX.Element {
       <section {...{ [ATRIBUTO_DE_LA_INTRO_DE_PAGINA]: PRESET.id }} className="relative flex min-h-svh items-center text-tinta max-escritorio:items-end max-escritorio:pb-[var(--spacing-20)]">
         <PresetDeLaPagina preset={PRESET} />
         <Envoltorio className="w-full">
-          <div data-parte="bajada" className="flex max-w-[34rem] flex-col items-start gap-[var(--spacing-5)] escritorio:max-w-[max(16rem,calc(50vw-17rem))]">
+          {/* [L7g] La caja termina a 4,5 rem del logo (su medio ancho: 0,277 del alto, tope 0,175 del ancho): a 1440 lo rozaba y a 1920 lo pisaba 59 px. */}
+          <div data-parte="bajada" className="flex max-w-[34rem] flex-col items-start gap-[var(--spacing-5)] escritorio:max-w-[max(16rem,calc(50vw-min(28vh,17.5vw)-4.5rem))]">
             <Titular nivel="titulo-l" como="h1" className="[text-shadow:var(--sombra-de-la-intro)]">
               Esta página no existe, pero tu proyecto sí puede.
             </Titular>

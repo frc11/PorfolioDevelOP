@@ -68,3 +68,12 @@ export const PREGUNTAS_DE_NOSOTROS: readonly PreguntaFrecuente[] = [
   { pregunta: '¿Qué pasa después de la entrega?', respuesta: 'No desaparecemos. Te entregamos todo funcionando, con tu panel, y seguimos disponibles para soporte y para lo que quieras sumar más adelante.' },
   { pregunta: '¿Qué tipo de proyectos hacen?', respuesta: 'Páginas web, integraciones con inteligencia artificial y automatizaciones, y software a medida. Si no estás seguro de qué te conviene, te lo decimos de frente.' },
 ]
+
+/** [L7g] La foto de la facultad (`public/v3/nosotros/facultad.webp`, 500 × 298: el original que mandó Valentino, sin estirar). */
+export const FOTO_DE_LA_FACULTAD = {
+  src: '/v3/nosotros/facultad.webp',
+  ancho: 500,
+  alto: 298,
+  alt: 'El edificio de la facultad visto desde arriba, rodeado de árboles',
+  pie: 'FACET · Universidad Nacional de Tucumán',
+} as const
