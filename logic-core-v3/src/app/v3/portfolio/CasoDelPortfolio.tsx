@@ -53,7 +53,7 @@ export function CasoDelPortfolio({ proyecto, indice }: { readonly proyecto: Proy
   const alaDerecha = indice % 2 === 1
   const marca = { '--color-tinta': proyecto.colorDeMarca } as React.CSSProperties
   return (
-    <article id={`portfolio-${proyecto.slug}`} data-caso={proyecto.slug} className="grid scroll-mt-[var(--spacing-24)] grid-cols-1 items-center gap-[var(--spacing-8)] escritorio:grid-cols-2 escritorio:gap-[var(--spacing-16)]">
+    <article id={`portfolio-${proyecto.slug}`} data-caso={proyecto.slug} className="grid scroll-mt-[var(--spacing-20)] grid-cols-1 items-center gap-[var(--spacing-8)] escritorio:grid-cols-2 escritorio:gap-[var(--spacing-12)]">
       <Gatillo desde="abajo" className={cn('min-w-0', alaDerecha && 'escritorio:order-2')}>
         <RecorridoDelCaso proyecto={proyecto} />
       </Gatillo>
@@ -68,7 +68,9 @@ export function CasoDelPortfolio({ proyecto, indice }: { readonly proyecto: Proy
             </Caption>
           )}
         </header>
-        <Ficha proyecto={proyecto} visible reducido desde={0} />
+        <div className="[&_dt_span]:text-tinta-media">
+          <Ficha proyecto={proyecto} visible reducido desde={0} />
+        </div>
         <div style={marca} className="self-start">
           <CtaEnlace href={proyecto.url} externo rotulo={`${CASOS.visitar} ↗`} etiqueta={CASOS.visitarDe(proyecto.nombre)} />
         </div>

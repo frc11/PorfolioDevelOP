@@ -4,10 +4,11 @@ Orden: L7b (Nosotros + Portfolio) → L7c (Blog) → L7d (legales, 404, enlaces,
 
 | Lote | Estado | Commits | Resultado |
 |---|---|---|---|
-| L7b | en curso (plan escrito) | — | `L7b-resultado.md` |
+| L7b | terminado (commit de cierre abajo) | ver git log | `L7b-resultado.md` |
 | L7c | pendiente | — | — |
 | L7d | pendiente | — | — |
 
 ## Notas para retomar
 - `C:\nocturno\l7-assets\` NO existe en esta máquina (ni `facultad.png`): se usa un sustituto propio y se anota en el resultado.
 - Los títulos 3D nuevos (Nosotros, Portfolio, Blog) obligan a regenerar `_fuentes/archivo-*-pagina.json` (scripts-retoque/fuentes-3d.py, necesita el TTF de Archivo de google/fonts vía scripts-titular/subsetear-fuentes.py).
+- L7b: terminado salvo verificación a 1024/768/390 (ver resultado); L7c siguiente

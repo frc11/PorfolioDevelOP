@@ -18,7 +18,7 @@ import { EQUIPO, HISTORIA } from './contenido'
  * equipo NO va en 3D: un párrafo largo por persona, con su foto al costado, alternando los lados.
  * La foto de la facultad no estaba en `l7-assets`: el marco de la historia lleva la foto del equipo del home hasta que Valentino pase la real.
  */
-const FILA = 'grid grid-cols-1 items-center gap-[var(--spacing-8)] escritorio:grid-cols-2 escritorio:gap-[var(--spacing-16)]'
+const FILA = 'grid grid-cols-1 items-center gap-[var(--spacing-8)] escritorio:grid-cols-2 escritorio:gap-[var(--spacing-12)]'
 
 export function HistoriaYEquipo(): React.JSX.Element {
   const [franco, valentino] = PERSONAS.personas
@@ -53,13 +53,13 @@ export function HistoriaYEquipo(): React.JSX.Element {
 
       <SeccionDePapel dato="equipo">
         <TituloQueSube titulo={EQUIPO.titulo} como="h2" nivel="titulo-l" />
-        <div className="flex flex-col gap-[var(--spacing-16)]">
+        <div className="flex flex-col gap-[var(--spacing-12)]">
           {[
             { persona: franco, texto: EQUIPO.franco.texto, alaDerecha: false },
             { persona: valentino, texto: EQUIPO.valentino.texto, alaDerecha: true },
           ].map(({ persona, texto, alaDerecha }) => (
             <article key={persona.nombre} data-persona={persona.nombre} className={FILA}>
-              <Gatillo desde="abajo" className={cn('min-w-0', alaDerecha && 'escritorio:order-2')}>
+              <Gatillo desde="abajo" className={cn('w-full min-w-0 max-w-[30rem]', alaDerecha ? 'escritorio:order-2 escritorio:justify-self-end' : 'escritorio:justify-self-start')}>
                 <MarcoDeDosTomas
                   seria={persona.seria}
                   suelta={persona.suelta}
