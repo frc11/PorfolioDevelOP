@@ -81,6 +81,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'Seis tarjetas en un patrón corrido (no una grilla) que caen en su lugar con un giro chico que se endereza. Pasá el mouse por «Leer la nota». ¿Se lee irregular o desordenado?',
     sale: 'El gatillo del home (32 px, 700 ms, la curva de salida, en espejo al subir) más un giro; DosCopias, el rollover del sitio.',
   },
+  {
+    slug: 'nota',
+    codigo: 'L1 + L2',
+    titulo: 'La nota con su hilo',
+    pagina: 'Nota del blog',
+    mirar: 'Arriba de todo, un hilo fino se dibuja mientras leés. Los subtítulos se levantan, la frase destacada se pinta y, al llegar al final, el tiempo de lectura se tacha y queda «Leída».',
+    sale: 'La raya del Trazo, TitularQueSeLevanta, el pintado del Panel y el tachado de Quiénes somos: cuatro piezas del home puestas a leer.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
