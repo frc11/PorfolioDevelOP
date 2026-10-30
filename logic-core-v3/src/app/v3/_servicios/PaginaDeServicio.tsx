@@ -27,6 +27,7 @@ import { QueHacemos } from './bloques/QueHacemos'
 import { QueIncluye } from './bloques/QueIncluye'
 import { Trabajos } from './bloques/Trabajos'
 import { PRESETS_DE_LAS_PAGINAS } from './escena/presets'
+import { MomentoDelServicio } from './momentos/MomentoDelServicio'
 import { estiloDelAcentoSobrePapel } from './estiloDelAcento'
 import type { Servicio } from './tipos'
 
@@ -50,6 +51,7 @@ export function CuerpoDelServicio({ servicio, enDesarrollo }: { readonly servici
   return (
     <div style={estiloDelAcentoSobrePapel(servicio.idEnElHome)} className="text-tinta">
       <QueHacemos queHacemos={servicio.queHacemos} detalle={servicio.detalle} />
+      <MomentoDelServicio servicio={servicio} />
       <Ejemplos ejemplos={servicio.ejemplos} />
       <QueIncluye incluye={servicio.incluye} aparte={servicio.aparte} />
       <Precio precio={servicio.precio} enDesarrollo={enDesarrollo} />

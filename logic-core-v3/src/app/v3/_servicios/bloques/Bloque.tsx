@@ -32,6 +32,12 @@ export const CLASES_DEL_PAPEL = SUPERFICIES['papel-opaco'].clases
 /** [M1 · L7a] Los bloques del cuerpo, en su orden. La intro es la del home y el cierre (con el FAQ) es el común (`CierreDeLaPagina`). */
 export type NombreDeBloque =
   | 'que-hacemos'
+  // [M3] Los momentos de cada página, después de «Qué hacemos» (`momentos/MomentoDelServicio.tsx`).
+  | 'la-pantalla'
+  | 'lo-de-siempre'
+  | 'el-orden'
+  | 'el-chat'
+  | 'automatizaciones'
   | 'ejemplos'
   | 'que-incluye'
   | 'precio'

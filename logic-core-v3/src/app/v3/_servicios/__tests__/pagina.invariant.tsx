@@ -187,13 +187,18 @@ titulo('2 · Los bloques, en el orden de la maqueta (M0 §1.3)')
 // bloque: es la bajada de la intro del home (REEMPLAZADO por la spec: la intro no lleva bloques).
 // [L7a] REEMPLAZADO por la spec (L7a ítem 3): se suman «Para qué te sirve», «Lo que podemos construir» (software e IA, en el lugar de los
 // trabajos), «Qué recibís al final» y «Después de la entrega»; el FAQ, el llamado y el cierre provisorio salen (el cierre común del home).
-const ORDEN_DE_LA_MAQUETA = ['que-hacemos', 'ejemplos', 'que-incluye', 'precio', 'llamado-del-precio', 'extra', 'trabajos', 'posibles', 'proceso', 'entrega', 'despues']
+// [M3] REEMPLAZADO por la spec (M3): después de «Qué hacemos», el momento de cada página (web: la pantalla; software: lo de siempre y el
+// orden; IA: el chat y las automatizaciones). Cada página lleva SÓLO los suyos.
+const ORDEN_DE_LA_MAQUETA = ['que-hacemos', 'la-pantalla', 'lo-de-siempre', 'el-orden', 'el-chat', 'automatizaciones', 'ejemplos', 'que-incluye', 'precio', 'llamado-del-precio', 'extra', 'trabajos', 'posibles', 'proceso', 'entrega', 'despues']
 const sin = (...fuera: string[]): string[] => ORDEN_DE_LA_MAQUETA.filter((b) => !fuera.includes(b))
+const DE_WEB = ['la-pantalla']
+const DE_SOFTWARE = ['lo-de-siempre', 'el-orden']
+const DE_IA = ['el-chat', 'automatizaciones']
 /** Lo que lleva cada página: Extra y [M3] el video de trabajos solo existen en web, en los dos modos. */
 const ESPERADO: Readonly<Record<string, { readonly dev: readonly string[]; readonly prod: readonly string[] }>> = {
-  'paginas-web': { dev: sin('posibles'), prod: sin('posibles') },
-  'software-a-medida': { dev: sin('extra', 'trabajos'), prod: sin('extra', 'trabajos') },
-  'ia-y-automatizaciones': { dev: sin('extra', 'trabajos'), prod: sin('extra', 'trabajos') },
+  'paginas-web': { dev: sin('posibles', ...DE_SOFTWARE, ...DE_IA), prod: sin('posibles', ...DE_SOFTWARE, ...DE_IA) },
+  'software-a-medida': { dev: sin('extra', 'trabajos', ...DE_WEB, ...DE_IA), prod: sin('extra', 'trabajos', ...DE_WEB, ...DE_IA) },
+  'ia-y-automatizaciones': { dev: sin('extra', 'trabajos', ...DE_WEB, ...DE_SOFTWARE), prod: sin('extra', 'trabajos', ...DE_WEB, ...DE_SOFTWARE) },
 }
 afirmarIgual(fallan((p) => JSON.stringify(bloquesEnOrden(p.html)) === JSON.stringify(ESPERADO[p.servicio.slug]?.[p.enDesarrollo ? 'dev' : 'prod'])), [], 'las tres páginas, en los dos modos: exactamente los bloques que les tocan, en el orden de la maqueta')
 afirmarIgual(fallan((p) => respetaElOrden(bloquesEnOrden(p.html), ORDEN_DE_LA_MAQUETA)), [], '  y ninguno fuera de su lugar')
@@ -519,7 +524,8 @@ afirmarIgual(nombresQueChocan(FUENTES.map((x) => x.f.replace(/\\/g, '/'))), [], 
 controlPositivo('Planes.tsx y planes.ts juntos se detectan', ['bloques/precio/Planes.tsx', 'bloques/precio/planes.ts'], (l: string[]) => nombresQueChocan(l).length === 0)
 const deCliente = (codigo: string): boolean => /^\s*['"]use client['"]/.test(codigo)
 const dondeEsDeCliente = (lista: readonly { f: string; codigo: string }[]): string[] => lista.filter((x) => deCliente(x.codigo)).map((x) => x.f.replace(/\\/g, '/')).sort()
-afirmarIgual(dondeEsDeCliente(FUENTES), ['escena/VarianteDeWeb.tsx', 'movimiento/PrecioEnHistorias.tsx', 'movimiento/RepartoDelPrecio.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el código de cliente son los cinco de movimiento/ (los dos envoltorios del revelado, [M2a] el reparto del precio en diagonales, [M3] el video de trabajos y [M2b] el precio en historias; [L7a] la raíz con la salida se fue: la pide EnlaceDeRuta) y [V1] la variante de la escena, que carga la ranura del home por el registro: todo lo demás es de servidor. [R1] El gatillo ya no es nuestro: es el del contrato del home')
+// [M3 · 2026-10-30] REEMPLAZADO por la spec (M3): se suman los momentos de cada página, que se mueven con el scroll o solos (`momentos/`).
+afirmarIgual(dondeEsDeCliente(FUENTES), ['escena/VarianteDeWeb.tsx', 'momentos/atiende/ChatQueAtiende.tsx', 'momentos/atiende/PasaSolo.tsx', 'momentos/orden/ElOrden.tsx', 'momentos/orden/RenglonesTachados.tsx', 'momentos/pantalla/LaPantalla.tsx', 'momentos/pantalla/useVideosDeLaPantalla.ts', 'momentos/useAvanceDelRecorrido.ts', 'movimiento/PrecioEnHistorias.tsx', 'movimiento/RepartoDelPrecio.tsx', 'movimiento/Revelado.tsx', 'movimiento/TitularQueEntra.tsx', 'movimiento/VideoDeFondo.tsx'], 'el código de cliente son los cinco de movimiento/ (los dos envoltorios del revelado, [M2a] el reparto del precio en diagonales, [M3] el video de trabajos y [M2b] el precio en historias; [L7a] la raíz con la salida se fue: la pide EnlaceDeRuta) y [V1] la variante de la escena, que carga la ranura del home por el registro: todo lo demás es de servidor. [R1] El gatillo ya no es nuestro: es el del contrato del home')
 controlPositivo('un bloque de cliente fuera de movimiento/ se detecta', ["'use client'", 'export const x = 1'].join('\n'), (c: string) => !deCliente(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -567,6 +573,12 @@ const REVELADO_ESPERADO: Readonly<Record<string, { readonly arbol: number; reado
   proceso: { arbol: 2, gatillo: 0 },
   entrega: { arbol: 2, gatillo: 0 },
   despues: { arbol: 2, gatillo: 0 },
+  // [M3] Los momentos: el título entra por línea como en todos; lo de adentro se mueve por su cuenta (con el scroll o solo), sin revelado.
+  'la-pantalla': { arbol: 1, gatillo: 0 },
+  'lo-de-siempre': { arbol: 1, gatillo: 0 },
+  'el-orden': { arbol: 1, gatillo: 0 },
+  'el-chat': { arbol: 1, gatillo: 0 },
+  automatizaciones: { arbol: 1, gatillo: 0 },
 }
 const cuentaEnElBloque = (html: string, nombre: string, aguja: string): number => (bloqueDe(html, nombre) ?? '').split(aguja).length - 1
 // [M2a] El precio en diagonales (web) suma el Bloque del contrato que reparte el progreso a los tres paneles: una marca más.
@@ -697,7 +709,10 @@ const videoServido = (html: string): boolean => {
   return lista.length === 1 && [' muted=""', ' loop=""', ' playsinline=""', ' preload="none"', ' data-video-de-trabajos=""'].every((a) => v.toLowerCase().includes(a)) &&
     !/\s(autoplay|src)=/i.test(v)
 }
-afirmar(videoServido(bloqueDe(WEB_PROD, 'trabajos') ?? '') && videoServido(bloqueDe(WEB_DEV, 'trabajos') ?? '') && videoServido(WEB_PROD), 'Páginas web, en los dos modos, sin movimiento reducido: un solo <video> —muted, loop, playsInline, preload="none", data-video-de-trabajos—, en el slot de trabajos, sin autoplay ni src (la fuente se pide al acercarse)')
+// [M3 · 2026-10-30] La pantalla que se dibuja trae sus dos videos (escritorio y celular, con las mismas reglas: los afirma momentos.invariant §1):
+// el «uno solo en la página» pasa a «uno solo fuera de la pantalla».
+const SIN_LA_PANTALLA = WEB_PROD.replace(bloqueDe(WEB_PROD, 'la-pantalla') ?? '', '')
+afirmar(videoServido(bloqueDe(WEB_PROD, 'trabajos') ?? '') && videoServido(bloqueDe(WEB_DEV, 'trabajos') ?? '') && videoServido(SIN_LA_PANTALLA), 'Páginas web, en los dos modos, sin movimiento reducido: un solo <video> —muted, loop, playsInline, preload="none", data-video-de-trabajos—, en el slot de trabajos, sin autoplay ni src (la fuente se pide al acercarse)')
 const BLOQUE_DEL_VIDEO = bloqueDe(WEB_PROD, 'trabajos') ?? ''
 controlPositivo('  un <video> con autoplay se detecta', BLOQUE_DEL_VIDEO.replace('<video ', '<video autoplay="" '), videoServido)
 controlPositivo('  uno con la fuente en el HTML servido', BLOQUE_DEL_VIDEO.replace('<video ', `<video src="${VIDEO.horizontal.video}" `), videoServido)
@@ -726,7 +741,7 @@ const laPausaDelHome = (html: string): boolean => {
 afirmar(laPausaDelHome(BLOQUE_DEL_VIDEO), `la pausa del slot es la del home (BotonPausa): type="button", nombre fijo «${NOMBRE_DE_LA_PAUSA}», aria-pressed="false" con el ícono de pausa; la nuestra ya no está`)
 controlPositivo('  la nuestra de antes se detecta', BLOQUE_DEL_VIDEO.replace('data-pieza="boton-pausa"', 'data-pieza="pausa-del-video"'), laPausaDelHome)
 controlPositivo('  una con otro nombre', BLOQUE_DEL_VIDEO.replace(NOMBRE_DE_LA_PAUSA, 'Pausar el video'), laPausaDelHome)
-controlPositivo('  y una página sin el botón', WEB_PROD.replace(botonDeLaPausa(WEB_PROD), ''), laPausaDelHome)
+controlPositivo('  y una página sin el botón', SIN_LA_PANTALLA.replace(botonDeLaPausa(SIN_LA_PANTALLA), ''), laPausaDelHome)
 const clasesDeLaPausa = (html: string): string[] => (/\sclass="([^"]*)"/.exec(/<button[^>]*>/.exec(botonDeLaPausa(html))?.[0] ?? '')?.[1] ?? '').split(/\s+/)
 // [V1] Sólo para el teclado, como el panel después de su F7: el botón lleva TODAS las clases de comportamiento de la pausa del panel
 // (`CLASE_DE_LA_PAUSA_DEL_PANEL`: en escala 0 y sin puntero, entera con :focus-visible); el lugar es el nuestro.
@@ -765,9 +780,12 @@ const nombresDeLasFuentes = (linea: string): boolean =>
   VIDEO.demos.length === 3 && VIDEO.demos.every((slug) => linea.includes(FUENTE_DE_DEMOS.find((d) => d.slug === slug)?.nombre ?? '\u0000'))
 afirmar(nombresDeLasFuentes(VIDEO.linea), '  y dice la marca (LOGOTIPO), los tres casos con su nombre de PROYECTOS y las tres demos con su nombre de la sección Demos del home')
 controlPositivo('  una línea sin una de las demos se detecta', VIDEO.linea.replace('Skyline Estates', 'Skyline'), nombresDeLasFuentes)
-// En Software e IA el slot no se monta: ni el bloque, ni un <video>, ni la pausa.
-const sinVideoDeTrabajos = (html: string): boolean =>
-  bloqueDe(html, 'trabajos') === null && videos(html).length === 0 && !html.includes('data-video-de-trabajos') && !html.includes('pausa-del-video') && !html.includes('boton-pausa')
+// En Software e IA el slot no se monta: ni el bloque, ni un <video>, ni la pausa. [M3 · 2026-10-30] La pausa del chat de IA (la conversación
+// que se mueve sola, WCAG 2.2.2) es otra pausa, de otro bloque: se mira la página sin el bloque del chat (su pausa la fija momentos.invariant §3).
+const sinVideoDeTrabajos = (htmlEntero: string): boolean => {
+  const html = htmlEntero.replace(bloqueDe(htmlEntero, 'el-chat') ?? ' ', '')
+  return bloqueDe(html, 'trabajos') === null && videos(html).length === 0 && !html.includes('data-video-de-trabajos') && !html.includes('pausa-del-video') && !html.includes('boton-pausa')
+}
 afirmarIgual(fallan((p) => p.servicio.slug === 'paginas-web' || sinVideoDeTrabajos(p.html)), [], 'en Software e IA, en los dos modos, el slot de trabajos no se monta: ni el bloque, ni un <video>, ni la pausa (la nuestra ni la del home)')
 controlPositivo('  Software con el video de web se detecta', pagina({ ...SOFTWARE_A_MEDIDA, prueba: { ...SOFTWARE_A_MEDIDA.prueba, video: VIDEO } }, false), sinVideoDeTrabajos)
 controlPositivo('  y un botón de pausa suelto (el nuestro)', '<div><button type="button" data-pieza="pausa-del-video"></button></div>', sinVideoDeTrabajos)

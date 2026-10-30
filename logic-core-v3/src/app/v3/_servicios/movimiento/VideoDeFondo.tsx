@@ -126,7 +126,10 @@ export function CapaDelVideo({
  */
 export const CLASE_DE_LA_PAUSA_DEL_VIDEO = 'pointer-events-none absolute right-4 bottom-4 scale-0 focus-visible:scale-100'
 
-/** La pausa del video, o nada con movimiento reducido (queda el póster, quieto). */
-export function PausaDelVideo({ reducido, pausado, alCambiar }: { readonly reducido: boolean; readonly pausado: boolean; readonly alCambiar: (pausado: boolean) => void }): React.JSX.Element | null {
-  return reducido ? null : <BotonPausa pausado={pausado} alCambiar={alCambiar} de={DE_LA_PAUSA} className={CLASE_DE_LA_PAUSA_DEL_VIDEO} />
+/**
+ * La pausa del video, o nada con movimiento reducido (queda el póster, quieto). [M3] Los momentos que se mueven solos (los videos de la
+ * pantalla, el chat) la usan con su propio nombre (`de`): la pausa de servicios sigue entrando por este archivo (s77 fija quién importa la del home).
+ */
+export function PausaDelVideo({ reducido, pausado, alCambiar, de = DE_LA_PAUSA }: { readonly reducido: boolean; readonly pausado: boolean; readonly alCambiar: (pausado: boolean) => void; readonly de?: string }): React.JSX.Element | null {
+  return reducido ? null : <BotonPausa pausado={pausado} alCambiar={alCambiar} de={de} className={CLASE_DE_LA_PAUSA_DEL_VIDEO} />
 }
