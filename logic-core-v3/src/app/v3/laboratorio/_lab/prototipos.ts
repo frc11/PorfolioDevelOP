@@ -97,6 +97,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'En 1440, scrolleá el texto: el subrayado del índice no salta de un ítem al otro, viaja. Es la página donde menos hay que lucirse: ¿alcanza con esto?',
     sale: 'El subrayado del CTA (grosor y curva de salida) y la sección activa de la barra del home.',
   },
+  {
+    slug: 'como-trabajamos',
+    codigo: 'N3',
+    titulo: 'Cómo trabajamos, con un trazo',
+    pagina: 'Nosotros (y Software)',
+    mirar: 'Una línea se dibuja hacia abajo con el scroll y une los pasos; cada paso se subraya y pasa a tinta cuando la línea lo alcanza. Los pasos salen de frases que el home ya dice.',
+    sale: 'El Trazo del titular de Quiénes somos (subrayado) y su raya, de pie; los pasos, de los textos de Servicios, Seis razones y el Panel.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
