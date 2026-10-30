@@ -165,7 +165,7 @@ function Secuencia({ trabajos, trabajo, alElegir }: PropsDeLaSecuencia): React.J
             </div>
             <div ref={caja} className="relative flex min-h-0 items-center justify-center escritorio:col-span-8 escritorio:col-start-5 escritorio:row-span-2 escritorio:row-start-1">
               <div ref={marco} data-marco-de-la-pantalla="" className="relative" style={{ width: 0, height: 0, willChange: 'width, height' }}>
-                <div ref={bisel} aria-hidden="true" className="absolute -inset-1.5 bg-tinta" style={{ opacity: 0 }} />
+                <div ref={bisel} aria-hidden="true" className="pointer-events-none absolute -inset-1.5 border-[6px] border-tinta" style={{ opacity: 0 }} />
                 <Plano key={trabajo.slug} plano={plano} svg={svg} />
                 <div ref={real} className="absolute inset-0 overflow-hidden bg-tinta" style={{ clipPath: 'inset(50%)', willChange: 'clip-path' }}>
                   <video key={`e-${trabajo.slug}`} ref={videoDeEscritorio} data-video-de-la-pantalla="escritorio" muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 size-full object-cover object-top" />
