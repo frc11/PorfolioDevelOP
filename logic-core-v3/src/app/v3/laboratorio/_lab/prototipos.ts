@@ -89,6 +89,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'Arriba de todo, un hilo fino se dibuja mientras leés. Los subtítulos se levantan, la frase destacada se pinta y, al llegar al final, el tiempo de lectura se tacha y queda «Leída».',
     sale: 'La raya del Trazo, TitularQueSeLevanta, el pintado del Panel y el tachado de Quiénes somos: cuatro piezas del home puestas a leer.',
   },
+  {
+    slug: 'indice-legal',
+    codigo: 'G1',
+    titulo: 'El índice con el subrayado que viaja',
+    pagina: 'Privacidad y Términos',
+    mirar: 'En 1440, scrolleá el texto: el subrayado del índice no salta de un ítem al otro, viaja. Es la página donde menos hay que lucirse: ¿alcanza con esto?',
+    sale: 'El subrayado del CTA (grosor y curva de salida) y la sección activa de la barra del home.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
