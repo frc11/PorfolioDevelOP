@@ -21,7 +21,7 @@ propósito, lo digo. Los marcados con **▶ prototipo** se pueden ver andando en
 - **Costo:** S–M (SVG + un `Bloque` + `MarcoDeMedio`). **Riesgo:** que parezca un wireframe de plantilla; el alambre tiene que ser del
   mismo trazo fino que el globo, no un esquema gris.
 
-**W2 · El mismo sitio en el celular.**
+**W2 · El mismo sitio en el celular.** ▶ prototipo `/v3/laboratorio/mismo-sitio-en-el-celular` (hecho después de cerrar el lote)
 - **Qué ve:** el video móvil de un trabajo real en un teléfono, y al lado el de escritorio; al scrollear, el de escritorio se angosta
   hasta volverse el teléfono (el ancho baja con el scroll, el contenido se reacomoda porque es otro video).
 - **Por qué:** «se vea bien en el celular, que es donde te van a encontrar» es una promesa de la página; esto la muestra.
@@ -43,9 +43,9 @@ Panel del home; va una sola, chica, al lado del párrafo que la nombra. *Sin pro
 - **De dónde sale:** el titular de Quiénes somos («algo distinto, no ~~lo mismo de siempre~~», §3), con su `Trazo` tipo tachado.
 - **Costo:** S. **Riesgo:** con mucho texto, el tachado cansa; cuatro o cinco renglones, no más.
 
-**S2 · El sistema que se ordena.** Fichas sueltas desordenadas (pedidos, turnos, clientes) que, con el scroll, vuelan a sus columnas de
+**S2 · El sistema que se ordena.** ▶ prototipo `/v3/laboratorio/el-sistema-que-se-ordena`. Fichas sueltas desordenadas (pedidos, turnos, clientes) que, con el scroll, vuelan a sus columnas de
 un tablero. Sale de la `LlegadaEnCurva` de las fotos del equipo (§5). Costo M. Riesgo: «lo que entra en diagonal sin motivo» (GUSTO.md);
-el motivo tiene que ser legible: de desorden a orden. *Sin prototipo; si S1 gusta, S2 es su segunda parte.*
+el motivo tiene que ser legible: de desorden a orden. Si S1 gusta, S2 es su segunda parte.
 
 **S3 · «Primero entendemos, después presupuestamos».** Un proceso de tres pasos donde el presupuesto aparece *recién* en el tercero,
 tapado hasta entonces. Sale del proceso de Nosotros (N3): se comparte la pieza. Costo S (si N3 existe).
@@ -67,7 +67,7 @@ con el scroll) y en la bajada van apareciendo las consultas que el chatbot conte
   y subir el nivel). **Riesgo:** que se lea como «IA que trabaja de noche» y no como «atiende a cualquier hora». *Sin prototipo: necesita
   la escena.*
 
-**I3 · Lo que antes hacías a mano.** La lista de tareas repetitivas que se tilda sola (un tic de sonido por cada una) a medida que
+**I3 · Lo que antes hacías a mano.** ▶ prototipo `/v3/laboratorio/pasa-solo`. La lista de tareas repetitivas que se tilda sola (un tic de sonido por cada una) a medida que
 scrolleás. Es S1 con otro verbo: se comparte la pieza. Costo S.
 
 ## Nosotros (de día)
@@ -115,9 +115,9 @@ scrolleás. Es S1 con otro verbo: se comparte la pieza. Costo S.
 - **De dónde sale:** `Ficha` y `PROYECTOS` (§5), importados; la secuencia de la ficha y el video de `mediosDe`.
 - **Costo:** S. **Riesgo:** los `[TESTIMONIO]` y `[TEXTO]` se van a ver (con la llave apagada); es correcto, son huecos marcados.
 
-**P2 · Las demos como un estante.** Las cinco plantillas en una fila de lomos (como los lomos del acordeón) que se abren de a una con el
-hover y muestran qué es y para qué rubro. Sale de la `Biblioteca` y los lomos del Portfolio (§5). Costo M. *Sin prototipo: la biblioteca
-del home ya lo hace; el aporte sería sólo de composición.*
+**P2 · Las demos como un estante.** ▶ prototipo `/v3/laboratorio/demos-en-conjunto`. Las cinco plantillas en una fila de lomos (como los lomos del acordeón) que se abren de a una con el
+hover y muestran qué es y para qué rubro. Sale de la `Biblioteca` y los lomos del Portfolio (§5). Costo M. La biblioteca
+del home ya lo hace; el aporte es la composición (en conjunto, como pide ESTRUCTURA) y los tres pasos de qué son.
 
 **P3 · Las reseñas, planas y a la deriva.** `PistaDeLasResenas` (la cinta que deriva del home abajo de 1024) a todo el ancho en el
 cuerpo. Costo S. Riesgo: las reseñas son **ficticias** (`resenas/contenido.ts:4-7`); no se puede publicar así. *Sin prototipo.*
@@ -173,6 +173,16 @@ tachado (§3). Costo S. *Dentro del prototipo L1.*
 
 **E2 · La sala vacía.** La escena de día sin logo (el hueco en el piso), y el logo bajando a su lugar cuando tocás «Volver al home». L:
 necesita la escena (pedido P-H para una variante que esconda el logo). *Sin prototipo.*
+
+## Las de día (Nosotros, Portfolio, Blog)
+
+**D1 · La intro corta de día.** ▶ prototipo `/v3/laboratorio/intro-de-dia`
+- **Qué ve:** una sola pantalla de la sala de día en la pose del hero (el logo a la derecha, con el mouse), el título a la izquierda en
+  los dos registros del sitio, que se levanta al llegar, su bajada y el aviso de scroll; después, el papel, y la escena se duerme debajo.
+- **Por qué:** sus nombres (Nosotros, Portfolio, Blog) no están entre los títulos que el 3D sabe escribir; hasta regenerar las fuentes
+  (P-H), la intro de estas páginas es de DOM. Y ESTRUCTURA pide «poca animación al principio y pasa rápido al fondo».
+- **De dónde sale:** el hero del home (la composición 3, la pose, los dos registros) y `TitularQueSeLevanta`.
+- **Costo:** S. **Riesgo:** que se lea como «el hero con otro texto»; lo que la distingue es que dura una pantalla y no se queda.
 
 ## Para todas
 

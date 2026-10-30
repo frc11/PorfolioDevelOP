@@ -65,6 +65,20 @@ viven en `/v3/laboratorio/…` y nada de afuera los importa. Lo que elijas se ca
 12. **`/v3/laboratorio/indice-legal` · Privacidad y Términos (1 min).** El texto legal con su índice al costado: el subrayado no salta de
     un ítem al otro, **viaja**. **Decisión:** ¿alcanza con esto para las legales? (Es la página donde menos hay que lucirse.)
 
+## Si te quedan diez minutos más (se hicieron después de cerrar el recorrido)
+
+13. **`/v3/laboratorio/intro-de-dia` · la intro corta de Nosotros, Portfolio y Blog (2 min).** La única con la escena: una pantalla de
+    la sala de día con el título en el DOM (el 3D no sabe escribir estos nombres todavía), que se levanta al llegar; después, el papel.
+    Probá los tres nombres con los botones y mové el mouse. **Decisión:** ¿así es la intro de las de día hasta que haya fuentes 3D?
+14. **`/v3/laboratorio/el-sistema-que-se-ordena` · Software (1,5 min) 📱.** Papeles sueltos tirados sobre la mesa que, con el scroll,
+    viajan a su columna de un tablero y se enderezan. Es la segunda parte del tachado (4). **Decisión:** ¿uno, el otro o los dos?
+15. **`/v3/laboratorio/pasa-solo` · IA, las automatizaciones (1 min).** Las tareas repetitivas se tildan solas al cruzar la mitad de la
+    pantalla («pasa solo»); con el sonido prendido, un tic por cada una. **Decisión:** ¿el tic suma o sobra?
+16. **`/v3/laboratorio/mismo-sitio-en-el-celular` · Desarrollo web (1,5 min).** La pantalla de un trabajo se angosta con el scroll hasta
+    ser un teléfono y pasa al video móvil del mismo sitio; se elige el trabajo. **Decisión:** ¿esto o la pantalla que se dibuja (8)?
+17. **`/v3/laboratorio/demos-en-conjunto` · Portfolio, las demos (1 min).** Las cinco tapas apoyadas en un estante; con el mouse una se
+    levanta y dice su rubro. Debajo, qué son en tres pasos. **Decisión:** ¿las demos del Portfolio son esto?
+
 ## Lo que quedó en el papel y por qué
 En `docs/ideas/MOMENTOS.md` están las ideas que no prototipé, a propósito:
 - **Mientras dormís (IA)** y **la sala vacía (404)**: necesitan la escena y un pedido al home (una variante nueva o mover la luz); el
