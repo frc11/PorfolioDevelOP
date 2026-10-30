@@ -113,6 +113,14 @@ const TODOS: readonly Prototipo[] = [
     mirar: 'Al lado del texto de Web, el alambre de una página se dibuja trazo por trazo con el scroll y, al terminar, la pantalla de un trabajo real se abre adentro desde el centro. ¿Se ve develOP o se ve wireframe de plantilla?',
     sale: 'El globo de alambre de Servicios (el trazo fino, el celeste), el clip-path desde el centro de la segunda toma y el póster de El Garage.',
   },
+  {
+    slug: 'mismo-sitio-en-el-celular',
+    codigo: 'W2',
+    titulo: 'El mismo sitio en el celular',
+    pagina: 'Desarrollo web',
+    mirar: 'La pantalla de escritorio de un trabajo real se angosta con el scroll hasta ser un teléfono, y en el medio pasa al video móvil del mismo sitio. Probá los tres trabajos.',
+    sale: 'Los videos de escritorio y móvil que el Portfolio ya tiene por trabajo; la tira del acordeón que cambia de ancho.',
+  },
 ]
 
 /** El orden del índice: el de `docs/ideas/COMO-MIRAR.md`, los que más creo primero. */
@@ -125,6 +133,7 @@ const ORDEN = [
   'historia-que-se-pinta',
   'como-trabajamos',
   'pantalla-que-se-dibuja',
+  'mismo-sitio-en-el-celular',
   'carrusel-del-blog',
   'notas-irregulares',
   'nota',
