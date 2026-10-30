@@ -4,7 +4,7 @@ Rama `l7/a`, worktree `C:\nocturno\cola3`, dev :3002. Un lote: L7a (las tres pá
 
 | Lote | Modelo | Estado | Commits | Resultado |
 |---|---|---|---|---|
-| L7a | Opus alto | en curso | 72ac5e3b.. | L7a-resultado.md |
+| L7a | Opus alto | cerrado | 72ac5e3b..HEAD | L7a-resultado.md |
 
 ## Para el carril B (leer antes de mergear)
 - **La intro de las páginas es de la base y L7a la acortó:** `PANTALLAS_DE_LA_INTRO` 2,5 → 1,8 y `TRAMO_DEL_TITULO` 1,6 → 1,4

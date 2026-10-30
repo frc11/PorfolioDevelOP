@@ -50,7 +50,7 @@ export const PAGINAS_WEB: Servicio = {
   seo: {
     title: `${NOMBRE} · ${LOGOTIPO}`, // C2: provisorio (L7a)
     description: // C2: provisorio (L7a)
-      'Páginas web a medida para tu negocio: que te encuentren, te entiendan y te escriban. Se ven bien en el celular y las manejás vos desde tu panel.',
+      'Páginas web a medida para tu negocio: que te encuentren, te entiendan y te escriban. Pensadas para el celular, de una landing a una tienda online.',
   },
   problema: {
     titulo: '¿Te buscan y no te encuentran?',
@@ -67,7 +67,7 @@ export const PAGINAS_WEB: Servicio = {
     { nombre: 'Una landing', texto: 'Una sola página que cuenta qué hacés y lleva a escribirte. Para arrancar, para un producto o para una campaña.' },
     { nombre: 'Un sitio institucional', texto: 'Varias páginas para mostrar tu negocio, tus servicios y cómo contactarte, con la información ordenada.' },
     { nombre: 'Un catálogo', texto: 'Tus productos con fotos, precios y un buscador, sin compras: el cliente elige y te escribe.' },
-    { nombre: 'Una tienda online', texto: 'El catálogo con carrito y pago, para que te compren sin que tengas que contestar uno por uno.' },
+    { nombre: 'Una tienda online', texto: 'Tus clientes ven el catálogo, eligen y te compran sin que tengas que contestar uno por uno.' },
   ],
   posibles: [],
   incluye: [
@@ -133,9 +133,9 @@ export const PAGINAS_WEB: Servicio = {
   proceso: {
     pasos: [
       { nombre: 'Charla', texto: 'Nos contás de tu negocio, qué vendés, a quién y cómo te buscan. De ahí sale qué página te conviene.' },
-      { nombre: 'Propuesta', texto: 'Te pasamos por escrito qué incluye, el calibre, el precio y los tiempos. Arrancamos cuando estás de acuerdo.' },
+      { nombre: 'Propuesta', texto: 'Te pasamos qué incluye, el calibre y el precio. Arrancamos cuando estás de acuerdo, y todo extra se presupuesta antes.' },
       { nombre: 'Diseño', texto: 'Armamos cómo se va a ver cada pantalla, en el celular y en la computadora, y lo ajustamos con vos.' },
-      { nombre: 'Desarrollo', texto: 'La construimos y vas viendo el avance. Cargamos tus textos y fotos, y conectamos el formulario.' },
+      { nombre: 'Desarrollo', texto: 'La construimos, cargamos tus textos y fotos, y conectamos el formulario de contacto.' },
       { nombre: 'Entrega', texto: 'La dejamos publicada y funcionando, y te mostramos cómo manejarla desde tu panel.' },
     ],
     plazo: PLAZO,
@@ -166,7 +166,7 @@ export const PAGINAS_WEB: Servicio = {
     {
       pregunta: '¿Cuánto tarda una web?',
       // SPEC §7.1: el proceso y el plazo de referencia, que es una referencia y nunca una promesa
-      respuesta: `Como referencia, ${PLAZO.charAt(0).toLowerCase()}${PLAZO.slice(1)}. Va de la charla a la propuesta, el diseño, el desarrollo y la entrega, y vas viendo el avance mientras se construye.`,
+      respuesta: `Como referencia, ${PLAZO.charAt(0).toLowerCase()}${PLAZO.slice(1)}. Va de la charla a la propuesta, el diseño, el desarrollo y la entrega.`,
     },
     {
       pregunta: '¿Puedo editarla yo después?',
@@ -180,8 +180,8 @@ export const PAGINAS_WEB: Servicio = {
     },
     {
       pregunta: '¿Me ayudan con el dominio y la publicación?',
-      // L7a: la sección Servicios del home (hosting, dominio y certificado) y la base (`pagina-base/faq.ts`)
-      respuesta: 'Sí. Te acompañamos con el dominio y dejamos la página publicada y funcionando antes de darla por terminada.',
+      // L7a: la sección Servicios del home (hosting, dominio y certificado) y SPEC §7.1 (la entrega)
+      respuesta: 'Sí. El hosting, el dominio y el certificado son parte de lo que hacemos, y la entrega es la página publicada y funcionando.',
     },
     {
       pregunta: '¿Qué pasa después de la entrega?',

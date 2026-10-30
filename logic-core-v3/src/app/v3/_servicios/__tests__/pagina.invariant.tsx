@@ -603,9 +603,9 @@ const maquinaQueLaSacaArriba: typeof siguienteEstado = (estado, evento) => (even
 controlPositivo('  una máquina que la saca cuando se va por arriba, bajando, se detecta', maquinaQueLaSacaArriba, (m: typeof siguienteEstado) => JSON.stringify(cruces(m, 'puesto')) === JSON.stringify(['puesto', 'ido', 'puesto', 'puesto']))
 // [M1] La línea vuelve a la del remate del home, para que la salida al subir pase a la vista; la franja de debajo la cubre la guarda.
 // [R1] Desde P-H18 el remate toma la línea del contrato. [L7a] `tu-panel/entrada.ts` ya no existe en el home: la línea es la del contrato
-// (`_contrato/disparo.ts`), la única; se afirma que queda dentro de la vista.
-const lineaDelRemate = (linea: number): boolean => linea > 0 && linea < 100
-afirmar(lineaDelRemate(LINEA_DEL_DISPARO), `la línea de disparo es la del contrato: ${String(LINEA_DEL_DISPARO)} % desde abajo, dentro de la vista (_contrato/disparo.ts)`)
+// (`_contrato/disparo.ts`), la única, y vale lo que el home fija (6 %, como la clava s42).
+const lineaDelRemate = (linea: number): boolean => linea === 6
+afirmar(lineaDelRemate(LINEA_DEL_DISPARO), `la línea de disparo es la del contrato: ${String(LINEA_DEL_DISPARO)} % desde abajo (_contrato/disparo.ts)`)
 controlPositivo('  la línea en el borde (la salida pasaría fuera de la vista) se detecta', 0, lineaDelRemate)
 // [M1] LA GUARDA EN REPOSO (P-H25): con el scroll quieto, lo que está a la vista y no se disparó se dispara; lejos de la vista, nada.
 const reposos = (maquina: typeof siguienteEstado, aLaVista: boolean): EstadoDelGatillo[] => ESTADOS_DEL_GATILLO.map((e) => maquina(e, { tipo: 'reposo', aLaVista }))

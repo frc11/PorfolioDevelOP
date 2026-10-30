@@ -76,15 +76,15 @@ export const SOFTWARE_A_MEDIDA: Servicio = {
     pasos: [
       { nombre: 'Relevamiento', texto: 'Nos sentamos a entender cómo trabajás: qué se carga, quién lo usa y dónde se traba. Después presupuestamos, no antes.' },
       { nombre: 'Prototipo', texto: 'Antes de construir, ves cómo va a funcionar: las pantallas principales y el recorrido de cada tarea.' },
-      { nombre: 'Desarrollo', texto: 'Lo construimos por partes y lo probás en un ambiente de prueba, con tus datos, antes de usarlo de verdad.' },
-      { nombre: 'Entrega', texto: 'Lo ponemos en marcha, pasamos lo que ya tenías y capacitamos a tu equipo para usarlo.' },
+      { nombre: 'Desarrollo', texto: 'Lo construimos y lo probás en un ambiente de prueba antes de salir.' },
+      { nombre: 'Entrega', texto: 'Lo ponemos en marcha, migramos tus planillas y capacitamos a tu equipo para usarlo.' },
       { nombre: 'Soporte', texto: `Los primeros meses te acompañamos de cerca: ${SOPORTE_INCLUIDO}.` },
     ],
     plazo: 'Depende de la complejidad',
   },
   entrega: [
     'El sistema funcionando, desde la compu o el celular',
-    'Tus datos de antes, pasados al sistema',
+    'Tus planillas, migradas al sistema',
     'Tu equipo capacitado para usarlo',
     'Acceso a tu portal del cliente',
   ],
@@ -111,13 +111,13 @@ export const SOFTWARE_A_MEDIDA: Servicio = {
     },
     {
       pregunta: '¿Cuánto tarda?',
-      // L7a: SPEC §7.2 (depende de la complejidad; el prototipo es un paso)
-      respuesta: 'Depende de la complejidad. Los tiempos van en la propuesta y, desde el prototipo, ves cómo avanza.',
+      // L7a: SPEC §7.2 (depende de la complejidad) y 05-TEXTOS (primero entendemos, después presupuestamos)
+      respuesta: 'Depende de la complejidad: primero entendemos qué hay que hacer y recién ahí se puede estimar.',
     },
     {
       pregunta: '¿Qué pasa con mis planillas?',
       // L7a: la sección Servicios del home (migración de tus planillas)
-      respuesta: 'Las pasamos al sistema. Lo que ya tenés cargado no se pierde: arrancás con tus datos.',
+      respuesta: 'Las pasamos al sistema: la migración de tus planillas es parte de lo que hacemos, para que no arranques de cero.',
     },
     {
       pregunta: '¿Qué pasa si después necesito cambios?',
