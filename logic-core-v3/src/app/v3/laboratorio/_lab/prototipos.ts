@@ -65,6 +65,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'La historia de develOP entera, palabra por palabra: lo leído queda en tinta, lo que viene en gris. ¿Se lee bien a este ritmo o cansa?',
     sale: 'El título del Panel que se pinta (el cálculo de _componentes/pintado, importado), estirado a un texto largo.',
   },
+  {
+    slug: 'carrusel-del-blog',
+    codigo: 'B1',
+    titulo: 'El carrusel de las destacadas',
+    pagina: 'Blog',
+    mirar: 'Cambia solo cada 10 s, con las líneas de arriba (llenas las ya vistas); mantené apretado para pausar; flechas y dedo. El titular se levanta al entrar. Las tapas son tipográficas porque las notas no tienen foto.',
+    sale: 'CarruselDeTarjetas (el del Portfolio y Demos en el teléfono) y TitularQueSeLevanta, importados.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
