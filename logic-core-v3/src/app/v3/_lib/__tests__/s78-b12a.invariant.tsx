@@ -184,7 +184,8 @@ titulo('B12a.2 · 7 · El cableado: el avance va por su canal, no por el progres
 
 const enLaPagina = (a: string): string => /if \(secciones === null\) \{[\s\S]*?\n {6}\}\n/.exec(a)?.[0] ?? ''
 const escribeElAvance = (a: string): boolean =>
-  /const intro = preset === null \|\| preset\.pista === null \|\| preset\.tramos === null \? null : document\.querySelector\(preset\.tramos\.intro\)\s*if \(intro !== null\) AVANCE_DE_LA_INTRO\.current = avanceDeLaIntro\(intro\.getBoundingClientRect\(\)\.top \+ desplazamiento, desplazamiento, ventana\)/.test(enLaPagina(a)) &&
+  /const intro = preset === null \|\| preset\.pista === null \|\| preset\.tramos === null \? null : document\.querySelector\(preset\.tramos\.intro\)\s*if \(intro !== null\) AVANCE_DE_LA_INTRO\.current = avanceDeLaIntro\(intro\.getBoundingClientRect\(\)\.top \+ desplazamiento, desplazamiento, ventana, pantallasDeLaIntro\(preset\)\)/.test(enLaPagina(a)) &&
+  // [M1] Reemplazada por la spec: el avance se mide con el largo de la intro de ESA página (la de día, 3,4; la de noche, 1,8).
   // [B12a.6] Reemplazada por la spec: en una página el progreso del rig sólo vuelve al del hero (0: con la navegación cliente llegaba el del
   // home); nunca lleva el avance de la intro.
   (enLaPagina(a).match(/rig\.set\(/g) ?? []).length === 1 && /if \(rig\.current\.progress !== 0\) rig\.set\('progress', 0\)/.test(enLaPagina(a))

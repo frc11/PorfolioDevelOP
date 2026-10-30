@@ -6,7 +6,7 @@ import { armarLaCamara, cajaProyectada } from '../poseDelPortfolio'
 
 import { poseDelCierre } from './cierreDeLaPagina'
 import { COMPOSICION_EN_LA_ESCENA, type HuecoDeLaIntro } from './composicion'
-import { avanceDelGiro, esIntroDeDia } from './pistaDeLaIntro'
+import { COMPOSICION_INICIAL, avanceDelGiro, esIntroDeDia } from './pistaDeLaIntro'
 import { presetActual } from './preset'
 import { camaraDelViaje, mezclarConLaPartida } from './viajeDelServicio'
 
@@ -89,6 +89,8 @@ export function poseDeLaIntro(track: ChoreoTrack, avance: number, objetivo: Muta
   // [M1] De día el logo pasa del hueco del título al del giro (del lado contrario al bloque de la página) a lo largo del giro.
   if (esIntroDeDia(presetActual())) {
     const peso = avanceDelGiro(avance)
+    // [M1] En un cuadro vertical la cámara no se acerca en el giro: a la distancia de Quiénes somos el logo llenaba la pantalla y el bloque caía encima.
+    if (aspecto < 1) objetivo.distance = Math.max(objetivo.distance, COMPOSICION_INICIAL.distance)
     if (hueco === null && giro === null) return
     const delTitulo = hueco === null || peso >= 1 ? { frameX: objetivo.frameX, frameY: objetivo.frameY } : encuadreDelHueco(objetivo, hueco, aspecto, fov, logoW, logoH)
     const delGiro = giro === null || peso <= 0 ? { frameX: objetivo.frameX, frameY: objetivo.frameY } : encuadreDelHueco(objetivo, giro, aspecto, fov, logoW, logoH, DEL_GIRO)

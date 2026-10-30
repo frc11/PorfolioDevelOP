@@ -20,6 +20,7 @@ const BASE = process.env.BASE ?? 'http://localhost:3003'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
 const FOTOS = process.env.FOTOS ?? 'C:\\nocturno\\cola3-fotos\\M1'
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+const PASOS = (process.env.PASOS ?? 'intro,equipo,casos,tapas').split(',')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 let fallas = 0
 const informar = (bien: boolean, linea: string): void => {
@@ -227,18 +228,23 @@ async function main(): Promise<void> {
       await p.route('**/api/**', (r) => r.abort())
       const errores: string[] = []
       p.on('pageerror', (e) => errores.push(e.message.slice(0, 200)))
-      const pasos: (() => Promise<void>)[] = [
-        () => laIntro(p, 'nosotros', ancho, alto),
-        () => laIntro(p, 'portfolio', ancho, alto),
-        () => laIntro(p, 'blog', ancho, alto),
-        () => elEquipo(p, ancho, alto),
-        () => losCasos(p, ancho, alto),
+      // `PASOS` elige cuáles corren: las tapas muestrean cuadros, y eso se corre con el candado (un carril en paralelo cambia los cuadros).
+      const todos: [string, () => Promise<void>][] = [
+        ['intro', () => laIntro(p, 'nosotros', ancho, alto)],
+        ['intro', () => laIntro(p, 'portfolio', ancho, alto)],
+        ['intro', () => laIntro(p, 'blog', ancho, alto)],
+        ['equipo', () => elEquipo(p, ancho, alto)],
+        ['casos', () => losCasos(p, ancho, alto)],
       ]
-      if (ancho >= 1024) pasos.push(async () => {
-        await lasTapas(p, ancho, alto)
-        await laVentana(p, ancho, alto)
-      })
-      for (const paso of pasos) await paso().catch((e: unknown) => informar(false, `${String(ancho)} · se cayó: ${String(e).slice(0, 240)}`))
+      if (ancho >= 1024)
+        todos.push([
+          'tapas',
+          async () => {
+            await lasTapas(p, ancho, alto)
+            await laVentana(p, ancho, alto)
+          },
+        ])
+      for (const [nombre, paso] of todos) if (PASOS.includes(nombre)) await paso().catch((e: unknown) => informar(false, `${String(ancho)} · se cayó: ${String(e).slice(0, 240)}`))
       informar(errores.length === 0, `${String(ancho)} · errores de la página: ${errores.length === 0 ? 'ninguno' : JSON.stringify(errores)}`)
     } finally {
       await ctx.close()

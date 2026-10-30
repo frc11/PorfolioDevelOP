@@ -39,7 +39,7 @@ function FraseQueSePinta({ texto }: { readonly texto: string }): React.JSX.Eleme
     }
   }, [reducido])
   return (
-    <span ref={frase} data-frase-pintada="" className="font-display font-fuerte tracking-display uppercase">
+    <span ref={frase} data-frase-pintada="" className="font-display font-fuerte tracking-texto uppercase">
       {texto.split(' ').map((palabra, i) => (
         <span key={i}>
           <span data-palabra="" style={COLOR_DE_LA_PALABRA}>
