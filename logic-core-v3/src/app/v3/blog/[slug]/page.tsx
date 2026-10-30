@@ -23,7 +23,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${nota.titulo} | Blog develOP`,
     description: nota.resumen,
-    openGraph: { type: 'article', title: nota.titulo, description: nota.resumen, publishedTime: nota.fecha, locale: 'es_AR', siteName: 'develOP' },
+    alternates: { canonical: `/v3/blog/${nota.slug}` },
+    openGraph: { type: 'article', url: `/v3/blog/${nota.slug}`, title: nota.titulo, description: nota.resumen, publishedTime: nota.fecha, locale: 'es_AR', siteName: 'develOP' },
   }
 }
 

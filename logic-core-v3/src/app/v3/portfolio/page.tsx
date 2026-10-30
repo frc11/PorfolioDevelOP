@@ -12,6 +12,8 @@ import { PRESET } from './preset'
 export const metadata: Metadata = {
   title: 'Portfolio | develOP',
   description: 'Los sitios que hicimos para negocios reales, explicados de principio a fin, y las demos que armamos de ejemplo para distintos rubros.',
+  alternates: { canonical: '/v3/portfolio' },
+  openGraph: { type: 'website', locale: 'es_AR', siteName: 'develOP', title: 'Portfolio | develOP', description: 'Los sitios que hicimos para negocios reales, explicados de principio a fin, y las demos que armamos de ejemplo para distintos rubros.', url: '/v3/portfolio' },
 }
 
 export default function Portfolio(): React.JSX.Element {

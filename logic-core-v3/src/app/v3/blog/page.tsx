@@ -12,6 +12,8 @@ import { PRESET } from './preset'
 export const metadata: Metadata = {
   title: 'Blog | develOP',
   description: 'Guías cortas y concretas para dueños de negocios: páginas web, chatbots con IA, automatizaciones y software a medida, explicadas sin tecnicismos.',
+  alternates: { canonical: '/v3/blog' },
+  openGraph: { type: 'website', locale: 'es_AR', siteName: 'develOP', title: 'Blog | develOP', description: 'Guías cortas y concretas para dueños de negocios: páginas web, chatbots con IA, automatizaciones y software a medida, explicadas sin tecnicismos.', url: '/v3/blog' },
 }
 
 export default function Blog(): React.JSX.Element {

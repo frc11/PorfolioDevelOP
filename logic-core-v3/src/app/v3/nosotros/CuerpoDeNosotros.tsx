@@ -1,6 +1,7 @@
 'use client'
 
 import { Cta } from '../_componentes/chrome/Cta'
+import { EnlaceDeRuta } from '../_componentes/navegacion/EnlaceDeRuta'
 import { SeccionDePapel } from '../_componentes/pagina/SeccionDePapel'
 import { Caption, Cuerpo } from '../_componentes/tipografia/Textos'
 import { Titular } from '../_componentes/tipografia/Titular'
@@ -65,6 +66,9 @@ export function CuerpoDeNosotros(): React.JSX.Element {
           <div data-pieza="cta-de-nosotros" data-abre-contacto="panel" className="self-start">
             <Cta rotulo={CTA_DE_NOSOTROS.rotulo} />
           </div>
+          <EnlaceDeRuta href="/v3/portfolio" className="self-start font-semi underline underline-offset-4">
+            Ver nuestros trabajos
+          </EnlaceDeRuta>
         </Gatillo>
       </SeccionDePapel>
     </CompuertaDelHome>

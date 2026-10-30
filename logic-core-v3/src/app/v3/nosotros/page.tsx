@@ -12,6 +12,8 @@ import { PRESET } from './preset'
 export const metadata: Metadata = {
   title: 'Nosotros | develOP',
   description: 'Somos Franco y Valentino, dos amigos de Tucumán que hacemos sitios web, software y automatizaciones. Conocé nuestra historia, cómo trabajamos y lo que nos importa.',
+  alternates: { canonical: '/v3/nosotros' },
+  openGraph: { type: 'website', locale: 'es_AR', siteName: 'develOP', title: 'Nosotros | develOP', description: 'Somos Franco y Valentino, dos amigos de Tucumán que hacemos sitios web, software y automatizaciones. Conocé nuestra historia, cómo trabajamos y lo que nos importa.', url: '/v3/nosotros' },
 }
 
 export default function Nosotros(): React.JSX.Element {
