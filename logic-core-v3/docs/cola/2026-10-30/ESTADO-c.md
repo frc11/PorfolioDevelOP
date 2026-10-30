@@ -1,19 +1,15 @@
 # ESTADO · lane C (L7e, el laboratorio)
 
-Rama `l7/lab` · worktree `C:\nocturno\cola3c` · puerto 3004.
+Rama `l7/lab` · worktree `C:\nocturno\cola3c` · puerto 3004 (apagado).
 
 ## Hecho (commiteado)
-- Paso 1: `docs/ideas/VOZ-DEL-SITIO.md`.
-- Paso 2: `docs/ideas/MOMENTOS.md` (con ranking).
-- Paso 3, prototipos en `/v3/laboratorio/…` (índice en `/v3/laboratorio`): `no-encaja` (E1, 404), `dos-tomas` (N1+N4, Nosotros),
-  `fichas-abiertas` (P1, Portfolio), `conversacion-en-vivo` (I1, IA), `lo-de-siempre-tachado` (S1, Software), `historia-que-se-pinta`
-  (N2, Nosotros), `carrusel-del-blog` (B1), `notas-irregulares` (B2). Lint limpio en `laboratorio/`.
+- `docs/ideas/VOZ-DEL-SITIO.md`, `docs/ideas/MOMENTOS.md`, `docs/ideas/COMO-MIRAR.md`.
+- 12 prototipos + índice en `/v3/laboratorio`, verificados a 1440 y 390 (tsc 0, lint limpio, sin errores de consola, sin desborde).
+- Capturas en `C:\nocturno\cola3-fotos\L7\laboratorio\` (26).
+- `L7e-resultado.md` y `L7e-TERMINADO`.
 
 ## En curso
-- Más prototipos: L1 (la nota), G1 (índice legal), N3 (cómo trabajamos), W1 (la pantalla que se dibuja).
-- **Sin verificar en el navegador todavía**: el lock lo tiene la lane A desde 08:27 (lote pesado). La ráfaga de verificación (tsc + dev
-  :3004 + Chrome a 1440 y 390 + capturas) va cuando se libere.
+- Sigo construyendo prototipos de MOMENTOS que no estaban (W2, S2…): cada uno con su commit; el resultado se actualiza al final.
 
-## Próximo
-- Ráfaga de verificación de todo junto; arreglar lo que salga; capturas en `C:\nocturno\cola3-fotos\L7\laboratorio\`.
-- `docs/ideas/COMO-MIRAR.md`, `L7e-resultado.md`, `L7e-TERMINADO`.
+## Si la noche se corta
+- Todo lo de arriba está commiteado y el lote está cerrado; lo que esté a medio hacer en `laboratorio/` sin commit se puede descartar.

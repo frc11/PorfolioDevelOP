@@ -248,7 +248,35 @@ Lo que hace que esto se sienta develOP, en orden:
   necesita otra: tiene el cierre.
 - **La noche** se dispara dos veces en el recorrido (la gota y el final).
 
-## 11. Para quien construya las páginas (resumen en una línea por regla)
+## 11. Lo que aprendí usando las piezas fuera del home (el laboratorio)
+
+Armando doce prototipos con piezas importadas aparecieron cosas que el inventario no muestra. Ninguna se cambió (son del home); las que
+piden un cambio están como **propuesta** al final de `docs/cola/2026-10-30/L7e-resultado.md`.
+
+- **Una ruta sin preset tiene la escena debajo, dormida pero pintada.** El lienzo es `fixed z-0`: el papel de una página tiene que ser
+  `relative z-10 bg-fondo` (como `/v3/piezas`), o la escena se pinta encima a partir de 1024. Y nada de `data-panel`: con uno, la escena
+  toma la ruta por el home.
+- **Las demos del Panel traen su propio `h1`.** Con dos demos montadas, la página del prototipo de IA tiene tres `h1` (medido a 390). En
+  el home pasa lo mismo; en una página real rompe «un `h1` por página» (P-H31 lo pide).
+- **Las demos del Panel usan la paleta vieja** (el cian del panel real). Sobre una página de IA (verde) se nota.
+- **La itálica de Chivo sólo tiene mayúsculas** (68 posiciones, `layout.tsx`). El segundo registro de un título va siempre en
+  mayúsculas; en minúsculas cae a la fuente de reserva sin avisar.
+- **`CtaEnlace` es un `<a>` común**: para ir a otra página de /v3 con el velo hay que armar el CTA a mano (`EnlaceDeRuta` con
+  `data-pieza="cta"` y `ContenidoDelCta` adentro). Falta un CTA de ruta.
+- **Un CTA sobre una caja oscura** no se arregla con `text-fondo`: `cta.css` pinta con `--color-tinta`. Se resuelve con la caja como
+  sección invertida (`data-seccion="invertida"`) o pisando `--color-tinta` (como el «Visitar sitio» con el color de la marca).
+- **`MarcoDeDosTomas` no se puede abrir desde afuera**: su estado es interno. Para abrirlo con el scroll, el prototipo aprieta su botón
+  (el mismo camino que un toque, con su sonido y su `aria-pressed`).
+- **`Trazo` reparte un solo progreso**: el subrayado en la primera mitad y el tachado en la segunda. Para usar uno solo hay que correr el
+  progreso (lo hacen el tachado de Software, el proceso y el tiempo de lectura).
+- **El pintado palabra por palabra sirve para texto largo** con un solo cambio: el avance sale de cuánto del bloque pasó la línea de
+  lectura, no del centro del título (`_lab/usePintadoDelBloque.tsx`).
+- **`vector-effect: non-scaling-stroke` rompe el trazo que se dibuja**: el guion se mide en píxeles de pantalla y `getTotalLength()` en
+  unidades del `viewBox`, así que el trazo queda cortado. Para dibujar con `strokeDashoffset`, sin `non-scaling-stroke`.
+- **Un gatillo por `IntersectionObserver` no ve un salto**: si el scroll salta por encima de un elemento sin que entre a la pantalla, el
+  observador no avisa y el estado queda viejo. Un escuchador de scroll con un cuadro por vez es igual de barato y no se pierde el salto.
+
+## 12. Para quien construya las páginas (resumen en una línea por regla)
 
 - Una página nueva **deriva** su momento de una mecánica de §3–§6, con otro contenido. Lo que no se puede rastrear al home, probablemente
   no sea develOP.
