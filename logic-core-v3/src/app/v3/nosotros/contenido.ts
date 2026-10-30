@@ -6,40 +6,86 @@ import type { PreguntaFrecuente } from '../_componentes/faq/preguntas'
  */
 export const INTRO_DE_NOSOTROS = {
   bajada: 'Somos Franco y Valentino, dos amigos de Tucumán que hacemos sitios, software y automatizaciones para negocios.',
-  etiqueta: 'De qué se trata',
-  deQueSeTrata: 'Esta es nuestra historia, cómo trabajamos y lo que nos importa a la hora de ocuparnos de tu proyecto.',
-} as const
-
-export const HISTORIA = {
-  titulo: 'Nuestra historia',
-  parrafos: [
-    'Somos dos amigos que nos conocemos de toda la vida. Fuimos al mismo colegio y, cuando llegó el momento de elegir, decidimos estudiar la misma carrera.',
-    'Estudiamos en la Universidad Nacional de Tucumán, en la Facultad de Ciencias Exactas (FACET), y los dos estamos en el último año. Nos desenvolvemos bien en lo académico y somos de Tucumán, de Yerba Buena.',
-    'Con el final de la carrera cerca nos quedó un hambre: trabajar, crecer y ganar experiencia. Queremos emprender siendo dueños de nuestro propio negocio y entregar un trabajo de calidad excepcional. Los dos somos perfeccionistas y trabajadores: no paramos hasta terminar todo.',
-    'Más allá de lo económico, develOP significa para nosotros crecimiento personal y el forjamiento de una marca que va a guiar nuestras vidas. No es un proyecto aislado: es nuestra historia y la huella que queremos dejar. Nuestra idea es ofrecer soluciones tecnológicas a empresas que las necesiten, no solo acá sino también afuera. No tenemos límites.',
+  etiqueta: 'Qué vas a encontrar',
+  // [M1] El bloque del giro (el lugar que el home le da a Quiénes somos): qué hay más abajo, sin hechos nuevos.
+  deQueSeTrata: [
+    'Nos conocemos de toda la vida: fuimos al mismo colegio y elegimos la misma carrera. develOP es lo que armamos juntos.',
+    'Más abajo está nuestra historia, quién se ocupa de qué, cómo trabajamos con cada negocio paso por paso y lo que nos importa cuando tomamos tu proyecto.',
   ],
 } as const
 
+/** [M1] Un tramo de la historia; `destacado`: una de las tres frases que se pintan con el scroll (lo único que se pinta). */
+export interface TramoDeLaHistoria {
+  readonly texto: string
+  readonly destacado?: boolean
+}
+
+/**
+ * [M1] La historia, en palabras de Valentino (`ESTRUCTURA-PAGINAS.md`, «La historia»; el texto del prototipo 6 de `l7/lab`): cuatro
+ * párrafos, sin hechos nuevos. Sólo las tres frases que el prototipo destacaba se pintan; todo lo demás sube desde abajo.
+ */
+export const HISTORIA: { readonly titulo: string; readonly parrafos: readonly (readonly TramoDeLaHistoria[])[] } = {
+  titulo: 'Nuestra historia',
+  parrafos: [
+    [
+      { texto: 'Somos dos amigos que nos conocemos de toda la vida.' },
+      { texto: 'Fuimos al mismo colegio y decidimos estudiar la misma carrera.' },
+      { texto: 'Ya estamos en el último año, con hambre de trabajar y de salir al mundo laboral.' },
+    ],
+    [
+      { texto: 'Queremos emprender con esto: ser dueños de nuestro propio negocio y entregar un trabajo de' },
+      { texto: 'calidad excepcional.', destacado: true },
+      { texto: 'Somos muy perfeccionistas y trabajadores; no paramos hasta terminar todo.' },
+    ],
+    [
+      { texto: 'Más allá de lo económico, develOP es para nosotros crecimiento personal y una marca que va a guiar nuestras vidas.' },
+      { texto: 'Esto no es un proyecto aislado:', destacado: true },
+      { texto: 'es nuestra historia, y lo que queremos dejar como nuestra huella.' },
+    ],
+    [
+      { texto: 'Estudiamos en la Universidad Nacional de Tucumán, en la Facultad de Ciencias Exactas, y somos de Yerba Buena.' },
+      { texto: 'Queremos ofrecer soluciones tecnológicas a las empresas que las necesiten, acá y en el resto del mundo.' },
+      { texto: 'No tenemos límites.', destacado: true },
+    ],
+  ],
+}
+
+/** [M1] El equipo: el párrafo largo de cada uno (el texto del prototipo 2 de `l7/lab`, armado con ESTRUCTURA y los roles del home). */
 export const EQUIPO = {
   titulo: 'El equipo',
-  franco: {
-    texto:
-      'Franco se ocupa de la estrategia, de lo comercial y de la planificación. Su trabajo es entender qué necesita tu negocio, ordenar lo que hay que hacer y armar el camino para llegar. Es enfocado, creativo y perfeccionista, y se encarga de toda la estructura de develOP, para que cada proyecto tenga un orden claro de principio a fin.',
-  },
-  valentino: {
-    texto:
-      'Valentino está a cargo de la ejecución técnica: escribe el sistema, lo pone a andar y lo mantiene. Es obsesivo, curioso e inconformista, de los que no se conforman con que algo funcione si todavía se puede hacer mejor. Se ocupa de que lo que se planificó se vea y se comporte como corresponde, tanto en la computadora como en el teléfono.',
-  },
+  franco: [
+    'Franco es la mitad de develOP que piensa antes de que se escriba una línea: la estrategia, lo comercial y la planificación. Es el que se sienta con cada negocio a entender qué necesita y cómo trabaja, y el que ordena el camino para llegar.',
+    'Somos de Yerba Buena, en Tucumán, y nos conocemos de toda la vida: fuimos al mismo colegio y elegimos la misma carrera. Los dos estamos en el último año, con hambre de salir a trabajar y de construir algo propio.',
+  ],
+  valentino: [
+    'Valentino es la ejecución técnica: escribe el sistema, lo pone a andar y lo mantiene. Perfeccionista como Franco, no para hasta que todo está terminado y bien hecho.',
+    'Para los dos, develOP es más que un trabajo: es crecimiento personal y una marca que queremos que nos guíe. No es un proyecto aislado, es nuestra historia, y queremos llevarla a empresas de acá y de afuera.',
+  ],
 } as const
 
+/** [M1] La foto de la facultad (la real, de Valentino): 500 × 298, se muestra a su ancho como mucho. */
+export const FACULTAD = {
+  titulo: 'Donde estudiamos',
+  leyenda: 'FACET · Universidad Nacional de Tucumán',
+  src: '/v3/nosotros/facultad.webp',
+  alt: 'La Facultad de Ciencias Exactas (FACET) de la Universidad Nacional de Tucumán, donde estudiamos los dos',
+  ancho: 500,
+  alto: 298,
+} as const
+
+/**
+ * [M1] Cómo trabajamos: los pasos del prototipo 7 (`l7/lab`), armados SÓLO con lo que el home ya dice («Primero nos sentamos a entender
+ * cómo trabajás… Después presupuestamos, no antes», «Hablás con quien lo hace», «Ves cómo va tu proyecto y pedís cambios sin esperar un
+ * mail», «la manejás vos desde tu panel», «Tu panel crece con vos»). Valentino los revisa después.
+ */
 export const PROCESO = {
   titulo: 'Cómo trabajamos',
-  bajada: 'Cuatro pasos, sin sorpresas: sabés qué viene antes de que arranque.',
   pasos: [
-    { numero: '01', titulo: 'Hablamos y entendemos tu negocio', texto: 'Empezamos conversando. Queremos saber a qué te dedicás, qué necesitás y qué te está faltando hoy.' },
-    { numero: '02', titulo: 'Propuesta y presupuesto antes de empezar', texto: 'Te contamos qué proponemos y cuánto cuesta, por escrito. Si estás de acuerdo, arrancamos.' },
-    { numero: '03', titulo: 'Construimos con revisiones en el camino', texto: 'Vas viendo cómo avanza y nos decís qué cambiarías. Ajustamos sobre la marcha, no al final.' },
-    { numero: '04', titulo: 'Entrega, panel y soporte', texto: 'Te entregamos todo funcionando, con tu panel para seguir tu proyecto, y seguimos a tu lado después.' },
+    { titulo: 'Charlamos', texto: 'Nos sentamos a entender tu negocio: qué vendés, cómo trabajás, quién lo usa y dónde se traba. Hablás con quienes lo van a hacer.' },
+    { titulo: 'Presupuestamos', texto: 'Después de entender, no antes. Te decimos qué te conviene y por qué.' },
+    { titulo: 'Lo construimos', texto: 'Desde cero, para tu negocio. Ves cómo va en tu panel y pedís cambios sin esperar un mail.' },
+    { titulo: 'Lo manejás vos', texto: 'Cuando está listo, no te lo tiramos por la cabeza: cambiás precios, fotos y textos desde tu panel, sin depender de nadie.' },
+    { titulo: 'Crece con vos', texto: 'Sumamos módulos nuevos cuando tu negocio los necesita.' },
   ],
 } as const
 

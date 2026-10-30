@@ -26,7 +26,9 @@ export default function Nosotros(): React.JSX.Element {
         deQueSeTrata={
           <>
             <EtiquetaDeSeccion sangria={false}>{INTRO_DE_NOSOTROS.etiqueta}</EtiquetaDeSeccion>
-            <Cuerpo>{INTRO_DE_NOSOTROS.deQueSeTrata}</Cuerpo>
+            {INTRO_DE_NOSOTROS.deQueSeTrata.map((p) => (
+              <Cuerpo key={p}>{p}</Cuerpo>
+            ))}
           </>
         }
       />
