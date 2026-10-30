@@ -1,7 +1,7 @@
 /**
  * INVARIANTE — Los momentos de las tres páginas de servicio. **[M3]**
  *
- * Corre a mano, como los demás de `_servicios`: `npx tsx src/app/v3/_servicios/__tests__/momentos.invariant.tsx`.
+ * Corre con `npm run test:s94-m3-momentos` (lo sumó M-INT; `verificar` lo corre). Los demás de `_servicios` siguen a mano con `npx tsx`.
  *
  * Afirma la CUENTA de cada momento (pura) y el MARCADO que sirve la página (`renderToStaticMarkup` de la intro y el cuerpo), cada
  * comprobación con su control positivo (el mismo detector contra una entrada armada para fallar):

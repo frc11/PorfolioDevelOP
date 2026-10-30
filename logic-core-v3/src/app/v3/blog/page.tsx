@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function Blog(): React.JSX.Element {
   return (
-    <main className="relative z-10">
+    <main className="relative z-10 overflow-x-clip">
       <IntroDeLaPagina
         titulo="Blog"
         preset={PRESET}

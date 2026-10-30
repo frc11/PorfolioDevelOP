@@ -5,6 +5,7 @@ import { ContactoDelPie, LineaLegal, RedesDelPie } from '../../_secciones/cierre
 import { Envoltorio } from '../layout/Envoltorio'
 import { Caption, Cuerpo } from '../tipografia/Textos'
 import { Titular } from '../tipografia/Titular'
+import { ID_DEL_CONTENIDO_DE_PAGINA } from './atributoDeLaIntro'
 
 /**
  * [L7d · 1] LA PÁGINA LEGAL — Privacidad y Términos: sin escena ni 3D. Una intro corta y plana (el título y una línea), el texto legal con un
@@ -41,8 +42,9 @@ export function PaginaLegal({ texto }: { readonly texto: TextoLegal }): React.JS
     </ol>
   )
   return (
-    <main data-pagina-legal="" className="relative z-10 bg-fondo text-tinta">
-      <header className="pt-[var(--spacing-20)] pb-[var(--spacing-8)]">
+    <main data-pagina-legal="" className="relative z-10 overflow-x-clip bg-fondo text-tinta">
+      {/* [M-INT] El destino del salto al contenido (focalizable, no tabulable). */}
+      <header id={ID_DEL_CONTENIDO_DE_PAGINA} tabIndex={-1} className="pt-[var(--spacing-20)] pb-[var(--spacing-8)]">
         <Envoltorio claseDeContenido="flex flex-col gap-[var(--spacing-3)] pt-[var(--spacing-12)]">
           <Titular nivel="titulo-xl" como="h1">
             {texto.titulo}

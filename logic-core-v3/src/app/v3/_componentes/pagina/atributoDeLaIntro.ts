@@ -4,6 +4,8 @@
  * que esa intro renderiza, lo lea sin importarla.
  */
 export const ATRIBUTO_DE_LA_INTRO_DE_PAGINA = 'data-intro-de-pagina'
+/** [M-INT] Adonde salta «Saltar al contenido» fuera del home: la primera pieza de la página (la intro, la cabecera legal, la 404). */
+export const ID_DEL_CONTENIDO_DE_PAGINA = 'contenido'
 /** El selector de la intro: lo que va en `tramos.intro` del preset de una página. */
 export const SELECTOR_DE_LA_INTRO = `[${ATRIBUTO_DE_LA_INTRO_DE_PAGINA}]`
 

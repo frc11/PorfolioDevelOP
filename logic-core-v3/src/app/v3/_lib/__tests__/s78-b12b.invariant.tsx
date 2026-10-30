@@ -141,7 +141,7 @@ async function principal(): Promise<void> {
   const enLaComposicion = igual(pose(), COMPOSICION_INICIAL)
   afirmar(enLaPartida && enLaComposicion, 'el rig (la pose de la intro con la pista del destino): durante el viaje, de la partida; fuera, la composición inicial (sin un número cambiado)')
   const rig = leer('_lib/escena/ruta/composicionEnLaEscena.ts')
-  const poseCableada = (c: string): boolean => /sampleTrack\(track, avance, objetivo\)\s*(?:\/\/[^\n]*\n\s*)?mezclarConLaPartida\(objetivo, camaraDelViaje\(performance\.now\(\)\)\)\s*const hueco/.test(c)
+  const poseCableada = (c: string): boolean => /sampleTrack\(track, avance, objetivo\)\s*(?:\/\/[^\n]*\n\s*)?mezclarConLaPartida\(objetivo, camaraDelViaje\(performance\.now\(\)\)\)\s*const \{ hueco, giro \}/.test(c) // [M-INT] M1 lee los dos huecos (el del título y el del giro)
   afirmar(poseCableada(rig), '  la mezcla va DESPUÉS de la pista y ANTES del encuadre del hueco: el logo va en su hueco durante todo el descenso')
   controlPositivo('  el detector ve la mezcla después del encuadre (el logo se saldría del hueco al bajar)', rig.replace(/(\s*\/\/[^\n]*\n\s*mezclarConLaPartida\(objetivo, camaraDelViaje\(performance\.now\(\)\)\))/, '').replace('  objetivo.frameY = e.frameY\n', '  objetivo.frameY = e.frameY\n  mezclarConLaPartida(objetivo, camaraDelViaje(performance.now()))\n'), poseCableada)
 

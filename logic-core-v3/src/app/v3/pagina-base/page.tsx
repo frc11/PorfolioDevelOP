@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function PaginaBase(): React.JSX.Element {
   return (
-    <main className="relative z-10">
+    <main className="relative z-10 overflow-x-clip">
       <IntroDeLaPagina
         titulo="Páginas web"
         preset={PRESET}

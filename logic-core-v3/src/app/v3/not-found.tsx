@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { Envoltorio } from './_componentes/layout/Envoltorio'
 import { EnlaceDeRuta } from './_componentes/navegacion/EnlaceDeRuta'
-import { SELECTOR_DE_LA_INTRO, ATRIBUTO_DE_LA_INTRO_DE_PAGINA } from './_componentes/pagina/atributoDeLaIntro'
+import { SELECTOR_DE_LA_INTRO, ATRIBUTO_DE_LA_INTRO_DE_PAGINA, ID_DEL_CONTENIDO_DE_PAGINA } from './_componentes/pagina/atributoDeLaIntro'
 import { Cuerpo } from './_componentes/tipografia/Textos'
 import { Titular } from './_componentes/tipografia/Titular'
 import { PresetDeLaPagina } from './_lib/escena/ruta/PresetDeLaPagina'
@@ -33,8 +33,8 @@ const PRESET: PresetDeLaEscena = {
 
 export default function NoEncontrada(): React.JSX.Element {
   return (
-    <main className="relative z-10">
-      <section {...{ [ATRIBUTO_DE_LA_INTRO_DE_PAGINA]: PRESET.id }} className="relative flex min-h-svh items-center text-tinta max-escritorio:items-end max-escritorio:pb-[var(--spacing-20)]">
+    <main className="relative z-10 overflow-x-clip">
+      <section {...{ [ATRIBUTO_DE_LA_INTRO_DE_PAGINA]: PRESET.id }} id={ID_DEL_CONTENIDO_DE_PAGINA} tabIndex={-1} className="relative flex min-h-svh items-center text-tinta max-escritorio:items-end max-escritorio:pb-[var(--spacing-20)]">
         <PresetDeLaPagina preset={PRESET} />
         <Envoltorio className="w-full">
           {/* [L7g] La caja termina a 4,5 rem del logo (su medio ancho: 0,277 del alto, tope 0,175 del ancho): a 1440 lo rozaba y a 1920 lo pisaba 59 px. */}

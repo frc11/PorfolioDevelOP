@@ -18,3 +18,6 @@ Rama `l7/a`, worktree `C:\nocturno\cola3`, dev :3002. Un lote: L7a (las tres pá
 
 ## L7g (2026-10-30, sobre la rama integrada)
 - Hecho: enlaces de Quiénes somos y Portfolio a sus páginas, Privacidad y Términos en el pie 3D (geometría medida igual), foto de la facultad, la 404 sin pisar el logo (43 px de holgura a 1440 y 1920), el desborde del CTA del cierre a 320/390, ondas del sonido verificadas en el navegador, matriz de 10 páginas × 5 anchos (49/50; la falla no se repite). **Pendiente:** el logo del pie arriba en las páginas (plan en `L7g-resultado.md`, L7g-1) y los nanobots (falta el archivo). Ver `L7g-resultado.md`.
+
+## M-INT (2026-10-30, L7g + M1 + M2 + M3)
+- Merges de m/1, m/2 y m/3 resueltos (la foto de la facultad una sola vez, la 404 con la animación de M2 y el espacio de L7g). Integración sin commitear: el recorte en el `<main>` de cada página (blog 390: 0 px), `banda.css` acotada a lo que mezcla (fuera el parche de M3), «Saltar al contenido» según la ruta (en las diez páginas no llevaba a nada), 15 scripts nuevos en `package.json` (s92–s94), cuatro suites a la spec. Compuerta: los mismos 11 grupos rojos que la base; una afirmación nueva, la de `s7-compuerta` de L7-INT (+6,3 KiB gzip de entrada). Ver `M-INT-resultado.md`.

@@ -194,10 +194,12 @@ controlPositivo('el chequeo del px suelto ve una clase con un valor en px', `<i 
 afirmarIgual(hoversSinFoco(quieto), [], `los ${veces(quieto, 'hover:')} \`hover:\` llevan su \`focus-visible:\` en la misma clase`)
 controlPositivo('  el detector ve un hover sin su gemela', '<a class="hover:underline">x</a>', (html: string) => hoversSinFoco(html).length === 0)
 afirmarIgual(veces(quieto, '<button'), CONTENIDO.proyectos.length + 1 + 1, 'CINCO botones: una cabecera por tira (las tres y la tuya) y [B1.2c] «Enviar» del formulario de la tuya ([B1.2e] las flechas del carrusel, debajo de 1024, se montan en el cliente)')
-afirmarIgual(veces(quieto, '<a '), 2 * PROYECTOS.length + 1 + DE_LA_CINTA + DEL_CARRUSEL, 'SIETE enlaces del Portfolio (el medio de cada tira, sólo para el mouse, y su «Visitar sitio»; [B1.2c] y WhatsApp en la tuya) más los de Demos')
-afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), veces(quieto, '<a '), '  todos salen del sitio sin darle acceso a esta ventana ni el referente')
-afirmarIgual(veces(conMotion, '<a '), 2 * PROYECTOS.length + 1 + DEMOS.length + DEL_CARRUSEL, '  y los mismos siete con la coreografía puesta')
-afirmarIgual(enlacesFueraDelContenido(quieto, [...PROYECTOS.map((p) => p.url), ...DEMOS.map((d) => d.url), WHATSAPP.href]), [], '  y ni un `href` que no salga del contenido: ninguna URL inventada ([B1.2c] WhatsApp, el del archivo del pie)')
+// [M-INT] L7g sumó «Ver todos los trabajos» bajo la bajada del encabezado: un enlace INTERNO a la página del Portfolio.
+const DE_LA_PAGINA = 1
+afirmarIgual(veces(quieto, '<a '), 2 * PROYECTOS.length + 1 + DE_LA_PAGINA + DE_LA_CINTA + DEL_CARRUSEL, 'SIETE enlaces del Portfolio (el medio de cada tira, sólo para el mouse, y su «Visitar sitio»; [B1.2c] y WhatsApp en la tuya; [L7g] y el de la página) más los de Demos')
+afirmarIgual(veces(quieto, 'rel="noopener noreferrer"'), veces(quieto, '<a ') - DE_LA_PAGINA, '  todos salen del sitio sin darle acceso a esta ventana ni el referente (menos el de la página, que es interno)')
+afirmarIgual(veces(conMotion, '<a '), 2 * PROYECTOS.length + 1 + DE_LA_PAGINA + DEMOS.length + DEL_CARRUSEL, '  y los mismos siete con la coreografía puesta')
+afirmarIgual(enlacesFueraDelContenido(quieto, [...PROYECTOS.map((p) => p.url), ...DEMOS.map((d) => d.url), WHATSAPP.href, '/v3/portfolio']), [], '  y ni un `href` que no salga del contenido: ninguna URL inventada ([B1.2c] WhatsApp, el del archivo del pie; [L7g] la página del Portfolio)')
 controlPositivo('el detector ve un enlace inventado', '<a href="https://inventado.example">Esquina</a>', (html: string) => enlacesFueraDelContenido(html, PROYECTOS.map((p) => p.url)).length === 0)
 afirmarIgual(clicsFueraDeUnBoton(FUENTE_DE_LA_COMPOSICION), [], 'cada `onClick` de la fuente va en un `<button>`: ningún div haciendo de botón')
 controlPositivo('  el detector ve un div con un manejador', '<div className="x" onClick={() => undefined}>', (src: string) => clicsFueraDeUnBoton(src).length === 0)
@@ -233,12 +235,12 @@ titulo('16 · Las paradas de teclado')
 // [NOCTURNO B5] Reemplazada por la spec: una por demo en el estante (o la cinta); el carrusel de abajo de 1024 se monta en el cliente.
 const PARADAS_DE_DEMOS = DEMOS.length
 const PARADAS = paradasDeTabulacion(quieto)
-afirmarIgual(PARADAS.length, PROYECTOS.length + 1 + PROYECTOS.length + 5 + PARADAS_DE_DEMOS, 'DOCE paradas del Portfolio (cuatro cabeceras, tres «Visitar sitio» y [B1.2c] el formulario de la tuya: dos campos, [B1.2d B] el texto largo, «Enviar» y WhatsApp; los dos toques de la historia se fueron) más las de Demos (el estante o la cinta; [B5] el carrusel se monta en el cliente)')
+afirmarIgual(PARADAS.length, PROYECTOS.length + 1 + PROYECTOS.length + 5 + DE_LA_PAGINA + PARADAS_DE_DEMOS, '[L7g] el enlace a la página y DOCE paradas del Portfolio (cuatro cabeceras, tres «Visitar sitio» y [B1.2c] el formulario de la tuya: dos campos, [B1.2d B] el texto largo, «Enviar» y WhatsApp; los dos toques de la historia se fueron) más las de Demos (el estante o la cinta; [B5] el carrusel se monta en el cliente)')
 afirmarIgual(PARADAS.filter((p) => p.etiqueta !== 'a' && p.etiqueta !== 'button' && p.etiqueta !== 'input' && p.etiqueta !== 'textarea').map((p) => p.etiqueta), [], '  todas son anclas, botones o [B1.2c] los campos del formulario ([B1.2d B] con el texto largo): ningún `tabindex` escrito')
 afirmarIgual(PARADAS.filter((p) => rotuloDeParada(quieto, p).rotulo.trim() === '').map((p) => p.destino ?? p.etiqueta), [], '  y todas se anuncian con algo (un campo, con su `<label for>`)')
 afirmarIgual(PARADAS.filter((p) => p.ocultoALectores).length, 0, '  ninguna cuelga de algo escondido a los lectores')
 afirmarIgual(paradasDeTabulacion(conMotion).length, PARADAS.length, 'y con la coreografía puesta son las mismas: el recorrido no lo cambia el ancho')
-afirmarIgual(veces(quieto, 'visibility:hidden'), 1, '  y lo único oculto por estilo es la capa del barrido de la gota, que es decoración')
+afirmarIgual(veces(quieto, 'visibility:hidden'), 1 + DE_LA_PAGINA, '  y lo único oculto por estilo es la capa del barrido de la gota, que es decoración, y [L7g] el enlace a la página fuera de la presencia del encabezado (sin ella no se enfoca)')
 
 // ═══════════════════════════════════════════════════════════════════════════
 afirmarElSelector(quieto, conMotion)

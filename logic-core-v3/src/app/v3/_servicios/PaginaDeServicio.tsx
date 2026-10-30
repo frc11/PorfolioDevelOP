@@ -69,7 +69,7 @@ export function CuerpoDelServicio({ servicio, enDesarrollo }: { readonly servici
 export function PaginaDeServicio({ servicio, enDesarrollo = EN_DESARROLLO }: PaginaDeServicioProps): React.JSX.Element {
   const preset = PRESETS_DE_LAS_PAGINAS[servicio.idEnElHome]
   return (
-    <main className="relative z-10">
+    <main className="relative z-10 overflow-x-clip">
       {/* Antes de la intro: nada entre la intro y el cuerpo, ni entre el cierre y el fin del `<main>` (B12a-API §7 y §8). */}
       <JsonLd servicio={servicio} />
       <Intro servicio={servicio} />

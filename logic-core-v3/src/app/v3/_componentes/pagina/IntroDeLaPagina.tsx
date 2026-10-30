@@ -6,7 +6,7 @@ import { Envoltorio } from '../layout/Envoltorio'
 import { TituloDePagina } from '../titulos3d/TituloDePagina'
 import { Cuerpo } from '../tipografia/Textos'
 
-import { ATRIBUTO_DE_LA_INTRO_DE_PAGINA, TRAMOS_DE_LA_INTRO } from './atributoDeLaIntro'
+import { ATRIBUTO_DE_LA_INTRO_DE_PAGINA, ID_DEL_CONTENIDO_DE_PAGINA, TRAMOS_DE_LA_INTRO } from './atributoDeLaIntro'
 import { BajadaDeLaIntro } from './BajadaDeLaIntro'
 import { FilaDeQueSeTrata, MarcoDeLaIntro, MarcoDelGiro } from './ComposicionDeLaIntro'
 
@@ -55,6 +55,9 @@ export function IntroDeLaPagina({ titulo, partes, bajada, deQueSeTrata, preset }
       {...{ [ATRIBUTO_DE_LA_INTRO_DE_PAGINA]: preset.id }}
       {...(preset.acento === null ? {} : { [ATRIBUTO_DE_SERVICIO]: preset.acento })}
       aria-label={titulo}
+      // [M-INT] El destino del salto al contenido: focalizable pero no tabulable (como la sección de entrada del home).
+      id={ID_DEL_CONTENIDO_DE_PAGINA}
+      tabIndex={-1}
       // De noche, sobre la escena, los claros (los tokens de la sección invertida).
       data-seccion={preset.noche === 'noche' ? 'invertida' : undefined}
       style={larga ? ALTOS_DE_DIA : ALTOS}

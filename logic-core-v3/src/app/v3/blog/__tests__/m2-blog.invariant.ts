@@ -2,8 +2,8 @@
  * INVARIANTE M2 — el blog, la nota y la 404 con lo que Valentino eligió del laboratorio (`docs/cola/2026-10-30/M2.md`). Sin navegador: las
  * cuentas puras y el marcado leído del disco. Cada regla con su control positivo (una entrada rota que la tiene que hacer fallar).
  *
- * Corre con `npx tsx src/app/v3/blog/__tests__/m2-blog.invariant.ts` (el script `test:m2-blog` de `package.json` queda propuesto: está fuera del
- * carril M2).
+ * Corre con `npm run test:s93-m2-blog` (lo sumó M-INT; `verificar` lo corre). Antes, a mano con `npx tsx`, porque `package.json` estaba fuera del
+ * carril M2.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'

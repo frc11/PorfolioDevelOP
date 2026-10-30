@@ -1,5 +1,7 @@
 import { ID_DE_LA_SECCION_DE_ENTRADA } from '../_componentes/Panel'
 
+import { EnlaceDelSalto } from './EnlaceDelSalto'
+
 /**
  * EL ENLACE DE SALTO — la primera parada del documento, y la única que existe
  * para dejar de usarse.
@@ -77,14 +79,7 @@ import { ID_DE_LA_SECCION_DE_ENTRADA } from '../_componentes/Panel'
  */
 export const ROTULO_DEL_SALTO = 'Saltar al contenido'
 
+// [M-INT] Fuera del home no hay sección de entrada: `EnlaceDelSalto` elige el destino según la ruta (en el home, el de siempre).
 export function SaltarAlContenido(): React.JSX.Element {
-  return (
-    <a
-      data-pieza="salto"
-      href={`#${ID_DE_LA_SECCION_DE_ENTRADA}`}
-      className="text-cuerpo tracking-texto leading-texto font-semi"
-    >
-      {ROTULO_DEL_SALTO}
-    </a>
-  )
+  return <EnlaceDelSalto delHome={ID_DE_LA_SECCION_DE_ENTRADA} rotulo={ROTULO_DEL_SALTO} />
 }

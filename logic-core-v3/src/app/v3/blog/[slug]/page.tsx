@@ -32,7 +32,7 @@ export default async function NotaDelBlog({ params }: { params: Promise<{ slug: 
   const nota = notaPorSlug((await params).slug)
   if (nota === undefined) notFound()
   return (
-    <main className="relative z-10">
+    <main className="relative z-10 overflow-x-clip">
       <IntroDeLaPagina titulo="Blog" preset={PRESET} bajada={<ParrafoDeLaBajada>{`Una nota del ${fechaLarga(nota.fecha)}.`}</ParrafoDeLaBajada>} />
       <CuerpoDeLaNota nota={nota} />
       <CierreDeLaPagina preset={PRESET} preguntas={PREGUNTAS_DEL_HOME} />

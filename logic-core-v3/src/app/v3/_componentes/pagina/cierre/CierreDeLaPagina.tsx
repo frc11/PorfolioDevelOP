@@ -40,8 +40,8 @@ export function CierreDeLaPagina({ preset, preguntas = [] }: { readonly preset: 
       {...(deNoche ? { [ATRIBUTO_DEL_CIERRE_DE_NOCHE]: '' } : {})}
       {...(preset.acento === null ? {} : { [ATRIBUTO_DE_SERVICIO]: preset.acento })}
       data-seccion={deNoche ? 'invertida' : undefined}
-      // [L7g] `overflow-x-clip` como el `main` del home: el enlace del CTA lo lleva a su pose una matriz 3D y, de paso, pasa del ancho (15 px a 390, 11 a 320); `clip` no abre un scroll y no rompe el `sticky`.
-      className="relative overflow-x-clip text-tinta"
+      // [L7g] El «HABLANOS» del CTA (una matriz 3D) pasa del ancho a 320 y 390. [M-INT] Lo recorta el `<main>` de cada página, como en el home: un solo recorte.
+      className="relative text-tinta"
     >
       <CompuertaDelHome>
         <PrecargaDelCta.Provider value={preset.acento}>

@@ -43,7 +43,7 @@ const sinVelo = (css: string, q: string): boolean =>
   BLOQUE_M1(css) !== '' && !/velo-del-cuerpo|degrade-del-cuerpo|alcance-del-cuerpo|\[data-halo-del-cuerpo\]::before|radial-gradient/.test(BLOQUE_M1(css)) &&
   !css.includes('--velo-del-cuerpo') && q.includes('<div ref={enElPlano} data-halo-del-cuerpo="">') && !q.includes('data-velo-del-cuerpo')
 afirmar(sinVelo(BANDA, QUIENES), '  sin el velo elíptico blanco (ni su pseudo-elemento, ni su degradé, ni sus tokens): el cuerpo pide su halo')
-const VELO_DE_PULIDO_14 = BANDA.replace("  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo] p {", "  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo]::before {\n    background: radial-gradient(closest-side, var(--velo-del-cuerpo) 70%, transparent);\n  }\n\n  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo] p {")
+const VELO_DE_PULIDO_14 = BANDA.replace("  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo] p,", "  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo]::before {\n    background: radial-gradient(closest-side, var(--velo-del-cuerpo) 70%, transparent);\n  }\n\n  [data-v3] [data-panel='quienes-somos'] [data-halo-del-cuerpo] p,")
 controlPositivo('  el detector VE el velo de PULIDO 14 vuelto a poner', VELO_DE_PULIDO_14, (css: string) => sinVelo(css, QUIENES))
 // El halo: corto y denso (al menos tres sombras de 0,1 em apiladas y ninguna de más de 0,2 em: las colas largas de D2, en un
 // párrafo, se juntan en una mancha), todas del color del borde; el borde, el contrario de la letra (papel de día, tinta de noche),
@@ -60,7 +60,8 @@ const haloBien = (css: string): boolean => {
     b.includes('--de-noche-del-cuerpo: clamp(0, (var(--noche-del-arco, 0) - 0.5) * 1000, 1);') &&
     b.includes('--letra-del-cuerpo: color-mix(in srgb, var(--color-fondo) calc(var(--de-noche-del-cuerpo) * 100%), var(--color-tinta));') &&
     b.includes('--borde-del-cuerpo: color-mix(in srgb, var(--color-tinta) calc(var(--de-noche-del-cuerpo) * 100%), var(--color-fondo));') &&
-    /@media \(width >= 1024px\) \{[\s\S]*\[data-v3\] \[data-panel='quienes-somos'\] \[data-halo-del-cuerpo\] p \{\s*color: var\(--letra-del-cuerpo\);\s*text-shadow: var\(--halo-del-cuerpo\);/.test(b)
+    // [M-INT] y en el enlace de la última pantalla (L7g: «Conocé más sobre nosotros», con la misma letra y el mismo halo).
+    /@media \(width >= 1024px\) \{[\s\S]*\[data-v3\] \[data-panel='quienes-somos'\] \[data-halo-del-cuerpo\] p,\s*\[data-v3\] \[data-panel='quienes-somos'\] \[data-halo-del-cuerpo\] a \{\s*color: var\(--letra-del-cuerpo\);\s*text-shadow: var\(--halo-del-cuerpo\);/.test(b)
 }
 afirmar(haloBien(BANDA), '  el halo: corto y denso (tres sombras de 0,1 em y tres de 0,2 em, sin colas), del color contrario a la letra (el papel de día, la tinta de noche)')
 controlPositivo('  el detector VE el halo de D2 con sus colas (la mancha)', BANDA.replace('0 0 0.2em var(--borde-del-cuerpo);', '0 0 0.2em var(--borde-del-cuerpo), 0 0 0.45em var(--borde-del-cuerpo), 0 0 0.9em var(--borde-del-cuerpo);'), haloBien)

@@ -42,17 +42,22 @@
    *
    * Los dos tonos se vuelven uno, y es correcto: bajo `difference` lo que decide
    * el resultado es la distancia al fondo, y dos fuentes distintas darían dos
-   * inversiones distintas sobre el mismo logo. */
-  [data-v3] [data-trazo] [data-parte='linea'] {
+   * inversiones distintas sobre el mismo logo.
+   *
+   * [M-INT] Sólo adentro de lo que mezcla (o el ≠, que lleva la mezcla en sí mismo): sobre el papel de las páginas no hay mezcla y
+   * el papel sobre el papel dejaba invisibles los trazos de «Cómo trabajamos» y de lo de siempre de Software a medida. */
+  [data-v3] .max-escritorio\:mix-blend-difference [data-trazo] [data-parte='linea'] {
     background-color: var(--color-fondo);
   }
 
-  [data-v3] [data-trazo='tachado'] {
+  [data-v3] .max-escritorio\:mix-blend-difference [data-trazo='tachado'] {
     color: var(--color-fondo);
   }
 
-  [data-v3] [data-signo='distinto'] [data-parte='barra'] line,
-  [data-v3] [data-signo='distinto'] [data-parte='diagonal'] line {
+  [data-v3] .max-escritorio\:mix-blend-difference [data-signo='distinto'] [data-parte='barra'] line,
+  [data-v3] .max-escritorio\:mix-blend-difference [data-signo='distinto'] [data-parte='diagonal'] line,
+  [data-v3] .max-escritorio\:mix-blend-difference[data-signo='distinto'] [data-parte='barra'] line,
+  [data-v3] .max-escritorio\:mix-blend-difference[data-signo='distinto'] [data-parte='diagonal'] line {
     stroke: var(--color-fondo);
   }
 
