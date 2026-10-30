@@ -33,6 +33,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'En 1440, el hover de la foto como en el home. En 390, cada foto se abre sola al cruzar la mitad de la pantalla y se cierra al volver. Al final, la foto de la facultad se abre desde una rendija.',
     sale: 'MarcoDeDosTomas de Quiénes somos, importado; el disparo del gatillo; el clip-path desde el centro de la segunda toma.',
   },
+  {
+    slug: 'fichas-abiertas',
+    codigo: 'P1',
+    titulo: 'Cada caso, una ficha abierta',
+    pagina: 'Portfolio',
+    mirar: 'Cada trabajo es una franja de noche sobre el papel: el video clavado a la izquierda y la ficha que entra fila por fila. ¿La noche por caso suma o corta la página?',
+    sale: 'La tira activa del acordeón del Portfolio: Ficha, PROYECTOS y el «Visitar sitio» con el color de la marca, importados.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
