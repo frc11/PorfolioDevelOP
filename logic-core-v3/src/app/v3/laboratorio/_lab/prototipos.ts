@@ -137,6 +137,14 @@ const TODOS: readonly Prototipo[] = [
     mirar: 'Las tareas repetitivas se tildan solas al cruzar la mitad de la pantalla: el tilde se dibuja, la tarea se apaga y aparece «pasa solo». Con el sonido prendido, cada una hace el tic del sitio.',
     sale: 'El trazo que se dibuja del signo ≠ de Quiénes somos, el despinte de lo tachado y el tic del sonido del sitio.',
   },
+  {
+    slug: 'intro-de-dia',
+    codigo: 'D1',
+    titulo: 'La intro corta de día',
+    pagina: 'Nosotros, Portfolio y Blog',
+    mirar: 'Una pantalla de escena de día con el título en el DOM (el 3D no sabe escribir estos nombres todavía) que se levanta al llegar; después, el papel. Probá los tres nombres con los botones y mové el mouse.',
+    sale: 'La escena del home en la pose del hero, con su preset; los dos registros del titular; TitularQueSeLevanta; AvisoDeScroll.',
+  },
 ]
 
 /** El orden del índice: el de `docs/ideas/COMO-MIRAR.md`, los que más creo primero. */
@@ -149,6 +157,7 @@ const ORDEN = [
   'conversacion-en-vivo',
   'pasa-solo',
   'historia-que-se-pinta',
+  'intro-de-dia',
   'como-trabajamos',
   'pantalla-que-se-dibuja',
   'mismo-sitio-en-el-celular',
