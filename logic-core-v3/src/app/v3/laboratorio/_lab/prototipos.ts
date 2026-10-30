@@ -73,6 +73,14 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     mirar: 'Cambia solo cada 10 s, con las líneas de arriba (llenas las ya vistas); mantené apretado para pausar; flechas y dedo. El titular se levanta al entrar. Las tapas son tipográficas porque las notas no tienen foto.',
     sale: 'CarruselDeTarjetas (el del Portfolio y Demos en el teléfono) y TitularQueSeLevanta, importados.',
   },
+  {
+    slug: 'notas-irregulares',
+    codigo: 'B2',
+    titulo: 'Las notas en lugares irregulares',
+    pagina: 'Blog',
+    mirar: 'Seis tarjetas en un patrón corrido (no una grilla) que caen en su lugar con un giro chico que se endereza. Pasá el mouse por «Leer la nota». ¿Se lee irregular o desordenado?',
+    sale: 'El gatillo del home (32 px, 700 ms, la curva de salida, en espejo al subir) más un giro; DosCopias, el rollover del sitio.',
+  },
 ]
 
 export const prototipo = (slug: string): Prototipo | undefined => PROTOTIPOS.find((p) => p.slug === slug)
