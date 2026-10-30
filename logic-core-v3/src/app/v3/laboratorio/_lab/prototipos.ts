@@ -121,6 +121,14 @@ const TODOS: readonly Prototipo[] = [
     mirar: 'La pantalla de escritorio de un trabajo real se angosta con el scroll hasta ser un teléfono, y en el medio pasa al video móvil del mismo sitio. Probá los tres trabajos.',
     sale: 'Los videos de escritorio y móvil que el Portfolio ya tiene por trabajo; la tira del acordeón que cambia de ancho.',
   },
+  {
+    slug: 'el-sistema-que-se-ordena',
+    codigo: 'S2',
+    titulo: 'El sistema que se ordena',
+    pagina: 'Software a medida',
+    mirar: 'Los papeles sueltos de un negocio están tirados y torcidos; con el scroll, cada uno viaja a su columna de un tablero y se endereza. Subí: se desordenan.',
+    sale: 'La llegada en curva de las fotos del equipo (cada foto viaja a su marco), con papeles en vez de fotos.',
+  },
 ]
 
 /** El orden del índice: el de `docs/ideas/COMO-MIRAR.md`, los que más creo primero. */
@@ -129,6 +137,7 @@ const ORDEN = [
   'dos-tomas',
   'fichas-abiertas',
   'lo-de-siempre-tachado',
+  'el-sistema-que-se-ordena',
   'conversacion-en-vivo',
   'historia-que-se-pinta',
   'como-trabajamos',
