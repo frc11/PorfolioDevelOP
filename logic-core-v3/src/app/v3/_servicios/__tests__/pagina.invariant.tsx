@@ -187,13 +187,18 @@ titulo('2 · Los bloques, en el orden de la maqueta (M0 §1.3)')
 // bloque: es la bajada de la intro del home (REEMPLAZADO por la spec: la intro no lleva bloques).
 // [L7a] REEMPLAZADO por la spec (L7a ítem 3): se suman «Para qué te sirve», «Lo que podemos construir» (software e IA, en el lugar de los
 // trabajos), «Qué recibís al final» y «Después de la entrega»; el FAQ, el llamado y el cierre provisorio salen (el cierre común del home).
-const ORDEN_DE_LA_MAQUETA = ['que-hacemos', 'ejemplos', 'que-incluye', 'precio', 'llamado-del-precio', 'extra', 'trabajos', 'posibles', 'proceso', 'entrega', 'despues']
+// [M3] REEMPLAZADO por la spec (M3): después de «Qué hacemos», el momento de cada página (web: la pantalla; software: lo de siempre y el
+// orden; IA: el chat y las automatizaciones). Cada página lleva SÓLO los suyos.
+const ORDEN_DE_LA_MAQUETA = ['que-hacemos', 'la-pantalla', 'lo-de-siempre', 'el-orden', 'el-chat', 'automatizaciones', 'ejemplos', 'que-incluye', 'precio', 'llamado-del-precio', 'extra', 'trabajos', 'posibles', 'proceso', 'entrega', 'despues']
 const sin = (...fuera: string[]): string[] => ORDEN_DE_LA_MAQUETA.filter((b) => !fuera.includes(b))
+const DE_WEB = ['la-pantalla']
+const DE_SOFTWARE = ['lo-de-siempre', 'el-orden']
+const DE_IA = ['el-chat', 'automatizaciones']
 /** Lo que lleva cada página: Extra y [M3] el video de trabajos solo existen en web, en los dos modos. */
 const ESPERADO: Readonly<Record<string, { readonly dev: readonly string[]; readonly prod: readonly string[] }>> = {
-  'paginas-web': { dev: sin('posibles'), prod: sin('posibles') },
-  'software-a-medida': { dev: sin('extra', 'trabajos'), prod: sin('extra', 'trabajos') },
-  'ia-y-automatizaciones': { dev: sin('extra', 'trabajos'), prod: sin('extra', 'trabajos') },
+  'paginas-web': { dev: sin('posibles', ...DE_SOFTWARE, ...DE_IA), prod: sin('posibles', ...DE_SOFTWARE, ...DE_IA) },
+  'software-a-medida': { dev: sin('extra', 'trabajos', ...DE_WEB, ...DE_IA), prod: sin('extra', 'trabajos', ...DE_WEB, ...DE_IA) },
+  'ia-y-automatizaciones': { dev: sin('extra', 'trabajos', ...DE_WEB, ...DE_SOFTWARE), prod: sin('extra', 'trabajos', ...DE_WEB, ...DE_SOFTWARE) },
 }
 afirmarIgual(fallan((p) => JSON.stringify(bloquesEnOrden(p.html)) === JSON.stringify(ESPERADO[p.servicio.slug]?.[p.enDesarrollo ? 'dev' : 'prod'])), [], 'las tres páginas, en los dos modos: exactamente los bloques que les tocan, en el orden de la maqueta')
 afirmarIgual(fallan((p) => respetaElOrden(bloquesEnOrden(p.html), ORDEN_DE_LA_MAQUETA)), [], '  y ninguno fuera de su lugar')
