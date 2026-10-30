@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react'
 
 import { sonar } from '../../_lib/sonido/bus'
 import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimiento'
-import { TEXTO_DEL_MEDIO, TITULO_DEL_SERVICIO } from '../../_secciones/servicios/escenario/datos'
+import { TEXTO_DEL_MEDIO } from '../../_secciones/servicios/escenario/datos'
 import { useAlCruzar } from '../_lab/useAlCruzar'
 
 /** Lo repetitivo, en las palabras de la página de IA: «mensajes, recordatorios, cargas de datos y avisos entre sistemas». */
@@ -22,7 +22,6 @@ const TAREAS = [
  * del sitio (sólo con el sonido prendido: el sonido confirma, no adorna). Al subir, se destilda. Con movimiento reducido, sin trazo.
  */
 export function PasaSolo(): React.JSX.Element {
-  const titulo = TITULO_DEL_SERVICIO['ia-automatizacion']
   return (
     <div data-servicio="ia-automatizacion">
       <header className="mx-auto max-w-4xl px-6 pt-36 pb-[14svh] escritorio:pt-44">
