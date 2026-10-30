@@ -9,7 +9,7 @@ import {
 import { hayPrimerCuadro, suscribirALaCarga } from '../carga'
 import { hayBanco } from './entorno'
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
-import { AVANCE_DE_LA_INTRO, avanceDeLaIntro } from './ruta/pistaDeLaIntro'
+import { AVANCE_DE_LA_INTRO, avanceDeLaIntro, pantallasDeLaIntro } from './ruta/pistaDeLaIntro'
 import { bloquesDelPreset, despiertaEnLaPagina, presetActual, suscribirseAlPreset } from './ruta/preset'
 import { medirElCierre } from './ruta/cierreDeLaPagina'
 import { medidaSinElEstiramiento } from './tramoEstirado'
@@ -146,7 +146,7 @@ export function useEscenaAtadaAlScroll(
         const preset = presetActual()
         // [B12a.2] El avance de la intro (de 0 a 1 en 1,5 pantallas), medido en el layout sobre su bloque; el progreso del rig no se toca.
         const intro = preset === null || preset.pista === null || preset.tramos === null ? null : document.querySelector(preset.tramos.intro)
-        if (intro !== null) AVANCE_DE_LA_INTRO.current = avanceDeLaIntro(intro.getBoundingClientRect().top + desplazamiento, desplazamiento, ventana)
+        if (intro !== null) AVANCE_DE_LA_INTRO.current = avanceDeLaIntro(intro.getBoundingClientRect().top + desplazamiento, desplazamiento, ventana, pantallasDeLaIntro(preset))
         // [B12a.6] Con la navegación cliente el rig llega con el progreso del home (el dolly del CTA y el mouse lo leen): en una página, el del hero.
         if (rig.current.progress !== 0) rig.set('progress', 0)
         const despierta = !hayPrimerCuadro() || despiertaEnLaPagina(preset, bloquesDelPreset(document, preset, desplazamiento), desplazamiento, ventana, MARGEN_DE_REANUDACION)

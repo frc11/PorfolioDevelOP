@@ -15,8 +15,11 @@ export interface HuecoDeLaIntro {
   readonly y: number
 }
 
-/** Lo que el DOM de la intro le dice a la escena: el hueco medido, o `null` (sin intro, o sin medir: el encuadre de la pista). */
-export const COMPOSICION_EN_LA_ESCENA: { hueco: HuecoDeLaIntro | null } = { hueco: null }
+/**
+ * Lo que el DOM de la intro le dice a la escena: el hueco medido, o `null` (sin intro, o sin medir: el encuadre de la pista). [M1] `giro`:
+ * el hueco del logo en el tramo del giro de la intro de día (del lado contrario al bloque de la página); el encuadre pasa de uno al otro.
+ */
+export const COMPOSICION_EN_LA_ESCENA: { hueco: HuecoDeLaIntro | null; giro: HuecoDeLaIntro | null } = { hueco: null, giro: null }
 
 /** El centro de una caja del cuadro (px, con la intro fija arriba) en coordenadas del cuadro. */
 export function huecoEnElCuadro(caja: { readonly izquierda: number; readonly arriba: number; readonly ancho: number; readonly alto: number }, ancho: number, alto: number): HuecoDeLaIntro {

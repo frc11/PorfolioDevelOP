@@ -54,12 +54,62 @@ export const PISTA_DE_LA_INTRO: readonly ChoreoKeyframe[] = [
 ]
 
 /**
- * El avance de la intro (0…1): 0 con el tope del bloque en el tope del cuadro, 1 después de `PANTALLAS_DE_LA_INTRO` pantallas. `arriba`:
- * el tope del bloque en el documento, medido en el LAYOUT (nunca con `scrollHeight`: lección de PULIDO 19).
+ * [M1] LA INTRO DE DÍA — la apertura del home hasta Quiénes somos (Valentino: «que sea la intro y luego hace el giro de nosotros y luego
+ * ahí entra el blanco»): el tramo del título (`TRAMO_DEL_TITULO`, como la de noche) y el GIRO del home hacia Quiénes somos, dos pantallas
+ * con el bloque de la página fijo del lado contrario al logo; después, el papel. Las páginas de noche (servicios) siguen con la suya.
  */
-export function avanceDeLaIntro(arriba: number, scrollY: number, alto: number): number {
+export const PANTALLAS_DEL_GIRO = 2
+export const PANTALLAS_DE_LA_INTRO_DE_DIA = TRAMO_DEL_TITULO + PANTALLAS_DEL_GIRO
+
+/** El giro, en pantallas de scroll desde el tope de la intro: arranca con el título ya caído y termina cuando el bloque se suelta. */
+export const GIRO_EN_PANTALLAS = { desde: 0.6, hasta: PANTALLAS_DE_LA_INTRO_DE_DIA - 1 } as const
+
+/** La pose de Quiénes somos en el home (`CHOREO_KEYFRAMES`, `at: 0.375`): el destino del giro. Su encuadre lo pone el hueco del bloque. */
+export const POSE_DE_QUIENES_SOMOS: ChoreoPose = { angleDeg: 130, height: -3.6, distance: 14, frameX: -0.8, frameY: 0 }
+
+/** La pista de día: quieta en la composición inicial (el hero), el giro con la curva y la vuelta literal del home, y quieta en Quiénes somos. */
+export const PISTA_DE_LA_INTRO_DE_DIA: readonly ChoreoKeyframe[] = [
+  { at: 0, name: 'composicion-inicial', pose: COMPOSICION_INICIAL },
+  { at: GIRO_EN_PANTALLAS.desde / PANTALLAS_DE_LA_INTRO_DE_DIA, name: 'hero', ease: 'linear', pose: COMPOSICION_INICIAL },
+  { at: GIRO_EN_PANTALLAS.hasta / PANTALLAS_DE_LA_INTRO_DE_DIA, name: 'quienes-somos', ease: 'shift', turn: 'literal', pose: POSE_DE_QUIENES_SOMOS },
+  { at: 1, name: 'sosten', ease: 'linear', pose: POSE_DE_QUIENES_SOMOS },
+]
+
+/**
+ * Si la página PUEDE llevar la intro de día (de día y con pista). La lleva si además tiene su bloque («de qué se trata»): sin bloque (una
+ * nota del blog) quedaría un giro de dos pantallas vacías, y se queda con la intro corta. El DOM lo decide (`tieneIntroLarga`) y avisa a la
+ * escena montando el marco del giro (`INTRO_LARGA_MONTADA`).
+ */
+export const esDeDiaConPista = (preset: PresetDeLaEscena | null): boolean => preset !== null && preset.pista !== null && preset.noche === 'dia'
+
+/** Lo que decide el DOM de la intro: de día, con pista y con su bloque. */
+export const tieneIntroLarga = (preset: PresetDeLaEscena | null, hayBloque: boolean): boolean => esDeDiaConPista(preset) && hayBloque
+
+/** Cuántos marcos del giro hay montados (con la navegación cliente la página nueva se monta antes de que se vaya la vieja): la escena sabe así que la intro de esta página es la larga. */
+export const INTRO_LARGA_MONTADA: { montados: number } = { montados: 0 }
+
+/** Lo que lee la escena: la intro de esta página es la de día (la página lo permite y el DOM montó el giro). */
+export const esIntroDeDia = (preset: PresetDeLaEscena | null): boolean => esDeDiaConPista(preset) && INTRO_LARGA_MONTADA.montados > 0
+
+/** Lo que dura la intro de una página, en pantallas: la de día o la de noche. */
+export const pantallasDeLaIntro = (preset: PresetDeLaEscena | null): number => (esIntroDeDia(preset) ? PANTALLAS_DE_LA_INTRO_DE_DIA : PANTALLAS_DE_LA_INTRO)
+
+/** Cuánto del giro pasó (0…1) en un avance de la intro de día: el peso del encuadre del bloque contra el del título. */
+export function avanceDelGiro(avance: number): number {
+  const desde = GIRO_EN_PANTALLAS.desde / PANTALLAS_DE_LA_INTRO_DE_DIA
+  const hasta = GIRO_EN_PANTALLAS.hasta / PANTALLAS_DE_LA_INTRO_DE_DIA
+  const t = (avance - desde) / (hasta - desde)
+  return t <= 0 ? 0 : t >= 1 ? 1 : t
+}
+
+/**
+ * El avance de la intro (0…1): 0 con el tope del bloque en el tope del cuadro, 1 después de `pantallas` pantallas (las de la intro de la
+ * página; sin ellas, `PANTALLAS_DE_LA_INTRO`). `arriba`: el tope del bloque en el documento, medido en el LAYOUT (nunca con `scrollHeight`:
+ * lección de PULIDO 19).
+ */
+export function avanceDeLaIntro(arriba: number, scrollY: number, alto: number, pantallas: number = PANTALLAS_DE_LA_INTRO): number {
   if (!(alto > 0)) return 0
-  return Math.min(1, Math.max(0, (scrollY - arriba) / (PANTALLAS_DE_LA_INTRO * alto)))
+  return Math.min(1, Math.max(0, (scrollY - arriba) / (pantallas * alto)))
 }
 
 /**
@@ -73,6 +123,7 @@ export const AVANCE_DE_LA_INTRO: { current: number } = { current: 0 }
 if (hayBanco()) (window as Window & { __avanceDeLaIntro?: () => number }).__avanceDeLaIntro = () => AVANCE_DE_LA_INTRO.current
 
 const pistas = new WeakMap<PresetDeLaEscena, { readonly track: ChoreoTrack; readonly noche: boolean }>()
+const pistasLargas = new WeakMap<PresetDeLaEscena, { readonly track: ChoreoTrack; readonly noche: boolean }>()
 
 /**
  * La pista de la página de ahora (y si es de noche), o `null`: el home (su pista es `CHOREO_KEYFRAMES`) o una página sin pista. La lee
@@ -81,10 +132,13 @@ const pistas = new WeakMap<PresetDeLaEscena, { readonly track: ChoreoTrack; read
 export function pistaDeLaPagina(): { readonly track: ChoreoTrack; readonly noche: boolean } | null {
   const preset = presetActual()
   if (preset === null || preset.pista === null) return null
-  let pagina = pistas.get(preset)
+  // [M1] Con la intro larga, la apertura de día (el giro de Quiénes somos); si no, la pista que declara la página. Una caché por cada una.
+  const larga = esIntroDeDia(preset)
+  const cache = larga ? pistasLargas : pistas
+  let pagina = cache.get(preset)
   if (pagina === undefined) {
-    pagina = { track: buildTrack(preset.pista), noche: preset.noche === 'noche' }
-    pistas.set(preset, pagina)
+    pagina = { track: buildTrack(larga ? PISTA_DE_LA_INTRO_DE_DIA : preset.pista), noche: preset.noche === 'noche' }
+    cache.set(preset, pagina)
   }
   return pagina
 }
