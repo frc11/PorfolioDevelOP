@@ -64,21 +64,12 @@ export function PisoVivo(props: PropsDelPiso) {
 /** Como mucho, cuántos pasos fijos se corren en un cuadro (un cuadro muy largo no se recupera entero). */
 const PASOS_POR_CUADRO = 8
 
-/**
- * [C2-31m] SIN LOMA BAJO EL CURSOR — de acá salían las «líneas negras horizontales» en el piso junto al cursor (con `?moire=mouse`,
- * captura `lote3/01`). No era el moiré (salen igual sin la trama): era la loma que la simulación levantaba bajo el puntero
- * (`PISO_VIVO.cursor`, 0,6 u en un radio de 2 u). En el escenario de la formación el bloque mide 1,06 u y la loma quieta sube
- * 0,31 u en unas cuatro filas: cada fila queda hasta 0,08 a 0,1 u por encima de la de adelante (`s78-c2-31m`), lo que llega al
- * escalón con el que el costado se sombrea entero como costado (`luz.escalon`, 0,1), y el costado que mira a la cámara queda al pie
- * a 0,61 a 0,64 de la tapa (`luz.costado` y la rendija): una raya oscura por fila. El piso sigue con el mar, el pulso y la onda de la
- * interfaz; el cursor ya no lo empuja. La loma queda SÓLO como el
- * defecto del banco, para su control positivo (`window.__defectosDeLaIntro = 'con-lineas'`, nunca la URL; `scripts-carga/moire.ts`).
- */
-export const LOMA_DEL_CURSOR = { defecto: 'con-lineas' } as const
+/** [L1] LA LOMA BAJO EL CURSOR VUELVE (C2-31m la había sacado y Valentino no lo pidió): el piso se levanta bajo el puntero como antes. Sólo el defecto del banco `sin-loma` (`window.__defectosDeLaIntro`, nunca la URL) la apaga, para medir las rayas oscuras de las filas junto al cursor sin ella. */
+export const LOMA_DEL_CURSOR = { defecto: 'sin-loma' } as const
 
-/** ¿Levanta el cursor una loma en esta carga? Sólo con el defecto del banco. */
+/** ¿Levanta el cursor una loma en esta carga? Sí, salvo con el defecto del banco `sin-loma`. */
 function lomaDelCursorPedida(): boolean {
-  return typeof window !== 'undefined' && (window as Window & { __defectosDeLaIntro?: unknown }).__defectosDeLaIntro === LOMA_DEL_CURSOR.defecto
+  return !(typeof window !== 'undefined' && (window as Window & { __defectosDeLaIntro?: unknown }).__defectosDeLaIntro === LOMA_DEL_CURSOR.defecto)
 }
 
 function PisoVivoPrendido({ calidad, quieto }: PropsDelPiso) {
@@ -256,6 +247,8 @@ function armar(grilla: Grilla, conContacto: boolean) {
     uCalmaDelPie: FINAL_EN_EL_PISO.uCalmaDelPie,
     uBaseDelPie: FINAL_EN_EL_PISO.uBaseDelPie,
     uCalmaDelPieFuerza: FINAL_EN_EL_PISO.uCalmaDelPieFuerza,
+    // [L5] el anillo del aro de las reseñas abierto: los bloques de alrededor al ras.
+    uAnilloDelAro: FINAL_EN_EL_PISO.uAnilloDelAro,
     // [PULIDO 25] W2 a · la quietud de la energía debajo de las piezas acostadas (`pie3d/huecos.ts`). [PULIDO 27] Y2 b · c · y los huecos.
     ...QUIETUD_DEL_PIE,
     ...HUECOS_DEL_PIE,

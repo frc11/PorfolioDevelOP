@@ -2,8 +2,8 @@
  * s78 · C2-81 (cola 2, 2026-10-23) · EL PRELOADER CONTINUO Y EL MOVIMIENTO DEL TELÉFONO, sin navegador. Cada afirmación con su control.
  *
  *   1 · el preloader en el compositor: todas sus animaciones son sólo de `opacity` y `transform`; reproducen la línea (`vistaDeLaLinea`)
- *       en el tiempo; la capa y la flecha no escriben estilos por cuadro; las rayas aparecen cuando llega el dibujo y la punta recorre
- *       el camino sin vueltas de 360°; lo frenable es sólo el último 20 %;
+ *       en el tiempo; la capa y el botón no escriben estilos por cuadro; el botón late con dos pulsos cercanos y una pausa, y la onda de cada
+ *       pulso nace del botón y se desvanece;
  *   2 · la preparación de la escena repartida: espera a que la bienvenida terminó de aparecer (con su seguro) y se calienta en partes;
  *   3 · el movimiento: dónde va, apagado por defecto (con movimiento reducido también), la inclinación mueve el puntero de la cámara y el
  *       moiré (con su filtro suave), apagarlo suelta los dos, y con el permiso negado no pasa nada;
@@ -21,9 +21,8 @@ import * as THREE from 'three'
 
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import { RAIZ } from './s3-archivos'
-import { PULSO_DE_LA_PUNTA, TAU_DEL_FRENO, apareceLaRaya, fundidosDelTexto, inicioDeLaFlecha, recorridosDeLaPunta, salidaDeLaCapa, tauDelTrazo, type Animacion, type CuadroClave } from '../../_chrome/preloader/animaciones'
-import { INICIO_DE_LA_FLECHA_MS, LINEA, MARGEN_DEL_RATO_QUIETO_MS, lineaNueva, pasoDeLaLinea, ratoQuieto, trazoDeLaFlecha, vistaDeLaLinea, type EstadoDeLaLinea } from '../../_chrome/preloader/linea'
-import { rayasDeLaFlecha, trazarLaFlecha } from '../../_chrome/preloader/trazado'
+import { LATIDO, apareceElBoton, fundidosDelTexto, inicioDelBoton, latidoDelBoton, ondaDelPulso, salidaDeLaCapa, type Animacion, type CuadroClave } from '../../_chrome/preloader/animaciones'
+import { INICIO_DEL_BOTON_MS, LINEA, MARGEN_DEL_RATO_QUIETO_MS, lineaNueva, pasoDeLaLinea, ratoQuieto, vistaDeLaLinea, type EstadoDeLaLinea } from '../../_chrome/preloader/linea'
 import { laPreparacionPuede, permitirLaPreparacion, SEGURO_DE_LA_PREPARACION_MS } from '../entrada'
 import { calentarUnaParte, partesParaCalentar } from '../escena/gpu/partes'
 import { GIROSCOPIO, INCLINACION_DEL_TELEFONO, estadoDelGiroscopio, filtrarLaInclinacion } from '../escena/giroscopio'
@@ -37,20 +36,19 @@ const sinComentarios = (c: string): string => c.replace(/\/\*[\s\S]*?\*\//g, '')
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El preloader en el compositor: sólo opacity y transform, la línea exacta, ningún estilo escrito por cuadro')
 
-const V = { ancho: 1440, alto: 900 }
-const TRAZADO_1440 = trazarLaFlecha([{ x: 457, y: 434, ancho: 526, alto: 38 }], { x: 32, y: 24, ancho: 48, alto: 48 }, V, 'derecha', 'ultimo')
-const RAYAS_1440 = rayasDeLaFlecha(TRAZADO_1440, V)
 const todas = (reducido: boolean): Animacion[] => {
   const f = fundidosDelTexto(reducido)
-  return [f.bienvenida, f.blanco, f.frase, salidaDeLaCapa(reducido), ...RAYAS_1440.map((r) => apareceLaRaya(r, TRAZADO_1440.camino.largo, reducido)), ...recorridosDeLaPunta(TRAZADO_1440, reducido).map((t) => t.animacion), PULSO_DE_LA_PUNTA]
+  const o0 = ondaDelPulso(0, 0.02)
+  const o1 = ondaDelPulso(1, 0.02)
+  return [f.bienvenida, f.blanco, f.frase, salidaDeLaCapa(reducido), apareceElBoton(reducido), latidoDelBoton(reducido), o0.escala, o0.opacidad, o1.escala, o1.opacidad]
 }
 const PERMITIDAS = new Set(['opacity', 'transform', 'offset', 'easing'])
 const soloCompositor = (as: readonly Animacion[]): boolean =>
   as.every((a) => a.cuadros.length >= 2 && a.cuadros.every((c) => Object.keys(c).every((k) => PERMITIDAS.has(k)) && (c.transform === undefined || /^((translate|rotate|scale)\([^)]*\)\s*)+$/.test(c.transform))))
 const lasDelPreloader = [...todas(false), ...todas(true)]
-afirmar(soloCompositor(lasDelPreloader), `las ${String(lasDelPreloader.length)} animaciones del preloader (el texto, el blanco, la salida, cada raya, la punta y su pulso, normal y con movimiento reducido) son sólo de \`opacity\` y \`transform\` (traslados, giros y escalas): las anima el compositor`)
-controlPositivo('  el detector ve una flecha que se dibuja con `stroke-dashoffset` (la de antes)', [...lasDelPreloader, { cuadros: [{ strokeDashoffset: 100 } as CuadroClave, { strokeDashoffset: 0 } as CuadroClave], duracion: 1500, demora: 0, relleno: 'both' } as Animacion], soloCompositor)
-controlPositivo('  y una punta que se mueve con `left`', [{ cuadros: [{ transform: 'translate(0px, 0px)' }, { transform: 'translate(1px, 1px)', left: '3px' } as CuadroClave], duracion: 1, demora: 0, relleno: 'both' } as Animacion], soloCompositor)
+afirmar(soloCompositor(lasDelPreloader), `las ${String(lasDelPreloader.length)} animaciones del preloader (el texto, el blanco, la salida, el botón que aparece, su latido y las dos ondas, normal y con movimiento reducido) son sólo de \`opacity\` y \`transform\` (traslados, giros y escalas): las anima el compositor`)
+controlPositivo('  el detector ve un anillo que se dibuja con `stroke-dashoffset` (la flecha de antes)', [...lasDelPreloader, { cuadros: [{ strokeDashoffset: 100 } as CuadroClave, { strokeDashoffset: 0 } as CuadroClave], duracion: 1500, demora: 0, relleno: 'both' } as Animacion], soloCompositor)
+controlPositivo('  y una onda que se agranda con `left`', [{ cuadros: [{ transform: 'translate(0px, 0px)' }, { transform: 'translate(1px, 1px)', left: '3px' } as CuadroClave], duracion: 1, demora: 0, relleno: 'both' } as Animacion], soloCompositor)
 
 /** El valor de una animación en `tiempo` (ms desde su origen), con las curvas exactas (`x(s) = s`: controles de x en 1/3 y 2/3). */
 const curva = (easing: string | undefined): ((s: number) => number) => {
@@ -107,43 +105,47 @@ afirmar(desvio < 2e-3, `las animaciones reproducen la línea cuadro a cuadro (la
 const lineal = fundidosDelTexto(false)
 controlPositivo('  el detector ve una bienvenida que entra con otra curva (lineal)', { ...lineal, bienvenida: { ...lineal.bienvenida, cuadros: lineal.bienvenida.cuadros.map((c) => ({ ...c, easing: undefined })) } }, (f) => reproduce(f, salidaDeLaCapa(false)) < 2e-3)
 const reducida = fundidosDelTexto(true)
-const reducidaBien = (f: typeof reducida): boolean => valor(f.bienvenida, 0) === 1 && valor(f.bienvenida, 349) === 1 && valor(f.bienvenida, 351) === 0 && valor(f.frase, 351) === 1 && valor(f.blanco, 100) === 0 && f.bienvenida.duracion === 0 && inicioDeLaFlecha(true) === 350
-afirmar(reducidaBien(reducida), '  con movimiento reducido, saltos sin fundido: la bienvenida hasta los 350 ms y de golpe el blanco con la frase (y la flecha ya dibujada)')
+const reducidaBien = (f: typeof reducida): boolean => valor(f.bienvenida, 0) === 1 && valor(f.bienvenida, 349) === 1 && valor(f.bienvenida, 351) === 0 && valor(f.frase, 351) === 1 && valor(f.blanco, 100) === 0 && f.bienvenida.duracion === 0 && inicioDelBoton(true) === 350
+afirmar(reducidaBien(reducida), '  con movimiento reducido, saltos sin fundido: la bienvenida hasta los 350 ms y de golpe el blanco con la frase (y el botón ya a la vista)')
 controlPositivo('  el detector ve la reducida con fundidos', fundidosDelTexto(false), reducidaBien)
 
-// Las rayas, cuando llega el dibujo; la punta, sin vueltas; lo frenable, el último 20 %.
-const inversaBien = (tau: (y: number) => number): boolean => [0, 0.1, 0.3, 0.5, 0.62, 0.8, 0.97, 1].every((y) => Math.abs(trazoDeLaFlecha(tau(y)) - y) < 1e-9)
-afirmar(inversaBien(tauDelTrazo) && Math.abs(trazoDeLaFlecha(TAU_DEL_FRENO) - LINEA.frenoDesde) < 1e-9, `cada raya aparece cuando el dibujo llega a su principio (la inversa exacta del trazo); el freno, desde el ${String(LINEA.frenoDesde * 100)} % (${TAU_DEL_FRENO.toFixed(0)} ms de la flecha)`)
-controlPositivo('  el detector ve rayas que aparecen a ritmo parejo (sin la curva del trazo)', (y: number) => y * LINEA.flechaMs, inversaBien)
-const punta = recorridosDeLaPunta(TRAZADO_1440, false)
-const angulo = (c: CuadroClave): number => Number(/rotate\(([-\d.]+)deg\)/.exec(c.transform ?? '')?.[1])
-const puntaBien = (tramos: typeof punta): boolean => {
-  const cuadros = tramos.flatMap((t) => t.animacion.cuadros)
-  const offs = tramos.every((t) => t.animacion.cuadros.every((c, i, cs) => (c.offset ?? 0) >= 0 && (c.offset ?? 0) <= 1 && (i === 0 || (c.offset ?? 0) >= (cs[i - 1].offset ?? 0))))
-  const sinVueltas = cuadros.every((c, i) => i === 0 || Math.abs(angulo(c) - angulo(cuadros[i - 1])) < 60)
-  const ultimo = cuadros[cuadros.length - 1].transform ?? ''
-  const llega = ultimo.startsWith(`translate(${TRAZADO_1440.punta.x.toFixed(2)}px, ${TRAZADO_1440.punta.y.toFixed(2)}px)`)
-  const partes = tramos.length === 2 && !tramos[0].frenable && tramos[1].frenable && tramos[1].animacion.demora === TAU_DEL_FRENO && tramos[0].animacion.duracion + tramos[1].animacion.duracion === LINEA.flechaMs
-  return offs && sinVueltas && llega && partes
+// [L6 · ítem 81] El latido «tu-tu … tu-tu»: dos pulsos cercanos y una pausa larga; la onda de cada pulso crece del botón hasta el tamaño final y se desvanece.
+const picos = (a: Animacion): number[] => a.cuadros.flatMap((c) => (c.transform === `scale(${String(LATIDO.escala)})` ? [(c.offset ?? 0) * a.duracion] : []))
+const latidoBien = (a: Animacion): boolean => {
+  const p = picos(a)
+  const ultimoCuadro = a.cuadros[a.cuadros.length - 1]
+  const pausa = a.duracion - p[1]
+  return p.length === 2 && a.duracion === LINEA.latidoPeriodoMs && a.iteraciones === Number.POSITIVE_INFINITY && p[1] - p[0] === LATIDO.entrePulsosMs && pausa > 4 * (p[1] - p[0]) && ultimoCuadro.transform === 'scale(1)' && ultimoCuadro.offset === 1
 }
-afirmar(puntaBien(punta), `la punta recorre el camino (${String(punta.reduce((n, t) => n + t.animacion.cuadros.length, 0))} cuadros clave, el ángulo desenrollado) y termina en el borde del botón; en dos tramos: el libre y el frenable (desde el freno)`)
-controlPositivo('  el detector ve un ángulo que da la vuelta entre dos cuadros (giraría 360°)', punta.map((t, i) => (i === 0 ? { ...t, animacion: { ...t.animacion, cuadros: t.animacion.cuadros.map((c, k) => (k === 5 ? { ...c, transform: (c.transform ?? '').replace(/rotate\(([-\d.]+)deg\)/, (_, a: string) => `rotate(${String(Number(a) + 360)}deg)`) } : c)) } } : t)), puntaBien)
+afirmar(latidoBien(latidoDelBoton(false)), `el botón late como un corazón: dos pulsos a ${String(LATIDO.entrePulsosMs)} ms uno del otro y una pausa de más de cuatro veces eso, en un período de ${String(LINEA.latidoPeriodoMs)} ms, sin fin`)
+const parejo = latidoDelBoton(false)
+controlPositivo('  el detector ve dos pulsos parejos (sin la pausa: un metrónomo)', { ...parejo, cuadros: parejo.cuadros.map((c) => (c.transform === `scale(${String(LATIDO.escala)})` && (c.offset ?? 0) > 0.1 ? { ...c, offset: 0.5 } : c)) }, latidoBien)
+controlPositivo('  y un latido que se agota (una sola vuelta)', { ...parejo, iteraciones: 1 }, latidoBien)
+const ondasBien = (o0: ReturnType<typeof ondaDelPulso>, o1: ReturnType<typeof ondaDelPulso>, inicio: number): boolean => {
+  const fin = o0.escala.cuadros.find((c) => c.transform === 'scale(1)')
+  const nace = o0.escala.cuadros[0].transform === `scale(${inicio.toFixed(4)})`
+  const sale = o0.opacidad.cuadros[0].opacity === LATIDO.ondaOpacidad && o0.opacidad.cuadros.some((c) => c.opacity === 0 && (c.offset ?? 0) === (fin?.offset ?? -1))
+  return nace && sale && (fin?.offset ?? 0) * LINEA.latidoPeriodoMs === LATIDO.ondaMs && o1.escala.demora - o0.escala.demora === LATIDO.entrePulsosMs && o1.opacidad.demora === o1.escala.demora && o0.escala.relleno === 'none' && o1.escala.relleno === 'none' && o0.opacidad.relleno === 'none' && o1.opacidad.relleno === 'none' && o0.escala.iteraciones === Number.POSITIVE_INFINITY
+}
+afirmar(ondasBien(ondaDelPulso(0, 0.0123), ondaDelPulso(1, 0.0123), 0.0123), `cada pulso manda su onda: nace del tamaño del botón, llega al tamaño final en ${String(LATIDO.ondaMs)} ms (opacidad de ${String(LATIDO.ondaOpacidad)} a 0), la segunda ${String(LATIDO.entrePulsosMs)} ms después, y ninguna se ve antes de su turno (sin relleno hacia atrás)`)
+controlPositivo('  el detector ve una onda que nace del tamaño final (no del botón)', ondaDelPulso(0, 1), (o: ReturnType<typeof ondaDelPulso>) => ondasBien(o, ondaDelPulso(1, 0.0123), 0.0123))
+controlPositivo('  y una segunda onda que se ve antes de su turno (relleno hacia atrás)', ondaDelPulso(1, 0.0123), (o: ReturnType<typeof ondaDelPulso>) => ondasBien(ondaDelPulso(0, 0.0123), { escala: { ...o.escala, relleno: 'both' }, opacidad: o.opacidad }, 0.0123))
 
-// La capa y la flecha no escriben estilos por cuadro: todo va por `animar` (el reloj) o por `animate`.
+// La capa y el botón no escriben estilos por cuadro: todo va por `animar` (el reloj) o por `animate`.
 const CAPA = sinComentarios(leer(`${V3}/_chrome/preloader/CapaDelPreloader.tsx`))
-const FLECHA = sinComentarios(leer(`${V3}/_chrome/preloader/FlechaDelSonido.tsx`))
+const BOTON = sinComentarios(leer(`${V3}/_chrome/preloader/BotonQueVibra.tsx`))
 const sinEstilosPorCuadro = (fuentes: readonly string[]): boolean =>
   fuentes.every((c) => !/\.style\.(opacity|transform)\s*=|strokeDashoffset|setAttribute\('transform'|\.style\.setProperty\('opacity'/.test(c)) &&
-  /animar\(el, a, r, 0\)/.test(fuentes[0]) && /animar\(capa, salidaDeLaCapa\(decision\.reducido\), r, e\.salidaDesde\)/.test(fuentes[0]) && /animar\(el, a, r, origen\)/.test(fuentes[1])
-afirmar(sinEstilosPorCuadro([CAPA, FLECHA]), 'la capa y la flecha no escriben `opacity`, `transform` ni el trazo por cuadro: el texto, la salida y cada raya van con `animar` (alineadas con el reloj, en el compositor)')
-controlPositivo('  el detector ve la capa de antes (las opacidades escritas por cuadro desde el rAF)', [`${CAPA}\nif (bienvenida.current !== null) bienvenida.current.style.opacity = String(v.bienvenida)`, FLECHA], sinEstilosPorCuadro)
+  /animar\(el, a, r, 0\)/.test(fuentes[0]) && /animar\(capa, salidaDeLaCapa\(decision\.reducido\), r, e\.salidaDesde\)/.test(fuentes[0]) && /animar\(aparece\.current, apareceElBoton\(reducido\), r, origen\)/.test(fuentes[1])
+afirmar(sinEstilosPorCuadro([CAPA, BOTON]), 'la capa y el botón no escriben `opacity`, `transform` ni el trazo por cuadro: el texto, la salida, el botón y sus ondas van con `animar` (alineadas con el reloj, en el compositor)')
+controlPositivo('  el detector ve la capa de antes (las opacidades escritas por cuadro desde el rAF)', [`${CAPA}\nif (bienvenida.current !== null) bienvenida.current.style.opacity = String(v.bienvenida)`, BOTON], sinEstilosPorCuadro)
 
 titulo('2 · La preparación de la escena, repartida: sólo en los ratos quietos del preloader, y en partes')
 
-// Los ratos quietos: la bienvenida aparecida y quieta (con margen antes de irse) y desde la flecha; nunca en un fundido.
+// Los ratos quietos: la bienvenida aparecida y quieta (con margen antes de irse) y desde el botón; nunca en un fundido.
 const FUNDIDOS: readonly (readonly [number, number])[] = [
   [0, LINEA.bienvenidaEntraMs],
-  [LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs, INICIO_DE_LA_FLECHA_MS],
+  [LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs, INICIO_DEL_BOTON_MS],
 ]
 const quietosBien = (f: typeof ratoQuieto): boolean => {
   for (let t = 0; t <= 9000; t += 10) {
@@ -151,9 +153,9 @@ const quietosBien = (f: typeof ratoQuieto): boolean => {
     if (enFundido && f(t, false)) return false
     if (!f(t, true)) return false
   }
-  return f(LINEA.bienvenidaEntraMs + 10, false) && f(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS - 10, false) && !f(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS + 10, false) && f(INICIO_DE_LA_FLECHA_MS + 10, false)
+  return f(LINEA.bienvenidaEntraMs + 10, false) && f(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS - 10, false) && !f(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS + 10, false) && f(INICIO_DEL_BOTON_MS + 10, false)
 }
-afirmar(quietosBien(ratoQuieto), `la escena se prepara sólo en los ratos quietos: con la bienvenida aparecida (de ${String(LINEA.bienvenidaEntraMs)} ms a ${String(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS)}, ${String(MARGEN_DEL_RATO_QUIETO_MS)} ms antes de que se vaya) y desde la flecha; nunca en el fundido de entrada, el de salida, el blanco ni la frase; con movimiento reducido, siempre`)
+afirmar(quietosBien(ratoQuieto), `la escena se prepara sólo en los ratos quietos: con la bienvenida aparecida (de ${String(LINEA.bienvenidaEntraMs)} ms a ${String(LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS)}, ${String(MARGEN_DEL_RATO_QUIETO_MS)} ms antes de que se vaya) y desde el botón; nunca en el fundido de entrada, el de salida, el blanco ni la frase; con movimiento reducido, siempre`)
 controlPositivo('  el detector ve una preparación que sigue durante la salida de la bienvenida (lo que medía el teléfono)', ((t: number, r: boolean) => r || t >= LINEA.bienvenidaEntraMs) as typeof ratoQuieto, quietosBien)
 controlPositivo('  y una que arranca en pleno fundido de entrada (la de antes de C2-81)', ((t: number, r: boolean) => r || t >= 0) as typeof ratoQuieto, quietosBien)
 
@@ -324,17 +326,17 @@ async function cableado(): Promise<void> {
   const botonBien = (m: string, c: string, e: string, ch: string): boolean =>
     /aria-label="Activar movimiento"/.test(m) && /data-estado="apagado"/.test(m) && /data-control-fijo=""/.test(m) && /stroke-width="1\.5"/.test(m) && /lucide-smartphone/.test(m) &&
     c.includes("aria-label={prendido ? 'Desactivar movimiento' : 'Activar movimiento'}") &&
-    e.includes('escritorio:hidden') && e.includes(['right', '[max(var(--spacing-4),env(safe-area-inset-right))]'].join('-')) && e.includes('data-parte="lugar-del-movimiento"') && /useSyncExternalStore\(sinCambios, hayMovimiento, \(\) => false\)/.test(e) &&
+    e.includes('hasta-tablet:hidden') && e.includes(['right', '[max(var(--spacing-4),env(safe-area-inset-right))]'].join('-')) && e.includes('data-parte="lugar-del-movimiento"') && /useSyncExternalStore\(sinCambios, hayMovimiento, \(\) => false\)/.test(e) &&
     /<EsquinaDelMovimiento \/>\s*<EsquinaDelSonido \/>\s*\{\/\*[^]*?\*\/\}\s*<ChatDelSitio \/>/.test(ch)
   afirmar(botonBien(boton, CONTROL, ESQUINA, CHROME), 'el botón: «Activar movimiento» / «Desactivar movimiento» (05-TEXTOS), su estado en `data-estado`, el teléfono de lucide con trazo 1,5, un control fijo (la órbita no lo sigue), arriba a la derecha y escondido desde 1024; montado en el chrome junto al parlante', boton.slice(0, 160))
   controlPositivo('  el detector ve un botón sin su `aria-label`', [boton.replace('aria-label="Activar movimiento"', ''), CONTROL, ESQUINA, CHROME] as const, ([m, c, e, ch]) => botonBien(m, c, e, ch))
-  controlPositivo('  y uno que se ve también en escritorio', [boton, CONTROL, ESQUINA.replace('escritorio:hidden', ''), CHROME] as const, ([m, c, e, ch]) => botonBien(m, c, e, ch))
+  controlPositivo('  y uno que se ve también en escritorio', [boton, CONTROL, ESQUINA.replace('hasta-tablet:hidden', ''), CHROME] as const, ([m, c, e, ch]) => botonBien(m, c, e, ch))
 
   const TEXTOS = leer('docs/cola/2026-10-23/05-TEXTOS.md')
-  const { FRASE, FLECHAS } = await import('../../_chrome/preloader/CapaDelPreloader')
+  const { FRASE, BOTONES } = await import('../../_chrome/preloader/CapaDelPreloader')
   const fraseBien = (c: string, f: typeof FRASE): boolean =>
-    TEXTOS.includes(`Escritorio: queda **«${f.escritorio}»**`) && TEXTOS.includes(`Teléfono y tablet: **«${f.conMovimiento}»**`) && /if \(conMovimiento\) activarElMovimiento\(\)\s*setActivado\(true\)/.test(c) && /const \[conMovimiento\] = useState\(hayMovimiento\)/.test(c) && FLECHAS.conMovimiento.length === 2 && FLECHAS.escritorio.length === 1 && FLECHAS.conMovimiento.some((x) => x.objetivo === 'movimiento')
-  afirmar(fraseBien(CAPA, FRASE), 'la frase del preloader, tal cual 05-TEXTOS: en escritorio la del sonido (una flecha); en el teléfono la del sonido y el movimiento (dos flechas, una a cada botón), y tocarla prende los dos dentro del toque')
+    TEXTOS.includes(`Escritorio: queda **«${f.escritorio}»**`) && TEXTOS.includes(`Teléfono y tablet: **«${f.conMovimiento}»**`) && /if \(conMovimiento\) activarElMovimiento\(\)\s*setActivado\(true\)/.test(c) && /const \[conMovimiento\] = useState\(hayMovimiento\)/.test(c) && BOTONES.conMovimiento.length === 2 && BOTONES.escritorio.length === 1 && BOTONES.conMovimiento.includes('movimiento')
+  afirmar(fraseBien(CAPA, FRASE), 'la frase del preloader, tal cual 05-TEXTOS: en escritorio la del sonido (vibra su botón); en el teléfono la del sonido y el movimiento (vibran los dos botones), y tocarla prende los dos dentro del toque')
   controlPositivo('  el detector ve la frase que sólo prende el sonido', [CAPA.replace('if (conMovimiento) activarElMovimiento()', ''), FRASE] as const, ([c, f]) => fraseBien(c, f))
 
   const SONIDO = sinComentarios(leer(`${V3}/_chrome/sonido/ControlDelSonido.tsx`))

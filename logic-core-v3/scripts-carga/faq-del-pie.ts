@@ -17,7 +17,7 @@
  *     vuelve entero (`hunde` 0; en la página, sus columnas sin recorte); en el home, el encastre NO se rebobina (`__finalDelBanco().fin` ≥ 0,99
  *     durante la salida y medio segundo después);
  *   · EL FOCO: enfocar una pregunta lo trae; Mayús+Tab (al pie) lo saca.
- * Abajo de 1024 (táctil), la LISTA: después del pie, cada pregunta con su respuesta en el DOM, sin WhatsApp ([C2 · 71t] un acordeón de
+ * Abajo de 1024 (táctil), la LISTA: después del pie ([L5] en el home, ANTES del pie: se la mira donde está), cada pregunta con su respuesta en el DOM, sin WhatsApp ([C2 · 71t] un acordeón de
  * vidrio: un botón por pregunta; el toque, el vidrio y el desborde los mide `faq-telefono.ts`); con el pie al
  * fondo el encastre corre como siempre (el fondo del layout no cambió) y, con la lista a la vista, un dedo hacia arriba no se retiene.
  * En todos: los datos estructurados (`FAQPage`) con seis preguntas.
@@ -374,7 +374,9 @@ async function lista(p: Page, ruta: string): Promise<{ readonly linea: string; r
   await dormir(6000)
   const finAlPie = await fin(p)
   // La lista hasta la mitad del cuadro: el pie todavía asoma (el final del pie escucha los gestos) y la lista ya se ve.
-  await p.evaluate('window.scrollTo({ top: document.documentElement.offsetHeight - innerHeight / 2, behavior: "instant" })')
+  // [L5] En el home la lista va ANTES del pie (71 de la revisión 3): se la trae a la vista donde está (el pie, debajo).
+  if (home) await p.evaluate(`(() => { const l = document.querySelector('[data-faq-del-pie="lista"]'); const pie = document.querySelector('[data-pieza="pie"]'); if (l && pie) window.__listaAntesDelPie = l.getBoundingClientRect().bottom <= pie.getBoundingClientRect().top + 1; if (l) window.scrollTo({ top: l.getBoundingClientRect().top + scrollY - innerHeight / 3, behavior: 'instant' }) })()`)
+  else await p.evaluate('window.scrollTo({ top: document.documentElement.offsetHeight - innerHeight / 2, behavior: "instant" })')
   await dormir(1500)
   const enLaLista = (await p.evaluate(`(() => {
     const l = document.querySelector('[data-faq-del-pie="lista"]')
@@ -388,11 +390,12 @@ async function lista(p: Page, ruta: string): Promise<{ readonly linea: string; r
   })()`)) as { aLaVista: boolean; items: number; conRespuesta: boolean; botones: number; whatsapp: boolean; retenido: boolean } | null
   await p.screenshot({ path: path.join(SALIDA, `390${ruta.replaceAll('/', '-')}-lista.png`), fullPage: false })
   const datos = (await p.evaluate(DATOS)) as number
-  const listaBien = enLaLista !== null && enLaLista.aLaVista && enLaLista.items === 6 && enLaLista.conRespuesta && enLaLista.botones === enLaLista.items && !enLaLista.whatsapp && !enLaLista.retenido
+  const antesDelPie = !home || (await p.evaluate('window.__listaAntesDelPie === true')) === true
+  const listaBien = enLaLista !== null && enLaLista.aLaVista && enLaLista.items === 6 && enLaLista.conRespuesta && enLaLista.botones === enLaLista.items && !enLaLista.whatsapp && !enLaLista.retenido && antesDelPie
   const encastreBien = !home || finAlPie === null || finAlPie > 0
   const bien = listaBien && encastreBien && datos === 6
   const linea =
-    `${bien ? 'ok   ' : 'FALLA'} 390 · ${ruta} · lista ${listaBien ? 'ok' : 'FALLA'} (${enLaLista === null ? 'sin lista' : `${String(enLaLista.items)} preguntas, ${enLaLista.conRespuesta ? 'con' : 'SIN'} respuesta, ${String(enLaLista.botones)} botones, WhatsApp ${enLaLista.whatsapp ? 'SÍ' : 'no'}, el dedo ${enLaLista.retenido ? 'RETENIDO' : 'suelto'}`})` +
+    `${bien ? 'ok   ' : 'FALLA'} 390 · ${ruta} · lista ${listaBien ? 'ok' : 'FALLA'} (${enLaLista === null ? 'sin lista' : `${String(enLaLista.items)} preguntas, ${enLaLista.conRespuesta ? 'con' : 'SIN'} respuesta, ${String(enLaLista.botones)} botones, WhatsApp ${enLaLista.whatsapp ? 'SÍ' : 'no'}, el dedo ${enLaLista.retenido ? 'RETENIDO' : 'suelto'}${home ? `, ${antesDelPie ? 'antes' : 'DESPUÉS'} del pie` : ''}`})` +
     ` · encastre al fondo del pie ${encastreBien ? 'ok' : 'FALLA'} (fin ${String(finAlPie)}) · datos estructurados: ${String(datos)} preguntas`
   return { linea, bien }
 }

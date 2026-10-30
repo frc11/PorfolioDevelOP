@@ -12,7 +12,7 @@ import { MAXIMOS, validarElMail } from '../../_lib/formularios/validar'
 import { NEWSLETTER } from './contenido'
 
 /**
- * [RONDA 2] F1 · EL NEWSLETTER DE TU PANEL, QUE ENVÍA. [C2 · 60c] Rehecho al estándar de los formularios del sitio: un form chico con
+ * [RONDA 2] F1 · EL NEWSLETTER DE TU PANEL, QUE ENVÍA. [L4] Más grande: las píldoras y la carga en su tamaño normal (ya no `compacto`). [C2 · 60c] Rehecho al estándar de los formularios del sitio: un form chico con
  * «Nombre» y «Mail» (las píldoras del contacto, `Campos.tsx`, no una copia) y «Suscribirme» (el botón simple del sitio, `Cta`). El
  * envío es `EstadoDeEnvio` (la carga de develOP, el encastre con «¡Listo!» o el error, y a los 3 s vuelve el form: vacío después del
  * éxito, con lo escrito después del error), con sus textos de la newsletter. El error de un campo, en el formato de siempre (el
@@ -73,17 +73,17 @@ export function NewsletterDelPanel(): React.JSX.Element {
   const enviando = estado === 'enviando'
   return (
     <div data-pieza="newsletter-del-panel" className="w-full">
-      <EstadoDeEnvio estado={estado} alVolver={alVolver} mensajes={MENSAJES_DEL_ENVIO.newsletter} compacto>
+      <EstadoDeEnvio estado={estado} alVolver={alVolver} mensajes={MENSAJES_DEL_ENVIO.newsletter}>
         <form data-pieza="form-de-novedades" noValidate onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-[var(--spacing-3)] text-left">
           <CampoDePildora
             rotulo={NEWSLETTER.rotuloDelNombre} nombre="nombre" id={idDe('nombre')} valor={datos.nombre} alEscribir={escribir('nombre')}
-            ejemplo={CAMPOS.nombre.ejemplo} maximo={MAXIMOS.nombre} idDelError={null} conError={false} autocompletar="name" compacto
+            ejemplo={CAMPOS.nombre.ejemplo} maximo={MAXIMOS.nombre} idDelError={null} conError={false} autocompletar="name"
           />
           <div className="flex flex-col gap-[var(--spacing-1)]">
             <CampoDePildora
               rotulo={NEWSLETTER.rotulo} nombre="mail" id={idDe('mail')} valor={datos.mail} alEscribir={escribir('mail')}
               ejemplo={CAMPOS.medio.ejemplo} maximo={MAXIMOS.contacto} idDelError={ID_DEL_ERROR} conError={errorDelMail !== null}
-              autocompletar="email" modoDeEntrada="email" requerido compacto
+              autocompletar="email" modoDeEntrada="email" requerido
             />
             <ErrorDelCampo id={ID_DEL_ERROR} texto={errorDelMail ?? undefined} />
           </div>

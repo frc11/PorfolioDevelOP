@@ -9,14 +9,18 @@
  *       0,15 ─────── 0,68       el panel entra, con una desaceleración final (en web, más tarde si hace falta: ver `inicioDelPanel`)
  *            0,415 ───── 1      [C2-50] los renglones se levantan en 2D, uno por uno, desde que el panel va por la MITAD (ítem 13)
  *                  0,68 ─ 0,9   [C2-50] el título del servicio se subraya al terminar de llegar: rápido y después desacelera
+ *                     0,75 ─ 0,97  [L3] el subrayado del segundo renglón, un escalón después
  */
 
 export const DURACION_DE_LA_TRANSICION_MS = 2200
 
+/** [L3] Lo que la máquina traga después de un paso, además del vuelo del salto: nada (ítem 50, «pasar más rápido, con gatillo»). */
+export const CANDADO_DE_SERVICIOS_MS = 0
+
 export const TIEMPOS = {
   enjambre: { desde: 0, hasta: 0.5 },
   nube: { desde: 0.05, hasta: 0.9 },
-  subrayado: { duracion: 0.22 },
+  subrayado: { duracion: 0.22, escalon: 0.07, renglones: 2 },
   panel: { inicio: 0.15, duracion: 0.53 },
   texto: { desde: 0.7, porLinea: 0.045, duracion: 0.2 },
 } as const
@@ -73,9 +77,14 @@ export function inicioDelPanel(gDelCambio: number, borde: number, ancho: number)
 /** [C2-50] Los renglones arrancan con el panel por la MITAD de su entrada (ítem 13: antes que el resto); si el panel arranca más tarde, ellos también. */
 export const desdeDelTexto = (inicio: number): number => inicio + TIEMPOS.panel.duracion / 2
 
-/** [C2-50] Cuánto se subrayó el título (0 → 1): desde que el panel cerró, rápido y después desacelera (easeOutQuart); llega antes del final. */
-export function avanceDelSubrayado(g: number, inicio: number = TIEMPOS.panel.inicio): number {
-  const desde = Math.min(inicio + TIEMPOS.panel.duracion, 1 - TIEMPOS.subrayado.duracion)
+/**
+ * [C2-50] Cuánto se subrayó el título (0 → 1): desde que el panel cerró, rápido y después desacelera (easeOutQuart); llega antes del final.
+ * [L3] Un subrayado por renglón: el renglón `renglon` arranca un escalón después del anterior (y también llega en g = 1).
+ */
+export function avanceDelSubrayado(g: number, inicio: number = TIEMPOS.panel.inicio, renglon = 0): number {
+  const { duracion, escalon, renglones } = TIEMPOS.subrayado
+  // Con el panel tarde, cada uno se adelanta lo que haga falta para llegar en g = 1 sin perder el escalón.
+  const desde = Math.min(inicio + TIEMPOS.panel.duracion + renglon * escalon, 1 - duracion - (renglones - 1 - renglon) * escalon)
   const t = acotar((g - desde) / TIEMPOS.subrayado.duracion)
   return 1 - (1 - t) ** 4
 }
@@ -85,6 +94,17 @@ export function capaDelEnjambre(posicion: number, gDelCambio: number): 'detras' 
   if (posicion <= 0) return 'detras'
   if (posicion >= 1) return 'delante'
   return posicion >= gDelCambio ? 'delante' : 'detras'
+}
+
+/**
+ * [L3] Cómo sigue la posición cuando la vista cambia: desde DONDE ESTÁ (aunque la transición de antes no haya terminado), en
+ * `min(distancia, 1)` transiciones: pasar rápido acelera lo que falta, sin saltar. Salta sólo si la VISTA salta más de un estado (la
+ * barra de desplazamiento, un ancla). `conSalto`: el criterio de antes (por la distancia de la posición), para el control del banco.
+ */
+export function retomarHacia(posicion: number, vistaAntes: number, vista: number, conSalto = false): { readonly salta: boolean; readonly ms: number } {
+  const distancia = Math.abs(vista - posicion)
+  const salta = Math.abs(vista - vistaAntes) > 1.001 || (conSalto && distancia > 1.001)
+  return { salta, ms: Math.min(distancia, 1) * DURACION_DE_LA_TRANSICION_MS }
 }
 
 /** Sin el enjambre medido todavía: un cambio a mitad del viaje y el panel en su tiempo de siempre. */

@@ -18,7 +18,7 @@ import { PROPIEDAD_DE_LA_CUBIERTA, SCRIPT_DE_LA_DECISION, decisionDeLaVentana } 
  *      bloquea el scroll desde el primer instante.
  *   2. **La cubierta:** viaja en el HTML del servidor, negra, encima de todo (también del chrome y de los diálogos), y sin la decisión no
  *      se ve (`_estilos/preloader.css`, con su seguro si la página no hidrata). Sin hijos en el servidor: lo que se ve lo pone la capa.
- *   3. **La capa** (`CapaDelPreloader`, perezosa: sólo la baja quien la ve): la secuencia, la flecha y la espera de la carga. Al terminar,
+ *   3. **La capa** (`CapaDelPreloader`, perezosa: sólo la baja quien la ve): la secuencia, el botón que vibra y la espera de la carga. Al terminar,
  *      la entrada se abre (`_lib/entrada.ts`): el titular del hero y el logo caen, o el título de la página llega. **El scroll** sigue
  *      bloqueado hasta que llegan (lo que llega con la entrada lo retiene), o a lo sumo `TOPE_DEL_BLOQUEO_MS` después.
  *

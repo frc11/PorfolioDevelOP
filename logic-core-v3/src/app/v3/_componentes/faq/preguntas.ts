@@ -16,6 +16,8 @@ export const MAXIMO_DE_PREGUNTAS = 6
 /** Los textos del FAQ (de B10, como los pidió Valentino). */
 export const TEXTOS_DEL_FAQ = {
   titulo: 'Preguntas frecuentes',
+  /** [L5] La introducción, debajo del título (la del bloque de las preguntas en escritorio). */
+  intro: 'Lo que más nos preguntan antes de arrancar. Si no está acá, escribinos.',
   /** El aviso del bloque de la derecha, antes de la primera pregunta. */
   aviso: 'Tocá una pregunta y mirá lo que pasa.',
   /** El bloque chico que sube con la primera respuesta. */

@@ -113,16 +113,16 @@ afirmar(!/serif/i.test(sinComentarios(FUENTE_MARCA_TSX)), 'ninguna pieza referen
  * proxy. El contador se mantiene igual de duro: la tercera está NOMBRADA, así
  * que una cuarta sin declarar sigue rompiendo esto.
  */
-// [B12a.4] Y cuatro caras más de Archivo (no una serif): las del título de las páginas, nombradas por su binario, sin precarga.
+// [B12a.4] [L6: tres] Y caras más de Archivo (no una serif): las del título de las páginas, nombradas por su binario, sin precarga.
 const FAMILIAS_LOCALES_DECLARADAS = [
   'chivo-latin.woff2', 'chivo-mono-latin.woff2', 'archivo-display-latin.woff2',
-  'archivo-125-800-pagina.woff', 'archivo-125-300-pagina.woff', 'archivo-75-800-pagina.woff', 'archivo-112-300-pagina.woff',
+  'archivo-125-800-pagina.woff', 'archivo-125-300-pagina.woff', 'archivo-125-400-pagina.woff',
 ] as const
 afirmarIgual((FUENTE_LAYOUT.match(/localFont\(/g) ?? []).length, FAMILIAS_LOCALES_DECLARADAS.length, `el layout carga exactamente las ${FAMILIAS_LOCALES_DECLARADAS.length} familias locales declaradas, ni una más`)
 afirmarIgual(
   FAMILIAS_LOCALES_DECLARADAS.filter((f) => !FUENTE_LAYOUT.includes(f)),
   [],
-  '  y son esas por nombre de binario: Chivo, Chivo Mono, Archivo (la cara de display) y las cuatro de Archivo del título de las páginas',
+  '  y son esas por nombre de binario: Chivo, Chivo Mono, Archivo (la cara de display) y las tres de Archivo del título de las páginas (L6: la familia fija y su peso)',
 )
 afirmar(
   !/serif/i.test(sinComentarios(FUENTE_LAYOUT).replace(/sans-serif/g, '')),

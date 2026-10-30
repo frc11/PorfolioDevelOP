@@ -18,6 +18,25 @@ export const AVISO_DE_LA_ENTRADA = 'Scrolleá para explorarlo'
 export const AVISO_DEL_TELEFONO = 'Deslizá para pasar de servicio'
 
 /**
+ * [L3] EL TÍTULO DE CADA SERVICIO, EN DOS RENGLONES (ítem 50, como «Coffee that / arrives like a letter»): el primero derecho, en la
+ * display del Panel; el segundo en cursiva, para el contraste. IA se renombra en esta sección («me suena mucho mejor»).
+ */
+export const TITULO_DEL_SERVICIO: Readonly<Record<IdDeServicio, { readonly derecho: string; readonly cursiva: string }>> = {
+  web: { derecho: 'Desarrollo', cursiva: 'web' },
+  software: { derecho: 'Software', cursiva: 'a medida' },
+  'ia-automatizacion': { derecho: 'Integraciones con', cursiva: 'inteligencia artificial' },
+}
+
+/** [L3] El título entero, en una línea (el nombre que se lee en otros lugares del home). */
+export const nombreDelTitulo = (id: IdDeServicio): string => `${TITULO_DEL_SERVICIO[id].derecho} ${TITULO_DEL_SERVICIO[id].cursiva}`
+
+/** [L3] El enlace discreto al final del cuerpo: lleva a la página del servicio (como el título y el video). */
+export const LEER_MAS = 'Leer más…'
+
+/** [L3] En el teléfono y la tablet el cuerpo es más corto y más grande: los dos primeros párrafos de cada servicio. */
+export const PARRAFOS_DEL_TELEFONO = 2
+
+/**
  * [C2-50] EL TEXTO DEL MEDIO DE CADA SERVICIO (05-TEXTOS, tal cual): cuatro párrafos. Lo usan las dos ramas (el escenario y las
  * pantallas quietas), así anuncian lo mismo. El párrafo corto de siempre (`../contenido.ts`) queda para la sección de antes.
  */
@@ -85,7 +104,7 @@ export const PRESET_DEL_DESTINO: Readonly<Record<IdDeServicio, PresetDeLaEscena>
 }
 
 /** [C2-50] El corte de la diagonal: el alto del panel por la tangente (`100cqh`: el panel es el contenedor de tamaño). */
-export const CORTE_DE_LA_DIAGONAL = 'calc(100cqh * var(--tangente-de-la-diagonal, 0.114))'
+export const CORTE_DE_LA_DIAGONAL = 'calc(100cqh * var(--tangente-de-la-diagonal, 0.1228))'
 
 /** Por dónde entra cada servicio (y por dónde sale al subir). */
 export type Entrada = 'izquierda' | 'derecha' | 'arriba'

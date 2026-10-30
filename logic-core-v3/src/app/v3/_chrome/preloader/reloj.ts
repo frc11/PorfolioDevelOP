@@ -3,7 +3,7 @@ import type { Animacion } from './animaciones'
 /**
  * [C2-81] EL RELOJ DEL PRELOADER — una animación maestra sin objetivo (un `KeyframeEffect` sobre `null`) en la línea de tiempo del
  * documento. Su `currentTime` es el tiempo de la línea (`linea.ts`) y todas las animaciones del preloader se alinean con ella
- * (`animar`, `alinear`): el texto, la salida y la flecha corren en el compositor con el mismo origen, y lo que decide el hilo principal (la
+ * (`animar`, `alinear`): el texto, la salida y el botón con sus ondas corren en el compositor con el mismo origen, y lo que decide el hilo principal (la
  * etapa, el freno, la salida) lee el mismo reloj. Con la pestaña oculta la capa lo pausa a él y a todas (`pausarConLaPestana`): quien
  * vuelve ve la secuencia entera.
  */

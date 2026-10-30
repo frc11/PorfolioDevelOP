@@ -8,14 +8,15 @@
  *
  * [B1.2e] Debajo de 1024 el selector es el carrusel: el medio no son los pasos sino el flujo (el título, el carrusel y «la tuya»), medido en
  * el DOM (`medioDelCarrusel.ts`). El tramo es el mismo —arranca en el pin y la escena lo ve medir lo que veía— con `k = medio / lo que
- * veía`. Hasta que el flujo se mide, el de los pasos.
+ * veía`. Hasta que el flujo se mide, el de los pasos. [L2] Con Demos de una pantalla, el tramo del carrusel llega al final de la sección: la
+ * escena lo ve medir el medio que veía y la cola (`medioDelCarrusel.ts`).
  *
  * En las dos ramas (con y sin coreografía): la sección mide lo mismo en las dos.
  */
 
 import { TRAMO_ESTIRADO, type TramoEstirado } from '../../../_lib/escena/tramoEstirado'
 
-import { kDelCarrusel } from './medioDelCarrusel'
+import { pxQueVeLaEscenaDespuesDelPin } from './medioDelCarrusel'
 import { PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA, PX_DE_LA_APROXIMACION, anchoDelValor, kDelAncho, type AnchoDelPortfolio } from './pasos'
 
 /** El tramo del selector para un ancho y un paso. */
@@ -23,9 +24,20 @@ export function tramoDelSelector(panel: Element, ancho: AnchoDelPortfolio, paso:
   return { panel, k: kDelAncho(paso, ancho), arranque: PX_DE_LA_APROXIMACION, largo: PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho] }
 }
 
-/** [B1.2e] El tramo del carrusel para un ancho y el medio que mide su flujo (px de la regla). */
+/**
+ * [INT] La parte de cada punta del tramo del carrusel en la que la escena acelera y frena (`TramoEstirado.rampa`): sin ella pasaba de golpe
+ * de su velocidad a ~4,5 veces (390×844) al llegar el pin, y de vuelta al llegar Demos.
+ */
+export const RAMPA_DEL_CARRUSEL = 0.3
+
+/**
+ * [B1.2e] El tramo del carrusel para un ancho y el medio que mide su flujo (px de la regla). [L2] Hasta el final de la sección (con la cola).
+ * [INT] Desde que la sección asoma (la aproximación entra al tramo: lo que la escena tiene que recuperar se reparte en una pantalla más) y
+ * con rampa en las dos puntas. Afuera de la sección, lo mismo que antes.
+ */
 export function tramoDelCarrusel(panel: Element, ancho: AnchoDelPortfolio, medio: number): TramoEstirado {
-  return { panel, k: kDelCarrusel(medio, ancho), arranque: PX_DE_LA_APROXIMACION, largo: PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho] }
+  const largo = PX_DE_LA_APROXIMACION + pxQueVeLaEscenaDespuesDelPin(ancho)
+  return { panel, k: (PX_DE_LA_APROXIMACION + medio) / largo, arranque: 0, largo, rampa: RAMPA_DEL_CARRUSEL }
 }
 
 /** El ancho que decidió el CSS de la sección (`--ancho-del-portfolio`). */

@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils'
 
 import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
 import { entradaAbierta, retenerElScroll, suscribirALaEntrada } from '../../_lib/entrada'
-import { dispararLasGrietas } from '../../_lib/escena/cristal/grietas'
 import type { IdDePagina } from '../../_lib/escena/ruta/preset'
 import { useTituloDeVolumen, useTituloListo, useTitulosDeVolumen } from '../../_lib/titulos3d/registro'
 import { LLEGADA_DEL_TITULAR_S } from '../../_lib/titulos3d/titular'
@@ -16,12 +15,12 @@ import { usePrefiereMenosMovimiento } from '../../_lib/usePrefiereMenosMovimient
 import { SELECTOR_DEL_TRAMO_DEL_TITULO } from '../pagina/atributoDeLaIntro'
 import { Titular } from '../tipografia/Titular'
 import { anchoDelTitulo } from './anchoDelTitulo'
-import { LEGIBILIDAD_POR_DEFECTO, fuentesConLaLegibilidad, legibilidadDeLaUrl } from './legibilidad'
-import { CAIDA_DEL_TITULO, CARA_DEL_DOM, TITULOS_CON_LETRAS, TITULO_DE_PAGINA, caeElTitulo, combinacionDeLaBandera, partesDelTitulo, type PresetDelTitulo } from './presets'
+import { fuentesConLaLegibilidad } from './legibilidad'
+import { CAIDA_DEL_TITULO, CARA_DEL_DOM, TITULOS_CON_LETRAS, TITULO_DE_PAGINA, caeElTitulo, partesDelTitulo } from './presets'
 
 const sinCambios = (): (() => void) => () => undefined
-/** `?titulo=1|2|3|4`, leída después de hidratar (el servidor pinta la de siempre). */
-const combinacionDeLaPagina = (): PresetDelTitulo => combinacionDeLaBandera(new URLSearchParams(window.location.search).get('titulo'))
+/** [L6] El preset fijo: la familia de `TITULO_DE_PAGINA` con el peso elegido (la liviana un paso más pesada, `legibilidad.ts`), también en el servidor. */
+const PRESET = { ...TITULO_DE_PAGINA, fuentes: fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes) }
 /** [B12a.8] `?nombre=1` a `6`: uno de los títulos con letras (los de las páginas de servicio primero), para probar con los de verdad; sin ella, el de la página. */
 const nombreDeLaUrl = (): string | null => TITULOS_CON_LETRAS[Number(new URLSearchParams(window.location.search).get('nombre')) - 1] ?? null
 
@@ -44,8 +43,8 @@ export const idDeLaParte = (id: IdDePagina, parte: 1 | 2): string => `pagina-${i
 /**
  * [B12a.4] EL TÍTULO DE UNA PÁGINA (P-H13, P-H14; `docs/rediseno/B12a-API.md` §3) — lo renderiza `IntroDeLaPagina`. El `h1` dice el
  * título entero (las dos partes unidas con un espacio): siempre en el DOM y el visible sin WebGL, con movimiento reducido o abajo de
- * 1024. Desde 1024, con la escena, cada parte es un título de volumen con su fuente del preset (`TITULO_DE_PAGINA`, o la de
- * `?titulo=`): va en la pantalla (sigue al `h1`, fijo arriba mientras dura la intro), llega con el gesto y el reloj del titular del hero
+ * 1024. Desde 1024, con la escena, cada parte es un título de volumen con su fuente del preset (`TITULO_DE_PAGINA`):
+ * va en la pantalla (sigue al `h1`, fijo arriba mientras dura la intro), llega con el gesto y el reloj del titular del hero
  * y, [B12a.8] cuando a su tramo le falta `CAIDA_DEL_TITULO.antes` para soltarse (`caeElTitulo`), cae; al volver arriba, llega de nuevo.
  * Con las dos partes armadas el texto del DOM se apaga.
  *
@@ -56,11 +55,7 @@ export const idDeLaParte = (id: IdDePagina, parte: 1 | 2): string => `pagina-${i
 export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: { readonly id: IdDePagina; readonly titulo: string; readonly partes?: readonly [string, string]; readonly deNoche?: boolean }): React.JSX.Element {
   const deLaBandera = useSyncExternalStore(sinCambios, nombreDeLaUrl, () => null)
   const partes = deLaBandera === null ? partesDelTitulo(titulo, dadas) : partesDelTitulo(deLaBandera)
-  const familia = useSyncExternalStore(sinCambios, combinacionDeLaPagina, () => TITULO_DE_PAGINA)
-  // [B12a.8] T5 · [T0] la legibilidad elegida, `peso` (la parte liviana un paso más pesada, `legibilidad.ts`), también en el servidor;
-  // `?legibilidad=tamano`, la otra (la familia como es, más grande).
-  const legibilidad = useSyncExternalStore(sinCambios, legibilidadDeLaUrl, () => LEGIBILIDAD_POR_DEFECTO)
-  const preset = { ...familia, fuentes: fuentesConLaLegibilidad(familia.fuentes, legibilidad) }
+  const preset = PRESET
   const material = useTitulosDeVolumen()
   const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
   const reducido = usePrefiereMenosMovimiento()
@@ -139,16 +134,7 @@ export function TituloDePagina({ id, titulo, partes: dadas, deNoche = false }: {
     }
   }, [])
 
-  // [NOCTURNO B9] El cristal se agrieta cuando el título terminó de entrar: abierta la entrada y, con el título en volumen, armado, más
-  // lo que tarda su llegada (el mismo reloj que suelta el scroll). Sin volumen (abajo de 1024, sin WebGL), con el `h1` a la vista y el
-  // mismo reloj. Las grietas se quedan: la caída y la nueva llegada del título no las vuelven a pedir.
-  useEffect(() => {
-    if (!entrada || (activo && !listo)) return undefined
-    const reloj = window.setTimeout(() => dispararLasGrietas('avance', id), LLEGADA_DEL_TITULAR_S * 1000)
-    return () => window.clearTimeout(reloj)
-  }, [activo, entrada, listo, id])
-
-  // La cara de cada parte sale de la combinación (que se elige en el cliente): en línea, con el peso exacto de su instancia.
+  // La cara de cada parte sale del preset: en línea, con el peso exacto de su instancia.
   const cara = (i: 0 | 1): React.CSSProperties => ({ fontFamily: CARA_DEL_DOM[preset.fuentes[i]].familia, fontWeight: CARA_DEL_DOM[preset.fuentes[i]].peso })
   const tamano = { ...cara(0), '--em-del-titulo': anchoDelTitulo(partes, preset).toFixed(4), fontSize: TAMANO_DEL_TITULO } as React.CSSProperties
   return (

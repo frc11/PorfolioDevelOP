@@ -19,10 +19,9 @@ import { seccionDe } from '../_contrato/forma'
 import { escanearLoReal, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
 import { codigoDeLaSeccion, leer } from '../_invariantes/soporte'
-import { CONTENIDO, CTA_POR_SERVICIO } from './contenido'
+import { CONTENIDO } from './contenido'
 import { cuenta, focalizablesDe } from './deteccion'
-import { SUBTITULO, TEXTO_DEL_MEDIO } from './escenario/datos'
-import { nombreDelServicio } from './escenario/PanelDeServicio'
+import { LEER_MAS, SUBTITULO, TEXTO_DEL_MEDIO, TITULO_DEL_SERVICIO } from './escenario/datos'
 import { TEXTOS_DEL_RECOMENDADOR } from './recomendador/logica'
 import { TITULO_DEL_RECOMENDADOR } from './recomendador/Recomendador'
 import { Servicios } from './Servicios'
@@ -50,11 +49,11 @@ afirmar(animado.includes(`min-height:${seccionDe('servicios').alto}`) && quieto.
 titulo('2 · El mismo texto en las dos ramas, y los encabezados')
 
 // [C2-51] El texto del recomendador son dos párrafos (05-TEXTOS): cada uno, entero.
-const textos = [SUBTITULO, TITULO_DEL_RECOMENDADOR, ...TEXTOS_DEL_RECOMENDADOR.parrafos, ...SERVICIOS.flatMap((s) => [nombreDelServicio(s), CTA_POR_SERVICIO[s.id]])]
+const textos = [SUBTITULO, TITULO_DEL_RECOMENDADOR, ...TEXTOS_DEL_RECOMENDADOR.parrafos, ...SERVICIOS.flatMap((s) => [TITULO_DEL_SERVICIO[s.id].derecho, TITULO_DEL_SERVICIO[s.id].cursiva]), LEER_MAS]
 const visibleQuieto = textoVisible(quieto)
 const visibleAnimado = textoVisible(animado)
 const faltan = (t: string): string[] => textos.filter((x) => !t.includes(x))
-afirmarIgual([faltan(visibleQuieto), faltan(visibleAnimado)], [[], []], 'la bajada, el recomendador y cada servicio (su nombre y su CTA) están en las dos ramas')
+afirmarIgual([faltan(visibleQuieto), faltan(visibleAnimado)], [[], []], 'la bajada, el recomendador y cada servicio (los dos renglones de su título y, L3, «Leer más…» en lugar del CTA) están en las dos ramas')
 // [C2-50] El texto del medio nuevo (05-TEXTOS: cuatro párrafos), el mismo en las dos ramas.
 const palabrasDe = (t: string, id: keyof typeof CONTENIDO): boolean => TEXTO_DEL_MEDIO[id].join(' ').split(' ').every((p) => t.includes(p))
 afirmar(SERVICIOS.every((s) => palabrasDe(visibleQuieto, s.id) && palabrasDe(visibleAnimado, s.id)), '  y el párrafo de cada servicio, palabra por palabra (en el escenario va partido para levantarse por renglón)')
@@ -78,18 +77,22 @@ afirmarIgual(fuentes.flatMap((f) => funcionesDeColorEncontradas(f.texto)), [], '
 afirmarIgual(fuentes.flatMap((f) => literalesConUnidad(f.texto)), [], 'ningún literal con unidad')
 afirmarIgual(fuentes.flatMap((f) => arbitrariosSinVar(f.texto)), [], 'toda clase arbitraria consume var(--token)')
 controlPositivo('los detectores ven un hex, un px suelto y un arbitrario sin var', 'className="p-[16px] text-[#ff0000]" color: rgba(0,0,0,.1)', (t) => hexEncontrados(t).length + literalesConUnidad(t).length + arbitrariosSinVar(t).length + funcionesDeColorEncontradas(t).length === 0)
-const conAcento = (h: string): boolean => SERVICIOS.every((s) => new RegExp(`data-servicio="${s.id}"`).test(h)) && /color:var\(--color-acento\)/.test(h)
-afirmar(conAcento(quieto) && conAcento(animado), 'cada servicio pone su acento por `data-servicio` y el CTA lo consume por el alias (`--color-acento`): un acento por panel')
-controlPositivo('  el detector ve un CTA sin el alias', quieto.replaceAll('color:var(--color-acento)', 'color:red'), conAcento)
+// [L3] Reemplazada por la spec: el CTA se fue; el título y «Leer más…» consumen el alias por la clase (`text-acento`), dos por servicio.
+const conAcento = (h: string): boolean => SERVICIOS.every((s) => new RegExp(`data-servicio="${s.id}"`).test(h)) && cuenta(h, /class="[^"]*\btext-acento\b/g) >= 2 * SERVICIOS.length
+afirmar(conAcento(quieto) && conAcento(animado), 'cada servicio pone su acento por `data-servicio`, y su título y su «Leer más…» lo consumen por el alias (`text-acento`): un acento por panel')
+controlPositivo('  el detector ve el título y el enlace sin el alias', quieto.replaceAll('text-acento', 'text-tinta'), conAcento)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · El foco y el teclado')
 
 afirmarIgual(fuentes.flatMap((f) => apagadosDeFoco(f.texto)), [], 'ningún archivo apaga el anillo de foco')
-const recorrido = (h: string): string => focalizablesDe(h).join(' ')
+// [L3] Un enlace con `tabindex="-1"` (el del video, que repite al del título) no es una parada del teclado.
+const recorrido = (h: string): string => focalizablesDe(h.replace(/<a\b[^>]*tabindex="-1"[^>]*>/g, '')).join(' ')
 // [C2-51] Reemplazada por la spec: el recomendador va por etapas; el servidor publica la primera (cinco opciones y «Siguiente»).
-const esperado = [...SERVICIOS.map(() => '<a'), ...Array.from({ length: 5 }, () => '<input'), '<button'].join(' ')
-afirmarIgual([recorrido(quieto), recorrido(animado)], [esperado, esperado], 'el recorrido del teclado: el CTA de cada servicio (su página), las cinco opciones de la primera etapa del recomendador y «Siguiente»; el mismo en las dos ramas')
+// [L3] Reemplazada por la spec: por servicio, el título y «Leer más…» (el video lleva a la misma página, fuera del Tab).
+const esperado = [...SERVICIOS.flatMap(() => ['<a', '<a']), ...Array.from({ length: 5 }, () => '<input'), '<button'].join(' ')
+afirmarIgual([recorrido(quieto), recorrido(animado)], [esperado, esperado], 'el recorrido del teclado: el título y «Leer más…» de cada servicio (su página), las cinco opciones de la primera etapa del recomendador y «Siguiente»; el mismo en las dos ramas')
+afirmar(cuenta(animado, /<a\b[^>]*tabindex="-1"[^>]*data-viaje-del-servicio|<a\b[^>]*data-viaje-del-servicio[^>]*tabindex="-1"/g) === SERVICIOS.length && cuenta(animado, /aria-hidden="true"[^>]*tabindex="-1"|tabindex="-1"[^>]*aria-hidden="true"/g) >= SERVICIOS.length, '  [L3] el video también lleva a la página, sin anunciarse ni entrar al Tab (uno por servicio)')
 afirmar(/onFocus|data-pieza="panel-de-servicio"/.test(leer('src/app/v3/_secciones/servicios/escenario/PanelDeServicio.tsx')) && /onFocus=\{\(\) => foco\(estado\)\}/.test(leer('src/app/v3/_secciones/servicios/escenario/PanelDeServicio.tsx')), 'con el escenario, el foco que entra en un panel que no se ve lleva la página a ese servicio (el teclado ve lo que enfoca)')
 controlPositivo('el buscador de focalizables no está ciego', '<button>x</button><a href="#y">y</a>', (h) => focalizablesDe(h).length === 0)
 

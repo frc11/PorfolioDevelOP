@@ -435,7 +435,7 @@ async function main(): Promise<void> {
       return {
         centrado: h2 === null || h2 === undefined ? false : getComputedStyle(h2).textAlign === 'center',
         cta: caja('[data-pieza="ingreso-con-clave"] [data-pieza="cta"]'),
-        olvido: caja('a[href="/forgot-password"]'),
+        olvido: caja('[data-parte="olvido"]'),
         volver: caja('[data-parte="volver"]'),
         probar: caja('[data-parte="probar-el-panel"]'),
         form: caja('[data-pieza="ingreso-con-clave"]'),

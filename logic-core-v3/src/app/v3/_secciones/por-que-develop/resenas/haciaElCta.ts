@@ -8,6 +8,8 @@
  */
 
 import { TRANSFORMACION } from '../../../_lib/escena/ctaDelFinal/transformacion'
+import { TIEMPOS_DEL_FINAL } from '../../../_lib/escena/finalDelRecorrido'
+import { INSERCION_DE_LAS_RESENAS, MOMENTOS_DE_LAS_RESENAS, PANTALLAS_DE_LAS_RESENAS } from './tramo'
 
 const acotar01 = (x: number): number => Math.min(1, Math.max(0, x))
 const tramo = (x: number, desde: number, dura: number): number => acotar01((x - desde) / dura)
@@ -18,11 +20,16 @@ const GIRO = { desde: TRANSFORMACION.giro.desde, hasta: TRANSFORMACION.giro.desd
 
 export const HACIA_EL_CTA = {
   /** El anillo se abre un poco antes de que las placas empiecen a bajar, y se cierra cuando ya no queda ninguna. */
-  abre: [GIRO.desde - 0.16, 0.12],
+  // [L5] Abierto entero ANTES de que la primera placa se mueva (era desde 0,12: bajaban con el anillo a medio abrir).
+  abre: [GIRO.desde - 0.2, 0.12],
   baja: [GIRO.desde - 0.06, GIRO.hasta - (GIRO.desde - 0.06)],
   cierra: [GIRO.hasta + 0.02, 0.14],
-  /** Con el gatillo: la animación (s) y dónde se dispara (p). */
-  gatillo: { duracionS: 2.2, entra: 0.04, sale: 0.01 },
+  /**
+   * Con el gatillo: la animación (s) y dónde se dispara (p). [L5] Siempre (las dos variantes) y más lenta (era 2,2 s): primero la cámara
+   * llega arriba, después el piso se abre, bajan, se cierra, y recién ahí la cámara suelta. `guardado`: la parte de la animación en que
+   * corre la ventana del piso (abre, baja y cierra); antes, la cámara llega; después, suelta.
+   */
+  gatillo: { duracionS: 3.6, entra: 0.04, sale: 0.01, guardado: [0.12, 0.82] as const },
 } as const
 
 /** La bajada de las placas (0, en el aro; 1, se fueron por el hueco) con el progreso de la transformación (o la animación del gatillo). */
@@ -36,7 +43,11 @@ export function aperturaDelHueco(p: number): number {
 }
 
 /** Con el gatillo, la animación por tiempo (0 a 1) lleva a `p` por la ventana entera de la bajada (abre, baja y cierra). */
-export const progresoDelGatillo = (t: number): number => HACIA_EL_CTA.abre[0] + acotar01(t) * (HACIA_EL_CTA.cierra[0] + HACIA_EL_CTA.cierra[1] - HACIA_EL_CTA.abre[0])
+// [L5] Sólo en su parte `guardado` (antes y después, la cámara llega y suelta con el piso quieto).
+export const progresoDelGatillo = (t: number): number => {
+  const [desde, hasta] = HACIA_EL_CTA.gatillo.guardado
+  return HACIA_EL_CTA.abre[0] + tramo(t, desde, hasta - desde) * (HACIA_EL_CTA.cierra[0] + HACIA_EL_CTA.cierra[1] - HACIA_EL_CTA.abre[0])
+}
 
 /** El gatillo de la bajada: adónde va (1, la transformación empezó; 0, volvió a su arranque), con margen para no titilar. */
 export function objetivoDeLaBajada(p: number, previo: 0 | 1): 0 | 1 {
@@ -56,7 +67,8 @@ export function objetivoDeLaBajada(p: number, previo: 0 | 1): 0 | 1 {
  * su objetivo, y así el cartel nunca se adelanta a ella (s83 §16 lo simula cuadro a cuadro). Primero se enfoca el guardado, después se
  * pasa al CTA.
  */
-export const CAMARA_DEL_GUARDADO_EN_EL_GATILLO = { llega: 0.13, suelta: 0.66, soltada: 0.9, ctaSuelta: 0.72, margen: [0.4, 0.2] } as const
+// [L5] Llega antes de que el piso se abra y suelta después de que se cerró (era suelta 0,66: las últimas placas bajaban con la cámara yéndose).
+export const CAMARA_DEL_GUARDADO_EN_EL_GATILLO = { llega: 0.12, suelta: 0.83, soltada: 0.93, ctaSuelta: 0.88, margen: [0.4, 0.2] } as const
 
 const C_G = CAMARA_DEL_GUARDADO_EN_EL_GATILLO
 /** Con el scroll `p`: 1 hasta el margen (después de la llegada a C), 0 pasado. */
@@ -91,3 +103,68 @@ export function cruceDeLaVuelta(antes: number, ahora: number): 'ida' | 'vuelta' 
   if (antes >= VUELTA_DEL_CTA && ahora < VUELTA_DEL_CTA) return 'vuelta'
   return null
 }
+
+/**
+ * [L8b · 3] RESEÑAS → CTA, UN SOLO GATILLO — hasta acá el guardado era un gatillo pero la transformación al CTA seguía al scroll: un gesto
+ * corto dejaba el CTA a medio camino. Ahora el paso entero es UN gatillo, en pantallas del pin del bloque (`PIN_CON_LAS_RESENAS`):
+ *   · **ida:** el scroll cruza el fin de la lectura bajando (`lectura` + `umbral`) → un vuelo corto hasta `guardado` (la transformación en
+ *     `previo`, pasado el disparo del guardado), espera a que la cámara suelte el guardado (`C_G.suelta`) y vuela al CTA armado (`cta`);
+ *   · **vuelta:** el scroll cruza el CTA armado subiendo → vuela al fin de la lectura y espera a que las reseñas vuelvan a subir (el guardado
+ *     al revés, que se dispara en el camino).
+ * Mientras dura, los gestos se retienen (`useGatilloHaciaElCta`). Un salto que cruza el tramo entero (el foco que lleva al CTA, la barra) no
+ * es un cruce: el gatillo sólo mira lo que entra en el tramo desde su borde.
+ */
+export const GATILLO_HACIA_EL_CTA = { umbral: 0.02, previo: 0.06, llegada: 0.03, vueloAlAsientoMs: 450, vueloAlGuardadoMs: 900, vueloAlCtaMs: 2400, vueloDeVueltaMs: 3000, esperaMaximaMs: 6000 } as const
+
+/** Las pantallas del pin (con el tramo) en que la transformación al CTA vale `p` (0 a 1): el tramo de las reseñas va antes. */
+export const pantallaDelCta = (p: number): number => TIEMPOS_DEL_FINAL.valores.hasta + p * (TIEMPOS_DEL_FINAL.cta.armado - TIEMPOS_DEL_FINAL.valores.hasta) + PANTALLAS_DE_LAS_RESENAS
+
+/**
+ * Los lugares del gatillo, en pantallas del pin: el asiento (el aro armado), el fin de la lectura, el guardado disparado y el CTA armado (con
+ * su margen). [L9b · 3] El asiento es donde las reseñas se quedan: llegar bajando las asienta ahí, y desde ahí UN gesto hacia abajo es la ida
+ * entera (antes había que scrollear la lectura entera, una pantalla y media, hasta su fin); la vuelta termina ahí, asentada.
+ */
+export const LUGARES_DEL_GATILLO = {
+  asiento: INSERCION_DE_LAS_RESENAS + MOMENTOS_DE_LAS_RESENAS.entrada[1] * PANTALLAS_DE_LAS_RESENAS,
+  lectura: INSERCION_DE_LAS_RESENAS + MOMENTOS_DE_LAS_RESENAS.lectura[1] * PANTALLAS_DE_LAS_RESENAS,
+  guardado: pantallaDelCta(GATILLO_HACIA_EL_CTA.previo),
+  cta: pantallaDelCta(1) + GATILLO_HACIA_EL_CTA.llegada,
+} as const
+
+/**
+ * El cruce de un borde del tramo entre dos lecturas del scroll (pantallas del pin): `asiento` (llegó bajando a las reseñas armadas), `ida`
+ * (bajó por el fin de la lectura: el respaldo si la página quedó adentro de la lectura sin asentarse, una recarga o la barra), `vuelta` (entró
+ * subiendo por el CTA) o `null`.
+ */
+export function cruceDelGatillo(antes: number, ahora: number): 'asiento' | 'ida' | 'vuelta' | null {
+  const { umbral } = GATILLO_HACIA_EL_CTA
+  const desde = LUGARES_DEL_GATILLO.lectura + umbral
+  const hasta = pantallaDelCta(1) - umbral
+  const asiento = LUGARES_DEL_GATILLO.asiento
+  if (antes < asiento && ahora >= asiento && ahora < LUGARES_DEL_GATILLO.guardado) return 'asiento'
+  if (antes <= desde && antes >= asiento && ahora > desde && ahora < hasta) return 'ida'
+  if (antes >= hasta && ahora < hasta && ahora > desde) return 'vuelta'
+  return null
+}
+
+/**
+ * [L9b · 3] Asentada, qué hace un gesto que EMPIEZA: hacia abajo, la ida entera; hacia arriba, suelta (la página sube libre). Lo que sigue de
+ * un gesto ya visto (la cola de la inercia, la rueda que sigue) se retiene sin decidir nada.
+ */
+export function gestoAsentado(sentido: -1 | 1, nuevo: boolean, cola: boolean): 'retener' | 'ida' | 'soltar' {
+  if (cola && !nuevo) return 'retener'
+  return sentido === 1 ? 'ida' : 'soltar'
+}
+
+/** Cuándo sigue la ida (la cámara soltó el guardado: la animación de la bajada `t` pasó su `suelta`) y cuándo termina la vuelta (volvió a 0). */
+export const guardadoSuelto = (t: number): boolean => t >= C_G.suelta
+export const guardadoDeVuelta = (t: number): boolean => t <= 0.001
+
+/**
+ * [L8b · revisión] La secuencia se suelta si otro se lleva la página: un viaje del navbar, un vuelo pisado (Lenis con otra marca) o el scroll
+ * afuera del tramo (más de media pantalla antes del asiento o después del CTA). Si no, una espera que vence la volvería a arrastrar.
+ */
+export const debeAbortar = (pantalla: number, conViaje: boolean, pisado: boolean): boolean => conViaje || pisado || pantalla < LUGARES_DEL_GATILLO.asiento - 0.5 || pantalla > LUGARES_DEL_GATILLO.cta + 0.5
+
+/** [L9b · 3] Asentada, la página se movió sin un gesto (la barra, el foco que salta, un ancla): se suelta. */
+export const seFueDelAsiento = (pantalla: number): boolean => Math.abs(pantalla - LUGARES_DEL_GATILLO.asiento) > 0.1

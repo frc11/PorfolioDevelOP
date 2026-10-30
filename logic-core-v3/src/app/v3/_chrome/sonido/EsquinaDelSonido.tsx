@@ -2,6 +2,7 @@
 
 import { useLaBarraSeVe } from '../contacto/apertura'
 import { useCabeceraAlFondo } from '../recorrido/cabeceraAlFondo'
+import { LatidoDeLaEntrada } from './LatidoDeLaEntrada'
 import { SonidoDelHome } from './SonidoDelHome'
 
 /**
@@ -9,15 +10,19 @@ import { SonidoDelHome } from './SonidoDelHome'
  * teléfono, y la esquina de abajo a la derecha quedó libre (ahí va a ir el chatbot). El parlante: en escritorio, arriba a la izquierda,
  * en la fila de la barra (enfrente de Contacto y Login, del mismo vidrio y del mismo alto); abajo de 1024, la cabecera: el parlante a la
  * izquierda y el menú al centro. Con la cabecera del teléfono, al fondo y con el pie más alto que la pantalla, se retira (`K5`).
+ * [L8b] Antes, su latido de cada entrada (la onda va debajo del botón).
  */
 export function EsquinaDelSonido(): React.JSX.Element {
   const conLaBarra = useLaBarraSeVe()
   useCabeceraAlFondo(!conLaBarra)
   return (
-    <div data-pieza="esquina-del-sonido" className="pointer-events-none fixed top-[max(var(--spacing-4),env(safe-area-inset-top))] left-[max(var(--spacing-4),env(safe-area-inset-left))] z-[var(--z-cabecera)] escritorio:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]">
-      <div data-parte="lugar-del-parlante">
-        <SonidoDelHome />
+    <>
+      <LatidoDeLaEntrada />
+      <div data-pieza="esquina-del-sonido" className="pointer-events-none fixed top-[max(var(--spacing-4),env(safe-area-inset-top))] left-[max(var(--spacing-4),env(safe-area-inset-left))] z-[var(--z-cabecera)] hasta-tablet:top-[var(--spacing-6)] escritorio:left-[var(--pad-lateral-compacto)]">
+        <div data-parte="lugar-del-parlante">
+          <SonidoDelHome />
+        </div>
       </div>
-    </div>
+    </>
   )
 }

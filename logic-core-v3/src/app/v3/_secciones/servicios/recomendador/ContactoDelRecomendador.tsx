@@ -12,6 +12,7 @@ import { enviarContacto, validarContacto, type DatosDeContacto, type ErroresDeCo
 import type { EstadoDelEnvio, ResultadoDelEnvio } from '../../../_lib/formularios/estadoDeEnvio'
 import { MAXIMOS } from '../../../_lib/formularios/validar'
 import { EnlaceDelServicio } from '../escenario/PanelDeServicio'
+import { BotonDelRecomendador } from './BotonDelRecomendador'
 import { mensajeDelContacto, rotuloDeLaPagina, solucion, TEXTOS_DEL_RECOMENDADOR, tituloDelContacto, type IdDeSolucion, type Respuestas } from './logica'
 
 /**
@@ -20,8 +21,8 @@ import { mensajeDelContacto, rotuloDeLaPagina, solucion, TEXTOS_DEL_RECOMENDADOR
  * arreglo global del autocompletado de `piezas.css`), la validación y el envío son los del contacto general (`validarContacto`,
  * `enviarContacto`: el mismo endpoint, `/api/contacto`), con los intereses de la precarga del servicio (`data-precarga`, como los
  * «Quiero mi…» de Servicios) y el envío estándar del sitio (`EstadoDeEnvio`: la carga de develOP, «¡Recibido!» o el error, y a los
- * 3 s vuelve el formulario: después del éxito con el mensaje precargado de nuevo; después del error, con lo escrito). Debajo, el link
- * chico a la página del servicio (el viaje de B12b: `EnlaceDelServicio`). Los bancos nunca envían de verdad (`/api/` interceptado).
+ * 3 s vuelve el formulario: después del error, con lo escrito; después del éxito [L4] el recomendador vuelve a sus dos soluciones: `alEnviado`).
+ * En la fila de acciones, «Enviar», el link a la página del servicio (el viaje de B12b: `EnlaceDelServicio`) y «Empezar de nuevo». Los bancos nunca envían de verdad (`/api/` interceptado).
  */
 
 type CampoDelRecomendador = 'nombre' | 'medio' | 'mensaje'
@@ -30,7 +31,16 @@ type Datos = Pick<DatosDeContacto, CampoDelRecomendador>
 const idDelCampo = (campo: string): string => `recomendador-${campo}`
 const idDelError = (campo: string): string => `recomendador-error-${campo}`
 
-export function ContactoDelRecomendador({ respuestas, elegida }: { readonly respuestas: Respuestas; readonly elegida: IdDeSolucion }): React.JSX.Element {
+interface Props {
+  readonly respuestas: Respuestas
+  readonly elegida: IdDeSolucion
+  /** [L4] El envío terminó bien (y ya pasó el mensaje): el recomendador vuelve a las dos soluciones. */
+  readonly alEnviado: () => void
+  /** [L4] «Empezar de nuevo», en la fila de acciones del contacto. */
+  readonly alEmpezar: () => void
+}
+
+export function ContactoDelRecomendador({ respuestas, elegida, alEnviado, alEmpezar }: Props): React.JSX.Element {
   const servicio = solucion(elegida).servicio
   const precargado = (): Datos => ({ nombre: '', medio: '', mensaje: mensajeDelContacto(respuestas, elegida) })
   const [datos, setDatos] = useState<Datos>(precargado)
@@ -72,6 +82,9 @@ export function ContactoDelRecomendador({ respuestas, elegida }: { readonly resp
     if (despuesDe === 'exito') {
       setDatos(precargado())
       setIntento(false)
+      setEstado('reposo')
+      alEnviado()
+      return
     }
     setEstado('reposo')
   }
@@ -83,10 +96,17 @@ export function ContactoDelRecomendador({ respuestas, elegida }: { readonly resp
   })
   return (
     <div data-pieza="contacto-del-recomendador" data-solucion={elegida} className="flex flex-col gap-[var(--spacing-5)]">
-      <Titular nivel="titulo-m" como="h4">
-        {tituloDelContacto(elegida)}
-      </Titular>
-      <EstadoDeEnvio estado={estado} alVolver={alVolver}>
+      {/* [L8a] El título a la izquierda y, a su derecha, el botón a la página del servicio (abajo de 1024 se apilan). */}
+      <div data-parte="cabecera-del-contacto" className="flex flex-col items-start gap-[var(--spacing-2)] escritorio:flex-row escritorio:items-center escritorio:justify-between escritorio:gap-[var(--spacing-6)]">
+        <Titular nivel="titulo-m" como="h4">
+          {tituloDelContacto(elegida)}
+        </Titular>
+        <div className="max-escritorio:hidden">
+          <EnlaceDelServicio id={servicio} rotulo={rotuloDeLaPagina(servicio)} enTinta />
+        </div>
+      </div>
+      {/* `grid-cols-1`: la columna del envío no crece con su contenido (a 390 las píldoras se salían 6 px del recuadro). */}
+      <EstadoDeEnvio estado={estado} alVolver={alVolver} className="grid-cols-1">
         <form noValidate data-precarga={servicio} onSubmit={(e) => void alEnviar(e)} className="flex flex-col gap-[var(--spacing-3)]">
           <div className="grid grid-cols-1 gap-[var(--spacing-3)] escritorio:grid-cols-2">
             <div className="flex flex-col gap-[var(--spacing-1)]">
@@ -98,13 +118,19 @@ export function ContactoDelRecomendador({ respuestas, elegida }: { readonly resp
             </div>
           </div>
           <CampoDeTextoLargo {...comun('mensaje', TEXTOS_DEL_RECOMENDADOR.mensaje, CAMPOS.mensaje.ejemplo, MAXIMOS.mensaje)} renglones={4} />
-          <div data-parte="fila-del-envio" className="mt-[var(--spacing-1)] flex">
-            <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className="shrink-0" />
+          {/* [L8a] Abajo, como los pasos: «Empezar de nuevo» a la izquierda y «Enviar» (el principal) a la derecha. */}
+          <div data-parte="fila-del-envio" className="mt-[var(--spacing-2)] flex flex-col items-start gap-[var(--spacing-5)] escritorio:flex-row escritorio:items-center escritorio:justify-between">
+            <div className="order-3 escritorio:order-none">
+              <BotonDelRecomendador parte="empezar-de-nuevo" rotulo={TEXTOS_DEL_RECOMENDADOR.empezarDeNuevo} alTocar={alEmpezar} />
+            </div>
+            {/* Abajo de 1024 el enlace sigue en la fila, entre «Enviar» y «Empezar de nuevo» (el orden de antes). */}
+            <div className="order-2 escritorio:hidden">
+              <EnlaceDelServicio id={servicio} rotulo={rotuloDeLaPagina(servicio)} enTinta />
+            </div>
+            <Cta type="submit" rotulo={enviando ? ROTULO_ENVIANDO : ROTULO_DEL_ENVIO} deshabilitado={enviando} className="order-1 shrink-0 escritorio:order-none" />
           </div>
         </form>
       </EstadoDeEnvio>
-      {/* Debajo, el link chico a la página del servicio (afuera del envío: se ve también mientras viaja). */}
-      <EnlaceDelServicio id={servicio} rotulo={rotuloDeLaPagina(servicio)} enTinta />
       {/* El aviso de los errores de los campos (el resultado del envío lo anuncia `EstadoDeEnvio`). */}
       <p role="alert" className="sr-only">
         {aviso}

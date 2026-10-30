@@ -23,6 +23,11 @@ export interface TramoEstirado {
   /** Dónde arranca el tramo y cuánto dura SIN estirar, en px de la regla desde el arranque del progreso del panel. */
   readonly arranque: number
   readonly largo: number
+  /**
+   * [INT] La parte del tramo (de 0 a 0,5, en cada punta) en la que la velocidad de la escena va de la de afuera a la de adentro en
+   * rampa, en vez de saltar en el borde. Sin ella (o 0), el `k` parejo de siempre. Afuera del tramo no cambia nada: recorre lo mismo.
+   */
+  readonly rampa?: number
 }
 
 /** El tramo estirado de esta carga, o ninguno (el producto). */
@@ -33,10 +38,21 @@ export const TRAMO_ESTIRADO: { valor: TramoEstirado | null } = { valor: null }
  * [B1] También comprime (`k < 1`: el selector del Portfolio con el paso de 0,6 mide en el teléfono menos de lo que la escena veía):
  * la misma cuenta, con lo «agregado» negativo. Con `k = 1` (o un `k` que no es un número positivo) no toca nada.
  */
-export function sinElEstiramiento(y: number, desde: number, largoEstirado: number, k: number): number {
+export function sinElEstiramiento(y: number, desde: number, largoEstirado: number, k: number, rampa = 0): number {
   if (!(k > 0) || k === 1 || y <= desde) return y
-  if (y <= desde + largoEstirado) return desde + (y - desde) / k
-  return y - largoEstirado * (1 - 1 / k)
+  if (y > desde + largoEstirado) return y - largoEstirado * (1 - 1 / k)
+  const t = y - desde
+  const recorre = largoEstirado / k
+  // La rampa nunca más larga que la mitad de lo que recorre: así la velocidad del medio es siempre positiva (un tramo que estira mucho
+  // tendría que frenar más de lo que recorre) y no se vuelve al escalón.
+  const r = Math.min(Math.min(Math.max(rampa, 0), 0.5) * largoEstirado, recorre / 2)
+  if (!(r > 0)) return desde + t / k
+  // [INT] La velocidad en trapecio: de 1 a `v` en `r`, pareja, y de vuelta a 1 en los últimos `r`; recorre lo mismo que el `k` parejo.
+  const v = (recorre - r) / (largoEstirado - r)
+  const enRampa = (s: number): number => s + ((v - 1) * s * s) / (2 * r)
+  if (t <= r) return desde + enRampa(t)
+  if (t <= largoEstirado - r) return desde + enRampa(r) + v * (t - r)
+  return desde + recorre - enRampa(largoEstirado - t)
 }
 
 /**
@@ -59,12 +75,14 @@ export function anotarTramo(tramo: TramoEstirado): () => void {
 const DESDE: number[] = []
 const LARGO: number[] = []
 const K: number[] = []
+const RAMPA: number[] = []
 
 function juntar(t: TramoEstirado, n: number, lectura: number, ventana: number, escala: number): number {
   if (!t.panel.isConnected) return n
   DESDE[n] = t.panel.getBoundingClientRect().top + lectura - ventana + t.arranque * escala
   LARGO[n] = t.k * t.largo * escala
   K[n] = t.k
+  RAMPA[n] = t.rampa ?? 0
   return n + 1
 }
 
@@ -88,8 +106,8 @@ export function medidaSinElEstiramiento(y: number, abajo: number, lectura: numbe
     let j = -1
     for (let i = 0; i < n; i++) if (K[i] === K[i] && (j < 0 || DESDE[i] > DESDE[j])) j = i
     if (j < 0) break
-    destino.y = sinElEstiramiento(destino.y, DESDE[j], LARGO[j], K[j])
-    destino.abajo = sinElEstiramiento(destino.abajo, DESDE[j], LARGO[j], K[j])
+    destino.y = sinElEstiramiento(destino.y, DESDE[j], LARGO[j], K[j], RAMPA[j])
+    destino.abajo = sinElEstiramiento(destino.abajo, DESDE[j], LARGO[j], K[j], RAMPA[j])
     K[j] = Number.NaN
   }
   return destino

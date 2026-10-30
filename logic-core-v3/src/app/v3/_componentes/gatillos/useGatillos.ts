@@ -65,6 +65,13 @@ export interface OpcionesDeLosGatillos {
    * (la rueda, las teclas y el dedo), y el último aterriza al pie de su tramo. Ver `ReglaDeGatillos.salidaDeAbajoLibre`.
    */
   readonly salidaDeAbajoLibre?: boolean
+  /** [L2] La entrada y la salida de arriba sin gatillo (Servicios en el teléfono: el cruce con Demos). Ver `ReglaDeGatillos.salidaDeArribaLibre`. */
+  readonly salidaDeArribaLibre?: boolean
+  /**
+   * [L3] Cuánto traga la máquina después de un paso (ms), si no es la transición entera (`duracionMs`). Servicios usa 0: el gesto siguiente
+   * cuenta apenas termina el vuelo del salto (y el gesto que ya dio su paso sigue tragado hasta que la rueda se aquieta).
+   */
+  readonly candadoMs?: number
 }
 
 export interface GatillosVivos {
@@ -95,7 +102,9 @@ function tragar(e: WheelEvent): void {
 }
 
 export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
-  const { pista, cantidad, activa, tactil, reducido, duracionMs, ocupada, salidaDeArriba, nombre, salidaDeAbajoLibre = false } = o
+  const { pista, cantidad, activa, tactil, reducido, ocupada, salidaDeArriba, nombre, salidaDeAbajoLibre = false, salidaDeArribaLibre = false } = o
+  // [L3] El defecto del banco (`con-candado`): la transición entera traga los gestos, como antes de L3.
+  const duracionMs = o.candadoMs === undefined || conElDefectoDeLosGatillos('con-candado') ? o.duracionMs : o.candadoMs
   const [paso, setPaso] = useState(ANTES_DEL_ANCLA)
   const actual = useRef(ANTES_DEL_ANCLA)
   const regla = useRef<ReglaDeGatillos>({ cantidad, pasoPx: 1 })
@@ -115,12 +124,14 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
     const elVuelo = enVuelo
     // [C2-51] El defecto del banco (`con-gatillo-al-final`): la salida de abajo de B4, con su vuelo.
     const libre = salidaDeAbajoLibre && !conElDefectoDeLosGatillos('con-gatillo-al-final')
+    // [L2] El defecto del banco (`con-gatillo-arriba`): la entrada y la salida de arriba de antes.
+    const arriba = salidaDeArribaLibre && !conElDefectoDeLosGatillos('con-gatillo-arriba')
     const medir = (): boolean => {
       const el = pista.current
       const alto = window.innerHeight
       if (el === null || !(alto > 0)) return false
       inicio.current = el.getBoundingClientRect().top + window.scrollY
-      regla.current = { cantidad, pasoPx: Math.max(1, (el.offsetHeight - alto) / cantidad), salidaDeAbajoLibre: libre }
+      regla.current = { cantidad, pasoPx: Math.max(1, (el.offsetHeight - alto) / cantidad), salidaDeArribaLibre: arriba, salidaDeAbajoLibre: libre }
       return true
     }
     const publicar = (siguiente: number): void => {
@@ -219,10 +230,12 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       ultimoGesto.current = performance.now()
       if (decision === 'paso') porGesto(sentido)
     }
-    const dedo = { y: 0, disparado: false }
+    const dedo = { y: 0, disparado: false, dioPaso: false, desdeArriba: false }
     const alTocar = (e: TouchEvent): void => {
       dedo.y = e.touches[0]?.clientY ?? 0
       dedo.disparado = false
+      dedo.dioPaso = false
+      dedo.desdeArriba = faseDe(actual.current, cantidad) === 'antes'
       ultimoGesto.current = performance.now()
     }
     const alArrastrar = (e: TouchEvent): void => {
@@ -231,11 +244,19 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       ultimoGesto.current = performance.now()
       if (enVuelo.current === null && faseDe(actual.current, cantidad) !== 'adentro') return
       const dy = y - dedo.y
+      // [L2] La salida de arriba libre: el dedo que sube la página desde la entrada (contado desde que tocó, como la de abajo) es de la página.
+      // Y el que la trajo desde arriba no da el paso de al lado (ése es del gesto siguiente); si el navegador ya no deja frenar ese scroll, sigue
+      // con el scroll y los servicios pasan por la histéresis, sin vuelo.
+      // [L3] Salvo el dedo que ya dio su paso (como la rueda: lo que queda del gesto que trajo hasta acá se sigue tragando). Con el candado
+      // corto de Servicios, sin esto, el mismo dedo que llevó a IA seguía de largo al recomendador apenas terminaba el vuelo.
+      if (dy > 0 && enVuelo.current === null && !ocupado() && !dedo.dioPaso && salidaLibre(actual.current, -1, regla.current)) return
+      if (dedo.desdeArriba && regla.current.salidaDeArribaLibre === true) dedo.disparado = true
       // [C2-51] La salida libre: el dedo que baja la página desde el último es de la página (ni se traga ni dispara).
-      if (dy <= 0 && enVuelo.current === null && !ocupado() && salidaLibre(actual.current, 1, regla.current)) return
+      if (dy <= 0 && enVuelo.current === null && !ocupado() && !dedo.dioPaso && salidaLibre(actual.current, 1, regla.current)) return
       if (e.cancelable) e.preventDefault()
       if (dedo.disparado || Math.abs(dy) < DEDO_PX) return
       dedo.disparado = true
+      dedo.dioPaso = true
       if (!ocupado()) porGesto(dy < 0 ? 1 : -1)
     }
 
@@ -264,7 +285,7 @@ export function useGatillos(o: OpcionesDeLosGatillos): GatillosVivos {
       if (hayBanco() && nombre === undefined) delete ventana.__gatillosDelBanco
       else if (hayBanco() && nombre !== undefined) delete ventana.__gatillosDelBancoDe?.[nombre]
     }
-  }, [pista, cantidad, nombre, salidaDeAbajoLibre])
+  }, [pista, cantidad, nombre, salidaDeAbajoLibre, salidaDeArribaLibre])
 
   const ir = useCallback((i: number) => irAlPaso.current(i), [])
   return { paso, vista: vistaDelPasoEnElTramo(paso, cantidad), ir }

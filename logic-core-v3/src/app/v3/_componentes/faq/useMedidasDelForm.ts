@@ -8,7 +8,8 @@ import { useEffect, useState, type CSSProperties } from 'react'
  * preguntas), del ancho del formulario y más alto (`masAlto`: no cuadrado). Lo mide del formulario del pie (`data-pieza`), con un
  * observador (cambia con el ancho de la ventana). Sin el pie de volumen, nada (el vidrio tiene su tamaño).
  */
-export const MEDIDAS_DEL_FAQ = { masAlto: 1.3, formulario: '[data-pieza="contacto-del-pie"]' } as const
+// [L5] `masAlto` 1 (era 1,3: el bloque quedaba con un espacio grande abajo, lote2/17): el contenido lo agranda si hace falta.
+export const MEDIDAS_DEL_FAQ = { masAlto: 1, formulario: '[data-pieza="contacto-del-pie"]' } as const
 
 export interface MedidasDelFaq {
   readonly preguntas?: CSSProperties

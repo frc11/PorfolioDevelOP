@@ -61,7 +61,7 @@ export default function Mensajes(): React.JSX.Element {
   }
 
   return (
-    <MarcoDelPanel item="mensajes" conPausa>
+    <MarcoDelPanel item="mensajes">
       <div className="flex h-full min-h-0 flex-col gap-3">
         <div className="shrink-0 rounded-[24px] border border-white/10 bg-white/5 px-5 py-3">
           <div className="flex items-center justify-between gap-3">

@@ -184,9 +184,9 @@ const sinLaLoma = (c: string): boolean => {
   const bloque = c.slice(c.indexOf('if (conLoma) {'), c.indexOf('atenderLaOnda(state.camera'))
   const fuera = c.replace(bloque, '')
   return c.includes('const conLoma = useMemo(() => lomaDelCursorPedida(), [])') && bloque.includes('m.presencia +=') && bloque.includes('intersectPlane') &&
-    !/m\.presencia \+?=/.test(fuera) && !/intersectPlane/.test(fuera) && /__defectosDeLaIntro\?: unknown \}\)\.__defectosDeLaIntro === LOMA_DEL_CURSOR\.defecto/.test(c) && /defecto: 'con-lineas'/.test(c)
+    !/m\.presencia \+?=/.test(fuera) && !/intersectPlane/.test(fuera) && /__defectosDeLaIntro\?: unknown \}\)\.__defectosDeLaIntro === LOMA_DEL_CURSOR\.defecto/.test(c) && /defecto: 'sin-loma'/.test(c)
 }
-afirmar(sinLaLoma(PISO), 'en el producto el cursor no empuja el piso: la presencia (y el rayo al piso) sólo con el defecto del banco `con-lineas` (nunca la URL)')
+afirmar(sinLaLoma(PISO), '[L1] en el producto el cursor empuja el piso (la loma volvió): la presencia (y el rayo al piso) corre salvo con el defecto del banco `sin-loma` (nunca la URL)')
 controlPositivo('  el detector VE el piso de antes (la presencia subía con el mouse siempre)', PISO.replace('if (conLoma) {', '{'), sinLaLoma)
 // No era la trama: el piso no lee la textura de la trama salvo los cuadros de sol del amanecer (que sólo existen mientras amanece).
 const noLeeLaTrama = (c: string): boolean => /conElAmanecer\(material, true\)/.test(c) && !/uTramaGruesa|leerLaTrama|MoireHandle/.test(c)

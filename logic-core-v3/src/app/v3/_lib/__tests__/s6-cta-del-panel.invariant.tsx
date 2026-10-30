@@ -177,7 +177,7 @@ const opacidades = (html: string): number => (html.match(/style="opacity:1"/g) ?
 afirmar(opacidades(QUIETO) === 1 && opacidades(sinLaOpacidadDelEnvio(QUIETO)) === 0, '  la única opacidad en línea del CTA es la de la capa de `EstadoDeEnvio` (la pieza compartida), y `s6-tu-panel` descuenta sólo ésa')
 controlPositivo('  el descuento no se come otra opacidad escrita a mano', `${QUIETO}<p style="opacity:1">x</p>`, (h: string) => opacidades(sinLaOpacidadDelEnvio(h)) === 0)
 const NEWSLETTER_FUENTE = fuente('NewsletterDelPanel.tsx')
-afirmar(/<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\} mensajes=\{MENSAJES_DEL_ENVIO\.newsletter\} compacto>/.test(NEWSLETTER_FUENTE) && /enviarAlServidor\('\/api\/newsletter', cuerpoDelNewsletter\(datos\)\)/.test(NEWSLETTER_FUENTE) && /setEstado\(r\.ok \? 'exito' : 'error'\)/.test(NEWSLETTER_FUENTE), '  el envío es el estándar (la carga, el encastre y el mensaje de la newsletter) y va a la ruta de siempre')
+afirmar(/<EstadoDeEnvio estado=\{estado\} alVolver=\{alVolver\} mensajes=\{MENSAJES_DEL_ENVIO\.newsletter}>/.test(NEWSLETTER_FUENTE) && /enviarAlServidor\('\/api\/newsletter', cuerpoDelNewsletter\(datos\)\)/.test(NEWSLETTER_FUENTE) && /setEstado\(r\.ok \? 'exito' : 'error'\)/.test(NEWSLETTER_FUENTE), '  el envío es el estándar (la carga, el encastre y el mensaje de la newsletter) y va a la ruta de siempre')
 /** Las claves que la ruta acepta, leídas de su esquema de Zod. */
 const clavesDeLaRuta = (ruta: string): string[] => [...(/z\.object\(\{([^}]*)\}\)/.exec(ruta)?.[1] ?? '').matchAll(/(\w+):/g)].map((m) => m[1])
 const ACEPTA = clavesDeLaRuta(leer('src/app/api/newsletter/route.ts'))

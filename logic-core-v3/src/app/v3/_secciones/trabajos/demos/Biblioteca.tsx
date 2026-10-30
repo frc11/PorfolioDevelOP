@@ -152,6 +152,7 @@ export function Biblioteca({
             aria-haspopup="dialog"
             aria-label={`${demo.nombre}, ${demo.rubro}`}
             data-pieza="libro"
+            className={i === 0 ? 'escritorio:ms-[var(--libro-corrimiento)]' : undefined}
             data-demo={demo.slug}
             onPointerEnter={(e) => alEntrar(e, demo)}
             onPointerLeave={esconderElCartel}

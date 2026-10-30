@@ -160,12 +160,12 @@ const barraCss = leer(`${V3}/_estilos/barra.css`)
 const barra = sinComentarios(leer(`${V3}/_chrome/barra/BarraDelHome.tsx`))
 const ARRIBA = 'max(var(--spacing-4),env(safe-area-inset-top))'
 const elModeloSigue =
-  esquina.includes(clase('top', ARRIBA)) && esquina.includes(clase('left', 'max(var(--spacing-4),env(safe-area-inset-left))')) && esquina.includes(clase('escritorio:top', 'var(--spacing-6)')) && esquina.includes(clase('escritorio:left', 'var(--pad-lateral-compacto)')) &&
-  control.includes(clase('max-escritorio:size', 'var(--spacing-12)')) && control.includes(clase('escritorio:size', 'calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))')) && control.includes(clase('mt', 'var(--spacing-2)')) &&
+  esquina.includes(clase('top', ARRIBA)) && esquina.includes(clase('left', 'max(var(--spacing-4),env(safe-area-inset-left))')) && esquina.includes(clase('hasta-tablet:top', 'var(--spacing-6)')) && esquina.includes(clase('escritorio:left', 'var(--pad-lateral-compacto)')) &&
+  control.includes(clase('max-hasta-tablet:size', 'var(--spacing-12)')) && control.includes(clase('hasta-tablet:size', 'calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))')) && control.includes(clase('mt', 'var(--spacing-2)')) &&
   menu.includes(`inset-x-0 ${clase('top', ARRIBA)} mx-auto grid ${clase('size', 'var(--spacing-12)')}`) &&
   barraCss.includes('--barra-reposo: var(--spacing-6);') && barraCss.includes('--barra-alto: calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto));') && barraCss.includes('--barra-margen-al-pie: var(--spacing-6);') &&
   /left: 50%;\s*transform: translateX\(-50%\);/.test(barraCss) && /right: var\(--pad-lateral-compacto\);\s*display: flex;\s*align-items: center;\s*gap: var\(--spacing-2\);/.test(barraCss) && barraCss.includes('padding-inline: var(--spacing-2) var(--spacing-1);') && barraCss.includes('padding-inline: var(--spacing-3);') &&
-  CLASE_DE_LA_PASTILLA_APAGADA === 'max-medio:invisible' && barra.includes('>= AIRE_DE_LA_ESQUINA') && BREAKPOINTS.medio === 860 && BREAKPOINTS.escritorio === 1024
+  CLASE_DE_LA_PASTILLA_APAGADA === 'max-hasta-tablet:invisible' && barra.includes('>= AIRE_DE_LA_ESQUINA') && BREAKPOINTS.medio === 860 && BREAKPOINTS.escritorio === 1024
 afirmar(elModeloSigue, '  el modelo describe el chrome de hoy: el parlante y su cartel, el menú, la píldora (centrada, desde `medio` y sólo si entra con la esquina) y Contacto y Login, con sus tokens')
 
 const aire = aireDeLaEsquina(barra)

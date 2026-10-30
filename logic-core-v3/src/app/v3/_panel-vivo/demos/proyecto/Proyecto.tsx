@@ -40,7 +40,7 @@ export default function Proyecto(): React.JSX.Element {
   ]
 
   return (
-    <MarcoDelPanel item="proyecto" conPausa>
+    <MarcoDelPanel item="proyecto">
       <div className="flex flex-col gap-8">
         <header className="rounded-[28px] border border-white/10 bg-white/5 p-5">
           <p className="text-xs tracking-tight text-zinc-500">Tablero</p>

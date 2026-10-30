@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 import { BLOQUES_DEL_FAQ, BOTON_EN_VIVO, FAQ_EN_VIVO, faseEn, nivelesDelFaq, pasoDelBoton, subidaDelBloque, versionDelFaqDeVolumen, type IdDelBloqueDelFaq } from '../../pie3d/faqDelPie'
 import { homografia, matrix3dCss, nitidaEn } from '../../pie3d/homografia'
+import { HUNDIMIENTO_DEL_PIE, pisoDelHundimiento } from '../../formularios/volteo'
 import { SALIDA_EN_VIVO } from '../../pie3d/salidas'
 import { hayBanco } from '../entorno'
 import { CAIDA_DEL_PIE } from '../final/caidaDelPie'
@@ -13,6 +14,7 @@ import { uniformesDelPie, type UniformesDelPie } from './coreografia'
 import { capaPropia, fijarLaFase } from './domQueSigue'
 import { VOLUMEN_DEL_PIE, armarElBloque } from './geometria'
 import { HUECOS_DEL_PIE, HUECO_DEL_PIE, MAXIMO_DE_HUECOS_DEL_PIE, QUIETUD_DEL_PIE } from './huecos'
+import { fundirLaPlaca, hundirComoElPie } from './hundidoDelFaq'
 import { materialDelPie } from './material'
 
 /**
@@ -38,6 +40,8 @@ export const BLOQUES_DE_VOLUMEN = {
   debajo: 0.3,
   /** Entre bloques y hasta el logo (u). */
   aire: CAIDA_DEL_PIE.aire,
+  /** [L5] Cuánto más abajo va el botón del FAQ (en alturas del botón). */
+  bajaElBoton: 1.6,
 } as const
 
 /**
@@ -50,6 +54,18 @@ export function poseDelBloque(v: number, mpp: number, forma: { readonly espesor:
   const [espesor, asoma] = [forma.espesor * mpp, forma.asoma * mpp]
   const descenso = (asoma + BLOQUES_DE_VOLUMEN.debajo) * (1 - s.sube)
   return { caraY: FLOOR_Y + asoma - descenso, abre: s.abre, sube: s.sube, texto: s.texto, hondo: espesor - asoma + HUECO_DEL_PIE.hondoDeMas + descenso, espesor }
+}
+
+/**
+ * [L5] La pose de un bloque en el CAMBIO de lo que muestra (la respuesta), con su tiempo `t` (0 a 1): EXACTAMENTE el cambio del formulario
+ * del pie (`pisoDelHundimiento`): con el hueco abierto la placa entera baja `espesores` espesores sobre su plataforma, el piso se cierra
+ * encima (a cubierto se cambia el texto), se abre y sube. El texto se va al empezar a bajar y vuelve con la placa en su lugar. Pura.
+ */
+export function poseDelCambio(t: number, mpp: number, forma: { readonly espesor: number; readonly asoma: number } = BLOQUES_DE_VOLUMEN): ReturnType<typeof poseDelBloque> {
+  const { baja, cerrado } = pisoDelHundimiento(t)
+  const [espesor, asoma] = [forma.espesor * mpp, forma.asoma * mpp]
+  const descenso = HUNDIMIENTO_DEL_PIE.espesores * espesor * baja
+  return { caraY: FLOOR_Y + asoma - descenso, abre: 1 - cerrado, sube: 1 - baja, texto: 1 - Math.min(1, baja * 4), hondo: espesor - asoma + HUECO_DEL_PIE.hondoDeMas + descenso, espesor }
 }
 
 interface Bloque {
@@ -70,6 +86,8 @@ interface Bloque {
   css: string
   opacidad: string
   tocable: boolean | null
+  /** [L5] Lo que se hundió con el mouse, el foco o al apretar (px; sólo el WhatsApp, como el del pie). */
+  hundido: number
   /** Lo de este cuadro (para el banco): el nivel a la vista, el centro en la base del pie (u) y su escala (u por px). */
   nivel: number
   d: number
@@ -178,7 +196,7 @@ export function crearElFaqDeVolumen(): { readonly grupo: THREE.Group; readonly a
       // Acostada como las piezas del pie: las caras mate, los costados con el filo oscuro (`acostado.ts`); sin bajarle el relieve.
       uniformes.uAcostadaDelPie.value = 1
       uniformes.uRelieveAcostadoDelPie.value = 1
-      const b: Bloque = { id: anotado.id, elemento: anotado.elemento, x: 0, y: 0, ancho: 0, alto: 0, radio: 0, firma: '', malla: null, material: materialDelPie(uniformes), uniformes, grupo: new THREE.Group(), escrito: new Float64Array(17), css: '', opacidad: '', tocable: null, nivel: 0, d: 0, a: 0, mpp: 0 }
+      const b: Bloque = { id: anotado.id, elemento: anotado.elemento, x: 0, y: 0, ancho: 0, alto: 0, radio: 0, firma: '', malla: null, material: materialDelPie(uniformes), uniformes, grupo: new THREE.Group(), escrito: new Float64Array(17), css: '', opacidad: '', tocable: null, hundido: 0, nivel: 0, d: 0, a: 0, mpp: 0 }
       b.grupo.name = `faq de volumen · ${anotado.id}`
       b.grupo.visible = false
       anotado.elemento.style.transformOrigin = '0 0'
@@ -271,9 +289,15 @@ export function crearElFaqDeVolumen(): { readonly grupo: THREE.Group; readonly a
       if (b.id === 'respuesta') [d, a] = [dRespuesta, aRespuesta]
       else if (b.id === 'preguntas') [d, a] = [dPreguntas, aPreguntas]
       else if (b.id === 'whatsapp') [d, a] = [dRespuesta - medio(respuesta, 'ancho') + mAncho, aRespuesta - medio(respuesta, 'alto') - A - mAlto]
-      else [d, a] = [0, -(base.logoFondo / 2 + A + mAlto)]
-      const s = poseDelBloque(v, mpp)
-      const caraY = s.caraY
+      // [L5] El botón, más abajo (lote2/14): `bajaElBoton` alturas suyas más lejos del logo (pegado, pisaba las columnas del pie).
+      else [d, a] = [0, -(base.logoFondo / 2 + A + mAlto * (1 + 2 * BLOQUES_DE_VOLUMEN.bajaElBoton))]
+      const cambio = BLOQUES_DEL_FAQ.get(b.id)?.cambio ?? null
+      // [L8a] El WhatsApp no sube del piso: aparece en su lugar con un fundido (la placa, su hueco y el texto con el nivel).
+      const s = b.id === 'whatsapp' ? { ...poseDelBloque(1, mpp), abre: v, texto: v } : cambio !== null ? poseDelCambio(cambio, mpp) : poseDelBloque(v, mpp)
+      if (b.id === 'whatsapp') fundirLaPlaca(b.material, v)
+      // [L5] El WhatsApp del FAQ, como el del pie: con el mouse encima o el foco se hunde y su cara se aclara; al apretar, más (lote2/19).
+      if (b.id === 'whatsapp') hundirComoElPie(b, e.quieto, e.dt)
+      const caraY = s.caraY - b.hundido * mpp
       const [cx, cz] = [base.derechaX * d + base.atrasX * a, base.derechaZ * d + base.atrasZ * a]
       b.grupo.quaternion.setFromRotationMatrix(BASE)
       b.grupo.position.set(cx - base.derechaX * mAncho + base.atrasX * mAlto, caraY, cz - base.derechaZ * mAncho + base.atrasZ * mAlto)

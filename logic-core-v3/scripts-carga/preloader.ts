@@ -2,15 +2,16 @@
  * [B12c] EL PRELOADER DEL SITIO, EN EL SITIO — el Chrome del sistema a la vista contra el dev o el build (`BASE`), `/api/` bloqueado.
  * Es el único banco que lo quiere ver: pide `window.__preloaderDelBanco = 'normal'` (decide el día y la navegación, como una persona;
  * los demás bancos salen sin él, ver `_chrome/preloader/decision.ts`). Mide, con el reloj del preloader (`window.__preloaderMedido`: el
- * tiempo que se ve, la etapa, el trazo, el pulso, si estaba listo y la opacidad de la bienvenida que ve el hilo principal, en cada cuadro)
+ * tiempo que se ve, la etapa, los latidos que empezaron, si estaba listo y la opacidad de la bienvenida que ve el hilo principal, en cada cuadro)
  * y un rAF propio (el scroll, la cubierta, los cuadros largos):
  *
  *   en cada ancho (`ANCHOS`, por defecto 1440x900, 1024x768, 768x1024 y 390x844; abajo de 1024, táctil), el home y `/v3/pagina-base`:
  *     · la primera entrada del día lo muestra desde el primer cuadro (la cubierta, antes de hidratar);
- *     · cuánto dura: con la carga lista antes del freno, de 5 a 6 s; si no, el freno en el último 20 % y, desde los 6 s, el pulso;
- *     · [C2-81] la frase: en escritorio la del sonido (una flecha); abajo de 1024, táctil, la del sonido y el movimiento (dos flechas);
- *     · [C2-81] la punta de cada flecha (lo que se ve: la marca de su vértice) contra su botón, medido después: a su radio del centro
- *       (|Δ| ≤ 4 px). La del sonido a 1440, 1024 y 390; la del movimiento a 768 y 390;
+ *     · cuánto dura: con la carga lista antes del primer latido, de 5 a 6 s; si no, el latido «tu-tu … tu-tu» se repite cada 2,8 s;
+ *     · [C2-81] la frase: en escritorio la del sonido (vibra su botón); abajo de 1024, táctil, la del sonido y el movimiento (vibran los dos);
+ *     · [L6 · 81] SIN FLECHAS; el botón se dibuja en su lugar (el centro y el tamaño del real, medido después) y cada pulso manda su onda:
+ *       nace centrada en el botón, crece hasta cubrir el fondo hasta la esquina más lejana y se desvanece; los dos pulsos de un latido a
+ *       300 ms uno del otro (±60); un latido por entrada normal y los que haga falta si la carga tarda;
  *     · el scroll: la rueda (o el dedo, abajo de 1024) no mueve la página mientras está y hasta que entra lo que llega con la entrada;
  *     · la recarga, con la fecha de AYER guardada (así lo único que la frena es el tipo de navegación): sin preloader (ni un cuadro de la
  *       cubierta); volviendo con la flecha, igual; otra entrada el mismo día, tampoco; con la fecha de otro día y una entrada nueva, otra vez;
@@ -27,12 +28,12 @@
  *
  *   BASE=http://localhost:3000 npx tsx scripts-carga/preloader.ts
  *   ANTES=1 …                sólo mide (la base: las tareas largas, el hilo principal, el trace); no afirma lo de C2-81
- *   LENTO=6 …                la CPU 6 veces más lenta (CDP): la carga llega tarde y se ve el freno y el pulso
- *   CONTROL=sin-freno …      la flecha no frena (con LENTO: el banco TIENE que dar FALLA en el freno)
+ *   LENTO=6 …                la CPU 6 veces más lenta (CDP): la carga llega tarde y se ve el latido repetirse
  *   CONTROL=en-recargas …    aparece también en las recargas (TIENE que dar FALLA en la recarga: con la fecha de ayer, ya no la frena el día)
  *   CONTROL=sin-bloqueo …    no bloquea el scroll (TIENE que dar FALLA en el bloqueo)
  *   CONTROL=en-el-hilo …     el texto lo empuja el hilo principal, sus animaciones en pausa (TIENE que dar FALLA en el compositor)
- *   CONTROL=punta-corta …    las flechas terminan 20 px antes del botón (TIENE que dar FALLA en las puntas)
+ *   CONTROL=sin-onda …       el botón no manda su onda (TIENE que dar FALLA en la onda)
+ *   CONTROL=onda-corrida …   la onda nace 120 px al costado del botón (TIENE que dar FALLA en el centro de la onda)
  *   CONTROL=sin-movimiento … el teléfono sin el movimiento (TIENE que dar FALLA en la frase de abajo de 1024)
  *
  * Fotos y el CSV en la salida del banco (`salidaDelBanco('preloader')`). Sin correr al escribirse (C2-81): lo corre el orquestador.
@@ -42,7 +43,7 @@ import path from 'node:path'
 
 import { chromium, type BrowserContext, type CDPSession, type Page } from '@playwright/test'
 
-import { LINEA, lineaNueva, vistaDeLaLinea } from '../src/app/v3/_chrome/preloader/linea'
+import { INICIO_DEL_BOTON_MS, LINEA, lineaNueva, vistaDeLaLinea } from '../src/app/v3/_chrome/preloader/linea'
 import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 import { desplazarConElDedo, tocar } from './tactil'
 
@@ -89,6 +90,43 @@ const inicio = (conPreloader: boolean): string => `(() => {
     if (r !== null) anim.ready.then(() => { r.inicio = anim.startTime === null ? NaN : Number(anim.startTime) }).catch(() => {})
     return anim
   }
+  // [L6 · 81] El botón que vibra y sus ondas, por cuadro: dónde están (el centro y el ancho de lo que se ve), con qué opacidad.
+  window.__ondas = []
+  const muestraDeLasOndas = () => {
+    const raiz = document.querySelector('[data-pieza="preloader"]')
+    if (raiz) {
+      const bs = Array.from(raiz.querySelectorAll('[data-parte="boton-que-vibra"]'))
+      if (bs.length > 0) {
+        window.__ondas.push({
+          t: performance.now(),
+          flechas: raiz.querySelectorAll('[data-parte="flecha"], [data-parte="raya"], [data-parte="punta"]').length,
+          botones: bs.map((b) => {
+            const caja = b.querySelector('[data-parte="boton"]').getBoundingClientRect()
+            const ondas = Array.from(b.querySelectorAll('[data-parte="onda-del-pulso"]')).map((o) => {
+              const c = o.firstElementChild.getBoundingClientRect()
+              const op = o.getAnimations()[0]
+              const esc = o.firstElementChild.getAnimations()[0]
+              const claves = esc && esc.effect ? esc.effect.getKeyframes() : []
+              const inicio = /scale\\(([\\d.]+)\\)/.exec(String(claves[0] && claves[0].transform))
+              const fin = /scale\\(([\\d.]+)\\)/.exec(String(claves[1] && claves[1].transform))
+              return {
+                cx: c.left + c.width / 2, cy: c.top + c.height / 2, w: c.width, op: Number(getComputedStyle(o).opacity),
+                completa: o.getBoundingClientRect().width,
+                iter: op && op.effect ? op.effect.getComputedTiming().currentIteration : -1,
+                demora: op && op.effect ? op.effect.getTiming().delay : NaN,
+                escalaDeInicio: inicio ? Number(inicio[1]) : NaN,
+                escalaFinal: fin ? Number(fin[1]) : NaN,
+              }
+            })
+            return { objetivo: b.getAttribute('data-objetivo'), bx: caja.left + caja.width / 2, by: caja.top + caja.height / 2, bw: caja.width, ondas }
+          }),
+        })
+      }
+    }
+    if (window.__ondas.length > 4000) window.__ondas.splice(0, 2000)
+    requestAnimationFrame(muestraDeLasOndas)
+  }
+  requestAnimationFrame(muestraDeLasOndas)
   const log = (window.__cuadrosDelBanco = [])
   let antes = null
   const cuadro = (ahora) => {
@@ -120,16 +158,27 @@ interface MuestraDelPreloader {
   readonly t: number
   readonly ahora: number
   readonly etapa: string
-  readonly trazo: number
-  readonly pulsa: boolean
+  readonly latidos: number
   readonly listo: boolean
 }
-interface Punto {
-  readonly x: number
-  readonly y: number
+interface OndaDelBanco {
+  readonly cx: number
+  readonly cy: number
+  readonly w: number
+  readonly op: number
+  /** El ancho de la onda entera (a escala 1) y lo que dicen sus animaciones: la iteración, la demora y la escala de inicio y de fin. */
+  readonly completa: number
+  readonly iter: number
+  readonly demora: number
+  readonly escalaDeInicio: number
+  readonly escalaFinal: number
+}
+interface MuestraDeLasOndas {
+  readonly t: number
+  readonly flechas: number
+  readonly botones: readonly { readonly objetivo: 'sonido' | 'movimiento'; readonly bx: number; readonly by: number; readonly bw: number; readonly ondas: readonly OndaDelBanco[] }[]
 }
 interface FinalDelPreloader {
-  readonly puntas?: readonly { readonly objetivo: 'sonido' | 'movimiento'; readonly punta: Punto | null; readonly trazada: Punto | null }[]
   readonly conMovimiento?: boolean
   readonly activado: boolean
   readonly t: number
@@ -331,31 +380,59 @@ async function unaEntrada(ancho: number, alto: number, ruta: string): Promise<vo
       verNuevo(r.bien, `${tag} · la bienvenida, continua: en el compositor, sin huecos ni escalones por cuadro (C2-81; rojo: CONTROL=en-el-hilo)`, r.detalle)
       console.log(`info  ${tag} · ${await loQueVioElHilo(p, primero?.ahora ?? 0, fuera.ahora)}`)
     }
-    // La frase y las flechas: abajo de 1024 (táctil), la del movimiento y dos flechas.
+    // La frase y los botones que vibran: abajo de 1024 (táctil), la del movimiento y los dos botones.
     const conMovimiento = movil
     const esperada = conMovimiento ? 'Recomendamos activar el sonido y el movimiento.' : 'Recomendamos activar el sonido.'
-    verNuevo(frase?.trim() === esperada && m.final.conMovimiento === conMovimiento && (m.final.puntas?.length ?? 0) === (conMovimiento ? 2 : 1), `${tag} · la frase y sus flechas (${conMovimiento ? 'táctil: el sonido y el movimiento, dos flechas' : 'escritorio: el sonido, una flecha'})`, `«${String(frase)}» · ${String(m.final.puntas?.length ?? 0)} flechas`)
+    const ondas = await p.evaluate(() => (window as unknown as { __ondas?: MuestraDeLasOndas[] }).__ondas ?? [])
+    const objetivos = [...new Set(ondas.flatMap((x) => x.botones.map((b) => b.objetivo)))].sort()
+    verNuevo(frase?.trim() === esperada && m.final.conMovimiento === conMovimiento && objetivos.join() === (conMovimiento ? 'movimiento,sonido' : 'sonido'), `${tag} · la frase y los botones que vibran (${conMovimiento ? 'táctil: el sonido y el movimiento, los dos' : 'escritorio: el sonido'})`, `«${String(frase)}» · ${String(m.final.conMovimiento)} · botones ${objetivos.join('+')}`)
+    verNuevo(ondas.length > 0 && ondas.every((x) => x.flechas === 0), `${tag} · sin flechas: ninguna flecha, raya ni punta en toda la entrada`, `${String(ondas.length)} cuadros con el botón, ${String(Math.max(0, ...ondas.map((x) => x.flechas)))} piezas de flecha`)
     const listo = m.muestras.find((x) => x.listo)
-    const antesDelFreno = listo !== undefined && m.muestras.filter((x) => x.t <= listo.t).every((x) => x.trazo < 0.8)
-    if (antesDelFreno) ver(fuera.t >= 5000 && fuera.t <= 6000, `${tag} · con la carga lista antes del freno, dura de 5 a 6 s`, `${String(fuera.t)} ms (lista a los ${String(listo?.t ?? -1)})`)
-    else {
-      const antesDeListo = m.muestras.filter((x) => listo === undefined || x.t < listo.t)
-      const maximo = Math.max(0, ...antesDeListo.map((x) => x.trazo))
-      const quieta = antesDeListo.filter((x) => x.t >= 6100)
-      ver(maximo < 1 && maximo >= 0.8, `${tag} · sin la carga, la flecha frena en su último 20 % (no llega)`, `lo más dibujado sin la carga: ${maximo.toFixed(3)} · lista a los ${String(listo?.t ?? -1)} ms`)
-      ver(quieta.length === 0 || quieta.every((x) => x.pulsa && x.trazo === quieta[0].trazo), `${tag} · desde los 6 s, quieta con el pulso`, `${String(quieta.length)} cuadros después de los 6 s sin la carga`)
+    const latidos = Math.max(0, ...m.muestras.filter((x) => x.etapa === 'boton').map((x) => x.latidos))
+    if (listo !== undefined && listo.t <= INICIO_DEL_BOTON_MS) {
+      ver(fuera.t >= 5000 && fuera.t <= 6000, `${tag} · con la carga lista antes del primer latido, dura de 5 a 6 s`, `${String(fuera.t)} ms (lista a los ${String(listo.t)})`)
+      verNuevo(latidos === 1, `${tag} · y el botón late una sola vez`, `${String(latidos)} latidos`)
+    } else {
+      const esperados = 1 + Math.floor(((m.muestras.filter((x) => x.etapa === 'boton').pop()?.t ?? fuera.t) - INICIO_DEL_BOTON_MS) / LINEA.latidoPeriodoMs)
+      // Con la carga a menos de un período del primer latido (lista antes de los 6,3 s) no alcanza a repetirse: sólo cuenta.
+      verNuevo(latidos === esperados && (latidos >= 2 || (listo?.t ?? 0) < INICIO_DEL_BOTON_MS + LINEA.latidoPeriodoMs), `${tag} · con la carga tarde, el latido se repite cada ${String(LINEA.latidoPeriodoMs / 1000)} s`, `${String(latidos)} latidos (esperados ${String(esperados)}) · lista a los ${String(listo?.t ?? -1)} ms`)
     }
-    // Las puntas (lo que se ve) contra los botones, medidos ya sin la cubierta.
+    // La onda: nace en el botón, crece hasta cubrir el fondo y se desvanece; dos pulsos por latido, a 300 ms uno del otro.
+    for (const objetivo of conMovimiento ? (['sonido', 'movimiento'] as const) : (['sonido'] as const)) {
+      const filas = ondas.flatMap((x) => {
+        const b = x.botones.find((y) => y.objetivo === objetivo)
+        return b === undefined ? [] : [{ t: x.t, b, o0: b.ondas[0], o1: b.ondas[1] }]
+      })
+      const visibles = filas.filter((f) => f.o0 !== undefined && f.o0.op > 0.02)
+      const descentrada = Math.max(0, ...visibles.map((f) => Math.hypot(f.o0.cx - f.b.bx, f.o0.cy - f.b.by)))
+      verNuevo(visibles.length > 0 && descentrada <= 1.5, `${tag} · la onda del ${objetivo} nace en su botón (su centro, |Δ| ≤ 1,5 px; rojo: CONTROL=onda-corrida)`, `${String(visibles.length)} cuadros con la onda a la vista, el peor desvío ${descentrada.toFixed(1)} px`)
+      const f0 = visibles[0]
+      const centroX = f0?.b.bx ?? 0
+      const centroY = f0?.b.by ?? 0
+      const lejos = Math.max(Math.hypot(centroX, centroY), Math.hypot(ancho - centroX, centroY), Math.hypot(centroX, alto - centroY), Math.hypot(ancho - centroX, alto - centroY))
+      // Lo que dicen las animaciones (no depende de cuántos cuadros alcanzó a ver el hilo principal): la onda termina a escala 1 y su
+      // tamaño entero cubre el fondo hasta la esquina más lejana.
+      const dato = [...filas].reverse().find((f) => f.o0 !== undefined && Number.isFinite(f.o0.escalaFinal))
+      const cubre = dato !== undefined && dato.o0.escalaFinal === 1 && dato.o0.completa / 2 >= lejos - 1
+      verNuevo(cubre, `${tag} · y cruza todo el fondo: termina a escala 1 con ${((dato?.o0.completa ?? 0) / 2).toFixed(0)} px de radio contra los ${lejos.toFixed(0)} px a la esquina más lejana (rojo: CONTROL=sin-onda)`, `escala final ${String(dato?.o0.escalaFinal)} · radio ${((dato?.o0.completa ?? 0) / 2).toFixed(0)}`)
+      const arranca = dato === undefined ? Number.NaN : (dato.o0.completa * dato.o0.escalaDeInicio) / dato.b.bw
+      verNuevo(Math.abs(arranca - 1) <= 0.1, `${tag} · y arranca del tamaño del botón (la escala de inicio por el ancho entero, contra el del botón: 1 ± 0,1)`, `${arranca.toFixed(2)} veces el botón`)
+      // Los dos pulsos del latido: la segunda onda va 300 ms después de la primera (sus demoras), y el latido se repite como dice la línea.
+      const d1 = filas.find((f) => f.o1 !== undefined && Number.isFinite(f.o1.demora))
+      const entre = (d1?.o1.demora ?? Number.NaN) - (d1?.o0.demora ?? Number.NaN)
+      verNuevo(entre === 300, `${tag} · los dos pulsos del ${objetivo} a 300 ms uno del otro (tu-tu)`, `${String(entre)} ms`)
+      const iteraciones = Math.max(-1, ...filas.map((f) => f.o0?.iter ?? -1)) + 1
+      verNuevo(iteraciones >= latidos && iteraciones <= latidos + 1, `${tag} · y los latidos que la animación hizo (${String(iteraciones)}) son los de la línea (${String(latidos)}, a lo sumo uno más durante la salida)`)
+    }
+    // El botón dibujado, contra el real (ya sin la cubierta).
     await dormir(400)
-    for (const punta of m.final.puntas ?? []) {
-      const boton = await cajaDe(p, BOTONES[punta.objetivo])
-      const en = punta.punta
-      if (boton !== null && en !== null) {
-        const centro = { x: boton.x + boton.ancho / 2, y: boton.y + boton.alto / 2 }
-        const radio = Math.min(boton.ancho, boton.alto) / 2
-        const d = Math.hypot(en.x - centro.x, en.y - centro.y)
-        verNuevo(Math.abs(d - radio) <= 4, `${tag} · la punta de la flecha del ${punta.objetivo} termina sobre su botón (a su radio del centro, |Δ| ≤ 4 px; rojo: CONTROL=punta-corta)`, `${d.toFixed(1)} px del centro, radio ${radio.toFixed(1)}, Δ ${(d - radio).toFixed(1)}`)
-      } else verNuevo(false, `${tag} · la punta de la flecha del ${punta.objetivo} contra su botón`, `botón ${String(boton !== null)}, punta ${String(en !== null)}`)
+    for (const objetivo of conMovimiento ? (['sonido', 'movimiento'] as const) : (['sonido'] as const)) {
+      const boton = await cajaDe(p, BOTONES[objetivo])
+      const visto = [...ondas].reverse().find((x) => x.botones.some((y) => y.objetivo === objetivo))?.botones.find((y) => y.objetivo === objetivo)
+      if (boton !== null && visto !== undefined) {
+        const d = Math.hypot(boton.x + boton.ancho / 2 - visto.bx, boton.y + boton.alto / 2 - visto.by)
+        verNuevo(d <= 2 && Math.abs(boton.ancho - visto.bw) <= 2, `${tag} · el botón del ${objetivo} aparece en su lugar (el centro y el tamaño del real, |Δ| ≤ 2 px)`, `centro a ${d.toFixed(1)} px, ancho ${visto.bw.toFixed(1)} contra ${boton.ancho.toFixed(1)}`)
+      } else verNuevo(false, `${tag} · el botón del ${objetivo} aparece en su lugar`, `real ${String(boton !== null)}, dibujado ${String(visto !== undefined)}`)
     }
     // El scroll: nada se movió mientras estaba; se mueve recién cuando entra lo que llega con la entrada.
     const finEnLaPagina = fuera.ahora
@@ -378,7 +455,7 @@ async function unaEntrada(ancho: number, alto: number, ruta: string): Promise<vo
     await p.reload({ waitUntil: 'load' })
     await dormir(2500)
     ver(!(await cuadros(p)).some((x) => x.cubierta), `${tag} · en la recarga no aparece, aunque el día guardado sea otro (ni un cuadro; rojo: CONTROL=en-recargas)`)
-    // Volviendo con la flecha: igual.
+    // Volviendo con la flecha del navegador: igual.
     await p.evaluate((clave) => localStorage.setItem(clave, '2000-1-1'), CLAVE_DEL_DIA)
     await p.goto(`${BASE}${ruta}?otra=1`, { waitUntil: 'load' })
     await dormir(1500)
@@ -434,7 +511,7 @@ async function main(): Promise<void> {
       const m = await esperarElFinal(a, 1440, 900)
       const fuera = m?.muestras.find((x) => x.etapa === 'fuera')
       const listo = m?.muestras.find((x) => x.listo)
-      ver(fuera !== undefined && fuera.t <= Math.max(1300, (listo?.t ?? 0) + 300) && (m?.muestras.every((x) => !x.pulsa) ?? false), '1440 · con movimiento reducido, cerca de 1 s y sin pulso', `${String(fuera?.t ?? -1)} ms (lista a los ${String(listo?.t ?? -1)})`)
+      ver(fuera !== undefined && fuera.t <= Math.max(1300, (listo?.t ?? 0) + 300) && (await a.p.evaluate(() => (window as unknown as { __ondas?: MuestraDeLasOndas[] }).__ondas ?? [])).every((x) => x.botones.every((b) => b.ondas.length === 0)), '1440 · con movimiento reducido, cerca de 1 s y sin onda (el botón late con su opacidad)', `${String(fuera?.t ?? -1)} ms (lista a los ${String(listo?.t ?? -1)})`)
     } finally {
       await a.ctx.close()
     }
@@ -457,7 +534,7 @@ async function main(): Promise<void> {
       const m = await esperarElFinal(a, ancho, alto)
       const prendido = await a.p.evaluate(() => localStorage.getItem('develop-v3-sonido'))
       ver(prendido === 'si' && m?.final?.activado === true, `${String(ancho)} · tocar la frase prende el sonido (la preferencia) y la página entra con él`, `preferencia ${String(prendido)}`)
-      ver((await a.p.getAttribute(BOTONES.sonido, 'aria-pressed')) === 'true', `${String(ancho)} · el botón del sonido, donde apuntó la flecha, queda prendido`)
+      ver((await a.p.getAttribute(BOTONES.sonido, 'aria-pressed')) === 'true', `${String(ancho)} · el botón del sonido, el que vibraba, queda prendido`)
       if (a.movil) {
         const mov = { estado: await a.p.getAttribute(BOTONES.movimiento, 'data-estado'), etiqueta: await a.p.getAttribute(BOTONES.movimiento, 'aria-label') }
         verNuevo(mov.estado === 'prendido' && mov.etiqueta === 'Desactivar movimiento', `${String(ancho)} · y el movimiento: su botón queda prendido («Desactivar movimiento»)`, `${String(mov.estado)} · «${String(mov.etiqueta)}»`)

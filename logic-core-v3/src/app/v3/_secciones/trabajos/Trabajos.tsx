@@ -15,7 +15,7 @@ import { ParadaDeDemos } from './demos/ParadaDeDemos'
 import { ANCLAS_DEL_PORTFOLIO } from './portfolio/anclas'
 import { EscenarioDelPortfolio } from './portfolio/EscenarioDelPortfolio'
 import { FlujoDelPortfolio } from './portfolio/FlujoDelPortfolio'
-import { PANTALLAS_DESPUES_DEL_FLUJO, PANTALLAS_EXTRA_CON_EL_CARRUSEL } from './portfolio/medioDelCarrusel'
+import { PANTALLAS_DESPUES_DEL_FLUJO } from './portfolio/medioDelCarrusel'
 import { CANTIDAD_DE_PASOS, PANTALLAS_POR_PASO, pantallasDelAncla, pantallasExtra } from './portfolio/pasos'
 import { usePortfolio } from './portfolio/usePortfolio'
 
@@ -48,10 +48,10 @@ import { usePortfolio } from './portfolio/usePortfolio'
  * ── [B1.2e] Debajo de 1024: el carrusel ───────────────────────────────────
  *
  * El CSS decide el carrusel (`--modo-del-portfolio: carrusel`) y el cliente lo lee: la sección deja de ser un pin de pasos y pasa a ser un
- * FLUJO que se scrollea (`FlujoDelPortfolio`: el título, el carrusel y «la tuya»), hermano de la caja, seguido por lo que la cola necesita
- * (`PANTALLAS_DESPUES_DEL_FLUJO`). [C2-41t] Demos va ahí, en las dos ramas (`DemosDelFlujo`: entra deslizándose y se queda pegado); el
- * escenario pegado queda vacío (el diagnóstico de la carga lo lee). El alto sale del contenido (la variable de los pasos va en
- * cero: el flujo en su mínimo y la cola suman la tabla) y la escena lo descuenta con el flujo medido (`medioDelCarrusel.ts`).
+ * FLUJO que se scrollea (`FlujoDelPortfolio`: el título, el carrusel y «la tuya»), hermano de la caja, seguido por Demos
+ * (`PANTALLAS_DESPUES_DEL_FLUJO`). [C2-41t] Demos va ahí, en las dos ramas (`DemosDelFlujo`); el escenario pegado queda vacío (el
+ * diagnóstico de la carga lo lee). [L2] Demos es una pantalla que pasa con el scroll (ya no pegada la cola entera) y el alto es el del
+ * contenido, sin piso: la escena lo descuenta con el flujo medido, hasta el final de la sección (`medioDelCarrusel.ts`).
  */
 export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
   // MÓVIL-TRABAJOS: la única sección que corre su coreografía en todo ancho.
@@ -75,9 +75,13 @@ const ESTILO_DE_LA_SECCION = {
   '--pantallas-de-la-pista': (1 + CANTIDAD_DE_PASOS * PANTALLAS_POR_PASO).toFixed(5),
 } as React.CSSProperties
 
-/** [B1.2e] Con el carrusel: la sección mide su contenido (el flujo y lo que sigue), no los pasos; la pista de la rama quieta no se usa. */
+/**
+ * [B1.2e] Con el carrusel: la sección mide su contenido (el flujo y lo que sigue), no los pasos; la pista de la rama quieta no se usa. [L2] Sin
+ * piso: ni el de la tabla (`--alto-minimo-del-panel` en cero acá; el del panel lo suelta `useMedioDelCarrusel`) ni los pasos.
+ */
 const ESTILO_CON_EL_CARRUSEL = {
-  '--pantallas-extra-del-portfolio': PANTALLAS_EXTRA_CON_EL_CARRUSEL.toFixed(5),
+  '--alto-minimo-del-panel': '0px',
+  '--pantallas-extra-del-portfolio': '0',
 } as React.CSSProperties
 const ESTILO_DE_LO_QUE_SIGUE_AL_FLUJO: React.CSSProperties = { height: `${(PANTALLAS_DESPUES_DEL_FLUJO * 100).toFixed(4)}svh` }
 
@@ -117,7 +121,7 @@ function TrabajosEnSuRama({ seccion }: PropsDeSeccion): React.JSX.Element {
         </Bloque>
       </div>
 
-      {/* [B1.2e] El flujo del carrusel y lo que lo sigue: [C2-41t] Demos, una sección más (entra deslizándose y se queda pegado la cola). */}
+      {/* [B1.2e] El flujo del carrusel y lo que lo sigue: [C2-41t] Demos, una sección más ([L2] una pantalla, con el scroll). */}
       {vivo.carrusel ? <FlujoDelPortfolio seccion={seccion} vivo={vivo} /> : null}
       {vivo.carrusel ? (
         <div data-pieza="despues-del-flujo" style={ESTILO_DE_LO_QUE_SIGUE_AL_FLUJO}>

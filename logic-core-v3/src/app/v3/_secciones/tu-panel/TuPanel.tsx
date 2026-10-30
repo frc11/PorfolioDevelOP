@@ -37,7 +37,7 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
       <ContenidoDeSeccion claseDeContenido="@container flex flex-col">
         {/* La cabecera (el título solo): adonde viaja «Panel» de la barra (`destinosDelViaje.ts`). Con el aire de arriba, el viaje
             la deja con su centro arriba de la mitad: llega pintada. */}
-        <div className="shrink-0 pt-[var(--spacing-20)] escritorio:pt-[var(--aire-arriba)]">
+        <div className="shrink-0 pt-[max(var(--spacing-20),28cqw)] escritorio:pt-[var(--aire-arriba)]">
           <div data-pieza="encabezado-del-panel" className="relative isolate">
             <span aria-hidden="true" data-pieza="palabra-del-titulo" className={CLASE_DE_LA_PALABRA_DEL_TITULO}>
               {`${PALABRA_DEL_TITULO[0]} `}

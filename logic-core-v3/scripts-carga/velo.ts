@@ -18,7 +18,7 @@
  *
  *   BASE=http://localhost:3004 ANCHOS=1440,390 npx tsx scripts-carga/velo.ts
  *   CONTROL=sin-velo …   el control (navega sin cubrir): el cuadro del cambio sin cubrir
- *   [C2-21] CONTROL=grietas-sin-esperar …   las grietas de la página se arman sin esperar al velo quieto (como antes): «el home → la
+ * (CONTROL=grietas-sin-esperar se sacó en L1 con las grietas)
  *         página» vuelve a mostrar cuadros largos mientras la píldora se desliza (la línea los nombra con sus scripts).
  *   [T0 · 2026-10-22] VIA=banda|montaje|ambas|ninguna …   la vía para bajar el tiempo hacia el home (`viaDelVelo`, `_lib/veloDeNavegacion.ts`):
  *         siembra `window.__viaDelVelo` antes de cargar; sin VIA, la del código (`VIA_POR_DEFECTO`). `ninguna` es la de B12a.8 (la referencia).

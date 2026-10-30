@@ -2,6 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from 'react'
 
+import { entradaAbierta, suscribirALaEntrada } from '../../_lib/entrada'
 import { quitarElTelon } from './telon'
 
 /**
@@ -167,6 +168,20 @@ export function esUnClicParaElLogin(e: Pick<MouseEvent, 'button' | 'metaKey' | '
   return !e.defaultPrevented && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey
 }
 
+/** [L6 · 80] Sigue a la URL cuando la entrada del sitio está abierta (en el acto, sin preloader). Devuelve cómo dejar de esperar. */
+export function seguirCuandoEntre(): () => void {
+  if (entradaAbierta()) {
+    seguirALaUrl(() => null)
+    return () => undefined
+  }
+  const quitar = suscribirALaEntrada(() => {
+    if (!entradaAbierta()) return
+    quitar()
+    seguirALaUrl(() => null)
+  })
+  return quitar
+}
+
 /**
  * Se monta una vez, en el chrome: los clics de apertura (en la captura), la flecha del navegador y la entrada directa. Al acercarse
  * al botón (el puntero o el foco) se pide el código de la hoja, así el clic no la espera.
@@ -192,9 +207,12 @@ export function useAperturaDelIngreso(precargar: () => void): void {
     document.addEventListener('focusin', alAcercarse)
     window.addEventListener('popstate', alUsarLaFlecha)
     window.addEventListener('pageshow', alVolverDeLaCache)
-    // La entrada directa con `?ingresar` (o la vuelta a una entrada que lo tenía): sin clic, con el fundido.
-    seguirALaUrl(() => null)
+    // La entrada directa con `?ingresar` (o la vuelta a una entrada que lo tenía): sin clic, con el fundido. [L6 · 80] En la primera
+    // entrada del día el preloader del sitio tapa la página: el login espera a que se vaya y recién entonces se despliega (antes lo hacía
+    // debajo y, al irse el preloader, ya estaba abierto: «no hace la animación a veces»).
+    const dejarDeEsperar = seguirCuandoEntre()
     return () => {
+      dejarDeEsperar()
       document.removeEventListener('click', alTocar, { capture: true })
       document.removeEventListener('pointerover', alAcercarse)
       document.removeEventListener('focusin', alAcercarse)

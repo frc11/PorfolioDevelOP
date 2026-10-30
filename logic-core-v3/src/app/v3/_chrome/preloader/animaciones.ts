@@ -1,5 +1,4 @@
-import { FIN_DE_LA_BIENVENIDA_MS, INICIO_DE_LA_FLECHA_MS, LINEA, LINEA_REDUCIDA } from './linea'
-import { anguloEn, puntoEn, type Raya, type Trazado } from './trazado'
+import { FIN_DE_LA_BIENVENIDA_MS, INICIO_DEL_BOTON_MS, LINEA, LINEA_REDUCIDA } from './linea'
 
 /**
  * [C2-81] LAS ANIMACIONES DEL PRELOADER, EN EL COMPOSITOR — puro: los cuadros clave y los tiempos de todo lo que se mueve en el preloader,
@@ -11,8 +10,8 @@ import { anguloEn, puntoEn, type Raya, type Trazado } from './trazado'
  * un `cubic-bezier` exacto con los controles de `x` en 1/3 y 2/3 (`x(s) = s`); la simétrica va en dos mitades. `s78-c2-81` lo compara
  * en el tiempo.
  *
- * Los tiempos: los del texto y la salida, desde el arranque de la línea; los de la flecha, desde que arranca la flecha
- * (`inicioDeLaFlecha`). La capa los alinea con su reloj (`reloj.ts`).
+ * Los tiempos: los del texto y la salida, desde el arranque de la línea; los del botón (aparece, late y manda su onda), desde que aparece
+ * (`inicioDelBoton`). La capa los alinea con su reloj (`reloj.ts`).
  */
 
 /** Un cuadro clave: sólo `opacity` y `transform`. */
@@ -27,7 +26,7 @@ export interface Animacion {
   readonly cuadros: readonly CuadroClave[]
   /** ms. */
   readonly duracion: number
-  /** ms, desde el origen de su grupo (la línea o la flecha). */
+  /** ms, desde el origen de su grupo (la línea o el botón). */
   readonly demora: number
   readonly relleno: 'both' | 'forwards' | 'none'
   readonly iteraciones?: number
@@ -37,15 +36,9 @@ export interface Animacion {
 export const EN_CSS = {
   principal: 'cubic-bezier(0.33333, 0.66667, 0.66667, 1)',
   entrada: 'cubic-bezier(0.33333, 0, 0.66667, 0.33333)',
-  /** El pulso de la punta: medio coseno (una seno de ida y vuelta). */
-  pulso: 'cubic-bezier(0.37, 0, 0.63, 1)',
+  /** La onda: sale rápido del botón y se acuesta a lo lejos. */
+  onda: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
 } as const
-
-/** Lo que dura la aparición de cada raya (ms): corta, así la flecha se dibuja raya a raya y no de a saltos. */
-export const RAYA_MS = 70
-
-/** El pulso de la punta (`linea.ts`): cuánto crece y su período. */
-export const PULSO = { escala: 1.22, periodoMs: LINEA.pulsoPeriodoMs } as const
 
 /** La simétrica (`power1.inOut`) de `desde` a `hasta`, en dos mitades exactas. */
 const simetrica = (desde: number, hasta: number): CuadroClave[] => [
@@ -84,75 +77,49 @@ export function fundidosDelTexto(reducido: boolean): { readonly bienvenida: Anim
 export const salidaDeLaCapa = (reducido: boolean): Animacion =>
   reducido ? { cuadros: [{ opacity: 1 }, { opacity: 0 }], duracion: LINEA_REDUCIDA.salidaMs, demora: 0, relleno: 'forwards' } : { cuadros: simetrica(1, 0), duracion: LINEA.salidaMs, demora: 0, relleno: 'forwards' }
 
-/** Cuándo arranca la flecha, desde el arranque de la línea. */
-export const inicioDeLaFlecha = (reducido: boolean): number => (reducido ? LINEA_REDUCIDA.bienvenidaMs : INICIO_DE_LA_FLECHA_MS)
-
-/** La inversa de la simétrica: el tiempo (0 a 1) en que llega a `y`. */
-export const simetricaInversa = (y: number): number => {
-  const v = Math.min(1, Math.max(0, y))
-  return v < 0.5 ? Math.sqrt(v / 2) : 1 - Math.sqrt((1 - v) / 2)
-}
-
-/** Cuándo (ms desde que arranca la flecha, a su ritmo) el dibujo llega a `trazo` (0 a 1): la inversa de `trazoDeLaFlecha`. */
-export const tauDelTrazo = (trazo: number): number => LINEA.flechaMs * simetricaInversa(trazo)
-
-/** Desde dónde frena si falta la carga (`frenoDesde`), en el tiempo de la flecha: lo de antes corre siempre solo. */
-export const TAU_DEL_FRENO = tauDelTrazo(LINEA.frenoDesde)
-
-/** La aparición de una raya: cuando el dibujo llega a su principio. */
-export function apareceLaRaya(r: Raya, largoDelCamino: number, reducido: boolean): Animacion {
-  if (reducido) return { cuadros: [{ opacity: 0 }, { opacity: 1 }], duracion: 0, demora: 0, relleno: 'forwards' }
-  return { cuadros: [{ opacity: 0 }, { opacity: 1 }], duracion: RAYA_MS, demora: tauDelTrazo(largoDelCamino <= 0 ? 0 : r.desde / largoDelCamino), relleno: 'forwards' }
-}
-
-/** Cada cuántos px del camino va un cuadro clave de la punta. */
-export const PASO_DE_LA_PUNTA_PX = 5
-
-const transformDeLaPunta = (x: number, y: number, angulo: number): string => `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${angulo.toFixed(2)}deg)`
+/** Cuándo aparece el botón, desde el arranque de la línea. */
+export const inicioDelBoton = (reducido: boolean): number => (reducido ? LINEA_REDUCIDA.bienvenidaMs : INICIO_DEL_BOTON_MS)
 
 /**
- * El recorrido de la punta: dos tramos, el libre (hasta el freno) y el frenable (el último 20 %), para que la capa pueda frenar sólo el
- * segundo si falta la carga. Cuadros cada `PASO_DE_LA_PUNTA_PX` del camino, con el ángulo desenrollado (sin vueltas de 360° entre dos
- * cuadros); la opacidad entra en el primer 4 % del trazo. Con movimiento reducido, un solo cuadro: la punta ya en el botón.
+ * EL LATIDO [L6 · ítem 81] — «tu-tu … tu-tu»: dos pulsos cercanos y una pausa. Cada pulso del botón sube en `subeMs` y baja en `bajaMs`; el
+ * segundo empieza `entrePulsosMs` después del primero; el período entero es `LINEA.latidoPeriodoMs`. De cada pulso nace una onda (`ondaMs`).
  */
-export function recorridosDeLaPunta(t: Trazado, reducido: boolean): { readonly animacion: Animacion; readonly frenable: boolean }[] {
-  const L = t.camino.largo
-  if (reducido || L <= 0) {
-    const fin = transformDeLaPunta(t.punta.x, t.punta.y, anguloEn(t.camino, L))
-    return [{ animacion: { cuadros: [{ transform: fin, opacity: 1 }, { transform: fin, opacity: 1 }], duracion: 0, demora: 0, relleno: 'forwards' }, frenable: false }]
-  }
-  const sFreno = LINEA.frenoDesde * L
-  const muestras = (desde: number, hasta: number): number[] => {
-    const n = Math.max(1, Math.ceil((hasta - desde) / PASO_DE_LA_PUNTA_PX))
-    return Array.from({ length: n + 1 }, (_, i) => desde + ((hasta - desde) * i) / n)
-  }
-  let previo: number | null = null
-  const cuadro = (s: number, t0: number, dur: number): CuadroClave => {
-    const p = puntoEn(t.camino, s)
-    let a = anguloEn(t.camino, s)
-    if (previo !== null) {
-      while (a - previo > 180) a -= 360
-      while (a - previo < -180) a += 360
-    }
-    previo = a
-    return { transform: transformDeLaPunta(p.x, p.y, a), opacity: Math.min(1, s / L / 0.04), offset: Math.min(1, Math.max(0, (tauDelTrazo(s / L) - t0) / dur)) }
-  }
-  const tramo = (desde: number, hasta: number, t0: number, t1: number, frenable: boolean): { readonly animacion: Animacion; readonly frenable: boolean } => ({
-    animacion: { cuadros: muestras(desde, hasta).map((s) => cuadro(s, t0, t1 - t0)), duracion: t1 - t0, demora: t0, relleno: 'forwards' },
-    frenable,
-  })
-  return [tramo(0, sFreno, 0, TAU_DEL_FRENO, false), tramo(sFreno, L, TAU_DEL_FRENO, LINEA.flechaMs, true)]
+export const LATIDO = { escala: 1.12, subeMs: 90, bajaMs: 160, entrePulsosMs: 300, ondaMs: 1250, ondaOpacidad: 0.55, apareceMs: 350, escalaAlAparecer: 0.88 } as const
+
+/** El botón aparece en su lugar: un fundido con un poco de escala (reducido: de golpe). */
+export const apareceElBoton = (reducido: boolean): Animacion =>
+  reducido
+    ? salto(0, 1, 0)
+    : { cuadros: [{ opacity: 0, transform: `scale(${String(LATIDO.escalaAlAparecer)})`, easing: EN_CSS.principal }, { opacity: 1, transform: 'scale(1)' }], duracion: LATIDO.apareceMs, demora: 0, relleno: 'both' }
+
+const enElPeriodo = (ms: number): number => ms / LINEA.latidoPeriodoMs
+
+/**
+ * El latido del botón, sin fin (mientras la capa viva; la salida la desvanece): escala dos veces; con movimiento reducido, sin escala, la
+ * opacidad baja y vuelve (nada se agranda).
+ */
+export function latidoDelBoton(reducido: boolean): Animacion {
+  const { subeMs, bajaMs, entrePulsosMs } = LATIDO
+  const valor = (arriba: boolean): Pick<CuadroClave, 'opacity' | 'transform'> => (reducido ? { opacity: arriba ? 0.55 : 1 } : { transform: `scale(${arriba ? String(LATIDO.escala) : '1'})` })
+  const pulso = (desde: number): CuadroClave[] => [
+    { ...valor(false), offset: enElPeriodo(desde), easing: EN_CSS.principal },
+    { ...valor(true), offset: enElPeriodo(desde + subeMs), easing: EN_CSS.entrada },
+    { ...valor(false), offset: enElPeriodo(desde + subeMs + bajaMs) },
+  ]
+  return { cuadros: [...pulso(0), ...pulso(entrePulsosMs), { ...valor(false), offset: 1 }], duracion: LINEA.latidoPeriodoMs, demora: 0, relleno: 'none', iteraciones: Number.POSITIVE_INFINITY }
 }
 
-/** El pulso de la punta (desde los 6 s, si falta la carga): crece y vuelve, sin fin. */
-export const PULSO_DE_LA_PUNTA: Animacion = {
-  cuadros: [
-    { transform: 'scale(1)', easing: EN_CSS.pulso },
-    { transform: `scale(${String(PULSO.escala)})`, offset: 0.5, easing: EN_CSS.pulso },
-    { transform: 'scale(1)' },
-  ],
-  duracion: PULSO.periodoMs,
-  demora: 0,
-  relleno: 'none',
-  iteraciones: Number.POSITIVE_INFINITY,
+/**
+ * La onda de un pulso (`indice` 0 o 1): un anillo del tamaño final (cubre el fondo desde el botón hasta la esquina más lejana) que crece
+ * desde el tamaño del botón (`escalaInicial`, 0 a 1) y se desvanece. La escala y la opacidad van en dos elementos (la curva de la escala
+ * sale rápido; la opacidad baja pareja). Sin movimiento reducido: ninguna (el latido de la opacidad del botón alcanza).
+ */
+export function ondaDelPulso(indice: 0 | 1, escalaInicial: number): { readonly escala: Animacion; readonly opacidad: Animacion } {
+  const fin = enElPeriodo(LATIDO.ondaMs)
+  const demora = indice * LATIDO.entrePulsosMs
+  const comun = { duracion: LINEA.latidoPeriodoMs, demora, relleno: 'none', iteraciones: Number.POSITIVE_INFINITY } as const
+  return {
+    escala: { ...comun, cuadros: [{ transform: `scale(${escalaInicial.toFixed(4)})`, offset: 0, easing: EN_CSS.onda }, { transform: 'scale(1)', offset: fin }, { transform: 'scale(1)', offset: 1 }] },
+    opacidad: { ...comun, cuadros: [{ opacity: LATIDO.ondaOpacidad, offset: 0 }, { opacity: 0, offset: fin }, { opacity: 0, offset: 1 }] },
+  }
 }

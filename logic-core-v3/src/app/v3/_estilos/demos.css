@@ -27,7 +27,9 @@
    * columna (la del espejo del Portfolio: 656 px a 1440, 448 a 1024), nunca menos de 164 px. A 1440, 197 px; a 1024, 164. El abanico
    * llena la columna entera (el segundo término del paso; s84 lo cuenta con la perspectiva). En `cqw` del estante (su contenedor)
    * y no en %: así el área de cada pieza (abajo) mide el paso con la misma cuenta, aunque esté adentro de la pieza. */
-  --libro-ancho: max(calc(var(--spacing-8) * 5.125), 30cqw);
+  /* [L2] Más chicas y enteras en el alto (Valentino, 41: «gigantes… no entran en pantalla»): el 27 % de la columna (177 px a 1440) y nunca
+   * más de lo que entra debajo de la bajada (`--libro-ancho-por-el-alto`, lo escribe `demos/espejo.ts`); el piso, el mismo. */
+  --libro-ancho: max(calc(var(--spacing-8) * 5.125), min(27cqw, var(--libro-ancho-por-el-alto, 27cqw)));
   /* [C2-41e] EL PASO: de una pieza a la siguiente (lo que se ve de cada una). Cada una tapa parte de la anterior, y si no entran en su
    * columna se pisan MÁS (las portadas no se achican nunca): el segundo término es el paso que llena el estante exacto con
    * `--libros` piezas (lo pone `Biblioteca`), y `min()` elige el menor. Era el solape del margen; ahora lo leen el margen y el área. */
@@ -40,6 +42,8 @@
   /* [NOCTURNO B5] El giro de un canto sobre su borde: de canto a la cara, un cuarto de vuelta. */
   --libro-canto: 90deg;
   --libro-perspectiva: calc(var(--spacing-8) * 40);
+  /* [L8a] El abanico no llena el estante (queda arrimado a la izquierda) y el giro de las placas le come la derecha: se lo centra, medio sobrante más lo que el giro le saca. */
+  --libro-corrimiento: max(0px, calc((100cqw - var(--libro-ancho) - (var(--libros) - 1) * var(--libro-paso)) / 2 + var(--libro-ancho) * 0.015));
   /* [NOCTURNO B5] La mirada de la cámara (`giroDeLaPieza`, la de los valores de Por qué develOP): la escribe la biblioteca en cada
    * cambio del mouse; quieta, de frente. */
   --mirada: rotateX(0deg);

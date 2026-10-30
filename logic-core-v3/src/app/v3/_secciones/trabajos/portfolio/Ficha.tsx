@@ -58,7 +58,11 @@ export function piezasDeLaFicha(p: ProyectoDelPortfolio): number {
  */
 export const CLASE_DEL_VALOR_COMPACTO = 'max-tablet:text-caption'
 
-export function Ficha({ proyecto, visible, reducido, desde, compacta = false }: { readonly proyecto: ProyectoDelPortfolio; readonly visible: boolean; readonly reducido: boolean; readonly desde: number; readonly compacta?: boolean }): React.JSX.Element {
+/**
+ * [L2] `sinResena`: la de la tarjeta del carrusel — la reseña se sacrifica para que la tarjeta entre en la pantalla (Valentino: «sacrifiquemos
+ * el testimonio»). Va igual al marcado, oculta (`hidden`), como las filas que no se muestran.
+ */
+export function Ficha({ proyecto, visible, reducido, desde, compacta = false, sinResena = false }: { readonly proyecto: ProyectoDelPortfolio; readonly visible: boolean; readonly reducido: boolean; readonly desde: number; readonly compacta?: boolean; readonly sinResena?: boolean }): React.JSX.Element {
   const r = CONTENIDO.ficha
   const filas = filasDe(proyecto)
   const valor = compacta ? CLASE_DEL_VALOR_COMPACTO : undefined
@@ -80,7 +84,7 @@ export function Ficha({ proyecto, visible, reducido, desde, compacta = false }: 
         ))}
       </dl>
       {proyecto.resena === null ? null : (
-        <motion.figure className="flex flex-col gap-2" {...enLaSecuencia(visible, ordenDeLaResena, reducido)}>
+        <motion.figure data-parte="resena" hidden={sinResena} className="flex flex-col gap-2" {...enLaSecuencia(visible, ordenDeLaResena, reducido)}>
           <Rotulo>{r.resena}</Rotulo>
           <blockquote>
             <Cuerpo className={valor}>{proyecto.resena.texto}</Cuerpo>

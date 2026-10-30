@@ -35,6 +35,7 @@ import { Biblioteca, LADOS_DE_LA_PLACA } from '../../_secciones/trabajos/demos/B
 import { CATALOGO_DE_DEMOS, MEDIDA_DE_LA_VENTANA, TEXTO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { aparicionPedida } from '../../_secciones/trabajos/demos/entrada'
 import { PARADA_DE_DEMOS, llegadaEnCurso, reglaDeLaParada } from '../../_secciones/trabajos/demos/parada'
+import { CRECIMIENTO_DE_LA_PERSPECTIVA, PISO_DE_LA_PLACA_PX, anchoPorElAlto, loQueFaltaParaElPiso } from '../../_secciones/trabajos/demos/espejo'
 import { ORIGENES_DE_LAS_DEMOS } from '../../_secciones/trabajos/demos/precarga'
 import { PANTALLAS_POR_PASO, mostradoDeDemos, pxDeLaSeccion, pxDelScroll } from '../../_secciones/trabajos/portfolio/pasos'
 import { REVELADO_FRACCION, maskDeRevelado } from '../escena/revelado'
@@ -177,11 +178,12 @@ const DEMOS_CSS = leer('_estilos/demos.css').replace(/\/\*[\s\S]*?\*\//g, '')
 /** Lo que el estante declara (los valores de la hoja, no copias). La placa es `max(piso, porcentaje)`; la de B5, sólo el porcentaje. */
 function medidasDelEstante(css: string): { readonly piso: number; readonly ancho: number; readonly giro: number; readonly perspectiva: number; readonly paso: number; readonly llenaElEstante: boolean } {
   // [C2-41e] En `cqw` del estante (su contenedor), que es lo mismo que el % de antes; la de B5 era sólo el porcentaje.
-  const conPiso = /--libro-ancho: max\(calc\(var\(--spacing-8\) \* ([\d.]+)\), ([\d.]+)(?:%|cqw)\);/.exec(css)
+  // [L2] El del ancho, acotado además por el alto (`min(Ncqw, var(--libro-ancho-por-el-alto, Ncqw))`): acá se mide la parte del ancho.
+  const conPiso = /--libro-ancho: max\(calc\(var\(--spacing-8\) \* ([\d.]+)\), (?:min\(([\d.]+)cqw, var\(--libro-ancho-por-el-alto, \2cqw\)\)|([\d.]+)(?:%|cqw))\);/.exec(css)
   const soloPorcentaje = /--libro-ancho: ([\d.]+)(?:%|cqw);/.exec(css)
   // `--spacing-8`: 2 rem, 32 px.
   const piso = conPiso === null ? 0 : 32 * Number(conPiso[1])
-  const ancho = Number(conPiso?.[2] ?? soloPorcentaje?.[1] ?? Number.NaN)
+  const ancho = Number(conPiso?.[2] ?? conPiso?.[3] ?? soloPorcentaje?.[1] ?? Number.NaN)
   const giro = Number(/--libro-giro: ([\d.]+)deg;/.exec(css)?.[1] ?? Number.NaN)
   const perspectiva = 32 * Number(/--libro-perspectiva: calc\(var\(--spacing-8\) \* ([\d.]+)\);/.exec(css)?.[1] ?? Number.NaN)
   // [C2-41e] El paso (lo que se ve de cada placa) y el margen que lo usa; con el segundo término, el paso llena el estante.
@@ -230,6 +232,17 @@ afirmar(grillaDeSiempre && pasoDelEspejo === 16 && tamanoJusto(DEMOS_CSS, column
 controlPositivo('  el detector ve las placas de B5 (el 36 % de la columna de entonces: 242 px a 1440 y 167 a 1024)', DEMOS_CSS.replace(/--libro-ancho: [^;]+;/, '--libro-ancho: 36%;'), (c: string) => tamanoJusto(c, columnaDeB5))
 controlPositivo('  y las de antes del agrandamiento (160 px a 1440)', DEMOS_CSS.replace(/--libro-ancho: [^;]+;/, '--libro-ancho: 23.8095%;'), (c: string) => tamanoJusto(c, columnaDeB5))
 controlPositivo('  y un abanico que no llena la columna (placas de 164 px con el solape fijo de antes)', DEMOS_CSS.replace(/--libro-ancho: [^;]+;/, '--libro-ancho: max(calc(var(--spacing-8) * 5.125), 20cqw);').replace(/--libro-paso: [^;]+;/, '--libro-paso: calc(var(--libro-ancho) * 0.58);'), (c: string) => llena(c, columnaDelEspejo))
+// [L2] Y entra en el alto (Valentino, 41): la hoja toma el menor entre el del ancho y el que escribe el espejo, y el espejo escribe uno que entra.
+const ESPEJO_DEL_ALTO = sinComentarios(leer('_secciones/trabajos/demos/espejo.ts'))
+const entraEnElAlto = (porElAlto: (libre: number, relleno: number) => number, css: string, hook: string): boolean =>
+  [220, 280, 360, 480].every((libre) => {
+    const sube = Math.min(loQueFaltaParaElPiso(libre, 36), 1000)
+    const placa = Math.max(PISO_DE_LA_PLACA_PX, porElAlto(libre + sube, 36))
+    return placa * 1.5 * CRECIMIENTO_DE_LA_PERSPECTIVA + 36 <= libre + sube + 1e-9
+  }) && /min\(27cqw, var\(--libro-ancho-por-el-alto, 27cqw\)\)/.test(css) && /escribir\(VARIABLE_DEL_ANCHO_POR_EL_ALTO, ancho\)/.test(hook) && /conElDefectoDeDemos\('sin-alto'\)/.test(hook)
+afirmar(entraEnElAlto(anchoPorElAlto, DEMOS_CSS, ESPEJO_DEL_ALTO), '  [L2] y entra en el alto: la placa nunca pasa lo que queda debajo de la bajada (con su perspectiva); si ni el piso entra, la columna sube lo que falta (el banco: `demos-escritorio.ts` MODO=entera a 1440×900, 1366×768, 1280×720 y 1024×768)')
+controlPositivo('  el detector ve el ancho por el alto sin la perspectiva (se pasa)', ((libre: number, relleno: number) => (libre - relleno) / 1.5), (f: (libre: number, relleno: number) => number) => entraEnElAlto(f, DEMOS_CSS, ESPEJO_DEL_ALTO))
+controlPositivo('  y la hoja sólo con el ancho (la de antes)', DEMOS_CSS.replace(/min\(27cqw, var\(--libro-ancho-por-el-alto, 27cqw\)\)/, '30cqw'), (c: string) => entraEnElAlto(anchoPorElAlto, c, ESPEJO_DEL_ALTO))
 // Debajo del título: el estante va después del texto (título y párrafo) en la misma columna; nada lo pone encima.
 const debajo = (c: string): boolean => {
   const texto = c.indexOf('<TextoDeDemos ')

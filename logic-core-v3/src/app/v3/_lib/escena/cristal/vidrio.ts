@@ -3,7 +3,6 @@ import * as THREE from 'three'
 import { HAZ, LUCES_VIVAS, LUCES_VIVAS_MAXIMO } from '../entorno/vivo'
 import { FLOOR_Y } from '../probeScene'
 import { CRISTAL } from './cristal'
-import { GRIETAS_EN_EL_MAIN, GRIETAS_GLSL, uniformesDeLasGrietas } from './grietasDelVidrio'
 
 /**
  * [PULIDO 20] R2 · EL VIDRIO (`cristal.ts`: lo puro; `muro.ts`: la geometría; `fondo.ts`: lo que refracta). Cada fragmento: la normal de
@@ -29,9 +28,6 @@ attribute float aInterior;
 attribute float aHondura;
 attribute vec4 aBorde;
 attribute vec2 aCelda;
-// [C2-31g] Dónde está en su celda (u desde su centro), la semilla y los rayos de la celda: la telaraña de cada una (\`grietasDelVidrio.ts\`).
-attribute vec4 aGrieta;
-varying vec4 vGrieta;
 varying vec3 vMundo;
 varying vec3 vNormal;
 varying float vInterior;
@@ -46,7 +42,6 @@ void main() {
 	vInterior = aInterior;
 	vBorde = vec4( mat3( modelMatrix ) * aBorde.xyz, aBorde.w );
 	vCelda = aCelda;
-	vGrieta = aGrieta;
 	gl_Position = projectionMatrix * viewMatrix * p;
 }
 `
@@ -79,7 +74,6 @@ varying float vInterior;
 varying float vHondura;
 varying vec4 vBorde;
 varying vec2 vCelda;
-${GRIETAS_GLSL}
 vec2 enElFondo( vec3 p ) {
 	vec4 c = uVista * vec4( p, 1.0 );
 	return c.xy / max( 1e-4, c.w ) * 0.5 + 0.5;
@@ -187,8 +181,6 @@ void main() {
 	float deNoche = uModoDelBrillo < 0.5 ? porCelda : uModoDelBrillo < 1.5 ? parejo : 0.0;
 	float especular = mix( porCelda * uBrillo.x, deNoche * uBrillo.y, uNoche ) * ( 0.4 + fresnel );
 	color += vec3( especular + brillosDeNoche( nf, v, fresnel, bisel ) );
-	// [NOCTURNO B9] Las grietas (\`grietasDelVidrio.ts\`): la banda oscura y la luz fina, sobre el vidrio ya armado.
-${GRIETAS_EN_EL_MAIN}
 	gl_FragColor = vec4( color * amp, amp );
 }
 `
@@ -216,8 +208,6 @@ export function uniformesDelVidrio() {
     uDeNoche: { value: new THREE.Vector4(0, C.noche.radioDelHaz, C.noche.luces, C.noche.dureza) },
     uLucesVivas: LUCES_VIVAS.uLuces,
     uCuantasLucesVivas: LUCES_VIVAS.uCuantas,
-    // [NOCTURNO B9] Las grietas: cuánto se formaron y se encendieron, desde dónde, y su color ([C2-31g] la telaraña de cada celda).
-    ...uniformesDeLasGrietas(),
   }
 }
 export type UniformesDelVidrio = ReturnType<typeof uniformesDelVidrio>

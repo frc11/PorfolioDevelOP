@@ -226,9 +226,11 @@ async function principal(): Promise<void> {
   afirmar(destinoBien(PRESET_DEL_DESTINO), 'cada servicio viaja con el preset de su página de destino, el MISMO objeto que declara la página (hoy, la base: de noche, con la pista de la intro y su variante)')
   controlPositivo('  el detector ve una copia del preset (la escena armaría la pista dos veces y la ranura no sabría que es la misma)', { ...PRESET_DEL_DESTINO, web: { ...PRESET_DE_LA_BASE } }, destinoBien)
   const panel = sinComentarios(leer('_secciones/servicios/escenario/PanelDeServicio.tsx'))
-  const ctaBien = (c: string): boolean => /<EnlaceDeRuta href=\{DESTINO_DEL_SERVICIO\[id\]\} onClick=\{\(e\) => pedirElViajeAlServicio\(e, PRESET_DEL_DESTINO\[id\]\)\} [^>]*data-viaje-del-servicio=\{id\}/.test(c)
-  afirmar(ctaBien(panel), '  el CTA (`EnlaceDelServicio`, el de los paneles, las pantallas sueltas y el recomendador) pide el viaje en su clic, con `data-viaje-del-servicio` para el banco')
-  controlPositivo('  el detector ve el CTA sin el pedido (pasaría el velo)', panel.replace(' onClick={(e) => pedirElViajeAlServicio(e, PRESET_DEL_DESTINO[id])}', ''), ctaBien)
+  // [L3] Reemplazada por la spec (ítem 50): los paneles ya no tienen el CTA; el título, el video y «Leer más…» son `EnlaceAlServicio` (en
+  // varios renglones), y el link del recomendador sigue siendo `EnlaceDelServicio`. Los DOS enlaces del archivo piden el viaje.
+  const ctaBien = (c: string): boolean => (c.match(/<EnlaceDeRuta\s+href=\{DESTINO_DEL_SERVICIO\[id\]\}\s+onClick=\{\(e\) => pedirElViajeAlServicio\(e, PRESET_DEL_DESTINO\[id\]\)\}\s+[^>]*data-viaje-del-servicio=\{id\}/g) ?? []).length === 2
+  afirmar(ctaBien(panel), '  los enlaces a la página del servicio (`EnlaceAlServicio`: el título, el video y «Leer más…» de los paneles y las pantallas sueltas; `EnlaceDelServicio`: el del recomendador) piden el viaje en su clic, con `data-viaje-del-servicio` para el banco')
+  controlPositivo('  el detector ve el enlace del panel sin el pedido (pasaría el velo)', panel.replace(/\s+onClick=\{\(e\) => pedirElViajeAlServicio\(e, PRESET_DEL_DESTINO\[id\]\)\}/, ''), ctaBien)
   const viaje = sinComentarios(leer('_componentes/navegacion/viajeAlServicio.ts'))
   type SonidosDelViaje = { readonly sale: string; readonly llega: string }
   const sonidosBien = (s: SonidosDelViaje, c: string): boolean =>

@@ -606,3 +606,5 @@ Servicios necesita primero la ranura, la intro, el título y la navegación. La 
 | B12a.6 | la navegación cliente y el velo (pide la salida de la variante) | hecho (`f4b37280`); era B12a.5 |
 | B12a.7 | la vuelta al home; el build de D7 | hecho (`7cb477d6`); era B12a.6 |
 | B12a.8 | la maqueta base: la intro larga y su composición, el título en volumen protagonista, la navbar, el velo sin pantalla en blanco, la vuelta por entrada, la página base y el paso a paso (§7) | hecho (este FRENO); pedido directo, fuera del plan |
+
+> **[L1, 2026-10-28]** Las grietas del cristal (B9, C2-31g) se sacaron del home y de las páginas, con `?grietas=` y su código: el efecto se rediseña más adelante.

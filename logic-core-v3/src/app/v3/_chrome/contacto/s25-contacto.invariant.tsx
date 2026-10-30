@@ -132,6 +132,8 @@ afirmar(esPanel(HOJA_PANEL), 'abajo de escritorio la hoja es el PANEL: en su esc
 controlPositivo('  el detector VE la placa de escritorio (con sus caras 3D)', HOJA, esPanel)
 controlPositivo('  y una hoja que no es el panel', HOJA_PANEL.replace('data-forma="panel"', 'data-forma="hoja"'), esPanel)
 afirmar(/data-forma="placa"/.test(HOJA) && (HOJA.match(/data-cara=/g) ?? []).length === 5 && !HOJA.includes('escenario-del-panel'), '  y en escritorio sigue la placa (cinco caras y su escenario), sin el del panel')
+afirmar((HOJA.match(/data-esquina=/g) ?? []).length === 4, '  [L1] y cuatro caras de esquina que cierran el borde (los costados se corren del radio y dejaban un hueco)')
+controlPositivo('  el detector VE una placa sin las esquinas', HOJA.replace(/data-esquina=/g, 'data-x='), (h: string) => (h.match(/data-esquina=/g) ?? []).length === 4)
 
 // El tamaño: ~70 % del ancho y del alto (el alto es un mínimo: si el contenido pide más, crece hasta el 90 % y recién ahí scrollea).
 const clasesDelTamano = (c: string, p: typeof PANEL): boolean =>

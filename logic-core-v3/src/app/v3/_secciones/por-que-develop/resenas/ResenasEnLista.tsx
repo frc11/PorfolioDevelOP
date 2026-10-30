@@ -1,20 +1,18 @@
 'use client'
 
-import { useEffect, useRef, type RefObject } from 'react'
+import { useRef, type RefObject } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { AvisoDeScroll } from '../../../_componentes/avisos/AvisoDeScroll'
 import { CtaEnlace } from '../../../_componentes/chrome/Cta'
 import { Titular } from '../../../_componentes/tipografia/Titular'
-import { ALTO_DE_VIEWPORT_DE_LA_REFERENCIA } from '../../../_lib/navegacion'
-import { anotarTramo } from '../../../_lib/escena/tramoEstirado'
+import { useTramoDelBloque } from '../../../_lib/escena/useTramoDelBloque'
 import { MEZCLA_SOBRE_LA_ESCENA } from '../../../_lib/superficies'
 import { usePrefiereMenosMovimiento } from '../../../_lib/usePrefiereMenosMovimiento'
 import { RESENAS, TEXTO_DE_LAS_RESENAS, TITULO_DE_LAS_RESENAS, enlaceDelTrabajo, type Resena } from './contenido'
 import { estadoDelAviso, type EstadoDelAviso } from './deriva'
 import { ResenasParaElLector } from './ResenasParaElLector'
-import { LARGO_SIN_ESTIRAR_PX } from './tramo'
 import { CaraDeLaResena } from './TarjetaDeResena'
 import { useDerivaDelCarrusel } from './useDerivaDelCarrusel'
 
@@ -41,31 +39,8 @@ export function ResenasEnLista(): React.JSX.Element {
   const pista = useRef<HTMLUListElement>(null)
   const quieto = usePrefiereMenosMovimiento()
   const { enPantalla, deslizado } = useDerivaDelCarrusel(pista, quieto)
-
-  useEffect(() => {
-    const el = bloque.current
-    const panel = el?.closest('[data-panel]') ?? null
-    if (el === null || panel === null) return undefined
-    let soltar: (() => void) | null = null
-    const anotar = (): void => {
-      soltar?.()
-      soltar = null
-      const escala = window.innerHeight / ALTO_DE_VIEWPORT_DE_LA_REFERENCIA
-      const alto = el.offsetHeight
-      if (getComputedStyle(el).getPropertyValue('--resenas-alargan').trim() !== '1' || !(escala > 0) || alto <= 0) return
-      const arranque = (el.getBoundingClientRect().top - panel.getBoundingClientRect().top) / escala
-      soltar = anotarTramo({ panel, k: (alto / escala + LARGO_SIN_ESTIRAR_PX) / LARGO_SIN_ESTIRAR_PX, arranque, largo: LARGO_SIN_ESTIRAR_PX })
-    }
-    anotar()
-    const observador = new ResizeObserver(anotar)
-    observador.observe(el)
-    window.addEventListener('resize', anotar)
-    return () => {
-      observador.disconnect()
-      window.removeEventListener('resize', anotar)
-      soltar?.()
-    }
-  }, [])
+  // [L5] El tramo que la escena no ve, con el hook compartido (`useTramoDelBloque`, el FAQ del teléfono también lo usa).
+  useTramoDelBloque(bloque, alargaLaSeccion)
 
   return (
     <div ref={bloque} data-pieza="resenas-en-lista" className="flex flex-col gap-[var(--spacing-8)] [--resenas-alargan:1] escritorio:[--resenas-alargan:0]">
@@ -81,11 +56,16 @@ export function ResenasEnLista(): React.JSX.Element {
   )
 }
 
+/** Quién decide si el bloque alarga la sección es el CSS (`--resenas-alargan`), no una consulta de JS. */
+const alargaLaSeccion = (el: HTMLElement): boolean => getComputedStyle(el).getPropertyValue('--resenas-alargan').trim() === '1'
+
 /** La pista: las reseñas y, si deriva, su copia (el bucle sin costura). Sin encaje si deriva: volvería cada paso a la tarjeta más cercana. */
 export function PistaDeLasResenas({ pista, quieto, resenas = RESENAS }: { readonly pista?: RefObject<HTMLUListElement | null>; readonly quieto: boolean; readonly resenas?: readonly Resena[] }): React.JSX.Element {
   return (
-    <div aria-hidden="true" className="w-full @container">
-      <ul ref={pista} data-parte="pista" data-deriva={quieto ? 'quieta' : 'viva'} className={cn('flex gap-[var(--spacing-6)] overflow-x-auto overscroll-x-contain pb-[var(--spacing-3)]', quieto && 'snap-x snap-mandatory')}>
+    // [L5] Abajo de 1024, a sangre: la pista llega a los bordes de la pantalla (las tarjetas entran por la derecha y salen por la izquierda
+    // enteras, sin el corte del relleno lateral: lote2/13); el mismo relleno va adentro, así la primera arranca alineada con el título.
+    <div aria-hidden="true" className="w-full @container max-escritorio:-mx-[var(--pad-lateral-compacto)] max-escritorio:w-[calc(100%+var(--pad-lateral-compacto)*2)]">
+      <ul ref={pista} data-parte="pista" data-deriva={quieto ? 'quieta' : 'viva'} className={cn('flex gap-[var(--spacing-6)] overflow-x-auto overscroll-x-contain pb-[var(--spacing-3)] max-escritorio:px-[var(--pad-lateral-compacto)] max-escritorio:scroll-px-[var(--pad-lateral-compacto)]', quieto && 'snap-x snap-mandatory')}>
         {resenas.map((r) => (
           <TarjetaDeLaLista key={r.clave} resena={r} copia={false} />
         ))}

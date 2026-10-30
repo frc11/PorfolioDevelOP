@@ -35,6 +35,25 @@ const CARAS = [
   { cara: 'atras', className: 'inset-0 rounded-[var(--radius-medio)] bg-fondo', style: { transform: `translateZ(-${String(E)}px)` } },
 ] as const
 
+/**
+ * [L1] LAS ESQUINAS DEL BLOQUE — los costados se corren `--radius-medio` de cada punta (lo que redondea el frente) y en cada esquina quedaba un
+ * hueco por donde se veía la cara de atrás y el interior. Cada esquina lleva una cara en diagonal (la cuerda de la curva) del mismo
+ * espesor, de punta a punta de los costados: el borde queda cerrado y negro desde cualquier ángulo.
+ * [L9a] Y de la tinta de los costados que une: cada cuerda es un degradé del tono del costado donde empieza al del costado donde termina
+ * (antes todas iban a un 90 % parejo, más claro que los lados y con una costura en cada punta).
+ */
+const R = 'var(--radius-medio)'
+const TINTA = (pct: number): string => `color-mix(in srgb, var(--color-tinta) ${String(pct)}%, var(--color-fondo))`
+const TONO = { izquierda: TINTA(86), derecha: TINTA(86), arriba: TINTA(78), abajo: 'var(--color-tinta)' } as const
+const CUERDA = { width: `calc(${R} * 1.4143)`, height: E, transformOrigin: '0 0', pointerEvents: 'none' } as const
+const degrade = (desde: string, hasta: string): string => `linear-gradient(to right, ${desde}, ${hasta})`
+const ESQUINAS = [
+  { esquina: 'arriba-izquierda', style: { ...CUERDA, left: 0, top: R, transform: 'rotateZ(-45deg) rotateX(-90deg)', background: degrade(TONO.izquierda, TONO.arriba) } },
+  { esquina: 'arriba-derecha', style: { ...CUERDA, left: `calc(100% - ${R})`, top: 0, transform: 'rotateZ(45deg) rotateX(-90deg)', background: degrade(TONO.arriba, TONO.derecha) } },
+  { esquina: 'abajo-derecha', style: { ...CUERDA, left: '100%', top: `calc(100% - ${R})`, transform: 'rotateZ(135deg) rotateX(-90deg)', background: degrade(TONO.derecha, TONO.abajo) } },
+  { esquina: 'abajo-izquierda', style: { ...CUERDA, left: R, top: '100%', transform: 'rotateZ(-135deg) rotateX(-90deg)', background: degrade(TONO.abajo, TONO.izquierda) } },
+] as const
+
 // [PULIDO 11] B3 · sin el hundido del rechazo (J5): el error es la tarjeta que no encaja, del otro lado del volteo.
 export function PlacaDelContacto({ activa, children }: { readonly activa: boolean; readonly children: React.ReactNode }): React.JSX.Element {
   const [llego, setLlego] = useState(false)
@@ -72,6 +91,9 @@ export function PlacaDelContacto({ activa, children }: { readonly activa: boolea
           {/* [P-H12] Las caras no reciben el puntero: van después de la hoja en el DOM y tapaban la X (y todo lo de la hoja) al pedir el elemento del punto. */}
           {CARAS.map((c) => (
             <div key={c.cara} data-cara={c.cara} aria-hidden="true" className={cn('absolute', c.className, !llego && 'invisible')} style={{ ...c.style, pointerEvents: 'none' }} />
+          ))}
+          {ESQUINAS.map((c) => (
+            <div key={c.esquina} data-esquina={c.esquina} aria-hidden="true" className={cn('absolute', !llego && 'invisible')} style={c.style} />
           ))}
         </motion.div>
       </motion.div>

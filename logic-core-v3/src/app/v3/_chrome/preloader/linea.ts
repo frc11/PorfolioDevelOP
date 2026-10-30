@@ -9,22 +9,22 @@ import { TOPE_MS } from './decision'
  *
  * [C2-81] Lo que se ve ya no lo pinta el hilo principal: son animaciones nativas en el compositor (`animaciones.ts`), y el reloj de la
  * capa es el `currentTime` de una animación maestra (se pausa con la pestaña oculta). Por eso el paso ya no acota el `dt` a 100 ms: con
- * el hilo ocupado el compositor sigue, y la línea tiene que seguir al mismo tiempo que lo que se ve. La flecha se integra en pasos de un
- * cuadro (`PASO_DE_LA_FLECHA_MS`): un cuadro largo no la pasa del freno. Y `libre`: desde que la carga estuvo lista, la parte frenable de
- * la flecha corre sola en el compositor, así que la línea la deja seguir a su ritmo aunque la carga vuelva a faltar (la salida igual la
- * espera).
+ * el hilo ocupado el compositor sigue, y la línea tiene que seguir al mismo tiempo que lo que se ve.
+ *
+ * [L6 · ítem 81] La flecha punteada se fue. En su lugar, el botón del sonido aparece donde está y vibra: una onda fina que cruza todo el
+ * fondo desde él, con el ritmo de un corazón (dos pulsos cercanos y una pausa: «tu-tu … tu-tu»). En el teléfono, los dos botones.
  *
  * El caso normal, 5,7 s (Valentino: de 5 a 6):
  *
  *   1. negro; «Bienvenido a una nueva experiencia.» entra con un fundido lento (0,9 s), se queda (1,1 s) y se va (0,6 s);
  *   2. el fondo pasa a blanco con un fundido simple (0,5 s) y entra la frase del sonido (0,4 s);
- *   3. la flecha punteada se dibuja en 1,5 s **si todo está listo**. Si falta, se frena en su último 20 % (no llega nunca sin la carga:
- *      se acerca a `frenoHasta`), y pasados 6 s desde el arranque se queda quieta con un pulso suave en la punta hasta que esté. Con la
- *      carga lista retoma a su ritmo. Si la espera pasa de `iconoDesdeMs`, un ícono de carga discreto (la página resultó muy pesada);
- *   4. completa la flecha, el blanco se desvanece (0,7 s) y aparece la página.
+ *   3. aparece el botón y late UNA vez (`ondaMs`: los dos pulsos y su onda). Si todo está listo, sigue la salida. Si falta, el latido se
+ *      repite cada `latidoPeriodoMs` hasta que esté (nunca queda quieto: la gente sigue la onda). Si la espera pasa de `iconoDesdeMs`,
+ *      un ícono de carga discreto (la página resultó muy pesada);
+ *   4. el blanco se desvanece (0,7 s) y aparece la página.
  *
- * Con movimiento reducido (~1 s, sin fundidos largos): el negro con la bienvenida 0,35 s, de golpe el blanco con la frase y la flecha ya
- * dibujada 0,65 s, y un fundido corto (0,15 s). Si falta la carga, se queda quieto (sin pulso) hasta que esté.
+ * Con movimiento reducido (~1 s, sin fundidos largos): el negro con la bienvenida 0,35 s, de golpe el blanco con la frase y el botón (sin
+ * onda: late su opacidad) y un fundido corto (0,15 s). Si falta la carga, se queda quieto hasta que esté.
  *
  * El tope (`TOPE_MS`, 20 s): pasado, sale aunque no esté todo (nunca queda tapando).
  */
@@ -34,14 +34,11 @@ export const LINEA = {
   bienvenidaSaleMs: 600,
   blancoMs: 500,
   fraseEntraMs: 400,
-  flechaMs: 1500,
+  /** Lo que dura el primer latido (sus dos pulsos y su onda): lo mínimo que se ve el botón antes de salir. */
+  ondaMs: 1500,
+  /** Cada cuánto se repite el latido si falta la carga (el pulso, la pausa). */
+  latidoPeriodoMs: 2800,
   salidaMs: 700,
-  /** Desde qué parte del trazo frena si falta la carga, y hacia dónde se acerca sin llegar. */
-  frenoDesde: 0.8,
-  frenoHasta: 0.97,
-  /** Desde el arranque: la flecha quieta con el pulso en la punta. */
-  pulsoDesdeMs: 6000,
-  pulsoPeriodoMs: 1400,
   /** Desde el arranque: el ícono de carga (sólo si la espera se hizo muy larga). */
   iconoDesdeMs: 12000,
   topeMs: TOPE_MS,
@@ -49,109 +46,69 @@ export const LINEA = {
 
 export const LINEA_REDUCIDA = { bienvenidaMs: 350, fraseMs: 650, salidaMs: 150 } as const
 
-/** Cuándo arranca la flecha (el fin de la frase). */
-export const INICIO_DE_LA_FLECHA_MS = LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs + LINEA.bienvenidaSaleMs + LINEA.blancoMs + LINEA.fraseEntraMs
+/** Cuándo aparece el botón (el fin de la frase). */
+export const INICIO_DEL_BOTON_MS = LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs + LINEA.bienvenidaSaleMs + LINEA.blancoMs + LINEA.fraseEntraMs
 export const FIN_DE_LA_BIENVENIDA_MS = LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs + LINEA.bienvenidaSaleMs
 
 /**
  * [C2-81] LOS RATOS QUIETOS: cuándo la escena se puede preparar (`entrada.ts`, `Precompilar`) sin trabar un fundido. La bienvenida ya
- * aparecida y quieta (con un margen antes de que se vaya: una parte del calentado puede tardar) y, desde que arranca la flecha, siempre (la
- * flecha es la espera: frena si falta la carga). Con movimiento reducido no hay fundidos largos: siempre.
+ * aparecida y quieta (con un margen antes de que se vaya: una parte del calentado puede tardar) y, desde que aparece el botón, siempre (el
+ * latido es la espera). Con movimiento reducido no hay fundidos largos: siempre.
  */
 export const MARGEN_DEL_RATO_QUIETO_MS = 200
 export const ratoQuieto = (t: number, reducido: boolean): boolean =>
-  reducido || (t >= LINEA.bienvenidaEntraMs && t < LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS) || t >= INICIO_DE_LA_FLECHA_MS
+  reducido || (t >= LINEA.bienvenidaEntraMs && t < LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs - MARGEN_DEL_RATO_QUIETO_MS) || t >= INICIO_DEL_BOTON_MS
 
 /** El caso normal entero, con la carga lista desde el principio. */
-export const DURACION_NORMAL_MS = INICIO_DE_LA_FLECHA_MS + LINEA.flechaMs + LINEA.salidaMs
+export const DURACION_NORMAL_MS = INICIO_DEL_BOTON_MS + LINEA.ondaMs + LINEA.salidaMs
 export const DURACION_REDUCIDA_MS = LINEA_REDUCIDA.bienvenidaMs + LINEA_REDUCIDA.fraseMs + LINEA_REDUCIDA.salidaMs
 
-export type Etapa = 'bienvenida' | 'blanco' | 'frase' | 'flecha' | 'salida' | 'fuera'
+export type Etapa = 'bienvenida' | 'blanco' | 'frase' | 'boton' | 'salida' | 'fuera'
 
 export interface EstadoDeLaLinea {
   /** ms vistos desde el arranque. */
   t: number
-  /** ms de la flecha: avanzan con el freno. */
-  tau: number
-  /** Lo dibujado de la flecha (0 a 1). */
-  trazo: number
-  pulsa: boolean
   icono: boolean
-  /** [C2-81] La carga estuvo lista alguna vez: la flecha ya no frena (su último tramo corre en el compositor). */
-  libre: boolean
   /** Cuándo arrancó la salida (`t`), o `null`. */
   salidaDesde: number | null
   etapa: Etapa
 }
 
-export const lineaNueva = (): EstadoDeLaLinea => ({ t: 0, tau: 0, trazo: 0, pulsa: false, icono: false, libre: false, salidaDesde: null, etapa: 'bienvenida' })
+export const lineaNueva = (): EstadoDeLaLinea => ({ t: 0, icono: false, salidaDesde: null, etapa: 'bienvenida' })
 
-/** [C2-81] El paso de la integración de la flecha (un cuadro): con un `dt` largo, la flecha avanza de a uno y frena donde tiene que frenar. */
-export const PASO_DE_LA_FLECHA_MS = 1000 / 60
-
-/** El dibujo de la flecha en el tiempo (de 0 a 1 en `flechaMs`): arranca y termina suave. */
-export const trazoDeLaFlecha = (tau: number): number => CURVAS.simetrica(Math.min(1, Math.max(0, tau / LINEA.flechaMs)))
-
-/**
- * A qué velocidad avanza la flecha (1 = su ritmo): con la carga lista, el suyo; si falta, el suyo hasta el 80 % del trazo y desde ahí
- * frena (se acerca a `frenoHasta` sin llegar); pasados `pulsoDesdeMs`, quieta. `sinFreno`: el control del banco.
- */
-export function velocidadDeLaFlecha(trazo: number, listo: boolean, t: number, sinFreno = false): number {
-  if (listo || sinFreno) return 1
-  if (t >= LINEA.pulsoDesdeMs) return 0
-  if (trazo < LINEA.frenoDesde) return 1
-  return Math.max(0, (LINEA.frenoHasta - trazo) / (LINEA.frenoHasta - LINEA.frenoDesde)) ** 2
+/** Cuántos latidos (pares de pulsos) empezaron hasta `t`: el primero cuando aparece el botón, y uno más cada `latidoPeriodoMs`. */
+export const latidosEn = (t: number, reducido = false): number => {
+  const inicio = reducido ? LINEA_REDUCIDA.bienvenidaMs : INICIO_DEL_BOTON_MS
+  return t < inicio ? 0 : 1 + Math.floor((t - inicio) / LINEA.latidoPeriodoMs)
 }
 
 const etapaDe = (e: EstadoDeLaLinea, reducido: boolean): Etapa => {
   if (e.salidaDesde !== null) return e.t - e.salidaDesde >= (reducido ? LINEA_REDUCIDA.salidaMs : LINEA.salidaMs) ? 'fuera' : 'salida'
-  if (reducido) return e.t < LINEA_REDUCIDA.bienvenidaMs ? 'bienvenida' : 'flecha'
+  if (reducido) return e.t < LINEA_REDUCIDA.bienvenidaMs ? 'bienvenida' : 'boton'
   if (e.t < FIN_DE_LA_BIENVENIDA_MS) return 'bienvenida'
   if (e.t < FIN_DE_LA_BIENVENIDA_MS + LINEA.blancoMs) return 'blanco'
-  if (e.t < INICIO_DE_LA_FLECHA_MS) return 'frase'
-  return 'flecha'
+  if (e.t < INICIO_DEL_BOTON_MS) return 'frase'
+  return 'boton'
 }
 
 /** Un cuadro (escribe en `e`). `dt` en ms: el tiempo visto desde el cuadro anterior (el reloj maestro de la capa, sin acotar). */
-export function pasoDeLaLinea(e: EstadoDeLaLinea, dt: number, listo: boolean, reducido: boolean, sinFreno = false): void {
-  const paso = Math.max(dt, 0)
-  const antes = e.t
-  e.t += paso
+export function pasoDeLaLinea(e: EstadoDeLaLinea, dt: number, listo: boolean, reducido: boolean): void {
+  e.t += Math.max(dt, 0)
   const listoYa = listo || e.t >= LINEA.topeMs
-  if (listoYa) e.libre = true
   if (e.salidaDesde === null) {
-    if (reducido) {
-      e.trazo = e.t >= LINEA_REDUCIDA.bienvenidaMs ? 1 : 0
-      e.pulsa = false
-      e.icono = !listoYa && e.t >= LINEA.iconoDesdeMs
-      if (listoYa && e.t >= LINEA_REDUCIDA.bienvenidaMs + LINEA_REDUCIDA.fraseMs) e.salidaDesde = e.t
-    } else if (e.t > INICIO_DE_LA_FLECHA_MS) {
-      // De a un cuadro, cada uno con la velocidad de su momento (el freno depende de lo dibujado y del reloj).
-      let resta = Math.min(paso, e.t - Math.max(antes, INICIO_DE_LA_FLECHA_MS))
-      let reloj = e.t - resta
-      while (resta > 1e-9 && e.tau < LINEA.flechaMs) {
-        const d = Math.min(resta, PASO_DE_LA_FLECHA_MS)
-        reloj += d
-        e.tau = Math.min(LINEA.flechaMs, e.tau + d * velocidadDeLaFlecha(e.trazo, e.libre, reloj, sinFreno))
-        e.trazo = trazoDeLaFlecha(e.tau)
-        resta -= d
-      }
-      e.pulsa = !listoYa && e.t >= LINEA.pulsoDesdeMs
-      e.icono = !listoYa && e.t >= LINEA.iconoDesdeMs
-      if (listoYa && e.trazo >= 1) e.salidaDesde = e.t
-    }
+    e.icono = !listoYa && e.t >= LINEA.iconoDesdeMs && (reducido || e.t > INICIO_DEL_BOTON_MS)
+    const salePasado = reducido ? LINEA_REDUCIDA.bienvenidaMs + LINEA_REDUCIDA.fraseMs : INICIO_DEL_BOTON_MS + LINEA.ondaMs
+    if (listoYa && e.t >= salePasado) e.salidaDesde = e.t
   }
   e.etapa = etapaDe(e, reducido)
 }
 
-/** Lo que se pinta en un cuadro: opacidades (0 a 1), lo dibujado de la flecha y el pulso de la punta (0 a 1). */
+/** Lo que se pinta en un cuadro: opacidades (0 a 1) de lo que se funde. */
 export interface VistaDeLaLinea {
   readonly bienvenida: number
   readonly blanco: number
   readonly frase: number
-  readonly trazo: number
   readonly capa: number
-  readonly pulso: number
   readonly icono: boolean
 }
 
@@ -162,15 +119,14 @@ export function vistaDeLaLinea(e: EstadoDeLaLinea, reducido: boolean): VistaDeLa
   if (reducido) {
     const blanco = t >= LINEA_REDUCIDA.bienvenidaMs ? 1 : 0
     const capa = e.salidaDesde === null ? 1 : 1 - tramo(t, e.salidaDesde, LINEA_REDUCIDA.salidaMs)
-    return { bienvenida: 1 - blanco, blanco, frase: blanco, trazo: e.trazo, capa, pulso: 0, icono: e.icono }
+    return { bienvenida: 1 - blanco, blanco, frase: blanco, capa, icono: e.icono }
   }
   const entra = CURVAS.principal(tramo(t, 0, LINEA.bienvenidaEntraMs))
   const sale = CURVAS.entrada(tramo(t, LINEA.bienvenidaEntraMs + LINEA.bienvenidaQuedaMs, LINEA.bienvenidaSaleMs))
   const blanco = CURVAS.simetrica(tramo(t, FIN_DE_LA_BIENVENIDA_MS, LINEA.blancoMs))
   const frase = CURVAS.principal(tramo(t, FIN_DE_LA_BIENVENIDA_MS + LINEA.blancoMs, LINEA.fraseEntraMs))
   const capa = e.salidaDesde === null ? 1 : 1 - CURVAS.simetrica(tramo(t, e.salidaDesde, LINEA.salidaMs))
-  const pulso = e.pulsa ? 0.5 - 0.5 * Math.cos((2 * Math.PI * (t - LINEA.pulsoDesdeMs)) / LINEA.pulsoPeriodoMs) : 0
-  return { bienvenida: entra * (1 - sale), blanco, frase, trazo: e.trazo, capa, pulso, icono: e.icono }
+  return { bienvenida: entra * (1 - sale), blanco, frase, capa, icono: e.icono }
 }
 
 /**

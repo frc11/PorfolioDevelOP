@@ -1,6 +1,6 @@
 /**
- * [B12a.8] T4 · EL TÍTULO DE LA PÁGINA EN 3D, COMO LOS DEL HOME — `/v3/pagina-base?composicion=1|2|3` con el Chrome del sistema a la vista,
- * el banco de la escena (`__titulosDelBanco`) y `/api/` bloqueado. Por composición y ancho:
+ * [B12a.8] T4 · EL TÍTULO DE LA PÁGINA EN 3D, COMO LOS DEL HOME — `/v3/pagina-base` con el Chrome del sistema a la vista,
+ * el banco de la escena (`__titulosDelBanco`) y `/api/` bloqueado. Por ancho ([INT] la composición es fija desde L6: no se barre):
  *   · desde 1024 (la regla de los títulos del home: `CONSULTA_ESCENARIO`), el 3D montado: las dos partes armadas, colocadas y llegadas;
  *     abajo de 1024, el `h1` del DOM a la vista y ningún título en volumen (como en el home a ese ancho);
  *   · el `h1` oculto a la vista mientras el 3D está (sus partes en opacidad 0) y en el árbol accesible (ni `aria-hidden` ni `display: none`);
@@ -10,7 +10,7 @@
  *   · la entrada: desde que se arma, su llegada sube hasta 1 (el gesto del titular del hero);
  *   · la salida: al pasar el tramo del título, su llegada baja a 0 y la caja BAJA mientras se va (cae; nunca sube), y vuelve al subir.
  *
- *   BASE=http://localhost:3004 npx tsx scripts-carga/titulo-3d.ts        (ANCHOS=…, COMPOSICIONES=…, CONTROL=pegado-al-h1)
+ *   BASE=http://localhost:3004 npx tsx scripts-carga/titulo-3d.ts        (ANCHOS=…, CONTROL=pegado-al-h1)
  */
 import { mkdirSync, rmSync } from 'node:fs'
 import os from 'node:os'
@@ -21,7 +21,8 @@ import { perfilDelBanco, salidaDelBanco } from './limpieza-del-banco'
 
 const BASE = process.env.BASE ?? 'http://localhost:3004'
 const ANCHOS = (process.env.ANCHOS ?? '1440x900,1280x800,1024x768,768x1024,390x844').split(',').map((a) => a.split('x').map(Number) as [number, number])
-const COMPOSICIONES = (process.env.COMPOSICIONES ?? '1,2,3').split(',')
+/** La única composición desde L6 (la 3); sólo nombra las fotos. */
+const COMPOSICION = '3'
 const CONTROL = process.env.CONTROL ?? ''
 const SALIDA = salidaDelBanco('titulo-3d')
 const dormir = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -97,9 +98,9 @@ async function main(): Promise<void> {
       await ctx.addInitScript(`(() => { window.__name = window.__name || ((f) => f); window.__entornoDeLaEscena = 'producto'; window.__defectosDeLaIntro = ${JSON.stringify(CONTROL)}; try { sessionStorage.setItem('home:intro', '1') } catch (e) {} })()`)
       const p = ctx.pages()[0] ?? (await ctx.newPage())
       await p.route('**/api/**', (r) => r.abort())
-      for (const c of COMPOSICIONES) {
+      for (const c of [COMPOSICION]) {
         await p.mouse.move(ancho / 2, alto / 2)
-        await p.goto(`${BASE}/v3/pagina-base?composicion=${c}`, { waitUntil: 'load', timeout: 300000 })
+        await p.goto(`${BASE}/v3/pagina-base`, { waitUntil: 'load', timeout: 300000 })
         // La entrada: la llegada de cada parte desde que se arma, cada 100 ms durante 5 s.
         const llegadas: number[] = []
         for (let k = 0; k < 50; k += 1) {
@@ -113,7 +114,7 @@ async function main(): Promise<void> {
         const montado = ts.length === 2 && ts.every((t) => t.visible && t.colocado && t.mostrado.llegada > 0.99)
         if (movil) {
           const bien = ts.every((t) => !t.visible) && h1.opacidades.every((o) => o === 1) && h1.accesible
-          console.log(`${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · ?composicion=${c} · abajo de 1024 (como el home): el \`h1\` del DOM a la vista (${h1.opacidades.join(', ')}), ${String(ts.filter((t) => t.visible).length)} títulos en volumen a la vista`)
+          console.log(`${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · abajo de 1024 (como el home): el \`h1\` del DOM a la vista (${h1.opacidades.join(', ')}), ${String(ts.filter((t) => t.visible).length)} títulos en volumen a la vista`)
           if (!bien) fallas.push(`${String(ancho)} c${c}`)
           await p.screenshot({ path: path.join(SALIDA, `c${c}-${String(ancho)}${CONTROL === '' ? '' : `-${CONTROL}`}.png`) })
           continue
@@ -161,10 +162,10 @@ async function main(): Promise<void> {
         await dormir(2500)
         const vuelve = (await titulos(p)).every((t) => t.mostrado.llegada > 0.99)
         const bien = montado && sube && oculto && perspectiva && problemas.length === 0 && seFue && cae && vuelve
-        if (problemas.length > 0) console.log(`      ${String(ancho)} · ?composicion=${c} · ${problemas.join(' · ')}`)
+        if (problemas.length > 0) console.log(`      ${String(ancho)} · ${problemas.join(' · ')}`)
         if (!bien) fallas.push(`${String(ancho)} c${c}`)
         console.log(
-          `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · ?composicion=${c} · «${h1.texto}» · el 3D ${montado ? 'montado' : 'NO montado'} · la entrada ${sube ? 'sube a 1' : `NO (${tramo.slice(0, 6).map((l) => l.toFixed(2)).join(' ')})`} · el h1 ${oculto ? 'oculto y accesible' : `a la vista (${h1.opacidades.join(', ')})`}` +
+          `${bien ? 'ok   ' : 'FALLA'} ${String(ancho)} · «${h1.texto}» · el 3D ${montado ? 'montado' : 'NO montado'} · la entrada ${sube ? 'sube a 1' : `NO (${tramo.slice(0, 6).map((l) => l.toFixed(2)).join(' ')})`} · el h1 ${oculto ? 'oculto y accesible' : `a la vista (${h1.opacidades.join(', ')})`}` +
             ` · el mouse de un lado al otro: la caja se corre ${corrida.toFixed(1)} px y su ancho cambia ${(der.ancho - izq.ancho).toFixed(1)} px · la salida ${seFue ? 'a 0' : 'NO'}${cae ? '' : ' (SUBE)'} · la vuelta ${vuelve ? 'a 1' : 'NO'}`,
         )
       }

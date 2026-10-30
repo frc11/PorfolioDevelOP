@@ -7,9 +7,10 @@
  *   3 · el muestrario montado: cinco tarjetas en el modo `asoma`, la de ahora sola en el recorrido, las barras de las vistas, la portada
  *       vertical y el enlace en otra pestaña; y el dedo puede arrastrar la tarjeta aunque sea un enlace;
  *   4 · lo común no es una trampa ni sabe de quién lo usa (las piezas nuevas del carrusel);
- *   5 · Demos en el flujo: en lo que sigue al flujo del Portfolio, pegado, en las dos ramas, sin la capa que crecía desde atrás del logo;
+ *   5 · Demos en el flujo: en lo que sigue al flujo del Portfolio, [L2] una pantalla que pasa con el scroll, en las dos ramas, sin la capa
+ *       que crecía desde atrás del logo;
  *   6 · el título se levanta con la pieza del Portfolio (no una copia);
- *   7 · la REGLA DE ALTURAS: el alto de la sección no cambia (la k tampoco).
+ *   7 · la REGLA DE ALTURAS: [L2] Demos mide una pantalla y el tramo del carrusel le devuelve a la escena la cola.
  *
  * Lo que se mide en el sitio (la entrada deslizando, el título que sube, el dedo, las barras) lo corre `scripts-carga/demos-telefono.ts`.
  *
@@ -28,7 +29,7 @@ import { CATALOGO_DE_DEMOS } from '../../_secciones/trabajos/demos/catalogo'
 import { FORMA_DE_LA_TARJETA_DE_DEMO, PROPS_DEL_CARRUSEL_DE_DEMOS } from '../../_secciones/trabajos/demos/CarruselDeDemos'
 import { DemosDelFlujo } from '../../_secciones/trabajos/demos/DemosDelFlujo'
 import { TitularQueSeLevanta } from '../../_secciones/trabajos/portfolio/levantarse'
-import { PANTALLAS_DESPUES_DEL_FLUJO, PANTALLAS_EXTRA_CON_EL_CARRUSEL, PANTALLAS_MINIMAS_DEL_FLUJO } from '../../_secciones/trabajos/portfolio/medioDelCarrusel'
+import { PANTALLAS_DESPUES_DEL_FLUJO } from '../../_secciones/trabajos/portfolio/medioDelCarrusel'
 import { PX_DE_LA_COLA, PX_DE_LA_SECCION_EN_LA_TABLA } from '../../_secciones/trabajos/portfolio/pasos'
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -147,13 +148,27 @@ const deAntesTrabajos = `${trabajos.replace(/\{vivo\.carrusel \? null : <CapaDeD
 controlPositivo('  el detector ve la entrada de antes (la capa en el escenario, la caja de después vacía)', deAntesTrabajos, enElFlujo)
 
 const delFlujo = marcar(<DemosDelFlujo reducido={false} />, { anima: true })
+// [L2] Ya no se pega: una pantalla (un `svh`) que entra y sale con el scroll, como cualquier sección (antes, `sticky top-0` la cola entera).
 const pantalla = (m: string): boolean => {
   const tag = /<div data-pantalla="demos"[^>]*>/.exec(m)?.[0] ?? ''
   const clases = /class="([^"]*)"/.exec(tag)?.[1]?.split(' ') ?? []
-  return ['sticky', 'top-0', 'h-svh', 'flex', 'flex-col'].every((c) => clases.includes(c)) && /id="demos"/.test(m) && /<h3[^>]*>[\s\S]*Demos[\s\S]*<\/h3>/.test(m) && !/scale\(|--demos-escala|demos-entrada/.test(m)
+  return ['h-svh', 'flex', 'flex-col'].every((c) => clases.includes(c)) && !clases.includes('sticky') && /id="demos"/.test(m) && /<h3[^>]*>[\s\S]*Demos[\s\S]*<\/h3>/.test(m) && !/scale\(|--demos-escala|demos-entrada/.test(m)
 }
-afirmar(pantalla(delFlujo), '  su pantalla: pegada arriba de la caja (`sticky top-0`, un `svh` de alto) con «Demos» (el destino `#demos` del pie) y sin escala: entra con el scroll, no crece')
-controlPositivo('  el detector ve la capa que crece (escala desde 0)', delFlujo.replace('data-pantalla="demos"', 'data-pantalla="demos" data-x="--demos-escala:0"').replace(/class="sticky /, 'class="absolute '), pantalla)
+afirmar(pantalla(delFlujo), '  su pantalla: un `svh` de alto con «Demos» (el destino `#demos` del pie), sin escala y [L2] sin pegarse: entra y sale con el scroll, no crece')
+controlPositivo('  el detector ve la capa que crece (escala desde 0)', delFlujo.replace('data-pantalla="demos"', 'data-pantalla="demos" data-x="--demos-escala:0"'), pantalla)
+controlPositivo('  [L2] el detector ve la pantalla pegada de antes', delFlujo.replace(/(data-pantalla="demos"[^>]*class=")/, '$1sticky top-0 '), pantalla)
+// [L2] 4 · El velo del Portfolio también en Demos del teléfono (Valentino, 41: «a demos y la descrp ponele el mismo velo que en portfolio»):
+// el halo en el bloque y el degradé detrás de la bajada, en las mismas reglas de `banda.css` que el encabezado del Portfolio.
+const BANDA = leer('_estilos/banda.css').replace(/\/\*[\s\S]*?\*\//g, '')
+const conElVelo = (css: string): boolean => {
+  const regla = (cola: string): string => (css.match(new RegExp(`[^{}]*\\{[^}]*${cola}[^}]*\\}`, 'g')) ?? []).join('\n')
+  const halo = regla('text-shadow: var\\(--halo-sobre-la-escena\\)')
+  const degrade = regla('background: var\\(--degrade-del-velo\\)')
+  return /\[data-pieza='encabezado-del-portfolio'\],/.test(halo) && /\[data-pantalla='demos'\] \[data-parte='titulo'\],/.test(halo) &&
+    /\[data-pieza='encabezado-del-portfolio'\] p::before/.test(degrade) && /\[data-pantalla='demos'\] \[data-parte='titulo'\] p::before,/.test(degrade)
+}
+afirmar(conElVelo(BANDA), '  [L2] el bloque de Demos del teléfono lleva el halo del Portfolio y su bajada el mismo velo (el degradé detrás), en las mismas reglas: antes sólo lo tenía la capa de escritorio')
+controlPositivo('  el detector ve Demos sin el velo (sólo la capa de escritorio, la de antes)', BANDA.replaceAll("  [data-v3] [data-panel='trabajos'] [data-pantalla='demos'] [data-parte='titulo'] p::before,\n", ''), conElVelo)
 const capa = sinComentarios(leer('_secciones/trabajos/demos/DemosDelFlujo.tsx'))
 afirmar(!/anotarTramo|scale|--demos-escala|requestAnimationFrame|window\.scroll/.test(capa), '  y no escribe nada por cuadro ni mueve la página: la entrada es el scroll del navegador')
 
@@ -177,16 +192,17 @@ afirmar(enLaPantalla(delFlujo), '  en la pantalla de Demos el titular va adentro
 controlPositivo('  el detector ve el titular sin la pieza', delFlujo.replace('data-parte="se-levanta"', 'data-parte="quieto"'), enLaPantalla)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · REGLA DE ALTURAS: el alto de la sección no cambia (la k del flujo tampoco)')
+titulo('7 · REGLA DE ALTURAS: [L2] Demos mide una pantalla y el tramo del carrusel le devuelve a la escena la cola entera')
 
-const alto = (h: number): number => Math.round((PANTALLAS_MINIMAS_DEL_FLUJO + PANTALLAS_DESPUES_DEL_FLUJO) * h)
-const deSiempre = (despues: number, t: string): boolean =>
-  Math.abs(despues - (1 + PX_DE_LA_COLA / 900)) < 1e-12 && PANTALLAS_EXTRA_CON_EL_CARRUSEL === 0 && Math.abs((PANTALLAS_MINIMAS_DEL_FLUJO + despues) * 900 - PX_DE_LA_SECCION_EN_LA_TABLA) < 1e-9 &&
-  /style=\{ESTILO_DE_LO_QUE_SIGUE_AL_FLUJO\}>\s*<DemosDelFlujo/.test(t) && /height: `\$\{\(PANTALLAS_DESPUES_DEL_FLUJO \* 100\)\.toFixed\(4\)\}svh`/.test(t)
-afirmar(
-  deSiempre(PANTALLAS_DESPUES_DEL_FLUJO, trabajos),
-  `Demos va adentro de la caja de lo que sigue al flujo, que mide lo de antes (${(PANTALLAS_DESPUES_DEL_FLUJO * 100).toFixed(2)}svh; la pantalla pegada de adentro, un svh, no le suma): la sección con el flujo en su mínimo sigue siendo la tabla (757svh: ${String(alto(844))} px a 390×844, ${String(alto(1024))} px a 768×1024) y no hay tramo nuevo que anotar`,
-)
-controlPositivo('  el detector ve una cola acortada (Demos pegado una pantalla: la sección más corta que la tabla)', 2, (d: number) => deSiempre(d, trabajos))
+// [L2] La spec cambió (Valentino, 41: «tengo que scrollear bastante en demos para pasar a servicios»): la caja de después del flujo es la
+// pantalla de Demos y nada más. La escena no se corre: el tramo del carrusel llega al final de la sección (s76 §48 lo mide con el flujo que sea).
+// [INT] El tramo arranca cuando la sección asoma: su largo suma la aproximación (s76 §48 mide la rampa y lo de afuera).
+const unaPantalla = (despues: number, t: string, tramo: string): boolean =>
+  despues === 1 && /style=\{ESTILO_DE_LO_QUE_SIGUE_AL_FLUJO\}>\s*<DemosDelFlujo/.test(t) && /height: `\$\{\(PANTALLAS_DESPUES_DEL_FLUJO \* 100\)\.toFixed\(4\)\}svh`/.test(t) &&
+  /const largo = PX_DE_LA_APROXIMACION \+ pxQueVeLaEscenaDespuesDelPin\(ancho\)/.test(tramo) && PX_DE_LA_COLA === 2931 && PX_DE_LA_SECCION_EN_LA_TABLA === 6813
+const tramo = sinComentarios(leer('_secciones/trabajos/portfolio/tramoDelSelector.ts'))
+afirmar(unaPantalla(PANTALLAS_DESPUES_DEL_FLUJO, trabajos, tramo), `Demos va adentro de la caja de lo que sigue al flujo, que mide una pantalla (${(PANTALLAS_DESPUES_DEL_FLUJO * 100).toFixed(0)}svh): ni scroll quieto antes de Servicios ni empujón; el tramo anotado le cuenta a la escena la cola de siempre (${String(PX_DE_LA_COLA)} px de la regla)`)
+controlPositivo('  el detector ve la cola de antes (Demos pegado 4,26 pantallas)', 1 + PX_DE_LA_COLA / 900, (d: number) => unaPantalla(d, trabajos, tramo))
+controlPositivo('  y el tramo de antes (la escena sin la cola: todo lo de después llegaría antes)', tramo.replace('const largo = PX_DE_LA_APROXIMACION + pxQueVeLaEscenaDespuesDelPin(ancho)', 'const largo = PX_DE_LA_APROXIMACION + PX_DEL_MEDIO_QUE_VEIA_LA_ESCENA[ancho]'), (s: string) => unaPantalla(PANTALLAS_DESPUES_DEL_FLUJO, trabajos, s))
 
 cerrar('s84-demos-telefono.invariant')

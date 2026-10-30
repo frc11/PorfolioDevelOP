@@ -24,6 +24,9 @@ import { TituloQueSePinta } from './TituloQueSePinta'
  * novedades; el aviso. La bajada, las dos columnas y el divisor entran con el gatillo del contrato DESDE ABAJO (al cruzar la línea,
  * en su lugar; se van en espejo al volver a subir), como el resto del sitio: el deslizamiento lateral se fue.
  */
+/** [L4] Abajo de 1024 los títulos de las dos columnas («Probar el panel», «Suscribite a las novedades») más grandes: de ~32 px a un fluido de 36 a 52. */
+const TITULO_DE_LA_COLUMNA_EN_EL_TELEFONO = 'max-escritorio:text-[length:var(--titulo-de-la-columna-angosto)] escritorio:flex escritorio:[min-block-size:var(--dos-renglones)] escritorio:items-end escritorio:justify-center' // [L9a] y desde 1024 las dos columnas reservan dos renglones: el texto de cada una arranca a la misma altura
+
 export function CtaDelPanel(): React.JSX.Element {
   return (
     <div data-pieza="cta-del-panel" className="flex min-h-svh flex-col items-center justify-center gap-[var(--spacing-8)] py-[var(--spacing-12)]">
@@ -36,7 +39,7 @@ export function CtaDelPanel(): React.JSX.Element {
       <div data-pieza="fila-del-cta" className="mt-[var(--spacing-4)] flex w-full flex-col items-center gap-[var(--spacing-8)] escritorio:flex-row escritorio:items-stretch escritorio:gap-[var(--spacing-12)]">
         <Gatillo desde="abajo" className="w-full escritorio:flex-1">
           <div data-pieza="columna-probar" className="mx-auto flex max-w-[var(--ancho-del-formulario)] flex-col items-center gap-[var(--spacing-4)] text-center">
-            <Titular nivel="titulo-l" como="h4">
+            <Titular nivel="titulo-l" como="h4" className={TITULO_DE_LA_COLUMNA_EN_EL_TELEFONO}>
               {CTA.probar.titulo}
             </Titular>
             <Cuerpo className="text-tinta-media">
@@ -55,7 +58,7 @@ export function CtaDelPanel(): React.JSX.Element {
         </Gatillo>
         <Gatillo desde="abajo" className="w-full escritorio:flex-1">
           <div data-pieza="columna-novedades" className="mx-auto flex max-w-[var(--ancho-del-formulario)] flex-col items-center gap-[var(--spacing-4)] text-center">
-            <Titular nivel="titulo-m" como="h4">
+            <Titular nivel="titulo-l" como="h4" className={TITULO_DE_LA_COLUMNA_EN_EL_TELEFONO}>
               {NEWSLETTER.titulo}
             </Titular>
             <Cuerpo className="text-tinta-media">{NEWSLETTER.texto}</Cuerpo>
@@ -83,12 +86,16 @@ function Divisor(): React.JSX.Element {
   )
 }
 
-/** La flecha punteada que baja del texto y señala el botón: una curva suave de puntos y la punta, en el trazo del sitio. */
+/**
+ * La flecha punteada que sale del texto y señala el botón. [L4] Rehecha: una sola curva en S suave (sale a la izquierda, gira y baja
+ * derecho al botón), a tamaño real (1 unidad = 1 px: sin escalas que desparejen los puntos), puntos redondos a paso fijo, y una punta
+ * en V que mira en el sentido en que termina el trazo (hacia abajo, al botón).
+ */
 function FlechaPunteada(): React.JSX.Element {
   return (
-    <svg data-pieza="flecha-punteada" viewBox="0 0 40 64" fill="none" aria-hidden="true" focusable="false" className="text-tinta-media block h-[calc(var(--spacing-12)*1.5)] w-[var(--spacing-12)] overflow-visible">
-      <path d="M14 2 C 30 18, 6 34, 20 56" stroke="currentColor" strokeWidth={1.5} strokeDasharray="0.5 5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-      <path d="M13 50 L20 58 L27 50" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    <svg data-pieza="flecha-punteada" viewBox="0 0 120 100" width="120" height="100" fill="none" aria-hidden="true" focusable="false" className="text-tinta-media block overflow-visible">
+      <path d="M 22 4 C 108 6, 60 46, 60 84" stroke="currentColor" strokeWidth={2.5} strokeDasharray="0 9" strokeLinecap="round" />
+      <path d="M 50 86 L 60 98 L 70 86" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

@@ -38,6 +38,7 @@ export const RELUCIENTE = {
 
 type Props =
   | { readonly como?: 'caja'; readonly className?: string }
+  | { readonly como: 'letras'; readonly children: React.ReactNode; readonly className?: string }
   | { readonly como: 'texto'; readonly children: React.ReactNode; readonly className?: string }
 
 export function Reluciente(props: Props): React.JSX.Element {
@@ -45,6 +46,14 @@ export function Reluciente(props: Props): React.JSX.Element {
   const ref = useRef<HTMLSpanElement>(null)
   const aLaVista = useInView(ref)
   const quieto = reducido || !aLaVista ? '' : undefined
+  // [L9a] Sólo la luz, recortada a las letras (el texto de abajo —o la escena 3D que lo reemplaza— no se pinta): se pone encima de él, con su misma letra.
+  if (props.como === 'letras') {
+    return (
+      <span ref={ref} aria-hidden="true" data-reluciente="letras" data-quieto={quieto} className={props.className}>
+        {props.children}
+      </span>
+    )
+  }
   if (props.como === 'texto') {
     return (
       <span ref={ref} data-reluciente="texto" data-quieto={quieto} className={props.className}>

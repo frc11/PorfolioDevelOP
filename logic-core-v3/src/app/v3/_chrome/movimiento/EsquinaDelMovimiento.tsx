@@ -31,7 +31,7 @@ export function EsquinaDelMovimiento(): React.JSX.Element | null {
   }, [])
   if (!hay) return null
   return (
-    <div data-pieza="esquina-del-movimiento" className="pointer-events-none fixed top-[max(var(--spacing-4),env(safe-area-inset-top))] right-[max(var(--spacing-4),env(safe-area-inset-right))] z-[var(--z-cabecera)] escritorio:hidden">
+    <div data-pieza="esquina-del-movimiento" className="pointer-events-none fixed top-[max(var(--spacing-4),env(safe-area-inset-top))] right-[max(var(--spacing-4),env(safe-area-inset-right))] z-[var(--z-cabecera)] hasta-tablet:hidden">
       <div data-parte="lugar-del-movimiento">
         <ControlDelMovimiento />
       </div>

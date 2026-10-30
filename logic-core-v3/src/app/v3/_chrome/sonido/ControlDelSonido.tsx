@@ -40,7 +40,8 @@ const ENLACES_Y_BOTONES = 'a[href], button, [role="button"], summary'
 /** [RETOQUE 3D] La barra (la pastilla, la esquina y el menú del teléfono) y los CTA: [CIERRE RETOQUE 3D] S1 · su clic, el pestillo. */
 const DE_LA_BARRA = '[data-pieza="barra"] a, [data-pieza="menu-movil"] [data-parte="item-del-menu"]'
 // [RONDA 2] F5 · y las piezas del pie (desde 1025): el hover, el tic; el clic, el pestillo, como una tecla.
-const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto], [data-pieza="bloque-solido"][data-solido]`
+// [L5] Y el WhatsApp del FAQ de volumen, que suena como el del pie.
+const DE_LOS_CTA = `${SELECTOR_DE_LOS_CTA}, [data-pieza="empezar"], [data-abre-contacto], [data-pieza="bloque-solido"][data-solido], [data-bloque-del-faq="whatsapp"]`
 /** [RETOQUE PANEL] T2 · las demos de Tu panel: sin clic propio; lo que se toca adentro suena el pestillo de la barra y los CTA. */
 const DE_LAS_DEMOS_DEL_PANEL = '[data-pieza="demo-del-panel"]'
 
@@ -200,7 +201,7 @@ export default function ControlDelSonido(): React.JSX.Element {
         aria-pressed={prendido}
         aria-label="Sonido"
         onClick={tocar}
-        className="flex cursor-pointer items-center justify-center rounded-full border-borde shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)] max-escritorio:size-[var(--spacing-12)] max-escritorio:border max-escritorio:bg-fondo escritorio:size-[calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))] escritorio:border-[length:var(--border-hairline)] escritorio:bg-[var(--color-superficie-translucida)] escritorio:backdrop-blur-[var(--blur-panel)]"
+        className="flex cursor-pointer items-center justify-center rounded-full border-borde shadow-[var(--shadow-flotante)] transition-colors duration-[var(--duracion-media)] max-hasta-tablet:size-[var(--spacing-12)] max-hasta-tablet:border max-hasta-tablet:bg-fondo hasta-tablet:size-[calc(var(--spacing-3)*2+var(--text-cuerpo)*var(--leading-texto))] hasta-tablet:border-[length:var(--border-hairline)] hasta-tablet:bg-[var(--color-superficie-translucida)] hasta-tablet:backdrop-blur-[var(--blur-panel)]"
       >
         <IconoDelParlante prendido={prendido} suena={estadoReal === 'listo'} reducido={reducido} />
       </button>

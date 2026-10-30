@@ -174,7 +174,8 @@ const luz = (rgb: readonly number[]): number => 0.2126 * lineal(rgb[0]) + 0.7152
 const PAPEL = hex(/--color-fondo:\s*(#[0-9A-Fa-f]{6})/)
 const TINTA = hex(/--color-tinta:\s*(#[0-9A-Fa-f]{6})/)
 const contraste = (luz(PAPEL) + 0.05) / (luz(PAPEL.map((p, i) => ALFA_DE_LA_PALABRA * TINTA[i] + (1 - ALFA_DE_LA_PALABRA) * p)) + 0.05)
-afirmar(Math.abs(contraste - 1.0595) < 0.002, 'la palabra fundida queda pálida: la tinta a su alfa sobre el papel da el 1,0595:1 de las palabras del fondo de antes', `${contraste.toFixed(4)}:1`)
+// [L4] «Casi invisible» (1,0595:1) → se lee, todavía secundaria: entre 1,15:1 y 1,35:1.
+afirmar(contraste >= 1.15 && contraste <= 1.35, 'la palabra fundida se lee y queda secundaria: la tinta a su alfa sobre el papel da entre 1,15:1 y 1,35:1', `${contraste.toFixed(4)}:1`)
 const palabras = [...QUIETO.matchAll(/<span aria-hidden="true" data-pieza="palabra-fundida"[^>]*>([^<]*)<\/span>/g)].map((m) => m[1])
 afirmarIgual(palabras, TARJETAS.map((t) => t.palabra), '  las tres palabras van `aria-hidden`: no se anuncian')
 afirmar(TARJETAS.every((t) => !textoAccesible(QUIETO).split(/\s+/).includes(t.palabra) || ORDEN.some((o) => o.includes(t.palabra))) && sinAriaHidden(QUIETO).length < QUIETO.length, '  y ninguna se anuncia sola (CONTROL: la poda de aria-hidden saca algo)')

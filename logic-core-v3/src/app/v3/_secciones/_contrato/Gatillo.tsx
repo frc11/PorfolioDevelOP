@@ -35,10 +35,16 @@ const CLASES_DESDE_ABAJO: Readonly<Record<EstadoDelGatillo, string>> = {
   ido: 'translate-y-8 opacity-0 transition duration-[var(--duracion-muy-lenta)] ease-[var(--ease-salida)] motion-reduce:transition-none',
 }
 
+/**
+ * [L2] `claseDelContenido`: la del hijo que se corre (lo que se mueve), para que una pieza que llena su alto (el carrusel del Portfolio en el
+ * teléfono) siga siendo flex adentro del gatillo. Sin la prop, el marcado de siempre.
+ */
+const claseConLaDelContenido = (delEstado: string, delContenido: string | undefined): string => (delContenido === undefined ? delEstado : `${delEstado} ${delContenido}`.trim())
+
 /** De dónde llega la pieza: del costado (el defecto, el gesto del remate del home) o desde abajo. */
 export type DesdeDelGatillo = 'costado' | 'abajo'
 
-export function Gatillo({ children, className, desde = 'costado' }: { readonly children: ReactNode; readonly className?: string; readonly desde?: DesdeDelGatillo }): React.JSX.Element {
+export function Gatillo({ children, className, desde = 'costado', claseDelContenido }: { readonly children: ReactNode; readonly className?: string; readonly desde?: DesdeDelGatillo; readonly claseDelContenido?: string }): React.JSX.Element {
   const anima = useMovimientoEnTodoAncho()
   const [estado, setEstado] = useState<EstadoDelGatillo>('quieto')
   const caja = useRef<HTMLDivElement>(null)
@@ -70,7 +76,7 @@ export function Gatillo({ children, className, desde = 'costado' }: { readonly c
   const efectivo = anima ? estado : siguienteEstado(estado, { tipo: 'sin-movimiento' })
   return (
     <div ref={caja} data-gatillo={efectivo} className={className}>
-      <div className={(desde === 'abajo' ? CLASES_DESDE_ABAJO : CLASES_DEL_ESTADO)[efectivo]}>{children}</div>
+      <div className={claseConLaDelContenido((desde === 'abajo' ? CLASES_DESDE_ABAJO : CLASES_DEL_ESTADO)[efectivo], claseDelContenido)}>{children}</div>
     </div>
   )
 }

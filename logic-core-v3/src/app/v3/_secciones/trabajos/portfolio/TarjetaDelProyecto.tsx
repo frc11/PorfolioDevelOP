@@ -15,7 +15,7 @@ import { Ficha } from './Ficha'
 import { MarcaDeAgua } from './MarcaDeAgua'
 import { estiloDeLaMarca } from './Tira'
 import { estadoDelVideo, type EstadoDelVideo } from './MedioDeLaTira'
-import { ANCHO_DEL_MEDIO, CLASE_DEL_ALTO_DEL_MEDIO_DEL_CARRUSEL, PROPORCION_DEL_MEDIO } from './medios'
+import { PROPORCION_DEL_MEDIO } from './medios'
 
 /**
  * [B1.2e] LA SUPERFICIE DE LO QUE FLOTA EN EL FLUJO DEL CARRUSEL (la tarjeta y «la tuya»): la hoja de vidrio de la tinta que ya pasó el AA
@@ -23,6 +23,13 @@ import { ANCHO_DEL_MEDIO, CLASE_DEL_ALTO_DEL_MEDIO_DEL_CARRUSEL, PROPORCION_DEL_
  * radio fuerte y el borde fino. El texto va encima, en la tinta.
  */
 export const SUPERFICIE_DEL_CARRUSEL = 'rounded-fuerte border border-tinta/10 bg-fondo/75 backdrop-blur-[var(--blur-panel)]'
+
+/**
+ * [L2] EL VIDEO CEDE: su caja (un contenedor de tamaño) se queda con el alto que le deja la ficha en la tarjeta, y el video la llena en 16:10
+ * sin deformarse (lo que mande, el ancho o el alto de la caja). Antes, el 24 % del cuadro y la tarjeta crecía con la ficha.
+ */
+const CLASE_DE_LA_CAJA_DEL_MEDIO = 'relative flex min-h-0 flex-1 items-center justify-center [container-type:size] medio:h-full'
+const ESTILO_DEL_MEDIO: React.CSSProperties = { aspectRatio: PROPORCION_DEL_MEDIO, width: 'min(100cqw, 100cqh * 16 / 10)' }
 
 /**
  * El video de la tarjeta: el recorrido del sitio (el de escritorio, 16:10 y contenido: la tarjeta es apaisada en todo ancho). Sólo la tarjeta
@@ -43,7 +50,7 @@ function MedioDeLaTarjeta({ proyecto, e, cerca, reinicio }: { readonly proyecto:
     if (v !== null && v.currentTime > 0) v.currentTime = 0
   }, [reinicio])
   return (
-    <figure aria-label={proyecto.alt} className="relative mx-auto w-full overflow-clip rounded-sutil bg-tinta/5" style={{ aspectRatio: PROPORCION_DEL_MEDIO, maxWidth: ANCHO_DEL_MEDIO }}>
+    <figure aria-label={proyecto.alt} className="relative mx-auto overflow-clip rounded-sutil bg-tinta/5" style={ESTILO_DEL_MEDIO}>
       <video
         ref={video}
         data-video-del-portfolio={proyecto.slug}
@@ -67,6 +74,7 @@ function MedioDeLaTarjeta({ proyecto, e, cerca, reinicio }: { readonly proyecto:
  * el problema, lo que resolvimos y la reseña con su firma; el servicio y el resultado, ocultos como siempre) y la marca de agua del cliente.
  * Ningún texto se acortó: en el teléfono la ficha va en `caption` (`compacta`). La ficha entra con la secuencia de la tira cada vez que la
  * tarjeta se activa. Apilada hasta 860; desde ahí, el video a la izquierda y el texto a la derecha (la tablet acostada no tiene alto).
+ * [L2] Sin la reseña (`sinResena`) y llenando el alto que le deja la pantalla: el video cede (`CLASE_DE_LA_CAJA_DEL_MEDIO`).
  */
 export function TarjetaDelProyecto({ proyecto, activa, corre, reinicio, cerca, reducido }: {
   readonly proyecto: ProyectoDelPortfolio
@@ -82,11 +90,13 @@ export function TarjetaDelProyecto({ proyecto, activa, corre, reinicio, cerca, r
     <article
       data-pieza="tarjeta-del-proyecto"
       data-proyecto={proyecto.slug}
-      className={cn(SUPERFICIE_DEL_CARRUSEL, CLASE_DEL_ALTO_DEL_MEDIO_DEL_CARRUSEL, 'relative grid h-full content-start gap-4 overflow-clip p-4 tablet:gap-5 tablet:p-6 medio:grid-cols-2 medio:content-center medio:items-center medio:gap-8')}
+      className={cn(SUPERFICIE_DEL_CARRUSEL, 'relative flex h-full flex-col gap-3 overflow-clip p-3 tablet:gap-5 tablet:p-6 medio:grid medio:grid-cols-2 medio:items-center medio:gap-8')}
     >
       <MarcaDeAgua proyecto={proyecto} cerca={cerca} />
-      <MedioDeLaTarjeta proyecto={proyecto} e={video} cerca={cerca} reinicio={reinicio} />
-      <div className="relative flex min-w-0 flex-col gap-3 tablet:gap-4">
+      <div data-parte="caja-del-medio" className={CLASE_DE_LA_CAJA_DEL_MEDIO}>
+        <MedioDeLaTarjeta proyecto={proyecto} e={video} cerca={cerca} reinicio={reinicio} />
+      </div>
+      <div className="relative flex min-w-0 shrink-0 flex-col gap-3 tablet:gap-4">
         <div data-fila="nombre" className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col">
             <Titular nivel="titulo-m" como="h3">{proyecto.nombre}</Titular>
@@ -96,7 +106,7 @@ export function TarjetaDelProyecto({ proyecto, activa, corre, reinicio, cerca, r
             <CtaEnlace href={proyecto.url} rotulo={`${CONTENIDO.ficha.visitar} ↗`} etiqueta={`${CONTENIDO.ficha.visitar} de ${proyecto.nombre}, ${CONTENIDO.ficha.abreAparte}`} externo />
           </span>
         </div>
-        <Ficha proyecto={proyecto} visible={activa} reducido={reducido} desde={1} compacta />
+        <Ficha proyecto={proyecto} visible={activa} reducido={reducido} desde={1} compacta sinResena />
       </div>
     </article>
   )

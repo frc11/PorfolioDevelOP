@@ -35,15 +35,16 @@ const entre = (x: number): number => Math.min(1, Math.max(0, x))
  * Un cuadro en `ahora`: cuánto está arriba el bloque (0 a 1). Escribe el cambio (lo mostrado, a la mitad). Devuelve también si sigue
  * moviéndose (para pedir otro cuadro) y si cambió lo mostrado (para que React lo pinte).
  */
-export function pasoDeLaRespuesta(r: RelojDeLaRespuesta, ahora: number): { readonly nivel: number; readonly enCurso: boolean; readonly cambioLoMostrado: boolean } {
+// [L5] Y `cambio`: el tiempo del cambio en curso (0 a 1), o `null` quieto (el bloque de volumen hace con él el cambio del formulario).
+export function pasoDeLaRespuesta(r: RelojDeLaRespuesta, ahora: number): { readonly nivel: number; readonly enCurso: boolean; readonly cambioLoMostrado: boolean; readonly cambio: number | null } {
   const M = MITAD_DEL_CAMBIO_MS
   if (r.desde === Number.NEGATIVE_INFINITY) {
-    if (r.pedido === r.mostrado) return { nivel: 1, enCurso: false, cambioLoMostrado: false }
+    if (r.pedido === r.mostrado) return { nivel: 1, enCurso: false, cambioLoMostrado: false, cambio: null }
     r.desde = ahora
     r.cambiado = false
   }
   const e = ahora - r.desde
-  if (e < M) return { nivel: 1 - entre(e / M), enCurso: true, cambioLoMostrado: false }
+  if (e < M) return { nivel: 1 - entre(e / M), enCurso: true, cambioLoMostrado: false, cambio: entre(e / (2 * M)) }
   let cambioLoMostrado = false
   if (!r.cambiado) {
     r.cambiado = true
@@ -51,11 +52,11 @@ export function pasoDeLaRespuesta(r: RelojDeLaRespuesta, ahora: number): { reado
     r.mostrado = r.pedido
     if (r.mostrado !== 'aviso' && r.primeraEn === Number.NEGATIVE_INFINITY) r.primeraEn = r.desde + M
   }
-  if (e < 2 * M) return { nivel: entre((e - M) / M), enCurso: true, cambioLoMostrado }
+  if (e < 2 * M) return { nivel: entre((e - M) / M), enCurso: true, cambioLoMostrado, cambio: entre(e / (2 * M)) }
   r.desde = Number.NEGATIVE_INFINITY
   r.cambiado = false
   // Se pidió otra mientras subía: otro cambio, desde el próximo cuadro.
-  return { nivel: 1, enCurso: r.pedido !== r.mostrado, cambioLoMostrado }
+  return { nivel: 1, enCurso: r.pedido !== r.mostrado, cambioLoMostrado, cambio: null }
 }
 
 /** Cuánto está arriba el bloque de WhatsApp en `ahora` (sube con la primera respuesta y se queda). */

@@ -339,6 +339,8 @@ interface Ocupacion {
 
 /** [C2 60b] De lado a lado y adentro: la tinta del 94 al 100 % del ancho y la caja que no lo pasa. */
 const deLadoALado = (o: Ocupacion): boolean => o.tinta >= 0.94 && o.tinta <= 1 && o.caja <= 1
+/** [L4] Abajo de 1024 «Lo que nos distingue» es MÁS ANCHA que el título (que ocupa ~97 %): la tinta de 100 a 104 % y la caja hasta 104 %. */
+const masAnchaQueElTitulo = (o: Ocupacion): boolean => o.tinta > 1 && o.tinta <= 1.04 && o.caja <= 1.04
 const enPorciento = (o: Ocupacion): string => `tinta ${(o.tinta * 100).toFixed(1)} %, caja ${(o.caja * 100).toFixed(1)} %`
 
 /**
@@ -393,7 +395,7 @@ async function main(): Promise<void> {
       anotar(cerca(m.antesDelCta, esperado.antes) && topes, `${tag} espacios · último módulo → CTA ${px(m.antesDelCta)} (declarado ${String(esperado.antes)}svh${escritorio ? '; tope 10' : ''}); hasta el titular del CTA, con su aire de adentro: ${px(m.hastaElTitularDelCta)}`, `espacio-cta-${tag}`)
       console.log(`      ${tag} la sección mide ${m.seccion.toFixed(0)} px = ${(m.seccion / m.ventana.alto).toFixed(3)} pantallas${escritorio ? ` (antes 7; k = ${(m.seccion / (7 * m.ventana.alto)).toFixed(4)})` : ' (el alto de antes es el modelo de `altoViejoAngosto`)'}`)
       anotar(m.renglonesDelTitulo === (escritorio ? 2 : 3), `${tag} el título en ${String(m.renglonesDelTitulo)} renglones (${escritorio ? '2' : '3'})`, `renglones-${tag}`)
-      anotar(m.palabraDelTitulo.renglones === (escritorio ? 1 : 2) && deLadoALado(m.palabraDelTitulo), `${tag} «Lo que nos distingue» en ${String(m.palabraDelTitulo.renglones)} renglón(es), de lado a lado y adentro (${enPorciento(m.palabraDelTitulo)} del ancho)`, `palabra-del-titulo-${tag}`)
+      anotar(m.palabraDelTitulo.renglones === (escritorio ? 1 : 2) && (escritorio ? deLadoALado(m.palabraDelTitulo) : masAnchaQueElTitulo(m.palabraDelTitulo)), `${tag} «Lo que nos distingue» en ${String(m.palabraDelTitulo.renglones)} renglón(es), ${escritorio ? 'de lado a lado y adentro' : '[L4] más ancha que el título'} (${enPorciento(m.palabraDelTitulo)} del ancho)`, `palabra-del-titulo-${tag}`)
       if (!escritorio) {
         anotar(m.palabras.length === 3 && m.palabras.every(deLadoALado), `${tag} cada palabra fundida del ancho de la sección y adentro: ${m.palabras.map(enPorciento).join(' · ')}`, `palabras-${tag}`)
         anotar(m.titulos.length === 3 && m.titulos.every((t) => /archivo/i.test(t.familia) && t.peso === '600' && !t.mayusculas), `${tag} los títulos de los módulos en Archivo a 600, en minúsculas (${m.titulos.map((t) => `${t.familia.split(',')[0]} ${t.peso}`).join(' · ')})`, `titulos-${tag}`)

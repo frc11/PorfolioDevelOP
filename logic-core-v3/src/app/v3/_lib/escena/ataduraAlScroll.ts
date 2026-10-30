@@ -7,6 +7,7 @@ import {
 } from '@/components/layout/home-intro/introHandoff'
 
 import { hayPrimerCuadro, suscribirALaCarga } from '../carga'
+import { hayBanco } from './entorno'
 import { medirLasSeccionesEn } from './extensionDeLasSecciones'
 import { AVANCE_DE_LA_INTRO, avanceDeLaIntro } from './ruta/pistaDeLaIntro'
 import { bloquesDelPreset, despiertaEnLaPagina, presetActual, suscribirseAlPreset } from './ruta/preset'
@@ -223,8 +224,12 @@ export function useEscenaAtadaAlScroll(
     const desuscribirDelPreset = suscribirseAlPreset(pedir)
     const desuscribirDeLaCarga = suscribirALaCarga(pedir)
     const desuscribirDeLaTapa = suscribirALaTapa(pedir)
+    // [INT] Al banco de las alturas: lo que la escena midió en la última lectura (el scroll y el pie sin los tramos, y el tope).
+    const ventanaDelBanco = window as Window & { __medidaDeLaEscenaDelBanco?: () => { y: number; arriba: number; abajo: number } }
+    if (hayBanco()) ventanaDelBanco.__medidaDeLaEscenaDelBanco = () => ({ y: sinEstirar.y, arriba: extension.arriba, abajo: sinEstirar.abajo })
 
     return () => {
+      delete ventanaDelBanco.__medidaDeLaEscenaDelBanco
       if (pedido !== 0) cancelAnimationFrame(pedido)
       window.removeEventListener('scroll', alDesplazar)
       window.removeEventListener('resize', pedir)

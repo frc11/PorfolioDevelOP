@@ -84,14 +84,19 @@ export function afirmacionesDeC2({ quieto, codigo, tabla, fuenteDe }: EntradaDeC
   afirmar(detras(encabezado), '  va en la cabecera ANTES del título (detrás: `-z-10` en una cabecera `isolate`), `aria-hidden`: no se anuncia')
   controlPositivo('  el detector VE la palabra anunciada (sin `aria-hidden`)', encabezado.replace('<span aria-hidden="true" data-pieza="palabra-del-titulo"', '<span data-pieza="palabra-del-titulo"'), detras)
   const clase = CLASE_DE_LA_PALABRA_DEL_TITULO
-  afirmar(['absolute', 'top-1/2', '-translate-y-1/2', '-z-10', 'font-display', 'font-fuerte', 'uppercase', 'text-tinta', '--alfa-de-la-palabra-angosta', '--alfa-de-la-palabra)'].every((c) => clase.includes(c)), '  centrada en la caja del título, en la letra y el alfa de las palabras fundidas (pálida y disimulada)')
+  // [L4] El tope del título queda en la mitad de la palabra: la palabra se ancla al tope de la caja del título y se sube media vez su alto (`top-0` + `-translate-y-1/2`; antes, centrada en la caja: `top-1/2`).
+  afirmar(['absolute', 'top-0', '-translate-y-1/2', '-z-10', 'font-display', 'font-fuerte', 'uppercase', 'text-tinta', '--alfa-de-la-palabra-angosta', '--alfa-de-la-palabra)'].every((c) => clase.includes(c)) && !clase.includes('top-1/2'), '  [L4] con su centro en el tope del título (el tope del título, en la mitad de la palabra), en la letra y el alfa de las palabras fundidas')
+  controlPositivo('  el detector VE la palabra centrada en la caja del título (la de antes)', clase.replace('top-0', 'top-1/2'), (c: string) => ['top-0'].every((x) => c.includes(x)) && !c.includes('top-1/2'))
   /** Lo que ocupa del ancho útil un texto con un divisor dado. */
   const ocupa = (texto: string, divisor: number): number => emDe(texto) / divisor
   const desde1024 = ocupa(palabra, TIPO.divisorDeLaPalabraDelTitulo)
   const abajo = Math.max(ocupa(PALABRA_DEL_TITULO[0], TIPO.divisorDeLaPalabraDelTituloAngosta), ocupa(PALABRA_DEL_TITULO[1], TIPO.divisorDeLaPalabraDelTituloAngosta))
   const deLadoALado = (o: number): boolean => o >= 0.97 && o < 1
-  afirmar(deLadoALado(desde1024) && deLadoALado(abajo), `  de lado a lado: desde 1024 en un renglón (el ${(desde1024 * 100).toFixed(1)} % del ancho), abajo en dos (el más ancho, el ${(abajo * 100).toFixed(1)} %)`)
+  // [L4] Abajo de 1024 la palabra es más ancha que el título (sobresale un poco hacia los costados, dentro del margen de la página).
+  const masAnchaQueElTitulo = (o: number): boolean => o > 1 && o <= 1.06
+  afirmar(deLadoALado(desde1024) && masAnchaQueElTitulo(abajo), `  de lado a lado: desde 1024 en un renglón (el ${(desde1024 * 100).toFixed(1)} % del ancho), abajo en dos (el más ancho, el ${(abajo * 100).toFixed(1)} %)`)
   controlPositivo('  el detector VE una palabra que no llega a los bordes (con el divisor del título)', ocupa(palabra, TIPO.divisorDelTitulo), deLadoALado)
+  controlPositivo('  el detector VE la palabra de abajo de 1024 de antes (el 98,5 %: no más ancha que el título)', ocupa(PALABRA_DEL_TITULO[0], 4), masAnchaQueElTitulo)
   afirmar(/<span aria-hidden="true" data-pieza="palabra-del-titulo"[^>]*>Lo que nos <br data-corte="" class="escritorio:hidden"\/>distingue<\/span>/.test(quieto), '  el corte de los dos renglones existe sólo abajo de 1024')
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -122,9 +127,12 @@ export function afirmacionesDeC2({ quieto, codigo, tabla, fuenteDe }: EntradaDeC
   const debajo = (c: string): boolean => ['max-escritorio:absolute', 'max-escritorio:inset-x-0', 'max-escritorio:-z-10', '--divisor-de-esta-palabra', 'escritorio:text-', '--alfa-de-la-palabra-angosta', '--alfa-de-la-palabra)'].every((x) => c.includes(x))
   afirmar(debajo(CLASE_DE_LA_PALABRA), '  detrás del título (absoluta, `-z-10`) sólo abajo de 1024; desde 1024, arriba de él en el flujo, con su tamaño y su alfa de siempre')
   controlPositivo('  el detector VE la palabra en el flujo (la «union» de antes)', CLASE_DE_LA_PALABRA.replace('max-escritorio:absolute ', ''), debajo)
-  const notoria = (alfa: number): boolean => contrasteDe(alfa) >= 1.1 && contrasteDe(alfa) <= 1.16
-  afirmar(notoria(ALFA_DE_LA_PALABRA_ANGOSTA) && Math.abs(contrasteDe(ALFA_DE_LA_PALABRA) - 1.0595) < 0.002, `  más notoria: abajo de 1024 al ${contrasteDe(ALFA_DE_LA_PALABRA_ANGOSTA).toFixed(3)}:1 (sigue pálida); desde 1024 al ${contrasteDe(ALFA_DE_LA_PALABRA).toFixed(4)}:1 de siempre`)
-  controlPositivo('  el detector VE el alfa de antes («casi no se ve»)', ALFA_DE_LA_PALABRA, notoria)
+  // [L4] «Casi invisible» → se lee: entre 1,15:1 y 1,35:1 contra el papel (secundaria: el título va a más de 15:1). Desde 1024 y abajo, la de abajo un poco más.
+  const notoria = (alfa: number): boolean => contrasteDe(alfa) >= 1.15 && contrasteDe(alfa) <= 1.35
+  afirmar(notoria(ALFA_DE_LA_PALABRA_ANGOSTA) && notoria(ALFA_DE_LA_PALABRA) && ALFA_DE_LA_PALABRA_ANGOSTA >= ALFA_DE_LA_PALABRA, `  más notoria: abajo de 1024 al ${contrasteDe(ALFA_DE_LA_PALABRA_ANGOSTA).toFixed(3)}:1 y desde 1024 al ${contrasteDe(ALFA_DE_LA_PALABRA).toFixed(4)}:1 (se lee, y sigue por debajo del título)`)
+  controlPositivo('  el detector VE el alfa de antes («casi no se ve»: 0,0285 y 0,06)', 0.0285, notoria)
+  controlPositivo('  el detector VE un alfa que compite con el título', 0.4, notoria)
+  afirmar(CLASE_DE_LA_PALABRA.includes('max-escritorio:-translate-y-1/2') && CLASE_DE_LA_PALABRA.includes('escritorio:mb-[var(--sube-la-palabra)]'), '  [L4] el tope del título de cada módulo, en la mitad de su palabra: abajo de 1024 la palabra se sube media vez su alto; desde 1024 se mete media vez su alto sobre el título')
 
   // ═════════════════════════════════════════════════════════════════════════
   titulo('C2 · 5 · Los títulos de los módulos, distintos del cuerpo y del título general (abajo de 1024)')

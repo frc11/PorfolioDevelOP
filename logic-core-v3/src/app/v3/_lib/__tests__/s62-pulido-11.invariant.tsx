@@ -503,7 +503,7 @@ titulo('C2 · La cabecera abajo de 1024: parlante y menú del mismo tamaño y en
 const ARRIBA = 'top-[max(var(--spacing-4),env(safe-area-inset-top))]'
 // [CIERRE A] A6 · con el sentido nuevo: sin el progreso (se sacó); el parlante, su disco (el redondo, el borde y la sombra son de todos los
 // anchos: en escritorio es el vidrio de Contacto y Login) en su esquina, arriba a la izquierda; a la derecha, nada.
-const DISCO = 'max-escritorio:size-[var(--spacing-12)] max-escritorio:border max-escritorio:bg-fondo'
+const DISCO = 'max-hasta-tablet:size-[var(--spacing-12)] max-hasta-tablet:border max-hasta-tablet:bg-fondo'
 const ESQUINA_C2 = leer('_chrome/sonido/EsquinaDelSonido.tsx')
 const SONIDO_C2 = leer('_chrome/sonido/ControlDelSonido.tsx')
 const MENU_C2 = leer('_chrome/menu/MenuMovil.tsx')

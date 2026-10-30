@@ -18,17 +18,17 @@ import * as DEL_PORTFOLIO from '../../_secciones/trabajos/portfolio/rueda'
 import * as SALTAR_DEL_PORTFOLIO from '../../_secciones/trabajos/portfolio/saltar'
 import { SERVICIOS, IDS_DE_SERVICIO } from '../../_secciones/_contrato/acento'
 import { seccionDe } from '../../_secciones/_contrato/forma'
-import { diagonalDeLaBandera, fuenteDeLaBandera, tangenteDe, tituloDeLaBandera } from '../../_secciones/servicios/escenario/banderas'
+import { colorDelAroDeLaBandera, cursivaDeLaBandera, diagonalDeLaBandera, tangenteDe } from '../../_secciones/servicios/escenario/banderas'
 import { tamanoQueEntra } from '../../_secciones/servicios/escenario/ajuste'
 import { SIN_OBJETIVO, baseDelObjetivo, seguirElObjetivo } from '../../_componentes/gatillos/maquina'
-import { EXTENSION_DE_LA_ORBITA } from '../nanobots/simbolos'
+import { EXTENSION_DE_LA_ORBITA, MODOS_DEL_ARO, extensionDeLaOrbita, proporcionDeLaCaja, unidadDelLugar } from '../nanobots/simbolos'
 import { DESTINO_DEL_SERVICIO, VIDEO_DEL_SERVICIO, DISTRIBUCION } from '../../_secciones/servicios/escenario/datos'
-import { DURACION_DE_LA_TRANSICION_MS, TIEMPOS, avanceDelPanel, avanceDelRenglon, avanceDelSubrayado, capaDelEnjambre, desdeDelTexto, gDelAvance, inicioDelPanel, posicionDelEnjambre } from '../../_secciones/servicios/escenario/tiempos'
+import { CANDADO_DE_SERVICIOS_MS, DURACION_DE_LA_TRANSICION_MS, TIEMPOS, avanceDelPanel, avanceDelRenglon, avanceDelSubrayado, capaDelEnjambre, desdeDelTexto, gDelAvance, inicioDelPanel, posicionDelEnjambre, retomarHacia } from '../../_secciones/servicios/escenario/tiempos'
 import { recomendar, todasLasRespuestas } from '../../_secciones/servicios/recomendador/logica'
 import { Servicios } from '../../_secciones/servicios/Servicios'
 import { altoViejoMedido, tramoDeServicios, type AltoViejo } from '../../_secciones/servicios/tramoDeServicios'
 import { cambioDeCapa, extensionDelSimbolo, type Caja, type Lugar } from '../nanobots/capa'
-import { ACENTOS_DE_SERVICIOS_EN_PAPEL, VERTICE_DE_SERVICIOS, simbolosDeServicios } from '../nanobots/enjambreDeServicios'
+import { ACENTOS_DE_SERVICIOS_EN_PAPEL, VERTICE_DE_SERVICIOS, indiceDelModoDelAro, simbolosDeServicios } from '../nanobots/enjambreDeServicios'
 import { RED_NEURONAL, conexionesDeLaRed, nodosDeLaRed } from '../nanobots/redNeuronal'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { ESCENARIOS_DE_PRUEBA, adentro, lugarDe, nanobotsEn } from './s81-servicios-capa'
@@ -101,7 +101,9 @@ const CASOS: readonly { readonly nombre: string; readonly eventos: readonly Even
   { nombre: 'una muesca adentro: un paso', eventos: [muesca(1000)], desde: 0, espera: [1] },
   { nombre: 'el trackpad con su inercia (1,1 s): un paso', eventos: trackpad(1000), desde: 1, espera: [2] },
   { nombre: 'una ráfaga de doce muescas: un paso', eventos: rafaga(1000), desde: 1, espera: [2] },
-  { nombre: 'dos muescas a 1 s (la transición corriendo): un paso', eventos: [muesca(1000), muesca(2000)], desde: 0, espera: [1] },
+  // [L3] Reemplazada por la spec (ítem 50: «puede pasar más rápido, con gatillo»): la transición ya no se espera; el vuelo del salto sí.
+  { nombre: 'dos muescas a 1 s (la transición corriendo): dos pasos, de a uno (L3)', eventos: [muesca(1000), muesca(2000)], desde: 0, espera: [1, 2] },
+  { nombre: 'dos muescas a 300 ms (el salto todavía vuela): un paso', eventos: [muesca(1000), muesca(1300)], desde: 0, espera: [1] },
   { nombre: 'dos muescas a 3 s: dos pasos, de a uno', eventos: [muesca(1000), muesca(4000)], desde: 0, espera: [1, 2] },
   { nombre: 'subiendo desde IA: sale por donde entró, de a uno', eventos: [muesca(1000, -100), muesca(4000, -100), muesca(7000, -100), muesca(10000, -100)], desde: 3, espera: [2, 1, 0, -1] },
   // [C2-51] Reemplazada por la spec (ítem 14: «que el último scroll no sea gatillo»): de IA al recomendador la rueda es de la página.
@@ -109,11 +111,16 @@ const CASOS: readonly { readonly nombre: string; readonly eventos: readonly Even
   { nombre: 'entrando con una ráfaga larga: aterriza en la entrada, no más allá', eventos: rafaga(1000), desde: -1, espera: [0] },
   { nombre: 'subiendo desde el recomendador con el trackpad: aterriza en IA', eventos: trackpad(1000, -1), desde: 4, espera: [3] },
 ]
-const anduvo = (decidir: typeof decidirLaRueda, transicion = DURACION_DE_LA_TRANSICION_MS): string[] => CASOS.filter((c) => recorrido(c.eventos, c.desde, decidir, transicion).join() !== c.espera.join()).map((c) => c.nombre)
-afirmarIgual(anduvo(decidirLaRueda), [], `los ${String(CASOS.length)} casos: un gesto es un paso (quieta ${String(COMUN.RUEDA.quietoMs)} ms), nunca dos; la transición (${String(DURACION_DE_LA_TRANSICION_MS)} ms) se ve entera; la entrada atrapa`)
+// [L3] Servicios traga sólo mientras vuela el salto: su candado es `CANDADO_DE_SERVICIOS_MS` (0), no la transición entera.
+const anduvo = (decidir: typeof decidirLaRueda, transicion: number = CANDADO_DE_SERVICIOS_MS): string[] => CASOS.filter((c) => recorrido(c.eventos, c.desde, decidir, transicion).join() !== c.espera.join()).map((c) => c.nombre)
+afirmarIgual(anduvo(decidirLaRueda), [], `los ${String(CASOS.length)} casos: un gesto es un paso (quieta ${String(COMUN.RUEDA.quietoMs)} ms), nunca dos; [L3] el gesto siguiente cuenta apenas termina el vuelo (${String(duracionDelSalto(1))} ms), sin esperar la transición; la entrada atrapa`)
 const dePixeles: typeof decidirLaRueda = (m) => ({ decision: { tipo: 'paso', sentido: m.px > 0 ? 1 : -1 }, gesto: m.gesto })
 controlPositivo('  el detector ve la rueda de a píxeles (cada evento, un paso)', dePixeles, (d) => anduvo(d).length === 0)
-controlPositivo('  y la máquina sin candado (la transición se corta: dos muescas a 1 s dan dos pasos)', 0, (t) => anduvo(decidirLaRueda, t).length === 0)
+controlPositivo('  y la máquina con el candado de antes (la transición entera: dos muescas a 1 s dan UN paso)', DURACION_DE_LA_TRANSICION_MS, (t) => anduvo(decidirLaRueda, t).length === 0)
+const sinVuelo: typeof decidirLaRueda = (m, r) => decidirLaRueda({ ...m, enVuelo: false, ocupado: false }, r)
+controlPositivo('  y la máquina que no traga ni el vuelo (dos muescas a 300 ms dan dos pasos)', sinVuelo, (d) => anduvo(d).length === 0)
+const escenarioDeServicios = leer('_secciones/servicios/escenario/EscenarioDeServicios.tsx')
+afirmar(/useGatillos\(\{[^}]*candadoMs: CANDADO_DE_SERVICIOS_MS[^}]*\}\)/.test(escenarioDeServicios) && CANDADO_DE_SERVICIOS_MS < DURACION_DE_LA_TRANSICION_MS, '  [L3] y Servicios le pasa ese candado a la máquina común (el Portfolio y Demos, sin `candadoMs`: la transición entera, como siempre)')
 const sinTrampa: typeof decidirLaRueda = (m, r) => (m.paso < 0 ? { decision: { tipo: 'pagina' }, gesto: m.gesto } : decidirLaRueda(m, r))
 controlPositivo('  y la entrada sin trampa (la ráfaga entra de largo, F2)', sinTrampa, (d) => anduvo(d).length === 0)
 afirmar(decidirLaTecla(1, 4, false, false, false) === 'paso' && decidirLaTecla(1, 4, false, false, true) === 'tragar' && decidirLaTecla(1, 4, false, true, false) === 'tragar' && decidirLaTecla(-1, 4, false, false, false) === 'pagina' && decidirLaTecla(4, 4, true, false, false) === 'tragar', 'el teclado: adentro, una tecla apretada es un paso (su repetición y lo que llega en la transición se tragan); afuera, la página')
@@ -134,6 +141,43 @@ controlPositivo('  el detector ve un subrayado lineal', (g: number) => Math.min(
 const renglonesEnOrden = (f: typeof avanceDelRenglon): boolean => [1, 4, 8, 12].every((n) => Array.from({ length: n }, (_, i) => f(1, i, n)).every((a) => a === 1) && Array.from({ length: n - 1 }, (_, i) => f(0.8, i, n) >= f(0.8, i + 1, n)).every(Boolean) && f(desdeDelTexto(TIEMPOS.panel.inicio) - 0.001, 0, n) === 0)
 afirmar(renglonesEnOrden(avanceDelRenglon), 'los renglones se levantan después de que el panel cerró, uno detrás del otro, y en g = 1 están todos en su lugar (con 1 a 12 renglones)')
 controlPositivo('  el detector ve el escalonado que no llega (el último a medias al terminar)', (g: number, i: number) => Math.min(1, Math.max(0, (g - 0.7 - i * 0.045) / 0.2)), renglonesEnOrden)
+// [L3] Pasar rápido sin teletransportarse: la posición sigue desde donde está. Un doble gesto a 600 ms, cuadro a cuadro (60 por segundo),
+// con la posición corriendo lineal hacia la vista como `usePosicionDelEscenario`: ningún cuadro mueve el enjambre más de 0,05.
+const retomaBien = (f: typeof retomarHacia): boolean => {
+  const a = f(0.4, 1, 2)
+  const b = f(0.5, 1, 0)
+  return !a.salta && a.ms === DURACION_DE_LA_TRANSICION_MS && !b.salta && Math.abs(b.ms - 0.5 * DURACION_DE_LA_TRANSICION_MS) < 1e-9 && f(0, 0, 2).salta && f(1, 1, 3).salta
+}
+afirmar(retomaBien(retomarHacia), 'L3: un gesto en medio de la transición la retoma desde donde está (lo que falta, en una transición como mucho); sólo un salto de la VISTA de más de uno (la barra, un ancla) va de golpe')
+controlPositivo('  el detector ve el criterio de antes (salta si la posición quedó a más de uno)', ((p: number, v0: number, v: number) => retomarHacia(p, v0, v, true)) as typeof retomarHacia, retomaBien)
+/** El mayor salto por cuadro de la posición del enjambre en un doble gesto (vista 0 → 1 en t = 0, → 2 en t = 600 ms). */
+function saltoMaximo(retomar: typeof retomarHacia): number {
+  const cuadro = 1000 / 60
+  let p = 0
+  let vista = 0
+  let anim = { desde: 0, hasta: 0, t0: 0, ms: 0 }
+  let maximo = 0
+  for (let t = 0; t <= 5000; t += cuadro) {
+    const nueva = t >= 600 ? 2 : 1
+    if (nueva !== vista) {
+      const r = retomar(p, vista, nueva)
+      anim = r.salta ? { desde: nueva, hasta: nueva, t0: t, ms: 0 } : { desde: p, hasta: nueva, t0: t, ms: r.ms }
+      vista = nueva
+    }
+    const antes = posicionDelEnjambre(p)
+    p = anim.ms === 0 ? anim.hasta : anim.desde + (anim.hasta - anim.desde) * Math.min(1, (t - anim.t0) / anim.ms)
+    maximo = Math.max(maximo, Math.abs(posicionDelEnjambre(p) - antes))
+  }
+  return p === 2 ? maximo : Number.POSITIVE_INFINITY
+}
+afirmar(saltoMaximo(retomarHacia) <= 0.05, `  y en un doble gesto a 600 ms el enjambre no salta: a lo sumo ${saltoMaximo(retomarHacia).toFixed(4)} por cuadro (umbral 0,05), y termina en software`)
+controlPositivo('  el detector ve el doble gesto que se teletransporta (el criterio de antes)', ((p: number, v0: number, v: number) => retomarHacia(p, v0, v, true)) as typeof retomarHacia, (f) => saltoMaximo(f) <= 0.05)
+const continua = (f: typeof posicionDelEnjambre): boolean => Array.from({ length: 3000 }, (_, i) => Math.abs(f((i + 1) / 1000) - f(i / 1000))).every((d) => d <= 0.0025)
+afirmar(continua(posicionDelEnjambre), '  la posición del enjambre es continua en todo el recorrido (de la entrada a IA, cruzando cada estado)')
+controlPositivo('  el detector ve una posición con un escalón', ((p: number) => (p > 1.5 ? posicionDelEnjambre(p) + 0.3 : posicionDelEnjambre(p))) as typeof posicionDelEnjambre, continua)
+const subrayaPorRenglon = (f: typeof avanceDelSubrayado): boolean => [TIEMPOS.panel.inicio, 0.3].every((i) => f(1, i, 0) === 1 && f(1, i, 1) === 1 && f(i + TIEMPOS.panel.duracion + 0.03, i, 0) > f(i + TIEMPOS.panel.duracion + 0.03, i, 1))
+afirmar(subrayaPorRenglon(avanceDelSubrayado), 'L3: un subrayado por renglón del título; el segundo arranca un escalón después y los dos llegan en g = 1')
+controlPositivo('  el detector ve los dos subrayados juntos', ((g: number, i?: number) => avanceDelSubrayado(g, i, 0)) as typeof avanceDelSubrayado, subrayaPorRenglon)
 afirmar(capaDelEnjambre(0, 0.3) === 'detras' && capaDelEnjambre(0.29, 0.3) === 'detras' && capaDelEnjambre(0.3, 0.3) === 'delante' && capaDelEnjambre(1, 0.9) === 'delante' && capaDelEnjambre(2.4, 0.3) === 'delante', 'la capa: detrás del título en la entrada, delante desde el cambio, y delante en los tres servicios')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -192,9 +236,34 @@ const decodificaBien = (datos: Float32Array): boolean => {
 afirmar(decodificaBien(SIMBOLOS[3] ?? new Float32Array()), '  y cada nanobot de la red se decodifica en el sombreador como un nodo o una conexión válida (su capa, sus dos nodos y su fracción)')
 controlPositivo('  el decodificador ve un `w` fuera de la red', Float32Array.from([0, 0, 0, 20 + 3 * 100]), decodificaBien)
 afirmar(VERTICE_DE_SERVICIOS.includes('uniform float uRadioDelPuntero;') && VERTICE_DE_SERVICIOS.includes('float radio = uRadioDelPuntero *'), 'el desarme bajo el mouse de C4, con su radio medido en el símbolo (el lienzo cubre el escenario)')
-const banderasBien = (d: typeof diagonalDeLaBandera): boolean => d(null) === 6.5 && d('12') === 12 && d('7') === 7 && d('6.5') === 6.5 && d('50') === 6.5 && d('x') === 6.5 && tituloDeLaBandera(null) === '1' && tituloDeLaBandera('3') === '3' && tituloDeLaBandera('4') === '1' && fuenteDeLaBandera(null) === '1' && fuenteDeLaBandera('4') === '4' && Math.abs(tangenteDe(6.5) - 0.114) < 0.001
-afirmar(banderasBien(diagonalDeLaBandera), 'C2-50: `?diagonal=` numérica (6,5 por defecto, de 0 a 45), `?titulo-servicio=1|2|3` y `?fuente-servicio=1|2|3|4` (1 por defecto); `?servicios-movil` se fue')
-controlPositivo('  el detector ve la diagonal de B4 (20 por defecto)', (v: string | null) => (v === null ? 20 : Number(v)), banderasBien)
+// [L3] Reemplazada por la spec: la diagonal por defecto es 7; `?titulo-servicio=` y `?fuente-servicio=` se fueron; llegan `?titulo-cursiva=`
+// y `?aro-color=` (ola por defecto).
+const banderasBien = (d: typeof diagonalDeLaBandera): boolean => d(null) === 7 && d('12') === 12 && d('6.5') === 6.5 && d('50') === 7 && d('x') === 7 && cursivaDeLaBandera(null) === '1' && cursivaDeLaBandera('3') === '3' && cursivaDeLaBandera('4') === '1' && colorDelAroDeLaBandera(null) === 'ola' && colorDelAroDeLaBandera('tercios') === 'tercios' && colorDelAroDeLaBandera('mezcla') === 'mezcla' && colorDelAroDeLaBandera('arcoiris') === 'ola' && Math.abs(tangenteDe(7) - 0.1228) < 0.001
+afirmar(banderasBien(diagonalDeLaBandera), 'L3: `?diagonal=` numérica (7 por defecto, de 0 a 45), `?titulo-cursiva=1|2|3` (1 por defecto) y `?aro-color=mezcla|tercios|ola` (ola por defecto)')
+controlPositivo('  el detector ve la diagonal de C2-50 (6,5 por defecto)', (v: string | null) => (v === null ? 6.5 : Number(v)), banderasBien)
+const sinComentarios = (c: string): string => c.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+const banderasDeLaSeccion = ['escenario/banderas.ts', 'escenario/useFuentesDelServicio.ts', 'escenario/PanelDeServicio.tsx', 'escenario/TextoEnDiagonal.tsx', 'movil/ServiciosDeslizar.tsx'].map((r) => sinComentarios(leer(`_secciones/servicios/${r}`))).join('\n')
+afirmar(!/titulo-servicio|fuente-servicio|textoCormorant|tituloSerif|claseDelTexto/.test(banderasDeLaSeccion), '  L3: ni `?titulo-servicio=` ni `?fuente-servicio=` (ni sus letras) quedan en la sección')
+// [L3] El color del aro sale del ángulo ACTUAL de cada nanobot (antes, del de su semilla: al minuto los colores quedaban mezclados).
+const cuerpoDelColor = (v: string): string => /vec3 colorDeLaOrbita\( vec4 d, float t \) \{([\s\S]*?)\n\}/.exec(v)?.[1] ?? ''
+const colorPorAngulo = (v: string): boolean => cuerpoDelColor(v).includes('anguloDeLaOrbita( d, t )') && !/atan\( d\.y/.test(cuerpoDelColor(v)) && ['uModoDelAro < 0.5', 'uModoDelAro < 1.5'].every((m) => cuerpoDelColor(v).includes(m)) && /p\.xy = vec2\( 1\.0, uProporcion \) \* dir/.test(v)
+afirmar(colorPorAngulo(VERTICE_DE_SERVICIOS), 'L3: el color del aro (mezcla, tercios, ola) sale del ángulo actual de cada nanobot, y la elipse es la de su caja (`uProporcion`)')
+controlPositivo('  el detector ve el color de C2-50 (del ángulo de la semilla)', VERTICE_DE_SERVICIOS.replace('float a = anguloDeLaOrbita( d, t );\n\t// La vuelta', 'float a = atan( d.y, d.x );\n\t// La vuelta'), colorPorAngulo)
+// [L3] El sombreador decide el modo por su índice (< 0,5 mezcla, < 1,5 tercios, el resto ola): el orden de `MODOS_DEL_ARO` es el contrato.
+const ordenDelAro = (modos: readonly string[]): boolean => modos.join() === 'mezcla,tercios,ola' && MODOS_DEL_ARO.every((m) => indiceDelModoDelAro(m) === modos.indexOf(m))
+afirmar(ordenDelAro(MODOS_DEL_ARO), '  y el índice de cada modo es el que lee el sombreador (mezcla 0, tercios 1, ola 2)')
+controlPositivo('  el detector ve los modos reordenados', ['ola', 'tercios', 'mezcla'], ordenDelAro)
+const aroVertical =(u: typeof unidadDelLugar, e: typeof extensionDeLaOrbita, proporcionDe: typeof proporcionDeLaCaja = proporcionDeLaCaja): boolean => {
+  // La elipse de la caja (la vertical del teléfono y la achatada de escritorio): sus semiejes en px (× 0,82 × unidad) son la mitad del
+  // ancho y del alto, y la cota de capa.ts cubre el más largo.
+  return [[320, 428], [985, 328]].every(([w, h]) => {
+    const p = proporcionDe(w, h)
+    const unidad = u(0, w, h, 1)
+    return Math.abs(0.82 * unidad - w / 2) < 0.5 && Math.abs(p * 0.82 * unidad - h / 2) < 0.5 && e(p) * unidad >= Math.max(w, h) / 2
+  })
+}
+afirmar(aroVertical(unidadDelLugar, extensionDeLaOrbita), 'L3: la órbita llena su caja, vertical (el teléfono) o achatada (escritorio): la unidad sale del ancho y el alto de la proporción; la cota del truco de profundidad cubre el semieje largo')
+controlPositivo('  el detector ve la órbita de C2-50 (siempre 2:1, sin la proporción de su caja)', (() => 0.5) as typeof proporcionDeLaCaja, (p) => aroVertical(unidadDelLugar, extensionDeLaOrbita, p))
 // [C2-50] El bug de 390: sin Lenis la rueda nativa llega tarde. Tres muescas de 100 px desde 250 px antes del ancla, con el scroll quieto.
 const entraALaTercera = (base: typeof baseDelObjetivo): boolean => {
   const r: ReglaDeGatillos = { cantidad: 4, pasoPx: 844 }
@@ -236,15 +305,17 @@ titulo('7 · Lo que se renderiza sin coreografía (el servidor y menos movimient
 
 const html = renderToStaticMarkup(<Servicios seccion={seccionDe('servicios')} />)
 const veces = (aguja: string): number => html.split(aguja).length - 1
-afirmar(html.includes('id="titular-servicios"') && veces('<h3') === SERVICIOS.length + 1 && veces('data-viaje-del-servicio=') === SERVICIOS.length && veces('href="/v3/pagina-base"') === SERVICIOS.length, 'el `h2` de la sección, un `h3` por servicio y el del recomendador, y un CTA por servicio a su página (el viaje)')
+// [L3] Reemplazada por la spec: el CTA se fue; a la página llevan el título, el video y «Leer más…» (tres enlaces por servicio, con el viaje).
+afirmar(html.includes('id="titular-servicios"') && veces('<h3') === SERVICIOS.length + 1 && veces('data-viaje-del-servicio=') === 3 * SERVICIOS.length && veces('href="/v3/pagina-base"') === 3 * SERVICIOS.length && veces('data-parte="leer-mas"') === SERVICIOS.length && !html.includes('Quiero mi'), 'el `h2` de la sección, un `h3` por servicio y el del recomendador; L3: el título, el video y «Leer más…» de cada servicio llevan a su página (el viaje), sin el CTA «Quiero mi…»')
 // [C2-51] Reemplazada por la spec: el recomendador va por etapas (el servidor publica la primera: cinco opciones) y con sus textos reales.
 afirmar(veces('type="radio"') === 5 && !html.includes('[TEXTO]') && !/desde \$|PRECIOS_DESDE/.test(html), 'el recomendador por etapas (la primera: cinco opciones, con los textos de 05-TEXTOS, sin marcadores), y ningún precio «desde» en el home (P-H8 sin efecto)')
 // [C2-50] El orden del teléfono (las pantallas quietas, en el marcado): el título (con sus nanobots), el video, el texto y el CTA.
 const ordenBien = (h: string): boolean => {
   const pantallas = h.split('data-pieza="pantalla-de-servicio"').slice(1)
-  return pantallas.length === 3 && pantallas.every((a) => { const i = [a.indexOf('<h3'), a.indexOf('data-pieza="video-del-servicio"'), a.indexOf('<p'), a.indexOf('data-viaje-del-servicio')]; return i.every((x, k) => x >= 0 && (k === 0 || x > (i[k - 1] ?? 0))) })
+  // [L3] El último, «Leer más…» (el CTA se fue).
+  return pantallas.length === 3 && pantallas.every((a) => { const i = [a.indexOf('<h3'), a.indexOf('data-pieza="video-del-servicio"'), a.indexOf('<p'), a.indexOf('data-parte="leer-mas"')]; return i.every((x, k) => x >= 0 && (k === 0 || x > (i[k - 1] ?? 0))) })
 }
-afirmar(ordenBien(html), 'C2-50: cada servicio en el orden del teléfono: el título, el video, el texto del medio y el CTA')
+afirmar(ordenBien(html), 'C2-50: cada servicio en el orden del teléfono: el título, el video, el texto del medio y (L3) «Leer más…»')
 controlPositivo('  el detector ve el video arriba del título (B4)', html.split('<h3').join('<h3 data-x=""').replace(/data-pieza="pantalla-de-servicio"/g, 'data-pieza="pantalla-de-servicio"><div data-pieza="video-del-servicio"></div'), ordenBien)
 afirmar(html.includes('Los tipos de trabajos que hacemos en develOP.') && html.includes('Landing, sitio institucional, catálogo o tienda online') && html.includes('Se paga la implementación una vez'), 'C2-50: el subtítulo y el texto del medio nuevos (05-TEXTOS, tal cual)')
 const fuenteDeLaSeccion = ['escenario/EscenarioDeServicios.tsx', 'escenario/useNanobotsDelEscenario.ts', 'movil/NanobotsQuietos.tsx'].map((r) => leer(`_secciones/servicios/${r}`)).join('\n')

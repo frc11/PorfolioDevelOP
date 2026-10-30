@@ -26,7 +26,7 @@ import { fundidoQueSube } from './movimiento'
  */
 
 const TARJETA =
-  'flex h-full cursor-pointer items-center gap-[var(--spacing-4)] rounded-[var(--radius-fuerte)] border border-borde-fuerte bg-fondo px-[var(--spacing-5)] py-[var(--spacing-4)] text-tinta hover:border-tinta has-checked:border-tinta has-checked:bg-tinta has-checked:text-fondo has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-tinta'
+  'flex h-full cursor-pointer items-center gap-[var(--spacing-4)] rounded-[var(--radius-fuerte)] border border-borde-fuerte bg-fondo px-[var(--spacing-5)] py-[var(--spacing-5)] transition-colors duration-[var(--duracion-rapida)] text-tinta hover:border-tinta has-checked:border-tinta has-checked:bg-tinta has-checked:text-fondo has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-tinta'
 
 interface Props {
   readonly estado: EstadoDelRecomendador
@@ -56,13 +56,13 @@ export function EtapaDelRecomendador({ estado, despachar, reducido, enfocarAlMon
       noValidate
       data-pieza="etapa-del-recomendador"
       data-etapa={estado.etapa}
-      className="flex flex-col gap-[var(--spacing-6)] escritorio:gap-[var(--spacing-8)]"
+      className="@container flex flex-col gap-[var(--spacing-6)] escritorio:gap-[var(--spacing-8)]"
       onSubmit={(e) => {
         e.preventDefault()
         despachar({ tipo: 'siguiente' })
       }}
     >
-      <IndicadorDePasos etapa={estado.etapa} />
+      <IndicadorDePasos etapa={estado.etapa} reducido={reducido} animar={enfocarAlMontar} />
       <AnimatePresence mode="wait" initial={false}>
         <PreguntaDeLaEtapa key={estado.etapa} estado={estado} despachar={despachar} reducido={reducido} enfocarAlMontar={enfocarAlMontar} idDelError={idDelError} />
       </AnimatePresence>
@@ -102,7 +102,7 @@ function PreguntaDeLaEtapa({ estado, despachar, reducido, enfocarAlMontar, idDel
   return (
     <motion.fieldset ref={grupo} data-parte="pregunta" aria-describedby={estado.falta ? idDelError : undefined} className="flex min-w-0 flex-col gap-[var(--spacing-5)]" {...(enfocarAlMontar ? fundidoQueSube(reducido) : {})}>
       <legend className="font-display font-fuerte tracking-display leading-titulo text-fluido-titulo-l mb-[var(--spacing-5)]">{pregunta.texto}</legend>
-      <div className="grid grid-cols-1 gap-[var(--spacing-3)] escritorio:grid-cols-3">
+      <div className="grid grid-cols-1 gap-[var(--spacing-3)] @xl:grid-cols-2 @4xl:grid-cols-3">
         {pregunta.opciones.map((opcion, i) => {
           const Icono = ICONOS_DE_LAS_OPCIONES[estado.etapa]?.[i] ?? Check
           const campo = `${id}-opcion-${String(i)}`
@@ -120,10 +120,32 @@ function PreguntaDeLaEtapa({ estado, despachar, reducido, enfocarAlMontar, idDel
   )
 }
 
-/** El indicador 1-2-3: una raya y un número por paso, en tinta los hechos y el de ahora (`aria-current="step"`). */
-function IndicadorDePasos({ etapa }: { readonly etapa: number }): React.JSX.Element {
+/**
+ * El indicador de pasos. [L4] Desde 1024, el 1-2-3 completo: una raya y un número por paso, en tinta los hechos y el de ahora
+ * (`aria-current="step"`). Abajo de 1024 (no entran los tres nombres), SÓLO el paso de ahora, centrado (el número y el nombre), que
+ * se desvanece en el siguiente (`AnimatePresence` en `wait`); la lista completa queda en el DOM (oculta) para el lector.
+ */
+function IndicadorDePasos({ etapa, reducido, animar }: { readonly etapa: number; readonly reducido: boolean; readonly animar: boolean }): React.JSX.Element {
+  const ahora = PREGUNTAS[etapa] ?? PREGUNTAS[0]
   return (
-    <ol data-parte="indicador-de-pasos" className="grid grid-cols-3 gap-[var(--spacing-2)] escritorio:gap-[var(--spacing-4)]">
+    <>
+      <div data-parte="paso-actual" aria-hidden="true" className="flex justify-center escritorio:hidden">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span key={etapa} data-parte="paso-actual-contenido" className="flex items-center gap-[var(--spacing-3)] font-cuerpo text-cuerpo leading-texto font-medio text-tinta" {...(animar ? fundidoQueSube(reducido) : {})}>
+            {/* El número, como en la lista: lo dibuja el CSS (`content`). */}
+            <span aria-hidden="true" style={{ '--numero-del-paso': `"${String(etapa + 1)}"` } as CSSProperties} className="grid size-8 shrink-0 place-items-center rounded-full border border-tinta bg-tinta text-caption text-fondo before:content-[var(--numero-del-paso)]" />
+            <span>{ahora.paso}</span>
+          </motion.span>
+        </AnimatePresence>
+      </div>
+      <ListaDePasos etapa={etapa} />
+    </>
+  )
+}
+
+function ListaDePasos({ etapa }: { readonly etapa: number }): React.JSX.Element {
+  return (
+    <ol data-parte="indicador-de-pasos" className="max-escritorio:sr-only escritorio:grid grid-cols-3 gap-[var(--spacing-2)] escritorio:gap-[var(--spacing-4)]">
       {PREGUNTAS.map((p, i) => {
         const hecho = i < etapa
         const ahora = i === etapa

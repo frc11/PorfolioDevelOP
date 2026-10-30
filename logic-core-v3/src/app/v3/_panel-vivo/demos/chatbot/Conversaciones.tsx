@@ -60,7 +60,7 @@ export default function Conversaciones(): React.JSX.Element {
   }
 
   return (
-    <MarcoDelPanel item="chatbot" conPausa>
+    <MarcoDelPanel item="chatbot">
       <div ref={raiz} className="flex flex-col gap-5">
         <EncabezadoDelChatbot activa="conversations" />
         <Probalo preguntar={preguntar} ocupado={tuya.escribiendo} />

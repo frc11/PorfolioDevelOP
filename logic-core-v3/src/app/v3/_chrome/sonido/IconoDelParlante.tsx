@@ -61,7 +61,7 @@ function Trazos({ prendido, suena, reducido, ...trazo }: { readonly prendido: bo
 
 export function IconoDelParlante({ prendido, suena, reducido }: { readonly prendido: boolean; readonly suena: boolean; readonly reducido: boolean }): React.JSX.Element {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="block h-[var(--spacing-5)] w-[var(--spacing-5)] overflow-visible escritorio:h-[var(--spacing-6)] escritorio:w-[var(--spacing-6)]" fill="none" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="block h-[var(--spacing-5)] w-[var(--spacing-5)] overflow-visible hasta-tablet:h-[var(--spacing-6)] hasta-tablet:w-[var(--spacing-6)]" fill="none" strokeLinecap="round" strokeLinejoin="round">
       {/* El borde del tono contrario, debajo (como el infinito): se lee sobre cualquier fondo. */}
       <Trazos prendido={prendido} suena={suena} reducido={reducido} stroke="var(--color-fondo)" strokeWidth={3.5} opacity={0.35} />
       <Trazos prendido={prendido} suena={suena} reducido={reducido} stroke="currentColor" strokeWidth={1.5} />

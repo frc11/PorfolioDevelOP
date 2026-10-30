@@ -36,7 +36,7 @@ export interface Renglon {
 
 /**
  * El pintado por tiempo de las `[data-palabra]` de `ref`: con `progreso`, al llegar a 1 (y se despinta si baja de la mitad); sin él,
- * al quedar a la vista (el 60 %). Recorre las palabras en `duracionMs`. Con movimiento reducido no hace nada (pintado entero).
+ * al quedar a la vista (el 60 %, sobre el 70 % de arriba de la pantalla: [L9a] al volver a subir se despinta cuando baja de esa línea, no recién al salir). Recorre las palabras en `duracionMs`. Con movimiento reducido no hace nada (pintado entero).
  */
 export function usePintadoAlLlegar(ref: RefObject<HTMLElement | null>, progreso: MotionValue<number> | null, duracionMs: number = PINTADO_MS): void {
   const reducido = useMovimientoReducido()
@@ -70,7 +70,7 @@ export function usePintadoAlLlegar(ref: RefObject<HTMLElement | null>, progreso:
       mirar(progreso.get())
       soltar = progreso.on('change', mirar)
     } else {
-      const mirador = new IntersectionObserver(([e]) => ir(e?.isIntersecting === true ? 1 : 0), { threshold: 0.6 })
+      const mirador = new IntersectionObserver(([e]) => ir(e?.isIntersecting === true ? 1 : 0), { threshold: 0.6, rootMargin: '0px 0px -30% 0px' })
       mirador.observe(el)
       soltar = () => mirador.disconnect()
     }
@@ -89,16 +89,18 @@ interface Props {
   readonly como?: 'h2' | 'h3' | 'h4'
   readonly className?: string
   readonly envolver?: boolean
+  /** [L3] La clase de cada renglón, si no es la de siempre (la entrada de Servicios: un renglón en escritorio, dos en el teléfono). */
+  readonly claseDelRenglon?: string
 }
 
-export function TituloQueSePintaAlLlegar({ renglones, progreso, id, como: Etiqueta = 'h2', className, envolver = false }: Props): React.JSX.Element {
+export function TituloQueSePintaAlLlegar({ renglones, progreso, id, como: Etiqueta = 'h2', className, envolver = false, claseDelRenglon }: Props): React.JSX.Element {
   const titulo = useRef<HTMLHeadingElement>(null)
   usePintadoAlLlegar(titulo, progreso)
 
   return (
     <Etiqueta ref={titulo} id={id} data-pieza="titulo-que-se-pinta" className={className === undefined ? TIPOGRAFIA_QUE_SE_PINTA : cn(TIPOGRAFIA_QUE_SE_PINTA, className)} style={ESTILO_DEL_PINTADO}>
       {renglones.map((renglon, k) => (
-        <span key={renglon.palabras.join(' ')} data-caja-del-titulo="" className={envolver ? 'inline' : 'block whitespace-nowrap'}>
+        <span key={renglon.palabras.join(' ')} data-caja-del-titulo="" className={claseDelRenglon ?? (envolver ? 'inline' : 'block whitespace-nowrap')}>
           {renglon.palabras.map((palabra, j) => (
             <span key={`${String(j)}-${palabra}`}>
               {k > 0 || j > 0 ? ' ' : null}

@@ -95,7 +95,8 @@ export function CapaDelAro(): React.JSX.Element {
       ref={capa}
       data-pieza="capa-del-aro"
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
+      // [L5] Arrastrar el aro no selecciona texto (se pintaba de azul: lote2/08).
+      className="pointer-events-none absolute inset-0 select-none"
       style={{ zIndex: 1 }}
       onClickCapture={(e) => {
         if (!arrastrado.current) return

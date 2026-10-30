@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useMovimientoReducido } from '../../../_lib/motion/reducido'
 import { montarElEnjambre } from '../../../_lib/nanobots/montaje'
-import { PUNTOS_DEL_ENJAMBRE, unidadDelLugar } from '../../../_lib/nanobots/simbolos'
+import { PUNTOS_DEL_ENJAMBRE, proporcionDeLaCaja, unidadDelLugar } from '../../../_lib/nanobots/simbolos'
 
 /**
  * [B4] LOS NANOBOTS DE UN SERVICIO, EN SU LUGAR — para las pantallas sueltas (el teléfono con `?servicios-movil=deslizar`, y la
@@ -44,7 +44,8 @@ export function NanobotsQuietos({ estado, className }: { readonly estado: number
         const enjambre = crearEnjambreDeServicios(c, PUNTOS_DEL_ENJAMBRE.angosto)
         const ubicar = (): void => {
           const [w, h] = [c.clientWidth, c.clientHeight]
-          enjambre.ubicar(enjambre.extensiones.map((ex, k) => ({ x: w / 2, y: h / 2, unidad: unidadDelLugar(k, w, h, ex) })))
+          // [L3] La órbita llena su caja (su proporción).
+          enjambre.ubicar(enjambre.extensiones.map((ex, k) => ({ x: w / 2, y: h / 2, unidad: unidadDelLugar(k, w, h, ex), proporcion: k === 0 ? proporcionDeLaCaja(w, h) : undefined })))
         }
         ubicar()
         const medidor = new ResizeObserver(ubicar)

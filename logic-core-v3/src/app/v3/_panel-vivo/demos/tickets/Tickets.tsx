@@ -56,7 +56,7 @@ export default function Tickets(): React.JSX.Element {
   const abiertos = tickets.filter((t) => t.status !== 'RESOLVED').length
 
   return (
-    <MarcoDelPanel item="soporte" conPausa encima={formulario ? <FormularioDeTicket alCrear={crear} alCerrar={() => { setFormulario(false); boton.current?.querySelector('button')?.focus() }} /> : null}>
+    <MarcoDelPanel item="soporte" encima={formulario ? <FormularioDeTicket alCrear={crear} alCerrar={() => { setFormulario(false); boton.current?.querySelector('button')?.focus() }} /> : null}>
       <div ref={raiz} className="flex w-full flex-col gap-4">
         <div className="flex shrink-0 flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <PageHeader eyebrow="Soporte" title="Centro de Soporte" description="Un canal directo para ordenar consultas, prioridades y próximos pasos con el equipo." icon={Headphones} className="pt-0 sm:pt-1" />

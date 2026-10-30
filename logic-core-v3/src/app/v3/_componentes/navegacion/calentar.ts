@@ -1,11 +1,11 @@
 import { RUTA_DEL_HOME, conElMontajeLiviano, viaDelVelo } from '../../_lib/veloDeNavegacion'
 import { precargarLaCoreografia } from '../../_secciones/_contrato/precargaDeLaCoreografia'
 import { REGISTRO_DE_VARIANTES } from '../../_variantes/registro'
-import { LEGIBILIDAD_POR_DEFECTO, fuentesConLaLegibilidad } from '../titulos3d/legibilidad'
+import { fuentesConLaLegibilidad } from '../titulos3d/legibilidad'
 import { CARA_DEL_DOM, TITULO_DE_PAGINA } from '../titulos3d/presets'
 
-/** [T0] Las dos fuentes del título de una página, con la legibilidad elegida (`peso`: la liviana un paso más pesada). */
-const FUENTES_DEL_DESTINO = fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes, LEGIBILIDAD_POR_DEFECTO)
+/** [T0] Las dos fuentes del título de una página, con el peso elegido (la liviana un paso más pesada). */
+const FUENTES_DEL_DESTINO = fuentesConLaLegibilidad(TITULO_DE_PAGINA.fuentes)
 
 /**
  * [B12a.8] CALENTAR EL DESTINO — mientras el puntero está encima del enlace (o tiene el foco) y mientras el velo cubre: lo que la página

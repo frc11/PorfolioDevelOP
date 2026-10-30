@@ -12,6 +12,7 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titul
 import { RAIZ } from '../../_lib/__tests__/s3-archivos'
 import { quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
+import { abrirLaEntrada } from '../../_lib/entrada'
 import { escenaTapada, suscribirALaTapa, taparLaEscena } from '../../_lib/escena/tapa'
 import { envioSimulado } from '../../_lib/formularios/enviar'
 import { ENLACE_DE_LOGIN } from '../enlaces'
@@ -25,6 +26,7 @@ import {
   pideIngreso,
   reiniciarIngreso,
   seguirALaUrl,
+  seguirCuandoEntre,
   sinIngreso,
   soltarIngreso,
   usarEntorno,
@@ -225,6 +227,34 @@ const HOJA_FUENTE = fuente(`${CARPETA}/HojaDelIngreso.tsx`)
   }
   const razonDelBorde = razonDeContraste(compuesto(borde), negro)
   afirmar(razonDelBorde >= 3, `  el borde de las píldoras y los chips (un límite de componente) da ${razonDelBorde.toFixed(2)}:1 ≥ 3:1; el foco y el error van en la tinta (${razonDeContraste(textos.tinta, negro).toFixed(2)}:1)`)
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  titulo('9b · [L6 · 80] La entrada directa (`?ingresar`) espera al preloader del sitio: el login no se despliega debajo de él')
+
+  // La primera entrada del día: la decisión del `<head>` dejó el preloader activo; la entrada está cerrada hasta que se va.
+  ;(globalThis as unknown as { window: unknown }).window = { __preloaderDelSitio: { activo: true } }
+  const conUrl = (u: string): void => {
+    const url = new URL(u, 'http://x')
+    usarEntorno(() => ({ state: null, pushState: () => undefined, replaceState: () => undefined, back: () => undefined }), () => ({ pathname: url.pathname, search: url.search, hash: url.hash }))
+  }
+  conUrl('/v3?ingresar')
+  reiniciarIngreso()
+  const dejarDeEsperar = seguirCuandoEntre()
+  const abiertoConElPreloader = estadoDelIngreso().abierto
+  abrirLaEntrada()
+  const abiertoAlIrseElPreloader = estadoDelIngreso().abierto
+  afirmar(!abiertoConElPreloader && abiertoAlIrseElPreloader, 'con el preloader tapando, el login de la URL NO se abre; apenas el preloader se va (la entrada se abre), se despliega')
+  dejarDeEsperar()
+  // El control: el defecto de antes (seguir a la URL en el acto, sin esperar) se abre debajo del preloader.
+  const sinEsperar = (): boolean => {
+    reiniciarIngreso()
+    seguirALaUrl(() => null)
+    return !estadoDelIngreso().abierto
+  }
+  controlPositivo('  el detector ve el login que se abre en el acto (debajo del preloader)', sinEsperar, (f: () => boolean) => f())
+  reiniciarIngreso()
+  usarEntorno()
+  delete (globalThis as unknown as { window?: unknown }).window
 
   // ═══════════════════════════════════════════════════════════════════════════
   titulo('10 · Ningún archivo pasa las 300 líneas de código')
