@@ -70,7 +70,7 @@ export const PROTOTIPOS: readonly Prototipo[] = [
     codigo: 'B1',
     titulo: 'El carrusel de las destacadas',
     pagina: 'Blog',
-    mirar: 'Cambia solo cada 10 s, con las líneas de arriba (llenas las ya vistas); mantené apretado para pausar; flechas y dedo. El titular se levanta al entrar. Las tapas son tipográficas porque las notas no tienen foto.',
+    mirar: 'Cambia solo cada 10 s, con las líneas de abajo (llenas las ya vistas); mantené apretado para pausar; flechas y dedo. El titular se levanta al entrar. Las tapas son tipográficas porque las notas no tienen foto.',
     sale: 'CarruselDeTarjetas (el del Portfolio y Demos en el teléfono) y TitularQueSeLevanta, importados.',
   },
   {

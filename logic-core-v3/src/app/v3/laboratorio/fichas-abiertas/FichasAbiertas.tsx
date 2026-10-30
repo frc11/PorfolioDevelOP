@@ -48,11 +48,11 @@ function Caso({ proyecto, indice }: { readonly proyecto: ProyectoDelPortfolio; r
     <section data-seccion="invertida" aria-labelledby={`caso-${proyecto.slug}`} className="relative bg-fondo text-tinta">
       {/* La raya de la marca: de punta a punta del caso, a la izquierda. */}
       <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5" style={{ background: proyecto.colorDeMarca }} />
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 escritorio:grid-cols-[1.35fr_1fr] escritorio:gap-16 escritorio:py-32">
-        <div className="escritorio:sticky escritorio:top-[18svh] escritorio:self-start">
+      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 escritorio:h-[160svh] escritorio:grid-cols-[1.35fr_1fr] escritorio:gap-16">
+        <div className="escritorio:sticky escritorio:top-[16svh] escritorio:self-start">
           <Video proyecto={proyecto} />
         </div>
-        <div ref={ficha} className="escritorio:min-h-[110svh] escritorio:pt-[8svh]">
+        <div ref={ficha} className="escritorio:sticky escritorio:top-[16svh] escritorio:self-start">
           <p className="font-codigo text-caption text-tinta-media">{String(indice + 1).padStart(2, '0')} / {String(PROYECTOS.length).padStart(2, '0')}</p>
           <h2 id={`caso-${proyecto.slug}`} className="mt-2 font-display text-titulo-l font-fuerte leading-titulo tracking-display uppercase">
             {proyecto.nombre}

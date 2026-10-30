@@ -28,6 +28,8 @@ export function IndiceLegal(): React.JSX.Element {
       titulos.forEach((t, i) => {
         if (t !== null && t.getBoundingClientRect().top < linea) indice = i
       })
+      // Al fondo de la página, la última: sus títulos ya no pueden subir hasta la línea.
+      if (window.scrollY + window.innerHeight >= document.documentElement.offsetHeight - 2) indice = titulos.length - 1
       setActiva(indice)
     }
     const pedir = (): void => {

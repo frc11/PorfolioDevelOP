@@ -10,7 +10,7 @@ import { DESTACADAS, NOTAS, type NotaDelBlog } from '../_lab/notas'
 
 /**
  * [L7e · B1] EL CARRUSEL DE LAS DESTACADAS — el carrusel común del Portfolio y de Demos (`CarruselDeTarjetas`, importado: su reloj de
- * 10 s, su pausa al mantener, sus flechas, el dedo y las líneas de arriba, llenas las ya vistas como en las historias), a todo el ancho,
+ * 10 s, su pausa al mantener, sus flechas, el dedo y sus líneas, llenas las ya vistas como en las historias), a todo el ancho,
  * con las tres notas destacadas. Lo propio es la tarjeta: sin foto todavía (las notas no tienen imagen), una tapa tipográfica con su número
  * enorme y el titular que SE LEVANTA al entrar (el de los títulos del teléfono, `TitularQueSeLevanta`), no que se desliza.
  */

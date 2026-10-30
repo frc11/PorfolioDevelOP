@@ -41,7 +41,8 @@ export function ComoTrabajamos(): React.JSX.Element {
     let pedido = 0
     const dibujar = (): void => {
       pedido = 0
-      const caja = el.getBoundingClientRect()
+      // Se mide la línea de fondo (sin transformar), no la columna: la columna lleva aire abajo que la línea no recorre.
+      const caja = (el.querySelector('[data-linea="fondo"]') ?? el).getBoundingClientRect()
       const v = Math.min(1, Math.max(0, (window.innerHeight * 0.6 - caja.top) / caja.height))
       l.style.transform = `scaleY(${v.toFixed(4)})`
     }
@@ -70,7 +71,7 @@ export function ComoTrabajamos(): React.JSX.Element {
         </header>
         <ol ref={columna} className="relative mx-auto max-w-4xl px-6 pb-[40svh]">
           {/* La línea: de punta a punta de la columna, del grosor del trazo, dibujada de arriba hacia abajo. */}
-          <span aria-hidden="true" className="absolute top-0 bottom-[40svh] left-6 w-[calc(var(--border-hairline)*3)] bg-borde" />
+          <span data-linea="fondo" aria-hidden="true" className="absolute top-0 bottom-[40svh] left-6 w-[calc(var(--border-hairline)*3)] bg-borde" />
           <span ref={linea} aria-hidden="true" className="absolute top-0 bottom-[40svh] left-6 w-[calc(var(--border-hairline)*3)] origin-top bg-tinta" style={{ transform: 'scaleY(0)' }} />
           {PASOS.map((p, i) => (
             <li key={p.titulo} className="relative pb-[16svh] pl-10 tablet:pl-16">

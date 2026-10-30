@@ -19,7 +19,7 @@ const PANTALLA = PROYECTOS[0]
  * [L7e · W1] LA PANTALLA QUE SE DIBUJA — a la par del texto de Desarrollo web («Pensamos cada pantalla para que se entienda sola»), el
  * alambre de una página (la ventana, la barra, el titular, el botón, la imagen, tres bloques) se dibuja trazo por trazo con el scroll,
  * en el celeste oscuro de web y con el trazo fino del globo de Servicios; cuando termina, la pantalla de un trabajo real se abre adentro
- * desde el centro (el `clip-path` de la segunda toma). Trazos con `strokeDashoffset` y la longitud real de cada uno (la lección de
+ * desde el centro (el `clip-path` de la segunda toma). Trazos con `strokeDashoffset` y la longitud real de cada uno, sin `non-scaling-stroke` (con él, el guion se mide en píxeles y la longitud en unidades: queda cortado) (la lección de
  * `pathLength` del repo). En escritorio el dibujo queda clavado mientras pasa el texto; abajo de 1024 se dibuja mientras cruza la
  * pantalla. Con movimiento reducido, dibujado y abierto.
  */
@@ -48,7 +48,7 @@ export function PantallaQueSeDibuja(): React.JSX.Element {
         t.style.strokeDashoffset = `${(largos[i] * (1 - local)).toFixed(2)}`
       })
       const abierto = Math.min(1, Math.max(0, (v - FIN_DEL_DIBUJO) / (1 - FIN_DEL_DIBUJO)))
-      foto.style.clipPath = `inset(${((1 - abierto) * 49.5).toFixed(2)}% ${((1 - abierto) * 49.5).toFixed(2)}%)`
+      foto.style.clipPath = `inset(${((1 - abierto) * 50).toFixed(2)}%)`
     }
     if (reducido) {
       pintar(1)
@@ -98,23 +98,23 @@ export function PantallaQueSeDibuja(): React.JSX.Element {
         </div>
         <div className="escritorio:sticky escritorio:top-[18svh] escritorio:self-start">
           <div className="relative w-full">
-            <svg ref={dibujo} viewBox="0 0 400 300" className="block w-full text-acento" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" aria-hidden="true">
-              <rect data-trazo-del-alambre="" x="10" y="10" width="380" height="280" rx="10" vectorEffect="non-scaling-stroke" />
-              <line data-trazo-del-alambre="" x1="10" y1="36" x2="390" y2="36" vectorEffect="non-scaling-stroke" />
-              <circle data-trazo-del-alambre="" cx="25" cy="23" r="4" vectorEffect="non-scaling-stroke" />
-              <circle data-trazo-del-alambre="" cx="39" cy="23" r="4" vectorEffect="non-scaling-stroke" />
-              <line data-trazo-del-alambre="" x1="30" y1="56" x2="90" y2="56" vectorEffect="non-scaling-stroke" />
-              <line data-trazo-del-alambre="" x1="250" y1="56" x2="370" y2="56" vectorEffect="non-scaling-stroke" />
-              <line data-trazo-del-alambre="" x1="30" y1="100" x2="220" y2="100" vectorEffect="non-scaling-stroke" />
-              <line data-trazo-del-alambre="" x1="30" y1="118" x2="180" y2="118" vectorEffect="non-scaling-stroke" />
-              <rect data-trazo-del-alambre="" x="30" y="136" width="80" height="22" rx="11" vectorEffect="non-scaling-stroke" />
-              <rect data-trazo-del-alambre="" x="246" y="80" width="124" height="82" rx="6" vectorEffect="non-scaling-stroke" />
-              <rect data-trazo-del-alambre="" x="30" y="188" width="104" height="82" rx="6" vectorEffect="non-scaling-stroke" />
-              <rect data-trazo-del-alambre="" x="148" y="188" width="104" height="82" rx="6" vectorEffect="non-scaling-stroke" />
-              <rect data-trazo-del-alambre="" x="266" y="188" width="104" height="82" rx="6" vectorEffect="non-scaling-stroke" />
+            <svg ref={dibujo} viewBox="0 0 400 300" className="block w-full text-acento" fill="none" stroke="currentColor" strokeWidth={1.1} strokeLinecap="round" aria-hidden="true">
+              <rect data-trazo-del-alambre="" x="10" y="10" width="380" height="280" rx="10" />
+              <line data-trazo-del-alambre="" x1="10" y1="36" x2="390" y2="36" />
+              <circle data-trazo-del-alambre="" cx="25" cy="23" r="4" />
+              <circle data-trazo-del-alambre="" cx="39" cy="23" r="4" />
+              <line data-trazo-del-alambre="" x1="30" y1="56" x2="90" y2="56" />
+              <line data-trazo-del-alambre="" x1="250" y1="56" x2="370" y2="56" />
+              <line data-trazo-del-alambre="" x1="30" y1="100" x2="220" y2="100" />
+              <line data-trazo-del-alambre="" x1="30" y1="118" x2="180" y2="118" />
+              <rect data-trazo-del-alambre="" x="30" y="136" width="80" height="22" rx="11" />
+              <rect data-trazo-del-alambre="" x="246" y="80" width="124" height="82" rx="6" />
+              <rect data-trazo-del-alambre="" x="30" y="188" width="104" height="82" rx="6" />
+              <rect data-trazo-del-alambre="" x="148" y="188" width="104" height="82" rx="6" />
+              <rect data-trazo-del-alambre="" x="266" y="188" width="104" height="82" rx="6" />
             </svg>
             {/* La pantalla real, en el hueco de la ventana (debajo de su barra), cerrada al centro hasta que el alambre termina. */}
-            <div ref={real} className="absolute overflow-hidden rounded-b-[2.5%]" style={{ left: '2.5%', top: '12%', width: '95%', height: '84.7%', clipPath: 'inset(49.5% 49.5%)', willChange: 'clip-path' }}>
+            <div ref={real} className="absolute overflow-hidden rounded-b-[2.5%]" style={{ left: '2.5%', top: '12%', width: '95%', height: '84.7%', clipPath: 'inset(50%)', willChange: 'clip-path' }}>
               {/* eslint-disable-next-line @next/next/no-img-element -- prototipo: el póster ya optimizado del Portfolio */}
               <img src={PANTALLA.medios.poster.escritorio} alt={`La página de ${PANTALLA.nombre}`} className="block size-full object-cover object-top" />
             </div>

@@ -5,7 +5,7 @@ import { useEffect, type RefObject } from 'react'
 /**
  * [L7e] Cuando el centro de un elemento cruza una línea de la pantalla hacia arriba (`entra`, fracción del alto desde arriba), avisa
  * `true`; cuando vuelve a bajar más allá de `sale`, avisa `false`. Es el gatillo del home (`_contrato/disparo.ts`: se dispara al cruzar
- * y vuelve en espejo al subir), con histéresis para que no titile en la línea. Escucha el scroll sólo mientras el elemento está cerca.
+ * y vuelve en espejo al subir), con histéresis para que no titile en la línea.
  */
 export function useAlCruzar(ref: RefObject<HTMLElement | null>, alCambiar: (adentro: boolean) => void, activo: boolean, entra = 0.55, sale = 0.7): void {
   useEffect(() => {
@@ -28,14 +28,10 @@ export function useAlCruzar(ref: RefObject<HTMLElement | null>, alCambiar: (aden
     const pedir = (): void => {
       if (pedido === 0) pedido = requestAnimationFrame(medir)
     }
-    const cerca = new IntersectionObserver(([e]) => {
-      if (e?.isIntersecting === true) window.addEventListener('scroll', pedir, { passive: true })
-      else window.removeEventListener('scroll', pedir)
-      pedir()
-    })
-    cerca.observe(el)
+    // Siempre escuchando (con un cuadro por vez): un salto que pasa por encima del elemento sin que entre a la pantalla también lo cruza.
+    window.addEventListener('scroll', pedir, { passive: true })
+    pedir()
     return () => {
-      cerca.disconnect()
       window.removeEventListener('scroll', pedir)
       if (pedido !== 0) cancelAnimationFrame(pedido)
     }

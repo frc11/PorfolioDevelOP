@@ -4,6 +4,8 @@ import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 
 import { EnlaceDeRuta } from '../../_componentes/navegacion/EnlaceDeRuta'
+import { CONSULTA_ESCENARIO } from '../../_lib/compuerta'
+import { useAnchoMinimo } from '../../_lib/useAnchoMinimo'
 import { prototipo } from './prototipos'
 
 /**
@@ -11,13 +13,16 @@ import { prototipo } from './prototipos'
  * que no tape lo que se está mirando. No es una pieza del sitio: es la nota al margen del laboratorio.
  */
 export function Leyenda({ slug }: { readonly slug: string }): React.JSX.Element | null {
-  const [abierta, setAbierta] = useState(true)
+  // Abierta en el escritorio y plegada en el teléfono (donde taparía medio prototipo), hasta que la persona la toque.
+  const escritorio = useAnchoMinimo(CONSULTA_ESCENARIO)
+  const [elegida, setAbierta] = useState<boolean | null>(null)
+  const abierta = elegida ?? escritorio
   const p = prototipo(slug)
   if (p === undefined) return null
   return (
     <aside
       aria-label="Qué es este prototipo"
-      className="fixed right-4 bottom-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 text-tinta shadow-lg backdrop-blur-[20px] backdrop-saturate-[180%]"
+      className="fixed right-4 bottom-4 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-borde bg-fondo/95 p-4 text-tinta shadow-lg backdrop-blur-[20px]"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -28,7 +33,7 @@ export function Leyenda({ slug }: { readonly slug: string }): React.JSX.Element 
         </div>
         <button
           type="button"
-          onClick={() => setAbierta((a) => !a)}
+          onClick={() => setAbierta(!abierta)}
           aria-expanded={abierta}
           aria-label={abierta ? 'Plegar la leyenda' : 'Abrir la leyenda'}
           className="grid size-8 shrink-0 place-items-center rounded-full border border-borde"

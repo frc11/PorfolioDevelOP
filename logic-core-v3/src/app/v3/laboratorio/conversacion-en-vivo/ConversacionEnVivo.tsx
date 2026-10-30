@@ -40,7 +40,7 @@ export function ConversacionEnVivo(): React.JSX.Element {
 
 function Fila({ demo, lado, titulo, parrafos }: { readonly demo: IdDeDemo; readonly lado: 'izquierda' | 'derecha'; readonly titulo: string; readonly parrafos: readonly string[] }): React.JSX.Element {
   return (
-    <section className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 escritorio:grid-cols-[1fr_1.5fr] escritorio:gap-16 escritorio:py-24">
+    <section className={`mx-auto grid max-w-7xl items-center gap-10 px-6 py-16 escritorio:gap-16 escritorio:py-24 ${lado === 'izquierda' ? 'escritorio:grid-cols-[1.5fr_1fr]' : 'escritorio:grid-cols-[1fr_1.5fr]'}`}>
       <div className={lado === 'izquierda' ? 'escritorio:order-2' : undefined}>
         <Gatillo desde="abajo">
           <h2 className="font-display text-titulo-m font-fuerte leading-titulo tracking-display text-acento uppercase">{titulo}</h2>
@@ -53,7 +53,8 @@ function Fila({ demo, lado, titulo, parrafos }: { readonly demo: IdDeDemo; reado
           </div>
         </Gatillo>
       </div>
-      <div className="relative w-full overflow-hidden rounded-fuerte shadow-2xl shadow-tinta/25" style={{ aspectRatio: `${String(PANTALLA_DEL_MODULO.ancho)} / ${String(PANTALLA_DEL_MODULO.alto)}` }}>
+      {/* La tarjeta del Panel: en el teléfono, 4:5 como en el home (la demo se dibuja angosta); en escritorio, la pantalla del módulo. */}
+      <div className="relative aspect-4/5 w-full overflow-hidden rounded-fuerte shadow-2xl shadow-tinta/25 escritorio:aspect-[920/700]">
         <DemoEnSuLugar demo={demo} pantalla={PANTALLA_DEL_MODULO} respaldo={<div className="size-full bg-superficie-2" />} />
       </div>
     </section>

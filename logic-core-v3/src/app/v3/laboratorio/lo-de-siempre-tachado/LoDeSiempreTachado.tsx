@@ -77,7 +77,7 @@ function Renglon({ progreso, antes, despues }: { readonly progreso: Progreso; re
           {antes}
         </Trazo>
       </p>
-      <span className="block overflow-hidden escritorio:text-right">
+      <span className="block overflow-hidden pb-2 escritorio:text-right">
         <motion.span className="block font-display text-titulo-s leading-titulo tablet:text-titulo-m font-fuerte tracking-display text-acento uppercase" style={conMovimiento ? { opacity: presencia, y: subida } : undefined}>
           <Trazo progreso={conMovimiento ? paraSubrayar : null} tipo="subrayado">
             {despues}
