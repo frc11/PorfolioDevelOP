@@ -87,6 +87,24 @@ export const ESCENARIOS_DE_PRUEBA: readonly EscenarioDePrueba[] = [
     nube: { izquierda: 155, arriba: 234, derecha: 871, abajo: 473 },
     globo: { izquierda: 741, arriba: 260, derecha: 992, abajo: 768 },
   },
+  // [L9b] Con el título de L8b (más grande, colgado sobre la bajada), medidas en el sitio (dev, 2026-10-29): a 1440 el enjambre ya no sale
+  // del título con margen en todo el camino y el cambio va en la llegada.
+  {
+    nombre: 'L9b 1440×900',
+    ancho: 1440,
+    alto: 900,
+    titulo: [{ izquierda: 193, arriba: 256, derecha: 716, abajo: 412 }, { izquierda: 716, arriba: 256, derecha: 730, abajo: 412 }, { izquierda: 730, arriba: 256, derecha: 1247, abajo: 412 }, { izquierda: 444, arriba: 412, derecha: 996, abajo: 441 }],
+    nube: { izquierda: 259, arriba: 274, derecha: 1181, abajo: 581 },
+    globo: { izquierda: 1036, arriba: 308, derecha: 1408, abajo: 900 },
+  },
+  {
+    nombre: 'L9b 1024×768',
+    ancho: 1024,
+    alto: 768,
+    titulo: [{ izquierda: 83, arriba: 214, derecha: 508, abajo: 342 }, { izquierda: 508, arriba: 214, derecha: 520, abajo: 342 }, { izquierda: 520, arriba: 214, derecha: 940, abajo: 342 }, { izquierda: 283, arriba: 344, derecha: 741, abajo: 368 }],
+    nube: { izquierda: 154, arriba: 237, derecha: 870, abajo: 475 },
+    globo: { izquierda: 741, arriba: 260, derecha: 992, abajo: 768 },
+  },
 ]
 
 /** Un lugar con la proporción de su caja (la órbita, L3). */

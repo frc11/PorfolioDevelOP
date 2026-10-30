@@ -84,7 +84,8 @@ const cerca = (a: number, b: number): boolean => Math.abs(a - b) < 1e-9
 afirmar(cerca(LUGARES_DEL_GATILLO.lectura, 6) && cerca(pantallaDelCta(0), 6.6) && cerca(pantallaDelCta(1), 9.6) && cerca(LUGARES_DEL_GATILLO.guardado, 6.78) && cerca(LUGARES_DEL_GATILLO.cta, 9.63), 'los lugares en pantallas del pin: la lectura termina en 6, la transformación va de 6,6 a 9,6; la ida se para en 6,78 (pasado el disparo) y termina en 9,63')
 afirmar(guardadoSuelto(0.83) && !guardadoSuelto(0.8) && guardadoDeVuelta(0) && !guardadoDeVuelta(0.2), 'la ida sigue cuando la cámara soltó el guardado; la vuelta termina con el guardado en 0')
 type Abortar = typeof debeAbortar
-const aborta = (f: Abortar): boolean => f(7, true, false) && f(7, false, true) && f(5, false, false) && f(10.5, false, false) && !f(6, false, false) && !f(9.63, false, false) && !f(7.5, false, false)
+// [L9b] El tramo de la secuencia arranca en el asiento (4,5), no en el fin de la lectura: «afuera» es antes de 4.
+const aborta = (f: Abortar): boolean => f(7, true, false) && f(7, false, true) && f(3.9, false, false) && f(10.5, false, false) && !f(4.5, false, false) && !f(6, false, false) && !f(9.63, false, false) && !f(7.5, false, false)
 afirmar(aborta(debeAbortar), '[revisión] la secuencia se suelta con un viaje del navbar, con su vuelo pisado o con el scroll afuera del tramo; adentro, sigue')
 controlPositivo('  el detector ve una secuencia que nunca se suelta (la de antes)', ((): boolean => false) as Abortar, aborta)
 const tramo = leer('_secciones/por-que-develop/resenas/useTramoDeLasResenas.ts')
