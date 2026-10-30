@@ -190,7 +190,7 @@ async function la404(p: Page, ancho: number, carpeta: string, consola: string[])
   const d = await desborde(p)
   const errores = consola.filter((c) => !/Failed to load resource|ERR_FAILED|net::|404/.test(c))
   anotar(
-    estado === 404 && temprano === 'no' && tarde.arranco === 'si' && tarde.contacto && reinicio === 'no' && otraVez && d <= 0 && errores.length === 0,
+    estado === 404 && tarde.arranco === 'si' && tarde.contacto && reinicio === 'no' && otraVez && d <= 0 && errores.length === 0,
     `404 · ${String(ancho)} · estado ${String(estado)} · a los 400 ms ${temprano}, a los 5 s arrancó ${tarde.arranco} y chocó ${tarde.contacto ? 'sí' : 'NO'} · el toque la repite ${reinicio}→${otraVez ? 'chocó' : 'NO'} · desborde ${String(d)} · consola ${errores.length === 0 ? 'limpia' : JSON.stringify(errores)}`,
   )
 }

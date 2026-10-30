@@ -54,7 +54,7 @@ export function LogoQueNoEncaja(): React.JSX.Element {
       data-resultado="error"
       data-pieza="logo-que-no-encaja"
       data-arranco={arrancado === intento ? 'si' : 'no'}
-      className="relative w-[min(56vw,13rem)] rounded-[var(--radius-medio)] bg-[var(--resultado-fondo)] px-[var(--spacing-6)] pt-[var(--spacing-12)] pb-[var(--spacing-6)] escritorio:w-[15rem]"
+      className="relative w-[min(44vw,11rem)] rounded-[var(--radius-medio)] bg-[var(--resultado-fondo)] px-[var(--spacing-6)] pt-[var(--spacing-12)] pb-[var(--spacing-6)] escritorio:w-[15rem]"
     >
       <div style={{ aspectRatio: String(PROPORCION_DEL_ENCAJE) }}>
         <EncajeDelLogo key={intento} resultado="no-encaja" empieza={arrancado === intento} quieto={reducido} alTerminar={() => undefined} />

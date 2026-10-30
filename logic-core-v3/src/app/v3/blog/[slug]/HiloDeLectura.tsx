@@ -36,7 +36,12 @@ export function HiloDeLectura({ children }: { readonly children: React.ReactNode
     let pedido = 0
     let marcas: readonly HTMLElement[] = []
     const medirHitos = (): void => {
-      const tops = [...el.querySelectorAll<HTMLElement>('[data-hito]')].map((h) => h.offsetTop)
+      // La marca va al medio del subtítulo (el primer hijo del hito), no al tope de su sección (que lleva su respiro arriba). Los dos miden
+      // contra el recorrido (el ancestro posicionado).
+      const tops = [...el.querySelectorAll<HTMLElement>('[data-hito]')].map((h) => {
+        const sub = h.firstElementChild
+        return Math.round(sub instanceof HTMLElement ? sub.offsetTop + sub.offsetHeight / 2 : h.offsetTop)
+      })
       setHitos((antes) => (antes.length === tops.length && antes.every((t, i) => t === tops[i]) ? antes : tops))
     }
     const mover = (): void => {
@@ -74,7 +79,7 @@ export function HiloDeLectura({ children }: { readonly children: React.ReactNode
       {forma === 'barra' ? (
         <span aria-hidden="true" data-pieza="hilo-de-lectura" data-forma="barra" ref={barra} className="fixed inset-x-0 top-0 z-[var(--z-elevado)] block h-1 origin-left bg-tinta" style={{ transform: 'scaleX(0)' }} />
       ) : (
-        <span aria-hidden="true" data-pieza="hilo-de-lectura" data-forma="costado" className="pointer-events-none absolute inset-y-0 -left-3 block w-3 tablet:-left-8 escritorio:-left-14">
+        <span aria-hidden="true" data-pieza="hilo-de-lectura" data-forma="costado" className="pointer-events-none absolute inset-y-0 -left-5 block w-3 tablet:-left-8 escritorio:-left-14">
           <span className="absolute inset-y-0 left-1/2 block w-0.5 -translate-x-1/2 rounded-full bg-tinta/15" />
           <span ref={leido} className="absolute inset-y-0 left-1/2 block w-[3px] -translate-x-1/2 origin-top rounded-full bg-tinta" style={{ transform: 'scaleY(0)' }} />
           {hitos.map((top) => (
