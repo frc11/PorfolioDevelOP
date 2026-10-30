@@ -1,28 +1,43 @@
-# M1 · resultado — PARCIAL (la sesión se cortó por el límite de uso)
+# M1 · resultado — Nosotros, Portfolio, el ancho y la intro de día
 
-Rama `m/1`. Todo lo construido está commiteado. **Nada se vio en el navegador**: el candado lo tuvieron L7g (10:05–12:34) y M3 (12:34–12:53); cuando M1 lo tomó (12:53) sólo alcanzó a correr `tsc` (0 errores) antes del corte. Lo soltó al cortar.
+Rama `m/1` (desde `3d89b628`). Dev :3003, Chrome del sistema (uno por vez, cerrado al terminar cada tanda). Fotos en `C:\nocturno\cola3-fotos\M1\`.
+
+## Para los otros carriles: el ancho (ítem 0)
+**El contenedor no cambió, y no había que cambiarlo.** Medido a 1440 (`scripts-carga/m1-ancestros.ts`): la cadena de ancestros es la MISMA en el home y en las páginas (`main` 1440 → `envoltorio` con 32 px por lado, `--container-dominante` 100 % → contenido 1376, tope `--container-tope` 1920). Ningún ancestro de una sección de página es más angosto; al revés, el home suma una columna lateral y su texto arranca en x 188, el de las páginas en x 32. Por sección (`m1-anchos.ts`): Nosotros, Portfolio y el blog van del 2 % al 98 % del ancho a 1440; a 2560 el home y las páginas cortan igual en 1920 (13 %–88 %). Lo angosto a propósito: la nota (27–73 %, columna de lectura) y las legales (índice + texto). **La columna al centro que vio Valentino era el LABORATORIO:** 18 archivos de prototipos de `l7/lab` envuelven todo en `mx-auto max-w-6xl/5xl/4xl/3xl` (1152 → 768 px centrados). Las secciones reales de M1 no copiaron esos envoltorios. M2 y M3: construyan con `SeccionDePapel`/`Envoltorio` como hasta ahora y no copien el `max-w-*xl` de los prototipos.
 
 ## Por ítem
-- **0 · El ancho — no hecho.** El contenedor compartido (`Envoltorio`) ya es a sangre con tope de 1920 en el home y en las páginas: no es el contenedor. Falta mirar a 1440 y 2560 qué hace que las páginas se lean centradas (probable: columnas angostas y texto chico en el cuerpo). Banco listo: `BASE=http://localhost:3003 ANCHOS=1440x900,2560x1440 npx tsx scripts-carga/m1-anchos.ts` (fotos y cajas de cada sección contra el home). **M2 y M3: el contenedor no cambió.**
-- **1 · La intro de día — construido, no verificado en el navegador.** De día (Nosotros, Portfolio y el blog, por `noche: 'dia'` del preset: el blog lo toma solo en el merge) la intro mide 3,4 pantallas: el tramo del título (1,4) y el giro del home hacia Quiénes somos (2 pantallas, pose 130° / −3,6 / 14, vuelta literal) con «de qué se trata» fijo del lado contrario al logo (marco del giro con su propio hueco; el encuadre pasa de un hueco al otro con el giro). Las de noche (servicios) siguen en 1,8, sin cambios. Archivos: `pistaDeLaIntro.ts`, `composicion.ts`, `composicionEnLaEscena.ts`, `ataduraAlScroll.ts` (una línea), `IntroDeLaPagina.tsx`, `ComposicionDeLaIntro.tsx`. Sin ver: si el título 3D caído molesta durante el giro y cómo queda el logo en 390.
-- **2 · El equipo — construido, no verificado.** Prototipo 2 tal cual; abajo de 1024 la segunda toma se abre al cruzar la mitad y se cierra al volver (aprieta el botón del marco). Facultad: `public/v3/nosotros/facultad.webp` (500×298, desde `l7-assets`), a 500 px como mucho, que se abre desde una rendija, con «FACET · Universidad Nacional de Tucumán».
-- **3 · La historia — construido, no verificado.** Cada párrafo sube desde abajo; sólo «calidad excepcional», «Esto no es un proyecto aislado» y «No tenemos límites» se pintan.
-- **4 · Cómo trabajamos — construido, no verificado.** Prototipo 7: la línea que baja y subraya cada paso; los cinco pasos del prototipo.
-- **5 · Los casos — construido, no verificado.** Papel, lados alternados (izq/der/izq), medio y texto clavados desde 1024, ritmo de la ficha; título propio + 3 párrafos (163/153/162 palabras, sólo hechos de `PROYECTOS` y del home) + rubro y fecha + «Visitar sitio». Reseña: ninguna es real, no se muestra.
-- **6 · Las demos — construido, no verificado.** Texto corrido; estante sin cruces (el apilado no cambia nunca, las vecinas se abren antes de que la elegida suba y esperan a que la anterior baje); desde 1024 abre `VentanaDeDemo` (el Genie del home) en la página; abajo de 1024, pestaña nueva como el home.
+- **0 · El ancho — hecho (diagnóstico, sin cambio de contenedor).** Arriba. Fotos `anchos\<página>\{1440,2560}-*.png`.
+- **1 · La intro de día — hecho.** Una página de día con pista Y con su bloque («de qué se trata») lleva 3,4 pantallas: el tramo del título (1,4) y el giro del home hacia Quiénes somos (2; pose 130° / −3,6 / 14, vuelta literal), con el bloque fijo del lado contrario al logo y el logo pasando de un hueco al otro; después, el papel. Medido: Nosotros, Portfolio y el blog miden 3,40 pantallas a 1440 y 390; las de servicio 1,80 (sin cambios); una nota (sin bloque) 1,80. En un cuadro vertical la cámara no se acerca en el giro (si no, el logo tapaba el bloque: visto en la tira de 390 y arreglado). Tiras: `nosotros|portfolio|blog\{1440,390}-intro-tira.png`. **Título 3D vs DOM:** ninguna página cae al DOM: «Nosotros», «Portfolio» y «Blog» ya estaban en las fuentes 3D (L7-INT).
+- **2 · El equipo — hecho.** A 390 la segunda toma de Franco: abajo `false` · cruzando la mitad `true` · de vuelta `false`; a 1440 no se abre sola. Facultad en `public/v3/nosotros/facultad.webp` (500×298), a 500 px como mucho, se abre desde una rendija, con «FACET · Universidad Nacional de Tucumán».
+- **3 · La historia — hecho.** Sube por párrafo; sólo se pintan las tres frases. Foto `anchos\nosotros\1440-2.png`.
+- **4 · Cómo trabajamos — hecho.** La línea que baja y subraya cada paso (prototipo 7), cinco pasos.
+- **5 · Los casos — hecho.** Lados medidos: 1440 izquierda/derecha/izquierda; 390 apilados (el medio arriba). Textos de 162/153/154 palabras. «Visitar sitio» pasado a AA sobre el papel (El Garage 5,38:1, Banú 8,22:1, Esquina la tinta).
+- **6 · Las demos — hecho.** Banco cuadro a cuadro con el candado (`m1-banco.ts`, `PASOS=tapas`): 1440 → 752 cuadros, 436 tapa-cuadro movidas, **cero cruces**, apilado fijo; 1024 → 754 / 441 / cero / fijo. La ventana del home abre en la página y cierra con Esc (1440 y 1024, una sola pestaña). Abajo de 1024, pestaña nueva como el home.
 
-## Verificación que sí corrió
-- `npx tsc --noEmit`: 0 errores.
-- `npx tsx src/app/v3/_lib/__tests__/s92-m1.invariant.tsx`: 43 afirmaciones, 0 fallas, con controles. La simulación cuadro a cuadro de las tapas cazó un cruce real (pasar directo de una tapa a la siguiente) que se arregló.
-- **No corrió:** ESLint (la sesión se cortó), `s78-b12a`, `verificar`, el build, el navegador en ningún ancho, la revisión independiente. **390 no está verificado.**
+## Verificación
+- `npx tsc --noEmit`: 0 errores. ESLint en los archivos tocados: limpio.
+- `s92-m1` (nuevo): 47 afirmaciones, 0 fallas, cada una con su control. `s78-b12a`: 162 / 0 (una afirmación actualizada a la spec nueva: el avance pasa el largo de la intro de la página; se endureció, no se aflojó).
+- Humo (`l7-int-humo.ts` contra :3003) a 1440, 1024, 768 y 390, **390 real (innerWidth 390, pestaña visible)**: las tres de servicio, Nosotros, Portfolio y la 404 en verde en los cuatro anchos. Privacidad y Términos «FALLA» sólo por el criterio de orden del banco (conocido desde L7-INT; desborde 0, `h1`, pie y consola bien). Blog y nota en 1440/1024/768 en verde; **a 390 el blog desborda 32 px y la nota 3 px** (ver propuestas).
+- No corrió: `npm run verificar` completo ni el build de producción (el build va con candado y no hizo falta para cerrar M1; queda para el merge).
+
+## Revisión independiente (Sonnet, sobre el diff)
+Nueve hallazgos, los nueve arreglados: el texto de los casos y la facultad invisibles sin JS; el Genie de cierre volvía a una caja vieja (la tapa se soltaba con la ventana abierta); las notas del blog quedaban con dos pantallas de giro vacías (la intro larga ahora exige su bloque); la variable de color circular de Esquina; la tapa que titilaba en el borde (se suelta al salir del estante); dos frases que afirmaban de más; una clase arbitraria entera en el invariante; dos `span` como hijos de un `ol`.
 
 ## Decisiones tomadas solo
-- **M1-1** La intro de día se decide por `noche === 'dia'` del preset (no por página): así el blog y sus notas la heredan sin tocar archivos de M2. La 404 (de día, sin scroll) no cambia porque la pista de día arranca en la misma composición.
-- **M1-2** Los colores de marca de los tokens están medidos para la noche; sobre el papel fallaban AA (Esquina, blanco: invisible). En `portfolio/contenido.ts`: El Garage `#9A5400` (5,38:1), Banú `#654324` (su marrón del póster, 8,22:1), Esquina la tinta. Los tokens no se tocaron.
-- **M1-3** Abajo de 1024 la demo abre en otra pestaña (la rama del teléfono del home); la ventana sólo desde 1024.
-- **M1-4** `s92-m1` no se sumó a `package.json` para no chocar en el merge con M2/M3: propuesta, agregar `"test:s92-m1": "npx tsx src/app/v3/_lib/__tests__/s92-m1.invariant.tsx"`.
+- **M1-1** La intro larga la decide el DOM (día + pista + bloque) y la escena la toma mientras el marco del giro está montado (un contador: con la navegación cliente hay dos un instante). Así el blog la hereda en el merge sin tocar archivos de M2, y una nota sin bloque queda corta.
+- **M1-2** Colores de marca sobre el papel en `portfolio/contenido.ts`; los tokens no se tocaron.
+- **M1-3** Abajo de 1024 la demo abre en otra pestaña (la rama del teléfono del home).
+- **M1-4** En un cuadro vertical el giro no acerca la cámara (el logo a distancia 14 tapaba el bloque).
+- **M1-5** El `main` de Nosotros y Portfolio recorta el desborde de costado como el del home (a 390 algo que entra de costado sumaba 32 px).
+- **M1-6** `s92-m1` no se sumó a `package.json` para no chocar en el merge.
 
-## Para la próxima sesión (en este orden)
-1. Candado → dev :3003 → `m1-anchos.ts` a 1440 y 2560 → arreglar el ancho → `m1-banco.ts` a 1440 y 390 → el humo `BASE=http://localhost:3003 FOTOS=C:\nocturno\cola3-fotos\M1 ANCHOS=1440x900,1024x768,768x1024,390x844 npx tsx scripts-carga/l7-int-humo.ts`.
-2. ESLint en los archivos tocados, `npm run test:s78-b12a`, s92-m1.
-3. Revisión independiente sobre `git diff 3d89b628..m/1`, resultado final, push.
+## Propuestas fuera de mi borde
+- **M2:** `overflow-x-clip` en el `<main>` de `blog/page.tsx` y `blog/[slug]/page.tsx`, como el home y M1 (a 390: +32 px y +3 px). El bloque del giro del índice del blog es su «de qué se trata» actual: conviene escribirle uno pensado para ese lugar.
+- **M3:** lo mismo en `_servicios/PaginaDeServicio.tsx` si su humo a 390 lo pide (hoy da 0).
+- **package.json:** `"test:s92-m1": "npx tsx src/app/v3/_lib/__tests__/s92-m1.invariant.tsx"`.
+
+## Qué tiene que mirar Valentino
+1. `/v3/nosotros` a 1440: bajar despacio la intro — el título, el giro del home y el bloque a la derecha; después el papel.
+2. `/v3/portfolio` a 1440: pasar el mouse por las tapas de las demos (ninguna atraviesa a otra) y hacer clic en una (la ventana del home).
+3. `/v3/nosotros` en el teléfono: las fotos del equipo se abren solas al pasar la mitad.
+4. `/v3/portfolio`: los tres casos alternados con su texto (para reescribir).
