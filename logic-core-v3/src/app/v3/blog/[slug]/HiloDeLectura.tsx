@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { LINEA_DE_LECTURA, formaDelHiloPedida, posicionDeLaAguja, type FormaDelHilo } from '../_movimiento/hilo'
+
+/** La URL no cambia mientras se lee la nota: nada que escuchar. */
+const sinCambios = (): (() => void) => () => undefined
 
 /**
  * [M2] EL HILO DE LECTURA — «el hilo me encanta, me gustaría que se note más… literal tuve que leer acá para darme cuenta que era». El del
@@ -24,12 +27,8 @@ export function HiloDeLectura({ children }: { readonly children: React.ReactNode
   const leido = useRef<HTMLSpanElement>(null)
   const aguja = useRef<HTMLSpanElement>(null)
   const barra = useRef<HTMLSpanElement>(null)
-  const [forma, setForma] = useState<FormaDelHilo>('costado')
+  const forma = useSyncExternalStore(sinCambios, () => formaDelHiloPedida(window.location.search), (): FormaDelHilo => 'costado')
   const [hitos, setHitos] = useState<readonly number[]>([])
-
-  useEffect(() => {
-    setForma(formaDelHiloPedida(window.location.search))
-  }, [])
 
   useEffect(() => {
     const el = recorrido.current

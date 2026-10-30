@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -29,16 +29,7 @@ export function TitularQueSeLevantaAlCruzar({ children, nivel, como, retrasoMs =
 }): React.JSX.Element {
   const reducido = usePrefiereMenosMovimiento()
   const caja = useRef<HTMLDivElement>(null)
-  const cruzo = useCruzoLaLinea(caja)
-  const [arriba, setArriba] = useState(false)
-  useEffect(() => {
-    if (!cruzo) {
-      setArriba(false)
-      return undefined
-    }
-    const t = window.setTimeout(() => setArriba(true), retrasoMs)
-    return () => window.clearTimeout(t)
-  }, [cruzo, retrasoMs])
+  const arriba = useCruzoLaLinea(caja, retrasoMs)
   const presencia = usePresencia(arriba || reducido, reducido, PRESENCIA_DEL_ENCABEZADO)
   return (
     <div ref={caja} data-parte="titular-que-se-levanta">
