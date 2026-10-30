@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { BotonPausa } from '../../../_componentes/medios/BotonPausa'
 import { Envoltorio } from '../../../_componentes/layout/Envoltorio'
 import { useMovimientoReducido } from '../../../_lib/motion/reducido'
 import type { MediosDelProyecto, SlugDelProyecto } from '../../../_secciones/trabajos/proyectos'
 import { CLASES_DEL_PAPEL, EncabezadoDelBloque, idDelTituloDe } from '../../bloques/Bloque'
-import { CLASE_DE_LA_PAUSA_DEL_VIDEO } from '../../movimiento/VideoDeFondo'
+import { PausaDelVideo } from '../../movimiento/VideoDeFondo'
 import { useAvanceDelRecorrido } from '../useAvanceDelRecorrido'
 import { MenuDeTrabajos, type TrabajoDelMenu } from './MenuDeTrabajos'
 import { PantallaQuieta } from './PantallaQuieta'
@@ -177,7 +176,7 @@ function Secuencia({ trabajos, trabajo, alElegir }: PropsDeLaSecuencia): React.J
                   <RotulosDelPlano key={trabajo.slug} plano={plano} />
                 </div>
               </div>
-              <BotonPausa pausado={videos.pausado} alCambiar={videos.setPausado} de={DE_LA_PAUSA_DE_LA_PANTALLA} className={CLASE_DE_LA_PAUSA_DEL_VIDEO} />
+              <PausaDelVideo reducido={false} pausado={videos.pausado} alCambiar={videos.setPausado} de={DE_LA_PAUSA_DE_LA_PANTALLA} />
             </div>
             <ol ref={textos} role="list" className="flex min-w-0 flex-col gap-3 escritorio:col-span-4 escritorio:row-start-2 escritorio:self-end">
               <TextoDeFase fase={0}>{TEXTOS_DE_LAS_FASES.plano}</TextoDeFase>

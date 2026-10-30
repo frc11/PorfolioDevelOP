@@ -5,12 +5,11 @@ import { useEffect, useRef, useState } from 'react'
 
 import { intentLabel } from '@/modules/chatbot/lead-intent-labels'
 
-import { BotonPausa } from '../../../_componentes/medios/BotonPausa'
 
 import { useMovimientoReducido } from '../../../_lib/motion/reducido'
 import { CONVERSACION_EN_VIVO, NOMBRE_DEL_ASISTENTE, PREGUNTAS_SUGERIDAS, RITMO_DEL_CHAT, type MensajeDeEjemplo } from '../../../_panel-vivo/demos/chatbot/datos'
 import { ReproduccionDeLaDemo, usePasos, usePestanaVisible } from '../../../_panel-vivo/reproduccion'
-import { CLASE_DE_LA_PAUSA_DEL_VIDEO } from '../../movimiento/VideoDeFondo'
+import { PausaDelVideo } from '../../movimiento/VideoDeFondo'
 import { AVISO_DEL_EJEMPLO, DE_LA_PAUSA_DEL_CHAT, ROTULO_DE_PROBALO } from './datos'
 
 /**
@@ -37,7 +36,7 @@ export function ChatQueAtiende(): React.JSX.Element {
     <ReproduccionDeLaDemo.Provider value={{ corre: aLaVista && pestana && !reducido && !conTuyos && !pausado, reducido, conBarra: false, bucle: true }}>
       <div ref={caja} className="relative">
         <Ventana tuyos={tuyos} setTuyos={setTuyos} reducido={reducido} />
-        {reducido ? null : <BotonPausa pausado={pausado} alCambiar={setPausado} de={DE_LA_PAUSA_DEL_CHAT} className={CLASE_DE_LA_PAUSA_DEL_VIDEO} />}
+        <PausaDelVideo reducido={reducido} pausado={pausado} alCambiar={setPausado} de={DE_LA_PAUSA_DEL_CHAT} />
       </div>
     </ReproduccionDeLaDemo.Provider>
   )
