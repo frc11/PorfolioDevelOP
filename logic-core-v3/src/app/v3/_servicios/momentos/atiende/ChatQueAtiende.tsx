@@ -5,10 +5,13 @@ import { useEffect, useRef, useState } from 'react'
 
 import { intentLabel } from '@/modules/chatbot/lead-intent-labels'
 
+import { BotonPausa } from '../../../_componentes/medios/BotonPausa'
+
 import { useMovimientoReducido } from '../../../_lib/motion/reducido'
 import { CONVERSACION_EN_VIVO, NOMBRE_DEL_ASISTENTE, PREGUNTAS_SUGERIDAS, RITMO_DEL_CHAT, type MensajeDeEjemplo } from '../../../_panel-vivo/demos/chatbot/datos'
 import { ReproduccionDeLaDemo, usePasos, usePestanaVisible } from '../../../_panel-vivo/reproduccion'
-import { AVISO_DEL_EJEMPLO, ROTULO_DE_PROBALO } from './datos'
+import { CLASE_DE_LA_PAUSA_DEL_VIDEO } from '../../movimiento/VideoDeFondo'
+import { AVISO_DEL_EJEMPLO, DE_LA_PAUSA_DEL_CHAT, ROTULO_DE_PROBALO } from './datos'
 
 /**
  * [M3] EL CHAT QUE ATIENDE — el prototipo 5 rechazado («se ve desde el panel, quiero que se vea desde un chat directamente») rehecho
@@ -27,11 +30,14 @@ export function ChatQueAtiende(): React.JSX.Element {
   const aLaVista = useInView(caja, { amount: 0.4 })
   const pestana = usePestanaVisible()
   const [tuyos, setTuyos] = useState<readonly MensajeDeEjemplo[]>([])
+  // WCAG 2.2.2: la conversación se mueve sola y en bucle; la pausa es la del home, sólo para el teclado (como el video de trabajos).
+  const [pausado, setPausado] = useState(false)
   const conTuyos = tuyos.length > 0
   return (
-    <ReproduccionDeLaDemo.Provider value={{ corre: aLaVista && pestana && !reducido && !conTuyos, reducido, conBarra: false, bucle: true }}>
-      <div ref={caja}>
+    <ReproduccionDeLaDemo.Provider value={{ corre: aLaVista && pestana && !reducido && !conTuyos && !pausado, reducido, conBarra: false, bucle: true }}>
+      <div ref={caja} className="relative">
         <Ventana tuyos={tuyos} setTuyos={setTuyos} reducido={reducido} />
+        {reducido ? null : <BotonPausa pausado={pausado} alCambiar={setPausado} de={DE_LA_PAUSA_DEL_CHAT} className={CLASE_DE_LA_PAUSA_DEL_VIDEO} />}
       </div>
     </ReproduccionDeLaDemo.Provider>
   )
@@ -49,12 +55,14 @@ function Ventana({
   const guion = CONVERSACION_EN_VIVO.mensajes
   const { paso, termino } = usePasos(guion.length, RITMO_DEL_CHAT.mensajeMs)
   const [respondiendo, setRespondiendo] = useState(false)
+  // Hasta dónde había llegado el guion cuando el visitante preguntó: su pregunta va a continuación, no después del final del guion.
+  const [corte, setCorte] = useState<number | null>(null)
   const reloj = useRef<number | undefined>(undefined)
   const lista = useRef<HTMLDivElement>(null)
   useEffect(() => () => window.clearTimeout(reloj.current), [])
 
-  // Con movimiento reducido o cuando el visitante ya preguntó, el guion se ve entero (y el bucle se detiene).
-  const llegaron = reducido || tuyos.length > 0 ? guion : guion.slice(0, paso)
+  // Con movimiento reducido, el guion entero; cuando el visitante pregunta, el guion se queda donde estaba (y el bucle se detiene).
+  const llegaron = reducido ? guion : guion.slice(0, corte ?? paso)
   const escribe = respondiendo || (!reducido && tuyos.length === 0 && !termino && guion[paso].rol === 'ASSISTANT')
   const lead = llegaron.length === guion.length ? CONVERSACION_EN_VIVO.lead : null
 
@@ -64,6 +72,8 @@ function Ventana({
   }, [llegaron.length, tuyos.length, escribe, reducido])
 
   const preguntar = (pregunta: string, respuesta: string): void => {
+    if (respondiendo) return
+    if (corte === null) setCorte(paso)
     window.clearTimeout(reloj.current)
     if (reducido) {
       setTuyos((m) => [...m, { rol: 'USER', texto: pregunta }, { rol: 'ASSISTANT', texto: respuesta }])
@@ -90,7 +100,7 @@ function Ventana({
         </span>
         <span className="ml-auto hidden shrink-0 font-codigo text-micro tracking-wide uppercase tablet:inline">{AVISO_DEL_EJEMPLO}</span>
       </div>
-      <div ref={lista} role="log" aria-live={tuyos.length > 0 ? 'polite' : 'off'} aria-label={`Conversación con ${NOMBRE_DEL_ASISTENTE}`} className="flex h-88 flex-col gap-2.5 overflow-y-auto overscroll-contain bg-superficie-1 px-4 py-4 escritorio:h-104">
+      <div ref={lista} role="log" tabIndex={0} aria-live={tuyos.length > 0 ? 'polite' : 'off'} aria-label={`Conversación con ${NOMBRE_DEL_ASISTENTE}`} className="flex h-88 flex-col gap-2.5 overflow-y-auto bg-superficie-1 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-acento px-4 py-4 escritorio:h-104">
         {[...llegaron, ...tuyos].map((m, i) => (
           <Burbuja key={i} mensaje={m} />
         ))}
@@ -111,9 +121,9 @@ function Ventana({
             <button
               key={s.pregunta}
               type="button"
-              disabled={respondiendo}
+              aria-disabled={respondiendo}
               onClick={() => preguntar(s.pregunta, s.respuesta)}
-              className="cursor-pointer rounded-full border border-acento/40 px-3 py-1.5 text-caption text-tinta transition-colors duration-[var(--duracion-rapida)] hover:border-acento hover:bg-acento hover:text-fondo focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento disabled:cursor-wait disabled:opacity-50"
+              className="cursor-pointer rounded-full border border-acento/40 px-3 py-1.5 text-caption text-tinta transition-colors duration-[var(--duracion-rapida)] hover:border-acento hover:bg-acento hover:text-fondo focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento aria-disabled:cursor-wait aria-disabled:opacity-50"
             >
               {s.pregunta}
             </button>
@@ -136,9 +146,9 @@ function Burbuja({ mensaje }: { readonly mensaje: MensajeDeEjemplo }): React.JSX
 
 function Escribiendo(): React.JSX.Element {
   return (
-    <span role="status" aria-label="El asistente está escribiendo" className="flex gap-1 self-start rounded-medio border border-tinta/10 bg-fondo px-3.5 py-3">
+    <span aria-hidden="true" className="flex gap-1 self-start rounded-medio border border-tinta/10 bg-fondo px-3.5 py-3">
       {[0, 1, 2].map((i) => (
-        <span key={i} aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-tinta-media motion-reduce:animate-none" style={{ animationDelay: `${String(i * 160)}ms` }} />
+        <span key={i} className="size-1.5 animate-pulse rounded-full bg-tinta-media motion-reduce:animate-none" style={{ animationDelay: `${String(i * 160)}ms` }} />
       ))}
     </span>
   )

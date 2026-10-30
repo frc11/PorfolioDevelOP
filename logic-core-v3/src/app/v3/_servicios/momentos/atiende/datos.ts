@@ -14,6 +14,8 @@ export const TEXTOS_DEL_CHAT = [
 /** Lo que dice el chat de sí mismo: que las respuestas son de ejemplo (el negocio de ejemplo del panel). */
 export const AVISO_DEL_EJEMPLO = 'Respuestas de ejemplo' // C2: provisorio (M3)
 export const ROTULO_DE_PROBALO = 'Probalo como cliente' // C2: provisorio (M3)
+/** Lo que pausa el botón de teclado del chat (`BotonPausa` arma «Pausar …»). */
+export const DE_LA_PAUSA_DEL_CHAT = 'la conversación de ejemplo'
 
 export const TITULO_DE_AUTOMATIZACIONES = 'Lo repetitivo, que pase solo' // C2: provisorio (M3)
 export const TEXTOS_DE_AUTOMATIZACIONES = [

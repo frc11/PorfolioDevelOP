@@ -23,7 +23,7 @@ import { Intro } from '../Intro'
 import { avanceClavado, avanceDelCruce } from '../momentos/avance'
 import { TAREAS, debeSonar, tildeSiguiente } from '../momentos/atiende/datos'
 import { trabajosDeLaPantalla } from '../momentos/MomentoDelServicio'
-import { ANCHO_DEL_PAPEL, LUGARES, PAPELES, TABLERO, avanceDelRenglon, papelEn } from '../momentos/orden/datos'
+import { ANCHO_DEL_PAPEL, FRANJA_DE_LAS_CABECERAS, LUGARES, PAPELES, TABLERO, avanceDelRenglon, papelEn } from '../momentos/orden/datos'
 import { LIENZO, PLANOS, TRAMOS, avanceDeLaTraza, avanceMostrado, fasesDe, medidasDelMarco, repeticionTerminada } from '../momentos/pantalla/planos'
 import { CuerpoDelServicio } from '../PaginaDeServicio'
 import type { Servicio } from '../tipos'
@@ -93,8 +93,8 @@ afirmarIgual(botones.map((b) => /<span class="truncate[^"]*">([^<]*)<\/span>/.ex
 afirmarIgual(botones.map((b) => b[1]), ['true', 'false', 'false'], '  con el primero elegido (`aria-pressed`)')
 afirmarIgual(trabajosDeLaPantalla(PAGINAS_WEB).map((t) => t.slug), ['el-garage', 'esquina-estudio', 'banu-scents'], '  que son los tres de PROYECTOS')
 const videosDeLaPantalla = [...bloque(WEB, 'la-pantalla').matchAll(/<video\b[^>]*>/g)].map((m) => m[0])
-const videosQuietos = (vs: readonly string[]): boolean => vs.length === 2 && vs.every((v) => !/\s(src|poster|autoplay)=/.test(v) && /preload="none"/.test(v) && /\smuted/.test(v))
-afirmar(videosQuietos(videosDeLaPantalla), 'los dos videos (escritorio y celular) salen sin src, sin póster y sin autoplay, mudos y sin precarga: se piden al acercarse', `${String(videosDeLaPantalla.length)} videos`)
+const videosQuietos = (vs: readonly string[]): boolean => vs.length === 2 && vs.every((v) => !/\s(src|poster|autoplay)=/.test(v) && /preload="none"/.test(v) && /\smuted/.test(v) && /\sloop/.test(v) && /\splaysinline/i.test(v))
+afirmar(videosQuietos(videosDeLaPantalla), 'los dos videos (escritorio y celular) salen sin src, sin póster y sin autoplay, mudos, en bucle, en línea y sin precarga: se piden al acercarse', `${String(videosDeLaPantalla.length)} videos`)
 controlPositivo('  un video con autoplay se detecta', ['<video autoplay="" muted="" preload="none">', '<video muted="" preload="none">'], videosQuietos)
 afirmar(bloque(SOFTWARE, 'la-pantalla') === '' && bloque(IA, 'la-pantalla') === '', 'la pantalla es sólo de Desarrollo web')
 
@@ -115,6 +115,8 @@ afirmar(sinSolapes(LUGARES.map((l) => cajaDe(l.x, l.y))), 'al final, ningún pap
 afirmar(sinSolapes(PAPELES.map((p) => cajaDe(p.x, p.y))), 'al principio, tirados, tampoco (sin el giro): el desorden es de lugar y de ángulo, no una pila ilegible')
 afirmar([...LUGARES.map((l) => cajaDe(l.x, l.y)), ...PAPELES.map((p) => cajaDe(p.x, p.y))].every((c) => c.x >= 0 && c.y >= 0 && c.x + c.w <= 100 + 1e-6 && c.y + c.h <= 100 + 1e-6), 'y todos quedan adentro de la mesa, al principio y al final')
 afirmar(LUGARES.every((l) => l.y >= TABLERO.cabecera), '  y abajo de la cabecera de su columna')
+afirmar(PAPELES.every((p) => p.y >= FRANJA_DE_LAS_CABECERAS), '  [revisión] tirados, ninguno arranca encima de las cabeceras de las columnas (no pisa «En curso»)')
+controlPositivo('  un papel tirado sobre la cabecera se detecta', [{ y: 3 }], (ps: { y: number }[]) => ps.every((p) => p.y >= FRANJA_DE_LAS_CABECERAS))
 controlPositivo('  dos papeles en el mismo lugar se detectan', [cajaDe(10, 10), cajaDe(20, 15)], sinSolapes)
 const paso = 1 / 2000
 const maxSalto = Math.max(...PAPELES.map((_, i) => Math.max(...muestras(2000).slice(1).map((v) => { const a = papelEn(i, v - paso); const b = papelEn(i, v); return Math.hypot(b.x - a.x, b.y - a.y) }))))
@@ -129,6 +131,8 @@ const h1s = (html: string): number => (html.match(/<h1(?=[\s>])/g) ?? []).length
 afirmarIgual([h1s(WEB), h1s(SOFTWARE), h1s(IA)], [1, 1, 1], 'un solo h1 en cada página, el de la intro (el prototipo 5 tenía tres)')
 controlPositivo('  un segundo h1 se detecta', `${IA}<h1>Un chatbot</h1>`, (h: string) => h1s(h) === 1)
 const chat = bloque(IA, 'el-chat')
+afirmar(/data-pieza="boton-pausa"[^>]*aria-label="Pausar la conversación de ejemplo"|aria-label="Pausar la conversación de ejemplo"[^>]*data-pieza="boton-pausa"/.test(chat), '[revisión] la conversación que se mueve sola tiene su pausa (WCAG 2.2.2): la del home, para el teclado')
+controlPositivo('  un chat sin pausa se detecta', chat.replace(/data-pieza="boton-pausa"/g, ''), (h: string) => /data-pieza="boton-pausa"[^>]*aria-label="Pausar la conversación de ejemplo"|aria-label="Pausar la conversación de ejemplo"[^>]*data-pieza="boton-pausa"/.test(h))
 afirmar(chat.includes('data-chat-que-atiende') && !/<h[1-6][\s>]/.test(chat.replace(/^[\s\S]*?data-chat-que-atiende/, '')), 'el chat es una ventana de chat (sin encabezados adentro), no el panel')
 afirmar(!/cyan|zinc|MarcoDelPanel|data-demo/.test(chat), '  sin el cian ni el gris del panel ni su marco: el acento es el de la página')
 controlPositivo('  el cian del panel se detecta', '<div class="border-cyan-500/30">', (h: string) => !/cyan|zinc|MarcoDelPanel|data-demo/.test(h))

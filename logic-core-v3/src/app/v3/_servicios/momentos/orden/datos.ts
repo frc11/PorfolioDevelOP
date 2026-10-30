@@ -34,9 +34,9 @@ export const COLUMNAS = ['Para hacer', 'En curso', 'Listo'] as const
 
 /** Los papeles sueltos: qué son (el rótulo), qué dicen, en qué columna terminan y dónde están tirados (en % de la mesa, con su giro). */
 export const PAPELES = [
-  { rotulo: 'Pedido', texto: 'Pedido por mensaje', columna: 0, x: 4, y: 6, giro: -7 },
-  { rotulo: 'Turno', texto: 'Turno del sábado', columna: 1, x: 37, y: 3, giro: 5 },
-  { rotulo: 'Presupuesto', texto: 'Presupuesto para mandar', columna: 0, x: 69, y: 9, giro: -4 },
+  { rotulo: 'Pedido', texto: 'Pedido por mensaje', columna: 0, x: 4, y: 9, giro: -7 },
+  { rotulo: 'Turno', texto: 'Turno del sábado', columna: 1, x: 37, y: 8, giro: 5 },
+  { rotulo: 'Presupuesto', texto: 'Presupuesto para mandar', columna: 0, x: 69, y: 10, giro: -4 },
   { rotulo: 'Stock', texto: 'Stock por reponer', columna: 0, x: 66, y: 38, giro: 8 },
   { rotulo: 'Pago', texto: 'Seña recibida', columna: 2, x: 2, y: 37, giro: 6 },
   { rotulo: 'Cliente', texto: 'Cliente nuevo', columna: 1, x: 35, y: 33, giro: -9 },
@@ -44,6 +44,9 @@ export const PAPELES = [
   { rotulo: 'Factura', texto: 'Factura enviada', columna: 2, x: 36, y: 66, giro: 4 },
   { rotulo: 'Pedido', texto: 'Pedido entregado', columna: 2, x: 69, y: 70, giro: -8 },
 ] as const
+
+/** Lo alto de la franja de las cabeceras de las columnas (en % de la mesa): ningún papel arranca encima de ellas. */
+export const FRANJA_DE_LAS_CABECERAS = 7
 
 /** La geometría del tablero, en % de la mesa: tres columnas de 1/3 con su margen, la cabecera y el alto de un papel. */
 export const TABLERO = { margenX: 1.5, cabecera: 13, alto: 23, separacion: 4 } as const

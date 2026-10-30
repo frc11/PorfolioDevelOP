@@ -780,9 +780,12 @@ const nombresDeLasFuentes = (linea: string): boolean =>
   VIDEO.demos.length === 3 && VIDEO.demos.every((slug) => linea.includes(FUENTE_DE_DEMOS.find((d) => d.slug === slug)?.nombre ?? '\u0000'))
 afirmar(nombresDeLasFuentes(VIDEO.linea), '  y dice la marca (LOGOTIPO), los tres casos con su nombre de PROYECTOS y las tres demos con su nombre de la sección Demos del home')
 controlPositivo('  una línea sin una de las demos se detecta', VIDEO.linea.replace('Skyline Estates', 'Skyline'), nombresDeLasFuentes)
-// En Software e IA el slot no se monta: ni el bloque, ni un <video>, ni la pausa.
-const sinVideoDeTrabajos = (html: string): boolean =>
-  bloqueDe(html, 'trabajos') === null && videos(html).length === 0 && !html.includes('data-video-de-trabajos') && !html.includes('pausa-del-video') && !html.includes('boton-pausa')
+// En Software e IA el slot no se monta: ni el bloque, ni un <video>, ni la pausa. [M3 · 2026-10-30] La pausa del chat de IA (la conversación
+// que se mueve sola, WCAG 2.2.2) es otra pausa, de otro bloque: se mira la página sin el bloque del chat (su pausa la fija momentos.invariant §3).
+const sinVideoDeTrabajos = (htmlEntero: string): boolean => {
+  const html = htmlEntero.replace(bloqueDe(htmlEntero, 'el-chat') ?? ' ', '')
+  return bloqueDe(html, 'trabajos') === null && videos(html).length === 0 && !html.includes('data-video-de-trabajos') && !html.includes('pausa-del-video') && !html.includes('boton-pausa')
+}
 afirmarIgual(fallan((p) => p.servicio.slug === 'paginas-web' || sinVideoDeTrabajos(p.html)), [], 'en Software e IA, en los dos modos, el slot de trabajos no se monta: ni el bloque, ni un <video>, ni la pausa (la nuestra ni la del home)')
 controlPositivo('  Software con el video de web se detecta', pagina({ ...SOFTWARE_A_MEDIDA, prueba: { ...SOFTWARE_A_MEDIDA.prueba, video: VIDEO } }, false), sinVideoDeTrabajos)
 controlPositivo('  y un botón de pausa suelto (el nuestro)', '<div><button type="button" data-pieza="pausa-del-video"></button></div>', sinVideoDeTrabajos)

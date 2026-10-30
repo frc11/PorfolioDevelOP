@@ -16,11 +16,10 @@ import { COLUMNAS_DE_LO_DE_SIEMPRE, RENGLONES, avanceDelRenglon } from './datos'
  * 1025). Al subir, se destacha. Con movimiento reducido (y sin JS) sale como la rama quieta del trazo: tachado y con lo nuevo a la vista.
  */
 /**
- * Los dos tonos de `trazo.css`, escritos en el elemento: abajo de 1024 `banda.css` pinta todo trazo del sitio en el papel (para la mezcla
+ * Los dos tonos de `trazo.css`, escritos en el elemento (la raya, con una utilidad importante: un fondo en `style` lo prohíbe la página): abajo de 1024 `banda.css` pinta todo trazo del sitio en el papel (para la mezcla
  * de Quiénes somos sobre el logo), y acá no hay mezcla: sin esto, en el teléfono lo de siempre quedaba papel sobre papel, invisible.
  */
 const TINTA_DEL_TACHADO = { color: 'color-mix(in srgb, var(--color-tinta-media), var(--color-tinta) calc((1 - var(--trazo-despinte, 1)) * 100%))' } as const
-const TINTA_DE_LA_RAYA = { backgroundColor: 'var(--color-tinta-media)' } as const
 
 export function RenglonesTachados(): React.JSX.Element {
   const reducido = useMovimientoReducido()
@@ -57,7 +56,7 @@ function Renglon({ antes, despues, conMovimiento }: { readonly antes: string; re
         <span className="sr-only">{COLUMNAS_DE_LO_DE_SIEMPRE.hoy}: </span>
         <span ref={tramo} data-trazo="tachado" style={TINTA_DEL_TACHADO}>
           {antes}
-          <span ref={raya} data-parte="linea" style={TINTA_DE_LA_RAYA} />
+          <span ref={raya} data-parte="linea" className="bg-tinta-media!" />
         </span>
       </p>
       <p className="text-titulo-s leading-titulo tablet:text-titulo-m">
